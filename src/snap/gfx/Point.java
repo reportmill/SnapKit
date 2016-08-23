@@ -1,0 +1,136 @@
+package snap.gfx;
+import snap.util.*;
+
+/**
+ * A custom class.
+ */
+public class Point implements Cloneable {
+
+    // Ivars
+    public double x, y;
+    
+/**
+ * Create new point.
+ */
+public Point()  { }
+
+/**
+ * Create new point.
+ */
+public Point(double aX, double aY)  { x = aX; y = aY; }
+
+/**
+ * Create new point.
+ */
+public Point(Point aPoint)  { x = aPoint.getX(); y = aPoint.getY(); }
+
+/**
+ * Return point x.
+ */
+public double getX()  { return x; }
+
+/**
+ * Set point x.
+ */
+public void setX(double aValue)  { x = aValue; }
+
+/**
+ * Return point y.
+ */
+public double getY()  { return y; }
+
+/**
+ * Set point y.
+ */
+public void setY(double aValue)  { y = aValue; }
+    
+/**
+ * Sets the x/y.
+ */
+public void setXY(Point aPoint)  { setX(aPoint.getX()); setY(aPoint.getY()); }
+
+/**
+ * Sets the x/y.
+ */
+public void setXY(double aX, double aY)  { setX(aX); setY(aY); }
+
+/**
+ * Offsets the receiver by the given x and y.
+ */
+public void offset(double dx, double dy)  { setXY(getX() + dx, getY() + dy); }
+
+/**
+ * Returns the rounded x value (as int).
+ */
+public int getRoundX()  { return (int)Math.round(x); }
+
+/**
+ * Returns the rounded y value (as int).
+ */
+public int getRoundY()  { return (int)Math.round(y); }
+
+/**
+ * Adds the given point to this point.
+ */
+public void add(Point aPoint)  { setXY(x + aPoint.getX(), y + aPoint.getY()); }
+
+/**
+ * Subtracts the given point from this point.
+ */
+public void subtract(Point aPoint)  { setXY(x - aPoint.getX(), y - aPoint.getY()); }
+
+/**
+ * Multiplies this point by the given sx and sy.
+ */
+public void multiply(double sx, double sy)  { setXY(x*sx, y*sy); }
+
+/**
+ * Transforms this point by the given Transform.
+ */
+public void transformBy(Transform aTrans)  { aTrans.transform(this, this); }
+
+/**
+ * Returns the distance from this Point to a specified point.
+ */
+public double getDistance(Point aPoint)  { return getDistance(aPoint.getX(), aPoint.getY()); }
+
+/**
+ * Returns the distance from this Point to a specified point.
+ */
+public double getDistance(double px, double py)  { px -= getX(); py -= getY(); return Math.sqrt(px*px + py*py); }
+
+/**
+ * Rounds a point to neared integers.
+ */
+public void snap()  { setXY(Math.round(getX()), Math.round(getY())); }
+
+/**
+ * Standard equals implementation.
+ */
+public boolean equals(Object anObj)
+{
+    Point other = anObj instanceof Point? (Point)anObj : null; if(other==null) return false; 
+    return MathUtils.equals(other.x, x) && MathUtils.equals(other.y, y);
+}
+
+/**
+ * Standard clone implementation.
+ */
+public Point clone()  { try { return (Point)super.clone(); } catch(Exception e) { throw new RuntimeException(e); } }
+
+/**
+ * Returns a string representation of the receiver in the form "[x y]".
+ */
+public String toString()  { return "[" + x + " " + y + "]"; }
+
+/**
+ * Returns a point instance for x/y.
+ */
+public static Point get(Point aPoint)  { return new Point(aPoint.x, aPoint.y); }
+
+/**
+ * Returns a point instance for x/y.
+ */
+public static Point get(double aX, double aY)  { return new Point(aX, aY); }
+
+}

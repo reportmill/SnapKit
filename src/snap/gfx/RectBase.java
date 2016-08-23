@@ -1,0 +1,186 @@
+package snap.gfx;
+import snap.util.MathUtils;
+
+/**
+ * A custom class.
+ */
+public abstract class RectBase implements Shape, Cloneable {
+
+    // Ivars
+    public double x, y, width, height;
+    
+/**
+ * Returns the x.
+ */
+public double getX()  { return x; }
+
+/**
+ * Sets the x.
+ */
+public void setX(double aValue)  { x = aValue; }
+
+/**
+ * Returns the y.
+ */
+public double getY()  { return y; }
+
+/**
+ * Sets the y.
+ */
+public void setY(double aValue)  { y = aValue; }
+
+/**
+ * Returns the width.
+ */
+public double getWidth()  { return width; }
+
+/**
+ * Sets the width.
+ */
+public void setWidth(double aValue)  { width = aValue; }
+
+/**
+ * Returns the height.
+ */
+public double getHeight()  { return height; }
+
+/**
+ * Sets the height.
+ */
+public void setHeight(double aValue)  { height = aValue; }
+
+/**
+ * Returns the rectangle x/y as a point.
+ */
+public Point getXY()  { return new Point(x,y); }
+
+/**
+ * Sets the rectangle x/y.
+ */
+public void setXY(double aX, double aY)  { setX(aX); setY(aY); }
+
+/**
+ * Returns the size.
+ */
+public Size getSize()  { return new Size(width, height); }
+
+/**
+ * Sets the size.
+ */
+public void setSize(double aWidth, double aHeight)  { setWidth(aWidth); setHeight(aHeight); }
+
+/**
+ * Sets the rect.
+ */
+public void setRect(Rect r)  { setRect(r.x,r.y,r.width,r.height); }
+
+/**
+ * Sets the rect.
+ */
+public void setRect(double x, double y, double w, double h)  { setX(x); setY(y); setWidth(w); setHeight(h); }
+
+/**
+ * Returns the max x.
+ */
+public double getMinX()  { return x; }
+
+/**
+ * Returns the max y.
+ */
+public double getMinY()  { return y; }
+
+/**
+ * Returns the x mid-point of the rect.
+ */
+public double getMidX()  { return x + width/2; }
+
+/**
+ * Returns the y mid-point of the rect.
+ */
+public double getMidY()  { return y + height/2; }
+
+/**
+ * Returns the max x.
+ */
+public double getMaxX()  { return x + width; }
+
+/**
+ * Returns the max y.
+ */
+public double getMaxY()  { return y + height; }
+
+/**
+ * Returns the shape bounds.
+ */
+public Rect getBounds()  { return new Rect(x,y,width,height); }
+
+/**
+ * Returns whether rect is empty.
+ */
+public boolean isEmpty()  { return width<=0 || height<=0; }
+
+/**
+ * Insets the receiver rect by the given amount.
+ */
+public void inset(double anInset)  { inset(anInset, anInset); }
+
+/**
+ * Insets the receiver rect by the given amount.
+ */
+public void inset(double xIns, double yIns)  { setRect(x+xIns,y+yIns,width-2*xIns,height-2*yIns); }
+
+/**
+ * Insets the receiver rect by the given amount.
+ */
+public void inset(Insets anIns)
+{
+    if(anIns!=null) setRect(x+anIns.left,y+anIns.top,width-anIns.left-anIns.top,height-anIns.top-anIns.bottom);
+}
+
+/**
+ * Offsets the receiver by the given x & y.
+ */
+public void offset(double dx, double dy)  { setXY(x + dx, y + dy); }
+
+/**
+ * Returns a String reprsentation of this rect.
+ */
+public String getString()
+{
+    StringBuffer sb = new StringBuffer(); double x = getX(), y = getY(), w = getWidth(), h = getHeight();
+    if(x==(int)x) sb.append((int)x); else sb.append(x); sb.append(' ');
+    if(y==(int)y) sb.append((int)y); else sb.append(y); sb.append(' ');
+    if(w==(int)w) sb.append((int)w); else sb.append(w); sb.append(' ');
+    if(h==(int)h) sb.append((int)h); else sb.append(h);
+    return sb.toString();
+}
+
+/**
+ * Standard clone implementation.
+ */
+public RectBase clone()
+{
+    try { return (RectBase)super.clone(); }
+    catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
+}
+
+/**
+ * Standard equals implementation.
+ */
+public boolean equals(Object anObj)
+{
+    if(anObj==this) return true;
+    RectBase other = anObj instanceof RectBase? (RectBase)anObj : null; if(other==null) return false;
+    return MathUtils.equals(other.x,x) && MathUtils.equals(other.y,y) &&
+        MathUtils.equals(other.width,width) && MathUtils.equals(other.height,height);
+}
+
+/**
+ * Standard toString implementation.
+ */
+public String toString()
+{
+    return getClass().getSimpleName() + " [" + getString() + "]";
+}
+
+}

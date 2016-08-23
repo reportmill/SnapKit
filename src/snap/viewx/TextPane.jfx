@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HBox PrefHeight="28" Padding="0,4,0,4" Spacing="3">
+  <font name="Arial" size="11" />
+  <jbutton name="SaveButton" PrefWidth="22" PrefHeight="22" ttip="Save" image="/com/reportmill/app/pkg.images/File_Save.png" align="center" ShowBorder="false" margin="0" />
+  <jseparator PrefHeight="18" Vertical="true" />
+  <jbutton name="CutButton" PrefWidth="22" PrefHeight="22" ttip="Cut" image="/com/reportmill/app/pkg.images/Edit_Cut.png" align="center" ShowBorder="false" margin="0" />
+  <jbutton name="CopyButton" PrefWidth="22" PrefHeight="22" ttip="Copy" image="/com/reportmill/app/pkg.images/Edit_Copy.png" align="center" ShowBorder="false" margin="0" />
+  <jbutton name="PasteButton" PrefWidth="22" PrefHeight="22" ttip="Paste" image="/com/reportmill/app/pkg.images/Edit_Paste.png" align="center" ShowBorder="false" margin="0" />
+  <jbutton name="DeleteButton" PrefWidth="22" PrefHeight="22" ttip="Delete" image="/com/reportmill/app/pkg.images/Edit_Delete.png" align="center" ShowBorder="false" margin="0" />
+  <jseparator PrefHeight="18" Vertical="true" />
+  <jtextfield name="FontSizeText" PrefWidth="32" PrefHeight="22" />
+  <jbutton name="IncreaseFontButton" PrefWidth="22" PrefHeight="22" ttip="Increase Font Size" image="/com/reportmill/app/pkg.images/Format_IncreaseFont.png" align="center" ShowBorder="false" margin="0" />
+  <jbutton name="DecreaseFontButton" PrefWidth="22" PrefHeight="22" ttip="Decrease Font Size" image="/com/reportmill/app/pkg.images/Format_DecreaseFont.png" align="center" ShowBorder="false" margin="0" />
+  <jseparator PrefHeight="18" Vertical="true" />
+  <jbutton name="UndoButton" PrefWidth="22" PrefHeight="22" ttip="Undo" image="/com/reportmill/app/pkg.images/Edit_Undo.png" align="center" ShowBorder="false" margin="0">
+    <binding aspect="Enabled" key="TextView.Undoer.hasUndos" />
+  </jbutton>
+  <jbutton name="RedoButton" PrefWidth="22" PrefHeight="22" ttip="Redo" image="/com/reportmill/app/pkg.images/Edit_Redo.png" align="center" ShowBorder="false" margin="0">
+    <binding aspect="Enabled" key="TextView.Undoer.hasRedos" />
+  </jbutton>
+  <jseparator PrefHeight="18" Vertical="true" />
+  <jtextfield name="FindText" PrefWidth="172" PrefHeight="22">
+    <font name="Arial" size="11" />
+  </jtextfield>
+  <jcheckbox name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" asize="--~,--~" text="IC" align="left" selected="true">
+    <font name="Arial" size="11" />
+  </jcheckbox>
+</HBox>

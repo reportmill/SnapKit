@@ -1,0 +1,28 @@
+package snap.gfx;
+
+/**
+ * A custom class.
+ */
+public enum HPos {
+
+    LEFT,
+    CENTER,
+    RIGHT;
+
+/**
+ * Returns the pos as a double from 0 to 1.
+ */
+public double asDouble()  { return this==LEFT? 0 : this==CENTER? .5 : 1; }
+
+/**
+ * Returns the HPos.
+ */
+public static HPos get(String aStr)
+{
+    try { HPos.valueOf(aStr); }
+    catch(Exception e) { }
+    for(HPos p : HPos.values()) if(p.toString().equalsIgnoreCase(aStr)) return p;
+    return LEFT;
+}
+
+}

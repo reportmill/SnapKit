@@ -1,0 +1,291 @@
+package snap.view;
+import snap.gfx.*;
+import snap.util.*;
+
+/**
+ * A View for Buttons.
+ */
+public class ButtonBase extends ParentView {
+    
+    // The button label
+    Label                   _label;
+    
+    // Whether button has border
+    boolean                 _showBorder = true;
+    
+    // Whether button is pressed
+    boolean                 _pressed;
+    
+    // Whether button is under mouse
+    boolean                 _targeted;
+    
+    // Whether button is being tracked by mouse
+    boolean                 _tracked;
+    
+    // The button fill
+    Paint                   _btnFill;
+    
+    // The stack layout that button uses to layout label
+    ViewLayout.StackLayout  _layout = new ViewLayout.StackLayout(this);
+    
+    // Constants for properties
+    public static final String Image_Prop = "Image";
+    public static final String Pressed_Prop = "Pressed";
+    public static final String ShowBorder_Prop = "ShowBorder";
+    public static final String Targeted_Prop = "Targeted";
+    public static final String Text_Prop = "Text";
+    
+    // Button states
+    public static final int BUTTON_NORMAL = 0;
+    public static final int BUTTON_OVER = 1;
+    public static final int BUTTON_PRESSED = 2;
+
+/**
+ * Creates a new ButtonBaseNode.
+ */
+public ButtonBase()
+{
+    setFocusable(true);
+    enableEvents(MouseEvents); enableEvents(Action);
+}
+
+/**
+ * Returns the text.
+ */
+public String getText()  { return getLabel().getText(); }
+
+/**
+ * Sets the text.
+ */
+public void setText(String aStr)
+{
+    if(SnapUtils.equals(aStr,getText())) return;
+    getLabel().setText(aStr); relayout();
+}
+
+/**
+ * Returns the image.
+ */
+public Image getImage()  { return getLabel().getImage(); }
+
+/**
+ * Sets the image.
+ */
+public void setImage(Image anImage)  { getLabel().setImage(anImage); relayout(); }
+
+/**
+ * Returns the image after text.
+ */
+public Image getImageAfter()  { return getLabel().getImageAfter(); }
+
+/**
+ * Sets the image after text.
+ */
+public void setImageAfter(Image anImage)  { getLabel().setImageAfter(anImage); relayout(); }
+
+/**
+ * Returns the graphic node.
+ */
+public View getGraphic()  { return getLabel().getGraphic(); }
+
+/**
+ * Sets the graphic node.
+ */
+public void setGraphic(View aGraphic)  { getLabel().setGraphic(aGraphic); }
+
+/**
+ * Returns the graphic node after text.
+ */
+public View getGraphicAfter()  { return getLabel().getGraphicAfter(); }
+
+/**
+ * Sets the graphic node after text.
+ */
+public void setGraphicAfter(View aGraphic)  { getLabel().setGraphicAfter(aGraphic); }
+
+/**
+ * Returns the label.
+ */
+public Label getLabel()
+{
+    if(_label!=null) return _label;
+    _label = new Label();
+    addChild(_label);
+    return _label;
+}
+
+/**
+ * Returns whether button is pressed (visibly).
+ */
+public boolean isPressed()  { return _pressed; }
+
+/**
+ * Sets whether button is pressed (visibly).
+ */
+protected void setPressed(boolean aValue)
+{
+    if(aValue==_pressed) return;
+    firePropChange(Pressed_Prop, _pressed, _pressed=aValue);
+    repaint();
+}
+
+/**
+ * Returns whether button is under mouse.
+ */
+public boolean isTargeted()  { return _targeted; }
+
+/**
+ * Sets whether button is under mouse.
+ */
+protected void setTargeted(boolean aValue)
+{
+    if(aValue==_targeted) return;
+    firePropChange(Targeted_Prop, _targeted, _targeted=aValue);
+    repaint();
+}
+
+/**
+ * Returns whether button border is painted.
+ */
+public boolean isShowBorder()  { return _showBorder; }
+
+/**
+ * Sets whether button border is painted.
+ */
+public void setShowBorder(boolean aValue)
+{
+    if(aValue==_showBorder) return;
+    firePropChange(ShowBorder_Prop, _showBorder, _showBorder=aValue);
+}
+
+/**
+ * Returns the button fill.
+ */
+public Paint getButtonFill()  { return _btnFill; }
+
+/**
+ * Sets the button fill.
+ */
+public void setButtonFill(Paint aPaint)  { _btnFill = aPaint; }
+
+/**
+ * Returns the insets.
+ */
+public Insets getInsetsAll()
+{
+    Insets pad = getPadding();
+    if(isShowBorder()) pad = new Insets(pad.top+2,pad.right+2,pad.bottom+2,pad.left+2);
+    return pad;
+}
+
+/**
+ * Handle events.
+ */
+protected void processEvent(ViewEvent anEvent)
+{
+    // Handle MouseEntered, MouseExited, MousePressed, MouseReleased
+    if(anEvent.isMouseEntered()) { setTargeted(true); setPressed(_tracked); repaint(); }
+    else if(anEvent.isMouseExited())  { setTargeted(false); setPressed(false); repaint(); }
+    else if(anEvent.isMousePressed())  { _tracked = true; setPressed(true); repaint(); }
+    else if(anEvent.isMouseReleased())  { if(_pressed) fire(); _pressed = _tracked = false; repaint(); }
+}
+
+/**
+ * Perform button click.
+ */
+public void fire()  { if(isEnabled()) fireActionEvent(); }
+
+/**
+ * Paint Button.
+ */
+public void paintFront(Painter aPntr)
+{
+    if(isShowBorder()) {
+        int state = isPressed()? Painter.BUTTON_PRESSED : isTargeted()? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
+        ButtonPainter bp = new ButtonPainter(); bp.setWidth(getWidth()); bp.setHeight(getHeight());
+        bp.setState(state); if(getButtonFill()!=null) bp.setFill(getButtonFill());
+        bp.paint(aPntr);
+    }
+    else {
+        if(isPressed()) {
+            aPntr.setPaint(Color.LIGHTGRAY); aPntr.fillRect(0,0,getWidth(),getHeight()); }
+        if(isTargeted()) {
+            aPntr.setPaint(Color.GRAY); aPntr.drawRect(.5,.5,getWidth()-1,getHeight()-1); }
+    }
+}
+
+/**
+ * Override to do bogus disabled painting.
+ */
+public void paintAll(Painter aPntr)
+{
+    super.paintAll(aPntr);
+    if(isDisabled()) {
+        aPntr.setColor(new Color(1,1,1,.5)); aPntr.fillRect(0,0,getWidth(),getHeight()); }
+}
+
+/**
+ * Returns the default alignment for button.
+ */
+public Pos getAlignmentDefault()  { return Pos.CENTER; }
+
+/**
+ * Returns the preferred width.
+ */
+protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(-1); }
+
+/**
+ * Returns the preferred height.
+ */
+protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
+
+/**
+ * Override to layout children.
+ */
+protected void layoutChildren()  { _layout.layoutChildren(); }
+
+/**
+ * XML archival.
+ */
+protected XMLElement toXMLView(XMLArchiver anArchiver)
+{
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver); e.setName("jbutton");
+
+    // Archive Text and Image (name)
+    String text = getText(); if(text!=null && text.length()>0) e.add("text", text);
+    Image image = getImage(); String iname = image!=null? image.getName() : null;
+    if(iname!=null) e.add("image", iname);
+    
+    // Archive ShowBorder
+    if(!isShowBorder()) e.add("ShowBorder", isShowBorder());
+    
+    // Return element
+    return e;
+}
+
+/**
+ * XML unarchival.
+ */
+protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+{
+    // Unarchive basic view attributes
+    super.fromXMLView(anArchiver, anElement);
+    
+    // Unarchive Text and Image name
+    setText(anElement.getAttributeValue("text", anElement.getAttributeValue("value")));
+    String iname = anElement.getAttributeValue("image");
+    Image image = iname!=null? Image.get(anArchiver.getSourceURL(), iname) : null;
+    if(image!=null) setImage(image);
+    
+    // Unarchive ShowBorder
+    if(anElement.hasAttribute("ShowBorder")) setShowBorder(anElement.getAttributeBoolValue("ShowBorder"));
+        
+    // Unarchive Margin
+    if(anElement.hasAttribute("margin")) {
+        Insets insets = Insets.get(anElement.getAttributeValue("margin"));
+        setPadding(insets);
+    }
+}
+
+}

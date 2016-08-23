@@ -1,0 +1,181 @@
+
+Date { (LOOKAHEAD(2) RelativeDate | AbsoluteDate) (AT? Settime)? }
+
+/**
+ * simple expressions, like "3 weeks from this past christmas" or "a year ago", "3 months from now", "
+ * Doesn't do things like "8/13/99 + 3 days", but that seems really stupid
+ * Some other interesting cases that we don't handle might be : "the 4th thursday in November", 
+ *   "the saturday after christmas", "the last monday in may", "a week ago this friday"
+ */
+DateExpression { (((A | THE) | Number) CalendarField "s"? (AGO | HENCE | BEFORE | AFTER)) }
+
+/* 1st, 29th, etc. */
+DayOrdinal  { (FIRST | SECOND | THIRD | FOURTH) PERIOD? }
+
+/* a year, subject to y2k handling if it's only got 2 digits */
+TwoOrFourDigitYear { TwoOrFourDigitDateField(true) }
+
+/* a 2 or 4 digit numeric field, optionally interpreted as a year */
+TwoOrFourDigitDateField(boolean isYear) { FOURDIGIT | TWODIGIT | ONEDIGIT }
+
+/* Things like, "today", "next wednesday" */
+RelativeDate { NOW | TODAY | YESTERDAY | TOMORROW | Modifier (Weekday | Holiday) | DateExpression }
+
+/* Silly, but easy */
+Holiday(int modifier)
+{
+    CHRISTMAS (DAY | EVE)? | NEWYEARS (DAY | EVE)? | CINCODEMAYO | HALLOWEEN | INDEPENDENCEDAY | VALENTINESDAY | STPATTYSDAY | APRILFOOLS | DDAY | PEARLHARBOR
+}
+
+/* the parser isn't picky.  You can use "3/21/04", "3.21.04", or even "3.21/04" */
+DatePartsSeparator { SLASH | PERIOD }
+
+/*  8/30/67  */
+SimpleDate
+{
+	TwoOrFourDigitDateField DatePartsSeparator TwoOrFourDigitDateField (DatePartsSeparator TwoOrFourDigitDateField)?
+}
+
+/*
+ * Covers absolute dates like "December 7, 1941" as well as the default
+ * java.util.Date output : "Wed May 02 13:56:39 EDT 2007" and "Halloween, 1944"
+ */
+AbsoluteDate
+{
+    LOOKAHEAD(2) iso_8601_date | SimpleDate | (Holiday | LongDate | Weekday LongDate?) TwoOrFourDigitYear?
+}
+
+/* December 14th, or Dec 04 */
+LongDate { Month (Number | DayOrdinal) }
+
+/* time formats :  "13:56:39 EDT" */
+Settime { TIME }
+
+Settimezone { GMT | TIMEZONE }
+
+/* decimal fraction (for seconds) */
+Fraction { PERIOD (ONEDIGIT | TWODIGIT) }
+
+/* ISO 8601 formats:  "2007-01-13..." (see http://www.w3.org/TR/NOTE-datetime) */
+Iso_8601_date {	FOURDIGIT DASH Number DASH Number (ISO8601SEPARATOR Setiso_8601_time)? }
+
+/* Very similar to settime(), but without am/pm and with iso8601 timezone formats */
+Setiso_8601_time { TIME	SetIso_8601_timezone? }
+
+SetIso_8601_timezone { ISO8601GMT | TIMEZONEOFFSET }
+
+LocalField { LOCAL_DATEFIELD }
+
+InitLocale { LocalField LOCAL_SEPARATOR LocalField LOCAL_SEPARATOR LocalField }
+
+Month { JAN | FEB | MAR | APR | MAY | JUN | JUL | AUG | SEP | OCT | NOV | DEC }
+
+Weekday { SUN | MON | TUE | WED | THU | FRI | SAT }
+
+Modifier { THIS | NEXT | LAST  | THISCOMING | THISPAST }
+
+CalendarField {	DAY | WEEK | MONTH | YEAR }
+
+Number { ONEDIGIT | TWODIGIT }
+
+LOCAL_DATEFIELD { (["0"-"9"])+ }
+
+LOCAL_SEPARATOR { (~["0"-"9"])+ }
+
+// special state used to help pick apart string from the dateformatter
+INITLOCALE { LOCAL_DATEFIELD | LOCAL_SEPARATOR }
+
+// Number of digits in a number are often very signicant in the grammar
+FOURDIGIT { ["0"-"9"]["0"-"9"]["0"-"9"]["0"-"9"] }
+TWODIGIT { ["0"-"9"]["0"-"9"]> }
+ONEDIGIT { ["0"-"9"] }
+
+/* English (obviously) versions of the months */
+JAN { "jan"("." | "uary")? }
+FEB { "feb"("." | "ruary")? }
+MAR { "mar"("." | "ch")? }
+APR { "apr"("." | "il")? }
+MAY { "may"(".")? }
+JUN { "jun"("." | "e")? }
+JUL { "jul"("." | "y")? }
+AUG { "aug"("." | "ust")? }
+SEP { "sep"((("t")?(".")?) | "tember") }
+OCT { "oct"("." | "ober")? }
+NOV { "nov"("." | "ember")? }
+DEC { "dec"("." | "ember")? }
+
+/* English days of the week */
+SUN { "sun"("." | "day")? }
+MON { "mon"("." | "day")? }
+TUE { "tue"((("s")? (".")?) | "sday") }
+WED { "wed"("." | "nesday")? }
+THU { "thu"((("r"("s")?)?".") | "rsday")? }
+FRI { "fri"("." | "day")? }
+SAT { "sat"("." | "urday")? }
+
+/* Tokens for English relative days of the week */
+LAST { "last" } 
+THISPAST { "this "("p"|"l") "ast" }
+THISCOMING { "this " "up"? "coming" }
+THIS { "this" }
+NEXT { "next" }
+NOW { "now" }
+TODAY { "today" }
+TOMORROW { "tomorrow" }
+YESTERDAY { "yesterday" }
+
+/* What the hell, some straightforward holidays. Nothing that requires calculations (like "easter" or "thanksgiving") */
+CHRISTMAS { "christmas" }
+NEWYEARS { "new year" "'"? "s" }
+CINCODEMAYO { "cinco de mayo" }
+HALLOWEEN { "halloween" }
+INDEPENDENCEDAY { ("fourth of july" | "4th of july" | "independence day") }
+SAINT { (("St" "."?) | "Saint") " " }
+VALENTINESDAY { SAINT? "valentine" "'"? "s day" }
+STPATTYSDAY {  SAINT ("Patrick" | "Paddy" | "Patty") "'"? "s day" }
+APRILFOOLS { "April Fool"("'")?"s"(" day")? }
+DDAY { "D" (" " | ". " | "-") "day" }
+PEARLHARBOR { "Pearl Harbor day" }
+DAY { "day" }
+EVE { "eve" }
+
+AM { "am" }
+PM { "pm" }
+ISO8601SEPARATOR { "T" }
+ISO8601GMT { "Z" }
+TIMEZONEOFFSET { ["+","-"]<TWODIGIT><COLON><TWODIGIT>   }
+GMT { "GMT"<TIMEZONEOFFSET>  }
+AGO { "ago"> } //just here so it takes precedence over timezone, below
+THE { "the" }
+TIMEZONE { ["A"-"Z"]["A"-"Z"]["A"-"Z"] }
+
+// A big honker of a expression to match the entire time string.  
+// This will have be turned into h:m:s:tz at some point
+DECIMAL { "." (["0"-"9"])+  }
+TZ { GMT | (["A"-"Z"])+ }
+AMPM { (" ")* ("AM"|"PM") }
+MINSEC { COLON ["0"-"5"] ["0"-"9"] }
+TIME { (["0"-"2"])?(["0"-"9"])(AMPM | (MINSEC (MINSEC DECIMAL?)? AMPM?)) (" "+ TZ)? }
+
+COLON { ":" }
+SLASH { "/" }
+DASH { "-" }
+PERIOD { "." }
+AT { ("@"|"at") }
+
+// the ordinals, but only 1st-31st
+FIRST { ("2" | "3")? "1st" }
+SECOND { "2"? "2nd" }
+THIRD { "2"? "3rd" }
+FOURTH { (("1"["0"-"9"]) | ("2"["0","4"-"9"]) | ("30") | (["4"-"9"]))"th" }
+
+// some tokens for calculations: "3 weeks ago", "tuesday before last", "a year from tomorrow"
+// "10 years after black tuesday"
+// It's forgiving about pluralization - "3 week ago" or "a months from sunday" will all work.
+WEEK { "week" }
+MONTH { "month" }
+YEAR { "year" }
+HENCE { "hence" }
+BEFORE { "since" | "before" }
+AFTER { "from" | "after" }
+A { "a" }
