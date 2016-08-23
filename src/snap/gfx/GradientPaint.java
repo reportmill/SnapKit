@@ -43,6 +43,15 @@ public GradientPaint(double anAngle, Stop theStops[])
 }
 
 /**
+ * Creates a new linear GradientPaint with given stops and roll.
+ */
+public GradientPaint(Color aC1, Color aC2, double anAngle)
+{
+    _stops = getStops(0, aC1, 1, aC2);
+    setRoll(anAngle, new Rect(0,0,1,1));
+}
+
+/**
  * Creates a new linear GradientPaint with given type, start/end points, stops.
  */
 public GradientPaint(double aSX, double aSY, Color aC1, double aEX, double aEY, Color aC2)

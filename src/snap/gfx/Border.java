@@ -30,6 +30,11 @@ public Color getColor()  { return Color.BLACK; }
 public double getWidth()  { return 1; }
 
 /**
+ * Returns the name for paint.
+ */
+public String getName()  { return getClass().getSimpleName(); }
+
+/**
  * Paint border.
  */
 public void paint(Painter aPntr, Shape aShape)  { }

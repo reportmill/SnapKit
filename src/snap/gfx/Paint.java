@@ -19,5 +19,10 @@ public interface Paint {
      * Returns an absolute paint for given bounds of primitive to be filled.
      */
     public Paint copyFor(Rect aRect);
+    
+    /**
+     * Returns the name for paint.
+     */
+    default String getName()  { return getClass().getSimpleName(); }
 
 }

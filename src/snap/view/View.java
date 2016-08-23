@@ -438,6 +438,16 @@ public void setFill(Paint aPaint)
 }
 
 /**
+ * Returns the fill as color.
+ */
+public Color getFillColor()
+{
+    Paint fill = getFill(); if(fill==null || fill instanceof Color) return (Color)fill;
+    if(fill instanceof GradientPaint) return ((GradientPaint)fill).getStopColor(0); 
+    return null;
+}
+
+/**
  * Returns the border.
  */
 public Border getBorder()  { return _border; }
@@ -730,6 +740,11 @@ public Point localToScreen(double aX, double aY)
  * Returns the transform from screen to local.
  */
 public Transform getScreenToLocal()  { Transform t = getLocalToScreen(); t.invert(); return t; }
+
+/**
+ * Returns whether view contains point.
+ */
+public boolean contains(Point aPnt)  { return contains(aPnt.x, aPnt.y); }
 
 /**
  * Returns whether view contains point.

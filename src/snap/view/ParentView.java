@@ -135,6 +135,25 @@ public int indexOfChild(View aChild)
 public View getChildLast()  { return getChildCount()>0? getChild(getChildCount()-1) : null; }
 
 /**
+ * Returns the child at given point.
+ */
+public View getChildAt(Point aPnt)  { return getChildAt(aPnt.x, aPnt.y); }
+
+/**
+ * Returns the child at given point.
+ */
+public View getChildAt(double aX, double aY)
+{
+    List <View> children = getChildren();
+    for(int i=children.size()-1; i>=0; i--) { View child = children.get(i); if(!child.isPickable()) continue;
+        Point p = child.parentToLocal(aX, aY);
+        if(child.contains(p.x,p.y))
+            return child;
+    }
+    return null;
+}
+
+/**
  * Returns the managed children.
  */
 public View[] getChildrenManaged()
