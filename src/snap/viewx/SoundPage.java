@@ -97,7 +97,7 @@ protected View createUI()
     Label recSavePaneTitle = new Label("Record/Save");
     
     // Return VBox, add pieces and return
-    VBox vbox = new VBox(); vbox.setAlignment(Pos.TOP_CENTER); vbox.setPadding(50,50,50,50);vbox.setSpacing(10);
+    VBox vbox = new VBox(); vbox.setAlign(Pos.TOP_CENTER); vbox.setPadding(50,50,50,50);vbox.setSpacing(10);
     vbox.setChildren(playPanelTitle, playPanel, recSavePaneTitle, recSavePane);
     return vbox;
 }

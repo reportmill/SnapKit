@@ -136,12 +136,12 @@ public static void setActiveDragboard(Dragboard aDragboard)  { _activeDragboard 
 /**
  * Returns the align x factor.
  */
-public static final double getAlignX(View aView)  { return getAlignX(aView.getAlignment()); }
+public static final double getAlignX(View aView)  { return getAlignX(aView.getAlign()); }
     
 /**
  * Returns the align y factor.
  */
-public static final double getAlignY(View aView)  { return getAlignY(aView.getAlignment()); }
+public static final double getAlignY(View aView)  { return getAlignY(aView.getAlign()); }
     
 /**
  * Returns the align x factor.

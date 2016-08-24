@@ -89,7 +89,7 @@ protected double getBestHeight(View aView, double aW) { return Math.max(aView.ge
  */
 protected double getAlignX(View aView)
 {
-    HPos hp = aView.getAlignment().getHPos(); return hp==HPos.RIGHT? 1 : hp==HPos.CENTER? .5 : 0;
+    HPos hp = aView.getAlign().getHPos(); return hp==HPos.RIGHT? 1 : hp==HPos.CENTER? .5 : 0;
 }
     
 /**
@@ -97,7 +97,7 @@ protected double getAlignX(View aView)
  */
 protected double getAlignY(View aView)
 {
-    VPos vp = aView.getAlignment().getVPos(); return vp==VPos.BOTTOM? 1 : vp==VPos.CENTER? .5 : 0;
+    VPos vp = aView.getAlign().getVPos(); return vp==VPos.BOTTOM? 1 : vp==VPos.CENTER? .5 : 0;
 }
     
 /**

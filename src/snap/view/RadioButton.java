@@ -33,7 +33,7 @@ public void paintFront(Painter aPntr)
 /**
  * Returns the default alignment for button.
  */
-public Pos getAlignmentDefault()  { return Pos.CENTER_LEFT; }
+public Pos getAlignDefault()  { return Pos.CENTER_LEFT; }
 
 /**
  * Returns the insets for checkbox.

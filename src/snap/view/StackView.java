@@ -12,7 +12,7 @@ public class StackView extends ChildView {
 /**
  * Returns the default alignment.
  */    
-public Pos getAlignmentDefault()  { return Pos.CENTER; }
+public Pos getAlignDefault()  { return Pos.CENTER; }
 
 /**
  * Returns the preferred width.

@@ -27,7 +27,7 @@ public class View implements XMLArchiver.Archivable {
     double          _sx = 1, _sy = 1;
     
     // The alignment of content in this view
-    Pos             _align = getAlignmentDefault();
+    Pos             _align = getAlignDefault();
     
     // The padding for content in this view
     Insets          _padding = getPaddingDefault();
@@ -162,7 +162,7 @@ public class View implements XMLArchiver.Archivable {
     public static final String Effect_Prop = "Effect";
     public static final String Fill_Prop = "Fill";
     public static final String Font_Prop = "Font";
-    public static final String Alignment_Prop = "Alignment";
+    public static final String Align_Prop = "Align";
     public static final String Padding_Prop = "Padding";
     public static final String Parent_Prop = "Parent";
     public static final String Border_Prop = "Border";
@@ -1294,21 +1294,21 @@ public Size getBestSize()
 /**
  * Returns the alignment.
  */    
-public Pos getAlignment()  { return _align; }
+public Pos getAlign()  { return _align; }
 
 /**
  * Sets the alignment.
  */
-public void setAlignment(Pos aPos)
+public void setAlign(Pos aPos)
 {
     if(aPos==_align) return;
-    firePropChange(Alignment_Prop, _align, _align=aPos);
+    firePropChange(Align_Prop, _align, _align=aPos);
 }
 
 /**
  * Returns the default alignment.
  */    
-public Pos getAlignmentDefault()  { return Pos.TOP_LEFT; }
+public Pos getAlignDefault()  { return Pos.TOP_LEFT; }
 
 /**
  * Returns the padding.
@@ -1888,7 +1888,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
     String asize = getAutosizing(); if(!asize.equals(getAutosizingDefault())) e.add("asize", asize);
     
     // Archive Alignment
-    if(getAlignment()!=getAlignmentDefault()) e.add("align", getAlignment());
+    if(getAlign()!=getAlignDefault()) e.add("align", getAlign());
     
     // Archive Vertical
     if(isVertical()) e.add("Vertical", true);
@@ -2004,9 +2004,9 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     
     // Unarchive Alignment
     if(anElement.hasAttribute("align"))
-        setAlignment(Pos.get(anElement.getAttributeValue("align")));
+        setAlign(Pos.get(anElement.getAttributeValue("align")));
     else if(anElement.hasAttribute("Alignment"))
-        setAlignment(Pos.get(anElement.getAttributeValue("Alignment")));
+        setAlign(Pos.get(anElement.getAttributeValue("Alignment")));
         
     // Unarchive Vertical
     if(anElement.hasAttribute("Vertical"))

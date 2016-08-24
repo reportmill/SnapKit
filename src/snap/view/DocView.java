@@ -18,7 +18,7 @@ public class DocView extends ParentView {
  */
 public DocView()
 {
-    setAlignment(Pos.CENTER);
+    setAlign(Pos.CENTER);
     _layout.setFillCenter(false);
 }
 
@@ -41,7 +41,7 @@ public void setPage(View aView)
 /**
  * Returns the default alignment.
  */    
-public Pos getAlignmentDefault()  { return Pos.CENTER_LEFT; }
+public Pos getAlignDefault()  { return Pos.CENTER_LEFT; }
 
 /**
  * Returns the preferred width.

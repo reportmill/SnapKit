@@ -81,7 +81,7 @@ public void setScaleUp(boolean aValue)  { setFillWidth(aValue); }
 /**
  * Override to change to CENTER.
  */    
-public Pos getAlignmentDefault()  { return Pos.CENTER; }
+public Pos getAlignDefault()  { return Pos.CENTER; }
 
 /**
  * Override.

@@ -571,8 +571,8 @@ protected void paintFront(Painter aPntr)
     Rect clip = aPntr.getClipBounds(); if(clip==null) clip = getBoundsInside();
     
     // If alignment not TOP_LEFT, shift text block
-    double dx = ViewUtils.getAlignX(getAlignment());
-    double dy = ViewUtils.getAlignY(getAlignment());
+    double dx = ViewUtils.getAlignX(getAlign());
+    double dy = ViewUtils.getAlignY(getAlign());
     if(dx!=0 || dy!=0) {
         Rect tbnds = getTextBoxBounds(); TextBox tbox = getTextBox();
         dx = tbnds.getX() + Math.round(dx*(tbnds.getWidth() - tbox.getPrefWidth()));
@@ -1071,9 +1071,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive valign
     if(anElement.hasAttribute("valign")) {
         String align = anElement.getAttributeValue("valign");
-        if(align.equals("top")) setAlignment(Pos.get(HPos.LEFT,VPos.TOP));
-        else if(align.equals("middle")) setAlignment(Pos.get(HPos.LEFT,VPos.CENTER));
-        else if(align.equals("bottom")) setAlignment(Pos.get(HPos.LEFT,VPos.BOTTOM));
+        if(align.equals("top")) setAlign(Pos.get(HPos.LEFT,VPos.TOP));
+        else if(align.equals("middle")) setAlign(Pos.get(HPos.LEFT,VPos.CENTER));
+        else if(align.equals("bottom")) setAlign(Pos.get(HPos.LEFT,VPos.BOTTOM));
     }
     
     // Unarchive text

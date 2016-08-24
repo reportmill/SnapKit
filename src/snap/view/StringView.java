@@ -35,7 +35,7 @@ public void setTextFill(Paint aPnt)  { _textFill = aPnt; repaint(); }
 /**
  * Returns the default alignment.
  */    
-public Pos getAlignmentDefault()  { return Pos.CENTER_LEFT; }
+public Pos getAlignDefault()  { return Pos.CENTER_LEFT; }
 
 /**
  * Returns the preferred width.

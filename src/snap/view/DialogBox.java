@@ -297,7 +297,7 @@ protected HBox addOptionButtons()
     // Add OK/Cancel buttons
     String titles[] = getOptions(), rtitles[] = titles.clone(); ArrayUtils.reverse(rtitles);
     HBox bbox = _builder.addButtons(rtitles, rtitles);
-    bbox.setAlignment(Pos.CENTER_RIGHT); bbox.setPadding(15,15,15,15);
+    bbox.setAlign(Pos.CENTER_RIGHT); bbox.setPadding(15,15,15,15);
     for(View btn : bbox.getChildren()) { btn.setMinWidth(100); btn.setMinHeight(24); }
     
     // Set DefaultButton (and maybe FirstFocus)
@@ -329,7 +329,7 @@ protected View createUI()
     // If image provided, reset pane to hbox containing image and original root pane
     if(getImage()!=null) {
         HBox hbox = new HBox(); hbox.setPadding(15,0,0,20); hbox.setSpacing(20);
-        hbox.setAlignment(Pos.TOP_CENTER);
+        hbox.setAlign(Pos.TOP_CENTER);
         hbox.addChild(new ImageView(getImage()));
         hbox.addChild(view); view = hbox;
     }

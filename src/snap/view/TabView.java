@@ -92,7 +92,7 @@ public void addTab(Tab aTab, int anIndex)
 {
     _tabs.add(anIndex, aTab);
     ToggleButton btn = new ToggleButton(); btn.setText(aTab.getTitle()); btn.getLabel().setPadding(4,7,4,7);
-    btn.setMinWidth(getTabMinWidth()); btn.setAlignment(Pos.TOP_CENTER);
+    btn.setMinWidth(getTabMinWidth()); btn.setAlign(Pos.TOP_CENTER);
     _shelf.addChild(btn, anIndex); btn.addEventHandler(e -> shelfButtonPressed(e), Action);
     if(aTab.getContent()!=null) _hiddenKids.addChild(aTab.getContent(),0);
     if(getContent()==null) setSelectedIndex(0);
