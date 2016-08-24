@@ -714,6 +714,11 @@ public Point parentToLocal(View aPar, double aX, double aY)  { return getParentT
 public Shape parentToLocal(Shape aShape)  { return getParentToLocal().createTransformedShape(aShape); }
 
 /**
+ * Converts a shape from parent to local.
+ */
+public Shape parentToLocal(View aView, Shape aShape)  { return getParentToLocal(aView).createTransformedShape(aShape); }
+
+/**
  * Returns the transform from local to screen.
  */
 public Transform getLocalToScreen()

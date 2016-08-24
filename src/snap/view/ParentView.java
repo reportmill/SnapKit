@@ -154,6 +154,20 @@ public View getChildAt(double aX, double aY)
 }
 
 /**
+ * Returns the child at given point.
+ */
+public List <View> getChildrenAt(Shape aShape)
+{
+    List <View> children = getChildren(), hit = new ArrayList();
+    for(int i=children.size()-1; i>=0; i--) { View child = children.get(i); if(!child.isPickable()) continue;
+        Shape shp = child.parentToLocal(aShape);
+        if(child.intersects(shp))
+            hit.add(child);
+    }
+    return hit;
+}
+
+/**
  * Returns the managed children.
  */
 public View[] getChildrenManaged()

@@ -314,6 +314,15 @@ public static class CompoundBorder extends Border {
         return _insets = Insets.add(_obdr.getInsets(),_ibdr.getInsets());
     }
 
+    /** Paint border. */
+    public void paint(Painter aPntr, Shape aShape)
+    {
+        _obdr.paint(aPntr, aShape);
+        Insets ins = _obdr.getInsets();
+        Rect bnds = aShape.getBounds(); bnds.inset(ins);
+        _ibdr.paint(aPntr, bnds);
+    }
+    
     /** XML Archival. */
     public XMLElement toXML(XMLArchiver anArchiver)
     {

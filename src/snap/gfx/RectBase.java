@@ -134,7 +134,7 @@ public void inset(double xIns, double yIns)  { setRect(x+xIns,y+yIns,width-2*xIn
  */
 public void inset(Insets anIns)
 {
-    if(anIns!=null) setRect(x+anIns.left,y+anIns.top,width-anIns.left-anIns.top,height-anIns.top-anIns.bottom);
+    if(anIns!=null) setRect(x+anIns.left,y+anIns.top,width-anIns.left-anIns.right,height-anIns.top-anIns.bottom);
 }
 
 /**

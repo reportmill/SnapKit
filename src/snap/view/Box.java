@@ -1,4 +1,5 @@
 package snap.view;
+import snap.gfx.Pos;
 import snap.util.*;
 
 /**
@@ -76,6 +77,11 @@ public boolean isScaleUp()  { return isFillWidth(); }
  * Sets whether to scale up as well as down.
  */
 public void setScaleUp(boolean aValue)  { setFillWidth(aValue); }
+
+/**
+ * Override to change to CENTER.
+ */    
+public Pos getAlignmentDefault()  { return Pos.CENTER; }
 
 /**
  * Override.

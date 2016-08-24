@@ -1010,7 +1010,7 @@ protected void setShowing(boolean aValue)
 {
     if(aValue==isShowing()) return; super.setShowing(aValue);
     if(isFocused()) setCaretAnim();
-    if(aValue)
+    if(aValue && getSelStart()!=0)
         getEnv().runLater(() -> scrollSelToVisible());
 }
 
