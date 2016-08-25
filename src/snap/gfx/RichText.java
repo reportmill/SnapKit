@@ -778,7 +778,7 @@ public String toString()
 /**
  * A property change event for addChars/removeChars.
  */
-protected class CharsChange extends PropChange {
+public class CharsChange extends PropChange {
     public CharsChange(Object oldV, Object newV, int anInd)  { super(RichText.this, Chars_Prop, oldV, newV, anInd); }
     public CharSequence getOldValue()  { return (CharSequence)super.getOldValue(); }
     public CharSequence getNewValue()  { return (CharSequence)super.getNewValue(); }

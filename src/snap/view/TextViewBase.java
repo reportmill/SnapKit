@@ -1,6 +1,7 @@
 package snap.view;
 import snap.gfx.*;
 import snap.util.*;
+import snap.web.*;
 
 /**
  * A View subclass for viewing/editing a TextBox.
@@ -95,11 +96,6 @@ public void setText(String aString)
 }
 
 /**
- * Returns the rich text.
- */
-public RichText getRichText()  { return getTextBox().getText(); }
-
-/**
  * Set the source for TextComponent text.
  */
 public void setSource(Object aSource)
@@ -108,6 +104,21 @@ public void setSource(Object aSource)
     textDidChange();
     setSel(0);
 }
+
+/**
+ * Returns the source URL.
+ */
+public WebURL getSourceURL()  { return getTextBox().getSourceURL(); }
+
+/**
+ * Returns the source file.
+ */
+public WebFile getSourceFile()  { return getTextBox().getSourceFile(); }
+
+/**
+ * Returns the rich text.
+ */
+public RichText getRichText()  { return getTextBox().getText(); }
 
 /**
  * Returns the text that is being edited.
@@ -391,8 +402,7 @@ public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd
         setSel(start, getSelEnd() + delta);
     }
     
-    // Register for repaint and update LastReplaceIndex
-    textDidChange();
+    // Update LastReplaceIndex
     _lastReplaceIndex = aStart + strLen;
 }
 
@@ -405,14 +415,6 @@ public void delete()  { delete(getSelStart(), getSelEnd(), true); }
  * Deletes the given range of chars.
  */
 public void delete(int aStart, int anEnd, boolean doUpdateSel) { replaceChars(null, null, aStart, anEnd, doUpdateSel); }
-
-/**
- * Called when text changes in some way.
- */
-protected void textDidChange()
-{
-    relayoutParent(); repaint();
-}
 
 /**
  * Moves the selection index forward a character (or if a range is selected, moves to end of range).
@@ -955,8 +957,16 @@ public void propertyChange(PropChange anEvent)
     // Forward on to listeners
     firePropChange(anEvent);
     
-    // Reset
-    repaint();
+    // Notify text did change
+    textDidChange();
+}
+
+/**
+ * Called when text changes in some way.
+ */
+protected void textDidChange()
+{
+    relayoutParent(); repaint();
 }
 
 /**

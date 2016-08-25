@@ -100,11 +100,7 @@ public WebURL getSourceURL()  { return getText().getSourceURL(); }
 /**
  * Sets the source URL.
  */
-public void setSourceURL(WebURL aURL)
-{
-    getText().setSourceURL(aURL);
-    setNeedsUpdateAll();
-}
+public void setSourceURL(WebURL aURL)  { setSource(aURL); }
 
 /**
  * Returns the source file.
