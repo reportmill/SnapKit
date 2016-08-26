@@ -125,6 +125,9 @@ protected WebResponse doHead(WebRequest aRequest)
     // If found, set response code to ok
     if(fhdr!=null) {
         resp.setFileHeader(fhdr); resp.setCode(WebResponse.OK); }
+        
+    // Otherwise mark FILE_NOT_FOUND
+    else resp.setCode(WebResponse.NOT_FOUND);
     
     // Return response
     return resp;
@@ -217,12 +220,14 @@ public synchronized WebFile getFile(String aPath) throws ResponseException
     if(resp.getException()!=null)
         throw new ResponseException(resp);
         
-    // Get file header from response - if found, create file and set Exists to true
+    // If not found, return null
+    if(resp.getCode()==WebResponse.NOT_FOUND)
+        return null;
+        
+    // Get file header from response, create file and return
     FileHeader fhdr = resp.getFileHeader();
-    if(fhdr!=null) {
-        file = createFile(fhdr); file._exists = true; }
-    
-    // Return Response.File (might be null if FILE_NOT_FOUND)
+    if(fhdr==null) { System.err.println("WebSite.getFile: No Header for " + url); return null; } // Can't happen?
+    file = createFile(fhdr); file._exists = true;
     return file;
 }
 
