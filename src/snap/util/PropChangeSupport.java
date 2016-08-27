@@ -11,9 +11,6 @@ public class PropChangeSupport {
     // The PropChangeListener
     PropChangeListener  _pcl;
     
-    // The Property (if PCL is constrained)
-    String              _prop;
-
     // An empty PropChangeSupport
     public static final PropChangeSupport EMPTY = new PropChangeSupport("");
     

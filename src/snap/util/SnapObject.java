@@ -55,8 +55,8 @@ protected void firePropChange(PropChange anEvent)
 public <T> T getListener(Class<T> aClass, int anIndex)
 {
     Object[] lList = _listeners; 
-    for(int i=lList.length-2, j=0; i>=0; i-=2) {
-        if(lList[i]==aClass && (anIndex==j++))
+    for(int i=0,iMax=lList.length, j=0; i<iMax; i+=2) {
+        if(lList[i]==aClass && anIndex==j++)
             return (T)lList[i+1]; }
     throw new IndexOutOfBoundsException("Listener index " + anIndex + " beyond " + getListenerCount(aClass));
 }
@@ -68,7 +68,7 @@ public <T> T[] getListeners(Class<T> aClass)
 {
     Object[] lList = _listeners; int count = getListenerCount(lList, aClass);
     T[] result = (T[])Array.newInstance(aClass, count); if(count==0) return result;
-    for(int i=lList.length-2, j=0; i>=0; i-=2) {
+    for(int i=0,iMax=lList.length, j=0; i<iMax; i+=2) {
         if(lList[i]==aClass)
             result[j++] = (T)lList[i+1]; }
     return result;   
