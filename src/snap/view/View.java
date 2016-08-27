@@ -2005,8 +2005,8 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive Alignment
     if(anElement.hasAttribute("align"))
         setAlign(Pos.get(anElement.getAttributeValue("align")));
-    else if(anElement.hasAttribute("Alignment"))
-        setAlign(Pos.get(anElement.getAttributeValue("Alignment")));
+    else if(anElement.hasAttribute("Align"))
+        setAlign(Pos.get(anElement.getAttributeValue("Align")));
         
     // Unarchive Vertical
     if(anElement.hasAttribute("Vertical"))
