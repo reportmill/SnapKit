@@ -9,9 +9,6 @@ import snap.util.*;
  */
 public abstract class ViewOwner implements EventListener {
 
-    // Whether view has been loaded
-    boolean                   _uiSet;
-    
     // The UI View
     View                      _ui;
     
@@ -71,7 +68,7 @@ public abstract class ViewOwner implements EventListener {
 /**
  * Returns whether UI has been set.
  */
-public boolean isUISet()  { return _uiSet; }
+public boolean isUISet()  { return _ui!=null; }
 
 /**
  * Returns top level view.
@@ -85,7 +82,6 @@ public synchronized View getUI()
     initUI();
     _ui.setOwner(this);
     setSendEventDisabled(false);
-    _uiSet = true;
     runLater(() -> resetLater());
     return _ui;
 }
