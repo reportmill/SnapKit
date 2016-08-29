@@ -162,6 +162,20 @@ public View getContent()  { return getRootView().getContent(); }
 public void setContent(View aView)  { getRootView().setContent(aView); }
 
 /**
+ * Returns the content associated with this window, with option to set from owner if not there yet.
+ */
+public View getContent(boolean doSet)
+{
+    View content = getContent();
+    if(content==null && doSet) {
+        ViewOwner owner = getOwner(); if(owner==null) return null;
+        content = owner.getUI();
+        setContent(content);
+    }
+    return content;
+}
+
+/**
  * Returns whether the window is always on top.
  */
 public boolean isAlwaysOnTop()  { return _alwaysOnTop; }
@@ -233,6 +247,10 @@ public void show()
  */
 public void show(View aView, double aSX, double aSY)
 {
+    // Make sure content is set
+    getContent(true);
+    
+    // Make sure window is initialized
     getHelper().checkInit();
     
     // If FrameSaveName provided, set Location from defaults and register to store future window moves
@@ -272,6 +290,9 @@ public void toFront()  { getHelper().toFront(); }
  */
 public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
 {
+    // Make sure content is set
+    getContent(true);
+    
     // Get rect for given node and point for given offsets
     Rect rect = aView!=null? aView.getLocalToScreen().createTransformedShape(aView.getBoundsInside()).getBounds() :
         getEnv().getScreenBoundsInset();

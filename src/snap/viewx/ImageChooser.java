@@ -92,7 +92,7 @@ protected void addFilesPaneFile(WebFile aFile)
     Label label = new Label(aFile.getSimpleName()); label.setName(aFile.getSimpleName());
     VBox vbox = new VBox(); vbox.setAlign(Pos.TOP_CENTER); vbox.setChildren(iview,label);
     vbox.setPrefSize(100,100); vbox.setProp("File", aFile);
-    initUI(vbox);
+    vbox.setOwner(this);
     enableEvents(vbox, MouseClicked);
     _filesPane.addChild(vbox);
 }

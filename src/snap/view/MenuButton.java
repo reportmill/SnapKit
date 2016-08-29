@@ -200,11 +200,12 @@ private Image getArrowImage()
 }
 
 /**
- * Initialize UI.
+ * Override to send to items.
  */
-protected void initUI(ViewOwner anOwner)
+public void setOwner(ViewOwner anOwner)
 {
-    for(View child : _items) anOwner.initUI(child);
+    super.setOwner(anOwner);
+    for(View child : _items) child.setOwner(anOwner);
 }
 
 /**

@@ -78,9 +78,9 @@ protected String getValuePropName()  { return "Selected"; }
 /**
  * Override to add to ToggleGroup if name is set.
  */
-public void initUI(ViewOwner anOwner)
+public void setOwner(ViewOwner anOwner)
 {
-    super.initUI(anOwner);
+    super.setOwner(anOwner);
     if(getToggleGroupName()!=null)
         anOwner.getToggleGroup(getToggleGroupName()).add(this);
 }

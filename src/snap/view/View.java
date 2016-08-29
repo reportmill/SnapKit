@@ -1570,7 +1570,12 @@ public ViewOwner getOwner()  { return _owner; }
 /**
  * Sets the owner.
  */
-public void setOwner(ViewOwner anOwner)  { _owner = anOwner; }
+public void setOwner(ViewOwner anOwner)
+{
+    if(_owner!=null) return;
+    _owner = anOwner;
+    if(_evtAdptr!=null && _evtAdptr.isEnabled(Action)) anOwner.enableEvents(this, Action);
+}
 
 /**
  * Returns the owner of given class.
@@ -1579,14 +1584,6 @@ public <T> T getOwner(Class <T> aClass)
 {
     if(getOwner()!=null && aClass.isAssignableFrom(getOwner().getClass())) return (T)getOwner();
     return getParent()!=null? getParent().getOwner(aClass) : null;
-}
-
-/**
- * Initialize view for owner.
- */
-protected void initUI(ViewOwner anOwner)
-{
-    if(_evtAdptr!=null && _evtAdptr.isEnabled(Action)) anOwner.enableEvents(this,Action);
 }
 
 /**

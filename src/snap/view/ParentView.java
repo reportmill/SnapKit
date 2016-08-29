@@ -179,6 +179,16 @@ public View[] getChildrenManaged()
 }
 
 /**
+ * Override to propogate to children.
+ */
+public void setOwner(ViewOwner anOwner)
+{
+    if(getOwner()!=null) return; super.setOwner(anOwner);
+    for(View child : getChildren())
+        child.setOwner(anOwner);
+}
+
+/**
  * Override to add call to paintChildren.
  */
 protected void paintAll(Painter aPntr)

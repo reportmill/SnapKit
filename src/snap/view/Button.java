@@ -68,11 +68,11 @@ public void paintFront(Painter aPntr)
 }
 
 /**
- * Initializes newly created object.
+ * Override to handle DefaultButton/CancelButton features.
  */
-public void initUI(ViewOwner anOwner)
+public void setOwner(ViewOwner anOwner)
 {
-    super.initUI(anOwner);  // Do normal init
+    super.setOwner(anOwner);  // Do normal version
     
     // Register default or cancel buttons
     if(isDefaultButton())

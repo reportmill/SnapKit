@@ -83,7 +83,7 @@ public synchronized View getUI()
     _ui = createUI();
     setSendEventDisabled(true);
     initUI();
-    initUI(_win!=null? _win : _ui);
+    _ui.setOwner(this);
     setSendEventDisabled(false);
     _uiSet = true;
     runLater(() -> resetLater());
@@ -122,22 +122,6 @@ protected Object getUISource()  { return _env.getUISource(getClass()); }
  * Initializes the UI panel.
  */
 protected void initUI()  { }
-
-/**
- * Initialize UI.
- */
-protected void initUI(Object anObj)
-{
-    View view = getView(anObj);                       // Get view
-    if(view.getOwner()!=null) return;     // If already initialized, just return
-    view.setOwner(this);                              // Set owner
-    if(view._evtAdptr!=null && view._evtAdptr.isEnabled(Action)) enableEvents(view, Action);
-    view.initUI(this);                                // Init view
-    if(!(view instanceof ParentView)) return;         // Just return if not parent
-    ParentView pview = (ParentView)view;              // Get view as parent
-    View children[] = pview.getChildArray();          // Get children
-    for(View child : children) initUI(child);         // Recurse
-}
 
 /**
  * Returns the specific child view for given object (name, event or view).
@@ -475,17 +459,20 @@ public boolean isWindowSet()  { return _win!=null; }
 /**
  * Returns the Window to manage this ViewOwner's window.
  */
-public WindowView getWindow()  { return _win!=null? _win : (_win=createWindow()); }
+public WindowView getWindow()
+{
+    getUI(); // Without this Window gets reset!
+    if(_win!=null) return _win;
+    _win = createWindow();
+    _win.setOwner(this);
+    _win.getRootView().setOwner(this);
+    return _win;
+}
 
 /**
  * Creates the Window to manage this ViewOwner's window.
  */
-protected WindowView createWindow()
-{
-    WindowView win = new WindowView();
-    win.setContent(getUI());
-    return win;
-}
+protected WindowView createWindow()  { return new WindowView(); }
 
 /**
  * Returns whether window is visible.
