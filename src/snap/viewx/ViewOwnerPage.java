@@ -10,7 +10,7 @@ public class ViewOwnerPage extends WebPage {
     ViewOwner              _owner;
 
 /**
- * Creates a new JFXPage for given JFXOwner.
+ * Creates a new ViewOwnerPage for given ViewOwner.
  */
 public ViewOwnerPage(ViewOwner anOwner)  { _owner = anOwner; }
 

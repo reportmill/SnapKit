@@ -3,12 +3,12 @@ import snap.gfx.*;
 import snap.view.*;
 
 /**
- * A WebPage subclass for JFX files.
+ * A WebPage subclass for SnapKit files.
  */
-public class JFXPage extends WebPage {
+public class SnapPage extends WebPage {
 
 /**
- * Returns the JavaFX Scene Root node.
+ * Returns the SnapKit file root view.
  */
 protected View createUI()
 {
