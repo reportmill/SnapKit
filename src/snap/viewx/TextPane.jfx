@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <HBox PrefHeight="28" Padding="0,4,0,4" Spacing="3">
   <font name="Arial" size="11" />
-  <jbutton name="SaveButton" PrefWidth="22" PrefHeight="22" ttip="Save" image="/com/reportmill/app/pkg.images/File_Save.png" align="center" ShowBorder="false" margin="0" />
+  <jbutton name="SaveButton" PrefWidth="22" PrefHeight="22" ttip="Save" image="File_Save.png" ShowBorder="false" />
   <jseparator PrefHeight="18" Vertical="true" />
-  <jbutton name="CutButton" PrefWidth="22" PrefHeight="22" ttip="Cut" image="/com/reportmill/app/pkg.images/Edit_Cut.png" align="center" ShowBorder="false" margin="0" />
-  <jbutton name="CopyButton" PrefWidth="22" PrefHeight="22" ttip="Copy" image="/com/reportmill/app/pkg.images/Edit_Copy.png" align="center" ShowBorder="false" margin="0" />
-  <jbutton name="PasteButton" PrefWidth="22" PrefHeight="22" ttip="Paste" image="/com/reportmill/app/pkg.images/Edit_Paste.png" align="center" ShowBorder="false" margin="0" />
-  <jbutton name="DeleteButton" PrefWidth="22" PrefHeight="22" ttip="Delete" image="/com/reportmill/app/pkg.images/Edit_Delete.png" align="center" ShowBorder="false" margin="0" />
+  <jbutton name="CutButton" PrefWidth="22" PrefHeight="22" ttip="Cut" image="Edit_Cut.png" ShowBorder="false" />
+  <jbutton name="CopyButton" PrefWidth="22" PrefHeight="22" ttip="Copy" image="Edit_Copy.png" ShowBorder="false" />
+  <jbutton name="PasteButton" PrefWidth="22" PrefHeight="22" ttip="Paste" image="Edit_Paste.png" ShowBorder="false" />
+  <jbutton name="DeleteButton" PrefWidth="22" PrefHeight="22" ttip="Delete" image="Edit_Delete.png" ShowBorder="false" />
   <jseparator PrefHeight="18" Vertical="true" />
   <jtextfield name="FontSizeText" PrefWidth="32" PrefHeight="22" />
-  <jbutton name="IncreaseFontButton" PrefWidth="22" PrefHeight="22" ttip="Increase Font Size" image="/com/reportmill/app/pkg.images/Format_IncreaseFont.png" align="center" ShowBorder="false" margin="0" />
-  <jbutton name="DecreaseFontButton" PrefWidth="22" PrefHeight="22" ttip="Decrease Font Size" image="/com/reportmill/app/pkg.images/Format_DecreaseFont.png" align="center" ShowBorder="false" margin="0" />
+  <jbutton name="IncreaseFontButton" PrefWidth="22" PrefHeight="22" ttip="Increase Font Size" image="Font_Increase.png" ShowBorder="false" />
+  <jbutton name="DecreaseFontButton" PrefWidth="22" PrefHeight="22" ttip="Decrease Font Size" image="Font_Decrease.png" ShowBorder="false" />
   <jseparator PrefHeight="18" Vertical="true" />
-  <jbutton name="UndoButton" PrefWidth="22" PrefHeight="22" ttip="Undo" image="/com/reportmill/app/pkg.images/Edit_Undo.png" align="center" ShowBorder="false" margin="0">
+  <jbutton name="UndoButton" PrefWidth="22" PrefHeight="22" ttip="Undo" image="Edit_Undo.png" ShowBorder="false">
     <binding aspect="Enabled" key="TextView.Undoer.hasUndos" />
   </jbutton>
-  <jbutton name="RedoButton" PrefWidth="22" PrefHeight="22" ttip="Redo" image="/com/reportmill/app/pkg.images/Edit_Redo.png" align="center" ShowBorder="false" margin="0">
+  <jbutton name="RedoButton" PrefWidth="22" PrefHeight="22" ttip="Redo" image="Edit_Redo.png" ShowBorder="false">
     <binding aspect="Enabled" key="TextView.Undoer.hasRedos" />
   </jbutton>
   <jseparator PrefHeight="18" Vertical="true" />
   <jtextfield name="FindText" PrefWidth="172" PrefHeight="22">
     <font name="Arial" size="11" />
   </jtextfield>
-  <jcheckbox name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" asize="--~,--~" text="IC" align="left" selected="true">
+  <jcheckbox name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" text="IC" selected="true">
     <font name="Arial" size="11" />
   </jcheckbox>
 </HBox>
