@@ -559,12 +559,12 @@ public void sendEvent(Object anObj)
 }
 
 /**
- * Returns whether Ribs' send event facility is disabled (so controls can be updated without triggering response).
+ * Returns whether send event facility is disabled (so controls can be updated without triggering response).
  */
 public boolean isSendEventDisabled()  { return _sendEventDisabled; }
 
 /**
- * Sets whether Ribs' send event facility is disabled (so controls can be updated without triggering response).
+ * Sets whether send event facility is disabled (so controls can be updated without triggering response).
  */
 public boolean setSendEventDisabled(boolean aFlag)
 {

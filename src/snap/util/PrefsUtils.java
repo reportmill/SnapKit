@@ -72,7 +72,7 @@ public static void flush()
 }
 
 /**
- * Sets the class that ribs preferences are associated with.
+ * Sets the class that preferences are associated with.
  */
 public static void setPrefsClass(Class aClass)  { _prefsClass = aClass; }
 

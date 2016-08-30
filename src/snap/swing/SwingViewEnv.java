@@ -87,9 +87,7 @@ public Object getUISource(Class aClass)
     WebURL durl = WebURL.getURL(aClass, null);
     WebFile dfile = durl.getFile().getParent();
     String sname = aClass.getSimpleName();
-    WebFile file = dfile.getFile(sname + ".rib"); if(file!=null) return file;
-    file = dfile.getFile(sname + ".ribs/" + sname + ".rib"); if(file!=null) return file;
-    file = dfile.getFile(sname + ".jfx"); if(file!=null) return file;
+    WebFile file = dfile.getFile(sname + ".snp"); if(file!=null) return file;
     return aClass!=Object.class? getUISource(aClass.getSuperclass()) : null;
 }
 

@@ -33,8 +33,7 @@ public boolean isEventThread()  { return Platform.isFxApplicationThread(); }
  */
 public Object getUISource(Class aClass)
 {
-    WebURL durl = WebURL.getURL(aClass, aClass.getSimpleName() + ".jfx");
-    if(durl==null) durl =  WebURL.getURL(aClass, aClass.getSimpleName() + ".rib");
+    WebURL durl = WebURL.getURL(aClass, aClass.getSimpleName() + ".snp");
     return durl!=null || aClass==Object.class? durl : getUISource(aClass.getSuperclass());
 }
 
