@@ -127,12 +127,12 @@ public void setShowHeader(boolean aValue)
 /**
  * Returns whether to show horizontal lines.
  */
-public boolean getShowHorizontalLines()  { return _showLinesH; }
+public boolean isShowLinesX()  { return _showLinesH; }
 
 /**
  * Sets whether to show horizontal lines.
  */
-public void setShowHorizontalLines(boolean aValue)
+public void setShowLinesX(boolean aValue)
 {
     firePropChange("ShowHorizontalLines", _showLinesH, _showLinesH = aValue);
 }
@@ -140,12 +140,12 @@ public void setShowHorizontalLines(boolean aValue)
 /**
  * Returns whether to show vertical lines.
  */
-public boolean getShowVerticalLines()  { return _showLinesV; }
+public boolean isShowLinesY()  { return _showLinesV; }
 
 /**
  * Sets whether to show vertical lines.
  */
-public void setShowVerticalLines(boolean aValue)
+public void setShowLinesY(boolean aValue)
 {
     firePropChange("ShowVerticalLines", _showLinesV, _showLinesV = aValue);
 }
@@ -328,20 +328,13 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive ShowHeader
     if(!getShowHeader()) e.add("ShowHeader", false);
     
-    // Archive GridColor
+    // Archive GridColor, ShowLinesX, ShowLinesY
     if(getGridColor()!=null) e.add("GridColor", '#' + getGridColor().toHexString());
-    
-    // Archive ShowHorizontalLines, ShowVerticalLinses
-    if(getShowHorizontalLines()) e.add("ShowHorizontalLines", getShowHorizontalLines());
-    if(getShowVerticalLines()) e.add("ShowVerticalLines", getShowVerticalLines());
+    if(isShowLinesX()) e.add("ShowLinesX", true);
+    if(isShowLinesY()) e.add("ShowLinesY", true);
     
     // Archive RowHeight
     if(getRowHeight()!=24) e.add("RowHeight", getRowHeight());
-    
-    // Archive SelectionMode
-    //if(getSelectionMode()!=SELECT_SINGLE) e.add("selection", getSelectionModeString());
-    
-    // Return the element
     return e;
 }
 
@@ -357,18 +350,13 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     if(anElement.hasAttribute("ShowHeader"))
         setShowHeader(anElement.getAttributeBooleanValue("ShowHeader"));
     
-    // Unarchive grid color
+    // Unarchive GridColor, ShowLinesX, ShowLinesY
     if(anElement.hasAttribute("GridColor")) setGridColor(new Color(anElement.getAttributeValue("GridColor")));
-    
-    // Unarchive ShowHorizontalLines, ShowVerticalLines
-    setShowHorizontalLines(anElement.getAttributeBoolValue("ShowHorizontalLines", false));
-    setShowVerticalLines(anElement.getAttributeBoolValue("ShowVerticalLines", false));
+    setShowLinesX(anElement.getAttributeBoolValue("ShowLinesX", false));
+    setShowLinesY(anElement.getAttributeBoolValue("ShowLinesY", false));
     
     // Unarchive RowHeight
     setRowHeight(anElement.getAttributeIntValue("RowHeight", 24));
-    
-    // Unarchive SelectionMode string
-    //if(anElement.hasAttribute("selection")) setSelectionModeString(anElement.getAttributeValue("selection"));
 }
 
 /**

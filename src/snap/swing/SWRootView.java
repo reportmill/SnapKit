@@ -152,7 +152,7 @@ public String getToolTipText(MouseEvent anEvent)
 {
     if(_rview==null) return null;
     ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, null, null);
-    return _rview.getToolTipText(event);
+    return _rview.getToolTip(event);
 }
 
 /**

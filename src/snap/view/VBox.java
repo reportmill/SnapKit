@@ -55,8 +55,8 @@ protected void layoutChildren()  { _layout.layoutChildren(); }
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("VBox");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive Spacing, FillWidth
     if(getSpacing()!=0) e.add("Spacing", getSpacing());

@@ -8,7 +8,7 @@
     <jtogglebutton name="SwatchPickerButton" PrefWidth="40" PrefHeight="27" image="swatches-icon.png" bgroup="bg1" />
     <jseparator PrefWidth="20" Vertical="true" visible="false" />
     <ColorWell name="DisplayColorWell" PrefWidth="40" PrefHeight="27" selectable="false" />
-    <menubutton name="HistoryMenuButton" PrefWidth="16" PrefHeight="11" ttip="Recent Colors" ShowBorder="false" popup-x="-40" popup-y="10" popup-width="56" popup-height="120" />
+    <menubutton name="HistoryMenuButton" PrefWidth="16" PrefHeight="11" ttip="Recent Colors" ShowBorder="false" PopupX="-40" PopupY="10" PopupWidth="56" PopupHeight="120" />
   </HBox>
   <switchpane name="PickerPanel" PrefHeight="198">
     <VBox name="ImagePicker" Spacing="4" FillWidth="true">

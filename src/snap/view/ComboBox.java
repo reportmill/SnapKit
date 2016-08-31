@@ -105,14 +105,14 @@ public TextField getTextField()
 /**
  * Returns the maximum row count.
  */
-public int getMaximumRowCount()  { return _maxRowCount; }
+public int getMaxRowCount()  { return _maxRowCount; }
 
 /**
  * Sets the maximum row count.
  */
-public void setMaximumRowCount(int aValue)
+public void setMaxRowCount(int aValue)
 {
-    firePropChange("MaximumRowCount", _maxRowCount, _maxRowCount = aValue);
+    firePropChange("MaxRowCount", _maxRowCount, _maxRowCount = aValue);
 }
 
 /**
@@ -289,11 +289,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive Editable
-    if(isEditable()) e.add("editable", true);
-    
-    // Archive MaximumRowCount
-    if(getMaximumRowCount()!=8) e.add("MaximumRowCount", getMaximumRowCount());
+    // Archive Editable, MaxRowCount
+    if(isEditable()) e.add("Editable", true);
+    if(getMaxRowCount()!=8) e.add("MaxRowCount", getMaxRowCount());
     
     // Archive Items
     List items = getItems();
@@ -319,13 +317,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive whether combobox is editable
-    if(anElement.getAttributeBoolValue("editable")) setEditable(true);
-        
-    // Unarchive MaximumRowCount (and old maxvisible)
-    if(anElement.hasAttribute("MaximumRowCount")) 
-        setMaximumRowCount(anElement.getAttributeIntValue("MaximumRowCount"));
-    if(anElement.hasAttribute("maxvisible")) setMaximumRowCount(anElement.getAttributeIntValue("maxvisible"));
+    // Unarchive Editable, MaxRowCount
+    if(anElement.getAttributeBoolValue("Editable")) setEditable(true);
+    if(anElement.hasAttribute("MaxRowCount")) setMaxRowCount(anElement.getAttributeIntValue("MaxRowCount"));
     
     // Unarchive items
     List items = new ArrayList();

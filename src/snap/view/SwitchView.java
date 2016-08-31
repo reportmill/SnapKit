@@ -77,7 +77,7 @@ public void setSelectedName(String aName)
 /**
  * Returns a mapped property name.
  */
-public String getValuePropName()  { return "SelectedIndex"; }
+public String getValuePropName()  { return SelectedIndex_Prop; }
 
 /**
  * Override to layout content.
@@ -118,7 +118,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
-    if(getSelectedIndex()>0) e.add("selected-index", getSelectedIndex());
+    if(getSelectedIndex()>0) e.add(SelectedIndex_Prop, getSelectedIndex());
     return e;
 }
 
@@ -129,7 +129,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
-    setSelectedIndex(anElement.getAttributeIntValue("selected-index", 0));
+    setSelectedIndex(anElement.getAttributeIntValue(SelectedIndex_Prop, 0));
 }
 
 }

@@ -205,11 +205,11 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive Value, Minimum, Maximum, StepSize
-    if(getValue()!=null) e.add("value", getValue());
-    if(getMin()!=Integer.MIN_VALUE) e.add("min", getMin());
-    if(getMax()!=Integer.MAX_VALUE) e.add("max", getMax());
-    if(getStep()!=1) e.add("step", getStep());
+    // Archive Value, Min, Max, Step
+    if(getValue()!=null) e.add("Value", getValue());
+    if(getMin()!=Integer.MIN_VALUE) e.add("Min", getMin());
+    if(getMax()!=Integer.MAX_VALUE) e.add("Max", getMax());
+    if(getStep()!=1) e.add("Step", getStep());
     
     // Return element
     return e;
@@ -223,11 +223,11 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive Value, Minimum, Maximum, StepSize
-    if(anElement.hasAttribute("value")) setValue((T)(Integer)anElement.getAttributeIntValue("value"));
-    if(anElement.hasAttribute("min")) setMin(anElement.getAttributeFloatValue("min"));
-    if(anElement.hasAttribute("max")) setMax(anElement.getAttributeFloatValue("max"));
-    if(anElement.hasAttribute("step")) setStep(anElement.getAttributeFloatValue("step"));
+    // Unarchive Value, Min, Max, Step
+    if(anElement.hasAttribute("Value")) setValue((T)(Integer)anElement.getAttributeIntValue("Value"));
+    if(anElement.hasAttribute("Min")) setMin(anElement.getAttributeFloatValue("Min"));
+    if(anElement.hasAttribute("Max")) setMax(anElement.getAttributeFloatValue("Max"));
+    if(anElement.hasAttribute("Step")) setStep(anElement.getAttributeFloatValue("Step"));
 }
 
 }

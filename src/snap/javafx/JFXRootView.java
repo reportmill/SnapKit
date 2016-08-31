@@ -148,7 +148,7 @@ public void enableToolTips()
     setOnMouseMoved(e -> _lastMouseMoved = e);
     ttip.setOnShowing(e -> {
         ViewEvent event = JFXViewEnv.get().createEvent(_view,_lastMouseMoved, null, null);
-        String ttstr = _view.getToolTipText(event);
+        String ttstr = _view.getToolTip(event);
         if(ttstr!=null) ttip.setText(ttstr);
         else Platform.runLater(() ->ttip.hide());
     });

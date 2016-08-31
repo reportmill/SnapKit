@@ -251,7 +251,17 @@ public boolean isViewEnabled(Object anObj)  { return getView(anObj).isEnabled();
 /**
  * Sets whether given name or UI view is enabled.
  */
-public void setViewEnabled(Object anObj, boolean aValue)  { getView(anObj).setEnabled(aValue); }
+public void setViewEnabled(Object anObj, boolean aValue)  { getView(anObj).setDisabled(!aValue); }
+
+/**
+ * Returns whether given name or UI view is disabled.
+ */
+public boolean isViewDisabled(Object anObj)  { return getView(anObj).isDisabled(); }
+
+/**
+ * Sets whether given name or UI view is disabled.
+ */
+public void setViewDisabled(Object anObj, boolean aValue)  { getView(anObj).setDisabled(aValue); }
 
 /**
  * Returns an image with given name or path from this class.

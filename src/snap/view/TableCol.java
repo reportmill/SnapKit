@@ -96,18 +96,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Create xml for column
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive HeaderValue
+    // Archive Header, Resizable
     if(getHeaderValue()!=null) e.add("Header", getHeaderValue());
-    
-    // Archive ItemKey
-    if(getItemKey()!=null && getItemKey().length()>0 && !getItemKey().equals(getHeaderValue()))
-        e.add("ItemKey", getItemKey());
-    
-    // Archive model index
-    //if(getModelIndex()!=anIndex) cxml.add("index", getModelIndex());
-    
-    // Resizable
-    if(!isResizable()) e.add("resizable", false);
+    if(!isResizable()) e.add("Resizable", false);
     
     // Return column xml
     return e;
@@ -121,18 +112,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Do normal version
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive ColumnHeader
+    // Unarchive Header, Resizable
     if(anElement.hasAttribute("Header")) setHeaderValue(anElement.getAttributeValue("Header"));
-    
-    // Unarchive ItemKey
-    if(anElement.hasAttribute("ItemKey")) setItemKey(anElement.getAttributeValue("ItemKey"));
-    
-    // Unarchive Width, MinWidth, MaxWidth, PrefWidth, Resizable, GrowWidth
-    if(anElement.hasAttribute("width")) setWidth(anElement.getAttributeIntValue("width"));
-    if(anElement.hasAttribute("MinWidth")) setMinWidth(anElement.getAttributeIntValue("MinWidth"));
-    if(anElement.hasAttribute("PrefWidth")) setPrefWidth(anElement.getAttributeIntValue("PrefWidth"));
-    if(anElement.hasAttribute("resizable")) setResizable(anElement.getAttributeBoolValue("resizable"));
-    if(anElement.hasAttribute("GrowWidth")) setGrowWidth(anElement.getAttributeBoolValue("GrowWidth"));
+    if(anElement.hasAttribute("Resizable")) setResizable(anElement.getAttributeBoolValue("Resizable"));
 }
 
 }

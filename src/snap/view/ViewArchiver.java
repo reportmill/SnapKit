@@ -11,7 +11,12 @@ public class ViewArchiver extends XMLArchiver {
 
     // Whether to use real class
     static boolean          _useRealCls = true;
-    
+
+/**
+ * Creates a new ViewArchiver.
+ */
+public ViewArchiver()  { setIgnoreCase(true); }
+
 /**
  * Returns a parent shape for source.
  */

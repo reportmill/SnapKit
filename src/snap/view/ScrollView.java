@@ -227,6 +227,19 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 }
 
 /**
+ * XML unarchival.
+ */
+public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+{
+    // Unarchive basic view attributes
+    super.fromXMLView(anArchiver, anElement);
+    
+    // Unarchive ShowHBar, ShowVBar
+    if(anElement.hasAttribute("ShowHBar")) setShowHBar(anElement.getAttributeBoolValue("ShowHBar"));
+    if(anElement.hasAttribute("ShowVBar")) setShowVBar(anElement.getAttributeBoolValue("ShowVBar"));
+}
+
+/**
  * XML archival deep.
  */
 public void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
@@ -234,7 +247,6 @@ public void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     // Archive content
     View child = getContent(); if(child==null) return;
     XMLElement cxml = anArchiver.toXML(child, this);
-    cxml.removeAttribute("x"); cxml.removeAttribute("y"); cxml.removeAttribute("asize");
     anElement.add(cxml);
 }
 
@@ -251,19 +263,6 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
             setContent(view); break;
         }
     }
-}
-
-/**
- * XML unarchival.
- */
-public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Unarchive basic view attributes
-    super.fromXMLView(anArchiver, anElement);
-    
-    // Unarchive ShowHBar, ShowVBar
-    if(anElement.hasAttribute("ShowHBar")) setShowHBar(anElement.getAttributeBoolValue("ShowHBar"));
-    if(anElement.hasAttribute("ShowVBar")) setShowVBar(anElement.getAttributeBoolValue("ShowVBar"));
 }
 
 }

@@ -44,6 +44,9 @@ public class XMLArchiver {
     // The stack of parents
     Deque                     _parentStack = new ArrayDeque();
     
+    // Whether element should ignore case when asking for attributes/elements by name
+    boolean                   _ignoreCase;
+    
 /**
  * An interface for objects that are archivable.
  */
@@ -92,6 +95,16 @@ public double getVersion()  { return _version; }
 public void setVersion(double aVersion)  { _version = aVersion; }
 
 /**
+ * Returns whether element should ignore case when asking for attributes/elements by name.
+ */
+public boolean isIgnoreCase()  { return _ignoreCase; }
+
+/**
+ * Sets whether element should ignore case when asking for attributes/elements by name.
+ */
+public void setIgnoreCase(boolean aVal)  { _ignoreCase = aVal; }
+
+/**
  * Returns the root xml.
  */
 public XMLElement getRootXML()  { return _root; }
@@ -124,6 +137,7 @@ public Object readObject(Object aSource)
 public Object readObject(byte theBytes[])
 {
     XMLElement xml = XMLElement.getElement(theBytes);
+    if(isIgnoreCase()) xml.setIgnoreCase(true);
     return readObject(xml);
 }
 

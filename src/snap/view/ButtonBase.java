@@ -282,10 +282,8 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     if(anElement.hasAttribute("ShowBorder")) setShowBorder(anElement.getAttributeBoolValue("ShowBorder"));
         
     // Unarchive Margin
-    if(anElement.hasAttribute("margin")) {
-        Insets insets = Insets.get(anElement.getAttributeValue("margin"));
-        setPadding(insets);
-    }
+    if(anElement.hasAttribute("margin")) { Insets ins = Insets.get(anElement.getAttributeValue("margin"));
+        if(!ins.isEmpty()) setPadding(ins); }
 }
 
 }

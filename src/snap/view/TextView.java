@@ -45,9 +45,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     XMLElement e = super.toXMLView(anArchiver);
     
     // Archive SendActionOnReturn
-    if(getSendActionOnReturn()) e.add("send-action-on-return", true);
-
-    // Return element
+    if(getSendActionOnReturn()) e.add("SendActionOnReturn", true);
     return e;
 }
 
@@ -59,9 +57,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive text component attributes
     super.fromXMLView(anArchiver, anElement);
 
-    // Unarchive send action on return
-    if(anElement.hasAttribute("send-action-on-return"))
-        setSendActionOnReturn(anElement.getAttributeBoolValue("send-action-on-return"));
+    // Unarchive SendActionOnReturn
+    if(anElement.hasAttribute("SendActionOnReturn") || anElement.hasAttribute("send-action-on-return"))
+        setSendActionOnReturn(anElement.getAttributeBoolValue("SendActionOnReturn", true));
 }
 
 }

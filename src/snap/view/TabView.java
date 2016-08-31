@@ -32,6 +32,9 @@ public class TabView extends ParentView implements View.Selectable <Tab> {
     // The default back fill
     static Paint    _defBackFill = new Color("#F4F4F4");
     
+    // Constants for properties
+    public static final String SelectedIndex_Prop = "SelectedIndex";
+
 /**
  * Creates a new TabView.
  */
@@ -152,7 +155,7 @@ public void setSelectedIndex(int anIndex)
     ToggleButton nb = getTabButton(anIndex); if(nb!=null) { nb.setSelected(true); nb.setButtonFill(_defBackFill); }
     setContent(tab!=null? tab.getContent() : null);
     positionBorderBlockerBox();
-    firePropChange("SelectedIndex", _sindex, _sindex=anIndex);
+    firePropChange(SelectedIndex_Prop, _sindex, _sindex=anIndex);
     fireActionEvent();
 }
 
@@ -261,7 +264,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
-    e.add("selected-index", getSelectedIndex()); // Archive the index of the currently selected tab
+    e.add(SelectedIndex_Prop, getSelectedIndex()); // Archive the index of the currently selected tab
     return e;
 }
 
@@ -273,7 +276,6 @@ public void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     // Archive children
     for(int i=0, iMax=getChildCount(); i<iMax; i++) { View child = getChild(i); String title = getTabTitle(i);
         XMLElement cxml = anArchiver.toXML(child, this); cxml.add("title", title);
-        cxml.removeAttribute("x"); cxml.removeAttribute("y"); cxml.removeAttribute("asize");
         anElement.add(cxml);
     }    
 }
@@ -296,8 +298,8 @@ public void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     }
     
     // Unarchive SelectedIndex (after children unarchival - otherwise it may be out of bounds)
-    if(anElement.hasAttribute("selected-index"))
-        setSelectedIndex(anElement.getAttributeIntValue("selected-index"));
+    if(anElement.hasAttribute(SelectedIndex_Prop))
+        setSelectedIndex(anElement.getAttributeIntValue(SelectedIndex_Prop));
 }
 
 }

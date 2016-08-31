@@ -508,14 +508,12 @@ protected boolean equalsItems(List theItems)
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jtree");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
 
     // Archive RootVisible, ShowRootHandles
     if(!isRootVisible()) e.add("RootVisible", false);
-    if(!isShowRootHandle()) e.add("ShowsRootHandles", false);
-
-    // Return element
+    if(!isShowRootHandle()) e.add("ShowRootHandles", false);
     return e;
 }
 
@@ -528,7 +526,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     super.fromXMLView(anArchiver, anElement);
 
     // Unarchive RootVisible, ShowRootHandles
-    if(anElement.hasAttribute("RootVisible")) setRootVisible(anElement.getAttributeBooleanValue("RootVisible", true));
+    if(anElement.hasAttribute("RootVisible")) setRootVisible(anElement.getAttributeBooleanValue("RootVisible"));
+    if(anElement.hasAttribute("ShowRootHandles"))
+        setShowRootHandle(anElement.getAttributeBooleanValue("ShowRootHandles"));
     if(anElement.hasAttribute("ShowsRootHandles"))
         setShowRootHandle(anElement.getAttributeBooleanValue("ShowsRootHandles"));
 }

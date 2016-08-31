@@ -1045,19 +1045,22 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive text string, Editable, WrapText, Margin
-    if(getText()!=null && getText().length()>0) e.add("text", getText());
-    if(!isEditable()) e.add("editable", false);
+    // Archive Editable, WrapText, RichText
+    if(!isEditable()) e.add("Editable", false);
     if(isWrapText()) e.add("WrapText", true);
     if(isRichText()) e.add("RichText", true);
-    if(!getPadding().equals(getPaddingDefault())) e.add("margin", getPadding().getString());
 
-    // Get the xml element for the xstring
-    XMLElement xse = anArchiver.toXML(getRichText());
-    for(int i=0, iMax=xse.size(); i<iMax; i++)
-        e.add(xse.get(i));
+    // If RichText, archive rich text
+    if(isRichText()) {
+        XMLElement rtxml = anArchiver.toXML(getRichText());
+        for(int i=0, iMax=rtxml.size(); i<iMax; i++)
+            e.add(rtxml.get(i));
+    }
 
-    return e;  // Return element
+    // Otherwise, archive text string
+    else if(getText()!=null && getText().length()>0) e.add("text", getText());
+    
+    return e;
 }
 
 /**
@@ -1068,17 +1071,13 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive Editable, WrapTet, Margin
-    if(anElement.getAttribute("editable")!=null)
-        setEditable(anElement.getAttributeBoolValue("editable"));
-    if(anElement.getAttribute("WrapText")!=null)
-        setWrapText(anElement.getAttributeBoolValue("WrapText"));
-    if(anElement.getAttribute("RichText")!=null)
-        setRichText(anElement.getAttributeBoolValue("RichText"));
-    if(anElement.hasAttribute("margin"))
-        setPadding(Insets.get(anElement.getAttributeValue("margin")));
+    // Unarchive Editable, WrapText, RichText
+    if(anElement.getAttribute("Editable")!=null) setEditable(anElement.getAttributeBoolValue("editable"));
+    if(anElement.getAttribute("WrapText")!=null) setWrapText(anElement.getAttributeBoolValue("WrapText"));
+    if(anElement.getAttribute("RichText")!=null) setRichText(anElement.getAttributeBoolValue("RichText"));
 
-    // Unarchive valign
+    // Unarchive margin, valign (should go soon)
+    if(anElement.hasAttribute("margin")) setPadding(Insets.get(anElement.getAttributeValue("margin")));
     if(anElement.hasAttribute("valign")) {
         String align = anElement.getAttributeValue("valign");
         if(align.equals("top")) setAlign(Pos.get(HPos.LEFT,VPos.TOP));
@@ -1086,15 +1085,19 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
         else if(align.equals("bottom")) setAlign(Pos.get(HPos.LEFT,VPos.BOTTOM));
     }
     
-    // Unarchive text
-    getUndoer().disable();
-    getRichText().fromXML(anArchiver, anElement);
-    getUndoer().enable();
+    // If RichText, unarchive rich text
+    if(isRichText()) {
+        getUndoer().disable();
+        getRichText().fromXML(anArchiver, anElement);
+        getUndoer().enable();
+    }
 
-    // Unarchive text - Text can be specified as "text" or "value" attribute, or as content (CDATA or otherwise)
-    String string = anElement.getAttributeValue("text",  anElement.getAttributeValue("value", anElement.getValue()));
-    if(string!=null && string.length()>0)
-        setText(string);
+    // Otherwise unarchive text. Text can be "text" or "value" attribute, or as content (CDATA or otherwise)
+    else {
+        String str = anElement.getAttributeValue("text",  anElement.getAttributeValue("value", anElement.getValue()));
+        if(str!=null && str.length()>0)
+            setText(str);
+    }
 }
 
 /**

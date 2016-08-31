@@ -93,11 +93,11 @@ protected XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive selected state
-    if(isSelected()) e.add("selected", true);
+    // Archive Selected
+    if(isSelected()) e.add("Selected", true);
     
-    // Archive ButtonGroupName
-    if(getToggleGroupName()!=null) e.add("bgroup", getToggleGroupName());
+    // Archive ToggleGroup
+    if(getToggleGroupName()!=null) e.add("ToggleGroup", getToggleGroupName());
     return e;
 }
     
@@ -109,12 +109,12 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive selected state
-    setSelected(anElement.getAttributeBoolValue("selected"));
+    // Unarchive Selected
+    setSelected(anElement.getAttributeBoolValue("Selected"));
     
-    // Unarchive ButtonGroupName
-    if(anElement.hasAttribute("bgroup"))
-        setToggleGroupName(anElement.getAttributeValue("bgroup"));
+    // Unarchive ToggleGroup
+    if(anElement.hasAttribute("ToggleGroup") || anElement.hasAttribute("bgroup"))
+        setToggleGroupName(anElement.getAttributeValue("ToggleGroup", anElement.getAttributeValue("bgroup")));
 }
 
 }

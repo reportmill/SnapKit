@@ -224,9 +224,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive ShowBorder, ShowArrow, PopupPoint, PopupSize
     if(!isShowBorder()) e.add("ShowBorder", false);
     if(!isShowArrow()) e.add("ShowArrow", false);
-    if(getPopupPoint()!=null) { e.add("popup-x", getPopupPoint().x); e.add("popup-y", getPopupPoint().y); }
+    if(getPopupPoint()!=null) { e.add("PopupX", getPopupPoint().x); e.add("PopupY", getPopupPoint().y); }
     if(getPopupSize()!=null) {
-        e.add("popup-width", getPopupSize().width); e.add("popup-height", getPopupSize().height); }
+        e.add("PopupWidth", getPopupSize().width); e.add("PopupHeight", getPopupSize().height); }
         
     // Return element
     return e;
@@ -252,16 +252,16 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     setShowArrow(anElement.getAttributeBooleanValue("ShowArrow", true));
     
     // Unarchive PopupPoint
-    if(anElement.hasAttribute("popup-x") || anElement.hasAttribute("popup-y")) {
-        int x = anElement.getAttributeIntValue("popup-x");
-        int y = anElement.getAttributeIntValue("popup-y");
+    if(anElement.hasAttribute("PopupX") || anElement.hasAttribute("PopupY")) {
+        int x = anElement.getAttributeIntValue("PopupX");
+        int y = anElement.getAttributeIntValue("PopupY");
         setPopupPoint(new Point(x, y));
     }
     
     // Unarchive PopupSize
-    if(anElement.hasAttribute("popup-width") || anElement.hasAttribute("popup-height")) {
-        int w = anElement.getAttributeIntValue("popup-width");
-        int h = anElement.getAttributeIntValue("popup-height");
+    if(anElement.hasAttribute("PopupWidth") || anElement.hasAttribute("PopupHeight")) {
+        int w = anElement.getAttributeIntValue("PopupWidth");
+        int h = anElement.getAttributeIntValue("PopupHeight");
         setPopupSize(new Size(w, h));
     }
 }

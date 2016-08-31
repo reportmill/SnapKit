@@ -88,13 +88,12 @@ public boolean isSelectable()  { return _selectable; }
 public void setSelectable(boolean flag)  { _selectable = flag; repaint(); }
 
 /**
- * This just makes sure that any colorwell that is disabled is also deselected
+ * Override to make sure any colorwell that is disabled is also deselected
  */
-public void setEnabled(boolean enableIt)
+public void setDisabled(boolean aValue)
 {
-    if(!enableIt) setSelected(false);
-    super.setEnabled(enableIt);
-    repaint();
+    super.setDisabled(aValue);
+    if(aValue) setSelected(false);
 }
 
 /**
@@ -232,9 +231,9 @@ public String getValuePropName()  { return "Color"; }
  */
 public XMLElement toXML(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXML(anArchiver); e.setName("colorwell");
-    if(!isSelectable()) e.add("selectable", false);
+    // Archive basic view attributes
+    XMLElement e = super.toXML(anArchiver);
+    if(!isSelectable()) e.add("Selectable", false);
     return e;
 }
 
@@ -244,7 +243,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
 public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
 {
     super.fromXML(anArchiver, anElement);
-    if(anElement.hasAttribute("selectable")) setSelectable(anElement.getAttributeBoolValue("selectable"));
+    if(anElement.hasAttribute("Selectable")) setSelectable(anElement.getAttributeBoolValue("Selectable"));
     return this;
 }
 

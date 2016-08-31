@@ -1,6 +1,5 @@
 package snap.view;
 import snap.gfx.*;
-import snap.util.*;
 
 /**
  * This class provides a RM shape/inspector for editing JSeparator.

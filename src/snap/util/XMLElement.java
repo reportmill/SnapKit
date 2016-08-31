@@ -24,6 +24,9 @@ public class XMLElement extends XMLAttribute {
     // Processing instruction data
     String               _pidata;
     
+    // Whether element should ignore case when asking for attributes/elements by name
+    boolean              _ignoreCase;
+    
 /**
  * Creates a new element.
  */
@@ -156,7 +159,7 @@ public int getAttributeIndex(XMLAttribute anAttribute)  { return ListUtils.index
 public XMLAttribute getAttribute(String aName)
 {
     for(int i=0, iMax=getAttributeCount(); i<iMax; i++)
-        if(getAttribute(i).getName().equals(aName))
+        if(equals(getAttribute(i).getName(), aName))
             return getAttribute(i);
     return null;
 }
@@ -167,7 +170,7 @@ public XMLAttribute getAttribute(String aName)
 public int getAttributeIndex(String aName)
 {
     for(int i=0, iMax=getAttributeCount(); i<iMax; i++)
-        if(getAttribute(i).getName().equals(aName))
+        if(equals(getAttribute(i).getName(), aName))
             return i;
     return -1;
 }
@@ -224,7 +227,7 @@ public int getElementCount(String aName)
 {
     int count = 0;
     for(int i=0, iMax=getElementCount(); i<iMax; i++)
-        if(getElement(i).getName().equals(aName))
+        if(equals(getElement(i).getName(), aName))
             count++;
     return count;
 }
@@ -235,7 +238,7 @@ public int getElementCount(String aName)
 public int getElementIndex(String aName, int start)
 {
     for(int i=start, iMax=getElementCount(); i<iMax; i++)
-        if(getElement(i).getName().equals(aName))
+        if(equals(getElement(i).getName(), aName))
             return i;
     return -1;
 }
@@ -246,7 +249,7 @@ public int getElementIndex(String aName, int start)
 public XMLElement getElement(String aName)
 {
     for(int i=0, iMax=getElementCount(); i<iMax; i++)
-        if(getElement(i).getName().equals(aName))
+        if(equals(getElement(i).getName(), aName))
             return getElement(i);
     return null;
 }
@@ -268,7 +271,7 @@ public List <XMLElement> getElements(String aName)
 {
     List <XMLElement> elements = new ArrayList();
     for(int i=0, iMax=getElementCount(); i<iMax; i++)
-        if(getElement(i).getName().equals(aName))
+        if(equals(getElement(i).getName(), aName))
             elements.add(getElement(i));
     return elements;
 }
@@ -497,6 +500,27 @@ public void setValueBytes(byte theBytes[])
     byteString = StringUtils.replace(byteString, "]]>", "xxx");
     setValue(byteString);
     add("rm-byte-encoding", "Ascii85");
+}
+
+/**
+ * Returns whether element should ignore case when asking for attributes/elements by name.
+ */
+public boolean isIgnoreCase()  { return _ignoreCase; }
+
+/**
+ * Sets whether element should ignore case when asking for attributes/elements by name.
+ */
+public void setIgnoreCase(boolean aVal)
+{
+    _ignoreCase = aVal; if(_elements!=null) for(XMLElement e : _elements) e.setIgnoreCase(aVal);
+}
+
+/**
+ * A string compare that honors CaseSensitive setting.
+ */
+protected boolean equals(String aStr1, String aStr2)
+{
+    return _ignoreCase? aStr1.equalsIgnoreCase(aStr2) : aStr1.equals(aStr2);
 }
 
 /**

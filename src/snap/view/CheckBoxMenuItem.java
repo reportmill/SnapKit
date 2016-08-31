@@ -1,6 +1,5 @@
 package snap.view;
 import snap.gfx.*;
-import snap.util.*;
 
 /**
  * A JComponentShape for JCheckBoxMenuItem.

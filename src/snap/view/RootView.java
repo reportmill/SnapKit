@@ -132,7 +132,7 @@ public void setCurrentCursor(Cursor aCursor)
 public String getToolTipText(ViewEvent anEvent)
 {
     for(int i=_mouseOvers.size()-1;i>=0;i--) { View view = _mouseOvers.get(i);
-        String text = view.isToolTipEnabled()? view.getToolTipText(anEvent.copyForView(view)) : view.getToolTipText();
+        String text = view.isToolTipEnabled()? view.getToolTip(anEvent.copyForView(view)) : view.getToolTip();
         if(text!=null) return text;
     }
     return null;
