@@ -1,5 +1,6 @@
 package snap.view;
 import snap.gfx.*;
+import snap.util.*;
 
 /**
  * A view subclass to display a text string in a single style.
@@ -76,6 +77,26 @@ public void paintFront(Painter aPntr)
     // Set font/paint and draw string
     aPntr.setFont(font); aPntr.setPaint(_textFill);
     aPntr.drawString(_text, x, y+Math.ceil(font.getAscent()));
+}
+
+/**
+ * XML archival.
+ */
+public XMLElement toXML(XMLArchiver anArchiver)
+{
+    XMLElement e = super.toXML(anArchiver);
+    String text = getText(); if(text!=null && text.length()>0) e.add("text", text);
+    return e;
+}
+
+/**
+ * XML unarchival.
+ */
+public View fromXML(XMLArchiver anArchiver, XMLElement anElement)
+{
+    super.fromXML(anArchiver, anElement);
+    setText(anElement.getAttributeValue("text", anElement.getAttributeValue("value")));
+    return this;
 }
 
 }

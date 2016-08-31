@@ -197,12 +197,22 @@ private Image getDownArrowImage()
 }
 
 /**
+ * XML archival.
+ */
+public XMLElement toXML(XMLArchiver anArchiver)
+{
+    XMLElement e = super.toXML(anArchiver);
+    if(getTitle()!=null && getTitle().length()>0) e.add("Title", getTitle());
+    return e;
+}
+
+/**
  * XML unarchival.
  */
 public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
 {
     super.fromXML(anArchiver, anElement);
-    if(anElement.hasAttribute("title")) setTitle(anElement.getAttributeValue("title"));
+    if(anElement.hasAttribute("Title")) setTitle(anElement.getAttributeValue("Title"));
     return this;
 }
 

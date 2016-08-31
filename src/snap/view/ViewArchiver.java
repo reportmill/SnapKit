@@ -110,6 +110,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("TableCol", TableCol.class);
     cmap.put("TabView", TabView.class);
     cmap.put("TextView", TextView.class);
+    cmap.put("TextViewBase", TextViewBase.class);
     cmap.put("TextField", TextField.class);
     cmap.put("ThumbWheel", ThumbWheel.class);
     cmap.put("ToggleButton", ToggleButton.class);

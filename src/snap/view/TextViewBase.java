@@ -1053,9 +1053,8 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 
     // If RichText, archive rich text
     if(isRich()) {
-        XMLElement rtxml = anArchiver.toXML(getRichText());
-        for(int i=0, iMax=rtxml.size(); i<iMax; i++)
-            e.add(rtxml.get(i));
+        XMLElement rtxml = anArchiver.toXML(getRichText()); rtxml.setName("RichText");
+        if(rtxml.size()>0) e.add(rtxml); //for(int i=0, iMax=rtxml.size(); i<iMax; i++) e.add(rtxml.get(i));
     }
 
     // Otherwise, archive text string
@@ -1071,8 +1070,12 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
+    // Hack for archived rich stuff
+    XMLElement rtxml = anElement.get("RichText");
+    boolean rich = rtxml!=null;
+    
     // Unarchive Rich, Editable, WrapText
-    if(anElement.getAttribute("Rich")!=null) setRich(anElement.getAttributeBoolValue("Rich"));
+    if(anElement.getAttribute("Rich")!=null || rich) setRich(anElement.getAttributeBoolValue("Rich") || rich);
     if(anElement.getAttribute("Editable")!=null) setEditable(anElement.getAttributeBoolValue("editable"));
     if(anElement.getAttribute("WrapText")!=null) setWrapText(anElement.getAttributeBoolValue("WrapText"));
 
@@ -1088,7 +1091,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // If Rich, unarchive rich text
     if(isRich()) {
         getUndoer().disable();
-        getRichText().fromXML(anArchiver, anElement);
+        if(rtxml!=null) getRichText().fromXML(anArchiver, rtxml);
         getUndoer().enable();
     }
 
