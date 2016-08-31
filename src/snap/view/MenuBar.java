@@ -12,10 +12,11 @@ public class MenuBar extends ParentView {
     ViewLayout.HBoxLayout  _layout = new ViewLayout.HBoxLayout(this);
     
     // The menubar fill
-    Color c1 = new Color("#fefefeff"), c2 = new Color("#f5f5f5ff"), c3 = new Color("#f0f0f0ff");
-    Color c4 = new Color("#ebebebff"), c5 = new Color("#e7e7e7ff");
-    GradientPaint.Stop stops[] = GradientPaint.getStops(new double[] { 0,.25,.5,.75,1 }, c1, c2, c3, c4, c5);
-    GradientPaint MENU_BAR_PAINT = new GradientPaint(0,0,0,1,stops);
+    static Color c1 = new Color("#fefefeff"), c2 = new Color("#f5f5f5ff"), c3 = new Color("#f0f0f0ff");
+    static Color c4 = new Color("#ebebebff"), c5 = new Color("#e7e7e7ff");
+    static GradientPaint.Stop stops[] = GradientPaint.getStops(new double[] { 0,.25,.5,.75,1 }, c1, c2, c3, c4, c5);
+    static GradientPaint MENU_BAR_PAINT = new GradientPaint(0,0,0,1,stops);
+    static Font MENU_BAR_FONT = new Font("Arial", 14);
 
 /**
  * Creates a new MenuBarNode.
@@ -23,7 +24,7 @@ public class MenuBar extends ParentView {
 public MenuBar()
 {
     setFill(MENU_BAR_PAINT); setPadding(0,10,0,10); _layout.setFillHeight(true);
-    setFont(new Font("Arial", 14));
+    setFont(MENU_BAR_FONT);
 }
 
 /**
@@ -118,6 +119,16 @@ protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1
  * Layout children.
  */
 protected void layoutChildren()  { _layout.layoutChildren(); }
+
+/**
+ * Override to return default.
+ */
+public Paint getFillDefault()  { return MENU_BAR_PAINT; }
+
+/**
+ * Returns the default font.
+ */
+public Font getFontDefault()  { return MENU_BAR_FONT; }
 
 /**
  * XML archival of children.

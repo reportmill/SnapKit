@@ -82,7 +82,7 @@ public static Border fromXMLBorder(XMLArchiver anArchiver, XMLElement anElement)
     Border border = null;
     if(type.equals("line")) border = new LineBorder();
     else if(type.equals("bevel")) border = new BevelBorder();
-    else if(type.equals("etched")) border = new EtchedBorder();
+    else if(type.equals("etched")) border = new EtchBorder();
     else if(type.equals("empty")) border = new EmptyBorder();
     else border = new NullBorder();
     border.fromXML(anArchiver, anElement);
@@ -122,7 +122,7 @@ public static class EmptyBorder extends Border {
     /** XML Archival. */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
-        XMLElement e = new XMLElement("border"); e.add("type", "empty");
+        XMLElement e = new XMLElement("EmptyBorder");
         if(_tp!=0) e.add("Top", _tp); if(_lt!=0) e.add("Left", _lt);
         if(_bm!=0) e.add("Bottom", _bm); if(_rt!=0) e.add("Right", _rt);
         return e;
@@ -175,21 +175,23 @@ public static class LineBorder extends Border {
     /** XML Archival. */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
-        XMLElement e = new XMLElement("border"); e.add("type", "line");
-        if(!_color.equals(Color.BLACK)) e.add("line-color", '#' + _color.toHexString());
+        XMLElement e = new XMLElement("LineBorder");
+        if(!_color.equals(Color.BLACK)) e.add("Color", '#' + _color.toHexString());
+        if(_width!=1) e.add("Width", _width);
         return e;
     }
     
     /** XML Unarchival. */
     public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
-        if(anElement.hasAttribute("line-color"))
-            _color = new Color(anElement.getAttributeValue("line-color"));
+        if(anElement.hasAttribute("Color")) _color = new Color(anElement.getAttributeValue("Color"));
+        if(anElement.hasAttribute("line-color")) _color = new Color(anElement.getAttributeValue("line-color"));
+        if(anElement.hasAttribute("Width")) _width = anElement.getAttributeFloatValue("Width");
         return this;
     }
     
     /** Standard toString implementation. */
-    public String toString()  { return "LineBorder { color=" + _color + ", width=" + _width + " }"; }
+    public String toString()  { return "LineBorder { Color=" + _color + ", Width=" + _width + " }"; }
 }
 
 /**
@@ -198,7 +200,8 @@ public static class LineBorder extends Border {
 public static class BevelBorder extends Border {
 
     // The type
-    int _type = 1; static int RAISED = 0, LOWERED = 1;
+    int _type = LOWERED;
+    public static final int LOWERED = 0, RAISED = 1;
     
     /** Creates new border. */
     public BevelBorder() { }
@@ -231,8 +234,8 @@ public static class BevelBorder extends Border {
     /** XML Archival. */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
-        XMLElement e = new XMLElement("border"); e.add("type", "bevel");
-        if(_type==RAISED) e.add("bevel-type", "raised");
+        XMLElement e = new XMLElement("BevelBorder");
+        if(_type==RAISED) e.add("Type", "RAISED");
         return e;
     }
     
@@ -240,7 +243,9 @@ public static class BevelBorder extends Border {
     public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
         String type = anElement.getAttributeValue("bevel-type", "lowered");
-        if(type.equals("raised")) _type = 0;
+        if(anElement.hasAttribute("Type")) type = anElement.getAttributeValue("Type");
+        if(anElement.hasAttribute("bevel-type")) type = anElement.getAttributeValue("bevel-type");
+        if(type.equals("RAISED") || type.equals("raised")) _type = RAISED;
         return this;
     }
 }
@@ -248,16 +253,17 @@ public static class BevelBorder extends Border {
 /**
  * A subclass for etched border.
  */
-public static class EtchedBorder extends Border {
+public static class EtchBorder extends Border {
 
     // The type
-    int _type = 1; int RAISED = 0, LOWERED = 1;
+    int _type = LOWERED;
+    public static final int LOWERED = 0, RAISED = 1;
 
-    /** Creates new border. */
-    public EtchedBorder() { }
+    /** Creates new EtchBorder. */
+    public EtchBorder() { }
 
-    /** Creates new border. */
-    public EtchedBorder(int aType) { _type = aType; }
+    /** Creates new EtchBorder. */
+    public EtchBorder(int aType) { _type = aType; }
 
     /** Returns the type. */
     public int getType()  { return _type; }
@@ -276,16 +282,16 @@ public static class EtchedBorder extends Border {
     /** XML Archival. */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
-        XMLElement e = new XMLElement("border"); e.add("type", "etched");
-        if(_type==RAISED) e.add("etch-type", "raised");
+        XMLElement e = new XMLElement("EtchBorder");
+        if(_type==RAISED) e.add("Type", "RAISED");
         return e;
     }
     
     /** XML Unarchival. */
     public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
-        String type = anElement.getAttributeValue("etch-type", "lowered");
-        if(type.equals("raised")) _type = RAISED;
+        String type = anElement.getAttributeValue("Type", "LOWERED");
+        if(type.equals("RAISED")) _type = RAISED;
         return this;
     }
 }

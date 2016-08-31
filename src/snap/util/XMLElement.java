@@ -587,7 +587,7 @@ public void write(StringBuffer aSB, String aNameSpace, int indent, String indent
     
     // If no child elements and no element value, close and return
     if(getElementCount()==0 && getValue()==null) {
-        aSB.append("/>\n"); return; }
+        aSB.append(" />\n"); return; }
     
     // If element value, close start tag, add element value and add end tag
     else if(getValue()!=null) {

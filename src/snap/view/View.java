@@ -427,12 +427,12 @@ public double getScale()  { return _sx; }
 public void setScale(double aValue)  { setScaleX(aValue); setScaleY(aValue); }
 
 /**
- * Returns fill.
+ * Returns fill paint.
  */
 public Paint getFill()  { return _fill; }
 
 /**
- * Sets paint.
+ * Sets fill paint.
  */
 public void setFill(Paint aPaint)
 {
@@ -440,6 +440,11 @@ public void setFill(Paint aPaint)
     firePropChange(Fill_Prop, _fill, _fill=aPaint);
     repaint();
 }
+
+/**
+ * Returns the default fill paint.
+ */
+public Paint getFillDefault()  { return null; }
 
 /**
  * Returns the fill as color.
@@ -487,19 +492,9 @@ public void setEffect(Effect anEff)
 }
 
 /**
- * Returns whether font has been set.
- */
-public boolean isFontSet()  { return _font!=null; }
-
-/**
  * Returns the font for the view (defaults to parent font).
  */
-public Font getFont()
-{
-    if(_font!=null) return _font;
-    View par = getParent(); if(par==null) return Font.Arial12;
-    return par.getFont();
-}
+public Font getFont()  { return _font!=null? _font : getFontDefault(); }
 
 /**
  * Sets the font for the view.
@@ -510,6 +505,11 @@ public void setFont(Font aFont)
     firePropChange(Font_Prop, _font, _font=aFont);
     relayout(); relayoutParent(); repaint();
 }
+
+/**
+ * Returns the default font.
+ */
+public Font getFontDefault()  { View p = getParent(); return p!=null? p.getFont() : Font.Arial11; }
 
 /**
  * Returns the cursor.
@@ -1866,10 +1866,10 @@ public XMLElement toXML(XMLArchiver anArchiver)
     XMLElement e = new XMLElement(cname);
     
     // Archive name
-    if(getName()!=null && getName().length()>0) e.add("name", getName());
+    if(getName()!=null && getName().length()>0) e.add(Name_Prop, getName());
     
     // Archive X, Y, Width, Height
-    if(getParent() instanceof SpringView) {
+    if(this instanceof SpringView || getParent() instanceof SpringView) {
         if(getX()!=0) e.add("x", getX()); if(getY()!=0) e.add("y", getY());
         if(getWidth()!=0) e.add("width", getWidth()); if(getHeight()!=0) e.add("height", getHeight());
     }
@@ -1890,11 +1890,11 @@ public XMLElement toXML(XMLArchiver anArchiver)
     
     // Archive border, Fill, Effect
     if(!SnapUtils.equals(getBorder(),getBorderDefault())) e.add(anArchiver.toXML(getBorder(), this));
-    if(getFill()!=null) e.add(anArchiver.toXML(getFill(), this));
+    if(!SnapUtils.equals(getFill(),getFillDefault())) e.add(anArchiver.toXML(getFill(), this));
     if(getEffect()!=null) e.add(anArchiver.toXML(getEffect(), this));
     
     // Archive font
-    if(isFontSet()) e.add(getFont().toXML(anArchiver));
+    if(!SnapUtils.equals(getFont(),getFontDefault())) e.add(getFont().toXML(anArchiver));
     
     // Archive Disabled, Visible, Opacity
     if(isDisabled()) e.add(Disabled_Prop, true);
@@ -1935,60 +1935,56 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     if(anElement.hasAttribute("Class"))
         setRealClassName(anElement.getAttributeValue("Class"));
 
-    // Unarchive name
-    if(anElement.hasAttribute("name"))
-        setName(anElement.getAttributeValue("name"));
+    // Unarchive Name
+    if(anElement.hasAttribute(Name_Prop))
+        setName(anElement.getAttributeValue(Name_Prop));
     
     // Unarchive X, Y, Width, Height
     if(anElement.hasAttribute("x") || anElement.hasAttribute("y") ||
         anElement.hasAttribute("width") || anElement.hasAttribute("height")) {
-        double x = anElement.getAttributeFloatValue("x", 0);
-        double y = anElement.getAttributeFloatValue("y", 0);
-        double w = anElement.getAttributeFloatValue("width", 0);
-        double h = anElement.getAttributeFloatValue("height", 0);
+        double x = anElement.getAttributeFloatValue("x"), y = anElement.getAttributeFloatValue("y");
+        double w = anElement.getAttributeFloatValue("width"), h = anElement.getAttributeFloatValue("height");
         setBounds(x, y, w, h);
     }
     
     // Unarchive MinWidth, MinHeight, PrefWidth, PrefHeight
-    if(anElement.hasAttribute("MinWidth")) setMinWidth(anElement.getAttributeFloatValue("MinWidth"));
-    if(anElement.hasAttribute("MinHeight")) setMinHeight(anElement.getAttributeFloatValue("MinHeight"));
-    if(anElement.hasAttribute("PrefWidth")) setPrefWidth(anElement.getAttributeFloatValue("PrefWidth"));
-    if(anElement.hasAttribute("PrefHeight")) setPrefHeight(anElement.getAttributeFloatValue("PrefHeight"));
+    if(anElement.hasAttribute(MinWidth_Prop)) setMinWidth(anElement.getAttributeFloatValue(MinWidth_Prop));
+    if(anElement.hasAttribute(MinHeight_Prop)) setMinHeight(anElement.getAttributeFloatValue(MinHeight_Prop));
+    if(anElement.hasAttribute(PrefWidth_Prop)) setPrefWidth(anElement.getAttributeFloatValue(PrefWidth_Prop));
+    if(anElement.hasAttribute(PrefHeight_Prop)) setPrefHeight(anElement.getAttributeFloatValue(PrefHeight_Prop));
     
     // Unarchive Roll, ScaleX, ScaleY
     if(anElement.hasAttribute("roll")) setRotate(anElement.getAttributeFloatValue("roll"));
-    if(anElement.hasAttribute("Rotate")) setRotate(anElement.getAttributeFloatValue("Rotate"));
-    if(anElement.hasAttribute("ScaleX")) setScaleX(anElement.getAttributeFloatValue("ScaleX", 1));
-    if(anElement.hasAttribute("ScaleY")) setScaleY(anElement.getAttributeFloatValue("ScaleY", 1));
+    if(anElement.hasAttribute(Rotate_Prop)) setRotate(anElement.getAttributeFloatValue(Rotate_Prop));
+    if(anElement.hasAttribute(ScaleX_Prop)) setScaleX(anElement.getAttributeFloatValue(ScaleX_Prop));
+    if(anElement.hasAttribute(ScaleY_Prop)) setScaleY(anElement.getAttributeFloatValue(ScaleY_Prop));
 
     // Unarchive Vertical
-    if(anElement.hasAttribute("Vertical")) setVertical(anElement.getAttributeBoolValue("Vertical"));
+    if(anElement.hasAttribute(Vertical_Prop)) setVertical(anElement.getAttributeBoolValue(Vertical_Prop));
         
     // Unarchive Stroke
     XMLElement sxml = anElement.getElement("stroke");
     if(sxml!=null) { String cstr = sxml.getAttributeValue("color");
         Color sc = cstr!=null? new Color(cstr) : Color.BLACK; double sw = sxml.getAttributeFloatValue("width", 1);
-        setBorder(Border.createLineBorder(sc, sw));
-    }
+        setBorder(Border.createLineBorder(sc, sw)); }
     
     // Unarchive Border
-    XMLElement bxml = anElement.getElement("border");
+    XMLElement bxml = anElement.getElement(Border_Prop);
     if(bxml!=null) { Border border = Border.fromXMLBorder(anArchiver, bxml);
         setBorder(border); }
     
     // Unarchive Fill 
-    XMLElement fxml = anElement.getElement("fill");
-    if(fxml!=null) { Paint fill = (Paint)anArchiver.fromXML(fxml, this);
+    int pind = anArchiver.indexOf(anElement, Paint.class);
+    if(pind>=0) { Paint fill = (Paint)anArchiver.fromXML(anElement.get(pind), this);
         setFill(fill); }
     
     // Unarchive Effect
-    for(int i=anArchiver.indexOf(anElement, Effect.class); i>=0; i=-1) {
-        Effect fill = (Effect)anArchiver.fromXML(anElement.get(i), this);
-        setEffect(fill);
-    }
-    
+    int eind = anArchiver.indexOf(anElement, Effect.class);
+    if(eind>=0) { Effect eff = (Effect)anArchiver.fromXML(anElement.get(eind), this);
+        setEffect(eff); }
+
     // Unarchive font
-    XMLElement fontXML = anElement.getElement("font");
+    XMLElement fontXML = anElement.getElement(Font_Prop);
     if(fontXML!=null) setFont((Font)anArchiver.fromXML(fontXML, this));
     
     // Unarchive Disabled, Visible, Opacity
@@ -2004,10 +2000,10 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     }
     
     // Unarchive GrowWidth, GrowHeight, LeanX, LeanY
-    if(anElement.hasAttribute("GrowWidth")) setGrowWidth(anElement.getAttributeBoolValue("GrowWidth"));
-    if(anElement.hasAttribute("GrowHeight")) setGrowHeight(anElement.getAttributeBoolValue("GrowHeight"));
-    if(anElement.hasAttribute("LeanX")) setLeanX(HPos.get(anElement.getAttributeValue("LeanX")));
-    if(anElement.hasAttribute("LeanY")) setLeanY(VPos.get(anElement.getAttributeValue("LeanY")));
+    if(anElement.hasAttribute(GrowWidth_Prop)) setGrowWidth(anElement.getAttributeBoolValue(GrowWidth_Prop));
+    if(anElement.hasAttribute(GrowHeight_Prop)) setGrowHeight(anElement.getAttributeBoolValue(GrowHeight_Prop));
+    if(anElement.hasAttribute(LeanX_Prop)) setLeanX(HPos.get(anElement.getAttributeValue(LeanX_Prop)));
+    if(anElement.hasAttribute(LeanY_Prop)) setLeanY(VPos.get(anElement.getAttributeValue(LeanY_Prop)));
         
     // Unarchive Autosizing
     if(anElement.hasAttribute("asize")) setAutosizing(anElement.getAttributeValue("asize"));

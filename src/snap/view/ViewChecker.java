@@ -17,7 +17,7 @@ public static void main(String args[])
     
     for(WebFile file : dir.getFiles())
         if(file.getType().equals("snp")) {
-            testFile(file); break; }
+            testFile(file); }
     System.exit(0);
 }
 
@@ -26,22 +26,32 @@ public static void main(String args[])
  */
 public static void testFile(WebFile aFile)
 {
+    System.err.println("Writing " + aFile);
+    
+    // Read original file
     ViewArchiver varch = new ViewArchiver(); ViewArchiver.setUseRealClass(false);
     View view = varch.getParentView(aFile);
-    XMLElement xml = varch.writeObject(view);
     
-    WebFile out0 = WebURL.getURL("/tmp/Out0.snp").createFile(false);
+    // Write to new version
+    XMLElement xml = varch.writeObject(view);
+    byte bytes1[] = xml.getBytes();
+    
+    // Read new version and write again
+    View view2 = varch.getParentView(bytes1);
+    XMLElement xml2 = varch.writeObject(view2);
+    byte bytes2[] = xml2.getBytes();
+    
+    // Write original file
+    WebFile out0 = WebURL.getURL("/tmp/Out0/" + aFile.getName()).createFile(false);
     out0.setBytes(aFile.getBytes()); out0.save();
     
-    WebFile out1 = WebURL.getURL("/tmp/Out1.snp").createFile(false);
-    out1.setBytes(xml.getBytes()); out1.save();
+    // Write new file
+    WebFile out1 = WebURL.getURL("/tmp/Out1/" + aFile.getName()).createFile(false);
+    out1.setBytes(bytes1); out1.save();
     
-    View view2 = varch.getParentView(out1);
-    XMLElement xml2 = varch.writeObject(view2);
-    WebFile out2 = WebURL.getURL("/tmp/Out2.snp").createFile(false);
-    out2.setBytes(xml2.getBytes()); out2.save();
-    
-    System.err.println("Writing " + aFile);
+    // Write new file again
+    WebFile out2 = WebURL.getURL("/tmp/Out2/" + aFile.getName()).createFile(false);
+    out2.setBytes(bytes2); out2.save();
 }
 
 }

@@ -1,5 +1,5 @@
 package snap.view;
-import snap.gfx.Color;
+import snap.gfx.*;
 import snap.util.*;
 
 /**
@@ -35,6 +35,11 @@ public void setSendActionOnReturn(boolean aValue)
     else getEventAdapter().disableEvents(this, Action);
     firePropChange("SendActionOnReturn", _sendActionOnReturn, _sendActionOnReturn = aValue);
 }
+
+/**
+ * Override to return white.
+ */
+public Paint getFillDefault()  { return Color.WHITE; }
 
 /**
  * XML archival.

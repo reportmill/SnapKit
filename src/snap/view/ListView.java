@@ -532,6 +532,11 @@ protected void processEvent(ViewEvent anEvent)
 }
 
 /**
+ * Override to return white.
+ */
+public Paint getFillDefault()  { return Color.WHITE; }
+
+/**
  * Override to make list same width as ScrollView.
  */
 public boolean isScrollFitWidth()  { return true; }

@@ -17,9 +17,9 @@ public class Slider extends View {
     double           _max = 1;
     
     // Constants for properties
+    public static final String Min_Prop = "Min";
+    public static final String Max_Prop = "Max";
     public static final String Value_Prop = "Value";
-    public static final String Minimum_Prop = "Minimum";
-    public static final String Maximum_Prop = "Maximum";
     
     // Constants for knob size
     static final int SIZE = 16, HSIZE = 8;
@@ -55,7 +55,7 @@ public double getMin()  { return _min; }
 public void setMin(double aValue)
 {
     if(aValue==_min) return;
-    firePropChange(Minimum_Prop, _min, _min=aValue);
+    firePropChange(Min_Prop, _min, _min=aValue);
     repaint();
 }
 
@@ -70,7 +70,7 @@ public double getMax()  { return _max; }
 public void setMax(double aValue)
 {
     if(aValue==_max) return;
-    firePropChange(Maximum_Prop, _max, _max=aValue);
+    firePropChange(Max_Prop, _max, _max=aValue);
     repaint();
 }
 
@@ -174,12 +174,10 @@ public XMLElement toXML(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXML(anArchiver);
     
-    // Archive Minimum, Maximum and current value
-    if(getMin()!=0) e.add("min", getMin());
-    if(getMax()!=100) e.add("max", getMax());
-    if(getValue()!=50) e.add("value", getValue());
-
-    // Return element
+    // Archive Min, Max, Value
+    if(getMin()!=0) e.add(Min_Prop, getMin());
+    if(getMax()!=100) e.add(Max_Prop, getMax());
+    if(getValue()!=50) e.add(Value_Prop, getValue());
     return e;
 }
 
@@ -191,10 +189,10 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXML(anArchiver, anElement);
 
-    // Unarchive Minimum, Maximum and current value
-    setMin(anElement.getAttributeIntValue("min", 0));
-    setMax(anElement.getAttributeIntValue("max", 100));
-    setValue(anElement.getAttributeIntValue("value", 50));
+    // Unarchive Min, Max, Value
+    setMin(anElement.getAttributeIntValue(Min_Prop, 0));
+    setMax(anElement.getAttributeIntValue(Max_Prop, 100));
+    setValue(anElement.getAttributeIntValue(Value_Prop, 50));
     return this;
 }
 

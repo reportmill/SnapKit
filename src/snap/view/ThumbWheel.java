@@ -492,6 +492,11 @@ private void drawGradient(Painter aPntr, double aX, double aY, double aW, double
 }
 
 /**
+ * Override to return white.
+ */
+public Paint getFillDefault()  { return Color.LIGHTGRAY; }
+
+/**
  * Override to reset image.
  */
 public void setWidth(double aValue)

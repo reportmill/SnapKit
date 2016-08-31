@@ -15,6 +15,11 @@ public class Menu extends MenuItem {
     static Polygon         _arrow = new Polygon(0, 0, 9, 5, 0, 10);
 
 /**
+ * Creates a new Menu.
+ */
+public Menu()  { setFont(MenuBar.MENU_BAR_FONT); }
+
+/**
  * Returns whether menu is showing arrow graphic.
  */
 public boolean isShowArrow()  { return getLabel().getGraphicAfter()!=null; }
@@ -168,6 +173,11 @@ public void setOwner(ViewOwner anOwner)
     super.setOwner(anOwner);
     for(View child : _items) child.setOwner(anOwner);
 }
+
+/**
+ * Returns the default font.
+ */
+public Font getFontDefault()  { return MenuBar.MENU_BAR_FONT; }
 
 /**
  * XML archival of children.

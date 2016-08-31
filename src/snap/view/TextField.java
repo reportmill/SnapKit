@@ -33,7 +33,6 @@ public class TextField extends TextViewBase {
  */
 public TextField()
 {
-    setRichText(false);
     setEditable(true);
     setFill(Color.WHITE);
     enableEvents(Action);
@@ -87,6 +86,11 @@ public Pos getAlignDefault()  { return Pos.CENTER_LEFT; }
  * Returns the padding default.
  */
 public Insets getPaddingDefault()  { return _def; } static Insets _def = new Insets(2,2,2,5);
+
+/**
+ * Override to return white.
+ */
+public Paint getFillDefault()  { return Color.WHITE; }
 
 /**
  * Calculates the preferred width.

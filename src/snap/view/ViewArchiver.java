@@ -119,16 +119,18 @@ protected Map <String, Class> createClassMap()
     cmap.put("View", ParentView.class);
     
     // Graphics
-    cmap.put("color", Color.class);
-    cmap.put("font", Font.class);
-    cmap.put("stroke", Border.class);
-    cmap.put("fill", Color.class); //RMFill.class
-    cmap.put("gradient-fill", GradientPaint.class); //RMGradientFill.class
-    cmap.put("image-fill", ImagePaint.class); //RMImageFill.class
-    cmap.put("blur-effect", BlurEffect.class);
-    cmap.put("shadow-effect", ShadowEffect.class);
-    cmap.put("reflection-effect", ReflectEffect.class);
-    cmap.put("emboss-effect", EmbossEffect.class);
+    cmap.put("Color", Color.class);
+    cmap.put("Font", Font.class);
+    cmap.put("EmptyBorder", Border.EmptyBorder.class);
+    cmap.put("BevelBorder", Border.BevelBorder.class);
+    cmap.put("EtchBorder", Border.EtchBorder.class);
+    cmap.put("LineBorder", Border.LineBorder.class);
+    cmap.put("GradientPaint", GradientPaint.class); //RMGradientFill.class
+    cmap.put("ImagePaint", ImagePaint.class); //RMImageFill.class
+    cmap.put("BlurEffect", BlurEffect.class);
+    cmap.put("ShadowEffect", ShadowEffect.class);
+    cmap.put("ReflectEffect", ReflectEffect.class);
+    cmap.put("EmbossEffect", EmbossEffect.class);
     
     // Add aliases and return cmap
     addAliases(cmap);
@@ -175,8 +177,20 @@ protected void addAliases(Map cmap)
     cmap.put("jtree", TreeView.class);
     cmap.put("TitlePane", TitleView.class);
     
+    // Graphics
+    cmap.put("color", Color.class);
+    cmap.put("font", Font.class);
+    cmap.put("stroke", Border.class);
+    cmap.put("fill", Color.class); //RMFill.class
+    cmap.put("gradient-fill", GradientPaint.class); //RMGradientFill.class
+    cmap.put("image-fill", ImagePaint.class); //RMImageFill.class
+    cmap.put("blur-effect", BlurEffect.class);
+    cmap.put("shadow-effect", ShadowEffect.class);
+    cmap.put("reflection-effect", ReflectEffect.class);
+    cmap.put("emboss-effect", EmbossEffect.class);
+    
     // Miscellaneous component shapes 
-    cmap.put("customview", ParentView.class);
+    cmap.put("customview", View.class);
     cmap.put("menubutton", MenuButton.class);
     cmap.put("switchpane", SwitchView.class);
     cmap.put("thumbwheel", ThumbWheel.class);

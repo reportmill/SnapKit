@@ -40,7 +40,6 @@ public TextViewBase getTextArea()  { getUI(); return _textPane.getTextView(); }
 protected View createUI()
 {
     _textPane = new TFTextPane();
-    _textPane.getTextView().setRichText(false);
     _textPane.getTextView().setFont(getDefaultFont());
     _textPane.getTextView().setText(getText());
     return _textPane.getUI();

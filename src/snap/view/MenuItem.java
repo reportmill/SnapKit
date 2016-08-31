@@ -29,7 +29,6 @@ public class MenuItem extends ButtonBase implements Cloneable {
 public MenuItem()
 {
     enableEvents(Action); setShowBorder(false);
-    setFont(new Font("Arial", 14));
 }
 
 /**
@@ -163,6 +162,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic attributes
     XMLElement e = super.toXMLView(anArchiver);
+    e.removeAttribute(ShowBorder_Prop);
 
     // Archive Accelerator
     if(getAccelerator()!=null && getAccelerator().length()>0) e.add("key", getAccelerator());

@@ -267,6 +267,16 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 }
 
 /**
+ * XML archival of children.
+ */
+protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
+{
+    // Archive children
+    for(View child : getItems())
+        anElement.add(anArchiver.toXML(child, this));
+}
+
+/**
  * XML unarchival for shape children.
  */
 protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)

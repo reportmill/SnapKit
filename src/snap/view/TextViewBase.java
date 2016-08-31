@@ -55,7 +55,8 @@ public TextViewBase()
 {
     // Set default font
     getTextBox();
-    setFont(new Font("Arial", 12));
+    setRich(false);
+    setFont(getFontDefault());
     
     // Enable mouse, key and focus events
     enableEvents(MouseEvents); enableEvents(KeyEvents);
@@ -185,12 +186,12 @@ public void setWrapText(boolean aValue)
 /**
  * Returns whether text supports multiple styles.
  */
-public boolean isRichText()  { return !getTextBox().isSingleStyle(); }
+public boolean isRich()  { return !getTextBox().isSingleStyle(); }
 
 /**
  * Sets whether text supports multiple styles.
  */
-public void setRichText(boolean aValue)  { getTextBox().setSingleStyle(!aValue); }
+public void setRich(boolean aValue)  { getTextBox().setSingleStyle(!aValue); }
 
 /**
  * Returns the text selection.
@@ -340,7 +341,7 @@ public TextStyle getInputStyle()
 public void setInputStyleValue(String aKey, Object aValue)
 {
     // If selection is zero length, just modify input style
-    if(isSelEmpty() && isRichText())
+    if(isSelEmpty() && isRich())
         _inputStyle = getInputStyle().copyFor(aKey, aValue);
     
     // If selection is multiple chars, apply attribute to text and reset InputStyle
@@ -1045,13 +1046,13 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive Editable, WrapText, RichText
+    // Archive Rich, Editable, WrapText
+    if(isRich()) e.add("Rich", true);
     if(!isEditable()) e.add("Editable", false);
     if(isWrapText()) e.add("WrapText", true);
-    if(isRichText()) e.add("RichText", true);
 
     // If RichText, archive rich text
-    if(isRichText()) {
+    if(isRich()) {
         XMLElement rtxml = anArchiver.toXML(getRichText());
         for(int i=0, iMax=rtxml.size(); i<iMax; i++)
             e.add(rtxml.get(i));
@@ -1059,7 +1060,6 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 
     // Otherwise, archive text string
     else if(getText()!=null && getText().length()>0) e.add("text", getText());
-    
     return e;
 }
 
@@ -1071,10 +1071,10 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive Editable, WrapText, RichText
+    // Unarchive Rich, Editable, WrapText
+    if(anElement.getAttribute("Rich")!=null) setRich(anElement.getAttributeBoolValue("Rich"));
     if(anElement.getAttribute("Editable")!=null) setEditable(anElement.getAttributeBoolValue("editable"));
     if(anElement.getAttribute("WrapText")!=null) setWrapText(anElement.getAttributeBoolValue("WrapText"));
-    if(anElement.getAttribute("RichText")!=null) setRichText(anElement.getAttributeBoolValue("RichText"));
 
     // Unarchive margin, valign (should go soon)
     if(anElement.hasAttribute("margin")) setPadding(Insets.get(anElement.getAttributeValue("margin")));
@@ -1085,8 +1085,8 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
         else if(align.equals("bottom")) setAlign(Pos.get(HPos.LEFT,VPos.BOTTOM));
     }
     
-    // If RichText, unarchive rich text
-    if(isRichText()) {
+    // If Rich, unarchive rich text
+    if(isRich()) {
         getUndoer().disable();
         getRichText().fromXML(anArchiver, anElement);
         getUndoer().enable();

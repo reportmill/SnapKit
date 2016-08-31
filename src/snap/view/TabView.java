@@ -264,7 +264,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
-    e.add(SelectedIndex_Prop, getSelectedIndex()); // Archive the index of the currently selected tab
+    if(getSelectedIndex()>0) e.add(SelectedIndex_Prop, getSelectedIndex());
     return e;
 }
 
@@ -274,7 +274,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 public void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Archive children
-    for(int i=0, iMax=getChildCount(); i<iMax; i++) { View child = getChild(i); String title = getTabTitle(i);
+    for(int i=0, iMax=getTabCount(); i<iMax; i++) { View child = getTabContent(i); String title = getTabTitle(i);
         XMLElement cxml = anArchiver.toXML(child, this); cxml.add("title", title);
         anElement.add(cxml);
     }    

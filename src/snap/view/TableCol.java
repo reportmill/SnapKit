@@ -98,7 +98,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     
     // Archive Header, Resizable
     if(getHeaderValue()!=null) e.add("Header", getHeaderValue());
-    if(!isResizable()) e.add("Resizable", false);
+    if(isResizable()) e.add("Resizable", false);
     
     // Return column xml
     return e;

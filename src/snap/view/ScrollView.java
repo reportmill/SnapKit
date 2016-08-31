@@ -19,6 +19,9 @@ public class ScrollView extends ParentView implements PropChangeListener {
     // The ScrollBar size
     int             BAR_SIZE = 16;
     
+    // Constants
+    static final Border SCROLL_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
+    
 /**
  * Creates a new ScrollView.
  */
@@ -26,7 +29,7 @@ public ScrollView()
 {
     _scroller = new Scroller(); _scroller.addPropChangeListener(this);
     addChild(_scroller);
-    setBorder(Border.createLineBorder(Color.LIGHTGRAY,1));
+    setBorder(SCROLL_VIEW_BORDER);
 }
     
 /**
@@ -195,6 +198,11 @@ protected void layoutChildren()
     if(showHBar) h -= BAR_SIZE; if(showVBar) w -= BAR_SIZE;
     _scroller.setBounds(x,y,w,h);
 }
+
+/**
+ * Returns the default border.
+ */
+public Border getBorderDefault()  { return SCROLL_VIEW_BORDER; }
 
 /**
  * Handle property changes.

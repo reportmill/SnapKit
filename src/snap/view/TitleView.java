@@ -96,12 +96,32 @@ protected void paintFront(Painter aPntr)
 }
 
 /**
+ * XML archival.
+ */
+protected XMLElement toXMLView(XMLArchiver anArchiver)
+{
+    XMLElement e = super.toXMLView(anArchiver);
+    if(getTitle()!=null && getTitle().length()>0) e.add("Title", getTitle());
+    return e;
+}
+
+/**
  * XML unarchival.
  */
 protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
     super.fromXMLView(anArchiver,anElement);
-    setTitle(anElement.getAttributeValue("title"));
+    setTitle(anElement.getAttributeValue("Title"));
+}
+
+/**
+ * XML archival of children.
+ */
+protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
+{
+    // Archive Content
+    if(getContent()==null) return;
+    anElement.add(anArchiver.toXML(getContent(), this));
 }
 
 /**

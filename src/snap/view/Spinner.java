@@ -26,10 +26,10 @@ public class Spinner <T> extends ParentView {
     Image            _upImg, _dnImg;
   
     // Constants for properties
-    public static final String Value_Prop = "Value";
-    public static final String Min_Prop = "Minimum";
-    public static final String Max_Prop = "Maximum";
+    public static final String Min_Prop = "Min";
+    public static final String Max_Prop = "Max";
     public static final String Step_Prop = "StepSize";
+    public static final String Value_Prop = "Value";
 
 /**
  * Creates a new Spinner.
@@ -205,11 +205,11 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive Value, Min, Max, Step
-    if(getValue()!=null) e.add("Value", getValue());
-    if(getMin()!=Integer.MIN_VALUE) e.add("Min", getMin());
-    if(getMax()!=Integer.MAX_VALUE) e.add("Max", getMax());
-    if(getStep()!=1) e.add("Step", getStep());
+    // Archive Min, Max, Step, Value
+    if(getMin()!=Integer.MIN_VALUE) e.add(Min_Prop, getMin());
+    if(getMax()!=Integer.MAX_VALUE) e.add(Max_Prop, getMax());
+    if(getStep()!=1) e.add(Step_Prop, getStep());
+    if(getValue()!=null) e.add(Value_Prop, getValue());
     
     // Return element
     return e;
@@ -223,11 +223,11 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive Value, Min, Max, Step
-    if(anElement.hasAttribute("Value")) setValue((T)(Integer)anElement.getAttributeIntValue("Value"));
-    if(anElement.hasAttribute("Min")) setMin(anElement.getAttributeFloatValue("Min"));
-    if(anElement.hasAttribute("Max")) setMax(anElement.getAttributeFloatValue("Max"));
-    if(anElement.hasAttribute("Step")) setStep(anElement.getAttributeFloatValue("Step"));
+    // Unarchive Min, Max, Step, Value
+    if(anElement.hasAttribute(Min_Prop)) setMin(anElement.getAttributeFloatValue(Min_Prop));
+    if(anElement.hasAttribute(Max_Prop)) setMax(anElement.getAttributeFloatValue(Max_Prop));
+    if(anElement.hasAttribute(Step_Prop)) setStep(anElement.getAttributeFloatValue(Step_Prop));
+    if(anElement.hasAttribute(Value_Prop)) setValue((T)(Integer)anElement.getAttributeIntValue(Value_Prop));
 }
 
 }
