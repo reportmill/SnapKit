@@ -250,7 +250,7 @@ protected void layoutChildren()  { _layout.layoutChildren(); }
 protected XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic view attributes
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jbutton");
+    XMLElement e = super.toXMLView(anArchiver);
 
     // Archive Text and Image (name)
     String text = getText(); if(text!=null && text.length()>0) e.add("text", text);

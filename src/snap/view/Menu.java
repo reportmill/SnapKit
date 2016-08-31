@@ -170,14 +170,6 @@ public void setOwner(ViewOwner anOwner)
 }
 
 /**
- * XML archival.
- */
-public XMLElement toXMLView(XMLArchiver anArchiver)
-{
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jmenu"); return e;
-}
-
-/**
  * XML archival of children.
  */
 protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)

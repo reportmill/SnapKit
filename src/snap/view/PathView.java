@@ -42,9 +42,9 @@ protected double getPrefHeightImpl(double aW)
  */
 public XMLElement toXML(XMLArchiver anArchiver)
 {
-    XMLElement e = super.toXML(anArchiver); e.setName("polygon"); // Archive basic shape attributes and reset name
-    e.add(_path.toXML(anArchiver));                                    // Archive path
-    return e;                                                          // Return xml element
+    XMLElement e = super.toXML(anArchiver);                     // Archive basic shape attributes
+    e.add(_path.toXML(anArchiver));                             // Archive path
+    return e;                                                   // Return xml element
 }
 
 /**

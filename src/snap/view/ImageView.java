@@ -87,8 +87,8 @@ public void paintFront(Painter aPntr)
  */
 public XMLElement toXML(XMLArchiver anArchiver)
 {
-    // Archive basic shape attributes and reset element name to image-shape
-    XMLElement e = super.toXML(anArchiver); e.setName("image-shape");
+    // Archive basic shape attributes
+    XMLElement e = super.toXML(anArchiver);
     
     // Archive Image (name)
     Image image = getImage(); String iname = image!=null? image.getName() : null;

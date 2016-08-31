@@ -116,8 +116,8 @@ public double getPrefHeightImpl(double aW)
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("switchpane");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
     if(getSelectedIndex()>0) e.add("selected-index", getSelectedIndex());
     return e;
 }

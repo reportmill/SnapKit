@@ -40,12 +40,4 @@ protected double getPrefHeightImpl(double aW)
     return Math.max(super.getPrefHeightImpl(aW), ins.top + 2 + 16 + 2 + ins.bottom);
 }
 
-/**
- * XML archival.
- */
-public XMLElement toXMLView(XMLArchiver anArchiver)
-{
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jcheckboxmenuitem"); return e;
-}
-
 }

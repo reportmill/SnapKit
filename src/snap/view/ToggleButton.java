@@ -91,9 +91,7 @@ public void setOwner(ViewOwner anOwner)
 protected XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic view attributes
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jtogglebutton");
-    if(this instanceof CheckBox) e.setName("jcheckbox");
-    else if(this instanceof RadioButton) e.setName("jradiobutton");
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive selected state
     if(isSelected()) e.add("selected", true);

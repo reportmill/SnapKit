@@ -1042,8 +1042,8 @@ protected void setFocused(boolean aValue)
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jtextcomponent");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive text string, Editable, WrapText, Margin
     if(getText()!=null && getText().length()>0) e.add("text", getText());

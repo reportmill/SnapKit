@@ -217,8 +217,8 @@ public void propertyChange(PropChange anEvent)
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jscrollpane");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive ShowHBar, ShowVBar
     if(getShowHBar()!=null) e.add("ShowHBar", getShowHBar());

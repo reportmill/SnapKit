@@ -555,8 +555,8 @@ protected boolean equalsItems(List theItems)
 @Override
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jlist");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive selection mode
     //if(getSelectionMode()==SELECT_SINGLE) e.add("selection", "single-interval");

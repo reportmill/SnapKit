@@ -94,7 +94,7 @@ protected void processEvent(ViewEvent anEvent)
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Create xml for column
-    XMLElement e = new XMLElement("column");
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive HeaderValue
     if(getHeaderValue()!=null) e.add("Header", getHeaderValue());
@@ -106,12 +106,8 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive model index
     //if(getModelIndex()!=anIndex) cxml.add("index", getModelIndex());
     
-    // Archive Width, MinWidth, MaxWith, PrefWidth, Resizable, GrowWidth
-    if(getWidth()!=75) e.add("width", getWidth());
-    if(getMinWidth()!=15) e.add("MinWidth", getMinWidth());
-    if(getPrefWidth()!=75) e.add("PrefWidth", getPrefWidth());
+    // Resizable
     if(!isResizable()) e.add("resizable", false);
-    if(isGrowWidth()) e.add("GrowWidth", true);
     
     // Return column xml
     return e;
@@ -122,6 +118,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
  */
 public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
+    // Do normal version
+    super.fromXMLView(anArchiver, anElement);
+    
     // Unarchive ColumnHeader
     if(anElement.hasAttribute("Header")) setHeaderValue(anElement.getAttributeValue("Header"));
     

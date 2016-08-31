@@ -299,18 +299,6 @@ private int getDivider(double aX, double aY)
 }
 
 /**
- * XML archival.
- */
-public XMLElement toXMLView(XMLArchiver anArchiver)
-{
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jsplitpane");
-    
-    // Return the XML element
-    return e;
-}
-
-/**
  * XML archival deep.
  */
 public void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
@@ -321,19 +309,6 @@ public void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
         cxml.removeAttribute("x"); cxml.removeAttribute("y"); cxml.removeAttribute("asize");
         anElement.add(cxml);
     }    
-}
-
-/**
- * XML unarchival.
- */
-public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Unarchive basic view attributes
-    super.fromXMLView(anArchiver, anElement);
-    
-    // Unarchive Orientation (Legacy)
-    String orient = anElement.getAttributeValue("orientation", "horizontal");
-    if(orient.startsWith("v")) setVertical(true);
 }
 
 }

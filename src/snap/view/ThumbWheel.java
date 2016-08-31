@@ -510,8 +510,8 @@ private boolean isEven(float aValue)  { return Math.round(aValue)%2==0; }
  */
 public XMLElement toXML(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXML(anArchiver); e.setName("thumbwheel");
+    // Archive basic view attributes
+    XMLElement e = super.toXML(anArchiver);
     
     // Archive Type, VisibleMin, VisibleMax, AbsoluteMin, AbsoluteMax and Round
     if(getType()!=TYPE_RADIAL) e.add("type", "linear");

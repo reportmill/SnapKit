@@ -41,26 +41,4 @@ protected double getPrefWidthImpl(double aH)  { return isVertical()? 3 : 0; }
  */
 protected double getPrefHeightImpl(double aW)  { return isHorizontal()? 3 : 0; }
 
-/**
- * XML archival.
- */
-public XMLElement toXML(XMLArchiver anArchiver)
-{
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXML(anArchiver); e.setName("jseparator");
-    if(isVertical()) e.add("orientation", 1);
-    return e;
-}
-
-/**
- * XML unarchival.
- */
-public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Unarchive basic view attributes
-    super.fromXML(anArchiver, anElement);
-    if(anElement.getAttributeIntValue("orientation",0)==1) setVertical(true);
-    return this;
-}
-
 }

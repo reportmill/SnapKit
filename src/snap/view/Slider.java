@@ -20,7 +20,6 @@ public class Slider extends View {
     public static final String Value_Prop = "Value";
     public static final String Minimum_Prop = "Minimum";
     public static final String Maximum_Prop = "Maximum";
-    public static final String Orientation_Prop = "Orientation";
     
     // Constants for knob size
     static final int SIZE = 16, HSIZE = 8;
@@ -172,16 +171,13 @@ protected void processEvent(ViewEvent anEvent)
  */
 public XMLElement toXML(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXML(anArchiver); e.setName("jslider");
+    // Archive basic view attributes
+    XMLElement e = super.toXML(anArchiver);
     
     // Archive Minimum, Maximum and current value
     if(getMin()!=0) e.add("min", getMin());
     if(getMax()!=100) e.add("max", getMax());
     if(getValue()!=50) e.add("value", getValue());
-        
-    // Archive orientation
-    if(isVertical()) e.add("orient", "vertical");
 
     // Return element
     return e;
@@ -199,10 +195,6 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     setMin(anElement.getAttributeIntValue("min", 0));
     setMax(anElement.getAttributeIntValue("max", 100));
     setValue(anElement.getAttributeIntValue("value", 50));
-    
-    // Unarchive orientation
-    if(anElement.getAttributeValue("orient", "horizontal").startsWith("v"))
-        setVertical(true);
     return this;
 }
 

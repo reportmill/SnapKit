@@ -322,8 +322,8 @@ public String getValuePropName()  { return "SelectedItem"; }
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jtable");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive ShowHeader
     if(!getShowHeader()) e.add("ShowHeader", false);

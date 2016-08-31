@@ -213,8 +213,8 @@ public void setOwner(ViewOwner anOwner)
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("menubutton");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive Text and Image (name)
     String text = getText(); if(text!=null && text.length()>0) e.add("text", text);

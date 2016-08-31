@@ -36,16 +36,6 @@ protected void layoutChildren()  { _layout.layoutChildren(); }
 /**
  * XML Archival.
  */
-public XMLElement toXMLView(XMLArchiver anArchiver)
-{
-    // Archive basic view attributes and reset element name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("panel");
-    return e;
-}
-
-/**
- * XML Archival.
- */
 public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Unarchive basic view attributes

@@ -201,8 +201,8 @@ protected void paintSel(Painter aPntr)  { if(isFocused()) super.paintSel(aPntr);
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive text component attributes and reset element name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jtextfield");
+    // Archive text component attributes
+    XMLElement e = super.toXMLView(anArchiver);
     if(getColumnCount()!=20) e.add(ColumnCount_Prop, getColumnCount());
     return e; // Return element
 }

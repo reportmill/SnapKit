@@ -162,7 +162,7 @@ public MenuItem clone()
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic attributes
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jmenuitem");
+    XMLElement e = super.toXMLView(anArchiver);
 
     // Archive Accelerator
     if(getAccelerator()!=null && getAccelerator().length()>0) e.add("key", getAccelerator());

@@ -222,8 +222,8 @@ public String getValuePropName()  { return "Text"; }
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jlabel");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
 
     // Archive Text and Image (name)
     String text = getText(); if(text!=null && text.length()>0) e.add("text", text);

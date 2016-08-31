@@ -63,105 +63,120 @@ static Map <String, Class> _rmCM;
 protected Map <String, Class> createClassMap()
 {
     // Create class map and add classes
-    Map classMap = new HashMap();
+    Map cmap = new HashMap();
     
     // Shape classes
-    //classMap.put("arrow-head", RMLineShape.ArrowHead.class);
-    //classMap.put("cell-table", RMCrossTab.class);
-    //classMap.put("cell-table-frame", RMCrossTabFrame.class);
-    classMap.put("document", DocView.class); // RMDocument.class
-    //classMap.put("flow-shape", RMFlowShape.class);
-    //classMap.put("graph", RMGraph.class);
-    //classMap.put("graph-legend", RMGraphLegend.class);
-    classMap.put("image-shape", ImageView.class); //RMImageShape.class
-    //classMap.put("label", RMLabel.class);
-    //classMap.put("labels", RMLabels.class);
-    //classMap.put("line", RMLineShape.class);
-    //classMap.put("oval", RMOvalShape.class);
-    classMap.put("page", PageView.class); // RMPage.class
-    classMap.put("polygon", PathView.class); //RMPolygonShape.class
-    classMap.put("rect", RectView.class); //RMRectShape.class
-    //classMap.put("shape", RMParentShape.class);
-    classMap.put("spring-shape", SpringView.class); //RMSpringShape.class
-    //classMap.put("subreport", RMSubreport.class);
-    //classMap.put("switchshape", RMSwitchShape.class);
-    //classMap.put("table", RMTable.class);
-    //classMap.put("table-group", RMTableGroup.class);
-    //classMap.put("tablerow", RMTableRow.class);
-    classMap.put("text", TextViewBase.class); //RMTextShape.class
-    classMap.put("TextView", TextView.class); //RMTextShape.class
-    //classMap.put("linked-text", RMLinkedText.class);
-    //classMap.put("scene3d", RMScene3D.class);
+    cmap.put("DocView", DocView.class);
+    cmap.put("ImageView", ImageView.class);
+    cmap.put("PageView", PageView.class);
+    cmap.put("PathView", PathView.class);
+    cmap.put("RectView", RectView.class);
+    cmap.put("StringView", StringView.class);
+    
+    // View classes
+    cmap.put("BorderView", BorderView.class);
+    cmap.put("Box", Box.class);
+    cmap.put("BrowserView", BrowserView.class);
+    cmap.put("Button", Button.class);
+    cmap.put("ColorButton", snap.viewx.ColorButton.class);
+    cmap.put("ColorDock", snap.viewx.ColorDock.class);
+    cmap.put("ColorWell", snap.viewx.ColorWell.class);
+    cmap.put("CheckBox", CheckBox.class);
+    cmap.put("CheckBoxMenuItem", CheckBoxMenuItem.class);
+    cmap.put("ComboBox", ComboBox.class);
+    cmap.put("HBox", HBox.class);
+    cmap.put("Label", Label.class);
+    cmap.put("ListView", ListView.class);
+    cmap.put("Menu", Menu.class);
+    cmap.put("MenuBar", MenuBar.class);
+    cmap.put("MenuButton", MenuButton.class);
+    cmap.put("MenuItem", MenuItem.class);
+    cmap.put("ProgressBar", ProgressBar.class);
+    cmap.put("RadioButton", RadioButton.class);
+    cmap.put("ScrollView", ScrollView.class);
+    cmap.put("Separator", Separator.class);
+    cmap.put("Slider", Slider.class);
+    cmap.put("Spinner", Spinner.class);
+    cmap.put("SplitView", SplitView.class);
+    cmap.put("SpringView", SpringView.class);
+    cmap.put("StackView", StackView.class);
+    cmap.put("SwitchView", SwitchView.class);
+    cmap.put("TableView", TableView.class);
+    cmap.put("TableCol", TableCol.class);
+    cmap.put("TabView", TabView.class);
+    cmap.put("TextView", TextView.class);
+    cmap.put("TextField", TextField.class);
+    cmap.put("ThumbWheel", ThumbWheel.class);
+    cmap.put("ToggleButton", ToggleButton.class);
+    cmap.put("TreeView", TreeView.class);
+    cmap.put("TitleView", TitleView.class);
+    cmap.put("VBox", VBox.class);
+    cmap.put("View", ParentView.class);
     
     // Graphics
-    classMap.put("color", Color.class);
-    classMap.put("font", Font.class);
-    //classMap.put("pgraph", RMParagraph.class);
-    //classMap.put("xstring", RMXString.class);
+    cmap.put("color", Color.class);
+    cmap.put("font", Font.class);
+    cmap.put("stroke", Border.class);
+    cmap.put("fill", Color.class); //RMFill.class
+    cmap.put("gradient-fill", GradientPaint.class); //RMGradientFill.class
+    cmap.put("image-fill", ImagePaint.class); //RMImageFill.class
+    cmap.put("blur-effect", BlurEffect.class);
+    cmap.put("shadow-effect", ShadowEffect.class);
+    cmap.put("reflection-effect", ReflectEffect.class);
+    cmap.put("emboss-effect", EmbossEffect.class);
     
-    // Strokes
-    //classMap.put("stroke", RMStroke.class); classMap.put("double-stroke", RMStroke.class);
-    //classMap.put("border-stroke", RMBorderStroke.class);
-    
-    // Fills
-    classMap.put("fill", Color.class); //RMFill.class
-    classMap.put("gradient-fill", GradientPaint.class); //RMGradientFill.class
-    //classMap.put("radial-fill", RMRadialGradientFill.class);
-    classMap.put("image-fill", ImagePaint.class); //RMImageFill.class
-    
-    // Effects
-    classMap.put("blur-effect", BlurEffect.class);
-    classMap.put("shadow-effect", ShadowEffect.class);
-    classMap.put("reflection-effect", ReflectEffect.class);
-    classMap.put("emboss-effect", EmbossEffect.class);
+    // Add aliases and return cmap
+    addAliases(cmap);
+    return cmap;
+}
 
+/**
+ * Adds aliases.
+ */
+protected void addAliases(Map cmap)
+{
+    // Shape classes
+    cmap.put("document", DocView.class); // RMDocument.class
+    cmap.put("image-shape", ImageView.class); //RMImageShape.class
+    cmap.put("page", PageView.class); // RMPage.class
+    cmap.put("polygon", PathView.class); //RMPolygonShape.class
+    cmap.put("rect", RectView.class); //RMRectShape.class
+    cmap.put("spring-shape", SpringView.class); //RMSpringShape.class
+    cmap.put("text", TextViewBase.class); //RMTextShape.class
+    
     // Swing Component shapes
-    classMap.put("BorderView", BorderView.class);
-    classMap.put("Box", Box.class);
-    classMap.put("BrowserView", BrowserView.class);
-    classMap.put("ColorButton", snap.viewx.ColorButton.class);
-    classMap.put("ColorDock", snap.viewx.ColorDock.class);
-    classMap.put("ColorWell", snap.viewx.ColorWell.class);
-    classMap.put("panel", SpringView.class);
-    classMap.put("HBox", HBox.class);
-    classMap.put("jbutton", Button.class);
-    classMap.put("jcheckbox", CheckBox.class);
-    classMap.put("jcheckboxmenuitem", CheckBoxMenuItem.class);
-    classMap.put("jcombobox", ComboBox.class);
-    classMap.put("jlabel", Label.class);
-    classMap.put("jlist", ListView.class);
-    classMap.put("jmenu", Menu.class);
-    classMap.put("MenuBar", MenuBar.class);
-    classMap.put("jmenuitem", MenuItem.class);
-    classMap.put("jprogressbar", ProgressBar.class);
-    classMap.put("jradiobutton", RadioButton.class);
-    classMap.put("jscrollpane", ScrollView.class);
-    classMap.put("jseparator", Separator.class);
-    classMap.put("jslider", Slider.class);
-    classMap.put("jspinner", Spinner.class);
-    classMap.put("jsplitpane", SplitView.class);
-    classMap.put("jtable", TableView.class);
-    classMap.put("JTableColumn", TableCol.class);
-    classMap.put("jtabbedpane", TabView.class);
-    classMap.put("jtextarea", TextView.class);
-    classMap.put("jtextfield", TextField.class);
-    classMap.put("jtogglebutton", ToggleButton.class);
-    classMap.put("jtree", TreeView.class);
-    classMap.put("StackView", StackView.class);
-    classMap.put("TitlePane", TitleView.class);
-    classMap.put("VBox", VBox.class);
+    cmap.put("panel", SpringView.class);
+    cmap.put("jbutton", Button.class);
+    cmap.put("jcheckbox", CheckBox.class);
+    cmap.put("jcheckboxmenuitem", CheckBoxMenuItem.class);
+    cmap.put("jcombobox", ComboBox.class);
+    cmap.put("jlabel", Label.class);
+    cmap.put("jlist", ListView.class);
+    cmap.put("jmenu", Menu.class);
+    cmap.put("jmenuitem", MenuItem.class);
+    cmap.put("jprogressbar", ProgressBar.class);
+    cmap.put("jradiobutton", RadioButton.class);
+    cmap.put("jscrollpane", ScrollView.class);
+    cmap.put("jseparator", Separator.class);
+    cmap.put("jslider", Slider.class);
+    cmap.put("jspinner", Spinner.class);
+    cmap.put("jsplitpane", SplitView.class);
+    cmap.put("jtable", TableView.class);
+    cmap.put("JTableColumn", TableCol.class);
+    cmap.put("jtabbedpane", TabView.class);
+    cmap.put("jtextarea", TextView.class);
+    cmap.put("jtextfield", TextField.class);
+    cmap.put("jtogglebutton", ToggleButton.class);
+    cmap.put("jtree", TreeView.class);
+    cmap.put("TitlePane", TitleView.class);
     
     // Miscellaneous component shapes 
-    classMap.put("View", ParentView.class);
-    classMap.put("customview", ParentView.class);
-    classMap.put("menubutton", MenuButton.class);
-    classMap.put("switchpane", SwitchView.class);
-    classMap.put("thumbwheel", ThumbWheel.class);
-    
-    // Return classmap
-    return classMap;
+    cmap.put("customview", ParentView.class);
+    cmap.put("menubutton", MenuButton.class);
+    cmap.put("switchpane", SwitchView.class);
+    cmap.put("thumbwheel", ThumbWheel.class);
 }
-    
+
 /**
  * Returns whether to use real classes.
  */

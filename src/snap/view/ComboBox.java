@@ -286,8 +286,8 @@ public String getValuePropName()  { return "SelectedItem"; }
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jcombobox");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive Editable
     if(isEditable()) e.add("editable", true);

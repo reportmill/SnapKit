@@ -41,8 +41,8 @@ public void setSendActionOnReturn(boolean aValue)
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive text component attributes and reset element name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jtextarea");
+    // Archive text component attributes
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive SendActionOnReturn
     if(getSendActionOnReturn()) e.add("send-action-on-return", true);

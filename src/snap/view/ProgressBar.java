@@ -122,9 +122,9 @@ protected void paintFront(Painter aPntr)
  */
 public XMLElement toXML(XMLArchiver anArchiver)
 {
-    XMLElement e = super.toXML(anArchiver); e.setName("jprogressbar");  // Do normal archival and reset name
-    if(isIndeterminate()) e.add("indeterminate", true);                      // Archive isIndeterminate
-    return e;                                                                // Return the element
+    XMLElement e = super.toXML(anArchiver);                        // Do normal archival
+    if(isIndeterminate()) e.add("indeterminate", true);            // Archive isIndeterminate
+    return e;                                                      // Return element
 }
 
 /**

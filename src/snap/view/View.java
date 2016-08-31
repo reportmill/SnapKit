@@ -1837,8 +1837,13 @@ public Animator getAnimator(boolean doCreate)
  */
 public XMLElement toXML(XMLArchiver anArchiver)
 {
-    // Get new element called shape
-    XMLElement e = new XMLElement("shape");
+    // Get class name for element
+    String cname = null;
+    for(Class c=getClass();;c=c.getSuperclass()) {
+        if(c.getName().startsWith("snap.view")) { cname = c.getSimpleName(); break; }}
+
+    // Get new element with class name
+    XMLElement e = new XMLElement(cname);
     
     // Archive name
     if(getName()!=null && getName().length()>0) e.add("name", getName());
@@ -1920,7 +1925,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
     if(getItemKey()!=null) e.add("ItemKey", getItemKey());
     
     // Archive RealClassName
-    String cname = getRealClassName(); if(cname!=null && cname.length()>0) e.add("class", cname);
+    cname = getRealClassName(); if(cname!=null && cname.length()>0) e.add("class", cname);
     
     // Return the element
     return e;

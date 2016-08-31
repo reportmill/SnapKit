@@ -120,14 +120,6 @@ protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1
 protected void layoutChildren()  { _layout.layoutChildren(); }
 
 /**
- * XML archival.
- */
-public XMLElement toXMLView(XMLArchiver anArchiver)
-{
-    XMLElement e = super.toXMLView(anArchiver); e.setName("MenuBar"); return e;
-}
-
-/**
  * XML archival of children.
  */
 protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)

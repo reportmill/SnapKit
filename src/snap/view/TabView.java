@@ -259,8 +259,8 @@ protected void shelfButtonPressed(ViewEvent anEvent)
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jtabbedpane");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
     e.add("selected-index", getSelectedIndex()); // Archive the index of the currently selected tab
     return e;
 }

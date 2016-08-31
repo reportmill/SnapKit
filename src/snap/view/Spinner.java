@@ -202,8 +202,8 @@ protected void layoutChildren()
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
-    // Archive basic view attributes and reset name
-    XMLElement e = super.toXMLView(anArchiver); e.setName("jspinner");
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
     
     // Archive Value, Minimum, Maximum, StepSize
     if(getValue()!=null) e.add("value", getValue());
