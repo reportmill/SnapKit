@@ -16,6 +16,9 @@ public class SplitView extends ChildView {
     
     // The list of child bounds
     List <Rect>        _cbnds = new ArrayList();
+    
+    // The default border
+    static final Border SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
 
 /**
  * Creates a new SplitView.
@@ -23,7 +26,7 @@ public class SplitView extends ChildView {
 public SplitView()
 {
     enableEvents(MousePressed, MouseDragged, MouseMoved, MouseExited);
-    setBorder(Border.createLineBorder(Color.LIGHTGRAY,1));
+    setBorder(SPLIT_VIEW_BORDER);
 }
 
 /**
@@ -297,6 +300,11 @@ private int getDivider(double aX, double aY)
     }
     return -1;
 }
+
+/**
+ * Returns the default border.
+ */
+public Border getBorderDefault()  { return SPLIT_VIEW_BORDER; }
 
 /**
  * XML archival deep.

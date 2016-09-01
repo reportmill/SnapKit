@@ -1859,7 +1859,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
 {
     // Get class name for element
     String cname = null;
-    for(Class c=getClass();;c=c.getSuperclass()) {
+    for(Class c=getClass();;c=c.getSuperclass()) { if(c==ParentView.class) continue;
         if(c.getName().startsWith("snap.view")) { cname = c.getSimpleName(); break; }}
 
     // Get new element with class name
