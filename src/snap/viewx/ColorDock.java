@@ -25,13 +25,16 @@ public class ColorDock extends View {
     // The size of the individual swatches
     static int              SWATCH_SIZE = 13;
     
+    // The border for color dock
+    static final Border     COLOR_DOCK_BORDER = Border.createLoweredBevelBorder();
+    
 /**
  * Creates a new color dock.
  */
 public ColorDock()
 {
     enableEvents(MouseClicked, DragEnter, DragOver, DragExit, DragDrop, DragGesture);
-    setBorder(Border.createLoweredBevelBorder());
+    setBorder(COLOR_DOCK_BORDER);
 }
 
 /**
@@ -331,5 +334,10 @@ public void readFromPreferences(String aName)
     // Catch exceptions
     } catch(Throwable t) { System.err.println("Error reading color dock from preferences"); }
 }
+
+/**
+ * Returns the default border.
+ */
+public Border getBorderDefault()  { return COLOR_DOCK_BORDER; }
 
 }

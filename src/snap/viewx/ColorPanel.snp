@@ -1,63 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<VBox name="ColorPanel" PrefWidth="275" PrefHeight="260" Padding="8,4,4,4" Spacing="4" FillWidth="true">
-  <font name="Arial" size="11" />
-  <HBox align="CENTER" Spacing="2">
-    <jtogglebutton name="ImagePickerButton" PrefWidth="40" PrefHeight="27" image="spectrum-icon.png" selected="true" bgroup="bg1" />
-    <jtogglebutton name="RGBPickerButton" PrefWidth="40" PrefHeight="27" image="rgb-icon.png" bgroup="bg1" />
-    <jtogglebutton name="GrayPickerButton" PrefWidth="40" PrefHeight="27" image="grayscale-icon.png" bgroup="bg1" />
-    <jtogglebutton name="SwatchPickerButton" PrefWidth="40" PrefHeight="27" image="swatches-icon.png" bgroup="bg1" />
-    <jseparator PrefWidth="20" Vertical="true" visible="false" />
-    <ColorWell name="DisplayColorWell" PrefWidth="40" PrefHeight="27" selectable="false" />
-    <menubutton name="HistoryMenuButton" PrefWidth="16" PrefHeight="11" ttip="Recent Colors" ShowBorder="false" PopupX="-40" PopupY="10" PopupWidth="56" PopupHeight="120" />
+<VBox Name="ColorPanel" PrefWidth="275" PrefHeight="260" Padding="8,4,4,4" Spacing="4" FillWidth="true">
+  <HBox Align="CENTER" Spacing="2">
+    <ToggleButton Name="ImagePickerButton" PrefWidth="40" PrefHeight="27" image="spectrum-icon.png" Selected="true" ToggleGroup="bg1" />
+    <ToggleButton Name="RGBPickerButton" PrefWidth="40" PrefHeight="27" image="rgb-icon.png" ToggleGroup="bg1" />
+    <ToggleButton Name="GrayPickerButton" PrefWidth="40" PrefHeight="27" image="grayscale-icon.png" ToggleGroup="bg1" />
+    <ToggleButton Name="SwatchPickerButton" PrefWidth="40" PrefHeight="27" image="swatches-icon.png" ToggleGroup="bg1" />
+    <Separator PrefWidth="20" Vertical="true" Visible="false" />
+    <ColorWell Name="DisplayColorWell" PrefWidth="40" PrefHeight="27" Selectable="false" />
+    <MenuButton Name="HistoryMenuButton" PrefWidth="16" PrefHeight="11" ToolTip="Recent Colors" ShowBorder="false" PopupX="-40" PopupY="10" PopupWidth="56" PopupHeight="120" />
   </HBox>
-  <switchpane name="PickerPanel" PrefHeight="198">
-    <VBox name="ImagePicker" Spacing="4" FillWidth="true">
-      <jscrollpane GrowHeight="true">
-        <customview name="ImagePickerLabel" class="snap.viewx.ColorPanel$ImagePicker" />
-      </jscrollpane>
-      <jcombobox name="ImageComboBox" PrefHeight="23" />
+  <SwitchView Name="PickerPanel" PrefHeight="198">
+    <VBox Name="ImagePicker" Spacing="4" FillWidth="true">
+      <ScrollView GrowHeight="true">
+        <View Name="ImagePickerLabel" Class="snap.viewx.ColorPanel$ImagePicker" />
+      </ScrollView>
+      <ComboBox Name="ImageComboBox" PrefHeight="23" />
     </VBox>
-    <VBox name="RGBPicker" Padding="16,12,12,12" Spacing="15" FillWidth="true">
-      <font name="Arial" size="11" />
+    <VBox Name="RGBPicker" Padding="16,12,12,12" Spacing="15" FillWidth="true">
       <HBox Spacing="4">
-        <jlabel PrefWidth="12" text="R:" />
-        <jslider name="RedSlider" GrowWidth="true" max="255" class="snap.viewx.ColorPanel$GradSlider" />
-        <jtextfield name="RedText" PrefWidth="45" align="center" />
+        <Label PrefWidth="12" text="R:" />
+        <Slider Name="RedSlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
+        <TextField Name="RedText" PrefWidth="45" Align="CENTER" />
       </HBox>
       <HBox Spacing="4">
-        <jlabel PrefWidth="12" text="G:" />
-        <jslider name="GreenSlider" GrowWidth="true" max="255" class="snap.viewx.ColorPanel$GradSlider" />
-        <jtextfield name="GreenText" PrefWidth="45" align="center" />
+        <Label PrefWidth="12" text="G:" />
+        <Slider Name="GreenSlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
+        <TextField Name="GreenText" PrefWidth="45" Align="CENTER" />
       </HBox>
       <HBox Spacing="4">
-        <jlabel PrefWidth="12" text="B:" />
-        <jslider name="BlueSlider" GrowWidth="true" max="255" class="snap.viewx.ColorPanel$GradSlider" />
-        <jtextfield name="BlueText" PrefWidth="45" align="center" />
+        <Label PrefWidth="12" text="B:" />
+        <Slider Name="BlueSlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
+        <TextField Name="BlueText" PrefWidth="45" Align="CENTER" />
       </HBox>
       <HBox Spacing="4">
-        <jlabel PrefWidth="12" text="A:" />
-        <jslider name="AlphaSlider" GrowWidth="true" max="255" class="snap.viewx.ColorPanel$GradSlider" />
-        <jtextfield name="AlphaText" PrefWidth="45" align="center" />
+        <Label PrefWidth="12" text="A:" />
+        <Slider Name="AlphaSlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
+        <TextField Name="AlphaText" PrefWidth="45" Align="CENTER" />
       </HBox>
-      <HBox align="CENTER" GrowHeight="true" Spacing="4">
-        <jlabel text="Hex:" />
-        <jtextfield name="HexText" PrefWidth="74" align="center" />
-      </HBox>
-    </VBox>
-    <VBox name="GrayPicker" Padding="16,12,12,12" Spacing="15" FillWidth="true">
-      <font name="Arial" size="11" />
-      <HBox Spacing="4">
-        <jlabel PrefWidth="12" text="G:" />
-        <jslider name="GraySlider" GrowWidth="true" max="255" class="snap.viewx.ColorPanel$GradSlider" />
-        <jtextfield name="GrayText" PrefWidth="45" align="center" />
-      </HBox>
-      <HBox Spacing="4">
-        <jlabel PrefWidth="12" text="A:" />
-        <jslider name="GrayAlphaSlider" GrowWidth="true" max="255" class="snap.viewx.ColorPanel$GradSlider" />
-        <jtextfield name="GrayAlphaText" PrefWidth="45" align="center" />
+      <HBox Align="CENTER" GrowHeight="true" Spacing="4">
+        <Label text="Hex:" />
+        <TextField Name="HexText" PrefWidth="74" Align="CENTER" />
       </HBox>
     </VBox>
-    <panel name="SwatchPicker" />
-  </switchpane>
-  <ColorDock name="ColorDock" PrefHeight="30" GrowHeight="true" />
+    <VBox Name="GrayPicker" Padding="16,12,12,12" Spacing="15" FillWidth="true">
+      <HBox Spacing="4">
+        <Label PrefWidth="12" text="G:" />
+        <Slider Name="GraySlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
+        <TextField Name="GrayText" PrefWidth="45" Align="CENTER" />
+      </HBox>
+      <HBox Spacing="4">
+        <Label PrefWidth="12" text="A:" />
+        <Slider Name="GrayAlphaSlider" GrowWidth="true" Class="snap.viewx.ColorPanel$GradSlider" Max="255" />
+        <TextField Name="GrayAlphaText" PrefWidth="45" Align="CENTER" />
+      </HBox>
+    </VBox>
+    <SpringView Name="SwatchPicker" PrefWidth="0" PrefHeight="0" />
+  </SwitchView>
+  <ColorDock Name="ColorDock" PrefHeight="30" GrowHeight="true" />
 </VBox>

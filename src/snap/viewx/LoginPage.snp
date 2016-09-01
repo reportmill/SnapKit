@@ -1,30 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<panel width="400" height="400">
-  <font name="Arial" size="11" />
-  <jlabel x="56" y="76" width="273" height="25" text="Login Required" align="left">
+<SpringView width="400" height="400" PrefWidth="400" PrefHeight="400">
+  <Label x="56" y="76" width="273" height="25" text="Login Required">
     <font name="Arial Bold" size="18" />
-  </jlabel>
-  <jlabel name="SiteText" x="56" y="101" width="273" height="22" align="left">
+  </Label>
+  <Label Name="SiteText" x="56" y="101" width="273" height="22">
     <font name="Arial" size="12" />
-  </jlabel>
-  <jlabel x="56" y="142" width="62" height="22" text="Name:" align="left">
+  </Label>
+  <Label x="56" y="142" width="62" height="22" text="Name:">
     <font name="Arial" size="14" />
-  </jlabel>
-  <jtextfield name="NameText" x="132" y="142" width="217" height="22">
+  </Label>
+  <TextField Name="NameText" x="132" y="142" width="217" height="22">
     <font name="Arial" size="14" />
     <binding aspect="Text" key="Name" />
-  </jtextfield>
-  <jlabel x="56" y="182" width="76" height="22" text="Password:" align="left">
+  </TextField>
+  <Label x="56" y="182" width="76" height="22" text="Password:">
     <font name="Arial" size="14" />
-  </jlabel>
-  <jtextfield name="PasswordText" x="132" y="182" width="217" height="22">
+  </Label>
+  <TextField Name="PasswordText" x="132" y="182" width="217" height="22">
     <font name="Arial" size="14" />
     <binding aspect="Text" key="Password" />
-  </jtextfield>
-  <jcheckbox name="RememberLoginCheckBox" x="56" y="220" width="273" height="22" text="Remember this password" align="left" selected="true">
+  </TextField>
+  <CheckBox Name="RememberLoginCheckBox" x="56" y="220" width="273" height="22" text="Remember this password" Selected="true">
     <font name="Arial" size="12" />
-  </jcheckbox>
-  <jbutton name="LoginButton" x="130" y="273" width="157" height="22" text="Login" align="center">
-    <font name="Arial" size="11" />
-  </jbutton>
-</panel>
+  </CheckBox>
+  <Button Name="LoginButton" x="130" y="273" width="157" height="22" text="Login" />
+</SpringView>

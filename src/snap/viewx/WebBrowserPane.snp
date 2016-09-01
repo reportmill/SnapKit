@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<panel width="500" height="500">
-  <font name="Arial" size="11" />
-  <panel name="ToolBar" width="500" height="30" asize="-~-,--~">
-    <jbutton name="BackButton" x="2" y="2" width="25" height="25" ttip="Page Back">
+<SpringView width="500" height="500" PrefWidth="500" PrefHeight="500">
+  <SpringView Name="ToolBar" width="500" height="30" PrefWidth="500" PrefHeight="30" GrowWidth="true">
+    <Button Name="BackButton" x="2" y="2" width="25" height="25" ToolTip="Page Back">
       <binding aspect="Enabled" key="Browser.LastURL" />
-    </jbutton>
-    <jbutton name="ReloadButton" x="27" y="2" width="25" height="25" image="Reload.png">
-    </jbutton>
-    <jbutton name="NextButton" x="52" y="2" width="25" height="25" ttip="Page Forward">
+    </Button>
+    <Button Name="ReloadButton" x="27" y="2" width="25" height="25" image="Reload.png" />
+    <Button Name="NextButton" x="52" y="2" width="25" height="25" ToolTip="Page Forward">
       <binding aspect="Enabled" key="Browser.NextURL" />
-    </jbutton>
-    <jtextfield name="AddressText" x="77" y="2" width="350" height="25" asize="-~-,--~">
+    </Button>
+    <TextField Name="AddressText" x="77" y="2" width="350" height="25" GrowWidth="true">
       <font name="Arial" size="12" />
-    </jtextfield>
-    <jbutton name="InfoButton" x="474" y="3" width="22" height="22" asize="~--,--~" ttip="Get Browser Info" image="Info.png" margin="0">
+    </TextField>
+    <Button Name="InfoButton" x="474" y="3" width="22" height="22" LeanX="RIGHT" ToolTip="Get Browser Info" image="Info.png">
       <font name="Arial Bold Italic" size="9" />
-    </jbutton>
-  </panel>
-  <customview name="Browser" y="30" width="500" height="450" asize="-~-,-~-" class="snap.viewx.WebBrowser" />
-  <panel name="StatusBar" y="480" width="500" height="20" asize="-~-,--~">
-    <jlabel name="StatusText" x="2" width="227" height="20" asize="-~~,~--" />
-    <jprogressbar name="ProgressBar" x="227" y="2" width="46" height="16" asize="~~~,~--" visible="false" />
-    <jlabel name="ActivityText" x="273" width="225" height="20" asize="~~-,~--" align="right" />
-  </panel>
-</panel>
+    </Button>
+  </SpringView>
+  <View Name="Browser" y="30" width="500" height="450" GrowWidth="true" GrowHeight="true" Class="snap.viewx.WebBrowser" />
+  <SpringView Name="StatusBar" y="480" width="500" height="20" PrefWidth="500" PrefHeight="20" GrowWidth="true">
+    <Label Name="StatusText" x="2" width="227" height="20" GrowWidth="true" LeanY="BOTTOM" />
+    <ProgressBar Name="ProgressBar" x="227" y="2" width="46" height="16" Visible="false" GrowWidth="true" LeanX="CENTER" LeanY="BOTTOM" />
+    <Label Name="ActivityText" x="273" width="225" height="20" Align="CENTER_RIGHT" GrowWidth="true" LeanX="RIGHT" LeanY="BOTTOM" />
+  </SpringView>
+</SpringView>
