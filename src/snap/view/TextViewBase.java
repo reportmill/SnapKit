@@ -1053,6 +1053,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 
     // If RichText, archive rich text
     if(isRich()) {
+        e.removeElement("font");
         XMLElement rtxml = anArchiver.toXML(getRichText()); rtxml.setName("RichText");
         if(rtxml.size()>0) e.add(rtxml); //for(int i=0, iMax=rtxml.size(); i<iMax; i++) e.add(rtxml.get(i));
     }
@@ -1072,6 +1073,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     
     // Hack for archived rich stuff
     XMLElement rtxml = anElement.get("RichText");
+    if(rtxml==null && anElement.get("string")!=null) rtxml = anElement;
     boolean rich = rtxml!=null;
     
     // Unarchive Rich, Editable, WrapText

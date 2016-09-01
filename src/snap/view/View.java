@@ -1969,8 +1969,8 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
         setBorder(Border.createLineBorder(sc, sw)); }
     
     // Unarchive Border
-    XMLElement bxml = anElement.getElement(Border_Prop);
-    if(bxml!=null) { Border border = Border.fromXMLBorder(anArchiver, bxml);
+    int bind = anArchiver.indexOf(anElement, Border.class);
+    if(bind>=0) { Border border = (Border)anArchiver.fromXML(anElement.get(bind), this);
         setBorder(border); }
     
     // Unarchive Fill 
@@ -1983,6 +1983,12 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     if(eind>=0) { Effect eff = (Effect)anArchiver.fromXML(anElement.get(eind), this);
         setEffect(eff); }
 
+    // Unarchive Fill, Border (Legacy)
+    XMLElement fxml = anElement.getElement("fill");
+    if(fxml!=null) { Paint fill = (Paint)anArchiver.fromXML(fxml, this); setFill(fill); }
+    XMLElement bxml = anElement.getElement("border");
+    if(bxml!=null) { Border border = Border.fromXMLBorder(anArchiver, bxml); setBorder(border); }
+    
     // Unarchive font
     XMLElement fontXML = anElement.getElement(Font_Prop);
     if(fontXML!=null) setFont((Font)anArchiver.fromXML(fontXML, this));

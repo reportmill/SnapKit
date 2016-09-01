@@ -95,8 +95,10 @@ public XMLElement toXML(XMLArchiver anArchiver)
     if(iname!=null) e.add("ImageName", iname);
     
     // Archive image bytes as archiver resource
-    //String rname = anArchiver.addResource(image.getBytes(), "" + System.identityHashCode(this));
-    //e.add("resource", rname);
+    else if(image!=null) {
+        String rname = anArchiver.addResource(image.getBytes(), "" + System.identityHashCode(this));
+        e.add("resource", rname);
+    }
     
     // Archive GrowToFit, PreserveRatio
     //if(!isGrowToFit()) e.add("GrowToFit", isGrowToFit());

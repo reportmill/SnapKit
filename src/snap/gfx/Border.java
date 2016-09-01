@@ -143,13 +143,13 @@ public static class EmptyBorder extends Border {
 public static class LineBorder extends Border {
 
     // The color
-    Color       _color;
+    Color       _color = Color.BLACK;
     
     // The width
-    double      _width;
+    double      _width = 1;
     
     /** Creates a new line border. */
-    public LineBorder()  { _color = Color.BLACK; _width = 1; }
+    public LineBorder()  { }
     
     /** Creates a new line border. */
     public LineBorder(Color aColor, double aWidth)  { _color = aColor; _width = aWidth; }
