@@ -97,10 +97,10 @@ public Paint getFillDefault()  { return Color.WHITE; }
  */
 protected double getPrefWidthImpl(double aH)
 {
-    int ccount = getColumnCount(); Font font = getFont(); String txt = getText(); if(txt==null) txt = "";
-    double pw = ccount>0? ccount*font.charAdvance('X') : Math.ceil(font.getStringAdvance(txt) + 10);
+    Insets ins = getInsetsAll(); int ccount = getColumnCount();
+    double pw = super.getPrefWidthImpl(aH) - ins.left - ins.right + 10;
+    if(ccount>0) pw = ccount*getFont().charAdvance('X');
     pw = Math.max(pw, _label.getPrefWidth());
-    Insets ins = getInsetsAll(); 
     return ins.left + pw + ins.right;
 }
 
@@ -109,9 +109,9 @@ protected double getPrefWidthImpl(double aH)
  */
 protected double getPrefHeightImpl(double aW)
 {
-    double ph = Math.ceil(getFont().getSize());
-    ph = Math.max(ph, _label.getPrefHeight());
     Insets ins = getInsetsAll();
+    double ph = super.getPrefHeightImpl(aW) - ins.top - ins.bottom;
+    ph = Math.max(ph, _label.getPrefHeight());
     return ins.top + ph + ins.bottom + 6;
 }
 
@@ -120,6 +120,7 @@ protected double getPrefHeightImpl(double aW)
  */
 protected void layoutChildren()
 {
+    checkFont();
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
     _label.setBounds(x, y, w, h);

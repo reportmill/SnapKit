@@ -10,6 +10,9 @@ public class ImageView extends View {
     // The image
     Image        _image;
 
+    // The image name, if loaded from local resource
+    String       _iname;
+    
 /**
  * Creates a new ImageNode.
  */
@@ -38,6 +41,16 @@ public void setImage(Image anImage)
     firePropChange("Image", _image, _image = anImage);
     relayoutParent(); repaint();
 }
+
+/**
+ * Returns the image name, if loaded from local resource.
+ */
+public String getImageName()  { return _iname; }
+
+/**
+ * Sets the image name, if loaded from local resource.
+ */
+public void setImageName(String aName)  { _iname = aName; }
 
 /**
  * Returns the default alignment.
@@ -90,9 +103,9 @@ public XMLElement toXML(XMLArchiver anArchiver)
     // Archive basic shape attributes
     XMLElement e = super.toXML(anArchiver);
     
-    // Archive Image (name)
-    Image image = getImage(); String iname = image!=null? image.getName() : null;
-    if(iname!=null) e.add("ImageName", iname);
+    // Archive Image or ImageName
+    Image image = getImage();
+    String iname = getImageName(); if(iname!=null) e.add("ImageName", iname);
     
     // Archive image bytes as archiver resource
     else if(image!=null) {
@@ -116,11 +129,14 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic shape attributes
     super.fromXML(anArchiver, anElement);
     
-    // Unarchive Image name
+    // Unarchive ImageName
     String iname = anElement.getAttributeValue("ImageName");
-    Image image = iname!=null? Image.get(anArchiver.getSourceURL(), iname) : null;
-    if(image!=null)
-        setImage(image);
+    if(iname==null) iname = anElement.getAttributeValue("image");
+    if(iname!=null) {
+        setImageName(iname);
+        Image image = Image.get(anArchiver.getSourceURL(), iname);
+        if(image!=null) setImage(image);
+    }
     
     // Unarchive image resource: get resource bytes, page and set ImageData
     String rname = anElement.getAttributeValue("resource");

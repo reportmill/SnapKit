@@ -312,12 +312,28 @@ public void setColor(Color aColor)  { setInputStyleValue(TextStyle.COLOR_KEY, aC
 /**
  * Returns the font of the current selection or cursor.
  */
-public Font getFont()  { return getInputStyle().getFont(); } // Was getTextFont()
+public Font getFont()
+{
+    if(!isRich()) return _font!=null? _font : getFontDefault();
+    return getInputStyle().getFont();
+}
 
 /**
  * Sets the font of the current selection or cursor.
  */
-public void setFont(Font aFont)  { setInputStyleValue(TextStyle.FONT_KEY, aFont); } // Was setTextFont()
+public void setFont(Font aFont)
+{
+    setInputStyleValue(TextStyle.FONT_KEY, aFont);
+    if(!isRich()) _font = aFont.equals(getFontDefault())? null : aFont;
+}
+
+// Bogus font to work with fonts normally when not rich
+Font _font;
+protected void checkFont()
+{
+    if(isRich()) return;
+    if(!getFont().equals(getInputStyle().getFont())) setInputStyleValue(TextStyle.FONT_KEY, getFont());
+}
 
 /**
  * Returns the style at given char index.
@@ -975,6 +991,7 @@ protected void textDidChange()
  */
 protected double getPrefWidthImpl(double aH)
 {
+    checkFont();
     Insets ins = getInsetsAll();
     return ins.left + getTextBox().getPrefWidth() + ins.right;
 }
@@ -984,9 +1001,15 @@ protected double getPrefWidthImpl(double aH)
  */
 protected double getPrefHeightImpl(double aW)
 {
+    checkFont();
     Insets ins = getInsetsAll();
     return ins.top + getTextBox().getPrefHeight() + ins.bottom;
 }
+
+/**
+ * Layout children.
+ */
+protected void layoutChildren()  { checkFont(); }
 
 /**
  * Override to update getTextBlock.Rect.

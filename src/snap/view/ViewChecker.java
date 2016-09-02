@@ -12,7 +12,7 @@ public class ViewChecker {
  */
 public static void main(String args[])
 {
-    WebURL url = WebURL.getURL("/Users/jeff/SnapCode/RM15/src/com/reportmill/app");
+    WebURL url = WebURL.getURL("/Users/jeff/SnapCode/RM15/src!/com/reportmill/apptools");
     WebFile dir = url.getFile();
     
     for(WebFile file : dir.getFiles())

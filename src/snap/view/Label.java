@@ -16,6 +16,9 @@ public class Label extends ParentView {
     // The graphics node after text
     View            _graphicAfter;
     
+    // The image name, if loaded from local resource
+    String          _iname;
+    
     // The spacing between text and graphic
     double          _spacing = 4;
     
@@ -163,6 +166,16 @@ public void setGraphicAfter(View aGraphic)
 }
 
 /**
+ * Returns the image name, if loaded from local resource.
+ */
+public String getImageName()  { return _iname; }
+
+/**
+ * Sets the image name, if loaded from local resource.
+ */
+public void setImageName(String aName)  { _iname = aName; }
+
+/**
  * Returns the spacing between text and graphics.
  */
 public double getSpacing()  { return _spacing; }
@@ -225,10 +238,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
 
-    // Archive Text and Image (name)
+    // Archive Text and ImageName
     String text = getText(); if(text!=null && text.length()>0) e.add("text", text);
-    Image image = getImage(); String iname = image!=null? image.getName() : null;
-    if(iname!=null) e.add("image", iname);
+    String iname = getImageName(); if(iname!=null) e.add("image", iname);
 
     // Return element
     return e;
@@ -242,11 +254,14 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive Text and Image name
+    // Unarchive Text and ImageName
     setText(anElement.getAttributeValue("text", anElement.getAttributeValue("value")));
     String iname = anElement.getAttributeValue("image");
-    Image image = iname!=null? Image.get(anArchiver.getSourceURL(), iname) : null;
-    if(image!=null) setImage(image);
+    if(iname!=null) {
+        setImageName(iname);
+        Image image = Image.get(anArchiver.getSourceURL(), iname);
+        if(image!=null) setImage(image);
+    }
 }
 
 /**
