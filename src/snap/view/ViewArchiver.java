@@ -181,7 +181,6 @@ protected void addAliases(Map cmap)
     // Graphics
     cmap.put("color", Color.class);
     cmap.put("font", Font.class);
-    cmap.put("stroke", Border.class);
     cmap.put("fill", Color.class); //RMFill.class
     cmap.put("gradient-fill", GradientPaint.class); //RMGradientFill.class
     cmap.put("image-fill", ImagePaint.class); //RMImageFill.class

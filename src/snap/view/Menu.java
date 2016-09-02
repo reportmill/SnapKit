@@ -88,7 +88,7 @@ public View getChild(String aName)
 public PopupWindow getPopup()
 {
     hide();
-    PopupWindow pop = new PopupWindow();
+    PopupWindow pop = new PopupWindow(); pop.setFont(getFontDefault());
     VBox vbox = new VBox(); vbox.setMinWidth(125); vbox.setFillWidth(true); vbox.setPadding(4,1,4,1);
     for(View node : _items) { vbox.addChild(node); node.addEventHandler(_lsnr, Action); }
     pop.setContent(vbox);

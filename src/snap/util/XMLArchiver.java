@@ -328,7 +328,8 @@ protected Class getClass(XMLElement anElement)
 protected Object newInstance(Class aClass)
 {
     try { return aClass.newInstance(); }
-    catch(Exception e) { e.printStackTrace(); return null; }
+    catch(InstantiationException e) { System.err.println(e + " on " + aClass); e.printStackTrace(); }
+    catch(Exception e) { e.printStackTrace(); } return null;
 }
 
 /**

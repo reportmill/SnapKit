@@ -1962,12 +1962,6 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive Vertical
     if(anElement.hasAttribute(Vertical_Prop)) setVertical(anElement.getAttributeBoolValue(Vertical_Prop));
         
-    // Unarchive Stroke
-    XMLElement sxml = anElement.getElement("stroke");
-    if(sxml!=null) { String cstr = sxml.getAttributeValue("color");
-        Color sc = cstr!=null? new Color(cstr) : Color.BLACK; double sw = sxml.getAttributeFloatValue("width", 1);
-        setBorder(Border.createLineBorder(sc, sw)); }
-    
     // Unarchive Border
     int bind = anArchiver.indexOf(anElement, Border.class);
     if(bind>=0) { Border border = (Border)anArchiver.fromXML(anElement.get(bind), this);
@@ -1984,6 +1978,9 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
         setEffect(eff); }
 
     // Unarchive Fill, Border (Legacy)
+    XMLElement sxml = anElement.getElement("stroke");
+    if(sxml!=null) { String cstr = sxml.getAttributeValue("color"); Color sc = cstr!=null? new Color(cstr):Color.BLACK;
+        double sw = sxml.getAttributeFloatValue("width", 1); setBorder(Border.createLineBorder(sc, sw)); }
     XMLElement fxml = anElement.getElement("fill");
     if(fxml!=null) { Paint fill = (Paint)anArchiver.fromXML(fxml, this); setFill(fill); }
     XMLElement bxml = anElement.getElement("border");
