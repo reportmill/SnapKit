@@ -143,7 +143,8 @@ public void setGraphic(View aGraphic)
 {
     View old = getGraphic(); if(aGraphic==old) return;
     if(_graphic!=null && _graphic.getParent()!=null) removeChild(_graphic);
-    addChild(_graphic = aGraphic, 0);
+    _graphic = aGraphic;
+    if(_graphic!=null) addChild(_graphic, 0);
     firePropChange(Graphic_Prop, old, _graphic);
     relayoutParent();
 }
@@ -160,7 +161,8 @@ public void setGraphicAfter(View aGraphic)
 {
     View old = getGraphicAfter(); if(aGraphic==old) return;
     if(_graphicAfter!=null && _graphicAfter.getParent()!=null) removeChild(_graphicAfter);
-    addChild(_graphicAfter = aGraphic);
+    _graphicAfter = aGraphic;
+    if(_graphicAfter!=null) addChild(_graphicAfter);
     firePropChange(GraphicAfter_Prop, old, _graphicAfter);
     relayoutParent();
 }

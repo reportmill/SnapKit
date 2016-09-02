@@ -4,13 +4,10 @@ import snap.gfx.*;
 import snap.util.*;
 
 /**
- * RMShape subclass for MenuButton.
+ * Button subclass to show a menu when clicked.
  */
-public class MenuButton extends BorderView {
+public class MenuButton extends ButtonBase {
 
-    // Whether button has border
-    boolean              _showBorder = true;
-    
     // Whether button shows down arrow
     boolean              _showArrow;
 
@@ -23,62 +20,13 @@ public class MenuButton extends BorderView {
     // The items
     List <MenuItem>      _items = new ArrayList();
     
-    // The label
-    Label                _label;
-    
-    // The image name, if loaded from local resource
-    String               _iname;
-
-    // Whether button is armed
-    boolean              _armed;
-    
-    // Whether button is under mouse
-    boolean              _targeted;
-    
-    // Whether button is being tracked by mouse
-    boolean              _tracked;
-    
     // The down arrow image
     static Image         _arrowImg;
 
 /**
  * Creates a new MenuButton.
  */
-public MenuButton()
-{
-    setShowArrow(true);
-    enableEvents(MouseEvents);
-}
-
-/**
- * Returns the text.
- */
-public String getText()  { return getLabel().getText(); }
-
-/**
- * Sets the text.
- */
-public void setText(String aString)  { getLabel().setText(aString); }
-
-/**
- * Returns the image.
- */
-public Image getImage()  { return getLabel().getImage(); }
-
-/**
- * Sets the image.
- */
-public void setImage(Image anImage)  { getLabel().setImage(anImage); }
-
-/**
- * Returns the image name, if loaded from local resource.
- */
-public String getImageName()  { return _iname; }
-
-/**
- * Sets the image name, if loaded from local resource.
- */
-public void setImageName(String aName)  { _iname = aName; }
+public MenuButton()  { setShowArrow(true); }
 
 /**
  * Returns the items.
@@ -100,16 +48,6 @@ public void setItems(List <MenuItem> theItems)
 public void addItem(MenuItem anItem)  { _items.add(anItem); }
 
 /**
- * Returns whether button shows border.
- */
-public boolean isShowBorder()  { return _showBorder; }
-
-/**
- * Sets whether button shows border.
- */
-public void setShowBorder(boolean aValue)  { firePropChange("ShowBorder", _showBorder, _showBorder = aValue); }
-
-/**
  * Returns whether button should show arrow.
  */
 public boolean isShowArrow()  { return _showArrow; }
@@ -121,7 +59,7 @@ public void setShowArrow(boolean aValue)
 {
     if(aValue==isShowArrow()) return;
     View iview = aValue? new ImageView(getArrowImage()) : null;
-    setRight(iview); if(iview!=null) iview.setPadding(0,2,0,2);
+    setGraphicAfter(iview); if(iview!=null) iview.setPadding(0,2,0,2);
     firePropChange("ShowArrow", _showArrow, _showArrow=aValue);
 }
 
@@ -151,10 +89,10 @@ public void setPopupSize(Size aValue)  { firePropChange("PopupSize", _popSize, _
 protected void processEvent(ViewEvent anEvent)
 {
     // Handle MouseEntered, MouseExited, MousePressed, MouseReleased
-    if(anEvent.isMouseEntered()) { _targeted = true; _armed = _tracked; repaint(); }
-    else if(anEvent.isMouseExited())  { _targeted = _armed = false; repaint(); }
-    else if(anEvent.isMousePressed())  { _tracked = true; _armed = true; if(_armed) fire(anEvent); repaint(); }
-    else if(anEvent.isMouseReleased())  { _armed = _tracked = false; repaint(); }
+    if(anEvent.isMouseEntered()) { setTargeted(true); repaint(); }
+    else if(anEvent.isMouseExited())  { setTargeted(false); repaint(); }
+    else if(anEvent.isMousePressed())  { setPressed(false); setTargeted(false); fire(anEvent); repaint(); }
+    else if(anEvent.isMouseReleased())  { setPressed(false); setTargeted(false); repaint(); }
 }
 
 /**
@@ -165,37 +103,6 @@ public void fire(ViewEvent anEvent)
     Menu popup = new Menu();
     for(MenuItem item : getItems()) popup.addItem(item);
     popup.show(this,0,getHeight());
-}
-
-/**
- * Returns the label.
- */
-private Label getLabel()
-{
-    if(_label!=null) return _label;
-    _label = new Label(); setCenter(_label);
-    return _label;
-}
-
-/**
- * Returns the insets.
- */
-public Insets getInsetsAll()
-{
-    Insets pad = getPadding();
-    if(isShowBorder()) pad = new Insets(pad.top+2,pad.right+2,pad.bottom+2,pad.left+2);
-    return pad;
-}
-
-/**
- * Paint Button.
- */
-public void paintFront(Painter aPntr)
-{
-    if(isShowBorder()) {
-        int state = _armed? Painter.BUTTON_PRESSED : _targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
-        aPntr.drawButton2(0,0,getWidth(),getHeight(), state);
-    }
 }
 
 /**
@@ -229,12 +136,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive Text and ImageName
-    String text = getText(); if(text!=null && text.length()>0) e.add("text", text);
-    String iname = getImageName(); if(iname!=null) e.add("image", iname);
-
-    // Archive ShowBorder, ShowArrow, PopupPoint, PopupSize
-    if(!isShowBorder()) e.add("ShowBorder", false);
+    // Archive ShowArrow, PopupPoint, PopupSize
     if(!isShowArrow()) e.add("ShowArrow", false);
     if(getPopupPoint()!=null) { e.add("PopupX", getPopupPoint().x); e.add("PopupY", getPopupPoint().y); }
     if(getPopupSize()!=null) {
@@ -252,18 +154,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive Text and ImageName
-    String text = anElement.getAttributeValue("text", anElement.getAttributeValue("value"));
-    if(text!=null) setText(text);
-    String iname = anElement.getAttributeValue("image");
-    if(iname!=null) {
-        setImageName(iname);
-        Image image = Image.get(anArchiver.getSourceURL(), iname);
-        if(image!=null) setImage(image);
-    }
-
-    // Unarchive ShowBorder, ShowArrow
-    if(anElement.hasAttribute("ShowBorder")) setShowBorder(anElement.getAttributeBooleanValue("ShowBorder"));
+    // Unarchive ShowArrow
     setShowArrow(anElement.getAttributeBooleanValue("ShowArrow", true));
     
     // Unarchive PopupPoint
