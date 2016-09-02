@@ -123,12 +123,12 @@ protected void layoutChildren()  { _layout.layoutChildren(); }
 /**
  * Override to return default.
  */
-public Paint getFillDefault()  { return MENU_BAR_PAINT; }
+public Paint getDefaultFill()  { return MENU_BAR_PAINT; }
 
 /**
  * Returns the default font.
  */
-public Font getFontDefault()  { return MENU_BAR_FONT; }
+public Font getDefaultFont()  { return MENU_BAR_FONT; }
 
 /**
  * XML archival of children.

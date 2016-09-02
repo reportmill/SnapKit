@@ -33,7 +33,7 @@ public void setFillHeight(boolean aValue)  { _layout.setFillHeight(aValue); }
 /**
  * Returns the default alignment.
  */    
-public Pos getAlignDefault()  { return Pos.CENTER_LEFT; }
+public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
 /**
  * Returns the preferred width.

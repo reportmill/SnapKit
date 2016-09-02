@@ -27,10 +27,10 @@ public class View implements XMLArchiver.Archivable {
     double          _sx = 1, _sy = 1;
     
     // The alignment of content in this view
-    Pos             _align = getAlignDefault();
+    Pos             _align = getDefaultAlign();
     
     // The padding for content in this view
-    Insets          _padding = getPaddingDefault();
+    Insets          _padding = getDefaultPadding();
     
     // The horizontal position this view would prefer to take when inside a pane
     HPos            _leanX;
@@ -442,11 +442,6 @@ public void setFill(Paint aPaint)
 }
 
 /**
- * Returns the default fill paint.
- */
-public Paint getFillDefault()  { return null; }
-
-/**
  * Returns the fill as color.
  */
 public Color getFillColor()
@@ -472,11 +467,6 @@ public void setBorder(Border aBorder)
 }
 
 /**
- * Returns the default border.
- */
-public Border getBorderDefault()  { return null; }
-
-/**
  * Returns effect.
  */
 public Effect getEffect()  { return _effect; }
@@ -494,7 +484,7 @@ public void setEffect(Effect anEff)
 /**
  * Returns the font for the view (defaults to parent font).
  */
-public Font getFont()  { return _font!=null? _font : getFontDefault(); }
+public Font getFont()  { return _font!=null? _font : getDefaultFont(); }
 
 /**
  * Sets the font for the view.
@@ -505,11 +495,6 @@ public void setFont(Font aFont)
     firePropChange(Font_Prop, _font, _font=aFont);
     relayout(); relayoutParent(); repaint();
 }
-
-/**
- * Returns the default font.
- */
-public Font getFontDefault()  { View p = getParent(); return p!=null? p.getFont() : Font.Arial11; }
 
 /**
  * Returns the cursor.
@@ -1326,11 +1311,6 @@ public void setAlign(Pos aPos)
 }
 
 /**
- * Returns the default alignment.
- */    
-public Pos getAlignDefault()  { return Pos.TOP_LEFT; }
-
-/**
  * Returns the padding.
  */
 public Insets getPadding()  { return _padding; }
@@ -1345,15 +1325,35 @@ public void setPadding(double aTp, double aRt, double aBtm, double aLt)  { setPa
  */
 public void setPadding(Insets theIns)
 {
-    if(theIns==null) theIns = getPaddingDefault();
+    if(theIns==null) theIns = getDefaultPadding();
     if(SnapUtils.equals(theIns,_padding)) return;
     firePropChange(Padding_Prop, _padding, _padding = theIns);
 }
 
 /**
+ * Returns the default alignment.
+ */    
+public Pos getDefaultAlign()  { return Pos.TOP_LEFT; }
+
+/**
+ * Returns the default border.
+ */
+public Border getDefaultBorder()  { return null; }
+
+/**
+ * Returns the default fill paint.
+ */
+public Paint getDefaultFill()  { return null; }
+
+/**
+ * Returns the default font.
+ */
+public Font getDefaultFont()  { View p = getParent(); return p!=null? p.getFont() : Font.Arial11; }
+
+/**
  * Returns the padding default.
  */
-public Insets getPaddingDefault()  { return _emptyIns; }
+public Insets getDefaultPadding()  { return _emptyIns; }
 
 /**
  * Returns the insets due to border and/or padding.
@@ -1889,12 +1889,12 @@ public XMLElement toXML(XMLArchiver anArchiver)
     if(isVertical()) e.add(Vertical_Prop, true);
     
     // Archive border, Fill, Effect
-    if(!SnapUtils.equals(getBorder(),getBorderDefault())) e.add(anArchiver.toXML(getBorder(), this));
-    if(!SnapUtils.equals(getFill(),getFillDefault())) e.add(anArchiver.toXML(getFill(), this));
+    if(!SnapUtils.equals(getBorder(),getDefaultBorder())) e.add(anArchiver.toXML(getBorder(), this));
+    if(!SnapUtils.equals(getFill(),getDefaultFill())) e.add(anArchiver.toXML(getFill(), this));
     if(getEffect()!=null) e.add(anArchiver.toXML(getEffect(), this));
     
     // Archive font
-    if(!SnapUtils.equals(getFont(),getFontDefault())) e.add(getFont().toXML(anArchiver));
+    if(!SnapUtils.equals(getFont(),getDefaultFont())) e.add(getFont().toXML(anArchiver));
     
     // Archive Disabled, Visible, Opacity
     if(isDisabled()) e.add(Disabled_Prop, true);
@@ -1902,8 +1902,8 @@ public XMLElement toXML(XMLArchiver anArchiver)
     //if(getOpacity()<1) e.add("opacity", getOpacity());
     
     // Archive Alignment, Padding
-    if(getAlign()!=getAlignDefault()) e.add(Align_Prop, getAlign());
-    if(!getPadding().equals(getPaddingDefault())) e.add(Padding_Prop, getPadding().getString());
+    if(getAlign()!=getDefaultAlign()) e.add(Align_Prop, getAlign());
+    if(!getPadding().equals(getDefaultPadding())) e.add(Padding_Prop, getPadding().getString());
         
     // Archive GrowWidth, GrowHeight, LeanX, LeanY
     if(isGrowWidth()) e.add(GrowWidth_Prop, true);

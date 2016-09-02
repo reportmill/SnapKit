@@ -39,6 +39,10 @@ public class TreeView <T> extends ParentView implements View.Selectable <T> {
     // Images for collapsed/expanded
     Image                   _clpImg, _expImg;
     
+    // Constants for TreeView
+    public static final String ShowRoot_Prop = "ShowRoot";
+    public static final String ShowRootHandle_Prop = "ShowRootHandle";
+    
 /**
  * Creates a new TreeView.
  */
@@ -53,15 +57,15 @@ public TreeView()
 /**
  * Returns whether root is visible.
  */
-public boolean isRootVisible()  { return _rootVis; }
+public boolean isShowRoot()  { return _rootVis; }
 
 /**
  * Sets whether root is visible.
  */
-public void setRootVisible(boolean aValue)
+public void setShowRoot(boolean aValue)
 {
     if(aValue==_rootVis) return;
-    firePropChange("RootVisible", _rootVis, _rootVis = aValue);
+    firePropChange(ShowRoot_Prop, _rootVis, _rootVis = aValue);
 }
 
 /**
@@ -75,7 +79,7 @@ public boolean isShowRootHandle()  { return _rootHandle; }
 public void setShowRootHandle(boolean aValue)
 {
     if(aValue==_rootHandle) return;
-    firePropChange("ShowsRootHandles", _rootHandle, _rootHandle = aValue);
+    firePropChange(ShowRootHandle_Prop, _rootHandle, _rootHandle = aValue);
 }
 
 /**
@@ -512,7 +516,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     XMLElement e = super.toXMLView(anArchiver);
 
     // Archive RootVisible, ShowRootHandles
-    if(!isRootVisible()) e.add("RootVisible", false);
+    if(!isShowRoot()) e.add("RootVisible", false);
     if(!isShowRootHandle()) e.add("ShowRootHandles", false);
     return e;
 }
@@ -526,7 +530,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     super.fromXMLView(anArchiver, anElement);
 
     // Unarchive RootVisible, ShowRootHandles
-    if(anElement.hasAttribute("RootVisible")) setRootVisible(anElement.getAttributeBooleanValue("RootVisible"));
+    if(anElement.hasAttribute("RootVisible")) setShowRoot(anElement.getAttributeBooleanValue("RootVisible"));
     if(anElement.hasAttribute("ShowRootHandles"))
         setShowRootHandle(anElement.getAttributeBooleanValue("ShowRootHandles"));
     if(anElement.hasAttribute("ShowsRootHandles"))

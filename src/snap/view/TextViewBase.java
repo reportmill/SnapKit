@@ -56,7 +56,7 @@ public TextViewBase()
     // Set default font
     getTextBox();
     setRich(false);
-    setFont(getFontDefault());
+    setFont(getDefaultFont());
     
     // Enable mouse, key and focus events
     enableEvents(MouseEvents); enableEvents(KeyEvents);
@@ -152,7 +152,7 @@ protected TextBox createText()  { return new TextBox(); }
 /**
  * Returns the padding default.
  */
-public Insets getPaddingDefault()  { return _def; } static Insets _def = new Insets(2);
+public Insets getDefaultPadding()  { return _def; } static Insets _def = new Insets(2);
 
 /**
  * Returns whether Text shape is editable.
@@ -314,7 +314,7 @@ public void setColor(Color aColor)  { setInputStyleValue(TextStyle.COLOR_KEY, aC
  */
 public Font getFont()
 {
-    if(!isRich()) return _font!=null? _font : getFontDefault();
+    if(!isRich()) return _font!=null? _font : getDefaultFont();
     return getInputStyle().getFont();
 }
 
@@ -324,7 +324,7 @@ public Font getFont()
 public void setFont(Font aFont)
 {
     setInputStyleValue(TextStyle.FONT_KEY, aFont);
-    if(!isRich()) _font = aFont.equals(getFontDefault())? null : aFont;
+    if(!isRich()) _font = aFont.equals(getDefaultFont())? null : aFont;
 }
 
 // Bogus font to work with fonts normally when not rich

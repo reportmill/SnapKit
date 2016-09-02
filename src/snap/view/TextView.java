@@ -39,7 +39,7 @@ public void setSendActionOnReturn(boolean aValue)
 /**
  * Override to return white.
  */
-public Paint getFillDefault()  { return Color.WHITE; }
+public Paint getDefaultFill()  { return Color.WHITE; }
 
 /**
  * XML archival.

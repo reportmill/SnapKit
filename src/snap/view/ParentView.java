@@ -293,7 +293,7 @@ public void relayout()  { setNeedsLayout(true); }
  */
 public void setPadding(Insets theIns)
 {
-    if(theIns==null) theIns = getPaddingDefault();
+    if(theIns==null) theIns = getDefaultPadding();
     if(SnapUtils.equals(theIns,_padding)) return; super.setPadding(theIns);
     relayout();
 }

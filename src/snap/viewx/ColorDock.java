@@ -338,6 +338,6 @@ public void readFromPreferences(String aName)
 /**
  * Returns the default border.
  */
-public Border getBorderDefault()  { return COLOR_DOCK_BORDER; }
+public Border getDefaultBorder()  { return COLOR_DOCK_BORDER; }
 
 }

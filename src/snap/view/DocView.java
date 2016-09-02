@@ -41,7 +41,7 @@ public void setPage(View aView)
 /**
  * Returns the default alignment.
  */    
-public Pos getAlignDefault()  { return Pos.CENTER_LEFT; }
+public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
 /**
  * Returns the preferred width.

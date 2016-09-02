@@ -88,7 +88,7 @@ public View getChild(String aName)
 public PopupWindow getPopup()
 {
     hide();
-    PopupWindow pop = new PopupWindow(); pop.setFont(getFontDefault());
+    PopupWindow pop = new PopupWindow(); pop.setFont(getDefaultFont());
     VBox vbox = new VBox(); vbox.setMinWidth(125); vbox.setFillWidth(true); vbox.setPadding(4,1,4,1);
     for(View node : _items) { vbox.addChild(node); node.addEventHandler(_lsnr, Action); }
     pop.setContent(vbox);
@@ -177,7 +177,7 @@ public void setOwner(ViewOwner anOwner)
 /**
  * Returns the default font.
  */
-public Font getFontDefault()  { return MenuBar.MENU_BAR_FONT; }
+public Font getDefaultFont()  { return MenuBar.MENU_BAR_FONT; }
 
 /**
  * XML archival of children.

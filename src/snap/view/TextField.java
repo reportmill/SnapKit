@@ -80,17 +80,17 @@ public Label getLabel()  { return _label; }
 /**
  * Returns the default alignment.
  */    
-public Pos getAlignDefault()  { return Pos.CENTER_LEFT; }
+public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
 /**
  * Returns the padding default.
  */
-public Insets getPaddingDefault()  { return _def; } static Insets _def = new Insets(2,2,2,5);
+public Insets getDefaultPadding()  { return _def; } static Insets _def = new Insets(2,2,2,5);
 
 /**
  * Override to return white.
  */
-public Paint getFillDefault()  { return Color.WHITE; }
+public Paint getDefaultFill()  { return Color.WHITE; }
 
 /**
  * Calculates the preferred width.

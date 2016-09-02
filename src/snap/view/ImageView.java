@@ -55,7 +55,7 @@ public void setImageName(String aName)  { _iname = aName; }
 /**
  * Returns the default alignment.
  */    
-public Pos getAlignDefault()  { return Pos.CENTER; }
+public Pos getDefaultAlign()  { return Pos.CENTER; }
 
 /**
  * Returns the preferred width.

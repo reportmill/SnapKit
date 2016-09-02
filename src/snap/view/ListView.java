@@ -534,7 +534,7 @@ protected void processEvent(ViewEvent anEvent)
 /**
  * Override to return white.
  */
-public Paint getFillDefault()  { return Color.WHITE; }
+public Paint getDefaultFill()  { return Color.WHITE; }
 
 /**
  * Override to make list same width as ScrollView.

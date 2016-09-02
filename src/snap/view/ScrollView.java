@@ -202,7 +202,7 @@ protected void layoutChildren()
 /**
  * Returns the default border.
  */
-public Border getBorderDefault()  { return SCROLL_VIEW_BORDER; }
+public Border getDefaultBorder()  { return SCROLL_VIEW_BORDER; }
 
 /**
  * Handle property changes.

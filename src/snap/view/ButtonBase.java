@@ -240,7 +240,7 @@ public void paintAll(Painter aPntr)
 /**
  * Returns the default alignment for button.
  */
-public Pos getAlignDefault()  { return Pos.CENTER; }
+public Pos getDefaultAlign()  { return Pos.CENTER; }
 
 /**
  * Returns the preferred width.

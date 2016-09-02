@@ -304,7 +304,7 @@ private int getDivider(double aX, double aY)
 /**
  * Returns the default border.
  */
-public Border getBorderDefault()  { return SPLIT_VIEW_BORDER; }
+public Border getDefaultBorder()  { return SPLIT_VIEW_BORDER; }
 
 /**
  * XML archival deep.

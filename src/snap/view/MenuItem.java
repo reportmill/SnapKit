@@ -22,6 +22,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
     // Constants for properties
     public static final String Image_Prop = "Image";
     public static final String Selected_Prop = "Selected";
+    public static final String Shortcut_Prop = "Shortcut";
 
 /**
  * Create new menu item node.
@@ -48,14 +49,14 @@ public void setSelected(boolean aValue)
 /**
  * Returns the key string.
  */
-public String getAccelerator()  { return _key; }
+public String getShortcut()  { return _key; }
 
 /**
  * Sets the key string.
  */
-public void setAccelerator(String aValue)
+public void setShortcut(String aValue)
 {
-    firePropChange("Accelerator", _key, _key = aValue);
+    firePropChange(Shortcut_Prop, _key, _key = aValue);
     
     // Set graphic
     if(aValue==null) { setGraphicAfter(null); return; }
@@ -99,12 +100,12 @@ public Menu getParentMenu()  { return _parentMenu; }
 /**
  * Returns the default alignment for button.
  */
-public Pos getAlignDefault()  { return Pos.CENTER_LEFT; }
+public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
 /**
  * Returns the padding default.
  */
-public Insets getPaddingDefault()  { return _mitemIns; } static Insets _mitemIns = new Insets(4,8,4,6);
+public Insets getDefaultPadding()  { return _mitemIns; } static Insets _mitemIns = new Insets(4,8,4,6);
 
 /**
  * Returns a mapped property name.
@@ -165,7 +166,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     e.removeAttribute(ShowBorder_Prop);
 
     // Archive Accelerator
-    if(getAccelerator()!=null && getAccelerator().length()>0) e.add("key", getAccelerator());
+    if(getShortcut()!=null && getShortcut().length()>0) e.add("key", getShortcut());
     return e;
 }
 
@@ -178,7 +179,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     super.fromXMLView(anArchiver, anElement);
     
     // Unarchive Accelerator
-    String key = anElement.getAttributeValue("key"); if(key!=null) setAccelerator(key);
+    String key = anElement.getAttributeValue("key"); if(key!=null) setShortcut(key);
 }
 
 }

@@ -24,11 +24,11 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 /**
  * Override to return white.
  */
-public Paint getFillDefault()  { return Color.WHITE; }
+public Paint getDefaultFill()  { return Color.WHITE; }
 
 /**
  * Returns the default border.
  */
-public Border getBorderDefault()  { return PAGE_VIEW_BORDER; }
+public Border getDefaultBorder()  { return PAGE_VIEW_BORDER; }
 
 }

@@ -299,7 +299,7 @@ public static MenuItem copyMenuItem(MenuItem anItem)
         for(MenuItem i : citems) menu2.addItem(i);
     }
     else mi = new MenuItem();
-    mi.setText(anItem.getText()); mi.setName(anItem.getName()); mi.setAccelerator(anItem.getAccelerator());
+    mi.setText(anItem.getText()); mi.setName(anItem.getName()); mi.setShortcut(anItem.getShortcut());
     return mi;
 }
 
