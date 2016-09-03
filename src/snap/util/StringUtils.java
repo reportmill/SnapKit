@@ -105,110 +105,32 @@ public static StringBuffer toStringAdd(StringBuffer aSB, String aName, Object aV
 /**
  * Returns the file name component of the given string path (everything after last file separator).
  */
-public static String getPathFileName(String aPath)
-{
-    String path = getPathStandardized(aPath);
-    int index = getPathFileNameIndex(path);
-    return index==0? path : path.substring(index);
-}
+public static String getPathFileName(String aPath)  { return FilePathUtils.getFileName(aPath); }
 
 /**
  * Returns the simple file name for a given path (just the file name without extension).
  */
-public static String getPathFileNameSimple(String aPath)
-{
-    String fileName = getPathFileName(getPathStandardized(aPath));
-    int index = fileName.lastIndexOf('.');
-    return index<0? fileName : fileName.substring(0, index);
-}
-
-/**
- * Returns the index to the first character of the filename component of the given path.
- */
-public static int getPathFileNameIndex(String aPath)
-{
-    String path = getPathStandardized(aPath);
-    int index = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
-    if(index<0)
-        index = path.lastIndexOf(File.separator);
-    return Math.max(index+1, 0);
-}
+public static String getPathFileNameSimple(String aPath)  { return FilePathUtils.getFileNameSimple(aPath); }
 
 /**
  * Returns the extension of the given string path (everything after last '.').
  */
-public static String getPathExtension(String aPath)
-{
-    if(aPath==null) return null;
-    String filename = getPathFileName(aPath);
-    int dot = filename.lastIndexOf('.');
-    return dot>=0 && dot<filename.length()-1? filename.substring(dot+1) : "";
-}
+public static String getPathExtension(String aPath)  { return FilePathUtils.getExtension(aPath); }
 
 /**
  * Returns the given string path minus any extension.
  */
-public static String getPathSimple(String aPath)
-{
-    String ext = getPathExtension(aPath);
-    return ext!=null && ext.length()>0? aPath.substring(0, aPath.length()-ext.length()-1) : aPath;
-}
+public static String getPathSimple(String aPath)  { return FilePathUtils.getSimple(aPath); }
 
 /**
  * Returns the given string path minus the file name component (everything after last file separator).
  */
-public static String getPathParent(String aPath)
-{
-    int index = getPathFileNameIndex(aPath);
-    return index>0 && aPath.length()>1? getPathStandardized(aPath.substring(0, index)) : "";
-}
+public static String getPathParent(String aPath)  { return FilePathUtils.getParent(aPath); }
 
 /**
  * Returns a path with a filename or relative path added.
  */
-public static String getPathChild(String aPath, String aChildPath)
-{
-    String path = getPathStandardized(aPath);
-    if(path.endsWith("/") ^ aChildPath.startsWith("/"))
-        return path + aChildPath;
-    if(aChildPath.startsWith("/"))
-        return path + aChildPath.substring(1);
-    return path + '/' + aChildPath;
-}
-
-/**
- * Returns a peer path for given path and new filename by stripping filename from given path and using given name.
- */
-public static String getPathPeer(String aPath, String aName)
-{
-    String parent = getPathParent(aPath); if(parent.length()==0) parent = "/";
-    return getPathChild(parent, aName);
-}
-
-/**
- * Returns a sister path for given path and new extension by stripping extension from path and using given extension.
- */
-public static String getPathSister(String aPath, String anExtension)
-{
-    String path = getPathSimple(aPath); if(!anExtension.startsWith(".")) path += ".";
-    return path + anExtension;
-}
-
-/**
- * Returns the path in a standard, normal format (strips any trailing file separators).
- */
-public static String getPathStandardized(String aPath)
-{
-    // Get path stripped of trailing file separator
-    String path = aPath;
-    if((path.endsWith("/") || path.endsWith("\\")) && path.length()>1)
-        path = path.substring(0, path.length()-1);
-    else if(path.endsWith(File.separator) && path.length()>File.separator.length())
-        path = path.substring(0, path.length()-File.separator.length());
-    
-    // Return path
-    return path;
-}
+public static String getPathChild(String aPath, String aChildPath) { return FilePathUtils.getChild(aPath, aChildPath); }
 
 /**
  * Trims the end of a string.

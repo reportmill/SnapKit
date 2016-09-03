@@ -47,17 +47,17 @@ public static String getPath(File aFile)  { return aFile.getAbsolutePath(); }
 /**
  * Returns the file name for a file.
  */
-public static String getFileName(File aFile)  { return StringUtils.getPathFileName(getPath(aFile)); }
+public static String getFileName(File aFile)  { return FilePathUtils.getFileName(getPath(aFile)); }
 
 /**
  * Returns the file name for a file.
  */
-public static String getFileNameSimple(File aFile)  { return StringUtils.getPathFileNameSimple(getPath(aFile)); }
+public static String getFileNameSimple(File aFile)  { return FilePathUtils.getFileNameSimple(getPath(aFile)); }
 
 /**
  * Returns the file name for a file.
  */
-public static String getFileExtension(File aFile)  { return StringUtils.getPathExtension(getPath(aFile)); }
+public static String getFileExtension(File aFile)  { return FilePathUtils.getExtension(getPath(aFile)); }
 
 /**
  * Returns whether file is given type.

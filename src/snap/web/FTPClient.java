@@ -1,7 +1,7 @@
 package snap.web;
 import java.io.*;
 import java.util.*;
-import snap.util.StringUtils;
+import snap.util.FilePathUtils;
 import sun.net.ftp.*;
 
 /**
@@ -74,14 +74,14 @@ public String getAbsolutePath(String aPath)
     String path = aPath;
     if(path.startsWith("/")) {
         if(!path.startsWith(getLoginPath()))
-            path = StringUtils.getPathChild(getLoginPath(), path);
+            path = FilePathUtils.getChild(getLoginPath(), path);
     }
     
     // If relative path, append current path
-    else path = StringUtils.getPathChild(getCurrentDirectory(), path);
+    else path = FilePathUtils.getChild(getCurrentDirectory(), path);
     
     // Standardize path and return
-    path = StringUtils.getPathStandardized(path);
+    path = FilePathUtils.getStandardized(path);
     return path;
 }
 
@@ -127,7 +127,7 @@ public void setConnected(boolean aValue) throws FtpProtocolException, IOExceptio
             else println("User " + getUserName() + " login OK");
             
             // Get login path
-            _loginPath = _cwd = StringUtils.getPathStandardized(_ftpClient.getWorkingDirectory());
+            _loginPath = _cwd = FilePathUtils.getStandardized(_ftpClient.getWorkingDirectory());
             
             // Set binary mode
             _ftpClient.setBinaryType();
@@ -304,9 +304,9 @@ public static void main2(String args[]) throws Exception
     ftp.setConnected(true);
     List <FileInfo> finfos = ftp.getFileInfos("support");
     for(FileInfo fi : finfos) System.out.println("\t" + fi.name + " (" + fi.size + ")" + (fi.directory? " dir" : ""));
-    byte bytes[] = ftp.getBytes("/index.html"); String string = StringUtils.getISOLatinString(bytes);
+    byte bytes[] = ftp.getBytes("/index.html"); String string = new String(bytes);
     System.out.println(bytes.length>0? string : "Empty file");
-    bytes = ftp.getBytes("/product/index.html"); string = StringUtils.getISOLatinString(bytes);
+    bytes = ftp.getBytes("/product/index.html"); string = new String(bytes);
     System.out.println(bytes.length>0? string : "Empty file");
     ftp.setConnected(false);
 }
