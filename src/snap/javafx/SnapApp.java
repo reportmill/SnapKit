@@ -58,7 +58,7 @@ public void main()
     // Set URL file in background
     getUI();
     _browser.setURLString(_fname);
-    getWindow().setTitle(StringUtils.getPathFileNameSimple(_fname));
+    getWindow().setTitle(FilePathUtils.getFileNameSimple(_fname));
     
     // Make window visible
     getWindow().setSaveName("SnapBrowser");
@@ -75,7 +75,7 @@ public void main()
  */
 protected View createUI()
 {
-    String text = "  " + StringUtils.getPathFileNameSimple(getParameter(_args, "file"));
+    String text = "  " + FilePathUtils.getFileNameSimple(getParameter(_args, "file"));
     WebBrowserPane browserPane;
     if(isParameter(_args, "iphone")) browserPane = new WebBrowserPanes.iPhone();
     else browserPane = new WebBrowserPanes.Labeled(text);

@@ -41,7 +41,7 @@ protected List <FileHeader> getFileHeaders(String aPath) throws Exception
     List <FileHeader> files = new ArrayList(cfiles.length);
     for(File cfile : cfiles) { String name = cfile.getName();
         if(name.equalsIgnoreCase(".DS_Store")) continue; // Skip funky apple files
-        FileHeader fhdr = getFileHeader(StringUtils.getPathChild(aPath, name));
+        FileHeader fhdr = getFileHeader(FilePathUtils.getChild(aPath, name));
         if(fhdr!=null) files.add(fhdr); // Happens with links
     }
     

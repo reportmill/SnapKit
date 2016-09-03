@@ -133,7 +133,7 @@ public static File getLocalFileDestination(URL aURL, File aFile)
 
     // If file is directory, create from URL path file name in directory
     else if(file.isDirectory())
-        file = new File(file, StringUtils.getPathFileName(aURL.getPath()));
+        file = new File(file, FilePathUtils.getFileName(aURL.getPath()));
 
     // Return file
     return file;

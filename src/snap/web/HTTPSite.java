@@ -1,7 +1,7 @@
 package snap.web;
 import java.io.*;
 import java.util.*;
-import snap.util.StringUtils;
+import snap.util.*;
 
 /**
  * A WebSite for HTTP sources.
@@ -32,7 +32,7 @@ protected FileHeader getFileHeader(String aPath) throws IOException
         throw new IOException(resp.getMessage());
     
     // Create file, set bytes and return
-    boolean isDir = StringUtils.getPathExtension(aPath).length()==0;
+    boolean isDir = FilePathUtils.getExtension(aPath).length()==0;
     FileHeader file = new FileHeader(aPath, isDir);
     file.setLastModifiedTime(resp.getLastModified());
     file.setSize(resp.getContentLength());
@@ -64,14 +64,14 @@ public List <FileHeader> getFileHeaders(String aPath) throws IOException
     files = new ArrayList();
     
     // If ".index" file exists, load children
-    WebFile indexFile = getFile(StringUtils.getPathChild(aPath, ".index"));
+    WebFile indexFile = getFile(FilePathUtils.getChild(aPath, ".index"));
     if(indexFile!=null) {
         String indexFileString = StringUtils.getISOLatinString(indexFile.getBytes());
         String fileEntries[] = indexFileString.split("\n");
         for(String fileEntry : fileEntries) {
             if(fileEntry.length()==0) continue;
             String fileInfo[] = fileEntry.split("\t");
-            FileHeader file = new FileHeader(StringUtils.getPathChild(aPath, fileInfo[0]), false);
+            FileHeader file = new FileHeader(FilePathUtils.getChild(aPath, fileInfo[0]), false);
             files.add(file);
         }
     }
@@ -95,7 +95,7 @@ List <FileHeader> getFilesFromHTML(String aPath) throws IOException
         String name = text.substring(i+6,end);
         if(name.length()<2 || !Character.isLetterOrDigit(name.charAt(0))) continue;
         boolean isDir = false; if(name.endsWith("/")) { isDir = true; name = name.substring(0, name.length()-1); }
-        String path = StringUtils.getPathChild(aPath, name);
+        String path = FilePathUtils.getChild(aPath, name);
         FileHeader file = new FileHeader(path, isDir);
         file.setLastModifiedTime(System.currentTimeMillis());
         files.add(file);

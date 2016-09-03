@@ -4,7 +4,7 @@
 package snap.web;
 import java.net.*;
 import snap.gfx.GFXEnv;
-import snap.util.StringUtils;
+import snap.util.FilePathUtils;
 
 /**
  * A class to represent a URL for a WebSite and WebFile (it can be both for nested sources).
@@ -148,12 +148,12 @@ public String getPath()  { return _path; }
 /**
  * Returns the last component of the file path.
  */
-public String getPathName()  { return StringUtils.getPathFileName(getPath()); }
+public String getPathName()  { return FilePathUtils.getFileName(getPath()); }
 
 /**
  * Returns the last component of the file path minus any '.' extension suffix.
  */
-public String getPathNameSimple()  { return StringUtils.getPathFileNameSimple(getPath()); }
+public String getPathNameSimple()  { return FilePathUtils.getFileNameSimple(getPath()); }
 
 /**
  * Returns the part of the URL string that describes the query.

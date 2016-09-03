@@ -1,6 +1,6 @@
 package snap.web;
 import java.util.*;
-import snap.util.StringUtils;
+import snap.util.FilePathUtils;
 
 /**
  * A data source built on top of FTP.
@@ -75,7 +75,7 @@ public List <FileHeader> getFileHeaders(String aPath)
     List <FileHeader> files = new ArrayList();
     for(FTPClient.FileInfo finfo : fileInfos) {
         if(finfo.name.equals(".")) continue;
-        FileHeader file = new FileHeader(StringUtils.getPathChild(aPath, finfo.name), finfo.directory);
+        FileHeader file = new FileHeader(FilePathUtils.getChild(aPath, finfo.name), finfo.directory);
         file.setLastModifiedTime(finfo.lastModified);
         files.add(file);
     }

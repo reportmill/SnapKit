@@ -103,36 +103,6 @@ public static StringBuffer toStringAdd(StringBuffer aSB, String aName, Object aV
 }
 
 /**
- * Returns the file name component of the given string path (everything after last file separator).
- */
-public static String getPathFileName(String aPath)  { return FilePathUtils.getFileName(aPath); }
-
-/**
- * Returns the simple file name for a given path (just the file name without extension).
- */
-public static String getPathFileNameSimple(String aPath)  { return FilePathUtils.getFileNameSimple(aPath); }
-
-/**
- * Returns the extension of the given string path (everything after last '.').
- */
-public static String getPathExtension(String aPath)  { return FilePathUtils.getExtension(aPath); }
-
-/**
- * Returns the given string path minus any extension.
- */
-public static String getPathSimple(String aPath)  { return FilePathUtils.getSimple(aPath); }
-
-/**
- * Returns the given string path minus the file name component (everything after last file separator).
- */
-public static String getPathParent(String aPath)  { return FilePathUtils.getParent(aPath); }
-
-/**
- * Returns a path with a filename or relative path added.
- */
-public static String getPathChild(String aPath, String aChildPath) { return FilePathUtils.getChild(aPath, aChildPath); }
-
-/**
  * Trims the end of a string.
  */
 public static String trimEnd(CharSequence aString)

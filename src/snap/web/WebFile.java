@@ -71,17 +71,17 @@ public String getPath()  { return _path; }
 /**
  * Returns the resource name.
  */
-public String getName()  { return StringUtils.getPathFileName(getPath()); }
+public String getName()  { return FilePathUtils.getFileName(getPath()); }
 
 /**
  * Returns the file simple name.
  */
-public String getSimpleName()  { return StringUtils.getPathFileNameSimple(getPath()); }
+public String getSimpleName()  { return FilePathUtils.getFileNameSimple(getPath()); }
 
 /**
  * Returns the file type (extension without the '.').
  */
-public String getType()  { return StringUtils.getPathExtension(getPath()).toLowerCase(); }
+public String getType()  { return FilePathUtils.getExtension(getPath()).toLowerCase(); }
 
 /**
  * Returns the path as a directory (with trailing separator).
@@ -147,7 +147,7 @@ public WebFile getParent()
 {
     // If parent not set, get from data source
     if(_parent==null && !isRoot() && getSite()!=null)
-        _parent = getSite().createFile(StringUtils.getPathParent(getPath()), true);
+        _parent = getSite().createFile(FilePathUtils.getParent(getPath()), true);
 
     // Return parent
     return _parent;

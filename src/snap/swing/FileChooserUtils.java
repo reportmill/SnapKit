@@ -62,7 +62,7 @@ public static String showChooser(boolean save, View aView, String aDesc, String 
         file = new File(path = System.getProperty("user.home") + File.separator + path.substring(path.indexOf('~')+1));
 
     // Get path extension
-    String ext = "." + StringUtils.getPathExtension(path);
+    String ext = "." + FilePathUtils.getExtension(path);
     if(ext.equals("."))
         ext = theExtensions[0];
     
@@ -86,7 +86,7 @@ public static String showChooser(boolean save, View aView, String aDesc, String 
     }
     
     // The open case can return file with invalid ext since we really run showDialog, so make sure path is OK
-    if(open && !StringUtils.containsIC(theExtensions, "." + StringUtils.getPathExtension(path)))
+    if(open && !StringUtils.containsIC(theExtensions, "." + FilePathUtils.getExtension(path)))
         return null;
 
     // If saving, make sure path has extension

@@ -376,7 +376,7 @@ public static File getUniqueFile(File aFile)
     File file = aFile;
     while(file.exists()) {
         String fileName = file.getName();
-        int value = Math.abs(SnapUtils.intValue(StringUtils.getPathFileNameSimple(file.getPath()))) +1;
+        int value = Math.abs(SnapUtils.intValue(FilePathUtils.getFileNameSimple(file.getPath()))) +1;
         fileName = fileName.replaceFirst("-?\\d*\\.", "-" + value + ".");
         file = new File(file.getParentFile(), fileName);
     }

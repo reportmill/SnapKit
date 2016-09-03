@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.data;
-import snap.util.StringUtils;
+import snap.util.FilePathUtils;
 
 /**
  * A class to describe type of content in WebFile (from WebURL).
@@ -36,7 +36,7 @@ public DataType(String aType)  { _type = aType; }
  */
 public static DataType getPathDataType(String aPath)
 {
-    String type = StringUtils.getPathExtension(aPath).toLowerCase();
+    String type = FilePathUtils.getExtension(aPath).toLowerCase();
     if(type.equals("class")) return Class;
     if(type.equals("htm") || type.equals("html")) return HTML;
     if(type.equals("java")) return Java;
@@ -55,7 +55,7 @@ public static DataType getPathDataType(String aPath)
  */
 public static boolean isImageType(String aPath)
 {
-    String type = StringUtils.getPathExtension(aPath).toLowerCase();
+    String type = FilePathUtils.getExtension(aPath).toLowerCase();
     return type.equals("jpg") || type.equals("jpeg") || type.equals("gif") || type.equals("png");
 }
 
