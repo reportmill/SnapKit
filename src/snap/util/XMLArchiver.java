@@ -14,6 +14,9 @@ import snap.web.WebURL;
  */
 public class XMLArchiver {
 
+    // The owner class that initated archival/unarchival
+    Object                    _owner;
+    
     // The URL of the source the archiver is reading from
     WebURL                    _surl;
 
@@ -63,6 +66,21 @@ public interface Archivable {
  * Returns the WebURL of the currently loading archive.
  */
 public WebURL getSourceURL()  { return _surl; }
+
+/**
+ * Returns the owner.
+ */
+public Object getOwner()  { return _owner; }
+
+/**
+ * Sets the owner.
+ */
+public void setOwner(Object anOwner)  { _owner = anOwner; }
+
+/**
+ * Returns the owner class.
+ */
+public Class getOwnerClass()  { return _owner!=null? _owner.getClass() : null; }
 
 /**
  * Returns the object that the archiver should read "into".

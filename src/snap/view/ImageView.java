@@ -134,7 +134,7 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     if(iname==null) iname = anElement.getAttributeValue("image");
     if(iname!=null) {
         setImageName(iname);
-        Image image = Image.get(anArchiver.getSourceURL(), iname);
+        Image image = ViewArchiver.getImage(anArchiver, iname);
         if(image!=null) setImage(image);
     }
     

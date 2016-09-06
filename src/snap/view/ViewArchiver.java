@@ -206,4 +206,16 @@ public static boolean getUseRealClass()  { return _useRealCls; }
  */
 public static void setUseRealClass(boolean aFlag)  { _useRealCls = aFlag; }
 
+/**
+ * Returns an image for given name/path.
+ */
+public static Image getImage(XMLArchiver anArchiver, String aPath)
+{
+    Class cls = anArchiver.getOwnerClass();
+    for(Class c=cls;c!=null && c!=ViewOwner.class;c=c.getSuperclass()) { Image img = Image.get(c, aPath);
+        if(img!=null) return img; }
+    WebURL url = anArchiver.getSourceURL();
+    return Image.get(url, aPath);
+}
+
 }

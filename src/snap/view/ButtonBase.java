@@ -289,7 +289,7 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     String iname = anElement.getAttributeValue("image");
     if(iname!=null) {
         setImageName(iname);
-        Image image = Image.get(anArchiver.getSourceURL(), iname);
+        Image image = ViewArchiver.getImage(anArchiver, iname);
         if(image!=null) setImage(image);
     }
     

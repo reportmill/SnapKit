@@ -106,7 +106,9 @@ protected View createUI(Class aClass)  { return createUI(_env.getUISource(aClass
  */
 protected View createUI(Object aSource)
 {
-    return aSource!=null? new ViewArchiver().getView(aSource, null) : null;
+    if(aSource==null) return null;
+    ViewArchiver arch = new ViewArchiver(); arch.setOwner(this);
+    return arch.getView(aSource, null);
 }
 
 /**
