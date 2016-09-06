@@ -1,5 +1,6 @@
 # SnapKit
-SnapKit is a Java UI kit. Why do we need another UI kit? Because JavaFX is missing many great things about Swing, and vice versa.
+SnapKit is a Java UI kit. Why do we need another UI kit? Because JavaFX is missing many great
+aspects of Swing, and vice versa.
 
 What's to love about Swing?
 
@@ -27,8 +28,9 @@ What's to love about SnapKit?
 	- The ViewOwner class facilitates control functionally (whoops, there goes the C)
 	- The ViewEvent class unifies all input events for more consistent handling
 
-One of the great aspects of Swing is the separation between the core graphics layer (Java2D) and the UI layer.
-SnapKit provides this same separation with the completely independent snap.gfx package that contains:
+One of the great aspects of Swing is the separation between the core graphics layer (Java2D) and
+the UI layer. SnapKit provides this same separation with the completely independent snap.gfx package
+that contains:
 
 	- Full set of geometric primitives: Rect, Point, Size, Insets, Pos (for alignment)
 	- Transform for arbitrary transforms and coordinate conversions: rotate, scale, skew
@@ -37,18 +39,17 @@ SnapKit provides this same separation with the completely independent snap.gfx p
 	- Stroke for defining outline style, and Border for a stroke in a specific Paint
 	- Effects for rich rendering: Shadow, Reflect, Emboss, Blur
 	- Font and FontFile objects (wrap around platform fonts)
-	- Painter capable of rendering shapes, images and text with transforms, fills, strokes, effects
+	- Painter capable of rendering shapes, images and text with transform, fill, stroke, effect
 	- Image object (wraps around platform image)
 	- RichText object for managing large text content with attributes
 	- TextStyle object to manage a set of attributes: font, color, underline, hyper links, format, etc.
 	- TextBox object for managing RichText in a geometric region (with spelling and hyphenation)
 	- SoundClip for playing sounds
 
-And the essentail part of a good UI kit are the classes that model standard UI controls.
+And the essentail part of a good UI kit are the classes that model the scene graph and
+standard UI controls.
 
 	- View for managing hierarchy of coordinate systems, drawing and input events
-	- ViewArchiver for reading/writing views from simple XML files
-	- ViewEvent for encapsulating all input events in unified object
 	- Full set of classes for graphics primitives: RectView, ShapeView, ImageView, StringView
 	- Label: Convenient View+StringView+View layout to easily label UI
 	- ButtonBase: Embeds Label for simple, flexible and customizable buttons
@@ -66,4 +67,6 @@ And the essentail part of a good UI kit are the classes that model standard UI c
 	- WindowView: Maps to a platform window
 	- MenuItem, Menu, MenuBar
 	- ProgressBar, Separator
+	- ViewArchiver for reading/writing views from simple XML files
+	- ViewEvent for encapsulating all input events in unified object
 	- DialogBox, FormBuilder: For quickly generating UI for common user input
