@@ -1,4 +1,6 @@
 package snap.util;
+import java.io.File;
+import java.net.URL;
 
 /**
  * A custom class.
@@ -140,13 +142,47 @@ public static String[] getNativePaths(String thePaths[])
 }
 
 /**
- * Returns the native paths for given absolute paths using platform native File separator char.
+ * Returns the total string when joining the given paths by the platform path separator.
  */
 public static String getJoinedPath(String thePaths[])
 {
     StringBuffer sb = new StringBuffer();
     for(int i=0, iMax=thePaths.length; i<iMax; i++) sb.append(i==0? "" : PATH_SEPARATOR).append(thePaths[i]);
     return sb.toString();
+}
+
+/**
+ * Returns a File for given path.
+ */
+public static File getFile(String aPath)  { return new File(aPath); }
+
+/**
+ * Returns the Files for given paths.
+ */
+public static File[] getFiles(String thePaths[])
+{
+    File files[] = new File[thePaths.length];
+    for(int i=0;i<thePaths.length;i++) files[i] = getFile(thePaths[i]);
+    return files;
+}
+
+/**
+ * Returns a URL for given path.
+ */
+public static URL getURL(String aPath)
+{
+    try { return getFile(aPath).toURI().toURL(); }
+    catch(Exception e) { throw new RuntimeException(e); }
+}
+
+/**
+ * Returns the URLs for given paths.
+ */
+public static URL[] getURLs(String thePaths[])
+{
+    URL urls[] = new URL[thePaths.length];
+    for(int i=0;i<thePaths.length;i++) urls[i] = getURL(thePaths[i]);
+    return urls;
 }
 
 }
