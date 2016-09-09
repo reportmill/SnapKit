@@ -96,8 +96,9 @@ public static class Transition {
     /** Removes OldNode from TransitionPane. */
     public void finish(TransitionPane aTP, View oldNode)
     {
+        aTP.removeChild(oldNode);
         if(oldNode==aTP._lastContent) {
-            aTP.removeChild(oldNode); aTP._lastContent = null; aTP._transition = MoveDown; }
+            aTP._lastContent = null; aTP._transition = MoveDown; }
         oldNode.setTransX(0); oldNode.setTransY(0);
     }
 }

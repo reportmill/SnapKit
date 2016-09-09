@@ -220,7 +220,8 @@ public void resetLater(ViewOwner anOwnr)
  */
 public void playAnim(View aView)
 {
-    System.out.println("Add Anim " + (aView.getName()!=null? aView.getName() : aView.getClass().getSimpleName()));
+    System.out.println("Add Anim " + (aView.getName()!=null? aView.getName() : aView.getClass().getSimpleName()) +
+        " " + System.identityHashCode(aView));
     _animViews.add(aView);
     if(_animViews.size()==1) _timer.start();
     ViewAnim anim = aView.getAnim(0);
@@ -236,7 +237,8 @@ public void stopAnim(View aView)
     if(_animViews.size()==0) _timer.stop();
     ViewAnim anim = aView.getAnim(0);
     if(!anim.isSuspended()) anim.setStartTime(-1);
-    System.out.println("Remove Anim " + (aView.getName()!=null? aView.getName() : aView.getClass().getSimpleName()));
+    System.out.println("Remove Anim " + (aView.getName()!=null? aView.getName() : aView.getClass().getSimpleName()) +
+        " " + System.identityHashCode(aView));
 }
 
 /**

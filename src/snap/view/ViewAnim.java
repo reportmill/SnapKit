@@ -180,7 +180,7 @@ public boolean setTime(int aTime)
     }
     
     // If completed and there is an OnFinished, trigger it
-    if(completed && _onFinish!=null)
+    if(completed && needsUpdate && _onFinish!=null)
         _onFinish.accept(this);
     
     // If completed and root anim, stop
