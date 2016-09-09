@@ -3,9 +3,7 @@
  */
 package snap.view;
 import java.util.*;
-import snap.util.Interpolator;
-import snap.util.Key;
-import snap.util.ListUtils;
+import snap.util.*;
 
 /**
  * A class to animate View attributes.
@@ -32,6 +30,9 @@ public class ViewAnim {
     
     // The nested anims
     List <ViewAnim>      _anims = new ArrayList();
+    
+    // The loop count
+    int                  _loopCount;
     
     // The start time, current time
     int                  _startTime = -1, _time;
@@ -157,17 +158,17 @@ public boolean setTime(int aTime)
     // Set new time
     int oldTime = _time; _time = aTime - _startTime; if(aTime==oldTime) return false;
     
-    // Get whether this anim is waiting or completed or needs update
-    boolean waiting = oldTime<=_start && _time<=_start;
-    boolean completed = oldTime>=_end && _time >=_end;
-    boolean needsUpdate = !(waiting || completed);
+    // If anim is completed, but there is a LoopCount, call again with new loop corrected time
+    boolean completed = _time >=_end;
+    if(completed && _loopCount>0 && _time<_loopCount*_end) {
+        getRoot(0).setTime(_time%_end); return false; }
     
     // If new values need to be set, set them
+    boolean needsUpdate = !(oldTime<=_start && _time<=_start || oldTime>=_end && _time>=_end);
     if(needsUpdate) for(String key : getKeys())
         setTime(_time, key);
         
     // Forward on to anims
-    completed = _time >=_end;
     for(ViewAnim a : _anims) {
         if(_time>a.getStart())
             completed &= a.setTime(aTime);
@@ -262,6 +263,16 @@ public ViewAnim setValue(String aKey, Object aValue)
 }
 
 /**
+ * Sets the loop count.
+ */
+public ViewAnim setLoops()  { return setLoopCount(Short.MAX_VALUE); }
+
+/**
+ * Sets the loop count.
+ */
+public ViewAnim setLoopCount(int aValue)  { _loopCount = aValue; return this; }
+
+/**
  * Play the anim.
  */
 public void play()
@@ -301,6 +312,19 @@ public ViewAnim clear()
 {
     stop();
     _keys.clear(); _startVals.clear(); _endVals.clear(); _anims.clear(); return this;
+}
+
+/**
+ * Standard toString implementation.
+ */
+public String toString()
+{
+    StringBuffer sb = StringUtils.toString(this, "Start", "End");
+    String keys = ListUtils.joinStrings(getKeys(), ","); if(keys.length()>0) StringUtils.toStringAdd(sb, "Keys", keys);
+    if(_loopCount==Short.MAX_VALUE) StringUtils.toStringAdd(sb, "Loops", "true");
+    else if(_loopCount>0) StringUtils.toStringAdd(sb, "LoopCount", _loopCount);
+    for(ViewAnim va : _anims) sb.append("\n    " + va.toString().replace("\n", "\n    "));
+    return sb.toString();
 }
 
 }

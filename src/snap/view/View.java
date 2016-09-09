@@ -119,8 +119,8 @@ public class View implements XMLArchiver.Archivable {
     // The event adapter
     EventAdapter    _evtAdptr;
     
-    // The animator for this view
-    Animator        _animator;
+    // Provides animation for View
+    ViewAnim        _anim;
     
     // The view owner of this view
     ViewOwner       _owner;
@@ -852,12 +852,6 @@ protected void setShowing(boolean aValue)
     ViewAnim anim = getAnim(-1);
     if(aValue && anim!=null  && anim.isSuspended()) anim.play();
     else if(!aValue && anim!=null && anim.isPlaying()) anim.suspend();
-        
-    // If animator set, pause/play
-    if(getAnimator(false)!=null) { Animator animator = getAnimator(false);
-        if(aValue && animator.isPaused()) animator.play();
-        else if(!aValue && animator.isRunning()) animator.pause();
-    }
 }
 
 /**
@@ -1845,19 +1839,6 @@ public void fireActionEvent()
 protected void processEvent(ViewEvent anEvent)  { }
 
 /**
- * Returns the animator for this view.
- */
-public Animator getAnimator()  { return _animator; }
-
-/**
- * Returns the animator for this view.
- */
-public Animator getAnimator(boolean doCreate)
-{
-    return _animator!=null || !doCreate? _animator : (_animator=new Animator(this));
-}
-
-/**
  * Returns the anim for the given time.
  */
 public ViewAnim getAnim(int aTime)
@@ -1867,7 +1848,15 @@ public ViewAnim getAnim(int aTime)
     return aTime>0? _anim.getAnim(aTime) : _anim;
 }
 
-ViewAnim _anim;
+/**
+ * Play animations deep.
+ */
+public void playAnimDeep()  { ViewAnim anim = getAnim(-1); if(anim!=null) anim.play(); }
+
+/**
+ * Stop animations deep.
+ */
+public void stopAnimDeep()  { ViewAnim anim = getAnim(-1); if(anim!=null) anim.stop(); }
 
 /**
  * XML Archival.
@@ -2029,12 +2018,16 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     if(anElement.hasAttribute("asize")) setAutosizing(anElement.getAttributeValue("asize"));
     
     // Unarchive animation
+    ViewAnim anim = null;
     for(int i=anElement.indexOf("KeyFrame");i>=0;i=anElement.indexOf("KeyFrame",i+1)) {
         XMLElement kframe = anElement.get(i); int time = kframe.getAttributeIntValue("time");
+        anim = anim!=null? anim.getAnim(time) : getAnim(0).getAnim(time);
         for(int j=kframe.indexOf("KeyValue");j>=0;j=kframe.indexOf("KeyValue",j+1)) { XMLElement kval = kframe.get(j);
             String key = kval.getAttributeValue("key"); double val = kval.getAttributeFloatValue("value");
-            getAnimator(true).addKeyFrame(key, val, time);
+            anim.setValue(key, val);
         }
+        if(kframe.getAttributeBoolValue("Loops", false)) anim.setLoops();
+        if(kframe.hasAttribute("LoopCount")) anim.setLoopCount(kframe.getAttributeIntValue("LoopCount"));
     }
     
     // Unarchive bindings

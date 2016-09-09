@@ -310,6 +310,24 @@ protected void setClipAll(Shape aShape)
 }
 
 /**
+ * Override to forward to children.
+ */
+public void playAnimDeep()
+{
+    super.playAnimDeep();
+    for(View child : getChildren()) child.playAnimDeep();
+}
+
+/**
+ * Override to forward to children.
+ */
+public void stopAnimDeep()
+{
+    super.stopAnimDeep();
+    for(View child : getChildren()) child.stopAnimDeep();
+}
+
+/**
  * Override to break toXML into toXMLNode and toXMLChildren.
  */
 public XMLElement toXML(XMLArchiver anArchiver)
