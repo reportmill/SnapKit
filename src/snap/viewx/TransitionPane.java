@@ -8,7 +8,7 @@ import snap.view.*;
 public class TransitionPane extends ParentView {
 
     // The current content node
-    View                 _content = new Label("No content");
+    View                 _content;// = new Label("No content");
 
     // The last content node
     View                 _lastContent;
@@ -116,10 +116,10 @@ public static Transition MoveUp = new Transition() {
     public void configure(TransitionPane aTP)
     {
         View nview = aTP._content, oview = aTP._lastContent;
-        Anim anim = new Anim(nview, "TransY", aTP.getHeight(), 0, 500); anim.play();
+        nview.setTransY(aTP.getHeight()); nview.getAnim(0).clear().getAnim(500).setTransY(0).play();
         if(oview==null) return;
-        anim = new Anim(oview, "TransY", 0, -aTP.getHeight(), 500);
-        anim.setOnFinish(a -> finish(aTP, oview)); anim.play();
+        oview.setTransY(0);
+        oview.getAnim(0).clear().getAnim(500).setTransY(-aTP.getHeight()).setOnFinish(a -> finish(aTP, oview)).play();
     }
 };
 
@@ -132,10 +132,10 @@ public static Transition MoveDown = new Transition() {
     public void configure(TransitionPane aTP)
     {
         View nview = aTP._content, oview = aTP._lastContent;
-        Anim anim = new Anim(nview, "TransY", -aTP.getHeight(), 0, 500); anim.play();
+        nview.setTransY(-aTP.getHeight()); nview.getAnim(0).clear().getAnim(500).setTransY(0).play();
         if(oview==null) return;
-        anim = new Anim(oview, "TransY", 0, aTP.getHeight(), 500);
-        anim.setOnFinish(a -> finish(aTP, oview)); anim.play();
+        oview.setTransY(0);
+        oview.getAnim(0).clear().getAnim(500).setTransY(aTP.getHeight()).setOnFinish(a -> finish(aTP, oview)).play();
     }
 };
 
@@ -148,10 +148,10 @@ public static Transition MoveLeft = new Transition() {
     public void configure(TransitionPane aTP)
     {
         View nview = aTP._content, oview = aTP._lastContent;
-        Anim anim = new Anim(nview, "TransX", -aTP.getWidth(), 0, 500); anim.play();
+        nview.setTransX(-aTP.getWidth()); nview.getAnim(0).clear().getAnim(500).setTransX(0).play();
         if(oview==null) return;
-        anim = new Anim(oview, "TransX", 0, aTP.getWidth(), 500);
-        anim.setOnFinish(a -> finish(aTP, oview)); anim.play();
+        oview.setTransX(0);
+        oview.getAnim(0).clear().getAnim(500).setTransX(aTP.getWidth()).setOnFinish(a -> finish(aTP, oview)).play();
     }
 };
 
@@ -163,11 +163,11 @@ public static Transition MoveRight = new Transition() {
     /** Configure. */
     public void configure(TransitionPane aTP)
     {
-        final View nview = aTP._content, oview = aTP._lastContent; final TransitionPane tp = aTP;
-        Anim anim = new Anim(nview, "TransX", aTP.getWidth(), 0, 500); anim.play();
+        View nview = aTP._content, oview = aTP._lastContent; TransitionPane tp = aTP;
+        nview.setTransX(aTP.getWidth()); nview.getAnim(0).clear().getAnim(500).setTransX(0).play();
         if(oview==null) return;
-        anim = new Anim(oview, "TransX", 0, -aTP.getWidth(), 500);
-        anim.setOnFinish(a -> finish(aTP, oview)); anim.play();
+        oview.setTransX(0);
+        oview.getAnim(0).clear().getAnim(500).setTransX(-aTP.getWidth()).setOnFinish(a -> finish(aTP, oview)).play();
     }
 };
 

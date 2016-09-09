@@ -220,10 +220,11 @@ public void resetLater(ViewOwner anOwnr)
  */
 public void playAnim(View aView)
 {
+    System.out.println("Add Anim " + (aView.getName()!=null? aView.getName() : aView.getClass().getSimpleName()));
     _animViews.add(aView);
     if(_animViews.size()==1) _timer.start();
     ViewAnim anim = aView.getAnim(0);
-    if(!anim.isSuspended()) anim.setStartTime(_timer.getTime());
+    if(!anim.isSuspended() || anim.getStartTime()<0) anim.setStartTime(_timer.getTime());
 }
 
 /**
@@ -231,10 +232,11 @@ public void playAnim(View aView)
  */
 public void stopAnim(View aView)
 {
-    _animViews.remove(aView);
+    if(!_animViews.remove(aView)) return;
     if(_animViews.size()==0) _timer.stop();
     ViewAnim anim = aView.getAnim(0);
     if(!anim.isSuspended()) anim.setStartTime(-1);
+    System.out.println("Remove Anim " + (aView.getName()!=null? aView.getName() : aView.getClass().getSimpleName()));
 }
 
 /**
@@ -267,6 +269,7 @@ public synchronized void paintLater()
             if(anim==null || anim.isSuspended()) stopAnim(av);
             else anim.setTime(time);
         }
+        //System.out.println("SetTime " + time);
     }
 
     // Send reset later calls

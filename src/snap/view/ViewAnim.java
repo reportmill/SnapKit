@@ -3,6 +3,7 @@
  */
 package snap.view;
 import java.util.*;
+import java.util.function.Consumer;
 import snap.util.*;
 
 /**
@@ -33,6 +34,9 @@ public class ViewAnim {
     
     // The loop count
     int                  _loopCount;
+    
+    // A runnable to be called when anim is finished
+    Consumer <ViewAnim>  _onFinish;
     
     // The start time, current time
     int                  _startTime = -1, _time;
@@ -175,6 +179,10 @@ public boolean setTime(int aTime)
         else completed = false;
     }
     
+    // If completed and there is an OnFinished, trigger it
+    if(completed && _onFinish!=null)
+        _onFinish.accept(this);
+    
     // If completed and root anim, stop
     if(completed && isRoot())
         stop();
@@ -233,6 +241,16 @@ public ViewAnim setWidth(double aVal)  { return setValue(View.Width_Prop, aVal);
 public ViewAnim setHeight(double aVal)  { return setValue(View.Height_Prop, aVal); }
 
 /**
+ * Sets the TransX value.
+ */
+public ViewAnim setTransX(double aVal)  { return setValue(View.TransX_Prop, aVal); }
+
+/**
+ * Sets the TransY value.
+ */
+public ViewAnim setTransY(double aVal)  { return setValue(View.TransY_Prop, aVal); }
+
+/**
  * Sets the Rotate value.
  */
 public ViewAnim setRotate(double aVal)  { return setValue(View.Rotate_Prop, aVal); }
@@ -272,6 +290,16 @@ public ViewAnim setLoops()  { return setLoopCount(Short.MAX_VALUE); }
  */
 public ViewAnim setLoopCount(int aValue)  { _loopCount = aValue; return this; }
 
+/**
+ * Returns the on finished.
+ */
+public Consumer <ViewAnim> getOnFinish()  { return _onFinish; }
+
+/**
+ * Sets the on finished.
+ */
+public ViewAnim setOnFinish(Consumer <ViewAnim> aFinish)  { _onFinish = aFinish; return this; }
+    
 /**
  * Play the anim.
  */
