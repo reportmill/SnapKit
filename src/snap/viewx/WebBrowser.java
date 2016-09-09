@@ -88,6 +88,7 @@ public WebFile getFile()  { WebPage page = getPage(); return page!=null? page.ge
 public void setFile(WebFile aFile)
 {
     if(aFile==null) { setPage(null); return; }              // Handle null page
+    if(aFile==getFile()) return;
     WebPage page = getPage(aFile.getURL());                 // Get cached page for URL
     if(page==null) {                                        // Create and cache if necessary
         page = createPage(aFile); setPage(page.getURL(), page); }

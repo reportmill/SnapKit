@@ -8,11 +8,8 @@ import snap.view.*;
 public class TransitionPane extends ParentView {
 
     // The current content node
-    View                 _content;// = new Label("No content");
+    View                 _content;
 
-    // The last content node
-    View                 _lastContent;
-    
     // The Transition
     Transition           _transition = MoveDown;
 
@@ -29,18 +26,19 @@ public void setContent(View aView)
     // If view already set, just return
     if(aView==_content) return;
     
-    // Remove LastContent
-    if(_lastContent!=null) removeChild(_lastContent);
+    // Get last view
+    View oldView = getChildCount()>0? getChildLast() : null;
+    while(getChildCount()>1) removeChild(0);
     
     // Set LastContent and Content
-    _lastContent = _content; _content = aView;
+    _content = aView;
     
     // Add view
     if(_content!=null) addChild(aView,0);
-    else { removeChildren(); _lastContent = null; return; }
+    else { removeChildren(); return; }
     
     // Configure transition
-    _transition.configure(this);
+    _transition.configure(this, _content, oldView);
 }
 
 /**
@@ -91,15 +89,14 @@ protected void layoutChildren()
 public static class Transition {
 
     /** Configure. */
-    public void configure(TransitionPane aTP)  { }
+    public void configure(TransitionPane aTP, View nview, View oview)  { }
     
     /** Removes OldNode from TransitionPane. */
-    public void finish(TransitionPane aTP, View oldNode)
+    public void finish(TransitionPane aTP, View oldView)
     {
-        aTP.removeChild(oldNode);
-        if(oldNode==aTP._lastContent) {
-            aTP._lastContent = null; aTP._transition = MoveDown; }
-        oldNode.setTransX(0); oldNode.setTransY(0);
+        if(oldView.getParent()!=null) aTP._transition = MoveDown;
+        aTP.removeChild(oldView);
+        oldView.setTransX(0); oldView.setTransY(0);
     }
 }
 
@@ -114,9 +111,8 @@ public static class Transition {
 public static Transition MoveUp = new Transition() {
 
     /** Configure. */
-    public void configure(TransitionPane aTP)
+    public void configure(TransitionPane aTP, View nview, View oview)
     {
-        View nview = aTP._content, oview = aTP._lastContent;
         nview.setTransY(aTP.getHeight()); nview.getAnim(0).clear().getAnim(500).setTransY(0).play();
         if(oview==null) return;
         oview.setTransY(0);
@@ -130,9 +126,8 @@ public static Transition MoveUp = new Transition() {
 public static Transition MoveDown = new Transition() {
 
     /** Configure. */
-    public void configure(TransitionPane aTP)
+    public void configure(TransitionPane aTP, View nview, View oview)
     {
-        View nview = aTP._content, oview = aTP._lastContent;
         nview.setTransY(-aTP.getHeight()); nview.getAnim(0).clear().getAnim(500).setTransY(0).play();
         if(oview==null) return;
         oview.setTransY(0);
@@ -146,9 +141,8 @@ public static Transition MoveDown = new Transition() {
 public static Transition MoveLeft = new Transition() {
 
     /** Configure. */
-    public void configure(TransitionPane aTP)
+    public void configure(TransitionPane aTP, View nview, View oview)
     {
-        View nview = aTP._content, oview = aTP._lastContent;
         nview.setTransX(-aTP.getWidth()); nview.getAnim(0).clear().getAnim(500).setTransX(0).play();
         if(oview==null) return;
         oview.setTransX(0);
@@ -162,9 +156,8 @@ public static Transition MoveLeft = new Transition() {
 public static Transition MoveRight = new Transition() {
 
     /** Configure. */
-    public void configure(TransitionPane aTP)
+    public void configure(TransitionPane aTP, View nview, View oview)
     {
-        View nview = aTP._content, oview = aTP._lastContent; TransitionPane tp = aTP;
         nview.setTransX(aTP.getWidth()); nview.getAnim(0).clear().getAnim(500).setTransX(0).play();
         if(oview==null) return;
         oview.setTransX(0);
@@ -178,10 +171,9 @@ public static Transition MoveRight = new Transition() {
 public static Transition Instant = new Transition() {
 
     /** Configure. */
-    public void configure(TransitionPane aTP)
+    public void configure(TransitionPane aTP, View nview, View oview)
     {
-        if(aTP._lastContent==null) return;
-        aTP.removeChild(aTP._lastContent);
+        aTP.removeChild(oview);
         aTP._transition = MoveDown; 
     }
 };

@@ -179,13 +179,13 @@ public boolean setTime(int aTime)
         else completed = false;
     }
     
-    // If completed and there is an OnFinished, trigger it
-    if(completed && needsUpdate && _onFinish!=null)
-        _onFinish.accept(this);
-    
     // If completed and root anim, stop
     if(completed && isRoot())
         stop();
+    
+    // If completed and there is an OnFinish, trigger it
+    if(completed && needsUpdate && _onFinish!=null)
+        _view.getEnv().runLater(() -> _onFinish.accept(this));
     
     // Return whether completed
     return completed;

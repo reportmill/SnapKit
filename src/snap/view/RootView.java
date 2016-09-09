@@ -220,9 +220,7 @@ public void resetLater(ViewOwner anOwnr)
  */
 public void playAnim(View aView)
 {
-    System.out.println("Add Anim " + (aView.getName()!=null? aView.getName() : aView.getClass().getSimpleName()) +
-        " " + System.identityHashCode(aView));
-    _animViews.add(aView);
+    _animViews.add(aView);                     //System.out.println("Add Anim " + name(aView));
     if(_animViews.size()==1) _timer.start();
     ViewAnim anim = aView.getAnim(0);
     if(!anim.isSuspended() || anim.getStartTime()<0) anim.setStartTime(_timer.getTime());
@@ -234,11 +232,7 @@ public void playAnim(View aView)
 public void stopAnim(View aView)
 {
     if(!_animViews.remove(aView)) return;
-    if(_animViews.size()==0) _timer.stop();
-    ViewAnim anim = aView.getAnim(0);
-    if(!anim.isSuspended()) anim.setStartTime(-1);
-    System.out.println("Remove Anim " + (aView.getName()!=null? aView.getName() : aView.getClass().getSimpleName()) +
-        " " + System.identityHashCode(aView));
+    if(_animViews.size()==0) _timer.stop();   //System.out.println("Remove Anim " + name(aView));
 }
 
 /**
@@ -259,6 +253,9 @@ public synchronized void repaint(View aView, double aX, double aY, double aW, do
     }
 }
 
+String name(View v)
+{ return (v.getName()!=null? v.getName() : v.getClass().getSimpleName()) + " " + System.identityHashCode(v); }
+
 /**
  * Called to request a paint after current event.
  */
@@ -268,6 +265,8 @@ public synchronized void paintLater()
     if(_timer.isRunning()) {
         View aviews[] = _animViews.toArray(new View[0]); int time = _timer.getTime();
         for(View av : aviews) { ViewAnim anim = av.getAnim(-1);
+            if(!av.isShowing()) { System.err.println("View shouldn't be animated: "+name(av));
+                System.err.flush(); stopAnim(av); continue; }
             if(anim==null || anim.isSuspended()) stopAnim(av);
             else anim.setTime(time);
         }
