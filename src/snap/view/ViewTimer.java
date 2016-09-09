@@ -101,10 +101,11 @@ public synchronized void start(int aDelay)
     // Create task and schedule
     _run = () -> sendEvent();
     
-    // Schedule task
-    _env.runIntervals(_run, getPeriod(), aDelay, false, true);
+    // Initialize times and Schedule task
+    _time = 0;
     _startTime = System.nanoTime()/1000000 - (_pauseTime>0? (_pauseTime - _startTime) : 0);
     _pauseTime = 0;
+    _env.runIntervals(_run, getPeriod(), aDelay, false, true);
 }
 
 /**

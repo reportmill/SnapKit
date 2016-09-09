@@ -34,6 +34,12 @@ public class RootView extends ParentView {
     
     // A set of ViewOwners that want to be reset on next UI update call
     Set <ViewOwner>          _resetLaters = Collections.synchronizedSet(new HashSet());
+    
+    // A set of Views with active animations
+    Set <View>               _animViews = new HashSet();
+    
+    // The timer for animated views
+    ViewTimer                _timer = new ViewTimer(40, t -> activatePaintLater());
 
     // Whether painting in debug mode
     boolean                  _debug = false; int _pc; long _frames[] = null; //new long[20];
@@ -187,8 +193,13 @@ protected void layoutChildren()  { _layout.layoutChildren(); }
 protected void setNeedsLayoutDeep(boolean aVal)
 {
     if(aVal==isNeedsLayoutDeep()) return; super.setNeedsLayoutDeep(aVal);
-    if(_plater==null) getEnv().runLater(_plater = _platerShared);
+    activatePaintLater();
 }
+
+/**
+ * Activate PaintLater.
+ */
+private final void activatePaintLater()  { if(_plater==null) getEnv().runLater(_plater = _platerShared); }
 
 /**
  * Override to actually paint in this RootView.
@@ -201,7 +212,29 @@ protected void repaintInParent(Rect aRect)  { repaint(aRect!=null? aRect : getBo
 public void resetLater(ViewOwner anOwnr)
 {
     _resetLaters.add(anOwnr);
-    if(_plater==null) getEnv().runLater(_plater = _platerShared);
+    activatePaintLater();
+}
+
+/**
+ * Adds a view to set of Views that are being animated.
+ */
+public void playAnim(View aView)
+{
+    _animViews.add(aView);
+    if(_animViews.size()==1) _timer.start();
+    ViewAnim anim = aView.getAnim(0);
+    if(!anim.isSuspended()) anim.setStartTime(_timer.getTime());
+}
+
+/**
+ * Removes a view to set of Views that are being animated.
+ */
+public void stopAnim(View aView)
+{
+    _animViews.remove(aView);
+    if(_animViews.size()==0) _timer.stop();
+    ViewAnim anim = aView.getAnim(0);
+    if(!anim.isSuspended()) anim.setStartTime(-1);
 }
 
 /**
@@ -227,6 +260,15 @@ public synchronized void repaint(View aView, double aX, double aY, double aW, do
  */
 public synchronized void paintLater()
 {
+    // If timer is running, send Anim calls
+    if(_timer.isRunning()) {
+        View aviews[] = _animViews.toArray(new View[0]); int time = _timer.getTime();
+        for(View av : aviews) { ViewAnim anim = av.getAnim(-1);
+            if(anim==null || anim.isSuspended()) stopAnim(av);
+            else anim.setTime(time);
+        }
+    }
+
     // Send reset later calls
     while(_resetLaters.size()>0) {
         ViewOwner owners[] = _resetLaters.toArray(new ViewOwner[_resetLaters.size()]); _resetLaters.clear();

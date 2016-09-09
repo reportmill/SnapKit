@@ -848,10 +848,15 @@ protected void setShowing(boolean aValue)
     if(this instanceof ParentView) { ParentView pview = (ParentView)this;
         for(View child : pview.getChildren()) child.setShowing(_showing && child.isVisible()); }
         
+    // If Anim set, play/suspend
+    ViewAnim anim = getAnim(-1);
+    if(aValue && anim!=null  && anim.isSuspended()) anim.play();
+    else if(!aValue && anim!=null && anim.isPlaying()) anim.suspend();
+        
     // If animator set, pause/play
-    if(getAnimator(false)!=null) { Animator anim = getAnimator(false);
-        if(aValue && anim.isPaused()) anim.play();
-        else if(!aValue && anim.isRunning()) anim.pause();
+    if(getAnimator(false)!=null) { Animator animator = getAnimator(false);
+        if(aValue && animator.isPaused()) animator.play();
+        else if(!aValue && animator.isRunning()) animator.pause();
     }
 }
 
@@ -1851,6 +1856,18 @@ public Animator getAnimator(boolean doCreate)
 {
     return _animator!=null || !doCreate? _animator : (_animator=new Animator(this));
 }
+
+/**
+ * Returns the anim for the given time.
+ */
+public ViewAnim getAnim(int aTime)
+{
+    if(aTime<0) return _anim;
+    if(_anim==null) _anim = new ViewAnim(this, 0, 0);
+    return aTime>0? _anim.getAnim(aTime) : _anim;
+}
+
+ViewAnim _anim;
 
 /**
  * XML Archival.
