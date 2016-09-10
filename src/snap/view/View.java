@@ -234,7 +234,6 @@ public void setX(double aValue)
     repaintInParent(null);
     firePropChange(X_Prop, _x, _x=aValue);
     repaintInParent(null);
-    setClipAll(null);
 }
 
 /**
@@ -251,7 +250,6 @@ public void setY(double aValue)
     repaintInParent(null);
     firePropChange(Y_Prop, _y, _y=aValue);
     repaintInParent(null);
-    setClipAll(null);
 }
 
 /**
@@ -350,7 +348,6 @@ public void setTransX(double aValue)
     repaintInParent(null);
     firePropChange(TransX_Prop, _tx, _tx=aValue);
     repaintInParent(null);
-    setClipAll(null);
 }
 
 /**
@@ -367,7 +364,6 @@ public void setTransY(double aValue)
     repaintInParent(null);
     firePropChange(TransY_Prop, _ty, _ty=aValue);
     repaintInParent(null);
-    setClipAll(null);
 }
 
 /**
@@ -549,8 +545,7 @@ public Shape getClip()  { return _clip; }
 public void setClip(Shape aShape)
 {
     if(SnapUtils.equals(aShape,_clip)) return;
-    Shape old = _clip; _clip = aShape; setClipAll(null);
-    firePropChange(Clip_Prop, old, _clip);
+    firePropChange(Clip_Prop, _clip, _clip = aShape);
 }
 
 /**
@@ -563,20 +558,10 @@ public Rect getClipBounds()  { Shape clip = getClip(); return clip!=null? clip.g
  */
 public Shape getClipAll()
 {
-    if(_clipAll!=null) return _clipAll;
     Shape vshp = getParent()!=null? getParent().getClipAll() : null;
     if(vshp!=null) vshp = parentToLocal(vshp);
     if(getClip()!=null) vshp = vshp!=null? Shape.intersect(vshp, getClip()) : getClip();
-    return _clipAll = vshp;
-} Shape _clipAll;
-
-/**
- * Sets the clip of this view due to all parents.
- */
-protected void setClipAll(Shape aShape)
-{
-    if(SnapUtils.equals(aShape, _clipAll)) return;
-    _clipAll = aShape;
+    return vshp;
 }
 
 /**
@@ -590,7 +575,7 @@ public Rect getClipBoundsAll()  { Shape clip = getClipAll(); return clip!=null? 
 public Rect getVisRect()
 {
     if(!isVisible()) return new Rect(0,0,0,0);
-    Rect cbnds = getClipBoundsAll(); //return clip!=null? clip : getBoundsInside(); - old version
+    Rect cbnds = getClipBoundsAll();
     Rect bnds = getBoundsInside(); if(cbnds==null) return bnds;
     double x = Math.floor(Math.max(cbnds.getX(),bnds.getX()));
     double y = Math.floor(Math.max(cbnds.getY(),bnds.getY()));

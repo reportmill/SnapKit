@@ -55,7 +55,6 @@ protected void addChild(View aChild, int anIndex)
     if(_children==Collections.EMPTY_LIST) _children = new ArrayList();
     _children.add(anIndex, aChild);
     relayout(); relayoutParent(); setNeedsLayoutDeep(true); repaint();
-    aChild.setClipAll(null);
     
     // Fire property change
     firePropChange(Child_Prop, null, aChild, anIndex); //relayout(); repaint();
@@ -296,17 +295,6 @@ public void setPadding(Insets theIns)
     if(theIns==null) theIns = getDefaultPadding();
     if(SnapUtils.equals(theIns,_padding)) return; super.setPadding(theIns);
     relayout();
-}
-
-/**
- * Override to propagate to children.
- */
-protected void setClipAll(Shape aShape)
-{
-    if(SnapUtils.equals(aShape, _clipAll)) return;
-    super.setClipAll(aShape);
-    for(View child : getChildren())
-        child.setClipAll(null);
 }
 
 /**

@@ -448,15 +448,6 @@ public void setY(double aValue)  { if(aValue==getY()) return; resetCellsLater();
 public void setHeight(double aValue)  { if(aValue==getHeight()) return; resetCellsLater(); super.setHeight(aValue); }
 
 /**
- * Override to resetCells.
- */
-protected void setClipAll(Shape aShape)
-{
-    if(SnapUtils.equals(aShape, _clipAll)) return;
-    super.setClipAll(aShape); resetCellsLater();
-}
-
-/**
  * Calculates sample width and height from items.
  */
 protected void calcSampleSize()
