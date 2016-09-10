@@ -38,6 +38,9 @@ public class ViewAnim {
     // The root view currently playing this anim
     RootView             _rview;
     
+    // A runnable to be called on each anim frame
+    Consumer <ViewAnim>  _onFrame;
+    
     // A runnable to be called when anim is finished
     Consumer <ViewAnim>  _onFinish;
     
@@ -103,6 +106,15 @@ public Object getStartVal(String aKey)
         _startVals.put(aKey, val);
     }
     return val;
+}
+
+/**
+ * Sets the start value for given key.
+ */
+public ViewAnim setStartVal(String aKey, Object aVal)
+{
+    ListUtils.addUnique(_keys, aKey);
+    _startVals.put(aKey, aVal); return this;
 }
 
 /**
@@ -182,33 +194,35 @@ public boolean setTime(int aTime)
         else completed = false;
     }
     
+    // If on frame set, call it
+    if(_onFrame!=null)
+        _onFrame.accept(this);
+    
     // If completed and root anim, stop
     if(completed && isRoot())
         stop();
     
     // If completed and there is an OnFinish, trigger it
     if(completed && needsUpdate && _onFinish!=null)
-        _view.getEnv().runLater(() -> _onFinish.accept(this));
+        _onFinish.accept(this);
     
     // Return whether completed
     return completed;
 }
 
 /**
+ * Returns the current time.
+ */
+public int getTime()  { return _time; }
+
+/**
  * Sets the time.
  */
-public void setTime(long aTime, String aKey)
+public void setTime(int aTime, String aKey)
 {
-    // From/to values
-    Object fromVal = getStartVal(aKey), toVal = getEndVal(aKey), val = null;
-    
-    // Get value for current time
-    if(aTime<=getStart()) val = fromVal;
-    else if(aTime>=getEnd()) val = toVal;
-    else val = interpolate(fromVal, toVal, (aTime-getStart())/(double)getLen());
-
+    Object val = getValue(aKey, aTime);
     try { Key.setValue(_view, aKey, val); }
-    catch(Exception e) { System.err.println(e); }
+    catch(Exception e) { } //System.err.println(e);
 }
 
 /**
@@ -221,6 +235,23 @@ public Object interpolate(Object aVal1, Object aVal2, double aRatio)
         return Interpolator.EASE_BOTH.getValue(aRatio, val1, val2);
     }
     return null;
+}
+
+/**
+ * Returns the value for given key at current time.
+ */
+public Object getValue(String aKey)  { return getValue(aKey, _time); }
+
+/**
+ * Returns the value for given key and time.
+ */
+public Object getValue(String aKey, int aTime)
+{
+    Object fromVal = getStartVal(aKey), toVal = getEndVal(aKey), val = null;
+    if(aTime<=getStart()) val = fromVal;
+    else if(aTime>=getEnd()) val = toVal;
+    else val = interpolate(fromVal, toVal, (aTime-getStart())/(double)getLen());
+    return val;
 }
 
 /**
@@ -276,10 +307,16 @@ public ViewAnim setScaleY(double aVal)  { return setValue(View.ScaleY_Prop, aVal
 /**
  * Returns the end value for given key.
  */
-public ViewAnim setValue(String aKey, Object aValue)
+public ViewAnim setValue(String aKey, Object aValue)  { return setValue(aKey, null, aValue); }
+
+/**
+ * Returns the end value for given key.
+ */
+public ViewAnim setValue(String aKey, Object aVal0, Object aVal1)
 {
     ListUtils.addUnique(_keys, aKey);
-    _endVals.put(aKey, aValue);
+    if(aVal0!=null) setStartVal(aKey, aVal0);
+    _endVals.put(aKey, aVal1);
     return this;
 }
 
@@ -293,6 +330,16 @@ public ViewAnim setLoops()  { return setLoopCount(Short.MAX_VALUE); }
  */
 public ViewAnim setLoopCount(int aValue)  { _loopCount = aValue; return this; }
 
+/**
+ * Returns the consumer to be called on each frame.
+ */
+public Consumer <ViewAnim> getOnFrame()  { return _onFrame; }
+
+/**
+ * Sets the consumer to be called on each frame.
+ */
+public ViewAnim setOnFrame(Consumer <ViewAnim> aCall)  { _onFrame = aCall; return this; }
+    
 /**
  * Returns the on finished.
  */

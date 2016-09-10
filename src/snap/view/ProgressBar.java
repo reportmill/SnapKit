@@ -11,7 +11,7 @@ public class ProgressBar extends View {
     double       _prog;
     
     // The animator
-    Anim     _anim;
+    ViewAnim     _anim;
 
     // Constants for properties
     public static final String Progress_Prop = "Progress";
@@ -53,7 +53,7 @@ public boolean isIndeterminate()  { return _prog<0; }
 /**
  * Sets whether progress bar is indetermiante.
  */
-public void setIndeterminate(Boolean aValue)  { setProgress(-1); }
+public void setIndeterminate(boolean aValue)  { setProgress(aValue? -1 : 0); }
 
 /**
  * Override to check animation.
@@ -76,12 +76,9 @@ private boolean isAnim()  { return _anim!=null; }
 private void setAnim(boolean aValue)
 {
     if(aValue==isAnim()) return;
-    if(aValue) {
-        _anim = new Anim(this, "Repaint", 0, 1, Integer.MAX_VALUE);
-        _anim.setOnFrame(a -> repaint());
-        _anim.play();
-    }
-    else { _anim.stop(); _anim = null; }
+    if(aValue)
+        getAnim(Integer.MAX_VALUE).setOnFrame(a -> repaint()).play();
+    else getAnim(0).clear();
 }
 
 /**
@@ -106,7 +103,7 @@ protected void paintFront(Painter aPntr)
         // Get bounds of indeterminate bar
         int ix = 3, iy = 3, iw = (int)getWidth() - 6, ih = (int)getHeight() - 6;
         int aw = 50, ix2 = ix - aw, iw2 = iw + aw*2, imax2 = ix2 + iw2;
-        int etime = _anim.getElapsedTime(), imax3 = ix2 + (aw + etime/10)%(iw2*2), ix3 = imax3 - aw;
+        int etime = getAnim(0).getTime(), imax3 = ix2 + (aw + etime/10)%(iw2*2), ix3 = imax3 - aw;
         boolean back = false; if(imax3>imax2) { ix3 = imax2 - (imax3 - imax2); back = true; }
         
         // Create rect for anim and paint

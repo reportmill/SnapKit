@@ -122,9 +122,7 @@ public void addChildWithAnim(View aView, double aSize)
     if(isVertical()) aView.setHeight(1); else aView.setWidth(1);
     addChild(aView);
     setChildSize(aView, 1);
-    Anim anim = new Anim(this, "Divider", 1d, aSize, 500);
-    anim.setOnFrame(a -> setChildSize(aView, Math.round((double)a.getValue())));
-    anim.play();
+    getAnim(0).clear().getAnim(500).setValue("Divider", 1d, aSize).setOnFrame(a -> doAnim(a,aView)).play();
 }
 
 /**
@@ -133,10 +131,15 @@ public void addChildWithAnim(View aView, double aSize)
 public void removeChildWithAnim(View aView)
 {
     double size = isVertical()? aView.getHeight() : aView.getWidth();
-    Anim anim = new Anim(this, "Divider", size, 1d, 500);
-    anim.setOnFrame(a -> setChildSize(aView, Math.round((double)a.getValue())));
-    anim.setOnFinish(a -> removeChild(aView));
-    anim.play();
+    ViewAnim anim = getAnim(0).clear().getAnim(500).setValue("Divider", size, 1d);
+    anim.setOnFrame(a -> doAnim(a,aView)).setOnFinish(a -> removeChild(aView)).play();
+}
+
+/** Called on each frame of SplitView anim. */
+private void doAnim(ViewAnim anAnim, View aView)
+{
+    double val = (double)anAnim.getValue("Divider");
+    setChildSize(aView, Math.round(val));
 }
 
 /**

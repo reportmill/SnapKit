@@ -39,7 +39,7 @@ public class TextViewBase extends ParentView implements PropChangeListener {
     double                _downX, _downY;
     
     // The animator for caret blinking
-    Anim                  _caretAnim;
+    ViewTimer             _caretTimer;
     
     // Whether to hide carent
     boolean               _hideCaret;
@@ -844,7 +844,7 @@ private void setCaretAnim()  { setCaretAnim(isCaretAnimNeeded()); }
 /**
  * Returns whether ProgressBar is animating.
  */
-private boolean isCaretAnim()  { return _caretAnim!=null; }
+private boolean isCaretAnim()  { return _caretTimer!=null; }
 
 /**
  * Sets anim.
@@ -853,11 +853,10 @@ private void setCaretAnim(boolean aValue)
 {
     if(aValue==isCaretAnim()) return;
     if(aValue) {
-        _caretAnim = new Anim(this, "Repaint", 0, 1, Integer.MAX_VALUE); _caretAnim.setPeriod(500);
-        _caretAnim.setOnFrame(a -> { _hideCaret = !_hideCaret; repaintSel(); });
-        _caretAnim.play();
+        _caretTimer = new ViewTimer(500, t -> { _hideCaret = !_hideCaret; repaintSel(); });
+        _caretTimer.start();
     }
-    else { _caretAnim.stop(); _caretAnim = null; _hideCaret = false; repaintSel(); }
+    else { _caretTimer.stop(); _caretTimer = null; _hideCaret = false; repaintSel(); }
 }
 
 /**
