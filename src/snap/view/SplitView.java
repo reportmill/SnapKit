@@ -6,13 +6,13 @@ import snap.util.*;
 /**
  * A View subclass to show children with user adjustable divider.
  */
-public class SplitView extends ChildView {
+public class SplitView extends ParentView {
 
     // The divider location
     int                _dividerLoc;
     
-    // The list of kids
-    List <View>        _kids = new ArrayList();
+    // The list of items
+    List <View>        _items = new ArrayList();
     
     // The list of child bounds
     List <Rect>        _cbnds = new ArrayList();
@@ -32,43 +32,67 @@ public SplitView()
 /**
  * Returns the number of items.
  */
-public int getItemCount()  { return _kids.size(); }
-
-/**
- * Sets the item at index.
- */
-public void setItem(View aView, int anIndex)
-{
-    View old = anIndex<getItemCount()? _kids.get(anIndex) : null;
-    int index = old!=null? removeChild(old) : -1;
-    addChild(aView, index>=0? index : getChildCount());
-}
+public int getItemCount()  { return _items.size(); }
 
 /**
  * Override to make sure dividers are in place.
  */
-public void addChild(View aChild, int anIndex)
+public void addItem(View aView)  { addItem(aView, getItemCount()); }
+
+/**
+ * Returns the SplitView items.
+ */
+public List <View> getItems()  { return _items; }
+
+/**
+ * Override to make sure dividers are in place.
+ */
+public void addItem(View aView, int anIndex)
 {
     //System.out.println("Add Child");
-    super.addChild(aChild, anIndex);
-    _kids.add(aChild);
+    addChild(aView, anIndex);
+    _items.add(aView);
     _cbnds.add(new Rect());
 }
 
 /**
  * Override to remove unused dividers.
  */
-public int removeChild(View aView)
+public int removeItem(View aView)
 {
-    int index = ListUtils.indexOfId(_kids, aView);
-    if(index>=0) { _kids.remove(index); _cbnds.remove(index); }
-    return super.removeChild(aView);
+    int index = ListUtils.indexOfId(_items, aView);
+    if(index>=0) { _items.remove(index); _cbnds.remove(index); }
+    return removeChild(aView);
 }
+
+/**
+ * Sets the item at index.
+ */
+public void setItem(View aView, int anIndex)
+{
+    View old = anIndex<getItemCount()? _items.get(anIndex) : null;
+    int index = old!=null? removeItem(old) : -1;
+    addItem(aView, index>=0? index : getItemCount());
+}
+
+/**
+ * Sets the splitview items to given views
+ */
+public void setItems(View ... theViews)
+{
+    removeItems();
+    for(View view : theViews) addItem(view);
+}
+
+/**
+ * Sets the splitview items to given views
+ */
+public void removeItems()  { for(View view : getItems().toArray(new View[0])) removeItem(view); }
 
 /**
  * Returns the child size at index.
  */
-public double getChildSize(int anIndex)
+protected double getChildSize(int anIndex)
 {
     Rect bnds = _cbnds.get(anIndex);
     return isHorizontal()? bnds.getWidth() : bnds.getHeight();
@@ -77,7 +101,7 @@ public double getChildSize(int anIndex)
 /**
  * Sets an child size.
  */
-public void setChildSize(int anIndex, double aSize)
+protected void setChildSize(int anIndex, double aSize)
 {
     //System.out.println("SetChildSize: " + anIndex + ", " + aSize);
     Rect bnds = _cbnds.get(anIndex);
@@ -92,9 +116,9 @@ public void setChildSize(int anIndex, double aSize)
 /**
  * Sets an child size.
  */
-public void setChildSize(View aView, double aSize)
+protected void setChildSize(View aView, double aSize)
 {
-    int index = ListUtils.indexOfId(_kids, aView);
+    int index = ListUtils.indexOfId(_items, aView);
     if(index>=0) setChildSize(index,aSize);
 }
 
@@ -107,20 +131,12 @@ public void setChildRatio(int anIndex, double aRatio)
 }
 
 /**
- * Sets an child ratio.
- */
-public void setChildRatio(View aView, double aRatio)
-{
-    setChildSize(aView, aRatio*(isHorizontal()? getWidth() : getHeight()));
-}
-
-/**
  * Adds a child with animation.
  */
-public void addChildWithAnim(View aView, double aSize)
+public void addItemWithAnim(View aView, double aSize)
 {
     if(isVertical()) aView.setHeight(1); else aView.setWidth(1);
-    addChild(aView);
+    addItem(aView);
     setChildSize(aView, 1);
     getAnim(0).clear().getAnim(500).setValue("Divider", 1d, aSize).setOnFrame(a -> doAnim(a,aView)).play();
 }
@@ -128,11 +144,11 @@ public void addChildWithAnim(View aView, double aSize)
 /**
  * Removes a child with animation.
  */
-public void removeChildWithAnim(View aView)
+public void removeItemWithAnim(View aView)
 {
     double size = isVertical()? aView.getHeight() : aView.getWidth();
     ViewAnim anim = getAnim(0).clear().getAnim(500).setValue("Divider", size, 1d);
-    anim.setOnFrame(a -> doAnim(a,aView)).setOnFinish(a -> removeChild(aView)).play();
+    anim.setOnFrame(a -> doAnim(a,aView)).setOnFinish(a -> removeItem(aView)).play();
 }
 
 /** Called on each frame of SplitView anim. */
@@ -148,8 +164,8 @@ private void doAnim(ViewAnim anAnim, View aView)
 protected double getPrefWidthImpl(double aH)
 {
     double pw = 0; Insets ins = getInsetsAll();
-    if(isHorizontal()) { for(View child : getChildren()) pw += child.getPrefWidth(); pw += (_kids.size()-1)*8; }
-    else for(View child : getChildren()) pw = Math.max(pw,child.getPrefWidth());
+    if(isHorizontal()) { for(View item : getItems()) pw += item.getPrefWidth(); pw += (_items.size()-1)*8; }
+    else for(View item : getItems()) pw = Math.max(pw, item.getPrefWidth());
     return ins.getLeft() + pw + ins.getRight();
 }
 
@@ -159,8 +175,8 @@ protected double getPrefWidthImpl(double aH)
 protected double getPrefHeightImpl(double aW)
 {
     double ph = 0; Insets ins = getInsetsAll();
-    if(isVertical()) { for(View child : getChildren()) ph += child.getPrefHeight(); ph += (_kids.size()-1)*8; }
-    else for(View child : getChildren()) ph = Math.max(ph,child.getPrefHeight());
+    if(isVertical()) { for(View item : getItems()) ph += item.getPrefHeight(); ph += (_items.size()-1)*8; }
+    else for(View item : getItems()) ph = Math.max(ph, item.getPrefHeight());
     return ins.getTop() + ph + ins.getBottom();
 }
 
@@ -169,8 +185,7 @@ protected double getPrefHeightImpl(double aW)
  */
 protected void layoutChildren()
 {
-    //System.out.println("LayoutChildren " + (_cbnds.size()>1? _cbnds.get(1) : ""));
-    View children[] = _kids.toArray(new View[0]); //getChildArray();
+    View children[] = _items.toArray(new View[0]);
     Insets ins = getInsetsAll();
     double px = ins.left, py = ins.top, pw = getWidth() - px - ins.right, ph = getHeight() - py - ins.bottom;
     
@@ -230,7 +245,7 @@ protected void paintFront(Painter aPntr)
     double px = ins.left, py = ins.top, pw = getWidth() - px - ins.right, ph = getHeight() - py - ins.bottom;
     //aPntr.clearRect(px,py,pw,ph); //aPntr.setColor(Color.PINK); aPntr.fillRect(0,0,getWidth(),getHeight());
     
-    for(int i=0,iMax=_kids.size()-1;i<iMax;i++) { Rect rect = _cbnds.get(i);
+    for(int i=0,iMax=_items.size()-1;i<iMax;i++) { Rect rect = _cbnds.get(i);
         if(isHorizontal()) {
             double dx = Math.round(rect.getMaxX());
             aPntr.setPaint(getDivFill()); aPntr.fillRect(dx,py,8,ph);
@@ -314,12 +329,26 @@ public Border getDefaultBorder()  { return SPLIT_VIEW_BORDER; }
  */
 public void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
 {
-    // Archive children
-    for(View child : getChildren()) {
-        XMLElement cxml = anArchiver.toXML(child, this);
-        cxml.removeAttribute("x"); cxml.removeAttribute("y"); cxml.removeAttribute("asize");
+    // Archive items
+    for(View item : getItems()) {
+        XMLElement cxml = anArchiver.toXML(item, this);
         anElement.add(cxml);
     }    
+}
+
+/**
+ * XML unarchival for shape children.
+ */
+protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
+{
+    // Iterate over child elements and unarchive as child nodes
+    for(int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
+        Class cls = anArchiver.getClass(childXML.getName());
+        if(cls!=null && View.class.isAssignableFrom(cls)) {
+            View view = (View)anArchiver.fromXML(childXML, this);
+            addItem(view);
+        }
+    }
 }
 
 }
