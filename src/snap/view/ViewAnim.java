@@ -35,6 +35,9 @@ public class ViewAnim {
     // The loop count
     int                  _loopCount;
     
+    // The root view currently playing this anim
+    RootView             _rview;
+    
     // A runnable to be called when anim is finished
     Consumer <ViewAnim>  _onFinish;
     
@@ -128,7 +131,7 @@ public ViewAnim getAnim(int aTime)
 /**
  * Whether anim is playing.
  */
-public boolean isPlaying()  { return _startTime>=0; }
+public boolean isPlaying()  { return _rview!=null; }
 
 /**
  * Returns whether anim is suspended.
@@ -317,8 +320,7 @@ public void play()
 public void stop()
 {
     if(_parent!=null) { _parent.stop(); return; }
-    RootView rview = _view.getRootView();
-    if(rview!=null) rview.stopAnim(_view);
+    if(_rview!=null) _rview.stopAnim(_view);
     _suspended = false; _startTime = -1;
 }
 
@@ -329,8 +331,7 @@ public void suspend()
 {
     _suspended = true;
     if(_parent!=null) { _parent.suspend(); return; }
-    RootView rview = _view.getRootView();
-    if(rview!=null) rview.stopAnim(_view);
+    if(_rview!=null) _rview.stopAnim(_view);
 }
 
 /**
@@ -338,8 +339,9 @@ public void suspend()
  */
 public ViewAnim clear()
 {
-    stop();
-    _keys.clear(); _startVals.clear(); _endVals.clear(); _anims.clear(); return this;
+    stop(); _loopCount = 0; _onFinish = null;
+    _keys.clear(); _startVals.clear(); _endVals.clear(); _anims.clear();
+    return this;
 }
 
 /**

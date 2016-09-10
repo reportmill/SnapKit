@@ -350,6 +350,7 @@ public void setTransX(double aValue)
     repaintInParent(null);
     firePropChange(TransX_Prop, _tx, _tx=aValue);
     repaintInParent(null);
+    setClipAll(null);
 }
 
 /**
@@ -366,6 +367,7 @@ public void setTransY(double aValue)
     repaintInParent(null);
     firePropChange(TransY_Prop, _ty, _ty=aValue);
     repaintInParent(null);
+    setClipAll(null);
 }
 
 /**

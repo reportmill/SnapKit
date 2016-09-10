@@ -222,7 +222,7 @@ public void playAnim(View aView)
 {
     _animViews.add(aView);                     //System.out.println("Add Anim " + name(aView));
     if(_animViews.size()==1) _timer.start();
-    ViewAnim anim = aView.getAnim(0);
+    ViewAnim anim = aView.getAnim(0); anim._rview = this;
     if(!anim.isSuspended() || anim.getStartTime()<0) anim.setStartTime(_timer.getTime());
 }
 
@@ -233,6 +233,7 @@ public void stopAnim(View aView)
 {
     if(!_animViews.remove(aView)) return;
     if(_animViews.size()==0) _timer.stop();   //System.out.println("Remove Anim " + name(aView));
+    ViewAnim anim = aView.getAnim(0); anim._rview = null;
 }
 
 /**
