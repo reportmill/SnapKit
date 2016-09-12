@@ -113,10 +113,10 @@ public static Transition MoveUp = new Transition() {
     /** Configure. */
     public void configure(TransitionPane aTP, View nview, View oview)
     {
-        nview.setTransY(aTP.getHeight()); nview.getAnim(0).clear().getAnim(500).setTransY(0).play();
+        nview.setTransY(aTP.getHeight()); nview.getAnimCleared(500).setTransY(0).play();
         if(oview==null) return;
         oview.setTransY(0);
-        oview.getAnim(0).clear().getAnim(500).setTransY(-aTP.getHeight()).setOnFinish(a -> finish(aTP, oview)).play();
+        oview.getAnimCleared(500).setTransY(-aTP.getHeight()).setOnFinish(a -> finish(aTP, oview)).play();
     }
 };
 
@@ -128,10 +128,10 @@ public static Transition MoveDown = new Transition() {
     /** Configure. */
     public void configure(TransitionPane aTP, View nview, View oview)
     {
-        nview.setTransY(-aTP.getHeight()); nview.getAnim(0).clear().getAnim(500).setTransY(0).play();
+        nview.setTransY(-aTP.getHeight()); nview.getAnimCleared(500).setTransY(0).play();
         if(oview==null) return;
         oview.setTransY(0);
-        oview.getAnim(0).clear().getAnim(500).setTransY(aTP.getHeight()).setOnFinish(a -> finish(aTP, oview)).play();
+        oview.getAnimCleared(500).setTransY(aTP.getHeight()).setOnFinish(a -> finish(aTP, oview)).play();
     }
 };
 
@@ -143,10 +143,10 @@ public static Transition MoveLeft = new Transition() {
     /** Configure. */
     public void configure(TransitionPane aTP, View nview, View oview)
     {
-        nview.setTransX(-aTP.getWidth()); nview.getAnim(0).clear().getAnim(500).setTransX(0).play();
+        nview.setTransX(-aTP.getWidth()); nview.getAnimCleared(500).setTransX(0).play();
         if(oview==null) return;
         oview.setTransX(0);
-        oview.getAnim(0).clear().getAnim(500).setTransX(aTP.getWidth()).setOnFinish(a -> finish(aTP, oview)).play();
+        oview.getAnimCleared(500).setTransX(aTP.getWidth()).setOnFinish(a -> finish(aTP, oview)).play();
     }
 };
 
@@ -158,10 +158,10 @@ public static Transition MoveRight = new Transition() {
     /** Configure. */
     public void configure(TransitionPane aTP, View nview, View oview)
     {
-        nview.setTransX(aTP.getWidth()); nview.getAnim(0).clear().getAnim(500).setTransX(0).play();
+        nview.setTransX(aTP.getWidth()); nview.getAnimCleared(500).setTransX(0).play();
         if(oview==null) return;
         oview.setTransX(0);
-        oview.getAnim(0).clear().getAnim(500).setTransX(-aTP.getWidth()).setOnFinish(a -> finish(aTP, oview)).play();
+        oview.getAnimCleared(500).setTransX(-aTP.getWidth()).setOnFinish(a -> finish(aTP, oview)).play();
     }
 };
 

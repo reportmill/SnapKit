@@ -928,7 +928,7 @@ public void setGrowHeight(boolean aValue)  { _growHeight = aValue; }
 /**
  * Returns whether this view has a horizontal orientation.
  */
-public boolean isHorizontal()  { return !_vertical; }
+public boolean isHorizontal()  { return !isVertical(); }
 
 /**
  * Returns whether this view has a vertical orientation.
@@ -1834,6 +1834,11 @@ public ViewAnim getAnim(int aTime)
     if(_anim==null) _anim = new ViewAnim(this, 0, 0);
     return aTime>0? _anim.getAnim(aTime) : _anim;
 }
+
+/**
+ * Returns a cleared anim at given time.
+ */
+public ViewAnim getAnimCleared(int aTime)  { return getAnim(0).clear().getAnim(aTime); }
 
 /**
  * Play animations deep.

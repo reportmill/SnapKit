@@ -25,7 +25,7 @@ public void setParent(ParentView aPar)  { _parent = aPar; }
 /**
  * Returns the children.
  */
-public View[] getChildren()  { return _children!=null? _children : _parent.getChildrenManaged(); }
+public View[] getChildren()  { return _children!=null? _children : (_children=_parent.getChildrenManaged()); }
 
 /**
  * Sets the children.
@@ -48,6 +48,16 @@ public View getChild(int anIndex)  { return _children!=null? _children[anIndex] 
 public Insets getInsets()  { return _parent.getInsetsAll(); }
 
 /**
+ * Returns whether vertical or horizontal, based on parent.
+ */
+public boolean isHorizontal()  { return _parent.isHorizontal(); }
+    
+/**
+ * Returns whether vertical or horizontal, based on parent.
+ */
+public boolean isVertical()  { return _parent.isVertical(); }
+    
+/**
  * Returns preferred width of layout.
  */
 public abstract double getPrefWidth(double aH);
@@ -67,6 +77,7 @@ public void layoutChildren()
     double pw = _parent.getWidth() - px - ins.right; if(pw<0) pw = 0;
     double ph = _parent.getHeight() - py - ins.bottom; if(ph<0) ph = 0;
     layoutChildren(px, py, pw, ph);
+    _children = null;
 }
 
 /**
@@ -366,6 +377,187 @@ public static class VBoxLayout extends ViewLayout {
             double cw = _fillWidth || child.isGrowWidth()? pw : Math.min(getBestWidth(child, -1), pw);
             double ch = getBestHeight(child, cw), cx = px;
             if(pw>cw) { double ax2 = Math.max(ax,getLeanX(child)); cx += Math.round((pw-cw)*ax2); }
+            cbnds[i] = new Rect(cx,cy,cw,ch); cy += ch + _spacing; if(child.isGrowHeight()) grow++;
+        }
+        
+        // Calculate extra space (return if none)
+        double extra = py + ph - (cy - _spacing);
+        if(extra==0) { setBnds(children, cbnds); return; }
+        
+        // If grow shapes, add grow
+        if(grow>0) { double dy = 0;
+            for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect cbnd = cbnds[i];
+                if(dy!=0) cbnd.setY(cbnd.getY() + dy);
+                if(child.isGrowHeight()) { cbnd.setHeight(cbnd.getHeight()+extra/grow); dy += extra/grow; }
+            }
+        }
+        
+        // Otherwise, check for vertical alignment/lean shift
+        else if(extra>0) {
+            double ay = getAlignY(_parent);
+            for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect cbnd = cbnds[i];
+                ay = Math.max(ay, getLeanY(child)); double dy = extra*ay;
+                if(dy>0) cbnd.setY(cbnd.getY() + extra*ay);
+            }
+        }
+
+        // Reset children bounds
+        setBnds(children, cbnds);
+    }
+}
+
+/**
+ * A layout for HBox/VBox.
+ */
+public static class BoxesLayout extends ViewLayout {
+    
+    // The spacing between nodes
+    double        _spacing;
+    
+    // Whether to fill to with/height
+    boolean       _fillOut;
+    
+    /** Creates a new HBox layout for given parent. */
+    public BoxesLayout(ParentView aPar)  { setParent(aPar); }
+    
+    /** Returns the spacing. */
+    public double getSpacing()  { return _spacing; }
+    
+    /** Sets the spacing. */
+    public void setSpacing(double aValue)  { _spacing = aValue; }
+    
+    /** Returns whether layout should fill width/height. */
+    public boolean isFillOut()  { return _fillOut; }
+    
+    /** Sets whether to fill width/height. */
+    public void setFillOutt(boolean aValue)  { _fillOut = aValue; }
+    
+    /** Returns the right size for a view. */
+    protected double getBestWidth(View aView, int anIndex, double aH)
+    {
+        if(isHorizontal() && anIndex+1<_children.length && _children[anIndex+1] instanceof Divider) {
+            Divider div = (Divider)_children[anIndex+1];
+            if(div.getLocation()>=0) return div.getLocation();
+            if(div.getRemainder()>=0) return div.getRemainderAsLocation();
+        }
+        return getBestWidth(aView, aH);
+    }
+
+    /** Returns the right size for a view. */
+    protected double getBestHeight(View aView, int anIndex, double aW)
+    {
+        if(isVertical() && anIndex+1<_children.length && _children[anIndex+1] instanceof Divider) {
+            Divider div = (Divider)_children[anIndex+1];
+            if(div.getLocation()>=0) return div.getLocation();
+            if(div.getRemainder()>=0) return div.getRemainderAsLocation();
+        }
+        return Math.max(aView.getPrefHeight(aW),aView.getMinHeight());
+    }
+    
+    /** Returns preferred width of layout. */
+    public double getPrefWidth(double aH)  { return isVertical()? getPrefWidthV(aH) : getPrefWidthH(aH); }
+    
+    /** Returns preferred height of layout. */
+    public double getPrefHeight(double aW)  { return isVertical()? getPrefHeightV(aW) : getPrefHeightH(aW); }
+        
+    /** Performs layout. */
+    public void layoutChildren(double px, double py, double pw, double ph)
+    {
+        if(isVertical()) layoutChildrenV(px,py,pw,ph);
+        else layoutChildrenH(px,py,pw,ph);
+    }
+    
+    /** Returns preferred width of layout. */
+    public double getPrefWidthH(double aH)
+    {
+        Insets ins = getInsets(); View children[] = getChildren(); int ccount = children.length;
+        double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
+        double w = 0; for(View child : children) w += getBestWidth(child, h); if(ccount>1) w += (ccount-1)*_spacing;
+        return w + ins.left + ins.right;
+    }
+    
+    /** Returns preferred height of layout. */
+    public double getPrefHeightH(double aW)
+    {
+        Insets ins = getInsets(); View children[] = getChildren();
+        double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
+        double h = 0; for(View child : children) h = Math.max(h, getBestHeight(child, w));
+        return h + ins.top + ins.bottom;
+    }
+    
+    /** Returns preferred width of layout. */
+    public double getPrefWidthV(double aH)
+    {
+        Insets ins = getInsets(); View children[] = getChildren();
+        double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
+        double w = 0; for(View child : children) w = Math.max(w, getBestWidth(child, h));
+        return w + ins.left + ins.right;
+    }
+    
+    /** Returns preferred height of layout. */
+    public double getPrefHeightV(double aW)
+    {
+        Insets ins = getInsets(); View children[] = getChildren(); int ccount = children.length;
+        double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
+        double h = 0; for(View child : children) h += getBestHeight(child, w);
+        if(ccount>1) h += (ccount-1)*_spacing;
+        return h + ins.top + ins.bottom;
+    }
+    
+    /** Performs layout. */
+    public void layoutChildrenH(double px, double py, double pw, double ph)
+    {
+        View children[] = getChildren(); int ccount = children.length; if(ccount==0) return;
+        Rect cbnds[] = new Rect[children.length];
+        double cx = px, ay = getAlignY(_parent);
+        int grow = 0;
+        
+        // Layout children
+        for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i];
+            double cw = getBestWidth(child, i, -1), cy = py;
+            double ch = _fillOut || child.isGrowHeight()? ph : Math.min(getBestHeight(child, i, cw), ph);
+            if(ph>ch && !_fillOut) { double ay2 = Math.max(ay,getLeanY(child)); cy += Math.round((ph-ch)*ay2); }
+            cbnds[i] = new Rect(cx, cy, cw, ch); cx += cw + _spacing; if(child.isGrowWidth()) grow++;
+        }
+        
+        // Calculate extra space (return if none)
+        double extra = px + pw - (cx - _spacing);
+        if(extra==0) { setBnds(children,cbnds); return; }
+        
+        // If grow shapes, add grow
+        if(grow>0) { double dx = 0;
+            for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect cbnd = cbnds[i];
+                if(dx!=0) cbnd.setX(cbnd.getX() + dx);
+                if(child.isGrowWidth()) { cbnd.setWidth(cbnd.getWidth()+extra/grow); dx += extra/grow; }
+            }
+        }
+        
+        // Otherwise, check for horizontal alignment/lean shift
+        else if(extra>0) {
+            double ax = getAlignX(_parent);
+            for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect cbnd = cbnds[i];
+                ax = Math.max(ax, getLeanX(child)); double dx = extra*ax;
+                if(dx>0) cbnd.setX(cbnd.getX() + extra*ax);
+            }
+        }
+
+        // Reset children bounds
+        setBnds(children, cbnds);
+    }
+    
+    /** Performs layout in content rect. */
+    public void layoutChildrenV(double px, double py, double pw, double ph)
+    {
+        View children[] = getChildren(); int ccount = children.length; if(ccount==0) return;
+        Rect cbnds[] = new Rect[children.length];
+        double cy = py, ax = getAlignX(_parent);
+        int grow = 0;
+        
+        // Layout children
+        for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i];
+            double cw = _fillOut || child.isGrowWidth()? pw : Math.min(getBestWidth(child, i, -1), pw);
+            double ch = getBestHeight(child, i, cw), cx = px;
+            if(pw>cw && !_fillOut) { double ax2 = Math.max(ax,getLeanX(child)); cx += Math.round((pw-cw)*ax2); }
             cbnds[i] = new Rect(cx,cy,cw,ch); cy += ch + _spacing; if(child.isGrowHeight()) grow++;
         }
         
