@@ -221,4 +221,16 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     if(anElement.hasAttribute(ColumnCount_Prop)) setColumnCount(anElement.getAttributeIntValue(ColumnCount_Prop));
 }
 
+/**
+ * Sets the given TextField to animate background label alignment from center to left when focused.
+ */
+public static void setBackLabelAlignAnimatedOnFocused(TextField aTextField, boolean aValue)
+{
+    aTextField.getLabel().setAlign(Pos.CENTER);
+    aTextField.addPropChangeListener(pce -> {
+        if(aTextField.isFocused()) ViewAnim.setAlign(aTextField.getLabel(), Pos.CENTER_LEFT, 200);
+        else ViewAnim.setAlign(aTextField.getLabel(), Pos.CENTER, 600);
+    }, View.Focused_Prop);
+}
+
 }

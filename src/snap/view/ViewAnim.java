@@ -4,6 +4,7 @@
 package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
+import snap.gfx.Pos;
 import snap.util.*;
 
 /**
@@ -402,6 +403,22 @@ public String toString()
     else if(_loopCount>0) StringUtils.toStringAdd(sb, "LoopCount", _loopCount);
     for(ViewAnim va : _anims) sb.append("\n    " + va.toString().replace("\n", "\n    "));
     return sb.toString();
+}
+
+/**
+ * Sets the alignment.
+ */
+public static void setAlign(View aView, Pos aPos, int aTime)
+{
+    ParentView par = aView instanceof ParentView? (ParentView)aView : null; if(par==null) return;
+    View child0 = par.getChildCount()>0? par.getChild(0) : null; if(child0==null) return;
+    double x0 = child0.getX(), y0 = child0.getY();
+    par.setAlign(aPos); par.layoutDeep();
+    double x1 = child0.getX(), y1 = child0.getY();
+    for(View child : par.getChildren()) {
+        child.setTransX(x0-x1); child.setTransY(y0-y1);
+        child.getAnimCleared(aTime).setTransX(0).setTransY(0).play();
+    }
 }
 
 }

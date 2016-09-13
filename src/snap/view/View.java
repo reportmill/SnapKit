@@ -1314,6 +1314,7 @@ public void setAlign(Pos aPos)
 {
     if(aPos==_align) return;
     firePropChange(Align_Prop, _align, _align=aPos);
+    relayout();
 }
 
 /**
