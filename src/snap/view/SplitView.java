@@ -102,7 +102,7 @@ public void removeItems()  { for(View view : getItems().toArray(new View[0])) re
  */
 public void addItemWithAnim(View aView, double aSize)
 {
-    addItem(aView);
+    addItem(aView); getDivider(0).setRemainder(1);
     getDivider(0).getAnimCleared(500).setValue("Remainder", 1d, aSize).play();
 }
 
@@ -111,7 +111,7 @@ public void addItemWithAnim(View aView, double aSize)
  */
 public void removeItemWithAnim(View aView)
 {
-    double size = isVertical()? aView.getHeight() : aView.getWidth();
+    double size = isVertical()? aView.getHeight() : aView.getWidth(); getDivider(0).setRemainder(size);
     getDivider(0).getAnimCleared(500).setValue("Remainder", size, 1d).setOnFinish(a -> removeItem(aView)).play();
 }
 
@@ -166,6 +166,5 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
         }
     }
 }
-
 
 }

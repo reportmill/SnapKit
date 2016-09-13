@@ -1,5 +1,6 @@
 package snap.view;
 import snap.gfx.*;
+import snap.util.ArrayUtils;
 
 /**
  * A View to represent a movable separation between views.
@@ -15,8 +16,11 @@ public class Divider extends View {
     // The remainder, if explicitly position relative to right side
     double    _rem = -1;
     
-    // The last mouse down location
-    double _mx, _my;
+    // Constants for Divider Fill
+    static final Color c1 = Color.get("#fbfbfb"), c2 = Color.get("#e3e3e3");
+    static final Paint DIVIDER_FILL_HOR = new GradientPaint(c1, c2, 90);
+    static final Paint DIVIDER_FILL_VER = new GradientPaint(c1, c2, 0);
+    static final Border DIVIDER_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
     
 /**
  * Creates a new Divider.
@@ -24,6 +28,7 @@ public class Divider extends View {
 public Divider()
 {
     enableEvents(MousePressed, MouseDragged);
+    setBorder(DIVIDER_BORDER);
 }
 
 /**
@@ -36,7 +41,7 @@ public double getLocation()  { return _loc; }
  */
 public void setLocation(double aValue)
 {
-    _loc = aValue;
+    _loc = aValue; _rem = -1;
     relayoutParent();
 }
 
@@ -50,7 +55,7 @@ public double getRemainder()  { return _rem; }
  */
 public void setRemainder(double aValue)
 {
-    _rem = aValue;
+    _rem = aValue; _loc = -1;
     relayoutParent();
 }
 
@@ -59,7 +64,9 @@ public void setRemainder(double aValue)
  */
 public double getRemainderAsLocation()
 {
-    ParentView par = getParent(); if(par==null) return _rem;
+    ParentView par = getParent(); if(par==null) return 0;
+    if(isHorizontal())
+        return _rem - par.getHeight() - par.getInsetsAll().bottom;
     return _rem - par.getWidth() - par.getInsetsAll().right;
 }
 
@@ -75,33 +82,45 @@ protected void setParent(ParentView aPar)
 {
     super.setParent(aPar);
     setCursor(isVertical()? Cursor.E_RESIZE:Cursor.N_RESIZE);
-}
-
-/**
- * Override to wrap in Painter and forward.
- */
-protected void paintFront(Painter aPntr)
-{
-    Insets ins = getInsetsAll();
-    double px = ins.left, py = ins.top, pw = getWidth() - px - ins.right, ph = getHeight() - py - ins.bottom;
-    aPntr.setPaint(getDivFill()); aPntr.fillRect(px,py,pw,ph);
-    aPntr.setColor(Color.LIGHTGRAY); aPntr.setStroke(Stroke.Stroke1); aPntr.drawRect(px+.5,py+.5,pw-1,ph-1);
+    setFill(isVertical()? DIVIDER_FILL_VER : DIVIDER_FILL_HOR);
 }
 
 /**
  * Calculates the preferred width.
  */
-protected double getPrefWidthImpl(double aH)
-{
-    Insets ins = getInsetsAll(); int s = isHorizontal()? 0 : _size; return ins.getLeft() + s + ins.getRight();
-}
+protected double getPrefWidthImpl(double aH)  { return isVertical()? _size : 0; }
 
 /**
  * Calculates the preferred height.
  */
-protected double getPrefHeightImpl(double aW)
+protected double getPrefHeightImpl(double aW)  { return isVertical()? 0 : _size; }
+
+/**
+ * Called to adjust layouts of children.
+ */
+public void adjustLayouts(View children[], Rect bounds[])
 {
-    Insets ins = getInsetsAll(); int s = isHorizontal()? _size : 0; return ins.getTop() + s + ins.getBottom();
+    // Get location and remainder (just return if neither is set)
+    double loc = getLocation(), rem = getRemainder(); if(loc<0 && rem<0) return;
+    
+    // Get parent and peers and peer bounds
+    ParentView par = getParent(); int index = ArrayUtils.indexOf(children, this);
+    View view0 = children[index-1], view1 = children[index+1];
+    Rect bnds0 = bounds[index-1], bnds1 = bounds[index+1], bnds = bounds[index];
+    
+    // If horizontal, get delta for divider location and shift peers (using y components)
+    if(isHorizontal()) {
+        if(loc<0) loc = bnds1.getMaxY() - rem - bnds.height - bnds0.getY();
+        double delta = loc - (bnds.getY() - bnds0.getY());
+        bnds0.height += delta; bnds.y += delta; bnds1.y += delta; bnds1.height -= delta;
+    }
+    
+    // If vertical, get delta for divider location and shift peers (using x components)
+    else {
+        if(loc<0) loc = bnds1.getMaxX() - rem - bnds.width - bnds0.getX();
+        double delta = loc - (bnds.getX() - bnds0.getX());
+        bnds0.width += delta; bnds.x += delta; bnds1.x += delta; bnds1.width -= delta;
+    }
 }
 
 /**
@@ -109,29 +128,28 @@ protected double getPrefHeightImpl(double aW)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    // Handle MousePressed: Set Mouse location and divider
-    if(anEvent.isMousePressed()) { _mx = anEvent.getX(); _my = anEvent.getY(); }
-    
-    // Handle MouseDragged: If divider pressed, reset adjacent sides
-    else if(anEvent.isMouseDragged()) {
-        int index = getParent().indexOfChild(this);
-        View peer = getParent().getChild(index-1);
-        Point pnt = localToParent(anEvent.getX() - _size/2, anEvent.getY() - _size/2);
-        double loc = isVertical()? pnt.getX() - peer.getX() : pnt.getY() - peer.getY();
-        setLocation(loc);
-        System.out.println("SetLocation: " + loc);
+    // Handle MouseDragged: If divider pressed, set location or remainder
+    if(anEvent.isMouseDragged()) {
+        
+        // Get parent, divider peers, whether peers grow and event in parent coords
+        ParentView par = getParent(); int index = par.indexOfChild(this); boolean ver = isVertical();
+        View peer0 = par.getChild(index-1), peer1 = par.getChild(index+1);
+        boolean peer0Grows = ver? peer0.isGrowWidth() : peer0.isGrowHeight();
+        boolean peer1Grows = ver? peer1.isGrowWidth() : peer1.isGrowHeight();
+        Point pnt = localToParent(anEvent.getX(), anEvent.getY());
+        
+        // If peer0 grows, set remainder
+        if(peer0Grows) {
+            double rem = ver? peer1.getMaxX() - pnt.getX() - getWidth()/2 : peer1.getMaxY() - pnt.getY() -getHeight()/2;
+            setRemainder(rem);
+        }
+        
+        // Otherwise, set location
+        else {
+            double loc = ver? pnt.getX() - getWidth()/2 - peer0.getX() : pnt.getY() - getHeight()/2 - peer0.getY();
+            setLocation(loc);
+        }
     }
 }
-
-/**
- * Returns the divider fill.
- */
-private Paint getDivFill()
-{
-    if(_dfill!=null) return _dfill;
-    Color c1 = Color.get("#fbfbfb"), c2 = Color.get("#e3e3e3");
-    double x1 = 0, y1 = .5, x2 = 1, y2 = .5; if(isHorizontal()) { x1 = x2 = .5; y1 = 0; y2 = 1; }
-    return _dfill = new GradientPaint(x1,y1,x2,y2, GradientPaint.getStops(0,c1,1,c2));
-} Paint _dfill;
 
 }

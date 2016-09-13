@@ -285,6 +285,26 @@ public void setHeight(double aValue)
 }
 
 /**
+ * Returns the mid x.
+ */
+public double getMidX()  { return getX() + getWidth()/2; }
+
+/**
+ * Returns the mid y.
+ */
+public double getMidY()  { return getY() + getHeight()/2; }
+
+/**
+ * Returns the max x.
+ */
+public double getMaxX()  { return getX() + getWidth(); }
+
+/**
+ * Returns the max x.
+ */
+public double getMaxY()  { return getY() + getHeight(); }
+
+/**
  * Returns the view x/y.
  */
 public Point getXY()  { return new Point(getX(),getY()); }
