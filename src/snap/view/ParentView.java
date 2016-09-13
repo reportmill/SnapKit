@@ -178,6 +178,16 @@ public View[] getChildrenManaged()
 }
 
 /**
+ * Override to propagate to children.
+ */
+protected void setShowing(boolean aValue)
+{
+    if(aValue==_showing) return; super.setShowing(aValue);
+    for(View child : getChildren())
+        child.setShowing(aValue && child.isVisible());
+}
+
+/**
  * Override to propogate to children.
  */
 public void setOwner(ViewOwner anOwner)

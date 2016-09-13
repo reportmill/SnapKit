@@ -851,10 +851,6 @@ protected void setShowing(boolean aValue)
     if(!aValue && isFocused())
         setFocused(false);
     
-    // Propogate to children
-    if(this instanceof ParentView) { ParentView pview = (ParentView)this;
-        for(View child : pview.getChildren()) child.setShowing(_showing && child.isVisible()); }
-        
     // If Anim set, play/suspend
     ViewAnim anim = getAnim(-1);
     if(aValue && anim!=null  && anim.isSuspended()) anim.play();
