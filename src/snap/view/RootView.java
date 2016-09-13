@@ -135,7 +135,7 @@ public void setCurrentCursor(Cursor aCursor)
 /** 
  * Override to try to get tool tip from mouse over stack.
  */
-public String getToolTipText(ViewEvent anEvent)
+public String getToolTip(ViewEvent anEvent)
 {
     for(int i=_mouseOvers.size()-1;i>=0;i--) { View view = _mouseOvers.get(i);
         String text = view.isToolTipEnabled()? view.getToolTip(anEvent.copyForView(view)) : view.getToolTip();
