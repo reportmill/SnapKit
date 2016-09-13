@@ -436,7 +436,11 @@ public boolean isText()
 /**
  * Returns the file bytes as a string.
  */
-public String getText()  { return new String(getBytes()); }
+public String getText()
+{
+    byte bytes[] = getBytes(); if(bytes==null) return null;
+    return new String(bytes);
+}
 
 /**
  * Sets the file bytes as a string.

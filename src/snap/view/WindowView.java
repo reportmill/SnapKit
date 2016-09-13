@@ -247,10 +247,8 @@ public void show()
  */
 public void show(View aView, double aSX, double aSY)
 {
-    // Make sure content is set
+    // Make sure content is set and window is initialized
     getContent(true);
-    
-    // Make sure window is initialized
     getHelper().checkInit();
     
     // If FrameSaveName provided, set Location from defaults and register to store future window moves
@@ -290,14 +288,14 @@ public void toFront()  { getHelper().toFront(); }
  */
 public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
 {
-    // Make sure content is set
+    // Make sure content is set and window is initialized
     getContent(true);
+    getHelper().checkInit();
     
     // Get rect for given node and point for given offsets
     Rect rect = aView!=null? aView.getLocalToScreen().createTransformedShape(aView.getBoundsInside()).getBounds() :
         getEnv().getScreenBoundsInset();
     double x = aDX, y = aDY;
-    getHelper().checkInit();
     
     // Modify x for given HPos
     switch(aPos.getHPos()) {

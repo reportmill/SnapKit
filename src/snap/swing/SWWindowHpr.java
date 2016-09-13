@@ -31,7 +31,7 @@ public void setWidth(double aValue)  { get().setSize((int)aValue, get().getHeigh
 /** Sets the height value. */
 public void setHeight(double aValue)  { get().setSize(get().getWidth(), (int)aValue); }
 
-/** Override to get node as WindowView. */
+/** Override to get view as WindowView. */
 public WindowView getView()  { return (WindowView)super.getView(); }
     
 /**
@@ -39,12 +39,12 @@ public WindowView getView()  { return (WindowView)super.getView(); }
  */
 protected void init()
 {
-    // Get native, node and root pane
+    // Get native, window view and root view
     Window win = get();
-    WindowView node = getView();
-    RootView rpane = node.getRootView();
+    WindowView wview = getView();
+    RootView rview = wview.getRootView();
 
-    // Add component listener to sync win bounds changes with node
+    // Add component listener to sync win bounds changes with WindowView/RootView
     win.addComponentListener(new ComponentAdapter() {
         public void componentMoved(ComponentEvent e) { boundsChanged(); }
         public void componentResized(ComponentEvent e) { boundsChanged(); }
@@ -65,33 +65,33 @@ protected void init()
     if(win instanceof JFrame) { JFrame frame = (JFrame)get();
         
         // Set window attributes: Title, AlwaysOnTop, Modal and Resizable
-        frame.setTitle(node.getTitle());
-        frame.setAlwaysOnTop(node.isAlwaysOnTop()); //setIconImage(getIconImage());
-        frame.setResizable(node.isResizable()); //if(_windowListener!=null) addWindowListener(_windowListener);
+        frame.setTitle(wview.getTitle());
+        frame.setAlwaysOnTop(wview.isAlwaysOnTop()); //setIconImage(getIconImage());
+        frame.setResizable(wview.isResizable()); //if(_windowListener!=null) addWindowListener(_windowListener);
     
         // Install WindowView.RootView as ContentPane
-        frame.setContentPane(rpane.getNative(JComponent.class));
+        frame.setContentPane(rview.getNative(JComponent.class));
     }
     
     // Configure JDialog
     else if(win instanceof JDialog) { JDialog frame = (JDialog)get();
     
         // Set window attributes: Title, AlwaysOnTop, Modal and Resizable
-        frame.setTitle(node.getTitle());
-        frame.setAlwaysOnTop(node.isAlwaysOnTop()); //setIconImage(getIconImage());
-        frame.setModal(node.isModal());
-        frame.setResizable(node.isResizable());
-        if(node.getType()==WindowView.TYPE_UTILITY)
+        frame.setTitle(wview.getTitle());
+        frame.setAlwaysOnTop(wview.isAlwaysOnTop()); //setIconImage(getIconImage());
+        frame.setModal(wview.isModal());
+        frame.setResizable(wview.isResizable());
+        if(wview.getType()==WindowView.TYPE_UTILITY)
             frame.getRootPane().putClientProperty("Window.style", "small");
-        else if(node.getType()==WindowView.TYPE_PLAIN)
+        else if(wview.getType()==WindowView.TYPE_PLAIN)
             frame.setUndecorated(true);
         //setStyle(getStyle()); //if(_windowListener!=null) addWindowListener(_windowListener);
                 
         // Install WindowView.RootView as ContentPane
-        frame.setContentPane(rpane.getNative(JComponent.class));
+        frame.setContentPane(rview.getNative(JComponent.class));
     }
     
-    // Size window to root pane and update bounds
+    // Size window to root view
     win.pack();
     boundsChanged();
 }
@@ -109,31 +109,31 @@ public void show(View aView, double aSX, double aSY)
     // On first show, configure window
     checkInit();
         
-    // Get native and node
+    // Get native window and window view
     Window win = get();
-    WindowView node = getView();
+    WindowView wview = getView();
     
     // If always-on-top, turn this on (since this is can be turned off in setWindowVisible(false))
-    //if(node.isAlwaysOnTop()) win.setAlwaysOnTop(true);
+    //if(wview.isAlwaysOnTop()) win.setAlwaysOnTop(true);
 
     // Set window visible
     win.setLocation((int)Math.round(aSX),(int)Math.round(aSY));
     win.setVisible(true);
     
     // If window is modal, just return
-    if(node.isModal())
+    if(wview.isModal())
         return;
     
     // If window has frame save name, set listener
-    if(node.getSaveName()!=null && node.getProp("FrameSaveListener")==null) {
-        FrameSaveListener fsl = new FrameSaveListener(node);
-        node.setProp("FrameSaveListener", fsl);
+    if(wview.getSaveName()!=null && wview.getProp("FrameSaveListener")==null) {
+        FrameSaveListener fsl = new FrameSaveListener(wview);
+        wview.setProp("FrameSaveListener", fsl);
         win.addComponentListener(fsl);
     }
     
     // If window is always-on-top or does hide-on-deactivate, add listener to handle app deactivate stuff
-    //if(node.isAlwaysOnTop() || node.isHideOnDeactivate()) {
-        //if(_actvAdptr==null) _actvAdptr = new ActivationAdapter(win,node.isHideOnDeactivate()));
+    //if(wview.isAlwaysOnTop() || wview.isHideOnDeactivate()) {
+        //if(_actvAdptr==null) _actvAdptr = new ActivationAdapter(win,wview.isHideOnDeactivate()));
         //_actvAdptr.setEnabled(true); }
 }
 
@@ -201,10 +201,10 @@ public void setImage(Image anImage)  { get().setIconImage(AWT.get(anImage)); }
  */
 protected void showingChanged()
 {
-    Window win = get(); WindowView node = getView();
+    Window win = get(); WindowView wview = getView();
     boolean showing = get().isShowing();
-    ViewUtils.setShowing(node, showing);
-    if(showing) node.getRootView().repaint();
+    ViewUtils.setShowing(wview, showing);
+    if(showing) wview.getRootView().repaint();
 }
     
 /**
@@ -213,10 +213,10 @@ protected void showingChanged()
 protected void activeChanged()
 {
     Window win = get(); boolean active = win.isActive();
-    WindowView node = getView();
-    ViewUtils.setFocused(node, active);
+    WindowView wview = getView();
+    ViewUtils.setFocused(wview, active);
     ViewEvent.Type etype = active? ViewEvent.Type.WinActivated : ViewEvent.Type.WinDeactivated;
-    if(node.getEventAdapter().isEnabled(etype))
+    if(wview.getEventAdapter().isEnabled(etype))
         sendWinEvent(null, etype);
 }
 
@@ -225,17 +225,23 @@ protected void activeChanged()
  */
 protected void boundsChanged()
 {
+    // Get window (just return if bogus height - seems pack() sometimes does this first)
     Window win = get();
-    WindowView node = getView();
-    RootView rpane = node.getRootView();
-    JComponent rpaneNtv = rpane.getNative(JComponent.class);
-    node.setBounds(win.getX(),win.getY(),win.getWidth(),win.getHeight());
-    java.awt.Point pnt = SwingUtilities.convertPoint(rpaneNtv, 0, 0, win);
-    rpane.setBounds(pnt.x, pnt.y, rpaneNtv.getWidth(), rpaneNtv.getHeight());
+    if(win.getHeight()<30) return;
+    
+    // Update WindowView bounds from native
+    WindowView wview = getView();
+    wview.setBounds(win.getX(),win.getY(),win.getWidth(),win.getHeight());
+    
+    // Update RootView bounds from native
+    RootView rview = wview.getRootView();
+    JComponent rviewNtv = rview.getNative(JComponent.class);
+    java.awt.Point pnt = SwingUtilities.convertPoint(rviewNtv, 0, 0, win);
+    rview.setBounds(pnt.x, pnt.y, rviewNtv.getWidth(), rviewNtv.getHeight());
 }
 
 /**
- * Called when Node changes to update native.
+ * Called when WindowView changes to update native.
  */
 public void propertyChange(PropChange aPC)
 {
@@ -252,19 +258,19 @@ public void propertyChange(PropChange aPC)
  */
 protected void sendWinEvent(WindowEvent anEvent, ViewEvent.Type aType)
 {
-    View node = getView(); if(!node.getEventAdapter().isEnabled(aType)) return;
-    ViewEvent event = node.getEnv().createEvent(node, anEvent, aType, null);
-    node.fireEvent(event);
+    View wview = getView(); if(!wview.getEventAdapter().isEnabled(aType)) return;
+    ViewEvent event = wview.getEnv().createEvent(wview, anEvent, aType, null);
+    wview.fireEvent(event);
     if(aType==ViewEvent.Type.WinClosing && get() instanceof JFrame && event.isConsumed())
         ((JFrame)get()).setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 }
 
 /** A component listener to save frame to preferences on move. */
 private static class FrameSaveListener extends ComponentAdapter {
-    public FrameSaveListener(WindowView aWN)  { _wnode = aWN; } WindowView _wnode;
+    public FrameSaveListener(WindowView aWN)  { _wview = aWN; } WindowView _wview;
     public void componentMoved(ComponentEvent e)  { setFrameString(e); }
     public void componentResized(ComponentEvent e)  { setFrameString(e); }
-    private void setFrameString(ComponentEvent e)  { _wnode.saveFrame(); }
+    private void setFrameString(ComponentEvent e)  { _wview.saveFrame(); }
 }
 
 }
