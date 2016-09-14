@@ -110,7 +110,6 @@ protected Map <String, Class> createClassMap()
     cmap.put("TableCol", TableCol.class);
     cmap.put("TabView", TabView.class);
     cmap.put("TextView", TextView.class);
-    cmap.put("TextViewBase", TextViewBase.class);
     cmap.put("TextField", TextField.class);
     cmap.put("ThumbWheel", ThumbWheel.class);
     cmap.put("ToggleButton", ToggleButton.class);
@@ -150,7 +149,8 @@ protected void addAliases(Map cmap)
     cmap.put("polygon", PathView.class); //RMPolygonShape.class
     cmap.put("rect", RectView.class); //RMRectShape.class
     cmap.put("spring-shape", SpringView.class); //RMSpringShape.class
-    cmap.put("text", TextViewBase.class); //RMTextShape.class
+    cmap.put("text", TextView.class); //RMTextShape.class
+    cmap.put("TextViewBase", TextView.class);
     
     // Swing Component shapes
     cmap.put("panel", SpringView.class);
