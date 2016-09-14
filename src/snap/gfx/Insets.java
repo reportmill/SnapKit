@@ -92,6 +92,7 @@ public static Insets get(String aString)
     int left = margins.length>1? StringUtils.intValue(margins[1]) : 0;
     int bottom = margins.length>2? StringUtils.intValue(margins[2]) : 0;
     int right = margins.length>3? StringUtils.intValue(margins[3]) : 0;
+    if(margins.length==1) left = right = bottom = top;
     return new Insets(top, left, bottom, right);
 }
 

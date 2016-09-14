@@ -39,7 +39,7 @@ public class RootView extends ParentView {
     Set <View>               _animViews = new HashSet();
     
     // The timer for animated views
-    ViewTimer                _timer = new ViewTimer(40, t -> activatePaintLater());
+    ViewTimer                _timer = new ViewTimer(25, t -> activatePaintLater());
 
     // Whether painting in debug mode
     boolean                  _debug = false; int _pc; long _frames[] = null; //new long[20];

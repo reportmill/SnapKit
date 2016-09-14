@@ -34,7 +34,42 @@ public Paint getTextFill()  { return _textFill; }
 public void setTextFill(Paint aPnt)  { _textFill = aPnt; repaint(); }
 
 /**
- * Returns the default alignment.
+ * Returns the text length.
+ */
+public int length()  { return _text!=null? _text.length() : 0; }
+
+/**
+ * Returns the text width.
+ */
+public double getTextWidth()  { return length()>0? Math.ceil(getFont().getStringAdvance(getText())) : 0; }
+
+/**
+ * Returns the text height.
+ */
+public double getTextHeight()  { return Math.ceil(getFont().getLineHeight()); }
+
+/**
+ * Returns the text bounds.
+ */
+public Rect getTextBounds()
+{
+    // Get basic bounds for TextField size/insets and font/string width/height
+    Insets ins = getInsetsAll(); double width = getWidth(), height = getHeight();
+    double tx = ins.left, ty = ins.top, tw = getTextWidth(), th = getTextHeight();
+    
+    // Adjust rect by alignment
+    double ax = ViewUtils.getAlignX(this), ay = ViewUtils.getAlignY(this);
+    if(ax>0) { double extra = width - tx - ins.right - tw; 
+        tx = Math.max(tx+extra*ax,tx); }
+    if(ay>0) { double extra = height - ty - ins.bottom - th;
+        ty = Math.max(ty+Math.round(extra*ay),ty); }
+        
+    // Create/return rect
+    return new Rect(tx,ty,tw,th);
+}
+
+/**
+ * Override to make default center-left.
  */    
 public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
@@ -43,8 +78,8 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
  */
 public double getPrefWidthImpl(double aH)
 {
-    Insets ins = getInsetsAll();
-    return ins.left + (_text!=null? Math.ceil(getFont().getStringAdvance(_text)) : 0) + ins.right;
+    Insets ins = getInsetsAll(); double tw = getTextWidth();
+    return ins.left + tw + ins.right;
 }
 
 /**
@@ -52,31 +87,19 @@ public double getPrefWidthImpl(double aH)
  */
 public double getPrefHeightImpl(double aW)
 {
-    Insets ins = getInsetsAll();
-    return ins.top + Math.ceil(getFont().getLineHeight()) + ins.bottom;
+    Insets ins = getInsetsAll(); double th = getTextHeight();
+    return ins.top + th + ins.bottom;
 }
 
 /**
- * Paints node.
+ * Paints StringView.
  */
 public void paintFront(Painter aPntr)
 {
-    // Clear rect
-    if(_text==null) return;
-    double width = getWidth(), height = getHeight();
-    
-    // Calcuate text x/y based on insets, font and alignment
-    Insets ins = getInsetsAll(); Font font = getFont(); if(font==null) return;
-    double x = ins.left, y = ins.top;
-    double ax = ViewUtils.getAlignX(this), ay = ViewUtils.getAlignY(this);
-    if(ax>0) { double extra = width - x - ins.right - font.getStringAdvance(_text); 
-        x = Math.max(extra*ax,x); }
-    if(ay>0) { double extra = height - y - ins.bottom - Math.ceil(font.getLineHeight());
-        y = Math.max(Math.round(extra*ay),y); }
-        
-    // Set font/paint and draw string
+    if(length()==0) return;
+    Rect bnds = getTextBounds(); Font font = getFont(); double baseline = Math.ceil(font.getAscent());
     aPntr.setFont(font); aPntr.setPaint(_textFill);
-    aPntr.drawString(_text, x, y+Math.ceil(font.getAscent()));
+    aPntr.drawString(_text, bnds.x, bnds.y + baseline);
 }
 
 /**

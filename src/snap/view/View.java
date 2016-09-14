@@ -2066,10 +2066,11 @@ public View clone()  { return new ViewArchiver().copy(this); }
  */
 public String toString()
 {
-    StringBuffer sb = new StringBuffer(getClass().getSimpleName()).append(" {");
-    if(getName()!=null && getName().length()>0) sb.append(" Name=").append(getName()).append(',');
-    sb.append(" Bounds=").append(getBounds()).append(',');
-    return sb.append(" }").toString();
+    StringBuffer sb = StringUtils.toString(this);
+    if(getName()!=null && getName().length()>0) StringUtils.toStringAdd(sb, "Name", getName());
+    if(getText()!=null && getText().length()>0) StringUtils.toStringAdd(sb, "Text", getText());
+    StringUtils.toStringAdd(sb, "Bounds", getBounds());
+    return sb.toString();
 }
 
 /**

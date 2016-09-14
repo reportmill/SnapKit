@@ -96,6 +96,7 @@ public static StringBuffer toStringAdd(StringBuffer aSB, String aName, Object aV
     Object val = aVal;
     if(val instanceof snap.gfx.Color) val = ((snap.gfx.Color)val).toHexString();
     if(val instanceof Double) val = toString((Double)val);
+    if(val instanceof String && !((String)val).startsWith("\"")) val = '"' + (String)val + '"';
     
     int ind = aSB.length() - 2;
     if(aSB.charAt(ind-1)!='{') aSB.insert(ind++, ',');
@@ -388,7 +389,7 @@ public static boolean equalsIC(String s1, String s2)
 /**
  * Returns whether s1 equals any of the given strings, ignoring case.
  */
-public static boolean equalsIC(String s1, String... strings)
+public static boolean equalsIC(String s1, String ... strings)
 {
     for(String string : strings) if(equalsIC(s1, string)) return true; return false;
 }
@@ -404,7 +405,7 @@ public static boolean endsWithIC(String s1, String s2)
 /**
  * Returns whether s1 ends with any of the given strings, ignoring case.
  */
-public static boolean endsWithIC(String s1, String... strings)
+public static boolean endsWithIC(String s1, String ... strings)
 {
     for(String string : strings) if(endsWithIC(s1, string)) return true; return false;
 }
@@ -420,7 +421,7 @@ public static boolean startsWithIC(String s1, String s2)
 /**
  * Returns whether s1 starts with any of the given strings, ignoring case.
  */
-public static boolean startsWithIC(String s1, String... strings)
+public static boolean startsWithIC(String s1, String ... strings)
 {
     for(String string : strings) if(startsWithIC(s1, string)) return true; return false;
 }
