@@ -37,7 +37,7 @@ public PopupWindow getPopup()
 public void show(View aView, double aX, double aY)
 {
     _view = aView;
-    resetCellsLater();
+    relayout();
     getPopup().show(_view = aView, aX, aY);
     
     // Watch

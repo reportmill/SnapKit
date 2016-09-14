@@ -39,17 +39,17 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
     // The paint for targeted Fill and TextFill
     Paint                 _targTextFill = Color.WHITE;
     
-    // Whether cells needs reset
-    boolean               _resetCells; //, _resetCellsSet = () -> resetCells();
-    
     // The index of the first visible cell
-    int                   _cellStart, _cellEnd;
+    int                   _cellStart = -1, _cellEnd;
     
     // List of items that need to be updated
     Set <T>               _updateItems = new HashSet();
     
     // Value of cell width/height
     double                _sampleWidth = -1, _sampleHeight = -1;
+    
+    // The layout for cells
+    ViewLayout.VBoxLayout _layout = new ViewLayout.VBoxLayout(this);
     
     // Shared CellPadding default
     static Insets         _cellPadDefault = new Insets(2,2,2,4);
@@ -71,6 +71,7 @@ public ListView()
     enableEvents(MousePressed, KeyPressed, Action);
     setFocusable(true); setFocusWhenPressed(true);
     setFill(Color.WHITE);
+    _layout.setFillWidth(true);
 }
 
 /**
@@ -88,7 +89,7 @@ public void setItems(List <T> theItems)
     _items.clear();
     if(theItems!=null) _items.addAll(theItems);
     setSelectedItem(sitem);
-    resetCellsLater();
+    relayout();
     _sampleWidth = _sampleHeight = -1;
     relayoutParent();
 }
@@ -213,7 +214,7 @@ public void setCellPadding(Insets aPadding)
     if(aPadding==null) aPadding = getCellPaddingDefault();
     if(aPadding.equals(_cellPad)) return;
     firePropChange(CellPadding_Prop, _cellPad, _cellPad=aPadding);
-    resetCellsLater();
+    relayout();
 }
 
 /**
@@ -304,22 +305,6 @@ public void updateIndex(int anIndex)
 }
 
 /**
- * Updates items.
- */
-protected void updateItemsNow()
-{
-    // Get items
-    T items[] = null; synchronized (_updateItems) { items = (T[])_updateItems.toArray(); _updateItems.clear(); }
-    
-    // Update items
-    for(T item : items) {
-        int index = getItems().indexOf(item);
-        if(index>=_cellStart && index<=_cellEnd)
-            updateCellAt(index);
-    }
-}
-
-/**
  * Updates item at index (required to be in visible range).
  */
 protected void updateCellAt(int anIndex)
@@ -337,18 +322,26 @@ protected void updateCellAt(int anIndex)
 public ListCell <T> getCell(int anIndex)  { return (ListCell)getChild(anIndex); }
 
 /**
- * Resets the cells.
+ * Returns the preferred width.
  */
-protected void resetCellsLater()  { _resetCells = true; relayout(); }
+protected double getPrefWidthImpl(double aH)  { if(_sampleWidth<0) calcSampleSize(); return _sampleWidth; }
 
 /**
- * Resets all nodes.
+ * Returns the preferred height.
  */
-protected void resetCells()
+protected double getPrefHeightImpl(double aW)  { return getRowHeight()*_items.size(); }
+
+/**
+ * Override to layout children with VBox layout.
+ */
+protected void layoutChildren()
 {
     // Update CellStart/CellEnd for current ClipBounds
-    Rect clip = getClipBoundsAll(); if(clip==null) clip = getBoundsInside();
-    double rh = getRowHeight(); _cellStart = (int)Math.max(clip.getY()/rh,0); _cellEnd = (int)(clip.getMaxY()/rh);
+    Rect clip = getClipBoundsAll(); if(clip==null) clip = getBoundsInside(); double rh = getRowHeight();
+    
+    // Update CellStart/CellEnd for current ClipBounds
+    _cellStart = (int)Math.max(clip.getY()/rh,0);
+    _cellEnd = (int)(clip.getMaxY()/rh);
     
     // Remove cells before and/or after new visible range
     while(getChildCount()>0 && getCell(0).getRow()<_cellStart) removeChild(0);
@@ -374,8 +367,16 @@ protected void resetCells()
         }
     }
     
-    // Mark reset complete
-    _resetCells = false;
+    // Update items
+    T items[] = null; synchronized (_updateItems) { items = (T[])_updateItems.toArray(); _updateItems.clear(); }
+    for(T item : items) {
+        int index = getItems().indexOf(item);
+        if(index>=_cellStart && index<=_cellEnd)
+            updateCellAt(index);
+    }
+    
+    // Do real layout
+    _layout.layoutChildren();
 }
 
 /**
@@ -440,12 +441,25 @@ public Insets getInsetsAll()
 /**
  * Override to reset cells.
  */
-public void setY(double aValue)  { if(aValue==getY()) return; resetCellsLater(); super.setY(aValue); }
+public void setY(double aValue)  { if(aValue==getY()) return; super.setY(aValue); relayout(); }
 
 /**
  * Override to reset cells.
  */
-public void setHeight(double aValue)  { if(aValue==getHeight()) return; resetCellsLater(); super.setHeight(aValue); }
+public void setHeight(double aValue)  { if(aValue==getHeight()) return; super.setHeight(aValue); relayout(); }
+
+/**
+ * Override to see if paint exposes missing cells. If so, request layout.
+ * Should only happen under rare circumstances, like when a Scroller containing ListView grows.
+ */
+public void paintAll(Painter aPntr)
+{
+    super.paintAll(aPntr);
+    Rect clip = aPntr.getClipBounds(); double rh = getRowHeight();
+    int cellStart = (int)Math.max(clip.getY()/rh,0), cellEnd = (int)(clip.getMaxY()/rh);
+    if(cellStart!=_cellStart || cellEnd!=_cellEnd)
+        relayout();
+}
 
 /**
  * Calculates sample width and height from items.
@@ -465,27 +479,6 @@ protected void calcSampleSize()
     }
     if(_sampleWidth<0) _sampleWidth = 100;
     if(_sampleHeight<0) _sampleHeight = Math.ceil(getFont().getLineHeight()+4);
-}
-
-/**
- * Returns the preferred width.
- */
-protected double getPrefWidthImpl(double aH)  { if(_sampleWidth<0) calcSampleSize(); return _sampleWidth; }
-
-/**
- * Returns the preferred height.
- */
-protected double getPrefHeightImpl(double aW)  { return getRowHeight()*_items.size(); }
-
-/**
- * Override to layout children with VBox layout.
- */
-protected void layoutChildren()
-{
-    if(_resetCells) resetCells();
-    updateItemsNow();
-    ViewLayout.VBoxLayout layout = new ViewLayout.VBoxLayout(this); layout.setFillWidth(true);
-    layout.layoutChildren();
 }
 
 /**

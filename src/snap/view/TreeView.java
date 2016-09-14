@@ -432,7 +432,7 @@ protected Map getProps(T anItem, boolean doCreate)
 public void setY(double aValue)
 {
     if(aValue==getY()) return; super.setY(aValue);
-    for(TreeCol tcol : getCols()) tcol.resetCellsLater();
+    for(TreeCol tcol : getCols()) tcol.relayout();
 }
 
 /**
@@ -441,7 +441,7 @@ public void setY(double aValue)
 public void setHeight(double aValue)
 {
     if(aValue==getHeight()) return; super.setHeight(aValue);
-    for(TreeCol tcol : getCols()) tcol.resetCellsLater();
+    for(TreeCol tcol : getCols()) tcol.relayout();
 }
 
 /**

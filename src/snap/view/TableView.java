@@ -276,7 +276,7 @@ public int getRowAt(double aX, double aY)  { return (int)(aY/getRowHeight()); }
 public void setY(double aValue)
 {
     if(aValue==getY()) return; super.setY(aValue);
-    for(TableCol tcol : getCols()) tcol.resetCellsLater();
+    for(TableCol tcol : getCols()) tcol.relayout();
 }
 
 /**
@@ -285,7 +285,7 @@ public void setY(double aValue)
 public void setHeight(double aValue)
 {
     if(aValue==getHeight()) return; super.setHeight(aValue);
-    for(TableCol tcol : getCols()) tcol.resetCellsLater();
+    for(TableCol tcol : getCols()) tcol.relayout();
 }
 
 /**
