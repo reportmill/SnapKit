@@ -30,9 +30,9 @@ public void setText(String aString)  { _text = aString; }
 public TextPane getTextPane()  { getUI(); return _textPane; }
 
 /**
- * Returns the TextArea.
+ * Returns the TextView.
  */
-public TextViewBase getTextArea()  { getUI(); return _textPane.getTextView(); }
+public TextView getTextView()  { getUI(); return _textPane.getTextView(); }
 
 /**
  * Create UI panel.

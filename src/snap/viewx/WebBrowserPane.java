@@ -94,7 +94,7 @@ public void respondUI(ViewEvent anEvent)
     // Handle AddressTextAction
     if(anEvent.equals("AddressTextAction")) {
         requestFocus("AddressText");
-        getView("AddressText", TextViewBase.class).selectAll();
+        getView("AddressText", TextField.class).selectAll();
     }
     
     // Handle InfoButton

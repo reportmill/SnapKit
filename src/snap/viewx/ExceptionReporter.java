@@ -81,8 +81,7 @@ public void uncaughtException(Thread t, Throwable aThrowable)
     
     // Finally, set the exception text in the UI
     setViewValue("BacktraceText", eBuffer.toString());
-    getView("BacktraceText", TextViewBase.class).setSelStart(0);
-    getView("BacktraceText", TextViewBase.class).setSelEnd(0);
+    getView("BacktraceText", TextView.class).setSel(0,0);
     
     // Run panel (just return if cancelled)
     DialogBox dbox = new DialogBox("ReportMill Exception Reporter");

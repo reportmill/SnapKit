@@ -63,7 +63,7 @@ public View createUI()
     for(View node : _toolBarPane.getChildren()) if(node instanceof ButtonBase) node.setFocusable(false);
     
     // Create TextView and add to ScrollView (make sure it is always as big as ScrollView ViewportBounds
-    TextViewBase text = createTextView();
+    TextView text = createTextView();
     text.setName("TextView"); text.setGrowWidth(true); text.setGrowHeight(true);
     ScrollView spane = new ScrollView(text); spane.setName("ScrollView");
     setFirstFocus(text);
@@ -160,7 +160,7 @@ public void respondUI(ViewEvent anEvent)
     // Handle FindButton
     if(anEvent.equals("FindButton")) {
         if(!getTextView().getSel().isEmpty()) setViewValue("FindText", getTextView().getSel().getString());
-        getView("FindText", TextViewBase.class).selectAll();
+        getView("FindText", TextField.class).selectAll();
         requestFocus("FindText");
     }
     
@@ -227,7 +227,7 @@ public void find(String aString, boolean ignoreCase, boolean isNext)
     setViewValue("FindText", aString);
 
     // Get search string and find in text
-    TextViewBase tview = getTextView();
+    TextView tview = getTextView();
     String string = aString; if(ignoreCase) string = string.toLowerCase();
     String text = tview.getText(); if(ignoreCase) text = text.toLowerCase();
     
