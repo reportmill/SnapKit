@@ -101,14 +101,11 @@ public class View implements XMLArchiver.Archivable {
     // The clip (if set)
     Shape           _clip;
     
-    // Autosizing
-    String          _asize;
-    
     // Bindings for this view
     List <Binding>  _bindings = Collections.EMPTY_LIST;
     
     // Client properties
-    Map             _props = new HashMap();
+    Map             _props = Collections.EMPTY_MAP;
     
     // The parent of this view
     ParentView      _parent;
@@ -132,7 +129,7 @@ public class View implements XMLArchiver.Archivable {
     ViewHelper      _helper;
     
     // The view environment
-    ViewEnv         _env = ViewEnv.getEnv();
+    static final ViewEnv  _env = ViewEnv.getEnv();
 
     // Shared empty insets
     private static final Insets _emptyIns = new Insets(0);
@@ -205,10 +202,10 @@ public class View implements XMLArchiver.Archivable {
     public static final ViewEvent.Type WinDeactivated = ViewEvent.Type.WinDeactivated;
     public static final ViewEvent.Type WinOpened = ViewEvent.Type.WinOpened;
     public static final ViewEvent.Type WinClosing = ViewEvent.Type.WinClosing;
-    public ViewEvent.Type KeyEvents[] = { KeyPressed, KeyReleased, KeyTyped };
-    public ViewEvent.Type MouseEvents[] = { MousePressed, MouseDragged, MouseReleased,
+    public static final ViewEvent.Type KeyEvents[] = { KeyPressed, KeyReleased, KeyTyped };
+    public static final ViewEvent.Type MouseEvents[] = { MousePressed, MouseDragged, MouseReleased,
         MouseClicked, MouseEntered, MouseMoved, MouseExited };
-    public ViewEvent.Type DragEvents[] = { DragEnter, DragExit, DragOver, DragDrop };
+    public static final ViewEvent.Type DragEvents[] = { DragEnter, DragExit, DragOver, DragDrop };
 
 /**
  * Returns the name for the view.
@@ -1108,6 +1105,7 @@ public Object getProp(String aName)  { return _props.get(aName); }
  */
 public Object setProp(String aName, Object aValue)
 {
+    if(_props==Collections.EMPTY_MAP) _props = new HashMap();
     Object val = _props.put(aName, aValue);
     firePropChange(aName, val, aValue);
     return val;
