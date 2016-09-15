@@ -86,6 +86,9 @@ public class View implements XMLArchiver.Archivable {
     // The view effect
     Effect          _effect;
     
+    // The opacity
+    double          _opacity = 1;
+    
     // The view font
     Font            _font;
     
@@ -161,15 +164,16 @@ public class View implements XMLArchiver.Archivable {
     public static final String Focused_Prop = "Focused";
     public static final String Focusable_Prop = "Focusable";
     public static final String FocusWhenPressed_Prop = "FocusWhenPressed";
+    public static final String Border_Prop = "Border";
     public static final String Clip_Prop = "Clip";
     public static final String Cursor_Prop = "Cursor";
     public static final String Effect_Prop = "Effect";
     public static final String Fill_Prop = "Fill";
     public static final String Font_Prop = "Font";
     public static final String Align_Prop = "Align";
+    public static final String Opacity_Prop = "Opacity";
     public static final String Padding_Prop = "Padding";
     public static final String Parent_Prop = "Parent";
-    public static final String Border_Prop = "Border";
     public static final String Showing_Prop = "Showing";
     public static final String Text_Prop = "Text";
     public static final String ToolTip_Prop = "ToolTip";
@@ -497,6 +501,29 @@ public void setEffect(Effect anEff)
     if(SnapUtils.equals(anEff,_effect)) return;
     firePropChange(Effect_Prop, _effect, _effect=anEff);
     repaint();
+}
+
+/**
+ * Returns the opacity of the view.
+ */
+public double getOpacity()  { return _opacity; }
+
+/**
+ * Sets the opacity of the view.
+ */
+public void setOpacity(double aValue)
+{
+    if(aValue==_opacity) return;
+    firePropChange(Opacity_Prop, _opacity, _opacity=aValue);
+}
+
+/**
+ * Returns the combined opacity of this view and it's parents.
+ */
+public double getOpacityAll()
+{
+    double opacity = getOpacity(); ParentView par = getParent();
+    return par!=null? opacity*par.getOpacityAll() : opacity;
 }
 
 /**
@@ -1373,6 +1400,11 @@ public Insets getInsetsAll()
  */
 protected void paintAll(Painter aPntr)
 {
+    // Set opacity
+    double opacity = getOpacityAll(), opacityOld = 0;
+    if(opacity!=1) {
+        opacityOld = aPntr.getOpacity(); aPntr.setOpacity(opacity); }
+
     // If view has effect, get/create effect painter to speed up successive paints
     if(getEffect()!=null) { Effect eff = getEffect();
         PainterDVR pdvr = new PainterDVR();
@@ -1386,6 +1418,10 @@ protected void paintAll(Painter aPntr)
     
     // Otherwise, do normal draw
     else { paintBack(aPntr); paintFront(aPntr); }
+    
+    // Restore opacity
+    if(opacity!=1)
+        aPntr.setOpacity(opacityOld);
 }
 
 // DVR painters for caching effect drawing
