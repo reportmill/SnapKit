@@ -1950,7 +1950,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
     // Archive Disabled, Visible, Opacity
     if(isDisabled()) e.add(Disabled_Prop, true);
     if(!isVisible()) e.add(Visible_Prop, false);
-    //if(getOpacity()<1) e.add("opacity", getOpacity());
+    if(getOpacity()<1) e.add(Opacity_Prop, getOpacity());
     
     // Archive Alignment, Padding
     if(getAlign()!=getDefaultAlign()) e.add(Align_Prop, getAlign());
@@ -2044,7 +2044,7 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive Disabled, Visible, Opacity
     if(anElement.hasAttribute(Disabled_Prop)) setDisabled(anElement.getAttributeBoolValue(Disabled_Prop));
     if(anElement.hasAttribute(Visible_Prop)) setVisible(anElement.getAttributeBoolValue(Visible_Prop));
-    //setOpacity(anElement.getAttributeFloatValue("opacity", 1));
+    if(anElement.hasAttribute(Opacity_Prop)) setOpacity(anElement.getAttributeFloatValue(Opacity_Prop));
     
     // Unarchive Alignment, Padding
     else if(anElement.hasAttribute(Align_Prop)) setAlign(Pos.get(anElement.getAttributeValue(Align_Prop)));
