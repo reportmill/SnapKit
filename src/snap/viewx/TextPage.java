@@ -53,6 +53,7 @@ protected void initUI()
     Button btn = new Button("Reload"); btn.setName("ReloadButton"); btn.setPrefSize(80,22);
     btn.setLeanX(HPos.RIGHT); btn.addEventHandler(e -> getBrowser().reloadPage(), Action);
     _textPane.getToolBarPane().addChild(btn);
+    setFirstFocus(getTextView());
 }
 
 /**
