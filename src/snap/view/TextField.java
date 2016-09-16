@@ -237,11 +237,10 @@ protected void setFocused(boolean aValue)
 protected void textDidChange()
 {
     // Ensure that selection is still within bounds
-    int len = length(), start = getSelStart(), end = getSelEnd();
-    if(end>len) setSel(Math.min(start, len), Math.min(end,len));
+    setSel(getSelStart(), getSelEnd());
     
     // If PromptText present, update Label.StringView.Visible
-    if(_promptText!=null) _label.getStringView().setVisible(len==0);
+    if(_promptText!=null) _label.getStringView().setVisible(length()==0);
     
     // Relayout parent and repaint
     relayoutParent(); repaint();
@@ -311,8 +310,11 @@ public void setSel(int newStartEnd)  { setSel(newStartEnd, newStartEnd); }
  */
 public void setSel(int aStart, int anEnd)
 {
-    // Make sure start is before end
+    // Make sure start is before end and both are within bounds
     if(anEnd<aStart) { int temp = anEnd; anEnd = aStart; aStart = temp; }
+    aStart = MathUtils.clamp(aStart, 0, length());
+    anEnd = MathUtils.clamp(anEnd, 0, length());
+    if(aStart==_selStart && anEnd==_selEnd) return;
     
     // Set new start/end
     _selStart = aStart; _selEnd = anEnd;
