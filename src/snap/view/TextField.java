@@ -22,8 +22,8 @@ public class TextField extends ParentView {
     // The selection start/end
     int                   _selStart, _selEnd;
     
-    // Whether the editor is word selecting (double click)
-    boolean               _wordSel;
+    // Whether the editor is word selecting (double click) or paragraph selecting (triple click)
+    boolean               _wordSel, _pgraphSel;
     
     // The mouse down point
     double                _downX, _downY;
@@ -523,11 +523,18 @@ protected void mousePressed(ViewEvent anEvent)
     _downX = anEvent.getX(); _downY = anEvent.getY();
     
     // Determine if word or paragraph selecting
-    if(!anEvent.isShiftDown()) _wordSel = false;
+    if(!anEvent.isShiftDown()) _wordSel = _pgraphSel = false;
     if(anEvent.getClickCount()==2) _wordSel = true;
+    else if(anEvent.getClickCount()==3) _pgraphSel = true;
     
     // Get selected range for down point
     int start = getCharIndexAt(_downX), end = start;
+    
+    // If word selecting extend to word bounds
+    if(_wordSel) { }
+    
+    // If paragraph selecting extend to text bounds
+    else if(_pgraphSel) { start = 0; end = length(); }
     
     // If shift is down, xor selection
     if(anEvent.isShiftDown()) {
@@ -547,6 +554,12 @@ protected void mouseDragged(ViewEvent anEvent)
     // Get selected range for down point and drag point
     int start = getCharIndexAt(_downX);
     int end = getCharIndexAt(anEvent.getX());
+    
+    // If word selecting, extend to word bounds
+    if(_wordSel) { }
+    
+    // If paragraph selecting, extend to text bounds
+    else if(_pgraphSel) { start = 0; end = length(); }
     
     // If shift is down, xor selection
     if(anEvent.isShiftDown()) {
