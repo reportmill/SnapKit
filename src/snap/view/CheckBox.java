@@ -24,7 +24,6 @@ public void paintFront(Painter aPntr)
     int state = isPressed()? Painter.BUTTON_PRESSED : _targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
     Insets ins = getInsetsAll();
     double x = ins.left - 16 - 6, y = ins.top + 2 + Math.round((getHeight() - ins.top - 2 - 16 - 2 - ins.bottom)/2);
-    aPntr.clearRect(0,0,getWidth(),getHeight());
     aPntr.drawButton2(x,y,16,16, state);
     if(isSelected()) {
         aPntr.setPaint(Color.BLACK); Stroke str = aPntr.getStroke(); aPntr.setStroke(new Stroke(2));

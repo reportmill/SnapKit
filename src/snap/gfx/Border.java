@@ -170,6 +170,7 @@ public static class LineBorder extends Border {
         if(aShape instanceof RectBase) { RectBase r = (RectBase)aShape; double hw = _width/2; r = r.clone();
             r.inset(_width/2); aPntr.draw(r); }
         else aPntr.draw(aShape);
+        aPntr.setStroke(Stroke.Stroke1);
     }
 
     /** XML Archival. */
