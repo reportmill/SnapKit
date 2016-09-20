@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.view;
 import java.lang.reflect.Array;
 import java.util.List;

@@ -1,5 +1,7 @@
 # SnapKit
-SnapKit is a Java UI kit. Why do we need another UI kit? Because JavaFX is missing many great
+SnapKit is a Java UI kit. Check out a [demo of SnapKit running in the browser](http://www.reportmill.com/snaptea/BusyBox).
+
+Why do we need another UI kit? Because JavaFX is missing many great
 aspects of Swing, and vice versa.
 
 What's to love about Swing?

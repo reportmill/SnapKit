@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.data;
 import java.util.*;
 import snap.util.*;

@@ -1,5 +1,7 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.data;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

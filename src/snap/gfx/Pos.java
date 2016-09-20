@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.gfx;
 import static snap.gfx.HPos.LEFT;
 import static snap.gfx.HPos.RIGHT;

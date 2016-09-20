@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.util;
 import java.text.SimpleDateFormat;
 import java.util.*;

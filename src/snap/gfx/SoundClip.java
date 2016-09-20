@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.gfx;
 import java.io.IOException;
 import snap.web.*;

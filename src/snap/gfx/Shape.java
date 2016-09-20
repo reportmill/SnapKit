@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.gfx;
 import java.awt.BasicStroke;
 import java.awt.geom.Area;

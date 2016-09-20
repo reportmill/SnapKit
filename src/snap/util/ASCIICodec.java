@@ -1,5 +1,7 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.util;
-
 
 /**
  * This class has utility methods to code and decode into various different formats: hex, ASCII85, base 64.
