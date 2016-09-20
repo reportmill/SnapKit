@@ -1,7 +1,7 @@
 # SnapKit
 SnapKit is a Java UI kit. Check out a [demo of SnapKit running in the browser](http://www.reportmill.com/snaptea/BusyBox).
-Why do we need another UI kit? Because JavaFX is missing many great aspects of Swing, and vice versa.
-And neither of them can be compiled to JavaScript to run natively in the browser.
+Why do we need another UI kit? Because JavaFX is missing many great aspects of Swing, and Swing is missing great aspects of JavaFX.
+And neither can be compiled to JavaScript to run natively in the browser.
 
 What's to love about Swing?
 
