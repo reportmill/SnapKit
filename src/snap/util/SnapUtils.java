@@ -20,10 +20,6 @@ public class SnapUtils {
     // Whether app is currently running as desktop App
     public static boolean isApp = false;
     
-    // Whether app is currently running on Java 1.6+
-    public static boolean isJava6 = System.getProperty("java.version").compareTo("1.6.0")>=0;
-    public static boolean isJava7 = System.getProperty("java.version").compareTo("1.7.0")>=0;
-    
     // The build info string from "BuildInfo.txt" (eg, "Aug-31-04")
     private static String _buildInfo;
     
