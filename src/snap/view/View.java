@@ -1670,64 +1670,71 @@ public <T> T getNative(Class <T> aClass)  { return ClassUtils.getInstance(getNat
 public ViewEnv getEnv()  { return _env; }
 
 /**
- * Returns a value.
+ * Returns the value for given key.
  */
 public Object getValue(String aPropName)
 {
     // Map property name
     String pname = aPropName.equals("Value")? getValuePropName() : aPropName;
 
-    // Handle Enabled
-    if(pname.equals("Enabled"))
-        return isEnabled();
-    
-    // Handle Items
-    else if(pname.equals("Items")) { Selectable sview = (Selectable)this;
-        return sview.getItems(); }
-    
-    // Handle SelectedItem
-    else if(pname.equals("SelectedItem")) { Selectable sview = (Selectable)this;
-        return sview.getSelectedItem(); }
-    
-    // Handle SelectedIndex
-    else if(pname.equals("SelectedIndex")) { Selectable sview = (Selectable)this;
-        return sview.getSelectedIndex(); }
+    // Handle properties
+    switch(pname) {
+        case View.X_Prop: return getX();
+        case View.Y_Prop: return getY();
+        case View.Width_Prop: return getWidth();
+        case View.Height_Prop: return getHeight();
+        case View.Rotate_Prop: return getRotate();
+        case View.ScaleX_Prop: return getScaleX();
+        case View.ScaleY_Prop: return getScaleY();
+        case View.TransX_Prop: return getTransX();
+        case View.TransY_Prop: return getTransY();
+        case "Enabled": return isEnabled();
+        case "Items": return ((Selectable)this).getItems();
+        case "SelectedItem": return ((Selectable)this).getSelectedItem();
+        case "SelectedIndex": return ((Selectable)this).getSelectedIndex();
+        case Scroller.ScrollV_Prop: return ((Scroller)this).getScrollV();
+        default: break;
+    }
     
     // Use key chain evaluator to get value
     return KeyChain.getValue(this, pname);
 }
 
 /**
- * Sets a value.
+ * Sets the value for given key.
  */
 public void setValue(String aPropName, Object aValue)
 {
     // Map property name
     String pname = aPropName.equals("Value")? getValuePropName() : aPropName;
     
-    // Handle Enabled
-    if(pname.equals("Enabled"))
-        setDisabled(!SnapUtils.boolValue(aValue));
-    
-    // Handle Items
-    else if(pname.equals("Items")) { Selectable sview = (Selectable)this;
-        if(aValue instanceof List) sview.setItems((List)aValue);
-        else if(aValue!=null && aValue.getClass().isArray()) sview.setItems((Object[])aValue);
-        else sview.setItems(Collections.emptyList());
+    // Handle properties
+    switch(pname) {
+        case View.X_Prop: setX((Double)aValue); break;
+        case View.Y_Prop: setY((Double)aValue); break;
+        case View.Width_Prop: setWidth((Double)aValue); break;
+        case View.Height_Prop: setHeight((Double)aValue); break;
+        case View.Rotate_Prop: setRotate((Double)aValue); break;
+        case View.ScaleX_Prop: setScaleX((Double)aValue); break;
+        case View.ScaleY_Prop: setScaleY((Double)aValue); break;
+        case View.TransX_Prop: setTransX((Double)aValue); break;
+        case View.TransY_Prop: setTransY((Double)aValue); break;
+        case "Enabled": setDisabled(!SnapUtils.boolValue(aValue)); break;
+        case "Items": { Selectable sview = (Selectable)this;
+            if(aValue instanceof List) sview.setItems((List)aValue);
+            else if(aValue!=null && aValue.getClass().isArray()) sview.setItems((Object[])aValue);
+            else sview.setItems(Collections.emptyList());
+            break;
+        }
+        case "SelectedItem": ((Selectable)this).setSelectedItem(aValue); break;
+        case "SelectedIndex": { Selectable sview = (Selectable)this;
+            int index = aValue==null? -1 : SnapUtils.intValue(aValue);
+            sview.setSelectedIndex(index);
+            break;
+        }
+        case Scroller.ScrollV_Prop: ((Scroller)this).setScrollV((Double)aValue); break;
+        default: KeyChain.setValueSafe(this, pname, aValue);
     }
-        
-    // Handle SelectedItem
-    else if(pname.equals("SelectedItem")) { Selectable sview = (Selectable)this;
-        sview.setSelectedItem(aValue); }
-    
-    // Handle SelectedIndex
-    else if(pname.equals("SelectedIndex")) { Selectable sview = (Selectable)this;
-        int index = aValue==null? -1 : SnapUtils.intValue(aValue);
-        sview.setSelectedIndex(index);
-    }
-    
-    // Set value with key
-    else KeyChain.setValueSafe(this, pname, aValue);
 }
 
 /**

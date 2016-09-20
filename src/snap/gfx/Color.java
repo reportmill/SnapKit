@@ -245,25 +245,36 @@ public static Color get(Object anObj)
         try { return new Color(cs); }
         catch(Exception e) { }
         
-        // make lookup case-insensitive by converting to lower case
-        cs = cs.toLowerCase();
-        
-        // Try to invoke
-        try { return (Color)Color.class.getField(cs.toUpperCase()).get(null); }
-        catch(Exception e) { }
-        
-        // Special case for names that would fail the above lookups because the fields are mixed upper & lower case
-        if(cs.equals("lightgray") || cs.equals("light_gray")) return Color.LIGHTGRAY;
-        if(cs.equals("darkgray") || cs.equals("dark_gray")) return Color.DARKGRAY;
-        if(cs.equalsIgnoreCase("random")) return getRandom();
+        // Try to lookup color by name
+        cs = cs.toUpperCase();
+        switch(cs) {
+            case "WHITE": return Color.WHITE;
+            case "BLACK": return Color.BLACK;
+            case "RED": return Color.RED;
+            case "GREEN": return Color.GREEN;
+            case "BLUE": return Color.BLUE;
+            case "CYAN": return Color.CYAN;
+            case "MAGENTA": return Color.MAGENTA;
+            case "YELLOW": return Color.YELLOW;
+            case "ORANGE": return Color.ORANGE;
+            case "PINK": return Color.PINK;
+            case "CRIMSON": return Color.CRIMSON;
+            case "GRAY": return Color.GRAY;
+            case "CLEAR": return Color.CLEAR;
+            case "CLEARWHITE": return Color.CLEARWHITE;
+            case "LIGHTGRAY": case "LIGHT_GRAY": return Color.LIGHTGRAY;
+            case "DARKGRAY": case "DARK_GRAY": return Color.DARKGRAY;
+            case "RANDOM": return getRandom();
+            default: //try { return (Color)Color.class.getField(cs).get(null); } catch(Exception e) { }
+        }
         
         // Look in colors list
-        for(int i=0; i<_colors.length; i+=2) if(cs.equalsIgnoreCase(_colors[i])) return get(_colors[i+1]);
+        for(int i=0; i<_colors.length; i+=2) if(cs.equals(_colors[i])) return get(_colors[i+1]);
         
-        // Handle "light " or "dark " anything
-        if(StringUtils.startsWithIC(cs, "light ")) { Color c = get(cs.substring(6));
+        // Handle "LIGHT " or "DARK " anything
+        if(cs.startsWith("LIGHT ")) { Color c = get(cs.substring(6));
             return c!=null? c.brighter() : null; }
-        if(StringUtils.startsWithIC(cs, "dark ")) { Color c = get(cs.substring(5));
+        if(cs.startsWith("DARK ")) { Color c = get(cs.substring(5));
             return c!=null? c.darker() : null; }
     }
     

@@ -163,7 +163,8 @@ private static String getPatQuoted(String aStr)
 public static ParseRule loadRule(Class aClass, String aName)
 {
     String name = aName!=null? aName : aClass.getSimpleName() + ".txt";
-    String rtext = SnapUtils.getText(aClass.getResourceAsStream(name)); if(rtext==null) return null;
+    WebURL url = WebURL.getURL(aClass, name); if(url==null) return null;
+    String rtext = url.getText(); if(rtext==null) return null;
     try { return new ParseRuleParser().parse(rtext).getCustomNode(ParseRule.class); }
     catch(ParseException e) { throw new RuntimeException(e); }
 }

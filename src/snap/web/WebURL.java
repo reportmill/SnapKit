@@ -274,6 +274,15 @@ public byte[] getBytes()
 }
 
 /**
+ * Returns the file bytes as a string.
+ */
+public String getText()
+{
+    byte bytes[] = getBytes(); if(bytes==null) return null;
+    return new String(bytes);
+}
+
+/**
  * Returns the site for the URL.
  */
 public WebSite getAsSite()  { return _asSite!=null? _asSite : (_asSite=GFXEnv.getEnv().getSite(this)); }

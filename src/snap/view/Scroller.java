@@ -16,6 +16,10 @@ public class Scroller extends ParentView {
     // Whether to fit content to scroller width/height
     boolean         _fitWidth, _fitHeight;
 
+    // Constants for properties
+    public static final String ScrollH_Prop = "ScrollH";
+    public static final String ScrollV_Prop = "ScrollV";
+
 /**
  * Creates a new Scroller.
  */
@@ -53,7 +57,7 @@ public void setScrollH(double aValue)
 {
     aValue = Math.round(aValue); if(aValue<0) aValue = 0; else if(aValue>getScrollHMax()) aValue = getScrollHMax();
     if(MathUtils.equals(aValue,_scrollH)) return;
-    firePropChange("ScrollH", _scrollH, _scrollH=aValue);
+    firePropChange(ScrollH_Prop, _scrollH, _scrollH=aValue);
     relayout(); repaint();
 }
 
@@ -78,7 +82,7 @@ public void setScrollV(double aValue)
 {
     aValue = Math.round(aValue); if(aValue<0) aValue = 0; else if(aValue>getScrollVMax()) aValue = getScrollVMax();
     if(MathUtils.equals(aValue,_scrollV)) return;
-    firePropChange("ScrollV", _scrollV, _scrollV=aValue);
+    firePropChange(ScrollV_Prop, _scrollV, _scrollV=aValue);
     relayout(); repaint();
 }
 

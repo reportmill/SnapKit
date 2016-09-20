@@ -103,7 +103,7 @@ public Object getStartVal(String aKey)
 {
     Object val = _startVals.get(aKey);
     if(val==null) {
-        val = Key.getValue(_view, aKey);
+        val = _view.getValue(aKey);
         _startVals.put(aKey, val);
     }
     return val;
@@ -222,8 +222,7 @@ public int getTime()  { return _time; }
 public void setTime(int aTime, String aKey)
 {
     Object val = getValue(aKey, aTime);
-    try { Key.setValue(_view, aKey, val); }
-    catch(Exception e) { } //System.err.println(e);
+    _view.setValue(aKey, val);
 }
 
 /**
