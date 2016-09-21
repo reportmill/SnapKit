@@ -102,6 +102,9 @@ public void setProp(Object anObj, String aKey, Object aValue)
     else super.setProp(anObj, aKey, aValue);
 }
 
+/** Creates the top level properties map. */
+protected Map createPropsMap()  { return new WeakHashMap(); }
+
 /**
  * Creates an event for a UI node.
  */

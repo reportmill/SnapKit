@@ -13,12 +13,12 @@ public abstract class ViewEnv {
     // Map of RunOne runnables
     Map <String,Runnable>   _runOnceMap = new HashMap();
     
+    // Weak map of properties
+    Map<Object,Map>         _props = createPropsMap();
+
     // The node environment
     static ViewEnv          _env;
     
-    // Weak map of properties
-    static Map<Object,Map>  _props = new WeakHashMap();
-
 /**
  * Returns the node environment.
  */
@@ -147,6 +147,9 @@ protected Map getProps(Object anObj)
     if(props==null) _props.put(anObj, props=new HashMap());
     return props;
 }
+
+/** Creates the top level properties map. */
+protected Map createPropsMap()  { throw notImpl("createPropsMap"); }
 
 /**
  * Sends an event for a UI node.
