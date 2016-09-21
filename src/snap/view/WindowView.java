@@ -256,7 +256,7 @@ public void show(View aView, double aSX, double aSY)
     
     // If FrameSaveName provided, set Location from defaults and register to store future window moves
     if(getSaveName()!=null) {
-        String locString = PrefsUtils.prefs().get(getSaveName() + "Loc", null);
+        String locString = Prefs.get().get(getSaveName() + "Loc");
         if(locString!=null) {
             String strings[] = locString.split(" ");
             aSX = StringUtils.intValue(strings[0]);

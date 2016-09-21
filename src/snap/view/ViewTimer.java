@@ -106,7 +106,7 @@ public synchronized void start(int aDelay)
     
     // Initialize times and Schedule task
     _time = 0;
-    _startTime = System.nanoTime()/1000000 - (_pauseTime>0? (_pauseTime - _startTime) : 0);
+    _startTime = System.currentTimeMillis() - (_pauseTime>0? (_pauseTime - _startTime) : 0);
     _pauseTime = 0;
     _env.runIntervals(_run, getPeriod(), aDelay, false, true);
 }
@@ -124,14 +124,14 @@ public synchronized void stop()
 /**
  * Pauses the timer (next play will start from previous time).
  */
-public void pause()  { stop(); _pauseTime = System.nanoTime()/1000000; }
+public void pause()  { stop(); _pauseTime = System.currentTimeMillis(); }
 
 /**
  * Sends the event.
  */
 protected void sendEvent()
 {
-    _time = (int)(System.nanoTime()/1000000 - _startTime);
+    _time = (int)(System.currentTimeMillis() - _startTime);
     _onFire.accept(this); _count++;
 }
 
