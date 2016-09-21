@@ -129,4 +129,24 @@ public abstract void setHeadless();
  */
 public abstract SnapUtils.Platform getPlatform();
 
+/**
+ * Returns a key value.
+ */
+public abstract Object getKeyValue(Object anObj, String aKey);
+
+/**
+ * Sets a key value.
+ */
+public abstract void setKeyValue(Object anObj, String aKey, Object aValue);
+
+/**
+ * Returns a key chain value.
+ */
+public abstract Object getKeyChainValue(Object anObj, String aKeyChain);
+
+/**
+ * Sets a key chain value.
+ */
+public abstract void setKeyChainValue(Object anObj, String aKeyChain, Object aValue);
+
 }

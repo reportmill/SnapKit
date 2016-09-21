@@ -87,7 +87,7 @@ public static StringBuffer toString(Object anObj, String ... theNames)
  */
 public static StringBuffer toStringAdd(StringBuffer aSB, Object anObj, String ... theNames)
 {
-    for(String name : theNames) toStringAdd(aSB, name, Key.getValue(anObj, name));
+    for(String name : theNames) toStringAdd(aSB, name, snap.gfx.GFXEnv.getEnv().getKeyValue(anObj, name));
     return aSB;
 }
 

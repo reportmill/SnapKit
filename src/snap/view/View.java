@@ -1700,7 +1700,7 @@ public Object getValue(String aPropName)
     }
     
     // Use key chain evaluator to get value
-    return KeyChain.getValue(this, pname);
+    return GFXEnv.getEnv().getKeyChainValue(this, pname);
 }
 
 /**
@@ -1736,7 +1736,7 @@ public void setValue(String aPropName, Object aValue)
             break;
         }
         case Scroller.ScrollV_Prop: ((Scroller)this).setScrollV((Double)aValue); break;
-        default: KeyChain.setValueSafe(this, pname, aValue);
+        default: GFXEnv.getEnv().setKeyChainValue(this, pname, aValue);
     }
 }
 

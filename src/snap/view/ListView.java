@@ -401,7 +401,7 @@ protected void configureCell(ListCell <T> aCell)
 {
     // Get item and set text
     Object item = aCell.getItem();
-    if(getItemKey()!=null) item = KeyChain.getValue(item, getItemKey());
+    if(getItemKey()!=null) item = GFXEnv.getEnv().getKeyChainValue(item, getItemKey());
     aCell.setText(item!=null? item.toString() : null);
     
     // Set Fill/TextFill based on selection
