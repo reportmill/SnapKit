@@ -2122,9 +2122,6 @@ public String toString()
  */
 public interface Selectable <T> {
     
-    /** Returns the view helper. */
-    public ViewHelper getHelper();
-
     /** Returns the items for a given name or UI view. */
     default List <T> getItems() { return null; }
 
