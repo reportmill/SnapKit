@@ -228,8 +228,23 @@ public void setHeadless()
 }
 
 /**
+ * Returns the current platform.
+ */
+public SnapUtils.Platform getPlatform()
+{
+    if(System.getProperty("os.name").indexOf("Windows") >= 0) return SnapUtils.Platform.WINDOWS;
+    if(System.getProperty("os.name").indexOf("Mac OS X") >= 0) return SnapUtils.Platform.MAC;
+    return SnapUtils.Platform.UNKNOWN;
+}
+
+/**
  * Returns a shared instance.
  */
 public static AWTEnv get()  { return _shared; }
+
+/**
+ * Sets AWTEnv to be the default env.
+ */
+public static void set()  { GFXEnv.setEnv(get()); }
 
 }

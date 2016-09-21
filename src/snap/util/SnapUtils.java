@@ -7,18 +7,22 @@ import java.math.*;
 import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import snap.gfx.GFXEnv;
 import snap.web.WebURL;
 
 /**
  * This class provides a bunch of utility methods for common problems.
  */
 public class SnapUtils {
+    
+    // The current platform
+    private static Platform platform = GFXEnv.getEnv().getPlatform();
 
     // Whether app is currently running on Windows
-    public static boolean isWindows = (System.getProperty("os.name").indexOf("Windows") >= 0);
+    public static boolean isWindows = platform==Platform.WINDOWS;
     
     // Whether app is currently running on Mac
-    public static boolean isMac = (System.getProperty("os.name").indexOf("Mac OS X") >= 0);
+    public static boolean isMac = platform==Platform.MAC;
     
     // Whether app is currently running as desktop App
     public static boolean isApp = false;
@@ -28,6 +32,9 @@ public class SnapUtils {
     
     // A map to track "print once" messages
     private static Map <String, Integer> _doOnceMap = new HashMap();
+    
+    // Constants for platform
+    public static enum Platform { WINDOWS, MAC, UNKNOWN };
 
 /**
  * Returns a boolean value for the given object.

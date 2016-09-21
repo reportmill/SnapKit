@@ -191,6 +191,6 @@ public static SwingViewEnv get()  { return _shared; }
 /**
  * Sets the Swing Node Env.
  */
-public static void set()  { GFXEnv.setEnv(AWTEnv.get()); ViewEnv.setEnv(get()); }
+public static void set()  { AWTEnv.set(); ViewEnv.setEnv(get()); }
 
 }

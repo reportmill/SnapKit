@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import snap.util.Prefs;
+import snap.util.*;
 import snap.web.*;
 
 /**
@@ -16,12 +16,28 @@ public abstract class GFXEnv {
 /**
  * Returns the Graphics environment.
  */
-public static GFXEnv getEnv()  { return _env; }
+public static GFXEnv getEnv()
+{
+    if(_env==null) setAWTEnv();
+    return _env;
+}
 
 /**
  * Pushes an environment.
  */
 public static void setEnv(GFXEnv anEnv)  { _env = anEnv; }
+
+/**
+ * Sets the SwingEnv.
+ */
+public static void setAWTEnv()
+{
+    try {
+        Class cls = Class.forName("snap.swing.AWTEnv");
+        cls.getMethod("set").invoke(null);
+    }
+    catch(Exception e) { System.err.println("ViewEnv: No Environment set " + e); }
+}
 
 /**
  * Returns a list of all system fontnames (excludes any that don't start with capital A-Z).
@@ -107,5 +123,10 @@ public abstract Prefs getPrefs();
  * Sets this JVM to be headless.
  */
 public abstract void setHeadless();
+
+/**
+ * Returns the current platform.
+ */
+public abstract SnapUtils.Platform getPlatform();
 
 }

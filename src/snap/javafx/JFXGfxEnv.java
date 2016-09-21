@@ -1,7 +1,7 @@
 package snap.javafx;
 import snap.gfx.*;
 import snap.swing.AWTEnv;
-import snap.util.Prefs;
+import snap.util.*;
 import snap.web.*;
 
 /**
@@ -73,6 +73,9 @@ public Prefs getPrefs()  { return _senv.getPrefs(); }
 
 /** Sets this JVM to be headless. */
 public void setHeadless()  { _senv.setHeadless(); }
+
+/** Returns the current platform. */
+public SnapUtils.Platform getPlatform()  { return _senv.getPlatform(); }
 
 /**
  * Returns a shared instance.
