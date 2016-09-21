@@ -81,7 +81,7 @@ public GradientPaint(Type aType, Stop theStops[])  { this(aType, aType==Type.LIN
 public GradientPaint(Type aType, double aSX, double aSY, double aEX, double aEY, Stop theStops[])
 {
     _type = aType; _sx = aSX; _sy = aSY; _ex = aEX; _ey = aEY; _stops = theStops;
-    _abs = Math.abs(_ex-_sx)<2 && Math.abs(_ey-_sy)<2;
+    _abs = Math.abs(_ex-_sx)>2 || Math.abs(_ey-_sy)>2;
 }
 
 /**
