@@ -10,27 +10,27 @@ import snap.swing.AWT;
 /**
  * A custom class.
  */
-public interface Shape {
+public abstract class Shape {
 
 /**
  * Returns the bounds.
  */
-public Rect getBounds();
+public abstract Rect getBounds();
 
 /**
  * Returns a path iterator.
  */
-public PathIter getPathIter(Transform aT);
+public abstract PathIter getPathIter(Transform aT);
 
 /**
  * Returns whether shape contains point.
  */
-default boolean contains(Point aPnt)  { return contains(aPnt.getX(), aPnt.getY()); }
+public boolean contains(Point aPnt)  { return contains(aPnt.getX(), aPnt.getY()); }
 
 /**
  * Returns whether shape contains x/y.
  */
-default boolean contains(double aX, double aY)
+public boolean contains(double aX, double aY)
 {
     if(!getBounds().contains(aX, aY)) return false;
     return java.awt.geom.Path2D.contains(AWT.get(getPathIter(null)), aX, aY);
@@ -39,7 +39,7 @@ default boolean contains(double aX, double aY)
 /**
  * Returns whether shape contains shape.
  */
-default boolean contains(Shape aShape)
+public boolean contains(Shape aShape)
 {
     if(!getBounds().contains(aShape)) return false;
     Area area1 = area(this), area2 = (Area)area1.clone(); area2.add(area(aShape));
@@ -49,7 +49,7 @@ default boolean contains(Shape aShape)
 /**
  * Returns whether shape intersects shape.
  */
-default boolean intersects(Shape aShape)
+public boolean intersects(Shape aShape)
 {
     if(!getBounds().intersects(aShape.getBounds())) return false;
     Area area1 = area(this), area2 = area(aShape); area1.intersect(area2);
@@ -59,7 +59,7 @@ default boolean intersects(Shape aShape)
 /**
  * Returns whether shape with line width contains point.
  */
-default boolean contains(double aX, double aY, double aLineWidth)
+public boolean contains(double aX, double aY, double aLineWidth)
 {
     // If linewidth is small return normal version
     if(aLineWidth<=1) return contains(aX,aY);
@@ -83,7 +83,7 @@ default boolean contains(double aX, double aY, double aLineWidth)
 /**
  * Returns whether shape with line width intersects shape.
  */
-default boolean intersects(Shape aShape, double aLineWidth)
+public boolean intersects(Shape aShape, double aLineWidth)
 {
     // If bounds don't intersect, return false
     if(!getBounds().getInsetRect(-aLineWidth/2).intersects(aShape)) return false;
@@ -105,7 +105,7 @@ default boolean intersects(Shape aShape, double aLineWidth)
 /**
  * Returns the shape in rect.
  */
-default Shape getShapeInRect(Rect aRect)
+public Shape getShapeInRect(Rect aRect)
 {
     Rect bounds = getBounds(); if(bounds.equals(aRect)) return this;
     Transform trans = Transform.getTrans(aRect.getX() - bounds.getX(), aRect.getY() - bounds.getY());
@@ -116,12 +116,11 @@ default Shape getShapeInRect(Rect aRect)
 }
 
 /**
- * Standard to string implementation.
+ * Returns a string representation of Shape.
  */
-default String getString()
+public String getString()
 {
-    String str = getClass().getSimpleName() + "{ ";
-    PathIter pi = getPathIter(null); double pts[] = new double[6];
+    String str = "{ "; PathIter pi = getPathIter(null); double pts[] = new double[6];
     while(pi.hasNext()) {
         switch(pi.getNext(pts)) {
             case MoveTo: str += "M " + fmt(pts[0]) + "," + fmt(pts[1]) + " "; break;
@@ -134,9 +133,14 @@ default String getString()
     return str + "}";
 }
 
-// Format
-static String fmt(double aVal)  { return _fmt.format(aVal); }
-static DecimalFormat _fmt = new DecimalFormat("0.##");
+// Formater
+private static String fmt(double aVal)  { return _fmt.format(aVal); }
+private static DecimalFormat _fmt = new DecimalFormat("0.##");
+
+/**
+ * Standard to string implementation.
+ */
+public String toString()  { return getClass().getSimpleName() + getString(); }
 
 /**
  * Returns bounds rect for given PathIter.

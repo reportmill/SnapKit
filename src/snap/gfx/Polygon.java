@@ -7,7 +7,7 @@ import java.util.Arrays;
 /**
  * A custom class.
  */
-public class Polygon implements Shape {
+public class Polygon extends Shape {
 
     // The points
     double      _pnts[] = new double[0];

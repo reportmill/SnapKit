@@ -6,7 +6,7 @@ package snap.gfx;
 /**
  * A custom class.
  */
-public class Line implements Shape {
+public class Line extends Shape {
 
     // Ivars
     public double x1, y1, x2, y2;

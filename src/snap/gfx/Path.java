@@ -9,7 +9,7 @@ import snap.util.*;
 /**
  * A custom class.
  */
-public class Path implements Shape, XMLArchiver.Archivable {
+public class Path extends Shape implements XMLArchiver.Archivable {
 
     // The array of segments
     Seg          _segs[] = new Seg[8];
@@ -137,27 +137,6 @@ public void clear()  { _scount = _pcount = 0; _bounds = null; }
  * Returns a path iterator.
  */
 public PathIter getPathIter(Transform aTrans)  { return new PathPathIter(this, aTrans); }
-
-/**
- * Standard toString implementation.
- */
-public String toString()
-{
-    StringBuffer sb = new StringBuffer();
-    PathIter piter = getPathIter(null); double crds[] = new double[6];
-    while(piter.hasNext()) switch(piter.getNext(crds)) {
-        case MoveTo: sb.append(" m ").append(fmt(crds[0])).append(' ').append(fmt(crds[1])); break;
-        case LineTo: sb.append(" l ").append(fmt(crds[0])).append(' ').append(fmt(crds[1])); break;
-        case QuadTo: sb.append(" q ").append(fmt(crds[2])).append(' ').append(fmt(crds[3])); break;
-        case CubicTo: sb.append(" c ").append(fmt(crds[4])).append(' ').append(fmt(crds[5])); break;
-        case Close: sb.append(" cl"); break;
-    }
-    return getClass().getSimpleName() + sb;
-}
-
-// Used for print
-private static String fmt(double aValue)  { return _fmt.format(aValue); }
-private static java.text.DecimalFormat _fmt = new java.text.DecimalFormat("0.##");
 
 /**
  * XML archival.

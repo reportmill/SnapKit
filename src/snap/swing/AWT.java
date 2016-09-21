@@ -199,7 +199,7 @@ private static class AWTShape implements java.awt.Shape {
 /**
  * A Shape wrapper to provide AWT shape as snap.
  */
-private static class SnapShape implements Shape {
+private static class SnapShape extends Shape {
     
     /** Creates a new SnapShape for AWT Shape. */
     public SnapShape(java.awt.Shape aShape)  { _shp = aShape; } java.awt.Shape _shp;

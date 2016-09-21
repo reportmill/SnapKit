@@ -7,7 +7,7 @@ import snap.util.*;
 /**
  * Represents a rectangle - a Quadrilateral with parallel sides.
  */
-public class Rect extends RectBase implements Shape {
+public class Rect extends RectBase {
 
     // Constant rects
     public static final Rect ZeroRect = new Rect();
@@ -116,7 +116,7 @@ public boolean intersects(Shape aShape, double aLineWidth)
 {
     if(aShape instanceof Rect)
         return getInsetRect(-aLineWidth/2).intersects((Rect)aShape);
-    return Shape.super.intersects(aShape, aLineWidth);
+    return super.intersects(aShape, aLineWidth);
 }
 
 /**

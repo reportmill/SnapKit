@@ -7,7 +7,7 @@ import snap.util.MathUtils;
 /**
  * A custom class.
  */
-public abstract class RectBase implements Shape, Cloneable {
+public abstract class RectBase extends Shape implements Cloneable {
 
     // Ivars
     public double x, y, width, height;
