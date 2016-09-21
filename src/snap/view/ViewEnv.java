@@ -22,12 +22,28 @@ public abstract class ViewEnv {
 /**
  * Returns the node environment.
  */
-public static ViewEnv getEnv()  { return _env!=null? _env : (_env=snap.swing.SwingViewEnv.get()); }
+public static ViewEnv getEnv()
+{
+    if(_env==null) setSwingEnv();
+    return _env;
+}
 
 /**
  * Pushes an environment.
  */
 public static void setEnv(ViewEnv anEnv)  { _env = anEnv; }
+
+/**
+ * Sets the SwingEnv.
+ */
+public static void setSwingEnv()
+{
+    try {
+        Class cls = Class.forName("snap.swing.SwingViewEnv");
+        cls.getMethod("set").invoke(null);
+    }
+    catch(Exception e) { System.err.println("ViewEnv: No Environment set " + e); }
+}
 
 /**
  * Returns whether current thread is event thread.
