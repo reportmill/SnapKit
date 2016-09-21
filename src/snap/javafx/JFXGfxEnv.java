@@ -1,6 +1,7 @@
 package snap.javafx;
 import snap.gfx.*;
 import snap.swing.AWTEnv;
+import snap.util.Prefs;
 import snap.web.*;
 
 /**
@@ -66,6 +67,9 @@ public double getScreenResolution()  { return _senv.getScreenResolution(); }
 
 /** Plays a beep. */
 public void beep()  { _senv.beep(); }
+
+/** Returns the platform preferences object. */
+public Prefs getPrefs()  { return _senv.getPrefs(); }
 
 /** Sets this JVM to be headless. */
 public void setHeadless()  { _senv.setHeadless(); }

@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import snap.util.Prefs;
 import snap.web.*;
 
 /**
@@ -96,6 +97,11 @@ public abstract double getScreenResolution();
  * Plays a beep.
  */
 public abstract void beep();
+
+/**
+ * Returns the platform preferences object.
+ */
+public abstract Prefs getPrefs();
 
 /**
  * Sets this JVM to be headless.

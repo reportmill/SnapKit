@@ -213,6 +213,11 @@ public double getScreenResolution()
 public void beep()  { Toolkit.getDefaultToolkit().beep(); }
 
 /**
+ * Returns the platform preferences object.
+ */
+public Prefs getPrefs()  { return AWTPrefs.get(); }
+
+/**
  * Sets this JVM to be headless.
  */
 public void setHeadless()
