@@ -6,22 +6,61 @@ package snap.gfx;
 public class Cubic extends Shape {
 
     // The points
-    double x0, y0, x1, y1, x2, y2;
+    double x0, y0, xc0, yc0, xc1, yc1, x1, y1;
 
 /**
  * Returns the bounds.
  */
-public Rect getBounds()
-{
-    return null;
-}
+public Rect getBounds()  { return bounds(x0, y0, xc0, yc0, xc1, yc1, x1, y1, null); }
 
 /**
  * Returns a path iterator.
  */
-public PathIter getPathIter(Transform aT)
+public PathIter getPathIter(Transform aT)  { return null; }
+
+/**
+ * Returns the bounds for given quad points.
+ */
+public static Rect bounds(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1,
+    Rect aRect)
 {
-    return null;
+    // Add end points
+    aRect = Line.bounds(x0, y0, x1, y1, aRect);
+
+    // This curve might have extrema:
+    // f = a*t*t*t+b*t*t+c*t+d
+    // df/dt = 3*a*t*t+2*b*t+c
+    // A = 3*a, B = 2*b, C = c
+    // t = [-B+-sqrt(B^2-4*A*C)]/(2A)
+    // t = (-2*b+-sqrt(4*b*b-12*a*c)]/(6*a)
+    double ax = -x0 + 3*xc0 - 3*xc1 + x1, bx = 3*x0 - 6*xc0 + 3*xc1, cx = -3*x0 + 3*xc0, dx = x0;
+    double detx = (4*bx*bx - 12*ax*cx);
+    if(detx<0) { } // No solutions
+    else if(detx==0) { // One solution
+        double tx = -2*bx/(6*ax);
+        if(tx>0 && tx<1) aRect.addX(ax*tx*tx*tx + bx*tx*tx + cx*tx + dx); }
+   else { // Two solutions
+       detx = Math.sqrt(detx); double tx = (-2*bx + detx)/(6*ax);
+       if(tx>0 && tx<1) aRect.addX(ax*tx*tx*tx + bx*tx*tx + cx*tx + dx);
+       tx = (-2*bx - detx)/(6*ax);
+       if(tx>0 && tx<1) aRect.addX(ax*tx*tx*tx + bx*tx*tx + cx*tx + dx);
+   }
+
+   //do the same thing for y:
+   double ay = -y0 + 3*yc0 - 3*yc1 + y1, by = 3*y0 - 6*yc0 + 3*yc1, cy = -3*y0 + 3*yc0, dy = y0;
+   double dety = (4*by*by - 12*ay*cy);
+   if(dety<0) { } // No solutions
+   else if(dety==0) { // One solution
+       double ty = -2*by/(6*ay);
+       if(ty>0 && ty<1) aRect.addY(ay*ty*ty*ty + by*ty*ty + cy*ty + dy); }
+   else { // Two solutions
+       dety = Math.sqrt(dety); double ty = (-2*by + dety)/(6*ay);
+       if(ty>0 && ty<1) aRect.addY(ay*ty*ty*ty + by*ty*ty + cy*ty + dy);
+       ty = (-2*by - dety)/(6*ay);
+       if(ty>0 && ty<1) aRect.addY(ay*ty*ty*ty + by*ty*ty + cy*ty + dy);
+   }
+   
+   return aRect;
 }
 
 /**

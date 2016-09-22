@@ -145,26 +145,42 @@ public void scale(double anAmt)  { setRect(getX()*anAmt, getY()*anAmt, getWidth(
 public Rect getScaledRect(double anAmt)  { Rect r = clone(); r.scale(anAmt); return r; }
 
 /**
- * Unions the receiver rect with the given rect.
+ * Sets this rect to combined bounds of both rects, even if either is empty.
  */
-public void union(Rect r2)  { unionEvenIfEmpty(r2); }
-
-/**
- * Unions the receiver rect with the given rect.
- */
-public Rect getUnionRect(Rect r2)  { Rect r = clone(); r.unionEvenIfEmpty(r2); return r; }
-
-/**
- * Unions the receiver rect with the given rect.
- */
-public void unionEvenIfEmpty(Rect r2)
+public void add(Rect r2)
 {
-    if(r2==null) return;                         // If given rect is null, just return
-    double minX = getX(), maxX = getMaxX(), minY = getY(), maxY = getMaxY();
-    double x = Math.min(minX, r2.getX()), y = Math.min(minY, r2.getY());
-    double w = Math.max(maxX, r2.getMaxX()) - x, h = Math.max(maxY, r2.getMaxY()) - y;
-    setRect(x,y,w,h);
+    //if(r2==null) return;
+    double nx = Math.min(x, r2.x), nw = Math.max(x + width, r2.x + r2.width) - nx;
+    double ny = Math.min(y, r2.y), nh = Math.max(y + height, r2.y + r2.height) - ny;
+    setRect(nx, ny, nw, nh);
 }
+
+/**
+ * Returns rect for combined bounds of both rects, even if either is empty.
+ */
+public Rect getAddRect(Rect r2)  { Rect r = clone(); r.add(r2); return r; }
+
+/**
+ * Sets this rect to combined area with given rect. If either rect is empty, bounds are set to other rect.
+ */
+public void union(Rect r2)
+{
+    if(isEmpty()) { setRect(r2); return; }
+    if(r2.isEmpty()) return;
+    double nx = Math.min(x, r2.x), nw = Math.max(x + width, r2.x + r2.width) - nx;
+    double ny = Math.min(y, r2.y), nh = Math.max(y + height, r2.y + r2.height) - ny;
+    setRect(nx, ny, nw, nh);
+}
+
+/**
+ * Returns rect for combined area with given rect. If either rect is empty, bounds are from other rect.
+ */
+public Rect getUnionRect(Rect r2)  { Rect r = clone(); r.union(r2); return r; }
+
+/**
+ * Unions the receiver rect with the given rect.
+ */
+public void unionEvenIfEmpty(Rect r2)  { add(r2); }
 
 /**
  * Adds a point to this rect.  The resulting rect is the smallest that contains both the original and given point.
