@@ -32,8 +32,42 @@ public boolean contains(Point aPnt)  { return contains(aPnt.getX(), aPnt.getY())
  */
 public boolean contains(double aX, double aY)
 {
-    if(!getBounds().contains(aX, aY)) return false;
-    return java.awt.geom.Path2D.contains(AWT.get(getPathIter(null)), aX, aY);
+    if(!getBounds().contains(aX, aY)) return false; //return Path2D.contains(AWT.get(getPathIter(null)),aX,aY);
+    int cross = crossings(aX, aY), mask = -1; //(pi.getWindingRule() == WIND_NON_ZERO ? -1 : 1);
+    boolean c = ((cross & mask) != 0); System.out.println("Contains: " + c); return c;
+}
+
+/**
+ * Returns the number of crossings for the ray from given point extending to the right.
+ */
+public int crossings(double aX, double aY)
+{
+    int cross = 0;
+    PathIter pi = getPathIter(null); double pts[] = new double[6], cx = 0, cy = 0, mx = 0, my = 0, px = 0, py = 0;
+    while(pi.hasNext()) {
+        switch(pi.getNext(pts)) {
+            case MoveTo:
+                if(cy!=my) cross += Line.crossings(cx, cy, mx, my, aX, aY);
+                cx = mx = pts[0]; cy = my = pts[1]; break;
+            case LineTo:
+                px = pts[0]; py = pts[1];
+                cross += Line.crossings(cx, cy, px, py, aX, aY);
+                cx = px; cy = py; break;
+            case QuadTo:
+                px = pts[2]; py = pts[3];
+                cross += Quad.crossings(cx, cy, pts[0], pts[1], px, py, aX, aY, 0);
+                cx = px; cy = py; break;
+            case CubicTo:
+                px = pts[4]; py = pts[5];
+                cross += Cubic.crossings(cx, cy, pts[0], pts[1], pts[2], pts[3], px, py, aX, aY, 0);
+                cx = px; cy = py; break;
+            case Close:
+                if(cy!=my)
+                    cross += Line.crossings(cx, cy, mx, my, aX, aY);
+                cx = mx; cy = my; break;
+        }
+    }
+    return cross;
 }
 
 /**

@@ -108,6 +108,20 @@ public static double getDistanceSquared(double p1x, double p1y, double p2x, doub
 }
 
 /**
+ * Returns the number of crossings for the ray from given point extending to the right.
+ */
+public static int crossings(double x0, double y0, double x1, double y1, double px, double py)
+{
+    if (py <  y0 && py <  y1) return 0;
+    if (py >= y0 && py >= y1) return 0;
+    if (px >= x0 && px >= x1) return 0;
+    if (px <  x0 && px <  x1) return (y0 < y1) ? 1 : -1;
+    double xintercept = x0 + (py - y0) * (x1 - x0) / (y1 - y0);
+    if (px >= xintercept) return 0;
+    return (y0 < y1) ? 1 : -1;
+}
+
+/**
  * PathIter for Line.
  */
 private static class LineIter implements PathIter {
