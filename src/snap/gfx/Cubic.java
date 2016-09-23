@@ -9,6 +9,14 @@ public class Cubic extends Shape {
     double x0, y0, xc0, yc0, xc1, yc1, x1, y1;
 
 /**
+ * Creates a new Cubic.
+ */
+public Cubic(double aX0, double aY0, double aXC0, double aYC0, double aXC1, double aYC1, double aX1, double aY1)
+{
+    x0 = aX0; y0 = aY0; xc0 = aXC0; yc0 = aYC0; xc1 = aXC1; yc1 = aYC1; x1 = aX1; y1 = aY1;
+}
+
+/**
  * Returns the bounds.
  */
 public Rect getBounds()  { return bounds(x0, y0, xc0, yc0, xc1, yc1, x1, y1, null); }
@@ -46,7 +54,7 @@ public static Rect bounds(double x0, double y0, double xc0, double yc0, double x
        if(tx>0 && tx<1) aRect.addX(ax*tx*tx*tx + bx*tx*tx + cx*tx + dx);
    }
 
-   //do the same thing for y:
+   // Do the same for y
    double ay = -y0 + 3*yc0 - 3*yc1 + y1, by = 3*y0 - 6*yc0 + 3*yc1, cy = -3*y0 + 3*yc0, dy = y0;
    double dety = (4*by*by - 12*ay*cy);
    if(dety<0) { } // No solutions
@@ -69,20 +77,21 @@ public static Rect bounds(double x0, double y0, double xc0, double yc0, double x
 public static int crossings(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1,
     double px, double py, int level)
 {
-    if (py <  y0 && py <  yc0 && py <  yc1 && py <  y1) return 0;
-    if (py >= y0 && py >= yc0 && py >= yc1 && py >= y1) return 0;
-    // Note y0 could equal yc0...
-    if (px >= x0 && px >= xc0 && px >= xc1 && px >= x1) return 0;
-    if (px <  x0 && px <  xc0 && px <  xc1 && px <  x1) {
-        if (py >= y0) {
-            if (py < y1) return 1; }
+    // If point is above, below or to right of all curve points, return 0
+    if(py>=y0 && py>=yc0 && py>=yc1 && py>=y1) return 0;
+    if(py<y0 && py<yc0 && py<yc1 && py<y1) return 0;
+    if(px>=x0 && px>=xc0 && px>=xc1 && px>=x1) return 0;
+    
+    // If point to the left of all curve points...
+    if(px<x0 && px<xc0 && px<xc1 && px<x1) {
+        if(py>=y0) {
+            if(py<y1) return 1; }
         else { // py < y0
-            if (py >= y1) return -1; }
-        // py outside of y01 range, and/or y0==yc0
-        return 0;
+            if(py>=y1) return -1; }
+        return 0;  // py outside of y01 range, and/or y0==yc0
     }
     
-    // double precision only has 52 bits of mantissa
+    // Double precision only has 52 bits of mantissa
     if (level > 52) return Line.crossings(x0, y0, x1, y1, px, py);
     double xmid = (xc0 + xc1) / 2;
     double ymid = (yc0 + yc1) / 2;
@@ -105,6 +114,105 @@ public static int crossings(double x0, double y0, double xc0, double yc0, double
     int c1 = crossings(x0, y0, xc0, yc0, xc0m, yc0m, xmid, ymid, px, py, level+1);
     int c2 = crossings(xmid, ymid, xmc1, ymc1, xc1, yc1, x1, y1, px, py, level+1);
     return c1 + c2;
+}
+
+/**
+ * Returns whether Cubic for given points is effectively a line.
+ */
+public static boolean isLine(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1)
+{
+    return Line.getDistanceSquared(x0,y0,x1,y1,xc0,yc0)<.1 && Line.getDistanceSquared(x0,y0,x1,y1,xc1,yc1)<.1;
+}
+
+/**
+ * Returns whether Cubic for given points is intersected by line with given points.
+ */
+public static boolean intersectsLine(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
+    double x1, double y1, double px0, double py0, double px1, double py1)
+{
+    // If cubic is really a line, return line version
+    if(isLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1))
+        return Line.intersectsLine(x0, y0, x1, y1, px0, py0, px1, py1);
+
+    // Calculate new control points to split cubic into two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double xca = (xc0 + xc1) / 2;
+    double yca = (yc0 + yc1) / 2;
+    double nxc1 = (nxc0 + xca) / 2;
+    double nyc1 = (nyc0 + yca) / 2;
+    double nxc3 = (xc1 + x1) / 2;
+    double nyc3 = (yc1 + y1) / 2;
+    double nxc2 = (nxc3 + xca) / 2;
+    double nyc2 = (nyc3 + yca) / 2;
+    double midpx = (nxc1 + nxc2) / 2;
+    double midpy = (nyc1 + nyc2) / 2;
+    
+    // If either intersect, return true
+    if(intersectsLine(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, px0, py0, px1, py1))
+        return true;
+    return intersectsLine(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, px0, py0, px1, py1);
+}
+
+/**
+ * Returns whether Cubic for given points is intersected by line with given points.
+ */
+public static boolean intersectsQuad(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
+    double x1, double y1, double px0, double py0, double pxc0, double pyc0, double px1, double py1)
+{
+    // If cubic is really a line, return line version
+    if(isLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1))
+        return Quad.intersectsLine(px0, py0, pxc0, pyc0, px1, py1, x0, y0, x1, y1);
+
+    // Calculate new control points to split cubic into two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double xca = (xc0 + xc1) / 2;
+    double yca = (yc0 + yc1) / 2;
+    double nxc1 = (nxc0 + xca) / 2;
+    double nyc1 = (nyc0 + yca) / 2;
+    double nxc3 = (xc1 + x1) / 2;
+    double nyc3 = (yc1 + y1) / 2;
+    double nxc2 = (nxc3 + xca) / 2;
+    double nyc2 = (nyc3 + yca) / 2;
+    double midpx = (nxc1 + nxc2) / 2;
+    double midpy = (nyc1 + nyc2) / 2;
+    
+    // If either intersect, return true
+    if(intersectsQuad(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, px0, py0, pxc0, pyc0, px1, py1))
+        return true;
+    return intersectsQuad(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, px0, py0, pxc0, pyc0, px1, py1);
+}
+
+/**
+ * Returns whether Cubic for given points is intersected by Quad with given points.
+ */
+public static boolean intersectsCubic(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
+    double x1, double y1, double px0, double py0, double pxc0, double pyc0, double pxc1, double pyc1, double px1,
+    double py1)
+{
+    // If cubic is really a line, return line version
+    if(isLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1))
+        return intersectsLine(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, x0, y0, x1, y1);
+
+    // Calculate new control points to split cubic into two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double xca = (xc0 + xc1) / 2;
+    double yca = (yc0 + yc1) / 2;
+    double nxc1 = (nxc0 + xca) / 2;
+    double nyc1 = (nyc0 + yca) / 2;
+    double nxc3 = (xc1 + x1) / 2;
+    double nyc3 = (yc1 + y1) / 2;
+    double nxc2 = (nxc3 + xca) / 2;
+    double nyc2 = (nyc3 + yca) / 2;
+    double midpx = (nxc1 + nxc2) / 2;
+    double midpy = (nyc1 + nyc2) / 2;
+    
+    // If either intersect, return true
+    if(intersectsCubic(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1))
+        return true;
+    return intersectsCubic(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1);
 }
 
 }

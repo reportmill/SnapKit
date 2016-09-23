@@ -9,6 +9,14 @@ public class Quad extends Shape {
     double x0, y0, xc0, yc0, x1, y1;
 
 /**
+ * Creates a new Quad.
+ */
+public Quad(double aX0, double aY0, double aXC0, double aYC0, double aX1, double aY1)
+{
+    x0 = aX0; y0 = aY0; xc0 = aXC0; yc0 = aYC0; x1 = aX1; y1 = aY1;
+}
+
+/**
  * Returns the bounds.
  */
 public Rect getBounds()  { return bounds(x0, y0, xc0, yc0, x1, y1, null); }
@@ -72,6 +80,62 @@ public static int crossings(double x0, double y0, double xc, double yc, double x
     int c1 = crossings(x0, y0, x0c, y0c, xc, yc, px, py, level+1);
     int c2 = crossings(xc, yc, xc1, yc1, x1, y1, px, py, level+1);
     return c1 + c2;
+}
+
+/**
+ * Returns whether Quad for given points is effectively a line.
+ */
+public static boolean isLine(double x0, double y0, double xc0, double yc0, double x1, double y1)
+{
+    return Line.getDistanceSquared(x0,y0,x1,y1,xc0,yc0)<.1;
+}
+
+/**
+ * Returns whether Quad for given points is intersected by line with given points.
+ */
+public static boolean intersectsLine(double x0, double y0, double xc0, double yc0, double x1, double y1,
+    double px0, double py0, double px1, double py1)
+{
+    // If quad is really a line, return line version
+    if(isLine(x0, y0, xc0, yc0, x1, y1))
+        return Line.intersectsLine(x0, y0, x1, y1, px0, py0, px1, py1);
+
+    // Calculate new control points to split quad in two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double nxc1 = (x1 + xc0) / 2;
+    double nyc1 = (y1 + yc0) / 2;
+    double midpx = (nxc0 + nxc1) / 2;
+    double midpy = (nyc0 + nyc1) / 2;
+    
+    // If either intersect, return true
+    if(intersectsLine(x0, y0, nxc0, nyc0, midpx, midpy, px0, py0, px1, py1))
+        return true;
+    return intersectsLine(midpx, midpy, nxc1, nyc1, x1, y1, px0, py0, px1, py1);
+}
+
+/**
+ * Returns whether Quad for given points is intersected by Quad with given points.
+ */
+public static boolean intersectsQuad(double x0, double y0, double xc0, double yc0, double x1, double y1,
+    double px0, double py0, double pxc0, double pyc0, double px1, double py1)
+{
+    // If quad is really a line, return line version
+    if(isLine(x0, y0, xc0, yc0, x1, y1))
+        return intersectsLine(px0, py0, pxc0, pyc0, px1, py1, x0, y0, x1, y1);
+
+    // Calculate new control points to split quad in two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double nxc1 = (x1 + xc0) / 2;
+    double nyc1 = (y1 + yc0) / 2;
+    double midpx = (nxc0 + nxc1) / 2;
+    double midpy = (nyc0 + nyc1) / 2;
+    
+    // If either intersect, return true
+    if(intersectsQuad(x0, y0, nxc0, nyc0, midpx, midpy, px0, py0, pxc0, pyc0, px1, py1))
+        return true;
+    return intersectsQuad(midpx, midpy, nxc1, nyc1, x1, y1, px0, py0, pxc0, pyc0, px1, py1);
 }
 
 }

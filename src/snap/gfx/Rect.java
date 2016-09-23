@@ -80,14 +80,19 @@ public Rect getIntersectRect(Rect aRect)
 public boolean contains(double aX, double aY)  { return x<=aX && aX<x+width && y<=aY && aY<y+height; }
 
 /**
- * Returns whether rect contains x/y/w/h.
+ * Returns whether rect contains another rect.
+ */
+public boolean contains(Rect aRect)
+{
+    return contains(aRect.x,aRect.y) && contains(aRect.getMaxX(),aRect.getMaxY());
+}
+
+/**
+ * Override to omptimize rect-to-rect case.
  */
 public boolean contains(Shape aShape)
 {
-    if(isEmpty()) return false;
-    Rect bnds = aShape.getBounds(); // if(bnds.isEmpty()) return false;
-    double aX = bnds.x, aY = bnds.y, aW = bnds.width, aH = bnds.height;
-    return x<=aX && (aX+aW)<=x+width && y<=aY && (aY+aH)<=y+height;
+    return aShape instanceof Rect? contains((Rect)aShape) : super.contains(aShape);
 }
 
 /**
@@ -98,6 +103,14 @@ public boolean intersects(Rect aRect)
     // if(isEmpty() || aRect.isEmpty()) return false;
     double aX = aRect.x, aY = aRect.y, aW = aRect.width, aH = aRect.height;
     return x<aX+aW && aX<x+width && y<aY+aH && aY<y+height;
+}
+
+/**
+ * Override to omptimize rect-to-rect case.
+ */
+public boolean intersects(Shape aShape)
+{
+    return aShape instanceof Rect? intersects((Rect)aShape) : super.intersects(aShape);
 }
 
 /**

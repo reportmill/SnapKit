@@ -4,8 +4,8 @@
 package snap.gfx;
 import java.awt.BasicStroke;
 import java.awt.geom.Area;
-import java.text.DecimalFormat;
 import snap.swing.AWT;
+import snap.util.StringUtils;
 
 /**
  * A custom class.
@@ -34,7 +34,7 @@ public boolean contains(double aX, double aY)
 {
     if(!getBounds().contains(aX, aY)) return false; //return Path2D.contains(AWT.get(getPathIter(null)),aX,aY);
     int cross = crossings(aX, aY), mask = -1; //(pi.getWindingRule() == WIND_NON_ZERO ? -1 : 1);
-    boolean c = ((cross & mask) != 0); System.out.println("Contains: " + c); return c;
+    boolean c = ((cross & mask) != 0); return c; //System.out.println("Contains: " + c);
 }
 
 /**
@@ -75,9 +75,39 @@ public int crossings(double aX, double aY)
  */
 public boolean contains(Shape aShape)
 {
-    if(!getBounds().contains(aShape)) return false;
-    Area area1 = area(this), area2 = (Area)area1.clone(); area2.add(area(aShape));
-    return area1.equals(area2);
+    // If bounds don't contain shape, just return false
+    if(!getBounds().contains(aShape.getBounds())) return false;
+    
+    // Iterate over shape segments, if any segment end point not contained, return false
+    PathIter pi = aShape.getPathIter(null); double pts[] = new double[6];
+    while(pi.hasNext()) {
+        switch(pi.getNext(pts)) {
+            case MoveTo:
+            case LineTo: if(!contains(pts[0], pts[1])) return false; break;
+            case QuadTo: if(!contains(pts[2], pts[3])) return false; break;
+            case CubicTo: if(!contains(pts[4], pts[5])) return false; break;
+        }
+    }
+    
+    // Iterate over shape segments, if any segment edge intersects, return false
+    pi = getPathIter(null); double lx = 0, ly = 0;
+    while(pi.hasNext()) {
+        switch(pi.getNext(pts)) {
+            case MoveTo: lx = pts[0]; ly = pts[1]; break;
+            case LineTo:
+                if(intersects(lx,ly,lx=pts[0],ly=pts[1])) return false;
+                break;
+            case QuadTo:
+                if(intersects(lx,ly,pts[0],pts[1],lx=pts[0],ly=pts[1])) return false;
+                break;
+            case CubicTo:
+                if(intersects(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5])) return false;
+                break;
+        }
+    }
+    
+    // Return true since all shape points are contained and no shape edges intersect
+    return true; //Area area1=area(this),area2=(Area)area1.clone();area2.add(area(aShape));return area1.equals(area2);
 }
 
 /**
@@ -85,9 +115,120 @@ public boolean contains(Shape aShape)
  */
 public boolean intersects(Shape aShape)
 {
+    // If bounds don't intersect, just return false
     if(!getBounds().intersects(aShape.getBounds())) return false;
-    Area area1 = area(this), area2 = area(aShape); area1.intersect(area2);
-    return !area1.isEmpty();
+    
+    // Iterate over shape segments, if any segment intersects, return true
+    PathIter pi = aShape.getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
+    while(pi.hasNext()) {
+        switch(pi.getNext(pts)) {
+            case MoveTo: lx = pts[0]; ly = pts[1]; break;
+            case LineTo:
+                if(intersects(lx,ly,lx=pts[0],ly=pts[1])) return true;
+                break;
+            case QuadTo:
+                if(intersects(lx,ly,pts[0],pts[1],lx=pts[2],ly=pts[3])) return true;
+                break;
+            case CubicTo:
+                if(intersects(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5])) return true;
+                break;
+        }
+    }
+    
+    // Return true if either shape contains the other
+    return contains(aShape) || aShape.contains(this);
+}
+
+/**
+ * Returns whether this shape intersects line defined by given points.
+ */
+public boolean intersects(double x0, double y0, double x1, double y1)
+{
+    // If bounds don't intersect, just return false
+    if(!getBounds().intersects(Line.bounds(x0,y0,x1,y1,null))) return false;
+    
+    // Iterate over segments, if any segment intersects line, return true
+    PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
+    while(pi.hasNext()) {
+        switch(pi.getNext(pts)) {
+            case MoveTo: lx = pts[0]; ly = pts[1]; break;
+            case LineTo:
+                if(Line.intersectsLine(lx,ly,lx=pts[0],ly=pts[1],x0,y0,x1,y1)) return true;
+                break;
+            case QuadTo:
+                if(Quad.intersectsLine(lx,ly,pts[0],pts[1],lx=pts[2],ly=pts[3],x0,y0,x1,y1)) return true;
+                break;
+            case CubicTo:
+                if(Cubic.intersectsLine(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5],x0,y0,x1,y1))
+                    return true;
+                break;
+        }
+    }
+    
+    // Return false since line hits no segments
+    return false;
+}
+
+/**
+ * Returns whether this shape intersects quad defined by given points.
+ */
+public boolean intersects(double x0, double y0, double xc0, double yc0, double x1, double y1)
+{
+    // If bounds don't intersect, just return false
+    if(!getBounds().intersects(Quad.bounds(x0,y0,xc0,yc0,x1,y1,null))) return false;
+    
+    // Iterate over segments, if any segment intersects quad, return true
+    PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
+    while(pi.hasNext()) {
+        switch(pi.getNext(pts)) {
+            case MoveTo: lx = pts[0]; ly = pts[1]; break;
+            case LineTo:
+                if(Quad.intersectsLine(x0,y0,xc0,yc0,x1,y1,lx,ly,lx=pts[0],ly=pts[1])) return true;
+                break;
+            case QuadTo:
+                if(Quad.intersectsQuad(x0,y0,xc0,yc0,x1,y1,lx,ly,pts[0],pts[1],lx=pts[2],ly=pts[3])) return true;
+                break;
+            case CubicTo:
+                if(Cubic.intersectsQuad(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5],x0,y0,xc0,yc0,x1,y1))
+                    return true;
+                break;
+        }
+    }
+    
+    // Return false since line hits no segments
+    return false;
+}
+
+/**
+ * Returns whether this shape intersects cubic defined by given points.
+ */
+public boolean intersects(double x0, double y0, double xc0, double yc0, double xc1, double yc1,double x1, double y1)
+{
+    // If bounds don't intersect, just return false
+    if(!getBounds().intersects(Cubic.bounds(x0,y0,xc0,yc0,xc1,yc1,x1,y1,null))) return false;
+    
+    // Iterate over segments, if any segment intersects cubic, return true
+    PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
+    while(pi.hasNext()) {
+        switch(pi.getNext(pts)) {
+            case MoveTo: lx = pts[0]; ly = pts[1]; break;
+            case LineTo:
+                if(Cubic.intersectsLine(x0,y0,xc0,yc0,xc1,yc1,x1,y1,lx,ly,lx=pts[0],ly=pts[1])) return true;
+                break;
+            case QuadTo:
+                if(Cubic.intersectsQuad(x0,y0,xc0,yc0,xc1,yc1,x1,y1,lx,ly,pts[0],pts[1],lx=pts[2],ly=pts[3]))
+                    return true;
+                break;
+            case CubicTo:
+                if(Cubic.intersectsCubic(x0,y0,xc0,yc0,xc1,yc1,x1,y1,lx,ly,
+                    pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5]))
+                    return true;
+                break;
+        }
+    }
+    
+    // Return false since line hits no segments
+    return false;
 }
 
 /**
@@ -96,7 +237,7 @@ public boolean intersects(Shape aShape)
 public boolean contains(double aX, double aY, double aLineWidth)
 {
     // If linewidth is small return normal version
-    if(aLineWidth<=1) return contains(aX,aY);
+    if(aLineWidth<=111) return contains(aX,aY);
     
     // If bounds don't contain point, return false
     Rect bounds = getBounds().getInsetRect(-aLineWidth/2); if(!bounds.contains(aX,aY)) return false;
@@ -119,6 +260,9 @@ public boolean contains(double aX, double aY, double aLineWidth)
  */
 public boolean intersects(Shape aShape, double aLineWidth)
 {
+    // If linewidth is small return normal version
+    if(aLineWidth<=111) return intersects(aShape);
+    
     // If bounds don't intersect, return false
     if(!getBounds().getInsetRect(-aLineWidth/2).intersects(aShape)) return false;
     
@@ -168,8 +312,7 @@ public String getString()
 }
 
 // Formater
-private static String fmt(double aVal)  { return _fmt.format(aVal); }
-private static DecimalFormat _fmt = new DecimalFormat("0.##");
+private static String fmt(double aVal)  { return StringUtils.toString(aVal); }
 
 /**
  * Standard to string implementation.
