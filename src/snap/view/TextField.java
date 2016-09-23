@@ -534,7 +534,10 @@ protected void mousePressed(ViewEvent anEvent)
     int start = getCharIndexAt(_downX), end = start;
     
     // If word selecting extend to word bounds
-    if(_wordSel) { }
+    if(_wordSel) {
+        while(start>0 && Character.isLetterOrDigit(charAt(start-1))) start--;
+        while(end<length() && Character.isLetterOrDigit(charAt(end))) end++;
+    }
     
     // If paragraph selecting extend to text bounds
     else if(_pgraphSel) { start = 0; end = length(); }
@@ -557,9 +560,13 @@ protected void mouseDragged(ViewEvent anEvent)
     // Get selected range for down point and drag point
     int start = getCharIndexAt(_downX);
     int end = getCharIndexAt(anEvent.getX());
+    if(end<start) { int t = start; start = end; end = t; }
     
     // If word selecting, extend to word bounds
-    if(_wordSel) { }
+    if(_wordSel) {
+        while(start>0 && Character.isLetterOrDigit(charAt(start-1))) start--;
+        while(end<length() && Character.isLetterOrDigit(charAt(end))) end++;
+    }
     
     // If paragraph selecting, extend to text bounds
     else if(_pgraphSel) { start = 0; end = length(); }
