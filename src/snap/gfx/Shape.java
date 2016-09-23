@@ -2,9 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import java.awt.BasicStroke;
-import java.awt.geom.Area;
-import snap.swing.AWT;
 import snap.util.StringUtils;
 
 /**
@@ -288,23 +285,21 @@ public boolean intersects(double aX, double aY, double aLineWidth)
 public boolean intersects(Shape aShape, double aLineWidth)
 {
     // If linewidth is small return normal version
-    if(aLineWidth<=111) return intersects(aShape);
+    if(aLineWidth<=1) return intersects(aShape);
     
     // If bounds don't intersect, return false
     if(!getBounds().getInsetRect(-aLineWidth/2).intersects(aShape)) return false;
     
-    // Get stroked shape
-    java.awt.Shape shape1 = AWT.get(this);
-    BasicStroke bstroke = new BasicStroke((float)aLineWidth*8); 
-    java.awt.Shape shape2 = bstroke.createStrokedShape(shape1);
+    // We need to outset of shape or the other
+    Shape shp1 = this, shp2 = aShape; //double ins = -aLineWidth/2;
+    //if(aShape.isPolygonal()) shp2 = getInsetShape(ins); else shp1 = getInsetShape(ins);
+    return shp1.intersects(shp2);
     
-    // Get area of stroked shape
-    Area area1 = new Area(shape1);
-    Area area2 = new Area(shape2); if(!area1.isEmpty()) area2.add(area1);
-    
-    // Return whether stroked shape area intersects given shape
-    area2.intersect(area(aShape));
-    return !area2.isEmpty();
+    // Get stroked shape, get area of stroked shape, and return whether stroke shape area intersects given shape
+    //java.awt.Shape shape1 = AWT.get(this); BasicStroke bstroke = new BasicStroke((float)aLineWidth*8); 
+    //java.awt.Shape shape2 = bstroke.createStrokedShape(shape1);
+    //Area area1 = new Area(shape1), area2 = new Area(shape2); if(!area1.isEmpty()) area2.add(area1);
+    //area2.intersect(area(aShape)); return !area2.isEmpty();
 }
 
 /**
@@ -356,9 +351,8 @@ public static Rect getBounds(Shape aShape)  { return PathIter.getBounds(aShape.g
  */
 public static Shape add(Shape aShape1, Shape aShape2)
 {
-    Area a1 = area(aShape1), a2 = area(aShape2);
-    a1.add(a2);
-    return AWT.get(a1);
+    java.awt.geom.Area a1 = area(aShape1), a2 = area(aShape2); a1.add(a2);
+    return snap.swing.AWT.get(a1);
 }
 
 /**
@@ -366,9 +360,8 @@ public static Shape add(Shape aShape1, Shape aShape2)
  */
 public static Shape subtract(Shape aShape1, Shape aShape2)
 {
-    Area a1 = area(aShape1), a2 = area(aShape2);
-    a1.subtract(a2);
-    return AWT.get(a1);
+    java.awt.geom.Area a1 = area(aShape1), a2 = area(aShape2); a1.subtract(a2);
+    return snap.swing.AWT.get(a1);
 }
 
 /**
@@ -376,16 +369,14 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
  */
 public static Shape intersect(Shape aShape1, Shape aShape2)
 {
-    if(aShape1 instanceof Rect && aShape2 instanceof Rect)
-        return ((Rect)aShape1).getIntersectRect((Rect)aShape2);
-    Area a1 = area(aShape1), a2 = area(aShape2);
-    a1.intersect(a2);
-    return AWT.get(a1);
+    if(aShape1 instanceof Rect && aShape2 instanceof Rect) return ((Rect)aShape1).getIntersectRect((Rect)aShape2);
+    java.awt.geom.Area a1 = area(aShape1), a2 = area(aShape2); a1.intersect(a2);
+    return snap.swing.AWT.get(a1);
 }
 
 /**
  * Returns an area for a Shape.
  */
-static Area area(Shape aShape)  { return new Area(AWT.get(aShape)); }
+static java.awt.geom.Area area(Shape aShape)  { return new java.awt.geom.Area(snap.swing.AWT.get(aShape)); }
 
 }
