@@ -87,7 +87,7 @@ public boolean contains(Shape aShape)
     }
     
     // Iterate over shape segments, if any segment edge intersects, return false
-    pi = getPathIter(null); double lx = 0, ly = 0;
+    pi = aShape.getPathIter(null); double lx = 0, ly = 0;
     while(pi.hasNext()) {
         switch(pi.getNext(pts)) {
             case MoveTo: lx = pts[0]; ly = pts[1]; break;
