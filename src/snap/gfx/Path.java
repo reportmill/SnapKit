@@ -126,7 +126,7 @@ public void append(Shape aShape)  { append(aShape.getPathIter(null)); }
 /**
  * Returns the bounds.
  */
-public Rect getBounds()  { return _bounds!=null? _bounds : (_bounds=Shape.getBounds(this)); }
+public Rect getBounds()  { return _bounds!=null? _bounds : (_bounds=super.getBounds()); }
 
 /**
  * Clears all segments from path.

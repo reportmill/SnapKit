@@ -48,8 +48,8 @@ public static Rect getBounds(PathIter aPI)
     while(aPI.hasNext()) {
         switch(aPI.getNext(pts)) {
             
-            // Handle MoveTo
-            case MoveTo:
+            // Handle MoveTo (reset bounds for initial move)
+            case MoveTo: if(bnds==null) { bounds.setRect(lastX=pts[0],lastY=pts[1],0,0); continue; }
                 
             // Handle LineTo
             case LineTo: bnds = Line.bounds(lastX, lastY, lastX=pts[0], lastY=pts[1], bnds); break;

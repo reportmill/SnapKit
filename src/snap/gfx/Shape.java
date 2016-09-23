@@ -12,7 +12,7 @@ public abstract class Shape {
 /**
  * Returns the bounds.
  */
-public abstract Rect getBounds();
+public Rect getBounds()  { return PathIter.getBounds(getPathIter(null)); }
 
 /**
  * Returns a path iterator.
@@ -333,18 +333,10 @@ public String getString()
     return str + "}";
 }
 
-// Formater
-private static String fmt(double aVal)  { return StringUtils.toString(aVal); }
-
 /**
  * Standard to string implementation.
  */
-public String toString()  { return getClass().getSimpleName() + getString(); }
-
-/**
- * Returns bounds rect for given PathIter.
- */
-public static Rect getBounds(Shape aShape)  { return PathIter.getBounds(aShape.getPathIter(null)); }
+public String toString()  { return getClass().getSimpleName() + " [" + getBounds().getString() + "] " + getString(); }
 
 /**
  * Adds two shapes together.
@@ -378,5 +370,6 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
  * Returns an area for a Shape.
  */
 static java.awt.geom.Area area(Shape aShape)  { return new java.awt.geom.Area(snap.swing.AWT.get(aShape)); }
+private static String fmt(double aVal)  { return StringUtils.toString(aVal); }
 
 }
