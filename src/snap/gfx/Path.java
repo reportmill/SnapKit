@@ -27,6 +27,21 @@ public class Path extends Shape implements XMLArchiver.Archivable {
     Rect         _bounds;
 
 /**
+ * Creates a new path.
+ */
+public Path() { }
+
+/**
+ * Creates a new path with given path iterator.
+ */
+public Path(PathIter aPI)  { append(aPI); }
+
+/**
+ * Creates a path for given shape.
+ */
+public Path(Shape aShape)  { append(aShape.getPathIter(null)); }
+
+/**
  * Moveto.
  */
 public void moveTo(double x, double y)  { addSeg(Seg.MoveTo); addPoint(x, y); }
@@ -209,16 +224,6 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     // Return this path
     return this;
 }
-
-/**
- * Returns a path for given path iterator.
- */
-public static Path get(PathIter aPI)  { Path p = new Path(); p.append(aPI); return p; }
-
-/**
- * Returns a path for given shape.
- */
-public static Path get(Shape aShape)  { Path p = new Path(); p.append(aShape.getPathIter(null)); return p; }
 
 /**
  * A PathIter for Path.

@@ -30,14 +30,14 @@ public boolean contains(Point aPnt)  { return contains(aPnt.getX(), aPnt.getY())
 public boolean contains(double aX, double aY)
 {
     if(!getBounds().contains(aX, aY)) return false; //return Path2D.contains(AWT.get(getPathIter(null)),aX,aY);
-    int cross = crossings(aX, aY), mask = -1; //(pi.getWindingRule() == WIND_NON_ZERO ? -1 : 1);
+    int cross = getCrossings(aX, aY), mask = -1; //(pi.getWindingRule() == WIND_NON_ZERO ? -1 : 1);
     boolean c = ((cross & mask) != 0); return c; //System.out.println("Contains: " + c);
 }
 
 /**
  * Returns the number of crossings for the ray from given point extending to the right.
  */
-public int crossings(double aX, double aY)
+public int getCrossings(double aX, double aY)
 {
     int cross = 0;
     PathIter pi = getPathIter(null); double pts[] = new double[6], cx = 0, cy = 0, mx = 0, my = 0, px = 0, py = 0;
@@ -312,7 +312,7 @@ public Shape getShapeInRect(Rect aRect)
     double bw = bounds.getWidth(), bh = bounds.getHeight();
     double sx = bw!=0? aRect.getWidth()/bw : 0, sy = bh!=0? aRect.getHeight()/bh : 0;
     trans.scale(sx, sy);
-    return Path.get(getPathIter(trans));
+    return new Path(getPathIter(trans));
 }
 
 /**

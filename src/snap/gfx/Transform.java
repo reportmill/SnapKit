@@ -192,7 +192,7 @@ public Shape createTransformedShape(Shape aShape)
     // If shape is rect and transform is simple, return offset rect
     if(aShape instanceof RectBase && isSimple()) { RectBase rb = (RectBase)aShape; rb = rb.clone();
         rb.offset(_tx,_ty); return rb; }
-    return Path.get(aShape.getPathIter(this));
+    return new Path(aShape.getPathIter(this));
 }
 
 /**
