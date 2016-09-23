@@ -45,6 +45,30 @@ public static Rect bounds(double x0, double y0, double xc0, double yc0, double x
 }
 
 /**
+ * Returns the minimum distance from the given point to the curve.
+ */
+public static double getDistanceSquared(double x0, double y0, double xc0, double yc0, double x1, double y1,
+    double aX, double aY)
+{
+    // If quad is really a line, return line version
+    if(isLine(x0, y0, xc0, yc0, x1, y1))
+        return Line.getDistanceSquared(x0, y0, x1, y1, aX, aY);
+
+    // Calculate new control points to split quad in two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double nxc1 = (x1 + xc0) / 2;
+    double nyc1 = (y1 + yc0) / 2;
+    double midpx = (nxc0 + nxc1) / 2;
+    double midpy = (nyc0 + nyc1) / 2;
+    
+    // If either intersect, return true
+    double d1 = getDistanceSquared(x0, y0, nxc0, nyc0, midpx, midpy, aX, aY);
+    double d2 = getDistanceSquared(midpx, midpy, nxc1, nyc1, x1, y1, aX, aY);
+    return Math.min(d1,d2);
+}
+
+/**
  * Returns the number of crossings for the ray from given point extending to the right.
  */
 public static int crossings(double x0, double y0, double xc, double yc, double x1, double y1, double px, double py,

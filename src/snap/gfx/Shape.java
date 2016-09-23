@@ -232,27 +232,54 @@ public boolean intersects(double x0, double y0, double xc0, double yc0, double x
 }
 
 /**
+ * Returns the closest distance from given point to path.
+ */
+public double getDistance(double x, double y)
+{
+    // Iterate over segments, if any segment intersects cubic, return true
+    double dist = Float.MAX_VALUE, d = dist;
+    PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
+    while(pi.hasNext()) {
+        switch(pi.getNext(pts)) {
+            case MoveTo: lx = pts[0]; ly = pts[1]; break;
+            case LineTo: d = Line.getDistanceSquared(lx,ly,lx=pts[0],ly=pts[1],x,y); break;
+            case QuadTo: d = Quad.getDistanceSquared(lx,ly,pts[0],pts[1],lx=pts[2],ly=pts[3],x,y); break;
+            case CubicTo:d = Cubic.getDistanceSquared(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5],x,y); break;
+        }
+        dist = Math.min(dist, d);
+    }
+    
+    // Return false since line hits no segments
+    return Math.sqrt(dist);
+}
+
+/**
  * Returns whether shape with line width contains point.
  */
 public boolean contains(double aX, double aY, double aLineWidth)
 {
     // If linewidth is small return normal version
-    if(aLineWidth<=111) return contains(aX,aY);
+    if(aLineWidth<=1) return contains(aX,aY);
     
-    // If bounds don't contain point, return false
-    Rect bounds = getBounds().getInsetRect(-aLineWidth/2); if(!bounds.contains(aX,aY)) return false;
+    // If extended bounds don't contain point, return false
+    if(!getBounds().getInsetRect(-aLineWidth/2).contains(aX,aY)) return false;
     
-    // Get stroked shape
-    java.awt.Shape shape1 = AWT.get(this);
-    BasicStroke bstroke = new BasicStroke((float)aLineWidth);
-    java.awt.Shape shape2 = bstroke.createStrokedShape(shape1);
+    // If distance less than line width or this shape contains point, return true
+    double dist = getDistance(aX, aY);
+    return dist<=aLineWidth/2 || contains(aX, aY);
+}
+
+/**
+ * Returns whether shape with line width intersects point.
+ */
+public boolean intersects(double aX, double aY, double aLineWidth)
+{
+    // If extended bounds don't contain point, return false
+    if(!getBounds().getInsetRect(-aLineWidth/2).contains(aX,aY)) return false;
     
-    // Get area of stroked shape
-    Area area1 = new Area(shape1); if(area1.isEmpty()) return shape2.contains(aX,aY);
-    Area area2 = new Area(shape2); area2.add(area1);
-        
-    // Return whether stroked shape area contains given point
-    return area2.contains(aX,aY);
+    // If distance less than line width, return true
+    double dist = getDistance(aX, aY);
+    return dist<=aLineWidth/2;
 }
 
 /**

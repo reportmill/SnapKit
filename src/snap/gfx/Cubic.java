@@ -72,6 +72,36 @@ public static Rect bounds(double x0, double y0, double xc0, double yc0, double x
 }
 
 /**
+ * Returns whether Cubic for given points is intersected by line with given points.
+ */
+public static double getDistanceSquared(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
+    double x1, double y1, double aX, double aY)
+{
+    // If cubic is really a line, return line version
+    if(isLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1))
+        return Line.getDistanceSquared(x0, y0, x1, y1, aX, aY);
+
+    // Calculate new control points to split cubic into two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double xca = (xc0 + xc1) / 2;
+    double yca = (yc0 + yc1) / 2;
+    double nxc1 = (nxc0 + xca) / 2;
+    double nyc1 = (nyc0 + yca) / 2;
+    double nxc3 = (xc1 + x1) / 2;
+    double nyc3 = (yc1 + y1) / 2;
+    double nxc2 = (nxc3 + xca) / 2;
+    double nyc2 = (nyc3 + yca) / 2;
+    double midpx = (nxc1 + nxc2) / 2;
+    double midpy = (nyc1 + nyc2) / 2;
+    
+    // If either intersect, return true
+    double d1 = getDistanceSquared(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, aX, aY);
+    double d2 = getDistanceSquared(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, aX, aY);
+    return Math.min(d1,d2);
+}
+
+/**
  * Returns the number of crossings for the ray from given point extending to the right.
  */
 public static int crossings(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1,
