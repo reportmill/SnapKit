@@ -12,10 +12,13 @@ import snap.util.SnapUtils;
 public class FormBuilder extends ViewOwner {
 
     // The root pane
-    VBox               _pane = createRootPane();
+    VBox                 _pane = createRootPane();
 
     // The font
-    Font               _font;
+    Font                 _font;
+    
+    // Form values
+    Map <String,Object>  _values = new HashMap();
 
 /**
  * Returns the padding.
@@ -201,12 +204,12 @@ public boolean showPanel(View aView, String aTitle, Image anImage)
 /**
  * Returns the specified value.
  */
-public Object getValue(String aKey)  { String key = aKey.replace(" ", ""); return getModelValue(key); }
+public Object getValue(String aKey)  { String key = aKey.replace(" ", ""); return _values.get(key); }
 
 /**
  * Sets the specified value.
  */
-public void setValue(String aKey, Object aValue)  { String key = aKey.replace(" ", ""); setModelValue(key, aValue); }
+public void setValue(String aKey, Object aValue)  { String key = aKey.replace(" ", ""); _values.put(key, aValue); }
 
 /**
  * Returns the specified value.
