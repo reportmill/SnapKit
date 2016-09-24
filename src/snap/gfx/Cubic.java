@@ -1,4 +1,5 @@
 package snap.gfx;
+import snap.util.MathUtils;
 
 /**
  * A Shape representing a Cubic curve.
@@ -25,6 +26,44 @@ public Rect getBounds()  { return bounds(x0, y0, xc0, yc0, xc1, yc1, x1, y1, nul
  * Returns a path iterator.
  */
 public PathIter getPathIter(Transform aT)  { return new CubicIter(aT); }
+
+/**
+ * Splits this Cubic at given parametric location and return the remainder.
+ */
+public Cubic split(double aLoc)
+{
+    // Calculate new control points to split cubic into two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double xca = (xc0 + xc1) / 2;
+    double yca = (yc0 + yc1) / 2;
+    double nxc1 = (nxc0 + xca) / 2;
+    double nyc1 = (nyc0 + yca) / 2;
+    double nxc3 = (xc1 + x1) / 2;
+    double nyc3 = (yc1 + y1) / 2;
+    double nxc2 = (nxc3 + xca) / 2;
+    double nyc2 = (nyc3 + yca) / 2;
+    double midpx = (nxc1 + nxc2) / 2;
+    double midpy = (nyc1 + nyc2) / 2;
+    
+    // If either intersect, return true
+    Cubic rem = new Cubic(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1);
+    xc0 = nxc0; yc0 = nyc0; xc1 = nxc1; yc1 = nyc1; x1 = midpx; y1 = midpy;
+    return rem;
+}
+
+/**
+ * Standard equals implementation.
+ */
+public boolean equals(Object anObj)
+{
+    if(anObj==this) return true;
+    Cubic other = anObj instanceof Cubic? (Cubic)anObj : null; if(other==null) return false;
+    return MathUtils.equals(x0,other.x0) && MathUtils.equals(y0,other.y0) &&
+        MathUtils.equals(xc0,other.xc0) && MathUtils.equals(yc0,other.yc0) &&
+        MathUtils.equals(xc1,other.xc1) && MathUtils.equals(yc1,other.yc1) &&
+        MathUtils.equals(x1,other.x1) && MathUtils.equals(y1,other.y1);
+}
 
 /**
  * Returns the bounds for given quad points.

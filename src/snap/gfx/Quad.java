@@ -1,4 +1,5 @@
 package snap.gfx;
+import snap.util.MathUtils;
 
 /**
  * A Shape representing a Quadratic curve.
@@ -25,6 +26,37 @@ public Rect getBounds()  { return bounds(x0, y0, xc0, yc0, x1, y1, null); }
  * Returns a path iterator.
  */
 public PathIter getPathIter(Transform aT)  { return new QuadIter(aT); }
+
+/**
+ * Splits this Quad at given parametric location and return the remainder.
+ */
+public Quad split(double aLoc)
+{
+    // Calculate new control points to split quad in two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double nxc1 = (x1 + xc0) / 2;
+    double nyc1 = (y1 + yc0) / 2;
+    double midpx = (nxc0 + nxc1) / 2;
+    double midpy = (nyc0 + nyc1) / 2;
+    
+    // If either intersect, return true
+    Quad rem = new Quad(midpx, midpy, nxc1, nyc1, x1, y1);
+    xc0 = nxc0; yc0 = nyc0; x1 = midpx; y1 = midpy;
+    return rem;
+}
+
+/**
+ * Standard equals implementation.
+ */
+public boolean equals(Object anObj)
+{
+    if(anObj==this) return true;
+    Quad other = anObj instanceof Quad? (Quad)anObj : null; if(other==null) return false;
+    return MathUtils.equals(x0,other.x0) && MathUtils.equals(y0,other.y0) &&
+        MathUtils.equals(xc0,other.xc0) && MathUtils.equals(yc0,other.yc0) &&
+        MathUtils.equals(x1,other.x1) && MathUtils.equals(y1,other.y1);
+}
 
 /**
  * Returns the bounds for given quad points.

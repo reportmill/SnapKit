@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import snap.util.MathUtils;
 
 /**
  * A custom class.
@@ -76,6 +77,18 @@ public boolean contains(Shape aShape)  { return false; }
 public boolean contains(double aX, double aY, double aLineWidth)  { return getDistance(aX,aY)<aLineWidth/2; }
 
 /**
+ * Splits the line at given parametric location and return the remainder.
+ */
+public Line split(double aLoc)
+{
+    double x = x0 + aLoc*(x1 - x0);
+    double y = y0 + aLoc*(y1 - y0);
+    Line rem = new Line(x, y, x1, y1);
+    x1 = x; y1 = y;
+    return rem;
+}
+
+/**
  * Returns the minimum distance from the given point to this line.
  */
 public double getDistance(double aX, double aY)  { return Math.sqrt(getDistanceSquared(aX, aY)); }
@@ -84,6 +97,17 @@ public double getDistance(double aX, double aY)  { return Math.sqrt(getDistanceS
  * Returns the minimum distance from the given point to this line, squared.
  */
 public double getDistanceSquared(double aX, double aY)  { return getDistanceSquared(x0, y0, x1, y1, aX, aY); }
+
+/**
+ * Standard equals implementation.
+ */
+public boolean equals(Object anObj)
+{
+    if(anObj==this) return true;
+    Line other = anObj instanceof Line? (Line)anObj : null; if(other==null) return false;
+    return MathUtils.equals(x0,other.x0) && MathUtils.equals(y0,other.y0) &&
+        MathUtils.equals(x1,other.x1) && MathUtils.equals(y1,other.y1);
+}
 
 /**
  * Returns the distance from the given line points (p1,p2) to the given point.

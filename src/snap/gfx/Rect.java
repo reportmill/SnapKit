@@ -77,7 +77,7 @@ public Rect getIntersectRect(Rect aRect)
 /**
  * Returns whether rect contains x/y.
  */
-public boolean contains(double aX, double aY)  { return x<=aX && aX<x+width && y<=aY && aY<y+height; }
+public boolean contains(double aX, double aY)  { return x<=aX && aX<=x+width && y<=aY && aY<=y+height; }
 
 /**
  * Returns whether rect contains another rect.
