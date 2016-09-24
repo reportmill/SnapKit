@@ -24,7 +24,7 @@ public Rect getBounds()  { return bounds(x0, y0, xc0, yc0, xc1, yc1, x1, y1, nul
 /**
  * Returns a path iterator.
  */
-public PathIter getPathIter(Transform aT)  { return null; }
+public PathIter getPathIter(Transform aT)  { return new CubicIter(aT); }
 
 /**
  * Returns the bounds for given quad points.
@@ -243,6 +243,30 @@ public static boolean intersectsCubic(double x0, double y0, double xc0, double y
     if(intersectsCubic(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1))
         return true;
     return intersectsCubic(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1);
+}
+
+/**
+ * PathIter for Cubic.
+ */
+private class CubicIter implements PathIter {
+    
+    /** Create new CubicIter. */
+    CubicIter(Transform at) { trans = at; }  Transform trans; int index;
+
+    /** Returns whether there are more segments. */
+    public boolean hasNext() { return index<=1; }
+
+    /** Returns the coordinates and type of the current path segment in the iteration. */
+    public PathIter.Seg getNext(double pts[])
+    {
+        PathIter.Seg seg = null;
+        if(index==0) { seg = PathIter.Seg.MoveTo; pts[0] = x0; pts[1] = y0; }
+        else if(index==1) { seg = PathIter.Seg.CubicTo;
+            pts[0] = xc0; pts[1] = yc0; pts[2] = xc1; pts[3] = yc1; pts[4] = x1; pts[5] = y1; }
+        else throw new RuntimeException("line iterator out of bounds");
+        if(trans!=null) trans.transform(pts); index++;
+        return seg;
+    }
 }
 
 }
