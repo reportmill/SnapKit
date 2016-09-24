@@ -132,6 +132,15 @@ public static int crossings(double x0, double y0, double x1, double y1, double p
 public static boolean intersectsLine(double x0, double y0, double x1, double y1, double px0, double py0,
     double px1, double py1)
 {
+    return getHitPointLine(x0,y0,x1,y1,px0,py0,px1,py1,false)>=0;
+}
+
+/**
+ * Returns whether line for given points is intersected by second line with given points.
+ */
+public static double getHitPointLine(double x0, double y0, double x1, double y1, double px0, double py0,
+    double px1, double py1, boolean isOther)
+{
     // Probably some line slope stuff, I can't really remember
     double numerator1 = (y0-py0)*(px1-px0) - (x0-px0)*(py1-py0); //(p1y-p3y)*(p4x-p3x) - (p1x-p3x)*(p4y-p3y);
     double numerator2 = (y0-py0)*(x1-x0) - (x0-px0)*(y1-y0);     //(p1y-p3y)*(p2x-p1x) - (p1x-p3x)*(p2y-p1y);
@@ -142,7 +151,8 @@ public static boolean intersectsLine(double x0, double y0, double x1, double y1,
     double s = numerator2/denominator;
     
     // If parametric locations outside 0-1 range, then return false because lines don't intersect
-    return !(r<0 || r>1 || s<0 || s>1);
+    if(r<0 || r>1 || s<0 || s>1) return -1;
+    return isOther? s : r;
 }
 
 /**

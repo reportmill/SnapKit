@@ -160,28 +160,7 @@ public static boolean isLine(double x0, double y0, double xc0, double yc0, doubl
 public static boolean intersectsLine(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
     double x1, double y1, double px0, double py0, double px1, double py1)
 {
-    // If cubic is really a line, return line version
-    if(isLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1))
-        return Line.intersectsLine(x0, y0, x1, y1, px0, py0, px1, py1);
-
-    // Calculate new control points to split cubic into two
-    double nxc0 = (x0 + xc0) / 2;
-    double nyc0 = (y0 + yc0) / 2;
-    double xca = (xc0 + xc1) / 2;
-    double yca = (yc0 + yc1) / 2;
-    double nxc1 = (nxc0 + xca) / 2;
-    double nyc1 = (nyc0 + yca) / 2;
-    double nxc3 = (xc1 + x1) / 2;
-    double nyc3 = (yc1 + y1) / 2;
-    double nxc2 = (nxc3 + xca) / 2;
-    double nyc2 = (nyc3 + yca) / 2;
-    double midpx = (nxc1 + nxc2) / 2;
-    double midpy = (nyc1 + nyc2) / 2;
-    
-    // If either intersect, return true
-    if(intersectsLine(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, px0, py0, px1, py1))
-        return true;
-    return intersectsLine(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, px0, py0, px1, py1);
+    return getHitPointLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, px0, py0, px1, py1, false)>=0;
 }
 
 /**
@@ -190,28 +169,7 @@ public static boolean intersectsLine(double x0, double y0, double xc0, double yc
 public static boolean intersectsQuad(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
     double x1, double y1, double px0, double py0, double pxc0, double pyc0, double px1, double py1)
 {
-    // If cubic is really a line, return line version
-    if(isLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1))
-        return Quad.intersectsLine(px0, py0, pxc0, pyc0, px1, py1, x0, y0, x1, y1);
-
-    // Calculate new control points to split cubic into two
-    double nxc0 = (x0 + xc0) / 2;
-    double nyc0 = (y0 + yc0) / 2;
-    double xca = (xc0 + xc1) / 2;
-    double yca = (yc0 + yc1) / 2;
-    double nxc1 = (nxc0 + xca) / 2;
-    double nyc1 = (nyc0 + yca) / 2;
-    double nxc3 = (xc1 + x1) / 2;
-    double nyc3 = (yc1 + y1) / 2;
-    double nxc2 = (nxc3 + xca) / 2;
-    double nyc2 = (nyc3 + yca) / 2;
-    double midpx = (nxc1 + nxc2) / 2;
-    double midpy = (nyc1 + nyc2) / 2;
-    
-    // If either intersect, return true
-    if(intersectsQuad(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, px0, py0, pxc0, pyc0, px1, py1))
-        return true;
-    return intersectsQuad(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, px0, py0, pxc0, pyc0, px1, py1);
+    return getHitPointQuad(x0, y0, xc0, yc0, xc1, yc1, x1, y1, px0, py0, pxc0, pyc0, px1, py1, false)>=0;
 }
 
 /**
@@ -221,9 +179,18 @@ public static boolean intersectsCubic(double x0, double y0, double xc0, double y
     double x1, double y1, double px0, double py0, double pxc0, double pyc0, double pxc1, double pyc1, double px1,
     double py1)
 {
+    return getHitPointCubic(x0, y0, xc0, yc0, xc1, yc1, x1, y1, px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, false)>=0;
+}
+
+/**
+ * Returns whether Cubic for given points is intersected by line with given points.
+ */
+public static double getHitPointLine(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
+    double x1, double y1, double px0, double py0, double px1, double py1, boolean isOther)
+{
     // If cubic is really a line, return line version
     if(isLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1))
-        return intersectsLine(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, x0, y0, x1, y1);
+        return Line.getHitPointLine(x0, y0, x1, y1, px0, py0, px1, py1, isOther);
 
     // Calculate new control points to split cubic into two
     double nxc0 = (x0 + xc0) / 2;
@@ -240,9 +207,82 @@ public static boolean intersectsCubic(double x0, double y0, double xc0, double y
     double midpy = (nyc1 + nyc2) / 2;
     
     // If either intersect, return true
-    if(intersectsCubic(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1))
-        return true;
-    return intersectsCubic(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1);
+    double hp1 = getHitPointLine(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, px0, py0, px1, py1, isOther);
+    if(hp1>=0)
+        return isOther? hp1 : hp1/2;
+    double hp2 = getHitPointLine(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, px0, py0, px1, py1, isOther);
+    if(hp2>=0)
+        return isOther? hp2 : hp2/2 + .5;
+    return -1;
+}
+
+/**
+ * Returns whether Cubic for given points is intersected by line with given points.
+ */
+public static double getHitPointQuad(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
+    double x1, double y1, double px0, double py0, double pxc0, double pyc0, double px1, double py1, boolean isOther)
+{
+    // If cubic is really a line, return line version
+    if(isLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1))
+        return Quad.getHitPointLine(px0, py0, pxc0, pyc0, px1, py1, x0, y0, x1, y1, !isOther);
+
+    // Calculate new control points to split cubic into two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double xca = (xc0 + xc1) / 2;
+    double yca = (yc0 + yc1) / 2;
+    double nxc1 = (nxc0 + xca) / 2;
+    double nyc1 = (nyc0 + yca) / 2;
+    double nxc3 = (xc1 + x1) / 2;
+    double nyc3 = (yc1 + y1) / 2;
+    double nxc2 = (nxc3 + xca) / 2;
+    double nyc2 = (nyc3 + yca) / 2;
+    double midpx = (nxc1 + nxc2) / 2;
+    double midpy = (nyc1 + nyc2) / 2;
+    
+    // If either intersect, return true
+    double hp1 = getHitPointQuad(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, px0, py0, pxc0, pyc0, px1, py1, isOther);
+    if(hp1>=0)
+        return isOther? hp1 : hp1/2;
+    double hp2 = getHitPointQuad(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1, px0, py0, pxc0, pyc0, px1, py1, isOther);
+    if(hp2>=0)
+        return isOther? hp2 : hp2/2 + .5;
+    return -1;
+}
+
+/**
+ * Returns whether Cubic for given points is intersected by Quad with given points.
+ */
+public static double getHitPointCubic(double x0, double y0, double xc0, double yc0, double xc1, double yc1,
+    double x1, double y1, double px0, double py0, double pxc0, double pyc0, double pxc1, double pyc1, double px1,
+    double py1, boolean isOther)
+{
+    // If cubic is really a line, return line version
+    if(isLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1))
+        return getHitPointLine(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, x0, y0, x1, y1, !isOther);
+
+    // Calculate new control points to split cubic into two
+    double nxc0 = (x0 + xc0) / 2;
+    double nyc0 = (y0 + yc0) / 2;
+    double xca = (xc0 + xc1) / 2;
+    double yca = (yc0 + yc1) / 2;
+    double nxc1 = (nxc0 + xca) / 2;
+    double nyc1 = (nyc0 + yca) / 2;
+    double nxc3 = (xc1 + x1) / 2;
+    double nyc3 = (yc1 + y1) / 2;
+    double nxc2 = (nxc3 + xca) / 2;
+    double nyc2 = (nyc3 + yca) / 2;
+    double midpx = (nxc1 + nxc2) / 2;
+    double midpy = (nyc1 + nyc2) / 2;
+    
+    // If either intersect, return true
+    double hp1 = getHitPointCubic(x0,y0,nxc0,nyc0,nxc1,nyc1,midpx,midpy,px0,py0,pxc0,pyc0,pxc1,pyc1,px1,py1,isOther);
+    if(hp1>=0)
+        return isOther? hp1 : hp1/2;
+    double hp2 = getHitPointCubic(midpx,midpy,nxc2,nyc2,nxc3,nyc3,x1,y1,px0,py0,pxc0,pyc0,pxc1,pyc1,px1,py1,isOther);
+    if(hp2>=0)
+        return isOther? hp2 : hp2/2 + .5;
+    return -1;
 }
 
 /**

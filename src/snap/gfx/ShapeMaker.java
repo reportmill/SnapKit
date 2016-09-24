@@ -23,9 +23,6 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
         seg = slist.get(i1);
     }
     
-    
-    
-    
     return null;
 }
 
