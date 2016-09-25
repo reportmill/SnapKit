@@ -21,6 +21,7 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
         for(int j=0;j<slist2.size();j++) { Shape shp2 = slist2.get(j);
             if(shp1.intersects(shp2)) {
                 double hp1 = getHitPoint(shp1,shp2);
+                if(MathUtils.equalsZero(hp1) || MathUtils.equals(hp1,1)) continue;
                 Shape shp1b = split(shp1, hp1);
                 slist1.add(i+1,shp1b);
                 double hp2 = getHitPoint(shp2,shp1);
@@ -33,35 +34,35 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
     // Skip beginning segments not contained by shape2
     int i = 0;
     for(i=0;i<slist1.size(); i++) { Shape seg = slist1.get(i);
-        if(aShape2.contains(getX0(seg), getY0(seg))) break; }
+        if(contains(aShape2, slist2, getX0(seg), getY0(seg))) break; }
     
     // Iterate over slist1 util we find point that intersects or is contained by shape 2
-    Shape owner = aShape1, opp = aShape2;
+    List <Shape> owner = slist1, opp = slist2;
     Shape seg = null;
     if(i<slist1.size())
         seg = slist1.get(i);
-    else { seg = slist2.get(0); owner = aShape2; opp = aShape1; }
+    else { seg = slist2.get(0); owner = slist2; opp = slist1; }
     
     // 
     while(seg!=null) {
         
         // Add segment to new list
-        slist3.add(seg); System.err.println("Add Seg " + seg);
+        slist3.add(seg); //System.err.println("Add Seg " + seg);
     
         // Get segment at end point for current seg shape
-        List <Shape> segs = getSegments(seg, owner==aShape1? slist1 : slist2);
+        List <Shape> segs = getSegments(seg, owner);
         Shape nextSeg = null;
         for(Shape sg : segs) {
-            if(opp.contains(getX1(sg), getY1(sg)) && !slist3.contains(sg)) {
+            if(contains(opp==slist1? aShape1 : aShape2, opp, getX1(sg), getY1(sg)) && !contains(slist3, sg)) {
                 nextSeg = sg; break; }
         }
         
         // If not found, look for seg from other shape
         if(nextSeg==null) {
-            segs = getSegments(seg, owner==aShape1? slist2 : slist1);
+            segs = getSegments(seg, opp);
             for(Shape sg : segs) {
-                if(owner.contains(getX1(sg), getY1(sg)) && !slist3.contains(sg)) {
-                    nextSeg = sg; owner = opp; opp = opp==aShape1? aShape2 : aShape1; break; }
+                if(contains(owner==slist1? aShape1 : aShape2, owner, getX1(sg), getY1(sg)) && !contains(slist3,sg)) {
+                    nextSeg = sg; owner = opp; opp = opp==slist1? slist2 : slist1; break; }
             }
         }
         
@@ -103,7 +104,55 @@ public static List <Shape> getSegments(Shape aSeg, List <Shape> theSegs)
     return segs;
 }
 
+/**
+ * Returns whether given seg list contains given point.
+ */
+private static boolean contains(Shape aShape, List <Shape> theSegs, double x, double y)
+{
+    for(Shape seg : theSegs)
+        if(contains(seg,x,y))
+            return true;
+    return aShape.contains(x,y);
+}
+
+/**
+ * Returns whether given seg list contains given point.
+ */
+private static boolean contains(Shape aSeg, double x, double y)
+{
+    if(aSeg instanceof Line) { Line s = (Line)aSeg;
+        return eq(x,s.x1) && eq(y,s.y1); }
+    else if(aSeg instanceof Quad) { Quad s = (Quad)aSeg;
+        return eq(x,s.x1) && eq(y,s.y1); }
+    else if(aSeg instanceof Cubic) { Cubic s = (Cubic)aSeg;
+        return eq(x,s.x1) && eq(y,s.y1); }
+    throw new RuntimeException("ShapeMaker: Unsupported Seg class " + aSeg.getClass());
+}
+
 private static boolean eq(double v1, double v2)  { return MathUtils.equals(v1,v2); }
+
+/**
+ * Returns whether list contains segement (regardless of direction).
+ */
+private static boolean contains(List <Shape> theSegs, Shape aSeg)
+{
+    for(Shape seg : theSegs)
+        if(matches(seg, aSeg))
+            return true;
+    return false;
+}
+
+/**
+ * Returns whether given segs match (equal, regardless of direction).
+ */
+private static boolean matches(Shape seg1, Shape seg2)
+{
+    if(seg1.getClass()!=seg2.getClass()) return false;
+    if(seg1 instanceof Line) return ((Line)seg1).matches(seg2);
+    if(seg1 instanceof Quad) return ((Quad)seg1).matches(seg2);
+    if(seg1 instanceof Cubic) return ((Cubic)seg1).matches(seg2);
+    throw new RuntimeException("ShapeMaker: Unsupported Seg class " + seg1.getClass());
+}
 
 private static List <Shape> add(List <Shape> aList, Shape aShp)
 {
@@ -230,6 +279,7 @@ public static Shape split(Shape aShape, double aLoc)
 
 public static void main(String args[])
 {
+    //Shape r1 = new Rect(0,0,200,200), r2 = new Rect(100,100,200,200);
     Shape r1 = new Ellipse(0,0,200,200), r2 = new Ellipse(100,100,200,200);
     Shape r3 = intersect(r1,r2);
     System.err.println("Rect 3: " + r3);

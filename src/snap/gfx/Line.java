@@ -77,6 +77,33 @@ public boolean contains(Shape aShape)  { return false; }
 public boolean contains(double aX, double aY, double aLineWidth)  { return getDistance(aX,aY)<aLineWidth/2; }
 
 /**
+ * Returns whether this shape intersects line defined by given points.
+ */
+public boolean intersects(double px0, double py0, double px1, double py1)
+{
+    if(!getBounds().intersects(Line.bounds(px0, py0, px1, py1, null))) return false;
+    return intersectsLine(x0, y0, x1, y1, px0, py0, px1, py1);
+}
+
+/**
+ * Returns whether this shape intersects quad defined by given points.
+ */
+public boolean intersects(double px0, double py0, double pxc0, double pyc0, double px1, double py1)
+{
+    if(!getBounds().intersects(Quad.bounds(px0, py0, pxc0, pyc0, px1, py1, null))) return false;
+    return Quad.intersectsLine(px0, py0, pxc0, pyc0, px1, py1, x0, y0, x1, y1);
+}
+
+/**
+ * Returns whether this shape intersects cubic defined by given points.
+ */
+public boolean intersects(double px0, double py0, double pxc0,double pyc0,double pxc1,double pyc1,double px1,double py1)
+{
+    if(!getBounds().intersects(Cubic.bounds(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, null))) return false;
+    return Cubic.intersectsLine(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, x0, y0, x1, y1);
+}
+
+/**
  * Splits the line at given parametric location and return the remainder.
  */
 public Line split(double aLoc)
@@ -107,6 +134,17 @@ public boolean equals(Object anObj)
     Line other = anObj instanceof Line? (Line)anObj : null; if(other==null) return false;
     return MathUtils.equals(x0,other.x0) && MathUtils.equals(y0,other.y0) &&
         MathUtils.equals(x1,other.x1) && MathUtils.equals(y1,other.y1);
+}
+
+/**
+ * Returns whether line is equal to another, regardless of direction.
+ */
+public boolean matches(Object anObj)
+{
+    if(equals(anObj)) return true;
+    Line other = anObj instanceof Line? (Line)anObj : null; if(other==null) return false;
+    return MathUtils.equals(x0,other.x1) && MathUtils.equals(y0,other.y1) &&
+        MathUtils.equals(x1,other.x0) && MathUtils.equals(y1,other.y0);
 }
 
 /**

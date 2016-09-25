@@ -40,28 +40,18 @@ public boolean contains(double aX, double aY)
 public int getCrossings(double aX, double aY)
 {
     int cross = 0;
-    PathIter pi = getPathIter(null); double pts[] = new double[6], cx = 0, cy = 0, mx = 0, my = 0, px = 0, py = 0;
+    PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0, mx = 0, my = 0;
     while(pi.hasNext()) {
         switch(pi.getNext(pts)) {
             case MoveTo:
-                if(cy!=my) cross += Line.crossings(cx, cy, mx, my, aX, aY);
-                cx = mx = pts[0]; cy = my = pts[1]; break;
-            case LineTo:
-                px = pts[0]; py = pts[1];
-                cross += Line.crossings(cx, cy, px, py, aX, aY);
-                cx = px; cy = py; break;
-            case QuadTo:
-                px = pts[2]; py = pts[3];
-                cross += Quad.crossings(cx, cy, pts[0], pts[1], px, py, aX, aY, 0);
-                cx = px; cy = py; break;
+                if(ly!=my) cross += Line.crossings(lx, ly, mx, my, aX, aY);
+                lx = mx = pts[0]; ly = my = pts[1]; break;
+            case LineTo: cross += Line.crossings(lx, ly, lx=pts[0], ly=pts[1], aX, aY); break;
+            case QuadTo: cross += Quad.crossings(lx, ly, pts[0], pts[1], lx=pts[2], ly=pts[3], aX, aY, 0); break;
             case CubicTo:
-                px = pts[4]; py = pts[5];
-                cross += Cubic.crossings(cx, cy, pts[0], pts[1], pts[2], pts[3], px, py, aX, aY, 0);
-                cx = px; cy = py; break;
-            case Close:
-                if(cy!=my)
-                    cross += Line.crossings(cx, cy, mx, my, aX, aY);
-                cx = mx; cy = my; break;
+                cross += Cubic.crossings(lx, ly, pts[0], pts[1], pts[2], pts[3], lx=pts[4], ly=pts[5], aX, aY, 0);
+                break;
+            case Close: if(ly!=my) cross += Line.crossings(lx, ly, lx=mx, ly=my, aX, aY); break;
         }
     }
     return cross;
@@ -323,10 +313,12 @@ public String getString()
     String str = "{ "; PathIter pi = getPathIter(null); double pts[] = new double[6];
     while(pi.hasNext()) {
         switch(pi.getNext(pts)) {
-            case MoveTo: str += "M " + fmt(pts[0]) + "," + fmt(pts[1]) + " "; break;
-            case LineTo: str += "L " + fmt(pts[0]) + "," + fmt(pts[1]) + " "; break;
-            case QuadTo: str += "Q " + fmt(pts[2]) + "," + fmt(pts[3]) + " "; break;
-            case CubicTo: str += "C " + fmt(pts[4]) + "," + fmt(pts[5]) + " "; break;
+            case MoveTo: str += "M " + fmt(pts[0]) + " " + fmt(pts[1]) + " "; break;
+            case LineTo: str += "L " + fmt(pts[0]) + " " + fmt(pts[1]) + " "; break;
+            case QuadTo: str += "Q " + fmt(pts[0]) + " " + fmt(pts[1]) + ' ' + fmt(pts[2]) + ' ' + fmt(pts[3]) + ' ';
+                break;
+            case CubicTo: str += "C " + fmt(pts[0]) + ' ' + fmt(pts[1]) + ' ' + fmt(pts[2]) + ' ' + fmt(pts[3]) + ' ' +
+                fmt(pts[4]) + ' ' + fmt(pts[5]) + ' '; break;
             case Close: str += "CLS ";
         }
     }
@@ -362,8 +354,8 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
 public static Shape intersect(Shape aShape1, Shape aShape2)
 {
     if(aShape1 instanceof Rect && aShape2 instanceof Rect) return ((Rect)aShape1).getIntersectRect((Rect)aShape2);
-    java.awt.geom.Area a1 = area(aShape1), a2 = area(aShape2); a1.intersect(a2);
-    return snap.swing.AWT.get(a1);
+    return ShapeMaker.intersect(aShape1, aShape2);
+    //java.awt.geom.Area a1 = area(aShape1), a2 = area(aShape2); a1.intersect(a2); return snap.swing.AWT.get(a1);
 }
 
 /**

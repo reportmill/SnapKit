@@ -28,6 +28,33 @@ public Rect getBounds()  { return bounds(x0, y0, xc0, yc0, x1, y1, null); }
 public PathIter getPathIter(Transform aT)  { return new QuadIter(aT); }
 
 /**
+ * Returns whether this shape intersects line defined by given points.
+ */
+public boolean intersects(double px0, double py0, double px1, double py1)
+{
+    if(!getBounds().intersects(Line.bounds(px0,py0,px1,py1,null))) return false;
+    return intersectsLine(x0, y0, xc0, yc0, x1, y1, px0, py0, px1, py1);
+}
+
+/**
+ * Returns whether this shape intersects quad defined by given points.
+ */
+public boolean intersects(double px0, double py0, double pxc0, double pyc0, double px1, double py1)
+{
+    if(!getBounds().intersects(Quad.bounds(px0,py0,pxc0,pyc0,px1,py1,null))) return false;
+    return intersectsQuad(x0, y0, xc0, yc0, x1, y1, px0, py0, pxc0, pyc0, px1, py1);
+}
+
+/**
+ * Returns whether this shape intersects cubic defined by given points.
+ */
+public boolean intersects(double px0, double py0, double pxc0,double pyc0,double pxc1,double pyc1,double px1,double py1)
+{
+    if(!getBounds().intersects(Cubic.bounds(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, null))) return false;
+    return Cubic.intersectsQuad(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, x0, y0, xc0, yc0, x1, y1);
+}
+
+/**
  * Splits this Quad at given parametric location and return the remainder.
  */
 public Quad split(double aLoc)
@@ -56,6 +83,18 @@ public boolean equals(Object anObj)
     return MathUtils.equals(x0,other.x0) && MathUtils.equals(y0,other.y0) &&
         MathUtils.equals(xc0,other.xc0) && MathUtils.equals(yc0,other.yc0) &&
         MathUtils.equals(x1,other.x1) && MathUtils.equals(y1,other.y1);
+}
+
+/**
+ * Returns whether quad is equal to another, regardless of direction.
+ */
+public boolean matches(Object anObj)
+{
+    if(equals(anObj)) return true;
+    Quad other = anObj instanceof Quad? (Quad)anObj : null; if(other==null) return false;
+    return MathUtils.equals(x0,other.x1) && MathUtils.equals(y0,other.y1) &&
+        MathUtils.equals(xc0,other.xc0) && MathUtils.equals(yc0,other.yc0) &&
+        MathUtils.equals(x1,other.x0) && MathUtils.equals(y1,other.y0);
 }
 
 /**
