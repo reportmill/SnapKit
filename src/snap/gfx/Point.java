@@ -127,6 +127,22 @@ public Point clone()  { try { return (Point)super.clone(); } catch(Exception e) 
 public String toString()  { return "[" + x + " " + y + "]"; }
 
 /**
+ * Returns the distance from this Point to a specified point.
+ */
+public static final double getDistance(double x0, double y0, double x1, double y1)
+{
+    return Math.sqrt(getDistanceSquared(x0,y0,x1,y1));
+}
+
+/**
+ * Returns the distance from this Point to a specified point.
+ */
+public static final double getDistanceSquared(double x0, double y0, double x1, double y1)
+{
+    double dx = x1 - x0, dy = y1 - y0; return dx*dx + dy*dy;
+}
+
+/**
  * Returns a point instance for x/y.
  */
 public static Point get(Point aPoint)  { return new Point(aPoint.x, aPoint.y); }

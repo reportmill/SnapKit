@@ -265,7 +265,8 @@ public static int crossings(double x0, double y0, double xc0, double yc0, double
  */
 public static boolean isLine(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1)
 {
-    return Line.getDistanceSquared(x0,y0,x1,y1,xc0,yc0)<.1 && Line.getDistanceSquared(x0,y0,x1,y1,xc1,yc1)<.01;
+    //if(Point.getDistanceSquared(x0,y0,x1,y1)<.1) return true;
+    return Line.getDistanceSquared(x0,y0,x1,y1,xc0,yc0)<.01 && Line.getDistanceSquared(x0,y0,x1,y1,xc1,yc1)<.01;
 }
 
 /**
@@ -306,19 +307,21 @@ public static double getHitPointLine(double x0, double y0, double xc0, double yc
     if(isLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1))
         return Line.getHitPointLine(x0, y0, x1, y1, px0, py0, px1, py1, isOther);
 
-    // Calculate new control points to split cubic into two
-    double nxc0 = (x0 + xc0) / 2;
-    double nyc0 = (y0 + yc0) / 2;
-    double xca = (xc0 + xc1) / 2;
-    double yca = (yc0 + yc1) / 2;
-    double nxc1 = (nxc0 + xca) / 2;
-    double nyc1 = (nyc0 + yca) / 2;
-    double nxc3 = (xc1 + x1) / 2;
-    double nyc3 = (yc1 + y1) / 2;
-    double nxc2 = (nxc3 + xca) / 2;
-    double nyc2 = (nyc3 + yca) / 2;
-    double midpx = (nxc1 + nxc2) / 2;
-    double midpy = (nyc1 + nyc2) / 2;
+    // Calculate new x control points to split cubic into two
+    double nxc0 = (x0 + xc0)/2;
+    double xca = (xc0 + xc1)/2;
+    double nxc1 = (nxc0 + xca)/2;
+    double nxc3 = (xc1 + x1)/2;
+    double nxc2 = (nxc3 + xca)/2;
+    double midpx = (nxc1 + nxc2)/2;
+    
+    // Calculate new y control points to split cubic into two
+    double nyc0 = (y0 + yc0)/2;
+    double yca = (yc0 + yc1)/2;
+    double nyc1 = (nyc0 + yca)/2;
+    double nyc3 = (yc1 + y1)/2;
+    double nyc2 = (nyc3 + yca)/2;
+    double midpy = (nyc1 + nyc2)/2;
     
     // If either intersect, return true
     double hp1 = getHitPointLine(x0, y0, nxc0, nyc0, nxc1, nyc1, midpx, midpy, px0, py0, px1, py1, isOther);
