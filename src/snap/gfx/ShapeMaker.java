@@ -12,20 +12,20 @@ public class ShapeMaker {
  */
 public static Shape intersect(Shape aShape1, Shape aShape2)
 {
-    List <Shape> slist1 = getShapeList(aShape1);
-    List <Shape> slist2 = getShapeList(aShape2);
-    List <Shape> slist3 = new ArrayList();
+    List <Segment> slist1 = getShapeList(aShape1);
+    List <Segment> slist2 = getShapeList(aShape2);
+    List <Segment> slist3 = new ArrayList();
     
     // Iterate over list1 and split at all intersections with slist2
-    for(int i=0;i<slist1.size();i++) { Shape shp1 = slist1.get(i);
-        for(int j=0;j<slist2.size();j++) { Shape shp2 = slist2.get(j);
+    for(int i=0;i<slist1.size();i++) { Segment shp1 = slist1.get(i);
+        for(int j=0;j<slist2.size();j++) { Segment shp2 = slist2.get(j);
             if(shp1.intersects(shp2)) {
-                double hp1 = getHitPoint(shp1,shp2);
+                double hp1 = shp1.getHitPoint(shp2);
                 if(MathUtils.equalsZero(hp1) || MathUtils.equals(hp1,1)) continue;
-                Shape shp1b = split(shp1, hp1);
+                Segment shp1b = shp1.split(hp1);
                 slist1.add(i+1,shp1b);
-                double hp2 = getHitPoint(shp2,shp1);
-                Shape shp2b = split(shp2,hp2);
+                double hp2 = shp2.getHitPoint(shp1);
+                Segment shp2b = shp2.split(hp2);
                 slist2.add(j+1,shp2b);
             }
         }
@@ -33,12 +33,12 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
     
     // Skip beginning segments not contained by shape2
     int i = 0;
-    for(i=0;i<slist1.size(); i++) { Shape seg = slist1.get(i);
-        if(contains(aShape2, slist2, getX0(seg), getY0(seg))) break; }
+    for(i=0;i<slist1.size(); i++) { Segment seg = slist1.get(i);
+        if(contains(aShape2, slist2, seg.getX0(), seg.getY0())) break; }
     
     // Iterate over slist1 util we find point that intersects or is contained by shape 2
-    List <Shape> owner = slist1, opp = slist2;
-    Shape seg = null;
+    List <Segment> owner = slist1, opp = slist2;
+    Segment seg = null;
     if(i<slist1.size())
         seg = slist1.get(i);
     else { seg = slist2.get(0); owner = slist2; opp = slist1; }
@@ -50,18 +50,18 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
         slist3.add(seg); //System.err.println("Add Seg " + seg);
     
         // Get segment at end point for current seg shape
-        List <Shape> segs = getSegments(seg, owner);
-        Shape nextSeg = null;
-        for(Shape sg : segs) {
-            if(contains(opp==slist1? aShape1 : aShape2, opp, getX1(sg), getY1(sg)) && !contains(slist3, sg)) {
+        List <Segment> segs = getSegments(seg, owner);
+        Segment nextSeg = null;
+        for(Segment sg : segs) {
+            if(contains(opp==slist1? aShape1 : aShape2, opp, sg.getX1(), sg.getY1()) && !contains(slist3, sg)) {
                 nextSeg = sg; break; }
         }
         
         // If not found, look for seg from other shape
         if(nextSeg==null) {
             segs = getSegments(seg, opp);
-            for(Shape sg : segs) {
-                if(contains(owner==slist1? aShape1 : aShape2, owner, getX1(sg), getY1(sg)) && !contains(slist3,sg)) {
+            for(Segment sg : segs) {
+                if(contains(owner==slist1? aShape1 : aShape2, owner, sg.getX1(), sg.getY1()) && !contains(slist3,sg)) {
                     nextSeg = sg; owner = opp; opp = opp==slist1? slist2 : slist1; break; }
             }
         }
@@ -75,30 +75,20 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
     return getShape(slist3);
 }
 
-/** Returns end points for segment shapes. */
-public static double getX0(Shape s)
-{ return s instanceof Line? ((Line)s).x0 : s instanceof Quad? ((Quad)s).x0 : s instanceof Cubic? ((Cubic)s).x0 : 0; }
-public static double getY0(Shape s)
-{ return s instanceof Line? ((Line)s).y0 : s instanceof Quad? ((Quad)s).y0 : s instanceof Cubic? ((Cubic)s).y0 : 0; }
-public static double getX1(Shape s)
-{ return s instanceof Line? ((Line)s).x1 : s instanceof Quad? ((Quad)s).x1 : s instanceof Cubic? ((Cubic)s).x1 : 0; }
-public static double getY1(Shape s)
-{ return s instanceof Line? ((Line)s).y1 : s instanceof Quad? ((Quad)s).y1 : s instanceof Cubic? ((Cubic)s).y1 : 0; }
-
 /**
  * Returns the segements from list for end point of given seg.
  */
-public static List <Shape> getSegments(Shape aSeg, List <Shape> theSegs)
+public static List <Segment> getSegments(Segment aSeg, List <Segment> theSegs)
 {
-    double x = getX1(aSeg), y = getY1(aSeg);
-    List <Shape> segs = Collections.EMPTY_LIST;
+    double x = aSeg.getX1(), y = aSeg.getY1();
+    List <Segment> segs = Collections.EMPTY_LIST;
     
-    for(Shape seg : theSegs) {
+    for(Segment seg : theSegs) {
         if(seg.equals(aSeg)) continue;
-        if(eq(x,getX0(seg)) && eq(y,getY0(seg)))
+        if(eq(x,seg.getX0()) && eq(y,seg.getY0()))
             segs = add(segs, seg);
-        if(eq(x,getX1(seg)) && eq(y,getY1(seg)))
-            segs = add(segs, reverse(seg));
+        if(eq(x,seg.getX1()) && eq(y,seg.getY1()))
+            segs = add(segs, seg.createReverse());
     }
     
     return segs;
@@ -107,7 +97,7 @@ public static List <Shape> getSegments(Shape aSeg, List <Shape> theSegs)
 /**
  * Returns whether given seg list contains given point.
  */
-private static boolean contains(Shape aShape, List <Shape> theSegs, double x, double y)
+private static boolean contains(Shape aShape, List <Segment> theSegs, double x, double y)
 {
     for(Shape seg : theSegs)
         if(contains(seg,x,y))
@@ -134,50 +124,27 @@ private static boolean eq(double v1, double v2)  { return MathUtils.equals(v1,v2
 /**
  * Returns whether list contains segement (regardless of direction).
  */
-private static boolean contains(List <Shape> theSegs, Shape aSeg)
+private static boolean contains(List <Segment> theSegs, Segment aSeg)
 {
-    for(Shape seg : theSegs)
-        if(matches(seg, aSeg))
+    for(Segment seg : theSegs)
+        if(seg.matches(aSeg))
             return true;
     return false;
 }
 
-/**
- * Returns whether given segs match (equal, regardless of direction).
- */
-private static boolean matches(Shape seg1, Shape seg2)
-{
-    if(seg1.getClass()!=seg2.getClass()) return false;
-    if(seg1 instanceof Line) return ((Line)seg1).matches(seg2);
-    if(seg1 instanceof Quad) return ((Quad)seg1).matches(seg2);
-    if(seg1 instanceof Cubic) return ((Cubic)seg1).matches(seg2);
-    throw new RuntimeException("ShapeMaker: Unsupported Seg class " + seg1.getClass());
-}
-
-private static List <Shape> add(List <Shape> aList, Shape aShp)
+private static List <Segment> add(List <Segment> aList, Segment aShp)
 {
     if(aList==Collections.EMPTY_LIST) aList = new ArrayList();
     aList.add(aShp); return aList;
 }
 
-private static Shape reverse(Shape aSeg)
-{
-    if(aSeg instanceof Line) { Line line = (Line)aSeg;
-        return new Line(line.x1,line.y1,line.x0,line.y0); }
-    else if(aSeg instanceof Quad) { Quad quad = (Quad)aSeg;
-        return new Quad(quad.x1,quad.y1,quad.xc0, quad.yc0,quad.x0,quad.y0); }
-    else if(aSeg instanceof Cubic) { Cubic cubic = (Cubic)aSeg;
-        return new Cubic(cubic.x1,cubic.y1,cubic.xc1,cubic.yc1,cubic.xc0,cubic.yc0,cubic.x0,cubic.y0); }
-    throw new RuntimeException("ShapeMaker: Unsupported Seg class " + aSeg.getClass());
-}
-
 /**
  * Creates a list of primitive shapes from a shape.
  */
-public static List <Shape> getShapeList(Shape aShape)
+public static List <Segment> getShapeList(Shape aShape)
 {
     // Iterate over segments, if any segment intersects cubic, return true
-    List <Shape> shapes = new ArrayList();
+    List <Segment> shapes = new ArrayList();
     PathIter pi = aShape.getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0, mx = 0, my = 0;
     while(pi.hasNext()) {
         switch(pi.getNext(pts)) {
@@ -196,7 +163,7 @@ public static List <Shape> getShapeList(Shape aShape)
 /**
  * Creates a list of primitive shapes from a shape.
  */
-public static Shape getShape(List <Shape> slist)
+public static Shape getShape(List <Segment> slist)
 {
     // Iterate over segments, if any segment intersects cubic, return true
     Path path = new Path(); double lx = 0, ly = 0, mx = 0, my = 0;
@@ -218,63 +185,6 @@ public static Shape getShape(List <Shape> slist)
         
     // Return new path
     return path;
-}
-
-/**
- * Returns the hit point for shape 1 on shape 2.
- */
-public static double getHitPoint(Shape aShape1, Shape aShape2)
-{
-    if(aShape1 instanceof Line) { Line s1 = (Line)aShape1;
-        if(aShape2 instanceof Line) { Line s2 = (Line)aShape2;
-            return Line.getHitPointLine(s1.x0, s1.y0, s1.x1, s1.y1, s2.x0, s2.y0, s2.x1, s2.y1, false); }
-        if(aShape2 instanceof Quad) { Quad s2 = (Quad)aShape2;
-            return Quad.getHitPointLine(s2.x0, s2.y0, s2.xc0, s2.yc0, s2.x1, s2.y1, s1.x0, s1.y0, s1.x1, s1.y1, true); }
-        if(aShape2 instanceof Cubic) { Cubic s2 = (Cubic)aShape2;
-            return Cubic.getHitPointLine(s2.x0, s2.y0, s2.xc0, s2.yc0, s2.xc1, s2.yc1, s2.x1, s2.y1, 
-                s1.x0,s1.y0,s1.x1,s1.y1,true); }
-        throw new RuntimeException("ShapeMaker: Unsupported hit class " + aShape2.getClass());
-    }
-    
-    if(aShape1 instanceof Quad) { Quad s1 = (Quad)aShape1;
-        if(aShape2 instanceof Line) { Line s2 = (Line)aShape2;
-            return Quad.getHitPointLine(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.x1, s1.y1, s2.x0, s2.y0, s2.x1, s2.y1,false); }
-        if(aShape2 instanceof Quad) { Quad s2 = (Quad)aShape2;
-            return Quad.getHitPointQuad(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.x1, s1.y1,
-                s2.x0, s2.y0, s2.xc0, s2.yc0, s2.x1, s2.y1, false); }
-        if(aShape2 instanceof Cubic) { Cubic s2 = (Cubic)aShape2;
-            return Cubic.getHitPointQuad(s2.x0, s2.y0, s2.xc0, s2.yc0, s2.xc1, s2.yc1, s2.x1, s2.y1, 
-                s1.x0, s1.y0, s1.xc0, s1.yc0, s1.x1, s1.y1, true); }
-        throw new RuntimeException("ShapeMaker: Unsupported hit class " + aShape2.getClass());
-    }
-    
-    if(aShape1 instanceof Cubic) { Cubic s1 = (Cubic)aShape1;
-        if(aShape2 instanceof Line) { Line s2 = (Line)aShape2;
-            return Cubic.getHitPointLine(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.xc1, s1.yc1, s1.x1, s1.y1,
-                s2.x0, s2.y0, s2.x1, s2.y1, true); }
-        if(aShape2 instanceof Quad) { Quad s2 = (Quad)aShape2;
-            return Cubic.getHitPointQuad(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.xc1, s1.yc1, s1.x1, s1.y1,
-                s2.x0, s2.y0, s2.xc0, s2.yc0, s2.x1, s2.y1, true); }
-        if(aShape2 instanceof Cubic) { Cubic s2 = (Cubic)aShape2;
-            return Cubic.getHitPointCubic(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.xc1, s1.yc1, s1.x1, s1.y1,
-                s2.x0, s2.y0, s2.xc0, s2.yc0, s2.xc1, s2.yc1, s2.x1, s2.y1, true); }
-        throw new RuntimeException("ShapeMaker: Unsupported hit class " + aShape2.getClass());
-    }
-    throw new RuntimeException("ShapeMaker: Unsupported hit class " + aShape1.getClass());
-}
-
-/**
- * Splits a shape at given parametric location.
- */
-public static Shape split(Shape aShape, double aLoc)
-{
-    if(aShape instanceof Line)
-        return ((Line)aShape).split(aLoc);
-    if(aShape instanceof Quad)
-        return ((Quad)aShape).split(aLoc);
-    if(aShape instanceof Cubic)
-        return ((Cubic)aShape).split(aLoc);
-    throw new RuntimeException("ShapeMaker.split: Unsupported split class " + aShape.getClass());
 }
 
 public static void main(String args[])

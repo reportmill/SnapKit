@@ -7,36 +7,13 @@ import snap.util.MathUtils;
 /**
  * A custom class.
  */
-public class Line extends Shape {
+public class Line extends Segment {
 
-    // Ivars
-    public double x0, y0, x1, y1;
-    
 /**
  * Creates a new line.
  */
 public Line(double aX0, double aY0, double aX1, double aY1)  { x0 = aX0; y0 = aY0; x1 = aX1; y1 = aY1; }
     
-/**
- * Returns the first point x.
- */
-public double getX0()  { return x0; }
-
-/**
- * Returns the first point y.
- */
-public double getY0()  { return y0; }
-
-/**
- * Returns the second point x.
- */
-public double getX1()  { return x1; }
-
-/**
- * Returns the second point y.
- */
-public double getY1()  { return y1; }
-
 /**
  * Returns the shape bounds.
  */
@@ -114,6 +91,11 @@ public Line split(double aLoc)
     x1 = x; y1 = y;
     return rem;
 }
+
+/**
+ * Creates and returns the reverse of this segement.
+ */
+public Line createReverse()  { return new Line(x1, y1, x0, y0); }
 
 /**
  * Returns the minimum distance from the given point to this line.

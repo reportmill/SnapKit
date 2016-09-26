@@ -2,12 +2,12 @@ package snap.gfx;
 import snap.util.MathUtils;
 
 /**
- * A Shape representing a Cubic curve.
+ * A Segment representing a Cubic curve.
  */
-public class Cubic extends Shape {
+public class Cubic extends Segment {
 
-    // The points
-    double x0, y0, xc0, yc0, xc1, yc1, x1, y1;
+    // The control points
+    double xc0, yc0, xc1, yc1;
 
 /**
  * Creates a new Cubic.
@@ -78,6 +78,11 @@ public Cubic split(double aLoc)
     xc0 = nxc0; yc0 = nyc0; xc1 = nxc1; yc1 = nyc1; x1 = midpx; y1 = midpy;
     return rem;
 }
+
+/**
+ * Creates and returns the reverse of this segement.
+ */
+public Cubic createReverse()  { return new Cubic(x1, y1, xc1, yc1, xc0, yc0, x0, y0); }
 
 /**
  * Standard equals implementation.

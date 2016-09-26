@@ -2,12 +2,12 @@ package snap.gfx;
 import snap.util.MathUtils;
 
 /**
- * A Shape representing a Quadratic curve.
+ * A Segment representing a Quadratic curve.
  */
-public class Quad extends Shape {
+public class Quad extends Segment {
 
-    // The points
-    double x0, y0, xc0, yc0, x1, y1;
+    // The control point
+    double xc0, yc0;
 
 /**
  * Creates a new Quad.
@@ -72,6 +72,11 @@ public Quad split(double aLoc)
     xc0 = nxc0; yc0 = nyc0; x1 = midpx; y1 = midpy;
     return rem;
 }
+
+/**
+ * Creates and returns the reverse of this segement.
+ */
+public Quad createReverse()  { return new Quad(x1, y1, xc0, yc0, x0, y0); }
 
 /**
  * Standard equals implementation.
