@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import snap.util.MathUtils;
 
 /**
  * A custom class.
@@ -81,6 +80,16 @@ public boolean intersects(double px0, double py0, double pxc0,double pyc0,double
 }
 
 /**
+ * Returns the x value at given parametric location.
+ */
+public double getX(double aLoc)  { return x0 + aLoc*(x1 - x0); }
+
+/**
+ * Returns the y value at given parametric location.
+ */
+public double getY(double aLoc)  { return y0 + aLoc*(y1 - y0); }
+
+/**
  * Splits the line at given parametric location and return the remainder.
  */
 public Line split(double aLoc)
@@ -114,8 +123,8 @@ public boolean equals(Object anObj)
 {
     if(anObj==this) return true;
     Line other = anObj instanceof Line? (Line)anObj : null; if(other==null) return false;
-    return MathUtils.equals(x0,other.x0) && MathUtils.equals(y0,other.y0) &&
-        MathUtils.equals(x1,other.x1) && MathUtils.equals(y1,other.y1);
+    return equals(x0,other.x0) && equals(y0,other.y0) &&
+        equals(x1,other.x1) && equals(y1,other.y1);
 }
 
 /**
@@ -125,8 +134,8 @@ public boolean matches(Object anObj)
 {
     if(equals(anObj)) return true;
     Line other = anObj instanceof Line? (Line)anObj : null; if(other==null) return false;
-    return MathUtils.equals(x0,other.x1) && MathUtils.equals(y0,other.y1) &&
-        MathUtils.equals(x1,other.x0) && MathUtils.equals(y1,other.y0);
+    return equals(x0,other.x1) && equals(y0,other.y1) &&
+        equals(x1,other.x0) && equals(y1,other.y0);
 }
 
 /**

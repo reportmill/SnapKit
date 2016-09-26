@@ -1,5 +1,4 @@
 package snap.gfx;
-import snap.util.MathUtils;
 
 /**
  * A Segment representing a Cubic curve.
@@ -55,29 +54,64 @@ public boolean intersects(double px0, double py0, double pxc0,double pyc0,double
 }
 
 /**
+ * Returns the x value at given parametric location. p' = (1-t)^3*p0 + 3*t*(1-t)^2*p1 + 3*t^2*(1-t)*p2 + t^3*p3.
+ */
+public double getX(double aLoc)
+{
+    //double t=aLoc, s=1-t, s2 = s*s, s3 = s2*s, t2 = t*t, t3 = t2*t; return s3*x0 + 3*t*s2*xc0 + 3*t2*s*xc1 + t3*x1;
+    double nxc0 = average(x0, xc0, aLoc);
+    double xca = average(xc0, xc1, aLoc);
+    double nxc1 = average(nxc0, xca, aLoc);
+    double nxc3 = average(xc1, x1, aLoc);
+    double nxc2 = average(nxc3, xca, aLoc);
+    return average(nxc1, nxc2, aLoc);
+}
+
+/**
+ * Returns the y value at given parametric location. p' = (1-t)^3*p0 + 3*t*(1-t)^2*p1 + 3*t^2*(1-t)*p2 + t^3*p3.
+ */
+public double getY(double aLoc)
+{
+    //double t=aLoc, s=1-t, s2 = s*s, s3 = s2*s, t2 = t*t, t3 = t2*t; return s3*y0 + 3*t*s2*yc0 + 3*t2*s*yc1 + t3*y1;
+    double nyc0 = average(y0, yc0, aLoc);
+    double yca = average(yc0, yc1, aLoc);
+    double nyc1 = average(nyc0, yca, aLoc);
+    double nyc3 = average(yc1, y1, aLoc);
+    double nyc2 = average(nyc3, yca, aLoc);
+    return average(nyc1, nyc2, aLoc);
+}
+
+/**
  * Splits this Cubic at given parametric location and return the remainder.
  */
 public Cubic split(double aLoc)
 {
-    // Calculate new control points to split cubic into two
-    double nxc0 = (x0 + xc0) / 2;
-    double nyc0 = (y0 + yc0) / 2;
-    double xca = (xc0 + xc1) / 2;
-    double yca = (yc0 + yc1) / 2;
-    double nxc1 = (nxc0 + xca) / 2;
-    double nyc1 = (nyc0 + yca) / 2;
-    double nxc3 = (xc1 + x1) / 2;
-    double nyc3 = (yc1 + y1) / 2;
-    double nxc2 = (nxc3 + xca) / 2;
-    double nyc2 = (nyc3 + yca) / 2;
-    double midpx = (nxc1 + nxc2) / 2;
-    double midpy = (nyc1 + nyc2) / 2;
+    // Calculate new x control points to split cubic into two
+    double nxc0 = average(x0, xc0, aLoc);
+    double xca = average(xc0, xc1, aLoc);
+    double nxc3 = average(xc1, x1, aLoc);
+    double nxc1 = average(nxc0, xca, aLoc);
+    double nxc2 = average(xca, nxc3, aLoc);
+    double midpx = average(nxc1, nxc2, aLoc);
     
-    // If either intersect, return true
+    // Calculate new y control points to split cubic into two
+    double nyc0 = average(y0, yc0, aLoc);
+    double yca = average(yc0, yc1, aLoc);
+    double nyc3 = average(yc1, y1, aLoc);
+    double nyc1 = average(nyc0, yca, aLoc);
+    double nyc2 = average(yca, nyc3, aLoc);
+    double midpy = average(nyc1, nyc2, aLoc);
+    
+    // Create new remainder shape, update this shape and return remainder
     Cubic rem = new Cubic(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1);
     xc0 = nxc0; yc0 = nyc0; xc1 = nxc1; yc1 = nyc1; x1 = midpx; y1 = midpy;
     return rem;
 }
+
+/**
+ * Returns the weighted average of this point with another point.
+ */
+private static final double average(double x0, double x1, double t)  { return x0 + t*(x1 - x0); }
 
 /**
  * Creates and returns the reverse of this segement.
@@ -91,10 +125,8 @@ public boolean equals(Object anObj)
 {
     if(anObj==this) return true;
     Cubic other = anObj instanceof Cubic? (Cubic)anObj : null; if(other==null) return false;
-    return MathUtils.equals(x0,other.x0) && MathUtils.equals(y0,other.y0) &&
-        MathUtils.equals(xc0,other.xc0) && MathUtils.equals(yc0,other.yc0) &&
-        MathUtils.equals(xc1,other.xc1) && MathUtils.equals(yc1,other.yc1) &&
-        MathUtils.equals(x1,other.x1) && MathUtils.equals(y1,other.y1);
+    return equals(x0,other.x0) && equals(y0,other.y0) && equals(xc0,other.xc0) && equals(yc0,other.yc0) &&
+        equals(xc1,other.xc1) && equals(yc1,other.yc1) && equals(x1,other.x1) && equals(y1,other.y1);
 }
 
 /**
@@ -104,10 +136,8 @@ public boolean matches(Object anObj)
 {
     if(equals(anObj)) return true;
     Cubic other = anObj instanceof Cubic? (Cubic)anObj : null; if(other==null) return false;
-    return MathUtils.equals(x0,other.x1) && MathUtils.equals(y0,other.y1) &&
-        MathUtils.equals(xc0,other.xc1) && MathUtils.equals(yc0,other.yc1) &&
-        MathUtils.equals(xc1,other.xc0) && MathUtils.equals(yc1,other.yc0) &&
-        MathUtils.equals(x1,other.x0) && MathUtils.equals(y1,other.y0);
+    return equals(x0,other.x1) && equals(y0,other.y1) && equals(xc0,other.xc1) && equals(yc0,other.yc1) &&
+        equals(xc1,other.xc0) && equals(yc1,other.yc0) && equals(x1,other.x0) && equals(y1,other.y0);
 }
 
 /**
@@ -235,7 +265,7 @@ public static int crossings(double x0, double y0, double xc0, double yc0, double
  */
 public static boolean isLine(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1)
 {
-    return Line.getDistanceSquared(x0,y0,x1,y1,xc0,yc0)<.1 && Line.getDistanceSquared(x0,y0,x1,y1,xc1,yc1)<.1;
+    return Line.getDistanceSquared(x0,y0,x1,y1,xc0,yc0)<.1 && Line.getDistanceSquared(x0,y0,x1,y1,xc1,yc1)<.01;
 }
 
 /**

@@ -256,7 +256,7 @@ private static class AWTPathIter implements PathIterator {
     }
     
     /** Returns the winding rule. */
-    public int getWindingRule()  { return PathIterator.WIND_NON_ZERO; }
+    public int getWindingRule()  { return PathIterator.WIND_EVEN_ODD; }
     
     /** Returns whether is done. */
     public boolean isDone()  { return !_pi.hasNext(); }

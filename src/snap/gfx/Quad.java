@@ -1,5 +1,4 @@
 package snap.gfx;
-import snap.util.MathUtils;
 
 /**
  * A Segment representing a Quadratic curve.
@@ -55,17 +54,37 @@ public boolean intersects(double px0, double py0, double pxc0,double pyc0,double
 }
 
 /**
+ * Returns the x value at given parametric location.
+ */
+public double getX(double aLoc)
+{
+    double nxc0 = x0 + aLoc*(xc0 - x0);
+    double nxc1 = xc0 + aLoc*(x1 - xc0);
+    return nxc0 + aLoc*(nxc1 - nxc0); //double t=aLoc, s = 1 - t, s2 = s*s, t2 = t*t; return s2*x0 + 2*t*s*xc0 + t2*x1;
+}
+
+/**
+ * Returns the y value at given parametric location.
+ */
+public double getY(double aLoc)
+{
+    double nyc0 = y0 + aLoc*(yc0 - y0);
+    double nyc1 = yc0 + aLoc*(y1 - yc0);
+    return nyc0 + aLoc*(nyc1 + nyc0); //double t=aLoc, s = 1 - t, s2 = s*s, t2 = t*t; return s2*y0 + 2*t*s*yc0 + t2*y1;
+}
+
+/**
  * Splits this Quad at given parametric location and return the remainder.
  */
 public Quad split(double aLoc)
 {
     // Calculate new control points to split quad in two
-    double nxc0 = (x0 + xc0) / 2;
-    double nyc0 = (y0 + yc0) / 2;
-    double nxc1 = (x1 + xc0) / 2;
-    double nyc1 = (y1 + yc0) / 2;
-    double midpx = (nxc0 + nxc1) / 2;
-    double midpy = (nyc0 + nyc1) / 2;
+    double nxc0 = x0 + aLoc*(xc0 - x0);
+    double nyc0 = y0 + aLoc*(yc0 - y0);
+    double nxc1 = xc0 + aLoc*(x1 - xc0);
+    double nyc1 = yc0 + aLoc*(y1 - yc0);
+    double midpx = nxc0 + aLoc*(nxc1 - nxc0);
+    double midpy = nyc0 + aLoc*(nyc1 - nyc0);
     
     // If either intersect, return true
     Quad rem = new Quad(midpx, midpy, nxc1, nyc1, x1, y1);
@@ -85,9 +104,9 @@ public boolean equals(Object anObj)
 {
     if(anObj==this) return true;
     Quad other = anObj instanceof Quad? (Quad)anObj : null; if(other==null) return false;
-    return MathUtils.equals(x0,other.x0) && MathUtils.equals(y0,other.y0) &&
-        MathUtils.equals(xc0,other.xc0) && MathUtils.equals(yc0,other.yc0) &&
-        MathUtils.equals(x1,other.x1) && MathUtils.equals(y1,other.y1);
+    return equals(x0,other.x0) && equals(y0,other.y0) &&
+        equals(xc0,other.xc0) && equals(yc0,other.yc0) &&
+        equals(x1,other.x1) && equals(y1,other.y1);
 }
 
 /**
@@ -97,9 +116,9 @@ public boolean matches(Object anObj)
 {
     if(equals(anObj)) return true;
     Quad other = anObj instanceof Quad? (Quad)anObj : null; if(other==null) return false;
-    return MathUtils.equals(x0,other.x1) && MathUtils.equals(y0,other.y1) &&
-        MathUtils.equals(xc0,other.xc0) && MathUtils.equals(yc0,other.yc0) &&
-        MathUtils.equals(x1,other.x0) && MathUtils.equals(y1,other.y0);
+    return equals(x0,other.x1) && equals(y0,other.y1) &&
+        equals(xc0,other.xc0) && equals(yc0,other.yc0) &&
+        equals(x1,other.x0) && equals(y1,other.y0);
 }
 
 /**
@@ -187,7 +206,7 @@ public static int crossings(double x0, double y0, double xc, double yc, double x
  */
 public static boolean isLine(double x0, double y0, double xc0, double yc0, double x1, double y1)
 {
-    return Line.getDistanceSquared(x0,y0,x1,y1,xc0,yc0)<.1;
+    return Line.getDistanceSquared(x0,y0,x1,y1,xc0,yc0)<.01;
 }
 
 /**

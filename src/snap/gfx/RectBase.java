@@ -3,6 +3,7 @@
  */
 package snap.gfx;
 import snap.util.MathUtils;
+import snap.util.StringUtils;
 
 /**
  * A custom class.
@@ -150,11 +151,9 @@ public void offset(double dx, double dy)  { setXY(x + dx, y + dy); }
  */
 public String getString()
 {
-    StringBuffer sb = new StringBuffer(); double x = getX(), y = getY(), w = getWidth(), h = getHeight();
-    if(x==(int)x) sb.append((int)x); else sb.append(x); sb.append(' ');
-    if(y==(int)y) sb.append((int)y); else sb.append(y); sb.append(' ');
-    if(w==(int)w) sb.append((int)w); else sb.append(w); sb.append(' ');
-    if(h==(int)h) sb.append((int)h); else sb.append(h);
+    StringBuffer sb = new StringBuffer();
+    sb.append(StringUtils.toString(x)).append(' ').append(StringUtils.toString(y)).append(' ');
+    sb.append(StringUtils.toString(width)).append(' ').append(StringUtils.toString(height));
     return sb.toString();
 }
 
@@ -181,9 +180,6 @@ public boolean equals(Object anObj)
 /**
  * Standard toString implementation.
  */
-public String toString()
-{
-    return getClass().getSimpleName() + " [" + getString() + "]";
-}
+public String toString()  { return getClass().getSimpleName() + " [" + getString() + "]"; }
 
 }

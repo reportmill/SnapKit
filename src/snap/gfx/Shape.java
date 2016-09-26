@@ -29,9 +29,9 @@ public boolean contains(Point aPnt)  { return contains(aPnt.getX(), aPnt.getY())
  */
 public boolean contains(double aX, double aY)
 {
-    if(!getBounds().contains(aX, aY)) return false; //return Path2D.contains(AWT.get(getPathIter(null)),aX,aY);
-    int cross = getCrossings(aX, aY), mask = -1; //(pi.getWindingRule() == WIND_NON_ZERO ? -1 : 1);
-    boolean c = ((cross & mask) != 0); return c; //System.out.println("Contains: " + c);
+    if(!getBounds().contains(aX, aY)) return false;
+    int cross = getCrossings(aX, aY), mask = -1;
+    boolean c = ((cross & mask) != 0); return c;
 }
 
 /**
@@ -94,7 +94,7 @@ public boolean contains(Shape aShape)
     }
     
     // Return true since all shape points are contained and no shape edges intersect
-    return true; //Area area1=area(this),area2=(Area)area1.clone();area2.add(area(aShape));return area1.equals(area2);
+    return true;
 }
 
 /**
@@ -284,12 +284,6 @@ public boolean intersects(Shape aShape, double aLineWidth)
     Shape shp1 = this, shp2 = aShape; //double ins = -aLineWidth/2;
     //if(aShape.isPolygonal()) shp2 = getInsetShape(ins); else shp1 = getInsetShape(ins);
     return shp1.intersects(shp2);
-    
-    // Get stroked shape, get area of stroked shape, and return whether stroke shape area intersects given shape
-    //java.awt.Shape shape1 = AWT.get(this); BasicStroke bstroke = new BasicStroke((float)aLineWidth*8); 
-    //java.awt.Shape shape2 = bstroke.createStrokedShape(shape1);
-    //Area area1 = new Area(shape1), area2 = new Area(shape2); if(!area1.isEmpty()) area2.add(area1);
-    //area2.intersect(area(aShape)); return !area2.isEmpty();
 }
 
 /**
@@ -333,35 +327,19 @@ public String toString()  { return getClass().getSimpleName() + " [" + getBounds
 /**
  * Adds two shapes together.
  */
-public static Shape add(Shape aShape1, Shape aShape2)
-{
-    java.awt.geom.Area a1 = area(aShape1), a2 = area(aShape2); a1.add(a2);
-    return snap.swing.AWT.get(a1);
-}
+public static Shape add(Shape aShape1, Shape aShape2)  { return ShapeMaker.add(aShape1, aShape2); }
 
 /**
  * Subtracts two shapes together.
  */
-public static Shape subtract(Shape aShape1, Shape aShape2)
-{
-    java.awt.geom.Area a1 = area(aShape1), a2 = area(aShape2); a1.subtract(a2);
-    return snap.swing.AWT.get(a1);
-}
+public static Shape subtract(Shape aShape1, Shape aShape2)  { return ShapeMaker.subtract(aShape1, aShape2); }
 
 /**
  * Returns the intersection shape of two shapes.
  */
-public static Shape intersect(Shape aShape1, Shape aShape2)
-{
-    if(aShape1 instanceof Rect && aShape2 instanceof Rect) return ((Rect)aShape1).getIntersectRect((Rect)aShape2);
-    return ShapeMaker.intersect(aShape1, aShape2);
-    //java.awt.geom.Area a1 = area(aShape1), a2 = area(aShape2); a1.intersect(a2); return snap.swing.AWT.get(a1);
-}
+public static Shape intersect(Shape aShape1, Shape aShape2)  { return ShapeMaker.intersect(aShape1, aShape2); }
 
-/**
- * Returns an area for a Shape.
- */
-static java.awt.geom.Area area(Shape aShape)  { return new java.awt.geom.Area(snap.swing.AWT.get(aShape)); }
+/** Helper. */
 private static String fmt(double aVal)  { return StringUtils.toString(aVal); }
 
 }
