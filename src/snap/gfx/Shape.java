@@ -132,7 +132,7 @@ public boolean intersects(Shape aShape)
 public boolean intersects(double x0, double y0, double x1, double y1)
 {
     // If bounds don't intersect, just return false
-    if(!getBounds().intersects(Line.bounds(x0,y0,x1,y1,null))) return false;
+    if(!getBounds().intersects(x0, y0, x1, y1)) return false;
     
     // Iterate over segments, if any segment intersects line, return true
     PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
@@ -162,7 +162,7 @@ public boolean intersects(double x0, double y0, double x1, double y1)
 public boolean intersects(double x0, double y0, double xc0, double yc0, double x1, double y1)
 {
     // If bounds don't intersect, just return false
-    if(!getBounds().intersects(Quad.bounds(x0,y0,xc0,yc0,x1,y1,null))) return false;
+    if(!getBounds().intersects(x0, y0, xc0, yc0, x1, y1)) return false;
     
     // Iterate over segments, if any segment intersects quad, return true
     PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
@@ -192,7 +192,7 @@ public boolean intersects(double x0, double y0, double xc0, double yc0, double x
 public boolean intersects(double x0, double y0, double xc0, double yc0, double xc1, double yc1,double x1, double y1)
 {
     // If bounds don't intersect, just return false
-    if(!getBounds().intersects(Cubic.bounds(x0,y0,xc0,yc0,xc1,yc1,x1,y1,null))) return false;
+    if(!getBounds().intersects(x0, y0, xc0, yc0, xc1, yc1, x1, y1)) return false;
     
     // Iterate over segments, if any segment intersects cubic, return true
     PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;

@@ -57,7 +57,6 @@ public boolean contains(double aX, double aY, double aLineWidth)  { return getDi
  */
 public boolean intersects(double px0, double py0, double px1, double py1)
 {
-    if(!getBounds().intersects(Line.bounds(px0, py0, px1, py1, null))) return false;
     return intersectsLine(x0, y0, x1, y1, px0, py0, px1, py1);
 }
 
@@ -66,7 +65,6 @@ public boolean intersects(double px0, double py0, double px1, double py1)
  */
 public boolean intersects(double px0, double py0, double pxc0, double pyc0, double px1, double py1)
 {
-    if(!getBounds().intersects(Quad.bounds(px0, py0, pxc0, pyc0, px1, py1, null))) return false;
     return Quad.intersectsLine(px0, py0, pxc0, pyc0, px1, py1, x0, y0, x1, y1);
 }
 
@@ -75,7 +73,6 @@ public boolean intersects(double px0, double py0, double pxc0, double pyc0, doub
  */
 public boolean intersects(double px0, double py0, double pxc0,double pyc0,double pxc1,double pyc1,double px1,double py1)
 {
-    if(!getBounds().intersects(Cubic.bounds(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, null))) return false;
     return Cubic.intersectsLine(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, x0, y0, x1, y1);
 }
 
