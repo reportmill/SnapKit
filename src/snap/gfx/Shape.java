@@ -106,10 +106,10 @@ public boolean intersects(Shape aShape)
     if(!getBounds().intersects(aShape.getBounds())) return false;
     
     // Iterate over shape segments, if any segment intersects, return true
-    PathIter pi = aShape.getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
+    PathIter pi = aShape.getPathIter(null); double pts[] = new double[6], mx = 0, my = 0, lx = 0, ly = 0;
     while(pi.hasNext()) {
         switch(pi.getNext(pts)) {
-            case MoveTo: lx = pts[0]; ly = pts[1]; break;
+            case MoveTo: mx = lx = pts[0]; my = ly = pts[1]; break;
             case LineTo:
                 if(intersects(lx,ly,lx=pts[0],ly=pts[1])) return true;
                 break;
@@ -118,6 +118,9 @@ public boolean intersects(Shape aShape)
                 break;
             case CubicTo:
                 if(intersects(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5])) return true;
+                break;
+            case Close:
+                if(intersects(lx,ly,lx=mx,ly=my)) return true;
                 break;
         }
     }
@@ -134,11 +137,14 @@ public boolean intersects(double x0, double y0, double x1, double y1)
     // If bounds don't intersect, just return false
     if(!getBounds().intersects(x0, y0, x1, y1)) return false;
     
+    // If either endpoint contained, return true
+    if(contains(x0,y0) || contains(x1,y1)) return true;
+
     // Iterate over segments, if any segment intersects line, return true
-    PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
+    PathIter pi = getPathIter(null); double pts[] = new double[6], mx = 0, my = 0, lx = 0, ly = 0;
     while(pi.hasNext()) {
         switch(pi.getNext(pts)) {
-            case MoveTo: lx = pts[0]; ly = pts[1]; break;
+            case MoveTo: mx = lx = pts[0]; my = ly = pts[1]; break;
             case LineTo:
                 if(Line.intersectsLine(lx,ly,lx=pts[0],ly=pts[1],x0,y0,x1,y1)) return true;
                 break;
@@ -149,10 +155,13 @@ public boolean intersects(double x0, double y0, double x1, double y1)
                 if(Cubic.intersectsLine(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5],x0,y0,x1,y1))
                     return true;
                 break;
+            case Close:
+                if(Line.intersectsLine(lx,ly,lx=mx,ly=my,x0,y0,x1,y1)) return true;
+                break;
         }
     }
     
-    // Return false since line hits no segments
+    // Return false since no segements intersect
     return false;
 }
 
@@ -164,6 +173,9 @@ public boolean intersects(double x0, double y0, double xc0, double yc0, double x
     // If bounds don't intersect, just return false
     if(!getBounds().intersects(x0, y0, xc0, yc0, x1, y1)) return false;
     
+    // If either endpoint contained, return true
+    if(contains(x0,y0) || contains(x1,y1)) return true;
+
     // Iterate over segments, if any segment intersects quad, return true
     PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
     while(pi.hasNext()) {
@@ -182,7 +194,7 @@ public boolean intersects(double x0, double y0, double xc0, double yc0, double x
         }
     }
     
-    // Return false since line hits no segments
+    // Return false since no segements intersect
     return false;
 }
 
@@ -194,6 +206,9 @@ public boolean intersects(double x0, double y0, double xc0, double yc0, double x
     // If bounds don't intersect, just return false
     if(!getBounds().intersects(x0, y0, xc0, yc0, xc1, yc1, x1, y1)) return false;
     
+    // If either endpoint contained, return true
+    if(contains(x0,y0) || contains(x1,y1)) return true;
+
     // Iterate over segments, if any segment intersects cubic, return true
     PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
     while(pi.hasNext()) {
@@ -214,7 +229,7 @@ public boolean intersects(double x0, double y0, double xc0, double yc0, double x
         }
     }
     
-    // Return false since line hits no segments
+    // Return false since no segements intersect
     return false;
 }
 
