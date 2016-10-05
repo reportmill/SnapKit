@@ -377,6 +377,24 @@ public void respondUI(ViewEvent anEvent)
 }
 
 /**
+ * Show a dialog panel for error message.
+ */
+public static void showErrorDialog(View aView, String aTitle, String aMessage)
+{
+    DialogBox dbox = new DialogBox(aTitle); dbox.setErrorMessage(aMessage);
+    dbox.showMessageDialog(aView);
+}
+
+/**
+ * Show a dialog panel for warning message.
+ */
+public static void showWarningDialog(View aView, String aTitle, String aMessage)
+{
+    DialogBox dbox = new DialogBox(aTitle); dbox.setWarningMessage(aMessage);
+    dbox.showMessageDialog(aView);
+}
+
+/**
  * Show a dialog panel for exception.
  */
 public static void showExceptionDialog(View aView, String aTitle, Throwable e)
