@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.Border;
 import snap.gfx.Color;
 
 /**
@@ -23,7 +22,7 @@ public RootView getRootView()
 {
     if(_rpane!=null) return _rpane;
     _rpane = new RootView(); _rpane.setFill(Color.WHITE); _rpane.getHelper(); //_rpane._win = this;
-    _rpane.setBorder(Border.createLineBorder(Color.LIGHTGRAY,1));
+    _rpane.setBorder(Color.LIGHTGRAY,1);
     addChild(_rpane);
     return _rpane;
 }

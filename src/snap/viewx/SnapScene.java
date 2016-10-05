@@ -47,7 +47,7 @@ public class SnapScene extends ParentView {
 public SnapScene()
 {
      setPrefSize(720, 405);
-     setFill(Color.WHITE); setBorder(Border.createLineBorder(Color.BLACK,1));
+     setFill(Color.WHITE); setBorder(Color.BLACK, 1);
      enableEvents(MouseEvents); enableEvents(KeyEvents);
      setFocusable(true); setFocusWhenPressed(true);
 }

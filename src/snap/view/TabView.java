@@ -51,7 +51,7 @@ public TabView()
     
     // Create and configure content cradle
     _contentCradle = new BorderView(); _contentCradle.setFill(_defBackFill);
-    _contentCradle.setBorder(Border.createLineBorder(Color.LIGHTGRAY,1));
+    _contentCradle.setBorder(Color.LIGHTGRAY, 1);
     
     // Create and configure box node
     _borderBlockerBox.setHeight(1); _borderBlockerBox.setFill(_defBackFill);

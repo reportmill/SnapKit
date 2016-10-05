@@ -32,7 +32,7 @@ public static class Labeled extends WebBrowserPane {
         // Attach a LinearGradient style
         Color c1 = Color.get("#85B5E6"), c2 = Color.get("#426FA3");
         GradientPaint lg = new GradientPaint(0, GradientPaint.getStops(0, c1, .5, c2, 1, c1));
-        plabel.setFill(lg); plabel.setBorder(Border.createLineBorder(Color.GRAY,1));
+        plabel.setFill(lg); plabel.setBorder(Color.GRAY, 1);
         
         // Create BorderView with label and normal UI and return
         BorderView bpane = new BorderView(); bpane.setPrefSize(640, 480);

@@ -20,7 +20,7 @@ protected View createUI()
     ViewArchiver.setUseRealClass(true);
     if(!(superUI instanceof DocView)) {
         superUI.setFill(ViewUtils.getBackFill());
-        superUI.setBorder(Border.createLineBorder(Color.BLACK,1));
+        superUI.setBorder(Color.BLACK, 1);
         superUI.setEffect(new ShadowEffect());
         BorderView bpane = new BorderView(); bpane.setFillCenter(false); bpane.setCenter(superUI);
         bpane.setFill(ViewUtils.getBackDarkFill());

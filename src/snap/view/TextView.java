@@ -184,8 +184,8 @@ public void setEditable(boolean aValue)
     }
     
     else {
-        //disableEvents(MouseEvents); disableEvents(KeyEvents);
-        //setFocusable(false); setFocusWhenPressed(false); setFocusKeysEnabled(false);
+        disableEvents(MouseEvents); disableEvents(KeyEvents);
+        setFocusable(false); setFocusWhenPressed(false); setFocusKeysEnabled(false);
     }
 }
 

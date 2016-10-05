@@ -489,6 +489,14 @@ public void setBorder(Border aBorder)
 }
 
 /**
+ * Convenience to set border to given color and line width.
+ */
+public void setBorder(Color aColor, double aWidth)
+{
+    setBorder(aColor!=null? Border.createLineBorder(aColor, aWidth) : null);
+}
+
+/**
  * Returns effect.
  */
 public Effect getEffect()  { return _effect; }
@@ -2039,7 +2047,7 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive Fill, Border (Legacy)
     XMLElement sxml = anElement.getElement("stroke");
     if(sxml!=null) { String cstr = sxml.getAttributeValue("color"); Color sc = cstr!=null? new Color(cstr):Color.BLACK;
-        double sw = sxml.getAttributeFloatValue("width", 1); setBorder(Border.createLineBorder(sc, sw)); }
+        double sw = sxml.getAttributeFloatValue("width", 1); setBorder(sc, sw); }
     XMLElement fxml = anElement.getElement("fill");
     if(fxml!=null) { Paint fill = (Paint)anArchiver.fromXML(fxml, this); setFill(fill); }
     XMLElement bxml = anElement.getElement("border");

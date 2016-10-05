@@ -66,7 +66,7 @@ protected View createUI()
 {
     // Create TilePane
     _filesPane = new TilePane(); _filesPane.setPrefSize(450, 350);
-    _filesPane.setFill(Color.WHITE); _filesPane.setBorder(Border.createLineBorder(Color.BLACK, 1));
+    _filesPane.setFill(Color.WHITE); _filesPane.setBorder(Color.BLACK, 1);
     return _filesPane;
 }
 

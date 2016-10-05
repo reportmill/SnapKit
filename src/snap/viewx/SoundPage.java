@@ -80,7 +80,7 @@ protected View createUI()
 
     // Put those controls in a panel
     HBox playPanel = new HBox(); playPanel.setSpacing(5); playPanel.setPadding(20,10,20,10);
-    playPanel.setBorder(Border.createLineBorder(Color.BLACK,1));
+    playPanel.setBorder(Color.BLACK, 1);
     playPanel.setChildren(playButton, progSlider, timeLabel);
     Label playPanelTitle = new Label("Playback");
 
@@ -95,7 +95,7 @@ protected View createUI()
     
     // Put those controls in a panel
     HBox recSavePane = new HBox(); recSavePane.setSpacing(5); recSavePane.setPadding(20,20,20,20);
-    recSavePane.setBorder(Border.createLineBorder(Color.BLACK,1));
+    recSavePane.setBorder(Color.BLACK,1);
     recSavePane.setChildren(recButton, saveButton);
     Label recSavePaneTitle = new Label("Record/Save");
     
