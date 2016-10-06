@@ -162,7 +162,13 @@ public ParseRule setLookAhead(int aValue)  { _lookAhead = aValue; _op = Op.LookA
 /**
  * Returns a rule with given name.
  */
-public ParseRule getRule(String aName)  { return getNamedRules().get(aName); }
+public ParseRule getRule(String aName)
+{
+    ParseRule rule = getNamedRules().get(aName);
+    if(rule==null)
+        throw new RuntimeException("ParseRule: Rule not found for name " + aName);
+    return rule;
+}
 
 /**
  * Returns all the rules.
