@@ -80,7 +80,7 @@ public static XMLElement getElement(Object aSource)
         return (XMLElement)aSource;
     
     // Create and return new element from source
-    try { return new XMLParser().parse(aSource); }
+    try { return new XMLParser2().parseXML(aSource); }
     catch(Throwable t) { throw new RuntimeException(t); } // Catch and re-throw exceptions
 }
 

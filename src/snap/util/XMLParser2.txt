@@ -9,15 +9,15 @@ Attribute { Name "=" String }
 
 Content { Element* }
 
-Name { "[a-zA-Z0-9_]*" }
+Name { "[a-zA-Z0-9_-]*" }
 
 String { "\"[^\"]*\"" }
 
 
 
-//Document { Prolog? Element Misc* Element Misc* }
+//Document { Prolog? Misc* Element Misc* }
 //Content { Chardata? ((Element | Reference | CDATA) Chardata?)* }
-//CDATA { "\<!\[CDATA\[" Text "\]\]\>" }
+//CDATA { "<![CDATA[" Text "]]>" }
 //Chardata { Text }
 //Text { "[^<]*" }
 //Misc { Comment }
