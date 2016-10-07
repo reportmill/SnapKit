@@ -3,9 +3,8 @@
  */
 package snap.viewx;
 import java.util.*;
-import java.util.prefs.*;
 import snap.gfx.*;
-import snap.util.PrefsUtils;
+import snap.util.Prefs;
 import snap.view.*;
 
 /**
@@ -292,20 +291,14 @@ public void dropColor(Color aColor, Point aPoint)
 public void saveToPreferences(String aName, int aRow, int aColumn) 
 {
     // Get the app's preferences node and sub-node for the list of colors
-    Preferences root = PrefsUtils.prefs();
-    Preferences dockNode = root.node(aName);
+    Prefs prefs = Prefs.get().getChild(aName);
     
     // Get color, rgb value, key, then if not white put value, otherwise remove
-    try {
-        Color c = getColor(aRow, aColumn);
-        int rgb = c.getRGBA();
-        String key = aRow + "," + aColumn;
-        if(rgb!=0xFFFFFFFF) dockNode.putInt(key, rgb);
-        else dockNode.remove(key);
-    }
-    
-    // Catch exceptions
-    catch(Throwable t) { System.err.println("Error writing colors to preferences"); }
+    Color c = getColor(aRow, aColumn);
+    int rgb = c.getRGBA();
+    String key = aRow + "," + aColumn;
+    if(rgb!=0xFFFFFFFF) prefs.set(key, rgb);
+    else prefs.remove(key);
 }
 
 /**
@@ -313,29 +306,17 @@ public void saveToPreferences(String aName, int aRow, int aColumn)
  */
 public void readFromPreferences(String aName)
 {
-    // Get the app's preferences node
-    Preferences root = PrefsUtils.prefs();
-
     // Reset colors map
     resetColors();
     
-    // Handle exceptions
-    try {
-        
-        // If named node doesn't exist, just return
-        if(!root.nodeExists(aName)) return;
-        
-        // Get named node and node keys and iterate over keys
-        Preferences dockNode = root.node(aName);
-        String keys[] = dockNode.keys();
-        for(String key : keys) {
-            int rgba = dockNode.getInt(key,0xFFFFFFFF);  // Get color rgb for current loop key
-            Color color = new Color(rgba);             // Get color from rgb
-            _colors.put(key, color);                    // Add color to map
-        }
-    
-    // Catch exceptions
-    } catch(Throwable t) { System.err.println("Error reading color dock from preferences"); }
+    // Get named node and node keys and iterate over keys
+    Prefs prefs = Prefs.get().getChild(aName);
+    String keys[] = prefs.getKeys();
+    for(String key : keys) {
+        int rgba = prefs.getInt(key,0xFFFFFFFF);  // Get color rgb for current loop key
+        Color color = new Color(rgba);             // Get color from rgb
+        _colors.put(key, color);                    // Add color to map
+    }
 }
 
 /**

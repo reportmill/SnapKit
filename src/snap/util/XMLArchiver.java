@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
-import java.lang.reflect.*;
 import java.util.*;
 import snap.web.WebURL;
 
@@ -178,13 +177,13 @@ public Object readObject(XMLElement theXML)
     Object object = fromXML(_root, null);
     
     // Send fromXMLFinish to objects
-    for(XMLElement element : (List <XMLElement>)_references) {
+    /*for(XMLElement element : (List <XMLElement>)_references) {
         Object obj = fromXML(element, (Class)null, null); if(obj==null) continue;
         Method meth = ClassUtils.getMethod(obj, "fromXMLFinish", XMLArchiver.class, XMLElement.class);
         if(meth!=null) try { meth.invoke(obj, this, element); }
         catch(InvocationTargetException e) { throw new RuntimeException(e); }
         catch(IllegalAccessException e) { throw new RuntimeException(e); }
-    }
+    }*/
     
     // Return object
     return object;

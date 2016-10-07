@@ -53,7 +53,7 @@ public void setColor(Color aColor)
     _color = aColor; repaint();
     
     if(getTitle()!=null)
-        PrefsUtils.prefsPut(_title, _color==null? null : _color.toHexString());
+        Prefs.get().set(_title, _color==null? null : _color.toHexString());
 }
 
 /**
@@ -69,7 +69,7 @@ public void setTitle(String aTitle)
     _title = aTitle;
         
     // If color string is found, set color
-    String cstr = PrefsUtils.prefs().get(_title, null);
+    String cstr = Prefs.get().get(_title);
     if(cstr!=null)
         _color = Color.get(cstr);
     repaint();

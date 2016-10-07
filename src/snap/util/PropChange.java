@@ -111,22 +111,14 @@ public static void doChange(Object aSource, String aProp, Object oldVal, Object 
 {
     // If indexed change, create RMKeyList and add/remove
     if(anIndex>=0) {
-        
-        // Create list and get other value
         KeyList list = new KeyList(aSource, aProp);
         Object otherVal = list.size()>anIndex? list.get(anIndex) : null;
-        
-        // If new value was provided (added), add new object
-        if(newVal!=null && newVal!=otherVal)
-            list.add(anIndex, newVal);
-        
-        // Otherwise, remove object at index
-        else if(oldVal!=null && oldVal==otherVal)
-            list.remove(anIndex);
+        if(newVal!=null && newVal!=otherVal) list.add(anIndex, newVal);
+        else if(oldVal!=null && oldVal==otherVal) list.remove(anIndex);
     }
     
     // If plain change, do RMKey.setValue on new value
-    else KeyChain.setValue(aSource, aProp, newVal);
+    else snap.gfx.GFXEnv.getEnv().setKeyChainValue(aSource, aProp, newVal);
 }
 
 }

@@ -523,7 +523,7 @@ protected void updateLines(int aStart, int endOld, int endNew)
     if((!isLinked() && _bpath==null) && getEnd()!=_text.length()) {
         int blen = getEnd(), tlen = _text.length(), lcnt = getLineCount();
         int bstr = lcnt>0? getLine(0).getStart() : getStart(), bend = lcnt>0? getLine(lcnt-1).getEnd() : getStart();
-        String str = String.format("BoxLen: %d, TextLen: %d, Bstrt: %d, Bend: %d", blen, tlen, bstr, bend);
+        String str = "BoxLen: " + blen + ", TextLen: " + tlen + ", Bstrt: " + bstr + ", Bend: " + bend;
         throw new RuntimeException("TextBox: Invalid State: " + str);
     }
         

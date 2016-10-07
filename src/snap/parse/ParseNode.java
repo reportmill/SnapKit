@@ -133,7 +133,8 @@ public String toStringSimple()
 {
     ParseRule rule = getRule(); String name = rule.getName(); if(name==null) name = rule.toString();
     StringBuffer sb = new StringBuffer(name).append(' ');
-    sb.append(String.format("{ line:%d start:%d, end:%d }", getLineIndex()+1, getStart(), getEnd()));
+    sb.append("{ line:").append(getLineIndex()+1).append(", start:").append(getStart());
+    sb.append(", end:").append(getEnd()).append(" }");
     return sb.toString();
 }
 

@@ -372,7 +372,7 @@ public <T> T parseCustom(CharSequence anInput, Class <T> aClass)  { setInput(anI
 /**
  * A class to pass Handler by reference, allowing it to be created lazily, but used higher up in stack.
  */
-private static final class HandlerRef {
+public static final class HandlerRef {
     final ParseRule _rule; ParseHandler _handler;
     HandlerRef(ParseRule aRule) { _rule = aRule; }
     private final ParseHandler handler()  {

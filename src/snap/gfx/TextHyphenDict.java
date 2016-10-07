@@ -1,7 +1,7 @@
 /* ==================================================================
  * This file is part of JTextCheck - a Java text-checking API
  * Homepage: http://linux.org.mt/projects/jtextcheck/
- * Copyright Â© 2003 Ramon Casha
+ * Copyright © 2003 Ramon Casha
  *
  * Licensed under the GNU LGPL v2.1. You can find the text of this
  * license at http://www.gnu.org/copyleft/lesser.html
@@ -10,6 +10,7 @@ package snap.gfx;
 import java.io.*;
 import java.util.*;
 import snap.util.*;
+import snap.web.WebURL;
 
 /**
  * Module to load and process an OpenOffice.org-style hyphenation dictionary.
@@ -191,7 +192,7 @@ public class TextHyphenDict {
     private void loadHyphenDict() throws IOException
     {
         // Get bytes for aSource
-        byte bytes[] = SnapUtils.getBytes(getClass().getResource("hyph_en_US.dic"));
+        byte bytes[] = SnapUtils.getBytes(WebURL.getURL(getClass(), "hyph_en_US.dic"));
         
         // Get Charset
         String charset = null;

@@ -103,7 +103,7 @@ public static String stringValue(Object anObj)
     }
     
     // If object is File, get absolute path
-    if(anObj instanceof File) return ((File)anObj).getAbsolutePath();
+    //if(anObj instanceof File) return ((File)anObj).getAbsolutePath();
     
     // If object is Date, date format it
     if(anObj instanceof Date) return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Date)anObj);
@@ -329,8 +329,8 @@ public static byte[] getBytes(Object aSource)
     if(aSource instanceof InputStream) return getBytes((InputStream)aSource);
     WebURL url = null; try { url = WebURL.getURL(aSource); } catch(Exception e) { }
     if(url!=null && url.getFile()!=null) return url.getFile().getBytes();
-    if(aSource instanceof URL) try { return URLUtils.getBytes((URL)aSource); }
-    catch(IOException e) { e.printStackTrace(); }
+    //if(aSource instanceof URL) try { return URLUtils.getBytes((URL)aSource); }
+    //catch(IOException e) { e.printStackTrace(); }
     return null;
 }
 

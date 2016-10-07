@@ -80,12 +80,11 @@ public synchronized ParseHandler getAvailableHandler()
  */
 private ParseHandler getBackupHandler()
 {
-    if(_backupHandler==null) try {
-        Constructor constr = getClass().getDeclaredConstructor();
-        constr.setAccessible(true);
-        _backupHandler = (ParseHandler)constr.newInstance();
-    }
-    catch(Exception e) { throw new RuntimeException(e); }
+    if(_backupHandler==null)
+        try { _backupHandler = getClass().newInstance(); }
+        catch(Exception e) { throw new RuntimeException(e); }
+        //try { Constructor constr = getClass().getDeclaredConstructor(); constr.setAccessible(true);
+        //_backupHandler = (ParseHandler)constr.newInstance(); }
     return _backupHandler;
 }
 

@@ -10,6 +10,14 @@ import snap.parse.ParseRule.*;
  */
 public class ParseRuleParser extends Parser {
 
+protected ParseNode parse(ParseRule aRule, Parser.HandlerRef aHRef)
+{
+    System.out.println("Will parse " + aRule);
+    ParseNode pn = super.parse(aRule, aHRef);
+    System.out.println("Did parse " + aRule);
+    return pn;
+}
+
 /**
  * Creates a new ParseRule rule.
  */
@@ -77,14 +85,17 @@ private static ParseRule getRule2(String aName)
 /**
  * ParseRuleFile Handler: { ParseRule* }
  */
-private static class ParseRuleFileHandler extends ParseHandler <ParseRule> {
+public static class ParseRuleFileHandler extends ParseHandler <ParseRule> {
+
+    /** Returns the part class. */
+    protected Class <ParseRule> getPartClass()  { return ParseRule.class; }
 
     // Called when node is parsed.
     protected void parsedOne(ParseNode aNode, String anId)
     {
         // Get first
         if(_part==null) {
-            ParseRule rule = aNode.getCustomNode(ParseRule.class);
+            ParseRule rule = (ParseRule)aNode.getCustomNode();
             if(rule.getPattern()==null)
                 _part = rule;
         }
@@ -97,7 +108,10 @@ private static class ParseRuleFileHandler extends ParseHandler <ParseRule> {
 /**
  * ParseRule Handler: { Name "{" OrExpr "}" }
  */
-private static class ParseRuleHandler extends ParseHandler <ParseRule> {
+public static class ParseRuleHandler extends ParseHandler <ParseRule> {
+
+    /** Returns the part class. */
+    protected Class <ParseRule> getPartClass()  { return ParseRule.class; }
 
     // Called when node is parsed.
     protected void parsedOne(ParseNode aNode, String anId)
@@ -108,7 +122,7 @@ private static class ParseRuleHandler extends ParseHandler <ParseRule> {
         
         // Handle OrExpr
         if(anId=="OrExpr") {
-            ParseRule rule = aNode.getCustomNode(ParseRule.class);
+            ParseRule rule = (ParseRule)aNode.getCustomNode();
             _part._op = rule._op;
             _part._child0 = rule._child0; _part._child1 = rule._child1;
             _part._pattern = rule._pattern; _part._literal = rule._literal;
@@ -120,16 +134,19 @@ private static class ParseRuleHandler extends ParseHandler <ParseRule> {
 /**
  * OrExpr Handler: { AndExpr ( "|" AndExpr )* }
  */
-private static class OrExprHandler extends ParseHandler <ParseRule> {
+public static class OrExprHandler extends ParseHandler <ParseRule> {
 
     ParseRule _more;
+
+    /** Returns the part class. */
+    protected Class <ParseRule> getPartClass()  { return ParseRule.class; }
 
     /** Called when node is parsed. */
     protected void parsedOne(ParseNode aNode, String anId)
     {
         // Handle AndExpr
         if(anId=="AndExpr") {
-            ParseRule rule = aNode.getCustomNode(ParseRule.class);
+            ParseRule rule = (ParseRule)aNode.getCustomNode();
             if(_part==null) { _part = rule; _more = null; }
             else if(_more==null) _part = _more = new ParseRule(Op.Or, _part, rule);
             else { _more._child1 = new ParseRule(Op.Or, _more._child1, rule); _more = _more._child1; }
@@ -140,16 +157,19 @@ private static class OrExprHandler extends ParseHandler <ParseRule> {
 /**
  * AndExpr Handler: { CountExpr CountExpr* }
  */
-private static class AndExprHandler extends ParseHandler <ParseRule> {
+public static class AndExprHandler extends ParseHandler <ParseRule> {
 
     ParseRule _more;
     
+    /** Returns the part class. */
+    protected Class <ParseRule> getPartClass()  { return ParseRule.class; }
+
     /** Called when node is parsed. */
     protected void parsedOne(ParseNode aNode, String anId)
     {
         // Handle CountExpr
         if(anId=="CountExpr") {
-            ParseRule rule = aNode.getCustomNode(ParseRule.class);
+            ParseRule rule = (ParseRule)aNode.getCustomNode();
             if(_part==null) { _part = rule; _more = null; }
             else if(_more==null) _part = _more = new ParseRule(Op.And, _part, rule);
             else { _more._child1 = new ParseRule(Op.And, _more._child1, rule); _more = _more._child1; }
@@ -160,14 +180,17 @@ private static class AndExprHandler extends ParseHandler <ParseRule> {
 /**
  * CountExpr Handler: { Expression ( "*" "+" "?" )? }
  */
-private static class CountExprHandler extends ParseHandler <ParseRule> {
+public static class CountExprHandler extends ParseHandler <ParseRule> {
+
+    /** Returns the part class. */
+    protected Class <ParseRule> getPartClass()  { return ParseRule.class; }
 
     /** Called when node is parsed. */
     protected void parsedOne(ParseNode aNode, String anId)
     {
         // Handle Expression
         if(anId=="Expression")
-            _part = aNode.getCustomNode(ParseRule.class);
+            _part = (ParseRule)aNode.getCustomNode();
         
         // Handle Counts
         else if(anId=="*") _part = new ParseRule(Op.ZeroOrMore, _part);
@@ -179,7 +202,10 @@ private static class CountExprHandler extends ParseHandler <ParseRule> {
 /**
  * Expression Handler: { String | "LookAhead" "(" (Number | OrExpr) ")" | Name | "(" OrExpr ")" }
  */
-private static class ExpressionHandler extends ParseHandler <ParseRule> {
+public static class ExpressionHandler extends ParseHandler <ParseRule> {
+
+    /** Returns the part class. */
+    protected Class <ParseRule> getPartClass()  { return ParseRule.class; }
 
     /** Called when node is parsed. */
     protected void parsedOne(ParseNode aNode, String anId)
@@ -196,7 +222,7 @@ private static class ExpressionHandler extends ParseHandler <ParseRule> {
         
         // Handle OrExpr
         else if(anId=="OrExpr") {
-            ParseRule rule = aNode.getCustomNode(ParseRule.class);
+            ParseRule rule = (ParseRule)aNode.getCustomNode();
             if(_part==null) _part = rule;
             else _part._child0 = rule;  // LookAhead
         }
