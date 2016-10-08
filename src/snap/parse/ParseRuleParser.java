@@ -10,14 +10,6 @@ import snap.parse.ParseRule.*;
  */
 public class ParseRuleParser extends Parser {
 
-protected ParseNode parse(ParseRule aRule, Parser.HandlerRef aHRef)
-{
-    System.out.println("Will parse " + aRule);
-    ParseNode pn = super.parse(aRule, aHRef);
-    System.out.println("Did parse " + aRule);
-    return pn;
-}
-
 /**
  * Creates a new ParseRule rule.
  */
