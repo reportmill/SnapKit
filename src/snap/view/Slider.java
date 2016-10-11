@@ -78,6 +78,26 @@ public void setMax(double aValue)
 }
 
 /**
+ * Returns the value for given key.
+ */
+public Object getValue(String aPropName)
+{
+    if(aPropName.equals("Value"))
+        return getValue();
+    return super.getValue(aPropName);
+}
+
+/**
+ * Sets the value for given key.
+ */
+public void setValue(String aPropName, Object aValue)
+{
+    if(aPropName.equals("Value"))
+        setValue(SnapUtils.doubleValue(aValue));
+    else super.setValue(aPropName, aValue);
+}
+
+/**
  * Calculates the preferred width.
  */
 protected double getPrefWidthImpl(double aH)  { return isHorizontal()? 100 : (SIZE+4); }
