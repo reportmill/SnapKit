@@ -149,4 +149,14 @@ public abstract Object getKeyChainValue(Object anObj, String aKeyChain);
  */
 public abstract void setKeyChainValue(Object anObj, String aKeyChain, Object aValue);
 
+/**
+ * Returns a key list value.
+ */
+public abstract Object getKeyListValue(Object anObj, String aKey, int anIndex);
+
+/**
+ * Adds a key list value.
+ */
+public abstract void setKeyListValue(Object anObj, String aKey, Object aValue, int anIndex);
+
 }

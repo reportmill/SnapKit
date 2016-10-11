@@ -259,4 +259,19 @@ public static class InvalidKeyListException extends RuntimeException {
      public InvalidKeyListException(String aMessage, Throwable aCause) { super(aMessage, aCause); }
 }
 
+/**
+ * Returns a key list value for given object, key and index.
+ */
+public static Object getValue(Object anObj, String aKey, int anIndex)  { return new KeyList(anObj, aKey).get(anIndex); }
+
+/**
+ * Sets a key list value for given object, key and index.
+ */
+public static void setValue(Object anObj, String aKey, Object aValue, int anIndex)
+{
+    KeyList klist = new KeyList(anObj, aKey);
+    if(aValue!=null) klist.add(anIndex, aValue);
+    else klist.remove(anIndex);
+}
+
 }

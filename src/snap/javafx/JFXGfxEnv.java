@@ -98,6 +98,19 @@ public Object getKeyChainValue(Object anObj, String aKeyChain)  { return KeyChai
 public void setKeyChainValue(Object anObj, String aKC, Object aValue)  { KeyChain.setValue(anObj, aKC, aValue); }
 
 /**
+ * Returns a key list value.
+ */
+public Object getKeyListValue(Object anObj, String aKey, int anIndex) { return KeyList.getValue(anObj, aKey, anIndex); }
+
+/**
+ * Adds a key list value.
+ */
+public void setKeyListValue(Object anObj, String aKey, Object aValue, int anIndex)
+{
+    KeyList.setValue(anObj, aKey, aValue, anIndex);
+}
+
+/**
  * Returns a shared instance.
  */
 public static JFXGfxEnv get()  { return _shared; }

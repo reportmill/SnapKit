@@ -111,10 +111,10 @@ public static void doChange(Object aSource, String aProp, Object oldVal, Object 
 {
     // If indexed change, create RMKeyList and add/remove
     if(anIndex>=0) {
-        KeyList list = new KeyList(aSource, aProp);
-        Object otherVal = list.size()>anIndex? list.get(anIndex) : null;
-        if(newVal!=null && newVal!=otherVal) list.add(anIndex, newVal);
-        else if(oldVal!=null && oldVal==otherVal) list.remove(anIndex);
+        //Object otherVal = list.size()>anIndex? list.get(anIndex) : null;
+        //if(newVal!=null && newVal!=otherVal) list.add(anIndex, newVal);
+        //else if(oldVal!=null && oldVal==otherVal) list.remove(anIndex);
+        snap.gfx.GFXEnv.getEnv().setKeyListValue(aSource, aProp, newVal, anIndex);
     }
     
     // If plain change, do RMKey.setValue on new value
