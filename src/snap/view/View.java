@@ -1721,15 +1721,15 @@ public void setValue(String aPropName, Object aValue)
     
     // Handle properties
     switch(pname) {
-        case View.X_Prop: setX((Double)aValue); break;
-        case View.Y_Prop: setY((Double)aValue); break;
-        case View.Width_Prop: setWidth((Double)aValue); break;
-        case View.Height_Prop: setHeight((Double)aValue); break;
-        case View.Rotate_Prop: setRotate((Double)aValue); break;
-        case View.ScaleX_Prop: setScaleX((Double)aValue); break;
-        case View.ScaleY_Prop: setScaleY((Double)aValue); break;
-        case View.TransX_Prop: setTransX((Double)aValue); break;
-        case View.TransY_Prop: setTransY((Double)aValue); break;
+        case View.X_Prop: setX(SnapUtils.doubleValue(aValue)); break;
+        case View.Y_Prop: setY(SnapUtils.doubleValue(aValue)); break;
+        case View.Width_Prop: setWidth(SnapUtils.doubleValue(aValue)); break;
+        case View.Height_Prop: setHeight(SnapUtils.doubleValue(aValue)); break;
+        case View.Rotate_Prop: setRotate(SnapUtils.doubleValue(aValue)); break;
+        case View.ScaleX_Prop: setScaleX(SnapUtils.doubleValue(aValue)); break;
+        case View.ScaleY_Prop: setScaleY(SnapUtils.doubleValue(aValue)); break;
+        case View.TransX_Prop: setTransX(SnapUtils.doubleValue(aValue)); break;
+        case View.TransY_Prop: setTransY(SnapUtils.doubleValue(aValue)); break;
         case "Enabled": setDisabled(!SnapUtils.boolValue(aValue)); break;
         case "Items": { Selectable sview = (Selectable)this;
             if(aValue instanceof List) sview.setItems((List)aValue);
@@ -1743,7 +1743,7 @@ public void setValue(String aPropName, Object aValue)
             sview.setSelectedIndex(index);
             break;
         }
-        case Scroller.ScrollV_Prop: ((Scroller)this).setScrollV((Double)aValue); break;
+        case Scroller.ScrollV_Prop: ((Scroller)this).setScrollV(SnapUtils.doubleValue(aValue)); break;
         default: GFXEnv.getEnv().setKeyChainValue(this, pname, aValue);
     }
 }
