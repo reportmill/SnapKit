@@ -523,6 +523,7 @@ public void setOpacity(double aValue)
 {
     if(aValue==_opacity) return;
     firePropChange(Opacity_Prop, _opacity, _opacity=aValue);
+    repaint();
 }
 
 /**

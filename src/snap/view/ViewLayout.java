@@ -640,7 +640,7 @@ public static class SpringLayout extends ViewLayout {
     /** Override to perform layout. */
     public void layoutChildren()
     {
-        View children[] = getChildren();
+        View children[] = getChildren(); _children = null;
         double pw = _parent.getWidth(), ph = _parent.getHeight(); if(pw==_ow && ph==_oh) return;
         for(View child : children) layoutChild(child, pw, ph);
         _ow = pw; _oh = ph;

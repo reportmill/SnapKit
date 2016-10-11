@@ -222,16 +222,19 @@ public static class BevelBorder extends Border {
     /** Paint border. */
     public void paint(Painter aPntr, Shape aShape)
     {
-        Rect rect = aShape.getBounds(); double w = rect.getWidth(), h = rect.getHeight();
-        aPntr.setStroke(Stroke.Stroke1);
-        aPntr.setColor(Color.WHITE); aPntr.drawRect(.5,.5,w-1,h-1); aPntr.drawRect(1.5,1.5,w-3,h-3);
+        Rect rect = aShape.getBounds(); double x = rect.x, y = rect.y, w = rect.width, h = rect.height;
+        aPntr.setStroke(Stroke.Stroke1); aPntr.setColor(Color.WHITE);
+        aPntr.drawRect(x+.5,y+.5,w-1,h-1); aPntr.drawRect(x+1.5,y+1.5,w-3,h-3);
         if(_type==LOWERED) {
-            aPntr.setColor(BORDER_GRAY); aPntr.drawLine(.5,.5,w-1,.5); aPntr.drawLine(.5,.5,.5,h-1);
-            aPntr.setColor(BORDER_DARKGRAY); aPntr.drawLine(1.5,1.5,w-3,1.5); aPntr.drawLine(1.5,1.5,1.5,h-3);
+            aPntr.setColor(BORDER_GRAY); aPntr.drawLine(x+.5,y+.5,x+w-1,y+.5); aPntr.drawLine(x+.5,y+.5,x+.5,y+h-1);
+            aPntr.setColor(BORDER_DARKGRAY); aPntr.drawLine(x+1.5,y+1.5,x+w-3,y+1.5);
+            aPntr.drawLine(x+1.5,y+1.5,x+1.5,y+h-3);
         }
         else {
-            aPntr.setColor(BORDER_DARKGRAY); aPntr.drawLine(.5,h-.5,w-1,h-.5); aPntr.drawLine(w-.5,.5,w-.5,h-1);
-            aPntr.setColor(BORDER_GRAY); aPntr.drawLine(1.5,h-1.5,w-3,h-1.5); aPntr.drawLine(w-1.5,1.5,w-1.5,h-3);
+            aPntr.setColor(BORDER_DARKGRAY); aPntr.drawLine(x+.5,y+h-.5,x+w-1,y+h-.5);
+            aPntr.drawLine(x+w-.5,y+.5,x+w-.5,y+h-1);
+            aPntr.setColor(BORDER_GRAY); aPntr.drawLine(x+1.5,y+h-1.5,x+w-3,y+h-1.5);
+            aPntr.drawLine(x+w-1.5,y+1.5,x+w-1.5,y+h-3);
         }
     }
 
@@ -329,7 +332,7 @@ public static class CompoundBorder extends Border {
     {
         _obdr.paint(aPntr, aShape);
         Insets ins = _obdr.getInsets();
-        Rect bnds = aShape.getBounds(); bnds.inset(ins);
+        Rect bnds = aShape.getBounds(); if(bnds==aShape) bnds = bnds.clone(); bnds.inset(ins);
         _ibdr.paint(aPntr, bnds);
     }
     
