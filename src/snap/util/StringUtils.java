@@ -321,7 +321,11 @@ public static byte[] getBytes(String aString, String enc)
 /**
  * Returns a string for given bytes.
  */
-public static String getString(byte theBytes[])  { return getString(theBytes, "ISO-8859-1"); }
+public static String getString(byte theBytes[])
+{
+    try { return theBytes!=null? new String(theBytes) : null; } //return getString(theBytes, "ISO-8859-1");
+    catch(Exception e) { e.printStackTrace(); return null; }
+}
 
 /**
  * Returns a string for given bytes.

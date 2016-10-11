@@ -67,11 +67,12 @@ public Token getStartToken()  { return _startToken; }
 /**
  * Returns a handler that is not in use.
  */
-public synchronized ParseHandler getAvailableHandler()
+public ParseHandler getAvailableHandler()
 {
     ParseHandler handler = this;
+    synchronized (this) { // Tried making whole method synchronized, but TeaVM hangs
     while(handler._inUse) handler = handler.getBackupHandler();
-    handler._inUse = true;
+    handler._inUse = true; }
     return handler;
 }
 
