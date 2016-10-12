@@ -52,7 +52,7 @@ protected WebFile createNewFile(String aPath)
     // Create text
     StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     sb.append("<SpringView width=\"400\" height=\"400\" PrefWidth=\"400\" PrefHeight=\"400\">\n");
-    sb.append("\t<Label x=\"100\" y=\"100\" width=\"100\" height=\"25\" text=\"Hello World\" />\n");
+    //sb.append("\t<Label x=\"100\" y=\"100\" width=\"100\" height=\"25\" text=\"Hello World\" />\n");
     sb.append("</SpringView>\n");
     file.setText(sb.toString());
     return file;
