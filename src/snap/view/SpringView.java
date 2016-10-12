@@ -32,6 +32,17 @@ public View removeChild(int anIndex)
 }
 
 /**
+ * Resets spring info for children.
+ */
+public void resetSpringInfo()
+{
+    for(View v : getChildren()) {
+        _layout.removeSpringInfo(v);
+        _layout.addSpringInfo(v);
+    }
+}
+
+/**
  * Layout children.
  */
 protected void layoutChildren()  { _layout.layoutChildren(); }
