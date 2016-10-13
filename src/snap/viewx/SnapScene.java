@@ -129,6 +129,21 @@ public <T extends SnapActor> List<T> getActorsAt(double aX, double aY, Class <T>
 }
 
 /**
+ * Removes an actor.
+ */
+public SnapActor removeActor(int anIndex)  { return (SnapActor)removeChild(anIndex); }
+
+/**
+ * Removes an actor.
+ */
+public int removeActor(SnapActor anActor)
+{
+    int index = indexOfChild(anActor);
+    if(index>=0) removeActor(index);
+    return index;
+}
+
+/**
  * Returns the frame rate.
  */
 public double getFrameRate()  { return _frameRate; }

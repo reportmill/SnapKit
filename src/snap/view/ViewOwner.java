@@ -10,7 +10,7 @@ import snap.util.*;
 /**
  * A base controller class class that manages a SwingPanel usually loaded from a rib file.
  */
-public abstract class ViewOwner implements EventListener {
+public class ViewOwner implements EventListener {
 
     // The UI View
     View                      _ui;
@@ -67,6 +67,16 @@ public abstract class ViewOwner implements EventListener {
     public ViewEvent.Type MouseEvents[] = { MousePressed, MouseDragged, MouseReleased,
         MouseClicked, MouseEntered, MouseMoved, MouseExited };
     public ViewEvent.Type DragEvents[] = { DragEnter, DragExit, DragOver, DragDrop };
+    
+/**
+ * Creates a new ViewOwner.
+ */
+public ViewOwner()  { }
+
+/**
+ * Creates a new ViewOwner with given View for UI.
+ */
+public ViewOwner(View aView)  { _ui = aView; _ui.setOwner(this); }
 
 /**
  * Returns whether UI has been set.
