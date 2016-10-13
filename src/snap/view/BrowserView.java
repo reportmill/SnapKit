@@ -377,8 +377,9 @@ private class ColScrollView extends ScrollView {
     /** PreferredSize. */
     public double getPrefWidthImpl(double aH)
     {
-        View vport = getParent().getParent();
-        return vport.getWidth()/getVisColCount();
+        View brsr = getParent(), vport = brsr!=null? brsr.getParent() : null;
+        double width = vport!=null? vport.getWidth() : brsr!=null? brsr.getWidth() : 200;
+        return width/getVisColCount();
     }
 }
 
