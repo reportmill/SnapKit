@@ -403,4 +403,13 @@ public static void showExceptionDialog(View aView, String aTitle, Throwable e)
     dbox.showMessageDialog(aView); e.printStackTrace();
 }
 
+/**
+ * Show a dialog panel for exception.
+ */
+public static String showInputDialog(View aView, String aTitle, String aMessage, String aDefault)
+{
+    DialogBox dbox = new DialogBox(aTitle); dbox.setQuestionMessage(aMessage);
+    return dbox.showInputDialog(aView, aDefault);
+}
+
 }
