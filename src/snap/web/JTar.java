@@ -397,7 +397,7 @@ public static class TarHeader {
     }
 }
 
-public class TarInputStream extends FilterInputStream {
+public static class TarInputStream extends FilterInputStream {
 
     private static final int SKIP_BUFFER_SIZE = 2048;
     private TarEntry currentEntry;
@@ -546,8 +546,6 @@ public class TarInputStream extends FilterInputStream {
 
     /**
      * Skips 'n' bytes on the InputStream<br>
-     * Overrides default implementation of skip
-     * 
      */
     @Override
     public long skip(long n) throws IOException {

@@ -9,7 +9,7 @@ import snap.view.*;
 /**
  * A TextView that is a console.
  */
-public class TextConsole extends TextView {
+public class ConsoleView extends TextView {
 
     // The location of the start of next input
     int               _inputLoc;
