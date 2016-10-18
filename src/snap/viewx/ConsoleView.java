@@ -3,6 +3,7 @@
  */
 package snap.viewx;
 import java.util.*;
+import snap.gfx.TextStyle;
 import snap.util.*;
 import snap.view.*;
 
@@ -50,14 +51,15 @@ protected void keyPressed(ViewEvent anEvent)
 {
     // Get key info
     int keyCode = anEvent.getKeyCode();
+    int inputLoc = getInputLocation();
     
     // Handle cursor out of range
-    if(getSelStart()<getInputLocation())
+    if(getSelStart()<inputLoc)
         setSel(length());
     
     // Handle delete at or before input location
-    if((keyCode==KeyCode.BACK_SPACE || keyCode==KeyCode.DELETE) && getSelStart()<=getInputLocation())
-        return;
+    if((keyCode==KeyCode.BACK_SPACE || keyCode==KeyCode.DELETE) && getSelStart()<=inputLoc) {
+        ViewUtils.beep(); return; }
     
     // Handle command-k
     if(keyCode==KeyCode.K && anEvent.isMetaDown())
@@ -65,14 +67,28 @@ protected void keyPressed(ViewEvent anEvent)
                 
     // Handle special keys
     else switch(keyCode) {
-        case KeyCode.UP: setCommandHistoryPrevious(); break; //if(keyTyped) 
-        case KeyCode.DOWN: setCommandHistoryNext(); break; //if(keyTyped) 
-        case KeyCode.ENTER: processEnterAction(); break;
-        default: super.keyPressed(anEvent); return;
+        case KeyCode.UP: setCommandHistoryPrevious(); anEvent.consume(); break;
+        case KeyCode.DOWN: setCommandHistoryNext(); anEvent.consume(); break;
+        default: super.keyPressed(anEvent);
     }
     
-    // Consume event
-    anEvent.consume();
+    // Reset input location
+    _inputLoc = inputLoc;
+    
+    // Handle Enter action
+    if(keyCode==KeyCode.ENTER)
+        processEnterAction();
+}
+
+/**
+ * Called when a key is typed.
+ */
+protected void keyTyped(ViewEvent anEvent)
+{
+    int keyCode = anEvent.getKeyCode();
+    int inputLoc = getInputLocation();
+    super.keyTyped(anEvent);
+    _inputLoc = inputLoc;
 }
 
 /**
@@ -81,13 +97,13 @@ protected void keyPressed(ViewEvent anEvent)
 protected void processEnterAction()
 {
     // Get command string
-    String command = getInput();
+    String cmd = getInput().trim();
     
     // Execute command
-    String results = executeCommand(command);
+    String results = executeCommand(cmd);
     
     // Append results and new prompt
-    append("\n" + results);
+    append(results);
     if(!results.endsWith("\n")) append("\n");
     append(getPrompt());
 }
@@ -95,14 +111,23 @@ protected void processEnterAction()
 /**
  * Appends a string.
  */
-public void append(String aString)  { addChars(aString); _inputLoc = length(); }
+public void append(String aString)  { addChars(aString); }
+
+/**
+ * Override to update input location.
+ */
+public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd, boolean doUpdateSel)
+{
+    super.replaceChars(aString, aStyle, aStart, anEnd, doUpdateSel);
+    _inputLoc = length();
+}
 
 /**
  * Gets input String from console starting at current input location.
  */
 public String getInput()
 {
-    String input = getText().subSequence(getInputLocation(), length()).toString().trim();
+    String input = getText().subSequence(getInputLocation(), length()).toString();
     _inputLoc = length();
     return input;
 }
