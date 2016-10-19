@@ -62,8 +62,8 @@ protected void keyPressed(ViewEvent anEvent)
         ViewUtils.beep(); return; }
     
     // Handle command-k
-    if(keyCode==KeyCode.K && anEvent.isMetaDown())
-        clearConsole();
+    if(keyCode==KeyCode.K && anEvent.isMetaDown()) {
+        clearConsole(); return; }
                 
     // Handle special keys
     else switch(keyCode) {

@@ -96,6 +96,7 @@ public synchronized View getUI()
     _ui.setOwner(this);
     setSendEventDisabled(false);
     runLater(() -> resetLater());
+    _ui.addPropChangeListener(pce -> uiShowingChanged(), View.Showing_Prop);
     return _ui;
 }
 
@@ -133,6 +134,17 @@ protected Object getUISource()  { return _env.getUISource(getClass()); }
  * Initializes the UI panel.
  */
 protected void initUI()  { }
+
+/**
+ * Called when UI showing has changed.
+ */
+protected void uiShowingChanged()
+{
+    if(getUI().isShowing()) {
+        if(getFirstFocus()!=null)
+            getView(getFirstFocus()).requestFocus();
+    }
+}
 
 /**
  * Returns the specific child view for given object (name, event or view).
