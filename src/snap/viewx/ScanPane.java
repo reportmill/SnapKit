@@ -1,6 +1,6 @@
 package snap.viewx;
 import java.io.*;
-import java.util.*;
+import java.util.Arrays;
 import snap.gfx.Font;
 import snap.view.*;
 
@@ -8,9 +8,6 @@ import snap.view.*;
  * A custom class.
  */
 public class ScanPane extends ViewOwner {
-    
-    // The Scanner
-    Scanner                   _scan;
     
     // The ScanView
     ScanView                  _scanView;
@@ -28,18 +25,7 @@ public ScanPane()
 {
     System.setOut(new SPPrintStream(System.out));
     System.setErr(new SPPrintStream(System.err));
-    _scan = new Scanner(in);
 }
-
-/**
- * Returns the scanner.
- */
-public Scanner getScanner()  { return _scan; }
-
-/**
- * Returns the next int.
- */
-public int nextInt()  { return _scan.nextInt(); }
 
 /**
  * Returns the ScanView.

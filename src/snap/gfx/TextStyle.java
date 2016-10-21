@@ -46,8 +46,21 @@ public class TextStyle implements Cloneable {
     
     // Constants for default text styles
     public static final TextStyle DEFAULT = new TextStyle();
-    public static final TextStyle MONOSPACE_DEFAULT = DEFAULT.copyFor(new Font("Consolas", 12));
-    
+    public static final TextStyle MONOSPACE_DEFAULT = new TextStyle(new Font("Consolas", 12));
+
+/**
+ * Creates a new TextStyle.
+ */
+public TextStyle()  { }
+
+/**
+ * Creates a new TextStyle for given attributes.
+ */
+public TextStyle(Object ... theAttrs)
+{
+    for(Object obj : theAttrs) { String key = getStyleKey(obj); if(key!=null) setValue(key, obj); }
+}
+
 /**
  * Returns the font for this run.
  */

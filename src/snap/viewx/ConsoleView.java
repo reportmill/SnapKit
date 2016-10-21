@@ -53,10 +53,6 @@ protected void keyPressed(ViewEvent anEvent)
     int keyCode = anEvent.getKeyCode();
     int inputLoc = getInputLocation();
     
-    // Handle cursor out of range
-    if(getSelStart()<inputLoc)
-        setSel(length());
-    
     // Handle delete at or before input location
     if((keyCode==KeyCode.BACK_SPACE || keyCode==KeyCode.DELETE) && getSelStart()<=inputLoc) {
         ViewUtils.beep(); return; }
@@ -85,8 +81,14 @@ protected void keyPressed(ViewEvent anEvent)
  */
 protected void keyTyped(ViewEvent anEvent)
 {
+    // Get keyCode and input location
     int keyCode = anEvent.getKeyCode();
     int inputLoc = getInputLocation();
+    
+    // Handle cursor out of range
+    if(getSelStart()<inputLoc)
+        setSel(length());
+    
     super.keyTyped(anEvent);
     _inputLoc = inputLoc;
 }
