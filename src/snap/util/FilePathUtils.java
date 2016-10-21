@@ -130,6 +130,7 @@ public static String getNativePath(String aPath)
 {
     if(SEPARATOR_CHAR=='/') return aPath;
     String path = aPath.replace('/', SEPARATOR_CHAR);
+    if(path.length()>2 && path.charAt(2)==':') path = path.substring(1);
     return path;
 }
 
