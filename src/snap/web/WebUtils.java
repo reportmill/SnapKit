@@ -37,4 +37,29 @@ public static void setSiteURL(WebSite aSite, WebURL aURL)
     aSite.setURL(aURL);
 }
 
+/**
+ * Copies a file to another file.
+ */
+public static void copyFile(WebFile aSrcFile, WebFile aDstFile)
+{
+    // Get Dest file (if directory, create new child file)
+    WebFile dstFile = aDstFile;
+    if(dstFile.isDir())
+        dstFile = aDstFile.getSite().createFile(aDstFile.getDirPath() + aSrcFile.getName(), aSrcFile.isDir());
+    
+    // If plain file, just load bytes into dest file and save    
+    if(aSrcFile.isFile()) {
+        dstFile.setBytes(aSrcFile.getBytes());
+        dstFile.save();
+    }
+    
+    // If directory, iterate over children and recurse
+    else {
+        for(WebFile child : aSrcFile.getFiles())
+            copyFile(child, dstFile);
+        if(aSrcFile.getFileCount()==0)
+            dstFile.save();
+    }
+}
+
 }

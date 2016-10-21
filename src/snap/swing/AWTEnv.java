@@ -160,13 +160,14 @@ public synchronized WebSite getSite(WebURL aSiteURL)
 protected WebSite createSite(WebURL aSiteURL)
 {
     WebURL parentSiteURL = aSiteURL.getSiteURL();
-    String scheme = aSiteURL.getScheme(), path = aSiteURL.getPath();
+    String scheme = aSiteURL.getScheme(), path = aSiteURL.getPath(); if(path==null) path = "";
+    String type = FilePathUtils.getExtension(path).toLowerCase();
     WebSite site = null;
     
     // If url has path, see if it's jar or zip
-    if(path!=null && (path.endsWith(".jar") || path.endsWith(".jar.pack.gz"))) site = new JarFileSite();
-    else if(path!=null && path.endsWith(".zip")) site = new ZipFileSite();
-    else if(path!=null && parentSiteURL!=null && parentSiteURL.getPath()!=null) site = new DirSite();
+    if(type.equals("jar") || path.endsWith(".jar.pack.gz")) site = new JarFileSite();
+    else if(type.equals("zip") || type.equals("gfar")) site = new ZipFileSite();
+    else if(parentSiteURL!=null && parentSiteURL.getPath()!=null) site = new DirSite();
     else if(scheme.equals("file")) site = new FileSite();
     else if(scheme.equals("http") || scheme.equals("https")) site = new HTTPSite();
     else if(scheme.equals("ftp")) site = new FTPSite();
