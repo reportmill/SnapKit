@@ -25,12 +25,7 @@ public class ViewUtils {
     private static Color TARGET_COLOR = new Color("#4080F0");
 
     // Image Constants
-    public static Image RootFile = Image.get(ViewUtils.class, "RootFile.png");
-    public static Image DirFile = Image.get(ViewUtils.class, "DirFile.png");
-    public static Image ClassFile = Image.get(ViewUtils.class, "ClassFile.png");
-    public static Image JavaFile = Image.get(ViewUtils.class, "JavaFile.png");
-    public static Image TableFile = Image.get(ViewUtils.class, "TableFile.png");
-    public static Image PlainFile = Image.get(ViewUtils.class, "PlainFile.png");
+    static Image        RootFile, DirFile, ClassFile, JavaFile, TableFile, PlainFile;
 
 /**
  * Returns whether alt is down.
@@ -242,13 +237,24 @@ public static View getCommonAncetor(View aView1, View aView2)
  */
 public static Image getFileIconImage(WebFile aFile)
 {
-    //Image i = !_file.isDir()? BrowserUtils.getIcon(_file):UIMan.getIcon(isExp?"Tree.openIcon":"Tree.closedIcon");
+    if(RootFile==null) loadFileIconImages();
     if(aFile.isRoot()) return RootFile;
     if(aFile.isDir()) return DirFile;
     if(aFile.getType().equals("class")) return ClassFile;
     if(aFile.getType().equals("java")) return JavaFile;
     if(aFile.getType().equals("table")) return TableFile;
     return PlainFile;
+}
+
+/** Loads the file icon images. */
+private static void loadFileIconImages()
+{
+    RootFile = Image.get(ViewUtils.class, "RootFile.png");
+    DirFile = Image.get(ViewUtils.class, "DirFile.png");
+    ClassFile = Image.get(ViewUtils.class, "ClassFile.png");
+    JavaFile = Image.get(ViewUtils.class, "JavaFile.png");
+    TableFile = Image.get(ViewUtils.class, "TableFile.png");
+    PlainFile = Image.get(ViewUtils.class, "PlainFile.png");
 }
 
 /**
