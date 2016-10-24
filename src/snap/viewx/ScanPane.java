@@ -86,14 +86,14 @@ private class SPPrintStream extends PrintStream {
 private static class BytesInputStream extends InputStream {
 
     // The byte array
-    byte       buf[] = new byte[0];
+    byte       buf[] = new byte[0], buf2[] = new byte[1];
 
     // The index of the next character to read, the currently marked position, and the number of bytes.
     int        pos, mark, count;
     
     // Whether waiting for more input
     boolean    _waiting;
-
+    
     // Creates a <code>ByteArrayInputStream</code>
     public BytesInputStream(byte buf[]) { if(buf!=null) add(buf); }
     
@@ -101,27 +101,35 @@ private static class BytesInputStream extends InputStream {
     public void add(String aStr)  { add(aStr.getBytes()); }
     
     /** Adds bytes to stream. */
-    public synchronized void add(byte theBytes[])
+    public void add(byte theBytes[])
     {
         int len = buf.length;
         buf = Arrays.copyOf(buf, len + theBytes.length);
         System.arraycopy(theBytes, 0, buf, len, theBytes.length);
         count = buf.length;
         if(_waiting) {
-            try { notifyAll(); _waiting = false; }
-            catch(Exception e) { throw new RuntimeException(e); }
+            synchronized(this) {
+                try { notifyAll(); _waiting = false; }
+                catch(Exception e) { throw new RuntimeException(e); }
+            }
         }
     }
     
     /** Reads the next byte of data from this input stream. */
-    public synchronized int read() { return (pos < count) ? (buf[pos++] & 0xff) : -1; }
+    public int read()
+    {
+        int len = read(buf2, 0, 1);
+        return len>0? buf2[0] : -1;
+    }
 
     /** Reads up to <code>len</code> bytes of data into an array of bytes from this input stream. */
-    public synchronized int read(byte b[], int off, int len)
+    public int read(byte b[], int off, int len)
     {
         while (pos >= count) {
-            try { _waiting = true; wait(); }
-            catch(Exception e) { throw new RuntimeException(e); } //return -1;
+            synchronized(this) {
+                try { _waiting = true; wait(); }
+                catch(Exception e) { throw new RuntimeException(e); } //return -1;
+            }
         }
 
         int avail = count - pos;
