@@ -28,7 +28,7 @@ public class TreeView <T> extends ParentView implements View.Selectable <T> {
     int                     _selCol;
     
     // The resolver
-    TreeResolver <T>        _resolver = new TreeResolver() { };
+    TreeResolver <T>        _resolver = new TreeResolver.Adapter() { };
     
     // Row height
     int                     _rowHeight = 20;
@@ -153,17 +153,7 @@ public List <T> getItems()  { return _items; }
  */
 public void setItems(List <T> theItems)
 {
-    // Expand items that are already expanded
-    List <T> items = theItems;
-    for(int i=0; i<items.size(); i++) { T item = items.get(i);
-        if(isExpanded(item)) {
-            if(!isParent(item)) { setExpanded(item,false); continue; } // Item may have changed Parent state
-            if(items==theItems) items = new ArrayList(items);
-            T citems[] = getChildren(item);
-            for(int j=0,jMax=citems.length;j<jMax;j++) { T itm = citems[j];
-                if(!ListUtils.containsId(items,itm)) items.add(i+j+1, itm); }
-        }
-    }
+    List <T> items = getExpandedItems(theItems);
     setItemsImpl(items);
 }
     
@@ -189,6 +179,38 @@ protected void setItemsImpl(List <T> theItems)
  * Sets the items.
  */
 public void setItems(T ... theItems)  { setItems(Arrays.asList(theItems)); }
+
+/**
+ * Returns the list of expanded items for given items.
+ */
+public List <T> getExpandedItems(List <T> theItems)
+{
+    List <T> items = theItems;
+    for(int i=0; i<items.size(); i++) { T item = items.get(i);
+    
+        // If item not expanded just continue
+        if(!isExpanded(item)) continue;
+        
+        // If we haven't yet created new list, do it now
+        if(items==theItems) items = new ArrayList(items);
+        
+        // Remove successive items decended from current item
+        for(int j=i+1,jMax=items.size();j<jMax;j++) { T next = items.get(i+1);
+            if(isAncestor(next,item)) items.remove(i+1);
+            else break;
+        }
+        
+        // If item no long parent (could have changed), clear state and continue
+        if(!isParent(item)) { setExpanded(item,false); continue; }
+        
+        // Get item children and add after item
+        T citems[] = getChildren(item);
+        for(int j=0;j<citems.length;j++) items.add(i+j+1, citems[j]);
+    }
+    
+    // Return items
+    return items;
+}
 
 /**
  * Called to update items that have changed.
@@ -293,12 +315,12 @@ public void expandAll()  { for(int i=0;i<getItems().size();i++) expandItem(getIt
  */
 public void expandItem(T anItem)
 {
-    if(!isParent(anItem) || isExpanded(anItem)) return;
-    List items = new ArrayList(getItems());
-    int index = items.indexOf(anItem); if(index<0) return;
-    for(T item : getChildren(anItem)) items.add(++index, item);
-    setItemsImpl(items);
+    // If not expandable, just return
+    if(!isParent(anItem) || isExpanded(anItem) || !getItems().contains(anItem)) return;
+    
+    // Set item expanded state, reset items and update given item
     setExpanded(anItem, true);
+    setItems(getItems());
     updateItems(anItem);
 }
 
@@ -307,10 +329,18 @@ public void expandItem(T anItem)
  */
 public void collapseItem(T anItem)
 {
-    if(!isParent(anItem) || !isExpanded(anItem)) return;
-    List items = new ArrayList(getItems());
-    int index = items.indexOf(anItem); if(index<0) return;
-    removeCollapsedItems(getChildren(anItem), items); //for(T i : getChildren(anItem)) items.remove(i);
+    // If not collapsable, just return
+    if(!isParent(anItem) || !isExpanded(anItem) || !getItems().contains(anItem)) return;
+    
+    // Get items copy and remove successive items decended from given item
+    List <T> items = new ArrayList(getItems());
+    int index = items.indexOf(anItem);
+    for(int i=index+1,iMax=items.size();i<iMax;i++) { T next = items.get(index+1);
+        if(isAncestor(next,anItem)) items.remove(index+1);
+        else break;
+    }
+    
+    // Set item expanded state, reset items and update given item
     setExpanded(anItem, false);
     setItemsImpl(items);
     updateItems(anItem);
@@ -326,18 +356,6 @@ public void toggleItem(T anItem)
 }
 
 /**
- * Removes collapsed items from a list recursively.
- */
-protected void removeCollapsedItems(T theItems[], List theList)
-{
-    for(T item : theItems) {
-        theList.remove(item);
-        if(isParent(item) && isExpanded(item))
-            removeCollapsedItems(getChildren(item), theList);
-    }
-}
-
-/**
  * Returns the resolver.
  */
 public TreeResolver getResolver()  { return _resolver; }
@@ -345,7 +363,7 @@ public TreeResolver getResolver()  { return _resolver; }
 /**
  * Sets the resolver.
  */
-public void setResolver(TreeResolver aResolver)  { _resolver = aResolver; _resolver.setTree(this); }
+public void setResolver(TreeResolver aResolver)  { _resolver = aResolver; }
 
 /**
  * Returns the parent of given item.
@@ -355,25 +373,26 @@ public T getParent(T anItem)  { return _resolver.getParent(anItem); }
 /**
  * Returns the parent of given item.
  */
-protected int getParentCount(T anItem)
+public int getParentCount(T anItem)
 {
     int pc = 0; for(T p=getParent(anItem); p!=null; p=getParent(p)) pc++; return pc;
 }
 
 /**
+ * Returns whether given item has given object as any of it's ancestors.
+ */
+public boolean isAncestor(T anItem, T aPar)
+{
+    for(T par=getParent(anItem); par!=null; par=getParent(par))
+        if(par==aPar)
+            return true;
+    return false;
+}
+
+/**
  * Whether given object is a parent (has children).
  */
-protected boolean isParent(T anItem)  { return _resolver.isParent(anItem); }
-
-/**
- * The number of children in given parent.
- */
-protected int getChildCount(T aParent)  { return _resolver.getChildren(aParent).length; }
-
-/**
- * The child at given index in given parent.
- */
-protected T getChild(T aParent, int anIndex)  { return _resolver.getChildren(aParent)[anIndex]; }
+public boolean isParent(T anItem)  { return _resolver.isParent(anItem); }
 
 /**
  * Returns the children.
@@ -383,17 +402,17 @@ public T[] getChildren(T aParent)  { return _resolver.getChildren(aParent); }
 /**
  * Returns the text to be used for given item.
  */
-protected String getText(T anItem, int aCol)  { return _resolver.getText(anItem, aCol); }
+public String getText(T anItem, int aCol)  { return _resolver.getText(anItem, aCol); }
 
 /**
  * Return the image to be used for given item.
  */
-protected Image getImage(T anItem)  { return _resolver.getImage(anItem); }
+public Image getImage(T anItem)  { return _resolver.getImage(anItem); }
 
 /**
  * Return the graphic to be used for given item.
  */
-protected View getGraphic(T anItem)  { return _resolver.getGraphic(anItem); }
+public View getGraphic(T anItem)  { return _resolver.getGraphic(anItem); }
 
 /**
  * Returns whether an item is expanded.
@@ -427,6 +446,19 @@ protected Map getProps(T anItem, boolean doCreate)
     Map props = _props.get(anItem);
     if(props==null && doCreate) _props.put(anItem, props=new HashMap());
     return props;
+}
+
+/**
+ * Searches for parent of given item (only works if given item is visible).
+ */
+public T findParent(T anItem)
+{
+    List <T> items = getItems();
+    int index = items.indexOf(anItem); if(index<0) return null;
+    for(int i=index-1;i>=0;i--) { T item = items.get(i);
+        if(isParent(item) && isExpanded(item) && ArrayUtils.contains(getChildren(item), anItem))
+            return item; }
+    return null;
 }
 
 /**

@@ -16,7 +16,7 @@ public class BrowserView <T> extends ParentView {
     BrowserCol <T>          _col0;
 
     // The resolver
-    TreeResolver <T>        _resolver = new TreeResolver() { };
+    TreeResolver <T>        _resolver = new TreeResolver.Adapter() { };
     
     // Row height
     int                     _rowHeight = 20;

@@ -78,14 +78,14 @@ public void respondUI(ViewEvent anEvent)
  */
 public static class FileTreeResolver extends TreeResolver <WebFile> {
 
+    /** Returns the parent of given item. */
+    public WebFile getParent(WebFile anItem)  { return anItem.getParent(); }
+    
     // Return whether file is directory
     public boolean isParent(WebFile anObj)  { return anObj.isDir(); }
 
-    // Return child count
-    public int getChildCount(WebFile aParent)  { return aParent.getFileCount(); }
-
-    // Return child file
-    public WebFile getChild(WebFile aParent, int anIndex)  { return aParent.getFile(anIndex); }
+    // Return child files
+    public WebFile[] getChildren(WebFile aParent)  { return aParent.getFiles().toArray(new WebFile[0]); }
 
     // Return child file name
     public String getText(WebFile aFile)  { return aFile.getName(); }
