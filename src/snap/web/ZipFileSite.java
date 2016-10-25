@@ -5,6 +5,7 @@ package snap.web;
 import java.io.*;
 import java.util.*;
 import java.util.zip.*;
+import snap.util.FilePathUtils;
 import snap.util.SnapUtils;
 
 /**
@@ -16,7 +17,7 @@ public class ZipFileSite extends WebSite {
     ZipFile                    _zipFile;
     
     // A map of paths to ZipEntry
-    Map <String,ZipEntry>      _paths;
+    Map <String,ZipEntry>      _entries;
     
     // A map of directory paths to List of child paths
     Map <String,List<String>>  _dirs;
@@ -49,16 +50,26 @@ protected File getStandardFile() throws Exception
 /**
  * Returns a map of ZipFile paths to ZipEntry(s).
  */
-protected synchronized Map <String,ZipEntry> getPaths()
+protected synchronized Map <String,ZipEntry> getEntries()
 {
-    if(_paths!=null) return _paths;
-    _paths = new HashMap(); _dirs = new HashMap();
+    // If already set, just return
+    if(_entries!=null) return _entries;
+    
+    // Create maps
+    _entries = new HashMap(); _dirs = new HashMap();
+    
+    // Get ZipFile
     ZipFile zipFile; try { zipFile = getZipFile(); } catch(Exception e) { throw new RuntimeException(e); }
-    if(zipFile==null) return _paths;
+    if(zipFile==null) return _entries;
+    
+    // Get ZipEntries and add
     Enumeration <? extends ZipEntry> zentries = zipFile.entries();
-    while(zentries.hasMoreElements()) addZipEntry(zentries.nextElement());
+    while(zentries.hasMoreElements())
+        addZipEntry(zentries.nextElement());
+    
+    // Close and return 
     //try { zipFile.close(); _zipFile = null; } catch(Exception e) { throw new RuntimeException(e); }
-    return _paths;
+    return _entries;
 }
 
 /**
@@ -66,14 +77,10 @@ protected synchronized Map <String,ZipEntry> getPaths()
  */
 protected void addZipEntry(ZipEntry anEntry)
 {
-    // Get path
-    String path = "/" + anEntry.getName();
-    if(path.endsWith("/") && path.length()>1) path = path.substring(0, path.length()-1);
-    
-    // Add path to paths and dirs
-    _paths.put(path, anEntry);
-    if(path.length()>1)
-        getDirList(path).add(path);
+    // Get path and add entry to entries and path to dirs lists
+    String path = FilePathUtils.getStandardized('/' + anEntry.getName());
+    _entries.put(path, anEntry);
+    addDirListPath(path);
 }
 
 /**
@@ -81,15 +88,27 @@ protected void addZipEntry(ZipEntry anEntry)
  */
 protected List <String> getDirList(String aPath)
 {
-    int index = aPath.lastIndexOf('/');
-    String ppath = index>0? aPath.substring(0, index) : "/";
-    List <String> dlist = _dirs.get(ppath);
-    if(dlist==null) {
-        _dirs.put(ppath, dlist=new ArrayList());
-        if(ppath.length()>1 && !getDirList(ppath).contains(ppath))
-            getDirList(ppath).add(ppath);
-    }
+    // Get parent path and return list for path
+    String ppath =  FilePathUtils.getParent(aPath);
+    List <String> dlist = _dirs.get(ppath); if(dlist!=null) return dlist;
+    
+    // If list not found, create, set and return
+    _dirs.put(ppath, dlist=new ArrayList());
+    addDirListPath(ppath);
     return dlist;
+}
+
+/**
+ * Returns a dir list for a path.
+ */
+protected void addDirListPath(String aPath)
+{
+    if(aPath.length()<=1) return;
+    String path = FilePathUtils.getStandardized(aPath);
+
+    List <String> dlist = getDirList(path);
+    if(!dlist.contains(path))
+        dlist.add(path);
 }
 
 /**
@@ -97,7 +116,7 @@ protected List <String> getDirList(String aPath)
  */
 protected FileHeader getFileHeader(String aPath) throws Exception
 {
-    ZipEntry zentry = getPaths().get(aPath); if(zentry==null && _dirs.get(aPath)==null) return null;
+    ZipEntry zentry = getEntries().get(aPath); if(zentry==null && _dirs.get(aPath)==null) return null;
     FileHeader file = new FileHeader(aPath, zentry==null || zentry.isDirectory());
     if(zentry!=null) file.setLastModifiedTime(zentry.getTime());
     if(zentry!=null) file.setSize(zentry.getSize());
@@ -109,7 +128,7 @@ protected FileHeader getFileHeader(String aPath) throws Exception
  */
 protected byte[] getFileBytes(String aPath) throws Exception
 {
-    ZipEntry zentry = _paths.get(aPath); if(zentry==null) return null;
+    ZipEntry zentry = _entries.get(aPath); if(zentry==null) return null;
     InputStream istream = _zipFile.getInputStream(zentry);
     return SnapUtils.getBytes2(istream);
 }
