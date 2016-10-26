@@ -1,7 +1,7 @@
 package snap.viewx;
 import java.io.*;
 import java.util.Arrays;
-import snap.gfx.Font;
+import snap.gfx.*;
 import snap.view.*;
 
 /**
@@ -33,11 +33,16 @@ public ScanPane()
 public ScanView getScanView()  { return _scanView; }
 
 /**
+ * Clears the ScanView.
+ */
+public void clear()  { _scanView.clear(); }
+
+/**
  * Creates the UI.
  */
 protected View createUI()
 {
-    _scanView = new ScanView(); _scanView.setFont(new Font("Arial", 16)); _scanView.setPadding(4,4,4,4);
+    _scanView = new ScanView();
     setFirstFocus(_scanView);
     ScrollView scroll = new ScrollView(_scanView); scroll.setPrefSize(640,480);
     return scroll;
@@ -47,6 +52,15 @@ protected View createUI()
  * A ConsoleView subclass that works with scanner.
  */
 public static class ScanView extends ConsoleView {
+    
+    /** Creates a new ScanView. */
+    public ScanView()
+    {
+        setPadding(4,4,4,4);
+        setRich(false);
+        setFont(new Font("Arial", 16));
+        getRichText().setDefaultStyle(new TextStyle(new Font("Arial", 16)));
+    }
     
     /** Override to send to process. */
     protected void processEnterAction()

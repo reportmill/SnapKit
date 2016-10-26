@@ -95,19 +95,31 @@ public void setReadMultiLineComments(boolean aValue)  { _mlc = aValue; _jc = _sl
 /**
  * Adds a pattern.
  */
-public void addPattern(String aName, String aPattern, boolean isLiteral)
+public void addPattern(String aName, String aPattern)
 {
-    // Get unique pattern string
+    // Get unique pattern string - if already in list, just return
     String pattern = aPattern.intern();
-    
-    // If pattern already in list, just return
     for(Regex regex : _regexList)
         if(regex.getPattern()==pattern)
             return;
 
     // Create and add new regex
-    _regexList.add(new Regex(aName, pattern, isLiteral));
-    _regexes = null;
+    _regexList.add(new Regex(aName, pattern)); _regexes = null;
+}
+
+/**
+ * Adds a pattern.
+ */
+public void addPattern(String aName, String aPattern, boolean isLiteral)
+{
+    // Get unique pattern string - if already in list, just return
+    String pattern = aPattern.intern();
+    for(Regex regex : _regexList)
+        if(regex.getPattern()==pattern)
+            return;
+
+    // Create and add new regex
+    _regexList.add(new Regex(aName, pattern, isLiteral)); _regexes = null;
 }
 
 /**
