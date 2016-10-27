@@ -1,7 +1,7 @@
 /* ==================================================================
  * This file is part of JTextCheck - a Java text-checking API
  * Homepage: http://linux.org.mt/projects/jtextcheck/
- * Copyright © 2003 Ramon Casha
+ * Copyright 2003 Ramon Casha
  *
  * Licensed under the GNU LGPL v2.1. You can find the text of this
  * license at http://www.gnu.org/copyleft/lesser.html
