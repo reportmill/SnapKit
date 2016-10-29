@@ -36,8 +36,8 @@ public class TreeView <T> extends ParentView implements View.Selectable <T> {
     // The Cell Configure method
     Consumer <ListCell<T>>  _cellConf;
     
-    // Map of properties for items
-    Map <T,Map>             _props = new HashMap();
+    // The set of expanded items
+    Set <T>                 _expanded = new HashSet();
     
     // Images for collapsed/expanded
     Image                   _clpImg, _expImg;
@@ -170,9 +170,9 @@ protected void setItemsImpl(List <T> theItems)
     for(TreeCol tcol : getCols()) tcol.setItems(theItems);
     setSelectedItem(sitem);
     
-    // Clear props for removed items
-    Set <T> oldItems = new HashSet(_props.keySet());
-    for(T item : oldItems) if(!_items.contains(item)) _props.remove(item);
+    // Prune removed items from expanded set
+    Object expanded[] = _expanded.toArray();
+    for(Object item : expanded) if(!_items.contains(item)) _expanded.remove(item);
 }
 
 /**
@@ -417,35 +417,15 @@ public View getGraphic(T anItem)  { return _resolver.getGraphic(anItem); }
 /**
  * Returns whether an item is expanded.
  */
-public boolean isExpanded(T anItem)  { Boolean b = (Boolean)getProp(anItem, "Expanded"); return b!=null && b; }
+public boolean isExpanded(T anItem)  { return _expanded.contains(anItem); }
 
 /**
  * Sets whether an item is expaned.
  */
-public void setExpanded(T anItem, boolean aValue)  { setProp(anItem, "Expanded", aValue); }
-
-/**
- * Returns the prop value for an item and key.
- */
-public Object getProp(T anItem, String aKey)  { Map m = getProps(anItem, false); return m!=null? m.get(aKey) : null; }
-
-/**
- * Sets the prop value for an item, key and value.
- */
-public Object setProp(T anItem, String aKey, Object aValue)
+public void setExpanded(T anItem, boolean aValue)
 {
-    Map m = getProps(anItem, true);
-    return m.put(aKey, aValue);
-}
-
-/**
- * Returns the properties for an item.
- */
-protected Map getProps(T anItem, boolean doCreate)
-{
-    Map props = _props.get(anItem);
-    if(props==null && doCreate) _props.put(anItem, props=new HashMap());
-    return props;
+    if(aValue) _expanded.add(anItem);
+    else _expanded.remove(anItem);
 }
 
 /**
