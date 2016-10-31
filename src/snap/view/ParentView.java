@@ -174,9 +174,9 @@ public List <View> getChildrenAt(Shape aShape)
  */
 public View[] getChildrenManaged()
 {
-    int ccount = getChildCount(); View nodes[] = new View[ccount];
-    for(int i=0,j=0;i<ccount;i++) { View c = getChild(i);
-        if(c.isManaged()) nodes[j++] = c; else nodes = Arrays.copyOf(nodes,nodes.length-1); }
+    int cc = getChildCount(), cc2 = 0; View nodes[] = new View[cc];
+    for(int i=0,j=0;i<cc;i++) { View c = getChild(i); if(c.isManaged()) nodes[cc2++] = c; }
+    if(cc2!=cc) nodes = Arrays.copyOf(nodes, cc2);
     return nodes;
 }
 

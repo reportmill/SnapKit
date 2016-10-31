@@ -26,7 +26,7 @@ public class SplitView extends ParentView {
 public SplitView()
 {
     setBorder(SPLIT_VIEW_BORDER);
-    _layout.setFillOutt(true);
+    _layout.setFillOut(true);
 }
 
 /**
