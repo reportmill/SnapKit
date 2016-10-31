@@ -182,23 +182,23 @@ protected static Type getType(Event anEvent)
 {
     EventType etype = anEvent.getEventType();
     if(etype==ActionEvent.ACTION) return Type.Action;
-    if(etype==MouseEvent.MOUSE_PRESSED) return Type.MousePressed;
-    if(etype==MouseEvent.MOUSE_DRAGGED) return Type.MouseDragged;
-    if(etype==MouseEvent.MOUSE_RELEASED) return Type.MouseReleased;
-    if(etype==MouseEvent.MOUSE_ENTERED) return Type.MouseEntered;
-    if(etype==MouseEvent.MOUSE_MOVED) return Type.MouseMoved;
-    if(etype==MouseEvent.MOUSE_EXITED) return Type.MouseExited;
+    if(etype==MouseEvent.MOUSE_PRESSED) return Type.MousePress;
+    if(etype==MouseEvent.MOUSE_DRAGGED) return Type.MouseDrag;
+    if(etype==MouseEvent.MOUSE_RELEASED) return Type.MouseRelease;
+    if(etype==MouseEvent.MOUSE_ENTERED) return Type.MouseEnter;
+    if(etype==MouseEvent.MOUSE_MOVED) return Type.MouseMove;
+    if(etype==MouseEvent.MOUSE_EXITED) return Type.MouseExit;
     if(etype==MouseEvent.DRAG_DETECTED) return Type.DragGesture;
     if(etype==ScrollEvent.SCROLL) return Type.Scroll;
-    if(etype==KeyEvent.KEY_PRESSED) return Type.KeyPressed;
-    if(etype==KeyEvent.KEY_RELEASED) return Type.KeyReleased;
-    if(etype==KeyEvent.KEY_TYPED) return Type.KeyTyped;
+    if(etype==KeyEvent.KEY_PRESSED) return Type.KeyPress;
+    if(etype==KeyEvent.KEY_RELEASED) return Type.KeyRelease;
+    if(etype==KeyEvent.KEY_TYPED) return Type.KeyType;
     if(etype==DragEvent.DRAG_ENTERED) return Type.DragEnter;
     if(etype==DragEvent.DRAG_OVER) return Type.DragOver;
     if(etype==DragEvent.DRAG_EXITED) return Type.DragExit;
     if(etype==DragEvent.DRAG_DROPPED) return Type.DragDrop;
-    if(etype==WindowEvent.WINDOW_SHOWN) return Type.WinOpened;
-    if(etype==WindowEvent.WINDOW_CLOSE_REQUEST) return Type.WinClosing;
+    if(etype==WindowEvent.WINDOW_SHOWN) return Type.WinOpen;
+    if(etype==WindowEvent.WINDOW_CLOSE_REQUEST) return Type.WinClose;
     return null;  // Return null since event object not recognized
 }
 

@@ -71,7 +71,7 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
  */
 public ListView()
 {
-    enableEvents(MousePressed, KeyPressed, Action);
+    enableEvents(MousePress, KeyPress, Action);
     setFocusable(true); setFocusWhenPressed(true);
     setFill(Color.WHITE);
     _layout.setFillWidth(true);
@@ -266,8 +266,8 @@ public void setTargeting(boolean aValue)
 {
     if(aValue==_targeting) return;
     _targeting = aValue;
-    if(_targeting) enableEvents(MouseMoved, MouseExited);
-    else disableEvents(MouseMoved, MouseExited);
+    if(_targeting) enableEvents(MouseMove, MouseExit);
+    else disableEvents(MouseMove, MouseExit);
 }
 
 /**
@@ -489,25 +489,25 @@ protected void calcSampleSize()
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    // Handle MousePressed
-    if(anEvent.isMousePressed()) {
+    // Handle MousePress
+    if(anEvent.isMousePress()) {
         int index = getRowAt(anEvent.getY());
         setSelectedIndex(index);
         fireActionEvent();
     }
     
-    // Handle MouseExited
-    if(anEvent.isMouseExited())
+    // Handle MouseExit
+    if(anEvent.isMouseExit())
         setTargetedIndex(-1);
         
-    // Handle MouseMoved
-    if(anEvent.isMouseMoved() && isTargeting()) {
+    // Handle MouseMove
+    if(anEvent.isMouseMove() && isTargeting()) {
         int index = getRowAt(anEvent.getY()); if(index>=getItems().size()) index = -1;
         setTargetedIndex(index);
     }
     
-    // Handle KeyPressed
-    if(anEvent.isKeyPressed()) {
+    // Handle KeyPress
+    if(anEvent.isKeyPress()) {
         int kcode = anEvent.getKeyCode();
         switch(kcode) {
             case KeyCode.UP: if(getSelectedIndex()>0)setSelectedIndex(getSelectedIndex()-1); anEvent.consume(); break;

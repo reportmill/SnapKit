@@ -87,7 +87,7 @@ public Consumer <ListCell<T>> getCellConfigure()
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    if(anEvent.isMousePressed()) getTable()._selCol = ListUtils.indexOfId(getTable().getCols(), this);
+    if(anEvent.isMousePress()) getTable()._selCol = ListUtils.indexOfId(getTable().getCols(), this);
     super.processEvent(anEvent);
 }
 

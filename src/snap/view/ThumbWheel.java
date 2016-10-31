@@ -68,7 +68,7 @@ public class ThumbWheel extends View {
  */
 public ThumbWheel()
 {
-    enableEvents(MousePressed, MouseDragged, MouseReleased, Action); // Turn on mouse events
+    enableEvents(MousePress, MouseDrag, MouseRelease, Action); // Turn on mouse events
     setFill(Color.LIGHTGRAY); // Set default color
 }
 
@@ -151,15 +151,15 @@ protected void processEvent(ViewEvent anEvent)
     // If disabled, just return
     if(!isEnabled()) return;
 
-    // Handle MousePressed
-    if(anEvent.isMousePressed()) {
+    // Handle MousePress
+    if(anEvent.isMousePress()) {
         _pressedMousePoint = anEvent.getPoint(); // Record pressed mouse point
         _pressedValue = getValue(); // Record pressed pressed value
         _valueIsAdjusting = true; // Set value is adjusting
     }
     
-    // Handle MouseDragged
-    else if(anEvent.isMouseDragged()) {
+    // Handle MouseDrag
+    else if(anEvent.isMouseDrag()) {
         // Get values for last point and current point
         double lastPointVal = getValueAtPoint(_pressedMousePoint);
         double currPointVal = getValueAtPoint(anEvent.getPoint());
@@ -174,8 +174,8 @@ protected void processEvent(ViewEvent anEvent)
         setValue(_pressedValue + (currPointVal - lastPointVal));
     }
 
-    // Handle MouseReleased
-    else if(anEvent.isMouseReleased()) {
+    // Handle MouseRelease
+    else if(anEvent.isMouseRelease()) {
         // Turn off value is adjusting
         _valueIsAdjusting = false;
         

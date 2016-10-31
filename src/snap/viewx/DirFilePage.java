@@ -56,7 +56,7 @@ protected View createUI()
 protected void initUI()
 {
     // Enable events on FileBrowser
-    enableEvents(_fileBrowser, MouseReleased);
+    enableEvents(_fileBrowser, MouseRelease);
 }
 
 /**

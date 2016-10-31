@@ -122,11 +122,11 @@ protected void paintFront(Painter aPntr)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    // Handle MouseEntered, MouseExited, MousePressed, MouseReleased
-    if(anEvent.isMouseEntered()) { _targeted = true; _armed = _tracked; repaint(); }
-    else if(anEvent.isMouseExited())  { _targeted = _armed = false; repaint(); }
-    else if(anEvent.isMousePressed())  { _tracked = true; _armed = true; repaint(); }
-    else if(anEvent.isMouseReleased())  { if(_armed) fire(anEvent); _armed = _tracked = false; repaint(); }
+    // Handle MouseEnter, MouseExit, MousePress, MouseRelease
+    if(anEvent.isMouseEnter()) { _targeted = true; _armed = _tracked; repaint(); }
+    else if(anEvent.isMouseExit())  { _targeted = _armed = false; repaint(); }
+    else if(anEvent.isMousePress())  { _tracked = true; _armed = true; repaint(); }
+    else if(anEvent.isMouseRelease())  { if(_armed) fire(anEvent); _armed = _tracked = false; repaint(); }
 }
 
 /**
@@ -246,11 +246,11 @@ public class ColorBoxesPane extends View {
     /** Handle Events. */
     protected void processEvent(ViewEvent anEvent)
     {
-        if(anEvent.isMouseMoved()) { _mx = (int)anEvent.getX()/20; _my = (int)anEvent.getY()/20; repaint(); }
-        if(anEvent.isMouseExited()) { _mx = _my = -1; repaint(); }
-        if(anEvent.isMousePressed()) { _armx = (int)anEvent.getX()/20; _army = (int)anEvent.getY()/20; repaint(); }
-        if(anEvent.isMouseDragged()) { _mx = (int)anEvent.getX()/20; _my = (int)anEvent.getY()/20; repaint(); }
-        if(anEvent.isMouseReleased()) {
+        if(anEvent.isMouseMove()) { _mx = (int)anEvent.getX()/20; _my = (int)anEvent.getY()/20; repaint(); }
+        if(anEvent.isMouseExit()) { _mx = _my = -1; repaint(); }
+        if(anEvent.isMousePress()) { _armx = (int)anEvent.getX()/20; _army = (int)anEvent.getY()/20; repaint(); }
+        if(anEvent.isMouseDrag()) { _mx = (int)anEvent.getX()/20; _my = (int)anEvent.getY()/20; repaint(); }
+        if(anEvent.isMouseRelease()) {
             int mx = (int)anEvent.getX()/20, my = (int)anEvent.getY()/20;
             if(_armx==mx && _army==my) {
                 setColor(_colors[_armx+_army*8]); fire(null); getPopup().hide(); }

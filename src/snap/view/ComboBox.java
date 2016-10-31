@@ -50,7 +50,7 @@ public ComboBox()
     _btn.setMinWidth(18); _layout.setFillHeight(true); _btn.getLabel().setGrowWidth(true);
     _btn.setImageAfter(getArrowImage()); _btn.setGrowWidth(true); _btn.getLabel().setPadding(0,2,0,4);
     _btn.getLabel().getGraphicAfter().setLean(Pos.CENTER_RIGHT); //_btn.getLabel().getGraphic().setPadding(2,2,2,2);
-    _btn.addEventHandler(e -> showPopup(), MousePressed);
+    _btn.addEventHandler(e -> showPopup(), MousePress);
     _plist.setAltPaint(null); _plist.setTargeting(true);
     _plist.addEventHandler(e -> handleChildActionEvent(_plist), Action);
     enableEvents(Action);

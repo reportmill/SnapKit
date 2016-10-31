@@ -199,11 +199,11 @@ public Insets getInsetsAll()
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    // Handle MouseEntered, MouseExited, MousePressed, MouseReleased
-    if(anEvent.isMouseEntered()) { setTargeted(true); setPressed(_tracked); repaint(); }
-    else if(anEvent.isMouseExited())  { setTargeted(false); setPressed(false); repaint(); }
-    else if(anEvent.isMousePressed())  { _tracked = true; setPressed(true); repaint(); }
-    else if(anEvent.isMouseReleased())  { if(_pressed) fire(); _pressed = _tracked = false; repaint(); }
+    // Handle MouseEnter, MouseExit, MousePress, MouseRelease
+    if(anEvent.isMouseEnter()) { setTargeted(true); setPressed(_tracked); repaint(); }
+    else if(anEvent.isMouseExit())  { setTargeted(false); setPressed(false); repaint(); }
+    else if(anEvent.isMousePress())  { _tracked = true; setPressed(true); repaint(); }
+    else if(anEvent.isMouseRelease())  { if(_pressed) fire(); _pressed = _tracked = false; repaint(); }
 }
 
 /**

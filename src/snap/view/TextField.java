@@ -496,19 +496,19 @@ protected void paintFront(Painter aPntr)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    if(anEvent.isMousePressed()) _mouseDown = true;
+    if(anEvent.isMousePress()) _mouseDown = true;
     
     switch(anEvent.getType()) {
-        case MousePressed: mousePressed(anEvent); break;
-        case MouseDragged: mouseDragged(anEvent); break;
-        case MouseReleased: mouseReleased(anEvent); break;
-        case MouseMoved: mouseMoved(anEvent); break;
-        case KeyPressed: keyPressed(anEvent); break;
-        case KeyTyped: keyTyped(anEvent); break;
-        case KeyReleased: keyReleased(anEvent); break;
+        case MousePress: mousePressed(anEvent); break;
+        case MouseDrag: mouseDragged(anEvent); break;
+        case MouseRelease: mouseReleased(anEvent); break;
+        case MouseMove: mouseMoved(anEvent); break;
+        case KeyPress: keyPressed(anEvent); break;
+        case KeyType: keyTyped(anEvent); break;
+        case KeyRelease: keyReleased(anEvent); break;
     }
     
-    if(anEvent.isMouseReleased()) _mouseDown = false;
+    if(anEvent.isMouseRelease()) _mouseDown = false;
     
     // Consume all mouse events
     if(anEvent.isMouseEvent()) anEvent.consume();

@@ -35,7 +35,7 @@ public class ColorDock extends View {
  */
 public ColorDock()
 {
-    enableEvents(MouseReleased, DragEnter, DragOver, DragExit, DragDrop, DragGesture);
+    enableEvents(MouseRelease, DragEnter, DragOver, DragExit, DragDrop, DragGesture);
     setBorder(COLOR_DOCK_BORDER);
 }
 

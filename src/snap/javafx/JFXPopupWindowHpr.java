@@ -123,7 +123,7 @@ protected void focusChanged()
     PopupWindow win = get(); boolean focused = win.isFocused();
     snap.view.PopupWindow node = getView();
     ViewUtils.setFocused(node, focused);
-    ViewEvent.Type etype = focused? ViewEvent.Type.WinActivated : ViewEvent.Type.WinDeactivated;
+    ViewEvent.Type etype = focused? ViewEvent.Type.WinActivate : ViewEvent.Type.WinDeactivate;
     if(node.getEventAdapter().isEnabled(etype))
         sendEvent(null, etype);
 }

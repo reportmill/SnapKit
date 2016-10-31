@@ -169,20 +169,20 @@ protected Type getTypeImpl()
     int id = event instanceof AWTEvent? ((AWTEvent)event).getID() : 0;
     switch(id) {
         case ActionEvent.ACTION_PERFORMED: return Type.Action;
-        case MouseEvent.MOUSE_PRESSED: return Type.MousePressed;
-        case MouseEvent.MOUSE_DRAGGED: return Type.MouseDragged;
-        case MouseEvent.MOUSE_RELEASED: return Type.MouseReleased;
-        case MouseEvent.MOUSE_ENTERED: return Type.MouseEntered;
-        case MouseEvent.MOUSE_MOVED: return Type.MouseMoved;
-        case MouseEvent.MOUSE_EXITED: return Type.MouseExited;
+        case MouseEvent.MOUSE_PRESSED: return Type.MousePress;
+        case MouseEvent.MOUSE_DRAGGED: return Type.MouseDrag;
+        case MouseEvent.MOUSE_RELEASED: return Type.MouseRelease;
+        case MouseEvent.MOUSE_ENTERED: return Type.MouseEnter;
+        case MouseEvent.MOUSE_MOVED: return Type.MouseMove;
+        case MouseEvent.MOUSE_EXITED: return Type.MouseExit;
         case MouseEvent.MOUSE_WHEEL: return Type.Scroll;
-        case KeyEvent.KEY_PRESSED: return Type.KeyPressed;
-        case KeyEvent.KEY_RELEASED: return Type.KeyReleased;
-        case KeyEvent.KEY_TYPED: return Type.KeyTyped;
-        case WindowEvent.WINDOW_ACTIVATED: return Type.WinActivated;
-        case WindowEvent.WINDOW_CLOSING: return Type.WinClosing;
-        case WindowEvent.WINDOW_DEACTIVATED: return Type.WinDeactivated;
-        case WindowEvent.WINDOW_OPENED: return Type.WinOpened;
+        case KeyEvent.KEY_PRESSED: return Type.KeyPress;
+        case KeyEvent.KEY_RELEASED: return Type.KeyRelease;
+        case KeyEvent.KEY_TYPED: return Type.KeyType;
+        case WindowEvent.WINDOW_ACTIVATED: return Type.WinActivate;
+        case WindowEvent.WINDOW_CLOSING: return Type.WinClose;
+        case WindowEvent.WINDOW_DEACTIVATED: return Type.WinDeactivate;
+        case WindowEvent.WINDOW_OPENED: return Type.WinOpen;
     }
     if(event instanceof DropTargetDropEvent) return Type.DragDrop;
     if(event instanceof DragGestureEvent) return Type.DragGesture;

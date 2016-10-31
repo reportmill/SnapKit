@@ -143,7 +143,7 @@ protected void focusChanged()
     Stage win = get(); boolean focused = win.isFocused();
     WindowView node = getView();
     ViewUtils.setFocused(node, focused);
-    ViewEvent.Type etype = focused? ViewEvent.Type.WinActivated : ViewEvent.Type.WinDeactivated;
+    ViewEvent.Type etype = focused? ViewEvent.Type.WinActivate : ViewEvent.Type.WinDeactivate;
     if(node.getEventAdapter().isEnabled(etype))
         sendEvent(null, etype);
 }

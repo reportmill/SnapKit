@@ -101,21 +101,21 @@ public double getScroll(double aPnt)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    // Handle MouseEntered, MouseExited, MousePressed, MouseReleased
+    // Handle MouseEnter, MouseExit, MousePress, MouseRelease
     boolean hor = isHorizontal();
-    if(anEvent.isMouseEntered()) { _targeted = true; repaint(); }
-    else if(anEvent.isMouseExited())  { _targeted = false; repaint(); }
-    else if(anEvent.isMousePressed())  {
+    if(anEvent.isMouseEnter()) { _targeted = true; repaint(); }
+    else if(anEvent.isMouseExit())  { _targeted = false; repaint(); }
+    else if(anEvent.isMousePress())  {
         Rect tbnds = getThumbBounds(); double mx = anEvent.getX(), my = anEvent.getY();
         _pressed = true;
         _dv = hor? mx - tbnds.getMidX() : my - tbnds.getMidY();
         if(!tbnds.contains(mx,my)) { setScroll(getScroll(hor? mx : my)); _dv = 0; }
         repaint();
     }
-    else if(anEvent.isMouseReleased())  { _pressed = false; repaint(); }
+    else if(anEvent.isMouseRelease())  { _pressed = false; repaint(); }
     
     // Handle MouseDragged
-    else if(anEvent.isMouseDragged()) {
+    else if(anEvent.isMouseDrag()) {
         double mv = (hor? anEvent.getX() : anEvent.getY()) - _dv;
         double val = getScroll(mv);
         setScroll(val);

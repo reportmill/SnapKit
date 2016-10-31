@@ -96,64 +96,64 @@ public boolean isActionEvent()  { return getType()==Type.Action; }
 public boolean isMouseEvent()
 {
     Type t = getType();
-    return t==Type.MouseEntered || t==Type.MouseMoved || t==Type.MouseExited || t==Type.MousePressed ||
-        t==Type.MouseDragged || t==Type.MouseReleased;
+    return t==Type.MouseEnter || t==Type.MouseMove || t==Type.MouseExit || t==Type.MousePress ||
+        t==Type.MouseDrag || t==Type.MouseRelease;
 }
 
 /**
  * Returns whether event is mouse pressed.
  */
-public boolean isMousePressed()  { return getType()==Type.MousePressed; }
+public boolean isMousePress()  { return getType()==Type.MousePress; }
 
 /**
  * Returns whether event is mouse dragged.
  */
-public boolean isMouseDragged()  { return getType()==Type.MouseDragged; }
+public boolean isMouseDrag()  { return getType()==Type.MouseDrag; }
 
 /**
  * Returns whether event is mouse released.
  */
-public boolean isMouseReleased()  { return getType()==Type.MouseReleased; }
+public boolean isMouseRelease()  { return getType()==Type.MouseRelease; }
 
 /**
  * Returns whether event is mouse clicked.
  */
-public boolean isMouseClick()  { return isMouseReleased(); }
+public boolean isMouseClick()  { return isMouseRelease(); }
 
 /**
  * Returns whether event is mouse entered.
  */
-public boolean isMouseEntered()  { return getType()==Type.MouseEntered; }
+public boolean isMouseEnter()  { return getType()==Type.MouseEnter; }
 
 /**
  * Returns whether event is mouse moved.
  */
-public boolean isMouseMoved()  { return getType()==Type.MouseMoved; }
+public boolean isMouseMove()  { return getType()==Type.MouseMove; }
 
 /**
  * Returns whether event is mouse exited.
  */
-public boolean isMouseExited()  { return getType()==Type.MouseExited; }
+public boolean isMouseExit()  { return getType()==Type.MouseExit; }
 
 /**
  * Returns whether event is key event.
  */
-public boolean isKeyEvent() { Type t = getType(); return t==Type.KeyPressed || t==Type.KeyTyped || t==Type.KeyReleased;}
+public boolean isKeyEvent() { Type t = getType(); return t==Type.KeyPress || t==Type.KeyType || t==Type.KeyRelease;}
 
 /**
  * Returns whether event is key pressed.
  */
-public boolean isKeyPressed()  { return getType()==Type.KeyPressed; }
+public boolean isKeyPress()  { return getType()==Type.KeyPress; }
 
 /**
  * Returns whether event is key released.
  */
-public boolean isKeyReleased()  { return getType()==Type.KeyReleased; }
+public boolean isKeyRelease()  { return getType()==Type.KeyRelease; }
 
 /**
  * Returns whether event is key typed.
  */
-public boolean isKeyTyped()  { return getType()==Type.KeyTyped; }
+public boolean isKeyType()  { return getType()==Type.KeyType; }
 
 /**
  * Returns whether event is scroll.
@@ -216,22 +216,22 @@ public boolean isDragSourceEnd()  { return getType()==Type.DragSourceEnd; }
 /**
  * Returns whether event is WinActivated.
  */
-public boolean isWinActivated()  { return getType()==Type.WinActivated; }
+public boolean isWinActivate()  { return getType()==Type.WinActivate; }
 
 /**
  * Returns whether event is WinDeactivated.
  */
-public boolean isWinDeativated()  { return getType()==Type.WinDeactivated; }
+public boolean isWinDeativate()  { return getType()==Type.WinDeactivate; }
 
 /**
  * Returns whether event is WinOpened.
  */
-public boolean isWinOpened()  { return getType()==Type.WinOpened; }
+public boolean isWinOpen()  { return getType()==Type.WinOpen; }
 
 /**
  * Returns whether event is WinClosing.
  */
-public boolean isWinClosing()  { return getType()==Type.WinClosing; }
+public boolean isWinClose()  { return getType()==Type.WinClose; }
 
 /**
  * Returns the value encapsulated by the event widget.
@@ -481,10 +481,10 @@ public enum Type {
     Action,
 
     /** Key events. */
-    KeyPressed, KeyReleased, KeyTyped,
+    KeyPress, KeyRelease, KeyType,
     
     /** Mouse events.*/
-    MousePressed, MouseDragged, MouseReleased, MouseEntered, MouseMoved, MouseExited,
+    MousePress, MouseDrag, MouseRelease, MouseEnter, MouseMove, MouseExit,
         
     /** Scroll event. */
     Scroll,
@@ -496,7 +496,7 @@ public enum Type {
     DragGesture, DragSourceEnter, DragSourceOver, DragSourceExit, DragSourceEnd,
         
     /** Window events. */
-    WinActivated, WinDeactivated, WinOpened, WinClosing
+    WinActivate, WinDeactivate, WinOpen, WinClose
 }
 
 /** Prints "not implemented" for string (method name). */

@@ -44,27 +44,27 @@ public class ViewOwner implements EventListener {
     
     // Convenience for common events
     public static final ViewEvent.Type Action = ViewEvent.Type.Action;
-    public static final ViewEvent.Type KeyPressed = ViewEvent.Type.KeyPressed;
-    public static final ViewEvent.Type KeyReleased = ViewEvent.Type.KeyReleased;
-    public static final ViewEvent.Type KeyTyped = ViewEvent.Type.KeyTyped;
-    public static final ViewEvent.Type MousePressed = ViewEvent.Type.MousePressed;
-    public static final ViewEvent.Type MouseDragged = ViewEvent.Type.MouseDragged;
-    public static final ViewEvent.Type MouseReleased = ViewEvent.Type.MouseReleased;
-    public static final ViewEvent.Type MouseEntered = ViewEvent.Type.MouseEntered;
-    public static final ViewEvent.Type MouseMoved = ViewEvent.Type.MouseMoved;
-    public static final ViewEvent.Type MouseExited = ViewEvent.Type.MouseExited;
+    public static final ViewEvent.Type KeyPress = ViewEvent.Type.KeyPress;
+    public static final ViewEvent.Type KeyRelease = ViewEvent.Type.KeyRelease;
+    public static final ViewEvent.Type KeyType = ViewEvent.Type.KeyType;
+    public static final ViewEvent.Type MousePress = ViewEvent.Type.MousePress;
+    public static final ViewEvent.Type MouseDrag = ViewEvent.Type.MouseDrag;
+    public static final ViewEvent.Type MouseRelease = ViewEvent.Type.MouseRelease;
+    public static final ViewEvent.Type MouseEnter = ViewEvent.Type.MouseEnter;
+    public static final ViewEvent.Type MouseMove = ViewEvent.Type.MouseMove;
+    public static final ViewEvent.Type MouseExit = ViewEvent.Type.MouseExit;
     public static final ViewEvent.Type DragEnter = ViewEvent.Type.DragEnter;
     public static final ViewEvent.Type DragOver = ViewEvent.Type.DragOver;
     public static final ViewEvent.Type DragExit = ViewEvent.Type.DragExit;
     public static final ViewEvent.Type DragDrop = ViewEvent.Type.DragDrop;
     public static final ViewEvent.Type DragGesture = ViewEvent.Type.DragGesture;
-    public static final ViewEvent.Type WinActivated = ViewEvent.Type.WinActivated;
-    public static final ViewEvent.Type WinDeactivated = ViewEvent.Type.WinDeactivated;
-    public static final ViewEvent.Type WinOpened = ViewEvent.Type.WinOpened;
-    public static final ViewEvent.Type WinClosing = ViewEvent.Type.WinClosing;
-    public ViewEvent.Type KeyEvents[] = { KeyPressed, KeyReleased, KeyTyped };
-    public ViewEvent.Type MouseEvents[] = { MousePressed, MouseDragged, MouseReleased,
-        MouseEntered, MouseMoved, MouseExited };
+    public static final ViewEvent.Type WinActivate = ViewEvent.Type.WinActivate;
+    public static final ViewEvent.Type WinDeactivate = ViewEvent.Type.WinDeactivate;
+    public static final ViewEvent.Type WinOpen = ViewEvent.Type.WinOpen;
+    public static final ViewEvent.Type WinClose = ViewEvent.Type.WinClose;
+    public ViewEvent.Type KeyEvents[] = { KeyPress, KeyRelease, KeyType };
+    public ViewEvent.Type MouseEvents[] = { MousePress, MouseDrag, MouseRelease,
+        MouseEnter, MouseMove, MouseExit };
     public ViewEvent.Type DragEvents[] = { DragEnter, DragExit, DragOver, DragDrop };
     
 /**
@@ -613,7 +613,7 @@ public boolean setSendEventDisabled(boolean aFlag)
 public void addKeyActionEvent(String aName, String aKey)
 {
     KeyCombo kcombo = KeyCombo.get(aKey); if(kcombo==null) return;
-    if(_keyActions.size()==0) getUI().addEventHandler(e -> checkKeyActions(e), KeyPressed);
+    if(_keyActions.size()==0) getUI().addEventHandler(e -> checkKeyActions(e), KeyPress);
     _keyActions.put(kcombo, aName);
 }
 

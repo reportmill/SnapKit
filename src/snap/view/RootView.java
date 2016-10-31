@@ -156,7 +156,7 @@ protected void setShowing(boolean aVal)
     
     // If no longer showing, dispatch mouse move outside bounds to trigger any mouse exit code
     if(!aVal) {
-        ViewEvent event = getEnv().createEvent(this, null, MouseMoved, null);
+        ViewEvent event = getEnv().createEvent(this, null, MouseMove, null);
         event = event.copyForViewPoint(this, getWidth()+100, 0, 0);
         dispatchMouseEvent(event);
     }
@@ -337,22 +337,22 @@ public void dispatchEvent(ViewEvent anEvent)
 public void dispatchMouseEvent(ViewEvent anEvent)
 {
     // Update ViewEnv.MouseDown
-    if(anEvent.isMousePressed()) ViewUtils._mouseDown = true;
-    else if(anEvent.isMouseReleased()) ViewUtils._mouseDown = false;
+    if(anEvent.isMousePress()) ViewUtils._mouseDown = true;
+    else if(anEvent.isMouseRelease()) ViewUtils._mouseDown = false;
 
     // If popup window, forward to it
     if(_popup!=null) {
-        if(anEvent.isMouseDragged() || anEvent.isMouseReleased()) {
+        if(anEvent.isMouseDrag() || anEvent.isMouseRelease()) {
             _popup.processTriggerEvent(anEvent);
-            if(anEvent.isMouseReleased()) _popup = null; return;
+            if(anEvent.isMouseRelease()) _popup = null; return;
         }
         else _popup = null;
     }
     
     // Get target view (at mouse point, or mouse press, or mouse press point)
     View targ = ViewUtils.getDeepestViewAt(this, anEvent.getX(), anEvent.getY());
-    if(anEvent.isMouseExited()) targ = null;
-    if(anEvent.isMouseDragged() || anEvent.isMouseReleased()) {
+    if(anEvent.isMouseExit()) targ = null;
+    if(anEvent.isMouseDrag() || anEvent.isMouseRelease()) {
         targ = _mousePressView;
         if(targ.getRootView()!=this)
             targ = _mousePressView = ViewUtils.getDeepestViewAt(this, _mpx, _mpy);
@@ -362,14 +362,14 @@ public void dispatchMouseEvent(ViewEvent anEvent)
     View pars[] = getParents(targ);
     
     // Update MouseOvers
-    if(anEvent.isMouseMoved() || anEvent.isMouseReleased() || anEvent.isMouseEntered() || anEvent.isMouseExited()) {
+    if(anEvent.isMouseMove() || anEvent.isMouseRelease() || anEvent.isMouseEnter() || anEvent.isMouseExit()) {
     
         // Remove old MouseOver views and dispatch appropriate MouseExited events
         for(int i=_mouseOvers.size()-1;i>=0;i--) { View view = _mouseOvers.get(i);
              if(!ArrayUtils.containsId(pars,view)) {
                  _mouseOvers.remove(i); _mouseOverView = i>0? _mouseOvers.get(i-1) : null;
-                if(!view.getEventAdapter().isEnabled(MouseExited)) continue;
-                 ViewEvent e2 = getEnv().createEvent(view, anEvent.getEvent(), MouseExited, null);
+                if(!view.getEventAdapter().isEnabled(MouseExit)) continue;
+                 ViewEvent e2 = getEnv().createEvent(view, anEvent.getEvent(), MouseExit, null);
                  view.fireEvent(e2);
              }
              else break;
@@ -378,8 +378,8 @@ public void dispatchMouseEvent(ViewEvent anEvent)
         // Add new MouseOver views and dispatch appropriate MouseEntered events
         for(int i=_mouseOvers.size();i<pars.length;i++) { View view = pars[i];
             _mouseOvers.add(view); _mouseOverView = view;
-            if(!view.getEventAdapter().isEnabled(MouseEntered)) continue;
-             ViewEvent e2 = getEnv().createEvent(view, anEvent.getEvent(), MouseEntered, null);
+            if(!view.getEventAdapter().isEnabled(MouseEnter)) continue;
+             ViewEvent e2 = getEnv().createEvent(view, anEvent.getEvent(), MouseEnter, null);
              view.fireEvent(e2);
         }
         
@@ -388,8 +388,8 @@ public void dispatchMouseEvent(ViewEvent anEvent)
             setCurrentCursor(_mouseOverView.getCursor());
     }
     
-    // Handle MousePressed: Update MousePressView and mouse pressed point
-    else if(anEvent.isMousePressed()) {
+    // Handle MousePress: Update MousePressView and mouse pressed point
+    else if(anEvent.isMousePress()) {
         _mousePressView = targ; _mpx = anEvent.getX(); _mpy = anEvent.getY();
         for(View n=targ;n!=null;n=n.getParent())
             if(n.isFocusWhenPressed() && (getFocusedView()==null || !getFocusedView().isAncestor(n))) {
@@ -447,7 +447,7 @@ public void dispatchKeyEvent(ViewEvent anEvent)
     }
     
     // Send to MenuBar
-    if(anEvent.isKeyPressed() && anEvent.isShortcutDown() && getMenuBar()!=null)
+    if(anEvent.isKeyPress() && anEvent.isShortcutDown() && getMenuBar()!=null)
         getMenuBar().processEvent(anEvent);
 }
 

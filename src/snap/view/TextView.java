@@ -674,13 +674,13 @@ protected void paintSel(Painter aPntr)
 protected void processEvent(ViewEvent anEvent)
 {
     switch(anEvent.getType()) {
-        case MousePressed: mousePressed(anEvent); break;
-        case MouseDragged: mouseDragged(anEvent); break;
-        case MouseReleased: mouseReleased(anEvent); break;
-        case MouseMoved: mouseMoved(anEvent); break;
-        case KeyPressed: keyPressed(anEvent); break;
-        case KeyTyped: keyTyped(anEvent); break;
-        case KeyReleased: keyReleased(anEvent); break;
+        case MousePress: mousePressed(anEvent); break;
+        case MouseDrag: mouseDragged(anEvent); break;
+        case MouseRelease: mouseReleased(anEvent); break;
+        case MouseMove: mouseMoved(anEvent); break;
+        case KeyPress: keyPressed(anEvent); break;
+        case KeyType: keyTyped(anEvent); break;
+        case KeyRelease: keyReleased(anEvent); break;
     }
     
     // Consume all mouse events

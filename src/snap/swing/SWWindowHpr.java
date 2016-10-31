@@ -56,8 +56,8 @@ protected void init()
     win.addWindowListener(new WindowAdapter() {
         public void windowActivated(WindowEvent anEvent)  { activeChanged(); }
         public void windowDeactivated(WindowEvent anEvent)  { activeChanged(); }
-        public void windowOpened(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinOpened); }
-        public void windowClosing(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinClosing); }
+        public void windowOpened(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinOpen); }
+        public void windowClosing(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinClose); }
         public void windowClosed(WindowEvent anEvent)  { }
     });
         
@@ -215,7 +215,7 @@ protected void activeChanged()
     Window win = get(); boolean active = win.isActive();
     WindowView wview = getView();
     ViewUtils.setFocused(wview, active);
-    ViewEvent.Type etype = active? ViewEvent.Type.WinActivated : ViewEvent.Type.WinDeactivated;
+    ViewEvent.Type etype = active? ViewEvent.Type.WinActivate : ViewEvent.Type.WinDeactivate;
     if(wview.getEventAdapter().isEnabled(etype))
         sendWinEvent(null, etype);
 }
@@ -261,7 +261,7 @@ protected void sendWinEvent(WindowEvent anEvent, ViewEvent.Type aType)
     View wview = getView(); if(!wview.getEventAdapter().isEnabled(aType)) return;
     ViewEvent event = wview.getEnv().createEvent(wview, anEvent, aType, null);
     wview.fireEvent(event);
-    if(aType==ViewEvent.Type.WinClosing && get() instanceof JFrame && event.isConsumed())
+    if(aType==ViewEvent.Type.WinClose && get() instanceof JFrame && event.isConsumed())
         ((JFrame)get()).setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 }
 

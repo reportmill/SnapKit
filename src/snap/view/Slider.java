@@ -30,7 +30,7 @@ public class Slider extends View {
 /**
  * Creates a new Slider.
  */
-public Slider()  { enableEvents(Action, MouseDragged); }
+public Slider()  { enableEvents(Action, MouseDrag); }
 
 /**
  * Returns the value.
@@ -177,7 +177,7 @@ protected Point getKnobPoint()
 protected void processEvent(ViewEvent anEvent)
 {
     // Handle MouseDragged
-    if(anEvent.isMouseDragged()) {
+    if(anEvent.isMouseDrag()) {
         Rect tbnds = getTrackBounds();
         double mx = anEvent.getX(); if(mx<tbnds.getX()) mx = tbnds.getX(); if(mx>tbnds.getMaxX()) mx = tbnds.getMaxX();
         double my = anEvent.getY(); if(my<tbnds.getY()) my = tbnds.getY(); if(my>tbnds.getMaxY()) my = tbnds.getMaxY();

@@ -96,7 +96,7 @@ protected void addFilesPaneFile(WebFile aFile)
     VBox vbox = new VBox(); vbox.setAlign(Pos.TOP_CENTER); vbox.setChildren(iview,label);
     vbox.setPrefSize(100,100); vbox.setProp("File", aFile);
     vbox.setOwner(this);
-    enableEvents(vbox, MouseReleased);
+    enableEvents(vbox, MouseRelease);
     _filesPane.addChild(vbox);
 }
 

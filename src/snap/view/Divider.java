@@ -30,7 +30,7 @@ public class Divider extends View {
  */
 public Divider()
 {
-    enableEvents(MousePressed, MouseDragged);
+    enableEvents(MousePress, MouseDrag);
     setBorder(DIVIDER_BORDER);
 }
 
@@ -132,7 +132,7 @@ public void adjustLayouts(View children[], Rect bounds[])
 protected void processEvent(ViewEvent anEvent)
 {
     // Handle MouseDragged: If divider pressed, set location or remainder
-    if(anEvent.isMouseDragged()) {
+    if(anEvent.isMouseDrag()) {
         
         // Get parent, divider peers, whether peers grow and event in parent coords
         ParentView par = getParent(); int index = par.indexOfChild(this); boolean ver = isVertical();

@@ -306,7 +306,7 @@ public static class ImagePicker extends View {
     Color  _color = Color.WHITE;
     
     /** Creates new ImagePicker. */
-    public ImagePicker()  { enableEvents(MousePressed, MouseDragged, MouseReleased, Action); repaint(); }
+    public ImagePicker()  { enableEvents(MousePress, MouseDrag, MouseRelease, Action); repaint(); }
     
     /** Returns the image. */
     public Image getImage()  { return _img; }
@@ -354,7 +354,7 @@ private class SwatchPanel extends View {
     int WIDTH = 16, HEIGHT = 14, SIZE = 12;
     
     /** Creates new SwatchPanel. */
-    public SwatchPanel()  { enableEvents(MouseReleased); setBounds(30,10,WIDTH*SIZE,HEIGHT*SIZE); }
+    public SwatchPanel()  { enableEvents(MouseRelease); setBounds(30,10,WIDTH*SIZE,HEIGHT*SIZE); }
     
     /** Paint component. */
     protected void paintFront(Painter aPntr)

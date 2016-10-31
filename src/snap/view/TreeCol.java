@@ -121,7 +121,7 @@ protected void configureCell(ListCell <T> aCell)
         ImageView iview = new ImageView(bimg); iview.setPadding(4,4,4,4);
         View gview = aCell.getGraphic()!=null? new Label(iview, null, aCell.getGraphic()) : iview;
         aCell.setGraphic(gview);
-        iview.addEventHandler(e -> { tree.toggleItem(item); e.consume(); }, MousePressed);
+        iview.addEventHandler(e -> { tree.toggleItem(item); e.consume(); }, MousePress);
     }
 }
 
@@ -130,7 +130,7 @@ protected void configureCell(ListCell <T> aCell)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    if(anEvent.isMousePressed()) getTree()._selCol = ListUtils.indexOfId(getTree().getCols(), this);
+    if(anEvent.isMousePress()) getTree()._selCol = ListUtils.indexOfId(getTree().getCols(), this);
     super.processEvent(anEvent);
 }
 

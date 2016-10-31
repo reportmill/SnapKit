@@ -293,10 +293,10 @@ protected void processEvent(ViewEvent anEvent)
 {
     // Handle MouseEvent
     if(anEvent.isMouseEvent()) {
-        if(anEvent.isMousePressed()) _mouseDown = anEvent;
-        else if(anEvent.isMouseReleased()) _mouseDown = null;
+        if(anEvent.isMousePress()) _mouseDown = anEvent;
+        else if(anEvent.isMouseRelease()) _mouseDown = null;
         else if(anEvent.isMouseClick()) _mouseClicked = anEvent;
-        else if(anEvent.isMouseMoved() && getShowCoords())
+        else if(anEvent.isMouseMove() && getShowCoords())
             repaint(Rect.get(anEvent.getPoint(),new Point(_mx,_my)).getInsetRect(-80,-25));
         _mx = anEvent.getX(); _my = anEvent.getY();
     }
@@ -304,8 +304,8 @@ protected void processEvent(ViewEvent anEvent)
     // Handle KeyEvent: Update KeyDowns and KeyClicks for event
     else if(anEvent.isKeyEvent()) {
         int kcode = anEvent.getKeyCode();
-        if(anEvent.isKeyPressed()) { _keyDowns.add(kcode); _keyClicks.add(kcode); }
-        else if(anEvent.isKeyReleased()) _keyDowns.remove(kcode);
+        if(anEvent.isKeyPress()) { _keyDowns.add(kcode); _keyClicks.add(kcode); }
+        else if(anEvent.isKeyRelease()) _keyDowns.remove(kcode);
     }
 }
 

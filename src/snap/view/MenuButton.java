@@ -91,11 +91,11 @@ public void setPopupSize(Size aValue)  { firePropChange("PopupSize", _popSize, _
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    // Handle MouseEntered, MouseExited, MousePressed, MouseReleased
-    if(anEvent.isMouseEntered()) { setTargeted(true); repaint(); }
-    else if(anEvent.isMouseExited())  { setTargeted(false); repaint(); }
-    else if(anEvent.isMousePressed())  { setPressed(false); setTargeted(false); fire(anEvent); repaint(); }
-    else if(anEvent.isMouseReleased())  { setPressed(false); setTargeted(false); repaint(); }
+    // Handle MouseEnter, MouseExit, MousePress, MouseRelease
+    if(anEvent.isMouseEnter()) { setTargeted(true); repaint(); }
+    else if(anEvent.isMouseExit())  { setTargeted(false); repaint(); }
+    else if(anEvent.isMousePress())  { setPressed(false); setTargeted(false); fire(anEvent); repaint(); }
+    else if(anEvent.isMouseRelease())  { setPressed(false); setTargeted(false); repaint(); }
 }
 
 /**

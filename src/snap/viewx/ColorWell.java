@@ -31,7 +31,7 @@ public class ColorWell extends View {
  */
 public ColorWell()
 {
-    enableEvents(Action, MouseReleased, DragGesture, DragSourceEnd); enableEvents(DragEvents);
+    enableEvents(Action, MouseRelease, DragGesture, DragSourceEnd); enableEvents(DragEvents);
     repaint();
 }
 
