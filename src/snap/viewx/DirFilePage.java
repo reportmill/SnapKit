@@ -56,7 +56,7 @@ protected View createUI()
 protected void initUI()
 {
     // Enable events on FileBrowser
-    enableEvents(_fileBrowser, MouseClicked);
+    enableEvents(_fileBrowser, MouseReleased);
 }
 
 /**
@@ -64,8 +64,8 @@ protected void initUI()
  */
 public void respondUI(ViewEvent anEvent)
 {
-    // Handle FileBrowser MouseClicked
-    if(anEvent.isMouseClicked()) {
+    // Handle FileBrowser MouseClick
+    if(anEvent.isMouseClick()) {
         
         // Handle single click: set browser to file (or clear if directory)
         if(anEvent.getClickCount()==1) {

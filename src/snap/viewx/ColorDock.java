@@ -35,7 +35,7 @@ public class ColorDock extends View {
  */
 public ColorDock()
 {
-    enableEvents(MouseClicked, DragEnter, DragOver, DragExit, DragDrop, DragGesture);
+    enableEvents(MouseReleased, DragEnter, DragOver, DragExit, DragDrop, DragGesture);
     setBorder(COLOR_DOCK_BORDER);
 }
 
@@ -221,8 +221,8 @@ protected void paintFront(Painter aPntr)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    // Handle MouseClicked: Make ColorPanel display clicked color
-    if(anEvent.isMouseClicked()) {
+    // Handle MouseClick: Make ColorPanel display clicked color
+    if(anEvent.isMouseClick()) {
         if(!isEnabled()) return;
         ColorPanel panel = ColorPanel.getShared();
         panel.setColor(getColor(anEvent.getPoint()));

@@ -84,7 +84,7 @@ public View createUI()
  */
 protected void initUI()
 {
-    // Get text area and start listening for events (KeyEvents, MouseClicked, DragOver/Exit/Drop)
+    // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
     _textView = getView("TextView", TextView.class);
     _textView.getTextBox().getText().addPropChangeListener(this);
     

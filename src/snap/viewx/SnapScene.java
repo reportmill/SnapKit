@@ -295,7 +295,7 @@ protected void processEvent(ViewEvent anEvent)
     if(anEvent.isMouseEvent()) {
         if(anEvent.isMousePressed()) _mouseDown = anEvent;
         else if(anEvent.isMouseReleased()) _mouseDown = null;
-        else if(anEvent.isMouseClicked()) _mouseClicked = anEvent;
+        else if(anEvent.isMouseClick()) _mouseClicked = anEvent;
         else if(anEvent.isMouseMoved() && getShowCoords())
             repaint(Rect.get(anEvent.getPoint(),new Point(_mx,_my)).getInsetRect(-80,-25));
         _mx = anEvent.getX(); _my = anEvent.getY();

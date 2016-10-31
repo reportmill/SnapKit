@@ -97,7 +97,7 @@ public boolean isMouseEvent()
 {
     Type t = getType();
     return t==Type.MouseEntered || t==Type.MouseMoved || t==Type.MouseExited || t==Type.MousePressed ||
-        t==Type.MouseDragged || t==Type.MouseReleased || t==Type.MouseClicked;
+        t==Type.MouseDragged || t==Type.MouseReleased;
 }
 
 /**
@@ -118,7 +118,7 @@ public boolean isMouseReleased()  { return getType()==Type.MouseReleased; }
 /**
  * Returns whether event is mouse clicked.
  */
-public boolean isMouseClicked()  { return getType()==Type.MouseClicked; }
+public boolean isMouseClick()  { return isMouseReleased(); }
 
 /**
  * Returns whether event is mouse entered.
@@ -481,10 +481,10 @@ public enum Type {
     Action,
 
     /** Key events. */
-    KeyPressed, KeyReleased, KeyTyped, KeyFinished,
+    KeyPressed, KeyReleased, KeyTyped,
     
     /** Mouse events.*/
-    MousePressed, MouseDragged, MouseReleased, MouseClicked, MouseEntered, MouseMoved, MouseExited,
+    MousePressed, MouseDragged, MouseReleased, MouseEntered, MouseMoved, MouseExited,
         
     /** Scroll event. */
     Scroll,

@@ -185,7 +185,6 @@ protected static Type getType(Event anEvent)
     if(etype==MouseEvent.MOUSE_PRESSED) return Type.MousePressed;
     if(etype==MouseEvent.MOUSE_DRAGGED) return Type.MouseDragged;
     if(etype==MouseEvent.MOUSE_RELEASED) return Type.MouseReleased;
-    if(etype==MouseEvent.MOUSE_CLICKED) return Type.MouseClicked;
     if(etype==MouseEvent.MOUSE_ENTERED) return Type.MouseEntered;
     if(etype==MouseEvent.MOUSE_MOVED) return Type.MouseMoved;
     if(etype==MouseEvent.MOUSE_EXITED) return Type.MouseExited;

@@ -501,7 +501,7 @@ protected void processEvent(ViewEvent anEvent)
     switch(anEvent.getType()) {
         case MousePressed: mousePressed(anEvent); break;
         case MouseDragged: mouseDragged(anEvent); break;
-        case MouseReleased: mouseReleased(anEvent); break; //case MouseClicked: mouseClicked(anEvent); break;
+        case MouseReleased: mouseReleased(anEvent); break;
         case MouseMoved: mouseMoved(anEvent); break;
         case KeyPressed: keyPressed(anEvent); break;
         case KeyTyped: keyTyped(anEvent); break;

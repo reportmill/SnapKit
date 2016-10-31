@@ -677,7 +677,6 @@ protected void processEvent(ViewEvent anEvent)
         case MousePressed: mousePressed(anEvent); break;
         case MouseDragged: mouseDragged(anEvent); break;
         case MouseReleased: mouseReleased(anEvent); break;
-        case MouseClicked: mouseClicked(anEvent); break;
         case MouseMoved: mouseMoved(anEvent); break;
         case KeyPressed: keyPressed(anEvent); break;
         case KeyTyped: keyTyped(anEvent); break;
@@ -740,16 +739,15 @@ protected void mouseDragged(ViewEvent anEvent)
 /**
  * Handles mouse released.
  */
-protected void mouseReleased(ViewEvent anEvent) { setCaretAnim(); _downX = _downY = 0; }
-
-/**
- * Handles mouse clicked.
- */
-protected void mouseClicked(ViewEvent anEvent)
+protected void mouseReleased(ViewEvent anEvent)
 {
-    int cindex = getCharIndex(anEvent.getX(), anEvent.getY());
-    TextStyle style = getStyleAt(cindex);
-    if(style.getLink()!=null) openLink(style.getLink().getString());
+    setCaretAnim(); _downX = _downY = 0;
+
+    if(anEvent.isMouseClick()) {
+        int cindex = getCharIndex(anEvent.getX(), anEvent.getY());
+        TextStyle style = getStyleAt(cindex);
+        if(style.getLink()!=null) openLink(style.getLink().getString());
+    }
 }
 
 /**

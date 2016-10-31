@@ -113,6 +113,7 @@ protected void processEvent(AWTEvent anEvent)
     
     // Handle MouseEvents
     if(anEvent instanceof MouseEvent) { MouseEvent me = (MouseEvent)anEvent; int id = me.getID();
+        if(id==MouseEvent.MOUSE_CLICKED) return;
         ViewEvent event = SwingViewEnv.get().createEvent(_rview, me, null, null);
         _rview.dispatchEvent(event);
         if(!isFocusOwner()) requestFocusInWindow(true); // Bogus!

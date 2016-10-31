@@ -96,7 +96,7 @@ protected void addFilesPaneFile(WebFile aFile)
     VBox vbox = new VBox(); vbox.setAlign(Pos.TOP_CENTER); vbox.setChildren(iview,label);
     vbox.setPrefSize(100,100); vbox.setProp("File", aFile);
     vbox.setOwner(this);
-    enableEvents(vbox, MouseClicked);
+    enableEvents(vbox, MouseReleased);
     _filesPane.addChild(vbox);
 }
 
@@ -105,8 +105,8 @@ protected void addFilesPaneFile(WebFile aFile)
  */
 public void respondUI(ViewEvent anEvent)
 {
-    // Handle Label MouseClicked
-    if(anEvent.isMouseClicked()) {
+    // Handle Label MouseClick
+    if(anEvent.isMouseClick()) {
         
         // Handle double-click
         if(anEvent.getClickCount()>1) {

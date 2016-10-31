@@ -187,7 +187,6 @@ public class View implements XMLArchiver.Archivable {
     public static final ViewEvent.Type MousePressed = ViewEvent.Type.MousePressed;
     public static final ViewEvent.Type MouseDragged = ViewEvent.Type.MouseDragged;
     public static final ViewEvent.Type MouseReleased = ViewEvent.Type.MouseReleased;
-    public static final ViewEvent.Type MouseClicked = ViewEvent.Type.MouseClicked;
     public static final ViewEvent.Type MouseEntered = ViewEvent.Type.MouseEntered;
     public static final ViewEvent.Type MouseMoved = ViewEvent.Type.MouseMoved;
     public static final ViewEvent.Type MouseExited = ViewEvent.Type.MouseExited;
@@ -207,7 +206,7 @@ public class View implements XMLArchiver.Archivable {
     public static final ViewEvent.Type WinClosing = ViewEvent.Type.WinClosing;
     public static final ViewEvent.Type KeyEvents[] = { KeyPressed, KeyReleased, KeyTyped };
     public static final ViewEvent.Type MouseEvents[] = { MousePressed, MouseDragged, MouseReleased,
-        MouseClicked, MouseEntered, MouseMoved, MouseExited };
+        MouseEntered, MouseMoved, MouseExited };
     public static final ViewEvent.Type DragEvents[] = { DragEnter, DragExit, DragOver, DragDrop };
 
 /**

@@ -31,7 +31,7 @@ public class ColorWell extends View {
  */
 public ColorWell()
 {
-    enableEvents(Action, MouseClicked, DragGesture, DragSourceEnd); enableEvents(DragEvents);
+    enableEvents(Action, MouseReleased, DragGesture, DragSourceEnd); enableEvents(DragEvents);
     repaint();
 }
 
@@ -156,8 +156,8 @@ protected void processEvent(ViewEvent anEvent)
     // If disabled, just return
     if(!isEnabled()) return;
     
-    // Handle MouseClicked
-    if(anEvent.isMouseClicked()) {
+    // Handle MouseClick
+    if(anEvent.isMouseClick()) {
         
         // If is selectable, toggle selected state
         if(isSelectable())

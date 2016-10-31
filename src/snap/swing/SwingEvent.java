@@ -172,7 +172,6 @@ protected Type getTypeImpl()
         case MouseEvent.MOUSE_PRESSED: return Type.MousePressed;
         case MouseEvent.MOUSE_DRAGGED: return Type.MouseDragged;
         case MouseEvent.MOUSE_RELEASED: return Type.MouseReleased;
-        case MouseEvent.MOUSE_CLICKED: return Type.MouseClicked;
         case MouseEvent.MOUSE_ENTERED: return Type.MouseEntered;
         case MouseEvent.MOUSE_MOVED: return Type.MouseMoved;
         case MouseEvent.MOUSE_EXITED: return Type.MouseExited;
