@@ -365,11 +365,6 @@ public Point getPerimeterPointForRadial(double anAngle, boolean doEllipse)
 }
 
 /**
- * Returns the shape in rect.
- */
-public Shape getShapeInRect(Rect aRect)  { return aRect; }
-
-/**
  * Standard clone implementation.
  */
 public Rect clone()  { return new Rect(x,y,width,height); }

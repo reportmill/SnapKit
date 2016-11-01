@@ -42,14 +42,6 @@ public PathIter getPathIter(Transform aTrans)
 }
 
 /**
- * Returns the shape in rect.
- */
-public Shape getShapeInRect(Rect aRect)
-{
-    return new RoundRect(aRect.x, aRect.y, aRect.width, aRect.height, _rad);
-}
-
-/**
  * Standard hashCode implementation.
  */
 public int hashCode()

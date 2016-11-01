@@ -67,7 +67,7 @@ public PathIter getPathIter(Transform aTrans)  { return getPath().getPathIter(aT
 /**
  * Returns the shape in rect.
  */
-public Shape getShapeInRect(Rect aRect)
+public Shape copyFor(Rect aRect)
 {
     return new Arc(aRect.x, aRect.y, aRect.width, aRect.height, _start, _sweep);
 }

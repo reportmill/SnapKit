@@ -21,7 +21,7 @@ public Rect getBounds()  { return bounds(x0, y0, x1, y1, null); }
 /**
  * Returns the shape in rect.
  */
-public Shape getShapeInRect(Rect aRect)
+public Shape copyFor(Rect aRect)
 {
     double x = Math.min(x0, x1), y = Math.min(y0, y1);
     double w = Math.max(x0, x1) - x, h = Math.max(y0, y1) - y;

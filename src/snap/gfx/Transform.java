@@ -46,6 +46,11 @@ public final boolean isIdentity() { return equals(IDENTITY); }
 public final boolean isSimple()  { return _a==1 && _b==0 && _c==0 && _d==1; }
 
 /**
+ * Returns whether this transform has a rotation component.
+ */
+public final boolean isRotated()  { return _b!=0 || _c!=0; }
+
+/**
  * Translates this transform by given x & y.
  */
 public void translate(double dx, double dy)  { _tx += dx; _ty += dy; }
@@ -182,17 +187,6 @@ public void transformVector(Size aSize)
 {
     double w = aSize.getWidth(), h = aSize.getHeight();
     aSize.setSize(w*_a + h*_c, w*_b + h*_d);
-}
-
-/**
- * Creates returns a transformed shape.
- */
-public Shape createTransformedShape(Shape aShape)
-{
-    // If shape is rect and transform is simple, return offset rect
-    if(aShape instanceof RectBase && isSimple()) { RectBase rb = (RectBase)aShape; rb = rb.clone();
-        rb.offset(_tx,_ty); return rb; }
-    return new Path(aShape.getPathIter(this));
 }
 
 /**

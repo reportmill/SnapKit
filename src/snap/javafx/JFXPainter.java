@@ -175,9 +175,9 @@ public Transform getTransform()  { return JFX.get(_gc.getTransform()); }
  */
 public void setTransform(Transform aTrans)
 {
-    if(_clip!=null) _clip = getTransform().createTransformedShape(_clip);
+    if(_clip!=null) _clip = _clip.copyFor(getTransform());
     _gc.setTransform(JFX.get(aTrans));
-    if(_clip!=null) _clip = aTrans.getInverse().createTransformedShape(_clip);    
+    if(_clip!=null) _clip = _clip.copyFor(aTrans.getInverse());
 }
 
 /**
@@ -186,7 +186,7 @@ public void setTransform(Transform aTrans)
 public void transform(Transform aTrans)
 {
     _gc.transform(JFX.get(aTrans));
-    if(_clip!=null) _clip = aTrans.getInverse().createTransformedShape(_clip);
+    if(_clip!=null) _clip = _clip.copyFor(aTrans.getInverse());
 }
 
 /**

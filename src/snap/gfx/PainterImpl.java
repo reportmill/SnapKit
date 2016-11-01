@@ -57,7 +57,7 @@ public void fill(Shape aShape)  { updateMarkedBounds(aShape, getPaint().isOpaque
 /** Draw image with transform. */
 public void drawImage(Image anImg, Transform aTrans)
 {
-    Shape shp = aTrans.createTransformedShape(new Rect(0,0,anImg.getWidth(),anImg.getHeight()));
+    Shape shp = new Rect(0,0,anImg.getWidth(),anImg.getHeight()).copyFor(aTrans);
     updateMarkedBounds(shp, !anImg.hasAlpha());
 }
 
@@ -80,7 +80,7 @@ public void drawString(String aStr, double aX, double aY, double cs)
 private void updateMarkedBounds(Shape aShape, boolean isOpaque)
 {
     // Get marked shape in global coords
-    Shape mshp = _gstate.xform.createTransformedShape(aShape);
+    Shape mshp = aShape.copyFor(_gstate.xform);
     
     // If no marked shape yet, just set
     if(_mshape==null) { _mshape = mshp; _opaque = isOpaque; }
@@ -112,9 +112,9 @@ public Transform getTransform()  { return _gstate.xform; }
  */
 public void setTransform(Transform aTrans)
 {
-    if(_gstate.clip!=null) _gstate.clip = _gstate.xform.getInverse().createTransformedShape(_gstate.clip);
+    if(_gstate.clip!=null) _gstate.clip = _gstate.clip.copyFor(_gstate.xform.getInverse());
     _gstate.xform = aTrans;
-    if(_gstate.clip!=null) _gstate.clip = aTrans.createTransformedShape(_gstate.clip);
+    if(_gstate.clip!=null) _gstate.clip = _gstate.clip.copyFor(aTrans);
 }
 
 /**
@@ -123,7 +123,7 @@ public void setTransform(Transform aTrans)
 public void transform(Transform aTrans)
 {
     _gstate.xform.multiply(aTrans);
-    if(_gstate.clip!=null) _gstate.clip = aTrans.createTransformedShape(_gstate.clip);
+    if(_gstate.clip!=null) _gstate.clip = _gstate.clip.copyFor(aTrans);
 }
 
 /**

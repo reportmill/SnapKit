@@ -412,7 +412,7 @@ public boolean intersects(Shape aShape, double aLineWidth)
 /**
  * Returns the shape in rect.
  */
-public Shape getShapeInRect(Rect aRect)
+public Shape copyFor(Rect aRect)
 {
     Rect bounds = getBounds(); if(bounds.equals(aRect)) return this;
     Transform trans = Transform.getTrans(aRect.getX() - bounds.getX(), aRect.getY() - bounds.getY());
@@ -421,6 +421,11 @@ public Shape getShapeInRect(Rect aRect)
     trans.scale(sx, sy);
     return new Path(getPathIter(trans));
 }
+
+/**
+ * Returns a copy of this shape transformed by given transform.
+ */
+public Shape copyFor(Transform aTrans)  { return new Path(getPathIter(aTrans)); }
 
 /**
  * Returns a string representation of Shape.

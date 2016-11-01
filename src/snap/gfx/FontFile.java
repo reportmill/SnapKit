@@ -132,7 +132,7 @@ public Shape getOutline(CharSequence aStr, double aSize, double aX, double aY, d
     Path path = new Path(); double x = aX, ascent = getAscent()*aSize, descent = getDescent()*aSize;
     for(int i=0, iMax=aStr.length();i<iMax; i++) { char c = aStr.charAt(i);
        Shape cpath = getCharPath(c); Rect bnds = cpath.getBounds(); double cw = bnds.getWidth(), ch = bnds.getHeight();
-       cpath = cpath.getShapeInRect(new Rect(x, aY - descent, cw*aSize/1000, ch*aSize/1000));
+       cpath = cpath.copyFor(new Rect(x, aY - descent, cw*aSize/1000, ch*aSize/1000));
        path.append(cpath); x += charAdvance(c)*aSize + aCharSpacing;
     }
     return path;

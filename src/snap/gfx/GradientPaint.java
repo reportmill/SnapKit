@@ -152,7 +152,7 @@ protected void setRoll(double aRoll, Rect aRect)
     // Do arbitrary version
     Transform t = Transform.getTrans(-aRect.getMidX(), -aRect.getMidY());   // Get transform of reverse rotation
     t.rotate(-_roll); t.translate(aRect.getMidX(), aRect.getMidY());
-    Rect r2 = t.createTransformedShape(aRect).getBounds();                  // Get bounds of transformed rect
+    Rect r2 = aRect.copyFor(t).getBounds();                  // Get bounds of transformed rect
     Point p1 = Point.get(r2.getX(), r2.getMidY()), p2 = Point.get(r2.getMaxX(), r2.getMidY());
     t = Transform.getTrans(-r2.getMidX(), -r2.getMidY());
     t.rotate(_roll); t.translate(r2.getMidX(), r2.getMidY());

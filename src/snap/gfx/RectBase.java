@@ -147,6 +147,37 @@ public void inset(Insets anIns)
 public void offset(double dx, double dy)  { setXY(x + dx, y + dy); }
 
 /**
+ * Returns the shape in rect.
+ */
+public Shape copyFor(Rect aRect)
+{
+    RectBase clone = clone(); clone.setRect(aRect);
+    return clone;
+}
+
+/**
+ * Returns a copy of this shape transformed by given transform.
+ */
+public Shape copyFor(Transform aTrans)
+{
+    // If just translation, return cloned offset rect
+    if(aTrans.isSimple()) {
+        RectBase clone = clone(); clone.offset(aTrans._tx, aTrans._ty);
+        return clone;
+    }
+    
+    // if just scale+translation, return scaled rect
+    else if(!aTrans.isRotated()) {
+        RectBase clone = clone(); clone.x = clone.x*aTrans._a + aTrans._tx; clone.y = clone.y*aTrans._d + aTrans._ty;
+        clone.width *= aTrans._a; clone.height *= aTrans._d;
+        return clone;
+    }
+
+    // Otherwise do full version
+    return super.copyFor(aTrans);
+}
+
+/**
  * Returns a String reprsentation of this rect.
  */
 public String getString()

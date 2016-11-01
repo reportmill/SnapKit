@@ -20,7 +20,7 @@ public Path getPath()  { return _path!=null? _path : (_path=new Path()); }
 /**
  * Override to return path as bounds shape.
  */
-public Shape getBoundsShape()  { return getPath().getShapeInRect(getBoundsInside()); }
+public Shape getBoundsShape()  { return getPath().copyFor(getBoundsInside()); }
 
 /**
  * Calculates the preferred width.

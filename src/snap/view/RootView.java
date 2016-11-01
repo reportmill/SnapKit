@@ -291,8 +291,8 @@ public synchronized void paintLater()
     View views[] = _dirtyRects.keySet().toArray(new View[_dirtyRects.size()]);
     for(View n : views) { Rect r = _dirtyRects.get(n);
         Transform tfm = n!=this? n.getLocalToParent(this) : Transform.IDENTITY;
-        Rect vr = n.getVisRect(); vr = tfm.createTransformedShape(vr).getBounds();
-        r = tfm.createTransformedShape(r).getBounds();
+        Rect vr = n.getVisRect(); vr = vr.copyFor(tfm).getBounds();
+        r = r.copyFor(tfm).getBounds();
         r = r.getIntersectRect(vr);
         if(rect==null) rect = r;
         else rect.union(r);
