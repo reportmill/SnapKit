@@ -79,7 +79,7 @@ public void repaint(Rect aRect)
 {
     _paintRect = aRect;
     int x = (int)aRect.x, y = (int)aRect.y, w = (int)aRect.width, h = (int)aRect.height;
-    super.repaint(0,x,y,w,h);
+    paintImmediately(x, y, w, h); //super.repaint(0,x,y,w,h);
 }
 
 /**
