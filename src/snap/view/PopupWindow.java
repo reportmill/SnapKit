@@ -47,8 +47,8 @@ public void show(View aView, double aX, double aY)
     
     // Record time and node location and set this popup as Node.RootView.Popup to get trigger events
     _mptime = System.currentTimeMillis(); _nx = aX; _ny = aY;
-    RootView rpane = aView!=null? aView.getRootView() : null;
-    if(rpane!=null) rpane.setPopup(this);
+    RootView rview = aView!=null? aView.getRootView() : null;
+    if(rview!=null) rview.setPopup(this);
 }
 
 /**

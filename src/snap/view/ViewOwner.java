@@ -321,8 +321,8 @@ protected void respondUI(ViewEvent anEvent)  { }
 public void resetLater()
 {
     View ui = isUISet()? getUI() : null; if(ui==null) return;
-    RootView rpane = ui.getRootView(); if(rpane==null) return;
-    rpane.resetLater(this);
+    RootView rview = ui.getRootView(); if(rview==null) return;
+    rview.resetLater(this);
 }
 
 /**

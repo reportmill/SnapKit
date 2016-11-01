@@ -24,9 +24,9 @@ public void show(View aView, double aX, double aY)
 {
     // Add PopupNode.RootView to JPopupMenu
     PopupWindow pnode = getView(PopupWindow.class);
-    RootView rpane = pnode.getRootView();
-    JComponent rpaneNtv = rpane.getNative(JComponent.class);
-    get().add(rpaneNtv);
+    RootView rview = pnode.getRootView();
+    JComponent rviewNtv = rview.getNative(JComponent.class);
+    get().add(rviewNtv);
     
     // Get X and Y relative to aView.RootView
     RootView view = aView!=null? aView.getRootView() : null;

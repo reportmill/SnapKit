@@ -49,8 +49,8 @@ protected void init()
     else get().initStyle(StageStyle.DECORATED); // Don't need this
 
     // Install ContentPane
-    RootView rpane = node.getRootView();
-    SnapRoot.setContent(win, rpane);
+    RootView rview = node.getRootView();
+    SnapRoot.setContent(win, rview);
     win.setOpacity(0); win.show(); win.hide(); win.setOpacity(1);     // Make visible to force window to resolve
     
     // Sync window with node
@@ -155,11 +155,11 @@ protected void boundsChanged()
 {
     Stage win = get();
     WindowView node = getView();
-    RootView rpane = node.getRootView();
-    javafx.scene.Node rpaneNtv = rpane.getNative(javafx.scene.Node.class);
+    RootView rview = node.getRootView();
+    javafx.scene.Node rpaneNtv = rview.getNative(javafx.scene.Node.class);
     node.setBounds(win.getX(),win.getY(),win.getWidth(),win.getHeight());
     Scene scn = win.getScene(); double sx = scn.getX(), sy = scn.getY(), sw = scn.getWidth(), sh = scn.getHeight();
-    rpane.setBounds(sx, sy, sw, sh);
+    rview.setBounds(sx, sy, sw, sh);
 }
 
 /**

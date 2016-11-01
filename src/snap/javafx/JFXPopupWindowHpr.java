@@ -42,10 +42,10 @@ protected void init()
     // Get native, node and root pane
     PopupWindow win = get();
     snap.view.PopupWindow node = getView();
-    RootView rpane = node.getRootView();
+    RootView rview = node.getRootView();
     
     // Set content
-    SnapRoot.setContent(win, rpane);
+    SnapRoot.setContent(win, rview);
     win.setOpacity(0); win.show(null); win.hide(); win.setOpacity(1);     // Make visible to force window to resolve
     
     // Sync window with node
@@ -76,11 +76,11 @@ public void show(snap.view.View aView, double x, double y)
     get().setAutoFix(false);
     
     // Get PopupNode and RootView
-    snap.view.PopupWindow pnode = getView(); RootView rpane = pnode.getRootView();
+    snap.view.PopupWindow pnode = getView(); RootView rview = pnode.getRootView();
     
     // Set popup window SnapRoot content to RootView, and add drop shadow
     SnapRoot sroot = SnapRoot.get(get());
-    sroot.setContent(rpane);
+    sroot.setContent(rview);
     sroot.setEffect(new DropShadow(18,0,3,Color.DARKGRAY));
     
     // Show window

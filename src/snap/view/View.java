@@ -561,7 +561,7 @@ public void setCursor(Cursor aCursor)
 {
     if(aCursor==null) aCursor = Cursor.DEFAULT; if(aCursor==_cursor) return;
     firePropChange(Cursor_Prop, _cursor, _cursor=aCursor);
-    RootView rpane = getRootView(); if(rpane!=null) rpane.setCurrentCursor(_cursor);
+    RootView rview = getRootView(); if(rview!=null) rview.setCurrentCursor(_cursor);
 }
 
 /**
@@ -1564,8 +1564,8 @@ public void repaint(Rect aRect)  { repaint(aRect.x,aRect.y,aRect.width,aRect.hei
  */
 public void repaint(double aX, double aY, double aW, double aH)
 {
-    RootView rpane = getRootView(); if(rpane==null) return;
-    rpane.repaint(this, aX, aY, aW, aH);
+    RootView rview = getRootView(); if(rview==null) return;
+    rview.repaint(this, aX, aY, aW, aH);
 }
 
 /**
@@ -1626,7 +1626,7 @@ public void setFocusWhenPressed(boolean aValue)
 public void requestFocus()
 {
     if(isFocused()) return;
-    RootView rpane = getRootView(); if(rpane!=null) rpane.requestFocus(this);
+    RootView rview = getRootView(); if(rview!=null) rview.requestFocus(this);
     repaint();
 }
 

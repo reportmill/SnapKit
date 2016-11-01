@@ -358,8 +358,8 @@ public static WindowView[] getOpenWindows()  { return _openWins.toArray(new Wind
 public static <T extends ViewOwner> T getOpenWindowOwner(Class <T> aClass)
 {
     for(WindowView wnode : _openWins) {
-        RootView rpane = wnode.getRootView();
-        View content = rpane.getContent();
+        RootView rview = wnode.getRootView();
+        View content = rview.getContent();
         ViewOwner ownr = content.getOwner();
         if(ownr!=null && aClass==null || aClass.isAssignableFrom(ownr.getClass()))
             return (T)ownr;
@@ -374,8 +374,8 @@ public static <T extends ViewOwner> T[] getOpenWindowOwners(Class <T> aClass)
 {
     List <T> ownrs = new ArrayList();
     for(WindowView wnode : _openWins) {
-        RootView rpane = wnode.getRootView();
-        View content = rpane.getContent();
+        RootView rview = wnode.getRootView();
+        View content = rview.getContent();
         ViewOwner ownr = content.getOwner();
         if(ownr!=null && aClass==null || aClass.isAssignableFrom(ownr.getClass()))
             ownrs.add((T)ownr);

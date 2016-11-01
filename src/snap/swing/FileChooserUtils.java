@@ -18,8 +18,8 @@ public class FileChooserUtils {
 public static String showChooser(boolean save, View aView, String aDesc, String ... theExtensions)
 {
     // Get component
-    RootView rpane = aView!=null? aView.getRootView() : null;
-    JComponent aComp = rpane!=null? rpane.getNative(JComponent.class) : null;
+    RootView rview = aView!=null? aView.getRootView() : null;
+    JComponent aComp = rview!=null? rview.getNative(JComponent.class) : null;
     
     // Declare local variable for whether this is an open
     boolean open = !save;

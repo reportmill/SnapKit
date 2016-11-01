@@ -77,9 +77,9 @@ public static SnapRoot get(Window aWin)
  */
 protected void paintRoot(Rect aRect)
 {
-    RootView rpane = (RootView)_content;
+    RootView rview = (RootView)_content;
     Painter pntr = new JFXPainter(_canvas);
-    rpane.paintViews(pntr, aRect);
+    rview.paintViews(pntr, aRect);
 }
 
 /** Returns the preferred width. */
