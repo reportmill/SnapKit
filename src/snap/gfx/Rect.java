@@ -77,7 +77,7 @@ public Rect getIntersectRect(Rect aRect)
 /**
  * Returns whether rect contains x/y.
  */
-public boolean contains(double aX, double aY)  { return x<=aX && aX<=x+width && y<=aY && aY<=y+height; }
+public boolean contains(double aX, double aY)  { return (x<=aX) && (aX<=x+width) && (y<=aY) && (aY<=y+height); }
 
 /**
  * Returns whether rect contains another rect.
@@ -93,6 +93,48 @@ public boolean contains(Rect aRect)
 public boolean contains(Shape aShape)
 {
     return aShape instanceof Rect? contains((Rect)aShape) : super.contains(aShape);
+}
+
+/**
+ * Returns whether this shape contains line defined by given points.
+ */
+public boolean contains(double x0, double y0, double x1, double y1)
+{
+    double xmax = x + width, ymax = y + height;
+    if(!contains(x0,y0) || !contains(x1,y1)) return false;
+    if(Line.intersectsLine(x0, y0, x1, y1, x, y, xmax, y)) return false;
+    if(Line.intersectsLine(x0, y0, x1, y1, xmax, y, xmax, ymax)) return false;
+    if(Line.intersectsLine(x0, y0, x1, y1, xmax, ymax, x, ymax)) return false;
+    if(Line.intersectsLine(x0, y0, x1, y1, x, ymax, x, y)) return false;
+    return true;
+}
+
+/**
+ * Returns whether this shape contains quad defined by given points.
+ */
+public boolean contains(double x0, double y0, double xc0, double yc0, double x1, double y1)
+{
+    double xmax = x + width, ymax = y + height;
+    if(!contains(x0,y0) || !contains(x1,y1)) return false;
+    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, x, y, xmax, y)) return false;
+    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, xmax, y, xmax, ymax)) return false;
+    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, xmax, ymax, x, ymax)) return false;
+    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, x, ymax, x, y)) return false;
+    return true;
+}
+
+/**
+ * Returns whether this shape contains cubic defined by given points.
+ */
+public boolean contains(double x0, double y0, double xc0, double yc0, double xc1, double yc1,double x1, double y1)
+{
+    double xmax = x + width, ymax = y + height;
+    if(!contains(x0,y0) || !contains(x1,y1)) return false;
+    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, x, y, xmax, y)) return false;
+    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, xmax, y, xmax, ymax)) return false;
+    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, xmax, ymax, x, ymax)) return false;
+    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, x, ymax, x, y)) return false;
+    return true;
 }
 
 /**
@@ -393,18 +435,18 @@ private static class RectIter implements PathIter {
     }
 
     /** Returns whether there are more segments. */
-    public boolean hasNext() { return index<=5; }
+    public boolean hasNext() { return index<=4; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
     public PathIter.Seg getNext(double[] coords)
     {
-        if(!hasNext()) throw new RuntimeException("rect iterator out of bounds");
-        if(index==5) { index++; return PathIter.Seg.Close; }
+        if(index>4) throw new RuntimeException("Rect path iterator out of bounds");
+        if(index==4) { index++; return PathIter.Seg.Close; }
         coords[0] = x; coords[1] = y;
         if(index==1 || index==2) coords[0] += w;
         if(index==2 || index==3) coords[1] += h;
-        if(affine!=null) affine.transform(coords); index++;
-        return index==1? PathIter.Seg.MoveTo : PathIter.Seg.LineTo;
+        if(affine!=null) affine.transform(coords, 1);
+        return ++index==1? PathIter.Seg.MoveTo : PathIter.Seg.LineTo;
     }
 }
 
