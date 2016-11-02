@@ -117,6 +117,7 @@ protected void processEvent(AWTEvent anEvent)
         ViewEvent event = SwingViewEnv.get().createEvent(_rview, me, null, null);
         _rview.dispatchEvent(event);
         if(!isFocusOwner()) requestFocusInWindow(true); // Bogus!
+        me.consume(); // This stops scroll events from closing popup window
     }
     
     // Handle KeyEvents
