@@ -5,7 +5,7 @@ package snap.view;
 import java.util.List;
 import java.util.function.Consumer;
 import snap.gfx.*;
-import snap.util.ListUtils;
+import snap.util.ArrayUtils;
 
 /**
  * A custom class.
@@ -78,7 +78,7 @@ public void setSelectedIndex(int anIndex)
 /**
  * Returns the column index.
  */
-public int getColIndex()  { return ListUtils.indexOfId(getTree().getCols(), this); }
+public int getColIndex()  { return ArrayUtils.indexOfId(getTree().getCols(), this); }
 
 /**
  * Called to set method for rendering.
@@ -130,7 +130,7 @@ protected void configureCell(ListCell <T> aCell)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    if(anEvent.isMousePress()) getTree()._selCol = ListUtils.indexOfId(getTree().getCols(), this);
+    if(anEvent.isMousePress()) getTree()._selCol = ArrayUtils.indexOfId(getTree().getCols(), this);
     super.processEvent(anEvent);
 }
 

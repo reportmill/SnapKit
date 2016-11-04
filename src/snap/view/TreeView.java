@@ -121,7 +121,7 @@ public TreeCol <T> getCol(int anIndex)  { return (TreeCol)getChild(anIndex); }
 /**
  * Returns the column at given index.
  */
-public List <TreeCol<T>> getCols()  { return (List)getChildren(); }
+public TreeCol<T>[] getCols()  { return Arrays.copyOf(getChildren(), getChildCount(), TreeCol[].class); }
 
 /**
  * Adds a column.

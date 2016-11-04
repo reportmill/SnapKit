@@ -71,7 +71,7 @@ public void setSelectedIndex(int anIndex)
 /**
  * Returns the column index.
  */
-public int getColIndex()  { return ListUtils.indexOfId(getTable().getCols(), this); }
+public int getColIndex()  { return ArrayUtils.indexOfId(getTable().getCols(), this); }
 
 /**
  * Called to set method for rendering.
@@ -87,7 +87,7 @@ public Consumer <ListCell<T>> getCellConfigure()
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    if(anEvent.isMousePress()) getTable()._selCol = ListUtils.indexOfId(getTable().getCols(), this);
+    if(anEvent.isMousePress()) getTable()._selCol = ArrayUtils.indexOfId(getTable().getCols(), this);
     super.processEvent(anEvent);
 }
 

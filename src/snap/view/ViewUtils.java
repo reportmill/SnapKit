@@ -172,8 +172,8 @@ public static View getChildAt(View aView, double aX, double aY)  { return getChi
 public static <T extends View> T getChildAt(View aView, double aX, double aY, Class <T> aClass)
 {
     ParentView par = aView instanceof ParentView? (ParentView)aView : null; if(par==null) return null;
-    List <View> children = par.getChildren();
-    for(int i=children.size()-1; i>=0; i--) { View child = children.get(i); if(!child.isPickable()) continue;
+    View children[] = par.getChildren();
+    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickable()) continue;
         Point p = child.parentToLocal(aX, aY);
         if(child.contains(p.x,p.y) && (aClass==null || aClass.isInstance(child)))
             return (T)child;
@@ -207,8 +207,8 @@ public static View getDeepestChildAt(View aView, double aX, double aY)  { return
 public static <T extends View> T getDeepestChildAt(View aView, double aX, double aY, Class <T> aClass)
 {
     ParentView par = aView instanceof ParentView? (ParentView)aView : null; if(par==null) return null;
-    List <View> children = par.getChildren();
-    for(int i=children.size()-1; i>=0; i--) { View child = children.get(i); if(!child.isPickable()) continue;
+    View children[] = par.getChildren();
+    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickable()) continue;
         Point p = child.parentToLocal(aX, aY);
         if(child.contains(p.x,p.y)) {
             T hcdeep = getDeepestChildAt(child, p.x, p.y, aClass);
@@ -304,7 +304,7 @@ public static MenuItem copyMenuItem(MenuItem anItem)
     //if(anItem instanceof SeparatorMenuItem) mi = new SeparatorMenuItem(); else
     if(anItem instanceof Menu) { Menu menu = (Menu)anItem;
         Menu menu2 = new Menu(); mi = menu2;
-        List <MenuItem> citems = copyMenuItems((List)menu.getChildren());
+        List <MenuItem> citems = copyMenuItems(menu.getItems());
         for(MenuItem i : citems) menu2.addItem(i);
     }
     else mi = new MenuItem();

@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.util.List;
+import java.util.Arrays;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -33,7 +33,7 @@ public MenuBar()
 /**
  * Returns the child menus.
  */
-public List <Menu> getMenus()  { return (List)getChildren(); }
+public Menu[] getMenus()  { return Arrays.copyOf(getChildren(), getChildCount(), Menu[].class); }
 
 /**
  * Returns the number of menus.

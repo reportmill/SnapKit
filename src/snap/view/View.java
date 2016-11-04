@@ -910,7 +910,11 @@ public boolean isManaged()  { return _managed; }
 /**
  * Sets whether view should be laid out.
  */
-public void setManaged(boolean aValue)  { _managed = aValue; }
+public void setManaged(boolean aValue)
+{
+    _managed = aValue;
+    ParentView par = getParent(); if(par!=null) { par._managed = null; relayoutParent(); }
+}
 
 /**
  * Returns the root view.

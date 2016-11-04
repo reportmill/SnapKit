@@ -44,7 +44,7 @@ public void setSelectedIndex(int anIndex)
  */
 public View getSelectedPane()
 {
-    return _sindex>=0 && _sindex<getChildCount()? getChildren().get(_sindex) : null;
+    return _sindex>=0 && _sindex<getChildCount()? getChild(_sindex) : null;
 }
 
 /**
@@ -52,8 +52,8 @@ public View getSelectedPane()
  */
 public void setSelectedPane(View aPane)
 {
-    for(int i=0, iMax=getChildren().size(); i<iMax; i++)
-        if(getChildren().get(i)==aPane) setSelectedIndex(i);
+    for(int i=0, iMax=getChildCount(); i<iMax; i++)
+        if(getChild(i)==aPane) setSelectedIndex(i);
 }
 
 /**
@@ -90,7 +90,7 @@ protected void layoutChildren()
     Insets ins = getInsetsAll();
     double tp = ins.top, rt = ins.right, bt = ins.bottom, lt = ins.left;
     double w = getWidth() - lt - rt, h = getHeight() - tp - bt;
-    for(int i=0, iMax=getChildren().size(); i<iMax; i++) { View child = getChild(i);
+    for(int i=0, iMax=getChildCount(); i<iMax; i++) { View child = getChild(i);
         child.setBounds(lt, tp, w, h); child.setVisible(i==_sindex); child.setPickable(i==_sindex); }
 }
 

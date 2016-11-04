@@ -88,7 +88,7 @@ public TableCol getCol(int anIndex)  { return (TableCol)getChild(anIndex); }
 /**
  * Returns the column at given index.
  */
-public List <TableCol> getCols()  { return (List)getChildren(); }
+public TableCol[] getCols()  { return Arrays.copyOf(getChildren(), getChildCount(), TableCol[].class); }
 
 /**
  * Adds a TableCol.

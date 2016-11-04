@@ -123,7 +123,7 @@ public boolean intersects(double aX, double aY, double aW, double aH)
 public <T extends SnapActor> List <T> getActorsInRange(double aRadius, Class <T> aClass)
 {
     List actors = new ArrayList();
-    for(int i=getScene().getChildren().size()-1; i>=0; i--) { View child = getScene().getChild(i);
+    for(int i=getScene().getChildCount()-1; i>=0; i--) { View child = getScene().getChild(i);
         if(aClass==null || aClass.isInstance(child)) {
             if(getDistance((SnapActor)child)<=aRadius)
                 actors.add(child); } }

@@ -12,7 +12,7 @@ import snap.util.*;
 public class ParentView extends View {
     
     // The children
-    List <View>    _children = Collections.EMPTY_LIST;
+    View           _children[] = EMPTY_VIEWS, _managed[] = EMPTY_VIEWS;
     
     // Whether node needs layout, or node has children that need layout
     boolean        _needsLayout, _needsLayoutDeep;
@@ -23,20 +23,23 @@ public class ParentView extends View {
     // Constants for properties
     public static final String Child_Prop = "Child";
     
+    // Shared empty view array
+    private static View[] EMPTY_VIEWS = new View[0];
+    
 /**
  * Returns the number of children associated with this node.
  */
-public int getChildCount()  { return _children.size(); }
+public int getChildCount()  { return _children.length; }
 
 /**
  * Returns the child at the given index.
  */
-public View getChild(int anIndex)  { return _children.get(anIndex); }
+public View getChild(int anIndex)  { return _children[anIndex]; }
 
 /**
  * Returns the list of children associated with this node.
  */
-public List <View> getChildren()  { return Arrays.asList(getChildArray()); }
+public View[] getChildren()  { return _children; }
 
 /**
  * Adds the given child to the end of this node's children list.
@@ -55,8 +58,7 @@ protected void addChild(View aChild, int anIndex)
     aChild.setParent(this);
     
     // Add child to Children list
-    if(_children==Collections.EMPTY_LIST) _children = new ArrayList();
-    _children.add(anIndex, aChild);
+    _children = ArrayUtils.add(_children, aChild, anIndex); _managed = null;
     relayout(); relayoutParent(); setNeedsLayoutDeep(true); repaint();
     
     // Fire property change
@@ -69,7 +71,9 @@ protected void addChild(View aChild, int anIndex)
 protected View removeChild(int anIndex)
 {
     // Remove child from children list and clear parent
-    View child = _children.remove(anIndex); child.setParent(null);
+    View child = _children[anIndex];
+    _children = ArrayUtils.remove(_children, anIndex); _managed = null;
+    child.setParent(null);
     relayout(); relayoutParent(); repaint();
     
     // Fire property change and return
@@ -96,16 +100,6 @@ protected void removeChildren()  { for(int i=getChildCount()-1; i>=0; i--) remov
  * Sets children to given list.
  */
 protected void setChildren(View ... theChildren)  { removeChildren(); for(View c : theChildren) addChild(c); }
-
-/**
- * Returns a copy of the children as an array.
- */
-public View[] getChildArray()
-{
-    View nodes[] = new View[getChildCount()];
-    for(int i=0;i<nodes.length;i++) nodes[i] = getChild(i);
-    return nodes;
-}
 
 /**
  * Returns the child with given name.
@@ -146,8 +140,8 @@ public View getChildAt(Point aPnt)  { return getChildAt(aPnt.x, aPnt.y); }
  */
 public View getChildAt(double aX, double aY)
 {
-    List <View> children = getChildren();
-    for(int i=children.size()-1; i>=0; i--) { View child = children.get(i); if(!child.isPickable()) continue;
+    View children[] = getChildren();
+    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickable()) continue;
         Point p = child.parentToLocal(aX, aY);
         if(child.contains(p.x,p.y))
             return child;
@@ -160,8 +154,8 @@ public View getChildAt(double aX, double aY)
  */
 public List <View> getChildrenAt(Shape aShape)
 {
-    List <View> children = getChildren(), hit = new ArrayList();
-    for(int i=children.size()-1; i>=0; i--) { View child = children.get(i); if(!child.isPickable()) continue;
+    View children[] = getChildren(); List <View> hit = new ArrayList();
+    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickable()) continue;
         Shape shp = child.parentToLocal(aShape);
         if(child.intersects(shp))
             hit.add(child);
@@ -174,10 +168,11 @@ public List <View> getChildrenAt(Shape aShape)
  */
 public View[] getChildrenManaged()
 {
-    int cc = getChildCount(), cc2 = 0; View nodes[] = new View[cc];
-    for(int i=0,j=0;i<cc;i++) { View c = getChild(i); if(c.isManaged()) nodes[cc2++] = c; }
-    if(cc2!=cc) nodes = Arrays.copyOf(nodes, cc2);
-    return nodes;
+    if(_managed!=null) return _managed;
+    int cc = getChildCount(), mc = 0; for(View child : getChildren()) if(child.isManaged()) mc++;
+    if(mc==cc) return _managed = _children;
+    View mngd[] = new View[mc]; for(int i=0,j=0;i<cc;i++) { View c = getChild(i); if(c.isManaged()) mngd[j++] = c; }
+    return _managed = mngd;
 }
 
 /**

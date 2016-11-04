@@ -3,6 +3,7 @@
  */
 package snap.util;
 import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * A collection of array utility methods.
@@ -169,6 +170,16 @@ public static <T> T[] get(Object anArray[], Class<T> aClass)
             
     // Return array
     return array;
+}
+
+/**
+ * Returns an array as an ArrayList.
+ */
+public static <T> ArrayList <T> asArrayList(T ... theItems)
+{
+    ArrayList <T> list = new ArrayList();
+    for(T item : theItems) list.add(item);
+    return list;
 }
 
 /**
