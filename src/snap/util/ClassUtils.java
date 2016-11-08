@@ -309,7 +309,7 @@ public static Field getDeclaredField(Class aClass, String aName)
 public static Method[] getMethods(Class aClass, String aPrefix)
 {
     List meths = new ArrayList();
-    getMethods(aClass, aPrefix, meths, true);
+    getMethods(aClass, aPrefix.toLowerCase(), meths, true);
     return (Method[])meths.toArray(new Method[0]);
 }
 
@@ -322,7 +322,7 @@ private static void getMethods(Class aClass, String aPrefix, List theMethods, bo
     Method methods[] = cls.getDeclaredMethods();
     for(Method meth : methods) {
         if(meth.isSynthetic()) continue;
-        if(meth.getName().startsWith(aPrefix) && (doPrivate || !Modifier.isPrivate(meth.getModifiers())))
+        if(meth.getName().toLowerCase().startsWith(aPrefix) && (doPrivate || !Modifier.isPrivate(meth.getModifiers())))
             theMethods.add(meth);
     }
     
