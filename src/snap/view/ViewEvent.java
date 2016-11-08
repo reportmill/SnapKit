@@ -372,6 +372,12 @@ public boolean isEnterKey()  { return getKeyCode()==KeyCode.ENTER; }
 /** Returns whether key is escape key. */
 public boolean isEscapeKey()  { return getKeyCode()==KeyCode.ESCAPE; }
 
+/** Returns whether key is escape key. */
+public boolean isSpaceKey()  { return getKeyCode()==KeyCode.SPACE; }
+
+/** Returns whether key is ISO control character. */
+public boolean isControlChar()  { char c = getKeyChar(); return Character.isISOControl(c); }
+
 /** Returns the whether event is drag and has drag string. */
 public boolean hasDragString()  { return getDragboard().hasString(); }
 

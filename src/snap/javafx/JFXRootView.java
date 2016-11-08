@@ -67,7 +67,7 @@ public void setView(View aView)
 public void handleKeyEvent(KeyEvent anEvent)
 {
     ViewEvent nevent = JFXViewEnv.get().createEvent(_view, anEvent, null, null);
-    _rpane.dispatchKeyEvent(nevent);
+    _rpane.dispatchEvent(nevent);
 }
 
 /**

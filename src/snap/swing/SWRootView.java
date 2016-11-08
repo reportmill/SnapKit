@@ -121,9 +121,9 @@ protected void processEvent(AWTEvent anEvent)
     }
     
     // Handle KeyEvents
-    else if(anEvent instanceof KeyEvent) { KeyEvent ke = (KeyEvent)anEvent;
+    else if(anEvent instanceof KeyEvent) { KeyEvent ke = (KeyEvent)anEvent; int id = ke.getID();
         ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, null, null);
-        _rview.dispatchKeyEvent(event);
+        _rview.dispatchEvent(event);
     }
 }
 

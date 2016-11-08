@@ -326,6 +326,18 @@ public void paintViews(Painter aPntr, Rect aRect)
  */
 public void dispatchEvent(ViewEvent anEvent)
 {
+    // If popup window, forward to it
+    if(_popup!=null) {
+        if(anEvent.isMouseDrag() || anEvent.isMouseRelease()) {
+            _popup.processTriggerEvent(anEvent);
+            if(anEvent.isMouseRelease()) _popup = null; return;
+        }
+        else if(anEvent.isKeyPress() && anEvent.isEscapeKey())
+            _popup.hide();
+        if(!_popup.isShowing())
+            _popup = null;
+    }
+    
     if(anEvent.isMouseEvent() || anEvent.isScroll()) dispatchMouseEvent(anEvent);
     else if(anEvent.isKeyEvent()) dispatchKeyEvent(anEvent);
     else anEvent.getView().fireEvent(anEvent);
@@ -340,15 +352,6 @@ public void dispatchMouseEvent(ViewEvent anEvent)
     if(anEvent.isMousePress()) ViewUtils._mouseDown = true;
     else if(anEvent.isMouseRelease()) ViewUtils._mouseDown = false;
 
-    // If popup window, forward to it
-    if(_popup!=null) {
-        if(anEvent.isMouseDrag() || anEvent.isMouseRelease()) {
-            _popup.processTriggerEvent(anEvent);
-            if(anEvent.isMouseRelease()) _popup = null; return;
-        }
-        else _popup = null;
-    }
-    
     // Get target view (at mouse point, or mouse press, or mouse press point)
     View targ = ViewUtils.getDeepestViewAt(this, anEvent.getX(), anEvent.getY());
     if(anEvent.isMouseExit()) targ = null;
