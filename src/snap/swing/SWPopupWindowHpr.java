@@ -28,6 +28,45 @@ public void show(View aView, double aX, double aY)
     JComponent rviewNtv = rview.getNative(JComponent.class);
     get().add(rviewNtv);
     
+    // Get proper bounds for given view and x/y (and available screen space at that point)
+    Rect bnds = getPrefBounds(aView, aX, aY); bnds.snap();
+    int x = (int)bnds.x, y = (int)bnds.y, bw = (int)bnds.width, bh = (int)bnds.height;
+    
+    // Set popup size
+    get().setPopupSize(bw,bh); //get().setPreferredSize(new java.awt.Dimension(bw,bh)); get().pack();
+    get().setBorder(BorderFactory.createEmptyBorder()); // MacOS adds 4pt border to top/bottom
+    
+    // Get ParentPopup and suppress close if found
+    RootView viewRoot = aView!=null? aView.getRootView() : null;
+    JComponent viewRootNtv = viewRoot!=null? viewRoot.getNative(JComponent.class) : null;
+    SnapPopupMenu pp = viewRootNtv!=null? SwingUtils.getParent(viewRootNtv, SnapPopupMenu.class) : null;
+    if(pp!=null) pp.setSuppressNextClose(true);
+
+    // Show popup and set RootView.Showing.
+    get().setFocusable(pnode.isFocusable());
+    get().show(viewRootNtv, x, y);
+    setRootViewShowing(pp);
+}
+
+/**
+ * Hides the popup.
+ */
+public void hide()  { get().setVisible(false); }
+
+/**
+ * Sets the window size to preferred size.
+ */
+public void setPrefSize()
+{
+    Rect bnds = getPrefBounds(null, get().getX(), get().getY()); bnds.snap();
+    get().setPopupSize((int)bnds.width, (int)bnds.height);
+}
+
+/**
+ * Returns the preferred bounds for given view and location.
+ */
+public Rect getPrefBounds(View aView, double aX, double aY)
+{
     // Get X and Y relative to aView.RootView
     RootView view = aView!=null? aView.getRootView() : null;
     JComponent nodeNtv = view!=null? view.getNative(JComponent.class) : null;
@@ -36,7 +75,8 @@ public void show(View aView, double aX, double aY)
         Point pnt = aView.localToParent(view, x, y); x = (int)pnt.x; y = (int)pnt.y; }
     
     // Get to best size (why doesn't this happen automatically?)
-    Size bs = pnode.getBestSize();
+    PopupWindow pview = getView(PopupWindow.class);
+    Size bs = pview.getBestSize();
     int bw = (int)Math.round(bs.getWidth()), bh = (int)Math.round(bs.getHeight());
     
     // If size not available at location, shrink size (because otherwise, window will automatically be moved)
@@ -45,24 +85,9 @@ public void show(View aView, double aX, double aY)
         bw = Math.min(bw, ss.width); bh = Math.min(bh,ss.height);
     }
     
-    // Set popup size
-    get().setPopupSize(bw,bh); //get().setPreferredSize(new java.awt.Dimension(bw,bh)); get().pack();
-    get().setBorder(BorderFactory.createEmptyBorder()); // MacOS adds 4pt border to top/bottom
-    
-    // Get ParentPopup and suppress close if found
-    SnapPopupMenu pp = nodeNtv!=null? SwingUtils.getParent(nodeNtv, SnapPopupMenu.class) : null;
-    if(pp!=null) pp.setSuppressNextClose(true);
-
-    // Show popup and set RootView.Showing.
-    get().setFocusable(pnode.isFocusable());
-    get().show(nodeNtv, x, y);
-    setRootViewShowing(pp);
+    // Return rect
+    return new Rect(x, y, bw, bh);
 }
-
-/**
- * Hides the popup.
- */
-public void hide()  { get().setVisible(false); }
 
 /**
  * Sets RootView.Showing with listener to set false (and remove listener).

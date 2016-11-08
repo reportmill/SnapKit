@@ -9,22 +9,22 @@ import snap.gfx.Color;
  */
 public class PopupWindow extends ParentView {
     
-    // The root pane
-    RootView      _rpane;
+    // The RootView
+    RootView      _rview;
     
     // The mouse press trigger event and time
     ViewEvent     _mpress; long _mptime; double _nx, _ny;
     
 /**
- * Returns the root pane.
+ * Returns the RootView.
  */
 public RootView getRootView()
 {
-    if(_rpane!=null) return _rpane;
-    _rpane = new RootView(); _rpane.setFill(Color.WHITE); _rpane.getHelper(); //_rpane._win = this;
-    _rpane.setBorder(Color.LIGHTGRAY,1);
-    addChild(_rpane);
-    return _rpane;
+    if(_rview!=null) return _rview;
+    _rview = new RootView(); _rview.setFill(Color.WHITE); _rview.getHelper();
+    _rview.setBorder(Color.LIGHTGRAY,1);
+    addChild(_rview);
+    return _rview;
 }
 
 /**
@@ -69,12 +69,12 @@ public void setVisible(boolean aValue)  { if(!aValue) hide(); }
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _rpane!=null? _rpane.getPrefWidth() : 0; }
+protected double getPrefWidthImpl(double aH)  { return _rview!=null? _rview.getPrefWidth() : 0; }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _rpane!=null? _rpane.getPrefHeight() : 0; }
+protected double getPrefHeightImpl(double aW)  { return _rview!=null? _rview.getPrefHeight() : 0; }
 
 /**
  * Handles trigger event.

@@ -30,7 +30,7 @@ public PopupWindow getPopup()
     if(_popup!=null) return _popup;
     _popup = new PopupWindow(); _popup.setFocusable(false);
     ScrollView spane = new ScrollView(this); spane.setBorder(null);
-    _popup.setContent(spane);
+    _popup.setContent(spane); setGrowWidth(true); setGrowHeight(true);
     return _popup;
 }
 
