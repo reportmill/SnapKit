@@ -240,6 +240,11 @@ protected void setValue(String aKey, Object aValue)
 {
     if(aKey.equals(ALIGN_KEY)) { _align = (HPos)aValue; _justify = false; }
     else if(aKey.equals(JUSTIFY_KEY)) _justify = SnapUtils.boolValue(aValue);
+    else if(aKey.equals(SPACING_KEY)) _spacing = SnapUtils.doubleValue(aValue);
+    else if(aKey.equals(SPACING_FACTOR_KEY)) _spacingFactor = SnapUtils.doubleValue(aValue);
+    else if(aKey.equals(NEWLINE_SPACING_KEY)) _newlineSpacing = SnapUtils.doubleValue(aValue);
+    else if(aKey.equals(MIN_HEIGHT_KEY)) _minHeight = SnapUtils.doubleValue(aValue);
+    else if(aKey.equals(MAX_HEIGHT_KEY)) _maxHeight = SnapUtils.doubleValue(aValue);
     else System.err.println("TextLineStyle.setValue: Unsupported key: " + aKey);
 }
 
@@ -299,7 +304,8 @@ public XMLElement toXML(XMLArchiver anArchiver)
     if(_leftIndentFirst!=_leftIndent) e.add("left-indent-0", _leftIndentFirst);
     if(_rightIndent!=0) e.add("right-indent", _rightIndent);
         
-    // Archive LineSpacing, LineHeightMin, LineHeightMax, ParagraphSpacing
+    // Archive Spacing, SpacingFactor, LineHeightMin, LineHeightMax, ParagraphSpacing
+    if(_spacing!=0) e.add("line-gap", _spacingFactor);
     if(_spacingFactor!=1) e.add("line-space", _spacingFactor);
     if(_minHeight!=0) e.add("min-line-ht", _minHeight);
     if(_maxHeight!=Float.MAX_VALUE) e.add("max-line-ht", _maxHeight);
@@ -325,7 +331,8 @@ public TextLineStyle fromXML(XMLArchiver anArchiver, XMLElement anElement)
     _leftIndentFirst = anElement.getAttributeFloatValue("left-indent-0", (float)_leftIndent);
     _rightIndent = anElement.getAttributeFloatValue("right-indent");
     
-    // Archive LineSpacing, LineHeightMin, LineHeightMax, ParagraphSpacing
+    // Archive Spacing, SpacingFactor, LineHeightMin, LineHeightMax, ParagraphSpacing
+    _spacing = anElement.getAttributeFloatValue("line-gap");
     _spacingFactor = anElement.getAttributeFloatValue("line-space", 1);
     _minHeight = anElement.getAttributeFloatValue("min-line-ht");
     _maxHeight = anElement.getAttributeFloatValue("max-line-ht", Float.MAX_VALUE);

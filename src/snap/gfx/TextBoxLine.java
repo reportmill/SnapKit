@@ -3,6 +3,7 @@
  */
 package snap.gfx;
 import java.util.*;
+import snap.util.MathUtils;
 
 /**
  * A class to represent a line of text in a TextBox.
@@ -129,7 +130,7 @@ public double getYLocal()
     if(_yloc<0) {
         int index = getIndex(); //validate();
         TextBoxLine lastLine = index>0? _tbox.getLine(index-1) : null;
-        _yloc = lastLine!=null? (lastLine.getYLocal() + lastLine.getHeight() + lastLine._leading) : 0;
+        _yloc = lastLine!=null? (lastLine.getYLocal() + lastLine.getLineAdvance()) : 0;
     }
     return _yloc;
 }
@@ -197,10 +198,20 @@ public void resetSizes()
     //height = RMMath.clamp((float)height, getLineHeightMin(), getLineHeightMax());
     //height *= getLineSpacing(); height += getLineGap();
     
+    // Get TextLineStyle
+    TextLineStyle lstyle = _rtline.getLineStyle();
+    
     // Set width, height and LineAdvance
     _width = _widthAll = etok!=null? etok.getMaxX() - getX() : 0;
     _height = _ascent + _descent;
+    
+    // Calculate LineAdvance
     _lineAdvance = _ascent + _descent + _leading;
+    _lineAdvance = MathUtils.clamp(_lineAdvance, lstyle.getMinHeight(), lstyle.getMaxHeight());
+    _lineAdvance *= lstyle.getSpacingFactor();
+    _lineAdvance += lstyle.getSpacing();
+    
+    // Calculate widthAll (width with trailing whitespace)
     for(int i=etokEnd, iMax=_length;i<iMax;i++) { char c = charAt(i);
         if(c=='\t') _widthAll = getXForTabAtIndexAndX(i, getX()+_widthAll) - getX();
         //_rtline.getLineStyle().getTabForX(getX()+_widthAll) - getX();
@@ -208,7 +219,7 @@ public void resetSizes()
     }
     
     // If justify, shift tokens in line
-    if(_rtline.getLineStyle().isJustify() && getTokenCount()>1 && !isLastCharNewline()) {
+    if(lstyle.isJustify() && getTokenCount()>1 && !isLastCharNewline()) {
         double y = getY(), w = getWidth(), h = getHeight();
         double tx = _tbox.getMinHitX(y,h);
         double tmaxx = _tbox.getMaxHitX(y,_height);
