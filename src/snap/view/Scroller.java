@@ -194,12 +194,12 @@ protected double getMinHeightImpl()  { return _content!=null? _content.getMinHei
 /**
  * Calculates the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _content!=null? _content.getScrollPrefWidth() : 0; }
+protected double getPrefWidthImpl(double aH)  { return _content!=null? _content.getPrefWidth(aH) : 0; }
 
 /**
  * Calculates the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _content!=null? _content.getScrollPrefHeight() : 0; }
+protected double getPrefHeightImpl(double aW)  { return _content!=null? _content.getPrefHeight(aW) : 0; }
 
 /**
  * Override to layout children.

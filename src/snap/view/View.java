@@ -1499,16 +1499,10 @@ public boolean isFocusKeysEnabled()  { return _focusKeysEnbld; } boolean _focusK
 public void setFocusKeysEnabled(boolean aValue)  { _focusKeysEnbld = aValue; }
 
 /** Scroller method. */
-public boolean isScrollFitWidth() { return getScrollPrefWidth()<getParent().getWidth(); }
+public boolean isScrollFitWidth() { return getPrefWidth()<getParent().getWidth(); }
 
 /** Scroller method. */
-public boolean isScrollFitHeight() { return getScrollPrefHeight()<getParent().getHeight(); }
-
-/** Scroller method. */
-public double getScrollPrefWidth()  { return getPrefWidth(); }
-
-/** Scroller method. */
-public double getScrollPrefHeight()  { return getPrefHeight(); }
+public boolean isScrollFitHeight() { return getPrefHeight()<getParent().getHeight(); }
 
 /**
  * Returns the ItemKey.

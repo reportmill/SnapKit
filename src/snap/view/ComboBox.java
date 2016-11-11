@@ -18,9 +18,6 @@ public class ComboBox <T> extends ParentView implements View.Selectable <T> {
     // Whether combo box is editable
     boolean                _editable;
     
-    // The maximum row count
-    int                    _maxRowCount = 8;
-    
     // The menu button to show popup
     Button                 _btn = new Button();
     
@@ -103,19 +100,6 @@ public TextField getTextField()
     _tfield.setGrowWidth(true);
     _tfield.addEventHandler(e -> handleChildActionEvent(_tfield), Action);
     return _tfield;
-}
-
-/**
- * Returns the maximum row count.
- */
-public int getMaxRowCount()  { return _maxRowCount; }
-
-/**
- * Sets the maximum row count.
- */
-public void setMaxRowCount(int aValue)
-{
-    firePropChange("MaxRowCount", _maxRowCount, _maxRowCount = aValue);
 }
 
 /**
@@ -292,9 +276,8 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive Editable, MaxRowCount
+    // Archive Editable
     if(isEditable()) e.add("Editable", true);
-    if(getMaxRowCount()!=8) e.add("MaxRowCount", getMaxRowCount());
     
     // Archive Items
     List items = getItems();
@@ -320,9 +303,8 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive Editable, MaxRowCount
+    // Unarchive Editable
     if(anElement.getAttributeBoolValue("Editable")) setEditable(true);
-    if(anElement.hasAttribute("MaxRowCount")) setMaxRowCount(anElement.getAttributeIntValue("MaxRowCount"));
     
     // Unarchive items
     List items = new ArrayList();
