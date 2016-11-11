@@ -1197,7 +1197,7 @@ public boolean isMaxWidthSet()  { return _maxWidth>=0; }
 /**
  * Returns the view maximum width.
  */
-public double getMaxWidth()  { return _maxWidth>=0? _maxWidth : Double.MAX_VALUE; }
+public double getMaxWidth()  { return _maxWidth>=0? _maxWidth : Float.MAX_VALUE; }
 
 /**
  * Sets the view maximum width.
@@ -1216,7 +1216,7 @@ public boolean isMaxHeightSet()  { return _maxHeight>=0; }
 /**
  * Returns the view maximum height.
  */
-public double getMaxHeight()  { return _maxHeight>=0? _maxHeight : Double.MAX_VALUE; }
+public double getMaxHeight()  { return _maxHeight>=0? _maxHeight : Float.MAX_VALUE; }
 
 /**
  * Sets the view maximum height.
@@ -1320,12 +1320,12 @@ public void setPrefSize(double aWidth, double aHeight)  { setPrefWidth(aWidth); 
 /**
  * Returns the best width for view - accounting for pref/min/max.
  */
-public double getBestWidth(double aH)  { return Math.max(getMinWidth(), getPrefWidth()); }
+public double getBestWidth(double aH)  { return MathUtils.clamp(getPrefWidth(), getMinWidth(), getMaxWidth()); }
 
 /**
  * Returns the best height for view - accounting for pref/min/max.
  */
-public double getBestHeight(double aW)  { return Math.max(getMinHeight(), getPrefHeight()); }
+public double getBestHeight(double aW)  { return MathUtils.clamp(getPrefHeight(), getMinHeight(), getMaxHeight()); }
 
 /**
  * Returns the best size.

@@ -96,7 +96,7 @@ public static int clamp(int i, int min, int max)  { return Math.min(Math.max(i, 
 /**
  * Returns the given double clamped between the two values.
  */
-public static float clamp(double f, double min, double max)  { return (float)Math.min(Math.max(f,min),max); }
+public static double clamp(double f, double min, double max)  { return Math.min(Math.max(f,min),max); }
 
 /**
  * Returns the given double clamped between the two values (wraps around if out of range).

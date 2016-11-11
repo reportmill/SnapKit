@@ -59,8 +59,7 @@ public PopupWindow getPopup()
 public void show(View aView, double aX, double aY)
 {
     // Set preferred size
-    getPopup();
-    _scrollView.setMaxHeight(_visRowCount>=0? -1 : Math.abs(_visRowCount)*getRowHeight());
+    getPopup().setMaxHeight(_visRowCount>=0? -1 : Math.abs(_visRowCount)*getRowHeight());
     _scrollView.setPrefHeight(_visRowCount>=0? _visRowCount*getRowHeight() : -1);
     
     _view = aView;
