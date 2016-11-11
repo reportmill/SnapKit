@@ -526,7 +526,7 @@ public Paint getDefaultFill()  { return Color.WHITE; }
 /**
  * Override to make list same width as ScrollView.
  */
-public boolean isScrollFitWidth()  { return true; }
+public boolean isScrollFillWidth()  { return true; }
 
 /**
  * Returns a mapped property name.

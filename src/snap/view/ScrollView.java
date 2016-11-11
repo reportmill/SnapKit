@@ -108,22 +108,22 @@ public void setShowVBar(Boolean aValue)  { firePropChange("VBarPolicy", _showVBa
 /**
  * Returns whether this ScrollView fits content to its width.
  */
-public boolean isFitWidth()  { return _scroller.isFitWidth(); }
+public boolean isFillWidth()  { return _scroller.isFillWidth(); }
 
 /**
  * Sets whether this ScrollView fits content to its width.
  */
-public void setFitWidth(boolean aValue)  { _scroller.setFitWidth(aValue); relayout(); }
+public void setFillWidth(boolean aValue)  { _scroller.setFillWidth(aValue); relayout(); }
 
 /**
  * Returns whether this ScrollView fits content to its height.
  */
-public boolean isFitHeight()  { return _scroller.isFitHeight(); }
+public boolean isFillHeight()  { return _scroller.isFillHeight(); }
 
 /**
- * Sets whether this ScrollView fits content to its width.
+ * Sets whether this ScrollView fits content to its height.
  */
-public void setFitHeight(boolean aValue)  { _scroller.setFitHeight(aValue); relayout(); }
+public void setFillHeight(boolean aValue)  { _scroller.setFillHeight(aValue); relayout(); }
 
 /**
  * Calculates the minimum width.
@@ -174,8 +174,8 @@ protected void layoutChildren()
     // Get whether to show scroll bars
     boolean asneedH = _showHBar==null, alwaysH = _showHBar==Boolean.TRUE;
     boolean asneedV = _showVBar==null, alwaysV = _showVBar==Boolean.TRUE;
-    boolean showHBar = alwaysH || asneedH && cpw>w && !_scroller.isContentFitWidth();
-    boolean showVBar = alwaysV || asneedV && cph>h && !_scroller.isContentFitHeight();
+    boolean showHBar = alwaysH || asneedH && cpw>w && !_scroller.isContentFillWidth();
+    boolean showVBar = alwaysV || asneedV && cph>h && !_scroller.isContentFillHeight();
     
     // If horizontal scrollbar needed, add it
     if(showHBar) {

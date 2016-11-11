@@ -325,8 +325,8 @@ protected void layoutChildren()  { _layout.layoutChildren(); }
 /**
  * Scrollable methods.
  */
-public boolean isScrollFitWidth() { return getColCount()<=getVisColCount(); }
-public boolean isScrollFitHeight() { return true; }
+public boolean isScrollFillWidth() { return getColCount()<=getVisColCount(); }
+public boolean isScrollFillHeight() { return true; }
 
 /**
  * Called to configure browser cell.

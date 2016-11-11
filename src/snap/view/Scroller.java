@@ -121,40 +121,40 @@ public void setRatioV(double aValue)  { setScrollV(aValue*getScrollVMax()); }
 /**
  * Returns whether this scroller fits content to its width.
  */
-public boolean isFitWidth()  { return _fitWidth; }
+public boolean isFillWidth()  { return _fitWidth; }
 
 /**
  * Sets whether this scroller fits content to its width.
  */
-public void setFitWidth(boolean aValue)
+public void setFillWidth(boolean aValue)
 {
-    if(aValue==isFitWidth()) return;
+    if(aValue==isFillWidth()) return;
     firePropChange("FitWidth", _fitWidth, _fitWidth = aValue);
 }
 
 /**
  * Returns whether this scroller fits content to its height.
  */
-public boolean isFitHeight()  { return _fitHeight; }
+public boolean isFillHeight()  { return _fitHeight; }
 
 /**
- * Sets whether this scroller fits content to its width.
+ * Sets whether this scroller fits content to its height.
  */
-public void setFitHeight(boolean aValue)
+public void setFillHeight(boolean aValue)
 {
-    if(aValue==isFitHeight()) return;
+    if(aValue==isFillHeight()) return;
     firePropChange("FitHeight", _fitHeight, _fitHeight = aValue);
 }
 
 /**
  * Returns whether content is fit width.
  */
-public boolean isContentFitWidth()  { return isFitWidth() || _content!=null && _content.isScrollFitWidth(); }
+public boolean isContentFillWidth()  { return isFillWidth() || _content!=null && _content.isScrollFillWidth(); }
 
 /**
  * Returns whether content is fit height.
  */
-public boolean isContentFitHeight()  { return isFitHeight() || _content!=null && _content.isScrollFitHeight(); }
+public boolean isContentFillHeight()  { return isFillHeight() || _content!=null && _content.isScrollFillHeight(); }
 
 /**
  * Called to scroll the given shape in this node coords to visible.
@@ -208,8 +208,8 @@ protected void layoutChildren()
 {
     if(_content==null) return;
     double w = getWidth(), h = getHeight(); View cnt = _content;
-    double cpw = cnt.getPrefWidth(); if(isContentFitWidth() || cpw<w && cnt.isGrowWidth()) cpw = w;
-    double cph = cnt.getPrefHeight(); if(isContentFitHeight() || cph<h && cnt.isGrowHeight()) cph = h;
+    double cpw = cnt.getPrefWidth(); if(isContentFillWidth() || cpw<w && cnt.isGrowWidth()) cpw = w;
+    double cph = cnt.getPrefHeight(); if(isContentFillHeight() || cph<h && cnt.isGrowHeight()) cph = h;
     
     // Get content bounds
     double sx = getScrollH(); if(sx>cpw-w) sx = Math.round(cpw-w);
