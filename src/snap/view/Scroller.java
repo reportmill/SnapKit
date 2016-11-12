@@ -19,6 +19,9 @@ public class Scroller extends ParentView {
     // Whether to fit content to scroller width/height
     boolean         _fitWidth, _fitHeight;
 
+    // Whether to grow content to scroller width/height if smaller than scroller (overrides content setting if true)
+    boolean         _growContWidth = true, _growContHeight = true;
+
     // Constants for properties
     public static final String ScrollH_Prop = "ScrollH";
     public static final String ScrollV_Prop = "ScrollV";
@@ -147,14 +150,50 @@ public void setFillHeight(boolean aValue)
 }
 
 /**
- * Returns whether content is fit width.
+ * Returns whether to grow content to scroller width if smaller than scroller (overrides content setting if true).
  */
-public boolean isContentFillWidth()  { return isFillWidth() || _content!=null && _content.isScrollFillWidth(); }
+public boolean isGrowContentWidth()  { return _growContWidth; }
 
 /**
- * Returns whether content is fit height.
+ * Sets whether to grow content to scroller width if smaller than scroller (overrides content setting if true).
  */
-public boolean isContentFillHeight()  { return isFillHeight() || _content!=null && _content.isScrollFillHeight(); }
+public void setGrowContentWidth(boolean aValue)
+{
+    if(aValue==isGrowContentWidth()) return;
+    firePropChange("GrowContentWidth", _growContWidth, _growContWidth = aValue);
+}
+
+/**
+ * Returns whether to grow content to scroller height if smaller than scroller (overrides content setting if true).
+ */
+public boolean isGrowContentHeight()  { return _growContHeight; }
+
+/**
+ * Sets whether to grow content to scroller height if smaller than scroller (overrides content setting if true).
+ */
+public void setGrowContentHeight(boolean aValue)
+{
+    if(aValue==isGrowContentHeight()) return;
+    firePropChange("GrowContentHeight", _growContHeight, _growContHeight = aValue);
+}
+
+/**
+ * Returns whether content is effectively filing width.
+ */
+protected boolean isFillingWidth()
+{
+    if(isFillWidth()) return true;
+    return _content!=null && (isGrowContentWidth() || _content.isGrowWidth()) && _content.getPrefWidth()<=getWidth();
+}
+
+/**
+ * Returns whether content is effectively filling height.
+ */
+protected boolean isFillingHeight()
+{
+    if(isFillHeight()) return true;
+    return _content!=null && (isGrowContentHeight() || _content.isGrowHeight()) &&_content.getPrefHeight()<=getHeight();
+}
 
 /**
  * Called to scroll the given shape in this node coords to visible.
@@ -208,8 +247,8 @@ protected void layoutChildren()
 {
     if(_content==null) return;
     double w = getWidth(), h = getHeight(); View cnt = _content;
-    double cpw = cnt.getPrefWidth(); if(isContentFillWidth() || cpw<w && cnt.isGrowWidth()) cpw = w;
-    double cph = cnt.getPrefHeight(); if(isContentFillHeight() || cph<h && cnt.isGrowHeight()) cph = h;
+    double cpw = cnt.getPrefWidth(); if(isFillingWidth()) cpw = w;
+    double cph = cnt.getPrefHeight(); if(isFillingHeight()) cph = h;
     
     // Get content bounds
     double sx = getScrollH(); if(sx>cpw-w) sx = Math.round(cpw-w);

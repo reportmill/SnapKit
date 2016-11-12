@@ -524,11 +524,6 @@ protected void processEvent(ViewEvent anEvent)
 public Paint getDefaultFill()  { return Color.WHITE; }
 
 /**
- * Override to make list same width as ScrollView.
- */
-public boolean isScrollFillWidth()  { return true; }
-
-/**
  * Returns a mapped property name.
  */
 public String getValuePropName()  { return getBinding("SelectedIndex")!=null? "SelectedIndex" : "SelectedItem"; }

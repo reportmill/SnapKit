@@ -323,10 +323,14 @@ public double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); 
 protected void layoutChildren()  { _layout.layoutChildren(); }
 
 /**
- * Scrollable methods.
+ * Override to automatically set parent Scroller to FillHeight.
  */
-public boolean isScrollFillWidth() { return getColCount()<=getVisColCount(); }
-public boolean isScrollFillHeight() { return true; }
+protected void setParent(ParentView aPar)
+{
+    super.setParent(aPar);
+    if(aPar instanceof Scroller)
+        ((Scroller)aPar).setFillHeight(true);
+}
 
 /**
  * Called to configure browser cell.
@@ -372,6 +376,7 @@ private class ColScrollView extends ScrollView {
     public ColScrollView(BrowserCol aCol)
     {
         setContent(aCol); setShowHBar(false); setShowVBar(true); getScroller().setFill(Color.WHITE);
+        setFillWidth(true);
     }
     
     /** PreferredSize. */

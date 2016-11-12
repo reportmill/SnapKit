@@ -174,8 +174,8 @@ protected void layoutChildren()
     // Get whether to show scroll bars
     boolean asneedH = _showHBar==null, alwaysH = _showHBar==Boolean.TRUE;
     boolean asneedV = _showVBar==null, alwaysV = _showVBar==Boolean.TRUE;
-    boolean showHBar = alwaysH || asneedH && cpw>w && !_scroller.isContentFillWidth();
-    boolean showVBar = alwaysV || asneedV && cph>h && !_scroller.isContentFillHeight();
+    boolean showHBar = alwaysH || asneedH && cpw>w && !_scroller.isFillingWidth();
+    boolean showVBar = alwaysV || asneedV && cph>h && !_scroller.isFillingHeight();
     
     // If horizontal scrollbar needed, add it
     if(showHBar) {
