@@ -148,28 +148,28 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Unarchive Top
     XMLElement top = anElement.get("Top"); top = top!=null && top.getElementCount()>0? top.getElement(0) : null;
-    Object topNode = top!=null? anArchiver.fromXML(top, this) : null;
-    if(topNode instanceof View) setTop((View)topNode);
+    Object topView = top!=null? anArchiver.fromXML(top, this) : null;
+    if(topView instanceof View) setTop((View)topView);
     
     // Unarchive Left
     XMLElement lft = anElement.get("Left"); lft = lft!=null && lft.getElementCount()>0? lft.getElement(0) : null;
-    Object lftNode = lft!=null? anArchiver.fromXML(lft, this) : null;
-    if(lftNode instanceof View) setLeft((View)lftNode);
+    Object lftView = lft!=null? anArchiver.fromXML(lft, this) : null;
+    if(lftView instanceof View) setLeft((View)lftView);
     
     // Unarchive Center
     XMLElement ctr = anElement.get("Center"); ctr = ctr!=null && ctr.getElementCount()>0? ctr.getElement(0) : null;
-    Object ctrNode = ctr!=null? anArchiver.fromXML(ctr, this) : null;
-    if(ctrNode instanceof View) setCenter((View)ctrNode);
+    Object ctrView = ctr!=null? anArchiver.fromXML(ctr, this) : null;
+    if(ctrView instanceof View) setCenter((View)ctrView);
     
     // Unarchive Bottom
     XMLElement btm = anElement.get("Bottom"); btm = btm!=null && btm.getElementCount()>0? btm.getElement(0) : null;
-    Object btmNode = btm!=null? anArchiver.fromXML(btm, this) : null;
-    if(btmNode instanceof View) setCenter((View)btmNode);
+    Object btmView = btm!=null? anArchiver.fromXML(btm, this) : null;
+    if(btmView instanceof View) setBottom((View)btmView);
     
     // Unarchive Right
     XMLElement rgt = anElement.get("Right"); rgt = rgt!=null && rgt.getElementCount()>0? rgt.getElement(0) : null;
-    Object rgtNode = rgt!=null? anArchiver.fromXML(rgt, this) : null;
-    if(rgtNode instanceof View) setRight((View)rgtNode);
+    Object rgtView = rgt!=null? anArchiver.fromXML(rgt, this) : null;
+    if(rgtView instanceof View) setRight((View)rgtView);
 }
 
 }
