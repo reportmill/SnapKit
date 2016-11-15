@@ -264,6 +264,21 @@ private Image getArrowImage()
 }
 
 /**
+ * Override to use button.
+ */
+public Pos getAlign()  { return _btn.getLabel().getAlign(); }
+
+/**
+ * Override to send to button.
+ */
+public void setAlign(Pos aPos)  { _btn.getLabel().setAlign(aPos); }
+
+/**
+ * Override to send to button.
+ */
+public void setDisabled(boolean aValue)  { super.setDisabled(aValue); _btn.setDisabled(aValue); }
+
+/**
  * Returns Value property name.
  */
 public String getValuePropName()  { return "SelectedItem"; }
