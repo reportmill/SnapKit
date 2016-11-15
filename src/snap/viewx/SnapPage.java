@@ -23,10 +23,11 @@ protected View createUI()
         superUI.setFill(ViewUtils.getBackFill());
         superUI.setBorder(Color.BLACK, 1);
         superUI.setEffect(new ShadowEffect());
-        BorderView bpane = new BorderView(); bpane.setFillCenter(false); bpane.setCenter(superUI);
-        bpane.setFill(ViewUtils.getBackDarkFill());
-        superUI = bpane;
+        Box box = new Box(superUI); box.setFill(ViewUtils.getBackDarkFill());
+        if(!(superUI instanceof SpringView)) superUI.setMinSize(500,500);
+        superUI = box;
     }
+    
     return new ScrollView(superUI);
 }
     

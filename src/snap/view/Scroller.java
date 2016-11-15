@@ -73,7 +73,7 @@ public void setScrollH(double aValue)
 public double getScrollHMax()
 {
     if(_content==null) return 0;
-    return Math.round(Math.max(_content.getPrefWidth() - getWidth(),0));
+    return Math.round(Math.max(_content.getBestWidth(-1) - getWidth(),0));
 }
 
 /**
@@ -98,7 +98,7 @@ public void setScrollV(double aValue)
 public double getScrollVMax()
 {
     if(_content==null) return 0;
-    return Math.round(Math.max(_content.getPrefHeight() - getHeight(),0));
+    return Math.round(Math.max(_content.getBestHeight(-1) - getHeight(),0));
 }
 
 /**
@@ -183,7 +183,7 @@ public void setGrowContentHeight(boolean aValue)
 protected boolean isFillingWidth()
 {
     if(isFillWidth()) return true;
-    return _content!=null && (isGrowContentWidth() || _content.isGrowWidth()) && _content.getPrefWidth()<=getWidth();
+    return _content!=null && (isGrowContentWidth() || _content.isGrowWidth()) && _content.getBestWidth(-1)<=getWidth();
 }
 
 /**
@@ -192,7 +192,7 @@ protected boolean isFillingWidth()
 protected boolean isFillingHeight()
 {
     if(isFillHeight()) return true;
-    return _content!=null && (isGrowContentHeight() || _content.isGrowHeight()) &&_content.getPrefHeight()<=getHeight();
+    return _content!=null && (isGrowContentHeight()||_content.isGrowHeight()) &&_content.getBestHeight(-1)<=getHeight();
 }
 
 /**
@@ -233,12 +233,12 @@ protected double getMinHeightImpl()  { return _content!=null? _content.getMinHei
 /**
  * Calculates the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _content!=null? _content.getPrefWidth(aH) : 0; }
+protected double getPrefWidthImpl(double aH)  { return _content!=null? _content.getBestWidth(aH) : 0; }
 
 /**
  * Calculates the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _content!=null? _content.getPrefHeight(aW) : 0; }
+protected double getPrefHeightImpl(double aW)  { return _content!=null? _content.getBestHeight(aW) : 0; }
 
 /**
  * Override to layout children.
@@ -247,8 +247,8 @@ protected void layoutChildren()
 {
     if(_content==null) return;
     double w = getWidth(), h = getHeight(); View cnt = _content;
-    double cpw = cnt.getPrefWidth(); if(isFillingWidth()) cpw = w;
-    double cph = cnt.getPrefHeight(); if(isFillingHeight()) cph = h;
+    double cpw = cnt.getBestWidth(-1); if(isFillingWidth()) cpw = w;
+    double cph = cnt.getBestHeight(-1); if(isFillingHeight()) cph = h;
     
     // Get content bounds
     double sx = getScrollH(); if(sx>cpw-w) sx = Math.round(cpw-w);
