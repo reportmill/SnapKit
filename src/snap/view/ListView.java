@@ -92,9 +92,8 @@ public void setItems(List <T> theItems)
     _items.clear();
     if(theItems!=null) _items.addAll(theItems);
     setSelectedItem(sitem);
-    relayout();
-    _sampleWidth = _sampleHeight = -1;
-    relayoutParent();
+    relayout(); _sampleWidth = _sampleHeight = -1;
+    relayoutParent(); repaint();
 }
 
 /**

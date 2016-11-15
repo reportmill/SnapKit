@@ -131,7 +131,6 @@ public void setStringView(StringView aStrView)
     _strView = aStrView;
     if(_strView!=null) addChild(_strView, getGraphic()!=null? 1 : 0);
     firePropChange(StringView_Prop, old, _graphic);
-    relayoutParent();
 }
 
 /**
@@ -149,7 +148,6 @@ public void setGraphic(View aGraphic)
     _graphic = aGraphic;
     if(_graphic!=null) addChild(_graphic, 0);
     firePropChange(Graphic_Prop, old, _graphic);
-    relayoutParent();
 }
 
 /**
@@ -167,7 +165,6 @@ public void setGraphicAfter(View aGraphic)
     _graphicAfter = aGraphic;
     if(_graphicAfter!=null) addChild(_graphicAfter);
     firePropChange(GraphicAfter_Prop, old, _graphicAfter);
-    relayoutParent();
 }
 
 /**

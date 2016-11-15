@@ -115,11 +115,15 @@ protected void configureCell(ListCell <T> aCell)
     int pcount = tree.getParentCount(item);
     aCell.setPadding(0, 2, 0, rootIndent + pcount*20);
     
-    // Add Expand/Collapse graphic
+    // If parent, configure Expand/Collapse image
     if(tree.isParent(item)) {
         Image bimg = tree.isExpanded(item)? tree.getExpandedImage() : tree.getCollapsedImage();
-        ImageView iview = new ImageView(bimg); iview.setPadding(4,4,4,4);
-        View gview = aCell.getGraphic()!=null? new Label(iview, null, aCell.getGraphic()) : iview;
+        ImageView iview = (ImageView)aCell.getChild("BranchImageView");
+        if(iview!=null) {
+            iview.setImage(bimg); return; }
+
+        iview = new ImageView(bimg); iview.setPadding(4,4,4,4); iview.setName("BranchImageView");
+        View gview = aCell.getGraphic()!=null? new Label(iview,null,aCell.getGraphic()) : iview;
         aCell.setGraphic(gview);
         iview.addEventHandler(e -> { tree.toggleItem(item); e.consume(); }, MousePress);
     }
