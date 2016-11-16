@@ -11,7 +11,10 @@ public class RoundRect extends RectBase {
     
     // The radius of the round
     double      _rad;
-
+    
+    // The rounded corners
+    boolean     _nw = true, _ne = true, _sw = true, _se = true;
+    
 /**
  * Creates new Rect.
  */
@@ -30,7 +33,22 @@ public double getRadius()  { return _rad; }
 /**
  * Sets the radius of the round.
  */
-public void setRadius(double aValue)  { _rad = aValue; }
+public void setRadius(double aValue)  { _rad = aValue;  }
+
+/**
+ * Returns a copy with given radius.
+ */
+public RoundRect copyForRadius(double aRad)  { RoundRect copy = (RoundRect)clone(); copy._rad = aRad; return copy; }
+
+/**
+ * Returns a copy with only set corners rounded.
+ */
+public RoundRect copyForCorners(boolean doNW, boolean doNE, boolean doSW, boolean doSE)
+{
+    RoundRect copy = (RoundRect)clone();
+    copy._nw = doNW; copy._ne = doNE; copy._sw = doSW; copy._se = doSE;
+    return copy;
+}
 
 /**
  * Returns a path iterator.
@@ -65,79 +83,63 @@ public boolean equals(Object anObj)
 /**
  * PathIter for RoundRect.
  */
-private static class RoundRectIter implements PathIter {
+private static class RoundRectIter extends PathIter {
     
     // Ivars
-    double x, y, w, h, rad; Transform trans; int index;
+    double x, y, w, h, maxx, maxy, rw, rh; int index; boolean nw, ne, sw, se;
 
     /** Create new RectIter. */
     RoundRectIter(RoundRect r, Transform at)
     {
-        x = r.getX(); y = r.getY(); w = r.getWidth(); h = r.getHeight(); rad = r.getRadius(); trans = at;
+        super(at);
+        x = r.getX(); y = r.getY(); w = r.getWidth(); h = r.getHeight(); maxx = r.getMaxX(); maxy = r.getMaxY();
+        double rad = r.getRadius(); rw = rad>w/2? w/2 : rad; rh = rad>h/2? h/2 : rad;
+        nw = r._nw; ne = r._ne; sw = r._sw; se = r._se;
         if(w<0 || h<0) index = 10;
     }
 
     /** Returns whether there are more segments. */
-    public boolean hasNext() { return index<=9; }
+    public boolean hasNext() { return index<10; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
     public PathIter.Seg getNext(double[] coords)
     {
-        // Get half width/height, radius width and radius height (which can't exceed half width/height)
-        double hw = w/2, hh = h/2, rw = rad>hw? hw : rad, rh = rad>hh? hh : rad;
-        double of = .5523f; // I calculated this in mathematica one time
-        
         // Switch on segment index to draw corners and edges
-        switch(index) {
+        switch(index++) {
+            
+            // Start point
+            case 0: return moveTo(nw? x+rw : x, y, coords);
             
             // Top edge
-            case 0: coords[0] = x+rw; coords[1] = y; index++;
-                if(trans!=null) trans.transform(coords,1); return Seg.MoveTo;
-            case 1: coords[0] = x+w-rw; coords[1] = y; index++;
-                if(trans!=null) trans.transform(coords,1); return Seg.LineTo;
+            case 1: if(ne) return lineTo(maxx-rw, y, coords);
+                index++; return lineTo(maxx, y, coords);
             
             // Upper right corner
-            case 2:
-                coords[0] = x+w-rw+rw*of; coords[1] = y;
-                coords[2] = x+w; coords[3] = y+rh*of;
-                coords[4] = x+w; coords[5] = y+rh; index++;
-                if(trans!=null) trans.transform(coords,3); return Seg.CubicTo;
+            case 2: return arcTo(maxx-rw, y, maxx, y, maxx, y+rh, coords);
                 
             // Right edge
-            case 3: coords[0] = x+w; coords[1] = y+h-rh; index++;
-                if(trans!=null) trans.transform(coords,1); return Seg.LineTo;
+            case 3: if(se) return lineTo(maxx, maxy-rh, coords);
+                index++; return lineTo(maxx, maxy, coords);
             
             // Lower right corner
-            case 4:
-                coords[0] = x+w; coords[1] = y+h-rh+rh*of;
-                coords[2] = x+w-rw+rw*of; coords[3] = y+h;
-                coords[4] = x+w-rw; coords[5] = y+h; index++;
-                if(trans!=null) trans.transform(coords,3); return Seg.CubicTo;
+            case 4: return arcTo(maxx, maxy-rh, maxx, maxy, maxx-rw, maxy, coords);
                 
             // Bottom edge
-            case 5: coords[0] = x+rw; coords[1] = y+h; index++;
-                if(trans!=null) trans.transform(coords,1); return Seg.LineTo;
-            
+            case 5: if(sw) return lineTo(x+rw, maxy, coords);
+                index++; return lineTo(x, maxy, coords);
+
             // Lower left corner
-            case 6:
-                coords[0] = x+rw-rw*of; coords[1] = y+h;
-                coords[2] = x; coords[3] = y+h-rh+rh*of;
-                coords[4] = x; coords[5] = y+h-rh; index++;
-                if(trans!=null) trans.transform(coords,3); return Seg.CubicTo;
+            case 6: return arcTo(x+rw, maxy, x, maxy, x, maxy-rh, coords);
                 
             // Left edge
-            case 7: coords[0] = x; coords[1] = y+rh; index++;
-                if(trans!=null) trans.transform(coords,1); return Seg.LineTo;
-            
+            case 7: if(ne) return lineTo(x, y+rh, coords);
+                index += 2; return close();
+
             // Upper left corner
-            case 8:
-                coords[0] = x; coords[1] = y+rh-rh*of;
-                coords[2] = x+rw-rw*of; coords[3] = y;
-                coords[4] = x+rw; coords[5] = y; index++;
-                if(trans!=null) trans.transform(coords,3); return Seg.CubicTo;
+            case 8: return arcTo(x, y+rh, x, y, x+rw, y, coords);
                 
             // Close
-            case 9: index++; return Seg.Close;
+            case 9: return close();
             
             // Impossible
             default: throw new RuntimeException("RoundRectIter: index beyond bounds");

@@ -46,26 +46,27 @@ public PathIter getPathIter(Transform aTrans)  { return new PolyIter(_pnts, aTra
 /**
  * PathIter for Line.
  */
-private static class PolyIter implements PathIter {
+private static class PolyIter extends PathIter {
     
     // Ivars
-    double _pnts[]; Transform trans; int index;
+    double _pnts[]; int plen, index;
 
     /** Create new LineIter. */
-    PolyIter(double thePnts[], Transform at)  { _pnts = thePnts; trans = at; }
+    PolyIter(double thePnts[], Transform at)  { super(at); _pnts = thePnts; plen = _pnts.length; }
 
     /** Returns whether there are more segments. */
-    public boolean hasNext() { return index<_pnts.length+2; }
+    public boolean hasNext() { return index<plen+2; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
     public PathIter.Seg getNext(double[] coords)
     {
-        int ind = index;
-        if(ind<_pnts.length) { coords[0] = _pnts[index]; coords[1] = _pnts[index+1]; }
-        if(trans!=null) trans.transform(coords); index += 2;
-        if(ind==0) return PathIter.Seg.MoveTo;
-        if(ind<_pnts.length) return PathIter.Seg.LineTo;
-        return PathIter.Seg.Close;
+        if(index==0)
+            return moveTo(_pnts[index++], _pnts[index++], coords);
+        if(index<plen)
+            return lineTo(_pnts[index++], _pnts[index++], coords);
+        if(index>plen)
+            throw new RuntimeException("PolygonIter: Index beyond bounds " + index + " " + plen);
+        index += 2; return close();
     }
 }
 

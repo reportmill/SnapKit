@@ -417,31 +417,28 @@ public static Rect get(String aString)
 /**
  * PathIter for Rect.
  */
-private static class RectIter implements PathIter {
+private static class RectIter extends PathIter {
     
     // Ivars
-    double x, y, w, h; Transform affine; int index;
+    double x, y, w, h; int index;
 
     /** Create new RectIter. */
-    RectIter(Rect r, Transform at)
-    {
-        x = r.getX(); y = r.getY(); w = r.getWidth(); h = r.getHeight(); affine = at;
-        if(w<0 || h<0) index = 6;
-    }
+    RectIter(Rect r, Transform t)  { super(t); x = r.x; y = r.y; w = r.width; h = r.height; if(w<0 || h<0) index = 5; }
 
     /** Returns whether there are more segments. */
-    public boolean hasNext() { return index<=4; }
+    public boolean hasNext() { return index<5; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
     public PathIter.Seg getNext(double[] coords)
     {
-        if(index>4) throw new RuntimeException("Rect path iterator out of bounds");
-        if(index==4) { index++; return PathIter.Seg.Close; }
-        coords[0] = x; coords[1] = y;
-        if(index==1 || index==2) coords[0] += w;
-        if(index==2 || index==3) coords[1] += h;
-        if(affine!=null) affine.transform(coords, 1);
-        return ++index==1? PathIter.Seg.MoveTo : PathIter.Seg.LineTo;
+        switch(index++) {
+            case 0: return moveTo(x, y, coords);
+            case 1: return lineTo(x+w, y, coords);
+            case 2: return lineTo(x+w, y+h, coords);
+            case 3: return lineTo(x, y+h, coords);
+            case 4: return close();
+            default: throw new RuntimeException("Rect path iterator out of bounds " + index);
+        }
     }
 }
 

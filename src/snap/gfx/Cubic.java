@@ -402,24 +402,22 @@ public static double getHitPointCubic(double x0, double y0, double xc0, double y
 /**
  * PathIter for Cubic.
  */
-private class CubicIter implements PathIter {
+private class CubicIter extends PathIter {
     
     /** Create new CubicIter. */
-    CubicIter(Transform at) { trans = at; }  Transform trans; int index;
+    CubicIter(Transform at) { super(at); }  int index;
 
     /** Returns whether there are more segments. */
-    public boolean hasNext() { return index<=1; }
+    public boolean hasNext() { return index<2; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
-    public PathIter.Seg getNext(double pts[])
+    public PathIter.Seg getNext(double coords[])
     {
-        PathIter.Seg seg = null;
-        if(index==0) { seg = PathIter.Seg.MoveTo; pts[0] = x0; pts[1] = y0; }
-        else if(index==1) { seg = PathIter.Seg.CubicTo;
-            pts[0] = xc0; pts[1] = yc0; pts[2] = xc1; pts[3] = yc1; pts[4] = x1; pts[5] = y1; }
-        else throw new RuntimeException("line iterator out of bounds");
-        if(trans!=null) trans.transform(pts); index++;
-        return seg;
+        switch(index++) {
+            case 0: return moveTo(x0, y0, coords);
+            case 1: return cubicTo(xc0, yc0, xc1, yc1, x1, y1, coords);
+            default: throw new RuntimeException("line iterator out of bounds");
+        }
     }
 }
 

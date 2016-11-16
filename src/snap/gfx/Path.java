@@ -228,7 +228,7 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
 /**
  * A PathIter for Path.
  */
-private static class PathPathIter implements PathIter {
+private static class PathPathIter extends PathIter {
     
     // Ivars
     Path _path; Transform _trans; int _sindex, _pindex;

@@ -268,7 +268,7 @@ private static class AWTPathIter implements PathIterator {
 /**
  * A Path iterator wrapper.
  */
-private static class SnapPathIter implements PathIter {
+private static class SnapPathIter extends PathIter {
     
     /** Creates a new SnapPathIter for AWT PathIterator. */
     public SnapPathIter(PathIterator aPI)  { _pi = aPI; }  PathIterator _pi;

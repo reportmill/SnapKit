@@ -60,49 +60,34 @@ public boolean equals(Object anObj)
 /**
  * Path iterator for ellipse.
  */
-private static class EllipseIter implements PathIter {
+private static class EllipseIter extends PathIter {
     
     // Ivars
-    double x, y, w, h; Transform affine; int index;
+    double x, y, w, h, midx, midy, maxx, maxy; int index;
 
     /** Creates new EllipseIter. */
     EllipseIter(Ellipse e, Transform at)
     {
-        x = e.getX(); y = e.getY(); w = e.getWidth(); h = e.getHeight(); affine = at;
+        super(at); x = e.x; y = e.y; w = e.width; h = e.height;
+        midx = e.getMidX(); midy = e.getMidY(); maxx = e.getMaxX(); maxy = e.getMaxY();
         if(w<0 || h<0) index = 6;
     }
 
     /** Returns whether there are more segments. */
-    public boolean hasNext() { return index <= 5; }
-
-    // Control points for set of 4 bezier curves that approximate a circle of radius 0.5 centered at 0.5, 0.5
-    public static final double CtrlVal = 0.5522847498307933;     // ArcIterator.btan(Math.PI/2)
-    private static final double pcv = 0.5 + CtrlVal * 0.5;
-    private static final double ncv = 0.5 - CtrlVal * 0.5;
-    private static double ctrlpts[][] = {
-        {  1.0,  pcv,  pcv,  1.0,  0.5,  1.0 },
-        {  ncv,  1.0,  0.0,  pcv,  0.0,  0.5 },
-        {  0.0,  ncv,  ncv,  0.0,  0.5,  0.0 },
-        {  pcv,  0.0,  1.0,  ncv,  1.0,  0.5 }
-    };
+    public boolean hasNext() { return index<6; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
     public Seg getNext(double[] coords)
     {
-        if(!hasNext()) throw new RuntimeException("ellipse iterator out of bounds");
-        if(index==5) { index++; return Seg.Close; }
-        if(index==0) {
-            double ctrls[] = ctrlpts[3];
-            coords[0] = x + ctrls[4] * w; coords[1] = y + ctrls[5] * h;
-            if(affine != null) affine.transform(coords, 1);
-            index++; return Seg.MoveTo;
+        switch(index++) {
+            case 0: return moveTo(midx, y, coords);
+            case 1: return arcTo(midx, y, maxx, y, maxx, midy, coords);
+            case 2: return arcTo(maxx, midy, maxx, maxy, midx, maxy, coords);
+            case 3: return arcTo(midx, maxy, x, maxy, x, midy, coords);
+            case 4: return arcTo(x, midy, x, y, midx, y, coords);
+            case 5: return close();
+            default: throw new RuntimeException("line iterator out of bounds");
         }
-        double ctrls[] = ctrlpts[index - 1];
-        coords[0] = x + ctrls[0] * w; coords[1] = y + ctrls[1] * h;
-        coords[2] = x + ctrls[2] * w; coords[3] = y + ctrls[3] * h;
-        coords[4] = x + ctrls[4] * w; coords[5] = y + ctrls[5] * h;
-        if(affine != null) affine.transform(coords, 3);
-        index++; return Seg.CubicTo;
     }
 }
 
