@@ -286,8 +286,9 @@ protected XMLElement toXMLView(XMLArchiver anArchiver)
     String text = getText(); if(text!=null && text.length()>0) e.add("text", text);
     String iname = getImageName(); if(iname!=null) e.add("image", iname);
     
-    // Archive ShowBorder
-    if(!isShowBorder()) e.add("ShowBorder", isShowBorder());
+    // Archive ShowBorder, Position
+    if(!isShowBorder()) e.add(ShowBorder_Prop, isShowBorder());
+    if(getPosition()!=null) e.add(Position_Prop, getPosition());
     
     // Return element
     return e;

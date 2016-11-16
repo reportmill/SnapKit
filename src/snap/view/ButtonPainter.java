@@ -19,7 +19,7 @@ public class ButtonPainter {
     Paint         _fill = FILL_NORMAL_BUTTON;
     
     // The rounding
-    double        _rnd = 3;
+    double        _rnd = 4;
     
     // The position of the button when in a group (determines corner rendering).
     Pos           _pos;

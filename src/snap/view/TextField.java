@@ -22,6 +22,9 @@ public class TextField extends ParentView {
     // The string to show when textfield is empty
     String                _promptText;
     
+    // The radius of border
+    double                _rad = 4;
+    
     // The selection start/end
     int                   _selStart, _selEnd;
     
@@ -99,6 +102,16 @@ public void setPromptText(String aStr)
  * Returns the label in the background.
  */
 public Label getLabel()  { return _label; }
+
+/**
+ * Returns the rounding radius.
+ */
+public double getRadius()  { return _rad; }
+
+/**
+ * Sets the rounding radius.
+ */
+public void setRadius(double aValue)  { _rad = aValue; }
 
 /**
  * Returns the default alignment.
@@ -461,7 +474,7 @@ public void clear()  { delete(0, length(), true); }
 protected void paintBack(Painter aPntr)
 {
     double w = getWidth(), h = getHeight(); aPntr.clearRect(0,0,w,h);
-    RoundRect rrect = new RoundRect(.5,.5,w-1,h-1,3);
+    RoundRect rrect = new RoundRect(.5, .5, w-1, h-1, _rad);
     aPntr.setPaint(getFill()); aPntr.fill(rrect);
     aPntr.setColor(isFocused()? FOCUSED_COLOR : Color.LIGHTGRAY);
     aPntr.setStroke(Stroke.Stroke1); aPntr.draw(rrect);
@@ -779,6 +792,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     XMLElement e = super.toXMLView(anArchiver);
     if(getColumnCount()!=20) e.add(ColumnCount_Prop, getColumnCount());
     if(getText()!=null && getText().length()>0) e.add("text", getText());
+    if(getRadius()!=4) e.add("Radius", getRadius());
     return e;
 }
 
@@ -787,11 +801,15 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
  */
 public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
+    // Do normal version
     super.fromXMLView(anArchiver, anElement);
+    
+    // Unarchive ColumnCount, Text, Radius
     if(anElement.hasAttribute(ColumnCount_Prop)) setColumnCount(anElement.getAttributeIntValue(ColumnCount_Prop));
     String str = anElement.getAttributeValue("text",  anElement.getAttributeValue("value", anElement.getValue()));
     if(str!=null && str.length()>0)
         setText(str);
+    if(anElement.hasAttribute("Radius")) setRadius(anElement.getAttributeDoubleValue("Radius"));
         
     // Unarchive margin, valign (should go soon)
     if(anElement.hasAttribute("margin")) setPadding(Insets.get(anElement.getAttributeValue("margin")));
