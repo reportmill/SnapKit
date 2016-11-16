@@ -19,6 +19,9 @@ public class ButtonBase extends ParentView {
     // Whether button has border
     boolean                 _showBorder = true;
     
+    // The position of the button when in a group (determines corner rendering)
+    Pos                     _pos;
+    
     // Whether button is pressed
     boolean                 _pressed;
     
@@ -38,6 +41,7 @@ public class ButtonBase extends ParentView {
     public static final String Image_Prop = "Image";
     public static final String Pressed_Prop = "Pressed";
     public static final String ShowBorder_Prop = "ShowBorder";
+    public static final String Position_Prop = "Position";
     public static final String Targeted_Prop = "Targeted";
     public static final String Text_Prop = "Text";
     
@@ -175,6 +179,16 @@ public void setShowBorder(boolean aValue)
 }
 
 /**
+ * Returns the position of the button when in a group (determines corner rendering).
+ */
+public Pos getPosition()  { return _pos; }
+
+/**
+ * Sets the position of the button when in a group (determines corner rendering).
+ */
+public void setPosition(Pos aPos)  { _pos = aPos; }
+
+/**
  * Returns the button fill.
  */
 public Paint getButtonFill()  { return _btnFill; }
@@ -219,7 +233,7 @@ public void paintFront(Painter aPntr)
     if(isShowBorder()) {
         int state = isPressed()? Painter.BUTTON_PRESSED : isTargeted()? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
         ButtonPainter bp = new ButtonPainter(); bp.setWidth(getWidth()); bp.setHeight(getHeight());
-        bp.setState(state); if(getButtonFill()!=null) bp.setFill(getButtonFill());
+        bp.setState(state); if(getButtonFill()!=null) bp.setFill(getButtonFill()); bp.setPosition(getPosition());
         bp.paint(aPntr);
     }
     else {
@@ -296,8 +310,9 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
         if(image!=null) setImage(image);
     }
     
-    // Unarchive ShowBorder
-    if(anElement.hasAttribute("ShowBorder")) setShowBorder(anElement.getAttributeBoolValue("ShowBorder"));
+    // Unarchive ShowBorder, Position
+    if(anElement.hasAttribute(ShowBorder_Prop)) setShowBorder(anElement.getAttributeBoolValue(ShowBorder_Prop));
+    if(anElement.hasAttribute(Position_Prop)) setPosition(Pos.valueOf(anElement.getAttributeValue(Position_Prop)));
         
     // Unarchive Margin
     if(anElement.hasAttribute("margin")) { Insets ins = Insets.get(anElement.getAttributeValue("margin"));

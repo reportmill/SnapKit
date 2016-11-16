@@ -43,7 +43,7 @@ public RoundRect copyForRadius(double aRad)  { RoundRect copy = (RoundRect)clone
 /**
  * Returns a copy with only set corners rounded.
  */
-public RoundRect copyForCorners(boolean doNW, boolean doNE, boolean doSW, boolean doSE)
+public RoundRect copyForCorners(boolean doNW, boolean doNE, boolean doSE, boolean doSW)
 {
     RoundRect copy = (RoundRect)clone();
     copy._nw = doNW; copy._ne = doNE; copy._sw = doSW; copy._se = doSE;
@@ -132,7 +132,7 @@ private static class RoundRectIter extends PathIter {
             case 6: return arcTo(x+rw, maxy, x, maxy, x, maxy-rh, coords);
                 
             // Left edge
-            case 7: if(ne) return lineTo(x, y+rh, coords);
+            case 7: if(nw) return lineTo(x, y+rh, coords);
                 index += 2; return close();
 
             // Upper left corner

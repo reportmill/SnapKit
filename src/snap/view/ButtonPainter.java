@@ -21,6 +21,9 @@ public class ButtonPainter {
     // The rounding
     double        _rnd = 3;
     
+    // The position of the button when in a group (determines corner rendering).
+    Pos           _pos;
+    
     // The button state
     int           _state = Button.BUTTON_NORMAL;
     
@@ -85,12 +88,42 @@ public int getState()  { return _state; }
 public void setState(int aState)  { _state = aState; }
 
 /**
+ * Returns the position of the button when in a group (determines corner rendering).
+ */
+public Pos getPosition()  { return _pos; }
+
+/**
+ * Sets the position of the button when in a group (determines corner rendering).
+ */
+public void setPosition(Pos aPos)  { _pos = aPos; }
+
+/**
+ * Returns the rect for current position.
+ */
+public RoundRect getRoundRectForPosition()
+{
+    RoundRect rect = new RoundRect(_x,_y,_w,_h,_rnd);
+    if(_pos!=null) switch(_pos) {
+        case CENTER_LEFT: rect = rect.copyForCorners(true, false, false, true); break;
+        case CENTER: rect = rect.copyForCorners(false, false, false, false); break;
+        case CENTER_RIGHT: rect = rect.copyForCorners(false, true, true, false); break;
+        case TOP_CENTER: rect = rect.copyForCorners(true, true, false, false); break;
+        case BOTTOM_CENTER: rect = rect.copyForCorners(false, false, true, true); break;
+        case TOP_LEFT: rect = rect.copyForCorners(true, false, false, false); break;
+        case TOP_RIGHT: rect = rect.copyForCorners(false, true, false, false); break;
+        case BOTTOM_LEFT: rect = rect.copyForCorners(false, false, false, true); break;
+        case BOTTOM_RIGHT: rect = rect.copyForCorners(false, false, true, false); break;
+    }
+    return rect;
+}
+
+/**
  * Draws a button for the given rect with an option for pressed.
  */
 public void paint(Painter aPntr)
 {
     // Get shape and paint fill
-    RoundRect rect = new RoundRect(_x,_y,_w,_h,_rnd);
+    RoundRect rect = getRoundRectForPosition();
     aPntr.setPaint(_fill); aPntr.fill(rect);
     
     // Draw rings: (1) Outer-bottom: light gray, (2) inner: light gray gradient, (3) outer: gray
