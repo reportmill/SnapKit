@@ -55,7 +55,7 @@ public abstract boolean hasNext();
 /**
  * Returns a MoveTo for given coords.
  */
-public final Seg moveTo(double aX, double aY, double coords[])
+protected final Seg moveTo(double aX, double aY, double coords[])
 {
     coords[0] = aX; coords[1] = aY;
     if(_trans!=null) _trans.transform(coords, 1);
@@ -65,7 +65,7 @@ public final Seg moveTo(double aX, double aY, double coords[])
 /**
  * Returns a LineTo for given coords.
  */
-public final Seg lineTo(double aX, double aY, double coords[])
+protected final Seg lineTo(double aX, double aY, double coords[])
 {
     coords[0] = aX; coords[1] = aY;
     if(_trans!=null) _trans.transform(coords, 1);
@@ -75,7 +75,7 @@ public final Seg lineTo(double aX, double aY, double coords[])
 /**
  * Returns a QuadTo for given coords.
  */
-public final Seg quadTo(double aCPX, double aCPY, double aX, double aY, double coords[])
+protected final Seg quadTo(double aCPX, double aCPY, double aX, double aY, double coords[])
 {
     coords[0] = aCPX; coords[1] = aCPY; coords[2] = aX; coords[3] = aY;
     if(_trans!=null) _trans.transform(coords, 2);
@@ -85,7 +85,7 @@ public final Seg quadTo(double aCPX, double aCPY, double aX, double aY, double c
 /**
  * Returns a CubicTo for given coords.
  */
-public final Seg cubicTo(double aCPX0, double aCPY0, double aCPX1, double aCPY1, double aX, double aY, double coords[])
+protected final Seg cubicTo(double aCPX0, double aCPY0, double aCPX1, double aCPY1, double aX, double aY, double coords[])
 {
     coords[0] = aCPX0; coords[1] = aCPY0; coords[2] = aCPX1; coords[3] = aCPY1; coords[4] = aX; coords[5] = aY;
     if(_trans!=null) _trans.transform(coords, 3);
@@ -95,7 +95,7 @@ public final Seg cubicTo(double aCPX0, double aCPY0, double aCPX1, double aCPY1,
 /**
  * Returns a CubicTo for start, corner and end points.
  */
-public final Seg arcTo(double lx, double ly, double cx, double cy, double x, double y, double coords[])
+protected final Seg arcTo(double lx, double ly, double cx, double cy, double x, double y, double coords[])
 {
     double magic = .5523f; // I calculated this in mathematica one time - probably only valid for 90 deg corner.
     double cpx1 = lx + (cx-lx)*magic, cpy1 = ly + (cy-ly)*magic;
@@ -106,7 +106,7 @@ public final Seg arcTo(double lx, double ly, double cx, double cy, double x, dou
 /**
  * Returns a close.
  */
-public final Seg close()  { return Seg.Close; }
+protected final Seg close()  { return Seg.Close; }
 
 /**
  * Returns bounds rect for given PathIter.
