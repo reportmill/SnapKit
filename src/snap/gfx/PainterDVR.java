@@ -123,7 +123,7 @@ public void save()  { super.save(); add(new Save()); }
 public void restore()  { super.restore(); add(new Restore()); }
 
 /** Override to forward to real painter. */
-public Props getProps()  { return _pntr.getProps(); }
+public Props getProps()  { return _pntr!=null? _pntr.getProps() : null; }
 
 /**
  * Adds an instruction.
