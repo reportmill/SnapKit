@@ -7,7 +7,7 @@ import snap.util.StringUtils;
 public class Insets {
 
     // Insets
-    public double top, left, bottom, right;
+    public double top, right, bottom, left;
     
     // Dec
     
@@ -16,7 +16,7 @@ public class Insets {
  */
 public Insets(double aTop, double aRight, double aBottom, double aLeft)
 {
-    top = aTop; left = aLeft; bottom = aBottom; right = aRight;
+    top = aTop; right = aRight; bottom = aBottom; left = aLeft;
 }
 
 /**
@@ -92,11 +92,12 @@ public static Insets get(String aString)
     if(aString==null || aString.length()==0) return null;
     String margins[] = aString.split("\\,");
     int top = margins.length>0? StringUtils.intValue(margins[0]) : 0;
-    int left = margins.length>1? StringUtils.intValue(margins[1]) : 0;
+    int right = margins.length>1? StringUtils.intValue(margins[1]) : 0;
     int bottom = margins.length>2? StringUtils.intValue(margins[2]) : 0;
-    int right = margins.length>3? StringUtils.intValue(margins[3]) : 0;
-    if(margins.length==1) left = right = bottom = top;
-    return new Insets(top, left, bottom, right);
+    int left = margins.length>3? StringUtils.intValue(margins[3]) : 0;
+    if(margins.length==2) { left = right; bottom = top; }
+    else if(margins.length==1) left = right = bottom = top;
+    return new Insets(top, right, bottom, left);
 }
 
 }
