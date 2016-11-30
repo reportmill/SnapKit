@@ -143,6 +143,18 @@ public static final double getDistanceSquared(double x0, double y0, double x1, d
 }
 
 /**
+ * Returns the angle to the mouse point.
+ */
+public static final double getAngle(double x0, double y0, double x1, double y1)
+{
+    double dx = x1 - x0, dy = y1 - y0;
+    double angle = Math.toDegrees(Math.atan(dy/Math.abs(dx)));
+    if(dx<0) angle = 180 - angle;
+    else if(dx==0) angle = dy>0? -90 : dy<0? 90 : 0;
+    return angle;
+}
+
+/**
  * Returns a point instance for x/y.
  */
 public static Point get(Point aPoint)  { return new Point(aPoint.x, aPoint.y); }

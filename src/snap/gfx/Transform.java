@@ -65,6 +65,17 @@ public void rotate(double anAngle)
 }
 
 /**
+ * Rotates this transform by given angle in degrees about the given point.
+ */
+public void rotateAbout(double anAngle, double aX, double aY)
+{
+    translate(-aX, -aY);
+    double angle = Math.toRadians(anAngle), c = Math.cos(angle), s = Math.sin(angle);
+    multiply(c, s, -s, c, 0, 0);
+    translate(aX, aY);
+}
+
+/**
  * Scales this transform by given scale x and scale y.
  */
 public void scale(double sx, double sy)  { multiply(sx, 0, 0, sy, 0, 0); }
