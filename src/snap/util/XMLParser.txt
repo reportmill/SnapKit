@@ -1,7 +1,9 @@
 
-Document { Prolog? Element }
+Document { Prolog? DocType? Element }
 
 Prolog { "<?xml" Attribute* "?>" }
+
+DocType { "<!DOCTYPE" (Name | String)* ">" }
 
 Element { "<" Name Attribute* ("/>" | (">" Content "</" Name ">")) }
 
