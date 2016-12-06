@@ -24,7 +24,7 @@ protected FileHeader getFileHeader(String aPath) throws IOException
     // Fetch URL
     String urls = getURLString() + aPath;
     HTTPRequest req = new HTTPRequest(urls); req.setRequestMethod("HEAD");
-    HTTPResponse resp  = req.getResponse();
+    HTTPResponse resp = req.getResponse();
     
     // Handle non-success response codes
     if(resp.getCode()==HTTPResponse.NOT_FOUND)
@@ -35,7 +35,8 @@ protected FileHeader getFileHeader(String aPath) throws IOException
         throw new IOException(resp.getMessage());
     
     // Create file, set bytes and return
-    boolean isDir = FilePathUtils.getExtension(aPath).length()==0;
+    String contentType = resp.getContentType().toLowerCase();
+    boolean isDir = FilePathUtils.getExtension(aPath).length()==0 && contentType.startsWith("text");
     FileHeader file = new FileHeader(aPath, isDir);
     file.setLastModifiedTime(resp.getLastModified());
     file.setSize(resp.getContentLength());
@@ -43,23 +44,45 @@ protected FileHeader getFileHeader(String aPath) throws IOException
 }
 
 /**
- * Gets file bytes.
+ * Returns file bytes.
  */
-public byte[] getFileBytes(String aPath) throws IOException
+protected Object getFileContent(String aPath) throws Exception
 {
+    // Fetch URL
     String urls = getURLString() + aPath;
     HTTPRequest req = new HTTPRequest(urls);
-    HTTPResponse resp  = req.getResponse();
+    HTTPResponse resp = req.getResponse();
+    
+    // Handle non-success response codes
+    if(resp.getCode()==HTTPResponse.NOT_FOUND)
+        return null; // throw new FileNotFoundException(aPath);
+    if(resp.getCode()==HTTPResponse.UNAUTHORIZED)
+        throw new AccessException();
+    if(resp.getCode()!=HTTPResponse.OK)
+        throw new IOException(resp.getMessage());
+    
+    // Create file, set bytes and return
+    String contentType = resp.getContentType().toLowerCase();
+    boolean isDir = FilePathUtils.getExtension(aPath).length()==0 && contentType.startsWith("text");
+    
+    // If directory, return
+    if(isDir) {
+        List <FileHeader> fhdrs = getFilesFromHTMLBytes(aPath, resp.getBytes());
+        if(fhdrs!=null)
+            return fhdrs;
+    }
+    
+    // Return bytes
     return resp.getBytes();
 }
 
 /**
  * Returns files at path.
  */
-public List <FileHeader> getFileHeaders(String aPath) throws IOException
+public List <FileHeader> getFileHeaders(String aPath, byte bytes[]) throws IOException
 {
     // Create files list
-    List <FileHeader> files = getFilesFromHTML(aPath);
+    List <FileHeader> files = getFilesFromHTMLBytes(aPath, bytes);
     if(files!=null)
         return files;
     
@@ -86,9 +109,8 @@ public List <FileHeader> getFileHeaders(String aPath) throws IOException
 /**
  * Returns files from HTML.
  */
-List <FileHeader> getFilesFromHTML(String aPath) throws IOException
+List <FileHeader> getFilesFromHTMLBytes(String aPath, byte bytes[]) throws IOException
 {
-    byte bytes[] = getFileBytes(aPath);
     String text = new String(bytes);
     int htag = text.indexOf("<HTML>"); if(htag<0) return null;
     List <FileHeader> files = new ArrayList();

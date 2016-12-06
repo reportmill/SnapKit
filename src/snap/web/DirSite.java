@@ -53,11 +53,18 @@ protected FileHeader getFileHeader(String aPath) throws Exception
 }
 
 /**
- * Get file from directory.
+ * Returns file content (bytes for file, FileHeaders for dir).
  */
-protected List <FileHeader> getFileHeaders(String aPath) throws Exception
+protected Object getFileContent(String aPath) throws Exception
 {
+    // Get dir file (just return if null)
     WebFile dfile = getDirFile(aPath); if(dfile==null) return null;
+    
+    // If plain file, just return bytes
+    if(dfile.isFile())
+        return dfile.getBytes();
+    
+    // Get file headers and return
     List <WebFile> dfiles = dfile.getFiles(); List <FileHeader> files = new ArrayList(dfiles.size());
     for(WebFile df : dfiles) {
         String path = aPath; if(!path.endsWith("/")) path += '/';
@@ -66,15 +73,6 @@ protected List <FileHeader> getFileHeaders(String aPath) throws Exception
         files.add(f);
     }
     return files;
-}
-
-/**
- * Return file bytes.
- */
-protected byte[] getFileBytes(String aPath) throws Exception
-{
-    WebFile dfile = getDirFile(aPath);
-    return dfile!=null? dfile.getBytes() : null;
 }
 
 /**

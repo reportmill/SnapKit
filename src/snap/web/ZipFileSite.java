@@ -124,6 +124,18 @@ protected FileHeader getFileHeader(String aPath) throws Exception
 }
 
 /**
+ * Returns file content (bytes for file, FileHeaders for dir).
+ */
+protected Object getFileContent(String aPath) throws Exception
+{
+    ZipEntry zentry = getEntries().get(aPath); if(zentry==null && _dirs.get(aPath)==null) return null;
+    boolean isDir = zentry==null || zentry.isDirectory();
+    if(isDir)
+        return getFileHeaders(aPath);
+    return getFileBytes(aPath);
+}
+
+/**
  * Returns file bytes.
  */
 protected byte[] getFileBytes(String aPath) throws Exception

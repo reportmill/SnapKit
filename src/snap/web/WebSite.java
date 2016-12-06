@@ -138,26 +138,32 @@ protected WebResponse doHead(WebRequest aRequest)
  */
 protected synchronized WebResponse doGet(WebRequest aRequest)
 {
+    // Get URL and path and create basic response
+    WebURL url = aRequest.getURL();
+    String path = url.getPath(); if(path==null) path = "/";
+    WebResponse resp = new WebResponse(); resp.setRequest(aRequest);
+    
+    // Get file header for path
+    Object content = null; try { content = getFileContent(path); }
+    catch(AccessException e) { resp.setException(e); resp.setCode(WebResponse.UNAUTHORIZED); }
+    catch(Exception e) { resp.setException(e); resp.setCode(WebResponse.NOT_FOUND); }
+    
     // Handle file
-    WebResponse resp = doHead(aRequest);
-    FileHeader fhdr = resp.getFileHeader(); if(fhdr==null) return resp;
-    String path = fhdr.getPath();
-    
-    // If file is plain file, get bytes
-    if(fhdr.isFile()) {
-        byte bytes[] = null; try { bytes = getFileBytes(path); }
-        catch(Exception e) { resp.setException(e); }
-        if(bytes!=null) {
-            resp.setBytes(bytes); resp.setCode(WebResponse.OK); }
+    if(content instanceof byte[]) { byte bytes[] = (byte[])content;
+        resp.setBytes(bytes); resp.setCode(WebResponse.OK);
+        FileHeader fhdr = new FileHeader(path, false); fhdr.setSize(bytes.length);
+        resp.setFileHeader(fhdr);
     }
-    
-    // Otherwise if directory, get files
-    else {
-        List <FileHeader> fhdrs = null; try { fhdrs = getFileHeaders(path); }
-        catch(Exception e) { resp.setException(e); }
-        if(fhdrs!=null) { 
-            resp.setFileHeaders(fhdrs); resp.setCode(WebResponse.OK); }
+        
+    // Handle directory
+    else if(content instanceof List) { List <FileHeader> fhdrs = (List)content;
+        resp.setFileHeaders(fhdrs); resp.setCode(WebResponse.OK);
+        FileHeader fhdr = new FileHeader(path, true);
+        resp.setFileHeader(fhdr);
     }
+        
+    // Handle FILE_NOT_FOUND
+    else resp.setCode(WebResponse.NOT_FOUND);
     
     // Return response
     return resp;
@@ -301,14 +307,9 @@ protected void deleteFile(WebFile aFile) throws ResponseException
 protected FileHeader getFileHeader(String aPath) throws Exception  { throw notImpl("getFileHeader"); }
 
 /**
- * Returns a list of files at path.
+ * Returns file content (bytes for file, FileHeaders for dir).
  */
-protected List <FileHeader> getFileHeaders(String aPath) throws Exception { throw notImpl("getFileHeaders"); }
-
-/**
- * Returns file bytes.
- */
-protected byte[] getFileBytes(String aPath) throws Exception { throw notImpl("getFileBytes"); }
+protected abstract Object getFileContent(String aPath) throws Exception;
 
 /**
  * Saves a file.

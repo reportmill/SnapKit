@@ -25,6 +25,26 @@ protected FileHeader getFileHeader(String aPath)
 }
 
 /**
+ * Returns file bytes.
+ */
+protected Object getFileContent(String aPath) throws Exception
+{
+    File file = getStandardFile(aPath);
+    if(file.exists() && file.isFile())
+        return getFileBytes(aPath);
+    return getFileHeaders(aPath);
+}
+
+/**
+ * Returns the file bytes at given path.
+ */
+protected byte[] getFileBytes(String aPath) throws Exception
+{
+    File file = getStandardFile(aPath);
+    return FileUtils.getBytes(file);
+}
+
+/**
  * Returns the child file headers at given path.
  */
 protected List <FileHeader> getFileHeaders(String aPath) throws Exception
@@ -47,15 +67,6 @@ protected List <FileHeader> getFileHeaders(String aPath) throws Exception
     
     // Return files
     return files;
-}
-
-/**
- * Returns the file bytes at given path.
- */
-protected byte[] getFileBytes(String aPath) throws Exception
-{
-    File file = getStandardFile(aPath);
-    return FileUtils.getBytes(file);
 }
 
 /**

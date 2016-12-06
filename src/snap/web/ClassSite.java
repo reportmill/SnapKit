@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import snap.util.URLUtils;
@@ -32,11 +31,19 @@ protected FileHeader getFileHeader(String aPath)
     return file;
 }
 
-protected List <FileHeader> getFileHeaders(String aPath)  { return Collections.emptyList(); }
-
-protected byte[] getFileBytes(String aPath) throws IOException
+/**
+ * Returns file content (bytes for file, FileHeaders for dir).
+ */
+protected Object getFileContent(String aPath) throws Exception
 {
+    // Get URL
     URL url = getClass().getResource(aPath); if(url==null) return null;
+    
+    // If directory, return emtpy list
+    if(aPath.equals("/"))
+        return Collections.emptyList();
+        
+    // Return bytes
     return URLUtils.getBytes(url);
 }
 

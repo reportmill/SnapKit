@@ -58,6 +58,45 @@ protected FileHeader getFileHeader(String aPath)
 }
 
 /**
+ * Returns file content (bytes for file, FileHeaders for dir).
+ */
+protected Object getFileContent(String aPath) throws Exception
+{
+    // Make sure we're connected
+    FTPClient ftpc = getFTPClient(); try { ftpc.setConnected(true); }
+    catch(Exception e) { throw new AccessException(this, e); }
+    
+    // Get path
+    String ftpPath = getFtpPath(aPath);
+    
+    // Get file info for path
+    FTPClient.FileInfo fileInfo;
+    try { fileInfo = ftpc.getFileInfo(ftpPath); }
+    catch(Exception e) { throw new RuntimeException(e); }
+    if(fileInfo==null) return null;
+    
+    // Handle directory
+    if(fileInfo.directory)
+        return getFileHeaders(aPath);
+    return getFileBytes(aPath);
+}
+
+/**
+ * Gets file bytes.
+ */
+public byte[] getFileBytes(String aPath)
+{
+    // Make sure we're connected
+    FTPClient ftpc = getFTPClient(); try { ftpc.setConnected(true); }
+    catch(Exception e) { throw new AccessException(this, e); }
+    
+    // Get bytes
+    String ftpPath = getFtpPath(aPath);
+    try { return ftpc.getBytes(ftpPath); }
+    catch(Exception e) { throw new RuntimeException(e); }
+}
+
+/**
  * Returns files at path.
  */
 public List <FileHeader> getFileHeaders(String aPath)
@@ -85,21 +124,6 @@ public List <FileHeader> getFileHeaders(String aPath)
     
     // Return files
     return files;
-}
-
-/**
- * Gets file bytes.
- */
-public byte[] getFileBytes(String aPath)
-{
-    // Make sure we're connected
-    FTPClient ftpc = getFTPClient(); try { ftpc.setConnected(true); }
-    catch(Exception e) { throw new AccessException(this, e); }
-    
-    // Get bytes
-    String ftpPath = getFtpPath(aPath);
-    try { return ftpc.getBytes(ftpPath); }
-    catch(Exception e) { throw new RuntimeException(e); }
 }
 
 /**
