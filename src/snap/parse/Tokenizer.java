@@ -14,6 +14,9 @@ public class Tokenizer {
     // The tokenizer input
     CharSequence     _input;
     
+    // The input length
+    int              _length;
+    
     // Whether to support standard Java single line comments and multiple line comments
     boolean          _slc, _mlc, _jc;
     
@@ -42,7 +45,7 @@ public CharSequence getInput()  { return _input; }
  */
 public void setInput(CharSequence anInput)
 {
-    _input = anInput; _charIndex = _lineIndex = _lineStart = 0;
+    _input = anInput; _length = _input.length(); _charIndex = _lineIndex = _lineStart = 0;
     for(Regex regex : _regexList)
         regex.getMatcher(_input).reset(_input);
 }
@@ -55,12 +58,42 @@ public CharSequence getInput(int aStart, int anEnd)  { return _input.subSequence
 /**
  * CharSequence method.
  */
-public final int length()  { return _input.length(); }
+public final int length()  { return _length; }
+
+/**
+ * CharSequence method.
+ */
+public final char charAt(int anIndex)  { return _input.charAt(anIndex); }
+
+/**
+ * Returns whether another char is available.
+ */
+public final boolean hasChar()  { return _charIndex<length(); }
+
+/**
+ * Returns whether another given number of chars is available.
+ */
+public final boolean hasChars(int aVal)  { return _charIndex+aVal<=length(); }
 
 /**
  * Returns the current parse char.
  */
 public final char getChar()  { return _input.charAt(_charIndex); }
+
+/**
+ * Returns the char at the current index plus offset.
+ */
+public final char getChar(int anOffset)  { return _input.charAt(_charIndex+anOffset); }
+
+/**
+ * Returns the char at the current index plus offset.
+ */
+public final char eatChar()  { return _input.charAt(_charIndex++); }
+
+/**
+ * Returns the next given number of chars as a string.
+ */
+public final String getChars(int aValue)  { return _input.subSequence(_charIndex, _charIndex+aValue).toString(); }
 
 /**
  * Returns the current parse char location.
@@ -145,11 +178,6 @@ private void addPatterns(ParseRule aRule, List theRules)
 protected Regex[] getRegexes()  { return _regexes!=null? _regexes : (_regexes=_regexList.toArray(new Regex[0])); }
 
 /**
- * CharSequence method.
- */
-public final char charAt(int anIndex)  { return _input.charAt(anIndex); }
-
-/**
  * Returns the current line index.
  */
 public final int getLineIndex()  { return _lineIndex; }
@@ -183,7 +211,7 @@ public Token getNextToken()
     Token specialToken = getNextSpecialToken();
     
     // Get list of matchers for next char
-    char c = _charIndex<length()? getChar() : 0;
+    char c = hasChar()? getChar() : 0;
     Regex regexes[] = c<128? getRegexes(c) : getRegexes();
     
     // Iterate over regular expressions to find best match
@@ -206,7 +234,7 @@ public Token getNextToken()
     
     // If no match, return null
     if(match==null) {
-        if(_charIndex==length()) return null;
+        if(!hasChar()) return null;
         throw new ParseException("Token not found for: " + getInput(_charIndex, Math.min(_charIndex+30,length())));
     }
     
@@ -277,7 +305,7 @@ protected Token getNextSpecialToken(Token aSpclTkn)
     skipWhiteSpace();
     
     // Look for standard Java single/multi line comments tokens
-    if(!_jc || _charIndex+1>=length() || getChar()!='/') return null;
+    if(!_jc || !hasChar() || getChar()!='/') return null;
     Token token = _slc? getSingleLineCommentToken(aSpclTkn) : null;
     if(token==null && _mlc) token = getMultiLineCommentToken(aSpclTkn);
 
@@ -290,9 +318,9 @@ protected Token getNextSpecialToken(Token aSpclTkn)
  */
 protected void skipWhiteSpace()
 {
-    char c; while(_charIndex<length() && Character.isWhitespace(c=getChar())) { _charIndex++;
+    char c; while(hasChar() && Character.isWhitespace(c=getChar())) { _charIndex++;
         if(c=='\n' || c=='\r') {
-            if(c=='\r' && _charIndex<length() && getChar()=='\n') _charIndex++;
+            if(c=='\r' && hasChar() && getChar()=='\n') _charIndex++;
             _lineIndex++; _lineStart = _charIndex;
         }
     }
@@ -304,7 +332,7 @@ protected void skipWhiteSpace()
 protected Token getSingleLineCommentToken(Token aSpclTkn)
 {
     // If next two chars are single line comment (//), return token
-    if(_charIndex+1<length() && getChar()=='/' && charAt(_charIndex+1)=='/') {
+    if(hasChars(2) && getChar()=='/' && getChar(1)=='/') {
         int start = _charIndex; _charIndex += 2;
         _charIndex = StringUtils.indexAfterNewline(getInput(), _charIndex);
         if(_charIndex<0) _charIndex = length(); else { _lineIndex++; _lineStart = _charIndex; }
@@ -321,7 +349,7 @@ protected Token getSingleLineCommentToken(Token aSpclTkn)
 protected Token getMultiLineCommentToken(Token aSpclTkn)
 {
     // If next two chars are multi line comment (/*) prefix, return token
-    if(_charIndex+1<length() && getChar()=='/' && charAt(_charIndex+1)=='*')
+    if(hasChars(2) && getChar()=='/' && getChar(1)=='*')
         return getMultiLineCommentTokenMore(aSpclTkn);
     return null;
 }
@@ -335,11 +363,11 @@ protected Token getMultiLineCommentTokenMore(Token aSpclTkn)
     int start = _charIndex; if(start==length()) return null;
     
     // Gobble chars until multi-line comment termination or input end
-    while(_charIndex<length()) {
-        char c = charAt(_charIndex++);
-        if(c=='*' && _charIndex<length() && charAt(_charIndex)=='/') { _charIndex++; break; }
+    while(hasChar()) {
+        char c = eatChar();
+        if(c=='*' && hasChar() && getChar()=='/') { _charIndex++; break; }
         if(c=='\n' || c=='\r') {
-            if(c=='\r' && _charIndex<length() && charAt(_charIndex)=='\n') _charIndex++;
+            if(c=='\r' && hasChar() && getChar()=='\n') _charIndex++;
             _lineIndex++; _lineStart = _charIndex;
         }
     }

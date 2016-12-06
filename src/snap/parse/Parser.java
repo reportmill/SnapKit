@@ -74,6 +74,46 @@ public Parser setInput(CharSequence aSequence)
 }
 
 /**
+ * CharSequence method.
+ */
+public final int length()  { return getTokenizer().length(); }
+
+/**
+ * CharSequence method.
+ */
+public final char charAt(int anIndex)  { return getTokenizer().charAt(anIndex); }
+
+/**
+ * Returns whether another char is available.
+ */
+public final boolean hasChar()  { return getTokenizer().hasChar(); }
+
+/**
+ * Returns whether another given number of chars is available.
+ */
+public final boolean hasChars(int aVal)  { return getTokenizer().hasChars(aVal); }
+
+/**
+ * Returns the current parse char.
+ */
+public final char getChar()  { return getTokenizer().getChar(); }
+
+/**
+ * Returns the char at the current index plus offset.
+ */
+public final char getChar(int anOffset)  { return getTokenizer().getChar(anOffset); }
+
+/**
+ * Returns the char at the current index plus offset.
+ */
+public final char eatChar()  { return getTokenizer().eatChar(); }
+
+/**
+ * Returns the next given number of chars as a string.
+ */
+public final String getChars(int aValue)  { return getTokenizer().getChars(aValue); }
+
+/**
  * Returns the current parse char location.
  */
 public int getCharIndex()  { return getTokenizer().getCharIndex(); }

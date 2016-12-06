@@ -351,6 +351,32 @@ public static String getISOLatinString(byte bytes[], int offset, int length)
 }
 
 /**
+ * Returns the last index of given search chars in given chars.
+ */
+public static int indexOf(CharSequence theChars, CharSequence theSearch, int aStart)
+{
+    int clen = theChars.length(), slen = theSearch.length(); char fchar = theSearch.charAt(0);
+    for(int cpos=aStart; cpos<clen; cpos++) { if(theChars.charAt(cpos)==fchar) {
+        int i = 1; for(i=0;i<slen;i++) if(theChars.charAt(cpos+i)!=theSearch.charAt(i)) break;
+        if(i==slen)
+            return cpos; }}
+    return -1;
+}
+
+/**
+ * Returns the last index of given search chars in given chars.
+ */
+public static int lastIndexOf(CharSequence theChars, CharSequence theSearch)
+{
+    int cpos = theChars.length() - theSearch.length() + 1; char fchar = theSearch.charAt(0);
+    while(--cpos>=0) { if(theChars.charAt(cpos)==fchar) {
+        int i = 0; for(i=0;i<theSearch.length();i++) if(theChars.charAt(cpos+i)!=theSearch.charAt(i)) break;
+        if(i==theSearch.length())
+            return cpos; }}
+    return -1;
+}
+
+/**
  * Returns the index of search string s2 in given string s1, ignores case.
  */
 public static int indexOfIC(CharSequence s1, CharSequence s2)  { return indexOfIC(s1, s2, 0); }
