@@ -67,7 +67,7 @@ protected Object getFileContent(String aPath) throws Exception
     
     // If directory, return
     if(isDir) {
-        List <FileHeader> fhdrs = getFilesFromHTMLBytes(aPath, resp.getBytes());
+        List <FileHeader> fhdrs = getFileHeaders(aPath, resp.getBytes());
         if(fhdrs!=null)
             return fhdrs;
     }
@@ -126,6 +126,27 @@ List <FileHeader> getFilesFromHTMLBytes(String aPath, byte bytes[]) throws IOExc
         files.add(file);
     }
     return files;
+}
+
+/**
+ * Handle a get request.
+ */
+protected WebResponse doPost(WebRequest aReq)
+{
+    // Fetch URL
+    String path = aReq.getURL().getPath();
+    String urls = aReq.getURL().getString();
+    HTTPRequest req = new HTTPRequest(urls); req.setBytes(aReq.getPostBytes());
+    
+    HTTPResponse resp;
+    try { resp = req.getResponse(); }
+    catch(Exception e) { throw new RuntimeException(e); }
+    
+    // Configure response and return
+    WebResponse resp2 = new WebResponse(); resp2.setRequest(aReq);
+    resp2.setCode(resp.getCode());
+    resp2.setBytes(resp.getBytes());
+    return resp2;
 }
 
 /** WebSite method. */

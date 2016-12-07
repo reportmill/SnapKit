@@ -274,6 +274,19 @@ public byte[] getBytes()
 }
 
 /**
+ * Returns bytes for this URL.
+ */
+public byte[] postBytes(byte theBytes[])
+{
+    WebSite site = getSite();
+    WebRequest req = new WebRequest(this); req.setPostBytes(theBytes);
+    WebResponse resp = site.getResponse(req);
+    if(resp.getException()!=null)                // If response hit exception, throw it
+        throw new ResponseException(resp);
+    return resp.getBytes();
+}
+
+/**
  * Returns the file bytes as a string.
  */
 public String getText()

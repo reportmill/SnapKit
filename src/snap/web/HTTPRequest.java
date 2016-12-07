@@ -100,7 +100,7 @@ public byte[] getBytes()  { return _bytes; }
 /**
  * Sets the bytes associated with the request (POST).
  */
-public void setBytes(byte theBytes[])  { _bytes = theBytes; }
+public void setBytes(byte theBytes[])  { _bytes = theBytes; setRequestMethod("POST"); }
 
 /**
  * Executes this request and returns a response.

@@ -14,6 +14,9 @@ public class WebRequest {
     // The type of request
     Type           _type = Type.GET;
     
+    // The post bytes
+    byte           _postBytes[];
+    
     // Constants for request type
     public enum Type  { GET, HEAD, POST, PUT, DELETE }
 
@@ -51,6 +54,16 @@ public Type getType()  { return _type; }
  * Sets the type of request.
  */
 public void setType(Type aType)  { _type = aType; }
+
+/**
+ * Returns the post bytes.
+ */
+public byte[] getPostBytes()  { return _postBytes; }
+
+/**
+ * Sets the post bytes.
+ */
+public void setPostBytes(byte theBytes[])  { _postBytes = theBytes; _type = Type.POST; }
 
 /**
  * Standard toString implementation.

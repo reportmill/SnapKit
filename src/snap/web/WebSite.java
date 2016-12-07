@@ -101,6 +101,7 @@ public WebResponse getResponse(WebRequest aRequest)
     switch(aRequest.getType())  {
         case HEAD: return doHead(aRequest);
         case GET: return doGet(aRequest);
+        case POST: return doPost(aRequest);
         case PUT: return doPut(aRequest);
         case DELETE: return doDelete(aRequest);
     }
@@ -168,6 +169,11 @@ protected synchronized WebResponse doGet(WebRequest aRequest)
     // Return response
     return resp;
 }
+
+/**
+ * Handle a get request.
+ */
+protected WebResponse doPost(WebRequest aRequest)  { throw new RuntimeException("handlePost"); }
 
 /**
  * Handle a PUT request.
