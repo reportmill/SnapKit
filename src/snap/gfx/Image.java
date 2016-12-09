@@ -105,9 +105,18 @@ public byte[] getBytes()  { return _bytes!=null? _bytes : (_bytes=getBytesImpl()
  */
 public byte[] getBytesImpl()
 {
+    // Get bytes for URL and return
     WebURL url = getSourceURL();
-    byte bytes[] = url!=null? (url.getFile()!=null? url.getFile().getBytes() : null) : SnapUtils.getBytes(_source);
-    return bytes;
+    if(url!=null)
+        return url.getBytes();
+        
+    // Get bytes for source and return
+    byte bytes[] = SnapUtils.getBytes(_source);
+    if(bytes!=null)
+        return bytes;
+        
+    System.err.println("Image.getBytes: Image bytes not found for source " + _source);
+    return null;
 }
 
 /**
@@ -209,7 +218,7 @@ public abstract Object getNative();
 public static Image get(Object aSource)  { return GFXEnv.getEnv().getImage(aSource); }
 
 /**
- * Creates a new image from source.
+ * Creates a new image from class and resource path.
  */
 public static Image get(Class aClass, String aPath)
 {
@@ -220,7 +229,7 @@ public static Image get(Class aClass, String aPath)
 }
 
 /**
- * Returns the image WebFile.
+ * Returns the image from URL and resource path.
  */
 public static Image get(WebURL aBaseURL, String aName)
 {
