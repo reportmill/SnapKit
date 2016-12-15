@@ -10,18 +10,6 @@ import java.util.stream.IntStream;
 public class GFXUtils {
 
 /**
- * Returns an image for string and font.
- */
-public static Image getImage(String aStr, Font aFont)
-{
-    int sw = (int)Math.ceil(aFont.getStringAdvance(aStr)), sh = (int)Math.ceil(aFont.getLineHeight());
-    Image img = Image.get(sw+8,sh+8,true);
-    Painter pntr = img.getPainter(); pntr.setColor(Color.BLACK); pntr.setFont(aFont);
-    pntr.drawString(aStr, 4,aFont.getAscent()+4);
-    return img;
-}
-
-/**
  * Emboss a source image according to a bump map, both in ARGB integer array form.
  * Bump map is assumed to to be (2*radius x 2*radius) pixels larger than the source
  * to compensate for edge conditions of both the blur and the emboss convolutions.

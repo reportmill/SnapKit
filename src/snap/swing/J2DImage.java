@@ -18,6 +18,9 @@ public class J2DImage extends Image {
     // The width/height dpi
     double            _wdpi = 72, _hdpi = 72;
     
+    // The color map
+    byte              _colorMap[];
+    
     // The buffered image
     BufferedImage     _native;
 
@@ -63,12 +66,51 @@ public boolean hasAlpha()  { return getNative().getColorModel().hasAlpha(); }
 /**
  * Returns number of components.
  */
-public int getComponentCount()  { return getNative().getColorModel().getNumComponents(); }
+public int getSamplesPerPixel()  { return getNative().getColorModel().getNumComponents(); }
+
+/**
+ * Returns the number of bits per sample.
+ */
+public int getBitsPerSample()  { return getNative().getColorModel().getComponentSize(0); }
 
 /**
  * Returns whether index color model.
  */
 public boolean isIndexedColor()  { return getNative().getColorModel() instanceof IndexColorModel; }
+
+/**
+ * Color map support: returns the bytes of color map from a color map image.
+ */
+public byte[] getColorMap()
+{
+    if(_colorMap!=null) return _colorMap; //_spp = 1;
+    
+    // Get basic info
+    IndexColorModel icm = (IndexColorModel)getNative().getColorModel();
+    int tableColors = icm.getMapSize();
+    int numColors = 1<<getBitsPerPixel();
+    
+    // Load components
+    byte reds[] = new byte[numColors]; icm.getReds(reds);
+    byte greens[] = new byte[numColors]; icm.getGreens(greens);
+    byte blues[] = new byte[numColors]; icm.getBlues(blues);
+    
+    // Load ColorMap
+    _colorMap = new byte[3*numColors];
+    for(int i=0, j=0; i<tableColors; i++) {
+        _colorMap[j++] = reds[i]; _colorMap[j++] = greens[i]; _colorMap[j++] = blues[i]; }
+    
+    // Get _imageData._transparentColorIndex (JAI doesn't seem to set transparentPixel, but does set alpha entry)
+    int _transparentColorIndex = icm.getTransparentPixel();
+    if(_transparentColorIndex<0 && icm.getTransparency()==IndexColorModel.BITMASK) {
+        icm.getAlphas(reds);
+        for(int i=0; i<tableColors; i++)
+            if(reds[i]==(byte)0) {
+                _transparentColorIndex = i; break; }
+    }
+    
+    return _colorMap;
+}
 
 /**
  * Returns the integer representing the color at the given x,y point.

@@ -51,12 +51,22 @@ public boolean hasAlpha()  //{ return getBI().getColorModel().hasAlpha(); }
 /**
  * Returns number of components.
  */
-public int getComponentCount()  { return hasAlpha()? 4 : 3; }
+public int getSamplesPerPixel()  { return hasAlpha()? 4 : 3; }
+
+/**
+ * Returns the number of bits per sample.
+ */
+public int getBitsPerSample()  { return 8; }
 
 /**
  * Returns whether index color model.
  */
 public boolean isIndexedColor()  { return false; }
+
+/**
+ * Color map support: returns the bytes of color map from a color map image.
+ */
+public byte[] getColorMap()  { return null; }
 
 /**
  * Returns the integer representing the color at the given x,y point.

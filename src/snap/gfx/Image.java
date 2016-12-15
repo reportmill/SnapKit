@@ -19,6 +19,9 @@ public abstract class Image extends Object {
      // The image source bytes
      byte            _bytes[];
      
+     // The image type
+     String          _type;
+     
      // The native image
      Object          _native;
      
@@ -86,14 +89,34 @@ public abstract int getPixHeight();
 public abstract boolean hasAlpha();
 
 /**
+ * Returns whether the image is non-grayscale.
+ */
+public boolean isColor()  { return isIndexedColor() || getSamplesPerPixel()>2; }
+
+/**
  * Returns number of components.
  */
-public abstract int getComponentCount();
+public abstract int getSamplesPerPixel();
+
+/**
+ * Returns the number of bits per sample.
+ */
+public abstract int getBitsPerSample();
+
+/**
+ * Returns the number of bits per pixel (derived from bits per sample and samples per pixel).
+ */
+public int getBitsPerPixel()  { return getBitsPerSample()*getSamplesPerPixel(); }
 
 /**
  * Returns whether index color model.
  */
 public abstract boolean isIndexedColor();
+
+/**
+ * Color map support: returns the bytes of color map from a color map image.
+ */
+public abstract byte[] getColorMap();
 
 /**
  * Returns the source bytes.
@@ -118,6 +141,11 @@ public byte[] getBytesImpl()
     System.err.println("Image.getBytes: Image bytes not found for source " + _source);
     return null;
 }
+
+/**
+ * Returns the type of the image bytes provided.
+ */
+public String getType()  { return _type!=null? _type : (_type=ImageUtils.getImageType(getBytes())); }
 
 /**
  * Returns an RGB integer for given x, y.
