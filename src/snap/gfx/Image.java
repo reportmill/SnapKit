@@ -109,6 +109,11 @@ public abstract int getBitsPerSample();
 public int getBitsPerPixel()  { return getBitsPerSample()*getSamplesPerPixel(); }
 
 /**
+ * Returns the number of bytes per row (derived from width and bits per pixel).
+ */
+public int getBytesPerRow()  { return (getPixWidth()*getBitsPerPixel()+7)/8; }
+
+/**
  * Returns whether index color model.
  */
 public abstract boolean isIndexedColor();

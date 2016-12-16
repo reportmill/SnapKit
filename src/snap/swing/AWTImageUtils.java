@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import javax.imageio.ImageIO;
 
 /**
- * A custom class.
+ * Utility methods for AWT Images.
  */
 public class AWTImageUtils {
 
@@ -106,7 +106,7 @@ public static byte[] getBytesRGBA(BufferedImage anImage)
         return getBytesRGBA(anImage, (IndexColorModel)cm);
     
     // If anything else, complain
-    throw new RuntimeException("Color model not supported: " + cm.getClass().getName());
+    throw new RuntimeException("AWTImageUtils.getBytesRGBA: Color model not supported: " + cm.getClass().getName());
 }
 
 /**
@@ -152,12 +152,10 @@ private static byte[] getBytesRGBA(BufferedImage anImage, ComponentColorModel cc
  */
 private static byte[] getBytesRGBA(BufferedImage anImage, DirectColorModel dcm)
 {
+    // Get pixel size (if not standard, throw fit)
     int psize = dcm.getPixelSize();
-    
-    if(psize!=24 && psize!=32) {
-        System.err.println("Can't read direct color images with pixel size " + psize);
-        return null; //_valid = false
-    }
+    if(psize!=24 && psize!=32)
+        throw new RuntimeException("AWTImageUtils.getBytesRGBA: Can't read DCM images with pixel size " + psize);
 
     // Load _imageData._bytesDecoded from raster
     int width = anImage.getWidth(), height = anImage.getHeight();
