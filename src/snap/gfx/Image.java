@@ -2,11 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import snap.util.SnapUtils;
+import snap.util.*;
 import snap.web.*;
 
 /**
- * A custom class.
+ * Represents an Image, such as JPEG, PNG, GIF, TIFF, BMP.
  */
 public abstract class Image extends Object {
 
@@ -27,6 +27,9 @@ public abstract class Image extends Object {
      
      // The cached width/height
      double          _width = -1, _height = -1;
+
+    // Supported image type strings
+    static String    _types[] = { "gif", "jpg", "jpeg", "png", "tif", "tiff", "bmp" };
 
 /**
  * Returns the name of image (if from URL/file).
@@ -296,5 +299,15 @@ public static Image get(int aWidth, int aHeight, boolean hasAlpha)
 {
     return GFXEnv.getEnv().getImage(aWidth,aHeight,hasAlpha);
 }
+
+/**
+ * Returns whether given extension is supported.
+ */
+public static boolean canRead(String anExt)  { return StringUtils.containsIC(_types, anExt.toLowerCase()); }
+
+/**
+ * Returns whether image reader can read the file provided in the byte array.
+ */
+public static boolean canRead(byte bytes[])  { return ImageUtils.getImageType(bytes)!=null; }
 
 }
