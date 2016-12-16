@@ -138,6 +138,11 @@ public byte[] getBytesImpl()
     if(bytes!=null)
         return bytes;
         
+    // If image created from scratch or native, generate bytes
+    if(getNative()!=null)
+        return hasAlpha()? getBytesPNG() : getBytesJPEG();
+    
+    // Complain and return
     System.err.println("Image.getBytes: Image bytes not found for source " + _source);
     return null;
 }
