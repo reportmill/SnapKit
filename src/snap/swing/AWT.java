@@ -91,7 +91,7 @@ public static GradientPaintX get(GradientPaint aGP)  { return new GradientPaintX
 /** Returns awt TexturePaint for snap TexturePaint. */
 public static java.awt.TexturePaint get(ImagePaint aTP)
 {
-    BufferedImage bi = AWTUtils.getBufferedImage((java.awt.Image)aTP.getImage().getNative());
+    BufferedImage bi = AWTImageUtils.getBufferedImage((java.awt.Image)aTP.getImage().getNative());
     return new java.awt.TexturePaint(bi, get(aTP.getBounds()));
 }
 

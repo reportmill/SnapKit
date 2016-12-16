@@ -119,6 +119,11 @@ public abstract boolean isIndexedColor();
 public abstract byte[] getColorMap();
 
 /**
+ * Color map support: returns the index of the transparent color in a color map image.
+ */
+public abstract int getAlphaColorIndex();
+
+/**
  * Returns the source bytes.
  */
 public byte[] getBytes()  { return _bytes!=null? _bytes : (_bytes=getBytesImpl()); }
@@ -161,6 +166,11 @@ public abstract int getRGB(int aX, int aY);
  * Returns the ARGB array of this image.
  */
 public int[] getArrayARGB()  { System.err.println("Image.getArrayARGB: Not implemented"); return null; }
+
+/**
+ * Returns the decoded RGBA bytes of this image.
+ */
+public abstract byte[] getBytesRGBA();
 
 /**
  * Returns the JPEG bytes for image.

@@ -5,7 +5,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
-import snap.swing.AWTUtils;
+import snap.swing.AWTImageUtils;
 
 /**
  * A custom class.
@@ -69,19 +69,29 @@ public boolean isIndexedColor()  { return false; }
 public byte[] getColorMap()  { return null; }
 
 /**
+ * Color map support: returns the index of the transparent color in a color map image.
+ */
+public int getAlphaColorIndex()  { return 0; }
+
+/**
  * Returns the integer representing the color at the given x,y point.
  */
 public int getRGB(int aX, int aY)  { return getNative().getPixelReader().getArgb(aX, aY); }
 
 /**
+ * Returns the decoded RGBA bytes of this image.
+ */
+public byte[] getBytesRGBA()  { return AWTImageUtils.getBytesRGBA(getBI()); }
+
+/**
  * Returns the JPEG bytes for image.
  */
-public byte[] getBytesJPEG()  { return AWTUtils.getBytesJPEG(getBI()); }
+public byte[] getBytesJPEG()  { return AWTImageUtils.getBytesJPEG(getBI()); }
 
 /**
  * Returns the PNG bytes for image.
  */
-public byte[] getBytesPNG()  { return AWTUtils.getBytesPNG(getBI()); }
+public byte[] getBytesPNG()  { return AWTImageUtils.getBytesPNG(getBI()); }
 
 /**
  * Returns a painter for image.

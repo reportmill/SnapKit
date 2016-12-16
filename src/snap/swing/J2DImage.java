@@ -18,12 +18,15 @@ public class J2DImage extends Image {
     // The width/height dpi
     double            _wdpi = 72, _hdpi = 72;
     
+    // The buffered image
+    BufferedImage     _native;
+    
+    // The decoded bytes
+    byte              _bytesRGBA[];
+
     // The color map
     byte              _colorMap[];
     
-    // The buffered image
-    BufferedImage     _native;
-
 /**
  * Returns the native image object for image.
  */
@@ -66,7 +69,11 @@ public boolean hasAlpha()  { return getNative().getColorModel().hasAlpha(); }
 /**
  * Returns number of components.
  */
-public int getSamplesPerPixel()  { return getNative().getColorModel().getNumComponents(); }
+public int getSamplesPerPixel()
+{
+    int spp = getNative().getColorModel().getNumComponents();
+    return spp!=2? spp : 4; // We don't really support gray/alpha
+}
 
 /**
  * Returns the number of bits per sample.
@@ -81,36 +88,12 @@ public boolean isIndexedColor()  { return getNative().getColorModel() instanceof
 /**
  * Color map support: returns the bytes of color map from a color map image.
  */
-public byte[] getColorMap()
-{
-    if(_colorMap!=null) return _colorMap; //_spp = 1;
-    
-    // Get basic info
-    IndexColorModel icm = (IndexColorModel)getNative().getColorModel();
-    int tableColors = icm.getMapSize();
-    int numColors = 1<<getBitsPerPixel();
-    
-    // Load components
-    byte reds[] = new byte[numColors]; icm.getReds(reds);
-    byte greens[] = new byte[numColors]; icm.getGreens(greens);
-    byte blues[] = new byte[numColors]; icm.getBlues(blues);
-    
-    // Load ColorMap
-    _colorMap = new byte[3*numColors];
-    for(int i=0, j=0; i<tableColors; i++) {
-        _colorMap[j++] = reds[i]; _colorMap[j++] = greens[i]; _colorMap[j++] = blues[i]; }
-    
-    // Get _imageData._transparentColorIndex (JAI doesn't seem to set transparentPixel, but does set alpha entry)
-    int _transparentColorIndex = icm.getTransparentPixel();
-    if(_transparentColorIndex<0 && icm.getTransparency()==IndexColorModel.BITMASK) {
-        icm.getAlphas(reds);
-        for(int i=0; i<tableColors; i++)
-            if(reds[i]==(byte)0) {
-                _transparentColorIndex = i; break; }
-    }
-    
-    return _colorMap;
-}
+public byte[] getColorMap()  { return _colorMap!=null? _colorMap : (_colorMap=AWTImageUtils.getColorMap(getNative())); }
+
+/**
+ * Color map support: returns the index of the transparent color in a color map image.
+ */
+public int getAlphaColorIndex()  { return AWTImageUtils.getAlphaColorIndex(getNative()); }
 
 /**
  * Returns the integer representing the color at the given x,y point.
@@ -118,14 +101,22 @@ public byte[] getColorMap()
 public int getRGB(int aX, int aY)  { return getNative().getRGB(aX, aY); }
 
 /**
+ * Returns the decoded RGBA bytes of this image.
+ */
+public byte[] getBytesRGBA()
+{
+    return _bytesRGBA!=null? _bytesRGBA : (_bytesRGBA=AWTImageUtils.getBytesRGBA(getNative()));
+}
+
+/**
  * Returns the JPEG bytes for image.
  */
-public byte[] getBytesJPEG()  { return AWTUtils.getBytesJPEG(getNative()); }
+public byte[] getBytesJPEG()  { return AWTImageUtils.getBytesJPEG(getNative()); }
 
 /**
  * Returns the PNG bytes for image.
  */
-public byte[] getBytesPNG()  { return AWTUtils.getBytesPNG(getNative()); }
+public byte[] getBytesPNG()  { return AWTImageUtils.getBytesPNG(getNative()); }
 
 /**
  * Returns a painter for image.
@@ -189,7 +180,7 @@ public BufferedImage getNative()
     if(_native!=null) return _native;
     
     if(getSource() instanceof java.awt.Image)
-        return _native = AWTUtils.getBufferedImage((java.awt.Image)getSource());
+        return _native = AWTImageUtils.getBufferedImage((java.awt.Image)getSource());
 
     // Get image bytes
     byte bytes[] = getBytes();
