@@ -71,7 +71,7 @@ public boolean hasAlpha()  { return getNative().getColorModel().hasAlpha(); }
  */
 public int getSamplesPerPixel()
 {
-    int spp = getNative().getColorModel().getNumComponents();
+    int spp = isIndexedColor()? 1 : getNative().getColorModel().getNumComponents();
     return spp!=2? spp : 4; // We don't really support gray/alpha
 }
 
