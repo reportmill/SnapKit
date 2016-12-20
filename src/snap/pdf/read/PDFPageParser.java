@@ -192,14 +192,14 @@ public void parse(List tokenList, byte pageBytes[])
                         gs.trans.concatenate(getTransform(i)); swallowedToken = true; }
                     else if ((c=='s') && (numops==1)) { //cs - set non-stroke colorspace 
                         String space = getToken(i-1).nameString(pageBytes);
-                        gs.colorSpace = getPage().getColorspace(space); swallowedToken = true;
+                        gs.colorSpace = PDFColorSpace.getColorspace(space, _pfile, _page); swallowedToken = true;
                     }
                 }
                 break;
             case 'C' : // CS stroke colorspace
                 if(tlen==2 && pageBytes[tstart+1]=='S' && numops==1) {
                     String space = getToken(i-1).nameString(pageBytes);
-                    gs.scolorSpace = getPage().getColorspace(space); swallowedToken = true;
+                    gs.scolorSpace = PDFColorSpace.getColorspace(space, _pfile, _page); swallowedToken = true;
                 }
                 break;
             case 'd' : //setdash
@@ -248,7 +248,7 @@ public void parse(List tokenList, byte pageBytes[])
                 break;
             case 'g' : // setgray
                 if (tlen==1) {
-                    cspace = getPage().getColorspace("DeviceGray");
+                    cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
                     gs.color = getColor(cspace,i,numops); gs.colorSpace = cspace; swallowedToken = true;
                 }
                 else if ((tlen==2) && (pageBytes[tstart+1]=='s') && (numops==1)) { // gs
@@ -259,7 +259,7 @@ public void parse(List tokenList, byte pageBytes[])
                 break;
             case 'G' : // setgray
                 if (tlen==1) {
-                    cspace = getPage().getColorspace("DeviceGray");
+                    cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
                     gs.scolor = getColor(cspace,i,numops); gs.scolorSpace = cspace; swallowedToken = true;
                 }
                 break;
@@ -292,7 +292,7 @@ public void parse(List tokenList, byte pageBytes[])
             case 'k' : // setcmyk non-stroke
             case 'K' : // setcmyk stroke
                 if(tlen==1) {
-                    cspace = getPage().getColorspace("DeviceCMYK");
+                    cspace = PDFColorSpace.getColorspace("DeviceCMYK", _pfile, _page);
                     acolor = getColor(cspace,i,numops);
                     if(c=='k') { gs.colorSpace = cspace; gs.color = acolor; }
                     else { gs.scolorSpace = cspace; gs.scolor = acolor; } // strokecolor
@@ -355,11 +355,11 @@ public void parse(List tokenList, byte pageBytes[])
                         gs.cp.x = x; gs.cp.y = y; swallowedToken = true;
                     }
                     else if ((c=='i') && (numops==1)) {  //  /IntentName ri
-                        gs.renderingIntent=getRenderingIntentID(getToken(i-1).nameValue(pageBytes));
+                        gs.renderingIntent = PDFGState.getRenderingIntentID(getToken(i-1).nameValue(pageBytes));
                         swallowedToken=true;
                     }
                     else if (c=='g') { //r g b rg
-                        cspace = getPage().getColorspace("DeviceRGB");
+                        cspace = PDFColorSpace.getColorspace("DeviceRGB", _pfile, _page);
                         gs.color = getColor(cspace,i,numops);
                         gs.colorSpace = cspace; swallowedToken = true;
                     }
@@ -369,7 +369,7 @@ public void parse(List tokenList, byte pageBytes[])
             // RG set stroke rgbcolor
             case 'R': 
                 if((tlen==2) && (pageBytes[tstart+1]=='G')) {
-                    cspace = getPage().getColorspace("DeviceRGB");
+                    cspace = PDFColorSpace.getColorspace("DeviceRGB", _pfile, _page);
                     gs.scolor = getColor(cspace,i,numops);
                     gs.scolorSpace = cspace; swallowedToken = true;
                 }
@@ -792,7 +792,7 @@ public int parseInlineImage(int tIndex, byte[] pageBytes)
         // Create stream, tell imageFactory to create image and draw it
         else if (token.type==PageToken.PDFInlineImageData) {
             Object space = imageDict.get("ColorSpace");
-            ColorSpace imageCSpace = space==null ? null : getPage().getColorspace(space);
+            ColorSpace imageCSpace = space==null ? null : PDFColorSpace.getColorspace(space, _pfile, _page);
             PDFStream imageStream = new PDFStream(pageBytes, token.tokenLocation(), token.tokenLength(), imageDict);
             drawImage(_pfile.getImageFactory().getImage(imageStream, imageCSpace, _pfile));
             return i; // return token index
@@ -912,36 +912,27 @@ private Color getColor(ColorSpace space, int tindex, int numops)
         throw new PDFException("Wrong number of color components for colorspace");
     for(int i=0; i<n; ++i)
         varray[i] = getFloat(tindex-(n-i));
-    return _pfile.getColorFactory().createColor(space, varray);
-}
-
-static int getRenderingIntentID(String pdfName)
-{
-    if(pdfName.equals("/AbsoluteColorimetric")) return ColorFactory.AbsoluteColorimetricIntent;
-    if(pdfName.equals("/RelativeColorimetric")) return ColorFactory.RelativeColorimetricIntent;
-    if(pdfName.equals("/Saturation")) return ColorFactory.SaturationIntent;
-    if(pdfName.equals("/Perceptual")) return ColorFactory.PerceptualIntent;
-    throw new PDFException("Unknown rendering intent name \""+pdfName+"\"");
+    return PDFColorSpace.createColor(space, varray);
 }
 
 static int getBlendModeID(String pdfName)
 {
-    if(pdfName.equals("/Normal") || pdfName.equals("/Compatible")) return ColorFactory.NormalBlendMode;
-    if(pdfName.equals("/Multiply")) return ColorFactory.MultiplyBlendMode;
-    if(pdfName.equals("/Screen")) return ColorFactory.ScreenBlendMode;
-    if(pdfName.equals("/Overlay")) return ColorFactory.OverlayBlendMode;
-    if(pdfName.equals("/Darken")) return ColorFactory.DarkenBlendMode;
-    if(pdfName.equals("/Lighten")) return ColorFactory.LightenBlendMode;
-    if(pdfName.equals("/ColorDodge")) return ColorFactory.ColorDodgeBlendMode;
-    if(pdfName.equals("/ColorBurn")) return ColorFactory.ColorBurnBlendMode;
-    if(pdfName.equals("/HardLight")) return ColorFactory.HardLightBlendMode;
-    if(pdfName.equals("/SoftLight")) return ColorFactory.SoftLightBlendMode;
-    if(pdfName.equals("/Difference")) return ColorFactory.DifferenceBlendMode;
-    if(pdfName.equals("/Exclusion")) return ColorFactory.ExclusionBlendMode;
-    if(pdfName.equals("/Hue")) return ColorFactory.HueBlendMode;
-    if(pdfName.equals("/Saturation")) return ColorFactory.SaturationBlendMode;
-    if(pdfName.equals("/Color")) return ColorFactory.ColorBlendMode;
-    if(pdfName.equals("/Luminosity")) return ColorFactory.LuminosityBlendMode;
+    if(pdfName.equals("/Normal") || pdfName.equals("/Compatible")) return PDFComposite.NormalBlendMode;
+    if(pdfName.equals("/Multiply")) return PDFComposite.MultiplyBlendMode;
+    if(pdfName.equals("/Screen")) return PDFComposite.ScreenBlendMode;
+    if(pdfName.equals("/Overlay")) return PDFComposite.OverlayBlendMode;
+    if(pdfName.equals("/Darken")) return PDFComposite.DarkenBlendMode;
+    if(pdfName.equals("/Lighten")) return PDFComposite.LightenBlendMode;
+    if(pdfName.equals("/ColorDodge")) return PDFComposite.ColorDodgeBlendMode;
+    if(pdfName.equals("/ColorBurn")) return PDFComposite.ColorBurnBlendMode;
+    if(pdfName.equals("/HardLight")) return PDFComposite.HardLightBlendMode;
+    if(pdfName.equals("/SoftLight")) return PDFComposite.SoftLightBlendMode;
+    if(pdfName.equals("/Difference")) return PDFComposite.DifferenceBlendMode;
+    if(pdfName.equals("/Exclusion")) return PDFComposite.ExclusionBlendMode;
+    if(pdfName.equals("/Hue")) return PDFComposite.HueBlendMode;
+    if(pdfName.equals("/Saturation")) return PDFComposite.SaturationBlendMode;
+    if(pdfName.equals("/Color")) return PDFComposite.ColorBlendMode;
+    if(pdfName.equals("/Luminosity")) return PDFComposite.LuminosityBlendMode;
     throw new PDFException("Unknown blend mode name \""+pdfName+"\"");
 }
 
@@ -983,7 +974,7 @@ void readExtendedGState(PDFGState gs, Map exgstate)
     
         // Rendering intent
         else if(key.equals("RI"))
-            gs.renderingIntent = getRenderingIntentID((String)val);
+            gs.renderingIntent = PDFGState.getRenderingIntentID((String)val);
     
         // Transparency blending mode
         else if(key.equals("BM")) {
@@ -1024,8 +1015,8 @@ void readExtendedGState(PDFGState gs, Map exgstate)
     
     // cache new composite objects if necessary
     if(transparencyChanged) {
-        gs.composite = _pfile.getColorFactory().createComposite(gs.colorSpace, gs.blendMode, gs.alphaIsShape, gs.alpha);
-        gs.scomposite = _pfile.getColorFactory().createComposite(gs.colorSpace, gs.blendMode, gs.alphaIsShape, gs.salpha);
+        gs.composite = PDFComposite.createComposite(gs.colorSpace, gs.blendMode, gs.alphaIsShape, gs.alpha);
+        gs.scomposite = PDFComposite.createComposite(gs.colorSpace, gs.blendMode, gs.alphaIsShape, gs.salpha);
     }
 }
 

@@ -42,7 +42,6 @@ public class PDFFile {
     
     // Factory classes and callback handler
     FontFactory             _fontFact;
-    ColorFactory            _colorFact;
     ImageFactory            _imageFact;
     PDFMarkupHandler        _markupHandler;
     
@@ -149,7 +148,6 @@ public void clearPageCache() { _pages.clear(); }
 
 /** Graphics object creation factories */
 public FontFactory getFontFactory() { return _fontFact!=null? _fontFact : (_fontFact=new PDFFontFactory()); }
-public ColorFactory getColorFactory() { return  _colorFact!=null? _colorFact : (_colorFact=new PDFColorFactory()); }
 public ImageFactory getImageFactory() { return _imageFact!=null? _imageFact : (_imageFact=new PDFImageFactory()); }
 
 /** The callback handler */

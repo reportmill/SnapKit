@@ -104,7 +104,7 @@ public Object getPageResources()  { return inheritedAttributeForKeyInPage("Resou
  * Resource which currently isn't a dictionaries is the ProcSet.
  * If you need the ProcSet or something other than a dictionary, use getResources() and pull it out from there.
  */
-protected Object findResource(String resourceName, String name)
+public Object findResource(String resourceName, String name)
 {
     List rezstack = getResources();
     int n = rezstack.size();
@@ -156,158 +156,6 @@ public Map getExtendedGStateNamed(String name) { return (Map)findResource("ExtGS
 public Map getFontDictForAlias(String alias) { return (Map)findResource("Font", alias); }
 
 /**
- * A colorspace can be specified in several ways. If a colorspace needs no arguments, in can just be the name.
- * Otherwise, it is an entry in the page's resource dictionary. The format of the object in the resource dictionary
- * is dependent upon the type of the colorspace. Once we figure out what kind of colorspace it is and the parameters,
- * we can call the ColorFactory to make an awt ColorSpace object.
- *
- *  Note that colorspaces in pdf are usually specified as strings (for built-ins) or arrays (eg. [/CalRGB << ... >>])
- */
-public java.awt.color.ColorSpace getColorspace(Object csobj)
-{
-    int type=-1;
-    Object params = null;
-    List cslist = null;
-    
-    // Strings are either a name of a built in color space or the name of a
-    // colorspace resource
-    if (csobj instanceof String) {
-        String pdfName = (String)csobj;
-        
-        // TODO:This shouldn't really be necessary
-        if (pdfName.charAt(0)=='/')
-            pdfName=pdfName.substring(1);
-        
-        // All Device spaces are subject to possible remapping through a Default space
-        if (pdfName.startsWith("Device")) {
-            String defName = "Default"+pdfName.substring(6);
-            Object resource = findResource("ColorSpace", defName);
-            if (resource != null)
-                return getColorspace(resource);
-        }
-        
-        // Device... & Pattern are all fully specified by the name
-        if (pdfName.equals("DeviceGray"))
-            type = ColorFactory.DeviceGrayColorspace;
-        else if (pdfName.equals("DeviceRGB"))
-            type = ColorFactory.DeviceRGBColorspace;
-        else if (pdfName.equals("DeviceCMYK"))
-            type = ColorFactory.DeviceCMYKColorspace;
-        else if (pdfName.equals("Pattern"))
-            type = ColorFactory.PatternColorspace;
-        else {
-            // Look up the name in the resource dictionary and try again
-            Object resource = findResource("ColorSpace", pdfName);
-            if (resource != null)
-                return getColorspace(resource);
-        }
-    }
-    else if (csobj instanceof List) { cslist = (List)csobj;
-        // The usual format is [/SpaceName obj1 obj2...]
-        // We do color space cacheing by adding the awt colorspace as the last object in the list.
-        // The normal map cacheing strategy is to add an element with key _rb_cached_..., but Adobe, in their inifinite
-        // wisdom, decided that color spaces should be arrays instead of dictionaries, like everything else.
-        // TODO:  Make sure not to export this extra element when saving pdf
-        Object cachedObj = cslist.get(cslist.size()-1);
-        if (cachedObj instanceof ColorSpace)
-            return (ColorSpace)cachedObj;
-        
-        String pdfName = ((String)cslist.get(0)).substring(1);
-        params = cslist.size()>1 ? getXRefObj(cslist.get(1)) : null;
-        
-        if (pdfName.equals("CalGray")) 
-            type = ColorFactory.CalibratedGrayColorspace;
-        else if (pdfName.equals("CalRGB"))
-            type = ColorFactory.CalibratedRGBColorspace;
-        else if (pdfName.equals("Lab"))
-            type = ColorFactory.LabColorspace;
-        else if (pdfName.equals("ICCBased"))
-            type = ColorFactory.ICCBasedColorspace;
-        else if (pdfName.equals("Pattern")) {
-            type = ColorFactory.PatternColorspace;
-            if (params != null)
-                params = getColorspace(params);
-        }
-        else if (pdfName.equals("Separation")) {
-            type = ColorFactory.SeparationColorspace;
-            Map paramDict = new Hashtable(2);
-            paramDict.put("Colorant", cslist.get(1));
-            paramDict.put("Base",getColorspace(getXRefObj(cslist.get(2))));
-            paramDict.put("TintTransform", PDFFunction.getInstance(getXRefObj(cslist.get(3)), _pfile));
-            params = paramDict;
-         }
-        else if (pdfName.equals("DeviceN")) {
-            type = ColorFactory.DeviceNColorspace;
-            Map paramDict = new Hashtable(2);
-            paramDict.put("Colorants", getXRefObj(cslist.get(1)));
-            paramDict.put("Base", getColorspace(getXRefObj(cslist.get(2))));
-            paramDict.put("TintTransform", PDFFunction.getInstance(getXRefObj(cslist.get(3)), _pfile));
-            if (cslist.size()>4)
-                paramDict.put("Attributes", getXRefObj(cslist.get(4)));
-            
-            params=paramDict;
-        }
-        
-        else if (pdfName.equals("Indexed")) {
-            type = ColorFactory.IndexedColorspace;
-            //  [/Indexed basecolorspace hival <hex clut>]
-            // params set above is the base colorspace.
-            // Turn it into a real colorspace
-            // NB: this is recursive and there's no check for following illegal sequence, which would cause
-            // infinite recursion:
-            //   8 0 obj [/Indexed  8 0 R  1 <FF>] endobj
-            // Also note that in the time it took to write this comment, you could have put in a check for this case.
-            if (cslist.size() != 4)
-                throw new PDFException("Wrong number of elements in colorspace definition");
- 
-            if ((params instanceof String) && ( ((String)params).charAt(0)=='/') )
-                params = ((String)params).substring(1);
-            
-            ColorSpace base = getColorspace(params);
-            Object hival = cslist.get(2);
-            byte lookup_table[];
-            
-            if (!(hival instanceof Number))
-                throw new PDFException("Illegal Colorspace definition "+cslist);
-
-            // The lookuptable is next
-            Object val = getXRefObj(cslist.get(3));
-            if (val instanceof PDFStream) 
-                lookup_table = ((PDFStream)val).decodeStream();
-            else if (val instanceof String) {
-                // get the pageparser to decode the hex
-                // NB:  For historical reasons, PDFReader doesn't interpret the string as hex, but just leaves it alone.
-                // It probably makes sense to move much of this parsing back into PDFReader and let javacc handle it.
-                lookup_table = PageToken.getPDFHexString((String)val);
-            }
-            else if (val instanceof byte[]) {
-                // In the case of inline images, the pageparser has already done the conversion.
-                lookup_table = (byte [])val;
-            }
-            else 
-                throw new PDFException("Can't read color lookup table");
-            
-            // Build a dictionary to pass to the colorFactory
-            Map paramDict = new Hashtable(3);
-            paramDict.put("Base", base);
-            paramDict.put("HiVal", hival);
-            paramDict.put("Lookup", lookup_table);
-            params = paramDict;
-        }
-    }
-
-    if (type != -1) {
-        ColorSpace outerSpace = _pfile.getColorFactory().createColorSpace(type, params);
-        // cache it
-        if (cslist != null)
-            cslist.add(outerSpace);
-        return outerSpace;
-    }
-
-    throw new PDFException("Unknown colorspace : "+csobj);
-}
-
-/**
  * Like above, but for XObjects. XObjects can be Forms or Images.
  * If the dictionary represents an Image, this routine calls the ImageFactory to create a java.awt.Image.
  * If it's a Form XObject, the object returned will be a PDFForm.
@@ -332,7 +180,7 @@ public Object getXObject(String pdfName)
         if (type.equals("/Image")) {
             // First check for a colorspace entry for the image, and create an awt colorspace.
             Object space = getXRefObj(xobjDict.get("ColorSpace"));
-            ColorSpace imageCSpace = space==null ? null : getColorspace(space);
+            ColorSpace imageCSpace = space==null ? null : PDFColorSpace.getColorspace(space, _pfile, this);
             cached = _pfile.getImageFactory().getImage(xobjStream, imageCSpace, _pfile);
         }
         
@@ -362,7 +210,7 @@ public PDFPattern getPattern(String pdfName)
         Map shmap = (Map)getXRefObj(((Map)pat).get("Shading"));
         Object csobj = getXRefObj(shmap.get("ColorSpace"));
         if (csobj != null) 
-          ((PDFPatternShading)patobj).setColorSpace(this.getColorspace(csobj));
+          ((PDFPatternShading)patobj).setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, this));
     }
     
     return patobj;
@@ -377,7 +225,7 @@ public PDFPatternShading getShading(String pdfName)
     // Resolve the colorspace.
     Object csobj = getXRefObj(pat.get("ColorSpace"));
     if (csobj != null) 
-          patobj.setColorSpace(this.getColorspace(csobj));
+          patobj.setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, this));
     return patobj;
 }
 

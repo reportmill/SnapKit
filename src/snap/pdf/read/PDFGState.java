@@ -6,6 +6,7 @@ import java.util.*;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.color.*;
+import snap.pdf.PDFException;
 
 /**
  * Current settings in a page.
@@ -25,7 +26,7 @@ public class PDFGState implements Cloneable {
     ColorSpace     colorSpace;
     
     // The current color rendering intent
-    int            renderingIntent = ColorFactory.RelativeColorimetricIntent;
+    int            renderingIntent = RelativeColorimetricIntent;
     
     // The current stroke color
     Color          scolor = Color.black;
@@ -34,7 +35,7 @@ public class PDFGState implements Cloneable {
     ColorSpace     scolorSpace;
     
     // The transparency parameters
-    int            blendMode = ColorFactory.NormalBlendMode;
+    int            blendMode = PDFComposite.NormalBlendMode;
     boolean        alphaIsShape = false;
     float          salpha = 1; // stroke alpha
     float          alpha = 1;  // non-stroke alpha
@@ -106,6 +107,12 @@ public class PDFGState implements Cloneable {
     public static final int PDFRoundJoin = 1;
     public static final int PDFBevelJoin = 2;
 
+    // Rendering intents constants
+    public static final int AbsoluteColorimetricIntent = 0;
+    public static final int RelativeColorimetricIntent = 1;
+    public static final int SaturationIntent = 2;
+    public static final int PerceptualIntent = 3;
+
 /**
  * Creates a new PDF gstate.
  */
@@ -158,6 +165,15 @@ public Object clone()
     copy.cp = (Point2D.Float)cp.clone();
     if(clip!=null) copy.clip = (GeneralPath)clip.clone();
     return copy;
+}
+
+public static int getRenderingIntentID(String pdfName)
+{
+    if(pdfName.equals("/AbsoluteColorimetric")) return AbsoluteColorimetricIntent;
+    if(pdfName.equals("/RelativeColorimetric")) return RelativeColorimetricIntent;
+    if(pdfName.equals("/Saturation")) return SaturationIntent;
+    if(pdfName.equals("/Perceptual")) return PerceptualIntent;
+    throw new PDFException("Unknown rendering intent name \""+pdfName+"\"");
 }
 
 }
