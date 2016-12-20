@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TabView>
+  <font name="Arial" size="12" />
+  <SplitView PrefWidth="1000" PrefHeight="1000" title="Structure">
+    <ScrollView>
+      <TreeView name="TreeView" PrefWidth="300" />
+    </ScrollView>
+    <ScrollView GrowWidth="true">
+      <font name="Arial" size="14" />
+      <TextView name="TextView" GrowWidth="true" />
+    </ScrollView>
+  </SplitView>
+  <ScrollView title="Graphics">
+    <Box FillWidth="false" FillHeight="false">
+      <ImageView name="ImageView" />
+    </Box>
+  </ScrollView>
+  <ScrollView title="Text">
+    <font name="Arial" size="14" />
+    <TextView name="PDFTextView" GrowWidth="true" />
+  </ScrollView>
+</TabView>

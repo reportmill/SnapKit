@@ -1,0 +1,27 @@
+
+File { Version Object ObjectDef "startxref" "xref" "trailer" "n" "f" }
+
+Version { "%PDF-[\S]*" }
+
+Object { Array | (Dictionary ("stream" "endstream")?) | LookAhead(3) ObjectRef | Leaf }
+
+ObjectRef { Integer Integer "R" }
+
+ObjectDef { Integer Integer "obj" Object "endobj" }
+
+Array { "[" Object* "]" }
+
+Dictionary { "<<" (Name Object)* ">>" }
+
+Leaf { "true" | "false" | "null" | Integer | Real | Name | String | HexString }
+
+String { "(" }    // Handler sucks in remaining chars (with nested/escaped parens)
+
+HexString { "<[\s0-9a-fA-F]*>" }
+
+Name { "/[^\s\<\>\(\)\[\]\{\}%/]+" }
+
+Integer { "[\+\-]?[0-9]+" }
+
+Real { "[\+\-]?[0-9]*\.[0-9]+" }
+
