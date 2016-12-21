@@ -16,55 +16,39 @@ import snap.pdf.PDFException;
  * images in device colorspaces without conversion would probably be a good idea.
  */
 public class PDFImageColorModel extends ColorModel {
-  ColorSpace savedSpace;
-  int componentmask, componentshift;
-  float componentscale[];
-  float componentmin[];
-  float conversion_buffer[];
-  SoftMask softmask;
+    ColorSpace savedSpace;
+    int componentmask, componentshift;
+    float componentscale[];
+    float componentmin[];
+    float conversion_buffer[];
+    SoftMask softmask;
   
-public static PDFImageColorModel createPDFModel(ColorSpace space, int bps, float decodemins[], float decodemaxs[], boolean hasalpha)
+public static PDFImageColorModel createPDFModel(ColorSpace space, int bps, float decodemins[], float decodemaxs[],
+    boolean hasalpha)
 {
     int spp = space.getNumComponents()+(hasalpha?1:0);
-    int bitsPerPixel = bps*spp;
-    int transferType;
+    int bpp = bps*spp, transferType;
 
     //color model expects a pixel to fit in one type
-    if (bitsPerPixel<=8) {
-        transferType = DataBuffer.TYPE_BYTE;
-    }
-    else if (bitsPerPixel<=16) {
-        transferType = DataBuffer.TYPE_USHORT;
-    }
-    else if (bitsPerPixel<=32) {
-        transferType = DataBuffer.TYPE_INT;
-    }
-    else {
-        System.err.println("Unknown image format:"+
-                           "\n\tbits per sample="+bps+
-                           "\n\tsamples per pixel ="+spp);
-        return null;
-    }
+    if(bpp<=8) transferType = DataBuffer.TYPE_BYTE;
+    else if(bpp<=16) transferType = DataBuffer.TYPE_USHORT;
+    else if(bpp<=32) transferType = DataBuffer.TYPE_INT;
+    else { System.err.println("Unknown image format: bps=" + bps + "spp=" + spp); return null; }
     
-    int significantBits[] = new int[spp];
-    for(int i=0;i<spp;++i)
-        significantBits[i]=bps;
-
+    int significantBits[] = new int[spp]; for(int i=0;i<spp;i++) significantBits[i] = bps;
     
-//    PDFImageColorModel bugger_off = new PDFImageColorModel(space, bitsPerPixel, maskArray, 0, false, OPAQUE, transferType);
-    PDFImageColorModel bugger_off = new PDFImageColorModel(space, bitsPerPixel, significantBits, hasalpha, transferType);
-     bugger_off.init(bps, decodemins, decodemaxs);
-     return bugger_off;
+    //PDFImageColorModel bugger_off = new PDFImageColorModel(space, bpp, maskArray, 0, false, OPAQUE, transferType);
+    PDFImageColorModel bugger_off = new PDFImageColorModel(space, bpp, significantBits, hasalpha, transferType);
+    bugger_off.init(bps, decodemins, decodemaxs);
+    return bugger_off;
 }
 
-//Create a raster based on samplesPerPixel bytes interleaved in some unspecified fashion (eg. RGBRGB, RGBARGBA, etc)
-static WritableRaster createInterleavedPDFRaster(DataBuffer buf, int samplesPerPixel, int w, int h)
+// Create raster based on samplesPerPixel bytes interleaved in some unspecified fashion (eg. RGBRGB, RGBARGBA, etc)
+static WritableRaster createInterleavedPDFRaster(DataBuffer buf, int spp, int w, int h)
 {
     // for 8 bit samples
-    int bandaids[] = new int[samplesPerPixel];
-    for(int i=0; i<samplesPerPixel; ++i)
-      bandaids[i]=i;
-    return Raster.createInterleavedRaster(buf,w,h,w*samplesPerPixel, samplesPerPixel, bandaids, new java.awt.Point(0,0));
+    int bandaids[] = new int[spp]; for(int i=0; i<spp; i++) bandaids[i] = i;
+    return Raster.createInterleavedRaster(buf,w,h,w*spp, spp, bandaids, new java.awt.Point(0,0));
 }
 
 public static WritableRaster createPDFRaster(byte packedbytes[], ColorSpace space, int bps, int w, int h) 
@@ -72,43 +56,30 @@ public static WritableRaster createPDFRaster(byte packedbytes[], ColorSpace spac
     DataBufferByte byteBuffer;
     int spp = space.getNumComponents();
 
-    if (bps==8) {
-        byteBuffer = new DataBufferByte(packedbytes, packedbytes.length);
-    }
-    else if ((bps==1) || (bps==2) || (bps==4)) {
+    if(bps==8) { byteBuffer = new DataBufferByte(packedbytes, packedbytes.length); }
+    else if(bps==1 || bps==2 || bps==4) {
         // All pixel formats where a sample is smaller than a byte get expanded out.
         // Could probably use a SinglePixelPackedSampleModel for colorspaces with 1 sample per pixel
-        // Some spaces may require scaling of samples as well, but I think the
-        // decode arrays should cover things.
+        // Some spaces may require scaling of samples as well, but I think decode arrays should cover things.
         byteBuffer = new DataBufferByte(w*h*spp);
         byte rasterbytes[] = byteBuffer.getData();
-        int row, col;
         int src=0, dest=0;
-        // a mask for a single sample at the most significant position
-        int sampmask=((1<<bps)-1)<<(8-bps); 
-        int m,shift=0;
+        int sampmask = ((1<<bps)-1)<<(8-bps), shift=0; // a mask for a single sample at the most significant position
         byte sourcebyte=0;
-        for(row=0; row<h; ++row) {
-            m=0;
-            for(col=0; col<w*spp; ++col) {
-                if (m==0) {
-                   sourcebyte = packedbytes[src++];
-                   m=sampmask;
-                   shift = 8-bps;
-                }
+        for(int row=0; row<h; row++) {
+            int m = 0;
+            for(int col=0; col<w*spp; col++) {
+                if(m==0) {
+                   sourcebyte = packedbytes[src++]; m = sampmask; shift = 8-bps; }
                 rasterbytes[dest++]=(byte)((sourcebyte&m)>>>shift);
-                m>>>=bps;
-                shift-=bps;
+                m >>>= bps; shift -= bps;
             }
-            // done with a row.  If the mask is nonzero here, the rest of the 
-            // bits are padding bits so the rows fit on byte boundaries.
+            // done with a row. If mask is nonzero here, rest of bits are padding so rows fit on byte boundaries.
         }
         // sanity check
-        if (dest != h*w*spp)
-            throw new PDFException("Internal error - bad pixel conversion");
+        if(dest!=h*w*spp) throw new PDFException("Internal error - bad pixel conversion");
     }
-    else 
-        throw new PDFException("Illegal pixel format [ SamplesPerPixel="+spp+" BitPerSample="+bps);
+    else throw new PDFException("Illegal pixel format [ SPP=" + spp + " BPS=" + bps + " ]");
     
     return createInterleavedPDFRaster(byteBuffer, spp, w, h);
 }
@@ -120,65 +91,46 @@ public static WritableRaster createPDFRaster(byte packedbytes[], SoftMask mask, 
     // In PDF the color samples are meshed, but the alpha samples, if available, are 
     // in a separated plane (from the SMask).  This routine creates new storage for the
     // raster and copies the samples and the alpha into the new buffer, meshing them as RGBA
-    DataBufferByte byteBuffer=null;
-    byte rasterbytes[];
+    DataBufferByte byteBuffer = null;
     int spp = space.getNumComponents();
-    int x,y, i, in,out;
     
-    if (bps==8) {
+    if(bps==8) {
         byteBuffer = new DataBufferByte((spp+1)*w*h);
-        rasterbytes  = byteBuffer.getData();
-        in = out = 0;
-        for(y=0; y<h; ++y) {
-            for(x=0;  x<w; ++x) {
-                for(i=0; i<spp; ++i)
+        byte rasterbytes[] = byteBuffer.getData();
+        int in = 0, out = 0;
+        for(int y=0; y<h; y++) {
+            for(int x=0;  x<w; x++) {
+                for(int i=0; i<spp; i++)
                     rasterbytes[out++] = packedbytes[in++];
                 rasterbytes[out++]=(byte)mask.getUnnormalizedAlpha(x,y);
             }
         }
     }
 
-    if (byteBuffer != null)
-        return createInterleavedPDFRaster(byteBuffer, spp+1, w,h);
-
-    return null;    
+    return byteBuffer!=null? createInterleavedPDFRaster(byteBuffer, spp+1, w, h) : null;
 }
 
-
-public PDFImageColorModel(ColorSpace space, int bits, int significantBits[], boolean hasalpha, int transferType) {
+public PDFImageColorModel(ColorSpace space, int bits, int significantBits[], boolean hasalpha, int transferType)
+{
     super(bits, significantBits, space, hasalpha, true, hasalpha?TRANSLUCENT:OPAQUE, transferType);
     savedSpace = space;
 }
 
-/*
- * public PDFImageColorModel(ColorSpace space, int bits, int rmask, int gmask,
-        int bmask, int amask, boolean isAlphaPremultiplied, int trans,
-        int transferType) {
-    super(space, bits, rmask, gmask, bmask, amask, isAlphaPremultiplied, trans,
-            transferType);
-    savedSpace = space;
-}
-*/
-
 public void init(int bps, float decodemins[], float decodemaxs[]) 
 {
-  int spp = savedSpace.getNumComponents();
-
-  // mask to get component out of a pixel
-  componentmask = (1<<bps)-1;
-  // amount to shift to get next component
-  componentshift = bps;
-  // scale factors to get to colorspace range
-  componentmin = new float[spp];
-  componentscale = new float[spp];
+    int spp = savedSpace.getNumComponents();
+    componentmask = (1<<bps)-1; // mask to get component out of a pixel
+    componentshift = bps;  // amount to shift to get next component
+    componentmin = new float[spp];  // scale factors to get to colorspace range
+    componentscale = new float[spp];
   
-  for(int i=0; i<spp; ++i) {
-    componentmin[i]=decodemins[i];
-    componentscale[i] = (decodemaxs[i]-decodemins[i])/componentmask;
-  }
+    for(int i=0; i<spp; ++i) {
+      componentmin[i] = decodemins[i];
+      componentscale[i] = (decodemaxs[i]-decodemins[i])/componentmask;
+    }
   
-  // a buffer to place the normalized values for colorspace conversion
-  conversion_buffer = new float[spp];
+    // a buffer to place the normalized values for colorspace conversion
+    conversion_buffer = new float[spp];
 }
 
 /** Specify softmask (alpha) information for this image */
@@ -187,25 +139,21 @@ public void setSoftMask(SoftMask m)  { softmask =  m; }
 /** Returns the number of color components present in the input pixels */
 public int getNumSourceComponents()  { return savedSpace.getNumComponents(); }
 
-/**
- * CoerceData.
- */
+/** CoerceData. */
 public ColorModel coerceData(WritableRaster r, boolean premultipliedAlpha)  { return this; }
 
-/**
- * Not sure.
- */
+/** Not sure. */
 public boolean isCompatibleRaster(Raster r)  { return true; }
 
 /**
  * Implemented under duress.  The class defines these as abstract, so we have to provide implementations of them
  * even though they'll never get called.
  */
-public int getRGB(int pixel) { return 0; }
-public int getRed(int pixel) { return 0; };
-public int getGreen(int pixel) { return 0; }
-public int getBlue(int pixel) { return 0; }
-public int getAlpha(int pixel) { return 0; }
+public int getRGB(int pixel)  { return 0; }
+public int getRed(int pixel)  { return 0; };
+public int getGreen(int pixel)  { return 0; }
+public int getBlue(int pixel)  { return 0; }
+public int getAlpha(int pixel)  { return 0; }
 
 /**
  * Convert an array of elements, whose size is defined by the transfertype, into sRGB+alpha.  
@@ -214,24 +162,17 @@ public int getAlpha(int pixel) { return 0; }
  */
 public int getRGB(Object inData)
 {
-  byte pix[] = (byte[])inData;  
-  float srgbvals[];
-  int ncomps = conversion_buffer.length;
+    byte pix[] = (byte[])inData;  
+    int ncomps = conversion_buffer.length;
   
-  // normalize values so colorspace can do conversion
-  for(int i=0; i<ncomps; ++i)
-      conversion_buffer[i]=componentmin[i]+(pix[i]&255)*componentscale[i];
-// What the fuck was this?  conversion_buffer[ncomps-i-1]=componentmin[i]+pix[i]*componentscale[i];
+    // normalize values so colorspace can do conversion
+    for(int i=0; i<ncomps; ++i)
+        conversion_buffer[i] = componentmin[i]+(pix[i]&255)*componentscale[i];
   
-  // do actual color space conversion
-  srgbvals = savedSpace.toRGB(conversion_buffer);
-  // turn into a pixel
-  int alpha = (softmask != null) ? (pix[ncomps]<<24) : 0xff000000;
-  // rgba -> argb
-  return alpha |
-         (((int)(255*srgbvals[0]))<<16) |
-         (((int)(255*srgbvals[1]))<<8) |
-         ((int)(255*srgbvals[2]));
+    // do actual color space conversion and turn into a pixel
+    float srgbvals[] = savedSpace.toRGB(conversion_buffer);
+    int alpha = (softmask != null) ? (pix[ncomps]<<24) : 0xff000000;
+    return alpha | (((int)(255*srgbvals[0]))<<16) | (((int)(255*srgbvals[1]))<<8) | ((int)(255*srgbvals[2]));
 }
 
 /**
@@ -258,9 +199,8 @@ protected static class SoftMask extends Object {
     public void setSourceImageSize(int sw, int sh)   { wscale = ((float)width)/sw; hscale = ((float)height)/sh; }
     
     /**
-     * returns the alpha value that would be mapped to the point in the source image.
-     * Since the image dimensions may not match the mask dimensions, these routines find
-     * the alpha value based on the sizes of the source and destination.
+     * Returns alpha value that would be mapped to the point in the source image. Since image dimensions may not match
+     * mask dimensions, these routines find the alpha value based on sizes of source and destination.
      */
     public float getAlpha(int x, int y)
     {
@@ -277,17 +217,13 @@ protected static class SoftMask extends Object {
         
         switch(bitspersample) {
             case 8: return alphabits[desty*rowbytes+destx]&255;
-            case 4:
-                a = alphabits[desty*rowbytes+destx/2];
-                if (destx%2==1)
-                    a>>=4;
+            case 4: a = alphabits[desty*rowbytes+destx/2];
+                if(destx%2==1) a>>=4;
                 return (a&15);
-            case 2:
-                a = alphabits[desty*rowbytes+destx/4];
+            case 2: a = alphabits[desty*rowbytes+destx/4];
                 a >>= 6 - 2*(destx%4);
                 return (a&3);
-            case 1:
-                a = alphabits[desty*rowbytes+destx/8];
+            case 1: a = alphabits[desty*rowbytes+destx/8];
                 a >>= 7 - (destx%8);
                 return (a&1);
         }

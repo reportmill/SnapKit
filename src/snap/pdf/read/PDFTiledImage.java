@@ -52,12 +52,10 @@ public void imageComplete(int status)
     if (remainder>0) {
         int tileIndex = (_currentTileY / tileHeight)-1;
         int destY = tileIndex*tileHeight;
-        _destination.drawImage(_tile, 0, destY, _width, destY+remainder, 
-                                      0, 0, _width, remainder, null);
+        _destination.drawImage(_tile, 0, destY, _width, destY+remainder, 0, 0, _width, remainder, null);
     }
     _tile = null;
 }
-
 
 public void setHints(int hintflags)  { }
 
@@ -72,22 +70,18 @@ public void setDimensions(int width, int height)
     _width = width; _height = height;
     // This is a lame attempt to hide our meshing problems.
     Rectangle2D r = new Rectangle2D.Float(0f,0f, _width, _height);
-    _destination.setColor(Color.WHITE);
-    _destination.fill(r);
-    _destination.setColor(Color.BLACK);
-    _destination.draw(r);
+    _destination.setColor(Color.WHITE); _destination.fill(r);
+    _destination.setColor(Color.BLACK); _destination.draw(r);
 }
 
 public WritableRaster getTileBuffer()
 {
-    if (_tile == null) {
-        // It's really a strip, not a tile
-        // The buffer is actually 1 pixel higher than the tile size.
+    if(_tile==null) {
+        // It's really a strip, not a tile. The buffer is actually 1 pixel higher than the tile size.
         // This is for an attempt to deal with the meshing problems
         _tile = new BufferedImage(_width, getTileHeight()+1, BufferedImage.TYPE_BYTE_BINARY, 
                            (IndexColorModel)_colorModel);
-        // The next scanline goes at the top of the tile
-        _currentTileY=0;
+        _currentTileY = 0; // The next scanline goes at the top of the tile
     }
     // probably should cache this, too
     return _tile.getRaster();
@@ -115,9 +109,7 @@ public void setPixels(int x, int y, int w, int h, ColorModel model, byte[] pixel
     if (tileY == tileHeight) {
         int tileIndex = (_currentTileY / tileHeight)-1;
         _destination.drawImage(_tile, x, tileIndex*tileHeight, null);
-        // experiment to help meshing.  copy the last scanline in the tile to the first
-        r.setDataElements(x,0,w,h,pixels);
-        
+        r.setDataElements(x,0,w,h,pixels); // experiment to help meshing.  copy last scanline in tile to the first
     }
     
     // get ready for the next scanline
@@ -134,16 +126,13 @@ public void setProperties(Hashtable props)  { }
 public void drawImage(ImageProducer ip, Graphics2D destination)
 {
     _destination = destination;
-    //reset everything
-    _tile = null;
-    _currentTileY = 0;
-    // tell the producer to start
-    ip.requestTopDownLeftRightResend(this);
+    _tile = null; _currentTileY = 0;  // reset everything
+    ip.requestTopDownLeftRightResend(this);  // tell the producer to start
 }
 
-public static void drawTiledImage(ImageProducer ip, Graphics2D destination)
+public static void drawTiledImage(ImageProducer ip, Graphics2D aGfx)
 {
-    (new PDFTiledImage()).drawImage(ip, destination);
+    new PDFTiledImage().drawImage(ip, aGfx);
 }
 
 // Just for fitting in to all the places that require an Image to be passed around.

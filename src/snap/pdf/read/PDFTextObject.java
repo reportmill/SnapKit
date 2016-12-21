@@ -6,8 +6,7 @@ import java.awt.Font;
 import java.awt.font.*;
 import java.awt.geom.*;
 import java.util.*;
-import snap.pdf.PDFException;
-import snap.pdf.PDFFile;
+import snap.pdf.*;
 
 /**
  * Represents text spacing details that are defined in between BT & ET operation. Only one text object is alive at any
