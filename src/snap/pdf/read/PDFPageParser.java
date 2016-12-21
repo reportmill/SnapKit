@@ -385,7 +385,7 @@ public void parse(List tokenList, byte pageBytes[])
                     if(tlen==2) {
                         gs.color = getColor(gs.colorSpace,i,numops); swallowedToken = true; }
                     else if(tlen==3 && pageBytes[tstart+2]=='n') { // scn
-                        if(gs.colorSpace instanceof PDFColorSpace.PDFPatternSpace && numops>=1) {
+                        if(gs.colorSpace instanceof PDFColorSpaces.PatternSpace && numops>=1) {
                             String pname = getToken(i-1).nameString(pageBytes);
                             PDFPattern pat = getPage().getPattern(pname);
                             gs.color = pat.getPaint();                            
@@ -395,7 +395,7 @@ public void parse(List tokenList, byte pageBytes[])
                                 // Note, however, that although you can draw an uncolored tiling pattern any number of
                                 // times in different colors, we only do it once (after which it will be cached)
                                 if (numops>1) {
-                                    ColorSpace tileSpace=((PDFColorSpace.PDFPatternSpace)gs.colorSpace).tileSpace;
+                                    ColorSpace tileSpace=((PDFColorSpaces.PatternSpace)gs.colorSpace).tileSpace;
                                     if (tileSpace==null)
                                         tileSpace=gs.colorSpace;
                                     gs.color = getColor(tileSpace,i-1, numops-1);

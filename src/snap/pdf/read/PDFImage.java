@@ -87,7 +87,7 @@ public static Image getImage(PDFStream imageStream, ColorSpace cspace, PDFFile s
         
         //current color and alpha for mask, black and white for image
         byte clut[] = isMask ? new byte[]{0,0,0,-1,-1,-1,-1,0} : new byte[]{0,0,0,-1,-1,-1};
-        cspace = new PDFIndexedColorSpace(PDFColorSpace.PDFDeviceRGB.get(), 1, isMask, clut);
+        cspace = new PDFColorSpaces.IndexedColorSpace(PDFColorSpaces.DeviceRGB.get(), 1, isMask, clut);
         bpc=8;
         expandBitmap = true;
     }
@@ -132,7 +132,7 @@ public static Image getImage(PDFStream imageStream, ColorSpace cspace, PDFFile s
     else { 
         //default decodes are [0 1 .. 0 1] except for indexed spaces
         //in which case its [0 2^bps-1]
-        if (cspace instanceof PDFIndexedColorSpace) {
+        if (cspace instanceof PDFColorSpaces.IndexedColorSpace) {
             dmins[0] = 0; dmaxs[0] = (1<<bpc)-1; }
         else {
             for(int i=0; i<cpp; ++i) {

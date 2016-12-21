@@ -131,7 +131,7 @@ public static final int ArbitraryColorSpaceShading=2;
  */
 public void setColorSpace(ColorSpace c)
 { 
-    if (c instanceof PDFColorSpace.PDFDeviceRGB)
+    if (c instanceof PDFColorSpaces.DeviceRGB)
         shadingColorMode = DeviceRGBShading;
     else if (c.getType()==ColorSpace.TYPE_GRAY) 
         shadingColorMode = DeviceGrayShading;
