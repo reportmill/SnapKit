@@ -41,7 +41,6 @@ public class PDFFile {
     List <String>           _fileIds;
     
     // Factory classes and callback handler
-    FontFactory             _fontFact;
     ImageFactory            _imageFact;
     PDFMarkupHandler        _markupHandler;
     
@@ -147,7 +146,6 @@ public PDFPage getPage(int aPageIndex)
 public void clearPageCache() { _pages.clear(); }
 
 /** Graphics object creation factories */
-public FontFactory getFontFactory() { return _fontFact!=null? _fontFact : (_fontFact=new PDFFontFactory()); }
 public ImageFactory getImageFactory() { return _imageFact!=null? _imageFact : (_imageFact=new PDFImageFactory()); }
 
 /** The callback handler */

@@ -84,9 +84,8 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDF
 {
     // Get the font factory and use it to create a glyphmapper & an awt font
     Map f = gs.font;      // Get the font dictionary from the gstate
-    FontFactory factory = file.getFontFactory();
-    GlyphMapper gmapper = factory.getGlyphMapper(f,file);
-    Font awtFont = factory.getFont(f, file);
+    GlyphMapper gmapper = PDFFont.getGlyphMapper(f,file);
+    Font awtFont = PDFFont.getFont(f, file);
     Point2D.Float pt = new Point2D.Float();
     
     // TODO: This is probably a huge mistake (performance-wise) The font returned by the factory has a font size of 1
@@ -111,7 +110,7 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDF
     int numMappedChars = gmapper.mapBytesToChars(pageBytes, offset, length, unicodeBuffer);
     
     // get the metrics (actually just the widths)
-    Object wobj = factory.getGlyphWidths(f,file);
+    Object wobj = PDFFont.getGlyphWidths(f,file);
 
     // Two nearly identical routines broken out for performance (and readability) reasons
     GlyphVector glyphs;
@@ -226,41 +225,6 @@ public void showText(byte pageBytes[], List tokens, PDFGState gs, PDFFile file)
             textMatrix.translate(tok.floatValue()*hscale, 0);
         else showText(pageBytes, tok.tokenLocation(), tok.tokenLength(), gs, file);
     }
-}
-
-// Debugging foolishness
-public void dddshowText(byte pageBytes[], int offset, int length, PDFGState gs, PDFFile file) 
-{
-    // Get the font factory and use it to create a glyphmapper & an awt font
-    Map f = gs.font;       // Get the font dictionary from the gstate
-    FontFactory factory = file.getFontFactory();
-    Font awtFont = factory.getFont(f, file);
-    Point2D.Float textoffset = new Point2D.Float();
-    
-    renderingMatrix.setTransform(gs.fontSize*gs.thscale, 0, 0, -gs.fontSize, 0, -gs.trise);
- 
-    int nglyphs = awtFont.getNumGlyphs(); int gbuff[] = new int[nglyphs];
-    for(int i=0; i<nglyphs; ++i) gbuff[i]=i;
-    
-    GlyphVector glyphs = awtFont.createGlyphVector(rendercontext, gbuff);
-    Rectangle2D bigBounds = awtFont.getMaxCharBounds(rendercontext);
-    float dx = (float)bigBounds.getWidth(), dy = (float)bigBounds.getHeight();
-  
-    textoffset.x = textoffset.y = 0;
-    for(int i=0; i<nglyphs; ++i) {
-        glyphs.setGlyphPosition(i,textoffset);
-        if(i%10==9) {
-            textoffset.y += dy; textoffset.x = 0; }
-        else textoffset.x += dx;
-    }
-    
-    // replace the gstate ctm with one that includes the text transforms
-    AffineTransform saved_ctm=(AffineTransform)gs.trans.clone();
-    gs.trans.concatenate(textMatrix); gs.trans.concatenate(renderingMatrix);
-    
-    // draw and restore ctm
-    file.getMarkupHandler().showText(gs, glyphs);
-    gs.trans=saved_ctm;
 }
 
 }

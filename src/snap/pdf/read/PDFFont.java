@@ -1,25 +1,31 @@
-/*
- * Copyright (c) 2010, ReportMill Software. All rights reserved.
- */
 package snap.pdf.read;
-import java.awt.*;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.io.*;
 import java.util.*;
-import java.util.List;
-import snap.pdf.PDFException;
-import snap.pdf.PDFFile;
-import snap.pdf.PDFStream;
+import snap.pdf.*;
 import snap.util.StringUtils;
 
 /**
- * PDFFontFactory.java 
+ * Represents a font referenced in a PDF file.
  */
-public class PDFFontFactory implements FontFactory {
+public class PDFFont {
+
+    /** Constants used to identify embedded font types */
+    public final static int AdobeType0Font = 0;
+    public final static int AdobeType1Font = 1;
+    public final static int AdobeMultipleMasterFont = 2;
+    public final static int AdobeType3Font = 3;
+    public final static int TrueTypeFont = 4;
+    public final static int AdobeCIDType0Font = 5;
+    public final static int AdobeCIDType2Font = 6;
+    public final static int UnknownFontType = 100;
 
 /**
  * Given a Font dictionary with keys and values as described in the pdf spec, return java.awt.Font to use for it.
  */
-public Font getFont(Map fontDict, PDFFile srcfile)
+public static Font getFont(Map fontDict, PDFFile srcfile)
 {
     if (fontDict==null) 
         return getDefaultFont();
@@ -92,8 +98,10 @@ public Font getFont(Map fontDict, PDFFile srcfile)
     return awtFont;
 }
 
-/** Look on the system for a font with the given name.  */
-public Font getFont(String name, String type)
+/**
+ * Look on the system for a font with the given name.
+ */
+public static Font getFont(String name, String type)
 {
     int fstyle = Font.PLAIN;
     
@@ -118,14 +126,20 @@ public Font getFont(String name, String type)
     return new Font(name, fstyle, 1);
 }
 
-/** Try some font substitutions. TODO:  Might be able to do a half-assed job using java.awt.font.TextAttributes. */
-public Font getSubstituteFont(Map fontDict)  { return null; }
+/**
+ * Try some font substitutions. TODO:  Might be able to do a half-assed job using java.awt.font.TextAttributes.
+ */
+public static Font getSubstituteFont(Map fontDict)  { return null; }
 
-/** When all else fails, use this font.  Damn well better return something. */
-public Font getDefaultFont()  { return new Font("SansSerif", Font.PLAIN, 1); }
+/**
+ * When all else fails, use this font.  Damn well better return something.
+ */
+public static Font getDefaultFont()  { return new Font("SansSerif", Font.PLAIN, 1); }
 
-/** Create a glyphmapper for the font specified by the pdf font dictionary */
-public GlyphMapper getGlyphMapper(Map fontDict, PDFFile srcfile)
+/**
+ * Create a glyphmapper for the font specified by the pdf font dictionary.
+ */
+public static GlyphMapper getGlyphMapper(Map fontDict, PDFFile srcfile)
 {
     // Check if we did it already
     GlyphMapper mapper = (GlyphMapper)fontDict.get("_rbcached_glyphmapper_");
@@ -146,7 +160,7 @@ public GlyphMapper getGlyphMapper(Map fontDict, PDFFile srcfile)
 /**
  * Utility routine for composite fonts.  Composite fonts have a single descendant CID font.
  */
-Map getDescendantFont(Map fontDict, PDFFile srcfile)
+static Map getDescendantFont(Map fontDict, PDFFile srcfile)
 {
     if ("/Type0".equals(fontDict.get("Subtype"))) {
         List descendants = (List)srcfile.getXRefObj(fontDict.get("DescendantFonts"));
@@ -169,7 +183,7 @@ Map getDescendantFont(Map fontDict, PDFFile srcfile)
  * Returns the widths for all glyphs in the fonts. Return value is either a float[] for simple single-byte fonts or an
  * instance of a PDFGlyphWidthTable for multi-byte or CID fonts.
  */
-public Object getGlyphWidths(Map fontDict, PDFFile srcfile)
+public static Object getGlyphWidths(Map fontDict, PDFFile srcfile)
 {
     Object obj = fontDict.get("_rbcached_glyphwidths_");
     int i;
