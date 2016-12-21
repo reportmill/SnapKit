@@ -34,44 +34,26 @@ public class PDFCCITTFaxProducer extends OutputStream implements ImageProducer {
  */
 public PDFCCITTFaxProducer(SnapDecodeCCITTFax decoder)
 {
-    super();
     _ccittFaxDecoder = decoder;
-    // create the color model.  It's the same for all pixels
-    byte clut[];
-    if (_ccittFaxDecoder.blackIsOne())
-        clut = new byte[]{(byte)0xff, (byte)0x00};
-    else
-        clut = new byte[]{(byte)0,(byte)0xff};
-    
+    byte clut[]; // create the color model.  It's the same for all pixels
+    if(_ccittFaxDecoder.blackIsOne()) clut = new byte[]{(byte)0xff, (byte)0x00};
+    else clut = new byte[]{(byte)0,(byte)0xff};
     _colorModel = new IndexColorModel(1,2,clut,clut,clut);
 }
 
-/** ImageProducer method - add a new consumer */
-public void addConsumer(ImageConsumer ic)
-{
-    // just add the consumer to the list
-    // We wait until startProduction() to do any work.
-    if (!isConsumer(ic))
-        _consumers.add(ic);
-}
+/** ImageProducer method. */
+public boolean isConsumer(ImageConsumer ic)  { return _consumers.indexOf(ic)!=-1; }
 
-/** ImageProducer method - check to see if we are sending bits to ic */
-public boolean isConsumer(ImageConsumer ic)
-{
-    return _consumers.indexOf(ic) != -1;
-}
+/** ImageProducer method. */
+public void addConsumer(ImageConsumer ic)  { if(!isConsumer(ic)) _consumers.add(ic); }
 
-/** ImageProducer method */
-public void removeConsumer(ImageConsumer ic)
-{
-    _consumers.remove(ic);
-}
+/** ImageProducer method. */
+public void removeConsumer(ImageConsumer ic)  { _consumers.remove(ic); }
 
 /** ImageProducer method - kicks things off. */
 public void startProduction(ImageConsumer ic)
 {
-    addConsumer(ic);
-    // set the list of target consumers to everybody
+    addConsumer(ic); // set the list of target consumers to everybody
     _currentConsumers = (ImageConsumer[])_consumers.toArray(new ImageConsumer[_consumers.size()]);
     produce();
 }
@@ -88,42 +70,34 @@ public void requestTopDownLeftRightResend(ImageConsumer ic)
 public void produce()
 {
     int nconsumers = _currentConsumers.length;
-    int i, status;
     
     // Tell everyone about the basic information
-    for(i=0; i<nconsumers; ++i) {
-        _currentConsumers[i].setHints(ImageConsumer.COMPLETESCANLINES |
-                              ImageConsumer.SINGLEFRAME | 
-                              ImageConsumer.TOPDOWNLEFTRIGHT |
-                              ImageConsumer.SINGLEPASS);
-        _currentConsumers[i].setColorModel(_colorModel);
-        _currentConsumers[i].setDimensions(_ccittFaxDecoder.getWidth(), _ccittFaxDecoder.getHeight());
-
+    for(ImageConsumer ic : _currentConsumers) {
+        ic.setHints(ImageConsumer.COMPLETESCANLINES | ImageConsumer.SINGLEFRAME | 
+            ImageConsumer.TOPDOWNLEFTRIGHT | ImageConsumer.SINGLEPASS);
+        ic.setColorModel(_colorModel);
+        ic.setDimensions(_ccittFaxDecoder.getWidth(), _ccittFaxDecoder.getHeight());
    }
     
     // Reset the y value
     _scanlineIndex = 0;
     
     // launch the decoder, which will call our OutputStream methods while decompressing.
+    int status;
     try {
         _ccittFaxDecoder.decodeStream(this);
-        if (_scanlineIndex != _ccittFaxDecoder.getHeight()) {
-            System.err.println("CCITTFaxDecode read "+_scanlineIndex+" scanlines.  Expecting "+_ccittFaxDecoder.getHeight());
+        if(_scanlineIndex != _ccittFaxDecoder.getHeight()) {
+            System.err.println("CCITTFaxDecode read " + _scanlineIndex + " scanlines.  Expecting " +
+                _ccittFaxDecoder.getHeight());
             status = ImageConsumer.IMAGEERROR;
         }
-        else
-            status = ImageConsumer.STATICIMAGEDONE;
+        else status = ImageConsumer.STATICIMAGEDONE;
     }
-    catch (Exception e) {
-        e.printStackTrace();
-        status = ImageConsumer.IMAGEERROR;
-    }
+    catch (Exception e) { e.printStackTrace(); status = ImageConsumer.IMAGEERROR; }
    
     // Tell everyone we're done
-    for(i=0; i<nconsumers; ++i) {
-        _currentConsumers[i].imageComplete(status);
-    }
-    
+    for(ImageConsumer ic : _currentConsumers)
+        ic.imageComplete(status);
 }
 
 /**
@@ -131,29 +105,19 @@ public void produce()
  */
 public SnapDecodeCCITTFax getCodec() { return _ccittFaxDecoder; }
 
-/* These Outputstream methods are used as 'callbacks' from the decoder.  
- * When it writes a scanline, we'll send it to the consumer.
- */
+/* These Outputstream methods are used as callbacks from decoder. When it writes a scanline, we send it to consumer.*/
 public void write(byte[] b) throws IOException
 {
-    int scanlinesize = _ccittFaxDecoder.getWidth();
-    
     // send the scanline to everyone
-    for(int i=0, n=_currentConsumers.length; i<n; ++i)
-        _currentConsumers[i].setPixels(0, _scanlineIndex, scanlinesize, 1, _colorModel, 
-                b, 0, scanlinesize);
-    // bump the y
-    ++_scanlineIndex;
+    int scanlinesize = _ccittFaxDecoder.getWidth();
+    for(ImageConsumer ic : _currentConsumers)
+        ic.setPixels(0, _scanlineIndex, scanlinesize, 1, _colorModel, b, 0, scanlinesize);
+    _scanlineIndex++; // bump the y
 }
 
-public void flush() throws IOException
-{
-}
+public void flush() throws IOException  { }
 
 // see RBCodeCCITTFaxDecoder for a treatise on why this is especially stupid
-public void write(int b) throws IOException
-{
-    throw new IOException("blackIsOne not implemented yet");   
-}
+public void write(int b) throws IOException  { throw new IOException("blackIsOne not implemented yet"); }
 
 }
