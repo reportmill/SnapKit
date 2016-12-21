@@ -1,10 +1,71 @@
-/*
- * Copyright (c) 2010, ReportMill Software. All rights reserved.
- */
 package snap.pdf.read;
 import java.util.*;
-import snap.pdf.PDFException;
-import snap.pdf.PDFFile;
+import snap.pdf.*;
+
+/**
+ * GlyphMapper subclasses.
+ */
+public class GlyphMappers {
+
+/**
+ * A concrete subclass of GlyphMapper for the Identity-H & Identity-V maps input bytes -> cids is done with no mapping,
+ * just interpreting the bytes as big-endian shorts. Also supports mapping to GIDs via an embedded CIDToGIDMap
+ *
+ * Note that for fonts with CIDToGIDMaps, it might be tempting to provide a way to skip the CID step and just go from
+ * input bytes to GIDs. However, all the font metric info is based on CIDs, so we're always going to have to convert to
+ * CIDs no matter what.
+ */
+public static class Indentity extends GlyphMapper {
+    int cidsToGids[]=null;
+    boolean identityCidToGid=false;
+    
+    public static boolean canHandleEncoding(String pdfEncodingName)
+    {
+        return pdfEncodingName.equals("/Identity-H") || pdfEncodingName.equals("/Identity-V");
+    }
+    
+    public Indentity(Map fontDict, PDFFile srcfile)  { super(fontDict, srcfile); }
+    
+    /** For CID fonts that know how to map their cids directly into glyph indices. */
+    public void setCIDToGIDMap(Object mapobj)
+    {
+        // cid->gid stream is just an array of big-endian shorts
+        if (mapobj instanceof PDFStream) {
+            byte map[] = ((PDFStream)mapobj).decodeStream();
+            int ncids = map.length/2;
+            cidsToGids = new int[ncids];
+            for(int i=0; i<ncids; ++i)
+                cidsToGids[i] = ((map[2*i]&255)<<8) | (map[2*i+1]&255);
+        }
+        // A special cid->gid map is the "Identity" map
+        else if ("Identity".equals(mapobj)) 
+            identityCidToGid = true;
+    }
+    
+    public boolean isMultiByte() { return true; }
+    
+    public int maximumOutputBufferSize(byte[] inbytes, int offset, int length)  { return length/2; }
+    
+    public int mapBytesToChars(byte[] inbytes, int offset, int length, char[] outchars)
+    {
+        // odd byte at end left out
+        for(int i=0; i<length-1; i+=2) { // big endian
+            outchars[i/2] = (char)((inbytes[i+offset]<<8) | (inbytes[i+offset+1]&255)); }
+        return length/2;
+    }
+    
+    // For fonts that have a CIDToGIDMap
+    public boolean supportsCIDToGIDMapping()  { return (cidsToGids != null) || identityCidToGid; }
+    
+    public int mapCharsToGIDs(char cidbuffer[], int ncids, int gidbuffer[])
+    {
+        // CIDType0 fonts use cids, CIDType2 (truetype) use glyphids
+        if(identityCidToGid || cidsToGids==null) {
+            for(int i=0; i<ncids; ++i) gidbuffer[i] = cidbuffer[i] & 0xffff; }
+        else for(int i=0; i<ncids; ++i) gidbuffer[i] = cidsToGids[cidbuffer[i] & 0xffff];
+        return ncids;
+    }
+}
 
 /**
  * A LatinGlyphMapper is a concrete subclass of GlyphMapper that can handle
@@ -19,100 +80,85 @@ import snap.pdf.PDFFile;
  * not exactly correct all the time.  In PDF, a null encoding actually specifies
  * the font's internal (1 byte) encoding.
  */
-public class LatinGlyphMapper extends GlyphMapper {
+public static class Latin extends GlyphMapper {
 
     // Latin char map
     char latinMap[];
   
-public static boolean canHandleEncoding(String pdfEncodingName)
-{
-    return (pdfEncodingName==null) ||
-           pdfEncodingName.equals("/MacRomanEncoding") || 
-           pdfEncodingName.equals("/WinAnsiEncoding");
-}
-
-public LatinGlyphMapper(Map fontDict, PDFFile srcfile) {
-    super(fontDict, srcfile);
-    
-    // allocate map
-    latinMap=new char[256];
-    
-    // Get the base encoding name
-    Object obj = srcfile.getXRefObj(fontDict.get("Encoding"));
-    String encodingName=null;
-    if (obj instanceof String)
-        encodingName = (String)obj;
-    else if (obj instanceof Map)
-        encodingName = (String)((Map)obj).get("BaseEncoding");
-    
-    initializeMapForEncoding(encodingName);
-    
-    // Modify the map according to the differences array
-    if (obj instanceof Map) {
-        Object diffs = srcfile.getXRefObj(((Map)obj).get("Differences"));
-        if ((diffs != null) && (diffs instanceof List))
-            applyDifferences((List)diffs, fontDict);
+    public static boolean canHandleEncoding(String pdfEncName)
+    {
+        return (pdfEncName==null) || pdfEncName.equals("/MacRomanEncoding") || pdfEncName.equals("/WinAnsiEncoding");
     }
- }
-
-// Note:  This code used to use java.nio.charset to create 
-// the base encoding map, until I discovered that java.nio.charset
-// doesn't necessarily return the same thing on every platform.
-// In particular, MacRoman encoding was not available on some
-// windows machines.
-// So, all the simple encodings are hardcoded in this file.
-void initializeMapForEncoding(String pdfName)
-{
-    char baseMap[];
     
-    // Special case for adobeStandardEncoding 
-    if (pdfName==null)
-        baseMap=adobeStandard;
-    else if (pdfName.equals("/MacRomanEncoding"))
-        baseMap=macRomanMap;
-    else if (pdfName.equals("/WinAnsiEncoding"))
-        baseMap=winAnsiMap;
-    else throw new PDFException("Unknown encoding name : "+pdfName);
+    public Latin(Map fontDict, PDFFile srcfile)
+    {
+        super(fontDict, srcfile);
+        
+        // allocate map
+        latinMap=new char[256];
+        
+        // Get the base encoding name
+        Object obj = srcfile.getXRefObj(fontDict.get("Encoding"));
+        String encodingName=null;
+        if (obj instanceof String)
+            encodingName = (String)obj;
+        else if (obj instanceof Map)
+            encodingName = (String)((Map)obj).get("BaseEncoding");
+        
+        initializeMapForEncoding(encodingName);
+        
+        // Modify the map according to the differences array
+        if (obj instanceof Map) {
+            Object diffs = srcfile.getXRefObj(((Map)obj).get("Differences"));
+            if ((diffs != null) && (diffs instanceof List))
+                applyDifferences((List)diffs, fontDict);
+        }
+     }
     
-    System.arraycopy(baseMap,0,latinMap,0,256);
-}
-
-/* List looks like : [ num1 /glyphname1 /glyphname2 num2 /glyphname3 ...] */
-void applyDifferences(List diffs, Map f)
-{
-    int i, n=diffs.size();
-    int first = 0;
-    Object item;
+    // Note: This code used to use java.nio.charset to create base encoding map, until I discovered java.nio.charset
+    // doesn't necessarily return the same thing on every platform. In particular, MacRoman encoding was not available
+    // on some windows machines. So, all the simple encodings are hardcoded in this file.
+    void initializeMapForEncoding(String pdfName)
+    {
+        // Special case for adobeStandardEncoding 
+        char baseMap[];
+        if(pdfName==null) baseMap = adobeStandard;
+        else if(pdfName.equals("/MacRomanEncoding")) baseMap = macRomanMap;
+        else if(pdfName.equals("/WinAnsiEncoding")) baseMap = winAnsiMap;
+        else throw new PDFException("Unknown encoding name : " + pdfName);
+        
+        System.arraycopy(baseMap,0,latinMap,0,256);
+    }
     
-    for(i=0; i<n; ++i) {
-        item = diffs.get(i);
-        if (item instanceof Number) 
-            first = ((Number)item).intValue();
-        else if (item instanceof String) {
-            String glyphname = (String)item;
-            // It really ought to be an error if the name doesn't start with a /
-            if (glyphname.startsWith("/"))
-                glyphname = glyphname.substring(1);
-            latinMap[first] = (char)GlyphMapper.adobeGlyphNameToUnicode(glyphname, f);
-            ++first;
+    /* List looks like : [ num1 /glyphname1 /glyphname2 num2 /glyphname3 ...] */
+    void applyDifferences(List diffs, Map f)
+    {
+        int first = 0;
+        for(int i=0, n=diffs.size(); i<n; ++i) {
+            Object item = diffs.get(i);
+            if (item instanceof Number) 
+                first = ((Number)item).intValue();
+            else if (item instanceof String) {
+                String glyphname = (String)item;
+                // It really ought to be an error if the name doesn't start with a /
+                if (glyphname.startsWith("/"))
+                    glyphname = glyphname.substring(1);
+                latinMap[first] = (char)GlyphMapper.adobeGlyphNameToUnicode(glyphname, f);
+                ++first;
+            }
         }
     }
-}
-
-public boolean isMultiByte() { return false; }
-
-public int maximumOutputBufferSize(byte[] inbytes, int offset, int len)
-{
-    // 1 byte -> 1 glyph
-    return len;
-}
-
-public int mapBytesToChars(byte[] inbytes, int offset, int len, char[] outchars)
-{
-    for(int i=0; i<len; ++i)
-        outchars[i]=latinMap[(inbytes[i+offset] & 0xff)];
-    return len;
-}
+    
+    public boolean isMultiByte() { return false; }
+    
+    public int maximumOutputBufferSize(byte[] inbytes, int offset, int len)  { return len; } // 1 byte -> 1 glyph
+    
+    public int mapBytesToChars(byte[] inbytes, int offset, int len, char[] outchars)
+    {
+        for(int i=0; i<len; ++i)
+            outchars[i]=latinMap[(inbytes[i+offset] & 0xff)];
+        return len;
+    }
 
 /** The AdobeStandard encoding map */
 private static final char adobeStandard[] = {
@@ -173,5 +219,7 @@ private static final char winAnsiMap[] = {
     0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x00e4, 0x00e5, 0x00e6, 0x00e7, 0x00e8, 0x00e9, 0x00ea, 0x00eb, 0x00ec, 0x00ed, 0x00ee, 0x00ef,
     0x00f0, 0x00f1, 0x00f2, 0x00f3, 0x00f4, 0x00f5, 0x00f6, 0x00f7, 0x00f8, 0x00f9, 0x00fa, 0x00fb, 0x00fc, 0x00fd, 0x00fe, 0x00ff
 };
+
+}
 
 }
