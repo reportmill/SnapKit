@@ -253,15 +253,15 @@ public static ColorSpace createColorSpace(int type, Object params)
             break;
         case IndexedColorspace:
             Map indexdict = (Map)params;
-            return new PDFColorSpaces.IndexedColorSpace((ColorSpace)indexdict.get("Base"),
+            return new IndexedColorSpace((ColorSpace)indexdict.get("Base"),
                 ((Number)indexdict.get("HiVal")).intValue(), (byte[])indexdict.get("Lookup"));
         case SeparationColorspace:
             Map sepdict = (Map)params;
-            return new PDFSeparationColorSpace((String)sepdict.get("Colorant"), (ColorSpace)sepdict.get("Base"),
+            return new SeparationColorSpace((String)sepdict.get("Colorant"), (ColorSpace)sepdict.get("Base"),
                (PDFFunction)sepdict.get("TintTransform"));
         case DeviceNColorspace:
             Map devndict = (Map)params;
-            return new PDFDeviceNColorSpace((List)devndict.get("Colorants"), (ColorSpace)devndict.get("Base"),
+            return new DeviceNColorSpace((List)devndict.get("Colorants"), (ColorSpace)devndict.get("Base"),
                     (PDFFunction)devndict.get("TintTransform"), (Map)devndict.get("Attributes"));            
         case PatternColorspace:
             if (params instanceof ColorSpace)

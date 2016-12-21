@@ -1,6 +1,6 @@
 package snap.pdf.read;
 import java.awt.color.ColorSpace;
-import java.util.Map;
+import java.util.*;
 import snap.pdf.*;
 
 /**
@@ -147,6 +147,97 @@ public static class IndexedColorSpace extends ColorSpace {
     
     public float[] fromCIEXYZ(float[] cval)
     { throw new IllegalArgumentException("Indexed colorspaces cannot map color values to indices"); }
+}
+
+/**
+ * DeviceNColorSpace represents a pdf /DeviceN colorspace.  This is a more general form of a separation colorspace,
+ * so it is also the superclass of a PDFSeparationColorSpace.
+ * 
+ * In PDF, separation & deviceN spaces are used for subtractive color. Drawing to an additive device (like the screen),
+ * however, requires using an alternative additive colorspace. This object, therefore is similar to
+ * PDFIndexedColorspace, in that it is merely a mapping from a input values to a color in a different colorspace.
+ * 
+ * Whereas an indexed colorspace takes an input value and maps it into a color, a separation takes an input value and
+ * uses a special tintTransform function to get the component values to use in the alternative color space.
+ * 
+ * Two special separation names are /All & /None. /All is supposed to use all the colorants, which is usefull for 
+ * putting down registration marks, but seems stupid on the screen. /None is supposed to be a null colorspace. There's
+ * no real support in awt for null colorspaces, so parser should check for this case specifically and toss any drawing.
+ */
+public static class DeviceNColorSpace extends ColorSpace {
+
+    // the additive colorspace
+    ColorSpace alternative;
+    
+    // The function to map a tint value to color components.
+    PDFFunction tintTransform;
+    
+    // The names of the colorants (like /Cyan, /PukeYellow, /All, etc.)
+    List colorantNames;
+    
+    // Additional attributes
+    Map attributes;
+    
+    // buffers to do conversions in
+    float alt_colors[], rgb_colors[];
+
+    public DeviceNColorSpace(List names, ColorSpace altspace, PDFFunction tinttrans, Map attrs) 
+    {
+        super(altspace.getType(), names.size());
+        colorantNames = names; alternative = altspace; tintTransform = tinttrans; attributes = attrs;
+        
+        // colorant names.  Check for case of all channels being /None
+        colorantNames = null;
+        for(int i=0; i<names.size(); ++i)
+            if (!"/None".equals(names.get(i))) {
+                colorantNames = names; break; }
+        
+        // set up conversion buffers
+        alt_colors = null;
+        
+        // no drawing should happen if all colorants are specified as None, but in case it does, this always returns white.
+        if (colorantNames==null)
+            rgb_colors = new float[]{1,1,1};
+            
+        // all other attempts to draw to the screen go through the alternate space.
+        else { rgb_colors = new float[3]; alt_colors = new float[3]; }
+    }
+    
+    /**
+     * If all colorants in a deviceN or Separation are specified as /None,no drawing is done.  You can call this method
+     * to determine if this is is the case, indicating that you can toss all drawing operations done in this colorspace.
+     */
+    public boolean doesDraw()  { return (colorantNames != null); }
+    
+    public float[] toRGB(float[] cval)
+    {
+        if (alt_colors == null) return rgb_colors; // special separations have their values initialized once
+        return alternative.toRGB(tintTransform.evaluate(cval)); // run color through the tintTransform and convert
+    }
+    
+    // No reverse mapping - tintTransform functions arent necessarily invertable. Not that we'd need to do it anyway.
+    public float[] fromRGB(float[] rgbvalue)  { return null; }
+    
+    public float[] toCIEXYZ(float[] cval)
+    {
+        if (alt_colors == null) return rgb_colors; // special separations have their values initialized once
+        return alternative.toCIEXYZ(tintTransform.evaluate(cval)); // run color through the tintTransform and convert
+    }
+    
+    public float[] fromCIEXYZ(float[] colorvalue)  { return null; } // no reverse mapping 
+}
+
+/** 
+ * A java.awt.color.ColorSpace subclass to represent a pdf /Separation colorspace.
+ * This is just a subclass of PDFDeviceNColorSpace with a single colorant.
+ */
+public static class SeparationColorSpace extends DeviceNColorSpace {
+
+    public SeparationColorSpace(String name, ColorSpace altspace, PDFFunction tinttrans) 
+    {
+        super(Collections.singletonList(name), altspace, tinttrans, null);
+    }
+
 }
 
 }
