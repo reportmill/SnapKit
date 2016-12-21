@@ -22,6 +22,8 @@ public static void main(String args[])
     TextView text = new TextView(); text.setBounds(380,80,300,200); text.setWrapText(true); text.setRotate(-20);
     text.setText("Why is the world in love again, why are they marching hand in hand?");
     text.setFont(new Font("Arial Bold", 24)); text.setBorder(Color.GREEN, 1); text.setFill(new Color("#AACCEE33"));
+    text.setRich(true);
+    text.getTextBox().setStyleValue(TextStyle.UNDERLINE_KEY, 1, 20, 30);
     page.addChild(text);
     
     // Add Image

@@ -1,4 +1,5 @@
 package snap.pdf.write;
+import java.util.*;
 import snap.gfx.*;
 import snap.pdf.PDFWriter;
 import snap.util.SnapUtils;
@@ -34,10 +35,8 @@ public static void writeText(PDFWriter aWriter, TextBox aTextBox)
     pwriter.appendln("BT");
 
     // Run iteration variables
-    PDFPageWriter underliner = null;
-    
-    // Get text shape and textLayout for text and start it
     TextBoxRun lastRun = null;
+    List <TextBoxRun> underlineRuns = null;
 
     // Iterate over runs
     for(TextBoxLine line : aTextBox.getLines())
@@ -52,13 +51,7 @@ public static void writeText(PDFWriter aWriter, TextBox aTextBox)
         // If underlining, get PDFPageBuffer for underlining ops (to be added after End Text)
         TextStyle style = run.getStyle();
         if(style.isUnderlined()) {
-            if(underliner == null) underliner = new PDFPageWriter(null, aWriter);
-            underliner.setStrokeColor(style.getColor());
-            underliner.setStrokeWidth((float)line.getUnderlineStroke());
-            underliner.moveTo((float)run.getX(), (float)line.getBaseline() - (float)line.getUnderlineY());
-            underliner.lineTo((float)run.getMaxX(), (float)line.getBaseline() - (float)line.getUnderlineY());
-            underliner.appendln("S");
-        }
+            if(underlineRuns==null) underlineRuns = new ArrayList(); underlineRuns.add(run); }
         lastRun = run;
     }
     
@@ -69,8 +62,14 @@ public static void writeText(PDFWriter aWriter, TextBox aTextBox)
     pwriter.grestore();
     
     // If there was any underlining, add underlining ops
-    if(underliner != null)
-        pwriter.append(underliner);
+    if(underlineRuns!=null) for(TextBoxRun run : underlineRuns) {
+        TextStyle style = run.getStyle(); TextBoxLine line = run.getLine();
+        pwriter.setStrokeColor(style.getColor());
+        pwriter.setStrokeWidth(line.getUnderlineStroke());
+        pwriter.moveTo(run.getX(), line.getBaseline() - line.getUnderlineY());
+        pwriter.lineTo(run.getMaxX(), line.getBaseline() - line.getUnderlineY());
+        pwriter.appendln("S");
+    }
 }
 
 /**

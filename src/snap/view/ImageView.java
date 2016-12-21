@@ -56,6 +56,21 @@ public String getImageName()  { return _iname; }
 public void setImageName(String aName)  { _iname = aName; }
 
 /**
+ * Returns the image bounds.
+ */
+public Rect getImageBounds()
+{
+    Insets ins = getInsetsAll(); if(_image==null) return null;
+    double vw = getWidth(), vh = getHeight();
+    double pw = vw - ins.left - ins.right, ph = vh - ins.top - ins.bottom;
+    double iw = _image.getWidth(), w = iw; if(isGrowWidth() || iw>pw) w = pw;
+    double ih = _image.getHeight(), h = ih; if(isGrowHeight() || ih>ph) h = ph;
+    double x = ins.left + Math.round(ViewUtils.getAlignX(this)*(pw-w));
+    double y = ins.top + Math.round(ViewUtils.getAlignY(this)*(ph-h));
+    return new Rect(x, y, w, h);
+}
+
+/**
  * Returns the default alignment.
  */    
 public Pos getDefaultAlign()  { return Pos.CENTER; }
@@ -83,18 +98,12 @@ public double getPrefHeightImpl(double aW)
  */
 public void paintFront(Painter aPntr)
 {
-    // Clear rect
-    double width = getWidth(), height = getHeight(); //aPntr.clearRect(0,0,width, height);
-    
     // Calcuate text x/y based on insets, font and alignment
-    Insets ins = getInsetsAll(); if(_image==null) return;
-    double pw = getWidth() - ins.left - ins.right, ph = getHeight() - ins.top - ins.bottom;
-    double iw = _image.getWidth(), w = iw; if(isGrowWidth() || iw>pw) w = pw;
-    double ih = _image.getHeight(), h = ih; if(isGrowHeight() || ih>ph) h = ph;
-    double x = ins.left + Math.round(ViewUtils.getAlignX(this)*(pw-w));
-    double y = ins.top + Math.round(ViewUtils.getAlignY(this)*(ph-h));
-    if(w==iw && h==ih && aPntr.getTransform().isSimple()) aPntr.setImageQuality(0);
-    aPntr.drawImage(_image, x, y, w, h);
+    Rect ibnds = getImageBounds(); if(ibnds==null) return;
+    double iw = _image.getWidth(), ih = _image.getHeight();
+    boolean noResize = ibnds.width==iw && ibnds.height==ih && aPntr.getTransform().isSimple();
+    if(noResize) aPntr.setImageQuality(0);
+    aPntr.drawImage(_image, ibnds.x, ibnds.y, ibnds.width, ibnds.height);
     aPntr.setImageQuality(.5);
 }
 

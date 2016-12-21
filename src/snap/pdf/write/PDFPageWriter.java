@@ -19,6 +19,9 @@ public class PDFPageWriter extends PDFWriterBase {
     // The pdf file this page is part of
     PDFFile               _pfile;
     
+    // The master writer for this page writer
+    PDFWriter             _writer;
+    
     // The pdf media box for this page
     Rect                  _mediaBox;
     
@@ -49,7 +52,7 @@ public class PDFPageWriter extends PDFWriterBase {
 public PDFPageWriter(PDFFile aFile, PDFWriter aWriter)
 {
     // Cache PDF file and add this to pages tree and xref table
-    _pfile = aFile; if(aFile==null) return;
+    _writer = aWriter; _pfile = aFile;
     _pfile._pageTree.addPage(this);
     _pfile.getXRefTable().addObject(this);
         
@@ -202,6 +205,38 @@ public void setOpacity(double anOpacity, byte coverage)
         appendln("BX /" + name + " gs EX");
         _gstack.setStrokeOpacity(anOpacity);
     }
+}
+
+/**
+ * Override to write Image.
+ */
+protected void writeImage(Image anImage, double x, double y, double width, double height)
+{
+    // Get image and image bounds (just return if missing or invalid)
+    if(anImage==null) return;
+    
+    // Add image
+    _writer.addImageData(anImage);
+
+    // Gsave
+    gsave();
+    
+    // Apply clip if needed
+    /*if(anImageView.getRadius()>.001) {
+        Shape path = anImageView.getPath(); pwriter.writePath(path); pwriter.append(" re W n "); }*/
+    
+    // Apply CTM - image coords are flipped from page coords ( (0,0) at upper-left )
+    writeTransform(width, 0, 0, -height, x, y + height);
+    
+    // Do image
+    appendln("/" + _writer.getImageName(anImage) + " Do");
+        
+    // Grestore
+    grestore();
+    
+    // If image has alpha, declare output to be PDF-1.4
+    if(anImage.hasAlpha() && anImage.getSamplesPerPixel()==4)
+        _writer.getPDFFile().setVersion(1.4f);
 }
 
 /**

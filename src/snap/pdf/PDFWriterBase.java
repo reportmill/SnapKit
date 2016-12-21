@@ -109,11 +109,6 @@ public PDFWriterBase append(byte theBytes[], int anOffset, int aLen)
 }
 
 /**
- * Appends another buffer.
- */
-public PDFWriterBase append(PDFWriterBase aBuffer)  { return append(aBuffer.toByteArray()); }
-
-/**
  * Adds a newline to the pdf buffer.
  */
 public PDFWriterBase appendln()  { return append('\n'); }
