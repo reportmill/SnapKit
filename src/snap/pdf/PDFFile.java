@@ -185,13 +185,10 @@ public byte[] getFileID()
             md.update(infoString.getBytes());
         }
         
-        // Rather than adding the file size, which we won't have until everything gets dumped out, add the number
-        // of objects in the xref table (as 4 bytes). This is probably going to be the same for everyone.
-        int i, size = _xtable.getEntryCount();
-        for(i=0; i<4; ++i) {
-            md.update((byte)(size&0xff));
-            size>>=8;
-        }
+        // Rather than adding file size, which we won't have until everything gets dumped out, add number
+        // of objects in xref table (as 4 bytes). This is probably going to be the same for everyone.
+        for(int i=0, size=_xtable.getEntryCount(); i<4; i++) {
+            md.update((byte)(size&0xff)); size >>= 8; }
         
         // Get the digest and cache it - MD5 is defined to return a 128 bit (16 byte) digest
         byte digest_bytes[] = md.digest();
@@ -203,7 +200,7 @@ public byte[] getFileID()
     }
     
     // If the md5 fails, just create a fileID with random bytes
-    catch (java.security.NoSuchAlgorithmException nsae) {
+    catch(java.security.NoSuchAlgorithmException nsae) {
         _fileId = new byte[16]; new Random().nextBytes(_fileId);  }
     
     return _fileId;
