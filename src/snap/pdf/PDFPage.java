@@ -206,21 +206,21 @@ public PDFPattern getPattern(String pdfName)
     PDFPattern patobj = PDFPattern.getInstance(pat, _pfile);
     
     // Resolve the colorspace.
-    if (patobj instanceof PDFPatternShading) {
+    if (patobj instanceof PDFPatterns.Shading) {
         Map shmap = (Map)getXRefObj(((Map)pat).get("Shading"));
         Object csobj = getXRefObj(shmap.get("ColorSpace"));
         if (csobj != null) 
-          ((PDFPatternShading)patobj).setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, this));
+          ((PDFPatterns.Shading)patobj).setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, this));
     }
     
     return patobj;
 }
 
 /** Creates a new shadingPattern for the resource name.  Used by the shading operator */
-public PDFPatternShading getShading(String pdfName)
+public PDFPatterns.Shading getShading(String pdfName)
 {
     Map pat = (Map)findResource("Shading", pdfName);
-    PDFPatternShading patobj = PDFPatternShading.getInstance(pat, _pfile);
+    PDFPatterns.Shading patobj = PDFPatterns.Shading.getInstance(pat, _pfile);
     
     // Resolve the colorspace.
     Object csobj = getXRefObj(pat.get("ColorSpace"));

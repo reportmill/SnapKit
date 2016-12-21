@@ -24,8 +24,8 @@ public static PDFPattern getInstance(Object pat, PDFFile srcFile)
     if (v instanceof Number) {
         int ptype = ((Number)v).intValue();
         switch(ptype) {
-            case 1: return PDFPatternTiling.getInstance((PDFStream)pat, srcFile);
-            case 2: return PDFPatternShading.getInstance(pdict, srcFile);
+            case 1: return new PDFPatterns.Tiling((PDFStream)pat, srcFile);
+            case 2: return PDFPatterns.Shading.getInstance(pdict, srcFile);
         }
     }
     throw new PDFException("Illegal pattern definition");

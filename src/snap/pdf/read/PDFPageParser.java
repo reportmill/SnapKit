@@ -390,7 +390,7 @@ public void parse(List tokenList, byte pageBytes[])
                             PDFPattern pat = getPage().getPattern(pname);
                             gs.color = pat.getPaint();                            
                             // this is really stupid.  change this around
-                            if ((pat instanceof PDFPatternTiling) && (gs.color==null)) {
+                            if ((pat instanceof PDFPatterns.Tiling) && (gs.color==null)) {
                                 // Uncolored tiling patterns require color values be passed.
                                 // Note, however, that although you can draw an uncolored tiling pattern any number of
                                 // times in different colors, we only do it once (after which it will be cached)
@@ -400,7 +400,7 @@ public void parse(List tokenList, byte pageBytes[])
                                         tileSpace=gs.colorSpace;
                                     gs.color = getColor(tileSpace,i-1, numops-1);
                                 }
-                                this.executePatternStream((PDFPatternTiling)pat);
+                                this.executePatternStream((PDFPatterns.Tiling)pat);
                                 gs.color = pat.getPaint();
                             }
                         }
@@ -411,7 +411,7 @@ public void parse(List tokenList, byte pageBytes[])
                 else if(tlen==2 && pageBytes[tstart+1]=='h') { //sh      && (numops==1?
                     String shadename = getToken(i-1).nameString(pageBytes);
                     java.awt.Paint oldPaint = gs.color;
-                    PDFPatternShading shade = getPage().getShading(shadename);
+                    PDFPatterns.Shading shade = getPage().getShading(shadename);
                     gs.color = shade.getPaint();  //save away old color
                     // Get the area to fill.  If the shading specifies a bounds, use that, if not, use the clip.
                     // If there's no clip, fill the whole page.
@@ -563,7 +563,7 @@ public void executeForm(PDFForm f)
  * we only execute it once and cache a tile. To do this, we temporarily set the markup handler in the file to a new 
  * BufferedMarkupHander, add the pattern's resource dictionary and fire up the parser.
  */
-public void executePatternStream(PDFPatternTiling pat)
+public void executePatternStream(PDFPatterns.Tiling pat)
 {
     // Cache old handler, create image painter and set
     PDFMarkupHandler oldHandler = _pfile.getMarkupHandler();

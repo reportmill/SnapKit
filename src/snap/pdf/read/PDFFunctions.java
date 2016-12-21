@@ -295,72 +295,59 @@ public static class Sampled extends PDFFunction {
     // output samples at each of the 2^n vertices of the hypercube.
     public void multilinear_interpolate(float in[], float out[])
     {
-        int i;
         int indim = in.length;
         int outdim = out.length;
-        int sample_index;
-        int left;
-        float fraction;
         
         // No point playing around with a hypercube if it's just a 1 dimensional interpolation
-        if (indim==1) {
-            left = (int)in[0];
-            fraction = in[0]-left;
-            sample_index = outdim*left;
+        if(indim==1) {
+            int left = (int)in[0];
+            float fraction = in[0]-left;
+            int sample_index = outdim*left;
             if (fraction==0) {//landed on a sample
-                for(i=0; i<outdim; ++i)
+                for(int i=0; i<outdim; ++i)
                     out[i]=sampleTable[sample_index+i];
             }
             else { // 1d linear interpolate
-                for(i=0; i<outdim; ++i)
+                for(int i=0; i<outdim; ++i)
                     out[i]=sampleTable[sample_index+i]*(1-fraction)+sampleTable[sample_index+outdim+i]*fraction;
             }      
         }
+        
         else {
-          float weight;
-          int num_vertices=1<<indim;  //# hypercube vertices = 2^dimension
-          int sample_offset; // offset into the sample table corresponding to a vertex
-          int samples_dimension_offset;
-          int dimension,combination, mask;
           
           // Initialize output values to 0
-          for(dimension=0; dimension<outdim; ++dimension)
-              out[dimension]=0;
+          for(int dim=0; dim<outdim; dim++) out[dim] = 0;
           
-          // for each vertex of hypercube, caluclate offset to individual samples in table and weight for each sample
-          for(combination=0; combination<num_vertices; ++combination) {
-              sample_offset=0;
-              mask=1;
-              weight=1;
-              samples_dimension_offset=outdim;
-              for(dimension=0; dimension<indim; ++dimension) {
-                  left = (int)in[dimension];
-                  fraction = in[dimension]-left;
-                  if ((combination & mask) == 0) {
-                      weight *= (1-fraction);
-                      sample_index=left;
-                  }
-                  else {
-                      weight *= fraction;
-                      sample_index=left+1;
-                      //left+1 is outside the table if you land
-                      //exactly on the last sample in the dimension.
-                      //In this case, weight will be zero, so just
-                      //set sample_index to 0 so we don't get an
-                      //arrayIndexOutOfBounds error.
-                      if (sample_index>=samplesPerDimension[dimension])
-                          sample_index=0;
-                  }
-                  // Add in this dimension's value to the sample table offset
-                  sample_offset += sample_index*samples_dimension_offset;
-                  samples_dimension_offset *= samplesPerDimension[dimension];
-                  // get mask for next bit in this vertex number.
-                  mask<<=1;
-              }
-              // add weighted contribution of the vertex for each output dimension
-              for(dimension=0; dimension<outdim; ++dimension)
-                  out[dimension] += sampleTable[sample_offset+dimension]*weight;
-          }
+            // for each vertex of hypercube, caluclate offset to individual samples in table and weight for each sample
+            int num_vertices=1<<indim;  //# hypercube vertices = 2^dimension
+            for(int combination=0; combination<num_vertices; ++combination) {
+                int sample_offset = 0; // offset into sample table corresponding to a vertex
+                int mask = 1;
+                float weight = 1;
+                int samples_dimension_offset=outdim;
+                for(int dimension=0; dimension<indim; ++dimension) {
+                    int left = (int)in[dimension];
+                    float fraction = in[dimension]-left;
+                    int sample_index;
+                    if((combination & mask) == 0) {
+                        weight *= (1-fraction); sample_index = left; }
+                    else {
+                        weight *= fraction; sample_index = left+1;
+                        // left+1 is outside the table if you land exactly on the last sample in the dimension.
+                        // In this case, weight is 0, so set sample_index to 0 to avoid ArrayIndexOutOfBounds.
+                        if(sample_index>=samplesPerDimension[dimension])
+                            sample_index = 0;
+                    }
+                  
+                    // Add in this dimension's value to the sample table offset
+                    sample_offset += sample_index*samples_dimension_offset;
+                    samples_dimension_offset *= samplesPerDimension[dimension];
+                    mask<<=1; // get mask for next bit in this vertex number
+                }
+                // add weighted contribution of the vertex for each output dimension
+                for(int dimension=0; dimension<outdim; ++dimension)
+                    out[dimension] += sampleTable[sample_offset+dimension]*weight;
+            }
         }
     }
 }
