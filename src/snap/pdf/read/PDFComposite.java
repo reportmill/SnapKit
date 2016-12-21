@@ -4,7 +4,7 @@ import java.awt.Composite;
 import java.awt.color.ColorSpace;
 
 /**
- * A custom class.
+ * Represents a PDF composite.
  */
 public class PDFComposite {
 
@@ -28,7 +28,7 @@ public class PDFComposite {
 
 public static Composite createComposite(ColorSpace sourcespace, int blendMode, boolean alphaIsShape, float alpha)
 {
-    /*TODO: implement some blend modes */
+    // TODO: implement blend modes
     switch (blendMode) {
         case NormalBlendMode:
         case MultiplyBlendMode:
