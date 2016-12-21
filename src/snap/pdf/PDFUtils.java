@@ -191,9 +191,8 @@ public static byte[] getBytesDecoded(byte bytes[], int offset, int length, Strin
         decoded = SnapDecodeLZW.decode(bytes, offset, length, early);
     }
     
-    // handle CCITTFaxDecode
-    else if (aFilter.equals("/CCITTFaxDecode")) {
-        // create a decoder instance from the parameters dictionary
+    // handle CCITTFaxDecode: Create decoder instance from parameters dictionary and decode stream
+    else if(aFilter.equals("/CCITTFaxDecode")) {
         SnapDecodeCCITTFax ccittDecoder = SnapDecodeCCITTFax.createDecoder(params, bytes, offset, length);
         decoded = ccittDecoder.decodeStream();
     }

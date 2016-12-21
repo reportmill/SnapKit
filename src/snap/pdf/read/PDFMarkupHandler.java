@@ -193,27 +193,11 @@ public void drawImage(PDFGState aGS, java.awt.Image anImg, AffineTransform ixfor
     if(aGS.composite!=null)
         _gfx.setComposite(aGS.composite);
     
-    // special case for huge images
-    if(anImg instanceof PDFTiledImage.TiledImageProxy)
-        drawTiledImage((PDFTiledImage.TiledImageProxy)anImg, ixform);
-    
     // normal image case - If image drawing throws exception, try workaround
     _gfx.drawImage(anImg, ixform, null); // If fails with ImagingOpException, see RM14 sun_bug_4723021_workaround
     
     // restore transform
     _gfx.setTransform(old);
-}
-
-public void drawTiledImage(PDFTiledImage.TiledImageProxy aIP, AffineTransform ixform)
-{
-    // save old antialiasing value and turn it off
-    boolean oldVal = _pntr.setAntialiasing(false);
-    
-    _gfx.transform(ixform);
-    try { aIP.drawImage(_gfx); }
-    catch (OutOfMemoryError e) { System.gc(); throw new PDFException("Out of memory error ",e); }
-    
-    _pntr.setAntialiasing(oldVal);
 }
 
 /**

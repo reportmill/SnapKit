@@ -21,25 +21,25 @@ public static Image getImage(PDFStream imageStream, ColorSpace cspace, PDFFile s
 {
     // First check to see if we've done this already
     Map imageDict = imageStream.getDict();
-    Image awtImage = (Image)imageDict.get("_rbcached_awtimage_");
-    if (awtImage != null)
-        return awtImage;
+    Image image = (Image)imageDict.get("_rbcached_awtimage_");
+    if (image!=null)
+        return image;
     
     // image xobjects only, although a form xobject could be made someday
     Object val = imageDict.get("Subtype");
-    if (val == null) 
+    if(val==null) 
         return null;
     
-    if (!val.equals("/Image")) {
+    if(!val.equals("/Image")) {
         System.err.println(val+" xObjects not supported yet"); return null; }
     
-    if (imageStream.usesFilter("/JPXDecode")) {
+    if(imageStream.usesFilter("/JPXDecode")) {
         System.err.println("JPeg2000 (/JPXDecode filter) not supported yet "); return null; }
         
-    if (imageStream.usesFilter("/DCTDecode")) {
-        awtImage = getDCTImage(imageStream);
-        imageDict.put("_rbcached_awtimage_", awtImage);
-        return awtImage;
+    if(imageStream.usesFilter("/DCTDecode")) {
+        image = getDCTImage(imageStream);
+        imageDict.put("_rbcached_awtimage_", image);
+        return image;
     }
 
     boolean expandBitmap = false;
@@ -78,21 +78,19 @@ public static Image getImage(PDFStream imageStream, ColorSpace cspace, PDFFile s
     //   1. this routine doesn't have access to stroke color
     //   2. image can't be cached, since it may be drawn with a different stroke color
     //   3. what happens if the colorspace is a pattern or shading?  would need clip path.
-    if (isMask || (bpc==1)) {
-        // For enormous monochrome images, use an image producer that renders the image in strips
-        if ((w*h>4*1024*1024) && imageStream.usesFilter("/CCITTFaxDecode")) {
-            awtImage = getCCITTFaxDecodeImage(imageStream,w,h);
-            return awtImage; // uncached - there's really no point
-        }
+    if(isMask || bpc==1) {
+        
+        // For enormous monochrome images, use image producer that renders image in strips (see RM14)
+        //if(w*h>4*1024*1024 && imageStream.usesFilter("/CCITTFaxDecode")) {
+        //    awtImage = getCCITTFaxDecodeImage(imageStream,w,h); return awtImage; }
         
         //current color and alpha for mask, black and white for image
-        byte clut[] = isMask ? new byte[]{0,0,0,-1,-1,-1,-1,0} : new byte[]{0,0,0,-1,-1,-1};
+        byte clut[] = isMask? new byte[] { 0,0,0,-1,-1,-1,-1,0 } : new byte[] { 0,0,0,-1,-1,-1 };
         cspace = new PDFColorSpaces.IndexedColorSpace(PDFColorSpaces.DeviceRGB.get(), 1, isMask, clut);
-        bpc=8;
-        expandBitmap = true;
+        bpc = 8; expandBitmap = true;
     }
     
-    if (bpc==0)
+    if(bpc==0)
         throw new PDFException("Illegal image format");
         
     // Components per pixel (from the colorspace)
@@ -103,15 +101,13 @@ public static Image getImage(PDFStream imageStream, ColorSpace cspace, PDFFile s
     try { streamBytes = imageStream.decodeStream(); }
     catch (Exception e) { System.err.println("Error decoding image stream: "+e); return null; }
     
-    // For image masks, check to see if filter already expanded the data out to 8bpp.
-    // If not, do it now.
+    // For image masks, check to see if filter already expanded the data out to 8bpp. If not, do it now.
     if (expandBitmap) {
         if (w*h != streamBytes.length)
             streamBytes = expandBitmapBits(streamBytes,w,h);
-        // if w & h are both 1, the number of bits equals the number of bytes
-        // regardless of whether we've exapanded them or not.  So do it again
-        // right here just in case.
-        else if (w==1 && h==1)
+        // if w & h are both 1, bit count equals byte count regardless of whether we've exapanded them or not.
+        // So do it again right here just in case.
+        else if(w==1 && h==1)
             streamBytes[0]=(byte)(streamBytes[0]&1);
     }
     
@@ -130,8 +126,7 @@ public static Image getImage(PDFStream imageStream, ColorSpace cspace, PDFFile s
         }
     }
     else { 
-        //default decodes are [0 1 .. 0 1] except for indexed spaces
-        //in which case its [0 2^bps-1]
+        //default decodes are [0 1 .. 0 1] except for indexed spaces in which case its [0 2^bps-1]
         if (cspace instanceof PDFColorSpaces.IndexedColorSpace) {
             dmins[0] = 0; dmaxs[0] = (1<<bpc)-1; }
         else {
@@ -152,12 +147,12 @@ public static Image getImage(PDFStream imageStream, ColorSpace cspace, PDFFile s
     if (praster != null) {
         PDFImageColorModel pixelModel = PDFImageColorModel.createPDFModel(cspace, bpc, dmins, dmaxs, alphaMask!=null);
         pixelModel.setSoftMask(alphaMask);
-        awtImage = new BufferedImage(pixelModel, praster, false, null);
+        image = new BufferedImage(pixelModel, praster, false, null);
     }
   
-    if (awtImage != null) 
-        imageDict.put("_rbcached_awtimage_", awtImage);
-    return awtImage;
+    if(image!=null) 
+        imageDict.put("_rbcached_awtimage_", image);
+    return image;
 }
 
 /**
@@ -168,21 +163,20 @@ public static Image getImage(PDFStream imageStream, ColorSpace cspace, PDFFile s
 private static SoftMask readSMask(PDFStream smaskStream)
 {
     Map smaskDict = smaskStream.getDict();
-    if ((!"/XObject".equals(smaskDict.get("Type"))) || (!"/Image".equals(smaskDict.get("Subtype"))) ||
-        (!"/DeviceGray".equals(smaskDict.get("ColorSpace"))))
+    Object typ = smaskDict.get("Type"), styp = smaskDict.get("Subtype"), cspc = smaskDict.get("ColorSpace");
+    if((!"/XObject".equals(typ)) || (!"/Image".equals(styp)) || (!"/DeviceGray".equals(cspc)))
         throw new PDFException("Illegal soft mask declaration");
     
     Object val = smaskDict.get("Width");
     int w = ((Number)val).intValue();
-    val =smaskDict.get("Height");
+    val = smaskDict.get("Height");
     int h = ((Number)val).intValue();
     val = smaskDict.get("BitsPerComponent");
     int bpc = ((Number)val).intValue();
     
     val = smaskDict.get("Matte");
     float matte_components[] = null;
-    if (val instanceof List) {
-        List mlist = (List)val;
+    if(val instanceof List) { List mlist = (List)val;
         matte_components = new float[mlist.size()];
         for(int i=0, n=mlist.size(); i<n; ++i)
             matte_components[i] = ((Number)mlist.get(i)).floatValue();
@@ -237,70 +231,12 @@ static Image getDCTImage(PDFStream imageStream)
     // Also, since we're going to try to pass the DCT encoded bytes to awt, we have to run any filters that come
     // BEFORE the dct, but leave the stream as DCT.
     //   /Filters [/ASCII85 /DCTDecode]
-    if (imageStream.indexOfFilter("/DCTDecode") != imageStream.numFilters()-1)
+    if(imageStream.indexOfFilter("/DCTDecode")!=imageStream.numFilters()-1)
         throw new PDFException("Illegal image stream");
     byte dctbytes[] = imageStream.decodeStream(imageStream.numFilters()-1);
     
-    // hold your breath
-    Image im = java.awt.Toolkit.getDefaultToolkit().createImage(dctbytes);
-    
-    // You need a component to use a media tracker
-    ImWaiter waiter = new ImWaiter();
-    if (!waiter.waitFor(im))
-        throw new PDFException("Error loading DCTDecoded image");
-
-    return im;
-}
-
-/**
- * Memory optimization for large ccittfax images.
- * Do stream processing as above, but create special image using an imageProducer that decrypts one scanline at a time.
- */
-static Image getCCITTFaxDecodeImage(PDFStream imageStream, int width, int height)
-{
-    // see above for comments on stream processing 
-    if (imageStream.indexOfFilter("/CCITTFaxDecode") != imageStream.numFilters()-1)
-        throw new PDFException("Illegal CCITTFaxDecode image stream");
-    byte ccittfaxBytes[] = imageStream.decodeStream(imageStream.numFilters()-1);
-
-    // Get the filter parameters
-    Map params = imageStream.getFilterParameters("/CCITTFaxDecode");
-
-    // Create a decoder
-    SnapDecodeCCITTFax decoder = SnapDecodeCCITTFax.createDecoder(params, ccittfaxBytes, 0, ccittfaxBytes.length);
-    
-    // Tell decoder what we think dimensions are (CCITTFaxDecode doesn't know until it's finished decompressing)
-    decoder.setDimensions(width, height);
-    
-    // And an image producer
-    PDFCCITTFaxProducer producer = new PDFCCITTFaxProducer(decoder);
-
-    // And a tiled image
-    PDFTiledImage.TiledImageProxy im = new PDFTiledImage.TiledImageProxy(producer);
-    return im;
-}
-
-static class ImWaiter implements ImageObserver {
-    public int imagestatus = 0;
-    public boolean waitFor(Image i)
-    {
-      int w = i.getWidth(this);
-      if (w != -1) return true;
-      while(imagestatus==0) Thread.yield();
-      return (imagestatus==1);
-    }
-    
-    public boolean imageUpdate(Image i, int flags, int x, int y, int w, int h)
-    {
-        if ((flags & ABORT) != 0) {
-            imagestatus = -1; return false; }
-        if ((flags & ERROR) != 0) {
-            imagestatus = -1; return false; }
-        if ((flags & ALLBITS) !=0) {
-            imagestatus = 1; return false; }
-        imagestatus = 0;
-        return true;
-    }
+    // Load image and return AWT image (was java.awt.Toolkit.getDefaultToolkit().createImage(bytes))
+    return (Image)snap.gfx.Image.get(dctbytes).getNative();
 }
 
 }
