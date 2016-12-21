@@ -3,9 +3,7 @@
  */
 package snap.pdf.read;
 import java.util.*;
-import snap.pdf.PDFException;
-import snap.pdf.PDFFile;
-import snap.pdf.PDFStream;
+import snap.pdf.*;
 
 /**
  * This is an abstract superclass for all objects implementing PDF functions. PDF functions come in several flavors,
@@ -38,7 +36,7 @@ public static PDFFunction getInstance(Object function, PDFFile srcFile)
     Map functionDict;
     
     if (function instanceof List) {
-        return new PDFFunctionArray((List)function, srcFile);
+        return new PDFFunctions.Array((List)function, srcFile);
     }
     else if (function instanceof PDFStream) {
         functionStream = (PDFStream)function;
@@ -53,9 +51,9 @@ public static PDFFunction getInstance(Object function, PDFFile srcFile)
     int type = ((Number)functionDict.get("FunctionType")).intValue();
     
     switch(type) {
-        case Sampled: return new PDFFunctionSampled(functionStream, srcFile);
-        case ExponentialInterpolation: return new PDFFunctionInterpolation(functionDict,srcFile);
-        case Stitching: return new PDFFunctionStitching(functionDict, srcFile);
+        case Sampled: return new PDFFunctions.Sampled(functionStream, srcFile);
+        case ExponentialInterpolation: return new PDFFunctions.Interpolation(functionDict,srcFile);
+        case Stitching: return new PDFFunctions.Stitching(functionDict, srcFile);
         default: throw new PDFException("Type "+type+" functions not supported");
     }
 }
