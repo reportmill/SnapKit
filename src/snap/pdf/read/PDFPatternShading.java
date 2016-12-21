@@ -7,9 +7,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.*;
 import java.awt.color.ColorSpace;
-import snap.pdf.PDFException;
-import snap.pdf.PDFFile;
-import snap.pdf.PDFStream;
+import snap.pdf.*;
 
 /**
  * PDFShadingPattern.
@@ -123,25 +121,21 @@ public static final int DeviceRGBShading=0;
 public static final int DeviceGrayShading=1;
 public static final int ArbitraryColorSpaceShading=2;
 
-public void setColorSpace(ColorSpace c) { 
-    // Cache a flag for use inside shading loop indicating how to
-    // convert color values to samples.  DeviceRGB & DeviceGray
-    // can set the sample directly.  Anything else has to 
-    // get converted by the ColorSpace object into RGB.
-    // According to the spec, certain colorspaces aren't supported
-    // by Acrobat (like /Indexed), although in principle there's
-    // no reason why they couldn't be (if you felt like writing dithering
-    // routines and all that)
-    // If an unsupported colorspace is used in a shading, the 
-    // colorspace will eventually throw an exception when toRGB() gets called.
-    if (c instanceof PDFDeviceRGB)
-        shadingColorMode=DeviceRGBShading;
+/**
+ * Cache a flag for use inside shading loop indicating how to convert color values to samples. DeviceRGB &
+ * DeviceGray can set the sample directly.  Anything else has to get converted by the ColorSpace object into RGB.
+ * According to the spec, certain colorspaces aren't supported by Acrobat (like /Indexed), although in principle
+ * there's no reason why they couldn't be (if you felt like writing dithering routines and all that)
+ * If an unsupported colorspace is used in a shading, the colorspace will eventually throw an exception when
+ * toRGB() gets called.
+ */
+public void setColorSpace(ColorSpace c)
+{ 
+    if (c instanceof PDFColorSpace.PDFDeviceRGB)
+        shadingColorMode = DeviceRGBShading;
     else if (c.getType()==ColorSpace.TYPE_GRAY) 
-        shadingColorMode=DeviceGrayShading;
-    else {
-        shadingColorMode=ArbitraryColorSpaceShading;
-        space=c;
-    }
+        shadingColorMode = DeviceGrayShading;
+    else { shadingColorMode = ArbitraryColorSpaceShading; space = c; }
 }
 
 /**
@@ -149,19 +143,16 @@ public void setColorSpace(ColorSpace c) {
  * always try to inline it. sample_values are assumed to to have the right number of elements in the
  * right range for the colorspace.
  */
-public int getRGBAPixel(float sample_values[])
+public int getRGBAPixel(float sample_vals[])
 {
     int pixel;
-    
     switch(shadingColorMode) {
-    case DeviceGrayShading : pixel = ((int)(255*sample_values[0])) * 0x010101; break;
-    case ArbitraryColorSpaceShading : sample_values = space.toRGB(sample_values); // fall through
-    case DeviceRGBShading :
-        pixel = (((int)(255*sample_values[0]))<<16) |
-                (((int)(255*sample_values[1]))<<8) |
-                 ((int)(255*sample_values[2]));
-        break;
-    default: pixel = 0; // mostly to shut up the compiler
+        case DeviceGrayShading : pixel = ((int)(255*sample_vals[0])) * 0x010101; break;
+        case ArbitraryColorSpaceShading : sample_vals = space.toRGB(sample_vals); // fall through
+        case DeviceRGBShading :
+            pixel = (((int)(255*sample_vals[0]))<<16) | (((int)(255*sample_vals[1]))<<8) | ((int)(255*sample_vals[2]));
+            break;
+        default: pixel = 0; // mostly to shut up the compiler
     }
     
     // all pixels are fully opaque
@@ -182,8 +173,6 @@ public PaintContext createContext(ColorModel cm, Rectangle deviceBounds, Rectang
     return this;
 }
 
-public void dispose() {}
-
 public Raster getRaster(int x, int y, int w, int h)
 {
 // Allocate an ARGB raster and pass the sample buffer to the shading implementation
@@ -198,15 +187,15 @@ public Raster getRaster(int x, int y, int w, int h)
 /** Alpha & color definitions */
 public int getTransparency() { return TRANSLUCENT; }
 
-public ColorModel getColorModel()
-{   // ARGB
-    return new DirectColorModel(32, 0xff0000, 0xff00, 0xff, 0xff000000);
-}
+// ARGB
+public ColorModel getColorModel()  { return new DirectColorModel(32, 0xff0000, 0xff00, 0xff, 0xff000000); }
 
 /**
  * Subclasses should implement this method to draw the shading. Samples is defined to be an array of
  * 8 bit persample/4 samples per pixel ARGB pixels. There is no padding, so all scanlines are w integers wide.
  */
 public abstract void doShading(int samples[], int x, int y, int w, int h);
+
+public void dispose() {}
 
 }

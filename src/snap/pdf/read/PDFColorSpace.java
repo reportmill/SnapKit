@@ -221,7 +221,7 @@ public static ColorSpace createColorSpace(int type, Object params)
     switch (type) {
         // The device spaces 
         case DeviceGrayColorspace: return ColorSpace.getInstance(ColorSpace.CS_GRAY);
-        case DeviceRGBColorspace: return PDFDeviceRGB.sharedInstance();
+        case DeviceRGBColorspace: return PDFDeviceRGB.get();
         case DeviceCMYKColorspace: return getDeviceCMYK();
         
         // The CIE spaces. TODO: Get appropriate .pf files for these to match the spec
@@ -290,6 +290,60 @@ public static Color createColor(ColorSpace space, float values[])
         _colorCache.put(key, c = new Color(space, values, 1f));
 
     return c;
+}
+
+/*
+ * Hard to believe this is even necessary. For consistency sake, colors are always created with a ColorSpace.
+ * The java docs claim that the standard sRGB space can be gotten with ColorSpace.getInstance(ColorSpace.CS_sRGB).
+ * However, this seems to return a colorspace whose colors don't really match the device defaults which are usually
+ * also referred to in the docs as sRGB.
+ * 
+ * In other words the following does not evaluate to true:
+ * 
+ *   boolean sRGBisTheSameAsDefault() {
+ *     float vals[] = {1,1,1};
+ *     Color scolor = new Color(ColorSpace.getInstance(ColorSpace.CS_sRGB), vals);
+ *     Color default = new Color(1,1,1);
+ *     return scolor.equals(default);
+ *     }
+ *  
+ *  This class, therefore, is just an identity colorspace that passes input values straight through.
+ */
+public static class PDFDeviceRGB extends ColorSpace {
+
+    public static PDFDeviceRGB get()  { return _shared; } static PDFDeviceRGB _shared = new PDFDeviceRGB();
+    
+    public PDFDeviceRGB()  { this(ColorSpace.TYPE_RGB, 3); }
+    public PDFDeviceRGB(int type, int numcomponents)  { super(type, numcomponents); }
+    
+    public float[] toRGB(float[] colorvalue)  { return colorvalue; }
+    public float[] fromRGB(float[] rgbvalue)  { return rgbvalue; }
+    public float[] toCIEXYZ(float[] colorvalue)  { return null; }
+    public float[] fromCIEXYZ(float[] colorvalue)  { return null; }
+}
+
+/**
+ * The Pattern colorspace is a special colorspace where shadings and tiling patterns can be declared. PDF treats this
+ * like other colorspaces, but it is not a full colorspace as far as awt is concerned.  Awt colorspaces are expected
+ * to be able to convert colors between each other, but this doesn't make sense for patterns or shadings. The
+ * conversion methods just generate errors, so if the colorspace is ever used in a strange place (like an image) it
+ * will generate an exception, and we don't need to always be checking to see if a particular colorspace
+ * is appropriate for the given operation.
+ * 
+ * To draw in a pattern colorspace, you can ask the colorspace for a Paint object. Classes which implement the
+ * java.awt.Paint interface can be created for all the different shading types, as well as for tiling patterns.
+ */
+public static class PDFPatternSpace extends ColorSpace {
+    public Map patternDict;
+    public ColorSpace tileSpace;
+    
+    public PDFPatternSpace()  { super(TYPE_RGB, 0); }
+    public PDFPatternSpace(ColorSpace tspace)  { this(); tileSpace = tspace; }
+    
+    public float[] toRGB(float[] colorval) { throw new IllegalArgumentException("Illegal use of pattern colorspace"); }
+    public float[] fromRGB(float[] rgbval) { throw new IllegalArgumentException("Illegal use of pattern colorspace"); }
+    public float[] toCIEXYZ(float[] clrval) { throw new IllegalArgumentException("Illegal use of pattern colorspace"); }
+    public float[] fromCIEXYZ(float[] clrval) { throw new IllegalArgumentException("Illegal use of pattern colorspace"); }
 }
 
 }

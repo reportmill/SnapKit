@@ -87,7 +87,7 @@ public static Image getImage(PDFStream imageStream, ColorSpace cspace, PDFFile s
         
         //current color and alpha for mask, black and white for image
         byte clut[] = isMask ? new byte[]{0,0,0,-1,-1,-1,-1,0} : new byte[]{0,0,0,-1,-1,-1};
-        cspace = new PDFIndexedColorSpace(PDFDeviceRGB.sharedInstance(), 1, isMask, clut);
+        cspace = new PDFIndexedColorSpace(PDFColorSpace.PDFDeviceRGB.get(), 1, isMask, clut);
         bpc=8;
         expandBitmap = true;
     }
