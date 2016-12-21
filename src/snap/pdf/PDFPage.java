@@ -181,7 +181,7 @@ public Object getXObject(String pdfName)
             // First check for a colorspace entry for the image, and create an awt colorspace.
             Object space = getXRefObj(xobjDict.get("ColorSpace"));
             ColorSpace imageCSpace = space==null ? null : PDFColorSpace.getColorspace(space, _pfile, this);
-            cached = _pfile.getImageFactory().getImage(xobjStream, imageCSpace, _pfile);
+            cached = PDFImage.getImage(xobjStream, imageCSpace, _pfile);
         }
         
         // A PDFForm just saves the stream away for later parsing

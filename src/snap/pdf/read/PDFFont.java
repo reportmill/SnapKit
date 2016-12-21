@@ -35,19 +35,17 @@ public static Font getFont(Map fontDict, PDFFile srcfile)
     if (awtFont != null)
         return awtFont;
 
-    // The (optional) PDF FontDescriptor dictionary
-    Map descriptor;
-    Object fobj;
     // The Subtype (ie. The font format.  awt likes TrueType fonts)
     String type = (String)fontDict.get("Subtype");
     
     // Check first to see if the font was embedded in the file
     if (type.equals("/TrueType") || type.equals("/CIDFontType2")) {
-        // resolve any indirect reference to the FontDescriptor
-        descriptor = (Map)srcfile.getXRefObj(fontDict.get("FontDescriptor"));
+        
+        // Get (optional) PDF FontDescriptor dictionary and resolve any indirect reference to the FontDescriptor
+        Map descriptor = (Map)srcfile.getXRefObj(fontDict.get("FontDescriptor"));
         if (descriptor != null) {
             // TrueType fonts are embedded as streams under the key FontFile2
-            fobj = srcfile.getXRefObj(descriptor.get("FontFile2"));
+            Object fobj = srcfile.getXRefObj(descriptor.get("FontFile2"));
             // Another possibility is to have FontFile3, with a FontFile2 subtype
             if (fobj==null) {
                 fobj = srcfile.getXRefObj(descriptor.get("FontFile3"));
@@ -72,24 +70,24 @@ public static Font getFont(Map fontDict, PDFFile srcfile)
             }
         }
     }
+    
     else if (type.equals("/Type0")) { // composite font with a single single cid font descendant
-        return getFont(getDescendantFont(fontDict, srcfile), srcfile);
-    }
-    // If Font wasn't embedded in the file, is an unsupported type, or it couldn't be read,
-    // look on the system using the font's name.
+        return getFont(getDescendantFont(fontDict, srcfile), srcfile); }
+        
+    // If Font wasn't embedded in file, is unsupported type, or couldn't be read, look on system using font's name.
     if (awtFont == null) {
         String fontName = (String)srcfile.getXRefObj(fontDict.get("BaseFont"));
         if (fontName != null) 
             awtFont = getFont(fontName.substring(1), type);
     }
     
-    // Still couldn't get the font.  Try font substitution
-    if (awtFont == null)
+    // Still couldn't get the font. Try font substitution
+    if(awtFont==null)
         awtFont = getSubstituteFont(fontDict);
     
-    // Oy vey, still no font.  Get the default
-    if (awtFont == null) {
-        System.err.println("Couldn't get a font for \""+fontDict.get("BaseFont")+"\"");
+    // Oy vey, still no font. Get the default
+    if(awtFont==null) {
+        System.err.println("Couldn't get a font for \"" + fontDict.get("BaseFont") + "\"");
         awtFont = getDefaultFont();
     }
 
@@ -164,15 +162,13 @@ static Map getDescendantFont(Map fontDict, PDFFile srcfile)
 {
     if ("/Type0".equals(fontDict.get("Subtype"))) {
         List descendants = (List)srcfile.getXRefObj(fontDict.get("DescendantFonts"));
-        Map child;
-        String subtype;
         if (descendants == null)
             throw new PDFException("Can't find descendant for Type 0 composite font "+fontDict);
-        child = (Map)srcfile.getXRefObj(descendants.get(0));
-        // This is the anally-retentive check to guard against malformed files
-        // which would lead to infinite recursion.
-        subtype = (String)child.get("Subtype");
-        if ((subtype == null) || (!subtype.startsWith("/CIDFont")))
+        Map child = (Map)srcfile.getXRefObj(descendants.get(0));
+        
+        // This is the anally-retentive check to guard against malformed files which would lead to infinite recursion.
+        String subtype = (String)child.get("Subtype");
+        if(subtype==null || !subtype.startsWith("/CIDFont"))
             throw new PDFException("Descendant of Type 0 composite font must be a CID font");
         return child;
     }
@@ -186,27 +182,26 @@ static Map getDescendantFont(Map fontDict, PDFFile srcfile)
 public static Object getGlyphWidths(Map fontDict, PDFFile srcfile)
 {
     Object obj = fontDict.get("_rbcached_glyphwidths_");
-    int i;
-    float missing=1;
-    
     if (obj != null)
         return obj;
     
     String type = (String)fontDict.get("Subtype");
+    float missing = 1;
     
     //Composite fonts look up widths in their descendant
     if (type.equals("/Type0")) 
         obj = getGlyphWidths(getDescendantFont(fontDict, srcfile), srcfile);
+        
     //CIDFonts look up their widths from a GlyphWidthTable
     else if (type.startsWith("/CIDFontType")) {
-        obj = new PDFGlyphWidthTable((List)srcfile.getXRefObj(fontDict.get("W")), fontDict.get("DW"));        
-    }
+        obj = new PDFGlyphWidthTable((List)srcfile.getXRefObj(fontDict.get("W")), fontDict.get("DW")); }
+    
     //Single byte fonts use a simple array of 256 floats
     else { 
         float widths[] = new float[256];
    
         //Get the optional MissingWidth from the not-really-optional font descriptor
-        Map descriptor=(Map)srcfile.getXRefObj(fontDict.get("FontDescriptor"));
+        Map descriptor = (Map)srcfile.getXRefObj(fontDict.get("FontDescriptor"));
         if (descriptor != null) {
             obj = descriptor.get("MissingWidth");
             if (obj != null)
@@ -221,16 +216,15 @@ public static Object getGlyphWidths(Map fontDict, PDFFile srcfile)
             int last = ((Number)fontDict.get("LastChar")).intValue();
             
             //Fill in the float array.
-            for(i=0; i<256; ++i) {
+            for(int i=0; i<256; ++i) {
                 if ((i<first) || (i>last))
                     widths[i] = missing;
-                else
-                    widths[i] = ((Number)wlist.get(i-first)).floatValue()/1000f;
+                else widths[i] = ((Number)wlist.get(i-first)).floatValue()/1000f;
             }
         }
+        
+        // No width array.  Should only happen for standard14 fonts. Use awt and cross your fingers.
         else {
-            // No width array.  Should only happen for standard14 fonts
-            // Use awt and cross your fingers
             Font aFont = getFont(fontDict, srcfile);
             Graphics g = srcfile.getMarkupHandler().getGraphics();
              
@@ -238,14 +232,11 @@ public static Object getGlyphWidths(Map fontDict, PDFFile srcfile)
                 FontMetrics metrics = g.getFontMetrics(aFont.deriveFont(1000f));
                 int iwidths[] = metrics.getWidths();
                 
-                //using a 1000 pt font to get the metrics
-                for(i=0; i<256; ++i)
-                    widths[i]=iwidths[i]/1000f;
+                // Using a 1000 pt font to get the metrics
+                for(int i=0; i<256; i++) widths[i] = iwidths[i]/1000f;
             }
             else { // no width info available.  Everybody gets missingwidth, which will be wrong
-                for(i=0; i<256; ++i)
-                    widths[i]=missing;
-            }
+                for(int i=0; i<256; i++) widths[i] = missing; }
         }
         obj = widths;
     }

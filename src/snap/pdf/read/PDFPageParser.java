@@ -794,7 +794,7 @@ public int parseInlineImage(int tIndex, byte[] pageBytes)
             Object space = imageDict.get("ColorSpace");
             ColorSpace imageCSpace = space==null ? null : PDFColorSpace.getColorspace(space, _pfile, _page);
             PDFStream imageStream = new PDFStream(pageBytes, token.tokenLocation(), token.tokenLength(), imageDict);
-            drawImage(_pfile.getImageFactory().getImage(imageStream, imageCSpace, _pfile));
+            drawImage(PDFImage.getImage(imageStream, imageCSpace, _pfile));
             return i; // return token index
         }
     }

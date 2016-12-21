@@ -1,7 +1,7 @@
 package snap.pdf;
 import java.util.*;
 import snap.pdf.PDFPage;
-import snap.pdf.read.*;
+import snap.pdf.read.PDFMarkupHandler;
 import snap.pdf.write.PDFPageTree;
 
 /**
@@ -40,8 +40,7 @@ public class PDFFile {
     byte                    _fileId[] = null;
     List <String>           _fileIds;
     
-    // Factory classes and callback handler
-    ImageFactory            _imageFact;
+    // PDFPainter
     PDFMarkupHandler        _markupHandler;
     
     // Pages tree
@@ -144,9 +143,6 @@ public PDFPage getPage(int aPageIndex)
  * Clears the page cache.
  */
 public void clearPageCache() { _pages.clear(); }
-
-/** Graphics object creation factories */
-public ImageFactory getImageFactory() { return _imageFact!=null? _imageFact : (_imageFact=new PDFImageFactory()); }
 
 /** The callback handler */
 public PDFMarkupHandler getMarkupHandler() { return _markupHandler; }
