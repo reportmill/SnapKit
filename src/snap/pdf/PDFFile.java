@@ -1,7 +1,6 @@
 package snap.pdf;
 import java.util.*;
 import snap.pdf.PDFPage;
-import snap.pdf.read.PDFMarkupHandler;
 import snap.pdf.write.PDFPageTree;
 
 /**
@@ -39,9 +38,6 @@ public class PDFFile {
     // File identifier
     byte                    _fileId[] = null;
     List <String>           _fileIds;
-    
-    // PDFPainter
-    PDFMarkupHandler        _markupHandler;
     
     // Pages tree
     public PDFPageTree      _pageTree;
@@ -143,10 +139,6 @@ public PDFPage getPage(int aPageIndex)
  * Clears the page cache.
  */
 public void clearPageCache() { _pages.clear(); }
-
-/** The callback handler */
-public PDFMarkupHandler getMarkupHandler() { return _markupHandler; }
-public void setMarkupHandler(PDFMarkupHandler h) { _markupHandler = h; }
 
 /**
  * Returns the PDF file's info dictionary.

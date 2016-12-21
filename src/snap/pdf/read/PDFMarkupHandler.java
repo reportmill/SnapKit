@@ -7,8 +7,10 @@ import java.awt.Shape;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
+import java.util.Stack;
 import snap.gfx.*;
 import snap.pdf.PDFException;
 
@@ -54,6 +56,9 @@ public class PDFMarkupHandler {
     // The bounds rect
     Rect                _destRect;
     
+    // The gstates of the page being parsed
+    Stack               _gstates;
+    
     // The transform to flip coordinates from Painter (origin is top-left) to PDF (origin is bottom-left)
     AffineTransform     _flipXForm;
     
@@ -70,6 +75,10 @@ public PDFMarkupHandler(Painter aPntr, Rect aRect)
 {
     _pntr = aPntr; _destRect = aRect;
     _gfx = aPntr!=null? aPntr.getNative(Graphics2D.class) : null;
+    
+    // Create the gstate list and the default gstate
+    _gstates = new Stack();
+    _gstates.push(new PDFGState());
 }
 
 /**
@@ -157,19 +166,38 @@ public void fillPath(PDFGState aGS, GeneralPath aShape)
 }    
 
 /**
+ * Establishes an image transform and tells markup engine to draw the image
+ */
+public void drawImage(java.awt.Image im) 
+{
+    // In pdf, an image is defined as occupying the unit square no matter how many pixels wide or high
+    // it is (image space goes from {0,0} - {1,1}). A pdf producer will scale up ctm to get whatever size they want.
+    // We remove pixelsWide & pixelsHigh from scale since awt image space goes from {0,0} - {width,height}
+    // Also note that in pdf image space, {0,0} is at the upper-, left.  Since this is flipped from all the other
+    // primatives, we also include a flip here for consistency.
+    int pixWide = im.getWidth(null);
+    int pixHigh = im.getHeight(null);
+    if(pixWide<0 || pixHigh<0)
+        throw new PDFException("Error loading image"); //This shouldn't happen
+
+    AffineTransform ixform = new AffineTransform(1.0/pixWide, 0.0, 0.0, -1.0/pixHigh, 0, 1.0);
+    drawImage(getGState(), im, ixform);
+}
+
+/**
  * Draw an image.
  */
 public void drawImage(PDFGState aGS, java.awt.Image anImg, AffineTransform ixform) 
 {
     AffineTransform old = establishTransform(aGS);
-    if (aGS.composite != null)
+    if(aGS.composite!=null)
         _gfx.setComposite(aGS.composite);
     
     // special case for huge images
-    if (anImg instanceof PDFTiledImage.TiledImageProxy)
+    if(anImg instanceof PDFTiledImage.TiledImageProxy)
         drawTiledImage((PDFTiledImage.TiledImageProxy)anImg, ixform);
     
-    // normal image case - If the image drawing throws an exception, try the workaround
+    // normal image case - If image drawing throws exception, try workaround
     _gfx.drawImage(anImg, ixform, null); // If fails with ImagingOpException, see RM14 sun_bug_4723021_workaround
     
     // restore transform
@@ -214,6 +242,63 @@ public void showText(PDFGState aGS, GlyphVector v)
     _gfx.setPaint(aGS.color);
     _gfx.drawGlyphVector(v,0,0);
     _gfx.setTransform(old);
+}
+
+/**
+ * Returns the last GState in the gstate list.
+ */
+public PDFGState getGState()  { return (PDFGState)_gstates.peek(); }
+
+/**
+ * Pushes a copy of the current gstate onto the gstate stack and returns the new gstate.
+ */
+public PDFGState gsave()
+{
+    PDFGState newstate = (PDFGState)getGState().clone();
+    _gstates.push(newstate);
+    return newstate;
+}
+
+/**
+ * Pops the current gstate from the gstate stack and returns the restored gstate.
+ */
+public PDFGState grestore()
+{
+    // also calls into the markup handler if the change in gstate will cause the clipping path to change.
+    GeneralPath currentclip = ((PDFGState)_gstates.pop()).clip;
+    PDFGState gs = getGState();
+    GeneralPath savedclip = gs.clip;
+     if(currentclip!=null && savedclip!=null) {
+        if (!currentclip.equals(savedclip))
+            clipChanged(gs);
+     }
+     else if(currentclip!=savedclip)
+         clipChanged(gs);
+     return gs;
+}
+
+/**
+ * Called when the clipping path changes. The clip in the gstate is defined to be in page space.
+ * Whenever clip is changed, we calculate new clip, which can be intersected with the old clip, and save it in gstate.
+ * NB. This routine modifies the path that's passed in to it.
+ */
+public void establishClip(GeneralPath newclip, boolean intersect)
+{
+    // transform the new clip path into page space
+    PDFGState gs = getGState();
+    newclip.transform(gs.trans);
+    
+    // If we're adding a clip to an existing clip, calculate the intersection
+    if(intersect && gs.clip!=null) {
+        Area clip_area = new Area(gs.clip);
+        Area newclip_area = new Area(newclip);
+        clip_area.intersect(newclip_area);
+        newclip = new GeneralPath(clip_area);
+    }
+    gs.clip = newclip;
+    
+    // notify the markup handler of the new clip
+    clipChanged(gs);
 }
 
 /**

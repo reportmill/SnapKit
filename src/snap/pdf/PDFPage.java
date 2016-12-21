@@ -312,10 +312,7 @@ public Image getImage()
     
     // Create PDF painter that renders into an image
     PDFMarkupHandler pntr = PDFMarkupHandler.get();
-    _pfile.setMarkupHandler(pntr);
-    
-    // Parse and return image
-    parse();
+    parse(pntr);
     return _image = pntr.getImage();
 }
 
@@ -326,19 +323,16 @@ public void paint(Painter aPntr, Rect aRect)
 {
     // Set PDF painter
     PDFMarkupHandler pntr = PDFMarkupHandler.get(aPntr, aRect); if(pntr==null) return;
-    _pfile.setMarkupHandler(pntr);
-    
-    // Parse and clean up
-    parse();
+    parse(pntr);
     pntr.endPage();
 }
     
 /**
  * Main entry point for parsing the page marking operations
  */
-public void parse()
+public void parse(PDFMarkupHandler aPntr)
 {
-    try { new PDFPageParser(_pfile, _index).parse(); }
+    try { new PDFPageParser(_pfile, _index, aPntr).parse(); }
     catch(Exception e) { e.printStackTrace(); }
 }
 

@@ -179,64 +179,63 @@ static Map getDescendantFont(Map fontDict, PDFFile srcfile)
  * Returns the widths for all glyphs in the fonts. Return value is either a float[] for simple single-byte fonts or an
  * instance of a PDFGlyphWidthTable for multi-byte or CID fonts.
  */
-public static Object getGlyphWidths(Map fontDict, PDFFile srcfile)
+public static Object getGlyphWidths(Map fontDict, PDFFile srcfile, PDFMarkupHandler aPntr)
 {
     Object obj = fontDict.get("_rbcached_glyphwidths_");
-    if (obj != null)
+    if(obj!=null)
         return obj;
     
     String type = (String)fontDict.get("Subtype");
     float missing = 1;
     
-    //Composite fonts look up widths in their descendant
-    if (type.equals("/Type0")) 
-        obj = getGlyphWidths(getDescendantFont(fontDict, srcfile), srcfile);
+    // Composite fonts look up widths in their descendant
+    if(type.equals("/Type0")) 
+        obj = getGlyphWidths(getDescendantFont(fontDict, srcfile), srcfile, aPntr);
         
-    //CIDFonts look up their widths from a GlyphWidthTable
+    // CIDFonts look up their widths from a GlyphWidthTable
     else if (type.startsWith("/CIDFontType")) {
         obj = new PDFGlyphWidthTable((List)srcfile.getXRefObj(fontDict.get("W")), fontDict.get("DW")); }
     
-    //Single byte fonts use a simple array of 256 floats
+    // Single byte fonts use a simple array of 256 floats
     else { 
         float widths[] = new float[256];
    
         //Get the optional MissingWidth from the not-really-optional font descriptor
         Map descriptor = (Map)srcfile.getXRefObj(fontDict.get("FontDescriptor"));
-        if (descriptor != null) {
+        if(descriptor!=null) {
             obj = descriptor.get("MissingWidth");
-            if (obj != null)
+            if(obj!=null)
                 missing = ((Number)obj).floatValue()/1000f;
         }
 
         // If there's a width array, use it
         Object pdfw = srcfile.getXRefObj(fontDict.get("Widths"));
-        if ((pdfw != null) && (pdfw instanceof List)) {
-            List wlist = (List)pdfw;
+        if(pdfw!=null && pdfw instanceof List) { List wlist = (List)pdfw;
             int first = ((Number)fontDict.get("FirstChar")).intValue();
             int last = ((Number)fontDict.get("LastChar")).intValue();
             
-            //Fill in the float array.
+            // Fill in the float array.
             for(int i=0; i<256; ++i) {
-                if ((i<first) || (i>last))
+                if(i<first || i>last)
                     widths[i] = missing;
                 else widths[i] = ((Number)wlist.get(i-first)).floatValue()/1000f;
             }
         }
         
-        // No width array.  Should only happen for standard14 fonts. Use awt and cross your fingers.
+        // No width array. Should only happen for standard14 fonts. Use awt and cross your fingers.
         else {
             Font aFont = getFont(fontDict, srcfile);
-            Graphics g = srcfile.getMarkupHandler().getGraphics();
+            Graphics g = aPntr.getGraphics();
              
-            if (g!=null) {
+            // Using a 1000 pt font to get the metrics
+            if(g!=null) {
                 FontMetrics metrics = g.getFontMetrics(aFont.deriveFont(1000f));
                 int iwidths[] = metrics.getWidths();
-                
-                // Using a 1000 pt font to get the metrics
                 for(int i=0; i<256; i++) widths[i] = iwidths[i]/1000f;
             }
-            else { // no width info available.  Everybody gets missingwidth, which will be wrong
-                for(int i=0; i<256; i++) widths[i] = missing; }
+            
+            // no width info available.  Everybody gets missingwidth, which will be wrong
+            else { for(int i=0; i<256; i++) widths[i] = missing; }
         }
         obj = widths;
     }
