@@ -76,6 +76,9 @@ public static class SnapPageViewPdfr <T extends PageView> extends SnapViewPdfr <
         // Flip coords to match java2d model
         pdfPage.append("1 0 0 -1 0 ").append(aPageShape.getHeight()).appendln(" cm");    
     }
+    
+    /** Override to suppress grestore. */
+    protected void writeShapeAfter(T aShape, PDFWriter aWriter)  { }
 }
 
 }

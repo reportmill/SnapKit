@@ -72,7 +72,7 @@ protected void writeShape(T aShape, PDFWriter aWriter)
     PDFPageWriter pdfPage = aWriter.getPageWriter();
     
     // Set shape opacity
-    pdfPage.setOpacity(aShape.getOpacityAll(), PDFPageWriter.OPACITY_SHAPE);
+    pdfPage.setOpacity(aShape.getOpacityAll());
     
     // Clip to bounds???
     //pageBuffer.print(aShape.getBoundsInside()); pageBuffer.println(" re W n"));
@@ -107,18 +107,17 @@ protected void writeShapeChildren(View aView, PDFWriter aWriter)
 protected void writeShapeAfter(T aShape, PDFWriter aWriter)
 {
     // Get pdf page
-    PDFPageWriter pdfPage = aWriter.getPageWriter();
+    PDFPageWriter pwriter = aWriter.getPageWriter();
     
-    // Restore graphics state (with hack since RMPagePdfr doesn't do a gsave and unbalances things)
-    if(pdfPage._gstack.getStackSize()>1)
-        pdfPage.grestore();
+    // Restore graphics state
+    pwriter.grestore();
 
     // Add link, if it's there (What happens with rotated or skewed shapes?)
     /*if(aShape.getURL() != null) {
         RMRect frame = aShape.getBoundsInside(); aShape.convertRectToShape(frame, null);
         frame.setY(aShape.getPageShape().getHeight() - frame.getMaxY());
         PDFAnnotation link = new PDFAnnotation.Link(frame, aShape.getURL());
-        pdfPage.addAnnotation(link);
+        pwriter.addAnnotation(link);
     }*/
 }
 

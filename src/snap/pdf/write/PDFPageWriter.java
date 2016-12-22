@@ -4,11 +4,7 @@
 package snap.pdf.write;
 import java.util.*;
 import snap.gfx.*;
-import snap.pdf.PDFFile;
-import snap.pdf.PDFStream;
-import snap.pdf.PDFWriter;
-import snap.pdf.PDFWriterBase;
-import snap.pdf.PDFXTable;
+import snap.pdf.*;
 import snap.util.*;
 
 /**
@@ -29,7 +25,7 @@ public class PDFPageWriter extends PDFWriterBase {
     Rect                  _cropBox;
     
     // The graphics state stack
-    public PDFGStateStack        _gstack = new PDFGStateStack();
+    PDFGStateStack        _gstack = new PDFGStateStack();
     
     // List of pdf annotations for this page
     List <PDFAnnotation>  _annotations;
@@ -37,15 +33,6 @@ public class PDFPageWriter extends PDFWriterBase {
     // List of pdf resources for this page 
     Map                   _resources;
     
-    // Compressed version of contents
-    PDFStream             _stream;
-
-    // Constants for opacity
-    public static final byte OPACITY_STROKE_ONLY = 0;
-    public static final byte OPACITY_STROKE_AND_FILL = 1;
-    public static final byte OPACITY_FILL_ONLY = 2;
-    public static final byte OPACITY_SHAPE = 3;
-
 /**
  * Creates a PDF page for the page tree and pfile.
  */ 
@@ -81,14 +68,10 @@ public void setFillColor(Color aColor)
     // If value already set, just return
     if(SnapUtils.equals(aColor, _gstack.getFillColor())) return;
         
-    // Set color in gstate and write it
+    // Set color in gstate and write it. Set opacity separate, since there is no set-rgba op
     _gstack.setFillColor(aColor);
-    append(aColor.getRed()).append(' ');
-    append(aColor.getGreen()).append(' ');
-    append(aColor.getBlue()).appendln(" rg");
-        
-    // Set the gstate drawing alpha constant to color's alpha.
-    setOpacity(aColor.getAlpha(), OPACITY_FILL_ONLY);
+    append(aColor.getRed()).append(' ').append(aColor.getGreen()).append(' ').append(aColor.getBlue()).appendln(" rg");
+    setFillOpacity(aColor.getAlpha());
 }
 
 /**
@@ -99,14 +82,64 @@ public void setStrokeColor(Color aColor)
     // If value already set, just return
     if(SnapUtils.equals(aColor, _gstack.getStrokeColor())) return;
         
-    // Set color in gstate and write it
+    // Set color in gstate and write it. Set opacity separate, since there is no set-rgba op
     _gstack.setStrokeColor(aColor);
-    append(aColor.getRed()).append(' ');
-    append(aColor.getGreen()).append(' ');
-    append(aColor.getBlue()).appendln(" RG");
+    append(aColor.getRed()).append(' ').append(aColor.getGreen()).append(' ').append(aColor.getBlue()).appendln(" RG");
+    setStrokeOpacity(aColor.getAlpha());
+}
+
+/**
+ * Sets the opacity for all drawing.
+ */
+public void setOpacity(double anOpacity)
+{
+    // If value already set, just return
+    if(anOpacity==_gstack.getShapeOpacity()) return;
+            
+    // Change global opacity causes change in both stroke/fill (clear vals in gstate to force change)
+    _gstack.setShapeOpacity(anOpacity);
+    double oso = _gstack.getStrokeOpacity(); _gstack.setStrokeOpacity(-1); setStrokeOpacity(oso);
+    double ofo = _gstack.getFillOpacity(); _gstack.setFillOpacity(-1); setFillOpacity(ofo);
+}
+
+/**
+ * Sets the opacity for fill operations. Stupidly, there's no setOpacity or setRGBAColor op, so we modify gstate
+ * parameter dict directly using generic gstate operator gs, which takes a name of a gstate map in page's
+ * ExtGState map (we have to add this silly little gstate map manually for each unique opacity).
+ */
+protected void setFillOpacity(double aValue)
+{
+    // If value already set, just return
+    if(aValue==_gstack.getFillOpacity()) return;
+    
+    // Get unique name for gstate parameter dict for alpha value and add param dict for it, if needed
+    double absOpacity = aValue*_gstack.getShapeOpacity();
+    String name = "ca" + Math.round(absOpacity*255);
+    if(getExtGStateMap().get(name)==null)
+        getExtGStateMap().put(name, MapUtils.newMap("ca", absOpacity));
+    
+    // Set alpha using this map (use BX & EX so this won't choke pre 1.4 readers) and update gstate value
+    appendln("BX /" + name + " gs EX");
+    _gstack.setFillOpacity(aValue);
+}
+
+/**
+ * Sets the opacity for stroke operations.
+ */
+protected void setStrokeOpacity(double aValue)
+{
+    // If value already set, just return
+    if(aValue==_gstack.getStrokeOpacity()) return;
+    
+    // Get unique name for gstate parameter dict for alpha value and add param dict for it, if needed
+    double absOpacity = aValue*_gstack.getShapeOpacity();
+    String name = "CA" + Math.round(absOpacity*255);
+    if(getExtGStateMap().get(name)==null)
+        getExtGStateMap().put(name, MapUtils.newMap("CA", absOpacity));
         
-    // Set the gstate drawing alpha constant to color's alpha.
-    setOpacity(aColor.getAlpha(), OPACITY_STROKE_ONLY);
+    // Set alpha using this map (use BX & EX so this won't choke pre 1.4 readers) and update gstate value
+    appendln("BX /" + name + " gs EX");
+    _gstack.setStrokeOpacity(aValue);
 }
 
 /**
@@ -148,65 +181,6 @@ public void setLineJoin(int aLineJoin)
     append(aLineJoin).appendln(" j");
 }
     
-/**
- * Sets the opacity to be the following value, for stroke operations, fill operations or both.
- * Stupidly, there's no setOpacity or setRGBAColor op in PDF, so you have to modify the gstate parameter dict
- * directly using the generic graphics state operator gs, which takes a name of a gstate map in page's
- * ExtGState map (we have to add this silly little gstate map manually for each unique opacity).
- */
-public void setOpacity(double anOpacity, byte coverage)
-{
-    // PDF fill/stroke opacities are actually combinations of shape opacity and GState fill/strokeOpacity values
-    if(coverage==OPACITY_SHAPE) {
-        
-        // Don't do anything if we don't have to
-        if(anOpacity!=_gstack.getShapeOpacity()) {
-            
-            _gstack.setShapeOpacity(anOpacity);
-            
-            // Changing OPACITY_SHAPE causes a change in both opacity values in the pdf gstate.
-            double oldStrokeOpacity = _gstack.getStrokeOpacity();
-            double oldFillOpacity = _gstack.getFillOpacity();
-            
-            // Clear values in the gstate to force the code below to get executed.
-            _gstack.setStrokeOpacity(-1);
-            _gstack.setFillOpacity(-1);
-            setOpacity(oldStrokeOpacity, OPACITY_STROKE_ONLY);
-            setOpacity(oldFillOpacity, OPACITY_FILL_ONLY);
-        }
-        return;
-    }
-    
-    // Absolute opacity is the combined opacity value for the pdf gstate
-    double absoluteOpacity = anOpacity * _gstack.getShapeOpacity();
-    
-    // If setting fill opacity and it's different than current opacity, write it and update gstate
-    if(coverage>=OPACITY_STROKE_AND_FILL && anOpacity!=_gstack.getFillOpacity()) {
-        
-        // Get unique name for gstate parameter dict for alpha value and add param dict for it, if needed
-        String name = "ca" + Math.round(absoluteOpacity*255);
-        if(getExtGStateMap().get(name)==null)
-            getExtGStateMap().put(name, MapUtils.newMap("ca", absoluteOpacity));
-        
-        // Set alpha using this map (use BX & EX so this won't choke pre 1.4 readers) and update gstate value
-        appendln("BX /" + name + " gs EX");
-        _gstack.setFillOpacity(anOpacity);
-    }
-    
-    // If setting stroke opacity and it's different than current stroke opacity, write it and update gstate
-    if(coverage<=OPACITY_STROKE_AND_FILL && anOpacity!=_gstack.getStrokeOpacity()) {
-        
-        // Get unique name for gstate parameter dict for alpha value and add param dict for it, if needed
-        String name = "CA" + Math.round(absoluteOpacity*255);
-        if(getExtGStateMap().get(name)==null)
-            getExtGStateMap().put(name, MapUtils.newMap("CA", absoluteOpacity));
-        
-        // Set alpha using this map (use BX & EX so this won't choke pre 1.4 readers) and update gstate value
-        appendln("BX /" + name + " gs EX");
-        _gstack.setStrokeOpacity(anOpacity);
-    }
-}
-
 /**
  * Override to write Image.
  */
@@ -264,8 +238,7 @@ public PDFAnnotation getAnnotation(int anIndex)  { return _annotations.get(anInd
  */
 public void addAnnotation(PDFAnnotation annot)
 {
-    if(_annotations==null)
-        _annotations = new Vector();
+    if(_annotations==null) _annotations = new ArrayList();
     _annotations.add(annot);
 }
 
@@ -345,28 +318,29 @@ public void resolvePageReferences(PDFPageTree pages)
 }
 
 /**
- * Caches compressed contents into _stream and releases contents for efficiency.
+ * Creates a stream for page contents bytes.
  */
-public void closeContents(PDFWriter aWriter)
+protected PDFStream createStream()
 {
-    // If not compressing, just return
-    if(!aWriter.getCompress())
-        return;
-    
-    // Get contents bytes and bytes flate encoded
+    // Get bytes and clear buffer
     byte bytes[] = toByteArray();
-    byte bytes2[] = aWriter.getBytesEncoded(bytes, 0, bytes.length);
-    
-    // If output stream is larger than original, just return
-    if(bytes2.length>=bytes.length)
-        return;
-    
-    // Create flat encoded stream and reset _contents
-    _stream = new PDFStream(bytes2, null);
-    _stream.addFilter("/FlateDecode");
-    
-    // Reset ByteArrayOutputStream
     _source.reset();
+    
+    // See if we need to compress
+    boolean compressed = false;
+    if(_writer.getCompress()) {
+        byte bytes2[] = _writer.getBytesEncoded(bytes, 0, bytes.length);
+        if(bytes2.length<bytes.length) {
+            bytes = bytes2; compressed = true; }
+    }
+    
+    // Create stream for bytes and if compressed, add filter
+    PDFStream stream = new PDFStream(bytes, null);
+    if(compressed)
+        stream.addFilter("/FlateDecode");
+    
+    // Return stream
+    return stream;
 }
 
 /**
@@ -380,15 +354,10 @@ public void writePDF(PDFWriter aWriter)
     // Write page basic info
     aWriter.append("<< /Type /Page /Parent ").appendln(xref.getRefString(_pfile.getPagesTree()));
 
-    // Write page contents (first turn to stream and add to xref, with Contents entry)
-    if(length()>0) {
-        PDFStream stream = new PDFStream(toByteArray(), null);
-        aWriter.append("/Contents ").appendln(xref.addObject(stream, true));
-    }
-    
     // Add stream if it's there instead of contents
-    if(_stream!=null)
-        aWriter.append("/Contents ").appendln(xref.addObject(_stream, true));
+    PDFStream stream = createStream();
+    if(stream!=null)
+        aWriter.append("/Contents ").appendln(xref.addObject(stream, true));
   
     // Write page media box
     if(!_mediaBox.isEmpty())

@@ -109,9 +109,6 @@ public byte[] getBytes(DocView aDoc)
         
         // Have page pdfr write pdf
         SnapViewPdfr.getPdfr(page).writePDF(page, this);
-
-        // Close page contents
-        _pageWriter.closeContents(this);
     }
       
     // run a pass though all the _pages to resolve any forward references
