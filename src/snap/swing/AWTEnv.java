@@ -182,6 +182,7 @@ protected WebSite createSite(WebURL aSiteURL)
  */
 public void openFile(Object aSource)
 {
+    if(aSource instanceof WebFile) aSource = ((WebFile)aSource).getStandardFile();
     if(aSource instanceof WebURL) aSource = ((WebURL)aSource).getURL();
     File file = FileUtils.getFile(aSource);
     try { Desktop.getDesktop().open(file); return; }
