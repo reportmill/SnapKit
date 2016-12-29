@@ -48,11 +48,12 @@ public class TextView extends ParentView implements PropChangeListener {
     boolean               _hideCaret;
     
     // Whether to send action on return
-    boolean              _sendActionOnReturn;
+    boolean              _fireActionOnReturn;
 
     // Constants for properties
     public static final String Editable_Prop = "Editable";
     public static final String WrapText_Prop = "WrapText";
+    public static final String FireActionOnReturn_Prop = "FireActionOnReturn";
 
 /**
  * Creates a new TextView.
@@ -215,19 +216,19 @@ public boolean isRich()  { return !getTextBox().isSingleStyle(); }
 public void setRich(boolean aValue)  { getTextBox().setSingleStyle(!aValue); }
 
 /**
- * Returns whether text area sends action on return.
+ * Returns whether text view fires action on return.
  */
-public boolean getSendActionOnReturn()  { return _sendActionOnReturn; }
+public boolean isFireActionOnReturn()  { return _fireActionOnReturn; }
 
 /**
  * Sets whether text area sends action on return.
  */
-public void setSendActionOnReturn(boolean aValue)
+public void setFireActionOnReturn(boolean aValue)
 {
-    if(aValue==_sendActionOnReturn) return;
-    if(_sendActionOnReturn) enableEvents(Action);
+    if(aValue==_fireActionOnReturn) return;
+    if(aValue) enableEvents(Action);
     else getEventAdapter().disableEvents(this, Action);
-    firePropChange("SendActionOnReturn", _sendActionOnReturn, _sendActionOnReturn = aValue);
+    firePropChange(FireActionOnReturn_Prop, _fireActionOnReturn, _fireActionOnReturn = aValue);
 }
 
 /**
@@ -1132,8 +1133,8 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Otherwise, archive text string
     else if(getText()!=null && getText().length()>0) e.add("text", getText());
     
-    // Archive SendActionOnReturn
-    if(getSendActionOnReturn()) e.add("SendActionOnReturn", true);
+    // Archive FireActionOnReturn
+    if(isFireActionOnReturn()) e.add(FireActionOnReturn_Prop, true);
     return e;
 }
 
@@ -1182,9 +1183,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
             setText(str);
     }
     
-    // Unarchive SendActionOnReturn
-    if(anElement.hasAttribute("SendActionOnReturn") || anElement.hasAttribute("send-action-on-return"))
-        setSendActionOnReturn(anElement.getAttributeBoolValue("SendActionOnReturn", true));
+    // Unarchive FireActionOnReturn
+    if(anElement.hasAttribute(FireActionOnReturn_Prop))
+        setFireActionOnReturn(anElement.getAttributeBoolValue(FireActionOnReturn_Prop, true));
 }
 
 }
