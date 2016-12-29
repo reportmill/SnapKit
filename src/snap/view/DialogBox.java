@@ -377,6 +377,15 @@ public void respondUI(ViewEvent anEvent)
 }
 
 /**
+ * Show a dialog panel for confirm message.
+ */
+public static boolean showConfirmDialog(View aView, String aTitle, String aMessage)
+{
+    DialogBox dbox = new DialogBox(aTitle); dbox.setQuestionMessage(aMessage);
+    return dbox.showConfirmDialog(aView);
+}
+
+/**
  * Show a dialog panel for error message.
  */
 public static void showErrorDialog(View aView, String aTitle, String aMessage)
