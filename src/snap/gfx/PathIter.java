@@ -109,33 +109,21 @@ protected final Seg arcTo(double lx, double ly, double cx, double cy, double x, 
 protected final Seg close()  { return Seg.Close; }
 
 /**
- * Returns bounds rect for given PathIter.
+ * Returns bounds rect for given PathIter, with option to include MoveTo segements.
  */
 public static Rect getBounds(PathIter aPI)
 {
-    Rect bounds = new Rect(), bnds = null; double pts[] = new double[6], lastX = 0, lastY = 0;
+    Rect bounds = new Rect(), bnds = null; double pts[] = new double[6], lx = 0, ly = 0;
     while(aPI.hasNext()) {
         switch(aPI.getNext(pts)) {
-            
-            // Handle MoveTo (reset bounds for initial move)
-            case MoveTo: if(bnds==null) { bounds.setRect(lastX=pts[0],lastY=pts[1],0,0); continue; }
-                
-            // Handle LineTo
-            case LineTo: bnds = Line.bounds(lastX, lastY, lastX=pts[0], lastY=pts[1], bnds); break;
-                
-            // Handle QuadTo
-            case QuadTo: bnds = Quad.bounds(lastX, lastY, pts[0], pts[1], lastX=pts[2], lastY=pts[3], bnds); break;
-                
-            // Handle CubicTo
-            case CubicTo:
-                bnds = Cubic.bounds(lastX, lastY, pts[0], pts[1], pts[2], pts[3], lastX=pts[4], lastY=pts[5], bnds);
-                break;
-            
-            // Handle Close
+            case MoveTo: if(bnds==null) { bounds.setRect(lx=pts[0],ly=pts[1],0,0); continue; }
+            case LineTo: bnds = Line.bounds(lx, ly, lx=pts[0], ly=pts[1], bnds); break;
+            case QuadTo: bnds = Quad.bounds(lx, ly, pts[0], pts[1], lx=pts[2], ly=pts[3], bnds); break;
+            case CubicTo: bnds = Cubic.bounds(lx, ly, pts[0], pts[1], pts[2], pts[3], lx=pts[4], ly=pts[5],bnds); break;
             case Close: break;
         }
         
-        // Combine bounds for segment (I with this was union() instead, so it didn't include (0,0))
+        // Combine bounds for segment (I wish this was union() instead, so it didn't include (0,0))
         bounds.add(bnds);
     }
  
