@@ -48,6 +48,11 @@ public void setValue(double aValue)
 }
 
 /**
+ * Returns the value as a number from 0-1, based on where the value is in the range (min=0, max=1).
+ */
+public double getValueRatio()  { return (getValue() - getMin())/(getMax() - getMin()); }
+
+/**
  * Returns the minimum.
  */
 public double getMin()  { return _min; }
@@ -166,8 +171,8 @@ protected Point getKnobPoint()
     double px = ins.left, py = ins.top, pw = w - px - ins.right, ph = h - py - ins.bottom;
     double tx = px + HSIZE + 1, tw = pw - SIZE - 2;
     double ty = py + HSIZE + 1, th = ph - SIZE - 2;
-    double midy = isHorizontal()? Math.round(py+ph/2) : Math.round(ty + th*getValue()/(getMax()-getMin()));
-    double midx = isHorizontal()? Math.round(tx + tw*getValue()/(getMax()-getMin())) : Math.round(px+pw/2);
+    double midy = isHorizontal()? Math.round(py+ph/2) : Math.round(ty + th*getValueRatio());
+    double midx = isHorizontal()? Math.round(tx + tw*getValueRatio()) : Math.round(px+pw/2);
     return new Point(midx, midy);
 }
 
