@@ -141,11 +141,17 @@ public double getTextHeight()  { return Math.ceil(getFont().getLineHeight()); }
 /**
  * Returns the text bounds.
  */
-public Rect getTextBounds()
+public Rect getTextBounds(boolean inBounds)
 {
     // Get basic bounds for TextField size/insets and font/string width/height
     Insets ins = getInsetsAll(); double width = getWidth(), height = getHeight();
     double tx = ins.left, ty = ins.top, tw = getTextWidth(), th = getTextHeight();
+    
+    // If requested to return text bounds in view bounds, constrain
+    if(inBounds) {
+        if(tx+tw>width-ins.right) tw = width - tx - ins.right;
+        if(ty+th>height-ins.bottom) th = height - ty - ins.bottom;
+    }
     
     // Adjust for PromptText if set
     if(_label.getStringView()!=null)
@@ -167,7 +173,7 @@ public Rect getTextBounds()
  */
 public int getCharIndexAt(double anX)
 {
-    Rect bnds = getTextBounds();
+    Rect bnds = getTextBounds(false);
     if(anX<bnds.getX()) return 0;
     if(anX>=bnds.getMaxX()) return length();
     double cx = bnds.getX(); Font font = getFont();
@@ -185,7 +191,7 @@ public int getCharIndexAt(double anX)
  */
 public double getXForChar(int anIndex)
 {
-    Rect bnds = getTextBounds();
+    Rect bnds = getTextBounds(false);
     if(anIndex==0) return bnds.getX();
     if(anIndex==length()) return bnds.getMaxX();
     double cx = bnds.getX(); Font font = getFont();
@@ -350,7 +356,7 @@ public String getSelString()  { return getText(); }
  */
 public Rect getSelBounds()
 {
-    Rect bnds = getTextBounds();
+    Rect bnds = getTextBounds(false);
     double x1 = getXForChar(getSelStart()), x2 = isSelEmpty()? x1 : getXForChar(getSelEnd());
     bnds.x = x1; bnds.width = x2 - x1;
     return bnds;
@@ -486,8 +492,7 @@ protected void paintBack(Painter aPntr)
 protected void paintFront(Painter aPntr)
 {
     // Get text bounds
-    Rect bnds = getTextBounds();
-    double tx = bnds.x, ty = bnds.y, tw = bnds.width, th = bnds.height;
+    Rect bnds = getTextBounds(true); double tx = bnds.x, ty = bnds.y;
         
     // Paint selection
     if(isFocused()) {
@@ -500,6 +505,7 @@ protected void paintFront(Painter aPntr)
     // Paint text
     if(length()==0) return;
     String str = getText(); Font font = getFont();
+    aPntr.clip(bnds);
     aPntr.setFont(font); aPntr.setPaint(Color.BLACK);
     aPntr.drawString(str, tx, ty + Math.ceil(font.getAscent()));
 }
