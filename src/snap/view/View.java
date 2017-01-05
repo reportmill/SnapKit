@@ -320,7 +320,7 @@ public void setXY(double aX, double aY)  { setX(aX); setY(aY); }
 /**
  * Returns the view size.
  */
-public Size getSize()  { return Size.get(getWidth(), getHeight()); }
+public Size getSize()  { return new Size(getWidth(), getHeight()); }
 
 /**
  * Sets the size.
@@ -1177,7 +1177,7 @@ protected double getMinHeightImpl()  { return 0; }
 /**
  * Returns the view minimum size.
  */
-public Size getMinSize()  { return Size.get(getMinWidth(), getMinHeight()); }
+public Size getMinSize()  { return new Size(getMinWidth(), getMinHeight()); }
 
 /**
  * Sets the view minimum size.
@@ -1230,7 +1230,7 @@ public void setMaxHeight(double aHeight)
 /**
  * Returns the view maximum size.
  */
-public Size getMaxSize()  { return Size.get(getMaxWidth(), getMaxHeight()); }
+public Size getMaxSize()  { return new Size(getMaxWidth(), getMaxHeight()); }
 
 /**
  * Sets the view maximum size.
@@ -1305,7 +1305,7 @@ protected double getPrefHeightImpl(double aW)  { return 0; }
 /**
  * Returns the view preferred size.
  */
-public Size getPrefSize()  { return Size.get(getPrefWidth(), getPrefHeight()); }
+public Size getPrefSize()  { return new Size(getPrefWidth(), getPrefHeight()); }
 
 /**
  * Sets the view preferred size.

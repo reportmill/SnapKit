@@ -154,14 +154,4 @@ public static final double getAngle(double x0, double y0, double x1, double y1)
     return angle;
 }
 
-/**
- * Returns a point instance for x/y.
- */
-public static Point get(Point aPoint)  { return new Point(aPoint.x, aPoint.y); }
-
-/**
- * Returns a point instance for x/y.
- */
-public static Point get(double aX, double aY)  { return new Point(aX, aY); }
-
 }

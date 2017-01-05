@@ -331,7 +331,7 @@ public double getX()  { return 0; }
 public double getY()  { return 0; }
 
 /** Returns the event location. */
-public Point getPoint()  { return Point.get(getX(),getY()); }
+public Point getPoint()  { return new Point(getX(),getY()); }
 
 /** Returns the screen x. */
 public double getScreenX()  { return getView().localToScreen(getX(),0).getX(); }

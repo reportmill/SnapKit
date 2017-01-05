@@ -32,7 +32,7 @@ public void setDragImageOffset(Point aPnt);
 /**
  * Sets the drag image offset.
  */
-default void setDragImageOffset(double aX, double aY)  { setDragImageOffset(Point.get(aX,aY)); }
+default void setDragImageOffset(double aX, double aY)  { setDragImageOffset(new Point(aX,aY)); }
 
 /**
  * Sets the drag image offset.

@@ -168,7 +168,7 @@ public Point transform(Point aPnt, Point aDst)
 {
     double x = aPnt.getX(), y = aPnt.getY();
     double x2 = x*_a + y*_c + _tx, y2 = x*_b + y*_d + _ty;
-    if(aDst==null) aDst = Point.get(x2, y2); else aDst.setXY(x2, y2);
+    if(aDst==null) aDst = new Point(x2, y2); else aDst.setXY(x2, y2);
     return aDst;
 }
 

@@ -73,20 +73,6 @@ public void negate()  { setSize(-getWidth(), -getHeight()); }
 public boolean equals(double w, double h)  { return w==getWidth() && h==getHeight(); }
 
 /**
- * Creates a new size.
- */
-public static Size get(double aWidth, double aHeight)  { return new Size(aWidth, aHeight); }
-
-/**
- * Creates a size from a string (assumes comma separated).
- */
-public static Size get(String aString)
-{
-    double w = StringUtils.floatValue(aString), h = StringUtils.doubleValue(aString, aString.indexOf(",") + 1);
-    return get(w,h);
-}
-
-/**
  * Standard clone implementation.
  */
 public Size clone()  { return new Size(width,height); }
@@ -105,5 +91,14 @@ public boolean equals(Object anObj)
  * Standard toString implementation.
  */
 public String toString()  { return "{" + width + "," + height + "}"; }
+
+/**
+ * Creates a size from a string (assumes comma separated).
+ */
+public static Size get(String aString)
+{
+    double w = StringUtils.floatValue(aString), h = StringUtils.doubleValue(aString, aString.indexOf(",") + 1);
+    return new Size(w,h);
+}
 
 }

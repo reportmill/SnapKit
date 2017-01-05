@@ -323,7 +323,7 @@ public void snap()
 public Point[] getPoints()
 {
     double x = getX(), y = getY(), w = getWidth(), h = getHeight();
-    return new Point[] { Point.get(x,y), Point.get(x+w,y), Point.get(x+w,y+h), Point.get(x,y+h) }; 
+    return new Point[] { new Point(x,y), new Point(x+w,y), new Point(x+w,y+h), new Point(x,y+h) }; 
 }
 
 /**
@@ -361,7 +361,7 @@ public Point getPerimeterPointForRadial(double anAngle, boolean doEllipse)
     }
     
     // Get point in rect coords
-    return Point.get(getMidX() + x2, getMidY() + y2);
+    return new Point(getMidX() + x2, getMidY() + y2);
 }
 
 /**
