@@ -65,6 +65,21 @@ public void setValue(T aValue)
 }
 
 /**
+ * Returns the value type.
+ */
+public Class getValueClass()
+{
+    Object val = getValue();
+    if(val instanceof Integer) return int.class;
+    else if(val instanceof Long) return long.class;
+    else if(val instanceof Byte) return byte.class;
+    else if(val instanceof Short) return short.class;
+    else if(val instanceof Float) return float.class;
+    else if(val instanceof Double) return double.class;
+    return val!=null? val.getClass() : null;
+}
+
+/**
  * Returns the spinner min.
  */
 public double getMin()  { return _min; }
@@ -108,15 +123,18 @@ public void setStep(double aValue)
  */
 public void increment()
 {
-    Object value = getValue();
-    if(value instanceof Integer) { int i1 = (Integer)value, i2 = (int)Math.round(getStep()); value = i1 + i2; }
-    else if(value instanceof Float) { float i1 = (Float)value, i2 = (float)getStep(); value = i1 + i2; }
-    else if(value instanceof Double) { double i1 = (Double)value, i2 = getStep(); value = i1 + i2; }
-    else System.out.println("Spinner: Unsuported value/step type");
+    Object val = getValue();
+    if(val instanceof Integer) { int i1 = (Integer)val, i2 = (int)Math.round(getStep()); val = i1 + i2; }
+    else if(val instanceof Long) { long i1 = (long)val, i2 = (long)getStep(); val = i1 + i2; }
+    else if(val instanceof Byte) { byte i1 = (byte)val, i2 = (byte)getStep(); val = i1 + i2; }
+    else if(val instanceof Short) { short i1 = (short)val, i2 = (short)getStep(); val = i1 + i2; }
+    else if(val instanceof Float) { float i1 = (Float)val, i2 = (float)getStep(); val = i1 + i2; }
+    else if(val instanceof Double) { double i1 = (Double)val, i2 = getStep(); val = i1 + i2; }
+    else { System.err.println("Spinner: Unsuported value/step type: " + getValueClass()); return; }
     
     // If new value, set and fire action
-    if(SnapUtils.equals(value, getValue())) return;
-    setValue((T)value);
+    if(SnapUtils.equals(val, getValue())) return;
+    setValue((T)val);
     fireActionEvent();
 }
 
@@ -125,15 +143,18 @@ public void increment()
  */
 public void decrement()
 {
-    Object value = getValue();
-    if(value instanceof Integer) { int i1 = (Integer)value, i2 = (int)Math.round(getStep()); value = i1 - i2; }
-    else if(value instanceof Float) { float i1 = (Float)value, i2 = (float)getStep(); value = i1 - i2; }
-    else if(value instanceof Double) { double i1 = (Double)value, i2 = getStep(); value = i1 - i2; }
-    else System.out.println("Spinner: Unsuported value/step type");
+    Object val = getValue();
+    if(val instanceof Integer) { int i1 = (Integer)val, i2 = (int)Math.round(getStep()); val = i1 - i2; }
+    else if(val instanceof Long) { long i1 = (long)val, i2 = (long)getStep(); val = i1 - i2; }
+    else if(val instanceof Byte) { byte i1 = (byte)val, i2 = (byte)getStep(); val = i1 - i2; }
+    else if(val instanceof Short) { short i1 = (short)val, i2 = (short)getStep(); val = i1 - i2; }
+    else if(val instanceof Float) { float i1 = (Float)val, i2 = (float)getStep(); val = i1 - i2; }
+    else if(val instanceof Double) { double i1 = (Double)val, i2 = getStep(); val = i1 - i2; }
+    else { System.err.println("Spinner: Unsuported value/step type: " + getValueClass()); return; }
     
     // If new value, set and fire action
-    if(SnapUtils.equals(value, getValue())) return;
-    setValue((T)value);
+    if(SnapUtils.equals(val, getValue())) return;
+    setValue((T)val);
     fireActionEvent();
 }
 
@@ -142,12 +163,18 @@ public void decrement()
  */
 public void textChanged()
 {
-    if(getValue() instanceof Integer) {
-        Object value = SnapUtils.intValue(_text.getText());
-        setValue((T)value);
-        fireActionEvent();
-    }
-    else System.out.println("Spinner: Unsuported value text type");
+    // Get Text value based as same current type of spinner
+    Object oval = getValue(), nval = null; String str = _text.getText();
+    if(oval instanceof Integer) nval = SnapUtils.intValue(str);
+    else if(oval instanceof Long) nval = SnapUtils.longValue(str);
+    else if(oval instanceof Byte) nval = (byte)SnapUtils.intValue(str);
+    else if(oval instanceof Short) nval = (short)SnapUtils.intValue(str);
+    else if(oval instanceof Float) nval = SnapUtils.floatValue(str);
+    else if(oval instanceof Double) nval = SnapUtils.doubleValue(str);
+    else { System.err.println("Spinner: Unsuported value type: " + getValueClass()); return; }
+    
+    setValue((T)nval);
+    fireActionEvent();
 }
 
 /**
