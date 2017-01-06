@@ -47,6 +47,15 @@ public void setSelected(boolean aValue)
 /**
  * Returns the button group name.
  */
+public ToggleGroup getToggleGroup()
+{
+    ViewOwner ownr = getOwner(); if(ownr==null) return null;
+    return _groupName!=null? ownr.getToggleGroup(_groupName) : null;
+}
+
+/**
+ * Returns the button group name.
+ */
 public String getToggleGroupName()  { return _groupName; }
 
 /**
