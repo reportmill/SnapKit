@@ -326,10 +326,8 @@ protected TextPage createExceptionPage(WebResponse aResp)
     WebURL url = aResp.getRequestURL(); Throwable t = aResp.getException();
     
     // Get default console text
-    String text = "WebBrowser Exception Console\n";
-    text += "Browser Build Date: " + SnapUtils.getBuildInfo() +
-            ", Version " + SnapUtils.getVersion() + ", JVM " + System.getProperty("java.version") +
-            ", User " + System.getProperty("user.name") + '\n';
+    String text = String.format("WebBrowser Exception Console\nBrowser Build Date: %s, Version 1.0, JVM %s, User %s\n",
+        SnapUtils.getBuildInfo(), System.getProperty("java.version"), System.getProperty("user.name"));
     text += t.toString() + '\n';
     text += "Caused by: " + StringUtils.getStackTraceString(t);
     

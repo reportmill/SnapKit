@@ -11,7 +11,7 @@ import snap.gfx.GFXEnv;
 import snap.web.WebURL;
 
 /**
- * This class provides a bunch of utility methods for common problems.
+ * This class provides general utility methods.
  */
 public class SnapUtils {
     
@@ -23,9 +23,6 @@ public class SnapUtils {
     
     // Whether app is currently running on Mac
     public static boolean isMac = platform==Platform.MAC;
-    
-    // Whether app is currently running as desktop App
-    public static boolean isApp = false;
     
     // The build info string from "BuildInfo.txt" (eg, "Aug-31-04")
     private static String _buildInfo;
@@ -379,88 +376,6 @@ public static void writeBytes(byte bytes[], Object aDest)
 }
 
 /**
- * Checks a string to see if it's valid.
- */
-public static boolean checkString(String aString, boolean isApplication)
-{
-    // If null string provided, just return
-    if(aString==null) return false;
-
-    // License is uppercase version of string - return if not long enough or has wrong prefix
-    String license = aString.toUpperCase();
-    
-    // Get index of dash in license string
-    int dash = license.indexOf("-"); if(dash<0) return false;
-    
-    // Get license prefix (substring before dash) and suffix (substring after dash)
-    String prefix = license.substring(0, dash);
-    String suffix = license.substring(dash+1);
-    
-    // Decrypt suffix
-    suffix = dString(suffix, "RMRules");
-    
-    // If prefix/suffix lengths not equal, return false
-    if(prefix.length()!=suffix.length()) return false;
-    
-    // Strip off first two characters of suffix
-    suffix = suffix.substring(2);
-    
-    // If prefix doesn't start with suffix, return false
-    if(!prefix.startsWith(suffix)) return false;
-    
-    // Declare local variable for license processor count
-    int procCount = 0;
-        
-    // Decode processor count hex digit at second to last prefix char
-    try { procCount = Integer.parseInt(prefix.substring(prefix.length()-2, prefix.length()-1), Character.MAX_RADIX); }
-    catch(Exception e) { return false; }
-    
-    // If less than actual processor count, return false
-    if((isApplication && procCount!=0) || (!isApplication && procCount<getProcessorCount())) {
-        if(!isApplication) {
-            System.err.println("Warning: License key not valid for CPU Count " + getProcessorCount());
-            System.err.println("Warning: License key CPU count is " + procCount);
-        }
-        return false;
-    }
-    
-    // Declare local variable for license version
-    int version = 0;
-    
-    // Decode version hex digit at last prefix char
-    try { version = Integer.parseInt(prefix.substring(prefix.length()-1), Character.MAX_RADIX); }
-    catch(Exception e) { System.err.println("Warning: License key invalid format (2)"); return false; }
-    
-    // If version is less than getVersion(), complain and return false
-    if(version<9) { //getVersion()) { Change back soon
-        System.err.print("Warning: License not valid for RM " + getVersion());
-        System.err.println(" (license valid for RM " + version + ")");
-        return false;
-    }
-
-    // Return true since all checks passed
-    return true;
-}
-
-/**
- * Decrypts aString with aPassword (takes hex string of form "AC5FDE" and returns human readable string).
- */
-private static String dString(String aString, String aPassword)
-{
-    if(aString==null || aPassword==null) return null;
-    
-    // Get bytes for string and password
-    byte string[] = ASCIICodec.decodeHex(aString);
-    byte password[] = StringUtils.getBytes(aPassword);
-    
-    // XOR string bytes with password bytes
-    for(int i=0; i<string.length; i++)
-        string[i] = (byte)(string[i]^password[i%password.length]);
-    
-    return StringUtils.getISOLatinString(string);
-}
-
-/**
  * Returns the hostname for this machine.
  */
 public static String getHostname()
@@ -474,25 +389,14 @@ public static String getHostname()
  */
 public static String getBuildInfo()
 {
-    // If build info file hasn't been loaded, load it
-    if(_buildInfo==null) {
-        try {
-            InputStream s = SnapUtils.class.getResourceAsStream("/com/reportmill/BuildInfo.txt");
-            InputStreamReader r = new InputStreamReader(s);
-            BufferedReader br = new BufferedReader(r);
-            _buildInfo = br.readLine(); 
-        }
-        catch(Exception e) { _buildInfo = ""; }
-    }
+    // If already set, just return
+    if(_buildInfo!=null) return _buildInfo;
     
-    // Return build info string
+    // If build info file hasn't been loaded, load it
+    try { _buildInfo = SnapUtils.getText(SnapUtils.class.getResourceAsStream("/com/reportmill/BuildInfo.txt")); }
+    catch(Exception e) { System.err.println("SnapUtils.getBuildInfo: " + e); _buildInfo = ""; }
     return _buildInfo;
 }
-
-/**
- * Returns the version number of the app.
- */
-public static float getVersion()  { return 14; }
 
 /**
  * Returns the number of processors on this machine.

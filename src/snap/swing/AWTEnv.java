@@ -224,7 +224,6 @@ public Prefs getPrefs()  { return AWTPrefs.get(); }
  */
 public void setHeadless()
 {
-    if(!SnapUtils.isApp)
     try { System.setProperty("java.awt.headless", "true"); }
     catch(Throwable e) { }
 }

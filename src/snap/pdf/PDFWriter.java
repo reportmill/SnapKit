@@ -94,7 +94,7 @@ public byte[] getBytes(DocView aDoc)
     _pfile.setAuthor("Snap User");
     
     // Set PDF file creator
-    String version = "SnapPDF " + SnapUtils.getVersion();
+    String version = "SnapPDF 1.0";
     String build = ", Build: " + SnapUtils.getBuildInfo();
     String jvm = ", JVM: " + System.getProperty("java.version");
     _pfile.setCreator(version + build + jvm);
