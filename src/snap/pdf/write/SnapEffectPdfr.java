@@ -12,27 +12,27 @@ import snap.view.*;
 public class SnapEffectPdfr {
 
 /**
- * Writes a shape with effect.
+ * Writes a View with effect.
  */
-public static void writeShapeEffect(View aShape, PDFWriter aWriter)
+public static void writeViewEffect(View aView, PDFWriter aWriter)
 {
-    Effect eff = aShape.getEffect();
-    if(eff instanceof BlurEffect) writeBlurEffect(aShape, (BlurEffect)eff, aWriter);
-    else if(eff instanceof ShadowEffect) writeShadowEffect(aShape, (ShadowEffect)eff, aWriter);
-    else if(eff instanceof ReflectEffect) writeRefectionEffect(aShape, (ReflectEffect)eff, aWriter);
-    else if(eff instanceof EmbossEffect) writeEmbossEffect(aShape, (EmbossEffect)eff, aWriter);
+    Effect eff = aView.getEffect();
+    if(eff instanceof BlurEffect) writeBlurEffect(aView, (BlurEffect)eff, aWriter);
+    else if(eff instanceof ShadowEffect) writeShadowEffect(aView, (ShadowEffect)eff, aWriter);
+    else if(eff instanceof ReflectEffect) writeRefectionEffect(aView, (ReflectEffect)eff, aWriter);
+    else if(eff instanceof EmbossEffect) writeEmbossEffect(aView, (EmbossEffect)eff, aWriter);
 }
     
 /**
- * Writes pdf for given blur effect and shape.
+ * Writes pdf for given blur effect and View.
  */
-public static void writeBlurEffect(View aShape, BlurEffect aBlur, PDFWriter aWriter)
+public static void writeBlurEffect(View aView, BlurEffect aBlur, PDFWriter aWriter)
 {
     // If radius is less than 1, do default drawing and return
-    if(aBlur.getRadius()<1) { SnapViewPdfr.getPdfr(aShape).writeShapeAll(aShape, aWriter); return; }
+    if(aBlur.getRadius()<1) { SnapViewPdfr.getPdfr(aView).writeViewAll(aView, aWriter); return; }
     
     // Get effect image and image fill
-    Image effImg = getEffectImage(aShape);
+    Image effImg = getEffectImage(aView);
     ImagePaint ifill = new ImagePaint(effImg);
     
     // Get bounds for image fill and write
@@ -41,12 +41,12 @@ public static void writeBlurEffect(View aShape, BlurEffect aBlur, PDFWriter aWri
 }
 
 /**
- * Writes pdf for given shadow effect and shape.
+ * Writes pdf for given shadow effect and View.
  */
-public static void writeShadowEffect(View aShape, ShadowEffect aShadow, PDFWriter aWriter)
+public static void writeShadowEffect(View aView, ShadowEffect aShadow, PDFWriter aWriter)
 {
     // Get effect image and image fill
-    Image effImg = getEffectImage(aShape);
+    Image effImg = getEffectImage(aView);
     ImagePaint ifill = new ImagePaint(effImg);
     
     // Get bounds for image fill and write
@@ -55,38 +55,38 @@ public static void writeShadowEffect(View aShape, ShadowEffect aShadow, PDFWrite
     SnapPaintPdfr.writeImagePaint(aWriter, ifill, null, bounds);
     
     // Do normal pdf write
-    SnapViewPdfr.getPdfr(aShape).writeShapeAll(aShape, aWriter);
+    SnapViewPdfr.getPdfr(aView).writeViewAll(aView, aWriter);
 }
     
 /**
- * Writes pdf for given reflection effect and shape.
+ * Writes pdf for given reflection effect and View.
  */
-private static void writeRefectionEffect(View aShape, ReflectEffect aReflect, PDFWriter aWriter)
+private static void writeRefectionEffect(View aView, ReflectEffect aReflect, PDFWriter aWriter)
 {
     // If valid reflection and fade heights, do reflection
     if(aReflect.getReflectHeight()>0 && aReflect.getFadeHeight()>0) {
     
-        // Get reflection image for shape and fill
-        Image refImg = getEffectImage(aShape);
+        // Get reflection image for View and fill
+        Image refImg = getEffectImage(aView);
         ImagePaint ifill = new ImagePaint(refImg);
         
         // Get bounds of reflected image and write
-        Rect bounds = aShape.getBoundsInside(); //aShape.getBoundsStroked();
+        Rect bounds = aView.getBoundsInside(); //aShape.getBoundsStroked();
         bounds = new Rect(bounds.getX(), bounds.getMaxY() + aReflect.getGap(), refImg.getWidth(), refImg.getHeight());
         SnapPaintPdfr.writeImagePaint(aWriter, ifill, null, bounds);
     }
     
     // Do normal write pdf
-    SnapViewPdfr.getPdfr(aShape).writeShapeAll(aShape, aWriter);
+    SnapViewPdfr.getPdfr(aView).writeViewAll(aView, aWriter);
 }
     
 /**
- * Writes pdf for given emboss effect and shape.
+ * Writes pdf for given emboss effect and View.
  */
-private static void writeEmbossEffect(View aShape, EmbossEffect anEmboss, PDFWriter aWriter)
+private static void writeEmbossEffect(View aView, EmbossEffect anEmboss, PDFWriter aWriter)
 {
     // Get effect image and image fill
-    Image effectImage = getEffectImage(aShape);
+    Image effectImage = getEffectImage(aView);
     ImagePaint ifill = new ImagePaint(effectImage);
     
     // Get bounds for image fill and write
@@ -97,12 +97,12 @@ private static void writeEmbossEffect(View aShape, EmbossEffect anEmboss, PDFWri
 /**
  * Returns the effect image.
  */
-private static Image getEffectImage(View aShape)
+private static Image getEffectImage(View aView)
 {
-    Effect eff = aShape.getEffect();
-    Rect bnds = aShape.getBoundsInside(); //aShape.getBoundsStrokedDeep();
+    Effect eff = aView.getEffect();
+    Rect bnds = aView.getBoundsInside(); //aShape.getBoundsStrokedDeep();
     PainterDVR pntr = new PainterDVR();
-    ViewUtils.paintAll(aShape, pntr); //paintShapeAll
+    ViewUtils.paintAll(aView, pntr); //paintShapeAll
     if(eff instanceof BlurEffect) return ((BlurEffect)eff).getBlurImage(pntr, bnds);
     if(eff instanceof EmbossEffect) return ((EmbossEffect)eff).getEmbossImage(pntr, bnds);
     if(eff instanceof ReflectEffect) return ((ReflectEffect)eff).getReflectImage(pntr, bnds);

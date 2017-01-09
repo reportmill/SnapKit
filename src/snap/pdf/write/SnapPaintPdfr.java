@@ -7,18 +7,18 @@ import snap.pdf.PDFWriter;
 import snap.view.*;
 
 /**
- * This RMObjectPdfr subclass writes PDF for RMFill.
+ * Methods to writes PDF for snap Paints.
  */
 public class SnapPaintPdfr {
 
 /**
- * Writes a given shape stroke.
+ * Writes a given View stroke.
  */
-public static void writeShapeStroke(View aShape, Border aStroke, PDFWriter aWriter)
+public static void writeViewStroke(View aView, Border aStroke, PDFWriter aWriter)
 {
     // Get PDF page and write stroke path
     PDFPageWriter pdfPage = aWriter.getPageWriter();
-    pdfPage.writePath(aShape.getBoundsShape()); //aStroke.getStrokePath(aShape)
+    pdfPage.writePath(aView.getBoundsShape()); //aStroke.getStrokePath(aShape)
     
     // Set stroke color and width
     pdfPage.setStrokeColor(aStroke.getColor());
@@ -34,23 +34,23 @@ public static void writeShapeStroke(View aShape, Border aStroke, PDFWriter aWrit
 }
 
 /**
- * Writes a given shape fill.
+ * Writes a given View fill.
  */
-public static void writeShapeFill(View aShape, Paint aFill, PDFWriter aWriter)
+public static void writeViewFill(View aView, Paint aFill, PDFWriter aWriter)
 {
-    //if(aFill instanceof GradientPaint) writeGradientFill(aShape, (GradientPaint)aFill, aWriter);
+    //if(aFill instanceof GradientPaint) writeGradientFill(aView, (GradientPaint)aFill, aWriter);
     //else
-    if(aFill instanceof ImagePaint) writeImagePaint(aWriter, aShape, (ImagePaint)aFill);
-    else writeBasicFill(aWriter, aShape, (Color)aFill);
+    if(aFill instanceof ImagePaint) writeImagePaint(aWriter, aView, (ImagePaint)aFill);
+    else writeBasicFill(aWriter, aView, (Color)aFill);
 }
 
 /**
  * Writes PDF for a plain RMFill.
  */
-public static void writeBasicFill(PDFWriter aWriter, View aShape, Color aFill)
+public static void writeBasicFill(PDFWriter aWriter, View aView, Color aFill)
 {
-    // Get shape path and PDF page and write path
-    Shape path = aShape.getBoundsShape(); //aShape.getPath()
+    // Get View path and PDF page and write path
+    Shape path = aView.getBoundsShape(); //aShape.getPath()
     PDFPageWriter pdfPage = aWriter.getPageWriter();
     pdfPage.writePath(path);
     
@@ -68,10 +68,10 @@ public static void writeBasicFill(PDFWriter aWriter, View aShape, Color aFill)
 /** 
  * Writes pdf for the path filled with a shading pattern defined by the RMGradientFill
  */
-/*public static void writeGradientFill(View aShape, GradientPaint aFill, RMPDFWriter aWriter)
+/*public static void writeGradientFill(View aView, GradientPaint aFill, RMPDFWriter aWriter)
 {
-    // Get shape path and PDF page and write path
-    Shape path = aShape.getPath();
+    // Get View path and PDF page and write path
+    Shape path = aView.getPath();
     PDFPage pdfPage = aWriter.getPDFPage();
     pdfPage.writePath(path);
     
@@ -130,14 +130,14 @@ public static void writeBasicFill(PDFWriter aWriter, View aShape, Color aFill)
     shading.put("Function", xref.addObject(function));
     
     // Get gradient paint and start/end
-    GradientPaint gpnt = aFill.copyFor(aShape.getBoundsInside());
+    GradientPaint gpnt = aFill.copyFor(aView.getBoundsInside());
     Point startPt = Point.get(gpnt.getStartX(), gpnt.getStartY()), endPt = Point.get(gpnt.getEndX(), gpnt.getEndY());
     
     // In pdf, coordinates of the gradient axis are defined in pattern space.  Pattern space is the same as the
     // page's coordinate system, and doesn't get affected by changes to the ctm. Since the RMGradient returns
-    // points in the shape's coordinate system, we have to transform them into pattern space (page space).
-    View page = aShape.getParent(PageView.class);
-    Transform patternSpaceTransform = aShape.getTransformToParent(page);
+    // points in the View's coordinate system, we have to transform them into pattern space (page space).
+    View page = aView.getParent(PageView.class);
+    Transform patternSpaceTransform = aView.getTransformToParent(page);
     patternSpaceTransform.transform(startPt);
     patternSpaceTransform.transform(endPt);
     
@@ -181,9 +181,9 @@ public static void writeBasicFill(PDFWriter aWriter, View aShape, Color aFill)
 /**
  * Writes given ImagePaint to a PDFWriter.
  */
-public static void writeImagePaint(PDFWriter aWriter, View aShape, ImagePaint anImageFill)
+public static void writeImagePaint(PDFWriter aWriter, View aView, ImagePaint anImageFill)
 {
-    writeImagePaint(aWriter, anImageFill, aShape.getBoundsShape(), aShape.getBoundsInside());
+    writeImagePaint(aWriter, anImageFill, aView.getBoundsShape(), aView.getBoundsInside());
 }
 
 /**
@@ -223,14 +223,14 @@ public static void writeImagePaint(PDFWriter aWriter, ImagePaint anImageFill, Sh
         pdfPage.appendln(" W n");
     }
 
-    // If scaled, translate to shape center, scale and return
+    // If scaled, translate to View center, scale and return
     /*if(anImageFill.getScaleX()!=1 || anImageFill.getScaleY()!=1) {
         
-        // Get shape width and height
+        // Get View width and height
         double width = bounds.getWidth();
         double height = bounds.getHeight();
 
-        // Get transform with translate to shape center, scale, and translate back
+        // Get transform with translate to View center, scale, and translate back
         Transform t = new Transform(); t.translate(-width/2, -height/2);
         t.scale(anImageFill.getScaleX(), anImageFill.getScaleY());
         t.translate(width/2, height/2);
@@ -261,7 +261,7 @@ public static void writeImagePaint(PDFWriter aWriter, ImagePaint anImageFill, Sh
         double startX = bounds.x + anImageFill.getX(); while(startX>bounds.x) startX -= width;
         double startY = bounds.y + anImageFill.getY(); while(startY>bounds.y) startY -= height;
 
-        // Iterate left to right over shape width and top to bottom over shape height
+        // Iterate left to right over View width and top to bottom over View height
         for(double x=startX, xMax=bounds.getMaxX(); x<xMax; x+=width) {
             for(double y=startY, yMax=bounds.getMaxY(); y<yMax; y+=height) {
                 

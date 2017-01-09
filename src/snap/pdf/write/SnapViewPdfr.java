@@ -7,7 +7,7 @@ import snap.pdf.PDFWriter;
 import snap.view.*;
 
 /**
- * This RMObjectPdfr subclass writes PDF for RMShape.
+ * This base class to write PDF for View subclasses.
  */
 public class SnapViewPdfr <T extends View> {
 
@@ -15,27 +15,27 @@ public class SnapViewPdfr <T extends View> {
     static SnapViewPdfr    _viewPdfr = new SnapViewPdfr();
 
 /**
- * Writes a given RMShape hierarchy to a PDF file (recursively).
+ * Writes a given View hierarchy to a PDF file (recursively).
  */
-public void writePDF(T aShape, PDFWriter aWriter)
+public void writePDF(T aView, PDFWriter aWriter)
 {
-    // Write shape
-    writeShapeBefore(aShape, aWriter);
+    // Write view
+    writeViewBefore(aView, aWriter);
     
-    // If shape has effect, forward to it
-    if(aShape.getEffect()!=null) SnapEffectPdfr.writeShapeEffect(aShape, aWriter);
+    // If view has effect, forward to it
+    if(aView.getEffect()!=null) SnapEffectPdfr.writeViewEffect(aView, aWriter);
     
-    // Otherwise, do basic write shape all
-    else writeShapeAll(aShape, aWriter);
+    // Otherwise, do basic writeViewAll
+    else writeViewAll(aView, aWriter);
     
-    // Write shape after children
-    writeShapeAfter(aShape, aWriter);    
+    // Write View after children
+    writeViewAfter(aView, aWriter);    
 }
 
 /**
- * Writes a given RMShape hierarchy to a PDF file (recursively).
+ * Writes a given View hierarchy to a PDF file (recursively).
  */
-protected void writeShapeBefore(T aShape, PDFWriter aWriter)
+protected void writeViewBefore(T aView, PDFWriter aWriter)
 {
     // Get page
     PDFPageWriter pdfPage = aWriter.getPageWriter();
@@ -44,54 +44,54 @@ protected void writeShapeBefore(T aShape, PDFWriter aWriter)
     pdfPage.gsave();
         
     // If not rotated/scaled, write simple translation matrix
-    if(aShape.isLocalToParentSimple())
-        pdfPage.append("1 0 0 1 ").append(aShape.getX()).append(' ').append(aShape.getY()).appendln(" cm");
+    if(aView.isLocalToParentSimple())
+        pdfPage.append("1 0 0 1 ").append(aView.getX()).append(' ').append(aView.getY()).appendln(" cm");
     
     // If rotated/scaled, write full transform
-    else pdfPage.writeTransform(aShape.getLocalToParent());
+    else pdfPage.writeTransform(aView.getLocalToParent());
 }
     
 /**
- * Writes the shape and then the shape's children.
+ * Writes the View and then the View's children.
  */
-protected void writeShapeAll(T aShape, PDFWriter aWriter)
+protected void writeViewAll(T aView, PDFWriter aWriter)
 {
-    // Write shape fills
-    writeShape(aShape, aWriter);
+    // Write View fills
+    writeView(aView, aWriter);
     
-    // Write shape children
-    writeShapeChildren(aShape, aWriter);
+    // Write View children
+    writeViewChildren(aView, aWriter);
 }
 
 /**
- * Writes a given RMShape hierarchy to a PDF file (recursively).
+ * Writes a given View hierarchy to a PDF file (recursively).
  */
-protected void writeShape(T aShape, PDFWriter aWriter)
+protected void writeView(T aView, PDFWriter aWriter)
 {
     // Get pdf page
     PDFPageWriter pdfPage = aWriter.getPageWriter();
     
-    // Set shape opacity
-    pdfPage.setOpacity(aShape.getOpacityAll());
+    // Set View opacity
+    pdfPage.setOpacity(aView.getOpacityAll());
     
     // Clip to bounds???
-    //pageBuffer.print(aShape.getBoundsInside()); pageBuffer.println(" re W n"));
+    //pageBuffer.print(aView.getBoundsInside()); pageBuffer.println(" re W n"));
         
     // Get fill and write pdf if not null
-    Paint fill = aShape.getFill();
+    Paint fill = aView.getFill();
     if(fill!=null)
-        SnapPaintPdfr.writeShapeFill(aShape, fill, aWriter);
+        SnapPaintPdfr.writeViewFill(aView, fill, aWriter);
     
     // Get stroke and write pdf if not null
-    Border stroke = aShape.getBorder();
+    Border stroke = aView.getBorder();
     if(stroke!=null)
-        SnapPaintPdfr.writeShapeStroke(aShape, stroke, aWriter);
+        SnapPaintPdfr.writeViewStroke(aView, stroke, aWriter);
 }
 
 /**
- * Writes a given RMShape hierarchy to a PDF file (recursively).
+ * Writes a given View hierarchy to a PDF file (recursively).
  */
-protected void writeShapeChildren(View aView, PDFWriter aWriter)
+protected void writeViewChildren(View aView, PDFWriter aWriter)
 {
     // Write children
     ParentView pview = aView instanceof ParentView? (ParentView)aView : null; if(pview==null) return;
@@ -102,9 +102,9 @@ protected void writeShapeChildren(View aView, PDFWriter aWriter)
 }
     
 /**
- * Writes a given RMShape hierarchy to a PDF file (recursively).
+ * Writes a given View hierarchy to a PDF file (recursively).
  */
-protected void writeShapeAfter(T aShape, PDFWriter aWriter)
+protected void writeViewAfter(T aView, PDFWriter aWriter)
 {
     // Get pdf page
     PDFPageWriter pwriter = aWriter.getPageWriter();
@@ -112,26 +112,23 @@ protected void writeShapeAfter(T aShape, PDFWriter aWriter)
     // Restore graphics state
     pwriter.grestore();
 
-    // Add link, if it's there (What happens with rotated or skewed shapes?)
-    /*if(aShape.getURL() != null) {
-        Rect frame = aShape.getBoundsInside(); aShape.convertRectToShape(frame, null);
-        frame.setY(aShape.getPageShape().getHeight() - frame.getMaxY());
-        PDFAnnotation link = new PDFAnnotation.Link(frame, aShape.getURL());
+    // Add link, if it's there (What happens with rotated or skewed Views?)
+    /*if(aView.getURL() != null) {
+        Rect frame = aView.getBoundsInside(); aView.convertRectToView(frame, null);
+        frame.setY(aView.getPageShape().getHeight() - frame.getMaxY());
+        PDFAnnotation link = new PDFAnnotation.Link(frame, aView.getURL());
         pwriter.addAnnotation(link);
     }*/
 }
 
 /**
- * Returns the shape pdfr for a shape.
+ * Returns the View pdfr for a View.
  */
 public static SnapViewPdfr getPdfr(View aView)
 {
-    if(aView instanceof TextView)
-        return SnapViewPdfrs._textViewPdfr;
-    if(aView instanceof ImageView)
-        return SnapViewPdfrs._imgViewPdfr;
-    if(aView instanceof PageView)
-        return SnapViewPdfrs._pageViewPdfr;
+    if(aView instanceof TextView) return SnapViewPdfrs._textViewPdfr;
+    if(aView instanceof ImageView) return SnapViewPdfrs._imgViewPdfr;
+    if(aView instanceof PageView) return SnapViewPdfrs._pageViewPdfr;
     return _viewPdfr;
 }
 

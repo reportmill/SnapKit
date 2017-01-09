@@ -23,10 +23,10 @@ public class SnapViewPdfrs {
 public static class SnapTextViewPdfr <T extends TextView> extends SnapViewPdfr<T> {
 
     /** Writes a given View hierarchy to a PDF file (recursively). */
-    protected void writeShape(T aTextShape, PDFWriter aWriter)
+    protected void writeView(T aTextView, PDFWriter aWriter)
     {
-        super.writeShape(aTextShape, aWriter);
-        PDFWriterText.writeText(aWriter, aTextShape.getTextBox());
+        super.writeView(aTextView, aWriter);
+        PDFWriterText.writeText(aWriter, aTextView.getTextBox());
     }
 }
 
@@ -36,10 +36,10 @@ public static class SnapTextViewPdfr <T extends TextView> extends SnapViewPdfr<T
 public static class SnapImageViewPdfr <T extends ImageView> extends SnapViewPdfr <T> {
 
     /** Override to write Image. */
-    protected void writeShape(T anImageView, PDFWriter aWriter)
+    protected void writeView(T anImageView, PDFWriter aWriter)
     {
         // Do normal version
-        super.writeShape(anImageView, aWriter);
+        super.writeView(anImageView, aWriter);
         
         // Get page writer, image and image bounds (just return if missing or invalid)
         PDFPageWriter pwriter = aWriter.getPageWriter();
@@ -60,13 +60,13 @@ public static class SnapImageViewPdfr <T extends ImageView> extends SnapViewPdfr
 public static class SnapPageViewPdfr <T extends PageView> extends SnapViewPdfr <T> {
 
     /** Writes a given View hierarchy to a PDF file (recursively). */
-    protected void writeShapeBefore(T aPageShape, PDFWriter aWriter)
+    protected void writeViewBefore(T aPageView, PDFWriter aWriter)
     {
         // Get pdf page
         PDFPageWriter pdfPage = aWriter.getPageWriter();
         
         // Write page header comment
-        int page = 1; //aPageShape.page();
+        int page = 1; //aPageView.page();
         pdfPage.appendln("\n% ------ page " + (page - 1) + " -----");
             
         // legacy defaults different from pdf defaults
@@ -74,11 +74,11 @@ public static class SnapPageViewPdfr <T extends PageView> extends SnapViewPdfr <
         pdfPage.setLineJoin(1);
         
         // Flip coords to match java2d model
-        pdfPage.append("1 0 0 -1 0 ").append(aPageShape.getHeight()).appendln(" cm");    
+        pdfPage.append("1 0 0 -1 0 ").append(aPageView.getHeight()).appendln(" cm");    
     }
     
     /** Override to suppress grestore. */
-    protected void writeShapeAfter(T aShape, PDFWriter aWriter)  { }
+    protected void writeViewAfter(T aView, PDFWriter aWriter)  { }
 }
 
 }
