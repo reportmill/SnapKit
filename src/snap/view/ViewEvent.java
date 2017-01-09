@@ -406,7 +406,7 @@ public void acceptDrag()  { complain("acceptDrag"); }
 public void dropComplete()  { complain("dropComplete"); }
 
 /** Returns a Dragboard for this event. */
-public Dragboard getDragboard()  { complain("getDragboard"); return null; }
+public Clipboard getDragboard()  { complain("getDragboard"); return null; }
 
 /** Returns whether event was consumed. */
 public boolean isConsumed()  { return _consumed; }

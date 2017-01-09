@@ -137,8 +137,8 @@ public void acceptDrag()
 /** Called to indicate that drop is complete. */
 public void dropComplete()  { getEvent(DropTargetDropEvent.class).dropComplete(true); }
 
-/** Returns a Dragboard for this event. */
-public Dragboard getDragboard()  { return new SwingDragboard(getView(), this); }
+/** Returns the drag Clipboard for this event. */
+public Clipboard getDragboard()  { return new SwingClipboard(getView(), this); }
 
 /**
  * Returns a ViewEvent at new point.

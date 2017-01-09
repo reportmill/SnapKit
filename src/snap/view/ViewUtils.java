@@ -16,7 +16,7 @@ public class ViewUtils {
     static boolean          _altDown, _cntrDown, _metaDown, _mouseDown, _shiftDown, _shortcutDown;
 
     // The current active Dragboard
-    static Dragboard        _activeDragboard;
+    static Clipboard        _activeDragboard;
     
     // Color constants
     private static Color BACK_FILL = new Color("#F1F1F1");
@@ -129,7 +129,7 @@ public static void processEvent(View aView, ViewEvent anEvent)  { aView.processE
 /**
  * Set active Dragboard.
  */
-public static void setActiveDragboard(Dragboard aDragboard)  { _activeDragboard = aDragboard; }
+public static void setActiveDragboard(Clipboard aDragboard)  { _activeDragboard = aDragboard; }
 
 /**
  * Returns the align x factor.

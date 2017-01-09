@@ -106,7 +106,7 @@ public void handleDragGesture(MouseEvent anEvent)
  */
 public void handleDragDone(DragEvent anEvent)
 {
-    JFXDragboard.get().getClipboard();
+    JFXClipboard.get().getDragboard();
     ViewEvent nevent = JFXViewEnv.get().createEvent(_rpane, anEvent, ViewEvent.Type.DragSourceEnd, null);
     _rpane.dispatchDragSourceEvent(nevent);
 }

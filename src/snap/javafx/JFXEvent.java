@@ -6,7 +6,7 @@ import javafx.scene.input.*;
 import javafx.stage.WindowEvent;
 import snap.view.*;
 import snap.view.KeyCode;
-import snap.view.Dragboard;
+import snap.view.Clipboard;
 
 /**
  * A ViewEvent subclass for JavaFX.
@@ -136,7 +136,7 @@ public String getKeyString()  { return getKeyEvent()!=null? getKeyEvent().getCha
 public DragEvent getDragEvent()  { return getEvent(DragEvent.class); }
 
 /** Returns a Dragboard. */
-public Dragboard getDragboard()  { return new JFXDragboard(getView(), this); }
+public Clipboard getDragboard()  { return new JFXClipboard(getView(), this); }
 
 /** Called to indicate that drop is accepted. */
 public void acceptDrag()  { getDragEvent().acceptTransferModes(TransferMode.ANY); }

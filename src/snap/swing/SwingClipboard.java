@@ -1,30 +1,71 @@
 package snap.swing;
 import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.Window;
+import java.awt.datatransfer.*;
+import java.awt.dnd.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import javax.swing.*;
 import snap.gfx.Image;
 import snap.gfx.Color;
+import snap.util.SnapUtils;
+import snap.view.*;
 import snap.view.Clipboard;
 
 /**
- * A custom class.
+ * A Clipboard implementation for Swing.
  */
-public class SwingClipboard implements Clipboard {
+public class SwingClipboard extends Clipboard implements DragSourceListener, DragSourceMotionListener {
     
     // The transferable
     Transferable        _trans;
     
+    // The view to initiate drag
+    View                _view;
+    
+    // The DragGestureEvent
+    DragGestureEvent    _dge;
+    
+    // A window that is optionally used to simulate image dragging.
+    JWindow             _dragWindow;
+
     // Image flavor
     static DataFlavor   _imageFlavor = new DataFlavor("text/image", "Snap Image");
     static DataFlavor   _jpegFlavor = new DataFlavor("image/jpeg", "JPEG Image Data");
     
     // The shared clipboard
-    static SwingClipboard      _shared = new SwingClipboard();
+    static SwingClipboard  _shared = new SwingClipboard();
+
+/**
+ * Creates a new SwingClipboard.
+ */
+public SwingClipboard()  { }
+
+/**
+ * Creates a new SwingClipboard to initiate drag for given view and event.
+ */
+public SwingClipboard(View aView, ViewEvent anEvent)
+{
+    // Set view
+    _view = aView;
+    
+    // If DragGesture, set DragGestureEvent
+    if(anEvent.isDragGesture())
+        _dge = anEvent.getEvent(DragGestureEvent.class);
+    
+    // If DragEvent, get transferable
+    else if(anEvent.isDragEvent()) {
+        DropTargetDragEvent dragEv = anEvent.getEvent(DropTargetDragEvent.class);
+        if(dragEv!=null) _trans = dragEv.getTransferable();
+        DropTargetDropEvent dropEv =anEvent.getEvent(DropTargetDropEvent.class);
+        if(dropEv!=null) _trans = dropEv.getTransferable();
+    }
+    
+    // Compain if passed a bogus event
+    else System.err.println("SwingDragBoard.init: Invalid event type: " + anEvent);
+}
 
 /**
  * Returns the clipboard content.
@@ -150,6 +191,99 @@ protected static List <File> getFiles(Transferable aTrans)
     
     // Otherwise return null
     return null;
+}
+
+/**
+ * Starts the drag.
+ */
+public void startDrag()
+{
+    // Get DragSource and start Listening to drag events drag source
+    DragSource dragSource = _dge.getDragSource();
+    dragSource.removeDragSourceListener(this); dragSource.removeDragSourceMotionListener(this);
+    dragSource.addDragSourceListener(this); dragSource.addDragSourceMotionListener(this);
+    
+    // Check to see if image drag is supported by system. If not (ie, Windows), simulate image dragging with a window.
+    if(getDragImage()!=null && !DragSource.isDragImageSupported())
+        createDragWindow();
+
+    // Get drag image and point (as AWT img/pnt)
+    java.awt.Image img = getDragImage()!=null? (java.awt.Image)getDragImage().getNative() : null;
+    double dx = img!=null? getDragImageOffset().x : 0;
+    double dy = img!=null? getDragImageOffset().y : 0; if(SnapUtils.isMac) { dx = -dx; dy = -dy; } // Mac is flipped?
+    java.awt.Point pnt = img!=null? new java.awt.Point((int)dx, (int)dy) : null;
+    
+    // Start drag
+    Transferable trans = getTrans();
+    dragSource.startDrag(_dge, DragSource.DefaultCopyDrop, img, pnt, trans, null);
+    ViewUtils.setActiveDragboard(this);
+}
+
+/**
+ * Creates new drag source listener.
+ */
+protected void createDragWindow()
+{
+    // Get drag image and the source window (if source is component)
+    Image img = getDragImage();
+    Window sourceWindow = SwingUtils.getWindow(_dge.getComponent());
+
+    // Create window for drag image
+    _dragWindow = new JWindow(sourceWindow);
+    _dragWindow.setSize((int)img.getWidth(), (int)img.getHeight());
+   
+    // Create label for drag image and add to window
+    _dragWindow.getContentPane().add(new JLabel(new ImageIcon((java.awt.Image)img.getNative())));
+}
+
+/**
+ * DragSourceMotionListener method.
+ */
+public void dragMouseMoved(DragSourceDragEvent anEvent) 
+{
+    // Make window follow cursor, if using window-based image dragging
+    // Note that offset of window is 1 pixel down and to right of cursor.  This is different from how it appears if
+    // system can handle image dragging, in which case image is centered under the cursor. If dragWindow were centered
+    // at cursor position, the dragWindow would become the destination of all system drag events, and we never get
+    // meaningful dragEntered, dragExited, etc. events.
+    // Clients can use translateRectToDropDestination() to get the proper image location across systems.
+    if(_dragWindow!=null) {
+        _dragWindow.setLocation(anEvent.getX()+1, anEvent.getY()+1);
+        if(!_dragWindow.isVisible())
+            _dragWindow.setVisible(true);
+    }
+}
+
+/**
+ * DragSourceListener method.
+ */
+public void dragDropEnd(DragSourceDropEvent anEvent)
+{
+    // Get rid of the window and its resources
+    if(_dragWindow!=null) {
+        _dragWindow.setVisible(false);
+        _dragWindow.dispose(); _dragWindow = null;
+    }
+    
+    // Stop listening to events
+    dispatchToRootView(anEvent, ViewEvent.Type.DragSourceEnd);
+    SwingUtilities.invokeLater(() -> ViewUtils.setActiveDragboard(null));
+}
+
+/** DragSourceListener methods. */
+public void dragEnter(DragSourceDragEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceEnter); }
+public void dragOver(DragSourceDragEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceOver); }
+public void dropActionChanged(DragSourceDragEvent anEvent)  { }
+public void dragExit(DragSourceEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceExit); }
+
+/**
+ * Sends an event to RootView.
+ */
+private void dispatchToRootView(Object anEvent, ViewEvent.Type aType)
+{
+    RootView rview = _view.getRootView();
+    ViewEvent nevent = SwingViewEnv.get().createEvent(rview, anEvent, aType, null);
+    rview.dispatchDragSourceEvent(nevent);
 }
 
 /**

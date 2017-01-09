@@ -231,7 +231,7 @@ protected void processEvent(ViewEvent anEvent)
     
     // Handle DragEnter
     else if(anEvent.isDragEnter()) {
-        Dragboard dboard = anEvent.getDragboard();
+        Clipboard dboard = anEvent.getDragboard();
         if(dboard.hasColor()) {
             anEvent.acceptDrag();
             _dragPoint = anEvent.getPoint(); repaint();
@@ -248,7 +248,7 @@ protected void processEvent(ViewEvent anEvent)
     
     // Handle DragDrop
     else if(anEvent.isDragDrop()) {
-        Dragboard dboard = anEvent.getDragboard();
+        Clipboard dboard = anEvent.getDragboard();
         Color color = dboard.getColor();
         dropColor(color, anEvent.getPoint());
         anEvent.dropComplete(); _dragPoint = null; repaint();
@@ -260,7 +260,7 @@ protected void processEvent(ViewEvent anEvent)
         Image image = Image.get(14,14,true); Painter pntr = image.getPainter();
         ColorWell.paintSwatch(pntr,color,0,0,14,14); pntr.setColor(Color.BLACK);
         pntr.drawRect(0,0,14-1,14-1); pntr.flush();
-        Dragboard dboard = anEvent.getDragboard();
+        Clipboard dboard = anEvent.getDragboard();
         dboard.setContent(color);
         dboard.setDragImage(image);
         dboard.startDrag();

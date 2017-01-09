@@ -1,21 +1,42 @@
 package snap.javafx;
 import java.io.File;
 import java.util.*;
-import javafx.scene.input.DataFormat;
+import javafx.scene.input.*;
 import snap.gfx.Image;
 import snap.gfx.Color;
+import snap.gfx.Point;
+import snap.view.*;
 import snap.view.Clipboard;
 
 /**
  * A custom class.
  */
-public class JFXClipboard implements Clipboard {
+public class JFXClipboard extends Clipboard {
+    
+    // The view
+    View                          _view;
+    
+    // The view event
+    JFXEvent                      _event;
+    
+    // The JavaFX Dragboard
+    javafx.scene.input.Dragboard  _dboard;
     
     // The shared clipboard
     static JFXClipboard      _shared = new JFXClipboard();
     
     // The map of formats
     static Map <String,DataFormat>  _dformats = new HashMap();
+
+/**
+ * Creates a new JFXClipboard.
+ */
+public JFXClipboard()  { }
+
+/**
+ * Creates a new JFXClipboard for given view.
+ */
+public JFXClipboard(View aView, ViewEvent anEvent)  { _view = aView; _event = (JFXEvent)anEvent; }
 
 /**
  * Returns the clipboard content.
@@ -112,9 +133,42 @@ protected DataFormat getDataFormatImpl(String aName)
 }
 
 /**
+ * Starts the drag.
+ */
+public void startDrag()
+{
+    // Get DragSource and start Listening to drag events drag source
+    Dragboard db = getDragboard();
+    //ClipboardContent content = getContent(); //if(getDragImage()!=null) db.setDragView(getDragImage());
+    //db.setContent(content); dragSource.addDragSourceListener(this); dragSource.addDragSourceMotionListener(this);
+    
+    // Set DragImage
+    if(getDragImage()!=null) {
+        Point offset = getDragImageOffset();
+        db.setDragView((javafx.scene.image.Image)getDragImage().getNative(), -offset.x, offset.y);
+    }
+    
+    // Start drag
+    //_dragger = this; Transferable trans = getTransferable();
+    //dragSource.startDrag(_dge, DragSource.DefaultCopyDrop, getDragImage(), getDragImageOffset(), trans, _dsl);
+    _event.consume();
+}
+
+/**
  * Returns the JavaFX clipboard.
  */
 protected javafx.scene.input.Clipboard getClipboard()  { return javafx.scene.input.Clipboard.getSystemClipboard(); }
+
+/**
+ * Returns the clipboard.
+ */
+public javafx.scene.input.Dragboard getDragboard()
+{
+    if(_dboard!=null) return _dboard;
+    if(_event.isDragEvent())
+        return _dboard = _event.getDragEvent().getDragboard();
+    return _dboard = _view.getNative(javafx.scene.Node.class).startDragAndDrop(TransferMode.ANY);
+}
 
 /**
  * Returns the shared JFXClipboard.
