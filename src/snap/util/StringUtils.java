@@ -488,23 +488,21 @@ public static String firstCharLowerCase(String aString)
  */
 public static String fromCamelCase(String aString)
 {
-    // Get string buffer for string
-    StringBuffer string = new StringBuffer(aString);
-    
-    // Make sure first char is upper case
-    if(string.length()>0 && Character.isLowerCase(string.charAt(0)))
-            string.setCharAt(0, Character.toUpperCase(string.charAt(0)));
+    // Get string buffer for string and make sure first char is upper case
+    StringBuffer sb = new StringBuffer(aString);
+    if(sb.length()>0 && Character.isLowerCase(sb.charAt(0)))
+            sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
     
     // Iterate over chars
-    for(int i=0; i<string.length()-1; i++) {
+    for(int i=0; i<sb.length()-1; i++) {
         
         // Add space between any adjacent pair of camel case chars
-        if(Character.isLowerCase(string.charAt(i)) && Character.isUpperCase(string.charAt(i+1)))
-            string.insert(i+1, ' ');
+        if(Character.isLowerCase(sb.charAt(i)) && Character.isUpperCase(sb.charAt(i+1)))
+            sb.insert(i+1, ' ');
     }
     
     // Return spaced string
-    return string.toString();
+    return sb.toString();
 }
 
 /**
@@ -512,10 +510,8 @@ public static String fromCamelCase(String aString)
  */
 public static String toCamelCase(String aString)
 {
-    // Get string buffer for string
+    // Get string buffer for string and iterate over chars
     StringBuffer sb = new StringBuffer(aString);
-    
-    // Iterate over chars
     for(int i=0; i<sb.length()-1; i++) { char c = sb.charAt(i);
         
         // If whitespace char, delete (and see if next char needs to be promoted)
@@ -542,10 +538,8 @@ public static String wrap(String aString, int aLimit)  { return wrap(aString, aL
  */
 public static String wrap(String aString, int aLimit, String aSeperator, String aJoiner)
 {
-    // Create new string buffer
-    StringBuffer buffer = new StringBuffer();
-    
-    // Get matcher
+    // Create new string buffer and get matcher
+    StringBuffer sb = new StringBuffer();
     Pattern pattern = Pattern.compile(aSeperator);
     Matcher matcher = pattern.matcher(aString);
     
@@ -553,17 +547,15 @@ public static String wrap(String aString, int aLimit, String aSeperator, String 
     int start = 0;
     while(start<aString.length()) {
         if(start+aLimit>aString.length()) {
-            buffer.append(aString, start, aString.length());
-            break;
-        }
+            sb.append(aString, start, aString.length()); break; }
         else {
-            start = addWords(aString, start, start+aLimit, buffer, matcher);
-            buffer.append(aJoiner);
+            start = addWords(aString, start, start+aLimit, sb, matcher);
+            sb.append(aJoiner);
         }
     }
     
     // Return string
-    return buffer.toString();
+    return sb.toString();
 }
 
 /**
@@ -585,42 +577,26 @@ public static int addWords(String aString, int aStart, int anEnd, StringBuffer a
     while(aMatcher.find() && aMatcher.start()<=anEnd)
         end = aMatcher.start();
     
-    // Add chars to buffer
+    // Add chars to buffer and return last char
     aBuffer.append(aString, start, end);
-    
-    // Return last char
     return aMatcher.find(end)? aMatcher.end() : end;
 }
     
 /** 
- * Allows you to take an array of strings and concatenate them together with a separator
- * @param parts an array of Strings
- * @param separator a string to place between elements
- * @return
+ * Returns a joined string given an array and separator.
  */
-public static String join(Object[] parts, String separator)  { return join(parts, separator, 0, parts.length); }
+public static String join(Object[] theParts, String aSep)
+{
+    StringBuffer sb = new StringBuffer();
+    for(int i=0, iMax=theParts.length; i<iMax; i++) {
+	    sb.append(theParts[i]); if(i<iMax-1 && aSep!=null) sb.append(aSep); }
+    return sb.toString();	
+}
 
 /** 
- * Allows you to take an array of strings and concatenate them together with a separator
- * @param parts an array of Strings
- * @param separator a string to place between elements
- * @return
+ * Returns a joined string given a list and separator.
  */
-public static String join(Object[] parts, String separator, int aStart, int anEnd)
-{
-    // Create string buffer
-    StringBuffer buf = new StringBuffer();
-    
-    // Iterate over parts array
-    for(int i=aStart; i<anEnd; i++) {
-	    buf.append(parts[i]);
-	    if(i<anEnd-1 && separator!=null)
-            buf.append(separator);
-    }
-    
-    // Return string buffer string
-    return buf.toString();	
-}
+public static String join(List aList, String aSep)  { return join(aList.toArray(), aSep); }
 
 /**
  * Turns a string like "myFile" into "myFile-1", and a string like "myFile-2" to "myFile-3", given suffix like "-".
