@@ -4,7 +4,6 @@
 package snap.util;
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
 /**
  * Utilities for URL.
@@ -140,53 +139,6 @@ public static File getLocalFileDestination(URL aURL, File aFile)
 
     // Return file
     return file;
-}
-
-/**
- * Send CGI Email.
- */
-public static Exception sendCGIEmail(String aURLString, Map aMap)
-{
-    try { return sendCGIEmail(new URL(aURLString), aMap); }
-    catch(Exception e) { return e; }
-}
-
-/**
- * Send CGI Email.
- */
-public static Exception sendCGIEmail(URL aURL, Map aMap)
-{
-    // Send email with cgiemail utility available through verio (more reliable than SMPT).
-    try {
-
-        // Set keys user-email, user-name, user-comment, and exception represent (they are used in cgiemail template)
-        StringBuffer buffer = new StringBuffer();
-        for(Map.Entry entry : (Set<Map.Entry>)aMap.entrySet())
-            buffer.append(entry.getKey()).append('=').append(entry.getValue()).append('&');
-        if(aMap.size()>0)
-            buffer.delete(buffer.length()-1, buffer.length());
-
-        // open the connection and set it up for posting
-        HttpURLConnection connection = (HttpURLConnection)aURL.openConnection();
-        connection.setDoOutput(true);
-        connection.setRequestMethod("POST");
-        
-        // Get connection's output stream and write to it
-        OutputStream os = new BufferedOutputStream(connection.getOutputStream());
-        OutputStreamWriter osw = new OutputStreamWriter(os, "ASCII");
-        osw.write(buffer.toString());
-        osw.close();
-        
-        // Must read response to complete transaction (the post doesn't really happen until we do this)
-        InputStreamReader isr = new InputStreamReader(connection.getInputStream());
-        BufferedReader br = new BufferedReader(isr);
-        for(String resp=br.readLine(); resp!=null; resp=br.readLine()) { }
-        br.close();
-        return null;
-    }
-    
-    // If email failed to send, run message dialog and print stack trace
-    catch (Exception e) { return e; }
 }
 
 }

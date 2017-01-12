@@ -2,31 +2,51 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
-import java.util.*;
 import snap.util.*;
 import snap.view.*;
+import snap.web.WebURL;
 
 /**
  * This class provides a UI panel to inform users that an exception was hit and send info back to developer.
  * 
  * Activate by setting in thread:
  * 
- *   ExceptionReporter er = new ExceptionReporter();
- *   er.setURL("http://www.website.com/cgi-bin/cgiemail/email/snap-exception.txt");
+ *   ExceptionReporter er = new ExceptionReporter("AppName");
+ *   er.setURL("http://www.reportmill.com/cgi-bin/SendMail.py");
+ *   er.setToAddress("support@domain.com")
  *   er.setInfo("MyApp Version X, Build Date: " + MyUtils.getBuildDate());
  *   Thread.setDefaultUncaughtExceptionHandler(er);
  */
 public class ExceptionReporter extends ViewOwner implements Thread.UncaughtExceptionHandler {
     
-    // The cgimail template URL
-    String         _url = "http://www.website.com/cgi-bin/cgiemail/email/exception.txt";
+    // The app name
+    String         _appName = "Application";
+    
+    // The URL to post send mail request to
+    String         _url = "http://www.reportmill.com/cgi-bin/SendMail.py";
+    
+    // The user to send mail to
+    String         _toAddr = "support@domain.com";
+    
+    // The subject to send mail with
+    String         _subject = "Exception Report";
     
     // An info string
     String         _info = "MyApp Version 1.0, BuildDate: Unknown";
     
     // Tells whether this exception reporter has been run before
     boolean        _done = false;
-    
+
+/**
+ * Creates a new ExceptionReporter with given app name.
+ */
+public ExceptionReporter(String aName)  { _appName = aName; }
+
+/**
+ * Returns the app name.
+ */
+public String getAppName()  { return _appName; }
+
 /**
  * Returns the URL.
  */
@@ -36,6 +56,16 @@ public String getURL()  { return _url; }
  * Sets the URL.
  */
 public void setURL(String aURL)  { _url = aURL; }
+
+/**
+ * Returns the user to send mail to.
+ */
+public String getToAddress()  { return _toAddr; }
+
+/**
+ * Sets the user to send mail to.
+ */
+public void setToAddress(String aStr)  { _toAddr = aStr; }
 
 /**
  * Returns the info string.
@@ -98,22 +128,46 @@ public void uncaughtException(Thread t, Throwable aThrowable)
 }
 
 /**
- * Send exception via cgiemail at reportmill.com.
+ * Send exception via SendMail.py at reportmill.com.
  */
 public void sendException()
 {        
-    // Set keys user-email, user-name, user-comment, and exception represent (they are used in cgiemail template)
-    final Map map = new HashMap();
-    map.put("user-name", getViewStringValue("UserText"));
-    map.put("user-email", getViewStringValue("EmailText"));
-    map.put("user-comment", getViewStringValue("ScenarioText"));
-    map.put("exception", getViewStringValue("BacktraceText"));
+    // Get to address
+    String toAddr = "support@reportmill.com";
+    
+    // Get from address
+    String name = getViewStringValue("UserText"); int nlen = name!=null? name.length() : 0;
+    String email = getViewStringValue("EmailText"); int elen = email!=null? email.length() : 0;
+    if(nlen>0 && elen>0) email = name + " <" + email + '>';
+    else if(nlen>0) email = name; else if(elen==0) email = "Anonymous";
+    String fromAddr = email;
+    
+    // Get subject
+    String subject = _appName + " Exception Report";
+    
+    // Get body
+    String scenario = getViewStringValue("ScenarioText");
+    if(scenario==null || scenario.length()==0) scenario = "<Not provided>";
+    String btrace = getViewStringValue("BacktraceText");
+    String body = String.format("%s\n\nFrom:\n%s\n\nUser Scenario:\n%s\n\n%s", subject, fromAddr, scenario, btrace);
         
     // Send email in background thread
     new Thread() { public void run() {
-        Exception e = URLUtils.sendCGIEmail(_url, map);
-        if(e!=null) e.printStackTrace();
+        String str = sendMail(getToAddress(), fromAddr, subject, body, _url);
+        if(str!=null) System.out.println("ExceptionReporter Response: " + str);
     }}.start();
+}
+
+/**
+ * Sends an email with given from, to, subject, body and SendMail url.
+ */
+public static String sendMail(String toAddr, String fromAddr, String aSubj, String aBody, String aURL)
+{
+    // Create full message text, create URL, post text bytes and return response string
+    String text = String.format("To=%s\nFrom=%s\nSubject=%s\n%s", toAddr, fromAddr, aSubj, aBody);
+    WebURL url = WebURL.getURL(aURL);
+    byte bytes[] = url.postBytes(text.getBytes());
+    return bytes!=null? new String(bytes) : null;
 }
 
 }
