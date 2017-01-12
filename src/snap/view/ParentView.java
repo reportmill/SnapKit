@@ -176,9 +176,9 @@ public View[] getChildrenManaged()
 }
 
 /**
- * Returns the next focus View.
+ * Returns the next focus View after given view (null to return first).
  */
-public View getFocusNext(View aChild)
+protected View getFocusNext(View aChild)
 {
     int ind = aChild!=null? indexOfChild(aChild) : -1;
     for(int i=ind+1,iMax=getChildCount();i<iMax;i++) { View child = getChild(i);
@@ -191,9 +191,9 @@ public View getFocusNext(View aChild)
 }
 
 /**
- * Returns the next focus View.
+ * Returns the next focus View after given view (null to return last).
  */
-public View getFocusPrev(View aChild)
+protected View getFocusPrev(View aChild)
 {
     int ind = aChild!=null? indexOfChild(aChild) : getChildCount();
     for(int i=ind-1;i>=0;i--) { View child = getChild(i);
