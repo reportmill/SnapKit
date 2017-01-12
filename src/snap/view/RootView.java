@@ -435,8 +435,17 @@ public void dispatchKeyEvent(ViewEvent anEvent)
     ViewUtils._metaDown = anEvent.isMetaDown();
     ViewUtils._shiftDown = anEvent.isShiftDown();
     ViewUtils._shortcutDown = anEvent.isShortcutDown();
+    
+    // If key pressed and tab and FocusedView.FocusKeysEnabled, switch focus
+    if(anEvent.isKeyPress() && anEvent.isTabKey() && _focusedView!=null && _focusedView.isFocusKeysEnabled()) {
+        View next = anEvent.isShiftDown()? _focusedView.getFocusPrev() : _focusedView.getFocusNext();
+        if(next!=null) { requestFocus(next); return; }
+    }
 
-    if(_focusedView.getRootView()!=this) requestFocus(this); // Bogus
+    // Make sure FocusedView is in this RootView - Bogus?
+    if(_focusedView.getRootView()!=this) requestFocus(this);
+    
+    // Get target for event and array of parent
     View targ = _focusedView;
     View pars[] = getParents(targ);
     

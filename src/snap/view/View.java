@@ -67,7 +67,10 @@ public class View implements XMLArchiver.Archivable {
     
     // Whether view should request focus when pressed
     boolean         _focusWhenPrsd;
-    
+
+    // Whether view focus should change when traveral key is pressed (Tab)
+    boolean         _focusKeysEnbld = true;
+ 
     // Whether view is visible
     boolean         _visible = true;
     
@@ -1489,16 +1492,6 @@ public void setToolTipEnabled(boolean aValue)  { firePropChange("ToolTipEnabled"
 public String getToolTip(ViewEvent anEvent)  { return null; }
 
 /**
- * Returns whether focus keys are enabled.
- */
-public boolean isFocusKeysEnabled()  { return _focusKeysEnbld; } boolean _focusKeysEnbld = true;
-
-/**
- * Sets whether focus keys are enabled.
- */
-public void setFocusKeysEnabled(boolean aValue)  { _focusKeysEnbld = aValue; }
-
-/**
  * Returns the ItemKey.
  */
 public String getItemKey()  { return (String)getProp("ItemKey"); }
@@ -1613,6 +1606,16 @@ public void setFocusWhenPressed(boolean aValue)
 }
 
 /**
+ * Returns whether focus should change when traversal keys are pressed (Tab).
+ */
+public boolean isFocusKeysEnabled()  { return _focusKeysEnbld; }
+
+/**
+ * Sets whether focus should change when traversal keys are pressed (Tab).
+ */
+public void setFocusKeysEnabled(boolean aValue)  { _focusKeysEnbld = aValue; }
+
+/**
  * Tells view to request focus.
  */
 public void requestFocus()
@@ -1621,6 +1624,16 @@ public void requestFocus()
     RootView rview = getRootView(); if(rview!=null) rview.requestFocus(this);
     repaint();
 }
+
+/**
+ * Returns the next focus View.
+ */
+public View getFocusNext()  { return getParent()!=null? getParent().getFocusNext(this) : null; }
+
+/**
+ * Returns the next focus View.
+ */
+public View getFocusPrev()  { return getParent()!=null? getParent().getFocusPrev(this) : null; }
 
 /**
  * Returns the view owner.

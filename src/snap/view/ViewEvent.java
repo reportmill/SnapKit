@@ -369,6 +369,9 @@ public boolean isDownArrow()  { return getKeyCode()==KeyCode.DOWN; }
 /** Returns whether key is enter key. */
 public boolean isEnterKey()  { return getKeyCode()==KeyCode.ENTER; }
 
+/** Returns whether key is tab key. */
+public boolean isTabKey()  { return getKeyCode()==KeyCode.TAB; }
+
 /** Returns whether key is escape key. */
 public boolean isEscapeKey()  { return getKeyCode()==KeyCode.ESCAPE; }
 

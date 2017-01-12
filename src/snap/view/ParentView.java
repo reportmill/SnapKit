@@ -176,6 +176,36 @@ public View[] getChildrenManaged()
 }
 
 /**
+ * Returns the next focus View.
+ */
+public View getFocusNext(View aChild)
+{
+    int ind = aChild!=null? indexOfChild(aChild) : -1;
+    for(int i=ind+1,iMax=getChildCount();i<iMax;i++) { View child = getChild(i);
+        if(child.isFocusable()) return child;
+        ParentView par = child instanceof ParentView? (ParentView)child : null; if(par==null) continue;
+        if(par.getFocusNext(null)!=null) return par.getFocusNext(null);
+    }
+    
+    return getFocusNext();
+}
+
+/**
+ * Returns the next focus View.
+ */
+public View getFocusPrev(View aChild)
+{
+    int ind = aChild!=null? indexOfChild(aChild) : getChildCount();
+    for(int i=ind-1;i>=0;i--) { View child = getChild(i);
+        if(child.isFocusable()) return child;
+        ParentView par = child instanceof ParentView? (ParentView)child : null; if(par==null) continue;
+        if(par.getFocusPrev(null)!=null) return par.getFocusPrev(null);
+    }
+    
+    return getFocusPrev();
+}
+
+/**
  * Override to propagate to children.
  */
 protected void setShowing(boolean aValue)
