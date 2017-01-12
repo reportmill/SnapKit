@@ -1,0 +1,24 @@
+
+rm -rf /tmp/javadoc
+
+cd /Temp/SnapKit/src
+
+javadoc -d /tmp/javadoc -windowtitle 'SnapCode API' \
+-header 'SnapCode API' \
+-footer 'SnapCode API' \
+-overview /Temp/SnapCode/scripts/overview.html \
+-public \
+snap/data/*.java \
+snap/gfx/*.java \
+snap/parse/*.java \
+snap/pdf/*.java \
+snap/pdf/read/*.java \
+snap/pdf/write/*.java \
+snap/util/*.java \
+snap/view/*.java \
+snap/viewx/*.java \
+snap/web/*.java
+
+echo "Zipping javadoc.zip"
+cd /tmp
+zip -rq javadoc.zip javadoc
