@@ -119,6 +119,10 @@ public void setSelectedIndex(int anIndex)
     updateIndex(_selIndex);
     firePropChange("SelectedIndex", _selIndex, _selIndex = anIndex);
     updateIndex(_selIndex);
+    
+    // Scroll selection to visible (after delay)
+    if(isShowing())
+        getEnv().runLater(() -> scrollSelToVisible());
 }
 
 /**
@@ -322,6 +326,33 @@ protected void updateCellAt(int anIndex)
  * Returns the cell at given index.
  */
 public ListCell <T> getCell(int anIndex)  { return (ListCell)getChild(anIndex); }
+
+/**
+ * Returns the bounds for item at index.
+ */
+public Rect getItemBounds(int anIndex)
+{
+    double rh = getRowHeight(), width = getWidth(), index = Math.max(anIndex,0);
+    return new Rect(0, index*rh, width, rh);
+}
+
+/**
+ * Scrolls Selection to visible.
+ */
+protected void scrollSelToVisible()
+{
+    // Get selection rect. If empty, outset by 1
+    Rect srect = getItemBounds(getSelectedIndex());
+    if(srect.isEmpty()) srect.inset(-1,-2);
+    
+    // If visible rect not set or empty or fully contains selection rect, just return
+    Rect vrect = getClipBoundsAll(); if(vrect==null || vrect.isEmpty()) return;
+    if(vrect.contains(srect)) return;
+    
+    // If totally out of view, add buffer. Then scroll rect to visible
+    if(!srect.intersects(vrect)) srect.inset(0,-4*getRowHeight());
+    scrollToVisible(srect);
+}
 
 /**
  * Returns the preferred width.
