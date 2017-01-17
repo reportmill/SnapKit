@@ -40,9 +40,6 @@ public class TextField extends ParentView {
     // Whether to hide carent
     boolean               _hideCaret;
     
-    // Whether the mouse is currently down
-    boolean               _mouseDown;
-    
     // The value of text on focus gained
     String                _focusGainedVal;
     
@@ -245,7 +242,7 @@ protected void setFocused(boolean aValue)
     // If focus gained, set FocusedGainedValue and select all (if not from mouse press)
     if(aValue) {
         _focusGainedVal = getText();
-        if(!_mouseDown) selectAll();
+        if(!ViewUtils.isMouseDown()) selectAll();
     }
     
     // If focus lost and FocusGainedVal changed, fire action
@@ -365,7 +362,14 @@ public Rect getSelBounds()
 /**
  * Selects all the characters in the text editor.
  */
-public void selectAll()  { setSel(0, length()); }
+public void selectAll()
+{
+    // If mouse down, come back later
+    if(ViewUtils.isMouseDown()) { getEnv().runLater(() -> selectAll()); return; }
+    
+    // Set selection
+    setSel(0, length());
+}
 
 /**
  * Replaces the current selection with the given string.
@@ -515,8 +519,6 @@ protected void paintFront(Painter aPntr)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    if(anEvent.isMousePress()) _mouseDown = true;
-    
     switch(anEvent.getType()) {
         case MousePress: mousePressed(anEvent); break;
         case MouseDrag: mouseDragged(anEvent); break;
@@ -526,8 +528,6 @@ protected void processEvent(ViewEvent anEvent)
         case KeyType: keyTyped(anEvent); break;
         case KeyRelease: keyReleased(anEvent); break;
     }
-    
-    if(anEvent.isMouseRelease()) _mouseDown = false;
     
     // Consume all mouse events
     if(anEvent.isMouseEvent()) anEvent.consume();
@@ -660,7 +660,7 @@ protected void keyPressed(ViewEvent anEvent)
     else switch(keyCode) {
         case KeyCode.TAB: if(!getEventAdapter().isEnabled(Action)) { replaceChars("\t"); anEvent.consume(); } break;
         case KeyCode.ENTER:
-            if(getEventAdapter().isEnabled(Action)) { selectAll(); fireActionEvent(); }
+            if(getEventAdapter().isEnabled(Action)) { selectAll(); fireActionEvent(); selectAll(); }
             else { replaceChars("\n"); anEvent.consume(); } break; // Handle enter
         case KeyCode.LEFT: selectBackward(shiftDown); anEvent.consume(); break; // Handle left arrow
         case KeyCode.RIGHT: selectForward(shiftDown); anEvent.consume(); break; // Handle right arrow

@@ -366,6 +366,12 @@ public boolean isUpArrow()  { return getKeyCode()==KeyCode.UP; }
 /** Returns whether key is down arrow. */
 public boolean isDownArrow()  { return getKeyCode()==KeyCode.DOWN; }
 
+/** Returns whether key is delete key. */
+public boolean isBackSpaceKey()  { return getKeyCode()==KeyCode.BACK_SPACE || getKeyChar()=='\b'; }
+
+/** Returns whether key is delete key. */
+public boolean isDeleteKey()  { return getKeyCode()==KeyCode.DELETE; }
+
 /** Returns whether key is enter key. */
 public boolean isEnterKey()  { return getKeyCode()==KeyCode.ENTER; }
 
