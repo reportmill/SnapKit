@@ -509,9 +509,10 @@ protected void paintFront(Painter aPntr)
     // Paint text
     if(length()==0) return;
     String str = getText(); Font font = getFont();
-    aPntr.clip(bnds);
+    aPntr.save(); aPntr.clip(bnds);
     aPntr.setFont(font); aPntr.setPaint(Color.BLACK);
     aPntr.drawString(str, tx, ty + Math.ceil(font.getAscent()));
+    aPntr.restore();
 }
 
 /**
