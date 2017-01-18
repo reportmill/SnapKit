@@ -3,11 +3,8 @@
  */
 package snap.pdf.write;
 import snap.gfx.*;
-import snap.pdf.PDFStream;
-import snap.pdf.PDFWriter;
-import snap.pdf.PDFWriterBase;
-import snap.pdf.PDFXTable;
-import snap.util.*;
+import snap.pdf.*;
+import snap.util.ArrayUtils;
 
 /**
  * PDFWriter utility method(s) for writing fonts.
@@ -256,15 +253,10 @@ static String getStandardFontName(FontFile fontFile)
  */
 static String getStandardFontNameSanitized(String aName)
 {
-    aName = StringUtils.replace(aName, "New", "");
-    aName = StringUtils.replace(aName, "Neue", "");
-    aName = StringUtils.replace(aName, "Plain", "");
-    aName = StringUtils.replace(aName, "Roman", "");
-    aName = StringUtils.replace(aName, "MT", "");
-    aName = StringUtils.replace(aName, "PS", "");
-    aName = StringUtils.replace(aName, "Oblique", "Italic");
-    aName = StringUtils.replace(aName, " ", "");
-    aName = StringUtils.replace(aName, "-", "");
+    aName = aName.replace("New", "").replace("Neue", "");
+    aName = aName.replace("Plain", "").replace("Roman", "");
+    aName = aName.replace("MT", "").replace("PS", "");
+    aName = aName.replace("Oblique", "Italic").replace(" ", "").replace("-", "");
     return aName;
 }
 

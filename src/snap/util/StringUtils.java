@@ -119,7 +119,7 @@ public static String trimEnd(CharSequence aString)
 /**
  * Returns the result of deleting from the given string any occurrence of the search string.
  */
-public static String delete(String aString, String aSearch)  { return replace(aString, aSearch, ""); }
+public static String delete(String aString, String aSearch)  { return aString.replace(aSearch, ""); }
 
 /**
  * Returns the result of deleting from the given string any occurrence of the search string (ignores case).
@@ -137,55 +137,13 @@ public static String replace(String s, int start, int end, String withString)
 }
 
 /**
- * Returns the result of replacing in the given string any occurrence of the search string with the replace-char.
- */
-public static String replace(String aString, String search, char replace)
-{
-    int start = aString.indexOf(search);
-    
-    if(start>=0) {
-        StringBuffer sb = new StringBuffer(aString);
-        
-        do {
-            int sbStart = start + sb.length() - aString.length();
-            sb.setCharAt(sbStart, replace);
-            sb.delete(sbStart + 1, sbStart + search.length());
-            start = aString.indexOf(search, start + search.length());
-        } while(start>=0);
-        aString = sb.toString();
-    }
-    
-    return aString;
-}
-
-/**
  * Returns the result of replacing in the given string any occurrence of the search string with the replace-string.
  */
 public static String replace(String aString, String search, String replace)
 {
-    // If string or search are null, return
-    if(aString==null || search==null) return aString;
-    
-    // If replace is null, do delete
-    if(replace==null) return delete(aString, search);
-    
-    // Get first occurrence of search string (just return if not found)
-    int start = aString.indexOf(search);
-    if(start<0)
-        return aString;
-
-    // Create string buffer for string
-    StringBuffer sb = new StringBuffer(aString);
-        
-    // Iterate while there are occurrences of search string
-    do {
-        int sbStart = start + sb.length() - aString.length();
-        sb.replace(sbStart, sbStart + search.length(), replace);
-        start = aString.indexOf(search, start + search.length());
-    } while(start>=0);
-    
-    // Return modified string buffer string
-    return sb.toString();
+    if(aString==null || search==null) return aString; // If string or search are null, return
+    if(replace==null) return delete(aString, search); // If replace is null, do delete
+    return aString.replace(search, replace); // Return real replace
 }
 
 /**
@@ -710,25 +668,20 @@ public static boolean containsIC(String theStrings[], String aString)  { return 
 public static String getStringQuoted(String aString)  { return getStringSurrounded(aString, "\"", "\\\""); }
 
 /**
- * Returns a single quoted string.
- */
-public static String getStringSingleQuoted(String aString)  { return getStringSurrounded(aString, "\'", "\\\'"); }
-
-/**
  * Returns a string surrounded by given string.
  */
 public static String getStringSurrounded(String aString, String aSurroundString, String anEscapeString)
 {
     // Get trimmed string and just return if it starts and ends with surround string
-    String string = aString.trim();
-    if(string.startsWith(aSurroundString) && string.endsWith(aSurroundString))
-        return string;
+    String str = aString.trim();
+    if(str.startsWith(aSurroundString) && str.endsWith(aSurroundString))
+        return str;
     
     // Replace any inner quotes with escaped version
-    string = replace(string, aSurroundString, anEscapeString);
+    str = str.replace(aSurroundString, anEscapeString);
     
     // Return quoted string
-    return aSurroundString + string + aSurroundString;
+    return aSurroundString + str + aSurroundString;
 }
 
 /**

@@ -5,7 +5,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.List;
 import javax.swing.*;
-import snap.util.*;
+import snap.util.SnapUtils;
 
 /**
  * This class offers a number of useful general purpose Swing utilities.
@@ -69,10 +69,10 @@ public static String getKeyText(KeyStroke aKeyStroke)
     String keyText = KeyEvent.getKeyText(aKeyStroke.getKeyCode());
     
     // Do some substitutions
-    keyText = StringUtils.replace(keyText, "Semicolon", ";");
-    keyText = StringUtils.replace(keyText, "Back Slash", "\\");
-    keyText = StringUtils.replace(keyText, "Open Bracket", "[");
-    keyText = StringUtils.replace(keyText, "Close Bracket", "]");
+    keyText = keyText.replace("Semicolon", ";");
+    keyText = keyText.replace("Back Slash", "\\");
+    keyText = keyText.replace("Open Bracket", "[");
+    keyText = keyText.replace("Close Bracket", "]");
     
     // Return key text
     return keyText;
@@ -90,7 +90,7 @@ public static KeyStroke getKeyStroke(String aKey)
     if(key.equals("BACKSPACE")) key = "BACK_SPACE";
 
     // If Windows, convert "meta" to "control"
-    if(SnapUtils.isWindows) key = StringUtils.replace(key, "meta", "control");
+    if(SnapUtils.isWindows) key = key.replace("meta", "control");
     
     // Try normal KeyStroke method
     KeyStroke kstroke = KeyStroke.getKeyStroke(key);
@@ -98,10 +98,10 @@ public static KeyStroke getKeyStroke(String aKey)
         return kstroke;
     
     // Do some common substitutions
-    key = StringUtils.replace(key, ";", "SEMICOLON");
-    key = StringUtils.replace(key, "\\", "BACK_SLASH");
-    key = StringUtils.replace(key, "[", "OPEN_BRACKET");
-    key = StringUtils.replace(key, "]", "CLOSE_BRACKET");
+    key = key.replace(";", "SEMICOLON");
+    key = key.replace("\\", "BACK_SLASH");
+    key = key.replace("[", "OPEN_BRACKET");
+    key = key.replace("]", "CLOSE_BRACKET");
     
     // Get last component and make sure its in upper case
     int index = key.lastIndexOf(" ") + 1;
