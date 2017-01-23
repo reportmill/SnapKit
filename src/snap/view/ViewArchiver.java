@@ -94,6 +94,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("ComboBox", ComboBox.class);
     cmap.put("HBox", HBox.class);
     cmap.put("Label", Label.class);
+    cmap.put("ListText", ListText.class);
     cmap.put("ListView", ListView.class);
     cmap.put("Menu", Menu.class);
     cmap.put("MenuBar", MenuBar.class);

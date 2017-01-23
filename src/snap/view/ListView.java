@@ -61,9 +61,6 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
     private static Paint ALTERNATE_GRAY = Color.get("#F8F8F8");
     
     // Constants for properties
-    public static final String Items_Prop = "Items";
-    public static final String SelectedItem_Prop = "SelectedItem";
-    public static final String SelectedIndex_Prop = "SelectedIndex";
     public static final String CellPadding_Prop = "CellPadding";
 
 /**
@@ -552,6 +549,34 @@ protected void processEvent(ViewEvent anEvent)
  * Override to return white.
  */
 public Paint getDefaultFill()  { return Color.WHITE; }
+
+/**
+ * Override to return text for currently selected item.
+ */
+public String getText()
+{
+    T item = getSelectedItem();
+    return item!=null? getText(item) : null;
+}
+
+/**
+ * Override to set the given text in the ListView by matching it to existing ListText item.
+ */
+public void setText(String aString)
+{
+    // Get ListView item for string
+    T item = null;
+    for(T itm : getItems()) if(SnapUtils.equals(aString, getText(itm))) { item = itm; break; }
+    if(item==null && getItems().size()>0) { T itm = getItems().get(0);
+        if(itm instanceof String) item = (T)aString;
+        else if(itm instanceof Integer) item = (T)SnapUtils.getInteger(aString);
+        else if(itm instanceof Float) item = (T)SnapUtils.getFloat(aString);
+        else if(itm instanceof Double) item = (T)SnapUtils.getDouble(aString);
+    }
+    
+    // Set ListView selected item
+    setSelectedItem(item);
+}
 
 /**
  * Returns a mapped property name.

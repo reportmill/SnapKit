@@ -2155,6 +2155,11 @@ public interface Selectable <T> {
     
     /** Sets the selected item for given name or UI view. */
     default void setSelectedItem(T anItem)  { int i = getItems().indexOf(anItem); setSelectedIndex(i); }
+
+    // Constants for properties
+    public static final String Items_Prop = "Items";
+    public static final String SelectedItem_Prop = "SelectedItem";
+    public static final String SelectedIndex_Prop = "SelectedIndex";
 }
 
 }
