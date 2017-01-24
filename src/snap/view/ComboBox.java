@@ -22,6 +22,12 @@ public class ComboBox <T> extends ParentView implements View.Selectable <T> {
     
     // The ListView
     ListView <T>           _list;
+    
+    // Whether text entered in TextField should filter ListView items
+    boolean                _filterList;
+
+    // The Last list of all items set
+    List <T>               _items;
 
     // The HBox layout
     ViewLayout.HBoxLayout  _layout = new ViewLayout.HBoxLayout(this);
@@ -81,9 +87,11 @@ public void setListView(ListView <T> aListView)
     _list.addEventHandler(e -> fireActionEvent(), Action);
     _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.SelectedIndex_Prop);
     
-    // Reset ShowButton based on whether ListView is PopupList
-    if(!(aListView instanceof PopupList))
+    // If not PopupList, turn off button and start listening to TextField KeyType events
+    if(!(aListView instanceof PopupList)) {
         setShowButton(false);
+        getTextField().addEventHandler(e -> textFieldKeyTyped(e), KeyType);
+    }
 }
 
 /**
@@ -126,6 +134,16 @@ public void setShowButton(boolean aValue)
     if(aValue) addChild(_button);
     else removeChild(_button);
 }
+
+/**
+ * Returns Whether text entered in TextField should filter ListView items.
+ */
+public boolean isFilterList()  { return _filterList; }
+
+/**
+ * Returns Whether text entered in TextField should filter ListView items.
+ */
+public void setFilterList(boolean aValue)  { _filterList = aValue; }
 
 /**
  * Called when Button/TextField changes.
@@ -250,10 +268,59 @@ public void setText(String aString)
  */
 protected void textFieldFocusChanged()
 {
-    if(!_text.isFocused()) return;
-    _text.selectAll();
-    if(isPopup())
-        showPopup();
+    // On focus gained: SelectAll, get copy of current items, 
+    if(_text.isFocused()) {
+        _text.selectAll();
+        _items = new ArrayList(_list.getItems());
+        if(isPopup())
+            showPopup();
+    }
+    
+    // On focus lost: Restore list items
+    else { _list.setItems(_items); _items = null; }
+}
+
+/**
+ * Called when TextField has KeyType.
+ */
+protected void textFieldKeyTyped(ViewEvent anEvent) { getEnv().runLater(() -> textFieldKeyTyped2(anEvent)); }
+protected void textFieldKeyTyped2(ViewEvent anEvent)
+{
+    // If backspace key, delete again, since first one just deleted completion-selection
+    if(anEvent.isBackSpaceKey())
+        _text.deleteBackward();
+    
+    // Get prefix to search for
+    boolean selEmpty = _text.isSelEmpty(); int selStart = _text.getSelStart();
+    String text = _text.getText(); if(!selEmpty) text = text.substring(0, selStart);
+    
+    // Get items for prefix
+    List <T> items = getItemsForPrefix(selStart>0? text : "");
+    T item = selStart>0? (items.size()>0? items.get(0) : null) : getSelectedItem();
+    
+    // Set ListView Items, SelectedItem
+    if(isFilterList()) _list.setItems(items);
+    _list.setSelectedItem(item);
+    
+    // If SelectedItem, set TextField text to full item text, but set selection to completed part
+    if(item!=null) {
+        String str = _list.getText(item);
+        _text.setText(str);
+        _text.setSel(selStart, str.length());
+    }
+}
+
+/**
+ * Called to return items for prefix.
+ */
+protected List <T> getItemsForPrefix(String aStr)
+{
+    if(aStr.length()==0) return _items;
+    List items = new ArrayList();
+    for(T item : _items)
+        if(StringUtils.startsWithIC(_list.getText(item), aStr))
+            items.add(item);
+    return items;
 }
 
 /**
