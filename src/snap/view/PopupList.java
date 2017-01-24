@@ -83,7 +83,7 @@ protected void setShowing(boolean aValue)
 {
     if(aValue==isShowing()) return; super.setShowing(aValue);
     if(!isShowing()) {
-        _view.removeEventHandler(_lsnr, KeyPress); _view = null; }
+        _view.removeEventFilter(_lsnr, KeyPress); _view = null; }
 }
 
 /**
