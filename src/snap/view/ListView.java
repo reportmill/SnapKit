@@ -340,7 +340,7 @@ protected void scrollSelToVisible()
 {
     // Get selection rect. If empty, outset by 1
     Rect srect = getItemBounds(getSelectedIndex());
-    if(srect.isEmpty()) srect.inset(-1,-2);
+    if(srect.isEmpty()) srect.inset(-1,-2); else srect.width = 30;
     
     // If visible rect not set or empty or fully contains selection rect, just return
     Rect vrect = getClipBoundsAll(); if(vrect==null || vrect.isEmpty()) return;

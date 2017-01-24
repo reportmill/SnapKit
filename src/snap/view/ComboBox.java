@@ -53,6 +53,7 @@ public TextField getTextField()
     if(_text!=null) return _text;
     _text = new TextField(); _text.setGrowWidth(true); _text.setColumnCount(0);
     _text.addEventHandler(e -> textFieldFiredAction(), Action);
+    _text.addEventHandler(e -> textFieldKeyTyped(e), KeyType);
     _text.addPropChangeListener(pce -> textFieldFocusChanged(), View.Focused_Prop);
     return _text;
 }
@@ -83,15 +84,14 @@ public ListView <T> getListView()
  */
 public void setListView(ListView <T> aListView)
 {
+    // Set List and start listening to Action and SelectedIndex changes
     _list = aListView;
     _list.addEventHandler(e -> fireActionEvent(), Action);
     _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.SelectedIndex_Prop);
     
     // If not PopupList, turn off button and start listening to TextField KeyType events
-    if(!(aListView instanceof PopupList)) {
+    if(!(aListView instanceof PopupList))
         setShowButton(false);
-        getTextField().addEventHandler(e -> textFieldKeyTyped(e), KeyType);
-    }
 }
 
 /**

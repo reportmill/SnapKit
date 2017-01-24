@@ -330,7 +330,8 @@ public void dispatchEvent(ViewEvent anEvent)
     if(_popup!=null) {
         if(anEvent.isMouseDrag() || anEvent.isMouseRelease()) {
             _popup.processTriggerEvent(anEvent);
-            if(anEvent.isMouseRelease()) _popup = null; return;
+            if(anEvent.isMouseRelease()) { _popup = null; ViewUtils._mouseDown = false; }
+            return;
         }
         else if(anEvent.isKeyPress() && anEvent.isEscapeKey())
             _popup.hide();
