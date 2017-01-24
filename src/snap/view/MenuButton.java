@@ -23,9 +23,6 @@ public class MenuButton extends ButtonBase {
     // The items
     List <MenuItem>      _items = new ArrayList();
     
-    // The down arrow image
-    static Image         _arrowImg;
-
 /**
  * Creates a new MenuButton.
  */
@@ -61,7 +58,7 @@ public boolean isShowArrow()  { return _showArrow; }
 public void setShowArrow(boolean aValue)
 {
     if(aValue==isShowArrow()) return;
-    View iview = aValue? new ImageView(getArrowImage()) : null;
+    View iview = aValue? new ImageView(ComboBox.getArrowImage()) : null;
     setGraphicAfter(iview); if(iview!=null) iview.setPadding(0,2,0,2);
     firePropChange("ShowArrow", _showArrow, _showArrow=aValue);
 }
@@ -94,32 +91,18 @@ protected void processEvent(ViewEvent anEvent)
     // Handle MouseEnter, MouseExit, MousePress, MouseRelease
     if(anEvent.isMouseEnter()) { setTargeted(true); repaint(); }
     else if(anEvent.isMouseExit())  { setTargeted(false); repaint(); }
-    else if(anEvent.isMousePress())  { setPressed(false); setTargeted(false); fire(anEvent); repaint(); }
+    else if(anEvent.isMousePress())  { setPressed(false); setTargeted(false); fire(); repaint(); }
     else if(anEvent.isMouseRelease())  { setPressed(false); setTargeted(false); repaint(); }
 }
 
 /**
  * Handles button click.
  */
-public void fire(ViewEvent anEvent)
+public void fire()
 {
     Menu popup = new Menu();
     for(MenuItem item : getItems()) popup.addItem(item);
     popup.show(this,0,getHeight());
-}
-
-/**
- * Returns an Icon of a down arrow.
- */
-private Image getArrowImage()
-{
-    // If down arrow icon hasn't been created, create it
-    if(_arrowImg!=null) return _arrowImg;
-    Image img = Image.get(9,7,true); Painter pntr = img.getPainter();
-    Polygon poly = new Polygon(1.5, 1.5, 7.5, 1.5, 4.5, 5.5);
-    pntr.setColor(new Color("#FFFFFF99")); pntr.drawLine(4.5,8,2,2); pntr.drawLine(4.5,8,7,2);
-    pntr.setColor(Color.DARKGRAY); pntr.draw(poly); pntr.fill(poly); pntr.flush();
-    return _arrowImg = img;
 }
 
 /**
