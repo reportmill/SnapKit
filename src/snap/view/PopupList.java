@@ -68,7 +68,7 @@ public void show(View aView, double aX, double aY)
     
     // Watch
     if(aView!=null)
-        aView.addEventHandler(_lsnr, KeyPress);
+        aView.addEventFilter(_lsnr, KeyPress);
 }
 
 /**

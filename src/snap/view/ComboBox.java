@@ -283,8 +283,7 @@ protected void textFieldFocusChanged()
 /**
  * Called when TextField has KeyType.
  */
-protected void textFieldKeyTyped(ViewEvent anEvent) { getEnv().runLater(() -> textFieldKeyTyped2(anEvent)); }
-protected void textFieldKeyTyped2(ViewEvent anEvent)
+protected void textFieldKeyTyped(ViewEvent anEvent)
 {
     // If backspace key, delete again, since first one just deleted completion-selection
     if(anEvent.isBackSpaceKey())

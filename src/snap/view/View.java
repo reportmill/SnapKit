@@ -1874,15 +1874,21 @@ public void removeEventHandler(EventListener aLsnr, ViewEvent.Type ... theTypes)
  */
 public void fireEvent(ViewEvent anEvent)
 {
-    // Forward event to listeners from last to first, short-circuit if event is consume
-    EventListener handlers[] = getEventAdapter()._handlers;
-    for(int i=handlers.length-1; i>=0; i--) { EventListener lsnr = handlers[i];
+    // Forward to Filters from last to first, short-circuit if event is consume
+    EventListener filters[] = getEventAdapter()._filters;
+    for(int i=filters.length-1; i>=0; i--) { EventListener lsnr = filters[i];
         if(getEventAdapter()._types.get(lsnr).contains(anEvent.getType())) {
             lsnr.fireEvent(anEvent); if(anEvent.isConsumed()) break; }}
             
     // If event not consumed, send to view
     if(!anEvent.isConsumed())
         processEvent(anEvent);
+
+    // Forward to Handlers from last to first
+    EventListener handlers[] = getEventAdapter()._handlers;
+    for(int i=handlers.length-1; i>=0; i--) { EventListener lsnr = handlers[i];
+        if(getEventAdapter()._types.get(lsnr).contains(anEvent.getType()))
+            lsnr.fireEvent(anEvent); }
 }
 
 /**
