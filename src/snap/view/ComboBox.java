@@ -399,11 +399,13 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive ShowTextField, ShowButton
+    // Archive ShowTextField, ShowButton, FilterList
     if(isShowTextField())
         e.add("ShowTextField", true);
     if(isShowButton()!=isPopup())
         e.add("ShowButton", isShowButton());
+    if(isFilterList())
+        e.add("FilterList", true);
     
     // Archive Items
     List items = getItems();
@@ -429,11 +431,13 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive ShowTextField, ShowButton
+    // Unarchive ShowTextField, ShowButton, FilterList
     if(anElement.hasAttribute("ShowTextField"))
         setShowTextField(anElement.getAttributeBooleanValue("ShowTextField"));
     if(anElement.hasAttribute("ShowButton"))
         setShowButton(anElement.getAttributeBooleanValue("ShowButton"));
+    if(anElement.hasAttribute("FilterList"))
+        setFilterList(anElement.getAttributeBooleanValue("FilterList"));
 
     // Unarchive items
     List items = new ArrayList();
