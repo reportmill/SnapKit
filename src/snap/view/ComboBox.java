@@ -53,6 +53,7 @@ public TextField getTextField()
     if(_text!=null) return _text;
     _text = new TextField(); _text.setGrowWidth(true); _text.setColumnCount(0);
     _text.addEventHandler(e -> textFieldFiredAction(), Action);
+    _text.addEventHandler(e -> textFieldKeyPressed(e), KeyPress);
     _text.addEventHandler(e -> textFieldKeyTyped(e), KeyType);
     _text.addPropChangeListener(pce -> textFieldFocusChanged(), View.Focused_Prop);
     return _text;
@@ -281,14 +282,26 @@ protected void textFieldFocusChanged()
 }
 
 /**
- * Called when TextField has KeyType.
+ * Called before TextField has KeyPress.
+ */
+protected void textFieldKeyPressed(ViewEvent anEvent)
+{
+    // If up/down arrow send to list
+    if(anEvent.isUpArrow() || anEvent.isDownArrow()) {
+        getListView().processEvent(anEvent);
+        getTextField().selectAll();
+    }
+}
+
+/**
+ * Called after TextField has KeyType.
  */
 protected void textFieldKeyTyped(ViewEvent anEvent)
 {
     // If backspace key, delete again, since first one just deleted completion-selection
-    if(anEvent.isBackSpaceKey())
+    if(anEvent.isBackSpaceKey() && getSelectedItem()!=null)
         _text.deleteBackward();
-    
+        
     // Get prefix to search for
     boolean selEmpty = _text.isSelEmpty(); int selStart = _text.getSelStart();
     String text = _text.getText(); if(!selEmpty) text = text.substring(0, selStart);
@@ -301,12 +314,10 @@ protected void textFieldKeyTyped(ViewEvent anEvent)
     if(isFilterList()) _list.setItems(items);
     _list.setSelectedItem(item);
     
-    // If SelectedItem, set TextField text to full item text, but set selection to completed part
-    if(item!=null) {
-        String str = _list.getText(item);
-        _text.setText(str);
-        _text.setSel(selStart, str.length());
-    }
+    // Reset TextField: If SelectedItem, set to full item text with selection to completed part, otherwise old string
+    String str = item!=null? _list.getText(item) : text;
+    _text.setText(str);
+    _text.setSel(selStart, str.length());
 }
 
 /**
