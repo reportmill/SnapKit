@@ -3,7 +3,8 @@
  */
 package snap.view;
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.*;
+import java.util.stream.Collectors;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -15,25 +16,28 @@ import snap.util.*;
 public class ComboBox <T> extends ParentView implements View.Selectable <T> {
 
     // The TextField (if showing)
-    TextField              _text;
+    TextField                  _text;
     
     // The Button to show popup (and maybe text)
-    Button                 _button;
+    Button                     _button;
     
     // The ListView
-    ListView <T>           _list;
+    ListView <T>               _list;
     
     // Whether text entered in TextField should filter ListView items
-    boolean                _filterList;
+    boolean                    _filterList;
+    
+    // A function to return filtered items from a prefix
+    Function <String,List<T>>  _prefixFunction;
 
     // The Last list of all items set
-    List <T>               _items;
+    List <T>                   _items;
 
     // The HBox layout
-    ViewLayout.HBoxLayout  _layout = new ViewLayout.HBoxLayout(this);
+    ViewLayout.HBoxLayout      _layout = new ViewLayout.HBoxLayout(this);
     
     // The arrow image
-    static Image           _arrowImg;
+    static Image               _arrowImg;
     
 /**
  * Creates a new ComboBox.
@@ -145,6 +149,16 @@ public boolean isFilterList()  { return _filterList; }
  * Returns Whether text entered in TextField should filter ListView items.
  */
 public void setFilterList(boolean aValue)  { _filterList = aValue; }
+
+/**
+ * Returns the function to return filtered items from a prefix
+ */
+public Function <String,List<T>> getPrefixFunction()  { return _prefixFunction; }
+
+/**
+ * Sets the function to return filtered items from a prefix
+ */
+public void setPrefixFunction(Function <String,List<T>> aFunc)  { _prefixFunction = aFunc; }
 
 /**
  * Called when Button/TextField changes.
@@ -325,12 +339,15 @@ protected void textFieldKeyTyped(ViewEvent anEvent)
  */
 protected List <T> getItemsForPrefix(String aStr)
 {
+    // If PrefixFunction, use it instead
+    if(_prefixFunction!=null)
+        return _prefixFunction.apply(aStr);
+    
+    // If no string, return all items
     if(aStr.length()==0) return _items;
-    List items = new ArrayList();
-    for(T item : _items)
-        if(StringUtils.startsWithIC(_list.getText(item), aStr))
-            items.add(item);
-    return items;
+    
+    // Otherwise, return items that start with prefix
+    return _items.stream().filter(i -> StringUtils.startsWithIC(_list.getText(i), aStr)).collect(Collectors.toList());
 }
 
 /**
