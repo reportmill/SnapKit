@@ -165,11 +165,13 @@ public void setPrefixFunction(Function <String,List<T>> aFunc)  { _prefixFunctio
  */
 protected void comboChanged()
 {
+    // If ShowTextField, configure small popup button
     if(isShowTextField()) {
         _button.setPrefSize(14,20); _button.setGrowWidth(false);
         _button.setImage(getArrowImage()); _button.setGraphicAfter(null);
     }
     
+    // Otherwse, configure wide popup button
     else {
         _button.setMinWidth(18); _button.setGrowWidth(true);
         _button.getLabel().setGrowWidth(true); _button.getLabel().setPadding(0,2,0,4);
@@ -184,9 +186,9 @@ protected void comboChanged()
 public boolean isPopup()  { return getListView() instanceof PopupList; }
 
 /**
- * Returns whether ComboBox popup is visible.
+ * Returns whether ComboBox popup is showing on screen.
  */
-public boolean isPopupVisible()  { return getListView().isVisible(); }
+public boolean isPopupShowing()  { return getListView().isShowing(); }
 
 /**
  * Returns ComboBox PopupList.
@@ -300,6 +302,10 @@ protected void textFieldFocusChanged()
  */
 protected void textFieldKeyPressed(ViewEvent anEvent)
 {
+    // If isPopup but not popped, pop it
+    if(isPopup() && !isPopupShowing())
+        showPopup();
+
     // If up/down arrow send to list
     if(anEvent.isUpArrow() || anEvent.isDownArrow()) {
         getListView().processEvent(anEvent);
