@@ -41,7 +41,7 @@ public class TextField extends ParentView {
     boolean               _hideCaret;
     
     // The value of text on focus gained
-    String                _focusGainedVal;
+    String                _focusGainedText;
     
     // Constants for properties
     public static final String ColumnCount_Prop = "ColumnCount";
@@ -241,12 +241,12 @@ protected void setFocused(boolean aValue)
     
     // If focus gained, set FocusedGainedValue and select all (if not from mouse press)
     if(aValue) {
-        _focusGainedVal = getText();
+        _focusGainedText = getText();
         if(!ViewUtils.isMouseDown()) selectAll();
     }
     
     // If focus lost and FocusGainedVal changed, fire action
-    else if(!SnapUtils.equals(_focusGainedVal, getText()))
+    else if(!SnapUtils.equals(_focusGainedText, getText()))
         fireActionEvent();
 }
 
@@ -271,7 +271,7 @@ protected void textDidChange()
 public void fireActionEvent()
 {
     super.fireActionEvent();
-    _focusGainedVal = getText();
+    _focusGainedText = getText();
 }
 
 /**

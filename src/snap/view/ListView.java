@@ -75,6 +75,16 @@ public ListView()
 }
 
 /**
+ * Returns the number of items.
+ */
+public int getItemCount()  { return getItems().size(); }
+
+/**
+ * Returns the individual item at index.
+ */
+public T getItem(int anIndex)  { return getItems().get(anIndex); }
+
+/**
  * Returns the items.
  */
 public List <T> getItems()  { return _items; }
@@ -117,9 +127,9 @@ public void setSelectedIndex(int anIndex)
     firePropChange("SelectedIndex", _selIndex, _selIndex = anIndex);
     updateIndex(_selIndex);
     
-    // Scroll selection to visible (after delay)
+    // Scroll selection to visible (after delay - twice in case ListView needed layout)
     if(isShowing())
-        getEnv().runLater(() -> scrollSelToVisible());
+        scrollSelToVisible();
 }
 
 /**
@@ -160,7 +170,7 @@ public void setSelectionInterval(int aStart, int anEnd)
 /**
  * Returns the selected item.
  */
-public T getSelectedItem()  { return _selIndex>=0 && _selIndex<_items.size()? _items.get(_selIndex) : null; }
+public T getSelectedItem()  { return _selIndex>=0 && _selIndex<getItemCount()? getItem(_selIndex) : null; }
 
 /**
  * Sets the selected index.
@@ -231,7 +241,7 @@ public Insets getCellPaddingDefault()  { return _cellPadDefault; }
 public int getRowAt(double aY)
 {
     int index = (int)(aY/getRowHeight());
-    return Math.min(index, getItems().size()-1);
+    return Math.min(index, getItemCount()-1);
 }
 
 /**
@@ -303,7 +313,7 @@ public void updateItems(T ... theItems)
  */
 public void updateIndex(int anIndex)
 {
-    T item = anIndex>=0 && anIndex<getItems().size()? getItems().get(anIndex) : null;
+    T item = anIndex>=0 && anIndex<getItemCount()? getItem(anIndex) : null;
     if(item!=null) updateItems(item);
 }
 
@@ -338,6 +348,9 @@ public Rect getItemBounds(int anIndex)
  */
 protected void scrollSelToVisible()
 {
+    // If needs layout, come back later
+    if(isNeedsLayout()) { getEnv().runLaterOnce("scrollSelToVisible",() -> scrollSelToVisible()); return; }
+    
     // Get selection rect. If empty, outset by 1
     Rect srect = getItemBounds(getSelectedIndex());
     if(srect.isEmpty()) srect.inset(-1,-2); else srect.width = 30;
@@ -348,7 +361,7 @@ protected void scrollSelToVisible()
     
     // If totally out of view, add buffer. Then scroll rect to visible
     if(!srect.intersects(vrect)) srect.inset(0,-4*getRowHeight());
-    scrollToVisible(srect);
+    scrollToVisible(srect); repaint();
 }
 
 /**
@@ -359,7 +372,7 @@ protected double getPrefWidthImpl(double aH)  { if(_sampleWidth<0) calcSampleSiz
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return getRowHeight()*_items.size(); }
+protected double getPrefHeightImpl(double aW)  { return getRowHeight()*getItemCount(); }
 
 /**
  * Override to layout children with VBox layout.
@@ -380,7 +393,7 @@ protected void layoutChildren()
     // Update cells in visible range: If row cell already set, update it, otherwise create, configure and add
     for(int i=_cellStart,cindex=0;i<=_cellEnd;i++,cindex++) {
         if(cindex<getChildCount()) {
-            T item = i<getItems().size()? getItems().get(i) : null;
+            T item = i<getItemCount()? getItem(i) : null;
             ListCell cell = getCell(cindex);
             if(i<cell.getRow()) {
                 ListCell cell2 = createCell(i); addChild(cell2,cindex);
@@ -414,7 +427,7 @@ protected void layoutChildren()
  */
 protected ListCell createCell(int anIndex)
 {
-    T item = anIndex>=0 && anIndex<_items.size()? _items.get(anIndex) : null;
+    T item = anIndex>=0 && anIndex<getItemCount()? getItem(anIndex) : null;
     ListCell cell = new ListCell(this, item, anIndex, getColIndex(), _selIndex==anIndex);
     cell.setPadding(getCellPadding());
     cell.setPrefHeight(getRowHeight());
@@ -499,8 +512,8 @@ protected void calcSampleSize()
     ListCell cell = new ListCell(this, null, 0, getColIndex(), false);
     cell.setFont(getFont());
     cell.setPadding(getCellPadding());
-    for(int i=0,iMax=Math.min(getItems().size(),30);i<iMax;i++) {
-        cell._item = i<getItems().size()? getItems().get(i) : null; cell._row = i;
+    for(int i=0,iMax=Math.min(getItemCount(),30);i<iMax;i++) {
+        cell._item = i<getItemCount()? getItem(i) : null; cell._row = i;
         for(int j=cell.getChildCount()-1;j>=0;j--) { View child = cell.getChild(j);
             if(child!=cell._strView && child!=cell._graphic) cell.removeChild(j); }
         configureCell(cell);
@@ -529,7 +542,7 @@ protected void processEvent(ViewEvent anEvent)
         
     // Handle MouseMove
     if(anEvent.isMouseMove() && isTargeting()) {
-        int index = getRowAt(anEvent.getY()); if(index>=getItems().size()) index = -1;
+        int index = getRowAt(anEvent.getY()); if(index>=getItemCount()) index = -1;
         setTargetedIndex(index);
     }
     
@@ -538,7 +551,7 @@ protected void processEvent(ViewEvent anEvent)
         int kcode = anEvent.getKeyCode();
         switch(kcode) {
             case KeyCode.UP: if(getSelectedIndex()>0)setSelectedIndex(getSelectedIndex()-1); anEvent.consume(); break;
-            case KeyCode.DOWN: if(getSelectedIndex()<getItems().size()-1)
+            case KeyCode.DOWN: if(getSelectedIndex()<getItemCount()-1)
                 setSelectedIndex(getSelectedIndex()+1); anEvent.consume(); break;
             case KeyCode.ENTER: fireActionEvent(); anEvent.consume(); break;
         }
@@ -567,7 +580,7 @@ public void setText(String aString)
     // Get ListView item for string
     T item = null;
     for(T itm : getItems()) if(SnapUtils.equals(aString, getText(itm))) { item = itm; break; }
-    if(item==null && getItems().size()>0) { T itm = getItems().get(0);
+    if(item==null && getItemCount()>0) { T itm = getItem(0);
         if(itm instanceof String) item = (T)aString;
         else if(itm instanceof Integer) item = (T)SnapUtils.getInteger(aString);
         else if(itm instanceof Float) item = (T)SnapUtils.getFloat(aString);
@@ -608,9 +621,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     if(getSelectedIndex()>=0) e.add("SelectedIndex", getSelectedIndex());
     
     // Archive Items
-    if(getItems()!=null) for(int i=0, iMax=getItems().size(); i<iMax; i++) {
+    if(getItems()!=null) for(int i=0, iMax=getItemCount(); i<iMax; i++) {
         XMLElement item = new XMLElement("item");
-        item.add("text", getItems().get(i));
+        item.add("text", getItem(i));
         e.add(item);
     }
     

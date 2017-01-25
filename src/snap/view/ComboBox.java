@@ -216,6 +216,16 @@ public void showPopup()
 }
 
 /**
+ * Returns the number of items.
+ */
+public int getItemCount()  { return getListView().getItemCount(); }
+
+/**
+ * Returns the individual item at given index.
+ */
+public T getItem(int anIndex)  { return getListView().getItem(anIndex); }
+
+/**
  * Returns the items.
  */
 public List <T> getItems()  { return getListView().getItems(); }
@@ -288,8 +298,8 @@ protected void textFieldFocusChanged()
     // On focus gained: SelectAll, get copy of current items, 
     if(_text.isFocused()) {
         _text.selectAll();
-        _items = new ArrayList(_list.getItems());
-        if(isPopup())
+        _items = new ArrayList(getListView().getItems());
+        if(isPopup() && getItemCount()>0)
             showPopup();
     }
     
@@ -302,14 +312,28 @@ protected void textFieldFocusChanged()
  */
 protected void textFieldKeyPressed(ViewEvent anEvent)
 {
-    // If isPopup but not popped, pop it
-    if(isPopup() && !isPopupShowing())
-        showPopup();
-
-    // If up/down arrow send to list
+    // Handle UpArrow/DownArrow: send to list
     if(anEvent.isUpArrow() || anEvent.isDownArrow()) {
         getListView().processEvent(anEvent);
         getTextField().selectAll();
+    }
+    
+    // Handle EscapeKey
+    if(anEvent.isEscapeKey()) {
+        
+        // If value has changed, reset to focus gained values
+        if(!SnapUtils.equals(_text.getText(), _text._focusGainedText)) {
+            _list.setItems(_items);
+            _list.setText(_text._focusGainedText);
+            _text.selectAll();
+            if(getItemCount()==0 && isPopup() && isPopupShowing()) getPopupList().hide();
+        }
+        
+        // Otherwise have RootView.FocusedViewLast request focus
+        else if(getRootView().getFocusedViewLast()!=null) {
+            if(isPopup() && isPopupShowing()) getPopupList().hide();
+            getRootView().getFocusedViewLast().requestFocus();
+        }
     }
 }
 
@@ -333,11 +357,17 @@ protected void textFieldKeyTyped(ViewEvent anEvent)
     // Set ListView Items, SelectedItem
     if(isFilterList()) _list.setItems(items);
     _list.setSelectedItem(item);
+    if(items.size()==0 && isPopup() && isPopupShowing())
+        getPopupList().hide();
     
     // Reset TextField: If SelectedItem, set to full item text with selection to completed part, otherwise old string
     String str = item!=null? _list.getText(item) : text;
     _text.setText(str);
     _text.setSel(selStart, str.length());
+    
+    // Handle KeyPress with no PopupShowing
+    if(isPopup() && !isPopupShowing() && getItemCount()>0)
+        showPopup();
 }
 
 /**
@@ -423,6 +453,15 @@ protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1
  * Layout children.
  */
 protected void layoutChildren()  { _layout.layoutChildren(); }
+
+/**
+ * Override to focus text or button.
+ */
+public void requestFocus()
+{
+    if(isShowTextField()) getTextField().requestFocus();
+    else getButton().requestFocus();
+}
 
 /**
  * XML archival.

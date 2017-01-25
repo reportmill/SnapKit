@@ -21,7 +21,7 @@ public class RootView extends ParentView {
     View                     _content;
     
     // The focused view
-    View                     _focusedView = this;
+    View                     _focusedView = this, _focusedViewLast;
     
     // A popup window, if one was added to root view during last event
     PopupWindow              _popup;
@@ -168,6 +168,11 @@ protected void setShowing(boolean aVal)
 public View getFocusedView()  { return _focusedView; }
 
 /**
+ * Returns the previous focus view.
+ */
+public View getFocusedViewLast()  { return _focusedViewLast; }
+
+/**
  * Tries to makes the given view the view that receives KeyEvents.
  */
 protected void requestFocus(View aView)
@@ -175,12 +180,17 @@ protected void requestFocus(View aView)
     // Make sure this happens on Event thread
     if(!getEnv().isEventThread()) { getEnv().runLater(() -> requestFocus(aView)); return; }
     
+    // If already set, just return
+    if(aView==_focusedView) return;
+    
     // If existing FocusedView, clear View.Focused
     if(_focusedView!=null)
         _focusedView.setFocused(false);
     
+    // Update FocusViewLast, FocusView
+    _focusedViewLast = _focusedView; _focusedView = aView;
+    
     // If new FocusedView, set View.Focused
-    _focusedView = aView;
     if(_focusedView!=null)
         _focusedView.setFocused(true);
 }
