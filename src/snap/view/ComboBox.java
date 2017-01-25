@@ -277,8 +277,8 @@ protected void textFieldFocusChanged()
             showPopup();
     }
     
-    // On focus lost: Restore list items
-    else { _list.setItems(_items); _items = null; }
+    // On focus lost: Restore list items after delay (twice, in case textFieldFiredAction with scrollSelToVisible)
+    else getEnv().runLater(() -> getEnv().runLater(() -> { _list.setItems(_items); _items = null; }));
 }
 
 /**
