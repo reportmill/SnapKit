@@ -261,12 +261,22 @@ public T getSelectedItem()  { return getListView().getSelectedItem(); }
 public void setSelectedItem(T anItem)  { getListView().setSelectedItem(anItem); }
 
 /**
- * Called to set method for rendering.
+ * Returns function for deteriming text for an item.
+ */
+public Function <T,String> getItemTextFunction()  { return getListView().getItemTextFunction(); }
+
+/**
+ * Sets function for deteriming text for an item.
+ */
+public void setItemTextFunction(Function <T,String> aFunc)  { getListView().setItemTextFunction(aFunc); }
+
+/**
+ * Returns method to configure list cells.
  */
 public Consumer<ListCell<T>> getCellConfigure()  { return getListView().getCellConfigure(); }
 
 /**
- * Called to set method for rendering.
+ * Sets method to configure list cells.
  */
 public void setCellConfigure(Consumer<ListCell<T>> aCC)  { getListView().setCellConfigure(aCC); }
 

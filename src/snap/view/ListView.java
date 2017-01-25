@@ -4,6 +4,7 @@
 package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -26,6 +27,9 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
     
     // The selected index
     int                   _selIndex = -1;
+    
+    // The function to format text
+    Function <T,String>   _itemTextFunc;
     
     // The Cell Configure method
     Consumer <ListCell<T>>  _cellConf;
@@ -245,12 +249,22 @@ public int getRowAt(double aY)
 }
 
 /**
- * Called to set method for rendering.
+ * Returns function for deteriming text for an item.
+ */
+public Function <T,String> getItemTextFunction()  { return _itemTextFunc; }
+
+/**
+ * Sets function for deteriming text for an item.
+ */
+public void setItemTextFunction(Function <T,String> aFunc)  { _itemTextFunc = aFunc; }
+
+/**
+ * Returns method to configure list cells.
  */
 public Consumer<ListCell<T>> getCellConfigure()  { return _cellConf; }
 
 /**
- * Called to set method for rendering.
+ * Sets method to configure list cells.
  */
 public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
 
@@ -439,10 +453,10 @@ protected ListCell createCell(int anIndex)
  */
 protected void configureCell(ListCell <T> aCell)
 {
-    // Get item and set text
-    Object item = aCell.getItem();
-    if(getItemKey()!=null) item = GFXEnv.getEnv().getKeyChainValue(item, getItemKey());
-    aCell.setText(item!=null? item.toString() : null);
+    // Get item text and set
+    T item = aCell.getItem();
+    String text = getTextX(item);
+    aCell.setText(text);
     
     // Set Fill/TextFill based on selection
     if(aCell.isSelected()) { aCell.setFill(ViewUtils.getSelectFill());aCell.setTextFill(ViewUtils.getSelectTextFill());}
@@ -461,9 +475,39 @@ protected void configureCell(ListCell <T> aCell)
  */
 public String getText(T anItem)
 {
-    ListCell cell = new ListCell(this, anItem, 0, 0, false);
-    configureCell(cell);
-    return cell.getText();
+    // If ItemTextFunc, just apply
+    String text;
+    if(_itemTextFunc!=null)
+        text = _itemTextFunc.apply(anItem);
+    
+    // If ItemKey, apply
+    else if(getItemKey()!=null) {
+        Object obj = GFXEnv.getEnv().getKeyChainValue(anItem, getItemKey());
+        text = obj!=null? obj.toString() : null;
+    }
+    
+    // If CellConfigure, create cell and call
+    else if(getCellConfigure()!=null) { Consumer cconf = getCellConfigure();
+        ListCell cell = new ListCell(this, anItem, 0, 0, false);
+        cell.setText(anItem!=null? anItem.toString() : null);
+        cconf.accept(cell);
+        text = cell.getText();
+    }
+    
+    // Otherwise just get string
+    else text = anItem!=null? anItem.toString() : null;
+    
+    // Return text
+    return text;
+}
+
+/** Returns text for item without CellConfigure. */
+private String getTextX(T anItem)
+{
+    if(_itemTextFunc!=null) return _itemTextFunc.apply(anItem);
+    if(getItemKey()!=null) { Object obj = GFXEnv.getEnv().getKeyChainValue(anItem, getItemKey());
+        return obj!=null? obj.toString() : null; }
+    return anItem!=null? anItem.toString() : null;
 }
 
 /**
