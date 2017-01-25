@@ -512,15 +512,6 @@ public String getText(T anItem)
     return text;
 }
 
-/** Returns text for item without CellConfigure. */
-private String getTextX(T anItem)
-{
-    if(_itemTextFunc!=null) return anItem!=null? _itemTextFunc.apply(anItem) : null;
-    if(getItemKey()!=null) { Object obj = GFXEnv.getEnv().getKeyChainValue(anItem, getItemKey());
-        return obj!=null? obj.toString() : null; }
-    return anItem!=null? anItem.toString() : null;
-}
-
 /**
  * Returns the column index.
  */
