@@ -10,6 +10,10 @@ import snap.util.*;
 
 /**
  * A View to show a list of items.
+ * 
+ * To display custom text in list, simply call list.setItemTextFunction(itm -> itm.getName());
+ * 
+ * To custom configure list cell, simply call list.setCellConfigure(cell -> cell.setImage(img));
  */
 public class ListView <T> extends ParentView implements View.Selectable <T> {
 
