@@ -455,7 +455,14 @@ protected void configureCell(ListCell <T> aCell)
 {
     // Get item text and set
     T item = aCell.getItem();
-    String text = getTextX(item);
+    
+    // Get item text (don't use getText() because it can call into here)
+    String text = null;
+    if(_itemTextFunc!=null) text = item!=null? _itemTextFunc.apply(item) : null;
+    else if(getItemKey()!=null) text = SnapUtils.stringValue(GFXEnv.getEnv().getKeyChainValue(item, getItemKey()));
+    else text = item!=null? item.toString() : null;
+
+    // Set text
     aCell.setText(text);
     
     // Set Fill/TextFill based on selection
@@ -478,7 +485,7 @@ public String getText(T anItem)
     // If ItemTextFunc, just apply
     String text;
     if(_itemTextFunc!=null)
-        text = _itemTextFunc.apply(anItem);
+        text = anItem!=null? _itemTextFunc.apply(anItem) : null;
     
     // If ItemKey, apply
     else if(getItemKey()!=null) {
@@ -504,7 +511,7 @@ public String getText(T anItem)
 /** Returns text for item without CellConfigure. */
 private String getTextX(T anItem)
 {
-    if(_itemTextFunc!=null) return _itemTextFunc.apply(anItem);
+    if(_itemTextFunc!=null) return anItem!=null? _itemTextFunc.apply(anItem) : null;
     if(getItemKey()!=null) { Object obj = GFXEnv.getEnv().getKeyChainValue(anItem, getItemKey());
         return obj!=null? obj.toString() : null; }
     return anItem!=null? anItem.toString() : null;
