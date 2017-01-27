@@ -283,7 +283,7 @@ private void dispatchToRootView(Object anEvent, ViewEvent.Type aType)
 {
     RootView rview = _view.getRootView();
     ViewEvent nevent = SwingViewEnv.get().createEvent(rview, anEvent, aType, null);
-    rview.dispatchDragSourceEvent(nevent);
+    rview.dispatchEvent(nevent);
 }
 
 /**

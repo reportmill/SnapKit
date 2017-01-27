@@ -88,6 +88,15 @@ public static Paint getBackFill()  { return BACK_FILL; }
 public static Paint getBackDarkFill()  { return BACK_DARK_FILL; }
 
 /**
+ * Returns an identifier string for a given view.
+ */
+public static String getId(View aView)
+{
+    String name = aView.getName()!=null? aView.getName() : aView.getClass().getSimpleName();
+    return name + " " + System.identityHashCode(aView);
+}
+
+/**
  * Paint nodes.
  */
 public static void paintAll(View aView, Painter aPntr)

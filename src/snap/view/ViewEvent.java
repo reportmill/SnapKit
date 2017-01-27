@@ -194,6 +194,15 @@ public boolean isDragDrop()  { return getType()==Type.DragDrop; }
 public boolean isDragDropEvent()  { return getType()==Type.DragDrop; }
 
 /**
+ * Returns whether event is drag source event.
+ */
+public boolean isDragSourceEvent()
+{
+    Type t = getType(); return t==Type.DragGesture || t==Type.DragSourceEnter || t==Type.DragSourceOver ||
+        t==Type.DragSourceExit || t==Type.DragSourceEnd;
+}
+
+/**
  * Returns whether event is DragGesture event.
  */
 public boolean isDragGesture()  { return getType()==Type.DragGesture; }

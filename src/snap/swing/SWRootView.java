@@ -163,7 +163,7 @@ public String getToolTipText(MouseEvent anEvent)
 public void dragGestureRecognized(DragGestureEvent anEvent)
 {
     ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, ViewEvent.Type.DragGesture, null);
-    _rview.dispatchDragSourceEvent(event);
+    _rview.dispatchEvent(event);
 }
 
 /**
@@ -172,7 +172,7 @@ public void dragGestureRecognized(DragGestureEvent anEvent)
 public void sendDropTargetEvent(DropTargetEvent anEvent, ViewEvent.Type aType)
 {
     ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, aType, null);
-    _rview.dispatchDragTargetEvent(event);
+    _rview.dispatchEvent(event);
 }
 
 }

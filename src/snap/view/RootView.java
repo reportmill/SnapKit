@@ -4,10 +4,11 @@
 package snap.view;
 import java.util.*;
 import snap.gfx.*;
-import snap.util.ArrayUtils;
 
 /**
  * The top level View in a window.
+ * Responsible for animation, resetUI, relayout and repaints.
+ * Also repsonsible for managing focus view and dispatching events.
  */
 public class RootView extends ParentView {
     
@@ -23,9 +24,9 @@ public class RootView extends ParentView {
     // The focused view
     View                     _focusedView = this, _focusedViewLast;
     
-    // A popup window, if one was added to root view during last event
-    PopupWindow              _popup;
-
+    // The EventDispatcher
+    EventDispatcher          _eventDispatcher = new EventDispatcher(this);
+    
     // The layout
     ViewLayout.BorderLayout  _layout = new ViewLayout.BorderLayout(this);
     
@@ -99,12 +100,12 @@ public void setContent(View aView)
 /**
  * Returns the popup window, if one was added to root view during last event.
  */
-public PopupWindow getPopup()  { return _popup; }
+public PopupWindow getPopup()  { return _eventDispatcher.getPopup(); }
 
 /**
  * Sets the popup window, if one added to this root view during last event.
  */
-protected void setPopup(PopupWindow aPopup)  { _popup = aPopup; }
+protected void setPopup(PopupWindow aPopup)  { _eventDispatcher.setPopup(aPopup); }
 
 /**
  * Returns the root view.
@@ -140,7 +141,7 @@ public void setCurrentCursor(Cursor aCursor)
  */
 public String getToolTip(ViewEvent anEvent)
 {
-    for(int i=_mouseOvers.size()-1;i>=0;i--) { View view = _mouseOvers.get(i);
+    for(int i=_eventDispatcher._mouseOvers.size()-1;i>=0;i--) { View view = _eventDispatcher._mouseOvers.get(i);
         String text = view.isToolTipEnabled()? view.getToolTip(anEvent.copyForView(view)) : view.getToolTip();
         if(text!=null) return text;
     }
@@ -158,7 +159,7 @@ protected void setShowing(boolean aVal)
     if(!aVal) {
         ViewEvent event = getEnv().createEvent(this, null, MouseMove, null);
         event = event.copyForViewPoint(this, getWidth()+100, 0, 0);
-        dispatchMouseEvent(event);
+        dispatchEvent(event);
     }
 }
 
@@ -267,9 +268,6 @@ public synchronized void repaint(View aView, double aX, double aY, double aW, do
     }
 }
 
-String name(View v)
-{ return (v.getName()!=null? v.getName() : v.getClass().getSimpleName()) + " " + System.identityHashCode(v); }
-
 /**
  * Called to request a paint after current event.
  */
@@ -279,7 +277,7 @@ public synchronized void paintLater()
     if(_timer.isRunning()) {
         View aviews[] = _animViews.toArray(new View[0]); int time = _timer.getTime();
         for(View av : aviews) { ViewAnim anim = av.getAnim(-1);
-            if(!av.isShowing()) { System.err.println("View shouldn't be animated: "+name(av));
+            if(!av.isShowing()) { System.err.println("View shouldn't be animated: " + ViewUtils.getId(av));
                 System.err.flush(); stopAnim(av); continue; }
             if(anim==null || anim.isSuspended()) stopAnim(av);
             else anim.setTime(time);
@@ -332,219 +330,6 @@ public void paintViews(Painter aPntr, Rect aRect)
 }
 
 /**
- * Dispatch event.
- */
-public void dispatchEvent(ViewEvent anEvent)
-{
-    // If popup window, forward to it
-    if(_popup!=null) {
-        if(anEvent.isMouseDrag() || anEvent.isMouseRelease()) {
-            _popup.processTriggerEvent(anEvent);
-            if(anEvent.isMouseRelease()) { _popup = null; ViewUtils._mouseDown = false; }
-            return;
-        }
-        else if(anEvent.isKeyPress() && anEvent.isEscapeKey())
-            _popup.hide();
-        if(!_popup.isShowing())
-            _popup = null;
-    }
-    
-    if(anEvent.isMouseEvent() || anEvent.isScroll()) dispatchMouseEvent(anEvent);
-    else if(anEvent.isKeyEvent()) dispatchKeyEvent(anEvent);
-    else anEvent.getView().fireEvent(anEvent);
-}
-
-/**
- * Dispatch Mouse event.
- */
-public void dispatchMouseEvent(ViewEvent anEvent)
-{
-    // Update ViewEnv.MouseDown
-    if(anEvent.isMousePress()) ViewUtils._mouseDown = true;
-    else if(anEvent.isMouseRelease()) ViewUtils._mouseDown = false;
-
-    // Get target view (at mouse point, or mouse press, or mouse press point)
-    View targ = ViewUtils.getDeepestViewAt(this, anEvent.getX(), anEvent.getY());
-    if(anEvent.isMouseExit()) targ = null;
-    if(anEvent.isMouseDrag() || anEvent.isMouseRelease()) {
-        targ = _mousePressView;
-        if(targ.getRootView()!=this)
-            targ = _mousePressView = ViewUtils.getDeepestViewAt(this, _mpx, _mpy);
-    }
-    
-    // Get target parents
-    View pars[] = getParents(targ);
-    
-    // Update MouseOvers
-    if(anEvent.isMouseMove() || anEvent.isMouseRelease() || anEvent.isMouseEnter() || anEvent.isMouseExit()) {
-    
-        // Remove old MouseOver views and dispatch appropriate MouseExited events
-        for(int i=_mouseOvers.size()-1;i>=0;i--) { View view = _mouseOvers.get(i);
-             if(!ArrayUtils.containsId(pars,view)) {
-                 _mouseOvers.remove(i); _mouseOverView = i>0? _mouseOvers.get(i-1) : null;
-                if(!view.getEventAdapter().isEnabled(MouseExit)) continue;
-                 ViewEvent e2 = getEnv().createEvent(view, anEvent.getEvent(), MouseExit, null);
-                 view.fireEvent(e2);
-             }
-             else break;
-        }
-        
-        // Add new MouseOver views and dispatch appropriate MouseEntered events
-        for(int i=_mouseOvers.size();i<pars.length;i++) { View view = pars[i];
-            _mouseOvers.add(view); _mouseOverView = view;
-            if(!view.getEventAdapter().isEnabled(MouseEnter)) continue;
-             ViewEvent e2 = getEnv().createEvent(view, anEvent.getEvent(), MouseEnter, null);
-             view.fireEvent(e2);
-        }
-        
-        // Update CurrentCursor
-        if(_mouseOverView!=null && _mouseOverView.getCursor()!=getCurrentCursor())
-            setCurrentCursor(_mouseOverView.getCursor());
-    }
-    
-    // Handle MousePress: Update MousePressView and mouse pressed point
-    else if(anEvent.isMousePress()) {
-        _mousePressView = targ; _mpx = anEvent.getX(); _mpy = anEvent.getY();
-        for(View n=targ;n!=null;n=n.getParent())
-            if(n.isFocusWhenPressed() && (getFocusedView()==null || !getFocusedView().isAncestor(n))) {
-                n.requestFocus(); break; }
-    }
-    
-    // Iterate down and see if any should filter
-    for(View view : pars)
-        if(view.getEventAdapter().isEnabled(anEvent.getType())) {
-            ViewEvent e2 = anEvent.copyForView(view);
-            view.processEventFilters(e2);
-            if(e2.isConsumed()) { anEvent.consume(); return; }  }
-        
-    // Iterate back up and see if any parents should handle
-    for(int i=pars.length-1;i>=0;i--) { View view = pars[i];
-        if(view.getEventAdapter().isEnabled(anEvent.getType())) {
-            ViewEvent e2 = anEvent.copyForView(view);
-            view.processEventHandlers(e2);
-            if(e2.isConsumed()) { anEvent.consume(); break; }
-        }
-    }
-    
-    // If popup window is now present, forward trigger event to it
-    if(_popup!=null)
-        _popup.processTriggerEvent(anEvent);
-}
-
-List <View> _mouseOvers = new ArrayList();
-View _mouseOverView, _mousePressView, _dragSourceView, _dragOverView;
-double _mpx, _mpy;
-
-/**
- * Dispatch key event.
- */
-public void dispatchKeyEvent(ViewEvent anEvent)
-{
-    // Update modifiers
-    ViewUtils._altDown = anEvent.isAltDown();
-    ViewUtils._cntrDown = anEvent.isControlDown();
-    ViewUtils._metaDown = anEvent.isMetaDown();
-    ViewUtils._shiftDown = anEvent.isShiftDown();
-    ViewUtils._shortcutDown = anEvent.isShortcutDown();
-    
-    // If key pressed and tab and FocusedView.FocusKeysEnabled, switch focus
-    if(anEvent.isKeyPress() && anEvent.isTabKey() && _focusedView!=null && _focusedView.isFocusKeysEnabled()) {
-        View next = anEvent.isShiftDown()? _focusedView.getFocusPrev() : _focusedView.getFocusNext();
-        if(next!=null) { requestFocus(next); return; }
-    }
-
-    // Make sure FocusedView is in this RootView - Bogus?
-    if(_focusedView.getRootView()!=this) requestFocus(this);
-    
-    // Get target for event and array of parent
-    View targ = _focusedView;
-    View pars[] = getParents(targ);
-    
-    // Iterate down and see if any should filter
-    for(View view : pars)
-        if(view.getEventAdapter().isEnabled(anEvent.getType())) {
-            ViewEvent e2 = anEvent.copyForView(view);
-            view.processEventFilters(e2);
-            if(e2.isConsumed()) { anEvent.consume(); return; }  }
-
-    // Iterate back up and see if any parents should handle
-    for(int i=pars.length-1;i>=0;i--) { View view = pars[i];
-        if(view.getEventAdapter().isEnabled(anEvent.getType())) {
-            ViewEvent event = anEvent.copyForView(view);
-            view.processEventHandlers(event);
-            if(event.isConsumed()) { anEvent.consume(); return; }
-        }
-    }
-    
-    // Send to MenuBar
-    if(anEvent.isKeyPress() && anEvent.isShortcutDown() && getMenuBar()!=null)
-        getMenuBar().processEvent(anEvent);
-}
-
-/**
- * Dispatch drag gesture event.
- */
-public void dispatchDragSourceEvent(ViewEvent anEvent)
-{
-    // Handle DragGesture
-    if(anEvent.isDragGesture()) {
-        for(View view=_mousePressView;view!=null;view=view.getParent())
-            if(view.getEventAdapter().isEnabled(DragGesture)) { _dragSourceView = view;
-                ViewEvent event = anEvent.copyForView(view);
-                view.fireEvent(event); break; }
-    }
-    
-    // Handle DragSource
-    else if(_dragSourceView!=null) {
-        if(_dragSourceView.getEventAdapter().isEnabled(anEvent.getType())) {
-            ViewEvent event = anEvent.copyForView(_dragSourceView);
-            _dragSourceView.fireEvent(event);
-        }
-        if(anEvent.isDragSourceEnd())
-            _dragSourceView = null;
-    }
-}
-
-/**
- * Dispatch drag target event.
- */
-public void dispatchDragTargetEvent(ViewEvent anEvent)
-{
-    // Get target view and parents
-    View targ = ViewUtils.getDeepestViewAt(this, anEvent.getX(), anEvent.getY());
-    View pars[] = getParents(targ);
-    
-    // Remove old DragOver views and dispatch appropriate MouseExited events
-    for(View view=_dragOverView;view!=null;view=view.getParent()) {
-         if(!ArrayUtils.containsId(pars,view)) {
-             _dragOverView = view.getParent();
-             if(!view.getEventAdapter().isEnabled(DragExit)) continue;
-             ViewEvent e2 = anEvent.copyForView(view); e2._type = DragExit;
-             view.fireEvent(e2);
-         }
-         else break;
-    }
-    
-    // Add new DragOver views and dispatch appropriate MouseEntered events
-    int start = getParentCount(_dragOverView!=null? _dragOverView : this);
-    for(int i=start;i<pars.length;i++) { View view = pars[i]; _dragOverView = view;
-        if(!view.getEventAdapter().isEnabled(DragEnter)) continue;
-        ViewEvent e2 = anEvent.copyForView(view); e2._type = DragEnter;
-        view.fireEvent(e2);
-    }
-    
-    // Handle DragOver, DragDrop
-    if(anEvent.isDragOver() || anEvent.isDragDrop()) {
-        for(View view=_dragOverView;view!=null;view=view.getParent()) {
-            if(view.getEventAdapter().isEnabled(anEvent.getType())) {
-                ViewEvent e2 = anEvent.copyForView(view);
-                view.fireEvent(e2); break;
-            }
-        }
-    }
-}
-
-/**
  * Do debug paint.
  */
 protected void paintDebug(View aView, Painter aPntr, Shape aShape)
@@ -556,29 +341,30 @@ protected void paintDebug(View aView, Painter aPntr, Shape aShape)
 }
 
 /**
- * Timing methods.
+ * Returns the EventDispatcher.
  */
+public EventDispatcher getDispatcher()  { return _eventDispatcher; }
+
+/**
+ * Dispatch event.
+ */
+public void dispatchEvent(ViewEvent anEvent)  { _eventDispatcher.dispatchEvent(anEvent); }
+
+/** Timing method: Returns animation start time. */
 private void startTime()  { _time = System.currentTimeMillis(); } long _time;
-private void stopTime() {
+
+/** Timing method: Returns animation stop time. */
+private void stopTime()
+{
     System.arraycopy(_frames,1,_frames,0,_frames.length-1);
-    _frames[_frames.length-1] = System.currentTimeMillis() - _time; }
-private void printTime() {
+    _frames[_frames.length-1] = System.currentTimeMillis() - _time;
+}
+
+/** Prints the time. */
+private void printTime()
+{
     int time = 0; for(int i=0;i<_frames.length;i++) time += _frames[i]; double avg = time/(double)_frames.length;
-    System.out.println("FrameRate: " + (int)(1000/avg)); }
+    System.out.println("FrameRate: " + (int)(1000/avg));
+}
     
-// Returns the number of parents of given view including this RootView.
-private int getParentCount(View aView)
-{
-    if(aView==null) return 0;
-    int pc = 1; for(View n=aView;n!=this;n=n.getParent()) pc++; return pc;
-}
-
-// Returns array of parents of given view up to and including this RootView.
-private View[] getParents(View aView)
-{
-    int pc = getParentCount(aView); View pars[] = new View[pc]; if(pc==0) return pars;
-    for(View n=aView;n!=this;n=n.getParent()) pars[--pc] = n; pars[0] = this;
-    return pars;
-}
-
 }
