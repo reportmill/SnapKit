@@ -613,7 +613,7 @@ public boolean setSendEventDisabled(boolean aFlag)
 public void addKeyActionEvent(String aName, String aKey)
 {
     KeyCombo kcombo = KeyCombo.get(aKey); if(kcombo==null) return;
-    if(_keyActions.size()==0) getUI().addEventHandler(e -> checkKeyActions(e), KeyPress);
+    if(_keyActions.size()==0) getUI().addEventFilter(e -> checkKeyActions(e), KeyPress);
     _keyActions.put(kcombo, aName);
 }
 

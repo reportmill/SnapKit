@@ -1870,16 +1870,48 @@ public void removeEventHandler(EventListener aLsnr, ViewEvent.Type ... theTypes)
 }
 
 /**
+ * Fires the action event.
+ */
+public void fireActionEvent()
+{
+    ViewEvent event = getEnv().createEvent(this, null, null, null);
+    fireEvent(event);
+}
+
+/**
  * Sends an event to this view.
  */
-public void fireEvent(ViewEvent anEvent)
+public void fireEvent(ViewEvent anEvent)  { processEventAll(anEvent); }
+
+/**
+ * Sends an event to this view.
+ */
+protected void processEventAll(ViewEvent anEvent)
+{
+    // Forward to Filters
+    processEventFilters(anEvent);
+            
+    // Forward to Handlers from last to first
+    processEventHandlers(anEvent);
+}
+
+/**
+ * Process ViewEvent for View EventFilters.
+ */
+protected void processEventFilters(ViewEvent anEvent)
 {
     // Forward to Filters from last to first, short-circuit if event is consume
     EventListener filters[] = getEventAdapter()._filters;
     for(int i=filters.length-1; i>=0; i--) { EventListener lsnr = filters[i];
         if(getEventAdapter()._types.get(lsnr).contains(anEvent.getType())) {
             lsnr.fireEvent(anEvent); if(anEvent.isConsumed()) break; }}
-            
+}
+
+/**
+ * Process ViewEvent for View EventHandlers.
+ */
+protected void processEventHandlers(ViewEvent anEvent)
+{
     // If event not consumed, send to view
     if(!anEvent.isConsumed())
         processEvent(anEvent);
@@ -1889,15 +1921,6 @@ public void fireEvent(ViewEvent anEvent)
     for(int i=handlers.length-1; i>=0; i--) { EventListener lsnr = handlers[i];
         if(getEventAdapter()._types.get(lsnr).contains(anEvent.getType()))
             lsnr.fireEvent(anEvent); }
-}
-
-/**
- * Fires the action event.
- */
-public void fireActionEvent()
-{
-    ViewEvent event = getEnv().createEvent(this, null, null, null);
-    fireEvent(event);
 }
 
 /**

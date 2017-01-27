@@ -411,17 +411,17 @@ public void dispatchMouseEvent(ViewEvent anEvent)
     }
     
     // Iterate down and see if any should filter
-    /*for(View view : pars)
-        if(view.getEventAdapter().isFiltered(anEvent.getType())) {
+    for(View view : pars)
+        if(view.getEventAdapter().isEnabled(anEvent.getType())) {
             ViewEvent e2 = anEvent.copyForView(view);
-            view.processEvent(e2);
-            if(e2.isConsumed()) { anEvent.consume(); return; }  }*/
+            view.processEventFilters(e2);
+            if(e2.isConsumed()) { anEvent.consume(); return; }  }
         
     // Iterate back up and see if any parents should handle
     for(int i=pars.length-1;i>=0;i--) { View view = pars[i];
         if(view.getEventAdapter().isEnabled(anEvent.getType())) {
             ViewEvent e2 = anEvent.copyForView(view);
-            view.fireEvent(e2);
+            view.processEventHandlers(e2);
             if(e2.isConsumed()) { anEvent.consume(); break; }
         }
     }
@@ -460,11 +460,18 @@ public void dispatchKeyEvent(ViewEvent anEvent)
     View targ = _focusedView;
     View pars[] = getParents(targ);
     
+    // Iterate down and see if any should filter
+    for(View view : pars)
+        if(view.getEventAdapter().isEnabled(anEvent.getType())) {
+            ViewEvent e2 = anEvent.copyForView(view);
+            view.processEventFilters(e2);
+            if(e2.isConsumed()) { anEvent.consume(); return; }  }
+
     // Iterate back up and see if any parents should handle
     for(int i=pars.length-1;i>=0;i--) { View view = pars[i];
         if(view.getEventAdapter().isEnabled(anEvent.getType())) {
             ViewEvent event = anEvent.copyForView(view);
-            view.fireEvent(event);
+            view.processEventHandlers(event);
             if(event.isConsumed()) { anEvent.consume(); return; }
         }
     }

@@ -370,7 +370,10 @@ public void respondUI(ViewEvent anEvent)
     }
     
     // Handle Cancel, EscapeAction
-    if(anEvent.equals("Cancel") || anEvent.equals("EscapeAction")) { cancel(); }
+    if(anEvent.equals("Cancel") || anEvent.equals("EscapeAction")) {
+        cancel();
+        anEvent.consume();
+    }
     
     // Do normal version
     super.respondUI(anEvent);

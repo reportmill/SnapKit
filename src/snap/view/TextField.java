@@ -669,7 +669,7 @@ protected void keyPressed(ViewEvent anEvent)
         case KeyCode.END: selectLineEnd(); break; // Handle end key
         case KeyCode.BACK_SPACE: deleteBackward(); anEvent.consume(); break; // Handle Backspace key
         case KeyCode.DELETE: deleteForward(); anEvent.consume(); break; // Handle Delete key
-        case KeyCode.SPACE: anEvent.consume(); break; // I have no idea why ScrollPane scrolls if this isn't called
+        case KeyCode.ESCAPE: escape(); anEvent.consume(); break;
         default: return; // Any other non-character key, just return
     }
     
@@ -752,7 +752,7 @@ public void copy()
     // If valid selection, get text for selection and add to clipboard
     if(!isSelEmpty()) {
         String string = getSelString();
-        Clipboard cb = Clipboard.get(); //Map content = new HashMap(); content.put(DataFormat.PLAIN_TEXT, string);
+        Clipboard cb = Clipboard.get();
         cb.setContent(string);
     }
 }
@@ -765,6 +765,27 @@ public void paste()
     Clipboard cb = Clipboard.get();
     if(cb.hasString()) { String string = cb.getString();
         replaceChars(string); }
+}
+
+/**
+ * Called when escape key is pressed to cancels editing in TextField.
+ * First cancel resets focus gained value. Second hands focus to previous view.
+ */
+public void escape()
+{
+    // If not focused, just return
+    if(!isFocused()) return;
+    
+    // If value has changed since focus gained, reset to original value
+    if(!SnapUtils.equals(getText(), _focusGainedText)) {
+        setText(_focusGainedText);
+        selectAll();
+    }
+    
+    // Otherwise hand focus to previous view
+    else if(getRootView().getFocusedViewLast()!=null)
+        getRootView().getFocusedViewLast().requestFocus();
+    else selectAll();
 }
 
 /**

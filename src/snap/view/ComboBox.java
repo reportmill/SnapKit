@@ -57,7 +57,7 @@ public TextField getTextField()
     if(_text!=null) return _text;
     _text = new TextField(); _text.setGrowWidth(true); _text.setColumnCount(0);
     _text.addEventHandler(e -> textFieldFiredAction(), Action);
-    _text.addEventHandler(e -> textFieldKeyPressed(e), KeyPress);
+    _text.addEventFilter(e -> textFieldKeyPressed(e), KeyPress);
     _text.addEventHandler(e -> textFieldKeyTyped(e), KeyType);
     _text.addPropChangeListener(pce -> textFieldFocusChanged(), View.Focused_Prop);
     return _text;
@@ -344,6 +344,8 @@ protected void textFieldKeyPressed(ViewEvent anEvent)
             if(isPopup() && isPopupShowing()) getPopupList().hide();
             getRootView().getFocusedViewLast().requestFocus();
         }
+        
+        anEvent.consume();
     }
 }
 
