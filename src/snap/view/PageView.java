@@ -3,22 +3,20 @@
  */
 package snap.view;
 import snap.gfx.*;
-import snap.util.*;
 
 /**
- * A custom class.
+ * A View subclass to represent a DocView page.
  */
-public class PageView extends SpringView {
+public class PageView extends ChildView {
     
     // Constant
     static final Border PAGE_VIEW_BORDER = Border.createLineBorder(Color.BLACK, 1);
 
 /**
- * XML Archival.
+ * Creates a new PageView.
  */
-public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+public PageView()
 {
-    super.fromXMLView(anArchiver, anElement);
     setFill(Color.WHITE);
     setBorder(PAGE_VIEW_BORDER);
     setEffect(new ShadowEffect());

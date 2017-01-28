@@ -101,7 +101,7 @@ public byte[] getBytes(DocView aDoc)
     
     // Iterate over doc pages
     //for(int i=0, iMax=aDoc.getPageCount(); i<iMax; i++) { PageView page = aDoc.getPage(i);
-    if(aDoc.getPage()!=null) { PageView page = (PageView)aDoc.getPage();
+    if(aDoc.getPage()!=null) { PageView page = aDoc.getPage();
         
         // Get pdf page, set media box and add to pages tree and xref
         _pageWriter = new PDFPageWriter(_pfile, this);

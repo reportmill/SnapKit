@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import java.util.*;
 import snap.gfx.Pos;
 import snap.util.*;
 
@@ -13,8 +14,11 @@ public class DocView extends ParentView {
     // The layout
     ViewLayout.BorderLayout  _layout = new ViewLayout.BorderLayout(this);
     
-    // The page
-    View               _page;
+    // The pages
+    List <PageView>          _pages = new ArrayList();
+    
+    // The selected page index
+    int                      _selIndex;
 
 /**
  * Creates a new DocNode.
@@ -26,19 +30,97 @@ public DocView()
 }
 
 /**
+ * Returns the number of pages.
+ */
+public int getPageCount()  { return _pages.size(); }
+
+/**
+ * Returns the individual page at given index.
+ */
+public PageView getPage(int anIndex)  { return _pages.get(anIndex); }
+
+/**
+ * Adds a given page.
+ */
+public void addPage(PageView aPage)  { addPage(aPage, getPageCount()); }
+
+/**
+ * Adds a given page at given index.
+ */
+public void addPage(PageView aPage, int anIndex)
+{
+    _pages.add(anIndex, aPage);
+}
+
+/**
+ * Removes the page at given index.
+ */
+public PageView removePage(int anIndex)
+{
+    return _pages.remove(anIndex);
+}
+
+/**
+ * Removes the given page.
+ */
+public int removePage(PageView aPage)
+{
+    int index = ListUtils.indexOfId(_pages, aPage);
+    if(index>=0) removePage(index);
+    return index;
+}
+
+/**
+ * Returns the selected page index.
+ */
+public int getSelectedIndex()  { return _selIndex; }
+
+/**
+ * Sets the selected page index.
+ */
+public void setSelectedIndex(int anIndex)
+{
+    if(anIndex==_selIndex) return;
+    
+    // Get/remove old page
+    PageView opage = getSelectedPage();
+    if(opage!=null) removeChild(opage);
+    
+    // Set new value
+    _selIndex = anIndex;
+    
+    // Get new page
+    PageView page = getSelectedPage();
+    if(page!=null) addChild(page);
+    _layout.setCenter(page);
+}
+
+/**
+ * Returns the currently selected page.
+ */
+public PageView getSelectedPage()  { return _selIndex>=0? getPage(_selIndex) : null; }
+
+/**
+ * Sets the currently selected page.
+ */
+public void setSelectedPage(PageView aPage)
+{
+    int index = ListUtils.indexOfId(_pages, aPage);
+    if(index>=0) setSelectedIndex(index);
+}
+
+/**
  * Returns the page node.
  */
-public View getPage()  { return _layout.getCenter(); }
+public PageView getPage()  { return (PageView)_layout.getCenter(); }
 
 /**
  * Sets the page node.
  */
-public void setPage(View aView)
+public void setPage(PageView aPage)
 {
-    View old = getPage(); if(aView==old) return;
-    if(old!=null) removeChild(old); if(aView!=null) addChild(aView);
-    _layout.setCenter(aView);
-    firePropChange("Page", old, aView);
+    if(getPage()!=null) removePage(getPage());
+    addPage(aPage);
 }
 
 /**
@@ -81,10 +163,9 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     // Iterate over child elements and unarchive shapes
     for(int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
         Class childClass = anArchiver.getClass(childXML.getName());
-        if(childClass!=null && View.class.isAssignableFrom(childClass)) {
-            View child = (View)anArchiver.fromXML(childXML, this);
-            if(getPage()==null) setPage(child);
-            else System.err.println("DocNode: Skipping child " + child);
+        if(childClass!=null && PageView.class.isAssignableFrom(childClass)) {
+            PageView child = (PageView)anArchiver.fromXML(childXML, this);
+            addPage(child);
         }
     }
     
