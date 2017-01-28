@@ -18,7 +18,7 @@ public class DocView extends ParentView {
     List <PageView>          _pages = new ArrayList();
     
     // The selected page index
-    int                      _selIndex;
+    int                      _selIndex = -1;
 
 /**
  * Creates a new DocNode.
@@ -50,6 +50,9 @@ public void addPage(PageView aPage)  { addPage(aPage, getPageCount()); }
 public void addPage(PageView aPage, int anIndex)
 {
     _pages.add(anIndex, aPage);
+    
+    if(_selIndex<=0)
+        setSelectedIndex(0);
 }
 
 /**
