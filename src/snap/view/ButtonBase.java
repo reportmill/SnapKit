@@ -218,6 +218,7 @@ protected void processEvent(ViewEvent anEvent)
     else if(anEvent.isMouseExit())  { setTargeted(false); setPressed(false); repaint(); }
     else if(anEvent.isMousePress())  { _tracked = true; setPressed(true); repaint(); }
     else if(anEvent.isMouseRelease())  { if(_pressed) fire(); _pressed = _tracked = false; repaint(); }
+    if(anEvent.isMouseEvent()) anEvent.consume();
 }
 
 /**
