@@ -361,6 +361,31 @@ public Rect getBoundsInside()  { return new Rect(0,0,getWidth(),getHeight()); }
 public Shape getBoundsShape()  { return getBoundsInside(); }
 
 /**
+ * Returns the rect in parent coords that fully encloses the shape.
+ */
+public Rect getFrame()
+{
+    if(!isLocalToParentSimple()) { Rect rect = getBoundsInside(); return localToParent(rect).getBounds(); }
+    return getBounds();
+}
+
+/**
+ * Sets the bounds of the shape such that it exactly fits in the given parent coord rect.
+ */
+public void setFrame(Rect aRect)  { setFrame(aRect.getX(), aRect.getY(), aRect.getWidth(), aRect.getHeight()); }
+
+/**
+ * Sets the bounds of the shape such that it exactly fits in the given parent coord rect.
+ */
+public void setFrame(double aX, double aY, double aWidth, double aHeight)
+{
+    //setFrameXY(anX, aY); setFrameSize(aWidth, aHeight);
+    Rect rect = new Rect(aX, aY, aWidth, aHeight);
+    rect = parentToLocal(rect).getBounds();
+    setBounds(rect);
+}
+
+/**
  * Returns the translation of this view from X.
  */
 public double getTransX()  { return _tx; }
