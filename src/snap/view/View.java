@@ -381,7 +381,7 @@ public void setFrame(double aX, double aY, double aWidth, double aHeight)
 {
     //setFrameXY(anX, aY); setFrameSize(aWidth, aHeight);
     Rect rect = new Rect(aX, aY, aWidth, aHeight);
-    rect = parentToLocal(rect).getBounds();
+    //rect = parentToLocal(rect).getBounds();
     setBounds(rect);
 }
 
