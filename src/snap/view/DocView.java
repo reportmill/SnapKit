@@ -3,22 +3,29 @@
  */
 package snap.view;
 import java.util.*;
+import snap.gfx.Insets;
 import snap.gfx.Pos;
 import snap.util.*;
 
 /**
- * A custom class.
+ * A view to represent a traditional paper document.
  */
 public class DocView extends ParentView {
 
-    // The layout
-    ViewLayout.BorderLayout  _layout = new ViewLayout.BorderLayout(this);
-    
     // The pages
     List <PageView>          _pages = new ArrayList();
     
+    // The page margin
+    Insets                   _pageMargin = new Insets(36);
+    
     // The selected page index
     int                      _selIndex = -1;
+    
+    // The layout
+    ViewLayout.BorderLayout  _layout = new ViewLayout.BorderLayout(this);
+    
+    // Constants for properties
+    public static final String PageMargin_Prop = "PageMargin";
 
 /**
  * Creates a new DocNode.
@@ -71,6 +78,20 @@ public int removePage(PageView aPage)
     int index = ListUtils.indexOfId(_pages, aPage);
     if(index>=0) removePage(index);
     return index;
+}
+
+/**
+ * Returns the page margin.
+ */
+public Insets getPageMargin()  { return _pageMargin; }
+
+/**
+ * Sets the page margin.
+ */
+public void setPageMargin(Insets aIns)
+{
+    if(SnapUtils.equals(aIns, _pageMargin)) return;
+    firePropChange(PageMargin_Prop, _pageMargin, _pageMargin = aIns);
 }
 
 /**
