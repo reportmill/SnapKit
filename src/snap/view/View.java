@@ -356,34 +356,43 @@ public void setBounds(double aX, double aY, double aW, double aH)  { setX(aX); s
 public Rect getBoundsInside()  { return new Rect(0,0,getWidth(),getHeight()); }
 
 /**
+ * Sets the bounds view such that it maintains it's location in parent.
+ */
+public void setBoundsLocal(double aX, double aY, double aW, double aH)
+{
+    setXYLocal(aX, aY);
+    setSizeLocal(aW, aH);
+}
+
+/**
+ * Sets the size view such that it maintains it's location in parent.
+ */
+public void setXYLocal(double aX, double aY)
+{
+    if(isLocalToParentSimple()) { setXY(getX() + aX, getY() + aY); return; }
+    Point p0 = localToParent(0,0);
+    Point p1 = localToParent(aX,aY);
+    double p2x = p1.x - p0.x, p2y = p1.y - p0.y;
+    setXY(Math.round(getX() + p2x), Math.round(getY() + p2y));
+}
+
+/**
+ * Sets the size view such that it maintains it's location in parent.
+ */
+public void setSizeLocal(double aW, double aH)
+{
+    if(isLocalToParentSimple()) { setSize(aW, aH); return; }
+    Point p0 = localToParent(0,0);
+    setSize(aW,aH);
+    Point p1 = localToParent(0,0);
+    double p2x = p1.x - p0.x, p2y = p1.y - p0.y;
+    setXY(Math.round(getX() - p2x), Math.round(getY() - p2y));
+}
+
+/**
  * Returns the bounds inside view.
  */
 public Shape getBoundsShape()  { return getBoundsInside(); }
-
-/**
- * Returns the rect in parent coords that fully encloses the shape.
- */
-public Rect getFrame()
-{
-    if(!isLocalToParentSimple()) { Rect rect = getBoundsInside(); return localToParent(rect).getBounds(); }
-    return getBounds();
-}
-
-/**
- * Sets the bounds of the shape such that it exactly fits in the given parent coord rect.
- */
-public void setFrame(Rect aRect)  { setFrame(aRect.getX(), aRect.getY(), aRect.getWidth(), aRect.getHeight()); }
-
-/**
- * Sets the bounds of the shape such that it exactly fits in the given parent coord rect.
- */
-public void setFrame(double aX, double aY, double aWidth, double aHeight)
-{
-    //setFrameXY(anX, aY); setFrameSize(aWidth, aHeight);
-    Rect rect = new Rect(aX, aY, aWidth, aHeight);
-    //rect = parentToLocal(rect).getBounds();
-    setBounds(rect);
-}
 
 /**
  * Returns the translation of this view from X.

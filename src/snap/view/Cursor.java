@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.gfx.Pos;
 
 /**
  * A class to represent a cursor.
@@ -36,5 +37,23 @@ protected Cursor(String aName)  { _name = aName; }
  * Returns the cursor name.
  */
 public String getName()  { return _name; }
+
+/**
+ * Returns the cursor for given position.
+ */
+public static Cursor get(Pos aHandle)
+{
+    switch(aHandle) {
+        case TOP_CENTER: return Cursor.N_RESIZE;
+        case BOTTOM_CENTER: return Cursor.S_RESIZE;
+        case CENTER_RIGHT: return Cursor.E_RESIZE;
+        case CENTER_LEFT: return Cursor.W_RESIZE;
+        case TOP_LEFT: return Cursor.NW_RESIZE;
+        case TOP_RIGHT: return Cursor.NE_RESIZE;
+        case BOTTOM_LEFT: return Cursor.SW_RESIZE;
+        case BOTTOM_RIGHT: return Cursor.SE_RESIZE;
+        default: return null;
+    }
+}
 
 }
