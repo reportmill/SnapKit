@@ -5,6 +5,9 @@ import snap.gfx.*;
  * A View subclass to draw a line.
  */
 public class LineView extends View {
+    
+    // The coordinates
+    double         _x0, _y0, _x1, _y1;
 
     // The line
     Line           _line;
@@ -12,52 +15,48 @@ public class LineView extends View {
 /**
  * Creates a new LineView.
  */
-public LineView()
-{
-    _line = new Line(0,0,0,0);
-    setBorder(Color.BLACK, 1);
-}
+public LineView()  { setBorder(Color.BLACK, 1); }
 
 /**
  * Creates a new LineView for given points.
  */
 public LineView(double x0, double y0, double x1, double y1)
 {
-    _line = new Line(x0, y0, x1, y1);
+    setLine(x0, y0, x1, y1);
     setBorder(Color.BLACK, 1);
 }
 
 /**
  * Returns the first point x.
  */
-public double getX0()  { return _line.x0; }
+public double getX0()  { return _x0; }
 
 /**
  * Returns the first point y.
  */
-public double getY0()  { return _line.y0; }
+public double getY0()  { return _y0; }
 
 /**
  * Returns the second point x.
  */
-public double getX1()  { return _line.x1; }
+public double getX1()  { return _x1; }
 
 /**
  * Returns the second point y.
  */
-public double getY1()  { return _line.y1; }
+public double getY1()  { return _y1; }
 
 /**
  * Returns the line.
  */
-public Line getLine()  { return _line; }
+public Line getLine()  { return _line!=null? _line : (_line = new Line(_x0, _y0, _x1, _y1)); }
 
 /**
  * Sets the line.
  */
 public void setLine(double x0, double y0, double x1, double y1)
 {
-    _line.x0 = x0; _line.y0 = y0; _line.x1 = x1; _line.y1 = y1;
+    _x0 = x0; _y0 = y0; _x1 = x1; _y1 = y1; _line = null;
 }
 
 /**
@@ -69,41 +68,6 @@ public void setLineInParent(double x0, double y0, double x1, double y1)
     double y = Math.min(y0, y1), h = Math.max(y0, y1) - y;
     setBounds(x, y, w, h);
     setLine(x0 - x, y0 - y, x1 - x, y1 - y);
-}
-
-/**
- * Returns the origin position.
- */
-public Pos getOriginPos()
-{
-    double x0 = getX0(), y0 = getY0(), x1 = getX1(), y1 = getY1();
-    if(x0<=x1 && y0<=y1) return Pos.TOP_LEFT;
-    if(x0<=x1 && y0>y1) return Pos.BOTTOM_LEFT;
-    if(x0>x1 && y0<=y1) return Pos.TOP_RIGHT;
-    return Pos.BOTTOM_RIGHT;
-}
-
-/**
- * Override to return path as bounds shape.
- */
-public Shape getBoundsShape()  { return _line; }
-
-/**
- * Override to reset line.
- */
-public void setWidth(double aValue)
-{
-    if(aValue==getWidth()) return; super.setWidth(aValue);
-    resetLine();
-}
-
-/**
- * Override to reset line.
- */
-public void setHeight(double aValue)
-{
-    if(aValue==getHeight()) return; super.setHeight(aValue);
-    resetLine();
 }
 
 /**
@@ -121,17 +85,29 @@ protected void resetLine()
 }
 
 /**
- * Paints background.
+ * Returns the origin position.
  */
-protected void paintBack(Painter aPntr)
+public Pos getOriginPos()
 {
-    Paint fill = getFill();
-    Border border = getBorder(); if(fill==null && border==null) return;
-    Shape shape = getBoundsShape();
-    if(fill!=null) {
-        aPntr.setPaint(fill); aPntr.fill(shape); }
-    if(border!=null)
-        border.paint(aPntr, shape);
+    if(_x0<=_x1 && _y0<=_y1) return Pos.TOP_LEFT;
+    if(_x0<=_x1 && _y0>_y1) return Pos.BOTTOM_LEFT;
+    if(_x0>_x1 && _y0<=_y1) return Pos.TOP_RIGHT;
+    return Pos.BOTTOM_RIGHT;
 }
+
+/**
+ * Override to return path as bounds shape.
+ */
+public Line getBoundsShape()  { return getLine(); }
+
+/**
+ * Override to reset line.
+ */
+public void setWidth(double aValue)  { if(aValue==getWidth()) return; super.setWidth(aValue); resetLine(); }
+
+/**
+ * Override to reset line.
+ */
+public void setHeight(double aValue)  { if(aValue==getHeight()) return; super.setHeight(aValue); resetLine(); }
 
 }
