@@ -79,9 +79,9 @@ public void setOwner(ViewOwner anOwner)
     
     // Register default or cancel buttons
     if(isDefaultButton())
-        anOwner.addKeyActionEvent(getName(), "ENTER");
+        anOwner.addKeyActionHandler(getName(), "ENTER");
     else if(isCancelButton())
-        anOwner.addKeyActionEvent(getName(), "ESCAPE");
+        anOwner.addKeyActionHandler(getName(), "ESCAPE");
 }
     
 /**

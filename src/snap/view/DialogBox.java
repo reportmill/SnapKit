@@ -352,7 +352,7 @@ protected View createUI()
 protected void initUI()
 {
     super.initUI();  // Do normal version
-    addKeyActionEvent("EscapeAction", "ESCAPE");  // Add Escape key binding
+    addKeyActionHandler("EscapeAction", "ESCAPE");  // Add Escape key binding
 }
 
 /**

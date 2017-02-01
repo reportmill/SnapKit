@@ -55,7 +55,7 @@ protected void initUI()
     getView("NextButton", Button.class).setGraphic(s1);
     
     // Add key binding to select address bar
-    addKeyActionEvent("AddressTextAction", "meta O");
+    addKeyActionHandler("AddressTextAction", "meta O");
 }
 
 /**

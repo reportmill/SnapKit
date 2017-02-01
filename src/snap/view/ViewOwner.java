@@ -28,7 +28,7 @@ public class ViewOwner implements EventListener {
     Object                    _firstFocus;
     
     // Map of key combos to action (names)
-    Map <KeyCombo,String>     _keyActions = new HashMap();
+    Map <KeyCombo,String>     _keyFilters = Collections.EMPTY_MAP, _keyHandlers = _keyFilters;
     
     // A map of binding values not explicitly defined in model
     Map                       _modelValues = new HashMap();
@@ -608,22 +608,36 @@ public boolean setSendEventDisabled(boolean aFlag)
 }
 
 /**
- * Registers an event to be sent to owner for given name and key description (in Swing KeyStroke string format).
+ * Registers an event filter to send event with given name to owner.respondUI() on key press for key description.
+ * Key description is in Swing KeyStroke string format.
  */
-public void addKeyActionEvent(String aName, String aKey)
+public void addKeyActionFilter(String aName, String aKey)
 {
     KeyCombo kcombo = KeyCombo.get(aKey); if(kcombo==null) return;
-    if(_keyActions.size()==0) getUI().addEventFilter(e -> checkKeyActions(e), KeyPress);
-    _keyActions.put(kcombo, aName);
+    if(_keyFilters.size()==0) {
+        getUI().addEventFilter(e -> checkKeyActions(e, true), KeyPress); _keyFilters = new HashMap(); }
+    _keyFilters.put(kcombo, aName);
 }
 
 /**
- * Called to check for KeyActions.
+ * Registers an event handler to send event with given name to owner.respondUI() on key press for key description.
+ * Key description is in Swing KeyStroke string format.
  */
-private void checkKeyActions(ViewEvent anEvent)
+public void addKeyActionHandler(String aName, String aKey)
+{
+    KeyCombo kcombo = KeyCombo.get(aKey); if(kcombo==null) return;
+    if(_keyHandlers.size()==0) {
+        getUI().addEventHandler(e -> checkKeyActions(e, false), KeyPress); _keyHandlers = new HashMap(); }
+    _keyHandlers.put(kcombo, aName);
+}
+
+/**
+ * Called to check for KeyAction filters/Handlers.
+ */
+private void checkKeyActions(ViewEvent anEvent, boolean isFilter)
 {
     KeyCombo kcombo = anEvent.getKeyCombo();
-    String name = _keyActions.get(kcombo);
+    String name = isFilter? _keyFilters.get(kcombo) : _keyHandlers.get(kcombo);
     if(name!=null) {
         sendEvent(name); anEvent.consume(); }
 }

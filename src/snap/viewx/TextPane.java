@@ -96,12 +96,12 @@ protected void initUI()
     addViewBinding("SelectionText", "Text", "SelectionInfo");
     
     // Register command-s for save, command-f for find, command-l for line number and escape
-    addKeyActionEvent("SaveButton", "Shortcut+S");
-    addKeyActionEvent("FindButton", "Shortcut+F");
-    addKeyActionEvent("FindText", "Shortcut+G");
-    addKeyActionEvent("FindTextPrevious", "Shortcut+Shift+G");
-    addKeyActionEvent("LineNumberPanelAction", "Shortcut+L");
-    addKeyActionEvent("EscapeAction", "ESC");
+    addKeyActionHandler("SaveButton", "Shortcut+S");
+    addKeyActionHandler("FindButton", "Shortcut+F");
+    addKeyActionHandler("FindText", "Shortcut+G");
+    addKeyActionHandler("FindTextPrevious", "Shortcut+Shift+G");
+    addKeyActionHandler("LineNumberPanelAction", "Shortcut+L");
+    addKeyActionHandler("EscapeAction", "ESC");
 }
 
 /**
