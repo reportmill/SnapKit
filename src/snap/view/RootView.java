@@ -40,7 +40,7 @@ public class RootView extends ParentView {
     Set <ViewOwner>          _resetLaters = Collections.synchronizedSet(new HashSet());
     
     // A set of Views with active animations
-    Set <View>               _animViews = new HashSet();
+    Set <View>               _animViews = Collections.synchronizedSet(new HashSet());
     
     // The timer for animated views
     ViewTimer                _timer = new ViewTimer(25, t -> activatePaintLater());

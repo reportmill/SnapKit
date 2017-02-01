@@ -43,6 +43,24 @@ public HPos getHPos()  { return hpos; }
 public VPos getVPos()  { return vpos; }
 
 /**
+ * Returns the opposing position.
+ */
+public Pos getOpposing()
+{
+    switch(this) {
+        case TOP_LEFT: return BOTTOM_RIGHT;
+        case TOP_CENTER: return BOTTOM_CENTER;
+        case TOP_RIGHT: return BOTTOM_LEFT;
+        case CENTER_LEFT: return CENTER_RIGHT;
+        case CENTER_RIGHT: return CENTER_LEFT;
+        case BOTTOM_LEFT: return TOP_RIGHT;
+        case BOTTOM_CENTER: return TOP_CENTER;
+        case BOTTOM_RIGHT: return TOP_LEFT;
+        default: return this;
+    }
+}
+
+/**
  * Returns the Pos for a string.
  */
 public static Pos get(String aString)
