@@ -166,7 +166,12 @@ protected void setShowing(boolean aVal)
 /**
  * Returns the view that currently receives KeyEvents.
  */
-public View getFocusedView()  { return _focusedView; }
+public View getFocusedView()
+{
+    if(_focusedView!=null && !_focusedView.isFocused())
+        _focusedView = null;
+    return _focusedView;
+}
 
 /**
  * Returns the previous focus view.

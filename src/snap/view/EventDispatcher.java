@@ -178,17 +178,14 @@ public void dispatchKeyEvent(ViewEvent anEvent)
     ViewUtils._shortcutDown = anEvent.isShortcutDown();
     
     // If key pressed and tab and FocusedView.FocusKeysEnabled, switch focus
-    View _focusedView = _rview.getFocusedView();
-    if(anEvent.isKeyPress() && anEvent.isTabKey() && _focusedView!=null && _focusedView.isFocusKeysEnabled()) {
-        View next = anEvent.isShiftDown()? _focusedView.getFocusPrev() : _focusedView.getFocusNext();
+    View focusedView = _rview.getFocusedView();
+    if(anEvent.isKeyPress() && anEvent.isTabKey() && focusedView!=null && focusedView.isFocusKeysEnabled()) {
+        View next = anEvent.isShiftDown()? focusedView.getFocusPrev() : focusedView.getFocusNext();
         if(next!=null) { _rview.requestFocus(next); return; }
     }
 
-    // Make sure FocusedView is in RootView - Bogus?
-    if(_focusedView.getRootView()!=_rview) _rview.requestFocus(_rview);
-    
     // Get target for event and array of parent
-    View targ = _focusedView;
+    View targ = focusedView;
     View pars[] = getParents(targ);
     
     // Iterate down and see if any should filter
@@ -279,7 +276,8 @@ public void dispatchDragTargetEvent(ViewEvent anEvent)
 private int getParentCount(View aView)
 {
     if(aView==null) return 0;
-    int pc = 1; for(View n=aView;n!=_rview;n=n.getParent()) pc++; return pc;
+    int pc = 1; for(View n=aView;n!=_rview;n=n.getParent()) pc++;
+    return pc;
 }
 
 /** Returns array of parents of given view up to and including RootView. */
