@@ -890,6 +890,11 @@ public boolean isAncestor(View aView)
 }
 
 /**
+ * Returns the index of this view in parent.
+ */
+public int indexInParent()  { ParentView par = getParent(); return par!=null? par.indexOfChild(this) : -1; }
+
+/**
  * Returns whether this view is visible.
  */
 public boolean isVisible()  { return _visible; }
