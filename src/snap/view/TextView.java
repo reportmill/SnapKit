@@ -610,16 +610,6 @@ public int getCharIndex(double anX, double aY)  { return getTextBox().getCharInd
 public Color getSelColor()  { return _selColor; }
 
 /**
- * Paint background.
- */
-protected void paintBack(Painter aPntr)
-{
-    // Paint background
-    if(getFill()!=null) {
-        aPntr.setPaint(getFill()); aPntr.fillRect(0,0,getWidth(),getHeight()); }
-}
-
-/**
  * Paint component.
  */
 protected void paintFront(Painter aPntr)
