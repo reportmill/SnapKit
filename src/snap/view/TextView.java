@@ -610,7 +610,7 @@ public int getCharIndex(double anX, double aY)  { return getTextBox().getCharInd
 public Color getSelColor()  { return _selColor; }
 
 /**
- * Paint component.
+ * Paint text.
  */
 protected void paintFront(Painter aPntr)
 {
@@ -630,20 +630,8 @@ protected void paintFront(Painter aPntr)
     // Paint selection
     paintSel(aPntr);
     
-    // Add text
-    int s = -1, e = -1;
-    for(int i=0, iMax=getLineCount(); i<iMax; i++) { TextBoxLine line = getLine(i);
-        if(line.getMaxY()<clip.getMinY()) continue;
-        if(line.getY()>clip.getMaxY()) break;
-        if(s==-1) s = i; e = i;
-        for(int j=0,jMax=line.getTokenCount(); j<jMax;j++) { TextBoxToken token = line.getToken(j);
-            double tx = token.getX(), tb = token.getBaseline();
-            aPntr.setFont(token.getFont()); aPntr.setPaint(token.getColor());
-            aPntr.drawString(token.getString(), tx, tb, token.getStyle().getCharSpacing());
-            if(token.isUnderlined()) {
-                aPntr.setStroke(Stroke.Stroke1); aPntr.drawLine(tx, tb+3, tx + token.getWidth(), tb+3); }
-        }
-    }
+    // Paint TextBox
+    getTextBox().paint(aPntr);
 }
 
 /**
