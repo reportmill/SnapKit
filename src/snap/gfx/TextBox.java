@@ -221,16 +221,6 @@ public boolean isLinked()  { return _linked; }
 public void setLinked(boolean aValue)  { _linked = aValue; }
 
 /**
- * Whether this text only allows a single style. (defaults to false).
- */
-public boolean isSingleStyle()  { return getText().isSingleStyle(); }
-
-/**
- * Sets whether this text only allows a single style.
- */
-public void setSingleStyle(boolean aValue)  { getText().setSingleStyle(aValue); }
-
-/**
  * Returns the start char in RichText.
  */
 public int getStart()  { return _start; }

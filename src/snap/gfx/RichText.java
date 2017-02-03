@@ -294,7 +294,8 @@ public void setStyle(TextStyle aStyle, int aStart, int anEnd)
         for(RichTextLine line : _lines)
             for(RichTextRun run : line.getRuns())
                 run.setStyle(aStyle);
-        //if(isPropChangeEnabled()) firePropertyChange(new StyleChange(ostyle, aStyle, aStart, anEnd));
+        if(isPropChangeEnabled())
+            firePropChange(new StyleChange(ostyle, aStyle, 0, length()));
     }
     
     // Iterate over runs in range and set style

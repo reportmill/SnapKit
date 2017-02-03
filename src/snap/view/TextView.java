@@ -205,12 +205,12 @@ public void setWrapText(boolean aValue)
 /**
  * Returns whether text supports multiple styles.
  */
-public boolean isRich()  { return !getTextBox().isSingleStyle(); }
+public boolean isRich()  { return !getRichText().isSingleStyle(); }
 
 /**
  * Sets whether text supports multiple styles.
  */
-public void setRich(boolean aValue)  { getTextBox().setSingleStyle(!aValue); }
+public void setRich(boolean aValue)  { getRichText().setSingleStyle(!aValue); }
 
 /**
  * Returns whether text view fires action on return.
