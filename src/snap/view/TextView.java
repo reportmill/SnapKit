@@ -54,6 +54,7 @@ public class TextView extends ParentView implements PropChangeListener {
     public static final String Editable_Prop = "Editable";
     public static final String WrapText_Prop = "WrapText";
     public static final String FireActionOnReturn_Prop = "FireActionOnReturn";
+    public static final String Selection_Prop = "Selection";
 
 /**
  * Creates a new TextView.
@@ -279,22 +280,25 @@ public void setSel(int aStart, int anEnd)  { setSel(aStart, anEnd, anEnd); }
 /**
  * Sets the character index of the start and end of the text selection.
  */
-public void setSel(int aStart, int anEnd, int anAnchor)
+public void setSel(int aStart, int aEnd, int aAnchor)
 {
     // Make sure start is before end
-    if(anEnd<aStart) { int temp = anEnd; anEnd = aStart; aStart = temp; }
+    if(aEnd<aStart) { int temp = aEnd; aEnd = aStart; aStart = temp; }
+    
+    // Just return if already set
+    if(aStart==getSelStart() && aEnd==getSelEnd()) return;
     
     // Get old selection shape
     if(isShowing()) repaintSel();
     
     // Set new start/end
-    _sel = new TextSel(_tbox, aStart, anEnd, anAnchor);
+    _sel = new TextSel(_tbox, aStart, aEnd, aAnchor);
     
     // Reset InputStyle
     _inputStyle = null;
     
     // Fire property change
-    firePropChange("Selection", aStart + ((long)anEnd)<<32, 0);
+    firePropChange(Selection_Prop, aStart + ((long)aEnd)<<32, 0);
     
     // Repaint selection and scroll to visible (after delay)
     if(isShowing()) {
