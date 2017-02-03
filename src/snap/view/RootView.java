@@ -24,6 +24,9 @@ public class RootView extends ParentView {
     // The focused view
     View                     _focusedView = this, _focusedViewLast;
     
+    // The RootView.Lister that is notified on certain root view actions
+    RootView.Listener        _lsnr;
+    
     // The EventDispatcher
     EventDispatcher          _eventDispatcher = new EventDispatcher(this);
     
@@ -106,6 +109,20 @@ public PopupWindow getPopup()  { return _eventDispatcher.getPopup(); }
  * Sets the popup window, if one added to this root view during last event.
  */
 protected void setPopup(PopupWindow aPopup)  { _eventDispatcher.setPopup(aPopup); }
+
+/**
+ * Adds a RootView listener.
+ */
+public void addRootViewListener(RootView.Listener aLsnr)
+{
+    if(_lsnr!=null) System.err.println("RootView.addRootViewListener: Multiple listeners not yet supported");
+    _lsnr = aLsnr;
+}
+
+/**
+ * Removes a RootView listener.
+ */
+public void removeRootViewListener(RootView.Listener aLsnr)  { if(_lsnr==aLsnr) _lsnr = null; }
 
 /**
  * Returns the root view.
@@ -313,6 +330,7 @@ public synchronized void paintLater()
     
     // Round rect and request real repaint
     rect.snap();
+    if(_lsnr!=null) rect = _lsnr.rootViewWillPaint(this, rect);
     getHelper().requestPaint(rect);
     
     // Clear dirty rects, reset runnable and return
@@ -370,6 +388,15 @@ private void printTime()
 {
     int time = 0; for(int i=0;i<_frames.length;i++) time += _frames[i]; double avg = time/(double)_frames.length;
     System.out.println("FrameRate: " + (int)(1000/avg));
+}
+
+/**
+ * An interface to listen to RootView events.
+ */
+public static interface Listener {
+    
+    /** Called before paint request. */
+    public Rect rootViewWillPaint(RootView aRV, Rect aRect);
 }
     
 }
