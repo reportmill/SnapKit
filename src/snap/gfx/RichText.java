@@ -349,17 +349,25 @@ public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
  */
 public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
 {
-    // Get Start/End lines
-    int sline = 0, eline = getLineCount()-1;
-    if(!isSingleStyle()) { sline = getLineAt(aStart).getIndex(); eline = getLineAt(anEnd).getIndex(); }
-    
-    // Set styles
-    for(int i=sline;i<=eline;i++) { RichTextLine line = getLine(i);
-        TextLineStyle ostyle = line.getLineStyle();
-        line.setLineStyle(aStyle);
+    // Handle SingleStyle
+    if(isSingleStyle()) {
+        TextLineStyle ostyle = getLine(0).getLineStyle();
+        getLines().forEach(i -> i.setLineStyle(aStyle));
         if(isPropChangeEnabled())
-            firePropChange(new LineStyleChange(ostyle, aStyle, i));
+            firePropChange(new LineStyleChange(ostyle, aStyle, 0));
     }
+    
+    // Handle MultiStyle
+    else {
+        int sline = getLineAt(aStart).getIndex(), eline = getLineAt(anEnd).getIndex();
+        for(int i=sline;i<=eline;i++) { RichTextLine line = getLine(i);
+            TextLineStyle ostyle = line.getLineStyle();
+            line.setLineStyle(aStyle);
+            if(isPropChangeEnabled())
+                firePropChange(new LineStyleChange(ostyle, aStyle, i));
+        }
+    }
+    
     _width = -1;
 }
 
@@ -384,8 +392,8 @@ public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
             if(isPropChangeEnabled())
                 firePropChange(new LineStyleChange(ostyle, nstyle, i));
         }
+        _width = -1;
     }
-    _width = -1;
 }
 
 /**

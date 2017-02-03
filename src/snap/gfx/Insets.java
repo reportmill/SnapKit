@@ -54,7 +54,14 @@ public boolean isEmpty()  { return top==0 && right==0 && bottom==0 && left==0; }
  */
 public String getString()
 {
-    if(top==right && top==bottom && top==left) return StringUtils.toString(top);
+    return top==right && top==bottom && top==left? StringUtils.toString(top) : getStringLong();
+}
+
+/**
+ * Returns a string representation of this Insets.
+ */
+public String getStringLong()
+{
     String t = StringUtils.toString(top), r = StringUtils.toString(right);
     String b = StringUtils.toString(bottom), l = StringUtils.toString(left);
     return t + "," + r + "," + b + "," + l;

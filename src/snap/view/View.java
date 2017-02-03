@@ -1396,6 +1396,16 @@ public void setAlign(Pos aPos)
 }
 
 /**
+ * Sets the horizontal alignment.
+ */
+public void setAlign(HPos aPos)  { setAlign(Pos.get(aPos, getAlign().getVPos())); }
+
+/**
+ * Sets the vertical alignment.
+ */
+public void setAlign(VPos aPos)  { setAlign(Pos.get(getAlign().getHPos(), aPos)); }
+
+/**
  * Returns the padding.
  */
 public Insets getPadding()  { return _padding; }

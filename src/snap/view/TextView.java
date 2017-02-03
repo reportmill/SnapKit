@@ -338,16 +338,6 @@ protected void scrollSelToVisible()
 }
 
 /**
- * Returns the color of the current selection or cursor.
- */
-public Color getColor()  { return getInputStyle().getColor(); }
-
-/**
- * Sets the color of the current selection or cursor.
- */
-public void setColor(Color aColor)  { setInputStyleValue(TextStyle.COLOR_KEY, aColor); }
-
-/**
  * Returns the font of the current selection or cursor.
  */
 public Font getFont()
@@ -374,9 +364,52 @@ protected void checkFont()
 }
 
 /**
+ * Returns the color of the current selection or cursor.
+ */
+public Paint getTextFill()  { return getInputStyle().getColor(); }
+
+/**
+ * Sets the color of the current selection or cursor.
+ */
+public void setTextFill(Paint aColor)
+{
+    setInputStyleValue(TextStyle.COLOR_KEY, aColor instanceof Color? aColor : null);
+}
+
+/**
+ * Returns whether TextView is underlined.
+ */
+public boolean isUnderlined()  { return getInputStyle().isUnderlined(); }
+
+/**
+ * Sets whether TextView is underlined.
+ */
+public void setUnderlined(boolean aValue)  { setInputStyleValue(TextStyle.UNDERLINE_KEY, aValue? 1 : 0); }
+
+/**
+ * Returns the text line alignment.
+ */
+public HPos getLineAlign()  { return getLineStyle().getAlign(); }
+
+/**
+ * Sets the text line alignment.
+ */
+public void setLineAlign(HPos anAlign)  { setLineStyleValue(TextLineStyle.ALIGN_KEY, anAlign); }
+
+/**
+ * Returns whether the text line justifies text.
+ */
+public boolean isLineJustify()  { return getLineStyle().isJustify(); }
+
+/**
+ * Sets whether the text line justifies text.
+ */
+public void setLineJustify(boolean aValue)  { setLineStyleValue(TextLineStyle.JUSTIFY_KEY, aValue); }
+
+/**
  * Returns the style at given char index.
  */
-public TextStyle getStyleAt(int anIndex)  { return getTextBox().getStyleAt(anIndex); }
+public TextStyle getStyleAt(int anIndex)  { return getRichText().getStyleAt(anIndex); }
 
 /**
  * Returns the TextStyle applied to any input characters.
@@ -400,9 +433,22 @@ public void setInputStyleValue(String aKey, Object aValue)
     
     // If selection is multiple chars, apply attribute to text and reset InputStyle
     else {
-        getTextBox().setStyleValue(aKey, aValue, getSelStart(), getSelEnd()); _inputStyle = null;
+        getRichText().setStyleValue(aKey, aValue, getSelStart(), getSelEnd()); _inputStyle = null;
         repaint();
     }
+}
+
+/**
+ * Returns the TextLineStyle for currently selected text.
+ */
+public TextLineStyle getLineStyle()  { return getRichText().getLineStyleAt(getSelStart()); }
+
+/**
+ * Sets the line attributes that are applied to current selection or newly typed chars.
+ */
+public void setLineStyleValue(String aKey, Object aValue)
+{
+    getRichText().setLineStyleValue(aKey, aValue, getSelStart(), getSelEnd());
 }
 
 /**
