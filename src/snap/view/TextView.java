@@ -44,11 +44,11 @@ public class TextView extends ParentView implements PropChangeListener {
     // The animator for caret blinking
     ViewTimer             _caretTimer;
     
-    // Whether to hide carent
-    boolean               _hideCaret;
+    // Whether to show text insertion point caret
+    boolean               _showCaret;
     
     // Whether to send action on return
-    boolean              _fireActionOnReturn;
+    boolean               _fireActionOnReturn;
 
     // Constants for properties
     public static final String Editable_Prop = "Editable";
@@ -68,10 +68,6 @@ public TextView()
     
     setEditable(true);
     setFill(Color.WHITE);
-    
-    // Disable Tab stealing FocusTraversalKeys
-    //setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
-    //setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, Collections.EMPTY_SET);
 }
 
 /**
@@ -658,7 +654,7 @@ protected void paintSel(Painter aPntr)
     if(!isEditable()) return;
     TextSel sel = getSel();
     Shape spath = sel.getPath();
-    if(sel.isEmpty()) { if((isFocused() || _downX>0) && !_hideCaret) {
+    if(sel.isEmpty()) { if(_showCaret) {
         aPntr.setPaint(Color.BLACK); aPntr.setStroke(Stroke.Stroke1); aPntr.draw(spath); }}
     else { aPntr.setPaint(getSelColor()); aPntr.fill(spath); }
 }
@@ -874,19 +870,19 @@ private void setCaretAnim()  { setCaretAnim(isCaretAnimNeeded()); }
 /**
  * Returns whether ProgressBar is animating.
  */
-private boolean isCaretAnim()  { return _caretTimer!=null; }
+public boolean isCaretAnim()  { return _caretTimer!=null; }
 
 /**
  * Sets anim.
  */
-private void setCaretAnim(boolean aValue)
+public void setCaretAnim(boolean aValue)
 {
     if(aValue==isCaretAnim()) return;
     if(aValue) {
-        _caretTimer = new ViewTimer(500, t -> { _hideCaret = !_hideCaret; repaintSel(); });
-        _caretTimer.start();
+        _caretTimer = new ViewTimer(500, t -> { _showCaret = !_showCaret; repaintSel(); });
+        _caretTimer.start(); _showCaret = true; repaintSel();
     }
-    else { _caretTimer.stop(); _caretTimer = null; _hideCaret = false; repaintSel(); }
+    else { _caretTimer.stop(); _caretTimer = null; _showCaret = false; repaintSel(); }
 }
 
 /**
