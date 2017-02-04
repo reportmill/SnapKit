@@ -353,7 +353,7 @@ public void setBounds(double aX, double aY, double aW, double aH)  { setX(aX); s
 /**
  * Returns the bounds inside view.
  */
-public Rect getBoundsInside()  { return new Rect(0,0,getWidth(),getHeight()); }
+public Rect getBoundsLocal()  { return new Rect(0,0,getWidth(),getHeight()); }
 
 /**
  * Sets the bounds view such that it maintains it's location in parent.
@@ -392,7 +392,7 @@ public void setSizeLocal(double aW, double aH)
 /**
  * Returns the bounds inside view.
  */
-public Shape getBoundsShape()  { return getBoundsInside(); }
+public Shape getBoundsShape()  { return getBoundsLocal(); }
 
 /**
  * Returns the translation of this view from X.
@@ -668,7 +668,7 @@ public Rect getVisRect()
 {
     if(!isVisible()) return new Rect(0,0,0,0);
     Rect cbnds = getClipBoundsAll();
-    Rect bnds = getBoundsInside(); if(cbnds==null) return bnds;
+    Rect bnds = getBoundsLocal(); if(cbnds==null) return bnds;
     double x = Math.floor(Math.max(cbnds.getX(),bnds.getX()));
     double y = Math.floor(Math.max(cbnds.getY(),bnds.getY()));
     double w = Math.ceil(Math.min(cbnds.getMaxX(),bnds.getMaxX())) - x;
@@ -1476,7 +1476,7 @@ protected void paintAll(Painter aPntr)
         paintBack(pdvr); paintFront(pdvr);
         if(_pdvr1==null || !pdvr.equals(_pdvr1)) {
             _pdvr1 = pdvr; _pdvr2 = new PainterDVR();
-            eff.applyEffect(pdvr, _pdvr2, getBoundsInside());
+            eff.applyEffect(pdvr, _pdvr2, getBoundsLocal());
         }
         _pdvr2.exec(aPntr);
     }
@@ -1608,7 +1608,7 @@ public void repaint(double aX, double aY, double aW, double aH)
 protected void repaintInParent(Rect aRect)
 {
     ParentView par = getParent(); if(par==null) return;
-    Rect rect = localToParent(aRect!=null? aRect : getBoundsInside()).getBounds();
+    Rect rect = localToParent(aRect!=null? aRect : getBoundsLocal()).getBounds();
     par.repaint(rect);
 }
 

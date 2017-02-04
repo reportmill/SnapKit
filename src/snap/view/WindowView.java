@@ -296,7 +296,7 @@ public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
     getHelper().checkInit();
     
     // Get rect for given node and point for given offsets
-    Rect rect = aView!=null? aView.getBoundsInside().copyFor(aView.getLocalToScreen()).getBounds() :
+    Rect rect = aView!=null? aView.getBoundsLocal().copyFor(aView.getLocalToScreen()).getBounds() :
         getEnv().getScreenBoundsInset();
     double x = aDX, y = aDY;
     

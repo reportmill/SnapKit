@@ -253,7 +253,7 @@ protected void layoutChildren()
     // Get content bounds
     double sx = getScrollH(); if(sx>cpw-w) sx = Math.round(cpw-w);
     double sy = getScrollV(); if(sy>cph-h) sy = Math.round(cph-h);
-    setClip(getBoundsInside());
+    setClip(getBoundsLocal());
     cnt.setBounds(-sx,-sy,cpw,cph);
 }
 

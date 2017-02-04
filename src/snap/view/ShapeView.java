@@ -38,7 +38,7 @@ public void setShape(Shape aShape)
 /**
  * Override to return path as bounds shape.
  */
-public Shape getBoundsShape()  { return getShape().copyFor(getBoundsInside()); }
+public Shape getBoundsShape()  { return getShape().copyFor(getBoundsLocal()); }
 
 /**
  * Calculates the preferred width.

@@ -240,7 +240,7 @@ private final void activatePaintLater()  { if(_plater==null) getEnv().runLater(_
 /**
  * Override to actually paint in this RootView.
  */
-protected void repaintInParent(Rect aRect)  { repaint(aRect!=null? aRect : getBoundsInside()); }
+protected void repaintInParent(Rect aRect)  { repaint(aRect!=null? aRect : getBoundsLocal()); }
 
 /**
  * Adds a given ViewOwner to set of owners that need reset on next UI update call.

@@ -82,7 +82,7 @@ protected void layoutChildren()
     if(_content==null) return;
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
-    setClip(getBoundsInside());
+    setClip(getBoundsLocal());
     _content.setBounds(x, y, w, h);
 }
 

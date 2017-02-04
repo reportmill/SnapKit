@@ -661,7 +661,7 @@ public Color getSelColor()  { return _selColor; }
 protected void paintFront(Painter aPntr)
 {
     // Get bounds in parent
-    Rect clip = aPntr.getClipBounds(); if(clip==null) clip = getBoundsInside();
+    Rect clip = aPntr.getClipBounds(); if(clip==null) clip = getBoundsLocal();
     
     // If alignment not TOP_LEFT, shift text block
     double dx = ViewUtils.getAlignX(getAlign());

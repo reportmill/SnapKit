@@ -71,7 +71,7 @@ private static void writeRefectionEffect(View aView, ReflectEffect aReflect, PDF
         ImagePaint ifill = new ImagePaint(refImg);
         
         // Get bounds of reflected image and write
-        Rect bounds = aView.getBoundsInside(); //aShape.getBoundsStroked();
+        Rect bounds = aView.getBoundsLocal(); //aShape.getBoundsStroked();
         bounds = new Rect(bounds.getX(), bounds.getMaxY() + aReflect.getGap(), refImg.getWidth(), refImg.getHeight());
         SnapPaintPdfr.writeImagePaint(aWriter, ifill, null, bounds);
     }
@@ -100,7 +100,7 @@ private static void writeEmbossEffect(View aView, EmbossEffect anEmboss, PDFWrit
 private static Image getEffectImage(View aView)
 {
     Effect eff = aView.getEffect();
-    Rect bnds = aView.getBoundsInside(); //aShape.getBoundsStrokedDeep();
+    Rect bnds = aView.getBoundsLocal(); //aShape.getBoundsStrokedDeep();
     PainterDVR pntr = new PainterDVR();
     ViewUtils.paintAll(aView, pntr); //paintShapeAll
     if(eff instanceof BlurEffect) return ((BlurEffect)eff).getBlurImage(pntr, bnds);

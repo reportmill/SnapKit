@@ -398,7 +398,7 @@ protected double getPrefHeightImpl(double aW)  { return getRowHeight()*getItemCo
 protected void layoutChildren()
 {
     // Update CellStart/CellEnd for current ClipBounds
-    Rect clip = getClipBoundsAll(); if(clip==null) clip = getBoundsInside(); double rh = getRowHeight();
+    Rect clip = getClipBoundsAll(); if(clip==null) clip = getBoundsLocal(); double rh = getRowHeight();
     
     // Update CellStart/CellEnd for current ClipBounds
     _cellStart = (int)Math.max(clip.getY()/rh,0);

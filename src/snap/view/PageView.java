@@ -33,7 +33,7 @@ public DocView getDoc()  { return getParent(DocView.class); }
 public Rect getMarginRect()
 {
     Insets ins = getDoc()!=null? getDoc().getPageMargin() : null; if(ins==null) return null;
-    Rect marg = getBoundsInside();
+    Rect marg = getBoundsLocal();
     marg.x += ins.left; marg.width -= ins.left + ins.right;
     marg.y += ins.top; marg.height -= ins.top + ins.bottom;
     return marg;

@@ -247,7 +247,7 @@ protected void paintChildren(Painter aPntr)
     for(View child : getChildren()) {
         if(!child.isVisible()) continue;
         Shape clip2 = child.parentToLocal(clip);
-        if(clip2.intersects(child.getBoundsInside())) {
+        if(clip2.intersects(child.getBoundsLocal())) {
             aPntr.save();
             aPntr.transform(child.getLocalToParent());
             if(child.getClip()!=null)

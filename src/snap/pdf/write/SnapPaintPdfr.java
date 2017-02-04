@@ -183,7 +183,7 @@ public static void writeBasicFill(PDFWriter aWriter, View aView, Color aFill)
  */
 public static void writeImagePaint(PDFWriter aWriter, View aView, ImagePaint anImageFill)
 {
-    writeImagePaint(aWriter, anImageFill, aView.getBoundsShape(), aView.getBoundsInside());
+    writeImagePaint(aWriter, anImageFill, aView.getBoundsShape(), aView.getBoundsLocal());
 }
 
 /**
