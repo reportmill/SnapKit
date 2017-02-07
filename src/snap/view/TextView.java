@@ -796,7 +796,7 @@ protected void keyPressed(ViewEvent anEvent)
     boolean commandDown = anEvent.isShortcutDown(), controlDown = anEvent.isControlDown();
     boolean emacsDown = SnapUtils.isWindows? anEvent.isAltDown() : controlDown;
     boolean shiftDown = anEvent.isShiftDown();
-    setCaretAnim(false);
+    setCaretAnim(false); _showCaret = true;
 
     // Handle command keys
     if(commandDown) {

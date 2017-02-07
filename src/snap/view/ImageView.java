@@ -16,6 +16,22 @@ public class ImageView extends View {
     // The image name, if loaded from local resource
     String       _iname;
     
+    // Whether to fit image so major image axis is visible if too big for view
+    boolean      _fitMajor = true;
+    
+    // Whether to fit image so minor image axis is visible if too big for view
+    boolean      _fitMinor;
+    
+    // Whether to grow image to major/minor attributes, even if image already fits in view
+    boolean      _fitAlways;
+    
+    // Constants for properties
+    public static final String Image_Prop = "Image";
+    public static final String ImageName_Prop = "ImageName";
+    public static final String FitMajor_Prop = "FitMajor";
+    public static final String FitMinor_Prop = "FitMinor";
+    public static final String FitAlways_Prop = "FitAlways";
+    
 /**
  * Creates a new ImageNode.
  */
@@ -41,7 +57,7 @@ public Image getImage()  { return _image; }
  */
 public void setImage(Image anImage)
 {
-    firePropChange("Image", _image, _image = anImage);
+    firePropChange(Image_Prop, _image, _image = anImage);
     relayoutParent(); repaint();
 }
 
@@ -53,20 +69,94 @@ public String getImageName()  { return _iname; }
 /**
  * Sets the image name, if loaded from local resource.
  */
-public void setImageName(String aName)  { _iname = aName; }
+public void setImageName(String aName)
+{
+    if(SnapUtils.equals(aName, _iname)) return;
+    firePropChange(ImageName_Prop, _iname, _iname = aName);
+}
+
+/**
+ * Returns whether to fit image so major image axis is visible if too big for view.
+ */
+public boolean isFitMajor()  { return _fitMajor; }
+
+/**
+ * Sets whether to fit image so major image axis is visible if too big for view.
+ */
+public void setFitMajor(boolean aValue)
+{
+    if(aValue==_fitMajor) return;
+    firePropChange(FitMajor_Prop, _fitMajor, _fitMajor = aValue);
+    repaint();
+}
+
+/**
+ * Returns whether to fit image so minor image axis is visible if too big for view.
+ */
+public boolean isFitMinor()  { return _fitMinor; }
+
+/**
+ * Sets whether to fit image so minor image axis is visible if too big for view.
+ */
+public void setFitMinor(boolean aValue)
+{
+    if(aValue==_fitMinor) return;
+    firePropChange(FitMinor_Prop, _fitMinor, _fitMinor = aValue);
+    repaint();
+}
+
+/**
+ * Returns whether to grow image to major/minor attributes, even if image already fits in view.
+ */
+public boolean isFitAlways()  { return _fitAlways; }
+
+/**
+ * Sets whether to grow image to major/minor attributes, even if image already fits in view.
+ */
+public void setFitAlways(boolean aValue)
+{
+    if(aValue==_fitAlways) return;
+    firePropChange(FitAlways_Prop, _fitAlways, _fitAlways = aValue);
+    repaint();
+}
 
 /**
  * Returns the image bounds.
  */
 public Rect getImageBounds()
 {
+    // Get insets, View width/height, available with/height, image width/height
     Insets ins = getInsetsAll(); if(_image==null) return null;
     double vw = getWidth(), vh = getHeight();
-    double pw = vw - ins.left - ins.right, ph = vh - ins.top - ins.bottom;
-    double iw = _image.getWidth(), w = iw; if(isGrowWidth() || iw>pw) w = pw;
-    double ih = _image.getHeight(), h = ih; if(isGrowHeight() || ih>ph) h = ph;
-    double x = ins.left + Math.round(ViewUtils.getAlignX(this)*(pw-w));
-    double y = ins.top + Math.round(ViewUtils.getAlignY(this)*(ph-h));
+    double aw = vw - ins.left - ins.right, ah = vh - ins.top - ins.bottom;
+    double iw = _image.getWidth(), ih = _image.getHeight();
+    
+    // Cacluate render width/height
+    double w = iw; if(isGrowWidth() || iw>aw) w = aw;
+    double h = ih; if(isGrowHeight() || ih>ah) h = ah;
+    
+    // Calculate image x/y based on insets and render image size
+    double x = ins.left + Math.round(ViewUtils.getAlignX(this)*(aw-w));
+    double y = ins.top + Math.round(ViewUtils.getAlignY(this)*(ah-h));
+    return new Rect(x, y, w, h);
+    
+    //Rect bnds = new Rect(ins.left, ins.top, getWidth() - ins.left - ins.right, getHeight() - ins.top - ins.bottom);
+    //return getImageBounds(iw, ih, bnds, getAlign(), isFitMajor(), isFitMinor(), isFitAlways());
+}
+
+/**
+ * Returns the image bounds in a given rect.
+ */
+public static Rect getImageBounds(double aW, double aH, Rect aBnds, Pos anAlign,
+    boolean fitMajor, boolean fitMinor, boolean fitAlways)
+{
+    boolean widthMajor = aW>=aH;
+    boolean fitWidth = widthMajor? fitMajor : fitMinor;
+    boolean fitHeight = widthMajor? fitMinor : fitMajor;
+    double w = fitWidth && (fitAlways || aW>aBnds.width)? aBnds.width : aW;
+    double h = fitHeight && (fitAlways || aH>aBnds.height)? aBnds.height : aH;
+    double x = aBnds.x + Math.round(ViewUtils.getAlignX(anAlign)*(aBnds.width-w));
+    double y = aBnds.y + Math.round(ViewUtils.getAlignY(anAlign)*(aBnds.height-h));
     return new Rect(x, y, w, h);
 }
 
@@ -117,7 +207,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
     
     // Archive Image or ImageName
     Image image = getImage();
-    String iname = getImageName(); if(iname!=null) e.add("ImageName", iname);
+    String iname = getImageName(); if(iname!=null) e.add(ImageName_Prop, iname);
     
     // Archive image bytes as archiver resource
     else if(image!=null) {
@@ -142,7 +232,7 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     super.fromXML(anArchiver, anElement);
     
     // Unarchive ImageName
-    String iname = anElement.getAttributeValue("ImageName");
+    String iname = anElement.getAttributeValue(ImageName_Prop);
     if(iname==null) iname = anElement.getAttributeValue("image");
     if(iname!=null) {
         setImageName(iname);

@@ -91,7 +91,7 @@ public void setListView(ListView <T> aListView)
 {
     // Set List and start listening to Action and SelectedIndex changes
     _list = aListView;
-    _list.addEventHandler(e -> fireActionEvent(), Action);
+    _list.addEventHandler(e -> listViewFiredAction(), Action);
     _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.SelectedIndex_Prop);
     
     // If not PopupList, turn off button and start listening to TextField KeyType events
@@ -405,6 +405,15 @@ protected void textFieldFiredAction()
 {
     getListView().setText(_text.getText());
     fireActionEvent();
+}
+
+/**
+ * Called when ListView fires action.
+ */
+protected void listViewFiredAction()
+{
+    if(getListView() instanceof PopupList)
+        fireActionEvent();
 }
 
 /**
