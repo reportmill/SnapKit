@@ -83,6 +83,9 @@ public class View implements XMLArchiver.Archivable {
     // Whether view should be included in layout
     boolean         _managed = true;
     
+    // Whether view should clip to bounds
+    boolean         _clipToBounds;
+    
     // The view fill
     Paint           _fill;
     
@@ -169,6 +172,7 @@ public class View implements XMLArchiver.Archivable {
     public static final String FocusWhenPressed_Prop = "FocusWhenPressed";
     public static final String Border_Prop = "Border";
     public static final String Clip_Prop = "Clip";
+    public static final String ClipToBounds_Prop = "ClipToBounds";
     public static final String Cursor_Prop = "Cursor";
     public static final String Effect_Prop = "Effect";
     public static final String Fill_Prop = "Fill";
@@ -625,6 +629,34 @@ public boolean isEnabled()  { return !_disabled; }
  * Sets whether view is enabled.
  */
 public void setEnabled(boolean aValue)  { setDisabled(!aValue); }
+
+/**
+ * Returns whether view should clip to bounds.
+ */
+public boolean isClipToBounds()  { return _clipToBounds; }
+
+/**
+ * Sets whether view should clip to bounds.
+ */
+public void setClipToBounds(boolean aValue)
+{
+    if(aValue==_clipToBounds) return;
+    firePropChange(ClipToBounds_Prop, _clipToBounds, _clipToBounds = aValue);
+    repaint();
+}
+
+/**
+ * Clips to bounds.
+ */
+protected void clipToBounds(Painter aPntr)
+{
+    Shape shp = getBoundsShape();
+    if(shp instanceof RectBase) {
+        Insets ins = getInsetsAll(); double w = getWidth(), h = getHeight();
+        shp = ((RectBase)shp).copyFor(new Rect(ins.left, ins.right, w-ins.left-ins.right, h-ins.top-ins.bottom));
+    }
+    aPntr.clip(shp);
+}
 
 /**
  * Returns the clip shape.
@@ -1473,7 +1505,9 @@ protected void paintAll(Painter aPntr)
     // If view has effect, get/create effect painter to speed up successive paints
     if(getEffect()!=null) { Effect eff = getEffect();
         PainterDVR pdvr = new PainterDVR();
-        paintBack(pdvr); paintFront(pdvr);
+        paintBack(pdvr);
+        if(isClipToBounds()) clipToBounds(aPntr);
+        paintFront(pdvr);
         if(_pdvr1==null || !pdvr.equals(_pdvr1)) {
             _pdvr1 = pdvr; _pdvr2 = new PainterDVR();
             eff.applyEffect(pdvr, _pdvr2, getBoundsLocal());
@@ -1482,7 +1516,11 @@ protected void paintAll(Painter aPntr)
     }
     
     // Otherwise, do normal draw
-    else { paintBack(aPntr); paintFront(aPntr); }
+    else {
+        paintBack(aPntr);
+        if(isClipToBounds()) clipToBounds(aPntr);
+        paintFront(aPntr);
+    }
     
     // Restore opacity
     if(opacity!=1)

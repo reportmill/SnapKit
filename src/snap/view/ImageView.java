@@ -127,21 +127,20 @@ public Rect getImageBounds()
 {
     // Get insets, View width/height, available with/height, image width/height
     Insets ins = getInsetsAll(); if(_image==null) return null;
-    double vw = getWidth(), vh = getHeight();
-    double aw = vw - ins.left - ins.right, ah = vh - ins.top - ins.bottom;
+    //double vw = getWidth(), vh = getHeight();
+    //double aw = vw - ins.left - ins.right, ah = vh - ins.top - ins.bottom;
     double iw = _image.getWidth(), ih = _image.getHeight();
     
     // Cacluate render width/height
-    double w = iw; if(isGrowWidth() || iw>aw) w = aw;
-    double h = ih; if(isGrowHeight() || ih>ah) h = ah;
-    
+    //double w = iw; if(isGrowWidth() || iw>aw) w = aw;
+    //double h = ih; if(isGrowHeight() || ih>ah) h = ah;
     // Calculate image x/y based on insets and render image size
-    double x = ins.left + Math.round(ViewUtils.getAlignX(this)*(aw-w));
-    double y = ins.top + Math.round(ViewUtils.getAlignY(this)*(ah-h));
-    return new Rect(x, y, w, h);
+    //double x = ins.left + Math.round(ViewUtils.getAlignX(this)*(aw-w));
+    //double y = ins.top + Math.round(ViewUtils.getAlignY(this)*(ah-h));
+    //return new Rect(x, y, w, h);
     
-    //Rect bnds = new Rect(ins.left, ins.top, getWidth() - ins.left - ins.right, getHeight() - ins.top - ins.bottom);
-    //return getImageBounds(iw, ih, bnds, getAlign(), isFitMajor(), isFitMinor(), isFitAlways());
+    Rect bnds = new Rect(ins.left, ins.top, getWidth() - ins.left - ins.right, getHeight() - ins.top - ins.bottom);
+    return getImageBounds(iw, ih, bnds, getAlign(), isFitMajor(), isFitMinor(), isFitAlways());
 }
 
 /**
@@ -150,11 +149,18 @@ public Rect getImageBounds()
 public static Rect getImageBounds(double aW, double aH, Rect aBnds, Pos anAlign,
     boolean fitMajor, boolean fitMinor, boolean fitAlways)
 {
+    // Convert fitMajor/Minor to fitWidth/Height
     boolean widthMajor = aW>=aH;
     boolean fitWidth = widthMajor? fitMajor : fitMinor;
     boolean fitHeight = widthMajor? fitMinor : fitMajor;
+    
+    // Get w/h based on fitWidth, fitHeight, fitAlways, image size and available size
     double w = fitWidth && (fitAlways || aW>aBnds.width)? aBnds.width : aW;
     double h = fitHeight && (fitAlways || aH>aBnds.height)? aBnds.height : aH;
+    if(fitWidth && !fitHeight) h = Math.round(w/aW*aH);
+    if(fitHeight && !fitWidth) w = Math.round(h/aH*aW);
+    
+    // Calculate x/y based on w/h, avaiable size and alignment
     double x = aBnds.x + Math.round(ViewUtils.getAlignX(anAlign)*(aBnds.width-w));
     double y = aBnds.y + Math.round(ViewUtils.getAlignY(anAlign)*(aBnds.height-h));
     return new Rect(x, y, w, h);
@@ -215,9 +221,10 @@ public XMLElement toXML(XMLArchiver anArchiver)
         e.add("resource", rname);
     }
     
-    // Archive GrowToFit, PreserveRatio
-    //if(!isGrowToFit()) e.add("GrowToFit", isGrowToFit());
-    //if(!getPreserveRatio()) e.add("PreserveRatio", getPreserveRatio());
+    // Archive FitMajor, FitMinor, FitAlways
+    if(!isFitMajor()) e.add(FitMajor_Prop, false);
+    if(isFitMinor()) e.add(FitMinor_Prop, true);
+    if(isFitAlways()) e.add(FitAlways_Prop, true);
     
     // Return
     return e;
@@ -246,9 +253,10 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     if(rname!=null)
         setImage(Image.get(bytes));
     
-    // Unarchive GrowToFit, PreserveRatio
-    //if(anElement.hasAttribute("GrowToFit")) setGrowToFit(anElement.getAttributeBooleanValue("GrowToFit"));
-    //if(anElement.hasAttribute("PreserveRatio")) setPreserveRatio(anElement.getAttributeBooleanValue("PreserveRatio"));
+    // Unarchive FitMajor, FitMinor, FitAlways
+    if(anElement.hasAttribute(FitMajor_Prop)) setFitMajor(anElement.getAttributeBooleanValue(FitMajor_Prop));
+    if(anElement.hasAttribute(FitMinor_Prop)) setFitMinor(anElement.getAttributeBooleanValue(FitMinor_Prop));
+    if(anElement.hasAttribute(FitAlways_Prop)) setFitAlways(anElement.getAttributeBooleanValue(FitAlways_Prop));
     return this;
 }
 
