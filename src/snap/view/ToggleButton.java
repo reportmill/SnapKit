@@ -83,9 +83,29 @@ public void fire()
 }
 
 /**
+ * Override because TeaVM hates reflection.
+ */
+public Object getValue(String aPropName)
+{
+    if(aPropName.equals("Value") || aPropName==Selected_Prop)
+        return isSelected();
+    return super.getValue(aPropName);
+}
+
+/**
+ * Override because TeaVM hates reflection.
+ */
+public void setValue(String aPropName, Object aValue)
+{
+    if(aPropName.equals("Value") || aPropName==Selected_Prop)
+        setSelected(SnapUtils.boolValue(aValue));
+    else super.setValue(aPropName, aValue);
+}
+
+/**
  * Returns a mapped property name name.
  */
-protected String getValuePropName()  { return "Selected"; }
+protected String getValuePropName()  { return Selected_Prop; }
 
 /**
  * Override to add to ToggleGroup if name is set.
@@ -106,7 +126,7 @@ protected XMLElement toXMLView(XMLArchiver anArchiver)
     XMLElement e = super.toXMLView(anArchiver);
     
     // Archive Selected
-    if(isSelected()) e.add("Selected", true);
+    if(isSelected()) e.add(Selected_Prop, true);
     
     // Archive ToggleGroup
     if(getToggleGroupName()!=null) e.add("ToggleGroup", getToggleGroupName());
@@ -122,7 +142,7 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     super.fromXMLView(anArchiver, anElement);
     
     // Unarchive Selected
-    setSelected(anElement.getAttributeBoolValue("Selected"));
+    setSelected(anElement.getAttributeBoolValue(Selected_Prop));
     
     // Unarchive ToggleGroup
     if(anElement.hasAttribute("ToggleGroup") || anElement.hasAttribute("bgroup"))
