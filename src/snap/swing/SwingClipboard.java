@@ -10,6 +10,7 @@ import java.util.*;
 import javax.swing.*;
 import snap.gfx.Image;
 import snap.gfx.Color;
+import snap.util.FileUtils;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.view.Clipboard;
@@ -310,6 +311,7 @@ private class GenericTransferable implements Transferable {
             if(df==_imageFlavor) {
                 _types.add(DataFlavor.imageFlavor); _contents.add(theContents[i-1]);
                 _types.add(_jpegFlavor); _contents.add(theContents[i-1]);
+                _types.add(DataFlavor.javaFileListFlavor); _contents.add(theContents[i-1]);
             }
         }
     }
@@ -323,20 +325,47 @@ private class GenericTransferable implements Transferable {
     /** Returns an inputstream with clipboard data for requested flavor. */
     public Object getTransferData(DataFlavor aFlavor) throws UnsupportedFlavorException, IOException
     {
+        // Get contents for requested flavor
         Object contents = null;
         for(int i=0;i<_types.size() && contents==null;i++)
             if(aFlavor.equals(_types.get(i)))
                 contents = _contents.get(i);
+                
+        // Handle ImageFlavor:
         if(aFlavor==DataFlavor.imageFlavor && contents instanceof Image)
             contents = ((Image)contents).getNative();
+            
+        // Handle JavaFileListFlavor + Image: Write to file and swap in for image
+        if(aFlavor==DataFlavor.javaFileListFlavor && contents instanceof Image) { Image img = (Image)contents;
+            byte bytes[] = img.getBytes()!=null? img.getBytes() : img.hasAlpha()? img.getBytesPNG():img.getBytesJPEG();
+            File file = FileUtils.getTempFile(getImageName(img)); file.deleteOnExit();
+            SnapUtils.writeBytes(bytes, file);
+            contents = Arrays.asList(file);
+        }
+            
+        // Handle JPEG Flavor
         if(aFlavor==_jpegFlavor && contents instanceof Image)
             contents = ((Image)contents).getBytesJPEG();
+            
+        // Handle content is bytes: Convert to ByteArrayInputStream
         if(contents instanceof byte[])
             contents = new ByteArrayInputStream((byte[])contents);
+            
+        // Handle no contents
         if(contents==null)
             throw new UnsupportedFlavorException(aFlavor);
         return contents;
     }
 }
+
+/**
+ * Returns an image name.
+ */
+private String getImageName(Image anImage)
+{
+    if(anImage.getSourceURL()!=null)
+        return anImage.getName();
+    return "DragImage-" + (_dragCount++) + "." + anImage.getType();
+} static int _dragCount;
 
 }
