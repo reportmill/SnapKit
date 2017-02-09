@@ -352,7 +352,7 @@ public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
     // Handle SingleStyle
     if(isSingleStyle()) {
         TextLineStyle ostyle = getLine(0).getLineStyle();
-        getLines().forEach(i -> i.setLineStyle(aStyle));
+        for(RichTextLine ln : getLines()) ln.setLineStyle(aStyle);
         if(isPropChangeEnabled())
             firePropChange(new LineStyleChange(ostyle, aStyle, 0));
     }

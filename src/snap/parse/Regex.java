@@ -248,7 +248,7 @@ private Regex append(String aString)  { _sb.append(aString); return this; }
 /**
  * Returns a string representation of regex.
  */
-public String toString()  { return String.format("RMRegex \"%s\"", getPattern()); }
+public String toString()  { return "RMRegex \"" + getPattern() + "\""; }
 
 /**
  * Utility method to return whether given character is a special char.

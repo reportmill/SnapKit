@@ -4,7 +4,6 @@
 package snap.view;
 import java.util.*;
 import java.util.function.*;
-import java.util.stream.Collectors;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -395,7 +394,10 @@ protected List <T> getItemsForPrefix(String aStr)
     if(aStr.length()==0) return _items;
     
     // Otherwise, return items that start with prefix
-    return _items.stream().filter(i -> StringUtils.startsWithIC(_list.getText(i), aStr)).collect(Collectors.toList());
+    List <T> list = new ArrayList();
+    for(T itm : _items) if(StringUtils.startsWithIC(_list.getText(itm), aStr)) list.add(itm);
+    return list;
+    //return _items.stream().filter(i -> StringUtils.startsWithIC(_list.getText(i), aStr)).collect(Collectors.toList());
 }
 
 /**

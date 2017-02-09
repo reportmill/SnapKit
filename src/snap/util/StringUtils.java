@@ -713,4 +713,23 @@ public static String getStackTraceString(Throwable aThrowable, int aDepth)
     return str2;
 }
 
+/**
+ * Basic implementation of String.format() to work around TeaVM.
+ */
+public static String format(String aFmt, Object ... theArgs)
+{
+    StringBuffer sb = new StringBuffer();
+    int i=aFmt.indexOf('%'), j=0, k=0;
+    for(;i>=0;i=aFmt.indexOf('%',j)) {
+        sb.append(aFmt, j, i);
+        char c = aFmt.charAt(i+1);
+        if(c=='s') sb.append(theArgs[k++]);
+        else if(c=='d') sb.append(((Number)theArgs[k++]).intValue());
+        else if(c=='f') sb.append(((Number)theArgs[k++]).floatValue());
+        j = i+2;
+    }
+    sb.append(aFmt, j, aFmt.length());
+    return sb.toString();
+}
+
 }

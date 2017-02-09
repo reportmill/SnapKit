@@ -3,6 +3,7 @@
  */
 package snap.gfx;
 import snap.util.MathUtils;
+import snap.util.StringUtils;
 
 /**
  * A custom class.
@@ -225,7 +226,10 @@ public boolean equals(Object anObj)
 /**
  * Standard toString implementation.
  */
-public String toString()  { return String.format("[ %f %f %f %f %f %f ]", _a, _b, _c, _d, _tx, _ty); }
+public String toString()
+{
+    return StringUtils.format("[ %f %f %f %f %f %f ]", _a, _b, _c, _d, _tx, _ty);
+}
     
 /**
  * Returns a translation transform.

@@ -265,7 +265,7 @@ public interface Selection {
  */
 public String toString()
 {
-    return String.format("Undoer { UndoCount=%d, RedoCount=%d }", getUndoSets().size(), getRedoSets().size());
+    return StringUtils.format("Undoer { UndoCount=%d, RedoCount=%d }", getUndoSets().size(), getRedoSets().size());
 }
 
 }

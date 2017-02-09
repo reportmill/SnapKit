@@ -171,7 +171,7 @@ public String toString(PropChange anEvent, boolean doUndo)
     String source = anEvent.getSource().getClass().getSimpleName(), pname = anEvent.getPropertyName(); 
     Object oV = anEvent.getOldValue(); String oS = oV!=null? oV.toString().replace("\n", "\\n") : null;
     Object nV = anEvent.getNewValue(); String nS = nV!=null? nV.toString().replace("\n", "\\n") : null;
-    return String.format("%s %s (set %s to %s)", source, pname, doUndo? nS : oS, doUndo? oS : nS);
+    return StringUtils.format("%s %s (set %s to %s)", source, pname, doUndo? nS : oS, doUndo? oS : nS);
 }
 
 }

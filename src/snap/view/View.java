@@ -1791,6 +1791,8 @@ public Object getValue(String aPropName)
         case View.ScaleY_Prop: return getScaleY();
         case View.TransX_Prop: return getTransX();
         case View.TransY_Prop: return getTransY();
+        case View.PrefWidth_Prop: return getPrefWidth();
+        case View.PrefHeight_Prop: return getPrefHeight();
         case "Enabled": return isEnabled();
         case "Items": return ((Selectable)this).getItems();
         case "SelectedItem": return ((Selectable)this).getSelectedItem();
@@ -1822,6 +1824,8 @@ public void setValue(String aPropName, Object aValue)
         case View.ScaleY_Prop: setScaleY(SnapUtils.doubleValue(aValue)); break;
         case View.TransX_Prop: setTransX(SnapUtils.doubleValue(aValue)); break;
         case View.TransY_Prop: setTransY(SnapUtils.doubleValue(aValue)); break;
+        case View.PrefWidth_Prop: setPrefWidth(SnapUtils.doubleValue(aValue)); break;
+        case View.PrefHeight_Prop: setPrefHeight(SnapUtils.doubleValue(aValue)); break;
         case "Enabled": setDisabled(!SnapUtils.boolValue(aValue)); break;
         case "Items": { Selectable sview = (Selectable)this;
             if(aValue instanceof List) sview.setItems((List)aValue);
