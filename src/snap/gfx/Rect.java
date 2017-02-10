@@ -34,6 +34,11 @@ public Rect getBounds()  { return this; }
 public PathIter getPathIter(Transform aTrans)  { return new RectIter(this, aTrans); }
 
 /**
+ * Returns a point for given position on rect.
+ */
+public Point getPoint(Pos aPos)  { return getPoint(x, y, width, height, aPos); }
+
+/**
  * Returns whether the receiver intersects with the given rect.
  */
 public boolean intersectsRect(Rect aRect)
@@ -387,6 +392,25 @@ public boolean equals(Object anObj)
     if(anObj==this) return true;
     Rect other = anObj instanceof Rect? (Rect)anObj : null; if(other==null) return false;
     return super.equals(other);
+}
+
+/**
+ * Returns a point for x, y, w, h and position.
+ */
+public static Point getPoint(double aX, double aY, double aW, double aH, Pos aPos)
+{
+    switch(aPos) {
+        case TOP_LEFT: return new Point(aX, aY);
+        case TOP_CENTER: return new Point(aX+aW/2, aY);
+        case TOP_RIGHT: return new Point(aX+aW, aY);
+        case CENTER_LEFT: return new Point(aX, aY+aH/2);
+        case CENTER: return new Point(aX+aW/2, aY+aH/2);
+        case CENTER_RIGHT: return new Point(aX+aW, aY+aH/2);
+        case BOTTOM_LEFT: return new Point(aX, aY+aH);
+        case BOTTOM_CENTER: return new Point(aX+aW/2, aY+aH);
+        case BOTTOM_RIGHT: return new Point(aX+aW, aY+aH);
+        default: return null;
+    }
 }
 
 /**

@@ -25,6 +25,14 @@ public class ArcView extends View {
 public ArcView()  { }
 
 /**
+ * Creates a new ArcView.
+ */
+public ArcView(double aX, double aY, double aW, double aH, double aSA, double aSW)
+{
+    setBounds(aX,aY,aW,aH); setStartAngle(aSA); setSweepAngle(aSW);
+}
+
+/**
  * Returns the arc.
  */
 public Arc getArc()

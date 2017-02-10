@@ -22,7 +22,7 @@ public LineView()  { setBorder(Color.BLACK, 1); }
  */
 public LineView(double x0, double y0, double x1, double y1)
 {
-    setLine(x0, y0, x1, y1);
+    setLineInParent(x0, y0, x1, y1);
     setBorder(Color.BLACK, 1);
 }
 
