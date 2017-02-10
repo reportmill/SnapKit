@@ -196,7 +196,7 @@ public static class BoxLayout extends ViewLayout {
         if(_scaleToFit)  { layoutChildrenScale(px, py, pw, ph); return; }
         
         // Otherwise do normal layout
-        View child = getContent();
+        View child = getContent(); if(child==null) return;
         double cw = _fillWidth? pw : Math.min(getBestWidth(child, -1), pw);
         double ch = _fillHeight? ph : Math.min(getBestHeight(child, cw), ph);
         double dx = pw - cw, dy = ph - ch;
@@ -208,7 +208,7 @@ public static class BoxLayout extends ViewLayout {
     /** Performs layout when ScaleToFit. */
     protected void layoutChildrenScale(double px, double py, double pw, double ph)
     {
-        View child = getContent();
+        View child = getContent(); if(child==null) return;
         double cw = child.getPrefWidth(), ch = child.getPrefHeight();
         if(pw<=0) pw = cw; if(ph<=0) ph = ch;
         

@@ -43,6 +43,16 @@ public HPos getHPos()  { return hpos; }
 public VPos getVPos()  { return vpos; }
 
 /**
+ * Returns whether position is side.
+ */
+public boolean isSide()  { return this==TOP_CENTER || this==CENTER_LEFT || this==CENTER_RIGHT || this==BOTTOM_CENTER; }
+
+/**
+ * Returns whether position is corner.
+ */
+public boolean isCorner()  { return this==TOP_LEFT || this==TOP_RIGHT || this==BOTTOM_LEFT || this==BOTTOM_RIGHT; }
+
+/**
  * Returns the opposing position.
  */
 public Pos getOpposing()

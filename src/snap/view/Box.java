@@ -37,8 +37,9 @@ public View getContent()  { return _child; }
 public void setContent(View aView)
 {
     if(aView==_child) return;
+    _child = aView;
     removeChildren();
-    addChild(_child = aView);
+    if(_child!=null) addChild(_child);
 }
 
 /**
