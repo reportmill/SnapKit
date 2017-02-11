@@ -17,6 +17,9 @@ public class ParentView extends View {
     // Whether node needs layout, or node has children that need layout
     boolean        _needsLayout, _needsLayoutDeep;
 
+    // Whether view should clip children to bounds
+    boolean        _clipToBounds;
+    
     // Whether this node is performing layout
     boolean        _inLayout;
     
@@ -25,6 +28,9 @@ public class ParentView extends View {
     
     // Shared empty view array
     private static View[] EMPTY_VIEWS = new View[0];
+    
+    // Constants for properties
+    public static final String ClipToBounds_Prop = "ClipToBounds";
     
 /**
  * Returns the number of children associated with this node.
@@ -176,6 +182,34 @@ public View[] getChildrenManaged()
 }
 
 /**
+ * Returns whether view should clip to bounds.
+ */
+public boolean isClipToBounds()  { return _clipToBounds; }
+
+/**
+ * Sets whether view should clip to bounds.
+ */
+public void setClipToBounds(boolean aValue)
+{
+    if(aValue==_clipToBounds) return;
+    firePropChange(ClipToBounds_Prop, _clipToBounds, _clipToBounds = aValue);
+    repaint();
+}
+
+/**
+ * Clips to bounds.
+ */
+protected void clipToBounds(Painter aPntr)
+{
+    Shape shp = getBoundsShape();
+    if(shp instanceof RectBase) {
+        Insets ins = getInsetsAll(); double w = getWidth(), h = getHeight();
+        shp = ((RectBase)shp).copyFor(new Rect(ins.left, ins.right, w-ins.left-ins.right, h-ins.top-ins.bottom));
+    }
+    aPntr.clip(shp);
+}
+
+/**
  * Returns the next focus View after given view (null to return first).
  */
 protected View getFocusNext(View aChild)
@@ -240,6 +274,12 @@ protected void paintAll(Painter aPntr)
  */
 protected void paintChildren(Painter aPntr)
 {
+    // If clip to bounds, do it
+    if(isClipToBounds()) {
+        aPntr.save();
+        clipToBounds(aPntr);
+    }
+
     // Get clip
     Shape clip = aPntr.getClip();
     
@@ -256,6 +296,9 @@ protected void paintChildren(Painter aPntr)
             aPntr.restore();
         }
     }
+    
+    // If ClipToBounds, Restore original clip
+    if(isClipToBounds()) aPntr.restore();
 }
 
 /**

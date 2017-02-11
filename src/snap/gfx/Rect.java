@@ -232,6 +232,16 @@ public Rect getInsetRect(double anInset)  { return getInsetRect(anInset, anInset
 public Rect getInsetRect(double xIns, double yIns)  { Rect r = clone(); r.inset(xIns,yIns); return r; }
 
 /**
+ * Returns a copy of this rect inset by given insets.
+ */
+public Rect getInsetRect(Insets anIns)
+{
+    Rect rect = clone();
+    if(anIns!=null) rect.setRect(x+anIns.left,y+anIns.top,width-anIns.left-anIns.right,height-anIns.top-anIns.bottom);
+    return rect;
+}
+
+/**
  * Offsets the receiver by the given x & y.
  */
 public Rect getOffsetRect(double dx, double dy)  { return new Rect(x+dx, y+dy, width, height); }

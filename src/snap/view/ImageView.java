@@ -194,6 +194,10 @@ public double getPrefHeightImpl(double aW)
  */
 public void paintFront(Painter aPntr)
 {
+    // Get whether to clip to bounds, and if so, do clip
+    boolean clipToBounds = isFitMinor() && !isFitMajor();
+    if(clipToBounds) { aPntr.save(); aPntr.clip(getBoundsLocal().getInsetRect(getInsetsAll())); }
+    
     // Calcuate text x/y based on insets, font and alignment
     Rect ibnds = getImageBounds(); if(ibnds==null) return;
     double iw = _image.getWidth(), ih = _image.getHeight();
@@ -201,6 +205,9 @@ public void paintFront(Painter aPntr)
     if(noResize) aPntr.setImageQuality(0);
     aPntr.drawImage(_image, ibnds.x, ibnds.y, ibnds.width, ibnds.height);
     aPntr.setImageQuality(.5);
+    
+    // If clipped, restore
+    if(clipToBounds) aPntr.restore();
 }
 
 /**
