@@ -35,6 +35,12 @@ public void setRootView(RootView aRootView)
     // RootView only beyond this point
     _rview = aRootView;
     
+    // Add component listener to sync SWRootView bounds changes with Snap RootView
+    addComponentListener(new ComponentAdapter() {
+        public void componentShown(ComponentEvent e) { showingChanged(); }
+        public void componentHidden(ComponentEvent e) { showingChanged(); }
+    });
+    
     // Suppress Tab key handling
     setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, java.util.Collections.EMPTY_SET);
     setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, java.util.Collections.EMPTY_SET);
@@ -64,7 +70,7 @@ public void setRootView(RootView aRootView)
 }
 
 /**
- * Override to sync with view.
+ * Override to sync with RootView.
  */
 public void setBounds(int aX, int aY, int aW, int aH)
 {
@@ -72,6 +78,16 @@ public void setBounds(int aX, int aY, int aW, int aH)
     _rview.setBounds(aX,aY,aW,aH);
 }
 
+/**
+ * Called when window is shown/hidden to forward to RootView.
+ */
+protected void showingChanged()
+{
+    boolean showing = isShowing();
+    ViewUtils.setShowing(_rview, showing);
+    if(showing) _rview.repaint();
+}
+    
 /**
  * Repaint from snap.
  */
@@ -128,7 +144,7 @@ protected void processEvent(AWTEvent anEvent)
 }
 
 /**
- * Returns the minimum size.
+ * Override to get from RootView.
  */
 public Dimension getMinimumSize()
 {
@@ -138,7 +154,7 @@ public Dimension getMinimumSize()
 }
 
 /**
- * Returns the preferred size.
+ * Override to get from RootView.
  */
 public Dimension getPreferredSize()
 {
@@ -148,7 +164,7 @@ public Dimension getPreferredSize()
 }
 
 /** 
- * Returns a tool tip string by asking deepest shape's tool.
+ * Override to get from RootView.
  */
 public String getToolTipText(MouseEvent anEvent)
 {
@@ -158,7 +174,7 @@ public String getToolTipText(MouseEvent anEvent)
 }
 
 /**
- * Sends an event to RootView.
+ * Sends DragGestureEvent to RootView.
  */
 public void dragGestureRecognized(DragGestureEvent anEvent)
 {
@@ -167,7 +183,7 @@ public void dragGestureRecognized(DragGestureEvent anEvent)
 }
 
 /**
- * Sends an event to RootView.
+ * Sends DropTargetEvent to RootView.
  */
 public void sendDropTargetEvent(DropTargetEvent anEvent, ViewEvent.Type aType)
 {

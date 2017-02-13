@@ -18,13 +18,13 @@ public class SWPopupWindowHpr  <T extends SWPopupWindowHpr.SnapPopupMenu> extend
 protected T createNative()  { return (T)new SnapPopupMenu(); }
 
 /**
- * Shows the popup at given point relative to given node.
+ * Shows the popup at given point relative to given view.
  */
 public void show(View aView, double aX, double aY)
 {
-    // Add PopupNode.RootView to JPopupMenu
-    PopupWindow pnode = getView(PopupWindow.class);
-    RootView rview = pnode.getRootView();
+    // Add PopupWindow.RootView to JPopupMenu
+    PopupWindow pwin = getView(PopupWindow.class);
+    RootView rview = pwin.getRootView();
     JComponent rviewNtv = rview.getNative(JComponent.class);
     get().add(rviewNtv);
     
@@ -43,7 +43,7 @@ public void show(View aView, double aX, double aY)
     if(pp!=null) pp.setSuppressNextClose(true);
 
     // Show popup and set RootView.Showing.
-    get().setFocusable(pnode.isFocusable());
+    get().setFocusable(pwin.isFocusable());
     get().show(viewRootNtv, x, y);
     setRootViewShowing(pp);
 }
@@ -68,11 +68,11 @@ public void setPrefSize()
 public Rect getPrefBounds(View aView, double aX, double aY)
 {
     // Get X and Y relative to aView.RootView
-    RootView view = aView!=null? aView.getRootView() : null;
-    JComponent nodeNtv = view!=null? view.getNative(JComponent.class) : null;
+    RootView rview = aView!=null? aView.getRootView() : null;
+    JComponent rviewNtv = rview!=null? rview.getNative(JComponent.class) : null;
     int x = (int)aX, y = (int)aY;
-    if(view!=null && view!=aView) {
-        Point pnt = aView.localToParent(view, x, y); x = (int)pnt.x; y = (int)pnt.y; }
+    if(rview!=null && rview!=aView) {
+        Point pnt = aView.localToParent(rview, x, y); x = (int)pnt.x; y = (int)pnt.y; }
     
     // Get to best size (why doesn't this happen automatically?)
     PopupWindow pview = getView(PopupWindow.class);
@@ -80,8 +80,8 @@ public Rect getPrefBounds(View aView, double aX, double aY)
     int bw = (int)Math.round(bs.getWidth()), bh = (int)Math.round(bs.getHeight());
     
     // If size not available at location, shrink size (because otherwise, window will automatically be moved)
-    if(view!=null) {
-        Dimension ss = SwingUtils.getScreenSizeAvailable(nodeNtv, x, y);
+    if(rview!=null) {
+        Dimension ss = SwingUtils.getScreenSizeAvailable(rviewNtv, x, y);
         bw = Math.min(bw, ss.width); bh = Math.min(bh,ss.height);
     }
     
@@ -94,13 +94,13 @@ public Rect getPrefBounds(View aView, double aX, double aY)
  */
 public void setRootViewShowing(SnapPopupMenu pp)
 {
-    PopupWindow pnode = getView(PopupWindow.class);
-    ViewUtils.setShowing(pnode, true);
+    PopupWindow pwin = getView(PopupWindow.class);
+    ViewUtils.setShowing(pwin, true);
     _pl = new PopupMenuListener() {
         public void popupMenuCanceled(PopupMenuEvent e) { }
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) { }
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-            ViewUtils.setShowing(pnode,false); get().removePopupMenuListener(_pl); _pl = null;
+            ViewUtils.setShowing(pwin,false); get().removePopupMenuListener(_pl); _pl = null;
             if(pp!=null) SwingUtilities.invokeLater(() -> pp.setVisible(false));
         }
     };

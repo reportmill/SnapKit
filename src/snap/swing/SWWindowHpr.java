@@ -42,7 +42,6 @@ protected void init()
     // Get native, window view and root view
     Window win = get();
     WindowView wview = getView();
-    RootView rview = wview.getRootView();
 
     // Add component listener to sync win bounds changes with WindowView/RootView
     win.addComponentListener(new ComponentAdapter() {
@@ -67,10 +66,7 @@ protected void init()
         // Set window attributes: Title, AlwaysOnTop, Modal and Resizable
         frame.setTitle(wview.getTitle());
         frame.setAlwaysOnTop(wview.isAlwaysOnTop()); //setIconImage(getIconImage());
-        frame.setResizable(wview.isResizable()); //if(_windowListener!=null) addWindowListener(_windowListener);
-    
-        // Install WindowView.RootView as ContentPane
-        frame.setContentPane(rview.getNative(JComponent.class));
+        frame.setResizable(wview.isResizable());
     }
     
     // Configure JDialog
@@ -78,18 +74,20 @@ protected void init()
     
         // Set window attributes: Title, AlwaysOnTop, Modal and Resizable
         frame.setTitle(wview.getTitle());
-        frame.setAlwaysOnTop(wview.isAlwaysOnTop()); //setIconImage(getIconImage());
+        frame.setAlwaysOnTop(wview.isAlwaysOnTop());
         frame.setModal(wview.isModal());
         frame.setResizable(wview.isResizable());
         if(wview.getType()==WindowView.TYPE_UTILITY)
             frame.getRootPane().putClientProperty("Window.style", "small");
         else if(wview.getType()==WindowView.TYPE_PLAIN)
             frame.setUndecorated(true);
-        //setStyle(getStyle()); //if(_windowListener!=null) addWindowListener(_windowListener);
-                
-        // Install WindowView.RootView as ContentPane
-        frame.setContentPane(rview.getNative(JComponent.class));
     }
+    
+    // Install RootView Native as ContentPane
+    RootView rview = wview.getRootView();
+    JComponent rviewNtv = rview.getNative(JComponent.class);
+    RootPaneContainer rpc = (RootPaneContainer)win;
+    rpc.setContentPane(rviewNtv);
     
     // Size window to root view
     win.pack();
@@ -204,9 +202,17 @@ protected void showingChanged()
     Window win = get(); WindowView wview = getView();
     boolean showing = get().isShowing();
     ViewUtils.setShowing(wview, showing);
-    if(showing) wview.getRootView().repaint();
 }
     
+/**
+ * Handles bounds changed.
+ */
+protected void boundsChanged()
+{
+    Window win = get(); WindowView wview = getView();
+    wview.setBounds(win.getX(),win.getY(),win.getWidth(),win.getHeight());
+}
+
 /**
  * Handles active changed.
  */
@@ -218,26 +224,6 @@ protected void activeChanged()
     ViewEvent.Type etype = active? ViewEvent.Type.WinActivate : ViewEvent.Type.WinDeactivate;
     if(wview.getEventAdapter().isEnabled(etype))
         sendWinEvent(null, etype);
-}
-
-/**
- * Handles bounds changed.
- */
-protected void boundsChanged()
-{
-    // Get window (just return if bogus height - seems pack() sometimes does this first)
-    Window win = get();
-    if(win.getHeight()<30) return;
-    
-    // Update WindowView bounds from native
-    WindowView wview = getView();
-    wview.setBounds(win.getX(),win.getY(),win.getWidth(),win.getHeight());
-    
-    // Update RootView bounds from native
-    RootView rview = wview.getRootView();
-    JComponent rviewNtv = rview.getNative(JComponent.class);
-    java.awt.Point pnt = SwingUtilities.convertPoint(rviewNtv, 0, 0, win);
-    rview.setBounds(pnt.x, pnt.y, rviewNtv.getWidth(), rviewNtv.getHeight());
 }
 
 /**
