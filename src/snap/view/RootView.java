@@ -12,14 +12,14 @@ import snap.gfx.*;
  */
 public class RootView extends ParentView {
     
-    // The window this root view is part of
-    WindowView               _win;
-    
     // The MenuBar
     MenuBar                  _mbar;
     
     // The content
     View                     _content;
+    
+    // The window used to show this root view on screen
+    WindowView               _win;
     
     // The focused view
     View                     _focusedView = this, _focusedViewLast;
@@ -62,11 +62,6 @@ public class RootView extends ParentView {
 public RootView()  { enableEvents(KeyEvents); setFocusable(true); }
 
 /**
- * Returns the window for this root view.
- */
-public WindowView getWindow()  { return _win; }
-
-/**
  * Returns the menubar.
  */
 public MenuBar getMenuBar()  { return _mbar; }
@@ -98,6 +93,22 @@ public void setContent(View aView)
     if(_content!=null) removeChild(_content); _content = aView;
     if(_content!=null) addChild(_content);
     firePropChange(Content_Prop, old, _content);
+}
+
+/**
+ * Returns the Window to manage this ViewOwner's window.
+ */
+public boolean isWindowSet()  { return _win!=null; }
+
+/**
+ * Returns the window for this root view.
+ */
+public WindowView getWindow()
+{
+    if(_win!=null) return _win;
+    WindowView win = new WindowView();
+    win.setRootView(this);
+    return _win = win;
 }
 
 /**

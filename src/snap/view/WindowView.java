@@ -19,8 +19,8 @@ public class WindowView extends ParentView {
     // The type
     String                    _type = TYPE_MAIN;
     
-    // The root pane
-    RootView                  _rpane;
+    // The root view
+    RootView                  _rview;
     
     // Whether the panel's window is always on top
     boolean                   _alwaysOnTop;
@@ -134,48 +134,18 @@ public void saveFrame()
 }
 
 /**
- * Returns the root pane.
+ * Returns the root view.
  */
-public RootView getRootView()
+public RootView getRootView()  { return _rview; }
+
+/**
+ * Sets the root view.
+ */
+protected void setRootView(RootView aRV)
 {
-    if(_rpane!=null) return _rpane;
-    _rpane = new RootView(); _rpane._win = this; _rpane.getHelper();
-    addChild(_rpane);
-    return _rpane;
-}
-
-/**
- * Returns the menu bar associated with this window.
- */
-public MenuBar getMenuBar()  { return getRootView().getMenuBar(); }
-
-/**
- * Sets the menu bar associated with this window.
- */
-public void setMenuBar(MenuBar aMenuBar)  { getRootView().setMenuBar(aMenuBar); }
-
-/**
- * Returns the content associated with this window.
- */
-public View getContent()  { return getRootView().getContent(); }
-
-/**
- * Sets the content associated with this window.
- */
-public void setContent(View aView)  { getRootView().setContent(aView); }
-
-/**
- * Returns the content associated with this window, with option to set from owner if not there yet.
- */
-public View getContent(boolean doSet)
-{
-    View content = getContent();
-    if(content==null && doSet) {
-        ViewOwner owner = getOwner(); if(owner==null) return null;
-        content = owner.getUI();
-        setContent(content);
-    }
-    return content;
+    _rview = aRV;
+    setOwner(aRV.getOwner());
+    addChild(aRV);
 }
 
 /**
@@ -250,8 +220,7 @@ public void show()
  */
 public void show(View aView, double aSX, double aSY)
 {
-    // Make sure content is set and window is initialized
-    getContent(true);
+    // Make window is initialized
     getHelper().checkInit();
     
     // If FrameSaveName provided, set Location from defaults and register to store future window moves
@@ -291,8 +260,7 @@ public void toFront()  { getHelper().toFront(); }
  */
 public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
 {
-    // Make sure content is set and window is initialized
-    getContent(true);
+    // Make window is initialized
     getHelper().checkInit();
     
     // Get rect for given node and point for given offsets

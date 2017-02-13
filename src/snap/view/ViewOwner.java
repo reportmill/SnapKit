@@ -15,9 +15,9 @@ public class ViewOwner implements EventListener {
     // The UI View
     View                      _ui;
     
-    // The Window
-    WindowView                _win;
-   
+    // The RootView
+    RootView                  _rview;
+    
     // Whether owner will fire events 
     boolean                   _sendEventDisabled;
     
@@ -162,8 +162,8 @@ public View getView(Object anObj)
         View cview = view instanceof ParentView? ((ParentView)view).getChild(name) : null;
         if(cview!=null) return cview;
         
-        // If view not found and Window.MenuBar is set, look in MenuBar
-        cview = isWindowSet() && getWindow().getMenuBar()!=null? getWindow().getMenuBar().getChild(name) : null;
+        // If view not found and RootView.MenuBar is set, look in MenuBar
+        cview = isRootViewSet() && getRootView().getMenuBar()!=null? getRootView().getMenuBar().getChild(name) : null;
         return cview;
     }
 
@@ -484,27 +484,36 @@ public void setFirstFocus(Object anObj)  { _firstFocus = anObj; }
 public void requestFocus(Object anObj)  { View view = getView(anObj); if(view!=null) view.requestFocus(); }
 
 /**
- * Returns the Window to manage this ViewOwner's window.
+ * Returns whether RootView has been created.
  */
-public boolean isWindowSet()  { return _win!=null; }
+public boolean isRootViewSet()  { return _rview!=null; }
 
 /**
- * Returns the Window to manage this ViewOwner's window.
+ * Returns the root view (creates, if needed).
  */
-public WindowView getWindow()
+public RootView getRootView()
 {
-    getUI(); // Without this Window gets reset!
-    if(_win!=null) return _win;
-    _win = createWindow();
-    _win.setOwner(this);
-    _win.getRootView().setOwner(this);
-    return _win;
+    if(_rview!=null) return _rview;
+    View ui = getUI();
+    RootView rview = createRootView();
+    rview.setContent(ui); rview.setOwner(this);
+    return _rview = rview;
 }
 
 /**
- * Creates the Window to manage this ViewOwner's window.
+ * Creates the RootView.
  */
-protected WindowView createWindow()  { return new WindowView(); }
+protected RootView createRootView()  { return new RootView(); }
+
+/**
+ * Returns the Window to manage this ViewOwner's window.
+ */
+public boolean isWindowSet()  { return isRootViewSet() && getRootView().isWindowSet(); }
+
+/**
+ * Returns the Window to manage this ViewOwner's window.
+ */
+public WindowView getWindow()  { return getRootView().getWindow(); }
 
 /**
  * Returns whether window is visible.
