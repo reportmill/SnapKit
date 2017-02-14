@@ -49,12 +49,26 @@ public Image getImage(int aWidth, int aHeight, boolean hasAlpha)  { return new J
 /**
  * Returns a sound for given source.
  */
-public SoundClip getSound(Object aSource)  { return new snap.javafx.SoundData(aSource); }
+public SoundClip getSound(Object aSource)
+{
+    try {
+        Class cls = Class.forName("snap.javafx.SoundData");
+        return (SoundClip)cls.getDeclaredConstructor(Object.class).newInstance(aSource);
+    }
+    catch(Exception e) { throw new RuntimeException(e); }
+}
 
 /**
  * Creates a sound for given source.
  */
-public SoundClip createSound()  { return new snap.javafx.SoundData(); }
+public SoundClip createSound()
+{
+    try {
+        Class cls = Class.forName("snap.javafx.SoundData");
+        return (SoundClip)cls.newInstance();
+    }
+    catch(Exception e) { throw new RuntimeException(e); }
+}
 
 /**
  * Returns a URL for given source.
