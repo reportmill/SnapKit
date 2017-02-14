@@ -186,12 +186,7 @@ public void removeSeg(int anIndex)
  */
 public void removeLastSeg()
 {
-    switch(getSegLast()) {
-        case CubicTo: _scount--; _pcount -= 3; _bounds = null; break;
-        case QuadTo: _scount--; _pcount -= 2; _bounds = null; break;
-        case MoveTo: case LineTo: _scount--; _pcount--; _bounds = null; break;
-        default: break;
-    }
+    Seg seg = getSegLast(); _pcount -= seg.getCount(); _scount--; _bounds = null;
 }
 
 /**

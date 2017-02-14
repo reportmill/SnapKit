@@ -2,11 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import static snap.gfx.HPos.LEFT;
-import static snap.gfx.HPos.RIGHT;
-import static snap.gfx.VPos.TOP;
-import static snap.gfx.VPos.BOTTOM;
-import static snap.gfx.VPos.BASELINE;
+import static snap.gfx.HPos.*;
+import static snap.gfx.VPos.*;
 
 /**
  * A custom class.
