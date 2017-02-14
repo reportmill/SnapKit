@@ -18,6 +18,29 @@ public class PathView extends View {
 public Path getPath()  { return _path!=null? _path : (_path=new Path()); }
 
 /**
+ * Sets the path.
+ */
+public void setPath(Path aPath)  { _path = aPath; }
+
+/**
+ * Replace the polygon's current path with a new path, adjusting the shape's bounds to match the new path.
+ */
+public void resetPath(Path newPath)
+{
+    // Get the transform to parent shape coords
+    //Transform toParentXF = getLocalToParent();  
+
+    // Set the new path and new size
+    setPath(newPath);
+    Rect bounds = newPath.getBounds();
+    setSizeLocal(bounds.getWidth(), bounds.getHeight());
+        
+    // Transform to parent for new x & y
+    //Rect boundsInParent = bounds.clone(); toParentXF.transform(boundsInParent);
+    //setFrameXY(boundsInParent.getXY());
+}
+
+/**
  * Override to return path as bounds shape.
  */
 public Shape getBoundsShape()  { return getPath().copyFor(getBoundsLocal()); }

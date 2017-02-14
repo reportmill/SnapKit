@@ -5,7 +5,7 @@ package snap.gfx;
 import snap.util.StringUtils;
 
 /**
- * A custom class.
+ * A class to represent a generic geometric shape (Line, Rect, Ellipse, etc.).
  */
 public abstract class Shape {
 

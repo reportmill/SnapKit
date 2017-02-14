@@ -9,7 +9,7 @@ import snap.util.*;
 /**
  * A custom class.
  */
-public class Path extends Shape implements XMLArchiver.Archivable {
+public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
 
     // The array of segments
     Seg          _segs[] = new Seg[8];
@@ -25,6 +25,13 @@ public class Path extends Shape implements XMLArchiver.Archivable {
     
     // The bounds
     Rect         _bounds;
+    
+    // Constants for segements
+    public static final PathIter.Seg MoveTo = PathIter.Seg.MoveTo;
+    public static final PathIter.Seg LineTo = PathIter.Seg.LineTo;
+    public static final PathIter.Seg QuadTo = PathIter.Seg.QuadTo;
+    public static final PathIter.Seg CubicTo = PathIter.Seg.CubicTo;
+    public static final PathIter.Seg Close = PathIter.Seg.Close;
 
 /**
  * Creates a new path.
@@ -101,6 +108,21 @@ public void arcTo(double cx, double cy, double x, double y)
 public void close() { addSeg(Seg.Close); }
 
 /**
+ * Returns the number of segments.
+ */
+public int getSegCount()  { return _scount; }
+
+/**
+ * Returns the individual segement at index.
+ */
+public Seg getSeg(int anIndex)  { return _segs[anIndex]; }
+
+/**
+ * Returns the last segement.
+ */
+public Seg getSegLast()  { return _scount>0? _segs[_scount-1] : null; }
+
+/**
  * Adds a segment.
  */
 private void addSeg(Seg aSeg)
@@ -110,12 +132,118 @@ private void addSeg(Seg aSeg)
 }
 
 /**
+ * Removes an element, reconnecting the elements on either side of the deleted element.
+ */
+public void removeSeg(int anIndex) 
+{
+    // range check
+    int scount = getSegCount();
+    if(anIndex<0 || anIndex>=scount)
+        throw new IndexOutOfBoundsException("PathViewUtils.removeSeg: index out of bounds: " + anIndex);
+    
+    // If this is the last element, nuke it
+    if(anIndex==scount-1) {
+        removeLastSeg();
+        if(scount>0 && getSeg(scount-1)==Seg.MoveTo) // but don't leave stray moveto sitting around
+            removeLastSeg();
+        return;
+    }
+        
+    // Get some info
+    int pindex = getSegPointIndex(anIndex);  // get the index to the first point for this element
+    Seg seg = getSeg(anIndex);            // the type of element (MOVETO,LINETO,etc)
+    int nPts = seg.getCount();                 // and how many points are associated with this element
+    int nDeletedPts = nPts;                  // how many points to delete from the points array
+    int nDeletedSegs = 1;                  // how many elements to delete (usually 1)
+    int deleteIndex = anIndex;             // index to delete from element array (usually same as original index)
+    
+    // delete all poins but the last of the next segment
+    if(seg==Seg.MoveTo) {
+        nDeletedPts = getSeg(anIndex+1).getCount();
+        ++deleteIndex;  // delete the next element and preserve the MOVETO
+    }
+    
+    else {
+        // If next element is a curveTo, we are merging 2 curves into one, so delete points such that slopes
+        // at endpoints of new curve match the starting and ending slopes of the originals.
+        if(getSeg(anIndex+1)==Seg.CubicTo)
+            pindex++;
+        
+        // Deleting the only curve or a line in a subpath can leave a stray moveto. If that happens, delete it, too
+        else if (getSeg(anIndex-1)==Seg.MoveTo && getSeg(anIndex+1)==Seg.MoveTo) {
+            ++nDeletedSegs; --deleteIndex; ++nDeletedPts; --pindex; }
+    }
+    
+    // Remove segement and points
+    System.arraycopy(_segs, deleteIndex+nDeletedSegs, _segs, deleteIndex, _scount-deleteIndex-nDeletedSegs);
+    _scount -= nDeletedSegs;
+    System.arraycopy(_points, (pindex+nDeletedPts)*2, _points, pindex*2, (_pcount-pindex-nDeletedPts)*2);
+    _pcount -= nDeletedPts; _bounds = null;
+}
+    
+/**
+ * Removes the last element from the path.
+ */
+public void removeLastSeg()
+{
+    switch(getSegLast()) {
+        case CubicTo: _scount--; _pcount -= 3; _bounds = null; break;
+        case QuadTo: _scount--; _pcount -= 2; _bounds = null; break;
+        case MoveTo: case LineTo: _scount--; _pcount--; _bounds = null; break;
+        default: break;
+    }
+}
+
+/**
+ * Returns the number of points.
+ */
+public int getPointCount()  { return _pcount; }
+
+/**
+ * Returns individual point at given index.
+ */
+public Point getPoint(int anIndex)  { return new Point(_points[anIndex*2], _points[anIndex*2+1]); }
+
+/**
+ * Sets the individual point at given index.
+ */
+public void setPoint(int anIndex, double aX, double aY)
+{
+    _points[anIndex*2] = aX;
+    _points[anIndex*2+1] = aY;
+}
+
+/**
+ * Returns last path point.
+ */
+public Point getPointLast()  { return _pcount>0? getPoint(_pcount-1) : null; }
+
+/**
  * Adds a point.
  */
 private void addPoint(double x, double y)
 {
     if(_pcount*2+1>_points.length) _points = Arrays.copyOf(_points, _points.length*2);
     _points[_pcount*2] = x; _points[_pcount*2+1] = y; _pcount++;
+}
+
+/**
+ * Returns the point index for a given segment index.
+ */
+public int getSegPointIndex(int anIndex)
+{
+    int pindex = 0; for(int i=0; i<anIndex; i++) pindex += getSeg(i).getCount();
+    return pindex;
+}
+
+/**
+ * Returns the element index for the given point index.
+ */
+public int getSegIndexForPointIndex(int anIndex)
+{
+    int sindex = 0;
+    for(int pindex=0; pindex<=anIndex; sindex++) pindex += getSeg(sindex).getCount();
+    return sindex - 1;
 }
 
 /**
@@ -152,6 +280,18 @@ public void clear()  { _scount = _pcount = 0; _bounds = null; }
  * Returns a path iterator.
  */
 public PathIter getPathIter(Transform aTrans)  { return new PathPathIter(this, aTrans); }
+
+/**
+ * Standard clone implementation.
+ */
+public Path clone()
+{
+    Path copy; try { copy = (Path)super.clone(); }
+    catch(Exception e) { throw new RuntimeException(e); }
+    copy._segs = Arrays.copyOf(_segs, _segs.length);
+    copy._points = Arrays.copyOf(_points, _points.length);
+    return copy;
+}
 
 /**
  * XML archival.
