@@ -119,7 +119,7 @@ public static String trimEnd(CharSequence aString)
 /**
  * Returns the result of deleting from the given string any occurrence of the search string.
  */
-public static String delete(String aString, String aSearch)  { return aString.replace(aSearch, ""); }
+public static String delete(String aString, String aSearch)  { return replace(aString, aSearch, ""); }
 
 /**
  * Returns the result of deleting from the given string any occurrence of the search string (ignores case).
