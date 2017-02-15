@@ -54,7 +54,7 @@ public void propertyChange(PropChange anEvent)  { resetLater(); }
 /**
  * Create UI.
  */
-public View createUI()
+protected View createUI()
 {
     // Create ToolBar
     _toolBarPane = (ChildView)super.createUI();
@@ -107,7 +107,7 @@ protected void initUI()
 /**
  * Reset UI.
  */
-public void resetUI()
+protected void resetUI()
 {    
     // Reset FontSizeText
     setViewValue("FontSizeText", getTextView().getFont().getSize());
@@ -119,7 +119,7 @@ public void resetUI()
 /**
  * Respond to UI controls.
  */
-public void respondUI(ViewEvent anEvent)
+protected void respondUI(ViewEvent anEvent)
 {
     // Handle SaveButton
     if(anEvent.equals("SaveButton")) saveChanges();

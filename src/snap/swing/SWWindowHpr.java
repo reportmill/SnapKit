@@ -43,23 +43,6 @@ protected void init()
     Window win = get();
     WindowView wview = getView();
 
-    // Add component listener to sync win bounds changes with WindowView/RootView
-    win.addComponentListener(new ComponentAdapter() {
-        public void componentMoved(ComponentEvent e) { boundsChanged(); }
-        public void componentResized(ComponentEvent e) { boundsChanged(); }
-        public void componentShown(ComponentEvent e) { showingChanged(); }
-        public void componentHidden(ComponentEvent e) { showingChanged(); }
-    });
-    
-    // Add WindowListener to dispatch window events
-    win.addWindowListener(new WindowAdapter() {
-        public void windowActivated(WindowEvent anEvent)  { activeChanged(); }
-        public void windowDeactivated(WindowEvent anEvent)  { activeChanged(); }
-        public void windowOpened(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinOpen); }
-        public void windowClosing(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinClose); }
-        public void windowClosed(WindowEvent anEvent)  { }
-    });
-        
     // Configure JFrame
     if(win instanceof JFrame) { JFrame frame = (JFrame)get();
         
@@ -92,6 +75,23 @@ protected void init()
     // Size window to root view
     win.pack();
     boundsChanged();
+
+    // Add component listener to sync win bounds changes with WindowView/RootView
+    win.addComponentListener(new ComponentAdapter() {
+        public void componentMoved(ComponentEvent e) { boundsChanged(); }
+        public void componentResized(ComponentEvent e) { boundsChanged(); }
+        public void componentShown(ComponentEvent e) { showingChanged(); }
+        public void componentHidden(ComponentEvent e) { showingChanged(); }
+    });
+    
+    // Add WindowListener to dispatch window events
+    win.addWindowListener(new WindowAdapter() {
+        public void windowActivated(WindowEvent anEvent)  { activeChanged(); }
+        public void windowDeactivated(WindowEvent anEvent)  { activeChanged(); }
+        public void windowOpened(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinOpen); }
+        public void windowClosing(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinClose); }
+        public void windowClosed(WindowEvent anEvent)  { }
+    });
 }
 
 /**
