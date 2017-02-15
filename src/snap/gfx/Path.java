@@ -205,7 +205,7 @@ public Point getPoint(int anIndex)  { return new Point(_points[anIndex*2], _poin
 public void setPoint(int anIndex, double aX, double aY)
 {
     _points[anIndex*2] = aX;
-    _points[anIndex*2+1] = aY;
+    _points[anIndex*2+1] = aY; _bounds = null;
 }
 
 /**
@@ -286,6 +286,22 @@ public Path clone()
     copy._segs = Arrays.copyOf(_segs, _segs.length);
     copy._points = Arrays.copyOf(_points, _points.length);
     return copy;
+}
+
+/**
+ * Standard equals implementation.
+ */
+public boolean equals(Object anObj)
+{
+    // Check identity & class and get other path
+    if(anObj==this) return true;
+    Path path = anObj instanceof Path? (Path)anObj : null; if(path==null) return false;
+    
+    // Check ElementCount, WindingRule, Elements and Points
+    if(path._scount!=_scount || path._pcount!=_pcount) return false;
+    if(!Arrays.equals(path._segs, _segs)) return false;
+    if(!Arrays.equals(path._points, _points)) return false;
+    return true; // Return true since all checks passed
 }
 
 /**
