@@ -213,6 +213,16 @@ public boolean isRich()  { return !getRichText().isSingleStyle(); }
 public void setRich(boolean aValue)  { getRichText().setSingleStyle(!aValue); }
 
 /**
+ * Returns whether TextView is plain text (not rich).
+ */
+public boolean isPlainText()  { return getRichText().isSingleStyle(); }
+
+/**
+ * Sets whether text supports multiple styles.
+ */
+public void setPlainText(boolean aValue)  { getRichText().setSingleStyle(aValue); }
+
+/**
  * Returns whether text view fires action on return.
  */
 public boolean isFireActionOnReturn()  { return _fireActionOnReturn; }
@@ -342,7 +352,7 @@ protected void scrollSelToVisible()
  */
 public Font getFont()
 {
-    if(!isRich()) return _font!=null? _font : getDefaultFont();
+    if(isPlainText()) return _font!=null? _font : getDefaultFont();
     return getInputStyle().getFont();
 }
 
@@ -352,14 +362,14 @@ public Font getFont()
 public void setFont(Font aFont)
 {
     setInputStyleValue(TextStyle.FONT_KEY, aFont);
-    if(!isRich()) _font = aFont.equals(getDefaultFont())? null : aFont;
+    if(isPlainText()) _font = aFont.equals(getDefaultFont())? null : aFont;
 }
 
 // Bogus font to work with fonts normally when not rich
 Font _font;
 protected void checkFont()
 {
-    if(isRich()) return;
+    if(!isPlainText()) return;
     if(!getFont().equals(getInputStyle().getFont())) setInputStyleValue(TextStyle.FONT_KEY, getFont());
 }
 
@@ -986,6 +996,11 @@ protected void undoerAddPropertyChange(PropChange anEvent)
 {
     // Get undoer (just return if null or disabled)
     Undoer undoer = getUndoer(); if(undoer==null || !undoer.isEnabled()) return;
+    String pname = anEvent.getPropertyName();
+    
+    // If PlainText Style_Prop or LineStyle_Prop, just return
+    if(isPlainText() && (pname==RichText.Style_Prop || pname==RichText.LineStyle_Prop))
+        return;
     
     // Get ActiveUndoSet - if no previous changes, set UndoSelection
     UndoSet activeUndoSet = undoer.getActiveUndoSet();
