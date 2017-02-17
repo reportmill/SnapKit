@@ -10,7 +10,7 @@ import java.util.*;
  *   "An Algorithm for Automatically Fitting Digitized Curves", by Philip J. Schneider
  *   "Graphics Gems", 1990 - Andrew S. Glassner, ed.
  */
-public class PathFitCurves {
+class PathFitCurves {
 
 /**
  * Takes a path with a bunch of line-to segments and replaces them with curves.

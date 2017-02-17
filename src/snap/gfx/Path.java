@@ -262,6 +262,11 @@ public void append(PathIter aPI)
 public void append(Shape aShape)  { append(aShape.getPathIter(null)); }
 
 /**
+ * Fits the path points to a curve starting at the given point index.
+ */
+public void fitToCurve(int anIndex)  { PathFitCurves.fitCurveFromPointIndex(this, anIndex); }
+
+/**
  * Returns the bounds.
  */
 public Rect getBounds()  { return _bounds!=null? _bounds : (_bounds=super.getBounds()); }
