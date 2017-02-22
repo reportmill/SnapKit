@@ -83,11 +83,11 @@ public Color(double c, double m, double y, double k, double a)  { _red =1-c; _gr
 public Color(String aHexString)
 {
     int start = aHexString.charAt(0)=='#'? 1 : 0;
-    _red = Integer.decode("0x" + aHexString.substring(start, start + 2)).intValue()/255f;
-    _green = Integer.decode("0x" + aHexString.substring(start + 2, start + 4)).intValue()/255f;
-    _blue = Integer.decode("0x" + aHexString.substring(start + 4, start + 6)).intValue()/255f;
+    _red = Integer.decode("0x" + aHexString.substring(start, start + 2))/255f;
+    _green = Integer.decode("0x" + aHexString.substring(start + 2, start + 4))/255f;
+    _blue = Integer.decode("0x" + aHexString.substring(start + 4, start + 6))/255f;
     if(aHexString.length() >= start + 8)
-        _alpha = Integer.decode("0x" + aHexString.substring(start + 6, start + 8)).intValue()/255f;
+        _alpha = Integer.decode("0x" + aHexString.substring(start + 6, start + 8))/255f;
 }
 
 /**
@@ -353,10 +353,10 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
 
     String hex = anElement.getAttributeValue("value");
     int start = hex.charAt(0)=='#'? 1 : 0;
-    _red = Integer.decode("0x" + hex.substring(start, start + 2)).intValue()/255f;
-    _green = Integer.decode("0x" + hex.substring(start + 2, start + 4)).intValue()/255f;
-    _blue = Integer.decode("0x" + hex.substring(start + 4, start + 6)).intValue()/255f;
-    if(hex.length()>=start+8) _alpha = Integer.decode("0x" + hex.substring(start + 6, start + 8)).intValue()/255f;
+    _red = Integer.decode("0x" + hex.substring(start, start + 2))/255f;
+    _green = Integer.decode("0x" + hex.substring(start + 2, start + 4))/255f;
+    _blue = Integer.decode("0x" + hex.substring(start + 4, start + 6))/255f;
+    if(hex.length()>=start+8) _alpha = Integer.decode("0x" + hex.substring(start + 6, start + 8))/255f;
     return this;
 }
 
