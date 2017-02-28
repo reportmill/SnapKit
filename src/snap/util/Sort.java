@@ -1,9 +1,8 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.data;
+package snap.util;
 import java.util.*;
-import snap.util.*;
 
 /**
  * This class provides a basic description for comparison and sorting with a simple key and order (ascending or

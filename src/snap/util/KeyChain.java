@@ -3,7 +3,6 @@
  */
 package snap.util;
 import java.util.*;
-import snap.data.Sort;
 
 /**
  * This class evaluates a string expression on a given object: RMKeyChain.getValue(object, expression).
