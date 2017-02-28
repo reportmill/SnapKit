@@ -3,7 +3,6 @@
  */
 package snap.web;
 import java.util.List;
-import snap.data.DataType;
 
 /**
  * The response.

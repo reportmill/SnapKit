@@ -1,11 +1,12 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.util;
+package snap.data;
 import java.io.File;
 import java.util.*;
 import snap.data.*;
 import snap.parse.*;
+import snap.util.*;
 
 /**
  * A class for reading file of comma separated values, or really any separated values.

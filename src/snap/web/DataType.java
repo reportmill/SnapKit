@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.data;
+package snap.web;
 import snap.util.FilePathUtils;
 
 /**

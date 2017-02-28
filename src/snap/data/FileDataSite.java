@@ -2,17 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.data;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import snap.util.CSVReader;
-import snap.util.ListUtils;
-import snap.util.SnapUtils;
-import snap.util.StringUtils;
+import java.util.*;
+import snap.util.*;
 import snap.web.WebFile;
 
 /**

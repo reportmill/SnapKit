@@ -4,7 +4,6 @@
 package snap.web;
 import java.io.File;
 import java.util.*;
-import snap.data.DataType;
 import snap.util.*;
 
 /**

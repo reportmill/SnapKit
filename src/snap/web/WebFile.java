@@ -5,7 +5,6 @@ package snap.web;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import snap.data.DataType;
 import snap.util.*;
 
 /**
