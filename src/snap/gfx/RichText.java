@@ -688,10 +688,10 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
         
         // Unarchive string
         if(e.getName().equals("string")) {
-            String string = e.getValue(); if(string==null) break;
+            String str = e.getValue(); if(str==null || str.length()==0) continue;
             int len = length();
-            addChars(string, style, len);
-            if(lstyle!=null) { setLineStyle(lstyle, len, len+string.length()); lstyle = null; }
+            addChars(str, style, len);
+            if(lstyle!=null) { setLineStyle(lstyle, len, len+str.length()); lstyle = null; }
         }
         
         // Unarchive font element
