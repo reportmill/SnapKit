@@ -46,28 +46,28 @@ private static class XMLTokenizer extends Tokenizer {
     /** Called to return the value of an element and update the char index. */
     protected String getContent()
     {
-        // Skip whitespace
-        skipWhiteSpace();
+        // Mark content start and skip to next element-start char
+        int start = _charIndex;
+        while(!isNext("<") && _charIndex<length())
+            _charIndex++;
         
-        // Handle CDATA: Gobble until close
+        // Handle CDATA: Gobble until close and return string
         if(isNext("<![CDATA[")) {
             _charIndex += "<![CDATA[".length(); if(Character.isWhitespace(_charIndex)) _charIndex++;
-            StringBuffer sb = new StringBuffer();
-            while(!isNext("]]>"))
-                sb.append(charAt(_charIndex++));
+            start = _charIndex;
+            while(!isNext("]]>")) _charIndex++;
+            String str = getInput().subSequence(start, _charIndex).toString();
             _charIndex += "]]>".length();
-            return sb.toString();
+            return str;
         }
         
-        // If next char is '<', just return
-        if(isNext("<"))
+        // If next char isn't close tag, return null (assumes we hit child element instead of text content)
+        if(!isNext("</"))
             return null;
         
-        // Handle Text: Gobble until next element
-        StringBuffer sb = new StringBuffer();
-        while(!isNext("<") && _charIndex<length())
-            sb.append(charAt(_charIndex++));
-        return decodeXMLString(sb.toString());
+        // Return string for content
+        String str = getInput().subSequence(start, _charIndex).toString();
+        return decodeXMLString(str);
     }
 
     /** Returns whether the given string is up next. */
