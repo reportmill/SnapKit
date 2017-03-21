@@ -228,6 +228,17 @@ public void setTime(int aTime, String aKey)
 /**
  * Returns the interpolated value.
  */
+public Object interpolate(Object aVal1, Object aVal2)
+{
+    double time = getTime(), start = getStart(), end = getEnd();
+    if(time<=start) return aVal1;
+    if(time>=end) return aVal2;
+    return interpolate(aVal1, aVal2, (time-start)/(end - start));
+}
+
+/**
+ * Returns the interpolated value.
+ */
 public Object interpolate(Object aVal1, Object aVal2, double aRatio)
 {
     if(aVal1 instanceof Number && aVal2 instanceof Number) {
