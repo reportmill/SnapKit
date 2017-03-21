@@ -182,15 +182,22 @@ public static class AttributeHandler extends ParseHandler <XMLAttribute> {
 /** Converts an XML string to plain. This implementation is a bit bogus. */
 private static String decodeXMLString(String aStr)
 {
+    // If no entity refs, just return
     if(aStr.indexOf('&')<0) return aStr;
+    
+    // Do common entity ref replacements
     aStr = aStr.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">");
     aStr = aStr.replace("&quot;", "\"").replace("&apos;", "'");
-    int start = 0; while(aStr.indexOf("&#", start)>=0) { start += 2;
-        int ind0 = aStr.indexOf("&#"), ind1 = aStr.indexOf(";", ind0); if(ind1<0) continue;
-        String str0 = aStr.substring(ind0, ind1+1), str1 = str0.substring(2,str0.length()-1);
+    
+    // Iterate over string to find numeric/hex references and replace with char
+    for(int start=aStr.indexOf("&#"); start>=0;start=aStr.indexOf("&#",start)) {
+        int end = aStr.indexOf(";", start); if(end<0) continue;
+        String str0 = aStr.substring(start, end+1), str1 = str0.substring(2,str0.length()-1);
         int val = Integer.valueOf(str1); String str2 = String.valueOf((char)val);
         aStr = aStr.replace(str0, str2);
     }
+    
+    // Return string
     return aStr;
 }
 
