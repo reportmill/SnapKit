@@ -11,9 +11,6 @@ import snap.view.*;
  */
 public class SnapActor extends ImageView {
 
-    // The name
-    String           _name;
-    
     // The actor pen
     SnapPen          _pen = new SnapPen();
     
@@ -22,6 +19,9 @@ public class SnapActor extends ImageView {
  */
 public SnapActor()
 {
+    if(getClass()!=SnapActor.class)
+        setName(getClass().getSimpleName());
+        
     Image img = Image.get(getClass(), getName() + ".png");
     if(img==null) img = Image.get(getClass(), "images/" + getName() + ".png");
     if(img!=null) {
@@ -29,11 +29,6 @@ public SnapActor()
         setSize(img.getWidth(),img.getHeight());
     }
 }
-
-/**
- * Returns the actors name.
- */
-public String getName()  { return _name!=null? _name : (_name=getClass().getSimpleName()); }
 
 /**
  * Returns the center X.
