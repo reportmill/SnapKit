@@ -67,6 +67,10 @@ protected void addChild(View aChild, int anIndex)
     _children = ArrayUtils.add(_children, aChild, anIndex); _managed = null;
     relayout(); relayoutParent(); setNeedsLayoutDeep(true); repaint();
     
+    // If this shape has PropChangeListeners, start listening to children as well
+    if(_pcs.hasDeepListeners()) {
+        aChild.addPropChangeListener(this); aChild.addDeepChangeListener(this); }
+    
     // Fire property change
     firePropChange(Child_Prop, null, aChild, anIndex); //relayout(); repaint();
 }
@@ -404,6 +408,20 @@ public XMLElement toXML(XMLArchiver anArchiver)
     XMLElement e = toXMLView(anArchiver); // Archive shape
     toXMLChildren(anArchiver, e); // Archive children
     return e; // Return xml element
+}
+
+/**
+ * Override to add this view as change listener to children on first call.
+ */
+public void addDeepChangeListener(DeepChangeListener aDCL)
+{
+    boolean first = !_pcs.hasDeepListeners();
+    super.addDeepChangeListener(aDCL);
+    
+    // If first listener, add for children
+    if(first)
+        for(View child : getChildren()) {
+            child.addPropChangeListener(this); child.addDeepChangeListener(this); }
 }
 
 /**

@@ -4,7 +4,7 @@
 package snap.util;
 
 /**
- * A custom class.
+ * A class to easily add propery change support to a class (and DeepChange support).
  */
 public class PropChangeSupport {
     
@@ -13,6 +13,9 @@ public class PropChangeSupport {
     
     // The PropChangeListener
     PropChangeListener  _pcl;
+    
+    // The DeepChangeListener
+    DeepChangeListener  _dcl;
     
     // An empty PropChangeSupport
     public static final PropChangeSupport EMPTY = new PropChangeSupport("");
@@ -99,6 +102,39 @@ public void firePropChange(PropChange anEvent)
 }
 
 /**
+ * Returns whether there are deep listeners.
+ */
+public boolean hasDeepListeners()  { return _dcl!=null; }
+
+/**
+ * Adds a DeepChangeListener.
+ */
+public void addDeepChangeListener(DeepChangeListener aLsnr)
+{
+    if(_dcl==null) _dcl = aLsnr;
+    else if(_dcl instanceof SplitDCL) ((SplitDCL)_dcl).add(aLsnr);
+    else _dcl = new SplitDCL(_dcl, aLsnr);
+}
+
+/**
+ * Removes a DeepChangeListener.
+ */
+public void removeDeepChangeListener(DeepChangeListener aLsnr)
+{
+    if(_dcl==aLsnr) _dcl = null;
+    else if(_dcl instanceof SplitDCL) _dcl = ((SplitDCL)_dcl).remove(aLsnr);
+}
+
+/**
+ * Sends the deep change.
+ */
+public void fireDeepChange(PropChangeListener aSrc, PropChange anEvent)
+{
+    if(hasDeepListeners())
+        _dcl.deepChange(aSrc, anEvent);
+}
+
+/**
  * A PropChangeListener implementation to restrict a PCL to a given prop name.
  */
 private static class NamedPCL implements PropChangeListener {
@@ -156,6 +192,40 @@ private static class SplitPCL implements PropChangeListener {
             if(npcl.pcl==aPCL && npcl.prop.equals(aProp)) return _pc1; }
         if(_pc1 instanceof SplitPCL) _pc1 = ((SplitPCL)_pc1).remove(aPCL);
         if(_pc2 instanceof SplitPCL) _pc2 = ((SplitPCL)_pc2).remove(aPCL);
+        return this;
+    }
+}
+
+/**
+ * A DeepChangeListener implementation to multiplex property change call.
+ */
+private static class SplitDCL implements DeepChangeListener {
+    
+    // The two PCLs
+    DeepChangeListener _pc1, _pc2;
+    
+    /** Create new SplitDCL. */
+    public SplitDCL(DeepChangeListener aPC1, DeepChangeListener aPC2)  { _pc1 = aPC1; _pc2 = aPC2; }
+    
+    /** Send DeepChange. */
+    public void deepChange(PropChangeListener aSrc, PropChange aPC)
+    {
+        _pc1.deepChange(aSrc, aPC); _pc2.deepChange(aSrc, aPC);
+    }
+    
+    /** Add. */
+    public void add(DeepChangeListener aPCL)
+    {
+        if(_pc2 instanceof SplitDCL) ((SplitDCL)_pc2).add(aPCL);
+        else _pc2 = new SplitDCL(_pc2, aPCL);
+    }
+    
+    /** Remove. */
+    public DeepChangeListener remove(DeepChangeListener aPCL)
+    {
+        if(_pc1==aPCL) return _pc2; if(_pc2==aPCL) return _pc1;
+        if(_pc1 instanceof SplitDCL) _pc1 = ((SplitDCL)_pc1).remove(aPCL);
+        if(_pc2 instanceof SplitDCL) _pc2 = ((SplitDCL)_pc2).remove(aPCL);
         return this;
     }
 }

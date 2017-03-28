@@ -9,7 +9,7 @@ import snap.util.*;
 /**
  * A custom class.
  */
-public class View implements XMLArchiver.Archivable {
+public class View implements XMLArchiver.Archivable, PropChangeListener, DeepChangeListener {
 
     // The name of this view
     String          _name;
@@ -1878,6 +1878,37 @@ protected void firePropChange(String aProp, Object oldVal, Object newVal, int an
  * Fires a given property change.
  */
 protected void firePropChange(PropChange aPC)  { _pcs.firePropChange(aPC); }
+
+/**
+ * Add DeepChange listener.
+ */
+public void addDeepChangeListener(DeepChangeListener aDCL)
+{
+    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+    _pcs.addDeepChangeListener(aDCL);
+}
+
+/**
+ * Remove DeepChange listener.
+ */
+public void removeDeepChangeListener(DeepChangeListener aPCL)  { _pcs.removeDeepChangeListener(aPCL); }
+
+/**
+ * Property change listener implementation to forward changes on to deep listeners.
+ */
+public void propertyChange(PropChange anEvent)
+{
+    // Propagate to this view's DeepChangeListeners (if present)
+    _pcs.fireDeepChange(this, anEvent);
+}
+
+/**
+ * Deep property change listener implementation to forward to this View's deep listeners.
+ */
+public void deepChange(PropChangeListener aLsnr, PropChange anEvent)
+{
+    _pcs.fireDeepChange(aLsnr, anEvent);
+}
 
 /**
  * Returns the event adapter for view.

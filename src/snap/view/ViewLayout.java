@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import java.util.*;
 import snap.gfx.*;
 
 /**
@@ -632,22 +633,25 @@ public static class SpringLayout extends ViewLayout {
     // The last set size
     double _ow, _oh;
     
+    // The SpringInfos for children
+    Map <Object,SpringInfo> _sinfos = new HashMap();
+    
     /** Creates a new SpringLayout for given parent. */
     public SpringLayout(ParentView aPar)  { setParent(aPar); }
     
     /** Returns spring info for child. */
-    protected SpringInfo getSpringInfo(View aChild)  { return (SpringInfo)aChild.getProp("SpringInfo"); }
+    protected SpringInfo getSpringInfo(View aChild)  { return _sinfos.get(aChild); }
     
     /** Adds spring info for child. */
     protected void addSpringInfo(View aChild)
     {
         double x = aChild.getX(), y = aChild.getY(), w = aChild.getWidth(), h = aChild.getHeight();
         SpringInfo sinfo = new SpringInfo(x,y,w,h,_parent.getWidth(),_parent.getHeight());
-        aChild.setProp("SpringInfo", sinfo); _ow = _oh = 0;
+        _sinfos.put(aChild, sinfo); _ow = _oh = 0;
     }
     
     /** Removes spring info for child. */
-    protected void removeSpringInfo(View aChild)  { aChild.setProp("SpringInfo", null); _ow = _oh = 0; }
+    protected void removeSpringInfo(View aChild)  { _sinfos.remove(aChild); _ow = _oh = 0; }
     
     /** Returns preferred width of layout. */
     public double getPrefWidth(double aH)  { return _parent.getWidth(); }
