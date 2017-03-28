@@ -138,7 +138,7 @@ public void acceptDrag()
 public void dropComplete()  { getEvent(DropTargetDropEvent.class).dropComplete(true); }
 
 /** Returns the drag Clipboard for this event. */
-public Clipboard getDragboard()  { return new SwingClipboard(getView(), this); }
+public Clipboard getDragboard()  { return SwingClipboard.getDrag(this); }
 
 /**
  * Returns a ViewEvent at new point.

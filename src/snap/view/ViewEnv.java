@@ -110,6 +110,11 @@ public Object getUISource(Class aClass)  { throw notImpl("getUIFile"); }
 public Clipboard getClipboard()  { throw notImpl("getClipboard"); }
 
 /**
+ * Returns the clipboard for dragging.
+ */
+public Clipboard getClipboardDrag()  { throw notImpl("getClipboardDrag"); }
+
+/**
  * Returns a FileChooser.
  */
 public FileChooser getFileChooser()  { throw notImpl("getFileChooser"); }

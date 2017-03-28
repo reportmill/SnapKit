@@ -15,9 +15,6 @@ public class ViewUtils {
     // Booleans for input event state and modifiers
     static boolean          _altDown, _cntrDown, _metaDown, _mouseDown, _shiftDown, _shortcutDown;
 
-    // The current active Dragboard
-    static Clipboard        _activeDragboard;
-    
     // Color constants
     private static Color BACK_FILL = new Color("#F1F1F1");
     private static Color BACK_DARK_FILL = new Color("#C0C0C0");
@@ -134,11 +131,6 @@ public static void setFocused(View aView, boolean aValue)  { aView.setFocused(aV
  * Process an event.
  */
 public static void processEvent(View aView, ViewEvent anEvent)  { aView.processEvent(anEvent); }
-
-/**
- * Set active Dragboard.
- */
-public static void setActiveDragboard(Clipboard aDragboard)  { _activeDragboard = aDragboard; }
 
 /**
  * Returns the align x factor.

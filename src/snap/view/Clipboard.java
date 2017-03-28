@@ -132,8 +132,8 @@ public abstract void startDrag();
 public static Clipboard get()  { return ViewEnv.getEnv().getClipboard(); }
 
 /**
- * Returns the active DragClipboard.
+ * Returns the clipboard for drag and drop.
  */
-public static Clipboard getDrag()  { return ViewUtils._activeDragboard; }
+public static Clipboard getDrag()  { return ViewEnv.getEnv().getClipboardDrag(); }
 
 }

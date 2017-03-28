@@ -11,9 +11,6 @@ import snap.web.*;
  */
 public class SwingViewEnv extends ViewEnv {
     
-    // The clipboard
-    SwingClipboard            _clipboard;
-    
     // The timer for runIntervals and runDelayed
     java.util.Timer           _timer = new java.util.Timer();
     
@@ -94,7 +91,12 @@ public Object getUISource(Class aClass)
 /**
  * Returns the system clipboard.
  */
-public Clipboard getClipboard()  { return _clipboard!=null? _clipboard : (_clipboard=SwingClipboard.get()); }
+public Clipboard getClipboard()  { return SwingClipboard.get(); }
+
+/**
+ * Returns the clipboard for drag and drop.
+ */
+public Clipboard getClipboardDrag()  { return SwingClipboard.getDrag(null); }
 
 /**
  * Returns a FileChooser.

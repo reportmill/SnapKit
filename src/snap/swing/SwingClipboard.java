@@ -36,31 +36,26 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
     static DataFlavor   _imageFlavor = new DataFlavor("text/image", "Snap Image");
     static DataFlavor   _jpegFlavor = new DataFlavor("image/jpeg", "JPEG Image Data");
     
-    // The shared clipboard
+    // The shared clipboards for system and drag
     static SwingClipboard  _shared = new SwingClipboard();
+    static SwingClipboard  _sharedDrag = new SwingClipboard();
 
 /**
- * Creates a new SwingClipboard.
+ * Sets the current event.
  */
-public SwingClipboard()  { }
-
-/**
- * Creates a new SwingClipboard to initiate drag for given view and event.
- */
-public SwingClipboard(View aView, ViewEvent anEvent)
+public void setEvent(ViewEvent anEvent)
 {
-    // Set view
-    _view = aView;
-    
-    // If DragGesture, set DragGestureEvent
-    if(anEvent.isDragGesture())
+    // If DragGesture, set View and DragGestureEvent
+    if(anEvent.isDragGesture()) {
+        _view = anEvent.getView();
         _dge = anEvent.getEvent(DragGestureEvent.class);
+    }
     
     // If DragEvent, get transferable
     else if(anEvent.isDragEvent()) {
         DropTargetDragEvent dragEv = anEvent.getEvent(DropTargetDragEvent.class);
         if(dragEv!=null) _trans = dragEv.getTransferable();
-        DropTargetDropEvent dropEv =anEvent.getEvent(DropTargetDropEvent.class);
+        DropTargetDropEvent dropEv = anEvent.getEvent(DropTargetDropEvent.class);
         if(dropEv!=null) _trans = dropEv.getTransferable();
     }
     
@@ -217,25 +212,13 @@ public void startDrag()
     // Start drag
     Transferable trans = getTrans();
     dragSource.startDrag(_dge, DragSource.DefaultCopyDrop, img, pnt, trans, null);
-    ViewUtils.setActiveDragboard(this);
 }
 
-/**
- * Creates new drag source listener.
- */
-protected void createDragWindow()
-{
-    // Get drag image and the source window (if source is component)
-    Image img = getDragImage();
-    Window sourceWindow = SwingUtils.getWindow(_dge.getComponent());
-
-    // Create window for drag image
-    _dragWindow = new JWindow(sourceWindow);
-    _dragWindow.setSize((int)img.getWidth(), (int)img.getHeight());
-   
-    // Create label for drag image and add to window
-    _dragWindow.getContentPane().add(new JLabel(new ImageIcon((java.awt.Image)img.getNative())));
-}
+/** DragSourceListener methods. */
+public void dragEnter(DragSourceDragEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceEnter); }
+public void dragOver(DragSourceDragEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceOver); }
+public void dropActionChanged(DragSourceDragEvent anEvent)  { }
+public void dragExit(DragSourceEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceExit); }
 
 /**
  * DragSourceMotionListener method.
@@ -266,16 +249,15 @@ public void dragDropEnd(DragSourceDropEvent anEvent)
         _dragWindow.dispose(); _dragWindow = null;
     }
     
-    // Stop listening to events
+    // Dispatch DragSourceEnd event
     dispatchToRootView(anEvent, ViewEvent.Type.DragSourceEnd);
-    SwingUtilities.invokeLater(() -> ViewUtils.setActiveDragboard(null));
+    
+    // Stop listening to DragSource events.
+    DragSource dragSource = _dge.getDragSource();
+    dragSource.removeDragSourceListener(this); dragSource.removeDragSourceMotionListener(this);
+    _view = null; _dge = null;
 }
 
-/** DragSourceListener methods. */
-public void dragEnter(DragSourceDragEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceEnter); }
-public void dragOver(DragSourceDragEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceOver); }
-public void dropActionChanged(DragSourceDragEvent anEvent)  { }
-public void dragExit(DragSourceEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceExit); }
 
 /**
  * Sends an event to RootView.
@@ -288,9 +270,35 @@ private void dispatchToRootView(Object anEvent, ViewEvent.Type aType)
 }
 
 /**
+ * Creates a window to represent interactive drag (if not DragImageSupported).
+ */
+protected void createDragWindow()
+{
+    // Get drag image and the source window (if source is component)
+    Image img = getDragImage();
+    Window sourceWindow = SwingUtils.getWindow(_dge.getComponent());
+
+    // Create window for drag image
+    _dragWindow = new JWindow(sourceWindow);
+    _dragWindow.setSize((int)img.getWidth(), (int)img.getHeight());
+   
+    // Create label for drag image and add to window
+    _dragWindow.getContentPane().add(new JLabel(new ImageIcon((java.awt.Image)img.getNative())));
+}
+
+/**
  * Returns the shared SwingClipboard.
  */
 public static SwingClipboard get()  { return _shared; }
+
+/**
+ * Returns the shared SwingClipboard for drag and drop.
+ */
+public static SwingClipboard getDrag(ViewEvent anEvent)
+{
+    if(anEvent!=null) _sharedDrag.setEvent(anEvent);
+    return _sharedDrag;
+}
 
 /**
  * Transferable implementation for text editor and xstrings.
