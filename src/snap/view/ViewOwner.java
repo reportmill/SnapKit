@@ -42,6 +42,9 @@ public class ViewOwner implements EventListener {
     // The view environment
     ViewEnv                   _env = ViewEnv.getEnv();
     
+    // Whether UI needs to be reset when next shown
+    boolean                   _resetLater;
+    
     // Convenience for common events
     public static final ViewEvent.Type Action = ViewEvent.Type.Action;
     public static final ViewEvent.Type KeyPress = ViewEvent.Type.KeyPress;
@@ -94,7 +97,7 @@ public synchronized View getUI()
     initUI();
     _ui.setOwner(this);
     setSendEventDisabled(false);
-    runLater(() -> resetLater());
+    resetLater();
     _ui.addPropChangeListener(pce -> uiShowingChanged(), View.Showing_Prop);
     return _ui;
 }
@@ -139,6 +142,9 @@ protected void initUI()  { }
  */
 protected void uiShowingChanged()
 {
+    if(_resetLater) {
+        resetLater(); _resetLater = false; }
+        
     if(getUI().isShowing()) {
         if(getFirstFocus()!=null)
             getView(getFirstFocus()).requestFocus();
@@ -321,8 +327,9 @@ protected void respondUI(ViewEvent anEvent)  { }
 public void resetLater()
 {
     View ui = isUISet()? getUI() : null; if(ui==null) return;
-    RootView rview = ui.getRootView(); if(rview==null) return;
-    rview.resetLater(this);
+    RootView rview = ui.getRootView();
+    if(rview==null) _resetLater = true;
+    else rview.resetLater(this);
 }
 
 /**

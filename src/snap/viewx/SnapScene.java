@@ -151,12 +151,16 @@ public double getFrameRate()  { return _frameRate; }
 /**
  * Sets the frame rate.
  */
-public void setFrameRate(double aValue)  { _frameRate = aValue; if(isPlaying()) { stop(); start(); } }
+public void setFrameRate(double aValue)
+{
+    _frameRate = aValue;
+    _timer.setPeriod(getFrameDelay());
+}
 
 /**
  * Returns the frame delay in milliseconds.
  */
-public int getFrameDelay()  { return (int)Math.round(1000/_frameRate); }
+public int getFrameDelay()  { return _frameRate<=0? Integer.MAX_VALUE : (int)Math.round(1000/_frameRate); }
 
 /**
  * Returns whether to draw coordinate grid.
@@ -280,8 +284,7 @@ public void setAutoStart(boolean aValue)  { _autoStart = aValue; }
  */
 protected void setShowing(boolean aValue)
 {
-    if(aValue==isShowing()) return;
-    super.setShowing(aValue);
+    if(aValue==isShowing()) return; super.setShowing(aValue);
     if(aValue) { if(_autoStart) _timer.start(800); _autoStart = false; }
     else { _autoStart = isPlaying(); stop(); }
 }
@@ -341,6 +344,7 @@ protected void paintFront(Painter aPntr)
     for(View child : getChildren()) { if(!(child instanceof SnapActor)) continue; SnapActor actr = (SnapActor)child;
         for(SnapPen.PenPath pp : actr.getPen()._paths) {
             aPntr.setColor(pp.getColor()); aPntr.setStroke(new Stroke(pp.getWidth())); aPntr.draw(pp); }
+        aPntr.setStroke(Stroke.Stroke1);
     }
 }
 

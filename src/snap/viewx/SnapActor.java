@@ -211,7 +211,20 @@ public void setPenColor(String aString)  { _pen.setColor(aString); }
 /**
  * Set pen down.
  */
-public void penDown()  { _pen.penDown(getPenPoint()); }
+public void penDown()
+{
+    if(isShowing()) _pen.penDown(getPenPoint());
+    else _pen.setPenDown(true);
+}
+
+/**
+ * Override to update pen location.
+ */
+protected void setShowing(boolean aValue)
+{
+    if(aValue==isShowing()) return; super.setShowing(aValue);
+    if(_pen.isPenDown()) penDown();
+}
 
 /**
  * Returns the scene.
