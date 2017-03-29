@@ -10,6 +10,14 @@ import snap.web.WebFile;
  * A WebPage subclass for SnapKit files.
  */
 public class SnapPage extends WebPage {
+    
+    // The content
+    View          _content;
+
+/**
+ * Returns the content.
+ */
+public View getContent()  { return _content; }
 
 /**
  * Returns the SnapKit file root view.
@@ -17,7 +25,7 @@ public class SnapPage extends WebPage {
 protected View createUI()
 {
     ViewArchiver.setUseRealClass(false);
-    View superUI = super.createUI();
+    View superUI = _content = super.createUI();
     ViewArchiver.setUseRealClass(true);
     if(!(superUI instanceof DocView)) {
         superUI.setFill(ViewUtils.getBackFill());
