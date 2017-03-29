@@ -311,6 +311,11 @@ protected void paintChildren(Painter aPntr)
 protected void paintAbove(Painter aPntr)  { }
 
 /**
+ * Returns whether view is currently performing layout.
+ */
+public boolean isInLayout()  { return _inLayout; }
+
+/**
  * Override to layout children.
  */
 public void layout()
