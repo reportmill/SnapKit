@@ -504,13 +504,20 @@ public RootView getRootView()
     View ui = getUI();
     RootView rview = createRootView();
     rview.setContent(ui); rview.setOwner(this);
-    return _rview = rview;
+    _rview = rview;
+    initRootView();
+    return _rview;
 }
 
 /**
  * Creates the RootView.
  */
 protected RootView createRootView()  { return new RootView(); }
+
+/**
+ * Initialize the RootView.
+ */
+protected void initRootView()  { }
 
 /**
  * Returns the Window to manage this ViewOwner's window.
