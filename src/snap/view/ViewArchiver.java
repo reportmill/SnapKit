@@ -73,15 +73,8 @@ protected Map <String, Class> createClassMap()
     // Create class map and add classes
     Map cmap = new HashMap();
     
-    // Shape classes
-    cmap.put("DocView", DocView.class);
-    cmap.put("ImageView", ImageView.class);
-    cmap.put("PageView", PageView.class);
-    cmap.put("PathView", PathView.class);
-    cmap.put("RectView", RectView.class);
-    cmap.put("StringView", StringView.class);
-    
     // View classes
+    cmap.put("ArcView", ArcView.class);
     cmap.put("BorderView", BorderView.class);
     cmap.put("Box", Box.class);
     cmap.put("BrowserView", BrowserView.class);
@@ -92,15 +85,20 @@ protected Map <String, Class> createClassMap()
     cmap.put("CheckBox", CheckBox.class);
     cmap.put("CheckBoxMenuItem", CheckBoxMenuItem.class);
     cmap.put("ComboBox", ComboBox.class);
+    cmap.put("DocView", DocView.class);
     cmap.put("HBox", HBox.class);
+    cmap.put("ImageView", ImageView.class);
     cmap.put("Label", Label.class);
     cmap.put("ListView", ListView.class);
     cmap.put("Menu", Menu.class);
     cmap.put("MenuBar", MenuBar.class);
     cmap.put("MenuButton", MenuButton.class);
     cmap.put("MenuItem", MenuItem.class);
+    cmap.put("PageView", PageView.class);
+    cmap.put("PathView", PathView.class);
     cmap.put("ProgressBar", ProgressBar.class);
     cmap.put("RadioButton", RadioButton.class);
+    cmap.put("RectView", RectView.class);
     cmap.put("ScrollView", ScrollView.class);
     cmap.put("Separator", Separator.class);
     cmap.put("Slider", Slider.class);
@@ -110,6 +108,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("SplitView", SplitView.class);
     cmap.put("SpringView", SpringView.class);
     cmap.put("StackView", StackView.class);
+    cmap.put("StringView", StringView.class);
     cmap.put("SwitchView", SwitchView.class);
     cmap.put("TableView", TableView.class);
     cmap.put("TableCol", TableCol.class);

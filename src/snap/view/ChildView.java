@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import java.util.List;
 import snap.util.*;
 
 /**
@@ -38,6 +39,28 @@ public void removeChildren()  { super.removeChildren(); }
  * Sets children to given list.
  */
 public void setChildren(View ... theChildren)  { super.setChildren(theChildren); }
+
+/**
+ * Moves the subset of children in given list to the front of this view's child list.
+ */
+public void bringViewsToFront(List <View> theViews)
+{
+    for(View view : theViews) {
+        removeChild(view);
+        addChild(view);
+    }
+}
+
+/**
+ * Moves the subset of children in given list to the back of this view's child list.
+ */
+public void sendViewsToBack(List <View> theViews)
+{
+    for(int i=0, iMax=theViews.size(); i<iMax; i++) { View view = theViews.get(i);
+        removeChild(view);
+        addChild(view, i);
+    }
+}
 
 /**
  * XML archival of children.
