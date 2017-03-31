@@ -27,6 +27,7 @@ public class JFXRootViewHpr <T extends JFXRootView> extends ViewHelper <T> {
     public void requestPaint(Rect aRect)
     {
         SnapRoot sroot = SnapRoot.get(get().getScene()); if(sroot==null) return;
+        if(sroot.getContent()==null) sroot.setContent(getView());
         sroot.paintRoot(aRect);
     }
     
