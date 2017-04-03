@@ -570,7 +570,7 @@ public boolean isAfterLineEnd(int anIndex)  { return StringUtils.isAfterLineEnd(
 /**
  * Returns whether a char is a newline char.
  */
-public boolean isNewlineChar(int anIndex)  { return StringUtils.isNewlineChar(this, anIndex); }
+public boolean isLineEndChar(int anIndex)  { return StringUtils.isLineEndChar(this, anIndex); }
 
 /**
  * Returns whether property change is enabled.

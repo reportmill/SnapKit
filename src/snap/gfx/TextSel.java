@@ -57,8 +57,8 @@ public TextSel(TextBox aTextBox, double x1, double y1, double x2, double y2, boo
     
     // If paragraph selecting, expand selection to paragraph boundary
     else if(isParaSel) {
-        while(selStart>0 && !_text.isNewlineChar(selStart-1)) selStart--;
-        while(selEnd<_tbox.length() && !_text.isNewlineChar(selEnd)) selEnd++;
+        while(selStart>0 && !_text.isLineEndChar(selStart-1)) selStart--;
+        while(selEnd<_tbox.length() && !_text.isLineEndChar(selEnd)) selEnd++;
         if(selEnd<_tbox.length()) selEnd++;
     }
 
