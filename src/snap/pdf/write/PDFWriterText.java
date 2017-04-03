@@ -185,7 +185,7 @@ public static void writeRun(PDFWriter aWriter, TextBox aText, TextBoxLine aLine,
     }
     
     // If run is hyphenated, add hyphen
-    if(aRun.isHyphenated()) pPage.append('-');
+    if(aLine.isHyphenated()) pPage.append('-');
     
     // End last text show block
     pPage.appendln(") Tj");

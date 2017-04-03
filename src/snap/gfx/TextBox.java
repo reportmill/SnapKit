@@ -480,7 +480,7 @@ protected void updateLines(int aStart, int endOld, int endNew)
     // Remove lines for old range RichTextLines
     int sline = lcount>0? getLineAt(aStart).getIndex() : 0;
     int eline = lcount>0? getLineAt(endOld).getIndex() : -1;
-    while(eline+1<lcount && getLine(eline+1).getTextLine()==getLine(eline).getTextLine()) eline++;
+    while(eline+1<lcount && getLine(eline+1).getRichTextLine()==getLine(eline).getRichTextLine()) eline++;
     for(int i=eline;i>=sline;i--) aStart = Math.min(_lines.remove(i).getStart(), aStart);
     
     // Add lines for updated RichTextLines
@@ -751,7 +751,6 @@ public void paint(Painter aPntr)
     for(int i=0, iMax=getLineCount(); i<iMax; i++) { TextBoxLine line = getLine(i); double ly = line.getBaseline();
         if(line.getMaxY()<clip.getMinY()) continue;
         if(line.getY()>=clip.getMaxY()) break;
-        boolean underline = false;
         
         // Iterate over line tokens
         for(int j=0,jMax=line.getTokenCount(); j<jMax;j++) { TextBoxToken token = line.getToken(j);
@@ -760,7 +759,6 @@ public void paint(Painter aPntr)
             double tx = token.getX();
             aPntr.setFont(token.getFont()); aPntr.setPaint(token.getColor()); //aPntr.setPaint(SnapColor.RED);
             aPntr.drawString(token.getString(), tx, ly, token.getStyle().getCharSpacing());
-            if(token.isUnderlined()) underline = true;
                 
             // Handle TextBorder: Get outline and stroke
             if(token.getStyle().getBorder()!=null) { Border border = token.getStyle().getBorder();
@@ -771,8 +769,8 @@ public void paint(Painter aPntr)
             }
         }
         
-        // If underline encountered, iterate over runs and draw
-        if(underline) for(TextBoxRun run : line.getRuns()) {
+        // Iterate over runs and draw underlines
+        for(TextBoxRun run : line.getRuns()) {
             if(run.getStyle().isUnderlined()) { double rx = run.getX(), rw = run.getWidth();
                 double uy = run.getFont().getUnderlineOffset(), uw = run.getFont().getUnderlineThickness();
                 aPntr.setStrokeWidth(uw); aPntr.drawLine(rx, ly-uy, rx + rw, ly-uy);

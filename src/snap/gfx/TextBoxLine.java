@@ -40,6 +40,9 @@ public class TextBoxLine implements CharSequence {
     // The max Ascent for line fonts
     double               _ascent, _descent, _leading, _lineAdvance;
     
+    // The first TextBoxRun for this line
+    TextBoxRun           _run;
+    
     // An array of character runs for the line
     List <TextBoxRun>    _runs;
 
@@ -100,12 +103,29 @@ public CharSequence subSequence(int aStart, int anEnd)  { return _rtline.subSequ
 /**
  * Returns the RichTextLine.
  */
-public RichTextLine getTextLine()  { return _rtline; }
+public RichTextLine getRichTextLine()  { return _rtline; }
 
 /**
  * Returns the start of this line in RichTextLine.
  */
-public int getTextLineStart()  { return _rtstart; }
+public int getRichTextLineStart()  { return _rtstart; }
+
+/**
+ * Returns the RichTextRun of char in line.
+ */
+public RichTextRun getRichTextRun(int anIndex)
+{
+    return _rtline.getRunAt(_rtstart+anIndex);
+}
+
+/**
+ * Returns the style at index of char in line.
+ */
+public TextStyle getStyleAt(int anIndex)
+{
+    RichTextRun rtrun = getRichTextRun(anIndex);
+    return rtrun.getStyle();
+}
 
 /**
  * Returns the line x.
@@ -242,12 +262,12 @@ public void resetSizes()
 /**
  * Returns the number of tokens.
  */
-public int getTokenCount()  { return getTokens().size(); }
+public int getTokenCount()  { return _tokens.size(); }
 
 /**
  * Returns the individual token at given index.
  */
-public TextBoxToken getToken(int anIndex)  { return getTokens().get(anIndex); }
+public TextBoxToken getToken(int anIndex)  { return _tokens.get(anIndex); }
 
 /**
  * Returns the tokens for this line.
@@ -258,6 +278,11 @@ public List <TextBoxToken> getTokens()  { return _tokens; }
  * Adds a token to line.
  */
 public void addToken(TextBoxToken aToken)  { _tokens.add(aToken); }
+
+/**
+ * Returns the last token for this line.
+ */
+public TextBoxToken getTokenLast()  { int tc = _tokens.size(); return tc>0? _tokens.get(tc-1) : null; }
 
 /**
  * Returns the max ascent of the chars in this line.
@@ -425,27 +450,33 @@ public double getUnderlineY()
  */
 public List <TextBoxRun> getRuns()
 {
-    if(_runs!=null) return _runs; _runs = new ArrayList(_rtline.getRunCount());
-    for(TextBoxRun run = getRun(); run!=null; run=run.getNext()) _runs.add(run);
-    return _runs;
+    // If already set, just return
+    if(_runs!=null) return _runs;
+    
+    // Create new list and create/add first run
+    List runs = new ArrayList(_rtline.getRunCount());
+    TextBoxRun run = new TextBoxRun(this,0); runs.add(run);
+    
+    // While not at line end, add additional runs
+    while(run.getEnd()<length()) {
+        run = new TextBoxRun(this, run.getEnd()); runs.add(run); }
+        
+    // Set and return
+    return _runs = runs;
 }
 
 /**
- * Returns an array of runs for the line.
+ * Returns the first TextBox run for the line.
  */
-public TextBoxRun getRun()  { return getRunForTokenIndex(0); }
+public TextBoxRun getRun()  { return getRuns().get(0); }
 
 /**
- * Returns the next run for token at given index.
+ * Returns whether line ends with hyphen.
  */
-protected TextBoxRun getRunForTokenIndex(int aTokIndex)
+public boolean isHyphenated()
 {
-    int tcount = getTokenCount(); if(aTokIndex>=tcount) return null;
-    TextBoxToken tok = getToken(aTokIndex); TextStyle style = tok.getStyle();
-    TextBoxRun run = new TextBoxRun(tok, aTokIndex);
-    for(int i=aTokIndex+1;i<tcount;i++) { tok = getToken(i); if(tok.getStyle()!=style) break;
-        run._end = tok.getEnd(); run._endTokInd = i; run._hyph = tok.isHyphenated(); }
-    return run;
+    TextBoxToken tok = getTokenLast();
+    return tok!=null && tok.isHyphenated();
 }
 
 /**

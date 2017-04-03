@@ -596,7 +596,7 @@ public static int indexOfIC(String theStrings[], String aString)
  */
 public static final int indexOfNewline(CharSequence theChars, int aStart)
 {
-    for(int i=aStart,iMax=theChars.length();i<iMax;i++) if(isNewlineChar(theChars,i)) return i;
+    for(int i=aStart,iMax=theChars.length();i<iMax;i++) if(isLineEndChar(theChars,i)) return i;
     return -1;
 }
 
@@ -629,7 +629,7 @@ public static final int lastIndexOfNewline(CharSequence theChars, int aStart)
  */
 public static final int lastIndexAfterNewline(CharSequence theChars, int aStart)
 {
-    for(int i=aStart-1;i>=0;i--) if(isNewlineChar(theChars,i)) return i+1;
+    for(int i=aStart-1;i>=0;i--) if(isLineEndChar(theChars,i)) return i+1;
     return -1;
 }
 
@@ -638,7 +638,7 @@ public static final int lastIndexAfterNewline(CharSequence theChars, int aStart)
  */
 public static final boolean isLineEnd(CharSequence theChars, int anIndex)
 {
-    return anIndex<theChars.length() && isNewlineChar(theChars, anIndex);
+    return anIndex<theChars.length() && isLineEndChar(theChars, anIndex);
 }
 
 /**
@@ -646,16 +646,21 @@ public static final boolean isLineEnd(CharSequence theChars, int anIndex)
  */
 public static final boolean isAfterLineEnd(CharSequence theChars, int anIndex)
 {
-    return anIndex-1>=0 && isNewlineChar(theChars, anIndex-1);
+    return anIndex-1>=0 && isLineEndChar(theChars, anIndex-1);
 }
 
 /**
  * Returns whether a char is a newline char.
  */
-public static final boolean isNewlineChar(CharSequence theChars, int anIndex)
+public static final boolean isLineEndChar(CharSequence theChars, int anIndex)
 {
-    char c = theChars.charAt(anIndex); return c=='\r' || c=='\n';
+    return isLineEndChar(theChars.charAt(anIndex));
 }
+
+/**
+ * Returns whether a char is a newline char.
+ */
+public static final boolean isLineEndChar(char c)  { return c=='\r' || c=='\n'; }
 
 /**
  * Returns whether the given string array contains the given string, ignoring case.
