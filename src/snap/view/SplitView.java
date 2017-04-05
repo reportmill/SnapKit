@@ -35,6 +35,11 @@ public SplitView()
 public int getItemCount()  { return _items.size(); }
 
 /**
+ * Returns the individual item at given index.
+ */
+public View getItem(int anIndex)  { return _items.get(anIndex); }
+
+/**
  * Override to make sure dividers are in place.
  */
 public void addItem(View aView)  { addItem(aView, getItemCount()); }
@@ -119,9 +124,24 @@ public void removeItemWithAnim(View aView)
 }
 
 /**
+ * Returns the number of dividers.
+ */
+public int getDividerCount()  { return Math.max(getItemCount() - 1, 0); }
+
+/**
  * Returns the individual divider at given index.
  */
 public Divider getDivider(int anIndex)  { return (Divider)getChild(anIndex*2+1); }
+
+/**
+ * Returns the dividers.
+ */
+public Divider[] getDividers()
+{
+    int dc = getDividerCount();
+    Divider divs[] = new Divider[dc]; for(int i=0;i<dc;i++) divs[i] = getDivider(i);
+    return divs;
+}
 
 /**
  * Calculates the preferred width.

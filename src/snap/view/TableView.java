@@ -5,6 +5,7 @@ package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
 import snap.gfx.Color;
+import snap.gfx.Paint;
 import snap.util.*;
 
 /**
@@ -36,6 +37,15 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     // The Cell Configure method
     Consumer <ListCell<T>>  _cellConf;
     
+    // The SplitView to hold columns
+    SplitView               _split = new SplitView();
+    
+    // The ScrollView to hold SplitView+Columns
+    ScrollView              _scroll = new ScrollView(_split);
+    
+    // Constants
+    static final Paint DIVIDER_FILL = new Color("#EEEEEE");
+
     // Constants for properties
     public static final String Items_Prop = "Items";
     public static final String SelectedItem_Prop = "SelectedItem";
@@ -44,7 +54,13 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
 /**
  * Creates a new TableView.
  */
-public TableView()  { enableEvents(Action); }
+public TableView()
+{
+    enableEvents(Action);
+    
+    _split.setGrowWidth(true);
+    addChild(_scroll);
+}
 
 /**
  * Returns the items.
@@ -78,32 +94,38 @@ public void updateItems(T ... theItems)
 /**
  * Returns the number of columns.
  */
-public int getColCount()  { return getChildCount(); }
+public int getColCount()  { return _split.getItemCount(); }
 
 /**
  * Returns the column at given index.
  */
-public TableCol getCol(int anIndex)  { return (TableCol)getChild(anIndex); }
+public TableCol getCol(int anIndex)  { return (TableCol)_split.getItem(anIndex); }
 
 /**
  * Returns the column at given index.
  */
-public TableCol[] getCols()  { return Arrays.copyOf(getChildren(), getChildCount(), TableCol[].class); }
+public TableCol[] getCols()  { return _split.getItems().toArray(new TableCol[0]); }
 
 /**
  * Adds a TableCol.
  */
-public void addCol(TableCol aCol)  { addChild(aCol); }
+public void addCol(TableCol aCol)
+{
+    _split.addItem(aCol);
+    
+    // Reset split DividerSize and Fill
+    for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
+}
 
 /**
  * Remove's the TableCol at the given index from this Table's children list.
  */
-public TableCol removeCol(int anIndex)  { return (TableCol)removeChild(anIndex); }
+public TableCol removeCol(int anIndex)  { return (TableCol)_split.removeChild(anIndex); }
 
 /**
  * Removes the given TableCol from this table's children list.
  */
-public int removeCol(TableCol aCol)  { return removeChild(aCol); }
+public int removeCol(TableCol aCol)  { return _split.removeItem(aCol); }
 
 /**
  * Returns the number of rows.
@@ -296,9 +318,8 @@ public void setHeight(double aValue)
  */
 protected double getPrefWidthImpl(double aH)
 {
-    double pw = 0;
-    for(TableCol tcol : getCols()) pw += tcol.getPrefWidth();
-    return pw;
+    //double pw = 0; for(TableCol tcol : getCols()) pw += tcol.getPrefWidth(); return pw;
+    return _scroll.getPrefWidth(aH);
 }
 
 /**
@@ -311,8 +332,9 @@ protected double getPrefHeightImpl(double aW)  { return getRowHeight()*getItems(
  */
 protected void layoutChildren()
 {
-    ViewLayout.HBoxLayout layout = new ViewLayout.HBoxLayout(this); layout.setFillHeight(true);
-    layout.layoutChildren();
+    //ViewLayout.HBoxLayout layout = new ViewLayout.HBoxLayout(this); layout.setFillHeight(true);
+    //layout.layoutChildren();
+    _scroll.setSize(getWidth(),getHeight());
 }
 
 /**

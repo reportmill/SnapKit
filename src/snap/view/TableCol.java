@@ -24,7 +24,7 @@ public TableCol()  { setFocusWhenPressed(false); }
 /**
  * Returns the table.
  */
-public TableView getTable()  { return (TableView)getParent(); }
+public TableView getTable()  { return getParent(TableView.class); }
 
 /**
  * Returns the header value.

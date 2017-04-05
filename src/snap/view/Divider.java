@@ -11,9 +11,9 @@ import snap.util.ArrayUtils;
 public class Divider extends View {
     
     // The size
-    int       _size = 8;
+    double    _size = 8;
     
-    // The location, if explicitly positioned
+    // The distance from the min x of preceeding View to min x of divider (or y if vertical)
     double    _loc = -1;
     
     // The remainder, if explicitly position relative to right side
@@ -25,6 +25,9 @@ public class Divider extends View {
     static final Paint DIVIDER_FILL_VER = new GradientPaint(c1, c2, 0);
     static final Border DIVIDER_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
     
+    // Constants for properties
+    public static final String DividerSize_Prop = "DividerSize";
+    
 /**
  * Creates a new Divider.
  */
@@ -35,12 +38,25 @@ public Divider()
 }
 
 /**
- * Returns the location.
+ * Returns the size of the divider.
+ */
+public double getDividerSize()  { return _size; }
+
+/**
+ * Sets the size of the divider.
+ */
+public void setDividerSize(double aValue)
+{
+    firePropChange(DividerSize_Prop, _size, _size = aValue);
+}
+
+/**
+ * Returns the distance from the min x of preceeding View to min x of divider (or y if vertical).
  */
 public double getLocation()  { return _loc; }
 
 /**
- * Sets the location.
+ * Sets the distance from the min x of preceeding View to min x of divider (or y if vertical).
  */
 public void setLocation(double aValue)
 {
@@ -49,12 +65,12 @@ public void setLocation(double aValue)
 }
 
 /**
- * Returns the remainder.
+ * Returns the distance from the max x of successive View to min x of divider (or y if vertical).
  */
 public double getRemainder()  { return _rem; }
 
 /**
- * Sets the remainder.
+ * Sets the distance from the max x of successive View to min x of divider (or y if vertical).
  */
 public void setRemainder(double aValue)
 {
