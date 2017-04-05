@@ -11,15 +11,23 @@ import snap.util.*;
 public class TableCol <T> extends ListView <T> {
 
     // The header value
-    String             _headerVal;
+    Label              _header = new Label();
     
     // Whether is resizable
     boolean            _resizable;
 
+    // Constants for properties
+    public static final String HeaderText_Prop = "HeaderText";
+    
 /**
  * Creates a new TableCol.
  */
-public TableCol()  { setFocusWhenPressed(false); }
+public TableCol()
+{
+    _header.setPadding(4,4,4,4);
+    addPropChangeListener(pce -> _header.setPrefWidth(getWidth()), Width_Prop);
+    setFocusWhenPressed(false);
+}
 
 /**
  * Returns the table.
@@ -27,17 +35,19 @@ public TableCol()  { setFocusWhenPressed(false); }
 public TableView getTable()  { return getParent(TableView.class); }
 
 /**
- * Returns the header value.
+ * Returns the header label.
  */
-public String getHeaderValue()  { return _headerVal; }
+public Label getHeader()  { return _header; }
 
 /**
- * Sets the header value.
+ * Returns the header text.
  */
-public void setHeaderValue(String aValue)
-{
-    firePropChange("HeaderValue", _headerVal, _headerVal = aValue);
-}
+public String getHeaderText()  { return _header.getText(); }
+
+/**
+ * Sets the header text.
+ */
+public void setHeaderText(String aValue)  { _header.setText(aValue); }
 
 /**
  * Returns whether resizable.
@@ -100,7 +110,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     XMLElement e = super.toXMLView(anArchiver);
     
     // Archive Header, Resizable
-    if(getHeaderValue()!=null) e.add("Header", getHeaderValue());
+    if(getHeaderText()!=null) e.add("Header", getHeaderText());
     if(isResizable()) e.add("Resizable", false);
     
     // Return column xml
@@ -116,7 +126,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     super.fromXMLView(anArchiver, anElement);
     
     // Unarchive Header, Resizable
-    if(anElement.hasAttribute("Header")) setHeaderValue(anElement.getAttributeValue("Header"));
+    if(anElement.hasAttribute("Header")) setHeaderText(anElement.getAttributeValue("Header"));
     if(anElement.hasAttribute("Resizable")) setResizable(anElement.getAttributeBoolValue("Resizable"));
 }
 

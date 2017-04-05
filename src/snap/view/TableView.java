@@ -5,6 +5,7 @@ package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
 import snap.gfx.Color;
+import snap.gfx.Insets;
 import snap.gfx.Paint;
 import snap.util.*;
 
@@ -23,7 +24,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     int                     _selCol;
     
     // Whether to show table header
-    boolean                 _showHeader = true;
+    boolean                 _showHeader;
     
     // Whether to show horziontal/vertical lines
     boolean                 _showLinesH, _showLinesV;
@@ -43,8 +44,12 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     // The ScrollView to hold SplitView+Columns
     ScrollView              _scroll = new ScrollView(_split);
     
+    // The view to hold header
+    ParentView              _header = createHeaderView();
+    
     // Constants
     static final Paint DIVIDER_FILL = new Color("#EEEEEE");
+    static final Paint DIVIDER_FILLH = new Color("#E0E0E0");
 
     // Constants for properties
     public static final String Items_Prop = "Items";
@@ -58,8 +63,11 @@ public TableView()
 {
     enableEvents(Action);
     
+    _split.setBorder(null);
     _split.setGrowWidth(true);
     addChild(_scroll);
+    setBorder(_scroll.getBorder());
+    _scroll.setBorder(null);
 }
 
 /**
@@ -115,6 +123,11 @@ public void addCol(TableCol aCol)
     
     // Reset split DividerSize and Fill
     for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
+    
+    // Add Header
+    SplitView hsplit = getHeaderSplitView();
+    hsplit.addItem(aCol.getHeader());
+    for(Divider div : hsplit.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILLH); div.setBorder(null); }
 }
 
 /**
@@ -135,14 +148,19 @@ public int getRowCount()  { return getItems().size(); }
 /**
  * Returns whether to show header.
  */
-public boolean getShowHeader()  { return _showHeader; }
+public boolean isShowHeader()  { return _showHeader; }
 
 /**
  * Sets whether to show header.
  */
 public void setShowHeader(boolean aValue)
 {
+    if(aValue==isShowHeader()) return;
     firePropChange("ShowHeader", _showHeader, _showHeader = aValue);
+    
+    // Add/remove header
+    if(aValue) addChild(_header,0);
+    else removeChild(_header);
 }
 
 /** Replace these with AllowMultipleChoice, AllowIntervals. */
@@ -210,6 +228,39 @@ public Consumer<ListCell<T>> getCellConfigure()  { return _cellConf; }
  * Called to set method for rendering.
  */
 public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
+
+/**
+ * Returns the HeaderView.
+ */
+public ParentView getHeaderView()  { return _header!=null? _header : (_header=createHeaderView()); }
+
+/**
+ * Returns the HeaderView.
+ */
+protected ParentView createHeaderView()
+{
+    SplitView split = new SplitView(); split.setGrowWidth(true); split.setBorder(null);
+    
+    for(TableCol col : getCols())
+        split.addItem(col.getHeader());
+    for(Divider div : split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILLH); div.setBorder(null); }
+
+    Scroller scroll = new Scroller(); scroll.setContent(split);
+    LineView line = new LineView(0,.5,10,.5); line.setPrefHeight(1); line.setBorder(Color.LIGHTGRAY,1);
+    VBox vbox = new VBox(); vbox.setFillWidth(true);
+    vbox.setChildren(scroll,line);
+    return vbox;
+}
+
+/**
+ * Returns the HeaderView.
+ */
+protected SplitView getHeaderSplitView()
+{
+    VBox vbox = (VBox)getHeaderView();
+    Scroller scroll = (Scroller)vbox.getChild(0);
+    return (SplitView)scroll.getContent();
+}
 
 /**
  * Returns the selected index.
@@ -325,16 +376,28 @@ protected double getPrefWidthImpl(double aH)
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return getRowHeight()*getItems().size(); }
+protected double getPrefHeightImpl(double aW)
+{
+    double ph = isShowHeader()? _header.getPrefHeight(aW) : 0;
+    ph += getRowHeight()*getItems().size();
+    return ph;
+}
 
 /**
  * Override to layout children with VBox layout.
  */
 protected void layoutChildren()
 {
-    //ViewLayout.HBoxLayout layout = new ViewLayout.HBoxLayout(this); layout.setFillHeight(true);
-    //layout.layoutChildren();
-    _scroll.setSize(getWidth(),getHeight());
+    Insets ins = getInsetsAll();
+    double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
+    double hh = 0;
+    
+    // If Header, update bounds
+    if(isShowHeader()) { hh = _header.getPrefHeight();
+        _header.setBounds(x,y,w,hh); }
+        
+    // Layout out scrollView
+    _scroll.setBounds(x,y+hh,w,h-hh);
 }
 
 /**
@@ -351,7 +414,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     XMLElement e = super.toXMLView(anArchiver);
     
     // Archive ShowHeader
-    if(!getShowHeader()) e.add("ShowHeader", false);
+    if(!isShowHeader()) e.add("ShowHeader", false);
     
     // Archive GridColor, ShowLinesX, ShowLinesY
     if(getGridColor()!=null) e.add("GridColor", '#' + getGridColor().toHexString());
