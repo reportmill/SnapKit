@@ -68,6 +68,11 @@ public TableView()
     addChild(_scroll);
     setBorder(_scroll.getBorder());
     _scroll.setBorder(null);
+    
+    // Set main scroller to sync HeaderScroller
+    Scroller scroller = _scroll.getScroller();
+    scroller.addPropChangeListener(pce -> getHeaderScroller().setWidth(scroller.getWidth()), Width_Prop);
+    scroller.addPropChangeListener(pce -> getHeaderScroller().setScrollH(scroller.getScrollH()), Scroller.ScrollH_Prop);
 }
 
 /**
@@ -241,10 +246,6 @@ protected ParentView createHeaderView()
 {
     SplitView split = new SplitView(); split.setGrowWidth(true); split.setBorder(null);
     
-    for(TableCol col : getCols())
-        split.addItem(col.getHeader());
-    for(Divider div : split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILLH); div.setBorder(null); }
-
     Scroller scroll = new Scroller(); scroll.setContent(split);
     LineView line = new LineView(0,.5,10,.5); line.setPrefHeight(1); line.setBorder(Color.LIGHTGRAY,1);
     VBox vbox = new VBox(); vbox.setFillWidth(true);
@@ -253,14 +254,18 @@ protected ParentView createHeaderView()
 }
 
 /**
- * Returns the HeaderView.
+ * Returns the Header ScrollView.
  */
-protected SplitView getHeaderSplitView()
+protected Scroller getHeaderScroller()
 {
     VBox vbox = (VBox)getHeaderView();
-    Scroller scroll = (Scroller)vbox.getChild(0);
-    return (SplitView)scroll.getContent();
+    return (Scroller)vbox.getChild(0);
 }
+
+/**
+ * Returns the HeaderView.
+ */
+protected SplitView getHeaderSplitView()  { return (SplitView)getHeaderScroller().getContent(); }
 
 /**
  * Returns the selected index.
