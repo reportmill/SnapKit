@@ -335,11 +335,19 @@ protected void layoutChildren()  { }
 public void layoutDeep()
 {
     if(_needsLayout) layout();
-    if(_needsLayoutDeep)
-    for(View child : getChildren())
-        if(child instanceof ParentView && (((ParentView)child)._needsLayout || ((ParentView)child)._needsLayoutDeep))
-            ((ParentView)child).layoutDeep();
+    if(_needsLayoutDeep) layoutDeepImpl();
     _needsLayout = _needsLayoutDeep = false;
+}
+
+/**
+ * Lays out children deep.
+ */
+protected void layoutDeepImpl()
+{
+    for(View child : getChildren())
+        if(child instanceof ParentView) { ParentView par = (ParentView)child;
+            if(par._needsLayout || par._needsLayoutDeep)
+                par.layoutDeep(); }
 }
 
 /**

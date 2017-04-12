@@ -71,7 +71,6 @@ public TableView()
     
     // Set main scroller to sync HeaderScroller
     Scroller scroller = _scroll.getScroller();
-    scroller.addPropChangeListener(pce -> getHeaderScroller().setWidth(scroller.getWidth()), Width_Prop);
     scroller.addPropChangeListener(pce -> getHeaderScroller().setScrollH(scroller.getScrollH()), Scroller.ScrollH_Prop);
 }
 
@@ -246,7 +245,7 @@ protected ParentView createHeaderView()
 {
     SplitView split = new SplitView(); split.setGrowWidth(true); split.setBorder(null);
     
-    Scroller scroll = new Scroller(); scroll.setContent(split);
+    Scroller scroll = new Scroller(); scroll.setContent(split); scroll.setClipToBounds(true);
     LineView line = new LineView(0,.5,10,.5); line.setPrefHeight(1); line.setBorder(Color.LIGHTGRAY,1);
     VBox vbox = new VBox(); vbox.setFillWidth(true);
     vbox.setChildren(scroll,line);
@@ -399,10 +398,22 @@ protected void layoutChildren()
     
     // If Header, update bounds
     if(isShowHeader()) { hh = _header.getPrefHeight();
-        _header.setBounds(x,y,w,hh); }
+        _header.setBounds(x,y,_header.getWidth(),hh); }
         
     // Layout out scrollView
     _scroll.setBounds(x,y+hh,w,h-hh);
+}
+
+/**
+ * Override to sync Header.Width with ScrollView.Scroller.Width.
+ */
+protected void layoutDeepImpl()
+{
+    _scroll.layoutDeep();
+    if(isShowHeader()) {
+        _header.setWidth(_scroll.getScroller().getWidth());
+        _header.layoutDeep();
+    }
 }
 
 /**
