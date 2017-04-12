@@ -321,13 +321,13 @@ public boolean isInLayout()  { return _inLayout; }
 public void layout()
 {
     if(_inLayout) return; _inLayout = true;
-    layoutChildren(); _inLayout = false;
+    layoutImpl(); _inLayout = false;
 }
 
 /**
  * Actual method to layout children.
  */
-protected void layoutChildren()  { }
+protected void layoutImpl()  { }
 
 /**
  * Lays out children deep.

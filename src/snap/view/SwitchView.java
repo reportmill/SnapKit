@@ -85,7 +85,7 @@ public String getValuePropName()  { return SelectedIndex_Prop; }
 /**
  * Override to layout content.
  */
-protected void layoutChildren()
+protected void layoutImpl()
 {
     Insets ins = getInsetsAll();
     double tp = ins.top, rt = ins.right, bt = ins.bottom, lt = ins.left;

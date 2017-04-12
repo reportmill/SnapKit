@@ -74,7 +74,7 @@ protected double getPrefHeightImpl(double aW)
 /**
  * Override to layout content.
  */
-protected void layoutChildren()
+protected void layoutImpl()
 {
     if(_content==null) return;
     Insets ins = getInsetsAll();

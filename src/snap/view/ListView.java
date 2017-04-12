@@ -395,7 +395,7 @@ protected double getPrefHeightImpl(double aW)  { return getRowHeight()*getItemCo
 /**
  * Override to layout children with VBox layout.
  */
-protected void layoutChildren()
+protected void layoutImpl()
 {
     // Update CellStart/CellEnd for current ClipBounds
     Rect clip = getClipBoundsAll(); if(clip==null) clip = getBoundsLocal(); double rh = getRowHeight();

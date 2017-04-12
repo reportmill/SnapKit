@@ -243,7 +243,7 @@ protected double getPrefHeightImpl(double aW)  { return _content!=null? _content
 /**
  * Override to layout children.
  */
-protected void layoutChildren()
+protected void layoutImpl()
 {
     if(_content==null) return;
     double w = getWidth(), h = getHeight(); View cnt = _content;

@@ -164,7 +164,7 @@ protected double getPrefHeightImpl(double aW)
 /**
  * Override to layout children.
  */
-protected void layoutChildren()
+protected void layoutImpl()
 {
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;

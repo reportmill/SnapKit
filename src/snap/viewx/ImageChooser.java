@@ -127,7 +127,7 @@ public void respondUI(ViewEvent anEvent)
 private static class TilePane extends ChildView {
     
     /** Layout children. */
-    protected void layoutChildren()
+    protected void layoutImpl()
     {
         Insets ins = getInsetsAll();
         double x = ins.left, y = ins.top;

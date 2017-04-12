@@ -231,7 +231,7 @@ protected double getPrefHeightImpl(double aW)
 /**
  * Override to layout children with VBox layout.
  */
-protected void layoutChildren()
+protected void layoutImpl()
 {
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top+28, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;

@@ -63,13 +63,12 @@ public void addItem(View aView, int anIndex)
 /**
  * Override to remove unused dividers.
  */
-public View removeItem(int anIndex)
+public void removeItem(int anIndex)
 {
-    View item = _items.remove(anIndex);
+    _items.remove(anIndex);
     removeChild(anIndex*2);
     if(getItemCount()>0)        // Remove divider, unless only item
         removeChild(anIndex>0? anIndex*2-1 : 0);
-    return item;
 }
 
 /**
@@ -157,7 +156,7 @@ protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(aW
 /**
  * Override to layout children.
  */
-protected void layoutChildren()  { _layout.layoutChildren(); }
+protected void layoutImpl()  { _layout.layoutChildren(); }
 
 /**
  * Returns the default border.

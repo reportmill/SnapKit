@@ -477,7 +477,7 @@ protected double getPrefHeightImpl(double aW)  { return getRowHeight()*getItems(
 /**
  * Override to layout children with VBox layout.
  */
-protected void layoutChildren()
+protected void layoutImpl()
 {
     ViewLayout.HBoxLayout layout = new ViewLayout.HBoxLayout(this); layout.setFillHeight(true);
     layout.layoutChildren();

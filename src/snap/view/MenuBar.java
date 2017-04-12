@@ -121,7 +121,7 @@ protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1
 /**
  * Layout children.
  */
-protected void layoutChildren()  { _layout.layoutChildren(); }
+protected void layoutImpl()  { _layout.layoutChildren(); }
 
 /**
  * Override to return default.

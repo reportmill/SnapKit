@@ -1083,7 +1083,7 @@ protected double getPrefHeightImpl(double aW)
 /**
  * Layout children.
  */
-protected void layoutChildren()  { checkFont(); }
+protected void layoutImpl()  { checkFont(); }
 
 /**
  * Override to update getTextBlock.Rect.

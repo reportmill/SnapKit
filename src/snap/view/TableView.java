@@ -71,6 +71,7 @@ public TableView()
     
     // Set main scroller to sync HeaderScroller
     Scroller scroller = _scroll.getScroller();
+    scroller.addPropChangeListener(pce -> getHeaderScroller().setWidth(scroller.getWidth()), Width_Prop);
     scroller.addPropChangeListener(pce -> getHeaderScroller().setScrollH(scroller.getScrollH()), Scroller.ScrollH_Prop);
 }
 
@@ -137,7 +138,7 @@ public void addCol(TableCol aCol)
 /**
  * Remove's the TableCol at the given index from this Table's children list.
  */
-public TableCol removeCol(int anIndex)  { return (TableCol)_split.removeItem(anIndex); }
+public TableCol removeCol(int anIndex)  { return (TableCol)_split.removeChild(anIndex); }
 
 /**
  * Removes the given TableCol from this table's children list.
@@ -245,7 +246,7 @@ protected ParentView createHeaderView()
 {
     SplitView split = new SplitView(); split.setGrowWidth(true); split.setBorder(null);
     
-    Scroller scroll = new Scroller(); scroll.setContent(split); scroll.setClipToBounds(true);
+    Scroller scroll = new Scroller(); scroll.setContent(split);
     LineView line = new LineView(0,.5,10,.5); line.setPrefHeight(1); line.setBorder(Color.LIGHTGRAY,1);
     VBox vbox = new VBox(); vbox.setFillWidth(true);
     vbox.setChildren(scroll,line);
@@ -390,7 +391,7 @@ protected double getPrefHeightImpl(double aW)
 /**
  * Override to layout children with VBox layout.
  */
-protected void layoutChildren()
+protected void layoutImpl()
 {
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
@@ -398,22 +399,10 @@ protected void layoutChildren()
     
     // If Header, update bounds
     if(isShowHeader()) { hh = _header.getPrefHeight();
-        _header.setBounds(x,y,_header.getWidth(),hh); }
+        _header.setBounds(x,y,w,hh); }
         
     // Layout out scrollView
     _scroll.setBounds(x,y+hh,w,h-hh);
-}
-
-/**
- * Override to sync Header.Width with ScrollView.Scroller.Width.
- */
-protected void layoutDeepImpl()
-{
-    _scroll.layoutDeep();
-    if(isShowHeader()) {
-        _header.setWidth(_scroll.getScroller().getWidth());
-        _header.layoutDeep();
-    }
 }
 
 /**

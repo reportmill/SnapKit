@@ -216,7 +216,7 @@ protected double getPrefHeightImpl(double aW)  { return _text.getPrefHeight(); }
 /**
  * Layout children.
  */
-protected void layoutChildren()
+protected void layoutImpl()
 {
     double w = getWidth(), h = getHeight();
     Insets ins = getInsetsAll(); double px = ins.left, py = ins.top, pw = w - px - ins.right, ph = h - py - ins.bottom;

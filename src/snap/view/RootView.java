@@ -232,7 +232,7 @@ protected void requestFocus(View aView)
 /**
  * Layout children.
  */
-protected void layoutChildren()  { _layout.layoutChildren(); }
+protected void layoutImpl()  { _layout.layoutChildren(); }
 
 /**
  * Override to register for layout.
