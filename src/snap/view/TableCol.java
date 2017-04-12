@@ -102,6 +102,17 @@ protected void processEvent(ViewEvent anEvent)
 }
 
 /**
+ * Override to account for header (if showing).
+ */
+protected double getPrefWidthImpl(double aH)
+{
+    double pw = super.getPrefWidthImpl(aH);
+    TableView table = getTable(); if(table!=null && table.isShowHeader())
+        pw = Math.max(getHeader().getPrefWidth(aH), pw);
+    return pw;
+}
+
+/**
  * XML archival - table columns.
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
