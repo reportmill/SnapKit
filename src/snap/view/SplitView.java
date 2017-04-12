@@ -63,12 +63,13 @@ public void addItem(View aView, int anIndex)
 /**
  * Override to remove unused dividers.
  */
-public void removeItem(int anIndex)
+public View removeItem(int anIndex)
 {
-    _items.remove(anIndex);
+    View item = _items.remove(anIndex);
     removeChild(anIndex*2);
     if(getItemCount()>0)        // Remove divider, unless only item
         removeChild(anIndex>0? anIndex*2-1 : 0);
+    return item;
 }
 
 /**

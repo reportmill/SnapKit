@@ -3,7 +3,7 @@ Object { "{" Member* "}" }
 
 Member { Pair ("," Member)* }
 
-Pair { (String | SimpleString) ":" Value }
+Pair { String ":" Value }
 
 Array { "[" Element* "]" }
 
@@ -11,9 +11,7 @@ Element { Value ("," Element)* }
 
 Value { String | Number | Object | Array | Boolean | Null }
 
-String { "\"(([^\"\\/\n\r])|(\\([ntbrf\\/'\"]|[0-7][0-7]?|[0-3][0-7][0-7]|u[\da-fA-F]{4})))*\"" }
-
-SimpleString { "[a-zA-Z0-9_]*" }
+String { "\"(([^\"\\])|(\\([\"\\/bfnrt]|u[\da-fA-F]{4})))*\"" }
 
 Number { Int | Float }
 

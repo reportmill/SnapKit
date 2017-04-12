@@ -44,36 +44,67 @@ protected FileHeader getFileHeader(String aPath) throws IOException
 }
 
 /**
- * Returns file bytes.
+ * Handle a get request.
  */
-protected Object getFileContent(String aPath) throws Exception
+protected synchronized WebResponse doGet(WebRequest aRequest)
 {
-    // Fetch URL
-    String urls = getURLString() + aPath;
-    HTTPRequest req = new HTTPRequest(urls);
-    HTTPResponse resp = req.getResponse();
-    
-    // Handle non-success response codes
-    if(resp.getCode()==HTTPResponse.NOT_FOUND)
-        return null; // throw new FileNotFoundException(aPath);
-    if(resp.getCode()==HTTPResponse.UNAUTHORIZED)
-        throw new AccessException();
-    if(resp.getCode()!=HTTPResponse.OK)
-        throw new IOException(resp.getMessage());
-    
-    // Create file, set bytes and return
-    String contentType = resp.getContentType().toLowerCase();
-    boolean isDir = FilePathUtils.getExtension(aPath).length()==0 && contentType.startsWith("text");
-    
-    // If directory, return
-    if(isDir) {
-        List <FileHeader> fhdrs = getFileHeaders(aPath, resp.getBytes());
-        if(fhdrs!=null)
-            return fhdrs;
+    // Get URL and path and create basic response
+    WebURL url = aRequest.getURL();
+    String path = url.getPath(); if(path==null) path = "/";
+    WebResponse resp = new WebResponse(); resp.setRequest(aRequest);
+ 
+    // Get content   
+    Object content = null;
+    try {
+        // Fetch URL
+        String urls = url.getString();
+        HTTPRequest hreq = new HTTPRequest(url.getURL());
+        HTTPResponse hresp = hreq.getResponse();
+        
+        // Handle non-success response codes
+        if(hresp.getCode()==HTTPResponse.NOT_FOUND)
+            return null; // throw new FileNotFoundException(aPath);
+        if(hresp.getCode()==HTTPResponse.UNAUTHORIZED)
+            throw new AccessException();
+        if(hresp.getCode()!=HTTPResponse.OK)
+            throw new IOException(hresp.getMessage());
+        
+        // Create file, set bytes and return
+        String contentType = hresp.getContentType().toLowerCase();
+        boolean isDir = FilePathUtils.getExtension(path).length()==0 && contentType.startsWith("text") &&
+            url.getQuery()==null;
+        
+        // If directory, return
+        if(isDir) {
+            List <FileHeader> fhdrs = getFileHeaders(path, hresp.getBytes());
+            content = fhdrs;
+        }
+        
+        // Return bytes
+        if(content==null)
+            content = hresp.getBytes();
     }
+    catch(Exception e) { System.err.println("HTTPSite.doGet: " + e); }
     
-    // Return bytes
-    return resp.getBytes();
+    // Handle file
+    if(content instanceof byte[]) { byte bytes[] = (byte[])content;
+        resp.setBytes(bytes); resp.setCode(WebResponse.OK);
+        FileHeader fhdr = new FileHeader(path, false); fhdr.setSize(bytes.length);
+        resp.setFileHeader(fhdr);
+    }
+        
+    // Handle directory
+    else if(content instanceof List) { List <FileHeader> fhdrs = (List)content;
+        resp.setFileHeaders(fhdrs); resp.setCode(WebResponse.OK);
+        FileHeader fhdr = new FileHeader(path, true);
+        resp.setFileHeader(fhdr);
+    }
+        
+    // Handle FILE_NOT_FOUND
+    else resp.setCode(WebResponse.NOT_FOUND);
+    
+    // Return response
+    return resp;
 }
 
 /**

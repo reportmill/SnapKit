@@ -138,7 +138,7 @@ public void addCol(TableCol aCol)
 /**
  * Remove's the TableCol at the given index from this Table's children list.
  */
-public TableCol removeCol(int anIndex)  { return (TableCol)_split.removeChild(anIndex); }
+public TableCol removeCol(int anIndex)  { return (TableCol)_split.removeItem(anIndex); }
 
 /**
  * Removes the given TableCol from this table's children list.

@@ -314,7 +314,7 @@ protected FileHeader getFileHeader(String aPath) throws Exception  { throw notIm
 /**
  * Returns file content (bytes for file, FileHeaders for dir).
  */
-protected abstract Object getFileContent(String aPath) throws Exception;
+protected Object getFileContent(String aPath) throws Exception  { throw notImpl("getFileContent"); }
 
 /**
  * Saves a file.
