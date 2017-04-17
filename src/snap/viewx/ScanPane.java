@@ -18,13 +18,20 @@ public class ScanPane extends ViewOwner {
     // The public input stream
     public static final InputStream in = _in;
     
+    // The public out and err PrintStreams
+    public static PrintStream out = System.out;
+    public static PrintStream err = System.err;
+    
 /**
  * Creates a new ScanPane.
  */
 public ScanPane()
 {
-    System.setOut(new SPPrintStream(System.out));
-    System.setErr(new SPPrintStream(System.err));
+    out = new SPPrintStream(System.out);
+    err = new SPPrintStream(System.err);
+    
+    System.setOut(out);
+    System.setErr(err);
 }
 
 /**
