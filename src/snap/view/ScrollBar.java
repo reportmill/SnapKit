@@ -26,6 +26,9 @@ public class ScrollBar extends View {
     // The delta between last mouse press and value
     double         _dv;
     
+    // Constants for properties
+    public static final String Scroll_Prop = "Scroll";
+    
 /**
  * Creates a new ScrollBar.
  */
@@ -43,7 +46,7 @@ public void setScroll(double aValue)
 {
     if(aValue<0) aValue = 0; else if(aValue>1) aValue = 1;
     if(MathUtils.equals(aValue,_scroll)) return;
-    firePropChange("Scroll", _scroll, _scroll=aValue);
+    firePropChange(Scroll_Prop, _scroll, _scroll=aValue);
     repaint();
 }
 

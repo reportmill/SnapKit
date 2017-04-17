@@ -213,13 +213,13 @@ public Border getDefaultBorder()  { return SCROLL_VIEW_BORDER; }
 public void propertyChange(PropChange anEvent)
 {
     String pname = anEvent.getPropertyName();
-    if(pname.equals("Scroll")) {
+    if(pname==ScrollBar.Scroll_Prop) {
         if(anEvent.getSource()==_hbar) _scroller.setRatioH(SnapUtils.doubleValue(anEvent.getNewValue()));
         else _scroller.setRatioV(SnapUtils.doubleValue(anEvent.getNewValue()));
     }
-    else if(pname.equals("ScrollV"))
+    else if(pname==Scroller.ScrollV_Prop)
         getVBar().setScroll(_scroller.getRatioV()); //SnapUtils.doubleValue(anEvent.getNewValue()));
-    else if(pname.equals("ScrollH"))
+    else if(pname==Scroller.ScrollH_Prop)
         getHBar().setScroll(_scroller.getRatioH()); //SnapUtils.doubleValue(anEvent.getNewValue()));
 }
 

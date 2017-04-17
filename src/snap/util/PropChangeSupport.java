@@ -141,6 +141,7 @@ private static class NamedPCL implements PropChangeListener {
     PropChangeListener pcl; String prop;
     public NamedPCL(PropChangeListener aPCL, String aProp)  { pcl = aPCL; prop = aProp; }
     public void propertyChange(PropChange aPC)  { if(aPC.getPropertyName().equals(prop)) pcl.propertyChange(aPC); }
+    public String toString()  { return "NamedPropChangeListener (" + prop + ")"; }
 }
 
 /**
@@ -157,8 +158,10 @@ private static class SplitPCL implements PropChangeListener {
     /** Returns whether either PCL hasListeners for prop. */
     public boolean hasListeners(String aProp)
     {
-        if(_pc1 instanceof NamedPCL && ((NamedPCL)_pc1).prop.equals(aProp)) return true;
-        if(_pc1 instanceof SplitPCL && ((SplitPCL)_pc1).hasListeners(aProp)) return true;
+        if(_pc1 instanceof NamedPCL) { if(((NamedPCL)_pc1).prop.equals(aProp)) return true; }
+        else if(_pc1 instanceof SplitPCL) { if(((SplitPCL)_pc1).hasListeners(aProp)) return true; }
+        else return true;
+        
         if(_pc2 instanceof NamedPCL) return ((NamedPCL)_pc2).prop.equals(aProp);
         if(_pc2 instanceof SplitPCL) return ((SplitPCL)_pc2).hasListeners(aProp);
         return true;
@@ -194,6 +197,9 @@ private static class SplitPCL implements PropChangeListener {
         if(_pc2 instanceof SplitPCL) _pc2 = ((SplitPCL)_pc2).remove(aPCL);
         return this;
     }
+    
+    /** Standard toString. */
+    public String toString()  { return "SplitPropChangeListener { pc1(" + _pc1 + "), pc2(" + _pc2 + ") }"; }
 }
 
 /**
