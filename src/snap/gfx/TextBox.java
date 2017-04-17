@@ -744,8 +744,10 @@ public Path getPathForChars(int aStart, int anEnd)
 public void paint(Painter aPntr)
 {
     // Get intersection of clip rect and bounds
+    aPntr.save();
     Rect clip = aPntr.getClipBounds();
     clip = clip!=null? clip.getIntersectRect(getBounds()) : getBounds();
+    aPntr.clip(clip);
     
     // Iterate over lines
     for(int i=0, iMax=getLineCount(); i<iMax; i++) { TextBoxLine line = getLine(i); double ly = line.getBaseline();
@@ -777,6 +779,9 @@ public void paint(Painter aPntr)
             }
         }
     }
+    
+    // Restore state
+    aPntr.restore();
 }
 
 /**

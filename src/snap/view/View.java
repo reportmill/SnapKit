@@ -2078,9 +2078,10 @@ public XMLElement toXML(XMLArchiver anArchiver)
     if(isVertical()) e.add(Vertical_Prop, true);
     
     // Archive border, Fill, Effect
-    if(!SnapUtils.equals(getBorder(),getDefaultBorder())) e.add(anArchiver.toXML(getBorder(), this));
-    if(!SnapUtils.equals(getFill(),getDefaultFill())) e.add(anArchiver.toXML(getFill(), this));
-    if(getEffect()!=null) e.add(anArchiver.toXML(getEffect(), this));
+    Paint fill = getFill(); Border brdr = getBorder(); Effect eff = getEffect();
+    if(brdr!=null && !SnapUtils.equals(brdr,getDefaultBorder())) e.add(anArchiver.toXML(brdr, this));
+    if(fill!=null && !SnapUtils.equals(fill,getDefaultFill())) e.add(anArchiver.toXML(fill, this));
+    if(eff!=null) e.add(anArchiver.toXML(eff, this));
     
     // Archive font
     if(!SnapUtils.equals(getFont(),getDefaultFont())) e.add(getFont().toXML(anArchiver));
