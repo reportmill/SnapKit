@@ -156,7 +156,20 @@ protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(aW
 /**
  * Override to layout children.
  */
-protected void layoutImpl()  { _layout.layoutChildren(); }
+protected void layoutImpl()
+{
+    // Do normal layout
+    _layout.layoutChildren();
+    
+    // If children don't fill main axis, grow last child
+    Insets ins = getInsetsAll();
+    double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
+    View child = getChildLast();
+    if(isHorizontal() && MathUtils.lt(child.getMaxX(),w))
+        child.setWidth(w - child.getX());
+    else if(isVertical() && MathUtils.lt(child.getMaxY(),h))
+        child.setHeight(h - child.getY());
+}
 
 /**
  * Returns the default border.

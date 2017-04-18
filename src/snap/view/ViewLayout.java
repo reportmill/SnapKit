@@ -351,10 +351,6 @@ public static class HBoxLayout extends ViewLayout {
             }
         }
         
-        // If dividers are present, adjust layouts
-        if(dividers) for(View child : children) if(child instanceof Divider)
-            ((Divider)child).adjustLayouts(children, cbnds);
-
         // Reset children bounds
         setBounds(children, cbnds);
     }
@@ -442,10 +438,6 @@ public static class VBoxLayout extends ViewLayout {
                 if(dy>0) cbnd.setY(cbnd.getY() + extra*ay);
             }
         }
-
-        // If dividers are present, adjust layouts
-        if(dividers) for(View child : children) if(child instanceof Divider)
-            ((Divider)child).adjustLayouts(children, cbnds);
 
         // Reset children bounds
         setBounds(children, cbnds);
