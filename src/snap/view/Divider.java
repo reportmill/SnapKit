@@ -119,7 +119,6 @@ protected void setLocationH(double aY)
         View child = par.getChildLast();
         child.setPrefHeight(child.getHeight() + extra);
     }
-    
 }
 
 /**

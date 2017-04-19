@@ -14,6 +14,9 @@ public class SplitView extends ParentView {
     // The list of items
     List <View>             _items = new ArrayList();
     
+    // The list of dividers
+    List <Divider>          _divs = new ArrayList();
+    
     // The layout
     ViewLayout.BoxesLayout  _layout = new ViewLayout.BoxesLayout(this);
     
@@ -54,21 +57,33 @@ public List <View> getItems()  { return _items; }
  */
 public void addItem(View aView, int anIndex)
 {
-    if(getItemCount()>0)        // Add divider, unless only item
-        addChild(new Divider(), anIndex>0? anIndex*2-1 : 0);
+    // Add View item
+    _items.add(anIndex,aView);
+    
+    // If more than one item, add divider
+    if(getItemCount()>1) {
+        Divider div = new Divider();
+        addDivider(div, anIndex>0? (anIndex-1) : 0);
+        addChild(div, anIndex>0? (anIndex*2-1) : 0);
+    }
+        
+    // Add view as child
     addChild(aView, anIndex*2);
-    _items.add(aView);
 }
 
 /**
  * Override to remove unused dividers.
  */
-public void removeItem(int anIndex)
+public View removeItem(int anIndex)
 {
-    _items.remove(anIndex);
-    removeChild(anIndex*2);
-    if(getItemCount()>0)        // Remove divider, unless only item
-        removeChild(anIndex>0? anIndex*2-1 : 0);
+    // Remove item and child
+    View view = _items.remove(anIndex);
+    removeChild(view);
+    
+    // If at least one item left, remove extra divider
+    if(getItemCount()>0)
+        removeDivider(anIndex>0? (anIndex-1) : 0);
+    return view;
 }
 
 /**
@@ -76,7 +91,7 @@ public void removeItem(int anIndex)
  */
 public int removeItem(View aView)
 {
-    int index = ListUtils.indexOfId(_items, aView);
+    int index = indexOfItem(aView);
     if(index>=0) removeItem(index);
     return index;
 }
@@ -106,12 +121,32 @@ public void setItems(View ... theViews)
 public void removeItems()  { for(View view : getItems().toArray(new View[0])) removeItem(view); }
 
 /**
+ * Returns the index of given item.
+ */
+public int indexOfItem(View anItem)  { return ListUtils.indexOfId(_items, anItem); }
+
+/**
  * Adds a child with animation.
  */
-public void addItemWithAnim(View aView, double aSize)
+public void addItemWithAnim(View aView, double aSize)  { addItemWithAnim(aView, aSize, getItemCount()); }
+
+/**
+ * Adds a child with animation.
+ */
+public void addItemWithAnim(View aView, double aSize, int anIndex)
 {
-    addItem(aView); getDivider(0).setRemainder(1);
-    getDivider(0).getAnimCleared(500).setValue("Remainder", 1d, aSize).play();
+    addItem(aView, anIndex);
+    Divider div = anIndex==0? getDivider(0) : getDivider(anIndex-1);
+    
+    if(anIndex==0) {
+        div.setLocation(0);
+        div.getAnimCleared(500).setValue("Location", 1d, aSize).play();
+    }
+    
+    else {
+        div.setRemainder(1);
+        div.getAnimCleared(500).setValue("Remainder", 1d, aSize).play();
+    }
 }
 
 /**
@@ -119,29 +154,50 @@ public void addItemWithAnim(View aView, double aSize)
  */
 public void removeItemWithAnim(View aView)
 {
-    double size = isVertical()? aView.getHeight() : aView.getWidth(); getDivider(0).setRemainder(size);
-    getDivider(0).getAnimCleared(500).setValue("Remainder", size, 1d).setOnFinish(a -> removeItem(aView)).play();
+    int index = indexOfItem(aView);
+    Divider div = index==0? getDivider(0) : getDivider(index-1);
+    double size = isVertical()? aView.getHeight() : aView.getWidth();
+    
+    if(index==0) {
+        div.setLocation(size);
+        div.getAnimCleared(500).setValue("Location", size, 1d).setOnFinish(a -> removeItem(aView)).play();
+    }
+    
+    else {
+        div.setRemainder(size);
+        div.getAnimCleared(500).setValue("Remainder", size, 1d).setOnFinish(a -> removeItem(aView)).play();
+    }
 }
 
 /**
  * Returns the number of dividers.
  */
-public int getDividerCount()  { return Math.max(getItemCount() - 1, 0); }
+public int getDividerCount()  { return _divs.size(); }
 
 /**
  * Returns the individual divider at given index.
  */
-public Divider getDivider(int anIndex)  { return (Divider)getChild(anIndex*2+1); }
+public Divider getDivider(int anIndex)  { return _divs.get(anIndex); }
+
+/**
+ * Adds a new divider.
+ */
+protected void addDivider(Divider aDiv, int anIndex)  { _divs.add(anIndex, aDiv); }
+
+/**
+ * Removes a divider.
+ */
+protected Divider removeDivider(int anIndex)
+{
+    Divider div = _divs.remove(anIndex);
+    removeChild(div);
+    return div;
+}
 
 /**
  * Returns the dividers.
  */
-public Divider[] getDividers()
-{
-    int dc = getDividerCount();
-    Divider divs[] = new Divider[dc]; for(int i=0;i<dc;i++) divs[i] = getDivider(i);
-    return divs;
-}
+public Divider[] getDividers()  { return _divs.toArray(new Divider[_divs.size()]); }
 
 /**
  * Calculates the preferred width.
