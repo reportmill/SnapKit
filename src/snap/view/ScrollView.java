@@ -20,7 +20,7 @@ public class ScrollView extends ParentView implements PropChangeListener {
     Boolean         _showHBar, _showVBar;
     
     // The ScrollBar size
-    int             BAR_SIZE = 16;
+    int             _barSize = 16;
     
     // Constants
     static final Border SCROLL_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
@@ -49,6 +49,11 @@ public View getContent()  { return _scroller.getContent(); }
  * Sets the content.
  */
 public void setContent(View aView)  { _scroller.setContent(aView); }
+
+/**
+ * Returns the view that handles scrolling.
+ */
+public Scroller getScroller()  { return _scroller; }
 
 /**
  * Returns the horizontal scroll.
@@ -81,11 +86,6 @@ public ScrollBar getVBar()
 }
 
 /**
- * Returns the view that handles scrolling.
- */
-public Scroller getScroller()  { return _scroller; }
-
-/**
  * Returns whether to show horizontal scroll bar (null means 'as-needed').
  */
 public Boolean getShowHBar()  { return _showHBar; }
@@ -104,6 +104,48 @@ public Boolean getShowVBar()  { return _showVBar; }
  * Returns whether to show vertical scroll bar (null means 'as-needed').
  */
 public void setShowVBar(Boolean aValue)  { firePropChange("VBarPolicy", _showVBar, _showVBar=aValue); relayout(); }
+
+/**
+ * Returns whether HBar is showing.
+ */
+public boolean isHBarShowing()  { return getHBar().getParent()!=null; }
+
+/**
+ * Sets whether HBar is showing.
+ */
+protected void setHBarShowing(boolean aValue)
+{
+    if(aValue==isHBarShowing()) return;
+    ScrollBar hbar = getHBar();
+    if(aValue) addChild(hbar);
+    else removeChild(hbar);
+}
+
+/**
+ * Returns whether VBar is showing.
+ */
+public boolean isVBarShowing()  { return getVBar().getParent()!=null; }
+
+/**
+ * Sets whether VBar is showing.
+ */
+protected void setVBarShowing(boolean aValue)
+{
+    if(aValue==isVBarShowing()) return;
+    ScrollBar vbar = getVBar();
+    if(aValue) addChild(vbar);
+    else removeChild(vbar);
+}
+
+/**
+ * Returns the scroll bar size.
+ */
+public int getBarSize()  { return _barSize; }
+
+/**
+ * Sets the scroll bar size.
+ */
+public void setBarSize(int aValue)  { _barSize = aValue; }
 
 /**
  * Returns whether this ScrollView fits content to its width.
@@ -169,7 +211,7 @@ protected void layoutImpl()
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
     Size cpsize = getContent()!=null? getContent().getBestSize() : new Size(1,1);
-    double cpw = cpsize.getWidth(), cph = cpsize.getHeight();
+    double cpw = cpsize.getWidth(), cph = cpsize.getHeight(); int barSize = getBarSize();
     
     // Get whether to show scroll bars
     boolean asneedH = _showHBar==null, alwaysH = _showHBar==Boolean.TRUE;
@@ -178,27 +220,23 @@ protected void layoutImpl()
     boolean showVBar = alwaysV || asneedV && cph>h && !_scroller.isFillingHeight();
     
     // If horizontal scrollbar needed, add it
-    if(showHBar) {
-        ScrollBar hbar = getHBar(); if(hbar.getParent()==null) addChild(hbar);
-        double sbw = showVBar? w-BAR_SIZE : w;
-        hbar.setBounds(x,y+h-BAR_SIZE,sbw,BAR_SIZE);
+    setHBarShowing(showHBar);
+    if(showHBar) { ScrollBar hbar = getHBar();
+        double sbw = showVBar? w-barSize : w;
+        hbar.setBounds(x,y+h-barSize,sbw,barSize);
         hbar.setThumbRatio(sbw/cpw);
     }
-    else if(getHBar().getParent()!=null)
-        removeChild(getHBar());
     
     // If vertical scrollbar needed, add it
-    if(showVBar) {
-        ScrollBar vbar = getVBar(); if(vbar.getParent()==null) addChild(vbar);
-        double sbh = showHBar? h-BAR_SIZE : h;
-        vbar.setBounds(x+w-BAR_SIZE,y,BAR_SIZE,sbh);
+    setVBarShowing(showVBar);
+    if(showVBar) { ScrollBar vbar = getVBar();
+        double sbh = showHBar? h-barSize : h;
+        vbar.setBounds(x+w-barSize,y,barSize,sbh);
         vbar.setThumbRatio(sbh/cph);
     }
-    else if(getVBar().getParent()!=null)
-        removeChild(getVBar());
     
     // Set scroller
-    if(showHBar) h -= BAR_SIZE; if(showVBar) w -= BAR_SIZE;
+    if(showHBar) h -= barSize; if(showVBar) w -= barSize;
     _scroller.setBounds(x,y,w,h);
 }
 
@@ -231,9 +269,10 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive ShowHBar, ShowVBar
+    // Archive ShowHBar, ShowVBar, BarSize
     if(getShowHBar()!=null) e.add("ShowHBar", getShowHBar());
     if(getShowVBar()!=null) e.add("ShowVBar", getShowVBar());
+    if(getBarSize()!=16) e.add("BarSize", getBarSize());
     return e;
 }
 
@@ -245,9 +284,10 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive ShowHBar, ShowVBar
+    // Unarchive ShowHBar, ShowVBar, BarSize
     if(anElement.hasAttribute("ShowHBar")) setShowHBar(anElement.getAttributeBoolValue("ShowHBar"));
     if(anElement.hasAttribute("ShowVBar")) setShowVBar(anElement.getAttributeBoolValue("ShowVBar"));
+    if(anElement.hasAttribute("BarSize")) setBarSize(anElement.getAttributeIntValue("BarSize"));
 }
 
 /**
