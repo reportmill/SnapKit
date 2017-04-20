@@ -25,7 +25,6 @@ public class TableCol <T> extends ListView <T> {
 public TableCol()
 {
     _header.setPadding(4,4,4,4);
-    addPropChangeListener(pce -> _header.setPrefWidth(getWidth()), Width_Prop);
     setFocusWhenPressed(false);
 }
 

@@ -31,6 +31,7 @@ public class ParentView extends View {
     
     // Constants for properties
     public static final String ClipToBounds_Prop = "ClipToBounds";
+    public static final String NeedsLayout_Prop = "NeedsLayout";
     
 /**
  * Returns the number of children associated with this node.
@@ -326,7 +327,7 @@ public boolean isNeedsLayout()  { return _needsLayout; }
 protected void setNeedsLayout(boolean aVal)
 {
     if(_needsLayout || _inLayout) return;
-    _needsLayout = true;
+    firePropChange(NeedsLayout_Prop, _needsLayout, _needsLayout = true);
     ParentView par = getParent(); if(par!=null) par.setNeedsLayoutDeep(true);
 }
 

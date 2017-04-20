@@ -61,18 +61,22 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
  */
 public TableView()
 {
+    // Enable Action event for selection change
     enableEvents(Action);
     
-    _split.setBorder(null);
-    _split.setGrowWidth(true);
+    // Configure Columns SplitView and ScrollView and add
+    _split.setBorder(null); _split.setGrowWidth(true);
+    setBorder(_scroll.getBorder()); _scroll.setBorder(null);
     addChild(_scroll);
-    setBorder(_scroll.getBorder());
-    _scroll.setBorder(null);
     
     // Set main scroller to sync HeaderScroller
     Scroller scroller = _scroll.getScroller();
-    scroller.addPropChangeListener(pce -> getHeaderScroller().setWidth(scroller.getWidth()), Width_Prop);
     scroller.addPropChangeListener(pce -> getHeaderScroller().setScrollH(scroller.getScrollH()), Scroller.ScrollH_Prop);
+    
+    // Whenever one split needs layout, propogate to other
+    SplitView hsplit = getHeaderSplitView();
+    _split.addPropChangeListener(pc -> hsplit.relayout(), NeedsLayout_Prop);
+    hsplit.addPropChangeListener(pc -> _split.relayout(), NeedsLayout_Prop);
 }
 
 /**
@@ -124,14 +128,24 @@ public TableCol[] getCols()  { return _split.getItems().toArray(new TableCol[0])
  */
 public void addCol(TableCol aCol)
 {
+    // Add column to column SplitView
     _split.addItem(aCol);
     
-    // Reset split DividerSize and Fill
-    for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
+    // Create Header Box for Column Header label
+    View hdr = aCol.getHeader();
+    Box hdrBox = new Box(hdr) {
+        public double getPrefWidthImpl(double aH)  { return aCol.getPrefWidth(); }
+        public void setPrefWidth(double aValue)  { aCol.setPrefWidth(aValue); }
+        public boolean isGrowWidth()  { return aCol.isGrowWidth(); }
+    };
+    hdrBox.setFillWidth(true);
     
-    // Add Header
+    // Add Header Box to Header SplitView
     SplitView hsplit = getHeaderSplitView();
-    hsplit.addItem(aCol.getHeader());
+    hsplit.addItem(hdrBox);
+    
+    // Configure split dividers
+    for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
     for(Divider div : hsplit.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILLH); div.setBorder(null); }
 }
 
@@ -399,10 +413,20 @@ protected void layoutImpl()
     
     // If Header, update bounds
     if(isShowHeader()) { hh = _header.getPrefHeight();
-        _header.setBounds(x,y,w,hh); }
+        _header.setBounds(x,y,_header.getWidth(),hh); }
         
     // Layout out scrollView
     _scroll.setBounds(x,y+hh,w,h-hh);
+}
+
+/**
+ * Override to sync header width with TableView.ScrollView.Scroller.
+ */
+protected void layoutDeepImpl()
+{
+    _scroll.layoutDeep();
+    _header.setWidth(_scroll.getScroller().getWidth());
+    _header.layoutDeep();
 }
 
 /**
