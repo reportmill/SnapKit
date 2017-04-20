@@ -17,6 +17,11 @@ public class TransitionPane extends ParentView {
     Transition           _transition = MoveDown;
 
 /**
+ * Creates a TransitionPane.
+ */
+public TransitionPane()  { setClipToBounds(true); }
+
+/**
  * Returns the content node.
  */
 public View getContent()  { return _content; }
@@ -82,7 +87,6 @@ protected void layoutImpl()
     if(_content==null) return;
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
-    setClip(getBoundsLocal());
     _content.setBounds(x, y, w, h);
 }
 

@@ -17,9 +17,6 @@ public class ParentView extends View {
     // Whether node needs layout, or node has children that need layout
     boolean        _needsLayout, _needsLayoutDeep;
 
-    // Whether view should clip children to bounds
-    boolean        _clipToBounds;
-    
     // Whether this node is performing layout
     boolean        _inLayout, _inLayoutDeep;
     
@@ -187,34 +184,6 @@ public View[] getChildrenManaged()
 }
 
 /**
- * Returns whether view should clip to bounds.
- */
-public boolean isClipToBounds()  { return _clipToBounds; }
-
-/**
- * Sets whether view should clip to bounds.
- */
-public void setClipToBounds(boolean aValue)
-{
-    if(aValue==_clipToBounds) return;
-    firePropChange(ClipToBounds_Prop, _clipToBounds, _clipToBounds = aValue);
-    repaint();
-}
-
-/**
- * Clips to bounds.
- */
-protected void clipToBounds(Painter aPntr)
-{
-    Shape shp = getBoundsShape();
-    if(shp instanceof RectBase) {
-        Insets ins = getInsetsAll(); double w = getWidth(), h = getHeight();
-        shp = ((RectBase)shp).copyFor(new Rect(ins.left, ins.right, w-ins.left-ins.right, h-ins.top-ins.bottom));
-    }
-    aPntr.clip(shp);
-}
-
-/**
  * Returns the next focus View after given view (null to return first).
  */
 protected View getFocusNext(View aChild)
@@ -279,31 +248,30 @@ protected void paintAll(Painter aPntr)
  */
 protected void paintChildren(Painter aPntr)
 {
-    // If clip to bounds, do it
-    if(isClipToBounds()) {
+    // If view clip set, save painter state and set
+    Shape vclip = getClip();
+    if(vclip!=null) {
         aPntr.save();
-        clipToBounds(aPntr);
+        aPntr.clip(vclip);
     }
 
-    // Get clip
-    Shape clip = aPntr.getClip();
+    // Get painter clip
+    Shape pclip = aPntr.getClip();
     
     // Iterate over children and paint any that intersect clip
     for(View child : getChildren()) {
         if(!child.isVisible()) continue;
-        Shape clip2 = child.parentToLocal(clip);
-        if(clip2.intersects(child.getBoundsLocal())) {
+        Shape clip = child.parentToLocal(pclip);
+        if(clip.intersects(child.getBoundsLocal())) {
             aPntr.save();
             aPntr.transform(child.getLocalToParent());
-            if(child.getClip()!=null)
-                aPntr.clip(child.getClip());
             child.paintAll(aPntr);
             aPntr.restore();
         }
     }
     
     // If ClipToBounds, Restore original clip
-    if(isClipToBounds()) aPntr.restore();
+    if(vclip!=null) aPntr.restore();
 }
 
 /**

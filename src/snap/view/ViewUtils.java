@@ -99,8 +99,6 @@ public static String getId(View aView)
 public static void paintAll(View aView, Painter aPntr)
 {
     aPntr.save();
-    if(aView.getClip()!=null)
-        aPntr.clip(aView.getClip());
     layoutDeep(aView);
     aView.paintAll(aPntr);
     aPntr.restore();

@@ -627,9 +627,31 @@ public boolean isEnabled()  { return !_disabled; }
 public void setEnabled(boolean aValue)  { setDisabled(!aValue); }
 
 /**
+ * Returns whether view should clip to bounds.
+ */
+public boolean isClipToBounds()  { return _clip==ClipToBoundsRect; }
+
+/**
+ * Sets whether view should clip to bounds.
+ */
+public void setClipToBounds(boolean aValue)
+{
+    if(aValue==isClipToBounds()) return;
+    setClip(aValue? ClipToBoundsRect : null);
+}
+
+// The shared rect to represent "ClipToBounds"
+private static Rect ClipToBoundsRect = new Rect();
+
+/**
  * Returns the clip shape.
  */
-public Shape getClip()  { return _clip; }
+public Shape getClip()
+{
+    if(_clip==ClipToBoundsRect)
+        return getBoundsShape();
+    return _clip;
+}
 
 /**
  * Sets the clip shape.

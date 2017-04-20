@@ -32,6 +32,7 @@ public class Scroller extends ParentView {
 public Scroller()
 {
     enableEvents(Scroll);
+    setClipToBounds(true);
 }
 
 /**
@@ -253,7 +254,6 @@ protected void layoutImpl()
     // Get content bounds
     double sx = getScrollH(); if(sx>cpw-w) sx = Math.round(cpw-w);
     double sy = getScrollV(); if(sy>cph-h) sy = Math.round(cph-h);
-    setClip(getBoundsLocal());
     cnt.setBounds(-sx,-sy,cpw,cph);
 }
 
