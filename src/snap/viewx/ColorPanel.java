@@ -341,8 +341,8 @@ public static class ImagePicker extends View {
     }
     
     /** Override to provide size. */
-    public double getPrefWidthImpl(double aH)  { return _img!=null? _img.getWidth() : 0; }
-    public double getPrefHeightImpl(double aW)  { return _img!=null? _img.getHeight() : 0; }
+    protected double getPrefWidthImpl(double aH)  { return _img!=null? _img.getWidth() : 0; }
+    protected double getPrefHeightImpl(double aW)  { return _img!=null? _img.getHeight() : 0; }
 }
 
 /**

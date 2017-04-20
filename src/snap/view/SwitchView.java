@@ -83,21 +83,9 @@ public void setSelectedName(String aName)
 public String getValuePropName()  { return SelectedIndex_Prop; }
 
 /**
- * Override to layout content.
- */
-protected void layoutImpl()
-{
-    Insets ins = getInsetsAll();
-    double tp = ins.top, rt = ins.right, bt = ins.bottom, lt = ins.left;
-    double w = getWidth() - lt - rt, h = getHeight() - tp - bt;
-    for(int i=0, iMax=getChildCount(); i<iMax; i++) { View child = getChild(i);
-        child.setBounds(lt, tp, w, h); child.setVisible(i==_sindex); child.setPickable(i==_sindex); }
-}
-
-/**
  * Override to return preferred width of content.
  */
-public double getPrefWidthImpl(double aH)
+protected double getPrefWidthImpl(double aH)
 {
     View c = getSelectedPane(); double cw = c!=null? c.getPrefWidth() : 0;
     Insets pad = getInsetsAll(); double pl = pad.getLeft(), pr = pad.getRight();
@@ -107,11 +95,23 @@ public double getPrefWidthImpl(double aH)
 /**
  * Override to return preferred height of content.
  */
-public double getPrefHeightImpl(double aW)
+protected double getPrefHeightImpl(double aW)
 {
     View c = getSelectedPane(); double ch = c!=null? c.getPrefHeight() : 0;
     Insets pad = getInsetsAll(); double pt = pad.getTop(), pb = pad.getBottom();
     return ch + pt + pb;
+}
+
+/**
+ * Override to layout content.
+ */
+protected void layoutImpl()
+{
+    Insets ins = getInsetsAll();
+    double tp = ins.top, rt = ins.right, bt = ins.bottom, lt = ins.left;
+    double w = getWidth() - lt - rt, h = getHeight() - tp - bt;
+    for(int i=0, iMax=getChildCount(); i<iMax; i++) { View child = getChild(i);
+        child.setBounds(lt, tp, w, h); child.setVisible(i==_sindex); child.setPickable(i==_sindex); }
 }
 
 /**

@@ -201,12 +201,12 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 /**
  * Returns the preferred width.
  */
-public double getPrefWidthImpl(double aH)  { return getLayout().getPrefWidth(-1); }
+protected double getPrefWidthImpl(double aH)  { return getLayout().getPrefWidth(-1); }
 
 /**
  * Returns the preferred height.
  */
-public double getPrefHeightImpl(double aW)  { return getLayout().getPrefHeight(-1); }
+protected double getPrefHeightImpl(double aW)  { return getLayout().getPrefHeight(-1); }
 
 /**
  * Layout children.

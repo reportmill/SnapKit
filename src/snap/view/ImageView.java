@@ -174,7 +174,7 @@ public Pos getDefaultAlign()  { return Pos.CENTER; }
 /**
  * Returns the preferred width.
  */
-public double getPrefWidthImpl(double aH)
+protected double getPrefWidthImpl(double aH)
 {
     Insets ins = getInsetsAll();
     return ins.left + (_image!=null? _image.getWidth() : 0) + ins.right;
@@ -183,7 +183,7 @@ public double getPrefWidthImpl(double aH)
 /**
  * Returns the preferred height.
  */
-public double getPrefHeightImpl(double aW)
+protected double getPrefHeightImpl(double aW)
 {
     Insets ins = getInsetsAll();
     return ins.top + (_image!=null? _image.getHeight() : 0) + ins.bottom;
@@ -192,7 +192,7 @@ public double getPrefHeightImpl(double aW)
 /**
  * Paints node.
  */
-public void paintFront(Painter aPntr)
+protected void paintFront(Painter aPntr)
 {
     // Get whether to clip to bounds, and if so, do clip
     boolean clipToBounds = isFitMinor() && !isFitMajor();

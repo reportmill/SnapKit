@@ -79,7 +79,7 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 /**
  * Returns the preferred width.
  */
-public double getPrefWidthImpl(double aH)
+protected double getPrefWidthImpl(double aH)
 {
     Insets ins = getInsetsAll(); double tw = getTextWidth();
     return ins.left + tw + ins.right;
@@ -88,7 +88,7 @@ public double getPrefWidthImpl(double aH)
 /**
  * Returns the preferred height.
  */
-public double getPrefHeightImpl(double aW)
+protected double getPrefHeightImpl(double aW)
 {
     Insets ins = getInsetsAll(); double th = getTextHeight();
     return ins.top + th + ins.bottom;
@@ -97,7 +97,7 @@ public double getPrefHeightImpl(double aW)
 /**
  * Paints StringView.
  */
-public void paintFront(Painter aPntr)
+protected void paintFront(Painter aPntr)
 {
     if(length()==0) return;
     Rect bnds = getTextBounds(); Font font = getFont(); double baseline = Math.ceil(font.getAscent());

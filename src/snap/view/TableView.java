@@ -134,7 +134,7 @@ public void addCol(TableCol aCol)
     // Create Header Box for Column Header label
     View hdr = aCol.getHeader();
     Box hdrBox = new Box(hdr) {
-        public double getPrefWidthImpl(double aH)  { return aCol.getPrefWidth(); }
+        protected double getPrefWidthImpl(double aH)  { return aCol.getPrefWidth(); }
         public void setPrefWidth(double aValue)  { aCol.setPrefWidth(aValue); }
         public boolean isGrowWidth()  { return aCol.isGrowWidth(); }
     };

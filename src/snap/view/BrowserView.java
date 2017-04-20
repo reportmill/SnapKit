@@ -306,7 +306,7 @@ public void setMinColumnWidth(int aWidth)  { _minColWidth = aWidth; }
 /**
  * PreferredSize.
  */
-public double getPrefWidthImpl(double aH)
+protected double getPrefWidthImpl(double aH)
 {
     View vport = getParent(); double width = vport!=null? vport.getWidth() : 150;
     return width/getVisColCount()*getColCount();
@@ -315,7 +315,7 @@ public double getPrefWidthImpl(double aH)
 /**
  * Returns the preferred height.
  */
-public double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
+protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
 
 /**
  * Layout children.
@@ -380,7 +380,7 @@ private class ColScrollView extends ScrollView {
     }
     
     /** PreferredSize. */
-    public double getPrefWidthImpl(double aH)
+    protected double getPrefWidthImpl(double aH)
     {
         View brsr = getParent(), vport = brsr!=null? brsr.getParent() : null;
         double width = vport!=null? vport.getWidth() : brsr!=null? brsr.getWidth() : 200;
