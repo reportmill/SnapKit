@@ -21,7 +21,7 @@ public class ParentView extends View {
     boolean        _clipToBounds;
     
     // Whether this node is performing layout
-    boolean        _inLayout;
+    boolean        _inLayout, _inLayoutDeep;
     
     // Constants for properties
     public static final String Child_Prop = "Child";
@@ -65,7 +65,7 @@ protected void addChild(View aChild, int anIndex)
     
     // Add child to Children list
     _children = ArrayUtils.add(_children, aChild, anIndex); _managed = null;
-    relayout(); relayoutParent(); setNeedsLayoutDeep(true); repaint();
+    relayout(); relayoutParent(); repaint(); setNeedsLayoutDeep(true);
     
     // If this shape has PropChangeListeners, start listening to children as well
     if(_pcs.hasDeepListeners()) {
@@ -311,44 +311,9 @@ protected void paintChildren(Painter aPntr)
 protected void paintAbove(Painter aPntr)  { }
 
 /**
- * Returns whether view is currently performing layout.
+ * Override Node version to really request layout from RootView.
  */
-public boolean isInLayout()  { return _inLayout; }
-
-/**
- * Override to layout children.
- */
-public void layout()
-{
-    if(_inLayout) return; _inLayout = true;
-    layoutImpl(); _inLayout = false;
-}
-
-/**
- * Actual method to layout children.
- */
-protected void layoutImpl()  { }
-
-/**
- * Lays out children deep.
- */
-public void layoutDeep()
-{
-    if(_needsLayout) layout();
-    if(_needsLayoutDeep) layoutDeepImpl();
-    _needsLayout = _needsLayoutDeep = false;
-}
-
-/**
- * Lays out children deep.
- */
-protected void layoutDeepImpl()
-{
-    for(View child : getChildren())
-        if(child instanceof ParentView) { ParentView par = (ParentView)child;
-            if(par._needsLayout || par._needsLayoutDeep)
-                par.layoutDeep(); }
-}
+public void relayout()  { setNeedsLayout(true); }
 
 /**
  * Returns whether needs layout.
@@ -377,13 +342,62 @@ protected void setNeedsLayoutDeep(boolean aVal)
 {
     if(_needsLayoutDeep) return;
     _needsLayoutDeep = true;
+    if(_inLayoutDeep) return;
     ParentView par = getParent(); if(par!=null) par.setNeedsLayoutDeep(true);
 }
 
 /**
- * Override Node version to really request layout from RootView.
+ * Returns whether view is currently performing layout.
  */
-public void relayout()  { setNeedsLayout(true); }
+public boolean isInLayout()  { return _inLayout; }
+
+/**
+ * Override to layout children.
+ */
+public void layout()
+{
+    if(_inLayout) return;
+    _inLayout = true;
+    layoutImpl(); _inLayout = false;
+}
+
+/**
+ * Actual method to layout children.
+ */
+protected void layoutImpl()  { }
+
+/**
+ * Lays out children deep.
+ */
+public void layoutDeep()
+{
+    // Set InLayoutDeep
+    _inLayoutDeep = true;
+    
+    // Do layout
+    if(_needsLayout) layout();
+    
+    // Do layout deep (several times, if necessary)
+    for(int i=0;_needsLayoutDeep;i++) {
+        _needsLayoutDeep = false;
+        layoutDeepImpl();
+        if(i==5) { System.err.println("ParentView.layoutDeep: Too many calls to relayout inside layout"); break; }
+    }
+    
+    // Clear flags
+    _needsLayout = _needsLayoutDeep = _inLayoutDeep = false;
+}
+
+/**
+ * Lays out children deep.
+ */
+protected void layoutDeepImpl()
+{
+    for(View child : getChildren())
+        if(child instanceof ParentView) { ParentView par = (ParentView)child;
+            if(par._needsLayout || par._needsLayoutDeep)
+                par.layoutDeep(); }
+}
 
 /**
  * Override to request layout.

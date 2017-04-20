@@ -546,8 +546,8 @@ public void paintAll(Painter aPntr)
     super.paintAll(aPntr);
     Rect clip = aPntr.getClipBounds(); double rh = getRowHeight();
     int cellStart = (int)Math.max(clip.getY()/rh,0), cellEnd = (int)(clip.getMaxY()/rh);
-    if(cellStart!=_cellStart || cellEnd!=_cellEnd)
-        relayout();
+    if(cellStart<_cellStart || cellEnd>_cellEnd)
+        getEnv().runLater(() -> relayout());
 }
 
 /**

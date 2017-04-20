@@ -47,6 +47,9 @@ public class RootView extends ParentView {
     
     // The timer for animated views
     ViewTimer                _timer = new ViewTimer(25, t -> activatePaintLater());
+    
+    // Whether currently painting
+    boolean                  _painting;
 
     // Whether painting in debug mode
     boolean                  _debug = false; int _pc; long _frames[] = null; //new long[20];
@@ -230,39 +233,6 @@ protected void requestFocus(View aView)
 }
 
 /**
- * Layout children.
- */
-protected void layoutImpl()  { _layout.layoutChildren(); }
-
-/**
- * Override to register for layout.
- */
-protected void setNeedsLayoutDeep(boolean aVal)
-{
-    if(aVal==isNeedsLayoutDeep()) return; super.setNeedsLayoutDeep(aVal);
-    activatePaintLater();
-}
-
-/**
- * Activate PaintLater.
- */
-private final void activatePaintLater()  { if(_plater==null) getEnv().runLater(_plater = _platerShared); }
-
-/**
- * Override to actually paint in this RootView.
- */
-protected void repaintInParent(Rect aRect)  { repaint(aRect!=null? aRect : getBoundsLocal()); }
-
-/**
- * Adds a given ViewOwner to set of owners that need reset on next UI update call.
- */
-public void resetLater(ViewOwner anOwnr)
-{
-    _resetLaters.add(anOwnr);
-    activatePaintLater();
-}
-
-/**
  * Adds a view to set of Views that are being animated.
  */
 public void playAnim(View aView)
@@ -284,12 +254,48 @@ public void stopAnim(View aView)
 }
 
 /**
+ * Adds a given ViewOwner to set of owners that need reset on next UI update call.
+ */
+public void resetLater(ViewOwner anOwnr)
+{
+    _resetLaters.add(anOwnr);
+    activatePaintLater();
+}
+
+/**
+ * Override to register for layout.
+ */
+protected void setNeedsLayoutDeep(boolean aVal)
+{
+    // If Painting, complaint (nothing should change during paint)
+    if(_painting)
+        System.err.println("RootView.relayout: Illegal view changes during paint.");
+
+    // If already set, just return
+    if(aVal==isNeedsLayoutDeep()) return;
+    
+    // Do normal version and activate paint later
+    super.setNeedsLayoutDeep(aVal);
+    activatePaintLater();
+}
+
+/**
+ * Layout children.
+ */
+protected void layoutImpl()  { _layout.layoutChildren(); }
+
+/**
+ * Override to actually paint in this RootView.
+ */
+protected void repaintInParent(Rect aRect)  { repaint(aRect!=null? aRect : getBoundsLocal()); }
+
+/**
  * Called to register a repaint.
  */
 public synchronized void repaint(View aView, double aX, double aY, double aW, double aH)
 {
     // Register for paintLater
-    if(_plater==null) getEnv().runLater(_plater = _platerShared);
+    activatePaintLater();
     
     // Set or combine dirty rect
     Rect drect = _dirtyRects.get(aView);
@@ -354,6 +360,7 @@ public synchronized void paintLater()
  */
 public void paintViews(Painter aPntr, Rect aRect)
 {
+    _painting = true;
     aPntr.save(); if(_frames!=null) startTime();
     aPntr.clip(aRect);
     if(getFill()==null) aPntr.clearRect(aRect.x,aRect.y,aRect.width,aRect.height);
@@ -361,6 +368,7 @@ public void paintViews(Painter aPntr, Rect aRect)
     else paintAll(aPntr);
     aPntr.restore();
     if(_frames!=null) { stopTime(); if(_pc%20==0) printTime(); }
+    _painting = false;
 }
 
 /**
@@ -373,6 +381,11 @@ protected void paintDebug(View aView, Painter aPntr, Shape aShape)
     //TimerTask task = new TimerTask() { public void run()  { RootView.this.repaint(aShape.getBounds()); }};
     //new Timer().schedule(task, 100);
 }
+
+/**
+ * Activate PaintLater.
+ */
+private final void activatePaintLater()  { if(_plater==null) getEnv().runLater(_plater = _platerShared); }
 
 /**
  * Returns the EventDispatcher.
