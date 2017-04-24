@@ -220,7 +220,7 @@ protected void layoutImpl()
     // If children don't fill main axis, grow last child
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
-    View child = getChildLast();
+    View child = getChildLast(); if(child==null) return;
     if(isHorizontal() && MathUtils.lt(child.getMaxX(),w))
         child.setWidth(w - child.getX());
     else if(isVertical() && MathUtils.lt(child.getMaxY(),h))

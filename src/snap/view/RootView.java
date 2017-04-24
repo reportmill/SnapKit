@@ -52,7 +52,7 @@ public class RootView extends ParentView {
     boolean                  _painting;
 
     // Whether painting in debug mode
-    boolean                  _debug = false; int _pc; long _frames[] = null; //new long[20];
+    boolean                  _debug = false; int _pc; long _frames[] = null;//new long[20];
     
     // Constants for properties
     public static final String MenuBar_Prop = "MenuBar";
@@ -265,7 +265,7 @@ public void resetLater(ViewOwner anOwnr)
 /**
  * Override to register for layout.
  */
-protected void setNeedsLayoutDeep(boolean aVal)
+protected synchronized void setNeedsLayoutDeep(boolean aVal)
 {
     // If Painting, complaint (nothing should change during paint)
     if(_painting)
@@ -294,6 +294,10 @@ protected void repaintInParent(Rect aRect)  { repaint(aRect!=null? aRect : getBo
  */
 public synchronized void repaint(View aView, double aX, double aY, double aW, double aH)
 {
+    // If Painting, complaint (nothing should change during paint)
+    if(_painting)
+        System.err.println("RootView.relayout: Illegal repaint call during paint.");
+
     // Register for paintLater
     activatePaintLater();
     
@@ -351,24 +355,23 @@ public synchronized void paintLater()
     getHelper().requestPaint(rect);
     
     // Clear dirty rects, reset runnable and return
-    _dirtyRects.clear(); _plater = null; _pc++;
-    if(_debug && _pc%2==0) repaint(this, rect.x, rect.y, rect.width, rect.height);
+    _dirtyRects.clear(); _plater = null;
 }
 
 /**
  * Paint views.
  */
-public void paintViews(Painter aPntr, Rect aRect)
+public synchronized void paintViews(Painter aPntr, Rect aRect)
 {
     _painting = true;
     aPntr.save(); if(_frames!=null) startTime();
     aPntr.clip(aRect);
     if(getFill()==null) aPntr.clearRect(aRect.x,aRect.y,aRect.width,aRect.height);
-    if(_debug && _pc%2==0) paintDebug(this, aPntr, aRect);
+    if(_debug) paintDebug(this, aPntr, aRect);
     else paintAll(aPntr);
     aPntr.restore();
     if(_frames!=null) { stopTime(); if(_pc%20==0) printTime(); }
-    _painting = false;
+    _painting = false; _pc++;
 }
 
 /**
@@ -376,8 +379,19 @@ public void paintViews(Painter aPntr, Rect aRect)
  */
 protected void paintDebug(View aView, Painter aPntr, Shape aShape)
 {
+    // If odd paint call, just do normal paint and return
+    if(_pc%2==1) { paintAll(aPntr); return; }
+    
+    // Fill paint bounds, sleep
     aPntr.setColor(Color.YELLOW); aPntr.fill(aShape);
-    getEnv().runLater(() -> { try { Thread.sleep(50); } catch(Exception e) { }});
+    
+    // Sleep for a bit then register for real paint
+    getEnv().runLater(() -> { Rect rect = aShape.getBounds();
+        try { Thread.sleep(50); } catch(Exception e) { }
+        repaint(this, rect.x, rect.y, rect.width, rect.height);
+    });
+    
+    // Register for new paint
     //TimerTask task = new TimerTask() { public void run()  { RootView.this.repaint(aShape.getBounds()); }};
     //new Timer().schedule(task, 100);
 }
