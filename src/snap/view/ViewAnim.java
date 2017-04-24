@@ -286,6 +286,21 @@ public ViewAnim setWidth(double aVal)  { return setValue(View.Width_Prop, aVal);
 public ViewAnim setHeight(double aVal)  { return setValue(View.Height_Prop, aVal); }
 
 /**
+ * Sets the PrefWidth value.
+ */
+public ViewAnim setPrefWidth(double aVal)  { return setValue(View.PrefWidth_Prop, aVal); }
+
+/**
+ * Sets the PrefHeight value.
+ */
+public ViewAnim setPrefHeight(double aVal)  { return setValue(View.PrefHeight_Prop, aVal); }
+
+/**
+ * Sets preferred size values.
+ */
+public ViewAnim setPrefSize(double aW, double aH)  { setPrefWidth(aW); return setPrefHeight(aH); }
+
+/**
  * Sets the TransX value.
  */
 public ViewAnim setTransX(double aVal)  { return setValue(View.TransX_Prop, aVal); }
