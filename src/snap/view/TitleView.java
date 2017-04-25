@@ -19,14 +19,17 @@ public class TitleView extends ParentView {
     // The Style
     TitleStyle     _tstyle;
     
-    // Whether Title view is expandable
-    boolean        _expandable;
+    // Whether Title view is collapsible
+    boolean        _collapsible;
     
     // Whether Title view is expanded
     boolean        _expanded;
     
     // Images for collapsed/expanded
     View           _clpView, _expView;
+    
+    // A listener for label click (if collapsable)
+    EventListener  _labelPressLsnr;
     
     // Constants for TitleView styles
     public enum TitleStyle {
@@ -36,7 +39,7 @@ public class TitleView extends ParentView {
     
     // Constants for properties
     public static final String Content_Prop = "Content";
-    public static final String Expandable_Prop = "Expandable";
+    public static final String Collapsible_Prop = "Collapsible";
     public static final String Expanded_Prop = "Expanded";
     public static final String TitleStyle_Prop = "TitleStyle";
     
@@ -89,41 +92,37 @@ public void setTitleStyle(TitleStyle aTS)
     if(aTS==_tstyle) return;
     firePropChange(TitleStyle_Prop, _tstyle, _tstyle=aTS);
     relayout(); relayoutParent(); repaint();
-    
-    // Configure ChiselBorder
-    if(_tstyle==TitleStyle.ChiselBorder)
-        _label.setPadding(0,0,0,10);
-        
-    // Configure Plain
-    else if(_tstyle==TitleStyle.Plain)
-        _label.setPadding(0,0,0,0);
+    updateTitleStyle();
 }
 
 /**
- * Returns whether title view is expandable.
+ * Returns whether title view is collapsible.
  */
-public boolean isExpandable()  { return _expandable; }
+public boolean isCollapsible()  { return _collapsible; }
 
 /**
- * Sets whether title view is expandable.
+ * Sets whether title view is collapsible.
  */
-public void setExpandable(boolean aValue)
+public void setCollapsible(boolean aValue)
 {
-    if(aValue==_expandable) return;
-    firePropChange(Expandable_Prop, _expandable, _expandable=aValue);
+    // Do normal setter
+    if(aValue==_collapsible) return;
+    firePropChange(Collapsible_Prop, _collapsible, _collapsible=aValue);
     
-    // If expandable
+    // If collapsible: Enable action event and listen for label click
     if(aValue) {
         enableEvents(Action);
-        _label.addEventHandler(e -> TitleView.this.fireActionEvent(), MousePress);
-    }
-    else {
-        disableEvents(Action);
-        //_label.removeEventHandler(e -> TitleView.this.fireActionEvent(), MousePress);
+        _label.addEventHandler(_labelPressLsnr = e -> TitleView.this.fireActionEvent(), MousePress);
     }
     
-    View graphic = aValue? (isExpanded()? getExpandedGraphic() : getCollapsedGraphic()) : null;
-    _label.setGraphic(graphic);
+    // If not collapsible: Disable action event and stop listen for lable click
+    else {
+        disableEvents(Action);
+        _label.removeEventHandler(_labelPressLsnr, MousePress);
+    }
+    
+    // Update graphic
+    updateGraphic();
 }
 
 /**
@@ -138,29 +137,57 @@ public void setExpanded(boolean aValue)
 {
     if(aValue==_expanded) return;
     firePropChange(Expanded_Prop, _expanded, _expanded=aValue);
-    
-    View graphic = isExpandable()? (aValue? getExpandedGraphic() : getCollapsedGraphic()) : null;
-    _label.setGraphic(graphic);
+    updateGraphic();
 }
 
 /**
  * Sets the expanded animated.
  */
-public void setExpandedAnimated(boolean aValue)
+protected void setExpandedAnimated(boolean aValue)
 {
+    // Cache current size and set new Expanded value
     double w = getWidth(), h = getHeight();
     setExpanded(aValue);
+    
+    // Gget new PrefSize
     setPrefSize(-1,-1);
     double pw = getPrefWidth(), ph = getPrefHeight();
+    
+    // Set pref size to current size and expanded to true (for duration of anim) and trigger anim to new size
     setPrefSize(w,h);
     setExpanded(true);
     getAnimCleared(500).setPrefSize(pw,ph).setOnFinish(a -> setExpanded(aValue)).play();
 }
 
 /**
+ * Updates the graphic.
+ */
+protected void updateGraphic()
+{
+    View graphic = isCollapsible()? (isExpanded()? getExpandedGraphic() : getCollapsedGraphic()) : null;
+    _label.setGraphic(graphic);
+}
+
+/**
+ * Updates the TitleStyle.
+ */
+protected void updateTitleStyle()
+{
+    TitleStyle tstyle = getTitleStyle();
+    
+    // Configure ChiselBorder
+    if(tstyle==TitleStyle.ChiselBorder)
+        _label.setPadding(0,0,0,10);
+        
+    // Configure Plain
+    else if(tstyle==TitleStyle.Plain)
+        _label.setPadding(0,0,0,0);
+}
+
+/**
  * Returns whether content is visible.
  */
-public boolean isContentVisible()  { return _content!=null && (!isExpandable() || isExpanded()); }
+public boolean isContentVisible()  { return _content!=null && (!isCollapsible() || isExpanded()); }
 
 /**
  * Override to return preferred width of content.
@@ -227,9 +254,6 @@ protected void paintStyleChiselBorder(Painter aPntr)
     aPntr.translate(1,1); aPntr.setPaint(Color.WHITE); aPntr.setStroke(Stroke.Stroke1); aPntr.draw(path);
     aPntr.translate(-1,-1);
     aPntr.setPaint(Color.LIGHTGRAY); aPntr.draw(path);
-    
-    // Paint title
-    //aPntr.setFont(getFont()); aPntr.setColor(Color.BLACK); if(_title!=null) aPntr.drawString(_title, 10, asc);
 }
 
 /**
@@ -248,8 +272,9 @@ public View getExpandedGraphic()
 {
     // If down arrow icon hasn't been created, create it
     if(_expView!=null) return _expView;
-    Polygon poly = new Polygon(1.5, 1.5, 7.5, 1.5, 4.5, 5.5);
-    ShapeView sview = new ShapeView(poly); sview.setPrefSize(9,9); sview.setFill(Color.BLACK);
+    Polygon poly = new Polygon(.5, 1.5, 8.5, 1.5, 4.5, 7.5);
+    ShapeView sview = new ShapeView(poly); sview.setPrefSize(9,9);
+    sview.setFill(Color.GRAY); sview.setBorder(Color.GRAY, 1);
     return _expView = sview;
 }
 
@@ -260,8 +285,9 @@ public View getCollapsedGraphic()
 {
     // If down arrow icon hasn't been created, create it
     if(_clpView!=null) return _clpView;
-    Polygon poly = new Polygon(1.5, 1.5, 1.5, 7.5, 5.5, 4.5);
-    ShapeView sview = new ShapeView(poly); sview.setPrefSize(9,9); sview.setFill(Color.BLACK);
+    Polygon poly = new Polygon(2.5, .5, 2.5, 8.5, 8.5, 4.5);
+    ShapeView sview = new ShapeView(poly); sview.setPrefSize(9,9);
+    sview.setFill(Color.GRAY); sview.setBorder(Color.GRAY, 1);
     return _clpView = sview;
 }
 
@@ -278,8 +304,8 @@ protected XMLElement toXMLView(XMLArchiver anArchiver)
     if(getTitleStyle()!=TitleStyle.ChiselBorder) e.add(TitleStyle_Prop, getTitleStyle());
     
     // Archive Expandable, Expanded
-    if(isExpandable()) e.add(Expandable_Prop, true);
-    if(isExpandable() && !isExpanded()) e.add(Expanded_Prop, false);
+    if(isCollapsible()) e.add(Collapsible_Prop, true);
+    if(isCollapsible() && !isExpanded()) e.add(Expanded_Prop, false);
     return e;
 }
 
@@ -298,7 +324,7 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     if(tstyl!=null) setTitleStyle(tstyl);
     
     // Unrchive Expandable, Expanded
-    if(anElement.hasAttribute(Expandable_Prop)) setExpandable(anElement.getAttributeBoolValue(Expandable_Prop));
+    if(anElement.hasAttribute(Collapsible_Prop)) setCollapsible(anElement.getAttributeBoolValue(Collapsible_Prop));
     if(anElement.hasAttribute(Expanded_Prop)) setExpanded(anElement.getAttributeBoolValue(Expanded_Prop));
 }
 

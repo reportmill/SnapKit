@@ -10,7 +10,15 @@ import snap.util.*;
  */
 public class ShapeView extends View {
     
-    Shape   _shape;
+    // The shape
+    Shape       _shape;
+    
+    // Whether to expand shape to view bounds
+    boolean     _fillWidth, _fillHeight;
+
+    // Constants for properties
+    public static final String FillWidth_Prop = "FillWidth";
+    public static final String FillHeight_Prop = "FillHeight";
 
 /**
  * Creates a new ShapeNode.
@@ -36,9 +44,53 @@ public void setShape(Shape aShape)
 }
 
 /**
+ * Returns whether to fit shape width to view width.
+ */
+public boolean isFillWidth()  { return _fillWidth; }
+
+/**
+ * Sets whether to fill shape width to view width.
+ */
+public void setFillWidth(boolean aValue)
+{
+    if(aValue==_fillWidth) return;
+    firePropChange(FillWidth_Prop, _fillWidth, _fillWidth=aValue);
+}
+
+/**
+ * Returns whether to fit shape height to view height.
+ */
+public boolean isFillHeight()  { return _fillHeight; }
+
+/**
+ * Sets whether to fill shape height to view height.
+ */
+public void setFillHeight(boolean aValue)
+{
+    if(aValue==_fillHeight) return;
+    firePropChange(FillHeight_Prop, _fillHeight, _fillHeight=aValue);
+}
+
+/**
+ * Returns whether to fit shape to view bounds.
+ */
+public boolean isFillSize()  { return _fillWidth && _fillHeight; }
+
+/**
+ * Sets whether to fill shape to view bounds.
+ */
+public void setFillSize(boolean aValue)  { setFillWidth(true); setFillHeight(true); }
+
+/**
  * Override to return path as bounds shape.
  */
-public Shape getBoundsShape()  { return getShape().copyFor(getBoundsLocal()); }
+public Shape getBoundsShape()
+{
+    Shape shape = getShape();
+    if(isFillSize())
+        shape = shape.copyFor(getBoundsLocal());
+    return shape;
+}
 
 /**
  * Calculates the preferred width.
