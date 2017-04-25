@@ -292,6 +292,31 @@ public View getCollapsedGraphic()
 }
 
 /**
+ * Override because TeaVM hates reflection.
+ */
+public Object getValue(String aPropName)
+{
+    if(aPropName.equals("Value") || aPropName==Expanded_Prop)
+        return isExpanded();
+    return super.getValue(aPropName);
+}
+
+/**
+ * Override because TeaVM hates reflection.
+ */
+public void setValue(String aPropName, Object aValue)
+{
+    if(aPropName.equals("Value") || aPropName==Expanded_Prop)
+        setExpanded(SnapUtils.boolValue(aValue));
+    else super.setValue(aPropName, aValue);
+}
+
+/**
+ * Returns a mapped property name name.
+ */
+protected String getValuePropName()  { return Expanded_Prop; }
+
+/**
  * XML archival.
  */
 protected XMLElement toXMLView(XMLArchiver anArchiver)
