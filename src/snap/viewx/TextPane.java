@@ -252,7 +252,7 @@ public void showLineNumberPanel()
 {
     TextSel sel = getTextView().getSel();
     int lnum = sel.getStartLine().getIndex()+1, start = sel.getStart(), col = start - sel.getStartLine().getStart();
-    String msg = String.format("Enter Line Number:\n(Line %d, Col %d, Char %d)", lnum, col, start);
+    String msg = StringUtils.format("Enter Line Number:\n(Line %d, Col %d, Char %d)", lnum, col, start);
     DialogBox dbox = new DialogBox("Go to Line"); dbox.setQuestionMessage(msg);
     String lstring = dbox.showInputDialog(getUI(), Integer.toString(lnum));
     int lindex = lstring!=null? SnapUtils.intValue(lstring) -1 : -1;

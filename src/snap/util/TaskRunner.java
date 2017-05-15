@@ -166,7 +166,7 @@ public TaskRunner <T> start()
     _thread = new Thread(() -> { invokeRun(); invokeFinished(); });
     
     // Start thread
-    _thread.setName(getName());
+    //_thread.setName(getName()); TeaVM doesn't like this
     _thread.start();
     
     // Return this runner
