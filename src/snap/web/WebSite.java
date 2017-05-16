@@ -238,7 +238,7 @@ public synchronized WebFile getFile(String aPath) throws ResponseException
     // Get file header from response, create file and return
     FileHeader fhdr = resp.getFileHeader();
     if(fhdr==null) { System.err.println("WebSite.getFile: No Header for " + url); return null; } // Can't happen?
-    file = createFile(fhdr); file._exists = true;
+    file = createFile(fhdr); file._exists = true; file._url = url;
     return file;
 }
 
