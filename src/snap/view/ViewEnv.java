@@ -4,6 +4,7 @@
 package snap.view;
 import java.util.*;
 import snap.gfx.Rect;
+import snap.web.WebURL;
 
 /**
  * An interface for platform specific UI functionality.
@@ -102,7 +103,12 @@ public abstract void stopIntervals(Runnable aRun);
 /**
  * Returns a UI source for given class.
  */
-public Object getUISource(Class aClass)  { throw notImpl("getUIFile"); }
+public Object getUISource(Class aClass)
+{
+    String rname = aClass.getSimpleName() + ".snp";
+    WebURL durl = WebURL.getURL(aClass, rname); if(durl!=null) return durl;
+    return aClass!=Object.class? getUISource(aClass.getSuperclass()) : null;
+}
 
 /**
  * Returns the system clipboard.
