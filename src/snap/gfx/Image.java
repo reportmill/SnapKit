@@ -8,28 +8,37 @@ import snap.web.*;
 /**
  * Represents an Image, such as JPEG, PNG, GIF, TIFF, BMP.
  */
-public abstract class Image extends Object {
+public abstract class Image {
 
      // The image source
-     Object          _source;
+     Object           _source;
      
      // The image source URL
-     WebURL          _url;
+     WebURL           _url;
      
      // The image source bytes
-     byte            _bytes[];
+     byte             _bytes[];
      
      // The image type
-     String          _type;
+     String           _type;
+     
+     // Whether the image is loaded
+     boolean          _loaded;
      
      // The native image
-     Object          _native;
+     Object           _native;
      
      // The cached width/height
-     double          _width = -1, _height = -1;
+     double           _width = -1, _height = -1;
+
+    // PropertyChangeSupport
+    PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
     // Supported image type strings
-    static String    _types[] = { "gif", "jpg", "jpeg", "png", "tif", "tiff", "bmp" };
+    static String     _types[] = { "gif", "jpg", "jpeg", "png", "tif", "tiff", "bmp" };
+
+    // Constants for properties
+    public static final String Loaded_Prop = "Name";
 
 /**
  * Returns the name of image (if from URL/file).
@@ -164,6 +173,43 @@ public byte[] getBytesImpl()
  * Returns the type of the image bytes provided.
  */
 public String getType()  { return _type!=null? _type : (_type=ImageUtils.getImageType(getBytes())); }
+
+/**
+ * Returns whether image is loaded (might be delayed is source is URL).
+ */
+public boolean isLoaded()  { return _loaded; }
+
+/**
+ * Sets whether image is loaded.
+ */
+protected void setLoaded(boolean aValue)
+{
+    if(aValue==_loaded) return;
+    firePropChange(Loaded_Prop, _loaded, _loaded=aValue);
+}
+
+/**
+ * Add listener.
+ */
+public void addPropChangeListener(PropChangeListener aPCL)
+{
+    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+    _pcs.addPropChangeListener(aPCL);
+}
+
+/**
+ * Remove listener.
+ */
+public void removePropChangeListener(PropChangeListener aPCL)  { _pcs.removePropChangeListener(aPCL); }
+
+/**
+ * Fires a property change for given property name, old value, new value and index.
+ */
+protected void firePropChange(String aProp, Object oldVal, Object newVal)
+{
+    if(!_pcs.hasListeners(aProp)) return;
+    _pcs.firePropChange(new PropChange(this, aProp, oldVal, newVal));
+}
 
 /**
  * Returns an RGB integer for given x, y.

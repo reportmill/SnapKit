@@ -59,7 +59,24 @@ public void setImage(Image anImage)
 {
     firePropChange(Image_Prop, _image, _image = anImage);
     relayoutParent(); repaint();
+    
+    // If image not done loading - listen for load
+    if(_image!=null && !_image.isLoaded())
+        _image.addPropChangeListener(_lsnr = pce -> imageFinishedLoading());
 }
+
+/**
+ * Called when image finishes loading.
+ */
+void imageFinishedLoading()
+{
+    if(_image==null || !_image.isLoaded()) return;
+    _image.removePropChangeListener(_lsnr); _lsnr = null;
+    relayoutParent(); repaint();
+}
+
+// The image finished loading listener.
+PropChangeListener _lsnr;
 
 /**
  * Returns the image name, if loaded from local resource.
