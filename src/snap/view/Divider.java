@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.gfx.*;
+import snap.util.SnapUtils;
 
 /**
  * A View to represent a movable separation between views.
@@ -174,6 +175,26 @@ protected double getPrefWidthImpl(double aH)  { return isVertical()? _size : 0; 
  * Calculates the preferred height.
  */
 protected double getPrefHeightImpl(double aW)  { return isVertical()? 0 : _size; }
+
+/**
+ * Override because TeaVM hates reflection.
+ */
+public Object getValue(String aPropName)
+{
+    if(aPropName.equals("Location")) return getLocation();
+    if(aPropName.equals("Remainder")) return getRemainder();
+    return super.getValue(aPropName);
+}
+
+/**
+ * Override because TeaVM hates reflection.
+ */
+public void setValue(String aPropName, Object aValue)
+{
+    if(aPropName.equals("Location")) setLocation(SnapUtils.doubleValue(aValue));
+    else if(aPropName.equals("Remainder")) setRemainder(SnapUtils.doubleValue(aValue));
+    else super.setValue(aPropName, aValue);
+}
 
 /**
  * Handle MouseDrag event: Calcualte and set new location.
