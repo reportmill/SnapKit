@@ -263,6 +263,11 @@ public void resetLater(ViewOwner anOwnr)
 }
 
 /**
+ * Override to not send to window.
+ */
+public void relayoutParent()  { }
+
+/**
  * Override to register for layout.
  */
 protected synchronized void setNeedsLayoutDeep(boolean aVal)

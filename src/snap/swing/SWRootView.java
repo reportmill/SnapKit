@@ -75,7 +75,7 @@ public void setRootView(RootView aRootView)
 public void setBounds(int aX, int aY, int aW, int aH)
 {
     super.setBounds(aX, aY, aW, aH);
-    _rview.setBounds(aX,aY,aW,aH);
+    _rview.setSize(aW, aH); //_rview.setBounds(aX,aY,aW,aH);
 }
 
 /**

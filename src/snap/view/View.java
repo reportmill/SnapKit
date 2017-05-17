@@ -814,32 +814,9 @@ public Shape parentToLocal(Shape aShape)  { return aShape.copyFor(getParentToLoc
 public Shape parentToLocal(View aView, Shape aShape)  { return aShape.copyFor(getParentToLocal(aView)); }
 
 /**
- * Returns the transform from local to screen.
- */
-public Transform getLocalToScreen()
-{
-    WindowView win = getWindow();
-    Transform xfm = getLocalToParent(win);
-    if(win!=null)
-        xfm.multiply(Transform.getTrans(win.getX(),win.getY()));
-    return xfm;
-}
-
-/**
  * Converts a point from local to parent.
  */
-public Point localToScreen(double aX, double aY)
-{
-    WindowView win = getWindow();
-    Point pnt = localToParent(win, aX,aY);
-    if(win!=null) { pnt.x += win.getX(); pnt.y += win.getY(); }
-    return pnt;
-}
-
-/**
- * Returns the transform from screen to local.
- */
-public Transform getScreenToLocal()  { Transform t = getLocalToScreen(); t.invert(); return t; }
+public Point localToScreen(double aX, double aY)  { return localToParent(null, aX,aY); }
 
 /**
  * Returns whether view contains point.

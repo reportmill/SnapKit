@@ -342,11 +342,17 @@ public double getY()  { return 0; }
 /** Returns the event location. */
 public Point getPoint()  { return new Point(getX(),getY()); }
 
-/** Returns the screen x. */
-public double getScreenX()  { return getView().localToScreen(getX(),0).getX(); }
-
-/** Returns the screen y. */
-public double getScreenY()  { return getView().localToScreen(0,getY()).getY(); }
+/** Returns the event location in coords of given view. */
+public Point getPoint(View aView)
+{
+    Point pt = getPoint(); View view0 = getView();
+    View ancestor = ViewUtils.getCommonAncetor(view0,aView);
+    if(ancestor!=view0)
+        pt = view0.localToParent(ancestor, pt.x, pt.y);
+    if(ancestor!=aView)
+        pt = aView.parentToLocal(ancestor, pt.x, pt.y);
+    return pt;
+}
 
 /** Returns the scroll amount X. */
 public double getScrollX()  { complain("getScrollAmountX"); return 0; }

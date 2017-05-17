@@ -42,7 +42,7 @@ protected void init()
     // Get native, window view and root view
     Window win = get();
     WindowView wview = getView();
-
+    
     // Configure JFrame
     if(win instanceof JFrame) { JFrame frame = (JFrame)get();
         
@@ -74,7 +74,11 @@ protected void init()
     
     // Size window to root view
     win.pack();
-    boundsChanged();
+    
+    // Set WindowView insets
+    java.awt.Insets insAWT = get().getInsets();
+    Insets ins = new Insets(insAWT.top, insAWT.right, insAWT.bottom, insAWT.left);
+    wview.setPadding(ins);
 
     // Add component listener to sync win bounds changes with WindowView/RootView
     win.addComponentListener(new ComponentAdapter() {
@@ -92,6 +96,9 @@ protected void init()
         public void windowClosing(WindowEvent anEvent)  { sendWinEvent(anEvent, ViewEvent.Type.WinClose); }
         public void windowClosed(WindowEvent anEvent)  { }
     });
+    
+    // Sync Window bounds to WindowView
+    boundsChanged();
 }
 
 /**

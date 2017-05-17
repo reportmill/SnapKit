@@ -264,7 +264,7 @@ public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
     getHelper().checkInit();
     
     // Get rect for given node and point for given offsets
-    Rect rect = aView!=null? aView.getBoundsLocal().copyFor(aView.getLocalToScreen()).getBounds() :
+    Rect rect = aView!=null? aView.getBoundsLocal().copyFor(aView.getLocalToParent(null)).getBounds() :
         getEnv().getScreenBoundsInset();
     double x = aDX, y = aDY;
     
@@ -285,6 +285,11 @@ public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
     // Return point
     return new Point(x,y);
 }
+
+/**
+ * Override to do layout immediately.
+ */
+public void relayout()  { layout(); }
 
 /**
  * Override to return showing, since it is eqivalent for window.
@@ -313,6 +318,35 @@ protected void setFocused(boolean aValue)
 {
     if(aValue==isFocused()) return; super.setFocused(aValue);
     if(aValue) ListUtils.moveToFront(_openWins, this);
+}
+
+/**
+ * Returns the preferred width.
+ */
+protected double getPrefWidthImpl(double aH)
+{
+    Insets ins = getInsetsAll();
+    return ins.left + getRootView().getPrefWidth(aH) + ins.right;
+}
+
+/**
+ * Returns the preferred height.
+ */
+protected double getPrefHeightImpl(double aW)
+{
+    Insets ins = getInsetsAll();
+    return ins.top + getRootView().getPrefHeight(aW) + ins.bottom;
+}
+
+/**
+ * Layout children.
+ */
+protected void layoutImpl()
+{
+    RootView rview = getRootView(); if(rview==null) return;
+    Insets ins = getInsetsAll();
+    double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
+    rview.setBounds(x, y, w, h);
 }
 
 /**
