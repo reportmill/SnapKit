@@ -149,6 +149,16 @@ protected void setRootView(RootView aRV)
 }
 
 /**
+ * Returns the content associated with this window.
+ */
+public View getContent()  { return getRootView().getContent(); }
+
+/**
+ * Sets the content associated with this window.
+ */
+public void setContent(View aView)  { getRootView().setContent(aView); }
+
+/**
  * Returns whether the window is always on top.
  */
 public boolean isAlwaysOnTop()  { return _alwaysOnTop; }
@@ -243,12 +253,17 @@ public void show(View aView, double aSX, double aSY)
 /**
  * Hide the window.
  */
-public void hide()  { getHelper().hide(); }
+public void hide()
+{
+    if(getRootView().getPopup()!=null)
+        getRootView().getPopup().hide();
+    getHelper().hide();
+}
 
 /**
  * Packs the window.
  */
-public void pack()  { getHelper().setPrefSize(); }
+public void pack()  { setSize(getBestSize()); }
 
 /**
  * Order window to front.
@@ -363,7 +378,7 @@ public static <T extends ViewOwner> T getOpenWindowOwner(Class <T> aClass)
         RootView rview = wnode.getRootView();
         View content = rview.getContent();
         ViewOwner ownr = content.getOwner();
-        if(ownr!=null && aClass==null || aClass.isAssignableFrom(ownr.getClass()))
+        if(ownr!=null && (aClass==null || aClass.isAssignableFrom(ownr.getClass())))
             return (T)ownr;
     }
     return null;
@@ -379,7 +394,7 @@ public static <T extends ViewOwner> T[] getOpenWindowOwners(Class <T> aClass)
         RootView rview = wnode.getRootView();
         View content = rview.getContent();
         ViewOwner ownr = content.getOwner();
-        if(ownr!=null && aClass==null || aClass.isAssignableFrom(ownr.getClass()))
+        if(ownr!=null && (aClass==null || aClass.isAssignableFrom(ownr.getClass())))
             ownrs.add((T)ownr);
     }
     return ownrs.toArray((T[])Array.newInstance(aClass, ownrs.size()));

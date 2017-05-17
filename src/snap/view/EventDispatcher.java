@@ -48,7 +48,11 @@ public PopupWindow getPopup()  { return _popup; }
 /**
  * Sets the popup window, if one added to this root view during last event.
  */
-protected void setPopup(PopupWindow aPopup)  { _popup = aPopup; }
+protected void setPopup(PopupWindow aPopup)
+{
+    if(_popup!=null) _popup.hide();
+    _popup = aPopup;
+}
 
 /**
  * Dispatch event.
@@ -57,14 +61,11 @@ public void dispatchEvent(ViewEvent anEvent)
 {
     // If popup window, forward to it
     if(_popup!=null) {
-        if(anEvent.isMouseDrag() || anEvent.isMouseRelease()) {
-            _popup.processTriggerEvent(anEvent);
-            if(anEvent.isMouseRelease()) { _popup = null; ViewUtils._mouseDown = false; }
-            return;
-        }
+        if(anEvent.isMousePress()) {
+            _popup.hide(); _popup = null; }
         else if(anEvent.isKeyPress() && anEvent.isEscapeKey())
             _popup.hide();
-        if(!_popup.isShowing())
+        if(_popup!=null && !_popup.isShowing())
             _popup = null;
     }
     
@@ -159,10 +160,6 @@ public void dispatchMouseEvent(ViewEvent anEvent)
             if(e2.isConsumed()) { anEvent.consume(); break; }
         }
     }
-    
-    // If popup window is now present, forward trigger event to it
-    if(_popup!=null)
-        _popup.processTriggerEvent(anEvent);
 }
 
 /**

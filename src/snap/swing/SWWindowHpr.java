@@ -15,7 +15,8 @@ public class SWWindowHpr <T extends Window> extends ViewHelper <T> {
 /** Creates the native. */
 protected T createNative()
 {
-    if(getView(WindowView.class).getType().equals(WindowView.TYPE_MAIN)) return (T)new JFrame();
+    WindowView wview = getView(); String type = wview.getType();
+    if(type==WindowView.TYPE_MAIN) return (T)new JFrame();
     return (T)new JDialog();
 }
 
@@ -43,29 +44,29 @@ protected void init()
     Window win = get();
     WindowView wview = getView();
     
-    // Configure JFrame
+    // Configure JFrame: Title, Resizable
     if(win instanceof JFrame) { JFrame frame = (JFrame)get();
-        
-        // Set window attributes: Title, AlwaysOnTop, Modal and Resizable
         frame.setTitle(wview.getTitle());
-        frame.setAlwaysOnTop(wview.isAlwaysOnTop()); //setIconImage(getIconImage());
         frame.setResizable(wview.isResizable());
     }
     
-    // Configure JDialog
+    // Configure JDialog: Title, Resizable, Modal
     else if(win instanceof JDialog) { JDialog frame = (JDialog)get();
-    
-        // Set window attributes: Title, AlwaysOnTop, Modal and Resizable
         frame.setTitle(wview.getTitle());
-        frame.setAlwaysOnTop(wview.isAlwaysOnTop());
         frame.setModal(wview.isModal());
         frame.setResizable(wview.isResizable());
         if(wview.getType()==WindowView.TYPE_UTILITY)
             frame.getRootPane().putClientProperty("Window.style", "small");
-        else if(wview.getType()==WindowView.TYPE_PLAIN)
+        else if(wview.getType()==WindowView.TYPE_PLAIN) {
             frame.setUndecorated(true);
+            frame.setFocusableWindowState(false);
+        }
     }
     
+    // Set common attributes
+    win.setAlwaysOnTop(wview.isAlwaysOnTop());
+    win.setOpacity((float)wview.getOpacity());
+
     // Install RootView Native as ContentPane
     RootView rview = wview.getRootView();
     JComponent rviewNtv = rview.getNative(JComponent.class);
@@ -120,10 +121,11 @@ public void show(View aView, double aSX, double aSY)
     
     // If always-on-top, turn this on (since this is can be turned off in setWindowVisible(false))
     //if(wview.isAlwaysOnTop()) win.setAlwaysOnTop(true);
-
+    
     // Set window visible
     win.setLocation((int)Math.round(aSX),(int)Math.round(aSY));
     win.setVisible(true);
+    showingChanged();
     
     // If window is modal, just return
     if(wview.isModal())
@@ -155,11 +157,6 @@ public void hide()
  * Order window to front.
  */
 public void toFront()  { get().toFront(); }
-
-/**
- * Sets the window size to preferred size.
- */
-public void setPrefSize()  { get().pack(); }
 
 /**
  * Sets the title of the window.
@@ -218,6 +215,10 @@ protected void boundsChanged()
 {
     Window win = get(); WindowView wview = getView();
     wview.setBounds(win.getX(),win.getY(),win.getWidth(),win.getHeight());
+
+    // If window deactivated and it has Popup, hide popup
+    if(wview.getRootView().getPopup()!=null)
+        wview.getRootView().getPopup().hide();
 }
 
 /**
@@ -231,6 +232,10 @@ protected void activeChanged()
     ViewEvent.Type etype = active? ViewEvent.Type.WinActivate : ViewEvent.Type.WinDeactivate;
     if(wview.getEventAdapter().isEnabled(etype))
         sendWinEvent(null, etype);
+    
+    // If window deactivated and it has Popup, hide popup
+    if(!active && wview.getRootView().getPopup()!=null)
+        wview.getRootView().getPopup().hide();
 }
 
 /**

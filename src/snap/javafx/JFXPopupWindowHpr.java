@@ -129,15 +129,6 @@ protected void focusChanged()
 }
 
 /**
- * Sets the window size to preferred size.
- */
-public void setPrefSize()
-{
-    checkInit();
-    get().sizeToScene();
-}
-
-/**
  * Sends an event.
  */
 private void sendEvent(Event anEvent, ViewEvent.Type aType)

@@ -93,7 +93,7 @@ public void setItems(java.util.List <T> theItems)
 {
     super.setItems(theItems);
     if(isShowing() && getVisRowCount()<0)
-        getPopup().getHelper().setPrefSize();
+        getPopup().pack();
 }
 
 /**

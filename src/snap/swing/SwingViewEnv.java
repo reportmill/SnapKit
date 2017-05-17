@@ -130,7 +130,6 @@ protected Map createPropsMap()  { return new WeakHashMap(); }
 public ViewHelper createHelper(View aView)
 {
     if(aView instanceof RootView) return new SWRootViewHpr();
-    if(aView instanceof PopupWindow) return new SWPopupWindowHpr();
     if(aView instanceof WindowView) return new SWWindowHpr();
     return null;
 }

@@ -104,9 +104,6 @@ public void show(View aView, double aX, double aY)  { complain("show"); }
 /** Window/Popup method: Hides the window. */
 public void hide()  { complain("hide"); }
 
-/** Window/Popup method: Sets the window size to preferred size. */
-public void setPrefSize()  { complain("setPrefSize"); }
-
 /** Window/Popup method: Order window to front. */
 public void toFront()  { complain("toFront"); }
 

@@ -117,15 +117,6 @@ public void hide()  { get().hide(); }
 public void toFront()  { get().toFront(); }
 
 /**
- * Sets the window size to preferred size.
- */
-public void setPrefSize()
-{
-    checkInit();
-    get().sizeToScene();
-}
-
-/**
  * Called when window is shown/hidden.
  */
 protected void showingChanged()
