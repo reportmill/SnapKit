@@ -34,6 +34,9 @@ public J2DPainter(Graphics aGr)
     _gfx.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
     _gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
     _gfx.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+    
+    // Initialize clip to Graphics clip
+    clip(AWT.get(aGr.getClip()));
 }
 
 /**

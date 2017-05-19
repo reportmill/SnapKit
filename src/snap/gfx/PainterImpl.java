@@ -183,7 +183,7 @@ public static class GState implements Cloneable {
     
     // Clip
     public Shape         clip = NO_CLIP;
-    public static Shape  NO_CLIP = new Rect(-5000,-5000,10000,10000);
+    public static Shape  NO_CLIP = new Rect(-5000000,-5000000,10000000,10000000);
     
     /** Standard clone implementation. */
     public GState clone()
