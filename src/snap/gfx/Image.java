@@ -185,6 +185,7 @@ public boolean isLoaded()  { return _loaded; }
 protected void setLoaded(boolean aValue)
 {
     if(aValue==_loaded) return;
+    _width = _height = -1;
     firePropChange(Loaded_Prop, _loaded, _loaded=aValue);
 }
 
