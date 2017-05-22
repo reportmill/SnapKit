@@ -388,16 +388,16 @@ public boolean isBackSpaceKey()  { return getKeyCode()==KeyCode.BACK_SPACE || ge
 public boolean isDeleteKey()  { return getKeyCode()==KeyCode.DELETE; }
 
 /** Returns whether key is enter key. */
-public boolean isEnterKey()  { return getKeyCode()==KeyCode.ENTER; }
+public boolean isEnterKey()  { return getKeyCode()==KeyCode.ENTER || getKeyChar()=='\n'; }
 
 /** Returns whether key is tab key. */
-public boolean isTabKey()  { return getKeyCode()==KeyCode.TAB; }
+public boolean isTabKey()  { return getKeyCode()==KeyCode.TAB || getKeyChar()=='\t'; }
 
 /** Returns whether key is escape key. */
 public boolean isEscapeKey()  { return getKeyCode()==KeyCode.ESCAPE; }
 
 /** Returns whether key is escape key. */
-public boolean isSpaceKey()  { return getKeyCode()==KeyCode.SPACE; }
+public boolean isSpaceKey()  { return getKeyCode()==KeyCode.SPACE || getKeyChar()==' '; }
 
 /** Returns whether key is ISO control character. */
 public boolean isControlChar()  { char c = getKeyChar(); return Character.isISOControl(c); }

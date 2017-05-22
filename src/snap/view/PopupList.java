@@ -17,12 +17,12 @@ public class PopupList <T> extends ListView <T> {
     // The scroll view holding the popup list
     ScrollView        _scrollView;
     
-    // The node that popup was shown around
-    View              _view;
+    // The view given with last show
+    View              _showView;
     
-    // An EventListener to handle events from source node
-    EventListener     _lsnr = e -> handleEvent(e);
-
+    // EventListener to listen to events from show view
+    EventListener     _lsnr;
+    
 /**
  * Creates a new PopupList.
  */
@@ -47,10 +47,11 @@ public void setVisRowCount(int aValue)
 public PopupWindow getPopup()
 {
     if(_popup!=null) return _popup;
-    _popup = new PopupWindow(); _popup.setFocusable(false);
+    PopupWindow popup = new PopupWindow(); popup.setFocusable(false);
     _scrollView = new ScrollView(this); _scrollView.setBorder(null);
-    _popup.setContent(_scrollView); setGrowWidth(true); setGrowHeight(true);
-    return _popup;
+    popup.setContent(_scrollView); setGrowWidth(true); setGrowHeight(true);
+    popup.addPropChangeListener(pce -> popupWindowShowingChanged(), Showing_Prop);
+    return _popup = popup;
 }
 
 /**
@@ -59,32 +60,18 @@ public PopupWindow getPopup()
 public void show(View aView, double aX, double aY)
 {
     // Set preferred size
-    getPopup().setMaxHeight(_visRowCount>=0? -1 : Math.abs(_visRowCount)*getRowHeight());
+    PopupWindow popup = getPopup();
+    popup.setMaxHeight(_visRowCount>=0? -1 : Math.abs(_visRowCount)*getRowHeight());
     _scrollView.setPrefHeight(_visRowCount>=0? _visRowCount*getRowHeight() : -1);
     
-    _view = aView;
-    relayout();
-    getPopup().show(_view = aView, aX, aY);
-    
-    // Watch
-    if(aView!=null)
-        aView.addEventFilter(_lsnr, KeyPress);
+    // Show window
+    popup.show(_showView = aView, aX, aY);
 }
 
 /**
  * Hides the node.
  */
 public void hide()  { getPopup().hide(); }
-
-/**
- * Override to remove Node event listener when not showing.
- */
-protected void setShowing(boolean aValue)
-{
-    if(aValue==isShowing()) return; super.setShowing(aValue);
-    if(!isShowing()) {
-        _view.removeEventFilter(_lsnr, KeyPress); _view = null; }
-}
 
 /**
  * Override to resize if showing and VisRowCount is really Max (negative).
@@ -106,12 +93,26 @@ public void fireActionEvent()
 }
 
 /**
- * Handle events.
+ * Called when owner View has KeyPress events.
  */
-protected void handleEvent(ViewEvent anEvent)
+protected void handleShowViewEvent(ViewEvent anEvent)
 {
     if(anEvent.isUpArrow() || anEvent.isDownArrow() || anEvent.isEnterKey())
         processEvent(anEvent);
+}
+
+/**
+ * Called when PopupWindow is shown/hidden.
+ */
+protected void popupWindowShowingChanged()
+{
+    if(_showView==null) return;
+    PopupWindow popup = getPopup(); boolean showing = popup.isShowing();
+    
+    // If showing, add EventListener, otherwise, remove
+    if(showing)
+        _showView.addEventFilter(_lsnr = e -> handleShowViewEvent(e), KeyPress);
+    else { _showView.removeEventFilter(_lsnr, KeyPress); _lsnr = null; _showView = null; }
 }
 
 }
