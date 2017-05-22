@@ -193,8 +193,8 @@ private static class SplitPCL implements PropChangeListener {
             if(npcl.pcl==aPCL && npcl.prop.equals(aProp)) return _pc2; }
         if(_pc2 instanceof NamedPCL) { NamedPCL npcl = (NamedPCL)_pc2;
             if(npcl.pcl==aPCL && npcl.prop.equals(aProp)) return _pc1; }
-        if(_pc1 instanceof SplitPCL) _pc1 = ((SplitPCL)_pc1).remove(aPCL);
-        if(_pc2 instanceof SplitPCL) _pc2 = ((SplitPCL)_pc2).remove(aPCL);
+        if(_pc1 instanceof SplitPCL) _pc1 = ((SplitPCL)_pc1).remove(aPCL, aProp);
+        if(_pc2 instanceof SplitPCL) _pc2 = ((SplitPCL)_pc2).remove(aPCL, aProp);
         return this;
     }
     
