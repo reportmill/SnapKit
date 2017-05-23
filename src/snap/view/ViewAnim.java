@@ -152,6 +152,18 @@ public int getMaxTime()
 }
 
 /**
+ * Returns the key frame times.
+ */
+public Integer[] getKeyFrameTimes()
+{
+    Set <Integer> timesSet = new HashSet(); timesSet.add(getStart()); timesSet.add(getEnd());
+    for(ViewAnim anim : _anims) Collections.addAll(timesSet, anim.getKeyFrameTimes());
+    Integer times[] = timesSet.toArray(new Integer[0]);
+    Arrays.sort(times);
+    return times;
+}
+
+/**
  * Whether anim is playing.
  */
 public boolean isPlaying()  { return _rview!=null; }
