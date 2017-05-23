@@ -44,6 +44,10 @@ public boolean hasListeners(String aProp)
  */
 public void addPropChangeListener(PropChangeListener aLsnr)
 {
+    // Do quick check for given listener (shouldn't need this)
+    if(hasListener(aLsnr)) { System.err.println("PropChangeSupport.add: Adding duplicate listener"); return; }
+    
+    // If none, just set, if SplitPCL already exists, forward on, otherwise create SplitPCL(old,new) and set
     if(_pcl==null) _pcl = aLsnr;
     else if(_pcl instanceof SplitPCL) ((SplitPCL)_pcl).add(aLsnr);
     else _pcl = new SplitPCL(_pcl, aLsnr);
@@ -74,6 +78,15 @@ public void removePropChangeListener(PropChangeListener aLsnr, String aProp)
     if(_pcl instanceof NamedPCL) { NamedPCL npcl = (NamedPCL)_pcl;
         if(npcl.pcl==aLsnr && npcl.prop.equals(aProp)) _pcl = null; }
     else if(_pcl instanceof SplitPCL) _pcl = ((SplitPCL)_pcl).remove(aLsnr, aProp);
+}
+
+/**
+ * Returns whether listener already included.
+ */
+boolean hasListener(PropChangeListener aLsnr)
+{
+    if(_pcl instanceof SplitPCL) return ((SplitPCL)_pcl).hasListener(aLsnr);
+    return aLsnr==_pcl;
 }
 
 /**
@@ -196,6 +209,14 @@ private static class SplitPCL implements PropChangeListener {
         if(_pc1 instanceof SplitPCL) _pc1 = ((SplitPCL)_pc1).remove(aPCL, aProp);
         if(_pc2 instanceof SplitPCL) _pc2 = ((SplitPCL)_pc2).remove(aPCL, aProp);
         return this;
+    }
+    
+    /** Returns whether given listener already exists. */
+    boolean hasListener(PropChangeListener aPCL)
+    {
+        if(_pc1 instanceof SplitPCL && ((SplitPCL)_pc1).hasListener(aPCL)) return true;
+        if(_pc2 instanceof SplitPCL && ((SplitPCL)_pc2).hasListener(aPCL)) return true;
+        return aPCL==_pc1 || aPCL==_pc2;
     }
     
     /** Standard toString. */
