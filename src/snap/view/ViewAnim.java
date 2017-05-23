@@ -142,6 +142,16 @@ public ViewAnim getAnim(int aTime)
 }
 
 /**
+ * Returns the max time.
+ */
+public int getMaxTime()
+{
+    int max = getEnd();
+    for(ViewAnim anim : _anims) max = Math.max(max, anim.getMaxTime());
+    return max;
+}
+
+/**
  * Whether anim is playing.
  */
 public boolean isPlaying()  { return _rview!=null; }
@@ -351,6 +361,10 @@ public ViewAnim setValue(String aKey, Object aVal0, Object aVal1)
  */
 public ViewAnim setLoops()  { return setLoopCount(Short.MAX_VALUE); }
 
+/**
+ * Returns the LoopCount.
+ */
+public int getLoopCount()  { return _loopCount; }
 /**
  * Sets the loop count.
  */
