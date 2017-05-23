@@ -92,9 +92,27 @@ public int getEnd()  { return _end; }
 public int getLen()  { return _end - _start; }
 
 /**
+ * Returns whether anim is empty/cleared.
+ */
+public boolean isEmpty()
+{
+    if(_endVals.size()>0)
+        return false;
+    for(ViewAnim child : _anims)
+        if(!child.isEmpty())
+            return false;
+    return true;
+}
+
+/**
  * Returns the keys.
  */
 public List <String> getKeys()  { return _keys; }
+
+/**
+ * Returns the start value for given key.
+ */
+public boolean isStartValSet(String aKey)  { return _startVals.get(aKey)!=null; }
 
 /**
  * Returns the start value for given key.
@@ -103,7 +121,8 @@ public Object getStartVal(String aKey)
 {
     Object val = _startVals.get(aKey);
     if(val==null) {
-        val = _view.getValue(aKey);
+        val = _parent!=null? _parent.getEndVal(aKey) : null;
+        if(val==null) val = _view.getValue(aKey);
         _startVals.put(aKey, val);
     }
     return val;
@@ -377,6 +396,7 @@ public ViewAnim setLoops()  { return setLoopCount(Short.MAX_VALUE); }
  * Returns the LoopCount.
  */
 public int getLoopCount()  { return _loopCount; }
+
 /**
  * Sets the loop count.
  */
