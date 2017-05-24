@@ -24,9 +24,6 @@ public class ViewAnim {
     // The anim keys
     List <String>        _keys = new ArrayList();
     
-    // The start values
-    Map <String,Object>  _startVals = new HashMap();
-    
     // The end values
     Map <String,Object>  _endVals = new HashMap();
     
@@ -112,19 +109,21 @@ public List <String> getKeys()  { return _keys; }
 /**
  * Returns the start value for given key.
  */
-public boolean isStartValSet(String aKey)  { return _startVals.get(aKey)!=null; }
+public boolean isStartValSet(String aKey)  { return _parent!=null && _parent.getEndVal(aKey)!=null; }
 
 /**
  * Returns the start value for given key.
  */
 public Object getStartVal(String aKey)
 {
-    Object val = _startVals.get(aKey);
-    if(val==null) {
-        val = _parent!=null? _parent.getEndVal(aKey) : null;
-        if(val==null) val = _view.getValue(aKey);
-        _startVals.put(aKey, val);
-    }
+    // If root anim, return end val
+    if(_parent==null)
+        return getEndVal(aKey);
+    
+    // Otherwise, get parent EndVal for key
+    Object val = _parent.getEndVal(aKey);
+    if(val==null)
+        _parent.setValue(aKey, val = _view.getValue(aKey));
     return val;
 }
 
@@ -133,8 +132,9 @@ public Object getStartVal(String aKey)
  */
 public ViewAnim setStartVal(String aKey, Object aVal)
 {
-    ListUtils.addUnique(_keys, aKey);
-    _startVals.put(aKey, aVal); return this;
+    if(_parent!=null)
+        _parent.setValue(aKey, aVal);
+    return this;
 }
 
 /**
@@ -459,7 +459,7 @@ public void suspend()
 public ViewAnim clear()
 {
     stop(); _loopCount = 0; _onFinish = null;
-    _keys.clear(); _startVals.clear(); _endVals.clear(); _anims.clear();
+    _keys.clear(); _endVals.clear(); _anims.clear();
     return this;
 }
 
