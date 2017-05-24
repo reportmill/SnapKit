@@ -270,8 +270,8 @@ protected void textDidChange()
  */
 public void fireActionEvent()
 {
-    super.fireActionEvent();
     _focusGainedText = getText();
+    super.fireActionEvent();
 }
 
 /**
