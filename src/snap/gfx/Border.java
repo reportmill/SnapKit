@@ -12,15 +12,27 @@ public abstract class Border implements XMLArchiver.Archivable {
     // Cached version of insets
     Insets           _insets = null;
     
-    // Shared insets
-    private static final Insets _empty = new Insets(0);
+    // Whether to paint above view
+    boolean          _paintAbove;
+    
+    // Border constants
     private static Color BORDER_GRAY = Color.LIGHTGRAY;
     private static Color BORDER_DARKGRAY = BORDER_GRAY.darker();
     
 /**
  * Returns the insets.
  */
-public Insets getInsets()  { return _insets!=null? _insets : (_insets=_empty); }
+public Insets getInsets()  { return _insets!=null? _insets : (_insets=createInsets()); }
+
+/**
+ * Sets the insets.
+ */
+public void setInsets(Insets theIns)  { _insets = theIns; }
+
+/**
+ * Creates the insets.
+ */
+protected Insets createInsets()  { return Insets.EMPTY; }
 
 /**
  * Returns the basic color of the border.
@@ -33,9 +45,19 @@ public Color getColor()  { return Color.BLACK; }
 public double getWidth()  { return 1; }
 
 /**
- * Returns the name for paint.
+ * Returns the name for border.
  */
 public String getName()  { return getClass().getSimpleName(); }
+
+/**
+ * Returns whether the border paints above view.
+ */
+public boolean isPaintAbove()  { return _paintAbove; }
+
+/**
+ * Sets whether the border paints above view.
+ */
+public void setPaintAbove(boolean aValue)  { _paintAbove = aValue; }
 
 /**
  * Paint border.
@@ -120,7 +142,7 @@ public static class EmptyBorder extends Border {
     public EmptyBorder(double tp, double rt, double bm, double lt)  { _tp = tp; _rt = rt; _bm = bm; _lt = lt; }
     
     /** Returns the insets. */
-    public Insets getInsets()  { return _insets!=null? _insets : (_insets=new Insets(_tp,_rt,_bm,_lt)); }
+    protected Insets createInsets()  { return new Insets(_tp,_rt,_bm,_lt); }
 
     /** XML Archival. */
     public XMLElement toXML(XMLArchiver anArchiver)
@@ -163,8 +185,8 @@ public static class LineBorder extends Border {
     /** Returns the width. */
     public double getWidth()  { return _width; }
     
-    /** Returns the insets. */
-    public Insets getInsets()  { return _insets!=null? _insets : (_insets=new Insets(_width)); }
+    /** Creates the insets. */
+    protected Insets createInsets()  { return new Insets(_width); }
 
     /** Paint border. */
     public void paint(Painter aPntr, Shape aShape)
@@ -216,8 +238,8 @@ public static class BevelBorder extends Border {
     /** Returns the type. */
     public int getType()  { return _type; }
     
-    /** Returns the insets. */
-    public Insets getInsets()  { return _insets!=null? _insets : (_insets=new Insets(2)); }
+    /** Creates the insets. */
+    protected Insets createInsets()  { return new Insets(2); }
     
     /** Paint border. */
     public void paint(Painter aPntr, Shape aShape)
@@ -275,8 +297,8 @@ public static class EtchBorder extends Border {
     /** Returns the type. */
     public int getType()  { return _type; }
     
-    /** Returns the insets. */
-    public Insets getInsets()  { return _insets!=null? _insets : (_insets=new Insets(2)); }
+    /** Creates the insets. */
+    protected Insets createInsets()  { return new Insets(2); }
 
     /** Paint border. */
     public void paint(Painter aPntr, Shape aShape)
@@ -320,12 +342,8 @@ public static class CompoundBorder extends Border {
     /** Returns the real border. */
     public Border getInsideBorder()  { return _ibdr; }
 
-    /** Returns the insets. */
-    public Insets getInsets()
-    {
-        if(_insets!=null ) return _insets;
-        return _insets = Insets.add(_obdr.getInsets(),_ibdr.getInsets());
-    }
+    /** Creates the insets. */
+    protected Insets createInsets()  { return Insets.add(_obdr.getInsets(),_ibdr.getInsets()); }
 
     /** Paint border. */
     public void paint(Painter aPntr, Shape aShape)

@@ -4,13 +4,22 @@
 package snap.gfx;
 import snap.util.StringUtils;
 
+/**
+ * This class represents a margin inset.
+ */
 public class Insets {
 
     // Insets
     public double top, right, bottom, left;
     
-    // Dec
+    // Shared emtpy insets
+    public static final Insets EMPTY = new Insets(0);
     
+/**
+ * Create new Insets.
+ */
+public Insets(double aVal)  { this(aVal, aVal, aVal, aVal); }
+
 /**
  * Create new Insets.
  */
@@ -18,11 +27,6 @@ public Insets(double aTop, double aRight, double aBottom, double aLeft)
 {
     top = aTop; right = aRight; bottom = aBottom; left = aLeft;
 }
-
-/**
- * Create new Insets.
- */
-public Insets(double aVal)  { this(aVal, aVal, aVal, aVal); }
 
 /**
  * Returns the top margin.

@@ -277,7 +277,13 @@ protected void paintChildren(Painter aPntr)
 /**
  * Paints above children.
  */
-protected void paintAbove(Painter aPntr)  { }
+protected void paintAbove(Painter aPntr)
+{
+    // Check for odd case of Border with PaintAbove set
+    Border bdr = getBorder();
+    if(bdr!=null && bdr.isPaintAbove())
+        bdr.paint(aPntr, getBoundsShape());
+}
 
 /**
  * Override Node version to really request layout from RootView.
