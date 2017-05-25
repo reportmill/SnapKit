@@ -4,6 +4,8 @@
 package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
+import snap.gfx.Color;
+import snap.gfx.Paint;
 import snap.gfx.Pos;
 import snap.util.*;
 
@@ -282,10 +284,20 @@ public Object interpolate(Object aVal1, Object aVal2)
  */
 public Object interpolate(Object aVal1, Object aVal2, double aRatio)
 {
+    // Interpolate numbers
     if(aVal1 instanceof Number && aVal2 instanceof Number) {
         double val1 = ((Number)aVal1).doubleValue(), val2 = ((Number)aVal2).doubleValue();
         return Interpolator.EASE_BOTH.getValue(aRatio, val1, val2);
     }
+    
+    // Interpolate colors
+    if(aVal1 instanceof Color || aVal2 instanceof Color) {
+        Color c1 = aVal1 instanceof Color? (Color)aVal1 : Color.CLEAR;
+        Color c2 = aVal2 instanceof Color? (Color)aVal2 : Color.CLEAR;
+        double ratio = Interpolator.EASE_BOTH.getValue(aRatio, 0, 1);
+        return c1.blend(c2, ratio);
+    }
+    
     return null;
 }
 
@@ -370,6 +382,11 @@ public ViewAnim setScaleX(double aVal)  { return setValue(View.ScaleX_Prop, aVal
  * Sets the ScaleY value.
  */
 public ViewAnim setScaleY(double aVal)  { return setValue(View.ScaleY_Prop, aVal); }
+
+/**
+ * Sets the ScaleY value.
+ */
+public ViewAnim setFill(Paint aVal)  { return setValue(View.Fill_Prop, aVal); }
 
 /**
  * Returns the end value for given key.

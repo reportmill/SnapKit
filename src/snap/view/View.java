@@ -1791,6 +1791,7 @@ public void setValue(String aPropName, Object aValue)
         case View.TransY_Prop: setTransY(SnapUtils.doubleValue(aValue)); break;
         case View.PrefWidth_Prop: setPrefWidth(SnapUtils.doubleValue(aValue)); break;
         case View.PrefHeight_Prop: setPrefHeight(SnapUtils.doubleValue(aValue)); break;
+        case View.Fill_Prop: setFill(aValue instanceof Paint? (Paint)aValue : null); break;
         case "Enabled": setDisabled(!SnapUtils.boolValue(aValue)); break;
         case "Items": { Selectable sview = (Selectable)this;
             if(aValue instanceof List) sview.setItems((List)aValue);
