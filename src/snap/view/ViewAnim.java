@@ -208,7 +208,7 @@ public int getTime()  { return _time; }
 public boolean setTime(int aTime)
 {
     // Set new time
-    int oldTime = _time; _time = aTime - _startTime; if(_time==oldTime) return false;
+    int oldTime = _time; _time = aTime - Math.max(_startTime,0); if(_time==oldTime) return false;
     
     // If anim is completed, but there is a LoopCount, call again with new loop corrected time
     boolean completed = _time >=_end;
@@ -220,10 +220,10 @@ public boolean setTime(int aTime)
     if(needsUpdate) for(String key : getKeys())
         setTime(_time, key);
         
-    // Forward on to anims
+    // Forward on to child anims
     for(ViewAnim a : _anims) {
-        if(_time>a.getStart())
-            completed &= a.setTime(aTime);
+        boolean cmpt = a.setTime(aTime);
+        if(_time>a.getStart()) completed &= cmpt;
         else completed = false;
     }
     
