@@ -111,23 +111,7 @@ public List <String> getKeys()  { return _keys; }
 /**
  * Returns the start value for given key.
  */
-public boolean isStartValSet(String aKey)  { return _parent!=null && _parent.getEndVal(aKey)!=null; }
-
-/**
- * Returns the start value for given key.
- */
-public Object getStartVal(String aKey)
-{
-    // If root anim, return end val
-    if(_parent==null)
-        return getEndVal(aKey);
-    
-    // Otherwise, get parent EndVal for key
-    Object val = _parent.getEndVal(aKey);
-    if(val==null)
-        _parent.setValue(aKey, val = _view.getValue(aKey));
-    return val;
-}
+public Object getStartVal(String aKey)  { return _parent!=null? _parent.getEndVal(aKey) : getEndVal(aKey); }
 
 /**
  * Sets the start value for given key.
@@ -214,12 +198,17 @@ protected void setStartTime(int aTime)
 }
 
 /**
+ * Returns the current time.
+ */
+public int getTime()  { return _time; }
+
+/**
  * Sets the time, returns whether anim has completed.
  */
 public boolean setTime(int aTime)
 {
     // Set new time
-    int oldTime = _time; _time = aTime - _startTime; if(aTime==oldTime) return false;
+    int oldTime = _time; _time = aTime - _startTime; if(_time==oldTime) return false;
     
     // If anim is completed, but there is a LoopCount, call again with new loop corrected time
     boolean completed = _time >=_end;
@@ -253,11 +242,6 @@ public boolean setTime(int aTime)
     // Return whether completed
     return completed;
 }
-
-/**
- * Returns the current time.
- */
-public int getTime()  { return _time; }
 
 /**
  * Sets the time.
@@ -311,7 +295,11 @@ public Object getValue(String aKey)  { return getValue(aKey, _time); }
  */
 public Object getValue(String aKey, int aTime)
 {
+    // Get start/end values (just return if they are equal)
     Object fromVal = getStartVal(aKey), toVal = getEndVal(aKey), val = null;
+    if(SnapUtils.equals(fromVal, toVal)) return fromVal;
+    
+    // Return value based on time
     if(aTime<=getStart()) val = fromVal;
     else if(aTime>=getEnd()) val = toVal;
     else val = interpolate(fromVal, toVal, (aTime-getStart())/(double)getLen());
@@ -398,10 +386,45 @@ public ViewAnim setValue(String aKey, Object aValue)  { return setValue(aKey, nu
  */
 public ViewAnim setValue(String aKey, Object aVal0, Object aVal1)
 {
+    // Add key and EndVal
     ListUtils.addUnique(_keys, aKey);
-    if(aVal0!=null) setStartVal(aKey, aVal0);
     _endVals.put(aKey, aVal1);
+    
+    // If Start value provided, set it
+    if(aVal0!=null)
+        setStartVal(aKey, aVal0);
+        
+    // If Start value missing, set it from any parent or view
+    else if(_parent!=null && getStartVal(aKey)==null)
+        _parent.setValue(aKey, findStartValue(aKey, aVal1));
+    
+    // Return
     return this;
+}
+
+/**
+ * Returns the start value for given end value by searching parents or asking view.
+ */
+protected Object findStartValue(String aKey, Object aVal)
+{
+    // Iterate up parents to see if start val has been set in previous key frame
+    Object sval = null;
+    for(ViewAnim par=_parent; par!=null && sval==null;par=par._parent)
+        sval = par.getEndVal(aKey);
+        
+    // If not found, get from current view
+    if(sval==null) {
+        sval = _view.getValue(aKey);
+        if(sval==null) {
+            if(aVal instanceof Integer) sval = 0;
+            else if(aVal instanceof Double) sval = 0d;
+            else if(aVal instanceof Color) sval = Color.CLEAR;
+            else System.err.println("ViewAnim.findStartValue: No default start value for type " + aVal.getClass());
+        }
+    }
+        
+    // Return start value
+    return sval;
 }
 
 /**
