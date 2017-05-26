@@ -12,7 +12,7 @@ import snap.util.*;
 /**
  * A class to animate View attributes.
  */
-public class ViewAnim {
+public class ViewAnim implements XMLArchiver.Archivable {
     
     // The View
     View                 _view;
@@ -222,8 +222,8 @@ public boolean setTime(int aTime)
         
     // Forward on to child anims
     for(ViewAnim a : _anims) {
-        boolean cmpt = a.setTime(aTime);
-        if(_time>a.getStart()) completed &= cmpt;
+        //boolean cmpt = a.setTime(aTime);
+        if(_time>a.getStart()) completed &= a.setTime(aTime);
         else completed = false;
     }
     
@@ -514,6 +514,93 @@ public String toString()
     else if(_loopCount>0) StringUtils.toStringAdd(sb, "LoopCount", _loopCount);
     for(ViewAnim va : _anims) sb.append("\n    " + va.toString().replace("\n", "\n    "));
     return sb.toString();
+}
+
+/**
+ * XML archival.
+ */
+public XMLElement toXML(XMLArchiver anArchiver)
+{
+    // Create element
+    XMLElement e = new XMLElement("Anim");
+    
+    // Unarchive Loops, LoopCount
+    if(getLoopCount()>0)
+        e.add("LoopCount", getLoopCount());
+        
+    // Archive KeyValues
+    toXMLAnim(this, e);
+    return e;
+}
+
+/**
+ * XML archival.
+ */
+protected static void toXMLAnim(ViewAnim theAnim, XMLElement aXML)
+{
+    // Iterate over values
+    for(String key : theAnim.getKeys()) {
+        XMLElement kvxml = new XMLElement("KeyValue"); kvxml.add("Time", theAnim.getEnd()); kvxml.add("Key", key);
+        Object val = theAnim.getEndVal(key); if(val instanceof Color) val = '#' + ((Color)val).toHexString();
+        kvxml.add("Value", val);
+        aXML.add(kvxml);
+    }
+    
+    // Iterate over children
+    for(ViewAnim child : theAnim.getAnims())
+        toXMLAnim(child, aXML);
+}
+
+/**
+ * XML unarchival.
+ */
+public ViewAnim fromXML(XMLArchiver anArchiver, XMLElement anElement)
+{
+    // Legacy
+    if(!anElement.getName().equals("Anim")) { fromXMLLegacy(anElement); return this; }
+    
+    // Unarchive LoopCount
+    if(anElement.hasAttribute("LoopCount")) setLoopCount(anElement.getAttributeIntValue("LoopCount"));
+        
+    // Unarchive KeyValue records
+    ViewAnim anim = this;
+    for(int i=anElement.indexOf("KeyValue");i>=0;i=anElement.indexOf("KeyValue",i+1)) {
+        XMLElement keyVal = anElement.get(i);
+        
+        // Get time and make sure we have right anim
+        int time = keyVal.getAttributeIntValue("Time");
+        anim = anim.getAnim(time);
+        
+        // Get key and value
+        String key = keyVal.getAttributeValue("Key");
+        String valStr = keyVal.getAttributeValue("Value"); Object val = null;
+        if(valStr.startsWith("#")) val = new Color(valStr);
+        else if(valStr.equalsIgnoreCase("true")) val = Boolean.TRUE;
+        else if(valStr.equalsIgnoreCase("false")) val = Boolean.FALSE;
+        else val = SnapUtils.doubleValue(valStr);
+        anim.setValue(key, val);
+    }
+    
+    // Return this anim
+    return this;
+}
+
+/**
+ * XML unarchival.
+ */
+public void fromXMLLegacy(XMLElement anElement)
+{
+    ViewAnim anim = this;
+    for(int i=anElement.indexOf("KeyFrame");i>=0;i=anElement.indexOf("KeyFrame",i+1)) {
+        XMLElement kframe = anElement.get(i); int time = kframe.getAttributeIntValue("time");
+        anim = anim.getAnim(time);
+        for(int j=kframe.indexOf("KeyValue");j>=0;j=kframe.indexOf("KeyValue",j+1)) { XMLElement kval = kframe.get(j);
+            String key = kval.getAttributeValue("key"); double val = kval.getAttributeFloatValue("value");
+            anim.setValue(key, val);
+        }
+        if(kframe.getAttributeBoolValue("Loops", false)) anim.setLoops();
+        if(kframe.hasAttribute("LoopCount")) anim.setLoopCount(kframe.getAttributeIntValue("LoopCount"));
+    }
 }
 
 /**

@@ -2058,7 +2058,8 @@ public XMLElement toXML(XMLArchiver anArchiver)
     if(getName()!=null && getName().length()>0) e.add(Name_Prop, getName());
     
     // Archive X, Y, Width, Height
-    if(this instanceof SpringView || getParent() instanceof SpringView) {
+    View par = getParent();
+    if(this instanceof SpringView || par instanceof SpringView || par instanceof PageView) {
         if(getX()!=0) e.add("x", getX()); if(getY()!=0) e.add("y", getY());
         if(getWidth()!=0) e.add("width", getWidth()); if(getHeight()!=0) e.add("height", getHeight());
     }
@@ -2100,6 +2101,10 @@ public XMLElement toXML(XMLArchiver anArchiver)
     if(isGrowHeight()) e.add(GrowHeight_Prop, true);
     if(getLeanX()!=null) e.add(LeanX_Prop, getLeanX());
     if(getLeanY()!=null) e.add(LeanY_Prop, getLeanY());
+    
+    // Archive animation
+    if(getAnim(-1)!=null && !getAnim(0).isEmpty()) { ViewAnim anim = getAnim(0);
+        e.add(anim.toXML(anArchiver)); }
         
     // Archive bindings
     for(Binding b : getBindings())
@@ -2202,17 +2207,10 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     if(anElement.hasAttribute("asize")) setAutosizing(anElement.getAttributeValue("asize"));
     
     // Unarchive animation
-    ViewAnim anim = null;
-    for(int i=anElement.indexOf("KeyFrame");i>=0;i=anElement.indexOf("KeyFrame",i+1)) {
-        XMLElement kframe = anElement.get(i); int time = kframe.getAttributeIntValue("time");
-        anim = anim!=null? anim.getAnim(time) : getAnim(0).getAnim(time);
-        for(int j=kframe.indexOf("KeyValue");j>=0;j=kframe.indexOf("KeyValue",j+1)) { XMLElement kval = kframe.get(j);
-            String key = kval.getAttributeValue("key"); double val = kval.getAttributeFloatValue("value");
-            anim.setValue(key, val);
-        }
-        if(kframe.getAttributeBoolValue("Loops", false)) anim.setLoops();
-        if(kframe.hasAttribute("LoopCount")) anim.setLoopCount(kframe.getAttributeIntValue("LoopCount"));
-    }
+    XMLElement animXML = anElement.getElement("Anim");
+    if(animXML==null) animXML = anElement.getElement("KeyFrame")!=null? anElement : null;
+    if(animXML!=null)
+        getAnim(0).fromXML(anArchiver, animXML);
     
     // Unarchive bindings
     for(int i=anElement.indexOf("binding");i>=0;i=anElement.indexOf("binding",i+1)) { XMLElement bx=anElement.get(i);
