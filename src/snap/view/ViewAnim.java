@@ -191,11 +191,7 @@ public int getStartTime()  { return _startTime; }
 /**
  * Sets the start time.
  */
-protected void setStartTime(int aTime)
-{
-    _startTime = aTime;
-    for(ViewAnim va : _anims) va.setStartTime(aTime);
-}
+protected void setStartTime(int aTime)  { _startTime = aTime; }
 
 /**
  * Returns the current time.
@@ -207,23 +203,30 @@ public int getTime()  { return _time; }
  */
 public boolean setTime(int aTime)
 {
-    // Set new time
-    int oldTime = _time; _time = aTime - Math.max(_startTime,0); if(_time==oldTime) return false;
+    // Get new time adjusted for looping and StartTime
+    int newTime = aTime - _startTime, oldTime = _time;
+    if(_loopCount>0) {
+        int maxTime = getMaxTime(), start = getStart(), loopCount = _loopCount -1;
+        int loopLen = maxTime - start;
+        int loopTime = (newTime - start) - loopCount*loopLen;
+        if(loopTime<0) loopTime = (newTime - start)%loopLen;
+        newTime = start + loopTime;
+    }
     
-    // If anim is completed, but there is a LoopCount, call again with new loop corrected time
-    boolean completed = _time >=_end;
-    if(completed && _loopCount>0 && _time<_loopCount*_end) {
-        getRoot(0).setTime(_time%_end); return false; }
+    // If time already set, just return
+    if(newTime==_time) return false;
+    _time = newTime;
     
     // If new values need to be set, set them
-    boolean needsUpdate = !(oldTime<=_start && _time<=_start || oldTime>=_end && _time>=_end);
+    boolean needsUpdate = !(oldTime<=_start && newTime<=_start || oldTime>=_end && newTime>=_end);
     if(needsUpdate) for(String key : getKeys())
         setTime(_time, key);
         
-    // Forward on to child anims
+    // Forward on to anims
+    boolean completed = _time >= _end;
     for(ViewAnim a : _anims) {
-        //boolean cmpt = a.setTime(aTime);
-        if(_time>a.getStart()) completed &= a.setTime(aTime);
+        if(_time>a.getStart())
+            completed &= a.setTime(_time);
         else completed = false;
     }
     
@@ -598,8 +601,8 @@ public void fromXMLLegacy(XMLElement anElement)
             String key = kval.getAttributeValue("key"); double val = kval.getAttributeFloatValue("value");
             anim.setValue(key, val);
         }
-        if(kframe.getAttributeBoolValue("Loops", false)) anim.setLoops();
-        if(kframe.hasAttribute("LoopCount")) anim.setLoopCount(kframe.getAttributeIntValue("LoopCount"));
+        if(kframe.getAttributeBoolValue("Loops", false)) setLoops();
+        if(kframe.hasAttribute("LoopCount")) setLoopCount(kframe.getAttributeIntValue("LoopCount"));
     }
 }
 
