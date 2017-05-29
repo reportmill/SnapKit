@@ -45,7 +45,13 @@ public class ViewAnim implements XMLArchiver.Archivable {
     Consumer <ViewAnim>  _onFinish;
     
     // The start time, current time
-    int                  _startTime = -1, _time;
+    int                  _time;
+    
+    // The max time
+    int                  _maxTime = -1;
+    
+    // The start time
+    int                  _startTime = -1;
     
     // Whether this anim was suspended because it's not visible
     boolean              _suspended;
@@ -143,6 +149,9 @@ public ViewAnim getAnim(int aTime)
         if(aTime==anim.getEnd()) return anim; }
     ViewAnim anim = new ViewAnim(_view, getEnd(), aTime);
     _anims.add(anim); anim._parent = this;
+    
+    // Clear MaxTimes and return
+    for(ViewAnim p=this;p!=null;p=p.getParent()) p._maxTime = -1;
     return anim;
 }
 
@@ -151,9 +160,10 @@ public ViewAnim getAnim(int aTime)
  */
 public int getMaxTime()
 {
+    if(_maxTime>=0) return _maxTime;
     int max = getEnd();
     for(ViewAnim anim : _anims) max = Math.max(max, anim.getMaxTime());
-    return max;
+    return _maxTime = max;
 }
 
 /**
@@ -199,14 +209,14 @@ protected void setStartTime(int aTime)  { _startTime = aTime; }
 public int getTime()  { return _time; }
 
 /**
- * Sets the time, returns whether anim has completed.
+ * Sets the current time.
  */
-public boolean setTime(int aTime)
+public void setTime(int aTime)
 {
     // Get new time adjusted for looping and StartTime
-    int newTime = aTime - _startTime, oldTime = _time;
+    int newTime = aTime - _startTime, oldTime = _time, maxTime = getMaxTime();
     if(_loopCount>0) {
-        int maxTime = getMaxTime(), start = getStart(), loopCount = _loopCount -1;
+        int start = getStart(), loopCount = _loopCount -1;
         int loopLen = maxTime - start;
         int loopTime = (newTime - start) - loopCount*loopLen;
         if(loopTime<0) loopTime = (newTime - start)%loopLen;
@@ -214,45 +224,42 @@ public boolean setTime(int aTime)
     }
     
     // If time already set, just return
-    if(newTime==_time) return false;
+    if(newTime==_time) return;
     _time = newTime;
     
     // If new values need to be set, set them
     boolean needsUpdate = !(oldTime<=_start && newTime<=_start || oldTime>=_end && newTime>=_end);
-    if(needsUpdate) for(String key : getKeys())
-        setTime(_time, key);
+    if(needsUpdate)
+        updateValues();
         
-    // Forward on to anims
-    boolean completed = _time >= _end;
-    for(ViewAnim a : _anims) {
-        if(_time>a.getStart())
-            completed &= a.setTime(_time);
-        else completed = false;
-    }
+    // Forward on to child anims (if within range)
+    for(ViewAnim child : _anims)
+        if(_time>child.getStart())
+            child.setTime(_time);
     
     // If on frame set, call it
     if(_onFrame!=null)
         _onFrame.accept(this);
     
-    // If completed and root anim, stop
+    // If completed and root anim, stop playing
+    boolean completed = _time >= maxTime;
     if(completed && isRoot())
         stop();
     
     // If completed and there is an OnFinish, trigger it
     if(completed && needsUpdate && _onFinish!=null)
         _onFinish.accept(this);
-    
-    // Return whether completed
-    return completed;
 }
 
 /**
- * Sets the time.
+ * Updates values for current time.
  */
-public void setTime(int aTime, String aKey)
+protected void updateValues()
 {
-    Object val = getValue(aKey, aTime);
-    _view.setValue(aKey, val);
+    for(String key : getKeys()) {
+        Object val = getValue(key, _time);
+        _view.setValue(key, val);
+    }
 }
 
 /**
