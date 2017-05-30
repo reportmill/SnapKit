@@ -22,12 +22,35 @@ public static String getNormalized(String aPath)
 /**
  * Returns a path with a filename or relative path added.
  */
+public static String getParent(String aPath)
+{
+    String path = getNormalized(aPath);
+    int ind = path.lastIndexOf('/');
+    if(ind>0)
+        path = path.substring(0, ind);
+    return path;
+}
+
+/**
+ * Returns a path with a filename or relative path added.
+ */
 public static String getChild(String aPath, String aChildPath)
 {
     String path = getNormalized(aPath);
     if(path.endsWith("/"))
         return path + (aChildPath.startsWith("/")? aChildPath.substring(1) : aChildPath);
     return path + (aChildPath.startsWith("/")? aChildPath : ("/" + aChildPath));
+}
+
+/**
+ * Returns a path with a filename or relative path added.
+ */
+public static String getRelative(String aPath, String aChildPath)
+{
+    String cpath = getNormalized(aChildPath); if(cpath.startsWith("/")) return cpath;
+    String path = getNormalized(aPath);
+    String parent = getParent(path);
+    return getChild(parent, cpath);
 }
 
 /**
