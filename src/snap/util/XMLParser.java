@@ -48,14 +48,14 @@ private static class XMLTokenizer extends Tokenizer {
     {
         // Mark content start and skip to next element-start char
         int start = _charIndex;
-        while(!isNext("<") && _charIndex<length())
-            _charIndex++;
+        while(!isNext("<") && hasChar())
+            eatChar();
         
         // Handle CDATA: Gobble until close and return string
         if(isNext("<![CDATA[")) {
-            _charIndex += "<![CDATA[".length(); if(Character.isWhitespace(_charIndex)) _charIndex++;
+            _charIndex += "<![CDATA[".length(); if(Character.isWhitespace(_charIndex)) eatChar();
             start = _charIndex;
-            while(!isNext("]]>")) _charIndex++;
+            while(!isNext("]]>")) eatChar();
             String str = getInput().subSequence(start, _charIndex).toString();
             _charIndex += "]]>".length();
             return str;

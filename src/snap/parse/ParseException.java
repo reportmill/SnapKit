@@ -41,7 +41,7 @@ protected String createMessage()
     // Get some useful line/char positions
     Token token = _parser.getToken();
     int charIndex = token!=null? token.getInputStart() : _parser.getTokenizer().getCharIndex();
-    int lineIndex = token!=null? token.getLineIndex() : _parser.getTokenizer().getLineIndex();
+    int lineIndex = token!=null? (token.getLineIndex()+1) : _parser.getTokenizer().getLineNum();
     int colIndex = token!=null? token.getColumnIndex() : 0;
     int lineEnd = _parser.getInput().toString().indexOf('\n', charIndex);
     if(lineEnd<0) lineEnd = _parser.getInput().length();

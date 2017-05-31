@@ -88,7 +88,14 @@ public final char getChar(int anOffset)  { return _input.charAt(_charIndex+anOff
 /**
  * Returns the char at the current index plus offset.
  */
-public final char eatChar()  { return _input.charAt(_charIndex++); }
+public final char eatChar()
+{
+    char c = _input.charAt(_charIndex++);
+    if(c=='\n' || c=='\r') {
+        if(c=='\r' && hasChar() && getChar()=='\n') _charIndex++;
+        _lineIndex++; _lineStart = _charIndex; }
+    return c;
+}
 
 /**
  * Returns the next given number of chars as a string.
@@ -181,6 +188,11 @@ protected Regex[] getRegexes()  { return _regexes!=null? _regexes : (_regexes=_r
  * Returns the current line index.
  */
 public final int getLineIndex()  { return _lineIndex; }
+
+/**
+ * Returns the current line number.
+ */
+public final int getLineNum()  { return _lineIndex + 1; }
 
 /**
  * Returns the current line start index.
@@ -316,15 +328,7 @@ protected Token getNextSpecialToken(Token aSpclTkn)
 /**
  * Gobble input characters until next non-whitespace or input end.
  */
-protected void skipWhiteSpace()
-{
-    char c; while(hasChar() && Character.isWhitespace(c=getChar())) { _charIndex++;
-        if(c=='\n' || c=='\r') {
-            if(c=='\r' && hasChar() && getChar()=='\n') _charIndex++;
-            _lineIndex++; _lineStart = _charIndex;
-        }
-    }
-}
+protected void skipWhiteSpace()  { while(hasChar() && Character.isWhitespace(getChar())) eatChar(); }
 
 /**
  * Processes and returns a single line comment token if next up in input.
@@ -365,11 +369,7 @@ protected Token getMultiLineCommentTokenMore(Token aSpclTkn)
     // Gobble chars until multi-line comment termination or input end
     while(hasChar()) {
         char c = eatChar();
-        if(c=='*' && hasChar() && getChar()=='/') { _charIndex++; break; }
-        if(c=='\n' || c=='\r') {
-            if(c=='\r' && hasChar() && getChar()=='\n') _charIndex++;
-            _lineIndex++; _lineStart = _charIndex;
-        }
+        if(c=='*' && hasChar() && getChar()=='/') { eatChar(); break; }
     }
     
     // Create and return token
