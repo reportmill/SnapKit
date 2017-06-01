@@ -185,6 +185,11 @@ protected Token getLookAheadToken(int anIndex)
 }
 
 /**
+ * Clears any currently set tokens.
+ */
+public void clearTokens()  { _lookAheadTokens.clear(); _token = null; }
+
+/**
  * Parses a given input and returns ParseNode (convenience).
  */
 public ParseNode parse(CharSequence anInput)  { setInput(anInput); return parse(); }
@@ -233,8 +238,8 @@ protected ParseNode parse(ParseRule aRule, HandlerRef aHRef)
     
         // Handle Or: Parse rules and break if either passes (return null if either fail)
         case Or: { ParseRule r0 = aRule.getChild0(), r1 = aRule.getChild1();
-            if(parseSimple(r0, href)) break;
-            if(parseSimple(r1, href)) break;
+            if(parseAndHandle(r0, href)) break;
+            if(parseAndHandle(r1, href)) break;
             return null;
         }
         
@@ -244,14 +249,22 @@ protected ParseNode parse(ParseRule aRule, HandlerRef aHRef)
             // Handle rule 0 LookAhead(x)
             if(r0.isLookAhead() && r0.getChild0()==null) {
                 if(lookAhead(r1, r0.getLookAhead(), 0)<0) return null;
-                if(parseSimple(r1, href)) break;
+                if(parseAndHandle(r1, href)) break;
                 parseFailed(r1, href.handler());
                 break;
             }
             
-            // Handle normal And
-            boolean parsed0 = parseSimple(r0, href); if(!parsed0 && !r0.isOptional()) return null;
-            if(parseSimple(r1, href)) break;
+            // Parse first rule (just return if parse not successful+optional)
+            boolean parsed0 = parseAndHandle(r0, href);
+            if(!parsed0 && !r0.isOptional())
+                return null;
+                
+            // If handler requested bypass, just break
+            if(href!=null && href.handler().isBypass())
+                break;
+            
+            // Parse second rule
+            if(parseAndHandle(r1, href)) break;
             if(parsed0 && r1.isOptional()) break;
             if(!parsed0) return null;
             parseFailed(r1, href.handler());
@@ -260,38 +273,43 @@ protected ParseNode parse(ParseRule aRule, HandlerRef aHRef)
         
         // Handle ZeroOrOne
         case ZeroOrOne: { ParseRule r0 = aRule.getChild0();
-            if(!parseSimple(r0, href)) return null;
+            if(!parseAndHandle(r0, href)) return null;
             break;
         }
         
         // Handle ZeroOrMore
         case ZeroOrMore: { ParseRule r0 = aRule.getChild0();
-            if(!parseSimple(r0, href)) return null;
-            while(parseSimple(r0, href));
+            if(!parseAndHandle(r0, href)) return null;
+            while(parseAndHandle(r0, href));
             break;
         }
         
         // Handle OneOrMore
         case OneOrMore: { ParseRule r0 = aRule.getChild0();
-            if(!parseSimple(r0, href)) return null;
-            while(parseSimple(r0, href));
+            if(!parseAndHandle(r0, href)) return null;
+            while(parseAndHandle(r0, href));
             break;
         }
             
         // Handle Pattern
         case Pattern: {
             
-            // Check pattern
-            if(aRule.getPattern()==token.getPattern()) {
-                ParseNode node = createNode(aRule, token, token);
-                if(href!=aHRef) {
-                    href.handler().parsedOne(node);
-                    node._customNode = href.handler().parsedAll();
-                }
-                _token = null; //getNextToken();
-                return node;
+            // If no match, just return
+            if(aRule.getPattern()!=token.getPattern())
+                return null;
+            
+            // Otherwise, create node, send handler parsedOne and parsedAll and return
+            ParseNode node = createNode(aRule, token, token);
+            if(href!=aHRef) {
+                ParseHandler handler = href.handler();
+                if(!sendHandlerParsedOne(node, handler))
+                    return null;
+                node._customNode = handler.parsedAll();
             }
-            return null;
+            
+            // Clear token and return 
+            _token = null; //getNextToken();
+            return node;
         }
         
         // Handle LookAhead
@@ -309,15 +327,37 @@ protected ParseNode parse(ParseRule aRule, HandlerRef aHRef)
 }
 
 /**
- * Simple parse - returns true if rule parsed.
+ * Parse rule and send handler parsedOne if successful.
  */
-boolean parseSimple(ParseRule aRule, HandlerRef anHRef)
+boolean parseAndHandle(ParseRule aRule, HandlerRef anHRef)
 {
+    // Do normal parse (just return if not successful)
     ParseNode node = parse(aRule, anHRef);
     if(node==null)
         return false;
-    if(anHRef!=null && !aRule.isAnonymous())
-        anHRef.handler().parsedOne(node);
+        
+    // If no handler, just return
+    if(anHRef==null || aRule.isAnonymous())
+        return true;
+        
+    // Send handler parsedOne
+    ParseHandler handler = anHRef.handler();
+    return sendHandlerParsedOne(node, handler);
+}
+
+/**
+ * Send handler parsedOne (with check for handler fail).
+ */
+boolean sendHandlerParsedOne(ParseNode aNode, ParseHandler aHandler)
+{
+    // Get handler and notify parseOne
+    aHandler.parsedOne(aNode);
+    
+    // If handler indicated fail, call fail and return false
+    if(aHandler.isFail()) {
+        parseFailed(aNode.getRule(), aHandler); return false; }
+
+    // Return true
     return true;
 }
 

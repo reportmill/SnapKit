@@ -18,6 +18,9 @@ public class ParseHandler <T> {
     // Whether handler is in use
     boolean          _inUse;
     
+    // Whether handler has been told to bypass further rules or fail
+    boolean          _bypass, _fail;
+    
     // The backup handler
     ParseHandler     _backupHandler;
 
@@ -65,6 +68,26 @@ protected Class<T> getPartClass()  { return getTypeParameterClass(getClass()); }
 public Token getStartToken()  { return _startToken; }
 
 /**
+ * Whether parsing should bypass succeeding rules.
+ */
+public boolean isBypass()  { return _bypass; }
+
+/**
+ * Indicates that parsing should short ciricuit.
+ */
+public void bypass()  { _bypass = true; }
+
+/**
+ * Whether parsing should fail on current rule.
+ */
+public boolean isFail()  { return _fail; }
+
+/**
+ * Indicates that parsing should fail on current rule.
+ */
+public void fail()  { _fail = true; }
+
+/**
  * Returns a handler that is not in use.
  */
 public ParseHandler getAvailableHandler()
@@ -92,7 +115,7 @@ private ParseHandler getBackupHandler()
 /**
  * Resets the handler.
  */
-public void reset()  { _part = null; _startToken = null; _inUse = false; }
+public void reset()  { _part = null; _startToken = null; _inUse = _bypass = _fail = false; }
 
 /** Returns a type parameter class. */
 private static Class getTypeParameterClass(Class aClass)
