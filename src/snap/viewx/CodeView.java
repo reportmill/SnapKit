@@ -30,6 +30,12 @@ public void setSource(Object anObj)
     syntaxColor();
 }
 
+public void setText(String aStr)
+{
+    super.setText(aStr);
+    syntaxColor();
+}
+
 /**
  * Performs coloring.
  */
