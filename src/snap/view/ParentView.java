@@ -66,7 +66,7 @@ protected void addChild(View aChild, int anIndex)
     relayout(); relayoutParent(); repaint(); setNeedsLayoutDeep(true);
     
     // If this shape has PropChangeListeners, start listening to children as well
-    if(_pcs.hasDeepListeners()) {
+    if(_pcs.hasDeepListener()) {
         aChild.addPropChangeListener(this); aChild.addDeepChangeListener(this); }
     
     // Fire property change
@@ -417,7 +417,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
  */
 public void addDeepChangeListener(DeepChangeListener aDCL)
 {
-    boolean first = !_pcs.hasDeepListeners();
+    boolean first = !_pcs.hasDeepListener();
     super.addDeepChangeListener(aDCL);
     
     // If first listener, add for children

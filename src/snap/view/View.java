@@ -1864,7 +1864,7 @@ public void removePropChangeListener(PropChangeListener aPCL, String aProp)
  */
 protected void firePropChange(String aProp, Object oldVal, Object newVal)
 {
-    if(!_pcs.hasListeners(aProp)) return;
+    if(!_pcs.hasListener(aProp)) return;
     firePropChange(new PropChange(this, aProp, oldVal, newVal));
 }
 
@@ -1873,7 +1873,7 @@ protected void firePropChange(String aProp, Object oldVal, Object newVal)
  */
 protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
 {
-    if(!_pcs.hasListeners(aProp)) return;
+    if(!_pcs.hasListener(aProp)) return;
     firePropChange(new PropChange(this, aProp, oldVal, newVal, anIndex));
 }
 

@@ -208,7 +208,7 @@ public void removePropChangeListener(PropChangeListener aPCL)  { _pcs.removeProp
  */
 protected void firePropChange(String aProp, Object oldVal, Object newVal)
 {
-    if(!_pcs.hasListeners(aProp)) return;
+    if(!_pcs.hasListener(aProp)) return;
     _pcs.firePropChange(new PropChange(this, aProp, oldVal, newVal));
 }
 
