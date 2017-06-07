@@ -54,8 +54,10 @@ public void syntaxColor()
             getTextBox().setStyleValue(TextStyle.COLOR_KEY, _reservedWordColor, tok.getInputStart(), tok.getInputEnd());
         else if(pattern.startsWith("\\\""))
             getTextBox().setStyleValue(TextStyle.COLOR_KEY, _stringLiteralColor, tok.getInputStart(), tok.getInputEnd());
-        if(stok!=null)
+        while(stok!=null) {
             getTextBox().setStyleValue(TextStyle.COLOR_KEY, _commentColor, stok.getInputStart(), stok.getInputEnd());
+            stok = stok.getSpecialToken();
+        }
     }
     
 }
