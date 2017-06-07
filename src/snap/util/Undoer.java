@@ -108,11 +108,6 @@ public void saveChanges()
         // Add current undo
         _undoSets.add(_activeUndoSet);
         
-        // See if RMShapes need to register new anim record
-        for(PropChange event : ListUtils.clone(_activeUndoSet.getChanges()))
-            if(event.getSource() instanceof SnapObject)
-                ((SnapObject)event.getSource()).animUpdate(event);
-        
         // Create new current undo
         _activeUndoSet = new UndoSet();
         

@@ -481,32 +481,6 @@ public WebFile getLocalFile(WebFile aFile, boolean doCache)  { return aFile; }
 public WebClassLoader getClassLoader() { return _clsLdr!=null? _clsLdr : (_clsLdr=new WebClassLoader(this));}
 
 /**
- * Adds a deep (property) change listener to get notified when this WebSite sees changes (to files).
- */
-public void addDeepChangeListener(DeepChangeListener aListener)
-{
-    addListener(DeepChangeListener.class, aListener);
-}
-
-/**
- * Removes a deep (property) change listener to get notified when this WebSite sees changes (to files).
- */
-public void removeDeepChangeListener(DeepChangeListener aListener)
-{
-    removeListener(DeepChangeListener.class, aListener);
-}
-
-/**
- * Handle property changes on row objects by forwarding to listener.
- */
-public void propertyChange(PropChange anEvent)
-{
-    // Forward to deep change listeners
-    for(int i=0, iMax=getListenerCount(DeepChangeListener.class); i<iMax; i++)
-        getListener(DeepChangeListener.class, i).deepChange(this, anEvent);
-}
-
-/**
  * Clears site Schema and ClassLoader.
  */
 public synchronized void refresh()  { _clsLdr = null; }

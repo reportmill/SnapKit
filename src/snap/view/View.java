@@ -1899,19 +1899,12 @@ public void removeDeepChangeListener(DeepChangeListener aPCL)  { _pcs.removeDeep
 /**
  * Property change listener implementation to forward changes on to deep listeners.
  */
-public void propertyChange(PropChange anEvent)
-{
-    // Propagate to this view's DeepChangeListeners (if present)
-    _pcs.fireDeepChange(this, anEvent);
-}
+public void propertyChange(PropChange aPCE)  { _pcs.fireDeepChange(this, aPCE); }
 
 /**
  * Deep property change listener implementation to forward to this View's deep listeners.
  */
-public void deepChange(PropChangeListener aLsnr, PropChange anEvent)
-{
-    _pcs.fireDeepChange(aLsnr, anEvent);
-}
+public void deepChange(PropChangeListener aLsnr, PropChange aPCE)  { _pcs.fireDeepChange(aLsnr, aPCE); }
 
 /**
  * Returns the event adapter for view.

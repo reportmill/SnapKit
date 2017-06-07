@@ -9,7 +9,7 @@ import snap.web.*;
 /**
  * This class performs data retrieval and udpates on a WebSite.
  */
-public class DataSite extends SnapObject implements PropChangeListener {
+public class DataSite extends SnapObject {
 
     // The WebSite
     WebSite                   _wsite;
@@ -329,16 +329,6 @@ public synchronized void deleteRow(Row aRow) throws Exception
  * Deletes a given row.
  */
 protected void deleteRowImpl(Row aRow) throws Exception  { throw notImpl("deleteRowImpl"); }
-
-/**
- * Handle property changes on row objects by forwarding to listener.
- */
-public void propertyChange(PropChange anEvent)
-{
-    // Forward to deep change listeners
-    for(int i=0, iMax=getListenerCount(DeepChangeListener.class); i<iMax; i++)
-        getListener(DeepChangeListener.class, i).deepChange(this, anEvent);
-}
 
 /**
  * Clears site Schema and ClassLoader.
