@@ -196,6 +196,9 @@ private static class SplitPCL implements PropChangeListener {
         if(_pc1==aPCL) return _pc2; if(_pc2==aPCL) return _pc1;
         if(_pc1 instanceof SplitPCL) _pc1 = ((SplitPCL)_pc1).remove(aPCL);
         if(_pc2 instanceof SplitPCL) _pc2 = ((SplitPCL)_pc2).remove(aPCL);
+        
+        // Validate and return
+        if(_pc1==this || _pc2==this) return error();
         return this;
     }
     
@@ -208,6 +211,9 @@ private static class SplitPCL implements PropChangeListener {
             if(npcl.pcl==aPCL && npcl.prop.equals(aProp)) return _pc1; }
         if(_pc1 instanceof SplitPCL) _pc1 = ((SplitPCL)_pc1).remove(aPCL, aProp);
         if(_pc2 instanceof SplitPCL) _pc2 = ((SplitPCL)_pc2).remove(aPCL, aProp);
+        
+        // Validate and return
+        if(_pc1==this || _pc2==this) return error();
         return this;
     }
     
@@ -219,6 +225,13 @@ private static class SplitPCL implements PropChangeListener {
         return aPCL==_pc1 || aPCL==_pc2;
     }
     
+    /** Called when child PCL set to itself - should never happen, remove when fixed. */
+    PropChangeListener error()
+    {
+        System.out.println(StringUtils.getStackTraceString(new RuntimeException("PropChangeSupport: Cycle")));
+        return _pc1==this? _pc2 : _pc1;
+    }
+
     /** Standard toString. */
     public String toString()  { return "SplitPropChangeListener { pc1(" + _pc1 + "), pc2(" + _pc2 + ") }"; }
 }
