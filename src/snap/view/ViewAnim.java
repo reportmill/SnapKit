@@ -35,8 +35,8 @@ public class ViewAnim implements XMLArchiver.Archivable {
     // The loop count
     int                  _loopCount;
     
-    // The root view currently playing this anim
-    RootView             _rview;
+    // The Interpolator
+    Interpolator         _interp = Interpolator.EASE_BOTH;
     
     // A runnable to be called on each anim frame
     Consumer <ViewAnim>  _onFrame;
@@ -55,6 +55,9 @@ public class ViewAnim implements XMLArchiver.Archivable {
     
     // Whether this anim was suspended because it's not visible
     boolean              _suspended;
+    
+    // The root view currently playing this anim
+    RootView             _rview;
     
 /**
  * Creates a new ViewAnim.
@@ -281,14 +284,14 @@ public Object interpolate(Object aVal1, Object aVal2, double aRatio)
     // Interpolate numbers
     if(aVal1 instanceof Number && aVal2 instanceof Number) {
         double val1 = ((Number)aVal1).doubleValue(), val2 = ((Number)aVal2).doubleValue();
-        return Interpolator.EASE_BOTH.getValue(aRatio, val1, val2);
+        return _interp.getValue(aRatio, val1, val2);
     }
     
     // Interpolate colors
     if(aVal1 instanceof Color || aVal2 instanceof Color) {
         Color c1 = aVal1 instanceof Color? (Color)aVal1 : Color.CLEAR;
         Color c2 = aVal2 instanceof Color? (Color)aVal2 : Color.CLEAR;
-        double ratio = Interpolator.EASE_BOTH.getValue(aRatio, 0, 1);
+        double ratio = _interp.getValue(aRatio, 0, 1);
         return c1.blend(c2, ratio);
     }
     
@@ -382,9 +385,14 @@ public ViewAnim setScaleX(double aVal)  { return setValue(View.ScaleX_Prop, aVal
 public ViewAnim setScaleY(double aVal)  { return setValue(View.ScaleY_Prop, aVal); }
 
 /**
- * Sets the ScaleY value.
+ * Sets the Fill value.
  */
 public ViewAnim setFill(Paint aVal)  { return setValue(View.Fill_Prop, aVal); }
+
+/**
+ * Sets the Opacity value.
+ */
+public ViewAnim setOpacity(double aVal)  { return setValue(View.Opacity_Prop, aVal); }
 
 /**
  * Returns the end value for given key.
@@ -471,6 +479,16 @@ public Consumer <ViewAnim> getOnFinish()  { return _onFinish; }
  * Sets the on finished.
  */
 public ViewAnim setOnFinish(Consumer <ViewAnim> aFinish)  { _onFinish = aFinish; return this; }
+
+/**
+ * Sets whether animation should start fast.
+ */
+public ViewAnim startFast()  { setInterpolator(Interpolator.EASE_OUT); return this; }
+    
+/**
+ * Sets whether to ease animation in
+ */
+public ViewAnim setInterpolator(Interpolator anInterp)  { _interp = anInterp; return this; }
     
 /**
  * Play the anim.
