@@ -23,7 +23,7 @@ public abstract class Image {
      String           _type;
      
      // Whether the image is loaded
-     boolean          _loaded;
+     boolean          _loaded = true;;
      
      // The native image
      Object           _native;
