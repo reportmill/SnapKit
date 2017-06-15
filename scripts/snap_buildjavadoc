@@ -7,7 +7,6 @@ javadoc -d /tmp/javadoc -windowtitle 'SnapCode API' \
 -header 'SnapCode API' \
 -footer 'SnapCode API' \
 -overview /Temp/SnapCode/scripts/overview.html \
--public \
 snap/data/*.java \
 snap/gfx/*.java \
 snap/parse/*.java \
