@@ -12,7 +12,7 @@ import snap.util.*;
 public class ParentView extends View {
     
     // The children
-    View           _children[] = EMPTY_VIEWS, _managed[] = EMPTY_VIEWS;
+    ViewList       _children = new ViewList();
     
     // Whether node needs layout, or node has children that need layout
     boolean        _needsLayout, _needsLayoutDeep;
@@ -29,21 +29,26 @@ public class ParentView extends View {
     // Constants for properties
     public static final String ClipToBounds_Prop = "ClipToBounds";
     public static final String NeedsLayout_Prop = "NeedsLayout";
-    
+
+/**
+ * Returns the ViewList that holds children.
+ */
+public ViewList getViewList()  { return _children; }
+
 /**
  * Returns the number of children associated with this node.
  */
-public int getChildCount()  { return _children.length; }
+public int getChildCount()  { return _children.size(); }
 
 /**
  * Returns the child at the given index.
  */
-public View getChild(int anIndex)  { return _children[anIndex]; }
+public View getChild(int anIndex)  { return _children.get(anIndex); }
 
 /**
  * Returns the list of children associated with this node.
  */
-public View[] getChildren()  { return _children; }
+public View[] getChildren()  { return _children.getAll(); }
 
 /**
  * Adds the given child to the end of this node's children list.
@@ -62,7 +67,7 @@ protected void addChild(View aChild, int anIndex)
     aChild.setParent(this);
     
     // Add child to Children list
-    _children = ArrayUtils.add(_children, aChild, anIndex); _managed = null;
+    _children.add(aChild, anIndex);
     relayout(); relayoutParent(); repaint(); setNeedsLayoutDeep(true);
     
     // If this shape has PropChangeListeners, start listening to children as well
@@ -79,8 +84,7 @@ protected void addChild(View aChild, int anIndex)
 protected View removeChild(int anIndex)
 {
     // Remove child from children list and clear parent
-    View child = _children[anIndex];
-    _children = ArrayUtils.remove(_children, anIndex); _managed = null;
+    View child = _children.remove(anIndex);
     child.setParent(null);
     relayout(); relayoutParent(); repaint();
     
@@ -125,63 +129,43 @@ public View getChild(String aName)
 /**
  * Returns the index of the given child in this node's children list.
  */
-public int indexOfChild(View aChild)
-{
-    for(int i=0,iMax=getChildCount();i<iMax;i++)
-        if(aChild==getChild(i))
-            return i;
-    return -1;
-}
+public int indexOfChild(View aChild)  { return _children.indexOf(aChild); }
 
 /**
  * Returns the last child of this node.
  */
-public View getChildLast()  { return getChildCount()>0? getChild(getChildCount()-1) : null; }
+public View getChildLast()  { return _children.getLast(); }
 
 /**
  * Returns the child at given point.
  */
-public View getChildAt(Point aPnt)  { return getChildAt(aPnt.x, aPnt.y); }
+public View getChildAt(Point aPnt)  { return _children.getViewAt(aPnt.x, aPnt.y); }
 
 /**
  * Returns the child at given point.
  */
-public View getChildAt(double aX, double aY)
+public View getChildAt(double aX, double aY)  { return _children.getViewAt(aX, aY); }
+
+/**
+ * Returns the first child view of given class (optional) hit by given shape, excluding given view (optional).
+ */
+public <T extends View> T getChildAt(Shape aShape, Class <T> aClass, View aChild)
 {
-    View children[] = getChildren();
-    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickable()) continue;
-        Point p = child.parentToLocal(aX, aY);
-        if(child.contains(p.x,p.y))
-            return child;
-    }
-    return null;
+    return _children.getViewAt(aShape, aClass, aChild);
 }
 
 /**
  * Returns the child at given point.
  */
-public List <View> getChildrenAt(Shape aShape)
+public <T extends View> List <T> getChildrenAt(Shape aShape, Class <T> aClass, View aChild)
 {
-    View children[] = getChildren(); List <View> hit = new ArrayList();
-    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickable()) continue;
-        Shape shp = child.parentToLocal(aShape);
-        if(child.intersects(shp))
-            hit.add(child);
-    }
-    return hit;
+    return _children.getViewsAt(aShape, aClass, aChild);
 }
 
 /**
  * Returns the managed children.
  */
-public View[] getChildrenManaged()
-{
-    if(_managed!=null) return _managed;
-    int cc = getChildCount(), mc = 0; for(View child : getChildren()) if(child.isManaged()) mc++;
-    if(mc==cc) return _managed = _children;
-    View mngd[] = new View[mc]; for(int i=0,j=0;i<cc;i++) { View c = getChild(i); if(c.isManaged()) mngd[j++] = c; }
-    return _managed = mngd;
-}
+public View[] getChildrenManaged()  { return _children.getManaged(); }
 
 /**
  * Returns the next focus View after given view (null to return first).

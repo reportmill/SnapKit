@@ -954,7 +954,7 @@ public boolean isManaged()  { return _managed; }
 public void setManaged(boolean aValue)
 {
     _managed = aValue;
-    ParentView par = getParent(); if(par!=null) { par._managed = null; relayoutParent(); }
+    ParentView par = getParent(); if(par!=null) { par._children._managed = null; relayoutParent(); }
 }
 
 /**
