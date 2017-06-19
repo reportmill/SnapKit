@@ -25,6 +25,9 @@ public class SwingViewEnv extends ViewEnv {
  */
 public SwingViewEnv()
 {
+    // Start Font Loading
+    AWTFontUtils.getFonts(); //new Thread(() -> AWTFontUtils.getFonts()).start();
+    
     // Turn on dyamic layout
     Toolkit.getDefaultToolkit().setDynamicLayout(true);
 }
