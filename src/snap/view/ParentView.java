@@ -218,6 +218,23 @@ public void setOwner(ViewOwner anOwner)
 }
 
 /**
+ * Override to forward to children.
+ */
+public boolean intersects(Shape aShape)
+{
+    // Do normal version (just return if miss or this ParentView has border/fill)
+    boolean hit = super.intersects(aShape);
+    if(!hit || getBorder()!=null || getFill()!=null)
+        return hit;
+    
+    // If any child is hit, return true
+    View hview = getViewList().getViewAt(aShape, null, null);
+    if(hview!=null)
+        return true;
+    return false;
+}
+
+/**
  * Override to add call to paintChildren.
  */
 protected void paintAll(Painter aPntr)
