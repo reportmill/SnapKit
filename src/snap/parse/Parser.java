@@ -40,7 +40,13 @@ public Parser(ParseRule aRule)  { setRule(aRule); }
 /**
  * Returns the top level rule.
  */
-public ParseRule getRule()  { return _rule!=null? _rule : (_rule=createRule()); }
+public ParseRule getRule()
+{
+    if(_rule!=null) return _rule;
+    _rule = createRule();
+    initRule();
+    return _rule;
+}
 
 /**
  * Sets the top level rule.
@@ -51,6 +57,11 @@ public void setRule(ParseRule aRule)  { _rule = aRule; }
  * Creates the top level rule. Default version tries to load rules from ClassName.txt.
  */
 protected ParseRule createRule()  { return ParseUtils.loadRule(getClass(), null); }
+
+/**
+ * Initializes rule(s).
+ */
+protected void initRule()  { }
 
 /**
  * Returns a named rule.

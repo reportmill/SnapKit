@@ -37,11 +37,22 @@ public String getAndResetError() { String e = _error; _error = null; return e; }
 /**
  * Load rule from rule file and install handlers.
  */
-public ParseRule createRule()
+protected void initRule()
 {
-    ParseRule rule = super.createRule();           // Load KeyChain rules from KeyChainParser.txt
-    ParseUtils.installHandlers(getClass(), rule);  // Install Handlers
-    return rule.getRule("Statement");              // Return Statement rule
+    // Install Handlers (TeaVM doesn't like auto version)
+    //ParseUtils.installHandlers(getClass(), rule);  // Install Handlers
+    getRule("Statement").setHandler(new StatementHandler());
+    getRule("Expression").setHandler(new ExpressionHandler());
+    getRule("LogicalOrExpr").setHandler(new LogicalOrExprHandler());
+    getRule("LogicalAndExpr").setHandler(new LogicalAndExprHandler());
+    getRule("EqualityExpr").setHandler(new EqualityExprHandler());
+    getRule("ComparativeExpr").setHandler(new ComparativeExprHandler());
+    getRule("AdditiveExpr").setHandler(new AdditiveExprHandler());
+    getRule("MultiplicativeExpr").setHandler(new MultiplicativeExprHandler());
+    getRule("UnaryExpr").setHandler(new UnaryExprHandler());
+    getRule("KeyChain").setHandler(new KeyChainHandler());
+    getRule("Object").setHandler(new ObjectHandler());
+    getRule("ArgList").setHandler(new ArgListHandler());
 }
 
 /**
