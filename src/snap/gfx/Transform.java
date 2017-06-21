@@ -13,6 +13,9 @@ public class Transform implements Cloneable {
     // Matrix components
     protected double _a = 1, _b = 0, _c = 0, _d = 1, _tx = 0, _ty = 0;
     
+    // The inverse
+    Transform        _inverse;
+    
     // Identity transform
     public static final Transform IDENTITY = new Transform();
 
@@ -54,7 +57,7 @@ public final boolean isRotated()  { return _b!=0 || _c!=0; }
 /**
  * Translates this transform by given x & y.
  */
-public void translate(double dx, double dy)  { _tx += dx; _ty += dy; }
+public void translate(double dx, double dy)  { _tx += dx; _ty += dy; _inverse = null; }
 
 /**
  * Rotates this transform by given angle in degrees.
@@ -111,6 +114,7 @@ public void multiply(double a, double b, double c, double d, double tx, double t
     double c2 = _c*a + _d*c, d2 = _c*b + _d*d;
     double tx2 = _tx*a + _ty*c + tx, ty2 = _tx*b + _ty*d + ty;
     _a = a2; _b = b2; _c = c2; _d = d2; _tx = tx2; _ty = ty2;
+    _inverse = null;
 }
 
 /**
@@ -125,6 +129,7 @@ public void invert()
         double tx = (_c*_ty - _d*_tx)/det, ty = (_b*_tx - _a*_ty)/det;
         _a = a; _b = b; _c = c; _d = d; _tx = tx; _ty = ty;
     }
+    _inverse = null;
 }
 
 /**
@@ -256,16 +261,29 @@ public static Transform getScale(double aSX, double aSY)
 }
 
 /**
- * Returns a scale transform.
+ * Returns a transform for given matrix.
  */
 public static Transform get(double m[])  { return get(m[0],m[1],m[2],m[3],m[4],m[5]); }
 
 /**
- * Returns a scale transform.
+ * Returns a transform for given matrix elements.
  */
 public static Transform get(double a, double b, double c, double d, double tx, double ty)
 {
     Transform t = new Transform(); t.multiply(a, b, c, d, tx, ty); return t;
+}
+
+/**
+ * Returns a transform from one given rect to second given rect.
+ */
+public static Transform get(Rect aRect1, Rect aRect2)
+{
+    double sx = aRect2.width/aRect1.width;
+    double sy = aRect2.height/aRect1.height;
+    Transform xform = Transform.getTrans(-aRect1.x,-aRect1.y);
+    xform.scale(sx,sy);
+    xform.translate(aRect2.x, aRect2.y);
+    return xform;
 }
 
 }
