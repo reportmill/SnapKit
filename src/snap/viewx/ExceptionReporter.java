@@ -90,7 +90,8 @@ public void uncaughtException(Thread t, Throwable aThrowable)
     aThrowable.printStackTrace();
     
     // If exception reporting not enabled, just return (otherwise mark done, because we only offer this once)
-    if(_done || !PrefsUtils.prefs().getBoolean("ExceptionReportingEnabled", true))
+    Prefs prefs = Prefs.get();
+    if(_done || !prefs.getBoolean("ExceptionReportingEnabled", true))
         return;
     else _done = true;
 
@@ -98,8 +99,8 @@ public void uncaughtException(Thread t, Throwable aThrowable)
     getUI().setPrefSize(585, 560);
     
     // Default user/email values in UI
-    setViewValue("UserText", PrefsUtils.prefs().get("ExceptionUserName", ""));
-    setViewValue("EmailText", PrefsUtils.prefs().get("ExceptionEmail", ""));
+    setViewValue("UserText", prefs.get("ExceptionUserName", ""));
+    setViewValue("EmailText", prefs.get("ExceptionEmail", ""));
     
     // Start the exception text with environment info
     StringBuffer eBuffer = new StringBuffer();
@@ -122,8 +123,8 @@ public void uncaughtException(Thread t, Throwable aThrowable)
     if(!dbox.showConfirmDialog(null)) return;
 
     // Update preferences and send exception
-    PrefsUtils.prefsPut("ExceptionUserName", getViewStringValue("UserText"));
-    PrefsUtils.prefsPut("ExceptionEmail", getViewStringValue("EmailText"));
+    prefs.set("ExceptionUserName", getViewStringValue("UserText"));
+    prefs.set("ExceptionEmail", getViewStringValue("EmailText"));
     sendException();
 }
 

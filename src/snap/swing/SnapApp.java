@@ -48,7 +48,7 @@ public void main()
     Thread.setDefaultUncaughtExceptionHandler(this);
 
     // Install Snap preferences class
-    PrefsUtils.setPrefsClass(SnapApp.class);
+    Prefs.setPrefsClass(SnapApp.class);
     
     // Set URL file in background
     getUI();

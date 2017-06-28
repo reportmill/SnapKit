@@ -130,7 +130,7 @@ public void saveFrame()
     int w = (int)getWidth(), h = (int)getHeight();
     StringBuffer sb = new StringBuffer().append(x).append(' ').append(y);
     if(_saveSize) sb.append(' ').append(w).append(' ').append(h);
-    PrefsUtils.prefsPut(_saveName + "Loc", sb.toString());
+    Prefs.get().set(_saveName + "Loc", sb.toString());
 }
 
 /**

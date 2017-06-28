@@ -36,7 +36,7 @@ public static String showChooser(boolean save, View aView, String aDesc, String 
     chooser.setFileFilter(new UIUtilsFileFilter(theExtensions, aDesc));
     
     // Get last chosen file name from preferences for first given extension
-    String path = PrefsUtils.prefs().get("MostRecentDocument" + theExtensions[0], System.getProperty("user.home"));
+    String path = Prefs.get().get("MostRecentDocument" + theExtensions[0], System.getProperty("user.home"));
     
     // Get last chosen file as File
     File file = new File(path);
@@ -67,7 +67,8 @@ public static String showChooser(boolean save, View aView, String aDesc, String 
         ext = theExtensions[0];
     
     // Save selected filename in preferences for it's type (extension)
-    PrefsUtils.prefsPut("MostRecentDocument" + ext, path, true);
+    Prefs.get().set("MostRecentDocument" + ext, path);
+    Prefs.get().flush();
             
     // If user chose a directory, just run again
     if(file.isDirectory())
@@ -127,7 +128,7 @@ private static class SnapFileChooser extends JFileChooser {
         JDialog dialog = super.createDialog(parent);
         
         // Get previous window size string from preferences
-        String size = PrefsUtils.prefs().get("FileChooserSize", " "); // Used to be: "FileChooserSize" + exts[0]
+        String size = Prefs.get().get("FileChooserSize", " "); // Used to be: "FileChooserSize" + exts[0]
         
         // Get previous window width and height from size string
         final int width = StringUtils.intValue(size);
@@ -139,7 +140,7 @@ private static class SnapFileChooser extends JFileChooser {
         // Add component listener to catch window resize
         dialog.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) { Component c = e.getComponent();
-                PrefsUtils.prefsPut("FileChooserSize", c.getWidth() + " " + c.getHeight()); }});
+                Prefs.get().set("FileChooserSize", c.getWidth() + " " + c.getHeight()); }});
         
         // Return dialog
         return dialog;
