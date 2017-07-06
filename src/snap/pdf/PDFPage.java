@@ -317,6 +317,24 @@ public Image getImage()
 }
 
 /**
+ * Set everything to the default implementations and return an Image for this page.
+ */
+public Image getImage2()
+{
+    // If already set, just return
+    if(_image!=null) return _image;
+    
+    // Create PDF painter that renders into an image
+    Image img = Image.get(612,792,false);
+    Painter ipntr = img.getPainter();
+    ipntr.setColor(Color.WHITE); ipntr.fillRect(0,0,img.getWidth(),img.getHeight());
+    ipntr.setColor(Color.BLACK); ipntr.drawRect(.5,.5,img.getWidth()-1,img.getHeight()-1);
+    PagePainter ppntr = new PagePainter();
+    ppntr.paint(_pfile.getPage(_index), ipntr);
+    return _image = img;
+}
+
+/**
  * Draw the page to g,  scaled to fit the rectangle r.
  */
 public void paint(Painter aPntr, Rect aRect)
