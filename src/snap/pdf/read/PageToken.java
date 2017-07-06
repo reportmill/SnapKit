@@ -13,8 +13,16 @@ import snap.pdf.PDFException;
  * Other possible contents of the value are Numbers and Lists.
  */
 public class PageToken {
+    
+    // Token type
     public int type;
+    
+    // Token value
     public Object value;
+    
+    // Token location and bytes (if loaded on demand)
+    int           _start, _len;
+    byte          _pageBytes[];
 
     // Constants
     public static final int PDFOperatorToken = 0;
@@ -38,32 +46,51 @@ public PageToken(int tokenType, Object objectValue)  { type = tokenType; value =
 public PageToken(int tokenType)  { this(tokenType,null); }
 
 /**
- * Specific accessors for the token's value
+ * Returns the token as int.
+ */
+public boolean boolValue() { return ((Boolean)value).booleanValue(); }
+
+/**
+ * Returns the token as int.
  */
 public int intValue() { return ((Number)value).intValue();  }
+
+/**
+ * Returns the token as int.
+ */
 public float floatValue() { return ((Number)value).floatValue(); }
-public boolean boolValue() { return ((Boolean)value).booleanValue(); }
-public int tokenLocation() { return ((Range)value).location; }
-public int tokenLength() { return ((Range)value).length; }
 
-
-public String nameValue(byte pageBytes[])
+/**
+ * Returns the token as string, regardless of type.
+ */
+public String stringValue()
 {
-    //TODO:  Name is preceded by a '/'.  Check that this is used consistently with the rest of the code.  I think the
-    // general rule is that names used as dictionary keys never have '/' but names appearing elsewhere do.
-    int tloc = tokenLocation(), tlen = tokenLength();
-    return new String(pageBytes, tloc, tlen);
+    if(value instanceof String)
+        return (String)value;
+    if(value!=null)
+        return value.toString();
+    if(_pageBytes!=null)
+        return new String(_pageBytes, _start, _len);
+    return null;
+}
+
+/**
+ * Returns the token as string.
+ */
+public String getString()
+{
+    if(!(value instanceof String)) System.err.println("PageToken: Request for string from non-string token " + value);
+    return (String)value;
 }
 
 /**
  * Returns the PDF name object stripped of the leading '/'.
  * NB: In PDF, "/" is a valid name, and this routine will return an empty string for that.
- * TODO: Not sure how I feel about the names of these two routines.
  */
-public String nameString(byte pageBytes[]) 
+public String getName()
 {
-    int tloc = tokenLocation(), tlen = tokenLength();
-    return new String(pageBytes, tloc+1, tlen-1);
+    if(type!=PDFNameToken) System.err.println("PageToken: Request for name from wrong token type " + type);
+    return getString().substring(1);
 }
 
 /**
@@ -71,28 +98,34 @@ public String nameString(byte pageBytes[])
  */
 public byte[] byteArrayValue(byte pageBytes[]) 
 {
-    int tloc = tokenLocation(), tlen = tokenLength();
+    int tloc = getStart(), tlen = getLength();
     byte sub[] = new byte[tlen];
     System.arraycopy(pageBytes, tloc, sub, 0, tlen);
     return sub;
 }
 
 /**
- * Standard toString implementation.
+ * Returns the token start char index.
  */
-public String toString() { return toString(null); }
+public int getStart() { return _start; }
+
+/**
+ * Returns the token end char index.
+ */
+public int getEnd() { return _start + _len; }
+
+/**
+ * Returns the token char length.
+ */
+public int getLength() { return _len; }
 
 /**
  * Standard toString implementation.
  */
-public String toString(byte pageBytes[])
+public String toString()
 {
-   Object tok = value;
-   if(value instanceof Range && pageBytes!=null) {
-       Range r = (Range)value;
-       tok = new String(pageBytes, r.location, r.length);
-   }
-   return "[" + type + " \"" + tok + "\"]";
+    String str = stringValue();
+    return "[" + type + " \"" + str + "\"]";
 }
 
 /**
@@ -150,49 +183,54 @@ private static int getTokens(byte pageBytes[], int offset, int end, List theToke
         }
         
         // Handle hex string end
-        else if ((c=='>') && (i<end-1) && (pageBytes[i+1]=='>')) {
+        else if(c=='>' && (i<end-1) && pageBytes[i+1]=='>') {
             aToken = new PageToken(PageToken.PDFDictCloseToken); i++; }
         
         // Handle name
         else if(c=='/') {
-            Range r = new Range(i,0);
-            aToken = new PageToken(PageToken.PDFNameToken);
-            while(++i<end) {
-                c = pageBytes[i];
-                // whitespace ends name
-                if(c==' ' || c=='\t' || c=='\r' || c=='\n' || c=='\f') {
-                    r.length = i-r.location; break; }
-                // other delimeter.  end name and back up 
+            
+            // Iterate over chars until name end
+            int start = i, len = 1;
+            while(++i<end) { c = pageBytes[i];
+            
+                // Whitespace ends name
+                if(c==' ' || c=='\t' || c=='\r' || c=='\n' || c=='\f')
+                    break;
+                    
+                // Other delimeter: end name and back up 
                 if(c=='(' || c==')' || c=='<' || c=='>' || c=='[' || c==']' || c=='{' || c=='}' || c=='/' || c=='%') {
-                    r.length = i-r.location; i--; break; }
+                    i--; break; }
+                len++;
             }
-            // end of stream also ends name
-            if(i==end)
-                r.length = end-r.location;
-            aToken.value = r;
+            
+            // Create/set name token with string
+            aToken = new PageToken(PageToken.PDFNameToken);
+            aToken.value = new String(pageBytes, start, len);
+            aToken._start = start; aToken._len = len;
         }
         
         // Handle number
-        else if((c=='+') || (c=='-') || (c=='.') || ((c>='0') && (c<='9'))) {
-            aToken = new PageToken(PageToken.PDFNumberToken);
-            i = getPDFNumber(pageBytes, i, end, aToken);
+        else if(c=='+' || c=='-' || c=='.' || (c>='0' && c<='9')) {
+            aToken = getNumberToken(pageBytes, i, end);
+            i = aToken.getEnd();
         }
         
         // Handle boolean
-        else if((c=='t' || c=='f') && ((aToken=checkPDFBoolean(pageBytes,i,end))!=null)) {
+        else if((c=='t' || c=='f') && ((aToken=getBoolToken(pageBytes,i,end))!=null)) {
             if(aToken.boolValue()) i += 3;
             else i+= 4;
         }
         
         // Handle ID
-        else if ((c=='I') && (i<end-4) && (pageBytes[i+1]=='D')) {
-            i+= 2; // skip over the ID
+        else if (c=='I' && (i<end-4) && pageBytes[i+1]=='D') {
+            i += 2; // skip over the ID
             
             // Check for a single whitespace char.  This is present for data types other than asciihex & ascii85
             if(pageBytes[i]==' ' || pageBytes[i]=='\t' || pageBytes[i]=='\n')
                 ++i;
             
-            Range r = new Range(i,0);
+            aToken = new PageToken(PageToken.PDFInlineImageData);
+            aToken._start = i; aToken._pageBytes = pageBytes;
             
             // Inline image data - slurp up all data up to EI token depending on encoding stream,
             // first byte might or might not be significant.
@@ -205,25 +243,29 @@ private static int getTokens(byte pageBytes[], int offset, int end, List theToke
                     break;
                 ++i;
             }
-            if(i>=end) 
-                throw new PDFException("Unterminated inline image data");
-            aToken = new PageToken(PageToken.PDFInlineImageData);
-            r.length = i-r.location; aToken.value = r; i+= 2;  // skip over 'EI'
+            
+            // Throw exception if unterminated
+            if(i>=end) throw new PDFException("Unterminated inline image data");
+                
+            // Set token length and skip over 'EI'
+            aToken._len = i - aToken._start; i += 2;
         }
         
-        // Handle
+        // Handle operator
         else if(c!=' ' && c!='\t' && c!='\r' && c!='\n' && c!='\f') {
-            Range r = new Range(i,0);
-            aToken = new PageToken(PageToken.PDFOperatorToken);
-            while(++i<end) {
-                c = pageBytes[i];
-                if(c==' ' || c=='\t' || c=='\r' || c=='\n' || c=='\f') {
-                    r.length = i-r.location; break; }
-                else if(c=='(' || c=='/' || c=='[' || c=='<' || c=='%') {
-                    r.length = i-r.location; i--; break; }
+            
+            // Iterate over chars until operator end
+            int start = i, len = 1;
+            while(++i<end) { c = pageBytes[i];
+                if(c==' ' || c=='\t' || c=='\r' || c=='\n' || c=='\f') break;
+                else if(c=='(' || c=='/' || c=='[' || c=='<' || c=='%') { i--; break; }
+                len++;
             }
-            if(i==end) r.length=i-r.location;
-            aToken.value = r;
+
+            // Create/set operator token with string
+            aToken = new PageToken(PageToken.PDFOperatorToken);
+            aToken.value = new String(pageBytes, start, len);
+            aToken._start = start; aToken._len = len;
         }
         
         // Add new token to the array
@@ -236,6 +278,59 @@ private static int getTokens(byte pageBytes[], int offset, int end, List theToke
 }
 
 /**
+ * Returns a boolean token if next bytes are "true" or "false".
+ * Should probably check next byte to make sure it's not "trueness", "falseness", etc.
+ */
+private static PageToken getBoolToken(byte pageBytes[], int start, int end)
+{
+    int len = end-start; if(len<4) return null;
+    byte b0 = pageBytes[start], b1 = pageBytes[start+1], b2 = pageBytes[start+2], b3 = pageBytes[start+3];
+    byte b4 = len>4? pageBytes[start+4] : 0;
+    if(b0=='t' && b1=='r' && b2=='u' && b3=='e')
+        return new PageToken(PageToken.PDFBooleanToken, true);
+    if(b0=='f' && b1=='a' && b2=='l' && b3=='s' && b4=='e')
+        return new PageToken(PageToken.PDFBooleanToken, false);
+    return null;
+}
+
+/**
+ * Numbers (floats or ints) Exponential notation not allowed in pdf.
+ */
+private static PageToken getNumberToken(byte pageBytes[], int aStart, int end)
+{
+    int start = aStart, div = 1, sign = 1;
+    int parts[] = {0,0}, whichpart = 0;
+    boolean good = false;
+    
+    if (pageBytes[start]=='+')
+        ++start;
+    else if(pageBytes[start]=='-') {
+        sign = -1; ++start; }
+    
+    while(start<end) { byte c = pageBytes[start];
+        if (c=='.') {
+            if (++whichpart>1)
+                throw new PDFException("Illegal number");
+        }
+        else if(c>='0' && c<='9') {
+            parts[whichpart] = parts[whichpart]*10+(c-'0');
+            if (whichpart==1)
+                div*=10;
+            good = true;
+        }
+        else break;
+        ++start;
+    }
+    if(!good)
+        throw new PDFException("Illegal number");
+    
+    PageToken tok = new PageToken(PageToken.PDFNumberToken);
+    tok.value = whichpart==0? sign*parts[0] : sign*(parts[0]+((float)parts[1])/div);
+    tok._start = aStart; tok._len = start - 1 - aStart;
+    return tok;
+}
+
+/**
  * Process any escape sequences. Note that this method and the one below are destructive. The pageBytes buffer gets
  * modified to the exact bytes represented by the escapes.  A buffer that starts out as "(He\154\154o)" would then
  * become "(Hello4\154o) and the token would point to "Hello". No new storage is required and everything can be
@@ -244,8 +339,7 @@ private static int getTokens(byte pageBytes[], int offset, int end, List theToke
  */
 private static int getPDFString(byte pageBytes[], int start, int end, PageToken tok)
 {
-    int parenDepth = 1, dest = start;
-    Range r = new Range(start,start);
+    int parenDepth = 1, dest = start, start0 = start;
     
     while(start<end) {
         byte c = pageBytes[start++];
@@ -259,7 +353,7 @@ private static int getPDFString(byte pageBytes[], int start, int end, PageToken 
                 ++start;
         }
         else if ((c=='\\') && (start<end)) {  // escapes
-            c=pageBytes[start++];
+            c = pageBytes[start++];
             switch(c) {
             case 'n' : c='\n'; break;
             case 'r' : c='\r'; break;
@@ -281,7 +375,7 @@ private static int getPDFString(byte pageBytes[], int start, int end, PageToken 
                     int octal = c-'0';
                     for(int i=1; i<3; ++i)
                         if (start<end) {
-                            c=pageBytes[start++];
+                            c = pageBytes[start++];
                             if((c>='0') && (c<='7')) octal = (octal<<3) | (c-'0');
                             else { start--; break; }
                         }
@@ -290,9 +384,11 @@ private static int getPDFString(byte pageBytes[], int start, int end, PageToken 
                 else { } // backslash ignored if not one of the above
            }
         }
-        pageBytes[dest++]=c;
+        pageBytes[dest++] = c;
     }
-    r.length = dest - r.location; tok.value = r;
+
+    tok.value = new String(pageBytes, start0, dest - start0);
+    tok._start = start0; tok._len = dest - start0;
     return start-1;
 }
 
@@ -303,35 +399,35 @@ private static int getPDFHexString(byte pageBytes[], int start, int end, PageTok
 {
     Range r = new Range(0,0);
     int nextChar = getPDFHexString(pageBytes, start, end, r);
-    tok.value = r;
+    tok._start = r.location; tok._len = r.length;
     return nextChar;
 }
 
 /**
  * Returns the decoded bytes for a PDF hex string (we probably already have this code somewhere).
  */
-public static byte[] getPDFHexString(String s)
+public static byte[] getPDFHexString(String aStr)
 {
    byte asciihex[];
-   char beginchar = s.charAt(0);
+   char beginchar = aStr.charAt(0);
    int decodedLoc, decodedLen;
    
    // Strings beginning with '<' are hex, '(' are binary. I wonder what would happen if the binary string in the pdf
    // winds up starting with a unicode byte-order mark.  Does the string get weird?
    if (beginchar == '(') {
-       int pos = 0, len = s.length();
+       int pos = 0, len = aStr.length();
        asciihex = new byte[len-2];
        for(int i = 1; i<len-1; ++i) {
-           char c = s.charAt(i);
+           char c = aStr.charAt(i);
            if (c=='\\') {
                if (++i == len-1)
                    throw new PDFException("Bad character escape in binary string");
-               c=s.charAt(i);
+               c = aStr.charAt(i);
                if (c>='0' && c<='7') {
                    int oval = c-'0';
                    for(int j=0; (j<2) && (i<len-1); ++j) {
                        if (++i<len-1) {
-                           c=s.charAt(i);
+                           c = aStr.charAt(i);
                            if(c>='0' && c<='7') oval = (oval*8)+(c-'0');
                            else { i--; break; }
                        }
@@ -349,7 +445,7 @@ public static byte[] getPDFHexString(String s)
    
    // Handle hex
    else if (beginchar == '<') {
-      try { asciihex = s.getBytes("US-ASCII"); }
+      try { asciihex = aStr.getBytes("US-ASCII"); }
       catch(UnsupportedEncodingException e) { throw new PDFException("Internal error - can't decode ascii string"); }
       Range decodedRange = new Range(0,0);
       getPDFHexString(asciihex, 1, asciihex.length, decodedRange);  // decode the ascii
@@ -370,7 +466,7 @@ public static byte[] getPDFHexString(String s)
  * to seek through. r gets filled with the actual ranbge of the converted bytes return value is index of last character
  * swallowed. See comment for getPDFString... about destructive behavior.
  */
-public static int getPDFHexString(byte pageBytes[], int start, int end, Range r)
+private static int getPDFHexString(byte pageBytes[], int start, int end, Range r)
 {
     int dest = start;
     byte high = 0;
@@ -387,64 +483,13 @@ public static int getPDFHexString(byte pageBytes[], int start, int end, Range r)
         else { throw new PDFException("invalid character in hex string"); }
         
         if(needhigh) { high = (byte)(c<<4); needhigh = false; }
-        else { pageBytes[dest++]=(byte)(high|c); needhigh = true; }
+        else { pageBytes[dest++] = (byte)(high|c); needhigh = true; }
     }
     
     // odd number of hex chars - last nibble is 0
-    if(!needhigh) pageBytes[dest++]=high;
+    if(!needhigh) pageBytes[dest++] = high;
     r.length = dest - r.location;
     return start - 1;
-}
-
-/** Numbers (floats or ints) Exponential notation not allowed in pdf */
-private static int getPDFNumber(byte pageBytes[], int start, int end, PageToken tok)
-{
-    int parts[] = {0,0}, whichpart = 0, div = 1, sign = 1;
-    boolean good = false;
-    
-    if (pageBytes[start]=='+')
-        ++start;
-    else if (pageBytes[start]=='-') {
-        sign=-1; ++start; }
-    
-    while(start<end) {
-        byte c = pageBytes[start];
-        if (c=='.') {
-            if (++whichpart>1)
-                throw new PDFException("Illegal number");
-        }
-        else if ((c>='0') && (c<='9')) {
-            parts[whichpart] = parts[whichpart]*10+(c-'0');
-            if (whichpart==1)
-                div*=10;
-            good=true;
-        }
-        else break;
-        ++start;
-    }
-    if (!good)
-        throw new PDFException("Illegal number");
-    
-    if (whichpart==0)
-        tok.value = sign*parts[0];
-    else tok.value = sign*(parts[0]+((float)parts[1])/div);
-    return start-1;
-}
-
-/**
- * Checks bytes to see if it's "true" or "false" and returns boolean token if so.
- * Should probably check next byte to make sure it's not "trueness", "falseness", etc.
- */
-private static PageToken checkPDFBoolean(byte pageBytes[], int start, int end)
-{
-    int len = end-start; if(len<4) return null;
-    byte b0 = pageBytes[start], b1 = pageBytes[start+1], b2 = pageBytes[start+2], b3 = pageBytes[start+3];
-    byte b4 = len>4? pageBytes[start+4] : 0;
-    if(b0=='t' && b1=='r' && b2=='u' && b3=='e')
-        return new PageToken(PageToken.PDFBooleanToken, true);
-    if(b0=='f' && b1=='a' && b2=='l' && b3=='s' && b4=='e')
-        return new PageToken(PageToken.PDFBooleanToken, false);
-    return null;
 }
 
 /**

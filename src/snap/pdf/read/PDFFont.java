@@ -53,20 +53,17 @@ public static Font getFont(Map fontDict, PDFFile srcfile)
                     if (!((PDFStream)fobj).getDict().get("Subtype").equals("/FontFile2"))
                         fobj=null;
             }
-            if ((fobj != null) && (fobj instanceof PDFStream)) {
-                // get the fontfile bytes from the stream
+            
+            // Handle Font stream: Get the fontfile bytes from the stream
+            if(fobj instanceof PDFStream) { PDFStream stream = (PDFStream)fobj;
                 try {
-                    byte fontFile[] = ((PDFStream)fobj).decodeStream();
-                
-                    // make a stream for the bytes and let awt try to read the font
-                    InputStream fstream = new ByteArrayInputStream(fontFile, 0, fontFile.length);
+                    byte fbytes[] = stream.decodeStream();
+                    InputStream fstream = new ByteArrayInputStream(fbytes, 0, fbytes.length);
                     awtFont = Font.createFont(Font.TRUETYPE_FONT, fstream);
                     fstream.close();
                 }
                 catch(Exception e) {
-                    System.err.println("Error loading font \""+fontDict.get("BaseFont")+"\" : "+e);
-                    awtFont=null;
-                }
+                    System.err.println("Error loading font \"" + fontDict.get("BaseFont") + "\" : " + e); }
             }
         }
     }
@@ -99,7 +96,7 @@ public static Font getFont(Map fontDict, PDFFile srcfile)
 /**
  * Look on the system for a font with the given name.
  */
-public static Font getFont(String name, String type)
+private static Font getFont(String name, String type)
 {
     int fstyle = Font.PLAIN;
     

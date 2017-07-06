@@ -132,8 +132,8 @@ public void parse(List tokenList, byte pageBytes[])
         boolean swallowedToken = false, didDraw = false;
         
         if(token.type==PageToken.PDFOperatorToken) {
-            int tstart = token.tokenLocation();
-            int tlen = token.tokenLength();
+            int tstart = token.getStart();
+            int tlen = token.getLength();
             
             // Switch on first byte of the operator
             byte c = pageBytes[tstart];
@@ -182,14 +182,14 @@ public void parse(List tokenList, byte pageBytes[])
                     if ((c=='m') && (numops==6)) { // cm - Concat matrix
                         gs.trans.concatenate(getTransform(i)); swallowedToken = true; }
                     else if ((c=='s') && (numops==1)) { //cs - set non-stroke colorspace 
-                        String space = getToken(i-1).nameString(pageBytes);
+                        String space = getToken(i-1).getName();
                         gs.colorSpace = PDFColorSpace.getColorspace(space, _pfile, _page); swallowedToken = true;
                     }
                 }
                 break;
             case 'C' : // CS stroke colorspace
                 if(tlen==2 && pageBytes[tstart+1]=='S' && numops==1) {
-                    String space = getToken(i-1).nameString(pageBytes);
+                    String space = getToken(i-1).getName();
                     gs.scolorSpace = PDFColorSpace.getColorspace(space, _pfile, _page); swallowedToken = true;
                 }
                 break;
@@ -205,7 +205,7 @@ public void parse(List tokenList, byte pageBytes[])
             case 'D' : // xobject Do [also DP]
                 if(tlen==2) {
                     if(pageBytes[tstart+1]=='o' && numops==1) {
-                        String iname=getToken(i-1).nameString(pageBytes);
+                        String iname=getToken(i-1).getName();
                         Object xobj = getPage().getXObject(iname);
                         if(xobj instanceof Image) {
                             _pntr.drawImage((Image)xobj); swallowedToken = true; }
@@ -244,7 +244,7 @@ public void parse(List tokenList, byte pageBytes[])
                 }
                 else if ((tlen==2) && (pageBytes[tstart+1]=='s') && (numops==1)) { // gs
                     // Extended graphics state
-                    Map exg = getPage().getExtendedGStateNamed(getToken(i-1).nameString(pageBytes));
+                    Map exg = getPage().getExtendedGStateNamed(getToken(i-1).getName());
                     readExtendedGState(gs, exg); swallowedToken = true;
                 }
                 break;
@@ -346,7 +346,7 @@ public void parse(List tokenList, byte pageBytes[])
                         gs.cp.x = x; gs.cp.y = y; swallowedToken = true;
                     }
                     else if(c=='i' && numops==1) {  //  /IntentName ri
-                        gs.renderingIntent = PDFGState.getRenderingIntentID(getToken(i-1).nameValue(pageBytes));
+                        gs.renderingIntent = PDFGState.getRenderingIntentID(getToken(i-1).getString());
                         swallowedToken=true;
                     }
                     else if(c=='g') { //r g b rg
@@ -377,7 +377,7 @@ public void parse(List tokenList, byte pageBytes[])
                         gs.color = getColor(gs.colorSpace,i,numops); swallowedToken = true; }
                     else if(tlen==3 && pageBytes[tstart+2]=='n') { // scn
                         if(gs.colorSpace instanceof PDFColorSpaces.PatternSpace && numops>=1) {
-                            String pname = getToken(i-1).nameString(pageBytes);
+                            String pname = getToken(i-1).getName();
                             PDFPattern pat = getPage().getPattern(pname);
                             gs.color = pat.getPaint();                            
                             // this is really stupid.  change this around
@@ -400,7 +400,7 @@ public void parse(List tokenList, byte pageBytes[])
                     }
                 }
                 else if(tlen==2 && pageBytes[tstart+1]=='h') { //sh      && (numops==1?
-                    String shadename = getToken(i-1).nameString(pageBytes);
+                    String shadename = getToken(i-1).getName();
                     java.awt.Paint oldPaint = gs.color;
                     PDFPatterns.Shading shade = getPage().getShading(shadename);
                     gs.color = shade.getPaint();  //save away old color
@@ -499,8 +499,8 @@ public void parse(List tokenList, byte pageBytes[])
                 // If we're in a compatibility section, just print a warning, since
                 // we want to be alerted about anything that we don't currently support.
                 if(compatibility_sections > 0) 
-                    System.err.println("Warning - ignoring "+token.toString(pageBytes)+" in compatibility section");
-                else throw new PDFException("Error in content stream. Token = "+token.toString(pageBytes));
+                    System.err.println("Warning - ignoring " + token + " in compatibility section");
+                else throw new PDFException("Error in content stream. Token = " + token);
             }
             
             numops = 0; // everything was fine, reset the number of operands
@@ -543,7 +543,7 @@ public void executeForm(PDFForm aForm)
   
     // add the form's resources to the page resource stack
     getPage().pushResources(aForm.getResources(_pfile));
-    parse(aForm.getTokens(this), aForm.getBytes());  // recurse back into the parser with a new set of tokens
+    parse(aForm.getTokens(), aForm.getBytes());  // recurse back into the parser with a new set of tokens
     getPage().popResources();    // restore the old resources, gstate,ctm, & clip
     _pntr.grestore();
 }
@@ -614,7 +614,7 @@ public boolean parseTextOperator(byte oper, int tindex, int numops, PDFGState gs
         // Tf - Set font name and size
         case 'f' : 
             if(numops==2) {
-                String fontalias = getToken(tindex-2).nameString(pageBytes); // name in dict is key, so lose leading /
+                String fontalias = getToken(tindex-2).getName(); // name in dict is key, so lose leading /
                 gs.font = getPage().getFontDictForAlias(fontalias);
                 gs.fontSize = getFloat(tindex-1); swallowedToken = true;
             }
@@ -631,7 +631,7 @@ public boolean parseTextOperator(byte oper, int tindex, int numops, PDFGState gs
         case 'j': 
             if(numops==1) {
                 PageToken tok = getToken(tindex-1);
-                int tloc = tok.tokenLocation(), tlen = tok.tokenLength();
+                int tloc = tok.getStart(), tlen = tok.getLength();
                 _textObj.showText(pageBytes, tloc, tlen, gs, _pfile, _pntr); swallowedToken = true;
             }
             break;
@@ -718,7 +718,7 @@ private AffineTransform getTransform(int i)
 Object getInlineImageValue(PageToken token, byte pageBytes[])
 {
     // Names (like /DeviceGray or /A85). Names can optionally be abbreviated.
-    if(token.type==PageToken.PDFNameToken) { String abbrev = token.nameString(pageBytes); 
+    if(token.type==PageToken.PDFNameToken) { String abbrev = token.getName(); 
         for(int i=0, n=_inline_image_value_abbreviations.length; i<n; ++i) {
             if(_inline_image_value_abbreviations[i][0].equals(abbrev))
                 return '/' + _inline_image_value_abbreviations[i][1]; }
@@ -764,7 +764,7 @@ public int parseInlineImage(int tIndex, byte[] pageBytes)
 
         // Handle NameToken: Translate key, get value, add translated key/value pair to the real dict
         if(token.type==PageToken.PDFNameToken) {
-            String key = translateInlineImageKey(token.nameString(pageBytes));
+            String key = translateInlineImageKey(token.getName());
             if (++i<iMax) {
                 token = getToken(i);
                 Object value = getInlineImageValue(token, pageBytes);
@@ -779,7 +779,7 @@ public int parseInlineImage(int tIndex, byte[] pageBytes)
         else if (token.type==PageToken.PDFInlineImageData) {
             Object space = imageDict.get("ColorSpace");
             ColorSpace imageCSpace = space==null ? null : PDFColorSpace.getColorspace(space, _pfile, _page);
-            PDFStream imageStream = new PDFStream(pageBytes, token.tokenLocation(), token.tokenLength(), imageDict);
+            PDFStream imageStream = new PDFStream(pageBytes, token.getStart(), token.getLength(), imageDict);
             _pntr.drawImage(PDFImage.getImage(imageStream, imageCSpace, _pfile));
             return i; // return token index
         }

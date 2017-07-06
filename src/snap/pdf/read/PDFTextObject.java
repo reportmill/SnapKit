@@ -217,7 +217,7 @@ public void showText(byte pageBytes[], List tokens, PDFGState gs, PDFFile file, 
         PageToken tok = (PageToken)tokens.get(i);
         if(tok.type==PageToken.PDFNumberToken)
             textMatrix.translate(tok.floatValue()*hscale, 0);
-        else showText(pageBytes, tok.tokenLocation(), tok.tokenLength(), gs, file, aPntr);
+        else showText(pageBytes, tok.getStart(), tok.getLength(), gs, file, aPntr);
     }
 }
 
