@@ -8,8 +8,14 @@ import snap.pdf.*;
  */
 public class PagePainter {
     
+    // The Page
+    PDFPage              _page;
+    
     // The Painter
     Painter              _pntr;
+    
+    // The Text renderer
+    PageText             _text = new PageText(this);
     
     // The tokens
     List <PageToken>     _tokens;
@@ -29,6 +35,7 @@ public class PagePainter {
 public void paint(PDFPage aPage, Painter aPntr)
 {
     // Get page contents stream and stream bytes (decompressed/decoded)
+    _page = aPage;
     PDFStream pstream = aPage.getPageContentsStream(); if(pstream==null) return;
     byte pbytes[] = pstream.decodeStream();
     
@@ -43,7 +50,7 @@ public void paint(PDFPage aPage, Painter aPntr)
 public void paint(List <PageToken> theTokens, Painter aPntr)
 {
     _tokens = theTokens;
-    _pntr = aPntr;
+    _pntr = _text._pntr = aPntr;
     paint();
 }
 
@@ -72,8 +79,10 @@ protected void paintOp(PageToken aToken, int anIndex)
     
     switch(op) {
         case "b": b(); break; // Closepath, fill, stroke
+        case "BT": BT(); break; // Begin text
         case "c": c(); break; // Curveto
         case "cm": cm(); break; // Concat matrix
+        case "ET": ET(); break; // End text
         case "f": f(); break; // Fill path
         case "F": f(); break; // Fill path (obsolete)
         case "h": h(); break; // Closepath
@@ -86,6 +95,10 @@ protected void paintOp(PageToken aToken, int anIndex)
         case "RG": RG(); break; // set stroke rgb color
         case "s": s(); break; // Closepath, stroke
         case "S": S(); break; // Stroke
+        case "Td": Td(); break; // Text move to
+        case "TD": TD(); break; // Text move to
+        case "Tf": Tf(); break; // Set font
+        case "Tj": Tj(); break; // Show text
         case "w": w(); break; // Set linewidth
         default: System.out.println("Unsupported op: " + op);
     }
@@ -107,6 +120,11 @@ void b()
 }
 
 /**
+ * BeginText.
+ */
+void BT()  { _text.begin(); }
+
+/**
  * Curveto.
  */
 void c()
@@ -125,6 +143,11 @@ void cm()
     Transform xfm = getTransform(_index);
     _pntr.transform(xfm);
 }
+
+/**
+ * BeginText.
+ */
+void ET()  { _text.end(); }
 
 /**
  * Fill.
@@ -219,6 +242,49 @@ void S()
     _pntr.setColor(_scolor);
     _pntr.draw(_path);
     _path.clear();
+}
+
+/**
+ * Text move relative to current line start
+ */
+void Td()
+{
+    float x = getFloat(_index-2);
+    float y = getFloat(_index-1);
+    _text.positionText(x,y);
+}
+
+/**
+ * Text move relative to current line start (uppercase indicates to set leading to -ty)
+ */
+void TD()
+{
+    float x = getFloat(_index-2);
+    float y = getFloat(_index-1);
+    _text.positionText(x,y);
+    //gs.tleading = -y;
+}
+
+/**
+ * Set font.
+ */
+void Tf()
+{
+    String fontalias = getToken(_index-2).getName(); // name in dict is key, so lose leading /
+    float fsize = getFloat(_index-1);
+    //gs.font = _page.getFontDictForAlias(fontalias);
+    Font font = Font.Arial12.deriveFont(fsize);
+    _pntr.setFont(font);
+}
+
+/**
+ * Show Text.
+ */
+void Tj()
+{
+    PageToken tok = getToken(_index-1);
+    String str = tok.getString();
+    _text.showText(str); //pageBytes, tloc, tlen, gs, _pfile, _pntr); swallowedToken = true;
 }
 
 /**

@@ -30,16 +30,6 @@ public Transform()  { }
 public Transform(double a, double b, double c, double d, double tx, double ty)  { _a=a;_b=b;_c=c;_d=d;_tx=tx;_ty=ty; }
 
 /**
- * Loads the given matrix.
- */
-public void getMatrix(double m[])  { m[0] = _a; m[1] = _b; m[2] = _c; m[3] = _d; m[4] = _tx; m[5] = _ty; }
-
-/**
- * Returns the matrix.
- */
-public double[] getMatrix()  { double m[] = new double[6]; getMatrix(m); return m; }
-
-/**
  * Returns whether this transform is identity.
  */
 public final boolean isIdentity() { return equals(IDENTITY); }
@@ -136,6 +126,45 @@ public void invert()
  * Returns the inverse.
  */
 public Transform getInverse()  { Transform t = clone(); t.invert(); return t; }
+
+/**
+ * Clears the transform to identity.
+ */
+public void clear()  { _a = 1; _b = 0; _c = 0; _d = 1; _tx = 0; _ty = 0; }
+
+/**
+ * Returns the matrix.
+ */
+public double[] getMatrix()  { double m[] = new double[6]; getMatrix(m); return m; }
+
+/**
+ * Loads the given matrix.
+ */
+public void getMatrix(double m[])  { m[0] = _a; m[1] = _b; m[2] = _c; m[3] = _d; m[4] = _tx; m[5] = _ty; }
+
+/**
+ * Sets transform values to given matrix values.
+ */
+public void setMatrix(double m[])
+{
+    _a = m[0]; _b = m[1]; _c = m[2]; _d = m[3]; _tx = m[4]; _ty = m[5];
+}
+
+/**
+ * Sets transform values to given transform values.
+ */
+public void setMatrix(Transform aTrans)
+{
+    _a = aTrans._a; _b = aTrans._b; _c = aTrans._c; _d = aTrans._d; _tx = aTrans._tx; _ty = aTrans._ty;
+}
+
+/**
+ * Sets transform values to given matrix values.
+ */
+public void setMatrix(double a, double b, double c, double d, double tx, double ty)
+{
+    _a = a; _b = b; _c = c; _d = d; _tx = tx; _ty = ty;
+}
 
 /**
  * Transforms the given values.

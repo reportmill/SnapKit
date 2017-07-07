@@ -2,49 +2,57 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.pdf.read;
-import java.awt.Font;
-import java.awt.font.*;
-import java.awt.geom.*;
-import java.util.*;
+import snap.gfx.*;
 import snap.pdf.*;
 
 /**
  * Represents text spacing details that are defined in between BT & ET operation. Only one text object is alive at any
  * given time, and only certain operations are allowed inside a text object.
  */
-public class PDFTextObject {
+public class PageText {
+    
+    // The PagePainter
+    PagePainter       _ppntr;
+    
+    // The Snap Painter
+    Painter           _pntr;
 
     // You can't nest text objects.  isOpen gets reset on BT & ET operations
-    boolean isOpen = false;
+    boolean           _open = false;
     
-    // The matrix for the current glyph
-    AffineTransform textMatrix = new AffineTransform();
+    // The Transform for the current glyph
+    Transform        _textMatrix = new Transform();
     
-    // The matrix for the current line
-    AffineTransform lineMatrix = new AffineTransform();
+    // The Transform for the current line
+    Transform        _lineMatrix = new Transform();
     
-    // combined rendering matrix
-    AffineTransform renderMatrix = new AffineTransform();
+    // Combined rendering Transform
+    Transform        _renderMatrix = new Transform();
     
     // Buffer used to convert bytes in font's encoding to unichars or some other form that font's cmap will understand
-    char unicodeBuffer[] = new char[32];
+    char             _unicodeBuffer[] = new char[32];
     
     // A FontRenderContext to help create glyphs
-    FontRenderContext rendercontext;
+    //FontRenderContext rendercontext;
     
     // Text state parameters can persist across many text objects, so they're stored in the gstate
     // TODO:  Only horizontal writing mode supported at the moment. Eventually we'll need to do vertical, too.
 
 /** Main constructor. */
-public PDFTextObject(FontRenderContext ctxt)  { rendercontext = ctxt; }
+//public PageText(FontRenderContext ctxt)  { rendercontext = ctxt; }
+public PageText(PagePainter aPntr)
+{
+    _ppntr = aPntr;
+    _pntr = _ppntr._pntr;
+}
 
 /** start a new text object */
 public void begin()
 {
-    if (!isOpen) {
-        textMatrix.setToIdentity();
-        lineMatrix.setToIdentity();
-        isOpen=true;
+    if (!_open) {
+        _textMatrix.clear();
+        _lineMatrix.clear();
+        _open = true;
     }
     else throw new PDFException("Attempt to nest text objects");
 }
@@ -52,7 +60,7 @@ public void begin()
 /** End the text object */
 public void end()
 {
-    if(isOpen) isOpen = false;
+    if(_open) _open = false;
     else throw new PDFException("Attempt to close a nonexistent text object");
 }
 
@@ -60,70 +68,73 @@ public void end()
  * Check if the text object is active.  This can be used to raise errors for operations
  * that are only legal within or without a text object.
  */
-public boolean isOpen() { return isOpen; }
+public boolean isOpen() { return _open; }
 
 /** Set text position relative to current line matrix.  Used by Td, TD, T*, ', "*/
 public void positionText(float x, float y)
 {
-    lineMatrix.translate(x,y);
-    textMatrix.setTransform(lineMatrix);
+    _lineMatrix.translate(x,y);
+    _textMatrix.setMatrix(_lineMatrix);
 }
 
 public void setTextMatrix(float a, float b, float c, float d, float e, float f)
 {
-    textMatrix.setTransform(a,b,c,d,e,f);
-    lineMatrix.setTransform(a,b,c,d,e,f);
+    _textMatrix.setMatrix(a,b,c,d,e,f);
+    _lineMatrix.setMatrix(a,b,c,d,e,f);
 }
 
 /**
  * Get a glyph vector by decoding string bytes according to font encoding,
  * and calculating spacing using text parameters in gstate.
  */
-public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
+//public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
+public void showText(String aStr) 
 {
     // Get the glyphmapper & font
-    Map fontDict = gs.font;      // Get the font dictionary from the gstate
-    GlyphMapper gmapper = PDFFont.getGlyphMapper(fontDict, file);
-    Font font = PDFFont.getFont(fontDict, file);
-    Point2D.Float pt = new Point2D.Float();
+    //Map fontDict = gs.font;      // Get the font dictionary from the gstate
+    //GlyphMapper gmapper = PDFFont.getGlyphMapper(fontDict, file);
+    //Font font = PDFFont.getFont(fontDict, file);
+    //Point pt = new Point();
     
     // TODO: This is probably a huge mistake (performance-wise) The font returned by the factory has a font size of 1
     // so we include the gstate's font size in the text rendering matrix. For any number of reasons, it'd probably be
     // better to do a deriveFont() with the font size and adjust the rendering matrix calculations.
     // I'm pretty sure this strategy completely mucks with rendering hints.
     // NB: rendering matrix includes flip (since font matrices are filpped)
-    renderMatrix.setTransform(gs.fontSize*gs.thscale, 0, 0, -gs.fontSize, 0, -gs.trise);
+    Font font = _pntr.getFont();
+    double fsize = 1;//font.getSize(); //gs.fontSize;
+    double thscale = 1; //gs.thscale;
+    double trise = 0; //gs.trise;
+    _renderMatrix.setMatrix(fsize*thscale, 0, 0, -fsize, 0, -trise);
  
     // Ensure the buffer is big enough for the bytes->cid conversion
-    int bufmax = gmapper.maximumOutputBufferSize(pageBytes, offset, length);
-    int buflen = unicodeBuffer.length;
-    if (buflen < bufmax) {
-        while(buflen<bufmax)
-            buflen += buflen;
-        unicodeBuffer = new char[buflen];
-    }
+    //int bufmax = gmapper.maximumOutputBufferSize(pageBytes, offset, length);
+    //int buflen = _unicodeBuffer.length;
+    //if (buflen < bufmax) {
+    //    while(buflen<bufmax) buflen += buflen;
+    //    _unicodeBuffer = new char[buflen]; }
     
     // Convert to cids
-    int numMappedChars = gmapper.mapBytesToChars(pageBytes, offset, length, unicodeBuffer);
+    //int numMappedChars = gmapper.mapBytesToChars(pageBytes, offset, length, unicodeBuffer);
     
     // get the metrics (actually just the widths)
-    Object wobj = PDFFont.getGlyphWidths(fontDict, file, aPntr);
+    //Object wobj = PDFFont.getGlyphWidths(fontDict, file, aPntr);
 
     // Two nearly identical routines broken out for performance (and readability) reasons
-    GlyphVector glyphs;
-    if(gmapper.isMultiByte()) 
-        glyphs = getMultibyteCIDGlyphVector(unicodeBuffer, numMappedChars, gs, font, wobj, gmapper, pt);
-    else glyphs = getSingleByteCIDGlyphVector(pageBytes, offset, length, unicodeBuffer,numMappedChars,gs,font,wobj,pt);
+    //GlyphVector glyphs;
+    //if(gmapper.isMultiByte()) 
+    //    glyphs = getMultibyteCIDGlyphVector(unicodeBuffer, numMappedChars, gs, font, wobj, gmapper, pt);
+    //else glyphs = getSingleByteCIDGlyphVector(pageBytes,offset,length,_unicodeBuffer,numMappedChars,gs,font,wobj,pt);
                            
     // replace the gstate ctm with one that includes the text transforms
-    AffineTransform saved_ctm = (AffineTransform)gs.trans.clone();
-    gs.trans.concatenate(textMatrix);
-    gs.trans.concatenate(renderMatrix);
+    _pntr.save(); //Transform saved_ctm = _pntr.get(Transform)gs.trans.clone();
+    _pntr.transform(_textMatrix); //gs.trans.concatenate(_textMatrix);
+    _pntr.transform(_renderMatrix); //gs.trans.concatenate(_renderMatrix);
     
     // draw, restore ctm and update the text matrix
-    aPntr.showText(gs, glyphs);
-    gs.trans = saved_ctm;
-    textMatrix.translate(pt.x*gs.fontSize*gs.thscale, pt.y);
+    _pntr.drawString(aStr, 0, 0); //_pntr.showText(gs, glyphs);
+    _pntr.restore(); //gs.trans = saved_ctm;
+    //_textMatrix.translate(pt.x*gs.fontSize*gs.thscale, pt.y);
 }
 
 /**
@@ -133,7 +144,7 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDF
  * TODO: check if there are any issues with composed chars or other cases such that the assumption that
  * 1 byte->1 unicode->1 glyph fails.
  */
-GlyphVector getSingleByteCIDGlyphVector(byte pageBytes[], int offset, int length, char uchars[], int numChars,
+/*GlyphVector getSingleByteCIDGlyphVector(byte pageBytes[], int offset, int length, char uchars[], int numChars,
                                         PDFGState gs, Font aFont, Object wobj, Point2D.Float textoffset)
 {
     // widths for single byte fonts is just a simple map
@@ -163,7 +174,7 @@ GlyphVector getSingleByteCIDGlyphVector(byte pageBytes[], int offset, int length
         textoffset.x += advance;
     }
     return glyphs;
-}
+}*/
 
 /**
  * For cid fonts.  The bytes have been mapped through the encoding into two-byte, big-endian cids.  
@@ -171,7 +182,7 @@ GlyphVector getSingleByteCIDGlyphVector(byte pageBytes[], int offset, int length
  * stream, and then create the GlyphVector.  It then uses a widthTable to look up each cid's width
  * for advancement calculations.
  */
-GlyphVector getMultibyteCIDGlyphVector(char cids[], int numCIDs, PDFGState gs, Font aFont, Object wobj,
+/*GlyphVector getMultibyteCIDGlyphVector(char cids[], int numCIDs, PDFGState gs, Font aFont, Object wobj,
                                      GlyphMapper mapper, Point2D.Float textoffset)
 {
     // widths for cid fonts are looked up in a widthtable
@@ -205,18 +216,20 @@ GlyphVector getMultibyteCIDGlyphVector(char cids[], int numCIDs, PDFGState gs, F
          textoffset.x += advance;
      }
     return glyphs;
-}
+}*/
 
 
 /** Like the previous routine, except using a list of strings & spacing adjustments */
-public void showText(byte pageBytes[], List <PageToken> tokens, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
+/*public void showText(byte pageBytes[], List tokens, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
 {
-    double hscale = -gs.fontSize*gs.thscale/1000;
-    for(PageToken tok : tokens) {
+    //TODO: This could be made much more efficient by creating a single glyphvector.
+    double hscale=-gs.fontSize*gs.thscale/1000;
+    for(int i=0, n=tokens.size(); i<n; ++i) {
+        PageToken tok = (PageToken)tokens.get(i);
         if(tok.type==PageToken.PDFNumberToken)
-            textMatrix.translate(tok.floatValue()*hscale, 0);
+            _textMatrix.translate(tok.floatValue()*hscale, 0);
         else showText(pageBytes, tok.getStart(), tok.getLength(), gs, file, aPntr);
     }
-}
+}*/
 
 }
