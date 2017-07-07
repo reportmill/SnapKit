@@ -305,7 +305,7 @@ public PDFStream getPageContentsStream()
 /**
  * Set everything to the default implementations and return an Image for this page.
  */
-public Image getImage2()
+public Image getImage()
 {
     // If already set, just return
     if(_image!=null) return _image;
@@ -319,7 +319,7 @@ public Image getImage2()
 /**
  * Set everything to the default implementations and return an Image for this page.
  */
-public Image getImage()
+public Image getImage2()
 {
     // If already set, just return
     if(_image!=null) return _image;

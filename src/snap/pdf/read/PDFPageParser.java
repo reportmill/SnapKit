@@ -39,12 +39,30 @@ public class PDFPageParser {
     // The tokens of the page being parsed
     List <PageToken>     _tokens;
     
+    // The current token index
+    int                  _index;
+    
     // The current text object (gets created once and reused)
     PDFTextObject        _textObj;
     
     // The current painter
     PDFMarkupHandler     _pntr;
     
+    // Current PageBytes
+    byte                 _pageBytes[];
+    
+    // Current path
+    GeneralPath path = null, future_clip = null;
+    
+    // The number of operands available for the current operator
+    int numops = 0;
+    
+    // save away the factory callback handler objects
+    int compatibility_sections = 0;
+    
+    //
+    PDFGState gs;
+   
 /**
  * Creates a new page parser for a given PDF file and a page index.
  */
@@ -109,567 +127,785 @@ public void parse()
 public void parse(List tokenList, byte pageBytes[]) 
 {
     // save away the factory callback handler objects
-    int compatibility_sections = 0;
+    compatibility_sections = 0;
     
-    // Cache old tokens and set the token list that will be used by routines like getToken()
-    // This routine is potentially recursive
+    // Cache old tokens and set token list that will be used by methods like getToken() (this method can be recursive)
     List oldTokens = _tokens; _tokens = tokenList;
+    byte oldPageBytes[] = _pageBytes; _pageBytes = pageBytes;
     
-    // Initialize current path
-    // Note: in PDF, the path is not part of GState and so is not saved/restored by gstate operators
-    GeneralPath path = null, future_clip = null;
-    int numops = 0;                    // The number of operands available for the current operator
+    // Initialize current path. Note: path is not part of GState and so is not saved/restored by gstate ops
+    path = null; future_clip = null;
+    numops = 0;
     
     // Get the current gstate
-    PDFGState gs = _pntr.getGState();
-    Color acolor; ColorSpace cspace;
+    gs = _pntr.getGState();
     
     // Iterate over page contents tokens
-    for(int i=0, iMax=_tokens.size(); i<iMax; i++) {
-        
-        // Get the current loop token
-        PageToken token = getToken(i);
-        boolean swallowedToken = false, didDraw = false;
-        
-        if(token.type==PageToken.PDFOperatorToken) {
-            int tstart = token.getStart();
-            int tlen = token.getLength();
+    for(int i=0, iMax=_tokens.size(); i<iMax; i++) { PageToken token = getToken(i); _index = i;
+    
+        if(token.type==PageToken.PDFOperatorToken)
+            paintOp(token);
             
-            // Switch on first byte of the operator
-            byte c = pageBytes[tstart];
-            switch(c) {
-            case 'b' : //closepath,fill,stroke (*=eostroke)   
-                if(numops==0) {
-                    if(tlen==1) path.setWindingRule(GeneralPath.WIND_NON_ZERO); // b
-                    else if(tlen==2 && pageBytes[tstart+1] =='*') path.setWindingRule(GeneralPath.WIND_EVEN_ODD); // b*
-                    else break;
-                    path.closePath();
-                    _pntr.fillPath(gs, path);
-                    _pntr.strokePath(gs, path); didDraw = true; swallowedToken = true;
-                }
-                break;
-            case 'B' : // fill,stroke (*=eostroke)
-                if(numops==0 && (tlen==1 || (tlen==2 && (pageBytes[tstart+1]=='*')))) {
-                    if(tlen==1) path.setWindingRule(GeneralPath.WIND_NON_ZERO);
-                    else path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
-                    _pntr.fillPath(gs, path);
-                    _pntr.strokePath(gs, path); didDraw = true; swallowedToken = true;
-                }
-                else if(numops==0 && tlen==2) {
-                    if(pageBytes[tstart+1]=='T') { //BT - Begin text object
-                        _textObj.begin(); swallowedToken = true; }
-                    else if(pageBytes[tstart+1]=='X') { //BX start (possibly nested) compatibility section
-                        ++compatibility_sections; swallowedToken = true; }
-                    // BI - inline images
-                    else if (pageBytes[tstart+1]=='I') {//BI
-                        i = parseInlineImage(i+1, pageBytes); swallowedToken = true; }
-                }
-                else if(tlen==3 && pageBytes[tstart+2]=='C') {
-                    if(pageBytes[tstart+1]=='D' || pageBytes[tstart+1]=='M')  //BDC, BMC
-                        swallowedToken = true;
-                } 
-                break;
-            case 'c' : // c, cm, cs
-                if(tlen==1) { // Cureveto
-                    if(numops==6) {
-                        getPoint(i, gs.cp);
-                        path.curveTo(getFloat(i-6), getFloat(i-5), getFloat(i-4), getFloat(i-3), gs.cp.x, gs.cp.y);
-                        swallowedToken = true;
-                    }
-                }
-                else if(tlen==2) {
-                    c = pageBytes[tstart+1];
-                    if ((c=='m') && (numops==6)) { // cm - Concat matrix
-                        gs.trans.concatenate(getTransform(i)); swallowedToken = true; }
-                    else if ((c=='s') && (numops==1)) { //cs - set non-stroke colorspace 
-                        String space = getToken(i-1).getName();
-                        gs.colorSpace = PDFColorSpace.getColorspace(space, _pfile, _page); swallowedToken = true;
-                    }
-                }
-                break;
-            case 'C' : // CS stroke colorspace
-                if(tlen==2 && pageBytes[tstart+1]=='S' && numops==1) {
-                    String space = getToken(i-1).getName();
-                    gs.scolorSpace = PDFColorSpace.getColorspace(space, _pfile, _page); swallowedToken = true;
-                }
-                break;
-            case 'd' : //setdash
-                if(tlen==1 && numops==2) {
-                    gs.lineDash = getFloatArray(i-2);
-                    gs.dashPhase = getFloat(i-1);
-                    gs.lineStroke = gs.createStroke();
-                    swallowedToken=true;
-                }
-                // d0 & d1 are only available in charprocs streams
-                break;
-            case 'D' : // xobject Do [also DP]
-                if(tlen==2) {
-                    if(pageBytes[tstart+1]=='o' && numops==1) {
-                        String iname=getToken(i-1).getName();
-                        Object xobj = getPage().getXObject(iname);
-                        if(xobj instanceof Image) {
-                            _pntr.drawImage((Image)xobj); swallowedToken = true; }
-                        else if(xobj instanceof PDFForm) {
-                            executeForm((PDFForm)xobj); swallowedToken = true; }
-                        else throw new PDFException("Error reading XObject");
-                    }
-                    else if(pageBytes[tstart+1]=='P') // DP marked content
-                        swallowedToken = true;
-                }
-                break;
-            case 'E' : // [also EI,EMC]
-                if(tlen==2 && numops==0) {
-                    if(pageBytes[tstart+1]=='T') {  //ET
-                        _textObj.end(); swallowedToken = true; }
-                    else if (pageBytes[tstart+1]=='X') { // EX
-                        if(--compatibility_sections<0)
-                            throw new PDFException("Unbalanced BX/EX operators");
-                        swallowedToken = true;
-                    }
-                }
-                else if ((tlen==3) && (pageBytes[tstart+1]=='M') && (pageBytes[tstart+2]=='C'))
-                    swallowedToken = true;
-                break;
-            case 'f' : // fill (*=eofill)  
-            case 'F' : // F is the same as f, but obsolete
-                if(tlen==1) path.setWindingRule(GeneralPath.WIND_NON_ZERO);
-                else if(tlen==2 && pageBytes[tstart+1]=='*') path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
-                else break;
-                _pntr.fillPath(gs, path); didDraw = true; swallowedToken = true;
-                break;
-            case 'g' : // setgray
-                if (tlen==1) {
-                    cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
-                    gs.color = getColor(cspace,i,numops); gs.colorSpace = cspace; swallowedToken = true;
-                }
-                else if ((tlen==2) && (pageBytes[tstart+1]=='s') && (numops==1)) { // gs
-                    // Extended graphics state
-                    Map exg = getPage().getExtendedGStateNamed(getToken(i-1).getName());
-                    readExtendedGState(gs, exg); swallowedToken = true;
-                }
-                break;
-            case 'G' : // setgray
-                if(tlen==1) {
-                    cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
-                    gs.scolor = getColor(cspace,i,numops); gs.scolorSpace = cspace; swallowedToken = true;
-                }
-                break;
-            case 'h' : // closepath
-                if(tlen==1 && numops==0) {
-                    path.closePath();
-                    Point2D lastPathPoint = path.getCurrentPoint(); 
-                    gs.cp.x = (float)lastPathPoint.getX();
-                    gs.cp.y = (float)lastPathPoint.getY(); swallowedToken = true;
-                }
-                break;
-            case 'i' : // setflat
-                if(tlen==1 && numops==1) {
-                    gs.flatness = getFloat(i-1); swallowedToken = true; }
-                break;
-            case 'I' : // ID
-                break;
-            case 'j' : // setlinejoin
-                if(tlen==1 && numops==1) {
-                    gs.lineJoin = getInt(i-1);
-                    gs.lineStroke = gs.createStroke(); swallowedToken = true;
-                }
-                break;
-            case 'J' : // setlinecap
-                if(tlen==1 && numops==1) {
-                    gs.lineCap = getInt(i-1);
-                    gs.lineStroke = gs.createStroke(); swallowedToken = true;
-                }
-                break;
-            case 'k' : // setcmyk non-stroke
-            case 'K' : // setcmyk stroke
-                if(tlen==1) {
-                    cspace = PDFColorSpace.getColorspace("DeviceCMYK", _pfile, _page);
-                    acolor = getColor(cspace,i,numops);
-                    if(c=='k') { gs.colorSpace = cspace; gs.color = acolor; }
-                    else { gs.scolorSpace = cspace; gs.scolor = acolor; } // strokecolor
-                    swallowedToken = true;
-                }
-                break;
-                
-            // lineto
-            case 'l': if(tlen==1 && numops==2) { getPoint(i, gs.cp); path.lineTo(gs.cp.x, gs.cp.y);
-                    swallowedToken = true; } break;
-                    
-            // moveto (creates a new path if there isn't one already, otherwise you get a subpath.)
-            case 'm':
-                if(tlen==1 && numops==2) {
-                    getPoint(i, gs.cp);
-                    if(path==null) path = new GeneralPath();
-                    path.moveTo(gs.cp.x, gs.cp.y);
-                    swallowedToken = true;
-                }
-                break;
-                
-            //setmiterlimit
-            case 'M' :
-                if(tlen==1) {
-                    if(numops == 1) { 
-                        gs.miterLimit = getFloat(i-1);
-                        gs.lineStroke = gs.createStroke();
-                        swallowedToken = true;
-                    }
-                }
-                else if(tlen==2 && pageBytes[tstart+1]=='P' && numops==1) { // MP - Marked content point
-                    swallowedToken = true; }
-                break;
-            case 'n' : //endpath
-                // End path without fill or stroke - used for clearing the path after a clipping operation ( W n )
-                if(tlen==1 && numops==0) {
-                    didDraw = true; swallowedToken=true; }
-                break;
-                
-            // gsave;
-            case 'q': if(tlen==1 && numops==0) { gs = _pntr.gsave(); swallowedToken = true; } break;
-            
-            // grestore
-            case 'Q': if(tlen==1 && numops==0) { gs = _pntr.grestore(); swallowedToken = true; } break;
-            
-            // re=rectangle, rg=setrgbcolor, ri=renderingintent
-            case 'r' : 
-                if (tlen==2) {
-                    c = pageBytes[tstart+1];
-                    if(c=='e' && numops==4) { //x y w h re
-                        // Add Rectangle
-                        float x = getFloat(i-4), y = getFloat(i-3);
-                        float w = getFloat(i-2), h = getFloat(i-1);
-                        
-                        // re either creates a new path or adds to the current one
-                        if (path==null) 
-                            path = new GeneralPath();
-                        path.moveTo(x,y); path.lineTo(x+w,y); path.lineTo(x+w,y+h); path.lineTo(x,y+h);path.closePath();
-                        // reset current point to start of rect. TODO: Check that this is what really happens in pdf
-                        gs.cp.x = x; gs.cp.y = y; swallowedToken = true;
-                    }
-                    else if(c=='i' && numops==1) {  //  /IntentName ri
-                        gs.renderingIntent = PDFGState.getRenderingIntentID(getToken(i-1).getString());
-                        swallowedToken=true;
-                    }
-                    else if(c=='g') { //r g b rg
-                        cspace = PDFColorSpace.getColorspace("DeviceRGB", _pfile, _page);
-                        gs.color = getColor(cspace,i,numops);
-                        gs.colorSpace = cspace; swallowedToken = true;
-                    }
-                }
-                break;
-                
-            // RG set stroke rgbcolor
-            case 'R': 
-                if(tlen==2 && pageBytes[tstart+1]=='G') {
-                    cspace = PDFColorSpace.getColorspace("DeviceRGB", _pfile, _page);
-                    gs.scolor = getColor(cspace,i,numops);
-                    gs.scolorSpace = cspace; swallowedToken = true;
-                }
-                break;
-            case 's' : 
-                if(tlen==1) { // s
-                    if(numops==0) { // closepath, stroke
-                        path.closePath();
-                        _pntr.strokePath(gs, path); didDraw = true; swallowedToken = true;
-                    }
-                }
-                else if(pageBytes[tstart+1]=='c') { //sc, scn   setcolor in colorspace
-                    if(tlen==2) {
-                        gs.color = getColor(gs.colorSpace,i,numops); swallowedToken = true; }
-                    else if(tlen==3 && pageBytes[tstart+2]=='n') { // scn
-                        if(gs.colorSpace instanceof PDFColorSpaces.PatternSpace && numops>=1) {
-                            String pname = getToken(i-1).getName();
-                            PDFPattern pat = getPage().getPattern(pname);
-                            gs.color = pat.getPaint();                            
-                            // this is really stupid.  change this around
-                            if ((pat instanceof PDFPatterns.Tiling) && (gs.color==null)) {
-                                // Uncolored tiling patterns require color values be passed.
-                                // Note, however, that although you can draw an uncolored tiling pattern any number of
-                                // times in different colors, we only do it once (after which it will be cached)
-                                if (numops>1) {
-                                    ColorSpace tileSpace=((PDFColorSpaces.PatternSpace)gs.colorSpace).tileSpace;
-                                    if (tileSpace==null)
-                                        tileSpace=gs.colorSpace;
-                                    gs.color = getColor(tileSpace,i-1, numops-1);
-                                }
-                                this.executePatternStream((PDFPatterns.Tiling)pat);
-                                gs.color = pat.getPaint();
-                            }
-                        }
-                        else gs.color = getColor(gs.colorSpace,i,numops);
-                        swallowedToken = true;
-                    }
-                }
-                else if(tlen==2 && pageBytes[tstart+1]=='h') { //sh      && (numops==1?
-                    String shadename = getToken(i-1).getName();
-                    java.awt.Paint oldPaint = gs.color;
-                    PDFPatterns.Shading shade = getPage().getShading(shadename);
-                    gs.color = shade.getPaint();  //save away old color
-                    // Get area to fill. If shading specifies bounds, use that, if not, use clip. else fill whole page.
-                    GeneralPath shadearea;
-                    if(shade.getBounds() != null)
-                        shadearea = new GeneralPath(shade.getBounds());
-                    else {
-                        Rectangle2D r = new Rectangle2D.Double(_bounds.x, _bounds.y, _bounds.width, _bounds.height);
-                        shadearea = gs.clip!=null? (GeneralPath)gs.clip.clone() : new GeneralPath(r);
-                        try { shadearea.transform(gs.trans.createInverse()); } // transform from page to user space
-                        catch(NoninvertibleTransformException e) { throw new PDFException("Invalid user space xform"); }
-                    }
-                    _pntr.fillPath(gs, shadearea);
-                    gs.color = oldPaint;  //restore the color
-                    didDraw = true; swallowedToken = true;  // TODO:probably did draw... check this
-                }
-                break;
-            case 'S' : // Very similar to above
-                if(tlen==1) { // S - stroke
-                    if(numops==0) {
-                        _pntr.strokePath(gs, path); didDraw = true; swallowedToken = true; }
-                }
-                else if (pageBytes[tstart+1]=='C') {  // SC : strokecolor in normal colorspaces
-                    if(tlen==2) {
-                        gs.scolor = getColor(gs.scolorSpace, i, numops); swallowedToken = true; }
-                    else if ((tlen==3) && (pageBytes[tstart+2]=='N')) { // SCN - TODO: deal with weird colorspaces
-                        gs.scolor = getColor(gs.scolorSpace, i, numops); swallowedToken = true; }
-                }
-                break;
-            case 'T' : // [T*, Tc, Td, TD, Tf, Tj, TJ, TL, Tm, Tr, Ts, Tw, Tz]
-                // break text handling out
-                if(tlen==2 && parseTextOperator(pageBytes[tstart+1], i, numops, gs, pageBytes)) 
-                    swallowedToken = true;
-                break;
-            case '\'':
-            case '\"':  // ' and " also handled by text routine
-                if(tlen==1 && parseTextOperator(c, i, numops, gs, pageBytes))
-                    swallowedToken = true;
-                break;
-            case 'v' : // Curveto (first control point is current point)
-                if(tlen==1 && numops==4) {
-                    double cp1x = gs.cp.x, cp1y = gs.cp.y;
-                    Point cp2 = getPoint(i-2);
-                    getPoint(i, gs.cp);
-                    path.curveTo(cp1x, cp1y, cp2.x, cp2.y, gs.cp.x, gs.cp.y); swallowedToken = true;
-                }
-                break;
-            case 'w' : // setlinewidth
-                if((tlen==1) && (numops==1)) {
-                    gs.lineWidth = getFloat(i-1);
-                    gs.lineStroke = gs.createStroke(); swallowedToken = true;
-                }
-                break;
-            case 'W' : // clip (*=eoclip)
-                int wind;
-                
-                if(numops != 0) break;
-                if(tlen==1) wind = GeneralPath.WIND_NON_ZERO; // W
-                else if(tlen==2 && pageBytes[tstart+1]=='*') wind = GeneralPath.WIND_EVEN_ODD; // W*
-                else break;
-                
-                // Somebody at Adobe's been smoking crack.
-                // The clipping operation doesn't modify the clipping in the gstate.
-                // Instead, the next path drawing operation will do that, but only AFTER it draws.  
-                // So a sequence like 0 0 99 99 re W f will fill the rect first
-                // and then set the clip path using the rect.
-                // Because the W operation doesn't do anything, they had to introduce
-                // the 'n' operation, which is a drawing no-op, in order to do a clip and not also draw the path.
-                // You might think it would be safe to just reset the clip here,
-                // since the path it will draw is the same as the path it will clip to.
-                // However, there's at least one (admittedly obscure) case I can think
-                // of where clip(path),draw(path)  is different from draw(path),clip(path): 
-                //     W* f  %eoclip, nonzero-fill
-                // Also note that Acrobat considers it an error to have a W that isn't
-                // immediately followed by a drawing operation (f, f*, F, s, S, B, b, n)
-                if(path != null) {
-                    path.setWindingRule(wind);
-                    future_clip = (GeneralPath)path.clone();
-                 }
-                swallowedToken = true;
-                break;
-            case 'y' : // curveto (final point replicated)
-                if(tlen==1 && numops==4) {
-                    Point cp1 = getPoint(i-2);
-                    getPoint(i, gs.cp);
-                    path.curveTo(cp1.x, cp1.y, gs.cp.x, gs.cp.y, gs.cp.x, gs.cp.y);
-                    swallowedToken = true;
-                }
-                break;
-            }
-            
-            // If we made it down here with swallowedToken==false, it's because there was no match, either because it
-            // was an illegal token, or there were the wrong number of operands for the token.
-            if(!swallowedToken) {
-                // If we're in a compatibility section, just print a warning, since
-                // we want to be alerted about anything that we don't currently support.
-                if(compatibility_sections > 0) 
-                    System.err.println("Warning - ignoring " + token + " in compatibility section");
-                else throw new PDFException("Error in content stream. Token = " + token);
-            }
-            
-            numops = 0; // everything was fine, reset the number of operands
-        }
-        
-        // It wasn't an operator, so it must be an operand (comments are tossed by the lexer)
-        else ++numops;
-        
+        // It not an op, it must be an operand
+        //else ++numops;
         // Catch up on that clipping.  Plus be anal and return an error, just like Acrobat.
-        if(didDraw) {
-            if(future_clip != null) {
-                // Note that unlike other operators that change gstate, there is a specific call into markup handler
-                // when clip changes. The markup handler can choose whether to respond to clipping change or whether
-                // just to pull the clip out of the gstate when it draws.
-                _pntr.establishClip(future_clip, true); future_clip = null;
-            }
-            path = null;  // The current path and the current point are undefined after a draw
-        }
-        
-        else {
-            if(future_clip != null) { } // TODO: an error unless the last token was W or W*
-        }
+        //if(didDraw) { if(future_clip!=null) _pntr.establishClip(future_clip, true); future_clip = null;
+        //    path = null; }  // The current path and the current point are undefined after a draw
+        //else if(future_clip != null) { } // TODO: an error unless the last token was W or W*
+        // If swallowedToken==false, it's because there was no match, either because it
+        // was an illegal token, or there were the wrong number of operands for the token.
+        /*if(!swallowedToken) {
+        // If in compatibility section, print warning, since we want alert about anything not supported.
+        if(compatibility_sections > 0) System.err.println("Warning - ignoring " + token + " in compatibility section");
+        else throw new PDFException("Error in content stream. Token = " + token); }*/
+    
+        numops = 0; // everything was fine, reset the number of operands
     }
-    
-    // restore previous token list
-    _tokens = oldTokens;
-}
 
-public void executeForm(PDFForm aForm)
-{
-    Rectangle2D bbox = aForm.getBBox();
-    AffineTransform xform = aForm.getTransform();
-    
-    // save the current gstate and set the transform in the newgstate
-    PDFGState gs = _pntr.gsave();
-    gs.trans.concatenate(xform);
-    
-    // clip to the form bbox
-    _pntr.establishClip(new GeneralPath(bbox), true);
-  
-    // add the form's resources to the page resource stack
-    getPage().pushResources(aForm.getResources(_pfile));
-    parse(aForm.getTokens(), aForm.getBytes());  // recurse back into the parser with a new set of tokens
-    getPage().popResources();    // restore the old resources, gstate,ctm, & clip
-    _pntr.grestore();
+    // restore previous token list
+    _tokens = oldTokens; _pageBytes = oldPageBytes;
 }
 
 /**
- * A pattern could execute its pdf over and over, like a form (above) but for performance reasons,
- * we only execute it once and cache a tile. To do this, we temporarily set the markup handler in the file to a new 
- * BufferedMarkupHander, add the pattern's resource dictionary and fire up the parser.
+ * The meat and potatoes of the pdf parser. Translates the token list into a series of calls to either a Factory class,
+ * which creates a Java2D object (like GeneralPath, Font, Image, GlyphVector, etc.), or the markup handler, which does
+ * the actual drawing.
  */
-public void executePatternStream(PDFPatterns.Tiling pat)
+public void paintOp(PageToken aToken)
 {
-    // Create image painter and set
-    PDFMarkupHandler pntr = PDFMarkupHandler.get();
+    String op = aToken.getString();
     
-    // By adding the pattern's resources to page's resource stack, it means pattern will have access to resources
-    // defined by the page.  I'll bet Acrobat doesn't allow you to do this, but it shouldn't hurt anything.
-    getPage().pushResources(pat.getResources());
-    
-    // save the current gstate
-    PDFGState gs = pntr.gsave();
-    
-    // Establish the pattern's transformation
-    gs.trans.concatenate(pat.getTransform());
-    
-    // Begin the markup handler. TODO:probably going to have to add a translate by -x, -y of the bounds rect
-    Rectangle2D prect = pat.getBounds();
-    pntr.beginPage(prect.getWidth(), prect.getHeight());
-    
-    // Get the pattern stream's tokens
-    byte contents[] = pat.getContents();
-    List <PageToken> tokens = PageToken.getTokens(contents);
-    
-    // Fire up parser
-    PDFMarkupHandler opntr = _pntr; _pntr = pntr;
-    parse(tokens, contents);
-    _pntr = opntr;
-    
-    // Get the image and set the tile.  All the resources can be freed up now
-    pat.setTile(pntr.getBufferedImage());
+    switch(op) {
+        case "b": b(); break;      // Closepath, fill, stroke
+        case "b*": b_x(); break;   // Closepath, fill, stroke (EO)
+        case "B": B(); break;      // Fill, stroke
+        case "B*": B_x(); break;   // Fill, stroke (EO)
+        case "BT": BT(); break;    // Begin Text
+        case "BX": BX(); break;
+        case "BI": BI(); break;
+        case "BDC": case "BMC": BDC(); break;
+        case "c": c(); break;      //
+        case "cm": cm(); break;    // Concat matrix
+        case "cs": cs(); break;    // Set colorspace
+        case "CS": CS(); break;    // Set stroke colorspace
+        case "d": d(); break;      // Set dash
+        case "Do": Do(); break;    // Do xobject
+        case "DP": DP(); break;    // Marked content
+        case "ET": ET(); break;    // End text
+        case "EX": EX(); break;
+        case "EMC": EMC(); break;
+        case "f": case "F": f(); break;     // Fill
+        case "f*": case "F*": f_x(); break; // Fill (EO)
+        case "g": g(); break;      // Set gray
+        case "gs": gs(); break;    // Extended graphics state
+        case "G": G(); break;      // Set stroke gray
+        case "h": h(); break;      // Closepath
+        case "i": i(); break;      // Set flatness
+        case "ID": ID(); break;
+        case "j": j(); break;      // Set linejoin
+        case "J": J(); break;      // Set linecap
+        case "k": k(); break;      // Set cmyk
+        case "K": K(); break;      // Set stroke cmyk
+        case "l": l(); break;      // Lineto
+        case "m": m(); break;      // Moveto
+        case "M": M(); break;      // Set miterlimit
+        case "MP": MP(); break;
+        case "n": n(); break;      // Endpath
+        case "q": q(); break;      // GSave
+        case "Q": Q(); break;      // GRestore
+        case "re": re(); break;    // Append rect
+        case "rg": rg(); break;    // Set rgb color
+        case "ri": ri(); break;    // Set render intent
+        case "RG": RG(); break;    // Set stroke rgb color
+        case "s": s(); break;      // Closepath
+        case "sc": sc(); break;
+        case "scn": scn(); break;
+        case "sh": sh(); break;
+        case "S": S(); break;      // Stroke path
+        case "SC": SC(); break;
+        case "SCN": SCN(); break;
+        case "T*": T_x(); break;   // Move to next line
+        case "Tc": Tc(); break;    // Set character spacing
+        case "Td": Td(); break;    // Move relative to current line start
+        case "TD": TD(); break;    // Move relative to current line start and set leading to -ty
+        case "Tf": Tf(); break;    // Set font
+        case "Tj": Tj(); break;    // Show text
+        case "TJ": TJ(); break;    // Show text array
+        case "TL": TL(); break;    // Set text leading
+        case "Tm": Tm(); break;    // Set text matrix
+        case "Tr": Tr(); break;    // Set text rendering mode
+        case "Ts": Ts(); break;    // Set text rise
+        case "Tw": Tw(); break;    // Set text word spacing
+        case "Tz": Tz(); break;    // Set text horizontal scale factor
+        //case "\'": case "\"": quote(); break;
+        case "v": v(); break;      // Curveto
+        case "w": w(); break;      // Set linewidth
+        case "W": W(); break;      // Set clip
+        case "W*": W_x(); break;   // Set clip (EO)
+        case "y": y(); break;      // Curveto
+        default: System.err.println("PageParser: Unknown op: " + op);
+    }
+}
+                
+/**
+ * Closepath, fill, stroke
+ */
+void b()
+{
+    path.setWindingRule(GeneralPath.WIND_NON_ZERO);
+    path.closePath();
+    _pntr.fillPath(gs, path);
+    _pntr.strokePath(gs, path);
+    didDraw(); //didDraw = true; swallowedToken = true;
 }
 
-// Handles all the text operations [T*,Tc,Td,TD,Tf,Tj,TJ,TL,Tm,Tr,Ts,Tw,Tz,'."]
-// For the "T" operations, oper represents the second letter.
-public boolean parseTextOperator(byte oper, int tindex, int numops, PDFGState gs, byte pageBytes[])
+/**
+ * Closepath, fill, stroke (EO)
+ */
+void b_x()
 {
-     boolean swallowedToken = false;
-     
-     switch(oper) {
-         
-         // T* - move to next line
-         case '*': if (numops==0) { _textObj.positionText(0, -gs.tleading); swallowedToken = true; } break;
-         
-         // Tc - // Set character spacing
-         case 'c': if(numops==1) { gs.tcs = getFloat(tindex-1); swallowedToken = true;  } break;
-         
-         // TD, td  - move relative to current line start (uppercase indicates to set leading to -ty)
-         case 'D' :
-         case 'd' : 
-            if(numops==2) {
-                float x = getFloat(tindex-2);
-                float y = getFloat(tindex-1);
-                _textObj.positionText(x,y);
-                if(oper=='D') gs.tleading = -y;
-                swallowedToken = true;
-            }
-            break;
-            
-        // Tf - Set font name and size
-        case 'f' : 
-            if(numops==2) {
-                String fontalias = getToken(tindex-2).getName(); // name in dict is key, so lose leading /
-                gs.font = getPage().getFontDictForAlias(fontalias);
-                gs.fontSize = getFloat(tindex-1); swallowedToken = true;
-            }
-            break;
-        
-        // w c string " set word & charspacing, move to next line, show text
-        case '"': if(numops!=3) break;
-            gs.tws = getFloat(tindex-3); gs.tcs = getFloat(tindex-2); numops = 1; // fall through
-             
-        // ' - move to next line and show text
-        case '\'': _textObj.positionText(0, -gs.tleading); // Fall through
-        
-        // Tj - Show text
-        case 'j': 
-            if(numops==1) {
-                PageToken tok = getToken(tindex-1);
-                int tloc = tok.getStart(), tlen = tok.getLength();
-                _textObj.showText(pageBytes, tloc, tlen, gs, _pfile, _pntr); swallowedToken = true;
-            }
-            break;
-            
-        // TJ - Show text with spacing adjustment array
-        case 'J': 
-            if(numops==1) {
-                List tArray = (List)(getToken(tindex-1).value);
-                _textObj.showText(pageBytes, tArray, gs, _pfile, _pntr); swallowedToken = true;
-            }
-            break;
-            
-        // TL -  set text leading
-        case 'L': if(numops==1) { gs.tleading = getFloat(tindex-1); swallowedToken = true; } break;
-         
-        // Tm - set text matrix
-        case 'm': 
-            if(numops==6) {
-                _textObj.setTextMatrix(getFloat(tindex-6), getFloat(tindex-5), getFloat(tindex-4),
-                    getFloat(tindex-3), getFloat(tindex-2), getFloat(tindex-1));
-                swallowedToken = true;
-            }
-            break;
-            
-        // Tr - set text rendering mode
-        case 'r': if(numops==1) { gs.trendermode = getInt(tindex-1); swallowedToken = true; } break;
-         
-        // Ts - set text rise
-        case 's': if(numops==1) { gs.trise = getFloat(tindex-1); swallowedToken = true; } break;
-        
-        // Tw - set text word spacing
-        case 'w': if(numops==1) { gs.tws = getFloat(tindex-1); swallowedToken = true; } break;
-         
-        // Tz - horizontal scale factor
-        case 'z': if(numops==1) { gs.thscale = getFloat(tindex-1)/100f; swallowedToken = true; } break;
-     }
+    path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
+    path.closePath();
+    _pntr.fillPath(gs, path);
+    _pntr.strokePath(gs, path);
+    didDraw(); //didDraw = true; swallowedToken = true;
+}
 
-     return swallowedToken;
+/**
+ * Fill, stroke
+ */
+void B()
+{
+    path.setWindingRule(GeneralPath.WIND_NON_ZERO);
+    _pntr.fillPath(gs, path);
+    _pntr.strokePath(gs, path);
+    didDraw(); //didDraw = true; swallowedToken = true;
+}
+
+/**
+ * Fill, stroke (EO)
+ */
+void B_x()
+{
+    path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
+    _pntr.fillPath(gs, path);
+    _pntr.strokePath(gs, path);
+    didDraw(); //didDraw = true; swallowedToken = true;
+}
+
+/**
+ * Begin Text
+ */
+void BT()  { _textObj.begin(); } //swallowedToken = true;
+
+/**
+ * BX start (possibly nested) compatibility section
+ */
+void BX()  { ++compatibility_sections; } //swallowedToken = true;
+
+/**
+ * BI inline images
+ */
+void BI()
+{
+    _index = parseInlineImage(_index+1, _pageBytes); //swallowedToken = true;
+}
+
+/**
+ * BDC, BMC
+ */
+void BDC()  { } //swallowedToken = true;
+
+/**
+ * curve to.
+ */
+void c()
+{
+    getPoint(_index, gs.cp);
+    path.curveTo(getFloat(_index-6), getFloat(_index-5), getFloat(_index-4), getFloat(_index-3), gs.cp.x, gs.cp.y);
+    //swallowedToken = true;
+}
+
+/**
+ * cm - Concat matrix
+ */
+void cm()
+{
+    gs.trans.concatenate(getTransform(_index)); //swallowedToken = true;
+}
+
+/**
+ * Set colorspace
+ */
+void cs()
+{
+    String space = getToken(_index-1).getName();
+    gs.colorSpace = PDFColorSpace.getColorspace(space, _pfile, _page); //swallowedToken = true;
+}
+
+/**
+ * Set stroke colorspace
+ */
+void CS()
+{
+    String space = getToken(_index-1).getName();
+    gs.scolorSpace = PDFColorSpace.getColorspace(space, _pfile, _page); //swallowedToken = true;
+}
+
+/**
+ * Set dash
+ */
+void d()
+{
+    gs.lineDash = getFloatArray(_index-2);
+    gs.dashPhase = getFloat(_index-1);
+    gs.lineStroke = gs.createStroke(); //swallowedToken=true;
+}
+
+/**
+ * Do xobject
+ */
+void Do()
+{
+    String iname = getToken(_index-1).getName();
+    Object xobj = getPage().getXObject(iname);
+    if(xobj instanceof Image) {
+        _pntr.drawImage((Image)xobj); } //swallowedToken = true; }
+    else if(xobj instanceof PDFForm) {
+        executeForm((PDFForm)xobj); } //swallowedToken = true; }
+    else throw new PDFException("Error reading XObject");
+}
+
+/**
+ * Marked content
+ */
+void DP() { } // swallowedToken = true;
+
+/**
+ * ET - End text
+ */
+void ET()  { _textObj.end(); } //swallowedToken = true;
+
+/**
+ * EMC
+ */
+void EMC() { } //swallowedToken = true;
+
+/**
+ * EX
+ */
+void EX()
+{
+    if(--compatibility_sections<0)
+        throw new PDFException("Unbalanced BX/EX operators"); //swallowedToken = true;
+}
+
+/**
+ * Fill
+ */
+void f()
+{
+    path.setWindingRule(GeneralPath.WIND_NON_ZERO);
+    _pntr.fillPath(gs, path);
+    didDraw(); //didDraw = true; swallowedToken = true;
+}
+
+/**
+ * Fill (EO)
+ */
+void f_x()
+{
+    path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
+    _pntr.fillPath(gs, path);
+    didDraw(); //didDraw = true; swallowedToken = true;
+}
+
+/**
+ * Set gray
+ */
+void g()
+{
+    ColorSpace cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
+    gs.color = getColor(cspace,_index,numops); gs.colorSpace = cspace; //swallowedToken = true;
+}
+
+/**
+ * Extended graphics state
+ */
+void gs()
+{
+    Map exg = getPage().getExtendedGStateNamed(getToken(_index-1).getName());
+    readExtendedGState(gs, exg); //swallowedToken = true;
+}
+
+/**
+ * Set stroke gray
+ */
+void G()
+{
+    ColorSpace cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
+    gs.scolor = getColor(cspace,_index,numops); gs.scolorSpace = cspace; //swallowedToken = true;
+}
+
+/**
+ * Closepath
+ */
+void h()
+{
+    path.closePath();
+    Point2D lastPathPoint = path.getCurrentPoint(); 
+    gs.cp.x = (float)lastPathPoint.getX();
+    gs.cp.y = (float)lastPathPoint.getY(); //swallowedToken = true;
+}
+
+/**
+ * Set flatness
+ */
+void i()  { gs.flatness = getFloat(_index-1); } //swallowedToken = true;
+
+/**
+ * ID
+ */
+void ID()  { }
+
+/**
+ * Set linejoin
+ */
+void j()
+{
+    gs.lineJoin = getInt(_index-1);
+    gs.lineStroke = gs.createStroke(); //swallowedToken = true;
+}
+
+/**
+ * Set linecap
+ */
+void J()
+{
+    gs.lineCap = getInt(_index-1);
+    gs.lineStroke = gs.createStroke(); //swallowedToken = true;
+}
+
+/**
+ * Set cmyk
+ */
+void k()
+{
+    ColorSpace cspace = PDFColorSpace.getColorspace("DeviceCMYK", _pfile, _page);
+    Color acolor = getColor(cspace,_index,numops);
+    gs.colorSpace = cspace; gs.color = acolor; //swallowedToken = true;
+}
+
+/**
+ * Set stroke cmyk
+ */
+void K()
+{
+    ColorSpace cspace = PDFColorSpace.getColorspace("DeviceCMYK", _pfile, _page);
+    Color acolor = getColor(cspace,_index,numops);
+    gs.scolorSpace = cspace; gs.scolor = acolor; //swallowedToken = true;
+}
+
+/**
+ * Lineto
+ */
+void l()
+{
+    getPoint(_index, gs.cp);
+    path.lineTo(gs.cp.x, gs.cp.y); //swallowedToken = true;
+}
+
+/**
+ * Moveto
+ */
+void m()
+{
+    getPoint(_index, gs.cp);
+    if(path==null) path = new GeneralPath();
+    path.moveTo(gs.cp.x, gs.cp.y); //swallowedToken = true;
+}
+
+/**
+ * Set miterlimit
+ */
+void M()
+{
+    gs.miterLimit = getFloat(_index-1);
+    gs.lineStroke = gs.createStroke(); //swallowedToken = true;
+}
+
+/**
+ * Marked content point
+ */
+void MP()  { }
+
+/**
+ * Endpath
+ */
+void n()  { didDraw(); } //didDraw = true; swallowedToken=true;
+
+/**
+ * gsave
+ */
+void q()  { gs = _pntr.gsave(); } //swallowedToken = true;
+
+/**
+ * grestore.
+ */
+void Q()  { gs = _pntr.grestore(); } //swallowedToken = true;
+
+/**
+ * Append rectangle
+ */
+void re()
+{
+    float x = getFloat(_index-4), y = getFloat(_index-3);
+    float w = getFloat(_index-2), h = getFloat(_index-1);
+    
+    // re either creates a new path or adds to the current one
+    if(path==null) path = new GeneralPath();
+    path.moveTo(x,y); path.lineTo(x+w,y); path.lineTo(x+w,y+h); path.lineTo(x,y+h);path.closePath();
+    // reset current point to start of rect. TODO: Check that this is what really happens in pdf
+    gs.cp.x = x; gs.cp.y = y; //swallowedToken = true;
+}
+
+/**
+ * Set render intent
+ */
+void ri()
+{
+    gs.renderingIntent = PDFGState.getRenderingIntentID(getToken(_index-1).getString()); //swallowedToken=true;
+}
+
+/**
+ * Set rgb color
+ */
+void rg()
+{
+    ColorSpace cspace = PDFColorSpace.getColorspace("DeviceRGB", _pfile, _page);
+    gs.color = getColor(cspace,_index,numops);
+    gs.colorSpace = cspace; //swallowedToken = true;
+}
+
+/**
+ * Set stroke rgb color
+ */
+void RG()
+{
+    ColorSpace cspace = PDFColorSpace.getColorspace("DeviceRGB", _pfile, _page);
+    gs.scolor = getColor(cspace,_index,numops);
+    gs.scolorSpace = cspace; //swallowedToken = true;
+}
+
+/**
+ * Closepath
+ */
+void s()
+{
+    path.closePath();
+    _pntr.strokePath(gs, path);
+    didDraw(); //didDraw = true; swallowedToken = true;
+}
+
+/**
+ * Set color in colorspace
+ */
+void sc()
+{
+    gs.color = getColor(gs.colorSpace,_index,numops); //swallowedToken = true;
+}
+
+/**
+ * scn
+ */
+void scn()
+{
+    if(gs.colorSpace instanceof PDFColorSpaces.PatternSpace && numops>=1) {
+        String pname = getToken(_index-1).getName();
+        PDFPattern pat = getPage().getPattern(pname);
+        gs.color = pat.getPaint();                            
+        // this is really stupid.  change this around
+        if ((pat instanceof PDFPatterns.Tiling) && (gs.color==null)) {
+            // Uncolored tiling patterns require color values be passed.
+            // Note, however, that although you can draw an uncolored tiling pattern any number of
+            // times in different colors, we only do it once (after which it will be cached)
+            if (numops>1) {
+                ColorSpace tileSpace=((PDFColorSpaces.PatternSpace)gs.colorSpace).tileSpace;
+                if (tileSpace==null)
+                    tileSpace=gs.colorSpace;
+                gs.color = getColor(tileSpace,_index-1, numops-1);
+            }
+            this.executePatternStream((PDFPatterns.Tiling)pat);
+            gs.color = pat.getPaint();
+        }
+    }
+    else gs.color = getColor(gs.colorSpace,_index,numops); //swallowedToken = true;
+}
+
+/**
+ * sh
+ */
+void sh()
+{
+    String shadename = getToken(_index-1).getName();
+    java.awt.Paint oldPaint = gs.color;
+    PDFPatterns.Shading shade = getPage().getShading(shadename);
+    gs.color = shade.getPaint();  //save away old color
+    // Get area to fill. If shading specifies bounds, use that, if not, use clip. else fill whole page.
+    GeneralPath shadearea;
+    if(shade.getBounds() != null)
+        shadearea = new GeneralPath(shade.getBounds());
+    else {
+        Rectangle2D r = new Rectangle2D.Double(_bounds.x, _bounds.y, _bounds.width, _bounds.height);
+        shadearea = gs.clip!=null? (GeneralPath)gs.clip.clone() : new GeneralPath(r);
+        try { shadearea.transform(gs.trans.createInverse()); } // transform from page to user space
+        catch(NoninvertibleTransformException e) { throw new PDFException("Invalid user space xform"); }
+    }
+    _pntr.fillPath(gs, shadearea);
+    gs.color = oldPaint;  //restore the color
+    didDraw(); //didDraw = true; swallowedToken = true;  // TODO:probably did draw... check this
+}
+
+/**
+ * Stroke path
+ */
+void S()
+{
+    _pntr.strokePath(gs, path);
+    didDraw(); //didDraw = true; swallowedToken = true;
+}
+
+/**
+ * Set stroke color in normal colorspaces
+ */
+void SC()
+{
+    gs.scolor = getColor(gs.scolorSpace, _index, numops); //swallowedToken = true;
+}
+
+/**
+ * strokecolor in normal colorspaces
+ */
+void SCN()
+{
+    gs.scolor = getColor(gs.scolorSpace, _index, numops); //swallowedToken = true;
+}
+
+/**
+ * Move to next line
+ */
+void T_x()
+{
+     _textObj.positionText(0, -gs.tleading); //swallowedToken = true;
+}
+
+/**
+ * Set character spacing
+ */
+void Tc()
+{
+    gs.tcs = getFloat(_index-1); //swallowedToken = true;
+}
+
+/**
+ * Move relative to current line start
+ */
+void Td()
+{
+    float x = getFloat(_index-2);
+    float y = getFloat(_index-1);
+    _textObj.positionText(x,y);// swallowedToken = true;
+}
+
+/**
+ * Move relative to current line start and set leading to -ty
+ */
+void TD()
+{
+    float x = getFloat(_index-2);
+    float y = getFloat(_index-1);
+    _textObj.positionText(x,y);
+    gs.tleading = -y; //swallowedToken = true;
+}
+
+/**
+ * Set font name and size
+ */
+void Tf()
+{
+    String fontalias = getToken(_index-2).getName(); // name in dict is key, so lose leading /
+    gs.font = getPage().getFontDictForAlias(fontalias);
+    gs.fontSize = getFloat(_index-1); //swallowedToken = true;
+}
+
+/**
+ * Show text.
+ */
+void Tj()
+{
+    PageToken tok = getToken(_index-1);
+    int tloc = tok.getStart(), tlen = tok.getLength();
+    _textObj.showText(_pageBytes, tloc, tlen, gs, _pfile, _pntr); //swallowedToken = true;
+}
+
+/**
+ * Show text with spacing adjustment array
+ */
+void TJ()
+{
+    List tArray = (List)(getToken(_index-1).value);
+    _textObj.showText(_pageBytes, tArray, gs, _pfile, _pntr); //swallowedToken = true;
+}
+
+/**
+ * Set text leading
+ */
+void TL()
+{
+    gs.tleading = getFloat(_index-1); //swallowedToken = true;
+}
+
+/**
+ * Set text matrix
+ */
+void Tm()
+{
+    float a = getFloat(_index-6), b = getFloat(_index-5), c = getFloat(_index-4), d = getFloat(_index-3);
+    float tx = getFloat(_index-2), ty = getFloat(_index-1);
+    _textObj.setTextMatrix(a, b, c, d, tx, ty);
+    //swallowedToken = true;
+}
+
+/**
+ * Set text rendering mode
+ */
+void Tr()
+{
+    gs.trendermode = getInt(_index-1); //swallowedToken = true;
+}
+
+/**
+ * Set text rise
+ */
+void Ts()
+{
+    gs.trise = getFloat(_index-1); //swallowedToken = true;
+}
+
+/**
+ * Set text word spacing
+ */
+void Tw()
+{
+    gs.tws = getFloat(_index-1); //swallowedToken = true;
+}
+
+/**
+ * Set text horizontal scale factor
+ */
+void Tz()
+{
+    gs.thscale = getFloat(_index-1)/100f; //swallowedToken = true;
+}
+
+/**
+ * Curveto (first control point is current point)
+ */
+void v()
+{
+    double cp1x = gs.cp.x, cp1y = gs.cp.y;
+    Point cp2 = getPoint(_index-2);
+    getPoint(_index, gs.cp);
+    path.curveTo(cp1x, cp1y, cp2.x, cp2.y, gs.cp.x, gs.cp.y); //swallowedToken = true;
+}
+
+/**
+ * Set linewidth
+ */
+void w()
+{
+    gs.lineWidth = getFloat(_index-1);
+    gs.lineStroke = gs.createStroke(); //swallowedToken = true;
+}
+
+/**
+ * Set clip
+ */
+void W()
+{
+    // Somebody at Adobe's been smoking crack. The clipping operation doesn't modify the clipping in the gstate.
+    // Instead, the next path drawing operation will do that, but only AFTER it draws.  
+    // So a sequence like 0 0 99 99 re W f will fill the rect first and then set the clip path using the rect.
+    // Because the W operation doesn't do anything, they had to introduce the 'n' operation, which is a drawing no-op,
+    // in order to do a clip and not also draw the path. You might think it would be safe to just reset the clip here,
+    // since the path it will draw is the same as the path it will clip to. However, there's at least one (admittedly
+    // obscure) case I can think of where clip(path),draw(path)  is different from draw(path),clip(path): 
+    //     W* f  %eoclip, nonzero-fill
+    // Note also, Acrobat considers it an error to have a W not immediately followed by drawing op (f,f*,F,s,S,B,b,n)
+    if(path != null) {
+        path.setWindingRule(GeneralPath.WIND_NON_ZERO);
+        future_clip = (GeneralPath)path.clone();
+     }  //swallowedToken = true;
+}
+
+/**
+ * Set clip (EO)
+ */
+void W_x()
+{
+    if(path != null) {
+        path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
+        future_clip = (GeneralPath)path.clone();
+     } //swallowedToken = true;
+}
+
+/**
+ * Curveto (final point replicated)
+ */
+void y()
+{
+    Point cp1 = getPoint(_index-2);
+    getPoint(_index, gs.cp);
+    path.curveTo(cp1.x, cp1.y, gs.cp.x, gs.cp.y, gs.cp.x, gs.cp.y); //swallowedToken = true;
+}
+
+/**
+ * quote
+ */
+void quote()
+{
+    //if(tlen==1 && parseTextOperator(c, i, numops, gs, pageBytes)) swallowedToken = true;
+}
+
+/**
+ * 
+ */
+void double_quote_close()
+{
+    gs.tws = getFloat(_index-3); gs.tcs = getFloat(_index-2); numops = 1;
+    _textObj.positionText(0, -gs.tleading);
+}
+
+/**
+ * 
+ */
+void single_quote_close()
+{
+    _textObj.positionText(0, -gs.tleading); // Fall through
+}
+
+/**
+ * Called after drawing op.
+ */
+void didDraw()
+{
+    // Note that unlike other ops that change gstate, there is a specific call into markup handler when clip changes.
+    // Markup handler can choose whether to respond to clipping change or just to pull clip out of gstate when it draws.
+    if(future_clip != null)
+        _pntr.establishClip(future_clip, true); future_clip = null;
+
+    // The current path and the current point are undefined after a draw
+    path = null;
 }
 
 /** Returns the token at the given index as a float. */
@@ -710,6 +946,17 @@ private AffineTransform getTransform(int i)
     float c = getToken(i-4).floatValue(), d = getToken(i-3).floatValue();
     float tx = getToken(i-2).floatValue(), ty = getToken(i-1).floatValue();
     return new AffineTransform(a, b, c, d, tx, ty);
+}
+
+/** Called with any of the set color ops to create new color from values in stream. */
+private Color getColor(ColorSpace space, int tindex, int numops)
+{
+    //if(numops != n) throw new PDFException("Wrong number of color components for colorspace");
+    
+    int n = space.getNumComponents();
+    float varray[] = new float[n]; // how much of a performance hit is allocating this every time?
+    for(int i=0; i<n; ++i) varray[i] = getFloat(tindex-(n-i));
+    return PDFColorSpace.createColor(space, varray);
 }
 
 /**
@@ -809,41 +1056,60 @@ static final String _inline_image_value_abbreviations[][] = {
     {"CCF", "CCITTFaxDecode"}, {"DCT", "DCTDecode"}
 };
 
-/**
- * Called with any of the set color operations to create new color instance from the values in the stream.
- * Currently considers having the wrong number of components an error.
- */
-private Color getColor(ColorSpace space, int tindex, int numops)
+public void executeForm(PDFForm aForm)
 {
-    int n = space.getNumComponents();
-    float varray[] = new float[n]; // how much of a performance hit is allocating this every time?
-
-    if(numops != n)
-        throw new PDFException("Wrong number of color components for colorspace");
-    for(int i=0; i<n; ++i)
-        varray[i] = getFloat(tindex-(n-i));
-    return PDFColorSpace.createColor(space, varray);
+    Rectangle2D bbox = aForm.getBBox();
+    AffineTransform xform = aForm.getTransform();
+    
+    // save the current gstate and set the transform in the newgstate
+    PDFGState gs = _pntr.gsave();
+    gs.trans.concatenate(xform);
+    
+    // clip to the form bbox
+    _pntr.establishClip(new GeneralPath(bbox), true);
+  
+    // add the form's resources to the page resource stack
+    getPage().pushResources(aForm.getResources(_pfile));
+    parse(aForm.getTokens(), aForm.getBytes());  // recurse back into the parser with a new set of tokens
+    getPage().popResources();    // restore the old resources, gstate,ctm, & clip
+    _pntr.grestore();
 }
 
-static int getBlendModeID(String pdfName)
+/**
+ * A pattern could execute its pdf over and over, like a form (above) but for performance reasons,
+ * we only execute it once and cache a tile. To do this, we temporarily set the markup handler in the file to a new 
+ * BufferedMarkupHander, add the pattern's resource dictionary and fire up the parser.
+ */
+public void executePatternStream(PDFPatterns.Tiling pat)
 {
-    if(pdfName.equals("/Normal") || pdfName.equals("/Compatible")) return PDFComposite.NormalBlendMode;
-    if(pdfName.equals("/Multiply")) return PDFComposite.MultiplyBlendMode;
-    if(pdfName.equals("/Screen")) return PDFComposite.ScreenBlendMode;
-    if(pdfName.equals("/Overlay")) return PDFComposite.OverlayBlendMode;
-    if(pdfName.equals("/Darken")) return PDFComposite.DarkenBlendMode;
-    if(pdfName.equals("/Lighten")) return PDFComposite.LightenBlendMode;
-    if(pdfName.equals("/ColorDodge")) return PDFComposite.ColorDodgeBlendMode;
-    if(pdfName.equals("/ColorBurn")) return PDFComposite.ColorBurnBlendMode;
-    if(pdfName.equals("/HardLight")) return PDFComposite.HardLightBlendMode;
-    if(pdfName.equals("/SoftLight")) return PDFComposite.SoftLightBlendMode;
-    if(pdfName.equals("/Difference")) return PDFComposite.DifferenceBlendMode;
-    if(pdfName.equals("/Exclusion")) return PDFComposite.ExclusionBlendMode;
-    if(pdfName.equals("/Hue")) return PDFComposite.HueBlendMode;
-    if(pdfName.equals("/Saturation")) return PDFComposite.SaturationBlendMode;
-    if(pdfName.equals("/Color")) return PDFComposite.ColorBlendMode;
-    if(pdfName.equals("/Luminosity")) return PDFComposite.LuminosityBlendMode;
-    throw new PDFException("Unknown blend mode name \""+pdfName+"\"");
+    // Create image painter and set
+    PDFMarkupHandler pntr = PDFMarkupHandler.get();
+    
+    // By adding the pattern's resources to page's resource stack, it means pattern will have access to resources
+    // defined by the page.  I'll bet Acrobat doesn't allow you to do this, but it shouldn't hurt anything.
+    getPage().pushResources(pat.getResources());
+    
+    // save the current gstate
+    PDFGState gs = pntr.gsave();
+    
+    // Establish the pattern's transformation
+    gs.trans.concatenate(pat.getTransform());
+    
+    // Begin the markup handler. TODO:probably going to have to add a translate by -x, -y of the bounds rect
+    Rectangle2D prect = pat.getBounds();
+    pntr.beginPage(prect.getWidth(), prect.getHeight());
+    
+    // Get the pattern stream's tokens
+    byte contents[] = pat.getContents();
+    List <PageToken> tokens = PageToken.getTokens(contents);
+    
+    // Fire up parser
+    PDFMarkupHandler opntr = _pntr; _pntr = pntr;
+    parse(tokens, contents);
+    _pntr = opntr;
+    
+    // Get the image and set the tile.  All the resources can be freed up now
+    pat.setTile(pntr.getBufferedImage());
 }
 
 /**
@@ -928,6 +1194,27 @@ void readExtendedGState(PDFGState gs, Map exgstate)
         gs.composite = PDFComposite.createComposite(gs.colorSpace, gs.blendMode, gs.alphaIsShape, gs.alpha);
         gs.scomposite = PDFComposite.createComposite(gs.colorSpace, gs.blendMode, gs.alphaIsShape, gs.salpha);
     }
+}
+
+static int getBlendModeID(String pdfName)
+{
+    if(pdfName.equals("/Normal") || pdfName.equals("/Compatible")) return PDFComposite.NormalBlendMode;
+    if(pdfName.equals("/Multiply")) return PDFComposite.MultiplyBlendMode;
+    if(pdfName.equals("/Screen")) return PDFComposite.ScreenBlendMode;
+    if(pdfName.equals("/Overlay")) return PDFComposite.OverlayBlendMode;
+    if(pdfName.equals("/Darken")) return PDFComposite.DarkenBlendMode;
+    if(pdfName.equals("/Lighten")) return PDFComposite.LightenBlendMode;
+    if(pdfName.equals("/ColorDodge")) return PDFComposite.ColorDodgeBlendMode;
+    if(pdfName.equals("/ColorBurn")) return PDFComposite.ColorBurnBlendMode;
+    if(pdfName.equals("/HardLight")) return PDFComposite.HardLightBlendMode;
+    if(pdfName.equals("/SoftLight")) return PDFComposite.SoftLightBlendMode;
+    if(pdfName.equals("/Difference")) return PDFComposite.DifferenceBlendMode;
+    if(pdfName.equals("/Exclusion")) return PDFComposite.ExclusionBlendMode;
+    if(pdfName.equals("/Hue")) return PDFComposite.HueBlendMode;
+    if(pdfName.equals("/Saturation")) return PDFComposite.SaturationBlendMode;
+    if(pdfName.equals("/Color")) return PDFComposite.ColorBlendMode;
+    if(pdfName.equals("/Luminosity")) return PDFComposite.LuminosityBlendMode;
+    throw new PDFException("Unknown blend mode name \""+pdfName+"\"");
 }
 
 }
