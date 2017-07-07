@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.pdf.read;
+import java.util.List;
 import snap.gfx.*;
 import snap.pdf.*;
 
@@ -220,16 +221,15 @@ public void showText(String aStr)
 
 
 /** Like the previous routine, except using a list of strings & spacing adjustments */
-/*public void showText(byte pageBytes[], List tokens, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
+//public void showText(byte pageBytes[], List tokens, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
+public void showText(List <PageToken> theTokens)
 {
-    //TODO: This could be made much more efficient by creating a single glyphvector.
-    double hscale=-gs.fontSize*gs.thscale/1000;
-    for(int i=0, n=tokens.size(); i<n; ++i) {
-        PageToken tok = (PageToken)tokens.get(i);
+    double hscale = 1; //-gs.fontSize*gs.thscale/1000;
+    for(PageToken tok : theTokens) {
         if(tok.type==PageToken.PDFNumberToken)
             _textMatrix.translate(tok.floatValue()*hscale, 0);
-        else showText(pageBytes, tok.getStart(), tok.getLength(), gs, file, aPntr);
+        else showText(tok.getString()); //showText(pageBytes, tok.getStart(), tok.getLength(), gs, file, aPntr);
     }
-}*/
+}
 
 }

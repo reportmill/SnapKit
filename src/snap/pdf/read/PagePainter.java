@@ -88,6 +88,7 @@ protected void paintOp(PageToken aToken, int anIndex)
         case "h": h(); break; // Closepath
         case "l": l(); break; // lineto
         case "m": m(); break; // moveto
+        case "n": n(); break; // End path
         case "q": q(); break; // gsave
         case "Q": Q(); break; // grestore
         case "re": re(); break; // grestore
@@ -95,10 +96,13 @@ protected void paintOp(PageToken aToken, int anIndex)
         case "RG": RG(); break; // set stroke rgb color
         case "s": s(); break; // Closepath, stroke
         case "S": S(); break; // Stroke
+        case "SC": SC(); break; // Set stroke color
         case "Td": Td(); break; // Text move to
         case "TD": TD(); break; // Text move to
         case "Tf": Tf(); break; // Set font
         case "Tj": Tj(); break; // Show text
+        case "TJ": TJ(); break; // Show text (list)
+        case "Tm": Tm(); break; // Set text matrix
         case "w": w(); break; // Set linewidth
         default: System.out.println("Unsupported op: " + op);
     }
@@ -184,6 +188,11 @@ void m()
 }
 
 /**
+ * End path: End path without fill or stroke - used for clearing the path after a clipping operation ( W n )
+ */
+void n()  { _path.clear(); }
+
+/**
  * GSave.
  */
 void q()  { _pntr.save(); }
@@ -245,6 +254,14 @@ void S()
 }
 
 /**
+ * Set stroke color.
+ */
+void SC()
+{
+    _scolor = getColor(_index); //cspace,i,numops);
+}
+
+/**
  * Text move relative to current line start
  */
 void Td()
@@ -288,12 +305,53 @@ void Tj()
 }
 
 /**
+ * Show text.
+ */
+void TJ()
+{
+    PageToken token = getToken(_index-1);
+    List <PageToken> tokens = (List)token.value;
+    _text.showText(tokens);
+}
+
+/**
+ * Set text matrix.
+ */
+void Tm()
+{
+    float a = getFloat(_index-6), b = getFloat(_index-5), c = getFloat(_index-4), d = getFloat(_index-3);
+    float tx = getFloat(_index-2), ty = getFloat(_index-1);
+    _text.setTextMatrix(a, b, c, d, tx, ty);
+}
+
+/**
  * Set linewidth.
  */
 void w()
 {
     double lwidth = getFloat(_index-1);
     _pntr.setStroke(new Stroke(lwidth));
+}
+
+/**
+ * Clip.
+ */
+void W()
+{
+    //int wind = GeneralPath.WIND_NON_ZERO; // if ( W* ) wind = GeneralPath.WIND_EVEN_ODD;
+                
+    // Somebody at Adobe's been smoking crack. The clipping operation doesn't modify the clipping in the gstate.
+    // Instead, the next path drawing operation will do that, but only AFTER it draws.  
+    // So a sequence like 0 0 99 99 re W f will fill the rect first and then set the clip path using the rect.
+    // Because the W operation doesn't do anything, they had to introduce the 'n' operation, which is a drawing no-op,
+    // in order to do a clip and not also draw the path. You might think it would be safe to just reset the clip here,
+    // since the path it will draw is the same as the path it will clip to. However, there's at least one (admittedly
+    // obscure) case I can think of where clip(path),draw(path)  is different from draw(path),clip(path): 
+    //     W* f  %eoclip, nonzero-fill
+    // Note Also, Acrobat considers it an error to have a W not immediately followed by drawing op (f,f*,F,s,S,B,b,n)
+    //if(_path != null) {
+    //    _path.setWindingRule(wind);
+    //    future_clip = (GeneralPath)path.clone(); }
 }
 
 /**
