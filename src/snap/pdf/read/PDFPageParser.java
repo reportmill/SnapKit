@@ -152,12 +152,6 @@ public void parse(List tokenList, byte pageBytes[])
         //if(didDraw) { if(future_clip!=null) _pntr.establishClip(future_clip, true); future_clip = null;
         //    path = null; }  // The current path and the current point are undefined after a draw
         //else if(future_clip != null) { } // TODO: an error unless the last token was W or W*
-        // If swallowedToken==false, it's because there was no match, either because it
-        // was an illegal token, or there were the wrong number of operands for the token.
-        /*if(!swallowedToken) {
-        // If in compatibility section, print warning, since we want alert about anything not supported.
-        if(compatibility_sections > 0) System.err.println("Warning - ignoring " + token + " in compatibility section");
-        else throw new PDFException("Error in content stream. Token = " + token); }*/
     
         numops = 0; // everything was fine, reset the number of operands
     }
@@ -184,7 +178,7 @@ public void paintOp(PageToken aToken)
         case "BX": BX(); break;
         case "BI": BI(); break;
         case "BDC": case "BMC": BDC(); break;
-        case "c": c(); break;      //
+        case "c": c(); break;      // Curveto
         case "cm": cm(); break;    // Concat matrix
         case "cs": cs(); break;    // Set colorspace
         case "CS": CS(); break;    // Set stroke colorspace
@@ -218,12 +212,12 @@ public void paintOp(PageToken aToken)
         case "ri": ri(); break;    // Set render intent
         case "RG": RG(); break;    // Set stroke rgb color
         case "s": s(); break;      // Closepath
-        case "sc": sc(); break;
-        case "scn": scn(); break;
-        case "sh": sh(); break;
+        case "sc": sc(); break;    // Set color in colorspace
+        case "scn": scn(); break;  // Set color in colorspace
+        case "sh": sh(); break;    // Set shader
         case "S": S(); break;      // Stroke path
-        case "SC": SC(); break;
-        case "SCN": SCN(); break;
+        case "SC": SC(); break;    // Set stroke color in colorspace
+        case "SCN": SCN(); break;  // Set stroke color in colorspace
         case "T*": T_x(); break;   // Move to next line
         case "Tc": Tc(); break;    // Set character spacing
         case "Td": Td(); break;    // Move relative to current line start
@@ -256,7 +250,7 @@ void b()
     path.closePath();
     _pntr.fillPath(gs, path);
     _pntr.strokePath(gs, path);
-    didDraw(); //didDraw = true; swallowedToken = true;
+    didDraw();
 }
 
 /**
@@ -268,7 +262,7 @@ void b_x()
     path.closePath();
     _pntr.fillPath(gs, path);
     _pntr.strokePath(gs, path);
-    didDraw(); //didDraw = true; swallowedToken = true;
+    didDraw();
 }
 
 /**
@@ -279,7 +273,7 @@ void B()
     path.setWindingRule(GeneralPath.WIND_NON_ZERO);
     _pntr.fillPath(gs, path);
     _pntr.strokePath(gs, path);
-    didDraw(); //didDraw = true; swallowedToken = true;
+    didDraw();
 }
 
 /**
@@ -290,48 +284,45 @@ void B_x()
     path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
     _pntr.fillPath(gs, path);
     _pntr.strokePath(gs, path);
-    didDraw(); //didDraw = true; swallowedToken = true;
+    didDraw();
 }
 
 /**
  * Begin Text
  */
-void BT()  { _textObj.begin(); } //swallowedToken = true;
+void BT()  { _textObj.begin(); }
 
 /**
  * BX start (possibly nested) compatibility section
  */
-void BX()  { ++compatibility_sections; } //swallowedToken = true;
+void BX()  { ++compatibility_sections; }
 
 /**
  * BI inline images
  */
-void BI()
-{
-    _index = parseInlineImage(_index+1, _pageBytes); //swallowedToken = true;
-}
+void BI()  { _index = parseInlineImage(_index+1, _pageBytes); }
 
 /**
  * BDC, BMC
  */
-void BDC()  { } //swallowedToken = true;
+void BDC()  { }
 
 /**
- * curve to.
+ * Curveto.
  */
 void c()
 {
     getPoint(_index, gs.cp);
     path.curveTo(getFloat(_index-6), getFloat(_index-5), getFloat(_index-4), getFloat(_index-3), gs.cp.x, gs.cp.y);
-    //swallowedToken = true;
 }
 
 /**
- * cm - Concat matrix
+ * Concat matrix
  */
 void cm()
 {
-    gs.trans.concatenate(getTransform(_index)); //swallowedToken = true;
+    AffineTransform xfm = getTransform(_index);
+    gs.trans.concatenate(xfm);
 }
 
 /**
@@ -340,7 +331,7 @@ void cm()
 void cs()
 {
     String space = getToken(_index-1).getName();
-    gs.colorSpace = PDFColorSpace.getColorspace(space, _pfile, _page); //swallowedToken = true;
+    gs.colorSpace = PDFColorSpace.getColorspace(space, _pfile, _page);
 }
 
 /**
@@ -349,7 +340,7 @@ void cs()
 void CS()
 {
     String space = getToken(_index-1).getName();
-    gs.scolorSpace = PDFColorSpace.getColorspace(space, _pfile, _page); //swallowedToken = true;
+    gs.scolorSpace = PDFColorSpace.getColorspace(space, _pfile, _page);
 }
 
 /**
@@ -359,7 +350,7 @@ void d()
 {
     gs.lineDash = getFloatArray(_index-2);
     gs.dashPhase = getFloat(_index-1);
-    gs.lineStroke = gs.createStroke(); //swallowedToken=true;
+    gs.lineStroke = gs.createStroke();
 }
 
 /**
@@ -367,29 +358,29 @@ void d()
  */
 void Do()
 {
-    String iname = getToken(_index-1).getName();
-    Object xobj = getPage().getXObject(iname);
-    if(xobj instanceof Image) {
-        _pntr.drawImage((Image)xobj); } //swallowedToken = true; }
-    else if(xobj instanceof PDFForm) {
-        executeForm((PDFForm)xobj); } //swallowedToken = true; }
+    String name = getToken(_index-1).getName();
+    Object xobj = getPage().getXObject(name);
+    if(xobj instanceof Image)
+        _pntr.drawImage((Image)xobj);
+    else if(xobj instanceof PDFForm)
+        executeForm((PDFForm)xobj);
     else throw new PDFException("Error reading XObject");
 }
 
 /**
  * Marked content
  */
-void DP() { } // swallowedToken = true;
+void DP() { }
 
 /**
  * ET - End text
  */
-void ET()  { _textObj.end(); } //swallowedToken = true;
+void ET()  { _textObj.end(); }
 
 /**
  * EMC
  */
-void EMC() { } //swallowedToken = true;
+void EMC() { }
 
 /**
  * EX
@@ -397,7 +388,7 @@ void EMC() { } //swallowedToken = true;
 void EX()
 {
     if(--compatibility_sections<0)
-        throw new PDFException("Unbalanced BX/EX operators"); //swallowedToken = true;
+        throw new PDFException("Unbalanced BX/EX operators");
 }
 
 /**
@@ -407,7 +398,7 @@ void f()
 {
     path.setWindingRule(GeneralPath.WIND_NON_ZERO);
     _pntr.fillPath(gs, path);
-    didDraw(); //didDraw = true; swallowedToken = true;
+    didDraw();
 }
 
 /**
@@ -417,7 +408,7 @@ void f_x()
 {
     path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
     _pntr.fillPath(gs, path);
-    didDraw(); //didDraw = true; swallowedToken = true;
+    didDraw();
 }
 
 /**
@@ -426,7 +417,7 @@ void f_x()
 void g()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
-    gs.color = getColor(cspace,_index,numops); gs.colorSpace = cspace; //swallowedToken = true;
+    gs.color = getColor(cspace,_index,numops); gs.colorSpace = cspace;
 }
 
 /**
@@ -435,7 +426,7 @@ void g()
 void gs()
 {
     Map exg = getPage().getExtendedGStateNamed(getToken(_index-1).getName());
-    readExtendedGState(gs, exg); //swallowedToken = true;
+    readExtendedGState(gs, exg);
 }
 
 /**
@@ -444,7 +435,7 @@ void gs()
 void G()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
-    gs.scolor = getColor(cspace,_index,numops); gs.scolorSpace = cspace; //swallowedToken = true;
+    gs.scolor = getColor(cspace,_index,numops); gs.scolorSpace = cspace;
 }
 
 /**
@@ -455,13 +446,13 @@ void h()
     path.closePath();
     Point2D lastPathPoint = path.getCurrentPoint(); 
     gs.cp.x = (float)lastPathPoint.getX();
-    gs.cp.y = (float)lastPathPoint.getY(); //swallowedToken = true;
+    gs.cp.y = (float)lastPathPoint.getY();
 }
 
 /**
  * Set flatness
  */
-void i()  { gs.flatness = getFloat(_index-1); } //swallowedToken = true;
+void i()  { gs.flatness = getFloat(_index-1); }
 
 /**
  * ID
@@ -474,7 +465,7 @@ void ID()  { }
 void j()
 {
     gs.lineJoin = getInt(_index-1);
-    gs.lineStroke = gs.createStroke(); //swallowedToken = true;
+    gs.lineStroke = gs.createStroke();
 }
 
 /**
@@ -483,7 +474,7 @@ void j()
 void J()
 {
     gs.lineCap = getInt(_index-1);
-    gs.lineStroke = gs.createStroke(); //swallowedToken = true;
+    gs.lineStroke = gs.createStroke();
 }
 
 /**
@@ -493,7 +484,7 @@ void k()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceCMYK", _pfile, _page);
     Color acolor = getColor(cspace,_index,numops);
-    gs.colorSpace = cspace; gs.color = acolor; //swallowedToken = true;
+    gs.colorSpace = cspace; gs.color = acolor;
 }
 
 /**
@@ -503,7 +494,7 @@ void K()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceCMYK", _pfile, _page);
     Color acolor = getColor(cspace,_index,numops);
-    gs.scolorSpace = cspace; gs.scolor = acolor; //swallowedToken = true;
+    gs.scolorSpace = cspace; gs.scolor = acolor;
 }
 
 /**
@@ -512,7 +503,7 @@ void K()
 void l()
 {
     getPoint(_index, gs.cp);
-    path.lineTo(gs.cp.x, gs.cp.y); //swallowedToken = true;
+    path.lineTo(gs.cp.x, gs.cp.y);
 }
 
 /**
@@ -522,7 +513,7 @@ void m()
 {
     getPoint(_index, gs.cp);
     if(path==null) path = new GeneralPath();
-    path.moveTo(gs.cp.x, gs.cp.y); //swallowedToken = true;
+    path.moveTo(gs.cp.x, gs.cp.y);
 }
 
 /**
@@ -531,7 +522,7 @@ void m()
 void M()
 {
     gs.miterLimit = getFloat(_index-1);
-    gs.lineStroke = gs.createStroke(); //swallowedToken = true;
+    gs.lineStroke = gs.createStroke();
 }
 
 /**
@@ -542,31 +533,31 @@ void MP()  { }
 /**
  * Endpath
  */
-void n()  { didDraw(); } //didDraw = true; swallowedToken=true;
+void n()  { didDraw(); }
 
 /**
  * gsave
  */
-void q()  { gs = _pntr.gsave(); } //swallowedToken = true;
+void q()  { gs = _pntr.gsave(); }
 
 /**
  * grestore.
  */
-void Q()  { gs = _pntr.grestore(); } //swallowedToken = true;
+void Q()  { gs = _pntr.grestore(); }
 
 /**
  * Append rectangle
  */
 void re()
 {
+    // Get rect
     float x = getFloat(_index-4), y = getFloat(_index-3);
     float w = getFloat(_index-2), h = getFloat(_index-1);
     
-    // re either creates a new path or adds to the current one
+    // Create new path and add rect and reset current point to start of rect
     if(path==null) path = new GeneralPath();
     path.moveTo(x,y); path.lineTo(x+w,y); path.lineTo(x+w,y+h); path.lineTo(x,y+h);path.closePath();
-    // reset current point to start of rect. TODO: Check that this is what really happens in pdf
-    gs.cp.x = x; gs.cp.y = y; //swallowedToken = true;
+    gs.cp.x = x; gs.cp.y = y;  // TODO: Check that this is what really happens in pdf
 }
 
 /**
@@ -574,7 +565,7 @@ void re()
  */
 void ri()
 {
-    gs.renderingIntent = PDFGState.getRenderingIntentID(getToken(_index-1).getString()); //swallowedToken=true;
+    gs.renderingIntent = PDFGState.getRenderingIntentID(getToken(_index-1).getString());
 }
 
 /**
@@ -584,7 +575,7 @@ void rg()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceRGB", _pfile, _page);
     gs.color = getColor(cspace,_index,numops);
-    gs.colorSpace = cspace; //swallowedToken = true;
+    gs.colorSpace = cspace;
 }
 
 /**
@@ -594,7 +585,7 @@ void RG()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceRGB", _pfile, _page);
     gs.scolor = getColor(cspace,_index,numops);
-    gs.scolorSpace = cspace; //swallowedToken = true;
+    gs.scolorSpace = cspace;
 }
 
 /**
@@ -604,46 +595,45 @@ void s()
 {
     path.closePath();
     _pntr.strokePath(gs, path);
-    didDraw(); //didDraw = true; swallowedToken = true;
+    didDraw();
 }
 
 /**
  * Set color in colorspace
  */
-void sc()
-{
-    gs.color = getColor(gs.colorSpace,_index,numops); //swallowedToken = true;
-}
+void sc()  { gs.color = getColor(gs.colorSpace,_index,numops); }
 
 /**
- * scn
+ * Set color in colorspace
  */
 void scn()
 {
+    // Handle PatternSpace
     if(gs.colorSpace instanceof PDFColorSpaces.PatternSpace && numops>=1) {
         String pname = getToken(_index-1).getName();
         PDFPattern pat = getPage().getPattern(pname);
-        gs.color = pat.getPaint();                            
+        gs.color = pat.getPaint();
+        
         // this is really stupid.  change this around
-        if ((pat instanceof PDFPatterns.Tiling) && (gs.color==null)) {
-            // Uncolored tiling patterns require color values be passed.
-            // Note, however, that although you can draw an uncolored tiling pattern any number of
-            // times in different colors, we only do it once (after which it will be cached)
+        if(pat instanceof PDFPatterns.Tiling && gs.color==null) {
+            // Uncolored tiling patterns require color values be passed. Note, that although you can draw them
+            // any number of times in different colors, we only do it once (after which it will be cached)
             if (numops>1) {
                 ColorSpace tileSpace=((PDFColorSpaces.PatternSpace)gs.colorSpace).tileSpace;
-                if (tileSpace==null)
-                    tileSpace=gs.colorSpace;
+                if(tileSpace==null) tileSpace = gs.colorSpace;
                 gs.color = getColor(tileSpace,_index-1, numops-1);
             }
             this.executePatternStream((PDFPatterns.Tiling)pat);
             gs.color = pat.getPaint();
         }
     }
-    else gs.color = getColor(gs.colorSpace,_index,numops); //swallowedToken = true;
+    
+    // Do normal version
+    else gs.color = getColor(gs.colorSpace,_index,numops);
 }
 
 /**
- * sh
+ * Set shader
  */
 void sh()
 {
@@ -662,8 +652,8 @@ void sh()
         catch(NoninvertibleTransformException e) { throw new PDFException("Invalid user space xform"); }
     }
     _pntr.fillPath(gs, shadearea);
-    gs.color = oldPaint;  //restore the color
-    didDraw(); //didDraw = true; swallowedToken = true;  // TODO:probably did draw... check this
+    gs.color = oldPaint;  //restore color
+    didDraw();
 }
 
 /**
@@ -672,40 +662,28 @@ void sh()
 void S()
 {
     _pntr.strokePath(gs, path);
-    didDraw(); //didDraw = true; swallowedToken = true;
+    didDraw();
 }
 
 /**
  * Set stroke color in normal colorspaces
  */
-void SC()
-{
-    gs.scolor = getColor(gs.scolorSpace, _index, numops); //swallowedToken = true;
-}
+void SC()  { gs.scolor = getColor(gs.scolorSpace, _index, numops); }
 
 /**
- * strokecolor in normal colorspaces
+ * Set strokecolor in normal colorspaces
  */
-void SCN()
-{
-    gs.scolor = getColor(gs.scolorSpace, _index, numops); //swallowedToken = true;
-}
+void SCN()  { SC(); } // TODO: deal with weird colorspaces
 
 /**
  * Move to next line
  */
-void T_x()
-{
-     _textObj.positionText(0, -gs.tleading); //swallowedToken = true;
-}
+void T_x()  { _textObj.positionText(0, -gs.tleading); }
 
 /**
  * Set character spacing
  */
-void Tc()
-{
-    gs.tcs = getFloat(_index-1); //swallowedToken = true;
-}
+void Tc()  { gs.tcs = getFloat(_index-1); }
 
 /**
  * Move relative to current line start
@@ -714,7 +692,7 @@ void Td()
 {
     float x = getFloat(_index-2);
     float y = getFloat(_index-1);
-    _textObj.positionText(x,y);// swallowedToken = true;
+    _textObj.positionText(x,y);
 }
 
 /**
@@ -725,7 +703,7 @@ void TD()
     float x = getFloat(_index-2);
     float y = getFloat(_index-1);
     _textObj.positionText(x,y);
-    gs.tleading = -y; //swallowedToken = true;
+    gs.tleading = -y;
 }
 
 /**
@@ -735,7 +713,7 @@ void Tf()
 {
     String fontalias = getToken(_index-2).getName(); // name in dict is key, so lose leading /
     gs.font = getPage().getFontDictForAlias(fontalias);
-    gs.fontSize = getFloat(_index-1); //swallowedToken = true;
+    gs.fontSize = getFloat(_index-1);
 }
 
 /**
@@ -745,7 +723,7 @@ void Tj()
 {
     PageToken tok = getToken(_index-1);
     int tloc = tok.getStart(), tlen = tok.getLength();
-    _textObj.showText(_pageBytes, tloc, tlen, gs, _pfile, _pntr); //swallowedToken = true;
+    _textObj.showText(_pageBytes, tloc, tlen, gs, _pfile, _pntr);
 }
 
 /**
@@ -754,16 +732,13 @@ void Tj()
 void TJ()
 {
     List tArray = (List)(getToken(_index-1).value);
-    _textObj.showText(_pageBytes, tArray, gs, _pfile, _pntr); //swallowedToken = true;
+    _textObj.showText(_pageBytes, tArray, gs, _pfile, _pntr);
 }
 
 /**
  * Set text leading
  */
-void TL()
-{
-    gs.tleading = getFloat(_index-1); //swallowedToken = true;
-}
+void TL()  { gs.tleading = getFloat(_index-1); }
 
 /**
  * Set text matrix
@@ -773,40 +748,27 @@ void Tm()
     float a = getFloat(_index-6), b = getFloat(_index-5), c = getFloat(_index-4), d = getFloat(_index-3);
     float tx = getFloat(_index-2), ty = getFloat(_index-1);
     _textObj.setTextMatrix(a, b, c, d, tx, ty);
-    //swallowedToken = true;
 }
 
 /**
  * Set text rendering mode
  */
-void Tr()
-{
-    gs.trendermode = getInt(_index-1); //swallowedToken = true;
-}
+void Tr()  { gs.trendermode = getInt(_index-1); }
 
 /**
  * Set text rise
  */
-void Ts()
-{
-    gs.trise = getFloat(_index-1); //swallowedToken = true;
-}
+void Ts()  { gs.trise = getFloat(_index-1); }
 
 /**
  * Set text word spacing
  */
-void Tw()
-{
-    gs.tws = getFloat(_index-1); //swallowedToken = true;
-}
+void Tw()  { gs.tws = getFloat(_index-1); }
 
 /**
  * Set text horizontal scale factor
  */
-void Tz()
-{
-    gs.thscale = getFloat(_index-1)/100f; //swallowedToken = true;
-}
+void Tz()  { gs.thscale = getFloat(_index-1)/100f; }
 
 /**
  * Curveto (first control point is current point)
@@ -816,7 +778,7 @@ void v()
     double cp1x = gs.cp.x, cp1y = gs.cp.y;
     Point cp2 = getPoint(_index-2);
     getPoint(_index, gs.cp);
-    path.curveTo(cp1x, cp1y, cp2.x, cp2.y, gs.cp.x, gs.cp.y); //swallowedToken = true;
+    path.curveTo(cp1x, cp1y, cp2.x, cp2.y, gs.cp.x, gs.cp.y);
 }
 
 /**
@@ -825,7 +787,7 @@ void v()
 void w()
 {
     gs.lineWidth = getFloat(_index-1);
-    gs.lineStroke = gs.createStroke(); //swallowedToken = true;
+    gs.lineStroke = gs.createStroke();
 }
 
 /**
@@ -845,7 +807,7 @@ void W()
     if(path != null) {
         path.setWindingRule(GeneralPath.WIND_NON_ZERO);
         future_clip = (GeneralPath)path.clone();
-     }  //swallowedToken = true;
+     }
 }
 
 /**
@@ -856,7 +818,7 @@ void W_x()
     if(path != null) {
         path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
         future_clip = (GeneralPath)path.clone();
-     } //swallowedToken = true;
+     }
 }
 
 /**
@@ -866,33 +828,15 @@ void y()
 {
     Point cp1 = getPoint(_index-2);
     getPoint(_index, gs.cp);
-    path.curveTo(cp1.x, cp1.y, gs.cp.x, gs.cp.y, gs.cp.x, gs.cp.y); //swallowedToken = true;
+    path.curveTo(cp1.x, cp1.y, gs.cp.x, gs.cp.y, gs.cp.x, gs.cp.y);
 }
 
-/**
- * quote
- */
-void quote()
-{
-    //if(tlen==1 && parseTextOperator(c, i, numops, gs, pageBytes)) swallowedToken = true;
-}
-
-/**
- * 
- */
-void double_quote_close()
-{
-    gs.tws = getFloat(_index-3); gs.tcs = getFloat(_index-2); numops = 1;
-    _textObj.positionText(0, -gs.tleading);
-}
-
-/**
- * 
- */
-void single_quote_close()
-{
-    _textObj.positionText(0, -gs.tleading); // Fall through
-}
+/** quote */
+//void quote()  { } //if(tlen==1 && parseTextOperator(c, i, numops, gs, pageBytes)) swallowedToken = true;
+//void single_quote_close()  { _textObj.positionText(0, -gs.tleading); } // Fall through
+//void double_quote_close() {
+//    gs.tws = getFloat(_index-3); gs.tcs = getFloat(_index-2); numops = 1;
+//    _textObj.positionText(0, -gs.tleading); }
 
 /**
  * Called after drawing op.
@@ -927,24 +871,24 @@ private float[] getFloatArray(int i)
 /** Returns a new point at the given index */
 private Point getPoint(int i)
 {
-    double x = getToken(i-2).floatValue();
-    double y = getToken(i-1).floatValue();
+    double x = getFloat(i-2);
+    double y = getFloat(i-1);
     return new Point(x,y);
 }
 
 /** Gets the token at the given index as a point. */
 private void getPoint(int i, Point2D.Float pt)
 {
-    pt.x = getToken(i-2).floatValue();
-    pt.y = getToken(i-1).floatValue();
+    pt.x = getFloat(i-2);
+    pt.y = getFloat(i-1);
 }
 
 /** Returns the token at the given index as a transform. */
 private AffineTransform getTransform(int i)
 {
-    float a = getToken(i-6).floatValue(), b = getToken(i-5).floatValue();
-    float c = getToken(i-4).floatValue(), d = getToken(i-3).floatValue();
-    float tx = getToken(i-2).floatValue(), ty = getToken(i-1).floatValue();
+    float a = getFloat(i-6), b = getFloat(i-5);
+    float c = getFloat(i-4), d = getFloat(i-3);
+    float tx = getFloat(i-2), ty = getFloat(i-1);
     return new AffineTransform(a, b, c, d, tx, ty);
 }
 

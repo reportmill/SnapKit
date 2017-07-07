@@ -115,7 +115,6 @@ void b()
 {
     //if(tlen==1) path.setWindingRule(GeneralPath.WIND_NON_ZERO); // b
     //else if(tlen==2 && pageBytes[tstart+1] =='*') path.setWindingRule(GeneralPath.WIND_EVEN_ODD); // b*
-    //else break;
     _path.close();
     _pntr.fill(_path);
     _pntr.setColor(_scolor);
@@ -301,7 +300,7 @@ void Tj()
 {
     PageToken tok = getToken(_index-1);
     String str = tok.getString();
-    _text.showText(str); //pageBytes, tloc, tlen, gs, _pfile, _pntr); swallowedToken = true;
+    _text.showText(str); //pageBytes, tloc, tlen, gs, _pfile, _pntr);
 }
 
 /**

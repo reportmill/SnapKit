@@ -296,37 +296,42 @@ private static PageToken getBoolToken(byte pageBytes[], int start, int end)
 /**
  * Numbers (floats or ints) Exponential notation not allowed in pdf.
  */
-private static PageToken getNumberToken(byte pageBytes[], int aStart, int end)
+private static PageToken getNumberToken(byte pageBytes[], int aStart, int anEnd)
 {
-    int start = aStart, div = 1, sign = 1;
-    int parts[] = {0,0}, whichpart = 0;
-    boolean good = false;
+    // Get number sign
+    int index = aStart, sign = 1;
+    if(pageBytes[index]=='+') index++;
+    else if(pageBytes[index]=='-') { sign = -1; index++; }
     
-    if (pageBytes[start]=='+')
-        ++start;
-    else if(pageBytes[start]=='-') {
-        sign = -1; ++start; }
+    // Iterate over chars and get whole and decimal parts
+    int part = 0, part0 = 0, part1 = 0; long div = 1; boolean good = false;
+    while(index<anEnd) { byte c = pageBytes[index];
     
-    while(start<end) { byte c = pageBytes[start];
-        if (c=='.') {
-            if (++whichpart>1)
-                throw new PDFException("Illegal number");
-        }
-        else if(c>='0' && c<='9') {
-            parts[whichpart] = parts[whichpart]*10+(c-'0');
-            if (whichpart==1)
-                div*=10;
+        // If digit, add to whole or decimal part
+        if(c>='0' && c<='9') {
+            if(part==0) part0 = part0*10 + (c - '0');
+            else { part1 = part1*10 + (c - '0'); div *= 10; }
             good = true;
         }
+        
+        // If decimal, move to decimal part (1)
+        else if(c=='.') {
+            if(++part>1) throw new PDFException("Illegal number"); }
+        
+        // If anything else, end number, otherwise bump counter
         else break;
-        ++start;
+        index++;
     }
-    if(!good)
-        throw new PDFException("Illegal number");
     
+    // If no digits found, just return
+    if(!good) throw new PDFException("Illegal number");
+    
+    // Get value
+    Number value = part==0? sign*part0 : sign*(part0 + part1/(double)div);
+    
+    // Create token and return
     PageToken tok = new PageToken(PageToken.PDFNumberToken);
-    tok.value = whichpart==0? sign*parts[0] : sign*(parts[0]+((float)parts[1])/div);
-    tok._start = aStart; tok._len = start - 1 - aStart;
+    tok.value = value; tok._start = aStart; tok._len = index - 1 - aStart;
     return tok;
 }
 
