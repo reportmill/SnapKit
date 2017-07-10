@@ -21,6 +21,9 @@ public class SWRootView extends JComponent implements DragGestureListener {
     
     // The DragSource
     DragSource            _dragSource;
+    
+    // Last mouse location (to suppress faux MouseDrags due to HiDPI)
+    int                   _lx, _ly;
 
 /**
  * Returns the RootView.
@@ -129,11 +132,28 @@ protected void processEvent(AWTEvent anEvent)
     
     // Handle MouseEvents
     if(anEvent instanceof MouseEvent) { MouseEvent me = (MouseEvent)anEvent; int id = me.getID();
+    
+        // MousePress: Store location for potential MouseDrag suppression
+        if(id==MouseEvent.MOUSE_PRESSED) { _lx = me.getX(); _ly = me.getY(); }
+        
+        // MouseDrag: If matches last location, skip (these can show up on HiDPI Mac and can cause problems)
+        else if(id==MouseEvent.MOUSE_DRAGGED) {
+            if(me.getX()==_lx && me.getY()==_ly) { me.consume(); return; }
+            _lx = me.getX(); _ly = me.getY();
+        }
+
+        // Handle MouseClick: Just skip
         if(id==MouseEvent.MOUSE_CLICKED) return;
+        
+        // Create new event and dispatch
         ViewEvent event = SwingViewEnv.get().createEvent(_rview, me, null, null);
         _rview.dispatchEvent(event);
-        if(!isFocusOwner()) requestFocusInWindow(true); // Bogus!
-        me.consume(); // This stops scroll events from closing popup window
+        
+        // Bogus! (not sure why this is here)
+        if(!isFocusOwner()) requestFocusInWindow(true);
+        
+        // This stops scroll events from closing popup window
+        me.consume();
     }
     
     // Handle KeyEvents
