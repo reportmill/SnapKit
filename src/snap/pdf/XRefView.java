@@ -84,8 +84,7 @@ public void setPDFFile(PDFFile aFile)
     _treeView.expandAll();
     
     // Set Text
-    byte bytes[] = _pfile!=null? _pfile.getBytes() : null;
-    String str = bytes!=null? new String(bytes) : "";
+    String str = getFileString();
     _ptextView.setText(str);
 }
 
@@ -102,7 +101,7 @@ public void setPage(int anIndex)
     if(anIndex==_pindex) return;
     _pindex = anIndex;
 
-    Image img = _pfile!=null? _pfile.getPage(0).getImage() : null;
+    Image img = _pfile!=null? _pfile.getPage(_pindex).getImage() : null;
     _imageView.setImage(img);
 }
 
@@ -152,8 +151,7 @@ protected void initUI()
 protected void resetUI()
 {
     Object item = _treeView.getSelectedItem();
-    _xtextView.setText(getTextViewText(item));
-    System.out.println("PW: " + _xtextView.getPrefWidth());
+    _xtextView.setText(getEntryText(item));
 }
 
 /**
@@ -178,9 +176,9 @@ protected void respondUI(ViewEvent anEvent)
 }
 
 /**
- * Returns text view text.
+ * Returns XRef entry text.
  */
-public String getTextViewText(Object anItem)
+public String getEntryText(Object anItem)
 {
     // If no file, return empty string
     if(_pfile==null) return "";
@@ -227,6 +225,35 @@ public String getTypeString(Object anObj)
         return "Array";
     return null;
 }
+
+/**
+ * Returns the file string.
+ */
+public String getFileString()
+{
+    // If no file, return empty string
+    if(_pfile==null) return "";
+    
+    // Get string builder for file bytes
+    byte bytes[] = _pfile!=null? _pfile.getBytes() : null;
+    String str = bytes!=null? new String(bytes) : "";
+    StringBuilder sb = new StringBuilder(str);
+    
+    // Strip out binary between "stream" and "endstream" strings
+    for(int i=sb.indexOf("stream");i>0;i=sb.indexOf("stream",i)) {
+        int end = sb.indexOf("endstream", i+6); if(end<0) break;
+        boolean binary = false; for(int j=i+6;j<end;j++) if(isBinary(sb.charAt(j))) { binary = true; break; }
+        if(binary) {
+            sb.delete(i+7, end); i = i + 17; }
+        else i = end + 10;
+    }
+    
+    // Return string
+    return sb.toString();
+}
+
+/** Returns whether given char is binary. */
+static boolean isBinary(char c)  { return Character.isISOControl(c) || !Character.isDefined(c); }
 
 /**
  * Main method.
@@ -294,7 +321,9 @@ private class PDFResolver extends TreeResolver {
         if(anItem instanceof PDFXTable) return "XTable";
         if(anItem instanceof PDFXEntry) { PDFXEntry xref = (PDFXEntry)anItem;
             Object obj = _pfile.getXRefObj(xref);
-            return xref + " " + getTypeString(obj);
+            String str = getTypeString(obj);
+            String xstr = xref.toString(); if(str!=null) xstr += " " + str;
+            return xstr;
         }
         if(anItem==_pfile.getTrailer()) return "Trailer";
         return anItem.toString();
