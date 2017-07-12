@@ -4,7 +4,11 @@
 package snap.pdf;
 import java.util.*;
 import snap.gfx.Color;
+import snap.gfx.Font;
+import snap.gfx.Image;
+import snap.util.SnapUtils;
 import snap.view.*;
+import snap.viewx.TextPane;
 import snap.web.WebURL;
 
 /**
@@ -12,20 +16,23 @@ import snap.web.WebURL;
  */
 public class XRefView extends ViewOwner {
     
+    // The PDF file source
+    Object     _src;
+    
     // The PDFFile
     PDFFile    _pfile;
     
     // The page index
     int        _pindex;
     
-    // The TreeView
-    TreeView   _treeView;
-    
-    // The TextView
-    TextView   _textView;
-    
     // The ImageView
     ImageView  _imageView;
+    
+    // The XRef TreeView
+    TreeView   _treeView;
+    
+    // The XRef TextView
+    TextView   _xtextView;
     
     // The PDF TextView
     TextView   _ptextView;
@@ -33,34 +40,109 @@ public class XRefView extends ViewOwner {
 /**
  * Creates a new XRefView.
  */
-public XRefView(Object aSource)
+public XRefView(Object aSource)  { setSource(aSource); }
+
+/**
+ * Returns the source.
+ */
+public Object getSource()  { return _src; }
+
+/**
+ * Sets the source.
+ */
+public void setSource(Object aSource)
 {
-    _pfile = new PDFFile(WebURL.getURL(aSource).getBytes());
+    if(aSource==_src) return;
+    _src = aSource;
+    
+    // Get source bytes and reset file
+    byte bytes[] = SnapUtils.getBytes(_src);
+    PDFFile pfile = bytes!=null? new PDFFile(bytes) : null;
+    setPDFFile(pfile);
 }
+
+/**
+ * Returns the PDF file.
+ */
+public PDFFile getPDFFile()  { return _pfile; }
+
+/**
+ * Sets the PDF file.
+ */
+public void setPDFFile(PDFFile aFile)
+{
+    if(aFile==_pfile) return;
+    _pfile = aFile;
+    getUI();
+    
+    // Set image
+    Image img = _pfile!=null? _pfile.getPage(0).getImage() : null;
+    _imageView.setImage(img);
+    
+    // Set XRefs
+    _treeView.setItems(_pfile);
+    _treeView.expandAll();
+    
+    // Set Text
+    byte bytes[] = _pfile!=null? _pfile.getBytes() : null;
+    String str = bytes!=null? new String(bytes) : "";
+    _ptextView.setText(str);
+}
+
+/**
+ * Returns the page.
+ */
+public int getPage()  { return _pindex; }
+
+/**
+ * Sets the page.
+ */
+public void setPage(int anIndex)
+{
+    if(anIndex==_pindex) return;
+    _pindex = anIndex;
+
+    Image img = _pfile!=null? _pfile.getPage(0).getImage() : null;
+    _imageView.setImage(img);
+}
+
+/**
+ * Returns the number of pages in file.
+ */
+public int getPageCount()  { return _pfile!=null? _pfile.getPageCount() : 0; }
 
 /**
  * Returns the UI.
  */
 protected void initUI()
 {
-    _treeView = getView("TreeView", TreeView.class);
-    _treeView.setResolver(new PDFResolver());
-    _treeView.setItems(_pfile);
-    _treeView.expandAll();
-    _treeView.getCol(0).setAltPaint(new Color("#F8F8F8"));
-    _textView = getView("TextView", TextView.class);
+    // Get TabView
+    TabView tabView = getView("TabView", TabView.class);
     
-    //
-    _imageView = getView("ImageView", ImageView.class);
-    _imageView.setImage(_pfile.getPage(0).getImage());
+    // Get/configure ImageView
+    _imageView = getView("ImageView", ImageView.class); _imageView.getParent().setPrefSize(820,940);
     _imageView.setFill(Color.WHITE); _imageView.setBorder(Color.BLACK, 1);
     enableEvents(_imageView, MouseRelease);
     
-    // PDFTextView
-    _ptextView = getView("PDFTextView", TextView.class);
-    String str = new String(_pfile.getBytes());
-    _ptextView.setText(str);
+    // Get/configure TreeView
+    _treeView = getView("TreeView", TreeView.class);
+    _treeView.setResolver(new PDFResolver());
+    _treeView.getCol(0).setAltPaint(new Color("#F8F8F8"));
     
+    // Create/add XRef TextView
+    TextPane xtextPane = new TextPane();
+    View xtextPaneUI = xtextPane.getUI(); xtextPaneUI.setGrowWidth(true);
+    _xtextView = xtextPane.getTextView(); _xtextView.setFont(Font.Arial14);
+    SplitView xsplit = getView("XRefSplit", SplitView.class);
+    xsplit.addItem(xtextPaneUI);
+    
+    // Create/add PDFTextView
+    TextPane ptextPane = new TextPane();
+    View ptextPaneUI = ptextPane.getUI(); ptextPaneUI.setGrowWidth(true);
+    _ptextView = ptextPane.getTextView(); _ptextView.setFont(Font.Arial14);
+    tabView.addTab("Text", ptextPaneUI);
+    
+    // Set PFile
     enableEvents(getUI(), DragDrop);
 }
 
@@ -70,7 +152,8 @@ protected void initUI()
 protected void resetUI()
 {
     Object item = _treeView.getSelectedItem();
-    _textView.setText(getTextViewText(item));
+    _xtextView.setText(getTextViewText(item));
+    System.out.println("PW: " + _xtextView.getPrefWidth());
 }
 
 /**
@@ -78,21 +161,19 @@ protected void resetUI()
  */
 protected void respondUI(ViewEvent anEvent)
 {
+    // If no file, just bail
+    if(_pfile==null) return;
+    
     // Handle ImageView
-    if(anEvent.equals("ImageView")) {
-        _pindex = (_pindex+1)%_pfile.getPageCount();
-        _imageView.setImage(_pfile.getPage(_pindex).getImage());
-    }
+    if(anEvent.equals("ImageView"))
+        setPage((getPage()+1)%getPageCount());
     
     // Handle DragDrop
     if(anEvent.isDragDrop()) {
         anEvent.acceptDrag();
         WebURL url = WebURL.getURL(anEvent.getDragFiles().get(0));
-        _pfile = new PDFFile(url.getBytes());
-        _treeView.setItems(_pfile);
-        _imageView.setImage(_pfile.getPage(0).getImage());
-        String str = new String(_pfile.getBytes());
-        _ptextView.setText(str);
+        setSource(url);
+        anEvent.dropComplete();
     }
 }
 
@@ -101,7 +182,13 @@ protected void respondUI(ViewEvent anEvent)
  */
 public String getTextViewText(Object anItem)
 {
+    // If no file, return empty string
+    if(_pfile==null) return "";
+    
+    // Get item string
     Object item = _pfile.getXRefObj(anItem);
+    
+    // Handle Map
     if(item instanceof Map) { Map map = (Map)item;
         StringBuffer sb = new StringBuffer("<<\n");
         for(Map.Entry entry : (Set<Map.Entry>)map.entrySet())
@@ -109,12 +196,16 @@ public String getTextViewText(Object anItem)
         sb.append(">>");
         return sb.toString();
     }
+    
+    // Handle List
     if(item instanceof List) { List list = (List)item;
         StringBuffer sb = new StringBuffer("[\n");
         for(Object itm : list) sb.append("    ").append(itm).append('\n');
         sb.append("]");
         return sb.toString();
     }
+    
+    // Handle anything else
     return item!=null? item.toString() : "(null)";
 }
 
@@ -142,9 +233,14 @@ public String getTypeString(Object anObj)
  */
 public static void main(String args[])
 {
+    // Get default doc source
     Object src = args.length>0? args[0] : "/tmp/test.pdf";
-    WebURL url = WebURL.getURL(src);
-    XRefView xrv = new XRefView(url); xrv.getWindow().setTitle(url.getPathName() + " - " + url.getPathNameSimple());
+    WebURL url = WebURL.getURL(src); if(url.getFile()==null) url = null;
+    
+    // Create Viewer
+    XRefView xrv = new XRefView(url);
+    xrv.getUI().setPrefSize(1000,1000);
+    xrv.getWindow().setTitle(url.getPathName() + " - " + url.getPathNameSimple());
     xrv.setWindowVisible(true);
 }
 

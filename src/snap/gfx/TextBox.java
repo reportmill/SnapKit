@@ -152,9 +152,13 @@ public void setBounds(Rect aRect)  { setBounds(aRect.getX(), aRect.getY(), aRect
  */
 public void setBounds(double aX, double aY, double aW, double aH)
 {
+    // If bounds already set, just return (ignore width if not WrapText)
     if(_x==aX && _y==aY && _width==aW && _height==aH) return;
+    if(_x==aX && _y==aY && _height==aH && !isWrapText()) { _width = aW; return; }
+    
+    // Set bounds and update all
     _x = aX; _y = aY; _width = aW; _height = aH;
-    setNeedsUpdateAll(); //invalidate();
+    setNeedsUpdateAll();
 }
 
 /**
