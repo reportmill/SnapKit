@@ -286,10 +286,26 @@ private class ByteCharSequence implements CharSequence {
 protected ParseRule createRule()
 {
     if(_sharedRule!=null) return _sharedRule;
-    ParseRule rule = ParseUtils.loadRule(getClass(), null);
-    ParseUtils.installHandlers(getClass(), rule);
-    return _sharedRule = rule; //.getRule("JavaFile");
+    return _sharedRule = super.createRule();
 } static ParseRule _sharedRule;
+
+/**
+ * Install handlers.
+ */
+protected void initRule()
+{
+    getRule("Dictionary").setHandler(new DictionaryHandler());
+    getRule("Array").setHandler(new ArrayHandler());
+    getRule("Object").setHandler(new ObjectHandler());
+    getRule("ObjectRef").setHandler(new ObjectRefHandler());
+    getRule("ObjectDef").setHandler(new ObjectDefHandler());
+    getRule("Leaf").setHandler(new LeafHandler());
+    getRule("Integer").setHandler(new IntegerHandler());
+    getRule("Real").setHandler(new RealHandler());
+    getRule("Name").setHandler(new NameHandler());
+    getRule("String").setHandler(new StringHandler());
+    getRule("HexString").setHandler(new HexStringHandler());
+}
 
 /**
  * Override to provide tokenizer that skips whitespace and comments.
