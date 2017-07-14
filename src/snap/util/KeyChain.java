@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -540,5 +541,17 @@ public String toString()
 
 /** Adds a class to the list of classes that RM queries for functions. */
 //public static void addFunctionClass(Class aClass) { RMKeyChainFuncs.addFunctionClass(aClass); }
+
+/**
+ * Simple main implementation, so RM's expressions can be used for simple math.
+ */
+public static void main(String args[]) throws IOException
+{
+    // If there is an arg, evaluate it, otherwise if no args, read from standard in until control-d
+    if(args.length>0 && args[0].length()>0) { Object value = KeyChain.getValue(new Object(), args[0]);
+        System.out.println(value instanceof Number? SnapUtils.getBigDecimal(value) : value); }
+    else { BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
+        for(String ln=rdr.readLine(); ln!=null; ln=rdr.readLine()) main(new String[] { ln }); }
+}
 
 }
