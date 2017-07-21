@@ -54,7 +54,7 @@ public class TextBox implements PropChangeListener {
     boolean              _needsUpdate, _updating;
     
     // The update start/end char indexes in RichText
-    int                  _updStart, _updEndOld, _updEndNew;
+    int                  _updStart, _updEnd, _lastLen;
     
 /**
  * Creates a new TextBox.
@@ -406,60 +406,39 @@ public void propertyChange(PropChange aPCE)
 /**
  * Called when chars added to RichText to track range in box and text to be synchronized.
  */
-protected void textAddedChars(int addStart, int addEnd)
-{
-    if(!_needsUpdate) {
-        _updStart = addStart; _updEndOld = addStart; _updEndNew = addEnd;
-        _needsUpdate = true; _prefWidth = _prefHeight = -1;
-    }
-    else {
-        _updStart = Math.min(addStart, _updStart);
-        if(addStart>_updEndNew) { _updEndOld += addStart - _updEndNew; _updEndNew = addEnd; }
-        else _updEndNew += addEnd - addStart;
-    }
-}
+protected void textAddedChars(int aStart, int aEnd)  { setUpdateBounds(aStart, length() - aEnd); }
 
 /**
  * Called when chars removed from RichText to track range in box and text to be synchronized.
  */
-protected void textRemovedChars(int remStart, int remEnd)
-{
-    if(!_needsUpdate) {
-        _updStart = remStart; _updEndOld = remEnd; _updEndNew = remStart;
-        _needsUpdate = true; _prefWidth = _prefHeight = -1;
-    }
-    else {
-        _updStart = Math.min(remStart, _updStart);
-        if(remEnd>_updEndNew) { _updEndOld += remEnd - _updEndNew; _updEndNew = remStart; }
-        else _updEndNew -= remEnd - remStart;
-    }
-}
+protected void textRemovedChars(int aStart, int aEnd)  { setUpdateBounds(aStart, length() - aStart); }
 
 /**
  * Called when chars changed in RichText to track range in box and text to be synchronized.
  */
-protected void textChangedChars(int chgStart, int chgEnd)
-{
-    if(!_needsUpdate) {
-        _updStart = chgStart; _updEndOld = _updEndNew = chgEnd;
-        _needsUpdate = true; _prefWidth = _prefHeight = -1;
-    }
-    else {
-        _updStart = Math.min(chgStart, _updStart);
-        if(chgEnd>_updEndNew) { _updEndOld += chgEnd - _updEndNew; _updEndNew = chgEnd; }
-    }
-}
+protected void textChangedChars(int aStart, int aEnd)  { setUpdateBounds(aStart, length() - aEnd); }
 
 /**
  * Updates all lines.
  */
-protected void setNeedsUpdateAll()
+protected void setNeedsUpdateAll()  { setUpdateBounds(0,0); }
+
+/**
+ * Sets the update bounds (in characters from start and from end).
+ */
+protected void setUpdateBounds(int aStart, int aEnd)
 {
-    int lcount = _lines.size();
-    _updStart = Math.min(lcount>0? _lines.get(0).getStart() : 0, getStart());
-    _updEndOld = lcount>0? _lines.get(lcount-1).getEnd() : 0;
-    _updEndNew = _text.length();
-    _needsUpdate = true; _prefWidth = _prefHeight = -1;
+    // If first call, set values
+    if(!_needsUpdate) {
+        _updStart = aStart; _updEnd = aEnd;
+        _needsUpdate = true; _prefWidth = _prefHeight = -1;
+    }
+    
+    // Successive calls update values
+    else {
+        _updStart = Math.min(_updStart, aStart);
+        _updEnd = Math.min(_updEnd, aEnd);
+    }
 }
 
 /**
@@ -467,15 +446,30 @@ protected void setNeedsUpdateAll()
  */
 protected void update()
 {
+    // Set updating
     _updating = true;
-    updateLines(_updStart, _updEndOld, _updEndNew);
+    
+    // Get count, start and end of currently configured lines
+    int lcount = _lines.size();
+    int lstart = lcount>0? _lines.get(0).getStart() : getStart();
+    int lend = lcount>0? _lines.get(lcount-1).getEnd() : getStart();
+    
+    // Get update start, linesEnd and textEnd to synchronize lines to text
+    int start = Math.max(_updStart, lstart);
+    int linesEnd = Math.min(_lastLen - _updEnd, lend);
+    int textEnd = length() - _updEnd;
+    if(start<=linesEnd || _lastLen==0)
+        updateLines(start, linesEnd, textEnd);
+        
+    // Reset Updating, NeedsUpdate and LastLen
     _updating = false; _needsUpdate = false;
+    _lastLen = length();
 }
 
 /**
  * Updates lines for given char start and an old/new char end.
  */
-protected void updateLines(int aStart, int endOld, int endNew)
+protected void updateLines(int aStart, int linesEnd, int textEnd)
 {
     // Modify params for text box start
     int tbstart = getStart(), lcount = getLineCount();
@@ -483,13 +477,13 @@ protected void updateLines(int aStart, int endOld, int endNew)
     
     // Remove lines for old range RichTextLines
     int sline = lcount>0? getLineAt(aStart).getIndex() : 0;
-    int eline = lcount>0? getLineAt(endOld).getIndex() : -1;
+    int eline = lcount>0? getLineAt(linesEnd).getIndex() : -1;
     while(eline+1<lcount && getLine(eline+1).getRichTextLine()==getLine(eline).getRichTextLine()) eline++;
     for(int i=eline;i>=sline;i--) aStart = Math.min(_lines.remove(i).getStart(), aStart);
     
     // Add lines for updated RichTextLines
-    int start = Math.max(aStart, tbstart);
-    int startRTL = getText().getLineAt(start).getIndex(), endRTL = getText().getLineAt(endNew).getIndex();
+    int start = Math.max(aStart, tbstart); if(start>length()) return;
+    int startRTL = getText().getLineAt(start).getIndex(), endRTL = getText().getLineAt(textEnd).getIndex();
     for(int i=startRTL, lindex=sline;i<=endRTL;i++) { RichTextLine rtl = getText().getLine(i);
         int lstart = Math.max(start-rtl.getStart(),0); if(lstart==rtl.length()) continue;
         List <TextBoxLine> lines = createLines(rtl, lindex, lstart);
@@ -518,7 +512,7 @@ protected void updateLines(int aStart, int endOld, int endNew)
         int blen = getEnd(), tlen = _text.length(), lcnt = getLineCount();
         int bstr = lcnt>0? getLine(0).getStart() : getStart(), bend = lcnt>0? getLine(lcnt-1).getEnd() : getStart();
         String str = "BoxLen: " + blen + ", TextLen: " + tlen + ", Bstrt: " + bstr + ", Bend: " + bend;
-        throw new RuntimeException("TextBox: Invalid State: " + str);
+        System.err.println("TextBox: Invalid State: " + str); //throw new RuntimeException("TextBox: Invalid State: " + str);
     }
         
     // Calculated aligned Y
