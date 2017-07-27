@@ -34,6 +34,9 @@ public class EventDispatcher {
      
     // A popup window, if one was added to root view during last event
     PopupWindow            _popup;
+    
+    // A buffer to hold debug keys (after "snp" sequence is typed)
+    StringBuilder          _debugKeys = new StringBuilder();
 
 /**
  * Creates a new EventDispatcher for given RootView.
@@ -180,6 +183,10 @@ public void dispatchKeyEvent(ViewEvent anEvent)
         View next = anEvent.isShiftDown()? focusedView.getFocusPrev() : focusedView.getFocusNext();
         if(next!=null) { _rview.requestFocus(next); return; }
     }
+    
+    // Track keys whenever "snp" + anything typed in to enable certain debug options
+    if(anEvent.isKeyType() && (anEvent.getKeyChar()=='d' || _debugKeys.length()>0))
+        trackDebugKeys(anEvent);
 
     // Get target for event and array of parent
     View targ = focusedView;
@@ -283,6 +290,29 @@ private View[] getParents(View aView)
     int pc = getParentCount(aView); View pars[] = new View[pc]; if(pc==0) return pars;
     for(View n=aView;n!=_rview;n=n.getParent()) pars[--pc] = n; pars[0] = _rview;
     return pars;
+}
+
+// A method to 
+void trackDebugKeys(ViewEvent anEvent)
+{
+    // Add char and clear if too long
+    _debugKeys.append(anEvent.getKeyChar());
+    if(_debugKeys.length()>5) _debugKeys.setLength(0);
+    
+    // If last sequence was "ddd1" toggle draw debug
+    String str = _debugKeys.toString();
+    if(str.equals("ddd1")) { boolean val = !RootView._debug;
+        RootView._debug = val; beep(val); _debugKeys.setLength(0); }
+        
+    // If last sequence was "ddd2" toggle draw debug
+    if(str.equals("ddd2")) { boolean val = RootView._frames==null;
+        RootView._frames = val? new long[20] : null; beep(val); _debugKeys.setLength(0); }
+}
+
+// A beep method to beep once for true or twice for false.
+void beep(boolean aFlag)
+{
+    ViewUtils.beep(); if(!aFlag) { try { Thread.sleep(300); } catch(Exception e) { } ViewUtils.beep(); }
 }
 
 }

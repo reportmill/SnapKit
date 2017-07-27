@@ -52,7 +52,7 @@ public class RootView extends ParentView {
     boolean                  _painting;
 
     // Whether painting in debug mode
-    boolean                  _debug = false; int _pc; long _frames[] = null;//new long[20];
+    static boolean           _debug = false; static int _pc; static long _frames[] = null;//new long[20];
     
     // Constants for properties
     public static final String MenuBar_Prop = "MenuBar";
@@ -422,14 +422,16 @@ private void startTime()  { _time = System.currentTimeMillis(); } long _time;
 /** Timing method: Returns animation stop time. */
 private void stopTime()
 {
-    System.arraycopy(_frames,1,_frames,0,_frames.length-1);
-    _frames[_frames.length-1] = System.currentTimeMillis() - _time;
+    //System.arraycopy(_frames,1,_frames,0,_frames.length-1);
+    //_frames[_frames.length-1] = System.currentTimeMillis() - _time;
+    long time = System.currentTimeMillis(), dt = time - _time; _time = time;
+    _frames[_pc%_frames.length] = dt;
 }
 
 /** Prints the time. */
 private void printTime()
 {
-    int time = 0; for(int i=0;i<_frames.length;i++) time += _frames[i]; double avg = time/(double)_frames.length;
+    long time = 0; for(int i=0;i<_frames.length;i++) time += _frames[i]; double avg = time/(double)_frames.length;
     System.out.println("FrameRate: " + (int)(1000/avg));
 }
 
