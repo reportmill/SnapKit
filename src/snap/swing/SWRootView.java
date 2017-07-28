@@ -16,9 +16,6 @@ public class SWRootView extends JComponent implements DragGestureListener {
     // The RootView
     RootView              _rview;
     
-    // The last request paint rect
-    Rect                  _paintRect;
-    
     // The DragSource
     DragSource            _dragSource;
     
@@ -96,7 +93,6 @@ protected void showingChanged()
  */
 public void repaint(Rect aRect)
 {
-    _paintRect = aRect;
     int x = (int)aRect.x, y = (int)aRect.y, w = (int)aRect.width, h = (int)aRect.height;
     paintImmediately(x, y, w, h); //super.repaint(0,x,y,w,h);
 }
@@ -111,10 +107,9 @@ public void repaint(long aTM, int aX, int aY, int aW, int aH)  { }
  */
 protected void paintComponent(Graphics aGr)
 {
-    Painter pntr = new J2DPainter(aGr); pntr.clipRect(0,0,getWidth(),getHeight());
-    if(_paintRect==null) _paintRect = new Rect(0,0,getWidth(),getHeight());
-    _rview.paintViews(pntr, _paintRect);
-    _paintRect = null;
+    Painter pntr = new J2DPainter(aGr);
+    java.awt.Rectangle crect = aGr.getClipBounds();
+    _rview.paintViews(pntr, new Rect(crect.x, crect.y, crect.width, crect.height));
 }
 
 /**
