@@ -47,8 +47,8 @@ public void main()
     // Install Exception reporter
     Thread.setDefaultUncaughtExceptionHandler(this);
 
-    // Install Snap preferences class
-    Prefs.setPrefsClass(SnapApp.class);
+    // Install default snap preferences
+    Prefs.setPrefsDefault(Prefs.getPrefs(SnapApp.class));
     
     // Set URL file in background
     getUI();

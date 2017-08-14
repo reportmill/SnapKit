@@ -229,9 +229,9 @@ public double getScreenResolution()
 public void beep()  { Toolkit.getDefaultToolkit().beep(); }
 
 /**
- * Returns the platform preferences object.
+ * Override to return AWTPrefs for name.
  */
-public Prefs getPrefs()  { return AWTPrefs.get(); }
+public Prefs getPrefs(String aName)  { return AWTPrefs.getPrefs(aName); }
 
 /**
  * Sets this JVM to be headless.

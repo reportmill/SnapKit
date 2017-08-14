@@ -117,7 +117,7 @@ public abstract void beep();
 /**
  * Returns the platform preferences object.
  */
-public Prefs getPrefs()  { return Prefs.getFake(); }
+public Prefs getPrefs(String aName)  { return Prefs.getFake(); }
 
 /**
  * Sets this JVM to be headless.

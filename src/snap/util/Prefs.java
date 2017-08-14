@@ -6,8 +6,8 @@ import snap.gfx.GFXEnv;
  */
 public abstract class Prefs {
 
-    // The class used to store preferences
-    static Class  _prefsClass = Prefs.class;
+    // The default preferences
+    static Prefs  _default;
     
 /**
  * Returns a value for given string.
@@ -65,19 +65,40 @@ public void flush()  { }
 public void clear()  { }
 
 /**
- * Returns the class that preferences are associated with.
+ * Returns the default prefs.
  */
-public static Class getPrefsClass()  { return _prefsClass; }
-
-/**
- * Sets the class that preferences are associated with.
- */
-public static void setPrefsClass(Class aClass)  { _prefsClass = aClass; }
+public static Prefs get()  { return getPrefsDefault(); }
 
 /**
  * Returns the default prefs.
  */
-public static Prefs get()  { return GFXEnv.getEnv().getPrefs(); }
+public static Prefs getPrefsDefault()
+{
+    if(_default!=null) return _default;
+    return _default = getPrefs("DefaultPrefs");
+}
+
+/**
+ * Sets the default preferences instance.
+ */
+public static void setPrefsDefault(Prefs thePrefs)  { _default = thePrefs; }
+
+/**
+ * Returns the preferences for given node name.
+ */
+public static Prefs getPrefs(String aName)  { return GFXEnv.getEnv().getPrefs(aName); }
+
+/**
+ * Returns the preferences for given class (package really).
+ */
+public static Prefs getPrefs(Class aClass)
+{
+    String cname = aClass.getName();
+    int pkgEndInd = cname.lastIndexOf('.');
+    String pname = pkgEndInd>0? cname.substring(0, pkgEndInd) : "<unnamed>";
+    String ppath = "/" + pname.replace('.', '/');
+    return getPrefs(ppath);
+}
 
 /**
  * Returns a prefs instance that doesn't do anything.

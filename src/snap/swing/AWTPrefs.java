@@ -5,7 +5,7 @@ import java.util.prefs.*;
 import snap.util.*;
 
 /**
- * A custom class.
+ * AWT implementation of Snap Prefs.
  */
 public class AWTPrefs extends Prefs {
     
@@ -13,19 +13,28 @@ public class AWTPrefs extends Prefs {
     Preferences      _prefs;
 
     // The shared AWT Prefs
-    static AWTPrefs  _shared = new AWTPrefs(null);
+    static Map<String,AWTPrefs>  _shared = new HashMap();
 
     // A special preferences instance to use if we don't have preferences permissions
-    private static Preferences _bogus = null;
+    private static Preferences   _bogus = null;
 
 /**
- * Creates new AWT Prefs.
+ * Creates new AWTPrefs.
  */
 public AWTPrefs(String aName)
 {
-    _prefs = getNative();
+    // Get root prefs
+    try { _prefs = Preferences.userRoot(); }
+    catch(AccessControlException ex) { _prefs = getBogus(); }
+
+    // Get named prefs
     if(aName!=null) _prefs = _prefs.node(aName);
 }
+
+/**
+ * Creates new AWTPrefs.
+ */
+public AWTPrefs(Preferences aPrefs)  { _prefs = aPrefs; }
 
 /**
  * Returns a value for given string.
@@ -94,7 +103,7 @@ public String[] getKeys()
 /**
  * Returns a child prefs for given name.
  */
-public AWTPrefs getChild(String aName)  { return new AWTPrefs(aName); }
+public AWTPrefs getChild(String aName)  { return new AWTPrefs(_prefs.node(aName)); }
 
 /**
  * Updates this persistant store associated with these preferences.
@@ -115,18 +124,14 @@ public void clear()
 }
 
 /**
- * Returns the user Preferences object (or bogus prefs, if security exception).
- */
-public static Preferences getNative()
-{
-    try { return Preferences.userNodeForPackage(getPrefsClass()); }
-    catch(AccessControlException ex) { return getBogus(); }
-}
-
-/**
  * Returns the shared AWTPrefs.
  */
-public static AWTPrefs get()  { return _shared; }
+public static AWTPrefs getPrefs(String aName)
+{
+    AWTPrefs prefs = _shared.get(aName);
+    if(prefs==null) _shared.put(aName, prefs = new AWTPrefs(aName));
+    return prefs;
+}
 
 /**
  * Returns a shared bogus preferences instance.
@@ -150,7 +155,7 @@ private static class BogusPrefs extends AbstractPreferences {
     protected void putSpi(String key, String value) { _store.put(key,value); }
     protected String[] keysSpi() throws BackingStoreException { return (String[])_store.keySet().toArray(); }
     protected String getSpi(String key) { return (String)_store.get(key); }
-    protected AbstractPreferences childSpi(String name) { return null; }
+    protected AbstractPreferences childSpi(String name) { return this; }
     protected String[] childrenNamesSpi() throws BackingStoreException { return null; }
 }
 
