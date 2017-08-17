@@ -16,6 +16,9 @@ public class SwingViewEnv extends ViewEnv {
     
     // A map of timer tasks
     Map <Runnable,TimerTask>  _timerTasks = new HashMap();
+    
+    // A map of runnables waiting to run
+    static Set <Runnable>     _waitingRunnables = Collections.synchronizedSet(new HashSet());
 
     // A shared instance.
     static SwingViewEnv       _shared = new SwingViewEnv();
@@ -56,7 +59,16 @@ public void runDelayed(Runnable aRun, int aDelay, boolean inAppThread)
  */
 public void runIntervals(Runnable aRun, int aPeriod, int aDelay, boolean doAll, boolean inAppThread)
 {
-    TimerTask task = new TimerTask() { public void run()  { if(inAppThread) runLaterAndWait(aRun); else aRun.run(); }};
+    // Create task
+    TimerTask task = new TimerTask() { public void run()  {
+        if(inAppThread) {
+            if(doAll) runLater(aRun);
+            else runLaterAndWait(aRun);
+        }
+        else aRun.run();
+    }};
+    
+    // Add task and schedule
     _timerTasks.put(aRun, task);
     if(doAll) _timer.scheduleAtFixedRate(task, aDelay, aPeriod);
     else _timer.schedule(task, aDelay, aPeriod);
@@ -71,12 +83,16 @@ public void stopIntervals(Runnable aRun)
     if(task!=null) task.cancel();
 }
 
-/** Runs an runnable later and waits for it to finish. */
-private synchronized void runLaterAndWait(Runnable aRun)
+/** Runs an runnable later (if it isn't already waiting for run). */
+private void runLaterAndWait(Runnable aRun)
 {
-    runLater(() -> { synchronized(SwingViewEnv.this) { aRun.run(); SwingViewEnv.this.notify(); }});
-    try { wait(); }
-    catch(Exception e) { throw new RuntimeException(e); }
+    // If runnable already queued, just return
+    if(_waitingRunnables.contains(aRun))
+        return;
+
+    // Queue runnable    
+    _waitingRunnables.add(aRun);
+    runLater(() -> { aRun.run(); _waitingRunnables.remove(aRun); });
 }
 
 /**

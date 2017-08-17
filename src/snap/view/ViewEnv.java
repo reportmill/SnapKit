@@ -12,7 +12,7 @@ import snap.web.WebURL;
 public abstract class ViewEnv {
 
     // Map of RunOne runnables
-    Map <String,Runnable>   _runOnceMap = new HashMap();
+    Set <String>            _runOnceNames = Collections.synchronizedSet(new HashSet());
     
     // Weak map of properties
     Map<Object,Map>         _props = createPropsMap();
@@ -61,28 +61,13 @@ public abstract void runLater(Runnable aRun);
  */
 public void runLaterOnce(String aName, Runnable aRun)
 {
-    synchronized (_runOnceMap) {
-        RunLaterRunnable runnable = (RunLaterRunnable)_runOnceMap.get(aName);
-        if(runnable==null) {
-            _runOnceMap.put(aName, runnable = new RunLaterRunnable(aName, aRun));
-            runLater(runnable);
-        }
-        else runnable._run = aRun;
-    }
-}
+    // If runnable already queued, just return
+    if(_runOnceNames.contains(aName))
+        return;
 
-/**
- * A wrapper Runnable for RunLaterOnce. 
- */
-private class RunLaterRunnable implements Runnable {
-    String _name; Runnable _run;
-    RunLaterRunnable(String aName, Runnable aRun)  { _name = aName; _run = aRun; }
-    public void run()
-    {
-        Runnable run;
-        synchronized (_runOnceMap) { _runOnceMap.remove(_name); run = _run; }
-        if(run!=null) run.run();
-    }
+    // Queue name and runnable    
+    _runOnceNames.add(aName);
+    runLater(() -> { aRun.run(); _runOnceNames.remove(aName); });
 }
 
 /**
