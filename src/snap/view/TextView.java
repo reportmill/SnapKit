@@ -50,10 +50,17 @@ public class TextView extends ParentView implements PropChangeListener {
     // Whether to send action on return
     boolean               _fireActionOnReturn;
 
+    // Whether to send action on focus lost (if content changed)
+    boolean               _fireActionOnFocusLost;
+    
+    // The content on focus gained
+    String                _focusGainedText;
+    
     // Constants for properties
     public static final String Editable_Prop = "Editable";
     public static final String WrapText_Prop = "WrapText";
     public static final String FireActionOnReturn_Prop = "FireActionOnReturn";
+    public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
     public static final String Selection_Prop = "Selection";
 
 /**
@@ -94,9 +101,14 @@ public void setText(String aString)
     String str = aString!=null? aString : "";
     if(str.length()==length() && (str.length()==0 || str.equals(getText()))) return;
     
-    // Set string and notify
+    // Set string and notify textDidChange
     getTextBox().setString(aString);
     textDidChange();
+    
+    // Reset selection (to line end if single-line, otherwise text start)
+    int sindex = getTextBox().getLineCount()==1 && length()<40? length() : 0;
+    setSel(sindex);
+    setCaretAnim();
 }
 
 /**
@@ -104,9 +116,14 @@ public void setText(String aString)
  */
 public void setSource(Object aSource)
 {
+    // Set source and notify textDidChange
     getTextBox().setSource(aSource);
     textDidChange();
-    setSel(0);
+    
+    // Reset selection (to line end if single-line, otherwise text start)
+    int sindex = getTextBox().getLineCount()==1 && length()<40? length() : 0;
+    setSel(sindex);
+    setCaretAnim();
 }
 
 /**
@@ -239,6 +256,20 @@ public void setFireActionOnReturn(boolean aValue)
 }
 
 /**
+ * Returns whether text view fires action on focus lost (if text changed).
+ */
+public boolean isFireActionOnFocusLost()  { return _fireActionOnFocusLost; }
+
+/**
+ * Sets whether text area sends action on focus lost (if text changed).
+ */
+public void setFireActionOnFocusLost(boolean aValue)
+{
+    if(aValue==_fireActionOnFocusLost) return;
+    firePropChange(FireActionOnFocusLost_Prop, _fireActionOnFocusLost, _fireActionOnFocusLost = aValue);
+}
+
+/**
  * Returns the text selection.
  */
 public TextSel getSel()  { return _sel; }
@@ -292,7 +323,7 @@ public void setSel(int aStart, int aEnd, int aAnchor)
     if(aEnd<aStart) { int temp = aEnd; aEnd = aStart; aStart = temp; }
     
     // Just return if already set
-    if(aStart==getSelStart() && aEnd==getSelEnd()) return;
+    if(aStart==getSelStart() && aEnd==getSelEnd() && aAnchor==getSelAnchor()) return;
     
     // Get old selection shape
     if(isShowing()) repaintSel();
@@ -1133,6 +1164,20 @@ protected void setFocused(boolean aValue)
     // Toggle caret animation and repaint
     if(!aValue || _downX==0) setCaretAnim();
     repaint();
+
+    // Handle FireActionOnFocusLost
+    if(_fireActionOnFocusLost) {
+        
+        // If focus gained, set FocusedGainedValue and select all (if not from mouse press)
+        if(aValue) {
+            _focusGainedText = getText();
+            if(!ViewUtils.isMouseDown()) selectAll();
+        }
+        
+        // If focus lost and FocusGainedVal changed, fire action
+        else if(!SnapUtils.equals(_focusGainedText, getText()))
+            fireActionEvent();
+    }
 }
 
 /**
@@ -1172,8 +1217,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Otherwise, archive text string
     else if(getText()!=null && getText().length()>0) e.add("text", getText());
     
-    // Archive FireActionOnReturn
+    // Archive FireActionOnReturn, FireActionOnFocusLost
     if(isFireActionOnReturn()) e.add(FireActionOnReturn_Prop, true);
+    if(isFireActionOnFocusLost()) e.add(FireActionOnFocusLost_Prop, true);
     return e;
 }
 
@@ -1222,9 +1268,11 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
             setText(str);
     }
     
-    // Unarchive FireActionOnReturn
+    // Unarchive FireActionOnReturn, FireActionOnFocusLost
     if(anElement.hasAttribute(FireActionOnReturn_Prop))
         setFireActionOnReturn(anElement.getAttributeBoolValue(FireActionOnReturn_Prop, true));
+    if(anElement.hasAttribute(FireActionOnFocusLost_Prop))
+        setFireActionOnFocusLost(anElement.getAttributeBoolValue(FireActionOnFocusLost_Prop, true));
 }
 
 }

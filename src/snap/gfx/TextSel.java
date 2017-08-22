@@ -74,27 +74,27 @@ public TextBox getTextBox()  { return _tbox; }
 /**
  * Returns the start.
  */
-public int getStart()  { return Math.min(_start,_text.length()); }
+public int getStart()  { return Math.min(_start, _text.length()); }
     
 /**
  * Returns the end.
  */
-public int getEnd()  { return Math.min(_end,_text.length()); }
+public int getEnd()  { return Math.min(_end, _text.length()); }
 
 /**
  * Returns the anchor.
  */
-public int getAnchor()  { return Math.min(_anchor<=_start? _start : _end,_text.length()); }
+public int getAnchor()  { return Math.min(_anchor<=_start? _start : _end, _text.length()); }
 
 /**
  * The length.
  */
-public int getSize()  { return _end - _start; }
+public int getSize()  { return getEnd() - getStart(); }
 
 /**
  * Returns whether selection is empty.
  */
-public boolean isEmpty()  { return _start==_end; }
+public boolean isEmpty()  { return getStart()==getEnd(); }
     
 /**
  * Returns the selected text string.
@@ -130,8 +130,9 @@ public int getCharLeft()
  */
 public int getCharUp()
 {
-    TextBoxLine lastColumnLine = _tbox.getLineAt(_anchor);
-    int lastColumn = _anchor - lastColumnLine.getStart();
+    int anchor = getAnchor();
+    TextBoxLine lastColumnLine = _tbox.getLineAt(anchor);
+    int lastColumn = anchor - lastColumnLine.getStart();
     TextBoxLine thisLine = getStartLine(), nextLine = thisLine.getPrevLine();
     int index = nextLine!=null? nextLine.getStart() + Math.min(nextLine.length()-1, lastColumn) : getStart();
     return index;
@@ -142,8 +143,9 @@ public int getCharUp()
  */
 public int getCharDown()
 {
-    TextBoxLine lastColumnLine = _tbox.getLineAt(_anchor);
-    int lastColumn = _anchor - lastColumnLine.getStart();
+    int anchor = getAnchor();
+    TextBoxLine lastColumnLine = _tbox.getLineAt(anchor);
+    int lastColumn = anchor - lastColumnLine.getStart();
     TextBoxLine thisLine = getEndLine(), nextLine = thisLine.getNextLine();
     int index = nextLine!=null? nextLine.getStart() + Math.min(nextLine.length()-1, lastColumn) : getEnd();
     return index;

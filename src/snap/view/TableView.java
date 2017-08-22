@@ -63,6 +63,7 @@ public TableView()
 {
     // Enable Action event for selection change
     enableEvents(Action);
+    setFocusable(true); setFocusWhenPressed(true);
     
     // Configure Columns SplitView and ScrollView and add
     _split.setBorder(null); _split.setGrowWidth(true);
