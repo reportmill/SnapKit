@@ -108,7 +108,6 @@ public void setText(String aString)
     // Reset selection (to line end if single-line, otherwise text start)
     int sindex = getTextBox().getLineCount()==1 && length()<40? length() : 0;
     setSel(sindex);
-    setCaretAnim();
 }
 
 /**
@@ -123,7 +122,6 @@ public void setSource(Object aSource)
     // Reset selection (to line end if single-line, otherwise text start)
     int sindex = getTextBox().getLineCount()==1 && length()<40? length() : 0;
     setSel(sindex);
-    setCaretAnim();
 }
 
 /**
@@ -340,6 +338,7 @@ public void setSel(int aStart, int aEnd, int aAnchor)
     // Repaint selection and scroll to visible (after delay)
     if(isShowing()) {
         repaintSel();
+        setCaretAnim();
         getEnv().runLater(() -> scrollSelToVisible());
     }
 }
@@ -1088,6 +1087,8 @@ public void propertyChange(PropChange anEvent)
  */
 protected void textDidChange()
 {
+    int start = getSelStart(), end = getSelEnd(), anchor = getSelAnchor();
+    setSel(start, end, anchor);
     relayoutParent(); repaint();
 }
 
