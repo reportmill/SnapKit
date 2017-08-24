@@ -20,6 +20,9 @@ public class TextView extends ParentView implements PropChangeListener {
     // Whether text should wrap
     boolean               _wrapText;
     
+    // The selection char indexes
+    int                   _selIndex, _selAnchor, _selStart, _selEnd;
+    
     // The text selection
     TextSel               _sel;
     
@@ -158,7 +161,7 @@ public void setTextBox(TextBox aText)
     if(_tbox!=null) _tbox.getText().addPropChangeListener(this);
     
     // Reset selection
-    _sel = new TextSel(_tbox, 0, 0, 0); //_text.setPropChangeEnabled(true);
+    if(getSelStart()!=0 || !isSelEmpty()) setSel(0);
     repaint();
 }
 
@@ -268,39 +271,34 @@ public void setFireActionOnFocusLost(boolean aValue)
 }
 
 /**
- * Returns the text selection.
+ * Returns whether the selection is empty.
  */
-public TextSel getSel()  { return _sel; }
+public boolean isSelEmpty()  { return getSelStart()==getSelEnd(); }
+
+/**
+ * Returns the initial character index of the selection (usually SelStart).
+ */
+public int getSelAnchor()  { return Math.min(_selAnchor, length()); }
+
+/**
+ * Returns the final character index of the selection (usually SelEnd).
+ */
+public int getSelIndex()  { return Math.min(_selIndex, length()); }
 
 /**
  * Returns the character index of the start of the text selection.
  */
-public int getSelStart()  { return _sel.getStart(); }
-
-/**
- * Sets the selection start.
- */
-public void setSelStart(int aValue)  { setSel(aValue,getSelEnd()); }
+public int getSelStart()  { return Math.min(_selStart, length()); }
 
 /**
  * Returns the character index of the end of the text selection.
  */
-public int getSelEnd()  { return _sel.getEnd(); }
+public int getSelEnd()  { return Math.min(_selEnd, length()); }
 
 /**
- * Sets the selection end.
+ * Returns the text selection.
  */
-public void setSelEnd(int aValue)  { setSel(getSelStart(),aValue); }
-
-/**
- * Returns the character index of the last explicitly selected char (confined to the bounds of the selection).
- */
-public int getSelAnchor()  { return _sel.getAnchor(); }
-
-/**
- * Returns whether the selection is empty.
- */
-public boolean isSelEmpty()  { return _sel.isEmpty(); }
+public TextSel getSel()  { return _sel!=null? _sel : (_sel=new TextSel(_tbox, _selAnchor, _selIndex)); }
 
 /**
  * Sets the character index of the text cursor.
@@ -310,30 +308,24 @@ public void setSel(int newStartEnd)  { setSel(newStartEnd, newStartEnd); }
 /**
  * Sets the character index of the start and end of the text selection.
  */
-public void setSel(int aStart, int anEnd)  { setSel(aStart, anEnd, anEnd); }
-
-/**
- * Sets the character index of the start and end of the text selection.
- */
-public void setSel(int aStart, int aEnd, int aAnchor)
+public void setSel(int aStart, int aEnd)
 {
-    // Make sure start is before end
-    if(aEnd<aStart) { int temp = aEnd; aEnd = aStart; aStart = temp; }
+    // If already set, just return
+    int len = length(), anchor = Math.min(aStart,len), index = Math.min(aEnd,len);
+    if(anchor==_selAnchor && index==_selIndex) return;
     
-    // Just return if already set
-    if(aStart==getSelStart() && aEnd==getSelEnd() && aAnchor==getSelAnchor()) return;
+    // Set values
+    _selAnchor = aStart; _selIndex = aEnd;
+    _selStart = Math.min(aStart, aEnd); _selEnd = Math.max(aStart, aEnd);
     
+    // Fire selection property change and clear selection
+    firePropChange(Selection_Prop, _sel, _sel=null);
+
     // Get old selection shape
     if(isShowing()) repaintSel();
     
-    // Set new start/end
-    _sel = new TextSel(_tbox, aStart, aEnd, aAnchor);
-    
     // Reset InputStyle
     _inputStyle = null;
-    
-    // Fire property change
-    firePropChange(Selection_Prop, aStart + ((long)aEnd)<<32, 0);
     
     // Repaint selection and scroll to visible (after delay)
     if(isShowing()) {
@@ -353,8 +345,7 @@ public void selectAll()  { setSel(0, length()); }
  */
 protected void repaintSel()
 {
-    if(_sel==null) return;
-    Shape shape = _sel.getPath();
+    Shape shape = getSel().getPath();
     Rect rect = shape.getBounds(); rect.inset(-1);
     repaint(rect);
 }
@@ -565,7 +556,7 @@ public void selectForward(boolean isShiftDown)
     // If shift is down, extend selection forward
     if(isShiftDown) {
         if(getSelAnchor()==getSelStart() && !isSelEmpty()) setSel(getSelStart()+1, getSelEnd());
-        else { setSel(getSelStart(), getSelEnd()+1, getSelEnd()+1); }
+        else { setSel(getSelStart(), getSelEnd()+1); }
     }
     
     // Set new selection
@@ -580,7 +571,7 @@ public void selectBackward(boolean isShiftDown)
     // If shift is down, extend selection back
     if(isShiftDown) {
         if(getSelAnchor()==getSelEnd() && !isSelEmpty()) setSel(getSelStart(), getSelEnd()-1);
-        else { setSel(getSelStart()-1, getSelEnd(), getSelStart()-1); }
+        else { setSel(getSelEnd(), getSelStart()-1); }
     }
     
     // Set new selection
@@ -769,17 +760,17 @@ protected void mousePressed(ViewEvent anEvent)
     else if(anEvent.getClickCount()==3) _pgraphSel = true;
     
     // Get selected range for down point and drag point
-    TextSel selection = new TextSel(_tbox, _downX, _downY, _downX, _downY, _wordSel, _pgraphSel);
-    int start = selection.getStart(), end = selection.getEnd();
+    TextSel sel = new TextSel(_tbox, _downX, _downY, _downX, _downY, _wordSel, _pgraphSel);
+    int anchor = sel.getAnchor(), index = sel.getIndex();
     
     // If shift is down, xor selection
     if(anEvent.isShiftDown()) {
-        if(selection.getStart()<=getSelStart()) end = getSelEnd();
-        else start = getSelStart();
+        anchor = Math.min(getSelStart(), sel.getStart());
+        index = Math.max(getSelEnd(), sel.getEnd());
     }
     
     // Set selection
-    setSel(start, end);
+    setSel(anchor, index);
 }
 
 /**
@@ -789,16 +780,16 @@ protected void mouseDragged(ViewEvent anEvent)
 {
     // Get selected range for down point and drag point
     TextSel sel = new TextSel(_tbox, _downX, _downY, anEvent.getX(), anEvent.getY(), _wordSel, _pgraphSel);
-    int start = sel.getStart(), end = sel.getEnd();
+    int anchor = sel.getAnchor(), index = sel.getIndex();
     
     // If shift is down, xor selection
     if(anEvent.isShiftDown()) {
-        if(start<=getSelStart()) end = getSelEnd();
-        else start = getSelStart();
+        anchor = Math.min(getSelStart(), sel.getStart());
+        index = Math.max(getSelEnd(), sel.getEnd());
     }
     
     // Set selection
-    setSel(start, end);
+    setSel(anchor, index);
 }
 
 /**
@@ -1087,8 +1078,6 @@ public void propertyChange(PropChange anEvent)
  */
 protected void textDidChange()
 {
-    int start = getSelStart(), end = getSelEnd(), anchor = getSelAnchor();
-    setSel(start, end, anchor);
     relayoutParent(); repaint();
 }
 

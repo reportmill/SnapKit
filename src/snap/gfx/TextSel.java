@@ -13,24 +13,21 @@ public class TextSel {
 
     // The RichText
     RichText    _text;
+    
+    // The selection anchor and index
+    int         _anchor, _index;
 
     // The start/end
     int         _start, _end;
     
-    // The anchor (usually End)
-    int         _anchor;
-
 /**
  * Creates a new selection.
  */
-public TextSel(TextBox aTextBox, int aStart, int anEnd) { this(aTextBox, aStart, anEnd, anEnd); }
-
-/**
- * Creates a new selection.
- */
-public TextSel(TextBox aTextBox, int aStart, int anEnd, int anAnchor)
+public TextSel(TextBox aTextBox, int aStart, int aEnd)
 {
-    _tbox = aTextBox; _text = _tbox.getText(); _start = aStart; _end = anEnd; _anchor = anAnchor;
+    _tbox = aTextBox; _text = _tbox.getText();
+    _anchor = aStart; _index = aEnd;
+    _start = Math.min(aStart,aEnd); _end = Math.max(aStart,aEnd);
 }
 
 /**
@@ -62,8 +59,10 @@ public TextSel(TextBox aTextBox, double x1, double y1, double x2, double y2, boo
         if(selEnd<_tbox.length()) selEnd++;
     }
 
-    // Set values
-    _start = selStart; _end = selEnd; _anchor = selEnd;
+    // Set selection char indexes
+    _anchor = p1Char<p2Char? selStart : selEnd;
+    _index = p1Char<p2Char? selEnd : selStart;
+    _start = selStart; _end = selEnd;
 }
 
 /**
@@ -72,19 +71,24 @@ public TextSel(TextBox aTextBox, double x1, double y1, double x2, double y2, boo
 public TextBox getTextBox()  { return _tbox; }
 
 /**
- * Returns the start.
+ * Returns the selection anchor (initial char of multi-char selection - usually start).
+ */
+public int getAnchor()  { return Math.min(_anchor, _text.length()); }
+
+/**
+ * Returns the cursor position (final char of multi-char selection - usually end).
+ */
+public int getIndex()  { return Math.min(_index, _text.length()); }
+
+/**
+ * Returns the selection start.
  */
 public int getStart()  { return Math.min(_start, _text.length()); }
     
 /**
- * Returns the end.
+ * Returns the selection end.
  */
 public int getEnd()  { return Math.min(_end, _text.length()); }
-
-/**
- * Returns the anchor.
- */
-public int getAnchor()  { return Math.min(_anchor<=_start? _start : _end, _text.length()); }
 
 /**
  * The length.
@@ -130,9 +134,9 @@ public int getCharLeft()
  */
 public int getCharUp()
 {
-    int anchor = getAnchor();
-    TextBoxLine lastColumnLine = _tbox.getLineAt(anchor);
-    int lastColumn = anchor - lastColumnLine.getStart();
+    int selIndex = getIndex();
+    TextBoxLine lastColumnLine = _tbox.getLineAt(selIndex);
+    int lastColumn = selIndex - lastColumnLine.getStart();
     TextBoxLine thisLine = getStartLine(), nextLine = thisLine.getPrevLine();
     int index = nextLine!=null? nextLine.getStart() + Math.min(nextLine.length()-1, lastColumn) : getStart();
     return index;
@@ -143,9 +147,9 @@ public int getCharUp()
  */
 public int getCharDown()
 {
-    int anchor = getAnchor();
-    TextBoxLine lastColumnLine = _tbox.getLineAt(anchor);
-    int lastColumn = anchor - lastColumnLine.getStart();
+    int selIndex = getIndex();
+    TextBoxLine lastColumnLine = _tbox.getLineAt(selIndex);
+    int lastColumn = selIndex - lastColumnLine.getStart();
     TextBoxLine thisLine = getEndLine(), nextLine = thisLine.getNextLine();
     int index = nextLine!=null? nextLine.getStart() + Math.min(nextLine.length()-1, lastColumn) : getEnd();
     return index;
