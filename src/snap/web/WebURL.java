@@ -3,7 +3,6 @@
  */
 package snap.web;
 import java.net.*;
-import snap.gfx.GFXEnv;
 import snap.util.FilePathUtils;
 
 /**
@@ -47,12 +46,12 @@ public WebURL(Object aSource, String aStr)  { _src = aSource; setString(aStr); }
 /**
  * Returns a URL for given object.
  */
-public static WebURL getURL(Object anObj)  { return GFXEnv.getEnv().getURL(anObj); }
+public static WebURL getURL(Object anObj)  { return WebGetter.getURL(anObj); }
 
 /**
  * Returns a URL for given class and resource name.
  */
-public static WebURL getURL(Class aClass, String aName)  { return GFXEnv.getEnv().getURL(aClass, aName); }
+public static WebURL getURL(Class aClass, String aName)  { return WebGetter.getURL(aClass, aName); }
 
 /**
  * Returns the source of this URL (java.net.URL, File, String).
@@ -298,7 +297,7 @@ public String getText()
 /**
  * Returns the site for the URL.
  */
-public WebSite getAsSite()  { return _asSite!=null? _asSite : (_asSite=GFXEnv.getEnv().getSite(this)); }
+public WebSite getAsSite()  { return _asSite!=null? _asSite : (_asSite=WebGetter.getSite(this)); }
 
 /**
  * Returns the standard URL.

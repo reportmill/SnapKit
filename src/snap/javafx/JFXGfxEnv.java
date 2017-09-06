@@ -2,7 +2,6 @@ package snap.javafx;
 import snap.gfx.*;
 import snap.swing.AWTEnv;
 import snap.util.*;
-import snap.web.*;
 
 /**
  * A custom class.
@@ -46,15 +45,6 @@ public String[] getFontNames(String aFamilyName)  { return _senv.getFontNames(aF
 
 /** Returns a font file for given name. */
 public FontFile getFontFile(String aName)  { return _senv.getFontFile(aName); }
-
-/** Returns a URL for given source. */
-public WebURL getURL(Object aSource)  { return _senv.getURL(aSource); }
-
-/** Returns a URL for given class and name/path string. */
-public WebURL getURL(Class aClass, String aName)  { return _senv.getURL(aClass, aName); }
-
-/** Returns a site for given source URL. */
-public WebSite getSite(WebURL aSiteURL)  { return _senv.getSite(aSiteURL); }
 
 /** Tries to open the given file source with the platform reader. */
 public void openFile(Object aSource)  { _senv.openFile(aSource); }

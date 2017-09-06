@@ -3,7 +3,6 @@
  */
 package snap.gfx;
 import snap.util.*;
-import snap.web.*;
 
 /**
  * An adapter class for drawing in a native environment (Java2D, JavaFX).
@@ -78,21 +77,6 @@ public abstract SoundClip getSound(Object aSource);
  * Creates a sound for given source.
  */
 public abstract SoundClip createSound();
-
-/**
- * Returns a URL for given source.
- */
-public abstract WebURL getURL(Object aSource);
-
-/**
- * Returns a URL for given class and name/path string.
- */
-public abstract WebURL getURL(Class aClass, String aName);
-
-/**
- * Returns a site for given source URL.
- */
-public abstract WebSite getSite(WebURL aSiteURL);
 
 /**
  * Tries to open the given file source with the platform reader.
