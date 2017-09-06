@@ -46,7 +46,15 @@ public WebURL(Object aSource, String aStr)  { _src = aSource; setString(aStr); }
 /**
  * Returns a URL for given object.
  */
-public static WebURL getURL(Object anObj)  { return WebGetter.getURL(anObj); }
+public static WebURL getURL(Object anObj)
+{
+    // Handle null, WebURL, WebFile
+    if(anObj==null || anObj instanceof WebURL) return (WebURL)anObj;
+    if(anObj instanceof WebFile) return ((WebFile)anObj).getURL();
+    
+    // Get URL
+    return WebGetter.getURL(anObj);
+}
 
 /**
  * Returns a URL for given class and resource name.

@@ -7,7 +7,7 @@ import snap.util.FilePathUtils;
 /**
  * A class to handle loading of URL items.
  */
-public class WebGetter extends Object {
+public class WebGetter {
 
     // A map of existing WebSites
     static Map <WebURL, WebSite>  _sites = Collections.synchronizedMap(new HashMap());
@@ -17,11 +17,7 @@ public class WebGetter extends Object {
  */
 public static WebURL getURL(Object anObj)
 {
-    // Handle null, WebURL, WebFile
-    if(anObj==null || anObj instanceof WebURL) return (WebURL)anObj;
-    if(anObj instanceof WebFile) return ((WebFile)anObj).getURL();
-    
-    // Handle String; 
+    // Handle String 
     if(anObj instanceof String) { String str = (String)anObj;
     
         // If it's our silly "Jar:/com/rm" format, return class resource URL
@@ -74,9 +70,6 @@ public static WebURL getURL(Class aClass, String aName)
         if(aName.startsWith("/")) path = aName;
         else { int sep = path.lastIndexOf('/'); path = path.substring(0, sep+1) + aName; }
     }
-    
-    // If class loader is DataClassLoader, have it return URL
-    //ClassLoader cl=aClass.getClassLoader();if(cl instanceof WebClassLoader) return((WebClassLoader)cl).getURL(path);
     
     // Get URL string for class and resource (decoded)
     URL url = aClass.getResource(path); if(url==null) return null;
