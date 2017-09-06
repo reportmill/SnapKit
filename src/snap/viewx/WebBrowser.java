@@ -199,13 +199,6 @@ protected WebPage createPage(WebResponse aResp)
     // Return Exception WebPage
     catch(Throwable t) { aResp.setException(t); return createExceptionPage(aResp); }
     
-    // If ClassPage, swap out for real page
-    if(page instanceof ClassPage) { page.setResponse(aResp); page.setBrowser(this);
-        page = ((ClassPage)page).getInstancePage();
-        page.setBrowser(this);
-        return page;
-    }
-    
     // Set response and browser and return
     page.setResponse(aResp); page.setBrowser(this);
     return page;
@@ -222,7 +215,6 @@ protected Class <? extends WebPage> getPageClass(WebResponse aResp)
     if(file.isDir())
         return DirFilePage.class;
 
-    if(type.equals("class")) return ClassPage.class;
     if(type.equals("jpg") || type.equals("jpeg") || type.equals("gif") || type.equals("png")) return ImagePage.class;
     if(type.equals("snp") || type.equals("rib") || type.equals("jfx")) return SnapPage.class;
     if(type.equals("rpt")) return getPageClass("com.reportmill.app.ReportPage.class", TextPage.class);

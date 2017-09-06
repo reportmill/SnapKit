@@ -134,9 +134,7 @@ public WebURL getURL(Class aClass, String aName)
     }
     
     // If class loader is DataClassLoader, have it return URL
-    ClassLoader cldr = aClass.getClassLoader();
-    if(cldr instanceof WebClassLoader)
-        return ((WebClassLoader)cldr).getURL(path);
+    //ClassLoader cl=aClass.getClassLoader();if(cl instanceof WebClassLoader) return((WebClassLoader)cl).getURL(path);
     
     // Get URL string for class and resource (decoded)
     URL url = aClass.getResource(path); if(url==null) return null;

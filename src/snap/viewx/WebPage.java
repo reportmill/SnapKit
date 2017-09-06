@@ -145,8 +145,7 @@ public void reload()
     // Reload page
     WebURL url = getURL();
     WebFile file = url.getFile();
-    if(file!=null && file.getType().equals("class") && url.getQueryValue("id")!=null) url = url.getFileURL();
-    else if(file!=null) file.reload();
+    if(file!=null) file.reload();
     if(getBrowser()!=null && getBrowser().getPage()==this)
         getBrowser().getLoader().setURL(url);
 }

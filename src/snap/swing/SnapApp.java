@@ -3,7 +3,6 @@ import javax.swing.SwingUtilities;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.*;
-import snap.web.*;
 
 /**
  * An app for Snap client desktop applications.
@@ -24,16 +23,6 @@ public static void main(final String args[])
     // Set args
     _args = args;
     _fname = getParameter(args, "file");
-    
-    // If file is local class file, see if we should just run it
-    if(StringUtils.startsWithIC(_fname, "Local:") && StringUtils.endsWithIC(_fname, ".class")) {
-        WebURL url = WebURL.getURL(_fname);
-        WebFile cfile = url.getFile();
-        Class cls = ClassUtils.getClass(cfile);
-        if(cls!=null && getHasMain(cls)) {
-            runMain(cls); return; }
-        //if(cls!=null && Application.class.isAssignableFrom(cls)) { Application.launch(cls, args); return; }
-    }
     
     // Run this app
     SwingUtilities.invokeLater(() -> new SnapApp().main()); //Application.launch(FXApp.class, args);

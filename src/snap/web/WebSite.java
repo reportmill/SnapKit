@@ -29,9 +29,6 @@ public abstract class WebSite extends SnapObject implements PropChangeListener {
     // A map of properties associated with file
     Map                       _props = new HashMap();
     
-    // The class loader for this WebSite
-    WebClassLoader            _clsLdr;
-
 /**
  * Returns the URL.
  */
@@ -476,14 +473,9 @@ protected String createSandboxURLS()
 public WebFile getLocalFile(WebFile aFile, boolean doCache)  { return aFile; }
 
 /**
- * Returns the DataClassLoader.
+ * Clears site caches.
  */
-public WebClassLoader getClassLoader() { return _clsLdr!=null? _clsLdr : (_clsLdr=new WebClassLoader(this));}
-
-/**
- * Clears site Schema and ClassLoader.
- */
-public synchronized void refresh()  { _clsLdr = null; }
+public synchronized void refresh()  { }
 
 /**
  * Flushes any unsaved changes to backing store.

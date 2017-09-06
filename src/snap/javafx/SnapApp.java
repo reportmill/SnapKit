@@ -4,7 +4,6 @@ import javafx.stage.Stage;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.*;
-import snap.web.*;
 
 /**
  * An app for Snap client desktop applications.
@@ -28,17 +27,6 @@ public static void main(final String args[])
     
     // Install JavaFX
     JFXViewEnv.set();
-    
-    // If file is local class file, see if we should just run it
-    if(StringUtils.startsWithIC(_fname, "Local:") && StringUtils.endsWithIC(_fname, ".class")) {
-        WebURL url = WebURL.getURL(_fname);
-        WebFile cfile = url.getFile();
-        Class cls = ClassUtils.getClass(cfile);
-        if(cls!=null && getHasMain(cls)) {
-            runMain(cls); return; }
-        if(cls!=null && Application.class.isAssignableFrom(cls)) {
-            Application.launch(cls, args); return; }
-    }
     
     // Run this app
     Application.launch(FXApp.class, args);

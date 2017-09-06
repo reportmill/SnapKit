@@ -4,7 +4,6 @@
 package snap.util;
 import java.lang.reflect.*;
 import java.util.*;
-import snap.web.WebFile;
 
 /**
  * Utility methods for Class.
@@ -524,25 +523,6 @@ public static Class getCommonClass(List aList)
     for(int i=1, iMax=aList.size(); i<iMax; i++)
         cclass = getCommonClass(cclass, aList.get(i));
     return cclass;
-}
-
-/**
- * Returns the class compiled from this java file.
- */
-public static Class getClass(WebFile aFile)
-{
-    String cname = getClassName(aFile);
-    try { return aFile.getSite().getClassLoader().loadClass(cname); }
-    catch(Throwable e) { System.err.println("ClassUtils.getClass(" + aFile.getName() + "): " + e); return null; }
-}
-
-/**
- * Returns the class name.
- */
-public static String getClassName(WebFile aFile)
-{
-    String fpath = aFile.getPath();
-    return fpath.substring(1, fpath.length() - ".class".length()).replace('/', '.');
 }
 
 }
