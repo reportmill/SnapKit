@@ -14,8 +14,11 @@ import snap.util.FilePathUtils;
  */
 public class WebURL {
 
-    // The URL source
+    // The source object (String, File, URL)
     Object          _src;
+    
+    // The source object as URL (if possible)
+    URL             _srcURL;
     
     // The URL string
     String          _str;
@@ -39,9 +42,20 @@ public class WebURL {
     WebFile         _file;
 
 /**
- * Creates a new WebURL for given source and URL string.
+ * Creates a new WebURL for given source.
  */
-public WebURL(Object aSource, String aStr)  { _src = aSource; setString(aStr); }
+public WebURL(Object aSource)
+{
+    // Set source
+    _src = aSource;
+    
+    // Get/set standard URL (if available)
+    _srcURL = WebGetter.getJavaURL(aSource);
+    
+    // Get/set string (and parts)
+    String urls = WebGetter.getURLString(_srcURL!=null? _srcURL : _src);
+    setString(urls);
+}
 
 /**
  * Returns a URL for given object.
@@ -53,18 +67,28 @@ public static WebURL getURL(Object anObj)
     if(anObj instanceof WebFile) return ((WebFile)anObj).getURL();
     
     // Get URL
-    return WebGetter.getURL(anObj);
+    URL url = WebGetter.getJavaURL(anObj); if(url==null) return null;
+    return new WebURL(url);
 }
 
 /**
  * Returns a URL for given class and resource name.
  */
-public static WebURL getURL(Class aClass, String aName)  { return WebGetter.getURL(aClass, aName); }
+public static WebURL getURL(Class aClass, String aName)
+{
+    URL url = WebGetter.getJavaURL(aClass, aName); if(url==null) return null;
+    return new WebURL(url);
+}
 
 /**
  * Returns the source of this URL (java.net.URL, File, String).
  */
 public Object getSource()  { return _src; }
+
+/**
+ * Returns the source as standard URL.
+ */
+public URL getSourceURL()  { return _srcURL; }
 
 /**
  * Returns the URL string.
@@ -306,16 +330,6 @@ public String getText()
  * Returns the site for the URL.
  */
 public WebSite getAsSite()  { return _asSite!=null? _asSite : (_asSite=WebGetter.getSite(this)); }
-
-/**
- * Returns the standard URL.
- */
-public URL getURL()
-{
-    if(_src instanceof URL) return (URL)_src;
-    try { return new URL(_str); }
-    catch(MalformedURLException e) { throw new RuntimeException(e); }
-}
 
 /**
  * Standard equals implementation.

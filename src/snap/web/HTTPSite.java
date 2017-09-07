@@ -58,7 +58,7 @@ protected synchronized WebResponse doGet(WebRequest aRequest)
     try {
         // Fetch URL
         String urls = url.getString();
-        HTTPRequest hreq = new HTTPRequest(url.getURL());
+        HTTPRequest hreq = new HTTPRequest(url.getSourceURL());
         HTTPResponse hresp = hreq.getResponse();
         
         // Handle non-success response codes

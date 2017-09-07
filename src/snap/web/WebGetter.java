@@ -13,16 +13,16 @@ public class WebGetter {
     static Map <WebURL, WebSite>  _sites = Collections.synchronizedMap(new HashMap());
 
 /**
- * Returns a URL for given source.
+ * Returns a java.net.URL for given source.
  */
-public static WebURL getURL(Object anObj)
+public static URL getJavaURL(Object anObj)
 {
     // Handle String 
     if(anObj instanceof String) { String str = (String)anObj;
     
         // If it's our silly "Jar:/com/rm" format, return class resource URL
         if(str.startsWith("Jar:/com/reportmill")) 
-            return getURL(WebURL.class.getResource(str.substring(4)));
+            return WebURL.class.getResource(str.substring(4));
             
         // If string is Windows/Unix file path, make it a file URL
         if(str.indexOf('\\')>=0) { String strlc = str.toLowerCase();
@@ -32,37 +32,38 @@ public static WebURL getURL(Object anObj)
         // Get protocol for URL
         int ind = str.indexOf(':'); if(ind<0) throw new RuntimeException("Missing protocol in URL: " + str);
         String scheme = str.substring(0, ind).toLowerCase();
-            
-        // Get URL for string
-        try { 
-            if(scheme.equals("class") || scheme.equals("local") || scheme.equals("git"))
-                anObj = new URL(null, str, new BogusURLStreamHandler());
-            else anObj = new URL(str);
-        }
-        catch(Exception e) { throw new RuntimeException(e); }
+        
+        // Try to return URL
+        try { return new URL(str); }
+        catch(Exception e) { }
+        
+        // Try to return URL with bogus stream handler
+        try { return new URL(null, str, new BogusURLStreamHandler()); }
+        catch(Exception e) { }
     }
     
     // Handle File: Convert to Canonical URL to normalize path
     if(anObj instanceof File) { File file = (File)anObj;
-        try { anObj = file.getCanonicalFile().toURI().toURL(); } catch(Exception e) { } }
-    
-    // Handle URL: Get string, decode and strip "jar:" prefix if found (we don't use that)
-    if(anObj instanceof URL) { URL url = (URL)anObj;
-        String urls = url.toExternalForm(); try { urls = URLDecoder.decode(urls, "UTF-8"); } catch(Exception e) { }
-        if(url.getProtocol().equals("jar")) urls = urls.substring(4);
-        else if(url.getProtocol().equals("wsjar")) urls = urls.substring(6);
-        return new WebURL(url, urls);
+        try { return file.getCanonicalFile().toURI().toURL(); }
+        catch(Exception e) { }
     }
     
+    // Handle URL: Get string, decode and strip "jar:" prefix if found (we don't use that)
+    if(anObj instanceof URL)
+        return (URL)anObj;
+    
     // Handle Class
-    if(anObj instanceof Class) return getURL((Class)anObj, null);
+    if(anObj instanceof Class)
+        return getJavaURL((Class)anObj, null);
+    
+    // Complain
     throw new RuntimeException("No URL found for: " + anObj);
 }
 
 /**
  * Returns a URL for given class and name/path string.
  */
-public static WebURL getURL(Class aClass, String aName)
+public static URL getJavaURL(Class aClass, String aName)
 {
     // Get absolute path to class/resource
     String path = '/' + aClass.getName().replace('.', '/') + ".class";
@@ -71,22 +72,31 @@ public static WebURL getURL(Class aClass, String aName)
         else { int sep = path.lastIndexOf('/'); path = path.substring(0, sep+1) + aName; }
     }
     
-    // Get URL string for class and resource (decoded)
-    URL url = aClass.getResource(path); if(url==null) return null;
-    
-    // Handle URL: Get string, decode and strip "jar:" prefix if found (we don't use that) and install path separator
-    String urls = url.toExternalForm(); try { urls = URLDecoder.decode(urls, "UTF-8"); } catch(Exception e) { }
-    if(url.getProtocol().equals("jar")) urls = urls.substring(4);
-    else if(url.getProtocol().equals("wsjar")) urls = urls.substring(6);
-    else urls = urls.replace(path, '!' + path);
-    return new WebURL(url, urls);
+    // Get URL for full path
+    return aClass.getResource(path);
 }
 
 /**
- * A URLStreamHandlerFactory.
+ * Returns the URL string for given object.
  */
-private static class BogusURLStreamHandler extends URLStreamHandler {
-    protected URLConnection openConnection(URL u) throws IOException  { return null; }}
+public static String getURLString(Object anObj)
+{
+    // Handle URL
+    if(anObj instanceof URL) { URL url = (URL)anObj;
+    
+        // Get URL in normal form
+        String urls = url.toExternalForm();
+        try { urls = URLDecoder.decode(urls, "UTF-8"); } catch(Exception e) { }
+        
+        // If jar or wsjar, just strip it
+        if(url.getProtocol().equals("jar")) urls = urls.substring(4);
+        else if(url.getProtocol().equals("wsjar")) urls = urls.substring(6);
+        return urls;
+    }
+    
+    // Handle anything else
+    return anObj.toString();
+}
 
 /**
  * Returns a site for given source URL.
@@ -120,5 +130,11 @@ protected static WebSite createSite(WebURL aSiteURL)
     if(site!=null) WebUtils.setSiteURL(site, aSiteURL);
     return site;
 }
+
+/**
+ * A URLStreamHandlerFactory.
+ */
+private static class BogusURLStreamHandler extends URLStreamHandler {
+    protected URLConnection openConnection(URL u) throws IOException  { return null; }}
 
 }
