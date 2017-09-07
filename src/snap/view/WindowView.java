@@ -257,7 +257,8 @@ public void hide()
 {
     if(getRootView().getPopup()!=null)
         getRootView().getPopup().hide();
-    getHelper().hide();
+    if(isShowing())
+        getHelper().hide();
 }
 
 /**
