@@ -279,6 +279,9 @@ public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
     // Make window is initialized
     getHelper().checkInit();
     
+    // If window isn't yet showing, size to pref size
+    if(!isShowing()) pack();
+    
     // Get rect for given node and point for given offsets
     Rect rect = aView!=null? aView.getBoundsLocal().copyFor(aView.getLocalToParent(null)).getBounds() :
         getEnv().getScreenBoundsInset();

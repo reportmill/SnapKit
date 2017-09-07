@@ -8,6 +8,9 @@ import java.util.*;
  * A base class for painting RMShapes.
  */
 public abstract class Painter {
+    
+    // The image quality
+    double         _imageQuality = .5;
 
     // Whether painting is being done for static output
     boolean        _printing;
@@ -306,9 +309,14 @@ public void setComposite(Composite aComp) { }
 public boolean setAntialiasing(boolean aValue)  { return false; }
 
 /**
+ * Returns image rendering quality.
+ */
+public double getImageQuality()  { return _imageQuality; }
+
+/**
  * Sets image rendering quality.
  */
-public void setImageQuality(double aValue)  { }
+public void setImageQuality(double aValue)  { _imageQuality = aValue; }
 
 /**
  * Returns whether painting is for static output.
