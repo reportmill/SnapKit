@@ -169,7 +169,7 @@ protected void respondUI(ViewEvent anEvent)
     // Handle DragDrop
     if(anEvent.isDragDrop()) {
         anEvent.acceptDrag();
-        WebURL url = WebURL.getURL(anEvent.getDragFiles().get(0));
+        WebURL url = WebURL.getURL(anEvent.getDragboard().getFiles().get(0));
         setSource(url);
         anEvent.dropComplete();
     }

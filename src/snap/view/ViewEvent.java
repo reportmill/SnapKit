@@ -249,7 +249,7 @@ public Object getValue()
 {
     // Handle DragDropEvent: Return String value
     if(isDragDropEvent())
-        return getDragString();
+        return getDragboard().getString();
     
     // Otherwise, return node value
     View view = getView(); return view!=null? view.getValue("Value") : null;
@@ -413,9 +413,6 @@ public boolean hasDragContent(String aName)  { return getDragboard().hasContent(
 
 /** Returns the drop string, if drop event. */
 public String getDragString()  { return getDragboard().getString(); }
-
-/** Returns the drop files, if drop files. */
-public List <File> getDragFiles()  { return getDragboard().getFiles(); }
 
 /** Returns the drop string, if drop event. */
 public String getDropString()  { return getDragboard().getString(); }
