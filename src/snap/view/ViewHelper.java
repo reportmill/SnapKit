@@ -50,11 +50,7 @@ public T get()
 /**
  * Sets the native being helped.
  */
-public void setNative(Object anObj)
-{
-    _ntv = (T)anObj;
-    _view.getEnv().setProp(_ntv, "View", _view);
-}
+public void setNative(Object anObj)  { _ntv = (T)anObj; }
 
 /**
  * Creates the native.

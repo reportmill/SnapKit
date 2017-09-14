@@ -123,27 +123,6 @@ public Clipboard getClipboardDrag()  { return SwingClipboard.getDrag(null); }
 public FileChooser getFileChooser()  { return new SwingFileChooser(); }
 
 /**
- * Returns a property for given node.
- */
-public Object getProp(Object anObj, String aKey)
-{
-    if(anObj instanceof JComponent) return ((JComponent)anObj).getClientProperty(aKey);
-    return super.getProp(anObj, aKey);
-}
-
-/**
- * Sets a property for a given native.
- */
-public void setProp(Object anObj, String aKey, Object aValue)
-{
-    if(anObj instanceof JComponent) ((JComponent)anObj).putClientProperty(aKey, aValue);
-    else super.setProp(anObj, aKey, aValue);
-}
-
-/** Creates the top level properties map. */
-protected Map createPropsMap()  { return new WeakHashMap(); }
-
-/**
  * Returns a new ViewHelper for given native component.
  */
 public ViewHelper createHelper(View aView)

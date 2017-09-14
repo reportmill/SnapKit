@@ -14,9 +14,6 @@ public abstract class ViewEnv {
     // Map of RunOne runnables
     Set <String>            _runOnceNames = Collections.synchronizedSet(new HashSet());
     
-    // Weak map of properties
-    Map<Object,Map>         _props = createPropsMap();
-
     // The node environment
     static ViewEnv          _env;
     
@@ -111,41 +108,9 @@ public Clipboard getClipboardDrag()  { throw notImpl("getClipboardDrag"); }
 public FileChooser getFileChooser()  { throw notImpl("getFileChooser"); }
 
 /**
- * Returns a View for given object (View or native).
- */
-public View getView(Object anObj)
-{
-    if(anObj instanceof View) return (View)anObj;
-    return (View)getProp(anObj, "View");
-}
-
-/**
  * Returns a ViewHelper for given native component.
  */
 public ViewHelper createHelper(View aView)  { return null; }
-
-/**
- * Returns a property for given node.
- */
-public Object getProp(Object anObj, String aKey)  { return getProps(anObj).get(aKey); }
-
-/**
- * Sets a property for a given native.
- */
-public void setProp(Object anObj, String aKey, Object aValue)  { getProps(anObj).put(aKey, aValue); }
-
-/**
- * Returns the properties for given object.
- */
-protected Map getProps(Object anObj)
-{
-    Map props = _props.get(anObj);
-    if(props==null) _props.put(anObj, props=new HashMap());
-    return props;
-}
-
-/** Creates the top level properties map. */
-protected Map createPropsMap()  { throw notImpl("createPropsMap"); }
 
 /**
  * Sends an event for a UI node.

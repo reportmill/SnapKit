@@ -3,7 +3,6 @@ import java.util.*;
 import javafx.application.Platform;
 import javafx.event.*;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Node;
 import javafx.stage.*;
 import snap.gfx.Rect;
 import snap.view.*;
@@ -83,27 +82,6 @@ private synchronized void runLaterAndWait(Runnable aRun)
     try { wait(); }
     catch(Exception e) { throw new RuntimeException(e); }
 }
-
-/**
- * Gets property for node.
- */
-public Object getProp(Object anObj, String aKey)
-{
-    if(anObj instanceof Node) return ((Node)anObj).getProperties().get(aKey);
-    return super.getProp(anObj, aKey);
-}
-
-/**
- * Sets property for node.
- */
-public void setProp(Object anObj, String aKey, Object aValue)
-{
-    if(anObj instanceof Node) ((Node)anObj).getProperties().put(aKey, aValue);
-    else super.setProp(anObj, aKey, aValue);
-}
-
-/** Creates the top level properties map. */
-protected Map createPropsMap()  { return new WeakHashMap(); }
 
 /**
  * Creates an event for a UI node.
