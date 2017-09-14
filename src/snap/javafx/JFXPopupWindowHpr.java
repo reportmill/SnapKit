@@ -1,7 +1,6 @@
 package snap.javafx;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.PopupControl;
 import javafx.scene.effect.DropShadow;
@@ -37,7 +36,7 @@ public snap.view.PopupWindow getView()  { return (snap.view.PopupWindow)super.ge
 /**
  * Ensure window has content.
  */
-protected void init()
+public void initWindow()
 {
     // Get native, node and root pane
     PopupWindow win = get();
@@ -62,21 +61,17 @@ protected void init()
 }
     
 /**
- * Checks to see if window has been initialized.
- */
-public void checkInit()  { if(!_initChecked) { _initChecked = true; init(); } } boolean _initChecked;
-
-/**
  * Shows the popup at given point relative to given node.
  */
-public void show(snap.view.View aView, double x, double y)
+public void show()
 {
     // Configure popup node
     get().setAutoHide(true);
     get().setAutoFix(false);
     
     // Get PopupNode and RootView
-    snap.view.PopupWindow pnode = getView(); RootView rview = pnode.getRootView();
+    snap.view.PopupWindow pnode = getView();
+    RootView rview = pnode.getRootView();
     
     // Set popup window SnapRoot content to RootView, and add drop shadow
     SnapRoot sroot = SnapRoot.get(get());
@@ -84,10 +79,13 @@ public void show(snap.view.View aView, double x, double y)
     sroot.setEffect(new DropShadow(18,0,3,Color.DARKGRAY));
     
     // Show window
-    javafx.scene.Node node = aView.getNative(javafx.scene.Node.class);
-    Bounds bounds = node.localToScreen(node.getBoundsInLocal());
-    double sx = bounds.getMinX() + x, sy = bounds.getMinY() + y;
-    get().show(node, sx, sy);
+    //javafx.scene.Node node = aView.getNative(javafx.scene.Node.class);
+    //Bounds bounds = node.localToScreen(node.getBoundsInLocal());
+    //double sx = bounds.getMinX() + x, sy = bounds.getMinY() + y; get().show(node, sx, sy);
+    //node.addEventFilter(MouseEvent.MOUSE_PRESSED, _realAutoHide);
+    
+    get().show((javafx.scene.Node)null, pnode.getX(), pnode.getY());
+    javafx.scene.Node node = rview.getNative(javafx.scene.Node.class);
     node.addEventFilter(MouseEvent.MOUSE_PRESSED, _realAutoHide);
 }
 

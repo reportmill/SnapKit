@@ -36,22 +36,22 @@ public void setHeight(double aValue)  { get().setSize(get().getWidth(), (int)aVa
 public WindowView getView()  { return (WindowView)super.getView(); }
     
 /**
- * Configure component.
+ * Initialze native window.
  */
-protected void init()
+public void initWindow()
 {
     // Get native, window view and root view
     Window win = get();
     WindowView wview = getView();
     
     // Configure JFrame: Title, Resizable
-    if(win instanceof JFrame) { JFrame frame = (JFrame)get();
+    if(win instanceof JFrame) { JFrame frame = (JFrame)win;
         frame.setTitle(wview.getTitle());
         frame.setResizable(wview.isResizable());
     }
     
     // Configure JDialog: Title, Resizable, Modal
-    else if(win instanceof JDialog) { JDialog frame = (JDialog)get();
+    else if(win instanceof JDialog) { JDialog frame = (JDialog)win;
         frame.setTitle(wview.getTitle());
         frame.setModal(wview.isModal());
         frame.setResizable(wview.isResizable());
@@ -75,9 +75,10 @@ protected void init()
     
     // Size window to root view
     win.pack();
+    win.setLocation((int)wview.getX(),(int)wview.getY());
     
     // Set WindowView insets
-    java.awt.Insets insAWT = get().getInsets();
+    java.awt.Insets insAWT = win.getInsets();
     Insets ins = new Insets(insAWT.top, insAWT.right, insAWT.bottom, insAWT.left);
     wview.setPadding(ins);
 
@@ -103,18 +104,10 @@ protected void init()
 }
 
 /**
- * Checks whether window has been initialized.
- */
-public void checkInit()  { if(!_initChecked) { _initChecked = true; init(); } } boolean _initChecked;
-
-/**
  * Show window at given screen x and y.
  */
-public void show(View aView, double aSX, double aSY)
+public void show()
 {
-    // On first show, configure window
-    checkInit();
-        
     // Get native window and window view
     Window win = get();
     WindowView wview = getView();
@@ -123,7 +116,8 @@ public void show(View aView, double aSX, double aSY)
     //if(wview.isAlwaysOnTop()) win.setAlwaysOnTop(true);
     
     // Set window visible
-    win.setLocation((int)Math.round(aSX),(int)Math.round(aSY));
+    int x = (int)Math.round(wview.getX()), y = (int)Math.round(wview.getY());
+    win.setLocation(x,y);
     win.setVisible(true);
     showingChanged();
     

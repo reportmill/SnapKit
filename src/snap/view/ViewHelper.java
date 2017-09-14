@@ -95,11 +95,11 @@ public void setCursor(Cursor aCursor)  { }
 /** Registers a view for repaint. */
 public void requestPaint(Rect aRect)  { complain("repaint"); }
 
-/** Window method: initializes window. */
-public void checkInit()  { }
+/** Window method: initializes native window. */
+public void initWindow()  { }
 
-/** Window/Popup method: Shows the window at given point relative to given view. */
-public void show(View aView, double aX, double aY)  { complain("show"); }
+/** Window/Popup method: Shows the window. */
+public void show()  { complain("show"); }
 
 /** Window/Popup method: Hides the window. */
 public void hide()  { complain("hide"); }

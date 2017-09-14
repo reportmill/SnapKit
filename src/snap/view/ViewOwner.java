@@ -539,7 +539,7 @@ public boolean isWindowVisible()  { return isWindowSet() && getWindow().isVisibl
  */
 public void setWindowVisible(boolean aValue)
 {
-    if(aValue) getWindow().show();
+    if(aValue) getWindow().showCentered(null);
     else getWindow().hide();
 }
 

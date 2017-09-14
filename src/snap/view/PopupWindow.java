@@ -3,7 +3,6 @@
  */
 package snap.view;
 import snap.gfx.Color;
-import snap.gfx.Point;
 
 /**
  * A WindowView subclass for popup windows.
@@ -36,12 +35,8 @@ public RootView getRootView()
  */
 public void show(View aView, double aX, double aY)
 {
-    // If aView provided, convert point
-    if(aView!=null) {
-        Point pt = aView.localToParent(null, aX, aY); aX = pt.x; aY = pt.y; }
-
     // Show node
-    getHelper().show(aView, aX, aY);
+    super.show(aView, aX, aY);
     
     // Set this popup as aView.RootView.Popup
     RootView rview = aView!=null? aView.getRootView() : null;

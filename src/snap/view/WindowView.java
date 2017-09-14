@@ -217,37 +217,64 @@ public boolean isModal()  { return _modal; }
 public void setModal(boolean aValue)  { _modal = aValue; }
 
 /**
- * Shows window in center of screen.
+ * Initializes the native window.
  */
-public void show()
+protected void initNativeWindow()
 {
-    Point pnt = getScreenLocation(null, Pos.CENTER, 0, 0);
+    getHelper().initWindow();
+    pack();
+}
+
+/** Initializes the native window once. */
+void initNativeWindowOnce()  { if(!_initWin) { _initWin = true; initNativeWindow(); } } boolean _initWin;
+
+/**
+ * Shows window in center of given view.
+ */
+public void showCentered(View aView)
+{
+    Point pnt = getScreenLocation(aView, Pos.CENTER, 0, 0);
     show(null, pnt.x, pnt.y);
 }
 
 /**
  * Show the window relative to given node.
  */
-public void show(View aView, double aSX, double aSY)
+public void show(View aView, double aX, double aY)
 {
     // Make window is initialized
-    getHelper().checkInit();
+    initNativeWindowOnce();
     
+    // If aView provided, convert point
+    if(aView!=null) {
+        Point pt = aView.localToParent(null, aX, aY); aX = pt.x; aY = pt.y; }
+        
     // If FrameSaveName provided, set Location from defaults and register to store future window moves
     if(getSaveName()!=null) {
         String locString = Prefs.get().get(getSaveName() + "Loc");
         if(locString!=null) {
             String strings[] = locString.split(" ");
-            aSX = StringUtils.intValue(strings[0]);
-            aSY = StringUtils.intValue(strings[1]);
+            aX = StringUtils.intValue(strings[0]);
+            aY = StringUtils.intValue(strings[1]);
             int w = getSaveSize() && strings.length>2? StringUtils.intValue(strings[2]) : 0;
             int h = getSaveSize() && strings.length>3? StringUtils.intValue(strings[3]) : 0;
             if(w>0 && h>0) setSize(w,h);
         }
     }
     
+    // Set window location
+    setXY(aX, aY);
+    
     // Have helper show window
-    getHelper().show(aView, aSX, aSY);
+    show();
+}
+
+/**
+ * Shows window in center of screen.
+ */
+public void show()
+{
+    getHelper().show();
 }
 
 /**
@@ -277,10 +304,7 @@ public void toFront()  { getHelper().toFront(); }
 public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
 {
     // Make window is initialized
-    getHelper().checkInit();
-    
-    // If window isn't yet showing, size to pref size
-    if(!isShowing()) pack();
+    initNativeWindowOnce();
     
     // Get rect for given node and point for given offsets
     Rect rect = aView!=null? aView.getBoundsLocal().copyFor(aView.getLocalToParent(null)).getBounds() :
@@ -318,7 +342,7 @@ public boolean isVisible()  { return isShowing(); }
 /**
  * Override to call show/hide.
  */
-public void setVisible(boolean aValue)  { if(aValue) show(); else hide(); }
+public void setVisible(boolean aValue)  { if(aValue) showCentered(null); else hide(); }
 
 /**
  * Override to add/remove window to/from global windows list.

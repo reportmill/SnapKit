@@ -268,8 +268,7 @@ protected boolean showPanel(View aView)
     _builder.runLater(() -> notifyDidShow());
     
     // Show window and return
-    Point pnt = win.getScreenLocation(aView, Pos.CENTER, 0, 0);
-    win.show(aView, pnt.x, pnt.y);
+    win.showCentered(aView);
     return !_cancelled;
 }
 

@@ -35,7 +35,7 @@ public WindowView getView()  { return (WindowView)super.getView(); }
 /**
  * Initialze native window.
  */
-protected void init()
+public void initWindow()
 {
     // Get window and window node
     Stage win = get();
@@ -72,24 +72,16 @@ protected void init()
 }
 
 /**
- * Checks to see if window has been initialized.
- */
-public void checkInit()  { if(!_initChecked) { _initChecked = true; init(); } } boolean _initChecked;
-
-/**
  * Show window at given screen x and y.
  */
-public void show(View aView, double aX, double aY)
+public void show()
 {
-    // On first show, configure window
-    checkInit();
-        
     // Get native window
     WindowView view = getView();
     Stage win = get();
     
     // Set window location
-    win.setX(aX); win.setY(aY);
+    win.setX(view.getX()); win.setY(view.getY());
     
     // Set window visible
     if(view.isModal()) win.showAndWait();
