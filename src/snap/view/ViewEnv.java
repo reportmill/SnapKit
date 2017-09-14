@@ -11,7 +11,10 @@ import snap.web.WebURL;
  */
 public abstract class ViewEnv {
 
-    // Map of RunOne runnables
+    // Map of Run-Once runnables
+    Set <Runnable>          _runOnceRuns = Collections.synchronizedSet(new HashSet());
+    
+    // Map of Run-Once names
     Set <String>            _runOnceNames = Collections.synchronizedSet(new HashSet());
     
     // The node environment
@@ -54,13 +57,25 @@ public abstract boolean isEventThread();
 public abstract void runLater(Runnable aRun);
 
 /**
- * Invokes the given runnable for name once (cancels unexecuted previous runLater registered with same name).
+ * Runs the given runnable once.
+ */
+public void runLaterOnce(Runnable aRun)
+{
+    // If runnable already queued, just return
+    if(_runOnceRuns.contains(aRun)) return;
+
+    // Queue runnable    
+    _runOnceRuns.add(aRun);
+    runLater(() -> { aRun.run(); _runOnceRuns.remove(aRun); });
+}
+
+/**
+ * Runs the given runnable for name once.
  */
 public void runLaterOnce(String aName, Runnable aRun)
 {
     // If runnable already queued, just return
-    if(_runOnceNames.contains(aName))
-        return;
+    if(_runOnceNames.contains(aName)) return;
 
     // Queue name and runnable    
     _runOnceNames.add(aName);
