@@ -12,13 +12,19 @@ import snap.web.WebURL;
 public abstract class ViewEnv {
 
     // Map of Run-Once runnables
-    Set <Runnable>          _runOnceRuns = Collections.synchronizedSet(new HashSet());
+    Set <Runnable>            _runOnceRuns = Collections.synchronizedSet(new HashSet());
     
     // Map of Run-Once names
-    Set <String>            _runOnceNames = Collections.synchronizedSet(new HashSet());
+    Set <String>              _runOnceNames = Collections.synchronizedSet(new HashSet());
+    
+    // The timer for runIntervals and runDelayed
+    java.util.Timer           _timer = new java.util.Timer();
+    
+    // A map of timer tasks
+    Map <Runnable,TimerTask>  _timerTasks = new HashMap();
     
     // The node environment
-    static ViewEnv          _env;
+    static ViewEnv            _env;
     
 /**
  * Returns the node environment.
@@ -85,25 +91,71 @@ public void runLaterOnce(String aName, Runnable aRun)
 /**
  * Runs given runnable after delay.
  */
-public abstract void runDelayed(Runnable aRun, int aDelay, boolean inAppThread);
+public void runDelayed(Runnable aRun, int aDelay, boolean inAppThread)
+{
+    TimerTask task = new TimerTask() { public void run() { if(inAppThread) runLater(aRun); else aRun.run(); }};
+    _timer.schedule(task, aDelay);
+}
 
 /**
  * Runs given runnable for given period after given delay with option to run once for every interval, even under load.
  */
-public abstract void runIntervals(Runnable aRun, int aPeriod, int aDelay, boolean doAll, boolean inAppThread);
+public void runIntervals(Runnable aRun, int aPeriod, int aDelay, boolean doAll, boolean inAppThread)
+{
+    // Create task
+    TimerTask task = new TimerTask() { public void run()  {
+        if(inAppThread) {
+            if(doAll) runLater(aRun);
+            else runLaterAndWait(aRun);
+        }
+        else aRun.run();
+    }};
+    
+    // Add task and schedule
+    _timerTasks.put(aRun, task);
+    if(doAll) _timer.scheduleAtFixedRate(task, aDelay, aPeriod);
+    else _timer.schedule(task, aDelay, aPeriod);
+}
 
 /**
  * Runs given runnable for given period after given delay with option to run once for every interval, even under load.
  */
-public abstract void stopIntervals(Runnable aRun);
+public void stopIntervals(Runnable aRun)
+{
+    TimerTask task = _timerTasks.get(aRun);
+    if(task!=null) task.cancel();
+}
+
+/**
+ * Runs an runnable later and waits for it to finish.
+ */
+public synchronized void runLaterAndWait(Runnable aRun)
+{
+    // If isEventThread, just run and return
+    if(isEventThread()) { aRun.run(); return; }
+    
+    // Register for runLater() to run and notify
+    runLater(() -> runAndNotify(aRun));
+    
+    // Wait for runAndNotify
+    try { wait(); }
+    catch(Exception e) { throw new RuntimeException(e); }
+}
+
+/** Run and notify - used to resume thread that called runLaterAndWait. */
+private synchronized void runAndNotify(Runnable aRun)
+{
+    aRun.run();
+    notify();
+}
 
 /**
  * Returns a UI source for given class.
  */
 public Object getUISource(Class aClass)
 {
-    String rname = aClass.getSimpleName() + ".snp";
-    WebURL durl = WebURL.getURL(aClass, rname); if(durl!=null) return durl;
+    String name = aClass.getSimpleName() + ".snp";
+    WebURL url = WebURL.getURL(aClass, name); if(url!=null) return url;
     return aClass!=Object.class? getUISource(aClass.getSuperclass()) : null;
 }
 

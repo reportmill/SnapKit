@@ -1,21 +1,17 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.swing;
 import java.awt.*;
-import java.util.*;
+import java.util.EventObject;
 import javax.swing.*;
 import snap.gfx.*;
 import snap.view.*;
-import snap.web.*;
 
 /**
  * A ViewEnv subclass for Swing.
  */
 public class SwingViewEnv extends ViewEnv {
-    
-    // The timer for runIntervals and runDelayed
-    java.util.Timer           _timer = new java.util.Timer();
-    
-    // A map of timer tasks
-    Map <Runnable,TimerTask>  _timerTasks = new HashMap();
     
     // A shared instance.
     static SwingViewEnv       _shared = new SwingViewEnv();
@@ -41,56 +37,6 @@ public boolean isEventThread()  { return SwingUtilities.isEventDispatchThread();
  * Run later.
  */
 public void runLater(Runnable aRunnable)  { SwingUtilities.invokeLater(aRunnable); }
-
-/**
- * Runs given runnable after delay.
- */
-public void runDelayed(Runnable aRun, int aDelay, boolean inAppThread)
-{
-    TimerTask task = new TimerTask() { public void run() { if(inAppThread) runLater(aRun); else aRun.run(); }};
-    _timer.schedule(task, aDelay);
-}
-
-/**
- * Runs given runnable for given period after given delay with option to run once for every interval, even under load.
- */
-public void runIntervals(Runnable aRun, int aPeriod, int aDelay, boolean doAll, boolean inAppThread)
-{
-    // Create task
-    TimerTask task = new TimerTask() { public void run()  {
-        if(inAppThread) {
-            if(doAll) runLater(aRun);
-            else runLaterOnce(aRun);
-        }
-        else aRun.run();
-    }};
-    
-    // Add task and schedule
-    _timerTasks.put(aRun, task);
-    if(doAll) _timer.scheduleAtFixedRate(task, aDelay, aPeriod);
-    else _timer.schedule(task, aDelay, aPeriod);
-}
-
-/**
- * Runs given runnable for given period after given delay with option to run once for every interval, even under load.
- */
-public void stopIntervals(Runnable aRun)
-{
-    TimerTask task = _timerTasks.get(aRun);
-    if(task!=null) task.cancel();
-}
-
-/**
- * Returns a UI file for given class.
- */
-public Object getUISource(Class aClass)
-{
-    WebURL durl = WebURL.getURL(aClass, null);
-    WebFile dfile = durl.getFile().getParent();
-    String sname = aClass.getSimpleName();
-    WebFile file = dfile.getFile(sname + ".snp"); if(file!=null) return file;
-    return aClass!=Object.class? getUISource(aClass.getSuperclass()) : null;
-}
 
 /**
  * Returns the system clipboard.
