@@ -65,6 +65,7 @@ public void show(View aView, double aX, double aY)
     _scrollView.setPrefHeight(_visRowCount>=0? _visRowCount*getRowHeight() : -1);
     
     // Show window
+    popup.pack();
     popup.show(_showView = aView, aX, aY);
 }
 
