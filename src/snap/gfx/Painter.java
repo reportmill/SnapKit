@@ -264,19 +264,35 @@ public void rotate(double theDegrees)  { transform(Transform.getRotate(theDegree
 public void scale(double sx, double sy)  { transform(Transform.getScale(sx, sy)); }
 
 /**
- * Transform by transform.
+ * Return transform.
  */
 public abstract Transform getTransform();
 
 /**
- * Transform by transform.
+ * Set to transform.
  */
 public abstract void setTransform(Transform aTrans);
 
 /**
  * Transform by transform.
  */
+public void setTransform(double a, double b, double c, double d, double tx, double ty)
+{
+    setTransform(new Transform(a,b,c,d,tx,ty));
+}
+
+/**
+ * Transform by transform.
+ */
 public abstract void transform(Transform aTrans);
+
+/**
+ * Transform by transform.
+ */
+public void transform(double a, double b, double c, double d, double tx, double ty)
+{
+    transform(new Transform(a,b,c,d,tx,ty));
+}
 
 /**
  * Return clip shape.

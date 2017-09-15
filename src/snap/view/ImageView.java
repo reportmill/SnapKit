@@ -218,10 +218,16 @@ protected void paintFront(Painter aPntr)
     // Calcuate text x/y based on insets, font and alignment
     Rect ibnds = getImageBounds(); if(ibnds==null) return;
     double iw = _image.getWidth(), ih = _image.getHeight();
+    
+    // If drawing at natural size and simple transform, get nearest-neighbor rendering (faster and better for hidpi)
     boolean noResize = ibnds.width==iw && ibnds.height==ih && aPntr.getTransform().isSimple();
     if(noResize) aPntr.setImageQuality(0);
+    
+    // Draw image
     aPntr.drawImage(_image, ibnds.x, ibnds.y, ibnds.width, ibnds.height);
-    aPntr.setImageQuality(.5);
+    
+    // Restore rendering mode
+    if(noResize) aPntr.setImageQuality(.5);
     
     // If clipped, restore
     if(clipToBounds) aPntr.restore();
