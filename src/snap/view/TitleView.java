@@ -296,8 +296,7 @@ public View getCollapsedGraphic()
  */
 public Object getValue(String aPropName)
 {
-    if(aPropName.equals("Value") || aPropName==Expanded_Prop)
-        return isExpanded();
+    if(aPropName.equals("Value") || aPropName==Expanded_Prop) return isExpanded();
     return super.getValue(aPropName);
 }
 
@@ -306,8 +305,7 @@ public Object getValue(String aPropName)
  */
 public void setValue(String aPropName, Object aValue)
 {
-    if(aPropName.equals("Value") || aPropName==Expanded_Prop)
-        setExpanded(SnapUtils.boolValue(aValue));
+    if(aPropName.equals("Value") || aPropName==Expanded_Prop) setExpanded(SnapUtils.boolValue(aValue));
     else super.setValue(aPropName, aValue);
 }
 

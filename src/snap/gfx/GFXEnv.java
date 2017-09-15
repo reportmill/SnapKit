@@ -27,7 +27,7 @@ public static GFXEnv getEnv()
 public static void setEnv(GFXEnv anEnv)  { _env = anEnv; }
 
 /**
- * Sets the SwingEnv.
+ * Sets the AWTEnv.
  */
 public static void setAWTEnv()
 {
@@ -102,45 +102,5 @@ public abstract void beep();
  * Returns the platform preferences object.
  */
 public Prefs getPrefs(String aName)  { return Prefs.getFake(); }
-
-/**
- * Sets this JVM to be headless.
- */
-public abstract void setHeadless();
-
-/**
- * Returns the current platform.
- */
-public abstract SnapUtils.Platform getPlatform();
-
-/**
- * Returns a key value.
- */
-public abstract Object getKeyValue(Object anObj, String aKey);
-
-/**
- * Sets a key value.
- */
-public abstract void setKeyValue(Object anObj, String aKey, Object aValue);
-
-/**
- * Returns a key chain value.
- */
-public abstract Object getKeyChainValue(Object anObj, String aKeyChain);
-
-/**
- * Sets a key chain value.
- */
-public abstract void setKeyChainValue(Object anObj, String aKeyChain, Object aValue);
-
-/**
- * Returns a key list value.
- */
-public abstract Object getKeyListValue(Object anObj, String aKey, int anIndex);
-
-/**
- * Adds a key list value.
- */
-public abstract void setKeyListValue(Object anObj, String aKey, Object aValue, int anIndex);
 
 }

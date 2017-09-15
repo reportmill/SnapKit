@@ -109,16 +109,16 @@ public String toString()
  */
 public static void doChange(Object aSource, String aProp, Object oldVal, Object newVal, int anIndex)
 {
-    // If indexed change, create RMKeyList and add/remove
+    // If indexed change, create KeyList and add/remove
     if(anIndex>=0) {
         //Object otherVal = list.size()>anIndex? list.get(anIndex) : null;
         //if(newVal!=null && newVal!=otherVal) list.add(anIndex, newVal);
         //else if(oldVal!=null && oldVal==otherVal) list.remove(anIndex);
-        snap.gfx.GFXEnv.getEnv().setKeyListValue(aSource, aProp, newVal, anIndex);
+        KeyList.setValue(aSource, aProp, newVal, anIndex);
     }
     
-    // If plain change, do RMKey.setValue on new value
-    else snap.gfx.GFXEnv.getEnv().setKeyChainValue(aSource, aProp, newVal);
+    // If plain change, do KeyChain.setValue on new value
+    else KeyChain.setValueSafe(aSource, aProp, newVal);
 }
 
 }

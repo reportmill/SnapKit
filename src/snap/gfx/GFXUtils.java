@@ -10,6 +10,15 @@ import java.util.stream.IntStream;
 public class GFXUtils {
 
 /**
+ * Sets this JVM to be headless.
+ */
+public static void setHeadless()
+{
+    try { System.setProperty("java.awt.headless", "true"); }
+    catch(Throwable e) { }
+}
+
+/**
  * Emboss a source image according to a bump map, both in ARGB integer array form.
  * Bump map is assumed to to be (2*radius x 2*radius) pixels larger than the source
  * to compensate for edge conditions of both the blur and the emboss convolutions.

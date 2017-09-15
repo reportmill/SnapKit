@@ -87,8 +87,7 @@ public void fire()
  */
 public Object getValue(String aPropName)
 {
-    if(aPropName.equals("Value") || aPropName==Selected_Prop)
-        return isSelected();
+    if(aPropName.equals("Value") || aPropName==Selected_Prop) return isSelected();
     return super.getValue(aPropName);
 }
 
@@ -97,8 +96,7 @@ public Object getValue(String aPropName)
  */
 public void setValue(String aPropName, Object aValue)
 {
-    if(aPropName.equals("Value") || aPropName==Selected_Prop)
-        setSelected(SnapUtils.boolValue(aValue));
+    if(aPropName.equals("Value") || aPropName==Selected_Prop) setSelected(SnapUtils.boolValue(aValue));
     else super.setValue(aPropName, aValue);
 }
 

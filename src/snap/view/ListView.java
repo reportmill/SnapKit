@@ -463,7 +463,7 @@ protected void configureCell(ListCell <T> aCell)
     // Get item text (don't use getText() because it can call into here)
     String text = null;
     if(_itemTextFunc!=null) text = item!=null? _itemTextFunc.apply(item) : null;
-    else if(getItemKey()!=null) text = SnapUtils.stringValue(GFXEnv.getEnv().getKeyChainValue(item, getItemKey()));
+    else if(getItemKey()!=null) text = SnapUtils.stringValue(KeyChain.getValue(item, getItemKey()));
     else text = item!=null? item.toString() : null;
 
     // Set text
@@ -493,7 +493,7 @@ public String getText(T anItem)
     
     // If ItemKey, apply
     else if(getItemKey()!=null) {
-        Object obj = GFXEnv.getEnv().getKeyChainValue(anItem, getItemKey());
+        Object obj = KeyChain.getValue(anItem, getItemKey());
         text = obj!=null? obj.toString() : null;
     }
     

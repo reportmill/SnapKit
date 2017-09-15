@@ -1,10 +1,9 @@
 package snap.javafx;
 import snap.gfx.*;
 import snap.swing.AWTEnv;
-import snap.util.*;
 
 /**
- * A custom class.
+ * A GFXEnv implementation for JavaFX.
  */
 public class JFXGfxEnv extends GFXEnv {
 
@@ -57,45 +56,6 @@ public double getScreenResolution()  { return _senv.getScreenResolution(); }
 
 /** Plays a beep. */
 public void beep()  { _senv.beep(); }
-
-/** Sets this JVM to be headless. */
-public void setHeadless()  { _senv.setHeadless(); }
-
-/** Returns the current platform. */
-public SnapUtils.Platform getPlatform()  { return _senv.getPlatform(); }
-
-/**
- * Returns a key value.
- */
-public Object getKeyValue(Object anObj, String aKey)  { return Key.getValue(anObj, aKey); }
-
-/**
- * Sets a key value.
- */
-public void setKeyValue(Object anObj, String aKey, Object aValue)  { Key.setValueSafe(anObj, aKey, aValue); }
-
-/**
- * Returns a key chain value.
- */
-public Object getKeyChainValue(Object anObj, String aKeyChain)  { return KeyChain.getValue(anObj, aKeyChain); }
-
-/**
- * Sets a key chain value.
- */
-public void setKeyChainValue(Object anObj, String aKC, Object aValue)  { KeyChain.setValue(anObj, aKC, aValue); }
-
-/**
- * Returns a key list value.
- */
-public Object getKeyListValue(Object anObj, String aKey, int anIndex) { return KeyList.getValue(anObj, aKey, anIndex); }
-
-/**
- * Adds a key list value.
- */
-public void setKeyListValue(Object anObj, String aKey, Object aValue, int anIndex)
-{
-    KeyList.setValue(anObj, aKey, aValue, anIndex);
-}
 
 /**
  * Returns a shared instance.

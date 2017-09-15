@@ -16,7 +16,7 @@ import snap.web.WebURL;
 public class SnapUtils {
     
     // The current platform
-    private static Platform platform = GFXEnv.getEnv().getPlatform();
+    private static Platform platform = getPlatform();
 
     // Whether app is currently running on Windows
     public static boolean isWindows = platform==Platform.WINDOWS;
@@ -32,6 +32,16 @@ public class SnapUtils {
     
     // Constants for platform
     public static enum Platform { WINDOWS, MAC, UNKNOWN };
+
+/**
+ * Returns the current platform.
+ */
+public static Platform getPlatform()
+{
+    if(System.getProperty("os.name").indexOf("Windows") >= 0) return SnapUtils.Platform.WINDOWS;
+    if(System.getProperty("os.name").indexOf("Mac OS X") >= 0) return SnapUtils.Platform.MAC;
+    return Platform.UNKNOWN;
+}
 
 /**
  * Returns a boolean value for the given object.

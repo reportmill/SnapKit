@@ -714,8 +714,8 @@ private class RunLaterRunnable implements Runnable {
  */
 public Object getModelValue(String aKey)
 {
-    Object value = GFXEnv.getEnv().getKeyChainValue(this, aKey);
-    if(value==null) value = GFXEnv.getEnv().getKeyChainValue(_modelValues, aKey);
+    Object value = KeyChain.getValue(this, aKey);
+    if(value==null) value = KeyChain.getValue(_modelValues, aKey);
     return value;
 }
 
@@ -724,8 +724,8 @@ public Object getModelValue(String aKey)
  */
 public void setModelValue(String aKey, Object aValue)
 {
-    try { GFXEnv.getEnv().setKeyChainValue(this, aKey, aValue); }
-    catch(Exception e) { GFXEnv.getEnv().setKeyChainValue(_modelValues, aKey, aValue); }
+    try { KeyChain.setValueSafe(this, aKey, aValue); }
+    catch(Exception e) { KeyChain.setValueSafe(_modelValues, aKey, aValue); }
 }
 
 /**

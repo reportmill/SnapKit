@@ -112,58 +112,6 @@ public void beep()  { Toolkit.getDefaultToolkit().beep(); }
 public Prefs getPrefs(String aName)  { return AWTPrefs.getPrefs(aName); }
 
 /**
- * Sets this JVM to be headless.
- */
-public void setHeadless()
-{
-    try { System.setProperty("java.awt.headless", "true"); }
-    catch(Throwable e) { }
-}
-
-/**
- * Returns the current platform.
- */
-public SnapUtils.Platform getPlatform()
-{
-    if(System.getProperty("os.name").indexOf("Windows") >= 0) return SnapUtils.Platform.WINDOWS;
-    if(System.getProperty("os.name").indexOf("Mac OS X") >= 0) return SnapUtils.Platform.MAC;
-    return SnapUtils.Platform.UNKNOWN;
-}
-
-/**
- * Returns a key value.
- */
-public Object getKeyValue(Object anObj, String aKey)  { return Key.getValue(anObj, aKey); }
-
-/**
- * Sets a key value.
- */
-public void setKeyValue(Object anObj, String aKey, Object aValue)  { Key.setValueSafe(anObj, aKey, aValue); }
-
-/**
- * Returns a key chain value.
- */
-public Object getKeyChainValue(Object anObj, String aKeyChain)  { return KeyChain.getValue(anObj, aKeyChain); }
-
-/**
- * Sets a key chain value.
- */
-public void setKeyChainValue(Object anObj, String aKC, Object aValue)  { KeyChain.setValueSafe(anObj, aKC, aValue); }
-
-/**
- * Returns a key list value.
- */
-public Object getKeyListValue(Object anObj, String aKey, int anIndex) { return KeyList.getValue(anObj, aKey, anIndex); }
-
-/**
- * Adds a key list value.
- */
-public void setKeyListValue(Object anObj, String aKey, Object aValue, int anIndex)
-{
-    KeyList.setValue(anObj, aKey, aValue, anIndex);
-}
-
-/**
  * Returns a shared instance.
  */
 public static AWTEnv get()  { return _shared; }
