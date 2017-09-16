@@ -135,8 +135,8 @@ public String getKeyString()  { return getKeyEvent()!=null? getKeyEvent().getCha
 /** Returns the drag event. */
 public DragEvent getDragEvent()  { return getEvent(DragEvent.class); }
 
-/** Returns a Dragboard. */
-public Clipboard getDragboard()  { return new JFXClipboard(getView(), this); }
+/** Returns a Clipboard. */
+public Clipboard getClipboard()  { return new JFXClipboard(getView(), this); }
 
 /** Called to indicate that drop is accepted. */
 public void acceptDrag()  { getDragEvent().acceptTransferModes(TransferMode.ANY); }

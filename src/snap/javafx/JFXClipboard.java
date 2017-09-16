@@ -52,6 +52,14 @@ public boolean hasContent(String aName)
  */
 public Object getContent(String aName)
 {
+    // Handle FILES
+    if(aName.equals(FILES)) {
+        List <File> jfiles = getClipboard().getFiles(); if(jfiles==null) return null;
+        List <ClipboardFile> cfiles = new ArrayList(jfiles.size());
+        for(File jfile : jfiles) cfiles.add(new ClipboardFile(jfile));
+        return cfiles;
+    }
+    
     DataFormat df = getDataFormat(aName);
     Object content = getClipboard().getContent(df);
     if(aName.equals(IMAGE) && content instanceof javafx.scene.image.Image)
@@ -88,26 +96,6 @@ public void setContent(Object ... theContents)
     //if(this==_shared)
     getClipboard().setContent(content);
 }
-
-/**
- * Returns whether clipboard has string.
- */
-public boolean hasString()  { return getClipboard().hasString(); }
-
-/**
- * Returns whether clipboard has string.
- */
-public boolean hasFiles()  { return getClipboard().hasFiles(); }
-
-/**
- * Returns a string from given transferable.
- */
-public String getString()  { return getClipboard().getString(); }
-
-/**
- * Returns a list of files from a given transferable.
- */
-public List <File> getFiles()  { return getClipboard().getFiles(); }
 
 /**
  * Returns a dataflavor for a name.

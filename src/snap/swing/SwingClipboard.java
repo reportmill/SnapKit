@@ -78,6 +78,15 @@ public boolean hasContent(String aName)
  */
 public Object getContent(String aName)
 {
+    // Handle STRING
+    if(aName.equals(STRING))
+        return getString();
+        
+    // Handle FILES
+    if(aName.equals(FILES))
+        return getFiles();
+        
+    // Handle anything else
     DataFlavor df = getDataFlavor(aName);
     Transferable trans = getTrans();
     try { return trans.getTransferData(df); }
@@ -111,24 +120,50 @@ public void setContent(Object ... theContents)
 }
 
 /**
- * Returns whether clipboard has string.
- */
-public boolean hasString()  { return getTrans().isDataFlavorSupported(DataFlavor.stringFlavor); }
-
-/**
- * Returns whether clipboard has string.
- */
-public boolean hasFiles()  { return getTrans().isDataFlavorSupported(DataFlavor.javaFileListFlavor); }
-
-/**
  * Returns a string from given transferable.
  */
-public String getString()  { return getString(getTrans()); }
+public String getString()
+{
+    // Get Transferable
+    Transferable aTrans = getTrans();
+    
+    // Handle StringFlavor
+    if(aTrans.isDataFlavorSupported(DataFlavor.stringFlavor))
+        try { return (String)aTrans.getTransferData(DataFlavor.stringFlavor); }
+        catch(Exception e) { e.printStackTrace(); return null; }
+    
+    // Handle FileList
+    List <File> files = getJavaFiles();
+    if(files!=null && files.size()>0)
+        return files.get(0).getAbsolutePath();
+    
+    // Otherwise return null
+    return null;
+}
 
 /**
  * Returns a list of files from a given transferable.
  */
-public List <File> getFiles()  { return getFiles(getTrans()); }
+public List <ClipboardFile> getFiles()
+{
+    // Return as ClipboardFiles
+    List <File> jfiles = getJavaFiles(); if(jfiles==null) return null;
+    List <ClipboardFile> cfiles = new ArrayList(jfiles.size());
+    for(File file : jfiles) cfiles.add(new ClipboardFile(file));
+    return cfiles;
+}
+
+/**
+ * Returns a list of files from a given transferable.
+ */
+public List <File> getJavaFiles()
+{
+    Transferable trans = getTrans();
+    if(trans.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
+        try { return (List)trans.getTransferData(DataFlavor.javaFileListFlavor); }
+        catch(Exception e) { System.err.println(e); }
+    return null;
+}
 
 /**
  * Returns the current transferable.
@@ -154,39 +189,6 @@ protected DataFlavor getDataFlavor(String aName)
     //if(aName.equals("rm-xstring")) return new DataFlavor("text/rm-xstring", "ReportMill Text Data");
     String name = aName; if(name.indexOf('/')<0) name = "text/" + name;
     return new DataFlavor(name, aName);
-}
-
-/**
- * Returns a string from given transferable.
- */
-protected static String getString(Transferable aTrans)
-{
-    // Handle StringFlavor
-    if(aTrans.isDataFlavorSupported(DataFlavor.stringFlavor))
-        try { return (String)aTrans.getTransferData(DataFlavor.stringFlavor); }
-        catch(Exception e) { e.printStackTrace(); return null; }
-    
-    // Handle FileList
-    List <File> files = getFiles(aTrans);
-    if(files!=null && files.size()>0)
-        return files.get(0).getAbsolutePath();
-    
-    // Otherwise return null
-    return null;
-}
-
-/**
- * Returns a list of files from a given transferable.
- */
-protected static List <File> getFiles(Transferable aTrans)
-{
-    // Handle JavaFileListFlavor
-    if(aTrans.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
-        try { return (List)aTrans.getTransferData(DataFlavor.javaFileListFlavor); }
-        catch(Exception e) { System.err.println(e); return null; }
-    
-    // Otherwise return null
-    return null;
 }
 
 /**

@@ -3,7 +3,7 @@
  */
 package snap.view;
 import java.io.File;
-import java.util.List;
+import java.util.*;
 import snap.gfx.Image;
 import snap.gfx.Color;
 import snap.gfx.Point;
@@ -44,7 +44,18 @@ public boolean hasFiles()  { return hasContent(FILES); }
 /**
  * Returns the clipboard content.
  */
-public List <File> getFiles()  { return getContent(STRING, List.class); }
+public List <ClipboardFile> getFiles()  { return getContent(FILES, List.class); }
+
+/**
+ * Returns the clipboard content.
+ */
+public List <File> getJavaFiles()
+{
+    List <ClipboardFile> cfiles = getFiles(); if(cfiles==null) return null;
+    List <File> jfiles = new ArrayList(cfiles.size());
+    for(ClipboardFile cfile : cfiles) if(cfile.getSource() instanceof File) jfiles.add((File)cfile.getSource());
+    return jfiles;
+}
 
 /**
  * Returns the clipboard content.

@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.io.File;
 import java.util.*;
 import snap.gfx.Point;
 import snap.util.*;
@@ -249,7 +248,7 @@ public Object getValue()
 {
     // Handle DragDropEvent: Return String value
     if(isDragDropEvent())
-        return getDragboard().getString();
+        return getClipboard().getString();
     
     // Otherwise, return node value
     View view = getView(); return view!=null? view.getValue("Value") : null;
@@ -402,32 +401,14 @@ public boolean isSpaceKey()  { return getKeyCode()==KeyCode.SPACE || getKeyChar(
 /** Returns whether key is ISO control character. */
 public boolean isControlChar()  { char c = getKeyChar(); return Character.isISOControl(c); }
 
-/** Returns the whether event is drag and has drag string. */
-public boolean hasDragString()  { return getDragboard().hasString(); }
-
-/** Returns the whether event is drag and has drag files. */
-public boolean hasDragFiles()  { return getDragboard().hasFiles(); }
-
-/** Returns the whether event is drag and has drag content for given name. */
-public boolean hasDragContent(String aName)  { return getDragboard().hasContent(aName); }
-
-/** Returns the drop string, if drop event. */
-public String getDragString()  { return getDragboard().getString(); }
-
-/** Returns the drop string, if drop event. */
-public String getDropString()  { return getDragboard().getString(); }
-
-/** Returns the drop files, if drop files. */
-public List <File> getDropFiles()  { return getDragboard().getFiles(); }
+/** Returns the Drag Clipboard for this event, if appropriate. */
+public Clipboard getClipboard()  { complain("getDragboard"); return null; }
 
 /** Called to indicate that drop is accepted. */
 public void acceptDrag()  { complain("acceptDrag"); }
 
 /** Called to indicate that drop is complete. */
 public void dropComplete()  { complain("dropComplete"); }
-
-/** Returns a Dragboard for this event. */
-public Clipboard getDragboard()  { complain("getDragboard"); return null; }
 
 /** Returns whether event was consumed. */
 public boolean isConsumed()  { return _consumed; }

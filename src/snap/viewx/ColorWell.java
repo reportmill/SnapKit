@@ -173,13 +173,13 @@ protected void processEvent(ViewEvent anEvent)
     
     // Handle DragEnter
     else if(anEvent.isDragEnter()) {
-        Clipboard cb = anEvent.getDragboard();
+        Clipboard cb = anEvent.getClipboard();
         if(!_dragging && cb.hasColor()) anEvent.acceptDrag(); //dtde.getDropAction());
         //else dtde.rejectDrag();
     }
     
     // Handle DragEnter
-    else if(anEvent.isDragOver()) { Clipboard cb = anEvent.getDragboard();
+    else if(anEvent.isDragOver()) { Clipboard cb = anEvent.getClipboard();
         if(!_dragging && cb.hasColor()) anEvent.acceptDrag(); }
     
     // Handle DragExit
@@ -189,7 +189,7 @@ protected void processEvent(ViewEvent anEvent)
     // Handle DragDrop
     else if(anEvent.isDragDrop()) {
         anEvent.acceptDrag(); //dtde.getDropAction());
-        Clipboard dboard = anEvent.getDragboard();
+        Clipboard dboard = anEvent.getClipboard();
         Color color = dboard.getColor();
         setColor(color);
         anEvent.dropComplete(); //true //else dtde.rejectDrop();
@@ -200,7 +200,7 @@ protected void processEvent(ViewEvent anEvent)
         Color color = getColor();
         Image image = Image.get(14,14,true); Painter pntr = image.getPainter();
         paintSwatch(pntr,color,0,0,14,14); pntr.setColor(Color.BLACK); pntr.drawRect(0,0,14-1,14-1); pntr.flush();
-        Clipboard dboard = anEvent.getDragboard();
+        Clipboard dboard = anEvent.getClipboard();
         dboard.setContent(color);
         dboard.setDragImage(image);
         dboard.startDrag();
