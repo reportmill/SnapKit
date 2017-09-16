@@ -1,9 +1,9 @@
 package snap.view;
 import java.io.File;
 import java.io.InputStream;
-import snap.util.FilePathUtils;
-import snap.util.SnapUtils;
+import snap.util.*;
 import snap.web.WebURL;
+import snap.web.MIMEType;
 
 /**
  * ClipboardFile represents a file from a copy/paste or drag/drop where the actual file might not be accessible.
@@ -29,6 +29,11 @@ public class ClipboardFile {
  * Creates a ClipboardFile from source.
  */
 public ClipboardFile(Object aSource)  { _src = aSource; }
+
+/**
+ * Creates a ClipboardFile from source.
+ */
+public ClipboardFile(Object aSource, String aMimeType)  { _src = aSource; _mimeType = aMimeType; }
 
 /**
  * The source of the file.
@@ -58,7 +63,15 @@ public String getName()
 /**
  * Returns the file extension.
  */
-public String getExtension()  { return FilePathUtils.getExtension(getName()); }
+public String getExtension()
+{
+    if(getName()!=null && getName().indexOf('.')>0)
+        return FilePathUtils.getExtension(getName());
+        
+    if(getMIMEType()!=null)
+        return MIMEType.getExtension(getMIMEType());
+    return null;
+}
 
 /**
  * Returns the file content type.
