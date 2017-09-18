@@ -28,12 +28,15 @@ public class ClipboardFile {
 /**
  * Creates a ClipboardFile from source.
  */
-public ClipboardFile(Object aSource)  { _src = aSource; }
+public ClipboardFile(Object aSource)
+{
+    _src = aSource;
+}
 
 /**
  * Creates a ClipboardFile from source.
  */
-public ClipboardFile(Object aSource, String aMimeType)  { _src = aSource; _mimeType = aMimeType; }
+public ClipboardFile(Object aSource, String aMimeType) { _src = aSource; _mimeType = aMimeType; }
 
 /**
  * The source of the file.
@@ -46,6 +49,7 @@ public Object getSource()  { return _src; }
 public WebURL getSourceURL()
 {
     if(_srcURL!=null) return _srcURL;
+    if(_src instanceof byte[]) return null;
     return _srcURL = WebURL.getURL(_src);
 }
 
@@ -65,11 +69,10 @@ public String getName()
  */
 public String getExtension()
 {
-    if(getName()!=null && getName().indexOf('.')>0)
-        return FilePathUtils.getExtension(getName());
-        
     if(getMIMEType()!=null)
         return MIMEType.getExtension(getMIMEType());
+    if(getName()!=null && getName().indexOf('.')>0)
+        return FilePathUtils.getExtension(getName());
     return null;
 }
 
