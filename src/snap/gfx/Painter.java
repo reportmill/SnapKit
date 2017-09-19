@@ -11,6 +11,9 @@ public abstract class Painter {
     
     // The image quality
     double         _imageQuality = .5;
+    
+    // The composite mode
+    Composite      _composite = Composite.SRC_OVER;
 
     // Whether painting is being done for static output
     boolean        _printing;
@@ -315,9 +318,14 @@ public abstract void clip(Shape s);
 public void clipRect(double aX, double aY, double aW, double aH)  { clip(new Rect(aX,aY,aW,aH)); }
 
 /**
+ * Returns the composite mode.
+ */
+public Composite getComposite()  { return _composite; }
+
+/**
  * Sets the composite mode.
  */
-public void setComposite(Composite aComp) { }
+public void setComposite(Composite aComp) { _composite = aComp; }
 
 /**
  * Sets whether antialiasing.

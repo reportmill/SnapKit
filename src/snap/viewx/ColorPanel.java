@@ -158,6 +158,7 @@ protected void initUI()
 
     // Configure SwatchPicker
     getView("SwatchPicker", ChildView.class).addChild(new SwatchPanel());
+    getUI().setClipToBounds(true);
 }
 
 /**

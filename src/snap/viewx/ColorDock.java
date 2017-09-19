@@ -187,8 +187,9 @@ protected void paintFront(Painter aPntr)
     int ncols = getColumnCount();
     int nrows = getRowCount();
     
-    // Set color to white and fill background
+    // Fill background to white and clip
     aPntr.setColor(Color.WHITE); aPntr.fillRect(ins.left, ins.top, width, height);
+    aPntr.clipRect(ins.left, ins.top, width, height);
     
     // Make as many rows & columns as will fit, and fill any that are present in the sparse array.
     for(int row=0; row<nrows; ++row) {
