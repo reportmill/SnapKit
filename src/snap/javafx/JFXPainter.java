@@ -87,10 +87,8 @@ public Stroke getStroke()
 public void setStroke(Stroke aStroke)
 {
     _gc.setLineWidth(aStroke.getWidth());
-    float da[] = aStroke.getDashArray();
-    double da2[] = null; if(da!=null) { da2 = new double[da.length]; for(int i=0;i<da.length;i++) da2[i] = da[i]; }
-    _gc.setLineDashes(da2);
-    _gc.setLineDashOffset(aStroke.getDashPhase());
+    _gc.setLineDashes(aStroke.getDashArray());
+    _gc.setLineDashOffset(aStroke.getDashOffset());
 }
 
 /**

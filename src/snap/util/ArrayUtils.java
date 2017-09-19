@@ -222,10 +222,49 @@ public static boolean equals(float array1[], float array2[], int length)
 {
     if(array1==array2) return true;
     if(array1==null || array2==null || array1.length<length || array2.length<length) return false;
-    for(int i=0; i<length; i++)
-        if(array1[i] != array2[i])
-            return false;
+    for(int i=0; i<length; i++) if(array1[i] != array2[i]) return false;
     return true;
+}
+
+/**
+ * Returns whether two double arrays are equal.
+ */
+public static boolean equals(double array1[], double array2[])
+{
+    if(array1==array2) return true;
+    if(array1==null || array2==null || array1.length!=array2.length) return false;
+    return equals(array1, array2, array1.length);
+}
+
+/**
+ * Returns whether two float arrays are equal to the given length.
+ */
+public static boolean equals(double array1[], double array2[], int length)
+{
+    if(array1==array2) return true;
+    if(array1==null || array2==null || array1.length<length || array2.length<length) return false;
+    for(int i=0; i<length; i++) if(array1[i] != array2[i]) return false;
+    return true;
+}
+
+/**
+ * Returns a double array for given floats.
+ */
+public static double[] getDoubles(float theFloats[])
+{
+    if(theFloats==null) return null;
+    double d[] = new double[theFloats.length]; for(int i=0;i<theFloats.length;i++) d[i] = theFloats[i];
+    return d;
+}
+
+/**
+ * Returns a float array for given doubles.
+ */
+public static float[] getFloats(double theDoubles[])
+{
+    if(theDoubles==null) return null;
+    float f[] = new float[theDoubles.length]; for(int i=0;i<theDoubles.length;i++) f[i] = (float)theDoubles[i];
+    return f;
 }
 
 /**

@@ -10,6 +10,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import snap.gfx.*;
+import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
 
 /**
@@ -98,8 +99,10 @@ public static java.awt.TexturePaint get(ImagePaint aTP)
 /** Returns awt stroke for snap stroke. */
 public static java.awt.Stroke get(Stroke aStroke)
 {
-    float dary[] = aStroke.getDashArray(); int cap = dary!=null? BasicStroke.CAP_BUTT : BasicStroke.CAP_ROUND;
-    return new BasicStroke((float)aStroke.getWidth(), cap, BasicStroke.JOIN_ROUND, 10, dary, aStroke.getDashPhase());
+    float width = (float)aStroke.getWidth(), offset = (float)aStroke.getDashOffset();
+    float dary[] = ArrayUtils.getFloats(aStroke.getDashArray());
+    int cap = dary!=null? BasicStroke.CAP_BUTT : BasicStroke.CAP_ROUND;
+    return new BasicStroke(width, cap, BasicStroke.JOIN_ROUND, 10, dary, offset);
 }
 
 /** Returns awt font for snap font. */
