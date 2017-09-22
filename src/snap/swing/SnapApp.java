@@ -25,7 +25,7 @@ public static void main(final String args[])
     _fname = getParameter(args, "file");
     
     // Run this app
-    SwingUtilities.invokeLater(() -> new SnapApp().main()); //Application.launch(FXApp.class, args);
+    SwingUtilities.invokeLater(() -> new SnapApp().main());
 }
 
 /**
@@ -48,10 +48,6 @@ public void main()
     getWindow().setSaveName("SnapBrowser");
     getWindow().setSaveSize(true);
     getWindow().setVisible(true);
-    
-    // Exit on close
-    //Stage stage = (Stage)getWindow().getNative();
-    //stage.setOnCloseRequest(e -> runLater(() ->  System.exit(0)));
 }
 
 /**
@@ -94,19 +90,5 @@ static int getArgIndex(String args[], String aName)
  * Called when exception is thrown at the top level.
  */
 public void uncaughtException(Thread th, Throwable t)  { t.printStackTrace(); _browser.showException(t); }
-
-/** Returns whether class file has main method. */
-private static boolean getHasMain(Class aClass)
-{
-    try { return aClass.getMethod("main", String[].class)!=null; }
-    catch(Exception e) { return false; }
-}
-
-/** Runs the main method of compiled class. */
-private static void runMain(Class aClass)
-{
-    try { aClass.getMethod("main", String[].class).invoke(null, (Object)new String[0]); }
-    catch(Exception e) { throw new RuntimeException(e); }
-}
 
 }

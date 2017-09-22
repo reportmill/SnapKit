@@ -23,9 +23,6 @@ public class ParentView extends View {
     // Constants for properties
     public static final String Child_Prop = "Child";
     
-    // Shared empty view array
-    private static View[] EMPTY_VIEWS = new View[0];
-    
     // Constants for properties
     public static final String ClipToBounds_Prop = "ClipToBounds";
     public static final String NeedsLayout_Prop = "NeedsLayout";

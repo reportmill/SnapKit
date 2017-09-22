@@ -7,7 +7,6 @@ import java.math.*;
 import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import snap.gfx.GFXEnv;
 import snap.web.WebURL;
 
 /**
