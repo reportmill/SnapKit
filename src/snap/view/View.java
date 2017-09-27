@@ -135,7 +135,7 @@ public class View implements XMLArchiver.Archivable, PropChangeListener, DeepCha
     ViewHelper      _helper;
     
     // The view environment
-    static final ViewEnv  _env = ViewEnv.getEnv();
+    static ViewEnv         _env; // This can go soon - but Cheerp demos will need recompile
 
     // Shared empty insets
     private static final Insets _emptyIns = new Insets(0);
@@ -1717,7 +1717,7 @@ public <T> T getOwner(Class <T> aClass)
 public ViewHelper getHelper()
 {
     if(_helper!=null) return _helper;
-    _helper = _env.createHelper(this);
+    _helper = getEnv().createHelper(this);
     _helper.setView(this);
     return _helper;
 }
@@ -1735,7 +1735,7 @@ public <T> T getNative(Class <T> aClass)  { return ClassUtils.getInstance(getNat
 /**
  * Returns the view environment.
  */
-public ViewEnv getEnv()  { return _env; }
+public ViewEnv getEnv()  { return ViewEnv.getEnv(); }
 
 /**
  * Returns the value for given key.

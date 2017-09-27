@@ -14,6 +14,7 @@ public class FilePathUtils extends Object {
     public static final String    SEPARATOR = SnapUtils.isWindows? "\\" : "/"; //java.io.File.separator;
     public static final char      SEPARATOR_CHAR = SnapUtils.isWindows? '\\' : '/'; //java.io.File.separatorChar;
     public static final String    PATH_SEPARATOR = SnapUtils.isWindows? ";" : ":"; //java.io.File.pathSeparator;
+    public static final char      PATH_SEPARATOR_CHAR = SnapUtils.isWindows? ';' : ':'; //java.io.File.pathSeparator;
 
 /**
  * Returns the file name component of the given string path (everything after last file separator).

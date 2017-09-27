@@ -2,8 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import java.io.File;
 import java.net.*;
 import snap.util.FilePathUtils;
+import snap.util.FileUtils;
 
 /**
  * A class to represent a URL for a WebSite and WebFile (it can be both for nested sources).
@@ -89,6 +91,11 @@ public Object getSource()  { return _src; }
  * Returns the source as standard URL.
  */
 public URL getSourceURL()  { return _srcURL; }
+
+/**
+ * Returns the source as standard URL.
+ */
+public File getSourceFile()  { return _src instanceof File? (File)_src : FileUtils.getFile(getSourceURL()); }
 
 /**
  * Returns the URL string.
