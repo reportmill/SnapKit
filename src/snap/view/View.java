@@ -134,9 +134,6 @@ public class View implements XMLArchiver.Archivable, PropChangeListener, DeepCha
     // The helper for this view when dealing with native
     ViewHelper      _helper;
     
-    // The view environment
-    static ViewEnv         _env; // This can go soon - but Cheerp demos will need recompile
-
     // Shared empty insets
     private static final Insets _emptyIns = new Insets(0);
     

@@ -17,7 +17,7 @@ public abstract class GFXEnv {
  */
 public static GFXEnv getEnv()
 {
-    if(_env==null) setAWTEnv();
+    if(_env==null) setDefaultEnv();
     return _env;
 }
 
@@ -27,15 +27,19 @@ public static GFXEnv getEnv()
 public static void setEnv(GFXEnv anEnv)  { _env = anEnv; }
 
 /**
- * Sets the AWTEnv.
+ * Sets the default GFXEnv.
  */
-public static void setAWTEnv()
+public static void setDefaultEnv()
 {
-    try {
-        Class cls = Class.forName("snap.swing.AWTEnv");
-        cls.getMethod("set").invoke(null);
+    // If platform is Cheerp, try to install Cheerp
+    if(SnapUtils.getPlatform()==SnapUtils.Platform.CHEERP) {
+        try { Class.forName("snapcj.CJEnv").getMethod("set").invoke(null); return; }
+        catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set CJEnv: " + e); }
     }
-    catch(Exception e) { System.err.println("ViewEnv: No Environment set " + e); }
+    
+    // Try Swing
+    try { Class.forName("snap.swing.AWTEnv").getMethod("set").invoke(null); }
+    catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set AWTEnv " + e); }
 }
 
 /**

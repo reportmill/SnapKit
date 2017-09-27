@@ -30,7 +30,7 @@ public class SnapUtils {
     private static Map <String, Integer> _doOnceMap = new HashMap();
     
     // Constants for platform
-    public static enum Platform { WINDOWS, MAC, UNKNOWN };
+    public static enum Platform { WINDOWS, MAC, CHEERP, UNKNOWN };
 
 /**
  * Returns the current platform.
@@ -39,6 +39,7 @@ public static Platform getPlatform()
 {
     if(System.getProperty("os.name").indexOf("Windows") >= 0) return SnapUtils.Platform.WINDOWS;
     if(System.getProperty("os.name").indexOf("Mac OS X") >= 0) return SnapUtils.Platform.MAC;
+    if(System.getProperty("java.vendor").indexOf("Leaning") >= 0) return SnapUtils.Platform.CHEERP;
     return Platform.UNKNOWN;
 }
 

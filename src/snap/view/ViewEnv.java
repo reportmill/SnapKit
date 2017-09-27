@@ -4,6 +4,7 @@
 package snap.view;
 import java.util.*;
 import snap.gfx.Rect;
+import snap.util.SnapUtils;
 import snap.web.WebURL;
 
 /**
@@ -31,7 +32,7 @@ public abstract class ViewEnv {
  */
 public static ViewEnv getEnv()
 {
-    if(_env==null) setSwingEnv();
+    if(_env==null) setDefaultEnv();
     return _env;
 }
 
@@ -43,13 +44,17 @@ public static void setEnv(ViewEnv anEnv)  { _env = anEnv; }
 /**
  * Sets the SwingEnv.
  */
-public static void setSwingEnv()
+public static void setDefaultEnv()
 {
-    try {
-        Class cls = Class.forName("snap.swing.SwingViewEnv");
-        cls.getMethod("set").invoke(null);
+    // If Cheerp, try to install Cheerp
+    if(SnapUtils.getPlatform()==SnapUtils.Platform.CHEERP) {
+        try { Class.forName("snapcj.CJViewEnv").getMethod("set").invoke(null); return; }
+        catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set CJViewEnv: " + e); }
     }
-    catch(Exception e) { System.err.println("ViewEnv: No Environment set " + e); }
+    
+    // Try Swing
+    try { Class.forName("snap.swing.SwingViewEnv").getMethod("set").invoke(null); }
+    catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set SwingViewEnv: " + e); }
 }
 
 /**
