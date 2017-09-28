@@ -33,7 +33,8 @@ public static void setDefaultEnv()
 {
     // If platform is Cheerp, try to install Cheerp
     if(SnapUtils.getPlatform()==SnapUtils.Platform.CHEERP) {
-        try { Class.forName("snapcj.CJEnv").getMethod("set").invoke(null); return; }
+        Class cls = null; try { cls = Class.forName("snapcj.CJEnv"); } catch(Exception e) { }
+        if(cls!=null) try { cls.getMethod("set").invoke(null); return; }
         catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set CJEnv: " + e); }
     }
     

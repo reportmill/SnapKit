@@ -48,7 +48,8 @@ public static void setDefaultEnv()
 {
     // If Cheerp, try to install Cheerp
     if(SnapUtils.getPlatform()==SnapUtils.Platform.CHEERP) {
-        try { Class.forName("snapcj.CJViewEnv").getMethod("set").invoke(null); return; }
+        Class cls = null; try { cls = Class.forName("snapcj.CJViewEnv"); } catch(Exception e) { }
+        if(cls!=null) try { cls.getMethod("set").invoke(null); return; }
         catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set CJViewEnv: " + e); }
     }
     
