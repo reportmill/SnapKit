@@ -36,4 +36,20 @@ public static String getExtension(String aMIMEType)
     }
 }
 
+/**
+ * Returns the MIME type for extension.
+ */
+public static String getType(String anExt)
+{
+    switch(anExt.toLowerCase()) {
+        case "jpg": case "jpeg": return JPEG;
+        case "png": return PNG;
+        case "gif": return GIF;
+        case "html": return HTML;
+        case "pdf": return PDF;
+        case "txt": return TEXT;
+        default: return null;
+    }
+}
+
 }
