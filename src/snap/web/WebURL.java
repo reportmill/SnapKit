@@ -299,13 +299,36 @@ public String getQueryURLString()
 }
 
 /**
+ * Returns whether URL can be found.
+ */
+public boolean isFound()  { return getResponse().getCode()==WebResponse.OK; }
+
+/**
+ * Returns the response for a HEAD request.
+ */
+public WebResponse getHead()
+{
+    WebSite site = getSite();
+    WebRequest req = new WebRequest(this); req.setType(WebRequest.Type.HEAD);
+    return site.getResponse(req);
+}
+
+/**
+ * Returns Response for a Get request.
+ */
+public WebResponse getResponse()
+{
+    WebSite site = getSite();
+    WebRequest req = new WebRequest(this);
+    return site.getResponse(req);
+}
+
+/**
  * Returns bytes for this URL.
  */
 public byte[] getBytes()
 {
-    WebSite site = getSite();
-    WebRequest req = new WebRequest(this);
-    WebResponse resp = site.getResponse(req);
+    WebResponse resp = getResponse();
     if(resp.getException()!=null)                // If response hit exception, throw it
         throw new ResponseException(resp);
     return resp.getBytes();

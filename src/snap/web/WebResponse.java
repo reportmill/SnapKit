@@ -76,16 +76,7 @@ public void setCode(int aCode)  { _code = aCode; }
 /**
  * Returns the code message.
  */
-public String getCodeString()
-{
-    switch(_code) {
-        case OK: return "OK";
-        case UNAUTHORIZED: return "Unauthorized";
-        case NOT_FOUND: return "Not Found";
-        case METHOD_NOT_ALLOWED: return "Method Not Allowed";
-        default: return "Unknown";
-    }
-}
+public String getCodeString()  { return getCodeString(_code); }
 
 /**
  * Returns the response time.
@@ -181,5 +172,19 @@ public void setException(Throwable aThrowable)  { _exception = aThrowable; }
  * Standard toString implementation.
  */
 public String toString() { return "Response " + getCode() + ' ' + getCodeString() + ' ' + getRequestURL().getString(); }
+
+/**
+ * Returns the code message.
+ */
+public static String getCodeString(int aCode)
+{
+    switch(aCode) {
+        case OK: return "OK";
+        case UNAUTHORIZED: return "Unauthorized";
+        case NOT_FOUND: return "Not Found";
+        case METHOD_NOT_ALLOWED: return "Method Not Allowed";
+        default: return "Unknown";
+    }
+}
 
 }
