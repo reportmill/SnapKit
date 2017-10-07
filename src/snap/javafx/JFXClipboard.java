@@ -2,8 +2,6 @@ package snap.javafx;
 import java.io.File;
 import java.util.*;
 import javafx.scene.input.*;
-import snap.gfx.Image;
-import snap.gfx.Color;
 import snap.gfx.Point;
 import snap.view.*;
 import snap.view.Clipboard;
@@ -53,47 +51,27 @@ public boolean hasContent(String aName)
 public Object getContent(String aName)
 {
     // Handle FILES
-    if(aName.equals(FILES)) {
+    if(aName.equals(FILE_LIST)) {
         List <File> jfiles = getClipboard().getFiles(); if(jfiles==null) return null;
-        List <ClipboardFile> cfiles = new ArrayList(jfiles.size());
-        for(File jfile : jfiles) cfiles.add(new ClipboardFile(jfile));
+        List <ClipboardData> cfiles = new ArrayList(jfiles.size());
+        for(File jfile : jfiles) cfiles.add(new ClipboardData(jfile));
         return cfiles;
     }
     
     DataFormat df = getDataFormat(aName);
     Object content = getClipboard().getContent(df);
-    if(aName.equals(IMAGE) && content instanceof javafx.scene.image.Image)
-        content = Image.get(content);
-    if(aName.equals(COLOR) && content instanceof String)
-        content = Color.get(content);
+    //if(aName.equals(IMAGE) && content instanceof javafx.scene.image.Image) content = Image.get(content);
+    //if(aName.equals(COLOR) && content instanceof String) content = Color.get(content);
     return content;
 }
 
 /**
  * Sets the clipboard content.
  */
-public void setContent(Object ... theContents)
+public void setContent(String aMIMEType, Object theData)
 {
-    // If contents only one object, map to key
-    if(theContents.length==1) {
-        if(theContents[0] instanceof String)
-            theContents = new Object[] { STRING, theContents[0] };
-        else if(theContents[0] instanceof File)
-            theContents = new Object[] { FILES, Arrays.asList(theContents[0]) };
-        else if(theContents[0] instanceof List)
-            theContents = new Object[] { FILES, theContents[0] };
-        else if(theContents[0] instanceof Image)
-            theContents = new Object[] { IMAGE, theContents[0] };
-        else if(theContents[0] instanceof Color)
-            theContents = new Object[] { COLOR, ((Color)theContents[0]).toHexString() };
-    }
-    
     Map <DataFormat,Object> content = new HashMap();
-    for(int i=0;i<theContents.length;i+=2)
-        content.put(getDataFormat((String)theContents[i]), theContents[i+1]);
-    
-    // Create transferable and set
-    //if(this==_shared)
+    content.put(getDataFormat(aMIMEType), theData);
     getClipboard().setContent(content);
 }
 
@@ -113,9 +91,8 @@ protected DataFormat getDataFormat(String aName)
 protected DataFormat getDataFormatImpl(String aName)
 {
     if(aName.equals(STRING)) return DataFormat.PLAIN_TEXT;
-    if(aName.equals(FILES)) return DataFormat.FILES;
-    if(aName.equals(IMAGE)) return DataFormat.IMAGE;
-    //if(aName.equals("rm-xstring")) return new DataFlavor("text/rm-xstring", "ReportMill Text Data");
+    if(aName.equals(FILE_LIST)) return DataFormat.FILES;
+    //if(aName.equals(IMAGE)) return DataFormat.IMAGE;
     String name = aName; if(name.indexOf('/')<0) name = "text/" + name;
     return new DataFormat(name, aName);
 }
@@ -127,8 +104,6 @@ public void startDrag()
 {
     // Get DragSource and start Listening to drag events drag source
     Dragboard db = getDragboard();
-    //ClipboardContent content = getContent(); //if(getDragImage()!=null) db.setDragView(getDragImage());
-    //db.setContent(content); dragSource.addDragSourceListener(this); dragSource.addDragSourceMotionListener(this);
     
     // Set DragImage
     if(getDragImage()!=null) {
@@ -137,8 +112,6 @@ public void startDrag()
     }
     
     // Start drag
-    //_dragger = this; Transferable trans = getTransferable();
-    //dragSource.startDrag(_dge, DragSource.DefaultCopyDrop, getDragImage(), getDragImageOffset(), trans, _dsl);
     _event.consume();
 }
 

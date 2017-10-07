@@ -261,10 +261,10 @@ protected void processEvent(ViewEvent anEvent)
         Image image = Image.get(14,14,true); Painter pntr = image.getPainter();
         ColorWell.paintSwatch(pntr,color,0,0,14,14); pntr.setColor(Color.BLACK);
         pntr.drawRect(0,0,14-1,14-1); pntr.flush();
-        Clipboard dboard = anEvent.getClipboard();
-        dboard.setContent(color);
-        dboard.setDragImage(image);
-        dboard.startDrag();
+        Clipboard cboard = anEvent.getClipboard();
+        cboard.addData(color);
+        cboard.setDragImage(image);
+        cboard.startDrag();
         _dragging = true;
     }
     

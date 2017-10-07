@@ -751,9 +751,9 @@ public void copy()
 {
     // If valid selection, get text for selection and add to clipboard
     if(!isSelEmpty()) {
-        String string = getSelString();
-        Clipboard cb = Clipboard.get();
-        cb.setContent(string);
+        String str = getSelString();
+        Clipboard cboard = Clipboard.getCleared();
+        cboard.addData(str);
     }
 }
 

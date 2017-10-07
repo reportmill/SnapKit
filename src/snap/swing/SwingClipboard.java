@@ -3,14 +3,11 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.*;
 import java.awt.dnd.*;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import javax.swing.*;
 import snap.gfx.Image;
-import snap.gfx.Color;
-import snap.util.FileUtils;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.view.Clipboard;
@@ -41,34 +38,11 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
     static SwingClipboard  _sharedDrag = new SwingClipboard();
 
 /**
- * Sets the current event.
+ * Override to map to Swing clipboard.
  */
-public void setEvent(ViewEvent anEvent)
+protected boolean hasDataImpl(String aMIMEType)
 {
-    // If DragGesture, set View and DragGestureEvent
-    if(anEvent.isDragGesture()) {
-        _view = anEvent.getView();
-        _dge = anEvent.getEvent(DragGestureEvent.class);
-    }
-    
-    // If DragEvent, get transferable
-    else if(anEvent.isDragEvent()) {
-        DropTargetDragEvent dragEv = anEvent.getEvent(DropTargetDragEvent.class);
-        if(dragEv!=null) _trans = dragEv.getTransferable();
-        DropTargetDropEvent dropEv = anEvent.getEvent(DropTargetDropEvent.class);
-        if(dropEv!=null) _trans = dropEv.getTransferable();
-    }
-    
-    // Compain if passed a bogus event
-    else System.err.println("SwingDragBoard.init: Invalid event type: " + anEvent);
-}
-
-/**
- * Returns the clipboard content.
- */
-public boolean hasContent(String aName)
-{
-    DataFlavor df = getDataFlavor(aName);
+    DataFlavor df = getDataFlavor(aMIMEType);
     Transferable trans = getTrans(); if(trans==null) return false;
     return trans.isDataFlavorSupported(df);
 }
@@ -76,80 +50,38 @@ public boolean hasContent(String aName)
 /**
  * Returns the clipboard content.
  */
-public Object getContent(String aName)
+protected ClipboardData getDataImpl(String aMIMEType)
 {
-    // Handle STRING
-    if(aName.equals(STRING))
-        return getString();
-        
-    // Handle FILES
-    if(aName.equals(FILES))
-        return getFiles();
-        
-    // Handle anything else
-    DataFlavor df = getDataFlavor(aName);
+    // Get raw data for type
+    DataFlavor df = getDataFlavor(aMIMEType);
     Transferable trans = getTrans();
-    try { return trans.getTransferData(df); }
+    Object data = null; try { data = trans.getTransferData(df); }
     catch(Exception e) { throw new RuntimeException(e); }
+    
+    // Return ClipboardData
+    return new ClipboardData(aMIMEType, data);
 }
 
 /**
  * Sets the clipboard content.
  */
-public void setContent(Object ... theContents)
+protected void addDataImpl(String aMIMEType, ClipboardData aData)
 {
-    // If contents only one object, map to key
-    if(theContents.length==1) {
-        if(theContents[0] instanceof String)
-            theContents = new Object[] { STRING, theContents[0] };
-        else if(theContents[0] instanceof File)
-            theContents = new Object[] { FILES, Arrays.asList(theContents[0]) };
-        else if(theContents[0] instanceof List)
-            theContents = new Object[] { FILES, theContents[0] };
-        else if(theContents[0] instanceof Image)
-            theContents = new Object[] { IMAGE, theContents[0] };
-        else if(theContents[0] instanceof Color)
-            theContents = new Object[] { COLOR, theContents[0] };
-    }
-    
     // Create transferable and set
-    GenericTransferable trans = new GenericTransferable(theContents);
+    GenericTransferable trans = new GenericTransferable();
     if(this==_shared)
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
     else _trans = trans;
 }
 
 /**
- * Returns a string from given transferable.
- */
-public String getString()
-{
-    // Get Transferable
-    Transferable aTrans = getTrans();
-    
-    // Handle StringFlavor
-    if(aTrans.isDataFlavorSupported(DataFlavor.stringFlavor))
-        try { return (String)aTrans.getTransferData(DataFlavor.stringFlavor); }
-        catch(Exception e) { e.printStackTrace(); return null; }
-    
-    // Handle FileList
-    List <File> files = getJavaFiles();
-    if(files!=null && files.size()>0)
-        return files.get(0).getAbsolutePath();
-    
-    // Otherwise return null
-    return null;
-}
-
-/**
  * Returns a list of files from a given transferable.
  */
-public List <ClipboardFile> getFiles()
+public List <ClipboardData> getFiles()
 {
-    // Return as ClipboardFiles
     List <File> jfiles = getJavaFiles(); if(jfiles==null) return null;
-    List <ClipboardFile> cfiles = new ArrayList(jfiles.size());
-    for(File file : jfiles) cfiles.add(new ClipboardFile(file));
+    List <ClipboardData> cfiles = new ArrayList(jfiles.size());
+    for(File file : jfiles) cfiles.add(new ClipboardData(file));
     return cfiles;
 }
 
@@ -184,9 +116,7 @@ protected Transferable getTrans()
 protected DataFlavor getDataFlavor(String aName)
 {
     if(aName.equals(STRING)) return DataFlavor.stringFlavor;
-    if(aName.equals(FILES)) return DataFlavor.javaFileListFlavor;
-    if(aName.equals(IMAGE)) return _imageFlavor;
-    //if(aName.equals("rm-xstring")) return new DataFlavor("text/rm-xstring", "ReportMill Text Data");
+    if(aName.equals(FILE_LIST)) return DataFlavor.javaFileListFlavor;
     String name = aName; if(name.indexOf('/')<0) name = "text/" + name;
     return new DataFlavor(name, aName);
 }
@@ -260,7 +190,6 @@ public void dragDropEnd(DragSourceDropEvent anEvent)
     _view = null; _dge = null;
 }
 
-
 /**
  * Sends an event to RootView.
  */
@@ -302,28 +231,51 @@ public static SwingClipboard getDrag(ViewEvent anEvent)
     return _sharedDrag;
 }
 
+/** Sets the current event. */
+void setEvent(ViewEvent anEvent)
+{
+    // If DragGesture, set View and DragGestureEvent
+    if(anEvent.isDragGesture()) {
+        _view = anEvent.getView();
+        _dge = anEvent.getEvent(DragGestureEvent.class);
+    }
+    
+    // If DragEvent, get transferable
+    else if(anEvent.isDragEvent()) {
+        DropTargetDragEvent dragEv = anEvent.getEvent(DropTargetDragEvent.class);
+        if(dragEv!=null) _trans = dragEv.getTransferable();
+        DropTargetDropEvent dropEv = anEvent.getEvent(DropTargetDropEvent.class);
+        if(dropEv!=null) _trans = dropEv.getTransferable();
+    }
+    
+    // Compain if passed a bogus event
+    else System.err.println("SwingDragBoard.init: Invalid event type: " + anEvent);
+}
+
 /**
- * Transferable implementation for text editor and xstrings.
+ * Transferable implementation to vend ClipboardData objects to/from Swing.
  */
 private class GenericTransferable implements Transferable {
     
     // The list of content types and values
-    List <DataFlavor>  _types = new ArrayList();
-    List <Object>      _contents = new ArrayList();
+    List <DataFlavor>     _types = new ArrayList();
+    List <ClipboardData>  _contents = new ArrayList();
     
     /** Creates a new editor clipboard for given xstring. */
-    public GenericTransferable(Object ... theContents)
+    public void addData(String aMimeType, ClipboardData aData)
     {
-        for(int i=0;i<theContents.length;) {
-            String name = (String)theContents[i++];
-            DataFlavor df = getDataFlavor(name);
-            _types.add(df); _contents.add(theContents[i++]);
-            if(df==_imageFlavor) {
-                _types.add(DataFlavor.imageFlavor); _contents.add(theContents[i-1]);
-                _types.add(_jpegFlavor); _contents.add(theContents[i-1]);
-                _types.add(DataFlavor.javaFileListFlavor); _contents.add(theContents[i-1]);
-            }
-        }
+        DataFlavor df = getDataFlavor(aMimeType);
+        _types.add(df);
+        _contents.add(aData);
+    }
+    
+    /** Creates a new editor clipboard for given xstring. */
+    public ClipboardData getData(DataFlavor aDF)
+    {
+        for(int i=0;i<_types.size();i++) { DataFlavor df = _types.get(i);
+            if(df.equals(aDF))
+                return _contents.get(i); }
+        return null;
     }
     
     /** Returns the supported flavors: RMTextFlavor and stringFlavor. */
@@ -335,47 +287,22 @@ private class GenericTransferable implements Transferable {
     /** Returns an inputstream with clipboard data for requested flavor. */
     public Object getTransferData(DataFlavor aFlavor) throws UnsupportedFlavorException, IOException
     {
-        // Get contents for requested flavor
-        Object contents = null;
-        for(int i=0;i<_types.size() && contents==null;i++)
-            if(aFlavor.equals(_types.get(i)))
-                contents = _contents.get(i);
-                
-        // Handle ImageFlavor:
-        if(aFlavor==DataFlavor.imageFlavor && contents instanceof Image)
-            contents = ((Image)contents).getNative();
-            
-        // Handle JavaFileListFlavor + Image: Write to file and swap in for image
-        if(aFlavor==DataFlavor.javaFileListFlavor && contents instanceof Image) { Image img = (Image)contents;
-            byte bytes[] = img.getBytes()!=null? img.getBytes() : img.hasAlpha()? img.getBytesPNG():img.getBytesJPEG();
-            File file = FileUtils.getTempFile(getImageName(img)); file.deleteOnExit();
-            SnapUtils.writeBytes(bytes, file);
-            contents = Arrays.asList(file);
-        }
-            
-        // Handle JPEG Flavor
-        if(aFlavor==_jpegFlavor && contents instanceof Image)
-            contents = ((Image)contents).getBytesJPEG();
-            
-        // Handle content is bytes: Convert to ByteArrayInputStream
-        if(contents instanceof byte[])
-            contents = new ByteArrayInputStream((byte[])contents);
-            
-        // Handle no contents
-        if(contents==null)
+        // Get ClipboardData for flavor
+        ClipboardData data = getData(aFlavor);
+        if(data==null)
             throw new UnsupportedFlavorException(aFlavor);
-        return contents;
+            
+        // Handle String
+        if(data.isString())
+            return data.getString();
+            
+        // Handle File list
+        if(data.isFileList())
+            return null;
+            
+        // Otherwise, return input stream
+        return data.getInputStream();
     }
 }
-
-/**
- * Returns an image name.
- */
-private String getImageName(Image anImage)
-{
-    if(anImage.getSourceURL()!=null)
-        return anImage.getName();
-    return "DragImage-" + (_dragCount++) + "." + anImage.getType();
-} static int _dragCount;
 
 }

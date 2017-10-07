@@ -962,9 +962,9 @@ public void copy()
 {
     // If valid selection, get text for selection and add to clipboard
     if(!isSelEmpty()) {
-        String string = getSel().getString();
-        Clipboard cb = Clipboard.get(); //Map content = new HashMap(); content.put(DataFormat.PLAIN_TEXT, string);
-        cb.setContent(string);
+        String str = getSel().getString();
+        Clipboard cboard = Clipboard.getCleared();
+        cboard.addData(str);
     }
 }
 

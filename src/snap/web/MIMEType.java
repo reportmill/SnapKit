@@ -52,4 +52,12 @@ public static String getType(String anExt)
     }
 }
 
+/**
+ * Returns all known image types.
+ */
+public static String[] getImageTypes()
+{
+    return new String[] { PNG, JPEG, GIF };
+}
+
 }
