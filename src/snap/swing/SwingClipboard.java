@@ -28,10 +28,6 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
     // A window that is optionally used to simulate image dragging.
     JWindow             _dragWindow;
 
-    // Image flavor
-    static DataFlavor   _imageFlavor = new DataFlavor("text/image", "Snap Image");
-    static DataFlavor   _jpegFlavor = new DataFlavor("image/jpeg", "JPEG Image Data");
-    
     // The shared clipboards for system and drag
     static SwingClipboard  _shared = new SwingClipboard();
     static SwingClipboard  _sharedDrag = new SwingClipboard();
@@ -42,8 +38,8 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
 protected boolean hasDataImpl(String aMIMEType)
 {
     DataFlavor df = getDataFlavor(aMIMEType);
-    Transferable trans = getTrans(); if(trans==null) return false;
-    return trans.isDataFlavorSupported(df);
+    Transferable trans = getTrans();
+    return trans!=null && trans.isDataFlavorSupported(df);
 }
 
 /**
