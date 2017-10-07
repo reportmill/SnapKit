@@ -160,7 +160,12 @@ public InputStream getInputStream()  { return new ByteArrayInputStream(getBytes(
  */
 public List <ClipboardData> getFiles()
 {
-    return new ArrayList();
+    List files = new ArrayList();
+    if(_src instanceof List) { List <File> list = (List)_src;
+        for(File file : list)
+            files.add(ClipboardData.get(file));
+    }
+    return files;
 }
 
 /**
@@ -184,6 +189,13 @@ public static ClipboardData get(Object theData)
     // Handle String
     if(theData instanceof String)
         return new ClipboardData(Clipboard.STRING, theData);
+        
+    // Handle File
+    if(theData instanceof File) { File file = (File)theData;
+        String ext = FilePathUtils.getExtension(file.getPath());
+        String mtype = MIMEType.getType(ext);
+        return new ClipboardData(mtype, theData);
+    }
         
     // Handle File List
     if(theData instanceof List) { List list = (List)theData; Object item0 = list.size()>0? list.get(0) : null;
