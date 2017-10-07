@@ -3,7 +3,6 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.*;
 import java.awt.dnd.*;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import javax.swing.*;
@@ -67,34 +66,14 @@ protected ClipboardData getDataImpl(String aMIMEType)
  */
 protected void addDataImpl(String aMIMEType, ClipboardData aData)
 {
+    // Do normal implementation
+    super.addDataImpl(aMIMEType, aData);
+    
     // Create transferable and set
-    GenericTransferable trans = new GenericTransferable();
+    SnapTransferable trans = new SnapTransferable();
     if(this==_shared)
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
     else _trans = trans;
-}
-
-/**
- * Returns a list of files from a given transferable.
- */
-public List <ClipboardData> getFiles()
-{
-    List <File> jfiles = getJavaFiles(); if(jfiles==null) return null;
-    List <ClipboardData> cfiles = new ArrayList(jfiles.size());
-    for(File file : jfiles) cfiles.add(new ClipboardData(file));
-    return cfiles;
-}
-
-/**
- * Returns a list of files from a given transferable.
- */
-public List <File> getJavaFiles()
-{
-    Transferable trans = getTrans();
-    if(trans.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
-        try { return (List)trans.getTransferData(DataFlavor.javaFileListFlavor); }
-        catch(Exception e) { System.err.println(e); }
-    return null;
 }
 
 /**
@@ -107,7 +86,7 @@ protected Transferable getTrans()
         return cb.getContents(null);
     }
     
-    else return _trans;
+    return _trans;
 }
 
 /**
@@ -117,8 +96,19 @@ protected DataFlavor getDataFlavor(String aName)
 {
     if(aName.equals(STRING)) return DataFlavor.stringFlavor;
     if(aName.equals(FILE_LIST)) return DataFlavor.javaFileListFlavor;
-    String name = aName; if(name.indexOf('/')<0) name = "text/" + name;
-    return new DataFlavor(name, aName);
+    return new DataFlavor(aName, aName);
+}
+
+/**
+ * Returns a dataflavor for a name.
+ */
+protected String getMIMEType(DataFlavor aFlavor)
+{
+    if(aFlavor.equals(DataFlavor.stringFlavor)) return STRING;
+    if(aFlavor.equals(DataFlavor.javaFileListFlavor)) return FILE_LIST;
+    String mtype = aFlavor.getMimeType();
+    if(mtype.indexOf(';')>0) mtype = mtype.substring(0,mtype.indexOf(';'));
+    return mtype;
 }
 
 /**
@@ -255,34 +245,32 @@ void setEvent(ViewEvent anEvent)
 /**
  * Transferable implementation to vend ClipboardData objects to/from Swing.
  */
-private class GenericTransferable implements Transferable {
+private class SnapTransferable implements Transferable {
     
-    // The list of content types and values
-    List <DataFlavor>     _types = new ArrayList();
-    List <ClipboardData>  _contents = new ArrayList();
-    
-    /** Creates a new editor clipboard for given xstring. */
-    public void addData(String aMimeType, ClipboardData aData)
+    /** Returns ClipboardData for given DataFlavor. */
+    public ClipboardData getData(DataFlavor aFlavor)
     {
-        DataFlavor df = getDataFlavor(aMimeType);
-        _types.add(df);
-        _contents.add(aData);
+        String mtype = getMIMEType(aFlavor);
+        return mtype!=null? getClipboardDatas().get(mtype) : null;
     }
     
-    /** Creates a new editor clipboard for given xstring. */
-    public ClipboardData getData(DataFlavor aDF)
+    /** Returns the supported flavors. */
+    public DataFlavor[] getTransferDataFlavors()
     {
-        for(int i=0;i<_types.size();i++) { DataFlavor df = _types.get(i);
-            if(df.equals(aDF))
-                return _contents.get(i); }
-        return null;
+        List <DataFlavor> flavors = new ArrayList();
+        for(String mtype : getClipboardDatas().keySet()) {
+            DataFlavor flavor = getDataFlavor(mtype);
+            if(flavor!=null) flavors.add(flavor);
+        }
+        return flavors.toArray(new DataFlavor[0]);
     }
-    
-    /** Returns the supported flavors: RMTextFlavor and stringFlavor. */
-    public DataFlavor[] getTransferDataFlavors() { return _types.toArray(new DataFlavor[0]); }
     
     /** Returns whether given flavor is supported. */
-    public boolean isDataFlavorSupported(DataFlavor aFlavor)  { return _types.contains(aFlavor); }
+    public boolean isDataFlavorSupported(DataFlavor aFlavor)
+    {
+        String mtype = getMIMEType(aFlavor);
+        return mtype!=null && getClipboardDatas().containsKey(mtype);
+    }
     
     /** Returns an inputstream with clipboard data for requested flavor. */
     public Object getTransferData(DataFlavor aFlavor) throws UnsupportedFlavorException, IOException

@@ -77,6 +77,11 @@ protected void addDataImpl(String aMimeType, ClipboardData theData)  { _cdatas.p
 public void clearData()  { _cdatas.clear(); }
 
 /**
+ * Returns the ClipboardDatas managed by this default implementation.
+ */
+public Map <String,ClipboardData> getClipboardDatas()  { return _cdatas; }
+
+/**
  * Returns the data for given MIME type as string.
  */
 public String getDataString(String aMimeType)
@@ -114,7 +119,8 @@ public boolean hasFiles()  { return hasData(FILE_LIST); }
  */
 public List <ClipboardData> getFiles()
 {
-    return null; //getContent(FILES, List.class);
+    ClipboardData cdata = getData(FILE_LIST);
+    return cdata!=null? cdata.getFiles() : null;
 }
 
 /**
@@ -122,10 +128,8 @@ public List <ClipboardData> getFiles()
  */
 public List <File> getJavaFiles()
 {
-    List <ClipboardData> cfiles = getFiles(); if(cfiles==null) return null;
-    List <File> jfiles = new ArrayList(cfiles.size());
-    for(ClipboardData cfile : cfiles) if(cfile.getSource() instanceof File) jfiles.add((File)cfile.getSource());
-    return jfiles;
+    ClipboardData cdata = getData(FILE_LIST);
+    return cdata!=null? cdata.getJavaFiles() : null;
 }
 
 /**

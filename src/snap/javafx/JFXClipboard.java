@@ -54,7 +54,7 @@ public Object getContent(String aName)
     if(aName.equals(FILE_LIST)) {
         List <File> jfiles = getClipboard().getFiles(); if(jfiles==null) return null;
         List <ClipboardData> cfiles = new ArrayList(jfiles.size());
-        for(File jfile : jfiles) cfiles.add(new ClipboardData(jfile));
+        for(File jfile : jfiles) cfiles.add(ClipboardData.get(jfile));
         return cfiles;
     }
     

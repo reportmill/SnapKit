@@ -1,5 +1,6 @@
 package snap.view;
 import java.io.*;
+import java.util.*;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.*;
@@ -16,7 +17,7 @@ public class ClipboardData {
     // A URL to the file contents
     WebURL         _srcURL;
     
-    // The file name
+    // The data name, if applicable
     String         _name;
     
     // The MIME type
@@ -71,12 +72,12 @@ public boolean isString()  { return _src instanceof String; }
 /**
  * Returns whether data is File list.
  */
-public boolean isFileList()  { return false; }
+public boolean isFileList()  { return _mimeType==Clipboard.FILE_LIST; }
 
 /**
  * Returns whether data is a File.
  */
-public boolean isFile()  { return false; }
+public boolean isFile()  { return !isString() && !isFileList(); }
 
 /**
  * Returns the file name.
@@ -155,9 +156,25 @@ public byte[] getBytes()
 public InputStream getInputStream()  { return new ByteArrayInputStream(getBytes()); }
 
 /**
- * Returns a conventional file, if available.
+ * Returns the data as a list of files.
  */
-public File getFile()  { return _src instanceof File? (File)_src : null; }
+public List <ClipboardData> getFiles()
+{
+    return new ArrayList();
+}
+
+/**
+ * Returns a conventional Java file, if available.
+ */
+public File getJavaFile()  { return _src instanceof File? (File)_src : null; }
+
+/**
+ * Returns the data as list of Java files.
+ */
+public List <File> getJavaFiles()
+{
+    return _src instanceof List? (List)_src : null;
+}
 
 /**
  * Returns a ClipboardData for given object.
@@ -169,9 +186,14 @@ public static ClipboardData get(Object theData)
         return new ClipboardData(Clipboard.STRING, theData);
         
     // Handle File List
-    //if(theData instanceof List) { List list = (List)theData;
-    //    if(list.size()>0)
-    //}
+    if(theData instanceof List) { List list = (List)theData; Object item0 = list.size()>0? list.get(0) : null;
+        if(item0 instanceof File || item0 instanceof WebURL)
+            return new ClipboardData(Clipboard.FILE_LIST, list);
+    }
+    
+    // Handle File array
+    if(theData instanceof File[]) { File files[] = (File[])theData;
+        return new ClipboardData(Clipboard.FILE_LIST, Arrays.asList(files)); }
     
     // Handle Image
     if(theData instanceof Image) { Image img = (Image)theData;
