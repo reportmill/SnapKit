@@ -189,11 +189,7 @@ public BufferedImage getNative()
     InputStream istream = new ByteArrayInputStream(bytes);
     
     // Read file
-    try {
-        _native = ImageIO.read(istream);
-        getDPI(bytes);
-        return _native;
-    }
+    try { _native = ImageIO.read(istream); }
     catch(IOException e)  { System.err.println(e); return null; }
     catch(SecurityException e) {
         if(ImageIO.getUseCache()) {
@@ -203,6 +199,13 @@ public BufferedImage getNative()
         }
         throw e;
     }
+    
+    // Read DPI
+    try { getDPI(bytes); }
+    catch(Exception e) { System.err.println("J2DImage.getDPI: " + e); }
+    
+    // Return native
+    return _native;
 }
 
 /**
