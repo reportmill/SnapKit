@@ -161,10 +161,9 @@ public InputStream getInputStream()  { return new ByteArrayInputStream(getBytes(
 public List <ClipboardData> getFiles()
 {
     List files = new ArrayList();
-    if(_src instanceof List) { List <File> list = (List)_src;
-        for(File file : list)
-            files.add(ClipboardData.get(file));
-    }
+    if(_src instanceof List) { List list = (List)_src;
+        for(Object file : list)
+            files.add(ClipboardData.get(file)); }
     return files;
 }
 
@@ -186,6 +185,10 @@ public List <File> getJavaFiles()
  */
 public static ClipboardData get(Object theData)
 {
+    // Handle ClipboardData
+    if(theData instanceof ClipboardData)
+        return (ClipboardData)theData;
+        
     // Handle String
     if(theData instanceof String)
         return new ClipboardData(Clipboard.STRING, theData);
