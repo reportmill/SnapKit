@@ -61,8 +61,15 @@ public void addData(Object theData)
  */
 public void addData(String aMimeType, Object theData)
 {
+    // Sanity check MIMEType should have / char
+    if(aMimeType.indexOf('/')<0) {
+        System.err.println("Clipboard.addData: invalid MIME type format: " + aMimeType); return; }
+        
+    // Get ClipboardData for given MIME type and data
     ClipboardData cdata = theData instanceof ClipboardData? (ClipboardData)theData :
         new ClipboardData(aMimeType, theData);
+        
+    // Call real addData() implementation
     addDataImpl(aMimeType, cdata);
 }
 

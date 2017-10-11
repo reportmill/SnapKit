@@ -1,5 +1,4 @@
 package snap.javafx;
-import java.io.File;
 import java.util.*;
 import javafx.scene.input.*;
 import snap.gfx.Point;
@@ -39,39 +38,40 @@ public JFXClipboard(View aView, ViewEvent anEvent)  { _view = aView; _event = (J
 /**
  * Returns the clipboard content.
  */
-public boolean hasContent(String aName)
+protected boolean hasDataImpl(String aMIMEType)
 {
-    DataFormat df = getDataFormat(aName);
+    DataFormat df = getDataFormat(aMIMEType);
     return getClipboard().hasContent(df);
 }
 
 /**
  * Returns the clipboard content.
  */
-public Object getContent(String aName)
+protected ClipboardData getDataImpl(String aMIMEType)
 {
-    // Handle FILES
-    if(aName.equals(FILE_LIST)) {
-        List <File> jfiles = getClipboard().getFiles(); if(jfiles==null) return null;
-        List <ClipboardData> cfiles = new ArrayList(jfiles.size());
-        for(File jfile : jfiles) cfiles.add(ClipboardData.get(jfile));
-        return cfiles;
-    }
-    
-    DataFormat df = getDataFormat(aName);
+    DataFormat df = getDataFormat(aMIMEType);
     Object content = getClipboard().getContent(df);
-    //if(aName.equals(IMAGE) && content instanceof javafx.scene.image.Image) content = Image.get(content);
-    //if(aName.equals(COLOR) && content instanceof String) content = Color.get(content);
-    return content;
+    return new ClipboardData(aMIMEType, content);
 }
 
 /**
  * Sets the clipboard content.
  */
-public void setContent(String aMIMEType, Object theData)
+protected void addDataImpl(String aMIMEType, ClipboardData aData)
 {
+    // Do normal version
+    super.addDataImpl(aMIMEType, aData);
+    
+    // Create map of content types for JavaFX
     Map <DataFormat,Object> content = new HashMap();
-    content.put(getDataFormat(aMIMEType), theData);
+    for(String mtype : getClipboardDatas().keySet()) {
+        DataFormat df = getDataFormat(mtype);
+        ClipboardData cdata = getClipboardDatas().get(mtype);
+        Object data = cdata.isString()? cdata.getString() : cdata.isFileList()? cdata.getJavaFiles() :
+            cdata.getBytes();
+        content.put(df, data);
+    }
+    
     getClipboard().setContent(content);
 }
 
@@ -90,11 +90,12 @@ protected DataFormat getDataFormat(String aName)
  */
 protected DataFormat getDataFormatImpl(String aName)
 {
+    // Map STRING and FILE_LIST to standard flavors
     if(aName.equals(STRING)) return DataFormat.PLAIN_TEXT;
     if(aName.equals(FILE_LIST)) return DataFormat.FILES;
-    //if(aName.equals(IMAGE)) return DataFormat.IMAGE;
-    String name = aName; if(name.indexOf('/')<0) name = "text/" + name;
-    return new DataFormat(name, aName);
+    
+    // For all others, create DataFormat
+    return new DataFormat(aName, aName);
 }
 
 /**

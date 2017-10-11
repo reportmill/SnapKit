@@ -37,7 +37,10 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
  */
 protected boolean hasDataImpl(String aMIMEType)
 {
+    // Get DataFlavor for MIME type
     DataFlavor df = getDataFlavor(aMIMEType);
+    
+    // Return whether transferable supports DataFlavor
     Transferable trans = getTrans();
     return trans!=null && trans.isDataFlavorSupported(df);
 }
@@ -47,13 +50,15 @@ protected boolean hasDataImpl(String aMIMEType)
  */
 protected ClipboardData getDataImpl(String aMIMEType)
 {
-    // Get raw data for type
+    // Get DataFlavor for MIME type
     DataFlavor df = getDataFlavor(aMIMEType);
+    
+    // Get raw data for DataFlavor from transferable
     Transferable trans = getTrans();
     Object data = null; try { data = trans.getTransferData(df); }
     catch(Exception e) { throw new RuntimeException(e); }
     
-    // Return ClipboardData
+    // Return ClipboardData for data
     return new ClipboardData(aMIMEType, data);
 }
 
@@ -62,7 +67,7 @@ protected ClipboardData getDataImpl(String aMIMEType)
  */
 protected void addDataImpl(String aMIMEType, ClipboardData aData)
 {
-    // Do normal implementation
+    // Do normal implementation to populate ClipboardDatas map
     super.addDataImpl(aMIMEType, aData);
     
     // Create transferable and set
@@ -77,11 +82,13 @@ protected void addDataImpl(String aMIMEType, ClipboardData aData)
  */
 protected Transferable getTrans()
 {
+    // If this Clipboard is System Clipboard, get transferable from System Clipboard
     if(this==_shared) {
         java.awt.datatransfer.Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
         return cb.getContents(null);
     }
     
+    // Otherwise, return transferable (assumed to be set by last addData call)
     return _trans;
 }
 
@@ -90,8 +97,11 @@ protected Transferable getTrans()
  */
 protected DataFlavor getDataFlavor(String aName)
 {
+    // Map STRING and FILE_LIST to standard flavors
     if(aName.equals(STRING)) return DataFlavor.stringFlavor;
     if(aName.equals(FILE_LIST)) return DataFlavor.javaFileListFlavor;
+    
+    // For all others, create flavor
     return new DataFlavor(aName, aName);
 }
 
@@ -100,8 +110,11 @@ protected DataFlavor getDataFlavor(String aName)
  */
 protected String getMIMEType(DataFlavor aFlavor)
 {
+    // Map StringFlavor and JavaFileListFlavor to STRING/FILE_LIST
     if(aFlavor.equals(DataFlavor.stringFlavor)) return STRING;
     if(aFlavor.equals(DataFlavor.javaFileListFlavor)) return FILE_LIST;
+    
+    // Otherwise get Mimetype and return it
     String mtype = aFlavor.getMimeType();
     if(mtype.indexOf(';')>0) mtype = mtype.substring(0,mtype.indexOf(';'));
     return mtype;
@@ -243,21 +256,17 @@ void setEvent(ViewEvent anEvent)
  */
 private class SnapTransferable implements Transferable {
     
-    /** Returns ClipboardData for given DataFlavor. */
-    public ClipboardData getData(DataFlavor aFlavor)
-    {
-        String mtype = getMIMEType(aFlavor);
-        return mtype!=null? getClipboardDatas().get(mtype) : null;
-    }
-    
     /** Returns the supported flavors. */
     public DataFlavor[] getTransferDataFlavors()
     {
+        // Get list of DataFlavors from ClipboardDatas
         List <DataFlavor> flavors = new ArrayList();
         for(String mtype : getClipboardDatas().keySet()) {
             DataFlavor flavor = getDataFlavor(mtype);
             if(flavor!=null) flavors.add(flavor);
         }
+        
+        // Return as array
         return flavors.toArray(new DataFlavor[0]);
     }
     
@@ -272,7 +281,8 @@ private class SnapTransferable implements Transferable {
     public Object getTransferData(DataFlavor aFlavor) throws UnsupportedFlavorException, IOException
     {
         // Get ClipboardData for flavor
-        ClipboardData data = getData(aFlavor);
+        String mtype = getMIMEType(aFlavor);
+        ClipboardData data = mtype!=null? getClipboardDatas().get(mtype) : null;
         if(data==null)
             throw new UnsupportedFlavorException(aFlavor);
             
