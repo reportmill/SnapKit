@@ -483,7 +483,7 @@ public void clear()  { delete(0, length(), true); }
  */
 protected void paintBack(Painter aPntr)
 {
-    double w = getWidth(), h = getHeight(); aPntr.clearRect(0,0,w,h);
+    double w = getWidth(), h = getHeight(); //aPntr.clearRect(0,0,w,h);
     RoundRect rrect = new RoundRect(.5, .5, w-1, h-1, _rad);
     aPntr.setPaint(getFill()); aPntr.fill(rrect);
     aPntr.setColor(isFocused()? FOCUSED_COLOR : Color.LIGHTGRAY);

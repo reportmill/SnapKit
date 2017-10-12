@@ -63,7 +63,6 @@ public void setCancelButton(boolean aValue)
 public void paintFront(Painter aPntr)
 {
     if(isShowBorder() && isDefaultButton()) {
-        aPntr.clearRect(0,0,getWidth(),getHeight());
         int state = isPressed()? Painter.BUTTON_PRESSED : _targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
         paintDefaultButton(aPntr, 0,0,getWidth(),getHeight(), state);
     }

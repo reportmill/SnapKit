@@ -19,7 +19,7 @@ protected void paintFront(Painter aPntr)
 {
     double w = getWidth(), h = getHeight();
     Insets ins = getInsetsAll(); double px = ins.left, py = ins.top, pw = w - px - ins.right, ph = h - py - ins.bottom;
-    aPntr.clearRect(0,0,w,h); aPntr.setStroke(Stroke.Stroke1);
+    aPntr.setStroke(Stroke.Stroke1);
 
     if(isHorizontal()) {
         double ly = Math.floor(py+ph/2) + .5;
