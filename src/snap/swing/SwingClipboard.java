@@ -292,7 +292,7 @@ private class SnapTransferable implements Transferable {
             
         // Handle File list
         if(data.isFileList())
-            return null;
+            return data.getJavaFiles();
             
         // Otherwise, return input stream
         return data.getInputStream();
