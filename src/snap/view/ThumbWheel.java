@@ -450,7 +450,7 @@ private Image getThumbWheelBackgroundImage()
     // If Horizontal: Draw top 2 points brighter, middle normal and bottom darker
     if(isHorizontal()) {
         drawGradient(pntr, 2, 2, w-4, 2, color.brighter());
-        drawGradient(pntr, 2, 4, w-4, h-4, color);
+        drawGradient(pntr, 2, 4, w-4, h-8, color);
         drawGradient(pntr, 2, h-4, w-4, 2, color.darker());
     }
     
@@ -477,7 +477,7 @@ private void drawGradient(Painter aPntr, double aX, double aY, double aW, double
     double radius = (length-1)/2f, radiusSquared = radius*radius;
 
     // Fill strip image with color components for each point along the thumbWheelLength
-    Image strip = Image.get((int)getWidth(), 1, false); Painter spntr = strip.getPainter();
+    Image strip = Image.get((int)aW, 1, false); Painter spntr = strip.getPainter();
     for(int i=0; i<length; i++) {
 
         // Calculate the height of the thumbwheel at current point
