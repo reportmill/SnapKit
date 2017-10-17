@@ -1098,7 +1098,17 @@ protected double getPrefHeightImpl(double aW)
 {
     checkFont();
     Insets ins = getInsetsAll();
-    return ins.top + getTextBox().getPrefHeight() + ins.bottom;
+    
+    // If given width not current width, update TextBox.Bounds
+    if(isWrapText() && !MathUtils.equals(aW,getWidth())) {
+        double w = aW<=0? Float.MAX_VALUE : aW; w -= ins.left + ins.right;
+        Rect tbnds = getTextBoxBounds(); tbnds.width = w;
+        getTextBox().setBounds(tbnds);
+    }
+    
+    // Return TextBox PrefHeight plus insets
+    double ph =  getTextBox().getPrefHeight();
+    return ins.top + ph + ins.bottom;
 }
 
 /**
