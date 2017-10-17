@@ -373,8 +373,8 @@ protected void scrollSelToVisible()
  */
 public Font getFont()
 {
-    if(isPlainText()) return _font!=null? _font : getDefaultFont();
-    return getInputStyle().getFont();
+    if(isRich()) return getInputStyle().getFont();
+    return super.getFont();
 }
 
 /**
@@ -382,16 +382,8 @@ public Font getFont()
  */
 public void setFont(Font aFont)
 {
+    super.setFont(aFont);
     setInputStyleValue(TextStyle.FONT_KEY, aFont);
-    if(isPlainText()) _font = aFont.equals(getDefaultFont())? null : aFont;
-}
-
-// Bogus font to work with fonts normally when not rich
-Font _font;
-protected void checkFont()
-{
-    if(!isPlainText()) return;
-    if(!getFont().equals(getInputStyle().getFont())) setInputStyleValue(TextStyle.FONT_KEY, getFont());
 }
 
 /**
@@ -1086,7 +1078,6 @@ protected void textDidChange()
  */
 protected double getPrefWidthImpl(double aH)
 {
-    checkFont();
     Insets ins = getInsetsAll();
     return ins.left + getTextBox().getPrefWidth() + ins.right;
 }
@@ -1096,7 +1087,6 @@ protected double getPrefWidthImpl(double aH)
  */
 protected double getPrefHeightImpl(double aW)
 {
-    checkFont();
     Insets ins = getInsetsAll();
     
     // If given width not current width, update TextBox.Bounds
@@ -1110,11 +1100,6 @@ protected double getPrefHeightImpl(double aW)
     double ph =  getTextBox().getPrefHeight();
     return ins.top + ph + ins.bottom;
 }
-
-/**
- * Layout children.
- */
-protected void layoutImpl()  { checkFont(); }
 
 /**
  * Override to update getTextBlock.Rect.
@@ -1141,6 +1126,19 @@ protected Rect getTextBoxBounds()
  * Sets the Text.Rect from text area.
  */
 protected void setTextBoxBounds()  { getTextBox().setBounds(getTextBoxBounds()); }
+
+/**
+ * Override to update font.
+ */
+protected void setParent(ParentView aPar)
+{
+    // Do normal version
+    super.setParent(aPar);
+    
+    // If PlainText, update to to parent (should probably watch parent Font_Prop change as well)
+    if(isPlainText() && !isFontSet() && !getFont().equals(getInputStyle().getFont()))
+        setInputStyleValue(TextStyle.FONT_KEY, getFont());
+}
 
 /**
  * Override to check caret animation and scrollSelToVisible when showing.

@@ -569,6 +569,11 @@ public double getOpacityAll()
 }
 
 /**
+ * Returns whether font has been explicitly set for this view.
+ */
+public boolean isFontSet()  { return _font!=null; }
+
+/**
  * Returns the font for the view (defaults to parent font).
  */
 public Font getFont()  { return _font!=null? _font : getDefaultFont(); }
