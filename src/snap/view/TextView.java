@@ -314,16 +314,16 @@ public void setSel(int aStart, int aEnd)
     int len = length(), anchor = Math.min(aStart,len), index = Math.min(aEnd,len);
     if(anchor==_selAnchor && index==_selIndex) return;
     
-    // Set values
+    // Repaint old selection
+    if(isShowing()) repaintSel();
+    
+    // Set new values
     _selAnchor = aStart; _selIndex = aEnd;
     _selStart = Math.min(aStart, aEnd); _selEnd = Math.max(aStart, aEnd);
     
     // Fire selection property change and clear selection
     firePropChange(Selection_Prop, _sel, _sel=null);
 
-    // Get old selection shape
-    if(isShowing()) repaintSel();
-    
     // Reset InputStyle
     _inputStyle = null;
     
