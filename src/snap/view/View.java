@@ -1363,12 +1363,12 @@ public void setPrefSize(double aWidth, double aHeight)  { setPrefWidth(aWidth); 
 /**
  * Returns the best width for view - accounting for pref/min/max.
  */
-public double getBestWidth(double aH)  { return MathUtils.clamp(getPrefWidth(), getMinWidth(), getMaxWidth()); }
+public double getBestWidth(double aH)  { return MathUtils.clamp(getPrefWidth(aH), getMinWidth(), getMaxWidth()); }
 
 /**
  * Returns the best height for view - accounting for pref/min/max.
  */
-public double getBestHeight(double aW)  { return MathUtils.clamp(getPrefHeight(), getMinHeight(), getMaxHeight()); }
+public double getBestHeight(double aW)  { return MathUtils.clamp(getPrefHeight(aW), getMinHeight(), getMaxHeight()); }
 
 /**
  * Returns the best size.

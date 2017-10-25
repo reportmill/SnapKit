@@ -74,16 +74,6 @@ public void layoutChildren()
 public void layoutChildren(double px, double py, double pw, double ph)  { }
 
 /**
- * Returns the right size for a view.
- */
-protected double getBestWidth(View aView, double aH)  { return Math.max(aView.getPrefWidth(aH), aView.getMinWidth()); }
-
-/**
- * Returns the right size for a view.
- */
-protected double getBestHeight(View aView, double aW) { return Math.max(aView.getPrefHeight(aW),aView.getMinHeight()); }
-    
-/**
  * Returns the align x factor.
  */
 protected double getAlignX(View aView)
@@ -173,7 +163,7 @@ public static class BoxLayout extends ViewLayout {
         // Otherwise, return pref size based on child
         Insets ins = getInsets(); View child = getContent();
         double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
-        double w = child!=null? getBestWidth(child, h) : 0;
+        double w = child!=null? child.getBestWidth(h) : 0;
         return ins.left + w + ins.right;
     }
     
@@ -186,7 +176,7 @@ public static class BoxLayout extends ViewLayout {
         // Otherwise, return pref size based on child
         Insets ins = getInsets(); View child = getContent();
         double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
-        double h = child!=null? getBestHeight(child, w) : 0;
+        double h = child!=null? child.getBestHeight(w) : 0;
         return ins.top + h + ins.bottom;
     }
     
@@ -198,8 +188,8 @@ public static class BoxLayout extends ViewLayout {
         
         // Otherwise do normal layout
         View child = getContent(); if(child==null) return;
-        double cw = _fillWidth? pw : Math.min(getBestWidth(child, -1), pw);
-        double ch = _fillHeight? ph : Math.min(getBestHeight(child, cw), ph);
+        double cw = _fillWidth? pw : Math.min(child.getBestWidth(-1), pw);
+        double ch = _fillHeight? ph : Math.min(child.getBestHeight(cw), ph);
         double dx = pw - cw, dy = ph - ch;
         double sx = child.getLeanX()!=null? getLeanX(child) : getAlignX(_parent);
         double sy = child.getLeanY()!=null? getLeanY(child) : getAlignY(_parent);
@@ -300,7 +290,7 @@ public static class HBoxLayout extends ViewLayout {
     {
         Insets ins = getInsets(); View children[] = getChildren(); int ccount = children.length;
         double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
-        double w = 0; for(View child : children) w += getBestWidth(child, h); if(ccount>1) w += (ccount-1)*_spacing;
+        double w = 0; for(View child : children) w += child.getBestWidth(h); if(ccount>1) w += (ccount-1)*_spacing;
         return w + ins.left + ins.right;
     }
     
@@ -309,7 +299,7 @@ public static class HBoxLayout extends ViewLayout {
     {
         Insets ins = getInsets(); View children[] = getChildren();
         double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
-        double h = 0; for(View child : children) h = Math.max(h, getBestHeight(child, w));
+        double h = 0; for(View child : children) h = Math.max(h, child.getBestHeight(w));
         return h + ins.top + ins.bottom;
     }
         
@@ -319,16 +309,15 @@ public static class HBoxLayout extends ViewLayout {
         View children[] = getChildren(); int ccount = children.length; if(ccount==0) return;
         Rect cbnds[] = new Rect[children.length];
         double cx = px, ay = getAlignY(_parent);
-        boolean dividers = false;
         int grow = 0;
         
         // Layout children
         for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i];
-            double cw = getBestWidth(child, -1), cy = py;
-            double ch = _fillOut || child.isGrowHeight()? ph : Math.min(getBestHeight(child, cw), ph);
+            double ch = _fillOut || child.isGrowHeight()? ph : Math.min(child.getBestHeight(-1), ph);
+            double cw = child.getBestWidth(ch), cy = py;
             if(ph>ch && !_fillOut) { double ay2 = Math.max(ay,getLeanY(child)); cy += Math.round((ph-ch)*ay2); }
             cbnds[i] = new Rect(cx, cy, cw, ch); cx += cw + _spacing;
-            if(child instanceof Divider) dividers = true; if(child.isGrowWidth()) grow++;
+            if(child.isGrowWidth()) grow++;
         }
         
         // Calculate extra space
@@ -354,7 +343,6 @@ public static class HBoxLayout extends ViewLayout {
         // Reset children bounds
         setBounds(children, cbnds);
     }
-    
 }
 
 /**
@@ -388,7 +376,7 @@ public static class VBoxLayout extends ViewLayout {
     {
         Insets ins = getInsets(); View children[] = getChildren();
         double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
-        double w = 0; for(View child : children) w = Math.max(w, getBestWidth(child, h));
+        double w = 0; for(View child : children) w = Math.max(w, child.getBestWidth(h));
         return w + ins.left + ins.right;
     }
     
@@ -397,7 +385,7 @@ public static class VBoxLayout extends ViewLayout {
     {
         Insets ins = getInsets(); View children[] = getChildren(); int ccount = children.length;
         double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
-        double h = 0; for(View child : children) h += getBestHeight(child, w); if(ccount>1) h += (ccount-1)*_spacing;
+        double h = 0; for(View child : children) h += child.getBestHeight(w); if(ccount>1) h += (ccount-1)*_spacing;
         return h + ins.top + ins.bottom;
     }
         
@@ -407,16 +395,15 @@ public static class VBoxLayout extends ViewLayout {
         View children[] = getChildren(); int ccount = children.length; if(ccount==0) return;
         Rect cbnds[] = new Rect[children.length];
         double cy = py, ax = getAlignX(_parent);
-        boolean dividers = false;
         int grow = 0;
         
         // Layout children
         for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i];
-            double cw = _fillOut || child.isGrowWidth()? pw : Math.min(getBestWidth(child, -1), pw);
-            double ch = getBestHeight(child, cw), cx = px;
+            double cw = _fillOut || child.isGrowWidth()? pw : Math.min(child.getBestWidth(-1), pw);
+            double ch = child.getBestHeight(cw), cx = px;
             if(pw>cw && !_fillOut) { double ax2 = Math.max(ax,getLeanX(child)); cx += Math.round((pw-cw)*ax2); }
             cbnds[i] = new Rect(cx,cy,cw,ch); cy += ch + _spacing;
-            if(child instanceof Divider) dividers = true; if(child.isGrowHeight()) grow++;
+            if(child.isGrowHeight()) grow++;
         }
         
         // Calculate extra space (return if none)
@@ -584,7 +571,7 @@ public static class StackLayout extends ViewLayout {
     {
         Insets ins = getInsets(); View children[] = getChildren();
         double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
-        double w = 0; for(View child : children) w = Math.max(w, getBestWidth(child, h));
+        double w = 0; for(View child : children) w = Math.max(w, child.getBestWidth(h));
         return ins.left + w + ins.right;
     }
     
@@ -593,7 +580,7 @@ public static class StackLayout extends ViewLayout {
     {
         Insets ins = getInsets(); View children[] = getChildren();
         double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
-        double h = 0; for(View child : children) h = Math.max(h, getBestHeight(child, w));
+        double h = 0; for(View child : children) h = Math.max(h, child.getBestHeight(w));
         return ins.top + h + ins.bottom;
     }
     
@@ -605,8 +592,8 @@ public static class StackLayout extends ViewLayout {
         // Layout children
         View children[] = getChildren();
         for(View child : children) {
-            double cw = _fillWidth || child.isGrowWidth()? pw : Math.min(getBestWidth(child, -1), pw);
-            double ch = _fillHeight || child.isGrowHeight()? ph : Math.min(getBestHeight(child, -1), ph);
+            double cw = _fillWidth || child.isGrowWidth()? pw : Math.min(child.getBestWidth(-1), pw);
+            double ch = _fillHeight || child.isGrowHeight()? ph : Math.min(child.getBestHeight(-1), ph);
             double cx = px, cy = py;
             if(pw>cw) { double ax2 = child.getLeanX()!=null? getLeanX(child) : ax;
                 cx += Math.round((pw-cw)*ax2); }
