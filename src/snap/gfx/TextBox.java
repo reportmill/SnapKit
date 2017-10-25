@@ -14,9 +14,6 @@ public class TextBox implements PropChangeListener {
     // The RichText
     RichText             _text;
     
-    // The TextBox length as currently configured
-    int                  _boxlen;
-    
     // The bounds of the text block
     double               _x, _y, _width, _height;
     
@@ -326,7 +323,12 @@ public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
 /**
  * Returns the current box length (could be out of sync with text).
  */
-protected int boxlen()  { return _boxlen; }
+protected int boxlen()
+{
+    int lcount = getLineCount(); if(lcount==0) return 0;
+    int start = getStart(), end = getLineLast().getEnd();
+    return end - start;
+}
 
 /**
  * Returns the number of lines in this text.
@@ -451,7 +453,7 @@ protected void update()
     
     // Get count, start and end of currently configured lines
     int lcount = _lines.size();
-    int lstart = lcount>0? _lines.get(0).getStart() : getStart();
+    int lstart = getStart();
     int lend = lcount>0? _lines.get(lcount-1).getEnd() : getStart();
     
     // Get update start, linesEnd and textEnd to synchronize lines to text
@@ -471,49 +473,24 @@ protected void update()
  */
 protected void updateLines(int aStart, int linesEnd, int textEnd)
 {
-    // Modify params for text box start
-    int tbstart = getStart(), lcount = getLineCount();
+    // Reset AlignY offset
     _alignedY = 0;
     
-    // Remove lines for old range RichTextLines
+    // Get start-line-index and start-char-index
+    int lcount = getLineCount();
     int sline = lcount>0? getLineAt(aStart).getIndex() : 0;
-    int eline = lcount>0? getLineAt(linesEnd).getIndex() : -1;
-    while(eline+1<lcount && getLine(eline+1).getRichTextLine()==getLine(eline).getRichTextLine()) eline++;
-    for(int i=eline;i>=sline;i--) aStart = Math.min(_lines.remove(i).getStart(), aStart);
+    int start = lcount>0? getLine(sline).getStart() : aStart;
     
-    // Add lines for updated RichTextLines
-    int start = Math.max(aStart, tbstart); if(start>length()) return;
-    int startRTL = getText().getLineAt(start).getIndex(), endRTL = getText().getLineAt(textEnd).getIndex();
-    for(int i=startRTL, lindex=sline;i<=endRTL;i++) { RichTextLine rtl = getText().getLine(i);
-        int lstart = Math.max(start-rtl.getStart(),0); if(lstart==rtl.length()) continue;
-        List <TextBoxLine> lines = createLines(rtl, lindex, lstart);
-        for(TextBoxLine line : lines) { line._index = lindex;
-            if((isLinked() || _bpath!=null) && line.getMaxY()>getMaxY()) {
-                i = Short.MAX_VALUE; break; }
-            _lines.add(lindex++, line);
-        }
-    }
+    // Remove lines for old range
+    removeLines(aStart, linesEnd);
     
-    // If we added last line and it is empty or ends with newline, add blank line
-    if(endRTL==getText().getLineCount()-1) {
-        RichTextLine rtl = getText().getLine(endRTL); if(rtl.length()==0 || rtl.isLastCharNewline()) {
-            TextBoxLine line = createLines(rtl, getLineCount(), rtl.length()).get(0); line._index = getLineCount();
-            if(!((isLinked() || _bpath!=null) && line.getMaxY()>getMaxY())) _lines.add(line); }
-    }
+    // Add lines for new range
+    addLines(sline, start, textEnd);
     
-    // Iterate over lines beyond BaseLine and update Index, Start, Length and Y
-    TextBoxLine baseLine = sline>0? getLine(sline-1) : null;
-    _boxlen = baseLine!=null? baseLine.getEnd() - getLine(0).getStart() : 0;
+    // Iterate over lines beyond start line and update lines Index, Start and Y_Local
+    int len = sline>0? getLine(sline-1).getEnd() : 0;
     for(int i=sline, iMax=_lines.size(); i<iMax; i++) { TextBoxLine line = getLine(i);
-        line._index = i; line._start = _boxlen + tbstart; _boxlen += line.length(); line._yloc = -1; }
-        
-    // This check can go after testing period
-    if((!isLinked() && _bpath==null) && getEnd()!=_text.length()) {
-        int blen = getEnd(), tlen = _text.length(), lcnt = getLineCount();
-        int bstr = lcnt>0? getLine(0).getStart() : getStart(), bend = lcnt>0? getLine(lcnt-1).getEnd() : getStart();
-        String str = "BoxLen: " + blen + ", TextLen: " + tlen + ", Bstrt: " + bstr + ", Bend: " + bend;
-        System.err.println("TextBox: Invalid State: " + str); //throw new RuntimeException("TextBox: Invalid State: " + str);
-    }
+        line._index = i; line._start = len; len += line.length(); line._yloc = -1; }
         
     // Calculated aligned Y
     if(_alignY!=VPos.TOP) {
@@ -523,9 +500,66 @@ protected void updateLines(int aStart, int linesEnd, int textEnd)
 }
 
 /**
- * Create and return TextBoxLines for given RichTextLine with line index and start char index.
+ * Removes the lines from given char index to given char index.
  */
-protected List <TextBoxLine> createLines(RichTextLine aTextLine, int aLineIndex, int aStart)
+protected void removeLines(int aStart, int aEnd)
+{
+    // Get LineCount, start-line-index and end-line-index
+    int lcount = getLineCount(); if(lcount==0) return;
+    int sline = getLineAt(aStart).getIndex();
+    int eline = getLineAt(aEnd).getIndex();
+    
+    // Extend end-line-index to end of RichTextLine
+    RichTextLine endRTL = getLine(eline).getRichTextLine();
+    while(eline+1<lcount && getLine(eline+1).getRichTextLine()==endRTL) eline++;
+    
+    // Remove lines in range
+    for(int i=eline;i>=sline;i--) _lines.remove(i);
+}
+
+/**
+ * Removes the lines from given char index to given char index.
+ */
+protected void addLines(int aLineIndex, int aStart, int aEnd)
+{
+    // Get start char index
+    int lcount = getLineCount();
+    int start = Math.max(aStart, getStart()); if(start>length()) return;
+    
+    // Get RichText start-line-index, end-line-index
+    int startRTL = getText().getLineAt(start).getIndex();
+    int endRTL = getText().getLineAt(aEnd).getIndex();
+    
+    // Iterate over RichText lines, create TextBox lines and add
+    for(int i=startRTL, lindex=aLineIndex;i<=endRTL;i++) { RichTextLine rtl = getText().getLine(i);
+    
+        // Get start-char-index for line
+        int lstart = Math.max(start-rtl.getStart(),0); if(lstart==rtl.length()) continue;
+        
+        // Add TextBoxLine(s) for RichTextLine
+        while(lstart<rtl.length()) {
+            TextBoxLine line = createLine(rtl, lstart, lindex);
+            if((isLinked() || _bpath!=null) && line.getMaxY()>getMaxY()) { i = Short.MAX_VALUE; break; }
+            _lines.add(lindex++, line);
+            lstart += line.length();
+        }
+    }
+    
+    // If we added last line and it is empty or ends with newline, add blank line
+    if(endRTL==getText().getLineCount()-1) {
+        RichTextLine rtl = getText().getLine(endRTL);
+        if(rtl.length()==0 || rtl.isLastCharNewline()) {
+            TextBoxLine line = createLine(rtl, rtl.length(), getLineCount());
+            if(!((isLinked() || _bpath!=null) && line.getMaxY()>getMaxY()))
+                _lines.add(line);
+        }
+    }
+}
+
+/**
+ * Create and return TextBoxLines for given RichTextLine, start char index and line index.
+ */
+protected TextBoxLine createLine(RichTextLine aTextLine, int aStart, int aLineIndex)
 {
     // Get iteration variables
     int start = aStart, len = aTextLine.length(), lineStart = aStart;
@@ -541,8 +575,8 @@ protected List <TextBoxLine> createLines(RichTextLine aTextLine, int aLineIndex,
     double w = 0, cspace = style.getCharSpacing(); char c;
     
     // Create lines list and create/add first line
-    TextBoxLine line = new TextBoxLine(this, style, aTextLine, aStart); line._yloc = y - getY();
-    List <TextBoxLine> lines = new ArrayList(); lines.add(line);
+    TextBoxLine line = new TextBoxLine(this, style, aTextLine, aStart);
+    line._yloc = y - getY();
     
     // Iterate over line chars
     while(start<len) {
@@ -589,15 +623,9 @@ protected List <TextBoxLine> createLines(RichTextLine aTextLine, int aLineIndex,
                     while(isHitRight(x+w-cspace,y,lineHt) && end>lineStart+1) {
                         --end; w -= style.getCharAdvance(aTextLine.charAt(end)) + cspace; }
 
-                // If no hyphen, create and add new line. If token doesn't fit on new line, shorten until it does
-                else if(!didHyph) {
-                    line.resetSizes(); y += line.getLineAdvance();
-                    lines.add(line = new TextBoxLine(this, style, aTextLine, start)); line._yloc = y - getY();
-                    lineStart = start;
-                    x = getMinHitX(y,lineHt); while(x>getWidth()) { y++; x = getMinHitX(y,lineHt); }
-                    while(isHitRight(w-cspace,y,lineHt) && end>lineStart+1) {
-                        --end; w -= style.getCharAdvance(aTextLine.charAt(end)) + cspace; }
-                }
+                // If no hyphen, break
+                else if(!didHyph)
+                    break;
             }
             
             // Create new token and add to line
@@ -609,8 +637,8 @@ protected List <TextBoxLine> createLines(RichTextLine aTextLine, int aLineIndex,
     }
     
     // Reset sizes and return
-    line.resetSizes(); line._yloc = y - getY();
-    return lines;
+    line.resetSizes();
+    return line;
 }
 
 /**
