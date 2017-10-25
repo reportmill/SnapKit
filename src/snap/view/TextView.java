@@ -29,11 +29,11 @@ public class TextView extends ParentView implements PropChangeListener {
     // Whether the editor is word selecting (double click) or paragraph selecting (triple click)
     boolean               _wordSel, _pgraphSel;
     
+    // The current TextStyle for the cursor or selection
+    TextStyle             _selStyle;
+    
     // The Selection color
     Color                 _selColor = new Color(181, 214, 254, 255);
-    
-    // The current TextStyle for the cursor or selection
-    TextStyle             _inputStyle;
     
     // The text pane undoer
     Undoer                _undoer = new Undoer();
@@ -324,8 +324,8 @@ public void setSel(int aStart, int aEnd)
     // Fire selection property change and clear selection
     firePropChange(Selection_Prop, _sel, _sel=null);
 
-    // Reset InputStyle
-    _inputStyle = null;
+    // Reset SelStyle
+    _selStyle = null;
     
     // Repaint selection and scroll to visible (after delay)
     if(isShowing()) {
@@ -373,7 +373,7 @@ protected void scrollSelToVisible()
  */
 public Font getFont()
 {
-    if(isRich()) return getInputStyle().getFont();
+    if(isRich()) return getSelStyle().getFont();
     return super.getFont();
 }
 
@@ -383,31 +383,31 @@ public Font getFont()
 public void setFont(Font aFont)
 {
     super.setFont(aFont);
-    setInputStyleValue(TextStyle.FONT_KEY, aFont);
+    setSelStyleValue(TextStyle.FONT_KEY, aFont);
 }
 
 /**
  * Returns the color of the current selection or cursor.
  */
-public Paint getTextFill()  { return getInputStyle().getColor(); }
+public Paint getTextFill()  { return getSelStyle().getColor(); }
 
 /**
  * Sets the color of the current selection or cursor.
  */
 public void setTextFill(Paint aColor)
 {
-    setInputStyleValue(TextStyle.COLOR_KEY, aColor instanceof Color? aColor : null);
+    setSelStyleValue(TextStyle.COLOR_KEY, aColor instanceof Color? aColor : null);
 }
 
 /**
  * Returns whether TextView is underlined.
  */
-public boolean isUnderlined()  { return getInputStyle().isUnderlined(); }
+public boolean isUnderlined()  { return getSelStyle().isUnderlined(); }
 
 /**
  * Sets whether TextView is underlined.
  */
-public void setUnderlined(boolean aValue)  { setInputStyleValue(TextStyle.UNDERLINE_KEY, aValue? 1 : 0); }
+public void setUnderlined(boolean aValue)  { setSelStyleValue(TextStyle.UNDERLINE_KEY, aValue? 1 : 0); }
 
 /**
  * Returns the text line alignment.
@@ -435,34 +435,28 @@ public void setLineJustify(boolean aValue)  { setLineStyleValue(TextLineStyle.JU
 public TextStyle getStyleAt(int anIndex)  { return getRichText().getStyleAt(anIndex); }
 
 /**
- * Returns the TextStyle applied to any input characters.
+ * Returns the TextStyle for the current selection and/or input characters.
  */
-public TextStyle getInputStyle()
-{
-    // If InputStyle has been cleared, reset from selection start
-    if(_inputStyle==null)
-        _inputStyle = getStyleAt(getSelStart());
-    return _inputStyle;
-}
+public TextStyle getSelStyle()  { return _selStyle!=null? _selStyle : (_selStyle=getStyleAt(getSelStart())); }
 
 /**
  * Sets the attributes that are applied to current selection or newly typed chars.
  */
-public void setInputStyleValue(String aKey, Object aValue)
+public void setSelStyleValue(String aKey, Object aValue)
 {
     // If selection is zero length, just modify input style
     if(isSelEmpty() && isRich())
-        _inputStyle = getInputStyle().copyFor(aKey, aValue);
+        _selStyle = getSelStyle().copyFor(aKey, aValue);
     
-    // If selection is multiple chars, apply attribute to text and reset InputStyle
+    // If selection is multiple chars, apply attribute to text and reset SelStyle
     else {
-        getRichText().setStyleValue(aKey, aValue, getSelStart(), getSelEnd()); _inputStyle = null;
+        getRichText().setStyleValue(aKey, aValue, getSelStart(), getSelEnd()); _selStyle = null;
         repaint();
     }
 }
 
 /**
- * Returns the TextLineStyle for currently selected text.
+ * Returns the TextLineStyle for currently selection.
  */
 public TextLineStyle getLineStyle()  { return getRichText().getLineStyleAt(getSelStart()); }
 
@@ -495,6 +489,16 @@ public void addChars(String aStr, TextStyle aStyle) { replaceChars(aStr, aStyle,
 public void addChars(String aStr, TextStyle aStyle, int anIndex) { replaceChars(aStr, aStyle, anIndex, anIndex, true); }
 
 /**
+ * Deletes the current selection.
+ */
+public void delete()  { delete(getSelStart(), getSelEnd(), true); }
+
+/**
+ * Deletes the given range of chars.
+ */
+public void delete(int aStart, int anEnd, boolean doUpdateSel) { replaceChars(null, null, aStart, anEnd, doUpdateSel); }
+
+/**
  * Replaces the current selection with the given string.
  */
 public void replaceChars(String aString)  { replaceChars(aString, null, getSelStart(), getSelEnd(), true);}
@@ -512,7 +516,7 @@ public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd
         undoerSaveChanges();
 
     // Do actual replace chars    
-    TextStyle style = aStyle!=null? aStyle : aStart==getSelStart()? getInputStyle() : getStyleAt(aStart);
+    TextStyle style = aStyle!=null? aStyle : aStart==getSelStart()? getSelStyle() : getStyleAt(aStart);
     getTextBox().replaceChars(aString, style, aStart, anEnd);
     
     // Update selection to be at end of new string
@@ -529,16 +533,6 @@ public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd
     // Update LastReplaceIndex
     _lastReplaceIndex = aStart + strLen;
 }
-
-/**
- * Deletes the current selection.
- */
-public void delete()  { delete(getSelStart(), getSelEnd(), true); }
-
-/**
- * Deletes the given range of chars.
- */
-public void delete(int aStart, int anEnd, boolean doUpdateSel) { replaceChars(null, null, aStart, anEnd, doUpdateSel); }
 
 /**
  * Moves the selection index forward a character (or if a range is selected, moves to end of range).
@@ -1136,8 +1130,8 @@ protected void setParent(ParentView aPar)
     super.setParent(aPar);
     
     // If PlainText, update to to parent (should probably watch parent Font_Prop change as well)
-    if(isPlainText() && !isFontSet() && !getFont().equals(getInputStyle().getFont()))
-        setInputStyleValue(TextStyle.FONT_KEY, getFont());
+    if(isPlainText() && !isFontSet() && !getFont().equals(getSelStyle().getFont()))
+        setSelStyleValue(TextStyle.FONT_KEY, getFont());
 }
 
 /**

@@ -34,16 +34,19 @@ public void setContent(View aView)
     // If view already set, just return
     if(aView==_content) return;
     
-    // Get last view
-    View oldView = getChildCount()>0? getChildLast() : null;
-    while(getChildCount()>1) removeChild(0);
+    // Get last content (remove any previous content that might be transitioning out)
+    View oldView = _content;
+    while(getChildCount()>1) removeChild(1);
     
-    // Set LastContent and Content
-    _content = aView;
+    // Set new Content (if null, remove children and return)
+    _content = aView; if(_content==null) { removeChildren(); return; }
     
     // Add view
-    if(_content!=null) addChild(aView,0);
-    else { removeChildren(); return; }
+    addChild(aView,0);
+    
+    // Make sure new content has no residual animation/transform
+    _content.getAnimCleared(0);
+    _content.setTransX(0); _content.setTransY(0);
     
     // Configure transition
     _transition.configure(this, _content, oldView);
