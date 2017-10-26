@@ -190,8 +190,9 @@ protected double getMinHeightImpl()
  */
 protected double getPrefWidthImpl(double aH)
 {
-    Insets ins = getInsetsAll(); double cpw = _scroller.getPrefWidth();
-    return ins.left + cpw + ins.right;
+    Insets ins = getInsetsAll();
+    double pw = _scroller.getPrefWidth(); if(_showVBar==Boolean.TRUE) pw += getBarSize();
+    return ins.left + pw + ins.right;
 }
 
 /**
@@ -199,8 +200,9 @@ protected double getPrefWidthImpl(double aH)
  */
 protected double getPrefHeightImpl(double aW)
 {
-    Insets ins = getInsetsAll(); double cph = _scroller.getPrefHeight();
-    return ins.top + cph + ins.bottom;
+    Insets ins = getInsetsAll();
+    double ph = _scroller.getPrefHeight(); if(_showHBar==Boolean.TRUE) ph += getBarSize();
+    return ins.top + ph + ins.bottom;
 }
 
 /**
@@ -228,7 +230,12 @@ protected void layoutImpl()
     boolean asneedH = _showHBar==null, alwaysH = _showHBar==Boolean.TRUE, showHBar = alwaysH || asneedH && cpw>w;
     boolean asneedV = _showVBar==null, alwaysV = _showVBar==Boolean.TRUE, showVBar = alwaysV || asneedV && cph>h;
     
-    // If ScrollBars in wrong state, set, run again and return
+    // If showing both ScrollBars, but only because both ScrollBars are showing, hide them and try again
+    if(isVBarShowing() && isHBarShowing() && showVBar && showHBar && asneedH && asneedV &&
+        cpw<=w+getVBar().getWidth() && cph<=h+getHBar().getHeight()) {
+            setVBarShowing(false); setHBarShowing(false); layoutImpl(); return; }
+    
+    // If either ScrollBar in wrong Showing state, set and try again
     if(showVBar!=isVBarShowing()) { setVBarShowing(showVBar); layoutImpl(); return; }
     if(showHBar!=isHBarShowing()) { setHBarShowing(showHBar); layoutImpl(); return; }
     
