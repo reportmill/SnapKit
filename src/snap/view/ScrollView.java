@@ -211,13 +211,13 @@ protected double getPrefHeightImpl(double aW)
 protected void layoutImpl()
 {
     // Get Scroller size (minus insets)
-    Insets ins = getInsetsAll();
+    Insets ins = getInsetsAll(); int barSize = getBarSize();
     double x = ins.left, w = getWidth() - x - ins.right;
     double y = ins.top, h = getHeight() - y - ins.bottom;
     
     // Account for ScrollBars
-    if(isVBarShowing()) w -= getVBar().getWidth();
-    if(isHBarShowing()) h -= getHBar().getHeight();
+    if(isVBarShowing()) w -= barSize;
+    if(isHBarShowing()) h -= barSize;
     
     // Set Scroller bounds
     _scroller.setBounds(x,y,w,h);
@@ -240,14 +240,14 @@ protected void layoutImpl()
     if(showHBar!=isHBarShowing()) { setHBarShowing(showHBar); layoutImpl(); return; }
     
     // If horizontal scrollbar showing, update it
-    if(showHBar) { ScrollBar hbar = getHBar(); int barSize = getBarSize();
+    if(showHBar) { ScrollBar hbar = getHBar();
         hbar.setBounds(x,y+h,w,barSize);
         hbar.setThumbRatio(w/cpw);
         hbar.setScroll(_scroller.getRatioH());
     }
     
     // If vertical scrollbar needed, add it
-    if(showVBar) { ScrollBar vbar = getVBar(); int barSize = getBarSize();
+    if(showVBar) { ScrollBar vbar = getVBar();
         vbar.setBounds(x+w,y,barSize,h);
         vbar.setThumbRatio(h/cph);
         vbar.setScroll(_scroller.getRatioV());
