@@ -44,9 +44,6 @@ public class TextBox implements PropChangeListener {
     // The lines in this text
     List <TextBoxLine>   _lines = new ArrayList();
     
-    // The preferred width/height
-    double               _prefWidth = -1, _prefHeight = -1;
-    
     // Whether text box needs updating
     boolean              _needsUpdate, _updating;
     
@@ -444,7 +441,7 @@ protected void setUpdateBounds(int aStart, int aEnd)
     // If first call, set values
     if(!_needsUpdate) {
         _updStart = aStart; _updEnd = aEnd;
-        _needsUpdate = true; _prefWidth = _prefHeight = -1;
+        _needsUpdate = true;
     }
     
     // Successive calls update values
@@ -505,7 +502,7 @@ protected void updateLines(int aStart, int linesEnd, int textEnd)
         
     // Calculated aligned Y
     if(_alignY!=VPos.TOP) {
-        double ph = getPrefHeight(), height = getHeight();
+        double ph = getPrefHeight(getWidth()), height = getHeight();
         if(height>ph) _alignedY = _alignY.asDouble()*(height-ph);
     }
 }
@@ -824,21 +821,27 @@ public void paint(Painter aPntr)
 /**
  * Returns the preferred width.
  */
-public double getPrefWidth()
+public double getPrefWidth(double aH)
 {
-    if(_prefWidth>=0) return _prefWidth;
     TextBoxLine ln = getLineLongest(); if(ln==null) return 0;
-    return _prefWidth = Math.ceil(ln.getWidth());
+    return Math.ceil(ln.getWidth());
 }
 
 /**
  * Returns the preferred height.
  */
-public double getPrefHeight()
+public double getPrefHeight(double aW)
 {
-    if(_prefHeight>=0) return _prefHeight;
+    // If WrapText and given Width doesn't match current Width, setWidth
+    if(isWrapText() && !MathUtils.equals(aW,getWidth()) && aW>0) { //double oldW = getWidth();
+        setWidth(aW);
+        double ph = getPrefHeight(aW); //setWidth(oldW); Should really reset old width - but why would they ask,
+        return ph;                     // if they didn't plan to use this width?
+    }
+    
+    // Return bottom of last line minus box Y
     TextBoxLine ln = getLineLast(); if(ln==null) return 0;
-    return _prefHeight = Math.ceil(ln.getMaxY() - getAlignedY());
+    return Math.ceil(ln.getMaxY() - getAlignedY());
 }
 
 /**
@@ -869,7 +872,7 @@ public void scaleTextToFit()
         // If text didn't exceed layout bounds, reset fsLo to fontScale
         else {
             fsLo = fontScale;
-            if(getHeight()-getPrefHeight()<1 || fsHi-fsLo<.05)
+            if(getHeight()-getPrefHeight(getWidth())<1 || fsHi-fsLo<.05)
                 break;
         }
     }

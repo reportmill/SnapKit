@@ -685,8 +685,8 @@ protected void paintFront(Painter aPntr)
     double dy = ViewUtils.getAlignY(getAlign());
     if(dx!=0 || dy!=0) {
         Rect tbnds = getTextBoxBounds(); TextBox tbox = getTextBox();
-        dx = tbnds.getX() + Math.round(dx*(tbnds.getWidth() - tbox.getPrefWidth()));
-        dy = tbnds.getY() + Math.round(dy*(tbnds.getHeight() - tbox.getPrefHeight()));
+        dx = tbnds.getX() + Math.round(dx*(tbnds.getWidth() - tbox.getPrefWidth(-1)));
+        dy = tbnds.getY() + Math.round(dy*(tbnds.getHeight() - tbox.getPrefHeight(tbox.getWidth())));
         tbox.setX(dx); tbox.setY(dy);
     }
     
@@ -1073,7 +1073,8 @@ protected void textDidChange()
 protected double getPrefWidthImpl(double aH)
 {
     Insets ins = getInsetsAll();
-    double pw = getTextBox().getPrefWidth();
+    double h = aH>=0? (aH - ins.top - ins.bottom) : aH;
+    double pw = getTextBox().getPrefWidth(h);
     return ins.left + pw + ins.right;
 }
 
@@ -1083,15 +1084,8 @@ protected double getPrefWidthImpl(double aH)
 protected double getPrefHeightImpl(double aW)
 {
     Insets ins = getInsetsAll();
-    
-    // If given width not current width, update TextBox.Bounds
-    if(isWrapText() && !MathUtils.equals(aW,getWidth())) {
-        double w = aW<=0? Float.MAX_VALUE : (aW - ins.left - ins.right);
-        getTextBox().setWidth(w);
-    }
-    
-    // Return TextBox PrefHeight plus insets
-    double ph =  getTextBox().getPrefHeight();
+    double w = aW>=0? (aW - ins.left - ins.right) : aW;
+    double ph = getTextBox().getPrefHeight(w);
     return ins.top + ph + ins.bottom;
 }
 
