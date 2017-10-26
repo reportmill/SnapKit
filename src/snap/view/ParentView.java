@@ -331,7 +331,8 @@ public void layout()
 {
     if(_inLayout) return;
     _inLayout = true;
-    layoutImpl(); _inLayout = false;
+    if(getWidth()>0 && getHeight()>0) layoutImpl();
+    _inLayout = false;
 }
 
 /**
