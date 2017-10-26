@@ -15,7 +15,7 @@ public class TextBox implements PropChangeListener {
     RichText             _text;
     
     // The bounds of the text block
-    double               _x, _y, _width, _height;
+    double               _x, _y, _width = Float.MAX_VALUE, _height;
     
     // Whether to wrap text in box
     boolean              _wrapText;
@@ -130,9 +130,29 @@ public void setY(double aY)  { _y = aY; }
 public double getWidth()  { return _width; }
 
 /**
+ * Sets the width.
+ */
+public void setWidth(double aValue)
+{
+    if(aValue==_width) return;
+    _width = aValue;
+    if(isWrapText()) setNeedsUpdateAll();
+}
+
+/**
  * Returns the height.
  */
 public double getHeight()  { return _height; }
+
+/**
+ * Sets the width.
+ */
+public void setHeight(double aValue)
+{
+    if(aValue==_height) return;
+    _height = aValue;
+    setNeedsUpdateAll();
+}
 
 /**
  * Returns the current bounds.
@@ -147,16 +167,7 @@ public void setBounds(Rect aRect)  { setBounds(aRect.getX(), aRect.getY(), aRect
 /**
  * Sets the rect location and size.
  */
-public void setBounds(double aX, double aY, double aW, double aH)
-{
-    // If bounds already set, just return (ignore width if not WrapText)
-    if(_x==aX && _y==aY && _width==aW && _height==aH) return;
-    if(_x==aX && _y==aY && _height==aH && !isWrapText()) { _width = aW; return; }
-    
-    // Set bounds and update all
-    _x = aX; _y = aY; _width = aW; _height = aH;
-    setNeedsUpdateAll();
-}
+public void setBounds(double aX, double aY, double aW, double aH)  { setX(aX); setY(aY); setWidth(aW); setHeight(aH); }
 
 /**
  * Returns the max X.
@@ -813,29 +824,21 @@ public void paint(Painter aPntr)
 /**
  * Returns the preferred width.
  */
-public double getPrefWidth()  { return _prefWidth>=0? _prefWidth : (_prefWidth=computePrefWidth()); }
-
-/**
- * Returns the preferred height.
- */
-public double getPrefHeight()  { return _prefHeight>=0? _prefHeight : (_prefHeight=computePrefHeight()); }
-
-/**
- * Compute the preferred width.
- */
-protected double computePrefWidth()
+public double getPrefWidth()
 {
+    if(_prefWidth>=0) return _prefWidth;
     TextBoxLine ln = getLineLongest(); if(ln==null) return 0;
-    return Math.ceil(ln.getWidth());
+    return _prefWidth = Math.ceil(ln.getWidth());
 }
 
 /**
  * Returns the preferred height.
  */
-protected double computePrefHeight()
+public double getPrefHeight()
 {
+    if(_prefHeight>=0) return _prefHeight;
     TextBoxLine ln = getLineLast(); if(ln==null) return 0;
-    return Math.ceil(ln.getMaxY() - getAlignedY());
+    return _prefHeight = Math.ceil(ln.getMaxY() - getAlignedY());
 }
 
 /**

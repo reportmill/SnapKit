@@ -208,36 +208,43 @@ protected double getPrefHeightImpl(double aW)
  */
 protected void layoutImpl()
 {
+    // Get Scroller size (minus insets)
     Insets ins = getInsetsAll();
-    double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
-    Size cpsize = getContent()!=null? getContent().getBestSize() : new Size(1,1);
-    double cpw = cpsize.getWidth(), cph = cpsize.getHeight(); int barSize = getBarSize();
+    double x = ins.left, w = getWidth() - x - ins.right;
+    double y = ins.top, h = getHeight() - y - ins.bottom;
+    
+    // Account for ScrollBars
+    if(isVBarShowing()) w -= getVBar().getWidth();
+    if(isHBarShowing()) h -= getHBar().getHeight();
+    
+    // Set Scroller bounds
+    _scroller.setBounds(x,y,w,h);
+    
+    // Get content size
+    Size cpsize = _scroller.getContentSize();
+    double cpw = cpsize.getWidth(), cph = cpsize.getHeight();
     
     // Get whether to show scroll bars
-    boolean asneedH = _showHBar==null, alwaysH = _showHBar==Boolean.TRUE;
-    boolean asneedV = _showVBar==null, alwaysV = _showVBar==Boolean.TRUE;
-    boolean showHBar = alwaysH || asneedH && cpw>w && !_scroller.isFillingWidth();
-    boolean showVBar = alwaysV || asneedV && cph>h && !_scroller.isFillingHeight();
+    boolean asneedH = _showHBar==null, alwaysH = _showHBar==Boolean.TRUE, showHBar = alwaysH || asneedH && cpw>w;
+    boolean asneedV = _showVBar==null, alwaysV = _showVBar==Boolean.TRUE, showVBar = alwaysV || asneedV && cph>h;
     
-    // If horizontal scrollbar needed, add it
-    setHBarShowing(showHBar);
-    if(showHBar) { ScrollBar hbar = getHBar();
-        double sbw = showVBar? w-barSize : w;
-        hbar.setBounds(x,y+h-barSize,sbw,barSize);
-        hbar.setThumbRatio(sbw/cpw);
+    // If ScrollBars in wrong state, set, run again and return
+    if(showVBar!=isVBarShowing()) { setVBarShowing(showVBar); layoutImpl(); return; }
+    if(showHBar!=isHBarShowing()) { setHBarShowing(showHBar); layoutImpl(); return; }
+    
+    // If horizontal scrollbar showing, update it
+    if(showHBar) { ScrollBar hbar = getHBar(); int barSize = getBarSize();
+        hbar.setBounds(x,y+h,w,barSize);
+        hbar.setThumbRatio(w/cpw);
+        hbar.setScroll(_scroller.getRatioH());
     }
     
     // If vertical scrollbar needed, add it
-    setVBarShowing(showVBar);
-    if(showVBar) { ScrollBar vbar = getVBar();
-        double sbh = showHBar? h-barSize : h;
-        vbar.setBounds(x+w-barSize,y,barSize,sbh);
-        vbar.setThumbRatio(sbh/cph);
+    if(showVBar) { ScrollBar vbar = getVBar(); int barSize = getBarSize();
+        vbar.setBounds(x+w,y,barSize,h);
+        vbar.setThumbRatio(h/cph);
+        vbar.setScroll(_scroller.getRatioV());
     }
-    
-    // Set scroller
-    if(showHBar) h -= barSize; if(showVBar) w -= barSize;
-    _scroller.setBounds(x,y,w,h);
 }
 
 /**

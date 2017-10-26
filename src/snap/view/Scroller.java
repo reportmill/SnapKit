@@ -53,6 +53,78 @@ public void setContent(View aView)
 }
 
 /**
+ * Returns the content size.
+ */
+public Size getContentSize()
+{
+    // If no content return (1,1)
+    if(_content==null) return new Size(1,1);
+    
+    // Handle Horizontal
+    if(_content.isHorizontal()) {
+        double w = isFillWidth()? getWidth() : _content.getBestWidth(-1);
+        if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
+        double h = isFillHeight()? getHeight() : _content.getBestHeight(w);
+        if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+        return new Size(w,h);
+    }
+    
+    // Handle Vertical
+    double h = isFillHeight()? getHeight() : _content.getBestHeight(-1);
+    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+    double w = isFillWidth()? getWidth() : _content.getBestWidth(h);
+    if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
+    return new Size(w,h);
+}
+
+/**
+ * Returns the content width.
+ */
+public double getContentWidth()
+{
+    // If no content return 1. If FillWidth, return Width
+    if(_content==null) return 1;
+    if(isFillWidth()) return getWidth();
+    
+    // Handle Horizontal
+    if(_content.isHorizontal()) {
+        double w = _content.getBestWidth(-1);
+        if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
+        return w;
+    }
+    
+    // Handle Vertical
+    double h = getContentHeight();
+    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+    double w = _content.getBestWidth(h);
+    if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
+    return w;
+}
+
+/**
+ * Returns the content height.
+ */
+public double getContentHeight()
+{
+    // If no content return 1. If FillHeight, return Height
+    if(_content==null) return 1;
+    if(isFillHeight()) return getHeight();
+    
+    // Handle Horizontal
+    if(_content.isHorizontal()) {
+        double w = getContentWidth();
+        double h = _content.getBestHeight(w);
+        if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+        return h;
+    }
+    
+    // Handle Vertical
+    double h = _content.getBestHeight(-1);
+    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+    return h;
+}
+
+/**
  * Returns the horizontal scroll.
  */
 public double getScrollH()  { return _scrollH; }
@@ -73,8 +145,8 @@ public void setScrollH(double aValue)
  */
 public double getScrollHMax()
 {
-    if(_content==null) return 0;
-    return Math.round(Math.max(_content.getBestWidth(-1) - getWidth(),0));
+    double cw = getContentWidth();
+    return Math.round(Math.max(cw - getWidth(),0));
 }
 
 /**
@@ -98,8 +170,8 @@ public void setScrollV(double aValue)
  */
 public double getScrollVMax()
 {
-    if(_content==null) return 0;
-    return Math.round(Math.max(_content.getBestHeight(-1) - getHeight(),0));
+    double ch = getContentHeight();
+    return Math.round(Math.max(ch - getHeight(),0));
 }
 
 /**
@@ -179,24 +251,6 @@ public void setGrowContentHeight(boolean aValue)
 }
 
 /**
- * Returns whether content is effectively filing width.
- */
-protected boolean isFillingWidth()
-{
-    if(isFillWidth()) return true;
-    return _content!=null && (isGrowContentWidth() || _content.isGrowWidth()) && _content.getBestWidth(-1)<=getWidth();
-}
-
-/**
- * Returns whether content is effectively filling height.
- */
-protected boolean isFillingHeight()
-{
-    if(isFillHeight()) return true;
-    return _content!=null && (isGrowContentHeight()||_content.isGrowHeight()) &&_content.getBestHeight(-1)<=getHeight();
-}
-
-/**
  * Called to scroll the given shape in this node coords to visible.
  */
 public void scrollToVisible(Shape aShape)
@@ -247,14 +301,13 @@ protected double getPrefHeightImpl(double aW)  { return _content!=null? _content
 protected void layoutImpl()
 {
     if(_content==null) return;
-    double w = getWidth(), h = getHeight(); View cnt = _content;
-    double cpw = cnt.getBestWidth(-1); if(isFillingWidth()) cpw = w;
-    double cph = cnt.getBestHeight(-1); if(isFillingHeight()) cph = h;
+    double w = getWidth(), h = getHeight(); Size csize = getContentSize();
+    double cw = csize.width, ch = csize.height;
     
     // Get content bounds
-    double sx = getScrollH(); if(sx>cpw-w) sx = Math.round(cpw-w);
-    double sy = getScrollV(); if(sy>cph-h) sy = Math.round(cph-h);
-    cnt.setBounds(-sx,-sy,cpw,cph);
+    double sx = getScrollH(); if(sx>cw-w) sx = Math.round(cw-w);
+    double sy = getScrollV(); if(sy>ch-h) sy = Math.round(ch-h);
+    _content.setBounds(-sx,-sy,cw,ch);
 }
 
 }

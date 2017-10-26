@@ -1073,7 +1073,8 @@ protected void textDidChange()
 protected double getPrefWidthImpl(double aH)
 {
     Insets ins = getInsetsAll();
-    return ins.left + getTextBox().getPrefWidth() + ins.right;
+    double pw = getTextBox().getPrefWidth();
+    return ins.left + pw + ins.right;
 }
 
 /**
@@ -1085,9 +1086,8 @@ protected double getPrefHeightImpl(double aW)
     
     // If given width not current width, update TextBox.Bounds
     if(isWrapText() && !MathUtils.equals(aW,getWidth())) {
-        double w = aW<=0? Float.MAX_VALUE : aW; w -= ins.left + ins.right;
-        Rect tbnds = getTextBoxBounds(); tbnds.width = w;
-        getTextBox().setBounds(tbnds);
+        double w = aW<=0? Float.MAX_VALUE : (aW - ins.left - ins.right);
+        getTextBox().setWidth(w);
     }
     
     // Return TextBox PrefHeight plus insets
@@ -1110,7 +1110,7 @@ public void setHeight(double aHeight)  { super.setHeight(aHeight); setTextBoxBou
  */
 protected Rect getTextBoxBounds()
 {
-    Insets ins = getInsetsAll(); boolean wrap = isWrapText();
+    Insets ins = getInsetsAll();
     double x = ins.left, w = getWidth() - x - ins.right;
     double y = ins.top, h = getHeight() - y - ins.bottom;
     return new Rect(x,y,w,h);
