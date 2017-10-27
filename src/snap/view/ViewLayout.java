@@ -27,6 +27,16 @@ public ParentView getParent()  { return _parent; }
 public void setParent(ParentView aPar)  { _parent = aPar; }
 
 /**
+ * Returns the (first) child.
+ */
+public View getChild()  { View chdrn[] = getChildren(); return chdrn!=null && chdrn.length>0? chdrn[0] : null; }
+
+/**
+ * Sets the child.
+ */
+public void setChild(View theChild)  { setChildren(new View[] { theChild }); }
+
+/**
  * Returns the children.
  */
 public View[] getChildren()  { return _children!=null? _children : _parent.getChildrenManaged(); }
@@ -35,6 +45,11 @@ public View[] getChildren()  { return _children!=null? _children : _parent.getCh
  * Sets the children.
  */
 public void setChildren(View theChildren[])  { _children = theChildren; }
+
+/**
+ * Returns the number of children.
+ */
+public int getChildCount()  { return getChildren().length; }
 
 /**
  * Returns the node insets.
@@ -47,25 +62,49 @@ public Insets getInsets()  { return _parent.getInsetsAll(); }
 public boolean isVertical()  { return _parent.isVertical(); }
     
 /**
- * Returns preferred width of layout.
+ * Returns preferred width of layout, including insets.
  */
-public abstract double getPrefWidth(double aH);
+public double getPrefWidth(double aH)
+{
+    Insets ins = getInsets(); if(getChildCount()==0) return ins.left + ins.right;
+    double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
+    double w = getPrefWidthImpl(h);
+    return ins.left + w + ins.right;
+}
 
 /**
- * Returns preferred height of layout.
+ * Returns preferred width of layout, excluding insets.
  */
-public abstract double getPrefHeight(double aW);
+protected double getPrefWidthImpl(double aH)  { return 0; }
+
+/**
+ * Returns preferred height of layout, including insets.
+ */
+public double getPrefHeight(double aW)
+{
+    Insets ins = getInsets(); if(getChildCount()==0) return ins.top + ins.bottom;
+    double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
+    double h = getPrefHeightImpl(w);
+    return ins.top + h + ins.bottom;
+}
+
+/**
+ * Returns preferred height of layout, excluding insets.
+ */
+protected double getPrefHeightImpl(double aW)  { return 0; }
 
 /**
  * Performs layout.
  */
 public void layoutChildren()
 {
+    if(getChildCount()==0) return;
     Insets ins = getInsets();
     double px = ins.left, py = ins.top;
     double pw = _parent.getWidth() - px - ins.right; if(pw<0) pw = 0;
     double ph = _parent.getHeight() - py - ins.bottom; if(ph<0) ph = 0;
-    layoutChildren(px, py, pw, ph);
+    if(pw>0 && ph>0)
+        layoutChildren(px, py, pw, ph);
 }
 
 /**
@@ -111,106 +150,6 @@ protected double getLeanY(View aView)
 private static final void setBounds(View c[], Rect r[])
 {
     for(int i=0,iMax=c.length;i<iMax;i++) { View c2 = c[i]; Rect r2 = r[i]; c2.setBounds(r2); }
-}
-
-/**
- * A centering layout.
- */
-public static class BoxLayout extends ViewLayout {
-    
-    // The content
-    View          _child;
-    
-    // Whether to fill width, height
-    boolean       _fillWidth, _fillHeight;
-    
-    // Whether to scale to fix instead of sizing
-    boolean       _scaleToFit;
-    
-    /** Creates a new BoxLayout for given parent. */
-    public BoxLayout(ParentView aPar)  { setParent(aPar); }
-    
-    /** Returns the content. */
-    public View getContent()  { return _child!=null? _child : _parent.getChildCount()>0? _parent.getChild(0) : null; }
-    
-    /** Sets the content. */
-    public void setContent(View aView)  { _child = aView; }
-    
-    /** Returns whether layout should fill width. */
-    public boolean isFillWidth()  { return _fillWidth; }
-    
-    /** Sets whether to fill width. */
-    public void setFillWidth(boolean aValue)  { _fillWidth = aValue; }
-    
-    /** Returns whether layout should fill height. */
-    public boolean isFillHeight()  { return _fillHeight; }
-    
-    /** Sets whether to fill height. */
-    public void setFillHeight(boolean aValue)  { _fillHeight = aValue; }
-    
-    /** Returns whether layout should scale instead of size. */
-    public boolean isScaleToFit()  { return _scaleToFit; }
-    
-    /** Sets whether layout should scale instead of size. */
-    public void setScaleToFit(boolean aValue)  { _scaleToFit = aValue; }
-    
-    /** Returns preferred width of layout. */
-    public double getPrefWidth(double aH)
-    {
-        // If scaling and value provided, return value by aspect
-        if(_scaleToFit && aH>=0 && (_fillWidth || aH<getPrefHeight(-1))) return aH*getAspect();
-        
-        // Otherwise, return pref size based on child
-        Insets ins = getInsets(); View child = getContent();
-        double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
-        double w = child!=null? child.getBestWidth(h) : 0;
-        return ins.left + w + ins.right;
-    }
-    
-    /** Returns preferred height of layout. */
-    public double getPrefHeight(double aW)
-    {
-        // If scaling and value provided, return value by aspect
-        if(_scaleToFit && aW>=0 && (_fillWidth || aW<getPrefWidth(-1))) return aW/getAspect();
-        
-        // Otherwise, return pref size based on child
-        Insets ins = getInsets(); View child = getContent();
-        double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
-        double h = child!=null? child.getBestHeight(w) : 0;
-        return ins.top + h + ins.bottom;
-    }
-    
-    /** Performs layout in content rect. */
-    public void layoutChildren(double px, double py, double pw, double ph)
-    {
-        // If scaling, return that layout
-        if(_scaleToFit)  { layoutChildrenScale(px, py, pw, ph); return; }
-        
-        // Otherwise do normal layout
-        View child = getContent(); if(child==null) return;
-        double cw = _fillWidth? pw : Math.min(child.getBestWidth(-1), pw);
-        double ch = _fillHeight? ph : Math.min(child.getBestHeight(cw), ph);
-        double dx = pw - cw, dy = ph - ch;
-        double sx = child.getLeanX()!=null? getLeanX(child) : getAlignX(_parent);
-        double sy = child.getLeanY()!=null? getLeanY(child) : getAlignY(_parent);
-        child.setBounds(px+dx*sx, py+dy*sy, cw, ch);
-    }
-    
-    /** Performs layout when ScaleToFit. */
-    protected void layoutChildrenScale(double px, double py, double pw, double ph)
-    {
-        View child = getContent(); if(child==null) return;
-        double cw = child.getPrefWidth(), ch = child.getPrefHeight();
-        if(pw<=0) pw = cw; if(ph<=0) ph = ch;
-        
-        // Set child bounds and scale
-        child.setBounds((pw-cw)/2 + px, (ph-ch)/2 + py, cw, ch);
-        double sx = pw/cw, sy = ph/ch, sc = Math.min(sx,sy); if(!_fillWidth) sc = Math.min(sc,1);
-        child.setScaleX(sc); child.setScaleY(sc);
-    }
-
-    /** Returns the aspect of the content. */
-    protected double getAspect()  { return getPrefWidth(-1)/getPrefHeight(-1); }
 }
 
 /**
@@ -286,21 +225,19 @@ public static class HBoxLayout extends ViewLayout {
     public void setFillHeight(boolean aValue)  { _fillOut = aValue; }
     
     /** Returns preferred width of layout. */
-    public double getPrefWidth(double aH)
+    protected double getPrefWidthImpl(double aH)
     {
-        Insets ins = getInsets(); View children[] = getChildren(); int ccount = children.length;
-        double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
-        double w = 0; for(View child : children) w += child.getBestWidth(h); if(ccount>1) w += (ccount-1)*_spacing;
-        return w + ins.left + ins.right;
+        View children[] = getChildren(); int ccount = children.length;
+        double w = 0; for(View child : children) w += child.getBestWidth(aH); if(ccount>1) w += (ccount-1)*_spacing;
+        return w;
     }
     
     /** Returns preferred height of layout. */
-    public double getPrefHeight(double aW)
+    protected double getPrefHeightImpl(double aW)
     {
-        Insets ins = getInsets(); View children[] = getChildren();
-        double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
-        double h = 0; for(View child : children) h = Math.max(h, child.getBestHeight(w));
-        return h + ins.top + ins.bottom;
+        View children[] = getChildren();
+        double h = 0; for(View child : children) h = Math.max(h, child.getBestHeight(aW));
+        return h;
     }
         
     /** Performs layout. */
@@ -372,21 +309,19 @@ public static class VBoxLayout extends ViewLayout {
     public void setFillWidth(boolean aValue)  { _fillOut = aValue; }
     
     /** Returns preferred width of layout. */
-    public double getPrefWidth(double aH)
+    protected double getPrefWidthImpl(double aH)
     {
-        Insets ins = getInsets(); View children[] = getChildren();
-        double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
-        double w = 0; for(View child : children) w = Math.max(w, child.getBestWidth(h));
-        return w + ins.left + ins.right;
+        View children[] = getChildren();
+        double w = 0; for(View child : children) w = Math.max(w, child.getBestWidth(aH));
+        return w;
     }
     
     /** Returns preferred height of layout. */
-    public double getPrefHeight(double aW)
+    protected double getPrefHeightImpl(double aW)
     {
-        Insets ins = getInsets(); View children[] = getChildren(); int ccount = children.length;
-        double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
-        double h = 0; for(View child : children) h += child.getBestHeight(w); if(ccount>1) h += (ccount-1)*_spacing;
-        return h + ins.top + ins.bottom;
+        View children[] = getChildren(); int ccount = children.length;
+        double h = 0; for(View child : children) h += child.getBestHeight(aW); if(ccount>1) h += (ccount-1)*_spacing;
+        return h;
     }
         
     /** Performs layout in content rect. */
@@ -447,9 +382,9 @@ public static class BorderLayout extends ViewLayout {
     CenterProxy   _cproxy = new CenterProxy();
     
     // Workers: for center node, horizontal nodes and vertical nodes
-    HBoxLayout    _hlay = new HBoxLayout(_hproxy);
-    VBoxLayout    _vlay = new VBoxLayout(null);
-    BoxLayout     _clay = new BoxLayout(null);
+    HBoxLayout     _hlay = new HBoxLayout(_hproxy);
+    VBoxLayout     _vlay = new VBoxLayout(null);
+    Box.BoxLayout  _clay = new Box.BoxLayout(null);
     
     /** Creates a new Border layout for given parent. */
     public BorderLayout(ParentView aPar)
@@ -506,7 +441,7 @@ public static class BorderLayout extends ViewLayout {
         _hlay.layoutChildren(_hproxy.getX(), _hproxy.getY(), _hproxy.getWidth(), _hproxy.getHeight());
         
         if(_center==null) return;
-        _clay.setContent(_center); _clay.setParent(getParent());
+        _clay.setChild(_center); _clay.setParent(getParent());
         _clay.setFillWidth(_fillCenter); _clay.setFillHeight(_fillCenter);
         _clay.layoutChildren(_cproxy.getX(), _cproxy.getY(), _cproxy.getWidth(), _cproxy.getHeight());
     }
@@ -567,21 +502,19 @@ public static class StackLayout extends ViewLayout {
     public void setFillHeight(boolean aValue)  { _fillHeight = aValue; }
     
     /** Returns preferred width of layout. */
-    public double getPrefWidth(double aH)
+    protected double getPrefWidthImpl(double aH)
     {
-        Insets ins = getInsets(); View children[] = getChildren();
-        double h = aH>=0? Math.max(aH - ins.top - ins.bottom, 0) : -1;
-        double w = 0; for(View child : children) w = Math.max(w, child.getBestWidth(h));
-        return ins.left + w + ins.right;
+        View children[] = getChildren();
+        double w = 0; for(View child : children) w = Math.max(w, child.getBestWidth(aH));
+        return w;
     }
     
     /** Returns preferred height of layout. */
-    public double getPrefHeight(double aW)
+    protected double getPrefHeightImpl(double aW)
     {
-        Insets ins = getInsets(); View children[] = getChildren();
-        double w = aW>=0? Math.max(aW - ins.left - ins.right, 0) : -1;
-        double h = 0; for(View child : children) h = Math.max(h, child.getBestHeight(w));
-        return ins.top + h + ins.bottom;
+        View children[] = getChildren();
+        double h = 0; for(View child : children) h = Math.max(h, child.getBestHeight(aW));
+        return h;
     }
     
     /** Performs layout. */

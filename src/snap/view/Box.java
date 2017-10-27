@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.Pos;
+import snap.gfx.*;
 import snap.util.*;
 
 /**
@@ -14,7 +14,7 @@ public class Box extends ParentView {
     View       _child;
     
     // The Box layout
-    ViewLayout.BoxLayout  _layout = new ViewLayout.BoxLayout(this);
+    BoxLayout  _layout = new BoxLayout(this);
     
 /**
  * Creates a new Box.
@@ -61,26 +61,6 @@ public boolean isFillHeight()  { return _layout.isFillHeight(); }
  * Sets whether children will be resized to fill height.
  */
 public void setFillHeight(boolean aValue)  { _layout.setFillHeight(aValue); repaint(); relayoutParent(); }
-
-/**
- * Returns whether layout should scale instead of size.
- */
-public boolean isScaleToFit()  { return _layout.isScaleToFit(); }
-
-/**
- * Sets whether layout should scale instead of size.
- */
-public void setScaleToFit(boolean aValue)  { _layout.setScaleToFit(aValue); repaint(); relayoutParent(); }
-
-/**
- * Returns whether to scale up as well as down.
- */
-public boolean isScaleUp()  { return isFillWidth(); }
-
-/**
- * Sets whether to scale up as well as down.
- */
-public void setScaleUp(boolean aValue)  { setFillWidth(aValue); }
 
 /**
  * Override to change to CENTER.
@@ -151,6 +131,61 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
             View view = (View)anArchiver.fromXML(childXML, this);
             setContent(view); break;
         }
+    }
+}
+
+/**
+ * A layout for Box.
+ */
+public static class BoxLayout extends ViewLayout {
+    
+    // Whether to fill width, height
+    boolean       _fillWidth, _fillHeight;
+    
+    /** Creates a new BoxLayout for given parent. */
+    public BoxLayout(ParentView aPar)  { setParent(aPar); }
+    
+    /** Returns whether layout should fill width. */
+    public boolean isFillWidth()  { return _fillWidth; }
+    
+    /** Sets whether to fill width. */
+    public void setFillWidth(boolean aValue)  { _fillWidth = aValue; }
+    
+    /** Returns whether layout should fill height. */
+    public boolean isFillHeight()  { return _fillHeight; }
+    
+    /** Sets whether to fill height. */
+    public void setFillHeight(boolean aValue)  { _fillHeight = aValue; }
+    
+    /** Returns preferred width of layout. */
+    public double getPrefWidthImpl(double aH)
+    {
+        View child = getChild();
+        double bw = child.getBestWidth(aH);
+        return bw;
+    }
+    
+    /** Returns preferred height of layout. */
+    public double getPrefHeight(double aW)
+    {
+        View child = getChild();
+        double bh = child.getBestHeight(aW);
+        return bh;
+    }
+    
+    /** Performs layout in content rect. */
+    public void layoutChildren(double px, double py, double pw, double ph)
+    {
+        // Get content width/height
+        View child = getChild();
+        double cw = _fillWidth || child.isGrowWidth()? pw : child.getBestWidth(-1); if(cw>pw) cw = pw;
+        double ch = _fillHeight? ph : child.getBestHeight(cw);
+        
+        // Handle normal layout
+        double dx = pw - cw, dy = ph - ch;
+        double sx = child.getLeanX()!=null? getLeanX(child) : getAlignX(_parent);
+        double sy = child.getLeanY()!=null? getLeanY(child) : getAlignY(_parent);
+        child.setBounds(px+dx*sx, py+dy*sy, cw, ch);
     }
 }
 
