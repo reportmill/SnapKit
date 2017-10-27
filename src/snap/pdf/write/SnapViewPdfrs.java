@@ -48,7 +48,7 @@ public static class SnapImageViewPdfr <T extends ImageView> extends SnapViewPdfr
         
         // Apply clip if needed
         /*if(anImageView.getRadius()>.001) {
-            Shape path = anImageView.getPath(); pwriter.writePath(path); pwriter.append(" re W n "); }*/
+            Shape path = anImageView.getPath(); pwriter.writePath(path); pwriter.append("W n "); }*/
             
         pwriter.writeImage(image, bnds.x, bnds.y, bnds.width, bnds.height);
     }

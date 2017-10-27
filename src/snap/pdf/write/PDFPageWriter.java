@@ -197,7 +197,7 @@ protected void writeImage(Image anImage, double x, double y, double width, doubl
     
     // Apply clip if needed
     /*if(anImageView.getRadius()>.001) {
-        Shape path = anImageView.getPath(); pwriter.writePath(path); pwriter.append(" re W n "); }*/
+        Shape path = anImageView.getPath(); pwriter.writePath(path); pwriter.append("W n "); }*/
     
     // Apply CTM - image coords are flipped from page coords ( (0,0) at upper-left )
     writeTransform(width, 0, 0, -height, x, y + height);
