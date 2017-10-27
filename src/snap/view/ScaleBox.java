@@ -13,12 +13,20 @@ public class ScaleBox extends Box {
 /**
  * Creates a new ScaleBox.
  */
-public ScaleBox()  { _layout = new ScaleLayout(this); setFillWidth(true); setFillHeight(true); }
+public ScaleBox()  { _layout = new ScaleLayout(this); } //setFillWidth(true); setFillHeight(true); 
 
 /**
  * Creates a new ScaleBox for content.
  */
 public ScaleBox(View aContent)  { this(); setContent(aContent); }
+
+/**
+ * Creates a new ScaleBox for content with FillWidth, FillHeight params.
+ */
+public ScaleBox(View aContent, boolean isFillWidth, boolean isFillHeight)
+{
+    this(aContent); setFillWidth(isFillWidth); setFillHeight(isFillHeight);
+}
 
 /**
  * A layout for ScaleBox.
@@ -53,11 +61,14 @@ public static class ScaleLayout extends BoxLayout {
         double ch = child.getBestHeight(cw);
         
         // Handle ScaleToFit: Set content bounds centered, calculate scale and set
-        if(cw>pw || ch>ph)  {
+        if(_fillWidth || _fillHeight || cw>pw || ch>ph)  {
             double cx = px + (pw-cw)/2, cy = py + (ph-ch)/2;
             child.setBounds(cx, cy, cw, ch);
-            double sx = pw/cw, sy = ph/ch, sc = Math.min(sx,sy); if(!_fillWidth) sc = Math.min(sc,1);
-            child.setScale(sc); return;
+            double sx = _fillWidth || cw>pw? pw/cw : 1;
+            double sy = _fillHeight || ch>ph? ph/ch : 1;
+            if(_fillWidth && _fillHeight) sx = sy = Math.min(sx,sy); // KeepAspect?
+            child.setScaleX(sx); child.setScaleY(sy);
+            return;
         }
         
         // Handle normal layout

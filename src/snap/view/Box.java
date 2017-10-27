@@ -27,6 +27,14 @@ public Box()  { }
 public Box(View aContent)  { setContent(aContent); }
 
 /**
+ * Creates a new Box for content with FillWidth, FillHeight params.
+ */
+public Box(View aContent, boolean isFillWidth, boolean isFillHeight)
+{
+    setContent(aContent); setFillWidth(isFillWidth); setFillHeight(isFillHeight);
+}
+
+/**
  * Returns the box content.
  */
 public View getContent()  { return _child; }
