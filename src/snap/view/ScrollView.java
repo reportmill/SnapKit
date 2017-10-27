@@ -191,7 +191,7 @@ protected double getMinHeightImpl()
 protected double getPrefWidthImpl(double aH)
 {
     Insets ins = getInsetsAll();
-    double pw = _scroller.getPrefWidth(); if(_showVBar==Boolean.TRUE) pw += getBarSize();
+    double pw = _scroller.getBestWidth(aH); if(_showVBar==Boolean.TRUE) pw += getBarSize();
     return ins.left + pw + ins.right;
 }
 
@@ -201,7 +201,7 @@ protected double getPrefWidthImpl(double aH)
 protected double getPrefHeightImpl(double aW)
 {
     Insets ins = getInsetsAll();
-    double ph = _scroller.getPrefHeight(); if(_showHBar==Boolean.TRUE) ph += getBarSize();
+    double ph = _scroller.getBestHeight(aW); if(_showHBar==Boolean.TRUE) ph += getBarSize();
     return ins.top + ph + ins.bottom;
 }
 

@@ -56,6 +56,9 @@ public class View implements XMLArchiver.Archivable, PropChangeListener, DeepCha
     // The view preferred width and height
     double          _prefWidth = -1, _prefHeight = -1;
     
+    // The view best width and height
+    double          _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
+    
     // Whether view is disabled
     boolean         _disabled;
     
@@ -1363,12 +1366,30 @@ public void setPrefSize(double aWidth, double aHeight)  { setPrefWidth(aWidth); 
 /**
  * Returns the best width for view - accounting for pref/min/max.
  */
-public double getBestWidth(double aH)  { return MathUtils.clamp(getPrefWidth(aH), getMinWidth(), getMaxWidth()); }
+public double getBestWidth(double aH)
+{
+    // If cached case, return cached value
+    if(MathUtils.equals(aH, _bestWidthParam) && _bestWidth>=0)
+        return _bestWidth;
+
+    // Otherwise, return uncached value
+    _bestWidthParam = aH;
+    return _bestWidth = MathUtils.clamp(getPrefWidth(aH), getMinWidth(), getMaxWidth());
+}
 
 /**
  * Returns the best height for view - accounting for pref/min/max.
  */
-public double getBestHeight(double aW)  { return MathUtils.clamp(getPrefHeight(aW), getMinHeight(), getMaxHeight()); }
+public double getBestHeight(double aW)
+{
+    // If common case, return cached value (set if needed)
+    if(MathUtils.equals(aW, _bestHeightParam) && _bestHeight>=0)
+        return _bestHeight;
+    
+    // Otherwise, return uncached value
+    _bestHeightParam = aW;
+    return _bestHeight = MathUtils.clamp(getPrefHeight(aW), getMinHeight(), getMaxHeight());
+}
 
 /**
  * Returns the best size.
@@ -1584,6 +1605,7 @@ public void relayout()  { }
  */
 public void relayoutParent()
 {
+    _bestWidth = _bestHeight = -1;
     ParentView par = getParent(); if(par==null) return;
     par.relayout(); par.relayoutParent();
 }
