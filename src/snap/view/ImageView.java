@@ -11,41 +11,56 @@ import snap.util.*;
 public class ImageView extends View {
     
     // The image
-    Image        _image;
+    Image               _image;
 
     // The image name, if loaded from local resource
-    String       _iname;
+    String              _iname;
     
-    // Whether to fit image so major image axis is visible if too big for view
-    boolean      _fitMajor = true;
+    // Whether to resize image to fill view width
+    boolean             _fillWidth;
     
-    // Whether to fit image so minor image axis is visible if too big for view
-    boolean      _fitMinor;
+    // Whether to resize image to fill view height
+    boolean             _fillHeight;
     
-    // Whether to grow image to major/minor attributes, even if image already fits in view
-    boolean      _fitAlways;
+    // Whether to preserve aspect ratio of image when resized
+    boolean             _keepAspect = true;
     
+    // Whether to allow image size to extend beyond view bounds
+    boolean             _allowBleed;
+    
+    // The image finished loading listener.
+    PropChangeListener  _lsnr;
+
     // Constants for properties
     public static final String Image_Prop = "Image";
     public static final String ImageName_Prop = "ImageName";
-    public static final String FitMajor_Prop = "FitMajor";
-    public static final String FitMinor_Prop = "FitMinor";
-    public static final String FitAlways_Prop = "FitAlways";
+    public static final String FillWidth_Prop = "FillWidth";
+    public static final String FillHeight_Prop = "FillHeight";
+    public static final String KeepAspect_Prop = "KeepAspect";
+    public static final String AllowBleed_Prop = "AllowBleed";
     
 /**
  * Creates a new ImageNode.
  */
-public ImageView() { }
+public ImageView()  { }
 
 /**
  * Creates a new ImageNode with Image.
  */
-public ImageView(Image anImage) { setImage(anImage); }
+public ImageView(Image anImage)  { setImage(anImage); }
+
+/**
+ * Creates a new ImageNode with Image and FillWidth/FillHeight params.
+ */
+public ImageView(Image anImage, boolean isFillWidth, boolean isFillHeight)
+{
+    setImage(anImage); setFillWidth(isFillWidth); setFillHeight(isFillHeight);
+}
 
 /**
  * Creates a new ImageNode for given URL.
  */
-public ImageView(Object aSource) { _image = Image.get(aSource); }
+public ImageView(Object aSource)  { _image = Image.get(aSource); }
 
 /**
  * Returns the image.
@@ -75,9 +90,6 @@ void imageFinishedLoading()
     relayoutParent(); repaint();
 }
 
-// The image finished loading listener.
-PropChangeListener _lsnr;
-
 /**
  * Returns the image name, if loaded from local resource.
  */
@@ -93,48 +105,64 @@ public void setImageName(String aName)
 }
 
 /**
- * Returns whether to fit image so major image axis is visible if too big for view.
+ * Returns whether to resize image to fill view width.
  */
-public boolean isFitMajor()  { return _fitMajor; }
+public boolean isFillWidth()  { return _fillWidth; }
 
 /**
- * Sets whether to fit image so major image axis is visible if too big for view.
+ * Sets whether to resize image to fill view width.
  */
-public void setFitMajor(boolean aValue)
+public void setFillWidth(boolean aValue)
 {
-    if(aValue==_fitMajor) return;
-    firePropChange(FitMajor_Prop, _fitMajor, _fitMajor = aValue);
+    if(aValue==_fillWidth) return;
+    firePropChange(FillWidth_Prop, _fillWidth, _fillWidth = aValue);
     repaint();
 }
 
 /**
- * Returns whether to fit image so minor image axis is visible if too big for view.
+ * Returns whether to resize image to fill view height.
  */
-public boolean isFitMinor()  { return _fitMinor; }
+public boolean isFillHeight()  { return _fillHeight; }
 
 /**
- * Sets whether to fit image so minor image axis is visible if too big for view.
+ * Sets whether to resize image to fill view height.
  */
-public void setFitMinor(boolean aValue)
+public void setFillHeight(boolean aValue)
 {
-    if(aValue==_fitMinor) return;
-    firePropChange(FitMinor_Prop, _fitMinor, _fitMinor = aValue);
+    if(aValue==_fillHeight) return;
+    firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
     repaint();
 }
 
 /**
- * Returns whether to grow image to major/minor attributes, even if image already fits in view.
+ * Returns whether to to preserve aspect ratio of image when resized.
  */
-public boolean isFitAlways()  { return _fitAlways; }
+public boolean isKeepAspect()  { return _keepAspect; }
 
 /**
- * Sets whether to grow image to major/minor attributes, even if image already fits in view.
+ * Sets whether to to preserve aspect ratio of image when resized.
  */
-public void setFitAlways(boolean aValue)
+public void setKeepAspect(boolean aValue)
 {
-    if(aValue==_fitAlways) return;
-    firePropChange(FitAlways_Prop, _fitAlways, _fitAlways = aValue);
+    if(aValue==_keepAspect) return;
+    firePropChange(KeepAspect_Prop, _keepAspect, _keepAspect = aValue);
     repaint();
+}
+
+/**
+ * Returns whether image size can extend outside view size.
+ */
+public boolean isAllowBleed()  { return _allowBleed; }
+
+/**
+ * Sets whether image size can extend outside view size.
+ */
+public void setAllowBleed(boolean aValue)
+{
+    if(aValue==_allowBleed) return;
+    firePropChange(AllowBleed_Prop, _allowBleed, _allowBleed = aValue);
+    repaint();
+    System.err.println("ImageView.setAllowBleed: Not implemented");
 }
 
 /**
@@ -144,38 +172,32 @@ public Rect getImageBounds()
 {
     // Get insets, View width/height, available with/height, image width/height
     Insets ins = getInsetsAll(); if(_image==null) return null;
-    //double vw = getWidth(), vh = getHeight();
-    //double aw = vw - ins.left - ins.right, ah = vh - ins.top - ins.bottom;
     double iw = _image.getWidth(), ih = _image.getHeight();
     
-    // Cacluate render width/height
-    //double w = iw; if(isGrowWidth() || iw>aw) w = aw;
-    //double h = ih; if(isGrowHeight() || ih>ah) h = ah;
-    // Calculate image x/y based on insets and render image size
-    //double x = ins.left + Math.round(ViewUtils.getAlignX(this)*(aw-w));
-    //double y = ins.top + Math.round(ViewUtils.getAlignY(this)*(ah-h));
-    //return new Rect(x, y, w, h);
-    
+    // Get inset bounds
     Rect bnds = new Rect(ins.left, ins.top, getWidth() - ins.left - ins.right, getHeight() - ins.top - ins.bottom);
-    return getImageBounds(iw, ih, bnds, getAlign(), isFitMajor(), isFitMinor(), isFitAlways());
+    
+    // Return image bounds
+    Rect ibounds = getImageBounds(iw, ih, bnds, getAlign(), isFillWidth(), isFillHeight(), isKeepAspect());
+    return ibounds;
 }
 
 /**
  * Returns the image bounds in a given rect.
  */
 public static Rect getImageBounds(double aW, double aH, Rect aBnds, Pos anAlign,
-    boolean fitMajor, boolean fitMinor, boolean fitAlways)
+    boolean fillWidth, boolean fillHeight, boolean keepAspect)
 {
-    // Convert fitMajor/Minor to fitWidth/Height
-    boolean widthMajor = aW>=aH;
-    boolean fitWidth = widthMajor? fitMajor : fitMinor;
-    boolean fitHeight = widthMajor? fitMinor : fitMajor;
+    // Get w/h based on FillWidth, FillHeight, KeepAspect, image size and available size
+    double w = fillWidth || aW>aBnds.width? aBnds.width : aW;
+    double h = fillHeight || aH>aBnds.height? aBnds.height : aH;
     
-    // Get w/h based on fitWidth, fitHeight, fitAlways, image size and available size
-    double w = fitWidth && (fitAlways || aW>aBnds.width)? aBnds.width : aW;
-    double h = fitHeight && (fitAlways || aH>aBnds.height)? aBnds.height : aH;
-    if(fitWidth && !fitHeight) h = Math.round(w/aW*aH);
-    if(fitHeight && !fitWidth) w = Math.round(h/aH*aW);
+    // If KeepAspect and either axis needs resize, find axis with least scale and ajust other to match
+    if(keepAspect && (w!=aW || h!=aH)) {
+        double sx = w/aW, sy = h/aH;
+        if(sx<=sy) h = aH*sx;
+        else w = aW*sy;
+    }
     
     // Calculate x/y based on w/h, avaiable size and alignment
     double x = aBnds.x + Math.round(ViewUtils.getAlignX(anAlign)*(aBnds.width-w));
@@ -193,8 +215,16 @@ public Pos getDefaultAlign()  { return Pos.CENTER; }
  */
 protected double getPrefWidthImpl(double aH)
 {
-    Insets ins = getInsetsAll();
-    return ins.left + (_image!=null? _image.getWidth() : 0) + ins.right;
+    // Get insets and given height minus insets (just return insets width if no image)
+    Insets ins = getInsetsAll(); if(_image==null) return ins.left + ins.right;
+    double h = aH>0? aH - ins.top - ins.bottom : aH;
+    
+    // PrefWidth is image width. If height is provided, adjust pref width by aspect
+    double pw = _image.getWidth();
+    if(h>0 && !MathUtils.equals(h, _image.getHeight())) pw = h*getAspect();
+    
+    // Return PrefWidth plus insets width
+    return ins.left + pw + ins.right;
 }
 
 /**
@@ -202,9 +232,20 @@ protected double getPrefWidthImpl(double aH)
  */
 protected double getPrefHeightImpl(double aW)
 {
-    Insets ins = getInsetsAll();
-    return ins.top + (_image!=null? _image.getHeight() : 0) + ins.bottom;
+    // Get insets and given width minus insets (just return insets height if no image)
+    Insets ins = getInsetsAll(); if(_image==null) return ins.top + ins.bottom;
+    double w = aW>=0? aW - ins.left - ins.right : aW;
+    
+    // PrefHeight is image height. If width is provided, adjust pref height by aspect
+    double ph = _image.getHeight();
+    if(w>0 && !MathUtils.equals(w, _image.getWidth())) ph = w/getAspect();
+    
+    // Return PrefHeight plus insets height
+    return ins.top + ph + ins.bottom;
 }
+
+/** Returns the ratio of the width/height. */
+protected double getAspect()  { return _image.getWidth()/_image.getHeight(); }
 
 /**
  * Paints node.
@@ -212,7 +253,7 @@ protected double getPrefHeightImpl(double aW)
 protected void paintFront(Painter aPntr)
 {
     // Get whether to clip to bounds, and if so, do clip
-    boolean clipToBounds = isFitMinor() && !isFitMajor();
+    boolean clipToBounds = isFillWidth() && !isFillHeight();
     if(clipToBounds) { aPntr.save(); aPntr.clip(getBoundsLocal().getInsetRect(getInsetsAll())); }
     
     // Calcuate text x/y based on insets, font and alignment
@@ -251,10 +292,10 @@ public XMLElement toXML(XMLArchiver anArchiver)
         e.add("resource", rname);
     }
     
-    // Archive FitMajor, FitMinor, FitAlways
-    if(!isFitMajor()) e.add(FitMajor_Prop, false);
-    if(isFitMinor()) e.add(FitMinor_Prop, true);
-    if(isFitAlways()) e.add(FitAlways_Prop, true);
+    // Archive FillWidth, FillHeight, KeepAspect
+    if(!isFillWidth()) e.add(FillWidth_Prop, false);
+    if(isFillHeight()) e.add(FillHeight_Prop, true);
+    if(isKeepAspect()) e.add(KeepAspect_Prop, true);
     
     // Return
     return e;
@@ -283,10 +324,10 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     if(rname!=null)
         setImage(Image.get(bytes));
     
-    // Unarchive FitMajor, FitMinor, FitAlways
-    if(anElement.hasAttribute(FitMajor_Prop)) setFitMajor(anElement.getAttributeBooleanValue(FitMajor_Prop));
-    if(anElement.hasAttribute(FitMinor_Prop)) setFitMinor(anElement.getAttributeBooleanValue(FitMinor_Prop));
-    if(anElement.hasAttribute(FitAlways_Prop)) setFitAlways(anElement.getAttributeBooleanValue(FitAlways_Prop));
+    // Unarchive FillWidth, FillHeight, KeepAspect
+    if(anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBooleanValue(FillWidth_Prop));
+    if(anElement.hasAttribute(FillHeight_Prop)) setFillHeight(anElement.getAttributeBooleanValue(FillHeight_Prop));
+    if(anElement.hasAttribute(KeepAspect_Prop)) setKeepAspect(anElement.getAttributeBooleanValue(KeepAspect_Prop));
     return this;
 }
 
