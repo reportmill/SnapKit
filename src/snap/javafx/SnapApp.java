@@ -102,20 +102,6 @@ static int getArgIndex(String args[], String aName)
  */
 public void uncaughtException(Thread th, Throwable t)  { t.printStackTrace(); _browser.showException(t); }
 
-/** Returns whether class file has main method. */
-private static boolean getHasMain(Class aClass)
-{
-    try { return aClass.getMethod("main", String[].class)!=null; }
-    catch(Exception e) { return false; }
-}
-
-/** Runs the main method of compiled class. */
-private static void runMain(Class aClass)
-{
-    try { aClass.getMethod("main", String[].class).invoke(null, (Object)new String[0]); }
-    catch(Exception e) { throw new RuntimeException(e); }
-}
-
 /**
  * A JavaFX Application to launch this class.
  */

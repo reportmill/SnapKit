@@ -4,7 +4,6 @@
 package snap.data;
 import java.io.File;
 import java.util.*;
-import snap.data.*;
 import snap.parse.*;
 import snap.util.*;
 
