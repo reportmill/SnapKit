@@ -937,6 +937,25 @@ public void setCaretAnim(boolean aValue)
 }
 
 /**
+ * Returns the font scale of the text box.
+ */
+public double getFontScale()  { return getTextBox().getFontScale(); }
+
+/**
+ * Sets the font scale of the text box.
+ */
+public void setFontScale(double aValue)
+{
+    getTextBox().setFontScale(aValue);
+    relayoutParent();
+}
+
+/**
+ * Scales font sizes of all text in TextBox to fit in bounds by finding/setting FontScale.
+ */
+public void scaleTextToFit()  { getTextBox().scaleTextToFit(); relayoutParent(); }
+
+/**
  * Copies the current selection onto the clip board, then deletes the current selection.
  */
 public void cut()  { copy(); delete(); }

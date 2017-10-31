@@ -845,7 +845,7 @@ public double getPrefHeight(double aW)
 }
 
 /**
- * Scales font sizes of all text in an RMText shape to fit in bounds. Caches font scale factor in xstring.
+ * Scales font sizes of all text in TextBox to fit in bounds by finding/setting FontScale.
  */
 public void scaleTextToFit()
 {

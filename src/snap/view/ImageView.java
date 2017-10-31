@@ -23,7 +23,7 @@ public class ImageView extends View {
     boolean             _fillHeight;
     
     // Whether to preserve aspect ratio of image when resized
-    boolean             _keepAspect = true;
+    boolean             _keepAspect;
     
     // Whether to allow image size to extend beyond view bounds
     boolean             _allowBleed;
@@ -293,7 +293,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
     }
     
     // Archive FillWidth, FillHeight, KeepAspect
-    if(!isFillWidth()) e.add(FillWidth_Prop, false);
+    if(isFillWidth()) e.add(FillWidth_Prop, true);
     if(isFillHeight()) e.add(FillHeight_Prop, true);
     if(isKeepAspect()) e.add(KeepAspect_Prop, true);
     
