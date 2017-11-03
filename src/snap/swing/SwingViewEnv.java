@@ -49,11 +49,6 @@ public Clipboard getClipboard()  { return SwingClipboard.get(); }
 public Clipboard getClipboardDrag()  { return SwingClipboard.getDrag(null); }
 
 /**
- * Returns a FileChooser.
- */
-public FileChooser getFileChooser()  { return new SwingFileChooser(); }
-
-/**
  * Returns a new ViewHelper for given native component.
  */
 public ViewHelper createHelper(View aView)

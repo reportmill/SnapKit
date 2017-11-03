@@ -24,14 +24,17 @@ public class BrowserView <T> extends ParentView {
     // The Cell Configure method
     Consumer <ListCell<T>>  _cellConf;
     
-    // The minimum column width
-    int                     _minColWidth = 200;
-
     // The minimum number of columns
     int                     _visColCount = 2;
     
-    // The HBox layout
-    ViewLayout.HBoxLayout   _layout = new ViewLayout.HBoxLayout(this);
+    // The preferred column width
+    int                     _prefColWidth = 150;
+    
+    // The view that holds the columns
+    HBox                    _colView = new HBox();
+    
+    // The ScrollView to hold SplitView+Columns
+    ScrollView              _scroll = new ScrollView(_colView);
     
     // Selection back paint
     Paint                   _selBackPaint = new Color("#022eff");
@@ -41,10 +44,55 @@ public class BrowserView <T> extends ParentView {
  */
 public BrowserView()
 {
+    _scroll.setFillHeight(true);
+    addChild(_scroll);
+    _colView.setFillHeight(true);
     _col0 = addCol();
-    _layout.setFillHeight(true);
     enableEvents(Action);
 }
+
+/**
+ * Returns the number of visible columns in the browser.
+ */
+public int getVisColCount()  { return _visColCount; }
+
+/**
+ * Sets the number of visible columns in the browser.
+ */
+public void setVisColCount(int aValue)  { _visColCount = aValue; }
+
+/**
+ * Returns the preferred column width.
+ */
+public int getPrefColWidth()  { return _prefColWidth; }
+
+/**
+ * Sets the preferred column width.
+ */
+public void setPrefColWidth(int aWidth)  { _prefColWidth = aWidth; }
+
+/**
+ * Returns the row height.
+ */
+public int getRowHeight()  { return _rowHeight; }
+
+/**
+ * Sets the row height.
+ */
+public void setRowHeight(int aValue)
+{
+    firePropChange("RowHeight", _rowHeight, _rowHeight = aValue);
+}
+
+/**
+ * Called to set method for rendering.
+ */
+public Consumer<ListCell<T>> getCellConfigure()  { return _cellConf; }
+
+/**
+ * Called to set method for rendering.
+ */
+public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
 
 /**
  * Returns the items.
@@ -72,40 +120,14 @@ public void setItems(T ... theItems)  { setItems(Arrays.asList(theItems)); }
 public void updateItems(T ... theItems)  { _col0.updateItems(theItems); }
 
 /**
- * Returns the selected index.
- */
-public int getSelectedIndex()  { return _col0.getSelectedIndex(); }
-
-/**
- * Sets the selected index.
- */
-public void setSelectedIndex(int anIndex)
-{
-    if(anIndex==getSelectedIndex()) return;
-    //firePropertyChange("SelectedIndex", _selIndex, _selIndex = anIndex);
-    _col0.setSelectedIndex(anIndex);
-    fireActionEvent();
-}
-
-/**
  * Returns the resolver.
  */
-public TreeResolver getResolver()  { return _resolver; }
+public TreeResolver <T> getResolver()  { return _resolver; }
 
 /**
  * Sets the resolver.
  */
-public void setResolver(TreeResolver aResolver)  { _resolver = aResolver; }
-
-/**
- * Returns the parent of given item.
- */
-public T getParent(T anItem)  { return _resolver.getParent(anItem); }
-
-/**
- * Returns the parent of given item.
- */
-protected int getParentCount(T anItem)  { int pc = 0; for(T p=anItem; p!=null; p=getParent(p)) pc++; return pc; }
+public void setResolver(TreeResolver <T> aResolver)  { _resolver = aResolver; }
 
 /**
  * Whether given object is a parent (has children).
@@ -113,19 +135,14 @@ protected int getParentCount(T anItem)  { int pc = 0; for(T p=anItem; p!=null; p
 protected boolean isParent(T anItem)  { return _resolver.isParent(anItem); }
 
 /**
- * The number of children in given parent.
+ * Returns the parent of given item.
  */
-protected int getChildCount(T aParent)  { return _resolver.getChildren(aParent).length; }
-
-/**
- * The child at given index in given parent.
- */
-protected T getChild(T aParent, int anIndex)  { return _resolver.getChildren(aParent)[anIndex]; }
+public T getParent(T anItem)  { return _resolver.getParent(anItem); }
 
 /**
  * Returns the children.
  */
-public T[] getChildren(T aParent)  { return _resolver.getChildren(aParent); }
+protected T[] getChildren(T aParent)  { return _resolver.getChildren(aParent); }
 
 /**
  * Returns the text to be used for given item.
@@ -138,21 +155,6 @@ protected String getText(T anItem)  { return _resolver.getText(anItem); }
 protected Image getImage(T anItem)  { return _resolver.getImage(anItem); }
 
 /**
- * Return the graphic to be used for given item.
- */
-protected View getGraphic(T anItem)  { return _resolver.getGraphic(anItem); }
-
-/**
- * Return the image to be used for given item after text.
- */
-protected Image getImageAfter(T anItem)  { return _resolver.getImage(anItem); }
-
-/**
- * Return the graphic to be used for given item after text.
- */
-protected View getGraphicAfter(T anItem)  { return _resolver.getGraphic(anItem); }
-
-/**
  * Return the branch image to be used for given item.
  */
 protected Image getBranchImage(T anItem)  { return _resolver.getBranchImage(anItem); }
@@ -160,15 +162,30 @@ protected Image getBranchImage(T anItem)  { return _resolver.getBranchImage(anIt
 /**
  * Returns the column count.
  */
-public int getColCount()  { return getChildCount(); }
+public int getColCount()  { return _colView.getChildCount(); }
 
 /**
  * Returns the browser column list at given index.
  */
 public BrowserCol <T> getCol(int anIndex)
 {
-    ScrollView spane = (ScrollView)getChild(anIndex);
+    ScrollView spane = (ScrollView)_colView.getChild(anIndex);
     return (BrowserCol)spane.getContent();
+}
+
+/**
+ * Returns the last column.
+ */
+public BrowserCol <T> getColLast()  { return getCol(getColCount()-1); }
+
+/**
+ * Returns the browser columns.
+ */
+public BrowserCol[] getCols()
+{
+    int cc = getColCount(); BrowserCol cols[] = new BrowserCol[cc];
+    for(int i=0;i<cc;i++) cols[i] = getCol(i);
+    return cols;
 }
 
 /**
@@ -176,54 +193,91 @@ public BrowserCol <T> getCol(int anIndex)
  */
 protected BrowserCol addCol()
 {
+    // Create new browser column and set index
     BrowserCol bcol = new BrowserCol(this);
-    int index = bcol._index = getChildCount();
+    int index = bcol._index = getColCount();
+    
+    // Wrap in ScrollView and add to ColBox
     ColScrollView spane = new ColScrollView(bcol);
-    addChild(spane);
+    _colView.addChild(spane);
+    
+    // If not root column, set items from last
     if(index>0) {
         BrowserCol <T> lastCol = getCol(index-1);
         T item = lastCol.getSelectedItem();
-        bcol.setItems(getChildren(item));
+        T items[] = getChildren(item);
+        bcol.setItems(items);
     }
+    
+    // Return column
     return bcol;
 }
 
 /**
- * Returns the currently selected column.
+ * Removes a column.
  */
-public BrowserCol <T> getSelectedCol()
+protected void removeCol(int anIndex)
 {
-    int columnIndex = getChildCount() - 1;
-    while(columnIndex>=0) {
-        BrowserCol <T> col = getCol(columnIndex--);
-        if(col.getSelectedItem()!=null)
-            return col;
-    }
-    return null;
+    _colView.removeChild(anIndex);
 }
 
 /**
  * Returns the currently selected column.
  */
-public int getSelectedColIndex()
+public BrowserCol <T> getSelCol()  { int sci = getSelColIndex(); return sci>=0? getCol(sci) : null; }
+
+/**
+ * Returns the currently selected column.
+ */
+public int getSelColIndex()
 {
-    int colIndex = getChildCount() - 1;
-    while(colIndex>=0) {
-        BrowserCol col = getCol(colIndex--);
-        if(col.getSelectedItem()!=null)
-            return colIndex;
-    }
+    //int colIndex = getColCount() - 1;
+    //while(colIndex>=0) { BrowserCol col = getCol(colIndex--); if(col.getSelectedItem()!=null) return colIndex; }
+    
+    for(int i=getColCount()-1;i>=0;i--) { BrowserCol col = getCol(i);
+        if(col.getSelectedIndex()>=0)
+            return i; }
     return -1;
 }
 
 /**
  * Sets the selected column index.
  */
-protected void setSelectedColumnIndex(int anIndex)
+protected void setSelColIndex(int anIndex)
 {
-    int selIndex = getSelectedColIndex(); if(anIndex==selIndex) return;  // If value already set, just return
-    for(int i=selIndex+1, iMax=getColCount(); i<iMax; i++)      // Clear selection in columns after this one
-        getCol(i).setSelectedIndex(-1);
+    // If already set, just return
+    //if(anIndex==getSelColIndex()) return;
+
+    // Iterate back from end to index and remove unused columns
+    for(int i=getColCount()-1; i>=anIndex+1; i--)
+        removeCol(i);
+        
+    // See if we need to add column
+    T item = getSelectedItem();
+    if(item!=null && isParent(item))
+        addCol();
+    
+    // Make sure selected item is visible
+    getEnv().runLater(() -> _colView.scrollToVisible(getColLast().getScrollView().getBounds()));
+}
+
+/**
+ * Returns the selected index.
+ */
+public int getSelectedIndex()
+{
+    BrowserCol <T> bcol = getSelCol();
+    return bcol!=null? bcol.getSelectedIndex() : -1;
+}
+
+/**
+ * Sets the selected index.
+ */
+public void setSelectedIndex(int anIndex)
+{
+    BrowserCol <T> bcol = getSelCol();
+    if(bcol!=null)
+        bcol.setSelectedIndex(anIndex);
 }
 
 /**
@@ -231,42 +285,74 @@ protected void setSelectedColumnIndex(int anIndex)
  */
 public T getSelectedItem()
 {
-    BrowserCol <T> bcol = getSelectedCol();
+    BrowserCol <T> bcol = getSelCol();
     return bcol!=null? bcol.getSelectedItem() : null;
 }
 
 /**
- * Returns the number of visible columns in the browser.
+ * Sets the selected item.
  */
-public int getVisColCount()  { return _visColCount; }
+public void setSelectedItem(T anItem)  { setSelectedItem(anItem, true); }
 
 /**
- * Sets the number of visible columns in the browser.
+ * Sets the selected item.
  */
-public void setVisColCount(int aValue)  { _visColCount = aValue; }
-
-/**
- * Returns the row height.
- */
-public int getRowHeight()  { return _rowHeight; }
-
-/**
- * Sets the row height.
- */
-public void setRowHeight(int aValue)
+public void setSelectedItem(T anItem, boolean scrollToVisible)
 {
-    firePropChange("RowHeight", _rowHeight, _rowHeight = aValue);
+    // If already set, just return
+    if(anItem.equals(getSelectedItem())) return;
+    
+    // If item in last column, select it
+    if(getColLast().getItems().contains(anItem)) {
+        getColLast().setSelectedItem(anItem);
+        if(isParent(anItem))
+            addCol();
+        if(scrollToVisible) scrollSelToVisible();
+        return;
+    }
+        
+    // Otherwise if item is selected, select column
+    BrowserCol col = getColWithSelItem(anItem);
+    if(col!=null) {
+        setSelColIndex(col.getIndex());
+        if(scrollToVisible) scrollSelToVisible();
+        return;
+    }
+    
+    // Otherwise, select parent
+    T par = getParent(anItem);
+    setSelectedItem(par, false);
+    
+    // Select item
+    getColLast().setSelectedItem(anItem);
+    if(isParent(anItem))
+        addCol();
+    if(scrollToVisible) scrollSelToVisible();
 }
 
 /**
- * Called to set method for rendering.
+ * Scrolls current selection to visible.
  */
-public Consumer<ListCell<T>> getCellConfigure()  { return _cellConf; }
+public void scrollSelToVisible()
+{
+    // If ColView NeedsLayout, come back later
+    if(_colView.isNeedsLayout())
+        getEnv().runLater(() -> scrollSelToVisible());
+        
+    // Scroll ColLast to visible
+    _colView.scrollToVisible(getColLast().getScrollView().getBounds());
+}
 
 /**
- * Called to set method for rendering.
+ * Returns the column that has selected item.
  */
-public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
+protected BrowserCol getColWithSelItem(T anItem)
+{
+    for(int i=getColCount()-1;i>=0;i--) { BrowserCol col = getCol(i);
+        if(col.getSelectedItem()==anItem)
+            return col; }
+    return null;
+}
 
 /**
  * Returns the path constructed by appending the selected row in each column by a dot.
@@ -294,33 +380,35 @@ public String getPath(String aSeparator)
 }
 
 /**
- * Returns the minimum column width.
- */
-public int getMinColumnWidth()  { return _minColWidth; }
-
-/**
- * Sets the minimum column width.
- */
-public void setMinColumnWidth(int aWidth)  { _minColWidth = aWidth; }
-
-/**
  * PreferredSize.
  */
 protected double getPrefWidthImpl(double aH)
 {
-    View vport = getParent(); double width = vport!=null? vport.getWidth() : 150;
-    return width/getVisColCount()*getColCount();
+    Insets ins = getInsetsAll();
+    double pw = getVisColCount()*getPrefColWidth();
+    return ins.left + pw + ins.right;
 }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
+protected double getPrefHeightImpl(double aW)
+{
+    Insets ins = getInsetsAll();
+    double ph = 0; for(BrowserCol col : getCols()) ph = Math.max(ph, col.getBestHeight(-1));
+    return ins.top + ph + ins.bottom;
+}
 
 /**
- * Layout children.
+ * Override to layout ScrollView.
  */
-protected void layoutImpl()  { _layout.layoutChildren(); }
+protected void layoutImpl()
+{
+    Insets ins = getInsetsAll();
+    double x = ins.left, w = getWidth() - x - ins.right;
+    double y = ins.top, h = getHeight() - y - ins.bottom;
+    _scroll.setBounds(x,y,w,h);
+}
 
 /**
  * Override to automatically set parent Scroller to FillHeight.
@@ -379,12 +467,12 @@ private class ColScrollView extends ScrollView {
         setFillWidth(true);
     }
     
-    /** PreferredSize. */
+    /** Override to request size of Browser/VisColCount (Should really be set in BrowserView.setWidth). */
     protected double getPrefWidthImpl(double aH)
     {
-        View brsr = getParent(), vport = brsr!=null? brsr.getParent() : null;
-        double width = vport!=null? vport.getWidth() : brsr!=null? brsr.getWidth() : 200;
-        return width/getVisColCount();
+        double width = _scroll.getScroller().getWidth();
+        double pw = width/getVisColCount();
+        return pw;
     }
 }
 

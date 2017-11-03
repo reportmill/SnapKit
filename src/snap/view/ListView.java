@@ -41,6 +41,9 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
     // The paint for alternating cells
     Paint                 _altPaint = ALTERNATE_GRAY;
     
+    // Whether to fire action on mouse release instead of press
+    boolean               _fireOnRelease;
+    
     // Whether list distinguishes item under the mouse
     boolean               _targeting;
     
@@ -76,7 +79,7 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
  */
 public ListView()
 {
-    enableEvents(MousePress, KeyPress, Action);
+    enableEvents(MousePress, MouseRelease, KeyPress, Action);
     setFocusable(true); setFocusWhenPressed(true);
     setFill(Color.WHITE);
     _layout.setFillWidth(true);
@@ -281,6 +284,16 @@ public Paint getAltPaint()  { return _altPaint; }
  * Sets the paint for alternating cells.
  */
 public void setAltPaint(Paint aPaint)  { _altPaint = aPaint; }
+
+/**
+ * Returns whether to fire action on mouse release instead of press.
+ */
+public boolean isFireActionOnRelease()  { return _fireOnRelease; }
+
+/**
+ * Sets whether to fire action on mouse release instead of press.
+ */
+public void setFireActionOnRelease(boolean aValue)  { _fireOnRelease = aValue; }
 
 /**
  * Returns whether list shows visual cue for item under the mouse.
@@ -579,7 +592,14 @@ protected void processEvent(ViewEvent anEvent)
     if(anEvent.isMousePress()) {
         int index = getRowAt(anEvent.getY());
         setSelectedIndex(index);
-        fireActionEvent();
+        if(!isFireActionOnRelease())
+            fireActionEvent();
+    }
+    
+    // Handle MouseRelease
+    if(anEvent.isMouseRelease()) {
+        if(isFireActionOnRelease())
+            fireActionEvent();
     }
     
     // Handle MouseExit

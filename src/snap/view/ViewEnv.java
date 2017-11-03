@@ -176,11 +176,6 @@ public Clipboard getClipboard()  { throw notImpl("getClipboard"); }
 public Clipboard getClipboardDrag()  { throw notImpl("getClipboardDrag"); }
 
 /**
- * Returns a FileChooser.
- */
-public FileChooser getFileChooser()  { throw notImpl("getFileChooser"); }
-
-/**
  * Returns a ViewHelper for given native component.
  */
 public ViewHelper createHelper(View aView)  { return null; }
