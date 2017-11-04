@@ -67,6 +67,7 @@ public void fireActionEvent()
 {
     _browser.setSelColIndex(_index);
     _browser.scrollSelToVisible();
+    _browser.fireActionEvent();
 }
 
 /**

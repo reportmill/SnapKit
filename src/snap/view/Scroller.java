@@ -134,7 +134,11 @@ public double getScrollH()  { return _scrollH; }
  */
 public void setScrollH(double aValue)
 {
-    aValue = Math.round(aValue); if(aValue<0) aValue = 0; else if(aValue>getScrollHMax()) aValue = getScrollHMax();
+    // Get value rounded and in valid range
+    aValue = Math.round(aValue);
+    if(aValue<0) aValue = 0; else if(aValue>getScrollHMax()) aValue = getScrollHMax();
+    
+    // Set value and relayout/repaint (just return if already set)
     if(MathUtils.equals(aValue,_scrollH)) return;
     firePropChange(ScrollH_Prop, _scrollH, _scrollH=aValue);
     relayout(); repaint();
@@ -159,7 +163,11 @@ public double getScrollV()  { return _scrollV; }
  */
 public void setScrollV(double aValue)
 {
-    aValue = Math.round(aValue); if(aValue<0) aValue = 0; else if(aValue>getScrollVMax()) aValue = getScrollVMax();
+    // Get value rounded and in valid range
+    aValue = Math.round(aValue);
+    if(aValue<0) aValue = 0; else if(aValue>getScrollVMax()) aValue = getScrollVMax();
+    
+    // Set value and relayout/repaint (just return if already set)
     if(MathUtils.equals(aValue,_scrollV)) return;
     firePropChange(ScrollV_Prop, _scrollV, _scrollV=aValue);
     relayout(); repaint();
@@ -261,7 +269,8 @@ public void scrollToVisible(Shape aShape)
     double sx = vx+srect.getX(), sy = vy+srect.getY(), sw = srect.getWidth(), sh = srect.getHeight();
     double nvx = sx<vx? sx : sx+sw>vx+vw? sx+sw-vw : vx; if(sw>vw) nvx += (sw-vw)/2;
     double nvy = sy<vy? sy : sy+sh>vy+vh? sy+sh-vh : vy; if(sh>vh) nvy += (sh-vh)/2;
-    setScrollH(nvx); setScrollV(nvy);
+    //setScrollH(nvx); setScrollV(nvy);
+    getAnimCleared(250).setValue(ScrollH_Prop, nvx).setValue(ScrollV_Prop, nvy).play();
 }
 
 /**

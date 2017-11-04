@@ -13,19 +13,25 @@ import snap.web.*;
 public class FileChooser extends ViewOwner {
     
     // Whether choosing file for save
-    boolean         _saving;
+    boolean                _saving;
     
     // The file types
-    String          _types[];
+    String                 _types[];
     
     // The description
-    String          _desc;
+    String                 _desc;
     
     // The current file
-    WebFile         _file;
+    WebFile                _file;
 
     // The current file
-    WebFile         _dir;
+    WebFile                _dir;
+    
+    // The FileBrowser
+    BrowserView <WebFile>  _fileBrowser;
+    
+    // The FileText
+    TextField              _fileText;
 
 /**
  * Returns whether is saving.
@@ -81,8 +87,20 @@ public WebFile getFile()  { return _file; }
  */
 public void setFile(WebFile aFile)
 {
+    // If no file, use home dir
+    if(aFile==null)
+        aFile = getFile(getHomeDirPath());
+
+    // If file is dir, do that instead
+    if(aFile!=null && aFile.isDir()) {
+        setDir(aFile); return; }
+
+    // Set file and dir
     _file = aFile;
     _dir = aFile!=null? aFile.getParent() : null;
+    
+    // If UI is set, set in browser and text
+    setFileInUI();
 }
 
 /**
@@ -97,6 +115,46 @@ public void setDir(WebFile aFile)
 {
     _dir = aFile;
     _file = null;
+    
+    // If UI is set, set in browser and text
+    setFileInUI();
+}
+
+/**
+ * Sets the file in the UI.
+ */
+protected void setFileInUI()
+{
+    if(!isUISet()) return;
+    _fileBrowser.setSelectedItem(getFile()!=null? getFile() : getDir());
+    _fileText.setText(getFile()!=null? getFile().getName() : null);
+    _fileText.selectAll();
+    _fileText.requestFocus();
+}
+
+/**
+ * Returns the home directory path.
+ */
+String getHomeDirPath()  { return System.getProperty("user.home"); }
+
+/**
+ * Sets a home directory file.
+ */
+public void setHomeDirFile(String aPath)
+{
+    String path = getHomeDirPath() + '/' + aPath.substring(1);
+    WebFile file = getFile(path); if(file==null) return;
+    setFile(file);
+}
+
+/**
+ * Returns a file for a path.
+ */
+WebFile getFile(String aPath)
+{
+    WebURL url = WebURL.getURL(aPath);
+    WebFile file = url.getFile();
+    return file;
 }
 
 /**
@@ -124,7 +182,6 @@ protected String showChooser(View aView)
 {
     // Get component
     RootView rview = aView!=null? aView.getRootView() : null;
-    //JComponent aComp = rview!=null? rview.getNative(JComponent.class) : null;
     
     // Declare local variable for whether this is an open
     boolean save = isSaving(), open = !save;
@@ -132,33 +189,26 @@ protected String showChooser(View aView)
     String type = types.length>0? types[0] : "";
     
     // Declare local variable for chooser
-    //JFileChooser chooser = null;
-    
-    // Add file filter to chooser
     //chooser.setFileFilter(new UIUtilsFileFilter(theExtensions, aDesc));
     
     // If no file/dir set, get from prefs
     if(getDir()==null) {
     
         // Get last chosen file path from prefs for first given extension
-        String path = Prefs.get().get("MostRecentDocument." + types[0], System.getProperty("user.home"));
+        String path = Prefs.get().get("MostRecentDocument." + types[0], getHomeDirPath());
     
         // Get last chosen file as File
-        WebURL url = WebURL.getURL(path);
-        WebFile file = url.getFile();
+        WebFile file = getFile(path);
         if(file==null) {
             path = path + '.' + type;
-            url = WebURL.getURL(path);
-            file = url.getFile();
+            file = getFile(path);
         }
     
        // Initialize chooser to last chosen directory and/or file
-       if(file.isDir()) setDir(file);
-       else setFile(file);
+       setFile(file);
    }
 
-    // Run chooser (use showDialog instead of showOpenDialog, because that version has no textfield)
-    //int option = save? chooser.showSaveDialog(aComp) : chooser.showDialog(aComp, "Open");
+    // Run FileChooser UI in DialogBox
     DialogBox dbox = new DialogBox(getTitle()); dbox.setContent(getUI());
     boolean value = dbox.showConfirmDialog(aView);
     if(!value)
@@ -166,12 +216,10 @@ protected String showChooser(View aView)
     
     // Get file and path of selection and save to preferences
     WebFile file = getFile();
+    if(file==null)
+        return showChooser(aView);
     String path = file.getPath();
     
-    // If "~", replace with user.home
-    //if(path.indexOf("~")>=0)
-    //    file = new File(path = System.getProperty("user.home") + File.separator + path.substring(path.indexOf('~')+1));
-
     // Get path extension
     String ext = "." + FilePathUtils.getExtension(path);
     if(ext.equals("."))
@@ -247,10 +295,44 @@ protected WebFile[] getFilteredFiles(List <WebFile> theFiles)
  */
 protected void initUI()
 {
-    BrowserView <WebFile> browser = getView("Browser", BrowserView.class);
-    browser.setResolver(new FileResolver());
-    browser.setItems(getFilteredFiles(getDir().getSite().getRootDir().getFiles()));
-    browser.setSelectedItem(getFile()!=null? getFile() : getDir());
+    // Get BrowserView and configure
+    _fileBrowser = getView("FileBrowser", BrowserView.class);
+    _fileBrowser.setResolver(new FileResolver());
+    _fileBrowser.setItems(getFilteredFiles(getDir().getSite().getRootDir().getFiles()));
+    _fileBrowser.setSelectedItem(getFile()!=null? getFile() : getDir());
+    
+    // Get FileText
+    _fileText = getView("FileText", TextField.class);
+    _fileText.setText(getFile()!=null? getFile().getName() : null);
+    _fileText.selectAll();
+    setFirstFocus(_fileText);
+}
+
+/**
+ * Respond to UI changes.
+ */
+protected void respondUI(ViewEvent anEvent)
+{
+    // Handle FileBrowser
+    if(anEvent.equals("FileBrowser")) {
+        WebFile file = _fileBrowser.getSelectedItem();
+        setFile(file);
+    }
+    
+    // Handle FileText
+    if(anEvent.equals("FileText")) {
+        
+        // Handle ~
+        String fname = _fileText.getText();
+        if(fname.startsWith("~"))
+            setHomeDirFile(fname);
+            
+        // Handle path
+        String path = fname.startsWith("/") || fname.startsWith("\\")? fname :
+            FilePathUtils.getChild(getDir().getPath(), fname);
+        WebFile file = getFile(path);
+        setFile(file);
+    }
 }
 
 /**

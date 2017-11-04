@@ -256,9 +256,6 @@ protected void setSelColIndex(int anIndex)
     T item = getSelectedItem();
     if(item!=null && isParent(item))
         addCol();
-    
-    // Make sure selected item is visible
-    getEnv().runLater(() -> _colView.scrollToVisible(getColLast().getScrollView().getBounds()));
 }
 
 /**
@@ -336,8 +333,8 @@ public void setSelectedItem(T anItem, boolean scrollToVisible)
 public void scrollSelToVisible()
 {
     // If ColView NeedsLayout, come back later
-    if(_colView.isNeedsLayout())
-        getEnv().runLater(() -> scrollSelToVisible());
+    if(_colView.isNeedsLayout()) {
+        getEnv().runLater(() -> scrollSelToVisible()); return; }
         
     // Scroll ColLast to visible
     _colView.scrollToVisible(getColLast().getScrollView().getBounds());

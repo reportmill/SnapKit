@@ -7,6 +7,6 @@
   </HBox>
   <HBox GrowHeight="true" Padding="1" >
     <Font Name="Arial" Size="12" />
-    <BrowserView name="Browser" GrowWidth="true" GrowHeight="true" />
+    <BrowserView name="FileBrowser" GrowWidth="true" GrowHeight="true" />
   </HBox>
 </VBox>
