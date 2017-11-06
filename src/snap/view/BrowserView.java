@@ -229,24 +229,15 @@ public BrowserCol <T> getSelCol()  { int sci = getSelColIndex(); return sci>=0? 
 /**
  * Returns the currently selected column.
  */
-public int getSelColIndex()
-{
-    //int colIndex = getColCount() - 1;
-    //while(colIndex>=0) { BrowserCol col = getCol(colIndex--); if(col.getSelectedItem()!=null) return colIndex; }
-    
-    for(int i=getColCount()-1;i>=0;i--) { BrowserCol col = getCol(i);
-        if(col.getSelectedIndex()>=0)
-            return i; }
-    return -1;
-}
+public int getSelColIndex()  { return _selCol; } int _selCol = -1;
 
 /**
  * Sets the selected column index.
  */
 protected void setSelColIndex(int anIndex)
 {
-    // If already set, just return
-    //if(anIndex==getSelColIndex()) return;
+    // Set value
+    _selCol = anIndex;
 
     // Iterate back from end to index and remove unused columns
     for(int i=getColCount()-1; i>=anIndex+1; i--)
@@ -296,14 +287,20 @@ public void setSelectedItem(T anItem)  { setSelectedItem(anItem, true); }
  */
 public void setSelectedItem(T anItem, boolean scrollToVisible)
 {
+    // If null item, reset to first column
+    if(anItem==null) {
+        getCol(0).setSelectedIndex(-1);
+        setSelColIndex(0);
+        return;
+    }
+    
     // If already set, just return
     if(anItem.equals(getSelectedItem())) return;
     
     // If item in last column, select it
     if(getColLast().getItems().contains(anItem)) {
         getColLast().setSelectedItem(anItem);
-        if(isParent(anItem))
-            addCol();
+        setSelColIndex(getColLast().getIndex());
         if(scrollToVisible) scrollSelToVisible();
         return;
     }
@@ -322,8 +319,7 @@ public void setSelectedItem(T anItem, boolean scrollToVisible)
     
     // Select item
     getColLast().setSelectedItem(anItem);
-    if(isParent(anItem))
-        addCol();
+    setSelColIndex(getColLast().getIndex());
     if(scrollToVisible) scrollSelToVisible();
 }
 

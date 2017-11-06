@@ -32,6 +32,9 @@ public class FileChooser extends ViewOwner {
     
     // The FileText
     TextField              _fileText;
+    
+    // The DialogBox
+    DialogBox              _dbox;
 
 /**
  * Returns whether is saving.
@@ -130,6 +133,7 @@ protected void setFileInUI()
     _fileText.setText(getFile()!=null? getFile().getName() : null);
     _fileText.selectAll();
     _fileText.requestFocus();
+    _dbox.setConfirmEnabled(isFileTextFileValid());
 }
 
 /**
@@ -209,8 +213,8 @@ protected String showChooser(View aView)
    }
 
     // Run FileChooser UI in DialogBox
-    DialogBox dbox = new DialogBox(getTitle()); dbox.setContent(getUI());
-    boolean value = dbox.showConfirmDialog(aView);
+    _dbox = new DialogBox(getTitle()); _dbox.setContent(getUI()); _dbox.setConfirmEnabled(isFileTextFileValid());
+    boolean value = _dbox.showConfirmDialog(aView);
     if(!value)
         return null;
     
@@ -306,6 +310,9 @@ protected void initUI()
     _fileText.setText(getFile()!=null? getFile().getName() : null);
     _fileText.selectAll();
     setFirstFocus(_fileText);
+    
+    // Set handler to update DialogBox.ConfirmEnabled when text changes
+    _fileText.addEventHandler(e -> runLater(() -> handleFileTextKeyReleased()), KeyRelease);
 }
 
 /**
@@ -333,6 +340,57 @@ protected void respondUI(ViewEvent anEvent)
         WebFile file = getFile(path);
         setFile(file);
     }
+}
+
+/**
+ * Returns the FileText path.
+ */
+private String getFileTextPath()
+{
+    // Get FileText string
+    String ftext = _fileText.getText().trim();
+    
+    // If empty just return dir path
+    if(ftext==null || ftext.length()==0)
+        return getDir().getPath();
+        
+    // If starts with ~ return home dir
+    if(ftext.startsWith("~"))
+        return getHomeDirPath();
+        
+    // If starts with FileSeparator, just return
+    if(ftext.startsWith("/") || ftext.startsWith("\\"))
+        return ftext;
+        
+     // Get path
+     String path = FilePathUtils.getChild(getDir().getPath(), ftext);
+     return path;
+}
+
+/**
+ * Returns the FileText path.
+ */
+private WebFile getFileTextFile()
+{
+    String path = getFileTextPath();
+    return getFile(path);
+}
+
+/**
+ * Returns the FileText path.
+ */
+private boolean isFileTextFileValid()
+{
+    WebFile file = getFileTextFile();
+    return file!=null && file.isFile() && ArrayUtils.contains(getTypes(), file.getType());
+}
+
+/**
+ * Called after FileText KeyRelease.
+ */
+private void handleFileTextKeyReleased()
+{
+    _dbox.setConfirmEnabled(isFileTextFileValid());
 }
 
 /**

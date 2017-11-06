@@ -30,6 +30,9 @@ public class DialogBox extends FormBuilder {
     
     // The content for dialog box
     View             _content;
+    
+    // Whether dialog box can be confirmed (confirm button is enabled)
+    boolean          _confirmEnabled = true;
 
     // The FormBuilder
     FormBuilder      _builder = this;
@@ -182,6 +185,22 @@ public View getContent()  { return _content; }
 public void setContent(View aView)  { _content = aView; }
 
 /**
+ * Returns whether dialog box can be confirmed (confirm button is enabled).
+ */
+public boolean isConfirmEnabled()  { return _confirmEnabled; }
+ 
+/**
+ * Sets whether dialog box can be confirmed (confirm button is enabled).
+ */
+public void setConfirmEnabled(boolean aValue)
+{
+    if(aValue==isConfirmEnabled()) return;
+    _confirmEnabled = aValue;
+    if(isUISet())
+        getView(getOptions()[0]).setEnabled(aValue);
+}
+ 
+/**
  * Runs the panel.
  */
 public void showMessageDialog(View aView)
@@ -305,6 +324,7 @@ protected HBox addOptionButtons()
     // Set DefaultButton (and maybe FirstFocus)
     Button dbutton = (Button)bbox.getChild(titles.length-1);
     dbutton.setDefaultButton(true); if(getFirstFocus()==null) setFirstFocus(dbutton);
+    dbutton.setEnabled(isConfirmEnabled());
     return bbox;
 }
 
@@ -364,7 +384,9 @@ public void respondUI(ViewEvent anEvent)
         String name = button.getName(), options[] = getOptions();
         for(int i=0; i<options.length; i++)
             if(name.equals(options[i])) {
-                _index = i; hide(); }
+                if(i==0) confirm();
+                else { _index = i; hide(); }
+            }
         if(options[0].equals("Cancel")) return; // Bogus
     }
     
