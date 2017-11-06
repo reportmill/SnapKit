@@ -37,6 +37,11 @@ public class FileChooser extends ViewOwner {
     DialogBox              _dbox;
 
 /**
+ * Returns whether is opening.
+ */
+public boolean isOpening()  { return !_saving; }
+
+/**
  * Returns whether is saving.
  */
 public boolean isSaving()  { return _saving; }
@@ -50,6 +55,11 @@ public void setSaving(boolean aValue)  { _saving = aValue; }
  * Returns the window title.
  */
 public String getTitle()  { return isSaving()? "Save Panel" : "Open Panel"; }
+
+/**
+ * Returns the first file types.
+ */
+public String getType()  { return _types!=null && _types.length>0? _types[0] : null; }
 
 /**
  * Returns the file types.
@@ -142,16 +152,6 @@ protected void setFileInUI()
 String getHomeDirPath()  { return System.getProperty("user.home"); }
 
 /**
- * Sets a home directory file.
- */
-public void setHomeDirFile(String aPath)
-{
-    String path = getHomeDirPath() + '/' + aPath.substring(1);
-    WebFile file = getFile(path); if(file==null) return;
-    setFile(file);
-}
-
-/**
  * Returns a file for a path.
  */
 WebFile getFile(String aPath)
@@ -159,6 +159,23 @@ WebFile getFile(String aPath)
     WebURL url = WebURL.getURL(aPath);
     WebFile file = url.getFile();
     return file;
+}
+
+/**
+ * Returns the most recent path for given type.
+ */
+public String getRecentPath(String aType)
+{
+    return Prefs.get().get("MostRecentDocument." + aType, getHomeDirPath());
+}
+
+/**
+ * Sets the most recent path for given type.
+ */
+public void setRecentPath(String aType, String aPath)
+{
+    Prefs.get().set("MostRecentDocument." + aType, aPath);
+    Prefs.get().flush();
 }
 
 /**
@@ -187,29 +204,14 @@ protected String showChooser(View aView)
     // Get component
     RootView rview = aView!=null? aView.getRootView() : null;
     
-    // Declare local variable for whether this is an open
-    boolean save = isSaving(), open = !save;
-    String types[] = getTypes();
-    String type = types.length>0? types[0] : "";
-    
     // Declare local variable for chooser
     //chooser.setFileFilter(new UIUtilsFileFilter(theExtensions, aDesc));
     
-    // If no file/dir set, get from prefs
+    // If no file/dir set, set from RecentPath (prefs)
     if(getDir()==null) {
-    
-        // Get last chosen file path from prefs for first given extension
-        String path = Prefs.get().get("MostRecentDocument." + types[0], getHomeDirPath());
-    
-        // Get last chosen file as File
+        String path = getRecentPath(getType());
         WebFile file = getFile(path);
-        if(file==null) {
-            path = path + '.' + type;
-            file = getFile(path);
-        }
-    
-       // Initialize chooser to last chosen directory and/or file
-       setFile(file);
+        setFile(file);
    }
 
     // Run FileChooser UI in DialogBox
@@ -219,45 +221,14 @@ protected String showChooser(View aView)
         return null;
     
     // Get file and path of selection and save to preferences
-    WebFile file = getFile();
-    if(file==null)
-        return showChooser(aView);
+    WebFile file = getFileTextFile(); if(file==null) {System.err.println("FileChooser: null not possible");return null;}
     String path = file.getPath();
     
-    // Get path extension
-    String ext = "." + FilePathUtils.getExtension(path);
-    if(ext.equals("."))
-        ext = types[0];
-    
     // Save selected filename in preferences for it's type (extension)
-    Prefs.get().set("MostRecentDocument" + ext, path);
-    Prefs.get().flush();
+    setRecentPath(getType(), path);
             
-    // If user chose a directory, just run again
-    if(file.isDir())
-        return showChooser(aView);
-    
-    // If opening a file that doesn't exists, see if it just needs an extension
-    if(open && !file.getExists()) {
-        
-        // If path doesn't contain an extension, add the first extension
-        //if(path.indexOf(".") < 0)
-        //    file = new File(path += theExtens[0]);
-
-        // If file doesn't exist, run chooser again
-        if(!file.getExists())
-            return showChooser(aView);
-    }
-    
-    // The open case can return file with invalid ext since we really run showDialog, so make sure path is OK
-    if(open && !StringUtils.containsIC(types, FilePathUtils.getExtension(path)))
-        return null;
-
-    // If saving, make sure path has extension
-    //if(save && path.indexOf(".") < 0)
-    //    file = new File(path += theExtens[0]);
-
     // If user is trying to save over an existing file, warn them
+    boolean save = isSaving();
     if(save && file.getExists()) {
         
         // Run option panel for whether to overwrite
@@ -267,7 +238,7 @@ protected String showChooser(View aView)
         int answer = dbox2.showOptionDialog(aView, "Replace");
         
         // If user chooses cancel, re-run chooser
-        if(answer==1)
+        if(answer!=0)
             return showChooser(aView);
     }
         
@@ -326,19 +297,11 @@ protected void respondUI(ViewEvent anEvent)
         setFile(file);
     }
     
-    // Handle FileText
+    // Handle FileText: If directory, set
     if(anEvent.equals("FileText")) {
-        
-        // Handle ~
-        String fname = _fileText.getText();
-        if(fname.startsWith("~"))
-            setHomeDirFile(fname);
-            
-        // Handle path
-        String path = fname.startsWith("/") || fname.startsWith("\\")? fname :
-            FilePathUtils.getChild(getDir().getPath(), fname);
-        WebFile file = getFile(path);
-        setFile(file);
+        WebFile file = getFileTextFile();
+        if(file!=null && file.isDir())
+            setFile(file);
     }
 }
 
@@ -372,8 +335,27 @@ private String getFileTextPath()
  */
 private WebFile getFileTextFile()
 {
+    // Get path and file for FileText
     String path = getFileTextPath();
-    return getFile(path);
+    WebFile file = getFile(path);
+    
+    // If opening a file that doesn't exists, see if it just needs an extension
+    if(file==null && isOpening() && path.indexOf(".")<0) {
+        path += getType();
+        file = getFile(path);
+    }
+    
+    // If saving, make sure path has extension and create
+    if(file==null && isSaving()) {
+        if(path.indexOf(".")<0) path += '.' + getType();
+        String dpath = FilePathUtils.getParent(path);
+        WebFile dir = getFile(dpath);
+        if(dir!=null && dir.isDir())
+            file = dir.getSite().createFile(path, false);
+    }
+    
+    // Return file
+    return file;
 }
 
 /**
