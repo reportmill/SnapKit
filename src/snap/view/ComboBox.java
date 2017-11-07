@@ -368,16 +368,17 @@ protected void textFieldKeyTyped(ViewEvent anEvent)
     // Set ListView Items, SelectedItem
     if(isFilterList()) _list.setItems(items);
     _list.setSelectedItem(item);
-    if(items.size()==0 && isPopup() && isPopupShowing())
+    if(items.size()<=1 && isPopup() && isPopupShowing())
         getPopupList().hide();
     
     // Reset TextField: If SelectedItem, set to full item text with selection to completed part, otherwise old string
-    String str = item!=null? _list.getText(item) : text;
-    _text.setText(str);
-    _text.setSel(selStart, str.length());
+    String text2 = item!=null? _list.getText(item) : text;
+    if(text2!=text) text2 = text + text2.substring(text.length());
+    _text.setText(text2);
+    _text.setSel(selStart, text2.length());
     
     // Handle KeyPress with no PopupShowing
-    if(isPopup() && !isPopupShowing() && getItemCount()>0)
+    if(isPopup() && !isPopupShowing() && getItemCount()>1)
         showPopup();
 }
 
@@ -405,7 +406,7 @@ protected List <T> getItemsForPrefix(String aStr)
  */
 protected void textFieldFiredAction()
 {
-    getListView().setText(_text.getText());
+    //getListView().setText(_text.getText());
     fireActionEvent();
 }
 
