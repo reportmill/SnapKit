@@ -38,17 +38,17 @@ public WebFile getSelectedFile()  { return _fileBrsr.getSelectedItem(); }
 protected View createUI()
 {
     // Create FileBrowser and put in ScrollView
-    _fileBrsr = new BrowserView(); _fileBrsr.setName("FileBrowser"); _fileBrsr.setVisColCount(3);
+    _fileBrsr = new BrowserView(); _fileBrsr.setName("FileBrowser");
+    _fileBrsr.setVisColCount(3); _fileBrsr.setGrowHeight(true);
     _fileBrsr.setResolver(new FileTreeResolver());
     _fileBrsr.setItems(getFiles());
-    ScrollView sview = new ScrollView(_fileBrsr); sview.setGrowHeight(true);
     
     // Create PageBrowser
     _pageBrsr = new WebBrowser(); _pageBrsr.setGrowHeight(true);
     
     // Put FileBrowser and PageBrowser in VBox
     VBox vbox = new VBox(); vbox.setFillWidth(true);
-    vbox.setChildren(sview, _pageBrsr);
+    vbox.setChildren(_fileBrsr, _pageBrsr);
     return vbox;
 }
 

@@ -337,7 +337,6 @@ public static byte[] getBytes(Object aSource)
     if(aSource instanceof InputStream) return getBytes((InputStream)aSource);
     
     // Handle WebFile
-    System.out.println("GetBytes: " + aSource);
     if(aSource instanceof WebFile) return ((WebFile)aSource).getBytes();
     
     // Handle WebURL (URL, File, String path)

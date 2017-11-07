@@ -42,11 +42,11 @@ protected View createUI()
 {
     HBox hbox = new HBox(); hbox.setFillHeight(true);
     _fileBrowser = new BrowserView(); _fileBrowser.setName("FileBrowser");
+    _fileBrowser.setPrefWidth(400); _fileBrowser.setGrowWidth(true);
     _fileBrowser.setResolver(new FileTreeResolver());
     _fileBrowser.setItems(getFile().getFiles());
-    ScrollView spane = new ScrollView(); spane.setContent(_fileBrowser); spane.setPrefWidth(400);
-    _pageBrowser = new WebBrowser(); _pageBrowser.setGrowWidth(true); spane.setGrowWidth(true);
-    hbox.setChildren(spane, _pageBrowser);
+    _pageBrowser = new WebBrowser(); _pageBrowser.setGrowWidth(true);
+    hbox.setChildren(_fileBrowser, _pageBrowser);
     return hbox;
 }
 
