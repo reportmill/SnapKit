@@ -669,7 +669,7 @@ protected void keyPressed(ViewEvent anEvent)
         case KeyCode.END: selectLineEnd(); break; // Handle end key
         case KeyCode.BACK_SPACE: deleteBackward(); anEvent.consume(); break; // Handle Backspace key
         case KeyCode.DELETE: deleteForward(); anEvent.consume(); break; // Handle Delete key
-        case KeyCode.ESCAPE: escape(); anEvent.consume(); break;
+        case KeyCode.ESCAPE: escape(anEvent); break;
         default: return; // Any other non-character key, just return
     }
     
@@ -771,7 +771,7 @@ public void paste()
  * Called when escape key is pressed to cancels editing in TextField.
  * First cancel resets focus gained value. Second hands focus to previous view.
  */
-public void escape()
+public void escape(ViewEvent anEvent)
 {
     // If not focused, just return
     if(!isFocused()) return;
@@ -780,6 +780,7 @@ public void escape()
     if(!SnapUtils.equals(getText(), _focusGainedText)) {
         setText(_focusGainedText);
         selectAll();
+        if(anEvent!=null) anEvent.consume();
     }
     
     // Otherwise hand focus to previous view

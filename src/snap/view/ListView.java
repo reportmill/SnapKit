@@ -591,15 +591,22 @@ protected void processEvent(ViewEvent anEvent)
     // Handle MousePress
     if(anEvent.isMousePress()) {
         int index = getRowAt(anEvent.getY());
-        setSelectedIndex(index);
-        if(!isFireActionOnRelease())
-            fireActionEvent();
+        ListCell cell = index>=0? getCell(index) : null;
+        if(cell!=null && cell.isEnabled()) {
+            setSelectedIndex(index);
+            if(!isFireActionOnRelease())
+                fireActionEvent();
+        }
     }
     
     // Handle MouseRelease
     if(anEvent.isMouseRelease()) {
-        if(isFireActionOnRelease())
-            fireActionEvent();
+        if(isFireActionOnRelease()) {
+            int index = getSelectedIndex();
+            ListCell cell = index>=0? getCell(index) : null;
+            if(cell!=null && cell.isEnabled())
+                fireActionEvent();
+        }
     }
     
     // Handle MouseExit

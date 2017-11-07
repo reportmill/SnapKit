@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <VBox Padding="5" GrowHeight="true" PrefWidth="500" PrefHeight="400" Spacing="15" FillWidth="true">
   <HBox Align="CENTER" Spacing="5" >
-    <Font Name="Arial" Size="13" />
+    <Font Name="Arial" Size="14" />
     <Label Text="File:" />
     <TextField name="FileText" ColumnCount="40" />
   </HBox>
   <HBox GrowHeight="true" Padding="1" >
-    <Font Name="Arial" Size="12" />
+    <Font Name="Arial" Size="13" />
     <BrowserView name="FileBrowser" GrowWidth="true" GrowHeight="true" />
   </HBox>
 </VBox>

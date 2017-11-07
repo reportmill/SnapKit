@@ -3,6 +3,7 @@
  */
 package snap.viewx;
 import java.util.*;
+import snap.gfx.Color;
 import snap.util.*;
 import snap.view.*;
 import snap.web.*;
@@ -258,8 +259,7 @@ protected WebFile[] getFilteredFiles(List <WebFile> theFiles)
     List <WebFile> files = new ArrayList();
     for(WebFile file : theFiles) {
         if(file.getName().startsWith(".")) continue;
-        if(file.isDir()) { files.add(file); continue; }
-        if(ArrayUtils.contains(getTypes(), file.getType()))
+        //if(file.isDir() || ArrayUtils.contains(getTypes(), file.getType()))
             files.add(file);
     }
     return files.toArray(new WebFile[0]);
@@ -270,9 +270,12 @@ protected WebFile[] getFilteredFiles(List <WebFile> theFiles)
  */
 protected void initUI()
 {
-    // Get BrowserView and configure
-    _fileBrowser = getView("FileBrowser", BrowserView.class);
+    // Get FileBrowser and configure
+    _fileBrowser = getView("FileBrowser", BrowserView.class); _fileBrowser.setRowHeight(22);
     _fileBrowser.setResolver(new FileResolver());
+    _fileBrowser.setCellConfigure(itm -> configureFileBrowserCell(itm));
+    
+    // Set FileBrowser Items, SelectedItem
     _fileBrowser.setItems(getFilteredFiles(getDir().getSite().getRootDir().getFiles()));
     _fileBrowser.setSelectedItem(getFile()!=null? getFile() : getDir());
     
@@ -284,6 +287,17 @@ protected void initUI()
     
     // Set handler to update DialogBox.ConfirmEnabled when text changes
     _fileText.addEventHandler(e -> runLater(() -> handleFileTextKeyReleased()), KeyRelease);
+}
+
+/**
+ * Configures a FileBrowser cell.
+ */
+protected void configureFileBrowserCell(ListCell<WebFile> aCell)
+{
+    WebFile file = aCell.getItem(); if(file==null) return;
+    if(file==null || file.isDir() || ArrayUtils.contains(getTypes(), file.getType())) return;
+    aCell.setEnabled(false);
+    aCell.setTextFill(Color.LIGHTGRAY);
 }
 
 /**
