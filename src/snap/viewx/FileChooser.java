@@ -272,6 +272,7 @@ protected void initUI()
 {
     // Get FileBrowser and configure
     _fileBrowser = getView("FileBrowser", BrowserView.class); _fileBrowser.setRowHeight(22);
+    enableEvents(_fileBrowser, MouseRelease);
     _fileBrowser.setResolver(new FileResolver());
     _fileBrowser.setCellConfigure(itm -> configureFileBrowserCell(itm));
     
@@ -307,8 +308,18 @@ protected void respondUI(ViewEvent anEvent)
 {
     // Handle FileBrowser
     if(anEvent.equals("FileBrowser")) {
-        WebFile file = _fileBrowser.getSelectedItem();
-        setFile(file);
+        
+        // Handle MouseRelease
+        if(anEvent.isMouseRelease()) {
+            if(anEvent.getClickCount()==2 && _dbox.isConfirmEnabled())
+                _dbox.confirm();
+        }
+        
+        // Handle Action
+        else {
+            WebFile file = _fileBrowser.getSelectedItem();
+            setFile(file);
+        }
     }
     
     // Handle FileText: If directory, set
