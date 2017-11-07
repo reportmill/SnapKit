@@ -19,10 +19,11 @@ protected FileHeader getFileHeader(String aPath)
     // Get standard file for path
     File file = getStandardFile(aPath); if(!file.exists()) return null;
     
-    // Get real path (fixes capitalization and expands links)
-    String path = file.getAbsolutePath();
-    try { path = file.getCanonicalPath(); }
+    // Get real path (fixes capitalization)
+    String path = aPath, cpath = null; try { cpath = file.getCanonicalPath(); }
     catch(Exception e) { System.err.println("FileSite.getFileHeader:" + e); }
+    if(cpath!=null && !cpath.endsWith(path) && StringUtils.endsWithIC(cpath,path))
+        path = cpath.substring(cpath.length() - path.length());
     
     // Create and initialize FileHeader and return
     FileHeader fhdr = new FileHeader(path, file.isDirectory());

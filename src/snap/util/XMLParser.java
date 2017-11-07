@@ -26,11 +26,15 @@ public XMLParser()
  */
 public XMLElement parseXML(Object aSource) throws Exception
 {
+    // Get string from source
     String str = SnapUtils.getText(aSource);
-    //WebURL url = WebURL.getURL(aSource);
-    //String str = url!=null? url.getText() : null;
-    //if(str==null && aSource instanceof byte[]) str = new String((byte[])aSource);
-    return (XMLElement)parse(str).getCustomNode();
+    if(str==null) {
+        System.err.println("XMLParser.parseXML: Couldn't load text from source: " + aSource); return null; }
+
+    // Parse string, get XML element and return
+    ParseNode node = parse(str);
+    XMLElement xml = (XMLElement)node.getCustomNode();
+    return xml;
 }
 
 /**

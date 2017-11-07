@@ -7,7 +7,7 @@ import java.math.*;
 import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import snap.web.WebURL;
+import snap.web.*;
 
 /**
  * This class provides general utility methods.
@@ -332,12 +332,19 @@ public static String getText(Object aSource)
  */
 public static byte[] getBytes(Object aSource)
 {
+    // Handle byte array and InputStream
     if(aSource instanceof byte[]) return (byte[])aSource;
     if(aSource instanceof InputStream) return getBytes((InputStream)aSource);
+    
+    // Handle WebFile
+    System.out.println("GetBytes: " + aSource);
+    if(aSource instanceof WebFile) return ((WebFile)aSource).getBytes();
+    
+    // Handle WebURL (URL, File, String path)
     WebURL url = null; try { url = WebURL.getURL(aSource); } catch(Exception e) { }
-    if(url!=null && url.getFile()!=null) return url.getFile().getBytes();
-    //if(aSource instanceof URL) try { return URLUtils.getBytes((URL)aSource); }
-    //catch(IOException e) { e.printStackTrace(); }
+    if(url!=null) return url.getBytes();
+
+    // Return null since bytes not found
     return null;
 }
 
