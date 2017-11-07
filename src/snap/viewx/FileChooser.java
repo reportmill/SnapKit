@@ -393,11 +393,45 @@ private boolean isFileTextFileValid()
 }
 
 /**
+ * Returns a file completion.
+ */
+private String getFileCompletion(String aPath)
+{
+    String dirPath = FilePathUtils.getParent(aPath), fname = FilePathUtils.getFileName(aPath);
+    WebFile dir = getFile(dirPath);
+    
+    for(WebFile file : dir.getFiles()) {
+        if(StringUtils.startsWithIC(file.getName(), fname))
+            return file.getName();
+    }
+    return null;
+}
+
+/**
  * Called after FileText KeyRelease.
  */
 private void handleFileTextKeyReleased()
 {
-    _dbox.setConfirmEnabled(isFileTextFileValid());
+    // Get whether FileTextFileValid
+    boolean fileTextFileValid = isFileTextFileValid();
+    
+    // If not valid and opening, check for completion
+    if(!fileTextFileValid && isOpening() && getFileTextFile()==null && _fileText.getText().trim().length()>0) {
+        String ftext = _fileText.getText().trim();
+        String path = getFileTextPath();
+        String fname = getFileCompletion(path);
+        
+        // If completion found, set filename remainder in FileText and select
+        if(fname!=null) {
+            fname = ftext + fname.substring(ftext.length());
+            _fileText.setText(fname);
+            _fileText.setSel(ftext.length(), fname.length());
+            fileTextFileValid = true;
+        }
+    }
+    
+    // Set confirm enabled
+    _dbox.setConfirmEnabled(fileTextFileValid);
 }
 
 /**

@@ -16,9 +16,16 @@ public class FileSite extends WebSite {
  */
 protected FileHeader getFileHeader(String aPath)
 {
-    // Get standard file for path, create and initialize file info and return
+    // Get standard file for path
     File file = getStandardFile(aPath); if(!file.exists()) return null;
-    FileHeader fhdr = new FileHeader(aPath, file.isDirectory());
+    
+    // Get real path (fixes capitalization and expands links)
+    String path = file.getAbsolutePath();
+    try { path = file.getCanonicalPath(); }
+    catch(Exception e) { System.err.println("FileSite.getFileHeader:" + e); }
+    
+    // Create and initialize FileHeader and return
+    FileHeader fhdr = new FileHeader(path, file.isDirectory());
     fhdr.setLastModifiedTime(file.lastModified());
     fhdr.setSize(file.length());
     return fhdr;
