@@ -339,14 +339,12 @@ protected void textFieldFocusChanged()
 protected void textFieldKeyPressed(ViewEvent anEvent)
 {
     // Handle UpArrow/DownArrow: send to list
-    if(anEvent.isUpArrow() || anEvent.isDownArrow()) {
+    if(anEvent.isUpArrow() || anEvent.isDownArrow())
         getListView().processEvent(anEvent);
-        getTextField().selectAll();
-    }
     
     // Handle EscapeKey
     if(anEvent.isEscapeKey()) {
-        
+
         // If value has changed, reset to focus gained values
         if(!SnapUtils.equals(_text.getText(), _text._focusGainedText)) {
             _list.setItems(_items);
@@ -370,29 +368,37 @@ protected void textFieldKeyPressed(ViewEvent anEvent)
  */
 protected void textFieldKeyTyped(ViewEvent anEvent)
 {
-    // If backspace key, delete again, since first one just deleted completion-selection
-    if(anEvent.isBackSpaceKey() && getSelectedItem()!=null)
-        _text.deleteBackward();
-        
-    // Get prefix to search for
-    boolean selEmpty = _text.isSelEmpty(); int selStart = _text.getSelStart();
-    String text = _text.getText(); if(!selEmpty) text = text.substring(0, selStart);
+    // Get prefix text and current selection
+    String text = _text.getText();
+    int selStart = _text.getSelStart();
+    
+    // Not sure if/why we needed this
+    if(!_text.isSelEmpty()) { System.err.println("ComboBox.textFieldKeyTyped: not SelEmpty?"); return; }
+    //text = text.substring(0, selStart);
     
     // Get items for prefix
     List <T> items = getItemsForPrefix(selStart>0? text : "");
-    T item = selStart>0? (items.size()>0? items.get(0) : null) : getSelectedItem();
+    T item = items.size()>0? items.get(0) : null;
+    
+    // What to do if empty text?
+    if(text.length()==0 && items.size()>0)
+        item = getSelectedItem();
     
     // Set ListView Items, SelectedItem
     if(isFilterList()) _list.setItems(items);
     _list.setSelectedItem(item);
     if(items.size()<=1 && isPopup() && isPopupShowing())
         getPopupList().hide();
-    
-    // Reset TextField: If SelectedItem, set to full item text with selection to completed part, otherwise old string
-    String text2 = item!=null? getText(item) : text;
-    if(text2!=text) text2 = text + text2.substring(text.length());
-    _text.setText(text2);
-    _text.setSel(selStart, text2.length());
+        
+    // Reset text and selection (since List.setSelectedItem changes it)
+    _text.setText(text);
+    _text.setSel(selStart);
+        
+    // If completion item available, set completion text
+    if(item!=null) {
+        String ctext = getText(item);
+        _text.setCompletionText(ctext);
+    }
     
     // Handle KeyPress with no PopupShowing
     if(isPopup() && !isPopupShowing() && getItemCount()>1)
@@ -443,7 +449,7 @@ protected void listViewSelectionChanged()
 {
     T item = getSelectedItem();
     String str = getText(item);
-    if(isShowTextField()) _text.setText(str);
+    if(isShowTextField()) { _text.setText(str); _text.selectAll(); }
     else _button.setText(str);
 }
 

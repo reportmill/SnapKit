@@ -31,6 +31,9 @@ public class TextField extends ParentView {
     // Whether the editor is word selecting (double click) or paragraph selecting (triple click)
     boolean               _wordSel, _pgraphSel;
     
+    // Whether text field is showing a completion selection
+    boolean               _compSel;
+    
     // The mouse down point
     double                _downX, _downY;
     
@@ -341,6 +344,7 @@ public void setSel(int aStart, int anEnd)
     // Fire property change
     firePropChange("Selection", aStart + ((long)anEnd)<<32, 0);
     repaint();
+    _compSel = false;
 }
 
 /**
@@ -446,8 +450,14 @@ public void selectLineEnd()  { setSel(length()); }
  */
 public void deleteBackward()
 {
-    if(!isSelEmpty() || getSelStart()==0) { delete(); return; }
-    delete(getSelStart()-1, getSelStart(), true);
+    // If CompSel (completion selection), run extra time
+    if(_compSel) { _compSel = false; deleteBackward(); }
+
+    // If selected range, delete selected range
+    if(!isSelEmpty() || getSelStart()==0) delete();
+    
+    // Otherwise delete previous char
+    else delete(getSelStart()-1, getSelStart(), true);
 }
 
 /**
@@ -477,6 +487,19 @@ public void deleteToLineEnd()
  * Clears the text.
  */
 public void clear()  { delete(0, length(), true); }
+
+/**
+ * Sets text that represents a completion of current text. This preserves the capitalization of chars in the current
+ * text and sets the selection to the remainder. If next key press is delete, removes the added remainder.
+ */
+public void setCompletionText(String aString)
+{
+    String text = getText(); if(!StringUtils.startsWithIC(aString,text)) return;
+    String text2 = text + aString.substring(text.length());
+    setText(text2);
+    setSel(text.length(), text2.length());
+    _compSel = true;
+}
 
 /**
  * Paint component.

@@ -417,15 +417,12 @@ private void handleFileTextKeyReleased()
     
     // If not valid and opening, check for completion
     if(!fileTextFileValid && isOpening() && getFileTextFile()==null && _fileText.getText().trim().length()>0) {
-        String ftext = _fileText.getText().trim();
         String path = getFileTextPath();
         String fname = getFileCompletion(path);
         
         // If completion found, set filename remainder in FileText and select
         if(fname!=null) {
-            fname = ftext + fname.substring(ftext.length());
-            _fileText.setText(fname);
-            _fileText.setSel(ftext.length(), fname.length());
+            _fileText.setCompletionText(fname);
             fileTextFileValid = true;
         }
     }
