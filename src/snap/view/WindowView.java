@@ -369,7 +369,9 @@ protected void setFocused(boolean aValue)
 protected double getPrefWidthImpl(double aH)
 {
     Insets ins = getInsetsAll();
-    return ins.left + getRootView().getPrefWidth(aH) + ins.right;
+    double h = aH>0? aH - ins.top - ins.bottom : aH;
+    double ph = getRootView().getBestWidth(h);
+    return ins.left + ph + ins.right;
 }
 
 /**
@@ -378,7 +380,9 @@ protected double getPrefWidthImpl(double aH)
 protected double getPrefHeightImpl(double aW)
 {
     Insets ins = getInsetsAll();
-    return ins.top + getRootView().getPrefHeight(aW) + ins.bottom;
+    double w = aW>=0? aW - ins.left - ins.right : aW;
+    double pw = getRootView().getBestHeight(w);
+    return ins.top + pw + ins.bottom;
 }
 
 /**
@@ -388,7 +392,8 @@ protected void layoutImpl()
 {
     RootView rview = getRootView(); if(rview==null) return;
     Insets ins = getInsetsAll();
-    double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
+    double x = ins.left, w = getWidth() - x - ins.right;
+    double y = ins.top, h = getHeight() - y - ins.bottom;
     rview.setBounds(x, y, w, h);
 }
 

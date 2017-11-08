@@ -11,7 +11,7 @@ import snap.util.*;
 public class BorderView extends ParentView {
     
     // The layout
-    ViewLayout.BorderLayout _layout = new ViewLayout.BorderLayout(this);
+    BorderLayout _layout = new BorderLayout(this);
 
 /**
  * Returns the center node.
@@ -172,4 +172,117 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     if(rgtView instanceof View) setRight((View)rgtView);
 }
 
+/**
+ * A Border layout.
+ */
+public static class BorderLayout extends ViewLayout {
+    
+    // The panes
+    View        _top, _center, _bottom, _left, _right;
+    
+    // Whether to fill center
+    boolean     _fillCenter = true;
+    
+    // Proxy nodes for horizontal nodes and center node
+    HBoxProxy     _hproxy = new HBoxProxy();
+    CenterProxy   _cproxy = new CenterProxy();
+    
+    // Workers: for center node, horizontal nodes and vertical nodes
+    HBoxLayout     _hlay = new HBoxLayout(_hproxy);
+    VBoxLayout     _vlay = new VBoxLayout(null);
+    Box.BoxLayout  _clay = new Box.BoxLayout(null);
+    
+    /** Creates a new Border layout for given parent. */
+    public BorderLayout(ParentView aPar)
+    {
+        setParent(aPar); _hlay.setFillHeight(true); _vlay.setFillWidth(true);
+    }
+    
+    /** Returns the top. */
+    public View getTop()  { return _top; }
+    
+    /** Sets the top. */
+    public void setTop(View aView)  { _top = aView; }
+    
+    /** Returns the Center. */
+    public View getCenter()  { return _center; }
+    
+    /** Sets the Center. */
+    public void setCenter(View aView)  { _center = aView; }
+    
+    /** Returns the Bottom. */
+    public View getBottom()  { return _bottom; }
+    
+    /** Sets the Bottom. */
+    public void setBottom(View aView)  { _bottom = aView; }
+    
+    /** Returns the Left. */
+    public View getLeft()  { return _left; }
+    
+    /** Sets the Left. */
+    public void setLeft(View aView)  { _left = aView; }
+    
+    /** Returns the Right. */
+    public View getRight()  { return _right; }
+    
+    /** Sets the Bottom. */
+    public void setRight(View aView)  { _right = aView; }
+    
+    /** Returns whether layout should fill center when bigger than pref size. */
+    public boolean isFillCenter()  { return _fillCenter; }
+    
+    /** Sets whether to fill center when bigger than pref size. */
+    public void setFillCenter(boolean aValue)  { _fillCenter = aValue; }
+        
+    /** Returns preferred width of layout. */
+    public double getPrefWidth(double aH)  { return getVLay().getPrefWidth(aH); }
+    
+    /** Returns preferred height of layout. */
+    public double getPrefHeight(double aW)  { return getVLay().getPrefHeight(aW); }
+    
+    /** Performs layout. */
+    public void layoutChildren(double px, double py, double pw, double ph)
+    {
+        getVLay().layoutChildren(px, py, pw, ph);
+        _hlay.layoutChildren(_hproxy.getX(), _hproxy.getY(), _hproxy.getWidth(), _hproxy.getHeight());
+        
+        if(_center==null) return;
+        _clay.setChild(_center); _clay.setParent(getParent());
+        _clay.setFillWidth(_fillCenter); _clay.setFillHeight(_fillCenter);
+        _clay.layoutChildren(_cproxy.getX(), _cproxy.getY(), _cproxy.getWidth(), _cproxy.getHeight());
+    }
+    
+    /** Returns a VBoxLayout with HBoxLayout to do real work. */
+    public VBoxLayout getVLay()
+    {
+        _cproxy.relayoutParent(); _hproxy.relayoutParent();
+        View hkids[] = asArray(_left, _center!=null? _cproxy : null, _right);
+        View vkids[] = asArray(_top, _hproxy, _bottom);
+        _hlay.setChildren(hkids); _vlay.setChildren(vkids); _vlay.setParent(getParent());
+        return _vlay;
+    }
+    
+    /** HBoxProxy to model left, center, right of BorderView. */
+    private class HBoxProxy extends ParentView {
+        public HBoxProxy() { setGrowWidth(true); setGrowHeight(true); }
+        protected double getPrefWidthImpl(double aH)  { return _hlay.getPrefWidth(aH); }
+        protected double getPrefHeightImpl(double aW)  { return _hlay.getPrefHeight(aW); }
+    }
+    
+    /** CenterProxy to model center as always grow width/height. */
+    private class CenterProxy extends ParentView {
+        public CenterProxy() { setGrowWidth(true); setGrowHeight(true); }
+        protected double getPrefWidthImpl(double aH)  { return _center.getPrefWidth(aH); }
+        protected double getPrefHeightImpl(double aW)  { return _center.getPrefHeight(aW); }
+    }
+    
+    /** Returns an array of non-null nodes from given nodes list. */
+    private View[] asArray(View ... theNodes)
+    {
+        int i = 0, len = 0; for(View n : theNodes) if(n!=null) len++;
+        View nodes[] = new View[len]; for(View n : theNodes) if(n!=null) nodes[i++] = n;
+        return nodes;
+    }
+}
+    
 }

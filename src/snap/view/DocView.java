@@ -22,7 +22,7 @@ public class DocView extends ParentView {
     int                      _selIndex = -1;
     
     // The layout
-    ViewLayout.BorderLayout  _layout = new ViewLayout.BorderLayout(this);
+    Box.BoxLayout            _layout = new Box.BoxLayout(this);
     
     // Constants for properties
     public static final String PageMargin_Prop = "PageMargin";
@@ -33,7 +33,6 @@ public class DocView extends ParentView {
 public DocView()
 {
     setAlign(Pos.CENTER);
-    _layout.setFillCenter(false);
 }
 
 /**
@@ -116,7 +115,6 @@ public void setSelectedIndex(int anIndex)
     // Get new page
     PageView page = getSelectedPage();
     if(page!=null) addChild(page);
-    _layout.setCenter(page);
 }
 
 /**
@@ -136,7 +134,7 @@ public void setSelectedPage(PageView aPage)
 /**
  * Returns the page node.
  */
-public PageView getPage()  { return (PageView)_layout.getCenter(); }
+public PageView getPage()  { return getSelectedPage(); }
 
 /**
  * Sets the page node.

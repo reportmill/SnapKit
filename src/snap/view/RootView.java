@@ -7,7 +7,7 @@ import snap.gfx.*;
 
 /**
  * The top level View in a window.
- * Responsible for animation, resetUI, relayout and repaints.
+ * Responsible for repaint, relayout, resetUI and animation.
  * Also repsonsible for managing focus view and dispatching events.
  */
 public class RootView extends ParentView {
@@ -31,7 +31,7 @@ public class RootView extends ParentView {
     EventDispatcher          _eventDispatcher = new EventDispatcher(this);
     
     // The layout
-    ViewLayout.BorderLayout  _layout = new ViewLayout.BorderLayout(this);
+    ViewLayout.VBoxLayout    _layout = new ViewLayout.VBoxLayout(this);
     
     // A map of dirty info
     Map <View,Rect>          _dirtyRects = new HashMap();
@@ -62,7 +62,11 @@ public class RootView extends ParentView {
 /**
  * Creates a RootView.
  */
-public RootView()  { enableEvents(KeyEvents); setFocusable(true); }
+public RootView()
+{
+    enableEvents(KeyEvents); setFocusable(true);
+    _layout.setFillWidth(true);
+}
 
 /**
  * Returns the menubar.
@@ -75,7 +79,6 @@ public MenuBar getMenuBar()  { return _mbar; }
 public void setMenuBar(MenuBar aMBar)
 {
     if(aMBar==_mbar) return;
-    _layout.setTop(aMBar);
     View old = _mbar; if(_mbar!=null) removeChild(_mbar);
     _mbar = aMBar; if(_mbar!=null) addChild(_mbar,0);
     firePropChange(MenuBar_Prop, old, _mbar);
@@ -92,9 +95,8 @@ public View getContent()  { return _content; }
 public void setContent(View aView)
 {
     View old = _content; if(aView==old) return;
-    _layout.setCenter(aView);
     if(_content!=null) removeChild(_content); _content = aView;
-    if(_content!=null) addChild(_content);
+    if(_content!=null) { addChild(_content); _content.setGrowHeight(true); }
     firePropChange(Content_Prop, old, _content);
 }
 
@@ -142,16 +144,6 @@ public void removeRootViewListener(RootView.Listener aLsnr)  { if(_lsnr==aLsnr) 
  * Returns the root view.
  */
 public RootView getRootView()  { return this; }
-
-/**
- * Returns the preferred width.
- */
-protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(-1); }
-
-/**
- * Returns the preferred height.
- */
-protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
 
 /**
  * Returns the current cursor.
@@ -263,18 +255,13 @@ public void resetLater(ViewOwner anOwnr)
 }
 
 /**
- * Override to not send to window.
- */
-public void relayoutParent()  { }
-
-/**
  * Override to register for layout.
  */
 protected synchronized void setNeedsLayoutDeep(boolean aVal)
 {
     // If Painting, complaint (nothing should change during paint)
     if(_painting)
-        System.err.println("RootView.relayout: Illegal view changes during paint.");
+        System.err.println("RootView.setNeedsLayoutDeep: Illegal view changes during paint.");
 
     // If already set, just return
     if(aVal==isNeedsLayoutDeep()) return;
@@ -283,6 +270,16 @@ protected synchronized void setNeedsLayoutDeep(boolean aVal)
     super.setNeedsLayoutDeep(aVal);
     activatePaintLater();
 }
+
+/**
+ * Returns the preferred width.
+ */
+protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(-1); }
+
+/**
+ * Returns the preferred height.
+ */
+protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
 
 /**
  * Layout children.
@@ -301,7 +298,7 @@ public synchronized void repaint(View aView, double aX, double aY, double aW, do
 {
     // If Painting, complaint (nothing should change during paint)
     if(_painting)
-        System.err.println("RootView.relayout: Illegal repaint call during paint.");
+        System.err.println("RootView.repaint: Illegal repaint call during paint.");
 
     // Register for paintLater
     activatePaintLater();
