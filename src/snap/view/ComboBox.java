@@ -23,6 +23,9 @@ public class ComboBox <T> extends ParentView implements View.Selectable <T> {
     // The ListView
     ListView <T>               _list;
     
+    // The function to format text
+    Function <T,String>        _itemTextFunc;
+    
     // Whether text entered in TextField should filter ListView items
     boolean                    _filterList;
     
@@ -105,6 +108,7 @@ protected ListView <T> createListView()
 {
     PopupList plist = new PopupList();
     plist.setAltPaint(null); plist.setTargeting(true);
+    plist.setItemTextFunction(getItemTextFunction());
     return plist;
 }
 
@@ -262,12 +266,15 @@ public void setSelectedItem(T anItem)  { getListView().setSelectedItem(anItem); 
 /**
  * Returns function for deteriming text for an item.
  */
-public Function <T,String> getItemTextFunction()  { return getListView().getItemTextFunction(); }
+public Function <T,String> getItemTextFunction()  { return _itemTextFunc; }
 
 /**
  * Sets function for deteriming text for an item.
  */
-public void setItemTextFunction(Function <T,String> aFunc)  { getListView().setItemTextFunction(aFunc); }
+public void setItemTextFunction(Function <T,String> aFunc)
+{
+    _itemTextFunc = aFunc;
+}
 
 /**
  * Returns method to configure list cells.
@@ -297,6 +304,16 @@ public void setText(String aString)
     if(isShowTextField()) _text.setText(aString);
     else _button.setText(aString);
     getListView().setText(aString);
+}
+
+/**
+ * Returns text for item.
+ */
+public String getText(T anItem)
+{
+    if(anItem==null) return null;
+    if(_itemTextFunc!=null) return _itemTextFunc.apply(anItem);
+    return anItem.toString();
 }
 
 /**
@@ -372,7 +389,7 @@ protected void textFieldKeyTyped(ViewEvent anEvent)
         getPopupList().hide();
     
     // Reset TextField: If SelectedItem, set to full item text with selection to completed part, otherwise old string
-    String text2 = item!=null? _list.getText(item) : text;
+    String text2 = item!=null? getText(item) : text;
     if(text2!=text) text2 = text + text2.substring(text.length());
     _text.setText(text2);
     _text.setSel(selStart, text2.length());
@@ -424,7 +441,8 @@ protected void listViewFiredAction()
  */
 protected void listViewSelectionChanged()
 {
-    String str = getListView().getText();
+    T item = getSelectedItem();
+    String str = getText(item);
     if(isShowTextField()) _text.setText(str);
     else _button.setText(str);
 }
