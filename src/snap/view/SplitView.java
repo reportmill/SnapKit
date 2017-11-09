@@ -285,7 +285,7 @@ public static class SplitLayout extends ViewLayout {
     public double getPrefHeight(double aW)  { return getLayout().getPrefHeight(aW); }
         
     /** Performs layout. */
-    public void layoutChildren(double px, double py, double pw, double ph)  { getLayout().layoutChildren(px,py,pw,ph); }
+    public void layoutChildren()  { getLayout().layoutChildren(); }
 }
 
 }

@@ -95,26 +95,12 @@ protected double getPrefHeightImpl(double aW)  { return 0; }
 /**
  * Performs layout.
  */
-public void layoutChildren()
-{
-    if(getChildCount()==0) return;
-    Insets ins = getInsets();
-    double px = ins.left, py = ins.top;
-    double pw = _parent.getWidth() - px - ins.right; if(pw<0) pw = 0;
-    double ph = _parent.getHeight() - py - ins.bottom; if(ph<0) ph = 0;
-    if(pw>0 && ph>0)
-        layoutChildren(px, py, pw, ph);
-}
-
-/**
- * Performs layout.
- */
-public void layoutChildren(double px, double py, double pw, double ph)  { }
+public void layoutChildren()  { }
 
 /**
  * Returns the align x factor.
  */
-protected double getAlignX(View aView)
+public static double getAlignX(View aView)
 {
     HPos hp = aView.getAlign().getHPos(); return hp==HPos.RIGHT? 1 : hp==HPos.CENTER? .5 : 0;
 }
@@ -122,7 +108,7 @@ protected double getAlignX(View aView)
 /**
  * Returns the align y factor.
  */
-protected double getAlignY(View aView)
+public static double getAlignY(View aView)
 {
     VPos vp = aView.getAlign().getVPos(); return vp==VPos.BOTTOM? 1 : vp==VPos.CENTER? .5 : 0;
 }
@@ -130,7 +116,7 @@ protected double getAlignY(View aView)
 /**
  * Returns the lean x factor.
  */
-protected double getLeanX(View aView)
+public static double getLeanX(View aView)
 {
     HPos hp = aView.getLeanX(); return hp==HPos.RIGHT? 1 : hp==HPos.CENTER? .5 : 0;
 }
@@ -138,7 +124,7 @@ protected double getLeanX(View aView)
 /**
  * Returns the lean y factor.
  */
-protected double getLeanY(View aView)
+public static double getLeanY(View aView)
 {
     VPos vp = aView.getLeanY(); return vp==VPos.BOTTOM? 1 : vp==VPos.CENTER? .5 : 0;
 }

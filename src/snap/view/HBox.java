@@ -122,25 +122,37 @@ public static class HBoxLayout extends ViewLayout {
         return h;
     }
         
-    /** Performs layout. */
-    public void layoutChildren(double px, double py, double pw, double ph)
+    /** Performs layout in content rect. */
+    public void layoutChildren()  { layout(_parent, getChildren(), null, _fillHeight, _spacing); }
+    
+    /** Performs layout in content rect. */
+    public static void layout(View aPar, View children[], Insets theIns, boolean isFillHeight, double aSpacing)
     {
-        View children[] = getChildren(); int ccount = children.length; if(ccount==0) return;
+        // If no children, just return
+        if(children.length==0) return;
+        
+        // Get parent bounds for insets
+        Insets ins = theIns!=null? theIns : aPar.getInsetsAll();
+        double px = ins.left, py = ins.top;
+        double pw = aPar.getWidth() - px - ins.right; if(pw<0) pw = 0; if(pw<=0) return;
+        double ph = aPar.getHeight() - py - ins.bottom; if(ph<0) ph = 0; if(ph<=0) return;
+        
+        // Get child bounds
         Rect cbnds[] = new Rect[children.length];
-        double cx = px, ay = getAlignY(_parent);
+        double cx = px, ay = getAlignY(aPar);
         int grow = 0;
         
         // Layout children
         for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i];
-            double ch = _fillHeight || child.isGrowHeight()? ph : Math.min(child.getBestHeight(-1), ph);
+            double ch = isFillHeight || child.isGrowHeight()? ph : Math.min(child.getBestHeight(-1), ph);
             double cw = child.getBestWidth(ch), cy = py;
-            if(ph>ch && !_fillHeight) { double ay2 = Math.max(ay,getLeanY(child)); cy += Math.round((ph-ch)*ay2); }
-            cbnds[i] = new Rect(cx, cy, cw, ch); cx += cw + _spacing;
+            if(ph>ch && !isFillHeight) { double ay2 = Math.max(ay,getLeanY(child)); cy += Math.round((ph-ch)*ay2); }
+            cbnds[i] = new Rect(cx, cy, cw, ch); cx += cw + aSpacing;
             if(child.isGrowWidth()) grow++;
         }
         
         // Calculate extra space
-        double extra = px + pw - (cx - _spacing);
+        double extra = px + pw - (cx - aSpacing);
         
         // If grow shapes, add grow
         if(extra!=0 && grow>0) { double dx = 0;
@@ -152,7 +164,7 @@ public static class HBoxLayout extends ViewLayout {
         
         // Otherwise, check for horizontal alignment/lean shift
         else if(extra>0) {
-            double ax = getAlignX(_parent);
+            double ax = getAlignX(aPar);
             for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect cbnd = cbnds[i];
                 ax = Math.max(ax, getLeanX(child)); double dx = extra*ax;
                 if(dx>0) cbnd.setX(cbnd.getX() + extra*ax);

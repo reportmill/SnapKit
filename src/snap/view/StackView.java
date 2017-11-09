@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.Pos;
+import snap.gfx.*;
 
 /**
  * A ChildView subclass to show overlapping children.
@@ -71,16 +71,26 @@ public static class StackLayout extends ViewLayout {
         return h;
     }
     
-    /** Performs layout. */
-    public void layoutChildren(double px, double py, double pw, double ph)
+    /** Performs layout in content rect. */
+    public void layoutChildren()  { layout(_parent, getChildren(), null, _fillWidth, _fillHeight); }
+    
+    /** Performs layout in content rect. */
+    public static void layout(View aPar, View children[], Insets theIns, boolean isFillWidth, boolean isFillHeight)
     {
-        double ay = getAlignY(_parent), ax = getAlignX(_parent);
+        // If no children, just return
+        if(children.length==0) return;
+        
+        // Get parent bounds for insets
+        Insets ins = theIns!=null? theIns : aPar.getInsetsAll();
+        double px = ins.left, py = ins.top;
+        double pw = aPar.getWidth() - px - ins.right; if(pw<0) pw = 0; if(pw<=0) return;
+        double ph = aPar.getHeight() - py - ins.bottom; if(ph<0) ph = 0; if(ph<=0) return;
+        double ay = getAlignY(aPar), ax = getAlignX(aPar);
         
         // Layout children
-        View children[] = getChildren();
         for(View child : children) {
-            double cw = _fillWidth || child.isGrowWidth()? pw : Math.min(child.getBestWidth(-1), pw);
-            double ch = _fillHeight || child.isGrowHeight()? ph : Math.min(child.getBestHeight(-1), ph);
+            double cw = isFillWidth || child.isGrowWidth()? pw : Math.min(child.getBestWidth(-1), pw);
+            double ch = isFillHeight || child.isGrowHeight()? ph : Math.min(child.getBestHeight(-1), ph);
             double cx = px, cy = py;
             if(pw>cw) { double ax2 = child.getLeanX()!=null? getLeanX(child) : ax;
                 cx += Math.round((pw-cw)*ax2); }
@@ -88,7 +98,7 @@ public static class StackLayout extends ViewLayout {
                 cy += Math.round((ph-ch)*ay2); }
             child.setBounds(cx, cy, cw, ch);
         }
-    }
+    }        
 }
 
 }

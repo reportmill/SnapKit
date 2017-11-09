@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.gfx.Insets;
 import snap.gfx.Pos;
 import snap.util.*;
 
@@ -178,25 +179,21 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
 public static class BorderLayout extends ViewLayout {
     
     // The panes
-    View        _top, _center, _bottom, _left, _right;
+    View              _top, _center, _bottom, _left, _right;
     
     // Whether to fill center
-    boolean     _fillCenter = true;
+    boolean          _fillCenter = true;
     
     // Proxy nodes for horizontal nodes and center node
-    HBoxProxy     _hproxy = new HBoxProxy();
-    CenterProxy   _cproxy = new CenterProxy();
+    HBoxProxy        _hproxy = new HBoxProxy();
+    CenterProxy      _cproxy = new CenterProxy();
     
     // Workers: for center node, horizontal nodes and vertical nodes
-    HBox.HBoxLayout     _hlay = new HBox.HBoxLayout(_hproxy);
-    VBox.VBoxLayout     _vlay = new VBox.VBoxLayout(null);
-    Box.BoxLayout  _clay = new Box.BoxLayout(null);
+    HBox.HBoxLayout  _hlay = new HBox.HBoxLayout(_hproxy);
+    VBox.VBoxLayout  _vlay = new VBox.VBoxLayout(null);
     
     /** Creates a new Border layout for given parent. */
-    public BorderLayout(ParentView aPar)
-    {
-        setParent(aPar); _hlay.setFillHeight(true); _vlay.setFillWidth(true);
-    }
+    public BorderLayout(ParentView aPar)  { setParent(aPar); _hlay.setFillHeight(true); _vlay.setFillWidth(true); }
     
     /** Returns the top. */
     public View getTop()  { return _top; }
@@ -241,24 +238,28 @@ public static class BorderLayout extends ViewLayout {
     public double getPrefHeight(double aW)  { return getVLay().getPrefHeight(aW); }
     
     /** Performs layout. */
-    public void layoutChildren(double px, double py, double pw, double ph)
+    public void layoutChildren()
     {
-        getVLay().layoutChildren(px, py, pw, ph);
-        _hlay.layoutChildren(_hproxy.getX(), _hproxy.getY(), _hproxy.getWidth(), _hproxy.getHeight());
+        // Do vertical layout (top, horiz-proxy, bottom)
+        View par = getParent();
+        View vkids[] = getVLay().getChildren();
+        VBox.VBoxLayout.layout(par, vkids, null, true, 0);
         
-        if(_center==null) return;
-        _clay.setChild(_center); _clay.setParent(getParent());
-        _clay.setFillWidth(_fillCenter); _clay.setFillHeight(_fillCenter);
-        _clay.layoutChildren(_cproxy.getX(), _cproxy.getY(), _cproxy.getWidth(), _cproxy.getHeight());
+        // Do horizontal layout (left, center-proxy, bottom)
+        Insets hins = getInsets(par, _hproxy);
+        HBox.HBoxLayout.layout(par, _hlay.getChildren(), hins, true, 0);
+        
+        // Do center layout
+        Insets cins = getInsets(par, _cproxy);
+        Box.BoxLayout.layout(par, _center, cins, _fillCenter, _fillCenter);
     }
     
     /** Returns a VBoxLayout with HBoxLayout to do real work. */
     public VBox.VBoxLayout getVLay()
     {
         _cproxy.relayoutParent(); _hproxy.relayoutParent();
-        View hkids[] = asArray(_left, _center!=null? _cproxy : null, _right);
-        View vkids[] = asArray(_top, _hproxy, _bottom);
-        _hlay.setChildren(hkids); _vlay.setChildren(vkids); _vlay.setParent(getParent());
+        _hlay.setChildren(asArray(_left, _center!=null? _cproxy : null, _right));
+        _vlay.setChildren(asArray(_top, _hproxy, _bottom)); _vlay.setParent(getParent());
         return _vlay;
     }
     
@@ -272,16 +273,24 @@ public static class BorderLayout extends ViewLayout {
     /** CenterProxy to model center as always grow width/height. */
     private class CenterProxy extends ParentView {
         public CenterProxy() { setGrowWidth(true); setGrowHeight(true); }
-        protected double getPrefWidthImpl(double aH)  { return _center.getPrefWidth(aH); }
-        protected double getPrefHeightImpl(double aW)  { return _center.getPrefHeight(aW); }
+        protected double getPrefWidthImpl(double aH)  { return _center.getBestWidth(aH); }
+        protected double getPrefHeightImpl(double aW)  { return _center.getBestHeight(aW); }
     }
     
-    /** Returns an array of non-null nodes from given nodes list. */
-    private View[] asArray(View ... theNodes)
+    /** Returns array of non-null views from given view args. */
+    private View[] asArray(View ... theViews)
     {
-        int i = 0, len = 0; for(View n : theNodes) if(n!=null) len++;
-        View nodes[] = new View[len]; for(View n : theNodes) if(n!=null) nodes[i++] = n;
-        return nodes;
+        int i = 0, len = 0; for(View n : theViews) if(n!=null) len++;
+        View views[] = new View[len]; for(View n : theViews) if(n!=null) views[i++] = n;
+        return views;
+    }
+    
+    /** Returns insets of given view in given parent. */
+    private Insets getInsets(View aPar, View aChild)
+    {
+        double right = aPar.getWidth() - aChild.getX() - aChild.getWidth();
+        double bottom = aPar.getHeight() - aChild.getY() - aChild.getHeight();
+        return new Insets(aChild.getY(), right, bottom, aChild.getX());
     }
 }
     

@@ -123,24 +123,36 @@ public static class VBoxLayout extends ViewLayout {
     }
         
     /** Performs layout in content rect. */
-    public void layoutChildren(double px, double py, double pw, double ph)
+    public void layoutChildren()  { layout(_parent, getChildren(), null, _fillWidth, _spacing); }
+    
+    /** Performs layout in content rect. */
+    public static void layout(View aPar, View children[], Insets theIns, boolean isFillWidth, double aSpacing)
     {
-        View children[] = getChildren(); int ccount = children.length; if(ccount==0) return;
+        // If no children, just return
+        if(children.length==0) return;
+        
+        // Get parent bounds for insets
+        Insets ins = theIns!=null? theIns : aPar.getInsetsAll();
+        double px = ins.left, py = ins.top;
+        double pw = aPar.getWidth() - px - ins.right; if(pw<0) pw = 0; if(pw<=0) return;
+        double ph = aPar.getHeight() - py - ins.bottom; if(ph<0) ph = 0; if(ph<=0) return;
+        
+        // Get child bounds
         Rect cbnds[] = new Rect[children.length];
-        double cy = py, ax = getAlignX(_parent);
+        double cy = py, ax = getAlignX(aPar);
         int grow = 0;
         
         // Layout children
         for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i];
-            double cw = _fillWidth || child.isGrowWidth()? pw : Math.min(child.getBestWidth(-1), pw);
+            double cw = isFillWidth || child.isGrowWidth()? pw : Math.min(child.getBestWidth(-1), pw);
             double ch = child.getBestHeight(cw), cx = px;
-            if(pw>cw && !_fillWidth) { double ax2 = Math.max(ax,getLeanX(child)); cx += Math.round((pw-cw)*ax2); }
-            cbnds[i] = new Rect(cx,cy,cw,ch); cy += ch + _spacing;
+            if(pw>cw && !isFillWidth) { double ax2 = Math.max(ax,getLeanX(child)); cx += Math.round((pw-cw)*ax2); }
+            cbnds[i] = new Rect(cx,cy,cw,ch); cy += ch + aSpacing;
             if(child.isGrowHeight()) grow++;
         }
         
         // Calculate extra space (return if none)
-        double extra = py + ph - (cy - _spacing);
+        double extra = py + ph - (cy - aSpacing);
         
         // If grow shapes, add grow
         if(extra!=0 && grow>0) { double dy = 0;
@@ -152,7 +164,7 @@ public static class VBoxLayout extends ViewLayout {
         
         // Otherwise, check for vertical alignment/lean shift
         else if(extra>0) {
-            double ay = getAlignY(_parent);
+            double ay = getAlignY(aPar);
             for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect cbnd = cbnds[i];
                 ay = Math.max(ay, getLeanY(child)); double dy = extra*ay;
                 if(dy>0) cbnd.setY(cbnd.getY() + extra*ay);

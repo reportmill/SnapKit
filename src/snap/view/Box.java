@@ -181,19 +181,32 @@ public static class BoxLayout extends ViewLayout {
         return bh;
     }
     
-    /** Performs layout in content rect. */
-    public void layoutChildren(double px, double py, double pw, double ph)
+    /** Performs layout. */
+    public void layoutChildren()  { layout(_parent, getChild(), null, _fillWidth, _fillHeight); }
+    
+    /**
+     * Performs Box layout for given parent, child and fill width/height.
+     */
+    public static void layout(View aPar, View aChild, Insets theIns, boolean isFillWidth, boolean isFillHeight)
     {
+        // If no child, just return
+        if(aChild==null) return;
+        
+        // Get parent bounds for insets (just return if empty)
+        Insets ins = theIns!=null? theIns : aPar.getInsetsAll();
+        double px = ins.left, py = ins.top;
+        double pw = aPar.getWidth() - px - ins.right; if(pw<0) pw = 0; if(pw<=0) return;
+        double ph = aPar.getHeight() - py - ins.bottom; if(ph<0) ph = 0; if(ph<=0) return;
+        
         // Get content width/height
-        View child = getChild();
-        double cw = _fillWidth || child.isGrowWidth()? pw : child.getBestWidth(-1); if(cw>pw) cw = pw;
-        double ch = _fillHeight? ph : child.getBestHeight(cw);
+        double cw = isFillWidth || aChild.isGrowWidth()? pw : aChild.getBestWidth(-1); if(cw>pw) cw = pw;
+        double ch = isFillHeight? ph : aChild.getBestHeight(cw);
         
         // Handle normal layout
         double dx = pw - cw, dy = ph - ch;
-        double sx = child.getLeanX()!=null? getLeanX(child) : getAlignX(_parent);
-        double sy = child.getLeanY()!=null? getLeanY(child) : getAlignY(_parent);
-        child.setBounds(px+dx*sx, py+dy*sy, cw, ch);
+        double sx = aChild.getLeanX()!=null? getLeanX(aChild) : getAlignX(aPar);
+        double sy = aChild.getLeanY()!=null? getLeanY(aChild) : getAlignY(aPar);
+        aChild.setBounds(px+dx*sx, py+dy*sy, cw, ch);
     }
 }
 
