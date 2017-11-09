@@ -143,4 +143,38 @@ protected double getLeanY(View aView)
     VPos vp = aView.getLeanY(); return vp==VPos.BOTTOM? 1 : vp==VPos.CENTER? .5 : 0;
 }
 
+/**
+ * Returns the basic pref width for a view and child.
+ */
+public static double getPrefWidthBasic(View aPar, View aChild, double aH)
+{
+    Insets ins = aPar.getInsetsAll(); if(aChild==null) return ins.left + ins.right;
+    double h = aH>=0? (aH - ins.getHeight()) : aH;
+    double pw = aChild.getBestWidth(h);
+    return pw + ins.getWidth();
+}
+
+/**
+ * Returns the basic pref height for a view and child.
+ */
+public static double getPrefHeightBasic(View aPar, View aChild, double aW)
+{
+    Insets ins = aPar.getInsetsAll(); if(aChild==null) return ins.top + ins.bottom;
+    double w = aW>=0? (aW - ins.getWidth()) : aW;
+    double ph = aChild.getBestHeight(w);
+    return ph + ins.getHeight();
+}
+
+/**
+ * Does basic layout for a parent and child.
+ */
+public static void layoutBasic(View aPar, View aChild)
+{
+    if(aChild==null) return;
+    Insets ins = aPar.getInsetsAll();
+    double x = ins.left, w = aPar.getWidth() - ins.getWidth();
+    double y = ins.top, h = aPar.getHeight() - ins.getHeight();
+    aChild.setBounds(x, y, w, h);
+}
+
 }

@@ -366,36 +366,17 @@ protected void setFocused(boolean aValue)
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)
-{
-    Insets ins = getInsetsAll();
-    double h = aH>0? aH - ins.top - ins.bottom : aH;
-    double ph = getRootView().getBestWidth(h);
-    return ins.left + ph + ins.right;
-}
+protected double getPrefWidthImpl(double aH)  { return ViewLayout.getPrefWidthBasic(this, getRootView(), aH); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)
-{
-    Insets ins = getInsetsAll();
-    double w = aW>=0? aW - ins.left - ins.right : aW;
-    double pw = getRootView().getBestHeight(w);
-    return ins.top + pw + ins.bottom;
-}
+protected double getPrefHeightImpl(double aW)  { return ViewLayout.getPrefHeightBasic(this, getRootView(), aW); }
 
 /**
  * Layout children.
  */
-protected void layoutImpl()
-{
-    RootView rview = getRootView(); if(rview==null) return;
-    Insets ins = getInsetsAll();
-    double x = ins.left, w = getWidth() - x - ins.right;
-    double y = ins.top, h = getHeight() - y - ins.bottom;
-    rview.setBounds(x, y, w, h);
-}
+protected void layoutImpl()  { ViewLayout.layoutBasic(this, getRootView()); }
 
 /**
  * Returns an array of all open windows.

@@ -54,6 +54,16 @@ public double getLeft()  { return left; }
 public boolean isEmpty()  { return top==0 && right==0 && bottom==0 && left==0; }
 
 /**
+ * Returns the width of the insets (left + right).
+ */
+public double getWidth()  { return left + right; }
+
+/**
+ * Returns the height of the insets (top + bottom).
+ */
+public double getHeight()  { return top + bottom; }
+
+/**
  * Returns a string representation of this Insets.
  */
 public String getString()
