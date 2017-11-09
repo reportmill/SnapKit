@@ -232,10 +232,10 @@ public static class BorderLayout extends ViewLayout {
     public void setFillCenter(boolean aValue)  { _fillCenter = aValue; }
         
     /** Returns preferred width of layout. */
-    public double getPrefWidth(double aH)  { return getVLay().getPrefWidth(aH); }
+    public double getPrefWidthImpl(double aH)  { return getVLay().getPrefWidth(aH); }
     
     /** Returns preferred height of layout. */
-    public double getPrefHeight(double aW)  { return getVLay().getPrefHeight(aW); }
+    public double getPrefHeightImpl(double aW)  { return getVLay().getPrefHeight(aW); }
     
     /** Performs layout. */
     public void layoutChildren()
