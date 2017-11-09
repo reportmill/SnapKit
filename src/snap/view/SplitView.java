@@ -18,7 +18,7 @@ public class SplitView extends ParentView {
     List <Divider>          _divs = new ArrayList();
     
     // The layout
-    ViewLayout.BoxesLayout  _layout = new ViewLayout.BoxesLayout(this);
+    SplitLayout             _layout = new SplitLayout(this);
     
     // The default border
     static final Border SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
@@ -29,7 +29,6 @@ public class SplitView extends ParentView {
 public SplitView()
 {
     setBorder(SPLIT_VIEW_BORDER);
-    _layout.setFillOut(true);
 }
 
 /**
@@ -257,6 +256,36 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
             addItem(view);
         }
     }
+}
+
+/**
+ * A layout for SplitView.
+ */
+public static class SplitLayout extends ViewLayout {
+    
+    // The real layouts
+    HBox.HBoxLayout       _hbox = new HBox.HBoxLayout(null);
+    VBox.VBoxLayout       _vbox = new VBox.VBoxLayout(null);
+    
+    /** Creates a new SplitLayout for given parent. */
+    public SplitLayout(ParentView aPar)
+    {
+        setParent(aPar);
+        _hbox.setParent(aPar); _hbox.setFillHeight(true);
+        _vbox.setParent(aPar); _vbox.setFillWidth(true);
+    }
+    
+    /** Returns the appropriate layout. */
+    public ViewLayout getLayout()  { return isVertical()? _vbox : _hbox; }
+    
+    /** Returns preferred width of layout. */
+    public double getPrefWidth(double aH)  { return getLayout().getPrefWidth(aH); }
+    
+    /** Returns preferred height of layout. */
+    public double getPrefHeight(double aW)  { return getLayout().getPrefHeight(aW); }
+        
+    /** Performs layout. */
+    public void layoutChildren(double px, double py, double pw, double ph)  { getLayout().layoutChildren(px,py,pw,ph); }
 }
 
 }

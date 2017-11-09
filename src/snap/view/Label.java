@@ -188,8 +188,8 @@ public double getSpacing()  { return _spacing; }
 public void setSpacing(double aValue)
 {
     _spacing = aValue;
-    if(_layout instanceof ViewLayout.HBoxLayout) ((ViewLayout.HBoxLayout)_layout).setSpacing(_spacing);
-    if(_layout instanceof ViewLayout.VBoxLayout) ((ViewLayout.VBoxLayout)_layout).setSpacing(_spacing);
+    if(_layout instanceof HBox.HBoxLayout) ((HBox.HBoxLayout)_layout).setSpacing(_spacing);
+    if(_layout instanceof VBox.VBoxLayout) ((VBox.VBoxLayout)_layout).setSpacing(_spacing);
     relayoutParent();
 }
 
@@ -220,10 +220,10 @@ protected ViewLayout getLayout()
 {
     if(_layout!=null) return _layout;
     if(isHorizontal()) {
-        ViewLayout.HBoxLayout hbox = new ViewLayout.HBoxLayout(this); hbox.setSpacing(_spacing);
+        HBox.HBoxLayout hbox = new HBox.HBoxLayout(this); hbox.setSpacing(_spacing);
         return _layout = hbox;
     }
-    ViewLayout.VBoxLayout vbox = new ViewLayout.VBoxLayout(this); vbox.setSpacing(_spacing);
+    VBox.VBoxLayout vbox = new VBox.VBoxLayout(this); vbox.setSpacing(_spacing);
     return _layout = vbox;
 }
 

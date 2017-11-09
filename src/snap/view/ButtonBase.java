@@ -35,7 +35,7 @@ public class ButtonBase extends ParentView {
     Paint                   _btnFill;
     
     // The stack layout that button uses to layout label
-    ViewLayout.StackLayout  _layout = new ViewLayout.StackLayout(this);
+    StackView.StackLayout  _layout = new StackView.StackLayout(this);
     
     // Constants for properties
     public static final String Image_Prop = "Image";

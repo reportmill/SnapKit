@@ -1189,6 +1189,7 @@ public void setMinWidth(double aWidth)
 {
     if(aWidth==_minWidth) return;
     firePropChange(MinWidth_Prop, _minWidth, _minWidth = aWidth);
+    relayoutParent();
 }
 
 /**
@@ -1208,6 +1209,7 @@ public void setMinHeight(double aHeight)
 {
     if(aHeight==_minHeight) return;
     firePropChange(MinHeight_Prop, _minHeight, _minHeight = aHeight);
+    relayoutParent();
 }
 
 /**
@@ -1252,6 +1254,7 @@ public void setMaxWidth(double aWidth)
 {
     if(aWidth==_maxWidth) return;
     firePropChange(MaxWidth_Prop, _maxWidth, _maxWidth = aWidth);
+    relayoutParent();
 }
 
 /**
@@ -1271,6 +1274,7 @@ public void setMaxHeight(double aHeight)
 {
     if(aHeight==_maxHeight) return;
     firePropChange(MaxHeight_Prop, _maxHeight, _maxHeight = aHeight);
+    relayoutParent();
 }
 
 /**

@@ -479,7 +479,7 @@ protected double getPrefHeightImpl(double aW)  { return getRowHeight()*getItems(
  */
 protected void layoutImpl()
 {
-    ViewLayout.HBoxLayout layout = new ViewLayout.HBoxLayout(this); layout.setFillHeight(true);
+    HBox.HBoxLayout layout = new HBox.HBoxLayout(this); layout.setFillHeight(true);
     layout.layoutChildren();
 }
 

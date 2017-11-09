@@ -188,8 +188,8 @@ public static class BorderLayout extends ViewLayout {
     CenterProxy   _cproxy = new CenterProxy();
     
     // Workers: for center node, horizontal nodes and vertical nodes
-    HBoxLayout     _hlay = new HBoxLayout(_hproxy);
-    VBoxLayout     _vlay = new VBoxLayout(null);
+    HBox.HBoxLayout     _hlay = new HBox.HBoxLayout(_hproxy);
+    VBox.VBoxLayout     _vlay = new VBox.VBoxLayout(null);
     Box.BoxLayout  _clay = new Box.BoxLayout(null);
     
     /** Creates a new Border layout for given parent. */
@@ -253,7 +253,7 @@ public static class BorderLayout extends ViewLayout {
     }
     
     /** Returns a VBoxLayout with HBoxLayout to do real work. */
-    public VBoxLayout getVLay()
+    public VBox.VBoxLayout getVLay()
     {
         _cproxy.relayoutParent(); _hproxy.relayoutParent();
         View hkids[] = asArray(_left, _center!=null? _cproxy : null, _right);

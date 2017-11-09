@@ -12,7 +12,7 @@ import snap.util.*;
 public class MenuBar extends ParentView {
 
     // The layout
-    ViewLayout.HBoxLayout  _layout = new ViewLayout.HBoxLayout(this);
+    HBox.HBoxLayout  _layout = new HBox.HBoxLayout(this);
     
     // The menubar fill
     static Color c1 = new Color("#fefefeff"), c2 = new Color("#f5f5f5ff"), c3 = new Color("#f0f0f0ff");

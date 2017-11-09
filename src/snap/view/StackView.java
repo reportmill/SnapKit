@@ -10,7 +10,7 @@ import snap.gfx.Pos;
 public class StackView extends ChildView {
 
     // The layout
-    ViewLayout.StackLayout _layout = new ViewLayout.StackLayout(this);
+    StackLayout _layout = new StackLayout(this);
 
 /**
  * Returns the default alignment.
@@ -31,5 +31,64 @@ protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1
  * Layout children.
  */
 protected void layoutImpl()  { _layout.layoutChildren(); }
+
+/**
+ * A Stack layout.
+ */
+public static class StackLayout extends ViewLayout {
+    
+    // Whether to fill width/height
+    boolean       _fillWidth, _fillHeight;
+    
+    /** Creates a new StackLayout for given parent. */
+    public StackLayout(ParentView aPar)  { setParent(aPar); }
+    
+    /** Returns whether layout should fill width. */
+    public boolean isFillWidth()  { return _fillWidth; }
+    
+    /** Sets whether to fill width. */
+    public void setFillWidth(boolean aValue)  { _fillWidth = aValue; }
+    
+    /** Returns whether layout should fill height. */
+    public boolean isFillHeight()  { return _fillHeight; }
+    
+    /** Sets whether to fill height. */
+    public void setFillHeight(boolean aValue)  { _fillHeight = aValue; }
+    
+    /** Returns preferred width of layout. */
+    protected double getPrefWidthImpl(double aH)
+    {
+        View children[] = getChildren();
+        double w = 0; for(View child : children) w = Math.max(w, child.getBestWidth(aH));
+        return w;
+    }
+    
+    /** Returns preferred height of layout. */
+    protected double getPrefHeightImpl(double aW)
+    {
+        View children[] = getChildren();
+        double h = 0; for(View child : children) h = Math.max(h, child.getBestHeight(aW));
+        return h;
+    }
+    
+    /** Performs layout. */
+    public void layoutChildren(double px, double py, double pw, double ph)
+    {
+        double ay = getAlignY(_parent), ax = getAlignX(_parent);
+        
+        // Layout children
+        View children[] = getChildren();
+        for(View child : children) {
+            double cw = _fillWidth || child.isGrowWidth()? pw : Math.min(child.getBestWidth(-1), pw);
+            double ch = _fillHeight || child.isGrowHeight()? ph : Math.min(child.getBestHeight(-1), ph);
+            double cx = px, cy = py;
+            if(pw>cw) { double ax2 = child.getLeanX()!=null? getLeanX(child) : ax;
+                cx += Math.round((pw-cw)*ax2); }
+            if(ph>ch) { double ay2 = child.getLeanY()!=null? getLeanY(child) : ay;
+                cy += Math.round((ph-ch)*ay2); }
+            child.setBounds(cx, cy, cw, ch);
+        }
+    }
+}
 
 }

@@ -63,7 +63,7 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
     double                _sampleWidth = -1, _sampleHeight = -1;
     
     // The layout for cells
-    ViewLayout.VBoxLayout _layout = new ViewLayout.VBoxLayout(this);
+    VBox.VBoxLayout       _layout = new VBox.VBoxLayout(this);
     
     // Shared CellPadding default
     static Insets         _cellPadDefault = new Insets(2,2,2,4);
