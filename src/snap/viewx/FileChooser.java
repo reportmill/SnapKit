@@ -346,6 +346,15 @@ private String getFileTextPath()
     if(ftext.startsWith("~"))
         return getHomeDirPath();
         
+    // If starts with '..', return parent dir
+    if(ftext.startsWith("..")) {
+        if(getFile()!=null)
+            return getDir().getPath();
+        if(getDir()!=null && getDir().getParent()!=null)
+            return getDir().getParent().getPath();
+        return "/";
+    }
+        
     // If starts with FileSeparator, just return
     if(ftext.startsWith("/") || ftext.startsWith("\\"))
         return ftext;
