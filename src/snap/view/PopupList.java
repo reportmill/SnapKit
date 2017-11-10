@@ -4,18 +4,12 @@
 package snap.view;
 
 /**
- * A ListNode that displays in a PopupNode.
+ * A ListViewScroll that displays in a PopupWindow.
  */
-public class PopupList <T> extends ListView <T> {
+public class PopupList <T> extends ListViewScroll <T> {
     
-    // The number of visible rows to show
-    int               _visRowCount = -15;
-
     // The PopupNode
     PopupWindow       _popup;
-    
-    // The scroll view holding the popup list
-    ScrollView        _scrollView;
     
     // The view given with last show
     View              _showView;
@@ -26,19 +20,10 @@ public class PopupList <T> extends ListView <T> {
 /**
  * Creates a new PopupList.
  */
-public PopupList()  { setFocusWhenPressed(false); }
-
-/**
- * Returns the number of visible rows to be shown in list.
- */
-public int getVisRowCount()  { return _visRowCount; }
-
-/**
- * Sets the number of visible rows to be shown in list (if negative, it's a maximum count).
- */
-public void setVisRowCount(int aValue)
+public PopupList()
 {
-    _visRowCount = aValue;
+    getListView().setFocusWhenPressed(false);
+    getScrollView().setBorder(null);
 }
 
 /**
@@ -48,8 +33,7 @@ public PopupWindow getPopup()
 {
     if(_popup!=null) return _popup;
     PopupWindow popup = new PopupWindow(); popup.setFocusable(false);
-    _scrollView = new ScrollView(this); _scrollView.setBorder(null);
-    popup.setContent(_scrollView); setGrowWidth(true); setGrowHeight(true);
+    popup.setContent(this);
     popup.addPropChangeListener(pce -> popupWindowShowingChanged(), Showing_Prop);
     return _popup = popup;
 }
@@ -59,13 +43,11 @@ public PopupWindow getPopup()
  */
 public void show(View aView, double aX, double aY)
 {
-    // Set preferred size
+    // Get popup and set best size
     PopupWindow popup = getPopup();
-    popup.setMaxHeight(_visRowCount>=0? -1 : Math.abs(_visRowCount)*getRowHeight());
-    _scrollView.setPrefHeight(_visRowCount>=0? _visRowCount*getRowHeight() : -1);
+    popup.pack();
     
     // Show window
-    popup.pack();
     popup.show(_showView = aView, aX, aY);
 }
 
@@ -75,12 +57,12 @@ public void show(View aView, double aX, double aY)
 public void hide()  { getPopup().hide(); }
 
 /**
- * Override to resize if showing and VisRowCount is really Max (negative).
+ * Override to resize if showing.
  */
 public void setItems(java.util.List <T> theItems)
 {
     super.setItems(theItems);
-    if(isShowing() && getVisRowCount()<0)
+    if(isShowing())
         getPopup().pack();
 }
 

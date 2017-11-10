@@ -135,7 +135,7 @@ public void setSelectedIndex(int anIndex)
 {
     if(anIndex==_selIndex) return;
     updateIndex(_selIndex);
-    firePropChange("SelectedIndex", _selIndex, _selIndex = anIndex);
+    firePropChange(SelectedIndex_Prop, _selIndex, _selIndex = anIndex);
     updateIndex(_selIndex);
     
     // Scroll selection to visible (after delay - twice in case ListView needed layout)

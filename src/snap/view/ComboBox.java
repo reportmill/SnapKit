@@ -91,9 +91,12 @@ public ListView <T> getListView()
  */
 public void setListView(ListView <T> aListView)
 {
-    // Set List and start listening to Action and SelectedIndex changes
+    // Set List
     _list = aListView;
+    
+    // Start listening to Action and SelectedIndex changes
     _list.addEventHandler(e -> listViewFiredAction(), Action);
+    ListView list = _list; if(list instanceof ListViewScroll) list = ((ListViewScroll)list).getListView();
     _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.SelectedIndex_Prop);
     
     // If not PopupList, turn off button and start listening to TextField KeyType events
@@ -291,6 +294,12 @@ public void setCellConfigure(Consumer<ListCell<T>> aCC)  { getListView().setCell
  */
 public String getText()
 {
+    // If selected Item, use it's text (potentially corrects case issues)
+    T selItem = getSelectedItem();
+    if(selItem!=null)
+        return getText(selItem);
+        
+    // Otherwise, if ShowTextField, return actual text
     if(isShowTextField())
         return getTextField().getText();
     return getListView().getText();

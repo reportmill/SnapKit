@@ -15,22 +15,35 @@ import snap.util.*;
  * 
  * To custom configure list cell, simply call list.setCellConfigure(cell -> cell.setImage(img));
  */
-public class ListViewScroll <T> extends ParentView implements View.Selectable <T> {
+public class ListViewScroll <T> extends ListView <T> implements View.Selectable <T> {
     
     // The ListView (real ListView functionality without scroll)
     ListView <T>          _listView;
     
     // The ScrollView
     ScrollView            _scroll;
+    
+    // The Preferred number of rows
+    int                   _prefRowCount = -1;
+    
+    // The maximum number of rows
+    int                   _maxRowCount = -1;
 
 /**
  * Creates a new ListViewScroll.
  */
 public ListViewScroll()
 {
+    // Reconfigure this to undo ListView stuff
+    disableEvents(MousePress, MouseRelease, KeyPress);
+    setFocusable(false); setFocusWhenPressed(false);
+    setFill(null);
+
     // Create/configure ListView
     _listView = createListView();
     _listView.setGrowWidth(true); _listView.setGrowHeight(true);
+    _listView.addEventHandler(e -> fireActionEvent(), Action);
+    _listView.addPropChangeListener(pce -> listViewPropChange(pce));
     
     // Create/configure ScrollView
     _scroll = createScrollView();
@@ -57,6 +70,26 @@ public ScrollView getScrollView()  { return _scroll; }
  * Creates the ScrollView.
  */
 protected ScrollView createScrollView()  { return new ScrollView(); }
+
+/**
+ * Returns the preferred number of rows.
+ */
+public int getPrefRowCount()  { return _prefRowCount; }
+
+/**
+ * Sets the preferred number of rows.
+ */
+public void setPrefRowCount(int aValue)  { _prefRowCount = aValue; relayoutParent(); }
+
+/**
+ * Returns the maximum number of rows.
+ */
+public int getMaxRowCount()  { return _maxRowCount; }
+
+/**
+ * Sets the maximum number of rows.
+ */
+public void setMaxRowCount(int aValue)  { _maxRowCount = aValue; relayoutParent(); }
 
 /**
  * Returns the number of items.
@@ -206,7 +239,28 @@ protected double getPrefWidthImpl(double aH)  { return ViewLayout.getPrefWidthBa
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return ViewLayout.getPrefHeightBasic(this, _scroll, aW); }
+protected double getPrefHeightImpl(double aW)
+{
+    // If PrefRowCount set, return PrefRowCount*RowHeight
+    if(getPrefRowCount()>0)
+        return getPrefRowCount()*getRowHeight() + getInsetsAll().getHeight();
+    
+    // Return pref height of Scroll
+    return ViewLayout.getPrefHeightBasic(this, _scroll, aW);
+}
+
+/**
+ * Returns the maximum height.
+ */
+public double getMaxHeight()
+{
+    // If MaxRowCount set, return MaxRowCount*RowHeight
+    if(getMaxRowCount()>0)
+        return getMaxRowCount()*getRowHeight() + getInsetsAll().getHeight();
+    
+    // Return normal version
+    return super.getMaxHeight();
+}
 
 /**
  * Override to layout children with VBox layout.
@@ -232,6 +286,15 @@ public void setText(String aString)  { _listView.setText(aString); }
  * Returns a mapped property name.
  */
 public String getValuePropName()  { return getBinding("SelectedIndex")!=null? "SelectedIndex" : "SelectedItem"; }
+
+/**
+ * Catches property changes from ListView and redispatches for this ListViewScroll.
+ */
+void listViewPropChange(PropChange aPC)
+{
+    if(aPC.getPropertyName()==SelectedIndex_Prop)
+        firePropChange(SelectedIndex_Prop, aPC.getOldValue(), aPC.getNewValue());
+}
 
 /**
  * XML archival.
