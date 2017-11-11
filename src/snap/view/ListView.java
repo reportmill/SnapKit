@@ -65,6 +65,9 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
     // The layout for cells
     VBox.VBoxLayout       _layout = new VBox.VBoxLayout(this);
     
+    // This allows this ListView to query a ListViewScroll for configureCell
+    ListView <T>          _proxy;
+    
     // Shared CellPadding default
     static Insets         _cellPadDefault = new Insets(2,2,2,4);
     
@@ -492,6 +495,10 @@ protected void configureCell(ListCell <T> aCell)
     // If cell configure set, call it
     Consumer cconf = getCellConfigure();
     if(cconf!=null) cconf.accept(aCell);
+    
+    // If Proxy (ListViewScroll) forward on
+    if(_proxy!=null)
+        _proxy.configureCell(aCell);
 }
 
 /**

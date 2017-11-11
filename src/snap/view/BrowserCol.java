@@ -2,12 +2,13 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.gfx.Color;
 import snap.util.StringUtils;
 
 /**
  * A ListNode subclass to act as a BrowserView columns.
  */
-public class BrowserCol <T> extends ListView <T> {
+public class BrowserCol <T> extends ListViewScroll <T> {
     
     // The Browser
     BrowserView <T>  _browser;
@@ -23,6 +24,12 @@ public BrowserCol(BrowserView aBrsr)
     _browser = aBrsr;
     setFireActionOnRelease(true);
     setFocusWhenPressed(false);
+    setRowHeight(_browser.getRowHeight());
+    
+    // Configure ScrollView
+    ScrollView scroll = getScrollView();
+    scroll.setShowHBar(false); scroll.setShowVBar(true); scroll.getScroller().setFill(Color.WHITE);
+    scroll.setFillWidth(true);
 }
 
 /**
@@ -31,32 +38,15 @@ public BrowserCol(BrowserView aBrsr)
 public BrowserView <T> getBrowser()  { return _browser; }
 
 /**
- * Returns the column ScrollView.
- */
-public ScrollView getScrollView()  { return getParent(ScrollView.class); }
-
-/**
  * Returns the column index.
  */
 public int getIndex()  { return _index; }
-
-/**
- * Returns the selected item text.
- */
-public String getSelectedItemText()  { T si = getSelectedItem(); return getText(si); }
-
-/**
- * Override to return browser row height.
- */
-public double getRowHeight()  { return getBrowser().getRowHeight(); }
 
 /**
  * Override to forward to browser.
  */
 protected void configureCell(ListCell <T> aCell)
 {
-    //Consumer cconf = getCellConfigure(); if(cconf!=null) cconf.accept(aCell); else aCell.configure();
-    super.configureCell(aCell);
     _browser.configureBrowserCell(this, aCell);
 }
 
@@ -70,6 +60,16 @@ public void fireActionEvent()
     _browser.fireActionEvent();
 }
 
+/**
+ * Override to request size of Browser/VisColCount (Should really be set in BrowserView.setWidth).
+ */
+protected double getPrefWidthImpl(double aH)
+{
+    double width = _browser.getScrollView().getScroller().getWidth();
+    double pw = width/_browser.getPrefColCount();
+    return pw;
+}
+    
 /**
  * Standard toString implementation.
  */

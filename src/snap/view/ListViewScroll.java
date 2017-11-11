@@ -44,6 +44,7 @@ public ListViewScroll()
     _listView.setGrowWidth(true); _listView.setGrowHeight(true);
     _listView.addEventHandler(e -> fireActionEvent(), Action);
     _listView.addPropChangeListener(pce -> listViewPropChange(pce));
+    _listView._proxy = this;
     
     // Create/configure ScrollView
     _scroll = createScrollView();
@@ -281,6 +282,11 @@ public String getText()  { return _listView.getText(); }
  * Override to set the given text in the ListView by matching it to existing ListText item.
  */
 public void setText(String aString)  { _listView.setText(aString); }
+
+/**
+ * Called to configure a cell.
+ */
+protected void configureCell(ListCell <T> aCell)  { }
 
 /**
  * Returns a mapped property name.

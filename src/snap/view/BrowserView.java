@@ -24,8 +24,8 @@ public class BrowserView <T> extends ParentView {
     // The Cell Configure method
     Consumer <ListCell<T>>  _cellConf;
     
-    // The minimum number of columns
-    int                     _visColCount = 2;
+    // The preferred number of columns
+    int                     _prefColCount = 2;
     
     // The preferred column width
     int                     _prefColWidth = 150;
@@ -52,14 +52,19 @@ public BrowserView()
 }
 
 /**
- * Returns the number of visible columns in the browser.
+ * Returns the ScrollView.
  */
-public int getVisColCount()  { return _visColCount; }
+public ScrollView getScrollView()  { return _scroll; }
 
 /**
- * Sets the number of visible columns in the browser.
+ * Returns the preferred number of visible columns in the browser.
  */
-public void setVisColCount(int aValue)  { _visColCount = aValue; }
+public int getPrefColCount()  { return _prefColCount; }
+
+/**
+ * Sets the preferred number of visible columns in the browser.
+ */
+public void setPrefColCount(int aValue)  { _prefColCount = aValue; }
 
 /**
  * Returns the preferred column width.
@@ -81,7 +86,11 @@ public int getRowHeight()  { return _rowHeight; }
  */
 public void setRowHeight(int aValue)
 {
+    // Set value
     firePropChange("RowHeight", _rowHeight, _rowHeight = aValue);
+    
+    // Update columns
+    for(BrowserCol col : getCols()) col.setRowHeight(aValue);
 }
 
 /**
@@ -167,11 +176,11 @@ public int getColCount()  { return _colView.getChildCount(); }
 /**
  * Returns the browser column list at given index.
  */
-public BrowserCol <T> getCol(int anIndex)
-{
+public BrowserCol <T> getCol(int anIndex)  { return (BrowserCol)_colView.getChild(anIndex); }
+/*{
     ScrollView spane = (ScrollView)_colView.getChild(anIndex);
     return (BrowserCol)spane.getContent();
-}
+}*/
 
 /**
  * Returns the last column.
@@ -197,9 +206,8 @@ protected BrowserCol addCol()
     BrowserCol bcol = new BrowserCol(this);
     int index = bcol._index = getColCount();
     
-    // Wrap in ScrollView and add to ColBox
-    ColScrollView spane = new ColScrollView(bcol);
-    _colView.addChild(spane);
+    // Add to ColBox
+    _colView.addChild(bcol);
     
     // If not root column, set items from last
     if(index>0) {
@@ -333,7 +341,7 @@ public void scrollSelToVisible()
         getEnv().runLater(() -> scrollSelToVisible()); return; }
         
     // Scroll ColLast to visible
-    _colView.scrollToVisible(getColLast().getScrollView().getBounds());
+    _colView.scrollToVisible(getColLast().getBounds());
 }
 
 /**
@@ -378,7 +386,7 @@ public String getPath(String aSeparator)
 protected double getPrefWidthImpl(double aH)
 {
     Insets ins = getInsetsAll();
-    double pw = getVisColCount()*getPrefColWidth();
+    double pw = getPrefColCount()*getPrefColWidth();
     return ins.left + pw + ins.right;
 }
 
@@ -447,26 +455,5 @@ public Image getBranchImage()
     Painter pntr = img.getPainter(); pntr.setColor(Color.BLACK); pntr.fill(poly); pntr.flush();
     return _branchImg = img;
 } Image _branchImg;
-
-/**
- * A browser column ScrollView.
- */
-private class ColScrollView extends ScrollView {
-
-    /** Creates a new ColScrollView. */
-    public ColScrollView(BrowserCol aCol)
-    {
-        setContent(aCol); setShowHBar(false); setShowVBar(true); getScroller().setFill(Color.WHITE);
-        setFillWidth(true);
-    }
-    
-    /** Override to request size of Browser/VisColCount (Should really be set in BrowserView.setWidth). */
-    protected double getPrefWidthImpl(double aH)
-    {
-        double width = _scroll.getScroller().getWidth();
-        double pw = width/getVisColCount();
-        return pw;
-    }
-}
 
 }
