@@ -11,13 +11,16 @@ import snap.util.*;
  */
 public class BorderView extends ParentView {
     
-    // The layout
-    BorderLayout _layout = new BorderLayout(this);
-
+    // The panes
+    View              _top, _center, _bottom, _left, _right;
+    
+    // Whether to fill center
+    boolean           _fillCenter = true;
+    
 /**
  * Returns the center node.
  */
-public View getCenter()  { return _layout.getCenter(); }
+public View getCenter()  { return _center; }
 
 /**
  * Sets the center node.
@@ -26,14 +29,14 @@ public void setCenter(View aView)
 {
     View old = getCenter(); if(aView==old) return;
     if(old!=null) removeChild(old); if(aView!=null) addChild(aView);
-    _layout.setCenter(aView);
+    _center = aView;
     firePropChange("Center", old, aView);
 }
 
 /**
  * Returns the top node.
  */
-public View getTop()  { return _layout.getTop(); }
+public View getTop()  { return _top; }
 
 /**
  * Sets the top node.
@@ -42,14 +45,14 @@ public void setTop(View aView)
 {
     View old = getTop(); if(aView==old) return;
     if(old!=null) removeChild(old); if(aView!=null) addChild(aView);
-    _layout.setTop(aView);
+    _top = aView;
     firePropChange("Top", old, aView);
 }
 
 /**
  * Returns the bottom node.
  */
-public View getBottom()  { return _layout.getBottom(); }
+public View getBottom()  { return _bottom; }
 
 /**
  * Sets the bottom node.
@@ -58,14 +61,14 @@ public void setBottom(View aView)
 {
     View old = getBottom(); if(aView==old) return;
     if(old!=null) removeChild(old); if(aView!=null) addChild(aView);
-    _layout.setBottom(aView);
+    _bottom = aView;
     firePropChange("Bottom", old, aView);
 }
 
 /**
  * Returns the left node.
  */
-public View getLeft()  { return _layout.getLeft(); }
+public View getLeft()  { return _left; }
 
 /**
  * Sets the left node.
@@ -74,14 +77,14 @@ public void setLeft(View aView)
 {
     View old = getLeft(); if(aView==old) return;
     if(old!=null) removeChild(old); if(aView!=null) addChild(aView);
-    _layout.setLeft(aView);
+    _left = aView;
     firePropChange("Left", old, aView);
 }
 
 /**
  * Returns the right node.
  */
-public View getRight()  { return _layout.getRight(); }
+public View getRight()  { return _right; }
 
 /**
  * Sets the right node.
@@ -90,19 +93,19 @@ public void setRight(View aView)
 {
     View old = getRight(); if(aView==old) return;
     if(old!=null) removeChild(old); if(aView!=null) addChild(aView);
-    _layout.setRight(aView);
+    _right = aView;
     firePropChange("Right", old, aView);
 }
 
 /**
  * Returns whether layout should fill center when bigger than pref size.
  */
-public boolean isFillCenter()  { return _layout.isFillCenter(); }
+public boolean isFillCenter()  { return _fillCenter; }
 
 /**
  * Sets whether to fill center when bigger than pref size.
  */
-public void setFillCenter(boolean aValue)  { _layout.setFillCenter(aValue); }
+public void setFillCenter(boolean aValue)  { _fillCenter = aValue; }
     
 /**
  * Returns the default alignment.
@@ -112,17 +115,64 @@ public Pos getDefaultAlign()  { return Pos.CENTER; }
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(aH); }
+protected double getPrefWidthImpl(double aH)  { return ColView.getPrefWidth(this, getColKids(), aH); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(aW); }
+protected double getPrefHeightImpl(double aW)  { return ColView.getPrefHeight(this, getColKids(), 0, aW); }
 
 /**
  * Layout children.
  */
-protected void layoutImpl()  { _layout.layoutChildren(); }
+protected void layoutImpl()
+{
+    // Do vertical layout (top, horiz-proxy, bottom)
+    View vkids[] = getColKids();
+    ColView.layout(this, vkids, null, true, 0);
+    
+    // Do horizontal layout (left, center-proxy, bottom)
+    double right = getWidth() - _rproxy.getX() - _rproxy.getWidth();
+    double bottom = getHeight() - _rproxy.getY() - _rproxy.getHeight();
+    Insets hins = new Insets(_rproxy.getY(), right, bottom, _rproxy.getX());
+    RowView.layout(this, _rproxy._kids, hins, true, 0);
+    
+    // Do center layout
+    if(_center==null) return;
+    _center.setBounds(_cproxy.getX(), _cproxy.getY(), _cproxy.getWidth(), _cproxy.getHeight());
+}
+    
+/** Returns array of column kids (top, row-proxy, bottom). */
+private View[] getColKids()
+{
+    _rproxy.relayoutParent(); _cproxy.relayoutParent();
+    _rproxy._kids = asArray(_left, _center!=null? _cproxy : null, _right);
+    return asArray(_top, _rproxy, _bottom);
+}
+    
+/** RowProxy to model left, center, right of BorderView. */
+private RowProxy _rproxy = new RowProxy();
+private class RowProxy extends ParentView {
+    public RowProxy() { setGrowWidth(true); setGrowHeight(true); } View _kids[];
+    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, _kids, 0, aH); }
+    protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, _kids, aW); }
+}
+
+/** CenterProxy to model center as always grow width/height. */
+private CenterProxy _cproxy = new CenterProxy();
+private class CenterProxy extends ParentView {
+    public CenterProxy() { setGrowWidth(true); setGrowHeight(true); }
+    protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _center, aH); }
+    protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(this, _center, aW); }
+}
+    
+/** Returns array of non-null views from given view args. */
+private View[] asArray(View ... theViews)
+{
+    int i = 0, len = 0; for(View n : theViews) if(n!=null) len++;
+    View views[] = new View[len]; for(View n : theViews) if(n!=null) views[i++] = n;
+    return views;
+}
 
 /**
  * XML archival of children.
@@ -173,125 +223,4 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     if(rgtView instanceof View) setRight((View)rgtView);
 }
 
-/**
- * A Border layout.
- */
-public static class BorderLayout extends ViewLayout {
-    
-    // The panes
-    View              _top, _center, _bottom, _left, _right;
-    
-    // Whether to fill center
-    boolean          _fillCenter = true;
-    
-    // Proxy nodes for horizontal nodes and center node
-    HBoxProxy        _hproxy = new HBoxProxy();
-    CenterProxy      _cproxy = new CenterProxy();
-    
-    // Workers: for center node, horizontal nodes and vertical nodes
-    RowView.HBoxLayout  _hlay = new RowView.HBoxLayout(_hproxy);
-    ColView.VBoxLayout  _vlay = new ColView.VBoxLayout(null);
-    
-    /** Creates a new Border layout for given parent. */
-    public BorderLayout(ParentView aPar)  { setParent(aPar); _hlay.setFillHeight(true); _vlay.setFillWidth(true); }
-    
-    /** Returns the top. */
-    public View getTop()  { return _top; }
-    
-    /** Sets the top. */
-    public void setTop(View aView)  { _top = aView; }
-    
-    /** Returns the Center. */
-    public View getCenter()  { return _center; }
-    
-    /** Sets the Center. */
-    public void setCenter(View aView)  { _center = aView; }
-    
-    /** Returns the Bottom. */
-    public View getBottom()  { return _bottom; }
-    
-    /** Sets the Bottom. */
-    public void setBottom(View aView)  { _bottom = aView; }
-    
-    /** Returns the Left. */
-    public View getLeft()  { return _left; }
-    
-    /** Sets the Left. */
-    public void setLeft(View aView)  { _left = aView; }
-    
-    /** Returns the Right. */
-    public View getRight()  { return _right; }
-    
-    /** Sets the Bottom. */
-    public void setRight(View aView)  { _right = aView; }
-    
-    /** Returns whether layout should fill center when bigger than pref size. */
-    public boolean isFillCenter()  { return _fillCenter; }
-    
-    /** Sets whether to fill center when bigger than pref size. */
-    public void setFillCenter(boolean aValue)  { _fillCenter = aValue; }
-        
-    /** Returns preferred width of layout. */
-    public double getPrefWidthImpl(double aH)  { return getVLay().getPrefWidth(aH); }
-    
-    /** Returns preferred height of layout. */
-    public double getPrefHeightImpl(double aW)  { return getVLay().getPrefHeight(aW); }
-    
-    /** Performs layout. */
-    public void layoutChildren()
-    {
-        // Do vertical layout (top, horiz-proxy, bottom)
-        ParentView par = getParent();
-        View vkids[] = getVLay().getChildren();
-        ColView.layout(par, vkids, null, true, 0);
-        
-        // Do horizontal layout (left, center-proxy, bottom)
-        Insets hins = getInsets(par, _hproxy);
-        RowView.layout(par, _hlay.getChildren(), hins, true, 0);
-        
-        // Do center layout
-        Insets cins = getInsets(par, _cproxy);
-        BoxView.layout(par, _center, cins, _fillCenter, _fillCenter);
-    }
-    
-    /** Returns a VBoxLayout with HBoxLayout to do real work. */
-    public ColView.VBoxLayout getVLay()
-    {
-        _cproxy.relayoutParent(); _hproxy.relayoutParent();
-        _hlay.setChildren(asArray(_left, _center!=null? _cproxy : null, _right));
-        _vlay.setChildren(asArray(_top, _hproxy, _bottom)); _vlay.setParent(getParent());
-        return _vlay;
-    }
-    
-    /** HBoxProxy to model left, center, right of BorderView. */
-    private class HBoxProxy extends ParentView {
-        public HBoxProxy() { setGrowWidth(true); setGrowHeight(true); }
-        protected double getPrefWidthImpl(double aH)  { return _hlay.getPrefWidth(aH); }
-        protected double getPrefHeightImpl(double aW)  { return _hlay.getPrefHeight(aW); }
-    }
-    
-    /** CenterProxy to model center as always grow width/height. */
-    private class CenterProxy extends ParentView {
-        public CenterProxy() { setGrowWidth(true); setGrowHeight(true); }
-        protected double getPrefWidthImpl(double aH)  { return _center.getBestWidth(aH); }
-        protected double getPrefHeightImpl(double aW)  { return _center.getBestHeight(aW); }
-    }
-    
-    /** Returns array of non-null views from given view args. */
-    private View[] asArray(View ... theViews)
-    {
-        int i = 0, len = 0; for(View n : theViews) if(n!=null) len++;
-        View views[] = new View[len]; for(View n : theViews) if(n!=null) views[i++] = n;
-        return views;
-    }
-    
-    /** Returns insets of given view in given parent. */
-    private Insets getInsets(View aPar, View aChild)
-    {
-        double right = aPar.getWidth() - aChild.getX() - aChild.getWidth();
-        double bottom = aPar.getHeight() - aChild.getY() - aChild.getHeight();
-        return new Insets(aChild.getY(), right, bottom, aChild.getX());
-    }
-}
-    
 }
