@@ -65,9 +65,6 @@ public class ListCol <T> extends ParentView implements View.Selectable <T> {
     // Value of cell width/height
     double                _sampleWidth = -1, _sampleHeight = -1;
     
-    // The layout for cells
-    ColView.VBoxLayout       _layout = new ColView.VBoxLayout(this);
-    
     // This allows this ListCol to query a ListCol for configureCell
     ListCol <T>          _proxy;
     
@@ -89,7 +86,6 @@ public ListCol()
     enableEvents(MousePress, MouseRelease, KeyPress, Action);
     setFocusable(true); setFocusWhenPressed(true);
     setFill(Color.WHITE);
-    _layout.setFillWidth(true);
 }
 
 /**
@@ -481,7 +477,7 @@ protected void layoutImpl()
     }
     
     // Do real layout
-    _layout.layoutChildren();
+    ColView.layout(this, null, null, true, 0);
 }
 
 /**

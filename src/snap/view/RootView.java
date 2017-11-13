@@ -30,9 +30,6 @@ public class RootView extends ParentView {
     // The EventDispatcher
     EventDispatcher          _eventDispatcher = new EventDispatcher(this);
     
-    // The layout
-    ColView.VBoxLayout          _layout = new ColView.VBoxLayout(this);
-    
     // A map of dirty info
     Map <View,Rect>          _dirtyRects = new HashMap();
     
@@ -65,7 +62,6 @@ public class RootView extends ParentView {
 public RootView()
 {
     enableEvents(KeyEvents); setFocusable(true);
-    _layout.setFillWidth(true);
 }
 
 /**
@@ -274,17 +270,17 @@ protected synchronized void setNeedsLayoutDeep(boolean aVal)
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(-1); }
+protected double getPrefWidthImpl(double aH)  { return ColView.getPrefWidth(this, null, -1); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
+protected double getPrefHeightImpl(double aW)  { return ColView.getPrefHeight(this, null, 0, -1); }
 
 /**
  * Layout children.
  */
-protected void layoutImpl()  { _layout.layoutChildren(); }
+protected void layoutImpl()  { ColView.layout(this, null, null, true, 0); }
 
 /**
  * Override to actually paint in this RootView.

@@ -21,9 +21,6 @@ public class DocView extends ParentView {
     // The selected page index
     int                      _selIndex = -1;
     
-    // The layout
-    BoxView.BoxLayout            _layout = new BoxView.BoxLayout(this);
-    
     // Constants for properties
     public static final String PageMargin_Prop = "PageMargin";
 
@@ -153,17 +150,17 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(-1); }
+protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, getPage(), -1); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
+protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(this, getPage(), -1); }
 
 /**
  * Layout children.
  */
-protected void layoutImpl()  { _layout.layoutChildren(); }
+protected void layoutImpl()  { BoxView.layout(this, getPage(), null, false, false); }
 
 /**
  * XML archival deep.

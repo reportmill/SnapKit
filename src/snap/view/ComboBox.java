@@ -35,9 +35,6 @@ public class ComboBox <T> extends ParentView implements View.Selectable <T> {
     // The Last list of all items set
     List <T>                   _items;
 
-    // The HBox layout
-    RowView.HBoxLayout            _layout = new RowView.HBoxLayout(this);
-    
     // The arrow image
     static Image               _arrowImg;
     
@@ -181,7 +178,6 @@ protected void comboChanged()
         _button.setMinWidth(18); _button.setGrowWidth(true);
         _button.getLabel().setGrowWidth(true); _button.getLabel().setPadding(0,2,0,4);
         _button.setImageAfter(getArrowImage()); _button.getGraphicAfter().setLean(Pos.CENTER_RIGHT);
-        _layout.setFillHeight(true);
     }
 }
 
@@ -498,17 +494,21 @@ public String getValuePropName()
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(-1); }
+protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, null, 0, -1); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
+protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, null, -1); }
 
 /**
  * Layout children.
  */
-protected void layoutImpl()  { _layout.layoutChildren(); }
+protected void layoutImpl()
+{
+    boolean fillHeight = !isShowTextField();
+    RowView.layout(this, null, null, fillHeight, 0);
+}
 
 /**
  * Override to focus text or button.

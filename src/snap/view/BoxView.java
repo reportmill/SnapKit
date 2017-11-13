@@ -11,10 +11,10 @@ import snap.util.*;
 public class BoxView extends ParentView {
 
     // The content
-    View       _child;
+    View         _child;
     
-    // The Box layout
-    BoxLayout  _layout = new BoxLayout(this);
+    // Whether to fill width, height
+    boolean      _fillWidth, _fillHeight;
     
 /**
  * Creates a new Box.
@@ -53,22 +53,30 @@ public void setContent(View aView)
 /**
  * Returns whether children will be resized to fill width.
  */
-public boolean isFillWidth()  { return _layout.isFillWidth(); }
+public boolean isFillWidth()  { return _fillWidth; }
 
 /**
  * Sets whether children will be resized to fill width.
  */
-public void setFillWidth(boolean aValue)  { _layout.setFillWidth(aValue); repaint(); relayoutParent(); }
+public void setFillWidth(boolean aValue)
+{
+    _fillWidth = aValue;
+    repaint(); relayoutParent();
+}
 
 /**
  * Returns whether children will be resized to fill height.
  */
-public boolean isFillHeight()  { return _layout.isFillHeight(); }
+public boolean isFillHeight()  { return _fillHeight; }
 
 /**
  * Sets whether children will be resized to fill height.
  */
-public void setFillHeight(boolean aValue)  { _layout.setFillHeight(aValue); repaint(); relayoutParent(); }
+public void setFillHeight(boolean aValue)
+{
+    _fillHeight = aValue;
+    repaint(); relayoutParent();
+}
 
 /**
  * Override to change to CENTER.
@@ -78,17 +86,17 @@ public Pos getDefaultAlign()  { return Pos.CENTER; }
 /**
  * Override.
  */
-protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(aH); }
+protected double getPrefWidthImpl(double aH)  { return getPrefWidth(this, getContent(), aH); }
 
 /**
  * Override.
  */
-protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(aW); }
+protected double getPrefHeightImpl(double aW)  { return getPrefHeight(this, getContent(), aW); }
 
 /**
  * Override.
  */
-protected void layoutImpl()  { _layout.layoutChildren(); }
+protected void layoutImpl()  { layout(this, getContent(), null, _fillWidth, _fillHeight); }
 
 /**
  * XML archival.
@@ -143,71 +151,56 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
 }
 
 /**
- * A layout for Box.
+ * Returns preferred width of layout.
  */
-public static class BoxLayout extends ViewLayout {
+public static double getPrefWidth(ParentView aPar, View aChild, double aH)
+{
+    // Get insets (just return if empty)
+    Insets ins = aPar.getInsetsAll(); if(aChild==null) return ins.getWidth();
     
-    // Whether to fill width, height
-    boolean       _fillWidth, _fillHeight;
-    
-    /** Creates a new BoxLayout for given parent. */
-    public BoxLayout(ParentView aPar)  { setParent(aPar); }
-    
-    /** Returns whether layout should fill width. */
-    public boolean isFillWidth()  { return _fillWidth; }
-    
-    /** Sets whether to fill width. */
-    public void setFillWidth(boolean aValue)  { _fillWidth = aValue; }
-    
-    /** Returns whether layout should fill height. */
-    public boolean isFillHeight()  { return _fillHeight; }
-    
-    /** Sets whether to fill height. */
-    public void setFillHeight(boolean aValue)  { _fillHeight = aValue; }
-    
-    /** Returns preferred width of layout. */
-    public double getPrefWidthImpl(double aH)
-    {
-        View child = getChild();
-        double bw = child.getBestWidth(aH);
-        return bw;
-    }
-    
-    /** Returns preferred height of layout. */
-    public double getPrefHeight(double aW)
-    {
-        View child = getChild();
-        double bh = child.getBestHeight(aW);
-        return bh;
-    }
-    
-    /** Performs layout. */
-    public void layoutChildren()  { layout(_parent, getChild(), null, _fillWidth, _fillHeight); }
-    
-    /**
-     * Performs Box layout for given parent, child and fill width/height.
-     */
-    public static void layout(View aPar, View aChild, Insets theIns, boolean isFillWidth, boolean isFillHeight)
-    {
-        // If no child, just return
-        if(aChild==null) return;
-        
-        // Get parent bounds for insets (just return if empty)
-        Insets ins = theIns!=null? theIns : aPar.getInsetsAll();
-        double px = ins.left, py = ins.top;
-        double pw = aPar.getWidth() - px - ins.right; if(pw<0) pw = 0; if(pw<=0) return;
-        double ph = aPar.getHeight() - py - ins.bottom; if(ph<0) ph = 0; if(ph<=0) return;
-        
-        // Get content width/height
-        double cw = isFillWidth || aChild.isGrowWidth()? pw : aChild.getBestWidth(-1); if(cw>pw) cw = pw;
-        double ch = isFillHeight? ph : aChild.getBestHeight(cw);
-        
-        // Handle normal layout
-        double dx = pw - cw, dy = ph - ch;
-        double sx = aChild.getLeanX()!=null? getLeanX(aChild) : getAlignX(aPar);
-        double sy = aChild.getLeanY()!=null? getLeanY(aChild) : getAlignY(aPar);
-        aChild.setBounds(px+dx*sx, py+dy*sy, cw, ch);
-    }
+    // Get height without insets, get best width and return
+    double h = aH>=0? (aH - ins.getHeight()) : aH;
+    double bw = aChild.getBestWidth(h);
+    return bw + ins.getWidth();
 }
 
+/**
+ * Returns preferred height of layout.
+ */
+public static double getPrefHeight(ParentView aPar, View aChild, double aW)
+{
+    // Get insets (just return if empty)
+    Insets ins = aPar.getInsetsAll(); if(aChild==null) return ins.getHeight();
+    
+    // Get width without insets, get best height and return
+    double w = aW>=0? (aW - ins.getWidth()) : aW;
+    double bh = aChild.getBestHeight(w);
+    return bh + ins.getHeight();
+}
+
+/**
+ * Performs Box layout for given parent, child and fill width/height.
+ */
+public static void layout(ParentView aPar, View aChild, Insets theIns, boolean isFillWidth, boolean isFillHeight)
+{
+    // If no child, just return
+    if(aChild==null) return;
+    
+    // Get parent bounds for insets (just return if empty)
+    Insets ins = theIns!=null? theIns : aPar.getInsetsAll();
+    double px = ins.left, py = ins.top;
+    double pw = aPar.getWidth() - px - ins.right; if(pw<0) pw = 0; if(pw<=0) return;
+    double ph = aPar.getHeight() - py - ins.bottom; if(ph<0) ph = 0; if(ph<=0) return;
+    
+    // Get content width/height
+    double cw = isFillWidth || aChild.isGrowWidth()? pw : aChild.getBestWidth(-1); if(cw>pw) cw = pw;
+    double ch = isFillHeight? ph : aChild.getBestHeight(cw);
+    
+    // Handle normal layout
+    double dx = pw - cw, dy = ph - ch;
+    double sx = aChild.getLeanX()!=null? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
+    double sy = aChild.getLeanY()!=null? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
+    aChild.setBounds(px+dx*sx, py+dy*sy, cw, ch);
+}
+    
 }

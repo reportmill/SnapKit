@@ -241,17 +241,17 @@ public static class BorderLayout extends ViewLayout {
     public void layoutChildren()
     {
         // Do vertical layout (top, horiz-proxy, bottom)
-        View par = getParent();
+        ParentView par = getParent();
         View vkids[] = getVLay().getChildren();
-        ColView.VBoxLayout.layout(par, vkids, null, true, 0);
+        ColView.layout(par, vkids, null, true, 0);
         
         // Do horizontal layout (left, center-proxy, bottom)
         Insets hins = getInsets(par, _hproxy);
-        RowView.HBoxLayout.layout(par, _hlay.getChildren(), hins, true, 0);
+        RowView.layout(par, _hlay.getChildren(), hins, true, 0);
         
         // Do center layout
         Insets cins = getInsets(par, _cproxy);
-        BoxView.BoxLayout.layout(par, _center, cins, _fillCenter, _fillCenter);
+        BoxView.layout(par, _center, cins, _fillCenter, _fillCenter);
     }
     
     /** Returns a VBoxLayout with HBoxLayout to do real work. */

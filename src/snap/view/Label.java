@@ -25,9 +25,6 @@ public class Label extends ParentView {
     // The spacing between text and graphic
     double          _spacing = 4;
     
-    // The layout
-    ViewLayout      _layout;
-
     // Constants for properties
     public static final String Graphic_Prop = "Graphic";
     public static final String GraphicAfter_Prop = "GraphicAfter";
@@ -188,8 +185,6 @@ public double getSpacing()  { return _spacing; }
 public void setSpacing(double aValue)
 {
     _spacing = aValue;
-    if(_layout instanceof RowView.HBoxLayout) ((RowView.HBoxLayout)_layout).setSpacing(_spacing);
-    if(_layout instanceof ColView.VBoxLayout) ((ColView.VBoxLayout)_layout).setSpacing(_spacing);
     relayoutParent();
 }
 
@@ -201,30 +196,31 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return getLayout().getPrefWidth(-1); }
+protected double getPrefWidthImpl(double aH)
+{
+    if(isHorizontal())
+        return RowView.getPrefWidth(this, null, getSpacing(), aH);
+    return ColView.getPrefWidth(this, null, -1);
+}
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return getLayout().getPrefHeight(-1); }
+protected double getPrefHeightImpl(double aW)
+{
+    if(isHorizontal())
+        return RowView.getPrefHeight(this, null, aW);
+    return ColView.getPrefHeight(this, null, getSpacing(), -1);
+}
 
 /**
  * Layout children.
  */
-protected void layoutImpl()  { getLayout().layoutChildren(); }
-
-/**
- * Returns the layout.
- */
-protected ViewLayout getLayout()
+protected void layoutImpl()
 {
-    if(_layout!=null) return _layout;
-    if(isHorizontal()) {
-        RowView.HBoxLayout hbox = new RowView.HBoxLayout(this); hbox.setSpacing(_spacing);
-        return _layout = hbox;
-    }
-    ColView.VBoxLayout vbox = new ColView.VBoxLayout(this); vbox.setSpacing(_spacing);
-    return _layout = vbox;
+    if(isHorizontal())
+        RowView.layout(this, null, null, false, getSpacing());
+    else ColView.layout(this, null, null, false, getSpacing());
 }
 
 /**

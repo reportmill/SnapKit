@@ -17,9 +17,6 @@ public class SplitView extends ParentView {
     // The list of dividers
     List <Divider>          _divs = new ArrayList();
     
-    // The layout
-    SplitLayout             _layout = new SplitLayout(this);
-    
     // The default border
     static final Border SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
 
@@ -201,12 +198,22 @@ public Divider[] getDividers()  { return _divs.toArray(new Divider[_divs.size()]
 /**
  * Calculates the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(aH); }
+protected double getPrefWidthImpl(double aH)
+{
+    if(isHorizontal())
+        return RowView.getPrefWidth(this, null, 0, aH);
+    return ColView.getPrefWidth(this, null, -1);    
+}
 
 /**
  * Calculates the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(aW); }
+protected double getPrefHeightImpl(double aW)
+{
+    if(isHorizontal())
+        return RowView.getPrefHeight(this, null, aW);
+    return ColView.getPrefHeight(this, null, 0, -1);
+}
 
 /**
  * Override to layout children.
@@ -214,7 +221,9 @@ protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(aW
 protected void layoutImpl()
 {
     // Do normal layout
-    _layout.layoutChildren();
+    if(isHorizontal())
+        RowView.layout(this, null, null, true, 0);
+    else ColView.layout(this, null, null, true, 0);
     
     // If children don't fill main axis, grow last child
     Insets ins = getInsetsAll();
@@ -256,36 +265,6 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
             addItem(view);
         }
     }
-}
-
-/**
- * A layout for SplitView.
- */
-public static class SplitLayout extends ViewLayout {
-    
-    // The real layouts
-    RowView.HBoxLayout       _hbox = new RowView.HBoxLayout(null);
-    ColView.VBoxLayout       _vbox = new ColView.VBoxLayout(null);
-    
-    /** Creates a new SplitLayout for given parent. */
-    public SplitLayout(ParentView aPar)
-    {
-        setParent(aPar);
-        _hbox.setParent(aPar); _hbox.setFillHeight(true);
-        _vbox.setParent(aPar); _vbox.setFillWidth(true);
-    }
-    
-    /** Returns the appropriate layout. */
-    public ViewLayout getLayout()  { return isVertical()? _vbox : _hbox; }
-    
-    /** Returns preferred width of layout. */
-    public double getPrefWidth(double aH)  { return getLayout().getPrefWidth(aH); }
-    
-    /** Returns preferred height of layout. */
-    public double getPrefHeight(double aW)  { return getLayout().getPrefHeight(aW); }
-        
-    /** Performs layout. */
-    public void layoutChildren()  { getLayout().layoutChildren(); }
 }
 
 }

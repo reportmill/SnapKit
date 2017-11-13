@@ -159,7 +159,17 @@ public static final double getAlignX(HPos aPos)  { return aPos==HPos.RIGHT? 1 : 
  * Returns the align y factor.
  */
 public static final double getAlignY(VPos aPos)  { return aPos==VPos.BOTTOM? 1 : aPos==VPos.CENTER? .5 : 0; }
+
+/** 
+ * Returns the lean x factor.
+ */
+public static final double getLeanX(View aView)  { return getAlignX(aView.getLeanX()); }
     
+/**
+ * Returns the lean y factor.
+ */
+public static final double getLeanY(View aView)  { return getAlignY(aView.getLeanY()); }
+
 /**
  * Returns the child of given class hit by coords.
  */

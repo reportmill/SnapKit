@@ -11,9 +11,6 @@ import snap.util.*;
  */
 public class MenuBar extends ParentView {
 
-    // The layout
-    RowView.HBoxLayout  _layout = new RowView.HBoxLayout(this);
-    
     // The menubar fill
     static Color c1 = new Color("#fefefeff"), c2 = new Color("#f5f5f5ff"), c3 = new Color("#f0f0f0ff");
     static Color c4 = new Color("#ebebebff"), c5 = new Color("#e7e7e7ff");
@@ -26,7 +23,7 @@ public class MenuBar extends ParentView {
  */
 public MenuBar()
 {
-    setFill(MENU_BAR_PAINT); setPadding(0,10,0,10); _layout.setFillHeight(true);
+    setFill(MENU_BAR_PAINT); setPadding(0,10,0,10);
     setFont(MENU_BAR_FONT);
 }
 
@@ -111,17 +108,17 @@ protected double getMinHeightImpl()  { return getFont().getSize() + 10; }
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(-1); }
+protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, null, 0, aH); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
+protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, null, aW); }
 
 /**
  * Layout children.
  */
-protected void layoutImpl()  { _layout.layoutChildren(); }
+protected void layoutImpl()  { RowView.layout(this, null, null, true, 0); }
 
 /**
  * Override to return default.

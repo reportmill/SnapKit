@@ -54,6 +54,10 @@ public class TreeView <T> extends ParentView implements View.Selectable <T> {
     // The ScrollView to hold SplitView+Columns
     ScrollView              _scroll = new ScrollView(_split);
     
+    // Constants
+    static final Paint DIVIDER_FILL = new Color("#EEEEEE");
+    static final Paint DIVIDER_FILLH = new Color("#E0E0E0");
+
     // Constants for TreeView
     public static final String ShowRoot_Prop = "ShowRoot";
     public static final String ShowRootHandle_Prop = "ShowRootHandle";
@@ -182,8 +186,12 @@ public void addCol(TreeCol aCol)  { addCol(aCol,getColCount()); }
  */
 public void addCol(TreeCol aCol, int anIndex)
 {
+    // Add TreeCol to SplitView
     aCol.setTree(this);
     _split.addItem(aCol, anIndex);
+    
+    // Configure split dividers
+    for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
 }
 
 /**
