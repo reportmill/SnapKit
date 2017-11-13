@@ -189,8 +189,8 @@ public static class BorderLayout extends ViewLayout {
     CenterProxy      _cproxy = new CenterProxy();
     
     // Workers: for center node, horizontal nodes and vertical nodes
-    HBox.HBoxLayout  _hlay = new HBox.HBoxLayout(_hproxy);
-    VBox.VBoxLayout  _vlay = new VBox.VBoxLayout(null);
+    RowView.HBoxLayout  _hlay = new RowView.HBoxLayout(_hproxy);
+    ColView.VBoxLayout  _vlay = new ColView.VBoxLayout(null);
     
     /** Creates a new Border layout for given parent. */
     public BorderLayout(ParentView aPar)  { setParent(aPar); _hlay.setFillHeight(true); _vlay.setFillWidth(true); }
@@ -243,19 +243,19 @@ public static class BorderLayout extends ViewLayout {
         // Do vertical layout (top, horiz-proxy, bottom)
         View par = getParent();
         View vkids[] = getVLay().getChildren();
-        VBox.VBoxLayout.layout(par, vkids, null, true, 0);
+        ColView.VBoxLayout.layout(par, vkids, null, true, 0);
         
         // Do horizontal layout (left, center-proxy, bottom)
         Insets hins = getInsets(par, _hproxy);
-        HBox.HBoxLayout.layout(par, _hlay.getChildren(), hins, true, 0);
+        RowView.HBoxLayout.layout(par, _hlay.getChildren(), hins, true, 0);
         
         // Do center layout
         Insets cins = getInsets(par, _cproxy);
-        Box.BoxLayout.layout(par, _center, cins, _fillCenter, _fillCenter);
+        BoxView.BoxLayout.layout(par, _center, cins, _fillCenter, _fillCenter);
     }
     
     /** Returns a VBoxLayout with HBoxLayout to do real work. */
-    public VBox.VBoxLayout getVLay()
+    public ColView.VBoxLayout getVLay()
     {
         _cproxy.relayoutParent(); _hproxy.relayoutParent();
         _hlay.setChildren(asArray(_left, _center!=null? _cproxy : null, _right));

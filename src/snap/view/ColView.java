@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * A View subclass to layout child views vertically, from top to bottom.
  */
-public class VBox extends ChildView {
+public class ColView extends ChildView {
 
     // The VBox layout
     VBoxLayout  _layout = new VBoxLayout(this);

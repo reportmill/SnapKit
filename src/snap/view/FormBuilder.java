@@ -12,7 +12,7 @@ import snap.util.SnapUtils;
 public class FormBuilder extends ViewOwner {
 
     // The root pane
-    VBox                 _pane = createRootPane();
+    ColView                 _pane = createRootPane();
 
     // The font
     Font                 _font;
@@ -85,7 +85,7 @@ public TextField addTextField(String aName, String aDefault)  { return addTextFi
 public TextField addTextField(String aLabel, String aName, String aDefault)
 {
     // Create HBox for label and text field
-    HBox hbox = new HBox();
+    RowView hbox = new RowView();
     
     // If label is provided, create configure and add
     if(aLabel!=null) {
@@ -119,7 +119,7 @@ public ComboBox addComboBox(String aTitle, String options[], String aDefault)
     Label label = new Label(); label.setText(aTitle + ":"); //label.setAlignmentX(0);
     ComboBox cbox = new ComboBox(); //cbox.getItems().add(options);
     cbox.setName(aTitle); //if(_font!=null) cbox.setFont(_font);
-    HBox hbox = new HBox(); //panel.setAlignmentX(0);
+    RowView hbox = new RowView(); //panel.setAlignmentX(0);
     hbox.addChild(label); hbox.addChild(cbox); addView(hbox);
     
     // Add binding
@@ -133,7 +133,7 @@ public ComboBox addComboBox(String aTitle, String options[], String aDefault)
 /**
  * Adds buttons.
  */
-public HBox addButtons(String theTitles[])
+public RowView addButtons(String theTitles[])
 {
     String names[] = new String[theTitles.length];
     for(int i=0; i<theTitles.length; i++) names[i] = theTitles[i] + "Button";
@@ -143,9 +143,9 @@ public HBox addButtons(String theTitles[])
 /**
  * Adds buttons.
  */
-public HBox addButtons(String theNames[], String theLabels[])
+public RowView addButtons(String theNames[], String theLabels[])
 {
-    HBox hbox = new HBox(); hbox.setSpacing(10); //panel.setAlignmentX(0);
+    RowView hbox = new RowView(); hbox.setSpacing(10); //panel.setAlignmentX(0);
     
     // Iterate over options
     for(int i=0, iMax=theNames.length; i<iMax; i++) { String title = theNames[i], text = theLabels[i];
@@ -219,9 +219,9 @@ public String getStringValue(String aKey)  { return SnapUtils.stringValue(getVal
 /**
  * Creates the UI.
  */
-protected VBox createRootPane()
+protected ColView createRootPane()
 {
-    VBox vbox = new VBox(); vbox.setPadding(new Insets(8)); vbox.setSpacing(20); vbox.setFillWidth(true);
+    ColView vbox = new ColView(); vbox.setPadding(new Insets(8)); vbox.setSpacing(20); vbox.setFillWidth(true);
     return vbox;
 }
 

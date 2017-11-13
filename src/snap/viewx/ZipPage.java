@@ -47,7 +47,7 @@ protected View createUI()
     _pageBrsr = new WebBrowser(); _pageBrsr.setGrowHeight(true);
     
     // Put FileBrowser and PageBrowser in VBox
-    VBox vbox = new VBox(); vbox.setFillWidth(true);
+    ColView vbox = new ColView(); vbox.setFillWidth(true);
     vbox.setChildren(_fileBrsr, _pageBrsr);
     return vbox;
 }

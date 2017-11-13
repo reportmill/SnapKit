@@ -188,8 +188,8 @@ public double getSpacing()  { return _spacing; }
 public void setSpacing(double aValue)
 {
     _spacing = aValue;
-    if(_layout instanceof HBox.HBoxLayout) ((HBox.HBoxLayout)_layout).setSpacing(_spacing);
-    if(_layout instanceof VBox.VBoxLayout) ((VBox.VBoxLayout)_layout).setSpacing(_spacing);
+    if(_layout instanceof RowView.HBoxLayout) ((RowView.HBoxLayout)_layout).setSpacing(_spacing);
+    if(_layout instanceof ColView.VBoxLayout) ((ColView.VBoxLayout)_layout).setSpacing(_spacing);
     relayoutParent();
 }
 
@@ -220,10 +220,10 @@ protected ViewLayout getLayout()
 {
     if(_layout!=null) return _layout;
     if(isHorizontal()) {
-        HBox.HBoxLayout hbox = new HBox.HBoxLayout(this); hbox.setSpacing(_spacing);
+        RowView.HBoxLayout hbox = new RowView.HBoxLayout(this); hbox.setSpacing(_spacing);
         return _layout = hbox;
     }
-    VBox.VBoxLayout vbox = new VBox.VBoxLayout(this); vbox.setSpacing(_spacing);
+    ColView.VBoxLayout vbox = new ColView.VBoxLayout(this); vbox.setSpacing(_spacing);
     return _layout = vbox;
 }
 

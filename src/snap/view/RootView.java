@@ -31,7 +31,7 @@ public class RootView extends ParentView {
     EventDispatcher          _eventDispatcher = new EventDispatcher(this);
     
     // The layout
-    VBox.VBoxLayout          _layout = new VBox.VBoxLayout(this);
+    ColView.VBoxLayout          _layout = new ColView.VBoxLayout(this);
     
     // A map of dirty info
     Map <View,Rect>          _dirtyRects = new HashMap();

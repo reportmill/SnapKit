@@ -21,16 +21,16 @@ public class TabView extends ParentView implements View.Selectable <Tab> {
     int             _sindex = -1;
     
     // The tab shelf
-    HBox            _shelf;
+    RowView            _shelf;
     
     // The view to hold content
     BorderView      _contentCradle;
     
     // The node to obscure the content cradle border below the selected tab button
-    View            _borderBlockerBox = new HBox();
+    View            _borderBlockerBox = new RowView();
     
     // Hidden kids
-    HBox            _hiddenKids = new HBox();
+    RowView            _hiddenKids = new RowView();
     
     // The default back fill
     static Paint    _defBackFill = new Color("#F4F4F4");
@@ -44,7 +44,7 @@ public class TabView extends ParentView implements View.Selectable <Tab> {
 public TabView()
 {
     // Create and configure shelf
-    _shelf = new HBox(); _shelf.setFillHeight(true); _shelf.setHeight(32); _shelf.setPrefHeight(32);
+    _shelf = new RowView(); _shelf.setFillHeight(true); _shelf.setHeight(32); _shelf.setPrefHeight(32);
     _shelf.setSpacing(1); _shelf.setPadding(5,5,0,5);
     Color c1 = new Color("#d6d6d6"), c2 = new Color("#dddddd");
     _shelf.setFill(new GradientPaint(.5,0,.5,1, GradientPaint.getStops(0,c1,.2,c2,1,c2)));

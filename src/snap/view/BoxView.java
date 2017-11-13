@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * A View that holds another view.
  */
-public class Box extends ParentView {
+public class BoxView extends ParentView {
 
     // The content
     View       _child;
@@ -19,17 +19,17 @@ public class Box extends ParentView {
 /**
  * Creates a new Box.
  */
-public Box()  { }
+public BoxView()  { }
 
 /**
  * Creates a new Box for content.
  */
-public Box(View aContent)  { setContent(aContent); }
+public BoxView(View aContent)  { setContent(aContent); }
 
 /**
  * Creates a new Box for content with FillWidth, FillHeight params.
  */
-public Box(View aContent, boolean isFillWidth, boolean isFillHeight)
+public BoxView(View aContent, boolean isFillWidth, boolean isFillHeight)
 {
     setContent(aContent); setFillWidth(isFillWidth); setFillHeight(isFillHeight);
 }

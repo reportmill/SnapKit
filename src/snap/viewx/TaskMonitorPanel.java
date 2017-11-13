@@ -106,7 +106,7 @@ protected View createUI()
     Label tlabel = new Label(); tlabel.setText(_title);
     _alabel = new Label();
     _pbar = new ProgressBar(); _pbar.setPrefWidth(360);
-    VBox vbox = new VBox(); vbox.setSpacing(8);
+    ColView vbox = new ColView(); vbox.setSpacing(8);
     vbox.addChild(tlabel); vbox.addChild(_alabel); vbox.addChild(_pbar);
     return vbox;
 }

@@ -264,8 +264,8 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
 public static class SplitLayout extends ViewLayout {
     
     // The real layouts
-    HBox.HBoxLayout       _hbox = new HBox.HBoxLayout(null);
-    VBox.VBoxLayout       _vbox = new VBox.VBoxLayout(null);
+    RowView.HBoxLayout       _hbox = new RowView.HBoxLayout(null);
+    ColView.VBoxLayout       _vbox = new ColView.VBoxLayout(null);
     
     /** Creates a new SplitLayout for given parent. */
     public SplitLayout(ParentView aPar)

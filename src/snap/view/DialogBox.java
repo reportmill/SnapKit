@@ -309,7 +309,7 @@ public void cancel()  { _cancelled = true; hide(); }
 /**
  * Adds the option buttons for dialog panel.
  */
-protected HBox addOptionButtons()
+protected RowView addOptionButtons()
 {
     // If there is only a label in RootView, make it at least an inch tall
     if(_builder._pane.getChildCount()==1 && _builder._pane.getChild(0) instanceof Label)
@@ -317,7 +317,7 @@ protected HBox addOptionButtons()
 
     // Add OK/Cancel buttons
     String titles[] = getOptions(), rtitles[] = titles.clone(); ArrayUtils.reverse(rtitles);
-    HBox bbox = _builder.addButtons(rtitles, rtitles);
+    RowView bbox = _builder.addButtons(rtitles, rtitles);
     bbox.setAlign(Pos.CENTER_RIGHT); bbox.setPadding(15,15,15,15);
     for(View btn : bbox.getChildren()) { btn.setMinWidth(100); btn.setMinHeight(24); }
     
@@ -350,7 +350,7 @@ protected View createUI()
     
     // If image provided, reset pane to hbox containing image and original root pane
     if(getImage()!=null) {
-        HBox hbox = new HBox(); hbox.setPadding(15,0,0,20); hbox.setSpacing(20);
+        RowView hbox = new RowView(); hbox.setPadding(15,0,0,20); hbox.setSpacing(20);
         hbox.setAlign(Pos.TOP_CENTER);
         hbox.addChild(new ImageView(getImage()));
         hbox.addChild(view); view = hbox;
@@ -358,7 +358,7 @@ protected View createUI()
     else view.setPadding(25, 30, 8, 30);
     
     // Add OK/Cancel buttons
-    HBox bbox = addOptionButtons();
+    RowView bbox = addOptionButtons();
     
     // Wrap buttons and view in BorderView and return
     BorderView bview = new BorderView(); bview.setCenter(view); bview.setBottom(bbox);

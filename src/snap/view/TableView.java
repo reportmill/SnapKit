@@ -134,7 +134,7 @@ public void addCol(TableCol aCol)
     
     // Create Header Box for Column Header label
     View hdr = aCol.getHeader();
-    Box hdrBox = new Box(hdr) {
+    BoxView hdrBox = new BoxView(hdr) {
         protected double getPrefWidthImpl(double aH)  { return aCol.getPrefWidth(); }
         public void setPrefWidth(double aValue)  { aCol.setPrefWidth(aValue); }
         public boolean isGrowWidth()  { return aCol.isGrowWidth(); }
@@ -263,7 +263,7 @@ protected ParentView createHeaderView()
     
     Scroller scroll = new Scroller(); scroll.setContent(split);
     LineView line = new LineView(0,.5,10,.5); line.setPrefHeight(1); line.setBorder(Color.LIGHTGRAY,1);
-    VBox vbox = new VBox(); vbox.setFillWidth(true);
+    ColView vbox = new ColView(); vbox.setFillWidth(true);
     vbox.setChildren(scroll,line);
     return vbox;
 }
@@ -273,7 +273,7 @@ protected ParentView createHeaderView()
  */
 protected Scroller getHeaderScroller()
 {
-    VBox vbox = (VBox)getHeaderView();
+    ColView vbox = (ColView)getHeaderView();
     return (Scroller)vbox.getChild(0);
 }
 

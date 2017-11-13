@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * A View subclass to layout child views horizontally, from left to right.
  */
-public class HBox extends ChildView {
+public class RowView extends ChildView {
     
     // The HBox layout
     HBoxLayout  _layout = new HBoxLayout(this);

@@ -31,7 +31,7 @@ public class BrowserView <T> extends ParentView {
     int                     _prefColWidth = 150;
     
     // The view that holds the columns
-    HBox                    _colView = new HBox();
+    RowView                    _colView = new RowView();
     
     // The ScrollView to hold SplitView+Columns
     ScrollView              _scroll = new ScrollView(_colView);

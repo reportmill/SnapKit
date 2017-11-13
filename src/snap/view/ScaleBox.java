@@ -9,7 +9,7 @@ import snap.gfx.Size;
  * A Box subclass that scales it's content instead of resize.
  * FillWidth, FillHeight, KeepAspect, FillAlways default to true.
  */
-public class ScaleBox extends Box {
+public class ScaleBox extends BoxView {
 
 /**
  * Creates a new ScaleBox.

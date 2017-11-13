@@ -36,7 +36,7 @@ public class ComboBox <T> extends ParentView implements View.Selectable <T> {
     List <T>                   _items;
 
     // The HBox layout
-    HBox.HBoxLayout            _layout = new HBox.HBoxLayout(this);
+    RowView.HBoxLayout            _layout = new RowView.HBoxLayout(this);
     
     // The arrow image
     static Image               _arrowImg;

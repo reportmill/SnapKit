@@ -22,7 +22,7 @@ public class DocView extends ParentView {
     int                      _selIndex = -1;
     
     // The layout
-    Box.BoxLayout            _layout = new Box.BoxLayout(this);
+    BoxView.BoxLayout            _layout = new BoxView.BoxLayout(this);
     
     // Constants for properties
     public static final String PageMargin_Prop = "PageMargin";

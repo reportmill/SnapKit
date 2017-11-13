@@ -66,7 +66,7 @@ public class ListCol <T> extends ParentView implements View.Selectable <T> {
     double                _sampleWidth = -1, _sampleHeight = -1;
     
     // The layout for cells
-    VBox.VBoxLayout       _layout = new VBox.VBoxLayout(this);
+    ColView.VBoxLayout       _layout = new ColView.VBoxLayout(this);
     
     // This allows this ListCol to query a ListCol for configureCell
     ListCol <T>          _proxy;

@@ -76,7 +76,7 @@ protected Map <String, Class> createClassMap()
     // View classes
     cmap.put("ArcView", ArcView.class);
     cmap.put("BorderView", BorderView.class);
-    cmap.put("Box", Box.class);
+    cmap.put("Box", BoxView.class);
     cmap.put("BrowserView", BrowserView.class);
     cmap.put("Button", Button.class);
     cmap.put("ColorButton", snap.viewx.ColorButton.class);
@@ -86,7 +86,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("CheckBoxMenuItem", CheckBoxMenuItem.class);
     cmap.put("ComboBox", ComboBox.class);
     cmap.put("DocView", DocView.class);
-    cmap.put("HBox", HBox.class);
+    cmap.put("HBox", RowView.class);
     cmap.put("ImageView", ImageView.class);
     cmap.put("Label", Label.class);
     cmap.put("ListView", ListView.class);
@@ -119,7 +119,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("ToggleButton", ToggleButton.class);
     cmap.put("TreeView", TreeView.class);
     cmap.put("TitleView", TitleView.class);
-    cmap.put("VBox", VBox.class);
+    cmap.put("VBox", ColView.class);
     cmap.put("View", ParentView.class);
     
     // Graphics

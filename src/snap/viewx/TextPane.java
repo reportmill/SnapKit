@@ -70,7 +70,7 @@ protected View createUI()
     
     // Create SelectionText Label in BottomBox
     Label slabel = new Label(); slabel.setName("SelectionText"); slabel.setFont(new Font("Arial", 11));
-    HBox bbox = new HBox(); bbox.setPadding(2,2,2,5); bbox.setName("BottomBox");
+    RowView bbox = new RowView(); bbox.setPadding(2,2,2,5); bbox.setName("BottomBox");
     bbox.addChild(slabel);
     
     // Create BorderView and add ToolBar, text and bottom box

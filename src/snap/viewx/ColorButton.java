@@ -149,7 +149,7 @@ public PopupWindow getPopup()
     
     // Create PopupWindow and content
     PopupWindow popup = new PopupWindow(); Insets pad = new Insets(2,2,2,20);
-    VBox content = new VBox(); content.setFillWidth(true); content.setPadding(2,2,2,2);
+    ColView content = new ColView(); content.setFillWidth(true); content.setPadding(2,2,2,2);
     popup.setContent(content);
     
     // Add title and ColorBoxesPane

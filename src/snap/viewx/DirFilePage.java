@@ -40,7 +40,7 @@ public WebBrowser getPageBrowser()  { getUI(); return _pageBrowser; }
  */
 protected View createUI()
 {
-    HBox hbox = new HBox(); hbox.setFillHeight(true);
+    RowView hbox = new RowView(); hbox.setFillHeight(true);
     _fileBrowser = new BrowserView(); _fileBrowser.setName("FileBrowser");
     _fileBrowser.setPrefWidth(400); _fileBrowser.setGrowWidth(true);
     _fileBrowser.setResolver(new FileTreeResolver());

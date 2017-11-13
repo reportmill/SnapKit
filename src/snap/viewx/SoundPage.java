@@ -79,7 +79,7 @@ protected View createUI()
     Label timeLabel = new Label("0"); timeLabel.setName("TimeLabel"); timeLabel.setPrefWidth(36);
 
     // Put those controls in a panel
-    HBox playPanel = new HBox(); playPanel.setSpacing(5); playPanel.setPadding(20,10,20,10);
+    RowView playPanel = new RowView(); playPanel.setSpacing(5); playPanel.setPadding(20,10,20,10);
     playPanel.setBorder(Color.BLACK, 1);
     playPanel.setChildren(playButton, progSlider, timeLabel);
     Label playPanelTitle = new Label("Playback");
@@ -94,13 +94,13 @@ protected View createUI()
     addViewBinding(saveButton, "Enabled", "Data.Modified");
     
     // Put those controls in a panel
-    HBox recSavePane = new HBox(); recSavePane.setSpacing(5); recSavePane.setPadding(20,20,20,20);
+    RowView recSavePane = new RowView(); recSavePane.setSpacing(5); recSavePane.setPadding(20,20,20,20);
     recSavePane.setBorder(Color.BLACK,1);
     recSavePane.setChildren(recButton, saveButton);
     Label recSavePaneTitle = new Label("Record/Save");
     
     // Return VBox, add pieces and return
-    VBox vbox = new VBox(); vbox.setAlign(Pos.TOP_CENTER); vbox.setPadding(50,50,50,50);vbox.setSpacing(10);
+    ColView vbox = new ColView(); vbox.setAlign(Pos.TOP_CENTER); vbox.setPadding(50,50,50,50);vbox.setSpacing(10);
     vbox.setChildren(playPanelTitle, playPanel, recSavePaneTitle, recSavePane);
     return vbox;
 }

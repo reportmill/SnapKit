@@ -92,7 +92,7 @@ public PopupWindow getPopup()
 {
     hide();
     PopupWindow pop = new PopupWindow(); pop.setFont(getDefaultFont());
-    VBox vbox = new VBox(); vbox.setMinWidth(125); vbox.setFillWidth(true); vbox.setPadding(4,1,4,1);
+    ColView vbox = new ColView(); vbox.setMinWidth(125); vbox.setFillWidth(true); vbox.setPadding(4,1,4,1);
     for(View node : _items) { vbox.addChild(node); node.addEventHandler(_lsnr, Action); }
     pop.setContent(vbox);
     return _pop = pop;
@@ -118,7 +118,7 @@ public void hide()
 {
     if(_pop==null) return;
     _pop.hide();
-    VBox vbox = (VBox)_pop.getContent();
+    ColView vbox = (ColView)_pop.getContent();
     for(View node : vbox.getChildren()) node.removeEventHandler(_lsnr, Action);
     _pop = null;
 }
@@ -133,7 +133,7 @@ public boolean isPopupShowing()  { return _pop!=null && _pop.isShowing(); }
  */
 public void fireActionEvent()
 {
-    double x = getParent() instanceof VBox? getWidth()-1 : 0;
+    double x = getParent() instanceof ColView? getWidth()-1 : 0;
     double y = getParent() instanceof MenuBar? getHeight()-1 : 0;
     show(this, x, y);
 }
@@ -153,7 +153,7 @@ protected void setTargeted(boolean aValue)
     }
     
     // Handle when in Menu
-    if(getParent() instanceof VBox) {
+    if(getParent() instanceof ColView) {
         if(aValue) fireActionEvent();
         //else hide();
     }

@@ -86,7 +86,7 @@ protected class ToolBar extends ViewOwner {
         speedText.setAlign(HPos.CENTER);
     
         // Create toolbar
-        HBox toolBar = new HBox(); toolBar.setAlign(Pos.CENTER); toolBar.setPadding(18,25,18,25); toolBar.setSpacing(15);
+        RowView toolBar = new RowView(); toolBar.setAlign(Pos.CENTER); toolBar.setPadding(18,25,18,25); toolBar.setSpacing(15);
         toolBar.setChildren(actBtn, runBtn, resetBtn, sep, speedLbl, speedSldr, speedText);
         return toolBar;
     }
