@@ -6,9 +6,9 @@ import snap.gfx.Color;
 import snap.util.StringUtils;
 
 /**
- * A ListNode subclass to act as a BrowserView columns.
+ * A ListView subclass to act as a BrowserView column.
  */
-public class BrowserCol <T> extends ListViewScroll <T> {
+public class BrowserCol <T> extends ListView <T> {
     
     // The Browser
     BrowserView <T>  _browser;

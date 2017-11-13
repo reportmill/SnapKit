@@ -96,7 +96,6 @@ public void setListView(ListView <T> aListView)
     
     // Start listening to Action and SelectedIndex changes
     _list.addEventHandler(e -> listViewFiredAction(), Action);
-    ListView list = _list; if(list instanceof ListViewScroll) list = ((ListViewScroll)list).getListView();
     _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.SelectedIndex_Prop);
     
     // If not PopupList, turn off button and start listening to TextField KeyType events

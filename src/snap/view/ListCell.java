@@ -11,9 +11,6 @@ public class ListCell <T> extends Label {
     // The cell item
     T                  _item;
     
-    // The cell parent node
-    ListView           _view;
-    
     // The cell row/column
     int                _row, _col;
     
@@ -23,15 +20,10 @@ public class ListCell <T> extends Label {
 /**
  * Creates a new ListCell.
  */
-public ListCell(ListView aView, T anItem, int aRow, int aCol, boolean isSel)
+public ListCell(T anItem, int aRow, int aCol, boolean isSel)
 {
-    _view = aView; _item = anItem; _row = aRow; _col = aCol; _sel = isSel;
+    _item = anItem; _row = aRow; _col = aCol; _sel = isSel;
 }
-
-/**
- * Returns the node this cell is associated with.
- */
-public View getView()  { return _view; }
 
 /**
  * Returns the item.

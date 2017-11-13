@@ -4,9 +4,9 @@
 package snap.view;
 
 /**
- * A ListViewScroll that displays in a PopupWindow.
+ * A ListView subclass that displays in a PopupWindow.
  */
-public class PopupList <T> extends ListViewScroll <T> {
+public class PopupList <T> extends ListView <T> {
     
     // The PopupNode
     PopupWindow       _popup;
@@ -22,7 +22,7 @@ public class PopupList <T> extends ListViewScroll <T> {
  */
 public PopupList()
 {
-    getListView().setFocusWhenPressed(false);
+    getCol().setFocusWhenPressed(false);
     getScrollView().setBorder(null);
 }
 

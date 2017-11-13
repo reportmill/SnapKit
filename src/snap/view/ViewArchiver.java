@@ -89,7 +89,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("HBox", HBox.class);
     cmap.put("ImageView", ImageView.class);
     cmap.put("Label", Label.class);
-    cmap.put("ListView", ListViewScroll.class);
+    cmap.put("ListView", ListView.class);
     cmap.put("Menu", Menu.class);
     cmap.put("MenuBar", MenuBar.class);
     cmap.put("MenuButton", MenuButton.class);

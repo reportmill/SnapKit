@@ -8,9 +8,9 @@ import snap.gfx.*;
 import snap.util.ArrayUtils;
 
 /**
- * A custom class.
+ * A ListCol subclass that represents a column in TreeView.
  */
-public class TreeCol <T> extends ListView <T> {
+public class TreeCol <T> extends ListCol <T> {
 
     // The header value
     String             _headerText;
