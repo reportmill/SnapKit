@@ -7,8 +7,6 @@
     </Box>
   </ScrollView>
   <SplitView name="XRefSplit" title="Structure">
-    <ScrollView>
-      <TreeView name="TreeView" PrefWidth="300" />
-    </ScrollView>
+    <TreeView name="TreeView" PrefWidth="300" />
   </SplitView>
 </TabView>

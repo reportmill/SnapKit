@@ -12,6 +12,9 @@ import snap.util.ArrayUtils;
  */
 public class TreeCol <T> extends ListCol <T> {
 
+    // The TreeView
+    TreeView           _tree;
+    
     // The header value
     String             _headerText;
     
@@ -31,7 +34,12 @@ public TreeCol()
 /**
  * Returns the tree.
  */
-public TreeView getTree()  { return (TreeView)getParent(); }
+public TreeView getTree()  { return _tree; }
+
+/**
+ * Sets the tree.
+ */
+protected void setTree(TreeView aTV)  { _tree = aTV; }
 
 /**
  * Returns the header value.

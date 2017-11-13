@@ -33,6 +33,12 @@ public class TreeView <T> extends ParentView implements View.Selectable <T> {
     // Row height
     int                     _rowHeight = 20;
 
+    // The Preferred number of rows
+    int                     _prefRowCount = -1;
+    
+    // The maximum number of rows
+    int                     _maxRowCount = -1;
+
     // The Cell Configure method
     Consumer <ListCell<T>>  _cellConf;
     
@@ -41,6 +47,12 @@ public class TreeView <T> extends ParentView implements View.Selectable <T> {
     
     // Images for collapsed/expanded
     Image                   _clpImg, _expImg;
+    
+    // The SplitView to hold columns
+    SplitView               _split = new SplitView();
+    
+    // The ScrollView to hold SplitView+Columns
+    ScrollView              _scroll = new ScrollView(_split);
     
     // Constants for TreeView
     public static final String ShowRoot_Prop = "ShowRoot";
@@ -51,10 +63,27 @@ public class TreeView <T> extends ParentView implements View.Selectable <T> {
  */
 public TreeView()
 {
+    // Enable Action event for selection change
     enableEvents(Action);
-    TreeCol treeCol = new TreeCol();
-    addChild(treeCol);
     setFocusable(true); setFocusWhenPressed(true);
+    
+    // Configure Columns SplitView and ScrollView and add
+    _split.setBorder(null); _split.setGrowWidth(true);
+    setBorder(_scroll.getBorder()); _scroll.setBorder(null);
+    addChild(_scroll);
+    
+    // Set main scroller to sync HeaderScroller
+    //Scroller scroller = _scroll.getScroller();
+    //scroller.addPropChangeListener(pce -> getHeaderScroller().setScrollH(scroller.getScrollH()), Scroller.ScrollH_Prop);
+    
+    // Whenever one split needs layout, propogate to other
+    //SplitView hsplit = getHeaderSplitView();
+    //_split.addPropChangeListener(pc -> hsplit.relayout(), NeedsLayout_Prop);
+    //hsplit.addPropChangeListener(pc -> _split.relayout(), NeedsLayout_Prop);
+    
+    // Create/add first column
+    TreeCol treeCol = new TreeCol();
+    addCol(treeCol);
 }
 
 /**
@@ -99,6 +128,26 @@ public void setRowHeight(int aValue)
 }
 
 /**
+ * Returns the preferred number of rows.
+ */
+public int getPrefRowCount()  { return _prefRowCount; }
+
+/**
+ * Sets the preferred number of rows.
+ */
+public void setPrefRowCount(int aValue)  { _prefRowCount = aValue; relayoutParent(); }
+
+/**
+ * Returns the maximum number of rows.
+ */
+public int getMaxRowCount()  { return _maxRowCount; }
+
+/**
+ * Sets the maximum number of rows.
+ */
+public void setMaxRowCount(int aValue)  { _maxRowCount = aValue; relayoutParent(); }
+
+/**
  * Called to set method for rendering.
  */
 public Consumer<ListCell<T>> getCellConfigure()  { return _cellConf; }
@@ -111,17 +160,17 @@ public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
 /**
  * Returns the number of columns.
  */
-public int getColCount()  { return getChildCount(); }
+public int getColCount()  { return _split.getItemCount(); }
 
 /**
  * Returns the column at given index.
  */
-public TreeCol <T> getCol(int anIndex)  { return (TreeCol)getChild(anIndex); }
+public TreeCol <T> getCol(int anIndex)  { return (TreeCol)_split.getItem(anIndex); }
 
 /**
  * Returns the column at given index.
  */
-public TreeCol<T>[] getCols()  { return Arrays.copyOf(getChildren(), getChildCount(), TreeCol[].class); }
+public TreeCol<T>[] getCols()  { return _split.getItems().toArray(new TreeCol[getColCount()]); }
 
 /**
  * Adds a column.
@@ -131,7 +180,11 @@ public void addCol(TreeCol aCol)  { addCol(aCol,getColCount()); }
 /**
  * Adds a column at index.
  */
-public void addCol(TreeCol aCol, int anIndex)  { addChild(aCol, anIndex); }
+public void addCol(TreeCol aCol, int anIndex)
+{
+    aCol.setTree(this);
+    _split.addItem(aCol, anIndex);
+}
 
 /**
  * Adds columns.
@@ -462,26 +515,38 @@ public void setHeight(double aValue)
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)
-{
-    double pw = 0;
-    for(TreeCol tcol : getCols()) pw += tcol.getPrefWidth();
-    return pw;
-}
+protected double getPrefWidthImpl(double aH)  { return ViewLayout.getPrefWidthBasic(this, _scroll, aH); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return getRowHeight()*getItems().size(); }
+protected double getPrefHeightImpl(double aW)
+{
+    // If PrefRowCount set, return PrefRowCount*RowHeight
+    if(getPrefRowCount()>0)
+        return getPrefRowCount()*getRowHeight() + getInsetsAll().getHeight();
+    
+    // Return pref height of Scroll
+    return ViewLayout.getPrefHeightBasic(this, _scroll, aW);
+}
 
 /**
- * Override to layout children with VBox layout.
+ * Returns the maximum height.
  */
-protected void layoutImpl()
+public double getMaxHeight()
 {
-    HBox.HBoxLayout layout = new HBox.HBoxLayout(this); layout.setFillHeight(true);
-    layout.layoutChildren();
+    // If MaxRowCount set, return MaxRowCount*RowHeight
+    if(getMaxRowCount()>0)
+        return getMaxRowCount()*getRowHeight() + getInsetsAll().getHeight();
+    
+    // Return normal version
+    return super.getMaxHeight();
 }
+
+/**
+ * Override to layout ScrollView.
+ */
+protected void layoutImpl()  { ViewLayout.layoutBasic(this, _scroll); }
 
 /**
  * Returns a mapped property name.
