@@ -180,7 +180,6 @@ public class View implements XMLArchiver.Archivable, PropChangeListener, DeepCha
     public static final String Showing_Prop = "Showing";
     public static final String Text_Prop = "Text";
     public static final String ToolTip_Prop = "ToolTip";
-    public static final String ItemKey_Prop = "ItemKey";
     
     // Convenience for common events
     public static final ViewEvent.Type Action = ViewEvent.Type.Action;
@@ -1571,21 +1570,6 @@ public void setToolTipEnabled(boolean aValue)  { firePropChange("ToolTipEnabled"
 public String getToolTip(ViewEvent anEvent)  { return null; }
 
 /**
- * Returns the ItemKey.
- */
-public String getItemKey()  { return (String)getProp("ItemKey"); }
-
-/**
- * Sets the ItemKey.
- */
-public void setItemKey(String aKey)
-{
-    String old = getItemKey(); if(SnapUtils.equals(aKey,old)) return;
-    setProp("ItemKey", aKey);
-    firePropChange(ItemKey_Prop, old, aKey);
-}
-
-/**
  * Returns the substitution class name.
  */
 public String getRealClassName()  { return _realClassName; }
@@ -2136,9 +2120,8 @@ public XMLElement toXML(XMLArchiver anArchiver)
     for(Binding b : getBindings())
         e.add(b.toXML(anArchiver));
 
-    // Archive ToolTip, ItemKey
+    // Archive ToolTip
     if(getToolTip()!=null) e.add(ToolTip_Prop, getToolTip());
-    if(getItemKey()!=null) e.add(ItemKey_Prop, getItemKey());
     
     // Archive RealClassName
     cname = getRealClassName(); if(cname!=null && cname.length()>0) e.add("Class", cname);
@@ -2242,10 +2225,9 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     for(int i=anElement.indexOf("binding");i>=0;i=anElement.indexOf("binding",i+1)) { XMLElement bx=anElement.get(i);
         addBinding(new Binding().fromXML(anArchiver, bx)); }
 
-    // Unarchive ToolTip, ItemKey
+    // Unarchive ToolTip
     if(anElement.hasAttribute("ttip")) setToolTip(anElement.getAttributeValue("ttip"));
     if(anElement.hasAttribute(ToolTip_Prop)) setToolTip(anElement.getAttributeValue(ToolTip_Prop));
-    if(anElement.hasAttribute(ItemKey_Prop)) setItemKey(anElement.getAttributeValue(ItemKey_Prop));
     
     // Unarchive class property for subclass substitution, if available
     if(anElement.hasAttribute("Class"))

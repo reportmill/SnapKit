@@ -38,6 +38,9 @@ public class ListCol <T> extends ParentView implements View.Selectable <T> {
     // The Cell Configure method
     Consumer <ListCell<T>>  _cellConf;
     
+    // A simple alternate way to set ListCol item text using Key
+    String                _itemKey;
+    
     // The paint for alternating cells
     Paint                 _altPaint = ALTERNATE_GRAY;
     
@@ -76,6 +79,7 @@ public class ListCol <T> extends ParentView implements View.Selectable <T> {
     
     // Constants for properties
     public static final String CellPadding_Prop = "CellPadding";
+    public static final String ItemKey_Prop = "ItemKey";
 
 /**
  * Creates a new ListCol.
@@ -277,6 +281,21 @@ public Consumer<ListCell<T>> getCellConfigure()  { return _cellConf; }
  * Sets method to configure list cells.
  */
 public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
+
+/**
+ * Returns the ItemKey (a simple alternate way to set ListCol item text using KeyChain).
+ */
+public String getItemKey()  { return _itemKey; }
+
+/**
+ * Sets the ItemKey (a simple alternate way to set ListCol item text using KeyChain).
+ */
+public void setItemKey(String aKey)
+{
+    String old = _itemKey; _itemKey = aKey;
+    setItemTextFunction(itm -> SnapUtils.stringValue(KeyChain.getValue(itm, _itemKey)));
+    firePropChange(ItemKey_Prop, old, _itemKey);
+}
 
 /**
  * Returns the paint for alternating cells.
@@ -485,10 +504,9 @@ protected void configureCell(ListCell <T> aCell)
     // Get item text and set
     T item = aCell.getItem();
     
-    // Get item text (don't use getText() because it can call into here)
+    // Get item text (don't use getText(item) because it can call into here)
     String text = null;
     if(_itemTextFunc!=null) text = item!=null? _itemTextFunc.apply(item) : null;
-    else if(getItemKey()!=null) text = SnapUtils.stringValue(KeyChain.getValue(item, getItemKey()));
     else text = item!=null? item.toString() : null;
 
     // Set text
@@ -519,12 +537,6 @@ public String getText(T anItem)
     String text;
     if(_itemTextFunc!=null)
         text = anItem!=null? _itemTextFunc.apply(anItem) : null;
-    
-    // If ItemKey, apply
-    else if(getItemKey()!=null) {
-        Object obj = KeyChain.getValue(anItem, getItemKey());
-        text = obj!=null? obj.toString() : null;
-    }
     
     // If CellConfigure, create cell and call
     else if(getCellConfigure()!=null) { Consumer cconf = getCellConfigure();
@@ -702,6 +714,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
+    // Archive ItemKey
+    if(getItemKey()!=null) e.add(ItemKey_Prop, getItemKey());
+    
     // Archive selection mode
     //if(getSelectionMode()==SELECT_SINGLE) e.add("selection", "single-interval");
     //else if(getSelectionMode()==SELECT_MULTIPLE) e.add("selection", "multiple-interval");
@@ -728,6 +743,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
+    
+    // Unarchive ItemKey
+    if(anElement.hasAttribute(ItemKey_Prop)) setItemKey(anElement.getAttributeValue(ItemKey_Prop));
     
     // Set selectionMode
     //String selection = anElement.getAttributeValue("selection", "single");
