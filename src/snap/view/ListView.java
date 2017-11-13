@@ -369,6 +369,15 @@ protected void updateCellAt(int anIndex)
 public ListCell <T> getCell(int anIndex)  { return (ListCell)getChild(anIndex); }
 
 /**
+ * Returns the cell at given index.
+ */
+public ListCell <T> getCellForRow(int anIndex)
+{
+    int cindex = anIndex - _cellStart;
+    return cindex>=0 && cindex<getChildCount()? (ListCell)getChild(cindex) : null;
+}
+
+/**
  * Returns the bounds for item at index.
  */
 public Rect getItemBounds(int anIndex)
@@ -598,7 +607,7 @@ protected void processEvent(ViewEvent anEvent)
     // Handle MousePress
     if(anEvent.isMousePress()) {
         int index = getRowAt(anEvent.getY());
-        ListCell cell = index>=0? getCell(index) : null;
+        ListCell cell = getCellForRow(index);
         if(cell!=null && cell.isEnabled()) {
             setSelectedIndex(index);
             if(!isFireActionOnRelease())
@@ -610,7 +619,7 @@ protected void processEvent(ViewEvent anEvent)
     if(anEvent.isMouseRelease()) {
         if(isFireActionOnRelease()) {
             int index = getSelectedIndex();
-            ListCell cell = index>=0? getCell(index) : null;
+            ListCell cell = getCellForRow(index);
             if(cell!=null && cell.isEnabled())
                 fireActionEvent();
         }
