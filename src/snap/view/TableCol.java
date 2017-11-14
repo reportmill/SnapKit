@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * Represents a Table Column.
  */
-public class TableCol <T> extends ListCol <T> {
+public class TableCol <T> extends ListArea <T> {
 
     // The header value
     Label              _header = new Label();

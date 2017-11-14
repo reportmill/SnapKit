@@ -8,9 +8,9 @@ import snap.gfx.*;
 import snap.util.ArrayUtils;
 
 /**
- * A ListCol subclass that represents a column in TreeView.
+ * A ListArea subclass that represents a column in TreeView.
  */
-public class TreeCol <T> extends ListCol <T> {
+public class TreeCol <T> extends ListArea <T> {
 
     // The TreeView
     TreeView           _tree;

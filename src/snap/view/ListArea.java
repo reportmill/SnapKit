@@ -9,13 +9,13 @@ import snap.gfx.*;
 import snap.util.*;
 
 /**
- * A View to show a list of items and act as column of ListView.
+ * A View to show a list of items and act as basis of ListView.
  * 
  * To display custom text in list, simply call list.setItemTextFunction(itm -> itm.getName());
  * 
  * To custom configure list cell, simply call list.setCellConfigure(cell -> cell.setImage(img));
  */
-public class ListCol <T> extends ParentView implements View.Selectable <T> {
+public class ListArea <T> extends ParentView implements View.Selectable <T> {
 
     // The items
     List <T>              _items = new ArrayList();
@@ -38,7 +38,7 @@ public class ListCol <T> extends ParentView implements View.Selectable <T> {
     // The Cell Configure method
     Consumer <ListCell<T>>  _cellConf;
     
-    // A simple alternate way to set ListCol item text using Key
+    // A simple alternate way to set ListArea item text using Key
     String                _itemKey;
     
     // The paint for alternating cells
@@ -65,8 +65,8 @@ public class ListCol <T> extends ParentView implements View.Selectable <T> {
     // Value of cell width/height
     double                _sampleWidth = -1, _sampleHeight = -1;
     
-    // This allows this ListCol to query a ListCol for configureCell
-    ListCol <T>          _proxy;
+    // This allows this ListArea to query a ListArea for configureCell
+    ListArea <T>          _proxy;
     
     // Shared CellPadding default
     static Insets         _cellPadDefault = new Insets(2,2,2,4);
@@ -79,9 +79,9 @@ public class ListCol <T> extends ParentView implements View.Selectable <T> {
     public static final String ItemKey_Prop = "ItemKey";
 
 /**
- * Creates a new ListCol.
+ * Creates a new ListArea.
  */
-public ListCol()
+public ListArea()
 {
     enableEvents(MousePress, MouseRelease, KeyPress, Action);
     setFocusable(true); setFocusWhenPressed(true);
@@ -279,12 +279,12 @@ public Consumer<ListCell<T>> getCellConfigure()  { return _cellConf; }
 public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
 
 /**
- * Returns the ItemKey (a simple alternate way to set ListCol item text using KeyChain).
+ * Returns the ItemKey (a simple alternate way to set ListArea item text using KeyChain).
  */
 public String getItemKey()  { return _itemKey; }
 
 /**
- * Sets the ItemKey (a simple alternate way to set ListCol item text using KeyChain).
+ * Sets the ItemKey (a simple alternate way to set ListArea item text using KeyChain).
  */
 public void setItemKey(String aKey)
 {
@@ -519,7 +519,7 @@ protected void configureCell(ListCell <T> aCell)
     Consumer cconf = getCellConfigure();
     if(cconf!=null) cconf.accept(aCell);
     
-    // If Proxy (ListCol) forward on
+    // If Proxy (ListArea) forward on
     if(_proxy!=null)
         _proxy.configureCell(aCell);
 }
@@ -576,7 +576,7 @@ public void setHeight(double aValue)  { if(aValue==getHeight()) return; super.se
 
 /**
  * Override to see if paint exposes missing cells. If so, request layout.
- * Should only happen under rare circumstances, like when a Scroller containing ListCol grows.
+ * Should only happen under rare circumstances, like when a Scroller containing ListArea grows.
  */
 public void paintAll(Painter aPntr)
 {
@@ -670,7 +670,7 @@ public String getText()
 }
 
 /**
- * Override to set the given text in this ListCol by matching it to existing item text.
+ * Override to set the given text in this ListArea by matching it to existing item text.
  */
 public void setText(String aString)
 {
