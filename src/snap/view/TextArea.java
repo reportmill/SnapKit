@@ -1256,10 +1256,6 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
  */
 public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
-    // Hack for non editable uses
-    if(anElement.hasAttribute("Editable") && !anElement.getAttributeBoolValue("Editable"))
-        setFill(null);
-
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
