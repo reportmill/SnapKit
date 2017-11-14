@@ -62,11 +62,13 @@ protected View createUI()
     // Disable all button focus
     for(View node : _toolBarPane.getChildren()) if(node instanceof ButtonBase) node.setFocusable(false);
     
-    // Create TextArea and add to ScrollView (make sure it is always as big as ScrollView ViewportBounds
+    // Create/config TextArea
     TextArea text = createTextArea();
-    text.setName("TextArea"); text.setGrowWidth(true); text.setGrowHeight(true);
-    ScrollView spane = new ScrollView(text); spane.setName("ScrollView");
+    text.setFill(Color.WHITE); text.setEditable(true); text.setName("TextArea");
     setFirstFocus(text);
+    
+    // Wrap TextArea in ScrollPane
+    ScrollView scroll = new ScrollView(text); scroll.setName("ScrollView");
     
     // Create SelectionText Label in BottomBox
     Label slabel = new Label(); slabel.setName("SelectionText"); slabel.setFont(new Font("Arial", 11));
@@ -75,7 +77,7 @@ protected View createUI()
     
     // Create BorderView and add ToolBar, text and bottom box
     BorderView pane = new BorderView();
-    pane.setTop(_toolBarPane); pane.setCenter(spane); pane.setBottom(bbox);
+    pane.setTop(_toolBarPane); pane.setCenter(scroll); pane.setBottom(bbox);
     return pane;
 }
 
