@@ -6,7 +6,7 @@ import snap.util.MathUtils;
 import snap.util.StringUtils;
 
 /**
- * A custom class.
+ * A Shape subclass to form the base class for generic rectangular shapes (Rect, Oval, Arc).
  */
 public abstract class RectBase extends Shape implements Cloneable {
 

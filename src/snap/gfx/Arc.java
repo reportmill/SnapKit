@@ -5,7 +5,7 @@ package snap.gfx;
 import snap.util.MathUtils;
 
 /**
- * A custom class.
+ * A Shape subclass to represent a segment of an ellipse with start and sweep angle.
  */
 public class Arc extends RectBase {
     

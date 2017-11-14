@@ -5,7 +5,7 @@ package snap.gfx;
 import snap.util.StringUtils;
 
 /**
- * A custom class.
+ * A class to represent a simple geometric size.
  */
 public class Size implements Cloneable {
     

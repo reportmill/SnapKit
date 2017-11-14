@@ -4,7 +4,7 @@
 package snap.gfx;
 
 /**
- * A custom class.
+ * A class to represent a horizontal position (LEFT, CENTER, RIGHT).
  */
 public enum HPos {
 

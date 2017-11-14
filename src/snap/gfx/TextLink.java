@@ -5,9 +5,9 @@ package snap.gfx;
 import snap.util.SnapUtils;
 
 /**
- * A custom class.
+ * A class to represent a hyperlink in a RichText TextStyle.
  */
-public class TextLink extends Object {
+public class TextLink {
 
     // The link string
     String          _string;

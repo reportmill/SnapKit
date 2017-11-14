@@ -4,7 +4,7 @@
 package snap.gfx;
 
 /**
- * A custom class.
+ * A class to represent a vertical position (TOP, CENTER, BOTTOM).
  */
 public enum VPos {
 

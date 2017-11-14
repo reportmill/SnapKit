@@ -5,7 +5,7 @@ package snap.gfx;
 import snap.util.*;
 
 /**
- * A custom class.
+ * A class to represent a visual effect that can be applied to drawing done in a Painter (like blur, shadow, etc.).
  */
 public class Effect implements XMLArchiver.Archivable {
 

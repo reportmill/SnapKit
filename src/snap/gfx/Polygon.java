@@ -5,7 +5,7 @@ package snap.gfx;
 import java.util.Arrays;
 
 /**
- * A custom class.
+ * A Shape subclass to represent a simple geometric polygon.
  */
 public class Polygon extends Shape {
 

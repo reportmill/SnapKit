@@ -5,7 +5,7 @@ package snap.gfx;
 import snap.util.*;
 
 /**
- * A custom class.
+ * An Effect subclass to render a reflection.
  */
 public class ReflectEffect extends Effect {
 

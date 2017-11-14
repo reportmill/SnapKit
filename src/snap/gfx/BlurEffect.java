@@ -5,7 +5,7 @@ package snap.gfx;
 import snap.util.*;
 
 /**
- * A custom class.
+ * An effect that performs a simple blur.
  */
 public class BlurEffect extends Effect {
 

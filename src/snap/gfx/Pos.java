@@ -6,7 +6,7 @@ import static snap.gfx.HPos.*;
 import static snap.gfx.VPos.*;
 
 /**
- * A custom class.
+ * A class to represent a position on both horizonal and vertical axis (e.g. TOP_LEFT, BOTTOM_RIGHT, etc.).
  */
 public enum Pos {
 

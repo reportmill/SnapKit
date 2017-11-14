@@ -6,7 +6,7 @@ import java.util.Arrays;
 import snap.util.*;
 
 /**
- * A custom class.
+ * A Paint subclass to represent a gradient.
  */
 public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     

@@ -5,7 +5,7 @@ package snap.gfx;
 import snap.util.*;
 
 /**
- * A custom class.
+ * A class to represent a simple geometric point.
  */
 public class Point implements Cloneable {
 

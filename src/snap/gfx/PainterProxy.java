@@ -4,7 +4,7 @@
 package snap.gfx;
 
 /**
- * A custom class.
+ * A Painter subclass that forward on to another.
  */
 public class PainterProxy extends Painter {
 

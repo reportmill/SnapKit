@@ -7,7 +7,7 @@ import snap.util.SnapUtils;
 import snap.util.StringUtils;
 
 /**
- * A custom class.
+ * A Painter subclass that records painting operations for later execution instead of executing them immediately.
  */
 public class PainterDVR extends PainterImpl {
     

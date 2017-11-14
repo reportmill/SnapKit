@@ -4,7 +4,7 @@
 package snap.gfx;
 
 /**
- * A custom class.
+ * A class to represent a mathematical line.
  */
 public class Line extends Segment {
 

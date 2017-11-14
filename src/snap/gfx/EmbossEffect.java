@@ -5,7 +5,7 @@ package snap.gfx;
 import snap.util.*;
 
 /**
- * A custom class.
+ * An Effect subclass that make drawing look slightly 3D with raised or lowered edges.
  */
 public class EmbossEffect extends Effect {
 

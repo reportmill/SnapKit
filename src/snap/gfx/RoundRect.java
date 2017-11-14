@@ -5,7 +5,7 @@ package snap.gfx;
 import snap.util.MathUtils;
 
 /**
- * A custom class.
+ * A Shape subclass to represent a rounded rectangle.
  */
 public class RoundRect extends RectBase {
     

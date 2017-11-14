@@ -4,7 +4,7 @@
 package snap.gfx;
 
 /**
- * A custom class.
+ * A class to represent a fill for a Shape or text (Color, GradientPaint, ImagePaint).
  */
 public interface Paint {
 

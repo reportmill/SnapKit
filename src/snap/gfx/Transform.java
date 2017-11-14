@@ -6,7 +6,7 @@ import snap.util.MathUtils;
 import snap.util.StringUtils;
 
 /**
- * A custom class.
+ * A class to represent a mathematical linear transform.
  */
 public class Transform implements Cloneable {
     

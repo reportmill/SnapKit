@@ -5,7 +5,7 @@ package snap.gfx;
 import snap.util.*;
 
 /**
- * A custom class.
+ * An Effect subclass to represent a drop shadow.
  */
 public class ShadowEffect extends Effect {
 

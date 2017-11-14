@@ -7,7 +7,7 @@ import snap.gfx.PathIter.Seg;
 import snap.util.*;
 
 /**
- * A custom class.
+ * A Shape subclass that represents a general path.
  */
 public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
 
