@@ -61,21 +61,9 @@ public TextBox()  { setText(new RichText()); }
 public TextBox(CharSequence theChars)  { this(); addChars(theChars, null, 0); }
 
 /**
- * Returns the RichText.
+ * Returns the source of current content (URL, File, String path, etc.)
  */
-public RichText getText()  { return _text; }
-
-/**
- * Sets the RichText.
- */
-public void setText(RichText aRichText)
-{
-    if(aRichText==_text) return;
-    if(_text!=null) _text.removePropChangeListener(this);
-    _text = aRichText;
-    _text.addPropChangeListener(this);
-    setNeedsUpdateAll();
-}
+public Object getSource()  { return getText().getSource(); }
 
 /**
  * Loads the text from the given source.
@@ -92,14 +80,26 @@ public void setSource(Object aSource)
 public WebURL getSourceURL()  { return getText().getSourceURL(); }
 
 /**
- * Sets the source URL.
- */
-public void setSourceURL(WebURL aURL)  { setSource(aURL); }
-
-/**
  * Returns the source file.
  */
 public WebFile getSourceFile()  { return getText().getSourceFile(); }
+
+/**
+ * Returns the RichText.
+ */
+public RichText getText()  { return _text; }
+
+/**
+ * Sets the RichText.
+ */
+public void setText(RichText aRichText)
+{
+    if(aRichText==_text) return;
+    if(_text!=null) _text.removePropChangeListener(this);
+    _text = aRichText;
+    _text.addPropChangeListener(this);
+    setNeedsUpdateAll();
+}
 
 /**
  * Returns the X location.

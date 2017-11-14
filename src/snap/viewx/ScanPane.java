@@ -64,7 +64,7 @@ public static class ScanView extends ConsoleView {
     public ScanView()
     {
         setPadding(4,4,4,4);
-        setRich(false);
+        setPlainText(true);
         setFont(new Font("Arial", 16));
         getRichText().setDefaultStyle(new TextStyle(new Font("Arial", 16)));
     }

@@ -31,11 +31,11 @@ public class XRefView extends ViewOwner {
     // The XRef TreeView
     TreeView   _treeView;
     
-    // The XRef TextView
-    TextView   _xtextView;
+    // The XRef TextArea
+    TextArea   _xtextArea;
     
-    // The PDF TextView
-    TextView   _ptextView;
+    // The PDF TextArea
+    TextArea   _ptextArea;
     
 /**
  * Creates a new XRefView.
@@ -85,7 +85,7 @@ public void setPDFFile(PDFFile aFile)
     
     // Set Text
     String str = getFileString();
-    _ptextView.setText(str);
+    _ptextArea.setText(str);
 }
 
 /**
@@ -128,17 +128,17 @@ protected void initUI()
     _treeView.setResolver(new PDFResolver());
     _treeView.getCol(0).setAltPaint(new Color("#F8F8F8"));
     
-    // Create/add XRef TextView
+    // Create/add XRef TextArea
     TextPane xtextPane = new TextPane();
     View xtextPaneUI = xtextPane.getUI(); xtextPaneUI.setGrowWidth(true);
-    _xtextView = xtextPane.getTextView(); _xtextView.setFont(Font.Arial14);
+    _xtextArea = xtextPane.getTextArea(); _xtextArea.setFont(Font.Arial14);
     SplitView xsplit = getView("XRefSplit", SplitView.class);
     xsplit.addItem(xtextPaneUI);
     
-    // Create/add PDFTextView
+    // Create/add PDFTextArea
     TextPane ptextPane = new TextPane();
     View ptextPaneUI = ptextPane.getUI(); ptextPaneUI.setGrowWidth(true);
-    _ptextView = ptextPane.getTextView(); _ptextView.setFont(Font.Arial14);
+    _ptextArea = ptextPane.getTextArea(); _ptextArea.setFont(Font.Arial14);
     tabView.addTab("Text", ptextPaneUI);
     
     // Set PFile
@@ -151,7 +151,7 @@ protected void initUI()
 protected void resetUI()
 {
     Object item = _treeView.getSelectedItem();
-    _xtextView.setText(getEntryText(item));
+    _xtextArea.setText(getEntryText(item));
 }
 
 /**

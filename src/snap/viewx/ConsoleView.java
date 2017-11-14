@@ -3,6 +3,7 @@
  */
 package snap.viewx;
 import java.util.*;
+import snap.gfx.Color;
 import snap.gfx.TextStyle;
 import snap.util.*;
 import snap.view.*;
@@ -10,7 +11,7 @@ import snap.view.*;
 /**
  * A TextView that is a console.
  */
-public class ConsoleView extends TextView {
+public class ConsoleView extends TextArea {
 
     // The location of the start of next input
     int               _inputLoc;
@@ -23,7 +24,16 @@ public class ConsoleView extends TextView {
     
     // The prompt
     String            _prompt;
-    
+
+/**
+ * Creates new ConsoleView.
+ */
+public ConsoleView()
+{
+    setFill(Color.WHITE);
+    setEditable(true);
+}
+
 /**
  * Returns the prompt.
  */

@@ -33,9 +33,9 @@ public void setText(String aString)  { _text = aString; }
 public TextPane getTextPane()  { getUI(); return _textPane; }
 
 /**
- * Returns the TextView.
+ * Returns the TextArea.
  */
-public TextView getTextView()  { getUI(); return _textPane.getTextView(); }
+public TextArea getTextArea()  { getUI(); return _textPane.getTextArea(); }
 
 /**
  * Create UI panel.
@@ -43,8 +43,8 @@ public TextView getTextView()  { getUI(); return _textPane.getTextView(); }
 protected View createUI()
 {
     _textPane = new TFTextPane();
-    _textPane.getTextView().setFont(getDefaultFont());
-    _textPane.getTextView().setText(getText());
+    _textPane.getTextArea().setFont(getDefaultFont());
+    _textPane.getTextArea().setText(getText());
     return _textPane.getUI();
 }
 
@@ -56,7 +56,7 @@ protected void initUI()
     Button btn = new Button("Reload"); btn.setName("ReloadButton"); btn.setPrefSize(80,22);
     btn.setLeanX(HPos.RIGHT); btn.addEventHandler(e -> getBrowser().reloadPage(), Action);
     _textPane.getToolBarPane().addChild(btn);
-    setFirstFocus(getTextView());
+    setFirstFocus(getTextArea());
 }
 
 /**
@@ -93,7 +93,7 @@ private class TFTextPane extends TextPane implements WebFile.Updater {
     }
     
     /** WebFile.Updater method. */
-    public void updateFile(WebFile aFile)  { getFile().setText(getTextView().getText()); }
+    public void updateFile(WebFile aFile)  { getFile().setText(getTextArea().getText()); }
 }
 
 }

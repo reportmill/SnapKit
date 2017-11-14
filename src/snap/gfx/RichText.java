@@ -11,6 +11,9 @@ import snap.web.*;
  */
 public class RichText extends SnapObject implements CharSequence, Cloneable, XMLArchiver.Archivable {
 
+    // The Source of the current content
+    Object               _source;
+    
     // The URL of the file that provided the text
     WebURL               _sourceURL;
 
@@ -27,7 +30,7 @@ public class RichText extends SnapObject implements CharSequence, Cloneable, XML
     TextLineStyle        _defLineStyle = TextLineStyle.DEFAULT;
 
     // Whether text only allows a single font, color, etc.
-    boolean              _singleStyle;
+    boolean              _plainText;
     
     // Whether property change is enabled
     boolean              _propChangeEnabled = true;
@@ -51,26 +54,49 @@ public RichText()  { addLine(createLine(), 0); }
 public RichText(CharSequence theChars)  { this(); addChars(theChars, null, 0); }
 
 /**
+ * Returns the source for the current text content.
+ */
+public Object getSource()  { return _source; }
+
+/**
  * Loads the text from the given source.
  */
 public void setSource(Object aSource)
 {
-    WebURL url = null; try { url = WebURL.getURL(aSource); } catch(Exception e) { } setSourceURL(url);
-    String string = url!=null && url.getFile()!=null? url.getFile().getText() : null;
-    if(string==null) string = StringUtils.getString(SnapUtils.getBytes(aSource));
-    setString(string);
-    setSourceURL(url);
+    // Declare text/url vars
+    String text = null;
+    WebURL url = null;
+    
+    // Try WebFile
+    if(aSource instanceof WebFile) { WebFile file = (WebFile)aSource;
+        _source = aSource;
+        text = file.getText();
+        url = file.getURL();
+    }
+    
+    // Try WebURL
+    else {
+        try { url = WebURL.getURL(aSource); } catch(Exception e) { }
+        if(url!=null) {
+            _source = aSource;
+            text = url.getText();
+        }
+    }
+    
+    // Try to get text directly from source 
+    if(text==null)
+        text = SnapUtils.getText(aSource);
+    
+    
+    // Set text and source
+    setString(text);
+    _sourceURL = url;
 }
 
 /**
  * Returns the source URL.
  */
 public WebURL getSourceURL()  { return _sourceURL; }
-
-/**
- * Sets the source URL.
- */
-public void setSourceURL(WebURL aURL)  { _sourceURL = aURL; }
 
 /**
  * Returns the source file.
@@ -157,14 +183,14 @@ public void setDefaultLineStyle(TextLineStyle aLineStyle)
 }
 
 /**
- * Whether this text only allows a single style. (defaults to false).
+ * Whether this text is really just plain text (has single font, color, etc.). Defaults to false.
  */
-public boolean isSingleStyle()  { return _singleStyle; }
+public boolean isPlainText()  { return _plainText; }
 
 /**
- * Sets whether this text only allows a single style.
+ * Sets whether this text really just plain text (has single font, color, etc.).
  */
-public void setSingleStyle(boolean aValue)  { _singleStyle = aValue; }
+public void setPlainText(boolean aValue)  { _plainText = aValue; }
 
 /**
  * Adds characters with attributes to this text at given index.
@@ -172,7 +198,7 @@ public void setSingleStyle(boolean aValue)  { _singleStyle = aValue; }
 public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
 {
     // If monofont, clear attributes
-    if(isSingleStyle()) theStyle = null; if(theChars==null) return;
+    if(isPlainText()) theStyle = null; if(theChars==null) return;
     
     // Get line for index - if adding at text end and last line and ends with newline, create/add new line
     RichTextLine line = getLineAt(anIndex);
@@ -251,7 +277,7 @@ public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, 
 {
     // Get style and linestyle for add chars
     TextStyle style = theStyle!=null? theStyle : getStyleAt(aStart);
-    TextLineStyle lstyle = theChars!=null && theChars.length()>0 && !isSingleStyle()? getLineStyleAt(aStart) : null;
+    TextLineStyle lstyle = theChars!=null && theChars.length()>0 && !isPlainText()? getLineStyleAt(aStart) : null;
     
     // Remove given range and add chars
     if(anEnd>aStart) removeChars(aStart, anEnd);
@@ -289,7 +315,7 @@ public void replaceText(RichText aRichText, int aStart, int anEnd)
 public void setStyle(TextStyle aStyle, int aStart, int anEnd)
 {
     // If single style, set style on all line runs
-    if(isSingleStyle()) {
+    if(isPlainText()) {
         TextStyle ostyle = getStyleAt(aStart);
         for(RichTextLine line : _lines)
             for(RichTextRun run : line.getRuns())
@@ -329,7 +355,7 @@ public void setStyleValue(Object aValue, int aStart, int aEnd)
 public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
 {
     // If not multifont, set attribute and invalidate everything
-    if(isSingleStyle()) {
+    if(isPlainText()) {
         TextStyle style = getStyleAt(aStart).copyFor(aKey, aValue);
         setStyle(style, aStart, anEnd);
     }
@@ -349,8 +375,8 @@ public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
  */
 public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
 {
-    // Handle SingleStyle
-    if(isSingleStyle()) {
+    // Handle PlainText
+    if(isPlainText()) {
         TextLineStyle ostyle = getLine(0).getLineStyle();
         for(RichTextLine ln : getLines()) ln.setLineStyle(aStyle);
         if(isPropChangeEnabled())
@@ -376,8 +402,8 @@ public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
  */
 public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
 {
-    // Handle SingleStyle
-    if(isSingleStyle()) {
+    // Handle PlainText
+    if(isPlainText()) {
         TextLineStyle ostyle = getLine(0).getLineStyle();
         TextLineStyle nstyle = ostyle.copyFor(aKey, aValue);
         setLineStyle(nstyle, 0, length());

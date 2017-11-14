@@ -2,13 +2,13 @@ package snap.viewx;
 import java.util.*;
 import snap.gfx.*;
 import snap.parse.*;
-import snap.view.TextView;
+import snap.view.TextArea;
 import snap.web.WebURL;
 
 /**
- * A TextView subclass for showing code.
+ * A TextArea subclass for showing code.
  */
-public class CodeView extends TextView {
+public class CodeView extends TextArea {
     
     // Colors
     static Color      _commentColor = new Color("#3F7F5F"); //336633
@@ -20,8 +20,10 @@ public class CodeView extends TextView {
  */
 public CodeView()
 {
-    setRich(true);
-    getRichText().setDefaultStyle(new TextStyle(Font.Arial14));
+    setFill(Color.WHITE);
+    setPlainText(true);
+    setDefaultStyle(new TextStyle(Font.Arial14));
+    setEditable(true);
 }
 
 public void setSource(Object anObj)
@@ -39,7 +41,7 @@ public void setText(String aStr)
 /**
  * Performs coloring.
  */
-public void syntaxColor()
+protected void syntaxColor()
 {
     Tokenizer tokenizer = new Tokenizer();
     tokenizer.setReadSingleLineComments(true);
@@ -65,7 +67,7 @@ public void syntaxColor()
 /**
  * Returns the patterns.
  */
-public String[] getPatterns()
+protected String[] getPatterns()
 {
     List list = new ArrayList();
     String str = WebURL.getURL(getClass(), "JTokens.txt").getText();

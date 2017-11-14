@@ -12,8 +12,8 @@ import snap.web.*;
  */
 public class TextPane extends ViewOwner implements PropChangeListener {
 
-    // The TextView
-    TextView            _textView;
+    // The TextArea
+    TextArea            _textArea;
     
     // The ToolBarPane
     ChildView                _toolBarPane;
@@ -22,14 +22,14 @@ public class TextPane extends ViewOwner implements PropChangeListener {
     boolean             _textModified;
     
 /**
- * Returns the TextView.
+ * Returns the TextArea.
  */
-public TextView getTextView()  { getUI(); return _textView; }
+public TextArea getTextArea()  { getUI(); return _textArea; }
 
 /**
- * Creates the TextView.
+ * Creates the TextArea.
  */
-protected TextView createTextView()  { return new TextView(); }
+protected TextArea createTextArea()  { return new TextArea(); }
 
 /**
  * Returns the toolbar pane.
@@ -62,9 +62,9 @@ protected View createUI()
     // Disable all button focus
     for(View node : _toolBarPane.getChildren()) if(node instanceof ButtonBase) node.setFocusable(false);
     
-    // Create TextView and add to ScrollView (make sure it is always as big as ScrollView ViewportBounds
-    TextView text = createTextView();
-    text.setName("TextView"); text.setGrowWidth(true); text.setGrowHeight(true);
+    // Create TextArea and add to ScrollView (make sure it is always as big as ScrollView ViewportBounds
+    TextArea text = createTextArea();
+    text.setName("TextArea"); text.setGrowWidth(true); text.setGrowHeight(true);
     ScrollView spane = new ScrollView(text); spane.setName("ScrollView");
     setFirstFocus(text);
     
@@ -85,8 +85,8 @@ protected View createUI()
 protected void initUI()
 {
     // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
-    _textView = getView("TextView", TextView.class);
-    _textView.getTextBox().getText().addPropChangeListener(this);
+    _textArea = getView("TextArea", TextArea.class);
+    _textArea.getTextBox().getText().addPropChangeListener(this);
     
     // Configure FindText
     getView("FindText", TextField.class).setPromptText("Find");
@@ -110,10 +110,10 @@ protected void initUI()
 protected void resetUI()
 {    
     // Reset FontSizeText
-    setViewValue("FontSizeText", getTextView().getFont().getSize());
+    setViewValue("FontSizeText", getTextArea().getFont().getSize());
     
     // Reset TextModified
-    setTextModified(getTextView().getUndoer().hasUndos());
+    setTextModified(getTextArea().getUndoer().hasUndos());
 }
 
 /**
@@ -126,40 +126,40 @@ protected void respondUI(ViewEvent anEvent)
     
     // Handle FontSizeText
     if(anEvent.equals("FontSizeText")) { float size = anEvent.getFloatValue(); if(size<1) return;
-        Font font = getTextView().getFont(), font2 = new Font(font.getName(), size);
-        getTextView().setFont(font2);
-        requestFocus(getTextView());
+        Font font = getTextArea().getFont(), font2 = new Font(font.getName(), size);
+        getTextArea().setFont(font2);
+        requestFocus(getTextArea());
     }
     
     // Handle IncreaseFontButton
     if(anEvent.equals("IncreaseFontButton")) {
-        Font font = getTextView().getFont(), font2 = new Font(font.getName(), font.getSize()+1);
-        getTextView().setFont(font2);
+        Font font = getTextArea().getFont(), font2 = new Font(font.getName(), font.getSize()+1);
+        getTextArea().setFont(font2);
     }
     
     // Handle DecreaseFontButton
     if(anEvent.equals("DecreaseFontButton")) {
-        Font font = getTextView().getFont(), font2 = new Font(font.getName(), font.getSize()-1);
-        getTextView().setFont(font2);
+        Font font = getTextArea().getFont(), font2 = new Font(font.getName(), font.getSize()-1);
+        getTextArea().setFont(font2);
     }
     
     // Handle UndoButton
     if(anEvent.equals("UndoButton")) {
-        if(getTextView().getUndoer().hasUndos())
-            getTextView().undo();
+        if(getTextArea().getUndoer().hasUndos())
+            getTextArea().undo();
         else beep();
     }
     
     // Handle RedoButton
     if(anEvent.equals("RedoButton")) {
-        if(getTextView().getUndoer().hasRedos())
-            getTextView().redo();
+        if(getTextArea().getUndoer().hasRedos())
+            getTextArea().redo();
         else beep();
     }
     
     // Handle FindButton
     if(anEvent.equals("FindButton")) {
-        if(!getTextView().getSel().isEmpty()) setViewValue("FindText", getTextView().getSel().getString());
+        if(!getTextArea().getSel().isEmpty()) setViewValue("FindText", getTextArea().getSel().getString());
         getView("FindText", TextField.class).selectAll();
         requestFocus("FindText");
     }
@@ -179,7 +179,7 @@ protected void respondUI(ViewEvent anEvent)
     // Handle EscapeAction
     if(anEvent.equals("EscapeAction")) {
         View t1 = getView("FindText"), t2 = getView("FontSizeText");
-        if(t1.isFocused() || t2.isFocused()) requestFocus(getTextView());
+        if(t1.isFocused() || t2.isFocused()) requestFocus(getTextArea());
     }
 }
 
@@ -189,7 +189,7 @@ protected void respondUI(ViewEvent anEvent)
 public void saveChanges()
 {
     saveChangesImpl(); // Do real version
-    getTextView().getUndoer().reset(); // Reset Undo
+    getTextArea().getUndoer().reset(); // Reset Undo
     setTextModified(false); // Reset TextModified
 }
 
@@ -198,10 +198,10 @@ public void saveChanges()
  */
 protected void saveChangesImpl()
 {
-    WebURL surl = getTextView().getTextBox().getSourceURL();
+    WebURL surl = getTextArea().getTextBox().getSourceURL();
     WebFile file = surl.getFile();
     if(file==null) file = surl.createFile(false);
-    file.setText(getTextView().getTextBox().getString());
+    file.setText(getTextArea().getTextBox().getString());
     try { file.save(); }
     catch(Exception e) { throw new RuntimeException(e); }
 }
@@ -212,9 +212,9 @@ protected void saveChangesImpl()
 public String getSelectionInfo()
 {
     StringBuffer sb = new StringBuffer();
-    TextBoxLine textLine = getTextView().getLineAt(getTextView().getSelStart());
+    TextBoxLine textLine = getTextArea().getLineAt(getTextArea().getSelStart());
     sb.append("Line ").append(textLine.getIndex()+1);
-    sb.append(", Col ").append(getTextView().getSelStart() - textLine.getStart());
+    sb.append(", Col ").append(getTextArea().getSelStart() - textLine.getStart());
     return sb.toString();
 }
 
@@ -227,12 +227,12 @@ public void find(String aString, boolean ignoreCase, boolean isNext)
     setViewValue("FindText", aString);
 
     // Get search string and find in text
-    TextView tview = getTextView();
+    TextArea tarea = getTextArea();
     String string = aString; if(ignoreCase) string = string.toLowerCase();
-    String text = tview.getText(); if(ignoreCase) text = text.toLowerCase();
+    String text = tarea.getText(); if(ignoreCase) text = text.toLowerCase();
     
     // Get index of search
-    int sstart = tview.getSelStart(), send = tview.getSelEnd();
+    int sstart = tarea.getSelStart(), send = tarea.getSelEnd();
     int index = isNext? text.indexOf(string, send) : text.lastIndexOf(string, Math.max(sstart-1,0));
     
     // If index not found, beep and try again from start
@@ -242,7 +242,7 @@ public void find(String aString, boolean ignoreCase, boolean isNext)
     }
     
     // If index found, select text and focus
-    if(index>=0) tview.setSel(index, index + string.length());
+    if(index>=0) tarea.setSel(index, index + string.length());
 }
 
 /**
@@ -250,16 +250,16 @@ public void find(String aString, boolean ignoreCase, boolean isNext)
  */
 public void showLineNumberPanel()
 {
-    TextSel sel = getTextView().getSel();
+    TextSel sel = getTextArea().getSel();
     int lnum = sel.getStartLine().getIndex()+1, start = sel.getStart(), col = start - sel.getStartLine().getStart();
     String msg = StringUtils.format("Enter Line Number:\n(Line %d, Col %d, Char %d)", lnum, col, start);
     DialogBox dbox = new DialogBox("Go to Line"); dbox.setQuestionMessage(msg);
     String lstring = dbox.showInputDialog(getUI(), Integer.toString(lnum));
     int lindex = lstring!=null? SnapUtils.intValue(lstring) -1 : -1;
-    if(lindex<0) lindex = 0; else if(lindex>=getTextView().getLineCount()) lindex = getTextView().getLineCount() -1;
-    TextBoxLine line = lindex>=0 && lindex<getTextView().getLineCount()? getTextView().getLine(lindex) : null;
-    getTextView().setSel(line.getStart(), line.getEnd());
-    requestFocus(getTextView());
+    if(lindex<0) lindex = 0; else if(lindex>=getTextArea().getLineCount()) lindex = getTextArea().getLineCount() -1;
+    TextBoxLine line = lindex>=0 && lindex<getTextArea().getLineCount()? getTextArea().getLine(lindex) : null;
+    getTextArea().setSel(line.getStart(), line.getEnd());
+    requestFocus(getTextArea());
 }
 
 }

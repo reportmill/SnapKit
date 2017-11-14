@@ -19,15 +19,11 @@
     <font name="Arial" size="12" />
   </TextField>
   <Label x="5" y="103" width="420" height="20" text="Please describe how to reproduce this exception:" />
-  <ScrollView x="5" y="120" width="575" height="100" GrowWidth="true">
-    <TextView Name="ScenarioText">
-      <font name="Arial" size="12" />
-    </TextView>
-  </ScrollView>
+  <TextView Name="ScenarioText" x="5" y="120" width="575" height="100" GrowWidth="true">
+    <font name="Arial" size="12" />
+  </TextView>
   <Label x="5" y="227" width="575" height="20" text="Exception Content:" />
-  <ScrollView x="5" y="245" width="575" height="230" GrowWidth="true" GrowHeight="true">
-    <TextView Name="BacktraceText">
-      <font name="Arial" size="12" />
-    </TextView>
-  </ScrollView>
+  <TextView Name="BacktraceText" x="5" y="245" width="575" height="230" GrowWidth="true" GrowHeight="true">
+    <font name="Arial" size="12" />
+  </TextView>
 </SpringView>
