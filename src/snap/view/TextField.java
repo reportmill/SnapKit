@@ -642,8 +642,8 @@ protected void keyPressed(ViewEvent anEvent)
     // Get event info
     int keyCode = anEvent.getKeyCode();
     boolean commandDown = anEvent.isShortcutDown(), controlDown = anEvent.isControlDown();
-    boolean emacsDown = SnapUtils.isWindows? anEvent.isAltDown() : controlDown;
-    boolean shiftDown = anEvent.isShiftDown();
+    boolean shiftDown = anEvent.isShiftDown(), altDown = anEvent.isAltDown();
+    boolean emacsDown = SnapUtils.isWindows? altDown : controlDown;
     setCaretAnim(false);
 
     // Handle command keys
@@ -682,10 +682,8 @@ protected void keyPressed(ViewEvent anEvent)
     
     // Handle supported non-character keys
     else switch(keyCode) {
-        case KeyCode.TAB: if(!getEventAdapter().isEnabled(Action)) { replaceChars("\t"); anEvent.consume(); } break;
-        case KeyCode.ENTER:
-            if(getEventAdapter().isEnabled(Action)) { selectAll(); fireActionEvent(); selectAll(); }
-            else { replaceChars("\n"); anEvent.consume(); } break; // Handle enter
+        case KeyCode.TAB: anEvent.consume(); break;
+        case KeyCode.ENTER: selectAll(); fireActionEvent(); anEvent.consume(); break; // Handle enter
         case KeyCode.LEFT: selectBackward(shiftDown); anEvent.consume(); break; // Handle left arrow
         case KeyCode.RIGHT: selectForward(shiftDown); anEvent.consume(); break; // Handle right arrow
         case KeyCode.HOME: selectLineStart(); break; // Handle home key
@@ -717,6 +715,10 @@ protected void keyTyped(ViewEvent anEvent)
         replaceChars(keyChars);
         hideCursor(); //anEvent.consume();
     }
+    
+    // If alt-TAB or alt-ENTER
+    //if(altDown && anEvent.isEnterKey() || anEvent.isTabKey()) {
+    //    replaceChars(keyChars); hideCursor(); anEvent.consume(); }
 }
 
 /**

@@ -343,11 +343,11 @@ protected void textFieldFocusChanged()
 protected void textFieldKeyPressed(ViewEvent anEvent)
 {
     // Handle UpArrow/DownArrow: send to list
-    if(anEvent.isUpArrow() || anEvent.isDownArrow())
-        getListView().processEvent(anEvent);
+    if(anEvent.isUpArrow())  { getListView().selectUp(); anEvent.consume(); }
+    else if(anEvent.isDownArrow()) { getListView().selectDown(); anEvent.consume(); }
     
     // Handle EscapeKey
-    if(anEvent.isEscapeKey()) {
+    else if(anEvent.isEscapeKey()) {
 
         // If value has changed, reset to focus gained values
         if(!SnapUtils.equals(_text.getText(), _text._focusGainedText)) {
@@ -425,7 +425,6 @@ protected List <T> getItemsForPrefix(String aStr)
     List <T> list = new ArrayList();
     for(T itm : _items) if(StringUtils.startsWithIC(_list.getText(itm), aStr)) list.add(itm);
     return list;
-    //return _items.stream().filter(i -> StringUtils.startsWithIC(_list.getText(i), aStr)).collect(Collectors.toList());
 }
 
 /**
@@ -433,6 +432,8 @@ protected List <T> getItemsForPrefix(String aStr)
  */
 protected void textFieldFiredAction()
 {
+    if(isPopup() && isPopupShowing())
+        getPopupList().hide();
     //getListView().setText(_text.getText());
     fireActionEvent();
 }

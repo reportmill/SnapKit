@@ -15,7 +15,7 @@ import snap.util.*;
  * 
  * To custom configure list cell, simply call list.setCellConfigure(cell -> cell.setImage(img));
  */
-public class ListView <T> extends ListArea <T> implements View.Selectable <T> {
+public class ListView <T> extends ParentView implements View.Selectable <T> {
     
     // The ListArea (real ListView functionality without scroll)
     ListArea <T>          _listArea;
@@ -29,26 +29,28 @@ public class ListView <T> extends ListArea <T> implements View.Selectable <T> {
     // The maximum number of rows
     int                   _maxRowCount = -1;
 
+    // Constants for properties
+    public static final String CellPadding_Prop = "CellPadding";
+    public static final String ItemKey_Prop = "ItemKey";
+
 /**
  * Creates a new ListView.
  */
 public ListView()
 {
-    // Reconfigure this to undo ListView stuff
-    disableEvents(MousePress, MouseRelease, KeyPress);
-    setFocusable(false); setFocusWhenPressed(false);
-    setFill(null);
-
     // Create/configure ListArea
     _listArea = createListArea();
     _listArea.addEventHandler(e -> fireActionEvent(), Action);
     _listArea.addPropChangeListener(pce -> listAreaPropChange(pce));
-    _listArea._proxy = this;
+    _listArea.setCellConfigure(lc -> configureCell(lc));
     
     // Create/configure ScrollView
     _scroll = createScrollView();
     _scroll.setContent(_listArea);
     addChild(_scroll);
+    
+    // Configure this ListView
+    enableEvents(Action);
 }
 
 /**
@@ -157,6 +159,16 @@ public T getSelectedItem()  { return _listArea.getSelectedItem(); }
 public void setSelectedItem(T anItem)  { _listArea.setSelectedItem(anItem); }
 
 /**
+ * Selects up in the list.
+ */
+public void selectUp()  { _listArea.selectUp(); }
+
+/**
+ * Selects up in the list.
+ */
+public void selectDown()  { _listArea.selectDown(); }
+
+/**
  * Returns the row height.
  */
 public double getRowHeight()  { return _listArea.getRowHeight(); }
@@ -190,6 +202,16 @@ public Consumer<ListCell<T>> getCellConfigure()  { return _listArea.getCellConfi
  * Sets method to configure list cells.
  */
 public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _listArea.setCellConfigure(aCC); }
+
+/**
+ * Returns the ItemKey (a simple alternate way to set ListArea item text using KeyChain).
+ */
+public String getItemKey()  { return _listArea.getItemKey(); }
+
+/**
+ * Sets the ItemKey (a simple alternate way to set ListArea item text using KeyChain).
+ */
+public void setItemKey(String aKey)  { _listArea.setItemKey(aKey); }
 
 /**
  * Returns the paint for alternating cells.
@@ -309,6 +331,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
+    // Archive ItemKey
+    if(getItemKey()!=null) e.add(ItemKey_Prop, getItemKey());
+    
     // Return element
     return e;
 }
@@ -320,6 +345,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
+    
+    // Unarchive ItemKey
+    if(anElement.hasAttribute(ItemKey_Prop)) setItemKey(anElement.getAttributeValue(ItemKey_Prop));
 }
 
 }

@@ -196,6 +196,16 @@ public void setSelectedItem(T anItem)
 }
 
 /**
+ * Selects up in the list.
+ */
+public void selectUp()  { if(getSelectedIndex()>0)setSelectedIndex(getSelectedIndex()-1); }
+
+/**
+ * Selects up in the list.
+ */
+public void selectDown()  { if(getSelectedIndex()<getItemCount()-1) setSelectedIndex(getSelectedIndex()+1); }
+
+/**
  * Returns the list items as a single string with items separated by newlines.
  */
 public String getItemsString()
@@ -647,9 +657,8 @@ protected void processEvent(ViewEvent anEvent)
     if(anEvent.isKeyPress()) {
         int kcode = anEvent.getKeyCode();
         switch(kcode) {
-            case KeyCode.UP: if(getSelectedIndex()>0)setSelectedIndex(getSelectedIndex()-1); anEvent.consume(); break;
-            case KeyCode.DOWN: if(getSelectedIndex()<getItemCount()-1)
-                setSelectedIndex(getSelectedIndex()+1); anEvent.consume(); break;
+            case KeyCode.UP: selectUp(); anEvent.consume(); break;
+            case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
             case KeyCode.ENTER: fireActionEvent(); anEvent.consume(); break;
         }
     }
@@ -704,7 +713,6 @@ protected boolean equalsItems(List theItems)
 /**
  * XML archival.
  */
-@Override
 public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic view attributes
@@ -717,16 +725,6 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     //if(getSelectionMode()==SELECT_SINGLE) e.add("selection", "single-interval");
     //else if(getSelectionMode()==SELECT_MULTIPLE) e.add("selection", "multiple-interval");
     
-    // Archive SelectedIndex
-    if(getSelectedIndex()>=0) e.add("SelectedIndex", getSelectedIndex());
-    
-    // Archive Items
-    if(getItems()!=null) for(int i=0, iMax=getItemCount(); i<iMax; i++) {
-        XMLElement item = new XMLElement("item");
-        item.add("text", getItem(i));
-        e.add(item);
-    }
-    
     // Return element
     return e;
 }
@@ -734,7 +732,6 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 /**
  * XML unarchival.
  */
-@Override
 public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Unarchive basic view attributes
@@ -747,17 +744,6 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     //String selection = anElement.getAttributeValue("selection", "single");
     //if(selection.equals("single")) setSelectionMode(SELECT_SINGLE);
     //else if(selection.equals("single-interval")) setSelectionMode(SELECT_INTERVAL); else setSelMode(SELECT_MULTIPLE);
-
-    // Unarchive SelectedIndex
-    if(anElement.hasAttribute("SelectedIndex")) setSelectedIndex(anElement.getAttributeIntValue("SelectedIndex"));
-    
-    // Unarchive items
-    if(anElement.indexOf("item")>=0) {
-        List items = new ArrayList();
-        for(int i=anElement.indexOf("item"); i>=0; i=anElement.indexOf("item", i+1))
-            items.add(anElement.get(i).getAttributeValue("text"));
-        setItems(items);
-    }
 }
 
 }
