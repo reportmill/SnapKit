@@ -67,7 +67,7 @@ public void layoutImpl()  { layout(this, getContent(), null, isFillWidth(), isFi
 /**
  * Performs Box layout for given parent, child and fill width/height.
  */
-public static void layout(View aPar, View aChild, Insets theIns, boolean isFillWidth, boolean isFillHeight)
+public static void layout(ParentView aPar, View aChild, Insets theIns, boolean isFillWidth, boolean isFillHeight)
 {
     // If no child, just return
     if(aChild==null) return;
@@ -90,6 +90,7 @@ public static void layout(View aPar, View aChild, Insets theIns, boolean isFillW
         double sy = isFillHeight || ch>ph? ph/ch : 1;
         if(isFillWidth && isFillHeight) sx = sy = Math.min(sx,sy); // KeepAspect?
         aChild.setScaleX(sx); aChild.setScaleY(sy);
+        System.out.println("Scale: " + sx);
         return;
     }
     
