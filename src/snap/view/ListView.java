@@ -41,7 +41,6 @@ public ListView()
 
     // Create/configure ListArea
     _listArea = createListArea();
-    _listArea.setGrowWidth(true); _listArea.setGrowHeight(true);
     _listArea.addEventHandler(e -> fireActionEvent(), Action);
     _listArea.addPropChangeListener(pce -> listAreaPropChange(pce));
     _listArea._proxy = this;

@@ -40,12 +40,13 @@ public TextView()
 {
     // Create/configure TextArea
     _textArea = createTextArea();
+    _textArea.addEventHandler(e -> fireActionEvent(), Action);
     
     // Create/add ScrollView
     _scroll = new ScrollView(_textArea);
     addChild(_scroll);
     
-    // Make Editable and White by default
+    // Other configuration
     setEditable(true);
     _textArea.setFill(Color.WHITE);
 }
@@ -173,7 +174,12 @@ public boolean isFireActionOnReturn()  { return _textArea.isFireActionOnReturn()
 /**
  * Sets whether text area sends action on return.
  */
-public void setFireActionOnReturn(boolean aValue)  { _textArea.setFireActionOnReturn(aValue); }
+public void setFireActionOnReturn(boolean aValue)
+{
+    _textArea.setFireActionOnReturn(aValue);
+    if(aValue) enableEvents(Action);
+    else getEventAdapter().disableEvents(this, Action);
+}
 
 /**
  * Returns whether text view fires action on focus lost (if text changed).
