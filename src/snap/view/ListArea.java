@@ -65,9 +65,6 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     // Value of cell width/height
     double                _sampleWidth = -1, _sampleHeight = -1;
     
-    // This allows this ListArea to query a ListArea for configureCell
-    ListArea <T>          _proxy;
-    
     // Shared CellPadding default
     static Insets         _cellPadDefault = new Insets(2,2,2,4);
     
@@ -528,10 +525,6 @@ protected void configureCell(ListCell <T> aCell)
     // If cell configure set, call it
     Consumer cconf = getCellConfigure();
     if(cconf!=null) cconf.accept(aCell);
-    
-    // If Proxy (ListArea) forward on
-    if(_proxy!=null)
-        _proxy.configureCell(aCell);
 }
 
 /**
