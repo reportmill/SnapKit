@@ -46,7 +46,7 @@ public double getPrefWidthImpl(double aH)
 {
     // If scaling and value provided, return value by aspect
     if(aH>=0 && (isFillHeight() || aH<getPrefHeight(-1))) return aH*getAspect();
-    return super.getPrefWidth(aH);
+    return super.getPrefWidthImpl(aH);
 }
 
 /**
@@ -56,7 +56,7 @@ public double getPrefHeightImpl(double aW)
 {
     // If scaling and value provided, return value by aspect
     if(aW>=0 && (isFillWidth() || aW<getPrefWidth(-1))) return aW/getAspect();
-    return super.getPrefHeight(aW);
+    return super.getPrefHeightImpl(aW);
 }
 
 /**

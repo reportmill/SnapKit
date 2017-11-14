@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
-import snap.gfx.Insets;
 import snap.view.*;
 
 /**
@@ -65,33 +64,17 @@ public void setTransition(Transition aTrans)  { _transition = aTrans; }
 /**
  * Override to return preferred width of content.
  */
-protected double getPrefWidthImpl(double aH)
-{
-    Insets ins = getInsetsAll();
-    View c = getContent(); double cw = c!=null? c.getPrefWidth() : 0;
-    return ins.left + cw + ins.right;
-}
+protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, getContent(), aH); }
 
 /**
  * Override to return preferred height of content.
  */
-protected double getPrefHeightImpl(double aW)
-{
-    Insets ins = getInsetsAll();
-    View c = getContent(); double ch = c!=null? c.getPrefHeight() : 0;
-    return ins.top + ch + ins.bottom;
-}
+protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(this, getContent(), aW); }
 
 /**
  * Override to layout content.
  */
-protected void layoutImpl()
-{
-    if(_content==null) return;
-    Insets ins = getInsetsAll();
-    double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
-    _content.setBounds(x, y, w, h);
-}
+protected void layoutImpl()  { BoxView.layout(this, getContent(), null, true, true); }
 
 /**
  * A class to perform transitions.
