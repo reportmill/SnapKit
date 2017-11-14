@@ -176,7 +176,7 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     // Iterate over child elements and unarchive shapes
     for(int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
         
-        // Get child class - if RMShape, unarchive and add
+        // Get child class - if MenuItem, unarchive and add
         Class childClass = anArchiver.getClass(childXML.getName());
         if(childClass!=null && MenuItem.class.isAssignableFrom(childClass)) {
             MenuItem mitem = (MenuItem)anArchiver.fromXML(childXML, this);

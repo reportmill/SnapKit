@@ -366,17 +366,17 @@ protected void setFocused(boolean aValue)
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return ViewLayout.getPrefWidthBasic(this, getRootView(), aH); }
+protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, getRootView(), aH); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return ViewLayout.getPrefHeightBasic(this, getRootView(), aW); }
+protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(this, getRootView(), aW); }
 
 /**
  * Layout children.
  */
-protected void layoutImpl()  { ViewLayout.layoutBasic(this, getRootView()); }
+protected void layoutImpl()  { BoxView.layout(this, getRootView(), null, true, true); }
 
 /**
  * Returns an array of all open windows.

@@ -5,7 +5,7 @@ package snap.gfx;
 import java.util.*;
 
 /**
- * A base class for painting RMShapes.
+ * A base class for painting Shapes, Text and Images.
  */
 public abstract class Painter {
     

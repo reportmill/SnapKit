@@ -523,7 +523,7 @@ public void setHeight(double aValue)
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return ViewLayout.getPrefWidthBasic(this, _scroll, aH); }
+protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _scroll, aH); }
 
 /**
  * Returns the preferred height.
@@ -535,7 +535,7 @@ protected double getPrefHeightImpl(double aW)
         return getPrefRowCount()*getRowHeight() + getInsetsAll().getHeight();
     
     // Return pref height of Scroll
-    return ViewLayout.getPrefHeightBasic(this, _scroll, aW);
+    return BoxView.getPrefHeight(this, _scroll, aW);
 }
 
 /**
@@ -554,7 +554,7 @@ public double getMaxHeight()
 /**
  * Override to layout ScrollView.
  */
-protected void layoutImpl()  { ViewLayout.layoutBasic(this, _scroll); }
+protected void layoutImpl()  { BoxView.layout(this, _scroll, null, true, true); }
 
 /**
  * Returns a mapped property name.

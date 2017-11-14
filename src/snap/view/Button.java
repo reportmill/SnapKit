@@ -5,7 +5,7 @@ package snap.view;
 import snap.gfx.*;
 
 /**
- * An RMShape subclass for JButton.
+ * A View subclass that represents a simple Button.
  */
 public class Button extends ButtonBase {
 

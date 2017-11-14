@@ -34,9 +34,6 @@ public class ButtonBase extends ParentView {
     // The button fill
     Paint                   _btnFill;
     
-    // The stack layout that button uses to layout label
-    StackView.StackLayout  _layout = new StackView.StackLayout(this);
-    
     // Constants for properties
     public static final String Image_Prop = "Image";
     public static final String Pressed_Prop = "Pressed";
@@ -263,17 +260,17 @@ public Pos getDefaultAlign()  { return Pos.CENTER; }
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _layout.getPrefWidth(-1); }
+protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, getLabel(), aH); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _layout.getPrefHeight(-1); }
+protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(this, getLabel(), aW); }
 
 /**
  * Override to layout children.
  */
-protected void layoutImpl()  { _layout.layoutChildren(); }
+protected void layoutImpl()  { BoxView.layout(this, getLabel(), null, false, false); }
 
 /**
  * XML archival.

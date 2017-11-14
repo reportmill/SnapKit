@@ -291,7 +291,7 @@ public void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     // Iterate over child elements and unarchive shapes
     for(int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement cxml = anElement.get(i);
         
-        // Get child class - if RMShape, unarchive and add
+        // Get child class - if View, unarchive and add
         Class childClass = anArchiver.getClass(cxml.getName());
         if(childClass!=null && View.class.isAssignableFrom(childClass)) {
             View shape = (View)anArchiver.fromXML(cxml, this);

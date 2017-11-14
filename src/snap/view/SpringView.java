@@ -10,8 +10,11 @@ import snap.util.*;
  */
 public class SpringView extends ChildView {
 
-    // The HBox layout
-    SpringLayout  _layout = new SpringLayout(this);
+    // The last set size
+    double _ow, _oh;
+    
+    // The SpringInfos for children
+    Map <Object,SpringInfo> _sinfos = new HashMap();
     
     // A PropChangeListener to resetSpringInfo when child bounds change outside of layout
     PropChangeListener       _pcl = pce -> childPropChange(pce);
@@ -22,7 +25,7 @@ public class SpringView extends ChildView {
 public void addChild(View aChild, int anIndex)
 {
     super.addChild(aChild, anIndex);
-    _layout.addSpringInfo(aChild);
+    addSpringInfo(aChild);
     aChild.addPropChangeListener(_pcl);
 }
 
@@ -32,7 +35,7 @@ public void addChild(View aChild, int anIndex)
 public View removeChild(int anIndex)
 {
     View child = super.removeChild(anIndex);
-    _layout.removeSpringInfo(child);
+    removeSpringInfo(child);
     child.removePropChangeListener(_pcl);
     return child;
 }
@@ -43,16 +46,75 @@ public View removeChild(int anIndex)
 public void resetSpringInfo(View aChild)
 {
     if(aChild!=null)
-        _layout.addSpringInfo(aChild);
+        addSpringInfo(aChild);
     else for(View v : getChildren())
-        _layout.addSpringInfo(v);
+        addSpringInfo(v);
 }
 
 /**
- * Layout children.
+ * Returns spring info for child.
  */
-protected void layoutImpl()  { _layout.layoutChildren(); }
+protected SpringInfo getSpringInfo(View aChild)  { return _sinfos.get(aChild); }
 
+/**
+ * Adds spring info for child.
+ */
+protected void addSpringInfo(View aChild)
+{
+    double pw = getWidth(), ph = getHeight();
+    double x = aChild.getX(), y = aChild.getY(), w = aChild.getWidth(), h = aChild.getHeight();
+    SpringInfo sinfo = new SpringInfo(x,y,w,h,pw,ph);
+    _sinfos.put(aChild, sinfo); _ow = _oh = 0;
+}
+
+/**
+ * Removes spring info for child.
+ */
+protected void removeSpringInfo(View aChild)  { _sinfos.remove(aChild); _ow = _oh = 0; }
+
+/**
+ * Returns preferred width.
+ */
+protected double getPrefWidthImpl(double aH)  { return getWidth(); }
+
+/**
+ * Returns preferred height.
+ */
+protected double getPrefHeightImpl(double aW)  { return getHeight(); }
+
+/**
+ * Override to perform layout.
+ */
+protected void layoutImpl()
+{
+    View children[] = getChildren();
+    double pw = getWidth(), ph = getHeight(); if(pw==_ow && ph==_oh) return;
+    for(View child : children) layoutChild(child, pw, ph);
+    _ow = pw; _oh = ph;
+}
+
+/**
+ * Returns the child rects for given parent height.
+ */
+protected void layoutChild(View aChild, double newPW, double newPH)
+{
+    SpringInfo sinfo = getSpringInfo(aChild);
+    String asize = aChild.getAutosizing();
+    double oldPW = sinfo.pwidth, oldPH = sinfo.pheight;
+    boolean lms = asize.charAt(0)=='~', ws = asize.charAt(1)=='~', rms = asize.charAt(2)=='~';
+    boolean tms = asize.charAt(4)=='~', hs = asize.charAt(5)=='~', bms = asize.charAt(6)=='~';
+    double x1 = sinfo.x, y1 = sinfo.y, w1 = sinfo.width, h1 = sinfo.height;
+    double sw = (lms? x1 : 0) + (ws? w1 : 0) + (rms? oldPW - (x1 + w1) : 0), dw = newPW - oldPW;
+    double sh = (tms? y1 : 0) + (hs? h1 : 0) + (bms? oldPH - (y1 + h1) : 0), dh = newPH - oldPH;
+    
+    // Calculate new bounds and set
+    double x2 = (!lms || sw==0)? x1 : (x1 + dw*x1/sw);
+    double y2 = (!tms || sh==0)? y1 : (y1 + dh*y1/sh);
+    double w2 = (!ws || sw==0)? w1 : (w1 + dw*w1/sw);
+    double h2 = (!hs || sh==0)? h1 : (h1 + dh*h1/sh);
+    aChild.setBounds(x2,y2,w2,h2);
+}
+    
 /**
  * Called when child property changes.
  */
@@ -74,70 +136,6 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     setPrefSize(getWidth(), getHeight());
 }
 
-/**
- * A Spring layout.
- */
-public static class SpringLayout extends ViewLayout {
-    
-    // The last set size
-    double _ow, _oh;
-    
-    // The SpringInfos for children
-    Map <Object,SpringInfo> _sinfos = new HashMap();
-    
-    /** Creates a new SpringLayout for given parent. */
-    public SpringLayout(ParentView aPar)  { setParent(aPar); }
-    
-    /** Returns spring info for child. */
-    protected SpringInfo getSpringInfo(View aChild)  { return _sinfos.get(aChild); }
-    
-    /** Adds spring info for child. */
-    protected void addSpringInfo(View aChild)
-    {
-        double x = aChild.getX(), y = aChild.getY(), w = aChild.getWidth(), h = aChild.getHeight();
-        SpringInfo sinfo = new SpringInfo(x,y,w,h,_parent.getWidth(),_parent.getHeight());
-        _sinfos.put(aChild, sinfo); _ow = _oh = 0;
-    }
-    
-    /** Removes spring info for child. */
-    protected void removeSpringInfo(View aChild)  { _sinfos.remove(aChild); _ow = _oh = 0; }
-    
-    /** Returns preferred width of layout. */
-    public double getPrefWidth(double aH)  { return _parent.getWidth(); }
-    
-    /** Returns preferred height of layout. */
-    public double getPrefHeight(double aW)  { return _parent.getHeight(); }
-
-    /** Override to perform layout. */
-    public void layoutChildren()
-    {
-        View children[] = getChildren();
-        double pw = _parent.getWidth(), ph = _parent.getHeight(); if(pw==_ow && ph==_oh) return;
-        for(View child : children) layoutChild(child, pw, ph);
-        _ow = pw; _oh = ph;
-    }
-    
-    /** Returns the child rects for given parent height. */
-    protected void layoutChild(View aChild, double newPW, double newPH)
-    {
-        SpringInfo sinfo = getSpringInfo(aChild);
-        String asize = aChild.getAutosizing();
-        double oldPW = sinfo.pwidth, oldPH = sinfo.pheight;
-        boolean lms = asize.charAt(0)=='~', ws = asize.charAt(1)=='~', rms = asize.charAt(2)=='~';
-        boolean tms = asize.charAt(4)=='~', hs = asize.charAt(5)=='~', bms = asize.charAt(6)=='~';
-        double x1 = sinfo.x, y1 = sinfo.y, w1 = sinfo.width, h1 = sinfo.height;
-        double sw = (lms? x1 : 0) + (ws? w1 : 0) + (rms? oldPW - (x1 + w1) : 0), dw = newPW - oldPW;
-        double sh = (tms? y1 : 0) + (hs? h1 : 0) + (bms? oldPH - (y1 + h1) : 0), dh = newPH - oldPH;
-        
-        // Calculate new bounds and set
-        double x2 = (!lms || sw==0)? x1 : (x1 + dw*x1/sw);
-        double y2 = (!tms || sh==0)? y1 : (y1 + dh*y1/sh);
-        double w2 = (!ws || sw==0)? w1 : (w1 + dw*w1/sw);
-        double h2 = (!hs || sh==0)? h1 : (h1 + dh*h1/sh);
-        aChild.setBounds(x2,y2,w2,h2);
-    }
-}
-    
 /**
  * A class to hold info for a spring child.
  */
