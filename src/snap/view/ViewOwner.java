@@ -665,20 +665,10 @@ private void checkKeyActions(ViewEvent anEvent, boolean isFilter)
     
     // If found, send action
     if(name!=null) {
-        if(name.equals(_defaultAction)) runLater(() -> sendEvent(name));
-        else sendEvent(name);
+        sendEvent(name);
         anEvent.consume();
     }
 }
-
-/**
- * Sets the name of the default action to be sent when the ENTER key is pressed in this UI.
- */
-public void setDefaultAction(String aName)
-{
-    _defaultAction = aName;
-    addKeyActionFilter(aName, "ENTER");
-} String _defaultAction;
 
 /**
  * Returns whether current thread is event thread.

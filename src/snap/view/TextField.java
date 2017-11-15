@@ -683,7 +683,7 @@ protected void keyPressed(ViewEvent anEvent)
     // Handle supported non-character keys
     else switch(keyCode) {
         case KeyCode.TAB: anEvent.consume(); break;
-        case KeyCode.ENTER: selectAll(); fireActionEvent(); anEvent.consume(); break; // Handle enter
+        case KeyCode.ENTER: selectAll(); fireActionEvent(); break; // Handle enter
         case KeyCode.LEFT: selectBackward(shiftDown); anEvent.consume(); break; // Handle left arrow
         case KeyCode.RIGHT: selectForward(shiftDown); anEvent.consume(); break; // Handle right arrow
         case KeyCode.HOME: selectLineStart(); break; // Handle home key
