@@ -10,7 +10,7 @@ import snap.web.*;
 /**
  * A panel for editing text files.
  */
-public class TextPane extends ViewOwner implements PropChangeListener {
+public class TextPane extends ViewOwner {
 
     // The TextArea
     TextArea            _textArea;
@@ -45,11 +45,6 @@ public boolean isTextModified()  { return _textModified; }
  * Sets whether text is modified.
  */
 public void setTextModified(boolean aFlag)  { _textModified = aFlag; }
-
-/**
- * Implement to set modified.
- */
-public void propertyChange(PropChange anEvent)  { resetLater(); }
 
 /**
  * Create UI.
@@ -88,7 +83,7 @@ protected void initUI()
 {
     // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
     _textArea = getView("TextArea", TextArea.class);
-    _textArea.getTextBox().getText().addPropChangeListener(this);
+    _textArea.getRichText().addPropChangeListener(pc -> resetLater());
     
     // Configure FindText
     getView("FindText", TextField.class).setPromptText("Find");

@@ -25,7 +25,7 @@ public class TextSel {
  */
 public TextSel(TextBox aTextBox, int aStart, int aEnd)
 {
-    _tbox = aTextBox; _text = _tbox.getText();
+    _tbox = aTextBox; _text = _tbox.getRichText();
     _anchor = aStart; _index = aEnd;
     _start = Math.min(aStart,aEnd); _end = Math.max(aStart,aEnd);
 }
@@ -36,7 +36,7 @@ public TextSel(TextBox aTextBox, int aStart, int aEnd)
 public TextSel(TextBox aTextBox, double x1, double y1, double x2, double y2, boolean isWordSel, boolean isParaSel)
 {
     // Get text
-    _tbox = aTextBox; _text = _tbox.getText();
+    _tbox = aTextBox; _text = _tbox.getRichText();
     
     // Get character index for point 1 & point 2
     int p1Char = _tbox.getCharIndex(x1, y1);

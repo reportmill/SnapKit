@@ -94,9 +94,9 @@ public void setTextBox(TextBox aText)
     if(aText==_tbox) return;
     
     // Set Text and add/remove PropChangeListener
-    if(_tbox!=null) _tbox.getText().removePropChangeListener(_richTextPropLsnr);
+    if(_tbox!=null) _tbox.getRichText().removePropChangeListener(_richTextPropLsnr);
     _tbox = aText;
-    if(_tbox!=null) _tbox.getText().addPropChangeListener(_richTextPropLsnr);
+    if(_tbox!=null) _tbox.getRichText().addPropChangeListener(_richTextPropLsnr);
     
     // Reset selection
     if(getSelStart()!=0 || !isSelEmpty()) setSel(0);
@@ -111,7 +111,7 @@ protected TextBox createTextBox()  { return new TextBox(); }
 /**
  * Returns the rich text.
  */
-public RichText getRichText()  { return getTextBox().getText(); }
+public RichText getRichText()  { return getTextBox().getRichText(); }
 
 /**
  * Returns the source of current content (URL, File, String path, etc.)

@@ -63,31 +63,31 @@ public TextBox(CharSequence theChars)  { this(); addChars(theChars, null, 0); }
 /**
  * Returns the source of current content (URL, File, String path, etc.)
  */
-public Object getSource()  { return getText().getSource(); }
+public Object getSource()  { return getRichText().getSource(); }
 
 /**
  * Loads the text from the given source.
  */
 public void setSource(Object aSource)
 {
-    getText().setSource(aSource);
+    getRichText().setSource(aSource);
     setNeedsUpdateAll();
 }
 
 /**
  * Returns the source URL.
  */
-public WebURL getSourceURL()  { return getText().getSourceURL(); }
+public WebURL getSourceURL()  { return getRichText().getSourceURL(); }
 
 /**
  * Returns the source file.
  */
-public WebFile getSourceFile()  { return getText().getSourceFile(); }
+public WebFile getSourceFile()  { return getRichText().getSourceFile(); }
 
 /**
  * Returns the RichText.
  */
-public RichText getText()  { return _text; }
+public RichText getRichText()  { return _text; }
 
 /**
  * Sets the RichText.
@@ -276,17 +276,17 @@ public void setBoundsPath(Shape aPath)  { _bpath = aPath; }
 /**
  * Returns the number of characters in the text.
  */
-public int length()  { return getText().length(); }
+public int length()  { return getRichText().length(); }
 
 /**
  * Returns the char value at the specified index.
  */
-public char charAt(int anIndex)  { return getText().charAt(anIndex); }
+public char charAt(int anIndex)  { return getRichText().charAt(anIndex); }
 
 /**
  * Returns the string for the text.
  */
-public String getString()  { return getText().getString(); }
+public String getString()  { return getRichText().getString(); }
 
 /**
  * Sets the text to the given string.
@@ -295,7 +295,7 @@ public void setString(String aString)
 {
     String str = aString!=null? aString : "";
     if(str.length()==length() && str.equals(getString())) return;
-    getText().setString(str);
+    getRichText().setString(str);
     setNeedsUpdateAll();
 }
 
@@ -304,20 +304,20 @@ public void setString(String aString)
  */
 public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
 {
-    getText().addChars(theChars, theStyle, anIndex);
+    getRichText().addChars(theChars, theStyle, anIndex);
 }
 
 /**
  * Removes characters in given range.
  */
-public void removeChars(int aStart, int anEnd)  { getText().removeChars(aStart, anEnd); }
+public void removeChars(int aStart, int anEnd)  { getRichText().removeChars(aStart, anEnd); }
 
 /**
  * Replaces chars in given range, with given String, using the given attributes.
  */
 public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
 {
-    getText().replaceChars(theChars, theStyle, aStart, anEnd);
+    getRichText().replaceChars(theChars, theStyle, aStart, anEnd);
 }
 
 /**
@@ -325,7 +325,7 @@ public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, 
  */
 public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
 {
-    getText().setStyleValue(aKey, aValue, aStart, anEnd);
+    getRichText().setStyleValue(aKey, aValue, aStart, anEnd);
 }
 
 /**
@@ -408,7 +408,7 @@ public void propertyChange(PropChange aPCE)
     else if(aPCE instanceof RichText.StyleChange) { RichText.StyleChange sc = (RichText.StyleChange)aPCE;
         textChangedChars(sc.getStart(), sc.getEnd()); }
     else if(aPCE instanceof RichText.LineStyleChange) { RichText.LineStyleChange lsc = (RichText.LineStyleChange)aPCE;
-        RichTextLine rtl = getText().getLine(lsc.getIndex());
+        RichTextLine rtl = getRichText().getLine(lsc.getIndex());
         textChangedChars(rtl.getStart(), rtl.getEnd());
     }
 }
@@ -535,11 +535,11 @@ protected void addLines(int aLineIndex, int aStart, int aEnd)
     int start = Math.max(aStart, getStart()); if(start>length()) return;
     
     // Get RichText start-line-index, end-line-index
-    int startRTL = getText().getLineAt(start).getIndex();
-    int endRTL = getText().getLineAt(aEnd).getIndex();
+    int startRTL = getRichText().getLineAt(start).getIndex();
+    int endRTL = getRichText().getLineAt(aEnd).getIndex();
     
     // Iterate over RichText lines, create TextBox lines and add
-    for(int i=startRTL, lindex=aLineIndex;i<=endRTL;i++) { RichTextLine rtl = getText().getLine(i);
+    for(int i=startRTL, lindex=aLineIndex;i<=endRTL;i++) { RichTextLine rtl = getRichText().getLine(i);
     
         // Get start-char-index for line
         int lstart = Math.max(start-rtl.getStart(),0); if(lstart==rtl.length()) continue;
@@ -554,8 +554,8 @@ protected void addLines(int aLineIndex, int aStart, int aEnd)
     }
     
     // If we added last line and it is empty or ends with newline, add blank line
-    if(endRTL==getText().getLineCount()-1) {
-        RichTextLine rtl = getText().getLine(endRTL);
+    if(endRTL==getRichText().getLineCount()-1) {
+        RichTextLine rtl = getRichText().getLine(endRTL);
         if(rtl.length()==0 || rtl.isLastCharNewline()) {
             TextBoxLine line = createLine(rtl, rtl.length(), getLineCount());
             if(!((isLinked() || _bpath!=null) && line.getMaxY()>getMaxY()))
@@ -693,12 +693,12 @@ public TextBoxToken getTokenAt(int anIndex)
 /**
  * Returns the TextRun that contains the given index.
  */
-public RichTextRun getRunAt(int anIndex)  { return getText().getRunAt(anIndex); }
+public RichTextRun getRunAt(int anIndex)  { return getRichText().getRunAt(anIndex); }
 
 /**
  * Returns the TextStyle for the run at the given character index.
  */
-public TextStyle getStyleAt(int anIndex)  { return getText().getStyleAt(anIndex); }
+public TextStyle getStyleAt(int anIndex)  { return getRichText().getStyleAt(anIndex); }
     
 /**
  * Returns the line for the given y value.
@@ -884,7 +884,7 @@ public void scaleTextToFit()
 public boolean isOutOfRoom()
 {
     int lcount = getLineCount();
-    return lcount>0 && getLine(lcount-1).getMaxY()>=getMaxY() || getEnd()<getText().length();
+    return lcount>0 && getLine(lcount-1).getMaxY()>=getMaxY() || getEnd()<getRichText().length();
 }
 
 /**

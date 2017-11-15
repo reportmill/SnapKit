@@ -310,6 +310,22 @@ public void setText(String aString)  { _listArea.setText(aString); }
 protected void configureCell(ListCell <T> aCell)  { }
 
 /**
+ * Process events.
+ */
+protected void processEvent(ViewEvent anEvent)
+{
+    // Handle KeyPress
+    if(anEvent.isKeyPress()) {
+        int kcode = anEvent.getKeyCode();
+        switch(kcode) {
+            case KeyCode.UP: selectUp(); anEvent.consume(); break;
+            case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
+            case KeyCode.ENTER: _listArea.fireActionEvent(); anEvent.consume(); break;
+        }
+    }
+}
+
+/**
  * Returns a mapped property name.
  */
 public String getValuePropName()  { return getBinding("SelectedIndex")!=null? "SelectedIndex" : "SelectedItem"; }
