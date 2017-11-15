@@ -529,24 +529,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     XMLElement e = super.toXMLView(anArchiver);
     
     // Archive ShowTextField, ShowButton, FilterList
-    if(isShowTextField())
-        e.add("ShowTextField", true);
-    if(isShowButton()!=isPopup())
-        e.add("ShowButton", isShowButton());
-    if(isFilterList())
-        e.add("FilterList", true);
-    
-    // Archive Items
-    List items = getItems();
-    if(items!=null) for(int i=0, iMax=items.size(); i<iMax; i++) {
-        XMLElement item = new XMLElement("item");
-        item.add("text", getItems().get(i).toString());
-        e.add(item);
-    }
-    
-    // Archive SelectedIndex 
-    if(getSelectedIndex()>=0)
-        e.add("SelectedIndex", getSelectedIndex());
+    if(isShowTextField()) e.add("ShowTextField", true);
+    if(isShowButton()!=isPopup()) e.add("ShowButton", isShowButton());
+    if(isFilterList()) e.add("FilterList", true);
     
     // Return element
     return e;
@@ -561,22 +546,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     super.fromXMLView(anArchiver, anElement);
     
     // Unarchive ShowTextField, ShowButton, FilterList
-    if(anElement.hasAttribute("ShowTextField"))
-        setShowTextField(anElement.getAttributeBooleanValue("ShowTextField"));
-    if(anElement.hasAttribute("ShowButton"))
-        setShowButton(anElement.getAttributeBooleanValue("ShowButton"));
-    if(anElement.hasAttribute("FilterList"))
-        setFilterList(anElement.getAttributeBooleanValue("FilterList"));
-
-    // Unarchive items
-    List items = new ArrayList();
-    for(int i=anElement.indexOf("item"); i>=0; i=anElement.indexOf("item", i+1))
-        items.add(anElement.get(i).getAttributeValue("text"));
-    if(items.size()>0) setItems(items);
-    
-    // Unarchive SelectedIndex, ItemKey
-    if(anElement.hasAttribute("SelectedIndex"))
-        setSelectedIndex(anElement.getAttributeIntValue("SelectedIndex"));
+    if(anElement.hasAttribute("ShowTextField")) setShowTextField(anElement.getAttributeBooleanValue("ShowTextField"));
+    if(anElement.hasAttribute("ShowButton")) setShowButton(anElement.getAttributeBooleanValue("ShowButton"));
+    if(anElement.hasAttribute("FilterList")) setFilterList(anElement.getAttributeBooleanValue("FilterList"));
 }
 
 /**
