@@ -350,10 +350,15 @@ public synchronized void paintLater()
     // Round rect and request real repaint
     rect.snap();
     if(_lsnr!=null) rect = _lsnr.rootViewWillPaint(this, rect);
-    getHelper().requestPaint(rect);
     
-    // Clear dirty rects, reset runnable and return
-    _dirtyRects.clear(); _plater = null;
+    // Do repaint (in exception handler so we can reset things on failure)
+    try {
+        _painting = true;
+        getHelper().requestPaint(rect);
+    }
+    
+    // Clear dirty rects, reset runnable, update PaintCount and set Painting false
+    finally { _dirtyRects.clear(); _plater = null; _pc++; _painting = false; }
 }
 
 /**
@@ -361,15 +366,17 @@ public synchronized void paintLater()
  */
 public synchronized void paintViews(Painter aPntr, Rect aRect)
 {
-    _painting = true;
+    // Save painter state, clip to rect, clear background
     aPntr.save(); if(_frames!=null) startTime();
     aPntr.clip(aRect);
     if(getFill()==null) aPntr.clearRect(aRect.x,aRect.y,aRect.width,aRect.height);
+    
+    // Paint views
     if(_debug) paintDebug(this, aPntr, aRect);
     else paintAll(aPntr);
-    aPntr.restore();
-    if(_frames!=null) { stopTime(); if(_pc%20==0) printTime(); }
-    _painting = false; _pc++;
+    
+    // Restore painter state and update frame counts
+    aPntr.restore(); if(_frames!=null) { stopTime(); if(_pc%20==0) printTime(); }
 }
 
 /**
