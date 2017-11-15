@@ -17,19 +17,10 @@ public class TextView extends ParentView {
     // The ScrollView for the TextArea
     ScrollView             _scroll;
     
-    // Whether to send action on return
-    boolean               _fireActionOnReturn;
-
-    // Whether to send action on focus lost (if content changed)
-    boolean               _fireActionOnFocusLost;
-    
-    // The content on focus gained
-    String                _focusGainedText;
-    
     // Constants for properties
     public static final String Editable_Prop = "Editable";
     public static final String WrapText_Prop = "WrapText";
-    public static final String FireActionOnReturn_Prop = "FireActionOnReturn";
+    public static final String FireActionOnEnterKey_Prop = "FireActionOnEnterKey";
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
     public static final String Selection_Prop = "Selection";
 
@@ -40,7 +31,6 @@ public TextView()
 {
     // Create/configure TextArea
     _textArea = createTextArea();
-    _textArea.addEventHandler(e -> fireActionEvent(), Action);
     
     // Create/add ScrollView
     _scroll = new ScrollView(_textArea);
@@ -169,17 +159,20 @@ public void setDefaultLineStyle(TextLineStyle aLineStyle)  { _textArea.setDefaul
 /**
  * Returns whether text view fires action on return.
  */
-public boolean isFireActionOnReturn()  { return _textArea.isFireActionOnReturn(); }
+public boolean isFireActionOnEnterKey()  { return _textArea.isFireActionOnEnterKey(); }
 
 /**
  * Sets whether text area sends action on return.
  */
-public void setFireActionOnReturn(boolean aValue)
+public void setFireActionOnEnterKey(boolean aValue)
 {
-    _textArea.setFireActionOnReturn(aValue);
-    if(aValue) enableEvents(Action);
-    else getEventAdapter().disableEvents(this, Action);
+    _textArea.setFireActionOnEnterKey(aValue);
+    if(aValue) { enableEvents(Action); _textArea.addEventHandler(_actionEvtLsnr, Action); }
+    else { getEventAdapter().disableEvents(this, Action); _textArea.removeEventHandler(_actionEvtLsnr); }
 }
+
+// Listener to propogate Action from TextArea to TextView
+private EventListener _actionEvtLsnr = e -> fireActionEvent();
 
 /**
  * Returns whether text view fires action on focus lost (if text changed).
@@ -496,8 +489,8 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Otherwise, archive text string
     else if(getText()!=null && getText().length()>0) e.add("text", getText());
     
-    // Archive FireActionOnReturn, FireActionOnFocusLost
-    if(isFireActionOnReturn()) e.add(FireActionOnReturn_Prop, true);
+    // Archive FireActionOnEnterKey, FireActionOnFocusLost
+    if(isFireActionOnEnterKey()) e.add(FireActionOnEnterKey_Prop, true);
     if(isFireActionOnFocusLost()) e.add(FireActionOnFocusLost_Prop, true);
     return e;
 }
@@ -543,9 +536,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
             setText(str);
     }
     
-    // Unarchive FireActionOnReturn, FireActionOnFocusLost
-    if(anElement.hasAttribute(FireActionOnReturn_Prop))
-        setFireActionOnReturn(anElement.getAttributeBoolValue(FireActionOnReturn_Prop));
+    // Unarchive FireActionOnEnterKey, FireActionOnFocusLost
+    if(anElement.hasAttribute(FireActionOnEnterKey_Prop))
+        setFireActionOnEnterKey(anElement.getAttributeBoolValue(FireActionOnEnterKey_Prop));
     if(anElement.hasAttribute(FireActionOnFocusLost_Prop))
         setFireActionOnFocusLost(anElement.getAttributeBoolValue(FireActionOnFocusLost_Prop));
 }

@@ -50,8 +50,8 @@ public class TextArea extends ParentView {
     // Whether to show text insertion point caret
     boolean               _showCaret;
     
-    // Whether to send action on return
-    boolean               _fireActionOnReturn;
+    // Whether to send action on enter key press
+    boolean               _fireActionOnEnterKey;
 
     // Whether to send action on focus lost (if content changed)
     boolean               _fireActionOnFocusLost;
@@ -62,7 +62,7 @@ public class TextArea extends ParentView {
     // Constants for properties
     public static final String Editable_Prop = "Editable";
     public static final String WrapText_Prop = "WrapText";
-    public static final String FireActionOnReturn_Prop = "FireActionOnReturn";
+    public static final String FireActionOnEnterKey_Prop = "FireActionOnEnterKey";
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
     public static final String Selection_Prop = "Selection";
 
@@ -241,19 +241,19 @@ public TextLineStyle getDefaultLineStyle()  { return getRichText().getDefaultLin
 public void setDefaultLineStyle(TextLineStyle aLineStyle)  { getRichText().setDefaultLineStyle(aLineStyle); }
 
 /**
- * Returns whether text view fires action on return.
+ * Returns whether text view fires action on enter key press.
  */
-public boolean isFireActionOnReturn()  { return _fireActionOnReturn; }
+public boolean isFireActionOnEnterKey()  { return _fireActionOnEnterKey; }
 
 /**
- * Sets whether text area sends action on return.
+ * Sets whether text area sends action on enter key press.
  */
-public void setFireActionOnReturn(boolean aValue)
+public void setFireActionOnEnterKey(boolean aValue)
 {
-    if(aValue==_fireActionOnReturn) return;
+    if(aValue==_fireActionOnEnterKey) return;
     if(aValue) enableEvents(Action);
     else getEventAdapter().disableEvents(this, Action);
-    firePropChange(FireActionOnReturn_Prop, _fireActionOnReturn, _fireActionOnReturn = aValue);
+    firePropChange(FireActionOnEnterKey_Prop, _fireActionOnEnterKey, _fireActionOnEnterKey = aValue);
 }
 
 /**
@@ -864,9 +864,9 @@ protected void keyPressed(ViewEvent anEvent)
     
     // Handle supported non-character keys
     else switch(keyCode) {
-        case KeyCode.TAB: if(!getEventAdapter().isEnabled(Action)) { replaceChars("\t"); anEvent.consume(); } break;
+        case KeyCode.TAB: replaceChars("\t"); anEvent.consume(); break;
         case KeyCode.ENTER:
-            if(getEventAdapter().isEnabled(Action)) { selectAll(); fireActionEvent(); }
+            if(isFireActionOnEnterKey()) { selectAll(); fireActionEvent(); }
             else { replaceChars("\n"); anEvent.consume(); } break; // Handle enter
         case KeyCode.LEFT: selectBackward(shiftDown); anEvent.consume(); break; // Handle left arrow
         case KeyCode.RIGHT: selectForward(shiftDown); anEvent.consume(); break; // Handle right arrow
@@ -1245,8 +1245,8 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Otherwise, archive text string
     else if(getText()!=null && getText().length()>0) e.add("text", getText());
     
-    // Archive FireActionOnReturn, FireActionOnFocusLost
-    if(isFireActionOnReturn()) e.add(FireActionOnReturn_Prop, true);
+    // Archive FireActionOnEnterKey, FireActionOnFocusLost
+    if(isFireActionOnEnterKey()) e.add(FireActionOnEnterKey_Prop, true);
     if(isFireActionOnFocusLost()) e.add(FireActionOnFocusLost_Prop, true);
     return e;
 }
@@ -1292,9 +1292,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
             setText(str);
     }
     
-    // Unarchive FireActionOnReturn, FireActionOnFocusLost
-    if(anElement.hasAttribute(FireActionOnReturn_Prop))
-        setFireActionOnReturn(anElement.getAttributeBoolValue(FireActionOnReturn_Prop, true));
+    // Unarchive FireActionOnEnterKey, FireActionOnFocusLost
+    if(anElement.hasAttribute(FireActionOnEnterKey_Prop))
+        setFireActionOnEnterKey(anElement.getAttributeBoolValue(FireActionOnEnterKey_Prop, true));
     if(anElement.hasAttribute(FireActionOnFocusLost_Prop))
         setFireActionOnFocusLost(anElement.getAttributeBoolValue(FireActionOnFocusLost_Prop, true));
 }
