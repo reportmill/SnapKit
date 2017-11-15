@@ -12,10 +12,10 @@
   <Button Name="DecreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Decrease Font Size" image="Font_Decrease.png" ShowBorder="false" />
   <Separator PrefHeight="18" Vertical="true" />
   <Button Name="UndoButton" PrefWidth="22" PrefHeight="22" ToolTip="Undo" image="Edit_Undo.png" ShowBorder="false">
-    <binding aspect="Enabled" key="TextView.Undoer.hasUndos" />
+    <binding aspect="Enabled" key="TextArea.Undoer.hasUndos" />
   </Button>
   <Button Name="RedoButton" PrefWidth="22" PrefHeight="22" ToolTip="Redo" image="Edit_Redo.png" ShowBorder="false">
-    <binding aspect="Enabled" key="TextView.Undoer.hasRedos" />
+    <binding aspect="Enabled" key="TextArea.Undoer.hasRedos" />
   </Button>
   <Separator PrefHeight="18" Vertical="true" />
   <TextField Name="FindText" PrefWidth="172" PrefHeight="22" />
