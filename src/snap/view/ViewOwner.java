@@ -724,7 +724,7 @@ public Object getModelValue(String aKey)
  */
 public void setModelValue(String aKey, Object aValue)
 {
-    try { KeyChain.setValueSafe(this, aKey, aValue); }
+    try { KeyChain.setValue(this, aKey, aValue); }
     catch(Exception e) { KeyChain.setValueSafe(_modelValues, aKey, aValue); }
 }
 

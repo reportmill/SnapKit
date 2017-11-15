@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * This class evaluates a string expression on a given object: RMKeyChain.getValue(object, expression).
+ * This class evaluates a string expression on a given object: KeyChain.getValue(object, expression).
  */
 public class KeyChain {
     
@@ -40,7 +40,7 @@ public interface Get {
 }
 
 /**
- * Returns a keyChain for aSource (should be a String or existing RMKeyChain).
+ * Returns a keyChain for aSource (should be a String or existing KeyChain).
  */
 public static KeyChain getKeyChain(Object aSource)
 {
@@ -60,7 +60,7 @@ public static KeyChain getKeyChain(Object aSource)
 }
 
 /**
- * Returns a keyChain for aSource (should be a String or existing RMKeyChain).
+ * Returns a keyChain for aSource (should be a String or existing KeyChain).
  */
 private static synchronized KeyChain createKeyChain(String aString)  { return _parser.keyChain(aString); }
 
@@ -175,11 +175,11 @@ public static Object getValue(Object aRoot, Object anObj, KeyChain aKeyChain)
     if(anObj instanceof List) { List list = (List)anObj; //&& !RMGroup.isLeaf(anObj) && !RMGroup.isTopNOthers(anObj))
         Object val = getValueImpl(aRoot, anObj, aKeyChain);
         if(val==null && list.size()>0) val = getValueImpl(aRoot, list.get(0), aKeyChain);
-        return val; //return RMKeyChainAggr.getValue(aRoot, (List)anObj, aKeyChain);
+        return val; //return KeyChainAggr.getValue(aRoot, (List)anObj, aKeyChain);
     }
     
     // If object implements getKeyChainValue, just forward on to it
-    //if(anObj instanceof RMKeyChain.Get) return ((RMKeyChain.Get)anObj).getKeyChainValue(aRoot, aKeyChain);
+    //if(anObj instanceof KeyChain.Get) return ((KeyChain.Get)anObj).getKeyChainValue(aRoot, aKeyChain);
 
     // Invoke the general implementation
     return getValueImpl(aRoot, anObj, aKeyChain);
@@ -284,7 +284,7 @@ private static Object getValueBinaryMathOp(Object aRoot, Object anObj, KeyChain 
         case Multiply: return MathUtils.multiply((Number)o1, (Number)o2);
         case Divide: return MathUtils.divide((Number)o1, (Number)o2);
         case Mod: return MathUtils.mod(SnapUtils.doubleValue(o1), SnapUtils.doubleValue(o2));
-        default: throw new RuntimeException("RMKeyChain.getValueBinaryMathOp: Not a math op.");
+        default: throw new RuntimeException("KeyChain.getValueBinaryMathOp: Not a math op.");
     }
 }
 
@@ -327,7 +327,7 @@ private static Object getValueBinaryCompareOp(Object aRoot, Object anObj, KeyCha
         case NotEqual: return Sort.Compare(o1, o2)!=Sort.ORDER_SAME;
         case GreaterThanOrEqual: return Sort.Compare(o1, o2)!=Sort.ORDER_ASCEND;
         case LessThanOrEqual: return Sort.Compare(o1, o2)!=Sort.ORDER_DESCEND;
-        default: throw new RuntimeException("RMKeyChain.getValueBinaryCompareOp: Not a compare op.");
+        default: throw new RuntimeException("KeyChain.getValueBinaryCompareOp: Not a compare op.");
     }
 }
 
@@ -455,7 +455,7 @@ public static void setValue(Object anObj, KeyChain aKeyChain, Object aValue)
     }
     
     // If not Key, just return
-    if(kchain.getOp()!=Op.Key)  { System.err.println("RMKeyChain.setValue: Last op not key."); return; }
+    if(kchain.getOp()!=Op.Key)  { System.err.println("KeyChain.setValue: Last op not key."); return; }
     
     // If object is Enum, do weird setEnumValue() instead
     if(obj instanceof Enum) { setEnumValue(anObj, aKeyChain); return; }
@@ -493,7 +493,7 @@ public static void setValueSafe(Object anObj, String aKey, Object aValue)
     try { setValue(anObj, aKey, aValue); }
     catch(Exception e) { Class cls = ClassUtils.getClass(anObj);
         String msg = (cls!=null? cls.getSimpleName() : "null") + " " + aKey + " " + aValue;
-        System.err.printf("RMKey.setValue (%s) failed: %s\n", msg, e);
+        System.err.printf("KeyChain.setValue (%s) failed: %s\n", msg, e);
     }
 }
 
@@ -540,7 +540,7 @@ public String toString()
 } 
 
 /** Adds a class to the list of classes that RM queries for functions. */
-//public static void addFunctionClass(Class aClass) { RMKeyChainFuncs.addFunctionClass(aClass); }
+//public static void addFunctionClass(Class aClass) { KeyChainFuncs.addFunctionClass(aClass); }
 
 /**
  * Simple main implementation, so RM's expressions can be used for simple math.

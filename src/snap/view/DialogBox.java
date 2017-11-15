@@ -269,7 +269,7 @@ public String showInputDialog(View aView, String aDefault)
 
     // Show panel
     if(!showPanel(aView)) return null;
-    return _builder.getViewStringValue("InputText");
+    return tfield.getText();
 }
 
 /**
