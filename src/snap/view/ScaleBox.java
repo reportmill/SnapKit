@@ -90,7 +90,6 @@ public static void layout(ParentView aPar, View aChild, Insets theIns, boolean i
         double sy = isFillHeight || ch>ph? ph/ch : 1;
         if(isFillWidth && isFillHeight) sx = sy = Math.min(sx,sy); // KeepAspect?
         aChild.setScaleX(sx); aChild.setScaleY(sy);
-        System.out.println("Scale: " + sx);
         return;
     }
     
