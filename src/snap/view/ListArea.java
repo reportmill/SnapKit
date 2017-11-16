@@ -414,7 +414,8 @@ public Rect getItemBounds(int anIndex)
 protected void scrollSelToVisible()
 {
     // If needs layout, come back later
-    if(isNeedsLayout()) { getEnv().runLaterOnce("scrollSelToVisible",() -> scrollSelToVisible()); return; }
+    if(isNeedsLayout() || ViewUtils.isMetaDown()) {
+        getEnv().runLaterOnce("scrollSelToVisible",() -> scrollSelToVisible()); return; }
     
     // Get selection rect. If empty, outset by 1
     Rect srect = getItemBounds(getSelectedIndex());

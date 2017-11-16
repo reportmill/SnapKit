@@ -30,14 +30,20 @@ public class BrowserView <T> extends ParentView {
     // The preferred column width
     int                     _prefColWidth = 150;
     
+    // The selected column index
+    int                     _selCol = -1;
+    
     // The view that holds the columns
-    RowView                    _colView = new RowView();
+    RowView                 _colView = new RowView();
     
     // The ScrollView to hold SplitView+Columns
     ScrollView              _scroll = new ScrollView(_colView);
     
     // Selection back paint
     Paint                   _selBackPaint = new Color("#022eff");
+    
+    // The image to be used for branch
+    Image                   _branchImg;
     
 /**
  * Creates a new BrowserView.
@@ -115,7 +121,13 @@ public void setItems(List <T> theItems)
 {
     // If already set, just return
     if(ListUtils.equalsId(theItems, getItems()) || theItems.equals(getItems())) return;
+    
+    // Get current selected item and col0 selected item
+    T selItem = getSelectedItem(), selItem0 = _col0.getSelectedItem();
     _col0.setItems(theItems);
+    if(selItem0==_col0.getSelectedItem())
+        setSelectedItem(selItem);
+    else setSelectedItem(null);
 }
 
 /**
@@ -138,35 +150,23 @@ public TreeResolver <T> getResolver()  { return _resolver; }
  */
 public void setResolver(TreeResolver <T> aResolver)  { _resolver = aResolver; }
 
-/**
- * Whether given object is a parent (has children).
- */
-protected boolean isParent(T anItem)  { return _resolver.isParent(anItem); }
+// Convenience resolver methods
+private boolean isParent(T anItem)  { return _resolver.isParent(anItem); }
+private T getParent(T anItem)  { return _resolver.getParent(anItem); }
+private T[] getChildren(T aParent)  { return _resolver.getChildren(aParent); }
+private String getText(T anItem)  { return _resolver.getText(anItem); }
+private Image getImage(T anItem)  { return _resolver.getImage(anItem); }
+private Image getBranchImage(T anItem)  { return _resolver.getBranchImage(anItem); }
 
 /**
- * Returns the parent of given item.
+ * Returns whether to fire action on mouse release instead of press.
  */
-public T getParent(T anItem)  { return _resolver.getParent(anItem); }
+public boolean isFireActionOnRelease()  { return _col0.isFireActionOnRelease(); }
 
 /**
- * Returns the children.
+ * Sets whether to fire action on mouse release instead of press.
  */
-protected T[] getChildren(T aParent)  { return _resolver.getChildren(aParent); }
-
-/**
- * Returns the text to be used for given item.
- */
-protected String getText(T anItem)  { return _resolver.getText(anItem); }
-
-/**
- * Return the image to be used for given item.
- */
-protected Image getImage(T anItem)  { return _resolver.getImage(anItem); }
-
-/**
- * Return the branch image to be used for given item.
- */
-protected Image getBranchImage(T anItem)  { return _resolver.getBranchImage(anItem); }
+public void setFireActionOnRelease(boolean aValue)  { _col0.setFireActionOnRelease(aValue); }
 
 /**
  * Returns the column count.
@@ -177,10 +177,6 @@ public int getColCount()  { return _colView.getChildCount(); }
  * Returns the browser column list at given index.
  */
 public BrowserCol <T> getCol(int anIndex)  { return (BrowserCol)_colView.getChild(anIndex); }
-/*{
-    ScrollView spane = (ScrollView)_colView.getChild(anIndex);
-    return (BrowserCol)spane.getContent();
-}*/
 
 /**
  * Returns the last column.
@@ -237,7 +233,7 @@ public BrowserCol <T> getSelCol()  { int sci = getSelColIndex(); return sci>=0? 
 /**
  * Returns the currently selected column.
  */
-public int getSelColIndex()  { return _selCol; } int _selCol = -1;
+public int getSelColIndex()  { return _selCol; }
 
 /**
  * Sets the selected column index.
@@ -248,7 +244,7 @@ protected void setSelColIndex(int anIndex)
     _selCol = anIndex;
 
     // Iterate back from end to index and remove unused columns
-    for(int i=getColCount()-1; i>=anIndex+1; i--)
+    for(int i=getColCount()-1; i>anIndex; i--)
         removeCol(i);
         
     // See if we need to add column
@@ -337,7 +333,7 @@ public void setSelectedItem(T anItem, boolean scrollToVisible)
 public void scrollSelToVisible()
 {
     // If ColView NeedsLayout, come back later
-    if(_colView.isNeedsLayout()) {
+    if(_colView.isNeedsLayout() || ViewUtils.isMouseDown()) {
         getEnv().runLater(() -> scrollSelToVisible()); return; }
         
     // Scroll ColLast to visible
@@ -454,6 +450,6 @@ public Image getBranchImage()
     Polygon poly = new Polygon(1.5,1.5,7.5,5.5,1.5,9.5);
     Painter pntr = img.getPainter(); pntr.setColor(Color.BLACK); pntr.fill(poly); pntr.flush();
     return _branchImg = img;
-} Image _branchImg;
+}
 
 }

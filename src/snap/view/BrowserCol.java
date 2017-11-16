@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.Color;
 import snap.util.StringUtils;
 
 /**
@@ -22,14 +21,15 @@ public class BrowserCol <T> extends ListView <T> {
 public BrowserCol(BrowserView aBrsr)
 {
     _browser = aBrsr;
-    setFireActionOnRelease(true);
-    setFocusWhenPressed(false);
+    
+    // Update some attribues
     setRowHeight(_browser.getRowHeight());
+    if(aBrsr.getColCount()>0) {
+        setFireActionOnRelease(aBrsr.isFireActionOnRelease()); }
     
     // Configure ScrollView
     ScrollView scroll = getScrollView();
-    scroll.setShowHBar(false); scroll.setShowVBar(true); scroll.getScroller().setFill(Color.WHITE);
-    scroll.setFillWidth(true);
+    scroll.setShowHBar(false); scroll.setShowVBar(true);
 }
 
 /**
