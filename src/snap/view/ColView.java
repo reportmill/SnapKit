@@ -93,9 +93,8 @@ public static final double getPrefWidth(ParentView aPar, View theChildren[], dou
     View children[] = theChildren!=null? theChildren : aPar.getChildrenManaged();
     if(children.length==0) return ins.getWidth();
     
-    // Get height without insets, get best width and return
-    double h = aH>=0? (aH - ins.getHeight()) : aH;
-    double bw = 0; for(View child : children) bw = Math.max(bw, child.getBestWidth(h));
+    // Get best width and return
+    double bw = 0; for(View child : children) bw = Math.max(bw, child.getBestWidth(-1));
     return bw + ins.getWidth();
 }
 
@@ -109,9 +108,8 @@ public static final double getPrefHeight(ParentView aPar, View theChildren[], do
     View children[] = theChildren!=null? theChildren : aPar.getChildrenManaged();
     int ccount = children.length; if(ccount==0) return ins.getHeight();
     
-    // Get width without insets, get best height and return
-    double w = aW>=0? (aW - ins.getWidth()) : aW;
-    double bh = 0; for(View child : children) bh += child.getBestHeight(w); if(ccount>1) bh += (ccount-1)*aSpacing;
+    // Get best height and return
+    double bh = 0; for(View child : children) bh += child.getBestHeight(-1); if(ccount>1) bh += (ccount-1)*aSpacing;
     return bh + ins.getHeight();
 }
 
