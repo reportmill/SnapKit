@@ -538,7 +538,7 @@ static class PDFBadPasswordException extends RuntimeException {
 /**
  * I have no idea if this will work.  I doubt it.
  */
-static class PDFKey extends Object implements Key {
+static class PDFKey implements Key {
     byte kbuf[];
     public PDFKey(int klen)  { klen = klen + 5; if(klen>16) klen = 16; kbuf = new byte[klen]; }
     public String getAlgorithm()  { return "RC4"; } //If this works, add AES

@@ -174,9 +174,9 @@ public static void writeRun(PDFWriter aWriter, TextBox aText, TextBoxLine aLine,
             pPage.append('(');
         
         // Handle special chars for PDF string (might need to do backspace (\b) and form-feed (\f), too)
-        if(c=='\t') { pPage.append("\\t"); continue; }  // Used to be if(aWriter.getIncludesNewlines())
-        if(c=='\n') { pPage.append("\\n"); continue; }  // This too
-        if(c=='\r') { pPage.append("\\r"); continue; }  // This too
+        if(c=='\t') { if(aWriter.getIncludeNewlines()) pPage.append("\\t"); continue; }
+        if(c=='\n') { if(aWriter.getIncludeNewlines()) pPage.append("\\n"); continue; }
+        if(c=='\r') { if(aWriter.getIncludeNewlines()) pPage.append("\\r"); continue; }
         if(c=='(' || c==')' || c=='\\')
             pPage.append('\\');
             

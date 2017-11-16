@@ -6,9 +6,9 @@ import java.io.File;
 import java.net.URL;
 
 /**
- * A custom class.
+ * Utility methods for file path strings.
  */
-public class FilePathUtils extends Object {
+public class FilePathUtils {
     
     // Separator
     public static final String    SEPARATOR = SnapUtils.isWindows? "\\" : "/"; //java.io.File.separator;

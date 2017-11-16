@@ -8,7 +8,7 @@ import java.util.*;
 /**
  * Utility methods for use with Java.util.List.
  */
-public class ListUtils extends Object {
+public class ListUtils {
 
 /**
  * Returns the size of a list (accepts null list).

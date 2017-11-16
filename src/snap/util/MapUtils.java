@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Utility methods for use with Java.util.Map.
  */
-public class MapUtils extends Object {
+public class MapUtils {
   
 /**
  * Creates a new map for given key and object.

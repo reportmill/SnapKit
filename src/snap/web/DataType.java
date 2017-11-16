@@ -7,7 +7,7 @@ import snap.util.FilePathUtils;
 /**
  * A class to describe type of content in WebFile (from WebURL).
  */
-public class DataType extends Object {
+public class DataType {
     
     // The type
     String       _type;

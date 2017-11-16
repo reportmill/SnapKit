@@ -18,16 +18,19 @@ import snap.util.SnapUtils;
 public class PDFWriter extends PDFWriterBase {
     
     // The PDFFile
-    protected PDFFile                     _pfile;
+    protected PDFFile           _pfile;
     
     // The XRefTable
-    protected PDFXTable                   _xtable;
+    protected PDFXTable         _xtable;
 
     // The current PDF page
-    protected PDFPageWriter               _pageWriter;
+    protected PDFPageWriter     _pageWriter;
 
     // Whether PDF stream objects should be compressed
-    protected boolean                     _compress;
+    protected boolean           _compress;
+    
+    // Whether writer should include newline and tab characters (like tab, newline, carriage return)
+    boolean                     _includeNewlines = _includeNewlinesDefault;
     
     // Shared deflater
     Deflater                    _deflater = new Deflater(6, false);
@@ -38,9 +41,6 @@ public class PDFWriter extends PDFWriterBase {
     // Map of pdfread XRefs to pdfwrite XRefs
     public Map                  _readerWriterXRefMap = new HashMap();
   
-    // The default viewer preferences map
-    static Map <String,String>  _viewerPreferencesDefault = Collections.singletonMap("PrintScaling", "/None");
-    
     // The current font entry
     PDFFontEntry                _fontEntry;
     
@@ -48,10 +48,16 @@ public class PDFWriter extends PDFWriterBase {
     Map <String, PDFFontEntry>  _fonts = new Hashtable();
     
     // Map of image data names to image reference strings
-    public Map <String,String>         _images = new Hashtable();
+    public Map <String,String>  _images = new Hashtable();
     
     // Map of unique image datas
     List <Image>                _imageDatas = new ArrayList();
+    
+    // Whether writer should include newline and tab characters (like tab, newline, carriage return)
+    static boolean              _includeNewlinesDefault;
+    
+    // The default viewer preferences map
+    static Map <String,String>  _viewerPreferencesDefault = Collections.singletonMap("PrintScaling", "/None");
     
 /**
  * Returns a PDF byte array for a given RMDocument.
@@ -194,6 +200,26 @@ public boolean getCompress()  { return _compress; }
  * Sets whether to compress or not.
  */
 public void setCompress(boolean aValue)  { _compress = aValue; }
+
+/**
+ * Returns whether to include newline and tab characters characters.
+ */
+public boolean getIncludeNewlines()  { return _includeNewlines; } 
+
+/**
+ * Sets whether to include newline and tab characters.
+ */
+public void setIncludeNewlines(boolean aValue)  { _includeNewlines = aValue; } 
+
+/**
+ * Returns whether to include newline and tab characters characters.
+ */
+public static boolean getIncludeNewlinesDefault()  { return _includeNewlinesDefault; } 
+
+/**
+ * Sets whether to include newline and tab characters.
+ */
+public static void setIncludeNewlinesDefault(boolean aValue)  { _includeNewlinesDefault = aValue; } 
 
 /**
  * Returns a shared deflater.

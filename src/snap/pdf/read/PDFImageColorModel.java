@@ -180,7 +180,7 @@ public int getRGB(Object inData)
  * necessarily have to be the same as the source image's. Can also contain a Matte array, which controls
  * premultiplication of source color samples.
  */
-protected static class SoftMask extends Object {
+protected static class SoftMask {
 
     // Ivars
     public int width, height, bitspersample;
