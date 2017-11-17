@@ -21,7 +21,7 @@ public class CodeView extends TextArea {
 public CodeView()
 {
     setFill(Color.WHITE);
-    setPlainText(true);
+    setPlainText(false);
     setDefaultStyle(new TextStyle(Font.Arial14));
     setEditable(true);
 }
