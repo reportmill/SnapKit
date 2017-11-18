@@ -125,7 +125,6 @@ protected static WebSite createSite(WebURL aSiteURL)
     else if(scheme.equals("file")) site = new FileSite();
     else if(scheme.equals("http") || scheme.equals("https")) site = new HTTPSite();
     else if(scheme.equals("ftp")) site = new FTPSite();
-    else if(scheme.equals("class")) site = new ClassSite();
     else if(scheme.equals("local")) site = new LocalSite();
     if(site!=null) WebUtils.setSiteURL(site, aSiteURL);
     return site;
