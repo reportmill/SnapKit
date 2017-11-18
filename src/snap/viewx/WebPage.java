@@ -17,10 +17,7 @@ public class WebPage extends ViewOwner {
     WebBrowser             _browser;
     
     // The response
-    WebResponse               _response;
-    
-    // An array of listeners for object
-    PropChangeSupport      _pcs = new PropChangeSupport(this);
+    WebResponse            _response;
     
     // A map of instances
     static HashMap         _instances = new HashMap();
@@ -148,18 +145,6 @@ public void reload()
     if(file!=null) file.reload();
     if(getBrowser()!=null && getBrowser().getPage()==this)
         getBrowser().getLoader().setURL(url);
-}
-
-/** Add PropChangeListener. */
-public void addPropChangeListener(PropChangeListener aPCL)  { _pcs.addPropChangeListener(aPCL); }
-
-/** Remove PropChangeListener. */
-public void removePropChangeListener(PropChangeListener aPCL)  { _pcs.removePropChangeListener(aPCL); }
-
-/** Fires a property change. */
-protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
-{
-    _pcs.firePropChange(aProp, oldVal, newVal, anIndex);
 }
 
 /**
