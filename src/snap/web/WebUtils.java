@@ -35,6 +35,7 @@ public static void setSiteURL(WebSite aSite, WebURL aURL)
 {
     if(aSite.getURL()!=null) throw new RuntimeException("WebUtils.setURL(site,url): Oh no you don't");
     aSite.setURL(aURL);
+    WebGetter._sites.put(aURL, aSite);
 }
 
 /**

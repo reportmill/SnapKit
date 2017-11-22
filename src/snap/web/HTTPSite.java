@@ -57,7 +57,6 @@ protected synchronized WebResponse doGet(WebRequest aRequest)
     Object content = null;
     try {
         // Fetch URL
-        String urls = url.getString();
         HTTPRequest hreq = new HTTPRequest(url.getSourceURL());
         HTTPResponse hresp = hreq.getResponse();
         

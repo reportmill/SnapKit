@@ -256,13 +256,14 @@ public synchronized List <WebFile> getFiles()
     if(_files!=null) return _files;
     
     // Get response for files
-    WebSite site = getSite(); WebURL url = getURL();
-    WebResponse resp = getSite().getResponse(new WebRequest(url)); //getURL().getResponse();
+    WebURL url = getURL();
+    WebResponse resp = url.getResponse();
     if(resp.getCode()==WebResponse.OK) _exists = true;
     if(resp.getException()!=null)
         throw new ResponseException(resp);
     
     // Get file headers
+    WebSite site = getSite();
     List <FileHeader> fhdrs = resp.getFileHeaders(); if(fhdrs==null) return Collections.EMPTY_LIST;
     List <WebFile> files = new ArrayList(fhdrs.size());
     for(FileHeader fhdr : fhdrs) { WebFile file = site.createFile(fhdr);
