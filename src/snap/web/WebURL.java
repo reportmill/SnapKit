@@ -314,6 +314,24 @@ public WebResponse getHead()
 }
 
 /**
+ * Returns the FileHeader.
+ */
+public FileHeader getFileHeader()
+{
+    WebResponse resp = getHead();
+    return resp!=null? resp.getFileHeader() : null;
+}
+
+/**
+ * Returns the last modified time.
+ */
+public long getLastModTime()
+{
+    FileHeader fhdr = getFileHeader();
+    return fhdr!=null? fhdr.getLastModifiedTime() : 0;
+}
+
+/**
  * Returns Response for a Get request.
  */
 public WebResponse getResponse()
