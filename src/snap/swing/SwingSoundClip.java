@@ -33,6 +33,9 @@ public class SwingSoundClip extends SoundClip {
     // The sound clip
     Clip            _clip;
     
+    // The SoundRecorder
+    SoundRecorder   _sndRec = new SoundRecorder();
+
     // Constants for bit rate
     public static final int  BitRate5k = 0;
     public static final int  BitRate11k = 1;
@@ -50,9 +53,14 @@ public SwingSoundClip(Object aSource)
 }
 
 /**
- * Returns the sound data bytes.
+ * Returns the sound bytes.
  */
 public byte[] getBytes()  { return _bytes; }
+
+/**
+ * Sets the sound bytes.
+ */
+public void setBytes(byte theBytes[])  { _bytes = theBytes; _clip = null; }
 
 /**
  * Returns the bits per sample.
@@ -94,7 +102,7 @@ public int bitRate()
 /**
  * Reads sound format info from sounds data bytes.
  */
-public void readData()
+private void readData()
 {
     if(_sampleBytes!=null) return;
     
@@ -158,21 +166,6 @@ public void stop()  { getClip().stop(); }
 public void pause()  { System.err.println("SwingSoundClip.pause: Not implemented"); }
 
 /**
- * Starts a recording.
- */
-public void recordStart()  { System.err.println("SwingSoundClip.recordStart: Not implemented"); }
-
-/**
- * Stops a recording.
- */
-public void recordStop()  { System.err.println("SwingSoundClip.recordStop: Not implemented"); }
-
-/**
- * Returns whether sound is recording.
- */
-public boolean isRecording()  { System.err.println("SwingSoundClip.isRecording: Not implemented"); return false; }
-
-/**
  * Returns the sound length in milliseconds.
  */
 public int getLength()  { return getClip().getFrameLength(); }
@@ -186,14 +179,6 @@ public int getTime()  { return getClip().getFramePosition(); }
  * Sets the sound time in milliseconds.
  */
 public void setTime(int aTime)  { getClip().setFramePosition(aTime); }
-
-/**
- * Saves this sound.
- */
-public void save() throws IOException
-{
-    System.err.println("SwingSoundClip.save: Not implemented");
-}
 
 /**
  * Returns the clip, creating it if requested.
@@ -264,6 +249,38 @@ public Clip getClip()
         
     // Return clip
     return _clip;
+}
+
+/**
+ * Whether file is recording.
+ */
+public boolean isRecording()  { return _sndRec.isRecording(); }
+
+/**
+ * Record start.
+ */
+public void recordStart()  { _sndRec.startRecording(); }
+
+/**
+ * Record stop.
+ */
+public void recordStop()
+{
+    _sndRec.stopRecording();
+    byte bytes[] = _sndRec.getBytes();
+    if(bytes!=null)
+        setBytes(bytes);
+}
+
+/**
+ * Override to clear modified.
+ */
+public void save() throws IOException
+{
+    System.out.println("SwingSoundClip.save: Not implemented");
+    //WebFile file = getSourceFile(); if(file==null) throw new RuntimeException("SnapData: No file available");
+    //file.setBytes(getBytes());
+    //file.save();
 }
 
 /**

@@ -5,9 +5,7 @@ import javafx.embed.swing.JFXPanel;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
-import javax.sound.sampled.*;
 import snap.gfx.SoundClip;
-import snap.util.*;
 import snap.web.WebFile;
 import snap.web.WebURL;
 
@@ -24,22 +22,15 @@ public class JFXSoundClip extends SoundClip {
     
     // The JavaFX media object
     Media                 _media;
-
-    // The line in when recording
-    TargetDataLine        _lineIn;
-    
-    // The record thread
-    Thread                _recordThead;
-    
-    // Whether file has been modified
-    boolean               _modified; File _modFile;
     
     // A list of clips
-    List <ClipPlayer>      _clips = new ArrayList();
+    List <ClipPlayer>     _clips = new ArrayList();
     
-    
+    // The SoundRecorder
+    SoundRecorder         _sndRec = new SoundRecorder();
+
     // Whether sound has been initialized
-    static boolean     _init;
+    static boolean        _init;
 
 /**
  * Creates a new JFXSoundClip.
@@ -51,9 +42,7 @@ public JFXSoundClip()  { checkInit(); }
  */
 public JFXSoundClip(Object aSource)  { _source = aSource; checkInit(); }
 
-/**
- * Does JFX initialization.
- */
+// Does JFX initialization.
 private void checkInit()  { if(_init) return; new JFXPanel(); _init = true; }
 
 /**
@@ -89,12 +78,21 @@ public byte[] getBytes()  { return getSourceFile().getBytes(); }
 /**
  * Sets the bytes.
  */
-public void setBytes(byte theBytes[])  { getSourceFile().setBytes(theBytes); }
+public void setBytes(byte theBytes[])
+{
+    getSourceFile().setBytes(theBytes);
+    _media = null; _clips.clear();
+}
 
 /**
- * Creates a new clip.
+ * Returns whether sound is playing.
  */
-public ClipPlayer createClip()  { return getBytes()!=null? new ClipPlayer() : null; }
+public boolean isPlaying()
+{
+    for(int i=0, iMax=_clips.size(); i<iMax; i++) if(_clips.get(i).isRunning())
+        return true;
+    return false;
+}
 
 /**
  * Play.
@@ -106,13 +104,19 @@ public void play()  { play(0); }
  */
 public void play(int count)
 {
+    // Look for existing clip that isn't in use
     for(int i=0, iMax=_clips.size(); i<iMax; i++) { ClipPlayer clip = _clips.get(i);
         if(!clip.isRunning()) {
             clip.setMillisecondPosition(0); clip.loop(count); clip.start(); return; }
     }
+    
+    // Otherwise, create/add/start new clip
     try { _clips.add(createClip()); _clips.get(_clips.size()-1).start(); }
     catch(Exception e) { throw new RuntimeException(e); }
 }
+
+// Creates new clip.
+private ClipPlayer createClip()  { return getBytes()!=null? new ClipPlayer() : null; }
 
 /**
  * Stops the clip(s).
@@ -123,16 +127,6 @@ public void stop() { for(int i=0, iMax=_clips.size(); i<iMax; i++) _clips.get(i)
  * Pauses the clip(s).
  */
 public void pause() { for(int i=0, iMax=_clips.size(); i<iMax; i++) _clips.get(i).pause(); }
-
-/**
- * Returns whether sound is playing.
- */
-public boolean isPlaying()
-{
-    for(int i=0, iMax=_clips.size(); i<iMax; i++) if(_clips.get(i).isRunning())
-        return true;
-    return false;
-}
 
 /**
  * Returns the sound length in milliseconds.
@@ -150,92 +144,36 @@ public int getTime()  { return _clips.size()>0? _clips.get(0).getMillisecondPosi
 public void setTime(int aTime)  { if(_clips.size()>0) _clips.get(0).setMillisecondPosition(aTime); }
 
 /**
+ * Whether file is recording.
+ */
+public boolean isRecording()  { return _sndRec.isRecording(); }
+
+/**
  * Record start.
  */
-public void recordStart()
-{
-    if(_recordThead!=null) return;
-    _recordThead = new Thread() { public void run() {
-       try { recordImpl(); }
-       catch(Exception e) { System.err.println("SoundData.recordStart:" + e); }
-    }};
-    _recordThead.start();
-}
+public void recordStart()  { _sndRec.startRecording(); }
 
 /**
  * Record stop.
  */
 public void recordStop()
 {
-    _lineIn.stop();
-    try { _recordThead.join(); }
-    catch(Exception e) { System.err.println("SoundData.recordStop:" + e); }
-    finally { _recordThead = null; }
-    _lineIn.close(); _lineIn = null;
+    // Stop recording
+    _sndRec.stopRecording();
+    
+    // If sound bytes collected, set new bytes
+    byte bytes[] = _sndRec.getBytes();
+    if(bytes!=null)
+        setBytes(bytes);
 }
-
-/**
- * Whether file is recording.
- */
-public boolean isRecording()  { return _recordThead!=null; }
-
-/**
- * Record start.
- */
-private void recordImpl() throws LineUnavailableException
-{
-    // Get audio format
-    float sampleRate = 22050; // 8000, 11025, 16000, 22050, 44100
-    int sampleSizeInBits = 16, channels = 1; // SampleSize: 8, 16, Channels: 1,2
-    boolean signed = true, bigEndian = false;
-    AudioFormat format = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
-    
-    // Get data line
-    DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-    _lineIn = (TargetDataLine)AudioSystem.getLine(info);
-
-    // Setup and initialize the line
-    _lineIn.open(format);
-    _lineIn.start();
-
-    int bufSize = (int)format.getSampleRate()*format.getFrameSize(); byte buffer[] = new byte[bufSize];
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    for(int len=_lineIn.read(buffer, 0, bufSize); len>0; len=_lineIn.read(buffer, 0, bufSize))
-        out.write(buffer, 0, len);
-    
-    // Close stream and set bytes
-    try { out.close(); } catch(Exception e) { System.err.println("SoundData.record" + e); }
-    
-    byte audio[] = out.toByteArray();
-    InputStream input = new ByteArrayInputStream(audio);
-    AudioInputStream ais = new AudioInputStream(input, format, audio.length/format.getFrameSize());
-    ByteArrayOutputStream output = new ByteArrayOutputStream();
-    try { AudioSystem.write(ais, AudioFileFormat.Type.WAVE, output); }
-    catch(Exception e) { System.err.println("SoundData.recordStartImpl: AudioSystem.write failed: " + e); }
-    
-    // Set bytes
-    setBytes(output.toByteArray());
-    _media = null; _modified = true;
-    if(_modFile==null) { _modFile = FileUtils.getTempFile("SoundData_Recorded.wav"); _modFile.deleteOnExit(); }
-    try { FileUtils.writeBytes(_modFile, getBytes()); }
-    catch(Exception e) { throw new RuntimeException(e); }
-    _clips.clear();
-}
-
-/**
- * Whether file is modified.
- */
-public boolean isModified()  { return _modified; }
 
 /**
  * Override to clear modified.
  */
 public void save() throws IOException
 {
-    WebFile file = getSourceFile(); if(file==null) throw new RuntimeException("SnapData: No file available");
-    file.setBytes(getBytes());
+    WebFile file = getSourceFile(); if(file==null) throw new RuntimeException("JFXSoundClip.save: No file available");
     file.save();
-    _modified = false;
 }
 
 /**
@@ -243,11 +181,17 @@ public void save() throws IOException
  */
 private Media getMedia()
 {
+    // If already set, just return
     if(_media!=null) return _media;
 
+    // Get sound file
     File file = getSourceFile().getStandardFile();
-    if(_modified) file = _modFile;
-    return new Media(file.toURI().toString());
+    if(_sndRec.getSoundFile()!=null)
+        file = _sndRec.getSoundFile();
+    
+    // Create media from sound file
+    String spath = file.toURI().toString();
+    return new Media(spath);
 }
 
 /**

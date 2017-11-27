@@ -36,21 +36,6 @@ public abstract void stop();
 public abstract void pause();
 
 /**
- * Starts a recording.
- */
-public abstract void recordStart();
-
-/**
- * Stops a recording.
- */
-public abstract void recordStop();
-
-/**
- * Returns whether sound is recording.
- */
-public abstract boolean isRecording();
-
-/**
  * Returns the sound length in milliseconds.
  */
 public abstract int getLength();
@@ -64,6 +49,21 @@ public abstract int getTime();
  * Sets the sound time in milliseconds.
  */
 public abstract void setTime(int aTime);
+
+/**
+ * Returns whether sound is recording.
+ */
+public abstract boolean isRecording();
+
+/**
+ * Starts a recording.
+ */
+public abstract void recordStart();
+
+/**
+ * Stops a recording.
+ */
+public abstract void recordStop();
 
 /**
  * Saves this sound.
