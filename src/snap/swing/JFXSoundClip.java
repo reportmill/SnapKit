@@ -1,4 +1,4 @@
-package snap.javafx;
+package snap.swing;
 import java.io.*;
 import java.util.*;
 import javafx.embed.swing.JFXPanel;
@@ -12,9 +12,9 @@ import snap.web.WebFile;
 import snap.web.WebURL;
 
 /**
- * A class to represent sound files.
+ * A SoundClip implementation using JavaFX.
  */
-public class SoundData extends SoundClip {
+public class JFXSoundClip extends SoundClip {
 
     // The source of the data
     Object                _source;
@@ -42,14 +42,14 @@ public class SoundData extends SoundClip {
     static boolean     _init;
 
 /**
- * Creates a new SoundData.
+ * Creates a new JFXSoundClip.
  */
-public SoundData()  { checkInit(); }
+public JFXSoundClip()  { checkInit(); }
 
 /**
  * Creates a new SoundData from given source.
  */
-public SoundData(Object aSource)  { _source = aSource; checkInit(); }
+public JFXSoundClip(Object aSource)  { _source = aSource; checkInit(); }
 
 /**
  * Does JFX initialization.
@@ -291,15 +291,6 @@ public class ClipPlayer {
     
     /** Sets the millisecond position. */
     public void setMillisecondPosition(long aPosition)  { _player.seek(Duration.millis(aPosition)); }
-}
-
-/**
- * Returns a Sound for given source.
- */
-public static SoundData get(Object aSource)
-{
-    try { return new SoundData(aSource); }
-    catch(Exception e) { System.err.println("SoundData.get: " + e); return null; }
 }
 
 }

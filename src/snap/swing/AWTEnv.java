@@ -51,7 +51,7 @@ public Image getImage(int aWidth, int aHeight, boolean hasAlpha)  { return new J
 public SoundClip getSound(Object aSource)
 {
     try {
-        Class cls = Class.forName("snap.javafx.SoundData");
+        Class cls = Class.forName("snap.swing.JFXSoundClip");
         return (SoundClip)cls.getDeclaredConstructor(Object.class).newInstance(aSource);
     }
     catch(Exception e) { throw new RuntimeException(e); }
@@ -63,7 +63,7 @@ public SoundClip getSound(Object aSource)
 public SoundClip createSound()
 {
     try {
-        Class cls = Class.forName("snap.javafx.SoundData");
+        Class cls = Class.forName("snap.swing.JFXSoundClip");
         return (SoundClip)cls.newInstance();
     }
     catch(Exception e) { throw new RuntimeException(e); }
