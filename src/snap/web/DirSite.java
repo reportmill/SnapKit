@@ -48,7 +48,7 @@ protected FileHeader getFileHeader(String aPath) throws Exception
 {
     WebFile dfile = getDirFile(aPath); if(dfile==null) return null;
     FileHeader file = new FileHeader(aPath, dfile.isDir());
-    file.setLastModifiedTime(dfile.getLastModifiedTime()); file.setSize(dfile.getSize());
+    file.setLastModTime(dfile.getLastModTime()); file.setSize(dfile.getSize());
     return file;
 }
 
@@ -69,7 +69,7 @@ protected Object getFileContent(String aPath) throws Exception
     for(WebFile df : dfiles) {
         String path = aPath; if(!path.endsWith("/")) path += '/';
         FileHeader f = new FileHeader(path + df.getName(), df.isDir());
-        f.setLastModifiedTime(df.getLastModifiedTime()); f.setSize(df.getSize());
+        f.setLastModTime(df.getLastModTime()); f.setSize(df.getSize());
         files.add(f);
     }
     return files;
@@ -83,7 +83,7 @@ protected long saveFileImpl(WebFile aFile) throws Exception
     WebFile dfile = createDirFile(aFile.getPath(), aFile.isDir());
     if(aFile.isFile()) dfile.setBytes(aFile.getBytes());
     dfile.save();
-    return dfile.getLastModifiedTime();
+    return dfile.getLastModTime();
 }
 
 /**

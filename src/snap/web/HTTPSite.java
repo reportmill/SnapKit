@@ -38,7 +38,7 @@ protected FileHeader getFileHeader(String aPath) throws IOException
     String contentType = resp.getContentType().toLowerCase();
     boolean isDir = FilePathUtils.getExtension(aPath).length()==0 && contentType.startsWith("text");
     FileHeader file = new FileHeader(aPath, isDir);
-    file.setLastModifiedTime(resp.getLastModified());
+    file.setLastModTime(resp.getLastModified());
     file.setSize(resp.getContentLength());
     return file;
 }
@@ -152,7 +152,7 @@ List <FileHeader> getFilesFromHTMLBytes(String aPath, byte bytes[]) throws IOExc
         boolean isDir = false; if(name.endsWith("/")) { isDir = true; name = name.substring(0, name.length()-1); }
         String path = FilePathUtils.getChild(aPath, name);
         FileHeader file = new FileHeader(path, isDir);
-        file.setLastModifiedTime(System.currentTimeMillis());
+        file.setLastModTime(System.currentTimeMillis());
         files.add(file);
     }
     return files;
@@ -186,7 +186,7 @@ protected long saveFileImpl(WebFile aFile) throws Exception
     HTTPRequest req = new HTTPRequest(urls);
     req.setBytes(aFile.getBytes());
     req.getResponse();
-    return aFile.getLastModifiedTime();
+    return aFile.getLastModTime();
 }
 
 /**
@@ -205,7 +205,7 @@ protected File getStandardFile(WebFile aFile)
 public WebFile getLocalFile(WebFile aFile, boolean doCache)
 {
     WebFile cfile = getCacheFile(aFile.getPath());
-    if(cfile.getExists() && cfile.getLastModifiedTime()>=aFile.getLastModifiedTime())
+    if(cfile.getExists() && cfile.getLastModTime()>=aFile.getLastModTime())
         return cfile;
     cfile.setBytes(aFile.getBytes());
     cfile.save();

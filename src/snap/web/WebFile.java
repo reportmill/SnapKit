@@ -160,12 +160,12 @@ protected void setParent(WebFile aFile)  { _parent = aFile; }
 /**
  * Returns the file modification time.
  */
-public long getLastModifiedTime()  { return _lastModTime; }
+public long getLastModTime()  { return _lastModTime; }
 
 /**
  * Sets the file modification time.
  */
-public void setLastModifiedTime(long aTime)
+public void setLastModTime(long aTime)
 {
     if(aTime==_lastModTime) return;
     firePropChange(ModifiedTime_Prop, _lastModTime, _lastModTime = aTime);
@@ -174,11 +174,11 @@ public void setLastModifiedTime(long aTime)
 /**
  * Sets the file modification time in file and in site internal storage.
  */
-public void setLastModifiedTimeDeep(long aTime)
+public void setLastModTimeDeep(long aTime)
 {
-    try { getSite().setLastModifiedTime(this, aTime); }
+    try { getSite().setLastModTime(this, aTime); }
     catch(Exception e) { System.err.println("WebFile.setLastModTimeDeep: " + e); }
-    setLastModifiedTime(aTime);
+    setLastModTime(aTime);
 }
 
 /**

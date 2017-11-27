@@ -27,7 +27,7 @@ protected FileHeader getFileHeader(String aPath)
     
     // Create and initialize FileHeader and return
     FileHeader fhdr = new FileHeader(path, file.isDirectory());
-    fhdr.setLastModifiedTime(file.lastModified());
+    fhdr.setLastModTime(file.lastModified());
     fhdr.setSize(file.length());
     return fhdr;
 }
@@ -113,7 +113,7 @@ protected void deleteFileImpl(WebFile aFile) throws Exception
  * Saves the modified time for a file to underlying file system.
  */
 @Override
-protected void setLastModifiedTime(WebFile aFile, long aTime) throws Exception
+protected void setLastModTime(WebFile aFile, long aTime) throws Exception
 {
     File file = getStandardFile(aFile);
     file.setLastModified(aTime);

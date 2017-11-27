@@ -328,7 +328,7 @@ public FileHeader getFileHeader()
 public long getLastModTime()
 {
     FileHeader fhdr = getFileHeader();
-    return fhdr!=null? fhdr.getLastModifiedTime() : 0;
+    return fhdr!=null? fhdr.getLastModTime() : 0;
 }
 
 /**

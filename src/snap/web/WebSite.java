@@ -198,7 +198,7 @@ public synchronized WebFile createFile(FileHeader fileHdr)
     WebFile file = _files.get(path);
     if(file==null) {
         file = new WebFile(); file._path = path; file._dir = fileHdr.isDir(); file._site = this;
-        file._lastModTime = fileHdr.getLastModifiedTime(); file._size = fileHdr.getSize();
+        file._lastModTime = fileHdr.getLastModTime(); file._size = fileHdr.getSize();
         _files.put(path, file);
         file.addPropChangeListener(this);
         file.setDataType(DataType.getPathDataType(path));
@@ -255,7 +255,7 @@ protected void saveFile(WebFile aFile) throws ResponseException
         parent.save();
     
     // Save file
-    try { long mt = saveFileImpl(aFile); aFile.setLastModifiedTime(mt); }
+    try { long mt = saveFileImpl(aFile); aFile.setLastModTime(mt); }
     catch(Exception e) { WebResponse r = new WebResponse(); r.setException(e); throw new ResponseException(r); }
     
     // If file needs to be added to parent, add and save
@@ -326,7 +326,7 @@ protected void deleteFileImpl(WebFile aFile) throws Exception { throw notImpl("d
 /**
  * Saves the modified time for a file to underlying file system.
  */
-protected void setLastModifiedTime(WebFile aFile, long aTime) throws Exception {}//throw notImpl("setLastModifiedTime");
+protected void setLastModTime(WebFile aFile, long aTime) throws Exception  { }
 
 /**
  * Reloads a file from site.
@@ -364,10 +364,10 @@ protected void reloadFile(WebFile aFile)
     }
     
     // If raw file has new modified time, reset file and set new modified time
-    if(file.getLastModifiedTime()>aFile.getLastModifiedTime()) {
+    if(file.getLastModTime()>aFile.getLastModTime()) {
         aFile._size = file.getSize();
         aFile.setBytes(null); aFile.setFiles(null);
-        aFile.setLastModifiedTime(file.getLastModifiedTime());
+        aFile.setLastModTime(file.getLastModTime());
     }
 }
 

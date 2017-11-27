@@ -118,7 +118,7 @@ protected FileHeader getFileHeader(String aPath) throws Exception
 {
     ZipEntry zentry = getEntries().get(aPath); if(zentry==null && _dirs.get(aPath)==null) return null;
     FileHeader file = new FileHeader(aPath, zentry==null || zentry.isDirectory());
-    if(zentry!=null) file.setLastModifiedTime(zentry.getTime());
+    if(zentry!=null) file.setLastModTime(zentry.getTime());
     if(zentry!=null) file.setSize(zentry.getSize());
     return file;
 }

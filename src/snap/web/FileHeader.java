@@ -22,7 +22,7 @@ public class FileHeader extends SnapObject {
     long              _size;
     
     // Constants for properties
-    final public static String LastModifiedTime_Prop = "LastModifiedTime";
+    final public static String LastModTime_Prop = "LastModTime";
     final public static String Size_Prop = "Size";
 
 /**
@@ -73,15 +73,15 @@ public boolean isRoot()  { return getPath().equals("/"); }
 /**
  * Returns the file modification time.
  */
-public long getLastModifiedTime()  { return _lastModTime; }
+public long getLastModTime()  { return _lastModTime; }
 
 /**
  * Sets the file modification time.
  */
-public void setLastModifiedTime(long aTime)
+public void setLastModTime(long aTime)
 {
     if(aTime==_lastModTime) return;
-    firePropChange(LastModifiedTime_Prop, _lastModTime, _lastModTime = aTime);
+    firePropChange(LastModTime_Prop, _lastModTime, _lastModTime = aTime);
 }
 
 /**
