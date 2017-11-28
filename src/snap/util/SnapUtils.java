@@ -246,8 +246,8 @@ public static <T> T clone(T anObj)
     if(anObj instanceof SnapObject)
         return (T)((SnapObject)anObj).clone();
     
-    // Try to invoke clone method manually
-    if(anObj!=null)
+    // Handle Cloneable: Invoke clone method with reflection
+    if(anObj instanceof Cloneable)
         try { return (T)anObj.getClass().getMethod("clone").invoke(anObj); }
         catch(Throwable t) { }
         

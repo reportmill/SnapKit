@@ -547,20 +547,4 @@ public static <T> List <T> clone(List <T> aList)
     return aList==null? null : new ArrayList(aList);
 }
 
-/**
- * Returns a copy of the given list with copies of all its items (recursively).
- */
-public static <T> List <T> cloneDeep(List <T> aList)
-{
-    // Clone list
-    List list = clone(aList);
-    
-    // Clone list items
-    for(int i=0, iMax=list.size(); i<iMax; i++)
-        list.set(i, SnapUtils.cloneDeep(list.get(i)));
-    
-    // Return list
-    return list;
-}
-
 }
