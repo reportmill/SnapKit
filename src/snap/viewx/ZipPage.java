@@ -39,7 +39,7 @@ protected View createUI()
 {
     // Create FileBrowser and put in ScrollView
     _fileBrsr = new BrowserView(); _fileBrsr.setName("FileBrowser");
-    _fileBrsr.setPrefColCount(3); _fileBrsr.setGrowHeight(true);
+    _fileBrsr.setPrefColCount(3); _fileBrsr.setPrefHeight(350); //_fileBrsr.setGrowHeight(true);
     _fileBrsr.setResolver(new FileTreeResolver());
     _fileBrsr.setItems(getFiles());
     
