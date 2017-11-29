@@ -216,13 +216,12 @@ protected Class <? extends WebPage> getPageClass(WebResponse aResp)
         return DirFilePage.class;
 
     if(type.equals("jpg") || type.equals("jpeg") || type.equals("gif") || type.equals("png")) return ImagePage.class;
-    if(type.equals("snp") || type.equals("rib") || type.equals("jfx")) return SnapPage.class;
-    if(type.equals("rpt")) return getPageClass("com.reportmill.app.ReportPage.class", TextPage.class);
+    if(type.equals("snp")) return SnapPage.class;
+    if(type.equals("rpt")) return getPageClass("com.reportmill.app.ReportPage", TextPage.class);
     if(type.equals("wav") || type.equals("snd") || type.equals("mp3") || type.equals("m4a")) return SoundPage.class;
-    if(type.equals("java")) return getPageClass("snap.app.JavaPage", TextPage.class);
+    if(type.equals("java")) return getPageClass("snap.javatext.JavaPage", TextPage.class);
     if(type.equals("jar")) return ZipPage.class;
     if(type.equals("txt") || file.isText()) return TextPage.class;
-    //if(type.equals("table")) return TablePage.class; if(type.equals("view")) return TableViewPage.class;
     return UnknownPage.class;
 }
 
@@ -231,7 +230,7 @@ protected Class <? extends WebPage> getPageClass(WebResponse aResp)
  */
 protected Class <? extends WebPage> getPageClass(String aClassName, Class <? extends WebPage> aDefault)
 {
-    try { return ClassUtils.getClass(aClassName); }
+    try { return (Class)Class.forName(aClassName); }
     catch(Exception e) { System.err.println("WebBrowser: Page class not found: " + e); }
     return aDefault!=null? aDefault : UnknownPage.class;
 }
