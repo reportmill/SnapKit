@@ -3,6 +3,7 @@
  */
 package snap.viewx;
 import snap.gfx.*;
+import snap.util.StringUtils;
 import snap.view.*;
 import snap.web.WebFile;
 
@@ -25,8 +26,13 @@ public View getContent()  { return _content; }
 protected View createUI()
 {
     ViewArchiver.setUseRealClass(false);
-    View superUI = _content = super.createUI();
-    ViewArchiver.setUseRealClass(true);
+    
+    // Load UI
+    View superUI = null;
+    try { superUI = _content = super.createUI(); }
+    catch(Exception e) { return createExceptionUI(e); }
+    finally { ViewArchiver.setUseRealClass(true); }
+    
     if(!(superUI instanceof DocView)) {
         superUI.setFill(ViewUtils.getBackFill());
         superUI.setBorder(Color.BLACK, 1);
@@ -39,6 +45,16 @@ protected View createUI()
     return new ScrollView(superUI);
 }
     
+/**
+ * Returns UI to show an exception.
+ */
+protected View createExceptionUI(Exception e)
+{
+    TextView text = new TextView(); text.setFont(Font.Arial14);
+    text.setText(StringUtils.getStackTraceString(e));
+    return text;
+}
+
 /**
  * Override to return UI file.
  */
