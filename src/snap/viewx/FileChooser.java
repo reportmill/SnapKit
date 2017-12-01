@@ -28,6 +28,9 @@ public class FileChooser extends ViewOwner {
     // The current file
     WebFile                _dir;
     
+    // The Directory ComboBox
+    ComboBox <WebFile>     _dirComboBox;
+    
     // The FileBrowser
     BrowserView <WebFile>  _fileBrowser;
     
@@ -146,8 +149,8 @@ protected void setFileInUI()
     
     // Update DirComboBox
     List <WebFile> dirs = new ArrayList(); for(WebFile dir=getDir();dir!=null;dir=dir.getParent()) dirs.add(dir);
-    setViewItems("DirComboBox", dirs);
-    setViewSelectedIndex("DirComboBox", 0);
+    _dirComboBox.setItems(dirs);
+    _dirComboBox.setSelectedIndex(0);
     
     // Update FileText
     _fileText.setText(getFile()!=null? getFile().getName() : null);
@@ -290,13 +293,13 @@ protected void initUI()
     _fileBrowser.setSelectedItem(getFile()!=null? getFile() : getDir());
     
     // Get/configure DirComboBox
-    ComboBox <WebFile> dirComboBox = getView("DirComboBox", ComboBox.class);
-    dirComboBox.setItemTextFunction(itm -> itm.isRoot()? "Root Directory" : itm.getName());
-    dirComboBox.getListView().setRowHeight(24);
+    _dirComboBox = getView("DirComboBox", ComboBox.class);
+    _dirComboBox.setItemTextFunction(itm -> itm.isRoot()? "Root Directory" : itm.getName());
+    _dirComboBox.getListView().setRowHeight(24);
     List <WebFile> dirs = new ArrayList();
     for(WebFile dir=getDir();dir!=null;dir=dir.getParent()) dirs.add(dir);
-    dirComboBox.setItems(dirs);
-    dirComboBox.setSelectedIndex(0);
+    _dirComboBox.setItems(dirs);
+    _dirComboBox.setSelectedIndex(0);
     
     // Get FileText
     _fileText = getView("FileText", TextField.class);
@@ -346,6 +349,14 @@ protected void respondUI(ViewEvent anEvent)
         if(file!=null && file.isDir())
             setFile(file);
     }
+    
+    // Handle HomeButton
+    if(anEvent.equals("HomeButton"))
+        setFile(getFile(getHomeDirPath()));
+        
+    // Handle DirComboBox
+    if(anEvent.equals("DirComboBox"))
+        setFile(_dirComboBox.getSelectedItem());
 }
 
 /**
