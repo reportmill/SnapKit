@@ -42,8 +42,8 @@ public class WebFile extends SnapObject implements Comparable<WebFile> {
     // The directory files
     List <WebFile>    _files;
     
-    // The content type
-    DataType          _dataType;
+    // The MIME type
+    String            _mimeType;
     
     // A map of properties associated with file
     Map               _props = new HashMap();
@@ -376,14 +376,14 @@ public boolean contains(WebFile aFile)
 }
 
 /**
- * Returns the data type of the file.
+ * Returns the MIME type of the file.
  */
-public DataType getDataType()  { return _dataType; }
+public String getMiType()  { return _mimeType; }
 
 /**
- * Sets the data type for the file.
+ * Sets the MIME type for the file.
  */
-protected void setDataType(DataType aDataType)  { _dataType = aDataType; }
+protected void setMIMEType(String aMIMEType)  { _mimeType = aMIMEType; }
 
 /**
  * Returns a file property for key.

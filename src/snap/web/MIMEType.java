@@ -1,4 +1,5 @@
 package snap.web;
+import snap.util.FilePathUtils;
 
 /**
  * A class to help work with MIME type strings.
@@ -37,11 +38,16 @@ public static String getExtension(String aMIMEType)
 }
 
 /**
- * Returns the MIME type for extension.
+ * Returns the MIME type for string path, extension, type.
  */
-public static String getType(String anExt)
+public static String getType(String aStr)
 {
-    switch(anExt.toLowerCase()) {
+    // Get type for given string
+    String type = FilePathUtils.getType(aStr);
+    if(type.length()==0) type = aStr.toLowerCase();
+    
+    // Return type
+    switch(type) {
         case "jpg": case "jpeg": return JPEG;
         case "png": return PNG;
         case "gif": return GIF;

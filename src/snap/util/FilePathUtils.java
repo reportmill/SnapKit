@@ -54,10 +54,15 @@ public static int getFileNameIndex(String aPath)
 public static String getExtension(String aPath)
 {
     if(aPath==null) return null;
-    String filename = getFileName(aPath);
-    int dot = filename.lastIndexOf('.');
-    return dot>=0 && dot<filename.length()-1? filename.substring(dot+1) : "";
+    String fname = getFileName(aPath);
+    int dot = fname.lastIndexOf('.');
+    return dot>=0? fname.substring(dot+1) : "";
 }
+
+/**
+ * Returns the file type of the given string path (everything after last '.' in lowercase).
+ */
+public static String getType(String aPath)  { return getExtension(aPath).toLowerCase(); }
 
 /**
  * Returns the given string path minus any extension.

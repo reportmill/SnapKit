@@ -21,9 +21,13 @@ public class FileHeader extends SnapObject {
     // The file size
     long              _size;
     
+    // The MIME type
+    String            _mimeType;
+    
     // Constants for properties
     final public static String LastModTime_Prop = "LastModTime";
     final public static String Size_Prop = "Size";
+    final public static String MIMEType_Prop = "MIMEType";
 
 /**
  * Creates a new FileInfo for path and directory.
@@ -96,6 +100,24 @@ public void setSize(long aSize)
 {
     if(aSize==_size) return;
     firePropChange(Size_Prop, _size, _size = aSize);
+}
+
+/**
+ * Returns the file MIME type.
+ */
+public String getMIMEType()
+{
+    if(_mimeType!=null) return _mimeType;
+    return _mimeType = MIMEType.getType(getPath());
+}
+
+/**
+ * Sets the file MIME type.
+ */
+public void setMIMEtype(String aMIMEType)
+{
+    if(SnapUtils.equals(aMIMEType, _mimeType)) return;
+    firePropChange(MIMEType_Prop, _mimeType, _mimeType = aMIMEType);
 }
 
 /**

@@ -201,7 +201,7 @@ public synchronized WebFile createFile(FileHeader fileHdr)
         file._lastModTime = fileHdr.getLastModTime(); file._size = fileHdr.getSize();
         _files.put(path, file);
         file.addPropChangeListener(this);
-        file.setDataType(DataType.getPathDataType(path));
+        file.setMIMEType(fileHdr.getMIMEType());
     }
     
     // Return file

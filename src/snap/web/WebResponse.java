@@ -18,8 +18,8 @@ public class WebResponse {
     // The response time
     long               _time;
     
-    // The response content/data type
-    DataType           _dataType;
+    // The response MIME type
+    String            _mimeType;
     
     // The response bytes
     byte               _bytes[];
@@ -84,18 +84,18 @@ public String getCodeString()  { return getCodeString(_code); }
 public long getTime()  { return _time; }
 
 /**
- * Returns the response type.
+ * Returns the response MIME type.
  */
-public DataType getDataType()
+public String getMIMEType()
 {
-    if(_dataType!=null) return _dataType;
-    return _dataType = DataType.getPathDataType(getRequestURL().getPath());
+    if(_mimeType!=null) return _mimeType;
+    return _mimeType = MIMEType.getType(getRequestURL().getPath());
 }
 
 /**
- * Sets the data type.
+ * Sets the response MIME type.
  */
-protected void setDataType(DataType aType)  { _dataType = aType; }
+protected void setMIMEType(String aMIMEType)  { _mimeType = aMIMEType; }
 
 /**
  * Returns the file header.
