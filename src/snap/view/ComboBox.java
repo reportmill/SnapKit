@@ -49,6 +49,30 @@ public ComboBox()
 }
 
 /**
+ * Returns function for deteriming text for an item.
+ */
+public Function <T,String> getItemTextFunction()  { return _itemTextFunc; }
+
+/**
+ * Sets function for deteriming text for an item.
+ */
+public void setItemTextFunction(Function <T,String> aFunc)
+{
+    _itemTextFunc = aFunc;
+    if(_list!=null) _list.setItemTextFunction(aFunc);
+}
+
+/**
+ * Returns method to configure list cells.
+ */
+public Consumer<ListCell<T>> getCellConfigure()  { return getListView().getCellConfigure(); }
+
+/**
+ * Sets method to configure list cells.
+ */
+public void setCellConfigure(Consumer<ListCell<T>> aCC)  { getListView().setCellConfigure(aCC); }
+
+/**
  * Returns the TextField.
  */
 public TextField getTextField()
@@ -260,29 +284,6 @@ public T getSelectedItem()  { return getListView().getSelectedItem(); }
  * Sets the selected index.
  */
 public void setSelectedItem(T anItem)  { getListView().setSelectedItem(anItem); }
-
-/**
- * Returns function for deteriming text for an item.
- */
-public Function <T,String> getItemTextFunction()  { return _itemTextFunc; }
-
-/**
- * Sets function for deteriming text for an item.
- */
-public void setItemTextFunction(Function <T,String> aFunc)
-{
-    _itemTextFunc = aFunc;
-}
-
-/**
- * Returns method to configure list cells.
- */
-public Consumer<ListCell<T>> getCellConfigure()  { return getListView().getCellConfigure(); }
-
-/**
- * Sets method to configure list cells.
- */
-public void setCellConfigure(Consumer<ListCell<T>> aCC)  { getListView().setCellConfigure(aCC); }
 
 /**
  * Return combo box text.

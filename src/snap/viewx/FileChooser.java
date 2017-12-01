@@ -140,7 +140,16 @@ public void setDir(WebFile aFile)
 protected void setFileInUI()
 {
     if(!isUISet()) return;
+    
+    // Update FileBrowser
     _fileBrowser.setSelectedItem(getFile()!=null? getFile() : getDir());
+    
+    // Update DirComboBox
+    List <WebFile> dirs = new ArrayList(); for(WebFile dir=getDir();dir!=null;dir=dir.getParent()) dirs.add(dir);
+    setViewItems("DirComboBox", dirs);
+    setViewSelectedIndex("DirComboBox", 0);
+    
+    // Update FileText
     _fileText.setText(getFile()!=null? getFile().getName() : null);
     _fileText.selectAll();
     _fileText.requestFocus();
@@ -279,6 +288,15 @@ protected void initUI()
     // Set FileBrowser Items, SelectedItem
     _fileBrowser.setItems(getFilteredFiles(getDir().getSite().getRootDir().getFiles()));
     _fileBrowser.setSelectedItem(getFile()!=null? getFile() : getDir());
+    
+    // Get/configure DirComboBox
+    ComboBox <WebFile> dirComboBox = getView("DirComboBox", ComboBox.class);
+    dirComboBox.setItemTextFunction(itm -> itm.isRoot()? "Root Directory" : itm.getName());
+    dirComboBox.getListView().setRowHeight(24);
+    List <WebFile> dirs = new ArrayList();
+    for(WebFile dir=getDir();dir!=null;dir=dir.getParent()) dirs.add(dir);
+    dirComboBox.setItems(dirs);
+    dirComboBox.setSelectedIndex(0);
     
     // Get FileText
     _fileText = getView("FileText", TextField.class);
