@@ -17,8 +17,8 @@ public class MIMEType {
     public static final String TEXT = "text/plain";
     public static final String WAV = "audio/x-wav";
     public static final String MP3 = "audio/mpeg";
-    public static final String Settings = "application/settings";
-    public static final String Unknown = "unknown";
+    public static final String SETTINGS = "application/settings";
+    public static final String UKNOWN = "application/octet-stream";
     
 /**
  * Returns the extension for a MIME type.

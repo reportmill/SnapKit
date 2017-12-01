@@ -44,7 +44,7 @@ public ClipboardData(Object aSource)
  */
 public ClipboardData(String aMimeType, Object aSource)
 {
-    _src = aSource; _mimeType = aMimeType;
+    _src = aSource; _mimeType = aMimeType; if(_mimeType==null) _mimeType = MIMEType.UKNOWN;
     if(_src instanceof String)
         _string = (String)_src;
 }
@@ -195,10 +195,7 @@ public static ClipboardData get(Object theData)
         
     // Handle File
     if(theData instanceof File) { File file = (File)theData;
-        String ext = FilePathUtils.getExtension(file.getPath());
-        String mtype = MIMEType.getType(ext);
-        return new ClipboardData(mtype, theData);
-    }
+        return new ClipboardData(Clipboard.FILE_LIST, Collections.singletonList(file)); }
         
     // Handle File List
     if(theData instanceof List) { List list = (List)theData; Object item0 = list.size()>0? list.get(0) : null;
