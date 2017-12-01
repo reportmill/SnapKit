@@ -46,6 +46,9 @@ public class WindowView extends ParentView {
     // Save frame size
     boolean                   _saveSize;
     
+    // The View that referenced on last show
+    View                      _clientView;
+    
     // A list of all open windows
     static List <WindowView>  _openWins = new ArrayList();
     
@@ -242,6 +245,9 @@ public void showCentered(View aView)
  */
 public void show(View aView, double aX, double aY)
 {
+    // Set ClientView
+    _clientView = aView;
+    
     // Make window is initialized
     initNativeWindowOnce();
     
@@ -289,6 +295,16 @@ public void hide()
 }
 
 /**
+ * Returns the client view.
+ */
+public View getClientView()  { return _clientView; }
+
+/**
+ * Returns the client window.
+ */
+public WindowView getClientWindow()  { return _clientView!=null? _clientView.getWindow() : null; }
+
+/**
  * Packs the window.
  */
 public void pack()  { setSize(getBestSize()); }
@@ -303,6 +319,9 @@ public void toFront()  { getHelper().toFront(); }
  */
 public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
 {
+    // Set ClientView
+    _clientView = aView;
+    
     // Make window is initialized
     initNativeWindowOnce();
     

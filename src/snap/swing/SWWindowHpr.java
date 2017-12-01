@@ -15,9 +15,17 @@ public class SWWindowHpr <T extends Window> extends ViewHelper <T> {
 /** Creates the native. */
 protected T createNative()
 {
-    WindowView wview = getView(); String type = wview.getType();
+    // Get Window and type
+    WindowView wview = getView();
+    String type = wview.getType();
+    
+    // See if window has client/owner (was requested by/for view in another window)
+    WindowView clientWinView = wview.getClientWindow();
+    Window owner = clientWinView!=null? (Window)clientWinView.getNative() : null;
+    
+    // Create frame or dialog
     if(type==WindowView.TYPE_MAIN) return (T)new JFrame();
-    return (T)new JDialog();
+    return (T)new JDialog(owner);
 }
 
 /** Sets the x value. */
