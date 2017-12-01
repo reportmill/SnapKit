@@ -40,9 +40,6 @@ public class WebURL {
     // The WebSite for the URL
     WebSite         _asSite;
     
-    // The WebFile for the URL
-    WebFile         _file;
-
 /**
  * Creates a new WebURL for given source.
  */
@@ -227,23 +224,13 @@ public WebSite getSite()  { return getSiteURL().getAsSite(); }
 public WebURL getSiteURL()  { return _siteURL!=null? _siteURL : (_siteURL=getURL(_siteURLS)); }
 
 /**
- * Returns whether file has been set/loaded for this URL.
- */
-public boolean isFileSet()  { return _file!=null; }
-
-/**
  * Returns the file for the URL.
  */
-public WebFile getFile()  { return _file!=null? _file : (_file=getFileImpl()); }
-
-/**
- * Returns the file for the URL.
- */
-protected WebFile getFileImpl()
+public WebFile getFile()
 {
-    String path = getPath(); WebSite site = getSite();
+    String path = getPath();
+    WebSite site = getSite();
     WebFile file = path!=null? site.getFile(path) : site.getRootDir();
-    if(file!=null && file._url==null) file._url = this;
     return file;
 }
 
@@ -252,10 +239,9 @@ protected WebFile getFileImpl()
  */
 public WebFile createFile(boolean isDir)
 {
-    String path = getPath(); WebSite site = getSite();
+    String path = getPath();
+    WebSite site = getSite();
     WebFile file = path!=null? site.createFile(path, isDir) : site.getRootDir();
-    if(file!=null && file._url==null) file._url = this;
-    if(_file==null) _file = file;
     return file;
 }
 

@@ -21,9 +21,6 @@ public class WebFile extends SnapObject implements Comparable<WebFile> {
     // Whether file is a directory
     boolean           _dir;
     
-    // The URL for this file
-    WebURL            _url;
-    
     // Whether file exists in data source (has been saved and, if so, not deleted)
     Boolean           _exists;
 
@@ -47,6 +44,9 @@ public class WebFile extends SnapObject implements Comparable<WebFile> {
     
     // A map of properties associated with file
     Map               _props = new HashMap();
+    
+    // The URL for this file
+    WebURL            _url;
     
     // Constants for properties
     final public static String ModifiedTime_Prop = "ModifiedTime";
@@ -92,8 +92,13 @@ public String getDirPath()  { String path = getPath(); return path.endsWith("/")
  */
 public WebURL getURL()
 {
-    if(_url==null) { _url = getSite().getURL(getPath()); _url._file = this; }
-    return _url;
+    // If already set, just return
+    if(_url!=null) return _url;
+    
+    // Get path, site, URL and return
+    String path = getPath();
+    WebSite site = getSite();
+    return _url = site.getURL(path);
 }
 
 /**

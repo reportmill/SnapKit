@@ -133,7 +133,7 @@ protected WebResponse doHead(WebRequest aRequest)
 /**
  * Handle a get request.
  */
-protected synchronized WebResponse doGet(WebRequest aRequest)
+protected WebResponse doGet(WebRequest aRequest)
 {
     // Get URL and path and create basic response
     WebURL url = aRequest.getURL();
@@ -182,45 +182,18 @@ protected WebResponse doPut(WebRequest aRequest)  { throw new RuntimeException("
 protected WebResponse doDelete(WebRequest aRequest) { throw new RuntimeException("handleDelete"); }
 
 /**
- * Returns a new file at the given path, regardless of whether it exists in the data source.
- */
-public WebFile createFile(String aPath, boolean isDir)  { return createFile(new FileHeader(aPath, isDir)); }
-
-/**
- * Returns a new file for given file header, regardless of whether it exists in the data source.
- */
-public synchronized WebFile createFile(FileHeader fileHdr)
-{
-    // Get standardized path
-    String path = PathUtils.getNormalized(fileHdr.getPath());
-    
-    // Get cached file for path - if not found, create and put new file in cache and configure (synched get/put)
-    WebFile file = _files.get(path);
-    if(file==null) {
-        file = new WebFile(); file._path = path; file._dir = fileHdr.isDir(); file._site = this;
-        file._lastModTime = fileHdr.getLastModTime(); file._size = fileHdr.getSize();
-        _files.put(path, file);
-        file.addPropChangeListener(this);
-        file.setMIMEType(fileHdr.getMIMEType());
-    }
-    
-    // Return file
-    return file;
-}
-
-/**
  * Returns the individual file with the given path.
  */
 public synchronized WebFile getFile(String aPath) throws ResponseException
 {
-    // Get file from files cache
+    // Get file from cache (just return if found)
     String path = PathUtils.getNormalized(aPath);
     WebFile file = _files.get(path);
     if(file!=null && file.getExists())
         return file;
 
     // Get URL, request and response for path
-    WebURL url = getURL(aPath);
+    WebURL url = getURL(path);
     WebRequest req = new WebRequest(url); req.setType(WebRequest.Type.HEAD);
     WebResponse resp = getResponse(req);
     
@@ -235,7 +208,34 @@ public synchronized WebFile getFile(String aPath) throws ResponseException
     // Get file header from response, create file and return
     FileHeader fhdr = resp.getFileHeader();
     if(fhdr==null) { System.err.println("WebSite.getFile: No Header for " + url); return null; } // Can't happen?
-    file = createFile(fhdr); file._exists = true; //file._url = url;
+    file = createFile(fhdr); file._exists = true; file._url = url;
+    return file;
+}
+
+/**
+ * Returns a new file for given path, regardless of whether it exists on site.
+ */
+public WebFile createFile(String aPath, boolean isDir)  { return createFile(new FileHeader(aPath, isDir)); }
+
+/**
+ * Returns a new file for given file header, regardless of whether it exists on site.
+ */
+public synchronized WebFile createFile(FileHeader fileHdr)
+{
+    // Get file from cache (just return if found)
+    String path = PathUtils.getNormalized(fileHdr.getPath());
+    WebFile file = _files.get(path);
+    if(file!=null)
+        return file;
+    
+    // Create/configure new file
+    file = new WebFile(); file._path = path; file._dir = fileHdr.isDir(); file._site = this;
+    file._lastModTime = fileHdr.getLastModTime(); file._size = fileHdr.getSize();
+    file.setMIMEType(fileHdr.getMIMEType());
+    
+    // Put in cache, start listening to file changes and return
+    _files.put(path, file);
+    file.addPropChangeListener(this);
     return file;
 }
 
