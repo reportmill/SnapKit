@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * A View for scrolling other views.
  */
-public class ScrollView extends ParentView implements PropChangeListener {
+public class ScrollView extends ParentView {
     
     // The scroll view
     Scroller        _scroller;
@@ -30,7 +30,8 @@ public class ScrollView extends ParentView implements PropChangeListener {
  */
 public ScrollView()
 {
-    _scroller = new Scroller(); _scroller.addPropChangeListener(this);
+    _scroller = new Scroller();
+    _scroller.addPropChangeListener(pc -> scrollerDidPropChange(pc), Scroller.ScrollH_Prop, Scroller.ScrollV_Prop);
     addChild(_scroller);
     setBorder(SCROLL_VIEW_BORDER);
 }
@@ -71,7 +72,8 @@ public double getScrollV()  { return getVBar().getScroll(); }
 public ScrollBar getHBar()
 {
     if(_hbar!=null) return _hbar;
-    _hbar = new ScrollBar(); _hbar.addPropChangeListener(this);
+    _hbar = new ScrollBar();
+    _hbar.addPropChangeListener(pc -> scrollBarDidPropChange(pc), ScrollBar.Scroll_Prop);
     return _hbar;
 }
 
@@ -81,7 +83,8 @@ public ScrollBar getHBar()
 public ScrollBar getVBar()
 {
     if(_vbar!=null) return _vbar;
-    _vbar = new ScrollBar(); _vbar.setVertical(true); _vbar.addPropChangeListener(this);
+    _vbar = new ScrollBar(); _vbar.setVertical(true);
+    _vbar.addPropChangeListener(pc -> scrollBarDidPropChange(pc), ScrollBar.Scroll_Prop);
     return _vbar;
 }
 
@@ -260,19 +263,27 @@ protected void layoutImpl()
 public Border getDefaultBorder()  { return SCROLL_VIEW_BORDER; }
 
 /**
- * Handle property changes.
+ * Handle Scroller property changes.
  */
-public void propertyChange(PropChange anEvent)
+public void scrollerDidPropChange(PropChange anEvent)
+{
+    String pname = anEvent.getPropertyName();
+    if(pname==Scroller.ScrollV_Prop)
+        getVBar().setScroll(_scroller.getRatioV());
+    else if(pname==Scroller.ScrollH_Prop)
+        getHBar().setScroll(_scroller.getRatioH());
+}
+
+/**
+ * Handle ScrollBar property changes.
+ */
+public void scrollBarDidPropChange(PropChange anEvent)
 {
     String pname = anEvent.getPropertyName();
     if(pname==ScrollBar.Scroll_Prop) {
         if(anEvent.getSource()==_hbar) _scroller.setRatioH(SnapUtils.doubleValue(anEvent.getNewValue()));
         else _scroller.setRatioV(SnapUtils.doubleValue(anEvent.getNewValue()));
     }
-    else if(pname==Scroller.ScrollV_Prop)
-        getVBar().setScroll(_scroller.getRatioV()); //SnapUtils.doubleValue(anEvent.getNewValue()));
-    else if(pname==Scroller.ScrollH_Prop)
-        getHBar().setScroll(_scroller.getRatioH()); //SnapUtils.doubleValue(anEvent.getNewValue()));
 }
 
 /**

@@ -1854,10 +1854,11 @@ public void addPropChangeListener(PropChangeListener aPCL)
 /**
  * Add listener.
  */
-public void addPropChangeListener(PropChangeListener aPCL, String aProp)
+public void addPropChangeListener(PropChangeListener aPCL, String ... theProps)
 {
     if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-    _pcs.addPropChangeListener(aPCL, aProp);
+    for(String prop : theProps)
+        _pcs.addPropChangeListener(aPCL, prop);
 }
 
 /**
@@ -1868,9 +1869,10 @@ public void removePropChangeListener(PropChangeListener aPCL)  { _pcs.removeProp
 /**
  * Remove listener.
  */
-public void removePropChangeListener(PropChangeListener aPCL, String aProp)
+public void removePropChangeListener(PropChangeListener aPCL, String ... theProps)
 {
-    _pcs.removePropChangeListener(aPCL, aProp);
+    for(String prop : theProps)
+       _pcs.removePropChangeListener(aPCL, prop);
 }
 
 /**
