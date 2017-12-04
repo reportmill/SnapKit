@@ -80,7 +80,7 @@ public void propertyChange(PropChange aPCE)  { _pcs.fireDeepChange(this, aPCE); 
 /**
  * Deep property change listener implementation to forward to this View's deep listeners.
  */
-public void deepChange(PropChangeListener aLsnr, PropChange aPCE)  { _pcs.fireDeepChange(aLsnr, aPCE); }
+public void deepChange(Object aLsnr, PropChange aPCE)  { _pcs.fireDeepChange(aLsnr, aPCE); }
 
 /**
  * Standard clone implementation.

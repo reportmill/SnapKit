@@ -170,7 +170,7 @@ public void removeDeepChangeListener(DeepChangeListener aLsnr)
 /**
  * Sends the deep change.
  */
-public void fireDeepChange(PropChangeListener aSrc, PropChange aPCE)
+public void fireDeepChange(Object aSrc, PropChange aPCE)
 {
     if(_dcl!=null)
         _dcl.deepChange(aSrc, aPCE);

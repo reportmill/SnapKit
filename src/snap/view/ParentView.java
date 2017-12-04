@@ -69,7 +69,7 @@ protected void addChild(View aChild, int anIndex)
     
     // If this shape has PropChangeListeners, start listening to children as well
     if(_pcs.hasDeepListener()) {
-        aChild.addPropChangeListener(this); aChild.addDeepChangeListener(this); }
+        aChild.addPropChangeListener(_childPCL); aChild.addDeepChangeListener(_childDCL); }
     
     // Fire property change
     firePropChange(Child_Prop, null, aChild, anIndex); //relayout(); repaint();
@@ -422,8 +422,22 @@ public void addDeepChangeListener(DeepChangeListener aDCL)
     // If first listener, add for children
     if(first)
         for(View child : getChildren()) {
-            child.addPropChangeListener(this); child.addDeepChangeListener(this); }
+            child.addPropChangeListener(_childPCL); child.addDeepChangeListener(_childDCL); }
 }
+
+// PropChange Listener for Child changes to propogate changes when there is DeepChangeListener
+PropChangeListener _childPCL = pc -> childDidPropChange(pc);
+DeepChangeListener _childDCL = (lsnr,pc) -> childDidDeepChange(lsnr,pc);
+
+/**
+ * Property change listener implementation to forward changes on to deep listeners.
+ */
+protected void childDidPropChange(PropChange aPC)  { _pcs.fireDeepChange(this, aPC); }
+
+/**
+ * Deep property change listener implementation to forward to this View's deep listeners.
+ */
+protected void childDidDeepChange(Object aLsnr, PropChange aPC)  { _pcs.fireDeepChange(aLsnr, aPC); }
 
 /**
  * XML Archival of basic node.
