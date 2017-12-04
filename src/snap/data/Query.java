@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * An object to fetch a dataset from a data source entity with a set condition and parameters.
  */
-public class Query extends SnapObject implements JSONArchiver.GetKeys, PropChangeListener {
+public class Query extends SnapObject implements JSONArchiver.GetKeys {
 
     // The data source entity to fetch from
     Entity             _entity;
@@ -24,6 +24,9 @@ public class Query extends SnapObject implements JSONArchiver.GetKeys, PropChang
     
     // The fetch limit
     int                _fetchLimit = getFetchLimitDefault();
+    
+    // Listner to watch Condition PropChange
+    PropChangeListener  _condLsnr = pc -> conditionDidPropChange(pc);
     
     // Constants for PropertyChange
     public static final String Condition_Prop = "Condition";
@@ -65,8 +68,8 @@ public Condition getCondition()  { return _condition; }
 public void setCondition(Condition aCondition)
 {
     // If old condition, stop listening to PropertyChange, if new one, start listening
-    if(_condition!=null) _condition.removePropChangeListener(this);
-    if(aCondition!=null) aCondition.addPropChangeListener(this);
+    if(_condition!=null) _condition.removePropChangeListener(_condLsnr);
+    if(aCondition!=null) aCondition.addPropChangeListener(_condLsnr);
     
     // Set condition and fire property change
     firePropChange(Condition_Prop, _condition, _condition = aCondition);
@@ -189,9 +192,9 @@ public boolean equals(Object anObj)
 }
 
 /**
- * Implement PropChangeListener method to forward on.
+ * Called when Condition has PropChange to refire from Query.
  */
-public void propertyChange(PropChange anEvent)  { firePropChange(anEvent); }
+protected void conditionDidPropChange(PropChange anEvent)  { firePropChange(anEvent); }
 
 /**
  * Standard clone implementation.

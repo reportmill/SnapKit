@@ -9,7 +9,7 @@ import snap.util.*;
 /**
  * This is an abstract class to provide data management (create, get, put, delete) and file management.
  */
-public abstract class WebSite extends SnapObject implements PropChangeListener {
+public abstract class WebSite extends SnapObject {
     
     // The URL describing this WebSite
     WebURL                    _url;
@@ -28,6 +28,9 @@ public abstract class WebSite extends SnapObject implements PropChangeListener {
     
     // A map of properties associated with file
     Map                       _props = new HashMap();
+    
+    // PropChangeListener for file changes
+    PropChangeListener        _fileLsnr = pc -> fileDidPropChange(pc);
     
 /**
  * Returns the URL.
@@ -235,7 +238,7 @@ public synchronized WebFile createFile(FileHeader fileHdr)
     
     // Put in cache, start listening to file changes and return
     _files.put(path, file);
-    file.addPropChangeListener(this);
+    file.addPropChangeListener(_fileLsnr);
     return file;
 }
 
@@ -376,9 +379,9 @@ protected void reloadFile(WebFile aFile)
  */
 public synchronized void resetFile(WebFile aFile)
 {
-    aFile.removePropChangeListener(this);
+    aFile.removePropChangeListener(_fileLsnr);
     aFile.setFiles(null); aFile.setBytes(null); aFile._lastModTime = 0; aFile._size = 0; aFile._exists = null;
-    aFile.addPropChangeListener(this);
+    aFile.addPropChangeListener(_fileLsnr);
 }
 
 /**
@@ -481,6 +484,11 @@ public synchronized void refresh()  { }
  * Flushes any unsaved changes to backing store.
  */
 public void flush() throws Exception { }
+
+/**
+ * Property change listener implementation to forward changes on to deep listeners.
+ */
+public void fileDidPropChange(PropChange aPCE)  { _pcs.fireDeepChange(this, aPCE); }
 
 /** Returns a "not implemented" exception for string (method name). */
 private Exception notImpl(String aStr)  { return new Exception(getClass().getName() + ": Not implemented:" + aStr); }

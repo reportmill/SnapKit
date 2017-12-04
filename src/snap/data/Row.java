@@ -9,7 +9,7 @@ import snap.util.JSONArchiver.*;
 /**
  * Represents a data bearing object from a WebSite.
  */
-public class Row extends HashMap <String,Object> implements PropChangeListener, GetKeys, GetValue, SetValue {
+public class Row extends HashMap <String,Object> implements GetKeys, GetValue, SetValue {
 
     // The DataSite that provided this row
     DataSite                   _site;
@@ -287,15 +287,9 @@ public void delete()
     catch(Exception e) { throw new RuntimeException(e); }
 }
 
-/**
- * PropChangeListener method to propagate changes from row object to row.
- */
-public void propertyChange(PropChange anEvent)
-{
-    Property property = getProperty(anEvent.getPropertyName());
-    if(property!=null && !property.isPrimary())
-        put(property, anEvent.getNewValue());
-}
+/** PropChangeListener method to propagate changes from row object to row.  */
+/*void rowObjectDidPropChange(PropChange anEvent) { Property prop = getProperty(anEvent.getPropertyName());
+    if(prop!=null && !prop.isPrimary()) put(prop, anEvent.getNewValue()); }*/
 
 /**
  * Add a property change listener.

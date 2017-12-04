@@ -9,7 +9,7 @@ import snap.web.*;
 /**
  * This class manages a TextDoc to be rendered and edited in a bounding area.
  */
-public class TextBox implements PropChangeListener {
+public class TextBox {
 
     // The RichText
     RichText             _text;
@@ -49,6 +49,9 @@ public class TextBox implements PropChangeListener {
     
     // The update start/end char indexes in RichText
     int                  _updStart, _updEnd, _lastLen;
+    
+    // A Listener to catch RichText PropChanges
+    PropChangeListener   _richTextLsnr = pc -> richTextDidPropChange(pc);
     
 /**
  * Creates a new TextBox.
@@ -95,9 +98,9 @@ public RichText getRichText()  { return _text; }
 public void setText(RichText aRichText)
 {
     if(aRichText==_text) return;
-    if(_text!=null) _text.removePropChangeListener(this);
+    if(_text!=null) _text.removePropChangeListener(_richTextLsnr);
     _text = aRichText;
-    _text.addPropChangeListener(this);
+    _text.addPropChangeListener(_richTextLsnr);
     setNeedsUpdateAll();
 }
 
@@ -397,17 +400,17 @@ public TextBoxLine getLineLongest()
 /**
  * Updates lines for RichText changes.
  */
-public void propertyChange(PropChange aPCE)
+protected void richTextDidPropChange(PropChange aPC)
 {
     // Handle CharsChange: Update lines for old/new range
-    if(aPCE instanceof RichText.CharsChange) { RichText.CharsChange cc = (RichText.CharsChange)aPCE;
+    if(aPC instanceof RichText.CharsChange) { RichText.CharsChange cc = (RichText.CharsChange)aPC;
         CharSequence nval = cc.getNewValue(), oval = cc.getOldValue(); int index = cc.getIndex();
         if(oval!=null) textRemovedChars(index, index+oval.length());
         if(nval!=null) textAddedChars(index, index+nval.length());
     }
-    else if(aPCE instanceof RichText.StyleChange) { RichText.StyleChange sc = (RichText.StyleChange)aPCE;
+    else if(aPC instanceof RichText.StyleChange) { RichText.StyleChange sc = (RichText.StyleChange)aPC;
         textChangedChars(sc.getStart(), sc.getEnd()); }
-    else if(aPCE instanceof RichText.LineStyleChange) { RichText.LineStyleChange lsc = (RichText.LineStyleChange)aPCE;
+    else if(aPC instanceof RichText.LineStyleChange) { RichText.LineStyleChange lsc = (RichText.LineStyleChange)aPC;
         RichTextLine rtl = getRichText().getLine(lsc.getIndex());
         textChangedChars(rtl.getStart(), rtl.getEnd());
     }

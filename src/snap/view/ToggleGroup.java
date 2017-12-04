@@ -8,16 +8,19 @@ import snap.util.*;
 /**
  * A class to manage a single selection for a group of objects that can each be selected.
  */
-public class ToggleGroup implements PropChangeListener {
+public class ToggleGroup {
     
     // The name
-    String                    _name;
+    String                _name;
     
     // The buttons
     List <ToggleButton>   _toggles = new ArrayList();
     
     // The selected node
     ToggleButton          _sel;
+    
+    // A Listener to watch for button Selection change
+    PropChangeListener    _btnLsnr = pc -> buttonSelectionDidChange(pc);
 
 /**
  * Returns the name.
@@ -49,7 +52,7 @@ public void setSelected(ToggleButton aToggle)
 public void add(ToggleButton aToggle)
 {
     _toggles.add(aToggle);
-    aToggle.addPropChangeListener(this);
+    aToggle.addPropChangeListener(_btnLsnr, ToggleButton.Selected_Prop);
     if(aToggle.isSelected())
         setSelected(aToggle);
 }
@@ -60,7 +63,7 @@ public void add(ToggleButton aToggle)
 public void remove(ToggleButton aToggle)
 {
     _toggles.remove(aToggle);
-    aToggle.removePropChangeListener(this);
+    aToggle.removePropChangeListener(_btnLsnr, ToggleButton.Selected_Prop);
     if(aToggle==_sel)
         setSelected(null);
 }
@@ -68,9 +71,9 @@ public void remove(ToggleButton aToggle)
 /**
  * PropChangeListener method.
  */
-public void propertyChange(PropChange anEvent)
+protected void buttonSelectionDidChange(PropChange anEvent)
 {
-    if(anEvent.getPropertyName().equals("Selected") && SnapUtils.boolValue(anEvent.getNewValue())) {
+    if(SnapUtils.boolValue(anEvent.getNewValue())) {
         if(_sel!=null) _sel.setSelected(false);
         _sel = (ToggleButton)anEvent.getSource();
     }

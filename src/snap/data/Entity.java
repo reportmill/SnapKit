@@ -10,7 +10,7 @@ import snap.web.WebFile;
  * This class represents an entity for a data source. It has a list of properties, some of which are simple
  * attributes and some of which are relationships.
  */
-public class Entity extends SnapObject implements PropChangeListener,JSONArchiver.GetKeys,XMLArchiver.Archivable {
+public class Entity extends SnapObject implements JSONArchiver.GetKeys, XMLArchiver.Archivable {
     
     // The schema that owns this entity
     Schema             _schema;
@@ -35,6 +35,9 @@ public class Entity extends SnapObject implements PropChangeListener,JSONArchive
     
     // The source file
     WebFile            _source;
+    
+    // A Listener to catch child Property PropChanges
+    PropChangeListener _propLsnr = pc -> propertyDidPropChange(pc);
     
     // Constants for properties
     final public static String Name_Prop = "Name";
@@ -136,7 +139,7 @@ public void addProperty(Property aProperty, int anIndex)
     // Add property to list
     _props.add(anIndex, aProperty);
     aProperty.setEntity(this);  // Set Property.Entity to this
-    aProperty.addPropChangeListener(this);  // Start listening to PropertyChanges
+    aProperty.addPropChangeListener(_propLsnr);  // Start listening to PropertyChanges
     _attrs = _attrsSorted = _relations = _relationsSorted = _primaries = null;  // Reset cached lists
     
     // Fire property change event
@@ -155,7 +158,7 @@ public Object removeProperty(int anIndex)
 {
     // Remove property from list
     Property property = _props.remove(anIndex);
-    property.removePropChangeListener(this);  // Stop listening to PropertyChanges
+    property.removePropChangeListener(_propLsnr);  // Stop listening to PropertyChanges
     _attrs = _attrsSorted = _relations = _relationsSorted = _primaries = null;  // Reset cached lists
 
     // Fire property change event and return
@@ -365,7 +368,7 @@ public String getDescriptorKeyGuess()
 /**
  * PropChangeListener implementation to forward Property property changes to entity property change listener.
  */
-public void propertyChange(PropChange anEvent)  { firePropChange(anEvent); }
+protected void propertyDidPropChange(PropChange anEvent)  { firePropChange(anEvent); }
 
 /**
  * Returns the source file.

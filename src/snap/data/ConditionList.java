@@ -8,13 +8,16 @@ import snap.util.*;
 /**
  * This condition subclass represents a list of conditions.
  */
-public class ConditionList extends Condition implements PropChangeListener {
+public class ConditionList extends Condition {
     
     // A list of operators for each condition
     List <Operator>     _operators = new ArrayList();
     
     // A list of conditions
     List <Condition>    _conditions = new ArrayList();
+    
+    // A listener to catch child condition PropChange
+    PropChangeListener  _childLsnr = pc -> childDidPropChange(pc);
     
     // Constants for PropertyChange
     public static final String Condition_Prop = "Condition";
@@ -67,7 +70,7 @@ public ConditionList addCondition(Operator anOperator, Condition aCondition, int
     _conditions.add(anIndex, aCondition);
     
     // Start listening to child PropertyChanges, fire PropertyChange and return
-    aCondition.addPropChangeListener(this);
+    aCondition.addPropChangeListener(_childLsnr);
     firePropChange(Condition_Prop, null, aCondition, anIndex);
     return this;
 }
@@ -98,7 +101,7 @@ public Condition removeCondition(int anIndex)
     _operators.remove(anIndex);
     
     // Stop listening to child PropertyChanges, fire PropertyChange and return
-    condition.removePropChangeListener(this);
+    condition.removePropChangeListener(_childLsnr);
     firePropChange(Condition_Prop, condition, null, anIndex);
     return condition;
 }
@@ -158,7 +161,7 @@ public boolean getValue(Entity anEntity, Object anObj)
 /**
  * Catches child property changes and forwards them to our listener.
  */
-public void propertyChange(PropChange anEvent)  { firePropChange(anEvent); }
+protected void childDidPropChange(PropChange anEvent)  { firePropChange(anEvent); }
 
 /**
  * Standard equals implementation.

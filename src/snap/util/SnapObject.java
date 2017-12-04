@@ -6,10 +6,10 @@ package snap.util;
 /**
  * A base class with prop change support.
  */
-public class SnapObject implements PropChangeListener {
+public class SnapObject {
     
     // The PropChangeSupport
-    PropChangeSupport    _pcs = PropChangeSupport.EMPTY;
+    protected PropChangeSupport    _pcs = PropChangeSupport.EMPTY;
 
 /**
  * Add listener.
@@ -72,15 +72,11 @@ public boolean hasPropChangeListener()  { return _pcs.hasListener(null); }
  */
 public boolean hasDeepChangeListener()  { return _pcs.hasDeepListener(); }
 
-/**
- * Property change listener implementation to forward changes on to deep listeners.
- */
-public void propertyChange(PropChange aPCE)  { _pcs.fireDeepChange(this, aPCE); }
+/** Property change listener implementation to forward changes on to deep listeners. */
+//protected void propertyChange(PropChange aPCE)  { _pcs.fireDeepChange(this, aPCE); }
 
-/**
- * Deep property change listener implementation to forward to this View's deep listeners.
- */
-public void deepChange(Object aLsnr, PropChange aPCE)  { _pcs.fireDeepChange(aLsnr, aPCE); }
+/** Deep property change listener implementation to forward to this View's deep listeners. */
+//protected void deepChange(Object aLsnr, PropChange aPCE)  { _pcs.fireDeepChange(aLsnr, aPCE); }
 
 /**
  * Standard clone implementation.

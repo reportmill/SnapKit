@@ -10,7 +10,7 @@ import snap.web.WebURL;
 /**
  * A class to manage a WebBrowser with a standard toolbar.
  */
-public class WebBrowserPane extends ViewOwner implements PropChangeListener {
+public class WebBrowserPane extends ViewOwner {
 
     // The browser
     WebBrowser                     _browser;
@@ -38,7 +38,7 @@ protected void initUI()
 {
     // Get Browser
     _browser = getView("Browser", WebBrowser.class);
-    _browser.addPropChangeListener(this);
+    _browser.addPropChangeListener(pc -> resetLater());
     
     // Get ToolBar
     View toolBar = getView("ToolBar"); toolBar.setPrefSize(toolBar.getWidth(), toolBar.getHeight());
@@ -108,10 +108,5 @@ public void respondUI(ViewEvent anEvent)
         dbox.showMessageDialog(getUI());
     }
 }
-
-/**
- * Responds to Browser changes (Page, Activity, Status, Loading) to update UI controls.
- */
-public void propertyChange(PropChange anEvent)  { resetLater(); }
 
 }

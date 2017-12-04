@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * This class represents a fetch of a set of data table rows for a given query.
  */
-public class DataTableView implements PropChangeListener {
+public class DataTableView {
 
     // The name of this view
     String             _name;
@@ -35,7 +35,11 @@ public DataTable getTable()  { return _table; }
 /**
  * Returns the table.
  */
-protected void setTable(DataTable aTable)  { _table = aTable; }
+protected void setTable(DataTable aTable)
+{
+    _table = aTable;
+    _table.addPropChangeListener(pc -> tableDidPropChange(pc));
+}
 
 /**
  * Returns the entity for the table file.
@@ -100,7 +104,7 @@ public void refresh()  { _query = null; _rows = null; }
 /**
  * Property change.
  */
-public void propertyChange(PropChange anEvent)
+protected void tableDidPropChange(PropChange anEvent)
 {
     // Handle LocalRow Add/Remove
     if(anEvent.getPropertyName()==DataTable.LocalRow_Prop) {
@@ -155,9 +159,7 @@ public static synchronized DataTableView getTableView(DataTable aTable, String a
     Map <String,DataTableView> tviews = getTableViewsMap(aTable);
     DataTableView tview = tviews.get(aName);
     if(tview==null && doCreate) {
-        tview = new DataTableView(); tview.setTable(aTable); tview.setName(aName); tviews.put(aName, tview);
-        aTable.addPropChangeListener(tview);
-    }
+        tview = new DataTableView(); tview.setTable(aTable); tview.setName(aName); tviews.put(aName, tview); }
     return tview;
 }
 

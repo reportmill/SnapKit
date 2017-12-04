@@ -23,6 +23,9 @@ public class DataSite extends SnapObject {
     // The DataTables
     Map <String,DataTable>    _dataTables = new HashMap();
     
+    // PropChangeListener for Row changes
+    PropChangeListener        _rowLsnr = pc -> rowDidPropChange(pc);
+    
 /**
  * Returns the WebSite.
  */
@@ -210,7 +213,7 @@ public synchronized Row createRow(Entity anEntity, Object aPrimaryValue, Map aMa
     
     // Initialize values, start listening to PropertyChanges and return
     row.initValues(aMap);
-    row.addPropChangeListener(this);
+    row.addPropChangeListener(_rowLsnr);
     return row;
 }
 
@@ -339,6 +342,11 @@ public synchronized void refresh()  { _schema = null; _wsite.refresh(); }
  * Flushes any unsaved changes to backing store.
  */
 public void flush() throws Exception  { _wsite.flush(); }
+
+/**
+ * Called when row changes.
+ */
+protected void rowDidPropChange(PropChange aPC)  { _pcs.fireDeepChange(this, aPC); }
 
 /** Returns a "not implemented" exception for string (method name). */
 private Exception notImpl(String aStr)  { return new Exception(getClass().getName() + ": Not implemented:" + aStr); }
