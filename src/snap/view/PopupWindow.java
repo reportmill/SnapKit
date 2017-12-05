@@ -26,7 +26,7 @@ public RootView getRootView()
 {
     if(_rview!=null) return _rview;
     RootView rview = new RootView(); rview.setFill(Color.WHITE); rview.setBorder(Color.LIGHTGRAY,1);
-    setRootView(rview);
+    setRootView(rview); _rview._win = this;
     return _rview;
 }
 
