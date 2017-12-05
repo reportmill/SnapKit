@@ -195,7 +195,9 @@ public static ClipboardData get(Object theData)
         
     // Handle File
     if(theData instanceof File) { File file = (File)theData;
-        return new ClipboardData(Clipboard.FILE_LIST, Collections.singletonList(file)); }
+        String mtype = MIMEType.getType(file.getPath());
+        return new ClipboardData(mtype, file);
+    }
         
     // Handle File List
     if(theData instanceof List) { List list = (List)theData; Object item0 = list.size()>0? list.get(0) : null;

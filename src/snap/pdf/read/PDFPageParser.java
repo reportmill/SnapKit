@@ -9,7 +9,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D;
-import java.awt.color.*;
+import java.awt.color.ColorSpace;
 import java.util.*;
 import snap.gfx.*;
 import snap.pdf.*;
@@ -359,7 +359,7 @@ void d()
 void Do()
 {
     String name = getToken(_index-1).getName();
-    Object xobj = getPage().getXObject(name);
+    Object xobj = getXObject(name);
     if(xobj instanceof Image)
         _pntr.drawImage((Image)xobj);
     else if(xobj instanceof PDFForm)
@@ -425,7 +425,7 @@ void g()
  */
 void gs()
 {
-    Map exg = getPage().getExtendedGStateNamed(getToken(_index-1).getName());
+    Map exg = getExtendedGStateNamed(getToken(_index-1).getName());
     readExtendedGState(gs, exg);
 }
 
@@ -611,7 +611,7 @@ void scn()
     // Handle PatternSpace
     if(gs.colorSpace instanceof PDFColorSpaces.PatternSpace && numops>=1) {
         String pname = getToken(_index-1).getName();
-        PDFPattern pat = getPage().getPattern(pname);
+        PDFPattern pat = getPattern(pname);
         gs.color = pat.getPaint();
         
         // this is really stupid.  change this around
@@ -639,7 +639,7 @@ void sh()
 {
     String shadename = getToken(_index-1).getName();
     java.awt.Paint oldPaint = gs.color;
-    PDFPatterns.Shading shade = getPage().getShading(shadename);
+    PDFPatterns.Shading shade = getShading(shadename);
     gs.color = shade.getPaint();  //save away old color
     // Get area to fill. If shading specifies bounds, use that, if not, use clip. else fill whole page.
     GeneralPath shadearea;
@@ -712,7 +712,7 @@ void TD()
 void Tf()
 {
     String fontalias = getToken(_index-2).getName(); // name in dict is key, so lose leading /
-    gs.font = getPage().getFontDictForAlias(fontalias);
+    gs.font = getFontDictForAlias(fontalias);
     gs.fontSize = getFloat(_index-1);
 }
 
@@ -1159,6 +1159,95 @@ static int getBlendModeID(String pdfName)
     if(pdfName.equals("/Color")) return PDFComposite.ColorBlendMode;
     if(pdfName.equals("/Luminosity")) return PDFComposite.LuminosityBlendMode;
     throw new PDFException("Unknown blend mode name \""+pdfName+"\"");
+}
+
+/**
+ * Accessors for the resource dictionaries.
+ */
+public Map getExtendedGStateNamed(String name) { return (Map)_page.findResource("ExtGState", name); }
+
+/**
+ * Returns the pdf Font dictionary for a given name (like "/f1").  You
+ * can use the FontFactory to get interesting objects from the dictionary.
+ */  
+public Map getFontDictForAlias(String alias) { return (Map)_page.findResource("Font", alias); }
+
+/**
+ * Like above, but for XObjects. XObjects can be Forms or Images.
+ * If the dictionary represents an Image, this routine calls the ImageFactory to create a java.awt.Image.
+ * If it's a Form XObject, the object returned will be a PDFForm.
+*/ 
+public Object getXObject(String pdfName)
+{
+    PDFStream xobjStream = (PDFStream)_page.findResource("XObject",pdfName);
+    
+    if (xobjStream != null) {
+        Map xobjDict = xobjStream.getDict();
+        
+        // Check to see if we went through this already
+        Object cached = xobjDict.get("_rbcached_xobject_");
+        if(cached != null)
+            return cached;
+        
+        String type = (String)xobjDict.get("Subtype");
+        if (type==null)
+            throw new PDFException("Unknown xobject type");
+        
+        // Image XObject - pass it to the ImageFactory
+        if (type.equals("/Image")) {
+            // First check for a colorspace entry for the image, and create an awt colorspace.
+            Object space = _page.getXRefObj(xobjDict.get("ColorSpace"));
+            ColorSpace imageCSpace = space==null ? null : PDFColorSpace.getColorspace(space, _pfile, _page);
+            cached = PDFImage.getImage(xobjStream, imageCSpace, _pfile);
+        }
+        
+        // A PDFForm just saves the stream away for later parsing
+        else if (type.equals("/Form"))
+            cached = new PDFForm(xobjStream);
+        
+        if (cached != null) {
+            xobjDict.put("_rbcached_xobject_", cached);
+            return cached;
+        }
+    }
+    
+    // Complain and return null
+    System.err.println("Unable to get xobject named \""+pdfName+"\"");
+    return null;
+}
+
+/**
+ * Creates a new pattern object for the resource name
+ */
+public PDFPattern getPattern(String pdfName)
+{
+    Object pat = _page.findResource("Pattern", pdfName);
+    PDFPattern patobj = PDFPattern.getInstance(pat, _pfile);
+    
+    // Resolve the colorspace.
+    if (patobj instanceof PDFPatterns.Shading) {
+        Map shmap = (Map)_page.getXRefObj(((Map)pat).get("Shading"));
+        Object csobj = _page.getXRefObj(shmap.get("ColorSpace"));
+        if(csobj!=null)
+            ((PDFPatterns.Shading)patobj).setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, _page));
+    }
+    
+    return patobj;
+}
+
+/**
+ * Creates a new shadingPattern for the resource name.  Used by the shading operator.
+ */
+public PDFPatterns.Shading getShading(String pdfName)
+{
+    Map pat = (Map)_page.findResource("Shading", pdfName);
+    PDFPatterns.Shading patobj = PDFPatterns.Shading.getInstance(pat, _pfile);
+    
+    // Resolve the colorspace.
+    Object csobj = _page.getXRefObj(pat.get("ColorSpace"));
+    if(csobj!=null)
+        patobj.setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, _page));
+    return patobj;
 }
 
 }

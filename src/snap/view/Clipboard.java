@@ -51,6 +51,9 @@ protected ClipboardData getDataImpl(String aMimeType)  { return _cdatas.get(aMim
  */
 public void addData(Object theData)
 {
+    if(theData instanceof File)
+        theData = Collections.singletonList(theData);
+        
     ClipboardData cdata = ClipboardData.get(theData);
     if(cdata!=null)
         addData(cdata.getMIMEType(), cdata);

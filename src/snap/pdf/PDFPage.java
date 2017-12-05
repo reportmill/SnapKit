@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.pdf;
-import java.util.List;
-import java.awt.color.ColorSpace;
 import java.util.*;
 import snap.gfx.*;
 import snap.pdf.read.*;
@@ -124,7 +122,7 @@ public Object findResource(String resourceName, String name)
 /**
  * Returns the XRef object for given object.
  */
-protected Object getXRefObj(Object anObj)  { return _pfile.getXRefObj(anObj); }
+public Object getXRefObj(Object anObj)  { return _pfile.getXRefObj(anObj); }
 
 /**
  * Returns x.
@@ -142,91 +140,6 @@ protected Object inheritedAttributeForKeyInPage(String aKey, Map aPage)
     }
     
     return value;
-}
-
-/**
- * Accessors for the resource dictionaries.
- */
-public Map getExtendedGStateNamed(String name) { return (Map)findResource("ExtGState", name); }
-
-/**
- * Returns the pdf Font dictionary for a given name (like "/f1").  You
- * can use the FontFactory to get interesting objects from the dictionary.
- */  
-public Map getFontDictForAlias(String alias) { return (Map)findResource("Font", alias); }
-
-/**
- * Like above, but for XObjects. XObjects can be Forms or Images.
- * If the dictionary represents an Image, this routine calls the ImageFactory to create a java.awt.Image.
- * If it's a Form XObject, the object returned will be a PDFForm.
-*/ 
-public Object getXObject(String pdfName)
-{
-    PDFStream xobjStream = (PDFStream)findResource("XObject",pdfName);
-    
-    if (xobjStream != null) {
-        Map xobjDict = xobjStream.getDict();
-        
-        // Check to see if we went through this already
-        Object cached = xobjDict.get("_rbcached_xobject_");
-        if(cached != null)
-            return cached;
-        
-        String type = (String)xobjDict.get("Subtype");
-        if (type==null)
-            throw new PDFException("Unknown xobject type");
-        
-        // Image XObject - pass it to the ImageFactory
-        if (type.equals("/Image")) {
-            // First check for a colorspace entry for the image, and create an awt colorspace.
-            Object space = getXRefObj(xobjDict.get("ColorSpace"));
-            ColorSpace imageCSpace = space==null ? null : PDFColorSpace.getColorspace(space, _pfile, this);
-            cached = PDFImage.getImage(xobjStream, imageCSpace, _pfile);
-        }
-        
-        // A PDFForm just saves the stream away for later parsing
-        else if (type.equals("/Form"))
-            cached = new PDFForm(xobjStream);
-        
-        if (cached != null) {
-            xobjDict.put("_rbcached_xobject_", cached);
-            return cached;
-        }
-    }
-    
-    // Complain and return null
-    System.err.println("Unable to get xobject named \""+pdfName+"\"");
-    return null;
-}
-
-/** Creates a new pattern object for the resource name */
-public PDFPattern getPattern(String pdfName)
-{
-    Object pat = findResource("Pattern", pdfName);
-    PDFPattern patobj = PDFPattern.getInstance(pat, _pfile);
-    
-    // Resolve the colorspace.
-    if (patobj instanceof PDFPatterns.Shading) {
-        Map shmap = (Map)getXRefObj(((Map)pat).get("Shading"));
-        Object csobj = getXRefObj(shmap.get("ColorSpace"));
-        if (csobj != null) 
-          ((PDFPatterns.Shading)patobj).setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, this));
-    }
-    
-    return patobj;
-}
-
-/** Creates a new shadingPattern for the resource name.  Used by the shading operator */
-public PDFPatterns.Shading getShading(String pdfName)
-{
-    Map pat = (Map)findResource("Shading", pdfName);
-    PDFPatterns.Shading patobj = PDFPatterns.Shading.getInstance(pat, _pfile);
-    
-    // Resolve the colorspace.
-    Object csobj = getXRefObj(pat.get("ColorSpace"));
-    if (csobj != null) 
-          patobj.setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, this));
-    return patobj;
 }
 
 /** Returns the page contents for this page. */
