@@ -150,17 +150,17 @@ public void reload()
 /**
  * Runs a new show file panel for type.
  */
-public WebFile showNewFilePanel(View aView)
+public WebFile showNewFilePanel(View aView, WebFile aFile)
 {
     // Run input panel to get new file name
-    String type = getFile().getType(), ext = '.' + type;
+    String type = aFile.getType(), ext = '.' + type;
     String msg = "Enter " + type + " file name", title = "New " + type + " File";
     DialogBox dbox = new DialogBox(title); dbox.setQuestionMessage(msg);
-    String fname = dbox.showInputDialog(aView, getFile().getName()); if(fname==null) return null;
+    String fname = dbox.showInputDialog(aView, aFile.getName()); if(fname==null) return null;
     
     // Strip spaces (for now) and get file path
     fname = fname.replace(" ", "");
-    String path = fname.startsWith("/")? fname : (getFile().getParent().getDirPath() + fname);
+    String path = fname.startsWith("/")? fname : (aFile.getParent().getDirPath() + fname);
     if(!path.toLowerCase().endsWith(ext) && ext.length()>1) path = path + ext;
     
     // If file exists, run option panel for replace
@@ -168,8 +168,12 @@ public WebFile showNewFilePanel(View aView)
         String name = FilePathUtils.getFileName(path);
         msg = "A file named " + name + " already exists in this location.\n Do you want to replace it with new file?";
         dbox = new DialogBox(title); dbox.setWarningMessage(msg);
-        if(!dbox.showConfirmDialog(aView)) return showNewFilePanel(aView);
+        if(!dbox.showConfirmDialog(aView)) return showNewFilePanel(aView, aFile);
     }
+    
+    // If directory, just create and return
+    if(aFile.isDir())
+        return getSite().createFile(path, true);
     
     // Create and return new file
     return createNewFile(path);
@@ -178,7 +182,7 @@ public WebFile showNewFilePanel(View aView)
 /**
  * Creates a new file for use with showNewFilePanel method.
  */
-protected WebFile createNewFile(String aPath)  { return getSite().createFile(aPath, getFile().isDir()); }
+protected WebFile createNewFile(String aPath)  { return getSite().createFile(aPath, false); }
 
 /**
  * Returns a peer object, if this page was provided by another object.

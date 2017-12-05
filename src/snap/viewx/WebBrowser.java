@@ -209,10 +209,10 @@ protected WebPage createPage(WebResponse aResp)
  */
 protected Class <? extends WebPage> getPageClass(WebResponse aResp)
 {
-    WebFile file = aResp.getFile();
-    String type = file.getType();
+    String type = aResp.getPathType();
     
-    if(file.isDir())
+    WebFile file = aResp.getFile();
+    if(file!=null && file.isDir())
         return DirFilePage.class;
 
     if(type.equals("jpg") || type.equals("jpeg") || type.equals("gif") || type.equals("png")) return ImagePage.class;
@@ -221,7 +221,7 @@ protected Class <? extends WebPage> getPageClass(WebResponse aResp)
     if(type.equals("wav") || type.equals("snd") || type.equals("mp3") || type.equals("m4a")) return SoundPage.class;
     if(type.equals("java")) return getPageClass("snap.javatext.JavaPage", TextPage.class);
     if(type.equals("jar")) return ZipPage.class;
-    if(type.equals("txt") || file.isText()) return TextPage.class;
+    if(type.equals("txt") || (file!=null && file.isText())) return TextPage.class;
     return UnknownPage.class;
 }
 

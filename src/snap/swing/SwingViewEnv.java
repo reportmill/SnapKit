@@ -26,6 +26,9 @@ public SwingViewEnv()
     
     // Turn on dyamic layout
     Toolkit.getDefaultToolkit().setDynamicLayout(true);
+    
+    // Set Printer.Master to SwingPrinter
+    SwingPrinter.set();
 }
 
 /**

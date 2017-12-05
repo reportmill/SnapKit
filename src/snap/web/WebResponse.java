@@ -3,6 +3,7 @@
  */
 package snap.web;
 import java.util.List;
+import snap.util.FilePathUtils;
 
 /**
  * The response.
@@ -82,6 +83,21 @@ public String getCodeString()  { return getCodeString(_code); }
  * Returns the response time.
  */
 public long getTime()  { return _time; }
+
+/**
+ * Returns the path.
+ */
+public String getPath()  { return getRequestURL().getPath(); }
+
+/**
+ * Returns the path file name.
+ */
+public String getPathName()  { return getRequestURL().getPathName(); }
+
+/**
+ * Returns the path file type (extension in lowercase, no dot).
+ */
+public String getPathType()  { return FilePathUtils.getType(getPath()); }
 
 /**
  * Returns the response MIME type.
