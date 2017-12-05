@@ -177,7 +177,7 @@ public void setShowCoords(boolean aValue)  { _showCoords = aValue; repaint(); }
  */
 public void setColor(String aString)
 {
-    Color c = Color.colorValue(aString);
+    Color c = Color.get(aString);
     if(c!=null) setFill(c);
     else System.err.println("SetColor: Don't recognize color: " + aString);
 }
