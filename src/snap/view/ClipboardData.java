@@ -95,10 +95,10 @@ public String getName()
  */
 public String getExtension()
 {
-    if(getMIMEType()!=null)
-        return MIMEType.getExtension(getMIMEType());
     if(getName()!=null && getName().indexOf('.')>0)
         return FilePathUtils.getExtension(getName());
+    if(getMIMEType()!=null)
+        return MIMEType.getExtension(getMIMEType());
     return null;
 }
 
