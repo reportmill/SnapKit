@@ -6,7 +6,7 @@ import snap.gfx.*;
 import snap.util.*;
 
 /**
- * A custom class.
+ * A class to display simple text with associcated image(s).
  */
 public class Label extends ParentView {
     

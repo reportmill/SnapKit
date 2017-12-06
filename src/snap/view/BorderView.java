@@ -7,7 +7,7 @@ import snap.gfx.Pos;
 import snap.util.*;
 
 /**
- * A custom class.
+ * A View subclass to manage subviews along edges (top, bottom, left, right) and center.
  */
 public class BorderView extends ParentView {
     

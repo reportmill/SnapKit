@@ -6,11 +6,12 @@ import snap.gfx.*;
 import snap.util.*;
 
 /**
- * A custom class.
+ * A class to show a path shape.
  */
 public class PathView extends View {
     
-    Path   _path;
+    // The path shape
+    Path        _path;
 
 /**
  * Returns the path.

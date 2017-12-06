@@ -5,7 +5,7 @@ package snap.view;
 import snap.util.SnapUtils;
 
 /**
- * A custom class.
+ * A class to model specific key strokes, including the key code and modifiers (shift, alt, etc.).
  */
 public class KeyCombo {
 

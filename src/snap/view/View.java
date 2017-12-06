@@ -7,7 +7,8 @@ import snap.gfx.*;
 import snap.util.*;
 
 /**
- * A custom class.
+ * A standard view implementation to show graphics and handle events and form the basis of all views (buttons, sliders,
+ * text fields, etc.).
  */
 public class View implements XMLArchiver.Archivable {
 

@@ -5,7 +5,7 @@ package snap.view;
 import snap.gfx.*;
 
 /**
- * A custom class.
+ * A class to handle button painting.
  */
 public class ButtonPainter {
     

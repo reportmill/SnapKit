@@ -5,7 +5,7 @@ package snap.view;
 import java.util.*;
 
 /**
- * A custom class.
+ * A class to facilitate working with keyboard key codes.
  */
 public class KeyCode {
     
