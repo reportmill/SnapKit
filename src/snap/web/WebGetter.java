@@ -103,9 +103,23 @@ public static String getURLString(Object anObj)
  */
 public static synchronized WebSite getSite(WebURL aSiteURL)
 {
+    // Get Site from map and return
     WebSite site = _sites.get(aSiteURL);
-    if(site==null) _sites.put(aSiteURL, site = createSite(aSiteURL));
+    if(site!=null)
+        return site;
+        
+    // Otherwise, create site, set URL and return        
+    site = createSite(aSiteURL);
+    site.setURL(aSiteURL);
     return site;
+}
+
+/**
+ * Sets a site for given source URL.
+ */
+protected static synchronized void setSite(WebURL aSiteURL, WebSite aSite)
+{
+    _sites.put(aSiteURL, aSite);
 }
 
 /**
@@ -113,21 +127,31 @@ public static synchronized WebSite getSite(WebURL aSiteURL)
  */
 protected static WebSite createSite(WebURL aSiteURL)
 {
+    // Get parentSiteURL, scheme, path and type
     WebURL parentSiteURL = aSiteURL.getSiteURL();
-    String scheme = aSiteURL.getScheme(), path = aSiteURL.getPath(); if(path==null) path = "";
+    String scheme = aSiteURL.getScheme();
+    String path = aSiteURL.getPath(); if(path==null) path = "";
     String type = FilePathUtils.getExtension(path).toLowerCase();
-    WebSite site = null;
     
-    // If url has path, see if it's jar or zip
-    if(type.equals("jar") || path.endsWith(".jar.pack.gz")) site = new JarFileSite();
-    else if(type.equals("zip") || type.equals("gfar")) site = new ZipFileSite();
-    else if(parentSiteURL!=null && parentSiteURL.getPath()!=null) site = new DirSite();
-    else if(scheme.equals("file")) site = new FileSite();
-    else if(scheme.equals("http") || scheme.equals("https")) site = new HTTPSite();
-    //else if(scheme.equals("ftp")) site = new FTPSite();
-    else if(scheme.equals("local")) site = new LocalSite();
-    if(site!=null) WebUtils.setSiteURL(site, aSiteURL);
-    return site;
+    // Handle JarSite and ZipSite
+    if(type.equals("jar") || path.endsWith(".jar.pack.gz")) return new JarFileSite();
+    else if(type.equals("zip") || type.equals("gfar")) return new ZipFileSite();
+    
+    // Handle DirSite
+    else if(parentSiteURL!=null && parentSiteURL.getPath()!=null) return new DirSite();
+    
+    // Handle FileSite
+    else if(scheme.equals("file")) return new FileSite();
+    
+    // Handle HTTPSite
+    else if(scheme.equals("http") || scheme.equals("https")) return new HTTPSite();
+
+    // Handle LocalSite
+    else if(scheme.equals("local")) return new LocalSite();
+    
+    // Return site
+    System.err.println("WebGetter: Site not found for " + aSiteURL);
+    return null;
 }
 
 /**

@@ -40,7 +40,14 @@ public WebURL getURL()  { return _url; }
 /**
  * Sets the URL.
  */
-protected void setURL(WebURL aURL)  { _url = aURL; _url._asSite = this; }
+protected void setURL(WebURL aURL)
+{
+    // Set URL
+    _url = aURL; _url._asSite = this;
+    
+    // Set in known sites
+    WebGetter.setSite(aURL, this);
+}
 
 /**
  * Returns the URL root.
