@@ -295,14 +295,9 @@ public void hide()
 }
 
 /**
- * Returns the client view.
+ * Returns the view associated with the last show() call.
  */
 public View getClientView()  { return _clientView; }
-
-/**
- * Returns the client window.
- */
-public WindowView getClientWindow()  { return _clientView!=null? _clientView.getWindow() : null; }
 
 /**
  * Packs the window.

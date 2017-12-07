@@ -20,8 +20,7 @@ protected T createNative()
     String type = wview.getType();
     
     // See if window has client/owner (was requested by/for view in another window)
-    WindowView clientWinView = wview.getClientWindow();
-    Window owner = clientWinView!=null? (Window)clientWinView.getNative() : null;
+    Window owner = getClientWindow(true);
     
     // Create frame or dialog
     if(type==WindowView.TYPE_MAIN) return (T)new JFrame();
@@ -123,8 +122,18 @@ public void show()
     // If always-on-top, turn this on (since this is can be turned off in setWindowVisible(false))
     //if(wview.isAlwaysOnTop()) win.setAlwaysOnTop(true);
     
-    // Set window visible
+    // Get window x & y (if client view not in WindowView, shift for real window)
     int x = (int)Math.round(wview.getX()), y = (int)Math.round(wview.getY());
+    
+    // If ClientView exists, but not in WindowView (i.e., CV.RootView was installed in Swing), convert point to screen)
+    if(!isClientViewInWindowView()) {
+        RootView rview = wview.getClientView().getRootView();
+        JComponent rcomp = (JComponent)rview.getNative();
+        java.awt.Point pnt = new java.awt.Point(0,0); SwingUtilities.convertPointToScreen(pnt,rcomp);
+        x += pnt.getX(); y += pnt.getY();
+    }
+    
+    // Set window location, make visible and notify ShowingChanged
     win.setLocation(x,y);
     win.setVisible(true);
     showingChanged();
@@ -264,6 +273,27 @@ protected void sendWinEvent(WindowEvent anEvent, ViewEvent.Type aType)
     if(aType==ViewEvent.Type.WinClose && get() instanceof JFrame && event.isConsumed())
         ((JFrame)get()).setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 }
+
+/** Returns the ClientView.RootView.Window.Native, with option to try ClientView.RootView.Native.Window instead. */
+public Window getClientWindow(boolean doReal)
+{
+    View cview = getView().getClientView();
+    RootView rview = cview!=null? cview.getRootView() : null;
+    WindowView wview = rview!=null && rview.isWindowSet()? rview.getWindow() : null;
+    Window win = wview!=null? wview.getNative(Window.class) : null;
+    
+    // If ClientView found, but not in window that is showing, get win from RootView.Native instead
+    if(cview!=null && (wview==null || !wview.isShowing()) && doReal) {
+        JComponent rcomp = rview.getNative(JComponent.class);
+        win = SwingUtils.getParent(rcomp, Window.class);
+    }
+    
+    // Return window
+    return win;
+}
+
+/** Returns whether ClientView.RootView is in Snap WindowView or explicitly installed in Swing component hierarch. */
+public boolean isClientViewInWindowView()  { return getClientWindow(true)==getClientWindow(false); }
 
 /** A component listener to save frame to preferences on move. */
 private static class FrameSaveListener extends ComponentAdapter {
