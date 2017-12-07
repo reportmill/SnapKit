@@ -72,13 +72,13 @@ public void end()
 public boolean isOpen() { return _open; }
 
 /** Set text position relative to current line matrix.  Used by Td, TD, T*, ', "*/
-public void positionText(float x, float y)
+public void positionText(double x, double y)
 {
     _lineMatrix.translate(x,y);
     _textMatrix.setMatrix(_lineMatrix);
 }
 
-public void setTextMatrix(float a, float b, float c, float d, float e, float f)
+public void setTextMatrix(double a, double b, double c, double d, double e, double f)
 {
     _textMatrix.setMatrix(a,b,c,d,e,f);
     _lineMatrix.setMatrix(a,b,c,d,e,f);

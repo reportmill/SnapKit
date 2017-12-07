@@ -84,7 +84,10 @@ protected void paintOp(PageToken aToken, int anIndex)
         case "cm": cm(); break; // Concat matrix
         case "ET": ET(); break; // End text
         case "f": f(); break; // Fill path
+        case "f*": f_x(); break; // Fill path
         case "F": f(); break; // Fill path (obsolete)
+        case "g": g(); break; // Set gray for nonstroking
+        case "G": G(); break; // Set gray for stroking
         case "h": h(); break; // Closepath
         case "l": l(); break; // lineto
         case "m": m(); break; // moveto
@@ -92,11 +95,12 @@ protected void paintOp(PageToken aToken, int anIndex)
         case "q": q(); break; // gsave
         case "Q": Q(); break; // grestore
         case "re": re(); break; // grestore
-        case "rg": rg(); break; // set rgb color
-        case "RG": RG(); break; // set stroke rgb color
+        case "rg": rg(); break; // set rgb color for nonstroking
+        case "RG": RG(); break; // set rgb color for stroking
         case "s": s(); break; // Closepath, stroke
         case "S": S(); break; // Stroke
         case "SC": SC(); break; // Set stroke color
+        case "T*": T_x(); break; // Text move to
         case "Td": Td(); break; // Text move to
         case "TD": TD(); break; // Text move to
         case "Tf": Tf(); break; // Set font
@@ -157,16 +161,78 @@ void ET()  { _text.end(); }
  */
 void f()
 {
-    //if(tlen==1) path.setWindingRule(GeneralPath.WIND_NON_ZERO);
-    //else if(tlen==2 && pageBytes[tstart+1]=='*') path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
+    //_path.setWindingRule(GeneralPath.WIND_NON_ZERO);
     _pntr.fill(_path);
     _path.clear();
 }
 
 /**
- * Closepath.
+ * Fill path (even-odd rule).
  */
-void h()  { _path.close(); }
+void f_x()
+{
+    //_path.setWindingRule(WIND_EVEN_ODD);
+    _pntr.fill(_path);
+    _path.clear();
+}
+
+/**
+ * Set gray for nonstroking.
+ */
+void g()
+{
+    //ColorSpace cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
+    //gs.color = getColor(cspace,_index,numops); gs.colorSpace = cspace;
+    _pntr.setColor(getGray(_index));
+}
+
+/**
+ * Set gray for stroking
+ */
+void G()
+{
+    //ColorSpace cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
+    //gs.scolor = getColor(cspace,_index,numops); gs.scolorSpace = cspace;
+    _scolor = getGray(_index);
+}
+
+/**
+ * Extended graphics state
+ */
+void gs()
+{
+    //Map exg = getExtendedGStateNamed(getToken(_index-1).getName());
+    //readExtendedGState(gs, exg);
+}
+
+/**
+ * Closepath
+ */
+void h()
+{
+    _path.close();
+    //Point2D lastPt = path.getCurrentPoint(); gs.cp.x = (float)lastPt.getX(); gs.cp.y = (float)lastPt.getY();
+}
+
+/**
+ * Set flatness
+ */
+void i()  { } //gs.flatness = getFloat(_index-1);
+
+/**
+ * ID
+ */
+void ID()  { }
+
+/**
+ * Set linejoin
+ */
+void j()  { } //gs.lineJoin = getInt(_index-1); gs.lineStroke = gs.createStroke();
+
+/**
+ * Set linecap
+ */
+void J()  { } //gs.lineCap = getInt(_index-1); gs.lineStroke = gs.createStroke();
 
 /**
  * Lineto.
@@ -261,6 +327,14 @@ void SC()
 }
 
 /**
+ * Move to next line
+ */
+void T_x()
+{
+    _text.positionText(0, -_pntr.getFont().getLeading()); //_text.positionText(0, -gs.tleading);
+}
+
+/**
  * Text move relative to current line start
  */
 void Td()
@@ -277,8 +351,7 @@ void TD()
 {
     float x = getFloat(_index-2);
     float y = getFloat(_index-1);
-    _text.positionText(x,y);
-    //gs.tleading = -y;
+    _text.positionText(x,y); //gs.tleading = -y;
 }
 
 /**
@@ -380,5 +453,11 @@ Color getColor(int ind)  //ColorSpace space
     //return PDFColorSpace.createColor(space, varray);
     return new Color(comp[0], comp[1], comp[2]);
 }
+
+/**
+ * Called with any of the set color operations to create new color instance from the values in the stream.
+ * Currently considers having the wrong number of components an error.
+ */
+Color getGray(int ind)  { float g = getFloat(ind-1); return new Color(g); }
 
 }
