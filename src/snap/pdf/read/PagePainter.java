@@ -78,7 +78,10 @@ protected void paintOp(PageToken aToken, int anIndex)
     String op = aToken.getString();
     
     switch(op) {
-        case "b": b(); break; // Closepath, fill, stroke
+        case "b": b(); break; // Closepath, fill and stroke path
+        case "b*": b_x(); break; // Closepath, fill and stroke path (even-odd rule)
+        case "B": B(); break; // Fill and stroke path
+        case "B*": B_x(); break; // Fill and stroke path (even-odd rule)
         case "BT": BT(); break; // Begin text
         case "c": c(); break; // Curveto
         case "cm": cm(); break; // Concat matrix
@@ -120,11 +123,31 @@ protected void paintOp(PageToken aToken, int anIndex)
 /**
  * Closepath, fill, stroke.
  */
-void b()
+void b()  { _path.close(); B(); }
+
+/**
+ * Fill and stroke path.
+ */
+void B()
 {
-    //if(tlen==1) path.setWindingRule(GeneralPath.WIND_NON_ZERO); // b
-    //else if(tlen==2 && pageBytes[tstart+1] =='*') path.setWindingRule(GeneralPath.WIND_EVEN_ODD); // b*
-    _path.close();
+    //_path.setWindingRule(GeneralPath.WIND_NON_ZERO);
+    _pntr.fill(_path);
+    _pntr.setColor(_scolor);
+    _pntr.draw(_path);
+    _path.clear();
+}
+
+/**
+ * Closepath, fill, stroke (even-odd rule).
+ */
+void b_x()  { _path.close(); B_x(); }
+
+/**
+ * Fill and stroke path (even-odd rule).
+ */
+void B_x()
+{
+    //_path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
     _pntr.fill(_path);
     _pntr.setColor(_scolor);
     _pntr.draw(_path);
@@ -145,6 +168,24 @@ void c()
     double xc1 = getFloat(_index-4), yc1 = getFloat(_index-3);
     double x1 = getFloat(_index-2), y1 = getFloat(_index-1);
     _path.curveTo(xc0, yc0, xc1, yc1, x1, y1);
+}
+
+/**
+ * Set colorspace
+ */
+void cs()
+{
+    //String space = getToken(_index-1).getName();
+    //gs.colorSpace = PDFColorSpace.getColorspace(space, _pfile, _page);
+}
+
+/**
+ * Set stroke colorspace
+ */
+void CS()
+{
+    //String space = getToken(_index-1).getName();
+    //gs.scolorSpace = PDFColorSpace.getColorspace(space, _pfile, _page);
 }
 
 /**
@@ -416,7 +457,11 @@ void Tm()
 /**
  * Set text rise
  */
-void Ts()  { _text._rise = getFloat(_index-1); }
+void Ts()
+{
+    _text._rise = getFloat(_index-1);
+    if(_text._rise!=0) System.out.println("PagePainter: Non-zero rise");
+}
 
 /**
  * Set text word spacing

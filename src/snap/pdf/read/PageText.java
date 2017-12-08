@@ -27,30 +27,15 @@ public class PageText {
     // The Transform for the current line
     Transform        _lineMatrix = new Transform();
     
-    // Combined rendering Transform
-    Transform        _renderMatrix = new Transform();
-    
     // Text space attributes (should really be in GState?)
     double           _charSpc, _wordSpc, _leading, _horScale = 1, _rise;
-    
-    // Buffer used to convert bytes in font's encoding to unichars or some other form that font's cmap will understand
-    //char             _unicodeBuf[] = new char[32];
-    
-    // A FontRenderContext to help create glyphs
-    //FontRenderContext rendercontext;
-    
-    // Text state parameters can persist across many text objects, so they're stored in the gstate
-    // TODO:  Only horizontal writing mode supported at the moment. Eventually we'll need to do vertical, too.
 
-/** Main constructor. */
-//public PageText(FontRenderContext ctxt)  { rendercontext = ctxt; }
-public PageText(PagePainter aPntr)
-{
-    _ppntr = aPntr;
-    _pntr = _ppntr._pntr;
-}
+/**
+ * Create new PageText.
+ */
+public PageText(PagePainter aPntr)  { _ppntr = aPntr; _pntr = _ppntr._pntr; }
 
-/** start a new text object */
+/** Start new text. */
 public void begin()
 {
     if(!_open) { _textMatrix.clear(); _lineMatrix.clear(); _open = true;
@@ -58,7 +43,7 @@ public void begin()
     else throw new PDFException("Attempt to nest text objects");
 }
 
-/** End the text object */
+/** End text. */
 public void end()
 {
     if(_open) _open = false;
@@ -66,18 +51,18 @@ public void end()
 }
 
 /**
- * Check if the text object is active.  This can be used to raise errors for operations
- * that are only legal within or without a text object.
+ * Set text position relative to current line matrix.  Used by Td, TD, T*, ', ".
  */
-public boolean isOpen() { return _open; }
-
-/** Set text position relative to current line matrix.  Used by Td, TD, T*, ', "*/
 public void positionText(double x, double y)
 {
-    _lineMatrix.translate(x,y);
-    _textMatrix.setMatrix(_lineMatrix);
+    Transform tm = Transform.getTrans(x,y); tm.multiply(_lineMatrix);
+    _lineMatrix.setMatrix(tm);
+    _textMatrix.setMatrix(tm);
 }
 
+/**
+ * Set text matrix. Used by Tm.
+ */
 public void setTextMatrix(double a, double b, double c, double d, double e, double f)
 {
     _textMatrix.setMatrix(a,b,c,d,e,f);
@@ -85,146 +70,60 @@ public void setTextMatrix(double a, double b, double c, double d, double e, doub
 }
 
 /**
- * Get a glyph vector by decoding string bytes according to font encoding,
- * and calculating spacing using text parameters in gstate.
+ * Show given string (Tj).
  */
-//public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
 public void showText(String aStr) 
 {
-    // TODO: This is probably a huge mistake (performance-wise) The font returned by the factory has a font size of 1
-    // so we include the gstate's font size in the text rendering matrix. For any number of reasons, it'd probably be
-    // better to do a deriveFont() with the font size and adjust the rendering matrix calculations.
-    // I'm pretty sure this strategy completely mucks with rendering hints.
-    // NB: rendering matrix includes flip (since font matrices are filpped)
-    //Font font = _pntr.getFont(); //Font font = PDFFont.getFont(fontDict, file);
-    double fsize = _pntr.getFont().getSize(); //gs.fontSize, gs.thscale, gs.trise
-    _renderMatrix.setMatrix(fsize*_horScale, 0, 0, -fsize, 0, -_rise);
- 
-    // Ensure the buffer is big enough for the bytes->cid conversion
-    //Map fontDict = gs.font;      // Get the font dictionary from the gstate
-    //GlyphMapper gmap = PDFFont.getGlyphMapper(fontDict, file);
-    //int bufmax = gmap.maximumOutputBufferSize(pageBytes, offset, length);
-    //int buflen = _unicodeBuf.length;
-    //if(buflen<bufmax) { while(buflen<bufmax) buflen += buflen; _unicodeBuf = new char[buflen]; }
+    // Save GState
+    _pntr.save();
     
-    // Convert to cids and get the metrics (actually just the widths)
-    //int numMappedChars = gmap.mapBytesToChars(pageBytes, offset, length, unicodeBuffer);
-    //Object wobj = PDFFont.getGlyphWidths(fontDict, file, aPntr);
-
-    // Two nearly identical routines broken out for performance (and readability) reasons
-    //GlyphVector glyphs; Point pt = new Point();
-    //if(gmap.isMultiByte()) glyphs = getMultibyteCIDGlyphVector(unicodeBuffer, numMappedChars,gs,font,wobj,gmap,pt);
-    //else glyphs = getSingleByteCIDGlyphVector(pageBytes,offset,length,_unicodeBuf,numMappedChars,gs,font,wobj,pt);
-                           
-    // replace the gstate ctm with one that includes the text transforms
-    _pntr.save(); //Transform saved_ctm = gs.trans.clone();
-    _pntr.transform(_textMatrix); //gs.trans.concatenate(_textMatrix);
-    _pntr.transform(_renderMatrix); //gs.trans.concatenate(_renderMatrix);
+    // Transform by TextMatrix, apply horizontal scale and flip and draw string
+    _pntr.transform(_textMatrix);
+    _pntr.scale(_horScale, -1);
+    _pntr.drawString(aStr, 0, 0);
     
-    // draw, restore ctm and update the text matrix
-    Font font1 = _pntr.getFont().deriveFont(1); _pntr.setFont(font1);
-    _pntr.drawString(aStr, 0, 0); //_pntr.showText(gs, glyphs);
-    _pntr.restore(); //gs.trans = saved_ctm;
+    // Restore GState
+    _pntr.restore();
     
     // Char char advance
-    double adv = _pntr.getFont().getStringAdvance(aStr); //adv = pt.x;
-    
-    // Update TextMatrix for char advance
-    _textMatrix.translate(adv, 0);
+    double adv = getAdvance(aStr);
+    Transform tm = Transform.getTrans(adv,0); tm.multiply(_textMatrix);
+    _textMatrix.setMatrix(tm);
 }
 
 /**
- * For simple fonts.  The bytes have been mapped through the encoding into unicode values.  The font itself will
- * create the glyphs, and the font metric lookups are done by assuming that a single byte in pageBytes will get
- * mapped to single unicode value (and therefore a single glyph) in the glyph vector.
- * TODO: check if there are any issues with composed chars or other cases such that the assumption that
- * 1 byte->1 unicode->1 glyph fails.
+ * Show given tokens (TJ)
  */
-/*GlyphVector getSingleByteCIDGlyphVector(byte pageBytes[], int offset, int length, char uchars[], int numChars,
-                                        PDFGState gs, Font aFont, Object wobj, Point2D.Float textoffset)
-{
-    // widths for single byte fonts is just a simple map
-    float widths[] = (float[])wobj;
-    
-    // Tell font (assumed to have a point size of 1) to create glyphs
-    char chars[] = uchars.length==numChars? uchars : Arrays.copyOf(uchars, numChars);
-    GlyphVector glyphs = aFont.createGlyphVector(rendercontext, chars);
-     
-    // position adjustments.  For performance reasons, we can probably skip this step if word and character spacing
-    // are both 0, although we still need to calculate advance for the whole thing (maybe with help from glyphVector)
-    textoffset.x = textoffset.y = 0;
-    for(int i=0; i<length; ++i) {
-        byte c = pageBytes[offset+i];
-        glyphs.setGlyphPosition(i,textoffset);
-        float advance = widths[c&255];
-            
-        // add word space, but only once if multiple spaces appear in a row
-        //TODO: I think Acrobat considers other whitespace (like \t or \r) to be wordbreaks worthy of adding space
-        if ((c==32) && ((i==0) || (pageBytes[offset+i-1] != 32)))
-            // Check this again - include scale & font or not?? This matches up with preview & Acrobat for char but
-            // only matches word when thscale=1. Mac.pdf has good example
-            advance += gs.tws/(gs.fontSize*gs.thscale);
-        
-        // add character space
-        advance += gs.tcs/(gs.fontSize*gs.thscale);
-        textoffset.x += advance;
-    }
-    return glyphs;
-}*/
-
-/**
- * For cid fonts.  The bytes have been mapped through the encoding into two-byte, big-endian cids.  
- * This will ask the GlyphMapper to map the cids to glyph ids, which it will do with the help of the CIDToGIDMap
- * stream, and then create the GlyphVector.  It then uses a widthTable to look up each cid's width
- * for advancement calculations.
- */
-/*GlyphVector getMultibyteCIDGlyphVector(char cids[], int numCIDs, PDFGState gs, Font aFont, Object wobj,
-                                     GlyphMapper mapper, Point2D.Float textoffset)
-{
-    // widths for cid fonts are looked up in a widthtable
-    PDFGlyphWidthTable widths = (PDFGlyphWidthTable)wobj;
- 
-    // make a conversion buffer.  note again the 1 cid->1 gid assumption
-    int glyphIDs[] = new int[numCIDs];
-    
-    // Get the glyph ids
-    mapper.mapCharsToGIDs(cids, numCIDs, glyphIDs); // int nglyphs = ?
-
-    // Create a glyphVector using the gids. Note that although the javadoc for Font claims that the int array is for
-    // glyphCodes, the description is identical to char method, which uses font's unicode cmap. I assume desrciption
-    // is a cut&paste bug and that the int array called glyphCodes is really used as an array of glyph codes.
-    GlyphVector glyphs = aFont.createGlyphVector(rendercontext, glyphIDs);
-    
-    // position adjustments.  See single-byte routine for comments
-    textoffset.x = textoffset.y = 0;
-    for(int i=0; i<numCIDs; ++i) {
-        int c = cids[i]&0xffff;
-        glyphs.setGlyphPosition(i,textoffset);
-        float advance = widths.getWidth(c);
-         
-        // This is only right for fonts that map cid 32 to the space char.
-        // How you determine that unambiguously is unclear.
-        if ((c==32) && ((i==0) || (cids[i-1] != 32)))
-             advance += gs.tws/(gs.fontSize*gs.thscale);
-         
-         // add character space
-         advance += gs.tcs/(gs.fontSize*gs.thscale);
-         textoffset.x += advance;
-     }
-    return glyphs;
-}*/
-
-
-/** Like the previous routine, except using a list of strings & spacing adjustments */
-//public void showText(byte pageBytes[], List tokens, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
 public void showText(List <PageToken> theTokens)
 {
-    double hscale = 1; //-gs.fontSize*gs.thscale/1000;
+    // Get horizontal scale
+    double hscale = _pntr.getFont().getSize()*_horScale/1000; //-gs.fontSize*gs.thscale/1000;
+    
+    // Iterate over tokens and show
     for(PageToken tok : theTokens) {
         if(tok.type==PageToken.PDFNumberToken)
             _textMatrix.translate(tok.floatValue()*hscale, 0);
-        else showText(tok.getString()); //showText(pageBytes, tok.getStart(), tok.getLength(), gs, file, aPntr);
+        else showText(tok.getString());
     }
+}
+
+/**
+ * Returns the advance for a string, based on font, char spacing, word spacing, horizontal scale.
+ */
+private double getAdvance(String aStr)
+{
+    // Get font and initialize advance
+    Font font = _pntr.getFont();
+    double adv = 0;
+    
+    // Iterate over characters and add charAdvance, CharSpacing, WordSpacing
+    for(int i=0, iMax=aStr.length(); i<iMax; i++) { char c = aStr.charAt(i);
+        adv += font.charAdvance(c) + _charSpc;
+        if(Character.isWhitespace(c) && (i==0 || !Character.isWhitespace(aStr.charAt(i-1)))) adv += _wordSpc;
+    }
+    
+    // Return advance time horizontal scale
+    return adv*_horScale;  // Divide by font size?
 }
 
 }
