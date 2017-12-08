@@ -43,7 +43,7 @@ public class PDFPageParser {
     int                  _index;
     
     // The current text object (gets created once and reused)
-    PDFTextObject        _textObj;
+    PDFPageText          _text;
     
     // The current painter
     PDFMarkupHandler     _pntr;
@@ -113,7 +113,7 @@ public void parse()
     _pntr.beginPage(_bounds.getWidth(), _bounds.getHeight());
     
     // Initialize a text object
-    _textObj = new PDFTextObject(_pntr.getFontRenderContext());
+    _text = new PDFPageText(_pntr.getFontRenderContext());
     
     // Parse the tokens
     parse(pageTokens, pbytes);
@@ -290,7 +290,7 @@ void B_x()
 /**
  * Begin Text
  */
-void BT()  { _textObj.begin(); }
+void BT()  { _text.begin(); }
 
 /**
  * BX start (possibly nested) compatibility section
@@ -375,7 +375,7 @@ void DP() { }
 /**
  * ET - End text
  */
-void ET()  { _textObj.end(); }
+void ET()  { _text.end(); }
 
 /**
  * EMC
@@ -678,7 +678,7 @@ void SCN()  { SC(); } // TODO: deal with weird colorspaces
 /**
  * Move to next line
  */
-void T_x()  { _textObj.positionText(0, -gs.tleading); }
+void T_x()  { _text.positionText(0, -gs.tleading); }
 
 /**
  * Set character spacing
@@ -692,7 +692,7 @@ void Td()
 {
     float x = getFloat(_index-2);
     float y = getFloat(_index-1);
-    _textObj.positionText(x,y);
+    _text.positionText(x,y);
 }
 
 /**
@@ -702,7 +702,7 @@ void TD()
 {
     float x = getFloat(_index-2);
     float y = getFloat(_index-1);
-    _textObj.positionText(x,y);
+    _text.positionText(x,y);
     gs.tleading = -y;
 }
 
@@ -723,7 +723,7 @@ void Tj()
 {
     PageToken tok = getToken(_index-1);
     int tloc = tok.getStart(), tlen = tok.getLength();
-    _textObj.showText(_pageBytes, tloc, tlen, gs, _pfile, _pntr);
+    _text.showText(_pageBytes, tloc, tlen, gs, _pfile, _pntr);
 }
 
 /**
@@ -732,7 +732,7 @@ void Tj()
 void TJ()
 {
     List tArray = (List)(getToken(_index-1).value);
-    _textObj.showText(_pageBytes, tArray, gs, _pfile, _pntr);
+    _text.showText(_pageBytes, tArray, gs, _pfile, _pntr);
 }
 
 /**
@@ -747,7 +747,7 @@ void Tm()
 {
     float a = getFloat(_index-6), b = getFloat(_index-5), c = getFloat(_index-4), d = getFloat(_index-3);
     float tx = getFloat(_index-2), ty = getFloat(_index-1);
-    _textObj.setTextMatrix(a, b, c, d, tx, ty);
+    _text.setTextMatrix(a, b, c, d, tx, ty);
 }
 
 /**
@@ -833,10 +833,9 @@ void y()
 
 /** quote */
 //void quote()  { } //if(tlen==1 && parseTextOperator(c, i, numops, gs, pageBytes)) swallowedToken = true;
-//void single_quote_close()  { _textObj.positionText(0, -gs.tleading); } // Fall through
-//void double_quote_close() {
-//    gs.tws = getFloat(_index-3); gs.tcs = getFloat(_index-2); numops = 1;
-//    _textObj.positionText(0, -gs.tleading); }
+//void single_quote_close()  { _text.positionText(0, -gs.tleading); } // Fall through
+//void double_quote_close() { gs.tws = getFloat(_index-3); gs.tcs = getFloat(_index-2); numops = 1;
+//    _text.positionText(0, -gs.tleading); }
 
 /**
  * Called after drawing op.

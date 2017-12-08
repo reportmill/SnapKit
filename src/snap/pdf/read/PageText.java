@@ -30,8 +30,11 @@ public class PageText {
     // Combined rendering Transform
     Transform        _renderMatrix = new Transform();
     
+    // Text space attributes (should really be in GState?)
+    double           _charSpc, _wordSpc, _leading, _horScale = 1, _rise;
+    
     // Buffer used to convert bytes in font's encoding to unichars or some other form that font's cmap will understand
-    char             _unicodeBuffer[] = new char[32];
+    //char             _unicodeBuf[] = new char[32];
     
     // A FontRenderContext to help create glyphs
     //FontRenderContext rendercontext;
@@ -50,11 +53,8 @@ public PageText(PagePainter aPntr)
 /** start a new text object */
 public void begin()
 {
-    if (!_open) {
-        _textMatrix.clear();
-        _lineMatrix.clear();
-        _open = true;
-    }
+    if(!_open) { _textMatrix.clear(); _lineMatrix.clear(); _open = true;
+        _charSpc = _wordSpc = _leading = _rise = 0; _horScale = 1; } // Should really be in GState?
     else throw new PDFException("Attempt to nest text objects");
 }
 
@@ -91,51 +91,46 @@ public void setTextMatrix(double a, double b, double c, double d, double e, doub
 //public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
 public void showText(String aStr) 
 {
-    // Get the glyphmapper & font
-    //Map fontDict = gs.font;      // Get the font dictionary from the gstate
-    //GlyphMapper gmapper = PDFFont.getGlyphMapper(fontDict, file);
-    //Font font = PDFFont.getFont(fontDict, file);
-    //Point pt = new Point();
-    
     // TODO: This is probably a huge mistake (performance-wise) The font returned by the factory has a font size of 1
     // so we include the gstate's font size in the text rendering matrix. For any number of reasons, it'd probably be
     // better to do a deriveFont() with the font size and adjust the rendering matrix calculations.
     // I'm pretty sure this strategy completely mucks with rendering hints.
     // NB: rendering matrix includes flip (since font matrices are filpped)
-    Font font = _pntr.getFont();
-    double fsize = 1;//font.getSize(); //gs.fontSize;
-    double thscale = 1; //gs.thscale;
-    double trise = 0; //gs.trise;
-    _renderMatrix.setMatrix(fsize*thscale, 0, 0, -fsize, 0, -trise);
+    //Font font = _pntr.getFont(); //Font font = PDFFont.getFont(fontDict, file);
+    double fsize = _pntr.getFont().getSize(); //gs.fontSize, gs.thscale, gs.trise
+    _renderMatrix.setMatrix(fsize*_horScale, 0, 0, -fsize, 0, -_rise);
  
     // Ensure the buffer is big enough for the bytes->cid conversion
-    //int bufmax = gmapper.maximumOutputBufferSize(pageBytes, offset, length);
-    //int buflen = _unicodeBuffer.length;
-    //if (buflen < bufmax) {
-    //    while(buflen<bufmax) buflen += buflen;
-    //    _unicodeBuffer = new char[buflen]; }
+    //Map fontDict = gs.font;      // Get the font dictionary from the gstate
+    //GlyphMapper gmap = PDFFont.getGlyphMapper(fontDict, file);
+    //int bufmax = gmap.maximumOutputBufferSize(pageBytes, offset, length);
+    //int buflen = _unicodeBuf.length;
+    //if(buflen<bufmax) { while(buflen<bufmax) buflen += buflen; _unicodeBuf = new char[buflen]; }
     
-    // Convert to cids
-    //int numMappedChars = gmapper.mapBytesToChars(pageBytes, offset, length, unicodeBuffer);
-    
-    // get the metrics (actually just the widths)
+    // Convert to cids and get the metrics (actually just the widths)
+    //int numMappedChars = gmap.mapBytesToChars(pageBytes, offset, length, unicodeBuffer);
     //Object wobj = PDFFont.getGlyphWidths(fontDict, file, aPntr);
 
     // Two nearly identical routines broken out for performance (and readability) reasons
-    //GlyphVector glyphs;
-    //if(gmapper.isMultiByte()) 
-    //    glyphs = getMultibyteCIDGlyphVector(unicodeBuffer, numMappedChars, gs, font, wobj, gmapper, pt);
-    //else glyphs = getSingleByteCIDGlyphVector(pageBytes,offset,length,_unicodeBuffer,numMappedChars,gs,font,wobj,pt);
+    //GlyphVector glyphs; Point pt = new Point();
+    //if(gmap.isMultiByte()) glyphs = getMultibyteCIDGlyphVector(unicodeBuffer, numMappedChars,gs,font,wobj,gmap,pt);
+    //else glyphs = getSingleByteCIDGlyphVector(pageBytes,offset,length,_unicodeBuf,numMappedChars,gs,font,wobj,pt);
                            
     // replace the gstate ctm with one that includes the text transforms
-    _pntr.save(); //Transform saved_ctm = _pntr.get(Transform)gs.trans.clone();
+    _pntr.save(); //Transform saved_ctm = gs.trans.clone();
     _pntr.transform(_textMatrix); //gs.trans.concatenate(_textMatrix);
     _pntr.transform(_renderMatrix); //gs.trans.concatenate(_renderMatrix);
     
     // draw, restore ctm and update the text matrix
+    Font font1 = _pntr.getFont().deriveFont(1); _pntr.setFont(font1);
     _pntr.drawString(aStr, 0, 0); //_pntr.showText(gs, glyphs);
     _pntr.restore(); //gs.trans = saved_ctm;
-    //_textMatrix.translate(pt.x*gs.fontSize*gs.thscale, pt.y);
+    
+    // Char char advance
+    double adv = _pntr.getFont().getStringAdvance(aStr); //adv = pt.x;
+    
+    // Update TextMatrix for char advance
+    _textMatrix.translate(adv, 0);
 }
 
 /**

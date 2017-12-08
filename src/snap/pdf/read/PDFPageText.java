@@ -12,7 +12,7 @@ import snap.pdf.*;
  * Represents text spacing details that are defined in between BT & ET operation. Only one text object is alive at any
  * given time, and only certain operations are allowed inside a text object.
  */
-public class PDFTextObject {
+public class PDFPageText {
 
     // You can't nest text objects.  isOpen gets reset on BT & ET operations
     boolean isOpen = false;
@@ -27,7 +27,7 @@ public class PDFTextObject {
     AffineTransform renderMatrix = new AffineTransform();
     
     // Buffer used to convert bytes in font's encoding to unichars or some other form that font's cmap will understand
-    char unicodeBuffer[] = new char[32];
+    char unicodeBuf[] = new char[32];
     
     // A FontRenderContext to help create glyphs
     FontRenderContext rendercontext;
@@ -35,21 +35,17 @@ public class PDFTextObject {
     // Text state parameters can persist across many text objects, so they're stored in the gstate
     // TODO:  Only horizontal writing mode supported at the moment. Eventually we'll need to do vertical, too.
 
-/** Main constructor. */
-public PDFTextObject(FontRenderContext ctxt)  { rendercontext = ctxt; }
+/** Create new PDFPageText. */
+public PDFPageText(FontRenderContext ctxt)  { rendercontext = ctxt; }
 
-/** start a new text object */
+/** start new text. */
 public void begin()
 {
-    if (!isOpen) {
-        textMatrix.setToIdentity();
-        lineMatrix.setToIdentity();
-        isOpen=true;
-    }
+    if(!isOpen) { textMatrix.setToIdentity(); lineMatrix.setToIdentity(); isOpen = true; }
     else throw new PDFException("Attempt to nest text objects");
 }
 
-/** End the text object */
+/** End text. */
 public void end()
 {
     if(isOpen) isOpen = false;
@@ -81,12 +77,6 @@ public void setTextMatrix(float a, float b, float c, float d, float e, float f)
  */
 public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
 {
-    // Get the glyphmapper & font
-    Map fontDict = gs.font;      // Get the font dictionary from the gstate
-    GlyphMapper gmapper = PDFFont.getGlyphMapper(fontDict, file);
-    Font font = PDFFont.getFont(fontDict, file);
-    Point2D.Float pt = new Point2D.Float();
-    
     // TODO: This is probably a huge mistake (performance-wise) The font returned by the factory has a font size of 1
     // so we include the gstate's font size in the text rendering matrix. For any number of reasons, it'd probably be
     // better to do a deriveFont() with the font size and adjust the rendering matrix calculations.
@@ -95,25 +85,24 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDF
     renderMatrix.setTransform(gs.fontSize*gs.thscale, 0, 0, -gs.fontSize, 0, -gs.trise);
  
     // Ensure the buffer is big enough for the bytes->cid conversion
-    int bufmax = gmapper.maximumOutputBufferSize(pageBytes, offset, length);
-    int buflen = unicodeBuffer.length;
-    if (buflen < bufmax) {
-        while(buflen<bufmax)
-            buflen += buflen;
-        unicodeBuffer = new char[buflen];
+    Map fontDict = gs.font;      // Get the font dictionary from the gstate
+    GlyphMapper gmap = PDFFont.getGlyphMapper(fontDict, file);
+    int bufmax = gmap.maximumOutputBufferSize(pageBytes, offset, length);
+    int buflen = unicodeBuf.length;
+    if(buflen<bufmax) {
+        while(buflen<bufmax) buflen += buflen;
+        unicodeBuf = new char[buflen];
     }
     
-    // Convert to cids
-    int numMappedChars = gmapper.mapBytesToChars(pageBytes, offset, length, unicodeBuffer);
-    
-    // get the metrics (actually just the widths)
+    // Convert to cids and get metrics (actually just the widths)
+    int numMappedChars = gmap.mapBytesToChars(pageBytes, offset, length, unicodeBuf);
     Object wobj = PDFFont.getGlyphWidths(fontDict, file, aPntr);
 
     // Two nearly identical routines broken out for performance (and readability) reasons
-    GlyphVector glyphs;
-    if(gmapper.isMultiByte()) 
-        glyphs = getMultibyteCIDGlyphVector(unicodeBuffer, numMappedChars, gs, font, wobj, gmapper, pt);
-    else glyphs = getSingleByteCIDGlyphVector(pageBytes, offset, length, unicodeBuffer,numMappedChars,gs,font,wobj,pt);
+    Font font = PDFFont.getFont(fontDict, file);
+    GlyphVector glyphs; Point2D.Float pt = new Point2D.Float();
+    if(gmap.isMultiByte()) glyphs = getMultibyteCIDGlyphVector(unicodeBuf, numMappedChars, gs, font, wobj, gmap, pt);
+    else glyphs = getSingleByteCIDGlyphVector(pageBytes, offset, length, unicodeBuf,numMappedChars,gs,font,wobj,pt);
                            
     // replace the gstate ctm with one that includes the text transforms
     AffineTransform saved_ctm = (AffineTransform)gs.trans.clone();
@@ -146,14 +135,13 @@ GlyphVector getSingleByteCIDGlyphVector(byte pageBytes[], int offset, int length
     // position adjustments.  For performance reasons, we can probably skip this step if word and character spacing
     // are both 0, although we still need to calculate advance for the whole thing (maybe with help from glyphVector)
     textoffset.x = textoffset.y = 0;
-    for(int i=0; i<length; ++i) {
-        byte c = pageBytes[offset+i];
+    for(int i=0; i<length; ++i) { byte c = pageBytes[offset+i];
         glyphs.setGlyphPosition(i,textoffset);
         float advance = widths[c&255];
             
         // add word space, but only once if multiple spaces appear in a row
         //TODO: I think Acrobat considers other whitespace (like \t or \r) to be wordbreaks worthy of adding space
-        if ((c==32) && ((i==0) || (pageBytes[offset+i-1] != 32)))
+        if(c==32 && ((i==0) || (pageBytes[offset+i-1] != 32)))
             // Check this again - include scale & font or not?? This matches up with preview & Acrobat for char but
             // only matches word when thscale=1. Mac.pdf has good example
             advance += gs.tws/(gs.fontSize*gs.thscale);
@@ -190,20 +178,19 @@ GlyphVector getMultibyteCIDGlyphVector(char cids[], int numCIDs, PDFGState gs, F
     
     // position adjustments.  See single-byte routine for comments
     textoffset.x = textoffset.y = 0;
-    for(int i=0; i<numCIDs; ++i) {
-        int c = cids[i]&0xffff;
+    for(int i=0; i<numCIDs; ++i) { int c = cids[i]&0xffff;
         glyphs.setGlyphPosition(i,textoffset);
         float advance = widths.getWidth(c);
          
         // This is only right for fonts that map cid 32 to the space char.
         // How you determine that unambiguously is unclear.
-        if ((c==32) && ((i==0) || (cids[i-1] != 32)))
-             advance += gs.tws/(gs.fontSize*gs.thscale);
+        if(c==32 && ((i==0) || (cids[i-1] != 32)))
+            advance += gs.tws/(gs.fontSize*gs.thscale);
          
-         // add character space
-         advance += gs.tcs/(gs.fontSize*gs.thscale);
-         textoffset.x += advance;
-     }
+        // add character space
+        advance += gs.tcs/(gs.fontSize*gs.thscale);
+        textoffset.x += advance;
+    }
     return glyphs;
 }
 

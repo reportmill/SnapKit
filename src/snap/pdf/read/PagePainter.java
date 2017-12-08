@@ -101,12 +101,17 @@ protected void paintOp(PageToken aToken, int anIndex)
         case "S": S(); break; // Stroke
         case "SC": SC(); break; // Set stroke color
         case "T*": T_x(); break; // Text move to
+        case "Tc": Tc(); break; // Set char spacing
         case "Td": Td(); break; // Text move to
         case "TD": TD(); break; // Text move to
         case "Tf": Tf(); break; // Set font
         case "Tj": Tj(); break; // Show text
         case "TJ": TJ(); break; // Show text (list)
+        case "TL": TL(); break; // Set text leading
         case "Tm": Tm(); break; // Set text matrix
+        case "Ts": Ts(); break; // Set text rise
+        case "Tw": Tw(); break; // Set word spacing
+        case "Tz": Tz(); break; // Set text horizontal scale
         case "w": w(); break; // Set linewidth
         default: System.out.println("Unsupported op: " + op);
     }
@@ -331,8 +336,14 @@ void SC()
  */
 void T_x()
 {
-    _text.positionText(0, -_pntr.getFont().getLeading()); //_text.positionText(0, -gs.tleading);
+    _text.positionText(0, -_text._leading); //_text.positionText(0, -gs.tleading);
+    //System.out.println("Move to next line");
 }
+
+/**
+ * Set character spacing
+ */
+void Tc()  { _text._charSpc = getFloat(_index-1); } //gs.tcs = getFloat(_index-1);
 
 /**
  * Text move relative to current line start
@@ -341,7 +352,7 @@ void Td()
 {
     float x = getFloat(_index-2);
     float y = getFloat(_index-1);
-    _text.positionText(x,y);
+    _text.positionText(x, y); //_text.positionText(x,y);
 }
 
 /**
@@ -351,7 +362,8 @@ void TD()
 {
     float x = getFloat(_index-2);
     float y = getFloat(_index-1);
-    _text.positionText(x,y); //gs.tleading = -y;
+    _text.positionText(x,y); //_text.positionText(x,y);
+    _text._leading = -y;
 }
 
 /**
@@ -387,6 +399,11 @@ void TJ()
 }
 
 /**
+ * Set text leading
+ */
+void TL()  { _text._leading = getFloat(_index-1); }
+
+/**
  * Set text matrix.
  */
 void Tm()
@@ -395,6 +412,21 @@ void Tm()
     float tx = getFloat(_index-2), ty = getFloat(_index-1);
     _text.setTextMatrix(a, b, c, d, tx, ty);
 }
+
+/**
+ * Set text rise
+ */
+void Ts()  { _text._rise = getFloat(_index-1); }
+
+/**
+ * Set text word spacing
+ */
+void Tw()  { _text._wordSpc = getFloat(_index-1); }
+
+/**
+ * Set text horizontal scale
+ */
+void Tz()  { _text._horScale = getFloat(_index-1)/100f; }
 
 /**
  * Set linewidth.
