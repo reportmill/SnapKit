@@ -102,7 +102,8 @@ protected void paintOp(PageToken aToken, int anIndex)
         case "RG": RG(); break; // set rgb color for stroking
         case "s": s(); break; // Closepath, stroke
         case "S": S(); break; // Stroke
-        case "SC": SC(); break; // Set stroke color
+        //case "sc": sc(); break; // Set color nonstroking
+        //case "SC": SC(); break; // Set color stroking
         case "T*": T_x(); break; // Text move to
         case "Tc": Tc(); break; // Set char spacing
         case "Td": Td(); break; // Text move to
@@ -365,7 +366,16 @@ void S()
 }
 
 /**
- * Set stroke color.
+ * Set color nonstroking.
+ */
+void sc()
+{
+    Color color = getColor(_index); //cspace,i,numops);
+    _pntr.setPaint(color);
+}
+
+/**
+ * Set color stroking.
  */
 void SC()
 {
