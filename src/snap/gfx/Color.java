@@ -10,7 +10,13 @@ import snap.util.*;
 public class Color implements Paint, XMLArchiver.Archivable {
     
     // RGBA components
-    double     _red, _green, _blue, _alpha = 1;
+    double      _red, _green, _blue, _alpha = 1;
+    
+    // The ColorSpace
+    ColorSpace  _cspace;
+    
+    // THe components in original ColorSpace
+    float       _comps[];
     
     // Common Colors
     public static Color BLACK = new Color(0d);
@@ -89,6 +95,33 @@ public Color(String aHexString)
         _alpha = Integer.decode("0x" + aHexString.substring(start + 6, start + 8))/255f;
 }
 
+/**
+ * Creates a new Color from given ColorSpace, components array and alpha.
+ */
+public Color(ColorSpace aCS, float comps[], double alpha)
+{
+    String errStr = "";
+    int n = aCS.getNumComponents();
+    _comps = new float[n];
+    
+    // Set Components and check ranges
+    for(int i=0; i<n; i++) {
+        if(comps[i]<0.0 || comps[i]>1.0) errStr += "Component " + i + " ";
+        else _comps[i] = comps[i];
+    }
+    
+    // Set alpha
+    if(alpha<0.0 || alpha>1.0) errStr += "Alpha";
+    else _alpha = alpha;
+
+    // Complain
+    if(errStr!="") throw new IllegalArgumentException("Color param outside of expected range: " + errStr);
+
+    // Set ColorSpace and RGB values
+    _cspace = aCS; float rgb[] = aCS.toRGB(comps);
+    _red = rgb[0]; _green = rgb[1]; _blue = rgb[2];
+}
+    
 /**
  * Returns the red component in the range 0-1.
  */
@@ -232,6 +265,51 @@ public String toHexString()
     return sb.toString();
 }
 
+/**
+ * Returns a float array containing the color and alpha components of the Color, in the ColorSpace specified by cspace
+ * parameter. If compArray is null, an array with length equal to number of components in cspace plus one is created.
+ */
+public float[] getComponents(ColorSpace cspace, float[] compArray)
+{
+    ColorSpace cs = getColorSpace();
+    float f[] = getComponents();
+    float tmp[] = cs.toCIEXYZ(f);
+    float tmpout[] = cspace.fromCIEXYZ(tmp);
+    if(compArray==null) compArray = new float[tmpout.length + 1];
+    for(int i=0;i<tmpout.length;i++) compArray[i] = tmpout[i];
+    compArray[tmpout.length] = (float)_alpha;
+    return compArray;
+}
+
+/**
+ * Returns a float array containing only the color components of the Color in the ColorSpace specified by the cspace
+ * parameter. If compArray is null, an array with length equal to the number of components in cspace is created.
+ */
+public float[] getColorComponents(ColorSpace cspace, float[] compArray)
+{
+    ColorSpace cs = getColorSpace();
+    float f[] = getComponents();
+    float tmp[] = cs.toCIEXYZ(f);
+    float tmpout[] = cspace.fromCIEXYZ(tmp);
+    if(compArray==null) return tmpout;
+    for(int i=0;i<tmpout.length;i++) compArray[i] = tmpout[i];
+    return compArray;
+}
+
+/**
+ * Returns the ColorSpace of this Color.
+ */
+public ColorSpace getColorSpace()
+{
+    return _cspace!=null? _cspace : (_cspace=ColorSpace.getInstance(ColorSpace.CS_sRGB));
+}
+    
+public float[] getComponents()
+{
+    if(_comps==null) _comps = new float[] { (float)_red, (float)_green, (float)_blue, (float)_alpha };
+    return _comps;
+}
+    
 /**
  * Returns a color value for a given object.
  */

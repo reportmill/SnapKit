@@ -894,12 +894,9 @@ private AffineTransform getTransform(int i)
 /** Called with any of the set color ops to create new color from values in stream. */
 private Color getColor(ColorSpace space, int tindex, int numops)
 {
-    //if(numops != n) throw new PDFException("Wrong number of color components for colorspace");
-    
-    int n = space.getNumComponents();
-    float varray[] = new float[n]; // how much of a performance hit is allocating this every time?
-    for(int i=0; i<n; ++i) varray[i] = getFloat(tindex-(n-i));
-    return PDFColorSpace.createColor(space, varray);
+    int cc = space.getNumComponents();
+    float ary[] = new float[cc]; for(int i=0;i<cc;i++) ary[i] = getFloat(tindex-(cc-i));
+    return new Color(space, ary, 1f);
 }
 
 /**

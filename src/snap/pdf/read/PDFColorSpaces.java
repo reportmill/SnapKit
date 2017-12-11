@@ -29,8 +29,7 @@ public static class DeviceRGB extends ColorSpace {
 
     public static DeviceRGB get()  { return _shared; } static DeviceRGB _shared = new DeviceRGB();
     
-    public DeviceRGB()  { this(ColorSpace.TYPE_RGB, 3); }
-    public DeviceRGB(int type, int numcomponents)  { super(type, numcomponents); }
+    public DeviceRGB()  { super(ColorSpace.TYPE_RGB, 3); }
     
     public float[] toRGB(float[] colorvalue)  { return colorvalue; }
     public float[] fromRGB(float[] rgbvalue)  { return rgbvalue; }
@@ -95,36 +94,32 @@ public static class IndexedColorSpace extends ColorSpace {
         
         int ccomps = base.getNumComponents();
         int ncomps = ccomps+(alpha?1:0);
-        int carraylen = ncomps*(hival+1);
-        float max;
-        float color_buffer[], converted_rgb[];
     
-        // Acrobat seems to consider it legal to have more bytes in the stream
-        // than necessary, so only check to see if there isn't enough data.
-        // Excess data just gets ignored.    
+        // Acrobat seems to consider it legal to have more bytes in the stream than necessary, so only check to see if
+        // there isn't enough data. Excess data just gets ignored.    
+        int carraylen = ncomps*(hival+1);
         if (comps.length < carraylen)
             throw new PDFException("Too few color components provided for indexed colorspace");
         baseSpace = base;
         nColors = hival+1;
-        color_buffer = new float[ncomps];
         rgbs = new float[nColors][3];
         
-        // cache component min/max for normalizing loop
+        // Cache component min/max for normalizing loop
         float comp_min[] = new float[ncomps];
         float comp_scale[] = new float[ncomps];
         for(int i=0; i<ncomps; ++i) {
-            comp_min[i] = i<ccomps ? baseSpace.getMinValue(i) : 0;
-            max = i<ccomps ? baseSpace.getMaxValue(i) : 1;
+            comp_min[i] = i<ccomps? baseSpace.getMinValue(i) : 0;
+            float max = i<ccomps? baseSpace.getMaxValue(i) : 1;
             comp_scale[i] = (max-comp_min[i])/255;
         }
         
-        // normalize components for each color in the clut and convert to rgb
+        // Normalize components for each color in the clut and convert to rgb
+        float color_buffer[] = new float[ncomps];
         for(int i=0; i<nColors; ++i) {
             for(int j=0; j<ncomps; ++j)
-                color_buffer[j]=comp_min[j]+comp_scale[j]*(comps[i*ncomps+j]&255);
-            converted_rgb=baseSpace.toRGB(color_buffer);
-            for(int j=0; j<3; ++j)
-                rgbs[i][j]=converted_rgb[j];
+                color_buffer[j] = comp_min[j]+comp_scale[j]*(comps[i*ncomps+j]&255);
+            float converted_rgb[] = baseSpace.toRGB(color_buffer);
+            for(int j=0; j<3; ++j) rgbs[i][j] = converted_rgb[j];
         }
     }
 
@@ -237,7 +232,6 @@ public static class SeparationColorSpace extends DeviceNColorSpace {
     {
         super(Collections.singletonList(name), altspace, tinttrans, null);
     }
-
 }
 
 }
