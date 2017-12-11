@@ -2,8 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.pdf.read;
-import java.awt.color.ColorSpace;
 import java.awt.image.*;
+import snap.gfx.ColorSpace;
 import snap.pdf.PDFException;
 
 /**
@@ -16,13 +16,22 @@ import snap.pdf.PDFException;
  * images in device colorspaces without conversion would probably be a good idea.
  */
 public class PDFImageColorModel extends ColorModel {
-    ColorSpace savedSpace;
+    
+    // Ivars
     int componentmask, componentshift;
     float componentscale[];
     float componentmin[];
     float conversion_buffer[];
     SoftMask softmask;
-  
+
+/**
+ * Create new PDFImageColorModel.
+ */  
+public PDFImageColorModel(ColorSpace space, int bits, int significantBits[], boolean hasalpha, int transferType)
+{
+    super(bits, significantBits, new AWTColorSpace(space), hasalpha, true, hasalpha?TRANSLUCENT:OPAQUE, transferType);
+}
+
 public static PDFImageColorModel createPDFModel(ColorSpace space, int bps, float decodemins[], float decodemaxs[],
     boolean hasalpha)
 {
@@ -86,11 +95,10 @@ public static WritableRaster createPDFRaster(byte packedbytes[], ColorSpace spac
 
 public static WritableRaster createPDFRaster(byte packedbytes[], SoftMask mask, ColorSpace space, int bps, int w, int h)
 {
-    // java.awt.image seems to support color models where all components are meshed or
-    // all components are planar, but not a mixture of the two.  
-    // In PDF the color samples are meshed, but the alpha samples, if available, are 
-    // in a separated plane (from the SMask).  This routine creates new storage for the
-    // raster and copies the samples and the alpha into the new buffer, meshing them as RGBA
+    // java.awt.image seems to support color models where all components are meshed or all components are planar,
+    // but not a mixture of the two. In PDF the color samples are meshed, but the alpha samples, if available, are 
+    // in a separated plane (from the SMask).  This routine creates new storage for the raster and copies the samples
+    // and the alpha into the new buffer, meshing them as RGBA
     DataBufferByte byteBuffer = null;
     int spp = space.getNumComponents();
     
@@ -110,15 +118,9 @@ public static WritableRaster createPDFRaster(byte packedbytes[], SoftMask mask, 
     return byteBuffer!=null? createInterleavedPDFRaster(byteBuffer, spp+1, w, h) : null;
 }
 
-public PDFImageColorModel(ColorSpace space, int bits, int significantBits[], boolean hasalpha, int transferType)
-{
-    super(bits, significantBits, space, hasalpha, true, hasalpha?TRANSLUCENT:OPAQUE, transferType);
-    savedSpace = space;
-}
-
 public void init(int bps, float decodemins[], float decodemaxs[]) 
 {
-    int spp = savedSpace.getNumComponents();
+    int spp = getColorSpace().getNumComponents();
     componentmask = (1<<bps)-1; // mask to get component out of a pixel
     componentshift = bps;  // amount to shift to get next component
     componentmin = new float[spp];  // scale factors to get to colorspace range
@@ -135,9 +137,6 @@ public void init(int bps, float decodemins[], float decodemaxs[])
 
 /** Specify softmask (alpha) information for this image */
 public void setSoftMask(SoftMask m)  { softmask =  m; }
-
-/** Returns the number of color components present in the input pixels */
-public int getNumSourceComponents()  { return savedSpace.getNumComponents(); }
 
 /** CoerceData. */
 public ColorModel coerceData(WritableRaster r, boolean premultipliedAlpha)  { return this; }
@@ -170,7 +169,7 @@ public int getRGB(Object inData)
         conversion_buffer[i] = componentmin[i]+(pix[i]&255)*componentscale[i];
   
     // do actual color space conversion and turn into a pixel
-    float srgbvals[] = savedSpace.toRGB(conversion_buffer);
+    float srgbvals[] = getColorSpace().toRGB(conversion_buffer);
     int alpha = (softmask != null) ? (pix[ncomps]<<24) : 0xff000000;
     return alpha | (((int)(255*srgbvals[0]))<<16) | (((int)(255*srgbvals[1]))<<8) | ((int)(255*srgbvals[2]));
 }
@@ -229,6 +228,22 @@ protected static class SoftMask {
         }
         return 0;   
     }
+}
+
+/**
+ * Implementation of snap ColorSpace using java.awt.color.ColorSpace.
+ */
+public static class AWTColorSpace extends java.awt.color.ColorSpace {
+    ColorSpace _cs;
+    AWTColorSpace(ColorSpace aCS)  { super(aCS.getType(),aCS.getNumComponents()); _cs = aCS; }
+    public boolean isCS_sRGB() { return _cs.isCS_sRGB(); }
+    public float[] toRGB(float[] colorvalue)  { return _cs.toRGB(colorvalue); }
+    public float[] fromRGB(float[] rgbvalue)  { return _cs.fromRGB(rgbvalue); }
+    public float[] toCIEXYZ(float[] colorvalue)  { return _cs.toCIEXYZ(colorvalue); }
+    public float[] fromCIEXYZ(float[] colorvalue)  { return _cs.fromCIEXYZ(colorvalue); }
+    public int getType()  { return _cs.getType(); }
+    public int getNumComponents()  { return _cs.getNumComponents(); }
+    public String getName(int idx)  { return _cs.getName(idx); }
 }
 
 }

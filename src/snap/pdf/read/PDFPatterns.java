@@ -1,9 +1,9 @@
 package snap.pdf.read;
 import java.awt.*;
-import java.awt.color.ColorSpace;
 import java.awt.geom.*;
 import java.awt.image.*;
 import java.util.Map;
+import snap.gfx.ColorSpace;
 import snap.pdf.*;
 
 /**

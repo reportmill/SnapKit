@@ -16,6 +16,14 @@ public class AWTEnv extends GFXEnv {
     static AWTEnv     _shared = new AWTEnv();
 
 /**
+ * Creates a new AWTEnv.
+ */
+public AWTEnv()
+{
+    ColorSpace._factory = new AWTColorSpaceFactory();
+}
+
+/**
  * Returns a list of all system fontnames (excludes any that don't start with capital A-Z).
  */
 public String[] getFontNames()  { return AWTFontUtils.getFontNames(); }
@@ -120,5 +128,48 @@ public static AWTEnv get()  { return _shared; }
  * Sets AWTEnv to be the default env.
  */
 public static void set()  { GFXEnv.setEnv(get()); }
+
+/**
+ * Implementation of snap ColorSpace using java.awt.color.ColorSpace.
+ */
+public static class AWTColorSpaceFactory implements ColorSpace.ColorSpaceFactory {
+    
+    /** Returns a ColorSpace for given type. */
+    public ColorSpace getInstance(int aCS)  { return new AWTColorSpace(aCS); }
+    
+    /** Create ICC ColorSpace from source. */
+    public ColorSpace createColorSpaceICC(Object aSource)
+    {
+        // Get bytes
+        byte bytes[] = SnapUtils.getBytes(aSource);
+        if(bytes==null) {
+            System.err.println("AWTColorSpaceFactory: Error getting bytes for source: " + aSource); return null; }
+        
+        // Load profile and create/return space
+        try {
+            java.awt.color.ICC_Profile prof = java.awt.color.ICC_Profile.getInstance(bytes);
+            java.awt.color.ColorSpace acs = new java.awt.color.ICC_ColorSpace(prof);
+            return new AWTColorSpace(acs);
+        }
+        catch(Exception e) { System.err.println("AWTColorSpaceFactory: Error reading colorspace: " + e); return null; }
+    }
+}
+
+/**
+ * Implementation of snap ColorSpace using java.awt.color.ColorSpace.
+ */
+public static class AWTColorSpace extends ColorSpace {
+    java.awt.color.ColorSpace _acs;
+    AWTColorSpace(int aCS)  { super(aCS,0); _acs = java.awt.color.ColorSpace.getInstance(aCS); }
+    AWTColorSpace(java.awt.color.ColorSpace aACS)  { super(aACS.getType(),aACS.getNumComponents()); _acs = aACS; }
+    public boolean isCS_sRGB() { return _acs.isCS_sRGB(); }
+    public float[] toRGB(float[] colorvalue)  { return _acs.toRGB(colorvalue); }
+    public float[] fromRGB(float[] rgbvalue)  { return _acs.fromRGB(rgbvalue); }
+    public float[] toCIEXYZ(float[] colorvalue)  { return _acs.toCIEXYZ(colorvalue); }
+    public float[] fromCIEXYZ(float[] colorvalue)  { return _acs.fromCIEXYZ(colorvalue); }
+    public int getType()  { return _acs.getType(); }
+    public int getNumComponents()  { return _acs.getNumComponents(); }
+    public String getName(int idx)  { return _acs.getName(idx); }
+}
 
 }

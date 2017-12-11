@@ -2,14 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.pdf.read;
-import java.awt.Color;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D;
-import java.awt.color.ColorSpace;
 import java.util.*;
 import snap.gfx.*;
 import snap.pdf.*;
@@ -610,7 +607,9 @@ void scn()
 {
     // Handle PatternSpace
     if(gs.colorSpace instanceof PDFColorSpaces.PatternSpace && numops>=1) {
-        String pname = getToken(_index-1).getName();
+        
+        System.err.println("PDFPagePainter: sc for PatternSpace not implemented");
+        /*String pname = getToken(_index-1).getName();
         PDFPattern pat = getPattern(pname);
         gs.color = pat.getPaint();
         
@@ -625,7 +624,7 @@ void scn()
             }
             this.executePatternStream((PDFPatterns.Tiling)pat);
             gs.color = pat.getPaint();
-        }
+        }*/
     }
     
     // Do normal version
@@ -637,7 +636,8 @@ void scn()
  */
 void sh()
 {
-    String shadename = getToken(_index-1).getName();
+    System.err.println("PDFPagePainter: Set shader (sh) not implemented");
+    /*String shadename = getToken(_index-1).getName();
     java.awt.Paint oldPaint = gs.color;
     PDFPatterns.Shading shade = getShading(shadename);
     gs.color = shade.getPaint();  //save away old color
@@ -652,8 +652,8 @@ void sh()
         catch(NoninvertibleTransformException e) { throw new PDFException("Invalid user space xform"); }
     }
     _pntr.fillPath(gs, shadearea);
-    gs.color = oldPaint;  //restore color
-    didDraw();
+    gs.color = oldPaint;
+    didDraw();*/
 }
 
 /**
@@ -1131,8 +1131,8 @@ void readExtendedGState(PDFGState gs, Map exgstate)
     
     // cache new composite objects if necessary
     if(transparencyChanged) {
-        gs.composite = PDFComposite.createComposite(gs.colorSpace, gs.blendMode, gs.alphaIsShape, gs.alpha);
-        gs.scomposite = PDFComposite.createComposite(gs.colorSpace, gs.blendMode, gs.alphaIsShape, gs.salpha);
+        gs.composite = PDFComposite.createComposite(gs.blendMode, gs.alphaIsShape, gs.alpha);
+        gs.scomposite = PDFComposite.createComposite(gs.blendMode, gs.alphaIsShape, gs.salpha);
     }
 }
 

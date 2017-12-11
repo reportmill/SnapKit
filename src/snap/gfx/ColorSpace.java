@@ -82,39 +82,14 @@ public abstract class ColorSpace {
 
     /** The built-in linear gray scale color space. */
     public static final int CS_GRAY = 1003;
+    
+    // The object that creates new ColorSpaces for current graphics environment. */
+    public static ColorSpaceFactory  _factory;
 
 /**
  * Constructs a ColorSpace object given a color space type and the number of components.
  */
 protected ColorSpace (int type, int numcomponents)  { this.type = type; this.numComponents = numcomponents; }
-
-/**
- * Returns a ColorSpace representing one of the specific predefined color spaces.
- * @param colorspace a specific color space identified by one of the predefined class constants (e.g.
- * CS_sRGB, CS_LINEAR_RGB, CS_CIEXYZ, CS_GRAY, or CS_PYCC)
- */
-public static ColorSpace getInstance(int aCS)
-{
-    switch(aCS) {
-        case CS_sRGB:
-            //if(sRGBspace == null) sRGBspace = new ICC_ColorSpace(ICC_Profile.getInstance(CS_sRGB));
-            return sRGBspace!=null? sRGBspace : (sRGBspace=new AWTColorSpace(aCS));
-
-        case CS_CIEXYZ:
-            //if(XYZspace == null) XYZspace = new ICC_ColorSpace(ICC_Profile.getInstance(CS_CIEXYZ));
-            return XYZspace!=null? XYZspace : (XYZspace=new AWTColorSpace(aCS));
-
-        case CS_GRAY:
-            //if(GRAYspace == null) GRAYspace = new ICC_ColorSpace (ICC_Profile.getInstance(CS_GRAY));
-            return GRAYspace!=null? GRAYspace : (GRAYspace=new AWTColorSpace(aCS));
-
-        case CS_LINEAR_RGB:
-            //if(LINEAR_RGBspace == null) LINEAR_RGBspace = new ICC_ColorSpace (ICC_Profile.getInstance(CS_LINEAR_RGB));
-            return LINEAR_RGBspace!=null? LINEAR_RGBspace : (LINEAR_RGBspace=new AWTColorSpace(aCS));
-
-        default: throw new IllegalArgumentException ("Unknown color space");
-    }
-}
 
 /**
  * Returns true if the ColorSpace is CS_sRGB.
@@ -190,7 +165,8 @@ public String getName(int idx)
 /**
  * Returns the minimum normalized color component value for the specified component.
  */
-public float getMinValue(int comp) {
+public float getMinValue(int comp)
+{
     if(comp<0 || comp>numComponents-1) throw new IllegalArgumentException("Component index out of range: " + comp);
     return 0.0f;
 }
@@ -198,30 +174,46 @@ public float getMinValue(int comp) {
 /**
  * Returns the maximum normalized color component value for the specified component.
  */
-public float getMaxValue(int comp) {
+public float getMaxValue(int comp)
+{
     if(comp<0 || comp>numComponents-1) throw new IllegalArgumentException("Component index out of range: " + comp);
     return 1.0f;
 }
 
 /**
- * Returns true if cspace is the XYZspace.
+ * Returns a ColorSpace representing one of the specific predefined color spaces.
+ * @param colorspace a specific color space identified by one of the predefined class constants (e.g.
+ * CS_sRGB, CS_LINEAR_RGB, CS_CIEXYZ, CS_GRAY, or CS_PYCC)
  */
-static boolean isCS_CIEXYZ(ColorSpace cspace) { return (cspace == XYZspace); }
+public static ColorSpace getInstance(int aCS)
+{
+    switch(aCS) {
+        case CS_sRGB: return sRGBspace!=null? sRGBspace : (sRGBspace=_factory.getInstance(aCS));
+        case CS_CIEXYZ: return XYZspace!=null? XYZspace : (XYZspace=_factory.getInstance(aCS));
+        case CS_GRAY: return GRAYspace!=null? GRAYspace : (GRAYspace=_factory.getInstance(aCS));
+        case CS_LINEAR_RGB: return LINEAR_RGBspace!=null? LINEAR_RGBspace : (LINEAR_RGBspace=_factory.getInstance(aCS));
+        default: throw new IllegalArgumentException ("Unknown color space");
+    }
+}
 
 /**
- * Implementation of snap ColorSpace using java.awt.color.ColorSpace.
+ * Create ICC ColorSpace from source (stream or bytes)
  */
-public static class AWTColorSpace extends ColorSpace {
-    java.awt.color.ColorSpace _acs;
-    AWTColorSpace(int aCS)  { super(aCS,0); _acs = java.awt.color.ColorSpace.getInstance(aCS); }
-    public boolean isCS_sRGB() { return _acs.isCS_sRGB(); }
-    public float[] toRGB(float[] colorvalue)  { return _acs.toRGB(colorvalue); }
-    public float[] fromRGB(float[] rgbvalue)  { return _acs.fromRGB(rgbvalue); }
-    public float[] toCIEXYZ(float[] colorvalue)  { return _acs.toCIEXYZ(colorvalue); }
-    public float[] fromCIEXYZ(float[] colorvalue)  { return _acs.fromCIEXYZ(colorvalue); }
-    public int getType()  { return _acs.getType(); }
-    public int getNumComponents()  { return _acs.getNumComponents(); }
-    public String getName(int idx)  { return _acs.getName(idx); }
+public static ColorSpace createColorSpaceICC(Object aSource)
+{
+    return _factory.createColorSpaceICC(aSource);
+}
+
+/**
+ * The ColorSpaceFactory.
+ */
+public interface ColorSpaceFactory {
+    
+    /** Returns a ColorSpace for given type. */
+    public ColorSpace getInstance(int aCS);
+    
+    /** Create ICC ColorSpace from source. */
+    public ColorSpace createColorSpaceICC(Object aSource);
 }
 
 }

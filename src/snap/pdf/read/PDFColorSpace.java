@@ -1,10 +1,9 @@
 package snap.pdf.read;
-import java.awt.color.ColorSpace;
 import java.io.InputStream;
 import java.util.*;
+import snap.gfx.ColorSpace;
 import snap.pdf.*;
 import snap.pdf.read.PDFColorSpaces.*;
-import snap.util.SnapUtils;
 
 /**
  * Color/ColorSpace utility methods for PDF.
@@ -83,7 +82,7 @@ public static ColorSpace getColorspace(Object csobj, PDFFile _pfile, PDFPage pag
     else if (csobj instanceof List) { cslist = (List)csobj;
         // The usual format is [/SpaceName obj1 obj2...]
         // We do color space cacheing by adding the colorspace as the last object in the list.
-        // The normal map cacheing strategy is to add an element with key _rb_cached_..., but Adobe, in their inifinite
+        // The normal map cacheing strategy is to add an element with key _rbcached_..., but Adobe, in their inifinite
         // wisdom, decided that color spaces should be arrays instead of dictionaries, like everything else.
         // TODO:  Make sure not to export this extra element when saving pdf
         Object cachedObj = cslist.get(cslist.size()-1);
@@ -124,14 +123,13 @@ public static ColorSpace getColorspace(Object csobj, PDFFile _pfile, PDFPage pag
             type = PDFColorSpace.IndexedColorspace;
             //  [/Indexed basecolorspace hival <hex clut>]
             // params set above is the base colorspace. Turn it into a real colorspace
-            // NB: this is recursive and there's no check for following illegal sequence, which would cause
-            // infinite recursion:
+            // NB: this is recursive and there's no check for this illegal sequence, which causes infinite recursion:
             //   8 0 obj [/Indexed  8 0 R  1 <FF>] endobj
             // Also note that in the time it took to write this comment, you could have put in a check for this case.
             if (cslist.size() != 4)
                 throw new PDFException("Wrong number of elements in colorspace definition");
  
-            if ((params instanceof String) && ( ((String)params).charAt(0)=='/') )
+            if(params instanceof String && (((String)params).charAt(0)=='/'))
                 params = ((String)params).substring(1);
             
             ColorSpace base = getColorspace(params, _pfile, page);
@@ -153,8 +151,8 @@ public static ColorSpace getColorspace(Object csobj, PDFFile _pfile, PDFPage pag
             }
             
             // In the case of inline images, the pageparser has already done the conversion.
-            else if (val instanceof byte[]) {
-                lookup_table = (byte [])val; }
+            else if (val instanceof byte[])
+                lookup_table = (byte [])val;
             
             else throw new PDFException("Can't read color lookup table");
             
@@ -186,7 +184,7 @@ private static ColorSpace getDeviceCMYK()
     
     // Get profile file stream and create/return space
     InputStream s = PDFColorSpace.class.getResourceAsStream("CMYK.icc");
-    return _cmykSpace = createColorSpaceICC(s);
+    return _cmykSpace = ColorSpace.createColorSpaceICC(s);
 }
 
 /**
@@ -215,7 +213,7 @@ private static ColorSpace createColorSpace(int type, Object params)
             ColorSpace cspace = null;
             try {
                 byte iccdata[] = s.decodeStream();
-                cspace = createColorSpaceICC(iccdata);
+                cspace = ColorSpace.createColorSpaceICC(iccdata);
             } catch (Exception e) {System.err.println("Error reading colorspace");}
             
             // Sanity check
@@ -262,24 +260,6 @@ private static ColorSpace createColorSpace(int type, Object params)
     // Return a default.  The parser's going to barf if the number of parameters passed to a 
     // sc operation doesn't match the number of components in this space.   Don't say you weren't warned.
     return ColorSpace.getInstance(ColorSpace.CS_sRGB);
-}
-
-/**
- * Create ICC ColorSpace from source (stream or bytes)
- */
-private static ColorSpace createColorSpaceICC(Object aSource)
-{
-    // Get bytes
-    byte bytes[] = SnapUtils.getBytes(aSource);
-    if(bytes==null) {
-        System.err.println("ColorSpace.createColorSpaceICC: Error getting bytes for soruce: " + aSource); return null; }
-    
-    // Load profile and create/return space
-    try {
-        java.awt.color.ICC_Profile prof = java.awt.color.ICC_Profile.getInstance(bytes);
-        return new java.awt.color.ICC_ColorSpace(prof);
-    }
-    catch(Exception e) { System.err.println("PDFColorSpace: Error reading colorspace: " + e); return null; }
 }
 
 }

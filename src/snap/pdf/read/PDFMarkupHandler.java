@@ -150,7 +150,7 @@ public void strokePath(PDFGState aGS, GeneralPath aShape)
 {
     AffineTransform old = establishTransform(aGS);
     if(aGS.scomposite != null) _gfx.setComposite(aGS.scomposite);
-    _gfx.setColor(aGS.scolor); _gfx.setStroke(aGS.lineStroke); _gfx.draw(aShape);
+    _pntr.setColor(aGS.scolor); _gfx.setStroke(aGS.lineStroke); _gfx.draw(aShape);
     _gfx.setTransform(old);
 }
 
@@ -161,7 +161,7 @@ public void fillPath(PDFGState aGS, GeneralPath aShape)
 {
     AffineTransform old = establishTransform(aGS);
     if(aGS.composite != null) _gfx.setComposite(aGS.composite);
-    _gfx.setPaint(aGS.color); _gfx.fill(aShape);
+    _pntr.setPaint(aGS.color); _gfx.fill(aShape);
     _gfx.setTransform(old);
 }    
 
@@ -223,7 +223,7 @@ public void showText(PDFGState aGS, GlyphVector v)
     if (aGS.composite != null)
         _gfx.setComposite(aGS.composite);
     
-    _gfx.setPaint(aGS.color);
+    _pntr.setPaint(aGS.color);
     _gfx.drawGlyphVector(v,0,0);
     _gfx.setTransform(old);
 }

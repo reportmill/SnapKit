@@ -1,7 +1,6 @@
 package snap.pdf.read;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
-import java.awt.color.ColorSpace;
 
 /**
  * Represents a PDF composite.
@@ -26,7 +25,7 @@ public class PDFComposite {
     public static final int ColorBlendMode = 14;
     public static final int LuminosityBlendMode = 15;
 
-public static Composite createComposite(ColorSpace sourcespace, int blendMode, boolean alphaIsShape, float alpha)
+public static Composite createComposite(int blendMode, boolean alphaIsShape, float alpha)
 {
     // TODO: implement blend modes
     switch (blendMode) {

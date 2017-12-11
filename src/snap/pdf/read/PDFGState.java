@@ -5,7 +5,8 @@ package snap.pdf.read;
 import java.util.*;
 import java.awt.*;
 import java.awt.geom.*;
-import java.awt.color.*;
+import snap.gfx.Color;
+import snap.gfx.ColorSpace;
 import snap.pdf.PDFException;
 
 /**
@@ -20,7 +21,7 @@ public class PDFGState implements Cloneable {
     AffineTransform      trans = new AffineTransform();
     
     // The current color
-    Paint          color = Color.black;
+    Color          color = Color.BLACK;
     
     // The current color space
     ColorSpace     colorSpace;
@@ -29,7 +30,7 @@ public class PDFGState implements Cloneable {
     int            renderingIntent = RelativeColorimetricIntent;
     
     // The current stroke color
-    Color          scolor = Color.black;
+    Color          scolor = Color.BLACK;
     
     // The current stroke color space
     ColorSpace     scolorSpace;

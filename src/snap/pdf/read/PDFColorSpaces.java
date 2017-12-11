@@ -1,6 +1,6 @@
 package snap.pdf.read;
-import java.awt.color.ColorSpace;
 import java.util.*;
+import snap.gfx.ColorSpace;
 import snap.pdf.*;
 
 /**
@@ -46,7 +46,7 @@ public static class DeviceRGB extends ColorSpace {
  * is appropriate for the given operation.
  * 
  * To draw in a pattern colorspace, you can ask the colorspace for a Paint object. Classes which implement the
- * java.awt.Paint interface can be created for all the different shading types, as well as for tiling patterns.
+ * awt Paint interface can be created for all the different shading types, as well as for tiling patterns.
  */
 public static class PatternSpace extends ColorSpace {
     public Map patternDict;

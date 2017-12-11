@@ -4,8 +4,8 @@
 package snap.pdf.read;
 import java.awt.Image;
 import java.awt.image.*;
-import java.awt.color.*;
 import java.util.*;
+import snap.gfx.ColorSpace;
 import snap.pdf.*;
 import snap.pdf.read.PDFImageColorModel.SoftMask;
 
@@ -138,16 +138,15 @@ public static Image getImage(PDFStream imageStream, ColorSpace cspace, PDFFile s
     // Create a Raster for the image samples. The raster will use meshed samples (as they are in pdf).
     // If the image specifies a softmask, its data will get meshed in with the color samples.
     WritableRaster praster;
-    if (alphaMask==null)
-        praster = PDFImageColorModel.createPDFRaster(streamBytes,cspace,bpc,w,h);
+    if(alphaMask==null) praster = PDFImageColorModel.createPDFRaster(streamBytes, cspace, bpc, w, h);
     else praster = PDFImageColorModel.createPDFRaster(streamBytes, alphaMask, cspace, bpc, w, h);
     
     // Now create a PDFColorModel for the image. The model takes care of colorspace conversion of the samples and 
     // knows how to return sRGB pixels with or without alpha for the BufferedImage
     if (praster != null) {
-        PDFImageColorModel pixelModel = PDFImageColorModel.createPDFModel(cspace, bpc, dmins, dmaxs, alphaMask!=null);
-        pixelModel.setSoftMask(alphaMask);
-        image = new BufferedImage(pixelModel, praster, false, null);
+        PDFImageColorModel pixModel = PDFImageColorModel.createPDFModel(cspace, bpc, dmins, dmaxs, alphaMask!=null);
+        pixModel.setSoftMask(alphaMask);
+        image = new BufferedImage(pixModel, praster, false, null);
     }
   
     if(image!=null) 
