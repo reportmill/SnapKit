@@ -336,6 +336,12 @@ public static byte[] getBytes(Object aSource)
     if(aSource instanceof byte[]) return (byte[])aSource;
     if(aSource instanceof InputStream) return getBytes((InputStream)aSource);
     
+    // Handle URL
+    if(aSource instanceof URL) { URL url = (URL)aSource;
+        try { return URLUtils.getBytes(url); }
+        catch(Exception e) { System.err.println("SnapUtils.getBytes: Error reading URL " + url + " " + e); return null;}
+    }
+    
     // Handle WebFile
     if(aSource instanceof WebFile) return ((WebFile)aSource).getBytes();
     

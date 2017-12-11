@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.*;
 import snap.pdf.*;
 import snap.pdf.read.PDFColorSpaces.*;
+import snap.util.SnapUtils;
 
 /**
  * A custom class.
@@ -50,7 +51,7 @@ public class PDFColorSpace {
  *
  *  Note that colorspaces in pdf are usually specified as strings (for built-ins) or arrays (eg. [/CalRGB << ... >>])
  */
-public static java.awt.color.ColorSpace getColorspace(Object csobj, PDFFile _pfile, PDFPage page)
+public static ColorSpace getColorspace(Object csobj, PDFFile _pfile, PDFPage page)
 {
     int type=-1;
     Object params = null;
@@ -215,18 +216,22 @@ private static ColorSpace findICCSpace(String name)
         return null;
     }
 }
-    
+
+/**
+ * Create ColorSpace from type or Map.
+ */
 public static ColorSpace createColorSpace(int type, Object params)
 {
     //TODO: recheck this mapping
     switch (type) {
+        
         // The device spaces 
         case DeviceGrayColorspace: return ColorSpace.getInstance(ColorSpace.CS_GRAY);
         case DeviceRGBColorspace: return DeviceRGB.get();
         case DeviceCMYKColorspace: return getDeviceCMYK();
         
         // The CIE spaces. TODO: Get appropriate .pf files for these to match the spec
-        case CalibratedGrayColorspace: return createColorSpace(DeviceGrayColorspace,null);
+        case CalibratedGrayColorspace: return createColorSpace(DeviceGrayColorspace, null);
         case CalibratedRGBColorspace: return createColorSpace(DeviceRGBColorspace, null);
        
         // ICC Based space - a CIE space that is specified in the pdf stream
@@ -251,28 +256,48 @@ public static ColorSpace createColorSpace(int type, Object params)
                 System.err.println("Couldn't load ICC color space .  Need to use alternate "+ alternate);
             }
             break;
+            
+        // Handle Indexed ColorSpace
         case IndexedColorspace:
             Map indexdict = (Map)params;
             return new IndexedColorSpace((ColorSpace)indexdict.get("Base"),
                 ((Number)indexdict.get("HiVal")).intValue(), (byte[])indexdict.get("Lookup"));
+                
+        // Handle SeparationColorspace
         case SeparationColorspace:
             Map sepdict = (Map)params;
             return new SeparationColorSpace((String)sepdict.get("Colorant"), (ColorSpace)sepdict.get("Base"),
                (PDFFunction)sepdict.get("TintTransform"));
+               
+        // Handle DeviceNColorspace
         case DeviceNColorspace:
             Map devndict = (Map)params;
             return new DeviceNColorSpace((List)devndict.get("Colorants"), (ColorSpace)devndict.get("Base"),
-                    (PDFFunction)devndict.get("TintTransform"), (Map)devndict.get("Attributes"));            
+                    (PDFFunction)devndict.get("TintTransform"), (Map)devndict.get("Attributes"));
+                    
+        // Handle PatternColorspace
         case PatternColorspace:
             if (params instanceof ColorSpace)
                 return new PatternSpace((ColorSpace)params);
             return new PatternSpace();
+            
+        // Handle anything else
         default: System.err.println("This is getting boring.  Need to implement colorspace id="+type);
     }
     
     // Return a default.  The parser's going to barf if the number of parameters passed to a 
     // sc operation doesn't match the number of components in this space.   Don't say you weren't warned.
     return ColorSpace.getInstance(ColorSpace.CS_sRGB);
+}
+
+/**
+ * Create ICC ColorSpace from source (stream or bytes)
+ */
+public static ColorSpace createColorSpaceICC(Object aSource)
+{
+    byte bytes[] = SnapUtils.getBytes(aSource);
+    ICC_Profile prof = ICC_Profile.getInstance(bytes);
+    return new ICC_ColorSpace(prof);
 }
 
 // According to JProfiler, 50% of the time parsing a page is spent in java.awt.Color.<init>

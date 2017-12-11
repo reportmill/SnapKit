@@ -93,24 +93,24 @@ protected ColorSpace (int type, int numcomponents)  { this.type = type; this.num
  * @param colorspace a specific color space identified by one of the predefined class constants (e.g.
  * CS_sRGB, CS_LINEAR_RGB, CS_CIEXYZ, CS_GRAY, or CS_PYCC)
  */
-public static ColorSpace getInstance(int colorspace)
+public static ColorSpace getInstance(int aCS)
 {
-    switch (colorspace) {
+    switch(aCS) {
         case CS_sRGB:
             //if(sRGBspace == null) sRGBspace = new ICC_ColorSpace(ICC_Profile.getInstance(CS_sRGB));
-            return sRGBspace;
+            return sRGBspace!=null? sRGBspace : (sRGBspace=new AWTColorSpace(aCS));
 
         case CS_CIEXYZ:
             //if(XYZspace == null) XYZspace = new ICC_ColorSpace(ICC_Profile.getInstance(CS_CIEXYZ));
-            return XYZspace;
+            return XYZspace!=null? XYZspace : (XYZspace=new AWTColorSpace(aCS));
 
         case CS_GRAY:
             //if(GRAYspace == null) GRAYspace = new ICC_ColorSpace (ICC_Profile.getInstance(CS_GRAY));
-            return GRAYspace;
+            return GRAYspace!=null? GRAYspace : (GRAYspace=new AWTColorSpace(aCS));
 
         case CS_LINEAR_RGB:
             //if(LINEAR_RGBspace == null) LINEAR_RGBspace = new ICC_ColorSpace (ICC_Profile.getInstance(CS_LINEAR_RGB));
-            return LINEAR_RGBspace;
+            return LINEAR_RGBspace!=null? LINEAR_RGBspace : (LINEAR_RGBspace=new AWTColorSpace(aCS));
 
         default: throw new IllegalArgumentException ("Unknown color space");
     }
@@ -207,5 +207,21 @@ public float getMaxValue(int comp) {
  * Returns true if cspace is the XYZspace.
  */
 static boolean isCS_CIEXYZ(ColorSpace cspace) { return (cspace == XYZspace); }
+
+/**
+ * Implementation of snap ColorSpace using java.awt.color.ColorSpace.
+ */
+public static class AWTColorSpace extends ColorSpace {
+    java.awt.color.ColorSpace _acs;
+    AWTColorSpace(int aCS)  { super(aCS,0); _acs = java.awt.color.ColorSpace.getInstance(aCS); }
+    public boolean isCS_sRGB() { return _acs.isCS_sRGB(); }
+    public float[] toRGB(float[] colorvalue)  { return _acs.toRGB(colorvalue); }
+    public float[] fromRGB(float[] rgbvalue)  { return _acs.fromRGB(rgbvalue); }
+    public float[] toCIEXYZ(float[] colorvalue)  { return _acs.toCIEXYZ(colorvalue); }
+    public float[] fromCIEXYZ(float[] colorvalue)  { return _acs.fromCIEXYZ(colorvalue); }
+    public int getType()  { return _acs.getType(); }
+    public int getNumComponents()  { return _acs.getNumComponents(); }
+    public String getName(int idx)  { return _acs.getName(idx); }
+}
 
 }

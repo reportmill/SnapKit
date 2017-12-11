@@ -162,9 +162,15 @@ private static String getPatQuoted(String aStr)
  */
 public static ParseRule loadRule(Class aClass, String aName)
 {
+    // Get URL for rule
     String name = aName!=null? aName : aClass.getSimpleName() + ".txt";
-    WebURL url = WebURL.getURL(aClass, name); if(url==null) return null;
-    String rtext = url.getText(); if(rtext==null) return null;
+    java.net.URL url = aClass.getResource(name);
+    if(url==null) { System.err.println("ParseUtils.loadRule: Couldn't find " + name); return null; }
+    
+    // Get text for URL
+    String rtext = SnapUtils.getText(url); if(rtext==null) return null;
+    
+    // Load rule from string
     try { return new ParseRuleParser().parse(rtext).getCustomNode(ParseRule.class); }
     catch(ParseException e) { throw new RuntimeException(e); }
 }
