@@ -229,8 +229,8 @@ public Image getImage()
     if(_image!=null) return _image;
     
     // Create PDF painter that renders into an image
-    PDFPageParser pntr = new PDFPageParser(null, null, this);
-    pntr.parse();
+    PDFPagePainter pntr = new PDFPagePainter(null, null, this);
+    pntr.paint(this);
     
     // Return image
     return _image = pntr.getImage();
@@ -274,21 +274,12 @@ public Image getImage2()
 public void paint(Painter aPntr, Rect aRect)
 {
     // Create PDF painter
-    PDFPageParser pntr = new PDFPageParser(aPntr, aRect, this);
-    pntr.parse();
+    PDFPagePainter pntr = new PDFPagePainter(aPntr, aRect, this);
+    pntr.paint(this);
     
     pntr.endPage();
 }
     
-/**
- * Main entry point for parsing the page marking operations
- */
-/*public void parse(PDFMarkupHandler aPntr)
-{
-    try { new PDFPageParser(_pfile, _index, aPntr).parse(); }
-    catch(Exception e) { e.printStackTrace(); }
-}*/
-
 /**
  * Returns the page dict for this page.
  */

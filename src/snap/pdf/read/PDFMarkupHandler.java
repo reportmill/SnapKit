@@ -4,7 +4,6 @@
 package snap.pdf.read;
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -57,7 +56,10 @@ public class PDFMarkupHandler {
     Rect                _destRect;
     
     // The gstates of the page being parsed
-    Stack               _gstates;
+    Stack <PDFGState>   _gstates;
+    
+    // The current GState
+    PDFGState           _gstate;
     
     // The transform to flip coordinates from Painter (origin is top-left) to PDF (origin is bottom-left)
     AffineTransform     _flipXForm;
@@ -78,7 +80,7 @@ public PDFMarkupHandler(Painter aPntr, Rect aRect)
     
     // Create the gstate list and the default gstate
     _gstates = new Stack();
-    _gstates.push(new PDFGState());
+    _gstates.push(_gstate = new PDFGState());
 }
 
 /**
@@ -91,6 +93,16 @@ public Painter getPainter()  { return _pntr; }
  */
 public Image getImage()  { return _image; }
   
+/**
+ * Return graphics.
+ */
+public Graphics2D getGraphics()  { return _gfx; }
+
+/**
+ * Returns pdf image.
+ */
+public BufferedImage getBufferedImage()  { return (BufferedImage)_image.getNative(); }
+
 /**
  * Set the bounds of the page.  This will be called before any marking operations.
  */
@@ -124,24 +136,6 @@ public void beginPage(double width, double height)
  * Restore painter to the state it was in before we started.
  */
 public void endPage() { _gfx.setClip(_initialClip); }
-
-/**
- * reset the clip
- */
-public void clipChanged(PDFGState g)
-{
-    // apply original clip, if any. A null clip in the gstate resets the clip to whatever it was originally
-    if(_initialClip!=null || g.clip==null)
-        _gfx.setClip(_initialClip);
-    
-     // Clip is defined in page space, so apply only the page->awtspace transform
-     if (g.clip != null) {
-        AffineTransform old = establishTransform(null);
-        if(_initialClip == null) _gfx.setClip(g.clip);
-        else _gfx.clip(g.clip);
-        _gfx.setTransform(old);
-    }
-}
 
 /**
  * Stroke the current path with the current miter limit, color, etc.
@@ -181,7 +175,7 @@ public void drawImage(java.awt.Image im)
         throw new PDFException("Error loading image"); //This shouldn't happen
 
     AffineTransform ixform = new AffineTransform(1.0/pixWide, 0.0, 0.0, -1.0/pixHigh, 0, 1.0);
-    drawImage(getGState(), im, ixform);
+    drawImage(_gstate, im, ixform);
 }
 
 /**
@@ -201,19 +195,7 @@ public void drawImage(PDFGState aGS, java.awt.Image anImg, AffineTransform ixfor
 }
 
 /**
- * Establish transform.
- */
-AffineTransform establishTransform(PDFGState aGS)
-{
-    AffineTransform old = _gfx.getTransform();
-    _gfx.setTransform(_flipXForm);
-    if(aGS!=null) _gfx.transform(aGS.trans);
-    return old;
-}
-
-/**
  * Draw some text at the current text position.  
- * The glyphVector will have been created by the parser using the current font and its character encodings.
  */
 public void showText(PDFGState aGS, GlyphVector v)
 {
@@ -229,18 +211,13 @@ public void showText(PDFGState aGS, GlyphVector v)
 }
 
 /**
- * Returns the last GState in the gstate list.
- */
-public PDFGState getGState()  { return (PDFGState)_gstates.peek(); }
-
-/**
  * Pushes a copy of the current gstate onto the gstate stack and returns the new gstate.
  */
 public PDFGState gsave()
 {
-    PDFGState newstate = (PDFGState)getGState().clone();
+    PDFGState newstate = (PDFGState)_gstate.clone();
     _gstates.push(newstate);
-    return newstate;
+    return _gstate = newstate;
 }
 
 /**
@@ -249,8 +226,10 @@ public PDFGState gsave()
 public PDFGState grestore()
 {
     // also calls into the markup handler if the change in gstate will cause the clipping path to change.
-    GeneralPath currentclip = ((PDFGState)_gstates.pop()).clip;
-    PDFGState gs = getGState();
+    GeneralPath currentclip = _gstates.pop().clip;
+    PDFGState gs = _gstate = _gstates.peek();
+    
+    //
     GeneralPath savedclip = gs.clip;
      if(currentclip!=null && savedclip!=null) {
         if (!currentclip.equals(savedclip))
@@ -258,7 +237,36 @@ public PDFGState grestore()
      }
      else if(currentclip!=savedclip)
          clipChanged(gs);
-     return gs;
+     return _gstate = gs;
+}
+
+/**
+ * Reset the clip
+ */
+void clipChanged(PDFGState g)
+{
+    // apply original clip, if any. A null clip in the gstate resets the clip to whatever it was originally
+    if(_initialClip!=null || g.clip==null)
+        _gfx.setClip(_initialClip);
+    
+     // Clip is defined in page space, so apply only the page->awtspace transform
+     if (g.clip != null) {
+        AffineTransform old = establishTransform(null);
+        if(_initialClip == null) _gfx.setClip(g.clip);
+        else _gfx.clip(g.clip);
+        _gfx.setTransform(old);
+    }
+}
+
+/**
+ * Establish transform.
+ */
+AffineTransform establishTransform(PDFGState aGS)
+{
+    AffineTransform old = _gfx.getTransform();
+    _gfx.setTransform(_flipXForm);
+    if(aGS!=null) _gfx.transform(aGS.trans);
+    return old;
 }
 
 /**
@@ -269,35 +277,19 @@ public PDFGState grestore()
 public void establishClip(GeneralPath newclip, boolean intersect)
 {
     // transform the new clip path into page space
-    PDFGState gs = getGState();
-    newclip.transform(gs.trans);
+    newclip.transform(_gstate.trans);
     
     // If we're adding a clip to an existing clip, calculate the intersection
-    if(intersect && gs.clip!=null) {
-        Area clip_area = new Area(gs.clip);
+    if(intersect && _gstate.clip!=null) {
+        Area clip_area = new Area(_gstate.clip);
         Area newclip_area = new Area(newclip);
         clip_area.intersect(newclip_area);
         newclip = new GeneralPath(clip_area);
     }
-    gs.clip = newclip;
+    _gstate.clip = newclip;
     
     // notify the markup handler of the new clip
-    clipChanged(gs);
+    clipChanged(_gstate);
 }
-
-/**
- * Return graphics.
- */
-public Graphics2D getGraphics()  { return _gfx; }
-
-/**
- * Returns pdf image.
- */
-public BufferedImage getBufferedImage()  { return (BufferedImage)_image.getNative(); }
-
-/**
- * Return an awt FontRenderContext object used to render the fonts.
- */
-public FontRenderContext getFontRenderContext()  { return _gfx.getFontRenderContext(); }
 
 }

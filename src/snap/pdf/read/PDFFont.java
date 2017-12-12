@@ -176,7 +176,7 @@ static Map getDescendantFont(Map fontDict, PDFFile srcfile)
  * Returns the widths for all glyphs in the fonts. Return value is either a float[] for simple single-byte fonts or an
  * instance of a PDFGlyphWidthTable for multi-byte or CID fonts.
  */
-public static Object getGlyphWidths(Map fontDict, PDFFile srcfile, PDFPageParser aPntr)
+public static Object getGlyphWidths(Map fontDict, PDFFile srcfile, PDFPagePainter aPntr)
 {
     Object obj = fontDict.get("_rbcached_glyphwidths_");
     if(obj!=null)

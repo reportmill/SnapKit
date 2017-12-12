@@ -150,7 +150,7 @@ public static ColorSpace getColorspace(Object csobj, PDFFile _pfile, PDFPage pag
                 lookup_table = PageToken.getPDFHexString((String)val);
             }
             
-            // In the case of inline images, the pageparser has already done the conversion.
+            // In the case of inline images, the pagepainter has already done the conversion.
             else if (val instanceof byte[])
                 lookup_table = (byte [])val;
             

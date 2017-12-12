@@ -8,7 +8,7 @@ import snap.pdf.*;
 
 /**
  * An object which holds on to a stream of markup operations for later drawing. In PDF a form xobject is a stream.
- * This object saves the stream data and when it comes time to draw, the PageParser will parse the stream. The tokens
+ * This object saves the stream data and when it comes time to draw, the PagePainter will parse the stream. The tokens
  * returned by the lexing portion of the parsing will be held on to by the PDFForm so that the markup operations can be
  * executed over and over without repeating that step.
  * This method can be used by form xobjects as well as pattern colorspaces.
@@ -34,7 +34,7 @@ public PDFForm(PDFStream aStream)
 }
 
 /**
- * Returns list of tokens that defines this form. The PDFPageParser is used to parse the stream the first time around.
+ * Returns list of tokens that defines this form. The PDFPagePainter is used to parse the stream the first time around.
  */
 public List <PageToken> getTokens()  { return _tokens!=null? _tokens : (_tokens=PageToken.getTokens(_streamBytes)); }
 

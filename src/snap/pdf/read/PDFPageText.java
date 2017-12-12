@@ -15,7 +15,7 @@ import snap.pdf.*;
 public class PDFPageText {
     
     // The PagePainter
-    PDFPageParser  _ppntr;
+    PDFPagePainter  _ppntr;
 
     // You can't nest text objects.  isOpen gets reset on BT & ET operations
     boolean isOpen = false;
@@ -33,13 +33,19 @@ public class PDFPageText {
     char unicodeBuf[] = new char[32];
     
     // A FontRenderContext to help create glyphs
-    FontRenderContext rendercontext;
+    FontRenderContext   _renderContext;
     
     // Text state parameters can persist across many text objects, so they're stored in the gstate
     // TODO:  Only horizontal writing mode supported at the moment. Eventually we'll need to do vertical, too.
 
-/** Create new PDFPageText. */
-public PDFPageText(PDFPageParser aPP)  { _ppntr = aPP; rendercontext = aPP.getFontRenderContext(); }
+/**
+ * Create new PDFPageText.
+ */
+public PDFPageText(PDFPagePainter aPP)
+{
+    _ppntr = aPP;
+    _renderContext = aPP.getGraphics().getFontRenderContext();
+}
 
 /** start new text. */
 public void begin()
@@ -78,7 +84,7 @@ public void setTextMatrix(float a, float b, float c, float d, float e, float f)
  * Get a glyph vector by decoding string bytes according to font encoding,
  * and calculating spacing using text parameters in gstate.
  */
-public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDFFile file) 
+public void showText(byte pageBytes[], int offset, int length, PDFGState gs) 
 {
     // TODO: This is probably a huge mistake (performance-wise) The font returned by the factory has a font size of 1
     // so we include the gstate's font size in the text rendering matrix. For any number of reasons, it'd probably be
@@ -88,6 +94,7 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDF
     renderMatrix.setTransform(gs.fontSize*gs.thscale, 0, 0, -gs.fontSize, 0, -gs.trise);
  
     // Ensure the buffer is big enough for the bytes->cid conversion
+    PDFFile file = _ppntr._pfile;
     Map fontDict = gs.font;      // Get the font dictionary from the gstate
     GlyphMapper gmap = PDFFont.getGlyphMapper(fontDict, file);
     int bufmax = gmap.maximumOutputBufferSize(pageBytes, offset, length);
@@ -119,6 +126,19 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDF
 }
 
 /**
+ * Like the previous routine, except using a list of strings & spacing adjustments.
+ */
+public void showText(byte pageBytes[], List <PageToken> tokens, PDFGState gs) 
+{
+    double hscale = -gs.fontSize*gs.thscale/1000;
+    for(PageToken tok : tokens) {
+        if(tok.type==PageToken.PDFNumberToken)
+            textMatrix.translate(tok.floatValue()*hscale, 0);
+        else showText(pageBytes, tok.getStart(), tok.getLength(), gs);
+    }
+}
+
+/**
  * For simple fonts.  The bytes have been mapped through the encoding into unicode values.  The font itself will
  * create the glyphs, and the font metric lookups are done by assuming that a single byte in pageBytes will get
  * mapped to single unicode value (and therefore a single glyph) in the glyph vector.
@@ -133,7 +153,7 @@ GlyphVector getSingleByteCIDGlyphVector(byte pageBytes[], int offset, int length
     
     // Tell font (assumed to have a point size of 1) to create glyphs
     char chars[] = uchars.length==numChars? uchars : Arrays.copyOf(uchars, numChars);
-    GlyphVector glyphs = aFont.createGlyphVector(rendercontext, chars);
+    GlyphVector glyphs = aFont.createGlyphVector(_renderContext, chars);
      
     // position adjustments.  For performance reasons, we can probably skip this step if word and character spacing
     // are both 0, although we still need to calculate advance for the whole thing (maybe with help from glyphVector)
@@ -177,7 +197,7 @@ GlyphVector getMultibyteCIDGlyphVector(char cids[], int numCIDs, PDFGState gs, F
     // Create a glyphVector using the gids. Note that although the javadoc for Font claims that the int array is for
     // glyphCodes, the description is identical to char method, which uses font's unicode cmap. I assume desrciption
     // is a cut&paste bug and that the int array called glyphCodes is really used as an array of glyph codes.
-    GlyphVector glyphs = aFont.createGlyphVector(rendercontext, glyphIDs);
+    GlyphVector glyphs = aFont.createGlyphVector(_renderContext, glyphIDs);
     
     // position adjustments.  See single-byte routine for comments
     textoffset.x = textoffset.y = 0;
@@ -195,18 +215,6 @@ GlyphVector getMultibyteCIDGlyphVector(char cids[], int numCIDs, PDFGState gs, F
         textoffset.x += advance;
     }
     return glyphs;
-}
-
-
-/** Like the previous routine, except using a list of strings & spacing adjustments */
-public void showText(byte pageBytes[], List <PageToken> tokens, PDFGState gs, PDFFile file) 
-{
-    double hscale = -gs.fontSize*gs.thscale/1000;
-    for(PageToken tok : tokens) {
-        if(tok.type==PageToken.PDFNumberToken)
-            textMatrix.translate(tok.floatValue()*hscale, 0);
-        else showText(pageBytes, tok.getStart(), tok.getLength(), gs, file);
-    }
 }
 
 }
