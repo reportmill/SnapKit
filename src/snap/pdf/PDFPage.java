@@ -273,11 +273,8 @@ public Image getImage2()
  */
 public void paint(Painter aPntr, Rect aRect)
 {
-    // Create PDF painter
     PDFPagePainter pntr = new PDFPagePainter(aPntr, aRect, this);
     pntr.paint(this);
-    
-    pntr.endPage();
 }
     
 /**

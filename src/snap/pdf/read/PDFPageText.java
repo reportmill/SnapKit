@@ -41,11 +41,7 @@ public class PDFPageText {
 /**
  * Create new PDFPageText.
  */
-public PDFPageText(PDFPagePainter aPP)
-{
-    _ppntr = aPP;
-    _renderContext = aPP.getGraphics().getFontRenderContext();
-}
+public PDFPageText(PDFPagePainter aPP)  { _ppntr = aPP; }
 
 /** start new text. */
 public void begin()

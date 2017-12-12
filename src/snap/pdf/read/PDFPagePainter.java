@@ -2,19 +2,22 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.pdf.read;
-import java.awt.Image;
+import java.awt.Graphics2D;
+//import java.awt.Image;
+import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import snap.gfx.*;
+import snap.gfx.Image;
 import snap.pdf.*;
 
 /**
- * This class parses the page marking operators for a specific page number (it gets the
- * contents for that page from n PDFReader.)  It uses the various factory objects for
- * graphic object creation and a MarkupHandler to do the actual drawing.
+ * This paints a PDFPage to a given Painter by parsing the page marking operators.
  *
  *  Currently unsupported:
  *       - Ignores hyperlinks (annotations)
@@ -22,14 +25,38 @@ import snap.pdf.*;
  *       - Transparency blend modes other than /Normal
  *       ...
  */
-public class PDFPagePainter extends PDFMarkupHandler {
+public class PDFPagePainter {
     
-    // The PDF file that owns this parser
-    PDFFile              _pfile;
-    
-    // The page index of the page being parsed
+    // The page being painted
     PDFPage              _page;
     
+    // The PDF file for the page
+    PDFFile              _pfile;
+    
+    // The page bytes holding page operators and data to be painted
+    byte                 _pageBytes[];
+    
+    // A helper class to handle text processing
+    PDFPageText          _text;
+    
+    // The gstates of the page being parsed
+    Stack <PDFGState>    _gstates;
+    
+    // The current GState
+    PDFGState            _gstate;
+    
+    // The bounds rect
+    Rect                 _destRect;
+    
+    // The transform to flip coordinates from Painter (origin is top-left) to PDF (origin is bottom-left)
+    AffineTransform      _flipXForm;
+    
+    // The start clip
+    java.awt.Shape       _initialClip;
+    
+    // The image, if painting to image
+    Image                _image;
+
     // The bounds of the area being parsed
     Rect                 _bounds;
     
@@ -38,12 +65,6 @@ public class PDFPagePainter extends PDFMarkupHandler {
     
     // The current token index
     int                  _index;
-    
-    // The current text object (gets created once and reused)
-    PDFPageText          _text;
-    
-    // Current PageBytes
-    byte                 _pageBytes[];
     
     // Current path
     GeneralPath          _path = null, _futureClip = null;
@@ -54,20 +75,34 @@ public class PDFPagePainter extends PDFMarkupHandler {
     // The graphics state
     PDFGState            gs;
    
+    // The painter
+    Painter              _pntr;
+    
+    // The graphics
+    Graphics2D           _gfx;
+    
 /**
  * Creates a new PDFPagePainter.
  */
 public PDFPagePainter(Painter aPntr, Rect aRect, PDFPage aPage)
 {
-    super(aPntr,aRect);
-    
-    // Cache given pdf file and page index
-    _pfile = aPage.getFile();
+    // Cache given page and page file
     _page = aPage;
+    _pfile = aPage.getFile();
+    
+    // Initialize a text object
+    _text = new PDFPageText(this);
+    
+    // Create the gstate list and the default gstate
+    _gstates = new Stack();
+    _gstates.push(_gstate = new PDFGState());
+    
+    // Set Painter
+    _pntr = aPntr;
+    _destRect = aRect;
     
     // Get Media box and crop box and set bounds of the area we're drawing into (interseciont of media and crop)
-    Rect media = _page.getMediaBox();
-    Rect crop = _page.getCropBox();
+    Rect media = _page.getMediaBox(), crop = _page.getCropBox();
     _bounds = media.getIntersectRect(crop);
     
     // Set Painter and initialize gstate to bounds. TODO need to set transform for pages with "/Rotate" key
@@ -92,11 +127,38 @@ public void paint(PDFPage aPage)
     // Start the markup handler
     beginPage(_bounds.getWidth(), _bounds.getHeight());
     
-    // Initialize a text object
-    _text = new PDFPageText(this);
-    
     // Parse the tokens
     paintTokens(pageTokens, pbytes);
+}
+
+/**
+ * Set the bounds of the page.  This will be called before any marking operations.
+ */
+public void beginPage(double width, double height)
+{
+    // If no painter, create image and painter
+    if(_pntr==null) {
+        _image = Image.get((int)Math.ceil(width), (int)Math.ceil(height), true);
+        _pntr = _image.getPainter();
+    }
+
+    // If no destination rect has been set, draw unscaled & untranslated
+    if(_destRect==null) _destRect = new Rect(0, 0, width, height);
+    
+    // Set Graphics
+    _gfx = _pntr.getNative(Graphics2D.class);
+    _text._renderContext = _gfx.getFontRenderContext();
+    
+    // Save away the initial user clip
+    _initialClip = _gfx.getClip();
+    
+    // Sets the clip for the destination to the page size
+    _pntr.clip(_destRect);
+    
+    // The PDF space has (0,0) at the top, awt has it at the bottom
+    _flipXForm = _gfx.getTransform();
+    _flipXForm.concatenate(new AffineTransform(_destRect.width/width, 0, 0, -_destRect.height/height,
+        _destRect.x, _destRect.getMaxY()));
 }
 
 /**
@@ -341,8 +403,8 @@ void Do()
 {
     String name = getToken(_index-1).getName();
     Object xobj = getXObject(name);
-    if(xobj instanceof Image)
-        drawImage((Image)xobj);
+    if(xobj instanceof java.awt.Image)
+        drawImage((java.awt.Image)xobj);
     else if(xobj instanceof PDFForm)
         executeForm((PDFForm)xobj);
     else throw new PDFException("Error reading XObject");
@@ -1222,6 +1284,181 @@ public PDFPatterns.Shading getShading(String pdfName)
     if(csobj!=null)
         patobj.setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, _page));
     return patobj;
+}
+
+/**
+ * Returns the painter.
+ */
+public Painter getPainter()  { return _pntr; }
+
+/**
+ * Returns the image, if painter was created for image.
+ */
+public Image getImage()  { return _image; }
+  
+/**
+ * Return graphics.
+ */
+public Graphics2D getGraphics()  { return _gfx; }
+
+/**
+ * Returns pdf image.
+ */
+public BufferedImage getBufferedImage()  { return (BufferedImage)_image.getNative(); }
+
+/**
+ * Stroke the current path with the current miter limit, color, etc.
+ */
+public void strokePath(PDFGState aGS, GeneralPath aShape)
+{
+    AffineTransform old = establishTransform(aGS);
+    if(aGS.scomposite != null) _gfx.setComposite(aGS.scomposite);
+    _pntr.setColor(aGS.scolor); _gfx.setStroke(aGS.lineStroke); _gfx.draw(aShape);
+    _gfx.setTransform(old);
+}
+
+/**
+ * Fill the current path using the fill params in the gstate
+ */
+public void fillPath(PDFGState aGS, GeneralPath aShape)
+{
+    AffineTransform old = establishTransform(aGS);
+    if(aGS.composite != null) _gfx.setComposite(aGS.composite);
+    _pntr.setPaint(aGS.color); _gfx.fill(aShape);
+    _gfx.setTransform(old);
+}    
+
+/**
+ * Establishes an image transform and tells markup engine to draw the image
+ */
+public void drawImage(java.awt.Image im) 
+{
+    // In pdf, an image is defined as occupying the unit square no matter how many pixels wide or high
+    // it is (image space goes from {0,0} - {1,1}). A pdf producer will scale up ctm to get whatever size they want.
+    // We remove pixelsWide & pixelsHigh from scale since awt image space goes from {0,0} - {width,height}
+    // Also note that in pdf image space, {0,0} is at the upper-, left.  Since this is flipped from all the other
+    // primatives, we also include a flip here for consistency.
+    int pixWide = im.getWidth(null);
+    int pixHigh = im.getHeight(null);
+    if(pixWide<0 || pixHigh<0)
+        throw new PDFException("Error loading image"); //This shouldn't happen
+
+    AffineTransform ixform = new AffineTransform(1.0/pixWide, 0.0, 0.0, -1.0/pixHigh, 0, 1.0);
+    drawImage(_gstate, im, ixform);
+}
+
+/**
+ * Draw an image.
+ */
+public void drawImage(PDFGState aGS, java.awt.Image anImg, AffineTransform ixform) 
+{
+    AffineTransform old = establishTransform(aGS);
+    if(aGS.composite!=null)
+        _gfx.setComposite(aGS.composite);
+    
+    // normal image case - If image drawing throws exception, try workaround
+    _gfx.drawImage(anImg, ixform, null); // If fails with ImagingOpException, see RM14 sun_bug_4723021_workaround
+    
+    // restore transform
+    _gfx.setTransform(old);
+}
+
+/**
+ * Draw some text at the current text position.  
+ */
+public void showText(PDFGState aGS, GlyphVector v)
+{
+    AffineTransform old = establishTransform(aGS);
+    
+    // TODO: eventually need check the font render mode in the gstate
+    if (aGS.composite != null)
+        _gfx.setComposite(aGS.composite);
+    
+    _pntr.setPaint(aGS.color);
+    _gfx.drawGlyphVector(v,0,0);
+    _gfx.setTransform(old);
+}
+
+/**
+ * Pushes a copy of the current gstate onto the gstate stack and returns the new gstate.
+ */
+public PDFGState gsave()
+{
+    PDFGState newstate = (PDFGState)_gstate.clone();
+    _gstates.push(newstate);
+    return _gstate = newstate;
+}
+
+/**
+ * Pops the current gstate from the gstate stack and returns the restored gstate.
+ */
+public PDFGState grestore()
+{
+    // also calls into the markup handler if the change in gstate will cause the clipping path to change.
+    GeneralPath currentclip = _gstates.pop().clip;
+    PDFGState gs = _gstate = _gstates.peek();
+    
+    //
+    GeneralPath savedclip = gs.clip;
+     if(currentclip!=null && savedclip!=null) {
+        if (!currentclip.equals(savedclip))
+            clipChanged(gs);
+     }
+     else if(currentclip!=savedclip)
+         clipChanged(gs);
+     return _gstate = gs;
+}
+
+/**
+ * Reset the clip
+ */
+void clipChanged(PDFGState g)
+{
+    // apply original clip, if any. A null clip in the gstate resets the clip to whatever it was originally
+    if(_initialClip!=null || g.clip==null)
+        _gfx.setClip(_initialClip);
+    
+     // Clip is defined in page space, so apply only the page->awtspace transform
+     if (g.clip != null) {
+        AffineTransform old = establishTransform(null);
+        if(_initialClip == null) _gfx.setClip(g.clip);
+        else _gfx.clip(g.clip);
+        _gfx.setTransform(old);
+    }
+}
+
+/**
+ * Establish transform.
+ */
+AffineTransform establishTransform(PDFGState aGS)
+{
+    AffineTransform old = _gfx.getTransform();
+    _gfx.setTransform(_flipXForm);
+    if(aGS!=null) _gfx.transform(aGS.trans);
+    return old;
+}
+
+/**
+ * Called when the clipping path changes. The clip in the gstate is defined to be in page space.
+ * Whenever clip is changed, we calculate new clip, which can be intersected with the old clip, and save it in gstate.
+ * NB. This routine modifies the path that's passed in to it.
+ */
+public void establishClip(GeneralPath newclip, boolean intersect)
+{
+    // transform the new clip path into page space
+    newclip.transform(_gstate.trans);
+    
+    // If we're adding a clip to an existing clip, calculate the intersection
+    if(intersect && _gstate.clip!=null) {
+        Area clip_area = new Area(_gstate.clip);
+        Area newclip_area = new Area(newclip);
+        clip_area.intersect(newclip_area);
+        newclip = new GeneralPath(clip_area);
+    }
+    _gstate.clip = newclip;
+    
+    // notify the markup handler of the new clip
+    clipChanged(_gstate);
 }
 
 }
