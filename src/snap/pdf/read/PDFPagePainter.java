@@ -165,15 +165,12 @@ public void beginPage(double width, double height)
  */
 protected void paintTokens(List tokenList, byte pageBytes[]) 
 {
-    // save away the factory callback handler objects
-    _compatibilitySections = 0;
-    
-    // Cache old tokens and set token list that will be used by methods like getToken() (this method can be recursive)
-    List oldTokens = _tokens; _tokens = tokenList;
-    byte oldPageBytes[] = _pageBytes; _pageBytes = pageBytes;
+    // Set Tokens and PageBytes
+    _tokens = tokenList;
+    _pageBytes = pageBytes;
     
     // Initialize current path. Note: path is not part of GState and so is not saved/restored by gstate ops
-    _path = null; _futureClip = null;
+    _path = null; _futureClip = null; _compatibilitySections = 0;
     
     // Iterate over page contents tokens
     for(int i=0, iMax=_tokens.size(); i<iMax; i++) { PageToken token = getToken(i); _index = i;
@@ -181,15 +178,11 @@ protected void paintTokens(List tokenList, byte pageBytes[])
         if(token.type==PageToken.PDFOperatorToken)
             paintOp(token);
             
-        // It not an op, it must be an operand
-        // Catch up on that clipping.  Plus be anal and return an error, just like Acrobat.
+        // If not op, must be an operand Catch up on clipping. Plus be anal and return error, just like Acrobat.
         //if(didDraw) { if(_futureClip!=null) establishClip(_futureClip, true); _futureClip = null;
         //    _path = null; }  // The current path and the current point are undefined after a draw
         //else if(_futureClip != null) { } // TODO: an error unless the last token was W or W*
     }
-
-    // restore previous token list
-    _tokens = oldTokens; _pageBytes = oldPageBytes;
 }
 
 /**
@@ -460,7 +453,7 @@ void g()
 void gs()
 {
     Map exg = getExtendedGStateNamed(getToken(_index-1).getName());
-    readExtendedGState(_gstate, exg);
+    readExtendedGState(exg);
 }
 
 /**
@@ -1033,22 +1026,32 @@ static final String _inline_image_value_abbreviations[][] = {
     {"CCF", "CCITTFaxDecode"}, {"DCT", "DCTDecode"}
 };
 
-public void executeForm(PDFForm aForm)
+/**
+ * Execute form.
+ */
+void executeForm(PDFForm aForm)
 {
     Rectangle2D bbox = aForm.getBBox();
     AffineTransform xform = aForm.getTransform();
     
-    // save the current gstate and set the transform in the newgstate
+    // Save the current gstate and set the transform in the newgstate
     PDFGState gs = gsave();
     gs.trans.concatenate(xform);
     
-    // clip to the form bbox
+    // Clip to the form bbox
     establishClip(new GeneralPath(bbox), true);
   
-    // add the form's resources to the page resource stack
+    // Add the form's resources to the page resource stack
     _page.pushResources(aForm.getResources(_pfile));
-    paintTokens(aForm.getTokens(), aForm.getBytes());  // recurse back into the parser with a new set of tokens
-    _page.popResources();    // restore the old resources, gstate,ctm, & clip
+    List oldTokens = _tokens; byte oldPageBytes[] = _pageBytes;
+    _tokens = aForm.getTokens(); _pageBytes = aForm.getBytes();
+    
+    // Recurse back into the parser with form tokens and bytes
+    paintTokens(aForm.getTokens(), aForm.getBytes());
+    
+    // Restore old resources and GState
+    _tokens = oldTokens; _pageBytes = oldPageBytes;
+    _page.popResources();
     grestore();
 }
 
@@ -1090,8 +1093,9 @@ public void executePatternStream(PDFPatterns.Tiling pat)
 /**
  * Pull out anything useful from an extended gstate dictionary
  */
-void readExtendedGState(PDFGState gs, Map exgstate)
+void readExtendedGState(Map exgstate)
 {
+    PDFGState gs = _gstate;
     boolean strokeChanged = false;
     boolean transparencyChanged = false;
     
@@ -1326,30 +1330,28 @@ void fillPath()
 /**
  * Establishes an image transform and tells markup engine to draw the image
  */
-public void drawImage(java.awt.Image im) 
+public void drawImage(java.awt.Image anImg) 
 {
     // In pdf, an image is defined as occupying the unit square no matter how many pixels wide or high
     // it is (image space goes from {0,0} - {1,1}). A pdf producer will scale up ctm to get whatever size they want.
     // We remove pixelsWide & pixelsHigh from scale since awt image space goes from {0,0} - {width,height}
     // Also note that in pdf image space, {0,0} is at the upper-, left.  Since this is flipped from all the other
     // primatives, we also include a flip here for consistency.
-    int pixWide = im.getWidth(null);
-    int pixHigh = im.getHeight(null);
-    if(pixWide<0 || pixHigh<0)
-        throw new PDFException("Error loading image"); //This shouldn't happen
+    int pixWide = anImg.getWidth(null);
+    int pixHigh = anImg.getHeight(null);
+    if(pixWide<0 || pixHigh<0) throw new PDFException("PDFPagePainter: Error loading image"); // Shouldn't happen
 
     AffineTransform ixform = new AffineTransform(1.0/pixWide, 0.0, 0.0, -1.0/pixHigh, 0, 1.0);
-    drawImage(_gstate, im, ixform);
+    drawImage(anImg, ixform);
 }
 
 /**
  * Draw an image.
  */
-public void drawImage(PDFGState aGS, java.awt.Image anImg, AffineTransform ixform) 
+public void drawImage(java.awt.Image anImg, AffineTransform ixform) 
 {
-    AffineTransform old = establishTransform(aGS);
-    if(aGS.composite!=null)
-        _gfx.setComposite(aGS.composite);
+    AffineTransform old = establishTransform(_gstate);
+    if(_gstate.composite!=null) _gfx.setComposite(_gstate.composite);
     
     // normal image case - If image drawing throws exception, try workaround
     _gfx.drawImage(anImg, ixform, null); // If fails with ImagingOpException, see RM14 sun_bug_4723021_workaround
@@ -1376,7 +1378,7 @@ public void showText(GlyphVector v)
 /**
  * Pushes a copy of the current gstate onto the gstate stack and returns the new gstate.
  */
-public PDFGState gsave()
+PDFGState gsave()
 {
     PDFGState newstate = (PDFGState)_gstate.clone();
     _gstates.push(newstate);
@@ -1386,37 +1388,37 @@ public PDFGState gsave()
 /**
  * Pops the current gstate from the gstate stack and returns the restored gstate.
  */
-public PDFGState grestore()
+PDFGState grestore()
 {
-    // also calls into the markup handler if the change in gstate will cause the clipping path to change.
+    // Pop last GState (but get it's clip)
     GeneralPath currentclip = _gstates.pop().clip;
-    PDFGState gs = _gstate = _gstates.peek();
+    _gstate = _gstates.peek();
     
     //
-    GeneralPath savedclip = gs.clip;
+    GeneralPath savedclip = _gstate.clip;
      if(currentclip!=null && savedclip!=null) {
-        if (!currentclip.equals(savedclip))
-            clipChanged(gs);
+        if(!currentclip.equals(savedclip))
+            clipChanged();
      }
      else if(currentclip!=savedclip)
-         clipChanged(gs);
-     return _gstate = gs;
+         clipChanged();
+     return _gstate;
 }
 
 /**
  * Reset the clip
  */
-void clipChanged(PDFGState g)
+void clipChanged()
 {
     // apply original clip, if any. A null clip in the gstate resets the clip to whatever it was originally
-    if(_initialClip!=null || g.clip==null)
+    if(_initialClip!=null || _gstate.clip==null)
         _gfx.setClip(_initialClip);
     
      // Clip is defined in page space, so apply only the page->awtspace transform
-     if (g.clip != null) {
+     if(_gstate.clip!=null) {
         AffineTransform old = establishTransform(null);
-        if(_initialClip == null) _gfx.setClip(g.clip);
-        else _gfx.clip(g.clip);
+        if(_initialClip == null) _gfx.setClip(_gstate.clip);
+        else _gfx.clip(_gstate.clip);
         _gfx.setTransform(old);
     }
 }
@@ -1451,8 +1453,8 @@ public void establishClip(GeneralPath newclip, boolean intersect)
     }
     _gstate.clip = newclip;
     
-    // notify the markup handler of the new clip
-    clipChanged(_gstate);
+    // Notify of new clip
+    clipChanged();
 }
 
 }
