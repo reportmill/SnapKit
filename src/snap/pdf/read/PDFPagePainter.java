@@ -45,9 +45,6 @@ public class PDFPagePainter {
     // The current GState
     PDFGState            _gstate;
     
-    // The transform to flip coordinates from Painter (origin is top-left) to PDF (origin is bottom-left)
-    AffineTransform      _flipXForm;
-    
     // The start clip
     java.awt.Shape       _initialClip;
     
@@ -126,13 +123,12 @@ public void paint(Painter aPntr, Object aSource, Rect theDestBnds, AffineTransfo
     _initialClip = _gfx.getClip();
     
     // Get flip transform (for page or pattern)
-    _flipXForm = _gfx.getTransform();
     if(aSource==null || aSource instanceof PDFPattern)
-        _flipXForm.concatenate(new AffineTransform(destBnds.width/srcBnds.width, 0, 0, -destBnds.height/srcBnds.height,
+        concatenate(new AffineTransform(destBnds.width/srcBnds.width, 0, 0, -destBnds.height/srcBnds.height,
             destBnds.x, destBnds.getMaxY()));
 
     // If Transform provided, append it
-    if(aTrans!=null) _gstate.trans.concatenate(aTrans);
+    if(aTrans!=null) concatenate(aTrans);
     
     // Make sure PageBytes is set (if missing, get from Page)
     if(_pageBytes==null) {
@@ -325,7 +321,16 @@ void c()
 void cm()
 {
     AffineTransform xfm = getTransform(_index);
+    concatenate(xfm);
+}
+
+/**
+ * Concat matrix
+ */
+void concatenate(AffineTransform xfm)
+{
     _gstate.trans.concatenate(xfm);
+    _gfx.transform(xfm);
 }
 
 /**
@@ -1003,18 +1008,16 @@ static final String _inline_image_value_abbreviations[][] = {
  */
 void executeForm(PDFForm aForm)
 {
-    // Add the form's resources to the page resource stack
+    // Add form's resources to page resource stack
     _page.pushResources(aForm.getResources(_pfile));
-    AffineTransform old = establishTransform(_gstate);
     
     // Recurse back into this painter for form tokens and bytes
     PDFPagePainter ppntr = new PDFPagePainter(_page); Rectangle2D bbox = aForm.getBBox();
     ppntr._pageBytes = aForm.getBytes(); ppntr._tokens = aForm.getTokens();
     ppntr.paint(_pntr, aForm, null, aForm.getTransform());
     
-    // Restore old resources and GState
+    // Restore old resources
     _page.popResources();
-    _gfx.setTransform(old);
 }
 
 /**
@@ -1246,10 +1249,8 @@ public PDFPattern.Shading getShading(String pdfName)
  */
 void strokePath()
 {
-    AffineTransform old = establishTransform(_gstate);
     if(_gstate.scomposite != null) _gfx.setComposite(_gstate.scomposite);
     _pntr.setColor(_gstate.scolor); _gfx.setStroke(_gstate.lineStroke); _gfx.draw(_path);
-    _gfx.setTransform(old);
 }
 
 /**
@@ -1257,10 +1258,8 @@ void strokePath()
  */
 void fillPath()
 {
-    AffineTransform old = establishTransform(_gstate);
     if(_gstate.composite != null) _gfx.setComposite(_gstate.composite);
     _pntr.setPaint(_gstate.color); _gfx.fill(_path);
-    _gfx.setTransform(old);
 }    
 
 /**
@@ -1286,14 +1285,10 @@ public void drawImage(java.awt.Image anImg)
  */
 public void drawImage(java.awt.Image anImg, AffineTransform ixform) 
 {
-    AffineTransform old = establishTransform(_gstate);
     if(_gstate.composite!=null) _gfx.setComposite(_gstate.composite);
     
     // normal image case - If image drawing throws exception, try workaround
     _gfx.drawImage(anImg, ixform, null); // If fails with ImagingOpException, see RM14 sun_bug_4723021_workaround
-    
-    // restore transform
-    _gfx.setTransform(old);
 }
 
 /**
@@ -1301,14 +1296,11 @@ public void drawImage(java.awt.Image anImg, AffineTransform ixform)
  */
 public void showText(GlyphVector v)
 {
-    AffineTransform old = establishTransform(_gstate);
-    
     // TODO: eventually need check the font render mode in the gstate
     if(_gstate.composite != null) _gfx.setComposite(_gstate.composite);
     
     _pntr.setPaint(_gstate.color);
     _gfx.drawGlyphVector(v,0,0);
-    _gfx.setTransform(old);
 }
 
 /**
@@ -1318,6 +1310,8 @@ PDFGState gsave()
 {
     PDFGState newstate = (PDFGState)_gstate.clone();
     _gstates.push(newstate);
+    _pntr.save();
+    _gfx = _pntr.getNative(Graphics2D.class);
     return _gstate = newstate;
 }
 
@@ -1329,6 +1323,8 @@ PDFGState grestore()
     // Pop last GState (but get it's clip)
     GeneralPath lastClip = _gstates.pop().clip;
     _gstate = _gstates.peek();
+    _pntr.restore();
+    _gfx = _pntr.getNative(Graphics2D.class);
     
     // If clip changed, call clipChanged
     if(!SnapUtils.equals(lastClip, _gstate.clip))
@@ -1345,24 +1341,11 @@ void clipChanged()
     if(_initialClip!=null || _gstate.clip==null)
         _gfx.setClip(_initialClip);
     
-     // Clip is defined in page space, so apply only the page->awtspace transform
-     if(_gstate.clip!=null) {
-        AffineTransform old = establishTransform(null);
+    // Clip is defined in page space, so apply only the page->awtspace transform
+    if(_gstate.clip!=null) {
         if(_initialClip == null) _gfx.setClip(_gstate.clip);
         else _gfx.clip(_gstate.clip);
-        _gfx.setTransform(old);
     }
-}
-
-/**
- * Establish transform.
- */
-AffineTransform establishTransform(PDFGState aGS)
-{
-    AffineTransform old = _gfx.getTransform();
-    _gfx.setTransform(_flipXForm);
-    if(aGS!=null) _gfx.transform(aGS.trans);
-    return old;
 }
 
 /**

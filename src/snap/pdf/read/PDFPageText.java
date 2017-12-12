@@ -115,13 +115,13 @@ public void showText(int offset, int length)
     else glyphs = getSingleByteCIDGlyphVector(pageBytes, offset, length, unicodeBuf,numMappedChars,gs,font,wobj,pt);
                            
     // replace the gstate ctm with one that includes the text transforms
-    AffineTransform saved_ctm = (AffineTransform)gs.trans.clone();
-    gs.trans.concatenate(textMatrix);
-    gs.trans.concatenate(renderMatrix);
+    _ppntr.gsave();
+    _ppntr.concatenate(textMatrix);
+    _ppntr.concatenate(renderMatrix);
     
     // draw, restore ctm and update the text matrix
     _ppntr.showText(glyphs);
-    gs.trans = saved_ctm;
+    _ppntr.grestore();
     textMatrix.translate(pt.x*gs.fontSize*gs.thscale, pt.y);
 }
 
