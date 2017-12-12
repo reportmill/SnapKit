@@ -54,9 +54,6 @@ public class PDFPagePainter {
     // The start clip
     java.awt.Shape       _initialClip;
     
-    // The image, if painting to image
-    Image                _image;
-
     // The bounds of the area being parsed
     Rect                 _bounds;
     
@@ -110,6 +107,16 @@ public PDFPagePainter(Painter aPntr, Rect aRect, PDFPage aPage)
 }
 
 /**
+ * Returns the painter.
+ */
+public Painter getPainter()  { return _pntr; }
+
+/**
+ * Return graphics.
+ */
+public Graphics2D getGraphics()  { return _gfx; }
+
+/**
  * Paint the given page.
  */
 public void paint(PDFPage aPage)
@@ -126,12 +133,6 @@ public void paint(PDFPage aPage)
  */
 public void beginPage(double width, double height)
 {
-    // If no painter, create image and painter
-    if(_pntr==null) {
-        _image = Image.get((int)Math.ceil(width), (int)Math.ceil(height), true);
-        _pntr = _image.getPainter();
-    }
-
     // If no destination rect has been set, draw unscaled & untranslated
     if(_destRect==null) _destRect = new Rect(0, 0, width, height);
     
@@ -152,9 +153,7 @@ public void beginPage(double width, double height)
 }
 
 /**
- * The meat and potatoes of the pdf parser. Translates the token list into a series of calls to either a Factory class,
- * which creates a Java2D object (like GeneralPath, Font, Image, GlyphVector, etc.), or the markup handler, which does
- * the actual drawing.
+ * Paints the drawing ops/data for Page/PageBytes/Tokens.
  */
 protected void paint() 
 {
@@ -1061,24 +1060,31 @@ void executeForm(PDFForm aForm)
  */
 public void executePatternStream(PDFPatterns.Tiling pat)
 {
+    // Get pattern width & height
+    int width = (int)Math.ceil(pat.getBounds().getWidth());
+    int height = (int)Math.ceil(pat.getBounds().getHeight());
+    
     // By adding the pattern's resources to page's resource stack, it means pattern will have access to resources
     // defined by the page.  I'll bet Acrobat doesn't allow you to do this, but it shouldn't hurt anything.
     _page.pushResources(pat.getResources());
     
+    // Create image for pattern
+    Image img = Image.get(width, height, true);
+    Painter pntr = img.getPainter();
+    
     // Create PagePainter with pattern's transformation
-    PDFPagePainter ppntr = new PDFPagePainter(null, null, _page);
+    PDFPagePainter ppntr = new PDFPagePainter(pntr, null, _page);
     ppntr._gstate.trans.concatenate(pat.getTransform());
     
     // Begin the markup handler. TODO:probably going to have to add a translate by -x, -y of the bounds rect
-    Rectangle2D prect = pat.getBounds();
-    ppntr.beginPage(prect.getWidth(), prect.getHeight());
+    ppntr.beginPage(width, height);
     
     // Fire up painter with pattern content bytes
     ppntr._pageBytes = pat.getContents();
     ppntr.paint();
     
     // Get the image and set the tile.  All the resources can be freed up now
-    pat.setTile((BufferedImage)ppntr.getImage().getNative());
+    pat.setTile((BufferedImage)img.getNative());
 }
 
 /**
@@ -1275,21 +1281,6 @@ public PDFPatterns.Shading getShading(String pdfName)
         patobj.setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, _page));
     return patobj;
 }
-
-/**
- * Returns the painter.
- */
-public Painter getPainter()  { return _pntr; }
-
-/**
- * Returns the image, if painter was created for image.
- */
-public Image getImage()  { return _image; }
-  
-/**
- * Return graphics.
- */
-public Graphics2D getGraphics()  { return _gfx; }
 
 /**
  * Stroke the current path with the current miter limit, color, etc.

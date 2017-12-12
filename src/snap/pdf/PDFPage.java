@@ -228,12 +228,21 @@ public Image getImage()
     // If already set, just return
     if(_image!=null) return _image;
     
+    // Get page bounds
+    Rect media = getMediaBox(), crop = getCropBox(), bounds = media.getIntersectRect(crop);
+    int width = (int)Math.round(bounds.width), height = (int)Math.round(bounds.height);
+    
     // Create PDF painter that renders into an image
-    PDFPagePainter pntr = new PDFPagePainter(null, null, this);
-    pntr.paint(this);
+    Image img = Image.get(width,height,false);
+    Painter ipntr = img.getPainter();
+    ipntr.setColor(Color.WHITE); ipntr.fillRect(0,0,width,height);
+    
+    // Create PDF painter that renders into an image
+    PDFPagePainter ppntr = new PDFPagePainter(ipntr, null, this);
+    ppntr.paint(this);
     
     // Return image
-    return _image = pntr.getImage();
+    return _image = img;
 }
 
 /**
@@ -245,9 +254,7 @@ public Image getImage2()
     if(_image!=null) return _image;
     
     // Get page bounds
-    Rect media = getMediaBox();
-    Rect crop = getCropBox();
-    Rect bounds = media.getIntersectRect(crop);
+    Rect media = getMediaBox(), crop = getCropBox(), bounds = media.getIntersectRect(crop);
     int width = (int)Math.round(bounds.width), height = (int)Math.round(bounds.height);
     
     // Create PDF painter that renders into an image
