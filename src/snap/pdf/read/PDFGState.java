@@ -17,14 +17,11 @@ public class PDFGState implements Cloneable {
     // The current point
     Point2D.Float  cp = new Point2D.Float();
     
-    // The current transform
-    AffineTransform      trans = new AffineTransform();
-    
     // The current color
     Color          color = Color.BLACK;
     
     // The current color space
-    ColorSpace     colorSpace;
+    ColorSpace     colorSpace = ColorSpace.getInstance(ColorSpace.CS_GRAY);
     
     // The current color rendering intent
     int            renderingIntent = RelativeColorimetricIntent;
@@ -33,7 +30,7 @@ public class PDFGState implements Cloneable {
     Color          scolor = Color.BLACK;
     
     // The current stroke color space
-    ColorSpace     scolorSpace;
+    ColorSpace     scolorSpace = colorSpace;
     
     // The transparency parameters
     int            blendMode = PDFComposite.NormalBlendMode;
@@ -58,9 +55,6 @@ public class PDFGState implements Cloneable {
     // A Stroke representation of the above
     Stroke         lineStroke = new BasicStroke(1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10f);
     
-    // The clipping path
-    GeneralPath    clip = null;
-        
     // The current font dictionary
     Map            font;
     
@@ -112,26 +106,12 @@ public class PDFGState implements Cloneable {
     public static final int PerceptualIntent = 3;
 
 /**
- * Creates a new PDF gstate.
- */
-public PDFGState()
-{
-    colorSpace = ColorSpace.getInstance(ColorSpace.CS_GRAY);
-    scolorSpace = ColorSpace.getInstance(ColorSpace.CS_GRAY);
-}
-
-/**
  * Creates a Stroke from GState settings.
  */
-public java.awt.Stroke createStroke()  { return createStroke(this); }
-
-/**
- * Creates a Stroke from GState settings.
- */
-private static java.awt.Stroke createStroke(PDFGState gs)
+public java.awt.Stroke createStroke()
 {
     // Convert from pdf constants to awt constants
-    int cap;
+    PDFGState gs = this; int cap;
     switch (gs.lineCap) {
         case PDFButtLineCap: cap = BasicStroke.CAP_BUTT; break;
         case PDFRoundLineCap: cap = BasicStroke.CAP_ROUND; break;
@@ -159,9 +139,7 @@ public Object clone()
 {
     PDFGState copy = null; try { copy = (PDFGState)super.clone(); }
     catch(CloneNotSupportedException e) { return null; }
-    copy.trans = (AffineTransform)trans.clone();
     copy.cp = (Point2D.Float)cp.clone();
-    if(clip!=null) copy.clip = (GeneralPath)clip.clone();
     return copy;
 }
 

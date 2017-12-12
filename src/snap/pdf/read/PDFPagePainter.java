@@ -5,7 +5,6 @@ package snap.pdf.read;
 import java.awt.Graphics2D;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D;
@@ -14,7 +13,6 @@ import java.util.*;
 import snap.gfx.*;
 import snap.gfx.Image;
 import snap.pdf.*;
-import snap.util.SnapUtils;
 
 /**
  * This paints a PDFPage to a given Painter by parsing the page marking operators.
@@ -55,7 +53,10 @@ public class PDFPagePainter {
     int                  _index;
     
     // Current path
-    GeneralPath          _path = null, _futureClip = null;
+    GeneralPath          _path = null;
+    
+    // Whether to clip after next draw op
+    boolean              _doClip;
     
     // save away the factory callback handler objects
     int                  _compatibilitySections = 0;
@@ -141,7 +142,7 @@ public void paint(Painter aPntr, Object aSource, Rect theDestBnds, AffineTransfo
         _tokens = PageToken.getTokens(_pageBytes);
     
     // Initialize current path. Note: path is not part of GState and so is not saved/restored by gstate ops
-    _path = null; _futureClip = null; _compatibilitySections = 0;
+    _path = null; _doClip = false; _compatibilitySections = 0;
     
     // Iterate over tokens
     for(int i=0, iMax=_tokens.size(); i<iMax; i++) { PageToken token = getToken(i); _index = i;
@@ -329,7 +330,6 @@ void cm()
  */
 void concatenate(AffineTransform xfm)
 {
-    _gstate.trans.concatenate(xfm);
     _gfx.transform(xfm);
 }
 
@@ -812,9 +812,7 @@ void W()
     //     W* f  %eoclip, nonzero-fill
     // Note also, Acrobat considers it an error to have a W not immediately followed by drawing op (f,f*,F,s,S,B,b,n)
     if(_path != null) {
-        _path.setWindingRule(GeneralPath.WIND_NON_ZERO);
-        _futureClip = (GeneralPath)_path.clone();
-     }
+        _path.setWindingRule(GeneralPath.WIND_NON_ZERO); _doClip = true; }
 }
 
 /**
@@ -823,9 +821,7 @@ void W()
 void W_x()
 {
     if(_path != null) {
-        _path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
-        _futureClip = (GeneralPath)_path.clone();
-     }
+        _path.setWindingRule(GeneralPath.WIND_EVEN_ODD); _doClip = true; }
 }
 
 /**
@@ -849,10 +845,9 @@ void y()
  */
 void didDraw()
 {
-    // Note that unlike other ops that change gstate, there is a specific call into markup handler when clip changes.
-    // Markup handler can choose whether to respond to clipping change or just to pull clip out of gstate when it draws.
-    if(_futureClip != null)
-        establishClip(_futureClip); _futureClip = null;
+    // If clipping operator preceeded drawing, update clip with drawing path.
+    if(_doClip) {
+        _gfx.clip(_path); _doClip = false; }
 
     // The current path and the current point are undefined after a draw
     _path = null;
@@ -1321,53 +1316,10 @@ PDFGState gsave()
 PDFGState grestore()
 {
     // Pop last GState (but get it's clip)
-    GeneralPath lastClip = _gstates.pop().clip;
     _gstate = _gstates.peek();
     _pntr.restore();
     _gfx = _pntr.getNative(Graphics2D.class);
-    
-    // If clip changed, call clipChanged
-    if(!SnapUtils.equals(lastClip, _gstate.clip))
-        clipChanged();
     return _gstate;
-}
-
-/**
- * Reset the clip
- */
-void clipChanged()
-{
-    // apply original clip, if any. A null clip in the gstate resets the clip to whatever it was originally
-    if(_initialClip!=null || _gstate.clip==null)
-        _gfx.setClip(_initialClip);
-    
-    // Clip is defined in page space, so apply only the page->awtspace transform
-    if(_gstate.clip!=null) {
-        if(_initialClip == null) _gfx.setClip(_gstate.clip);
-        else _gfx.clip(_gstate.clip);
-    }
-}
-
-/**
- * Called when the clipping path changes. The clip in the gstate is defined to be in page space.
- * Whenever clip is changed, we calculate new clip, which can be intersected with the old clip, and save it in gstate.
- * NB. This routine modifies the path that's passed in to it.
- */
-void establishClip(GeneralPath newclip)
-{
-    // transform the new clip path into page space
-    newclip.transform(_gstate.trans);
-    
-    // Calculate the intersection
-    if(_gstate.clip!=null) {
-        Area clip_area = new Area(_gstate.clip), newclip_area = new Area(newclip);
-        clip_area.intersect(newclip_area);
-        newclip = new GeneralPath(clip_area);
-    }
-    _gstate.clip = newclip;
-    
-    // Notify of new clip
-    clipChanged();
 }
 
 }
