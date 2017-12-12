@@ -48,6 +48,11 @@ public PDFPage(PDFFile aPdfFile, int anIndex)
 }
 
 /**
+ * Returns the PDFFile.
+ */
+public PDFFile getFile()  { return _pfile; }
+
+/**
  * Returns the media box of this page.
  */
 public Rect getMediaBox()
@@ -224,8 +229,10 @@ public Image getImage()
     if(_image!=null) return _image;
     
     // Create PDF painter that renders into an image
-    PDFMarkupHandler pntr = PDFMarkupHandler.get();
-    parse(pntr);
+    PDFPageParser pntr = new PDFPageParser(null, null, this);
+    pntr.parse();
+    
+    // Return image
     return _image = pntr.getImage();
 }
 
@@ -257,7 +264,7 @@ public Image getImage2()
     
     // Create PagePainter, paint page to image painter and return image
     PagePainter ppntr = new PagePainter();
-    ppntr.paint(_pfile.getPage(_index), ipntr);
+    ppntr.paint(this, ipntr);
     return _image = img;
 }
 
@@ -266,20 +273,21 @@ public Image getImage2()
  */
 public void paint(Painter aPntr, Rect aRect)
 {
-    // Set PDF painter
-    PDFMarkupHandler pntr = PDFMarkupHandler.get(aPntr, aRect); if(pntr==null) return;
-    parse(pntr);
+    // Create PDF painter
+    PDFPageParser pntr = new PDFPageParser(aPntr, aRect, this);
+    pntr.parse();
+    
     pntr.endPage();
 }
     
 /**
  * Main entry point for parsing the page marking operations
  */
-public void parse(PDFMarkupHandler aPntr)
+/*public void parse(PDFMarkupHandler aPntr)
 {
     try { new PDFPageParser(_pfile, _index, aPntr).parse(); }
     catch(Exception e) { e.printStackTrace(); }
-}
+}*/
 
 /**
  * Returns the page dict for this page.

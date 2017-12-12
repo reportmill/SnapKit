@@ -13,6 +13,9 @@ import snap.pdf.*;
  * given time, and only certain operations are allowed inside a text object.
  */
 public class PDFPageText {
+    
+    // The PagePainter
+    PDFPageParser  _ppntr;
 
     // You can't nest text objects.  isOpen gets reset on BT & ET operations
     boolean isOpen = false;
@@ -36,7 +39,7 @@ public class PDFPageText {
     // TODO:  Only horizontal writing mode supported at the moment. Eventually we'll need to do vertical, too.
 
 /** Create new PDFPageText. */
-public PDFPageText(FontRenderContext ctxt)  { rendercontext = ctxt; }
+public PDFPageText(PDFPageParser aPP)  { _ppntr = aPP; rendercontext = aPP.getFontRenderContext(); }
 
 /** start new text. */
 public void begin()
@@ -75,7 +78,7 @@ public void setTextMatrix(float a, float b, float c, float d, float e, float f)
  * Get a glyph vector by decoding string bytes according to font encoding,
  * and calculating spacing using text parameters in gstate.
  */
-public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
+public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDFFile file) 
 {
     // TODO: This is probably a huge mistake (performance-wise) The font returned by the factory has a font size of 1
     // so we include the gstate's font size in the text rendering matrix. For any number of reasons, it'd probably be
@@ -96,7 +99,7 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDF
     
     // Convert to cids and get metrics (actually just the widths)
     int numMappedChars = gmap.mapBytesToChars(pageBytes, offset, length, unicodeBuf);
-    Object wobj = PDFFont.getGlyphWidths(fontDict, file, aPntr);
+    Object wobj = PDFFont.getGlyphWidths(fontDict, file, _ppntr);
 
     // Two nearly identical routines broken out for performance (and readability) reasons
     Font font = PDFFont.getFont(fontDict, file);
@@ -110,7 +113,7 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs, PDF
     gs.trans.concatenate(renderMatrix);
     
     // draw, restore ctm and update the text matrix
-    aPntr.showText(gs, glyphs);
+    _ppntr.showText(gs, glyphs);
     gs.trans = saved_ctm;
     textMatrix.translate(pt.x*gs.fontSize*gs.thscale, pt.y);
 }
@@ -196,13 +199,13 @@ GlyphVector getMultibyteCIDGlyphVector(char cids[], int numCIDs, PDFGState gs, F
 
 
 /** Like the previous routine, except using a list of strings & spacing adjustments */
-public void showText(byte pageBytes[], List <PageToken> tokens, PDFGState gs, PDFFile file, PDFMarkupHandler aPntr) 
+public void showText(byte pageBytes[], List <PageToken> tokens, PDFGState gs, PDFFile file) 
 {
     double hscale = -gs.fontSize*gs.thscale/1000;
     for(PageToken tok : tokens) {
         if(tok.type==PageToken.PDFNumberToken)
             textMatrix.translate(tok.floatValue()*hscale, 0);
-        else showText(pageBytes, tok.getStart(), tok.getLength(), gs, file, aPntr);
+        else showText(pageBytes, tok.getStart(), tok.getLength(), gs, file);
     }
 }
 

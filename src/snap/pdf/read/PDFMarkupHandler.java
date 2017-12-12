@@ -300,17 +300,4 @@ public BufferedImage getBufferedImage()  { return (BufferedImage)_image.getNativ
  */
 public FontRenderContext getFontRenderContext()  { return _gfx.getFontRenderContext(); }
 
-/**
- * Returns a PDFMarkupHandler for given painter.
- */
-public static PDFMarkupHandler get()  { return new PDFMarkupHandler(null, null); }
-
-/**
- * Returns a PDFMarkupHandler for given painter.
- */
-public static PDFMarkupHandler get(Painter aPntr, Rect aRect)
-{
-    return aPntr.getNative() instanceof Graphics2D? new PDFMarkupHandler(aPntr, aRect) : null;
-}
-
 }

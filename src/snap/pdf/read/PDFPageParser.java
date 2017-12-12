@@ -22,7 +22,7 @@ import snap.pdf.*;
  *       - Transparency blend modes other than /Normal
  *       ...
  */
-public class PDFPageParser {
+public class PDFPageParser extends PDFMarkupHandler {
     
     // The PDF file that owns this parser
     PDFFile              _pfile;
@@ -42,9 +42,6 @@ public class PDFPageParser {
     // The current text object (gets created once and reused)
     PDFPageText          _text;
     
-    // The current painter
-    PDFMarkupHandler     _pntr;
-    
     // Current PageBytes
     byte                 _pageBytes[];
     
@@ -63,12 +60,13 @@ public class PDFPageParser {
 /**
  * Creates a new page parser for a given PDF file and a page index.
  */
-public PDFPageParser(PDFFile aPdfFile, int aPageIndex, PDFMarkupHandler aPntr)
+public PDFPageParser(Painter aPntr, Rect aRect, PDFPage aPage)
 {
+    super(aPntr,aRect);
+    
     // Cache given pdf file and page index
-    _pfile = aPdfFile;
-    _page = _pfile.getPage(aPageIndex);
-    _pntr = aPntr;
+    _pfile = aPage.getFile();
+    _page = aPage;
     
     // Get Media box and crop box and set bounds of the area we're drawing into (interseciont of media and crop)
     Rect media = _page.getMediaBox();
@@ -76,7 +74,7 @@ public PDFPageParser(PDFFile aPdfFile, int aPageIndex, PDFMarkupHandler aPntr)
     _bounds = media.getIntersectRect(crop);
     
     // Set Painter and initialize gstate to bounds. TODO need to set transform for pages with "/Rotate" key
-    _pntr.getGState().trans.setToTranslation(-_bounds.getX(),-_bounds.getY());
+    getGState().trans.setToTranslation(-_bounds.getX(),-_bounds.getY());
     //Transform  t = getGState().trans; t.setToTranslation(-_bounds.getX(),-_bounds.getY());
     //t.rotate(-Math.PI/2); t.translate(0,_bounds.getWidth());
     //TODO also need to make sure PDFPage returns right rect (ImageShape initialized from file) 
@@ -107,10 +105,10 @@ public void parse()
     List pageTokens = PageToken.getTokens(pbytes);
  
     // Start the markup handler
-    _pntr.beginPage(_bounds.getWidth(), _bounds.getHeight());
+    beginPage(_bounds.getWidth(), _bounds.getHeight());
     
     // Initialize a text object
-    _text = new PDFPageText(_pntr.getFontRenderContext());
+    _text = new PDFPageText(this);
     
     // Parse the tokens
     parse(pageTokens, pbytes);
@@ -135,7 +133,7 @@ public void parse(List tokenList, byte pageBytes[])
     numops = 0;
     
     // Get the current gstate
-    gs = _pntr.getGState();
+    gs = getGState();
     
     // Iterate over page contents tokens
     for(int i=0, iMax=_tokens.size(); i<iMax; i++) { PageToken token = getToken(i); _index = i;
@@ -146,7 +144,7 @@ public void parse(List tokenList, byte pageBytes[])
         // It not an op, it must be an operand
         //else ++numops;
         // Catch up on that clipping.  Plus be anal and return an error, just like Acrobat.
-        //if(didDraw) { if(future_clip!=null) _pntr.establishClip(future_clip, true); future_clip = null;
+        //if(didDraw) { if(future_clip!=null) establishClip(future_clip, true); future_clip = null;
         //    path = null; }  // The current path and the current point are undefined after a draw
         //else if(future_clip != null) { } // TODO: an error unless the last token was W or W*
     
@@ -245,8 +243,8 @@ void b()
 {
     path.setWindingRule(GeneralPath.WIND_NON_ZERO);
     path.closePath();
-    _pntr.fillPath(gs, path);
-    _pntr.strokePath(gs, path);
+    fillPath(gs, path);
+    strokePath(gs, path);
     didDraw();
 }
 
@@ -257,8 +255,8 @@ void b_x()
 {
     path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
     path.closePath();
-    _pntr.fillPath(gs, path);
-    _pntr.strokePath(gs, path);
+    fillPath(gs, path);
+    strokePath(gs, path);
     didDraw();
 }
 
@@ -268,8 +266,8 @@ void b_x()
 void B()
 {
     path.setWindingRule(GeneralPath.WIND_NON_ZERO);
-    _pntr.fillPath(gs, path);
-    _pntr.strokePath(gs, path);
+    fillPath(gs, path);
+    strokePath(gs, path);
     didDraw();
 }
 
@@ -279,8 +277,8 @@ void B()
 void B_x()
 {
     path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
-    _pntr.fillPath(gs, path);
-    _pntr.strokePath(gs, path);
+    fillPath(gs, path);
+    strokePath(gs, path);
     didDraw();
 }
 
@@ -358,7 +356,7 @@ void Do()
     String name = getToken(_index-1).getName();
     Object xobj = getXObject(name);
     if(xobj instanceof Image)
-        _pntr.drawImage((Image)xobj);
+        drawImage((Image)xobj);
     else if(xobj instanceof PDFForm)
         executeForm((PDFForm)xobj);
     else throw new PDFException("Error reading XObject");
@@ -394,7 +392,7 @@ void EX()
 void f()
 {
     path.setWindingRule(GeneralPath.WIND_NON_ZERO);
-    _pntr.fillPath(gs, path);
+    fillPath(gs, path);
     didDraw();
 }
 
@@ -404,7 +402,7 @@ void f()
 void f_x()
 {
     path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
-    _pntr.fillPath(gs, path);
+    fillPath(gs, path);
     didDraw();
 }
 
@@ -535,12 +533,12 @@ void n()  { didDraw(); }
 /**
  * gsave
  */
-void q()  { gs = _pntr.gsave(); }
+void q()  { gs = gsave(); }
 
 /**
  * grestore.
  */
-void Q()  { gs = _pntr.grestore(); }
+void Q()  { gs = grestore(); }
 
 /**
  * Append rectangle
@@ -591,7 +589,7 @@ void RG()
 void s()
 {
     path.closePath();
-    _pntr.strokePath(gs, path);
+    strokePath(gs, path);
     didDraw();
 }
 
@@ -606,7 +604,7 @@ void sc()  { gs.color = getColor(gs.colorSpace,_index,numops); }
 void scn()
 {
     // Handle PatternSpace
-    if(gs.colorSpace instanceof PDFColorSpaces.PatternSpace && numops>=1) {
+    if(gs.colorSpace instanceof PDFColorSpaces.PatternSpace) { // && numops>=1) {
         
         System.err.println("PDFPagePainter: sc for PatternSpace not implemented");
         /*String pname = getToken(_index-1).getName();
@@ -628,7 +626,7 @@ void scn()
     }
     
     // Do normal version
-    else gs.color = getColor(gs.colorSpace,_index,numops);
+    else gs.color = getColor(gs.colorSpace, _index, numops);
 }
 
 /**
@@ -651,7 +649,7 @@ void sh()
         try { shadearea.transform(gs.trans.createInverse()); } // transform from page to user space
         catch(NoninvertibleTransformException e) { throw new PDFException("Invalid user space xform"); }
     }
-    _pntr.fillPath(gs, shadearea);
+    fillPath(gs, shadearea);
     gs.color = oldPaint;
     didDraw();*/
 }
@@ -661,7 +659,7 @@ void sh()
  */
 void S()
 {
-    _pntr.strokePath(gs, path);
+    strokePath(gs, path);
     didDraw();
 }
 
@@ -723,7 +721,7 @@ void Tj()
 {
     PageToken tok = getToken(_index-1);
     int tloc = tok.getStart(), tlen = tok.getLength();
-    _text.showText(_pageBytes, tloc, tlen, gs, _pfile, _pntr);
+    _text.showText(_pageBytes, tloc, tlen, gs, _pfile);
 }
 
 /**
@@ -732,7 +730,7 @@ void Tj()
 void TJ()
 {
     List tArray = (List)(getToken(_index-1).value);
-    _text.showText(_pageBytes, tArray, gs, _pfile, _pntr);
+    _text.showText(_pageBytes, tArray, gs, _pfile);
 }
 
 /**
@@ -845,7 +843,7 @@ void didDraw()
     // Note that unlike other ops that change gstate, there is a specific call into markup handler when clip changes.
     // Markup handler can choose whether to respond to clipping change or just to pull clip out of gstate when it draws.
     if(future_clip != null)
-        _pntr.establishClip(future_clip, true); future_clip = null;
+        establishClip(future_clip, true); future_clip = null;
 
     // The current path and the current point are undefined after a draw
     path = null;
@@ -967,7 +965,7 @@ public int parseInlineImage(int tIndex, byte[] pageBytes)
             Object space = imageDict.get("ColorSpace");
             ColorSpace imageCSpace = space==null ? null : PDFColorSpace.getColorspace(space, _pfile, _page);
             PDFStream imageStream = new PDFStream(pageBytes, token.getStart(), token.getLength(), imageDict);
-            _pntr.drawImage(PDFImage.getImage(imageStream, imageCSpace, _pfile));
+            drawImage(PDFImage.getImage(imageStream, imageCSpace, _pfile));
             return i; // return token index
         }
     }
@@ -1002,17 +1000,17 @@ public void executeForm(PDFForm aForm)
     AffineTransform xform = aForm.getTransform();
     
     // save the current gstate and set the transform in the newgstate
-    PDFGState gs = _pntr.gsave();
+    PDFGState gs = gsave();
     gs.trans.concatenate(xform);
     
     // clip to the form bbox
-    _pntr.establishClip(new GeneralPath(bbox), true);
+    establishClip(new GeneralPath(bbox), true);
   
     // add the form's resources to the page resource stack
     getPage().pushResources(aForm.getResources(_pfile));
     parse(aForm.getTokens(), aForm.getBytes());  // recurse back into the parser with a new set of tokens
     getPage().popResources();    // restore the old resources, gstate,ctm, & clip
-    _pntr.grestore();
+    grestore();
 }
 
 /**
@@ -1023,7 +1021,7 @@ public void executeForm(PDFForm aForm)
 public void executePatternStream(PDFPatterns.Tiling pat)
 {
     // Create image painter and set
-    PDFMarkupHandler pntr = PDFMarkupHandler.get();
+    PDFPageParser pntr = new PDFPageParser(null, null, _page);
     
     // By adding the pattern's resources to page's resource stack, it means pattern will have access to resources
     // defined by the page.  I'll bet Acrobat doesn't allow you to do this, but it shouldn't hurt anything.
@@ -1044,9 +1042,7 @@ public void executePatternStream(PDFPatterns.Tiling pat)
     List <PageToken> tokens = PageToken.getTokens(contents);
     
     // Fire up parser
-    PDFMarkupHandler opntr = _pntr; _pntr = pntr;
-    parse(tokens, contents);
-    _pntr = opntr;
+    pntr.parse(tokens, contents);
     
     // Get the image and set the tile.  All the resources can be freed up now
     pat.setTile(pntr.getBufferedImage());
