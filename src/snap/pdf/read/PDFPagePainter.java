@@ -43,9 +43,6 @@ public class PDFPagePainter {
     // The current GState
     PDFGState            _gstate;
     
-    // The start clip
-    java.awt.Shape       _initialClip;
-    
     // The tokens of the page being parsed
     List <PageToken>     _tokens;
     
@@ -119,9 +116,6 @@ public void paint(Painter aPntr, Object aSource, Rect theDestBnds, AffineTransfo
     
     // Get Dest bounds
     Rect destBnds = theDestBnds!=null? theDestBnds : srcBnds;
-    
-    // Save away the initial user clip
-    _initialClip = _gfx.getClip();
     
     // Get flip transform (for page or pattern)
     if(aSource==null || aSource instanceof PDFPattern)
