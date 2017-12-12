@@ -114,18 +114,11 @@ public PDFPagePainter(Painter aPntr, Rect aRect, PDFPage aPage)
  */
 public void paint(PDFPage aPage)
 {
-    // Get page contents stream and stream bytes (decompressed/decoded)
-    PDFStream pstream = _page.getPageContentsStream(); if(pstream==null) return;
-    byte pbytes[] = pstream.decodeStream();
-    
-    // Create top-level list of tokens and run the lexer to fill the list
-    List pageTokens = PageToken.getTokens(pbytes);
- 
     // Start the markup handler
     beginPage(_bounds.getWidth(), _bounds.getHeight());
     
     // Parse the tokens
-    paintTokens(pageTokens, pbytes);
+    paint();
 }
 
 /**
@@ -163,11 +156,17 @@ public void beginPage(double width, double height)
  * which creates a Java2D object (like GeneralPath, Font, Image, GlyphVector, etc.), or the markup handler, which does
  * the actual drawing.
  */
-protected void paintTokens(List tokenList, byte pageBytes[]) 
+protected void paint() 
 {
-    // Set Tokens and PageBytes
-    _tokens = tokenList;
-    _pageBytes = pageBytes;
+    // Check PageBytes - if missing, get from Page
+    if(_pageBytes==null) {
+        PDFStream pstream = _page.getPageContentsStream(); if(pstream==null) return;
+        _pageBytes = pstream.decodeStream();
+    }
+    
+    // Check Tokens - if missing, get from PageBytes
+    if(_tokens==null)
+        _tokens = PageToken.getTokens(_pageBytes);
     
     // Initialize current path. Note: path is not part of GState and so is not saved/restored by gstate ops
     _path = null; _futureClip = null; _compatibilitySections = 0;
@@ -1046,8 +1045,8 @@ void executeForm(PDFForm aForm)
     List oldTokens = _tokens; byte oldPageBytes[] = _pageBytes;
     _tokens = aForm.getTokens(); _pageBytes = aForm.getBytes();
     
-    // Recurse back into the parser with form tokens and bytes
-    paintTokens(aForm.getTokens(), aForm.getBytes());
+    // Recurse back into this painter for form tokens and bytes
+    paint();
     
     // Restore old resources and GState
     _tokens = oldTokens; _pageBytes = oldPageBytes;
@@ -1062,32 +1061,24 @@ void executeForm(PDFForm aForm)
  */
 public void executePatternStream(PDFPatterns.Tiling pat)
 {
-    // Create image painter and set
-    PDFPagePainter pntr = new PDFPagePainter(null, null, _page);
-    
     // By adding the pattern's resources to page's resource stack, it means pattern will have access to resources
     // defined by the page.  I'll bet Acrobat doesn't allow you to do this, but it shouldn't hurt anything.
     _page.pushResources(pat.getResources());
     
-    // save the current gstate
-    PDFGState gs = pntr.gsave();
-    
-    // Establish the pattern's transformation
-    gs.trans.concatenate(pat.getTransform());
+    // Create PagePainter with pattern's transformation
+    PDFPagePainter ppntr = new PDFPagePainter(null, null, _page);
+    ppntr._gstate.trans.concatenate(pat.getTransform());
     
     // Begin the markup handler. TODO:probably going to have to add a translate by -x, -y of the bounds rect
     Rectangle2D prect = pat.getBounds();
-    pntr.beginPage(prect.getWidth(), prect.getHeight());
+    ppntr.beginPage(prect.getWidth(), prect.getHeight());
     
-    // Get the pattern stream's tokens
-    byte contents[] = pat.getContents();
-    List <PageToken> tokens = PageToken.getTokens(contents);
-    
-    // Fire up parser
-    pntr.paintTokens(tokens, contents);
+    // Fire up painter with pattern content bytes
+    ppntr._pageBytes = pat.getContents();
+    ppntr.paint();
     
     // Get the image and set the tile.  All the resources can be freed up now
-    pat.setTile(pntr.getBufferedImage());
+    pat.setTile((BufferedImage)ppntr.getImage().getNative());
 }
 
 /**
@@ -1299,11 +1290,6 @@ public Image getImage()  { return _image; }
  * Return graphics.
  */
 public Graphics2D getGraphics()  { return _gfx; }
-
-/**
- * Returns pdf image.
- */
-public BufferedImage getBufferedImage()  { return (BufferedImage)_image.getNative(); }
 
 /**
  * Stroke the current path with the current miter limit, color, etc.
