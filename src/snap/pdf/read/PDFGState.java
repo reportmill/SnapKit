@@ -38,9 +38,10 @@ public class PDFGState implements Cloneable {
     // The transparency parameters
     int            blendMode = PDFComposite.NormalBlendMode;
     boolean        alphaIsShape = false;
-    float          salpha = 1; // stroke alpha
     float          alpha = 1;  // non-stroke alpha
+    float          salpha = 1; // stroke alpha
     Object         softMask = null;
+    
     // Composites that performs the operation described above
     Composite      composite = AlphaComposite.SrcOver;
     Composite      scomposite = AlphaComposite.SrcOver;
@@ -83,10 +84,6 @@ public class PDFGState implements Cloneable {
     
     // The text rendering mode
     int            trendermode = 0;
-    
-    // The text knockout: false indicates individual glyphs in text get composited on top of each other.
-    //                    true indicates entire text object gets composited as one group.
-    boolean        tknockout = true;
     
     // Text rendering mode constants
     public final int PDFFillTextMode = 0;

@@ -3,7 +3,6 @@
  */
 package snap.pdf.read;
 import java.awt.Graphics2D;
-//import java.awt.Image;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -15,6 +14,7 @@ import java.util.*;
 import snap.gfx.*;
 import snap.gfx.Image;
 import snap.pdf.*;
+import snap.util.SnapUtils;
 
 /**
  * This paints a PDFPage to a given Painter by parsing the page marking operators.
@@ -45,17 +45,11 @@ public class PDFPagePainter {
     // The current GState
     PDFGState            _gstate;
     
-    // The bounds rect
-    Rect                 _destRect;
-    
     // The transform to flip coordinates from Painter (origin is top-left) to PDF (origin is bottom-left)
     AffineTransform      _flipXForm;
     
     // The start clip
     java.awt.Shape       _initialClip;
-    
-    // The bounds of the area being parsed
-    Rect                 _bounds;
     
     // The tokens of the page being parsed
     List <PageToken>     _tokens;
@@ -78,7 +72,7 @@ public class PDFPagePainter {
 /**
  * Creates a new PDFPagePainter.
  */
-public PDFPagePainter(Painter aPntr, Rect aRect, PDFPage aPage)
+public PDFPagePainter(PDFPage aPage)
 {
     // Cache given page and page file
     _page = aPage;
@@ -90,20 +84,6 @@ public PDFPagePainter(Painter aPntr, Rect aRect, PDFPage aPage)
     // Create the gstate list and the default gstate
     _gstates = new Stack();
     _gstates.push(_gstate = new PDFGState());
-    
-    // Set Painter
-    _pntr = aPntr;
-    _destRect = aRect;
-    
-    // Get Media box and crop box and set bounds of the area we're drawing into (interseciont of media and crop)
-    Rect media = _page.getMediaBox(), crop = _page.getCropBox();
-    _bounds = media.getIntersectRect(crop);
-    
-    // Set Painter and initialize gstate to bounds. TODO need to set transform for pages with "/Rotate" key
-    _gstate.trans.setToTranslation(-_bounds.getX(),-_bounds.getY());
-    //Transform  t = getGState().trans; t.setToTranslation(-_bounds.getX(),-_bounds.getY());
-    //t.rotate(-Math.PI/2); t.translate(0,_bounds.getWidth());
-    //TODO also need to make sure PDFPage returns right rect (ImageShape initialized from file) 
 }
 
 /**
@@ -117,70 +97,64 @@ public Painter getPainter()  { return _pntr; }
 public Graphics2D getGraphics()  { return _gfx; }
 
 /**
- * Paint the given page.
+ * Paints the page inside the given rect.
  */
-public void paint(PDFPage aPage)
+public void paint(Painter aPntr, Object aSource, Rect theDestBnds, AffineTransform aTrans) 
 {
-    // Start the markup handler
-    beginPage(_bounds.getWidth(), _bounds.getHeight());
+    // Save painter state
+    aPntr.save();
     
-    // Parse the tokens
-    paint();
-}
-
-/**
- * Set the bounds of the page.  This will be called before any marking operations.
- */
-public void beginPage(double width, double height)
-{
-    // If no destination rect has been set, draw unscaled & untranslated
-    if(_destRect==null) _destRect = new Rect(0, 0, width, height);
-    
-    // Set Graphics
-    _gfx = _pntr.getNative(Graphics2D.class);
+    // Set Painter, Graphics, Text.RenderContext
+    _pntr = aPntr; _gfx = _pntr.getNative(Graphics2D.class);
     _text._renderContext = _gfx.getFontRenderContext();
+    
+    // Get Source bounds (the natural bounds of the Page, Form or Pattern)
+    Rect srcBnds = null;
+    if(aSource instanceof PDFForm) { PDFForm form = (PDFForm)aSource; Rectangle2D bbox = form.getBBox();
+        srcBnds = new Rect(0, 0, bbox.getWidth(), bbox.getHeight()); }
+    if(aSource instanceof PDFPattern) { PDFPattern ptrn = (PDFPattern)aSource;
+        srcBnds = new Rect(0, 0, ptrn.getBounds().getWidth(), ptrn.getBounds().getHeight()); }
+    else {
+        Rect media = _page.getMediaBox(), crop = _page.getCropBox();
+        srcBnds = media.getIntersectRect(crop); srcBnds.snap();
+    }
+    
+    // Get Dest bounds
+    Rect destBnds = theDestBnds!=null? theDestBnds : srcBnds;
     
     // Save away the initial user clip
     _initialClip = _gfx.getClip();
     
-    // Sets the clip for the destination to the page size
-    _pntr.clip(_destRect);
-    
-    // The PDF space has (0,0) at the top, awt has it at the bottom
+    // Get flip transform (for page or pattern)
     _flipXForm = _gfx.getTransform();
-    _flipXForm.concatenate(new AffineTransform(_destRect.width/width, 0, 0, -_destRect.height/height,
-        _destRect.x, _destRect.getMaxY()));
-}
+    if(aSource==null || aSource instanceof PDFPattern)
+        _flipXForm.concatenate(new AffineTransform(destBnds.width/srcBnds.width, 0, 0, -destBnds.height/srcBnds.height,
+            destBnds.x, destBnds.getMaxY()));
 
-/**
- * Paints the drawing ops/data for Page/PageBytes/Tokens.
- */
-protected void paint() 
-{
-    // Check PageBytes - if missing, get from Page
+    // If Transform provided, append it
+    if(aTrans!=null) _gstate.trans.concatenate(aTrans);
+    
+    // Make sure PageBytes is set (if missing, get from Page)
     if(_pageBytes==null) {
         PDFStream pstream = _page.getPageContentsStream(); if(pstream==null) return;
         _pageBytes = pstream.decodeStream();
     }
     
-    // Check Tokens - if missing, get from PageBytes
+    // Make sure Tokens is set (if missing, get from PageBytes)
     if(_tokens==null)
         _tokens = PageToken.getTokens(_pageBytes);
     
     // Initialize current path. Note: path is not part of GState and so is not saved/restored by gstate ops
     _path = null; _futureClip = null; _compatibilitySections = 0;
     
-    // Iterate over page contents tokens
+    // Iterate over tokens
     for(int i=0, iMax=_tokens.size(); i<iMax; i++) { PageToken token = getToken(i); _index = i;
-    
         if(token.type==PageToken.PDFOperatorToken)
             paintOp(token);
-            
-        // If not op, must be an operand Catch up on clipping. Plus be anal and return error, just like Acrobat.
-        //if(didDraw) { if(_futureClip!=null) establishClip(_futureClip, true); _futureClip = null;
-        //    _path = null; }  // The current path and the current point are undefined after a draw
-        //else if(_futureClip != null) { } // TODO: an error unless the last token was W or W*
     }
+    
+    // Restore painter state
+    aPntr.restore();
 }
 
 /**
@@ -873,7 +847,7 @@ void didDraw()
     // Note that unlike other ops that change gstate, there is a specific call into markup handler when clip changes.
     // Markup handler can choose whether to respond to clipping change or just to pull clip out of gstate when it draws.
     if(_futureClip != null)
-        establishClip(_futureClip, true); _futureClip = null;
+        establishClip(_futureClip); _futureClip = null;
 
     // The current path and the current point are undefined after a draw
     _path = null;
@@ -1029,28 +1003,18 @@ static final String _inline_image_value_abbreviations[][] = {
  */
 void executeForm(PDFForm aForm)
 {
-    Rectangle2D bbox = aForm.getBBox();
-    AffineTransform xform = aForm.getTransform();
-    
-    // Save the current gstate and set the transform in the newgstate
-    PDFGState gs = gsave();
-    gs.trans.concatenate(xform);
-    
-    // Clip to the form bbox
-    establishClip(new GeneralPath(bbox), true);
-  
     // Add the form's resources to the page resource stack
     _page.pushResources(aForm.getResources(_pfile));
-    List oldTokens = _tokens; byte oldPageBytes[] = _pageBytes;
-    _tokens = aForm.getTokens(); _pageBytes = aForm.getBytes();
+    AffineTransform old = establishTransform(_gstate);
     
     // Recurse back into this painter for form tokens and bytes
-    paint();
+    PDFPagePainter ppntr = new PDFPagePainter(_page); Rectangle2D bbox = aForm.getBBox();
+    ppntr._pageBytes = aForm.getBytes(); ppntr._tokens = aForm.getTokens();
+    ppntr.paint(_pntr, aForm, null, aForm.getTransform());
     
     // Restore old resources and GState
-    _tokens = oldTokens; _pageBytes = oldPageBytes;
     _page.popResources();
-    grestore();
+    _gfx.setTransform(old);
 }
 
 /**
@@ -1058,33 +1022,28 @@ void executeForm(PDFForm aForm)
  * we only execute it once and cache a tile. To do this, we temporarily set the markup handler in the file to a new 
  * BufferedMarkupHander, add the pattern's resource dictionary and fire up the parser.
  */
-public void executePatternStream(PDFPatterns.Tiling pat)
+public void executePatternStream(PDFPattern.Tiling aPattern)
 {
     // Get pattern width & height
-    int width = (int)Math.ceil(pat.getBounds().getWidth());
-    int height = (int)Math.ceil(pat.getBounds().getHeight());
+    int width = (int)Math.ceil(aPattern.getBounds().getWidth());
+    int height = (int)Math.ceil(aPattern.getBounds().getHeight());
     
     // By adding the pattern's resources to page's resource stack, it means pattern will have access to resources
     // defined by the page.  I'll bet Acrobat doesn't allow you to do this, but it shouldn't hurt anything.
-    _page.pushResources(pat.getResources());
+    _page.pushResources(aPattern.getResources());
     
     // Create image for pattern
     Image img = Image.get(width, height, true);
-    Painter pntr = img.getPainter();
+    Painter ipntr = img.getPainter();
     
-    // Create PagePainter with pattern's transformation
-    PDFPagePainter ppntr = new PDFPagePainter(pntr, null, _page);
-    ppntr._gstate.trans.concatenate(pat.getTransform());
-    
-    // Begin the markup handler. TODO:probably going to have to add a translate by -x, -y of the bounds rect
-    ppntr.beginPage(width, height);
-    
-    // Fire up painter with pattern content bytes
-    ppntr._pageBytes = pat.getContents();
-    ppntr.paint();
+    // Create PagePainter with pattern bounds and transform
+    PDFPagePainter ppntr = new PDFPagePainter(_page);
+    ppntr._pageBytes = aPattern.getContents();
+    ppntr.paint(ipntr, aPattern, null, aPattern.getTransform());
     
     // Get the image and set the tile.  All the resources can be freed up now
-    pat.setTile((BufferedImage)img.getNative());
+    aPattern.setTile((BufferedImage)img.getNative());
+    System.out.println("PDFPagePainter.executePatternStream");
 }
 
 /**
@@ -1257,11 +1216,11 @@ public PDFPattern getPattern(String pdfName)
     PDFPattern patobj = PDFPattern.getInstance(pat, _pfile);
     
     // Resolve the colorspace.
-    if (patobj instanceof PDFPatterns.Shading) {
+    if (patobj instanceof PDFPattern.Shading) {
         Map shmap = (Map)_page.getXRefObj(((Map)pat).get("Shading"));
         Object csobj = _page.getXRefObj(shmap.get("ColorSpace"));
         if(csobj!=null)
-            ((PDFPatterns.Shading)patobj).setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, _page));
+            ((PDFPattern.Shading)patobj).setColorSpace(PDFColorSpace.getColorspace(csobj, _pfile, _page));
     }
     
     return patobj;
@@ -1270,10 +1229,10 @@ public PDFPattern getPattern(String pdfName)
 /**
  * Creates a new shadingPattern for the resource name.  Used by the shading operator.
  */
-public PDFPatterns.Shading getShading(String pdfName)
+public PDFPattern.Shading getShading(String pdfName)
 {
     Map pat = (Map)_page.findResource("Shading", pdfName);
-    PDFPatterns.Shading patobj = PDFPatterns.Shading.getInstance(pat, _pfile);
+    PDFPattern.Shading patobj = PDFPattern.Shading.getInstance(pat, _pfile);
     
     // Resolve the colorspace.
     Object csobj = _page.getXRefObj(pat.get("ColorSpace"));
@@ -1368,18 +1327,13 @@ PDFGState gsave()
 PDFGState grestore()
 {
     // Pop last GState (but get it's clip)
-    GeneralPath currentclip = _gstates.pop().clip;
+    GeneralPath lastClip = _gstates.pop().clip;
     _gstate = _gstates.peek();
     
-    //
-    GeneralPath savedclip = _gstate.clip;
-     if(currentclip!=null && savedclip!=null) {
-        if(!currentclip.equals(savedclip))
-            clipChanged();
-     }
-     else if(currentclip!=savedclip)
-         clipChanged();
-     return _gstate;
+    // If clip changed, call clipChanged
+    if(!SnapUtils.equals(lastClip, _gstate.clip))
+        clipChanged();
+    return _gstate;
 }
 
 /**
@@ -1416,15 +1370,14 @@ AffineTransform establishTransform(PDFGState aGS)
  * Whenever clip is changed, we calculate new clip, which can be intersected with the old clip, and save it in gstate.
  * NB. This routine modifies the path that's passed in to it.
  */
-public void establishClip(GeneralPath newclip, boolean intersect)
+void establishClip(GeneralPath newclip)
 {
     // transform the new clip path into page space
     newclip.transform(_gstate.trans);
     
-    // If we're adding a clip to an existing clip, calculate the intersection
-    if(intersect && _gstate.clip!=null) {
-        Area clip_area = new Area(_gstate.clip);
-        Area newclip_area = new Area(newclip);
+    // Calculate the intersection
+    if(_gstate.clip!=null) {
+        Area clip_area = new Area(_gstate.clip), newclip_area = new Area(newclip);
         clip_area.intersect(newclip_area);
         newclip = new GeneralPath(clip_area);
     }

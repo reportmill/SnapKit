@@ -238,8 +238,8 @@ public Image getImage()
     ipntr.setColor(Color.WHITE); ipntr.fillRect(0,0,width,height);
     
     // Create PDF painter that renders into an image
-    PDFPagePainter ppntr = new PDFPagePainter(ipntr, null, this);
-    ppntr.paint(this);
+    PDFPagePainter ppntr = new PDFPagePainter(this);
+    ppntr.paint(ipntr, null, null, null);
     
     // Return image
     return _image = img;
@@ -280,8 +280,8 @@ public Image getImage2()
  */
 public void paint(Painter aPntr, Rect aRect)
 {
-    PDFPagePainter pntr = new PDFPagePainter(aPntr, aRect, this);
-    pntr.paint(this);
+    PDFPagePainter pntr = new PDFPagePainter(this);
+    pntr.paint(aPntr, null, aRect, null);
 }
     
 /**
