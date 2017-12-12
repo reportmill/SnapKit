@@ -80,8 +80,13 @@ public void setTextMatrix(float a, float b, float c, float d, float e, float f)
  * Get a glyph vector by decoding string bytes according to font encoding,
  * and calculating spacing using text parameters in gstate.
  */
-public void showText(byte pageBytes[], int offset, int length, PDFGState gs) 
+public void showText(int offset, int length) 
 {
+    // Get some PagePainter attributes
+    PDFFile file = _ppntr._pfile;
+    byte pageBytes[] = _ppntr._pageBytes;
+    PDFGState gs = _ppntr._gstate;
+
     // TODO: This is probably a huge mistake (performance-wise) The font returned by the factory has a font size of 1
     // so we include the gstate's font size in the text rendering matrix. For any number of reasons, it'd probably be
     // better to do a deriveFont() with the font size and adjust the rendering matrix calculations.
@@ -90,7 +95,6 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs)
     renderMatrix.setTransform(gs.fontSize*gs.thscale, 0, 0, -gs.fontSize, 0, -gs.trise);
  
     // Ensure the buffer is big enough for the bytes->cid conversion
-    PDFFile file = _ppntr._pfile;
     Map fontDict = gs.font;      // Get the font dictionary from the gstate
     GlyphMapper gmap = PDFFont.getGlyphMapper(fontDict, file);
     int bufmax = gmap.maximumOutputBufferSize(pageBytes, offset, length);
@@ -116,7 +120,7 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs)
     gs.trans.concatenate(renderMatrix);
     
     // draw, restore ctm and update the text matrix
-    _ppntr.showText(gs, glyphs);
+    _ppntr.showText(glyphs);
     gs.trans = saved_ctm;
     textMatrix.translate(pt.x*gs.fontSize*gs.thscale, pt.y);
 }
@@ -124,13 +128,14 @@ public void showText(byte pageBytes[], int offset, int length, PDFGState gs)
 /**
  * Like the previous routine, except using a list of strings & spacing adjustments.
  */
-public void showText(byte pageBytes[], List <PageToken> tokens, PDFGState gs) 
+public void showText(List <PageToken> tokens) 
 {
+    PDFGState gs = _ppntr._gstate;
     double hscale = -gs.fontSize*gs.thscale/1000;
     for(PageToken tok : tokens) {
         if(tok.type==PageToken.PDFNumberToken)
             textMatrix.translate(tok.floatValue()*hscale, 0);
-        else showText(pageBytes, tok.getStart(), tok.getLength(), gs);
+        else showText(tok.getStart(), tok.getLength());
     }
 }
 

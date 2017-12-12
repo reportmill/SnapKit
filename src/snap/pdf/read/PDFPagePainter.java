@@ -72,9 +72,6 @@ public class PDFPagePainter {
     // save away the factory callback handler objects
     int                  _compatibilitySections = 0;
     
-    // The graphics state
-    PDFGState            gs;
-   
     // The painter
     Painter              _pntr;
     
@@ -177,9 +174,6 @@ protected void paintTokens(List tokenList, byte pageBytes[])
     
     // Initialize current path. Note: path is not part of GState and so is not saved/restored by gstate ops
     _path = null; _futureClip = null;
-    
-    // Get the current gstate
-    gs = _gstate;
     
     // Iterate over page contents tokens
     for(int i=0, iMax=_tokens.size(); i<iMax; i++) { PageToken token = getToken(i); _index = i;
@@ -291,8 +285,8 @@ void b()
 {
     _path.setWindingRule(GeneralPath.WIND_NON_ZERO);
     _path.closePath();
-    fillPath(gs, _path);
-    strokePath(gs, _path);
+    fillPath();
+    strokePath();
     didDraw();
 }
 
@@ -303,8 +297,8 @@ void b_x()
 {
     _path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
     _path.closePath();
-    fillPath(gs, _path);
-    strokePath(gs, _path);
+    fillPath();
+    strokePath();
     didDraw();
 }
 
@@ -314,8 +308,8 @@ void b_x()
 void B()
 {
     _path.setWindingRule(GeneralPath.WIND_NON_ZERO);
-    fillPath(gs, _path);
-    strokePath(gs, _path);
+    fillPath();
+    strokePath();
     didDraw();
 }
 
@@ -325,8 +319,8 @@ void B()
 void B_x()
 {
     _path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
-    fillPath(gs, _path);
-    strokePath(gs, _path);
+    fillPath();
+    strokePath();
     didDraw();
 }
 
@@ -355,8 +349,9 @@ void BDC()  { }
  */
 void c()
 {
-    getPoint(_index, gs.cp);
-    _path.curveTo(getFloat(_index-6), getFloat(_index-5), getFloat(_index-4), getFloat(_index-3), gs.cp.x, gs.cp.y);
+    getPoint(_index, _gstate.cp);
+    _path.curveTo(getFloat(_index-6), getFloat(_index-5), getFloat(_index-4), getFloat(_index-3),
+        _gstate.cp.x, _gstate.cp.y);
 }
 
 /**
@@ -365,7 +360,7 @@ void c()
 void cm()
 {
     AffineTransform xfm = getTransform(_index);
-    gs.trans.concatenate(xfm);
+    _gstate.trans.concatenate(xfm);
 }
 
 /**
@@ -374,7 +369,7 @@ void cm()
 void cs()
 {
     String space = getToken(_index-1).getName();
-    gs.colorSpace = PDFColorSpace.getColorspace(space, _pfile, _page);
+    _gstate.colorSpace = PDFColorSpace.getColorspace(space, _pfile, _page);
 }
 
 /**
@@ -383,7 +378,7 @@ void cs()
 void CS()
 {
     String space = getToken(_index-1).getName();
-    gs.scolorSpace = PDFColorSpace.getColorspace(space, _pfile, _page);
+    _gstate.scolorSpace = PDFColorSpace.getColorspace(space, _pfile, _page);
 }
 
 /**
@@ -391,9 +386,9 @@ void CS()
  */
 void d()
 {
-    gs.lineDash = getFloatArray(_index-2);
-    gs.dashPhase = getFloat(_index-1);
-    gs.lineStroke = gs.createStroke();
+    _gstate.lineDash = getFloatArray(_index-2);
+    _gstate.dashPhase = getFloat(_index-1);
+    _gstate.lineStroke = _gstate.createStroke();
 }
 
 /**
@@ -436,7 +431,7 @@ void EX()  { if(--_compatibilitySections<0) throw new PDFException("Unbalanced B
 void f()
 {
     _path.setWindingRule(GeneralPath.WIND_NON_ZERO);
-    fillPath(gs, _path);
+    fillPath();
     didDraw();
 }
 
@@ -446,7 +441,7 @@ void f()
 void f_x()
 {
     _path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
-    fillPath(gs, _path);
+    fillPath();
     didDraw();
 }
 
@@ -456,7 +451,7 @@ void f_x()
 void g()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
-    gs.color = getColor(cspace, _index); gs.colorSpace = cspace;
+    _gstate.color = getColor(cspace, _index); _gstate.colorSpace = cspace;
 }
 
 /**
@@ -465,7 +460,7 @@ void g()
 void gs()
 {
     Map exg = getExtendedGStateNamed(getToken(_index-1).getName());
-    readExtendedGState(gs, exg);
+    readExtendedGState(_gstate, exg);
 }
 
 /**
@@ -474,7 +469,7 @@ void gs()
 void G()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceGray", _pfile, _page);
-    gs.scolor = getColor(cspace, _index); gs.scolorSpace = cspace;
+    _gstate.scolor = getColor(cspace, _index); _gstate.scolorSpace = cspace;
 }
 
 /**
@@ -484,14 +479,14 @@ void h()
 {
     _path.closePath();
     Point2D lastPathPoint = _path.getCurrentPoint(); 
-    gs.cp.x = (float)lastPathPoint.getX();
-    gs.cp.y = (float)lastPathPoint.getY();
+    _gstate.cp.x = (float)lastPathPoint.getX();
+    _gstate.cp.y = (float)lastPathPoint.getY();
 }
 
 /**
  * Set flatness
  */
-void i()  { gs.flatness = getFloat(_index-1); }
+void i()  { _gstate.flatness = getFloat(_index-1); }
 
 /**
  * ID
@@ -503,8 +498,8 @@ void ID()  { }
  */
 void j()
 {
-    gs.lineJoin = getInt(_index-1);
-    gs.lineStroke = gs.createStroke();
+    _gstate.lineJoin = getInt(_index-1);
+    _gstate.lineStroke = _gstate.createStroke();
 }
 
 /**
@@ -512,8 +507,8 @@ void j()
  */
 void J()
 {
-    gs.lineCap = getInt(_index-1);
-    gs.lineStroke = gs.createStroke();
+    _gstate.lineCap = getInt(_index-1);
+    _gstate.lineStroke = _gstate.createStroke();
 }
 
 /**
@@ -523,7 +518,7 @@ void k()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceCMYK", _pfile, _page);
     Color acolor = getColor(cspace, _index);
-    gs.colorSpace = cspace; gs.color = acolor;
+    _gstate.colorSpace = cspace; _gstate.color = acolor;
 }
 
 /**
@@ -533,7 +528,7 @@ void K()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceCMYK", _pfile, _page);
     Color acolor = getColor(cspace, _index);
-    gs.scolorSpace = cspace; gs.scolor = acolor;
+    _gstate.scolorSpace = cspace; _gstate.scolor = acolor;
 }
 
 /**
@@ -541,8 +536,8 @@ void K()
  */
 void l()
 {
-    getPoint(_index, gs.cp);
-    _path.lineTo(gs.cp.x, gs.cp.y);
+    getPoint(_index, _gstate.cp);
+    _path.lineTo(_gstate.cp.x, _gstate.cp.y);
 }
 
 /**
@@ -550,9 +545,9 @@ void l()
  */
 void m()
 {
-    getPoint(_index, gs.cp);
+    getPoint(_index, _gstate.cp);
     if(_path==null) _path = new GeneralPath();
-    _path.moveTo(gs.cp.x, gs.cp.y);
+    _path.moveTo(_gstate.cp.x, _gstate.cp.y);
 }
 
 /**
@@ -560,8 +555,8 @@ void m()
  */
 void M()
 {
-    gs.miterLimit = getFloat(_index-1);
-    gs.lineStroke = gs.createStroke();
+    _gstate.miterLimit = getFloat(_index-1);
+    _gstate.lineStroke = _gstate.createStroke();
 }
 
 /**
@@ -577,12 +572,12 @@ void n()  { didDraw(); }
 /**
  * gsave
  */
-void q()  { gs = gsave(); }
+void q()  { _gstate = gsave(); }
 
 /**
  * grestore.
  */
-void Q()  { gs = grestore(); }
+void Q()  { _gstate = grestore(); }
 
 /**
  * Append rectangle
@@ -596,7 +591,7 @@ void re()
     // Create new path and add rect and reset current point to start of rect
     if(_path==null) _path = new GeneralPath();
     _path.moveTo(x,y); _path.lineTo(x+w,y); _path.lineTo(x+w,y+h); _path.lineTo(x,y+h); _path.closePath();
-    gs.cp.x = x; gs.cp.y = y;  // TODO: Check that this is what really happens in pdf
+    _gstate.cp.x = x; _gstate.cp.y = y;  // TODO: Check that this is what really happens in pdf
 }
 
 /**
@@ -604,7 +599,7 @@ void re()
  */
 void ri()
 {
-    gs.renderingIntent = PDFGState.getRenderingIntentID(getToken(_index-1).getString());
+    _gstate.renderingIntent = PDFGState.getRenderingIntentID(getToken(_index-1).getString());
 }
 
 /**
@@ -613,8 +608,8 @@ void ri()
 void rg()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceRGB", _pfile, _page);
-    gs.color = getColor(cspace, _index);
-    gs.colorSpace = cspace;
+    _gstate.color = getColor(cspace, _index);
+    _gstate.colorSpace = cspace;
 }
 
 /**
@@ -623,8 +618,8 @@ void rg()
 void RG()
 {
     ColorSpace cspace = PDFColorSpace.getColorspace("DeviceRGB", _pfile, _page);
-    gs.scolor = getColor(cspace, _index);
-    gs.scolorSpace = cspace;
+    _gstate.scolor = getColor(cspace, _index);
+    _gstate.scolorSpace = cspace;
 }
 
 /**
@@ -633,14 +628,23 @@ void RG()
 void s()
 {
     _path.closePath();
-    strokePath(gs, _path);
+    strokePath();
+    didDraw();
+}
+
+/**
+ * Stroke path
+ */
+void S()
+{
+    strokePath();
     didDraw();
 }
 
 /**
  * Set color in colorspace
  */
-void sc()  { gs.color = getColor(gs.colorSpace, _index); }
+void sc()  { _gstate.color = getColor(_gstate.colorSpace, _index); }
 
 /**
  * Set color in colorspace
@@ -648,7 +652,7 @@ void sc()  { gs.color = getColor(gs.colorSpace, _index); }
 void scn()
 {
     // Handle PatternSpace
-    if(gs.colorSpace instanceof PDFColorSpaces.PatternSpace) { // && numops>=1) {
+    if(_gstate.colorSpace instanceof PDFColorSpaces.PatternSpace) { // && numops>=1) {
         
         System.err.println("PDFPagePainter: sc for PatternSpace not implemented");
         /*String pname = getToken(_index-1).getName();
@@ -670,7 +674,7 @@ void scn()
     }
     
     // Do normal version
-    else gs.color = getColor(gs.colorSpace, _index);
+    else _gstate.color = getColor(_gstate.colorSpace, _index);
 }
 
 /**
@@ -699,18 +703,9 @@ void sh()
 }
 
 /**
- * Stroke path
- */
-void S()
-{
-    strokePath(gs, _path);
-    didDraw();
-}
-
-/**
  * Set stroke color in normal colorspaces
  */
-void SC()  { gs.scolor = getColor(gs.scolorSpace, _index); }
+void SC()  { _gstate.scolor = getColor(_gstate.scolorSpace, _index); }
 
 /**
  * Set strokecolor in normal colorspaces
@@ -720,12 +715,12 @@ void SCN()  { SC(); } // TODO: deal with weird colorspaces
 /**
  * Move to next line
  */
-void T_x()  { _text.positionText(0, -gs.tleading); }
+void T_x()  { _text.positionText(0, -_gstate.tleading); }
 
 /**
  * Set character spacing
  */
-void Tc()  { gs.tcs = getFloat(_index-1); }
+void Tc()  { _gstate.tcs = getFloat(_index-1); }
 
 /**
  * Move relative to current line start
@@ -745,7 +740,7 @@ void TD()
     float x = getFloat(_index-2);
     float y = getFloat(_index-1);
     _text.positionText(x,y);
-    gs.tleading = -y;
+    _gstate.tleading = -y;
 }
 
 /**
@@ -754,8 +749,8 @@ void TD()
 void Tf()
 {
     String fontalias = getToken(_index-2).getName(); // name in dict is key, so lose leading /
-    gs.font = getFontDictForAlias(fontalias);
-    gs.fontSize = getFloat(_index-1);
+    _gstate.font = getFontDictForAlias(fontalias);
+    _gstate.fontSize = getFloat(_index-1);
 }
 
 /**
@@ -765,7 +760,7 @@ void Tj()
 {
     PageToken tok = getToken(_index-1);
     int tloc = tok.getStart(), tlen = tok.getLength();
-    _text.showText(_pageBytes, tloc, tlen, gs);
+    _text.showText(tloc, tlen);
 }
 
 /**
@@ -774,13 +769,13 @@ void Tj()
 void TJ()
 {
     List tArray = (List)(getToken(_index-1).value);
-    _text.showText(_pageBytes, tArray, gs);
+    _text.showText(tArray);
 }
 
 /**
  * Set text leading
  */
-void TL()  { gs.tleading = getFloat(_index-1); }
+void TL()  { _gstate.tleading = getFloat(_index-1); }
 
 /**
  * Set text matrix
@@ -795,32 +790,32 @@ void Tm()
 /**
  * Set text rendering mode
  */
-void Tr()  { gs.trendermode = getInt(_index-1); }
+void Tr()  { _gstate.trendermode = getInt(_index-1); }
 
 /**
  * Set text rise
  */
-void Ts()  { gs.trise = getFloat(_index-1); }
+void Ts()  { _gstate.trise = getFloat(_index-1); }
 
 /**
  * Set text word spacing
  */
-void Tw()  { gs.tws = getFloat(_index-1); }
+void Tw()  { _gstate.tws = getFloat(_index-1); }
 
 /**
  * Set text horizontal scale factor
  */
-void Tz()  { gs.thscale = getFloat(_index-1)/100f; }
+void Tz()  { _gstate.thscale = getFloat(_index-1)/100f; }
 
 /**
  * Curveto (first control point is current point)
  */
 void v()
 {
-    double cp1x = gs.cp.x, cp1y = gs.cp.y;
+    double cp1x = _gstate.cp.x, cp1y = _gstate.cp.y;
     Point cp2 = getPoint(_index-2);
-    getPoint(_index, gs.cp);
-    _path.curveTo(cp1x, cp1y, cp2.x, cp2.y, gs.cp.x, gs.cp.y);
+    getPoint(_index, _gstate.cp);
+    _path.curveTo(cp1x, cp1y, cp2.x, cp2.y, _gstate.cp.x, _gstate.cp.y);
 }
 
 /**
@@ -828,8 +823,8 @@ void v()
  */
 void w()
 {
-    gs.lineWidth = getFloat(_index-1);
-    gs.lineStroke = gs.createStroke();
+    _gstate.lineWidth = getFloat(_index-1);
+    _gstate.lineStroke = _gstate.createStroke();
 }
 
 /**
@@ -869,8 +864,8 @@ void W_x()
 void y()
 {
     Point cp1 = getPoint(_index-2);
-    getPoint(_index, gs.cp);
-    _path.curveTo(cp1.x, cp1.y, gs.cp.x, gs.cp.y, gs.cp.x, gs.cp.y);
+    getPoint(_index, _gstate.cp);
+    _path.curveTo(cp1.x, cp1.y, _gstate.cp.x, _gstate.cp.y, _gstate.cp.x, _gstate.cp.y);
 }
 
 /** quote */
@@ -1309,22 +1304,22 @@ public BufferedImage getBufferedImage()  { return (BufferedImage)_image.getNativ
 /**
  * Stroke the current path with the current miter limit, color, etc.
  */
-public void strokePath(PDFGState aGS, GeneralPath aShape)
+void strokePath()
 {
-    AffineTransform old = establishTransform(aGS);
-    if(aGS.scomposite != null) _gfx.setComposite(aGS.scomposite);
-    _pntr.setColor(aGS.scolor); _gfx.setStroke(aGS.lineStroke); _gfx.draw(aShape);
+    AffineTransform old = establishTransform(_gstate);
+    if(_gstate.scomposite != null) _gfx.setComposite(_gstate.scomposite);
+    _pntr.setColor(_gstate.scolor); _gfx.setStroke(_gstate.lineStroke); _gfx.draw(_path);
     _gfx.setTransform(old);
 }
 
 /**
  * Fill the current path using the fill params in the gstate
  */
-public void fillPath(PDFGState aGS, GeneralPath aShape)
+void fillPath()
 {
-    AffineTransform old = establishTransform(aGS);
-    if(aGS.composite != null) _gfx.setComposite(aGS.composite);
-    _pntr.setPaint(aGS.color); _gfx.fill(aShape);
+    AffineTransform old = establishTransform(_gstate);
+    if(_gstate.composite != null) _gfx.setComposite(_gstate.composite);
+    _pntr.setPaint(_gstate.color); _gfx.fill(_path);
     _gfx.setTransform(old);
 }    
 
@@ -1366,15 +1361,14 @@ public void drawImage(PDFGState aGS, java.awt.Image anImg, AffineTransform ixfor
 /**
  * Draw some text at the current text position.  
  */
-public void showText(PDFGState aGS, GlyphVector v)
+public void showText(GlyphVector v)
 {
-    AffineTransform old = establishTransform(aGS);
+    AffineTransform old = establishTransform(_gstate);
     
     // TODO: eventually need check the font render mode in the gstate
-    if (aGS.composite != null)
-        _gfx.setComposite(aGS.composite);
+    if(_gstate.composite != null) _gfx.setComposite(_gstate.composite);
     
-    _pntr.setPaint(aGS.color);
+    _pntr.setPaint(_gstate.color);
     _gfx.drawGlyphVector(v,0,0);
     _gfx.setTransform(old);
 }
