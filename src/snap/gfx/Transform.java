@@ -50,6 +50,11 @@ public final boolean isRotated()  { return _b!=0 || _c!=0; }
 public void translate(double dx, double dy)  { _tx += dx; _ty += dy; _inverse = null; }
 
 /**
+ * Translates this transform by given x & y.
+ */
+public void translate2(double dx, double dy)  { _tx += dx*_a + dy*_b; _ty += dx*_c + dy*_d; _inverse = null; }
+
+/**
  * Rotates this transform by given angle in degrees.
  */
 public void rotate(double anAngle)
