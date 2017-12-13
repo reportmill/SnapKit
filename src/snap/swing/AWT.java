@@ -259,7 +259,7 @@ private static class AWTPathIter implements PathIterator {
     }
     
     /** Returns the winding rule. */
-    public int getWindingRule()  { return PathIterator.WIND_EVEN_ODD; }
+    public int getWindingRule()  { return _pi.getWinding(); }
     
     /** Returns whether is done. */
     public boolean isDone()  { return !_pi.hasNext(); }
@@ -292,6 +292,9 @@ private static class SnapPathIter extends PathIter {
     
     /** Returns whether is done. */
     public boolean hasNext()  { return !_pi.isDone(); }
+    
+    /** Returns the winding rule. */
+    public int getWinding()  { return _pi.getWindingRule(); }
 }
 
 }

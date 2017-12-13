@@ -26,12 +26,19 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     // The bounds
     Rect         _bounds;
     
+    // The winding -how a path determines what to fill when segments intersect
+    int          _wind = WIND_EVEN_ODD;
+    
     // Constants for segements
     public static final PathIter.Seg MoveTo = PathIter.Seg.MoveTo;
     public static final PathIter.Seg LineTo = PathIter.Seg.LineTo;
     public static final PathIter.Seg QuadTo = PathIter.Seg.QuadTo;
     public static final PathIter.Seg CubicTo = PathIter.Seg.CubicTo;
     public static final PathIter.Seg Close = PathIter.Seg.Close;
+    
+    // Constants for winding
+    public static final int WIND_EVEN_ODD = PathIter.WIND_EVEN_ODD;
+    public static final int WIND_NON_ZERO = PathIter.WIND_NON_ZERO;
 
 /**
  * Creates a new path.
@@ -47,6 +54,16 @@ public Path(PathIter aPI)  { append(aPI); }
  * Creates a path for given shape.
  */
 public Path(Shape aShape)  { append(aShape.getPathIter(null)); }
+
+/**
+ * Returns the winding - how a path determines what to fill when segments intersect.
+ */
+public int getWinding()  { return _wind; }
+
+/**
+ * Sets the winding - how a path determines what to fill when segments intersect.
+ */
+public void setWinding(int aValue)  { _wind = aValue; }
 
 /**
  * Moveto.
@@ -212,6 +229,15 @@ public void setPoint(int anIndex, double aX, double aY)
  * Returns last path point.
  */
 public Point getPointLast()  { return _pcount>0? getPoint(_pcount-1) : null; }
+
+/**
+ * Returns current path point.
+ */
+public Point getCurrentPoint()
+{
+    if(getSegLast()==Close && getPointCount()>0) return getPoint(0);
+    return getPointLast();
+}
 
 /**
  * Adds a point.
@@ -403,6 +429,10 @@ private static class PathPathIter extends PathIter {
         if(_trans!=null) _trans.transform(coords, count);
         return seg;
     }
+    
+    /** Returns the winding - how a path determines what to fill when segments intersect. */
+    public int getWinding()  { return _path.getWinding(); }
+
 }
 
 }

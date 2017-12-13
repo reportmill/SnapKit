@@ -5,7 +5,6 @@ package snap.pdf.read;
 import java.awt.Graphics2D;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
 import java.util.*;
 import snap.gfx.*;
 import snap.gfx.Image;
@@ -47,7 +46,7 @@ public class PDFPagePainter {
     int                  _index;
     
     // Current path
-    GeneralPath          _path = null;
+    Path                 _path = null;
     
     // Whether to clip after next draw op
     boolean              _doClip;
@@ -236,8 +235,8 @@ public void paintOp(PageToken aToken)
  */
 void b()
 {
-    _path.setWindingRule(GeneralPath.WIND_NON_ZERO);
-    _path.closePath();
+    _path.setWinding(Path.WIND_NON_ZERO);
+    _path.close();
     fillPath();
     strokePath();
     didDraw();
@@ -248,8 +247,8 @@ void b()
  */
 void b_x()
 {
-    _path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
-    _path.closePath();
+    _path.setWinding(Path.WIND_EVEN_ODD);
+    _path.close();
     fillPath();
     strokePath();
     didDraw();
@@ -260,7 +259,7 @@ void b_x()
  */
 void B()
 {
-    _path.setWindingRule(GeneralPath.WIND_NON_ZERO);
+    _path.setWinding(Path.WIND_NON_ZERO);
     fillPath();
     strokePath();
     didDraw();
@@ -271,7 +270,7 @@ void B()
  */
 void B_x()
 {
-    _path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
+    _path.setWinding(Path.WIND_EVEN_ODD);
     fillPath();
     strokePath();
     didDraw();
@@ -391,7 +390,7 @@ void EX()  { if(--_compatibilitySections<0) throw new PDFException("Unbalanced B
  */
 void f()
 {
-    _path.setWindingRule(GeneralPath.WIND_NON_ZERO);
+    _path.setWinding(Path.WIND_NON_ZERO);
     fillPath();
     didDraw();
 }
@@ -401,7 +400,7 @@ void f()
  */
 void f_x()
 {
-    _path.setWindingRule(GeneralPath.WIND_EVEN_ODD);
+    _path.setWinding(Path.WIND_EVEN_ODD);
     fillPath();
     didDraw();
 }
@@ -438,10 +437,8 @@ void G()
  */
 void h()
 {
-    _path.closePath();
-    Point lastPoint = new Point(_path.getCurrentPoint().getX(), _path.getCurrentPoint().getY()); 
-    _gstate.cp.x = (float)lastPoint.getX();
-    _gstate.cp.y = (float)lastPoint.getY();
+    _path.close();
+    _gstate.cp = _path.getCurrentPoint(); 
 }
 
 /**
@@ -507,7 +504,7 @@ void l()
 void m()
 {
     getPoint(_index, _gstate.cp);
-    if(_path==null) _path = new GeneralPath();
+    if(_path==null) _path = new Path();
     _path.moveTo(_gstate.cp.x, _gstate.cp.y);
 }
 
@@ -550,8 +547,8 @@ void re()
     float w = getFloat(_index-2), h = getFloat(_index-1);
     
     // Create new path and add rect and reset current point to start of rect
-    if(_path==null) _path = new GeneralPath();
-    _path.moveTo(x,y); _path.lineTo(x+w,y); _path.lineTo(x+w,y+h); _path.lineTo(x,y+h); _path.closePath();
+    if(_path==null) _path = new Path();
+    _path.moveTo(x,y); _path.lineTo(x+w,y); _path.lineTo(x+w,y+h); _path.lineTo(x,y+h); _path.close();
     _gstate.cp.x = x; _gstate.cp.y = y;  // TODO: Check that this is what really happens in pdf
 }
 
@@ -588,7 +585,7 @@ void RG()
  */
 void s()
 {
-    _path.closePath();
+    _path.close();
     strokePath();
     didDraw();
 }
@@ -803,7 +800,7 @@ void W()
     //     W* f  %eoclip, nonzero-fill
     // Note also, Acrobat considers it an error to have a W not immediately followed by drawing op (f,f*,F,s,S,B,b,n)
     if(_path != null) {
-        _path.setWindingRule(GeneralPath.WIND_NON_ZERO); _doClip = true; }
+        _path.setWinding(Path.WIND_NON_ZERO); _doClip = true; }
 }
 
 /**
@@ -812,7 +809,7 @@ void W()
 void W_x()
 {
     if(_path != null) {
-        _path.setWindingRule(GeneralPath.WIND_EVEN_ODD); _doClip = true; }
+        _path.setWinding(Path.WIND_EVEN_ODD); _doClip = true; }
 }
 
 /**
@@ -838,7 +835,7 @@ void didDraw()
 {
     // If clipping operator preceeded drawing, update clip with drawing path.
     if(_doClip) {
-        _gfx.clip(_path); _doClip = false; }
+        _pntr.clip(_path); _doClip = false; }
 
     // The current path and the current point are undefined after a draw
     _path = null;
@@ -1236,7 +1233,7 @@ public PDFPattern.Shading getShading(String pdfName)
 void strokePath()
 {
     if(_gstate.scomposite != null) _gfx.setComposite(_gstate.scomposite);
-    _pntr.setColor(_gstate.scolor); _gfx.setStroke(_gstate.lineStroke); _gfx.draw(_path);
+    _pntr.setColor(_gstate.scolor); _gfx.setStroke(_gstate.lineStroke); _pntr.draw(_path);
 }
 
 /**
@@ -1245,7 +1242,7 @@ void strokePath()
 void fillPath()
 {
     if(_gstate.composite != null) _gfx.setComposite(_gstate.composite);
-    _pntr.setPaint(_gstate.color); _gfx.fill(_path);
+    _pntr.setPaint(_gstate.color); _pntr.fill(_path);
 }    
 
 /**

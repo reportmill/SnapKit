@@ -22,6 +22,10 @@ public abstract class PathIter {
         public int getCount() { return _count; }
     }
     
+    // Constants for winding
+    public static final int WIND_EVEN_ODD = 0;
+    public static final int WIND_NON_ZERO = 1;
+
 /**
  * Creates a new PathIter.
  */
@@ -31,6 +35,11 @@ public PathIter()  { }
  * Creates a new PathIter for given transform.
  */
 public PathIter(Transform aTrans)  { _trans = aTrans; }
+
+/**
+ * Returns the winding - how a path determines what to fill when segments intersect.
+ */
+public int getWinding()  { return WIND_EVEN_ODD; }
 
 /**
  * Returns the next segment.
