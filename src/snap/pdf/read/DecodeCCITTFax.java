@@ -9,7 +9,7 @@ import snap.pdf.PDFException;
 /**
  * Decodes CCITTFax.
  */
-public class SnapDecodeCCITTFax {
+public class DecodeCCITTFax {
     
     // The bit stream
     byte _allBits[];
@@ -31,7 +31,7 @@ public class SnapDecodeCCITTFax {
 public static byte[] bytesForCCITTFaxDecode(byte bytes[], int offset, int len, int K, int rows, int columns, 
       boolean byteAligned, boolean eolRequired, boolean eoblockRequired, boolean blackIsOne, int allowedDamagedRows)
 {
-    SnapDecodeCCITTFax ccittFaxDecode = new SnapDecodeCCITTFax(bytes, offset, K, rows, columns, allowedDamagedRows, 
+    DecodeCCITTFax ccittFaxDecode = new DecodeCCITTFax(bytes, offset, K, rows, columns, allowedDamagedRows, 
        byteAligned, eolRequired, eoblockRequired,  blackIsOne);
     return ccittFaxDecode.decodeStream();
 }
@@ -39,7 +39,7 @@ public static byte[] bytesForCCITTFaxDecode(byte bytes[], int offset, int len, i
 /**
  * Utility method to create a CCITTFaxDecoder from the stream's decodeParameters dictionary.
  */
-public static SnapDecodeCCITTFax createDecoder(Map params, byte bytes[], int offset, int len)
+public static DecodeCCITTFax createDecoder(Map params, byte bytes[], int offset, int len)
 {
     // Every value has a default
     int K = 0;
@@ -79,14 +79,14 @@ public static SnapDecodeCCITTFax createDecoder(Map params, byte bytes[], int off
     }
     
     // return the new decoder
-    return new SnapDecodeCCITTFax(bytes, offset, K, rows, columns, allowedDamagedRows, 
+    return new DecodeCCITTFax(bytes, offset, K, rows, columns, allowedDamagedRows, 
             byteAligned, eolRequired, eoblockRequired, blackIsOne);
 }
 
 /**
- * Creates SnapDecodeCCITTFax.
+ * Creates DecodeCCITTFax.
  */
-public SnapDecodeCCITTFax(byte bits[], int offset, int k, int rows, int columns, int numdamagedrows, 
+public DecodeCCITTFax(byte bits[], int offset, int k, int rows, int columns, int numdamagedrows, 
         boolean aligned, boolean eolrequired, boolean eoblockrequired, boolean blackisone)
 {
     _allBits = bits; _bitOffset = _mark=offset*8; _K = k;

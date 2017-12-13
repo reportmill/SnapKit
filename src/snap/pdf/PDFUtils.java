@@ -5,8 +5,8 @@ package snap.pdf;
 import java.io.*;
 import java.util.Map;
 import java.util.zip.*;
-import snap.pdf.read.SnapDecodeCCITTFax;
-import snap.pdf.read.SnapDecodeLZW;
+import snap.pdf.read.DecodeCCITTFax;
+import snap.pdf.read.DecodeLZW;
 
 /*
  * Implementations of pdf decode filters
@@ -188,12 +188,12 @@ public static byte[] getBytesDecoded(byte bytes[], int offset, int length, Strin
             early = ((Number)obj).intValue();
 
         // LZW decode
-        decoded = SnapDecodeLZW.decode(bytes, offset, length, early);
+        decoded = DecodeLZW.decode(bytes, offset, length, early);
     }
     
     // handle CCITTFaxDecode: Create decoder instance from parameters dictionary and decode stream
     else if(aFilter.equals("/CCITTFaxDecode")) {
-        SnapDecodeCCITTFax ccittDecoder = SnapDecodeCCITTFax.createDecoder(params, bytes, offset, length);
+        DecodeCCITTFax ccittDecoder = DecodeCCITTFax.createDecoder(params, bytes, offset, length);
         decoded = ccittDecoder.decodeStream();
     }
     

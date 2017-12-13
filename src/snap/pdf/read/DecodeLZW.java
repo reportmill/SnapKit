@@ -7,7 +7,7 @@ import java.io.ByteArrayOutputStream;
 /**
  * LZW decompressor
  */
-public class SnapDecodeLZW {
+public class DecodeLZW {
    
     // Bytes, offset and length
     byte bytes[];
@@ -46,7 +46,7 @@ public class SnapDecodeLZW {
 /** Returns a decoded byte array for given LZW encoded byte array. */
 public static byte[] decode(byte bytes[], int offset, int length, int early)
 {
-    SnapDecodeLZW dec = new SnapDecodeLZW(bytes, offset, length, early);
+    DecodeLZW dec = new DecodeLZW(bytes, offset, length, early);
     ByteArrayOutputStream out;
     int c;
     
@@ -58,7 +58,7 @@ public static byte[] decode(byte bytes[], int offset, int length, int early)
 }
 
 /** Creates a new LZW decoder for given bytes. */
-public SnapDecodeLZW(byte bytes[], int offset, int length, int early1)
+public DecodeLZW(byte bytes[], int offset, int length, int early1)
 {
     this.bytes = bytes;
     this.offset = originalOffset = offset;
