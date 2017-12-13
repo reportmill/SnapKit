@@ -223,7 +223,7 @@ public static class DeviceNColorSpace extends ColorSpace {
 }
 
 /** 
- * A java.awt.color.ColorSpace subclass to represent a pdf /Separation colorspace.
+ * A ColorSpace subclass to represent a pdf /Separation colorspace.
  * This is just a subclass of PDFDeviceNColorSpace with a single colorant.
  */
 public static class SeparationColorSpace extends DeviceNColorSpace {
