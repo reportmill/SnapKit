@@ -2,13 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.pdf.read;
-import java.awt.AlphaComposite;
-import java.awt.Composite;
 import java.util.*;
-import snap.gfx.Color;
-import snap.gfx.ColorSpace;
-import snap.gfx.Point;
-import snap.gfx.Stroke;
+import snap.gfx.*;
 import snap.pdf.PDFException;
 
 /**
@@ -40,10 +35,6 @@ public class PDFGState implements Cloneable {
     float          alpha = 1;  // non-stroke alpha
     float          salpha = 1; // stroke alpha
     Object         softMask = null;
-    
-    // Composites that performs the operation described above
-    Composite      composite = AlphaComposite.SrcOver;
-    Composite      scomposite = AlphaComposite.SrcOver;
     
     // The current stroke parameters
     float          lineWidth = 1;

@@ -1,6 +1,6 @@
 package snap.pdf.read;
-import java.awt.AlphaComposite;
-import java.awt.Composite;
+import snap.gfx.Painter;
+import snap.pdf.PDFException;
 
 /**
  * Represents a PDF composite.
@@ -25,7 +25,31 @@ public class PDFComposite {
     public static final int ColorBlendMode = 14;
     public static final int LuminosityBlendMode = 15;
 
-public static Composite createComposite(int blendMode, boolean alphaIsShape, float alpha)
+/**
+ * Returns the composite mode for given blend mode.
+ */
+public static int getBlendModeID(String pdfName)
+{
+    if(pdfName.equals("/Normal") || pdfName.equals("/Compatible")) return NormalBlendMode;
+    if(pdfName.equals("/Multiply")) return MultiplyBlendMode;
+    if(pdfName.equals("/Screen")) return ScreenBlendMode;
+    if(pdfName.equals("/Overlay")) return OverlayBlendMode;
+    if(pdfName.equals("/Darken")) return DarkenBlendMode;
+    if(pdfName.equals("/Lighten")) return LightenBlendMode;
+    if(pdfName.equals("/ColorDodge")) return ColorDodgeBlendMode;
+    if(pdfName.equals("/ColorBurn")) return ColorBurnBlendMode;
+    if(pdfName.equals("/HardLight")) return HardLightBlendMode;
+    if(pdfName.equals("/SoftLight")) return SoftLightBlendMode;
+    if(pdfName.equals("/Difference")) return DifferenceBlendMode;
+    if(pdfName.equals("/Exclusion")) return ExclusionBlendMode;
+    if(pdfName.equals("/Hue")) return HueBlendMode;
+    if(pdfName.equals("/Saturation")) return SaturationBlendMode;
+    if(pdfName.equals("/Color")) return ColorBlendMode;
+    if(pdfName.equals("/Luminosity")) return LuminosityBlendMode;
+    throw new PDFException("Unknown blend mode name \""+pdfName+"\"");
+}
+
+public static Painter.Composite getComposite(int blendMode)
 {
     // TODO: implement blend modes
     switch (blendMode) {
@@ -44,7 +68,7 @@ public static Composite createComposite(int blendMode, boolean alphaIsShape, flo
         case HueBlendMode:
         case SaturationBlendMode:
         case ColorBlendMode:
-        case LuminosityBlendMode: return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
+        case LuminosityBlendMode: return Painter.Composite.SRC_OVER;
     }
     return null;
 }

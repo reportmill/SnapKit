@@ -1022,11 +1022,7 @@ public void executePatternStream(PDFPattern.Tiling aPattern)
  */
 void readExtendedGState(Map <String,Object> exgstate)
 {
-    PDFGState gs = _gstate;
-    boolean strokeChanged = false;
-    boolean transparencyChanged = false;
-    
-    if(exgstate==null) return;
+    PDFGState gs = _gstate; if(exgstate==null) return;
     
     // Iterate over entries
     for(Map.Entry <String,Object> entry : exgstate.entrySet()) {
@@ -1036,10 +1032,10 @@ void readExtendedGState(Map <String,Object> exgstate)
         Object val = entry.getValue();
         
         //line width, line cap, line join, & miter limit
-        if(key.equals("LW")) { gs.lineWidth = ((Number)val).floatValue(); strokeChanged = true; }
-        else if(key.equals("LC")) { gs.lineCap = ((Number)val).intValue(); strokeChanged = true; }
-        else if(key.equals("LJ")) { gs.lineJoin = ((Number)val).intValue(); strokeChanged = true; }
-        else if(key.equals("ML")) { gs.miterLimit = ((Number)val).floatValue(); strokeChanged = true; }
+        if(key.equals("LW")) { gs.lineWidth = ((Number)val).floatValue(); gs.stroke = null; }
+        else if(key.equals("LC")) { gs.lineCap = ((Number)val).intValue(); gs.stroke = null; }
+        else if(key.equals("LJ")) { gs.lineJoin = ((Number)val).intValue(); gs.stroke = null; }
+        else if(key.equals("ML")) { gs.miterLimit = ((Number)val).floatValue(); gs.stroke = null; }
      
         // Dash:       "/D  [ [4 2 5 5] 0 ]"
         else if(key.equals("D")) {
@@ -1049,7 +1045,7 @@ void readExtendedGState(Map <String,Object> exgstate)
             int n = dashArray.size();
             gs.lineDash = new float[n];
             for(int i=0; i<n; ++i) gs.lineDash[i] = ((Number)dashArray.get(i)).floatValue();
-            strokeChanged = true;
+            gs.stroke = null;
         }
     
         // Rendering intent
@@ -1058,14 +1054,15 @@ void readExtendedGState(Map <String,Object> exgstate)
     
         // Transparency blending mode
         else if(key.equals("BM")) {
-            int bm = getBlendModeID((String)val);
-            if(bm != gs.blendMode) { gs.blendMode = bm; transparencyChanged = true; }
+            int bm = PDFComposite.getBlendModeID((String)val);
+            if(bm != gs.blendMode) {
+                gs.blendMode = bm; _pntr.setComposite(PDFComposite.getComposite(gs.blendMode)); } //alphaChanged = true;
         }
         
         // Transparency - whether to treat alpha values as shape or transparency
         else if(key.equals("AIS")) {
             boolean ais = ((Boolean)val).booleanValue();
-            if(ais != gs.alphaIsShape) { gs.alphaIsShape = ais; transparencyChanged=true; }
+            if(ais != gs.alphaIsShape) gs.alphaIsShape = ais; //alphaChanged = true;
         }
         
         // Soft mask 
@@ -1077,48 +1074,17 @@ void readExtendedGState(Map <String,Object> exgstate)
         // Transparency - stroke alpha
         else if (key.equals("CA")) {
            float a = ((Number)val).floatValue();
-           if(a != gs.salpha) { gs.alpha = a; transparencyChanged = true; }
+           if(a != gs.salpha) gs.salpha = a; //alphaChanged = true;
         }
         
         // Transparency - nonstroke alpha
         else if (key.equals("ca")) {
             float a = ((Number)val).floatValue();
-            if (a != gs.alpha) { gs.alpha = a; transparencyChanged = true; }
+            if (a != gs.alpha) { gs.alpha = a; _pntr.setOpacity(gs.alpha); } //alphaChanged = true;
         }
         // Some other possible entries in this dict that are not currently handled include:
         // Font, BG, BG2, UCR, UCR2, OP, op, OPM, TR, TR2, HT, FL, SM, SA,TK
     }
-   
-    // cache a new stroke object
-    if(strokeChanged)
-        gs.stroke = null;
-    
-    // cache new composite objects if necessary
-    if(transparencyChanged) {
-        gs.composite = PDFComposite.createComposite(gs.blendMode, gs.alphaIsShape, gs.alpha);
-        gs.scomposite = PDFComposite.createComposite(gs.blendMode, gs.alphaIsShape, gs.salpha);
-    }
-}
-
-static int getBlendModeID(String pdfName)
-{
-    if(pdfName.equals("/Normal") || pdfName.equals("/Compatible")) return PDFComposite.NormalBlendMode;
-    if(pdfName.equals("/Multiply")) return PDFComposite.MultiplyBlendMode;
-    if(pdfName.equals("/Screen")) return PDFComposite.ScreenBlendMode;
-    if(pdfName.equals("/Overlay")) return PDFComposite.OverlayBlendMode;
-    if(pdfName.equals("/Darken")) return PDFComposite.DarkenBlendMode;
-    if(pdfName.equals("/Lighten")) return PDFComposite.LightenBlendMode;
-    if(pdfName.equals("/ColorDodge")) return PDFComposite.ColorDodgeBlendMode;
-    if(pdfName.equals("/ColorBurn")) return PDFComposite.ColorBurnBlendMode;
-    if(pdfName.equals("/HardLight")) return PDFComposite.HardLightBlendMode;
-    if(pdfName.equals("/SoftLight")) return PDFComposite.SoftLightBlendMode;
-    if(pdfName.equals("/Difference")) return PDFComposite.DifferenceBlendMode;
-    if(pdfName.equals("/Exclusion")) return PDFComposite.ExclusionBlendMode;
-    if(pdfName.equals("/Hue")) return PDFComposite.HueBlendMode;
-    if(pdfName.equals("/Saturation")) return PDFComposite.SaturationBlendMode;
-    if(pdfName.equals("/Color")) return PDFComposite.ColorBlendMode;
-    if(pdfName.equals("/Luminosity")) return PDFComposite.LuminosityBlendMode;
-    throw new PDFException("Unknown blend mode name \""+pdfName+"\"");
 }
 
 /**
@@ -1215,8 +1181,12 @@ public PDFPattern.Shading getShading(String pdfName)
  */
 void strokePath()
 {
-    if(_gstate.scomposite != null) _gfx.setComposite(_gstate.scomposite);
+    boolean setAlpha = _gstate.salpha!=_gstate.alpha;
+    if(setAlpha) _pntr.setOpacity(_gstate.salpha);
+
     _pntr.setColor(_gstate.scolor); _pntr.setStroke(_gstate.getStroke()); _pntr.draw(_path);
+    
+    if(setAlpha) _pntr.setOpacity(_gstate.alpha);
 }
 
 /**
@@ -1224,7 +1194,6 @@ void strokePath()
  */
 void fillPath()
 {
-    if(_gstate.composite != null) _gfx.setComposite(_gstate.composite);
     _pntr.setPaint(_gstate.color); _pntr.fill(_path);
 }    
 
@@ -1251,8 +1220,6 @@ public void drawImage(java.awt.Image anImg)
  */
 public void drawImage(java.awt.Image anImg, AffineTransform ixform) 
 {
-    if(_gstate.composite!=null) _gfx.setComposite(_gstate.composite);
-    
     // normal image case - If image drawing throws exception, try workaround
     _gfx.drawImage(anImg, ixform, null); // If fails with ImagingOpException, see RM14 sun_bug_4723021_workaround
 }
@@ -1263,8 +1230,6 @@ public void drawImage(java.awt.Image anImg, AffineTransform ixform)
 public void showText(GlyphVector v)
 {
     // TODO: eventually need check the font render mode in the gstate
-    if(_gstate.composite != null) _gfx.setComposite(_gstate.composite);
-    
     _pntr.setPaint(_gstate.color);
     _gfx.drawGlyphVector(v,0,0);
 }

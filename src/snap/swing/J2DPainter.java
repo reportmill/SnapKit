@@ -1,5 +1,6 @@
 package snap.swing;
 import java.awt.AlphaComposite;
+import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -62,14 +63,51 @@ public void setStroke(Stroke aStroke)  { _gfx.setStroke(AWT.get(aStroke)); _stro
 /**
  * Returns the opacity.
  */
-public double getOpacity()  { return _opacity; } double _opacity = 1;
+public double getOpacity()
+{
+    java.awt.Composite comp = _gfx.getComposite();
+    if(comp instanceof AlphaComposite)
+        return ((AlphaComposite)comp).getAlpha();
+    return 1;
+}
 
 /**
  * Sets the opacity in painter.
  */
 public void setOpacity(double aValue)
 {
-   _gfx.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)aValue)); _opacity = aValue;
+    java.awt.Composite comp = _gfx.getComposite();
+    if(comp instanceof AlphaComposite)
+        comp = ((AlphaComposite)comp).derive((float)aValue);
+    else comp = AlphaComposite.SrcOver.derive((float)aValue);
+   _gfx.setComposite(comp);
+}
+
+/**
+ * Returns the Composite.
+ */
+public Composite getComposite()
+{
+    java.awt.Composite comp = _gfx.getComposite();
+    int rule = comp instanceof AlphaComposite? ((AlphaComposite)comp).getRule() : AlphaComposite.SRC_OVER;
+    switch(rule) {
+        case AlphaComposite.SRC_IN: return Composite.SRC_IN;
+        case AlphaComposite.DST_IN: return Composite.DST_IN;
+        default: return Composite.SRC_OVER;
+    }
+}
+
+/**
+ * Sets the composite mode.
+ */
+public void setComposite(Composite aComp)
+{
+    float opac = (float)getOpacity();
+    switch(aComp) {
+        case SRC_OVER: _gfx.setComposite(AlphaComposite.SrcOver.derive(opac)); break;
+        case SRC_IN: _gfx.setComposite(AlphaComposite.SrcIn.derive(opac)); break;
+        case DST_IN: _gfx.setComposite(AlphaComposite.DstIn.derive(opac)); break;
+    }
 }
 
 /**
@@ -181,18 +219,6 @@ public Shape getClip()  { return AWT.get(_gfx.getClip()); }
  * Clip by shape.
  */
 public void clip(Shape s)  { _gfx.clip(AWT.get(s)); }
-
-/**
- * Sets the composite mode.
- */
-public void setComposite(Composite aComp)
-{
-    switch(aComp) {
-        case SRC_OVER: _gfx.setComposite(AlphaComposite.SrcOver); break;
-        case SRC_IN: _gfx.setComposite(AlphaComposite.SrcIn); break;
-        case DST_IN: _gfx.setComposite(AlphaComposite.DstIn); break;
-    }
-}
 
 /**
  * Returns whether antialiasing.
