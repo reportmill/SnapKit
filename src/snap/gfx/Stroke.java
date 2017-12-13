@@ -12,6 +12,15 @@ public class Stroke implements Cloneable {
     // The stroke width
     double       _width = 1;
     
+    // The cap - how a stroke renders endpoints
+    Cap          _cap = Cap.Butt;
+    
+    // The join - how a stroke renders the join between two segements
+    Join         _join = Join.Miter;
+    
+    // The limit to miter joins
+    double       _miterLitmit = 10;
+    
     // The dash array
     double       _dashArray[];
     
@@ -20,6 +29,7 @@ public class Stroke implements Cloneable {
     
     // Constants for cap
     public enum Cap { Butt, Round, Square }
+    public enum Join { Miter, Round, Bevel }
     
     // Constant for common stroke
     public static final Stroke Stroke1 = new Stroke();
@@ -33,7 +43,15 @@ public Stroke()  { }
 /**
  * Creates a stroke with the given line width.
  */
-public Stroke(double aWidth)  { _width = aWidth; }
+public Stroke(double aWidth)  { _width = aWidth; _cap = Cap.Round; }
+
+/**
+ * Creates a stroke with the given line width, dash array and phase.
+ */
+public Stroke(double aWidth, Cap aCap, Join aJoin, double aMiterLimit)
+{
+    _width = aWidth; _cap = aCap; _join = aJoin; _miterLitmit = aMiterLimit;
+}
 
 /**
  * Creates a stroke with the given line width, dash array and phase.
@@ -41,6 +59,15 @@ public Stroke(double aWidth)  { _width = aWidth; }
 public Stroke(double aWidth, float aDashAry[], float aDashPhase)
 {
     _width = aWidth; _dashArray = ArrayUtils.getDoubles(aDashAry); _dashOffset = aDashPhase;
+}
+
+/**
+ * Creates a stroke with the given line width, dash array and phase.
+ */
+public Stroke(double aWidth, Cap aCap, Join aJoin, double aMiterLimit, float aDashAry[], float aDashPhase)
+{
+    _width = aWidth; _cap = aCap; _join = aJoin; _miterLitmit = aMiterLimit;
+    _dashArray = ArrayUtils.getDoubles(aDashAry); _dashOffset = aDashPhase;
 }
 
 /**
@@ -55,6 +82,21 @@ public Stroke(double aWidth, double aDashAry[], double aDashPhase)
  * Returns the line width of this stroke.
  */
 public double getWidth()  { return _width; }
+
+/**
+ * Returns the line cap - how a stroke renders endpoints.
+ */
+public Cap getCap()  { return _cap; }
+
+/**
+ * Returns join - how a stroke renders the join between two segements. 
+ */
+public Join getJoin()  { return _join; }
+
+/**
+ * Returns the limit to miter joins.
+ */
+public double getMiterLimit()  { return _miterLitmit; }
 
 /**
  * Returns the dash array for this stroke.

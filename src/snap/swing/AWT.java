@@ -99,10 +99,24 @@ public static java.awt.TexturePaint get(ImagePaint aTP)
 /** Returns awt stroke for snap stroke. */
 public static java.awt.Stroke get(Stroke aStroke)
 {
-    float width = (float)aStroke.getWidth(), offset = (float)aStroke.getDashOffset();
-    float dary[] = ArrayUtils.getFloats(aStroke.getDashArray());
-    int cap = dary!=null? BasicStroke.CAP_BUTT : BasicStroke.CAP_ROUND;
-    return new BasicStroke(width, cap, BasicStroke.JOIN_ROUND, 10, dary, offset);
+    float width = (float)aStroke.getWidth(), miter = (float)aStroke.getMiterLimit();
+    int cap = get(aStroke.getCap()), join = get(aStroke.getJoin());
+    float dary[] = ArrayUtils.getFloats(aStroke.getDashArray()), offset = (float)aStroke.getDashOffset();
+    return new BasicStroke(width, cap, join, miter, dary, offset);
+}
+
+/** Return awt Stroke Cap for snap Stroke.Cap. */
+static int get(Stroke.Cap aCap)
+{
+    return aCap==Stroke.Cap.Butt? BasicStroke.CAP_BUTT : aCap==Stroke.Cap.Round? BasicStroke.CAP_ROUND :
+        BasicStroke.CAP_SQUARE;
+}
+
+/** Return awt Stroke Join for snap Stroke.Join. */
+static int get(Stroke.Join aJoin)
+{
+    return aJoin==Stroke.Join.Miter? BasicStroke.JOIN_MITER : aJoin==Stroke.Join.Round? BasicStroke.JOIN_ROUND :
+        BasicStroke.JOIN_BEVEL;
 }
 
 /** Returns awt font for snap font. */

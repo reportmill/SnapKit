@@ -3,13 +3,12 @@
  */
 package snap.pdf.read;
 import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
 import java.awt.Composite;
-import java.awt.Stroke;
 import java.util.*;
 import snap.gfx.Color;
 import snap.gfx.ColorSpace;
 import snap.gfx.Point;
+import snap.gfx.Stroke;
 import snap.pdf.PDFException;
 
 /**
@@ -56,7 +55,7 @@ public class PDFGState implements Cloneable {
     float          flatness = 0;
     
     // A Stroke representation of the above
-    Stroke         lineStroke = new BasicStroke(1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10f);
+    Stroke         stroke = new Stroke(1, Stroke.Cap.Square, Stroke.Join.Miter, 10);
     
     // The current font dictionary
     Map            font;
@@ -111,28 +110,30 @@ public class PDFGState implements Cloneable {
 /**
  * Creates a Stroke from GState settings.
  */
-public java.awt.Stroke createStroke()
+public Stroke getStroke()
 {
+    // If stroke already set, just return
+    if(stroke!=null) return stroke;
+    
     // Convert from pdf constants to awt constants
-    PDFGState gs = this; int cap;
+    PDFGState gs = this; Stroke.Cap cap;
     switch (gs.lineCap) {
-        case PDFButtLineCap: cap = BasicStroke.CAP_BUTT; break;
-        case PDFRoundLineCap: cap = BasicStroke.CAP_ROUND; break;
-        case PDFSquareLineCap: cap = BasicStroke.CAP_SQUARE; break;
-        default: cap = BasicStroke.CAP_SQUARE;
+        case PDFButtLineCap: cap = Stroke.Cap.Butt; break;
+        case PDFRoundLineCap: cap = Stroke.Cap.Round; break;
+        case PDFSquareLineCap: cap = Stroke.Cap.Square; break;
+        default: cap = Stroke.Cap.Square;
     }
 
-    int join;
+    Stroke.Join join;
     switch (gs.lineJoin) {
-        case PDFMiterJoin: join = BasicStroke.JOIN_MITER; break;
-        case PDFRoundJoin: join = BasicStroke.JOIN_ROUND; break;
-        case PDFBevelJoin: join = BasicStroke.JOIN_BEVEL; break;
-        default: join = BasicStroke.JOIN_ROUND;
+        case PDFMiterJoin: join = Stroke.Join.Miter; break;
+        case PDFRoundJoin: join = Stroke.Join.Round; break;
+        case PDFBevelJoin: join = Stroke.Join.Bevel; break;
+        default: join = Stroke.Join.Round;
     }
     
-    if(gs.lineDash==null || gs.lineDash.length==0)
-        return new BasicStroke(gs.lineWidth, cap, join, gs.miterLimit);
-    return new BasicStroke(gs.lineWidth, cap, join, gs.miterLimit, gs.lineDash, gs.dashPhase);
+    // Create stroke
+    return stroke = new Stroke(gs.lineWidth, cap, join, gs.miterLimit, gs.lineDash, gs.dashPhase);
 }
 
 /**

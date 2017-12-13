@@ -346,9 +346,10 @@ void CS()
  */
 void d()
 {
-    _gstate.lineDash = getFloatArray(_index-2);
+    float ld[] = _gstate.lineDash = getFloatArray(_index-2);
+    if(ld!=null && ld.length==0) _gstate.lineDash = null;
     _gstate.dashPhase = getFloat(_index-1);
-    _gstate.lineStroke = _gstate.createStroke();
+    _gstate.stroke = null;
 }
 
 /**
@@ -454,20 +455,12 @@ void ID()  { }
 /**
  * Set linejoin
  */
-void j()
-{
-    _gstate.lineJoin = getInt(_index-1);
-    _gstate.lineStroke = _gstate.createStroke();
-}
+void j()  { _gstate.lineJoin = getInt(_index-1); _gstate.stroke = null; }
 
 /**
  * Set linecap
  */
-void J()
-{
-    _gstate.lineCap = getInt(_index-1);
-    _gstate.lineStroke = _gstate.createStroke();
-}
+void J()  { _gstate.lineCap = getInt(_index-1); _gstate.stroke = null; }
 
 /**
  * Set cmyk
@@ -511,11 +504,7 @@ void m()
 /**
  * Set miterlimit
  */
-void M()
-{
-    _gstate.miterLimit = getFloat(_index-1);
-    _gstate.lineStroke = _gstate.createStroke();
-}
+void M()  { _gstate.miterLimit = getFloat(_index-1); _gstate.stroke = null; }
 
 /**
  * Marked content point
@@ -779,11 +768,7 @@ void v()
 /**
  * Set linewidth
  */
-void w()
-{
-    _gstate.lineWidth = getFloat(_index-1);
-    _gstate.lineStroke = _gstate.createStroke();
-}
+void w()  { _gstate.lineWidth = getFloat(_index-1); _gstate.stroke = null; }
 
 /**
  * Set clip
@@ -850,11 +835,10 @@ private int getInt(int i) { return getToken(i).intValue(); }
 /** Returns the token at the given index as an array of floats */
 private float[] getFloatArray(int i) 
 {
-    List <PageToken> ftokens = (List)(getToken(i).value);
-    float farray[] = new float[ftokens.size()];
-    for(int j=0, jMax=ftokens.size(); j<jMax; j++)  // We assume all tokens are floats
-        farray[j] = ftokens.get(j).floatValue();
-    return farray;
+    List <PageToken> toks = (List)(getToken(i).value);
+    float ary[] = new float[toks.size()];
+    for(int j=0, jMax=toks.size(); j<jMax; j++) ary[j] = toks.get(j).floatValue();
+    return ary;
 }
 
 /** Returns a new point at the given index */
@@ -1034,8 +1018,9 @@ public void executePatternStream(PDFPattern.Tiling aPattern)
 
 /**
  * Pull out anything useful from an extended gstate dictionary
+ * The dict will have been read in, so values have been converted to appropriate types, like Integer, Float, List, etc.
  */
-void readExtendedGState(Map exgstate)
+void readExtendedGState(Map <String,Object> exgstate)
 {
     PDFGState gs = _gstate;
     boolean strokeChanged = false;
@@ -1043,13 +1028,11 @@ void readExtendedGState(Map exgstate)
     
     if(exgstate==null) return;
     
-    // The dictionary will have been read in by PDFReader, so
-    // elements will have been converted into appropriate types, like Integer, Float, List, etc.
-    
-    Iterator entries = exgstate.entrySet().iterator();
-    while(entries.hasNext()) {
-        Map.Entry entry=(Map.Entry)entries.next();
-        String key = (String)entry.getKey();
+    // Iterate over entries
+    for(Map.Entry <String,Object> entry : exgstate.entrySet()) {
+        
+        // Get key/value
+        String key = entry.getKey();
         Object val = entry.getValue();
         
         //line width, line cap, line join, & miter limit
@@ -1108,7 +1091,7 @@ void readExtendedGState(Map exgstate)
    
     // cache a new stroke object
     if(strokeChanged)
-        gs.lineStroke = gs.createStroke();
+        gs.stroke = null;
     
     // cache new composite objects if necessary
     if(transparencyChanged) {
@@ -1233,7 +1216,7 @@ public PDFPattern.Shading getShading(String pdfName)
 void strokePath()
 {
     if(_gstate.scomposite != null) _gfx.setComposite(_gstate.scomposite);
-    _pntr.setColor(_gstate.scolor); _gfx.setStroke(_gstate.lineStroke); _pntr.draw(_path);
+    _pntr.setColor(_gstate.scolor); _pntr.setStroke(_gstate.getStroke()); _pntr.draw(_path);
 }
 
 /**
