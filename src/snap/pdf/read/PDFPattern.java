@@ -4,13 +4,14 @@
 package snap.pdf.read;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.Map;
 import snap.gfx.Image;
 import snap.gfx.ColorSpace;
+import snap.gfx.Point;
 import snap.gfx.Rect;
+import snap.gfx.Transform;
 import snap.pdf.PDFException;
 import snap.pdf.PDFFile;
 import snap.pdf.PDFStream;
@@ -25,7 +26,7 @@ public abstract class PDFPattern {
     Rect             bounds;
     
     // Transform
-    AffineTransform  xform;
+    Transform        _xform;
     
 /**
  * Returns the bounds
@@ -35,7 +36,7 @@ public Rect getBounds()  { return bounds; }
 /**
  * Returns the pattern space->default space transform.
  */
-public AffineTransform getTransform()  { return xform; }
+public Transform getTransform()  { return _xform; }
 
 /**
  * Returns the awt Paint object which will render the pattern.
@@ -81,8 +82,8 @@ public static class Tiling extends PDFPattern {
         bounds = PDFDictUtils.getRect(pmap, srcFile, "BBox");
         xstep = PDFDictUtils.getFloat(pmap, srcFile, "XStep");
         ystep = PDFDictUtils.getFloat(pmap, srcFile, "YStep");
-        xform = PDFDictUtils.getTransform(pmap, srcFile, "Matrix");
-        if(xform==null) xform = new AffineTransform();
+        _xform = PDFDictUtils.getTransform(pmap, srcFile, "Matrix");
+        if(_xform==null) _xform = new Transform();
         
         resources = (Map)srcFile.getXRefObj(pmap.get("Resources"));
         pdfData = pstream.decodeStream();
@@ -152,11 +153,11 @@ public static abstract class Shading extends PDFPattern implements PaintContext,
     {
         // Get pattern-specific parameters
         if (ptrnDict != null) {
-            xform = PDFDictUtils.getTransform(ptrnDict, srcFile, "Matrix");
-            if(xform==null) xform = new AffineTransform();
+            _xform = PDFDictUtils.getTransform(ptrnDict, srcFile, "Matrix");
+            if(_xform==null) _xform = new Transform();
             extGState = (Map)srcFile.getXRefObj(ptrnDict.get("ExtGState"));
         }
-        else xform = new AffineTransform();
+        else _xform = new Transform();
         
         // Get all the shading parameters
         initializeShadingParameters(shdgDict, srcFile);
@@ -231,7 +232,7 @@ public static abstract class Shading extends PDFPattern implements PaintContext,
     {
         // Allocate an ARGB raster and pass the sample buffer to the shading implementation
         DataBufferInt dbuf = new DataBufferInt(w*h); int scanlineStride[] = {0xff0000, 0xff00, 0xff, 0xff000000 };
-        WritableRaster r = Raster.createPackedRaster(dbuf, w, h, w, scanlineStride, new Point(0,0));
+        WritableRaster r = Raster.createPackedRaster(dbuf, w, h, w, scanlineStride, new java.awt.Point(0,0));
         int samples[] = dbuf.getData();
     
         doShading(samples,x,y,w,h);    
@@ -321,7 +322,6 @@ public static class ShadingAxial extends Shading {
 public static class ShadingFunction extends Shading {
     
     // Ivars
-    AffineTransform shading_xform;
     float domain[];
     PDFFunction func;
     
@@ -332,8 +332,8 @@ public static class ShadingFunction extends Shading {
     {
       super.initializeShadingParameters(shadingDict, srcFile);
       // Not sure about this - there are 2 matrices here. One inherited from Pattern, and this one from shading dict
-      shading_xform = PDFDictUtils.getTransform(shadingDict, srcFile, "Matrix");
-      if(shading_xform==null) shading_xform = new AffineTransform();
+      _xform = PDFDictUtils.getTransform(shadingDict, srcFile, "Matrix");
+      if(_xform==null) _xform = new Transform();
       domain = PDFDictUtils.getFloatArray(shadingDict, srcFile, "Domain");
       if(domain==null) domain = new float[]{0,1,0,1};
       func = PDFFunction.getInstance(srcFile.getXRefObj(shadingDict.get("Function")), srcFile);
@@ -394,7 +394,7 @@ public static class ShadingRadial extends Shading {
         func = PDFFunction.getInstance(srcFile.getXRefObj(shadingDict.get("Function")), srcFile);
         extend = PDFDictUtils.getBoolArray(shadingDict, srcFile, "Extend");
         if(extend==null) extend = new boolean[] {false, false};
-        if(xform.isIdentity()) xform = null;
+        if(_xform.isIdentity()) _xform = null;
     }
     
     /** Sets the transform from user space to device space */
@@ -419,7 +419,7 @@ public static class ShadingRadial extends Shading {
     public void doShading(int samples[], int x, int y, int w, int h)
     {
         // call out to separate version of this routine if there was a transform other than identity
-        if(xform!=null) {
+        if(_xform!=null) {
             doShadingWithTransform(samples,x,y,w,h); return; }
     
         // For every point P in the raster, find circle on which that point lies.
@@ -468,7 +468,7 @@ public static class ShadingRadial extends Shading {
     // the input coords and the radii would probably be enough. however...
     public void doShadingWithTransform(int samples[], int x, int y, int w, int h)
     {
-        Point2D.Double srcPt = new Point2D.Double(), dstPt = new Point2D.Double();
+        Point srcPt = new Point(), dstPt = new Point();
         int backsample = background!=null? getRGBAPixel(background) : 0;
         float t[] = new float[1];
         int sindex = 0;
@@ -478,7 +478,7 @@ public static class ShadingRadial extends Shading {
             srcPt.y = y0-(y+j);    //Yp
             srcPt.x = x0-x;       //Xp
             for(int i=0; i<w; ++i) {
-                xform.transform(srcPt, dstPt);
+                _xform.transform(srcPt, dstPt);
                 double pC0 = dstPt.y*dstPt.y-r0*r0; //Yp
                 double pB0 = dstPt.y*dy-r0*dr; //Xp
                 double pB = 2*(dstPt.x*dx+pB0);

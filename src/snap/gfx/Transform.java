@@ -25,6 +25,21 @@ public class Transform implements Cloneable {
 public Transform()  { }
 
 /**
+ * Creates a new Transform with given float array.
+ */
+public Transform(float anArray[])  { setMatrix(anArray); }
+
+/**
+ * Creates a new Transform with given double array.
+ */
+public Transform(double anArray[])  { setMatrix(anArray); }
+
+/**
+ * Creates a new Transform with given components.
+ */
+public Transform(float a, float b, float c, float d, float tx, float ty)  { _a=a;_b=b;_c=c;_d=d;_tx=tx;_ty=ty; }
+
+/**
  * Creates a new Transform with given components.
  */
 public Transform(double a, double b, double c, double d, double tx, double ty)  { _a=a;_b=b;_c=c;_d=d;_tx=tx;_ty=ty; }
@@ -150,10 +165,12 @@ public void getMatrix(double m[])  { m[0] = _a; m[1] = _b; m[2] = _c; m[3] = _d;
 /**
  * Sets transform values to given matrix values.
  */
-public void setMatrix(double m[])
-{
-    _a = m[0]; _b = m[1]; _c = m[2]; _d = m[3]; _tx = m[4]; _ty = m[5];
-}
+public void setMatrix(float m[])  { _a = m[0]; _b = m[1]; _c = m[2]; _d = m[3]; _tx = m[4]; _ty = m[5]; }
+
+/**
+ * Sets transform values to given matrix values.
+ */
+public void setMatrix(double m[])  { _a = m[0]; _b = m[1]; _c = m[2]; _d = m[3]; _tx = m[4]; _ty = m[5]; }
 
 /**
  * Sets transform values to given transform values.

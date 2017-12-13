@@ -3,8 +3,8 @@
  */
 package snap.pdf.read;
 import java.util.*;
-import java.awt.geom.AffineTransform;
 import snap.gfx.Rect;
+import snap.gfx.Transform;
 import snap.pdf.*;
 
 /**
@@ -47,10 +47,10 @@ public byte[] getBytes() { return _streamBytes; }
 /**
  * The form space->user space transform, from the Form's Matrix entry.
  */
-public AffineTransform getTransform() 
+public Transform getTransform() 
 {
-    AffineTransform xform = PDFDictUtils.getTransform(_formDict,null,"Matrix");
-    if(xform==null) xform = new AffineTransform(); // Matrix is optional - default is identity
+    Transform xform = PDFDictUtils.getTransform(_formDict,null,"Matrix");
+    if(xform==null) xform = new Transform(); // Matrix is optional - default is identity
     return xform;
 }
 

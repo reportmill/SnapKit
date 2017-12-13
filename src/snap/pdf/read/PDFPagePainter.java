@@ -89,7 +89,7 @@ public Graphics2D getGraphics()  { return _gfx; }
 /**
  * Paints the page inside the given rect.
  */
-public void paint(Painter aPntr, Object aSource, Rect theDestBnds, AffineTransform aTrans) 
+public void paint(Painter aPntr, Object aSource, Rect theDestBnds, Transform aTrans) 
 {
     // Save painter state
     aPntr.save();
@@ -114,7 +114,7 @@ public void paint(Painter aPntr, Object aSource, Rect theDestBnds, AffineTransfo
     
     // Get flip transform (for page or pattern)
     if(aSource==null || aSource instanceof PDFPattern)
-        concatenate(new AffineTransform(destBnds.width/srcBnds.width, 0, 0, -destBnds.height/srcBnds.height,
+        concatenate(new Transform(destBnds.width/srcBnds.width, 0, 0, -destBnds.height/srcBnds.height,
             destBnds.x, destBnds.getMaxY()));
 
     // If Transform provided, append it
@@ -310,17 +310,14 @@ void c()
  */
 void cm()
 {
-    AffineTransform xfm = getTransform(_index);
+    Transform xfm = getTransform(_index);
     concatenate(xfm);
 }
 
 /**
  * Concat matrix
  */
-void concatenate(AffineTransform xfm)
-{
-    _gfx.transform(xfm);
-}
+void concatenate(Transform xfm)  { _pntr.transform(xfm); }
 
 /**
  * Set colorspace
@@ -856,12 +853,12 @@ private void getPoint(int i, Point pt)
 }
 
 /** Returns the token at the given index as a transform. */
-private AffineTransform getTransform(int i)
+private Transform getTransform(int i)
 {
     float a = getFloat(i-6), b = getFloat(i-5);
     float c = getFloat(i-4), d = getFloat(i-3);
     float tx = getFloat(i-2), ty = getFloat(i-1);
-    return new AffineTransform(a, b, c, d, tx, ty);
+    return new Transform(a, b, c, d, tx, ty);
 }
 
 /** Called with any of the set color ops to create new color from values in stream. */
@@ -1211,15 +1208,6 @@ public void drawImage(java.awt.Image anImg)
     if(pixWide<0 || pixHigh<0) throw new PDFException("PDFPagePainter: Error loading image"); // Shouldn't happen
 
     AffineTransform ixform = new AffineTransform(1.0/pixWide, 0.0, 0.0, -1.0/pixHigh, 0, 1.0);
-    drawImage(anImg, ixform);
-}
-
-/**
- * Draw an image.
- */
-public void drawImage(java.awt.Image anImg, AffineTransform ixform) 
-{
-    // normal image case - If image drawing throws exception, try workaround
     _gfx.drawImage(anImg, ixform, null); // If fails with ImagingOpException, see RM14 sun_bug_4723021_workaround
 }
 
