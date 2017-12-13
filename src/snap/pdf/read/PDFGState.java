@@ -2,11 +2,14 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.pdf.read;
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Composite;
+import java.awt.Stroke;
 import java.util.*;
-import java.awt.*;
-import java.awt.geom.*;
 import snap.gfx.Color;
 import snap.gfx.ColorSpace;
+import snap.gfx.Point;
 import snap.pdf.PDFException;
 
 /**
@@ -15,7 +18,7 @@ import snap.pdf.PDFException;
 public class PDFGState implements Cloneable {
     
     // The current point
-    Point2D.Float  cp = new Point2D.Float();
+    Point          cp = new Point();
     
     // The current color
     Color          color = Color.BLACK;
@@ -139,7 +142,7 @@ public Object clone()
 {
     PDFGState copy = null; try { copy = (PDFGState)super.clone(); }
     catch(CloneNotSupportedException e) { return null; }
-    copy.cp = (Point2D.Float)cp.clone();
+    copy.cp = cp.clone();
     return copy;
 }
 

@@ -6,9 +6,6 @@ import java.awt.Graphics2D;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
-import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 import java.util.*;
 import snap.gfx.*;
 import snap.gfx.Image;
@@ -105,7 +102,7 @@ public void paint(Painter aPntr, Object aSource, Rect theDestBnds, AffineTransfo
     
     // Get Source bounds (the natural bounds of the Page, Form or Pattern)
     Rect srcBnds = null;
-    if(aSource instanceof PDFForm) { PDFForm form = (PDFForm)aSource; Rectangle2D bbox = form.getBBox();
+    if(aSource instanceof PDFForm) { PDFForm form = (PDFForm)aSource; Rect bbox = form.getBBox();
         srcBnds = new Rect(0, 0, bbox.getWidth(), bbox.getHeight()); }
     if(aSource instanceof PDFPattern) { PDFPattern ptrn = (PDFPattern)aSource;
         srcBnds = new Rect(0, 0, ptrn.getBounds().getWidth(), ptrn.getBounds().getHeight()); }
@@ -442,9 +439,9 @@ void G()
 void h()
 {
     _path.closePath();
-    Point2D lastPathPoint = _path.getCurrentPoint(); 
-    _gstate.cp.x = (float)lastPathPoint.getX();
-    _gstate.cp.y = (float)lastPathPoint.getY();
+    Point lastPoint = new Point(_path.getCurrentPoint().getX(), _path.getCurrentPoint().getY()); 
+    _gstate.cp.x = (float)lastPoint.getX();
+    _gstate.cp.y = (float)lastPoint.getY();
 }
 
 /**
@@ -872,7 +869,7 @@ private Point getPoint(int i)
 }
 
 /** Gets the token at the given index as a point. */
-private void getPoint(int i, Point2D.Float pt)
+private void getPoint(int i, Point pt)
 {
     pt.x = getFloat(i-2);
     pt.y = getFloat(i-1);
@@ -961,9 +958,9 @@ public int parseInlineImage(int tIndex, byte[] pageBytes)
         // Create stream, tell imageFactory to create image and draw it
         else if (token.type==PageToken.PDFInlineImageData) {
             Object space = imageDict.get("ColorSpace");
-            ColorSpace imageCSpace = space==null ? null : PDFColorSpace.getColorspace(space, _pfile, _page);
-            PDFStream imageStream = new PDFStream(pageBytes, token.getStart(), token.getLength(), imageDict);
-            drawImage(PDFImage.getImage(imageStream, imageCSpace, _pfile));
+            ColorSpace imgCSpace = space!=null? PDFColorSpace.getColorspace(space, _pfile, _page) : null;
+            PDFStream imgStream = new PDFStream(pageBytes, token.getStart(), token.getLength(), imageDict);
+            drawImage(PDFImage.getImage(imgStream, imgCSpace, _pfile));
             return i; // return token index
         }
     }
@@ -1001,7 +998,7 @@ void executeForm(PDFForm aForm)
     _page.pushResources(aForm.getResources(_pfile));
     
     // Recurse back into this painter for form tokens and bytes
-    PDFPagePainter ppntr = new PDFPagePainter(_page); Rectangle2D bbox = aForm.getBBox();
+    PDFPagePainter ppntr = new PDFPagePainter(_page);
     ppntr._pageBytes = aForm.getBytes(); ppntr._tokens = aForm.getTokens();
     ppntr.paint(_pntr, aForm, null, aForm.getTransform());
     
@@ -1034,7 +1031,7 @@ public void executePatternStream(PDFPattern.Tiling aPattern)
     ppntr.paint(ipntr, aPattern, null, aPattern.getTransform());
     
     // Get the image and set the tile.  All the resources can be freed up now
-    aPattern.setTile((BufferedImage)img.getNative());
+    aPattern.setTile(img);
     System.out.println("PDFPagePainter.executePatternStream");
 }
 

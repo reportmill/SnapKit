@@ -3,7 +3,8 @@
  */
 package snap.pdf.read;
 import java.util.*;
-import java.awt.geom.*;
+import java.awt.geom.AffineTransform;
+import snap.gfx.Rect;
 import snap.pdf.*;
 
 /**
@@ -48,32 +49,22 @@ public byte[] getBytes() { return _streamBytes; }
  */
 public AffineTransform getTransform() 
 {
-    // Matrix is optional - default is identity
     AffineTransform xform = PDFDictUtils.getTransform(_formDict,null,"Matrix");
-    if(xform==null)
-        xform = new AffineTransform();
+    if(xform==null) xform = new AffineTransform(); // Matrix is optional - default is identity
     return xform;
 }
 
 /**
  * The Form bounding box (in form space).
  */
-public Rectangle2D getBBox() 
+public Rect getBBox() 
 {
-    Rectangle2D r = PDFDictUtils.getRectangle(_formDict, null, "BBox");
-    if(r==null)
-        throw new PDFException("Error reading form bbox");
+    Rect r = PDFDictUtils.getRect(_formDict, null, "BBox");
+    if(r==null) throw new PDFException("Error reading form bbox");
       
-    // Make sure form bboxes always have positive widths & heights (new GeneralPath(box) doesn't like negatives)
-    double w = r.getWidth();
-    double h = r.getHeight();
-    if(w<0 || h<0) {
-        double x = r.getX() + (w<0 ? w : 0);
-        double y = r.getY() + (h<0 ? h : 0);
-        w = Math.abs(w);
-        h = Math.abs(h);
-        r.setRect(x,y,w,h);
-    }
+    // Make sure form bboxes always have positive widths & heights
+    double w = r.getWidth(), h = r.getHeight();
+    if(w<0 || h<0) { r.x += (w<0? w : 0); r.y += (h<0? h : 0); r.width = Math.abs(w); r.height = Math.abs(h); }
     return r;
 }
 

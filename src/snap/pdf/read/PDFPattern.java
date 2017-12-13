@@ -3,10 +3,14 @@
  */
 package snap.pdf.read;
 import java.awt.*;
-import java.awt.geom.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.Map;
+import snap.gfx.Image;
 import snap.gfx.ColorSpace;
+import snap.gfx.Rect;
 import snap.pdf.PDFException;
 import snap.pdf.PDFFile;
 import snap.pdf.PDFStream;
@@ -18,15 +22,15 @@ import snap.pdf.PDFStream;
 public abstract class PDFPattern {
     
     // Bounds
-    Rectangle2D          bounds;
+    Rect             bounds;
     
     // Transform
-    AffineTransform      xform;
+    AffineTransform  xform;
     
 /**
  * Returns the bounds
  */
-public Rectangle2D getBounds()  { return bounds; }
+public Rect getBounds()  { return bounds; }
 
 /**
  * Returns the pattern space->default space transform.
@@ -74,7 +78,7 @@ public static class Tiling extends PDFPattern {
         
         paintType = PDFDictUtils.getInt(pmap, srcFile, "PaintType");
         tilingType = PDFDictUtils.getInt(pmap, srcFile, "TilingType");
-        bounds = PDFDictUtils.getRectangle(pmap, srcFile, "BBox");
+        bounds = PDFDictUtils.getRect(pmap, srcFile, "BBox");
         xstep = PDFDictUtils.getFloat(pmap, srcFile, "XStep");
         ystep = PDFDictUtils.getFloat(pmap, srcFile, "YStep");
         xform = PDFDictUtils.getTransform(pmap, srcFile, "Matrix");
@@ -87,9 +91,10 @@ public static class Tiling extends PDFPattern {
     public Map getResources()  { return resources; }
     public byte[] getContents()  { return pdfData; }
     
-    public void setTile(BufferedImage timage)
+    public void setTile(Image anImg)
     {
-        Rectangle2D b = getBounds();
+        BufferedImage timage = (BufferedImage)anImg.getNative();
+        Rect b = getBounds();
         Rectangle2D anchor = new Rectangle2D.Float((float)b.getX(), (float)b.getY(), xstep, ystep);
         tile = new TexturePaint(timage, anchor); pdfData = null; resources = null;
     }
@@ -162,7 +167,7 @@ public static abstract class Shading extends PDFPattern implements PaintContext,
     {
         // Get parameters common to all shading types
         background = PDFDictUtils.getFloatArray(shadingDict, srcFile, "Background");
-        bounds = PDFDictUtils.getRectangle(shadingDict, srcFile, "BBox");
+        bounds = PDFDictUtils.getRect(shadingDict, srcFile, "BBox");
         Object a = shadingDict.get("AntiAlias");
         antialias = a instanceof Boolean && ((Boolean)a).booleanValue();
     

@@ -6,6 +6,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Map;
+import snap.gfx.Rect;
 import snap.pdf.PDFException;
 import snap.pdf.PDFFile;
 
@@ -114,6 +115,20 @@ public static AffineTransform getTransform(Map dictionary, PDFFile srcFile, Stri
         throw new PDFException("Wrong number of elements in matrix definition");
     
     return new AffineTransform(marray);
+}
+
+/** A rectangle : << /BBox [0 0 612 792] >> */
+public static Rect getRect(Map dictionary, PDFFile srcFile, String key)
+{
+    float rarray[] = getFloatArray(dictionary, srcFile, key);
+    
+    if (rarray == null)
+        return null;
+    
+    if (rarray.length != 4)
+        throw new PDFException("Wrong number of elements in rectangle definition");
+    
+    return new Rect(rarray[0],rarray[1],rarray[2]-rarray[0],rarray[3]-rarray[1]);
 }
 
 /** A rectangle : << /BBox [0 0 612 792] >> */
