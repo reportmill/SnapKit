@@ -246,36 +246,6 @@ public Image getImage()
 }
 
 /**
- * Set everything to the default implementations and return an Image for this page.
- */
-public Image getImage2()
-{
-    // If already set, just return
-    if(_image!=null) return _image;
-    
-    // Get page bounds
-    Rect media = getMediaBox(), crop = getCropBox(), bounds = media.getIntersectRect(crop);
-    int width = (int)Math.round(bounds.width), height = (int)Math.round(bounds.height);
-    
-    // Create PDF painter that renders into an image
-    Image img = Image.get(width,height,false);
-    Painter ipntr = img.getPainter();
-    ipntr.setColor(Color.WHITE); ipntr.fillRect(0,0,width,height);
-    ipntr.setColor(Color.BLACK); ipntr.drawRect(.5,.5,width-1,height-1);
-    
-    // Get transform from PDF coords to image (Snap) coords and appyt to image painter
-    Rect r1 = new Rect(0,0,width,height);
-    Rect r2 = new Rect(0,height,width,-height);
-    Transform xfm = Transform.get(r1, r2);
-    ipntr.transform(xfm);
-    
-    // Create PagePainter, paint page to image painter and return image
-    PagePainter ppntr = new PagePainter();
-    ppntr.paint(this, ipntr);
-    return _image = img;
-}
-
-/**
  * Draw the page to g,  scaled to fit the rectangle r.
  */
 public void paint(Painter aPntr, Rect aRect)

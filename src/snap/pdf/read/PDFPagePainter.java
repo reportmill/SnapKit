@@ -3,7 +3,6 @@
  */
 package snap.pdf.read;
 import java.awt.Graphics2D;
-import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
 import java.util.*;
 import snap.gfx.*;
@@ -1222,16 +1221,6 @@ public void drawImage(java.awt.Image anImg, AffineTransform ixform)
 {
     // normal image case - If image drawing throws exception, try workaround
     _gfx.drawImage(anImg, ixform, null); // If fails with ImagingOpException, see RM14 sun_bug_4723021_workaround
-}
-
-/**
- * Draw some text at the current text position.  
- */
-public void showText(GlyphVector v)
-{
-    // TODO: eventually need check the font render mode in the gstate
-    _pntr.setPaint(_gstate.color);
-    _gfx.drawGlyphVector(v,0,0);
 }
 
 /**

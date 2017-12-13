@@ -3,9 +3,12 @@
  */
 package snap.pdf.read;
 import java.awt.Font;
-import java.awt.font.*;
+import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
 import java.awt.geom.*;
 import java.util.*;
+import snap.gfx.Painter;
 import snap.pdf.*;
 
 /**
@@ -86,6 +89,8 @@ public void showText(int offset, int length)
     PDFFile file = _ppntr._pfile;
     byte pageBytes[] = _ppntr._pageBytes;
     PDFGState gs = _ppntr._gstate;
+    Painter pntr = _ppntr._pntr;
+    Graphics2D gfx = _ppntr._gfx;
 
     // TODO: This is probably a huge mistake (performance-wise) The font returned by the factory has a font size of 1
     // so we include the gstate's font size in the text rendering matrix. For any number of reasons, it'd probably be
@@ -119,8 +124,11 @@ public void showText(int offset, int length)
     _ppntr.concatenate(textMatrix);
     _ppntr.concatenate(renderMatrix);
     
+    // TODO: eventually need check the font render mode in the gstate
+    pntr.setPaint(gs.color);
+    gfx.drawGlyphVector(glyphs,0,0);
+    
     // draw, restore ctm and update the text matrix
-    _ppntr.showText(glyphs);
     _ppntr.grestore();
     textMatrix.translate(pt.x*gs.fontSize*gs.thscale, pt.y);
 }
