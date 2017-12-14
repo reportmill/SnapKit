@@ -58,7 +58,7 @@ public static AffineTransform get(Transform aTrans)
 
 /** Returns awt tranform for snap transform. */
 public static Transform get(AffineTransform aTrans)
-{ double m[] = new double[6]; aTrans.getMatrix(m); return Transform.get(m); }
+{ double m[] = new double[6]; aTrans.getMatrix(m); return new Transform(m); }
 
 /** Returns awt paint for snap paint. */
 public static java.awt.Paint get(Paint aSP)
