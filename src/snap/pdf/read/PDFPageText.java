@@ -30,7 +30,7 @@ public class PDFPageText {
     Transform          _lineMatrix = new Transform();
     
     // Buffer used to convert bytes in font's encoding to unichars or some other form that font's cmap will understand
-    char               _unicodeBuf[] = new char[32];
+    char               _charBuf[] = new char[32];
     
     // A FontRenderContext to help create glyphs
     FontRenderContext  _renderContext;
@@ -82,25 +82,22 @@ public void showText(int offset, int length)
     PDFGState gs = _ppntr._gstate;
     Painter pntr = _ppntr._pntr;
 
-    // Ensure the buffer is big enough for the bytes->cid conversion
-    Map fontDict = gs.font;      // Get the font dictionary from the gstate
+    // Get font and GlyphMapper. Ensure buffer is big enough for bytes->cid conversion
+    Map fontDict = gs.font;
     GlyphMapper gmap = PDFFont.getGlyphMapper(fontDict, file);
     int bufmax = gmap.maximumOutputBufferSize(pageBytes, offset, length);
-    int buflen = _unicodeBuf.length;
-    if(buflen<bufmax) {
-        while(buflen<bufmax) buflen += buflen;
-        _unicodeBuf = new char[buflen];
-    }
+    if(_charBuf.length<bufmax) {
+        int nlen = _charBuf.length; while(nlen<bufmax) nlen += nlen; _charBuf = new char[nlen]; }
     
     // Convert to cids and get metrics (actually just the widths)
-    int numMappedChars = gmap.mapBytesToChars(pageBytes, offset, length, _unicodeBuf);
+    int numMappedChars = gmap.mapBytesToChars(pageBytes, offset, length, _charBuf);
     Object wobj = PDFFont.getGlyphWidths(fontDict, file, _ppntr);
 
     // Two nearly identical routines broken out for performance (and readability) reasons
     Font font = PDFFont.getFont(fontDict, file);
     GlyphVector glyphs; Point2D.Float pt = new Point2D.Float();
-    if(gmap.isMultiByte()) glyphs = getMultibyteCIDGlyphVector(_unicodeBuf, numMappedChars, gs, font, wobj, gmap, pt);
-    else glyphs = getSingleByteCIDGlyphVector(pageBytes, offset, length, _unicodeBuf,numMappedChars,gs,font,wobj,pt);
+    if(gmap.isMultiByte()) glyphs = getMultibyteCIDGlyphVector(_charBuf, numMappedChars, gs, font, wobj, gmap, pt);
+    else glyphs = getSingleByteCIDGlyphVector(pageBytes, offset, length, _charBuf, numMappedChars, gs, font, wobj, pt);
                            
     // GSave
     _ppntr.gsave();

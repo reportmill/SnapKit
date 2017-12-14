@@ -869,61 +869,22 @@ private Color getColor(ColorSpace space, int tindex)
     return new Color(space, ary, 1f);
 }
 
-/**
- * The values for keys in inline images are limited to a small subset of names, numbers, arrays and maybe a dict.
- */
-Object getInlineImageValue(PageToken token, byte pageBytes[])
-{
-    // Names (like /DeviceGray or /A85). Names can optionally be abbreviated.
-    if(token.type==PageToken.PDFNameToken) { String abbrev = token.getName(); 
-        for(int i=0, n=_inline_image_value_abbreviations.length; i<n; ++i) {
-            if(_inline_image_value_abbreviations[i][0].equals(abbrev))
-                return '/' + _inline_image_value_abbreviations[i][1]; }
-        return '/' + abbrev;  // not found, so it's not an abbreviation.  We assume it's valid
-    }
-    
-    // Numbers or bools
-    else if(token.type==PageToken.PDFNumberToken || token.type==PageToken.PDFBooleanToken)
-        return token.value;
-        
-    // An array of numbers or names (for Filter or Decode)
-    else if(token.type==PageToken.PDFArrayToken) { List tokenarray = (List)token.value;
-           List newarray = new ArrayList(tokenarray.size());
-           for(int j=0, jMax=tokenarray.size(); j<jMax; ++j)     // recurse
-               newarray.add(getInlineImageValue((PageToken)tokenarray.get(j), pageBytes));
-           return newarray;
-    }
-    
-    // Hex strings for indexed color spaces
-    else if (token.type == PageToken.PDFStringToken)
-        return token.byteArrayValue(pageBytes);
-    
-    // TODO: One possible key in an inline image is DecodeParms (DP). The normal decodeparms for an image is a dict.
-    // The pdf spec doesn't give any information on the format of the dictionary.  Does it use the normal dictionary
-    // syntax, or does it use the inline image key/value syntax? I have no idea, and I don't know how to generate a
-    // pdf file that would have an inline image with a decodeparms dict.
-    else { }
-    throw new PDFException("Error parsing inline image dictionary");
-}
-        
 /** 
  * Converts the tokens & data inside a BI/EI block into an image and draws it.
  * Returns the index of the last token consumed.
  */
-public int parseInlineImage(int tIndex, byte[] pageBytes)
+private int parseInlineImage(int tIndex, byte[] pageBytes)
 {
-    Hashtable imageDict = new Hashtable();
+    Map imageDict = new Hashtable();
     imageDict.put("Subtype", "/Image");
 
     // Get the inline image key/value pairs and create a normal image dictionary
-    for(int i=tIndex, iMax=_tokens.size(); i<iMax; ++i) {
-        PageToken token = getToken(i);
+    for(int i=tIndex, iMax=_tokens.size(); i<iMax; ++i) { PageToken token = getToken(i);
 
         // Handle NameToken: Translate key, get value, add translated key/value pair to the real dict
         if(token.type==PageToken.PDFNameToken) {
             String key = translateInlineImageKey(token.getName());
-            if (++i<iMax) {
-                token = getToken(i);
+            if(++i<iMax) { token = getToken(i);
                 Object value = getInlineImageValue(token, pageBytes);
                 imageDict.put(key,value);
             }
@@ -933,7 +894,7 @@ public int parseInlineImage(int tIndex, byte[] pageBytes)
         // The only way an inline image would ever get reused is if it were inside a form xobject.
         // First get a colorspace object.  Inline images can use any colorspace a regular image can.
         // Create stream, tell imageFactory to create image and draw it
-        else if (token.type==PageToken.PDFInlineImageData) {
+        else if(token.type==PageToken.PDFInlineImageData) {
             Object space = imageDict.get("ColorSpace");
             ColorSpace imgCSpace = space!=null? PDFColorSpace.getColorspace(space, _pfile, _page) : null;
             PDFStream imgStream = new PDFStream(pageBytes, token.getStart(), token.getLength(), imageDict);
@@ -946,6 +907,42 @@ public int parseInlineImage(int tIndex, byte[] pageBytes)
     throw new PDFException("Syntax error parsing inline image dictionary");
 }
 
+/**
+ * The values for keys in inline images are limited to a small subset of names, numbers, arrays and maybe a dict.
+ */
+private Object getInlineImageValue(PageToken token, byte pageBytes[])
+{
+    // Names (like /DeviceGray or /A85). Names can optionally be abbreviated.
+    if(token.type==PageToken.PDFNameToken) { String abbrev = token.getName(); 
+        for(int i=0, n=_inline_image_value_abbreviations.length; i<n; ++i) {
+            if(_inline_image_value_abbreviations[i][0].equals(abbrev))
+                return '/' + _inline_image_value_abbreviations[i][1]; }
+        return '/' + abbrev;  // not found, so it's not an abbreviation.  We assume it's valid
+    }
+    
+    // Numbers or bools
+    if(token.type==PageToken.PDFNumberToken || token.type==PageToken.PDFBooleanToken)
+        return token.value;
+        
+    // An array of numbers or names (for Filter or Decode)
+    if(token.type==PageToken.PDFArrayToken) { List tokenarray = (List)token.value;
+       List newarray = new ArrayList(tokenarray.size());
+       for(int j=0, jMax=tokenarray.size(); j<jMax; ++j)     // recurse
+           newarray.add(getInlineImageValue((PageToken)tokenarray.get(j), pageBytes));
+       return newarray;
+    }
+    
+    // Hex strings for indexed color spaces
+    if(token.type==PageToken.PDFStringToken)
+        return token.byteArrayValue(pageBytes);
+    
+    // TODO: One possible key in an inline image is DecodeParms (DP). The normal decodeparms for an image is a dict.
+    // The pdf spec doesn't give any information on the format of the dictionary.  Does it use the normal dictionary
+    // syntax, or does it use the inline image key/value syntax? I have no idea, and I don't know how to generate a
+    // pdf file that would have an inline image with a decodeparms dict.
+    throw new PDFException("Error parsing inline image dictionary");
+}
+        
 /** map for translating inline image abbreviations into standard tokens */
 static final String _inline_image_key_abbreviations[][] = {
     {"BPC", "BitsPerComponent"}, {"CS", "ColorSpace"}, {"D", "Decode"}, {"DP", "DecodeParms"},
@@ -988,7 +985,7 @@ void executeForm(PDFForm aForm)
  * we only execute it once and cache a tile. To do this, we temporarily set the markup handler in the file to a new 
  * BufferedMarkupHander, add the pattern's resource dictionary and fire up the parser.
  */
-public void executePatternStream(PDFPattern.Tiling aPattern)
+private void executePatternStream(PDFPattern.Tiling aPattern)
 {
     // Get pattern width & height
     int width = (int)Math.ceil(aPattern.getBounds().getWidth());
@@ -1016,7 +1013,7 @@ public void executePatternStream(PDFPattern.Tiling aPattern)
  * Pull out anything useful from an extended gstate dictionary
  * The dict will have been read in, so values have been converted to appropriate types, like Integer, Float, List, etc.
  */
-void readExtendedGState(Map <String,Object> exgstate)
+private void readExtendedGState(Map <String,Object> exgstate)
 {
     PDFGState gs = _gstate; if(exgstate==null) return;
     
@@ -1086,20 +1083,19 @@ void readExtendedGState(Map <String,Object> exgstate)
 /**
  * Accessors for the resource dictionaries.
  */
-public Map getExtendedGStateNamed(String name) { return (Map)_page.findResource("ExtGState", name); }
+private Map getExtendedGStateNamed(String name) { return (Map)_page.findResource("ExtGState", name); }
 
 /**
  * Returns the pdf Font dictionary for a given name (like "/f1").  You
  * can use the FontFactory to get interesting objects from the dictionary.
  */  
-public Map getFontDictForAlias(String alias) { return (Map)_page.findResource("Font", alias); }
+private Map getFontDictForAlias(String alias) { return (Map)_page.findResource("Font", alias); }
 
 /**
- * Like above, but for XObjects. XObjects can be Forms or Images.
- * If the dictionary represents an Image, this routine calls the ImageFactory to create a java.awt.Image.
- * If it's a Form XObject, the object returned will be a PDFForm.
-*/ 
-public Object getXObject(String pdfName)
+ * Like above, but for XObjects. XObjects can be Forms or Images. If the dictionary represents an Image, this routine
+ * calls the ImageFactory to create a java.awt.Image. If it's a Form XObject, the object returned will be a PDFForm.
+ */ 
+private Object getXObject(String pdfName)
 {
     PDFStream xobjStream = (PDFStream)_page.findResource("XObject",pdfName);
     
@@ -1141,7 +1137,7 @@ public Object getXObject(String pdfName)
 /**
  * Creates a new pattern object for the resource name
  */
-public PDFPattern getPattern(String pdfName)
+private PDFPattern getPattern(String pdfName)
 {
     Object pat = _page.findResource("Pattern", pdfName);
     PDFPattern patobj = PDFPattern.getInstance(pat, _pfile);
@@ -1160,7 +1156,7 @@ public PDFPattern getPattern(String pdfName)
 /**
  * Creates a new shadingPattern for the resource name.  Used by the shading operator.
  */
-public PDFPattern.Shading getShading(String pdfName)
+private PDFPattern.Shading getShading(String pdfName)
 {
     Map pat = (Map)_page.findResource("Shading", pdfName);
     PDFPattern.Shading patobj = PDFPattern.Shading.getInstance(pat, _pfile);
