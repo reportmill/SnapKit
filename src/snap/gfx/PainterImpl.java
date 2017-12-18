@@ -122,7 +122,7 @@ public void setTransform(Transform aTrans)
  */
 public void transform(Transform aTrans)
 {
-    _gstate.xform.multiply(aTrans);
+    _gstate.xform.concat(aTrans);
     if(_gstate.clip!=null) _gstate.clip = _gstate.clip.copyFor(aTrans);
 }
 
