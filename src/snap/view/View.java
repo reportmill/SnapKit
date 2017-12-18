@@ -724,16 +724,17 @@ public boolean isLocalToParentSimple()  { return _rot==0 && _sx==1 && _sy==1; }
  */
 public Transform getLocalToParent()
 {
-    if(isLocalToParentSimple()) return Transform.getTrans(getX()+_tx, getY()+_ty);
+    if(isLocalToParentSimple()) return new Transform(getX()+_tx, getY()+_ty);
     
     // Get location, size, point of rotation, rotation, scale, skew
     double x = getX() + getTransX(), y = getY() + getTransY(), w = getWidth(), h = getHeight(), prx = w/2, pry = h/2;
     double rot = getRotate(), sx = getScaleX(), sy = getScaleY(); //skx = getSkewX(), sky = getSkewY();
     
     // Transform about point of rotation and return
-    Transform t = Transform.getTrans(-prx, -pry); //if(skx!=0 || sky!=0) t.skew(skx, sky);
-    if(sx!=1 || sy!=1) t.scale(sx, sy); if(rot!=0) t.rotate(rot);
-    t.translate(prx + x, pry + y); return t;
+    Transform t = new Transform(x + prx, y + pry);
+    if(rot!=0) t.rotate(rot);
+    if(sx!=1 || sy!=1) t.scale(sx, sy); //if(skx!=0 || sky!=0) t.skew(skx, sky);
+    t.translate(-prx, -pry); return t;
 }
 
 /**
@@ -743,7 +744,7 @@ public Transform getLocalToParent(View aPar)
 {
     Transform tfm = getLocalToParent();
     for(View n=getParent();n!=aPar&&n!=null;n=n.getParent()) {
-        if(n.isLocalToParentSimple()) tfm.translate(n._x+n._tx,n._y+n._ty);
+        if(n.isLocalToParentSimple()) tfm.preTranslate(n._x+n._tx,n._y+n._ty);
         else tfm.multiply(n.getLocalToParent());
     }
     return tfm;
@@ -785,7 +786,7 @@ public Shape localToParent(View aPar, Shape aShape)  { return aShape.copyFor(get
  */
 public Transform getParentToLocal()
 {
-    if(isLocalToParentSimple()) return Transform.getTrans(-_x-_tx, -_y-_ty);
+    if(isLocalToParentSimple()) return new Transform(-_x-_tx, -_y-_ty);
     Transform tfm = getLocalToParent(); tfm.invert(); return tfm;
 }
 

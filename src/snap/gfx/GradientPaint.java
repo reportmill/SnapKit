@@ -150,12 +150,18 @@ protected void setRoll(double aRoll, Rect aRect)
     if(aRoll==90) { _sx = aRect.getMidX(); _sy = aRect.getY(); _ex = aRect.getMidX(); _ey = aRect.getMaxY(); return; }
     
     // Do arbitrary version
-    Transform t = Transform.getTrans(-aRect.getMidX(), -aRect.getMidY());   // Get transform of reverse rotation
-    t.rotate(-_roll); t.translate(aRect.getMidX(), aRect.getMidY());
-    Rect r2 = aRect.copyFor(t).getBounds();                  // Get bounds of transformed rect
+    Transform t = new Transform(aRect.getMidX(), aRect.getMidY());   // Get transform of reverse rotation
+    t.rotate(-_roll);
+    t.translate(-aRect.getMidX(), -aRect.getMidY());
+    
+    // Get bounds of transformed rect
+    Rect r2 = aRect.copyFor(t).getBounds();
     Point p1 = new Point(r2.getX(), r2.getMidY()), p2 = new Point(r2.getMaxX(), r2.getMidY());
-    t = Transform.getTrans(-r2.getMidX(), -r2.getMidY());
-    t.rotate(_roll); t.translate(r2.getMidX(), r2.getMidY());
+    
+    // 
+    t = new Transform(r2.getMidX(), r2.getMidY());
+    t.rotate(_roll);
+    t.translate(-r2.getMidX(), -r2.getMidY());
     p1.transformBy(t); p2.transformBy(t);
     _sx = p1.x; _sy = p1.y; _ex = p2.x; _ey = p2.y;
 }

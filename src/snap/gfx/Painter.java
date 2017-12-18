@@ -254,7 +254,7 @@ public Rect getStringBounds(String aStr)  { return getFont().getStringBounds(aSt
 /**
  * Translate by x,y.
  */
-public void translate(double tx, double ty)  { transform(Transform.getTrans(tx, ty)); }
+public void translate(double tx, double ty)  { transform(new Transform(tx, ty)); }
 
 /**
  * Rotate by angle in degrees.

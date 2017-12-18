@@ -6,7 +6,10 @@ import snap.util.MathUtils;
 import snap.util.StringUtils;
 
 /**
- * A class to represent a mathematical linear transform.
+ * A class to represent a mathematical linear transforms.
+ * Transforms are represented by matrices in row-major form (vs column-major - google it).
+ * This works fine with Java2D transforms, which are column-major, since when all six values are given/returned
+ * from this class are transposed from Java2D transform (as is everything else).
  */
 public class Transform implements Cloneable {
     
@@ -23,6 +26,11 @@ public class Transform implements Cloneable {
  * Creates a new Transform.
  */
 public Transform()  { }
+
+/**
+ * Creates a new Transform with given translation.
+ */
+public Transform(double tx, double ty)  { _tx = tx; _ty = ty; }
 
 /**
  * Creates a new Transform with given float array.
@@ -62,12 +70,12 @@ public final boolean isRotated()  { return _b!=0 || _c!=0; }
 /**
  * Translates this transform by given x & y.
  */
-public void translate(double dx, double dy)  { _tx += dx; _ty += dy; _inverse = null; }
+public void translate(double dx, double dy)  { _tx += dx*_a + dy*_c; _ty += dx*_b + dy*_d; _inverse = null; }
 
 /**
- * Translates this transform by given x & y.
+ * Translates this transform by given x & y in global space (pre-multiply).
  */
-public void translate2(double dx, double dy)  { _tx += dx*_a + dy*_b; _ty += dx*_c + dy*_d; _inverse = null; }
+public void preTranslate(double dx, double dy)  { _tx += dx; _ty += dy; _inverse = null; }
 
 /**
  * Rotates this transform by given angle in degrees.
@@ -75,13 +83,13 @@ public void translate2(double dx, double dy)  { _tx += dx*_a + dy*_b; _ty += dx*
 public void rotate(double anAngle)
 {
     double angle = Math.toRadians(anAngle), c = Math.cos(angle), s = Math.sin(angle);
-    multiply(c, s, -s, c, 0, 0);
+    concat(c, s, -s, c, 0, 0);
 }
 
 /**
  * Scales this transform by given scale x and scale y.
  */
-public void scale(double sx, double sy)  { multiply(sx, 0, 0, sy, 0, 0); }
+public void scale(double sx, double sy)  { concat(sx, 0, 0, sy, 0, 0); }
 
 /**
  * Skews this transform by given skew x and skew y angles in degrees.
@@ -92,24 +100,7 @@ public void skew(double aSkewX, double aSkewY)
     double skewY = Math.toRadians(aSkewY);
     double tanSkewX = Math.tan(skewX);
     double tanSkewY = Math.tan(skewY);
-    multiply(1, tanSkewX, tanSkewY, 1, 0, 0);
-}
-
-/**
- * Multiplies this transform by the given transform.
- */
-public void multiply(Transform aTr)  { multiply(aTr._a, aTr._b, aTr._c, aTr._d, aTr._tx, aTr._ty); }
-
-/**
- * Multiplies this transform by the given transform components.
- */
-public void multiply(double a, double b, double c, double d, double tx, double ty)
-{
-    double a2 = _a*a + _b*c, b2 = _a*b + _b*d;
-    double c2 = _c*a + _d*c, d2 = _c*b + _d*d;
-    double tx2 = _tx*a + _ty*c + tx, ty2 = _tx*b + _ty*d + ty;
-    _a = a2; _b = b2; _c = c2; _d = d2; _tx = tx2; _ty = ty2;
-    _inverse = null;
+    concat(1, tanSkewX, tanSkewY, 1, 0, 0);
 }
 
 /**
@@ -119,12 +110,44 @@ public void concat(Transform aTr)  { concat(aTr._a, aTr._b, aTr._c, aTr._d, aTr.
 
 /**
  * Concatentates (pre-multiplies) this transform by given transform: T' = Tn x T.
+ *
+ *      [  a  b  0 ]   [  _a  _b  0 ]   [    a*_a+b*_c        a*_b+b*_d     0  ] 
+ * T' = [  c  d  0 ] x [  _c  _d  0 ] = [    c*_a+d*_c        c*_b+d*_d     0  ]
+ *      [ tx ty  1 ]   [ _tx _ty  1 ]   [ tx*_a+ty*_c+_tx  tx*_b+ty*_d+ty   1  ]
+ * 
  */
 public void concat(double a, double b, double c, double d, double tx, double ty)
 {
-    double a2 = a*_a + b*_c, b2 = a*_b + b*_d;
-    double c2 = c*_a + d*_c, d2 = c*_b + d*_d;
-    double tx2 = tx*_a + ty*_c + _tx, ty2 = tx*_b + ty*_d + _ty;
+    // Calc new values
+    double a2 = a*_a + b*_c,            b2 = a*_b + b*_d;
+    double c2 = c*_a + d*_c,            d2 = c*_b + d*_d;
+    double tx2 = tx*_a + ty*_c + _tx,  ty2 = tx*_b + ty*_d + _ty;
+    
+    // Set new values
+    _a = a2; _b = b2; _c = c2; _d = d2; _tx = tx2; _ty = ty2; _inverse = null;
+}
+
+/**
+ * Multiplies this transform by the given transform.
+ */
+public void multiply(Transform aTr)  { multiply(aTr._a, aTr._b, aTr._c, aTr._d, aTr._tx, aTr._ty); }
+
+/**
+ * Multiplies this transform by the given transform components.
+ * 
+ *      [  _a  _b  0 ]   [  a   b  0 ]   [    _a*a+_b*c       _a*b+_b*d     0  ] 
+ * T' = [  _c  _d  0 ] x [  c   d  0 ] = [    _c*a+_d*c       _c*b+_d*d     0  ]
+ *      [ _tx _ty  1 ]   [ tx  ty  1 ]   [ _tx*a+_ty*c+tx  _tx*b+_ty*d+ty   1  ]
+ * 
+ */
+public void multiply(double a, double b, double c, double d, double tx, double ty)
+{
+    // Calc new values
+    double a2 = _a*a + _b*c, b2 = _a*b + _b*d;
+    double c2 = _c*a + _d*c, d2 = _c*b + _d*d;
+    double tx2 = _tx*a + _ty*c + tx, ty2 = _tx*b + _ty*d + ty;
+    
+    // Set new values
     _a = a2; _b = b2; _c = c2; _d = d2; _tx = tx2; _ty = ty2; _inverse = null;
 }
 
@@ -221,11 +244,19 @@ public void transform(Point aPoint)  { transform(aPoint, aPoint); }
 
 /**
  * Transforms the given values.
+ *
+ *                     [  _a  _b  0 ]  
+ * P' = [ tx ty  1 ] x [  _c  _d  0 ] = [ tx*_a+ty*_c+_tx  tx*_b+ty*_d+ty   1  ]
+ *                     [ _tx _ty  1 ]  
+ * 
  */
 public Point transform(Point aPnt, Point aDst)
 {
+    // Calc new values
     double x = aPnt.getX(), y = aPnt.getY();
     double x2 = x*_a + y*_c + _tx, y2 = x*_b + y*_d + _ty;
+    
+    // Set new values and return
     if(aDst==null) aDst = new Point(x2, y2); else aDst.setXY(x2, y2);
     return aDst;
 }
@@ -251,7 +282,9 @@ public void transform(Rect aRect)
     aRect.setRect(x1,y1,x2-x1,y2-y1);
 }
 
-/** Transforms the given size as a vector (preserves negative values). */
+/**
+ * Transforms the given size as a vector (preserves negative values).
+ */
 public void transformVector(Size aSize)
 {
     double w = aSize.getWidth(), h = aSize.getHeight();
@@ -289,11 +322,6 @@ public String toString()
 }
     
 /**
- * Returns a translation transform.
- */
-public static Transform getTrans(double tx, double ty)  { return new Transform(1,0,0,1,tx,ty); }
-
-/**
  * Returns a rotation transform.
  */
 public static Transform getRotate(double theta)  { Transform t = new Transform(); t.rotate(theta); return t; }
@@ -301,27 +329,6 @@ public static Transform getRotate(double theta)  { Transform t = new Transform()
 /**
  * Returns a scale transform.
  */
-public static Transform getScale(double sx, double sy)  { Transform t = new Transform(); t.scale(sx,sy); return t; }
-
-/**
- * Returns a transform for given matrix elements.
- */
-public static Transform get(double a, double b, double c, double d, double tx, double ty)
-{
-    return new Transform(a,b,c,d,tx,ty);
-}
-
-/**
- * Returns a transform from one given rect to second given rect.
- */
-public static Transform get(Rect aRect1, Rect aRect2)
-{
-    double sx = aRect2.width/aRect1.width;
-    double sy = aRect2.height/aRect1.height;
-    Transform xform = Transform.getTrans(-aRect1.x,-aRect1.y);
-    xform.scale(sx,sy);
-    xform.translate(aRect2.x, aRect2.y);
-    return xform;
-}
+public static Transform getScale(double sx, double sy)  { return new Transform(sx, 0, 0, sy, 0, 0); }
 
 }

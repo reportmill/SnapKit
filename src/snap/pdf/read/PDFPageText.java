@@ -60,7 +60,7 @@ public void end()
 /** Set text position relative to current line matrix.  Used by Td, TD, T*, ', "*/
 public void positionText(float x, float y)
 {
-    _lineMatrix.translate2(x,y);
+    _lineMatrix.translate(x,y);
     _textMatrix.setMatrix(_lineMatrix);
 }
 
@@ -115,7 +115,7 @@ public void showText(int offset, int length)
     
     // draw, restore ctm and update the text matrix
     _ppntr.grestore();
-    _textMatrix.translate2(pt.x*gs.fontSize*gs.thscale, pt.y);
+    _textMatrix.translate(pt.x*gs.fontSize*gs.thscale, pt.y);
 }
 
 /**
@@ -127,7 +127,7 @@ public void showText(List <PageToken> tokens)
     double hscale = -gs.fontSize*gs.thscale/1000;
     for(PageToken tok : tokens) {
         if(tok.type==PageToken.PDFNumberToken)
-            _textMatrix.translate2(tok.floatValue()*hscale, 0);
+            _textMatrix.translate(tok.floatValue()*hscale, 0);
         else showText(tok.getStart(), tok.getLength());
     }
 }
