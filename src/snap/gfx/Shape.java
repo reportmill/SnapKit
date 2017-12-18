@@ -414,11 +414,11 @@ public boolean intersects(Shape aShape, double aLineWidth)
  */
 public Shape copyFor(Rect aRect)
 {
-    Rect bounds = getBounds(); if(bounds.equals(aRect)) return this;
-    Transform trans = new Transform(aRect.getX() - bounds.getX(), aRect.getY() - bounds.getY());
-    double bw = bounds.getWidth(), bh = bounds.getHeight();
-    double sx = bw!=0? aRect.getWidth()/bw : 0, sy = bh!=0? aRect.getHeight()/bh : 0;
-    trans.scale(sx, sy);
+    Rect bnds = getBounds(); if(bnds.equals(aRect)) return this;
+    double bw = bnds.width, bh = bnds.height;
+    double sx = bw!=0? aRect.width/bw : 0, sy = bh!=0? aRect.height/bh : 0;
+    Transform trans = Transform.getScale(sx, sy);
+    trans.translate(aRect.x - bnds.x, aRect.y - bnds.y);
     return new Path(getPathIter(trans));
 }
 
