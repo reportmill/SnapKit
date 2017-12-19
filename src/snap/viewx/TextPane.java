@@ -16,7 +16,7 @@ public class TextPane extends ViewOwner {
     TextArea            _textArea;
     
     // The ToolBarPane
-    ChildView                _toolBarPane;
+    ChildView           _toolBarPane;
     
     // Whether text pane text is modified
     boolean             _textModified;

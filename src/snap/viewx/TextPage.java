@@ -12,7 +12,7 @@ import snap.web.WebFile;
 public class TextPage extends WebPage {
 
     // The text pane
-    TFTextPane           _textPane;
+    TFTextPane           _textPane = new TFTextPane();
     
     // The text
     String               _text;
@@ -20,12 +20,22 @@ public class TextPage extends WebPage {
 /**
  * Returns the text.
  */
-public String getText()  { return _text!=null? _text : (_text=getFile().getText()); }
+public String getText()  { return _text!=null? _text : (_text=getDefaultText()); }
 
 /**
  * Sets the text.
  */
-public void setText(String aString)  { _text = aString; }
+public void setText(String aString)
+{
+    _text = aString;
+    if(isUISet())
+        getTextArea().setText(aString);
+}
+
+/**
+ * Returns the default text.
+ */
+protected String getDefaultText()  { return getFile().getText(); }
 
 /**
  * Returns the TextPane.
@@ -40,19 +50,17 @@ public TextArea getTextArea()  { getUI(); return _textPane.getTextArea(); }
 /**
  * Create UI panel.
  */
-protected View createUI()
-{
-    _textPane = new TFTextPane();
-    _textPane.getTextArea().setFont(getDefaultFont());
-    _textPane.getTextArea().setText(getText());
-    return _textPane.getUI();
-}
+protected View createUI()  { return _textPane.getUI(); }
 
 /**
  * Initialize UI.
  */
 protected void initUI()
 {
+    // Configure TextPane
+    _textPane.getTextArea().setFont(getDefaultFont());
+    _textPane.getTextArea().setText(getText());
+
     Button btn = new Button("Reload"); btn.setName("ReloadButton"); btn.setPrefSize(80,22);
     btn.setLeanX(HPos.RIGHT); btn.addEventHandler(e -> getBrowser().reloadPage(), Action);
     _textPane.getToolBarPane().addChild(btn);

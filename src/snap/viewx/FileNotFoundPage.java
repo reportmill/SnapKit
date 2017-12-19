@@ -12,15 +12,15 @@ public class FileNotFoundPage extends TextPage {
 /**
  * Override to configure page.
  */
-public void setResponse(WebResponse aResp)
+protected String getDefaultText()
 {
-    super.setResponse(aResp);
+    WebResponse resp = getResponse(); if(resp==null) return "No Response found";
     
     StringBuffer sb = new StringBuffer();
     sb.append("FileNotFound: ").append("\n\n");
-    sb.append("  - The requested URL " + aResp.getRequestURL().getString() + " was not found on this server.\n\n");
-    sb.append("  - Response Code: ").append(aResp.getCode()).append(' ').append(aResp.getCodeString());
-    setText(sb.toString());
+    sb.append("  - The requested URL " + resp.getRequestURL().getString() + " was not found on this server.\n\n");
+    sb.append("  - Response Code: ").append(resp.getCode()).append(' ').append(resp.getCodeString());
+    return sb.toString();
 }
 
 /**

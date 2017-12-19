@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
-import java.util.*;
 import snap.gfx.Image;
 import snap.util.*;
 import snap.view.*;
@@ -13,15 +12,18 @@ import snap.web.*;
  */
 public class WebPage extends ViewOwner {
 
-    // The browser that owns this page
-    WebBrowser             _browser;
+    // The URL
+    WebURL                 _url;
     
     // The response
     WebResponse            _response;
     
-    // A map of instances
-    static HashMap         _instances = new HashMap();
-
+    // The file
+    WebFile                _file;
+    
+    // The browser that owns this page
+    WebBrowser             _browser;
+    
 /**
  * Returns the WebBrowser for this WebPage.
  */
@@ -35,13 +37,40 @@ public void setBrowser(WebBrowser aBrowser)  { _browser = aBrowser; }
 /**
  * Returns the Page URL.
  */
-public WebURL getURL()  { return getResponse().getRequestURL(); }
+public WebURL getURL()  { return _url!=null? _url : (_url=getURLImpl()); }
+
+/**
+ * Returns the Page URL.
+ */
+protected WebURL getURLImpl()
+{
+    // If file, return from that
+    if(_file!=null)
+        return _file.getURL();
+        
+    // If Response, return from that
+    if(_response!=null)
+        return _response.getRequestURL();
+        
+    // If subclass of WebPage, use Class file URL
+    if(getClass()!=WebPage.class)
+        return WebURL.getURL(getClass());
+        
+    // Return null
+    System.err.println("WebPage.getURL: No page URL");
+    return null;
+}
 
 /**
  * Sets the Page URL.
  */
 public void setURL(WebURL aURL)
 {
+    // If already set, just return
+    if(SnapUtils.equals(aURL, _url)) return;
+    
+    // Set URL and Response
+    _url = aURL;
     WebRequest req = new WebRequest(); req.setURL(aURL);
     WebResponse resp = new WebResponse(); resp.setRequest(req); resp.setCode(WebResponse.OK);
     setResponse(resp);
@@ -50,32 +79,39 @@ public void setURL(WebURL aURL)
 /**
  * Returns the WebFile for this WebPage.
  */
-public WebFile getFile()  { return getResponse().getFile(); }
+public WebFile getFile()
+{
+    // if already set, just return
+    if(_file!=null) return _file;
+    
+    // Get file from URL
+    WebURL url = getURL(); if(url==null) return null;
+    return _file = url.getFile();
+}
 
 /**
  * Sets the WebFile for this WebPage.
  */
 public void setFile(WebFile aFile)
 {
-    WebURL url = aFile.getURL(); WebRequest req = new WebRequest(); req.setURL(url);
-    WebResponse resp = new WebResponse(); resp.setRequest(req); resp.setCode(WebResponse.OK);
-    setResponse(resp);
+    _file = aFile;
+    //WebURL url = aFile.getURL(); WebRequest req = new WebRequest(); req.setURL(url);
+    //WebResponse resp = new WebResponse(); resp.setRequest(req); resp.setCode(WebResponse.OK);
+    //setResponse(resp);
 }
 
 /**
  * Returns the response that generated this page.
  */
-public WebResponse getResponse()  { return _response!=null? _response : (_response=createResponse()); }
-
-/**
- * Creates a response for this page.
- */
-protected WebResponse createResponse()
+public WebResponse getResponse()
 {
-    WebURL url = getInstanceURL(this);
+    if(_response!=null) return _response;
+
+    // Create response from URL
+    WebURL url = getURL(); if(url==null) return null;
     WebRequest req = new WebRequest(); req.setURL(url);
     WebResponse resp = new WebResponse(); resp.setRequest(req); resp.setCode(WebResponse.OK);
-    return resp;
+    return _response = resp;
 }
 
 /**
@@ -193,28 +229,5 @@ public Object getPeer()  { return null; }
  * Standard toString implementation.
  */
 public String toString()  { return getClass().getSimpleName() + ": " + getURL().getString(); }
-
-/**
- * Returns a URL for given instance.
- */
-public static WebURL getInstanceURL(Object anObj)
-{
-    int id = System.identityHashCode(anObj);
-    WebURL curl = WebURL.getURL(anObj.getClass());
-    WebURL url = WebURL.getURL(curl.getString() + "?id=" + id);
-    _instances.put(id, anObj);
-    return url;
-}
-
-/**
- * Returns an instance for given id.
- */
-public static Object getURLInstance(WebURL aURL)
-{
-    String ids = aURL.getQueryValue("id");
-    Object obj = ids!=null? _instances.get(Integer.valueOf(ids)) : null;
-    if(obj==null) System.err.println("ClassData: URL id not found " + ids);
-    return obj;
-}
 
 }
