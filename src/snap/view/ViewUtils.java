@@ -16,7 +16,7 @@ public class ViewUtils {
     static boolean          _altDown, _cntrDown, _metaDown, _mouseDown, _shiftDown, _shortcutDown;
 
     // Color constants
-    private static Color BACK_FILL = new Color("#F1F1F1");
+    private static Color BACK_FILL = new Color("#E9E8EA");
     private static Color BACK_DARK_FILL = new Color("#C0C0C0");
     private static Color SELECT_COLOR = new Color("#0032D0");
     private static Color TARGET_COLOR = new Color("#4080F0");

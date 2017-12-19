@@ -62,6 +62,7 @@ public class RootView extends ParentView {
 public RootView()
 {
     enableEvents(KeyEvents); setFocusable(true);
+    setFill(ViewUtils.getBackFill());
 }
 
 /**

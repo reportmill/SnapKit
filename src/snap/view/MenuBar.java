@@ -12,11 +12,11 @@ import snap.util.*;
 public class MenuBar extends ParentView {
 
     // The menubar fill
-    static Color c1 = new Color("#fefefeff"), c2 = new Color("#f5f5f5ff"), c3 = new Color("#f0f0f0ff");
-    static Color c4 = new Color("#ebebebff"), c5 = new Color("#e7e7e7ff");
+    static Color c1 = new Color("#F9"), c2 = new Color("#EF"), c3 = new Color("#EA");
+    static Color c4 = new Color("#E6"), c5 = new Color("#E1");
     static GradientPaint.Stop stops[] = GradientPaint.getStops(new double[] { 0,.25,.5,.75,1 }, c1, c2, c3, c4, c5);
     static GradientPaint MENU_BAR_PAINT = new GradientPaint(0,0,0,1,stops);
-    static Font MENU_BAR_FONT = new Font("Arial", 14);
+    static Font MENU_BAR_FONT = new Font("Arial", 13);
 
 /**
  * Creates a new MenuBarNode.

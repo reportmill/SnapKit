@@ -21,19 +21,19 @@ public class TabView extends ParentView implements View.Selectable <Tab> {
     int             _sindex = -1;
     
     // The tab shelf
-    RowView            _shelf;
+    RowView         _shelf;
     
     // The view to hold content
-    BorderView      _contentCradle;
+    BoxView         _contentBox;
     
     // The node to obscure the content cradle border below the selected tab button
     View            _borderBlockerBox = new RowView();
     
     // Hidden kids
-    RowView            _hiddenKids = new RowView();
+    RowView         _hiddenKids = new RowView();
     
     // The default back fill
-    static Paint    _defBackFill = new Color("#F4F4F4");
+    static Paint    _backFill = ViewUtils.getBackFill();
     
     // Constants for properties
     public static final String SelectedIndex_Prop = "SelectedIndex";
@@ -50,15 +50,15 @@ public TabView()
     _shelf.setFill(new GradientPaint(.5,0,.5,1, GradientPaint.getStops(0,c1,.2,c2,1,c2)));
     
     // Create and configure content cradle
-    _contentCradle = new BorderView(); _contentCradle.setFill(_defBackFill);
-    _contentCradle.setBorder(Color.LIGHTGRAY, 1);
+    _contentBox = new BoxView(null, true, true); _contentBox.setFill(_backFill);
+    _contentBox.setBorder(Color.LIGHTGRAY, 1);
     
     // Create and configure box node
-    _borderBlockerBox.setHeight(1); _borderBlockerBox.setFill(_defBackFill);
+    _borderBlockerBox.setHeight(1); _borderBlockerBox.setFill(_backFill);
     _hiddenKids.setVisible(false);
     
     // Add shelf and content cradle, enable action event
-    setChildren(_hiddenKids, _shelf, _contentCradle, _borderBlockerBox);
+    setChildren(_hiddenKids, _shelf, _contentBox, _borderBlockerBox);
     enableEvents(Action);
 }
 
@@ -155,7 +155,7 @@ public void setSelectedIndex(int anIndex)
     if(anIndex==_sindex) return;
     Tab tab = anIndex>=0 && anIndex<getTabCount()? getTab(anIndex) : null;
     ToggleButton ob = getTabButton(_sindex); if(ob!=null) { ob.setSelected(false); ob.setButtonFill(null); }
-    ToggleButton nb = getTabButton(anIndex); if(nb!=null) { nb.setSelected(true); nb.setButtonFill(_defBackFill); }
+    ToggleButton nb = getTabButton(anIndex); if(nb!=null) { nb.setSelected(true); nb.setButtonFill(_backFill); }
     setContent(tab!=null? tab.getContent() : null);
     positionBorderBlockerBox();
     firePropChange(SelectedIndex_Prop, _sindex, _sindex=anIndex);
@@ -192,7 +192,7 @@ private ToggleButton getTabButton(int anIndex)
 /**
  * Returns the selected child.
  */
-public View getContent()  { return _contentCradle.getCenter(); }
+public View getContent()  { return _contentBox.getContent(); }
 
 /**
  * Sets the current tab content.
@@ -200,7 +200,7 @@ public View getContent()  { return _contentCradle.getCenter(); }
 public void setContent(View aView)
 {
     View old = getContent();
-    _contentCradle.setCenter(aView);
+    _contentBox.setContent(aView);
     
     // If old is a tab content, add back to hidden kids
     boolean isKid = false; for(Tab tab : _tabs) if(tab.getContent()==old) isKid = true;
@@ -236,7 +236,7 @@ protected void layoutImpl()
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top+28, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
     _shelf.setWidth(w);
-    _contentCradle.setBounds(x,y,w,h);
+    _contentBox.setBounds(x,y,w,h);
     positionBorderBlockerBox();
 }
 
@@ -246,7 +246,7 @@ protected void layoutImpl()
 private void positionBorderBlockerBox()
 {
     ToggleButton tbtn = getTabButton(_sindex);
-    if(tbtn!=null) _borderBlockerBox.setBounds(tbtn.getX()+1,_contentCradle.getY(),tbtn.getWidth()-2,1);
+    if(tbtn!=null) _borderBlockerBox.setBounds(tbtn.getX()+1,_contentBox.getY(),tbtn.getWidth()-2,1);
     else _borderBlockerBox.setBounds(0,0,0,0);
 }
 
