@@ -78,7 +78,7 @@ public Object getXRefObj(PDFXEntry anEntry)
 /**
  * Returns the object from the xref table, reading it if necessary.
  */
-protected Object getXRefObjImpl(snap.pdf.PDFXEntry anEntry) throws Exception
+protected Object getXRefObjImpl(PDFXEntry anEntry) throws Exception
 {
      // Handle entry by entry state
     switch(anEntry.state) {

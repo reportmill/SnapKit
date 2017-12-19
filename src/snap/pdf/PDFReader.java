@@ -351,6 +351,9 @@ public static class DictionaryHandler extends ParseHandler <HashMap> {
         // Handle Object
         else if(anId=="Object")
             getPart().put(key, aNode.getCustomNode());
+            
+        // Handle anything else ("<<", ">>"): Make sure map gets created in case of empty dict
+        else getPart();
     }
 }
 
@@ -365,6 +368,9 @@ public static class ArrayHandler extends ParseHandler <ArrayList> {
         // Handle Object
         if(anId=="Object")
             getPart().add(aNode.getCustomNode());
+
+        // Handle anything else ("[", "]"): Make sure list gets created in case of empty array
+        else getPart();
     }
 }
 
