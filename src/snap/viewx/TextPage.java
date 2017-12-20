@@ -82,6 +82,16 @@ private Font getDefaultFont()
 }
 
 /**
+ * Override to reload text.
+ */
+public void reload()
+{
+    super.reload();
+    _text = null;
+    _textPane.getTextArea().setText(getText());
+}
+
+/**
  * A TextPane subclass.
  */
 private class TFTextPane extends TextPane implements WebFile.Updater {
