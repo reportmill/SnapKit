@@ -5,7 +5,6 @@ package snap.view;
 import java.util.*;
 import snap.gfx.*;
 import snap.util.*;
-import snap.view.View;
 
 /**
  * A class to provide utility methods for UI components.

@@ -1,6 +1,5 @@
 package snap.pdf;
 import java.util.*;
-import snap.pdf.PDFPage;
 import snap.pdf.write.PDFPageTree;
 
 /**

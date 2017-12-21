@@ -4,9 +4,6 @@
 package snap.pdf;
 import java.util.*;
 import snap.parse.*;
-import snap.pdf.PDFException;
-import snap.pdf.PDFStream;
-import snap.pdf.PDFXEntry;
 import snap.pdf.read.PDFDictUtils;
 import snap.util.*;
 
