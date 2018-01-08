@@ -89,8 +89,9 @@ public void fail()  { _fail = true; }
 
 /**
  * Returns a handler that is not in use.
+ * This method should be synchronized, but that makes TeaVM unhappy.
  */
-public synchronized ParseHandler getAvailableHandler()
+public ParseHandler getAvailableHandler()
 {
     ParseHandler handler = this;
     while(handler._inUse) handler = handler.getBackupHandler();
@@ -103,11 +104,13 @@ public synchronized ParseHandler getAvailableHandler()
  */
 private ParseHandler getBackupHandler()
 {
-    if(_backupHandler==null)
-        try { _backupHandler = getClass().newInstance(); }
-        catch(Exception e) { throw new RuntimeException(e); }
-        //try { Constructor constr = getClass().getDeclaredConstructor(); constr.setAccessible(true);
-        //_backupHandler = (ParseHandler)constr.newInstance(); }
+    // If already set, just return
+    if(_backupHandler!=null) return _backupHandler;
+    
+    // Create and return
+    try { _backupHandler = getClass().newInstance(); }
+    catch(InstantiationException e) { throw new RuntimeException(e); }
+    catch(IllegalAccessException e) { throw new RuntimeException(e); }
     return _backupHandler;
 }
 

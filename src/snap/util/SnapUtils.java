@@ -23,6 +23,9 @@ public class SnapUtils {
     // Whether app is currently running on Mac
     public static boolean isMac = platform==Platform.MAC;
     
+    // Whether app is currently running on TeaVM
+    public static boolean isTeaVM = platform==Platform.TEAVM;
+    
     // The build info string from "BuildInfo.txt" (eg, "Aug-31-04")
     private static String _buildInfo;
     
@@ -30,16 +33,19 @@ public class SnapUtils {
     private static Map <String, Integer> _doOnceMap = new HashMap();
     
     // Constants for platform
-    public static enum Platform { WINDOWS, MAC, CHEERP, UNKNOWN };
+    public static enum Platform { WINDOWS, MAC, CHEERP, TEAVM, UNKNOWN };
 
 /**
  * Returns the current platform.
  */
 public static Platform getPlatform()
 {
-    if(System.getProperty("os.name").indexOf("Windows") >= 0) return SnapUtils.Platform.WINDOWS;
-    if(System.getProperty("os.name").indexOf("Mac OS X") >= 0) return SnapUtils.Platform.MAC;
-    if(System.getProperty("java.vendor").indexOf("Leaning") >= 0) return SnapUtils.Platform.CHEERP;
+    String name = System.getProperty("os.name"); if(name==null) name = "TeaVM";
+    String vend = System.getProperty("java.vendor"); if(vend==null) vend = "TeaVM";
+    if(name.indexOf("Windows") >= 0) return SnapUtils.Platform.WINDOWS;
+    if(name.indexOf("Mac OS X") >= 0) return SnapUtils.Platform.MAC;
+    if(vend.indexOf("Leaning") >= 0) return SnapUtils.Platform.CHEERP;
+    if(name.indexOf("TeaVM") >= 0) return SnapUtils.Platform.TEAVM;
     return Platform.UNKNOWN;
 }
 

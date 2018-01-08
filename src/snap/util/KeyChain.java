@@ -493,7 +493,7 @@ public static void setValueSafe(Object anObj, String aKey, Object aValue)
     try { setValue(anObj, aKey, aValue); }
     catch(Exception e) { Class cls = ClassUtils.getClass(anObj);
         String msg = (cls!=null? cls.getSimpleName() : "null") + " " + aKey + " " + aValue;
-        System.err.printf("KeyChain.setValue (%s) failed: %s\n", msg, e);
+        System.err.println("KeyChain.setValue (" + msg + ") failed: " + e);
     }
 }
 

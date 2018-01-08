@@ -3,6 +3,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import snap.util.FilePathUtils;
+import snap.util.SnapUtils;
 
 /**
  * A class to handle loading of URL items.
@@ -11,6 +12,9 @@ public class WebGetter {
 
     // A map of existing WebSites
     static Map <WebURL, WebSite>  _sites = Collections.synchronizedMap(new HashMap());
+    
+    // Whether TeaVM
+    static boolean isTVM = SnapUtils.isTeaVM;
 
 /**
  * Returns a java.net.URL for given source.
@@ -22,7 +26,7 @@ public static URL getJavaURL(Object anObj)
     
         // If it's our silly "Jar:/com/rm" format, return class resource URL
         if(str.startsWith("Jar:/com/reportmill")) 
-            return WebURL.class.getResource(str.substring(4));
+            return getJavaURL(WebURL.class, str.substring(4));
             
         // If string is Windows/Unix file path, make it a file URL
         if(str.indexOf('\\')>=0) { String strlc = str.toLowerCase();
@@ -72,6 +76,11 @@ public static URL getJavaURL(Class aClass, String aName)
         else { int sep = path.lastIndexOf('/'); path = path.substring(0, sep+1) + aName; }
     }
     
+    // Handle TeaVM
+    if(isTVM)
+        try { return new URL("http://localhost" + path); }
+        catch(Exception e) { throw new RuntimeException(e); }
+        
     // Get URL for full path
     return aClass.getResource(path);
 }
