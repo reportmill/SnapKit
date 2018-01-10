@@ -287,7 +287,7 @@ public String getQueryURLString()
 /**
  * Returns whether URL can be found.
  */
-public boolean isFound()  { return getResponse().getCode()==WebResponse.OK; }
+public boolean isFound()  { return getHead().getCode()==WebResponse.OK; }
 
 /**
  * Returns the response for a HEAD request.
