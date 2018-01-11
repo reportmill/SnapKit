@@ -325,15 +325,6 @@ public static String getTempDir()
 }
 
 /**
- * Returns text for a source.
- */
-public static String getText(Object aSource)
-{
-    byte bytes[] = getBytes(aSource); if(bytes==null) return null;
-    return StringUtils.getString(bytes);
-}
-
-/**
  * Returns a byte array from a File, String path, InputStream, URL, byte[], etc.
  */
 public static byte[] getBytes(Object aSource)
@@ -381,6 +372,33 @@ public static byte[] getBytes2(InputStream aStream) throws IOException
 }
 
 /**
+ * Returns text for a source.
+ */
+public static String getText(Object aSource)
+{
+    byte bytes[] = getBytes(aSource); if(bytes==null) return null;
+    return StringUtils.getString(bytes);
+}
+
+/**
+ * Returns bytes for a class and name/path.
+ */
+public static byte[] getBytes(Class aClass, String aName)
+{
+    WebURL url = WebURL.getURL(aClass, aName);
+    return getBytes(url);
+}
+
+/**
+ * Returns text string for a class and name/path.
+ */
+public static String getText(Class aClass, String aName)
+{
+    WebURL url = WebURL.getURL(aClass, aName);
+    return getText(url);
+}
+
+/**
  * Returns an input stream from a File, String path, URL, byte array, InputStream, etc.
  */
 public static InputStream getInputStream(Object aSource)
@@ -421,8 +439,8 @@ public static String getBuildInfo()
     if(_buildInfo!=null) return _buildInfo;
     
     // If build info file hasn't been loaded, load it
-    try { _buildInfo = SnapUtils.getText(SnapUtils.class.getResourceAsStream("/com/reportmill/BuildInfo.txt")); }
-    catch(Exception e) { System.err.println("SnapUtils.getBuildInfo: " + e); _buildInfo = ""; }
+    try { _buildInfo = SnapUtils.getText(SnapUtils.class, "/com/reportmill/BuildInfo.txt"); }
+    catch(Exception e) { System.err.println("SnapUtils.getBuildInfo: " + e); _buildInfo = "BuildInfo not found"; }
     return _buildInfo;
 }
 
