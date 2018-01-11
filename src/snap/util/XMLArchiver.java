@@ -144,10 +144,16 @@ protected Map <String, Class> createClassMap()  { throw new RuntimeException("No
  */
 public Object readObject(Object aSource)
 {
-    try { _surl = WebURL.getURL(aSource); } catch(Exception e) { }
-    byte bytes[] = _surl!=null? (_surl.getFile()!=null? _surl.getFile().getBytes() : null) :SnapUtils.getBytes(aSource);
+    // Get bytes from source - if not found or empty, complain
+    byte bytes[] = SnapUtils.getBytes(aSource);
     if(bytes==null || bytes.length==0)
-        throw new RuntimeException("RXArchiver.readObject: Cannot read source: " + (_surl!=null? _surl : aSource));
+        throw new RuntimeException("XMLArchiver.readObject: Cannot read source: " + aSource);
+        
+    // Try to get SourceURL from source
+    try { _surl = WebURL.getURL(aSource); }
+    catch(Exception e) { }
+        
+    // ReadObject(bytes) and return
     return readObject(bytes);
 }
 

@@ -121,7 +121,7 @@ public static void setValueSafe(Object anObj, String aKey, Object aValue)
     catch(Exception e) {
         Class cls = ClassUtils.getClass(anObj);
         String msg = (cls!=null? cls.getSimpleName() : "null") + " " + aKey + " " + aValue;
-        System.err.printf("Key.setValue (%s) failed: %s\n", msg, e);
+        System.err.println("Key.setValue (" + msg + ") failed: " + e);
     }
 }
 
