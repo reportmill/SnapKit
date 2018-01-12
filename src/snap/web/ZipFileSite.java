@@ -3,13 +3,16 @@
  */
 package snap.web;
 import java.io.*;
+import java.net.JarURLConnection;
+import java.net.URL;
 import java.util.*;
+import java.util.jar.JarFile;
 import java.util.zip.*;
 import snap.util.FilePathUtils;
 import snap.util.SnapUtils;
 
 /**
- * A WebSite subclass for Zip files.
+ * A WebSite subclass for Zip and Jar files.
  */
 public class ZipFileSite extends WebSite {
 
@@ -22,29 +25,39 @@ public class ZipFileSite extends WebSite {
     // A map of directory paths to List of child paths
     Map <String,List<String>>  _dirs;
     
+    // Whether Zip is really a Jar
+    boolean                    _jar;
+
+    // Whether to trim entries via isInterestingPath (silly Jar feature)
+    boolean                    _trim;
+
 /**
  * Returns the ZipFile.
  */
-protected ZipFile getZipFile() throws Exception { return _zipFile!=null? _zipFile : (_zipFile=createZipFile()); }
-
-/**
- * Creates the ZipFile.
- */
-protected ZipFile createZipFile() throws Exception
+protected ZipFile getZipFile()
 {
+    // If already set, just return
+    if(_zipFile!=null) return _zipFile;
+    
+    // If ZipFile
+    if(!_jar) {
+        File sfile = getStandardFile(); if(sfile==null) return null; // Get local file
+        try { return _zipFile = new ZipFile(sfile); }
+        catch(IOException e) { throw new RuntimeException(e); }
+    }
+    
+    // If HTTP or .pack.gz, use "jar:" url
+    if(getURL().getScheme().equals("http") || getURLString().endsWith(".pack.gz")) try {
+        URL url = new URL("jar:" + getURLString() + "!/");
+        JarURLConnection conn = (JarURLConnection)url.openConnection();
+        return _zipFile = conn.getJarFile();
+    }
+    catch(IOException e) { System.err.println(e); }
+    
+    // Otherwise, get local file and create JarFile
     File sfile = getStandardFile(); if(sfile==null) return null; // Get local file
-    return new ZipFile(sfile); // Create/return ZipFile
-}
-
-/**
- * Returns a Java file for the zip file URL (copied to Sandbox if remote).
- */
-protected File getStandardFile() throws Exception
-{
-    WebURL url = getURL();
-    WebFile file = url.getFile(); if(file==null) return null;
-    WebFile localFile = file.getSite().getLocalFile(file, true); // Get local file in case file is over http
-    return localFile.getStandardFile();
+    try { return _zipFile = new JarFile(sfile); }
+    catch(IOException e) { throw new RuntimeException(e); }
 }
 
 /**
@@ -59,8 +72,7 @@ protected synchronized Map <String,ZipEntry> getEntries()
     _entries = new HashMap(); _dirs = new HashMap();
     
     // Get ZipFile
-    ZipFile zipFile; try { zipFile = getZipFile(); } catch(Exception e) { throw new RuntimeException(e); }
-    if(zipFile==null) return _entries;
+    ZipFile zipFile = getZipFile(); if(zipFile==null) return _entries;
     
     // Get ZipEntries and add
     Enumeration <? extends ZipEntry> zentries = zipFile.entries();
@@ -68,7 +80,6 @@ protected synchronized Map <String,ZipEntry> getEntries()
         addZipEntry(zentries.nextElement());
     
     // Close and return 
-    //try { zipFile.close(); _zipFile = null; } catch(Exception e) { throw new RuntimeException(e); }
     return _entries;
 }
 
@@ -77,6 +88,9 @@ protected synchronized Map <String,ZipEntry> getEntries()
  */
 protected void addZipEntry(ZipEntry anEntry)
 {
+    // If performing trim, check entry name
+    if(_trim && !anEntry.isDirectory() && !isInterestingPath(anEntry.getName())) return;
+    
     // Get path and add entry to entries and path to dirs lists
     String path = FilePathUtils.getStandardized('/' + anEntry.getName());
     _entries.put(path, anEntry);
@@ -112,11 +126,67 @@ protected void addDirListPath(String aPath)
 }
 
 /**
+ * Handles a get or head request.
+ */
+protected WebResponse doGetOrHead(WebRequest aRequest, boolean isHead)
+{
+    // Get URL and path and create empty response
+    WebURL url = aRequest.getURL();
+    String path = url.getPath(); if(path==null) path = "/";
+    WebResponse resp = new WebResponse(); resp.setRequest(aRequest);
+    
+    // Get FileHeader for path
+    FileHeader fhdr = getFileHeaderForPath(path);
+    
+    // If not found, set Response.Code to NOT_FOUND and return
+    if(fhdr==null) {
+        resp.setCode(WebResponse.NOT_FOUND); return resp; }
+        
+    // Otherwise configure response
+    resp.setCode(WebResponse.OK);
+    resp.setFileHeader(fhdr);
+    
+    // If Head, just return
+    if(isHead)
+        return resp;
+        
+    // If file, get/set file bytes
+    if(resp.isFile()) {
+        try {
+            ZipEntry zentry = getEntries().get(path);
+            InputStream istream = _zipFile.getInputStream(zentry);
+            byte bytes[] = SnapUtils.getBytesOrThrow(istream);
+            resp.setBytes(bytes);
+        }
+        catch(IOException e) { resp.setException(e); }
+    }
+    
+    // If directory, get/set dir FileHeaders
+    else {
+        List <String> dpaths = _dirs.get(path); if(dpaths==null) dpaths = Collections.EMPTY_LIST;
+        List <FileHeader> fhdrs = dpaths.size()>0? new ArrayList() : Collections.EMPTY_LIST;
+        for(String dpath : dpaths) {
+            FileHeader fh = getFileHeaderForPath(dpath); if(fh==null) continue;
+            fhdrs.add(fh);
+        }
+        resp.setFileHeaders(fhdrs);
+    }
+    
+    // Set FileHeaderReturn response
+    return resp;
+}
+
+/**
  * Returns a data source file for given path (if file exists).
  */
-protected FileHeader getFileHeader(String aPath) throws Exception
+private FileHeader getFileHeaderForPath(String aPath)
 {
-    ZipEntry zentry = getEntries().get(aPath); if(zentry==null && _dirs.get(aPath)==null) return null;
+    // Get ZipEntry for path - if not found and not directory, just return
+    ZipEntry zentry = getEntries().get(aPath);
+    if(zentry==null && _dirs.get(aPath)==null)
+        return null;
+        
+    // Create FileHeader and return
     FileHeader file = new FileHeader(aPath, zentry==null || zentry.isDirectory());
     if(zentry!=null) file.setLastModTime(zentry.getTime());
     if(zentry!=null) file.setSize(zentry.getSize());
@@ -124,39 +194,44 @@ protected FileHeader getFileHeader(String aPath) throws Exception
 }
 
 /**
- * Returns file content (bytes for file, FileHeaders for dir).
+ * Returns a Java file for the zip file URL (copied to Sandbox if remote).
  */
-protected Object getFileContent(String aPath) throws Exception
+protected File getStandardFile()
 {
-    ZipEntry zentry = getEntries().get(aPath); if(zentry==null && _dirs.get(aPath)==null) return null;
-    boolean isDir = zentry==null || zentry.isDirectory();
-    if(isDir)
-        return getFileHeaders(aPath);
-    return getFileBytes(aPath);
+    WebURL url = getURL();
+    WebFile file = url.getFile(); if(file==null) return null;
+    WebFile localFile = file.getSite().getLocalFile(file, true); // Get local file in case file is over http
+    return localFile.getStandardFile();
 }
 
 /**
- * Returns file bytes.
+ * Override to turn on file trimming from system jars. 
  */
-protected byte[] getFileBytes(String aPath) throws Exception
+protected void setURL(WebURL aURL)
 {
-    ZipEntry zentry = _entries.get(aPath); if(zentry==null) return null;
-    InputStream istream = _zipFile.getInputStream(zentry);
-    return SnapUtils.getBytes2(istream);
+    // Do normal version
+    super.setURL(aURL);
+    
+    // Turn on file trimming if system jar
+    String urls = aURL.getString().toLowerCase();
+    _jar = urls.endsWith(".jar") || urls.endsWith(".jar.pack.gz");
+    _trim = _jar && (urls.contains("/rt.jar") || urls.contains("/jfxrt.jar"));
 }
 
 /**
- * Returns a list of file headers for directory path.
+ * Adds an entry (override to ignore).
  */
-protected List <FileHeader> getFileHeaders(String aPath) throws Exception
+protected boolean isInterestingPath(String aPath)
 {
-    List <String> dlist = _dirs.get(aPath); if(dlist==null) return null;
-    List <FileHeader> flist = new ArrayList(dlist.size());
-    for(String path : dlist) {
-        FileHeader file = getFileHeader(path); if(file==null) continue;
-        flist.add(file);
-    }
-    return flist;
+    // Bogus excludes
+    if(aPath.startsWith("sun")) return false;
+    if(aPath.startsWith("com/sun")) return false;
+    if(aPath.startsWith("com/apple")) return false;
+    if(aPath.startsWith("javax/swing/plaf")) return false;
+    if(aPath.startsWith("org/omg")) return false;
+    int dollar = aPath.endsWith(".class")? aPath.lastIndexOf('$') : -1;
+    if(dollar>0 && Character.isDigit(aPath.charAt(dollar+1))) return false;
+    return true;
 }
 
 }

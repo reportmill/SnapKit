@@ -5,6 +5,7 @@ package snap.web;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import snap.util.FilePathUtils;
 
 /**
  * A data source implementation that draws from a directory WebFile.
@@ -20,59 +21,53 @@ public class DirSite extends WebSite {
 public WebFile getDir()  { return getURL().getFile(); }
 
 /**
- * Returns the directory file for a path.
+ * Handles a get or head request.
  */
-protected WebFile getDirFile(String aPath)
+protected WebResponse doGetOrHead(WebRequest aRequest, boolean isHead)
 {
-    WebFile dir = getDir(); if(dir==null || !dir.isDir()) return null;
-    WebSite ds = dir.getSite();
-    String path = dir.getPath() + aPath;
-    return ds.getFile(path);
-}
-
-/**
- * Returns the directory file for a path.
- */
-protected WebFile createDirFile(String aPath, boolean isDir)
-{
-    WebFile dir = getDir(); if(dir==null || !dir.isDir()) return null;
-    WebSite ds = dir.getSite();
-    String path = dir.getPath() + aPath;
-    return ds.createFile(path, isDir);
-}
-
-/**
- * Get file from directory.
- */
-protected FileHeader getFileHeader(String aPath) throws Exception
-{
-    WebFile dfile = getDirFile(aPath); if(dfile==null) return null;
-    FileHeader file = new FileHeader(aPath, dfile.isDir());
-    file.setLastModTime(dfile.getLastModTime()); file.setSize(dfile.getSize());
-    return file;
-}
-
-/**
- * Returns file content (bytes for file, FileHeaders for dir).
- */
-protected Object getFileContent(String aPath) throws Exception
-{
-    // Get dir file (just return if null)
-    WebFile dfile = getDirFile(aPath); if(dfile==null) return null;
+    // Get URL and path and create empty response
+    WebURL url = aRequest.getURL();
+    String path = url.getPath(); if(path==null) path = "/";
+    WebResponse resp = new WebResponse(); resp.setRequest(aRequest);
     
-    // If plain file, just return bytes
-    if(dfile.isFile())
-        return dfile.getBytes();
+    // Get WebFile from Dir site
+    WebFile dfile = getDirFile(path);
     
-    // Get file headers and return
-    List <WebFile> dfiles = dfile.getFiles(); List <FileHeader> files = new ArrayList(dfiles.size());
-    for(WebFile df : dfiles) {
-        String path = aPath; if(!path.endsWith("/")) path += '/';
-        FileHeader f = new FileHeader(path + df.getName(), df.isDir());
-        f.setLastModTime(df.getLastModTime()); f.setSize(df.getSize());
-        files.add(f);
+    // If not found, set Response.Code to NOT_FOUND and return
+    if(dfile==null) {
+        resp.setCode(WebResponse.NOT_FOUND); return resp; }
+    
+    // If found, set response code to ok
+    resp.setCode(WebResponse.OK);
+    resp.setDir(dfile.isDir());
+    resp.setLastModTime(dfile.getLastModTime());
+    resp.setSize(dfile.getSize());
+        
+    // If Head, just return
+    if(isHead)
+        return resp;
+        
+    // If file, get/set file bytes
+    if(dfile.isFile()) {
+        byte bytes[] = dfile.getBytes();
+        resp.setBytes(bytes);
     }
-    return files;
+        
+    // Otherwise, get/set dir FileHeaders
+    else {
+        List <WebFile> dfiles = dfile.getFiles();
+        List <FileHeader> fhdrs = new ArrayList(dfiles.size());
+        for(WebFile df : dfiles) {
+            String hpath = FilePathUtils.getChild(path, df.getName());
+            FileHeader fhdr = new FileHeader(hpath, df.isDir());
+            fhdr.setLastModTime(df.getLastModTime()); fhdr.setSize(df.getSize());
+            fhdrs.add(fhdr);
+        }
+        resp.setFileHeaders(fhdrs);
+    }
+    
+    // Set FileHeaderReturn response
+    return resp;
 }
 
 /**
@@ -98,11 +93,32 @@ protected void deleteFileImpl(WebFile aFile) throws Exception
 /**
  * Override to get standard file from dir file getStandardFile.
  */
-@Override
 protected File getStandardFile(WebFile aFile)
 {
     WebFile dfile = getDirFile(aFile.getPath());
     return dfile!=null? dfile.getStandardFile() : null;
+}
+
+/**
+ * Returns the directory file for a path.
+ */
+protected WebFile getDirFile(String aPath)
+{
+    WebFile dir = getDir(); if(dir==null || !dir.isDir()) return null;
+    WebSite ds = dir.getSite();
+    String path = dir.getPath() + aPath;
+    return ds.getFile(path);
+}
+
+/**
+ * Returns the directory file for a path.
+ */
+protected WebFile createDirFile(String aPath, boolean isDir)
+{
+    WebFile dir = getDir(); if(dir==null || !dir.isDir()) return null;
+    WebSite ds = dir.getSite();
+    String path = dir.getPath() + aPath;
+    return ds.createFile(path, isDir);
 }
 
 }

@@ -105,8 +105,8 @@ public WebFile getRootDir()  { WebFile f = getFile("/"); return f!=null? f : cre
 public WebResponse getResponse(WebRequest aRequest)
 {
     switch(aRequest.getType())  {
-        case HEAD: return doHead(aRequest);
-        case GET: return doGet(aRequest);
+        case HEAD: return doGetOrHead(aRequest, true);
+        case GET: return doGetOrHead(aRequest, false);
         case POST: return doPost(aRequest);
         case PUT: return doPut(aRequest);
         case DELETE: return doDelete(aRequest);
@@ -117,64 +117,52 @@ public WebResponse getResponse(WebRequest aRequest)
 /**
  * Handles a head request.
  */
-protected WebResponse doHead(WebRequest aRequest)
+protected WebResponse doGetOrHead(WebRequest aRequest, boolean isHead)
 {
-    // Get URL and path and create basic response
+    // Get URL and path and create empty response
     WebURL url = aRequest.getURL();
     String path = url.getPath(); if(path==null) path = "/";
     WebResponse resp = new WebResponse(); resp.setRequest(aRequest);
     
     // Get file header for path
     FileHeader fhdr = null; try { fhdr = getFileHeader(path); }
-    catch(AccessException e) { resp.setException(e); resp.setCode(WebResponse.UNAUTHORIZED); }
-    catch(Exception e) { resp.setException(e); resp.setCode(WebResponse.NOT_FOUND); }
+    catch(Exception e) { resp.setException(e); return resp; }
     
-    // If found, set response code to ok
-    if(fhdr!=null) {
-        resp.setFileHeader(fhdr); resp.setCode(WebResponse.OK); }
+    // If not found, set Response.Code to NOT_FOUND and return
+    if(fhdr==null) {
+        resp.setCode(WebResponse.NOT_FOUND); return resp; }
         
-    // Otherwise mark FILE_NOT_FOUND
-    else resp.setCode(WebResponse.NOT_FOUND);
+    // Otherwise set FileHeader
+    resp.setFileHeader(fhdr);
     
-    // Return response
-    return resp;
-}
-
-/**
- * Handle a get request.
- */
-protected WebResponse doGet(WebRequest aRequest)
-{
-    // Get URL and path and create basic response
-    WebURL url = aRequest.getURL();
-    String path = url.getPath(); if(path==null) path = "/";
-    WebResponse resp = new WebResponse(); resp.setRequest(aRequest);
+    // If Head, just return
+    if(isHead)
+        return resp;
     
     // Get file header for path
     Object content = null; try { content = getFileContent(path); }
-    catch(AccessException e) { resp.setException(e); resp.setCode(WebResponse.UNAUTHORIZED); }
-    catch(Exception e) { resp.setException(e); resp.setCode(WebResponse.NOT_FOUND); }
+    catch(Exception e) { resp.setException(e); return resp; }
     
     // Handle file
     if(content instanceof byte[]) { byte bytes[] = (byte[])content;
-        resp.setBytes(bytes); resp.setCode(WebResponse.OK);
-        FileHeader fhdr = new FileHeader(path, false); fhdr.setSize(bytes.length);
-        resp.setFileHeader(fhdr);
-    }
+        resp.setBytes(bytes); }
         
     // Handle directory
     else if(content instanceof List) { List <FileHeader> fhdrs = (List)content;
-        resp.setFileHeaders(fhdrs); resp.setCode(WebResponse.OK);
-        FileHeader fhdr = new FileHeader(path, true);
-        resp.setFileHeader(fhdr);
-    }
+        resp.setFileHeaders(fhdrs); }
         
     // Handle FILE_NOT_FOUND
-    else resp.setCode(WebResponse.NOT_FOUND);
+    else { resp.setCode(WebResponse.NOT_FOUND); System.err.println("WebSite.doGetOrHead: Shouldn't happen"); }
     
-    // Return response
+    // Set FileHeaderReturn response
     return resp;
 }
+
+/** Returns a FileHeader for given path (if file exists). Should go soon. */
+protected FileHeader getFileHeader(String aPath) throws Exception  { throw notImpl("getFileHeader"); }
+
+/** Returns file content (bytes or FileHeaders (dir)). Should go soon. */
+protected Object getFileContent(String aPath) throws Exception  { throw notImpl("getFileContent"); }
 
 /**
  * Handle a get request.
@@ -312,16 +300,6 @@ protected void deleteFile(WebFile aFile) throws ResponseException
     aFile.setExists(false);
     resetFile(aFile);
 }
-
-/**
- * Returns a data source file for given path (if file exists).
- */
-protected FileHeader getFileHeader(String aPath) throws Exception  { throw notImpl("getFileHeader"); }
-
-/**
- * Returns file content (bytes for file, FileHeaders for dir).
- */
-protected Object getFileContent(String aPath) throws Exception  { throw notImpl("getFileContent"); }
 
 /**
  * Saves a file.

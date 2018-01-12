@@ -142,21 +142,21 @@ protected static WebSite createSite(WebURL aSiteURL)
     String path = aSiteURL.getPath(); if(path==null) path = "";
     String type = FilePathUtils.getExtension(path).toLowerCase();
     
-    // Handle JarSite and ZipSite
-    if(type.equals("jar") || path.endsWith(".jar.pack.gz")) return new JarFileSite();
-    else if(type.equals("zip") || type.equals("gfar")) return new ZipFileSite();
+    // Handle ZipSite and JarSite
+    if(type.equals("zip") || type.equals("jar") || path.endsWith(".jar.pack.gz") || type.equals("gfar"))
+        return new ZipFileSite();
     
     // Handle DirSite
-    else if(parentSiteURL!=null && parentSiteURL.getPath()!=null) return new DirSite();
+    if(parentSiteURL!=null && parentSiteURL.getPath()!=null) return new DirSite();
     
     // Handle FileSite
-    else if(scheme.equals("file")) return new FileSite();
+    if(scheme.equals("file")) return new FileSite();
     
     // Handle HTTPSite
-    else if(scheme.equals("http") || scheme.equals("https")) return new HTTPSite();
+    if(scheme.equals("http") || scheme.equals("https")) return new HTTPSite();
 
     // Handle LocalSite
-    else if(scheme.equals("local")) return new LocalSite();
+    if(scheme.equals("local")) return new LocalSite();
     
     // Return site
     System.err.println("WebGetter: Site not found for " + aSiteURL);

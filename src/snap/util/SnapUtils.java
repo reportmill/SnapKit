@@ -355,14 +355,14 @@ public static byte[] getBytes(Object aSource)
  */
 public static byte[] getBytes(InputStream aStream)
 {
-    try { return getBytes2(aStream); }
+    try { return getBytesOrThrow(aStream); }
     catch(IOException e) { throw new RuntimeException(e); }
 }
 
 /**
  * Returns bytes for an input stream.
  */
-public static byte[] getBytes2(InputStream aStream) throws IOException
+public static byte[] getBytesOrThrow(InputStream aStream) throws IOException
 {
     ByteArrayOutputStream bs = new ByteArrayOutputStream();
     byte chunk[] = new byte[8192];

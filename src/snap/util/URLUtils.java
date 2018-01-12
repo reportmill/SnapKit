@@ -52,7 +52,7 @@ public static byte[] getBytes(URL aURL) throws IOException
 private static byte[] getBytes(URLConnection aConnection) throws IOException
 {
     InputStream stream = aConnection.getInputStream();  // Get stream for URL
-    byte bytes[] = SnapUtils.getBytes2(stream);  // Get bytes for stream, close and return bytes
+    byte bytes[] = SnapUtils.getBytesOrThrow(stream);  // Get bytes for stream, close and return bytes
     stream.close();
     return bytes;
 }

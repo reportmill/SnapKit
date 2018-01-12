@@ -13,16 +13,6 @@ import snap.util.*;
 public class FileSite extends WebSite {
 
 /**
- * Handles a head request.
- */
-protected WebResponse doHead(WebRequest aReq)  { return doGetOrHead(aReq, true); }
-
-/**
- * Handle a get request.
- */
-protected WebResponse doGet(WebRequest aReq)  { return doGetOrHead(aReq, false); }
-
-/**
  * Handle a get or head request.
  */
 protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
