@@ -46,11 +46,20 @@ public static void setEnv(ViewEnv anEnv)  { _env = anEnv; }
  */
 public static void setDefaultEnv()
 {
-    // If Cheerp, try to install Cheerp
+    // If Cheerp, try to install
     if(SnapUtils.getPlatform()==SnapUtils.Platform.CHEERP) {
         Class cls = null; try { cls = Class.forName("snapcj.CJViewEnv"); } catch(Exception e) { }
+        if(cls==null) System.err.println("ViewEnv.setDefaultEnv: Can't find snapcj.CJViewEnv");
         if(cls!=null) try { cls.getMethod("set").invoke(null); return; }
         catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set CJViewEnv: " + e); }
+    }
+    
+    // If TeaVM, try to install
+    if(SnapUtils.getPlatform()==SnapUtils.Platform.TEAVM) {
+        Class cls = null; try { cls = Class.forName("snaptea.TV"); } catch(Exception e) { }
+        if(cls==null) System.err.println("ViewEnv.setDefaultEnv: Can't find snaptea.TV");
+        else try { cls.getMethod("set").invoke(null); return; }
+        catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set snaptea.TV: " + e); }
     }
     
     // Try Swing
