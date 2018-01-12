@@ -19,8 +19,17 @@ public class WebResponse {
     // The response time
     long               _time;
     
-    // The response MIME type
-    String            _mimeType;
+    // Whether file is a directory
+    boolean            _dir;
+    
+    // The file modified time
+    long               _lastModTime;
+    
+    // The file size
+    long               _size;
+    
+    // The MIME type
+    String             _mimeType;
     
     // The response bytes
     byte               _bytes[];
@@ -114,25 +123,62 @@ public String getMIMEType()
 protected void setMIMEType(String aMIMEType)  { _mimeType = aMIMEType; }
 
 /**
+ * Returns whether file is a directory.
+ */
+public boolean isDir()  { return _dir; }
+
+/**
+ * Sets whether file is a directory.
+ */
+public void setDir(boolean aValue)  { _dir = aValue; }
+
+/**
+ * Returns whether file is a plain file.
+ */
+public boolean isFile()  { return !_dir; }
+
+/**
+ * Returns the file modification time.
+ */
+public long getLastModTime()  { return _lastModTime; }
+
+/**
+ * Sets the file modification time.
+ */
+public void setLastModTime(long aTime)  { _lastModTime = aTime; }
+
+/**
+ * Returns the file size.
+ */
+public long getSize()  { return _size; }
+
+/**
+ * Sets the file size.
+ */
+public void setSize(long aSize)  { _size = aSize; }
+
+/**
  * Returns the file header.
  */
-public FileHeader getFileHeader()  { return _fileHdr; }
-
-/**
- * Sets the file header.
- */
-public void setFileHeader(FileHeader aFileHdr)  { _fileHdr = aFileHdr; }
-
-/**
- * Returns the file.
- */
-public WebFile getFile()
+public FileHeader getFileHeader()
 {
-    if(_file!=null) return _file;
-    if(_fileHdr!=null) _file = getRequestURL().getSite().createFile(_fileHdr);
-    else _file = getRequestURL().getFile();
-    return _file;
-} WebFile _file;
+    // If already set, just return
+    if(_fileHdr!=null) return _fileHdr;
+    
+    // Create and return
+    FileHeader fhdr = new FileHeader(getPath(), isDir());
+    fhdr.setLastModTime(getLastModTime()); fhdr.setSize(getSize()); fhdr.setMIMEtype(getMIMEType());
+    return _fileHdr = fhdr;
+}
+
+/**
+ * Sets the file header. Should go soon.
+ */
+protected void setFileHeader(FileHeader aFHdr)
+{
+    _fileHdr = aFHdr; _dir = aFHdr.isDir();
+    _lastModTime = aFHdr.getLastModTime(); _size = aFHdr.getSize(); _mimeType = aFHdr.getMIMEType();
+}
 
 /**
  * Returns the files (for directory request).
@@ -155,6 +201,16 @@ public byte[] getBytes()  { return _bytes; }
 public void setBytes(byte theBytes[])  { _bytes = theBytes; }
 
 /**
+ * Returns the exception.
+ */
+public Throwable getException()  { return _exception; }
+
+/**
+ * Sets the exception.
+ */
+public void setException(Throwable aThrowable)  { _exception = aThrowable; }
+
+/**
  * Returns whether response is text (regardless of what the data type is).
  */
 public boolean isText()
@@ -175,14 +231,15 @@ public String getText()
 }
 
 /**
- * Returns the exception.
+ * Returns the file.
  */
-public Throwable getException()  { return _exception; }
-
-/**
- * Sets the exception.
- */
-public void setException(Throwable aThrowable)  { _exception = aThrowable; }
+public WebFile getFile()
+{
+    WebFile file = getRequestURL().getFile();
+    if(file==null)
+        getRequestURL().getSite().createFile(getFileHeader());
+    return file;
+}
 
 /**
  * Standard toString implementation.

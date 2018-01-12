@@ -12,104 +12,82 @@ import snap.util.*;
 public class HTTPSite extends WebSite {
 
 /**
- * Returns the string identifying the prefix for URLs in this data source.
+ * Handles a head request.
  */
-public String getURLScheme()  { return "http"; }
-
-/**
- * Returns a data source file for given path (if file exists).
- */
-protected FileHeader getFileHeader(String aPath) throws IOException
-{
-    // Fetch URL
-    String urls = getURLString() + aPath;
-    HTTPRequest req = new HTTPRequest(urls); req.setRequestMethod("HEAD");
-    HTTPResponse resp = req.getResponse();
-    
-    // Handle non-success response codes
-    if(resp.getCode()==HTTPResponse.NOT_FOUND)
-        return null; // throw new FileNotFoundException(aPath);
-    if(resp.getCode()==HTTPResponse.UNAUTHORIZED)
-        throw new AccessException();
-    if(resp.getCode()!=HTTPResponse.OK)
-        throw new IOException(resp.getMessage());
-    
-    // Create file, set bytes and return
-    String contentType = resp.getContentType().toLowerCase();
-    boolean isDir = FilePathUtils.getExtension(aPath).length()==0 && contentType.startsWith("text");
-    FileHeader file = new FileHeader(aPath, isDir);
-    file.setLastModTime(resp.getLastModified());
-    file.setSize(resp.getContentLength());
-    return file;
-}
+protected WebResponse doHead(WebRequest aReq)  { return doHTTP(aReq, true); }
 
 /**
  * Handle a get request.
  */
-protected synchronized WebResponse doGet(WebRequest aRequest)
+protected WebResponse doGet(WebRequest aReq)  { return doHTTP(aReq, false); }
+
+/**
+ * Handle a get request.
+ */
+protected WebResponse doHTTP(WebRequest aReq, boolean isHead)
 {
-    // Get URL and path and create basic response
-    WebURL url = aRequest.getURL();
-    String path = url.getPath(); if(path==null) path = "/";
-    WebResponse resp = new WebResponse(); resp.setRequest(aRequest);
+    // Create empty WebResponse return value
+    WebResponse resp = new WebResponse(); resp.setRequest(aReq);
  
-    // Get content   
-    Object content = null;
-    try {
-        // Fetch URL
-        HTTPRequest hreq = new HTTPRequest(url.getSourceURL());
-        HTTPResponse hresp = hreq.getResponse();
-        
-        // Handle non-success response codes
-        if(hresp.getCode()==HTTPResponse.NOT_FOUND)
-            return null; // throw new FileNotFoundException(aPath);
-        if(hresp.getCode()==HTTPResponse.UNAUTHORIZED)
-            throw new AccessException();
-        if(hresp.getCode()!=HTTPResponse.OK)
-            throw new IOException(hresp.getMessage());
-        
-        // Create file, set bytes and return
-        String contentType = hresp.getContentType().toLowerCase();
-        boolean isDir = FilePathUtils.getExtension(path).length()==0 && contentType.startsWith("text") &&
-            url.getQuery()==null;
-        
-        // If directory, return
-        if(isDir) {
-            List <FileHeader> fhdrs = getFileHeaders(path, hresp.getBytes());
-            content = fhdrs;
-        }
-        
-        // Return bytes
-        if(content==null)
-            content = hresp.getBytes();
-    }
-    catch(Exception e) { System.err.println("HTTPSite.doGet: " + e); }
+    // Create HTTPRequest for java.net.URL
+    WebURL url = aReq.getURL();
+    HTTPRequest hreq = new HTTPRequest(url.getSourceURL()); if(isHead) hreq.setRequestMethod("HEAD");
     
-    // Handle file
-    if(content instanceof byte[]) { byte bytes[] = (byte[])content;
-        resp.setBytes(bytes); resp.setCode(WebResponse.OK);
-        FileHeader fhdr = new FileHeader(path, false); fhdr.setSize(bytes.length);
-        resp.setFileHeader(fhdr);
-    }
+    // Get HTTPResponse response (if IOException, set code/exception and return)
+    HTTPResponse hresp = null; try { hresp = hreq.getResponse(); }
+    catch(IOException e) {
+        resp.setCode(WebResponse.EXCEPTION_THROWN); resp.setException(e); return resp; }
+    
+    // Handle NOT_FOUND
+    if(hresp.getCode()==HTTPResponse.NOT_FOUND) {
+        resp.setCode(WebResponse.NOT_FOUND); return resp; }
         
-    // Handle directory
-    else if(content instanceof List) { List <FileHeader> fhdrs = (List)content;
-        resp.setFileHeaders(fhdrs); resp.setCode(WebResponse.OK);
-        FileHeader fhdr = new FileHeader(path, true);
-        resp.setFileHeader(fhdr);
-    }
+    // Handle UNAUTHORIZED
+    if(hresp.getCode()==HTTPResponse.UNAUTHORIZED) {
+        resp.setCode(WebResponse.UNAUTHORIZED); return resp; }
         
-    // Handle FILE_NOT_FOUND
-    else resp.setCode(WebResponse.NOT_FOUND);
+    // Handle anything else not okay
+    if(hresp.getCode()!=HTTPResponse.OK) {
+        resp.setCode(hresp.getCode()); return resp; }
+        
+    // Configure response info (just return if isHead)
+    resp.setCode(WebResponse.OK);
+    resp.setLastModTime(hresp.getLastModified());
+    resp.setSize(hresp.getContentLength());
+    if(isHead)
+        return resp;
+    
+    // Set Bytes
+    resp.setBytes(hresp.getBytes());
+    
+    // If directory, configure directory info and return
+    if(isDir(url, hresp)) {
+        resp.setDir(true);
+        String path = url.getPath(); if(path==null) path = "/";
+        List <FileHeader> fhdrs = getFileHeaders(path, hresp.getBytes());
+        resp.setFileHeaders(fhdrs);
+    }
     
     // Return response
     return resp;
 }
 
 /**
+ * Returns whether given URL and Response indicates directory.
+ */
+private boolean isDir(WebURL aURL, HTTPResponse aResp)
+{
+    String ctype = aResp.getContentType().toLowerCase();
+    String path = aURL.getPath(); if(path==null) path = "/";
+    boolean isdir = FilePathUtils.getExtension(path).length()==0 && ctype.startsWith("text") &&
+        aURL.getQuery()==null;
+    return isdir;
+}
+
+/**
  * Returns files at path.
  */
-public List <FileHeader> getFileHeaders(String aPath, byte bytes[]) throws IOException
+private List <FileHeader> getFileHeaders(String aPath, byte bytes[])
 {
     // Create files list
     List <FileHeader> files = getFilesFromHTMLBytes(aPath, bytes);
@@ -139,7 +117,7 @@ public List <FileHeader> getFileHeaders(String aPath, byte bytes[]) throws IOExc
 /**
  * Returns files from HTML.
  */
-List <FileHeader> getFilesFromHTMLBytes(String aPath, byte bytes[]) throws IOException
+private List <FileHeader> getFilesFromHTMLBytes(String aPath, byte bytes[])
 {
     String text = new String(bytes);
     int htag = text.indexOf("<HTML>"); if(htag<0) return null;
@@ -179,7 +157,9 @@ protected WebResponse doPost(WebRequest aReq)
     return resp2;
 }
 
-/** WebSite method. */
+/**
+ * WebSite method.
+ */
 protected long saveFileImpl(WebFile aFile) throws Exception
 {
     String urls = getURLString() + aFile.getPath();
@@ -192,7 +172,6 @@ protected long saveFileImpl(WebFile aFile) throws Exception
 /**
  * Override to return standard file for cache file.
  */
-@Override
 protected File getStandardFile(WebFile aFile)
 {
     WebFile cfile = getLocalFile(aFile, false);
@@ -215,7 +194,7 @@ public WebFile getLocalFile(WebFile aFile, boolean doCache)
 /**
  * Returns a cache file for path.
  */
-public WebFile getCacheFile(String aPath)
+private WebFile getCacheFile(String aPath)
 {
     WebSite sbox = getSandbox();
     WebFile dfile = sbox.getFile("/Cache" + aPath);

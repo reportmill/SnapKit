@@ -360,10 +360,11 @@ protected void reloadFile(WebFile aFile)
         return;
     }
         
-    // Fetch file copy - if raw file doesn't exist, reset real file and return
-    FileHeader file = null; try { file = getFileHeader(aFile.getPath()); }
-    catch(Exception e) { throw new RuntimeException(e); }
-    if(file==null) {
+    // Get updated HEAD response
+    WebResponse resp = aFile.getURL().getHead();
+    
+    // Handle NOT_FOUND: Update File.Exists, reset and remove from parent
+    if(resp.getCode()==WebResponse.NOT_FOUND) {
         aFile.setExists(false);
         resetFile(aFile);
         if(!aFile.isRoot() && aFile.getParent().isFilesSet()) { WebFile par = aFile.getParent();
@@ -373,18 +374,18 @@ protected void reloadFile(WebFile aFile)
         return;
     }
     
-    // If raw file has new modified time, reset file and set new modified time
-    if(file.getLastModTime()>aFile.getLastModTime()) {
-        aFile._size = file.getSize();
+    // Handle new mod time: reset file and set new modified time
+    if(resp.getLastModTime()>aFile.getLastModTime()) {
+        aFile._size = resp.getSize();
         aFile.setBytes(null); aFile.setFiles(null);
-        aFile.setLastModTime(file.getLastModTime());
+        aFile.setLastModTime(resp.getLastModTime());
     }
 }
 
 /**
  * Resets a file.
  */
-public synchronized void resetFile(WebFile aFile)
+protected synchronized void resetFile(WebFile aFile)
 {
     aFile.removePropChangeListener(_fileLsnr);
     aFile.setFiles(null); aFile.setBytes(null); aFile._lastModTime = 0; aFile._size = 0; aFile._exists = null;
