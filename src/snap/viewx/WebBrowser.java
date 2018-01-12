@@ -171,8 +171,8 @@ public void setPage(WebURL aURL, WebPage aPage)
 public WebPage createPage(WebFile aFile)
 {
     WebURL url = aFile.getURL();
-    WebRequest req = new WebRequest(); req.setURL(url);
-    WebResponse resp = new WebResponse(); resp.setRequest(req); resp.setCode(WebResponse.OK);
+    WebRequest req = new WebRequest(url);
+    WebResponse resp = new WebResponse(req); resp.setCode(WebResponse.OK);
     return createPage(resp);
 }
 
@@ -300,8 +300,8 @@ public void showException(WebURL aURL, Throwable t)
     t.printStackTrace();
     
     // Create request/response
-    WebRequest req = new WebRequest(); req.setURL(aURL);
-    WebResponse resp = new WebResponse(); resp.setRequest(req); resp.setException(t);
+    WebRequest req = new WebRequest(aURL);
+    WebResponse resp = new WebResponse(req); resp.setException(t);
     
     // Create page and set
     TextPage textPage = createExceptionPage(resp);

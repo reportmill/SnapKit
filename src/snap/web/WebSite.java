@@ -40,8 +40,11 @@ public WebURL getURL()  { return _url; }
 /**
  * Sets the URL.
  */
-protected void setURL(WebURL aURL)
+public void setURL(WebURL aURL)
 {
+    // WebSite URL can't be set twice
+    if(_url!=null) throw new RuntimeException("WebSite.setURL: Can't set URL twice");
+    
     // Set URL
     _url = aURL; _url._asSite = this;
     
@@ -115,54 +118,9 @@ public WebResponse getResponse(WebRequest aRequest)
 }
 
 /**
- * Handles a head request.
+ * Handles a get or head request.
  */
-protected WebResponse doGetOrHead(WebRequest aRequest, boolean isHead)
-{
-    // Get URL and path and create empty response
-    WebURL url = aRequest.getURL();
-    String path = url.getPath(); if(path==null) path = "/";
-    WebResponse resp = new WebResponse(); resp.setRequest(aRequest);
-    
-    // Get file header for path
-    FileHeader fhdr = null; try { fhdr = getFileHeader(path); }
-    catch(Exception e) { resp.setException(e); return resp; }
-    
-    // If not found, set Response.Code to NOT_FOUND and return
-    if(fhdr==null) {
-        resp.setCode(WebResponse.NOT_FOUND); return resp; }
-        
-    // Otherwise set FileHeader
-    resp.setFileHeader(fhdr);
-    
-    // If Head, just return
-    if(isHead)
-        return resp;
-    
-    // Get file header for path
-    Object content = null; try { content = getFileContent(path); }
-    catch(Exception e) { resp.setException(e); return resp; }
-    
-    // Handle file
-    if(content instanceof byte[]) { byte bytes[] = (byte[])content;
-        resp.setBytes(bytes); }
-        
-    // Handle directory
-    else if(content instanceof List) { List <FileHeader> fhdrs = (List)content;
-        resp.setFileHeaders(fhdrs); }
-        
-    // Handle FILE_NOT_FOUND
-    else { resp.setCode(WebResponse.NOT_FOUND); System.err.println("WebSite.doGetOrHead: Shouldn't happen"); }
-    
-    // Set FileHeaderReturn response
-    return resp;
-}
-
-/** Returns a FileHeader for given path (if file exists). Should go soon. */
-protected FileHeader getFileHeader(String aPath) throws Exception  { throw notImpl("getFileHeader"); }
-
-/** Returns file content (bytes or FileHeaders (dir)). Should go soon. */
-protected Object getFileContent(String aPath) throws Exception  { throw notImpl("getFileContent"); }
+protected abstract WebResponse doGetOrHead(WebRequest aReq, boolean isHead);
 
 /**
  * Handle a get request.
@@ -190,22 +148,20 @@ public synchronized WebFile getFile(String aPath) throws ResponseException
     if(file!=null && file.getExists())
         return file;
 
-    // Get URL, request and response for path
+    // Get path URL and Head response
     WebURL url = getURL(path);
-    WebRequest req = new WebRequest(url); req.setType(WebRequest.Type.HEAD);
-    WebResponse resp = getResponse(req);
+    WebResponse resp = url.getHead();
     
-    // If response contains exception, throw it
-    if(resp.getException()!=null)
-        throw new ResponseException(resp);
-        
     // If not found, return null
     if(resp.getCode()==WebResponse.NOT_FOUND)
         return null;
         
+    // If response contains exception, throw it
+    if(resp.getException()!=null)
+        throw new ResponseException(resp);
+        
     // Get file header from response, create file and return
     FileHeader fhdr = resp.getFileHeader();
-    if(fhdr==null) { System.err.println("WebSite.getFile: No Header for " + url); return null; } // Can't happen?
     file = createFile(fhdr); file._exists = true; file._url = url;
     return file;
 }
@@ -218,7 +174,7 @@ public WebFile createFile(String aPath, boolean isDir)  { return createFile(new 
 /**
  * Returns a new file for given file header, regardless of whether it exists on site.
  */
-public synchronized WebFile createFile(FileHeader fileHdr)
+protected synchronized WebFile createFile(FileHeader fileHdr)
 {
     // Get file from cache (just return if found)
     String path = PathUtils.getNormalized(fileHdr.getPath());
@@ -249,12 +205,12 @@ protected void saveFile(WebFile aFile) throws ResponseException
 
     // If parent doesn't exist, save it (to make sure it exists)
     WebFile parent = aFile.getParent();
-    if(parent!=null && !parent.getLoaded().getExists())
+    if(parent!=null && !parent.getVerified().getExists())
         parent.save();
     
     // Save file
     try { long mt = saveFileImpl(aFile); aFile.setLastModTime(mt); }
-    catch(Exception e) { WebResponse r = new WebResponse(); r.setException(e); throw new ResponseException(r); }
+    catch(Exception e) { WebResponse r = new WebResponse(null); r.setException(e); throw new ResponseException(r); }
     
     // If file needs to be added to parent, add and save
     if(parent!=null && !aFile.getExists()) {
@@ -274,7 +230,7 @@ protected void deleteFile(WebFile aFile) throws ResponseException
     // If file doesn't exist, throw exception
     if(!aFile.getExists()) {
         Exception e = new Exception("WebSite.deleteFile: File doesn't exist: " + aFile.getPath());
-        WebResponse r = new WebResponse(); r.setException(e); new ResponseException(r);
+        WebResponse r = new WebResponse(null); r.setException(e); new ResponseException(r);
     }
     
     // If directory, delete child files
@@ -287,7 +243,7 @@ protected void deleteFile(WebFile aFile) throws ResponseException
 
     // Delete file
     try { deleteFileImpl(aFile); }
-    catch(Exception e) { WebResponse r = new WebResponse(); r.setException(e); throw new ResponseException(r); }
+    catch(Exception e) { WebResponse r = new WebResponse(null); r.setException(e); throw new ResponseException(r); }
     
     // If not root, remove file from parent, and if parent still exists, save
     if(!aFile.isRoot()) { WebFile parent = aFile.getParent();
@@ -329,7 +285,7 @@ protected void reloadFile(WebFile aFile)
         getFile(aFile.getPath());
         if(aFile.getExists()) {
             aFile.setBytes(null); aFile.setFiles(null);
-            if(!aFile.isRoot() && aFile.getParent().isFilesSet()) { WebFile par = aFile.getParent();
+            if(!aFile.isRoot() && aFile.getParent().isLoaded()) { WebFile par = aFile.getParent();
                 par.addFile(aFile);
                 par.save();
             }
@@ -345,7 +301,7 @@ protected void reloadFile(WebFile aFile)
     if(resp.getCode()==WebResponse.NOT_FOUND) {
         aFile.setExists(false);
         resetFile(aFile);
-        if(!aFile.isRoot() && aFile.getParent().isFilesSet()) { WebFile par = aFile.getParent();
+        if(!aFile.isRoot() && aFile.getParent().isLoaded()) { WebFile par = aFile.getParent();
             par.removeFile(aFile);
             par.save();
         }
@@ -393,11 +349,6 @@ public WebURL getURL(String aPath)
 }
 
 /**
- * Creates the data site remote site (database, directory file, etc.).
- */
-public void createSite() throws Exception  { }
-
-/**
  * Deletes this data site, assuming it corresponds to something that can be deleted, like a database.
  */
 public void deleteSite() throws Exception
@@ -419,27 +370,20 @@ public void setProp(String aKey, Object aValue)  { _props.put(aKey, aValue); }
 /**
  * Returns a WebSite that can be used for storing persistent support files.
  */
-public WebSite getSandbox()  { return _sandbox!=null? _sandbox : (_sandbox=createSandbox()); }
-
-/**
- * Sets a WebSite that can be used for storing persistent support files.
- */
-public void setSandbox(WebSite aSandbox)  { _sandbox = aSandbox; }
-
-/**
- * Creates a WebSite that can be used for storing persistent support files.
- */
-protected WebSite createSandbox()  { return createSandboxURL().getAsSite(); }
-
-/**
- * Creates a WebSite that can be used for storing persistent support files.
- */
-protected WebURL createSandboxURL()  { return WebURL.getURL(createSandboxURLS()); }
+public WebSite getSandbox()
+{
+    // If already set, just return
+    if(_sandbox!=null) return _sandbox;
+    
+    // Create and return
+    WebURL sboxURL = WebURL.getURL(getSandboxURLS());
+    return _sandbox = sboxURL.getAsSite();
+}
 
 /**
  * Creates a WebSite that can be used for storing persistent support files.
  */
-protected String createSandboxURLS()
+protected String getSandboxURLS()
 {
     // Get site URL and construct filename string from scheme/host/path
     WebURL url = getURL(); String fname = "";

@@ -18,7 +18,7 @@ public class FileSite extends WebSite {
 protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
 {
     // Create empty WebResponse return value
-    WebResponse resp = new WebResponse(); resp.setRequest(aReq);
+    WebResponse resp = new WebResponse(aReq);
  
     // Get URL, path and file
     WebURL url = aReq.getURL();
@@ -39,16 +39,16 @@ protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
     if(isHead)
         return resp;
         
-    // If directory, configure directory info and return
-    if(file.isDirectory()) {
-        List <FileHeader> fhdrs = getFileHeaders(path, file);
-        resp.setFileHeaders(fhdrs);
-    }
-    
     // If file, just set bytes
-    else {
+    if(resp.isFile()) {
         try { byte bytes[] = FileUtils.getBytesOrThrow(file); resp.setBytes(bytes); }
         catch(IOException e) { resp.setException(e); }
+    }
+    
+    // If directory, configure directory info and return
+    else {
+        List <FileHeader> fhdrs = getFileHeaders(path, file);
+        resp.setFileHeaders(fhdrs);
     }
     
     // Return response

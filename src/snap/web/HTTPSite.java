@@ -17,7 +17,7 @@ public class HTTPSite extends WebSite {
 protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
 {
     // Create empty WebResponse return value
-    WebResponse resp = new WebResponse(); resp.setRequest(aReq);
+    WebResponse resp = new WebResponse(aReq);
  
     // Create HTTPRequest for java.net.URL
     WebURL url = aReq.getURL();
@@ -134,17 +134,17 @@ protected WebResponse doPost(WebRequest aReq)
     // Fetch URL
     String path = aReq.getURL().getPath();
     String urls = aReq.getURL().getString();
-    HTTPRequest req = new HTTPRequest(urls); req.setBytes(aReq.getPostBytes());
+    HTTPRequest hreq = new HTTPRequest(urls); hreq.setBytes(aReq.getPostBytes());
     
-    HTTPResponse resp;
-    try { resp = req.getResponse(); }
+    HTTPResponse hresp;
+    try { hresp = hreq.getResponse(); }
     catch(Exception e) { throw new RuntimeException(e); }
     
     // Configure response and return
-    WebResponse resp2 = new WebResponse(); resp2.setRequest(aReq);
-    resp2.setCode(resp.getCode());
-    resp2.setBytes(resp.getBytes());
-    return resp2;
+    WebResponse resp = new WebResponse(aReq);
+    resp.setCode(hresp.getCode());
+    resp.setBytes(hresp.getBytes());
+    return resp;
 }
 
 /**

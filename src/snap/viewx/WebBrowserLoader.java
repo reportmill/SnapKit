@@ -14,7 +14,7 @@ public class WebBrowserLoader {
     WebBrowser           _browser;
     
     // The current URL loading
-    WebRequest              _req;
+    WebRequest           _req;
     
     // The current runner loading a file
     TaskRunnerPanel      _runner;

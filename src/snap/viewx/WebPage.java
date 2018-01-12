@@ -71,8 +71,8 @@ public void setURL(WebURL aURL)
     
     // Set URL and Response
     _url = aURL;
-    WebRequest req = new WebRequest(); req.setURL(aURL);
-    WebResponse resp = new WebResponse(); resp.setRequest(req); resp.setCode(WebResponse.OK);
+    WebRequest req = new WebRequest(aURL);
+    WebResponse resp = new WebResponse(req); resp.setCode(WebResponse.OK);
     setResponse(resp);
 }
 
@@ -95,7 +95,7 @@ public WebFile getFile()
 public void setFile(WebFile aFile)
 {
     _file = aFile;
-    //WebURL url = aFile.getURL(); WebRequest req = new WebRequest(); req.setURL(url);
+    //WebURL url = aFile.getURL(); WebRequest req = new WebRequest(url);
     //WebResponse resp = new WebResponse(); resp.setRequest(req); resp.setCode(WebResponse.OK);
     //setResponse(resp);
 }
@@ -109,8 +109,8 @@ public WebResponse getResponse()
 
     // Create response from URL
     WebURL url = getURL(); if(url==null) return null;
-    WebRequest req = new WebRequest(); req.setURL(url);
-    WebResponse resp = new WebResponse(); resp.setRequest(req); resp.setCode(WebResponse.OK);
+    WebRequest req = new WebRequest(url);
+    WebResponse resp = new WebResponse(req); resp.setCode(WebResponse.OK);
     return _response = resp;
 }
 

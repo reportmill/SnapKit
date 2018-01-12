@@ -128,12 +128,12 @@ protected void addDirListPath(String aPath)
 /**
  * Handles a get or head request.
  */
-protected WebResponse doGetOrHead(WebRequest aRequest, boolean isHead)
+protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
 {
     // Get URL and path and create empty response
-    WebURL url = aRequest.getURL();
+    WebURL url = aReq.getURL();
     String path = url.getPath(); if(path==null) path = "/";
-    WebResponse resp = new WebResponse(); resp.setRequest(aRequest);
+    WebResponse resp = new WebResponse(aReq);
     
     // Get FileHeader for path
     FileHeader fhdr = getFileHeaderForPath(path);
@@ -207,7 +207,7 @@ protected File getStandardFile()
 /**
  * Override to turn on file trimming from system jars. 
  */
-protected void setURL(WebURL aURL)
+public void setURL(WebURL aURL)
 {
     // Do normal version
     super.setURL(aURL);

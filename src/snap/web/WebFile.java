@@ -131,16 +131,16 @@ protected void setExists(boolean aFlag)
 }
 
 /**
- * Returns whether file was formerly loaded or merely created.
+ * Returns whether bytes/files have been set for this file/dir.
  */
-public boolean isLoaded()  { return _exists!=null; }
+public boolean isLoaded()  { return _dir? (_files!=null) : (_bytes!=null); }
 
 /**
  * Returns the file, ensuring that it has attempted to load.
  */
-public WebFile getLoaded()
+public WebFile getVerified()
 {
-    if(!isLoaded()) getSite().getFile(getPath());
+    if(_exists==null) getSite().getFile(getPath());
     return this;
 }
 
@@ -206,11 +206,6 @@ public void setSize(long aSize)
 }
 
 /**
- * Returns whether bytes have been set/loaded for file.
- */
-public boolean isBytesSet()  { return _bytes!=null; }
-
-/**
  * Returns the file bytes.
  */
 public synchronized byte[] getBytes()
@@ -219,8 +214,8 @@ public synchronized byte[] getBytes()
     if(_bytes!=null) return _bytes;
     
     // Set request for bytes for URL
-    WebSite site = getSite(); WebURL url = getURL();
-    WebResponse resp = site.getResponse(new WebRequest(url)); //getURL().getResponse();
+    WebURL url = getURL();
+    WebResponse resp = url.getResponse();
     if(resp.getCode()==WebResponse.OK) _exists = true;
     if(resp.getException()!=null)
         throw new ResponseException(resp);
@@ -236,11 +231,6 @@ public void setBytes(byte theBytes[])
     firePropChange(Bytes_Prop, _bytes, _bytes = theBytes);
     setSize(theBytes!=null? theBytes.length : 0); // Update size
 }
-
-/**
- * Returns whether files have been set/loaded for directory.
- */
-public boolean isFilesSet()  { return _files!=null; }
 
 /**
  * Returns the number of files in this directory.

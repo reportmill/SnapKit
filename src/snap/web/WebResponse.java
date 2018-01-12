@@ -54,6 +54,11 @@ public class WebResponse {
     public static final int EXCEPTION_THROWN = 420;
 
 /**
+ * Creates a new WebResponse for given request.
+ */
+public WebResponse(WebRequest aReq)  { setRequest(aReq); }
+
+/**
  * Returns the request.
  */
 public WebRequest getRequest()  { return _request; }
@@ -174,7 +179,7 @@ public FileHeader getFileHeader()
 /**
  * Sets the file header. Should go soon.
  */
-protected void setFileHeader(FileHeader aFHdr)
+public void setFileHeader(FileHeader aFHdr)
 {
     _fileHdr = aFHdr; _dir = aFHdr.isDir();
     _lastModTime = aFHdr.getLastModTime(); _size = aFHdr.getSize(); _mimeType = aFHdr.getMIMEType();

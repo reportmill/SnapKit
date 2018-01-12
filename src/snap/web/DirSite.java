@@ -23,12 +23,12 @@ public WebFile getDir()  { return getURL().getFile(); }
 /**
  * Handles a get or head request.
  */
-protected WebResponse doGetOrHead(WebRequest aRequest, boolean isHead)
+protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
 {
     // Get URL and path and create empty response
-    WebURL url = aRequest.getURL();
+    WebURL url = aReq.getURL();
     String path = url.getPath(); if(path==null) path = "/";
-    WebResponse resp = new WebResponse(); resp.setRequest(aRequest);
+    WebResponse resp = new WebResponse(aReq);
     
     // Get WebFile from Dir site
     WebFile dfile = getDirFile(path);
