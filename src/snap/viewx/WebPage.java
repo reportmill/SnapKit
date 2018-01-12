@@ -50,7 +50,7 @@ protected WebURL getURLImpl()
         
     // If Response, return from that
     if(_response!=null)
-        return _response.getRequestURL();
+        return _response.getURL();
         
     // If subclass of WebPage, use Class file URL
     if(getClass()!=WebPage.class)

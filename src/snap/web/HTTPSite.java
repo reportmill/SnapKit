@@ -14,17 +14,17 @@ public class HTTPSite extends WebSite {
 /**
  * Handles a head request.
  */
-protected WebResponse doHead(WebRequest aReq)  { return doHTTP(aReq, true); }
+protected WebResponse doHead(WebRequest aReq)  { return doGetOrHead(aReq, true); }
 
 /**
  * Handle a get request.
  */
-protected WebResponse doGet(WebRequest aReq)  { return doHTTP(aReq, false); }
+protected WebResponse doGet(WebRequest aReq)  { return doGetOrHead(aReq, false); }
 
 /**
- * Handle a get request.
+ * Handle a get or head request.
  */
-protected WebResponse doHTTP(WebRequest aReq, boolean isHead)
+protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
 {
     // Create empty WebResponse return value
     WebResponse resp = new WebResponse(); resp.setRequest(aReq);
@@ -36,7 +36,7 @@ protected WebResponse doHTTP(WebRequest aReq, boolean isHead)
     // Get HTTPResponse response (if IOException, set code/exception and return)
     HTTPResponse hresp = null; try { hresp = hreq.getResponse(); }
     catch(IOException e) {
-        resp.setCode(WebResponse.EXCEPTION_THROWN); resp.setException(e); return resp; }
+        resp.setException(e); return resp; }
     
     // Handle NOT_FOUND
     if(hresp.getCode()==HTTPResponse.NOT_FOUND) {
@@ -54,6 +54,7 @@ protected WebResponse doHTTP(WebRequest aReq, boolean isHead)
     resp.setCode(WebResponse.OK);
     resp.setLastModTime(hresp.getLastModified());
     resp.setSize(hresp.getContentLength());
+    boolean isdir = isDir(url, hresp); resp.setDir(isdir);
     if(isHead)
         return resp;
     
@@ -61,8 +62,7 @@ protected WebResponse doHTTP(WebRequest aReq, boolean isHead)
     resp.setBytes(hresp.getBytes());
     
     // If directory, configure directory info and return
-    if(isDir(url, hresp)) {
-        resp.setDir(true);
+    if(isdir) {
         String path = url.getPath(); if(path==null) path = "/";
         List <FileHeader> fhdrs = getFileHeaders(path, hresp.getBytes());
         resp.setFileHeaders(fhdrs);

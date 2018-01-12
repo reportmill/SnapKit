@@ -66,7 +66,7 @@ public void setRequest(WebRequest aRequest)  { _request = aRequest; }
 /**
  * Returns the request URL.
  */
-public WebURL getRequestURL()  { return _request.getURL(); }
+public WebURL getURL()  { return _request.getURL(); }
 
 /**
  * Returns the site for the request/response.
@@ -96,12 +96,12 @@ public long getTime()  { return _time; }
 /**
  * Returns the path.
  */
-public String getPath()  { return getRequestURL().getPath(); }
+public String getPath()  { return getURL().getPath(); }
 
 /**
  * Returns the path file name.
  */
-public String getPathName()  { return getRequestURL().getPathName(); }
+public String getPathName()  { return getURL().getPathName(); }
 
 /**
  * Returns the path file type (extension in lowercase, no dot).
@@ -114,7 +114,7 @@ public String getPathType()  { return FilePathUtils.getType(getPath()); }
 public String getMIMEType()
 {
     if(_mimeType!=null) return _mimeType;
-    return _mimeType = MIMEType.getType(getRequestURL().getPath());
+    return _mimeType = MIMEType.getType(getURL().getPath());
 }
 
 /**
@@ -208,7 +208,11 @@ public Throwable getException()  { return _exception; }
 /**
  * Sets the exception.
  */
-public void setException(Throwable aThrowable)  { _exception = aThrowable; }
+public void setException(Throwable aThrowable)
+{
+    _exception = aThrowable;
+    if(_code==0) _code = EXCEPTION_THROWN;
+}
 
 /**
  * Returns whether response is text (regardless of what the data type is).
@@ -235,16 +239,16 @@ public String getText()
  */
 public WebFile getFile()
 {
-    WebFile file = getRequestURL().getFile();
+    WebFile file = getURL().getFile();
     if(file==null)
-        getRequestURL().getSite().createFile(getFileHeader());
+        getSite().createFile(getFileHeader());
     return file;
 }
 
 /**
  * Standard toString implementation.
  */
-public String toString() { return "Response " + getCode() + ' ' + getCodeString() + ' ' + getRequestURL().getString(); }
+public String toString() { return "Response " + getCode() + ' ' + getCodeString() + ' ' + getURL().getString(); }
 
 /**
  * Returns the code message.

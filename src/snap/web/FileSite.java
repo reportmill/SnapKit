@@ -3,6 +3,7 @@
  */
 package snap.web;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import snap.util.*;
 
@@ -12,12 +13,65 @@ import snap.util.*;
 public class FileSite extends WebSite {
 
 /**
+ * Handles a head request.
+ */
+protected WebResponse doHead(WebRequest aReq)  { return doGetOrHead(aReq, true); }
+
+/**
+ * Handle a get request.
+ */
+protected WebResponse doGet(WebRequest aReq)  { return doGetOrHead(aReq, false); }
+
+/**
+ * Handle a get or head request.
+ */
+protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
+{
+    // Create empty WebResponse return value
+    WebResponse resp = new WebResponse(); resp.setRequest(aReq);
+ 
+    // Get URL, path and file
+    WebURL url = aReq.getURL();
+    String path = url.getPath(); if(path==null) path = "/";
+    File file = getStandardFile(path);
+    
+    // Handle NOT_FOUND
+    if(!file.exists() || !file.canRead()) {
+        resp.setCode(WebResponse.NOT_FOUND); return resp; }
+        
+    // Handle UNAUTHORIZED
+    //if(!file.canRead()) { resp.setCode(WebResponse.UNAUTHORIZED); return resp; }
+        
+    // Configure response info (just return if isHead). Need to pre-create FileHeader to fix capitalization.
+    resp.setCode(WebResponse.OK);
+    FileHeader fhdr = getFileHeader(path, file);
+    resp.setFileHeader(fhdr);
+    if(isHead)
+        return resp;
+        
+    // If directory, configure directory info and return
+    if(file.isDirectory()) {
+        List <FileHeader> fhdrs = getFileHeaders(path, file);
+        resp.setFileHeaders(fhdrs);
+    }
+    
+    // If file, just set bytes
+    else {
+        try { byte bytes[] = FileUtils.getBytesOrThrow(file); resp.setBytes(bytes); }
+        catch(IOException e) { resp.setException(e); }
+    }
+    
+    // Return response
+    return resp;
+}
+
+/**
  * Returns the file header for given path.
  */
-protected FileHeader getFileHeader(String aPath)
+protected FileHeader getFileHeader(String aPath, File aFile)
 {
     // Get standard file for path
-    File file = getStandardFile(aPath); if(!file.exists()) return null;
+    File file = aFile!=null? aFile : getStandardFile(aPath);
     
     // Get real path (fixes capitalization)
     String path = aPath, cpath = null; try { cpath = file.getCanonicalPath(); }
@@ -33,43 +87,18 @@ protected FileHeader getFileHeader(String aPath)
 }
 
 /**
- * Returns file bytes.
- */
-protected Object getFileContent(String aPath) throws Exception
-{
-    File file = getStandardFile(aPath);
-    if(file.exists() && file.isFile())
-        return getFileBytes(aPath);
-    return getFileHeaders(aPath);
-}
-
-/**
- * Returns the file bytes at given path.
- */
-protected byte[] getFileBytes(String aPath) throws Exception
-{
-    File file = getStandardFile(aPath);
-    return FileUtils.getBytes(file);
-}
-
-/**
  * Returns the child file headers at given path.
  */
-protected List <FileHeader> getFileHeaders(String aPath) throws Exception
+protected List <FileHeader> getFileHeaders(String aPath, File aFile)
 {
-    // Get standard file for path
-    File file = getStandardFile(aPath);
-    if(!file.exists() || !file.isDirectory())
-        return null;
-    
     // Get java file children (if null, just return)
-    File cfiles[] = file.listFiles(); if(cfiles==null) return null;
+    File cfiles[] = aFile.listFiles(); if(cfiles==null) return null;
     
     // Create files from child java files
     List <FileHeader> files = new ArrayList(cfiles.length);
     for(File cfile : cfiles) { String name = cfile.getName();
         if(name.equalsIgnoreCase(".DS_Store")) continue; // Skip funky apple files
-        FileHeader fhdr = getFileHeader(FilePathUtils.getChild(aPath, name));
+        FileHeader fhdr = getFileHeader(FilePathUtils.getChild(aPath, name), null);
         if(fhdr!=null) files.add(fhdr); // Happens with links
     }
     
@@ -112,7 +141,6 @@ protected void deleteFileImpl(WebFile aFile) throws Exception
 /**
  * Saves the modified time for a file to underlying file system.
  */
-@Override
 protected void setLastModTime(WebFile aFile, long aTime) throws Exception
 {
     File file = getStandardFile(aFile);

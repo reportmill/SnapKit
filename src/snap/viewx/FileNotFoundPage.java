@@ -18,7 +18,7 @@ protected String getDefaultText()
     
     StringBuffer sb = new StringBuffer();
     sb.append("FileNotFound: ").append("\n\n");
-    sb.append("  - The requested URL " + resp.getRequestURL().getString() + " was not found on this server.\n\n");
+    sb.append("  - The requested URL " + resp.getURL().getString() + " was not found on this server.\n\n");
     sb.append("  - Response Code: ").append(resp.getCode()).append(' ').append(resp.getCodeString());
     return sb.toString();
 }

@@ -110,17 +110,21 @@ public static byte[] getBytes(File aFile)
         return null;
         
     // Get file length, byte buffer, file stream, read bytes into buffer and close stream
-    try {
-        int length = (int)aFile.length();
-        byte bytes[] = new byte[length];
-        InputStream stream = new FileInputStream(aFile);
-        stream.read(bytes, 0, length);
-        stream.close();
-        return bytes;
-    }
-    
-    // Re-throw exceptions
+    try { return getBytesOrThrow(aFile); }
     catch(IOException e) { throw new RuntimeException(e); }
+}
+
+/**
+ * Returns bytes for a file.
+ */
+public static byte[] getBytesOrThrow(File aFile) throws IOException
+{
+    int length = (int)aFile.length();
+    byte bytes[] = new byte[length];
+    InputStream stream = new FileInputStream(aFile);
+    stream.read(bytes, 0, length);
+    stream.close();
+    return bytes;
 }
 
 /**

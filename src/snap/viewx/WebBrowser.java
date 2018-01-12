@@ -314,7 +314,7 @@ public void showException(WebURL aURL, Throwable t)
 protected TextPage createExceptionPage(WebResponse aResp)
 {
     // Get URL and exception
-    WebURL url = aResp.getRequestURL(); Throwable t = aResp.getException();
+    WebURL url = aResp.getURL(); Throwable t = aResp.getException();
     
     // Get default console text
     String text = String.format("WebBrowser Exception Console\nBrowser Build Date: %s, Version 1.0, JVM %s, User %s\n",
