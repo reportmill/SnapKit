@@ -283,7 +283,7 @@ public Window getClientWindow(boolean doReal)
     Window win = wview!=null? wview.getNative(Window.class) : null;
     
     // If ClientView found, but not in window that is showing, get win from RootView.Native instead
-    if(cview!=null && (wview==null || !wview.isShowing()) && doReal) {
+    if(cview!=null && rview!=null && (wview==null || !wview.isShowing()) && doReal) {
         JComponent rcomp = rview.getNative(JComponent.class);
         win = SwingUtils.getParent(rcomp, Window.class);
     }
