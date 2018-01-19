@@ -17,7 +17,7 @@ public class Transform implements Cloneable {
     protected double _a = 1, _b = 0, _c = 0, _d = 1, _tx = 0, _ty = 0;
     
     // The inverse
-    Transform        _inverse;
+    Transform        _inv;
     
     // Identity transform
     public static final Transform IDENTITY = new Transform();
@@ -70,12 +70,12 @@ public final boolean isRotated()  { return _b!=0 || _c!=0; }
 /**
  * Translates this transform by given x & y.
  */
-public void translate(double dx, double dy)  { _tx += dx*_a + dy*_c; _ty += dx*_b + dy*_d; _inverse = null; }
+public void translate(double dx, double dy)  { _tx += dx*_a + dy*_c; _ty += dx*_b + dy*_d; _inv = null; }
 
 /**
  * Translates this transform by given x & y in global space (pre-multiply).
  */
-public void preTranslate(double dx, double dy)  { _tx += dx; _ty += dy; _inverse = null; }
+public void preTranslate(double dx, double dy)  { _tx += dx; _ty += dy; _inv = null; }
 
 /**
  * Rotates this transform by given angle in degrees.
@@ -124,7 +124,7 @@ public void concat(double a, double b, double c, double d, double tx, double ty)
     double tx2 = tx*_a + ty*_c + _tx,  ty2 = tx*_b + ty*_d + _ty;
     
     // Set new values
-    _a = a2; _b = b2; _c = c2; _d = d2; _tx = tx2; _ty = ty2; _inverse = null;
+    _a = a2; _b = b2; _c = c2; _d = d2; _tx = tx2; _ty = ty2; _inv = null;
 }
 
 /**
@@ -148,7 +148,7 @@ public void multiply(double a, double b, double c, double d, double tx, double t
     double tx2 = _tx*a + _ty*c + tx, ty2 = _tx*b + _ty*d + ty;
     
     // Set new values
-    _a = a2; _b = b2; _c = c2; _d = d2; _tx = tx2; _ty = ty2; _inverse = null;
+    _a = a2; _b = b2; _c = c2; _d = d2; _tx = tx2; _ty = ty2; _inv = null;
 }
 
 /**
@@ -163,18 +163,22 @@ public void invert()
         double tx = (_c*_ty - _d*_tx)/det, ty = (_b*_tx - _a*_ty)/det;
         _a = a; _b = b; _c = c; _d = d; _tx = tx; _ty = ty;
     }
-    _inverse = null;
+    _inv = null;
 }
 
 /**
  * Returns the inverse.
  */
-public Transform getInverse()  { Transform t = clone(); t.invert(); return t; }
+public Transform getInverse()
+{
+    if(_inv!=null) return _inv;
+    Transform t = clone(); t.invert(); return _inv = t;
+}
 
 /**
  * Clears the transform to identity.
  */
-public void clear()  { _a = 1; _b = 0; _c = 0; _d = 1; _tx = 0; _ty = 0; }
+public void clear()  { _a = 1; _b = 0; _c = 0; _d = 1; _tx = 0; _ty = 0; _inv = null; }
 
 /**
  * Returns the matrix.
@@ -189,19 +193,19 @@ public void getMatrix(double m[])  { m[0] = _a; m[1] = _b; m[2] = _c; m[3] = _d;
 /**
  * Sets transform values to given matrix values.
  */
-public void setMatrix(float m[])  { _a = m[0]; _b = m[1]; _c = m[2]; _d = m[3]; _tx = m[4]; _ty = m[5]; }
+public void setMatrix(float m[])  { setMatrix(m[0], m[1], m[2], m[3], m[4], m[5]); }
 
 /**
  * Sets transform values to given matrix values.
  */
-public void setMatrix(double m[])  { _a = m[0]; _b = m[1]; _c = m[2]; _d = m[3]; _tx = m[4]; _ty = m[5]; }
+public void setMatrix(double m[])  { setMatrix(m[0], m[1], m[2], m[3], m[4], m[5]); }
 
 /**
  * Sets transform values to given transform values.
  */
 public void setMatrix(Transform aTrans)
 {
-    _a = aTrans._a; _b = aTrans._b; _c = aTrans._c; _d = aTrans._d; _tx = aTrans._tx; _ty = aTrans._ty;
+    setMatrix(aTrans._a, aTrans._b, aTrans._c, aTrans._d, aTrans._tx, aTrans._ty);
 }
 
 /**
@@ -209,7 +213,7 @@ public void setMatrix(Transform aTrans)
  */
 public void setMatrix(double a, double b, double c, double d, double tx, double ty)
 {
-    _a = a; _b = b; _c = c; _d = d; _tx = tx; _ty = ty;
+    _a = a; _b = b; _c = c; _d = d; _tx = tx; _ty = ty; _inv = null;
 }
 
 /**
