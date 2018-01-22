@@ -132,6 +132,9 @@ public class View implements XMLArchiver.Archivable {
     // Provides animation for View
     ViewAnim        _anim;
     
+    // Provides information for physics simulations
+    ViewPhysics     _physics;
+    
     // The view owner of this view
     ViewOwner       _owner;
     
@@ -2044,6 +2047,16 @@ public void playAnimDeep()  { ViewAnim anim = getAnim(-1); if(anim!=null) anim.p
  * Stop animations deep.
  */
 public void stopAnimDeep()  { ViewAnim anim = getAnim(-1); if(anim!=null) anim.stop(); }
+
+/**
+ * Returns the physics objects that provides information for physics simulations.
+ */
+public ViewPhysics getPhysics()  { return _physics; }
+
+/**
+ * Returns the physics objects that provides information for physics simulations.
+ */
+public ViewPhysics getPhysics(boolean doCreate)  { return _physics!=null? _physics : (_physics=new ViewPhysics()); }
 
 /**
  * XML Archival.
