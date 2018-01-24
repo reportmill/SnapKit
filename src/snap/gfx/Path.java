@@ -23,9 +23,6 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     // The number of points
     int          _pcount;
     
-    // The bounds
-    Rect         _bounds;
-    
     // The winding -how a path determines what to fill when segments intersect
     int          _wind = WIND_EVEN_ODD;
     
@@ -326,11 +323,6 @@ public void append(Shape aShape)  { append(aShape.getPathIter(null)); }
  * Fits the path points to a curve starting at the given point index.
  */
 public void fitToCurve(int anIndex)  { PathFitCurves.fitCurveFromPointIndex(this, anIndex); }
-
-/**
- * Returns the bounds.
- */
-public Rect getBounds()  { return _bounds!=null? _bounds : (_bounds=super.getBounds()); }
 
 /**
  * Clears all segments from path.

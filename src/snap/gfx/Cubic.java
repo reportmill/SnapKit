@@ -19,7 +19,7 @@ public Cubic(double aX0, double aY0, double aXC0, double aYC0, double aXC1, doub
 /**
  * Returns the bounds.
  */
-public Rect getBounds()  { return bounds(x0, y0, xc0, yc0, xc1, yc1, x1, y1, null); }
+protected Rect getBoundsImpl()  { return bounds(x0, y0, xc0, yc0, xc1, yc1, x1, y1, null); }
 
 /**
  * Returns a path iterator.
@@ -101,7 +101,7 @@ public Cubic split(double aLoc)
     
     // Create new remainder shape, update this shape and return remainder
     Cubic rem = new Cubic(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1);
-    xc0 = nxc0; yc0 = nyc0; xc1 = nxc1; yc1 = nyc1; x1 = midpx; y1 = midpy;
+    xc0 = nxc0; yc0 = nyc0; xc1 = nxc1; yc1 = nyc1; x1 = midpx; y1 = midpy; _bounds = null;
     return rem;
 }
 

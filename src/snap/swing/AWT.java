@@ -228,7 +228,7 @@ private static class SnapShape extends Shape {
     public boolean contains(Point aPnt)  { return _shp.contains(aPnt.getX(), aPnt.getY()); }
 
     /** Returns whether shape contains rect. */
-    public Rect getBounds()  { return get(_shp.getBounds()); }
+    protected Rect getBoundsImpl()  { return get(_shp.getBounds()); }
 
     /** Returns whether shape contains rect. */
     public PathIter getPathIter(Transform aT)

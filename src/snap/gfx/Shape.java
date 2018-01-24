@@ -8,11 +8,39 @@ import snap.util.StringUtils;
  * A class to represent a generic geometric shape (Line, Rect, Ellipse, etc.).
  */
 public abstract class Shape {
+    
+    // The cached bounds
+    protected Rect         _bounds;
+
+/**
+ * Returns the shape bounds x.
+ */
+public double getX()  { return getBounds().x; }
+
+/**
+ * Returns the shape bounds y.
+ */
+public double getY()  { return getBounds().y; }
+
+/**
+ * Returns the shape bounds width.
+ */
+public double getWidth()  { return getBounds().width; }
+
+/**
+ * Returns the shape bounds height.
+ */
+public double getHeight()  { return getBounds().height; }
 
 /**
  * Returns the bounds.
  */
-public Rect getBounds()  { return PathIter.getBounds(getPathIter(null)); }
+public Rect getBounds()  { return _bounds!=null? _bounds : (_bounds=getBoundsImpl()); }
+
+/**
+ * Returns the bounds.
+ */
+protected Rect getBoundsImpl()  { return PathIter.getBounds(getPathIter(null)); }
 
 /**
  * Returns a path iterator.

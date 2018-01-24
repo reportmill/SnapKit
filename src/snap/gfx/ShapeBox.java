@@ -8,9 +8,6 @@ public class ShapeBox extends Shape {
     // The encapsulated shape
     Shape         _shape;
     
-    // The bounds
-    Rect          _bounds;
-
 /**
  * Creates a ShapeBox for given shape and rect.
  */
@@ -23,11 +20,6 @@ public ShapeBox(Shape aShape, double aWidth, double aHeight)
  * Returns the ecapsulated shape.
  */
 public Shape getShape()  { return _shape; }
-
-/**
- * Returns the bounds.
- */
-public Rect getBounds()  { return _bounds; }
 
 /**
  * Returns whether shape contains x/y.

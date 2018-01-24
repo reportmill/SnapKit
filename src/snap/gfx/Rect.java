@@ -24,9 +24,9 @@ public Rect()  { }
 public Rect(double aX, double aY, double aW, double aH)  { x = aX; y = aY; width = aW; height = aH; }
 
 /**
- * Returns the shape bounds.
+ * Override to just return this rect.
  */
-public Rect getBounds()  { return this; }
+protected Rect getBoundsImpl()  { return this; }
 
 /**
  * Returns a path iterator.

@@ -16,7 +16,7 @@ public Line(double aX0, double aY0, double aX1, double aY1)  { x0 = aX0; y0 = aY
 /**
  * Returns the shape bounds.
  */
-public Rect getBounds()  { return bounds(x0, y0, x1, y1, null); }
+protected Rect getBoundsImpl()  { return bounds(x0, y0, x1, y1, null); }
 
 /**
  * Returns the shape in rect.
@@ -94,7 +94,7 @@ public Line split(double aLoc)
     double x = x0 + aLoc*(x1 - x0);
     double y = y0 + aLoc*(y1 - y0);
     Line rem = new Line(x, y, x1, y1);
-    x1 = x; y1 = y;
+    x1 = x; y1 = y; _bounds = null;
     return rem;
 }
 

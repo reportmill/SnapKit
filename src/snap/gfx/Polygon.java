@@ -24,12 +24,13 @@ public void lineTo(double aX, double aY)
 {
     _pnts = Arrays.copyOf(_pnts, _pnts.length+2);
     _pnts[_pnts.length-2] = aX; _pnts[_pnts.length-1] = aY;
+    _bounds = null;
 }
 
 /**
  * Returns the shape bounds.
  */
-public Rect getBounds()
+protected Rect getBoundsImpl()
 {
     if(_pnts.length==0) return new Rect();
     double xmin = _pnts[0], xmax = _pnts[0], ymin = _pnts[1], ymax = _pnts[1];

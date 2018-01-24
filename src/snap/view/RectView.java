@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.gfx.RoundRect;
+import snap.gfx.Shape;
 
 /**
  * A View subclass for rects.
@@ -54,7 +55,7 @@ public void setRadius(double anAngle)
 /**
  * Returns the bounds path.
  */
-public RoundRect getBoundsShape()  { return getRect(); }
+public Shape getBoundsShape()  { return _radius>0? getRect() : getRect().getBounds(); }
 
 /**
  * Override to reset rect.

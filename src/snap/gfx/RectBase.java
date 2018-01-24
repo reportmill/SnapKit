@@ -21,7 +21,7 @@ public double getX()  { return x; }
 /**
  * Sets the x.
  */
-public void setX(double aValue)  { x = aValue; }
+public void setX(double aValue)  { x = aValue; _bounds = null; }
 
 /**
  * Returns the y.
@@ -31,7 +31,7 @@ public double getY()  { return y; }
 /**
  * Sets the y.
  */
-public void setY(double aValue)  { y = aValue; }
+public void setY(double aValue)  { y = aValue; _bounds = null; }
 
 /**
  * Returns the width.
@@ -41,7 +41,7 @@ public double getWidth()  { return width; }
 /**
  * Sets the width.
  */
-public void setWidth(double aValue)  { width = aValue; }
+public void setWidth(double aValue)  { width = aValue; _bounds = null; }
 
 /**
  * Returns the height.
@@ -51,7 +51,7 @@ public double getHeight()  { return height; }
 /**
  * Sets the height.
  */
-public void setHeight(double aValue)  { height = aValue; }
+public void setHeight(double aValue)  { height = aValue; _bounds = null; }
 
 /**
  * Returns the rectangle x/y as a point.
@@ -116,7 +116,7 @@ public double getMaxY()  { return y + height; }
 /**
  * Returns the shape bounds.
  */
-public Rect getBounds()  { return new Rect(x,y,width,height); }
+protected Rect getBoundsImpl()  { return new Rect(x,y,width,height); }
 
 /**
  * Returns whether rect is empty.

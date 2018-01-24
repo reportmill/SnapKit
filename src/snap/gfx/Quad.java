@@ -19,7 +19,7 @@ public Quad(double aX0, double aY0, double aXC0, double aYC0, double aX1, double
 /**
  * Returns the bounds.
  */
-public Rect getBounds()  { return bounds(x0, y0, xc0, yc0, x1, y1, null); }
+protected Rect getBoundsImpl()  { return bounds(x0, y0, xc0, yc0, x1, y1, null); }
 
 /**
  * Returns a path iterator.
@@ -85,7 +85,7 @@ public Quad split(double aLoc)
     
     // If either intersect, return true
     Quad rem = new Quad(midpx, midpy, nxc1, nyc1, x1, y1);
-    xc0 = nxc0; yc0 = nyc0; x1 = midpx; y1 = midpy;
+    xc0 = nxc0; yc0 = nyc0; x1 = midpx; y1 = midpy; _bounds = null;
     return rem;
 }
 
