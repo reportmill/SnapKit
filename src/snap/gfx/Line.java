@@ -138,6 +138,14 @@ public boolean matches(Object anObj)
 /**
  * Returns the distance from the given line points (p1,p2) to the given point.
  */
+public static double getDistance(double x0, double y0, double x1, double y1, double aX, double aY)
+{
+    return Math.sqrt(getDistanceSquared(x0, y0, x1, y1, aX, aY));
+}
+
+/**
+ * Returns the distance from the given line points (p1,p2) to the given point.
+ */
 public static double getDistanceSquared(double x0, double y0, double x1, double y1, double aX, double aY)
 {
     // Get parametric location of closest point, clamped between 0-1

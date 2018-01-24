@@ -410,6 +410,40 @@ public boolean intersects(Shape aShape, double aLineWidth)
 }
 
 /**
+ * Returns whether this shape is made up of only line segements.
+ */
+public boolean isFlat()
+{
+    PathIter piter = getPathIter(null); double pnts[] = new double[6];
+    while(piter.hasNext()) switch(piter.getNext(pnts)) {
+        case QuadTo: case CubicTo: return false; }
+    return true;
+}
+
+/**
+ * Returns a flattented version of this shape (just this shape if already flat).
+ */
+public Shape getFlat()
+{
+    // If already flat, just return this shape
+    if(isFlat()) return this;
+    
+    // Create path iterate over segments to generate flat path
+    Path path = new Path();
+    PathIter piter = getPathIter(null); double pnts[] = new double[6];
+    while(piter.hasNext()) switch(piter.getNext(pnts)) {
+        case MoveTo: path.moveTo(pnts[0], pnts[1]); break;
+        case LineTo: path.lineTo(pnts[0], pnts[1]); break;
+        case QuadTo: path.quadToFlat(pnts[0], pnts[1], pnts[2], pnts[3]); break;
+        case CubicTo: path.curveToFlat(pnts[0], pnts[1], pnts[2], pnts[3], pnts[4], pnts[5]); break;
+        case Close: path.close(); break;
+    }
+    
+    // Return new path
+    return path;
+}
+
+/**
  * Returns the shape in rect.
  */
 public Shape copyFor(Rect aRect)
