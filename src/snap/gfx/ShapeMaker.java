@@ -59,12 +59,22 @@ public void addSeg(Segment aSeg)  { addSeg(aSeg, getSegCount()); }
 public void addSeg(Segment aSeg, int anIndex)  { _segs.add(anIndex, aSeg); }
 
 /**
- * Returns whether given seg list contains given point.
+ * Returns whether this ShapeMaker contains given point.
  */
 public boolean contains(double x, double y)
 {
     boolean c1 = containsEndPoint(x, y);
     return c1 || _shape.contains(x,y);
+}
+
+/**
+ * Returns whether this ShapeMaker contains given point.
+ */
+public boolean containsSegMid(Segment aSeg)
+{
+    double x = aSeg.getX(.5), y = aSeg.getY(.5);
+    return contains(x, y);
+    
 }
 
 /**
@@ -87,6 +97,28 @@ public boolean contains(Segment aSeg)
         if(seg.matches(aSeg))
             return true;
     return false;
+}
+
+/**
+ * Returns the first Segment from this SegmentList outside of given SegList.
+ */
+public Segment getFirstSegOutside(ShapeMaker aShape)
+{
+    for(Segment sg : getSegs())
+        if(!aShape.containsSegMid(sg))
+            return sg;
+    return null;
+}
+
+/**
+ * Returns the first Segment from this SegmentList outside of given SegList.
+ */
+public Segment getFirstSegInside(ShapeMaker aShape)
+{
+    for(Segment sg : getSegs())
+        if(aShape.contains(sg.getX0(), sg.getY0()))
+            return sg;
+    return null;
 }
 
 /**
@@ -136,21 +168,26 @@ public Shape createShape()
 }
 
 /**
- * Splits the segements for given shape.
+ * Splits the segments for this and given SM for every intersection of the two.
  */
-public void splitSegments(ShapeMaker shape2)
+public void splitSegments(ShapeMaker aShape2)
 {
     // Iterate over list1 and split at all intersections with slist2
-    for(int i=0;i<getSegCount();i++) { Segment shp1 = getSeg(i);
-        for(int j=0;j<shape2.getSegCount();j++) { Segment shp2 = shape2.getSeg(j);
-            if(shp1.intersects(shp2)) {
-                double hp1 = shp1.getHitPoint(shp2);
-                if(Segment.equals(hp1,0) || Segment.equals(hp1,1)) continue;
-                double hp2 = shp2.getHitPoint(shp1);
-                Segment shp1b = shp1.split(hp1);
-                Segment shp2b = shp2.split(hp2);
-                addSeg(shp1b, i+1);
-                shape2.addSeg(shp2b, j+1);
+    for(int i=0;i<getSegCount();i++) { Segment seg1 = getSeg(i);
+        for(int j=0;j<aShape2.getSegCount();j++) { Segment seg2 = aShape2.getSeg(j);
+        
+            // If segments intersect
+            if(seg1.intersects(seg2)) {
+                
+                // Find intersection point for seg1 and split/add if inside
+                double hp1 = seg1.getHitPoint(seg2);
+                if(hp1>.001 && hp1<.999) {
+                    Segment tail = seg1.split(hp1); addSeg(tail, i+1); }
+                    
+                // Find intersection point for seg2 and split/add if inside
+                double hp2 = seg2.getHitPoint(seg1);
+                if(hp2>.001 && hp2<.999) {
+                    Segment tail = seg2.split(hp2); aShape2.addSeg(tail, j+1); }
             }
         }
     }
@@ -180,9 +217,7 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
     shape1.splitSegments(shape2);
     
     // Find first segement contained by both shape1 and shape2
-    Segment seg = null;
-    for(int i=0,iMax=shape1.getSegCount(); i<iMax && seg==null; i++) { Segment sg = shape1.getSeg(i);
-        if(shape2.contains(sg.getX0(), sg.getY0())) seg = sg; }
+    Segment seg = shape1.getFirstSegInside(shape2);
     if(seg==null) { System.err.println("ShapeMaker.intersect: No points!"); return aShape1; } // Should never happen
         
     // Iterate over segements to find those with endpoints in opposing shape and add to new shape
@@ -190,7 +225,7 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
     while(seg!=null) {
         
         // Add segment to new list
-        shape3.addSeg(seg); //System.err.println("Add Seg " + seg);
+        shape3.addSeg(seg);
     
         // Get segment at end point for current seg shape
         List <Segment> segs = owner.getSegments(seg);
@@ -239,32 +274,29 @@ public static Shape add(Shape aShape1, Shape aShape2)
     shape1.splitSegments(shape2);
     
     // Find first segement on perimeter of shape1 and shape2
-    Segment seg = null;
-    for(int i=0,iMax=shape1.getSegCount(); i<iMax && seg==null; i++) { Segment sg = shape1.getSeg(i);
-        double x = sg.getX(.5), y = sg.getY(.5);
-        if(!shape2.contains(x,y)) seg = sg; }
+    Segment seg = shape1.getFirstSegOutside(shape2);
     if(seg==null) { System.err.println("ShapeMaker.add: No intersections!"); return aShape1; } // Should never happen
     
     // Iterate over segements to find those with endpoints in opposing shape and add to new shape
-    ShapeMaker owner = shape1, opp = shape2; //if(seg==null) { seg = shape2.getSeg(0); owner = shape2; opp = shape1; }
+    ShapeMaker owner = shape1, opp = shape2;
     while(seg!=null) {
         
         // Add segment to new list
-        shape3.addSeg(seg); //System.err.println("Add Seg " + seg);
+        shape3.addSeg(seg);
     
         // Get segment at end point for current seg shape
         List <Segment> segs = owner.getSegments(seg);
         Segment nextSeg = null;
-        for(Segment sg : segs) { double x = sg.getX(.5), y = sg.getY(.5);
-            if(!opp.contains(x, y) && !shape3.contains(sg)) {
+        for(Segment sg : segs) {
+            if(!opp.containsSegMid(sg) && !shape3.contains(sg)) {
                 nextSeg = sg; break; }
         }
         
         // If not found, look for seg from other shape
         if(nextSeg==null) {
             segs = opp.getSegments(seg);
-            for(Segment sg : segs) { double x = sg.getX(.5), y = sg.getY(.5);
-                if(!owner.contains(x,y) && !shape3.contains(sg)) {
+            for(Segment sg : segs) {
+                if(!owner.containsSegMid(sg) && !shape3.contains(sg)) {
                     nextSeg = sg; owner = opp; opp = opp==shape1? shape2 : shape1; break; }
             }
         }
@@ -297,24 +329,21 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
     shape1.splitSegments(shape2);
     
     // Find first segement on perimeter of shape1 and shape2
-    Segment seg = null;
-    for(int i=0,iMax=shape1.getSegCount(); i<iMax && seg==null; i++) { Segment sg = shape1.getSeg(i);
-        double x = sg.getX(.5), y = sg.getY(.5);
-        if(!shape2.contains(x,y)) seg = sg; }
-    if(seg==null) { System.err.println("ShapeMaker.add: No intersections!"); return aShape1; } // Should never happen
+    Segment seg = shape1.getFirstSegOutside(shape2);
+    if(seg==null) { System.err.println("ShapeMaker.subtr: No intersections!"); return aShape1; } // Should never happen
     
     // Iterate over segements to find those with endpoints in opposing shape and add to new shape
-    ShapeMaker owner = shape1, opp = shape2; //if(seg==null) { seg = shape2.getSeg(0); owner = shape2; opp = shape1; }
+    ShapeMaker owner = shape1, opp = shape2;
     while(seg!=null) {
         
         // Add segment to new list
-        shape3.addSeg(seg); //System.err.println("Add Seg " + seg);
+        shape3.addSeg(seg);
     
         // Get segment at end point for current seg shape
         List <Segment> segs = owner.getSegments(seg);
         Segment nextSeg = null;
-        for(Segment sg : segs) { double x = sg.getX(.5), y = sg.getY(.5);
-            boolean b1 = owner==shape1? !shape2.contains(x,y) : shape1.contains(x,y);
+        for(Segment sg : segs) {
+            boolean b1 = owner==shape1? !shape2.containsSegMid(sg) : shape1.containsSegMid(sg);
             if(b1 && !shape3.contains(sg)) {
                 nextSeg = sg; break; }
         }
@@ -322,8 +351,8 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
         // If not found, look for seg from other shape
         if(nextSeg==null) {
             segs = opp.getSegments(seg);
-            for(Segment sg : segs) { double x = sg.getX(.5), y = sg.getY(.5);
-                boolean b1 = opp==shape1? !shape2.contains(x,y) : shape1.contains(x,y);
+            for(Segment sg : segs) {
+                boolean b1 = opp==shape1? !shape2.containsSegMid(sg) : shape1.containsSegMid(sg);
                 if(b1 && !shape3.contains(sg)) {
                     nextSeg = sg; owner = opp; opp = opp==shape1? shape2 : shape1; break; }
             }

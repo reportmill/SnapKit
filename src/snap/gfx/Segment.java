@@ -54,6 +54,19 @@ public abstract Segment createReverse();
 public abstract boolean matches(Object anObj);
 
 /**
+ * Returns whether shape intersects shape.
+ */
+public boolean intersects(Shape aShape)
+{
+    // If Segment, do simple case
+    if(aShape instanceof Segment)
+        return getHitPoint((Segment)aShape)>=0;
+        
+    // Do normal version
+    return super.intersects(aShape);
+}
+
+/**
  * Returns the hit point for shape 1 on shape 2.
  */
 public double getHitPoint(Segment aShape2)
@@ -66,7 +79,7 @@ public double getHitPoint(Segment aShape2)
         if(aShape2 instanceof Cubic) { Cubic s2 = (Cubic)aShape2;
             return Cubic.getHitPointLine(s2.x0, s2.y0, s2.xc0, s2.yc0, s2.xc1, s2.yc1, s2.x1, s2.y1, 
                 s1.x0,s1.y0,s1.x1,s1.y1,true); }
-        throw new RuntimeException("ShapeMaker: Unsupported hit class " + aShape2.getClass());
+        throw new RuntimeException("Segment: Unsupported hit class " + aShape2.getClass());
     }
     
     if(this instanceof Quad) { Quad s1 = (Quad)this;
@@ -78,7 +91,7 @@ public double getHitPoint(Segment aShape2)
         if(aShape2 instanceof Cubic) { Cubic s2 = (Cubic)aShape2;
             return Cubic.getHitPointQuad(s2.x0, s2.y0, s2.xc0, s2.yc0, s2.xc1, s2.yc1, s2.x1, s2.y1, 
                 s1.x0, s1.y0, s1.xc0, s1.yc0, s1.x1, s1.y1, true); }
-        throw new RuntimeException("ShapeMaker: Unsupported hit class " + aShape2.getClass());
+        throw new RuntimeException("Segment: Unsupported hit class " + aShape2.getClass());
     }
     
     if(this instanceof Cubic) { Cubic s1 = (Cubic)this;
@@ -91,7 +104,7 @@ public double getHitPoint(Segment aShape2)
         if(aShape2 instanceof Cubic) { Cubic s2 = (Cubic)aShape2;
             return Cubic.getHitPointCubic(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.xc1, s1.yc1, s1.x1, s1.y1,
                 s2.x0, s2.y0, s2.xc0, s2.yc0, s2.xc1, s2.yc1, s2.x1, s2.y1, false); }
-        throw new RuntimeException("ShapeMaker: Unsupported hit class " + aShape2.getClass());
+        throw new RuntimeException("Segment: Unsupported hit class " + aShape2.getClass());
     }
     
     throw new RuntimeException("Segement: Unsupported hit class " + getClass());
