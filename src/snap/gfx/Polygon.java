@@ -105,6 +105,40 @@ public Point getLastPoint()  { int plen = _pnts.length; return plen>0? new Point
 public void clear()  { _pnts = new double[0]; _bounds = null; }
 
 /**
+ * Returns whether polygon has no intersecting lines.
+ */
+public boolean isSimple()
+{
+    // Get point count
+    int pc = getPointCount(); if(pc<3) return false;
+    
+    // Iterate over all lines
+    for(int i=0;i<pc;i++) { int j = (i+1)%pc;
+    
+        // Get line endpoint and see if next point is collinear
+        double x0 = getX(i), y0 = getY(i);
+        double x1 = getX(j), y1 = getY(j);
+        
+        // If next point is collinear, return false. Fix this for when there is no overlap.
+        int jp1 = (j+1)%pc;
+        double jp1x = getX(jp1), jp1y = getY(jp1);
+        if(Line.isCollinear(x0, y0, x1, y1, jp1x, jp1y))
+            return false;
+            
+        // Iterate over remaining lines and see if they intersect
+        for(int k=j+1;k<pc;k++) { int l = (k+1)%pc;
+            double x2 = getX(k), y2 = getY(k);
+            double x3 = getX(l), y3 = getY(l);
+            if(Line.intersectsLine(x0, y0, x1, y1, x2, y2, x3, y3) && i!=l) // Suppress last
+                return false;
+        }
+    }
+    
+    // Return true
+    return true;
+}
+
+/**
  * Returns whether polygon is convex.
  */
 public boolean isConvex()
@@ -154,13 +188,22 @@ public double getExtAngleSum()
  */
 public PolygonList getConvexPolys(int aMax)
 {
+    // Create list with clone of first poly
     Polygon poly = clone();
     List <Polygon> polys = new ArrayList(); polys.add(poly);
+    
+    // If poly not simple, need to get simples
+    if(!poly.isSimple())
+        return new PolygonList(polys);
+    
+    // While current is concave or has too many points, split
     while(!poly.isConvex() || poly.getPointCount()>aMax) {
         poly = poly.splitConvex(aMax);
         polys.add(poly);
     }
-    return new PolygonList(polys.toArray(new Polygon[polys.size()]));
+    
+    // Return PolygonList
+    return new PolygonList(polys);
 }
 
 /**
@@ -169,36 +212,15 @@ public PolygonList getConvexPolys(int aMax)
 public Polygon splitConvex(int aMax)
 {
     // Iterate over points to find first one with enough convex segments to split
+    int start = 0, cmax = 0;
     for(int i=0,pc=getPointCount();i<pc;i++) {
         int ccc = getConvexCrossbarCount(i, aMax);
-        if(ccc>1)
-           return split(i, ccc);
+        if(ccc>cmax) {
+            start = i; cmax = ccc; if(cmax==aMax) break; }
     }
     
-    // Create and return remainder
-    return null;
-}
-
-/**
- * Splits this polygon into the first convex polygon and the remainder polygon and returns the remainder.
- */
-Polygon split(int aStart, int aLen)
-{
-    // Get points for remainder
-    int pc = getPointCount(), i = aStart, ccc = aLen;
-    int pcr = pc - ccc + 1;
-    double pnts[] = new double[pcr*2];
-    for(int j=0;j<i+1;j++) { pnts[j*2] = getX(j); pnts[j*2+1] = getY(j); }
-    for(int j=i+ccc,k=i+1;j<pc;j++,k++) { pnts[k*2] = getX(j); pnts[k*2+1] = getY(j); }
-    Polygon remainder = new Polygon(pnts);
-    
-    // Get pnts
-    int pc2 = ccc+1; pnts = new double[pc2*2];
-    for(int j=i,k=0;j<i+pc2;j++,k++) { pnts[k*2] = getX(j); pnts[k*2+1] = getY(j); }
-    setPoints(pnts);
-    
-    // Create and return remainder
-    return remainder;
+    // Split on convex part with max points
+    return split(start, cmax);
 }
 
 /**
@@ -244,6 +266,28 @@ boolean containsCrossbar(int ind0, int ind1)
     // If polygon also contains midpoint, it contains crossbar
     double mpx = x0 + (x1 - x0)/2, mpy = y0 + (y1 - y0)/2;
     return contains(mpx, mpy);
+}
+
+/**
+ * Splits this polygon into the first convex polygon and the remainder polygon and returns the remainder.
+ */
+Polygon split(int aStart, int aLen)
+{
+    // Get points for remainder
+    int pc = getPointCount(), i = aStart, ccc = aLen;
+    int pcr = pc - ccc + 1;
+    double pnts[] = new double[pcr*2];
+    for(int j=0;j<i+1;j++) { pnts[j*2] = getX(j); pnts[j*2+1] = getY(j); }
+    for(int j=i+ccc,k=i+1;j<pc;j++,k++) { pnts[k*2] = getX(j%pc); pnts[k*2+1] = getY(j%pc); }
+    Polygon remainder = new Polygon(pnts);
+    
+    // Get pnts
+    int pc2 = ccc+1; pnts = new double[pc2*2];
+    for(int j=i,k=0;j<i+pc2;j++,k++) { pnts[k*2] = getX(j%pc); pnts[k*2+1] = getY(j%pc); }
+    setPoints(pnts);
+    
+    // Create and return remainder
+    return remainder;
 }
 
 /**

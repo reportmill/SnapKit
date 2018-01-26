@@ -1,4 +1,5 @@
 package snap.gfx;
+import java.util.List;
 import snap.util.ArrayUtils;
 
 /**
@@ -24,6 +25,11 @@ public PolygonList()  { }
  * Creates a new PolygonList for given Polygons.
  */
 public PolygonList(Polygon ... thePolys)  { _polys = thePolys; _plen = thePolys.length; }
+
+/**
+ * Creates a new PolygonList for given Polygons.
+ */
+public PolygonList(List <Polygon> thePolys)  { this(thePolys.toArray(new Polygon[thePolys.size()])); }
 
 /**
  * Creates a new PolygonList for given Shape.

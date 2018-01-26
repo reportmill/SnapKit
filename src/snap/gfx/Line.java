@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import snap.util.MathUtils;
 
 /**
  * A class to represent a mathematical line.
@@ -199,10 +200,10 @@ public static boolean intersectsLine(double x0, double y0, double x1, double y1,
 public static double getHitPointLine(double x0, double y0, double x1, double y1, double px0, double py0,
     double px1, double py1, boolean isOther)
 {
-    // Probably some line slope stuff, I can't really remember
-    double numerator1 = (y0-py0)*(px1-px0) - (x0-px0)*(py1-py0); //(p1y-p3y)*(p4x-p3x) - (p1x-p3x)*(p4y-p3y);
-    double numerator2 = (y0-py0)*(x1-x0) - (x0-px0)*(y1-y0);     //(p1y-p3y)*(p2x-p1x) - (p1x-p3x)*(p2y-p1y);
-    double denominator = (x1-x0)*(py1-py0) - (y1-y0)*(px1-px0);  //(p2x-p1x)*(p4y-p3y) - (p2y-p1y)*(p4x-p3x)
+    // Some line slope stuff
+    double numerator1 = (y0-py0)*(px1-px0) - (x0-px0)*(py1-py0);
+    double numerator2 = (y0-py0)*(x1-x0) - (x0-px0)*(y1-y0);
+    double denominator = (x1-x0)*(py1-py0) - (y1-y0)*(px1-px0);
     
     // Calculate parametric locations of intersection (line1:r, line2:s)
     double r = numerator1/denominator;
@@ -211,6 +212,15 @@ public static double getHitPointLine(double x0, double y0, double x1, double y1,
     // If parametric locations outside 0-1 range, then return false because lines don't intersect
     if(r<0 || r>1 || s<0 || s>1) return -1;
     return isOther? s : r;
+}
+
+/**
+ * Returns whether given three points are collinear.
+ */
+public static boolean isCollinear(double x0, double y0, double x1, double y1, double x2, double y2)
+{
+    double twiceArea = x0*(y1 - y2) + x1*(y2 - y0) + x2*(y0 - y1);
+    return MathUtils.equalsZero(twiceArea);
 }
 
 /**
