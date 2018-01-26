@@ -449,7 +449,7 @@ public void writeXRefEntry(Object anObj)
 public int writeXRefTable()
 {
     // Create list for offsets
-    List <Integer> offsets = new Vector(_xtable.getEntryCount());
+    List <Integer> offsets = new ArrayList(_xtable.getEntryCount());
     
     // First write the objects themselves, saving the file offsets for later use.
     // Call entries.size() every time in loop because objects are added as descriptions are generated.

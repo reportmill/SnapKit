@@ -113,7 +113,7 @@ public void snap()  { setXY(Math.round(getX()), Math.round(getY())); }
 public boolean equals(Object anObj)
 {
     Point other = anObj instanceof Point? (Point)anObj : null; if(other==null) return false; 
-    return MathUtils.equals(other.x, x) && MathUtils.equals(other.y, y);
+    return equals(x, y, other.x, other.y);
 }
 
 /**
@@ -125,6 +125,14 @@ public Point clone()  { try { return (Point)super.clone(); } catch(Exception e) 
  * Returns a string representation of the receiver in the form "[x y]".
  */
 public String toString()  { return "[" + x + " " + y + "]"; }
+
+/**
+ * Standard equals implementation.
+ */
+public static boolean equals(double x0, double y0, double x1, double y1)
+{
+    return MathUtils.equals(x0, x1) && MathUtils.equals(y0, y1);
+}
 
 /**
  * Returns the distance from this Point to a specified point.
