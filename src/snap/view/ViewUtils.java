@@ -325,4 +325,27 @@ public static MenuItem copyMenuItem(MenuItem anItem)
 private static String fmt(double aValue)  { return _fmt.format(aValue); }
 private static DecimalFormat _fmt = new DecimalFormat("0.##");
 
+/**
+ * Silly feature to make any view draggable.
+ */
+public static void enableDragging(View aView)
+{
+    aView.addEventHandler(e -> handleDrag(e), View.MousePress, View.MouseDrag, View.MouseRelease);
+}
+
+/** Helper for enableDragging. */
+static void handleDrag(ViewEvent anEvent)
+{
+    View view = anEvent.getView(); view.setManaged(false); anEvent.consume();
+    Point mpt = _mpt; _mpt = anEvent.getPoint(view.getParent());
+    
+    if(anEvent.isMousePress()) return;
+    
+    view.setXY(view.getX() + (_mpt.x - mpt.x), view.getY() + (_mpt.y - mpt.y));
+    view.getParent().repaint(); // Bogus - to fix dragging artifacts due to border
+}
+
+// For dragging
+static Point _mpt;
+
 }

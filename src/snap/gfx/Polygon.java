@@ -105,6 +105,17 @@ public Point getLastPoint()  { int plen = _pnts.length; return plen>0? new Point
 public void clear()  { _pnts = new double[0]; _bounds = null; }
 
 /**
+ * Returns index of point at given x/y within given radius.
+ */
+public int getPointAt(double aX, double aY, double aRad)
+{
+    for(int i=0,pc=getPointCount();i<pc;i++)
+        if(Point.getDistance(aX, aY, getX(i), getY(i))<=aRad)
+            return i;
+    return -1;
+}
+
+/**
  * Returns whether polygon has no intersecting lines.
  */
 public boolean isSimple()
@@ -215,7 +226,7 @@ public Polygon splitConvex(int aMax)
     int start = 0, cmax = 0;
     for(int i=0,pc=getPointCount();i<pc;i++) {
         int ccc = getConvexCrossbarCount(i, aMax);
-        if(ccc>cmax) {
+        if(ccc>cmax) { //return split(i, ccc); }
             start = i; cmax = ccc; if(cmax==aMax) break; }
     }
     
@@ -271,19 +282,19 @@ boolean containsCrossbar(int ind0, int ind1)
 /**
  * Splits this polygon into the first convex polygon and the remainder polygon and returns the remainder.
  */
-Polygon split(int aStart, int aLen)
+Polygon split(int start, int len)
 {
     // Get points for remainder
-    int pc = getPointCount(), i = aStart, ccc = aLen;
-    int pcr = pc - ccc + 1;
+    int pc = getPointCount(), end = start + len;
+    int pcr = pc - len + 1;
     double pnts[] = new double[pcr*2];
-    for(int j=0;j<i+1;j++) { pnts[j*2] = getX(j); pnts[j*2+1] = getY(j); }
-    for(int j=i+ccc,k=i+1;j<pc;j++,k++) { pnts[k*2] = getX(j%pc); pnts[k*2+1] = getY(j%pc); }
+    for(int i=end>pc? end%pc : 0,k=0;k<pcr;i++) { if(i<=start || i>=end) {
+        pnts[k*2] = getX(i%pc); pnts[k*2+1] = getY(i%pc); k++; } }
     Polygon remainder = new Polygon(pnts);
     
     // Get pnts
-    int pc2 = ccc+1; pnts = new double[pc2*2];
-    for(int j=i,k=0;j<i+pc2;j++,k++) { pnts[k*2] = getX(j%pc); pnts[k*2+1] = getY(j%pc); }
+    int pc2 = len + 1; pnts = new double[pc2*2];
+    for(int j=start,k=0;j<start+pc2;j++,k++) { pnts[k*2] = getX(j%pc); pnts[k*2+1] = getY(j%pc); }
     setPoints(pnts);
     
     // Create and return remainder
