@@ -246,8 +246,8 @@ int getConvexCrossbarCount(int anIndex, int aMax)
             break;
     
     // If viable count found for index, check next index to see if it supports it as well
-    if(ccc>2)
-        ccc = Math.min(ccc, getConvexCrossbarCount(anIndex+1, anIndex+ccc) + 1);
+    if(ccc>2 && aMax>0)
+        ccc = Math.min(ccc, getConvexCrossbarCount(anIndex+1, aMax-1) + 1);
             
     // Return value
     return ccc;
@@ -290,6 +290,8 @@ Polygon split(int start, int len)
     double pnts[] = new double[pcr*2];
     for(int i=end>pc? end%pc : 0,k=0;k<pcr;i++) { if(i<=start || i>=end) {
         pnts[k*2] = getX(i%pc); pnts[k*2+1] = getY(i%pc); k++; } }
+    //for(int j=0;j<start+1;j++) { pnts[j*2] = getX(j); pnts[j*2+1] = getY(j); }
+    //for(int j=end,k=start+1;j<pc;j++,k++) { pnts[k*2] = getX(j%pc); pnts[k*2+1] = getY(j%pc); }
     Polygon remainder = new Polygon(pnts);
     
     // Get pnts
