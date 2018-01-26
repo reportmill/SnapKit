@@ -176,7 +176,7 @@ public double getAngle(int anIndex)
     double v1x = x2 - x1, v1y = y2 - y1;
     
     // Return angle between vectors
-    return Vector.getAngleBetween(v0x, v0y, v1x, v1y);
+    return Vect.getAngleBetween(v0x, v0y, v1x, v1y);
 }
 
 /**

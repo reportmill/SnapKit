@@ -7,7 +7,7 @@ import snap.util.StringUtils;
 /**
  * This class represents a vector.
  */
-public class Vector implements Cloneable {
+public class Vect implements Cloneable {
     
     // X Y components
     public double x, y;
@@ -15,7 +15,7 @@ public class Vector implements Cloneable {
 /**
  * Creates a new vector from the given coords.
  */
-public Vector(double aX, double aY)  { x = aX; y = aY; }
+public Vect(double aX, double aY)  { x = aX; y = aY; }
 
 /**
  * Returns the magnitude of the vector.
@@ -30,31 +30,31 @@ public void normalize()  { double t = getMagnitude(); x /= t; y /= t; }
 /**
  * Add the given vector to this.
  */
-public void add(Vector aVector)  { x += aVector.x; y += aVector.y; }
+public void add(Vect aVect)  { x += aVect.x; y += aVect.y; }
     
 /**
  * Returns the dot product of the receiver and the given vector.
  */
-public double getDotProduct(Vector v2)  { return getDotProduct(x, y, v2.x, v2.y); }
+public double getDotProduct(Vect v2)  { return getDotProduct(x, y, v2.x, v2.y); }
 
 /**
  * Returns whether given vector is in same general direction of this (with option to include perpendiculars).
  */
-public boolean isAligned(Vector aVector, boolean includePerpendiculars)
+public boolean isAligned(Vect aVect, boolean includePerpendiculars)
 {
-    return !isAway(aVector, !includePerpendiculars);
+    return !isAway(aVect, !includePerpendiculars);
 }
 
 /**
  * Returns whether given vector is pointing away from the direction of this (with option to include perpendiculars).
  */
-public boolean isAway(Vector aVector, boolean includePerpendiculars)
+public boolean isAway(Vect aVect, boolean includePerpendiculars)
 {
     // Get normalized version of this vector
-    Vector v1 = getMagnitude()==1? this : clone(); v1.normalize();
+    Vect v1 = getMagnitude()==1? this : clone(); v1.normalize();
     
     // Get normalized version of given vector
-    Vector v2 = aVector.getMagnitude()==1? aVector : aVector.clone(); v2.normalize();
+    Vect v2 = aVect.getMagnitude()==1? aVect : aVect.clone(); v2.normalize();
     
     // Dot of normalized vectors GT 0: angle<90deg, EQ 0: angle==90deg, LT 0: angle>90deg
     double dot = v1.getDotProduct(v2);
@@ -66,7 +66,7 @@ public boolean isAway(Vector aVector, boolean includePerpendiculars)
 /**
  * Returns the angle between the receiver and the given vector.
  */
-public double getAngleBetween(Vector aVector)  { return getAngleBetween(x, y, aVector.x, aVector.y); }
+public double getAngleBetween(Vect aVect)  { return getAngleBetween(x, y, aVect.x, aVect.y); }
     
 /**
  * Makes this receiver point in the opposite direction.
@@ -86,7 +86,7 @@ public void transform(Transform aTrans)
 /**
  * Standard clone implementation.
  */
-public Vector clone()  { return new Vector(x,y); }
+public Vect clone()  { return new Vect(x,y); }
 
 /**
  * Returns a string representation of the vector.
