@@ -5,6 +5,7 @@ package snap.view;
 import java.util.*;
 import snap.gfx.*;
 import snap.util.*;
+import snap.web.WebURL;
 
 /**
  * A class to provide utility methods for UI components.
@@ -102,8 +103,8 @@ public void hide()  { complain("hide"); }
 /** Window/Popup method: Order window to front. */
 public void toFront()  { complain("toFront"); }
 
-/** Window/Popup method: Sets the document file for the window title bar proxy icon. */
-public void setDocFile(java.io.File aFile)  { complain("setDocFile"); }
+/** Window/Popup method: Sets the document file url for the window title bar proxy icon. */
+public void setDocURL(WebURL aURL)  { complain("setDocFile"); }
 
 /** Prints "not implemented" for string (method name). */
 public void complain(String s)  { String msg = getClass().getSimpleName() + ": Not implemented:" + s;

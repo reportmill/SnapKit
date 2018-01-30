@@ -82,8 +82,8 @@ public SoundClip createSound()
  */
 public void openFile(Object aSource)
 {
-    if(aSource instanceof WebFile) aSource = ((WebFile)aSource).getStandardFile();
-    if(aSource instanceof WebURL) aSource = ((WebURL)aSource).getSourceURL();
+    if(aSource instanceof WebFile) aSource = ((WebFile)aSource).getJavaFile();
+    if(aSource instanceof WebURL) aSource = ((WebURL)aSource).getJavaURL();
     File file = FileUtils.getFile(aSource);
     try { Desktop.getDesktop().open(file); return; }
     catch(Throwable e) { System.err.println(e.getMessage()); }

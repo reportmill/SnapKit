@@ -18,9 +18,9 @@ public class LocalSite extends FileSite {
 public String getURLScheme()  { return "local"; }
 
 /**
- * Returns the Java file for RMFile.
+ * Returns the Java file for path.
  */
-protected File getStandardFile(String aPath)  { return new File(getPathInFileSystem() + aPath); }
+protected File getJavaFile(String aPath)  { return new File(getPathInFileSystem() + aPath); }
 
 /**
  * Returns the path of this data source in file system.

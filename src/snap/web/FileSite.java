@@ -23,7 +23,7 @@ protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
     // Get URL, path and file
     WebURL url = aReq.getURL();
     String path = url.getPath(); if(path==null) path = "/";
-    File file = getStandardFile(path);
+    File file = getJavaFile(path);
     
     // Handle NOT_FOUND
     if(!file.exists() || !file.canRead()) {
@@ -61,7 +61,7 @@ protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
 protected FileHeader getFileHeader(String aPath, File aFile)
 {
     // Get standard file for path
-    File file = aFile!=null? aFile : getStandardFile(aPath);
+    File file = aFile!=null? aFile : getJavaFile(aPath);
     
     // Get real path (fixes capitalization)
     String path = aPath, cpath = null; try { cpath = file.getCanonicalPath(); }
@@ -102,7 +102,7 @@ protected List <FileHeader> getFileHeaders(String aPath, File aFile)
 protected long saveFileImpl(WebFile aFile) throws Exception
 {
     // Get standard file
-    File file = getStandardFile(aFile);
+    File file = aFile.getJavaFile();
     
     // Make sure parent directories exist
     file.getParentFile().mkdirs();
@@ -124,7 +124,7 @@ protected long saveFileImpl(WebFile aFile) throws Exception
  */
 protected void deleteFileImpl(WebFile aFile) throws Exception
 {
-    File file = getStandardFile(aFile);
+    File file = aFile.getJavaFile();
     FileUtils.deleteDeep(file);
 }
 
@@ -133,19 +133,19 @@ protected void deleteFileImpl(WebFile aFile) throws Exception
  */
 protected void setLastModTime(WebFile aFile, long aTime) throws Exception
 {
-    File file = getStandardFile(aFile);
+    File file = aFile.getJavaFile();
     file.setLastModified(aTime);
 }
 
 /**
- * Returns the Java file for a WebFile.
+ * Returns the Java file for a WebURL.
  */
-protected File getStandardFile(WebFile aFile)  { return getStandardFile(aFile.getPath()); }
+protected File getJavaFile(WebURL aURL)  { return getJavaFile(aURL.getPath()); }
 
 /**
  * Returns the Java file for RMFile.
  */
-protected File getStandardFile(String aPath)
+protected File getJavaFile(String aPath)
 {
     String path = getPath()!=null? getPath() + aPath : aPath;
     return new File(path);

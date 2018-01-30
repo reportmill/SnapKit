@@ -21,7 +21,7 @@ protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
  
     // Create HTTPRequest for java.net.URL
     WebURL url = aReq.getURL();
-    HTTPRequest hreq = new HTTPRequest(url.getSourceURL()); if(isHead) hreq.setRequestMethod("HEAD");
+    HTTPRequest hreq = new HTTPRequest(url.getJavaURL()); if(isHead) hreq.setRequestMethod("HEAD");
     
     // Get HTTPResponse response (if IOException, set code/exception and return)
     HTTPResponse hresp = null; try { hresp = hreq.getResponse(); }
@@ -162,10 +162,11 @@ protected long saveFileImpl(WebFile aFile) throws Exception
 /**
  * Override to return standard file for cache file.
  */
-protected File getStandardFile(WebFile aFile)
+protected File getJavaFile(WebURL aURL)
 {
-    WebFile cfile = getLocalFile(aFile, false);
-    return cfile.getStandardFile();
+    WebFile file = aURL.getFile();
+    WebFile cfile = getLocalFile(file, false);
+    return cfile.getJavaFile();
 }
 
 /**

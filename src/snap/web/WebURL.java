@@ -5,7 +5,6 @@ package snap.web;
 import java.io.*;
 import java.net.*;
 import snap.util.FilePathUtils;
-import snap.util.FileUtils;
 
 /**
  * A class to represent a URL for a WebSite and WebFile (it can be both for nested sources).
@@ -85,14 +84,14 @@ public static WebURL getURL(Class aClass, String aName)
 public Object getSource()  { return _src; }
 
 /**
- * Returns the source as standard URL.
+ * Returns the source as standard Java URL (if possible).
  */
-public URL getSourceURL()  { return _srcURL; }
+public URL getJavaURL()  { return _srcURL; }
 
 /**
- * Returns the source as standard URL.
+ * Returns the source as standard Java file (if possible).
  */
-public File getSourceFile()  { return _src instanceof File? (File)_src : FileUtils.getFile(getSourceURL()); }
+public File getJavaFile()  { return getSite().getJavaFile(this); }
 
 /**
  * Returns the URL string.

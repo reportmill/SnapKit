@@ -41,7 +41,7 @@ protected ZipFile getZipFile()
     
     // If ZipFile
     if(!_jar) {
-        File sfile = getStandardFile(); if(sfile==null) return null; // Get local file
+        File sfile = getJavaFile(); if(sfile==null) return null; // Get local file
         try { return _zipFile = new ZipFile(sfile); }
         catch(IOException e) { throw new RuntimeException(e); }
     }
@@ -55,7 +55,7 @@ protected ZipFile getZipFile()
     catch(IOException e) { System.err.println(e); }
     
     // Otherwise, get local file and create JarFile
-    File sfile = getStandardFile(); if(sfile==null) return null; // Get local file
+    File sfile = getJavaFile(); if(sfile==null) return null; // Get local file
     try { return _zipFile = new JarFile(sfile); }
     catch(IOException e) { throw new RuntimeException(e); }
 }
@@ -196,12 +196,12 @@ private FileHeader getFileHeaderForPath(String aPath)
 /**
  * Returns a Java file for the zip file URL (copied to Sandbox if remote).
  */
-protected File getStandardFile()
+protected File getJavaFile()
 {
     WebURL url = getURL();
     WebFile file = url.getFile(); if(file==null) return null;
     WebFile localFile = file.getSite().getLocalFile(file, true); // Get local file in case file is over http
-    return localFile.getStandardFile();
+    return localFile.getJavaFile();
 }
 
 /**

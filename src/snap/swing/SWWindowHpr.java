@@ -6,6 +6,7 @@ import javax.swing.*;
 import snap.gfx.*;
 import snap.util.*;
 import snap.view.*;
+import snap.web.WebURL;
 
 /**
  * A ViewHelper for WindowView/Swing-Window.
@@ -196,11 +197,12 @@ public void setResizable(boolean aValue)
 /**
  * Sets the document file for the window title bar proxy icon.
  */
-public void setDocFile(File aFile)
+public void setDocURL(WebURL aURL)
 {
+    File file = aURL!=null? aURL.getJavaFile() : null;
     if(get() instanceof RootPaneContainer) { RootPaneContainer rpc = (RootPaneContainer)get();
         JRootPane rpane = rpc.getRootPane(); if(rpane==null) return;
-        rpane.putClientProperty("Window.documentFile", aFile);
+        rpane.putClientProperty("Window.documentFile", file);
     }
 }
 

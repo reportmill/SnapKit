@@ -448,9 +448,9 @@ public void setText(String aString)  { setBytes(StringUtils.getBytes(aString)); 
 public InputStream getInputStream()  { return new ByteArrayInputStream(getBytes()); }
 
 /**
- * Returns a standard java.io.File, if available.
+ * Returns a standard Java File (if available).
  */
-public File getStandardFile()  { return getSite().getStandardFile(this); }
+public File getJavaFile()  { return getURL().getJavaFile(); }
 
 /**
  * Returns a relative URL for the given file path.

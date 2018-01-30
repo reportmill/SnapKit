@@ -91,12 +91,12 @@ protected void deleteFileImpl(WebFile aFile) throws Exception
 }
 
 /**
- * Override to get standard file from dir file getStandardFile.
+ * Override to get Java file from dir file.
  */
-protected File getStandardFile(WebFile aFile)
+protected File getJavaFile(WebURL aURL)
 {
-    WebFile dfile = getDirFile(aFile.getPath());
-    return dfile!=null? dfile.getStandardFile() : null;
+    WebFile dfile = getDirFile(aURL.getPath());
+    return dfile!=null? dfile.getJavaFile() : null;
 }
 
 /**

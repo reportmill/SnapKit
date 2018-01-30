@@ -2,11 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.io.File;
 import java.lang.reflect.Array;
 import java.util.*;
 import snap.gfx.*;
 import snap.util.*;
+import snap.web.WebURL;
 
 /**
  * A class to manage a Window.
@@ -26,7 +26,7 @@ public class WindowView extends ParentView {
     boolean                   _alwaysOnTop;
     
     // The document file
-    File                      _docFile;
+    WebURL                    _docURL;
     
     // The window image
     Image                     _image;
@@ -176,17 +176,17 @@ public void setAlwaysOnTop(boolean aValue)
 }
 
 /**
- * Returns the document file for the window title bar proxy icon.
+ * Returns the document file URL for the window title bar proxy icon.
  */
-public File getDocFile()  { return _docFile; }
+public WebURL getDocURL()  { return _docURL; }
 
 /**
- * Returns the document file for the window title bar proxy icon.
+ * Returns the document file URL for the window title bar proxy icon.
  */
-public void setDocFile(File aFile)
+public void setDocURL(WebURL aURL)
 {
-    if(SnapUtils.equals(aFile, _docFile)) return; _docFile = aFile;
-    getHelper().setDocFile(aFile);
+    if(SnapUtils.equals(aURL, _docURL)) return; _docURL = aURL;
+    getHelper().setDocURL(aURL);
 }
 
 /**

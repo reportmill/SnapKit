@@ -185,7 +185,7 @@ private Media getMedia()
     if(_media!=null) return _media;
 
     // Get sound file
-    File file = getSourceFile().getStandardFile();
+    File file = getSourceFile().getJavaFile();
     if(_sndRec.getSoundFile()!=null)
         file = _sndRec.getSoundFile();
     

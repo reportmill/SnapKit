@@ -334,7 +334,13 @@ public synchronized void resetFiles()  { for(WebFile file : _files.values()) res
 /**
  * Returns a standard java.io.File, if available.
  */
-protected File getStandardFile(WebFile aFile)  { return null; }
+protected File getJavaFile(WebURL aURL)
+{
+    Object src = aURL.getSource();
+    if(src instanceof File) return (File)src;
+    java.net.URL url = aURL.getJavaURL();
+    return url!=null? FileUtils.getFile(url) : null;
+}
 
 /**
  * Returns a URL for the given file path.
