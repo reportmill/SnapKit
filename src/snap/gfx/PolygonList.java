@@ -71,7 +71,7 @@ public Polygon getPoly(int anIndex)  { return _polys[anIndex]; }
  */
 public void addPoly(Polygon aPoly, int anIndex)
 {
-    _polys = ArrayUtils.add(_polys, aPoly, anIndex); _bounds = null;
+    _polys = ArrayUtils.add(_polys, aPoly, anIndex); _plen++; _bounds = null;
 }
 
 /**
