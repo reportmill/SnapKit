@@ -124,7 +124,7 @@ protected View createUI(Object aSource)
 {
     if(aSource==null) return null;
     ViewArchiver arch = new ViewArchiver(); arch.setOwner(this);
-    return arch.getView(aSource, null);
+    return arch.getView(aSource);
 }
 
 /**

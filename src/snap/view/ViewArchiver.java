@@ -21,28 +21,20 @@ public class ViewArchiver extends XMLArchiver {
 public ViewArchiver()  { setIgnoreCase(true); }
 
 /**
- * Returns a parent shape for source.
+ * Returns a ParentView for source.
  */
-public ParentView getParentView(Object aSource)  { return (ParentView)getView(aSource, null); }
+public ParentView getParentView(Object aSource)  { return (ParentView)getView(aSource); }
 
 /**
- * Creates a view.
+ * Returns a View for source.
  */
-public View getView(Object aSource, Archivable aRootObj)
+public View getView(Object aSource)
 {
     // If source is a document, just return it
     if(aSource instanceof View) return (View)aSource;
     
-    // Get URL and/or bytes (complain if not found)
-    WebURL url = null; try { url = WebURL.getURL(aSource); } catch(Exception e) { }
-    byte bytes[] = url!=null? (url.getFile()!=null? url.getFile().getBytes() : null) : SnapUtils.getBytes(aSource);
-    if(bytes==null)
-        throw new RuntimeException("RMArchiver.getShape: Cannot read source: " + (url!=null? url : aSource));
-    
-    // Create archiver, read, set source and return
-    setRootObject(aRootObj);
-    View shape = (View)readObject(url!=null? url : bytes);
-    return shape;
+    // Return readObject(src)
+    return (View)readObject(aSource);
 }
 
 /**
