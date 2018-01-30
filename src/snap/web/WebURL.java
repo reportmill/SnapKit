@@ -4,7 +4,6 @@
 package snap.web;
 import java.io.*;
 import java.net.*;
-import snap.util.FilePathUtils;
 
 /**
  * A class to represent a URL for a WebSite and WebFile (it can be both for nested sources).
@@ -22,17 +21,8 @@ public class WebURL {
     URL             _srcURL;
     
     // The URL string
-    String          _str;
+    URLString       _ustr;
     
-    // The path string
-    String          _scheme, _auth, _user, _host, _path, _query, _ref;
-    
-    // The port
-    int             _port;
-    
-    // The site URL string
-    String          _siteURLS;
-
     // The URL of WebSite this WebURL belongs to (just this WebURL if no path)
     WebURL          _siteURL;
     
@@ -40,19 +30,19 @@ public class WebURL {
     WebSite         _asSite;
     
 /**
- * Creates a new WebURL for given source.
+ * Creates a WebURL for given source.
  */
-public WebURL(Object aSource)
+protected WebURL(Object aSource)
 {
     // Set source
     _src = aSource;
     
-    // Get/set standard URL (if available)
+    // Get/set Java URL (if available)
     _srcURL = WebGetter.getJavaURL(aSource);
     
-    // Get/set string (and parts)
+    // Get URLString for parts
     String urls = WebGetter.getURLString(_srcURL!=null? _srcURL : _src);
-    setString(urls);
+    _ustr = new URLString(urls);
 }
 
 /**
@@ -84,143 +74,74 @@ public static WebURL getURL(Class aClass, String aName)
 public Object getSource()  { return _src; }
 
 /**
- * Returns the source as standard Java URL (if possible).
+ * Returns the full URL string.
  */
-public URL getJavaURL()  { return _srcURL; }
-
-/**
- * Returns the source as standard Java file (if possible).
- */
-public File getJavaFile()  { return getSite().getJavaFile(this); }
-
-/**
- * Returns the URL string.
- */
-public String getString()  { return _str; }
-
-/**
- * Sets the standard URL.
- */
-protected void setString(String aStr)
-{
-    // Set String
-    _str = aStr;
-    
-    // Pick off reference
-    String str = aStr;
-    int rind = str.lastIndexOf('#');
-    if(rind>0) {
-        _ref = str.substring(rind+1); str = str.substring(0, rind); }
-        
-    // Pick off Query
-    int qind = str.lastIndexOf('?');
-    if(qind>0) {
-        _query = str.substring(qind+1); str = str.substring(0, qind); }
-        
-    // Pick off nested path
-    int npath = str.lastIndexOf('!');
-    if(npath>0) {
-        _path = str.substring(npath+1); str = str.substring(0, npath);
-        _siteURLS = str; //return;
-    }
-    
-    // Pick off scheme
-    int sind = str.indexOf(':');
-    if(sind>0) {
-        _scheme = str.substring(0, sind).toLowerCase(); str = str.substring(sind+1); }
-        
-    // If nested, just return
-    if(_siteURLS!=null) return;
-        
-    // Strip off '//'
-    int astart = 0; while(astart<str.length() && astart<2 && str.charAt(astart)=='/') astart++;
-    if(astart!=1) str = str.substring(astart);
-        
-    // Pick off path
-    int pind = str.indexOf('/');
-    if(pind>=0) {
-        _path = str.substring(pind); str = str.substring(0, pind); }
-        
-    // Set SiteURL string
-    _siteURLS = _scheme + "://" + str;
-        
-    // Pick off port
-    int po_ind = str.lastIndexOf(':');
-    if(po_ind>0) {
-        _port = Integer.valueOf(str.substring(po_ind+1)); str = str.substring(0, po_ind); }
-        
-    // Pick off user
-    int uind = str.indexOf('@');
-    if(uind>0) {
-        _user = str.substring(0, uind); str = str.substring(uind+1); }
-        
-    // Anything left is host!
-    if(str.length()>0)
-        _host = str;
-}
+public String getString()  { return _ustr.getString(); }
 
 /**
  * Returns the URL Scheme (lower case).
  */
-public String getScheme()  { return _scheme; }
+public String getScheme()  { return _ustr.getScheme(); }
 
 /**
  * Returns the Host part of the URL (the Authority minus the optional UserInfo and Port).
  */
-public String getHost()  { return _host; }
+public String getHost()  { return _ustr.getHost(); }
 
 /**
  * Returns the port of the URL.
  */
-public int getPort()  { return _port; }
+public int getPort()  { return _ustr.getPort(); }
 
 /**
  * Returns the part of the URL string that describes the file path.
  */
-public String getPath()  { return _path; }
+public String getPath()  { return _ustr.getPath(); }
 
 /**
  * Returns the last component of the file path.
  */
-public String getPathName()  { return FilePathUtils.getFileName(getPath()); }
+public String getPathName()  { return _ustr.getPathName(); }
 
 /**
  * Returns the last component of the file path minus any '.' extension suffix.
  */
-public String getPathNameSimple()  { return FilePathUtils.getFileNameSimple(getPath()); }
+public String getPathNameSimple()  { return _ustr.getPathNameSimple(); }
 
 /**
  * Returns the part of the URL string that describes the query.
  */
-public String getQuery()  { return _query; }
+public String getQuery()  { return _ustr.getQuery(); }
 
 /**
  * Returns the value for given Query key in URL, if available.
  */
-public String getQueryValue(String aKey)  { return new MapString(getQuery()).getValue(aKey); }
+public String getQueryValue(String aKey)  { return _ustr.getQueryValue(aKey); }
 
 /**
  * Returns the hash tag reference from the URL as a simple string.
  */
-public String getRef()  { return _ref; }
+public String getRef()  { return _ustr.getRef(); }
 
 /**
  * Returns the value for given HashTag key in URL, if available.
  */
-public String getRefValue(String aKey)  { return getRefMap().getValue(aKey); }
-
-// Returns the hash tag reference of the URL as a MapString.
-private MapString getRefMap()  { return _rm!=null? _rm : (_rm=new MapString(getRef())); } MapString _rm;
+public String getRefValue(String aKey)  { return _ustr.getRefValue(aKey); }
 
 /**
- * Returns the source of this URL.
+ * Returns the site that this URL belongs to.
  */
 public WebSite getSite()  { return getSiteURL().getAsSite(); }
 
 /**
- * Returns the URL for the source of this URL.
+ * Returns the URL for the site that this URL belongs to.
  */
-public WebURL getSiteURL()  { return _siteURL!=null? _siteURL : (_siteURL=getURL(_siteURLS)); }
+public WebURL getSiteURL()  { return _siteURL!=null? _siteURL : (_siteURL=getURL(_ustr.getSite())); }
+
+/**
+ * Returns the site for this URL (assumes this URL is a site).
+ */
+public WebSite getAsSite()  { return _asSite!=null? _asSite : (_asSite=WebGetter.getSite(this)); }
 
 /**
  * Returns the file for the URL.
@@ -247,41 +168,32 @@ public WebFile createFile(boolean isDir)
 /**
  * Returns whether URL specifies only the file (no query/hashtags).
  */
-public boolean isFileURL()  { return getQuery()==null && getRef()==null; }
+public boolean isFileURL()  { return _ustr.isFileURL(); }
 
 /**
  * Returns the URL for the file only (no query/hashtags).
  */
-public WebURL getFileURL()  { return isFileURL()? this : getURL(getFileURLString()); }
-
-/**
- * Returns the URL string for the file only (no query/hashtags).
- */
-public String getFileURLString()
-{
-    String str = getString(); int ind = str.indexOf('?'); if(ind<0) ind = str.indexOf('#');
-    if(ind>=0) str = str.substring(0, ind);
-    return str;
-}
+public WebURL getFileURL()  { return isFileURL()? this : getURL(_ustr.getFileURL()); }
 
 /**
  * Returns whether URL specifies only file and query (no hashtag references).
  */
-public boolean isQueryURL()  { return getRef()==null; }
+public boolean isQueryURL()  { return _ustr.isQueryURL(); }
 
 /**
  * Returns the URL for the file and query only (no hashtag references).
  */
-public WebURL getQueryURL()  { return isQueryURL()? this : getURL(getQueryURLString()); }
+public WebURL getQueryURL()  { return isQueryURL()? this : getURL(_ustr.getQueryURL()); }
 
 /**
- * Returns the URL string for the file and query only (no hashtag references).
+ * Returns the source as standard Java URL (if possible).
  */
-public String getQueryURLString()
-{
-    String str = getString(); int ind = str.indexOf('#'); if(ind>=0) str = str.substring(0, ind);
-    return str;
-}
+public URL getJavaURL()  { return _srcURL; }
+
+/**
+ * Returns the source as standard Java File (if possible).
+ */
+public File getJavaFile()  { return getSite().getJavaFile(this); }
 
 /**
  * Returns whether URL can be found.
@@ -365,24 +277,19 @@ public String getText()
 public InputStream getInputStream()  { return new ByteArrayInputStream(getBytes()); }
 
 /**
- * Returns the site for the URL.
- */
-public WebSite getAsSite()  { return _asSite!=null? _asSite : (_asSite=WebGetter.getSite(this)); }
-
-/**
  * Standard equals implementation.
  */
 public boolean equals(Object anObj)
 {
     if(anObj==this) return true;
     WebURL other = anObj instanceof WebURL? (WebURL)anObj : null; if(other==null) return false;
-    return _str.equals(other._str);
+    return _ustr.equals(other._ustr);
 }
 
 /**
  * Standard HashCode implementation.
  */
-public int hashCode()  { return _str.hashCode(); }
+public int hashCode()  { return _ustr.hashCode(); }
 
 /**
  * Standard toString implementation.
