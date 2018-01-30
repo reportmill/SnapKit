@@ -16,8 +16,7 @@ public class JSONParser extends Parser {
 public JSONNode readSource(Object aSource)
 {
     WebURL url = WebURL.getURL(aSource);
-    WebFile file = url.getFile();
-    return readString(file.getText());
+    return readString(url.getText());
 }
 
 /**

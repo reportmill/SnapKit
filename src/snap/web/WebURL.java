@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-import java.io.File;
+import java.io.*;
 import java.net.*;
 import snap.util.FilePathUtils;
 import snap.util.FileUtils;
@@ -359,6 +359,11 @@ public String getText()
     byte bytes[] = getBytes(); if(bytes==null) return null;
     return new String(bytes);
 }
+
+/**
+ * Returns an input stream for file.
+ */
+public InputStream getInputStream()  { return new ByteArrayInputStream(getBytes()); }
 
 /**
  * Returns the site for the URL.

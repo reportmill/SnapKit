@@ -284,7 +284,7 @@ public static JSONNode readSource(Object aSource)
 {
     WebURL url = WebURL.getURL(aSource);
     WebFile file = url.getFile();
-    return new JSONParser().readString(file.getText());
+    return new JSONParser().readString(url.getText());
 }
 
 }

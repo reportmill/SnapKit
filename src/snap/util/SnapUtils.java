@@ -403,10 +403,18 @@ public static String getText(Class aClass, String aName)
  */
 public static InputStream getInputStream(Object aSource)
 {
-    if(aSource instanceof InputStream) return (InputStream)aSource;
+    // Handle byte array and InputStream
     if(aSource instanceof byte[]) return new ByteArrayInputStream((byte[])aSource);
+    if(aSource instanceof InputStream) return (InputStream)aSource;
+    
+    // Handle WebFile
+    if(aSource instanceof WebFile) return ((WebFile)aSource).getInputStream();
+    
+    // Handle WebURL (URL, File, String path)
     WebURL url = null; try { url = WebURL.getURL(aSource); } catch(Exception e) { }
-    if(url!=null && url.getFile()!=null) return url.getFile().getInputStream();
+    if(url!=null) return url.getInputStream();
+    
+    // Complain and return null
     System.err.println("SnapUtils.getInputStream: Couldn't get stream for " + aSource);
     return null;
 }
