@@ -13,7 +13,7 @@ import snap.web.WebFile;
 public class ViewUtils {
     
     // Booleans for input event state and modifiers
-    static boolean          _altDown, _cntrDown, _metaDown, _mouseDown, _shiftDown, _shortcutDown;
+    static boolean          _altDown, _cntrDown, _metaDown, _mouseDown, _mouseDrag, _shiftDown, _shortcutDown;
 
     // Color constants
     private static Color BACK_FILL = new Color("#E9E8EA");
@@ -43,6 +43,11 @@ public static boolean isMetaDown()  { return _metaDown; }
  * Returns whether mouse is down.
  */
 public static boolean isMouseDown()  { return _mouseDown; }
+
+/**
+ * Returns whether mouse is being dragged.
+ */
+public static boolean isMouseDrag()  { return _mouseDrag; }
 
 /**
  * Returns whether shift is down.

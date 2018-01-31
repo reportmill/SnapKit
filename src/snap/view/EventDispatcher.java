@@ -99,7 +99,8 @@ public void dispatchMouseEvent(ViewEvent anEvent)
 {
     // Update ViewEnv.MouseDown
     if(anEvent.isMousePress()) ViewUtils._mouseDown = true;
-    else if(anEvent.isMouseRelease()) ViewUtils._mouseDown = false;
+    else if(anEvent.isMouseDrag()) ViewUtils._mouseDrag = true;
+    else if(anEvent.isMouseRelease()) ViewUtils._mouseDown = ViewUtils._mouseDrag = false;
 
     // Get target view (at mouse point, or mouse press, or mouse press point)
     View targ = ViewUtils.getDeepestViewAt(_rview, anEvent.getX(), anEvent.getY());
