@@ -61,8 +61,7 @@ protected void setSource(Object aSource)  { _source = aSource; }
 public WebURL getSourceURL()
 {
     if(_url!=null) return _url;
-    try { _url = WebURL.getURL(_source); } catch(Exception e) { }
-    return _url;
+    return _url = WebURL.getURL(_source);
 }
 
 /**

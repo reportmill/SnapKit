@@ -329,22 +329,31 @@ public static String getTempDir()
  */
 public static byte[] getBytes(Object aSource)
 {
+    try { return getBytesOrThrow(aSource); }
+    catch(Exception e) { return null; }
+}
+
+/**
+ * Returns a byte array from a File, String path, InputStream, URL, byte[], etc.
+ */
+public static byte[] getBytesOrThrow(Object aSource) throws IOException
+{
     // Handle byte array and InputStream
     if(aSource instanceof byte[]) return (byte[])aSource;
     if(aSource instanceof InputStream) return getBytes((InputStream)aSource);
     
     // Handle URL
-    if(aSource instanceof URL) { URL url = (URL)aSource;
-        try { return URLUtils.getBytes(url); }
-        catch(Exception e) { System.err.println("SnapUtils.getBytes: Error reading URL " + url + " " + e); return null;}
-    }
+    if(aSource instanceof URL)
+        return URLUtils.getBytes((URL)aSource);
     
     // Handle WebFile
-    if(aSource instanceof WebFile) return ((WebFile)aSource).getBytes();
+    if(aSource instanceof WebFile)
+        return ((WebFile)aSource).getBytes();
     
     // Handle WebURL (URL, File, String path)
-    WebURL url = null; try { url = WebURL.getURL(aSource); } catch(Exception e) { }
-    if(url!=null) return url.getBytes();
+    WebURL url = WebURL.getURL(aSource);
+    if(url!=null)
+        return url.getBytesOrThrow();
 
     // Return null since bytes not found
     return null;
@@ -411,7 +420,7 @@ public static InputStream getInputStream(Object aSource)
     if(aSource instanceof WebFile) return ((WebFile)aSource).getInputStream();
     
     // Handle WebURL (URL, File, String path)
-    WebURL url = null; try { url = WebURL.getURL(aSource); } catch(Exception e) { }
+    WebURL url = WebURL.getURL(aSource);
     if(url!=null) return url.getInputStream();
     
     // Complain and return null

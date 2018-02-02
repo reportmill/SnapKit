@@ -20,6 +20,22 @@ public static URI getURI(URL aURL)
 }
 
 /**
+ * Returns the URL string for given object.
+ */
+public static String getString(URL aURL)
+{
+    // Get URL in normal form
+    String urls = aURL.toExternalForm();
+    try { urls = URLDecoder.decode(urls, "UTF-8"); }
+    catch(Exception e) { }
+    
+    // If jar or wsjar, just strip it
+    if(aURL.getProtocol().equals("jar")) urls = urls.substring(4);
+    else if(aURL.getProtocol().equals("wsjar")) urls = urls.substring(6);
+    return urls;
+}
+
+/**
  * Returns a redirect string.
  */
 public static String getRedirectString(String aURLString)
@@ -55,6 +71,15 @@ private static byte[] getBytes(URLConnection aConnection) throws IOException
     byte bytes[] = SnapUtils.getBytesOrThrow(stream);  // Get bytes for stream, close and return bytes
     stream.close();
     return bytes;
+}
+
+/**
+ * Returns the last modified time of a URL.
+ */
+public static long getLastModTime(URL aURL)
+{
+    try { return aURL.openConnection().getLastModified(); }
+    catch(IOException e) { return 0; }
 }
 
 /**
@@ -110,12 +135,12 @@ public static File getLocalFile(URL aURL, File aFile) throws IOException
     file.getParentFile().mkdirs();
 
     // Get URL connection and lastModified time
-    URLConnection connection = aURL.openConnection();
-    long lastModified = connection.getLastModified();
+    URLConnection conn = aURL.openConnection();
+    long lastMod = conn.getLastModified();
     
     // If local file doesn't exist or is older than URL, rewrite it
-    if(!file.exists() || (lastModified>0 && file.lastModified()<lastModified)) {
-        byte bytes[] = getBytes(connection);
+    if(!file.exists() || (lastMod>0 && file.lastModified()<lastMod)) {
+        byte bytes[] = getBytes(conn);
         FileUtils.writeBytes(file, bytes);
     }
     

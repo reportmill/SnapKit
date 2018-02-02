@@ -150,8 +150,7 @@ public Object readObject(Object aSource)
         throw new RuntimeException("XMLArchiver.readObject: Cannot read source: " + aSource);
         
     // Try to get SourceURL from source
-    try { _surl = WebURL.getURL(aSource); }
-    catch(Exception e) { }
+    _surl = WebURL.getURL(aSource);
         
     // ReadObject(bytes) and return
     return readObject(bytes);

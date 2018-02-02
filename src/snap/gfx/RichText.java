@@ -76,7 +76,7 @@ public void setSource(Object aSource)
     
     // Try WebURL
     else {
-        try { url = WebURL.getURL(aSource); } catch(Exception e) { }
+        url = WebURL.getURL(aSource);
         if(url!=null) {
             _source = aSource;
             text = url.getText();

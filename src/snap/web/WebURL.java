@@ -4,6 +4,7 @@
 package snap.web;
 import java.io.*;
 import java.net.*;
+import snap.util.*;
 
 /**
  * A class to represent a URL for a WebSite and WebFile (it can be both for nested sources).
@@ -41,7 +42,7 @@ protected WebURL(Object aSource)
     _srcURL = WebGetter.getJavaURL(aSource);
     
     // Get URLString for parts
-    String urls = WebGetter.getURLString(_srcURL!=null? _srcURL : _src);
+    String urls = URLUtils.getString(_srcURL);
     _ustr = new URLString(urls);
 }
 
@@ -50,13 +51,21 @@ protected WebURL(Object aSource)
  */
 public static WebURL getURL(Object anObj)
 {
+    try { return getURLOrThrow(anObj); }
+    catch(Exception e) { return null; }
+}
+
+/**
+ * Returns a URL for given object.
+ */
+public static WebURL getURLOrThrow(Object anObj)
+{
     // Handle null, WebURL, WebFile
     if(anObj==null || anObj instanceof WebURL) return (WebURL)anObj;
     if(anObj instanceof WebFile) return ((WebFile)anObj).getURL();
     
     // Get URL
-    URL url = WebGetter.getJavaURL(anObj); if(url==null) return null;
-    return new WebURL(url);
+    return new WebURL(anObj);
 }
 
 /**
@@ -64,8 +73,8 @@ public static WebURL getURL(Object anObj)
  */
 public static WebURL getURL(Class aClass, String aName)
 {
-    URL url = WebGetter.getJavaURL(aClass, aName); if(url==null) return null;
-    return new WebURL(url);
+    URL url = WebGetter.getJavaURL(aClass, aName);
+    return url!=null? new WebURL(url) : null;
 }
 
 /**
@@ -198,25 +207,14 @@ public File getJavaFile()  { return getSite().getJavaFile(this); }
 /**
  * Returns whether URL can be found.
  */
-public boolean isFound()  { return getHead().getCode()==WebResponse.OK; }
-
-/**
- * Returns the response for a HEAD request.
- */
-public WebResponse getHead()
+public boolean isFound()
 {
-    WebSite site = getSite();
-    WebRequest req = new WebRequest(this); req.setType(WebRequest.Type.HEAD);
-    return site.getResponse(req);
-}
-
-/**
- * Returns the FileHeader.
- */
-public FileHeader getFileHeader()
-{
-    WebResponse resp = getHead();
-    return resp!=null? resp.getFileHeader() : null;
+    // Handle File
+    if(_src instanceof File)
+        return ((File)_src).exists();
+    
+    // Otherwise see if getHead() returns OK
+    return getHead().getCode()==WebResponse.OK;
 }
 
 /**
@@ -224,18 +222,19 @@ public FileHeader getFileHeader()
  */
 public long getLastModTime()
 {
-    FileHeader fhdr = getFileHeader();
-    return fhdr!=null? fhdr.getLastModTime() : 0;
-}
+    // Handle File or URL
+    if(_src instanceof File)
+        return ((File)_src).lastModified();
+        
+    // Handle URL
+    if(_src instanceof URL) { URL url = (URL)_src;
+        try { return url.openConnection().getLastModified(); }
+        catch(IOException e) { return 0; }
+    }
 
-/**
- * Returns Response for a Get request.
- */
-public WebResponse getResponse()
-{
-    WebSite site = getSite();
-    WebRequest req = new WebRequest(this);
-    return site.getResponse(req);
+    // Otherwise, return FileHeader.LastModTime
+    FileHeader fhdr = getFileHeader();
+    return fhdr.getLastModTime();
 }
 
 /**
@@ -243,6 +242,20 @@ public WebResponse getResponse()
  */
 public byte[] getBytes()
 {
+    try { return getBytesOrThrow(); }
+    catch(Exception e) { return null; }
+}
+
+/**
+ * Returns bytes for this URL.
+ */
+public byte[] getBytesOrThrow() throws IOException
+{
+    // Handle File or URL
+    if(_src instanceof File || _src instanceof URL)
+        return SnapUtils.getBytesOrThrow(_src);
+
+    // Otherwise get response and return bytes
     WebResponse resp = getResponse();
     if(resp.getException()!=null)                // If response hit exception, throw it
         throw new ResponseException(resp);
@@ -275,6 +288,35 @@ public String getText()
  * Returns an input stream for file.
  */
 public InputStream getInputStream()  { return new ByteArrayInputStream(getBytes()); }
+
+/**
+ * Returns the response for a HEAD request.
+ */
+public WebResponse getHead()
+{
+    WebSite site = getSite();
+    WebRequest req = new WebRequest(this); req.setType(WebRequest.Type.HEAD);
+    return site.getResponse(req);
+}
+
+/**
+ * Returns the FileHeader.
+ */
+public FileHeader getFileHeader()
+{
+    WebResponse resp = getHead();
+    return resp.getFileHeader();
+}
+
+/**
+ * Returns Response for a Get request.
+ */
+public WebResponse getResponse()
+{
+    WebSite site = getSite();
+    WebRequest req = new WebRequest(this);
+    return site.getResponse(req);
+}
 
 /**
  * Standard equals implementation.

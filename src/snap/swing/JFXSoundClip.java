@@ -15,7 +15,7 @@ import snap.web.WebURL;
 public class JFXSoundClip extends SoundClip {
 
     // The source of the data
-    Object                _source;
+    Object                _src;
     
     // The URL for the source of this data
     WebURL                _url;
@@ -40,7 +40,7 @@ public JFXSoundClip()  { checkInit(); }
 /**
  * Creates a new SoundData from given source.
  */
-public JFXSoundClip(Object aSource)  { _source = aSource; checkInit(); }
+public JFXSoundClip(Object aSource)  { _src = aSource; checkInit(); }
 
 // Does JFX initialization.
 private void checkInit()  { if(_init) return; new JFXPanel(); _init = true; }
@@ -48,22 +48,17 @@ private void checkInit()  { if(_init) return; new JFXPanel(); _init = true; }
 /**
  * Returns the source.
  */
-public Object getSource()  { return _source; }
+public Object getSource()  { return _src; }
 
 /**
  * Sets the source.
  */
-protected void setSource(Object aSource)  { _source = aSource; }
+protected void setSource(Object aSource)  { _src = aSource; }
 
 /**
  * Returns the source URL.
  */
-public WebURL getSourceURL()  { return _url!=null? _url : (_url=createSourceURL()); }
-
-/**
- * Creates the source URL from source if possible.
- */
-protected WebURL createSourceURL()  { try { return WebURL.getURL(_source); } catch(Exception e) { return null; } }
+public WebURL getSourceURL()  { return _url!=null? _url : (_url=WebURL.getURL(_src)); }
 
 /**
  * Returns the source file.

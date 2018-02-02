@@ -19,7 +19,7 @@ public class WebGetter {
 /**
  * Returns a java.net.URL for given source.
  */
-public static URL getJavaURL(Object anObj)
+public static URL getJavaURL(Object anObj) // throws MalformedURLException, IOException, IllegalArgumentException
 {
     // Handle String 
     if(anObj instanceof String) { String str = (String)anObj;
@@ -39,17 +39,17 @@ public static URL getJavaURL(Object anObj)
         
         // Try to return URL
         try { return new URL(str); }
-        catch(Exception e) { }
+        catch(MalformedURLException e) { }
         
         // Try to return URL with bogus stream handler
         try { return new URL(null, str, new BogusURLStreamHandler()); }
-        catch(Exception e) { }
+        catch(IOException e) { }
     }
     
     // Handle File: Convert to Canonical URL to normalize path
     if(anObj instanceof File) { File file = (File)anObj;
         try { return file.getCanonicalFile().toURI().toURL(); }
-        catch(Exception e) { }
+        catch(IOException e) { }
     }
     
     // Handle URL: Get string, decode and strip "jar:" prefix if found (we don't use that)
@@ -61,7 +61,7 @@ public static URL getJavaURL(Object anObj)
         return getJavaURL((Class)anObj, null);
     
     // Complain
-    throw new RuntimeException("No URL found for: " + anObj);
+    throw new IllegalArgumentException("No URL found for: " + anObj);
 }
 
 /**
@@ -83,28 +83,6 @@ public static URL getJavaURL(Class aClass, String aName)
         
     // Get URL for full path
     return aClass.getResource(path);
-}
-
-/**
- * Returns the URL string for given object.
- */
-public static String getURLString(Object anObj)
-{
-    // Handle URL
-    if(anObj instanceof URL) { URL url = (URL)anObj;
-    
-        // Get URL in normal form
-        String urls = url.toExternalForm();
-        try { urls = URLDecoder.decode(urls, "UTF-8"); } catch(Exception e) { }
-        
-        // If jar or wsjar, just strip it
-        if(url.getProtocol().equals("jar")) urls = urls.substring(4);
-        else if(url.getProtocol().equals("wsjar")) urls = urls.substring(6);
-        return urls;
-    }
-    
-    // Handle anything else
-    return anObj.toString();
 }
 
 /**
