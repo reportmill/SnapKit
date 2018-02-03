@@ -16,6 +16,9 @@ public class ColView extends ChildView {
     // Whether to fill to with
     boolean       _fillWidth;
     
+    // Constants for properties
+    public static final String Spacing_Prop = "Spacing";
+
 /**
  * Returns the spacing.
  */
@@ -24,7 +27,12 @@ public double getSpacing()  { return _spacing; }
 /**
  * Sets the spacing.
  */
-public void setSpacing(double aValue)  { _spacing = aValue; }
+public void setSpacing(double aValue)
+{
+    if(aValue==_spacing) return;
+    firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
+    relayout(); relayoutParent();
+}
 
 /**
  * Returns whether children will be resized to fill width.

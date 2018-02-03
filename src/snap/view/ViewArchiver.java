@@ -74,6 +74,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("ColorButton", snap.viewx.ColorButton.class);
     cmap.put("ColorDock", snap.viewx.ColorDock.class);
     cmap.put("ColorWell", snap.viewx.ColorWell.class);
+    cmap.put("ColView", ColView.class);
     cmap.put("CheckBox", CheckBox.class);
     cmap.put("CheckBoxMenuItem", CheckBoxMenuItem.class);
     cmap.put("ComboBox", ComboBox.class);
@@ -91,6 +92,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("ProgressBar", ProgressBar.class);
     cmap.put("RadioButton", RadioButton.class);
     cmap.put("RectView", RectView.class);
+    cmap.put("RowView", RowView.class);
     cmap.put("ScrollView", ScrollView.class);
     cmap.put("Separator", Separator.class);
     cmap.put("Slider", Slider.class);

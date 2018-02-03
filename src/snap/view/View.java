@@ -998,7 +998,12 @@ public HPos getLeanX()  { return _leanX; }
 /**
  * Sets the horizontal lean this view would prefer to take when inside a pane.
  */
-public void setLeanX(HPos aPos)  { _leanX = aPos; }
+public void setLeanX(HPos aPos)
+{
+    if(aPos==_leanX) return;
+    firePropChange(LeanX_Prop, _leanX, _leanX = aPos);
+    relayoutParent();
+}
 
 /**
  * Returns the vertical position this view would prefer to take when inside a pane.
@@ -1008,7 +1013,12 @@ public VPos getLeanY()  { return _leanY; }
 /**
  * Sets the vertical position this view would prefer to take when inside a pane.
  */
-public void setLeanY(VPos aPos)  { _leanY = aPos; }
+public void setLeanY(VPos aPos)
+{
+    if(aPos==_leanY) return;
+    firePropChange(LeanY_Prop, _leanY, _leanY = aPos);
+    relayoutParent();
+}
 
 /**
  * Returns whether this view would like to grow horizontally if possible when inside a pane.
@@ -1018,7 +1028,12 @@ public boolean isGrowWidth()  { return _growWidth; }
 /**
  * Sets whether this view would like to grow horizontally if possible when inside a pane.
  */
-public void setGrowWidth(boolean aValue)  { _growWidth = aValue; }
+public void setGrowWidth(boolean aValue)
+{
+    if(aValue==_growWidth) return;
+    firePropChange(GrowWidth_Prop, _growWidth, _growWidth = aValue);
+    relayoutParent();
+}
 
 /**
  * Returns whether this view would like to grow vertically if possible when inside a pane.
@@ -1028,7 +1043,12 @@ public boolean isGrowHeight()  { return _growHeight; }
 /**
  * Sets whether this view would like to grow vertically if possible when inside a pane.
  */
-public void setGrowHeight(boolean aValue)  { _growHeight = aValue; }
+public void setGrowHeight(boolean aValue)
+{
+    if(aValue==_growHeight) return;
+    firePropChange(GrowHeight_Prop, _growHeight, _growHeight = aValue);
+    relayoutParent();
+}
 
 /**
  * Returns whether this view has a horizontal orientation.
@@ -1043,7 +1063,12 @@ public boolean isVertical()  { return _vertical; }
 /**
  * Sets whether this view has a vertical orientation.
  */
-public void setVertical(boolean aValue)  { _vertical = aValue; }
+public void setVertical(boolean aValue)
+{
+    if(aValue==_vertical) return;
+    firePropChange(Vertical_Prop, _vertical, _vertical = aValue);
+    relayoutParent();
+}
 
 /**
  * Returns the autosizing settings as a string with hyphens for struts and tilde for sprints (horiz,vert).
@@ -1453,6 +1478,7 @@ public void setPadding(Insets theIns)
     if(theIns==null) theIns = getDefaultPadding();
     if(SnapUtils.equals(theIns,_padding)) return;
     firePropChange(Padding_Prop, _padding, _padding = theIns);
+    relayout(); relayoutParent();
 }
 
 /**
