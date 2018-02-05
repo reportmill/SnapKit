@@ -765,7 +765,7 @@ public Point localToParent(double aX, double aY)
 /**
  * Converts a point from local to given parent.
  */
-public Point localToParent(View aPar, double aX, double aY)
+public Point localToParent(double aX, double aY, View aPar)
 {
     Point point = new Point(aX,aY);
     for(View n=this;n!=aPar&&n!=null;n=n.getParent()) {
@@ -782,7 +782,7 @@ public Shape localToParent(Shape aShape)  { return aShape.copyFor(getLocalToPare
 /**
  * Converts a point from local to given parent.
  */
-public Shape localToParent(View aPar, Shape aShape)  { return aShape.copyFor(getLocalToParent(aPar)); }
+public Shape localToParent(Shape aShape, View aPar)  { return aShape.copyFor(getLocalToParent(aPar)); }
 
 /**
  * Returns the transform from parent to local coords.
@@ -810,7 +810,7 @@ public Point parentToLocal(double aX, double aY)
 /**
  * Converts a point from given parent to local.
  */
-public Point parentToLocal(View aPar, double aX, double aY)  { return getParentToLocal(aPar).transform(aX,aY); }
+public Point parentToLocal(double aX, double aY, View aPar)  { return getParentToLocal(aPar).transform(aX,aY); }
 
 /**
  * Converts a shape from parent to local.
@@ -820,12 +820,12 @@ public Shape parentToLocal(Shape aShape)  { return aShape.copyFor(getParentToLoc
 /**
  * Converts a shape from parent to local.
  */
-public Shape parentToLocal(View aView, Shape aShape)  { return aShape.copyFor(getParentToLocal(aView)); }
+public Shape parentToLocal(Shape aShape, View aView)  { return aShape.copyFor(getParentToLocal(aView)); }
 
 /**
  * Converts a point from local to parent.
  */
-public Point localToScreen(double aX, double aY)  { return localToParent(null, aX,aY); }
+public Point localToScreen(double aX, double aY)  { return localToParent(aX, aY,null); }
 
 /**
  * Returns whether view contains point.

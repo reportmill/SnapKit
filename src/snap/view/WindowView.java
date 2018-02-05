@@ -253,7 +253,7 @@ public void show(View aView, double aX, double aY)
     
     // If aView provided, convert point
     if(aView!=null) {
-        Point pt = aView.localToParent(null, aX, aY); aX = pt.x; aY = pt.y; }
+        Point pt = aView.localToParent(aX, aY, null); aX = pt.x; aY = pt.y; }
         
     // If FrameSaveName provided, set Location from defaults and register to store future window moves
     if(getSaveName()!=null) {

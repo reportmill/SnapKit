@@ -347,9 +347,9 @@ public Point getPoint(View aView)
     Point pt = getPoint(); View view0 = getView();
     View ancestor = ViewUtils.getCommonAncetor(view0,aView);
     if(ancestor!=view0)
-        pt = view0.localToParent(ancestor, pt.x, pt.y);
+        pt = view0.localToParent(pt.x, pt.y, ancestor);
     if(ancestor!=aView)
-        pt = aView.parentToLocal(ancestor, pt.x, pt.y);
+        pt = aView.parentToLocal(pt.x, pt.y, ancestor);
     return pt;
 }
 
@@ -433,7 +433,7 @@ public ViewEvent copyForView(View aView)
 {
     View thisNode = getView(); double x = getX(), y = getY();
     View par = ViewUtils.getCommonAncetor(thisNode, aView);
-    snap.gfx.Point point = par==thisNode? aView.parentToLocal(par,x,y) : thisNode.localToParent(par,x,y);
+    snap.gfx.Point point = par==thisNode? aView.parentToLocal(x,y,par) : thisNode.localToParent(x,y,par);
     return copyForViewPoint(aView, point.x, point.y, -1);
 }
 
