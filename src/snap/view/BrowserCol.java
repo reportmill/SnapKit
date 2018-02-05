@@ -20,7 +20,9 @@ public class BrowserCol <T> extends ListView <T> {
  */
 public BrowserCol(BrowserView aBrsr)
 {
+    // Set browser
     _browser = aBrsr;
+    setFocusWhenPressed(aBrsr.isFocusWhenPressed());
     
     // Update some attribues
     setRowHeight(_browser.getRowHeight());

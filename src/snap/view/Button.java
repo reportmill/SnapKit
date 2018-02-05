@@ -88,6 +88,9 @@ public void setOwner(ViewOwner anOwner)
  */
 public static void paintDefaultButton(Painter aPntr, double x, double y, double w, double h, int aState)
 {
+    // Reset stroke
+    aPntr.setStroke(Stroke.Stroke1);
+     
     RoundRect rect = new RoundRect(x,y,w,h,3); aPntr.setPaint(back); aPntr.fill(rect);  // Background grad
     rect.setRect(x+.5,y+.5,w-1,h); aPntr.setColor(_c6); aPntr.draw(rect);             // Paint outer bottom ring lt gray
     rect.setRect(x+1.5,y+1.5,w-3,h-4); aPntr.setPaint(ring1); aPntr.draw(rect);    // Paint inner ring light gray

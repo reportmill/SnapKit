@@ -340,6 +340,15 @@ void listAreaPropChange(PropChange aPC)
 }
 
 /**
+ * Override to forward to ListArea.
+ */
+public void setFocusWhenPressed(boolean aValue)
+{
+    super.setFocusWhenPressed(aValue);
+    _listArea.setFocusWhenPressed(aValue);
+}
+
+/**
  * XML archival.
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)

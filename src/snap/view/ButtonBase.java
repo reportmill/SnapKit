@@ -228,6 +228,9 @@ public void fire()  { if(isEnabled()) fireActionEvent(); }
  */
 public void paintFront(Painter aPntr)
 {
+    // Reset stroke
+    aPntr.setStroke(Stroke.Stroke1);
+
     if(isShowBorder()) {
         int state = isPressed()? Painter.BUTTON_PRESSED : isTargeted()? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
         ButtonPainter bp = new ButtonPainter(); bp.setWidth(getWidth()); bp.setHeight(getHeight());
