@@ -210,7 +210,7 @@ public File getJavaFile()  { return getSite().getJavaFile(this); }
 public boolean isFound()
 {
     // Handle File
-    if(_src instanceof File)
+    if(!SnapUtils.isTeaVM && _src instanceof File)
         return ((File)_src).exists();
     
     // Otherwise see if getHead() returns OK
@@ -223,7 +223,7 @@ public boolean isFound()
 public long getLastModTime()
 {
     // Handle File or URL
-    if(_src instanceof File)
+    if(!SnapUtils.isTeaVM && _src instanceof File)
         return ((File)_src).lastModified();
         
     // Handle URL
@@ -252,7 +252,7 @@ public byte[] getBytes()
 public byte[] getBytesOrThrow() throws IOException
 {
     // Handle File or URL
-    if(_src instanceof File || _src instanceof URL)
+    if(!SnapUtils.isTeaVM && (_src instanceof File || _src instanceof URL))
         return SnapUtils.getBytesOrThrow(_src);
 
     // Otherwise get response and return bytes

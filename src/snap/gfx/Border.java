@@ -303,6 +303,7 @@ public static class EtchBorder extends Border {
     /** Paint border. */
     public void paint(Painter aPntr, Shape aShape)
     {
+        aPntr.setStroke(Stroke.Stroke1);
         Rect rect = aShape.getBounds(); double w = rect.getWidth(), h = rect.getHeight();
         aPntr.setColor(Color.WHITE); aPntr.drawRect(1.5,1.5,w-2,h-2);
         aPntr.setColor(BORDER_GRAY); aPntr.drawRect(.5,.5,w-2,h-2);
