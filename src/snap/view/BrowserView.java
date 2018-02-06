@@ -366,10 +366,10 @@ public String getPath(String aSeparator)
     
     // Iterate over browser columns to add selected row items
     for(int i=0, iMax=getColCount(); i<iMax; i++) {
-        BrowserCol col = getCol(i);
-        Object item = col.getSelectedItem(); if(item==null) break;
+        BrowserCol <T> col = getCol(i);
+        T item = col.getSelectedItem(); if(item==null) break;
         if(i>0) buf.append(aSeparator);
-        buf.append(item.toString());
+        buf.append(getText(item));
     }
     
     // Return path string
