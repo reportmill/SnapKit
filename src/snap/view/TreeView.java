@@ -12,12 +12,6 @@ import snap.util.*;
  */
 public class TreeView <T> extends ParentView implements View.Selectable <T> {
     
-    // Whether tree root is visible
-    boolean                 _rootVis;
-    
-    // Whether to show root handle
-    boolean                 _rootHandle;
-    
     // The items
     List <T>                _items = new ArrayList();
     
@@ -58,10 +52,6 @@ public class TreeView <T> extends ParentView implements View.Selectable <T> {
     static final Paint DIVIDER_FILL = new Color("#EEEEEE");
     static final Paint DIVIDER_FILLH = new Color("#E0E0E0");
 
-    // Constants for TreeView
-    public static final String ShowRoot_Prop = "ShowRoot";
-    public static final String ShowRootHandle_Prop = "ShowRootHandle";
-    
 /**
  * Creates a new TreeView.
  */
@@ -73,7 +63,7 @@ public TreeView()
     
     // Configure Columns SplitView and ScrollView and add
     _split.setBorder(null); _split.setGrowWidth(true);
-    setBorder(_scroll.getBorder()); _scroll.setBorder(null);
+    _scroll.setBorder(null);
     addChild(_scroll);
     
     // Set main scroller to sync HeaderScroller
@@ -88,34 +78,6 @@ public TreeView()
     // Create/add first column
     TreeCol treeCol = new TreeCol();
     addCol(treeCol);
-}
-
-/**
- * Returns whether root is visible.
- */
-public boolean isShowRoot()  { return _rootVis; }
-
-/**
- * Sets whether root is visible.
- */
-public void setShowRoot(boolean aValue)
-{
-    if(aValue==_rootVis) return;
-    firePropChange(ShowRoot_Prop, _rootVis, _rootVis = aValue);
-}
-
-/**
- * Returns whether root shows handle.
- */
-public boolean isShowRootHandle()  { return _rootHandle; }
-
-/**
- * Sets whether root shows handle.
- */
-public void setShowRootHandle(boolean aValue)
-{
-    if(aValue==_rootHandle) return;
-    firePropChange(ShowRootHandle_Prop, _rootHandle, _rootHandle = aValue);
 }
 
 /**
@@ -588,6 +550,11 @@ public Image getCollapsedImage()
 }
 
 /**
+ * Returns the default border.
+ */
+public Border getDefaultBorder()  { return ScrollView.SCROLL_VIEW_BORDER; }
+
+/**
  * Returns whether given items are equal to set items.
  */
 protected boolean equalsItems(List theItems)
@@ -602,10 +569,6 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
-
-    // Archive RootVisible, ShowRootHandles
-    if(!isShowRoot()) e.add("RootVisible", false);
-    if(!isShowRootHandle()) e.add("ShowRootHandles", false);
     return e;
 }
 
@@ -616,13 +579,6 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
-
-    // Unarchive RootVisible, ShowRootHandles
-    if(anElement.hasAttribute("RootVisible")) setShowRoot(anElement.getAttributeBooleanValue("RootVisible"));
-    if(anElement.hasAttribute("ShowRootHandles"))
-        setShowRootHandle(anElement.getAttributeBooleanValue("ShowRootHandles"));
-    if(anElement.hasAttribute("ShowsRootHandles"))
-        setShowRootHandle(anElement.getAttributeBooleanValue("ShowsRootHandles"));
 }
 
 }

@@ -5,7 +5,7 @@ package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
 import snap.gfx.*;
-import snap.util.ListUtils;
+import snap.util.*;
 
 /**
  * A browser class.
@@ -44,6 +44,10 @@ public class BrowserView <T> extends ParentView implements View.Selectable <T> {
     
     // The image to be used for branch
     Image                   _branchImg;
+    
+    // Constants for properties
+    public static final String PrefColCount_Prop = "PrefColCount";
+    public static final String PrefColWidth_Prop = "PrefColWidth";
     
 /**
  * Creates a new BrowserView.
@@ -450,6 +454,35 @@ public Image getBranchImage()
     Polygon poly = new Polygon(1.5,1.5,7.5,5.5,1.5,9.5);
     Painter pntr = img.getPainter(); pntr.setColor(Color.BLACK); pntr.fill(poly); pntr.flush();
     return _branchImg = img;
+}
+
+/**
+ * XML archival.
+ */
+public XMLElement toXMLView(XMLArchiver anArchiver)
+{
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
+    
+    // Archive PrefColCount, PrefColWidth
+    if(getPrefColCount()!=2) e.add(PrefColCount_Prop, getPrefColCount());
+    if(getPrefColWidth()!=150) e.add(PrefColWidth_Prop, getPrefColWidth());
+    
+    // Archive 
+    return e;
+}
+
+/**
+ * XML unarchival.
+ */
+public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+{
+    // Unarchive basic view attributes
+    super.fromXMLView(anArchiver, anElement);
+    
+    // Archive PrefColCount, PrefColWidth
+    if(anElement.hasAttribute(PrefColCount_Prop)) setPrefColCount(anElement.getAttributeIntValue(PrefColCount_Prop));
+    if(anElement.hasAttribute(PrefColWidth_Prop)) setPrefColWidth(anElement.getAttributeIntValue(PrefColWidth_Prop));
 }
 
 }

@@ -119,8 +119,8 @@ protected void configureCell(ListCell <T> aCell)
     View graphic = tree.getGraphic(item); if(graphic!=null) aCell.setGraphic(graphic);
     
     // Calculate and set cell indent
-    int rootIndent = tree.isShowRoot()? 20 : 0; if(!tree.isParent(item)) rootIndent += 18;
     int pcount = tree.getParentCount(item);
+    int rootIndent = tree.isParent(item)? 0 : 18;
     aCell.setPadding(0, 2, 0, rootIndent + pcount*20);
     
     // If parent, configure Expand/Collapse image
