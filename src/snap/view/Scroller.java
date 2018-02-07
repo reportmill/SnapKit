@@ -185,7 +185,7 @@ public double getScrollVMax()
 /**
  * Returns the horizontal scroll.
  */
-public double getRatioH()  { return _scrollH/getScrollHMax(); }
+public double getRatioH()  { double shm = getScrollHMax(); return shm>0? _scrollH/shm : 0; }
 
 /**
  * Sets the horizontal scroll.
@@ -195,7 +195,7 @@ public void setRatioH(double aValue)  { setScrollH(aValue*getScrollHMax()); }
 /**
  * Returns the vertical scroll.
  */
-public double getRatioV()  { return _scrollV/getScrollVMax(); }
+public double getRatioV()  { double svm = getScrollVMax(); return svm>0? _scrollV/svm : 0; }
 
 /**
  * Sets the vertical scroll.

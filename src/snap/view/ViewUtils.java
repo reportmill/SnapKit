@@ -115,7 +115,8 @@ public static void paintAll(View aView, Painter aPntr)
 public static void layoutDeep(View aView)
 {
     ParentView par = aView instanceof ParentView? (ParentView)aView : null; if(par==null) return;
-    par.layout();
+    if(par.isNeedsLayout())
+        par.layout();
     for(View child : par.getChildren())
         layoutDeep(child);
 }
