@@ -180,6 +180,7 @@ public class View implements XMLArchiver.Archivable {
     public static final String Align_Prop = "Align";
     public static final String Opacity_Prop = "Opacity";
     public static final String Padding_Prop = "Padding";
+    public static final String Spacing_Prop = "Spacing";
     public static final String Parent_Prop = "Parent";
     public static final String Showing_Prop = "Showing";
     public static final String Text_Prop = "Text";
@@ -1480,6 +1481,16 @@ public void setPadding(Insets theIns)
     firePropChange(Padding_Prop, _padding, _padding = theIns);
     relayout(); relayoutParent();
 }
+
+/**
+ * Returns the spacing for views that support it (Label, Button, ColView, RowView etc.).
+ */
+public double getSpacing()  { return 0; }
+
+/**
+ * Sets the spacing for views that support it (Label, Button, ColView, RowView etc.).
+ */
+public void setSpacing(double aValue)  { }
 
 /**
  * Returns the default alignment.

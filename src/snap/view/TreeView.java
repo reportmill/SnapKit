@@ -81,6 +81,11 @@ public TreeView()
 }
 
 /**
+ * Returns the ScrollView.
+ */
+public ScrollView getScrollView()  { return _scroll; }
+
+/**
  * Returns the row height.
  */
 public int getRowHeight()  { return _rowHeight; }

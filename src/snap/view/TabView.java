@@ -27,7 +27,7 @@ public class TabView extends ParentView implements View.Selectable <Tab> {
     BoxView         _contentBox;
     
     // The node to obscure the content cradle border below the selected tab button
-    View            _borderBlockerBox = new RowView();
+    View            _borderBlockerBox = new RectView();
     
     // Hidden kids
     RowView         _hiddenKids = new RowView();
@@ -96,12 +96,40 @@ public void addTab(Tab aTab)  { addTab(aTab, getTabCount()); }
  */
 public void addTab(Tab aTab, int anIndex)
 {
+    // Add Tab to Tabs list
     _tabs.add(anIndex, aTab);
+    
+    // Create ToggleButton for tab and configure
     ToggleButton btn = new ToggleButton(); btn.setText(aTab.getTitle()); btn.getLabel().setPadding(4,7,4,7);
     btn.setMinWidth(getTabMinWidth()); btn.setAlign(Pos.TOP_CENTER); btn.setPosition(Pos.TOP_CENTER);
+    
+    // Add ToggleButton to Shelf
     _shelf.addChild(btn, anIndex); btn.addEventHandler(e -> shelfButtonPressed(e), Action);
+    
+    // Add Tab.Content to HiddenKids
     if(aTab.getContent()!=null) _hiddenKids.addChild(aTab.getContent(),0);
-    if(getContent()==null) setSelectedIndex(0);
+    
+    // If first tab, select 0
+    int selInd = getSelectedIndex();
+    if(anIndex<=selInd || selInd<0) {
+        setSelectedIndex(-1); setSelectedIndex(selInd+1); }
+}
+
+/**
+ * Removes the tab at given index.
+ */
+public void removeTab(int anIndex)
+{
+    // Remove Tab content and button
+    Tab tab = getTab(anIndex);
+    ToggleButton btn = getTabButton(anIndex);
+    _tabs.remove(anIndex);
+    _hiddenKids.removeChild(tab.getContent());
+    _shelf.removeChild(btn);
+    
+    // Reset Selection
+    if(anIndex==getSelectedIndex()) {
+        setSelectedIndex(anIndex-1); if(anIndex<getTabCount()) setSelectedIndex(anIndex); }
 }
 
 /**
@@ -152,12 +180,20 @@ public int getSelectedIndex()  { return _sindex; }
  */
 public void setSelectedIndex(int anIndex)
 {
+    // If already set, just return
     if(anIndex==_sindex) return;
+    
+    // Get tab at index
     Tab tab = anIndex>=0 && anIndex<getTabCount()? getTab(anIndex) : null;
+    
+    // Update old/new ToggleButtons
     ToggleButton ob = getTabButton(_sindex); if(ob!=null) { ob.setSelected(false); ob.setButtonFill(null); }
     ToggleButton nb = getTabButton(anIndex); if(nb!=null) { nb.setSelected(true); nb.setButtonFill(_backFill); }
+    
+    // Set content to tab.Content
     setContent(tab!=null? tab.getContent() : null);
-    positionBorderBlockerBox();
+    
+    // FirePropChange and fireActionEvent
     firePropChange(SelectedIndex_Prop, _sindex, _sindex=anIndex);
     fireActionEvent();
 }
@@ -197,7 +233,7 @@ public View getContent()  { return _contentBox.getContent(); }
 /**
  * Sets the current tab content.
  */
-public void setContent(View aView)
+protected void setContent(View aView)
 {
     View old = getContent();
     _contentBox.setContent(aView);
@@ -205,6 +241,7 @@ public void setContent(View aView)
     // If old is a tab content, add back to hidden kids
     boolean isKid = false; for(Tab tab : _tabs) if(tab.getContent()==old) isKid = true;
     if(old!=null && isKid) _hiddenKids.addChild(old,0);
+    relayout();
 }
 
 /**
@@ -233,18 +270,16 @@ protected double getPrefHeightImpl(double aW)
  */
 protected void layoutImpl()
 {
+    // Get insets and inner bounds
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top+28, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
+    
+    // Resize Shelf and ContentBox
     _shelf.setWidth(w);
+    _shelf.layout();
     _contentBox.setBounds(x,y,w,h);
-    positionBorderBlockerBox();
-}
-
-/**
- * Does layout for box that obscures the border under the selected tab button.
- */
-private void positionBorderBlockerBox()
-{
+    
+    // Reset BorderBlockerBox to obscure border under selected tab
     ToggleButton tbtn = getTabButton(_sindex);
     if(tbtn!=null) _borderBlockerBox.setBounds(tbtn.getX()+1,_contentBox.getY(),tbtn.getWidth()-2,1);
     else _borderBlockerBox.setBounds(0,0,0,0);

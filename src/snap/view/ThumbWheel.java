@@ -252,7 +252,7 @@ protected void paintFront(Painter aPntr)
     //boolean old = aPntr.setAntialiasing(false);
     
     // Get thumbwheel color
-    Color color = (Color)getFill();
+    Color color = (Color)getFill(); if(color==null) color = Color.LIGHTGRAY;
     
     // Draw linear background
     if(isLinear()) {
@@ -433,7 +433,7 @@ private int getShift()
 private Image getThumbWheelBackgroundImage()
 {
     // Get the thumbwheel color
-    Color color = (Color)getFill();
+    Color color = (Color)getFill(); if(color==null) color = Color.LIGHTGRAY;
     
     // Get name for image and try to find new image (return if already created/cached)
     int w = (int)Math.round(getWidth()), h = (int)Math.round(getHeight());

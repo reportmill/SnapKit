@@ -29,7 +29,6 @@ public class Label extends ParentView {
     public static final String Graphic_Prop = "Graphic";
     public static final String GraphicAfter_Prop = "GraphicAfter";
     public static final String StringView_Prop = "StringView";
-    public static final String Spacing_Prop = "Spacing";
     
 /**
  * Creates a label node.

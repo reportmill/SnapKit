@@ -98,6 +98,16 @@ public Pos getPosition()  { return _pos; }
 public void setPosition(Pos aPos)  { _pos = aPos; }
 
 /**
+ * Returns the radius of the round.
+ */
+public double getRadius()  { return _rnd; }
+
+/**
+ * Sets the radius of the round.
+ */
+public void setRadius(double aValue)  { _rnd = aValue;  }
+
+/**
  * Returns the rect for current position.
  */
 public RoundRect getRoundRectForPosition()

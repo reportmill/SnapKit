@@ -16,6 +16,9 @@ public class TextField extends ParentView {
     // The column count to be used for preferred width (if set)
     int                   _colCount = 20;
     
+    // The paint for the text
+    Paint                 _textFill = Color.BLACK;
+    
     // A label in the background for promt text and/or in text controls
     Label                 _label = new Label();
     
@@ -47,8 +50,9 @@ public class TextField extends ParentView {
     String                _focusGainedText;
     
     // Constants for properties
-    public static final String ColumnCount_Prop = "ColumnCount";
+    public static final String ColCount_Prop = "ColCount";
     public static final String PromptText_Prop = "PromptText";
+    public static final String TextFill_Prop = "TextFill";
     
     // The color of the border when focused
     static Color    SELECTION_COLOR = new Color(181, 214, 254, 255);
@@ -70,18 +74,38 @@ public TextField()
 }
 
 /**
+ * Returns the text fill.
+ */
+public Paint getTextFill()  { return _textFill; }
+
+/**
+ * Sets the text fill.
+ */
+public void setTextFill(Paint aPaint)
+{
+    if(SnapUtils.equals(aPaint, _textFill)) return;
+    firePropChange(TextFill_Prop, _textFill, _textFill = aPaint);
+    repaint();
+}
+
+/**
  * Returns the column count.
  */
-public int getColumnCount()  { return _colCount; }
+public int getColCount()  { return _colCount; }
 
 /**
  * Sets the column count.
  */
-public void setColumnCount(int aValue)
+public void setColCount(int aValue)
 {
-    firePropChange(ColumnCount_Prop, _colCount, _colCount=aValue);
+    firePropChange(ColCount_Prop, _colCount, _colCount=aValue);
     relayoutParent();
 }
+
+/**
+ * Returns the total column width.
+ */
+double getTotalColWidth()  { return Math.ceil(_colCount*getFont().charAdvance('X')); }
 
 /**
  * Returns the prompt text.
@@ -205,8 +229,8 @@ public double getXForChar(int anIndex)
  */
 protected double getPrefWidthImpl(double aH)
 {
-    Insets ins = getInsetsAll(); int ccount = getColumnCount();
-    double pw1 = ccount>0? ccount*getFont().charAdvance('X') : getTextWidth() + 10;
+    Insets ins = getInsetsAll();
+    double pw1 = getColCount()>0? getTotalColWidth() : getTextWidth() + 10;
     double pw2 = _label.getPrefWidth(), pw3 = Math.max(pw1, pw2);
     return ins.left + pw3 + ins.right;
 }
@@ -525,7 +549,7 @@ protected void paintFront(Painter aPntr)
     if(isFocused()) {
         Rect sbnds = getSelBounds(); double sx = sbnds.x, sy = sbnds.y, sh = sbnds.height;
         if(isSelEmpty()) { if(!_hideCaret) {
-            aPntr.setPaint(Color.BLACK); aPntr.setStroke(Stroke.Stroke1); aPntr.drawLine(sx,sy,sx,sy+sh); }}
+            aPntr.setPaint(_textFill); aPntr.setStroke(Stroke.Stroke1); aPntr.drawLine(sx,sy,sx,sy+sh); }}
         else { aPntr.setPaint(SELECTION_COLOR); aPntr.fill(sbnds); }
     }
         
@@ -533,7 +557,7 @@ protected void paintFront(Painter aPntr)
     if(length()==0) return;
     String str = getText(); Font font = getFont();
     aPntr.save(); aPntr.clip(bnds);
-    aPntr.setFont(font); aPntr.setPaint(Color.BLACK);
+    aPntr.setFont(font); aPntr.setPaint(_textFill);
     aPntr.drawString(str, tx, ty + Math.ceil(font.getAscent()));
     aPntr.restore();
 }
@@ -844,7 +868,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive text component attributes
     XMLElement e = super.toXMLView(anArchiver);
-    if(getColumnCount()!=20) e.add(ColumnCount_Prop, getColumnCount());
+    if(getColCount()!=20) e.add(ColCount_Prop, getColCount());
     if(getText()!=null && getText().length()>0) e.add("text", getText());
     if(getRadius()!=4) e.add("Radius", getRadius());
     return e;
@@ -859,7 +883,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     super.fromXMLView(anArchiver, anElement);
     
     // Unarchive ColumnCount, Text, Radius
-    if(anElement.hasAttribute(ColumnCount_Prop)) setColumnCount(anElement.getAttributeIntValue(ColumnCount_Prop));
+    if(anElement.hasAttribute(ColCount_Prop)) setColCount(anElement.getAttributeIntValue(ColCount_Prop));
     String str = anElement.getAttributeValue("text",  anElement.getAttributeValue("value", anElement.getValue()));
     if(str!=null && str.length()>0)
         setText(str);

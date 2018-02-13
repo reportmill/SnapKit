@@ -16,9 +16,6 @@ public class ColView extends ChildView {
     // Whether to fill to with
     boolean       _fillWidth;
     
-    // Constants for properties
-    public static final String Spacing_Prop = "Spacing";
-
 /**
  * Returns the spacing.
  */

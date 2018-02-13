@@ -22,6 +22,9 @@ public class ButtonBase extends ParentView {
     // The position of the button when in a group (determines corner rendering)
     Pos                     _pos;
     
+    // The radius of the button rounding
+    double                  _rad = 4;
+    
     // Whether button is pressed
     boolean                 _pressed;
     
@@ -186,6 +189,16 @@ public Pos getPosition()  { return _pos; }
 public void setPosition(Pos aPos)  { _pos = aPos; }
 
 /**
+ * Returns the radius of the round.
+ */
+public double getRadius()  { return _rad; }
+
+/**
+ * Sets the radius of the round.
+ */
+public void setRadius(double aValue)  { _rad = aValue;  }
+
+/**
  * Returns the button fill.
  */
 public Paint getButtonFill()  { return _btnFill; }
@@ -233,7 +246,7 @@ public void paintFront(Painter aPntr)
 
     if(isShowBorder()) {
         int state = isPressed()? Painter.BUTTON_PRESSED : isTargeted()? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
-        ButtonPainter bp = new ButtonPainter(); bp.setWidth(getWidth()); bp.setHeight(getHeight());
+        ButtonPainter bp = new ButtonPainter(); bp.setWidth(getWidth()); bp.setHeight(getHeight()); bp.setRadius(_rad);
         bp.setState(state); if(getButtonFill()!=null) bp.setFill(getButtonFill()); bp.setPosition(getPosition());
         bp.paint(aPntr);
     }

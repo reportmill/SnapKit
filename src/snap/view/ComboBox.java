@@ -78,7 +78,7 @@ public void setCellConfigure(Consumer<ListCell<T>> aCC)  { getListView().setCell
 public TextField getTextField()
 {
     if(_text!=null) return _text;
-    _text = new TextField(); _text.setGrowWidth(true); _text.setColumnCount(0);
+    _text = new TextField(); _text.setGrowWidth(true); _text.setColCount(0);
     _text.addEventHandler(e -> textFieldFiredAction(), Action);
     _text.addEventFilter(e -> textFieldKeyPressed(e), KeyPress);
     _text.addEventHandler(e -> textFieldKeyTyped(e), KeyType);

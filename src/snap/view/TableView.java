@@ -81,6 +81,11 @@ public TableView()
 }
 
 /**
+ * Returns the ScrollView.
+ */
+public ScrollView getScrollView()  { return _scroll; }
+
+/**
  * Returns the items.
  */
 public List <T> getItems()  { return _items; }

@@ -33,21 +33,38 @@ public class Spinner <T> extends ParentView {
     public static final String Max_Prop = "Max";
     public static final String Step_Prop = "StepSize";
     public static final String Value_Prop = "Value";
+    
+    // Constant for Button width
+    static final int BTN_W = 14;
 
 /**
  * Creates a new Spinner.
  */
 public Spinner()
 {
+    // Enable Action event
     enableEvents(Action);
     _text = new TextField();
+    
+    // Cconfigure Text
     _text.addEventHandler(e -> textChanged(), Action);
+    
+    // Create/configure UpButton
     _upBtn = new Button(); _upBtn.setImage(getUpArrowImage());
+    _upBtn.setRadius(3); _upBtn.setPosition(Pos.TOP_CENTER);
     _upBtn.addEventHandler(e -> increment(), Action);
+    
+    // Create/configure DownButton
     _dnBtn = new Button(); _dnBtn.setImage(getDownArrowImage());
+    _dnBtn.setPosition(Pos.BOTTOM_CENTER); _dnBtn.setRadius(3);
     _dnBtn.addEventHandler(e -> decrement(), Action);
     setChildren(_text, _upBtn, _dnBtn);
 }
+
+/**
+ * Returns the text field.
+ */
+public TextField getTextField()  { return _text; }
 
 /**
  * Returns the spinner value.
@@ -206,7 +223,7 @@ private Image getDownArrowImage()
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _text.getPrefWidth()+16; }
+protected double getPrefWidthImpl(double aH)  { return _text.getPrefWidth()+BTN_W; }
 
 /**
  * Returns the preferred height.
@@ -220,11 +237,17 @@ protected void layoutImpl()
 {
     double w = getWidth(), h = getHeight();
     Insets ins = getInsetsAll(); double px = ins.left, py = ins.top, pw = w - px - ins.right, ph = h - py - ins.bottom;
-    double by = Math.round(py+ph/2);
     
-    _text.setBounds(px, py, pw-18,ph);
-    _upBtn.setBounds(px+pw-16,0,16,by-py);
-    _dnBtn.setBounds(px+pw-16,by,16,py+ph-by);
+    // Layout text in bounds minus Button width - 2 (spacing)
+    double tw = pw - BTN_W - 2;
+    _text.setBounds(px, py, tw, ph);
+    
+    // Layout buttons
+    double bh = (ph/2-1); // Math.round()?
+    double bx = px + tw + 2;
+    double by = py + 1;
+    _upBtn.setBounds(bx, by, BTN_W, bh);
+    _dnBtn.setBounds(bx, by+bh, BTN_W, bh);
 }
 
 /**
