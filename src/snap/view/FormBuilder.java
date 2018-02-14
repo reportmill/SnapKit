@@ -176,7 +176,7 @@ public RadioButton addRadioButton(String aTitle, String theText, boolean isSelec
     RadioButton rb = new RadioButton(); rb.setName(aTitle); rb.setText(theText);
     if(_font!=null) rb.setFont(_font);
     if(isSelected) { rb.setSelected(true); setValue(aTitle, theText); }
-    rb.setToggleGroupName(aTitle);
+    rb.setGroup(aTitle);
     
     // Add/return button
     return addView(rb);

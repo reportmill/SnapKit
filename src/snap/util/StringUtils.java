@@ -253,8 +253,8 @@ public static double doubleValue(String aString, int aStart)
     
     // If number found, have Double parse it
     if(matcher.find(aStart)) {
-        String string = matcher.group();
-        try { return Double.parseDouble(string); }
+        String str = matcher.group(); if(str.charAt(0)=='.') str = '0' + str; // For TeaVM
+        try { return Double.parseDouble(str); }
         catch(Exception e) { }
     }
     

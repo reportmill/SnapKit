@@ -3,7 +3,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import snap.util.FilePathUtils;
-import snap.util.SnapUtils;
 
 /**
  * A class to handle loading of URL items.
@@ -14,7 +13,7 @@ public class WebGetter {
     static Map <WebURL, WebSite>  _sites = Collections.synchronizedMap(new HashMap());
     
     // Whether TeaVM
-    static boolean isTVM = SnapUtils.isTeaVM;
+    public static Hpr _hpr;
 
 /**
  * Returns a java.net.URL for given source.
@@ -77,9 +76,8 @@ public static URL getJavaURL(Class aClass, String aName)
     }
     
     // Handle TeaVM
-    if(isTVM)
-        try { return new URL("http://localhost" + path); }
-        catch(Exception e) { throw new RuntimeException(e); }
+    if(_hpr!=null)
+        return _hpr.getURL(aClass, path);
         
     // Get URL for full path
     return aClass.getResource(path);
@@ -146,5 +144,12 @@ protected static WebSite createSite(WebURL aSiteURL)
  */
 private static class BogusURLStreamHandler extends URLStreamHandler {
     protected URLConnection openConnection(URL u) throws IOException  { return null; }}
+    
+/**
+ * A class to let SnapTea/TeaVM evaluate URLs.
+ */
+public interface Hpr {
+    public URL getURL(Class aCls, String aName);
+}
 
 }

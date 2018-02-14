@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import snap.view.View;
+import snap.view.ChildView;
 
 /**
  * A class to describe object property changes.
@@ -114,11 +116,19 @@ public static void doChange(Object aSource, String aProp, Object oldVal, Object 
         //Object otherVal = list.size()>anIndex? list.get(anIndex) : null;
         //if(newVal!=null && newVal!=otherVal) list.add(anIndex, newVal);
         //else if(oldVal!=null && oldVal==otherVal) list.remove(anIndex);
-        KeyList.setValue(aSource, aProp, newVal, anIndex);
+        if(aSource instanceof ChildView) { ChildView view = (ChildView)aSource;
+            if(newVal!=null) view.addChild((View)newVal, anIndex);
+            else if(oldVal!=null) view.removeChild(anIndex);
+        }
+        else KeyList.setValue(aSource, aProp, newVal, anIndex);
     }
     
     // If plain change, do KeyChain.setValue on new value
-    else KeyChain.setValueSafe(aSource, aProp, newVal);
+    else {
+        if(aSource instanceof View) { View view = (View)aSource;
+            view.setValue(aProp, newVal); }
+        else KeyChain.setValueSafe(aSource, aProp, newVal);
+    }
 }
 
 }

@@ -197,6 +197,22 @@ protected View getFocusPrev(View aChild)
 /**
  * Override to propagate to children.
  */
+public void setFont(Font aFont)
+{
+    // If no change and not null, just return
+    if(SnapUtils.equals(aFont, _font) && aFont!=null) return;
+    
+    // Do normal version
+    super.setFont(aFont);
+    
+    // Let all children that inherrit font know
+    for(int i=0,iMax=getChildCount();i<iMax;i++) { View child = getChild(i);
+        if(!child.isFontSet()) child.setFont(null); }
+}
+
+/**
+ * Override to propagate to children.
+ */
 protected void setShowing(boolean aValue)
 {
     if(aValue==_showing) return; super.setShowing(aValue);

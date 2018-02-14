@@ -590,7 +590,12 @@ public Font getFont()  { return _font!=null? _font : getDefaultFont(); }
  */
 public void setFont(Font aFont)
 {
-    if(aFont==_font) return;
+    // Special case: If both fonts are null, assume parent updated
+    if(aFont==null && _font==null) {
+        relayout(); relayoutParent(); repaint(); return; }
+
+    // Do normal version
+    if(SnapUtils.equals(aFont, _font)) return;
     firePropChange(Font_Prop, _font, _font=aFont);
     relayout(); relayoutParent(); repaint();
 }
@@ -872,8 +877,14 @@ public ParentView getParent()  { return _parent; }
  */
 protected void setParent(ParentView aPar)
 {
+    // FirePropChange
     firePropChange(Parent_Prop, _parent, _parent=aPar);
+    
+    // Propagate Showing to children
     setShowing(aPar!=null && aPar.isShowing());
+    
+    // If inherrit font, propagate to children
+    if(!isFontSet()) setFont(null);
 }
 
 /**
