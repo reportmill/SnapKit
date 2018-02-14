@@ -38,7 +38,11 @@ public class ColorButton extends View {
 /**
  * Creates a new ColorButton.
  */
-public ColorButton()  { enableEvents(MouseEvents); enableEvents(Action); repaint(); }
+public ColorButton()
+{
+    enableEvents(MouseEvents); enableEvents(Action);
+    setPrefSize(32,22);
+}
 
 /**
  * Returns the color.
@@ -81,9 +85,9 @@ public void setTitle(String aTitle)
 public Image getImage()
 {
     if(_image!=null) return _image;
-    if(_title.startsWith("Stroke ")) return _image = Image.get(getClass(), "Color_StrokeColor.png");
-    if(_title.startsWith("Text ")) return _image = Image.get(getClass(), "Color_TextColor.png");
-    return _image = Image.get(getClass(), "Color_FillColor.png");
+    if(_title.startsWith("Stroke ")) return _image = Image.get(getClass(), "pkg.images/Color_StrokeColor.png");
+    if(_title.startsWith("Text ")) return _image = Image.get(getClass(), "pkg.images/Color_TextColor.png");
+    return _image = Image.get(getClass(), "pkg.images/Color_FillColor.png");
 }
 
 /**

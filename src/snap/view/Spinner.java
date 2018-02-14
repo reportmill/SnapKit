@@ -251,6 +251,24 @@ protected void layoutImpl()
 }
 
 /**
+ * Returns the value for given key.
+ */
+public Object getValue(String aPropName)
+{
+    if(aPropName.equals("Value")) return getValue();
+    return super.getValue(aPropName);
+}
+
+/**
+ * Sets the value for given key.
+ */
+public void setValue(String aPropName, Object aValue)
+{
+    if(aPropName.equals("Value")) setValue((T)aValue);
+    else super.setValue(aPropName, aValue);
+}
+
+/**
  * XML archival.
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)

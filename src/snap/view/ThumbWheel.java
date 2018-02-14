@@ -514,6 +514,24 @@ public void setWidth(double aValue)
 private boolean isEven(float aValue)  { return Math.round(aValue)%2==0; }
 
 /**
+ * Returns the value for given key.
+ */
+public Object getValue(String aPropName)
+{
+    if(aPropName.equals("Value")) return getValue();
+    return super.getValue(aPropName);
+}
+
+/**
+ * Sets the value for given key.
+ */
+public void setValue(String aPropName, Object aValue)
+{
+    if(aPropName.equals("Value")) setValue(SnapUtils.doubleValue(aValue));
+    else super.setValue(aPropName, aValue);
+}
+
+/**
  * XML archival.
  */
 public XMLElement toXML(XMLArchiver anArchiver)

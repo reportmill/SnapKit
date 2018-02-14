@@ -17,7 +17,7 @@ public class ToggleButton extends ButtonBase {
     
     // Constants for properties
     public static final String Selected_Prop = "Selected";
-    public static final String ToggleGroupName_Prop = "ToggleGroupName";
+    public static final String Group_Prop = "Group";
     
 /**
  * Creates a new ToggleButton.
@@ -56,15 +56,15 @@ public ToggleGroup getToggleGroup()
 /**
  * Returns the button group name.
  */
-public String getToggleGroupName()  { return _groupName; }
+public String getGroup()  { return _groupName; }
 
 /**
  * Sets the button group name.
  */
-public void setToggleGroupName(String aName)
+public void setGroup(String aName)
 {
     if(SnapUtils.equals(aName,_groupName)) return;
-    firePropChange(ToggleGroupName_Prop, _groupName, _groupName=aName);
+    firePropChange(Group_Prop, _groupName, _groupName=aName);
 }
 
 /**
@@ -77,7 +77,7 @@ public boolean isPressed()  { return super.isPressed() || _selected; }
  */
 public void fire()
 {
-    if(getToggleGroupName()==null || !isSelected())
+    if(getGroup()==null || !isSelected())
         setSelected(!isSelected());
     fireActionEvent();
 }
@@ -111,8 +111,8 @@ protected String getValuePropName()  { return Selected_Prop; }
 public void setOwner(ViewOwner anOwner)
 {
     super.setOwner(anOwner);
-    if(getToggleGroupName()!=null)
-        anOwner.getToggleGroup(getToggleGroupName()).add(this);
+    if(getGroup()!=null)
+        anOwner.getToggleGroup(getGroup()).add(this);
 }
     
 /**
@@ -127,7 +127,7 @@ protected XMLElement toXMLView(XMLArchiver anArchiver)
     if(isSelected()) e.add(Selected_Prop, true);
     
     // Archive ToggleGroup
-    if(getToggleGroupName()!=null) e.add("ToggleGroup", getToggleGroupName());
+    if(getGroup()!=null) e.add(Group_Prop, getGroup());
     return e;
 }
     
@@ -143,8 +143,8 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     setSelected(anElement.getAttributeBoolValue(Selected_Prop));
     
     // Unarchive ToggleGroup
-    if(anElement.hasAttribute("ToggleGroup") || anElement.hasAttribute("bgroup"))
-        setToggleGroupName(anElement.getAttributeValue("ToggleGroup", anElement.getAttributeValue("bgroup")));
+    if(anElement.hasAttribute(Group_Prop) || anElement.hasAttribute("ToggleGroup"))
+        setGroup(anElement.getAttributeValue(Group_Prop, anElement.getAttributeValue("ToggleGroup")));
 }
 
 }
