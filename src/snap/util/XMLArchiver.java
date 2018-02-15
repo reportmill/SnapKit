@@ -468,7 +468,7 @@ public List fromXMLList(XMLElement anElement, String aName, Class aClass, Object
  */
 public <T> T copy(T anObj)
 {
-    XMLElement xml = toXML(anObj);
+    XMLElement xml = toXML(anObj); if(isIgnoreCase()) xml.setIgnoreCase(true);
     return (T)fromXML(xml, null);
 }
 

@@ -393,7 +393,7 @@ public Font getFont()
 public void setFont(Font aFont)
 {
     super.setFont(aFont);
-    setSelStyleValue(TextStyle.FONT_KEY, aFont);
+    if(aFont!=null) setSelStyleValue(TextStyle.FONT_KEY, aFont);
 }
 
 /**
