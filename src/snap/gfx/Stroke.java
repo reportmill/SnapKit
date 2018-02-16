@@ -33,6 +33,7 @@ public class Stroke implements Cloneable {
     
     // Constant for common stroke
     public static final Stroke Stroke1 = new Stroke();
+    public static final Stroke Stroke2 = new Stroke(2);
     public static final Stroke StrokeDash1 = new Stroke(1, new double[] { 2,2 }, 0);
 
 /**

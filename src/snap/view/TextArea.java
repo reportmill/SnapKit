@@ -1100,7 +1100,12 @@ protected void textDidChange()
 }
 
 /**
- * Returns the padding default.
+ * Overrride to return Arial 11.
+ */
+public Font getDefaultFont()  { return Font.Arial11; }
+
+/**
+ * Overrride to return 2,2,2,2.
  */
 public Insets getDefaultPadding()  { return _def; } static Insets _def = new Insets(2);
 

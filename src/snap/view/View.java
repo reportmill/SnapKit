@@ -1591,7 +1591,22 @@ protected void paintBack(Painter aPntr)
 /**
  * Paints foreground.
  */
-protected void paintFront(Painter aPntr)  { }
+protected void paintFront(Painter aPntr)
+{
+    // If View with unrealized RealClassName, paint it
+    if(getClass()==View.class) {
+        String cname = getRealClassName(); if(cname==null) cname = "Custom View";
+        else cname = cname.substring(cname.lastIndexOf('.')+1);
+        if(getFill()==null) { aPntr.setPaint(Color.LIGHTGRAY); aPntr.fill(getBoundsLocal()); }
+        if(getBorder()==null) { aPntr.setPaint(Color.GRAY); aPntr.setStroke(Stroke.Stroke2);
+            aPntr.draw(getBoundsLocal().getInsetRect(1)); aPntr.setStroke(Stroke.Stroke1); }
+        aPntr.setFont(Font.Arial14.getBold()); aPntr.setPaint(Color.WHITE);
+        Rect r = aPntr.getStringBounds(cname);
+        double x = Math.round((getWidth() - r.width)/2);
+        double y = Math.round((getHeight() - r.height)/2) + Font.Arial14.getBold().getAscent();
+        aPntr.drawString(cname, x, y);
+    }
+}
 
 /**
  * Returns the tool tip text.

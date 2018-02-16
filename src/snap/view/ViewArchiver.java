@@ -115,7 +115,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("TreeView", TreeView.class);
     cmap.put("TitleView", TitleView.class);
     cmap.put("VBox", ColView.class);
-    cmap.put("View", ParentView.class);
+    cmap.put("View", View.class);
     
     // Graphics
     cmap.put("Color", Color.class);

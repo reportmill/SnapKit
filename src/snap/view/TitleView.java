@@ -32,10 +32,7 @@ public class TitleView extends ParentView {
     EventListener  _labelPressLsnr;
     
     // Constants for TitleView styles
-    public enum TitleStyle {
-        ChiselBorder,
-        Plain
-    }
+    public enum TitleStyle { Plain, EtchBorder }
     
     // Constants for properties
     public static final String Content_Prop = "Content";
@@ -50,19 +47,34 @@ public TitleView()
 {
     setPadding(2,2,2,2);
     _label = new Label();
-    setTitleStyle(TitleStyle.ChiselBorder);
+    setTitleStyle(TitleStyle.EtchBorder);
     addChild(_label);
 }
 
 /**
- * Returns the title.
+ * Creates a new TitleView for given title.
  */
-public String getTitle()  { return _label.getText(); }
+public TitleView(String aTitle)  { this(); setText(aTitle); }
 
 /**
- * Sets the title.
+ * Creates a new TitleView for given title.
  */
-public void setTitle(String aTitle)  { _label.setText(aTitle); }
+public TitleView(String aTitle, View aView)  { this(); setText(aTitle); setContent(aView); }
+
+/**
+ * Returns the label.
+ */
+public Label getLabel()  { return _label; }
+
+/**
+ * Override to get from label.
+ */
+public String getText()  { return _label.getText(); }
+
+/**
+ * Override to set to label.
+ */
+public void setText(String aTitle)  { _label.setText(aTitle); }
 
 /**
  * Returns the content.
@@ -175,8 +187,8 @@ protected void updateTitleStyle()
 {
     TitleStyle tstyle = getTitleStyle();
     
-    // Configure ChiselBorder
-    if(tstyle==TitleStyle.ChiselBorder)
+    // Configure EtchBorder
+    if(tstyle==TitleStyle.EtchBorder)
         _label.setPadding(0,0,0,10);
         
     // Configure Plain
@@ -216,7 +228,7 @@ protected double getPrefHeightImpl(double aW)
  */
 protected void layoutImpl()
 {
-    if(_content==null) return;
+    // Get inset bounds
     Insets ins = getInsetsAll();
     double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
     
@@ -227,7 +239,7 @@ protected void layoutImpl()
     // Layout content
     if(isContentVisible())
         _content.setBounds(x, y + lh, w, h - lh + 2);
-    else _content.setBounds(x,y,0,0);
+    else if(_content!=null) _content.setBounds(x,y,0,0);
 }
 
 /**
@@ -236,14 +248,14 @@ protected void layoutImpl()
 protected void paintFront(Painter aPntr)
 {
     switch(_tstyle) {
-        case ChiselBorder: paintStyleChiselBorder(aPntr); break;
+        case EtchBorder: paintStyleEtchBorder(aPntr); break;
     }
 }
 
 /**
  * Override to paint title and stroke.
  */
-protected void paintStyleChiselBorder(Painter aPntr)
+protected void paintStyleEtchBorder(Painter aPntr)
 {
     double w = getWidth(), h = getHeight();
     double sw = _label.getMaxX(), sh = _label.getHeight();
@@ -323,9 +335,9 @@ protected XMLElement toXMLView(XMLArchiver anArchiver)
     // Do normal archival
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive Title, TitleStyle
-    if(getTitle()!=null && getTitle().length()>0) e.add("Title", getTitle());
-    if(getTitleStyle()!=TitleStyle.ChiselBorder) e.add(TitleStyle_Prop, getTitleStyle());
+    // Archive Text, TitleStyle
+    String text = getText(); if(text!=null && text.length()>0) e.add(Text_Prop, text);
+    if(getTitleStyle()!=TitleStyle.EtchBorder) e.add(TitleStyle_Prop, getTitleStyle());
     
     // Archive Expandable, Expanded
     if(isCollapsible()) e.add(Collapsible_Prop, true);
@@ -341,8 +353,11 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Do normal version
     super.fromXMLView(anArchiver,anElement);
     
-    // Unrchive Title, TitleStyle
-    setTitle(anElement.getAttributeValue("Title"));
+    // Unarchive Title (legacy)
+    if(anElement.hasAttribute(Text_Prop)) setText(anElement.getAttributeValue(Text_Prop));
+    if(anElement.hasAttribute("Title")) setText(anElement.getAttributeValue("Title"));
+    
+    // Unrchive TitleStyle
     String tstr = anElement.getAttributeValue(TitleStyle_Prop);
     TitleStyle tstyl = tstr!=null? TitleStyle.valueOf(tstr) : null;
     if(tstyl!=null) setTitleStyle(tstyl);

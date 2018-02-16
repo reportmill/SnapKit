@@ -249,7 +249,8 @@ public float getVisibleRange() { return getVisibleMax() - getVisibleMin(); }
  */
 protected void paintFront(Painter aPntr)
 {
-    //boolean old = aPntr.setAntialiasing(false);
+    // Bail if too small
+    if(getWidth()<10 || getHeight()<10) return;
     
     // Get thumbwheel color
     Color color = (Color)getFill(); if(color==null) color = Color.LIGHTGRAY;
@@ -263,7 +264,7 @@ protected void paintFront(Painter aPntr)
     
     // Otherwise draw radial background
     else {
-        if(_image==null) _image = getThumbWheelBackgroundImage();
+        if(_image==null) _image = getBackImage();
         aPntr.drawImage(_image, 0, 0, getWidth(), getHeight());
     }
     
@@ -430,7 +431,7 @@ private int getShift()
 /**
  * Returns the background image if radial thumbwheel (keeps a cache based on orientation, size & color).
  */
-private Image getThumbWheelBackgroundImage()
+private Image getBackImage()
 {
     // Get the thumbwheel color
     Color color = (Color)getFill(); if(color==null) color = Color.LIGHTGRAY;
@@ -502,11 +503,12 @@ public Paint getDefaultFill()  { return Color.LIGHTGRAY; }
 /**
  * Override to reset image.
  */
-public void setWidth(double aValue)
-{
-    if(aValue!=getWidth()) _image = null;
-    super.setWidth(aValue);
-}
+public void setWidth(double aValue)  { if(aValue!=getWidth()) _image = null; super.setWidth(aValue); }
+
+/**
+ * Override to reset image.
+ */
+public void setHeight(double aValue)  { if(aValue!=getHeight()) _image = null; super.setHeight(aValue); }
 
 /**
  * Returns whether a number is even (not odd).

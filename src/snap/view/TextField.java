@@ -14,7 +14,7 @@ public class TextField extends ParentView {
     StringBuffer          _sb = new StringBuffer();
     
     // The column count to be used for preferred width (if set)
-    int                   _colCount = 20;
+    int                   _colCount = 12;
     
     // The paint for the text
     Paint                 _textFill = Color.BLACK;
