@@ -67,8 +67,8 @@ protected void addChild(View aChild, int anIndex)
     _children.add(aChild, anIndex);
     relayout(); relayoutParent(); repaint(); setNeedsLayoutDeep(true);
     
-    // If this shape has PropChangeListeners, start listening to children as well
-    if(_pcs.hasDeepListener()) {
+    // If this view has child prop listeners, add to this child as well
+    if(_childPCL!=null) {
         aChild.addPropChangeListener(_childPCL); aChild.addDeepChangeListener(_childDCL); }
     
     // Fire property change
@@ -83,6 +83,12 @@ protected View removeChild(int anIndex)
     // Remove child from children list and clear parent
     View child = _children.remove(anIndex);
     child.setParent(null);
+    
+    // If this view has child prop listeners, clear from child
+    if(_childPCL!=null) {
+        child.removePropChangeListener(_childPCL); child.removeDeepChangeListener(_childDCL); }
+    
+    // Register for layout
     relayout(); relayoutParent(); repaint();
     
     // Fire property change and return
@@ -432,18 +438,36 @@ public XMLElement toXML(XMLArchiver anArchiver)
  */
 public void addDeepChangeListener(DeepChangeListener aDCL)
 {
-    boolean first = !_pcs.hasDeepListener();
+    // Do normal version
     super.addDeepChangeListener(aDCL);
     
-    // If first listener, add for children
-    if(first)
+    // If child listeners not yet set, create/add for children
+    if(_childPCL==null) {
+        _childPCL = pc -> childDidPropChange(pc); _childDCL = (lsnr,pc) -> childDidDeepChange(lsnr,pc);
         for(View child : getChildren()) {
             child.addPropChangeListener(_childPCL); child.addDeepChangeListener(_childDCL); }
+    }
+}
+
+/**
+ * Override to remove this view as change listener to children when not needed.
+ */
+public void removeDeepChangeListener(DeepChangeListener aDCL)
+{
+    // Do normal version
+    super.removeDeepChangeListener(aDCL);
+    
+    // If no more deep listeners, remove 
+    if(!_pcs.hasDeepListener() && _childPCL!=null) {
+        for(View child : getChildren()) {
+            child.removePropChangeListener(_childPCL); child.removeDeepChangeListener(_childDCL); }
+        _childPCL = null; _childDCL = null;
+    }
 }
 
 // PropChange Listener for Child changes to propogate changes when there is DeepChangeListener
-PropChangeListener _childPCL = pc -> childDidPropChange(pc);
-DeepChangeListener _childDCL = (lsnr,pc) -> childDidDeepChange(lsnr,pc);
+PropChangeListener _childPCL;
+DeepChangeListener _childDCL;
 
 /**
  * Property change listener implementation to forward changes on to deep listeners.
