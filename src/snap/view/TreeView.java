@@ -524,6 +524,17 @@ public double getMaxHeight()
 protected void layoutImpl()  { BoxView.layout(this, _scroll, null, true, true); }
 
 /**
+ * Override to ensure that DragGesture events.
+ */
+protected void processEvent(ViewEvent anEvent)
+{
+    // If DragGesture outside ScrollView.Scroller, just return
+    if(anEvent.isDragGesture())
+        if(!_scroll.getScroller().contains(anEvent.getX(), anEvent.getY())) {
+            anEvent.consume(); return; }
+}
+
+/**
  * Returns a mapped property name.
  */
 public String getValuePropName()  { return "SelectedItem"; }

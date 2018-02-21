@@ -2070,6 +2070,9 @@ protected void processEventAll(ViewEvent anEvent)
     // Forward to Filters
     processEventFilters(anEvent);
             
+    // If event consumed, just return
+    if(anEvent.isConsumed()) return;
+
     // Forward to Handlers from last to first
     processEventHandlers(anEvent);
 }
@@ -2092,8 +2095,10 @@ protected void processEventFilters(ViewEvent anEvent)
 protected void processEventHandlers(ViewEvent anEvent)
 {
     // If event not consumed, send to view
-    if(!anEvent.isConsumed())
-        processEvent(anEvent);
+    processEvent(anEvent);
+
+    // If event consumed, just return
+    if(anEvent.isConsumed()) return;
 
     // Forward to Handlers from last to first
     EventListener handlers[] = getEventAdapter()._handlers;
