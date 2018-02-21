@@ -3,7 +3,6 @@
  */
 package snap.util;
 import snap.view.View;
-import snap.view.ChildView;
 
 /**
  * A class to describe object property changes.
@@ -112,16 +111,8 @@ public String toString()
 public static void doChange(Object aSource, String aProp, Object oldVal, Object newVal, int anIndex)
 {
     // If indexed change, create KeyList and add/remove
-    if(anIndex>=0) {
-        //Object otherVal = list.size()>anIndex? list.get(anIndex) : null;
-        //if(newVal!=null && newVal!=otherVal) list.add(anIndex, newVal);
-        //else if(oldVal!=null && oldVal==otherVal) list.remove(anIndex);
-        if(aSource instanceof ChildView) { ChildView view = (ChildView)aSource;
-            if(newVal!=null) view.addChild((View)newVal, anIndex);
-            else if(oldVal!=null) view.removeChild(anIndex);
-        }
-        else KeyList.setValue(aSource, aProp, newVal, anIndex);
-    }
+    if(anIndex>=0)
+        KeyList.setValue(aSource, aProp, newVal, anIndex);
     
     // If plain change, do KeyChain.setValue on new value
     else {

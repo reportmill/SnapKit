@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * A View for scrolling other views.
  */
-public class ScrollView extends ParentView {
+public class ScrollView extends HostView {
     
     // The scroll view
     Scroller        _scroller;
@@ -50,6 +50,26 @@ public View getContent()  { return _scroller.getContent(); }
  * Sets the content.
  */
 public void setContent(View aView)  { _scroller.setContent(aView); }
+
+/**
+ * HostView method.
+ */
+public int getGuestCount()  { return _scroller.getGuestCount(); }
+
+/**
+ * HostView method.
+ */
+public View getGuest(int anIndex)  { return _scroller.getGuest(anIndex); }
+
+/**
+ * HostView method.
+ */
+public void addGuest(View aChild, int anIndex)  { _scroller.addGuest(aChild, anIndex); }
+
+/**
+ * HostView method.
+ */
+public View removeGuest(int anIndex)  { return _scroller.removeGuest(anIndex); }
 
 /**
  * Returns the view that handles scrolling.
@@ -313,32 +333,6 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     if(anElement.hasAttribute("ShowHBar")) setShowHBar(anElement.getAttributeBoolValue("ShowHBar"));
     if(anElement.hasAttribute("ShowVBar")) setShowVBar(anElement.getAttributeBoolValue("ShowVBar"));
     if(anElement.hasAttribute("BarSize")) setBarSize(anElement.getAttributeIntValue("BarSize"));
-}
-
-/**
- * XML archival deep.
- */
-public void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Archive content
-    View child = getContent(); if(child==null) return;
-    XMLElement cxml = anArchiver.toXML(child, this);
-    anElement.add(cxml);
-}
-
-/**
- * XML unarchival for shape children.
- */
-protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Iterate over child elements and unarchive shapes
-    for(int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
-        Class childClass = anArchiver.getClass(childXML.getName());
-        if(childClass!=null && View.class.isAssignableFrom(childClass)) {
-            View view = (View)anArchiver.fromXML(childXML, this);
-            setContent(view); break;
-        }
-    }
 }
 
 }

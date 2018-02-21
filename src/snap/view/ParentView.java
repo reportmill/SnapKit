@@ -14,10 +14,10 @@ public class ParentView extends View {
     // The children
     ViewList       _children = new ViewList();
     
-    // Whether node needs layout, or node has children that need layout
+    // Whether view needs layout, or has children that need layout
     boolean        _needsLayout, _needsLayoutDeep;
 
-    // Whether this node is performing layout
+    // Whether this view is performing layout
     boolean        _inLayout, _inLayoutDeep;
     
     // Constants for properties
@@ -33,7 +33,7 @@ public class ParentView extends View {
 public ViewList getViewList()  { return _children; }
 
 /**
- * Returns the number of children associated with this node.
+ * Returns the number of children associated with this view.
  */
 public int getChildCount()  { return _children.size(); }
 
@@ -43,24 +43,24 @@ public int getChildCount()  { return _children.size(); }
 public View getChild(int anIndex)  { return _children.get(anIndex); }
 
 /**
- * Returns the list of children associated with this node.
+ * Returns the array of children associated with this view.
  */
 public View[] getChildren()  { return _children.getAll(); }
 
 /**
- * Adds the given child to the end of this node's children list.
+ * Adds the given child to the end of this view's children list.
  */
 protected void addChild(View aChild)  { addChild(aChild, getChildCount()); }
 
 /**
- * Adds the given child to this node's children list at the given index.
+ * Adds the given child to this view's children list at the given index.
  */
 protected void addChild(View aChild, int anIndex)
 {
     // If child already has parent, remove from parent
     if(aChild.getParent()!=null) aChild.getParent().removeChild(aChild);
     
-    // Add child to children list and set child's parent to this node
+    // Add child to children list and set child's parent to this view
     aChild.setParent(this);
     
     // Add child to Children list
@@ -72,11 +72,11 @@ protected void addChild(View aChild, int anIndex)
         aChild.addPropChangeListener(_childPCL); aChild.addDeepChangeListener(_childDCL); }
     
     // Fire property change
-    firePropChange(Child_Prop, null, aChild, anIndex); //relayout(); repaint();
+    firePropChange(Child_Prop, null, aChild, anIndex);
 }
 
 /**
- * Remove's the child at the given index from this node's children list.
+ * Remove's the child at the given index from this view's children list.
  */
 protected View removeChild(int anIndex)
 {
@@ -97,7 +97,7 @@ protected View removeChild(int anIndex)
 }
 
 /**
- * Removes the given child from this node's children list.
+ * Removes the given child from this view's children list.
  */
 protected int removeChild(View aChild)
 {
@@ -107,7 +107,7 @@ protected int removeChild(View aChild)
 }
 
 /**
- * Removes all children from this node (in reverse order).
+ * Removes all children from this view (in reverse order).
  */
 protected void removeChildren()  { for(int i=getChildCount()-1; i>=0; i--) removeChild(i); }
 
@@ -121,21 +121,21 @@ protected void setChildren(View ... theChildren)  { removeChildren(); for(View c
  */
 public View getChild(String aName)
 {
-    for(View cnode : getChildren()) {
-        if(aName.equals(cnode.getName())) return cnode;
-        if(cnode instanceof ParentView && cnode.getOwner()==getOwner()) {
-            View n = ((ParentView)cnode).getChild(aName); if(n!=null) return n; }
+    for(View child : getChildren()) {
+        if(aName.equals(child.getName())) return child;
+        if(child instanceof ParentView && child.getOwner()==getOwner()) {
+            View n = ((ParentView)child).getChild(aName); if(n!=null) return n; }
     }
     return null;
 }
 
 /**
- * Returns the index of the given child in this node's children list.
+ * Returns the index of the given child in this view's children list.
  */
 public int indexOfChild(View aChild)  { return _children.indexOf(aChild); }
 
 /**
- * Returns the last child of this node.
+ * Returns the last child of this view.
  */
 public View getChildLast()  { return _children.getLast(); }
 
@@ -306,7 +306,7 @@ protected void paintAbove(Painter aPntr)
 }
 
 /**
- * Override Node version to really request layout from RootView.
+ * Override to really request layout from RootView.
  */
 public void relayout()  { setNeedsLayout(true); }
 
@@ -424,7 +424,7 @@ public void stopAnimDeep()
 }
 
 /**
- * Override to break toXML into toXMLNode and toXMLChildren.
+ * Override to break toXML into toXMLView and toXMLChildren.
  */
 public XMLElement toXML(XMLArchiver anArchiver)
 {
@@ -480,7 +480,7 @@ protected void childDidPropChange(PropChange aPC)  { _pcs.fireDeepChange(this, a
 protected void childDidDeepChange(Object aLsnr, PropChange aPC)  { _pcs.fireDeepChange(aLsnr, aPC); }
 
 /**
- * XML Archival of basic node.
+ * XML Archival of basic view.
  */
 protected XMLElement toXMLView(XMLArchiver anArchiver)  { return super.toXML(anArchiver); }
 
@@ -490,7 +490,7 @@ protected XMLElement toXMLView(XMLArchiver anArchiver)  { return super.toXML(anA
 protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)  { }
 
 /**
- * Override to break fromXML into fromXMLNode and fromXMLChildren.
+ * Override to break fromXML into fromXMLView and fromXMLChildren.
  */
 public View fromXML(XMLArchiver anArchiver, XMLElement anElement)
 {
@@ -501,7 +501,7 @@ public View fromXML(XMLArchiver anArchiver, XMLElement anElement)
 }
 
 /**
- * XML unarchival of basic node.
+ * XML unarchival of basic view.
  */
 protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)  { super.fromXML(anArchiver,anElement); }
 

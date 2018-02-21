@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * A View that holds another view.
  */
-public class BoxView extends ParentView {
+public class BoxView extends HostView {
 
     // The content
     View         _child;
@@ -45,8 +45,8 @@ public View getContent()  { return _child; }
 public void setContent(View aView)
 {
     if(aView==_child) return;
+    if(_child!=null) removeChild(_child);
     _child = aView;
-    removeChildren();
     if(_child!=null) addChild(_child);
 }
 
@@ -76,6 +76,35 @@ public void setFillHeight(boolean aValue)
 {
     _fillHeight = aValue;
     repaint(); relayoutParent();
+}
+
+/**
+ * HostView method.
+ */
+public int getGuestCount()  { return getContent()!=null? 1 : 0; }
+
+/**
+ * HostView method.
+ */
+public View getGuest(int anIndex)  { return getContent(); }
+
+/**
+ * HostView method.
+ */
+public void addGuest(View aChild, int anIndex)
+{
+    setContent(aChild);
+    fireGuestPropChange(null, aChild, 0);
+}
+
+/**
+ * HostView method.
+ */
+public View removeGuest(int anIndex)
+{
+    View cont = getContent(); setContent(null);
+    fireGuestPropChange(cont, null, 0);
+    return cont;
 }
 
 /**
@@ -123,31 +152,6 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive Spacing, FillWidth
     if(anElement.hasAttribute("FillWidth")) setFillWidth(anElement.getAttributeBoolValue("FillWidth"));
     if(anElement.hasAttribute("FillHeight")) setFillHeight(anElement.getAttributeBoolValue("FillHeight"));
-}
-
-/**
- * XML archival of children.
- */
-protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Archive Content
-    if(getContent()==null) return;
-    anElement.add(anArchiver.toXML(getContent(), this));
-}
-
-/**
- * XML unarchival for shape children.
- */
-protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Iterate over child elements and unarchive first view
-    for(int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
-        Class childClass = anArchiver.getClass(childXML.getName());
-        if(childClass!=null && View.class.isAssignableFrom(childClass)) {
-            View view = (View)anArchiver.fromXML(childXML, this);
-            setContent(view); break;
-        }
-    }
 }
 
 /**

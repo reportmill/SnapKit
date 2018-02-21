@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * A view to attach a title to another view.
  */
-public class TitleView extends ParentView {
+public class TitleView extends HostView {
 
     // The title label
     Label          _label;
@@ -35,7 +35,6 @@ public class TitleView extends ParentView {
     public enum TitleStyle { Plain, EtchBorder }
     
     // Constants for properties
-    public static final String Content_Prop = "Content";
     public static final String Collapsible_Prop = "Collapsible";
     public static final String Expanded_Prop = "Expanded";
     public static final String TitleStyle_Prop = "TitleStyle";
@@ -87,8 +86,9 @@ public View getContent()  { return _content; }
 public void setContent(View aView)
 {
     View old = _content; if(aView==old) return;
-    _content = aView; addChild(aView);
-    firePropChange(Content_Prop, old, aView);
+    if(_content!=null) removeChild(_content);
+    _content = aView;
+    if(_content!=null) addChild(_content);
 }
 
 /**
@@ -194,6 +194,35 @@ protected void updateTitleStyle()
     // Configure Plain
     else if(tstyle==TitleStyle.Plain)
         _label.setPadding(0,0,0,0);
+}
+
+/**
+ * HostView method.
+ */
+public int getGuestCount()  { return getContent()!=null? 1 : 0; }
+
+/**
+ * HostView method.
+ */
+public View getGuest(int anIndex)  { return getContent(); }
+
+/**
+ * HostView method.
+ */
+public void addGuest(View aChild, int anIndex)
+{
+    setContent(aChild);
+    fireGuestPropChange(null,aChild,0);
+}
+
+/**
+ * HostView method.
+ */
+public View removeGuest(int anIndex)
+{
+    View cont = getContent(); setContent(null);
+    fireGuestPropChange(cont,null,0);
+    return cont;
 }
 
 /**
@@ -365,31 +394,6 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unrchive Expandable, Expanded
     if(anElement.hasAttribute(Collapsible_Prop)) setCollapsible(anElement.getAttributeBoolValue(Collapsible_Prop));
     if(anElement.hasAttribute(Expanded_Prop)) setExpanded(anElement.getAttributeBoolValue(Expanded_Prop));
-}
-
-/**
- * XML archival of children.
- */
-protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Archive Content
-    if(getContent()==null) return;
-    anElement.add(anArchiver.toXML(getContent(), this));
-}
-
-/**
- * XML unarchival for shape children.
- */
-protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Iterate over child elements and unarchive child
-    for(int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
-        Class childClass = anArchiver.getClass(childXML.getName());
-        if(childClass!=null && View.class.isAssignableFrom(childClass)) {
-            View view = (View)anArchiver.fromXML(childXML, this);
-            setContent(view); break;
-        }
-    }
 }
 
 }

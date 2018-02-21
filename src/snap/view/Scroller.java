@@ -6,9 +6,9 @@ import snap.gfx.*;
 import snap.util.MathUtils;
 
 /**
- * A class that can scroll a child node.
+ * A class that can scroll a child view.
  */
-public class Scroller extends ParentView {
+public class Scroller extends HostView {
 
     // The content
     View            _content;
@@ -274,14 +274,32 @@ public void scrollToVisible(Shape aShape)
 }
 
 /**
- * Handle events.
+ * HostView method.
  */
-public void processEvent(ViewEvent anEvent)
+public int getGuestCount()  { return getContent()!=null? 1 : 0; }
+
+/**
+ * HostView method.
+ */
+public View getGuest(int anIndex)  { return getContent(); }
+
+/**
+ * HostView method.
+ */
+public void addGuest(View aChild, int anIndex)
 {
-    if(anEvent.isScroll()) {
-        setScrollH(getScrollH() + anEvent.getScrollX()*4);
-        setScrollV(getScrollV() + anEvent.getScrollY()*4);
-    }
+    setContent(aChild);
+    fireGuestPropChange(null, aChild, 0);
+}
+
+/**
+ * HostView method.
+ */
+public View removeGuest(int anIndex)
+{
+    View cont = getContent(); setContent(null);
+    fireGuestPropChange(cont, null, 0);
+    return cont;
 }
 
 /**
@@ -317,6 +335,17 @@ protected void layoutImpl()
     double sx = getScrollH(); if(sx>cw-w) sx = Math.round(cw-w);
     double sy = getScrollV(); if(sy>ch-h) sy = Math.round(ch-h);
     _content.setBounds(-sx,-sy,cw,ch);
+}
+
+/**
+ * Handle events.
+ */
+public void processEvent(ViewEvent anEvent)
+{
+    if(anEvent.isScroll()) {
+        setScrollH(getScrollH() + anEvent.getScrollX()*4);
+        setScrollV(getScrollV() + anEvent.getScrollY()*4);
+    }
 }
 
 }

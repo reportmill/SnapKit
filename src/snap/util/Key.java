@@ -278,8 +278,8 @@ public static class KeyAccessor {
         catch(Exception e) { }
         
         // See if key is list key
-        try { new KeyList(anObj, _rawKey); _type = Type.ListKey; return; }
-        catch(KeyList.InvalidKeyListException e) { }
+        //try { new KeyList(anObj, _rawKey); _type = Type.ListKey; return; }
+        //catch(KeyList.InvalidKeyListException e) { }
         
         // Since nothing else panned out, set type to Unknown
         _type = Type.Unknown;
@@ -307,20 +307,22 @@ public static class KeyAccessor {
                 
                 // Catch InvocationTargetException and complain
                 catch(InvocationTargetException  e) {
-                    System.err.println("Key: Exception evaluating key " + _getMethod.getName() + " on object of class " + anObj.getClass());
+                    String name = _getMethod.getName(), cname = anObj.getClass().getName();
+                    System.err.println("Key: Exception evaluating key " + name + " on object of class " + cname);
                     e.getCause().printStackTrace();
                 }
                 
                 // Catch IllegalAccessException and complain
                 catch(IllegalAccessException e) {
-                    System.err.println("Key: Exception evaluating key " + _getMethod.getName() + " on object of class " + anObj.getClass());
-                    e.printStackTrace();
-                    _getMethod = null;
+                    String name = _getMethod.getName(), cname = anObj.getClass().getName();
+                    System.err.println("Key: Exception evaluating key " + name + " on object of class " + cname);
+                    e.printStackTrace(); _getMethod = null;
                 }
                 
                 // Catch anything else
                 catch(Throwable e) {
-                    System.err.println("Key: Exception evaluating key " + _getMethod.getName() + " on object of class " + anObj.getClass());
+                    String name = _getMethod.getName(), cname = anObj.getClass().getName();
+                    System.err.println("Key: Exception evaluating key " + name + " on object of class " + cname);
                     e.printStackTrace();
                     return null;
                 }
@@ -341,12 +343,10 @@ public static class KeyAccessor {
             }
                 
             // Handle TYPE_LISTKEY
-            case ListKey:
-                return new KeyList(anObj, _rawKey);
+            //case ListKey: return new KeyList(anObj, _rawKey);
     
             // Handle TYPE_UNKNOWN
-            default:
-                //System.err.println("Key: Key not found: " + _key + " for class " + _class.getSimpleName());
+            default: //System.err.println("Key: Key not found: " + _key + " for class " + _class.getSimpleName());
                 return null;
         }
     }
