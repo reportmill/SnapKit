@@ -1,9 +1,20 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.view;
+package snap.viewx;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
+import snap.view.BorderView;
+import snap.view.Button;
+import snap.view.ImageView;
+import snap.view.Label;
+import snap.view.ParentView;
+import snap.view.RowView;
+import snap.view.TextField;
+import snap.view.View;
+import snap.view.ViewEvent;
+import snap.view.ViewOwner;
+import snap.view.WindowView;
 
 /**
  * A class to run a dialog box.
