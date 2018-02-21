@@ -240,6 +240,11 @@ public void setDragImage(Image anImage, double aX, double aY)  { setDragImage(an
 public abstract void startDrag();
 
 /**
+ * Returns the view that started the 
+ */
+public View getDragSourceView()  { return null; }
+
+/**
  * Returns the system clipboard.
  */
 public static Clipboard get()  { return ViewEnv.getEnv().getClipboard(); }

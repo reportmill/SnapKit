@@ -145,6 +145,11 @@ public void startDrag()
     dragSource.startDrag(_dge, DragSource.DefaultCopyDrop, img, pnt, trans, null);
 }
 
+/**
+ * Returns the drag source view that started drag.
+ */
+public View getDragSourceView()  { return _view; }
+
 /** DragSourceListener methods. */
 public void dragEnter(DragSourceDragEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceEnter); }
 public void dragOver(DragSourceDragEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceOver); }

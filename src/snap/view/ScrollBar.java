@@ -129,7 +129,6 @@ protected void processEvent(ViewEvent anEvent)
         double mv = (hor? anEvent.getX() : anEvent.getY()) - _dv;
         double val = getScroll(mv);
         setScroll(val);
-        anEvent.consume();
     }
     
     // Handle scroll
@@ -139,6 +138,9 @@ protected void processEvent(ViewEvent anEvent)
         double dv = csize - size;
         if(dv>0 && Math.abs(units)>0) setScroll(getScroll() + units/dv);
     }
+    
+    // Consume event
+    anEvent.consume();
 }
 
 /**
