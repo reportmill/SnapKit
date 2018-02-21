@@ -271,8 +271,9 @@ public void blur(int aRad)
     
     // Get image data (and temp data)
     int w = getPixWidth(), h = getPixHeight();
-    int spix[] = getArrayARGB(), tpix[] = new int[w*h];
-
+    int spix[] = getArrayARGB(); if(spix==null) { System.err.println("Image.blur: No data"); return; }
+    int tpix[] = new int[w*h];
+    
     // Apply 1D gausian kernal for speed, as horizontal, then vertical (order = 2*rad instead of rad^2)
     float kern1[] = GFXUtils.getGaussianKernel(aRad,0); // size = aRad*2+1 x 1
     GFXUtils.convolve(spix, tpix, w, h, kern1, aRad*2+1);  // Horizontal 1D, kern size = aRad*2+1 x 1
@@ -299,7 +300,7 @@ public void emboss(double aRadius, double anAzi, double anAlt)
     bumpImg.blur(rad);
 
     // Get source and bump pixels as int arrays and call general emboss method
-    int spix[] = getArrayARGB(); if(spix==null) return;
+    int spix[] = getArrayARGB(); if(spix==null) { System.err.println("Image.emboss: No data"); return; }
     int bpix[] = bumpImg.getArrayARGB();
     GFXUtils.emboss(spix, bpix, w, h, radius, anAzi*Math.PI/180, anAlt*Math.PI/180);
 }
