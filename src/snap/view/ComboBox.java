@@ -555,7 +555,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 /**
  * Returns an Icon of a down arrow.
  */
-protected static Image getArrowImage()
+public static Image getArrowImage()
 {
     if(_arrowImg!=null) return _arrowImg;
     Image img = Image.get(9,7,true); Painter pntr = img.getPainter();

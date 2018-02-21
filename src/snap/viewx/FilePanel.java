@@ -11,7 +11,7 @@ import snap.web.*;
 /**
  * A class to select a file to open or save.
  */
-public class FileChooser extends ViewOwner {
+public class FilePanel extends ViewOwner {
     
     // Whether choosing file for save
     boolean                _saving;
@@ -160,11 +160,6 @@ protected void setFileInUI()
 }
 
 /**
- * Returns the home directory path.
- */
-String getHomeDirPath()  { return System.getProperty("user.home"); }
-
-/**
  * Returns a file for a path.
  */
 WebFile getFile(String aPath)
@@ -175,44 +170,19 @@ WebFile getFile(String aPath)
 }
 
 /**
- * Returns the most recent path for given type.
+ * Shows the panel.
  */
-public String getRecentPath(String aType)
-{
-    return Prefs.get().get("MostRecentDocument." + aType, getHomeDirPath());
-}
-
-/**
- * Sets the most recent path for given type.
- */
-public void setRecentPath(String aType, String aPath)
-{
-    Prefs.get().set("MostRecentDocument." + aType, aPath);
-    Prefs.get().flush();
-}
+public String showOpenPanel(View aView)  { setSaving(false); return showFilePanel(aView); }
 
 /**
  * Shows the panel.
  */
-public String showOpenPanel(View aView)
-{
-    setSaving(false);
-    return showChooser(aView);
-}
-
-/**
- * Shows the panel.
- */
-public String showSavePanel(View aView)
-{
-    setSaving(true);
-    return showChooser(aView);
-}
+public String showSavePanel(View aView)  { setSaving(true); return showFilePanel(aView); }
 
 /**
  * Runs a file chooser that remembers last open file and size.
  */
-protected String showChooser(View aView)
+protected String showFilePanel(View aView)
 {
     // Get component
     RootView rview = aView!=null? aView.getRootView() : null;
@@ -252,7 +222,7 @@ protected String showChooser(View aView)
         
         // If user chooses cancel, re-run chooser
         if(answer!=0)
-            return showChooser(aView);
+            return showFilePanel(aView);
     }
         
     // Give focus back to given view
@@ -474,9 +444,8 @@ private void handleFileTextKeyReleased()
  */
 public static String showOpenPanel(View aView, String aDesc, String ... theTypes)
 {
-    FileChooser fc = new FileChooser();
-    fc.setSaving(false); fc.setDesc(aDesc); fc.setTypes(theTypes);
-    return fc.showChooser(aView);
+    FilePanel fp = new FilePanel(); fp.setDesc(aDesc); fp.setTypes(theTypes);
+    return fp.showOpenPanel(aView);
 }
 
 /**
@@ -484,9 +453,30 @@ public static String showOpenPanel(View aView, String aDesc, String ... theTypes
  */
 public static String showSavePanel(View aView, String aDesc, String ... theTypes)
 {
-    FileChooser fc = new FileChooser();
-    fc.setSaving(true); fc.setDesc(aDesc); fc.setTypes(theTypes);
-    return fc.showChooser(aView);
+    FilePanel fp = new FilePanel(); fp.setDesc(aDesc); fp.setTypes(theTypes);
+    return fp.showSavePanel(aView);
+}
+
+/**
+ * Returns the home directory path.
+ */
+static String getHomeDirPath()  { return System.getProperty("user.home"); }
+
+/**
+ * Returns the most recent path for given type.
+ */
+public static String getRecentPath(String aType)
+{
+    return Prefs.get().get("MostRecentDocument." + aType, getHomeDirPath());
+}
+
+/**
+ * Sets the most recent path for given type.
+ */
+public static void setRecentPath(String aType, String aPath)
+{
+    Prefs.get().set("MostRecentDocument." + aType, aPath);
+    Prefs.get().flush();
 }
 
 /**

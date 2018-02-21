@@ -274,9 +274,9 @@ public int hashCode()  { return getName().hashCode() + (int)(_size*10); }
  */
 public XMLElement toXML(XMLArchiver anArchiver)
 {
-    XMLElement e = new XMLElement("Font");
-    e.add("Name", getNameEnglish());
-    e.add("Size", _size);
+    XMLElement e = new XMLElement("font");
+    e.add("name", getNameEnglish());
+    e.add("size", _size);
     return e;
 }
 
@@ -285,9 +285,9 @@ public XMLElement toXML(XMLArchiver anArchiver)
  */
 public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
 {
-    String name = anElement.getAttributeValue("Name");
+    String name = anElement.getAttributeValue("name");
     _fontFile = FontFile.getFontFile(name);
-    _size = anElement.getAttributeFloatValue("Size");
+    _size = anElement.getAttributeFloatValue("size");
     return this;
 }
 
