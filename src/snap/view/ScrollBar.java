@@ -104,10 +104,15 @@ public double getScroll(double aPnt)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    // Handle MouseEnter, MouseExit, MousePress, MouseRelease
     boolean hor = isHorizontal();
+    
+    // Handle MouseEnter
     if(anEvent.isMouseEnter()) { _targeted = true; repaint(); }
+    
+    // Handle MouseExit
     else if(anEvent.isMouseExit())  { _targeted = false; repaint(); }
+    
+    // Handle MousePress
     else if(anEvent.isMousePress())  {
         Rect tbnds = getThumbBounds(); double mx = anEvent.getX(), my = anEvent.getY();
         _pressed = true;
@@ -115,6 +120,8 @@ protected void processEvent(ViewEvent anEvent)
         if(!tbnds.contains(mx,my)) { setScroll(getScroll(hor? mx : my)); _dv = 0; }
         repaint();
     }
+
+    // Handle MouseRelease
     else if(anEvent.isMouseRelease())  { _pressed = false; repaint(); }
     
     // Handle MouseDragged
@@ -122,6 +129,7 @@ protected void processEvent(ViewEvent anEvent)
         double mv = (hor? anEvent.getX() : anEvent.getY()) - _dv;
         double val = getScroll(mv);
         setScroll(val);
+        anEvent.consume();
     }
     
     // Handle scroll

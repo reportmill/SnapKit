@@ -161,6 +161,14 @@ public static void showPathsMenu(View aView, String aName, Consumer <String> aFu
         mi.addEventHandler(e -> aFunc.accept(file.getPath()), Action);
         menu.addItem(mi);
     }
+    
+    // Add clear menu
+    menu.addSeparator();
+    MenuItem ci = new MenuItem(); ci.setText("Clear Recents");
+    ci.addEventHandler(e -> clearPaths(aName), Action);
+    menu.addItem(ci);
+    
+    // Show menu
     menu.show(aView, 0, aView.getHeight());
 }
 
