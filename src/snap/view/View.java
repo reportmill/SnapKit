@@ -2071,7 +2071,7 @@ protected void processEventAll(ViewEvent anEvent)
     processEventFilters(anEvent);
             
     // If event consumed, just return
-    if(anEvent.isConsumed()) return;
+    //if(anEvent.isConsumed()) return;
 
     // Forward to Handlers from last to first
     processEventHandlers(anEvent);
@@ -2098,7 +2098,7 @@ protected void processEventHandlers(ViewEvent anEvent)
     processEvent(anEvent);
 
     // If event consumed, just return
-    if(anEvent.isConsumed()) return;
+    //if(anEvent.isConsumed()) return;
 
     // Forward to Handlers from last to first
     EventListener handlers[] = getEventAdapter()._handlers;
