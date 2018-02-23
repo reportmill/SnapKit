@@ -42,8 +42,10 @@ public ToggleButton getSelected()  { return _sel; }
  */
 public void setSelected(ToggleButton aToggle)
 {
+    if(aToggle==_sel) return;
     if(_sel!=null) _sel.setSelected(false);
     _sel = aToggle;
+    if(_sel!=null) _sel.setSelected(true);
 }
 
 /**
@@ -73,10 +75,8 @@ public void remove(ToggleButton aToggle)
  */
 protected void buttonSelectionDidChange(PropChange anEvent)
 {
-    if(SnapUtils.boolValue(anEvent.getNewValue())) {
-        if(_sel!=null) _sel.setSelected(false);
-        _sel = (ToggleButton)anEvent.getSource();
-    }
+    if(SnapUtils.boolValue(anEvent.getNewValue()))
+        setSelected((ToggleButton)anEvent.getSource());
 }
 
 }

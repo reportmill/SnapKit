@@ -39,9 +39,11 @@ public class ButtonBase extends ParentView {
     
     // Constants for properties
     public static final String Image_Prop = "Image";
+    public static final String ImageName_Prop = "ImageName";
     public static final String Pressed_Prop = "Pressed";
     public static final String ShowBorder_Prop = "ShowBorder";
     public static final String Position_Prop = "Position";
+    public static final String Radius_Prop = "Radius";
     public static final String Targeted_Prop = "Targeted";
     public static final String Text_Prop = "Text";
     
@@ -132,7 +134,12 @@ public String getImageName()  { return _iname; }
 /**
  * Sets the image name, if loaded from local resource.
  */
-public void setImageName(String aName)  { _iname = aName; }
+public void setImageName(String aName)
+{
+    if(SnapUtils.equals(aName, _iname)) return;
+    firePropChange(ImageName_Prop, _iname, _iname = aName);
+    repaint();
+}
 
 /**
  * Returns whether button is pressed (visibly).
@@ -186,7 +193,12 @@ public Pos getPosition()  { return _pos; }
 /**
  * Sets the position of the button when in a group (determines corner rendering).
  */
-public void setPosition(Pos aPos)  { _pos = aPos; }
+public void setPosition(Pos aPos)
+{
+    if(aPos==_pos) return;
+    firePropChange(Position_Prop, _pos, _pos = aPos);
+    repaint();
+}
 
 /**
  * Returns the radius of the round.
@@ -196,7 +208,12 @@ public double getRadius()  { return _rad; }
 /**
  * Sets the radius of the round.
  */
-public void setRadius(double aValue)  { _rad = aValue;  }
+public void setRadius(double aValue)
+{
+    if(MathUtils.equals(aValue, _rad)) return;
+    firePropChange(Radius_Prop, _rad, _rad = aValue);
+    repaint();
+}
 
 /**
  * Returns the button fill.
