@@ -69,6 +69,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("ArcView", ArcView.class);
     cmap.put("BorderView", BorderView.class);
     cmap.put("Box", BoxView.class);
+    cmap.put("BoxView", BoxView.class);
     cmap.put("BrowserView", BrowserView.class);
     cmap.put("Button", Button.class);
     cmap.put("ColorButton", snap.viewx.ColorButton.class);

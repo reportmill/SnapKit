@@ -91,7 +91,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 /**
  * Returns preferred width of given parent with given children.
  */
-public static final double getPrefWidth(ParentView aPar, View theChildren[], double aSpacing, double aH)
+public static double getPrefWidth(ParentView aPar, View theChildren[], double aSpacing, double aH)
 {
     // Get insets and children (just return if empty)
     Insets ins = aPar.getInsetsAll();
@@ -106,7 +106,7 @@ public static final double getPrefWidth(ParentView aPar, View theChildren[], dou
 /**
  * Returns preferred height of given parent with given children.
  */
-public static final double getPrefHeight(ParentView aPar, View theChildren[], double aW)
+public static double getPrefHeight(ParentView aPar, View theChildren[], double aW)
 {
     // Get insets and children (just return if empty)
     Insets ins = aPar.getInsetsAll();
@@ -121,7 +121,16 @@ public static final double getPrefHeight(ParentView aPar, View theChildren[], do
 /**
  * Performs layout for given parent with given children.
  */
-public static final void layout(ParentView aPar, View theChilds[], Insets theIns, boolean isFillHeight, double aSpacing)
+public static void layout(ParentView aPar, View theChilds[], Insets theIns, boolean isFillHeight, double aSpacing)
+{
+    layout(aPar, theChilds, theIns, false, isFillHeight, aSpacing);
+}
+
+/**
+ * Performs layout for given parent with given children.
+ */
+public static void layout(ParentView aPar, View theChilds[], Insets theIns, boolean isFillWidth, boolean isFillHeight,
+    double aSpacing)
 {
     // Get children (just return if empty)
     View children[] = theChilds!=null? theChilds : aPar.getChildrenManaged(); if(children.length==0) return;
@@ -160,12 +169,18 @@ public static final void layout(ParentView aPar, View theChilds[], Insets theIns
     
     // Otherwise, check for horizontal alignment/lean shift
     else if(extra>0) {
+        
+        // Adjust for Par.Align and/or children Lean
         double ax = ViewUtils.getAlignX(aPar);
         for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect cbnd = cbnds[i];
             ax = Math.max(ax, ViewUtils.getLeanX(child)); double dx = extra*ax;
             if(dx>0) cbnd.setX(cbnd.getX() + extra*ax);
         }
     }
+        
+    // If FillWidth and last child doesn't fill width, extend it
+    if(isFillWidth && grow==0 && extra!=0 && !MathUtils.equals(cbnds[children.length-1].getMaxX(), px + pw))
+        cbnds[children.length-1].width = px + pw - cbnds[children.length-1].x;
     
     // Reset children bounds
     for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect bnds = cbnds[i];

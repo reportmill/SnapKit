@@ -121,10 +121,19 @@ public static final double getPrefHeight(ParentView aPar, View theChildren[], do
 /**
  * Performs layout for given parent with given children.
  */
-public static void layout(ParentView aPar, View theChildren[], Insets theIns, boolean isFillWidth, double aSpacing)
+public static void layout(ParentView aPar, View theChilds[], Insets theIns, boolean isFillWidth, double aSpacing)
+{
+    layout(aPar, theChilds, theIns, isFillWidth, false, aSpacing);
+}
+
+/**
+ * Performs layout for given parent with given children.
+ */
+public static void layout(ParentView aPar, View theChilds[], Insets theIns, boolean isFillWidth, boolean isFillHeight,
+    double aSpacing)
 {
     // Get children (just return if empty)
-    View children[] = theChildren!=null? theChildren : aPar.getChildrenManaged(); if(children.length==0) return;
+    View children[] = theChilds!=null? theChilds : aPar.getChildrenManaged(); if(children.length==0) return;
     
     // Get parent bounds for insets
     Insets ins = theIns!=null? theIns : aPar.getInsetsAll();
@@ -166,6 +175,10 @@ public static void layout(ParentView aPar, View theChildren[], Insets theIns, bo
         }
     }
 
+    // If FillWidth and last child doesn't fill height, extend it
+    if(isFillHeight && grow==0 && extra!=0 && !MathUtils.equals(cbnds[children.length-1].getMaxY(), py + ph))
+        cbnds[children.length-1].height = py + ph - cbnds[children.length-1].y;
+    
     // Reset children bounds
     for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect bnds = cbnds[i];
         child.setBounds(bnds); }

@@ -8,13 +8,17 @@ import snap.util.*;
 /**
  * A View that holds another view.
  */
-public class BoxView extends HostView {
+public class BoxView extends ChildView {
 
-    // The content
-    View         _child;
+    // The spacing between nodes
+    double        _spacing;
     
     // Whether to fill width, height
-    boolean      _fillWidth, _fillHeight;
+    boolean       _fillWidth, _fillHeight;
+    
+    // Constants for properties
+    public static final String FillWidth_Prop = "FillWidth";
+    public static final String FillHeight_Prop = "FillHeight";
     
 /**
  * Creates a new Box.
@@ -37,17 +41,31 @@ public BoxView(View aContent, boolean isFillWidth, boolean isFillHeight)
 /**
  * Returns the box content.
  */
-public View getContent()  { return _child; }
+public View getContent()  { return getGuestCount()>0? getGuest(0) : null; }
 
 /**
  * Sets the box content.
  */
 public void setContent(View aView)
 {
-    if(aView==_child) return;
-    if(_child!=null) removeChild(_child);
-    _child = aView;
-    if(_child!=null) addChild(_child);
+    if(aView==getContent()) return;
+    removeGuests();
+    if(aView!=null) addGuest(aView);
+}
+
+/**
+ * Returns the spacing.
+ */
+public double getSpacing()  { return _spacing; }
+
+/**
+ * Sets the spacing.
+ */
+public void setSpacing(double aValue)
+{
+    if(aValue==_spacing) return;
+    firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
+    relayout(); relayoutParent();
 }
 
 /**
@@ -79,35 +97,6 @@ public void setFillHeight(boolean aValue)
 }
 
 /**
- * HostView method.
- */
-public int getGuestCount()  { return getContent()!=null? 1 : 0; }
-
-/**
- * HostView method.
- */
-public View getGuest(int anIndex)  { return getContent(); }
-
-/**
- * HostView method.
- */
-public void addGuest(View aChild, int anIndex)
-{
-    setContent(aChild);
-    fireGuestPropChange(null, aChild, 0);
-}
-
-/**
- * HostView method.
- */
-public View removeGuest(int anIndex)
-{
-    View cont = getContent(); setContent(null);
-    fireGuestPropChange(cont, null, 0);
-    return cont;
-}
-
-/**
  * Override to change to CENTER.
  */    
 public Pos getDefaultAlign()  { return Pos.CENTER; }
@@ -115,17 +104,35 @@ public Pos getDefaultAlign()  { return Pos.CENTER; }
 /**
  * Override.
  */
-protected double getPrefWidthImpl(double aH)  { return getPrefWidth(this, getContent(), aH); }
+protected double getPrefWidthImpl(double aH)
+{
+    //return getPrefWidth(this, getContent(), aH);
+    if(isHorizontal())
+        return RowView.getPrefWidth(this, null, getSpacing(), aH);
+    return ColView.getPrefWidth(this, null, aH);
+}
 
 /**
  * Override.
  */
-protected double getPrefHeightImpl(double aW)  { return getPrefHeight(this, getContent(), aW); }
+protected double getPrefHeightImpl(double aW)
+{
+    //return getPrefHeight(this, getContent(), aW);
+    if(isHorizontal())
+        return RowView.getPrefHeight(this, null, aW);
+    return ColView.getPrefHeight(this, null, _spacing, aW);
+}
 
 /**
  * Override.
  */
-protected void layoutImpl()  { layout(this, getContent(), null, _fillWidth, _fillHeight); }
+protected void layoutImpl()
+{
+    //layout(this, getContent(), null, _fillWidth, _fillHeight);
+    if(isHorizontal())
+        RowView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
+    else ColView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
+}
 
 /**
  * XML archival.
@@ -135,9 +142,10 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive FillWidth
-    if(isFillWidth()) e.add("FillWidth", true);
-    if(isFillHeight()) e.add("FillHeight", true);
+    // Archive Spacing, FillWidth, FillHeight
+    if(getSpacing()!=0) e.add(Spacing_Prop, getSpacing());
+    if(isFillWidth()) e.add(FillWidth_Prop, true);
+    if(isFillHeight()) e.add(FillHeight_Prop, true);
     return e;
 }
 
@@ -149,9 +157,10 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
 
-    // Unarchive Spacing, FillWidth
-    if(anElement.hasAttribute("FillWidth")) setFillWidth(anElement.getAttributeBoolValue("FillWidth"));
-    if(anElement.hasAttribute("FillHeight")) setFillHeight(anElement.getAttributeBoolValue("FillHeight"));
+    // Unarchive Spacing, FillWidth, FillHeight
+    if(anElement.hasAttribute(Spacing_Prop))setSpacing(anElement.getAttributeFloatValue(Spacing_Prop));
+    if(anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
+    if(anElement.hasAttribute(FillHeight_Prop)) setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop));
 }
 
 /**
