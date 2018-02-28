@@ -167,10 +167,12 @@ public static void layout(ParentView aPar, View theChilds[], Insets theIns, bool
         }
     }
     
+    // Otherwise, if FillWidth and last child doesn't fill width, extend it
+    else if(isFillWidth && extra!=0 && grow==0)
+        cbnds[children.length-1].width = px + pw - cbnds[children.length-1].x;
+    
     // Otherwise, check for horizontal alignment/lean shift
     else if(extra>0) {
-        
-        // Adjust for Par.Align and/or children Lean
         double ax = ViewUtils.getAlignX(aPar);
         for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect cbnd = cbnds[i];
             ax = Math.max(ax, ViewUtils.getLeanX(child)); double dx = extra*ax;
@@ -178,11 +180,7 @@ public static void layout(ParentView aPar, View theChilds[], Insets theIns, bool
         }
     }
         
-    // If FillWidth and last child doesn't fill width, extend it
-    if(isFillWidth && grow==0 && extra!=0 && !MathUtils.equals(cbnds[children.length-1].getMaxX(), px + pw))
-        cbnds[children.length-1].width = px + pw - cbnds[children.length-1].x;
-    
-    // Reset children bounds
+    // Reset child bounds
     for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect bnds = cbnds[i];
         child.setBounds(bnds); }
 }

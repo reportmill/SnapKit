@@ -13,6 +13,6 @@
   <HBox Align="CENTER" Spacing="5" >
     <Font Name="Arial" Size="14" />
     <Label Text="File:" />
-    <TextField name="FileText" ColumnCount="32" />
+    <TextField name="FileText" ColCount="32" />
   </HBox>
 </VBox>

@@ -7,7 +7,7 @@ import snap.util.StringUtils;
 /**
  * This class represents a margin inset.
  */
-public class Insets {
+public class Insets implements Cloneable {
 
     // Insets
     public double top, right, bottom, left;
@@ -79,6 +79,15 @@ public String getStringLong()
     String t = StringUtils.toString(top), r = StringUtils.toString(right);
     String b = StringUtils.toString(bottom), l = StringUtils.toString(left);
     return t + "," + r + "," + b + "," + l;
+}
+
+/**
+ * Returns a copy of this gradient paint.
+ */
+public Insets clone()
+{
+    try { return (Insets)super.clone(); }
+    catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
 }
 
 /**

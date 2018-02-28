@@ -166,6 +166,10 @@ public static void layout(ParentView aPar, View theChilds[], Insets theIns, bool
         }
     }
     
+    // Otherwise, if FillHeight and last child doesn't fill height, extend it
+    else if(isFillHeight && extra!=0 && grow==0)
+        cbnds[children.length-1].height = py + ph - cbnds[children.length-1].y;
+    
     // Otherwise, check for vertical alignment/lean shift
     else if(extra>0) {
         double ay = ViewUtils.getAlignY(aPar);
@@ -175,11 +179,7 @@ public static void layout(ParentView aPar, View theChilds[], Insets theIns, bool
         }
     }
 
-    // If FillWidth and last child doesn't fill height, extend it
-    if(isFillHeight && grow==0 && extra!=0 && !MathUtils.equals(cbnds[children.length-1].getMaxY(), py + ph))
-        cbnds[children.length-1].height = py + ph - cbnds[children.length-1].y;
-    
-    // Reset children bounds
+    // Reset child bounds
     for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect bnds = cbnds[i];
         child.setBounds(bnds); }
 }

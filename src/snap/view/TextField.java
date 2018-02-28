@@ -882,7 +882,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Do normal version
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive ColumnCount, Text, Radius
+    // Unarchive ColCount, Text, Radius
     if(anElement.hasAttribute(ColCount_Prop)) setColCount(anElement.getAttributeIntValue(ColCount_Prop));
     String str = anElement.getAttributeValue("text",  anElement.getAttributeValue("value", anElement.getValue()));
     if(str!=null && str.length()>0)
