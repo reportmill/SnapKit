@@ -335,4 +335,15 @@ public static Transform getRotate(double theta)  { Transform t = new Transform()
  */
 public static Transform getScale(double sx, double sy)  { return new Transform(sx, 0, 0, sy, 0, 0); }
 
+/**
+ * Returns a transform from one rect to another.
+ */
+public static Transform getTrans(Rect fromRect, Rect toRect)
+{
+    if(fromRect.isEmpty()) { System.err.println("Transform.getTrans: Empty rect"); return IDENTITY; }
+    double sx = toRect.width/fromRect.width, sy = toRect.height/fromRect.height;
+    double tx = toRect.x - fromRect.x*sx, ty = toRect.y - fromRect.y*sy;
+    return new Transform(sx,0,0,sy,tx,ty);
+}
+
 }
