@@ -45,7 +45,7 @@ protected Tokenizer createTokenizerImpl()  { return new XMLTokenizer(); }
 /**
  * A Tokenizer subclass to read XML contents.
  */
-private static class XMLTokenizer extends Tokenizer {
+public static class XMLTokenizer extends Tokenizer {
     
     /** Called to return the value of an element and update the char index. */
     protected String getContent()
@@ -86,7 +86,7 @@ private static class XMLTokenizer extends Tokenizer {
 }
 
 /**
- * Document Handler.
+ * Document Handler: Document { Prolog? DocType? Element }
  */
 public static class DocumentHandler extends ParseHandler <XMLElement> {
     
@@ -103,7 +103,7 @@ public static class DocumentHandler extends ParseHandler <XMLElement> {
 }
 
 /**
- * Prolog Handler.
+ * Prolog Handler: Prolog { "<?xml" Attribute* "?>" }
  */
 public static class PrologHandler extends ParseHandler <XMLElement> {
     
@@ -120,7 +120,7 @@ public static class PrologHandler extends ParseHandler <XMLElement> {
 }
 
 /**
- * Element Handler.
+ * Element Handler: Element { "<" Name Attribute* ("/>" | (">" Content "</" Name ">")) }
  */
 public static class ElementHandler extends ParseHandler <XMLElement> {
     
@@ -158,7 +158,7 @@ public static class ElementHandler extends ParseHandler <XMLElement> {
 }
 
 /**
- * Attribute Handler.
+ * Attribute Handler: Attribute { Name "=" String }
  */
 public static class AttributeHandler extends ParseHandler <XMLAttribute> {
     
