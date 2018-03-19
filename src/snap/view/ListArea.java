@@ -26,9 +26,6 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     // The cell padding
     Insets                _cellPad = getCellPaddingDefault();
     
-    // The SelectionMode
-    int                   _selMode;
-    
     // The selected index
     int                   _selIndex = -1;
     
@@ -118,10 +115,6 @@ public void setItems(List <T> theItems)
  * Sets the items.
  */
 public void setItems(T ... theItems)  { setItems(theItems!=null? Arrays.asList(theItems) : null); }
-
-/** Returns the selection mode. Replace with MultipleChoice. SingleInterval. */
-//public int getSelectionMode()  { return _selMode; }
-//public void setSelectionMode(int aMode)  { firePropertyChange("SelectionMode", _selMode, _selMode = aMode); }
 
 /**
  * Returns the selected index.
