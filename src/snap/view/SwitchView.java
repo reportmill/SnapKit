@@ -13,9 +13,6 @@ public class SwitchView extends ChildView implements View.Selectable {
     // The selected index
     int        _sindex;
 
-    // Constants for properties
-    public static final String SelectedIndex_Prop = "SelectedIndex";
-
 /**
  * Returns the view with the given name.
  */

@@ -129,26 +129,6 @@ public int getSelectedIndex()  { return _listArea.getSelectedIndex(); }
 public void setSelectedIndex(int anIndex)  { _listArea.setSelectedIndex(anIndex); }
 
 /**
- * Returns the minimum selected index.
- */
-public int getSelectedIndexMin()  { return _listArea.getSelectedIndexMin(); }
-
-/**
- * Returns the maximum selected index.
- */
-public int getSelectedIndexMax()  { return _listArea.getSelectedIndexMax(); }
-
-/**
- * Returns the selected indices.
- */
-public int[] getSelectedIndices()  { return _listArea.getSelectedIndices(); }
-
-/**
- * Sets the selection interval.
- */
-public void setSelectionInterval(int aStart, int anEnd)  { _listArea.setSelectionInterval(aStart,anEnd); }
-
-/**
  * Returns the selected item.
  */
 public T getSelectedItem()  { return _listArea.getSelectedItem(); }

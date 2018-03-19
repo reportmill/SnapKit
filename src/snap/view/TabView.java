@@ -34,9 +34,6 @@ public class TabView extends ParentView implements View.Selectable <Tab> {
     
     // The default back fill
     static Paint    _backFill = ViewUtils.getBackFill();
-    
-    // Constants for properties
-    public static final String SelectedIndex_Prop = "SelectedIndex";
 
 /**
  * Creates a new TabView.

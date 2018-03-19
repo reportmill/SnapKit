@@ -50,11 +50,6 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     // Constants
     static final Paint DIVIDER_FILL = new Color("#EEEEEE");
     static final Paint DIVIDER_FILLH = new Color("#E0E0E0");
-
-    // Constants for properties
-    public static final String Items_Prop = "Items";
-    public static final String SelectedItem_Prop = "SelectedItem";
-    public static final String SelectedIndex_Prop = "SelectedIndex";
     
 /**
  * Creates a new TableView.
@@ -153,6 +148,9 @@ public void addCol(TableCol aCol)
     // Configure split dividers
     for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
     for(Divider div : hsplit.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILLH); div.setBorder(null); }
+    
+    // Synchronize TableCol selection with this TableView
+    aCol.addPropChangeListener(pc -> setSelectedIndex(aCol.getSelectedIndex()), SelectedIndex_Prop);
 }
 
 /**
@@ -187,10 +185,6 @@ public void setShowHeader(boolean aValue)
     if(aValue) addChild(_header,0);
     else removeChild(_header);
 }
-
-/** Replace these with AllowMultipleChoice, AllowIntervals. */
-//public int getSelectionMode()  { return _selMode; } int _selMode = SELECT_SINGLE;
-//public void setSelectionMode(int aValue)  { firePropertyChange("SelectionMode", _selMode, _selMode = aValue, -1); }
 
 /**
  * Returns whether to show horizontal lines.
@@ -298,44 +292,9 @@ public int getSelectedIndex()  { return _selIndex; }
 public void setSelectedIndex(int anIndex)
 {
     if(anIndex==_selIndex) return;
-    firePropChange("SelectedIndex", _selIndex, _selIndex = anIndex);
+    firePropChange(SelectedIndex_Prop, _selIndex, _selIndex = anIndex);
     for(TableCol tcol : getCols()) tcol.setSelectedIndex(anIndex);
     fireActionEvent();
-}
-
-/**
- * Returns the minimum selected index.
- */
-public int getSelectedIndexMin()
-{
-    int indexes[] = getSelectedIndices();
-    int min = Integer.MAX_VALUE; for(int i : indexes) min = Math.min(min, i);
-    return min!=Integer.MAX_VALUE? min : -1;
-}
-
-/**
- * Returns the maximum selected index.
- */
-public int getSelectedIndexMax()
-{
-    int indexes[] = getSelectedIndices();
-    int max = -1; for(int i : indexes) max = Math.max(max, i);
-    return max;
-}
-
-/**
- * Returns the selected indices.
- */
-public int[] getSelectedIndices()  { return _selIndex>=0? new int[] { _selIndex } : new int[0]; }
-
-/**
- * Sets the selection interval.
- */
-public void setSelectionInterval(int aStart, int anEnd)
-{
-    int min = Math.min(aStart,anEnd), max = Math.max(aStart,anEnd), len = max-min+1;
-    int indexes[] = new int[len]; for(int i=0;i<len;i++) indexes[i] = i + min;
-    setSelectedIndex(min);
 }
 
 /**

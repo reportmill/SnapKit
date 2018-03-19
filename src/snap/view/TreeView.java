@@ -159,6 +159,9 @@ public void addCol(TreeCol aCol, int anIndex)
     
     // Configure split dividers
     for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
+    
+    // Synchronize TreeCol selection with this TreeView
+    aCol.addPropChangeListener(pc -> setSelectedIndex(aCol.getSelectedIndex()), SelectedIndex_Prop);
 }
 
 /**
@@ -259,44 +262,9 @@ public int getSelectedIndex()  { return _selIndex; }
 public void setSelectedIndex(int anIndex)
 {
     if(anIndex==_selIndex) return;
-    firePropChange("SelectedIndex", _selIndex, _selIndex = anIndex);
+    firePropChange(SelectedIndex_Prop, _selIndex, _selIndex = anIndex);
     for(TreeCol tcol : getCols()) tcol.setSelectedIndex(anIndex);
     fireActionEvent();
-}
-
-/**
- * Returns the minimum selected index.
- */
-public int getSelectedIndexMin()
-{
-    int indexes[] = getSelectedIndices();
-    int min = Integer.MAX_VALUE; for(int i : indexes) min = Math.min(min, i);
-    return min!=Integer.MAX_VALUE? min : -1;
-}
-
-/**
- * Returns the maximum selected index.
- */
-public int getSelectedIndexMax()
-{
-    int indexes[] = getSelectedIndices();
-    int max = -1; for(int i : indexes) max = Math.max(max, i);
-    return max;
-}
-
-/**
- * Returns the selected indices.
- */
-public int[] getSelectedIndices()  { return _selIndex>=0? new int[] { _selIndex } : new int[0]; }
-
-/**
- * Sets the selection interval.
- */
-public void setSelectionInterval(int aStart, int anEnd)
-{
-    int min = Math.min(aStart,anEnd), max = Math.max(aStart,anEnd), len = max-min+1;
-    int indexes[] = new int[len]; for(int i=0;i<len;i++) indexes[i] = i + min;
-    setSelectedIndex(min);
 }
 
 /**

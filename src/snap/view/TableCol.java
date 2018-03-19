@@ -67,17 +67,6 @@ public void setResizable(boolean aValue)
 public double getRowHeight()  { return getTable().getRowHeight(); }
 
 /**
- * Sets the selected index.
- */
-public void setSelectedIndex(int anIndex)
-{
-    if(anIndex==getSelectedIndex()) return;
-    super.setSelectedIndex(anIndex);
-    //getTable().setSelectedCol(getColIndex());
-    getTable().setSelectedIndex(anIndex);
-}
-
-/**
  * Returns the column index.
  */
 public int getColIndex()  { return ArrayUtils.indexOfId(getTable().getCols(), this); }

@@ -18,16 +18,13 @@ import snap.util.*;
 public class ListArea <T> extends ParentView implements View.Selectable <T> {
 
     // The items
-    List <T>              _items = new ArrayList();
+    PickList <T>          _items = new PickList();
     
     // The row height
     double                _rowHeight;
     
     // The cell padding
     Insets                _cellPad = getCellPaddingDefault();
-    
-    // The selected index
-    int                   _selIndex = -1;
     
     // The function to format text
     Function <T,String>   _itemTextFunc;
@@ -80,6 +77,9 @@ public ListArea()
     enableEvents(MousePress, MouseRelease, KeyPress, Action);
     setFocusable(true); setFocusWhenPressed(true);
     setFill(Color.WHITE);
+    
+    // Register PickList to notify when selection changes
+    _items.addPropChangeListener(pc -> pickListSelChange(pc));
 }
 
 /**
@@ -103,12 +103,8 @@ public List <T> getItems()  { return _items; }
 public void setItems(List <T> theItems)
 {
     if(equalsItems(theItems)) return;
-    T sitem = getSelectedItem();
-    _items.clear();
-    if(theItems!=null) _items.addAll(theItems);
-    setSelectedItem(sitem);
-    relayout(); _sampleWidth = _sampleHeight = -1;
-    relayoutParent(); repaint();
+    _items.setAll(theItems);
+    relayout(); relayoutParent(); repaint(); _sampleWidth = _sampleHeight = -1;
 }
 
 /**
@@ -119,99 +115,50 @@ public void setItems(T ... theItems)  { setItems(theItems!=null? Arrays.asList(t
 /**
  * Returns the selected index.
  */
-public int getSelectedIndex()  { return _selIndex; }
+public int getSelectedIndex()  { return _items.getSelIndex(); }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedIndex(int anIndex)
-{
-    if(anIndex==_selIndex) return;
-    updateIndex(_selIndex);
-    firePropChange(SelectedIndex_Prop, _selIndex, _selIndex = anIndex);
-    updateIndex(_selIndex);
-    
-    // Scroll selection to visible
-    if(isShowing())
-        scrollSelToVisible();
-}
-
-/**
- * Returns the minimum selected index.
- */
-public int getSelectedIndexMin()
-{
-    int indexes[] = getSelectedIndices();
-    int min = Integer.MAX_VALUE; for(int i : indexes) min = Math.min(min, i);
-    return min!=Integer.MAX_VALUE? min : -1;
-}
-
-/**
- * Returns the maximum selected index.
- */
-public int getSelectedIndexMax()
-{
-    int indexes[] = getSelectedIndices();
-    int max = -1; for(int i : indexes) max = Math.max(max, i);
-    return max;
-}
-
-/**
- * Returns the selected indices.
- */
-public int[] getSelectedIndices()  { return _selIndex>=0? new int[] { _selIndex } : new int[0]; }
-
-/**
- * Sets the selection interval.
- */
-public void setSelectionInterval(int aStart, int anEnd)
-{
-    int min = Math.min(aStart,anEnd), max = Math.max(aStart,anEnd), len = max-min+1;
-    int indexes[] = new int[len]; for(int i=0;i<len;i++) indexes[i] = i + min;
-    setSelectedIndex(min);
-}
+public void setSelectedIndex(int anIndex)  { _items.setSelIndex(anIndex); }
 
 /**
  * Returns the selected item.
  */
-public T getSelectedItem()  { return _selIndex>=0 && _selIndex<getItemCount()? getItem(_selIndex) : null; }
+public T getSelectedItem()  { return _items.getSelItem(); }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedItem(T anItem)
-{
-    int index = _items.indexOf(anItem);
-    setSelectedIndex(index);
-}
+public void setSelectedItem(T anItem)  { _items.setSelItem(anItem); }
 
 /**
  * Selects up in the list.
  */
-public void selectUp()  { if(getSelectedIndex()>0)setSelectedIndex(getSelectedIndex()-1); }
+public void selectUp()  { _items.selectUp(); }
 
 /**
  * Selects up in the list.
  */
-public void selectDown()  { if(getSelectedIndex()<getItemCount()-1) setSelectedIndex(getSelectedIndex()+1); }
+public void selectDown()  { _items.selectDown(); }
 
 /**
- * Returns the list items as a single string with items separated by newlines.
+ * Called when PickList changes selection.
  */
-public String getItemsString()
+protected void pickListSelChange(PropChange aPC)
 {
-    List <T> items = getItems(); if(items==null) return null;
-    return ListUtils.joinStrings(items, "\n");
-}
-
-/**
- * Sets the list items as a single string with items separated by newlines.
- */
-public void setItemsString(String aString)
-{
-    String items[] = aString!=null? aString.split("\n") : new String[0];
-    for(int i=0; i<items.length; i++) items[i] = items[i].trim();
-    setItems((T)items);
+    // If not SelIndex, just return
+    if(aPC.getPropertyName()!=PickList.SelIndex_Prop) return;
+    
+    // Update old/new indexes
+    int oldInd = (Integer)aPC.getOldValue(), newInd = (Integer)aPC.getNewValue();
+    updateIndex(oldInd);
+    firePropChange(SelectedIndex_Prop, oldInd, newInd);
+    updateIndex(newInd);
+    
+    // Scroll selection to visible
+    if(isShowing())
+        scrollSelToVisible();
 }
 
 /**
@@ -487,7 +434,8 @@ protected void layoutImpl()
 protected ListCell createCell(int anIndex)
 {
     T item = anIndex>=0 && anIndex<getItemCount()? getItem(anIndex) : null;
-    ListCell cell = new ListCell(item, anIndex, getColIndex(), _selIndex==anIndex);
+    int selInd = getSelectedIndex();
+    ListCell cell = new ListCell(item, anIndex, getColIndex(), anIndex==selInd);
     cell.setPadding(getCellPadding());
     cell.setPrefHeight(getRowHeight());
     return cell;
@@ -708,10 +656,6 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive ItemKey
     if(getItemKey()!=null) e.add(ItemKey_Prop, getItemKey());
     
-    // Archive selection mode
-    //if(getSelectionMode()==SELECT_SINGLE) e.add("selection", "single-interval");
-    //else if(getSelectionMode()==SELECT_MULTIPLE) e.add("selection", "multiple-interval");
-    
     // Return element
     return e;
 }
@@ -726,11 +670,6 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     
     // Unarchive ItemKey
     if(anElement.hasAttribute(ItemKey_Prop)) setItemKey(anElement.getAttributeValue(ItemKey_Prop));
-    
-    // Set selectionMode
-    //String selection = anElement.getAttributeValue("selection", "single");
-    //if(selection.equals("single")) setSelectionMode(SELECT_SINGLE);
-    //else if(selection.equals("single-interval")) setSelectionMode(SELECT_INTERVAL); else setSelMode(SELECT_MULTIPLE);
 }
 
 }
