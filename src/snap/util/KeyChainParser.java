@@ -56,7 +56,7 @@ protected void initRule()
 }
 
 /**
- * Statement Handler.
+ * Statement Handler: Statement { LookAhead(2) KEY ("=" | "+=") Expression | Expression }
  */
 public static class StatementHandler extends ParseHandler <KeyChain> {
 
@@ -86,7 +86,7 @@ public static class StatementHandler extends ParseHandler <KeyChain> {
 }
 
 /**
- * Expression Handler.
+ * Expression Handler: Expression { LogicalOrExpr (LookAhead(2) "?" Expression (LookAhead(2) ":" Expression)?)? }
  */
 public static class ExpressionHandler extends ParseHandler <KeyChain> {
 
@@ -103,37 +103,37 @@ public static class ExpressionHandler extends ParseHandler <KeyChain> {
 }
 
 /**
- * LogicalOrExpr Handler.
+ * LogicalOrExpr Handler: LogicalOrExpr { LogicalAndExpr ("||" LogicalAndExpr)* }
  */
 public static class LogicalOrExprHandler extends BinaryExprHandler { }
 
 /**
- * LogicalAndExpr Handler.
+ * LogicalAndExpr Handler: LogicalAndExpr { EqualityExpr ("&&" EqualityExpr)* }
  */
 public static class LogicalAndExprHandler extends BinaryExprHandler { }
 
 /**
- * EqualityExpr Handler.
+ * EqualityExpr Handler: EqualityExpr { ComparativeExpr (("==" | "!=") ComparativeExpr)* }
  */
 public static class EqualityExprHandler extends BinaryExprHandler { }
 
 /**
- * ComparativeExpr Handler.
+ * ComparativeExpr Handler: ComparativeExpr { AdditiveExpr ((">" | "<" | ">=" | "<=") AdditiveExpr)* }
  */
 public static class ComparativeExprHandler extends BinaryExprHandler { }
 
 /**
- * AdditiveExpr Handler.
+ * AdditiveExpr Handler: AdditiveExpr { MultiplicativeExpr (("+" | "-") MultiplicativeExpr)* }
  */
 public static class AdditiveExprHandler extends BinaryExprHandler { }
 
 /**
- * MultiplicativeExpr Handler.
+ * MultiplicativeExpr Handler: MultiplicativeExpr { UnaryExpr (("*" | "/" | "%") UnaryExpr)* }
  */
 public static class MultiplicativeExprHandler extends BinaryExprHandler { }
 
 /**
- * OpExpr Handler.
+ * BinaryExpr Handler.
  */
 public static abstract class BinaryExprHandler extends ParseHandler <KeyChain> {
 
@@ -168,7 +168,7 @@ public static abstract class BinaryExprHandler extends ParseHandler <KeyChain> {
 }
 
 /**
- * UnaryExpr Handler.
+ * UnaryExpr Handler: UnaryExpr { "-" KeyChain | "!" KeyChain | KeyChain }
  */
 public static class UnaryExprHandler extends ParseHandler <KeyChain> {
 
@@ -191,7 +191,7 @@ public static class UnaryExprHandler extends ParseHandler <KeyChain> {
 }
 
 /**
- * KeyChain Handler.
+ * KeyChain Handler: KeyChain { Object ("." Object)* }
  */
 public static class KeyChainHandler extends ParseHandler <KeyChain> {
 
@@ -209,7 +209,8 @@ public static class KeyChainHandler extends ParseHandler <KeyChain> {
 }
 
 /**
- * Object Handler.
+ * Object Handler: LookAhead(3) KEY "(" ArgList? ")" | LookAhead(2) KEY "[" Expression "]" | LookAhead(3) KEY | INT |
+ *                     FLOAT | STRING | "(" Expression ")"
  */
 public static class ObjectHandler extends ParseHandler <KeyChain> {
 
@@ -258,7 +259,7 @@ public static class ObjectHandler extends ParseHandler <KeyChain> {
 }
 
 /**
- * ArgList Handler.
+ * ArgList Handler: ArgList { Expression ("," Expression)* }
  */
 public static class ArgListHandler extends ParseHandler <KeyChain> {
 
