@@ -340,7 +340,11 @@ public static byte[] getBytesOrThrow(Object aSource) throws IOException
 {
     // Handle byte array and InputStream
     if(aSource instanceof byte[]) return (byte[])aSource;
-    if(aSource instanceof InputStream) return getBytes((InputStream)aSource);
+    if(aSource instanceof InputStream) return getBytesOrThrow((InputStream)aSource);
+    
+    // Handle File
+    if(aSource instanceof File)
+        return FileUtils.getBytesOrThrow((File)aSource);
     
     // Handle URL
     if(aSource instanceof URL)

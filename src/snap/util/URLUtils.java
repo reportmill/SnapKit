@@ -55,7 +55,7 @@ public static byte[] getBytes(URL aURL) throws IOException
 {
     // If url is file, return bytes for file
     if(aURL.getProtocol().equals("file"))
-        return FileUtils.getBytes(getFile(aURL));
+        return FileUtils.getBytesOrThrow(getFile(aURL));
     
     // Get connection, stream, stream bytes, then close stream and return bytes
     URLConnection conn = aURL.openConnection();
