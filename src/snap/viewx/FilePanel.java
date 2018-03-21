@@ -258,7 +258,7 @@ protected void initUI()
     _fileBrowser.setResolver(new FileResolver());
     _fileBrowser.setCellConfigure(itm -> configureFileBrowserCell(itm));
     
-    // Set FileBrowser Items, SelectedItem
+    // Set FileBrowser Items, SelItem
     _fileBrowser.setItems(getFilteredFiles(getDir().getSite().getRootDir().getFiles()));
     _fileBrowser.setSelItem(getFile()!=null? getFile() : getDir());
     

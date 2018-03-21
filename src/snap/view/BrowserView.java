@@ -288,12 +288,12 @@ public T getSelItem()
 /**
  * Sets the selected item.
  */
-public void setSelItem(T anItem)  { setSelectedItem(anItem, true); }
+public void setSelItem(T anItem)  { setSelItem(anItem, true); }
 
 /**
  * Sets the selected item.
  */
-public void setSelectedItem(T anItem, boolean scrollToVisible)
+public void setSelItem(T anItem, boolean scrollToVisible)
 {
     // If null item, reset to first column
     if(anItem==null) {
@@ -323,7 +323,7 @@ public void setSelectedItem(T anItem, boolean scrollToVisible)
     
     // Otherwise, select parent
     T par = getParent(anItem);
-    setSelectedItem(par, false);
+    setSelItem(par, false);
     
     // Select item
     getColLast().setSelItem(anItem);

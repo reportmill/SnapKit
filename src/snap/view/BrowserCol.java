@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.util.StringUtils;
 
 /**
  * A ListView subclass to act as a BrowserView column.
@@ -70,14 +69,6 @@ protected double getPrefWidthImpl(double aH)
     double width = _browser.getScrollView().getScroller().getWidth();
     double pw = width/_browser.getPrefColCount();
     return pw;
-}
-    
-/**
- * Standard toString implementation.
- */
-public String toString()
-{
-    return StringUtils.toString(this, "Index", "SelectedItemText").toString();
 }
     
 }

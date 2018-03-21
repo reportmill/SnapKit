@@ -332,7 +332,7 @@ public void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
         }
     }
     
-    // Unarchive SelectedIndex (after children unarchival - otherwise it may be out of bounds)
+    // Unarchive SelIndex (after children unarchival - otherwise it may be out of bounds)
     if(anElement.hasAttribute(SelIndex_Prop))
         setSelIndex(anElement.getAttributeIntValue(SelIndex_Prop));
 }

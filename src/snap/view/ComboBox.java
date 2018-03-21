@@ -115,7 +115,7 @@ public void setListView(ListView <T> aListView)
     // Set List
     _list = aListView;
     
-    // Start listening to Action and SelectedIndex changes
+    // Start listening to Action and SelIndex changes
     _list.addEventHandler(e -> listViewFiredAction(), Action);
     _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.SelIndex_Prop);
     
@@ -389,13 +389,13 @@ protected void textFieldKeyTyped(ViewEvent anEvent)
     if(text.length()==0 && items.size()>0)
         item = getSelItem();
     
-    // Set ListView Items, SelectedItem
+    // Set ListView Items, SelItem
     if(isFilterList()) _list.setItems(items);
     _list.setSelItem(item);
     if(items.size()<=1 && isPopup() && isPopupShowing())
         getPopupList().hide();
         
-    // Reset text and selection (since List.setSelectedItem changes it)
+    // Reset text and selection (since List.setSelItem changes it)
     _text.setText(text);
     _text.setSel(selStart);
         

@@ -55,7 +55,7 @@ public void addPage(PageView aPage, int anIndex)
     _pages.add(anIndex, aPage);
     
     if(_selIndex<=0)
-        setSelectedIndex(0);
+        setSelIndex(0);
 }
 
 /**
@@ -93,12 +93,12 @@ public void setPageMargin(Insets aIns)
 /**
  * Returns the selected page index.
  */
-public int getSelectedIndex()  { return _selIndex; }
+public int getSelIndex()  { return _selIndex; }
 
 /**
  * Sets the selected page index.
  */
-public void setSelectedIndex(int anIndex)
+public void setSelIndex(int anIndex)
 {
     if(anIndex==_selIndex) return;
     
@@ -125,7 +125,7 @@ public PageView getSelectedPage()  { return _selIndex>=0? getPage(_selIndex) : n
 public void setSelectedPage(PageView aPage)
 {
     int index = ListUtils.indexOfId(_pages, aPage);
-    if(index>=0) setSelectedIndex(index);
+    if(index>=0) setSelIndex(index);
 }
 
 /**

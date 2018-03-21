@@ -23,7 +23,7 @@ public class DirFilePage extends WebPage {
 public WebFile getSelectedFile()  { return _fileBrowser.getSelItem(); }
 
 /** Returns the selected files in browser. */
-//public List <WebFile> getSelectedFiles()  { return _fileBrowser.getSelectedItems(); }
+//public List <WebFile> getSelectedFiles()  { return _fileBrowser.getSelItems(); }
 
 /**
  * Returns the file browser.
