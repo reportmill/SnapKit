@@ -25,14 +25,14 @@ public View getPane(String aName)
 /**
  * Returns the SwitchView's selected index.
  */
-public int getSelectedIndex()  { return _sindex; }
+public int getSelIndex()  { return _sindex; }
 
 /**
  * Sets the SwitchView's selected index.
  */
-public void setSelectedIndex(int anIndex)
+public void setSelIndex(int anIndex)
 {
-    firePropChange(SelectedIndex_Prop, _sindex, _sindex=anIndex);
+    firePropChange(SelIndex_Prop, _sindex, _sindex=anIndex);
     relayout(); relayoutParent(); repaint();
 }
 
@@ -50,7 +50,7 @@ public View getSelectedPane()
 public void setSelectedPane(View aPane)
 {
     for(int i=0, iMax=getChildCount(); i<iMax; i++)
-        if(getChild(i)==aPane) setSelectedIndex(i);
+        if(getChild(i)==aPane) setSelIndex(i);
 }
 
 /**
@@ -58,7 +58,7 @@ public void setSelectedPane(View aPane)
  */
 public String getSelectedName()
 {
-    int index = getSelectedIndex();
+    int index = getSelIndex();
     return index<0? null : getChild(index).getName();
 }
 
@@ -71,13 +71,13 @@ public void setSelectedName(String aName)
     for(int i=0, iMax=getChildCount(); i<iMax && index<0; i++)
         if(aName.equals(getChild(i).getName()))
             index = i;
-    setSelectedIndex(index);
+    setSelIndex(index);
 }
 
 /**
  * Returns a mapped property name.
  */
-public String getValuePropName()  { return SelectedIndex_Prop; }
+public String getValuePropName()  { return SelIndex_Prop; }
 
 /**
  * Override to return preferred width of content.
@@ -118,7 +118,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
-    if(getSelectedIndex()>0) e.add(SelectedIndex_Prop, getSelectedIndex());
+    if(getSelIndex()>0) e.add(SelIndex_Prop, getSelIndex());
     return e;
 }
 
@@ -129,7 +129,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
-    setSelectedIndex(anElement.getAttributeIntValue(SelectedIndex_Prop, 0));
+    setSelIndex(anElement.getAttributeIntValue(SelIndex_Prop, 0));
 }
 
 }

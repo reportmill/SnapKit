@@ -134,7 +134,7 @@ public ComboBox addComboBox(String aTitle, String options[], String aDefault)
     hbox.addChild(label); hbox.addChild(cbox); addView(hbox);
     
     // Add binding
-    addViewBinding(cbox, "SelectedItem", aTitle.replace(" ", ""));
+    addViewBinding(cbox, View.Selectable.SelItem_Prop, aTitle.replace(" ", ""));
     setValue(aTitle, aDefault);
     
     // Return combobox

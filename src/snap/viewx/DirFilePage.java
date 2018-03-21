@@ -20,7 +20,7 @@ public class DirFilePage extends WebPage {
 /**
  * Returns the selected file in browser.
  */
-public WebFile getSelectedFile()  { return _fileBrowser.getSelectedItem(); }
+public WebFile getSelectedFile()  { return _fileBrowser.getSelItem(); }
 
 /** Returns the selected files in browser. */
 //public List <WebFile> getSelectedFiles()  { return _fileBrowser.getSelectedItems(); }
@@ -69,7 +69,7 @@ public void respondUI(ViewEvent anEvent)
         
         // Handle single click: set browser to file (or clear if directory)
         if(anEvent.getClickCount()==1) {
-            WebFile file = _fileBrowser.getSelectedItem(); if(file==null) return;
+            WebFile file = _fileBrowser.getSelItem(); if(file==null) return;
             _pageBrowser.setFile(file.isFile()? file : null);
         }
         
@@ -80,7 +80,7 @@ public void respondUI(ViewEvent anEvent)
     
     // Handle FileBrowser click
     if(anEvent.equals("FileBrowser")) {
-        WebFile file = _fileBrowser.getSelectedItem(); if(file==null) return;
+        WebFile file = _fileBrowser.getSelItem(); if(file==null) return;
         _pageBrowser.setFile(file.isFile()? file : null);
         getUI().relayout();
     }
@@ -91,7 +91,7 @@ public void respondUI(ViewEvent anEvent)
  */
 protected void performFileBrowserDoubleClick()
 {
-    WebFile file = _fileBrowser.getSelectedItem(); if(file==null) return;
+    WebFile file = _fileBrowser.getSelItem(); if(file==null) return;
     getBrowser().setFile(file);
 }
 

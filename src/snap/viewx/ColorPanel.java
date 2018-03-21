@@ -133,7 +133,7 @@ public int getSelectedPicker()  { return getViewIntValue("PickerPanel"); }
  */
 public void setSelectedPicker(int aPicker)
 {
-    setViewSelectedIndex("PickerPanel", aPicker);
+    setViewSelIndex("PickerPanel", aPicker);
     resetLater();
 }
 
@@ -148,7 +148,7 @@ protected void initUI()
     
     // Configure ImageComboBox
     setViewItems("ImageComboBox", _iNames);
-    setViewSelectedItem("ImageComboBox", _iNames[0]);
+    setViewSelItem("ImageComboBox", _iNames[0]);
 
     // Start with black in the list of recent colors, more will be added as they are inspected or set
     addRecentColor(Color.BLACK);
@@ -238,7 +238,7 @@ public void respondUI(ViewEvent anEvent)
     
     // Handle ImageComboBox
     if(anEvent.equals("ImageComboBox"))
-        getView("ImagePickerLabel", ImagePicker.class).setImage(getImage(anEvent.getSelectedIndex()));
+        getView("ImagePickerLabel", ImagePicker.class).setImage(getImage(anEvent.getSelIndex()));
     
     // Handle GraySlider or GrayAlphaSlider
     if(anEvent.equals("GraySlider") || anEvent.equals("GrayAlphaSlider")) {

@@ -117,7 +117,7 @@ public void setListView(ListView <T> aListView)
     
     // Start listening to Action and SelectedIndex changes
     _list.addEventHandler(e -> listViewFiredAction(), Action);
-    _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.SelectedIndex_Prop);
+    _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.SelIndex_Prop);
     
     // If not PopupList, turn off button and start listening to TextField KeyType events
     if(!(aListView instanceof PopupList))
@@ -233,7 +233,7 @@ public void showPopup()
     double x = 0, y = getHeight();
     if(!isShowTextField()) {
         x = getWidth() - plist.getBestWidth(-1) - 8;
-        y = getHeight() - (getSelectedIndex()+1)*plist.getRowHeight() + 4;
+        y = getHeight() - (getSelIndex()+1)*plist.getRowHeight() + 4;
     }
     
     // Show list
@@ -268,22 +268,22 @@ public void setItems(T ... theItems)  { getListView().setItems(theItems); }
 /**
  * Returns the selected index.
  */
-public int getSelectedIndex()  { return getListView().getSelectedIndex(); }
+public int getSelIndex()  { return getListView().getSelIndex(); }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedIndex(int anIndex)  { getListView().setSelectedIndex(anIndex); }
+public void setSelIndex(int anIndex)  { getListView().setSelIndex(anIndex); }
 
 /**
  * Returns the selected item.
  */
-public T getSelectedItem()  { return getListView().getSelectedItem(); }
+public T getSelItem()  { return getListView().getSelItem(); }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedItem(T anItem)  { getListView().setSelectedItem(anItem); }
+public void setSelItem(T anItem)  { getListView().setSelItem(anItem); }
 
 /**
  * Return combo box text.
@@ -291,7 +291,7 @@ public void setSelectedItem(T anItem)  { getListView().setSelectedItem(anItem); 
 public String getText()
 {
     // If selected Item, use it's text (potentially corrects case issues)
-    T selItem = getSelectedItem();
+    T selItem = getSelItem();
     if(selItem!=null)
         return getText(selItem);
         
@@ -387,11 +387,11 @@ protected void textFieldKeyTyped(ViewEvent anEvent)
     
     // What to do if empty text?
     if(text.length()==0 && items.size()>0)
-        item = getSelectedItem();
+        item = getSelItem();
     
     // Set ListView Items, SelectedItem
     if(isFilterList()) _list.setItems(items);
-    _list.setSelectedItem(item);
+    _list.setSelItem(item);
     if(items.size()<=1 && isPopup() && isPopupShowing())
         getPopupList().hide();
         
@@ -453,7 +453,7 @@ protected void listViewFiredAction()
  */
 protected void listViewSelectionChanged()
 {
-    T item = getSelectedItem();
+    T item = getSelItem();
     String str = getText(item);
     if(isShowTextField()) { _text.setText(str); _text.selectAll(); }
     else _button.setText(str);
@@ -489,8 +489,8 @@ public void setDisabled(boolean aValue)
  */
 public String getValuePropName()
 {
-    T item = getSelectedItem();
-    return item!=null? SelectedItem_Prop : Text_Prop;
+    T item = getSelItem();
+    return item!=null? SelItem_Prop : Text_Prop;
 }
 
 /**

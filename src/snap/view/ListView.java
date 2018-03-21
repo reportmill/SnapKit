@@ -121,22 +121,22 @@ public void setItems(T ... theItems)  { setItems(theItems!=null? Arrays.asList(t
 /**
  * Returns the selected index.
  */
-public int getSelectedIndex()  { return _listArea.getSelectedIndex(); }
+public int getSelIndex()  { return _listArea.getSelIndex(); }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedIndex(int anIndex)  { _listArea.setSelectedIndex(anIndex); }
+public void setSelIndex(int anIndex)  { _listArea.setSelIndex(anIndex); }
 
 /**
  * Returns the selected item.
  */
-public T getSelectedItem()  { return _listArea.getSelectedItem(); }
+public T getSelItem()  { return _listArea.getSelItem(); }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedItem(T anItem)  { _listArea.setSelectedItem(anItem); }
+public void setSelItem(T anItem)  { _listArea.setSelItem(anItem); }
 
 /**
  * Selects up in the list.
@@ -308,15 +308,15 @@ protected void processEvent(ViewEvent anEvent)
 /**
  * Returns a mapped property name.
  */
-public String getValuePropName()  { return getBinding("SelectedIndex")!=null? "SelectedIndex" : "SelectedItem"; }
+public String getValuePropName()  { return getBinding(SelIndex_Prop)!=null? SelIndex_Prop : SelItem_Prop; }
 
 /**
  * Catches property changes from ListArea and redispatches for this ListView.
  */
 void listAreaPropChange(PropChange aPC)
 {
-    if(aPC.getPropertyName()==SelectedIndex_Prop)
-        firePropChange(SelectedIndex_Prop, aPC.getOldValue(), aPC.getNewValue());
+    if(aPC.getPropertyName()==SelIndex_Prop)
+        firePropChange(SelIndex_Prop, aPC.getOldValue(), aPC.getNewValue());
 }
 
 /**

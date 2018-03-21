@@ -107,9 +107,9 @@ public void addTab(Tab aTab, int anIndex)
     if(aTab.getContent()!=null) _hiddenKids.addChild(aTab.getContent(),0);
     
     // If first tab, select 0
-    int selInd = getSelectedIndex();
+    int selInd = getSelIndex();
     if(anIndex<=selInd || selInd<0) {
-        setSelectedIndex(-1); setSelectedIndex(selInd+1); }
+        setSelIndex(-1); setSelIndex(selInd+1); }
 }
 
 /**
@@ -125,8 +125,8 @@ public void removeTab(int anIndex)
     _shelf.removeChild(btn);
     
     // Reset Selection
-    if(anIndex==getSelectedIndex()) {
-        setSelectedIndex(anIndex-1); if(anIndex<getTabCount()) setSelectedIndex(anIndex); }
+    if(anIndex==getSelIndex()) {
+        setSelIndex(anIndex-1); if(anIndex<getTabCount()) setSelIndex(anIndex); }
 }
 
 /**
@@ -153,7 +153,7 @@ public void setTabContent(View aView, int anIndex)
     if(tab.getContent()!=null) _hiddenKids.removeChild(tab.getContent());
     tab.setContent(aView);
     if(tab.getContent()!=null) _hiddenKids.addChild(tab.getContent(),0);
-    if(anIndex==getSelectedIndex())
+    if(anIndex==getSelIndex())
         setContent(tab.getContent());
 }
 
@@ -170,12 +170,12 @@ public void setTabMinWidth(double aValue)  { _tabMinWidth = aValue; }
 /**
  * Returns the tap pane's selected index.
  */
-public int getSelectedIndex()  { return _sindex; }
+public int getSelIndex()  { return _sindex; }
 
 /**
  * Sets the TabView's selected index.
  */
-public void setSelectedIndex(int anIndex)
+public void setSelIndex(int anIndex)
 {
     // If already set, just return
     if(anIndex==_sindex) return;
@@ -191,22 +191,22 @@ public void setSelectedIndex(int anIndex)
     setContent(tab!=null? tab.getContent() : null);
     
     // FirePropChange and fireActionEvent
-    firePropChange(SelectedIndex_Prop, _sindex, _sindex=anIndex);
+    firePropChange(SelIndex_Prop, _sindex, _sindex=anIndex);
     fireActionEvent();
 }
 
 /**
  * Returns the selected item (tab).
  */
-public Tab getSelectedItem()  { return _sindex>=0 && _sindex<getTabCount()? getTab(_sindex) : null; }
+public Tab getSelItem()  { return _sindex>=0 && _sindex<getTabCount()? getTab(_sindex) : null; }
 
 /**
  * Sets the selected item (tab).
  */
-public void setSelectedItem(Tab aTab)
+public void setSelItem(Tab aTab)
 {
     int index = _tabs.indexOf(aTab);
-    setSelectedIndex(index);
+    setSelIndex(index);
 }
 
 /**
@@ -289,7 +289,7 @@ protected void shelfButtonPressed(ViewEvent anEvent)
 {
     View btn = anEvent.getView();
     int index = -1; for(int i=0;i<_shelf.getChildCount();i++) if(_shelf.getChild(i)==btn) index = i;
-    setSelectedIndex(index);
+    setSelIndex(index);
 }
 
 /**
@@ -299,7 +299,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
-    if(getSelectedIndex()>0) e.add(SelectedIndex_Prop, getSelectedIndex());
+    if(getSelIndex()>0) e.add(SelIndex_Prop, getSelIndex());
     return e;
 }
 
@@ -333,8 +333,8 @@ public void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     }
     
     // Unarchive SelectedIndex (after children unarchival - otherwise it may be out of bounds)
-    if(anElement.hasAttribute(SelectedIndex_Prop))
-        setSelectedIndex(anElement.getAttributeIntValue(SelectedIndex_Prop));
+    if(anElement.hasAttribute(SelIndex_Prop))
+        setSelIndex(anElement.getAttributeIntValue(SelIndex_Prop));
 }
 
 }

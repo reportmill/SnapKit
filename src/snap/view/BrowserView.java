@@ -127,11 +127,11 @@ public void setItems(List <T> theItems)
     if(ListUtils.equalsId(theItems, getItems()) || theItems.equals(getItems())) return;
     
     // Get current selected item and col0 selected item
-    T selItem = getSelectedItem(), selItem0 = _col0.getSelectedItem();
+    T selItem = getSelItem(), selItem0 = _col0.getSelItem();
     _col0.setItems(theItems);
-    if(selItem0==_col0.getSelectedItem())
-        setSelectedItem(selItem);
-    else setSelectedItem(null);
+    if(selItem0==_col0.getSelItem())
+        setSelItem(selItem);
+    else setSelItem(null);
 }
 
 /**
@@ -212,7 +212,7 @@ protected BrowserCol addCol()
     // If not root column, set items from last
     if(index>0) {
         BrowserCol <T> lastCol = getCol(index-1);
-        T item = lastCol.getSelectedItem();
+        T item = lastCol.getSelItem();
         T items[] = getChildren(item);
         bcol.setItems(items);
     }
@@ -252,7 +252,7 @@ protected void setSelColIndex(int anIndex)
         removeCol(i);
         
     // See if we need to add column
-    T item = getSelectedItem();
+    T item = getSelItem();
     if(item!=null && isParent(item))
         addCol();
 }
@@ -260,35 +260,35 @@ protected void setSelColIndex(int anIndex)
 /**
  * Returns the selected index.
  */
-public int getSelectedIndex()
+public int getSelIndex()
 {
     BrowserCol <T> bcol = getSelCol();
-    return bcol!=null? bcol.getSelectedIndex() : -1;
+    return bcol!=null? bcol.getSelIndex() : -1;
 }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedIndex(int anIndex)
+public void setSelIndex(int anIndex)
 {
     BrowserCol <T> bcol = getSelCol();
     if(bcol!=null)
-        bcol.setSelectedIndex(anIndex);
+        bcol.setSelIndex(anIndex);
 }
 
 /**
  * Returns the selected item.
  */
-public T getSelectedItem()
+public T getSelItem()
 {
     BrowserCol <T> bcol = getSelCol();
-    return bcol!=null? bcol.getSelectedItem() : null;
+    return bcol!=null? bcol.getSelItem() : null;
 }
 
 /**
  * Sets the selected item.
  */
-public void setSelectedItem(T anItem)  { setSelectedItem(anItem, true); }
+public void setSelItem(T anItem)  { setSelectedItem(anItem, true); }
 
 /**
  * Sets the selected item.
@@ -297,17 +297,17 @@ public void setSelectedItem(T anItem, boolean scrollToVisible)
 {
     // If null item, reset to first column
     if(anItem==null) {
-        getCol(0).setSelectedIndex(-1);
+        getCol(0).setSelIndex(-1);
         setSelColIndex(0);
         return;
     }
     
     // If already set, just return
-    if(anItem.equals(getSelectedItem())) return;
+    if(anItem.equals(getSelItem())) return;
     
     // If item in last column, select it
     if(getColLast().getItems().contains(anItem)) {
-        getColLast().setSelectedItem(anItem);
+        getColLast().setSelItem(anItem);
         setSelColIndex(getColLast().getIndex());
         if(scrollToVisible) scrollSelToVisible();
         return;
@@ -326,7 +326,7 @@ public void setSelectedItem(T anItem, boolean scrollToVisible)
     setSelectedItem(par, false);
     
     // Select item
-    getColLast().setSelectedItem(anItem);
+    getColLast().setSelItem(anItem);
     setSelColIndex(getColLast().getIndex());
     if(scrollToVisible) scrollSelToVisible();
 }
@@ -350,7 +350,7 @@ public void scrollSelToVisible()
 protected BrowserCol getColWithSelItem(T anItem)
 {
     for(int i=getColCount()-1;i>=0;i--) { BrowserCol col = getCol(i);
-        if(col.getSelectedItem()==anItem)
+        if(col.getSelItem()==anItem)
             return col; }
     return null;
 }
@@ -371,7 +371,7 @@ public String getPath(String aSeparator)
     // Iterate over browser columns to add selected row items
     for(int i=0, iMax=getColCount(); i<iMax; i++) {
         BrowserCol <T> col = getCol(i);
-        T item = col.getSelectedItem(); if(item==null) break;
+        T item = col.getSelItem(); if(item==null) break;
         if(i>0) buf.append(aSeparator);
         buf.append(getText(item));
     }

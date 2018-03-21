@@ -248,30 +248,30 @@ public void setViewItems(Object anObj, Object theItems[])  { getView(anObj, View
 /**
  * Returns the selected index for given name or UI view.
  */
-public int getViewSelectedIndex(Object anObj)  { return getView(anObj, View.Selectable.class).getSelectedIndex(); }
+public int getViewSelIndex(Object anObj)  { return getView(anObj, View.Selectable.class).getSelIndex(); }
 
 /**
  * Sets the selected index for given name or UI view.
  */
-public void setViewSelectedIndex(Object anObj, int aValue)
+public void setViewSelIndex(Object anObj, int aValue)
 {
     boolean old = setSendEventDisabled(true);
-    getView(anObj, View.Selectable.class).setSelectedIndex(aValue);
+    getView(anObj, View.Selectable.class).setSelIndex(aValue);
     setSendEventDisabled(old);
 }
 
 /**
  * Returns the selected item for given name or UI view.
  */
-public Object getViewSelectedItem(Object anObj)  { return getView(anObj, View.Selectable.class).getSelectedItem(); }
+public Object getViewSelItem(Object anObj)  { return getView(anObj, View.Selectable.class).getSelItem(); }
 
 /**
  * Sets the selected item for given name or UI view.
  */
-public void setViewSelectedItem(Object anObj, Object anItem)
+public void setViewSelItem(Object anObj, Object anItem)
 {
     boolean old = setSendEventDisabled(true);
-    getView(anObj, View.Selectable.class).setSelectedItem(anItem);
+    getView(anObj, View.Selectable.class).setSelItem(anItem);
     setSendEventDisabled(old);
 }
 

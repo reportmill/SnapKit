@@ -30,7 +30,7 @@ public List <WebFile> getFiles()
 /**
  * Returns the selected file in browser.
  */
-public WebFile getSelectedFile()  { return _fileBrsr.getSelectedItem(); }
+public WebFile getSelectedFile()  { return _fileBrsr.getSelItem(); }
 
 /**
  * Creates a file pane for the given file in the requested mode.
@@ -68,7 +68,7 @@ public void respondUI(ViewEvent anEvent)
 {
     // Handle FileBrowser click
     if(anEvent.equals("FileBrowser")) {
-        WebFile file = _fileBrsr.getSelectedItem(); if(file==null) return;
+        WebFile file = _fileBrsr.getSelItem(); if(file==null) return;
         _pageBrsr.setFile(file.isFile()? file : null);
     }
 }

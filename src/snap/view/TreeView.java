@@ -161,7 +161,7 @@ public void addCol(TreeCol aCol, int anIndex)
     for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
     
     // Synchronize TreeCol selection with this TreeView
-    aCol.addPropChangeListener(pc -> setSelectedIndex(aCol.getSelectedIndex()), SelectedIndex_Prop);
+    aCol.addPropChangeListener(pc -> setSelIndex(aCol.getSelIndex()), SelIndex_Prop);
 }
 
 /**
@@ -195,11 +195,11 @@ protected void setItemsImpl(List <T> theItems)
 {
     // If already set, just return
     if(equalsItems(theItems)) return;
-    T sitem = getSelectedItem();
+    T sitem = getSelItem();
     _items.clear();
     _items.addAll(theItems);
     for(TreeCol tcol : getCols()) tcol.setItems(theItems);
-    setSelectedItem(sitem);
+    setSelItem(sitem);
     
     // Prune removed items from expanded set
     Object expanded[] = _expanded.toArray();
@@ -254,37 +254,37 @@ public void updateItems(T ... theItems)
 /**
  * Returns the selected index.
  */
-public int getSelectedIndex()  { return _selIndex; }
+public int getSelIndex()  { return _selIndex; }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedIndex(int anIndex)
+public void setSelIndex(int anIndex)
 {
     if(anIndex==_selIndex) return;
-    firePropChange(SelectedIndex_Prop, _selIndex, _selIndex = anIndex);
-    for(TreeCol tcol : getCols()) tcol.setSelectedIndex(anIndex);
+    firePropChange(SelIndex_Prop, _selIndex, _selIndex = anIndex);
+    for(TreeCol tcol : getCols()) tcol.setSelIndex(anIndex);
     fireActionEvent();
 }
 
 /**
  * Returns the selected item.
  */
-public T getSelectedItem()  { return _selIndex>=0? _items.get(_selIndex) : null; }
+public T getSelItem()  { return _selIndex>=0? _items.get(_selIndex) : null; }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedItem(T anItem)
+public void setSelItem(T anItem)
 {
     int index = _items.indexOf(anItem);
-    setSelectedIndex(index);
+    setSelIndex(index);
 }
 
 /**
  * Returns the selected row.
  */
-public int getSelectedRow()  { return getSelectedIndex(); }
+public int getSelectedRow()  { return getSelIndex(); }
 
 /**
  * Returns the selected column.
@@ -505,7 +505,7 @@ protected void processEvent(ViewEvent anEvent)
 /**
  * Returns a mapped property name.
  */
-public String getValuePropName()  { return "SelectedItem"; }
+public String getValuePropName()  { return SelItem_Prop; }
 
 /**
  * Returns an Icon of a down arrow.

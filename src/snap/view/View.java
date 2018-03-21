@@ -1861,9 +1861,9 @@ public Object getValue(String aPropName)
         case View.Opacity_Prop: return getOpacity();
         case View.Text_Prop: return getText();
         case "Enabled": return isEnabled();
-        case "Items": return ((Selectable)this).getItems();
-        case "SelectedItem": return ((Selectable)this).getSelectedItem();
-        case "SelectedIndex": return ((Selectable)this).getSelectedIndex();
+        case Selectable.Items_Prop: return ((Selectable)this).getItems();
+        case Selectable.SelItem_Prop: return ((Selectable)this).getSelItem();
+        case Selectable.SelIndex_Prop: return ((Selectable)this).getSelIndex();
         case Scroller.ScrollH_Prop: return ((Scroller)this).getScrollH();
         case Scroller.ScrollV_Prop: return ((Scroller)this).getScrollV();
         default: break;
@@ -1898,16 +1898,16 @@ public void setValue(String aPropName, Object aValue)
         case View.Opacity_Prop: setOpacity(SnapUtils.doubleValue(aValue)); break;
         case View.Text_Prop: setText(aValue!=null? aValue.toString() : null); break;
         case "Enabled": setDisabled(!SnapUtils.boolValue(aValue)); break;
-        case "Items": { Selectable sview = (Selectable)this;
+        case Selectable.Items_Prop: { Selectable sview = (Selectable)this;
             if(aValue instanceof List) sview.setItems((List)aValue);
             else if(aValue!=null && aValue.getClass().isArray()) sview.setItems((Object[])aValue);
             else sview.setItems(Collections.emptyList());
             break;
         }
-        case "SelectedItem": ((Selectable)this).setSelectedItem(aValue); break;
-        case "SelectedIndex": { Selectable sview = (Selectable)this;
+        case Selectable.SelItem_Prop: ((Selectable)this).setSelItem(aValue); break;
+        case Selectable.SelIndex_Prop: { Selectable sview = (Selectable)this;
             int index = aValue==null? -1 : SnapUtils.intValue(aValue);
-            sview.setSelectedIndex(index);
+            sview.setSelIndex(index);
             break;
         }
         case Scroller.ScrollH_Prop: ((Scroller)this).setScrollH(SnapUtils.doubleValue(aValue)); break;
@@ -2365,21 +2365,21 @@ public interface Selectable <T> {
     default void setItems(T ... theItems)  { }
 
     /** Returns the selected index for given name or UI view. */
-    int getSelectedIndex();
+    int getSelIndex();
     
     /** Sets the selected index for given name or UI view. */
-    void setSelectedIndex(int aValue);
+    void setSelIndex(int aValue);
     
     /** Returns the selected item for given name or UI view. */
-    default T getSelectedItem()  { int i = getSelectedIndex(); return i>=0? getItems().get(i) : null; }
+    default T getSelItem()  { int i = getSelIndex(); return i>=0? getItems().get(i) : null; }
     
     /** Sets the selected item for given name or UI view. */
-    default void setSelectedItem(T anItem)  { int i = getItems().indexOf(anItem); setSelectedIndex(i); }
+    default void setSelItem(T anItem)  { int i = getItems().indexOf(anItem); setSelIndex(i); }
 
     // Constants for properties
     public static final String Items_Prop = "Items";
-    public static final String SelectedItem_Prop = "SelectedItem";
-    public static final String SelectedIndex_Prop = "SelectedIndex";
+    public static final String SelIndex_Prop = "SelIndex";
+    public static final String SelItem_Prop = "SelItem";
 }
 
 }

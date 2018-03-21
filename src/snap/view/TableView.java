@@ -150,7 +150,7 @@ public void addCol(TableCol aCol)
     for(Divider div : hsplit.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILLH); div.setBorder(null); }
     
     // Synchronize TableCol selection with this TableView
-    aCol.addPropChangeListener(pc -> setSelectedIndex(aCol.getSelectedIndex()), SelectedIndex_Prop);
+    aCol.addPropChangeListener(pc -> setSelIndex(aCol.getSelIndex()), SelIndex_Prop);
 }
 
 /**
@@ -284,36 +284,36 @@ protected SplitView getHeaderSplitView()  { return (SplitView)getHeaderScroller(
 /**
  * Returns the selected index.
  */
-public int getSelectedIndex()  { return _selIndex; }
+public int getSelIndex()  { return _selIndex; }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedIndex(int anIndex)
+public void setSelIndex(int anIndex)
 {
     if(anIndex==_selIndex) return;
-    firePropChange(SelectedIndex_Prop, _selIndex, _selIndex = anIndex);
-    for(TableCol tcol : getCols()) tcol.setSelectedIndex(anIndex);
+    firePropChange(SelIndex_Prop, _selIndex, _selIndex = anIndex);
+    for(TableCol tcol : getCols()) tcol.setSelIndex(anIndex);
     fireActionEvent();
 }
 
 /**
  * Returns the selected item.
  */
-public T getSelectedItem()  { return _selIndex>=0? _items.get(_selIndex) : null; }
+public T getSelItem()  { return _selIndex>=0? _items.get(_selIndex) : null; }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedItem(T anItem)
+public void setSelItem(T anItem)
 {
     int index = _items.indexOf(anItem);
-    setSelectedIndex(index);
+    setSelIndex(index);
 }
 /**
  * Returns the selected row.
  */
-public int getSelectedRow()  { return getSelectedIndex(); }
+public int getSelectedRow()  { return getSelIndex(); }
 
 /**
  * Returns the selected column.
@@ -397,7 +397,7 @@ protected void layoutDeepImpl()
 /**
  * Returns a mapped property name.
  */
-public String getValuePropName()  { return "SelectedItem"; }
+public String getValuePropName()  { return SelItem_Prop; }
 
 /**
  * XML archival.

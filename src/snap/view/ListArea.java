@@ -115,22 +115,22 @@ public void setItems(T ... theItems)  { setItems(theItems!=null? Arrays.asList(t
 /**
  * Returns the selected index.
  */
-public int getSelectedIndex()  { return _items.getSelIndex(); }
+public int getSelIndex()  { return _items.getSelIndex(); }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedIndex(int anIndex)  { _items.setSelIndex(anIndex); }
+public void setSelIndex(int anIndex)  { _items.setSelIndex(anIndex); }
 
 /**
  * Returns the selected item.
  */
-public T getSelectedItem()  { return _items.getSelItem(); }
+public T getSelItem()  { return _items.getSelItem(); }
 
 /**
  * Sets the selected index.
  */
-public void setSelectedItem(T anItem)  { _items.setSelItem(anItem); }
+public void setSelItem(T anItem)  { _items.setSelItem(anItem); }
 
 /**
  * Selects up in the list.
@@ -153,7 +153,7 @@ protected void pickListSelChange(PropChange aPC)
     // Update old/new indexes
     int oldInd = (Integer)aPC.getOldValue(), newInd = (Integer)aPC.getNewValue();
     updateIndex(oldInd);
-    firePropChange(SelectedIndex_Prop, oldInd, newInd);
+    firePropChange(SelIndex_Prop, oldInd, newInd);
     updateIndex(newInd);
     
     // Scroll selection to visible
@@ -358,7 +358,7 @@ protected void scrollSelToVisible()
         getEnv().runLaterOnce("scrollSelToVisible",() -> scrollSelToVisible()); return; }
     
     // Get selection rect. If empty, outset by 1
-    Rect srect = getItemBounds(getSelectedIndex());
+    Rect srect = getItemBounds(getSelIndex());
     if(srect.isEmpty()) srect.inset(-1,-2); else srect.width = 30;
     
     // If visible rect not set or empty or fully contains selection rect, just return
@@ -434,7 +434,7 @@ protected void layoutImpl()
 protected ListCell createCell(int anIndex)
 {
     T item = anIndex>=0 && anIndex<getItemCount()? getItem(anIndex) : null;
-    int selInd = getSelectedIndex();
+    int selInd = getSelIndex();
     ListCell cell = new ListCell(item, anIndex, getColIndex(), anIndex==selInd);
     cell.setPadding(getCellPadding());
     cell.setPrefHeight(getRowHeight());
@@ -562,7 +562,7 @@ protected void processEvent(ViewEvent anEvent)
         int index = getRowAt(anEvent.getY());
         ListCell cell = getCellForRow(index);
         if(cell!=null && cell.isEnabled()) {
-            setSelectedIndex(index);
+            setSelIndex(index);
             if(!isFireActionOnRelease())
                 fireActionEvent();
         }
@@ -571,7 +571,7 @@ protected void processEvent(ViewEvent anEvent)
     // Handle MouseRelease
     if(anEvent.isMouseRelease()) {
         if(isFireActionOnRelease()) {
-            int index = getSelectedIndex();
+            int index = getSelIndex();
             ListCell cell = getCellForRow(index);
             if(cell!=null && cell.isEnabled())
                 fireActionEvent();
@@ -609,7 +609,7 @@ public Paint getDefaultFill()  { return Color.WHITE; }
  */
 public String getText()
 {
-    T item = getSelectedItem();
+    T item = getSelItem();
     return item!=null? getText(item) : null;
 }
 
@@ -629,13 +629,13 @@ public void setText(String aString)
     }
     
     // Set selected item
-    setSelectedItem(item);
+    setSelItem(item);
 }
 
 /**
  * Returns a mapped property name.
  */
-public String getValuePropName()  { return getBinding("SelectedIndex")!=null? "SelectedIndex" : "SelectedItem"; }
+public String getValuePropName()  { return getBinding(SelIndex_Prop)!=null? SelIndex_Prop : SelItem_Prop; }
 
 /**
  * Returns whether given items are equal to set items.

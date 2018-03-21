@@ -31,7 +31,7 @@ public WebFile showFilesPanel(View aView)
     if(!_dbox.showConfirmDialog(null)) return null;
     
     // If not cancelled, return selected file
-    WebFile file = (WebFile)getViewSelectedItem("FilesList");
+    WebFile file = (WebFile)getViewSelItem("FilesList");
     return file;
 }
 
@@ -52,7 +52,7 @@ protected void resetUI()
 {
     setViewItems("FilesList", getFiles(_name));
     getView("FilesList", ListView.class).setItemKey("Name");
-    if(getViewSelectedIndex("FilesList")<0) setViewSelectedIndex("FilesList", 0);
+    if(getViewSelIndex("FilesList")<0) setViewSelIndex("FilesList", 0);
 }
 
 /**

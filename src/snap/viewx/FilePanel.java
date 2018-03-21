@@ -145,12 +145,12 @@ protected void setFileInUI()
     if(!isUISet()) return;
     
     // Update FileBrowser
-    _fileBrowser.setSelectedItem(getFile()!=null? getFile() : getDir());
+    _fileBrowser.setSelItem(getFile()!=null? getFile() : getDir());
     
     // Update DirComboBox
     List <WebFile> dirs = new ArrayList(); for(WebFile dir=getDir();dir!=null;dir=dir.getParent()) dirs.add(dir);
     _dirComboBox.setItems(dirs);
-    _dirComboBox.setSelectedIndex(0);
+    _dirComboBox.setSelIndex(0);
     
     // Update FileText
     _fileText.setText(getFile()!=null? getFile().getName() : null);
@@ -260,7 +260,7 @@ protected void initUI()
     
     // Set FileBrowser Items, SelectedItem
     _fileBrowser.setItems(getFilteredFiles(getDir().getSite().getRootDir().getFiles()));
-    _fileBrowser.setSelectedItem(getFile()!=null? getFile() : getDir());
+    _fileBrowser.setSelItem(getFile()!=null? getFile() : getDir());
     
     // Get/configure DirComboBox
     _dirComboBox = getView("DirComboBox", ComboBox.class);
@@ -269,7 +269,7 @@ protected void initUI()
     List <WebFile> dirs = new ArrayList();
     for(WebFile dir=getDir();dir!=null;dir=dir.getParent()) dirs.add(dir);
     _dirComboBox.setItems(dirs);
-    _dirComboBox.setSelectedIndex(0);
+    _dirComboBox.setSelIndex(0);
     
     // Get FileText
     _fileText = getView("FileText", TextField.class);
@@ -308,7 +308,7 @@ protected void respondUI(ViewEvent anEvent)
         
         // Handle Action
         else {
-            WebFile file = _fileBrowser.getSelectedItem();
+            WebFile file = _fileBrowser.getSelItem();
             setFile(file);
         }
     }
@@ -326,7 +326,7 @@ protected void respondUI(ViewEvent anEvent)
         
     // Handle DirComboBox
     if(anEvent.equals("DirComboBox"))
-        setFile(_dirComboBox.getSelectedItem());
+        setFile(_dirComboBox.getSelItem());
 }
 
 /**
