@@ -24,6 +24,11 @@ public Path getPath()  { return _path!=null? _path : (_path=new Path()); }
 public void setPath(Path aPath)  { _path = aPath; }
 
 /**
+ * Returns the path in shape bounds.
+ */
+public Path getPathInBounds()  {  return (Path)getPath().copyFor(getBoundsLocal()); }
+
+/**
  * Replace the polygon's current path with a new path, adjusting the shape's bounds to match the new path.
  */
 public void resetPath(Path newPath)

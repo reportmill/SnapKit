@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import snap.util.StringUtils;
 
 /**
  * A class to represent a generic geometric shape (Line, Rect, Ellipse, etc.).
@@ -494,19 +493,22 @@ public Shape copyFor(Transform aTrans)  { return new Path(getPathIter(aTrans)); 
  */
 public String getString()
 {
-    String str = "{ "; PathIter pi = getPathIter(null); double pts[] = new double[6];
+    StringBuilder sb = new StringBuilder();
+    PathIter pi = getPathIter(null); double pts[] = new double[6];
     while(pi.hasNext()) {
         switch(pi.getNext(pts)) {
-            case MoveTo: str += "M " + fmt(pts[0]) + " " + fmt(pts[1]) + " "; break;
-            case LineTo: str += "L " + fmt(pts[0]) + " " + fmt(pts[1]) + " "; break;
-            case QuadTo: str += "Q " + fmt(pts[0]) + " " + fmt(pts[1]) + ' ' + fmt(pts[2]) + ' ' + fmt(pts[3]) + ' ';
+            case MoveTo: sb.append("M ").append(fmt(pts[0])).append(' ').append(fmt(pts[1])).append('\n'); break;
+            case LineTo: sb.append("L ").append(fmt(pts[0])).append(' ').append(fmt(pts[1])).append('\n'); break;
+            case QuadTo: sb.append("Q ").append(fmt(pts[0])).append(' ').append(fmt(pts[1])).append(' ')
+                .append(fmt(pts[2])).append(' ').append(fmt(pts[3])).append('\n');
                 break;
-            case CubicTo: str += "C " + fmt(pts[0]) + ' ' + fmt(pts[1]) + ' ' + fmt(pts[2]) + ' ' + fmt(pts[3]) + ' ' +
-                fmt(pts[4]) + ' ' + fmt(pts[5]) + ' '; break;
-            case Close: str += "CLS ";
+            case CubicTo: sb.append("C ").append(fmt(pts[0])).append(' ').append(fmt(pts[1])).append(' ')
+                .append(fmt(pts[2])).append(' ').append(fmt(pts[3])).append(' ').append(fmt(pts[4])).append(' ')
+                .append(fmt(pts[5])).append('\n'); break;
+            case Close: sb.append("Z\n");
         }
     }
-    return str + "}";
+    return sb.toString();
 }
 
 /**
@@ -530,6 +532,7 @@ public static Shape subtract(Shape aShape1, Shape aShape2)  { return ShapeMaker.
 public static Shape intersect(Shape aShape1, Shape aShape2)  { return ShapeMaker.intersect(aShape1, aShape2); }
 
 /** Helper. */
-private static String fmt(double aVal)  { return StringUtils.toString(aVal); }
+private static String fmt(double aVal)  { return _fmt.format(aVal); }
+static java.text.DecimalFormat _fmt = new java.text.DecimalFormat("#");
 
 }

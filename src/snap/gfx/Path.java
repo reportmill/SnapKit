@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import java.util.Arrays;
+import java.util.*;
 import snap.gfx.PathIter.Seg;
 import snap.util.*;
 
@@ -432,6 +432,45 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     
     // Return this path
     return this;
+}
+
+/**
+ * Returns a path from an SVG path string.
+ */
+public static Path getPathFromSVG(String aStr)
+{
+    try { return getPathFromSVGOrThrow(aStr); }
+    catch(Exception e) { System.err.println("Path.getPathFromSVG: " + e); return null; }
+}
+
+/**
+ * Returns a path from an SVG path string.
+ */
+public static Path getPathFromSVGOrThrow(String aStr) throws InputMismatchException, NoSuchElementException
+{
+    // Create scanner from string and new path
+    Scanner scan = new Scanner(aStr);
+    Path path = new Path();
+    
+    // Iterate over scanner tokens
+    double x1, y1, cp0x, cp0y, cp1x, cp1y;
+    while(scan.hasNext()) {
+        String op = scan.next();
+        switch(op) {
+            case "M": x1 = scan.nextDouble(); y1 = scan.nextDouble(); path.moveTo(x1, y1); break;
+            case "L": x1 = scan.nextDouble(); y1 = scan.nextDouble(); path.lineTo(x1, y1); break;
+            case "Q": cp0x = scan.nextDouble(); cp0y = scan.nextDouble();
+                x1 = scan.nextDouble(); y1 = scan.nextDouble(); path.quadTo(cp0x, cp0y, x1, y1); break;
+            case "C": cp0x = scan.nextDouble(); cp0y = scan.nextDouble();
+                cp1x = scan.nextDouble(); cp1y = scan.nextDouble();
+                x1 = scan.nextDouble(); y1 = scan.nextDouble(); path.curveTo(cp0x, cp0y, cp1x, cp1y,x1, y1); break;
+            case "Z": path.close(); break;
+            default: throw new NoSuchElementException("Invalid op: " + op);
+        }
+    }
+    
+    // Return path
+    return path;
 }
 
 /**

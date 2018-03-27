@@ -182,7 +182,12 @@ public boolean isFireActionOnFocusLost()  { return _textArea.isFireActionOnFocus
 /**
  * Sets whether text area sends action on focus lost (if text changed).
  */
-public void setFireActionOnFocusLost(boolean aValue)  { _textArea.setFireActionOnFocusLost(aValue); }
+public void setFireActionOnFocusLost(boolean aValue)
+{
+    _textArea.setFireActionOnFocusLost(aValue);
+    if(aValue) { enableEvents(Action); _textArea.addEventHandler(_actionEvtLsnr, Action); }
+    else { getEventAdapter().disableEvents(this, Action); _textArea.removeEventHandler(_actionEvtLsnr); }
+}
 
 /**
  * Returns the number of characters in the text string.
