@@ -90,6 +90,29 @@ public static Paint getBackFill()  { return BACK_FILL; }
 public static Paint getBackDarkFill()  { return BACK_DARK_FILL; }
 
 /**
+ * Returns the bounds of a given view list.
+ */
+public static Rect getBoundsOfViews(View aPar, List <? extends View> aList)
+{
+    // If list is null or empty, return this shape's bounds inside
+    if(aList==null || aList.size()==0)
+        return aPar.getBoundsLocal();
+    
+    // Declare and initialize a rect to frame of first shape in list
+    View child0 = aList.get(0);
+    Rect rect = child0.localToParent(child0.getBoundsLocal()).getBounds();
+    
+    // Iterate over successive shapes in list and union their frames
+    for(int i=1, iMax=aList.size(); i<iMax; i++) { View child = aList.get(i);
+        Rect bnds = child.localToParent(child.getBoundsLocal()).getBounds();
+        rect.unionEvenIfEmpty(bnds);
+    }
+    
+    // Return frame
+    return rect;
+}
+
+/**
  * Returns an identifier string for a given view.
  */
 public static String getId(View aView)

@@ -31,12 +31,13 @@ public Path getPathInBounds()  {  return (Path)getPath().copyFor(getBoundsLocal(
 /**
  * Replace the polygon's current path with a new path, adjusting the shape's bounds to match the new path.
  */
-public void resetPath(Path newPath)
+public void resetPath(Shape aShape)
 {
     // Get the transform to parent shape coords
     //Transform toParentXF = getLocalToParent();  
 
     // Set the new path and new size
+    Path newPath = new Path(aShape);
     setPath(newPath);
     Rect bounds = newPath.getBounds();
     setSizeLocal(bounds.getWidth(), bounds.getHeight());
