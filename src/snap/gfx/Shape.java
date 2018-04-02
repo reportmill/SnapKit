@@ -437,6 +437,36 @@ public boolean intersects(Shape aShape, double aLineWidth)
 }
 
 /**
+ * Returns whether shape forms a closed polygon/path, either explicitly (last segment is close) or implicitly (last
+ * segment ends at last move to). Supports multiple subpaths.
+ */
+public boolean isClosed()
+{
+    // Iterate over path
+    PathIter piter = getPathIter(null);
+    double pts[] = new double[6], mx = 0, my = 0, lx = 0, ly = 0; boolean closed = true;
+    while(piter.hasNext()) switch(piter.getNext(pts)) {
+        
+        // Handle MoveTo: If we were in a path, and last move-to isn't equal, return false
+        case MoveTo:
+            if(!closed && !Point.equals(lx,ly,mx,my))
+                return false;
+            mx = pts[0]; my = pts[1]; closed = true; break;
+            
+        // Handle LineTo
+        case LineTo: lx = pts[0]; ly = pts[1]; closed = false; break;
+        case QuadTo: lx = pts[2]; ly = pts[3]; closed = false; break;
+        case CubicTo: lx = pts[4]; ly = pts[5]; closed = false; break;
+            
+        // Handle Close
+        case Close: closed = true; break;
+    }
+    
+    // Return true if last segment was an explicit close or ended at last move to point
+    return closed || Point.equals(lx,ly,mx,my);
+}
+
+/**
  * Returns whether this shape is made up of only line segements.
  */
 public boolean isFlat()
