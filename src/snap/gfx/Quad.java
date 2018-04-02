@@ -124,7 +124,7 @@ public boolean matches(Object anObj)
 public static Rect bounds(double x0, double y0, double xc0, double yc0, double x1, double y1, Rect aRect)
 {
     // Add end points
-    aRect = Line.bounds(x0, y0, x1, y1, aRect);
+    aRect = Line.getBounds(x0, y0, x1, y1, aRect);
 
     // this curve might have extrema:
     double ax = x0 - 2*xc0 + x1, bx = -2*x0 + 2*xc0, cx = x0, tx = -bx/(2*ax);
@@ -133,6 +133,50 @@ public static Rect bounds(double x0, double y0, double xc0, double yc0, double x
     double ay = y0 - 2*yc0 + y1, by = -2*y0 + 2*yc0, cy = y0, ty = -by/(2*ay);
     if(ty>0 && ty<1)  aRect.addY(ay*ty*ty + by*ty + cy);
     
+    return aRect;
+}
+
+/**
+ * Returns the bounds of the give quadratic.
+ */
+public static Rect getBounds(double x0, double y0, double x1, double y1, double x2, double y2, Rect aRect)
+{
+    // Declare coords for min/max points
+    double p1x = x0;
+    double p1y = y0;
+    double p2x = x0;
+    double p2y = y0;
+
+    // For quadratic, slope at point t is just linear interpolation of slopes at the endpoints.
+    // Find solution to LERP(slope0,slope1,t) == 0
+    double d = x0 - 2*x1 + x2;
+    double t = d==0 ? 0 : (x0 - x1) / d;
+
+    // If there's a valid solution, get actual x point at t and add it to the rect
+    if(t>0 && t<1) {
+        double turningpoint = x0*(1-t)*(1-t) + 2*x1*(1-t)*t + x2*t*t;
+        p1x = Math.min(p1x, turningpoint);
+        p2x = Math.max(p2x, turningpoint);
+    }
+    
+    // Do the same for y
+    d = y0 - 2*y1 + y2;
+    t = d==0? 0 : (y0 - y1)/d;
+    if(t>0 && t<1) {
+        double turningpoint = y0*(1-t)*(1-t) + 2*y1*(1-t)*t + y2*t*t;
+        p1y = Math.min(p1y, turningpoint);
+        p2y = Math.max(p2y, turningpoint);
+    }
+    
+    // Include endpoint
+    p1x = Math.min(p1x, x2);
+    p2x = Math.max(p2x, x2);
+    p1y = Math.min(p1y, y2);
+    p2y = Math.max(p2y, y2);    
+    
+    // Set rect
+    if(aRect==null) aRect = new Rect();
+    aRect.setRect(p1x, p1y, p2x - p1x, p2y - p1y);
     return aRect;
 }
 

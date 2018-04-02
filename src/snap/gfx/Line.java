@@ -17,7 +17,7 @@ public Line(double aX0, double aY0, double aX1, double aY1)  { x0 = aX0; y0 = aY
 /**
  * Returns the shape bounds.
  */
-protected Rect getBoundsImpl()  { return bounds(x0, y0, x1, y1, null); }
+protected Rect getBoundsImpl()  { return getBounds(x0, y0, x1, y1, null); }
 
 /**
  * Returns the shape in rect.
@@ -164,7 +164,7 @@ public static double getDistanceSquared(double x0, double y0, double x1, double 
 /**
  * Returns the bounds for given line points.
  */
-public static Rect bounds(double x0, double y0, double x1, double y1, Rect aRect)
+public static Rect getBounds(double x0, double y0, double x1, double y1, Rect aRect)
 {
     if(aRect==null) aRect = new Rect(x0,y0,0,0); else aRect.setRect(x0,y0,0,0);
     aRect.add(x1, y1);
