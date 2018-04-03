@@ -23,11 +23,8 @@ public class Spinner <T> extends ParentView {
     TextField        _text;
     
     // The up down buttons
-    Button           _upBtn, _dnBtn;
+    ArrowView        _arrowView;
     
-    // The arrow images
-    Image            _upImg, _dnImg;
-  
     // Constants for properties
     public static final String Min_Prop = "Min";
     public static final String Max_Prop = "Max";
@@ -44,21 +41,16 @@ public Spinner()
 {
     // Enable Action event
     enableEvents(Action);
+    
+    // Create/configure Text
     _text = new TextField();
-    
-    // Cconfigure Text
     _text.addEventHandler(e -> textChanged(), Action);
+    addChild(_text);
     
-    // Create/configure UpButton
-    _upBtn = new Button(); _upBtn.setImage(getUpArrowImage());
-    _upBtn.setRadius(3); _upBtn.setPosition(Pos.TOP_CENTER);
-    _upBtn.addEventHandler(e -> increment(), Action);
-    
-    // Create/configure DownButton
-    _dnBtn = new Button(); _dnBtn.setImage(getDownArrowImage());
-    _dnBtn.setPosition(Pos.BOTTOM_CENTER); _dnBtn.setRadius(3);
-    _dnBtn.addEventHandler(e -> decrement(), Action);
-    setChildren(_text, _upBtn, _dnBtn);
+    // Create/configure arrow view
+    _arrowView = new ArrowView();
+    _arrowView.addEventHandler(e -> arrowViewDidFireAction(), Action);
+    addChild(_arrowView);
 }
 
 /**
@@ -136,6 +128,15 @@ public void setStep(double aValue)
 }
 
 /**
+ * Called when ArrowView fires action.
+ */
+protected void arrowViewDidFireAction()
+{
+    if(_arrowView.isUp()) increment();
+    else if(_arrowView.isDown()) decrement();
+}
+
+/**
  * Increments spinner.
  */
 public void increment()
@@ -195,32 +196,6 @@ public void textChanged()
 }
 
 /**
- * Returns an Icon of a down arrow.
- */
-private Image getUpArrowImage()
-{
-    if(_upImg!=null) return _upImg;
-    Image img = Image.get(9,7,true); Painter pntr = img.getPainter();
-    Polygon poly = new Polygon(1.5, 5.5, 7.5, 5.5, 4.5, 1.5);
-    pntr.setColor(new Color("#FFFFFF99")); pntr.drawLine(4.5,8,2,2); pntr.drawLine(4.5,8,7,2);
-    pntr.setColor(Color.DARKGRAY); pntr.draw(poly); pntr.fill(poly); pntr.flush();
-    return _upImg = img;
-}
-
-/**
- * Returns an Icon of a down arrow.
- */
-private Image getDownArrowImage()
-{
-    if(_dnImg!=null) return _dnImg;
-    Image img = Image.get(9,7,true); Painter pntr = img.getPainter();
-    Polygon poly = new Polygon(1.5, 1.5, 7.5, 1.5, 4.5, 5.5);
-    pntr.setColor(new Color("#FFFFFF99")); pntr.drawLine(4.5,8,2,2); pntr.drawLine(4.5,8,7,2);
-    pntr.setColor(Color.DARKGRAY); pntr.draw(poly); pntr.fill(poly); pntr.flush();
-    return _dnImg = img;
-}
-
-/**
  * Returns the preferred width.
  */
 protected double getPrefWidthImpl(double aH)  { return _text.getPrefWidth()+BTN_W; }
@@ -242,12 +217,10 @@ protected void layoutImpl()
     double tw = pw - BTN_W - 2;
     _text.setBounds(px, py, tw, ph);
     
-    // Layout buttons
+    // Layout ArrowView
     double bh = (ph/2-1); // Math.round()?
-    double bx = px + tw + 2;
-    double by = py + 1;
-    _upBtn.setBounds(bx, by, BTN_W, bh);
-    _dnBtn.setBounds(bx, by+bh, BTN_W, bh);
+    double bx = px + tw + 2, by = py + 1;
+    _arrowView.setBounds(bx, by, BTN_W, bh*2);
 }
 
 /**
