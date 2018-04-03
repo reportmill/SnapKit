@@ -19,7 +19,7 @@ public Quad(double aX0, double aY0, double aXC0, double aYC0, double aX1, double
 /**
  * Returns the bounds.
  */
-protected Rect getBoundsImpl()  { return bounds(x0, y0, xc0, yc0, x1, y1, null); }
+protected Rect getBoundsImpl()  { return getBounds(x0, y0, xc0, yc0, x1, y1, null); }
 
 /**
  * Returns a path iterator.
@@ -121,7 +121,7 @@ public boolean matches(Object anObj)
 /**
  * Returns the bounds for given quad points.
  */
-public static Rect bounds(double x0, double y0, double xc0, double yc0, double x1, double y1, Rect aRect)
+public static Rect getBounds(double x0, double y0, double xc0, double yc0, double x1, double y1, Rect aRect)
 {
     // Add end points
     aRect = Line.getBounds(x0, y0, x1, y1, aRect);
@@ -139,18 +139,15 @@ public static Rect bounds(double x0, double y0, double xc0, double yc0, double x
 /**
  * Returns the bounds of the give quadratic.
  */
-public static Rect getBounds(double x0, double y0, double x1, double y1, double x2, double y2, Rect aRect)
+public static Rect getBounds2(double x0, double y0, double x1, double y1, double x2, double y2, Rect aRect)
 {
     // Declare coords for min/max points
-    double p1x = x0;
-    double p1y = y0;
-    double p2x = x0;
-    double p2y = y0;
+    double p1x = x0, p1y = y0, p2x = x0, p2y = y0;
 
     // For quadratic, slope at point t is just linear interpolation of slopes at the endpoints.
     // Find solution to LERP(slope0,slope1,t) == 0
     double d = x0 - 2*x1 + x2;
-    double t = d==0 ? 0 : (x0 - x1) / d;
+    double t = d==0? 0 : (x0 - x1) / d;
 
     // If there's a valid solution, get actual x point at t and add it to the rect
     if(t>0 && t<1) {
@@ -169,14 +166,11 @@ public static Rect getBounds(double x0, double y0, double x1, double y1, double 
     }
     
     // Include endpoint
-    p1x = Math.min(p1x, x2);
-    p2x = Math.max(p2x, x2);
-    p1y = Math.min(p1y, y2);
-    p2y = Math.max(p2y, y2);    
+    p1x = Math.min(p1x, x2); p2x = Math.max(p2x, x2);
+    p1y = Math.min(p1y, y2); p2y = Math.max(p2y, y2);    
     
     // Set rect
-    if(aRect==null) aRect = new Rect();
-    aRect.setRect(p1x, p1y, p2x - p1x, p2y - p1y);
+    if(aRect==null) aRect = new Rect(); aRect.setRect(p1x, p1y, p2x - p1x, p2y - p1y);
     return aRect;
 }
 

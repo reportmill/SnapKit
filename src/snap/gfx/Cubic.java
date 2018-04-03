@@ -19,7 +19,7 @@ public Cubic(double aX0, double aY0, double aXC0, double aYC0, double aXC1, doub
 /**
  * Returns the bounds.
  */
-protected Rect getBoundsImpl()  { return bounds(x0, y0, xc0, yc0, xc1, yc1, x1, y1, null); }
+protected Rect getBoundsImpl()  { return getBounds(x0, y0, xc0, yc0, xc1, yc1, x1, y1, null); }
 
 /**
  * Returns a path iterator.
@@ -140,7 +140,7 @@ public boolean matches(Object anObj)
 /**
  * Returns the bounds for given quad points.
  */
-public static Rect bounds(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1,
+public static Rect getBounds(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1,
     Rect aRect)
 {
     // Add end points
@@ -185,30 +185,21 @@ public static Rect bounds(double x0, double y0, double xc0, double yc0, double x
 /**
  * Returns the bounds of the bezier.
  */
-public static Rect getBounds(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3,
+public static Rect getBounds2(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3,
      Rect aRect)
 {
     // Declare coords for min/max points
-    double p1x = x0;
-    double p1y = y0;
-    double p2x = x0;
-    double p2y = y0;
+    double p1x = x0, p1y = y0, p2x = x0, p2y = y0;
 
     // Get coeficients of b-curve parametric equations (1-t)^3*x0 + 3*t*(1-t)^2*x1 + 3*t^2*(1-t)*x2 + t^3*x3
     // Take derivative of above function and solve for t where derivative equation = 0 (I used Mathematica).
     //   Since derivative of bezier cubic is quadradic, solution is of form (-b +- sqrt(b^2-4ac))/2a.
-    // Get the part in the sqrt for x & y.
     double aX = -x0 + 3*x1 - 3*x2 + x3;
-    double aY = -y0 + 3*y1 - 3*y2 + y3;
     double bX = 2*x0 - 4*x1 + 2*x2;
-    double bY = 2*y0 - 4*y1 + 2*y2;
-    double cX = -x0 + x1;
-    double cY = -y0 + y1;
-    double bSquaredMinus4acForX = bX*bX - 4*aX*cX;
-    double bSquaredMinus4acForY = bY*bY - 4*aY*cY;
+    double cX = -x0 + x1, bSqrMin4acForX = bX*bX - 4*aX*cX;
         
     // If square root part x is at least zero, there is a local max & min on bezier curve for x.
-    if(bSquaredMinus4acForX >= 0) {
+    if(bSqrMin4acForX >= 0) {
         
         // Declare variables for the two solutions
         double t1 = -1, t2 = -1;
@@ -219,8 +210,8 @@ public static Rect getBounds(double x0, double y0, double x1, double y1, double 
         
         // Otherwise, solve for tMax(-b + sqrt(b^2-4ac)/2a) and tMin(-b - sqrt(b^2-4ac)/2a)        
         else {
-            t1 = (-bX - Math.sqrt(bSquaredMinus4acForX))/(2*aX);
-            t2 = (-bX + Math.sqrt(bSquaredMinus4acForX))/(2*aX);
+            t1 = (-bX - Math.sqrt(bSqrMin4acForX))/(2*aX);
+            t2 = (-bX + Math.sqrt(bSqrMin4acForX))/(2*aX);
         }
 
         // If t1 is in valid range (0 to 1), solve for x value and use it to expand bounds
@@ -238,8 +229,11 @@ public static Rect getBounds(double x0, double y0, double x1, double y1, double 
         }
     }
 
-    // If square root part y is at least zero, there is a local max & min on bezier curve for y.
-    if(bSquaredMinus4acForY >= 0) {
+    // Do the same for y
+    double aY = -y0 + 3*y1 - 3*y2 + y3;
+    double bY = 2*y0 - 4*y1 + 2*y2;
+    double cY = -y0 + y1, bSqrMin4acForY = bY*bY - 4*aY*cY;
+    if(bSqrMin4acForY >= 0) {
         
         // Declare variables for the two solutions
         double t1 = -1, t2 = -1;
@@ -250,8 +244,8 @@ public static Rect getBounds(double x0, double y0, double x1, double y1, double 
         
         // Otherwise, solve for tMax(-b + sqrt(b^2-4ac)/2a) and tMin(-b - sqrt(b^2-4ac)/2a)        
         else {
-            t1 = (-bY - Math.sqrt(bSquaredMinus4acForY))/(2*aY);
-            t2 = (-bY + Math.sqrt(bSquaredMinus4acForY))/(2*aY);
+            t1 = (-bY - Math.sqrt(bSqrMin4acForY))/(2*aY);
+            t2 = (-bY + Math.sqrt(bSqrMin4acForY))/(2*aY);
         }
         
         // If tMin is in valid range (0 to 1), solve for x value and use it to expand bounds
@@ -272,14 +266,10 @@ public static Rect getBounds(double x0, double y0, double x1, double y1, double 
     }
 
     // Evaluate bounds expansion for curve endpoint
-    p1x = Math.min(p1x, x3);
-    p1y = Math.min(p1y, y3);
-    p2x = Math.max(p2x, x3);
-    p2y = Math.max(p2y, y3);
+    p1x = Math.min(p1x, x3); p1y = Math.min(p1y, y3); p2x = Math.max(p2x, x3); p2y = Math.max(p2y, y3);
     
     // Set rect
-    if(aRect==null) aRect = new Rect();
-    aRect.setRect(p1x, p1y, p2x - p1x, p2y - p1y);
+    if(aRect==null) aRect = new Rect(); aRect.setRect(p1x, p1y, p2x - p1x, p2y - p1y);
     return aRect;
 }
 

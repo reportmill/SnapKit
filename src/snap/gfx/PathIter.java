@@ -127,8 +127,8 @@ public static Rect getBounds(PathIter aPI)
         switch(aPI.getNext(pts)) {
             case MoveTo: if(bnds==null) { bounds.setRect(lx=pts[0],ly=pts[1],0,0); continue; }
             case LineTo: bnds = Line.getBounds(lx, ly, lx=pts[0], ly=pts[1], bnds); break;
-            case QuadTo: bnds = Quad.bounds(lx, ly, pts[0], pts[1], lx=pts[2], ly=pts[3], bnds); break;
-            case CubicTo: bnds = Cubic.bounds(lx, ly, pts[0], pts[1], pts[2], pts[3], lx=pts[4], ly=pts[5],bnds); break;
+            case QuadTo: bnds = Quad.getBounds(lx, ly, pts[0], pts[1], lx=pts[2], ly=pts[3], bnds); break;
+            case CubicTo: bnds = Cubic.getBounds(lx, ly, pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5],bnds); break;
             case Close: break;
         }
         
