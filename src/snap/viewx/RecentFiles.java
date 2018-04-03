@@ -81,7 +81,7 @@ public static List <String> getPaths(String aName)
     List list = new ArrayList();
     for(int i=0; ; i++) {
         String path = prefs.get("index" + i, null); if(path==null) break;
-        list.add(path);
+        if(!list.contains(path)) list.add(path);
     }
     
     // Return list

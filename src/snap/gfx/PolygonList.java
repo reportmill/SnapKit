@@ -41,6 +41,7 @@ public PolygonList(Shape aShape)  { this(aShape.getPathIter(null)); }
  */
 public PolygonList(PathIter aPI)
 {
+    aPI = new Path(aPI).getFlat().getPathIter(null);
     double pnts[] = new double[6];
     while(aPI.hasNext()) switch(aPI.getNext(pnts)) {
         case MoveTo: moveTo(pnts[0], pnts[1]); break;
@@ -119,7 +120,7 @@ public void quadTo(double cpx, double cpy, double x, double y)
     // Split curve at midpoint and add parts
     Quad c0 = new Quad(last.x, last.y, cpx, cpy, x, y), c1 = c0.split(.5);
     quadTo(c0.xc0, c0.yc0, c0.x1, c0.y1);
-    quadTo(c1.xc0, c1.yc0, c0.x1, c0.y1);
+    quadTo(c1.xc0, c1.yc0, c1.x1, c1.y1);
 }
 
 /**
@@ -137,7 +138,7 @@ public void curveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x
     // Split curve at midpoint and add parts
     Cubic c0 = new Cubic(last.x, last.y, cp1x, cp1y, cp2x, cp2y, x, y), c1 = c0.split(.5);
     curveTo(c0.xc0, c0.yc0, c0.xc1, c0.yc1, c0.x1, c0.y1);
-    curveTo(c1.xc0, c1.yc0, c1.xc1, c1.yc1, c0.x1, c0.y1);
+    curveTo(c1.xc0, c1.yc0, c1.xc1, c1.yc1, c1.x1, c1.y1);
 }
 
 /**

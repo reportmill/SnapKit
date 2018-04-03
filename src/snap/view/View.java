@@ -360,7 +360,7 @@ public void setBounds(double aX, double aY, double aW, double aH)  { setX(aX); s
 public Rect getBoundsLocal()  { return new Rect(0,0,getWidth(),getHeight()); }
 
 /**
- * Sets the bounds view such that it maintains it's location in parent.
+ * Sets the view bounds with given rect in current local coords such that it will have that rect as new local bounds.
  */
 public void setBoundsLocal(double aX, double aY, double aW, double aH)
 {
@@ -369,7 +369,7 @@ public void setBoundsLocal(double aX, double aY, double aW, double aH)
 }
 
 /**
- * Sets the size view such that it maintains it's location in parent.
+ * Sets the view x/y with given point in current local coords such that new origin will be at that point.
  */
 public void setXYLocal(double aX, double aY)
 {
@@ -381,7 +381,7 @@ public void setXYLocal(double aX, double aY)
 }
 
 /**
- * Sets the size view such that it maintains it's location in parent.
+ * Sets the view size such that it maintains it's location in parent.
  */
 public void setSizeLocal(double aW, double aH)
 {
@@ -394,9 +394,19 @@ public void setSizeLocal(double aW, double aH)
 }
 
 /**
- * Returns the bounds inside view.
+ * Returns the bounds in parent coords.
+ */
+public Rect getBoundsParent()  { return getBoundsShapeParent().getBounds(); }
+
+/**
+ * Returns the bounds shape in view coords.
  */
 public Shape getBoundsShape()  { return getBoundsLocal(); }
+
+/**
+ * Returns the bounds shape in parent coords.
+ */
+public Shape getBoundsShapeParent()  { return localToParent(getBoundsShape()); }
 
 /**
  * Returns the translation of this view from X.
