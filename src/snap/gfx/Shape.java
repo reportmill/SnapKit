@@ -125,7 +125,7 @@ public boolean contains(double x0, double y0, double x1, double y1)
     if(!getBounds().contains(x0, y0, x1, y1)) return false;
     
     // If either endpoint not contained, return false
-    if(!contains(x0,y0) || !contains(x1,y1)) return true;
+    if(!contains(x0,y0) || !contains(x1,y1)) return false;
 
     // Iterate over segments, if any segment doesn't contain line, return false
     PathIter pi = getPathIter(null); double pts[] = new double[6], mx = 0, my = 0, lx = 0, ly = 0;
