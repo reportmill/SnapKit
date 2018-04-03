@@ -1,5 +1,6 @@
 package snap.view;
 import snap.gfx.*;
+import snap.util.*;
 
 /**
  * A view to show up to four arrows.
@@ -18,6 +19,12 @@ public class ArrowView extends ParentView {
     // The arrow images
     static Image     _uimg, _dimg, _limg, _rimg;
   
+    // Constants for properties
+    public static final String ShowUp_Prop = "ShowUp";
+    public static final String ShowDown_Prop = "ShowDown";
+    public static final String ShowLeft_Prop = "ShowLeft";
+    public static final String ShowRight_Prop = "ShowRight";
+    
 /**
  * Creates a new ArrowView.
  */
@@ -27,7 +34,7 @@ public ArrowView()
     enableEvents(Action);
     
     // Create/configure Col view to hold up/down buttons
-    _col = new ColView();
+    _col = new ColView(); _col.setAlign(Pos.CENTER);
     addChild(_col);
     
     // Enable up/down buttons by default
@@ -49,8 +56,8 @@ public void setShowUp(boolean aValue)
     
     // Add button
     if(aValue) {
-        _ubtn = new Button(); _ubtn.setImage(getUpArrowImage());
-        _ubtn.setRadius(3); _ubtn.setPosition(Pos.TOP_CENTER);
+        _ubtn = new Button(); _ubtn.setPrefWidth(14); _ubtn.setMinHeight(9);
+        _ubtn.setRadius(3); _ubtn.setPosition(Pos.TOP_CENTER); _ubtn.setImage(getUpArrowImage());
         _ubtn.addEventHandler(e -> buttonDidFire(_ubtn), Action);
         _col.addChild(_ubtn, 0);
     }
@@ -74,8 +81,8 @@ public void setShowDown(boolean aValue)
     
     // Add button
     if(aValue) {
-        _dbtn = new Button(); _dbtn.setImage(getDownArrowImage());
-        _dbtn.setRadius(3); _dbtn.setPosition(Pos.BOTTOM_CENTER);
+        _dbtn = new Button(); _dbtn.setPrefWidth(14); _dbtn.setMinHeight(9);
+        _dbtn.setRadius(3); _dbtn.setPosition(Pos.BOTTOM_CENTER); _dbtn.setImage(getDownArrowImage());
         _dbtn.addEventHandler(e -> buttonDidFire(_dbtn), Action);
         _col.addChild(_dbtn);
     }
@@ -99,8 +106,8 @@ public void setShowLeft(boolean aValue)
     
     // Add button
     if(aValue) {
-        _lbtn = new Button(); _lbtn.setImage(getLeftArrowImage());
-        _lbtn.setRadius(3); _lbtn.setPosition(Pos.CENTER_LEFT);
+        _lbtn = new Button(); _lbtn.setPrefHeight(14); _lbtn.setMinWidth(9);
+        _lbtn.setRadius(3); _lbtn.setPosition(Pos.CENTER_LEFT); _lbtn.setImage(getLeftArrowImage());
         _lbtn.addEventHandler(e -> buttonDidFire(_lbtn), Action);
         addChild(_lbtn, 0);
     }
@@ -120,12 +127,12 @@ public boolean isShowRight()  { return _rbtn!=null; }
 public void setShowRight(boolean aValue)
 {
     // If already set, just return
-    if(aValue==isShowLeft()) return;
+    if(aValue==isShowRight()) return;
     
     // Add button
     if(aValue) {
-        _rbtn = new Button(); _rbtn.setImage(getRightArrowImage());
-        _rbtn.setRadius(3); _rbtn.setPosition(Pos.CENTER_RIGHT);
+        _rbtn = new Button(); _rbtn.setPrefHeight(14); _rbtn.setMinWidth(9);
+        _rbtn.setRadius(3); _rbtn.setPosition(Pos.CENTER_RIGHT); _rbtn.setImage(getRightArrowImage());
         _rbtn.addEventHandler(e -> buttonDidFire(_rbtn), Action);
         addChild(_rbtn);
     }
@@ -217,7 +224,7 @@ public static Image getLeftArrowImage()
 public static Image getRightArrowImage()
 {
     if(_rimg!=null) return _rimg;
-    Image img = Image.get(9,7,true); Painter pntr = img.getPainter();
+    Image img = Image.get(7,9,true); Painter pntr = img.getPainter();
     Polygon poly = new Polygon(1.5, 1.5, 1.5, 7.5, 5.5, 4.5);
     pntr.setColor(Color.DARKGRAY); pntr.draw(poly); pntr.fill(poly);
     return _rimg = img;
@@ -237,5 +244,43 @@ protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(th
  * Layout children.
  */
 protected void layoutImpl()  { RowView.layout(this, null, null, false, 0); }
+
+/**
+ * Returns the default alignment.
+ */    
+public Pos getDefaultAlign()  { return Pos.CENTER; }
+
+/**
+ * XML archival.
+ */
+public XMLElement toXMLView(XMLArchiver anArchiver)
+{
+    // Archive basic view attributes
+    XMLElement e = super.toXMLView(anArchiver);
+    
+    // Archive ShowUp, ShowDown, ShowLeft, ShowRight
+    if(!isShowUp()) e.add(ShowUp_Prop, isShowUp());
+    if(!isShowDown()) e.add(ShowDown_Prop, isShowDown());
+    if(isShowLeft()) e.add(ShowLeft_Prop, isShowLeft());
+    if(isShowRight()) e.add(ShowRight_Prop, isShowRight());
+    
+    // Return element
+    return e;
+}
+
+/**
+ * XML unarchival.
+ */
+public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+{
+    // Unarchive basic view attributes
+    super.fromXMLView(anArchiver, anElement);
+    
+    // Unarchive ShowUp, ShowDown, ShowLeft, ShowRight
+    if(anElement.hasAttribute(ShowUp_Prop)) setShowUp(anElement.getAttributeBoolValue(ShowUp_Prop));
+    if(anElement.hasAttribute(ShowDown_Prop)) setShowDown(anElement.getAttributeBoolValue(ShowDown_Prop));
+    if(anElement.hasAttribute(ShowLeft_Prop)) setShowLeft(anElement.getAttributeBoolValue(ShowLeft_Prop));
+    if(anElement.hasAttribute(ShowRight_Prop)) setShowRight(anElement.getAttributeBoolValue(ShowRight_Prop));
+}
 
 }

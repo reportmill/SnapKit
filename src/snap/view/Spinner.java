@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import java.text.DecimalFormat;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -33,6 +34,7 @@ public class Spinner <T> extends ParentView {
     
     // Constant for Button width
     static final int BTN_W = 14;
+    static DecimalFormat _fmt = new DecimalFormat("#.##");
 
 /**
  * Creates a new Spinner.
@@ -70,7 +72,18 @@ public void setValue(T aValue)
 {
     if(SnapUtils.equals(aValue,getValue())) return;
     firePropChange(Value_Prop, _value, _value = aValue);
-    _text.setText(_value!=null? _value.toString() : "");
+    _text.setText(getText());
+}
+
+/**
+ * Returns the text for value.
+ */
+public String getText()
+{
+    if(_value==null) return "";
+    if(_value instanceof Double) return _fmt.format((Double)_value);
+    if(_value instanceof Float) return _fmt.format((Float)_value);
+    return _value.toString();
 }
 
 /**

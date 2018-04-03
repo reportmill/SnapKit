@@ -67,6 +67,7 @@ protected Map <String, Class> createClassMap()
     
     // View classes
     cmap.put("ArcView", ArcView.class);
+    cmap.put("ArrowView", ArrowView.class);
     cmap.put("BorderView", BorderView.class);
     cmap.put("Box", BoxView.class);
     cmap.put("BoxView", BoxView.class);
