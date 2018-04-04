@@ -396,16 +396,6 @@ protected void layoutDeepImpl()
 }
 
 /**
- * Override to request layout.
- */
-public void setPadding(Insets theIns)
-{
-    if(theIns==null) theIns = getDefaultPadding();
-    if(SnapUtils.equals(theIns,_padding)) return; super.setPadding(theIns);
-    relayout();
-}
-
-/**
  * Override to forward to children.
  */
 public void playAnimDeep()

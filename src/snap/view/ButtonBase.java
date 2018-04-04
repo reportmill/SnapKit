@@ -345,10 +345,6 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive ShowBorder, Position
     if(anElement.hasAttribute(ShowBorder_Prop)) setShowBorder(anElement.getAttributeBoolValue(ShowBorder_Prop));
     if(anElement.hasAttribute(Position_Prop)) setPosition(Pos.valueOf(anElement.getAttributeValue(Position_Prop)));
-        
-    // Unarchive Margin
-    if(anElement.hasAttribute("margin")) { Insets ins = Insets.get(anElement.getAttributeValue("margin"));
-        if(!ins.isEmpty()) setPadding(ins); }
 }
 
 }

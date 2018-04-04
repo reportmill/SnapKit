@@ -517,15 +517,6 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     if(anElement.hasAttribute("Rich")) setPlainText(!anElement.getAttributeBoolValue("Rich"));
     if(anElement.hasAttribute("Editable")) setEditable(anElement.getAttributeBoolValue("Editable"));
     if(anElement.hasAttribute("WrapText")) setWrapText(anElement.getAttributeBoolValue("WrapText"));
-
-    // Unarchive margin, valign (should go soon)
-    if(anElement.hasAttribute("margin")) setPadding(Insets.get(anElement.getAttributeValue("margin")));
-    if(anElement.hasAttribute("valign")) {
-        String align = anElement.getAttributeValue("valign");
-        if(align.equals("top")) setAlign(Pos.get(HPos.LEFT,VPos.TOP));
-        else if(align.equals("middle")) setAlign(Pos.get(HPos.LEFT,VPos.CENTER));
-        else if(align.equals("bottom")) setAlign(Pos.get(HPos.LEFT,VPos.BOTTOM));
-    }
     
     // If Rich, unarchive rich text
     if(isRich()) {

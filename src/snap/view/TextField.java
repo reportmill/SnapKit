@@ -888,15 +888,6 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     if(str!=null && str.length()>0)
         setText(str);
     if(anElement.hasAttribute("Radius")) setRadius(anElement.getAttributeDoubleValue("Radius"));
-        
-    // Unarchive margin, valign (should go soon)
-    if(anElement.hasAttribute("margin")) setPadding(Insets.get(anElement.getAttributeValue("margin")));
-    if(anElement.hasAttribute("valign")) {
-        String align = anElement.getAttributeValue("valign");
-        if(align.equals("top")) setAlign(Pos.get(HPos.LEFT,VPos.TOP));
-        else if(align.equals("middle")) setAlign(Pos.get(HPos.LEFT,VPos.CENTER));
-        else if(align.equals("bottom")) setAlign(Pos.get(HPos.LEFT,VPos.BOTTOM));
-    }
 }
 
 /**

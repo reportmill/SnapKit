@@ -2336,7 +2336,7 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     if(anElement.hasAttribute(Visible_Prop)) setVisible(anElement.getAttributeBoolValue(Visible_Prop));
     if(anElement.hasAttribute(Opacity_Prop)) setOpacity(anElement.getAttributeFloatValue(Opacity_Prop));
     
-    // Unarchive Alignment, Padding
+    // Unarchive Alignment, Margin, Padding
     else if(anElement.hasAttribute(Align_Prop)) setAlign(Pos.get(anElement.getAttributeValue(Align_Prop)));
     if(anElement.hasAttribute(Margin_Prop)) { Insets ins = Insets.get(anElement.getAttributeValue(Margin_Prop));
         setMargin(ins); }
