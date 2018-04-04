@@ -98,9 +98,16 @@ public static final double getPrefWidth(ParentView aPar, View theChildren[], dou
     View children[] = theChildren!=null? theChildren : aPar.getChildrenManaged();
     if(children.length==0) return ins.getWidth();
     
-    // Get best width and return
-    double bw = 0; for(View child : children) bw = Math.max(bw, child.getBestWidth(-1));
-    return bw + ins.getWidth();
+    // Get max best width of children (including margins)
+    double pw = 0;
+    for(View child : children) {
+        double marW = child.getMargin().getWidth();
+        double cbw = child.getBestWidth(-1);
+        pw = Math.max(pw, cbw + marW);
+    }
+    
+    // Return preferred width + pad width
+    return pw + ins.getWidth();
 }
 
 /**
@@ -113,9 +120,20 @@ public static final double getPrefHeight(ParentView aPar, View theChildren[], do
     View children[] = theChildren!=null? theChildren : aPar.getChildrenManaged();
     int ccount = children.length; if(ccount==0) return ins.getHeight();
     
-    // Get best height and return
-    double bh = 0; for(View child : children) bh += child.getBestHeight(-1); if(ccount>1) bh += (ccount-1)*aSpacing;
-    return bh + ins.getHeight();
+    // Iterate over children and add spacing, margin-top (collapsable) and child height
+    double ph = 0, spc = 0;
+    for(View child : children) {
+        Insets marg = child.getMargin(); double marT = marg.getTop(), marB = marg.getBottom();
+        double cbh = child.getBestHeight(-1);
+        ph += Math.max(spc, marT) + cbh;
+        spc = Math.max(aSpacing, marB);
+    }
+    
+    // Add margin for final child
+    ph += children[ccount-1].getMargin().getBottom();
+    
+    // Return preferred height + pad height
+    return ph + ins.getHeight();
 }
 
 /**
@@ -147,16 +165,38 @@ public static void layout(ParentView aPar, View theChilds[], Insets theIns, bool
     int grow = 0;
     
     // Layout children
+    double spc = 0;
     for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i];
-        double cw = isFillWidth || child.isGrowWidth()? pw : Math.min(child.getBestWidth(-1), pw);
-        double ch = child.getBestHeight(cw), cx = px;
-        if(pw>cw && !isFillWidth) { double ax2 = Math.max(ax,ViewUtils.getLeanX(child)); cx += Math.round((pw-cw)*ax2);}
-        cbnds[i] = new Rect(cx,cy,cw,ch); cy += ch + aSpacing;
+    
+        // Get child margin
+        Insets marg = child.getMargin(); double marT = marg.getTop(), marB = marg.getBottom();
+        
+        // Get child width
+        double maxW = Math.max(pw - marg.getWidth(), 0);
+        double cw = isFillWidth || child.isGrowWidth()? maxW : Math.min(child.getBestWidth(-1), maxW);
+        
+        // Calc x accounting for margin and alignment
+        double cx = px + marg.getLeft();
+        if(cw<maxW) { double ax2 = Math.max(ax,ViewUtils.getLeanX(child));
+            cx = Math.max(cx, px + Math.round((pw-cw)*ax2)); }
+        
+        // Get child height and update child y for spacing/margin-top
+        double ch = child.getBestHeight(cw);
+        cy += Math.max(spc, marT);
+        
+        // Set child bounds
+        cbnds[i] = new Rect(cx, cy, cw, ch);
+        
+        // Update spacing, current child y and grow count
+        spc = Math.max(aSpacing, marB); cy += ch;
         if(child.isGrowHeight()) grow++;
     }
     
-    // Calculate extra space (return if none)
-    double extra = py + ph - (cy - aSpacing);
+    // Add margin for final child
+    cy += children[children.length-1].getMargin().getBottom();
+    
+    // Calculate extra space
+    double extra = py + ph - cy;
     
     // If grow shapes, add grow
     if(extra!=0 && grow>0) { double dy = 0;
