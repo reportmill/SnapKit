@@ -33,7 +33,10 @@ public class View implements XMLArchiver.Archivable {
     // The alignment of content in this view
     Pos             _align = getDefaultAlign();
     
-    // The padding for content in this view
+    // The margin to be provided around this view
+    Insets          _margin = getDefaultMargin();
+    
+    // The padding between the border and content in this view
     Insets          _padding = getDefaultPadding();
     
     // The horizontal position this view would prefer to take when inside a pane
@@ -179,6 +182,7 @@ public class View implements XMLArchiver.Archivable {
     public static final String Font_Prop = "Font";
     public static final String Align_Prop = "Align";
     public static final String Opacity_Prop = "Opacity";
+    public static final String Margin_Prop = "Margin";
     public static final String Padding_Prop = "Padding";
     public static final String Spacing_Prop = "Spacing";
     public static final String Parent_Prop = "Parent";
@@ -1502,17 +1506,38 @@ public void setAlign(HPos aPos)  { setAlign(Pos.get(aPos, getAlign().getVPos()))
 public void setAlign(VPos aPos)  { setAlign(Pos.get(getAlign().getHPos(), aPos)); }
 
 /**
- * Returns the padding.
+ * Returns the spacing insets requested between parent/neighbors and the border of this view.
+ */
+public Insets getMargin()  { return _margin; }
+
+/**
+ * Sets the spacing insets requested between parent/neighbors and the border of this view.
+ */
+public void setMargin(double aTp, double aRt, double aBtm, double aLt)  { setMargin(new Insets(aTp,aRt,aBtm,aLt)); }
+
+/**
+ * Sets the spacing insets requested between parent/neighbors and the border of this view.
+ */
+public void setMargin(Insets theIns)
+{
+    if(theIns==null) theIns = getDefaultMargin();
+    if(SnapUtils.equals(theIns,_margin)) return;
+    firePropChange(Padding_Prop, _margin, _margin = theIns);
+    relayout(); relayoutParent();
+}
+
+/**
+ * Returns the spacing insets between the border of this view and it's content.
  */
 public Insets getPadding()  { return _padding; }
 
 /**
- * Sets padding.
+ * Sets the spacing insets between the border of this view and it's content.
  */
 public void setPadding(double aTp, double aRt, double aBtm, double aLt)  { setPadding(new Insets(aTp,aRt,aBtm,aLt)); }
 
 /**
- * Sets the padding.
+ * Sets the spacing insets between the border of this view and it's content.
  */
 public void setPadding(Insets theIns)
 {
@@ -1551,6 +1576,11 @@ public Paint getDefaultFill()  { return null; }
  * Returns the default font.
  */
 public Font getDefaultFont()  { View p = getParent(); return p!=null? p.getFont() : Font.Arial11; }
+
+/**
+ * Returns the margin default.
+ */
+public Insets getDefaultMargin()  { return _emptyIns; }
 
 /**
  * Returns the padding default.
@@ -2208,8 +2238,9 @@ public XMLElement toXML(XMLArchiver anArchiver)
     if(!isVisible()) e.add(Visible_Prop, false);
     if(getOpacity()<1) e.add(Opacity_Prop, getOpacity());
     
-    // Archive Alignment, Padding
+    // Archive Alignment, Margin, Padding
     if(getAlign()!=getDefaultAlign()) e.add(Align_Prop, getAlign());
+    if(!getMargin().equals(getDefaultMargin())) e.add(Margin_Prop, getMargin().getString());
     if(!getPadding().equals(getDefaultPadding())) e.add(Padding_Prop, getPadding().getString());
         
     // Archive GrowWidth, GrowHeight, LeanX, LeanY
@@ -2307,10 +2338,10 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     
     // Unarchive Alignment, Padding
     else if(anElement.hasAttribute(Align_Prop)) setAlign(Pos.get(anElement.getAttributeValue(Align_Prop)));
-    if(anElement.hasAttribute(Padding_Prop)) {
-        Insets ins = Insets.get(anElement.getAttributeValue(Padding_Prop));
-        setPadding(ins);
-    }
+    if(anElement.hasAttribute(Margin_Prop)) { Insets ins = Insets.get(anElement.getAttributeValue(Margin_Prop));
+        setMargin(ins); }
+    if(anElement.hasAttribute(Padding_Prop)) { Insets ins = Insets.get(anElement.getAttributeValue(Padding_Prop));
+        setPadding(ins); }
     
     // Unarchive GrowWidth, GrowHeight, LeanX, LeanY
     if(anElement.hasAttribute(GrowWidth_Prop)) setGrowWidth(anElement.getAttributeBoolValue(GrowWidth_Prop));
