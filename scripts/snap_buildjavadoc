@@ -3,16 +3,12 @@ rm -rf /tmp/javadoc
 
 cd /Temp/SnapKit/src
 
-javadoc -d /tmp/javadoc -windowtitle 'SnapCode API' \
--header 'SnapCode API' \
--footer 'SnapCode API' \
--overview /Temp/SnapCode/scripts/overview.html \
-snap/data/*.java \
+javadoc -d /tmp/javadoc -windowtitle 'SnapKit API' \
+-header 'SnapKit API' \
+-footer 'SnapKit API' \
+-overview /Temp/SnapKit/scripts/overview.html \
 snap/gfx/*.java \
 snap/parse/*.java \
-snap/pdf/*.java \
-snap/pdf/read/*.java \
-snap/pdf/write/*.java \
 snap/util/*.java \
 snap/view/*.java \
 snap/viewx/*.java \
