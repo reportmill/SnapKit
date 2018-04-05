@@ -1241,8 +1241,7 @@ public Object getProp(String aName)  { return _props.get(aName); }
 public Object setProp(String aName, Object aValue)
 {
     if(_props==Collections.EMPTY_MAP) _props = new HashMap();
-    Object val = _props.put(aName, aValue);
-    firePropChange(aName, val, aValue);
+    Object val = _props.put(aName, aValue); //firePropChange(aName, val, aValue);
     return val;
 }
 
