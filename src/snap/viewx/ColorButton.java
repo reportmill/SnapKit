@@ -85,8 +85,8 @@ public void setTitle(String aTitle)
 public Image getImage()
 {
     if(_image!=null) return _image;
-    if(_title.startsWith("Stroke ")) return _image = Image.get(getClass(), "pkg.images/Color_StrokeColor.png");
-    if(_title.startsWith("Text ")) return _image = Image.get(getClass(), "pkg.images/Color_TextColor.png");
+    if(_title.startsWith("Stroke")) return _image = Image.get(getClass(), "pkg.images/Color_StrokeColor.png");
+    if(_title.startsWith("Text")) return _image = Image.get(getClass(), "pkg.images/Color_TextColor.png");
     return _image = Image.get(getClass(), "pkg.images/Color_FillColor.png");
 }
 
