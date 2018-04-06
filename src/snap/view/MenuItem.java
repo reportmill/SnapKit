@@ -144,6 +144,24 @@ public void paintFront(Painter aPntr)
 protected double getPrefHeightImpl(double aW)  { return isSeparator()? 3 : super.getPrefHeightImpl(aW); }
 
 /**
+ * Override because TeaVM hates reflection.
+ */
+public Object getValue(String aPropName)
+{
+    if(aPropName.equals("Value") || aPropName.equals(Selected_Prop)) return isSelected();
+    return super.getValue(aPropName);
+}
+
+/**
+ * Override because TeaVM hates reflection.
+ */
+public void setValue(String aPropName, Object aValue)
+{
+    if(aPropName.equals("Value") || aPropName.equals(Selected_Prop)) setSelected(SnapUtils.boolValue(aValue));
+    else super.setValue(aPropName, aValue);
+}
+
+/**
  * Copies a menu item.
  */
 public MenuItem clone()
