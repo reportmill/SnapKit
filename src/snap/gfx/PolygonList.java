@@ -101,7 +101,13 @@ public void moveTo(double x, double y)
  */
 public void lineTo(double x, double y)
 {
+    // If no poly, start one
     if(_poly==null) moveTo(0,0);
+    
+    // If closing last poly, just return
+    if(_poly.getPointCount()>0 && Point.equals(x,y,_poly.getX(0),_poly.getY(0))) return;
+    
+    // Add point and clear bounds
     _poly.addPoint(x,y);
     _bounds = null;
 }
@@ -113,8 +119,9 @@ public void quadTo(double cpx, double cpy, double x, double y)
 {
     // If distance from control point to base line less than tolerance, just add line
     Point last = getLastPoint();
-    double dist = Line.getDistance(last.x, last.y, x, y, cpx, cpy);
-    if(dist<.25) {
+    double dist0 = Point.getDistance(last.x, last.y, x, y); if(dist0<.5) return;
+    double dist1 = Line.getDistance(last.x, last.y, x, y, cpx, cpy);
+    if(dist1<.5) {
         lineTo(x,y); return; }
     
     // Split curve at midpoint and add parts
@@ -130,9 +137,10 @@ public void curveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x
 {
     // If distance from control points to base line less than tolerance, just add line
     Point last = getLastPoint();
+    double dist0 = Point.getDistance(last.x, last.y, x, y); if(dist0<.5) return;
     double dist1 = Line.getDistance(last.x, last.y, x, y, cp1x, cp1y);
     double dist2 = Line.getDistance(last.x, last.y, x, y, cp2x, cp2y);
-    if(dist1<.25 && dist2<.25) {
+    if(dist1<.5 && dist2<.5) {
         lineTo(x,y); return; }
     
     // Split curve at midpoint and add parts

@@ -130,10 +130,10 @@ public boolean isSimple()
         double x0 = getX(i), y0 = getY(i);
         double x1 = getX(j), y1 = getY(j);
         
-        // If next point is collinear, return false. Fix this for when there is no overlap.
+        // If next point is collinear and backtracks over previous segment, return false.
         int jp1 = (j+1)%pc;
         double jp1x = getX(jp1), jp1y = getY(jp1);
-        if(Line.isCollinear(x0, y0, x1, y1, jp1x, jp1y))
+        if(Line.isCollinear(x0, y0, x1, y1, jp1x, jp1y) && (jp1x-x0)/(x1-x0)<1)
             return false;
             
         // Iterate over remaining lines and see if they intersect
@@ -199,13 +199,22 @@ public double getExtAngleSum()
  */
 public PolygonList getConvexPolys(int aMax)
 {
+    // If not simple, get simples
+    if(!isSimple()) {
+        Shape shp = ShapeMaker.add(this,this);
+        PolygonList plist = new PolygonList(shp);
+        Polygon polys0[] = plist.getPolys();
+        List <Polygon> polys1 = new ArrayList();
+        for(Polygon poly : polys0) {
+            PolygonList plist1 = poly.getConvexPolys(aMax);
+            Collections.addAll(polys1, plist.getPolys());
+        }
+        return new PolygonList(polys1);
+    }
+    
     // Create list with clone of first poly
     Polygon poly = clone();
     List <Polygon> polys = new ArrayList(); polys.add(poly);
-    
-    // If poly not simple, need to get simples
-    if(!poly.isSimple())
-        return new PolygonList(polys);
     
     // While current is concave or has too many points, split
     while(!poly.isConvex() || poly.getPointCount()>aMax) {
@@ -331,6 +340,15 @@ public Polygon clone()
         return clone;
     }
     catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
+}
+
+/**
+ * Returns an array of simple polygons for a shape (assuming there are potentially subpaths and such).
+ */
+public Polygon[] getPolys(Shape aShape)
+{
+    PolygonList plist = new PolygonList(aShape);
+    return plist.getPolys();
 }
 
 /**

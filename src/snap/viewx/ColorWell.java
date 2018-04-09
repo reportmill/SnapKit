@@ -227,7 +227,25 @@ protected void setShowing(boolean aValue)
 /**
  * Returns a mapped property name.
  */
-public String getValuePropName()  { return "Color"; }
+public String getValuePropName()  { return Color_Prop; }
+
+/**
+ * Override because TeaVM hates reflection.
+ */
+public Object getValue(String aPropName)
+{
+    if(aPropName.equals("Value") || aPropName.equals(Color_Prop)) return getColor();
+    return super.getValue(aPropName);
+}
+
+/**
+ * Override because TeaVM hates reflection.
+ */
+public void setValue(String aPropName, Object aValue)
+{
+    if(aPropName.equals("Value") || aPropName.equals(Color_Prop)) setColor((Color)aValue);
+    else super.setValue(aPropName, aValue);
+}
 
 /**
  * XML archival.
