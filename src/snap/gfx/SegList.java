@@ -1,11 +1,11 @@
 package snap.gfx;
 import java.util.*;
-import snap.util.SnapUtils;
 
 /**
- * A Shape helper class to construct shapes from other shapes.
+ * A Shape containing a list of Segment shapes (Line, Quad, Cubic) to facilitate complex shape operations like
+ * constructive area geometry (CAG) operations (add, subtract, intersect paths).
  */
-public class ShapeMaker {
+public class SegList {
     
     // The original shape
     Shape            _shape;
@@ -14,9 +14,9 @@ public class ShapeMaker {
     List <Segment>   _segs = new ArrayList();
 
 /**
- * Creates a new ShapeMaker from given shape.
+ * Creates a new SegList from given shape.
  */
-public ShapeMaker(Shape aShape)
+public SegList(Shape aShape)
 {
     _shape = aShape; if(_shape==null) return;
     
@@ -59,7 +59,7 @@ public void addSeg(Segment aSeg)  { addSeg(aSeg, getSegCount()); }
 public void addSeg(Segment aSeg, int anIndex)  { _segs.add(anIndex, aSeg); }
 
 /**
- * Returns whether this ShapeMaker contains given point.
+ * Returns whether this SegList contains given point.
  */
 public boolean contains(double x, double y)
 {
@@ -68,7 +68,7 @@ public boolean contains(double x, double y)
 }
 
 /**
- * Returns whether this ShapeMaker contains given point.
+ * Returns whether this SegList contains given point.
  */
 public boolean containsSegMid(Segment aSeg)
 {
@@ -102,7 +102,7 @@ public boolean contains(Segment aSeg)
 /**
  * Returns the first Segment from this SegmentList outside of given SegList.
  */
-public Segment getFirstSegOutside(ShapeMaker aShape)
+public Segment getFirstSegOutside(SegList aShape)
 {
     for(Segment sg : getSegs())
         if(!aShape.containsSegMid(sg))
@@ -113,7 +113,7 @@ public Segment getFirstSegOutside(ShapeMaker aShape)
 /**
  * Returns the first Segment from this SegmentList outside of given SegList.
  */
-public Segment getFirstSegInside(ShapeMaker aShape)
+public Segment getFirstSegInside(SegList aShape)
 {
     for(Segment sg : getSegs())
         if(aShape.contains(sg.getX0(), sg.getY0()))
@@ -168,9 +168,9 @@ public Shape createShape()
 }
 
 /**
- * Splits the segments for this and given SM for every intersection of the two.
+ * Splits the segments for this and given SegList for every intersection of the two.
  */
-public void splitSegments(ShapeMaker aShape2)
+public void splitSegments(SegList aShape2)
 {
     // Iterate over list1 and split at all intersections with slist2
     for(int i=0;i<getSegCount();i++) { Segment seg1 = getSeg(i);
@@ -208,20 +208,20 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
     if(aShape2.contains(aShape1))
         return aShape1;
 
-    // Create ShapeMakers for given shapes and new shape
-    ShapeMaker shape1 = new ShapeMaker(aShape1);
-    ShapeMaker shape2 = new ShapeMaker(aShape2);
-    ShapeMaker shape3 = new ShapeMaker(null);
+    // Create SegLists for given shapes and new shape
+    SegList shape1 = new SegList(aShape1);
+    SegList shape2 = new SegList(aShape2);
+    SegList shape3 = new SegList(null);
     
     // Split segments in shape1 & shape2
     shape1.splitSegments(shape2);
     
     // Find first segement contained by both shape1 and shape2
     Segment seg = shape1.getFirstSegInside(shape2);
-    if(seg==null) { System.err.println("ShapeMaker.intersect: No points!"); return aShape1; } // Should never happen
+    if(seg==null) { System.err.println("SegList.intersect: No points!"); return aShape1; } // Should never happen
         
     // Iterate over segements to find those with endpoints in opposing shape and add to new shape
-    ShapeMaker owner = shape1, opp = shape2; //if(seg==null) { seg = shape2.getSeg(0); owner = shape2; opp = shape1; }
+    SegList owner = shape1, opp = shape2; //if(seg==null) { seg = shape2.getSeg(0); owner = shape2; opp = shape1; }
     while(seg!=null) {
         
         // Add segment to new list
@@ -245,7 +245,7 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
         }
         
         // Update seg and add to list if non-null
-        seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("ShapeMaker: too many segs"); }
+        seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("SegList: too many segs"); }
     }
     
     // Return new shape for segments list
@@ -265,20 +265,20 @@ public static Shape add(Shape aShape1, Shape aShape2)
     if(aShape2.contains(aShape1))
         return aShape2;
 
-    // Create ShapeMakers for given shapes and new shape
-    ShapeMaker shape1 = new ShapeMaker(aShape1);
-    ShapeMaker shape2 = new ShapeMaker(aShape2);
-    ShapeMaker shape3 = new ShapeMaker(null);
+    // Create SegLists for given shapes and new shape
+    SegList shape1 = new SegList(aShape1);
+    SegList shape2 = new SegList(aShape2);
+    SegList shape3 = new SegList(null);
     
     // Split segments in shape1 & shape2
     shape1.splitSegments(shape2);
     
     // Find first segement on perimeter of shape1 and shape2
     Segment seg = shape1.getFirstSegOutside(shape2);
-    if(seg==null) { System.err.println("ShapeMaker.add: No intersections!"); return aShape1; } // Should never happen
+    if(seg==null) { System.err.println("SegList.add: No intersections!"); return aShape1; } // Should never happen
     
     // Iterate over segements to find those with endpoints in opposing shape and add to new shape
-    ShapeMaker owner = shape1, opp = shape2;
+    SegList owner = shape1, opp = shape2;
     while(seg!=null) {
         
         // Add segment to new list
@@ -302,7 +302,7 @@ public static Shape add(Shape aShape1, Shape aShape2)
         }
         
         // Update seg and add to list if non-null
-        seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("ShapeMaker: too many segs"); }
+        seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("SegList: too many segs"); }
     }
     
     // Return new shape for segments list
@@ -320,20 +320,20 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
     if(aShape1.contains(aShape2)) {
         Path path = new Path(aShape1); path.append(aShape2); return path; }
 
-    // Create ShapeMakers for given shapes and new shape
-    ShapeMaker shape1 = new ShapeMaker(aShape1);
-    ShapeMaker shape2 = new ShapeMaker(aShape2);
-    ShapeMaker shape3 = new ShapeMaker(null);
+    // Create SegLists for given shapes and new shape
+    SegList shape1 = new SegList(aShape1);
+    SegList shape2 = new SegList(aShape2);
+    SegList shape3 = new SegList(null);
     
     // Split segments in shape1 & shape2
     shape1.splitSegments(shape2);
     
     // Find first segement on perimeter of shape1 and shape2
     Segment seg = shape1.getFirstSegOutside(shape2);
-    if(seg==null) { System.err.println("ShapeMaker.subtr: No intersections!"); return aShape1; } // Should never happen
+    if(seg==null) { System.err.println("SegList.subtr: No intersections!"); return aShape1; } // Should never happen
     
     // Iterate over segements to find those with endpoints in opposing shape and add to new shape
-    ShapeMaker owner = shape1, opp = shape2;
+    SegList owner = shape1, opp = shape2;
     while(seg!=null) {
         
         // Add segment to new list
@@ -359,7 +359,7 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
         }
         
         // Update seg and add to list if non-null
-        seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("ShapeMaker: too many segs"); }
+        seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("SegList: too many segs"); }
     }
     
     // Return new shape for segments list
@@ -370,20 +370,5 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
 private static boolean eq(double v1, double v2)  { return Segment.equals(v1,v2); }
 private static List <Segment> add(List <Segment> aList, Segment aShp)
 { if(aList==Collections.EMPTY_LIST) aList = new ArrayList(); aList.add(aShp); return aList; }
-
-/**
- * Main method for testing.
- */
-public static void main(String args[])
-{
-    //Shape r1 = new Rect(0,0,200,200), r2 = new Path(new Rect(100,100,200,200));
-    //Shape r1 = new Ellipse(0,0,200,200), r2 = new Ellipse(100,100,200,200);
-    Shape r1 = new Rect(0,0,200,200), r2 = new Ellipse(125,125,200,200);
-    Shape r3 = subtract(r1,r2);
-    System.err.println("Rect 3: " + r3);
-    Image img = Image.get(500,500, false);
-    Painter pntr = img.getPainter(); pntr.draw(r1); pntr.draw(r2); pntr.setColor(Color.PINK); pntr.fill(r3);
-    SnapUtils.writeBytes(img.getBytesJPEG(), "/tmp/test.jpg");
-}
 
 }

@@ -201,7 +201,7 @@ public PolygonList getConvexPolys(int aMax)
 {
     // If not simple, get simples
     if(!isSimple()) {
-        Shape shp = ShapeMaker.add(this,this);
+        Shape shp = Shape.add(this,this);
         PolygonList plist = new PolygonList(shp);
         Polygon polys0[] = plist.getPolys();
         List <Polygon> polys1 = new ArrayList();

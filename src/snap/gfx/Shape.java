@@ -549,17 +549,17 @@ public String toString()  { return getClass().getSimpleName() + " [" + getBounds
 /**
  * Adds two shapes together.
  */
-public static Shape add(Shape aShape1, Shape aShape2)  { return ShapeMaker.add(aShape1, aShape2); }
+public static Shape add(Shape aShape1, Shape aShape2)  { return SegList.add(aShape1, aShape2); }
 
 /**
  * Subtracts two shapes together.
  */
-public static Shape subtract(Shape aShape1, Shape aShape2)  { return ShapeMaker.subtract(aShape1, aShape2); }
+public static Shape subtract(Shape aShape1, Shape aShape2)  { return SegList.subtract(aShape1, aShape2); }
 
 /**
  * Returns the intersection shape of two shapes.
  */
-public static Shape intersect(Shape aShape1, Shape aShape2)  { return ShapeMaker.intersect(aShape1, aShape2); }
+public static Shape intersect(Shape aShape1, Shape aShape2)  { return SegList.intersect(aShape1, aShape2); }
 
 /** Helper. */
 private static String fmt(double aVal)  { return _fmt.format(aVal); }
