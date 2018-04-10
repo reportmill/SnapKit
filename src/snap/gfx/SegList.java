@@ -5,7 +5,7 @@ import java.util.*;
  * A Shape containing a list of Segment shapes (Line, Quad, Cubic) to facilitate complex shape operations like
  * constructive area geometry (CAG) operations (add, subtract, intersect paths).
  */
-public class SegList {
+public class SegList extends Shape {
     
     // The original shape
     Shape            _shape;
@@ -57,6 +57,11 @@ public void addSeg(Segment aSeg)  { addSeg(aSeg, getSegCount()); }
  * Adds the given segement.
  */
 public void addSeg(Segment aSeg, int anIndex)  { _segs.add(anIndex, aSeg); }
+
+/**
+ * Removes a given segment.
+ */
+public Segment removeSeg(int anIndex)  { return _segs.remove(anIndex); }
 
 /**
  * Returns whether this SegList contains given point.
@@ -141,26 +146,27 @@ public List <Segment> getSegments(Segment aSeg)
 }
 
 /**
- * Creates the shape from the list of segements.
+ * Creates the path from the list of segements.
  */
-public Shape createShape()
+public Path createPath()
 {
-    // Iterate over segments, if any segment intersects cubic, return true
+    // Iterate vars
     Path path = new Path(); double lx = 0, ly = 0, mx = 0, my = 0;
-    for(Shape seg : _segs) {
+    
+    // Iterate over segments, if any segment intersects cubic, return true
+    for(Segment seg : _segs) {
+        
+        // If last end point was last move point, add moveTo
+        if(lx==mx && ly==my) path.moveTo(mx=seg.x0, my=seg.y0);
+        
+        // Handle Seg (Line, Quad, Cubic)
         if(seg instanceof Line) { Line line = (Line)seg;
-            if(lx==mx && ly==my) path.moveTo(mx=line.x0, my=line.y0);
             if(mx==line.x1 && my==line.y1) path.close();
-            else path.lineTo(lx=line.x1, ly=line.y1);
-        }
+            else path.lineTo(lx=line.x1, ly=line.y1); }
         else if(seg instanceof Quad) { Quad quad = (Quad)seg;
-            if(lx==mx && ly==my) path.moveTo(mx=quad.x0, my=quad.y0);
-            path.quadTo(quad.xc0, quad.yc0, lx=quad.x1, ly=quad.y1);
-        }
+            path.quadTo(quad.xc0, quad.yc0, lx=quad.x1, ly=quad.y1); }
         else if(seg instanceof Cubic) { Cubic cubic = (Cubic)seg;
-            if(lx==mx && ly==my) path.moveTo(mx=cubic.x0, my=cubic.y0);
-            path.curveTo(cubic.xc0, cubic.yc0, cubic.xc1, cubic.yc1, lx=cubic.x1, ly=cubic.y1);
-        }
+            path.curveTo(cubic.xc0, cubic.yc0, cubic.xc1, cubic.yc1, lx=cubic.x1, ly=cubic.y1); }
     }
         
     // Return new path
@@ -168,13 +174,132 @@ public Shape createShape()
 }
 
 /**
- * Splits the segments for this and given SegList for every intersection of the two.
+ * Creates an array of paths from the list of segements.
  */
-public void splitSegments(SegList aShape2)
+public Path[] createPaths()
+{
+    // If single path, just create and return it
+    if(!isMultiPath())
+        return new Path[] { createPath() };
+        
+    // Iterate vars
+    List <Path> paths = new ArrayList();
+    Path path = null; double lx = 0, ly = 0, mx = 0, my = 0;
+    
+    // Iterate over segments, if any segment intersects cubic, return true
+    for(Segment seg : _segs) {
+        
+        // If last end point was last move point, start new path
+        if(lx==mx && ly==my) { paths.add(path = new Path()); path.moveTo(mx=seg.x0, my=seg.y0); }
+
+        // Handle Seg (Line, Quad, Cubic)
+        if(seg instanceof Line) { Line line = (Line)seg;
+            if(mx==line.x1 && my==line.y1) path.close();
+            else path.lineTo(lx=line.x1, ly=line.y1); }
+        else if(seg instanceof Quad) { Quad quad = (Quad)seg;
+            path.quadTo(quad.xc0, quad.yc0, lx=quad.x1, ly=quad.y1); }
+        else if(seg instanceof Cubic) { Cubic cubic = (Cubic)seg;
+            path.curveTo(cubic.xc0, cubic.yc0, cubic.xc1, cubic.yc1, lx=cubic.x1, ly=cubic.y1); }
+    }
+        
+    // Return new path
+    return paths.toArray(new Path[paths.size()]);
+}
+
+/**
+ * Splits the segments in this SegList wherever it intersects itself.
+ */
+public boolean splitSegments()
 {
     // Iterate over list1 and split at all intersections with slist2
-    for(int i=0;i<getSegCount();i++) { Segment seg1 = getSeg(i);
-        for(int j=0;j<aShape2.getSegCount();j++) { Segment seg2 = aShape2.getSeg(j);
+    int sc = getSegCount(); boolean didSplit = false;
+    for(int i=0;i<sc;i++) { Segment seg1 = getSeg(i);
+        for(int j=i+1;j<sc;j++) { Segment seg2 = getSeg(j);
+        
+            // If segments intersect
+            if(seg1.intersects(seg2)) {
+                    
+                // Find intersection point for seg2 and split/add if inside
+                double hp2 = seg2.getHitPoint(seg1);
+                if(hp2>.001 && hp2<.999) {
+                    Segment tail = seg2.split(hp2); addSeg(tail, j+1); sc++; didSplit = true; }
+                
+                // Find intersection point for seg1 and split/add if inside
+                double hp1 = seg1.getHitPoint(seg2);
+                if(hp1>.001 && hp1<.999) {
+                    Segment tail = seg1.split(hp1); addSeg(tail, i+1); sc++; didSplit = true; }
+            }
+        }
+    }
+    
+    // Return whether SegList did split somewhere
+    return didSplit;
+}
+
+/**
+ * Returns whether this SegList is simple (not self-intersecting).
+ */
+public boolean isSimple()
+{
+    // Iterate over list1 and split at all intersections with slist2
+    int sc = getSegCount();
+    for(int i=0;i<sc;i++) { Segment seg1 = getSeg(i);
+        for(int j=i+1;j<sc;j++) { Segment seg2 = getSeg(j);
+        
+            // If segments intersect somewhere not on an end-point, return false
+            if(seg1.intersects(seg2)) {
+                double hp2 = seg2.getHitPoint(seg1);
+                if(hp2>.001 && hp2<.999)
+                    return false;
+                double hp1 = seg1.getHitPoint(seg2);
+                if(hp1>.001 && hp1<.999)
+                    return false;
+            }
+        }
+    }
+    
+    // Return whether SegList did split somewhere
+    return true;
+}
+
+/**
+ * Makes the seg list simple (non intersecting).
+ */
+public boolean makeSimple()
+{
+    // Split any self intersecting segments (return if none)
+    boolean didSplit = splitSegments(); if(!didSplit) return false;
+    
+    // Create list of segments to be added at end
+    List <Segment> subsegs = new ArrayList();
+    int sc = getSegCount();
+    
+    // Extract subpath segments
+    for(int i=0;i<sc;i++) { Segment seg0 = getSeg(i);
+        for(int j=0;j<i;j++) { Segment seg1 = getSeg(j);
+        
+            // If primary segment endpoint equals second segment start point, move segments in range out to subsegs list
+            if(Point.equals(seg0.getX1(), seg0.getY1(), seg1.getX0(), seg1.getY0())) {
+                for(;i>=j;i--) subsegs.add(removeSeg(j));
+                i = j-1; sc = getSegCount(); break;
+            }
+        }
+    }
+    
+    // Add subsegs to end
+    for(Segment seg : subsegs) addSeg(seg);
+    return true;
+}
+
+/**
+ * Splits the segments for this and given SegList for every intersection of the two.
+ */
+public void splitSegments(SegList aSegList)
+{
+    // Iterate over list1 and split at all intersections with slist2
+    int sc = getSegCount(), sc2 = aSegList.getSegCount();
+    for(int i=0;i<sc;i++) { Segment seg1 = getSeg(i);
+        for(int j=0;j<sc2;j++) { Segment seg2 = aSegList.getSeg(j);
         
             // If segments intersect
             if(seg1.intersects(seg2)) {
@@ -182,16 +307,21 @@ public void splitSegments(SegList aShape2)
                 // Find intersection point for seg1 and split/add if inside
                 double hp1 = seg1.getHitPoint(seg2);
                 if(hp1>.001 && hp1<.999) {
-                    Segment tail = seg1.split(hp1); addSeg(tail, i+1); }
+                    Segment tail = seg1.split(hp1); addSeg(tail, i+1); sc++; }
                     
                 // Find intersection point for seg2 and split/add if inside
                 double hp2 = seg2.getHitPoint(seg1);
                 if(hp2>.001 && hp2<.999) {
-                    Segment tail = seg2.split(hp2); aShape2.addSeg(tail, j+1); }
+                    Segment tail = seg2.split(hp2); aSegList.addSeg(tail, j+1); sc2++; }
             }
         }
     }
 }
+
+/**
+ * Returns a path iterator.
+ */
+public PathIter getPathIter(Transform aTrans)  { return new SegListIter(this, aTrans); }
 
 /**
  * Returns the intersection shape of two shapes.
@@ -248,8 +378,8 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
         seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("SegList: too many segs"); }
     }
     
-    // Return new shape for segments list
-    return shape3.createShape();
+    // Return path for segments list
+    return shape3.createPath();
 }
 
 /**
@@ -305,8 +435,8 @@ public static Shape add(Shape aShape1, Shape aShape2)
         seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("SegList: too many segs"); }
     }
     
-    // Return new shape for segments list
-    return shape3.createShape();
+    // Return path for segments list
+    return shape3.createPath();
 }
 
 /**
@@ -362,13 +492,57 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
         seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("SegList: too many segs"); }
     }
     
-    // Return new shape for segments list
-    return shape3.createShape();
+    // Return path for segments list
+    return shape3.createPath();
+}
+
+/**
+ * Returns a simple shape for complex shape.
+ */
+public static Shape makeSimple(Shape aShape)
+{
+    SegList slist = new SegList(aShape);
+    slist.makeSimple();
+    return slist;
 }
 
 // Helpers
 private static boolean eq(double v1, double v2)  { return Segment.equals(v1,v2); }
 private static List <Segment> add(List <Segment> aList, Segment aShp)
 { if(aList==Collections.EMPTY_LIST) aList = new ArrayList(); aList.add(aShp); return aList; }
+
+/**
+ * A PathIter for SegList.
+ */
+private static class SegListIter extends PathIter {
+    
+    // Ivars
+    Segment _segs[]; int _index; double _lx, _ly, _mx, _my;
+    
+    /** Creates a new SegListIter for SegList. */
+    SegListIter(SegList aSL, Transform aTrans)  { super(aTrans); _segs = aSL._segs.toArray(new Segment[0]); }
+    
+    /** Returns whether this iter has another segement. */
+    public boolean hasNext()  { return _index<_segs.length; }
+    
+    /** Returns the next segment. */
+    public Seg getNext(double coords[])
+    {
+        Segment seg = _segs[_index];
+        
+        // If last end point was last move point, add moveTo
+        if(_lx==_mx && _ly==_my) { _lx += .001; return moveTo(_mx=seg.x0, _my=seg.y0, coords); }
+        _index++;
+        
+        // Handle Seg (Line, Quad, Cubic)
+        if(seg instanceof Line) { Line line = (Line)seg;
+            if(_mx==line.x1 && _my==line.y1) return close();
+            return lineTo(_lx=line.x1, _ly=line.y1, coords); }
+        if(seg instanceof Quad) { Quad quad = (Quad)seg;
+            return quadTo(quad.xc0, quad.yc0, _lx=quad.x1, _ly=quad.y1, coords); }
+        Cubic cubic = (Cubic)seg;
+        return cubicTo(cubic.xc0, cubic.yc0, cubic.xc1, cubic.yc1, _lx=cubic.x1, _ly=cubic.y1, coords);
+    }
+}
 
 }

@@ -501,6 +501,36 @@ public Shape getFlat()
 }
 
 /**
+ * Returns whether path is a single path (as opposed to having multiple subpaths).
+ */
+public boolean isSinglePath()
+{
+    PathIter piter = getPathIter(null); double pnts[] = new double[6]; int moveCount = 0;
+    while(piter.hasNext()) switch(piter.getNext(pnts)) {
+        case MoveTo: moveCount++; break;
+        case LineTo: case QuadTo: case CubicTo: if(moveCount>1) return false; break;
+        case Close: break;
+    }
+    
+    // Return true
+    return true;
+}
+
+/**
+ * Returns whether path made up of multiple subpaths.
+ */
+public boolean isMultiPath()  { return !isSinglePath(); }
+
+/**
+ * Returns whether shape has no intersecting lines.
+ */
+public boolean isSimple()
+{
+    SegList slist = new SegList(this);
+    return slist.isSimple();
+}
+
+/**
  * Returns the shape in rect.
  */
 public Shape copyFor(Rect aRect)
@@ -560,6 +590,11 @@ public static Shape subtract(Shape aShape1, Shape aShape2)  { return SegList.sub
  * Returns the intersection shape of two shapes.
  */
 public static Shape intersect(Shape aShape1, Shape aShape2)  { return SegList.intersect(aShape1, aShape2); }
+
+/**
+ * Returns a simple shape for complex shape.
+ */
+public static Shape makeSimple(Shape aShape)  { return SegList.makeSimple(aShape); }
 
 /** Helper. */
 private static String fmt(double aVal)  { return _fmt.format(aVal); }

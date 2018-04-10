@@ -197,19 +197,20 @@ public double getExtAngleSum()
 /**
  * Returns an array of polygons that are convex with max number of vertices.
  */
-public PolygonList getConvexPolys(int aMax)
+public Polygon[] getConvexPolys(int aMax)
 {
     // If not simple, get simples
     if(!isSimple()) {
-        Shape shp = Shape.add(this,this);
+        System.err.println("Polygon.getConvextPolys: Not simple - shouldn't happen");
+        Shape shp = Shape.makeSimple(this);
         PolygonList plist = new PolygonList(shp);
         Polygon polys0[] = plist.getPolys();
         List <Polygon> polys1 = new ArrayList();
         for(Polygon poly : polys0) {
-            PolygonList plist1 = poly.getConvexPolys(aMax);
+            Polygon plist1[] = poly.getConvexPolys(aMax);
             Collections.addAll(polys1, plist.getPolys());
         }
-        return new PolygonList(polys1);
+        return new PolygonList(polys1).getPolys();
     }
     
     // Create list with clone of first poly
@@ -222,8 +223,8 @@ public PolygonList getConvexPolys(int aMax)
         polys.add(poly);
     }
     
-    // Return PolygonList
-    return new PolygonList(polys);
+    // Return Polygon array
+    return polys.toArray(new Polygon[polys.size()]);
 }
 
 /**
@@ -345,10 +346,30 @@ public Polygon clone()
 /**
  * Returns an array of simple polygons for a shape (assuming there are potentially subpaths and such).
  */
-public Polygon[] getPolys(Shape aShape)
+public static Polygon[] getSimplePolys(Shape aShape)
 {
-    PolygonList plist = new PolygonList(aShape);
+    Shape shape = Shape.makeSimple(aShape);
+    PolygonList plist = new PolygonList(shape);
     return plist.getPolys();
+}
+
+/**
+ * Returns an array of convex polysgons for given max side count.
+ */
+public static Polygon[] getConvexPolys(Shape aShape, int aMax)
+{
+    // Get simple polygons
+    Polygon simplePolys[] = getSimplePolys(aShape);
+    
+    // Get convex polygons
+    List <Polygon> cpolys = new ArrayList();
+    for(Polygon spoly : simplePolys) {
+        Polygon cpolys2[] = spoly.getConvexPolys(aMax);
+        Collections.addAll(cpolys, cpolys2);
+    }
+    
+    // Return convex polygons
+    return cpolys.toArray(new Polygon[cpolys.size()]);
 }
 
 /**
