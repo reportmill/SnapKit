@@ -561,7 +561,7 @@ public Effect getEffect()  { return _effect; }
 public void setEffect(Effect anEff)
 {
     if(SnapUtils.equals(anEff,_effect)) return;
-    firePropChange(Effect_Prop, _effect, _effect=anEff);
+    firePropChange(Effect_Prop, _effect, _effect=anEff); _pdvr1 = null;
     repaint();
 }
 
