@@ -164,8 +164,7 @@ public void setDefaultStyle(TextStyle aStyle)
 {
     _defStyle = aStyle;
     for(RichTextLine line : getLines())
-        for(RichTextRun run : line.getRuns())
-            run.setStyle(aStyle);
+        line.setStyle(aStyle);
 }
 
 /**
@@ -318,8 +317,7 @@ public void setStyle(TextStyle aStyle, int aStart, int anEnd)
     if(isPlainText()) {
         TextStyle ostyle = getStyleAt(aStart);
         for(RichTextLine line : _lines)
-            for(RichTextRun run : line.getRuns())
-                run.setStyle(aStyle);
+            line.setStyle(aStyle);
         if(isPropChangeEnabled())
             firePropChange(new StyleChange(ostyle, aStyle, 0, length()));
     }
@@ -332,11 +330,12 @@ public void setStyle(TextStyle aStyle, int aStart, int anEnd)
             run = line.splitRun(run, aStart-lstart-run.getStart());
         if(anEnd-lstart<run.getEnd())
             line.splitRun(run, anEnd-lstart-run.getStart());
-        run.setStyle(aStyle);
+        run.setStyle(aStyle); line._width = -1;
         aStart = run.getEnd() + lstart;
         if(isPropChangeEnabled())
             firePropChange(new StyleChange(ostyle, aStyle, run.getStart()+lstart, run.getEnd()+lstart));
     }
+    
     _width = -1;
 }
 
@@ -560,7 +559,7 @@ public double getPrefWidth(int anIndex)
 {
     if(anIndex<=0) return getPrefWidth(); double width = 0;
     for(RichTextLine line : _lines)
-        if(anIndex<line.getEnd()) width = Math.max(_width,line.getWidth(anIndex-line.getStart()));
+        if(anIndex<line.getEnd()) width = Math.max(width, line.getWidth(anIndex-line.getStart()));
     return width;
 }
 

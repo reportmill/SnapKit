@@ -231,6 +231,16 @@ protected void updateRuns(int aRunIndex)
 }
 
 /**
+ * Sets the style for the line (propogates to runs).
+ */
+protected void setStyle(TextStyle aStyle)
+{
+    for(RichTextRun run : getRuns())
+        run.setStyle(aStyle);
+    _width = -1;
+}
+
+/**
  * Returns the line style.
  */
 public TextLineStyle getLineStyle()  { return _lstyle; }
