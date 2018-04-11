@@ -824,11 +824,7 @@ public void paint(Painter aPntr)
 /**
  * Returns the preferred width.
  */
-public double getPrefWidth(double aH)
-{
-    TextBoxLine ln = getLineLongest(); if(ln==null) return 0;
-    return Math.ceil(ln.getWidth());
-}
+public double getPrefWidth(double aH)  { return Math.ceil(getRichText().getPrefWidth()); }
 
 /**
  * Returns the preferred height.

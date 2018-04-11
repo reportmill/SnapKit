@@ -77,6 +77,7 @@ public TextArea()
     
     // Configure
     setPlainText(true);
+    setEditable(true);
     setFont(getDefaultFont());
 }
 

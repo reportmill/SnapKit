@@ -503,6 +503,17 @@ public RichTextLine getLineAt(int anIndex)
 public RichTextLine getLineLast()  { int lc = getLineCount(); return lc>0? getLine(lc-1) : null; }
 
 /**
+ * Returns the longest line.
+ */
+public RichTextLine getLineLongest()
+{
+    RichTextLine line = getLineCount()>0? getLine(0) : null; if(line==null) return null;
+    double w = line.getWidth();
+    for(RichTextLine ln : _lines) if(ln.getWidth()>w) { line = ln; w = ln.getWidth(); }
+    return line;
+}
+
+/**
  * Returns the TextRun that contains the given index.
  */
 public RichTextRun getRunAt(int anIndex)
@@ -535,19 +546,19 @@ public void scaleFonts(double aScale)
 /**
  * Returns the width of text.
  */
-public double getWidth()
+public double getPrefWidth()
 {
     if(_width>=0) return _width;
-    _width = 0; for(RichTextLine line : _lines) _width = Math.max(_width, line.getWidth());
-    return _width;
+    RichTextLine line = getLineLongest(); if(line==null) return 0;
+    return _width = Math.ceil(line.getWidth());
 }
 
 /**
  * Returns the width of text from given index.
  */
-public double getWidth(int anIndex)
+public double getPrefWidth(int anIndex)
 {
-    if(anIndex<=0) return getWidth(); double width = 0;
+    if(anIndex<=0) return getPrefWidth(); double width = 0;
     for(RichTextLine line : _lines)
         if(anIndex<line.getEnd()) width = Math.max(_width,line.getWidth(anIndex-line.getStart()));
     return width;

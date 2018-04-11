@@ -114,7 +114,11 @@ public boolean isWrapText()  { return _textArea.isWrapText(); }
 /**
  * Sets whether text wraps.
  */
-public void setWrapText(boolean aValue)  { _textArea.setWrapText(aValue); }
+public void setWrapText(boolean aValue)
+{
+    _textArea.setWrapText(aValue);
+    _scroll.setFillWidth(aValue);
+}
 
 /**
  * Returns whether text supports multiple styles.
