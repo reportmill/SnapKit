@@ -60,7 +60,7 @@ public E remove(int anIndex)
 public void setAll(Collection <? extends E> aCol)
 {
     Object sitems[] = getSelItems();
-    clear();
+    _list.clear(); // TeaVM didn't like just clear() - maybe I have a bug? 
     if(aCol!=null) addAll(aCol);
     setSelItems(sitems);
 }
