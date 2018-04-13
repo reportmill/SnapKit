@@ -161,48 +161,6 @@ public boolean intersects(Shape aShape)
 }
 
 /**
- * Returns whether this shape intersects line defined by given points.
- */
-public boolean intersects(double x0, double y0, double x1, double y1)
-{
-    double xmax = x + width, ymax = y + height;
-    if(contains(x0,y0) || contains(x1,y1)) return true;
-    if(Line.intersectsLine(x0, y0, x1, y1, x, y, xmax, y)) return true;
-    if(Line.intersectsLine(x0, y0, x1, y1, xmax, y, xmax, ymax)) return true;
-    if(Line.intersectsLine(x0, y0, x1, y1, xmax, ymax, x, ymax)) return true;
-    if(Line.intersectsLine(x0, y0, x1, y1, x, ymax, x, y)) return true;
-    return false;
-}
-
-/**
- * Returns whether this shape intersects quad defined by given points.
- */
-public boolean intersects(double x0, double y0, double xc0, double yc0, double x1, double y1)
-{
-    double xmax = x + width, ymax = y + height;
-    if(contains(x0,y0) || contains(x1,y1)) return true;
-    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, x, y, xmax, y)) return true;
-    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, xmax, y, xmax, ymax)) return true;
-    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, xmax, ymax, x, ymax)) return true;
-    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, x, ymax, x, y)) return true;
-    return false;
-}
-
-/**
- * Returns whether this shape intersects cubic defined by given points.
- */
-public boolean intersects(double x0, double y0, double xc0, double yc0, double xc1, double yc1,double x1, double y1)
-{
-    double xmax = x + width, ymax = y + height;
-    if(contains(x0,y0) || contains(x1,y1)) return true;
-    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, x, y, xmax, y)) return true;
-    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, xmax, y, xmax, ymax)) return true;
-    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, xmax, ymax, x, ymax)) return true;
-    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, x, ymax, x, y)) return true;
-    return false;
-}
-
-/**
  * Returns whether shape with line width contains point.
  */
 public boolean contains(double x, double y, double aLineWidth)

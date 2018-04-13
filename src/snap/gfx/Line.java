@@ -13,6 +13,14 @@ public class Line extends Segment {
  * Creates a new line.
  */
 public Line(double aX0, double aY0, double aX1, double aY1)  { x0 = aX0; y0 = aY0; x1 = aX1; y1 = aY1; }
+
+/**
+ * Sets the line points.
+ */
+public void setPoints(double aX0, double aY0, double aX1, double aY1)
+{
+    x0 = aX0; y0 = aY0; x1 = aX1; y1 = aY1; _bounds = null;
+}
     
 /**
  * Returns the shape bounds.
@@ -52,30 +60,6 @@ public boolean contains(Shape aShape)  { return false; }
  * Returns whether shape with line width contains point.
  */
 public boolean contains(double aX, double aY, double aLineWidth)  { return getDistance(aX,aY)<aLineWidth/2; }
-
-/**
- * Returns whether this shape intersects line defined by given points.
- */
-public boolean intersects(double px0, double py0, double px1, double py1)
-{
-    return intersectsLine(x0, y0, x1, y1, px0, py0, px1, py1);
-}
-
-/**
- * Returns whether this shape intersects quad defined by given points.
- */
-public boolean intersects(double px0, double py0, double pxc0, double pyc0, double px1, double py1)
-{
-    return Quad.intersectsLine(px0, py0, pxc0, pyc0, px1, py1, x0, y0, x1, y1);
-}
-
-/**
- * Returns whether this shape intersects cubic defined by given points.
- */
-public boolean intersects(double px0, double py0, double pxc0,double pyc0,double pxc1,double pyc1,double px1,double py1)
-{
-    return Cubic.intersectsLine(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, x0, y0, x1, y1);
-}
 
 /**
  * Returns the x value at given parametric location.

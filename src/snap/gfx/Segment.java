@@ -54,17 +54,22 @@ public abstract Segment createReverse();
 public abstract boolean matches(Object anObj);
 
 /**
- * Returns whether shape intersects shape.
+ * Returns whether this segment intersects shape.
  */
 public boolean intersects(Shape aShape)
 {
     // If Segment, do simple case
-    if(aShape instanceof Segment) //return getHitPoint((Segment)aShape)>=0;
-        return getHit((Segment)aShape)!=null;
+    if(aShape instanceof Segment)
+        return intersects((Segment)aShape);
         
     // Do normal version
     return super.intersects(aShape);
 }
+
+/**
+ * Returns whether this segment intersects shape.
+ */
+public boolean intersects(Segment aSeg)  { return getHit(aSeg)!=null; }
 
 /**
  * Returns the hit for given segment.

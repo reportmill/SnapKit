@@ -17,6 +17,14 @@ public Quad(double aX0, double aY0, double aCPX, double aCPY, double aX1, double
 }
 
 /**
+ * Sets the quad points.
+ */
+public void setPoints(double aX0, double aY0, double aCPX, double aCPY, double aX1, double aY1)
+{
+    x0 = aX0; y0 = aY0; cpx = aCPX; cpy = aCPY; x1 = aX1; y1 = aY1; _bounds = null;
+}
+    
+/**
  * Returns the bounds.
  */
 protected Rect getBoundsImpl()  { return getBounds(x0, y0, cpx, cpy, x1, y1, null); }
@@ -25,30 +33,6 @@ protected Rect getBoundsImpl()  { return getBounds(x0, y0, cpx, cpy, x1, y1, nul
  * Returns a path iterator.
  */
 public PathIter getPathIter(Transform aT)  { return new QuadIter(aT); }
-
-/**
- * Returns whether this shape intersects line defined by given points.
- */
-public boolean intersects(double px0, double py0, double px1, double py1)
-{
-    return intersectsLine(x0, y0, cpx, cpy, x1, y1, px0, py0, px1, py1);
-}
-
-/**
- * Returns whether this shape intersects quad defined by given points.
- */
-public boolean intersects(double px0, double py0, double pxc0, double pyc0, double px1, double py1)
-{
-    return intersectsQuad(x0, y0, cpx, cpy, x1, y1, px0, py0, pxc0, pyc0, px1, py1);
-}
-
-/**
- * Returns whether this shape intersects cubic defined by given points.
- */
-public boolean intersects(double px0, double py0, double pxc0,double pyc0,double pxc1,double pyc1,double px1,double py1)
-{
-    return Cubic.intersectsQuad(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, x0, y0, cpx, cpy, x1, y1);
-}
 
 /**
  * Returns the x value at given parametric location.
