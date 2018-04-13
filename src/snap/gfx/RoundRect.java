@@ -102,7 +102,7 @@ private static class RoundRectIter extends PathIter {
     public boolean hasNext() { return index<10; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
-    public PathIter.Seg getNext(double[] coords)
+    public Seg getNext(double[] coords)
     {
         // Switch on segment index to draw corners and edges
         switch(index++) {

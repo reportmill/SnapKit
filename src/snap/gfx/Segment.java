@@ -75,35 +75,35 @@ public double getHitPoint(Segment aShape2)
         if(aShape2 instanceof Line) { Line s2 = (Line)aShape2;
             return Line.getHitPointLine(s1.x0, s1.y0, s1.x1, s1.y1, s2.x0, s2.y0, s2.x1, s2.y1, false); }
         if(aShape2 instanceof Quad) { Quad s2 = (Quad)aShape2;
-            return Quad.getHitPointLine(s2.x0, s2.y0, s2.xc0, s2.yc0, s2.x1, s2.y1, s1.x0, s1.y0, s1.x1, s1.y1, true); }
+            return Quad.getHitPointLine(s2.x0, s2.y0, s2.cpx, s2.cpy, s2.x1, s2.y1, s1.x0, s1.y0, s1.x1, s1.y1, true); }
         if(aShape2 instanceof Cubic) { Cubic s2 = (Cubic)aShape2;
-            return Cubic.getHitPointLine(s2.x0, s2.y0, s2.xc0, s2.yc0, s2.xc1, s2.yc1, s2.x1, s2.y1, 
+            return Cubic.getHitPointLine(s2.x0, s2.y0, s2.cp0x, s2.cp0y, s2.cp1x, s2.cp1y, s2.x1, s2.y1, 
                 s1.x0,s1.y0,s1.x1,s1.y1,true); }
         throw new RuntimeException("Segment: Unsupported hit class " + aShape2.getClass());
     }
     
     if(this instanceof Quad) { Quad s1 = (Quad)this;
         if(aShape2 instanceof Line) { Line s2 = (Line)aShape2;
-            return Quad.getHitPointLine(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.x1, s1.y1, s2.x0, s2.y0, s2.x1, s2.y1,false); }
+            return Quad.getHitPointLine(s1.x0, s1.y0, s1.cpx, s1.cpy, s1.x1, s1.y1, s2.x0, s2.y0, s2.x1, s2.y1,false); }
         if(aShape2 instanceof Quad) { Quad s2 = (Quad)aShape2;
-            return Quad.getHitPointQuad(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.x1, s1.y1,
-                s2.x0, s2.y0, s2.xc0, s2.yc0, s2.x1, s2.y1, false); }
+            return Quad.getHitPointQuad(s1.x0, s1.y0, s1.cpx, s1.cpy, s1.x1, s1.y1,
+                s2.x0, s2.y0, s2.cpx, s2.cpy, s2.x1, s2.y1, false); }
         if(aShape2 instanceof Cubic) { Cubic s2 = (Cubic)aShape2;
-            return Cubic.getHitPointQuad(s2.x0, s2.y0, s2.xc0, s2.yc0, s2.xc1, s2.yc1, s2.x1, s2.y1, 
-                s1.x0, s1.y0, s1.xc0, s1.yc0, s1.x1, s1.y1, true); }
+            return Cubic.getHitPointQuad(s2.x0, s2.y0, s2.cp0x, s2.cp0y, s2.cp1x, s2.cp1y, s2.x1, s2.y1, 
+                s1.x0, s1.y0, s1.cpx, s1.cpy, s1.x1, s1.y1, true); }
         throw new RuntimeException("Segment: Unsupported hit class " + aShape2.getClass());
     }
     
     if(this instanceof Cubic) { Cubic s1 = (Cubic)this;
         if(aShape2 instanceof Line) { Line s2 = (Line)aShape2;
-            return Cubic.getHitPointLine(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.xc1, s1.yc1, s1.x1, s1.y1,
+            return Cubic.getHitPointLine(s1.x0, s1.y0, s1.cp0x, s1.cp0y, s1.cp1x, s1.cp1y, s1.x1, s1.y1,
                 s2.x0, s2.y0, s2.x1, s2.y1, false); }
         if(aShape2 instanceof Quad) { Quad s2 = (Quad)aShape2;
-            return Cubic.getHitPointQuad(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.xc1, s1.yc1, s1.x1, s1.y1,
-                s2.x0, s2.y0, s2.xc0, s2.yc0, s2.x1, s2.y1, false); }
+            return Cubic.getHitPointQuad(s1.x0, s1.y0, s1.cp0x, s1.cp0y, s1.cp1x, s1.cp1y, s1.x1, s1.y1,
+                s2.x0, s2.y0, s2.cpx, s2.cpy, s2.x1, s2.y1, false); }
         if(aShape2 instanceof Cubic) { Cubic s2 = (Cubic)aShape2;
-            return Cubic.getHitPointCubic(s1.x0, s1.y0, s1.xc0, s1.yc0, s1.xc1, s1.yc1, s1.x1, s1.y1,
-                s2.x0, s2.y0, s2.xc0, s2.yc0, s2.xc1, s2.yc1, s2.x1, s2.y1, false); }
+            return Cubic.getHitPointCubic(s1.x0, s1.y0, s1.cp0x, s1.cp0y, s1.cp1x, s1.cp1y, s1.x1, s1.y1,
+                s2.x0, s2.y0, s2.cp0x, s2.cp0y, s2.cp1x, s2.cp1y, s2.x1, s2.y1, false); }
         throw new RuntimeException("Segment: Unsupported hit class " + aShape2.getClass());
     }
     

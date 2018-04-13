@@ -126,8 +126,8 @@ public void quadTo(double cpx, double cpy, double x, double y)
     
     // Split curve at midpoint and add parts
     Quad c0 = new Quad(last.x, last.y, cpx, cpy, x, y), c1 = c0.split(.5);
-    quadTo(c0.xc0, c0.yc0, c0.x1, c0.y1);
-    quadTo(c1.xc0, c1.yc0, c1.x1, c1.y1);
+    quadTo(c0.cpx, c0.cpy, c0.x1, c0.y1);
+    quadTo(c1.cpx, c1.cpy, c1.x1, c1.y1);
 }
 
 /**
@@ -145,8 +145,8 @@ public void curveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x
     
     // Split curve at midpoint and add parts
     Cubic c0 = new Cubic(last.x, last.y, cp1x, cp1y, cp2x, cp2y, x, y), c1 = c0.split(.5);
-    curveTo(c0.xc0, c0.yc0, c0.xc1, c0.yc1, c0.x1, c0.y1);
-    curveTo(c1.xc0, c1.yc0, c1.xc1, c1.yc1, c1.x1, c1.y1);
+    curveTo(c0.cp0x, c0.cp0y, c0.cp1x, c0.cp1y, c0.x1, c0.y1);
+    curveTo(c1.cp0x, c1.cp0y, c1.cp1x, c1.cp1y, c1.x1, c1.y1);
 }
 
 /**
@@ -185,9 +185,9 @@ private static class PolyListIter extends PathIter {
     public boolean hasNext() { return _pi!=null && _pi.hasNext(); }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
-    public PathIter.Seg getNext(double[] coords)
+    public Seg getNext(double[] coords)
     {
-        PathIter.Seg seg = _pi.getNext(coords);
+        Seg seg = _pi.getNext(coords);
         while(!_pi.hasNext() && index<plen) _pi = _polyIters[index++];
         return seg;
     }

@@ -235,7 +235,7 @@ private class LineIter extends PathIter {
     public boolean hasNext() { return index<2; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
-    public PathIter.Seg getNext(double coords[])
+    public Seg getNext(double coords[])
     {
         switch(index++) {
             case 0: return moveTo(x0, y0, coords);

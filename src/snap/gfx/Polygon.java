@@ -387,7 +387,7 @@ private static class PolyIter extends PathIter {
     public boolean hasNext() { return plen>0 && index<plen+2; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
-    public PathIter.Seg getNext(double[] coords)
+    public Seg getNext(double[] coords)
     {
         if(index==0)
             return moveTo(_pnts[index++], _pnts[index++], coords);

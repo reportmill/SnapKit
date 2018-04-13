@@ -3,7 +3,6 @@
  */
 package snap.gfx;
 import java.util.*;
-import snap.gfx.PathIter.Seg;
 import snap.util.*;
 
 /**
@@ -27,11 +26,11 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     int          _wind = WIND_EVEN_ODD;
     
     // Constants for segements
-    public static final PathIter.Seg MoveTo = PathIter.Seg.MoveTo;
-    public static final PathIter.Seg LineTo = PathIter.Seg.LineTo;
-    public static final PathIter.Seg QuadTo = PathIter.Seg.QuadTo;
-    public static final PathIter.Seg CubicTo = PathIter.Seg.CubicTo;
-    public static final PathIter.Seg Close = PathIter.Seg.Close;
+    public static final Seg MoveTo = Seg.MoveTo;
+    public static final Seg LineTo = Seg.LineTo;
+    public static final Seg QuadTo = Seg.QuadTo;
+    public static final Seg CubicTo = Seg.CubicTo;
+    public static final Seg Close = Seg.Close;
     
     // Constants for winding
     public static final int WIND_EVEN_ODD = PathIter.WIND_EVEN_ODD;
@@ -129,8 +128,8 @@ public void quadToFlat(double cpx, double cpy, double x, double y)
     
     // Split curve at midpoint and add parts
     Quad c0 = new Quad(last.x, last.y, cpx, cpy, x, y), c1 = c0.split(.5);
-    quadToFlat(c0.xc0, c0.yc0, c0.x1, c0.y1);
-    quadToFlat(c1.xc0, c1.yc0, c1.x1, c1.y1);
+    quadToFlat(c0.cpx, c0.cpy, c0.x1, c0.y1);
+    quadToFlat(c1.cpx, c1.cpy, c1.x1, c1.y1);
 }
 
 /**
@@ -147,8 +146,8 @@ public void curveToFlat(double cp1x, double cp1y, double cp2x, double cp2y, doub
     
     // Split curve at midpoint and add parts
     Cubic c0 = new Cubic(last.x, last.y, cp1x, cp1y, cp2x, cp2y, x, y), c1 = c0.split(.5);
-    curveToFlat(c0.xc0, c0.yc0, c0.xc1, c0.yc1, c0.x1, c0.y1);
-    curveToFlat(c1.xc0, c1.yc0, c1.xc1, c1.yc1, c1.x1, c1.y1);
+    curveToFlat(c0.cp0x, c0.cp0y, c0.cp1x, c0.cp1y, c0.x1, c0.y1);
+    curveToFlat(c1.cp0x, c1.cp0y, c1.cp1x, c1.cp1y, c1.x1, c1.y1);
 }
 
 /**
@@ -305,9 +304,9 @@ public int getSegIndexForPointIndex(int anIndex)
 public void append(Segment aSeg)
 {
     if(aSeg instanceof Cubic) { Cubic seg = (Cubic)aSeg;
-        curveTo(seg.xc0, seg.yc0, seg.xc1, seg.yc1, aSeg.x1, aSeg.y1); }
+        curveTo(seg.cp0x, seg.cp0y, seg.cp1x, seg.cp1y, aSeg.x1, aSeg.y1); }
     else if(aSeg instanceof Quad) { Quad seg = (Quad)aSeg;
-        quadTo(seg.xc0, seg.yc0, aSeg.x1, aSeg.y1); }
+        quadTo(seg.cpx, seg.cpy, aSeg.x1, aSeg.y1); }
     else lineTo(aSeg.x1, aSeg.y1);
 }
 

@@ -463,7 +463,7 @@ private static class RectIter extends PathIter {
     public boolean hasNext() { return index<5; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
-    public PathIter.Seg getNext(double[] coords)
+    public Seg getNext(double[] coords)
     {
         switch(index++) {
             case 0: return moveTo(x, y, coords);

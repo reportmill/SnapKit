@@ -244,7 +244,7 @@ private static class SnapShape extends Shape {
 private static class AWTPathIter implements PathIterator {
     
     /** Creates a new AWTPathIter for snap PathIter. */
-    public AWTPathIter(PathIter aPI)  { _pi = aPI; }  PathIter _pi; PathIter.Seg _seg;
+    public AWTPathIter(PathIter aPI)  { _pi = aPI; }  PathIter _pi; Seg _seg;
     
     /** Returns the current segment. */
     public int currentSegment(double coords[])
@@ -295,11 +295,11 @@ private static class SnapPathIter extends PathIter {
     {
         int stype = _pi.currentSegment(coords); _pi.next();
         switch(stype) {
-            case PathIterator.SEG_MOVETO: return PathIter.Seg.MoveTo;
-            case PathIterator.SEG_LINETO: return PathIter.Seg.LineTo;
-            case PathIterator.SEG_QUADTO: return PathIter.Seg.QuadTo;
-            case PathIterator.SEG_CUBICTO: return PathIter.Seg.CubicTo;
-            case PathIterator.SEG_CLOSE: return PathIter.Seg.Close;
+            case PathIterator.SEG_MOVETO: return Seg.MoveTo;
+            case PathIterator.SEG_LINETO: return Seg.LineTo;
+            case PathIterator.SEG_QUADTO: return Seg.QuadTo;
+            case PathIterator.SEG_CUBICTO: return Seg.CubicTo;
+            case PathIterator.SEG_CLOSE: return Seg.Close;
             default: throw new RuntimeException("AWT.SnapPathIter: unknown segement type " + stype);
         }
     }

@@ -6,20 +6,20 @@ package snap.gfx;
 public class Quad extends Segment {
 
     // The control point
-    double xc0, yc0;
+    double cpx, cpy;
 
 /**
  * Creates a new Quad.
  */
-public Quad(double aX0, double aY0, double aXC0, double aYC0, double aX1, double aY1)
+public Quad(double aX0, double aY0, double aCPX, double aCPY, double aX1, double aY1)
 {
-    x0 = aX0; y0 = aY0; xc0 = aXC0; yc0 = aYC0; x1 = aX1; y1 = aY1;
+    x0 = aX0; y0 = aY0; cpx = aCPX; cpy = aCPY; x1 = aX1; y1 = aY1;
 }
 
 /**
  * Returns the bounds.
  */
-protected Rect getBoundsImpl()  { return getBounds(x0, y0, xc0, yc0, x1, y1, null); }
+protected Rect getBoundsImpl()  { return getBounds(x0, y0, cpx, cpy, x1, y1, null); }
 
 /**
  * Returns a path iterator.
@@ -31,7 +31,7 @@ public PathIter getPathIter(Transform aT)  { return new QuadIter(aT); }
  */
 public boolean intersects(double px0, double py0, double px1, double py1)
 {
-    return intersectsLine(x0, y0, xc0, yc0, x1, y1, px0, py0, px1, py1);
+    return intersectsLine(x0, y0, cpx, cpy, x1, y1, px0, py0, px1, py1);
 }
 
 /**
@@ -39,7 +39,7 @@ public boolean intersects(double px0, double py0, double px1, double py1)
  */
 public boolean intersects(double px0, double py0, double pxc0, double pyc0, double px1, double py1)
 {
-    return intersectsQuad(x0, y0, xc0, yc0, x1, y1, px0, py0, pxc0, pyc0, px1, py1);
+    return intersectsQuad(x0, y0, cpx, cpy, x1, y1, px0, py0, pxc0, pyc0, px1, py1);
 }
 
 /**
@@ -47,7 +47,7 @@ public boolean intersects(double px0, double py0, double pxc0, double pyc0, doub
  */
 public boolean intersects(double px0, double py0, double pxc0,double pyc0,double pxc1,double pyc1,double px1,double py1)
 {
-    return Cubic.intersectsQuad(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, x0, y0, xc0, yc0, x1, y1);
+    return Cubic.intersectsQuad(px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1, x0, y0, cpx, cpy, x1, y1);
 }
 
 /**
@@ -55,8 +55,8 @@ public boolean intersects(double px0, double py0, double pxc0,double pyc0,double
  */
 public double getX(double aLoc)
 {
-    double nxc0 = x0 + aLoc*(xc0 - x0);
-    double nxc1 = xc0 + aLoc*(x1 - xc0);
+    double nxc0 = x0 + aLoc*(cpx - x0);
+    double nxc1 = cpx + aLoc*(x1 - cpx);
     return nxc0 + aLoc*(nxc1 - nxc0); //double t=aLoc, s = 1 - t, s2 = s*s, t2 = t*t; return s2*x0 + 2*t*s*xc0 + t2*x1;
 }
 
@@ -65,8 +65,8 @@ public double getX(double aLoc)
  */
 public double getY(double aLoc)
 {
-    double nyc0 = y0 + aLoc*(yc0 - y0);
-    double nyc1 = yc0 + aLoc*(y1 - yc0);
+    double nyc0 = y0 + aLoc*(cpy - y0);
+    double nyc1 = cpy + aLoc*(y1 - cpy);
     return nyc0 + aLoc*(nyc1 + nyc0); //double t=aLoc, s = 1 - t, s2 = s*s, t2 = t*t; return s2*y0 + 2*t*s*yc0 + t2*y1;
 }
 
@@ -76,23 +76,23 @@ public double getY(double aLoc)
 public Quad split(double aLoc)
 {
     // Calculate new control points to split quad in two
-    double nxc0 = x0 + aLoc*(xc0 - x0);
-    double nyc0 = y0 + aLoc*(yc0 - y0);
-    double nxc1 = xc0 + aLoc*(x1 - xc0);
-    double nyc1 = yc0 + aLoc*(y1 - yc0);
+    double nxc0 = x0 + aLoc*(cpx - x0);
+    double nyc0 = y0 + aLoc*(cpy - y0);
+    double nxc1 = cpx + aLoc*(x1 - cpx);
+    double nyc1 = cpy + aLoc*(y1 - cpy);
     double midpx = nxc0 + aLoc*(nxc1 - nxc0);
     double midpy = nyc0 + aLoc*(nyc1 - nyc0);
     
     // If either intersect, return true
     Quad rem = new Quad(midpx, midpy, nxc1, nyc1, x1, y1);
-    xc0 = nxc0; yc0 = nyc0; x1 = midpx; y1 = midpy; _bounds = null;
+    cpx = nxc0; cpy = nyc0; x1 = midpx; y1 = midpy; _bounds = null;
     return rem;
 }
 
 /**
  * Creates and returns the reverse of this segement.
  */
-public Quad createReverse()  { return new Quad(x1, y1, xc0, yc0, x0, y0); }
+public Quad createReverse()  { return new Quad(x1, y1, cpx, cpy, x0, y0); }
 
 /**
  * Standard equals implementation.
@@ -102,7 +102,7 @@ public boolean equals(Object anObj)
     if(anObj==this) return true;
     Quad other = anObj instanceof Quad? (Quad)anObj : null; if(other==null) return false;
     return equals(x0,other.x0) && equals(y0,other.y0) &&
-        equals(xc0,other.xc0) && equals(yc0,other.yc0) &&
+        equals(cpx,other.cpx) && equals(cpy,other.cpy) &&
         equals(x1,other.x1) && equals(y1,other.y1);
 }
 
@@ -114,7 +114,7 @@ public boolean matches(Object anObj)
     if(equals(anObj)) return true;
     Quad other = anObj instanceof Quad? (Quad)anObj : null; if(other==null) return false;
     return equals(x0,other.x1) && equals(y0,other.y1) &&
-        equals(xc0,other.xc0) && equals(yc0,other.yc0) &&
+        equals(cpx,other.cpx) && equals(cpy,other.cpy) &&
         equals(x1,other.x0) && equals(y1,other.y0);
 }
 
@@ -330,11 +330,11 @@ private class QuadIter extends PathIter {
     public boolean hasNext() { return index<2; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
-    public PathIter.Seg getNext(double coords[])
+    public Seg getNext(double coords[])
     {
         switch(index++) {
             case 0: return moveTo(x0, y0, coords);
-            case 1: return quadTo(xc0, yc0, x1, y1, coords);
+            case 1: return quadTo(cpx, cpy, x1, y1, coords);
             default: throw new RuntimeException("line iterator out of bounds");
         }
     }

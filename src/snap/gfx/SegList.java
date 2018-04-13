@@ -164,9 +164,9 @@ public Path createPath()
             if(mx==line.x1 && my==line.y1) path.close();
             else path.lineTo(lx=line.x1, ly=line.y1); }
         else if(seg instanceof Quad) { Quad quad = (Quad)seg;
-            path.quadTo(quad.xc0, quad.yc0, lx=quad.x1, ly=quad.y1); }
+            path.quadTo(quad.cpx, quad.cpy, lx=quad.x1, ly=quad.y1); }
         else if(seg instanceof Cubic) { Cubic cubic = (Cubic)seg;
-            path.curveTo(cubic.xc0, cubic.yc0, cubic.xc1, cubic.yc1, lx=cubic.x1, ly=cubic.y1); }
+            path.curveTo(cubic.cp0x, cubic.cp0y, cubic.cp1x, cubic.cp1y, lx=cubic.x1, ly=cubic.y1); }
     }
         
     // Return new path
@@ -197,9 +197,9 @@ public Path[] createPaths()
             if(mx==line.x1 && my==line.y1) path.close();
             else path.lineTo(lx=line.x1, ly=line.y1); }
         else if(seg instanceof Quad) { Quad quad = (Quad)seg;
-            path.quadTo(quad.xc0, quad.yc0, lx=quad.x1, ly=quad.y1); }
+            path.quadTo(quad.cpx, quad.cpy, lx=quad.x1, ly=quad.y1); }
         else if(seg instanceof Cubic) { Cubic cubic = (Cubic)seg;
-            path.curveTo(cubic.xc0, cubic.yc0, cubic.xc1, cubic.yc1, lx=cubic.x1, ly=cubic.y1); }
+            path.curveTo(cubic.cp0x, cubic.cp0y, cubic.cp1x, cubic.cp1y, lx=cubic.x1, ly=cubic.y1); }
     }
         
     // Return new path
@@ -539,9 +539,9 @@ private static class SegListIter extends PathIter {
             if(_mx==line.x1 && _my==line.y1) return close();
             return lineTo(_lx=line.x1, _ly=line.y1, coords); }
         if(seg instanceof Quad) { Quad quad = (Quad)seg;
-            return quadTo(quad.xc0, quad.yc0, _lx=quad.x1, _ly=quad.y1, coords); }
+            return quadTo(quad.cpx, quad.cpy, _lx=quad.x1, _ly=quad.y1, coords); }
         Cubic cubic = (Cubic)seg;
-        return cubicTo(cubic.xc0, cubic.yc0, cubic.xc1, cubic.yc1, _lx=cubic.x1, _ly=cubic.y1, coords);
+        return cubicTo(cubic.cp0x, cubic.cp0y, cubic.cp1x, cubic.cp1y, _lx=cubic.x1, _ly=cubic.y1, coords);
     }
 }
 

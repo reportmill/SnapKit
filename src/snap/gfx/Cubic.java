@@ -6,20 +6,20 @@ package snap.gfx;
 public class Cubic extends Segment {
 
     // The control points
-    double xc0, yc0, xc1, yc1;
+    public double cp0x, cp0y, cp1x, cp1y;
 
 /**
  * Creates a new Cubic.
  */
 public Cubic(double aX0, double aY0, double aXC0, double aYC0, double aXC1, double aYC1, double aX1, double aY1)
 {
-    x0 = aX0; y0 = aY0; xc0 = aXC0; yc0 = aYC0; xc1 = aXC1; yc1 = aYC1; x1 = aX1; y1 = aY1;
+    x0 = aX0; y0 = aY0; cp0x = aXC0; cp0y = aYC0; cp1x = aXC1; cp1y = aYC1; x1 = aX1; y1 = aY1;
 }
 
 /**
  * Returns the bounds.
  */
-protected Rect getBoundsImpl()  { return getBounds(x0, y0, xc0, yc0, xc1, yc1, x1, y1, null); }
+protected Rect getBoundsImpl()  { return getBounds(x0, y0, cp0x, cp0y, cp1x, cp1y, x1, y1, null); }
 
 /**
  * Returns a path iterator.
@@ -31,7 +31,7 @@ public PathIter getPathIter(Transform aT)  { return new CubicIter(aT); }
  */
 public boolean intersects(double px0, double py0, double px1, double py1)
 {
-    return intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, px0, py0, px1, py1);
+    return intersectsLine(x0, y0, cp0x, cp0y, cp1x, cp1y, x1, y1, px0, py0, px1, py1);
 }
 
 /**
@@ -39,7 +39,7 @@ public boolean intersects(double px0, double py0, double px1, double py1)
  */
 public boolean intersects(double px0, double py0, double pxc0, double pyc0, double px1, double py1)
 {
-    return intersectsQuad(x0, y0, xc0, yc0, xc1, yc1, x1, y1, px0, py0, pxc0, pyc0, px1, py1);
+    return intersectsQuad(x0, y0, cp0x, cp0y, cp1x, cp1y, x1, y1, px0, py0, pxc0, pyc0, px1, py1);
 }
 
 /**
@@ -47,7 +47,7 @@ public boolean intersects(double px0, double py0, double pxc0, double pyc0, doub
  */
 public boolean intersects(double px0, double py0, double pxc0,double pyc0,double pxc1,double pyc1,double px1,double py1)
 {
-    return intersectsCubic(x0, y0, xc0, yc0, xc1, yc1, x1, y1, px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1);
+    return intersectsCubic(x0, y0, cp0x, cp0y, cp1x, cp1y, x1, y1, px0, py0, pxc0, pyc0, pxc1, pyc1, px1, py1);
 }
 
 /**
@@ -56,10 +56,10 @@ public boolean intersects(double px0, double py0, double pxc0,double pyc0,double
 public double getX(double aLoc)
 {
     //double t=aLoc, s=1-t, s2 = s*s, s3 = s2*s, t2 = t*t, t3 = t2*t; return s3*x0 + 3*t*s2*xc0 + 3*t2*s*xc1 + t3*x1;
-    double nxc0 = average(x0, xc0, aLoc);
-    double xca = average(xc0, xc1, aLoc);
+    double nxc0 = average(x0, cp0x, aLoc);
+    double xca = average(cp0x, cp1x, aLoc);
     double nxc1 = average(nxc0, xca, aLoc);
-    double nxc3 = average(xc1, x1, aLoc);
+    double nxc3 = average(cp1x, x1, aLoc);
     double nxc2 = average(nxc3, xca, aLoc);
     return average(nxc1, nxc2, aLoc);
 }
@@ -70,10 +70,10 @@ public double getX(double aLoc)
 public double getY(double aLoc)
 {
     //double t=aLoc, s=1-t, s2 = s*s, s3 = s2*s, t2 = t*t, t3 = t2*t; return s3*y0 + 3*t*s2*yc0 + 3*t2*s*yc1 + t3*y1;
-    double nyc0 = average(y0, yc0, aLoc);
-    double yca = average(yc0, yc1, aLoc);
+    double nyc0 = average(y0, cp0y, aLoc);
+    double yca = average(cp0y, cp1y, aLoc);
     double nyc1 = average(nyc0, yca, aLoc);
-    double nyc3 = average(yc1, y1, aLoc);
+    double nyc3 = average(cp1y, y1, aLoc);
     double nyc2 = average(nyc3, yca, aLoc);
     return average(nyc1, nyc2, aLoc);
 }
@@ -84,24 +84,24 @@ public double getY(double aLoc)
 public Cubic split(double aLoc)
 {
     // Calculate new x control points to split cubic into two
-    double nxc0 = average(x0, xc0, aLoc);
-    double xca = average(xc0, xc1, aLoc);
-    double nxc3 = average(xc1, x1, aLoc);
+    double nxc0 = average(x0, cp0x, aLoc);
+    double xca = average(cp0x, cp1x, aLoc);
+    double nxc3 = average(cp1x, x1, aLoc);
     double nxc1 = average(nxc0, xca, aLoc);
     double nxc2 = average(xca, nxc3, aLoc);
     double midpx = average(nxc1, nxc2, aLoc);
     
     // Calculate new y control points to split cubic into two
-    double nyc0 = average(y0, yc0, aLoc);
-    double yca = average(yc0, yc1, aLoc);
-    double nyc3 = average(yc1, y1, aLoc);
+    double nyc0 = average(y0, cp0y, aLoc);
+    double yca = average(cp0y, cp1y, aLoc);
+    double nyc3 = average(cp1y, y1, aLoc);
     double nyc1 = average(nyc0, yca, aLoc);
     double nyc2 = average(yca, nyc3, aLoc);
     double midpy = average(nyc1, nyc2, aLoc);
     
     // Create new remainder shape, update this shape and return remainder
     Cubic rem = new Cubic(midpx, midpy, nxc2, nyc2, nxc3, nyc3, x1, y1);
-    xc0 = nxc0; yc0 = nyc0; xc1 = nxc1; yc1 = nyc1; x1 = midpx; y1 = midpy; _bounds = null;
+    cp0x = nxc0; cp0y = nyc0; cp1x = nxc1; cp1y = nyc1; x1 = midpx; y1 = midpy; _bounds = null;
     return rem;
 }
 
@@ -113,7 +113,7 @@ private static final double average(double x0, double x1, double t)  { return x0
 /**
  * Creates and returns the reverse of this segement.
  */
-public Cubic createReverse()  { return new Cubic(x1, y1, xc1, yc1, xc0, yc0, x0, y0); }
+public Cubic createReverse()  { return new Cubic(x1, y1, cp1x, cp1y, cp0x, cp0y, x0, y0); }
 
 /**
  * Standard equals implementation.
@@ -122,8 +122,8 @@ public boolean equals(Object anObj)
 {
     if(anObj==this) return true;
     Cubic other = anObj instanceof Cubic? (Cubic)anObj : null; if(other==null) return false;
-    return equals(x0,other.x0) && equals(y0,other.y0) && equals(xc0,other.xc0) && equals(yc0,other.yc0) &&
-        equals(xc1,other.xc1) && equals(yc1,other.yc1) && equals(x1,other.x1) && equals(y1,other.y1);
+    return equals(x0,other.x0) && equals(y0,other.y0) && equals(cp0x,other.cp0x) && equals(cp0y,other.cp0y) &&
+        equals(cp1x,other.cp1x) && equals(cp1y,other.cp1y) && equals(x1,other.x1) && equals(y1,other.y1);
 }
 
 /**
@@ -133,8 +133,8 @@ public boolean matches(Object anObj)
 {
     if(equals(anObj)) return true;
     Cubic other = anObj instanceof Cubic? (Cubic)anObj : null; if(other==null) return false;
-    return equals(x0,other.x1) && equals(y0,other.y1) && equals(xc0,other.xc1) && equals(yc0,other.yc1) &&
-        equals(xc1,other.xc0) && equals(yc1,other.yc0) && equals(x1,other.x0) && equals(y1,other.y0);
+    return equals(x0,other.x1) && equals(y0,other.y1) && equals(cp0x,other.cp1x) && equals(cp0y,other.cp1y) &&
+        equals(cp1x,other.cp0x) && equals(cp1y,other.cp0y) && equals(x1,other.x0) && equals(y1,other.y0);
 }
 
 /**
@@ -502,11 +502,11 @@ private class CubicIter extends PathIter {
     public boolean hasNext() { return index<2; }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
-    public PathIter.Seg getNext(double coords[])
+    public Seg getNext(double coords[])
     {
         switch(index++) {
             case 0: return moveTo(x0, y0, coords);
-            case 1: return cubicTo(xc0, yc0, xc1, yc1, x1, y1, coords);
+            case 1: return cubicTo(cp0x, cp0y, cp1x, cp1y, x1, y1, coords);
             default: throw new RuntimeException("line iterator out of bounds");
         }
     }

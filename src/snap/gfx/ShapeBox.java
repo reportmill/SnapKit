@@ -50,9 +50,9 @@ private class BoxIter extends PathIter {
     public boolean hasNext() { return _piter.hasNext(); }
 
     /** Returns the coordinates and type of the current path segment in the iteration. */
-    public PathIter.Seg getNext(double[] coords)
+    public Seg getNext(double[] coords)
     {
-        PathIter.Seg seg = _piter.getNext(coords);
+        Seg seg = _piter.getNext(coords);
         switch(seg) {
             case MoveTo: return moveTo(coords[0], coords[1], coords);
             case LineTo: return lineTo(coords[0], coords[1], coords);
