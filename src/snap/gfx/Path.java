@@ -300,6 +300,18 @@ public int getSegIndexForPointIndex(int anIndex)
 }
 
 /**
+ * Appends a path segment.
+ */
+public void append(Segment aSeg)
+{
+    if(aSeg instanceof Cubic) { Cubic seg = (Cubic)aSeg;
+        curveTo(seg.xc0, seg.yc0, seg.xc1, seg.yc1, aSeg.x1, aSeg.y1); }
+    else if(aSeg instanceof Quad) { Quad seg = (Quad)aSeg;
+        quadTo(seg.xc0, seg.yc0, aSeg.x1, aSeg.y1); }
+    else lineTo(aSeg.x1, aSeg.y1);
+}
+
+/**
  * Appends a path iterator.
  */
 public void append(PathIter aPI)

@@ -21,7 +21,7 @@ public Path getPath()  { return _path!=null? _path : (_path=new Path()); }
 /**
  * Sets the path.
  */
-public void setPath(Path aPath)  { _path = aPath; }
+public void setPath(Path aPath)  { _path = aPath; repaint(); }
 
 /**
  * Returns the path in shape bounds.

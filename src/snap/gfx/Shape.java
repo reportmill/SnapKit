@@ -375,13 +375,14 @@ public double getDistance(double x, double y)
 {
     // Iterate over segments, if any segment intersects cubic, return true
     double dist = Float.MAX_VALUE, d = dist;
-    PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0;
+    PathIter pi = getPathIter(null); double pts[] = new double[6], lx = 0, ly = 0, mx = 0, my = 0;
     while(pi.hasNext()) {
         switch(pi.getNext(pts)) {
-            case MoveTo: lx = pts[0]; ly = pts[1]; break;
+            case MoveTo: mx = lx = pts[0]; my = ly = pts[1]; break;
             case LineTo: d = Line.getDistanceSquared(lx,ly,lx=pts[0],ly=pts[1],x,y); break;
             case QuadTo: d = Quad.getDistanceSquared(lx,ly,pts[0],pts[1],lx=pts[2],ly=pts[3],x,y); break;
             case CubicTo:d = Cubic.getDistanceSquared(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5],x,y); break;
+            case Close: d = Line.getDistanceSquared(lx,ly,lx=mx,ly=my,x,y); break;
         }
         dist = Math.min(dist, d);
     }
