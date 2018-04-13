@@ -137,6 +137,18 @@ public boolean matches(Object anObj)
 }
 
 /**
+ * Returns the hit for given segment.
+ */
+public SegHit getHit(Segment aSeg)
+{
+    if(aSeg instanceof Cubic) { Cubic s2 = (Cubic)aSeg;
+        return SegHit.getHitLineCubic(x0,y0,x1,y1, s2.x0, s2.y0, s2.cp0x, s2.cp0y, s2.cp1x, s2.cp1y, s2.x1, s2.y1); }
+    if(aSeg instanceof Quad) { Quad s2 = (Quad)aSeg;
+        return SegHit.getHitLineQuad(x0,y0,x1,y1, s2.x0, s2.y0, s2.cpx, s2.cpy, s2.x1, s2.y1); }
+    return SegHit.getHitLineLine(x0,y0,x1,y1, aSeg.x0, aSeg.y0, aSeg.x1, aSeg.y1);
+}
+
+/**
  * Returns the distance from the given line points (p1,p2) to the given point.
  */
 public static double getDistance(double x0, double y0, double x1, double y1, double aX, double aY)
@@ -191,27 +203,7 @@ public static int crossings(double x0, double y0, double x1, double y1, double p
 public static boolean intersectsLine(double x0, double y0, double x1, double y1, double px0, double py0,
     double px1, double py1)
 {
-    return getHitPointLine(x0,y0,x1,y1,px0,py0,px1,py1,false)>=0;
-}
-
-/**
- * Returns whether line for given points is intersected by second line with given points.
- */
-public static double getHitPointLine(double x0, double y0, double x1, double y1, double px0, double py0,
-    double px1, double py1, boolean isOther)
-{
-    // Some line slope stuff
-    double numerator1 = (y0-py0)*(px1-px0) - (x0-px0)*(py1-py0);
-    double numerator2 = (y0-py0)*(x1-x0) - (x0-px0)*(y1-y0);
-    double denominator = (x1-x0)*(py1-py0) - (y1-y0)*(px1-px0);
-    
-    // Calculate parametric locations of intersection (line1:r, line2:s)
-    double r = numerator1/denominator;
-    double s = numerator2/denominator;
-    
-    // If parametric locations outside 0-1 range, then return false because lines don't intersect
-    if(r<0 || r>1 || s<0 || s>1) return -1;
-    return isOther? s : r;
+    return SegHit.getHitLineLine(x0,y0,x1,y1,px0,py0,px1,py1)!=null;
 }
 
 /**
