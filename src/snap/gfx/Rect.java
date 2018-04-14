@@ -97,49 +97,9 @@ public boolean contains(Rect aRect)
  */
 public boolean contains(Shape aShape)
 {
-    return aShape instanceof Rect? contains((Rect)aShape) : super.contains(aShape);
-}
-
-/**
- * Returns whether this shape contains line defined by given points.
- */
-public boolean contains(double x0, double y0, double x1, double y1)
-{
-    double xmax = x + width, ymax = y + height;
-    if(!contains(x0,y0) || !contains(x1,y1)) return false;
-    if(Line.intersectsLine(x0, y0, x1, y1, x, y, xmax, y)) return false;
-    if(Line.intersectsLine(x0, y0, x1, y1, xmax, y, xmax, ymax)) return false;
-    if(Line.intersectsLine(x0, y0, x1, y1, xmax, ymax, x, ymax)) return false;
-    if(Line.intersectsLine(x0, y0, x1, y1, x, ymax, x, y)) return false;
-    return true;
-}
-
-/**
- * Returns whether this shape contains quad defined by given points.
- */
-public boolean contains(double x0, double y0, double xc0, double yc0, double x1, double y1)
-{
-    double xmax = x + width, ymax = y + height;
-    if(!contains(x0,y0) || !contains(x1,y1)) return false;
-    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, x, y, xmax, y)) return false;
-    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, xmax, y, xmax, ymax)) return false;
-    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, xmax, ymax, x, ymax)) return false;
-    if(Quad.intersectsLine(x0, y0, xc0, yc0, x1, y1, x, ymax, x, y)) return false;
-    return true;
-}
-
-/**
- * Returns whether this shape contains cubic defined by given points.
- */
-public boolean contains(double x0, double y0, double xc0, double yc0, double xc1, double yc1,double x1, double y1)
-{
-    double xmax = x + width, ymax = y + height;
-    if(!contains(x0,y0) || !contains(x1,y1)) return false;
-    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, x, y, xmax, y)) return false;
-    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, xmax, y, xmax, ymax)) return false;
-    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, xmax, ymax, x, ymax)) return false;
-    if(Cubic.intersectsLine(x0, y0, xc0, yc0, xc1, yc1, x1, y1, x, ymax, x, y)) return false;
-    return true;
+    if(aShape instanceof Rect)
+        return contains((Rect)aShape);
+    return super.contains(aShape);
 }
 
 /**
@@ -157,7 +117,9 @@ public boolean intersects(Rect aRect)
  */
 public boolean intersects(Shape aShape)
 {
-    return aShape instanceof Rect? intersects((Rect)aShape) : super.intersects(aShape);
+    if(aShape instanceof Rect)
+        return intersects((Rect)aShape);
+    return super.intersects(aShape);
 }
 
 /**

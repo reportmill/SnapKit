@@ -54,17 +54,9 @@ public abstract Segment createReverse();
 public abstract boolean matches(Object anObj);
 
 /**
- * Returns whether this segment intersects shape.
+ * Override to return false (segment can never contain another segment (well, I suppose a weird Cubic could)).
  */
-public boolean intersects(Shape aShape)
-{
-    // If Segment, do simple case
-    if(aShape instanceof Segment)
-        return intersects((Segment)aShape);
-        
-    // Do normal version
-    return super.intersects(aShape);
-}
+public boolean contains(Segment aSeg)  { return false; }
 
 /**
  * Returns whether this segment intersects shape.

@@ -47,6 +47,20 @@ protected Rect getBoundsImpl()  { return PathIter.getBounds(getPathIter(null)); 
 public abstract PathIter getPathIter(Transform aT);
 
 /**
+ * Returns the first segment end point.
+ */
+public Point getFirstMoveTo()
+{
+    PathIter pi = getPathIter(null); double pts[] = new double[6], mx = 0, my = 0;
+    while(pi.hasNext()) { switch(pi.getNext(pts)) {
+            case MoveTo: mx = pts[0]; my = pts[1]; break;
+            case LineTo: case QuadTo: case CubicTo: return new Point(mx, my);
+        }
+    }
+    return new Point(mx,my);
+}
+
+/**
  * Returns whether shape contains point.
  */
 public boolean contains(Point aPnt)  { return contains(aPnt.getX(), aPnt.getY()); }
@@ -89,141 +103,53 @@ public int getCrossings(double aX, double aY)
  */
 public boolean contains(Shape aShape)
 {
+    // If given shape is segment, do segment version instead
+    if(aShape instanceof Segment) return contains((Segment)aShape);
+    
     // If bounds don't contain shape, just return false
     if(!getBounds().contains(aShape.getBounds())) return false;
     
     // Iterate over shape segments, if any segment edge intersects, return false
-    PathIter pi = aShape.getPathIter(null); double pts[] = new double[6], mx = 0, my = 0, lx = 0, ly = 0;
+    PathIter pi = aShape.getPathIter(null); Line line = new Line(0,0,0,0); Quad quad = null; Cubic cub = null;
+    double pts[] = new double[6], mx = 0, my = 0, lx = 0, ly = 0;
     while(pi.hasNext()) {
         switch(pi.getNext(pts)) {
             case MoveTo: mx = lx = pts[0]; my = ly = pts[1]; break;
             case LineTo:
-                if(!contains(lx,ly,lx=pts[0],ly=pts[1])) return false;
+                line.setPoints(lx, ly, lx = pts[0], ly = pts[1]);
+                if(!contains(line)) return false;
                 break;
             case QuadTo:
-                if(!contains(lx,ly,pts[0],pts[1],lx=pts[0],ly=pts[1])) return false;
+                if(quad==null) quad = new Quad(0,0,0,0,0,0);
+                quad.setPoints(lx, ly, pts[0], pts[1], lx = pts[2], ly = pts[3]);
+                if(!contains(quad)) return false;
                 break;
             case CubicTo:
-                if(!contains(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5])) return false;
+                if(cub==null) cub = new Cubic(0,0,0,0,0,0,0,0);
+                cub.setPoints(lx, ly, pts[0], pts[1], pts[2], pts[3], lx = pts[4], ly = pts[5]);
+                if(!contains(cub)) return false;
                 break;
             case Close:
-                if(!contains(lx,ly,lx=mx,ly=my)) return false;
+                line.setPoints(lx, ly, lx = mx, ly = my);
+                if(!contains(line)) return false;
                 break;
         }
     }
     
-    // Return true since all shape points are contained and no shape edges intersect
+    // Return true since all shape segments are contained
     return true;
 }
 
 /**
- * Returns whether this shape contains line defined by given points.
+ * Returns whether shape contains segment.
  */
-public boolean contains(double x0, double y0, double x1, double y1)
+public boolean contains(Segment aSeg)
 {
-    // If bounds don't contain, just return false
-    if(!getBounds().contains(x0, y0, x1, y1)) return false;
-    
-    // If either endpoint not contained, return false
-    if(!contains(x0,y0) || !contains(x1,y1)) return false;
-
-    // Iterate over segments, if any segment doesn't contain line, return false
-    PathIter pi = getPathIter(null); double pts[] = new double[6], mx = 0, my = 0, lx = 0, ly = 0;
-    while(pi.hasNext()) {
-        switch(pi.getNext(pts)) {
-            case MoveTo: mx = lx = pts[0]; my = ly = pts[1]; break;
-            case LineTo:
-                if(Line.intersectsLine(lx,ly,lx=pts[0],ly=pts[1],x0,y0,x1,y1)) return false;
-                break;
-            case QuadTo:
-                if(Quad.intersectsLine(lx,ly,pts[0],pts[1],lx=pts[2],ly=pts[3],x0,y0,x1,y1)) return false;
-                break;
-            case CubicTo:
-                if(Cubic.intersectsLine(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5],x0,y0,x1,y1))
-                    return false;
-                break;
-            case Close:
-                if(Line.intersectsLine(lx,ly,lx=mx,ly=my,x0,y0,x1,y1)) return false;
-                break;
-        }
-    }
-    
-    // Return true since no segements intersect
-    return true;
-}
-
-/**
- * Returns whether this shape contains quad defined by given points.
- */
-public boolean contains(double x0, double y0, double xc0, double yc0, double x1, double y1)
-{
-    // If bounds don't contain, just return false
-    if(!getBounds().contains(x0, y0, xc0, yc0, x1, y1)) return false;
-    
-    // If either endpoint not contained, return false
-    if(!contains(x0,y0) || !contains(x1,y1)) return false;
-
-    // Iterate over segments, if any segment intersects quad, return false
-    PathIter pi = getPathIter(null); double pts[] = new double[6], mx = 0, my = 0, lx = 0, ly = 0;
-    while(pi.hasNext()) {
-        switch(pi.getNext(pts)) {
-            case MoveTo: mx = lx = pts[0]; my = ly = pts[1]; break;
-            case LineTo:
-                if(Quad.intersectsLine(x0,y0,xc0,yc0,x1,y1,lx,ly,lx=pts[0],ly=pts[1])) return false;
-                break;
-            case QuadTo:
-                if(Quad.intersectsQuad(x0,y0,xc0,yc0,x1,y1,lx,ly,pts[0],pts[1],lx=pts[2],ly=pts[3])) return false;
-                break;
-            case CubicTo:
-                if(Cubic.intersectsQuad(lx,ly,pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5],x0,y0,xc0,yc0,x1,y1))
-                    return false;
-                break;
-            case Close:
-                if(Quad.intersectsLine(x0,y0,xc0,yc0,x1,y1,lx,ly,lx=mx,ly=my)) return false;
-                break;
-        }
-    }
-    
-    // Return true since no segements intersect
-    return true;
-}
-
-/**
- * Returns whether this shape contains cubic defined by given points.
- */
-public boolean contains(double x0, double y0, double xc0, double yc0, double xc1, double yc1, double x1, double y1)
-{
-    // If bounds don't contain, just return false
-    if(!getBounds().contains(x0, y0, xc0, yc0, xc1, yc1, x1, y1)) return false;
-    
-    // If either endpoint not contained, return false
-    if(!contains(x0,y0) || !contains(x1,y1)) return false;
-
-    // Iterate over segments, if any segment intersects cubic, return false
-    PathIter pi = getPathIter(null); double pts[] = new double[6], mx = 0, my = 0, lx = 0, ly = 0;
-    while(pi.hasNext()) {
-        switch(pi.getNext(pts)) {
-            case MoveTo: mx = lx = pts[0]; my = ly = pts[1]; break;
-            case LineTo:
-                if(Cubic.intersectsLine(x0,y0,xc0,yc0,xc1,yc1,x1,y1,lx,ly,lx=pts[0],ly=pts[1])) return false;
-                break;
-            case QuadTo:
-                if(Cubic.intersectsQuad(x0,y0,xc0,yc0,xc1,yc1,x1,y1,lx,ly,pts[0],pts[1],lx=pts[2],ly=pts[3]))
-                    return false;
-                break;
-            case CubicTo:
-                if(Cubic.intersectsCubic(x0,y0,xc0,yc0,xc1,yc1,x1,y1,lx,ly,
-                    pts[0],pts[1],pts[2],pts[3],lx=pts[4],ly=pts[5]))
-                    return false;
-                break;
-            case Close:
-                if(Cubic.intersectsLine(x0,y0,xc0,yc0,xc1,yc1,x1,y1,lx,ly,lx=mx,ly=my)) return false;
-                break;
-        }
-    }
-    
-    // Return true since no segements intersect
-    return true;
+    // Segment is contained if this shape contains both endpoints and doesn't intersect
+    if(!contains(aSeg.x0,aSeg.y0)) return false;
+    if(!contains(aSeg.x1,aSeg.y1)) return false;
+    if(aSeg instanceof Line) return true;
+    return !intersects(aSeg);
 }
 
 /**
@@ -231,6 +157,9 @@ public boolean contains(double x0, double y0, double xc0, double yc0, double xc1
  */
 public boolean intersects(Shape aShape)
 {
+    // If given shape is segment, do segment version instead
+    if(aShape instanceof Segment) return intersects((Segment)aShape);
+    
     // If bounds don't intersect, just return false
     Rect bnds0 = getBounds(), bnds1 = aShape.getBounds();
     if(!bnds0.intersects(bnds1)) return false;
@@ -266,8 +195,9 @@ public boolean intersects(Shape aShape)
         }
     }
     
-    // Return false since no segments intersect
-    return false;
+    // Return true if shape contains shape start point (implies that whole shape is inside)
+    Point pnt = aShape.getFirstMoveTo();
+    return contains(pnt.x, pnt.y);
 }
 
 /**
@@ -305,8 +235,8 @@ public boolean intersects(Segment aSeg)
         }
     }
     
-    // Return true if shape contains segment
-    return contains(aSeg);
+    // Return true if shape contains segment start point (implies that whole segment is inside)
+    return contains(aSeg.x0, aSeg.y0);
 }
 
 /**
