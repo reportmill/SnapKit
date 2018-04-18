@@ -13,10 +13,7 @@ import snap.util.*;
 public class TreeView <T> extends ParentView implements View.Selectable <T> {
     
     // The items
-    List <T>                _items = new ArrayList();
-    
-    // The selected index
-    int                     _selIndex = -1;
+    PickList <T>            _items = new PickList();
     
     // The selected column
     int                     _selCol;
@@ -74,6 +71,9 @@ public TreeView()
     //SplitView hsplit = getHeaderSplitView();
     //_split.addPropChangeListener(pc -> hsplit.relayout(), NeedsLayout_Prop);
     //hsplit.addPropChangeListener(pc -> _split.relayout(), NeedsLayout_Prop);
+    
+    // Register PickList to notify when selection changes
+    _items.addPropChangeListener(pc -> pickListSelChange(pc));
     
     // Create/add first column
     TreeCol treeCol = new TreeCol();
@@ -160,8 +160,8 @@ public void addCol(TreeCol aCol, int anIndex)
     // Configure split dividers
     for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
     
-    // Synchronize TreeCol selection with this TreeView
-    aCol.addPropChangeListener(pc -> setSelIndex(aCol.getSelIndex()), SelIndex_Prop);
+    // Replace column picklist with tableView picklist
+    aCol.setPickList(_items);
 }
 
 /**
@@ -212,6 +212,42 @@ protected void setItemsImpl(List <T> theItems)
 public void setItems(T ... theItems)  { setItems(Arrays.asList(theItems)); }
 
 /**
+ * Returns the selected index.
+ */
+public int getSelIndex()  { return _items.getSelIndex(); }
+
+/**
+ * Sets the selected index.
+ */
+public void setSelIndex(int anIndex)  { _items.setSelIndex(anIndex); }
+
+/**
+ * Returns the selected item.
+ */
+public T getSelItem()  { return _items.getSelItem(); }
+
+/**
+ * Sets the selected index.
+ */
+public void setSelItem(T anItem)  { _items.setSelItem(anItem); }
+
+/**
+ * Called when PickList changes selection.
+ */
+protected void pickListSelChange(PropChange aPC)
+{
+    // If not SelIndex, just return
+    if(aPC.getPropertyName()!=PickList.SelIndex_Prop) return;
+    
+    // FirePropChange
+    int oldInd = (Integer)aPC.getOldValue(), newInd = (Integer)aPC.getNewValue();
+    firePropChange(SelIndex_Prop, oldInd, newInd);
+    
+    // Scroll selection to visible
+    //if(isShowing()) scrollSelToVisible();
+}
+
+/**
  * Returns the list of expanded items for given items.
  */
 public List <T> getExpandedItems(List <T> theItems)
@@ -249,36 +285,6 @@ public List <T> getExpandedItems(List <T> theItems)
 public void updateItems(T ... theItems)
 {
     for(TreeCol tcol : getCols()) tcol.updateItems(theItems);
-}
-
-/**
- * Returns the selected index.
- */
-public int getSelIndex()  { return _selIndex; }
-
-/**
- * Sets the selected index.
- */
-public void setSelIndex(int anIndex)
-{
-    if(anIndex==_selIndex) return;
-    firePropChange(SelIndex_Prop, _selIndex, _selIndex = anIndex);
-    for(TreeCol tcol : getCols()) tcol.setSelIndex(anIndex);
-    fireActionEvent();
-}
-
-/**
- * Returns the selected item.
- */
-public T getSelItem()  { return _selIndex>=0? _items.get(_selIndex) : null; }
-
-/**
- * Sets the selected index.
- */
-public void setSelItem(T anItem)
-{
-    int index = _items.indexOf(anItem);
-    setSelIndex(index);
 }
 
 /**

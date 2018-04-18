@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import java.util.List;
 import java.util.function.Consumer;
 import snap.util.*;
 
@@ -9,6 +10,9 @@ import snap.util.*;
  * Represents a Table Column.
  */
 public class TableCol <T> extends ListArea <T> {
+    
+    // The Table
+    TableView          _table;
 
     // The header value
     Label              _header = new Label();
@@ -31,7 +35,7 @@ public TableCol()
 /**
  * Returns the table.
  */
-public TableView getTable()  { return getParent(TableView.class); }
+public TableView getTable()  { return _table; }
 
 /**
  * Returns the header label.
@@ -81,6 +85,11 @@ public Consumer <ListCell<T>> getCellConfigure()
 }
 
 /**
+ * Override to suppress setting items in pick list (already done by TableView).
+ */
+public void setItems(List <T> theItems)  { itemsChanged(); }
+
+/**
  * Override to set Table.SelCol.
  */
 protected void processEvent(ViewEvent anEvent)
@@ -88,6 +97,11 @@ protected void processEvent(ViewEvent anEvent)
     if(anEvent.isMousePress()) getTable()._selCol = ArrayUtils.indexOfId(getTable().getCols(), this);
     super.processEvent(anEvent);
 }
+
+/**
+ * Override to have table fireAction.
+ */
+public void fireActionEvent()  { _table.fireActionEvent(); }
 
 /**
  * Override to account for header (if showing).

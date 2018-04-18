@@ -18,7 +18,7 @@ import snap.util.*;
 public class ListArea <T> extends ParentView implements View.Selectable <T> {
 
     // The items
-    PickList <T>          _items = new PickList();
+    PickList <T>          _items;
     
     // The row height
     double                _rowHeight;
@@ -59,6 +59,9 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     // Value of cell width/height
     double                _sampleWidth = -1, _sampleHeight = -1;
     
+    // The PropChangeListener to handle PickList selection change
+    PropChangeListener    _itemsLsnr = pc -> pickListSelChange(pc);
+    
     // Shared CellPadding default
     static Insets         _cellPadDefault = new Insets(2,2,2,4);
     
@@ -78,8 +81,8 @@ public ListArea()
     setFocusable(true); setFocusWhenPressed(true);
     setFill(Color.WHITE);
     
-    // Register PickList to notify when selection changes
-    _items.addPropChangeListener(pc -> pickListSelChange(pc));
+    // Create/set PickList
+    setPickList(new PickList());
 }
 
 /**
@@ -104,13 +107,31 @@ public void setItems(List <T> theItems)
 {
     if(equalsItems(theItems)) return;
     _items.setAll(theItems);
-    relayout(); relayoutParent(); repaint(); _sampleWidth = _sampleHeight = -1;
+    itemsChanged();
 }
 
 /**
  * Sets the items.
  */
 public void setItems(T ... theItems)  { setItems(theItems!=null? Arrays.asList(theItems) : null); }
+
+/**
+ * Sets the underlying picklist.
+ */
+protected void setPickList(PickList <T> aPL)
+{
+    if(_items!=null) _items.removePropChangeListener(_itemsLsnr);
+    _items = aPL;
+    _items.addPropChangeListener(_itemsLsnr);
+}
+
+/**
+ * Called when PickList items changed.
+ */
+protected void itemsChanged()
+{
+    relayout(); relayoutParent(); repaint(); _sampleWidth = _sampleHeight = -1;
+}
 
 /**
  * Returns the selected index.

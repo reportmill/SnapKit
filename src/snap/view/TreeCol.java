@@ -78,6 +78,25 @@ public double getRowHeight()  { return getTree().getRowHeight(); }
 public int getColIndex()  { return ArrayUtils.indexOfId(getTree().getCols(), this); }
 
 /**
+ * Override to suppress setting items in pick list (already done by TreeView).
+ */
+public void setItems(List <T> theItems)  { itemsChanged(); }
+
+/**
+ * Override to set TreeView.SelCol.
+ */
+protected void processEvent(ViewEvent anEvent)
+{
+    if(anEvent.isMousePress()) getTree()._selCol = ArrayUtils.indexOfId(getTree().getCols(), this);
+    super.processEvent(anEvent);
+}
+
+/**
+ * Override to have tree fireAction.
+ */
+public void fireActionEvent()  { _tree.fireActionEvent(); }
+
+/**
  * Called to set method for rendering.
  */
 public Consumer <ListCell<T>> getCellConfigure()
@@ -125,19 +144,5 @@ protected void configureCell(ListCell <T> aCell)
         iview.addEventHandler(e -> { tree.toggleItem(item); e.consume(); }, MousePress);
     }
 }
-
-/**
- * Override to set TreeView.SelCol.
- */
-protected void processEvent(ViewEvent anEvent)
-{
-    if(anEvent.isMousePress()) getTree()._selCol = ArrayUtils.indexOfId(getTree().getCols(), this);
-    super.processEvent(anEvent);
-}
-
-/**
- * Override to return false (if col is setting items, they must be new).
- */
-protected boolean equalsItems(List theItems)  { return false; }
 
 }

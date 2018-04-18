@@ -15,10 +15,7 @@ import snap.util.*;
 public class TableView <T> extends ParentView implements View.Selectable <T> {
 
     // The items
-    List <T>                _items = new ArrayList();
-    
-    // The selected index
-    int                     _selIndex = -1;
+    PickList <T>            _items = new PickList();
     
     // The selected column
     int                     _selCol;
@@ -26,8 +23,8 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     // Whether to show table header
     boolean                 _showHeader;
     
-    // Whether to show horziontal/vertical lines
-    boolean                 _showLinesH, _showLinesV;
+    // Whether to show horziontal/vertical grid lines
+    boolean                 _showGridX, _showGridY;
     
     // Grid color
     Color                   _gridColor;
@@ -73,6 +70,9 @@ public TableView()
     SplitView hsplit = getHeaderSplitView();
     _split.addPropChangeListener(pc -> hsplit.relayout(), NeedsLayout_Prop);
     hsplit.addPropChangeListener(pc -> _split.relayout(), NeedsLayout_Prop);
+    
+    // Register PickList to notify when selection changes
+    _items.addPropChangeListener(pc -> pickListSelChange(pc));
 }
 
 /**
@@ -90,16 +90,55 @@ public List <T> getItems()  { return _items; }
  */
 public void setItems(List <T> theItems)
 {
+    // If items already set, just return
     if(ListUtils.equalsId(theItems, _items) || SnapUtils.equals(theItems,_items)) return;
-    _items.clear();
-    if(theItems!=null) _items.addAll(theItems);
-    for(TableCol tcol : getCols()) tcol.setItems(theItems);
+    
+    // Set items
+    _items.setAll(theItems);
+    relayout(); relayoutParent(); repaint();
+    for(TableCol tc : getCols()) tc.setItems(theItems);
 }
 
 /**
  * Sets the items.
  */
 public void setItems(T ... theItems)  { setItems(theItems!=null? Arrays.asList(theItems) : null); }
+
+/**
+ * Returns the selected index.
+ */
+public int getSelIndex()  { return _items.getSelIndex(); }
+
+/**
+ * Sets the selected index.
+ */
+public void setSelIndex(int anIndex)  { _items.setSelIndex(anIndex); }
+
+/**
+ * Returns the selected item.
+ */
+public T getSelItem()  { return _items.getSelItem(); }
+
+/**
+ * Sets the selected index.
+ */
+public void setSelItem(T anItem)  { _items.setSelItem(anItem); }
+
+/**
+ * Called when PickList changes selection.
+ */
+protected void pickListSelChange(PropChange aPC)
+{
+    // If not SelIndex, just return
+    if(aPC.getPropertyName()!=PickList.SelIndex_Prop) return;
+    
+    // FirePropChange
+    int oldInd = (Integer)aPC.getOldValue(), newInd = (Integer)aPC.getNewValue();
+    firePropChange(SelIndex_Prop, oldInd, newInd);
+    
+    // Scroll selection to visible
+    //if(isShowing()) scrollSelToVisible();
+}
 
 /**
  * Tell table to update given items (none means all).
@@ -131,6 +170,7 @@ public void addCol(TableCol aCol)
 {
     // Add column to column SplitView
     _split.addItem(aCol);
+    aCol._table = this;
     
     // Create Header Box for Column Header label
     View hdr = aCol.getHeader();
@@ -149,8 +189,8 @@ public void addCol(TableCol aCol)
     for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
     for(Divider div : hsplit.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILLH); div.setBorder(null); }
     
-    // Synchronize TableCol selection with this TableView
-    aCol.addPropChangeListener(pc -> setSelIndex(aCol.getSelIndex()), SelIndex_Prop);
+    // Replace column picklist with tableView picklist
+    aCol.setPickList(_items);
 }
 
 /**
@@ -187,29 +227,29 @@ public void setShowHeader(boolean aValue)
 }
 
 /**
- * Returns whether to show horizontal lines.
+ * Returns whether to show horizontal grid lines.
  */
-public boolean isShowLinesX()  { return _showLinesH; }
+public boolean isShowGridX()  { return _showGridX; }
 
 /**
- * Sets whether to show horizontal lines.
+ * Sets whether to show horizontal grid lines.
  */
-public void setShowLinesX(boolean aValue)
+public void setShowGridX(boolean aValue)
 {
-    firePropChange("ShowHorizontalLines", _showLinesH, _showLinesH = aValue);
+    firePropChange("ShowGridX", _showGridX, _showGridX = aValue);
 }
 
 /**
- * Returns whether to show vertical lines.
+ * Returns whether to show vertical grid lines.
  */
-public boolean isShowLinesY()  { return _showLinesV; }
+public boolean isShowGridY()  { return _showGridY; }
 
 /**
- * Sets whether to show vertical lines.
+ * Sets whether to show vertical grid lines.
  */
-public void setShowLinesY(boolean aValue)
+public void setShowGridY(boolean aValue)
 {
-    firePropChange("ShowVerticalLines", _showLinesV, _showLinesV = aValue);
+    firePropChange("ShowGridY", _showGridY, _showGridY = aValue);
 }
 
 /**
@@ -281,35 +321,6 @@ protected Scroller getHeaderScroller()
  */
 protected SplitView getHeaderSplitView()  { return (SplitView)getHeaderScroller().getContent(); }
 
-/**
- * Returns the selected index.
- */
-public int getSelIndex()  { return _selIndex; }
-
-/**
- * Sets the selected index.
- */
-public void setSelIndex(int anIndex)
-{
-    if(anIndex==_selIndex) return;
-    firePropChange(SelIndex_Prop, _selIndex, _selIndex = anIndex);
-    for(TableCol tcol : getCols()) tcol.setSelIndex(anIndex);
-    fireActionEvent();
-}
-
-/**
- * Returns the selected item.
- */
-public T getSelItem()  { return _selIndex>=0? _items.get(_selIndex) : null; }
-
-/**
- * Sets the selected index.
- */
-public void setSelItem(T anItem)
-{
-    int index = _items.indexOf(anItem);
-    setSelIndex(index);
-}
 /**
  * Returns the selected row.
  */
@@ -412,8 +423,8 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     
     // Archive GridColor, ShowLinesX, ShowLinesY
     if(getGridColor()!=null) e.add("GridColor", '#' + getGridColor().toHexString());
-    if(isShowLinesX()) e.add("ShowLinesX", true);
-    if(isShowLinesY()) e.add("ShowLinesY", true);
+    if(isShowGridX()) e.add("ShowGridX", true);
+    if(isShowGridY()) e.add("ShowGridY", true);
     
     // Archive RowHeight
     if(getRowHeight()!=24) e.add("RowHeight", getRowHeight());
@@ -434,8 +445,8 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     
     // Unarchive GridColor, ShowLinesX, ShowLinesY
     if(anElement.hasAttribute("GridColor")) setGridColor(new Color(anElement.getAttributeValue("GridColor")));
-    setShowLinesX(anElement.getAttributeBoolValue("ShowLinesX", false));
-    setShowLinesY(anElement.getAttributeBoolValue("ShowLinesY", false));
+    setShowGridX(anElement.getAttributeBoolValue("ShowGridX", false));
+    setShowGridY(anElement.getAttributeBoolValue("ShowGridY", false));
     
     // Unarchive RowHeight
     setRowHeight(anElement.getAttributeIntValue("RowHeight", 24));

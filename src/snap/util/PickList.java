@@ -23,7 +23,7 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
 /**
  * Returns whether list allows multiple selections.
  */
-public boolean isMultipleChoice()  { return false; }
+public boolean isMultiSel()  { return false; }
 
 /**
  * Return list size.
@@ -60,10 +60,15 @@ public E remove(int anIndex)
 public void setAll(Collection <? extends E> aCol)
 {
     Object sitems[] = getSelItems();
-    _list.clear(); // TeaVM didn't like just clear() - maybe I have a bug? 
+    clear();
     if(aCol!=null) addAll(aCol);
     setSelItems(sitems);
 }
+
+/**
+ * Clears the list.
+ */
+public void clear()  { _list.clear(); }
 
 /**
  * Returns the selected index.
