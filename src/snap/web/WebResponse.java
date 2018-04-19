@@ -246,7 +246,7 @@ public WebFile getFile()
 {
     WebFile file = getURL().getFile();
     if(file==null)
-        getSite().createFile(getFileHeader());
+        file = getSite().createFile(getFileHeader());
     return file;
 }
 
