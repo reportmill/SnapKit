@@ -680,7 +680,7 @@ protected double getMaxHitX(double aY, double aH)
 {
     if(_bpath==null || aY+aH>getMaxY()) return getWidth(); 
     Rect rect = new Rect(getMaxX()-1,aY,1,aH);
-    while(!_bpath.contains(rect) && rect.x>0) rect.x--;
+    while(!_bpath.contains(rect) && rect.x>1) rect.x--;
     return rect.x - getX();
 }
 
@@ -739,11 +739,12 @@ public Path getPathForChars(int aStart, int anEnd)
     Path path = new Path();
     
     // If invalid range, just return
-    if(aStart>getEnd() || anEnd<getStart()) return path;
+    if(aStart>=getEnd() || anEnd<getStart()) return path;
     if(anEnd>getEnd()) anEnd = getEnd();
 
     // Get StartLine, EndLine and start/end points
-    TextBoxLine startLine = getLineAt(aStart), endLine = aStart==anEnd? startLine : getLineAt(anEnd);
+    TextBoxLine startLine = getLineAt(aStart);
+    TextBoxLine endLine = aStart==anEnd? startLine : getLineAt(anEnd);
     double startX = startLine.getXForChar(aStart-startLine.getStart()), startY = startLine.getBaseline();
     double endX = endLine.getXForChar(anEnd-endLine.getStart()), endY = endLine.getBaseline();
     startX = Math.min(startX,getMaxX()); endX = Math.min(endX,getMaxX());
