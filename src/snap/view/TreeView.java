@@ -290,12 +290,12 @@ public void updateItems(T ... theItems)
 /**
  * Returns the selected row.
  */
-public int getSelectedRow()  { return getSelIndex(); }
+public int getSelRow()  { return getSelIndex(); }
 
 /**
  * Returns the selected column.
  */
-public int getSelectedCol()  { return _selCol; }
+public int getSelCol()  { return _selCol; }
 
 /**
  * Sets the selected column.

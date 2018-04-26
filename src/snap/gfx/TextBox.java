@@ -739,7 +739,7 @@ public Path getPathForChars(int aStart, int anEnd)
     Path path = new Path();
     
     // If invalid range, just return
-    if(aStart>=getEnd() || anEnd<getStart()) return path;
+    if(aStart>getEnd() || anEnd<getStart()) return path;
     if(anEnd>getEnd()) anEnd = getEnd();
 
     // Get StartLine, EndLine and start/end points
