@@ -125,6 +125,16 @@ public T getSelItem()  { return _items.getSelItem(); }
 public void setSelItem(T anItem)  { _items.setSelItem(anItem); }
 
 /**
+ * Selects up in the list.
+ */
+public void selectUp()  { _items.selectUp(); }
+
+/**
+ * Selects up in the list.
+ */
+public void selectDown()  { _items.selectDown(); }
+
+/**
  * Called when PickList changes selection.
  */
 protected void pickListSelChange(PropChange aPC)
@@ -324,17 +334,17 @@ protected SplitView getHeaderSplitView()  { return (SplitView)getHeaderScroller(
 /**
  * Returns the selected row.
  */
-public int getSelectedRow()  { return getSelIndex(); }
+public int getSelRow()  { return getSelIndex(); }
 
 /**
  * Returns the selected column.
  */
-public int getSelectedCol()  { return _selCol; }
+public int getSelCol()  { return _selCol; }
 
 /**
  * Sets the selected column.
  */
-public void setSelectedCol(int anIndex)  { _selCol = anIndex; }
+public void setSelCol(int anIndex)  { _selCol = anIndex; }
 
 /**
  * Returns the row index at given point.
