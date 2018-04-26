@@ -131,16 +131,11 @@ public TextStyle getStyleAt(int anIndex)
  * Returns the line x.
  */
 public double getX()  { return _tbox.getX() + _alignX; }
-/*{
-    if(_rtline.getAlignX()==HPos.LEFT || _tbox.getWidth()>9999) return _tbox.getX();
-    double ax = _rtline.getAlignX().asDouble(), tw = _tbox.getWidth(), w = getWidth();
-    return _tbox.getX() + Math.round(ax*(tw - w));
-}*/
 
 /**
  * Returns the line y.
  */
-public double getY()  { return _tbox.getAlignedY() + getYLocal(); }
+public double getY()  { return getYLocal() + _tbox.getAlignedY(); }
 
 /**
  * Returns the line y.
@@ -240,22 +235,17 @@ public void resetSizes()
     
     // If justify, shift tokens in line
     if(lstyle.isJustify() && getTokenCount()>1 && !isLastCharNewline()) {
-        double y = getY(), w = getWidth(), h = getHeight();
-        double tx = _tbox.getMinHitX(y,h);
-        double tmaxx = _tbox.getMaxHitX(y,_height);
-        double tw = tmaxx - tx;
-        double shift = (tw - w)/(getTokenCount()-1), shft = 0;
-        for(TextBoxToken tok : getTokens()) {
-            tok._shiftX = shft; shft += shift; }
+        double y = getY();
+        double tmx = _tbox.getMaxHitX(y, _height), lmx = getMaxX(), rem = tmx - lmx;
+        double shift = rem/(getTokenCount()-1), shft = 0;
+        for(TextBoxToken tok : getTokens()) { tok._shiftX = shft; shft += shift; }
     }
     
     // Calculate X alignment shift
     else if(_rtline.getAlignX()!=HPos.LEFT && _tbox.getWidth()<9999) {
-        double ax = _rtline.getAlignX().asDouble(), y = getY(), w = getWidth(), h = getHeight();
-        double tx = _tbox.getMinHitX(y,h);
-        double tmaxx = _tbox.getMaxHitX(y,_height);
-        double tw = tmaxx - tx;
-        _alignX = Math.round(ax*(tw - w));
+        double ax = _rtline.getAlignX().asDouble(), y = getY();
+        double tmx = _tbox.getMaxHitX(y, _height), lmx = getMaxX(), rem = tmx - lmx;
+        _alignX = Math.round(ax*(rem));
     }
 }
 
