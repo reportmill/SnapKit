@@ -137,7 +137,6 @@ public void show()
     // Set window location, make visible and notify ShowingChanged
     win.setLocation(x,y);
     win.setVisible(true);
-    showingChanged();
     
     // If window is modal, just return
     if(wview.isModal())
@@ -162,13 +161,16 @@ public void show()
 public void hide()
 {
     get().setVisible(false);
-    showingChanged();
 }
 
 /**
  * Order window to front.
  */
-public void toFront()  { get().toFront(); }
+public void toFront()
+{
+    get().toFront();
+    System.out.println("ToFront: " + get());
+}
 
 /**
  * Sets the title of the window.
