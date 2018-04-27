@@ -127,9 +127,9 @@ protected void configureCell(ListCell <T> aCell)
     View graphic = tree.getGraphic(item); if(graphic!=null) aCell.setGraphic(graphic);
     
     // Calculate and set cell indent
-    int pcount = tree.getParentCount(item);
-    int rootIndent = tree.isParent(item)? 0 : 18;
-    aCell.setPadding(0, 2, 0, rootIndent + pcount*20);
+    int indent = (int)tree.getExpandedImage().getWidth() + 4 + 4;
+    int levels = tree.getParentCount(item); if(!tree.isParent(item)) levels++;
+    aCell.setPadding(0, 2, 0, levels*indent);
     
     // If parent, configure Expand/Collapse image
     if(tree.isParent(item)) {
@@ -138,8 +138,9 @@ protected void configureCell(ListCell <T> aCell)
         if(iview!=null) {
             iview.setImage(bimg); return; }
 
-        iview = new ImageView(bimg); iview.setPadding(4,4,4,4); iview.setName("BranchImageView");
+        iview = new ImageView(bimg); iview.setPadding(2,4,2,4); iview.setName("BranchImageView");
         View gview = aCell.getGraphic()!=null? new Label(iview,null,aCell.getGraphic()) : iview;
+        if(gview instanceof Label) gview.setSpacing(0);
         aCell.setGraphic(gview);
         iview.addEventHandler(e -> { tree.toggleItem(item); e.consume(); }, MousePress);
     }
