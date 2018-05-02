@@ -45,6 +45,11 @@ public Object getSource()  { return _src; }
 /**
  * Returns the Property name.
  */
+public String getPropName()  { return _pname; }
+
+/**
+ * Returns the Property name.
+ */
 public String getPropertyName()  { return _pname; }
 
 /**

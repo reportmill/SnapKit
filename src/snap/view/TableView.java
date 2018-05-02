@@ -216,7 +216,12 @@ public TableCol removeCol(int anIndex)
 /**
  * Removes the given TableCol from this table's children list.
  */
-public int removeCol(TableCol aCol)  { return _split.removeItem(aCol); }
+public int removeCol(TableCol aCol)
+{
+    int ind = _split.removeItem(aCol);
+    if(ind>=0) getHeaderSplitView().removeItem(ind);
+    return ind;
+}
 
 /**
  * Returns the number of rows.
