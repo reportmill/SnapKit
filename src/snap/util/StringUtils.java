@@ -107,13 +107,23 @@ public static StringBuffer toStringAdd(StringBuffer aSB, String aName, Object aV
 }
 
 /**
+ * Trims the start of a string.
+ */
+public static String trimStart(CharSequence aStr)
+{
+    int len = aStr.length(), ind = 0;
+    while(ind<len && Character.isWhitespace(aStr.charAt(ind))) ind++;
+    return ind>0? aStr.subSequence(ind, len).toString() : aStr.toString();
+}
+
+/**
  * Trims the end of a string.
  */
-public static String trimEnd(CharSequence aString)
+public static String trimEnd(CharSequence aStr)
 {
-    int length = aString.length(), index = length;
-    while(index>0 && Character.isWhitespace(aString.charAt(index-1))) index--;
-    return index<length? aString.subSequence(0, index).toString() : aString.toString();
+    int len = aStr.length(), ind = len;
+    while(ind>0 && Character.isWhitespace(aStr.charAt(ind-1))) ind--;
+    return ind<len? aStr.subSequence(0, ind).toString() : aStr.toString();
 }
 
 /**
