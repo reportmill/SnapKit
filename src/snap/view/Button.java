@@ -17,7 +17,6 @@ public class Button extends ButtonBase {
     
     // Constants for properties
     public static final String DefaultButton_Prop = "DefaultButton";
-    public static final String CancelButton_Prop = "CancelButton";
 
 /**
  * Creates a new Button.
@@ -44,20 +43,6 @@ public void setDefaultButton(boolean aValue)
 }
 
 /**
- * Returns whether button is window cancel button.
- */
-public boolean isCancelButton()  { return _cancel; }
-
-/**
- * Sets whether button is window cancel button.
- */
-public void setCancelButton(boolean aValue)
-{
-    if(aValue==_cancel) return;
-    firePropChange(CancelButton_Prop, _cancel, _cancel=aValue);
-}
-
-/**
  * Paint Button.
  */
 public void paintFront(Painter aPntr)
@@ -69,20 +54,6 @@ public void paintFront(Painter aPntr)
     else super.paintFront(aPntr);
 }
 
-/**
- * Override to handle DefaultButton/CancelButton features.
- */
-public void setOwner(ViewOwner anOwner)
-{
-    super.setOwner(anOwner);  // Do normal version
-    
-    // Register default or cancel buttons
-    if(isDefaultButton())
-        anOwner.addKeyActionHandler(getName(), "ENTER");
-    else if(isCancelButton())
-        anOwner.addKeyActionHandler(getName(), "ESCAPE");
-}
-    
 /**
  * Draws a button for the given rect with an option for pressed.
  */

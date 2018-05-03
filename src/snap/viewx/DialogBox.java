@@ -44,12 +44,21 @@ public class DialogBox extends FormBuilder {
     
     // Whether dialog box can be confirmed (confirm button is enabled)
     boolean          _confirmEnabled = true;
+    
+    // Whether to trigger confirm when enter key is pressed
+    boolean          _confirmOnEnter = true;
 
     // The FormBuilder
     FormBuilder      _builder = this;
     
     // Whether stage was cancelled
     boolean          _cancelled;
+    
+    // The confirm button
+    Button           _confirmBtn;
+
+    // The cancel button
+    Button           _cancelBtn;
 
     // Index of selected option
     int              _index = DialogBox.CANCEL_OPTION;
@@ -208,7 +217,21 @@ public void setConfirmEnabled(boolean aValue)
     if(aValue==isConfirmEnabled()) return;
     _confirmEnabled = aValue;
     if(isUISet())
-        getView(getOptions()[0]).setEnabled(aValue);
+        _confirmBtn.setEnabled(aValue);
+}
+ 
+/**
+ * Returns whether to trigger confirm when enter key is pressed.
+ */
+public boolean isConfirmOnEnter()  { return _confirmOnEnter; }
+ 
+/**
+ * Sets whether to trigger confirm when enter key is pressed.
+ */
+public void setConfirmOnEnter(boolean aValue)
+{
+    if(aValue==isConfirmOnEnter()) return;
+    _confirmOnEnter = aValue;
 }
  
 /**
@@ -332,10 +355,15 @@ protected RowView addOptionButtons()
     bbox.setAlign(Pos.CENTER_RIGHT); bbox.setPadding(15,15,15,15);
     for(View btn : bbox.getChildren()) { btn.setMinWidth(100); btn.setMinHeight(24); }
     
-    // Set DefaultButton (and maybe FirstFocus)
-    Button dbutton = (Button)bbox.getChild(titles.length-1);
-    dbutton.setDefaultButton(true); if(getFirstFocus()==null) setFirstFocus(dbutton);
-    dbutton.setEnabled(isConfirmEnabled());
+    // Set ConfirmButton (and maybe FirstFocus)
+    _confirmBtn = (Button)bbox.getChild(titles.length-1);
+    _confirmBtn.setDefaultButton(true); if(getFirstFocus()==null) setFirstFocus(_confirmBtn);
+    _confirmBtn.setEnabled(isConfirmEnabled());
+    
+    // Set CancelButton
+    _cancelBtn = bbox.getChildCount()>1? (Button)bbox.getChild(0) : null;
+    
+    // Return button box
     return bbox;
 }
 
@@ -381,8 +409,12 @@ protected View createUI()
  */
 protected void initUI()
 {
-    super.initUI();  // Do normal version
-    addKeyActionHandler("EscapeAction", "ESCAPE");  // Add Escape key binding
+    // Do normal version
+    super.initUI();
+    
+    // Add Enter, Escape key bindings
+    if(isConfirmOnEnter()) addKeyActionHandler("EnterAction", "ENTER");  
+    addKeyActionHandler("EscapeAction", "ESCAPE");  
 }
 
 /**
@@ -390,25 +422,26 @@ protected void initUI()
  */
 public void respondUI(ViewEvent anEvent)
 {
-    // Handle Option buttons
-    if(anEvent.getView() instanceof Button) { View button = anEvent.getView();
-        String name = button.getName(), options[] = getOptions();
-        for(int i=0; i<options.length; i++)
-            if(name.equals(options[i])) {
-                if(i==0) confirm();
-                else { _index = i; hide(); }
-            }
-        if(options[0].equals("Cancel")) return; // Bogus
+    // Handle Okay, EnterAction
+    if(anEvent.equals(_confirmBtn) || anEvent.equals("EnterAction")) {
+        if(!isConfirmEnabled()) { beep(); return; }
+        confirm(); anEvent.consume();
     }
     
     // Handle Cancel, EscapeAction
-    if(anEvent.equals("Cancel") || anEvent.equals("EscapeAction")) {
-        cancel();
-        anEvent.consume();
+    else if(anEvent.equals("Cancel") || anEvent.equals("EscapeAction")) {
+        cancel(); anEvent.consume(); }
+    
+    // Handle Option buttons
+    else if(anEvent.getView() instanceof Button) { View btn = anEvent.getView();
+        String name = btn.getName(), options[] = getOptions();
+        for(int i=0; i<options.length; i++)
+            if(name.equals(options[i])) {
+                _index = i; hide(); }
     }
     
     // Do normal version
-    super.respondUI(anEvent);
+    else super.respondUI(anEvent);
 }
 
 /**
