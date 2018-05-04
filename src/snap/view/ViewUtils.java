@@ -271,6 +271,15 @@ public static View getCommonAncetor(View aView1, View aView2)
 }
 
 /**
+ * Binds a view property to another view's same prop.
+ */
+public static void bind(View aView1, String aProp, View aView2, boolean doBoth)
+{
+    aView1.addPropChangeListener(pc -> aView2.setValue(aProp, pc.getNewValue()), aProp);
+    if(doBoth) aView2.addPropChangeListener(pc -> aView1.setValue(aProp, pc.getNewValue()), aProp);
+}
+
+/**
  * Returns the image for a file.
  */
 public static Image getFileIconImage(WebFile aFile)

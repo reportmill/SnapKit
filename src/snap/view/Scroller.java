@@ -3,7 +3,7 @@
  */
 package snap.view;
 import snap.gfx.*;
-import snap.util.MathUtils;
+import snap.util.*;
 
 /**
  * A class that can scroll a child view.
@@ -346,6 +346,26 @@ public void processEvent(ViewEvent anEvent)
         setScrollH(getScrollH() + anEvent.getScrollX()*4);
         setScrollV(getScrollV() + anEvent.getScrollY()*4);
     }
+}
+
+/**
+ * Override to avoid reflection (TeaVM).
+ */
+public Object getValue(String aPropName)
+{
+    if(aPropName.equals(ScrollH_Prop)) return getScrollH();
+    if(aPropName.equals(ScrollV_Prop)) return getScrollV();
+    return super.getValue(aPropName);
+}
+
+/**
+ * Override to avoid reflection (TeaVM).
+ */
+public void setValue(String aPropName, Object aValue)
+{
+    if(aPropName.equals(ScrollH_Prop)) setScrollH(SnapUtils.doubleValue(aValue));
+    else if(aPropName.equals(ScrollV_Prop)) setScrollV(SnapUtils.doubleValue(aValue));
+    else super.setValue(aPropName, aValue);
 }
 
 }

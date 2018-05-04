@@ -62,14 +62,12 @@ public TableView()
     setBorder(_scroll.getBorder()); _scroll.setBorder(null);
     addChild(_scroll);
     
-    // Set main scroller to sync HeaderScroller
+    // Bind main Scroll.ScrollH to HeaderScroller (both ways)
     Scroller scroller = _scroll.getScroller();
-    scroller.addPropChangeListener(pce -> getHeaderScroller().setScrollH(scroller.getScrollH()), Scroller.ScrollH_Prop);
+    ViewUtils.bind(scroller, Scroller.ScrollH_Prop, getHeaderScroller(), true);
     
-    // Whenever one split needs layout, propogate to other
-    SplitView hsplit = getHeaderSplitView();
-    _split.addPropChangeListener(pc -> hsplit.relayout(), NeedsLayout_Prop);
-    hsplit.addPropChangeListener(pc -> _split.relayout(), NeedsLayout_Prop);
+    // Bind main split needs layout to header split
+    //ViewUtils.bind(_split, NeedsLayout_Prop, getHeaderSplitView(), true);
     
     // Register PickList to notify when selection changes
     _items.addPropChangeListener(pc -> pickListSelChange(pc));
@@ -186,10 +184,12 @@ public void addCol(TableCol aCol)
     View hdr = aCol.getHeader();
     BoxView hdrBox = new BoxView(hdr) {
         protected double getPrefWidthImpl(double aH)  { return aCol.getPrefWidth(); }
-        public void setPrefWidth(double aValue)  { aCol.setPrefWidth(aValue); }
         public boolean isGrowWidth()  { return aCol.isGrowWidth(); }
     };
     hdrBox.setFillWidth(true);
+    
+    // Bind hdrBox.PrefWidth to aCol.PrefWidth, and visa-versa
+    ViewUtils.bind(aCol, PrefWidth_Prop, hdrBox, true);
     
     // Add Header Box to Header SplitView
     SplitView hsplit = getHeaderSplitView();
