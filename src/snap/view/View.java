@@ -99,6 +99,9 @@ public class View implements XMLArchiver.Archivable {
     // The view effect
     Effect          _effect;
     
+    // The ViewEffect to manage effect rendering for this view and current effect
+    ViewEffect      _viewEff;
+    
     // The opacity
     double          _opacity = 1;
     
@@ -553,15 +556,19 @@ public void setBorder(Color aColor, double aWidth)
 /**
  * Returns effect.
  */
-public Effect getEffect()  { return _effect; }
+public Effect getEffect()  { return _viewEff!=null? _viewEff._eff : null; }
 
 /**
  * Sets paint.
  */
 public void setEffect(Effect anEff)
 {
-    if(SnapUtils.equals(anEff,_effect)) return;
-    firePropChange(Effect_Prop, _effect, _effect=anEff); _pdvr1 = null;
+    // If already set, just return
+    Effect old = getEffect(); if(SnapUtils.equals(anEff,getEffect())) return;
+    
+    // Set new ViewEffect, fire prop change and repaint
+    if(anEff!=null) _viewEff = new ViewEffect(this, anEff);
+    firePropChange(Effect_Prop, old, anEff);
     repaint();
 }
 
@@ -1605,18 +1612,14 @@ protected void paintAll(Painter aPntr)
     double opacity = getOpacityAll(), opacityOld = 0;
     if(opacity!=1) {
         opacityOld = aPntr.getOpacity(); aPntr.setOpacity(opacity); }
+        
+    // If focused, render focused
+    if(isFocused())
+        ViewEffect.getFocusViewEffect(this).paintAll(aPntr);
 
     // If view has effect, get/create effect painter to speed up successive paints
-    if(getEffect()!=null) { Effect eff = getEffect();
-        PainterDVR pdvr = new PainterDVR();
-        paintBack(pdvr);
-        paintFront(pdvr);
-        if(_pdvr1==null || !pdvr.equals(_pdvr1)) {
-            _pdvr1 = pdvr; _pdvr2 = new PainterDVR();
-            eff.applyEffect(pdvr, _pdvr2, getBoundsLocal());
-        }
-        _pdvr2.exec(aPntr);
-    }
+    else if(_viewEff!=null)
+        _viewEff.paintAll(aPntr);
     
     // Otherwise, do normal draw
     else {
@@ -1628,9 +1631,6 @@ protected void paintAll(Painter aPntr)
     if(opacity!=1)
         aPntr.setOpacity(opacityOld);
 }
-
-// DVR painters for caching effect drawing
-PainterDVR _pdvr1, _pdvr2;
 
 /**
  * Paints background.
@@ -1727,7 +1727,15 @@ public void relayoutParent()
 /**
  * Called to register view for repaint.
  */
-public void repaint()  { repaint(0,0,getWidth(),getHeight()); }
+public void repaint()
+{
+    double x = 0, y = 0, w = getWidth(), h = getHeight();
+    if(isFocused()) { Rect r = ViewEffect.getFocusEffect().getBounds(getBoundsLocal());
+        x = r.x; y = r.y; w = r.width; h = r.height; }
+    else if(getEffect()!=null) { Rect r = getEffect().getBounds(getBoundsLocal());
+        x = r.x; y = r.y; w = r.width; h = r.height; }
+    repaint(x,y,w,h);
+}
 
 /**
  * Called to register view for repaint.
@@ -1764,8 +1772,9 @@ public boolean isFocused()  { return _focused; }
 protected void setFocused(boolean aValue)
 {
     if(aValue==_focused) return;
+    if(!aValue) repaint();
     firePropChange(Focused_Prop, _focused, _focused=aValue);
-    repaint();
+    if(aValue) repaint();
 }
 
 /**
@@ -1813,7 +1822,6 @@ public void requestFocus()
 {
     if(isFocused()) return;
     RootView rview = getRootView(); if(rview!=null) rview.requestFocus(this);
-    repaint();
 }
 
 /**

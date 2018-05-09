@@ -340,16 +340,24 @@ public synchronized void paintLater()
     Rect rect = null; if(_dirtyRects.size()==0)  { _plater = null; return; }
     View views[] = _dirtyRects.keySet().toArray(new View[_dirtyRects.size()]);
     for(View n : views) { Rect r = _dirtyRects.get(n);
+    
+        // Get transform from dirty view to this root view and convert dirty rect to root view coords
         Transform tfm = n!=this? n.getLocalToParent(this) : Transform.IDENTITY;
-        Rect vr = n.getVisRect(); vr = vr.copyFor(tfm).getBounds();
         r = r.copyFor(tfm).getBounds();
-        r = r.getIntersectRect(vr);
+        
+        // Constrain to visible rect?
+        //Rect vr = n.getVisRect(); vr = vr.copyFor(tfm).getBounds(); r = r.getIntersectRect(vr);
+        
+        // Combine
         if(rect==null) rect = r;
         else rect.union(r);
     }
     
-    // Round rect and request real repaint
-    rect.snap();
+    // Round rect and constrain to root bounds
+    rect.snap(); if(rect.x<0) rect.x = 0; if(rect.y<0) rect.y = 0;
+    if(rect.width>getWidth()) rect.width = getWidth(); if(rect.height>getHeight()) rect.height = getHeight();
+        
+    // Notify listener
     if(_lsnr!=null) rect = _lsnr.rootViewWillPaint(this, rect);
     
     // Do repaint (in exception handler so we can reset things on failure)

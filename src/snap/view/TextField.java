@@ -56,7 +56,6 @@ public class TextField extends ParentView {
     
     // The color of the border when focused
     static Color    SELECTION_COLOR = new Color(181, 214, 254, 255);
-    static Color    FOCUSED_COLOR = Color.get("#039ed3");
     
 /**
  * Creates a new TextField.
@@ -533,7 +532,7 @@ protected void paintBack(Painter aPntr)
     double w = getWidth(), h = getHeight(); //aPntr.clearRect(0,0,w,h);
     RoundRect rrect = new RoundRect(.5, .5, w-1, h-1, _rad);
     aPntr.setPaint(getFill()); aPntr.fill(rrect);
-    aPntr.setColor(isFocused()? FOCUSED_COLOR : Color.LIGHTGRAY);
+    aPntr.setColor(Color.LIGHTGRAY);
     aPntr.setStroke(Stroke.Stroke1); aPntr.draw(rrect);
 }
 
