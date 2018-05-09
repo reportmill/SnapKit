@@ -1765,6 +1765,7 @@ protected void setFocused(boolean aValue)
 {
     if(aValue==_focused) return;
     firePropChange(Focused_Prop, _focused, _focused=aValue);
+    repaint();
 }
 
 /**

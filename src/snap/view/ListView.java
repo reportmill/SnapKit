@@ -45,12 +45,13 @@ public ListView()
     _listArea.setCellConfigure(lc -> configureCell(lc));
     
     // Create/configure ScrollView
-    _scroll = createScrollView();
+    _scroll = createScrollView(); _scroll.setBorder(null);
     _scroll.setContent(_listArea);
     addChild(_scroll);
     
     // Configure this ListView
     enableEvents(Action);
+    setBorder(ScrollView.SCROLL_VIEW_BORDER);
 }
 
 /**
@@ -315,7 +316,8 @@ public String getValuePropName()  { return getBinding(SelIndex_Prop)!=null? SelI
  */
 void listAreaPropChange(PropChange aPC)
 {
-    if(aPC.getPropertyName()==SelIndex_Prop)
+    String pname = aPC.getPropName();
+    if(pname==SelIndex_Prop)
         firePropChange(SelIndex_Prop, aPC.getOldValue(), aPC.getNewValue());
 }
 
