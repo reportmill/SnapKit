@@ -58,7 +58,7 @@ public class ButtonBase extends ParentView {
 public ButtonBase()
 {
     setFocusable(true);
-    enableEvents(MouseEvents); enableEvents(Action);
+    enableEvents(MouseEvents); enableEvents(KeyPress, Action);
 }
 
 /**
@@ -246,6 +246,10 @@ protected void processEvent(ViewEvent anEvent)
     else if(anEvent.isMousePress())  { _tracked = true; setPressed(true); repaint(); }
     else if(anEvent.isMouseRelease())  { if(_pressed) fire(); _pressed = _tracked = false; repaint(); }
     if(anEvent.isMouseEvent()) anEvent.consume();
+    
+    // Handle KeyPress + Enter
+    if(anEvent.isKeyPress() && anEvent.getKeyCode()==KeyCode.SPACE)
+        fire();
 }
 
 /**

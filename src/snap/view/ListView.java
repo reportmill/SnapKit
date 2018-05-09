@@ -44,13 +44,17 @@ public ListView()
     _listArea.addPropChangeListener(pce -> listAreaPropChange(pce));
     _listArea.setCellConfigure(lc -> configureCell(lc));
     
+    // Fix so that ListView handles focus instead of ListArea
+    setFocusable(true); setFocusWhenPressed(true);
+    _listArea.setFocusable(false); _listArea.setFocusWhenPressed(false);
+    
     // Create/configure ScrollView
     _scroll = createScrollView(); _scroll.setBorder(null);
     _scroll.setContent(_listArea);
     addChild(_scroll);
     
     // Configure this ListView
-    enableEvents(Action);
+    enableEvents(KeyPress, Action);
     setBorder(ScrollView.SCROLL_VIEW_BORDER);
 }
 
@@ -319,15 +323,6 @@ void listAreaPropChange(PropChange aPC)
     String pname = aPC.getPropName();
     if(pname==SelIndex_Prop)
         firePropChange(SelIndex_Prop, aPC.getOldValue(), aPC.getNewValue());
-}
-
-/**
- * Override to forward to ListArea.
- */
-public void setFocusWhenPressed(boolean aValue)
-{
-    super.setFocusWhenPressed(aValue);
-    _listArea.setFocusWhenPressed(aValue);
 }
 
 /**
