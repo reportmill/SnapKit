@@ -372,7 +372,7 @@ protected void scrollSelToVisible()
     if(srect.getX()-1<=getTextBox().getX()) { srect.setX(-getX()); srect.setWidth(10); }
     
     // If selection rect not fully contained in visible rect, scrollRectToVisible
-    Rect vrect = getClipBoundsAll(); if(vrect==null || vrect.isEmpty()) return;
+    Rect vrect = getClipAllBounds(); if(vrect==null || vrect.isEmpty()) return;
     if(!vrect.contains(srect)) {
         if(!srect.intersects(vrect)) srect.inset(0,-100);
         scrollToVisible(srect);

@@ -341,13 +341,11 @@ public synchronized void paintLater()
     View views[] = _dirtyRects.keySet().toArray(new View[_dirtyRects.size()]);
     for(View view : views) { Rect r = _dirtyRects.get(view);
     
-        // Get transform from dirty view to this root view and convert dirty rect to root view coords
-        Transform tfm = view!=this? view.getLocalToParent(this) : Transform.IDENTITY;
-        r = r.copyFor(tfm).getBounds();
+        // Constrain to ancestor clips
+        r = view.getClippedRect(r); if(r.isEmpty()) continue;
         
-        // Constrain to visible rect?
-        if(view instanceof Scroller || view.getParent(Scroller.class)!=null) {
-            Rect vr = view.getVisRect(); vr = vr.copyFor(tfm).getBounds(); r = r.getIntersectRect(vr); }
+        // Transform to root coords
+        r = view.localToParent(r, this).getBounds();
         
         // Combine
         if(rect==null) rect = r;
@@ -355,6 +353,7 @@ public synchronized void paintLater()
     }
     
     // Round rect and constrain to root bounds
+    if(rect==null) { _plater = null; return; }
     rect.snap(); if(rect.x<0) rect.x = 0; if(rect.y<0) rect.y = 0;
     if(rect.width>getWidth()) rect.width = getWidth(); if(rect.height>getHeight()) rect.height = getHeight();
         

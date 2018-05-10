@@ -383,7 +383,7 @@ protected void scrollSelToVisible()
     if(srect.isEmpty()) srect.inset(-1,-2); else srect.width = 30;
     
     // If visible rect not set or empty or fully contains selection rect, just return
-    Rect vrect = getClipBoundsAll(); if(vrect==null || vrect.isEmpty()) return;
+    Rect vrect = getClipAllBounds(); if(vrect==null || vrect.isEmpty()) return;
     if(vrect.contains(srect)) return;
     
     // If totally out of view, add buffer. Then scroll rect to visible
@@ -407,7 +407,7 @@ protected double getPrefHeightImpl(double aW)  { return getRowHeight()*getItemCo
 protected void layoutImpl()
 {
     // Update CellStart/CellEnd for current ClipBounds
-    Rect clip = getClipBoundsAll(); if(clip==null) clip = getBoundsLocal(); double rh = getRowHeight();
+    Rect clip = getClipAllBounds(); if(clip==null) clip = getBoundsLocal(); double rh = getRowHeight();
     
     // Update CellStart/CellEnd for current ClipBounds
     _cellStart = (int)Math.max(clip.getY()/rh,0);

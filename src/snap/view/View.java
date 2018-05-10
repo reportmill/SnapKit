@@ -719,28 +719,23 @@ public Shape getClipAll()
 /**
  * Returns the clip bounds due to all parents.
  */
-public Rect getClipBoundsAll()  { Shape clip = getClipAll(); return clip!=null? clip.getBounds() : null; }
+public Rect getClipAllBounds()  { Shape clip = getClipAll(); return clip!=null? clip.getBounds() : null; }
 
 /**
- * Returns the visible bounds for a view based on first ancestor clip (or null if no clipping found).
+ * Returns the clipped shape for given shape.
  */
-public Rect getVisRect()
+public Rect getClippedRect(Rect aRect)
 {
-    if(!isVisible()) return new Rect(0,0,0,0);
-    Rect cbnds = getClipBoundsAll();
-    Rect bnds = getBoundsLocal(); if(cbnds==null) return bnds;
-    double x = Math.floor(Math.max(cbnds.getX(),bnds.getX()));
-    double y = Math.floor(Math.max(cbnds.getY(),bnds.getY()));
-    double w = Math.ceil(Math.min(cbnds.getMaxX(),bnds.getMaxX())) - x;
-    double h = Math.ceil(Math.min(cbnds.getMaxY(),bnds.getMaxY())) - y;
-    if(w<=0 || h<=0) { x = bnds.getMinX(); y = bnds.getMinY(); w = 0; h = 0; }
-    return new Rect(x,y,w,h);
+    if(!isVisible()) return new Rect();
+    Rect cbnds = getClipAllBounds(); if(cbnds==null) return aRect;
+    Rect crect = aRect.getIntersectRect(cbnds); crect.snap();
+    return crect;
 }
 
 /**
- * Sets the visible rect.
+ * Returns the visible bounds for a view based on ancestor clips (just bound local if no clipping found).
  */
-public void setVisRect(Rect aRect)  { scrollToVisible(aRect); }
+public Rect getVisRect()  { return getClippedRect(getBoundsLocal()); }
 
 /**
  * Called to scroll the given shape in this view coords to visible.

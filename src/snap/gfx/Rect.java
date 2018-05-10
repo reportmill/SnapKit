@@ -70,13 +70,23 @@ public boolean intersectsEvenIfEmpty(double aX, double aY, double aW, double aH)
 /**
  * Returns the rect that is an intersection of this rect and given rect.
  */
+public void intersect(Rect aRect)
+{
+    double x2 = Math.max(x, aRect.x), w2 = Math.min(getMaxX(), aRect.getMaxX()) - x2;
+    double y2 = Math.max(y, aRect.y), h2 = Math.min(getMaxY(), aRect.getMaxY()) - y2;
+    if(w2<0 || h2<0) { x2 = x; y2 = y; w2 = h2 = 0; }
+    setRect(x2, y2, w2, h2);
+}
+
+/**
+ * Returns the rect that is an intersection of this rect and given rect.
+ */
 public Rect getIntersectRect(Rect aRect)
 {
-    double x1 = Math.max(getMinX(), aRect.getMinX());
-    double y1 = Math.max(getMinY(), aRect.getMinY());
-    double x2 = Math.min(getMaxX(), aRect.getMaxX());
-    double y2 = Math.min(getMaxY(), aRect.getMaxY());
-    return new Rect(x1, y1, x2-x1, y2-y1);
+    double x2 = Math.max(x, aRect.x), w2 = Math.min(getMaxX(), aRect.getMaxX()) - x2;
+    double y2 = Math.max(y, aRect.y), h2 = Math.min(getMaxY(), aRect.getMaxY()) - y2;
+    if(w2<0 || h2<0) { x2 = x; y2 = y; w2 = h2 = 0; }
+    return new Rect(x2, y2, w2, h2);
 }
 
 /**
@@ -247,9 +257,9 @@ public void addY(double newy)
  */
 public void snap()
 {
-    double x = getX(), y = getY(), w = getWidth(), h = getHeight();
-    double x1 = Math.floor(x), y1 = Math.floor(y), x2 = Math.ceil(x+w), y2 = Math.ceil(y+h);
-    setRect((int)x1, (int)y1, (int)(x2 - x1), (int)(y2 - y1));
+    double x2 = Math.floor(x), w2 = Math.ceil(x+width) - x2;
+    double y2 = Math.floor(y), h2 = Math.ceil(y+height) - y2;
+    setRect(x2, y2, w2, h2);
 }
 
 /**
@@ -257,8 +267,8 @@ public void snap()
  */
 public Point[] getPoints()
 {
-    double x = getX(), y = getY(), w = getWidth(), h = getHeight();
-    return new Point[] { new Point(x,y), new Point(x+w,y), new Point(x+w,y+h), new Point(x,y+h) }; 
+    double x2 = x + width, y2 = y + height;
+    return new Point[] { new Point(x,y), new Point(x2,y), new Point(x2,y2), new Point(x,y2) }; 
 }
 
 /**
