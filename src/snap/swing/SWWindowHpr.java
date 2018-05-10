@@ -169,7 +169,6 @@ public void hide()
 public void toFront()
 {
     get().toFront();
-    System.out.println("ToFront: " + get());
 }
 
 /**
