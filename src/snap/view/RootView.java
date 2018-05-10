@@ -61,7 +61,7 @@ public class RootView extends ParentView {
  */
 public RootView()
 {
-    enableEvents(KeyEvents); setFocusable(true);
+    enableEvents(KeyEvents); setFocusable(true); setFocusPainted(false);
     setFill(ViewUtils.getBackFill());
 }
 
@@ -339,14 +339,15 @@ public synchronized void paintLater()
     // Calculate composite repaint rect from all dirty views/rects
     Rect rect = null; if(_dirtyRects.size()==0)  { _plater = null; return; }
     View views[] = _dirtyRects.keySet().toArray(new View[_dirtyRects.size()]);
-    for(View n : views) { Rect r = _dirtyRects.get(n);
+    for(View view : views) { Rect r = _dirtyRects.get(view);
     
         // Get transform from dirty view to this root view and convert dirty rect to root view coords
-        Transform tfm = n!=this? n.getLocalToParent(this) : Transform.IDENTITY;
+        Transform tfm = view!=this? view.getLocalToParent(this) : Transform.IDENTITY;
         r = r.copyFor(tfm).getBounds();
         
         // Constrain to visible rect?
-        //Rect vr = n.getVisRect(); vr = vr.copyFor(tfm).getBounds(); r = r.getIntersectRect(vr);
+        if(view instanceof Scroller || view.getParent(Scroller.class)!=null) {
+            Rect vr = view.getVisRect(); vr = vr.copyFor(tfm).getBounds(); r = r.getIntersectRect(vr); }
         
         // Combine
         if(rect==null) rect = r;

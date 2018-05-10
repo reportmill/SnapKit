@@ -56,7 +56,7 @@ public TreeView()
 {
     // Enable Action event for selection change
     enableEvents(Action);
-    setFocusable(true); setFocusWhenPressed(true);
+    setFocusable(true); setFocusWhenPressed(true); setFocusPainted(false);
     
     // Configure Columns SplitView and ScrollView and add
     _split.setBorder(null); _split.setGrowWidth(true);

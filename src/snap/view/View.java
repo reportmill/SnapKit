@@ -77,6 +77,9 @@ public class View implements XMLArchiver.Archivable {
 
     // Whether view focus should change when traveral key is pressed (Tab)
     boolean         _focusKeysEnbld = true;
+    
+    // Whether view should paint focus ring when focused
+    boolean         _focusPainted = true;
  
     // Whether view is visible
     boolean         _visible = true;
@@ -1614,7 +1617,7 @@ protected void paintAll(Painter aPntr)
         opacityOld = aPntr.getOpacity(); aPntr.setOpacity(opacity); }
         
     // If focused, render focused
-    if(isFocused())
+    if(isFocused() && isFocusPainted())
         ViewEffect.getFocusViewEffect(this).paintAll(aPntr);
 
     // If view has effect, get/create effect painter to speed up successive paints
@@ -1730,7 +1733,7 @@ public void relayoutParent()
 public void repaint()
 {
     double x = 0, y = 0, w = getWidth(), h = getHeight();
-    if(isFocused()) { Rect r = ViewEffect.getFocusEffect().getBounds(getBoundsLocal());
+    if(isFocused() && isFocusPainted()) { Rect r = ViewEffect.getFocusEffect().getBounds(getBoundsLocal());
         x = r.x; y = r.y; w = r.width; h = r.height; }
     else if(getEffect()!=null) { Rect r = getEffect().getBounds(getBoundsLocal());
         x = r.x; y = r.y; w = r.width; h = r.height; }
@@ -1814,6 +1817,21 @@ public boolean isFocusKeysEnabled()  { return _focusKeysEnbld; }
  * Sets whether focus should change when traversal keys are pressed (Tab).
  */
 public void setFocusKeysEnabled(boolean aValue)  { _focusKeysEnbld = aValue; }
+
+/**
+ * Returns whether focus ring should be painted when view is focused.
+ */
+public boolean isFocusPainted()
+{
+    if(!_focusPainted) return false;
+    if(getWidth()*getHeight()>90000) return false;
+    return _focusPainted;
+}
+
+/**
+ * Sets whether focus ring should be painted when view is focused.
+ */
+public void setFocusPainted(boolean aValue)  { _focusPainted = aValue; }
 
 /**
  * Tells view to request focus.

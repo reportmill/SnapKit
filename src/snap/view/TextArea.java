@@ -78,6 +78,7 @@ public TextArea()
     // Configure
     setPlainText(true);
     setFont(getDefaultFont());
+    setFocusPainted(false);
 }
 
 /**
