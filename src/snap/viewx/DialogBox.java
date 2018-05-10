@@ -233,6 +233,16 @@ public void setConfirmOnEnter(boolean aValue)
     if(aValue==isConfirmOnEnter()) return;
     _confirmOnEnter = aValue;
 }
+
+/**
+ * Returns the confirm button.
+ */
+public Button getConfirmButton()  { return _confirmBtn; }
+ 
+/**
+ * Returns the cancel button.
+ */
+public Button getCancelButton()  { return _cancelBtn; }
  
 /**
  * Runs the panel.
