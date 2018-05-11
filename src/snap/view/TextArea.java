@@ -72,8 +72,8 @@ public class TextArea extends ParentView {
 public TextArea()
 {
     // Create/set default TextBox
-    TextBox tbox = createTextBox();
-    setTextBox(tbox);
+    _tbox = createTextBox();
+    _tbox.getRichText().addPropChangeListener(_richTextPropLsnr);
     
     // Configure
     setPlainText(true);
@@ -87,24 +87,6 @@ public TextArea()
 public TextBox getTextBox()  { return _tbox; }
 
 /**
- * Sets the text that is to be edited.
- */
-public void setTextBox(TextBox aText)
-{
-    // If value already set, just return
-    if(aText==_tbox) return;
-    
-    // Set Text and add/remove PropChangeListener
-    if(_tbox!=null) _tbox.getRichText().removePropChangeListener(_richTextPropLsnr);
-    _tbox = aText;
-    if(_tbox!=null) _tbox.getRichText().addPropChangeListener(_richTextPropLsnr);
-    
-    // Reset selection
-    if(getSelStart()!=0 || !isSelEmpty()) setSel(0);
-    repaint();
-}
-
-/**
  * Creates a new TextBox.
  */
 protected TextBox createTextBox()  { return new TextBox(); }
@@ -113,6 +95,24 @@ protected TextBox createTextBox()  { return new TextBox(); }
  * Returns the rich text.
  */
 public RichText getRichText()  { return getTextBox().getRichText(); }
+
+/**
+ * Sets the RichText.
+ */
+public void setRichText(RichText aRichText)
+{
+    // If already set, just return
+    RichText old = getRichText(); if(aRichText==old) return;
+    
+    // Add/remove PropChangeListener
+    if(old!=null) old.removePropChangeListener(_richTextPropLsnr);
+    getTextBox().setText(aRichText);
+    if(aRichText!=null) aRichText.addPropChangeListener(_richTextPropLsnr);
+    
+    // Reset selection
+    if(getSelStart()!=0 || !isSelEmpty()) setSel(0);
+    repaint();
+}
 
 /**
  * Returns the source of current content (URL, File, String path, etc.)
