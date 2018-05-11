@@ -137,6 +137,7 @@ public void show()
     // Set window location, make visible and notify ShowingChanged
     win.setLocation(x,y);
     win.setVisible(true);
+    showingChanged(); // So change is reflected immediately
     
     // If window is modal, just return
     if(wview.isModal())
@@ -161,6 +162,7 @@ public void show()
 public void hide()
 {
     get().setVisible(false);
+    showingChanged(); // So change is reflected immediately
 }
 
 /**
