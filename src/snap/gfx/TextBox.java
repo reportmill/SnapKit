@@ -230,7 +230,12 @@ public boolean isLinked()  { return _linked; }
 /**
  * Returns whether text is linked to another text (and shouldn't add lines below bottom border).
  */
-public void setLinked(boolean aValue)  { _linked = aValue; }
+public void setLinked(boolean aValue)
+{
+    if(aValue==_linked) return;
+    _linked = aValue;
+    setNeedsUpdateAll();
+}
 
 /**
  * Returns the start char in RichText.
@@ -464,11 +469,10 @@ protected void update()
     
     // Get count, start and end of currently configured lines
     int lcount = _lines.size();
-    int lstart = getStart();
     int lend = lcount>0? _lines.get(lcount-1).getEnd() : getStart();
     
     // Get update start, linesEnd and textEnd to synchronize lines to text
-    int start = Math.max(_updStart, lstart);
+    int start = _updStart; //Math.max(_updStart, getStart());
     int linesEnd = Math.min(_lastLen - _updEnd, lend);
     int textEnd = length() - _updEnd;
     if(start<=linesEnd || _lastLen==0)
