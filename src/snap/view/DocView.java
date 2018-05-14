@@ -103,26 +103,26 @@ public void setSelIndex(int anIndex)
     if(anIndex==_selIndex) return;
     
     // Get/remove old page
-    PageView opage = getSelectedPage();
+    PageView opage = getSelPage();
     if(opage!=null) removeChild(opage);
     
     // Set new value
     _selIndex = anIndex;
     
     // Get new page
-    PageView page = getSelectedPage();
+    PageView page = getSelPage();
     if(page!=null) addChild(page);
 }
 
 /**
  * Returns the currently selected page.
  */
-public PageView getSelectedPage()  { return _selIndex>=0? getPage(_selIndex) : null; }
+public PageView getSelPage()  { return _selIndex>=0? getPage(_selIndex) : null; }
 
 /**
  * Sets the currently selected page.
  */
-public void setSelectedPage(PageView aPage)
+public void setSelPage(PageView aPage)
 {
     int index = ListUtils.indexOfId(_pages, aPage);
     if(index>=0) setSelIndex(index);
@@ -131,7 +131,7 @@ public void setSelectedPage(PageView aPage)
 /**
  * Returns the page node.
  */
-public PageView getPage()  { return getSelectedPage(); }
+public PageView getPage()  { return getSelPage(); }
 
 /**
  * Sets the page node.
