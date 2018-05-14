@@ -98,7 +98,7 @@ public void dispatchEvent(ViewEvent anEvent)
 public void dispatchMouseEvent(ViewEvent anEvent)
 {
     // Update ViewEnv.MouseDown
-    if(anEvent.isMousePress()) ViewUtils._mouseDown = true;
+    if(anEvent.isMousePress()) ViewUtils.setMouseDown(anEvent);
     else if(anEvent.isMouseDrag()) ViewUtils._mouseDrag = true;
     else if(anEvent.isMouseRelease()) ViewUtils._mouseDown = ViewUtils._mouseDrag = false;
 

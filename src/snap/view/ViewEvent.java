@@ -23,6 +23,12 @@ public abstract class ViewEvent {
     // The UI event type
     Type                _type;
     
+    // When the event was sent
+    long                _when;
+    
+    // The click count
+    int                 _clickCount = 1;
+    
     // Whether event was consumed
     boolean             _consumed;
     
@@ -85,6 +91,11 @@ protected abstract Type getTypeImpl();
 public void setType(Type aType)  { _type = aType; }
 
 /**
+ * Returns the time the event was sent.
+ */
+public long getWhen()  { return _when>0? _when : (_when=System.currentTimeMillis()); }
+
+/**
  * Returns whether event is action event.
  */
 public boolean isActionEvent()  { return getType()==Type.Action; }
@@ -117,7 +128,24 @@ public boolean isMouseRelease()  { return getType()==Type.MouseRelease; }
 /**
  * Returns whether event is mouse clicked.
  */
-public boolean isMouseClick()  { return isMouseRelease(); }
+public boolean isMouseClick()  { return isMouseRelease() && isClickCandidate(); }
+
+/**
+ * Returns whether event is mouse event in mouse click range (within half second of down
+ */
+public boolean isClickCandidate()
+{
+    // If event not within half second of last mouse, return false
+    ViewEvent last = ViewUtils.getMouseDown(); if(last==null) return false;
+    if(getWhen() - last.getWhen() >= 600) return false;
+    
+    // If event not within 1 point of last mouse, return false
+    Point pnt = getView()==last.getView()? last.getPoint() : last.getPoint(getView());
+    if(Math.abs(getX()-pnt.getX())>1 || Math.abs(getY()-pnt.getY())>1) return false;
+    
+    // Return true since passed tests
+    return true;
+}
 
 /**
  * Returns whether event is mouse entered.
@@ -321,22 +349,39 @@ public KeyCombo getKeyCombo()
     return _kcombo = new KeyCombo(getKeyCode(), isAltDown(), isMetaDown(), isControlDown(), isShiftDown());
 } KeyCombo _kcombo;
 
-/** Returns whether popup trigger is down. */
+/**
+ * Returns whether popup trigger is down.
+ */
 public boolean isPopupTrigger()  { return false; }
 
-/** Returns the click count for a mouse event. */
-public int getClickCount()  { return 0; }
+/**
+ * Returns the click count for a mouse event.
+ */
+public int getClickCount()  { return _clickCount; }
 
-/** Returns the mouse event x. */
+/**
+ * Sets the click count for a mouse event.
+ */
+protected void setClickCount(int aValue)  { _clickCount = aValue; }
+
+/**
+ * Returns the mouse event x.
+ */
 public double getX()  { return 0; }
 
-/** Returns the mouse event y. */
+/**
+ * Returns the mouse event y.
+ */
 public double getY()  { return 0; }
 
-/** Returns the event location. */
+/**
+ * Returns the event location.
+ */
 public Point getPoint()  { return new Point(getX(),getY()); }
 
-/** Returns the event location in coords of given view. */
+/**
+ * Returns the event location in coords of given view.
+ */
 public Point getPoint(View aView)
 {
     Point pt = getPoint(); View view0 = getView();
@@ -426,9 +471,9 @@ public void setTriggersReset(boolean aValue)  { _triggersReset = aValue; }
  */
 public ViewEvent copyForView(View aView)
 {
-    View thisNode = getView(); double x = getX(), y = getY();
-    View par = ViewUtils.getCommonAncetor(thisNode, aView);
-    snap.gfx.Point point = par==thisNode? aView.parentToLocal(x,y,par) : thisNode.localToParent(x,y,par);
+    View thisView = getView(); double x = getX(), y = getY();
+    View par = ViewUtils.getCommonAncetor(thisView, aView);
+    snap.gfx.Point point = par==thisView? aView.parentToLocal(x,y,par) : thisView.localToParent(x,y,par);
     return copyForViewPoint(aView, point.x, point.y, -1);
 }
 

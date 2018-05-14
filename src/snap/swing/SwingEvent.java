@@ -14,9 +14,6 @@ public class SwingEvent extends ViewEvent {
     // The mouse location
     double            _mx = Float.MIN_VALUE, _my = Float.MIN_VALUE;
     
-    // The click count
-    int               _ccount = -1;
-    
     // Shortcut key mask
     private static final int SHORTCUT_KEY_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
@@ -63,15 +60,8 @@ public boolean isShortcutDown()
 /** Returns whether popup trigger is down. */
 public boolean isPopupTrigger()  { return isMouseEvent() && getEvent(MouseEvent.class).isPopupTrigger(); }
 
-/**
- * Returns the click count for a mouse event.
- */
-public int getClickCount()
-{
-    if(_ccount>=0) return _ccount;
-    MouseEvent me = getEvent(MouseEvent.class);
-    return _ccount = me!=null? me.getClickCount() : 0;
-}
+/** Returns the click count for a mouse event. */
+//public int getClickCount() { if(_cnt>=0) return _cnt; MouseEvent me = getEvent(); return _cnt = me.getClickCount(); }
 
 /**
  * Returns the location for a mouse event or drop event.
@@ -147,7 +137,7 @@ public ViewEvent copyForViewPoint(View aView, double aX, double aY, int aClickCo
 {
     String name = getName(); if(name!=null && (name.length()==0 || name.equals(getView().getName()))) name = null;
     SwingEvent copy = (SwingEvent)SwingViewEnv.get().createEvent(aView, getEvent(), getType(), name);
-    copy._mx = aX; copy._my = aY; if(aClickCount>0) copy._ccount = aClickCount;
+    copy._mx = aX; copy._my = aY; copy.setClickCount(aClickCount>0? aClickCount : getClickCount());
     return copy;
 }
 

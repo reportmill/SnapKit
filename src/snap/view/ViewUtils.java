@@ -14,6 +14,9 @@ public class ViewUtils {
     
     // Booleans for input event state and modifiers
     static boolean          _altDown, _cntrDown, _metaDown, _mouseDown, _mouseDrag, _shiftDown, _shortcutDown;
+    
+    // The last MouseDown event
+    static ViewEvent        _lastMouseDown;
 
     // Color constants
     private static Color BACK_FILL = new Color("#E9E8EA");
@@ -58,6 +61,24 @@ public static boolean isShiftDown()  { return _shiftDown; }
  * Returns whether shortcut is down.
  */
 public static boolean isShortcutDown()  { return _shortcutDown; }
+
+/**
+ * Returns the last MouseDown event.
+ */
+public static ViewEvent getMouseDown()  { return _lastMouseDown; }
+
+/**
+ * Sets the MouseDown event.
+ */
+public static void setMouseDown(ViewEvent anEvent)
+{
+    // If time within range, bump click count
+    if(_lastMouseDown!=null && (anEvent.getWhen() - _lastMouseDown.getWhen() < 600))
+        anEvent.setClickCount(_lastMouseDown.getClickCount()+1);
+        
+    // Set new event
+    _lastMouseDown = anEvent; _mouseDown = true;
+}
 
 /**
  * Returns the selection color.
