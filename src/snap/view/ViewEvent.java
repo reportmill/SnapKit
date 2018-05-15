@@ -34,6 +34,10 @@ public abstract class ViewEvent {
     
     // Whether event triggers a UI reset
     boolean             _triggersReset = true;
+    
+    // Constants for double/triple click constraints
+    static long         CLICK_TIME = 550;
+    static double       CLICK_DIST = 1;
 
 /**
  * Returns the node associated with this event.
@@ -137,11 +141,11 @@ public boolean isClickCandidate()
 {
     // If event not within half second of last mouse, return false
     ViewEvent last = ViewUtils.getMouseDown(); if(last==null) return false;
-    if(getWhen() - last.getWhen() >= 600) return false;
+    if(getWhen() - last.getWhen() >= CLICK_TIME) return false;
     
     // If event not within 1 point of last mouse, return false
     Point pnt = getView()==last.getView()? last.getPoint() : last.getPoint(getView());
-    if(Math.abs(getX()-pnt.getX())>1 || Math.abs(getY()-pnt.getY())>1) return false;
+    if(Math.abs(getX()-pnt.getX())>CLICK_DIST || Math.abs(getY()-pnt.getY())>CLICK_DIST) return false;
     
     // Return true since passed tests
     return true;

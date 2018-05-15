@@ -73,7 +73,7 @@ public static ViewEvent getMouseDown()  { return _lastMouseDown; }
 public static void setMouseDown(ViewEvent anEvent)
 {
     // If time within range, bump click count
-    if(_lastMouseDown!=null && (anEvent.getWhen() - _lastMouseDown.getWhen() < 600))
+    if(_lastMouseDown!=null && (anEvent.getWhen() - _lastMouseDown.getWhen() < ViewEvent.CLICK_TIME))
         anEvent.setClickCount(_lastMouseDown.getClickCount()+1);
         
     // Set new event
