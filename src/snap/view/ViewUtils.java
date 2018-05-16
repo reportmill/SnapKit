@@ -134,6 +134,50 @@ public static Rect getBoundsOfViews(View aPar, List <? extends View> aList)
 }
 
 /**
+ * Run given runnable on event thread.
+ */
+public static void runLater(Runnable aRun)  { ViewEnv.getEnv().runLater(aRun); }
+
+/**
+ * Runs a runnable on next mouse release (assumes mouse is down).
+ */
+public static void runOnMouseUp(Runnable aRun)
+{
+    // Add MouseUpRun (just return if already present)
+    if(_mouseUpRuns.contains(aRun)) return; _mouseUpRuns.add(aRun);
+    
+    // Set MouseUpLsnr from shared (just return if already set)
+    if(_mouseUpLsnr!=null) return; _mouseUpLsnr = _mouseUpLsnrShared;
+        
+    // If not mouse down, complain
+    if(!isMouseDown()) System.err.println("ViewUtils.runOnMouseUp: Mouse not down");
+    
+    // Get mouse down view (just return if none)
+    View view = _lastMouseDown!=null? _lastMouseDown.getView() : null;
+    if(view==null) { runLater(aRun); return; }
+    
+    // Add EventListener to execute run on MouseRelease
+    view.addEventFilter(_mouseUpLsnr, View.MouseRelease);
+}
+
+/** Runs MouseUp runs. */
+static void runMouseUpRuns() {
+
+    // Schedule runs and clear
+    for(Runnable run : _mouseUpRuns) runLater(run); _mouseUpRuns.clear();
+    
+    // Remove MouseUpLsnr
+    View view = _lastMouseDown.getView();
+    view.removeEventFilter(_mouseUpLsnr, View.MouseRelease); _mouseUpLsnr = null;
+}
+
+// The current list of MouseUp runs
+private static List <Runnable> _mouseUpRuns = new ArrayList();
+
+// An EventListener to schedule MouseUpRuns on MouseUp
+private static snap.view.EventListener _mouseUpLsnr, _mouseUpLsnrShared = e -> runMouseUpRuns();
+
+/**
  * Returns an identifier string for a given view.
  */
 public static String getId(View aView)
