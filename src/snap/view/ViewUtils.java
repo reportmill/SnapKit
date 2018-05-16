@@ -139,6 +139,14 @@ public static Rect getBoundsOfViews(View aPar, List <? extends View> aList)
 public static void runLater(Runnable aRun)  { ViewEnv.getEnv().runLater(aRun); }
 
 /**
+ * Runs given runnable after delay.
+ */
+public static void runDelayed(Runnable aRun, int aDelay, boolean inAppThread)
+{
+    ViewEnv.getEnv().runDelayed(aRun, aDelay, inAppThread);
+}
+    
+/**
  * Runs a runnable on next mouse release (assumes mouse is down).
  */
 public static void runOnMouseUp(Runnable aRun)

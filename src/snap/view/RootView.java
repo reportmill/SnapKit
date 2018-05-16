@@ -393,21 +393,17 @@ public synchronized void paintViews(Painter aPntr, Rect aRect)
  */
 protected void paintDebug(View aView, Painter aPntr, Shape aShape)
 {
-    // If odd paint call, just do normal paint and return
-    if(_pc%2==1) { paintAll(aPntr); return; }
+    // If odd paint call, sleep for a moment to give debug paint a moment to register then do normal paint
+    if(_pc%2==1) {
+        try { Thread.sleep(30); } catch(Exception e) { }
+        paintAll(aPntr); return;
+    }
     
-    // Fill paint bounds, sleep
+    // Fill paint bounds with yellow
     aPntr.setColor(Color.YELLOW); aPntr.fill(aShape);
     
-    // Sleep for a bit then register for real paint
-    getEnv().runLater(() -> { Rect rect = aShape.getBounds();
-        try { Thread.sleep(50); } catch(Exception e) { }
-        repaint(this, rect.x, rect.y, rect.width, rect.height);
-    });
-    
-    // Register for new paint
-    //TimerTask task = new TimerTask() { public void run()  { RootView.this.repaint(aShape.getBounds()); }};
-    //new Timer().schedule(task, 100);
+    // Schedule repaint to do real paint
+    ViewUtils.runLater(() -> getChild(0).repaint(aShape.getBounds()));
 }
 
 /**
