@@ -99,8 +99,9 @@ public void dispatchMouseEvent(ViewEvent anEvent)
 {
     // Update ViewEnv.MouseDown
     if(anEvent.isMousePress()) ViewUtils.setMouseDown(anEvent);
-    else if(anEvent.isMouseDrag()) ViewUtils._mouseDrag = true;
-    else if(anEvent.isMouseRelease()) ViewUtils._mouseDown = ViewUtils._mouseDrag = false;
+    else if(anEvent.isMouseDrag()) { ViewUtils._mouseDrag = true; anEvent.setClickCount(getClickCount()); }
+    else if(anEvent.isMouseRelease()) { ViewUtils._mouseDown = ViewUtils._mouseDrag = false;
+        anEvent.setClickCount(getClickCount()); }
 
     // Get target view (at mouse point, or mouse press, or mouse press point)
     View targ = ViewUtils.getDeepestViewAt(_rview, anEvent.getX(), anEvent.getY());
@@ -315,5 +316,8 @@ void beep(boolean aFlag)
 {
     ViewUtils.beep(); if(!aFlag) { try { Thread.sleep(300); } catch(Exception e) { } ViewUtils.beep(); }
 }
+
+// Returns the current click count
+private static int getClickCount()  { return ViewUtils.getMouseDown().getClickCount(); }
 
 }
