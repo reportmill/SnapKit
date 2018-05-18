@@ -95,7 +95,7 @@ public void setPassword(String aPassword)  { firePropChange("Password", _passwor
 /**
  * Returns whether data source exists.
  */
-public boolean getExists()  { WebFile f = getFile("/"); return f!=null && f.getExists(); }
+public boolean getExists()  { WebFile f = getFile("/"); return f!=null && f.isSaved(); }
 
 /**
  * Returns the root directory.
@@ -145,7 +145,7 @@ public synchronized WebFile getFile(String aPath) throws ResponseException
     // Get file from cache (just return if found)
     String path = PathUtils.getNormalized(aPath);
     WebFile file = _files.get(path);
-    if(file!=null && file.getExists())
+    if(file!=null && file.isVerified() && file.isSaved())
         return file;
 
     // Get path URL and Head response
@@ -162,7 +162,7 @@ public synchronized WebFile getFile(String aPath) throws ResponseException
         
     // Get file header from response, create file and return
     FileHeader fhdr = resp.getFileHeader();
-    file = createFile(fhdr); file._exists = true; file._url = url;
+    file = createFile(fhdr); file._saved = true; file._url = url;
     return file;
 }
 
@@ -184,7 +184,7 @@ protected synchronized WebFile createFile(FileHeader fileHdr)
     
     // Create/configure new file
     file = new WebFile(); file._path = path; file._dir = fileHdr.isDir(); file._site = this;
-    file._lastModTime = fileHdr.getLastModTime(); file._size = fileHdr.getSize();
+    file._modTime = fileHdr.getLastModTime(); file._size = fileHdr.getSize();
     file.setMIMEType(fileHdr.getMIMEType());
     
     // Put in cache, start listening to file changes and return
@@ -204,22 +204,20 @@ protected void saveFile(WebFile aFile) throws ResponseException
         updater.updateFile(aFile); aFile.setUpdater(null); }
 
     // If parent doesn't exist, save it (to make sure it exists)
-    WebFile parent = aFile.getParent();
-    if(parent!=null && !parent.getVerified().getExists())
-        parent.save();
+    WebFile par = aFile.getParent();
+    if(par!=null && !par.getVerified().isSaved())
+        par.save();
     
     // Save file
-    try { long mt = saveFileImpl(aFile); aFile.setLastModTime(mt); }
+    try { long mt = saveFileImpl(aFile); aFile.setModTime(mt); }
     catch(Exception e) { WebResponse r = new WebResponse(null); r.setException(e); throw new ResponseException(r); }
     
-    // If file needs to be added to parent, add and save
-    if(parent!=null && !aFile.getExists()) {
-        parent.addFile(aFile);
-        parent.save();
-    }
+    // If this is first save, have parent resetContent() so it will be added to parent files
+    if(par!=null && !aFile.isSaved())
+        par.resetContent();
     
-    // Set File.Exists
-    aFile.setExists(true);
+    // Set File.Saved
+    aFile.setSaved(true);
 }
 
 /**
@@ -228,33 +226,26 @@ protected void saveFile(WebFile aFile) throws ResponseException
 protected void deleteFile(WebFile aFile) throws ResponseException
 {
     // If file doesn't exist, throw exception
-    if(!aFile.getExists()) {
+    if(!aFile.isSaved()) {
         Exception e = new Exception("WebSite.deleteFile: File doesn't exist: " + aFile.getPath());
         WebResponse r = new WebResponse(null); r.setException(e); new ResponseException(r);
     }
     
     // If directory, delete child files
     if(aFile.isDir()) {
-        aFile._exists = false;
         for(WebFile file : aFile.getFiles())
-            file.delete();
-        aFile._exists = true;
-    }
+            file.delete(); }
 
     // Delete file
     try { deleteFileImpl(aFile); }
     catch(Exception e) { WebResponse r = new WebResponse(null); r.setException(e); throw new ResponseException(r); }
     
-    // If not root, remove file from parent, and if parent still exists, save
-    if(!aFile.isRoot()) { WebFile parent = aFile.getParent();
-        parent.removeFile(aFile);
-        if(parent.getExists())
-            parent.save();
-    }
+    // If not root, have parent resetContent() so file will be removed from parent files
+    if(!aFile.isRoot()) { WebFile par = aFile.getParent();
+        par.resetContent(); }
     
     // Resets the file
-    aFile.setExists(false);
-    resetFile(aFile);
+    aFile.reset();
 }
 
 /**
@@ -270,66 +261,12 @@ protected void deleteFileImpl(WebFile aFile) throws Exception { throw notImpl("d
 /**
  * Saves the modified time for a file to underlying file system.
  */
-protected void setLastModTime(WebFile aFile, long aTime) throws Exception  { }
-
-/**
- * Reloads a file from site.
- */
-protected void reloadFile(WebFile aFile)
-{
-    // Clear updater (if present)
-    aFile.setUpdater(null);
-
-    // If file doesn't exist, try a fetch, if exists, reload parent and return
-    if(!aFile.getExists()) {
-        getFile(aFile.getPath());
-        if(aFile.getExists()) {
-            aFile.setBytes(null); aFile.setFiles(null);
-            if(!aFile.isRoot() && aFile.getParent().isLoaded()) { WebFile par = aFile.getParent();
-                par.addFile(aFile);
-                par.save();
-            }
-            aFile._exists = null; aFile.setExists(true);  // Force firePropertyChange to fire
-        }
-        return;
-    }
-        
-    // Get updated HEAD response
-    WebResponse resp = aFile.getURL().getHead();
-    
-    // Handle NOT_FOUND: Update File.Exists, reset and remove from parent
-    if(resp.getCode()==WebResponse.NOT_FOUND) {
-        aFile.setExists(false);
-        resetFile(aFile);
-        if(!aFile.isRoot() && aFile.getParent().isLoaded()) { WebFile par = aFile.getParent();
-            par.removeFile(aFile);
-            par.save();
-        }
-        return;
-    }
-    
-    // Handle new mod time: reset file and set new modified time
-    if(resp.getLastModTime()>aFile.getLastModTime()) {
-        aFile._size = resp.getSize();
-        aFile.setBytes(null); aFile.setFiles(null);
-        aFile.setLastModTime(resp.getLastModTime());
-    }
-}
-
-/**
- * Resets a file.
- */
-protected synchronized void resetFile(WebFile aFile)
-{
-    aFile.removePropChangeListener(_fileLsnr);
-    aFile.setFiles(null); aFile.setBytes(null); aFile._lastModTime = 0; aFile._size = 0; aFile._exists = null;
-    aFile.addPropChangeListener(_fileLsnr);
-}
+protected void setModTimeSaved(WebFile aFile, long aTime) throws Exception  { }
 
 /**
  * Resets all loaded site files.
  */
-public synchronized void resetFiles()  { for(WebFile file : _files.values()) resetFile(file); }
+public synchronized void resetFiles()  { for(WebFile file : _files.values()) file.reset(); }
 
 /**
  * Returns a standard java.io.File, if available.

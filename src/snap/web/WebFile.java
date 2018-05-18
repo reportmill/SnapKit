@@ -4,7 +4,6 @@
 package snap.web;
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import snap.util.*;
 
 /**
@@ -15,23 +14,26 @@ public class WebFile extends SnapObject implements Comparable<WebFile> {
     // The WebSite that provided this file
     WebSite           _site;
     
+    // The file parent
+    WebFile           _parent;
+    
     // The file path
     String            _path;
     
     // Whether file is a directory
     boolean           _dir;
     
-    // Whether file exists in data source (has been saved and, if so, not deleted)
-    Boolean           _exists;
-
-    // The file parent
-    WebFile           _parent;
-    
     // The file last modified time
-    long              _lastModTime;
+    long              _modTime;
     
     // The file size
     long              _size;
+    
+    // Whether this file has been checked to see if it is saved at site
+    boolean           _verified;
+    
+    // Whether this file has been saved at site
+    boolean           _saved;
     
     // The file bytes
     byte              _bytes[];
@@ -49,18 +51,37 @@ public class WebFile extends SnapObject implements Comparable<WebFile> {
     WebURL            _url;
     
     // Constants for properties
-    final public static String ModifiedTime_Prop = "ModifiedTime";
     final public static String Bytes_Prop = "Bytes";
-    final public static String Size_Prop = "Size";
     final public static String File_Prop = "File";
     final public static String Files_Prop = "Files";
-    final public static String Exists_Prop = "Exists";
+    final public static String ModTime_Prop = "ModTime";
+    final public static String Saved_Prop = "Saved";
+    final public static String Size_Prop = "Size";
     final public static String Updater_Prop = "Updater";
+    final public static String Verified_Prop = "Verified";
+    final public static String Loaded_Prop = "Loaded";
     
 /**
  * Returns the WebSite.
  */
 public WebSite getSite()  { return _site; }
+
+/**
+ * Returns the file parent directory.
+ */
+public WebFile getParent()
+{
+    // If already set, just return
+    if(_parent!=null || isRoot()) return _parent;
+    
+    // Get file for parent path from site
+    return _parent = getSite().createFile(FilePathUtils.getParent(getPath()), true);
+}
+
+/**
+ * Sets the file parent.
+ */
+protected void setParent(WebFile aFile)  { _parent = aFile; }
 
 /**
  * Returns the file path.
@@ -96,8 +117,7 @@ public WebURL getURL()
     if(_url!=null) return _url;
     
     // Get path, site, URL and return
-    String path = getPath();
-    WebSite site = getSite();
+    String path = getPath(); WebSite site = getSite();
     return _url = site.getURL(path);
 }
 
@@ -117,79 +137,77 @@ public boolean isFile()  { return !_dir; }
 public boolean isRoot()  { return getPath().equals("/"); }
 
 /**
- * Returns whether file exists in data source (has been saved and, if so, not deleted).
+ * Returns whether file status has been check at the site.
  */
-public boolean getExists()  { return _exists!=null && _exists; }
+public boolean isVerified()  { return _verified; }
 
 /**
- * Sets whether file exists in data source (has been saved and, if so, not deleted).
+ * Sets whether file status has been check at the site.
  */
-protected void setExists(boolean aFlag)
+protected void setVerified(boolean aValue)
 {
-    if(_exists!=null && aFlag==_exists) return;
-    firePropChange(Exists_Prop, _exists, _exists = aFlag);
+    if(aValue==_verified) return;
+    if(!aValue) { _modTime = 0; _size = 0; _saved = false; }
+    firePropChange(Verified_Prop, _verified, _verified = aValue);
 }
 
 /**
- * Returns whether bytes/files have been set for this file/dir.
+ * Returns the file, ensuring that it's status has been checked with the site.
  */
-public boolean isLoaded()  { return _dir? (_files!=null) : (_bytes!=null); }
+public WebFile getVerified()  { if(!isVerified()) getSite().getFile(getPath()); return this; }
 
 /**
- * Returns the file, ensuring that it has attempted to load.
+ * Returns whether this file has been saved at site..
  */
-public WebFile getVerified()
+public boolean isSaved()  { return _saved; }
+
+/**
+ * Sets whether this file has been saved at site..
+ */
+protected void setSaved(boolean aValue)
 {
-    if(_exists==null) getSite().getFile(getPath());
-    return this;
+    if(aValue==_saved) return;
+    firePropChange(Saved_Prop, _saved, _saved = aValue);
 }
 
 /**
- * Returns the file parent directory.
+ * Conventional file method that simply wraps isSaved().
  */
-public WebFile getParent()
-{
-    // If parent not set, get from data source
-    if(_parent==null && !isRoot() && getSite()!=null)
-        _parent = getSite().createFile(FilePathUtils.getParent(getPath()), true);
-
-    // Return parent
-    return _parent;
-}
+public boolean getExists()  { return isSaved(); }
 
 /**
- * Sets the file parent.
+ * Conventional file method that simply wraps getModTime().
  */
-protected void setParent(WebFile aFile)  { _parent = aFile; }
+public long getLastModTime()  { return _modTime; }
 
 /**
  * Returns the file modification time.
  */
-public long getLastModTime()  { return _lastModTime; }
+public long getModTime()  { return _modTime; }
 
 /**
  * Sets the file modification time.
  */
-public void setLastModTime(long aTime)
+protected void setModTime(long aTime)
 {
-    if(aTime==_lastModTime) return;
-    firePropChange(ModifiedTime_Prop, _lastModTime, _lastModTime = aTime);
+    if(aTime==_modTime) return;
+    firePropChange(ModTime_Prop, _modTime, _modTime = aTime);
 }
 
 /**
  * Sets the file modification time in file and in site internal storage.
  */
-public void setLastModTimeDeep(long aTime)
+public void setModTimeSaved(long aTime)
 {
-    try { getSite().setLastModTime(this, aTime); }
-    catch(Exception e) { System.err.println("WebFile.setLastModTimeDeep: " + e); }
-    setLastModTime(aTime);
+    try { getSite().setModTimeSaved(this, aTime); }
+    catch(Exception e) { System.err.println("WebFile.setModTimeSaved: " + e); }
+    setModTime(aTime);
 }
 
 /**
  * Returns the modified date.
  */
-public Date getModifiedDate()  { return new Date(_lastModTime); }
+public Date getModDate()  { return new Date(_modTime); }
 
 /**
  * Returns the file size.
@@ -199,10 +217,25 @@ public long getSize()  { return _size; }
 /**
  * Sets the file size.
  */
-public void setSize(long aSize)
+protected void setSize(long aSize)
 {
     if(aSize==_size) return;
     firePropChange(Size_Prop, _size, _size = aSize);
+}
+
+/**
+ * Returns whether bytes/files have been set for this file/dir.
+ */
+public boolean isLoaded()  { return _dir? (_files!=null) : (_bytes!=null); }
+
+/**
+ * Sets whether bytes/files have been set for this file/dir.
+ */
+protected void setLoaded(boolean aValue)
+{
+    if(aValue==isLoaded()) return;
+    if(!aValue) { _files = null; _bytes = null; _updater = null; }
+    firePropChange(Loaded_Prop, !aValue, aValue);
 }
 
 /**
@@ -216,10 +249,13 @@ public synchronized byte[] getBytes()
     // Set request for bytes for URL
     WebURL url = getURL();
     WebResponse resp = url.getResponse();
-    if(resp.getCode()==WebResponse.OK) _exists = true;
+    if(resp.getCode()==WebResponse.OK) _saved = true;
     if(resp.getException()!=null)
         throw new ResponseException(resp);
-    return _bytes = resp.getBytes();
+    _bytes = resp.getBytes();
+    _size = _bytes!=null? _bytes.length : 0;
+    _modTime = resp.getLastModTime();
+    return _bytes;
 }
 
 /**
@@ -253,7 +289,7 @@ public synchronized List <WebFile> getFiles()
     // Get response for files
     WebURL url = getURL();
     WebResponse resp = url.getResponse();
-    if(resp.getCode()==WebResponse.OK) _exists = true;
+    if(resp.getCode()==WebResponse.OK) _saved = true;
     if(resp.getException()!=null)
         throw new ResponseException(resp);
     
@@ -262,12 +298,13 @@ public synchronized List <WebFile> getFiles()
     List <FileHeader> fhdrs = resp.getFileHeaders(); if(fhdrs==null) return Collections.EMPTY_LIST;
     List <WebFile> files = new ArrayList(fhdrs.size());
     for(FileHeader fhdr : fhdrs) { WebFile file = site.createFile(fhdr);
-        file.setParent(this); file._exists = true; files.add(file); }
+        file.setParent(this); file._saved = true; files.add(file); }
         
     // Sort files, put in safe array and return
     Collections.sort(files);
-    files = new CopyOnWriteArrayList(files);
-    return _files = files;
+    _files = files;
+    _modTime = resp.getLastModTime();
+    return _files;
 }
 
 /**
@@ -277,43 +314,6 @@ protected void setFiles(List theFiles)
 {
     if(SnapUtils.equals(theFiles, _files)) return;
     firePropChange(Files_Prop, _files, _files = theFiles);
-}
-
-/**
- * Adds a file.
- */
-protected void addFile(WebFile aFile)
-{
-    // Get insert index, add file at index and set File.Parent to this file (just return if already in files)
-    int index = -Collections.binarySearch(getFiles(), aFile) - 1; if(index<0) return;
-    getFiles().add(index, aFile);
-    aFile.setParent(this);
-    
-    // Fire property change
-    firePropChange(File_Prop, null, aFile, index);
-}
-
-/**
- * Removes a file at given index.
- */
-protected WebFile removeFile(int anIndex)
-{
-    // Remove file and clear file parent
-    WebFile file = _files.remove(anIndex);
-    file.setParent(null);
-    
-    // Fire property change and return file
-    firePropChange(File_Prop, file, null, anIndex); return file;
-}
-
-/**
- * Removes given file.
- */
-protected int removeFile(WebFile aFile)
-{
-    int index = ListUtils.indexOfId(getFiles(), aFile);
-    if(index>=0) removeFile(index);
-    return index;
 }
 
 /**
@@ -327,9 +327,37 @@ public void save() throws ResponseException  { getSite().saveFile(this); }
 public void delete() throws ResponseException  { getSite().deleteFile(this); }
 
 /**
- * Reloads a file from site.
+ * Resets the file to unverified state where nothing is known about size, mod-time, saved.
  */
-public void reload()  { getSite().reloadFile(this); }
+public void reset()
+{
+    resetContent();
+    setVerified(false);
+}
+
+/**
+ * Resets the file to unloaded state so files/bytes are cleared (to reload when next called).
+ */
+public void resetContent()  { setLoaded(false); }
+
+/**
+ * Resets a file with check to have parent resetContent() if file is deleted.
+ */
+public void reload()
+{
+    // Reset content (just return if not verified)
+    resetContent(); if(!isVerified()) return;
+    
+    // Reset and verify
+    reset();
+    getVerified();
+    
+    // If file was deleted, reset parent content and trigger Saved change
+    if(!isSaved()) {
+        getParent().resetContent();
+        _saved = true; setSaved(false);
+    }
+}
 
 /**
  * Returns the file with the given name.

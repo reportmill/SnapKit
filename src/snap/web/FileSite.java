@@ -131,7 +131,7 @@ protected void deleteFileImpl(WebFile aFile) throws Exception
 /**
  * Saves the modified time for a file to underlying file system.
  */
-protected void setLastModTime(WebFile aFile, long aTime) throws Exception
+protected void setModTimeSaved(WebFile aFile, long aTime) throws Exception
 {
     File file = aFile.getJavaFile();
     file.setLastModified(aTime);
