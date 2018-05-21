@@ -18,7 +18,7 @@ protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
 {
     // Create HTTPRequest for java.net.URL
     WebURL url = aReq.getURL();
-    HTTPRequest hreq = new HTTPRequest(url.getJavaURL()); if(isHead) hreq.setRequestMethod("HEAD");
+    HTTPRequest hreq = new HTTPRequest(url.getJavaURL()); if(isHead) hreq.setMethod("HEAD");
     
     // Get HTTPResponse response (if IOException, set code/exception and return)
     HTTPResponse hresp = null; try { hresp = hreq.getResponse(); }

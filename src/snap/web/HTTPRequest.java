@@ -51,14 +51,14 @@ public URL getURL()  { return _url; }
 public String getURLString()  { return _url.toExternalForm(); }
 
 /**
- * Returns the request method.
+ * Returns the request method (always upper case).
  */
-public String getRequestMethod()  { return _method; }
+public String getMethod()  { return _method; }
 
 /**
  * Sets the request method.
  */
-public void setRequestMethod(String aMethod)  { _method = aMethod; }
+public void setMethod(String aMethod)  { _method = aMethod.toUpperCase(); }
 
 /**
  * Returns the cookie.
@@ -100,7 +100,11 @@ public byte[] getBytes()  { return _bytes; }
 /**
  * Sets the bytes associated with the request (POST).
  */
-public void setBytes(byte theBytes[])  { _bytes = theBytes; setRequestMethod("POST"); }
+public void setBytes(byte theBytes[])
+{
+    _bytes = theBytes;
+    if(getMethod().equals("GET")) setMethod("POST");
+}
 
 /**
  * Executes this request and returns a response.
@@ -117,8 +121,8 @@ public HTTPResponse getResponse() throws IOException
     HttpURLConnection connection = (HttpURLConnection)getURL().openConnection();
     
     // Set request method
-    if(!getRequestMethod().equals("GET"))
-        connection.setRequestMethod(getRequestMethod());
+    if(!getMethod().equals("GET"))
+        connection.setRequestMethod(getMethod());
     
     // Append additional headers
     if(getHeaders()!=null)
