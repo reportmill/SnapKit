@@ -128,37 +128,36 @@ protected void addDirListPath(String aPath)
 /**
  * Handles a get or head request.
  */
-protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
+protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
 {
-    // Get URL and path and create empty response
+    // Get URL and path
     WebURL url = aReq.getURL();
     String path = url.getPath(); if(path==null) path = "/";
-    WebResponse resp = new WebResponse(aReq);
     
     // Get FileHeader for path
     FileHeader fhdr = getFileHeaderForPath(path);
     
     // If not found, set Response.Code to NOT_FOUND and return
     if(fhdr==null) {
-        resp.setCode(WebResponse.NOT_FOUND); return resp; }
+        aResp.setCode(WebResponse.NOT_FOUND); return; }
         
     // Otherwise configure response
-    resp.setCode(WebResponse.OK);
-    resp.setFileHeader(fhdr);
+    aResp.setCode(WebResponse.OK);
+    aResp.setFileHeader(fhdr);
     
     // If Head, just return
     if(isHead)
-        return resp;
+        return;
         
     // If file, get/set file bytes
-    if(resp.isFile()) {
+    if(aResp.isFile()) {
         try {
             ZipEntry zentry = getEntries().get(path);
             InputStream istream = _zipFile.getInputStream(zentry);
             byte bytes[] = SnapUtils.getBytesOrThrow(istream);
-            resp.setBytes(bytes);
+            aResp.setBytes(bytes);
         }
-        catch(IOException e) { resp.setException(e); }
+        catch(IOException e) { aResp.setException(e); }
     }
     
     // If directory, get/set dir FileHeaders
@@ -169,11 +168,8 @@ protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
             FileHeader fh = getFileHeaderForPath(dpath); if(fh==null) continue;
             fhdrs.add(fh);
         }
-        resp.setFileHeaders(fhdrs);
+        aResp.setFileHeaders(fhdrs);
     }
-    
-    // Set FileHeaderReturn response
-    return resp;
 }
 
 /**

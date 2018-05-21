@@ -14,7 +14,7 @@ public class WebResponse {
     WebRequest         _request;
     
     // The response code
-    int                _code;
+    int                _code = OK;
     
     // The response time
     long               _time;

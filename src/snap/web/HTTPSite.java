@@ -14,11 +14,8 @@ public class HTTPSite extends WebSite {
 /**
  * Handle a get or head request.
  */
-protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
+protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
 {
-    // Create empty WebResponse return value
-    WebResponse resp = new WebResponse(aReq);
- 
     // Create HTTPRequest for java.net.URL
     WebURL url = aReq.getURL();
     HTTPRequest hreq = new HTTPRequest(url.getJavaURL()); if(isHead) hreq.setRequestMethod("HEAD");
@@ -26,40 +23,37 @@ protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
     // Get HTTPResponse response (if IOException, set code/exception and return)
     HTTPResponse hresp = null; try { hresp = hreq.getResponse(); }
     catch(IOException e) {
-        resp.setException(e); return resp; }
+        aResp.setException(e); return; }
     
     // Handle NOT_FOUND
     if(hresp.getCode()==HTTPResponse.NOT_FOUND) {
-        resp.setCode(WebResponse.NOT_FOUND); return resp; }
+        aResp.setCode(WebResponse.NOT_FOUND); return; }
         
     // Handle UNAUTHORIZED
     if(hresp.getCode()==HTTPResponse.UNAUTHORIZED) {
-        resp.setCode(WebResponse.UNAUTHORIZED); return resp; }
+        aResp.setCode(WebResponse.UNAUTHORIZED); return; }
         
     // Handle anything else not okay
     if(hresp.getCode()!=HTTPResponse.OK) {
-        resp.setCode(hresp.getCode()); return resp; }
+        aResp.setCode(hresp.getCode()); return; }
         
     // Configure response info (just return if isHead)
-    resp.setCode(WebResponse.OK);
-    resp.setLastModTime(hresp.getLastModified());
-    resp.setSize(hresp.getContentLength());
-    boolean isdir = isDir(url, hresp); resp.setDir(isdir);
+    aResp.setCode(WebResponse.OK);
+    aResp.setLastModTime(hresp.getLastModified());
+    aResp.setSize(hresp.getContentLength());
+    boolean isdir = isDir(url, hresp); aResp.setDir(isdir);
     if(isHead)
-        return resp;
+        return;
     
     // Set Bytes
-    resp.setBytes(hresp.getBytes());
+    aResp.setBytes(hresp.getBytes());
     
     // If directory, configure directory info and return
     if(isdir) {
         String path = url.getPath(); if(path==null) path = "/";
         List <FileHeader> fhdrs = getFileHeaders(path, hresp.getBytes());
-        resp.setFileHeaders(fhdrs);
+        aResp.setFileHeaders(fhdrs);
     }
-    
-    // Return response
-    return resp;
 }
 
 /**
@@ -127,36 +121,27 @@ private List <FileHeader> getFilesFromHTMLBytes(String aPath, byte bytes[])
 }
 
 /**
- * Handle a get request.
+ * Handle a POST request.
  */
-protected WebResponse doPost(WebRequest aReq)
-{
-    // Fetch URL
-    String path = aReq.getURL().getPath();
-    String urls = aReq.getURL().getString();
-    HTTPRequest hreq = new HTTPRequest(urls); hreq.setBytes(aReq.getPostBytes());
-    
-    HTTPResponse hresp;
-    try { hresp = hreq.getResponse(); }
-    catch(Exception e) { throw new RuntimeException(e); }
-    
-    // Configure response and return
-    WebResponse resp = new WebResponse(aReq);
-    resp.setCode(hresp.getCode());
-    resp.setBytes(hresp.getBytes());
-    return resp;
-}
+protected void doPost(WebRequest aReq, WebResponse aResp)  { doPut(aReq, aResp); }
 
 /**
- * WebSite method.
+ * Handle a POST request.
  */
-protected long saveFileImpl(WebFile aFile) throws Exception
+protected void doPut(WebRequest aReq, WebResponse aResp)
 {
-    String urls = getURLString() + aFile.getPath();
-    HTTPRequest req = new HTTPRequest(urls);
-    req.setBytes(aFile.getBytes());
-    req.getResponse();
-    return aFile.getLastModTime();
+    // Create/configure HTTP request
+    String urls = aReq.getURL().getString();
+    HTTPRequest hreq = new HTTPRequest(urls); hreq.setBytes(aReq.getSendBytes());
+    
+    // Get HTTPResponse
+    HTTPResponse hresp; try { hresp = hreq.getResponse(); }
+    catch(Exception e) {
+        aResp.setException(e); return; }
+    
+    // Configure response and return
+    aResp.setCode(hresp.getCode());
+    aResp.setBytes(hresp.getBytes());
 }
 
 /**

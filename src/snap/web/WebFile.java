@@ -319,12 +319,12 @@ protected void setFiles(List theFiles)
 /**
  * Saves the file.
  */
-public void save() throws ResponseException  { getSite().saveFile(this); }
+public WebResponse save() { return getSite().saveFile(this); }
 
 /**
  * Deletes the file.
  */
-public void delete() throws ResponseException  { getSite().deleteFile(this); }
+public WebResponse delete() { return getSite().deleteFile(this); }
 
 /**
  * Resets the file to unverified state where nothing is known about size, mod-time, saved.

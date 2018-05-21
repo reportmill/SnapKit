@@ -15,11 +15,8 @@ public class FileSite extends WebSite {
 /**
  * Handle a get or head request.
  */
-protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
+protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
 {
-    // Create empty WebResponse return value
-    WebResponse resp = new WebResponse(aReq);
- 
     // Get URL, path and file
     WebURL url = aReq.getURL();
     String path = url.getPath(); if(path==null) path = "/";
@@ -27,32 +24,29 @@ protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
     
     // Handle NOT_FOUND
     if(!file.exists() || !file.canRead()) {
-        resp.setCode(WebResponse.NOT_FOUND); return resp; }
+        aResp.setCode(WebResponse.NOT_FOUND); return; }
         
     // Handle UNAUTHORIZED
     //if(!file.canRead()) { resp.setCode(WebResponse.UNAUTHORIZED); return resp; }
         
     // Configure response info (just return if isHead). Need to pre-create FileHeader to fix capitalization.
-    resp.setCode(WebResponse.OK);
+    aResp.setCode(WebResponse.OK);
     FileHeader fhdr = getFileHeader(path, file);
-    resp.setFileHeader(fhdr);
+    aResp.setFileHeader(fhdr);
     if(isHead)
-        return resp;
+        return;
         
     // If file, just set bytes
-    if(resp.isFile()) {
-        try { byte bytes[] = FileUtils.getBytesOrThrow(file); resp.setBytes(bytes); }
-        catch(IOException e) { resp.setException(e); }
+    if(aResp.isFile()) {
+        try { byte bytes[] = FileUtils.getBytesOrThrow(file); aResp.setBytes(bytes); }
+        catch(IOException e) { aResp.setException(e); }
     }
     
     // If directory, configure directory info and return
     else {
         List <FileHeader> fhdrs = getFileHeaders(path, file);
-        resp.setFileHeaders(fhdrs);
+        aResp.setFileHeaders(fhdrs);
     }
-    
-    // Return response
-    return resp;
 }
 
 /**
@@ -97,34 +91,46 @@ protected List <FileHeader> getFileHeaders(String aPath, File aFile)
 }
 
 /**
- * Writes file bytes.
+ * Handle a POST request.
  */
-protected long saveFileImpl(WebFile aFile) throws Exception
+protected void doPost(WebRequest aReq, WebResponse aResp)  { doPut(aReq, aResp); }
+
+/**
+ * Handle a PUT request.
+ */
+protected void doPut(WebRequest aReq, WebResponse aResp)
 {
     // Get standard file
-    File file = aFile.getJavaFile();
+    String path = aReq.getURL().getPath();
+    File file = getJavaFile(path);
     
     // Make sure parent directories exist
     file.getParentFile().mkdirs();
     
     // If directory, create
-    if(aFile.isDir())
+    if(file.isDirectory())
         file.mkdir();
     
     // Otherwise, write bytes
-    else if(aFile.getBytes()!=null)
-        FileUtils.writeBytesSafely(file, aFile.getBytes());
+    else if(aReq.getSendBytes()!=null) {
+        try { FileUtils.writeBytesSafely(file, aReq.getSendBytes()); }
+        catch(IOException e) { aResp.setException(e); return; }
+    }
     
     // Return standard file modified time
-    return file.lastModified();
+    aResp.setLastModTime(file.lastModified());
 }
 
 /**
- * Deletes file.
+ * Handle a DELETE request.
  */
-protected void deleteFileImpl(WebFile aFile) throws Exception
+protected void doDelete(WebRequest aReq, WebResponse aResp)
 {
-    File file = aFile.getJavaFile();
+    // Get standard file
+    String path = aReq.getURL().getPath();
+    File file = getJavaFile(path);
+    
+    // Do delete
     FileUtils.deleteDeep(file);
 }
 

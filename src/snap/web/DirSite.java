@@ -23,34 +23,33 @@ public WebFile getDir()  { return getURL().getFile(); }
 /**
  * Handles a get or head request.
  */
-protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
+protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
 {
-    // Get URL and path and create empty response
+    // Get URL and path
     WebURL url = aReq.getURL();
     String path = url.getPath(); if(path==null) path = "/";
-    WebResponse resp = new WebResponse(aReq);
     
     // Get WebFile from Dir site
     WebFile dfile = getDirFile(path);
     
     // If not found, set Response.Code to NOT_FOUND and return
     if(dfile==null) {
-        resp.setCode(WebResponse.NOT_FOUND); return resp; }
+        aResp.setCode(WebResponse.NOT_FOUND); return; }
     
     // If found, set response code to ok
-    resp.setCode(WebResponse.OK);
-    resp.setDir(dfile.isDir());
-    resp.setLastModTime(dfile.getLastModTime());
-    resp.setSize(dfile.getSize());
+    aResp.setCode(WebResponse.OK);
+    aResp.setDir(dfile.isDir());
+    aResp.setLastModTime(dfile.getLastModTime());
+    aResp.setSize(dfile.getSize());
         
     // If Head, just return
     if(isHead)
-        return resp;
+        return;
         
     // If file, get/set file bytes
     if(dfile.isFile()) {
         byte bytes[] = dfile.getBytes();
-        resp.setBytes(bytes);
+        aResp.setBytes(bytes);
     }
         
     // Otherwise, get/set dir FileHeaders
@@ -63,31 +62,48 @@ protected WebResponse doGetOrHead(WebRequest aReq, boolean isHead)
             fhdr.setLastModTime(df.getLastModTime()); fhdr.setSize(df.getSize());
             fhdrs.add(fhdr);
         }
-        resp.setFileHeaders(fhdrs);
+        aResp.setFileHeaders(fhdrs);
     }
+}
+
+/**
+ * Handle POST request.
+ */
+protected void doPost(WebRequest aReq, WebResponse aResp)  { doPut(aReq, aResp); }
+
+/**
+ * Handle PUT request.
+ */
+protected void doPut(WebRequest aReq, WebResponse aResp)
+{
+    // Get file we're trying to save
+    String path = aReq.getURL().getPath();
+    WebFile file = getFile(path);
     
-    // Set FileHeaderReturn response
-    return resp;
-}
-
-/**
- * Save file.
- */
-protected long saveFileImpl(WebFile aFile) throws Exception
-{
-    WebFile dfile = createDirFile(aFile.getPath(), aFile.isDir());
-    if(aFile.isFile()) dfile.setBytes(aFile.getBytes());
+    // Get remote file
+    WebFile dfile = createDirFile(file.getPath(), file.isDir());
+    if(file.isFile()) dfile.setBytes(file.getBytes());
     dfile.save();
-    return dfile.getLastModTime();
+    
+    // Update response
+    aResp.setLastModTime(dfile.getModTime());
 }
 
 /**
- * Delete file.
+ * Handle DELETE request.
  */
-protected void deleteFileImpl(WebFile aFile) throws Exception
+protected void doDelete(WebRequest aReq, WebResponse aResp)
 {
-    WebFile dfile = getDirFile(aFile.getPath());
+    // Get file we're trying to save
+    String path = aReq.getURL().getPath();
+    //WebFile file = getFile(path);
+    
+    // Do Delete
+    WebFile dfile = getDirFile(path);
     if(dfile!=null) dfile.delete();
+    
+    // Update response
+    System.out.println("DirSite.doDelete: Probably need to do something more here");
 }
 
 /**

@@ -105,37 +105,43 @@ public WebFile getRootDir()  { WebFile f = getFile("/"); return f!=null? f : cre
 /**
  * Returns a response instance for a request.
  */
-public WebResponse getResponse(WebRequest aRequest)
+public WebResponse getResponse(WebRequest aReq)
 {
-    switch(aRequest.getType())  {
-        case HEAD: return doGetOrHead(aRequest, true);
-        case GET: return doGetOrHead(aRequest, false);
-        case POST: return doPost(aRequest);
-        case PUT: return doPut(aRequest);
-        case DELETE: return doDelete(aRequest);
+    // Create response
+    WebResponse resp = new WebResponse(aReq);
+    
+    // Send to property method
+    switch(aReq.getType())  {
+        case HEAD: doGetOrHead(aReq, resp, true); break;
+        case GET: doGetOrHead(aReq, resp, false); break;
+        case POST: doPost(aReq, resp); break;
+        case PUT: doPut(aReq, resp); break;
+        case DELETE: doDelete(aReq, resp); break;
     }
-    return null;
+    
+    // Return response
+    return resp;
 }
 
 /**
  * Handles a get or head request.
  */
-protected abstract WebResponse doGetOrHead(WebRequest aReq, boolean isHead);
+protected abstract void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead);
 
 /**
  * Handle a get request.
  */
-protected WebResponse doPost(WebRequest aRequest)  { throw new RuntimeException("handlePost"); }
+protected void doPost(WebRequest aReq, WebResponse aResp)  { throw new RuntimeException("handlePost"); }
 
 /**
  * Handle a PUT request.
  */
-protected WebResponse doPut(WebRequest aRequest)  { throw new RuntimeException("handlePut"); }
+protected void doPut(WebRequest aReq, WebResponse aResp)  { throw new RuntimeException("handlePut"); }
 
 /**
  * Handle a DELETE request.
  */
-protected WebResponse doDelete(WebRequest aRequest) { throw new RuntimeException("handleDelete"); }
+protected void doDelete(WebRequest aReq, WebResponse aResp) { throw new RuntimeException("handleDelete"); }
 
 /**
  * Returns the individual file with the given path.
@@ -196,7 +202,7 @@ protected synchronized WebFile createFile(FileHeader fileHdr)
 /**
  * Save file.
  */
-protected void saveFile(WebFile aFile) throws ResponseException
+protected WebResponse saveFile(WebFile aFile)
 {
     // If there is an updater, push update and clear
     WebFile.Updater updater = aFile.getUpdater();
@@ -207,10 +213,15 @@ protected void saveFile(WebFile aFile) throws ResponseException
     WebFile par = aFile.getParent();
     if(par!=null && !par.getVerified().isSaved())
         par.save();
+        
+    // Create web request
+    WebRequest req = new WebRequest(aFile.getURL());
+    req.setPostBytes(aFile.getBytes());
     
-    // Save file
-    try { long mt = saveFileImpl(aFile); aFile.setModTime(mt); }
-    catch(Exception e) { WebResponse r = new WebResponse(null); r.setException(e); throw new ResponseException(r); }
+    // Get response
+    WebResponse resp = getResponse(req); // Used to be saveFileImpl()
+    if(resp.getCode()==WebResponse.OK)
+        aFile.setModTime(resp.getLastModTime());
     
     // If this is first save, have parent resetContent() so it will be added to parent files
     if(par!=null && !aFile.isSaved())
@@ -218,12 +229,13 @@ protected void saveFile(WebFile aFile) throws ResponseException
     
     // Set File.Saved
     aFile.setSaved(true);
+    return resp;
 }
 
 /**
  * Delete file.
  */
-protected void deleteFile(WebFile aFile) throws ResponseException
+protected WebResponse deleteFile(WebFile aFile)
 {
     // If file doesn't exist, throw exception
     if(!aFile.isSaved()) {
@@ -236,9 +248,12 @@ protected void deleteFile(WebFile aFile) throws ResponseException
         for(WebFile file : aFile.getFiles())
             file.delete(); }
 
-    // Delete file
-    try { deleteFileImpl(aFile); }
-    catch(Exception e) { WebResponse r = new WebResponse(null); r.setException(e); throw new ResponseException(r); }
+    // Create web request
+    WebRequest req = new WebRequest(aFile.getURL());
+    req.setType(WebRequest.Type.DELETE);
+    
+    // Get response
+    WebResponse resp = getResponse(req); // Used to be deleteFileImpl()
     
     // If not root, have parent resetContent() so file will be removed from parent files
     if(!aFile.isRoot()) { WebFile par = aFile.getParent();
@@ -246,17 +261,8 @@ protected void deleteFile(WebFile aFile) throws ResponseException
     
     // Resets the file
     aFile.reset();
+    return resp;
 }
-
-/**
- * Saves a file.
- */
-protected long saveFileImpl(WebFile aFile) throws Exception { throw notImpl("saveFileImpl"); }
-
-/**
- * Deletes a file.
- */
-protected void deleteFileImpl(WebFile aFile) throws Exception { throw notImpl("deleteFileImpl"); }
 
 /**
  * Saves the modified time for a file to underlying file system.
