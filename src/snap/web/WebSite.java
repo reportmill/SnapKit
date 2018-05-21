@@ -168,7 +168,7 @@ public synchronized WebFile getFile(String aPath) throws ResponseException
         
     // Get file header from response, create file and return
     FileHeader fhdr = resp.getFileHeader();
-    file = createFile(fhdr); file._saved = true; file._url = url;
+    file = createFile(fhdr); file._verified = true; file._saved = true; file._url = url;
     return file;
 }
 
