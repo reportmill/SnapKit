@@ -39,7 +39,7 @@ protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     // If found, set response code to ok
     aResp.setCode(WebResponse.OK);
     aResp.setDir(dfile.isDir());
-    aResp.setLastModTime(dfile.getLastModTime());
+    aResp.setModTime(dfile.getModTime());
     aResp.setSize(dfile.getSize());
         
     // If Head, just return
@@ -59,7 +59,7 @@ protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
         for(WebFile df : dfiles) {
             String hpath = FilePathUtils.getChild(path, df.getName());
             FileHeader fhdr = new FileHeader(hpath, df.isDir());
-            fhdr.setLastModTime(df.getLastModTime()); fhdr.setSize(df.getSize());
+            fhdr.setModTime(df.getModTime()); fhdr.setSize(df.getSize());
             fhdrs.add(fhdr);
         }
         aResp.setFileHeaders(fhdrs);
@@ -86,7 +86,7 @@ protected void doPut(WebRequest aReq, WebResponse aResp)
     dfile.save();
     
     // Update response
-    aResp.setLastModTime(dfile.getModTime());
+    aResp.setModTime(dfile.getModTime());
 }
 
 /**

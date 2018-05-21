@@ -39,7 +39,7 @@ protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
         
     // Configure response info (just return if isHead)
     aResp.setCode(WebResponse.OK);
-    aResp.setLastModTime(hresp.getLastModified());
+    aResp.setModTime(hresp.getLastModified());
     aResp.setSize(hresp.getContentLength());
     boolean isdir = isDir(url, hresp); aResp.setDir(isdir);
     if(isHead)
@@ -114,7 +114,7 @@ private List <FileHeader> getFilesFromHTMLBytes(String aPath, byte bytes[])
         boolean isDir = false; if(name.endsWith("/")) { isDir = true; name = name.substring(0, name.length()-1); }
         String path = FilePathUtils.getChild(aPath, name);
         FileHeader file = new FileHeader(path, isDir);
-        file.setLastModTime(System.currentTimeMillis());
+        file.setModTime(System.currentTimeMillis());
         files.add(file);
     }
     return files;

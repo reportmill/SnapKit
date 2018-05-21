@@ -23,7 +23,7 @@ public class WebResponse {
     boolean            _dir;
     
     // The file modified time
-    long               _lastModTime;
+    long               _modTime;
     
     // The file size
     long               _size;
@@ -145,12 +145,12 @@ public boolean isFile()  { return !_dir; }
 /**
  * Returns the file modification time.
  */
-public long getLastModTime()  { return _lastModTime; }
+public long getModTime()  { return _modTime; }
 
 /**
  * Sets the file modification time.
  */
-public void setLastModTime(long aTime)  { _lastModTime = aTime; }
+public void setModTime(long aTime)  { _modTime = aTime; }
 
 /**
  * Returns the file size.
@@ -172,7 +172,7 @@ public FileHeader getFileHeader()
     
     // Create and return
     FileHeader fhdr = new FileHeader(getPath(), isDir());
-    fhdr.setLastModTime(getLastModTime()); fhdr.setSize(getSize()); fhdr.setMIMEtype(getMIMEType());
+    fhdr.setModTime(getModTime()); fhdr.setSize(getSize()); fhdr.setMIMEtype(getMIMEType());
     return _fileHdr = fhdr;
 }
 
@@ -182,7 +182,7 @@ public FileHeader getFileHeader()
 public void setFileHeader(FileHeader aFHdr)
 {
     _fileHdr = aFHdr; _dir = aFHdr.isDir();
-    _lastModTime = aFHdr.getLastModTime(); _size = aFHdr.getSize(); _mimeType = aFHdr.getMIMEType();
+    _modTime = aFHdr.getModTime(); _size = aFHdr.getSize(); _mimeType = aFHdr.getMIMEType();
 }
 
 /**

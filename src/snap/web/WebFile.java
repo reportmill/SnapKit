@@ -254,7 +254,7 @@ public synchronized byte[] getBytes()
         throw new ResponseException(resp);
     _bytes = resp.getBytes();
     _size = _bytes!=null? _bytes.length : 0;
-    _modTime = resp.getLastModTime();
+    _modTime = resp.getModTime();
     return _bytes;
 }
 
@@ -303,7 +303,7 @@ public synchronized List <WebFile> getFiles()
     // Sort files, put in safe array and return
     Collections.sort(files);
     _files = files;
-    _modTime = resp.getLastModTime();
+    _modTime = resp.getModTime();
     return _files;
 }
 

@@ -234,7 +234,7 @@ public long getLastModTime()
 
     // Otherwise, return FileHeader.LastModTime
     FileHeader fhdr = getFileHeader();
-    return fhdr.getLastModTime();
+    return fhdr.getModTime();
 }
 
 /**

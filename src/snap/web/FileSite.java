@@ -65,7 +65,7 @@ protected FileHeader getFileHeader(String aPath, File aFile)
     
     // Create and initialize FileHeader and return
     FileHeader fhdr = new FileHeader(path, file.isDirectory());
-    fhdr.setLastModTime(file.lastModified());
+    fhdr.setModTime(file.lastModified());
     fhdr.setSize(file.length());
     return fhdr;
 }
@@ -118,7 +118,7 @@ protected void doPut(WebRequest aReq, WebResponse aResp)
     }
     
     // Return standard file modified time
-    aResp.setLastModTime(file.lastModified());
+    aResp.setModTime(file.lastModified());
 }
 
 /**

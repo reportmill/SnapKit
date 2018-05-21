@@ -16,7 +16,7 @@ public class FileHeader extends SnapObject {
     boolean           _dir;
     
     // The file modified time
-    long              _lastModTime;
+    long              _modTime;
     
     // The file size
     long              _size;
@@ -77,15 +77,15 @@ public boolean isRoot()  { return getPath().equals("/"); }
 /**
  * Returns the file modification time.
  */
-public long getLastModTime()  { return _lastModTime; }
+public long getModTime()  { return _modTime; }
 
 /**
  * Sets the file modification time.
  */
-public void setLastModTime(long aTime)
+public void setModTime(long aTime)
 {
-    if(aTime==_lastModTime) return;
-    firePropChange(LastModTime_Prop, _lastModTime, _lastModTime = aTime);
+    if(aTime==_modTime) return;
+    firePropChange(LastModTime_Prop, _modTime, _modTime = aTime);
 }
 
 /**

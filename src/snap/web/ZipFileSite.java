@@ -184,7 +184,7 @@ private FileHeader getFileHeaderForPath(String aPath)
         
     // Create FileHeader and return
     FileHeader file = new FileHeader(aPath, zentry==null || zentry.isDirectory());
-    if(zentry!=null) file.setLastModTime(zentry.getTime());
+    if(zentry!=null) file.setModTime(zentry.getTime());
     if(zentry!=null) file.setSize(zentry.getSize());
     return file;
 }

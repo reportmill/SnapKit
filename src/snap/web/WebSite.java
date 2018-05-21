@@ -190,7 +190,7 @@ protected synchronized WebFile createFile(FileHeader fileHdr)
     
     // Create/configure new file
     file = new WebFile(); file._path = path; file._dir = fileHdr.isDir(); file._site = this;
-    file._modTime = fileHdr.getLastModTime(); file._size = fileHdr.getSize();
+    file._modTime = fileHdr.getModTime(); file._size = fileHdr.getSize();
     file.setMIMEType(fileHdr.getMIMEType());
     
     // Put in cache, start listening to file changes and return
@@ -216,12 +216,14 @@ protected WebResponse saveFile(WebFile aFile)
         
     // Create web request
     WebRequest req = new WebRequest(aFile.getURL());
-    req.setPostBytes(aFile.getBytes());
+    req.setPutBytes(aFile.getBytes());
     
     // Get response
     WebResponse resp = getResponse(req); // Used to be saveFileImpl()
-    if(resp.getCode()==WebResponse.OK)
-        aFile.setModTime(resp.getLastModTime());
+    if(resp.getCode()==WebResponse.OK) {
+        long mt = resp.getModTime(); if(mt==0) System.out.println("WebSite.saveFile: Unlikely saved mod time of 0");
+        aFile.setModTime(mt);
+    }
     
     // If this is first save, have parent resetContent() so it will be added to parent files
     if(par!=null && !aFile.isSaved())
