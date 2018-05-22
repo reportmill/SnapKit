@@ -200,6 +200,16 @@ protected synchronized WebFile createFile(FileHeader fileHdr)
 }
 
 /**
+ * Returns the file if it has been entered in the file cache.
+ */
+protected synchronized WebFile getFileCacheFile(String aPath)
+{
+    // Get file from cache (just return if found)
+    String path = PathUtils.getNormalized(aPath);
+    return _files.get(path);
+}
+
+/**
  * Save file.
  */
 protected WebResponse saveFile(WebFile aFile)

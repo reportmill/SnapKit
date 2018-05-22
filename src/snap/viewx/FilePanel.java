@@ -25,7 +25,7 @@ public class FilePanel extends ViewOwner {
     // The current file
     WebFile                _file;
 
-    // The current file
+    // The current directory
     WebFile                _dir;
     
     // The Directory ComboBox
@@ -95,6 +95,28 @@ public String getDesc()  { return _desc; }
 public void setDesc(String aValue)  { _desc = aValue; }
 
 /**
+ * Returns the site currently being browsed.
+ */
+public WebSite getSite()  { return _dir.getSite(); }
+
+/**
+ * Returns the current directory.
+ */
+public WebFile getDir()  { return _dir; }
+
+/**
+ * Sets the current directory.
+ */
+public void setDir(WebFile aFile)
+{
+    _dir = aFile;
+    _file = null;
+    
+    // If UI is set, set in browser and text
+    setFileInUI();
+}
+
+/**
  * Returns the current file.
  */
 public WebFile getFile()  { return _file; }
@@ -115,23 +137,6 @@ public void setFile(WebFile aFile)
     // Set file and dir
     _file = aFile;
     _dir = aFile!=null? aFile.getParent() : null;
-    
-    // If UI is set, set in browser and text
-    setFileInUI();
-}
-
-/**
- * Returns the current directory.
- */
-public WebFile getDir()  { return _dir; }
-
-/**
- * Sets the current directory.
- */
-public void setDir(WebFile aFile)
-{
-    _dir = aFile;
-    _file = null;
     
     // If UI is set, set in browser and text
     setFileInUI();
@@ -164,8 +169,8 @@ protected void setFileInUI()
  */
 WebFile getFile(String aPath)
 {
-    WebURL url = WebURL.getURL(aPath);
-    WebFile file = url.getFile();
+    WebSite site = getSite(); //WebURL url = WebURL.getURL(aPath);
+    WebFile file = site.getFile(aPath); //url.getFile();
     return file;
 }
 
