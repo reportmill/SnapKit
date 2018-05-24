@@ -95,6 +95,7 @@ protected Map <String, Class> createClassMap()
     cmap.put("RadioButton", RadioButton.class);
     cmap.put("RectView", RectView.class);
     cmap.put("RowView", RowView.class);
+    cmap.put("ScaleBox", ScaleBox.class);
     cmap.put("ScrollView", ScrollView.class);
     cmap.put("Separator", Separator.class);
     cmap.put("Slider", Slider.class);
