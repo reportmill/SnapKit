@@ -193,31 +193,18 @@ public void reset()
 }
 
 /**
- * Returns whether a given change doesn't really effect signficant state change.
- */
-public boolean isBenignChange(String aString)
-{
-    // Time changes are benign
-    if(aString.equals("Time Change") || aString.equals("Page Change") || aString.equals("Version Change"))
-        return true;
-    
-    // Return false for everything else
-    return false;
-}
-
-/**
  * Returns whether undoer has Undo changes stored away.
  */
 public boolean hasUndos()
 {
     // If active undo set has non-benign change title, return true
     UndoSet activeSet = getActiveUndoSet();
-    if(activeSet.getChangeCount()>0 && (activeSet.getUndoTitle()==null || !isBenignChange(activeSet.getUndoTitle())))
+    if(activeSet.getChangeCount()>0)
         return true;
 
     // Iterate over rest of undo list and return true if any undo has non-benign change title
     for(int i=0, iMax=_undoSets.size(); i<iMax; i++) { UndoSet undoSet = _undoSets.get(i);
-        if(undoSet.getUndoTitle()==null || !isBenignChange(undoSet.getUndoTitle()))
+        if(undoSet.getUndoTitle()==null)
             return true; }
     
     // Return false if we didn't encounter any non-benign undos
@@ -228,25 +215,6 @@ public boolean hasUndos()
  * Returns whether undoer has Redo changes stored away.
  */
 public boolean hasRedos()  { return getRedoSetLast()!=null; }
-
-/**
- * Returns whether given title is title of last undo.
- */
-public boolean isDuplicate(String aTitle, SnapObject anObj)
-{
-    // If no undos, return false
-    if(_undoSets.size()==0)
-        return false;
-    
-    // Get last undo
-    UndoSet lastUndo = getUndoSetLast();
-    
-    // Check title against last undo
-    if(!SnapUtils.equals(aTitle, lastUndo._undoTitle)) return false;
-    
-    // Return true since checks passed
-    return true;
-}
 
 /**
  * An interface for undo/redo selection.
