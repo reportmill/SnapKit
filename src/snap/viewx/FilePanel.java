@@ -97,7 +97,7 @@ public void setDesc(String aValue)  { _desc = aValue; }
 /**
  * Returns the site currently being browsed.
  */
-public WebSite getSite()  { return _dir.getSite(); }
+public WebSite getSite()  { return _dir!=null? _dir.getSite() : WebURL.getURL("/").getSite(); }
 
 /**
  * Returns the current directory.
