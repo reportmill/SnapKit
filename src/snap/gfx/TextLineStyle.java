@@ -326,7 +326,7 @@ public TextLineStyle fromXML(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Unarchive AlignX, LeftIndent, LeftIndentFirst, RightIndent
     String astr = anElement.getAttributeValue("align", "left");
-    if(astr=="full") _justify = true; else _align = HPos.get(astr);
+    if(astr.equals("full")) _justify = true; else _align = HPos.get(astr);
     _leftIndent = anElement.getAttributeFloatValue("left-indent");
     _leftIndentFirst = anElement.getAttributeFloatValue("left-indent-0", (float)_leftIndent);
     _rightIndent = anElement.getAttributeFloatValue("right-indent");
