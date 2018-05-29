@@ -102,23 +102,24 @@ protected void doPut(WebRequest aReq, WebResponse aResp)
 {
     // Get standard file
     String path = aReq.getURL().getPath();
-    File file = getJavaFile(path);
+    WebFile wfile = aReq.getFile();
+    File jfile = getJavaFile(path);
     
     // Make sure parent directories exist
-    file.getParentFile().mkdirs();
+    jfile.getParentFile().mkdirs();
     
     // If directory, create
-    if(file.isDirectory())
-        file.mkdir();
+    if(wfile!=null && wfile.isDir())
+        jfile.mkdir();
     
     // Otherwise, write bytes
     else if(aReq.getSendBytes()!=null) {
-        try { FileUtils.writeBytesSafely(file, aReq.getSendBytes()); }
+        try { FileUtils.writeBytesSafely(jfile, aReq.getSendBytes()); }
         catch(IOException e) { aResp.setException(e); return; }
     }
     
     // Return standard file modified time
-    aResp.setModTime(file.lastModified());
+    aResp.setModTime(jfile.lastModified());
 }
 
 /**

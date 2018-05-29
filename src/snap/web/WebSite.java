@@ -225,7 +225,7 @@ protected WebResponse saveFile(WebFile aFile)
         par.save();
         
     // Create web request
-    WebRequest req = new WebRequest(aFile.getURL());
+    WebRequest req = new WebRequest(aFile);
     req.setPutBytes(aFile.getBytes());
     
     // Get response
@@ -261,7 +261,7 @@ protected WebResponse deleteFile(WebFile aFile)
             file.delete(); }
 
     // Create web request
-    WebRequest req = new WebRequest(aFile.getURL());
+    WebRequest req = new WebRequest(aFile);
     req.setType(WebRequest.Type.DELETE);
     
     // Get response

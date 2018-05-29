@@ -11,6 +11,9 @@ public class WebRequest {
     // The URL
     WebURL         _url;
     
+    // The file - if request was for existing file
+    WebFile        _file;
+    
     // The type of request
     Type           _type = Type.GET;
     
@@ -31,19 +34,28 @@ public WebRequest()  { }
 public WebRequest(WebURL aURL)  { _url = aURL; }
 
 /**
- * Returns the URL.
+ * Creates a new WebRequest for URL.
  */
-public WebURL getURL()  { return _url; }
-
-/**
- * Sets the URL.
- */
-public void setURL(WebURL aURL)  { _url = aURL; }
+public WebRequest(WebFile aFile)  { _file = aFile; _url = aFile.getURL(); }
 
 /**
  * Returns the site for the request.
  */
 public WebSite getSite()  { return _url.getSite(); }
+
+/**
+ * Returns the URL.
+ */
+public WebURL getURL()  { return _url; }
+
+/**
+ * Returns the File if previously set or cached in site.
+ */
+public WebFile getFile()
+{
+    if(_file!=null) return _file;
+    return _file = getSite().getFileCacheFile(_url.getPath());
+}
 
 /**
  * Returns the type of request.
