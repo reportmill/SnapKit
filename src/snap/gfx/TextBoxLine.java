@@ -195,7 +195,7 @@ public void resetSizes()
     int etokEnd = etok!=null? etok.getEnd() : 0;
     TextStyle etokStyle = etok!=null? etok.getStyle() : getStartStyle();
     
-    // Get line end and length
+    // Get line end and length (extend end to capture trailing whitespace after last token)
     _end = etokEnd + _rtstart;
     while(_end<_rtline.length() && Character.isWhitespace(_rtline.charAt(_end))) _end++;
     _end += _rtline.getStart();
@@ -233,8 +233,9 @@ public void resetSizes()
         else if(c!='\n' && c!='\r') _widthAll += etokStyle.getCharAdvance(c);
     }
     
-    // If justify, shift tokens in line
-    if(lstyle.isJustify() && getTokenCount()>1 && !isLastCharNewline()) {
+    // If justify, shift tokens in line (unless line has newline or is last line in RichText)
+    if(lstyle.isJustify() && getTokenCount()>1) {
+        if(isLastCharNewline() || _end==_rtline.length()) return;
         double y = getY();
         double tmx = _tbox.getMaxHitX(y, _height), lmx = getMaxX(), rem = tmx - lmx;
         double shift = rem/(getTokenCount()-1), shft = 0;
