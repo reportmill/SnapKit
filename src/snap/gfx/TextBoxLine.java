@@ -235,11 +235,12 @@ public void resetSizes()
     
     // If justify, shift tokens in line (unless line has newline or is last line in RichText)
     if(lstyle.isJustify() && getTokenCount()>1) {
-        if(isLastCharNewline() || _end==_rtline.length()) return;
+        if(isLastCharNewline() || _end==_rtline.getEnd()) return;
         double y = getY();
         double tmx = _tbox.getMaxHitX(y, _height), lmx = getMaxX(), rem = tmx - lmx;
         double shift = rem/(getTokenCount()-1), shft = 0;
         for(TextBoxToken tok : getTokens()) { tok._shiftX = shft; shft += shift; }
+        _wordSpace = shift;
     }
     
     // Calculate X alignment shift
@@ -249,6 +250,8 @@ public void resetSizes()
         _alignX = Math.round(ax*(rem));
     }
 }
+
+public double _wordSpace;
 
 /**
  * Returns the number of tokens.
