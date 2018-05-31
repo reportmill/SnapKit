@@ -240,7 +240,6 @@ public void resetSizes()
         double tmx = _tbox.getMaxHitX(y, _height), lmx = getMaxX(), rem = tmx - lmx;
         double shift = rem/(getTokenCount()-1), shft = 0;
         for(TextBoxToken tok : getTokens()) { tok._shiftX = shft; shft += shift; }
-        _wordSpace = shift;
     }
     
     // Calculate X alignment shift
@@ -250,8 +249,6 @@ public void resetSizes()
         _alignX = Math.round(ax*(rem));
     }
 }
-
-public double _wordSpace;
 
 /**
  * Returns the number of tokens.
