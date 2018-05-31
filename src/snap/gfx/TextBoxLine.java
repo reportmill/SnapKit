@@ -462,6 +462,11 @@ public List <TextBoxRun> getRuns()
 public TextBoxRun getRun()  { return getRuns().get(0); }
 
 /**
+ * Returns the last TextBox run for the line.
+ */
+public TextBoxRun getRunLast()  { List <TextBoxRun> runs = getRuns(); return runs.get(runs.size()-1); }
+
+/**
  * Returns whether line ends with hyphen.
  */
 public boolean isHyphenated()

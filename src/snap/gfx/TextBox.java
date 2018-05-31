@@ -706,6 +706,33 @@ public RichTextRun getRunAt(int anIndex)  { return getRichText().getRunAt(anInde
  * Returns the TextStyle for the run at the given character index.
  */
 public TextStyle getStyleAt(int anIndex)  { return getRichText().getStyleAt(anIndex); }
+
+/**
+ * Returns whether text box contains an underlined run.
+ */
+public boolean isUnderlined()  { return getRichText().isUnderlined(); }
+
+/**
+ * Returns underlined runs for text box.
+ */
+public List <TextBoxRun> getUnderlineRuns(Rect aRect)
+{
+    // Iterate over lines to add underline runs to list
+    List <TextBoxRun> uruns = new ArrayList();
+    for(TextBoxLine line : getLines()) {
+        
+        // If line above rect, continue, if below, break
+        if(aRect!=null) if(line.getMaxY()<aRect.y) continue; else if(line.getY()>=aRect.getMaxY()) break;
+        
+        // If run underlined, add to list
+        for(TextBoxRun run : line.getRuns())
+            if(run.getStyle().isUnderlined())
+                uruns.add(run);
+    }
+    
+    // Return list
+    return uruns;
+}
     
 /**
  * Returns the line for the given y value.
@@ -812,15 +839,14 @@ public void paint(Painter aPntr)
                 aPntr.draw(shape);
             }
         }
-        
-        // Iterate over runs and draw underlines
-        for(TextBoxRun run : line.getRuns()) {
-            if(run.getStyle().isUnderlined()) { double rx = run.getX(), rw = run.getWidth();
-                double uy = run.getFont().getUnderlineOffset(), uw = run.getFont().getUnderlineThickness();
-                aPntr.setStrokeWidth(uw); aPntr.drawLine(rx, ly-uy, rx + rw, ly-uy);
-            }
-        }
     }
+    
+    // Paint underlines
+    if(isUnderlined()) { for(TextBoxRun run : getUnderlineRuns(clip)) {
+        double ly = run.getLine().getBaseline(), rx = run.getX(), rw = run.getWidth();
+        double uy = run.getFont().getUnderlineOffset(), uw = run.getFont().getUnderlineThickness();
+        aPntr.setColor(run.getColor()); aPntr.setStrokeWidth(uw); aPntr.drawLine(rx, ly-uy, rx + rw, ly-uy);
+    }}
     
     // Restore state
     aPntr.restore();

@@ -347,6 +347,15 @@ public double getWidth(int anIndex)
 }
 
 /**
+ * Returns whether line contains an underlined run.
+ */
+public boolean isUnderlined()
+{
+    for(RichTextRun run : _runs) if(run.isUnderlined() && run.length()>0) return true;
+    return false;
+}
+
+/**
  * Standard clone implementation.
  */
 public RichTextLine clone()

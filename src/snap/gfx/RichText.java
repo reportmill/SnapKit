@@ -532,6 +532,16 @@ public TextStyle getStyleAt(int anIndex)  { return getRunAt(anIndex).getStyle();
 public TextLineStyle getLineStyleAt(int anIndex)  { return getLineAt(anIndex).getLineStyle(); }
     
 /**
+ * Returns whether text contains an underlined run.
+ */
+public boolean isUnderlined()
+{
+    if(isPlainText()) return getStyleAt(0).isUnderlined();
+    for(RichTextLine line : _lines) if(line.isUnderlined()) return true;
+    return false;
+}
+
+/**
  * Scales all the fonts in text by given factor.
  */
 public void scaleFonts(double aScale)
