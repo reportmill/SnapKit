@@ -128,6 +128,11 @@ public TextStyle getStyleAt(int anIndex)
 }
 
 /**
+ * Returns the line style.
+ */
+public TextLineStyle getLineStyle()  { return _rtline.getLineStyle(); }
+
+/**
  * Returns the line x.
  */
 public double getX()  { return _tbox.getX() + _alignX; }
@@ -315,13 +320,9 @@ public boolean isLastCharNewline()  { char c = getLastChar(); return c=='\r' || 
  */
 public TextBoxToken getTokenAt(int anIndex)
 {
-    TextBoxToken tok = getTokenCount()>0? getToken(0) : null; if(tok==null || tok.getStart()>anIndex) return null;
-    for(int i=0, iMax=getTokenCount(); i<iMax; i++) {
-        TextBoxToken next = i+1<iMax? getToken(i+1) : null;
-        if(next!=null && next.getStart()<=anIndex)
-            tok = next;
-        else return tok;
-    }
+    int tc = getTokenCount(); if(tc==0) return null; TextBoxToken tok = getToken(0);
+    for(int i=1; i<tc; i++) { TextBoxToken next = getToken(i);
+        if(next.getStart()<=anIndex) tok = next; else break; }
     return tok;
 }
 
@@ -330,14 +331,14 @@ public TextBoxToken getTokenAt(int anIndex)
  */
 public TextBoxToken getTokenForPointX(double anX)
 {
-    TextBoxToken token = getTokenCount()>0? getToken(0) : null; if(token==null || token.getX()>anX) return null;
+    TextBoxToken tok = getTokenCount()>0? getToken(0) : null; if(tok==null || tok.getX()>anX) return null;
     for(int i=0, iMax=getTokenCount(); i<iMax; i++) {
         TextBoxToken next = i+1<iMax? getToken(i+1) : null;
         if(next!=null && next.getX()<=anX)
-            token = next;
-        else return token;
+            tok = next;
+        else return tok;
     }
-    return token;
+    return tok;
 }
 
 /**

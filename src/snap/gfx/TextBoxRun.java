@@ -31,6 +31,14 @@ public TextBoxRun(TextBoxLine aLine, int anIndex)
     // Find/set RichTextRun for char index and calculate/set end
     _rtrun = aLine.getRichTextRun(anIndex);
     _end = Math.min(_line.length(), _rtrun.getEnd() - _line.getRichTextLineStart());
+    
+    // If Justify, reset end to start of next token
+    if(_line.getLineStyle().isJustify()) {
+        TextBoxToken tok = _line.getTokenAt(anIndex);
+        int ind = tok!=null? _line.getTokens().indexOf(tok) : -1;
+        TextBoxToken tok2 = ind>=0 && ind+1<_line.getTokenCount()? _line.getToken(ind+1) : null;
+        if(tok2!=null) _end = tok2.getStart();
+    }
 }
 
 /**
