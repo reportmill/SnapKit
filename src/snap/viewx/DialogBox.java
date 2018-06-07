@@ -59,6 +59,9 @@ public class DialogBox extends FormBuilder {
 
     // The cancel button
     Button           _cancelBtn;
+    
+    // The box to hold the buttons
+    RowView          _buttonBox;
 
     // Index of selected option
     int              _index = DialogBox.CANCEL_OPTION;
@@ -245,6 +248,11 @@ public Button getConfirmButton()  { return _confirmBtn; }
 public Button getCancelButton()  { return _cancelBtn; }
  
 /**
+ * Returns the button box.
+ */
+public RowView getButtonBox()  { return _buttonBox; }
+ 
+/**
  * Runs the panel.
  */
 public void showMessageDialog(View aView)
@@ -361,20 +369,20 @@ protected RowView addOptionButtons()
 
     // Add OK/Cancel buttons
     String titles[] = getOptions(), rtitles[] = titles.clone(); ArrayUtils.reverse(rtitles);
-    RowView bbox = _builder.addButtons(rtitles, rtitles);
-    bbox.setAlign(Pos.CENTER_RIGHT); bbox.setPadding(15,15,15,15);
-    for(View btn : bbox.getChildren()) { btn.setMinWidth(100); btn.setMinHeight(24); }
+    _buttonBox = _builder.addButtons(rtitles, rtitles);
+    _buttonBox.setPadding(15,15,15,15); //_buttonBox.setAlign(Pos.CENTER_RIGHT);
+    for(View btn : _buttonBox.getChildren()) { btn.setMinWidth(100); btn.setMinHeight(24); btn.setLeanX(HPos.RIGHT); }
     
     // Set ConfirmButton (and maybe FirstFocus)
-    _confirmBtn = (Button)bbox.getChild(titles.length-1);
+    _confirmBtn = (Button)_buttonBox.getChild(titles.length-1);
     _confirmBtn.setDefaultButton(true); if(getFirstFocus()==null) setFirstFocus(_confirmBtn);
     _confirmBtn.setEnabled(isConfirmEnabled());
     
     // Set CancelButton
-    _cancelBtn = bbox.getChildCount()>1? (Button)bbox.getChild(0) : null;
+    _cancelBtn = _buttonBox.getChildCount()>1? (Button)_buttonBox.getChild(0) : null;
     
     // Return button box
-    return bbox;
+    return _buttonBox;
 }
 
 /**
@@ -407,10 +415,10 @@ protected View createUI()
     else view.setPadding(25, 30, 8, 30);
     
     // Add OK/Cancel buttons
-    RowView bbox = addOptionButtons();
+    addOptionButtons();
     
-    // Wrap buttons and view in BorderView and return
-    BorderView bview = new BorderView(); bview.setCenter(view); bview.setBottom(bbox);
+    // Wrap view and button box in BorderView and return
+    BorderView bview = new BorderView(); bview.setCenter(view); bview.setBottom(_buttonBox);
     return bview;
 }
 

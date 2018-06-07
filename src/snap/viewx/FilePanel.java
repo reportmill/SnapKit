@@ -109,8 +109,11 @@ public WebFile getDir()  { return _dir; }
  */
 public void setDir(WebFile aFile)
 {
-    _dir = aFile;
-    _file = null;
+    // Set dir and clear file
+    _dir = aFile; _file = null;
+    
+    // Reset dir file to get latest listing
+    if(_dir!=null) _dir.resetContent();
     
     // If UI is set, set in browser and text
     setFileInUI();
@@ -200,7 +203,10 @@ protected String showFilePanel(View aView)
         String path = getRecentPath(getType());
         WebFile file = getFile(path);
         setFile(file);
-   }
+    }
+   
+    // Run code to add new folder button
+    if(isSaving()) runLater(() -> addNewFolderButton());
 
     // Run FileChooser UI in DialogBox
     _dbox = new DialogBox(getTitle()); _dbox.setContent(getUI()); _dbox.setConfirmEnabled(isFileTextFileValid());
@@ -236,6 +242,16 @@ protected String showFilePanel(View aView)
 
     // Return path
     return path;
+}
+
+/**
+ * Adds a new Folder button.
+ */
+protected void addNewFolderButton()
+{
+    Button btn = new Button("New Folder"); btn.setMinWidth(100); btn.setMinHeight(24); btn.setName("NewFolderButton");
+    btn.setOwner(this);
+    _dbox.getButtonBox().addChild(btn, 0);
 }
 
 /**
@@ -309,6 +325,8 @@ protected void respondUI(ViewEvent anEvent)
         if(anEvent.isMouseRelease()) {
             if(anEvent.getClickCount()==2 && _dbox.isConfirmEnabled())
                 _dbox.confirm();
+            else if(getFile()==null && getDir()!=null) {
+                WebFile dir = getDir(); setFile(dir.getParent()); setFile(dir); }
         }
         
         // Handle Action
@@ -332,6 +350,16 @@ protected void respondUI(ViewEvent anEvent)
     // Handle DirComboBox
     if(anEvent.equals("DirComboBox"))
         setFile(_dirComboBox.getSelItem());
+        
+    // Handle NewFolderButton
+    if(anEvent.equals("NewFolderButton")) {
+        String name = DialogBox.showInputDialog(getUI(), "New Folder Panel", "Enter name:", null);
+        if(name==null) return;
+        String path = getDir().getDirPath() + name;
+        WebFile newDir = getDir().getSite().createFile(path, true);
+        newDir.save();
+        WebFile dir = getDir(); setFile(dir.getParent()); setFile(dir);
+    }
 }
 
 /**
