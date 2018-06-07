@@ -358,7 +358,7 @@ protected void respondUI(ViewEvent anEvent)
         String path = getDir().getDirPath() + name;
         WebFile newDir = getDir().getSite().createFile(path, true);
         newDir.save();
-        WebFile dir = getDir(); setFile(dir.getParent()); setFile(dir);
+        setDir(getDir().getParent()); setDir(newDir);
     }
 }
 
