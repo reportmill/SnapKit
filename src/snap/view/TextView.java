@@ -367,66 +367,6 @@ public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd
 public void clear()  { _textArea.clear(); }
 
 /**
- * Returns the number of lines.
- */
-public int getLineCount()  { return _textArea.getLineCount(); }
-
-/**
- * Returns the individual line at given index.
- */
-public TextBoxLine getLine(int anIndex)  { return _textArea.getLine(anIndex); }
-
-/**
- * Returns the last line.
- */
-public TextBoxLine getLineLast()  { return _textArea.getLineLast(); }
-
-/**
- * Returns the line for the given character index.
- */
-public TextBoxLine getLineAt(int anIndex)  { return _textArea.getLineAt(anIndex); }
-
-/**
- * Returns the token for given character index.
- */
-public TextBoxToken getTokenAt(int anIndex)  { return _textArea.getTokenAt(anIndex); }
-
-/**
- * Returns the char index for given point in text coordinate space.
- */
-public int getCharIndex(double anX, double aY)  { return _textArea.getCharIndex(anX, aY); }
-
-/**
- * Returns the selection color.
- */
-public Color getSelColor()  { return _textArea.getSelColor(); }
-
-/**
- * Returns whether ProgressBar is animating.
- */
-public boolean isCaretAnim()  { return _textArea.isCaretAnim(); }
-
-/**
- * Sets anim.
- */
-public void setCaretAnim(boolean aValue)  { _textArea.setCaretAnim(aValue); }
-
-/**
- * Returns the font scale of the text box.
- */
-public double getFontScale()  { return _textArea.getFontScale(); }
-
-/**
- * Sets the font scale of the text box.
- */
-public void setFontScale(double aValue)  { _textArea.setFontScale(aValue); }
-
-/**
- * Scales font sizes of all text in TextBox to fit in bounds by finding/setting FontScale.
- */
-public void scaleTextToFit()  { _textArea.scaleTextToFit(); }
-
-/**
  * Opens a given link.
  */
 protected void openLink(String aLink)  { System.out.println("Open Link: " + aLink); }

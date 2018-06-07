@@ -370,10 +370,10 @@ public int getCharIndex(double anX)
 public double getXForChar(int anIndex)
 {
     if(anIndex==length()) return getMaxXAll();
-    TextBoxToken token = getTokenAt(anIndex);
-    TextStyle style = token!=null? token.getStyle() : getStartStyle();
-    double x = token!=null? token.getX() : getX();
-    for(int i=token!=null? token.getStart() : 0; i<anIndex; i++) { char c = charAt(i);
+    TextBoxToken tok = getTokenAt(anIndex); if(tok!=null && anIndex<tok.getStart()) tok = null;
+    TextStyle style = tok!=null? tok.getStyle() : getStartStyle();
+    double x = tok!=null? tok.getX() : getX();
+    for(int i=tok!=null? tok.getStart() : 0; i<anIndex; i++) { char c = charAt(i);
         if(c=='\t') x = getXForTabAtIndexAndX(i,x);
         else x += style.getCharAdvance(c) + style.getCharSpacing();
     }
