@@ -195,21 +195,7 @@ public void reset()
 /**
  * Returns whether undoer has Undo changes stored away.
  */
-public boolean hasUndos()
-{
-    // If active undo set has non-benign change title, return true
-    UndoSet activeSet = getActiveUndoSet();
-    if(activeSet.getChangeCount()>0)
-        return true;
-
-    // Iterate over rest of undo list and return true if any undo has non-benign change title
-    for(int i=0, iMax=_undoSets.size(); i<iMax; i++) { UndoSet undoSet = _undoSets.get(i);
-        if(undoSet.getUndoTitle()==null)
-            return true; }
-    
-    // Return false if we didn't encounter any non-benign undos
-    return false;
-}
+public boolean hasUndos()  { return _undoSets.size()>0 || getActiveUndoSet().getChangeCount()>0; }
 
 /**
  * Returns whether undoer has Redo changes stored away.
