@@ -245,6 +245,9 @@ protected void setValue(String aKey, Object aValue)
     else if(aKey.equals(NEWLINE_SPACING_KEY)) _newlineSpacing = SnapUtils.doubleValue(aValue);
     else if(aKey.equals(MIN_HEIGHT_KEY)) _minHeight = SnapUtils.doubleValue(aValue);
     else if(aKey.equals(MAX_HEIGHT_KEY)) _maxHeight = SnapUtils.doubleValue(aValue);
+    else if(aKey.equals(FIRST_INDENT_KEY)) _leftIndentFirst = SnapUtils.doubleValue(aValue);
+    else if(aKey.equals(LEFT_INDENT_KEY)) _leftIndent = SnapUtils.doubleValue(aValue);
+    else if(aKey.equals(RIGHT_INDENT_KEY)) _rightIndent = SnapUtils.doubleValue(aValue);
     else System.err.println("TextLineStyle.setValue: Unsupported key: " + aKey);
 }
 
