@@ -586,7 +586,8 @@ protected TextBoxLine createLine(RichTextLine aTextLine, int aStart, int aLineIn
     // Get start x/y
     TextBoxLine lastLn = aLineIndex>0? getLine(aLineIndex-1) : null;
     double y = lastLn!=null? lastLn.getY() + lastLn.getLineAdvance() : getY();
-    double x = getMinHitX(y,lineHt); while(x>getMaxX() && y<=getMaxY()) { y++; x = getMinHitX(y,lineHt); }
+    double indent = aStart==0? aTextLine.getLineStyle().getFirstIndent() : aTextLine.getLineStyle().getLeftIndent();
+    double x = getMinHitX(y,lineHt,indent); while(x>getMaxX() && y<=getMaxY()) { y++; x = getMinHitX(y,lineHt,indent); }
     double w = 0, cspace = style.getCharSpacing(); char c;
     
     // Create lines list and create/add first line
@@ -669,10 +670,10 @@ protected boolean isHitRight(double aX, double aY, double aH)
 /**
  * Returns the minimum x value that doesn't hit left border for given y and style.
  */
-protected double getMinHitX(double aY, double aH)
+protected double getMinHitX(double aY, double aH, double anIndent)
 {
-    if(_bpath==null || aY+aH>getMaxY()) return 0; 
-    Rect rect = new Rect(getX(),aY,20,aH);
+    if(_bpath==null || aY+aH>getMaxY()) return anIndent; 
+    Rect rect = new Rect(getX() + anIndent, aY, 20, aH);
     while(!_bpath.contains(rect) && rect.x<=getMaxX()) rect.x++;
     return rect.x - getX();
 }

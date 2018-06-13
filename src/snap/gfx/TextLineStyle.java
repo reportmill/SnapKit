@@ -16,11 +16,11 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
     // Whether text in line should be justified
     boolean              _justify;
     
+    // Indentation for first line of paragraph
+    double               _firstIndent = 0;
+    
     // Indention for whole paragraph
     double               _leftIndent = 0;
-    
-    // Indentation for first line of paragraph
-    double               _leftIndentFirst = 0;
     
     // Indentation for right margin
     double               _rightIndent = 0;
@@ -90,15 +90,14 @@ public HPos getAlign()  { return _align; }
 public boolean isJustify()  { return _justify; }
 
 /**
+ * Returns the indentation of first line in paragraph (this can be set different than successive lines).
+ */
+public double getFirstIndent() { return _firstIndent; }
+
+/**
  * Returns the left side indentation of this paragraph.
  */
 public double getLeftIndent() { return _leftIndent; }
-
-/**
- * Returns the left side indentation of the first line in this paragraph (this can be set different than successive
- * lines).
- */
-public double getLeftIndentFirst() { return _leftIndentFirst; }
 
 /**
  * Returns the right side indentation of this paragraph.
@@ -245,7 +244,7 @@ protected void setValue(String aKey, Object aValue)
     else if(aKey.equals(NEWLINE_SPACING_KEY)) _newlineSpacing = SnapUtils.doubleValue(aValue);
     else if(aKey.equals(MIN_HEIGHT_KEY)) _minHeight = SnapUtils.doubleValue(aValue);
     else if(aKey.equals(MAX_HEIGHT_KEY)) _maxHeight = SnapUtils.doubleValue(aValue);
-    else if(aKey.equals(FIRST_INDENT_KEY)) _leftIndentFirst = SnapUtils.doubleValue(aValue);
+    else if(aKey.equals(FIRST_INDENT_KEY)) _firstIndent = SnapUtils.doubleValue(aValue);
     else if(aKey.equals(LEFT_INDENT_KEY)) _leftIndent = SnapUtils.doubleValue(aValue);
     else if(aKey.equals(RIGHT_INDENT_KEY)) _rightIndent = SnapUtils.doubleValue(aValue);
     else System.err.println("TextLineStyle.setValue: Unsupported key: " + aKey);
@@ -270,8 +269,8 @@ public boolean equals(Object anObj)
     TextLineStyle other = anObj instanceof TextLineStyle? (TextLineStyle)anObj : null; if(other==null) return false;
     if(other._align!=_align) return false;
     if(other._justify!=_justify) return false;
+    if(other._firstIndent!=_firstIndent) return false;
     if(other._leftIndent!=_leftIndent) return false;
-    if(other._leftIndentFirst!=_leftIndentFirst) return false;
     if(other._rightIndent!=_rightIndent) return false;
     if(other._spacing!=_spacing) return false;
     if(other._spacingFactor!=_spacingFactor) return false;
@@ -289,6 +288,11 @@ public boolean equals(Object anObj)
 public String toString()
 {
     String str = "LineStyle { Align=" + _align;
+    if(_justify) str += ", Justify=true";
+    if(_firstIndent!=0) str += ", FirstIndent=" + StringUtils.toString(_firstIndent);
+    if(_leftIndent!=0) str += ", LeftIndent=" + StringUtils.toString(_leftIndent);
+    if(_rightIndent!=0) str += ", RightIndent=" + StringUtils.toString(_rightIndent);
+    if(_spacing!=0) str += ", Spacing=" + StringUtils.toString(_spacing);
     return str + " }";
 }
 
@@ -300,11 +304,11 @@ public XMLElement toXML(XMLArchiver anArchiver)
     // Get new element named pgraph
     XMLElement e = new XMLElement("pgraph");
     
-    // Archive AlignX, LeftIndent, LeftIndentFirst, RightIndent
+    // Archive AlignX, FirstIndent, LeftIndent, RightIndent
     String astr = _justify? "full" : _align.toString().toLowerCase();
     if(!astr.equals("left")) e.add("align", astr);
+    if(_firstIndent!=_leftIndent) { e.add("FirstIndent", _firstIndent); e.add("left-indent-0", _firstIndent); }
     if(_leftIndent!=0) e.add("left-indent", _leftIndent);
-    if(_leftIndentFirst!=_leftIndent) e.add("left-indent-0", _leftIndentFirst);
     if(_rightIndent!=0) e.add("right-indent", _rightIndent);
         
     // Archive Spacing, SpacingFactor, LineHeightMin, LineHeightMax, ParagraphSpacing
@@ -327,11 +331,12 @@ public XMLElement toXML(XMLArchiver anArchiver)
  */
 public TextLineStyle fromXML(XMLArchiver anArchiver, XMLElement anElement)
 {
-    // Unarchive AlignX, LeftIndent, LeftIndentFirst, RightIndent
+    // Unarchive AlignX, FirstIndent, LeftIndent, RightIndent
     String astr = anElement.getAttributeValue("align", "left");
     if(astr.equals("full")) _justify = true; else _align = HPos.get(astr);
+    if(anElement.hasAttribute("FirstIndent")) _firstIndent = anElement.getAttributeDoubleValue("FirstIndent");
+    else if(anElement.hasAttribute("left-indent-0")) _firstIndent = anElement.getAttributeFloatValue("left-indent-0");
     _leftIndent = anElement.getAttributeFloatValue("left-indent");
-    _leftIndentFirst = anElement.getAttributeFloatValue("left-indent-0", (float)_leftIndent);
     _rightIndent = anElement.getAttributeFloatValue("right-indent");
     
     // Archive Spacing, SpacingFactor, LineHeightMin, LineHeightMax, ParagraphSpacing
