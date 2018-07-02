@@ -32,7 +32,6 @@ public class ColorWell extends View {
 public ColorWell()
 {
     enableEvents(Action, MouseRelease, DragGesture, DragSourceEnd); enableEvents(DragEvents);
-    repaint();
 }
 
 /**
@@ -156,30 +155,14 @@ protected void processEvent(ViewEvent anEvent)
     // If disabled, just return
     if(!isEnabled()) return;
     
-    // Handle MouseClick
-    if(anEvent.isMouseClick()) {
-        
-        // If is selectable, toggle selected state
-        if(isSelectable())
-            setSelected(!isSelected());
-        
-        // If isn't selectable, make the color panel display this color
-        else {
-            ColorPanel panel = ColorPanel.getShared();
-            panel.setColor(getColor());
-            panel.resetLater();
-        }
+    // Handle MouseRelease: Toggle selection or just show color panel
+    if(anEvent.isMouseRelease()) {
+        if(isSelectable()) setSelected(!isSelected());
+        else showColorPanel();
     }
     
-    // Handle DragEnter
-    else if(anEvent.isDragEnter()) {
-        Clipboard cb = anEvent.getClipboard();
-        if(!_dragging && cb.hasColor()) anEvent.acceptDrag(); //dtde.getDropAction());
-        //else dtde.rejectDrag();
-    }
-    
-    // Handle DragEnter
-    else if(anEvent.isDragOver()) { Clipboard cb = anEvent.getClipboard();
+    // Handle DragEnter, DragOver
+    else if(anEvent.isDragEnter() || anEvent.isDragOver()) { Clipboard cb = anEvent.getClipboard();
         if(!_dragging && cb.hasColor()) anEvent.acceptDrag(); }
     
     // Handle DragExit
@@ -213,6 +196,16 @@ protected void processEvent(ViewEvent anEvent)
         
     // Repaint
     repaint();
+}
+
+/**
+ * Shows the color panel.
+ */
+public void showColorPanel()
+{
+    ColorPanel panel = ColorPanel.getShared();
+    panel.setColor(getColor());
+    panel.resetLater();
 }
 
 /**

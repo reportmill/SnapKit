@@ -5,25 +5,26 @@ package snap.viewx;
 import java.util.*;
 import snap.gfx.*;
 import snap.util.Prefs;
+import snap.util.SnapUtils;
 import snap.view.*;
 
 /**
  * A ColorWell subclass that handle a whole grid of color swatches, including drag and drop support.
  */
-public class ColorDock extends View {
+public class ColorDock extends ColorWell {
 
-    // Whether changes to the dock cause the colors to be saved to the preferences database
-    boolean                 _persistent;
-    
     // A hashtable to map row,col coordinates to colors in the dock (which is a sparse array of unlimited size)
-    Map <String,Color>  _colors = new Hashtable();
+    Map <String,Color>      _colors = new Hashtable();
+    
+    // Whether dock colors are saved to prefs
+    boolean                 _persist;
+    
+    // The selected swatch
+    Swatch                  _selSwatch;
     
     // The drag point (swatch) in color dock
     Point                   _dragPoint = null;
     
-    // Whether draggine
-    boolean                 _dragging;
-
     // The size of the individual swatches
     static int              SWATCH_SIZE = 13;
     
@@ -35,32 +36,17 @@ public class ColorDock extends View {
  */
 public ColorDock()
 {
-    enableEvents(MouseRelease, DragEnter, DragOver, DragExit, DragDrop, DragGesture);
+    enableEvents(MousePress);
     setBorder(COLOR_DOCK_BORDER);
 }
 
 /**
- * Returns whether this doc writes itself out to preferences.
- */
-public boolean isPersistent()  { return _persistent; }
-
-/**
- * Sets whether this dock writes itself out to preferences.
- */
-public void setPersistent(boolean aFlag)
-{
-    _persistent = aFlag;
-    if(_persistent)
-        readFromPreferences(getName());
-}
-
-/**
- * Returns the color at the given row & column.
+ * Returns the color at given row & column.
  */
 public Color getColor(int aRow, int aCol)
 {
-    Color color = _colors.get(aRow + "," + aCol);  // Get color from color map
-    return color==null? Color.WHITE : color;       // Return color (or just white if null)
+    Color color = _colors.get(aRow + "," + aCol);
+    return color!=null? color : Color.WHITE;
 }
 
 /**
@@ -71,47 +57,102 @@ public void setColor(Color aColor, int aRow, int aCol)
     String key = aRow + "," + aCol;                // Get key
     if(aColor!=null) _colors.put(key, aColor);     // If color isn't null, add to map
     else _colors.remove(key);                      // If color is null, remove map key
+    if(_persist) saveToPrefs(getName(), aRow, aCol);
+}
+
+/**
+ * Returns whether this doc writes itself out to preferences.
+ */
+public boolean isPersistent()  { return _persist; }
+
+/**
+ * Sets whether this dock writes itself out to preferences.
+ */
+public void setPersistent(boolean aFlag)  { _persist = aFlag; if(_persist) readFromPrefs(getName()); }
+
+/**
+ * Returns the swatch at given index.
+ */
+public Swatch getSwatch(int anIndex)
+{
+    int row = anIndex/getColCount(), col = anIndex%getColCount();
+    return getSwatch(row, col);
+}
+
+/**
+ * Returns the swatch at given row+col.
+ */
+public Swatch getSwatch(int aRow, int aCol)  { return new Swatch(aRow,aCol); }
+
+/**
+ * Returns the swatch at given point.
+ */
+public Swatch getSwatchAt(Point aPoint)  { return getSwatchAt(aPoint.x, aPoint.y); }
+
+/**
+ * Returns the swatch at given point.
+ */
+public Swatch getSwatchAt(double aX, double aY)
+{
+    Insets ins = getInsetsAll();
+    int row = (int)((aY - ins.top)/SWATCH_SIZE);
+    int col = (int)((aX - ins.left)/SWATCH_SIZE);
+    return getSwatch(row,col);
 }
 
 /**
  * Returns the color at the given swatch index.
  */
-public Color getColor(int anIndex)
-{
-    int row = anIndex/getColumnCount();
-    int col = anIndex%getColumnCount();
-    return getColor(row, col);    
-}
+public Color getColor(int anIndex)  { return getSwatch(anIndex).getColor(); }
 
 /**
  * Sets the color at the given swatch index.
  */
-public void setColor(Color aColor, int anIndex)
+public void setColor(Color aColor, int anIndex)  { getSwatch(anIndex).setColor(aColor); }
+
+/**
+ * Returns the number of rows in this color dock.
+ */
+public int getRowCount()
 {
-    int row = anIndex/getColumnCount();
-    int col = anIndex%getColumnCount();
-    setColor(aColor, row, col);
+    int height = (int)Math.round(getHeight() - getInsetsAll().getHeight());
+    return height/SWATCH_SIZE + (height%SWATCH_SIZE !=0 ? 1 : 0);    
 }
 
 /**
- * Returns the color at the mouse location within the component.
+ * Returns the number of columns in this color dock.
  */
-public Color getColor(Point aPoint)
+public int getColCount()
 {
-    int row = getRow(aPoint);
-    int col = getColumn(aPoint);
-    return getColor(row, col);
+    int width = (int)Math.round(getWidth() - getInsetsAll().getWidth());
+    return width/SWATCH_SIZE;// + (width%swatchW != 0 ? 1 : 0);
 }
 
 /**
- * Returns the color at the mouse location within the component.
+ * Returns the total number of visible swatches.
  */
-public void setColor(Color aColor, Point aPoint)
+public int getSwatchCount()  { return getRowCount()*getColCount(); }
+
+/**
+ * Returns the selected swatch.
+ */
+public Swatch getSelSwatch()  { return _selSwatch; }
+
+/**
+ * Sets the selected swatch.
+ */
+public void setSelSwatch(Swatch aSwatch)
 {
-    int row = getRow(aPoint);
-    int col = getColumn(aPoint);
-    setColor(aColor, row, col);
+    if(SnapUtils.equals(aSwatch,_selSwatch)) return;
+    _selSwatch = aSwatch;
+    setColor(_selSwatch!=null? _selSwatch.getColor() : null);
+    repaint();
 }
+
+/**
+ * Returns the selected swatch index.
+ */
+public int getSelIndex()  { return _selSwatch!=null? _selSwatch.getIndex() : -1; }
 
 /**
  * Resets the colors in colordock to white.
@@ -119,52 +160,15 @@ public void setColor(Color aColor, Point aPoint)
 public void resetColors()  { _colors.clear(); }
 
 /**
- * Returns the row for the given y coordinate.
+ * Override to set color of selected swatch.
  */
-public int getRow(Point aPoint)  { Insets ins = getInsetsAll(); return (int)((aPoint.getY() - ins.top)/SWATCH_SIZE); }
-
-/**
- * Returns the column for the given x coordinate.
- */
-public int getColumn(Point aPoint)  { Insets ins = getInsetsAll(); return (int)((aPoint.getX() - ins.left)/SWATCH_SIZE); }
-
-/**
- * Returns the number of rows in this color dock.
- */
-public int getRowCount()
+public void setColor(Color aColor)
 {
-    Insets ins = getInsetsAll(); int height = (int)Math.round(getHeight() - (ins.top+ins.bottom));
-    return height/SWATCH_SIZE + (height%SWATCH_SIZE !=0 ? 1 : 0);    
-}
-
-/**
- * Returns the number of columns in this color dock.
- */
-public int getColumnCount()
-{
-    Insets ins = getInsetsAll(); int width = (int)Math.round(getWidth() - (ins.left+ins.right));
-    return width/SWATCH_SIZE;// + (width%swatchW != 0 ? 1 : 0);
-}
-
-/**
- * Returns the total number of visible swatches.
- */
-public int getSwatchCount()  { return getRowCount()*getColumnCount(); }
-
-/**
- * Returns the swatch index for given point.
- */
-public int getSwatchIndex(Point aPoint)
-{
-    // If point is null, return -1
-    if(aPoint==null) return -1;
+    // If there is selected swatch, set color
+    if(getSelSwatch()!=null) getSelSwatch().setColor(aColor);
     
-    // Get row and column for selected point
-    int row = getRow(aPoint);
-    int col = getColumn(aPoint);
-    
-    // Return selected index
-    return row*getColumnCount() + col;
+    // Do normal version
+    super.setColor(aColor);
 }
 
 /**
@@ -177,21 +181,18 @@ protected void paintFront(Painter aPntr)
     Insets ins = getInsetsAll();
     
     // Get content size
-    double width = bounds.width-(ins.left+ins.right);
-    double height = bounds.height-(ins.top+ins.bottom);
+    double width = bounds.width - ins.getWidth();
+    double height = bounds.height - ins.getHeight();
     
     // Get swatch size
     int swatchW = SWATCH_SIZE, swatchH = SWATCH_SIZE;
-    
-    // Get row & column count
-    int ncols = getColumnCount();
-    int nrows = getRowCount();
     
     // Fill background to white and clip
     aPntr.setColor(Color.WHITE); aPntr.fillRect(ins.left, ins.top, width, height);
     aPntr.clipRect(ins.left, ins.top, width, height);
     
     // Make as many rows & columns as will fit, and fill any that are present in the sparse array.
+    int nrows = getRowCount(), ncols = getColCount();
     for(int row=0; row<nrows; ++row) {
         for(int col=0; col<ncols; ++col) {
             Color color = getColor(row, col);
@@ -199,19 +200,18 @@ protected void paintFront(Painter aPntr)
         }
     }
     
-    // Draw borders
+    // Draw grid between swatches
     aPntr.setColor(Color.LIGHTGRAY);
-    for(int row=0; row<=nrows; ++row)
-        aPntr.drawLine(ins.left, ins.top+row*swatchH, ins.left+width, ins.top+row*swatchH);
-    for(int col=0; col<=ncols; ++col)
-        aPntr.drawLine(ins.left+col*swatchW, ins.top, ins.left+col*swatchW, ins.top+height);
+    for(int row=0; row<=nrows; row++) aPntr.drawLine(ins.left, ins.top+row*swatchH, ins.left+width,ins.top+row*swatchH);
+    for(int col=0; col<=ncols; col++) aPntr.drawLine(ins.left+col*swatchW, ins.top,ins.left+col*swatchW,ins.top+height);
     
-    // If dragging, hilight the drag destination
-    if(_dragPoint!=null) {
-        int row = getRow(_dragPoint);           // Get select row & column
-        int col = getColumn(_dragPoint);
-        double x = ins.left + col*swatchW;      // Get select x y
-        double y = ins.top + row*swatchH;       // Draw red rect
+    // If selected swatch or drag point, highlight
+    if(getSelSwatch()!=null || _dragPoint!=null) {
+        Swatch swatch = _dragPoint!=null? getSwatchAt(_dragPoint) : getSelSwatch();
+        int row = swatch.getRow(), col = swatch.getCol();
+        double x = ins.left + col*swatchW, y = ins.top + row*swatchH;
+        
+        // Draw red rect and redraw smaller swatch
         aPntr.setColor(Color.RED); aPntr.drawRect(x,y,swatchW,swatchH); aPntr.drawRect(x+1,y+1,swatchW-2,swatchH-2);
         aPntr.setColor(Color.WHITE); aPntr.drawRect(x+2,y+2,swatchW-4,swatchH-4);
     }
@@ -222,82 +222,51 @@ protected void paintFront(Painter aPntr)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    // Handle MouseClick: Make ColorPanel display clicked color
-    if(anEvent.isMouseClick()) {
-        if(!isEnabled()) return;
-        ColorPanel panel = ColorPanel.getShared();
-        panel.setColor(getColor(anEvent.getPoint()));
-        panel.resetLater();
+    // Handle MousePress: Select swatch under at point
+    if(anEvent.isMousePress()) { if(!isEnabled()) return;
+        Swatch swatch = getSwatchAt(anEvent.getPoint());
+        setSelSwatch(swatch);
     }
     
-    // Handle DragEnter
-    else if(anEvent.isDragEnter()) {
-        Clipboard dboard = anEvent.getClipboard();
-        if(dboard.hasColor()) {
-            anEvent.acceptDrag();
-            _dragPoint = anEvent.getPoint(); repaint();
-        } //else dtde.rejectDrag();
+    // Handle MouseRelease: Set selection or just show color panel
+    else if(anEvent.isMouseRelease()) {
+        if(isSelectable()) setSelected(true);
+        else showColorPanel();
     }
     
-    // Handle DragOver
-    else if(anEvent.isDragOver()) {
-        _dragPoint = anEvent.getPoint(); repaint(); }
+    // Handle DragEnter, DragOver
+    else if(anEvent.isDragEnter() || anEvent.isDragOver()) { Clipboard dboard = anEvent.getClipboard();
+        if(!_dragging && dboard.hasColor()) {
+            anEvent.acceptDrag(); _dragPoint = anEvent.getPoint(); repaint(); }
+    }
     
     // Handle DragExit
     else if(anEvent.isDragExit()) {
         _dragPoint = null; repaint(); }
     
     // Handle DragDrop
-    else if(anEvent.isDragDrop()) {
-        Clipboard dboard = anEvent.getClipboard();
+    else if(anEvent.isDragDrop()) { Clipboard dboard = anEvent.getClipboard();
         Color color = dboard.getColor();
-        dropColor(color, anEvent.getPoint());
+        Swatch swatch = getSwatchAt(anEvent.getPoint()); swatch.setColor(color);
         anEvent.dropComplete(); _dragPoint = null; repaint();
     }
     
-    // Handle DragGesture
-    else if(anEvent.isDragGesture()) {
-        Color color = getColor(anEvent.getPoint());
-        Image image = Image.get(14,14,true); Painter pntr = image.getPainter();
-        ColorWell.paintSwatch(pntr,color,0,0,14,14); pntr.setColor(Color.BLACK);
-        pntr.drawRect(0,0,14-1,14-1); pntr.flush();
-        Clipboard cboard = anEvent.getClipboard();
-        cboard.addData(color);
-        cboard.setDragImage(image);
-        cboard.startDrag();
-        _dragging = true;
-    }
-    
-    // Handle DragSourceEnd
-    else if(anEvent.isDragSourceEnd())
-        _dragging = false;
-}
-
-/**
- * DropTargetListener method.
- */
-public void dropColor(Color aColor, Point aPoint)
-{ 
-    // Get row and column for last drag point
-    int row = getRow(aPoint), col = getColumn(aPoint);
-    
-    // Set color - if color dock is persistent, save new color to preferences
-    setColor(aColor, row, col); //setColor(aColor);
-    if(_persistent) saveToPreferences(getName(), row, col);
+    // Otherwise, do normal version
+    else super.processEvent(anEvent);
 }
 
 /** 
  * Update an individual color at {row,column} in the preferences
  */
-public void saveToPreferences(String aName, int aRow, int aColumn) 
+protected void saveToPrefs(String aName, int aRow, int aCol) 
 {
     // Get the app's preferences node and sub-node for the list of colors
     Prefs prefs = Prefs.get().getChild(aName);
     
     // Get color, rgb value, key, then if not white put value, otherwise remove
-    Color c = getColor(aRow, aColumn);
+    Color c = getColor(aRow, aCol);
     int rgb = c.getRGBA();
-    String key = aRow + "," + aColumn;
+    String key = aRow + "," + aCol;
     if(rgb!=0xFFFFFFFF) prefs.set(key, rgb);
     else prefs.remove(key);
 }
@@ -305,7 +274,7 @@ public void saveToPreferences(String aName, int aRow, int aColumn)
 /**
  * Read color well color from preferences.
  */
-public void readFromPreferences(String aName)
+protected void readFromPrefs(String aName)
 {
     // Reset colors map
     resetColors();
@@ -321,8 +290,54 @@ public void readFromPreferences(String aName)
 }
 
 /**
- * Returns the default border.
+ * Override to return dock border.
  */
 public Border getDefaultBorder()  { return COLOR_DOCK_BORDER; }
+
+/**
+ * A class to represent a color swatch.
+ */
+private class Swatch {
+    
+    // The row, column
+    int          _row, _col;
+    
+    // The color
+    Color        _color;
+    
+    /** Creates swatch for row, col. */
+    public Swatch(int aRow, int aCol)  { _row = aRow; _col = aCol; }
+    
+    /** Returns the row. */
+    public int getRow()  { return _row; }
+    
+    /** Returns the column. */
+    public int getCol()  { return _col; }
+    
+    /** Returns the index of swatch in dock. */
+    public int getIndex()  { return _row*getColCount() + _col; }
+    
+    /** Returns the color. */
+    public Color getColor()
+    {
+        if(_color==null) _color = ColorDock.this.getColor(_row,_col);
+        return _color;
+    }
+    
+    /** Sets the color. */
+    public void setColor(Color aColor)
+    {
+        _color = aColor;
+        ColorDock.this.setColor(aColor, _row, _col);
+    }
+    
+    /** Standard equals. */
+    public boolean equals(Object anObj)
+    {
+        if(anObj==this) return true;
+        Swatch other = anObj instanceof Swatch? (Swatch)anObj : null; if(other==null) return false;
+        return _row==other._row && _col==other._col;
+    }
+}
 
 }
