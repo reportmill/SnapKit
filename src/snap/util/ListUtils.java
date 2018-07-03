@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -76,8 +75,7 @@ public static int[] getIndexesId(List aList, List aSubList)
 public static <T> List <T> add(List <T> aList, T anObj)
 {
     // If list is null, create list
-    if(aList==null)
-        aList = new Vector();
+    if(aList==null) aList = new Vector();
     
     // Add object
     aList.add(anObj);
@@ -203,8 +201,7 @@ public static <T> T removeLast(List <T> aList)  { return aList.remove(aList.size
 public static int removeId(List aList, Object anObj)
 {
     int index = indexOfId(aList, anObj);
-    if(index>=0)
-        aList.remove(index);
+    if(index>=0) aList.remove(index);
     return index;
 }
 
@@ -309,87 +306,6 @@ public static String joinStrings(List aList, String aString)
 }
 
 /**
- * Returns an array of object of given class.
- */
-public static <T> T[] toArray(List <T> aList, Class aClass)
-{
-    T array[] = (T[])Array.newInstance(aClass, aList.size());
-    return aList.toArray(array);
-}
-
-/**
- * Creates a new array list with given object.
- */
-public static <T> List<T> newArrayList(T anObj)  { return newArrayList(10, anObj); }
-
-/**
- * Creates a new array list with given object and capacity.
- */
-public static <T> List<T> newArrayList(int aCapacity, T anObj)
-{
-    List list = new ArrayList(aCapacity);
-    if(anObj!=null) list.add(anObj);
-    return list;
-}
-
-/**
- * Creates a new array list with given objects.
- */
-public static <T> List<T> newArrayList(T ... theObjects)  { return newArrayList(theObjects.length, theObjects); }
-
-/**
- * Creates a new array list with given objects and capacity.
- */
-public static <T> List<T> newArrayList(int aCapacity, T ... theObjects)
-{
-    List list = new ArrayList(Math.min(theObjects.length, aCapacity));
-    for(T item : theObjects) list.add(item);
-    return list;
-}
-
-/**
- * Creates a new list containing the objects in the object array.
- */
-public static <T> List<T> newList(T... objects)
-{
-    List list = new ArrayList(objects.length);
-    for(Object object : objects) list.add(object);
-    return list;
-}
-
-/**
- * Creates a new vector for the given array of objects.
- */
-public static <T> Vector<T> newVector(T... objects)
-{
-    Vector vector = new Vector(objects.length);
-    for(Object object : objects) vector.add(object);
-    return vector;
-}
-
-/**
- * Converts an iterable to list.
- */
-public static <T> List <T> toList(Iterable<T> anIterable)
-{
-    if(anIterable instanceof List)
-        return new ArrayList((List)anIterable);
-    List list = new ArrayList();
-    for(T obj : anIterable) list.add(obj);
-    return list;
-}
-
-/**
- * Converts an enumeration to a list.
- */
-public static <T> List <T> toList(Enumeration<T> anEnumeration)
-{
-    List <T> list = new ArrayList();
-    while(anEnumeration.hasMoreElements()) list.add(anEnumeration.nextElement());
-    return list;
-}
-
-/**
  * Adds object from list 2 to list 1, unless they are already present (then removes them).
  */
 public static void xor(List l1, List l2)
@@ -405,57 +321,6 @@ public static void xor(List l1, List l2)
     for(int i=size-1; i>=0; i--)
         if(l2.contains(l1.get(i)))
             l1.remove(i);
-}
-
-/**
- * Returns the matching object for this given key value.
- */
-public static <T> T getMatch(Collection <T> aCollection, String aKeyChain, Object aValue)
-{
-    for(T t : aCollection)
-        if(SnapUtils.equals(aValue, KeyChain.getValue(t, aKeyChain)))
-            return t;
-    return null;
-}
-
-/**
- * Returns the matching object for this given key value.
- */
-public static <T> List <T> getMatches(Collection <T> aCollection, String aKeyChain, Object aValue)
-{
-    List <T> matches = new ArrayList();
-    for(T t : aCollection)
-        if(SnapUtils.equals(aValue, KeyChain.getValue(t, aKeyChain)))
-            matches.add(t);
-    return matches;
-}
-
-/**
- * Returns the matching index for this given key value.
- */
-public static int getMatchIndex(List aList, String aKeyChain, Object aValue)
-{
-    for(int i=0, iMax=aList.size(); i<iMax; i++)
-        if(SnapUtils.equals(aValue, KeyChain.getValue(aList.get(i), aKeyChain)))
-            return i;
-    return -1;
-}
-
-/**
- * Filters a given list in place with the given key chain string.
- */
-public static void filter(List aList, String aKeyChain)
-{
-    // If key is null or zero length, just return
-    if(aKeyChain==null || aKeyChain.length()==0) return;
-    
-    // Get key chain
-    KeyChain keyChain = KeyChain.getKeyChain(aKeyChain);
-    
-    // Iterate over list (backward) and remove object that fail key chain
-    for(int i=aList.size()-1; i>=0; i--)
-        if(!KeyChain.getBoolValue(aList.get(i), keyChain))
-            aList.remove(i);
 }
 
 /**
@@ -497,21 +362,16 @@ public static boolean objectsHaveSameClass(List l)
 /**
  * Moves the object at the given index to the front of the list.
  */
-public static void moveToFront(List aList, int anIndex)
-{
-    if(anIndex>0)
-        moveToFront(aList, aList.get(anIndex));
-}
+public static void moveToFront(List aList, int anIndex)  { if(anIndex>0) moveToFront(aList, aList.get(anIndex)); }
 
 /**
  * Move the given object to the front of the list.
  */
 public static void moveToFront(List aList, Object anObj)
 {
-    if(anObj!=null) {
-        aList.remove(anObj);
-        aList.add(0, anObj);
-    }
+    if(anObj==null) return;
+    aList.remove(anObj);
+    aList.add(0, anObj);
 }
 
 /**
@@ -540,11 +400,9 @@ public static boolean equalsId(List aList1, List aList2)
  */
 public static <T> List <T> clone(List <T> aList)
 {
-    if(aList instanceof ArrayList)
-        return (List)((ArrayList)aList).clone();
-    if(aList instanceof Vector)
-        return (List)((Vector)aList).clone();
-    return aList==null? null : new ArrayList(aList);
+    if(aList instanceof ArrayList) return (List)((ArrayList)aList).clone();
+    if(aList instanceof Vector) return (List)((Vector)aList).clone();
+    return aList!=null? new ArrayList(aList) : null;
 }
 
 }
