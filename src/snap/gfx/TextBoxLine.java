@@ -146,11 +146,13 @@ public double getY()  { return getYLocal() + _tbox.getAlignedY(); }
  */
 public double getYLocal()
 {
-    if(_yloc<0) {
-        int index = getIndex(); //validate();
-        TextBoxLine lastLine = index>0? _tbox.getLine(index-1) : null;
-        _yloc = lastLine!=null? (lastLine.getYLocal() + lastLine.getLineAdvance()) : 0;
-    }
+    // If already set, just return
+    if(_yloc>=0) return _yloc;
+    
+    // Get YLocal from last line. Need to fix this to not stack overflow for large text showing tail first.
+    int index = getIndex();
+    TextBoxLine lastLine = index>0? _tbox.getLine(index-1) : null;
+    _yloc = lastLine!=null? (lastLine.getYLocal() + lastLine.getLineAdvance()) : 0;
     return _yloc;
 }
 
