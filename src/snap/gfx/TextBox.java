@@ -255,7 +255,7 @@ public void setStart(int anIndex)
 /**
  * Returns the end char in RichText.
  */
-public int getEnd()  { return getLineCount()>0? getLineLast().getEnd() : getStart(); }
+public int getEnd()  { return getStart() + (getLineCount()>0? getLineLast().getEnd() : 0); }
 
 /**
  * Returns the font scale of the text box.

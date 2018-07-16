@@ -20,12 +20,12 @@ public class TextBoxLine implements CharSequence {
     protected int        _index;
     
     // The char index of the start/end of this line in text
-    int                  _start, _end, _length;
+    int                  _start, _length;
 
-    // The TextDocLine that contains this line
+    // The RichTextLine that this line renders
     RichTextLine         _rtline;
     
-    // The start of this line in rich text line
+    // The start of this line in RichTextLine
     int                  _rtstart;
     
     // The bounds of this line in TextBlock
@@ -52,7 +52,6 @@ public class TextBoxLine implements CharSequence {
 public TextBoxLine(TextBox aBox, TextStyle aStartStyle, RichTextLine aTextLine, int theRTLStart)
 {
     _tbox = aBox; _startStyle = aStartStyle; _rtline = aTextLine; _rtstart = theRTLStart;
-    _start = _rtline.getStart() + _rtstart;
 }
 
 /**
@@ -201,10 +200,9 @@ public void resetSizes()
     TextStyle etokStyle = etok!=null? etok.getStyle() : getStartStyle();
     
     // Get line end and length (extend end to capture trailing whitespace after last token)
-    _end = etokEnd + _rtstart;
-    while(_end<_rtline.length() && Character.isWhitespace(_rtline.charAt(_end))) _end++;
-    _end += _rtline.getStart();
-    _length = _end - _start;
+    int end = etokEnd + _rtstart;
+    while(end<_rtline.length() && Character.isWhitespace(_rtline.charAt(end))) end++;
+    _length = end - _rtstart; //_end += _rtline.getStart(); _length = _end - _start;
     
     // Iterate over runs and get line metrics
     _ascent = etokStyle.getAscent(); _descent = etokStyle.getDescent(); _leading = etokStyle.getLeading();
@@ -240,7 +238,7 @@ public void resetSizes()
     
     // If justify, shift tokens in line (unless line has newline or is last line in RichText)
     if(lstyle.isJustify() && getTokenCount()>1) {
-        if(isLastCharNewline() || _end==_rtline.getEnd()) return;
+        if(isLastCharNewline() || end==_rtline.length()) return;
         double y = getY();
         double tmx = _tbox.getMaxHitX(y, _height), lmx = getMaxX(), rem = tmx - lmx;
         double shift = rem/(getTokenCount()-1), shft = 0;
