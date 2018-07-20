@@ -124,7 +124,7 @@ public boolean isSimple()
     int pc = getPointCount(); if(pc<3) return false;
     
     // Iterate over all lines
-    for(int i=0;i<pc;i++) { int j = (i+1)%pc;
+    for(int i=0;i<pc-1;i++) { int j = (i+1)%pc;
     
         // Get line endpoint and see if next point is collinear
         double x0 = getX(i), y0 = getY(i);
@@ -201,7 +201,7 @@ public Polygon[] getConvexPolys(int aMax)
 {
     // If not simple, get simples
     if(!isSimple()) {
-        System.err.println("Polygon.getConvextPolys: Not simple - shouldn't happen");
+        System.err.println("Polygon.getConvexPolys: Not simple - shouldn't happen");
         Shape shp = Shape.makeSimple(this);
         PolygonList plist = new PolygonList(shp);
         Polygon polys0[] = plist.getPolys();
