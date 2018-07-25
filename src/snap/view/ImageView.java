@@ -28,6 +28,9 @@ public class ImageView extends View {
     // Whether to allow image size to extend beyond view bounds
     boolean             _allowBleed;
     
+    // The frame
+    int                 _frame;
+    
     // The image finished loading listener.
     PropChangeListener  _lsnr;
 
@@ -163,6 +166,30 @@ public void setAllowBleed(boolean aValue)
     firePropChange(AllowBleed_Prop, _allowBleed, _allowBleed = aValue);
     repaint();
     System.err.println("ImageView.setAllowBleed: Not implemented");
+}
+
+/**
+ * Returns the frame.
+ */
+public int getFrame()  { return _frame; }
+
+/**
+ * Sets the frame.
+ */
+public void setFrame(int anIndex)
+{
+    _frame = anIndex;
+    ImageSet iset = _image!=null? _image.getImageSet() : null; if(iset==null) return;
+    setImage(iset.getImage(anIndex));
+}
+
+/**
+ * Returns the frame.
+ */
+public int getFrameMax()
+{
+    ImageSet iset = _image!=null? _image.getImageSet() : null; if(iset==null) return 0;
+    return iset.getCount() - 1;
 }
 
 /**

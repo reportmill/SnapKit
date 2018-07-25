@@ -1,7 +1,7 @@
 package snap.swing;
 import java.awt.image.*;
 import java.io.*;
-import java.util.Iterator;
+import java.util.*;
 import javax.imageio.*;
 import javax.imageio.metadata.*;
 import javax.imageio.stream.ImageInputStream;
@@ -181,6 +181,9 @@ public BufferedImage getNative()
     
     if(getSource() instanceof java.awt.Image)
         return _native = AWTImageUtils.getBufferedImage((java.awt.Image)getSource());
+        
+    if(getType()=="gif")
+        return getGif();
 
     // Get image bytes
     byte bytes[] = getBytes();
@@ -234,6 +237,38 @@ private void getDPI(byte theBytes[]) throws IOException
         Node vitem = vnnm!=null? vnnm.item(0) : null;
         if(vitem!=null) _hdpi = Math.round(25.4/Double.parseDouble(vitem.getNodeValue()));
     }
+}
+
+/**
+ * Returns the native image.
+ */
+public BufferedImage getGif()
+{
+    // Create images array, initialized with this image
+    List <Image> images = new ArrayList(); images.add(this);
+    
+    // Read image (or images, if more than one)
+    try {
+        byte bytes[] = getBytes();
+        InputStream istream = new ByteArrayInputStream(bytes);
+        ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
+        ImageInputStream stream = ImageIO.createImageInputStream(istream);
+        reader.setInput(stream);
+    
+        int count = reader.getNumImages(true);
+        for (int index = 0; index < count; index++) {
+            BufferedImage img = reader.read(index);
+            if(index==0) _native = img;
+            else images.add(new J2DImage(img));
+        }
+    }
+    
+    // Catch exception
+    catch(IOException e) { System.err.println(e); return null; }
+    
+    // If multiple images, create set
+    if(images.size()>1) new ImageSet(images);
+    return _native;
 }
 
 }

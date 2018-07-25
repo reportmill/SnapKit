@@ -30,6 +30,9 @@ public abstract class Image {
      
      // The cached width/height
      double           _width = -1, _height = -1;
+     
+     // The image set, if animated image
+     ImageSet         _imgSet;
 
     // PropertyChangeSupport
     PropChangeSupport _pcs = PropChangeSupport.EMPTY;
@@ -187,6 +190,16 @@ protected void setLoaded(boolean aValue)
     _width = _height = -1;
     firePropChange(Loaded_Prop, _loaded, _loaded=aValue);
 }
+
+/**
+ * Returns the image set.
+ */
+public ImageSet getImageSet()  { return _imgSet; }
+
+/**
+ * Sets the image set.
+ */
+protected void setImageSet(ImageSet anIS)  { _imgSet = anIS; }
 
 /**
  * Add listener.
