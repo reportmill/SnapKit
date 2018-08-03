@@ -540,6 +540,8 @@ public String toString()
     String keys = ListUtils.joinStrings(getKeys(), ","); if(keys.length()>0) StringUtils.toStringAdd(sb, "Keys", keys);
     if(_loopCount==Short.MAX_VALUE) StringUtils.toStringAdd(sb, "Loops", "true");
     else if(_loopCount>0) StringUtils.toStringAdd(sb, "LoopCount", _loopCount);
+    if(isRoot()) sb.append(" for ").append(_view.getClass().getSimpleName());
+    if(isRoot() && _view.getName()!=null) sb.append(' ').append(_view.getName());
     for(ViewAnim va : _anims) sb.append("\n    " + va.toString().replace("\n", "\n    "));
     return sb.toString();
 }
