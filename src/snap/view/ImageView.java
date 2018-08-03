@@ -178,18 +178,23 @@ public int getFrame()  { return _frame; }
  */
 public void setFrame(int anIndex)
 {
-    _frame = anIndex;
+    _frame = anIndex%getFrameCount();
     ImageSet iset = _image!=null? _image.getImageSet() : null; if(iset==null) return;
-    setImage(iset.getImage(anIndex));
+    setImage(iset.getImage(_frame));
 }
 
 /**
  * Returns the frame.
  */
-public int getFrameMax()
+public int getFrameMax()  { return getFrameCount() - 1; }
+
+/**
+ * Returns the frame.
+ */
+public int getFrameCount()
 {
-    ImageSet iset = _image!=null? _image.getImageSet() : null; if(iset==null) return 0;
-    return iset.getCount() - 1;
+    ImageSet iset = _image!=null? _image.getImageSet() : null; if(iset==null) return 1;
+    return iset.getCount();
 }
 
 /**
@@ -299,6 +304,24 @@ protected void paintFront(Painter aPntr)
     
     // If clipped, restore
     if(clipToBounds) aPntr.restore();
+}
+
+/**
+ * Returns the value for given key.
+ */
+public Object getValue(String aPropName)
+{
+    if(aPropName.equals("Frame")) return getFrame();
+    return super.getValue(aPropName);
+}
+
+/**
+ * Sets the value for given key.
+ */
+public void setValue(String aPropName, Object aValue)
+{
+    if(aPropName.equals("Frame")) setFrame(SnapUtils.intValue(aValue));
+    else super.setValue(aPropName, aValue);
 }
 
 /**
