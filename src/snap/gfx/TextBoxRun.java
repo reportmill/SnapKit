@@ -14,8 +14,8 @@ public class TextBoxRun {
     // The start/end char index of this run in line
     int            _start, _end;
     
-    // The RichTextRun this TextBoxRun maps to in RichText
-    RichTextRun    _rtrun;
+    // The TextStyle for characters in this run
+    TextStyle      _style;
 
     // The run x and width
     double         _x = -1, _width = -1;
@@ -23,22 +23,9 @@ public class TextBoxRun {
 /**
  * Creates a new TextBoxRun.
  */
-public TextBoxRun(TextBoxLine aLine, int anIndex)
+public TextBoxRun(TextBoxLine aLine, TextStyle aStyle, int aStart, int aEnd)
 {
-    // Set line and start char index
-    _line = aLine; _start = anIndex;
-    
-    // Find/set RichTextRun for char index and calculate/set end
-    _rtrun = aLine.getRichTextRun(anIndex);
-    _end = Math.min(_line.length(), _rtrun.getEnd() - _line.getRichTextLineStart());
-    
-    // If Justify, reset end to start of next token
-    if(_line.getLineStyle().isJustify()) {
-        TextBoxToken tok = _line.getTokenAt(anIndex);
-        int ind = tok!=null? _line.getTokens().indexOf(tok) : -1;
-        TextBoxToken tok2 = ind>=0 && ind+1<_line.getTokenCount()? _line.getToken(ind+1) : null;
-        if(tok2!=null) _end = tok2.getStart();
-    }
+    _line = aLine; _style = aStyle; _start = aStart; _end = aEnd;
 }
 
 /**
@@ -47,24 +34,19 @@ public TextBoxRun(TextBoxLine aLine, int anIndex)
 public TextBoxLine getLine()  { return _line; }
 
 /**
- * Returns the RichTextRun.
- */
-public RichTextRun getRichTextRun()  { return _rtrun; }
-
-/**
  * Returns the run style.
  */
-public TextStyle getStyle()  { return _rtrun.getStyle(); }
+public TextStyle getStyle()  { return _style; }
 
 /**
  * Returns the font.
  */
-public Font getFont()  { return _rtrun.getFont(); }
+public Font getFont()  { return _style.getFont(); }
 
 /**
  * Returns the color.
  */
-public Color getColor()  { return _rtrun.getColor(); }
+public Color getColor()  { return _style.getColor(); }
 
 /**
  * Returns the start index of this run in line.

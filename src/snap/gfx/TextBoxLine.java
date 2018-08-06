@@ -112,19 +112,7 @@ public int getRichTextLineStart()  { return _rtstart; }
 /**
  * Returns the RichTextRun of char in line.
  */
-public RichTextRun getRichTextRun(int anIndex)
-{
-    return _rtline.getRunAt(_rtstart+anIndex);
-}
-
-/**
- * Returns the style at index of char in line.
- */
-public TextStyle getStyleAt(int anIndex)
-{
-    RichTextRun rtrun = getRichTextRun(anIndex);
-    return rtrun.getStyle();
-}
+public RichTextRun getRichTextRun(int anIndex)  { return _rtline.getRunAt(_rtstart+anIndex); }
 
 /**
  * Returns the line style.
@@ -445,16 +433,43 @@ public List <TextBoxRun> getRuns()
     // If already set, just return
     if(_runs!=null) return _runs;
     
-    // Create new list and create/add first run
+    // Create new list for runs
     List runs = new ArrayList(_rtline.getRunCount());
-    TextBoxRun run = new TextBoxRun(this,0); runs.add(run);
     
-    // While not at line end, add additional runs
+    // Create first run and add to list.
+    TextBoxRun run = createRun(0); runs.add(run);
+
+    // Continue to create/add runs while not at line end
     while(run.getEnd()<length()) {
-        run = new TextBoxRun(this, run.getEnd()); runs.add(run); }
+        run = createRun(run.getEnd()); runs.add(run); }
         
     // Set and return
     return _runs = runs;
+}
+
+/**
+ * Creates the TextBoxRun at given char index in line.
+ */
+protected TextBoxRun createRun(int aStart)
+{
+    // Get RichTextRun and TextStyle at char index
+    RichTextRun rtrun = getRichTextRun(aStart);
+    TextStyle style = rtrun.getStyle();
+    if(_tbox._fontScale!=1) style = style.copyFor(style.getFont().scaleFont(_tbox._fontScale));
+    
+    // Get end of run
+    int end = Math.min(length(), rtrun.getEnd() - getRichTextLineStart());
+
+    // If Justify, reset end to start of next token
+    if(getLineStyle().isJustify()) {
+        TextBoxToken tok = getTokenAt(aStart);
+        int ind = tok!=null? getTokens().indexOf(tok) : -1;
+        TextBoxToken tok2 = ind>=0 && ind+1<getTokenCount()? getToken(ind+1) : null;
+        if(tok2!=null) end = tok2.getStart();
+    }
+    
+    // Create/return new run
+    return new TextBoxRun(this, style, aStart, end);
 }
 
 /**
