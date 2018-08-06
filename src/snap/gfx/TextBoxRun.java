@@ -71,12 +71,20 @@ public char charAt(int anIndex)  { return _line.charAt(_start+anIndex); }
 /**
  * Returns the x location of run.
  */
-public double getX()  { return _x>=0? _x : (_x=_line.getXForChar(_start)); }
+public double getX()
+{
+    if(_x>=0) return _x;
+    return _x = _line.getXForChar(_start);
+}
 
 /**
  * Returns the width of run.
  */
-public double getWidth()  { return _width>=0? _width : (_width=_line.getXForChar(_end) - getX()); }
+public double getWidth()
+{
+    if(_width>=0) return _width;
+    return _width = _line.getXForChar(_end) - getX();
+}
 
 /**
  * Returns the max x location of run.

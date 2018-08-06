@@ -468,6 +468,10 @@ protected TextBoxRun createRun(int aStart)
         if(tok2!=null) end = tok2.getStart();
     }
     
+    // If there are tabs, end after first tab instead
+    for(int i=aStart;i<end;i++) if(charAt(i)=='\t') {
+        end = i+1; break; }
+    
     // Create/return new run
     return new TextBoxRun(this, style, aStart, end);
 }
