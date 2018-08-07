@@ -245,6 +245,23 @@ public void addValue(String aKey, Object aValue)
 }
 
 /**
+ * Returns the node as a map.
+ */
+public Map getAsMap()
+{
+    // If not object, complain and return null
+    if(getType()!=Type.Object) { System.err.println("JSONNode.getAsMap: Type isn't Object"); return null; }
+    
+    // Create map, iterate over keys to add values and return map
+    Map map = new HashMap();
+    for(int i=0;i<getNodeCount();i++) { String key = getKey(i);
+        Object val = getNodeValue(key);
+        map.put(key,val);
+    }
+    return map;
+}
+
+/**
  * Standard equals implementation.
  */
 public boolean equals(Object anObj)
