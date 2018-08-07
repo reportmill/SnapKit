@@ -11,6 +11,26 @@ import snap.web.*;
 public class JSONParser extends Parser {
     
 /**
+ * Creates a JSONParser.
+ */
+public JSONParser()
+{
+    // Install Hanlders
+    installHandlers(new ObjectHandler(), new PairHandler(), new ArrayHandler(), new ValueHandler());
+}
+
+/**
+ * Installs handlers for given handler class.
+ */
+void installHandlers(ParseHandler ... theHandlers)
+{
+    for(ParseHandler hdlr : theHandlers) {
+        String name = hdlr.getClass().getSimpleName().replace("Handler", "");
+        getRule(name).setHandler(hdlr);
+    }
+}
+    
+/**
  * Reads JSON from a source.
  */
 public JSONNode readSource(Object aSource)
@@ -31,19 +51,12 @@ public JSONNode readString(String aString)
 }
 
 /**
- * Load rule from rule file and install handlers.
- */
-public ParseRule createRule()
-{
-    ParseRule rule = super.createRule();           // Load JSON rules from JSONParser.txt
-    ParseUtils.installHandlers(getClass(), rule);  // Install Handlers
-    return rule.getRule("Object");              // Return Object rule
-}
-
-/**
  * Object Handler.
  */
 public static class ObjectHandler extends ParseHandler <JSONNode> {
+
+    /** Returns the part class. */
+    protected Class <JSONNode> getPartClass()  { return JSONNode.class; }
 
     /** ParseHandler method. */
     public void parsedOne(ParseNode aNode, String anId)
@@ -62,6 +75,9 @@ public static class ObjectHandler extends ParseHandler <JSONNode> {
 public static class PairHandler extends ParseHandler <JSONNode> {
     
     String _key;
+
+    /** Returns the part class. */
+    protected Class <JSONNode> getPartClass()  { return JSONNode.class; }
 
     /** ParseHandler method. */
     public void parsedOne(ParseNode aNode, String anId)
@@ -88,6 +104,9 @@ public static class PairHandler extends ParseHandler <JSONNode> {
  * Array Handler.
  */
 public static class ArrayHandler extends ParseHandler <JSONNode> {
+
+    /** Returns the part class. */
+    protected Class <JSONNode> getPartClass()  { return JSONNode.class; }
 
     /** ParseHandler method. */
     public void parsedOne(ParseNode aNode, String anId)
