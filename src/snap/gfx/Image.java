@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import java.util.*;
 import snap.util.*;
 import snap.web.*;
 
@@ -194,7 +195,11 @@ protected void setLoaded(boolean aValue)
 /**
  * Returns the image set.
  */
-public ImageSet getImageSet()  { return _imgSet; }
+public ImageSet getImageSet()
+{
+    getNative();
+    return _imgSet;
+}
 
 /**
  * Sets the image set.
@@ -259,9 +264,33 @@ public abstract Painter getPainter();
  */
 public Image getSubimage(double aX, double aY, double aW, double aH)
 {
-    Image simg = Image.get((int)Math.round(aW), (int)Math.round(aH), hasAlpha());
-    simg.getPainter().drawImage(this,-aX,-aY,aW,aH);
-    return simg;
+    Image img2 = Image.get((int)Math.round(aW), (int)Math.round(aH), hasAlpha());
+    img2.getPainter().drawImage(this, aX, aY, aW, aH, 0, 0, aW, aH);
+    return img2;
+}
+
+/**
+ * Returns an image inside a larget image.
+ */
+public Image getFramedImage(int aW, int aH, double aX, double aY)
+{
+    Image img2 = Image.get(aW, aH, hasAlpha());
+    Painter pntr = img2.getPainter(); pntr.drawImage(this, aX, aY);
+    return img2;
+}
+
+/**
+ * Returns an image with ImageSet for given number of frames (assumes this is horizontal sprite sheet).
+ */
+public Image getSpriteSheetFrames(int aCount)
+{
+    List <Image> images = new ArrayList(aCount); int w = getPixWidth()/aCount;
+    for(int i=0;i<aCount;i++) {
+        Image img = getSubimage(i*w,0,w,getPixHeight());
+        images.add(img);
+    }
+    ImageSet iset = new ImageSet(images);
+    return iset.getImage(0);
 }
 
 /**

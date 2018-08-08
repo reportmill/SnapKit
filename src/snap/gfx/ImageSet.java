@@ -47,4 +47,19 @@ public Image getNext(Image anImage)
     return getImage(index);
 }
 
+/**
+ * Returns a sheet image.
+ */
+public Image getSpriteSheetImage()
+{
+    Image img0 = getImage(0);
+    int w = img0.getPixWidth(), h = img0.getPixHeight(), count = getCount();
+    
+    Image imgSheet = Image.get(w*count, h, true);
+    Painter pntr = imgSheet.getPainter();
+    for(int i=0;i<count;i++) { Image img = getImage(i);
+        pntr.drawImage(img, i*w, 0); }
+    return imgSheet;
+}
+
 }

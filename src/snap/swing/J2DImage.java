@@ -254,12 +254,27 @@ public BufferedImage getGif()
         ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
         ImageInputStream stream = ImageIO.createImageInputStream(istream);
         reader.setInput(stream);
+        
+        // Read first image
+        BufferedImage img0 = reader.read(0); _native = img0;
+        int w = img0.getWidth(), h = img0.getHeight();
     
+        // Read successive images
         int count = reader.getNumImages(true);
-        for (int index = 0; index < count; index++) {
-            BufferedImage img = reader.read(index);
-            if(index==0) _native = img;
-            else images.add(new J2DImage(img));
+        for(int ind=1;ind<count;ind++) {
+            
+            // Read next image into J2DImage
+            BufferedImage bimg = reader.read(ind);
+            Image img2 = new J2DImage(bimg);
+            
+            // If partial, center in full image
+            if(img2.getPixWidth()!=w || img2.getPixHeight()!=h) {
+                Point offset = getGIFOffset(reader.getImageMetadata(ind));
+                img2 = img2.getFramedImage(w, h, offset.x, offset.y);
+            }
+            
+            // Add to images
+            images.add(img2);
         }
     }
     
@@ -269,6 +284,28 @@ public BufferedImage getGif()
     // If multiple images, create set
     if(images.size()>1) new ImageSet(images);
     return _native;
+}
+
+/**
+ * Returns the GIF offset.
+ */
+private Point getGIFOffset(IIOMetadata metaData)
+{
+    Node tree = metaData.getAsTree("javax_imageio_gif_image_1.0");
+    NodeList childNodes = tree.getChildNodes();
+
+    for(int j=0;j<childNodes.getLength();j++) { Node nodeItem = childNodes.item(j);
+
+        if(nodeItem.getNodeName().equals("ImageDescriptor")){
+            NamedNodeMap attrs = nodeItem.getAttributes();
+            Node attrX = attrs.getNamedItem("imageLeftPosition");
+            int dx = Integer.valueOf(attrX.getNodeValue());
+            Node attrY = attrs.getNamedItem("imageTopPosition");
+            int dy = Integer.valueOf(attrY.getNodeValue());
+            return new Point(dx,dy);
+        }
+    }
+    return new Point();
 }
 
 }

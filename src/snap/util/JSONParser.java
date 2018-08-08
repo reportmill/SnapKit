@@ -128,8 +128,10 @@ public static class ValueHandler extends ParseHandler <Object> {
     public void parsedOne(ParseNode aNode, String anId)
     {
         // Handle INT or Float
-        if(anId=="Int" || anId=="Float")
-            _part = new java.math.BigDecimal(aNode.getString());
+        if(anId=="Int" || anId=="Float") {
+            try { _part = Double.valueOf(aNode.getString()); }
+            catch(Exception e) { _part = new java.math.BigDecimal(aNode.getString()); }
+        }
         
         // Handle String: Get string, strip quotes, convert any escaped forward slash to forward slash
         else if(anId=="String") {
