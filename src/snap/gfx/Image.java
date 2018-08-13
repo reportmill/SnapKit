@@ -260,6 +260,17 @@ public abstract byte[] getBytesPNG();
 public abstract Painter getPainter();
 
 /**
+ * Returns a new image scaled by given percent.
+ */
+public Image getImageScaled(double aRatio)
+{
+    int w = (int)Math.round(getPixWidth()*aRatio), h = (int)Math.round(getPixHeight()*aRatio);
+    Image img2 = Image.get(w, h, hasAlpha());
+    img2.getPainter().drawImage(this, 0, 0, getWidth(), getHeight(), 0, 0, w, h);
+    return img2;
+}
+
+/**
  * Returns a subimage from rectangle.
  */
 public Image getSubimage(double aX, double aY, double aW, double aH)

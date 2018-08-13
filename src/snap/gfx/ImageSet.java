@@ -1,4 +1,5 @@
 package snap.gfx;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,6 +46,18 @@ public Image getNext(Image anImage)
     int index = (_images.indexOf(anImage)+1)%getCount();
     System.out.println("GetImage: " + index);
     return getImage(index);
+}
+
+/**
+ * Returns the image set scaled.
+ */
+public Image getImageScaled(double aRatio)
+{
+    List <Image> images = new ArrayList();
+    for(Image img : _images) { img = img.getImageScaled(aRatio);
+        images.add(img); }
+    ImageSet iset = new ImageSet(images);
+    return iset.getImage(0);
 }
 
 /**
