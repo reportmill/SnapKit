@@ -9,7 +9,7 @@ import snap.view.*;
 /**
  * The parent and background for SnapActors.
  */
-public class SnapScene extends SpringView {
+public class SnapScene extends ChildView {
 
     // The pane that holds actors, console and background
     StackView          _scenePane;

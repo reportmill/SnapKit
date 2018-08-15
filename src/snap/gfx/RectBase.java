@@ -116,7 +116,13 @@ public double getMaxY()  { return y + height; }
 /**
  * Returns the shape bounds.
  */
-protected Rect getBoundsImpl()  { return new Rect(x,y,width,height); }
+protected Rect getBoundsImpl()
+{
+    Rect rect = new Rect(x,y,width,height);
+    if(width<0) { rect.x += width; rect.width = -width; }
+    if(height<0) { rect.y += height; rect.height = -height; }
+    return rect;
+}
 
 /**
  * Returns whether rect is empty.

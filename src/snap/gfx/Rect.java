@@ -26,7 +26,11 @@ public Rect(double aX, double aY, double aW, double aH)  { x = aX; y = aY; width
 /**
  * Override to just return this rect.
  */
-protected Rect getBoundsImpl()  { return this; }
+protected Rect getBoundsImpl()
+{
+    if(width>=0 && height>=0) return this;
+    return super.getBoundsImpl();
+}
 
 /**
  * Returns a path iterator.
