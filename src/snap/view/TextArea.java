@@ -9,7 +9,7 @@ import snap.web.*;
 /**
  * A view subclass for displaying and editing large blocks of text and rich text using a TextBox with RichText.
  */
-public class TextArea extends ParentView {
+public class TextArea extends View {
 
     // The text being edited
     TextBox               _tbox;
@@ -692,14 +692,12 @@ protected void paintFront(Painter aPntr)
     Rect clip = aPntr.getClipBounds(); if(clip==null) clip = getBoundsLocal();
     
     // If alignment not TOP_LEFT, shift text block
-    double dx = ViewUtils.getAlignX(getAlign());
-    double dy = ViewUtils.getAlignY(getAlign());
+    /*double dx = ViewUtils.getAlignX(getAlign()), dy = ViewUtils.getAlignY(getAlign());
     if(dx!=0 || dy!=0) {
         Rect tbnds = getTextBoxBounds(); TextBox tbox = getTextBox();
         dx = tbnds.getX() + Math.round(dx*(tbnds.getWidth() - tbox.getPrefWidth(-1)));
         dy = tbnds.getY() + Math.round(dy*(tbnds.getHeight() - tbox.getPrefHeight(tbox.getWidth())));
-        tbox.setX(dx); tbox.setY(dy);
-    }
+        tbox.setX(dx); tbox.setY(dy); }*/
     
     // Paint selection
     paintSel(aPntr);
@@ -1188,6 +1186,20 @@ protected void setShowing(boolean aValue)
 }
 
 /**
+ * Override to forward to text box.
+ */
+public void setAlign(Pos aPos)
+{
+    // Do normal version
+    super.setAlign(aPos);
+    
+    // Push align to TextBox via DefaultLineStyle.Aign (X) and TextBox align Y 
+    TextLineStyle lstyle = getDefaultLineStyle().copyFor(TextLineStyle.ALIGN_KEY, aPos.getHPos());
+    setDefaultLineStyle(lstyle);
+    getTextBox().setAlignY(aPos.getVPos());
+}
+
+/**
  * Override to check caret animation and repaint.
  */
 protected void setFocused(boolean aValue)
@@ -1231,10 +1243,10 @@ public String toString()
 /**
  * XML archival.
  */
-public XMLElement toXMLView(XMLArchiver anArchiver)
+public XMLElement toXML(XMLArchiver anArchiver)
 {
     // Archive basic view attributes
-    XMLElement e = super.toXMLView(anArchiver);
+    XMLElement e = super.toXML(anArchiver);
     
     // Archive Rich, Editable, WrapText
     if(isRich()) e.add("Rich", true);
@@ -1260,10 +1272,10 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 /**
  * XML unarchival.
  */
-public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+public TextArea fromXML(XMLArchiver anArchiver, XMLElement anElement)
 {
     // Unarchive basic view attributes
-    super.fromXMLView(anArchiver, anElement);
+    super.fromXML(anArchiver, anElement);
     
     // Hack for archived rich stuff
     XMLElement rtxml = anElement.get("RichText");
@@ -1294,6 +1306,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
         setFireActionOnEnterKey(anElement.getAttributeBoolValue(FireActionOnEnterKey_Prop, true));
     if(anElement.hasAttribute(FireActionOnFocusLost_Prop))
         setFireActionOnFocusLost(anElement.getAttributeBoolValue(FireActionOnFocusLost_Prop, true));
+    return this;
 }
 
 }
