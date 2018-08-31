@@ -79,8 +79,12 @@ public void drawString(String aStr, double aX, double aY, double cs)
  */
 private void updateMarkedBounds(Shape aShape, boolean isOpaque)
 {
-    // Get marked shape in global coords
+    // Get marked shape in world coords
     Shape mshp = aShape.copyFor(_gstate.xform);
+    
+    // If shape not in clip, clip
+    if(!_gstate.clip.contains(mshp))
+        mshp = Shape.intersect(_gstate.clip, mshp);
     
     // If no marked shape yet, just set
     if(_mshape==null) { _mshape = mshp; _opaque = isOpaque; }
@@ -112,9 +116,16 @@ public Transform getTransform()  { return _gstate.xform; }
  */
 public void setTransform(Transform aTrans)
 {
+    // Transform clip & mark shape back to world coords
     if(_gstate.clip!=null) _gstate.clip = _gstate.clip.copyFor(_gstate.xform.getInverse());
+    if(_mshape!=null) _mshape = _mshape.copyFor(_gstate.xform.getInverse());
+    
+    // Set new transform
     _gstate.xform = aTrans;
+    
+    // Transform clip and mark shape back to local coords
     if(_gstate.clip!=null) _gstate.clip = _gstate.clip.copyFor(aTrans);
+    if(_mshape!=null) _mshape = _mshape.copyFor(aTrans);
 }
 
 /**
@@ -124,6 +135,7 @@ public void transform(Transform aTrans)
 {
     _gstate.xform.concat(aTrans);
     if(_gstate.clip!=null) _gstate.clip = _gstate.clip.copyFor(aTrans);
+    if(_mshape!=null) _mshape = _mshape.copyFor(aTrans);
 }
 
 /**

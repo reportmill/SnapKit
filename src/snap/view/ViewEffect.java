@@ -44,6 +44,10 @@ protected void paintAll(Painter aPntr)
     PainterDVR pdvr = new PainterDVR();
     _view.paintBack(pdvr);
     _view.paintFront(pdvr);
+    if(_view instanceof ParentView) {
+        ((ParentView)_view).paintChildren(pdvr);
+        ((ParentView)_view).paintAbove(pdvr);
+    }
     
     // If painting has changed since last pass, render and cache effect of painting to second PainterDVR
     if(_pdvr1==null || !pdvr.equals(_pdvr1)) {

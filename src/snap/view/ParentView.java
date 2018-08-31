@@ -259,8 +259,10 @@ public boolean intersects(Shape aShape)
 protected void paintAll(Painter aPntr)
 {
     super.paintAll(aPntr);
-    paintChildren(aPntr);
-    paintAbove(aPntr);
+    if(_viewEff==null) {
+        paintChildren(aPntr);
+        paintAbove(aPntr);
+    }
 }
 
 /**

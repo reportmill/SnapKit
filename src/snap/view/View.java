@@ -570,7 +570,7 @@ public void setEffect(Effect anEff)
     Effect old = getEffect(); if(SnapUtils.equals(anEff,getEffect())) return;
     
     // Set new ViewEffect, fire prop change and repaint
-    if(anEff!=null) _viewEff = new ViewEffect(this, anEff);
+    _viewEff = anEff!=null? new ViewEffect(this, anEff) : null;
     firePropChange(Effect_Prop, old, anEff);
     repaint();
 }
