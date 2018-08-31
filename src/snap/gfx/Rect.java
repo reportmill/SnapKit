@@ -107,13 +107,11 @@ public boolean contains(Rect aRect)
 }
 
 /**
- * Override to omptimize rect-to-rect case.
+ * Override to simplify since rect contains any shape if-and-only-if it contians that shapes bounds.
  */
 public boolean contains(Shape aShape)
 {
-    if(aShape instanceof Rect)
-        return contains((Rect)aShape);
-    return super.contains(aShape);
+    return contains(aShape.getBounds());
 }
 
 /**
