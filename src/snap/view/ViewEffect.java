@@ -44,7 +44,9 @@ protected void paintAll(Painter aPntr)
     PainterDVR pdvr = new PainterDVR();
     _view.paintBack(pdvr);
     _view.paintFront(pdvr);
-    if(_view instanceof ParentView) {
+    
+    // If effect should include child views, paint children
+    if(isDeep()) {
         ((ParentView)_view).paintChildren(pdvr);
         ((ParentView)_view).paintAbove(pdvr);
     }
@@ -57,6 +59,17 @@ protected void paintAll(Painter aPntr)
     
     // Execute PainterDVR to given painter
     _pdvr2.exec(aPntr);
+}
+
+/**
+ * Returns whether effect should include children.
+ */
+public boolean isDeep()
+{
+    if(!(_view instanceof ParentView)) return false;
+    if(!(_eff instanceof ShadowEffect)) return true;
+    if(_view.getFill()==null) return true;
+    return false;
 }
 
 /**

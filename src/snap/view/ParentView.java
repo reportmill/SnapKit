@@ -259,7 +259,7 @@ public boolean intersects(Shape aShape)
 protected void paintAll(Painter aPntr)
 {
     super.paintAll(aPntr);
-    if(_viewEff==null) {
+    if(_viewEff==null || !_viewEff.isDeep()) {
         paintChildren(aPntr);
         paintAbove(aPntr);
     }
@@ -413,6 +413,25 @@ public void stopAnimDeep()
 {
     super.stopAnimDeep();
     for(View child : getChildren()) child.stopAnimDeep();
+}
+
+/**
+ * Returns the anim time.
+ */
+public int getAnimTimeDeep()
+{
+    ViewAnim anim = getAnim(-1); if(anim!=null) return anim.getTime();
+    for(View child : getChildren()) if(child.getAnim(-1)!=null) return child.getAnim(-1).getTime();
+    return 0;
+}
+
+/**
+ * Sets the anim time deep.
+ */
+public void setAnimTimeDeep(int aValue)
+{
+    super.setAnimTimeDeep(aValue);
+    for(View child : getChildren()) child.setAnimTimeDeep(aValue);
 }
 
 /**

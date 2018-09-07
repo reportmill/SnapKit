@@ -2199,6 +2199,16 @@ public void playAnimDeep()  { ViewAnim anim = getAnim(-1); if(anim!=null) anim.p
 public void stopAnimDeep()  { ViewAnim anim = getAnim(-1); if(anim!=null) anim.stop(); }
 
 /**
+ * Returns the anim time.
+ */
+public int getAnimTimeDeep()  { ViewAnim anim = getAnim(-1); return anim!=null? anim.getTime() : 0; }
+
+/**
+ * Sets the anim time deep.
+ */
+public void setAnimTimeDeep(int aValue)  { ViewAnim anim = getAnim(-1); if(anim!=null) anim.setTime(aValue); }
+
+/**
  * Returns the physics objects that provides information for physics simulations.
  */
 public ViewPhysics getPhysics()  { return _physics; }
