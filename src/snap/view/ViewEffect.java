@@ -46,7 +46,7 @@ protected void paintAll(Painter aPntr)
     _view.paintFront(pdvr);
     
     // If effect should include child views, paint children
-    if(isDeep()) {
+    if(!isSimpleShadow()) {
         ((ParentView)_view).paintChildren(pdvr);
         ((ParentView)_view).paintAbove(pdvr);
     }
@@ -64,12 +64,13 @@ protected void paintAll(Painter aPntr)
 /**
  * Returns whether effect should include children.
  */
-public boolean isDeep()
+public boolean isSimpleShadow()
 {
-    if(!(_view instanceof ParentView)) return false;
-    if(!(_eff instanceof ShadowEffect)) return true;
-    if(_view.getFill()==null) return true;
-    return false;
+    if(!(_view instanceof ParentView)) return true;
+    if(!(_eff instanceof ShadowEffect)) return false;
+    if(_view.getFill()==null) return false;
+    if(!(_view.getBoundsShape() instanceof Rect)) return false;
+    return true;
 }
 
 /**
