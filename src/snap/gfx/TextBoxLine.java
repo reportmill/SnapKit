@@ -180,6 +180,16 @@ public double getWidthAll()  { return _widthAll; }
 public double getMaxXAll()  { return getX() + getWidthAll(); }
 
 /**
+ * Returns the width without whitespace.
+ */
+public double getWidthNoWhiteSpace()
+{
+    int len = length(); while(len>0 && Character.isWhitespace(charAt(len-1))) len--;
+    if(len==length()) return getWidth();
+    return getXForChar(len) - getX();
+}
+
+/**
  * Validates this line.
  */
 public void resetSizes()
@@ -233,6 +243,7 @@ public void resetSizes()
         double tmx = _tbox.getMaxHitX(y, _height), lmx = getMaxX(), rem = tmx - lmx;
         double shift = rem/(getTokenCount()-1), shft = 0;
         for(TextBoxToken tok : getTokens()) { tok._shiftX = shft; shft += shift; }
+        _widthAll += shft - shift;
     }
     
     // Calculate X alignment shift

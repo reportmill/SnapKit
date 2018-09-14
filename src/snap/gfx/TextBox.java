@@ -844,9 +844,16 @@ public void paint(Painter aPntr)
     
     // Paint underlines
     if(isUnderlined()) { for(TextBoxRun run : getUnderlineRuns(clip)) {
-        double ly = run.getLine().getBaseline(), rx = run.getX(), rw = run.getWidth();
+        
+        // Set underline color and width
+        TextBoxLine line = run.getLine();
         double uy = run.getFont().getUnderlineOffset(), uw = run.getFont().getUnderlineThickness();
-        aPntr.setColor(run.getColor()); aPntr.setStrokeWidth(uw); aPntr.drawLine(rx, ly-uy, rx + rw, ly-uy);
+        aPntr.setColor(run.getColor()); aPntr.setStrokeWidth(uw);
+        
+        // Get under line endpoints and draw line
+        double x0 = run.getX(), y0 = line.getBaseline() - uy;
+        double x1 = run.getMaxX(); if(run.getEnd()==line.getEnd()) x1 = line.getX() + line.getWidthNoWhiteSpace();
+        aPntr.drawLine(x0, y0, x1, y0);
     }}
     
     // Restore state
