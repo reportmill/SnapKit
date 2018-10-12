@@ -366,6 +366,30 @@ public static Image getFileIconImage(WebFile aFile)
     return PlainFile;
 }
 
+/**
+ * Replace given view with new view.
+ */
+public static void replaceView(View aView, View newView)
+{
+    // Get parent
+    View par = aView.getParent(); if(par==null) { System.err.println("ViewUtils.replaceView: null parent"); return; }
+    
+    // Handle HostView
+    if(par instanceof HostView) { HostView hostView = (HostView)par;
+        int ind = hostView.removeGuest(aView);
+        hostView.addGuest(newView, ind);
+    }
+    
+    // Handle ChildView
+    else if(par instanceof ChildView) { ChildView childView = (ChildView)par;
+        int ind = childView.removeChild(aView);
+        childView.addChild(newView, ind);
+    }
+    
+    // Otherwise, complain
+    else System.err.println("ViewUtils.replaceView: Unknown parent host class: " + par.getClass());
+}
+
 /** Loads the file icon images. */
 private static void loadFileIconImages()
 {
