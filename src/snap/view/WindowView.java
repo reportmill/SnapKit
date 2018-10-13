@@ -31,14 +31,17 @@ public class WindowView extends ParentView {
     // The window image
     Image                     _image;
     
-    // Whether the panel's window hides on deativate
+    // Whether window hides on deativate
     boolean                   _hideOnDeactivate;
     
-    // Whether the panel's window is modal
+    // Whether window is modal
     boolean                   _modal = false;
     
-    // Whether the panel's window is resizable
+    // Whether window is resizable
     boolean                   _resizable = true;
+    
+    // Whether window is sized to maximum screen size
+    boolean                   _maximized;
     
     // The Frame save name
     String                    _saveName;
@@ -63,6 +66,7 @@ public class WindowView extends ParentView {
     // Constants for properties
     public static final String AlwaysOnTop_Prop = "AlwaysOnTop";
     public static final String Image_Prop = "Image";
+    public static final String Maximized_Prop = "Maximized";
     public static final String Resizable_Prop = "Resizable";
     public static final String Title_Prop = "Title";
 
@@ -102,6 +106,20 @@ public void setResizable(boolean aValue)
 {
     if(aValue==_resizable) return;
     firePropChange(Resizable_Prop, _resizable, _resizable=aValue);
+}
+
+/**
+ * Returns whether the window is sized to maximum screen size.
+ */
+public boolean isMaximized()  { return _maximized; }
+
+/**
+ * Sets whether the window is sized to maximum screen size.
+ */
+public void setMaximized(boolean aValue)
+{
+    if(aValue==_maximized) return;
+    firePropChange(Maximized_Prop, _maximized, _maximized=aValue);
 }
 
 /**
