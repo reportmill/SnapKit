@@ -43,6 +43,9 @@ public class WindowView extends ParentView {
     // Whether window is sized to maximum screen size
     boolean                   _maximized;
     
+    // The bounds for maximized window
+    Rect                      _maxBounds, _unmaxBounds;
+    
     // The Frame save name
     String                    _saveName;
     
@@ -118,9 +121,43 @@ public boolean isMaximized()  { return _maximized; }
  */
 public void setMaximized(boolean aValue)
 {
+    // If already set, just return
     if(aValue==_maximized) return;
+    
+    // If Maximizing
+    if(aValue) {
+        _unmaxBounds = getBounds();
+        Rect maxBounds = getMaximizedBounds();
+        setBounds(maxBounds);
+    }
+    
+    // If Un-Maximizing, reset bounds
+    else {
+        if(_unmaxBounds!=null && !_unmaxBounds.isEmpty())
+            setBounds(_unmaxBounds);
+        else {
+            Size psize = getPrefSize();
+            Rect screenRect = ViewEnv.getEnv().getScreenBoundsInset();
+            Rect centeredBounds = screenRect.getRectCenteredInside(psize.width, psize.height);
+        }
+    }
+    
+    // Get screen size
     firePropChange(Maximized_Prop, _maximized, _maximized=aValue);
 }
+
+/**
+ * Returns the window max size.
+ */
+public Rect getMaximizedBounds()
+{
+    return _maxBounds!=null? _maxBounds : ViewEnv.getEnv().getScreenBoundsInset();
+}
+
+/**
+ * Sets the bounds rect to use when window is maximized (uses ViewEnv ScreenBoundsInset by default).
+ */
+public void setMaximizedBounds(Rect aRect)  { _maxBounds = aRect; }
 
 /**
  * Returns the save name.

@@ -274,6 +274,16 @@ public Point[] getPoints()
 }
 
 /**
+ * Returns the rect centered inside for given size.
+ */
+public Rect getRectCenteredInside(double aW, double aH)
+{
+    double x = Math.round((getWidth() - aW)/2);
+    double y = Math.round((getHeight() - aH)/2);
+    return new Rect(x, y, aW, aH);
+}
+
+/**
  * Returns the point on the rectangle's perimeter that is intersected by a radial at the given angle from the
  * center of the rect. Zero degrees is at the 3 o'clock position.
  * 
