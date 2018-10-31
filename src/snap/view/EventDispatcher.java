@@ -125,6 +125,7 @@ public void dispatchMouseEvent(ViewEvent anEvent)
                 if(!view.getEventAdapter().isEnabled(MouseExit)) continue;
                  ViewEvent e2 = _rview.getEnv().createEvent(view, anEvent.getEvent(), MouseExit, null);
                  view.fireEvent(e2);
+                 if(e2.isConsumed()) anEvent.consume();
              }
              else break;
         }
@@ -135,6 +136,7 @@ public void dispatchMouseEvent(ViewEvent anEvent)
             if(!view.getEventAdapter().isEnabled(MouseEnter)) continue;
              ViewEvent e2 = _rview.getEnv().createEvent(view, anEvent.getEvent(), MouseEnter, null);
              view.fireEvent(e2);
+             if(e2.isConsumed()) anEvent.consume();
         }
         
         // Update CurrentCursor
@@ -225,14 +227,14 @@ public void dispatchDragSourceEvent(ViewEvent anEvent)
         for(View view=_mousePressView;view!=null;view=view.getParent())
             if(view.getEventAdapter().isEnabled(DragGesture)) { _dragSourceView = view;
                 ViewEvent event = anEvent.copyForView(view);
-                view.fireEvent(event); break; }
+                view.fireEvent(event); if(event.isConsumed()) anEvent.consume(); break; }
     }
     
     // Handle DragSource
     else if(_dragSourceView!=null) {
         if(_dragSourceView.getEventAdapter().isEnabled(anEvent.getType())) {
             ViewEvent event = anEvent.copyForView(_dragSourceView);
-            _dragSourceView.fireEvent(event);
+            _dragSourceView.fireEvent(event); if(event.isConsumed()) anEvent.consume();
         }
         if(anEvent.isDragSourceEnd())
             _dragSourceView = null;
@@ -254,7 +256,7 @@ public void dispatchDragTargetEvent(ViewEvent anEvent)
              _dragOverView = view.getParent();
              if(!view.getEventAdapter().isEnabled(DragExit)) continue;
              ViewEvent e2 = anEvent.copyForView(view); e2._type = DragExit;
-             view.fireEvent(e2);
+             view.fireEvent(e2); if(e2.isConsumed()) anEvent.consume();
          }
          else break;
     }
@@ -264,7 +266,7 @@ public void dispatchDragTargetEvent(ViewEvent anEvent)
     for(int i=start;i<pars.length;i++) { View view = pars[i]; _dragOverView = view;
         if(!view.getEventAdapter().isEnabled(DragEnter)) continue;
         ViewEvent e2 = anEvent.copyForView(view); e2._type = DragEnter;
-        view.fireEvent(e2);
+        view.fireEvent(e2); if(e2.isConsumed()) anEvent.consume();
     }
     
     // Handle DragOver, DragDrop
@@ -272,7 +274,7 @@ public void dispatchDragTargetEvent(ViewEvent anEvent)
         for(View view=_dragOverView;view!=null;view=view.getParent()) {
             if(view.getEventAdapter().isEnabled(anEvent.getType())) {
                 ViewEvent e2 = anEvent.copyForView(view);
-                view.fireEvent(e2); break;
+                view.fireEvent(e2); if(e2.isConsumed()) anEvent.consume(); break;
             }
         }
     }

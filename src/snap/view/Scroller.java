@@ -345,6 +345,7 @@ public void processEvent(ViewEvent anEvent)
     if(anEvent.isScroll()) {
         setScrollH(getScrollH() + anEvent.getScrollX()*4);
         setScrollV(getScrollV() + anEvent.getScrollY()*4);
+        anEvent.consume();
     }
 }
 
