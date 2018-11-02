@@ -127,7 +127,7 @@ public Number getNumber()  { return (Number)_value; }
 /**
  * Returns the value as Map if type is Map.
  */
-public Boolean getBoolean()  { return (Boolean)_value; }
+public Boolean getBoolean()  { return SnapUtils.booleanValue(_value); }
 
 /**
  * Returns the value as List if type is List.
