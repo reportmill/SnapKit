@@ -1017,6 +1017,16 @@ public void setManaged(boolean aValue)
 }
 
 /**
+ * Returns whether view effectively doesn't exist (not visible, pickable or managed).
+ */
+public boolean isPhantom()  { return !(isVisible() || isPickable() || isManaged()); }
+
+/**
+ * Returns whether view effectively doesn't exist (not visible, pickable or managed).
+ */
+public void setPhantom(boolean aValue)  { setVisible(!aValue); setPickable(!aValue); setManaged(!aValue); }
+
+/**
  * Returns the root view.
  */
 public RootView getRootView()  { return _parent!=null? _parent.getRootView() : null; }
