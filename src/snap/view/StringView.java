@@ -49,7 +49,11 @@ public double getTextWidth()  { return length()>0? Math.ceil(getFont().getString
 /**
  * Returns the text height.
  */
-public double getTextHeight()  { return Math.ceil(getFont().getLineHeight()); }
+public double getTextHeight()
+{
+    if(length()==0) return 0;
+    return Math.ceil(getFont().getLineHeight());
+}
 
 /**
  * Returns the text bounds.
