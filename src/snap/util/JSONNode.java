@@ -117,7 +117,7 @@ public boolean isNull()  { return _type==Type.Null; }
 /**
  * Returns the value as String if type is String.
  */
-public String getString()  { return (String)_value; }
+public String getString()  { return SnapUtils.stringValue(_value); }
 
 /**
  * Returns the value as Number if type is Number.
