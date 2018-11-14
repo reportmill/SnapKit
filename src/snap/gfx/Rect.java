@@ -347,6 +347,14 @@ public boolean equals(Object anObj)
 }
 
 /**
+ * Returns whether given rect parts contains given x/y.
+ */
+public static boolean contains(double x, double y, double w, double h, double aX, double aY)
+{
+    return (x<=aX) && (aX<=x+w) && (y<=aY) && (aY<=y+h);
+}
+
+/**
  * Returns a point for x, y, w, h and position.
  */
 public static Point getPoint(double aX, double aY, double aW, double aH, Pos aPos)
