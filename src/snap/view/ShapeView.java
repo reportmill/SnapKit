@@ -28,7 +28,7 @@ public ShapeView()  { }
 /**
  * Creates a new ShapeNode for given shape.
  */
-public ShapeView(Shape aShape)  { setShape(aShape); }
+public ShapeView(Shape aShape)  { setShape(aShape); sizeToShape(); }
 
 /**
  * Returns the shape.
@@ -41,6 +41,7 @@ public Shape getShape()  { return _shape!=null? _shape : (_shape=new Rect()); }
 public void setShape(Shape aShape)
 {
     _shape = aShape;
+    repaint();
 }
 
 /**
@@ -80,6 +81,16 @@ public boolean isFillSize()  { return _fillWidth && _fillHeight; }
  * Sets whether to fill shape to view bounds.
  */
 public void setFillSize(boolean aValue)  { setFillWidth(true); setFillHeight(true); }
+
+/**
+ * Resizes view to shape size.
+ */
+public void sizeToShape()
+{
+    Insets ins = getInsetsAll();
+    Shape shp = getShape(); double w = shp.getWidth() + ins.getWidth(), h = shp.getHeight() + ins.getHeight();
+    setSize(w, h);
+}
 
 /**
  * Override to return path as bounds shape.
