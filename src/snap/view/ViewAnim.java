@@ -486,6 +486,11 @@ public ViewAnim setOnFinish(Consumer <ViewAnim> aFinish)  { _onFinish = aFinish;
 public ViewAnim startFast()  { setInterpolator(Interpolator.EASE_OUT); return this; }
     
 /**
+ * Sets animation to run with linear interpolator.
+ */
+public ViewAnim setLinear()  { setInterpolator(Interpolator.LINEAR); return this; }
+    
+/**
  * Sets whether to ease animation in
  */
 public ViewAnim setInterpolator(Interpolator anInterp)  { _interp = anInterp; return this; }
