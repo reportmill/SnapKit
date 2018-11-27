@@ -115,7 +115,7 @@ public View getViewAt(Point aPnt)  { return getViewAt(aPnt.x, aPnt.y); }
 public View getViewAt(double aX, double aY)
 {
     View children[] = getAll();
-    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickable()) continue;
+    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickableVisible()) continue;
         Point p = child.parentToLocal(aX, aY);
         if(child.contains(p.x,p.y))
             return child;
@@ -130,7 +130,7 @@ public <T extends View> T getViewAt(Shape aShape, Class <T> aClass, View aView)
 {
     View children[] = getAll();
     for(int i=children.length-1; i>=0; i--) { View child = children[i];
-        if(child==aView || !child.isPickable()) continue;
+        if(child==aView || !child.isPickableVisible()) continue;
         if(aClass!=null && !aClass.isInstance(child)) continue;
         Shape shp2 = child.parentToLocal(aShape);
         if(child.intersects(shp2))
@@ -146,7 +146,7 @@ public <T extends View> List <T> getViewsAt(Shape aShape, Class <T> aClass, View
 {
     View children[] = getAll(); List <T> hit = Collections.EMPTY_LIST;
     for(int i=children.length-1; i>=0; i--) { View child = children[i];
-        if(child==aView || !child.isPickable()) continue;
+        if(child==aView || !child.isPickableVisible()) continue;
         if(aClass!=null && !aClass.isInstance(child)) continue;
         Shape shp = child.parentToLocal(aShape);
         if(child.intersects(shp)) { if(hit==Collections.EMPTY_LIST) hit = new ArrayList();
@@ -181,9 +181,9 @@ public <T extends View> List <T> getHitViews(View aView, Class <T> aClass, doubl
 public View[] getManaged()
 {
     if(_managed!=null) return _managed;
-    int cc = size(), mc = 0; for(View child : getAll()) if(child.isManaged()) mc++;
+    int cc = size(), mc = 0; for(View child : getAll()) if(child.isManagedVisible()) mc++;
     if(mc==cc) return _managed = _views;
-    View mngd[] = new View[mc]; for(int i=0,j=0;i<cc;i++) { View c = get(i); if(c.isManaged()) mngd[j++] = c; }
+    View mngd[] = new View[mc]; for(int i=0,j=0;i<cc;i++) { View c = get(i); if(c.isManagedVisible()) mngd[j++] = c; }
     return _managed = mngd;
 }
 

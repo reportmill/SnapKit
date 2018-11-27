@@ -284,7 +284,7 @@ public static <T extends View> T getChildAt(View aView, double aX, double aY, Cl
 {
     ParentView par = aView instanceof ParentView? (ParentView)aView : null; if(par==null) return null;
     View children[] = par.getChildren();
-    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickable()) continue;
+    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickableVisible()) continue;
         Point p = child.parentToLocal(aX, aY);
         if(child.contains(p.x,p.y) && (aClass==null || aClass.isInstance(child)))
             return (T)child;
@@ -319,7 +319,7 @@ public static <T extends View> T getDeepestChildAt(View aView, double aX, double
 {
     ParentView par = aView instanceof ParentView? (ParentView)aView : null; if(par==null) return null;
     View children[] = par.getChildren();
-    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickable()) continue;
+    for(int i=children.length-1; i>=0; i--) { View child = children[i]; if(!child.isPickableVisible()) continue;
         Point p = child.parentToLocal(aX, aY);
         if(child.contains(p.x,p.y)) {
             T hcdeep = getDeepestChildAt(child, p.x, p.y, aClass);

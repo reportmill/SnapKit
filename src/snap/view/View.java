@@ -966,6 +966,7 @@ public void setVisible(boolean aValue)
     firePropChange(Visible_Prop, _visible, _visible=aValue);
     setShowing(_visible && _parent!=null && _parent.isShowing());
     repaintInParent(null);
+    ParentView par = getParent(); if(par!=null) { par._children._managed = null; relayoutParent(); }
 }
 
 /**
@@ -1003,12 +1004,17 @@ public boolean isPickable()  { return _pickable; }
 public void setPickable(boolean aValue)  { _pickable = aValue; }
 
 /**
- * Returns whether view should be handled when a parent does layout.
+ * Returns whether view can be hit by mouse and visible.
+ */
+public boolean isPickableVisible()  { return isPickable() && isVisible(); }
+
+/**
+ * Returns whether view should be included when a parent does layout.
  */
 public boolean isManaged()  { return _managed; }
 
 /**
- * Sets whether view should be laid out.
+ * Sets whether view should be included when a parent does layout.
  */
 public void setManaged(boolean aValue)
 {
@@ -1017,14 +1023,9 @@ public void setManaged(boolean aValue)
 }
 
 /**
- * Returns whether view effectively doesn't exist (not visible, pickable or managed).
+ * Returns whether view should be included when a parent does layout.
  */
-public boolean isPhantom()  { return !(isVisible() || isPickable() || isManaged()); }
-
-/**
- * Returns whether view effectively doesn't exist (not visible, pickable or managed).
- */
-public void setPhantom(boolean aValue)  { setVisible(!aValue); setPickable(!aValue); setManaged(!aValue); }
+public boolean isManagedVisible()  { return isManaged() && isVisible(); }
 
 /**
  * Returns the root view.

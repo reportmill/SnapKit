@@ -108,7 +108,7 @@ protected void layoutImpl()
     double tp = ins.top, rt = ins.right, bt = ins.bottom, lt = ins.left;
     double w = getWidth() - lt - rt, h = getHeight() - tp - bt;
     for(int i=0, iMax=getChildCount(); i<iMax; i++) { View child = getChild(i);
-        child.setBounds(lt, tp, w, h); child.setVisible(i==_sindex); child.setPickable(i==_sindex); }
+        child.setBounds(lt, tp, w, h); child.setVisible(i==_sindex); }
 }
 
 /**
