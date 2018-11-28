@@ -350,6 +350,11 @@ public void setSize(Size aSize)  { setSize(aSize.getWidth(), aSize.getHeight());
 public void setSize(double aW, double aH)  { setWidth(aW); setHeight(aH); }
 
 /**
+ * Sets the size to preferred size.
+ */
+public void setSizeToPrefSize()  { setSize(getPrefWidth(), getPrefHeight()); }
+
+/**
  * Returns the bounds.
  */
 public Rect getBounds()  { return new Rect(getX(),getY(),getWidth(),getHeight()); }

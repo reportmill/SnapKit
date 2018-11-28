@@ -355,7 +355,10 @@ public void layout()
 {
     if(_inLayout) return;
     _inLayout = true;
-    if(getWidth()>0 && getHeight()>0) layoutImpl();
+    if(getWidth()>0 && getHeight()>0) {
+        layoutImpl();
+        layoutFloatingViews();
+    }
     _inLayout = false;
 }
 
@@ -363,6 +366,40 @@ public void layout()
  * Actual method to layout children.
  */
 protected void layoutImpl()  { }
+
+/**
+ * Called to layout floating children according to their Lean, Grow and Margin (if lean is set).
+ */
+protected void layoutFloatingViews()
+{
+    // If no floating, just return
+    if(getChildrenManaged().length==getChildCount()) return;
+    Insets ins = getInsetsAll(); double pw = getWidth(), ph = getHeight();
+    
+    // Layout floating (unmanaged + leaning) children
+    for(View child : getChildren()) { if(child.isManaged()) continue;
+    
+        // Get child lean, grow, margin and current bounds
+        HPos leanX = child.getLeanX(); VPos leanY = child.getLeanY(); if(leanX==null && leanY==null) continue;
+        Insets marg = child.getMargin(); boolean growX = child.isGrowWidth(), growY = child.isGrowHeight();
+        double x = child.getX(), y = child.getY(), w = child.getWidth(), h = child.getHeight();
+        
+        // Handle LeanX: If grow, make width fill parent (minus insets & margins). Set X for lean, width, insets.
+        if(leanX!=null) {
+            if(growX) w = pw - ins.getWidth() - marg.getWidth();
+            x = ins.left + marg.left + (pw - ins.getWidth() - marg.getWidth() - w)*ViewUtils.getAlignX(leanX);
+        }
+        
+        // Handle LeanY: If grow, make height fill parent (minus insets & margins). Set Y for lean, height, insets.
+        if(leanY!=null) {
+            if(growY) h = ph - ins.getHeight() - marg.getHeight();
+            y = ins.top + marg.top + (ph - ins.getHeight() - marg.getHeight() - h)*ViewUtils.getAlignY(leanY);
+        }
+        
+        // Set bounds
+        child.setBounds(x, y, w, h);
+    }
+}
 
 /**
  * Lays out children deep.
