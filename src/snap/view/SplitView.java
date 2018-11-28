@@ -267,4 +267,24 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     }
 }
 
+/**
+ * Replaces the given view with a SplitView.
+ */
+public static SplitView makeSplitView(View aView)
+{
+    SplitView split = new SplitView();
+    split.setVertical(aView.isVertical());
+    split.setLeanX(aView.getLeanX()); split.setLeanY(aView.getLeanY());
+    split.setGrowWidth(aView.isGrowWidth()); split.setGrowHeight(aView.isGrowHeight());
+    
+    // Handle HostView
+    if(aView instanceof HostView) { HostView hview = (HostView)aView;
+        split.setItems(hview.getGuests());
+    }
+    
+    // Replace
+    if(aView.getParent()!=null) ViewUtils.replaceView(aView, split);
+    return split;
+}
+
 }

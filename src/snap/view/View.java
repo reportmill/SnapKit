@@ -49,7 +49,7 @@ public class View implements XMLArchiver.Archivable {
     boolean         _growWidth, _growHeight;
     
     // Whether this view has a vertical orientation.
-    boolean         _vertical;
+    boolean         _vertical = getDefaultVertical();
     
     // The view minimum width and height
     double          _minWidth = -1, _minHeight = -1;
@@ -1608,6 +1608,11 @@ public Insets getDefaultMargin()  { return _emptyIns; }
 public Insets getDefaultPadding()  { return _emptyIns; }
 
 /**
+ * Returns the padding default.
+ */
+public boolean getDefaultVertical()  { return false; }
+
+/**
  * Returns the insets due to border and/or padding.
  */
 public Insets getInsetsAll()
@@ -2269,7 +2274,7 @@ public XMLElement toXML(XMLArchiver anArchiver)
     if(getScaleY()!=1) e.add(ScaleY_Prop, getScaleY());
 
     // Archive Vertical
-    if(isVertical()) e.add(Vertical_Prop, true);
+    if(isVertical()!=getDefaultVertical()) e.add(Vertical_Prop, isVertical());
     
     // Archive border, Fill, Effect
     Paint fill = getFill(); Border brdr = getBorder(); Effect eff = getEffect();

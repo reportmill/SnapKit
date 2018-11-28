@@ -62,6 +62,11 @@ protected double getPrefHeightImpl(double aW)  { return getPrefHeight(this, null
 protected void layoutImpl()  { layout(this, null, null, isFillWidth(), getSpacing()); }
 
 /**
+ * Override to return true.
+ */
+public boolean getDefaultVertical()  { return true; }
+
+/**
  * XML archival.
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
