@@ -368,13 +368,13 @@ public void layout()
 protected void layoutImpl()  { }
 
 /**
- * Called to layout floating children according to their Lean, Grow and Margin (if lean is set).
+ * Called to layout floating children (those unmanaged with lean) according to their Lean, Grow and Margin.
  */
 protected void layoutFloatingViews()
 {
     // If no floating, just return
     if(getChildrenManaged().length==getChildCount()) return;
-    Insets ins = getInsetsAll(); double pw = getWidth(), ph = getHeight();
+    double pw = getWidth(), ph = getHeight();
     
     // Layout floating (unmanaged + leaning) children
     for(View child : getChildren()) { if(child.isManaged()) continue;
@@ -384,16 +384,16 @@ protected void layoutFloatingViews()
         Insets marg = child.getMargin(); boolean growX = child.isGrowWidth(), growY = child.isGrowHeight();
         double x = child.getX(), y = child.getY(), w = child.getWidth(), h = child.getHeight();
         
-        // Handle LeanX: If grow, make width fill parent (minus insets & margins). Set X for lean, width, insets.
+        // Handle LeanX: If grow, make width fill parent (minus margin). Set X for lean, width, margin.
         if(leanX!=null) {
-            if(growX) w = pw - ins.getWidth() - marg.getWidth();
-            x = ins.left + marg.left + (pw - ins.getWidth() - marg.getWidth() - w)*ViewUtils.getAlignX(leanX);
+            if(growX) w = pw - marg.getWidth();
+            x = marg.left + (pw - marg.getWidth() - w)*ViewUtils.getAlignX(leanX);
         }
         
-        // Handle LeanY: If grow, make height fill parent (minus insets & margins). Set Y for lean, height, insets.
+        // Handle LeanY: If grow, make height fill parent (minus margin). Set Y for lean, height, margin.
         if(leanY!=null) {
-            if(growY) h = ph - ins.getHeight() - marg.getHeight();
-            y = ins.top + marg.top + (ph - ins.getHeight() - marg.getHeight() - h)*ViewUtils.getAlignY(leanY);
+            if(growY) h = ph - marg.getHeight();
+            y = marg.top + (ph - marg.getHeight() - h)*ViewUtils.getAlignY(leanY);
         }
         
         // Set bounds
