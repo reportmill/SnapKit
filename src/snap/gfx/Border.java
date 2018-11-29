@@ -335,13 +335,13 @@ public static class CompoundBorder extends Border {
     Border  _obdr, _ibdr;
     
     /** Creates a new TitledBorder. */
-    public CompoundBorder(Border anOutsdBdr, Border anInsdBdr)  { _obdr = anOutsdBdr; _ibdr = anInsdBdr; }
+    public CompoundBorder(Border anOuterBdr, Border anInnerBdr)  { _obdr = anOuterBdr; _ibdr = anInnerBdr; }
     
     /** Returns the real border. */
-    public Border getOutsideBorder()  { return _obdr; }
+    public Border getOuterBorder()  { return _obdr; }
 
     /** Returns the real border. */
-    public Border getInsideBorder()  { return _ibdr; }
+    public Border getInnerBorder()  { return _ibdr; }
 
     /** Creates the insets. */
     protected Insets createInsets()  { return Insets.add(_obdr.getInsets(),_ibdr.getInsets()); }
