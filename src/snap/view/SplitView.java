@@ -17,6 +17,9 @@ public class SplitView extends ParentView {
     // The list of dividers
     List <Divider>          _divs = new ArrayList();
     
+    // A listener to watch for when item.Visible changes
+    PropChangeListener      _visLsnr = pc -> itemVisibleChanged(pc);
+    
     // The default border
     static final Border SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
 
@@ -61,10 +64,26 @@ public void addItem(View aView, int anIndex)
         Divider div = new Divider();
         addDivider(div, anIndex>0? (anIndex-1) : 0);
         addChild(div, anIndex>0? (anIndex*2-1) : 0);
+        
+        // See if divider should be not-visible
+        boolean vis = aView.isVisible(); if(anIndex==1) vis &= getItem(0).isVisible();
+        div.setVisible(vis);
     }
         
     // Add view as child
     addChild(aView, anIndex*2);
+    aView.addPropChangeListener(_visLsnr, Visible_Prop);
+}
+
+void itemVisibleChanged(PropChange aPC)
+{
+    if(getItemCount()<2) return;
+
+    View view = (View)aPC.getSource();
+    int ind = getItems().indexOf(view);
+    Divider div = getDivider(ind>0? ind-1 : 0);
+    boolean vis = view.isVisible(); if(ind==1) vis &= getItem(0).isVisible();
+    div.setVisible(vis);
 }
 
 /**
@@ -136,12 +155,12 @@ public void addItemWithAnim(View aView, double aSize, int anIndex)
     
     if(anIndex==0) {
         div.setLocation(0);
-        div.getAnimCleared(500).setValue("Location", 1d, aSize).play();
+        div.getAnimCleared(500).setValue(Divider.Location_Prop, 1d, aSize).play();
     }
     
     else {
         div.setRemainder(1);
-        div.getAnimCleared(500).setValue("Remainder", 1d, aSize).play();
+        div.getAnimCleared(500).setValue(Divider.Remainder_Prop, 1d, aSize).play();
     }
 }
 
@@ -156,12 +175,51 @@ public void removeItemWithAnim(View aView)
     
     if(index==0) {
         div.setLocation(size);
-        div.getAnimCleared(500).setValue("Location", size, 1d).setOnFinish(a -> removeItem(aView)).play();
+        div.getAnimCleared(500).setValue(Divider.Location_Prop, size, 1d).setOnFinish(a -> removeItem(aView)).play();
     }
     
     else {
         div.setRemainder(size);
-        div.getAnimCleared(500).setValue("Remainder", size, 1d).setOnFinish(a -> removeItem(aView)).play();
+        div.getAnimCleared(500).setValue(Divider.Remainder_Prop, size, 1d).setOnFinish(a -> removeItem(aView)).play();
+    }
+}
+
+/**
+ * Sets a child visible with animation.
+ */
+public void setItemVisibleWithAnim(View aView, boolean aValue)
+{
+    // If already set, just return
+    if(aValue==aView.isVisible()) return;
+    
+    // Get index, divider and size
+    int index = indexOfItem(aView), time = 500;
+    Divider div = index==0? getDivider(0) : getDivider(index-1);
+    double size = isVertical()? aView.getHeight() : aView.getWidth();
+    
+    // Clear running anims
+    aView.getAnimCleared(0); div.getAnimCleared(0);
+    
+    // Handle visible true
+    if(aValue) {
+        double dsize = div.getDividerSize();
+        if(index==0) { div.setLocation(0); div.getAnim(time).setValue(Divider.Location_Prop, dsize, size).play(); }
+        else { div.setRemainder(1); div.getAnim(time).setValue(Divider.Remainder_Prop, dsize, size).play(); }
+        aView.setVisible(true); aView.setOpacity(0); div.setOpacity(0);
+        aView.getAnim(time).setOpacity(1).play();
+        div.getAnim(time).setOpacity(1).play();
+    }
+    
+    // Handle visible false
+    else {
+        if(index==0) { div.setLocation(size); div.getAnim(time).setValue(Divider.Location_Prop, size, 1d).play(); }
+        else { div.setRemainder(size); div.getAnim(time).setValue(Divider.Remainder_Prop, size, 1d).play(); }
+        aView.setOpacity(1); div.setOpacity(1);
+        div.getAnim(time).setOpacity(0).play();
+        aView.getAnim(time).setOpacity(0).setOnFinish(a -> {
+            aView.setVisible(false); aView.setOpacity(1); div.setOpacity(1);
+            if(isVertical()) aView.setHeight(size); else aView.setWidth(size);
+        }).play();
     }
 }
 

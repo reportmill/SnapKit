@@ -319,12 +319,10 @@ public synchronized void paintLater()
     if(_timer.isRunning()) {
         View aviews[] = _animViews.toArray(new View[0]); int time = _timer.getTime();
         for(View av : aviews) { ViewAnim anim = av.getAnim(-1);
-            if(!av.isShowing()) { System.err.println("View shouldn't be animated: " + ViewUtils.getId(av));
-                System.err.flush(); stopAnim(av); continue; }
-            if(anim==null || anim.isSuspended()) stopAnim(av);
+            if(!av.isShowing()) anim.finish();
+            else if(anim==null || anim.isSuspended()) stopAnim(av);
             else anim.setTime(time);
         }
-        //System.out.println("SetTime " + time);
     }
 
     // Send reset later calls

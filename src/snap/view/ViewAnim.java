@@ -537,6 +537,16 @@ public ViewAnim clear()
 }
 
 /**
+ * Finishes the anim.
+ */
+public ViewAnim finish()
+{
+    int maxTime = getMaxTime();
+    setTime(maxTime);
+    return this;
+}
+
+/**
  * Standard toString implementation.
  */
 public String toString()

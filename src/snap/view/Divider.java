@@ -21,6 +21,8 @@ public class Divider extends View {
     
     // Constants for properties
     public static final String DividerSize_Prop = "DividerSize";
+    public static final String Location_Prop = "Location";
+    public static final String Remainder_Prop = "Remainder";
     
 /**
  * Creates a new Divider.
@@ -181,8 +183,8 @@ protected double getPrefHeightImpl(double aW)  { return isVertical()? 0 : _size;
  */
 public Object getValue(String aPropName)
 {
-    if(aPropName.equals("Location")) return getLocation();
-    if(aPropName.equals("Remainder")) return getRemainder();
+    if(aPropName==Location_Prop) return getLocation();
+    if(aPropName==Remainder_Prop) return getRemainder();
     return super.getValue(aPropName);
 }
 
@@ -191,8 +193,8 @@ public Object getValue(String aPropName)
  */
 public void setValue(String aPropName, Object aValue)
 {
-    if(aPropName.equals("Location")) setLocation(SnapUtils.doubleValue(aValue));
-    else if(aPropName.equals("Remainder")) setRemainder(SnapUtils.doubleValue(aValue));
+    if(aPropName==Location_Prop) setLocation(SnapUtils.doubleValue(aValue));
+    else if(aPropName==Remainder_Prop) setRemainder(SnapUtils.doubleValue(aValue));
     else super.setValue(aPropName, aValue);
 }
 
