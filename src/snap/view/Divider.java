@@ -10,9 +10,6 @@ import snap.util.SnapUtils;
  */
 public class Divider extends View {
     
-    // The size
-    double    _size = 8;
-    
     // Constants for Divider Fill
     static final Color c1 = Color.get("#fbfbfb"), c2 = Color.get("#e3e3e3");
     static final Paint DIVIDER_FILL_HOR = new GradientPaint(c1, c2, 90);
@@ -20,7 +17,6 @@ public class Divider extends View {
     static final Border DIVIDER_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
     
     // Constants for properties
-    public static final String DividerSize_Prop = "DividerSize";
     public static final String Location_Prop = "Location";
     public static final String Remainder_Prop = "Remainder";
     
@@ -30,20 +26,28 @@ public class Divider extends View {
 public Divider()
 {
     enableEvents(MousePress, MouseDrag);
+    setCursor(Cursor.N_RESIZE);
+    setFill(DIVIDER_FILL_HOR);
     setBorder(DIVIDER_BORDER);
 }
 
 /**
  * Returns the size of the divider.
  */
-public double getDividerSize()  { return _size; }
+public double getSpan()  { return isVertical()? getWidth() : getHeight(); }
+
+/**
+ * Returns the preferred size of the divider.
+ */
+public double getPrefSpan()  { return isVertical()? getPrefWidth() : getPrefHeight(); }
 
 /**
  * Sets the size of the divider.
  */
-public void setDividerSize(double aValue)
+public void setPrefSpan(double aValue)
 {
-    firePropChange(DividerSize_Prop, _size, _size = aValue);
+    boolean isVert = isVertical();
+    setPrefSize(isVert? aValue : -1, isVert? -1 : aValue);
 }
 
 /**
@@ -148,35 +152,24 @@ public void setRemainder(double aValue)
     if(par.isNeedsLayout())
         par.layout();
         
-    double loc = isVertical()? (peer1.getMaxX() - aValue - getDividerSize() - peer0.getX()) :
-        (peer1.getMaxY() - aValue - getDividerSize() - peer0.getY());
+    double loc = isVertical()? (peer1.getMaxX() - aValue - getSpan() - peer0.getX()) :
+        (peer1.getMaxY() - aValue - getSpan() - peer0.getY());
     setLocation(loc);
 }
 
 /**
- * Override.
+ * Override to configure attributes based on parent.Vertical.
  */
-public boolean isVertical()  { return getParent()!=null? !getParent().isVertical() : super.isVertical(); }
-
-/**
- * Override.
- */
-protected void setParent(ParentView aPar)
+public void setVertical(boolean aValue)
 {
-    super.setParent(aPar);
-    setCursor(isVertical()? Cursor.E_RESIZE:Cursor.N_RESIZE);
-    setFill(isVertical()? DIVIDER_FILL_VER : DIVIDER_FILL_HOR);
+    // Do normal version
+    if(aValue==isVertical()) return; super.setVertical(aValue);
+    
+    // Set Cursor and Fill based on Vertical
+    setCursor(aValue? Cursor.E_RESIZE:Cursor.N_RESIZE);
+    if(getFill()==DIVIDER_FILL_VER) setFill(DIVIDER_FILL_HOR);
+    else if(getFill()==DIVIDER_FILL_HOR) setFill(DIVIDER_FILL_VER);
 }
-
-/**
- * Calculates the preferred width.
- */
-protected double getPrefWidthImpl(double aH)  { return isVertical()? _size : 0; }
-
-/**
- * Calculates the preferred height.
- */
-protected double getPrefHeightImpl(double aW)  { return isVertical()? 0 : _size; }
 
 /**
  * Override because TeaVM hates reflection.

@@ -59,7 +59,8 @@ public TreeView()
     setFocusable(true); setFocusWhenPressed(true); setFocusPainted(false);
     
     // Configure Columns SplitView and ScrollView and add
-    _split.setBorder(null); _split.setGrowWidth(true);
+    _split.setBorder(null); _split.setGrowWidth(true); _split.setSpacing(2);
+    _split.getDivider().setFill(DIVIDER_FILL); _split.getDivider().setBorder(null);
     _scroll.setBorder(null);
     addChild(_scroll);
     
@@ -156,9 +157,6 @@ public void addCol(TreeCol aCol, int anIndex)
     // Add TreeCol to SplitView
     aCol.setTree(this);
     _split.addItem(aCol, anIndex);
-    
-    // Configure split dividers
-    for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
     
     // Replace column picklist with tableView picklist
     aCol.setPickList(_items);

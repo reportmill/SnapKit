@@ -334,7 +334,7 @@ public static class CompoundBorder extends Border {
     // The two borders
     Border  _obdr, _ibdr;
     
-    /** Creates a new TitledBorder. */
+    /** Creates a CompoundBorder. */
     public CompoundBorder(Border anOuterBdr, Border anInnerBdr)  { _obdr = anOuterBdr; _ibdr = anInnerBdr; }
     
     /** Returns the real border. */

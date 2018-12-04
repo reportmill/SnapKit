@@ -42,7 +42,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     ScrollView              _scroll = new ScrollView(_split);
     
     // The view to hold header
-    ParentView              _header = createHeaderView();
+    ParentView              _header;
     
     // Constants
     static final Paint DIVIDER_FILL = new Color("#EEEEEE");
@@ -58,16 +58,14 @@ public TableView()
     setFocusable(true); setFocusWhenPressed(true);
     
     // Configure Columns SplitView and ScrollView and add
-    _split.setBorder(null); _split.setGrowWidth(true);
+    _split.setBorder(null); _split.setGrowWidth(true); _split.setSpacing(2);
+    _split.getDivider().setFill(DIVIDER_FILL); _split.getDivider().setBorder(null);
     setBorder(_scroll.getBorder()); _scroll.setBorder(null);
     addChild(_scroll);
     
     // Bind main Scroll.ScrollH to HeaderScroller (both ways)
     Scroller scroller = _scroll.getScroller();
     ViewUtils.bind(scroller, Scroller.ScrollH_Prop, getHeaderScroller(), true);
-    
-    // Bind main split needs layout to header split
-    //ViewUtils.bind(_split, NeedsLayout_Prop, getHeaderSplitView(), true);
     
     // Register PickList to notify when selection changes
     _items.addPropChangeListener(pc -> pickListSelChange(pc));
@@ -196,8 +194,8 @@ public void addCol(TableCol aCol)
     hsplit.addItem(hdrBox);
     
     // Configure split dividers
-    for(Divider div : _split.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILL); div.setBorder(null); }
-    for(Divider div : hsplit.getDividers()) { div.setDividerSize(2); div.setFill(DIVIDER_FILLH); div.setBorder(null); }
+    for(Divider div : _split.getDividers()) { div.setFill(DIVIDER_FILL); div.setBorder(null); }
+    for(Divider div : hsplit.getDividers()) { div.setFill(DIVIDER_FILLH); div.setBorder(null); }
     
     // Replace column picklist with tableView picklist
     aCol.setPickList(_items);
@@ -319,6 +317,8 @@ public ParentView getHeaderView()  { return _header!=null? _header : (_header=cr
 protected ParentView createHeaderView()
 {
     SplitView split = new SplitView(); split.setGrowWidth(true); split.setBorder(null);
+    split.setSpacing(_split.getSpacing());
+    split.getDivider().setFill(DIVIDER_FILLH); split.getDivider().setBorder(null);
     
     Scroller scroll = new Scroller(); scroll.setContent(split);
     LineView line = new LineView(0,.5,10,.5); line.setPrefHeight(1); line.setBorder(Color.LIGHTGRAY,1);

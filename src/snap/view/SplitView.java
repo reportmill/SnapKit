@@ -17,6 +17,12 @@ public class SplitView extends ParentView {
     // The list of dividers
     List <Divider>          _divs = new ArrayList();
     
+    // The spacing between items (really the default span of the dividers)
+    double                  _spacing = 8;
+    
+    // The default divider
+    Divider                 _divider;
+    
     // A listener to watch for when item.Visible changes
     PropChangeListener      _visLsnr = pc -> itemVisibleChanged(pc);
     
@@ -29,6 +35,21 @@ public class SplitView extends ParentView {
 public SplitView()
 {
     setBorder(SPLIT_VIEW_BORDER);
+}
+
+/**
+ * Returns the default width of the dividers.
+ */
+public double getSpacing()  { return _spacing; }
+
+/**
+ * Sets the default width of the dividers.
+ */
+public void setSpacing(double aValue)
+{
+    if(aValue==_spacing) return;
+    for(Divider div : _divs) div.setPrefSpan(aValue);
+    firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
 }
 
 /**
@@ -61,7 +82,7 @@ public void addItem(View aView, int anIndex)
     
     // If more than one item, add divider
     if(getItemCount()>1) {
-        Divider div = new Divider();
+        Divider div = createDivider();
         addDivider(div, anIndex>0? (anIndex-1) : 0);
         addChild(div, anIndex>0? (anIndex*2-1) : 0);
         
@@ -73,17 +94,6 @@ public void addItem(View aView, int anIndex)
     // Add view as child
     addChild(aView, anIndex*2);
     aView.addPropChangeListener(_visLsnr, Visible_Prop);
-}
-
-void itemVisibleChanged(PropChange aPC)
-{
-    if(getItemCount()<2) return;
-
-    View view = (View)aPC.getSource();
-    int ind = getItems().indexOf(view);
-    Divider div = getDivider(ind>0? ind-1 : 0);
-    boolean vis = view.isVisible(); if(ind==1) vis &= getItem(0).isVisible();
-    div.setVisible(vis);
 }
 
 /**
@@ -202,7 +212,7 @@ public void setItemVisibleWithAnim(View aView, boolean aValue)
     
     // Handle visible true
     if(aValue) {
-        double dsize = div.getDividerSize();
+        double dsize = div.getSpan();
         if(index==0) { div.setLocation(0); div.getAnim(time).setValue(Divider.Location_Prop, dsize, size).play(); }
         else { div.setRemainder(1); div.getAnim(time).setValue(Divider.Remainder_Prop, dsize, size).play(); }
         aView.setVisible(true); aView.setOpacity(0); div.setOpacity(0);
@@ -221,6 +231,20 @@ public void setItemVisibleWithAnim(View aView, boolean aValue)
             if(isVertical()) aView.setHeight(size); else aView.setWidth(size);
         }).play();
     }
+}
+
+/**
+ * Called when an item changes the value of visible property.
+ */
+void itemVisibleChanged(PropChange aPC)
+{
+    if(getItemCount()<2) return;
+
+    View view = (View)aPC.getSource();
+    int ind = getItems().indexOf(view);
+    Divider div = getDivider(ind>0? ind-1 : 0);
+    boolean vis = view.isVisible(); if(ind==1) vis &= getItem(0).isVisible();
+    div.setVisible(vis);
 }
 
 /**
@@ -252,6 +276,43 @@ protected Divider removeDivider(int anIndex)
  * Returns the dividers.
  */
 public Divider[] getDividers()  { return _divs.toArray(new Divider[_divs.size()]); }
+
+/**
+ * Returns the default divider.
+ */
+public Divider getDivider()
+{
+    // If already set, just return
+    if(_divider!=null) return _divider;
+    
+    // Create and return
+    Divider div = new Divider();
+    div.setVertical(!isVertical()); div.setBorder(Divider.DIVIDER_BORDER);
+    div.addPropChangeListener(pc -> dividerPropChange(pc), Fill_Prop, Border_Prop);
+    return _divider = div;
+}
+
+/**
+ * Creates a new divider.
+ */
+protected Divider createDivider()
+{
+    Divider div0 = getDivider(), div = new Divider();
+    div.setVertical(!isVertical());
+    div.setFill(div0.getFill()); div.setBorder(div0.getBorder());
+    div.setPrefSpan(getSpacing());
+    return div;
+}
+
+/**
+ * Called when divider has prop change.
+ */
+void dividerPropChange(PropChange aPC)
+{
+    String pname = aPC.getPropName();
+    if(pname==Fill_Prop) for(Divider d : _divs) d.setFill(_divider.getFill());
+    else if(pname==Border_Prop) for(Divider d : _divs) d.setBorder(_divider.getBorder());
+}
 
 /**
  * Calculates the preferred width.
@@ -297,6 +358,16 @@ protected void layoutImpl()
  * Returns the default border.
  */
 public Border getDefaultBorder()  { return SPLIT_VIEW_BORDER; }
+
+/**
+ * Override to forward to dividers.
+ */
+public void setVertical(boolean aValue)
+{
+    if(aValue==isVertical()) return; super.setVertical(aValue);
+    if(_divider!=null) _divider.setVertical(!aValue);
+    for(Divider d : _divs) d.setVertical(!aValue);
+}
 
 /**
  * XML archival deep.
