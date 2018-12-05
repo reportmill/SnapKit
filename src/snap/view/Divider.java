@@ -10,6 +10,9 @@ import snap.util.SnapUtils;
  */
 public class Divider extends View {
     
+    // The extra space beyond the divider bounds that should respond to resize
+    double         _reach;
+    
     // Constants for Divider Fill
     static final Color c1 = Color.get("#fbfbfb"), c2 = Color.get("#e3e3e3");
     static final Paint DIVIDER_FILL_HOR = new GradientPaint(c1, c2, 90);
@@ -25,7 +28,6 @@ public class Divider extends View {
  */
 public Divider()
 {
-    enableEvents(MousePress, MouseDrag);
     setCursor(Cursor.N_RESIZE);
     setFill(DIVIDER_FILL_HOR);
     setBorder(DIVIDER_BORDER);
@@ -49,6 +51,16 @@ public void setPrefSpan(double aValue)
     boolean isVert = isVertical();
     setPrefSize(isVert? aValue : -1, isVert? -1 : aValue);
 }
+
+/**
+ * Returns the extra space beyond the span that divider should respond to.
+ */
+public double getReach()  { return _reach; }
+
+/**
+ * Sets the extra space beyond the span that divider should respond to.
+ */
+public void setReach(double aValue)  { _reach = aValue; }
 
 /**
  * Returns the distance from the min x of preceeding View to min x of divider (or y if vertical).
@@ -189,22 +201,6 @@ public void setValue(String aPropName, Object aValue)
     if(aPropName==Location_Prop) setLocation(SnapUtils.doubleValue(aValue));
     else if(aPropName==Remainder_Prop) setRemainder(SnapUtils.doubleValue(aValue));
     else super.setValue(aPropName, aValue);
-}
-
-/**
- * Handle MouseDrag event: Calcualte and set new location.
- */
-protected void processEvent(ViewEvent anEvent)
-{
-    // Handle MouseDrag: Calculate new location and set
-    if(anEvent.isMouseDrag()) {
-        ParentView par = getParent(); int index = par.indexOfChild(this);
-        Point pnt = localToParent(anEvent.getX(), anEvent.getY());
-        View peer0 = par.getChild(index-1);
-        double loc = isVertical()? (pnt.getX() - getWidth()/2 - peer0.getX()) :
-            (pnt.getY() - getHeight()/2 - peer0.getY());
-        setLocation(loc);
-    }
 }
 
 }

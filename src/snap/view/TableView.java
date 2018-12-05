@@ -59,7 +59,7 @@ public TableView()
     
     // Configure Columns SplitView and ScrollView and add
     _split.setBorder(null); _split.setGrowWidth(true); _split.setSpacing(2);
-    _split.getDivider().setFill(DIVIDER_FILL); _split.getDivider().setBorder(null);
+    Divider div = _split.getDivider(); div.setFill(DIVIDER_FILL); div.setBorder(null); div.setReach(3);
     setBorder(_scroll.getBorder()); _scroll.setBorder(null);
     addChild(_scroll);
     
@@ -318,7 +318,7 @@ protected ParentView createHeaderView()
 {
     SplitView split = new SplitView(); split.setGrowWidth(true); split.setBorder(null);
     split.setSpacing(_split.getSpacing());
-    split.getDivider().setFill(DIVIDER_FILLH); split.getDivider().setBorder(null);
+    Divider div = split.getDivider(); div.setFill(DIVIDER_FILLH); div.setBorder(null); div.setReach(3);
     
     Scroller scroll = new Scroller(); scroll.setContent(split);
     LineView line = new LineView(0,.5,10,.5); line.setPrefHeight(1); line.setBorder(Color.LIGHTGRAY,1);

@@ -60,7 +60,7 @@ public TreeView()
     
     // Configure Columns SplitView and ScrollView and add
     _split.setBorder(null); _split.setGrowWidth(true); _split.setSpacing(2);
-    _split.getDivider().setFill(DIVIDER_FILL); _split.getDivider().setBorder(null);
+    Divider div = _split.getDivider(); div.setFill(DIVIDER_FILL); div.setBorder(null); div.setReach(3);
     _scroll.setBorder(null);
     addChild(_scroll);
     

@@ -23,6 +23,9 @@ public class SplitView extends ParentView {
     // The default divider
     Divider                 _divider;
     
+    // The divider currently being dragged (and the offset from center of drag start)
+    Divider                 _dragDiv; double _dragOff;
+
     // A listener to watch for when item.Visible changes
     PropChangeListener      _visLsnr = pc -> itemVisibleChanged(pc);
     
@@ -35,6 +38,7 @@ public class SplitView extends ParentView {
 public SplitView()
 {
     setBorder(SPLIT_VIEW_BORDER);
+    addEventFilter(e -> processDividerEvent(e), MouseMove, MousePress, MouseDrag, MouseRelease);
 }
 
 /**
@@ -248,6 +252,33 @@ void itemVisibleChanged(PropChange aPC)
 }
 
 /**
+ * Returns the default divider.
+ */
+public Divider getDivider()
+{
+    // If already set, just return
+    if(_divider!=null) return _divider;
+    
+    // Create and return
+    Divider div = new Divider();
+    div.setVertical(!isVertical()); div.setBorder(Divider.DIVIDER_BORDER);
+    div.addPropChangeListener(pc -> dividerPropChange(pc), Fill_Prop, Border_Prop);
+    return _divider = div;
+}
+
+/**
+ * Creates a new divider.
+ */
+protected Divider createDivider()
+{
+    Divider div0 = getDivider(), div = new Divider();
+    div.setVertical(!isVertical());
+    div.setFill(div0.getFill()); div.setBorder(div0.getBorder()); div.setReach(div0.getReach());
+    div.setPrefSpan(getSpacing());
+    return div;
+}
+
+/**
  * Returns the number of dividers.
  */
 public int getDividerCount()  { return _divs.size(); }
@@ -278,30 +309,22 @@ protected Divider removeDivider(int anIndex)
 public Divider[] getDividers()  { return _divs.toArray(new Divider[_divs.size()]); }
 
 /**
- * Returns the default divider.
+ * Returns the divider at given point.
  */
-public Divider getDivider()
+public Divider getDividerAt(double aX, double aY)
 {
-    // If already set, just return
-    if(_divider!=null) return _divider;
+    // Handle vertical
+    if(isVertical()) { for(Divider div : _divs) { if(!div.isVisible()) continue;
+        double min = div.getY() - div.getReach(), max = div.getMaxY() + div.getReach();
+        if(aY>=min && aY<=max) return div;
+    }}
     
-    // Create and return
-    Divider div = new Divider();
-    div.setVertical(!isVertical()); div.setBorder(Divider.DIVIDER_BORDER);
-    div.addPropChangeListener(pc -> dividerPropChange(pc), Fill_Prop, Border_Prop);
-    return _divider = div;
-}
-
-/**
- * Creates a new divider.
- */
-protected Divider createDivider()
-{
-    Divider div0 = getDivider(), div = new Divider();
-    div.setVertical(!isVertical());
-    div.setFill(div0.getFill()); div.setBorder(div0.getBorder());
-    div.setPrefSpan(getSpacing());
-    return div;
+    // Handle horizontal
+    else { for(Divider div : _divs) { if(!div.isVisible()) continue;
+        double min = div.getX() - div.getReach(), max = div.getMaxX() + div.getReach();
+        if(aX>=min && aX<=max) return div;
+    }}
+    return null;
 }
 
 /**
@@ -352,6 +375,41 @@ protected void layoutImpl()
         child.setWidth(w - child.getX());
     else if(isVertical() && MathUtils.lt(child.getMaxY(),h))
         child.setHeight(h - child.getY());
+}
+
+/**
+ * Handle MouseDrag event: Calcualte and set new location.
+ */
+protected void processDividerEvent(ViewEvent anEvent)
+{
+    // Handle MouseMove
+    if(anEvent.isMouseMove()) {
+        Divider div = getDividerAt(anEvent.getX(), anEvent.getY());
+        if(div!=null) getRootView().setCurrentCursor(div.getCursor());
+    }
+    
+    // Handle MouseDrag: Calculate new location and set
+    else if(anEvent.isMouseDrag()) { if(_dragDiv==null) return;
+        
+        // Get view before divider and adjust divider location
+        Divider div = _dragDiv; double x = anEvent.getX(), y = anEvent.getY();
+        int index = indexOfChild(div); View peer0 = getChild(index-1);
+        double loc = div.isVertical()? (x - div.getWidth()/2 - peer0.getX()) : (y - div.getHeight()/2 - peer0.getY());
+        div.setLocation(loc + _dragOff);
+        anEvent.consume();
+    }
+    
+    // Handle MousePress: Check for divider hit
+    else if(anEvent.isMousePress()) {
+        _dragDiv = getDividerAt(anEvent.getX(), anEvent.getY());
+        if(_dragDiv!=null) { anEvent.consume();
+            _dragOff = isVertical()? _dragDiv.getMidY() - anEvent.getY() : _dragDiv.getMidX() - anEvent.getX(); }
+    }
+        
+    // Handle MousePress: Clear DragDiv
+    else if(anEvent.isMouseRelease()) {
+        if(_dragDiv!=null) { _dragDiv = null; anEvent.consume(); }
+    }
 }
 
 /**
