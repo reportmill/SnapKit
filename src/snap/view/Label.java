@@ -25,7 +25,15 @@ public class Label extends ParentView {
     // The spacing between text and graphic
     double          _spacing = 4;
     
+    // Whether label text is editable
+    boolean         _editable, _editing;
+    
+    // A textfield for editing
+    TextField       _editor;
+    
     // Constants for properties
+    public static final String Editable_Prop = "Editable";
+    public static final String Editing_Prop = "Editing";
     public static final String Graphic_Prop = "Graphic";
     public static final String GraphicAfter_Prop = "GraphicAfter";
     public static final String StringView_Prop = "StringView";
@@ -114,14 +122,15 @@ public StringView getStringView()  { return _strView; }
 public StringView getStringView(boolean doCreate)
 {
     if(_strView!=null || !doCreate) return _strView;
-    StringView sview = new StringView(); setStringView(sview);
+    StringView sview = new StringView(); sview.setGrowWidth(true); sview.setAlign(getAlign().getHPos());
+    setStringView(sview);
     return _strView;
 }
 
 /**
  * Sets the text node.
  */
-public void setStringView(StringView aStrView)
+protected void setStringView(StringView aStrView)
 {
     View old = getStringView(); if(aStrView==old) return;
     if(_strView!=null && _strView.getParent()!=null) removeChild(_strView);
@@ -190,9 +199,80 @@ public void setSpacing(double aValue)
 }
 
 /**
- * Returns the default alignment.
- */    
-public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
+ * Returns whether label text is editable.
+ */
+public boolean isEditable()  { return _editable; }
+
+/**
+ * Sets whether label text is editable.
+ */
+public void setEditable(boolean aValue)
+{
+    if(aValue==isEditable()) return;
+    firePropChange(Editable_Prop, _editable, _editable = aValue);
+    if(aValue) enableEvents(MouseRelease);
+    else disableEvents(MouseRelease);
+}
+
+/**
+ * Returns whether editable.
+ */
+public boolean isEditing()  { return _editing; }
+
+/**
+ * Sets editing.
+ */
+public void setEditing(boolean aValue)
+{
+    // If value already set, just return
+    if(aValue==isEditing()) return;
+    _editing = aValue;
+    
+    // Handle set true
+    if(aValue) {
+        TextField editor = getEditor(); editor.setText(getText());
+        Rect bnds = getStringView(true).getBounds(); bnds.inset(-2); editor.setBounds(bnds);
+        addChild(editor); editor.requestFocus();
+        getStringView().setPaintable(false);
+    }
+    
+    // Handle set false
+    else {
+        removeChild(_editor);
+        setText(_editor.getText());
+        getStringView().setPaintable(true); _editor = null;
+    }
+    
+    // Fire prop change
+    firePropChange(Editing_Prop, !aValue, aValue);
+}
+
+/**
+ * Returns the editor.
+ */
+public TextField getEditor()
+{
+    // If editor set, return
+    if(_editor!=null) return _editor;
+    
+    // Create and return editor
+    TextField editor = new TextField(); editor.setManaged(false);editor.setRadius(2);
+    editor.setFill(new Color(1,.95));
+    editor.setBorder(new Color(1,.3,.3,.5), 1); editor.getBorder().setInsets(Insets.EMPTY);
+    editor.setPadding(2,2,2,2); editor.setAlign(getAlign().getHPos()); editor.setFont(getFont());
+    editor.addEventHandler(e -> setEditing(false), Action);
+    editor.addPropChangeListener(pc -> { if(!editor.isFocused()) setEditing(false); }, Focused_Prop);
+    return _editor = editor;
+}
+
+/**
+ * Handle events.
+ */
+protected void processEvent(ViewEvent anEvent)
+{
+    if(anEvent.isMouseRelease() && anEvent.getClickCount()==2)
+        setEditing(true);
+}
 
 /**
  * Returns the preferred width.
@@ -219,8 +299,7 @@ protected double getPrefHeightImpl(double aW)
  */
 protected void layoutImpl()
 {
-    if(isHorizontal())
-        RowView.layout(this, null, null, false, getSpacing());
+    if(isHorizontal()) RowView.layout(this, null, null, false, getSpacing());
     else ColView.layout(this, null, null, false, getSpacing());
 }
 
@@ -228,6 +307,20 @@ protected void layoutImpl()
  * Returns a mapped property name.
  */
 public String getValuePropName()  { return "Text"; }
+
+/**
+ * Override to make default align center-left.
+ */    
+public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
+
+/**
+ * Override to forward to StringView.
+ */
+public void setAlign(Pos aPos)
+{
+    super.setAlign(aPos);
+    if(getStringView()!=null) getStringView().setAlign(aPos.getHPos());
+}
 
 /**
  * XML archival.

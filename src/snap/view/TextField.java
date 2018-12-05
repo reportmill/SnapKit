@@ -62,7 +62,7 @@ public class TextField extends ParentView {
  */
 public TextField()
 {
-    setFill(Color.WHITE);
+    setFill(Color.WHITE); setBorder(Color.LIGHTGRAY, 1); getBorder().setInsets(Insets.EMPTY);
     enableEvents(Action);
     enableEvents(MouseEvents); enableEvents(KeyEvents);
     setFocusable(true); setFocusWhenPressed(true);
@@ -531,9 +531,14 @@ protected void paintBack(Painter aPntr)
 {
     double w = getWidth(), h = getHeight(); //aPntr.clearRect(0,0,w,h);
     RoundRect rrect = new RoundRect(.5, .5, w-1, h-1, _rad);
-    aPntr.setPaint(getFill()); aPntr.fill(rrect);
-    aPntr.setColor(Color.LIGHTGRAY);
-    aPntr.setStroke(Stroke.Stroke1); aPntr.draw(rrect);
+    
+    // Fill round rect
+    Paint fill = getFill();
+    if(fill!=null) { aPntr.setPaint(getFill()); aPntr.fill(rrect); }
+    
+    // Stroke round rect
+    Border bdr = getBorder();
+    if(bdr!=null) { aPntr.setColor(bdr.getColor()); aPntr.setStroke(Stroke.Stroke1); aPntr.draw(rrect); }
 }
 
 /**

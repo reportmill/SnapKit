@@ -90,6 +90,9 @@ public class View implements XMLArchiver.Archivable {
     // Whether view can be hit by mouse
     boolean         _pickable = true;
     
+    // Whether view should be painted
+    boolean         _paintable = true;
+    
     // Whether view should be included in layout
     boolean         _managed = true;
     
@@ -1012,6 +1015,16 @@ public void setPickable(boolean aValue)  { _pickable = aValue; }
  * Returns whether view can be hit by mouse and visible.
  */
 public boolean isPickableVisible()  { return isPickable() && isVisible(); }
+
+/**
+ * Returns whether view should be painted.
+ */
+public boolean isPaintable()  { return _paintable; }
+
+/**
+ * Sets whether view should be painted.
+ */
+public void setPaintable(boolean aValue)  { _paintable = aValue; }
 
 /**
  * Returns whether view should be included when a parent does layout.

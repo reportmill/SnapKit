@@ -282,7 +282,7 @@ protected void paintChildren(Painter aPntr)
     
     // Iterate over children and paint any that intersect clip
     for(View child : getChildren()) {
-        if(!child.isVisible()) continue;
+        if(!child.isVisible() || !child.isPaintable()) continue;
         Rect clip = child.parentToLocal(pclip).getBounds();
         if(clip.intersects(child.getBoundsLocal())) {
             aPntr.save();
