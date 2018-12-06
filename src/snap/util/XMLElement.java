@@ -333,7 +333,7 @@ public Boolean getAttributeBooleanValue(String aName)  { return getAttributeBool
 public Boolean getAttributeBooleanValue(String aName, Boolean defaultValue)
 {
     XMLAttribute a = getAttribute(aName);
-    return a==null? defaultValue : a.getValue().equals("true")? Boolean.TRUE : Boolean.FALSE;
+    return a!=null? a.getValue().equals("true") : defaultValue;
 }
 
 /**
