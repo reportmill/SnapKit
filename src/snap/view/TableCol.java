@@ -29,7 +29,7 @@ public class TableCol <T> extends ListArea <T> {
 public TableCol()
 {
     _header.setPadding(4,4,4,4);
-    setFocusWhenPressed(false);
+    setFocusable(false); setFocusWhenPressed(false);
 }
 
 /**
@@ -118,6 +118,16 @@ protected double getPrefWidthImpl(double aH)
         pw = Math.max(getHeader().getPrefWidth(aH), pw);
     return pw;
 }
+
+/**
+ * Override to forward to table.
+ */
+protected View getFocusNext(View aChild)  { return getTable().getFocusNext(); }
+
+/**
+ * Override to forward to table.
+ */
+protected View getFocusPrev(View aChild)  { return getTable().getFocusPrev(); }
 
 /**
  * XML archival - table columns.

@@ -140,14 +140,34 @@ public T getSelItem()  { return _items.getSelItem(); }
 public void setSelItem(T anItem)  { _items.setSelItem(anItem); }
 
 /**
- * Selects up in the list.
+ * Selects up in the table.
  */
 public void selectUp()  { _items.selectUp(); }
 
 /**
- * Selects up in the list.
+ * Selects down in the table.
  */
 public void selectDown()  { _items.selectDown(); }
+
+/**
+ * Selects right in the table.
+ */
+public void selectRight()
+{
+    int row = getSelRow(); if(row<0) row = 0;
+    int col = getSelCol()+1; if(col>=getColCount()) { col = 0; row = (row+1)%getRowCount(); }
+    setSelCell(row, col);
+}
+
+/**
+ * Selects right in the table.
+ */
+public void selectLeft()
+{
+    int row = getSelRow(); if(row<0) row = 0;
+    int col = getSelCol()-1; if(col<0) { col = getColCount()-1; row = (row-1)%getRowCount(); }
+    setSelCell(row, col);
+}
 
 /**
  * Called when PickList changes selection.
@@ -380,8 +400,8 @@ public void setEditable(boolean aValue)
     
     // Set value, fire prop change and enable MouseRelease events
     firePropChange(Editable_Prop, _editable, _editable = aValue);
-    if(aValue) enableEvents(MouseRelease);
-    else disableEvents(MouseRelease);
+    if(aValue) enableEvents(MouseRelease, KeyPress);
+    else disableEvents(MouseRelease, KeyPress);
 }
 
 /**
@@ -477,6 +497,21 @@ public void setSelCol(int anIndex)  { _selCol = anIndex; }
 public ListCell <T> getSelCell()  { return getCell(getSelRow(), getSelCol()); }
 
 /**
+ * Returns the selected cell.
+ */
+public void setSelCell(int aRow, int aCol)
+{
+    // If already selected, just return
+    if(aRow==getSelRow() && aCol==getSelCol()) return;
+    
+    // Set selected column and row
+    if(aCol<getColCount())
+        setSelCol(aCol);
+    if(aRow<getRowCount())
+        setSelIndex(aRow);
+}
+
+/**
  * Override to reset cells.
  */
 public void setY(double aValue)
@@ -548,9 +583,35 @@ public void processEvent(ViewEvent anEvent)
     // Handle Mouse double-click
     if(anEvent.isMouseClick() && anEvent.getClickCount()==2 && isEditable()) {
         ListCell cell = getCellAtXY(anEvent.getX(), anEvent.getY());
-        if(cell!=null)
-            configureCellEdit(cell);
+        editCell(cell);
     }
+    
+    // Handle KeyPress
+    else if(anEvent.isKeyPress() && isEditable()) {
+        int kcode = anEvent.getKeyCode();
+        switch(kcode) {
+            case KeyCode.UP: selectUp(); anEvent.consume(); break;
+            case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
+            default: {
+                char c = anEvent.getKeyChar();
+                boolean printable = Character.isJavaIdentifierPart(c); // Lame
+                if(isEditable() && printable) {
+                    ListCell cell = getSelCell();
+                    editCell(cell);
+                }
+                else if(kcode==KeyCode.ENTER) { selectDown(); anEvent.consume(); break; }
+            }
+        }
+    }
+}
+
+/**
+ * Called to edit given cell.
+ */
+public void editCell(ListCell aCell)
+{
+    if(aCell==null || !isEditable()) return;
+    configureCellEdit(aCell);
 }
 
 /**
@@ -563,6 +624,28 @@ protected void configureCellEdit(ListCell <T> aCell)
     else {
         aCell.setEditing(true);
     }
+}
+
+/**
+ * Override to forward to table.
+ */
+public View getFocusNext()
+{
+    selectRight();
+    ListCell cell = getSelCell();
+    if(cell!=null && isEditable()) getEnv().runLater(() -> editCell(cell));
+    return cell;
+}
+
+/**
+ * Override to forward to table.
+ */
+public View getFocusPrev()
+{
+    selectLeft();
+    ListCell cell = getSelCell();
+    if(cell!=null && isEditable()) getEnv().runLater(() -> editCell(cell));
+    return cell;
 }
 
 /**
