@@ -237,6 +237,15 @@ protected void layoutImpl()
 }
 
 /**
+ * Override to forward to StringView.
+ */
+public void setAlign(Pos aPos)
+{
+    super.setAlign(aPos);
+    _text.setAlign(aPos.getHPos());
+}
+
+/**
  * Returns the value for given key.
  */
 public Object getValue(String aPropName)
