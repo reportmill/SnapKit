@@ -21,8 +21,10 @@ public class ViewUtils {
     // Color constants
     private static Color BACK_FILL = new Color("#E9E8EA");
     private static Color BACK_DARK_FILL = new Color("#C0C0C0");
-    private static Color SELECT_COLOR = new Color("#0032D0");
-    private static Color TARGET_COLOR = new Color("#4080F0");
+    private static Color SEL_FILL = Color.LIGHTGRAY; //new Color("#0032D0");
+    private static Color SEL_TEXT_FILL = Color.BLACK; //Color.WHITE;
+    private static Color TARG_FILL = new Color("#4080F0");
+    private static Color TARG_TEXT_FILL = Color.WHITE;
 
     // Image Constants
     static Image        RootFile, DirFile, ClassFile, JavaFile, TableFile, PlainFile;
@@ -83,22 +85,22 @@ public static void setMouseDown(ViewEvent anEvent)
 /**
  * Returns the selection color.
  */
-public static Paint getSelectFill()  { return SELECT_COLOR; }
+public static Paint getSelectFill()  { return SEL_FILL; }
 
 /**
  * Returns the selection color.
  */
-public static Paint getSelectTextFill()  { return Color.WHITE; }
+public static Paint getSelectTextFill()  { return SEL_TEXT_FILL; }
 
 /**
  * Returns the selection color.
  */
-public static Paint getTargetFill()  { return TARGET_COLOR; }
+public static Paint getTargetFill()  { return TARG_FILL; }
 
 /**
  * Returns the selection color.
  */
-public static Paint getTargetTextFill()  { return Color.WHITE; }
+public static Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
 
 /**
  * Returns the background fill.

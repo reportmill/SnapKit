@@ -71,6 +71,11 @@ public void setResizable(boolean aValue)
 public double getRowHeight()  { return getTable().getRowHeight(); }
 
 /**
+ * Override to get row height from table.
+ */
+protected double getRowHeightSuper()  { return super.getRowHeight(); }
+
+/**
  * Returns the column index.
  */
 public int getColIndex()  { return ArrayUtils.indexOfId(getTable().getCols(), this); }

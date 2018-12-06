@@ -36,6 +36,17 @@ public class Color implements Paint, XMLArchiver.Archivable {
     public static Color LIGHTBLUE = new Color(.333f, .333f, 1f);
     public static Color CLEARWHITE = new Color(1f, 1f, 1f, 0f);
     public static Color CRIMSON = Color.get("#dc143c");
+    
+    // Shades of gray from .1 to .9
+    public static Color GRAY1 = new Color(.1);
+    public static Color GRAY2 = new Color(.2);
+    public static Color GRAY3 = new Color(.3);
+    public static Color GRAY4 = new Color(.4);
+    public static Color GRAY5 = new Color(.5);
+    public static Color GRAY6 = new Color(.6);
+    public static Color GRAY7 = new Color(.7);
+    public static Color GRAY8 = new Color(.8);
+    public static Color GRAY9 = new Color(.9);
 
 /**
  * Creates a plain black opaque color.

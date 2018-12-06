@@ -28,8 +28,11 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     Color                   _gridColor;
     
     // Row height
-    int                     _rowHeight = 24;
+    double                  _rowHeight, _rowHeightCached = -1;
 
+    // The cell padding
+    Insets                  _cellPad = ListArea.CELL_PAD_DEFAULT;
+    
     // An optional method hook to configure cell
     Consumer <ListCell<T>>  _cellConf;
     
@@ -49,7 +52,9 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     ParentView              _header;
     
     // Constants
+    public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
+    public static final String RowHeight_Prop = "RowHeight";
     static final Paint DIVIDER_FILL = new Color("#EEEEEE");
     static final Paint DIVIDER_FILLH = new Color("#E0E0E0");
     
@@ -98,12 +103,21 @@ public void setItems(List <T> theItems)
     _items.setAll(theItems);
     relayout(); relayoutParent(); repaint();
     for(TableCol tc : getCols()) tc.setItems(theItems);
+    itemsChanged();
 }
 
 /**
  * Sets the items.
  */
 public void setItems(T ... theItems)  { setItems(theItems!=null? Arrays.asList(theItems) : null); }
+
+/**
+ * Called when PickList items changed.
+ */
+protected void itemsChanged()
+{
+    _rowHeightCached = -1;
+}
 
 /**
  * Returns the selected index.
@@ -204,6 +218,7 @@ public void addCol(TableCol aCol)
     
     // Replace column picklist with tableView picklist
     aCol.setPickList(_items);
+    aCol.setCellPadding(getCellPadding());
 }
 
 /**
@@ -289,16 +304,45 @@ public void setGridColor(Color aValue)
 }
 
 /**
+ * Returns whether row height has been explicitly set.
+ */
+public boolean isRowHeightSet()  { return _rowHeight>0; }
+
+/**
  * Returns the row height.
  */
-public int getRowHeight()  { return _rowHeight; }
+public double getRowHeight()
+{
+    if(_rowHeight>0) return _rowHeight;
+    if(_rowHeightCached>0) return _rowHeightCached;
+    
+    _rowHeightCached = 1;
+    for(TableCol col : getCols()) _rowHeightCached = Math.max(_rowHeightCached, col.getRowHeightSuper());
+    return _rowHeightCached;
+}
 
 /**
  * Sets the row height.
  */
-public void setRowHeight(int aValue)
+public void setRowHeight(double aValue)
 {
-    firePropChange("RowHeight", _rowHeight, _rowHeight = aValue);
+    firePropChange(RowHeight_Prop, _rowHeight, _rowHeight = aValue);
+}
+
+/**
+ * Returns the cell padding.
+ */
+public Insets getCellPadding()  { return _cellPad; }
+
+/**
+ * Sets the cell padding.
+ */
+public void setCellPadding(Insets aPad)
+{
+    if(aPad==null) aPad = ListArea.CELL_PAD_DEFAULT; if(aPad.equals(_cellPad)) return;
+    firePropChange(CellPadding_Prop, _cellPad, _cellPad=aPad);
+    for(TableCol col : getCols()) col.setCellPadding(_cellPad);
+    relayout(); relayoutParent();
 }
 
 /**
@@ -376,6 +420,43 @@ protected Scroller getHeaderScroller()
 protected SplitView getHeaderSplitView()  { return (SplitView)getHeaderScroller().getContent(); }
 
 /**
+ * Returns the cell at given row and col.
+ */
+public ListCell <T> getCell(int aRow, int aCol)
+{
+    if(aRow<0 || aCol<0) return null;
+    TableCol col = getCol(aCol);
+    ListCell <T> cell = col.getCell(aRow);
+    return cell;
+}
+
+/**
+ * Returns the row index at given point.
+ */
+public int getRowAt(double aX, double aY)  { return (int)(aY/getRowHeight()); }
+
+/**
+ * Returns the column at given X coord.
+ */
+public TableCol <T> getColAtX(double aX)
+{
+    for(TableCol col : getCols())
+        if(aX>=col.getX() && aX<=col.getMaxX())
+            return col;
+    return null;
+}
+
+/**
+ * Returns the cell at given Y coord.
+ */
+public ListCell <T> getCellAtXY(double aX, double aY)
+{
+    TableCol <T> col = getColAtX(aX); if(col==null) return null;
+    Point pnt = col.parentToLocal(aX, aY, this);
+    return col.getCellAtY(pnt.y);
+}
+
+/**
  * Returns the selected row.
  */
 public int getSelRow()  { return getSelIndex(); }
@@ -391,9 +472,9 @@ public int getSelCol()  { return _selCol; }
 public void setSelCol(int anIndex)  { _selCol = anIndex; }
 
 /**
- * Returns the row index at given point.
+ * Returns the selected cell.
  */
-public int getRowAt(double aX, double aY)  { return (int)(aY/getRowHeight()); }
+public ListCell <T> getSelCell()  { return getCell(getSelRow(), getSelCol()); }
 
 /**
  * Override to reset cells.
@@ -473,27 +554,6 @@ public void processEvent(ViewEvent anEvent)
 }
 
 /**
- * Returns the column at given X coord.
- */
-public TableCol <T> getColAtX(double aX)
-{
-    for(TableCol col : getCols())
-        if(aX>=col.getX() && aX<=col.getMaxX())
-            return col;
-    return null;
-}
-
-/**
- * Returns the cell at given Y coord.
- */
-public ListCell <T> getCellAtXY(double aX, double aY)
-{
-    TableCol <T> col = getColAtX(aX); if(col==null) return null;
-    Point pnt = col.parentToLocal(aX, aY, this);
-    return col.getCellAtY(pnt.y);
-}
-
-/**
  * Called to configure a cell for edit.
  */
 protected void configureCellEdit(ListCell <T> aCell)
@@ -527,7 +587,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     if(isShowGridY()) e.add("ShowGridY", true);
     
     // Archive RowHeight
-    if(getRowHeight()!=24) e.add("RowHeight", getRowHeight());
+    if(isRowHeightSet()) e.add(RowHeight_Prop, getRowHeight());
     return e;
 }
 
@@ -549,7 +609,7 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     setShowGridY(anElement.getAttributeBoolValue("ShowGridY", false));
     
     // Unarchive RowHeight
-    setRowHeight(anElement.getAttributeIntValue("RowHeight", 24));
+    if(anElement.hasAttribute(RowHeight_Prop)) setRowHeight(anElement.getAttributeIntValue(RowHeight_Prop));
 }
 
 /**

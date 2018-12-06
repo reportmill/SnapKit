@@ -36,7 +36,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     String                _itemKey;
     
     // The paint for alternating cells
-    Paint                 _altPaint = ALTERNATE_GRAY;
+    Paint                 _altPaint = ALT_GRAY;
     
     // Whether to fire action on mouse release instead of press
     boolean               _fireOnRelease;
@@ -63,15 +63,20 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     PropChangeListener    _itemsLsnr = pc -> pickListSelChange(pc);
     
     // Shared CellPadding default
-    static Insets         _cellPadDefault = new Insets(2,2,2,4);
+    public static final Insets         CELL_PAD_DEFAULT = new Insets(4);
     
     // Shared constants for colors
-    private static Paint ALTERNATE_GRAY = Color.get("#F8F8F8");
+    private static Paint ALT_GRAY = Color.get("#F8F8F8");
+    private static Paint SEL_FILL = ViewUtils.getSelectFill();
+    private static Paint SEL_TEXT_FILL = ViewUtils.getSelectTextFill();
+    private static Paint TARG_FILL = ViewUtils.getTargetFill();
+    private static Paint TARG_TEXT_FILL = ViewUtils.getTargetTextFill();
     
     // Constants for properties
     public static final String Editable_Prop = "Editable";
     public static final String CellPadding_Prop = "CellPadding";
     public static final String ItemKey_Prop = "ItemKey";
+    public static final String RowHeight_Prop = "RowHeight";
 
 /**
  * Creates a new ListArea.
@@ -184,6 +189,11 @@ protected void pickListSelChange(PropChange aPC)
 }
 
 /**
+ * Returns whether row height has been explicitly set.
+ */
+public boolean isRowHeightSet()  { return _rowHeight>0; }
+
+/**
  * Returns the row height.
  */
 public double getRowHeight()
@@ -205,18 +215,17 @@ public Insets getCellPadding()  { return _cellPad; }
 /**
  * Sets the cell padding.
  */
-public void setCellPadding(Insets aPadding)
+public void setCellPadding(Insets aPad)
 {
-    if(aPadding==null) aPadding = getCellPaddingDefault();
-    if(aPadding.equals(_cellPad)) return;
-    firePropChange(CellPadding_Prop, _cellPad, _cellPad=aPadding);
-    relayout();
+    if(aPad==null) aPad = getCellPaddingDefault(); if(aPad.equals(_cellPad)) return;
+    firePropChange(CellPadding_Prop, _cellPad, _cellPad=aPad);
+    relayout(); relayoutParent();
 }
 
 /**
  * Returns the default cell padding.
  */
-public Insets getCellPaddingDefault()  { return _cellPadDefault; }
+public Insets getCellPaddingDefault()  { return CELL_PAD_DEFAULT; }
 
 /**
  * Returns the row at given Y location.
@@ -507,9 +516,9 @@ protected void configureCell(ListCell <T> aCell)
     aCell.setText(text);
     
     // Set Fill/TextFill based on selection
-    if(aCell.isSelected()) { aCell.setFill(ViewUtils.getSelectFill());aCell.setTextFill(ViewUtils.getSelectTextFill());}
+    if(aCell.isSelected()) { aCell.setFill(SEL_FILL); aCell.setTextFill(SEL_TEXT_FILL); }
     else if(isTargeting() && aCell.getRow()==getTargetedIndex())  {
-        aCell.setFill(ViewUtils.getTargetFill()); aCell.setTextFill(ViewUtils.getTargetTextFill()); }
+        aCell.setFill(TARG_FILL); aCell.setTextFill(TARG_TEXT_FILL); }
     else if(aCell.getRow()%2==0) { aCell.setFill(_altPaint); aCell.setTextFill(Color.BLACK); }
     else { aCell.setFill(null); aCell.setTextFill(Color.BLACK); }
     
@@ -702,7 +711,8 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive ItemKey
+    // Archive RowHeight, ItemKey
+    if(isRowHeightSet()) e.add(RowHeight_Prop, getRowHeight());
     if(getItemKey()!=null) e.add(ItemKey_Prop, getItemKey());
     
     // Return element
@@ -717,7 +727,8 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unarchive basic view attributes
     super.fromXMLView(anArchiver, anElement);
     
-    // Unarchive ItemKey
+    // Unarchive RowHeight, ItemKey
+    if(anElement.hasAttribute(RowHeight_Prop)) setRowHeight(anElement.getAttributeIntValue(RowHeight_Prop));
     if(anElement.hasAttribute(ItemKey_Prop)) setItemKey(anElement.getAttributeValue(ItemKey_Prop));
 }
 

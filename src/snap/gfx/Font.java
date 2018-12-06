@@ -29,12 +29,14 @@ public class Font implements XMLArchiver.Archivable {
     static public Font Arial10;
     static public Font Arial11;
     static public Font Arial12;
+    static public Font Arial13;
     static public Font Arial14;
+    static public Font Arial16;
     
 // Moved class initialization here because we were getting some odd init errors with bogus stacktraces
 static {
-    try { Arial10 = new Font("Arial",10d); Arial11 = Arial10.deriveFont(11d);
-        Arial12 = Arial10.deriveFont(12d); Arial14 = Arial10.deriveFont(14d); }
+    try { Arial10 = new Font("Arial",10d); Arial11 = Arial10.deriveFont(11d); Arial12 = Arial10.deriveFont(12d);
+    Arial13 = Arial10.deriveFont(13d); Arial14 = Arial10.deriveFont(14d); Arial16 = Arial10.deriveFont(16d); }
     catch(Throwable t) { t.printStackTrace(); throw new RuntimeException(t); }
 }
 
