@@ -76,7 +76,7 @@ public double getRowHeight()  { return getTable().getRowHeight(); }
 public int getColIndex()  { return ArrayUtils.indexOfId(getTable().getCols(), this); }
 
 /**
- * Called to set method for rendering.
+ * Override to return table cell configure if one isn't set for col.
  */
 public Consumer <ListCell<T>> getCellConfigure()
 {

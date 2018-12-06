@@ -4,9 +4,7 @@
 package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
-import snap.gfx.Color;
-import snap.gfx.Insets;
-import snap.gfx.Paint;
+import snap.gfx.*;
 import snap.util.*;
 
 /**
@@ -32,8 +30,14 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     // Row height
     int                     _rowHeight = 24;
 
-    // The Cell Configure method
+    // An optional method hook to configure cell
     Consumer <ListCell<T>>  _cellConf;
+    
+    // An optional method hook to configure cell for editing
+    Consumer <ListCell<T>>  _cellConfEdit;
+    
+    // Whether table cells are editable
+    boolean                 _editable;
     
     // The SplitView to hold columns
     SplitView               _split = new SplitView();
@@ -45,6 +49,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     ParentView              _header;
     
     // Constants
+    public static final String Editable_Prop = "Editable";
     static final Paint DIVIDER_FILL = new Color("#EEEEEE");
     static final Paint DIVIDER_FILLH = new Color("#E0E0E0");
     
@@ -297,14 +302,43 @@ public void setRowHeight(int aValue)
 }
 
 /**
- * Called to set method for rendering.
+ * Called to set method to configure cell for rendering.
  */
 public Consumer<ListCell<T>> getCellConfigure()  { return _cellConf; }
 
 /**
- * Called to set method for rendering.
+ * Called to set method to configure cell for rendering.
  */
 public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
+
+/**
+ * Called to set method to configure cell for editing.
+ */
+public Consumer<ListCell<T>> getCellConfigureEdit()  { return _cellConfEdit; }
+
+/**
+ * Called to set method to configure cell for editing.
+ */
+public void setCellConfigureEdit(Consumer<ListCell<T>> aCC)  { _cellConfEdit = aCC; }
+
+/**
+ * Returns whether table cells are editable.
+ */
+public boolean isEditable()  { return _editable; }
+
+/**
+ * Sets whether table cells are editable.
+ */
+public void setEditable(boolean aValue)
+{
+    // If already set, just return
+    if(aValue==isEditable()) return;
+    
+    // Set value, fire prop change and enable MouseRelease events
+    firePropChange(Editable_Prop, _editable, _editable = aValue);
+    if(aValue) enableEvents(MouseRelease);
+    else disableEvents(MouseRelease);
+}
 
 /**
  * Returns the HeaderView.
@@ -423,6 +457,52 @@ protected void layoutDeepImpl()
     _scroll.layoutDeep();
     _header.setWidth(_scroll.getScroller().getWidth());
     _header.layoutDeep();
+}
+
+/**
+ * Handle events.
+ */
+public void processEvent(ViewEvent anEvent)
+{
+    // Handle Mouse double-click
+    if(anEvent.isMouseClick() && anEvent.getClickCount()==2 && isEditable()) {
+        ListCell cell = getCellAtXY(anEvent.getX(), anEvent.getY());
+        if(cell!=null)
+            configureCellEdit(cell);
+    }
+}
+
+/**
+ * Returns the column at given X coord.
+ */
+public TableCol <T> getColAtX(double aX)
+{
+    for(TableCol col : getCols())
+        if(aX>=col.getX() && aX<=col.getMaxX())
+            return col;
+    return null;
+}
+
+/**
+ * Returns the cell at given Y coord.
+ */
+public ListCell <T> getCellAtXY(double aX, double aY)
+{
+    TableCol <T> col = getColAtX(aX); if(col==null) return null;
+    Point pnt = col.parentToLocal(aX, aY, this);
+    return col.getCellAtY(pnt.y);
+}
+
+/**
+ * Called to configure a cell for edit.
+ */
+protected void configureCellEdit(ListCell <T> aCell)
+{
+    if(getCellConfigureEdit()!=null)
+        getCellConfigureEdit().accept(aCell);
+    else {
+        aCell.setEditing(true);
+    }
 }
 
 /**

@@ -47,8 +47,8 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     // The index of the item currently being targeted
     int                   _targetedIndex = -1;
     
-    // The paint for targeted Fill and TextFill
-    Paint                 _targTextFill = Color.WHITE;
+    // Whether list is editable
+    boolean               _editable;
     
     // The index of the first visible cell
     int                   _cellStart = -1, _cellEnd;
@@ -69,6 +69,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     private static Paint ALTERNATE_GRAY = Color.get("#F8F8F8");
     
     // Constants for properties
+    public static final String Editable_Prop = "Editable";
     public static final String CellPadding_Prop = "CellPadding";
     public static final String ItemKey_Prop = "ItemKey";
 
@@ -314,6 +315,20 @@ protected void setTargetedIndex(int anIndex)
 }
 
 /**
+ * Returns whether list cells are editable.
+ */
+public boolean isEditable()  { return _editable; }
+
+/**
+ * Sets whether list cells are editable.
+ */
+public void setEditable(boolean aValue)
+{
+    if(aValue==isEditable()) return;
+    firePropChange(Editable_Prop, _editable, _editable = aValue);
+}
+
+/**
  * Called to update items in list that have changed.
  */
 public void updateItems(T ... theItems)
@@ -350,6 +365,19 @@ protected void updateCellAt(int anIndex)
  * Returns the cell at given index.
  */
 public ListCell <T> getCell(int anIndex)  { return (ListCell)getChild(anIndex); }
+
+/**
+ * Returns the cell for given Y.
+ */
+public ListCell <T> getCellAtY(double aY)
+{
+    for(View cell : getChildren()) {
+        if(!(cell instanceof ListCell)) continue;
+        if(aY>=cell.getY() && aY<=cell.getMaxY())
+            return (ListCell)cell;
+    }
+    return null;
+}
 
 /**
  * Returns the cell at given index.
@@ -484,7 +512,7 @@ protected void configureCell(ListCell <T> aCell)
         aCell.setFill(ViewUtils.getTargetFill()); aCell.setTextFill(ViewUtils.getTargetTextFill()); }
     else if(aCell.getRow()%2==0) { aCell.setFill(_altPaint); aCell.setTextFill(Color.BLACK); }
     else { aCell.setFill(null); aCell.setTextFill(Color.BLACK); }
-
+    
     // If cell configure set, call it
     Consumer cconf = getCellConfigure();
     if(cconf!=null) cconf.accept(aCell);

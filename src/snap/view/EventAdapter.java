@@ -115,4 +115,9 @@ public void removeHandler(EventListener aLsnr, ViewEvent.Type ... theTypes)
         _handlers = ArrayUtils.remove(_handlers, aLsnr);
 }
 
+/**
+ * Clears the adapter.
+ */
+public void clear()  { _bitset.clear(); _types.clear(); _filters = _handlers = _emptyLsnrs; }
+
 }

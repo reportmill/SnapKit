@@ -10,13 +10,13 @@ import snap.util.*;
  */
 public class Label extends ParentView {
     
-    // The text node
+    // The view to show text string
     StringView      _strView;
     
-    // The graphics node
+    // The graphics view
     View            _graphic;
     
-    // The graphics node after text
+    // The graphics view after text
     View            _graphicAfter;
     
     // The image name, if loaded from local resource
@@ -63,10 +63,12 @@ public String getText()  { return _strView!=null? _strView.getText() : null; }
  */
 public void setText(String aValue)
 {
-    if(SnapUtils.equals(aValue,getText())) return;
+    String oldVal = getText(); if(SnapUtils.equals(aValue, oldVal)) return;
+    
     if(aValue==null) { setStringView(null); return; }
     StringView sview = getStringView(true);
     sview.setText(aValue);
+    firePropChange(Text_Prop, oldVal, aValue);
 }
 
 /**
@@ -81,8 +83,7 @@ public void setImage(Image anImage)
 {
     Image image = getImage(); if(anImage==image) return;
     if(_graphic instanceof ImageView) ((ImageView)_graphic).setImage(anImage);
-    else setGraphic(new ImageView(anImage));
-    firePropChange("Image", image, anImage);
+    else setGraphic(new ImageView(anImage)); //firePropChange("Image", image, anImage); delete soon
 }
 
 /**
@@ -97,8 +98,7 @@ public void setImageAfter(Image anImage)
 {
     Image image = getImage(); if(anImage==image) return;
     if(_graphicAfter instanceof ImageView) ((ImageView)_graphicAfter).setImage(anImage);
-    else setGraphicAfter(new ImageView(anImage));
-    firePropChange("Image", image, anImage);
+    else setGraphicAfter(new ImageView(anImage)); //firePropChange("Image", image, anImage); delete soon
 }
 
 /**
@@ -260,9 +260,18 @@ public TextField getEditor()
     editor.setFill(new Color(1,.95));
     editor.setBorder(new Color(1,.3,.3,.5), 1); editor.getBorder().setInsets(Insets.EMPTY);
     editor.setPadding(2,2,2,2); editor.setAlign(getAlign().getHPos()); editor.setFont(getFont());
-    editor.addEventHandler(e -> setEditing(false), Action);
+    editor.addEventHandler(e -> editorFiredAction(), Action);
     editor.addPropChangeListener(pc -> { if(!editor.isFocused()) setEditing(false); }, Focused_Prop);
     return _editor = editor;
+}
+
+/**
+ * Called when editor fires action.
+ */
+void editorFiredAction()
+{
+    setEditing(false);
+    fireActionEvent();
 }
 
 /**
