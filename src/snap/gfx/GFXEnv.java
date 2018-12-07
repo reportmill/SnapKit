@@ -32,7 +32,7 @@ public static void setEnv(GFXEnv anEnv)  { _env = anEnv; }
 public static void setDefaultEnv()
 {
     // If platform is Cheerp, try to install Cheerp
-    if(SnapUtils.getPlatform()==SnapUtils.Platform.CHEERP) {
+    /*if(SnapUtils.getPlatform()==SnapUtils.Platform.CHEERP) {
         Class cls = null; try { cls = Class.forName("snapcj.CJEnv"); }
         catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't find snapcj.CJEnv"); }
         if(cls!=null) try { cls.getMethod("set").invoke(null); return; }
@@ -49,7 +49,7 @@ public static void setDefaultEnv()
     
     // Try Swing
     try { Class.forName("snap.swing.AWTEnv").getMethod("set").invoke(null); }
-    catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set AWTEnv " + e); }
+    catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set AWTEnv " + e); }*/
 }
 
 /**
