@@ -259,4 +259,16 @@ public void showLineNumberPanel()
     requestFocus(getTextArea());
 }
 
+/**
+ * Silly test.
+ */
+public static void main(String args[])
+{
+    TextPane tp = new TextPane();
+    tp.getTextArea().setPrefSize(800,600);
+    //String text = WebURL.getURL(TextPane.class, "TextPane.snp").getText();
+    //tp.getTextArea().setText(text);
+    tp.setWindowVisible(true);
+}
+
 }
