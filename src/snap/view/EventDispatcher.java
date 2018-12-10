@@ -316,7 +316,8 @@ void trackDebugKeys(ViewEvent anEvent)
 // A beep method to beep once for true or twice for false.
 void beep(boolean aFlag)
 {
-    ViewUtils.beep(); if(!aFlag) { try { Thread.sleep(300); } catch(Exception e) { } ViewUtils.beep(); }
+    ViewUtils.beep();
+    if(!aFlag) ViewUtils.runDelayed(() -> ViewUtils.beep(), 300, true);
 }
 
 // Returns the current click count
