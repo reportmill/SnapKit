@@ -254,7 +254,7 @@ public static <T> T clone(T anObj)
     
     // Handle Cloneable: Invoke clone method with reflection
     if(anObj instanceof Cloneable)
-        try { return (T)anObj.getClass().getMethod("clone").invoke(anObj); }
+        try { return (T)ClassUtils.getMethodOrThrow(anObj.getClass(), "clone").invoke(anObj); }
         catch(Throwable t) { }
         
     // If all else fails, just return given object

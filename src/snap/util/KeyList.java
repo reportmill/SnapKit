@@ -17,27 +17,16 @@ public class KeyList extends AbstractList {
     // The key
     String           _key;
     
-    // An optional key to allow de-referencing of object attributes
-    String           _subkey;
-    
     // The count method
     Method           _sizeMethod;
     
     // The get method
     Method           _getMethod;
     
-    // The direct list of objects derived from plural of key (fallback for size & get method if missing)
-    List             _list;
-    
 /**
- * Creates a new key list. 
+ * Creates a KeyList. 
  */
-public KeyList(Object anObj, String aKey)  { this(anObj, aKey, null); }
-
-/**
- * Creates a new key list. 
- */
-public KeyList(Object anObj, String aKey, String aSubkey)
+public KeyList(Object anObj, String aKey)
 {
     // Set object
     _object = anObj;
@@ -65,38 +54,28 @@ public KeyList(Object anObj, String aKey, String aSubkey)
     }
     
     // Get size method with getKeyCount
-    try { _sizeMethod = objClass.getMethod("get" + _key + "Count"); }
+    try { _sizeMethod = getMethodOrThrow(objClass, "get" + _key + "Count"); }
     catch(NoSuchMethodException e) { }
     catch(SecurityException e) { }
     
     // If not found, try again with getKeySize
     if(_sizeMethod==null)
-        try { _sizeMethod = objClass.getMethod("get" + _key + "Size"); }
+        try { _sizeMethod = getMethodOrThrow(objClass, "get" + _key + "Size"); }
         catch(NoSuchMethodException e) { }
         catch(SecurityException e) { }
         
-    // If size method is null, try to find list directly
-    if(_sizeMethod==null) {
-        try { _list = (List)anObj.getClass().getMethod("get" + _key + "s").invoke(anObj); }
-        catch(InvocationTargetException e) { throw new RuntimeException(e); }
-        catch(Exception e) { }
-    }
-
     // If still not found, panic
-    if(_sizeMethod==null && _list==null)
+    if(_sizeMethod==null)
         throw new InvalidKeyListException("Couldn't find get" + _key + "Size/Count method");
     
     // Get get method
-    try { _getMethod = objClass.getMethod("get" + _key, int.class); }
+    try { _getMethod = getMethodOrThrow(objClass, "get" + _key, int.class); }
     catch(NoSuchMethodException e) { }
     catch(SecurityException e) { }
     
     // If still not found, panic
-    if(_getMethod==null && _list==null)
+    if(_getMethod==null)
         throw new InvalidKeyListException("Couldn't find get" + _key + " method");
-    
-    // Set subkey
-    _subkey = aSubkey;
 }
 
 /**
@@ -105,13 +84,9 @@ public KeyList(Object anObj, String aKey, String aSubkey)
 public int size()
 {
     // If size method is available, evaluate
-    if(_sizeMethod!=null)
-        try { return ((Number)_sizeMethod.invoke(_object, new Object[0])).intValue(); }
-        catch(Exception e) { throw new InvalidKeyListException(_sizeMethod.getName() + ": " +
-            e.getClass().getSimpleName() + " " + e.getCause().getMessage()); }
-    
-    // Otherwise return list size (shouldn't be possible to be null)
-    return _list.size();
+    try { return ((Number)_sizeMethod.invoke(_object)).intValue(); }
+    catch(Exception e) { throw new InvalidKeyListException(_sizeMethod.getName() + ": " +
+        e.getClass().getSimpleName() + " " + e.getCause().getMessage()); }
 }
 
 /**
@@ -120,23 +95,16 @@ public int size()
 public Object get(int anIndex)
 {
     // Declare variable for object
-    Object object = null;
+    Object obj = null;
     
     // If get method is available, evaluate
     if(_getMethod!=null)
-        try { object = _getMethod.invoke(_object, anIndex); }
+        try { obj = _getMethod.invoke(_object, anIndex); }
         catch(Exception e) { throw new InvalidKeyListException(_getMethod.getName() + ": " +
             e.getClass().getSimpleName() + " " + e.getCause().getMessage()); }
         
-    // Otherwise get list object (shouldn't be possible to be null)
-    else object = _list.get(anIndex);
-    
-    // If subkey, try to evaluate
-    if(_subkey!=null)
-        object = Key.getValue(object, _subkey);
-    
     // Return object
-    return object;
+    return obj;
 }
 
 /**
@@ -149,7 +117,7 @@ public Object set(int anIndex, Object anObj)
     
     // Try to find set method (catch and ignore acceptable exceptions)
     for(Class oclass=objClass; oclass!=null; oclass=oclass.getSuperclass()) try {
-        Method set = _object.getClass().getMethod("set" + _key, int.class, oclass);
+        Method set = getMethodOrThrow(_object, "set" + _key, int.class, oclass);
         return set.invoke(_object, anIndex, anObj);
     }
     
@@ -161,7 +129,7 @@ public Object set(int anIndex, Object anObj)
     
     // If not found, try args in other order
     for(Class oclass=objClass; oclass!=null; oclass=oclass.getSuperclass()) try {
-        Method set = _object.getClass().getMethod("set" + _key, oclass, int.class);
+        Method set = getMethodOrThrow(_object, "set" + _key, oclass, int.class);
         return set.invoke(_object, anObj, anIndex);
     }
     
@@ -185,7 +153,7 @@ public void add(int anIndex, Object anObj)
     
     // Try to find add method (catch and ignore acceptable exceptions)
     for(Class oclass=objClass; oclass!=null; oclass=oclass.getSuperclass()) try {
-        Method add = _object.getClass().getMethod("add" + _key, int.class, oclass);
+        Method add = getMethodOrThrow(_object, "add" + _key, int.class, oclass);
         add.invoke(_object, anIndex, anObj);
         return;
     }
@@ -198,7 +166,7 @@ public void add(int anIndex, Object anObj)
     
     // If not found, try args in other order
     for(Class oclass=objClass; oclass!=null; oclass=oclass.getSuperclass()) try {
-        Method add = _object.getClass().getMethod("add" + _key, oclass, int.class);
+        Method add = getMethodOrThrow(_object, "add" + _key, oclass, int.class);
         add.invoke(_object, anObj, anIndex);
         return;
     }
@@ -220,7 +188,7 @@ public Object remove(int anIndex)
 {
     // Try to find remove method (catch and ignore acceptable exceptions)
     try {
-        Method remove = _object.getClass().getMethod("remove" + _key, int.class);
+        Method remove = getMethodOrThrow(_object, "remove" + _key, int.class);
         return remove.invoke(_object, anIndex);
     }
     catch(NoSuchMethodException e) { }
@@ -233,22 +201,19 @@ public Object remove(int anIndex)
 }
 
 /**
- * Creates a new object for this list.
+ * Class.getMethod wrapper to isolate call to one place.
  */
-public Object create()
+static Method getMethodOrThrow(Object anObj, String aName, Class ... theClasses) throws NoSuchMethodException
 {
-    // Try to find create method (catch and ignore acceptable exceptions)
-    try {
-        Method create = _object.getClass().getMethod("create" + _key);
-        return create.invoke(_object, (Object[])null);
-    }
-    catch(NoSuchMethodException e) { }
-    catch(SecurityException e) { }
-    catch(InvocationTargetException e) { throw new InvalidKeyListException(e.getMessage(), e); }
-    catch(IllegalAccessException e) { throw new InvalidKeyListException(e.getMessage(), e); }
-    
-    // If method not found, throw UnsupportedOperationException    
-    throw new UnsupportedOperationException("No " + _object.getClass() + "." + "create" + _key + "() method found.");
+    return getMethodOrThrow(anObj.getClass(), aName, theClasses);
+}
+
+/**
+ * Class.getMethod wrapper to isolate call to one place.
+ */
+static Method getMethodOrThrow(Class aClass, String aName, Class ... theClasses) throws NoSuchMethodException
+{
+    return ClassUtils.getMethodOrThrow(aClass, aName, theClasses);
 }
 
 /**

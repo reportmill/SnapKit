@@ -56,6 +56,22 @@ public static Class getClass(String aName, ClassLoader aClassLoader)
 }
 
 /**
+ * Class.getMethod wrapper to isolate call to one place.
+ */
+public static Method getMethodOrThrow(Object anObj, String aName, Class ... theClasses) throws NoSuchMethodException
+{
+    return getMethodOrThrow(anObj.getClass(), aName, theClasses);
+}
+
+/**
+ * Class.getMethod wrapper to isolate call to one place.
+ */
+public static Method getMethodOrThrow(Class aClass, String aName, Class ... theClasses) throws NoSuchMethodException
+{
+    return aClass.getMethod(aName, theClasses);
+}
+
+/**
  * Returns whether name is a primitive class name.
  */
 public static boolean isPrimitiveClassName(String aName)  { return getPrimitiveClass(aName)!=null; }

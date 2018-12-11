@@ -246,7 +246,7 @@ public static class KeyAccessor {
     Field     _field;
     
     // A bogus method to act as void
-    static Method  _nullMethod = ClassUtils.getMethod(String.class, "toString");
+    static Method  _nullMethod = getMethod(String.class, "toString");
     
     // Some constants
     public static enum Type { Map, Methods, Field, Enum, ListKey, Unknown };
@@ -360,18 +360,15 @@ public static class KeyAccessor {
         
         // Look for "get" method
         if(_getMethod==null)
-            try { _getMethod = _class.getMethod("get" + _key); }
-            catch (Exception t) { }
+            _getMethod = getMethod(_class, "get" + _key);
         
         // Look for "is" method
         if(_getMethod==null)
-            try { _getMethod = _class.getMethod("is" + _key); }
-            catch(Exception e) { }
+            _getMethod = getMethod(_class, "is" + _key);
             
         // Look for method as given by raw key
         if(_getMethod==null)
-            try { _getMethod = _class.getMethod(_rawKey); }
-            catch(Exception e) { }
+            _getMethod = getMethod(_class, _rawKey);
         
         // If method was found, set type to Method (3) and return
         if(_getMethod!=null) {
@@ -380,14 +377,11 @@ public static class KeyAccessor {
         }
     
         // See if object responds to valueForKey(String)
-        try {
-            _getMethod = _class.getMethod("valueForKey", String.class);
-            if(_getMethod!=null) {
-                _getMethodArgs = new Object[] { _rawKey };
-                return _getMethod;
-            }
+        _getMethod = getMethod(_class, "valueForKey", String.class);
+        if(_getMethod!=null) {
+            _getMethodArgs = new Object[] { _rawKey };
+            return _getMethod;
         }
-        catch(Exception e) { }
 
         // Return _getMethod
         return _getMethod;
@@ -461,12 +455,16 @@ public static class KeyAccessor {
         Class argClass = getMethod.getReturnType();
         
         // Try to get a method of the same name, with no arguments
-        try { return _setMethod = _class.getMethod(key, argClass); }
+        try { return _setMethod = ClassUtils.getMethodOrThrow(_class, key, argClass); }
         catch(Exception e) { _setMethod = _nullMethod; throw e; }
     }
 }
 
-/** NoSetMethodException. */
-public static class NoSetMethodException extends Exception { }
+/** Class.getMethod wrapper to isolate call to one place. */
+static Method getMethod(Class aClass, String aName, Class ... theClasses)
+{
+    try { return ClassUtils.getMethodOrThrow(aClass, aName, theClasses); }
+    catch(NoSuchMethodException e) { return null; }
+}
 
 }

@@ -4,7 +4,7 @@
 package snap.view;
 import java.util.*;
 import snap.gfx.Rect;
-import snap.util.SnapUtils;
+import snap.util.*;
 import snap.web.WebURL;
 
 /**
@@ -50,7 +50,7 @@ public static void setDefaultEnv()
     if(SnapUtils.getPlatform()==SnapUtils.Platform.CHEERP) {
         Class cls = null; try { cls = Class.forName("snapcj.CJViewEnv"); } catch(Exception e) { }
         if(cls==null) System.err.println("ViewEnv.setDefaultEnv: Can't find snapcj.CJViewEnv");
-        if(cls!=null) try { cls.getMethod("set").invoke(null); return; }
+        if(cls!=null) try { ClassUtils.getMethodOrThrow(cls, "set").invoke(null); return; }
         catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set CJViewEnv: " + e); }
     }
     
@@ -58,12 +58,13 @@ public static void setDefaultEnv()
     if(SnapUtils.getPlatform()==SnapUtils.Platform.TEAVM) {
         Class cls = null; try { cls = Class.forName("snaptea.TV"); } catch(Exception e) { }
         if(cls==null) System.err.println("ViewEnv.setDefaultEnv: Can't find snaptea.TV");
-        else try { cls.getMethod("set").invoke(null); return; }
+        else try { ClassUtils.getMethodOrThrow(cls, "set").invoke(null); return; }
         catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set snaptea.TV: " + e); }
     }
     
     // Try Swing
-    try { Class.forName("snap.swing.SwingViewEnv").getMethod("set").invoke(null); }
+    Class cls = null; try { cls = Class.forName("snap.swing.SwingViewEnv"); } catch(Exception e) { }
+    try { ClassUtils.getMethodOrThrow(cls, "set").invoke(null); }
     catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set SwingViewEnv: " + e); }
 }
 
