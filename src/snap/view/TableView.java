@@ -43,13 +43,13 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     boolean                 _editable;
     
     // The SplitView to hold columns
-    SplitView               _split = new SplitView();
+    SplitView               _split;
     
     // The ScrollView to hold SplitView+Columns
-    ScrollView              _scroll = new ScrollView(_split);
+    ScrollGroup             _scrollGroup;
     
     // The view to hold header
-    ParentView              _header;
+    SplitView               _header;
     
     // Constants
     public static final String CellPadding_Prop = "CellPadding";
@@ -67,24 +67,28 @@ public TableView()
     enableEvents(Action);
     setFocusable(true); setFocusWhenPressed(true);
     
-    // Configure Columns SplitView and ScrollView and add
-    _split.setBorder(null); _split.setGrowWidth(true); _split.setSpacing(2);
+    // Create/configure Columns SplitView and ScrollView and add
+    _split = new SplitView(); _split.setBorder(null); _split.setGrowWidth(true); _split.setSpacing(2);
     Divider div = _split.getDivider(); div.setFill(DIVIDER_FILL); div.setBorder(null); div.setReach(3);
-    setBorder(_scroll.getBorder()); _scroll.setBorder(null);
-    addChild(_scroll);
     
-    // Bind main Scroll.ScrollH to HeaderScroller (both ways)
-    Scroller scroller = _scroll.getScroller();
-    ViewUtils.bind(scroller, Scroller.ScrollH_Prop, getHeaderScroller(), true);
+    // Create/configure/add ScrollGroup
+    _scrollGroup = new ScrollGroup(_split);
+    setBorder(_scrollGroup.getBorder()); _scrollGroup.setBorder(null);
+    addChild(_scrollGroup);
     
     // Register PickList to notify when selection changes
     _items.addPropChangeListener(pc -> pickListSelChange(pc));
 }
 
 /**
+ * Returns the ScrollGroup.
+ */
+public ScrollGroup getScrollGroup()  { return _scrollGroup; }
+
+/**
  * Returns the ScrollView.
  */
-public ScrollView getScrollView()  { return _scroll; }
+public ScrollView getScrollView()  { return _scrollGroup.getScrollView(); }
 
 /**
  * Returns the items.
@@ -229,7 +233,7 @@ public void addCol(TableCol aCol)
     ViewUtils.bind(aCol, PrefWidth_Prop, hdrBox, true);
     
     // Add Header Box to Header SplitView
-    SplitView hsplit = getHeaderSplitView();
+    SplitView hsplit = getHeaderView();
     hsplit.addItem(hdrBox);
     
     // Configure split dividers
@@ -257,7 +261,7 @@ public TableCol removeCol(int anIndex)
 public int removeCol(TableCol aCol)
 {
     int ind = _split.removeItem(aCol);
-    if(ind>=0) getHeaderSplitView().removeItem(ind);
+    if(ind>=0) getHeaderView().removeItem(ind);
     return ind;
 }
 
@@ -280,8 +284,7 @@ public void setShowHeader(boolean aValue)
     firePropChange("ShowHeader", _showHeader, _showHeader = aValue);
     
     // Add/remove header
-    if(aValue) addChild(_header,0);
-    else removeChild(_header);
+    _scrollGroup.setTopView(aValue? getHeaderView() : null);
 }
 
 /**
@@ -407,37 +410,18 @@ public void setEditable(boolean aValue)
 /**
  * Returns the HeaderView.
  */
-public ParentView getHeaderView()  { return _header!=null? _header : (_header=createHeaderView()); }
+public SplitView getHeaderView()  { return _header!=null? _header : (_header=createHeaderView()); }
 
 /**
  * Returns the HeaderView.
  */
-protected ParentView createHeaderView()
+protected SplitView createHeaderView()
 {
     SplitView split = new SplitView(); split.setGrowWidth(true); split.setBorder(null);
     split.setSpacing(_split.getSpacing());
     Divider div = split.getDivider(); div.setFill(DIVIDER_FILLH); div.setBorder(null); div.setReach(3);
-    
-    Scroller scroll = new Scroller(); scroll.setContent(split);
-    LineView line = new LineView(0,.5,10,.5); line.setPrefHeight(1); line.setBorder(Color.LIGHTGRAY,1);
-    ColView vbox = new ColView(); vbox.setFillWidth(true);
-    vbox.setChildren(scroll,line);
-    return vbox;
+    return split;
 }
-
-/**
- * Returns the Header ScrollView.
- */
-protected Scroller getHeaderScroller()
-{
-    ColView vbox = (ColView)getHeaderView();
-    return (Scroller)vbox.getChild(0);
-}
-
-/**
- * Returns the HeaderView.
- */
-protected SplitView getHeaderSplitView()  { return (SplitView)getHeaderScroller().getContent(); }
 
 /**
  * Returns the cell at given row and col.
@@ -532,11 +516,7 @@ public void setHeight(double aValue)
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)
-{
-    //double pw = 0; for(TableCol tcol : getCols()) pw += tcol.getPrefWidth(); return pw;
-    return _scroll.getPrefWidth(aH);
-}
+protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _scrollGroup, aH); }
 
 /**
  * Returns the preferred height.
@@ -551,29 +531,7 @@ protected double getPrefHeightImpl(double aW)
 /**
  * Override to layout children with VBox layout.
  */
-protected void layoutImpl()
-{
-    Insets ins = getInsetsAll();
-    double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
-    double hh = 0;
-    
-    // If Header, update bounds
-    if(isShowHeader()) { hh = _header.getPrefHeight();
-        _header.setBounds(x,y,_header.getWidth(),hh); }
-        
-    // Layout out scrollView
-    _scroll.setBounds(x,y+hh,w,h-hh);
-}
-
-/**
- * Override to sync header width with TableView.ScrollView.Scroller.
- */
-protected void layoutDeepImpl()
-{
-    _scroll.layoutDeep();
-    _header.setWidth(_scroll.getScroller().getWidth());
-    _header.layoutDeep();
-}
+protected void layoutImpl()  { BoxView.layout(this, _scrollGroup, null, true, true); }
 
 /**
  * Handle events.

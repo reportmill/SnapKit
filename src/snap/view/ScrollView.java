@@ -24,6 +24,10 @@ public class ScrollView extends HostView {
     
     // Constants
     static final Border SCROLL_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
+    public static final String ShowHBar_Prop = "ShowHBar";
+    public static final String ShowVBar_Prop = "ShowVBar";
+    public static final String HBarShowing_Prop = "HBarShowing";
+    public static final String VBarShowing_Prop = "VBarShowing";
     
 /**
  * Creates a new ScrollView.
@@ -116,7 +120,7 @@ public Boolean getShowHBar()  { return _showHBar; }
 /**
  * Sets whether to show horizontal scroll bar (null means 'as-needed').
  */
-public void setShowHBar(Boolean aValue)  { firePropChange("HBarPolicy", _showHBar, _showHBar=aValue); relayout(); }
+public void setShowHBar(Boolean aValue)  { firePropChange(ShowHBar_Prop, _showHBar, _showHBar=aValue); relayout(); }
 
 /**
  * Returns whether to show vertical scroll bar (null means 'as-needed').
@@ -126,7 +130,7 @@ public Boolean getShowVBar()  { return _showVBar; }
 /**
  * Returns whether to show vertical scroll bar (null means 'as-needed').
  */
-public void setShowVBar(Boolean aValue)  { firePropChange("VBarPolicy", _showVBar, _showVBar=aValue); relayout(); }
+public void setShowVBar(Boolean aValue)  { firePropChange(ShowVBar_Prop, _showVBar, _showVBar=aValue); relayout(); }
 
 /**
  * Returns whether HBar is showing.
@@ -142,6 +146,7 @@ protected void setHBarShowing(boolean aValue)
     ScrollBar hbar = getHBar();
     if(aValue) addChild(hbar);
     else removeChild(hbar);
+    firePropChange(HBarShowing_Prop, !aValue, aValue);
 }
 
 /**
@@ -158,6 +163,7 @@ protected void setVBarShowing(boolean aValue)
     ScrollBar vbar = getVBar();
     if(aValue) addChild(vbar);
     else removeChild(vbar);
+    firePropChange(VBarShowing_Prop, !aValue, aValue);
 }
 
 /**
