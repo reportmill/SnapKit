@@ -444,8 +444,9 @@ public int getRowAt(double aX, double aY)  { return (int)(aY/getRowHeight()); }
  */
 public TableCol <T> getColAtX(double aX)
 {
+    Point pnt = _split.parentToLocal(aX, 0, this);
     for(TableCol col : getCols())
-        if(aX>=col.getX() && aX<=col.getMaxX())
+        if(pnt.x>=col.getX() && pnt.x<=col.getMaxX())
             return col;
     return null;
 }
