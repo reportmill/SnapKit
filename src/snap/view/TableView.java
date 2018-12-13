@@ -19,7 +19,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     int                     _selCol;
     
     // Whether to show table header
-    boolean                 _showHeader;
+    boolean                 _showHeader, _showHeaderCol;
     
     // Whether to show horziontal/vertical grid lines
     boolean                 _showGridX, _showGridY;
@@ -50,6 +50,9 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     
     // The view to hold header
     SplitView               _header;
+    
+    // The header column
+    TableCol                _headerCol;
     
     // Constants
     public static final String CellPadding_Prop = "CellPadding";
@@ -107,6 +110,7 @@ public void setItems(List <T> theItems)
     _items.setAll(theItems);
     relayout(); relayoutParent(); repaint();
     for(TableCol tc : getCols()) tc.setItems(theItems);
+    if(_headerCol!=null) _headerCol.setItems(theItems);
     itemsChanged();
 }
 
@@ -288,6 +292,37 @@ public void setShowHeader(boolean aValue)
 }
 
 /**
+ * Returns whether to show header.
+ */
+public boolean isShowHeaderCol()  { return _showHeaderCol; }
+
+/**
+ * Sets whether to show header.
+ */
+public void setShowHeaderCol(boolean aValue)
+{
+    if(aValue==isShowHeaderCol()) return;
+    firePropChange("ShowHeaderCol", _showHeaderCol, _showHeaderCol = aValue);
+    
+    // Add/remove header
+    _scrollGroup.setLeftView(aValue? getHeaderCol() : null);
+    _scrollGroup.getCornerNW().setContent(aValue? getHeaderCol().getHeader() : null);
+}
+
+/**
+ * Returns the header col.
+ */
+public TableCol getHeaderCol()
+{
+    if(_headerCol!=null) return _headerCol;
+    _headerCol = new TableCol(); _headerCol._table = this;
+    _headerCol.setPickList(_items);
+    _headerCol.setCellPadding(getCellPadding());
+    _headerCol.setItems(getItems());
+    return _headerCol;
+}
+
+/**
  * Returns whether to show horizontal grid lines.
  */
 public boolean isShowGridX()  { return _showGridX; }
@@ -444,10 +479,20 @@ public int getRowAt(double aX, double aY)  { return (int)(aY/getRowHeight()); }
  */
 public TableCol <T> getColAtX(double aX)
 {
+    // Check normal columns
     Point pnt = _split.parentToLocal(aX, 0, this);
     for(TableCol col : getCols())
         if(pnt.x>=col.getX() && pnt.x<=col.getMaxX())
             return col;
+
+    // If header column is showing, check it
+    if(isShowHeaderCol()) { TableCol hdrCol = getHeaderCol();
+        pnt = hdrCol.parentToLocal(aX,0);
+        if(hdrCol.contains(aX,1))
+            return hdrCol;
+    }
+
+    // Return null, since column not found    
     return null;
 }
 
