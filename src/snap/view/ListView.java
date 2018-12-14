@@ -209,16 +209,6 @@ public Paint getAltPaint()  { return _listArea.getAltPaint(); }
 public void setAltPaint(Paint aPaint)  { _listArea.setAltPaint(aPaint); }
 
 /**
- * Returns whether to fire action on mouse release instead of press.
- */
-public boolean isFireActionOnRelease()  { return _listArea.isFireActionOnRelease(); }
-
-/**
- * Sets whether to fire action on mouse release instead of press.
- */
-public void setFireActionOnRelease(boolean aValue)  { _listArea.setFireActionOnRelease(aValue); }
-
-/**
  * Returns whether list shows visual cue for item under the mouse.
  */
 public boolean isTargeting()  { return _listArea.isTargeting(); }

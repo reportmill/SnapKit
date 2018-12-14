@@ -163,16 +163,6 @@ private Image getImage(T anItem)  { return _resolver.getImage(anItem); }
 private Image getBranchImage(T anItem)  { return _resolver.getBranchImage(anItem); }
 
 /**
- * Returns whether to fire action on mouse release instead of press.
- */
-public boolean isFireActionOnRelease()  { return _col0.isFireActionOnRelease(); }
-
-/**
- * Sets whether to fire action on mouse release instead of press.
- */
-public void setFireActionOnRelease(boolean aValue)  { _col0.setFireActionOnRelease(aValue); }
-
-/**
  * Returns the column count.
  */
 public int getColCount()  { return _colView.getChildCount(); }

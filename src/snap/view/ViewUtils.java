@@ -153,15 +153,15 @@ public static void runDelayed(Runnable aRun, int aDelay, boolean inAppThread)
  */
 public static void runOnMouseUp(Runnable aRun)
 {
+    // If not mouse down, just run later and return
+    if(!isMouseDown()) { runLater(aRun); return; }
+    
     // Add MouseUpRun (just return if already present)
     if(_mouseUpRuns.contains(aRun)) return; _mouseUpRuns.add(aRun);
     
     // Set MouseUpLsnr from shared (just return if already set)
     if(_mouseUpLsnr!=null) return; _mouseUpLsnr = _mouseUpLsnrShared;
         
-    // If not mouse down, complain
-    if(!isMouseDown()) System.err.println("ViewUtils.runOnMouseUp: Mouse not down");
-    
     // Get mouse down view (just return if none)
     View view = _lastMouseDown!=null? _lastMouseDown.getView() : null;
     if(view==null) { runLater(aRun); return; }

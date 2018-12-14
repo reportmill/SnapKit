@@ -25,8 +25,6 @@ public BrowserCol(BrowserView aBrsr)
     
     // Update some attribues
     setRowHeight(_browser.getRowHeight());
-    if(aBrsr.getColCount()>0) {
-        setFireActionOnRelease(aBrsr.isFireActionOnRelease()); }
     
     // Configure ScrollView
     ScrollView scroll = getScrollView();
