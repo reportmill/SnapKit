@@ -37,7 +37,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     Consumer <ListCell<T>>  _cellConf;
     
     // An optional method hook to configure cell for editing
-    Consumer <ListCell<T>>  _cellConfEdit;
+    Consumer <ListCell<T>>  _cellEditBegin, _cellEditEnd;
     
     // Whether table cells are editable
     boolean                 _editable;
@@ -54,6 +54,9 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     // The header column
     TableCol                _headerCol;
     
+    // A listener to 
+    PropChangeListener      _editEndLsnr;
+
     // Constants
     public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
@@ -173,7 +176,7 @@ public void selectRight()
 public void selectLeft()
 {
     int row = getSelRow(); if(row<0) row = 0;
-    int col = getSelCol()-1; if(col<0) { col = getColCount()-1; row = (row-1)%getRowCount(); }
+    int col = getSelCol()-1; if(col<0) { col = getColCount()-1; row = (row+getRowCount()-1)%getRowCount(); }
     setSelCell(row, col);
 }
 
@@ -209,7 +212,11 @@ public int getColCount()  { return _split.getItemCount(); }
 /**
  * Returns the column at given index.
  */
-public TableCol getCol(int anIndex)  { return (TableCol)_split.getItem(anIndex); }
+public TableCol getCol(int anIndex)
+{
+    if(anIndex==-1 && isShowHeaderCol()) return getHeaderCol();
+    return (TableCol)_split.getItem(anIndex);
+}
 
 /**
  * Returns the column at given index.
@@ -414,14 +421,24 @@ public Consumer<ListCell<T>> getCellConfigure()  { return _cellConf; }
 public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
 
 /**
- * Called to set method to configure cell for editing.
+ * Called to set method to start cell editing.
  */
-public Consumer<ListCell<T>> getCellConfigureEdit()  { return _cellConfEdit; }
+public Consumer<ListCell<T>> getCellEditBegin()  { return _cellEditBegin; }
 
 /**
- * Called to set method to configure cell for editing.
+ * Called to set method to start cell editing.
  */
-public void setCellConfigureEdit(Consumer<ListCell<T>> aCC)  { _cellConfEdit = aCC; }
+public void setCellEditBegin(Consumer<ListCell<T>> aCC)  { _cellEditBegin = aCC; }
+
+/**
+ * Called to set method to stop cell for editing.
+ */
+public Consumer<ListCell<T>> getCellEditEnd()  { return _cellEditEnd; }
+
+/**
+ * Called to set method to stop cell for editing.
+ */
+public void setCellEditEnd(Consumer<ListCell<T>> aCC)  { _cellEditEnd = aCC; }
 
 /**
  * Returns whether table cells are editable.
@@ -463,7 +480,7 @@ protected SplitView createHeaderView()
  */
 public ListCell <T> getCell(int aRow, int aCol)
 {
-    if(aRow<0 || aCol<0) return null;
+    if(aRow<0) return null; // || aCol<0
     TableCol col = getCol(aCol);
     ListCell <T> cell = col.getCell(aRow);
     return cell;
@@ -615,19 +632,31 @@ public void processEvent(ViewEvent anEvent)
 public void editCell(ListCell aCell)
 {
     if(aCell==null || !isEditable()) return;
-    configureCellEdit(aCell);
+    cellEditBegin(aCell);
 }
 
 /**
  * Called to configure a cell for edit.
  */
-protected void configureCellEdit(ListCell <T> aCell)
+protected void cellEditBegin(ListCell <T> aCell)
 {
-    if(getCellConfigureEdit()!=null)
-        getCellConfigureEdit().accept(aCell);
-    else {
-        aCell.setEditing(true);
-    }
+    // Call CellEditBegin (or just set Cell.Editing true)
+    if(getCellEditBegin()!=null)
+        getCellEditBegin().accept(aCell);
+    else aCell.setEditing(true);
+    
+    // Add listener to catch Cell.Editing false
+    aCell.addPropChangeListener(_editEndLsnr = pc -> cellEditEnd(aCell), Label.Editing_Prop);
+}
+
+/**
+ * Called when Cell.Editing set false to stop cell editing.
+ */
+protected void cellEditEnd(ListCell <T> aCell)
+{
+    aCell.removePropChangeListener(_editEndLsnr, Label.Editing_Prop); _editEndLsnr = null;
+    if(getCellEditEnd()!=null)
+        getCellEditEnd().accept(aCell);
 }
 
 /**

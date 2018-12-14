@@ -373,7 +373,7 @@ protected void updateCellAt(int anIndex)
 /**
  * Returns the cell at given index.
  */
-public ListCell <T> getCell(int anIndex)  { return (ListCell)getChild(anIndex); }
+public ListCell <T> getCell(int anIndex)  { return anIndex<getChildCount()? (ListCell)getChild(anIndex) : null; }
 
 /**
  * Returns the cell for given Y.

@@ -49,8 +49,12 @@ public class TextField extends ParentView {
     // The value of text on focus gained
     String                _focusGainedText;
     
+    // Whether text has been edited since last focus
+    boolean               _edited;
+
     // Constants for properties
     public static final String ColCount_Prop = "ColCount";
+    public static final String Edited_Prop = "Edited";
     public static final String PromptText_Prop = "PromptText";
     public static final String TextFill_Prop = "TextFill";
     
@@ -177,7 +181,7 @@ public Rect getTextBounds(boolean inBounds)
     }
     
     // Adjust for PromptText if set
-    if(_label.getStringView()!=null)
+    if(_label.isStringViewSet())
         tx += _label.getStringView().getX() + _label.getStringView().getTransX();
     
     // Adjust rect by alignment
@@ -267,12 +271,12 @@ protected void setFocused(boolean aValue)
     
     // If focus gained, set FocusedGainedValue and select all (if not from mouse press)
     if(aValue) {
-        _focusGainedText = getText();
+        _focusGainedText = getText(); _edited = false;
         if(!ViewUtils.isMouseDown()) selectAll();
     }
     
     // If focus lost and FocusGainedVal changed, fire action
-    else if(!SnapUtils.equals(_focusGainedText, getText()))
+    else if(isEdited())
         fireActionEvent();
 }
 
@@ -287,6 +291,10 @@ protected void textDidChange()
     // If PromptText present, update Label.StringView.Visible
     if(_promptText!=null) _label.getStringView().setVisible(length()==0);
     
+    // If focused and text has changed, updated Edited
+    if(isFocused() && !isEdited() && !SnapUtils.equals(getText(), _focusGainedText))
+        setEdited(true);
+    
     // Relayout parent and repaint
     relayoutParent(); repaint();
 }
@@ -296,8 +304,22 @@ protected void textDidChange()
  */
 public void fireActionEvent()
 {
-    _focusGainedText = getText();
+    _focusGainedText = getText(); _edited = false;
     super.fireActionEvent();
+}
+
+/**
+ * Returns whether text has been edited since last focus (while focused).
+ */
+public boolean isEdited()  { return _edited; }
+
+/**
+ * Sets whether text has been edited since last focus (while focused).
+ */
+protected void setEdited(boolean aValue)
+{
+    if(aValue==isEdited()) return;
+    firePropChange(Edited_Prop, _edited, _edited = aValue);
 }
 
 /**
@@ -830,8 +852,8 @@ public void escape(ViewEvent anEvent)
     if(!isFocused()) return;
     
     // If value has changed since focus gained, reset to original value
-    if(!SnapUtils.equals(getText(), _focusGainedText)) {
-        setText(_focusGainedText);
+    if(isEdited()) {
+        setText(_focusGainedText); setEdited(false);
         selectAll();
         if(anEvent!=null) anEvent.consume();
     }

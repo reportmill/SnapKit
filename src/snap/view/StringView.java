@@ -86,7 +86,7 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 protected double getPrefWidthImpl(double aH)
 {
     Insets ins = getInsetsAll(); double tw = getTextWidth();
-    return ins.left + tw + ins.right;
+    return tw + ins.getWidth();
 }
 
 /**
@@ -95,7 +95,7 @@ protected double getPrefWidthImpl(double aH)
 protected double getPrefHeightImpl(double aW)
 {
     Insets ins = getInsetsAll(); double th = getTextHeight();
-    return ins.top + th + ins.bottom;
+    return th + ins.getHeight();
 }
 
 /**

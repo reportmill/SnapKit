@@ -63,11 +63,12 @@ public String getText()  { return _strView!=null? _strView.getText() : null; }
  */
 public void setText(String aValue)
 {
+    // If value already set or setting null in label with no StringView, just return
     String oldVal = getText(); if(SnapUtils.equals(aValue, oldVal)) return;
+    if(aValue==null && !isStringViewSet()) return;
     
-    if(aValue==null) { setStringView(null); return; }
-    StringView sview = getStringView(true);
-    sview.setText(aValue);
+    // Set value and fire prop change
+    StringView sview = getStringView(); sview.setText(aValue);
     firePropChange(Text_Prop, oldVal, aValue);
 }
 
@@ -109,34 +110,25 @@ public Paint getTextFill()  { return _strView!=null? _strView.getTextFill() : nu
 /**
  * Sets the text fill.
  */
-public void setTextFill(Paint aPaint)  { getStringView(true).setTextFill(aPaint); }
+public void setTextFill(Paint aPaint)  { getStringView().setTextFill(aPaint); }
 
 /**
  * Returns the StringView.
  */
-public StringView getStringView()  { return _strView; }
+public boolean isStringViewSet()  { return _strView!=null; }
 
 /**
- * Returns the StringView with option to create if missing.
+ * Returns the StringView.
  */
-public StringView getStringView(boolean doCreate)
+public StringView getStringView()
 {
-    if(_strView!=null || !doCreate) return _strView;
-    StringView sview = new StringView(); sview.setGrowWidth(true); sview.setAlign(getAlign().getHPos());
-    setStringView(sview);
+    // If StringView already set, just return
+    if(_strView!=null) return _strView;
+    
+    // Create, configure, add StringView and return
+    _strView = new StringView(); _strView.setGrowWidth(true); _strView.setAlign(getAlign().getHPos());
+    addChild(_strView, getGraphic()!=null? 1 : 0);
     return _strView;
-}
-
-/**
- * Sets the text node.
- */
-protected void setStringView(StringView aStrView)
-{
-    View old = getStringView(); if(aStrView==old) return;
-    if(_strView!=null && _strView.getParent()!=null) removeChild(_strView);
-    _strView = aStrView;
-    if(_strView!=null) addChild(_strView, getGraphic()!=null? 1 : 0);
-    firePropChange(StringView_Prop, old, _graphic);
 }
 
 /**
@@ -231,7 +223,7 @@ public void setEditing(boolean aValue)
     // Handle set true
     if(aValue) {
         TextField editor = getEditor(); editor.setText(getText());
-        Rect bnds = getStringView(true).getBounds(); bnds.inset(-2); editor.setBounds(bnds);
+        Rect bnds = getStringView().getBounds(); bnds.inset(-2); editor.setBounds(bnds);
         addChild(editor); editor.requestFocus();
         getStringView().setPaintable(false);
     }
@@ -270,8 +262,8 @@ public TextField getEditor()
  */
 void editorFiredAction()
 {
-    setEditing(false);
     fireActionEvent();
+    setEditing(false);
 }
 
 /**
@@ -328,7 +320,7 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 public void setAlign(Pos aPos)
 {
     super.setAlign(aPos);
-    if(getStringView()!=null) getStringView().setAlign(aPos.getHPos());
+    if(isStringViewSet()) getStringView().setAlign(aPos.getHPos());
 }
 
 /**
