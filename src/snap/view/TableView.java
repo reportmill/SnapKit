@@ -37,7 +37,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     Consumer <ListCell<T>>  _cellConf;
     
     // An optional method hook to configure cell for editing
-    Consumer <ListCell<T>>  _cellEditBegin, _cellEditEnd;
+    Consumer <ListCell<T>>  _cellEditStart, _cellEditEnd;
     
     // Whether table cells are editable
     boolean                 _editable;
@@ -54,7 +54,10 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     // The header column
     TableCol                _headerCol;
     
-    // A listener to 
+    // A listener to watch for TableCol.Action event
+    EventListener           _colActionLsnr = e -> colFiredAction(e);
+    
+    // A listener to watch for Cell.Editing set to false
     PropChangeListener      _editEndLsnr;
 
     // Constants
@@ -254,6 +257,7 @@ public void addCol(TableCol aCol)
     // Replace column picklist with tableView picklist
     aCol.setPickList(_items);
     aCol.setCellPadding(getCellPadding());
+    aCol.addEventHandler(_colActionLsnr, Action);
 }
 
 /**
@@ -263,6 +267,7 @@ public TableCol removeCol(int anIndex)
 {
     TableCol col = getCol(anIndex);
     removeCol(col);
+    col.removeEventHandler(_colActionLsnr, Action);
     return col;
 }
 
@@ -423,12 +428,12 @@ public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
 /**
  * Called to set method to start cell editing.
  */
-public Consumer<ListCell<T>> getCellEditBegin()  { return _cellEditBegin; }
+public Consumer<ListCell<T>> getCellEditStart()  { return _cellEditStart; }
 
 /**
  * Called to set method to start cell editing.
  */
-public void setCellEditBegin(Consumer<ListCell<T>> aCC)  { _cellEditBegin = aCC; }
+public void setCellEditStart(Consumer<ListCell<T>> aCC)  { _cellEditStart = aCC; }
 
 /**
  * Called to set method to stop cell for editing.
@@ -536,7 +541,15 @@ public int getSelCol()  { return _selCol; }
 /**
  * Sets the selected column.
  */
-public void setSelCol(int anIndex)  { _selCol = anIndex; }
+public void setSelCol(int anIndex)
+{
+    // If already set, just return
+    if(anIndex==getSelCol()) return;
+    
+    // Set value
+    _selCol = anIndex;
+    fireActionEvent();
+}
 
 /**
  * Returns the selected cell.
@@ -551,29 +564,14 @@ public void setSelCell(int aRow, int aCol)
     // If already selected, just return
     if(aRow==getSelRow() && aCol==getSelCol()) return;
     
+    // Stop cell editing
+    editCellStop();
+    
     // Set selected column and row
     if(aCol<getColCount())
         setSelCol(aCol);
     if(aRow<getRowCount())
         setSelIndex(aRow);
-}
-
-/**
- * Override to reset cells.
- */
-public void setY(double aValue)
-{
-    if(aValue==getY()) return; super.setY(aValue);
-    for(TableCol tcol : getCols()) tcol.relayout();
-}
-
-/**
- * Override to reset cells.
- */
-public void setHeight(double aValue)
-{
-    if(aValue==getHeight()) return; super.setHeight(aValue);
-    for(TableCol tcol : getCols()) tcol.relayout();
 }
 
 /**
@@ -627,22 +625,41 @@ public void processEvent(ViewEvent anEvent)
 }
 
 /**
+ * Called when TableCol does fireActionEvent.
+ */
+protected void colFiredAction(ViewEvent anEvent)
+{
+    fireActionEvent();
+}
+
+/**
  * Called to edit given cell.
  */
 public void editCell(ListCell aCell)
 {
-    if(aCell==null || !isEditable()) return;
-    cellEditBegin(aCell);
+    if(aCell==null || !isEditable() || aCell.isEditing()) return;
+    cellEditStart(aCell);
+}
+
+/**
+ * Called to stop editing a cell.
+ */
+public void editCellStop()
+{
+    if(!isEditable()) return;
+    ListCell cell = getSelCell();
+    if(cell!=null && cell.isEditing())
+        cellEditEnd(cell);
 }
 
 /**
  * Called to configure a cell for edit.
  */
-protected void cellEditBegin(ListCell <T> aCell)
+protected void cellEditStart(ListCell <T> aCell)
 {
-    // Call CellEditBegin (or just set Cell.Editing true)
-    if(getCellEditBegin()!=null)
-        getCellEditBegin().accept(aCell);
+    // Call CellEditStart (or just set Cell.Editing true)
+    if(getCellEditStart()!=null)
+        getCellEditStart().accept(aCell);
     else aCell.setEditing(true);
     
     // Add listener to catch Cell.Editing false
@@ -657,6 +674,24 @@ protected void cellEditEnd(ListCell <T> aCell)
     aCell.removePropChangeListener(_editEndLsnr, Label.Editing_Prop); _editEndLsnr = null;
     if(getCellEditEnd()!=null)
         getCellEditEnd().accept(aCell);
+}
+
+/**
+ * Override to reset cells.
+ */
+public void setY(double aValue)
+{
+    if(aValue==getY()) return; super.setY(aValue);
+    for(TableCol tcol : getCols()) tcol.relayout();
+}
+
+/**
+ * Override to reset cells.
+ */
+public void setHeight(double aValue)
+{
+    if(aValue==getHeight()) return; super.setHeight(aValue);
+    for(TableCol tcol : getCols()) tcol.relayout();
 }
 
 /**

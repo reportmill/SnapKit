@@ -763,7 +763,8 @@ protected void keyTyped(ViewEvent anEvent)
     // If actual text entered, replace
     if(charDefined && !commandDown && !controlDown && !emacsDown) {
         replaceChars(keyChars);
-        hideCursor(); //anEvent.consume();
+        hideCursor();
+        anEvent.consume();
     }
     
     // If alt-TAB or alt-ENTER

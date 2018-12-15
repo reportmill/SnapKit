@@ -262,8 +262,8 @@ public TextField getEditor()
  */
 void editorFiredAction()
 {
-    fireActionEvent();
     setEditing(false);
+    fireActionEvent();
 }
 
 /**
