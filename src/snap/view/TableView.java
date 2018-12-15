@@ -73,7 +73,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
 public TableView()
 {
     // Enable Action event for selection change
-    enableEvents(Action);
+    enableEvents(Action, KeyPress);
     setFocusable(true); setFocusWhenPressed(true);
     
     // Create/configure Columns SplitView and ScrollView and add
@@ -197,6 +197,7 @@ protected void pickListSelChange(PropChange aPC)
     
     // Scroll selection to visible
     //if(isShowing()) scrollSelToVisible();
+    repaint();
 }
 
 /**
@@ -549,6 +550,7 @@ public void setSelCol(int anIndex)
     // Set value
     _selCol = anIndex;
     fireActionEvent();
+    repaint();
 }
 
 /**
@@ -606,11 +608,14 @@ public void processEvent(ViewEvent anEvent)
     }
     
     // Handle KeyPress
-    else if(anEvent.isKeyPress() && isEditable()) {
+    else if(anEvent.isKeyPress()) {
         int kcode = anEvent.getKeyCode();
         switch(kcode) {
             case KeyCode.UP: selectUp(); anEvent.consume(); break;
             case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
+            case KeyCode.LEFT: selectLeft(); anEvent.consume(); break;
+            case KeyCode.RIGHT: selectRight(); anEvent.consume(); break;
+            case KeyCode.TAB: if(anEvent.isShiftDown()) selectLeft(); else selectRight(); anEvent.consume(); break;
             default: {
                 char c = anEvent.getKeyChar();
                 boolean printable = Character.isJavaIdentifierPart(c); // Lame
@@ -623,6 +628,31 @@ public void processEvent(ViewEvent anEvent)
         }
     }
 }
+
+/**
+ * Override to paint highlight for selected cell.
+ */
+protected void paintAbove(Painter aPntr)
+{
+    ListCell cell = getSelCell(); if(cell==null) return;
+    Rect bnds = cell.localToParent(cell.getBoundsLocal(), this).getBounds();
+    Image img = getFocusImage(bnds);
+    aPntr.drawImage(img, bnds.x-1, bnds.y-1);
+}
+
+/**
+ * A fuzzy cell border image to highlight cell.
+ */
+public Image getFocusImage(Rect aRect)
+{
+    if(_selImg!=null && _selImg.getWidth()==aRect.width+2 && _selImg.getHeight()==aRect.height+2) return _selImg;
+    Rect rect = aRect.getInsetRect(0,0); rect.x = rect.y = 1;
+    ShapeView shpView = new ShapeView(rect);
+    shpView.setSize(aRect.width+2, aRect.height+2);
+    shpView.setBorder(ViewEffect.FOCUSED_COLOR.brighter(),1);
+    shpView.setEffect(ViewEffect.getFocusEffect());
+    return _selImg = ViewUtils.getImage(shpView);
+} Image _selImg;
 
 /**
  * Called when TableCol does fireActionEvent.
@@ -674,6 +704,7 @@ protected void cellEditEnd(ListCell <T> aCell)
     aCell.removePropChangeListener(_editEndLsnr, Label.Editing_Prop); _editEndLsnr = null;
     if(getCellEditEnd()!=null)
         getCellEditEnd().accept(aCell);
+    aCell.setEditing(false);
 }
 
 /**

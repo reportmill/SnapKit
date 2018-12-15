@@ -181,20 +181,13 @@ public void dispatchKeyEvent(ViewEvent anEvent)
     ViewUtils._shiftDown = anEvent.isShiftDown();
     ViewUtils._shortcutDown = anEvent.isShortcutDown();
     
-    // If key pressed and tab and FocusedView.FocusKeysEnabled, switch focus
-    View focusedView = _rview.getFocusedView();
-    if(anEvent.isKeyPress() && anEvent.isTabKey() && focusedView!=null && focusedView.isFocusKeysEnabled()) {
-        View next = anEvent.isShiftDown()? focusedView.getFocusPrev() : focusedView.getFocusNext();
-        if(next!=null) { _rview.requestFocus(next); return; }
-    }
-    
     // Track keys whenever "snp" + anything typed in to enable certain debug options
     if(anEvent.isKeyType() && (anEvent.getKeyChar()=='d' || _debugKeys.length()>0))
         trackDebugKeys(anEvent);
 
-    // Get target for event and array of parent
-    View targ = focusedView;
-    View pars[] = getParents(targ);
+    // Get current focused view and array of parents
+    View focusedView = _rview.getFocusedView();
+    View pars[] = getParents(focusedView);
     
     // Iterate down and see if any should filter
     for(View view : pars)
@@ -203,6 +196,12 @@ public void dispatchKeyEvent(ViewEvent anEvent)
             view.processEventFilters(e2);
             if(e2.isConsumed()) { anEvent.consume(); return; }  }
 
+    // If key pressed and tab and FocusedView.FocusKeysEnabled, switch focus
+    if(anEvent.isKeyPress() && anEvent.isTabKey() && focusedView!=null && focusedView.isFocusKeysEnabled()) {
+        View next = anEvent.isShiftDown()? focusedView.getFocusPrev() : focusedView.getFocusNext();
+        if(next!=null) { _rview.requestFocus(next); return; }
+    }
+    
     // Iterate back up and see if any parents should handle
     for(int i=pars.length-1;i>=0;i--) { View view = pars[i];
         if(view.getEventAdapter().isEnabled(anEvent.getType())) {
