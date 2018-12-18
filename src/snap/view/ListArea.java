@@ -606,9 +606,10 @@ protected void processEvent(ViewEvent anEvent)
     if(anEvent.isMousePress()) {
         int index = getRowAt(anEvent.getY());
         ListCell cell = getCellForRow(index);
-        if(cell!=null && cell.isEnabled()) {
+        if(cell!=null && cell.isEnabled() && index!=getSelIndex()) {
             setSelIndex(index);
             fireActionEvent();
+            anEvent.consume();
         }
     }
     

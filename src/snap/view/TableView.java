@@ -54,9 +54,6 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     // The header column
     TableCol                _headerCol;
     
-    // A listener to watch for TableCol.Action event
-    EventListener           _colActionLsnr = e -> colFiredAction(e);
-    
     // A listener to watch for Cell.Editing set to false
     PropChangeListener      _editEndLsnr;
 
@@ -73,7 +70,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
 public TableView()
 {
     // Enable Action event for selection change
-    enableEvents(Action, KeyPress);
+    enableEvents(MousePress, KeyPress, Action);
     setFocusable(true); setFocusWhenPressed(true);
     
     // Create/configure Columns SplitView and ScrollView and add
@@ -156,12 +153,21 @@ public void setSelItem(T anItem)  { _items.setSelItem(anItem); }
 /**
  * Selects up in the table.
  */
-public void selectUp()  { _items.selectUp(); }
+public void selectUp()
+{
+    int row = getSelRow();
+    if(row>0) setSelIndex(row-1);
+}
 
 /**
  * Selects down in the table.
  */
-public void selectDown()  { _items.selectDown(); }
+public void selectDown()
+{
+    int row = getSelRow();
+    if(row<getItems().size()-1)
+        setSelIndex(row+1);
+}
 
 /**
  * Selects right in the table.
@@ -258,7 +264,6 @@ public void addCol(TableCol aCol)
     // Replace column picklist with tableView picklist
     aCol.setPickList(_items);
     aCol.setCellPadding(getCellPadding());
-    aCol.addEventHandler(_colActionLsnr, Action);
 }
 
 /**
@@ -268,7 +273,6 @@ public TableCol removeCol(int anIndex)
 {
     TableCol col = getCol(anIndex);
     removeCol(col);
-    col.removeEventHandler(_colActionLsnr, Action);
     return col;
 }
 
@@ -549,7 +553,6 @@ public void setSelCol(int anIndex)
     
     // Set value
     _selCol = anIndex;
-    fireActionEvent();
     repaint();
 }
 
@@ -599,8 +602,19 @@ protected void layoutImpl()  { BoxView.layout(this, _scrollGroup, null, true, tr
 /**
  * Handle events.
  */
-public void processEvent(ViewEvent anEvent)
+protected void processEvent(ViewEvent anEvent)
 {
+    // Handle MousePress: If hit column isn't selected, select + fire action + consume event
+    if(anEvent.isMousePress()) {
+        TableCol col = getColAtX(anEvent.getX());
+        int index = col!=null? col.getColIndex() : -1;
+        if(index>=0 && index!=getSelCol()) {
+            setSelCol(index);
+            fireActionEvent();
+            anEvent.consume();
+        }
+    }
+    
     // Handle Mouse double-click
     if(anEvent.isMouseClick() && anEvent.getClickCount()==2 && isEditable()) {
         ListCell cell = getCellAtXY(anEvent.getX(), anEvent.getY());
@@ -608,23 +622,32 @@ public void processEvent(ViewEvent anEvent)
     }
     
     // Handle KeyPress
-    else if(anEvent.isKeyPress()) {
-        int kcode = anEvent.getKeyCode();
-        switch(kcode) {
-            case KeyCode.UP: selectUp(); anEvent.consume(); break;
-            case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
-            case KeyCode.LEFT: selectLeft(); anEvent.consume(); break;
-            case KeyCode.RIGHT: selectRight(); anEvent.consume(); break;
-            case KeyCode.TAB: if(anEvent.isShiftDown()) selectLeft(); else selectRight(); anEvent.consume(); break;
-            default: {
-                char c = anEvent.getKeyChar();
-                boolean printable = Character.isJavaIdentifierPart(c); // Lame
-                if(isEditable() && printable) {
-                    ListCell cell = getSelCell();
-                    editCell(cell);
-                }
-                else if(kcode==KeyCode.ENTER) { selectDown(); anEvent.consume(); break; }
+    else if(anEvent.isKeyPress())
+        processKeyEvent(anEvent);
+}
+
+/**
+ * Handle events.
+ */
+protected void processKeyEvent(ViewEvent anEvent)
+{
+    int kcode = anEvent.getKeyCode();
+    switch(kcode) {
+        case KeyCode.UP: selectUp(); fireActionEvent(); anEvent.consume(); break;
+        case KeyCode.DOWN: selectDown(); fireActionEvent(); anEvent.consume(); break;
+        case KeyCode.LEFT: selectLeft(); fireActionEvent(); anEvent.consume(); break;
+        case KeyCode.RIGHT: selectRight(); fireActionEvent(); anEvent.consume(); break;
+        case KeyCode.TAB:
+            if(anEvent.isShiftDown()) selectLeft(); else selectRight();
+            fireActionEvent(); anEvent.consume(); break;
+        default: {
+            char c = anEvent.getKeyChar();
+            boolean printable = Character.isJavaIdentifierPart(c); // Lame
+            if(isEditable() && printable) {
+                ListCell cell = getSelCell();
+                editCell(cell);
             }
+            else if(kcode==KeyCode.ENTER) { selectDown(); anEvent.consume(); break; }
         }
     }
 }
@@ -636,14 +659,14 @@ protected void paintAbove(Painter aPntr)
 {
     ListCell cell = getSelCell(); if(cell==null) return;
     Rect bnds = cell.localToParent(cell.getBoundsLocal(), this).getBounds();
-    Image img = getFocusImage(bnds);
+    Image img = getSelectedRectImage(bnds);
     aPntr.drawImage(img, bnds.x-1, bnds.y-1);
 }
 
 /**
  * A fuzzy cell border image to highlight cell.
  */
-public Image getFocusImage(Rect aRect)
+protected Image getSelectedRectImage(Rect aRect)
 {
     if(_selImg!=null && _selImg.getWidth()==aRect.width+2 && _selImg.getHeight()==aRect.height+2) return _selImg;
     Rect rect = aRect.getInsetRect(0,0); rect.x = rect.y = 1;
@@ -655,11 +678,16 @@ public Image getFocusImage(Rect aRect)
 } Image _selImg;
 
 /**
- * Called when TableCol does fireActionEvent.
+ * Called when TableCol gets mouse press.
  */
-protected void colFiredAction(ViewEvent anEvent)
+protected void colDidMousePress(TableCol aCol, ViewEvent anEvent)
 {
-    fireActionEvent();
+    int row = aCol.getSelIndex(), col = aCol.getColIndex();
+    if(row!=getSelRow() || col!=getSelCol()) {
+        setSelCell(row, col);
+        fireActionEvent();
+        anEvent.consume();
+    }
 }
 
 /**

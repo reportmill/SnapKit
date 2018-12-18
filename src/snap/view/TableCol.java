@@ -99,14 +99,13 @@ public void setItems(List <T> theItems)  { itemsChanged(); }
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    if(anEvent.isMousePress()) getTable()._selCol = ArrayUtils.indexOfId(getTable().getCols(), this);
+    // Handle MousePress: Forward to table
+    if(anEvent.isMousePress())
+        getTable().colDidMousePress(this, anEvent);
+        
+    // Do normal version
     super.processEvent(anEvent);
 }
-
-/**
- * Override to have table fireAction.
- */
-public void fireActionEvent()  { _table.fireActionEvent(); }
 
 /**
  * Override to account for header (if showing).
