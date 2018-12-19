@@ -264,6 +264,7 @@ public void addCol(TableCol aCol)
     // Replace column picklist with tableView picklist
     aCol.setPickList(_items);
     aCol.setCellPadding(getCellPadding());
+    _rowHeightCached = -1;
 }
 
 /**
@@ -534,6 +535,17 @@ public ListCell <T> getCellAtXY(double aX, double aY)
 }
 
 /**
+ * Override to give control to table.
+ */
+protected void configureCell(TableCol <T> aCol, ListCell <T> aCell)
+{
+    aCol.configureCellText(aCell);
+    aCol.configureCellFills(aCell);
+    Consumer cconf = getCellConfigure();
+    if(cconf!=null) cconf.accept(aCell);
+}
+
+/**
  * Returns the selected row.
  */
 public int getSelRow()  { return getSelIndex(); }
@@ -653,6 +665,19 @@ protected void processKeyEvent(ViewEvent anEvent)
 }
 
 /**
+ * Called when TableCol gets mouse press.
+ */
+protected void colDidMousePress(TableCol aCol, ViewEvent anEvent)
+{
+    int row = aCol.getSelIndex(), col = aCol.getColIndex();
+    if(row!=getSelRow() || col!=getSelCol()) {
+        setSelCell(row, col);
+        fireActionEvent();
+        anEvent.consume();
+    }
+}
+
+/**
  * Override to paint highlight for selected cell.
  */
 protected void paintAbove(Painter aPntr)
@@ -676,19 +701,6 @@ protected Image getSelectedRectImage(Rect aRect)
     shpView.setEffect(ViewEffect.getFocusEffect());
     return _selImg = ViewUtils.getImage(shpView);
 } Image _selImg;
-
-/**
- * Called when TableCol gets mouse press.
- */
-protected void colDidMousePress(TableCol aCol, ViewEvent anEvent)
-{
-    int row = aCol.getSelIndex(), col = aCol.getColIndex();
-    if(row!=getSelRow() || col!=getSelCol()) {
-        setSelCell(row, col);
-        fireActionEvent();
-        anEvent.consume();
-    }
-}
 
 /**
  * Called to edit given cell.

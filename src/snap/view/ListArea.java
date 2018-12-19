@@ -491,27 +491,39 @@ protected ListCell createCell(int anIndex)
  */
 protected void configureCell(ListCell <T> aCell)
 {
-    // Get item text and set
-    T item = aCell.getItem();
+    // Set Fill/TextFill based on selection
+    configureCellText(aCell);
+    configureCellFills(aCell);
     
-    // Get item text (don't use getText(item) because it can call into here)
+    // If cell configure set, call it
+    Consumer cconf = getCellConfigure();
+    if(cconf!=null) cconf.accept(aCell);
+}
+
+/**
+ * Called to configure a cell text.
+ */
+protected void configureCellText(ListCell <T> aCell)
+{
+    T item = aCell.getItem();
     String text = null;
     if(_itemTextFunc!=null) text = item!=null? _itemTextFunc.apply(item) : null;
-    else text = item!=null? item.toString() : null;
-
-    // Set text
+    else if(item instanceof String) text = (String)item;
+    else if(item instanceof Enum) text = item.toString();
+    else if(getCellConfigure()==null && item!=null) text = item.toString();
     aCell.setText(text);
-    
-    // Set Fill/TextFill based on selection
+}
+
+/**
+ * Called to configure a cell fill and text fill.
+ */
+protected void configureCellFills(ListCell <T> aCell)
+{
     if(aCell.isSelected()) { aCell.setFill(SEL_FILL); aCell.setTextFill(SEL_TEXT_FILL); }
     else if(isTargeting() && aCell.getRow()==getTargetedIndex())  {
         aCell.setFill(TARG_FILL); aCell.setTextFill(TARG_TEXT_FILL); }
     else if(aCell.getRow()%2==0) { aCell.setFill(_altPaint); aCell.setTextFill(Color.BLACK); }
     else { aCell.setFill(null); aCell.setTextFill(Color.BLACK); }
-    
-    // If cell configure set, call it
-    Consumer cconf = getCellConfigure();
-    if(cconf!=null) cconf.accept(aCell);
 }
 
 /**
@@ -590,6 +602,7 @@ protected void calcSampleSize()
         for(int j=cell.getChildCount()-1;j>=0;j--) { View child = cell.getChild(j);
             if(child!=cell._strView && child!=cell._graphic) cell.removeChild(j); }
         configureCell(cell);
+        if(cell.getText()==null || cell.getText().length()==0) cell.setText("X");
         _sampleWidth = Math.max(_sampleWidth, cell.getPrefWidth());
         _sampleHeight = Math.max(_sampleHeight, cell.getPrefHeight());
     }

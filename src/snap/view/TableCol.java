@@ -81,6 +81,14 @@ protected double getRowHeightSuper()  { return super.getRowHeight(); }
 public int getColIndex()  { return ArrayUtils.indexOfId(getTable().getCols(), this); }
 
 /**
+ * Override to give control to table.
+ */
+protected void configureCell(ListCell <T> aCell)
+{
+    getTable().configureCell(this, aCell);
+}
+
+/**
  * Override to return table cell configure if one isn't set for col.
  */
 public Consumer <ListCell<T>> getCellConfigure()
