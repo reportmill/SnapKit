@@ -148,7 +148,7 @@ public void dispatchMouseEvent(ViewEvent anEvent)
     else if(anEvent.isMousePress()) {
         _mousePressView = targ; _mpx = anEvent.getX(); _mpy = anEvent.getY();
         for(View n=targ;n!=null;n=n.getParent())
-            if(n.isFocusWhenPressed() && (_rview.getFocusedView()==null || !_rview.getFocusedView().isAncestor(n))) {
+            if(n.isFocusWhenPressed()) {// && (_rview.getFocusedView()==null || !_rview.getFocusedView().isAncestor(n))) {
                 n.requestFocus(); break; }
     }
     
