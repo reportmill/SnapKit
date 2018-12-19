@@ -493,7 +493,7 @@ public ListCell <T> getCell(int aRow, int aCol)
 {
     if(aRow<0) return null; // || aCol<0
     TableCol col = getCol(aCol);
-    ListCell <T> cell = col.getCell(aRow);
+    ListCell <T> cell = col.getCellForRow(aRow);
     return cell;
 }
 
