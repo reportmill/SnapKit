@@ -180,6 +180,7 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
 private static View[] getColKids(View aCtr, View aTp, View aRt, View aBtm, View aLft)
 {
     _rproxy.relayoutParent(); _cproxy.relayoutParent();
+    _cproxy._kid = aCtr;
     _rproxy._kids = asArray(aLft, aCtr!=null? _cproxy : null, aRt);
     return asArray(aTp, _rproxy, aBtm);
 }
