@@ -35,7 +35,7 @@ public static void setDefaultEnv()
     if(SnapUtils.getPlatform()==SnapUtils.Platform.CHEERP) {
         Class cls = null; try { cls = ClassUtils.getClass("snapcj.CJEnv"); }
         catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't find snapcj.CJEnv"); }
-        if(cls!=null) try { cls.getMethod("set").invoke(null); return; }
+        if(cls!=null) try { ClassUtils.getMethodOrThrow(cls, "set").invoke(null); return; }
         catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set CJEnv: " + e); }
     }
     
@@ -43,12 +43,13 @@ public static void setDefaultEnv()
     if(SnapUtils.getPlatform()==SnapUtils.Platform.TEAVM) {
         Class cls = null; try { cls = ClassUtils.getClass("snaptea.TV"); } catch(Exception e) { }
         if(cls==null) System.err.println("GFXEnv.setDefaultEnv: Can't find snaptea.TV");
-        else try { cls.getMethod("set").invoke(null); return; }
+        else try { ClassUtils.getMethodOrThrow(cls, "set").invoke(null); return; }
         catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set TVEnv: " + e); }
     }
     
     // Try Swing
-    try { ClassUtils.getClass("snap.swing.AWTEnv").getMethod("set").invoke(null); }
+    Class cls = null; try { cls = ClassUtils.getClass("snap.swing.AWTEnv"); } catch(Exception e) { }
+    try { ClassUtils.getMethodOrThrow(cls, "set").invoke(null); }
     catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set AWTEnv " + e); }
 }
 
