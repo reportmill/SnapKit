@@ -157,6 +157,7 @@ public void selectUp()
 {
     int row = getSelRow();
     if(row>0) setSelIndex(row-1);
+    else ViewUtils.beep();
 }
 
 /**
@@ -167,6 +168,7 @@ public void selectDown()
     int row = getSelRow();
     if(row<getItems().size()-1)
         setSelIndex(row+1);
+    else ViewUtils.beep();
 }
 
 /**
@@ -310,6 +312,21 @@ public void setShowHeader(boolean aValue)
 }
 
 /**
+ * Returns the HeaderView.
+ */
+public SplitView getHeaderView()
+{
+    // If already set, just return
+    if(_header!=null) return _header;
+
+    // Create and return
+    SplitView split = new SplitView(); split.setGrowWidth(true); split.setBorder(null);
+    split.setSpacing(_split.getSpacing());
+    Divider div = split.getDivider(); div.setFill(DIVIDER_FILLH); div.setBorder(null); div.setReach(3);
+    return _header = split;
+}
+
+/**
  * Returns whether to show header.
  */
 public boolean isShowHeaderCol()  { return _showHeaderCol; }
@@ -332,8 +349,11 @@ public void setShowHeaderCol(boolean aValue)
  */
 public TableCol getHeaderCol()
 {
+    // If already set, just return
     if(_headerCol!=null) return _headerCol;
-    _headerCol = new TableCol(); _headerCol._table = this;
+    
+    // Create and return
+    _headerCol = new TableCol(); _headerCol._table = this; _headerCol.setFill(null);
     _headerCol.setPickList(_items);
     _headerCol.setCellPadding(getCellPadding());
     _headerCol.setItems(getItems());
@@ -468,22 +488,6 @@ public void setEditable(boolean aValue)
     firePropChange(Editable_Prop, _editable, _editable = aValue);
     if(aValue) enableEvents(MouseRelease, KeyPress);
     else disableEvents(MouseRelease, KeyPress);
-}
-
-/**
- * Returns the HeaderView.
- */
-public SplitView getHeaderView()  { return _header!=null? _header : (_header=createHeaderView()); }
-
-/**
- * Returns the HeaderView.
- */
-protected SplitView createHeaderView()
-{
-    SplitView split = new SplitView(); split.setGrowWidth(true); split.setBorder(null);
-    split.setSpacing(_split.getSpacing());
-    Divider div = split.getDivider(); div.setFill(DIVIDER_FILLH); div.setBorder(null); div.setReach(3);
-    return split;
 }
 
 /**
@@ -649,9 +653,6 @@ protected void processKeyEvent(ViewEvent anEvent)
         case KeyCode.DOWN: selectDown(); fireActionEvent(); anEvent.consume(); break;
         case KeyCode.LEFT: selectLeft(); fireActionEvent(); anEvent.consume(); break;
         case KeyCode.RIGHT: selectRight(); fireActionEvent(); anEvent.consume(); break;
-        case KeyCode.TAB:
-            if(anEvent.isShiftDown()) selectLeft(); else selectRight();
-            fireActionEvent(); anEvent.consume(); break;
         default: {
             char c = anEvent.getKeyChar();
             boolean printable = Character.isJavaIdentifierPart(c); // Lame
@@ -659,7 +660,28 @@ protected void processKeyEvent(ViewEvent anEvent)
                 ListCell cell = getSelCell();
                 editCell(cell);
             }
-            else if(kcode==KeyCode.ENTER) { selectDown(); anEvent.consume(); break; }
+        }
+    }
+}
+
+/**
+ * Override to catch KeyPress (tab or enter) for TableView or cells (when editing).
+ */
+protected void processEventFilters(ViewEvent anEvent)
+{
+    // Do normal version
+    super.processEventFilters(anEvent);
+    
+    // Handle KeyPress Tab
+    if(anEvent.isKeyPress()) {
+        int kcode = anEvent.getKeyCode();
+        switch(kcode) {
+            case KeyCode.TAB:
+                if(anEvent.isShiftDown()) selectLeft(); else selectRight();
+                fireActionEvent(); anEvent.consume(); requestFocus(); break;
+            case KeyCode.ENTER:
+                if(anEvent.isShiftDown()) selectUp(); else selectDown();
+                fireActionEvent(); anEvent.consume(); requestFocus(); break;
         }
     }
 }
@@ -682,7 +704,15 @@ protected void colDidMousePress(TableCol aCol, ViewEvent anEvent)
  */
 protected void paintAbove(Painter aPntr)
 {
+    // Get Selected Cell (just return if null)
     ListCell cell = getSelCell(); if(cell==null) return;
+    
+    // Clip to Scroller bounds
+    Scroller scroller = getScrollView().getScroller();
+    Rect scrollerBnds = scroller.localToParent(scroller.getBoundsLocal(), this).getBounds();
+    aPntr.clip(scrollerBnds);
+    
+    // Get fuzzy border image for selected cell bounds
     Rect bnds = cell.localToParent(cell.getBoundsLocal(), this).getBounds();
     Image img = getSelectedRectImage(bnds);
     aPntr.drawImage(img, bnds.x-1, bnds.y-1);
@@ -695,12 +725,20 @@ protected Image getSelectedRectImage(Rect aRect)
 {
     if(_selImg!=null && _selImg.getWidth()==aRect.width+2 && _selImg.getHeight()==aRect.height+2) return _selImg;
     Rect rect = aRect.getInsetRect(0,0); rect.x = rect.y = 1;
-    ShapeView shpView = new ShapeView(rect);
+    ShapeView shpView = new ShapeView(rect); boolean focused = isFoc();
     shpView.setSize(aRect.width+2, aRect.height+2);
-    shpView.setBorder(ViewEffect.FOCUSED_COLOR.brighter(),1);
-    shpView.setEffect(ViewEffect.getFocusEffect());
+    shpView.setBorder(focused? ViewEffect.FOCUSED_COLOR.brighter() : Color.GRAY,1);
+    shpView.setEffect(focused? ViewEffect.getFocusEffect() : new ShadowEffect(5, Color.GRAY, 0, 0));
     return _selImg = ViewUtils.getImage(shpView);
 } Image _selImg;
+
+/** Returns whether this view or child view has focus. */
+boolean isFoc()
+{
+    RootView rv = getRootView(); if(rv==null) return false;
+    View fv = rv.getFocusedView(); for(View v = fv; v!=null; v = v.getParent()) if(v==this) return true;
+    return false;
+}
 
 /**
  * Called to edit given cell.
@@ -742,9 +780,9 @@ protected void cellEditStart(ListCell <T> aCell)
 protected void cellEditEnd(ListCell <T> aCell)
 {
     aCell.removePropChangeListener(_editEndLsnr, Label.Editing_Prop); _editEndLsnr = null;
+    aCell.setEditing(false);
     if(getCellEditEnd()!=null)
         getCellEditEnd().accept(aCell);
-    aCell.setEditing(false);
 }
 
 /**
@@ -786,6 +824,11 @@ public View getFocusPrev()
     if(cell!=null && isEditable()) getEnv().runLater(() -> editCell(cell));
     return cell;
 }
+
+/**
+ * Override to clear focus image.
+ */
+protected void setFocused(boolean aValue)  { if(aValue==isFocused()) return; super.setFocused(aValue); _selImg = null; }
 
 /**
  * Returns a mapped property name.
