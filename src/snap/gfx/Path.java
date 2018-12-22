@@ -336,14 +336,48 @@ public void append(Shape aShape)  { append(aShape.getPathIter(null)); }
 public void fitToCurve(int anIndex)  { PathFitCurves.fitCurveFromPointIndex(this, anIndex); }
 
 /**
+ * Transforms the points in the path by the given transform.
+ */
+public void transformBy(Transform aTrans)
+{
+    for(int i=0, iMax=getPointCount(); i<iMax; i++) { Point p = getPoint(i); aTrans.transform(p,p);
+        setPoint(i, p.x, p.y); }
+}
+
+/**
  * Clears all segments from path.
  */
 public void clear()  { _scount = _pcount = 0; _bounds = null; }
 
 /**
+ * Returns a path with only moveto, lineto.
+ */
+public Path getPathFlattened()
+{
+    // Get a new path and point-array for path segment iteration and iterate over path segments
+    Path path = new Path();
+    PathIter piter = getPathIter(null); double pts[] = new double[6];
+    while(piter.hasNext()) switch(piter.getNext(pts)) {
+        case MoveTo: path.moveTo(pts[0], pts[1]); break;
+        case LineTo: path.lineTo(pts[0], pts[1]); break;
+        case QuadTo: path.quadToFlat(pts[0], pts[1], pts[2], pts[3]); break;
+        case CubicTo: path.curveToFlat(pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]); break;
+        case Close: path.close(); break;
+    }
+    
+    // Return new path
+    return path;
+}
+
+/**
  * Returns a path iterator.
  */
 public PathIter getPathIter(Transform aTrans)  { return new PathPathIter(this, aTrans); }
+
+/**
+ * Override to return as path.
+ */
+public Path copyFor(Rect aRect)  { return (Path)super.copyFor(aRect); }
 
 /**
  * Standard clone implementation.

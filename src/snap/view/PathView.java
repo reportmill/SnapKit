@@ -26,7 +26,7 @@ public void setPath(Path aPath)  { _path = aPath; repaint(); }
 /**
  * Returns the path in shape bounds.
  */
-public Path getPathInBounds()  {  return (Path)getPath().copyFor(getBoundsLocal()); }
+public Path getPathInBounds()  {  return getPath().copyFor(getBoundsLocal()); }
 
 /**
  * Replace the polygon's current path with a new path, adjusting the shape's bounds to match the new path.
