@@ -30,9 +30,6 @@ public class ThumbWheel extends View {
     // Absolute mode
     byte             _absoluteMode = ABSOLUTE_BOUNDED;
     
-    // Wether value is in the process of changing interactively
-    boolean          _valueIsAdjusting = false;
-
     // The type of thumbwheel (radial or linear)
     byte             _type = TYPE_RADIAL;
 
@@ -140,9 +137,6 @@ public byte getAbsoluteMode() { return _absoluteMode; }
 /** Sets the thumbhweel absolute mode (ABSOLUTE_BOUNDED or ABSOLUTE_WRAPPED). */
 public void setAbsoluteMode(byte aValue) { _absoluteMode = aValue; }
 
-/** Returns whether the thumbweel is in a state of rapid interactive use (from mouse loop). */
-public boolean getValueIsAdjusting() { return _valueIsAdjusting; }
-
 /**
  * Forwards mouse events to mouse methods.
  */
@@ -151,11 +145,10 @@ protected void processEvent(ViewEvent anEvent)
     // If disabled, just return
     if(!isEnabled()) return;
 
-    // Handle MousePress
+    // Handle MousePress: Record pressed mouse point and value
     if(anEvent.isMousePress()) {
-        _pressedMousePoint = anEvent.getPoint(); // Record pressed mouse point
-        _pressedValue = getValue(); // Record pressed pressed value
-        _valueIsAdjusting = true; // Set value is adjusting
+        _pressedMousePoint = anEvent.getPoint();
+        _pressedValue = getValue();
     }
     
     // Handle MouseDrag
@@ -176,8 +169,6 @@ protected void processEvent(ViewEvent anEvent)
 
     // Handle MouseRelease
     else if(anEvent.isMouseRelease()) {
-        // Turn off value is adjusting
-        _valueIsAdjusting = false;
         
         // Get values for last point and current point
         double lastPointVal = getValueAtPoint(_pressedMousePoint);
