@@ -271,7 +271,7 @@ void editorFiredAction()
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    if(anEvent.isMouseRelease() && anEvent.getClickCount()==2)
+    if(isEditable() && anEvent.isMouseRelease() && anEvent.getClickCount()==2)
         setEditing(true);
 }
 
