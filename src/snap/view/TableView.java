@@ -691,7 +691,7 @@ protected void processEventFilters(ViewEvent anEvent)
  */
 protected void colDidMousePress(TableCol aCol, ViewEvent anEvent)
 {
-    int row = aCol.getSelIndex(), col = aCol.getColIndex();
+    int row = aCol.getRowAt(anEvent.getY()), col = aCol.getColIndex();
     if(row!=getSelRow() || col!=getSelCol()) {
         setSelCell(row, col);
         fireActionEvent();
