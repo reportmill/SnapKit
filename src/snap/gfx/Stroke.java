@@ -186,4 +186,14 @@ public Stroke clone()
     catch(Exception e) { throw new RuntimeException(e); }
 }
 
+/**
+ * Returns a stroke for given line width.
+ */
+public static Stroke getStroke(double aLineWidth)
+{
+    if(aLineWidth==1) return Stroke1;
+    if(aLineWidth==2) return Stroke2;
+    return new Stroke(aLineWidth);
+}
+
 }
