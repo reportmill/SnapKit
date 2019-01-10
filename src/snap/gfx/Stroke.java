@@ -34,6 +34,8 @@ public class Stroke implements Cloneable {
     // Constant for common stroke
     public static final Stroke Stroke1 = new Stroke();
     public static final Stroke Stroke2 = new Stroke(2);
+    public static final Stroke StrokeRound1 = new Stroke(1, Cap.Round, Join.Round, 0);
+    public static final Stroke StrokeRound2 = new Stroke(2, Cap.Round, Join.Round, 0);
     public static final Stroke StrokeDash1 = new Stroke(1, new double[] { 2,2 }, 0);
 
 /**
@@ -194,6 +196,16 @@ public static Stroke getStroke(double aLineWidth)
     if(aLineWidth==1) return Stroke1;
     if(aLineWidth==2) return Stroke2;
     return new Stroke(aLineWidth);
+}
+
+/**
+ * Returns a stroke for given line width.
+ */
+public static Stroke getStrokeRound(double aLineWidth)
+{
+    if(aLineWidth==1) return StrokeRound1;
+    if(aLineWidth==2) return StrokeRound2;
+    return StrokeRound1.copyForWidth(aLineWidth);
 }
 
 }
