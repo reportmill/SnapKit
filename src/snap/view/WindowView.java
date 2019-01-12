@@ -123,6 +123,7 @@ public void setMaximized(boolean aValue)
 {
     // If already set, just return
     if(aValue==_maximized) return;
+    _maximized = aValue;
     
     // If Maximizing
     if(aValue) {
@@ -143,7 +144,7 @@ public void setMaximized(boolean aValue)
     }
     
     // Get screen size
-    firePropChange(Maximized_Prop, _maximized, _maximized=aValue);
+    firePropChange(Maximized_Prop, !_maximized, _maximized);
 }
 
 /**

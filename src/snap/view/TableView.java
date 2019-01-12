@@ -414,6 +414,7 @@ public double getRowHeight()
     
     _rowHeightCached = 1;
     for(TableCol col : getCols()) _rowHeightCached = Math.max(_rowHeightCached, col.getRowHeightSuper());
+    if(isShowHeaderCol()) _rowHeightCached = Math.max(_rowHeightCached, getHeaderCol().getRowHeightSuper());
     return _rowHeightCached;
 }
 
