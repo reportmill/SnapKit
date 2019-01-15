@@ -65,8 +65,10 @@ public static Class getClass(String aName, ClassLoader aClassLoader)
     // Handle arrays, either coded or uncoded (e.g. [I, [D, [LClassName; or  int[], double[] or ClassName[])
     if(aName.startsWith("[")) return getCodedClass(aName, aClassLoader);
     if(aName.endsWith("[]")) {
-        Class cls = getClass(aName.substring(0, aName.length()-2));
-        return cls!=null? Array.newInstance(cls,0).getClass() : null; }
+        String cname = aName.substring(0, aName.length()-2);
+        Class cls = getClass(cname, aClassLoader);
+        return cls!=null? Array.newInstance(cls,0).getClass() : null;
+    }
     
     // Handle primitive classes
     Class pcls = getPrimitiveClass(aName); if(pcls!=null) return pcls;
