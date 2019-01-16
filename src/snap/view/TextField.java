@@ -895,7 +895,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive text component attributes
     XMLElement e = super.toXMLView(anArchiver);
-    if(getColCount()!=20) e.add(ColCount_Prop, getColCount());
+    if(!isPrefWidthSet() && getColCount()!=12) e.add(ColCount_Prop, getColCount());
     if(getText()!=null && getText().length()>0) e.add("text", getText());
     if(getRadius()!=4) e.add("Radius", getRadius());
     return e;
