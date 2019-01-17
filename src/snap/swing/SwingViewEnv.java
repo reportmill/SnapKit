@@ -54,7 +54,7 @@ public Clipboard getClipboardDrag()  { return SwingClipboard.getDrag(null); }
 /**
  * Returns a new ViewHelper for given native component.
  */
-public WindowHpr createHelper(View aView)  { return new SWWindowHpr(); }
+public WindowView.WindowHpr createHelper(View aView)  { return new SWWindowHpr(); }
 
 /**
  * Creates an event for a UI node.

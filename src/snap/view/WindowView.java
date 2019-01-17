@@ -498,4 +498,37 @@ public static <T extends ViewOwner> T[] getOpenWindowOwners(Class <T> aClass)
     return ownrs.toArray((T[])Array.newInstance(aClass, ownrs.size()));
 }
 
+/**
+ * A class to map snap Window functionality to native platform.
+ */
+public abstract static class WindowHpr <T> {
+    
+    /** Returns the snap Window. */
+    public abstract WindowView getWindow();
+    
+    /** Sets the snap Window. */
+    public abstract void setWindow(WindowView aWin);
+    
+    /** Returns the native being helped. */
+    public abstract T getNative();
+    
+    /** Registers a view for repaint. */
+    public abstract void requestPaint(Rect aRect);
+    
+    /** Window method: initializes native window. */
+    public abstract void initWindow();
+    
+    /** Window/Popup method: Shows the window. */
+    public abstract void show();
+    
+    /** Window/Popup method: Hides the window. */
+    public abstract void hide();
+    
+    /** Window/Popup method: Order window to front. */
+    public abstract void toFront();
+    
+    /** Window/Popup method: Sets the document file url for the window title bar proxy icon. */
+    public void setDocURL(WebURL aURL)  { }
+}
+
 }

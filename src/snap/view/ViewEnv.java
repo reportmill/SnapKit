@@ -188,7 +188,7 @@ public Clipboard getClipboardDrag()  { throw notImpl("getClipboardDrag"); }
 /**
  * Returns a ViewHelper for given native component.
  */
-public WindowHpr createHelper(View aView)  { return null; }
+public WindowView.WindowHpr createHelper(View aView)  { return null; }
 
 /**
  * Sends an event for a UI node.
