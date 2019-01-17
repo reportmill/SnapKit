@@ -52,6 +52,9 @@ public class WindowView extends ParentView {
     // Save frame size
     boolean                   _saveSize;
     
+    // The helper to map window functionality to native platform
+    WindowHpr                 _helper;
+    
     // The View that referenced on last show
     View                      _clientView;
     
@@ -274,6 +277,17 @@ public boolean isModal()  { return _modal; }
  * Sets the modal mode of the window (defaults to false).
  */
 public void setModal(boolean aValue)  { _modal = aValue; }
+
+/**
+ * Returns the view helper.
+ */
+public WindowHpr getHelper()
+{
+    if(_helper!=null) return _helper;
+    _helper = getEnv().createHelper(this);
+    _helper.setWindow(this);
+    return _helper;
+}
 
 /**
  * Initializes the native window.

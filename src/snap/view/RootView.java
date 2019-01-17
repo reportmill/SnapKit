@@ -293,6 +293,9 @@ protected void repaintInParent(Rect aRect)  { repaint(aRect!=null? aRect : getBo
  */
 public synchronized void repaint(View aView, double aX, double aY, double aW, double aH)
 {
+    // If no window, just ignore (shouldn't need this)
+    if(!isWindowSet()) return;
+    
     // If Painting, complaint (nothing should change during paint)
     if(_painting)
         System.err.println("RootView.repaint: Illegal repaint call during paint.");
@@ -361,7 +364,7 @@ public synchronized void paintLater()
     // Do repaint (in exception handler so we can reset things on failure)
     try {
         _painting = true;
-        getHelper().requestPaint(rect);
+        getWindow().getHelper().requestPaint(rect);
     }
     
     // Clear dirty rects, reset runnable, update PaintCount and set Painting false

@@ -150,9 +150,6 @@ public class View implements XMLArchiver.Archivable {
     // The view owner of this view
     ViewOwner       _owner;
     
-    // The helper for this view when dealing with native
-    ViewHelper      _helper;
-    
     // Shared empty insets
     private static final Insets _emptyIns = new Insets(0);
     
@@ -1904,27 +1901,6 @@ public <T> T getOwner(Class <T> aClass)
     if(getOwner()!=null && aClass.isAssignableFrom(getOwner().getClass())) return (T)getOwner();
     return getParent()!=null? getParent().getOwner(aClass) : null;
 }
-
-/**
- * Returns the view helper.
- */
-public ViewHelper getHelper()
-{
-    if(_helper!=null) return _helper;
-    _helper = getEnv().createHelper(this);
-    _helper.setView(this);
-    return _helper;
-}
-
-/**
- * Returns the native version of view.
- */
-public Object getNative()  { return getHelper().get(); }
-
-/**
- * Returns the native version of view.
- */
-public <T> T getNative(Class <T> aClass)  { return ClassUtils.getInstance(getNative(), aClass); }
 
 /**
  * Returns the view environment.

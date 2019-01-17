@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
 import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import snap.gfx.Painter;
 import snap.gfx.Rect;
@@ -15,6 +16,12 @@ public class SWRootView extends JComponent implements DragGestureListener {
     
     // The RootView
     RootView              _rview;
+    
+    // The current cursor
+    snap.view.Cursor      _cursor;
+    
+    // Runnable to update cursor
+    Runnable              _cursRun, _cursRunShared = () -> { setCursor(AWT.get(_cursor)); _cursRun = null; };
     
     // The DragSource
     DragSource            _dragSource;
@@ -67,6 +74,9 @@ public void setRootView(RootView aRootView)
     
     // Enable DropTarget for RootView
     new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, dtl);
+    
+    // Add listener for RootView.CurrentCursor_Prop
+    _rview.addPropChangeListener(pc -> rootViewCurrentCursorChanged(), RootView.CurrentCursor_Prop);
 }
 
 /**
@@ -86,6 +96,15 @@ protected void showingChanged()
     boolean showing = isShowing();
     ViewUtils.setShowing(_rview, showing);
     if(showing) _rview.repaint();
+}
+
+/**
+ * Called when RootView CurrentCursor changes.
+ */
+void rootViewCurrentCursorChanged()
+{
+    _cursor = _rview.getCurrentCursor();
+    if(_cursRun==null) SwingUtilities.invokeLater(_cursRun = _cursRunShared);
 }
     
 /**

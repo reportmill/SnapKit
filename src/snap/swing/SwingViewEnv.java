@@ -54,12 +54,7 @@ public Clipboard getClipboardDrag()  { return SwingClipboard.getDrag(null); }
 /**
  * Returns a new ViewHelper for given native component.
  */
-public ViewHelper createHelper(View aView)
-{
-    if(aView instanceof RootView) return new SWRootViewHpr();
-    if(aView instanceof WindowView) return new SWWindowHpr();
-    return null;
-}
+public WindowHpr createHelper(View aView)  { return new SWWindowHpr(); }
 
 /**
  * Creates an event for a UI node.
@@ -123,30 +118,5 @@ public static SwingViewEnv get()  { return _shared; }
  * Sets the Swing Node Env.
  */
 public static void set()  { AWTEnv.set(); ViewEnv.setEnv(get()); }
-
-/**
- * ViewHelper subclass for RootView/SWRootView.
- */
-protected static class SWRootViewHpr <T extends SWRootView> extends ViewHelper <T> {
-    
-    snap.view.Cursor _cursor;
-    Runnable _cursRun, _cursRunShared = () -> { get().setCursor(AWT.get(_cursor)); _cursRun = null; };
-
-    /** Creates the native. */
-    protected T createNative()  { return (T)new SWRootView(); }
-
-    /** Override to set RootView in SWRootView. */
-    public void setView(View aView)  { super.setView(aView); get().setRootView((RootView)aView); }
-    
-    /** Sets the cursor. */
-    public void setCursor(snap.view.Cursor aCursor)
-    {
-        _cursor = aCursor; //get().setCursor(AWT.get(aCursor));
-        if(_cursRun==null) SwingUtilities.invokeLater(_cursRun = _cursRunShared);
-    }
-    
-    /** Registers a view for repaint. */
-    public void requestPaint(Rect aRect)  { get().repaint(aRect); }
-}
 
 }
