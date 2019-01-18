@@ -126,7 +126,7 @@ public StringView getStringView()
     if(_strView!=null) return _strView;
     
     // Create, configure, add StringView and return
-    _strView = new StringView(); _strView.setGrowWidth(true); _strView.setAlign(getAlign().getHPos());
+    _strView = new StringView(); _strView.setGrowWidth(isEditable()); _strView.setAlign(getAlign().getHPos());
     addChild(_strView, getGraphic()!=null? 1 : 0);
     return _strView;
 }
@@ -202,8 +202,13 @@ public void setEditable(boolean aValue)
 {
     if(aValue==isEditable()) return;
     firePropChange(Editable_Prop, _editable, _editable = aValue);
+    
+    // Enable/Disable MosueRelease
     if(aValue) enableEvents(MouseRelease);
     else disableEvents(MouseRelease);
+    
+    // If Editable, StringView should fill width
+    if(isStringViewSet()) getStringView().setGrowWidth(isEditable());
 }
 
 /**

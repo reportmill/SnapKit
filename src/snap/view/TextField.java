@@ -289,7 +289,7 @@ protected void textDidChange()
     setSel(getSelStart(), getSelEnd());
     
     // If PromptText present, update Label.StringView.Visible
-    if(_promptText!=null) _label.getStringView().setVisible(length()==0);
+    if(_promptText!=null) _label.getStringView().setPaintable(length()==0);
     
     // If focused and text has changed, updated Edited
     if(isFocused() && !isEdited() && !SnapUtils.equals(getText(), _focusGainedText))
