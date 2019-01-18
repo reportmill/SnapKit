@@ -12,9 +12,6 @@ import snap.gfx.*;
  */
 public class RootView extends ParentView {
     
-    // The MenuBar
-    MenuBar                  _mbar;
-    
     // The content
     View                     _content;
     
@@ -66,22 +63,6 @@ public RootView()
 }
 
 /**
- * Returns the menubar.
- */
-public MenuBar getMenuBar()  { return _mbar; }
-
-/**
- * Sets the menubar.
- */
-public void setMenuBar(MenuBar aMBar)
-{
-    if(aMBar==_mbar) return;
-    View old = _mbar; if(_mbar!=null) removeChild(_mbar);
-    _mbar = aMBar; if(_mbar!=null) addChild(_mbar,0);
-    firePropChange(MenuBar_Prop, old, _mbar);
-}
-
-/**
  * Returns the content.
  */
 public View getContent()  { return _content; }
@@ -93,7 +74,7 @@ public void setContent(View aView)
 {
     View old = _content; if(aView==old) return;
     if(_content!=null) removeChild(_content); _content = aView;
-    if(_content!=null) { addChild(_content); _content.setGrowHeight(true); }
+    if(_content!=null) addChild(_content);
     firePropChange(Content_Prop, old, _content);
 }
 
@@ -269,21 +250,6 @@ protected synchronized void setNeedsLayoutDeep(boolean aVal)
 }
 
 /**
- * Returns the preferred width.
- */
-protected double getPrefWidthImpl(double aH)  { return ColView.getPrefWidth(this, null, -1); }
-
-/**
- * Returns the preferred height.
- */
-protected double getPrefHeightImpl(double aW)  { return ColView.getPrefHeight(this, null, 0, -1); }
-
-/**
- * Layout children.
- */
-protected void layoutImpl()  { ColView.layout(this, null, null, true, 0); }
-
-/**
  * Override to actually paint in this RootView.
  */
 protected void repaintInParent(Rect aRect)  { repaint(aRect!=null? aRect : getBoundsLocal()); }
@@ -419,6 +385,15 @@ public EventDispatcher getDispatcher()  { return _eventDispatcher; }
  * Dispatch event.
  */
 public void dispatchEvent(ViewEvent anEvent)  { _eventDispatcher.dispatchEvent(anEvent); }
+
+/** Returns the preferred width. */
+protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _content, aH); }
+
+/** Returns the preferred height. */
+protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(this, _content, aW); }
+
+/** Layout children. */
+protected void layoutImpl()  { BoxView.layout(this, _content, null, true, true); }
 
 /** Timing method: Returns animation start time. */
 private void startTime()  { _time = System.currentTimeMillis(); } long _time;

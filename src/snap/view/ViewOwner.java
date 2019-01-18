@@ -174,12 +174,11 @@ public View getView(Object anObj)
         if(cview!=null) return cview;
         
         // If view not found and RootView.MenuBar is set, look in MenuBar
-        cview = isRootViewSet() && getRootView().getMenuBar()!=null? getRootView().getMenuBar().getChild(name) : null;
-        return cview;
+        //return isRootViewSet() && getRootView().getMenuBar()!=null? getRootView().getMenuBar().getChild(name):null;
     }
 
-    // If object is native, have environment get/create view for native
-    return null; //_env.getView(anObj);
+    // Return null since view not found
+    return null;
 }
 
 /**

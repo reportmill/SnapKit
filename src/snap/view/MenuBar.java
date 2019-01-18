@@ -155,4 +155,26 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     }
 }
 
+/**
+ * Creates a ColView holding given MenuBar and content view with a Key EventListener to send shortcut keys to MenuBar.
+ */
+public static ColView createMenuBarView(MenuBar aMenuBar, View aView)
+{
+    // Create ColView that makes given MenuBar FillWidth and given View fill extra height
+    ColView colView = new ColView(); colView.setFillWidth(true);
+    colView.addChild(aMenuBar); colView.addChild(aView);
+    aView.setGrowHeight(true);
+    
+    // Add EventListener (filter) to intercept any KeyPress + ShortCut events and run by MenuBar
+    colView.addEventFilter(e -> menuBarViewContentDidKeyPress(aMenuBar, e), KeyPress);
+    return colView;
+}
+
+/** Forwards KeyPress + ShortCut events to MenuBar. */
+private static void menuBarViewContentDidKeyPress(MenuBar aMenuBar, ViewEvent anEvent)
+{
+    if(anEvent.isShortcutDown())
+        ViewUtils.processEvent(aMenuBar, anEvent);
+}
+
 }

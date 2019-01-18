@@ -187,6 +187,7 @@ public void dispatchKeyEvent(ViewEvent anEvent)
 
     // Get current focused view and array of parents
     View focusedView = _rview.getFocusedView();
+    if(focusedView==null) focusedView = _rview.getContent(); // This is bogus
     View pars[] = getParents(focusedView);
     
     // Iterate down and see if any should filter
@@ -212,8 +213,7 @@ public void dispatchKeyEvent(ViewEvent anEvent)
     }
     
     // Send to MenuBar
-    if(anEvent.isKeyPress() && anEvent.isShortcutDown() && _rview.getMenuBar()!=null)
-        _rview.getMenuBar().processEvent(anEvent);
+    //if(e.isKeyPress() && e.isShortcutDown() && _rview.getMenuBar()!=null) _rview.getMenuBar().processEvent(e);
 }
 
 /**
