@@ -152,6 +152,11 @@ protected void uiShowingChanged()
 }
 
 /**
+ * Returns the native object for the UI (JComponent).
+ */
+public Object getNative()  { return getWindow().getHelper().getContentNative(); }
+
+/**
  * Returns the specific child view for given object (name, event or view).
  */
 public View getView(Object anObj)

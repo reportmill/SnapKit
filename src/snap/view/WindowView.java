@@ -512,6 +512,9 @@ public abstract static class WindowHpr <T> {
     /** Returns the native being helped. */
     public abstract T getNative();
     
+    /** Returns the native for the window content. */
+    public Object getContentNative()  { return null; }
+    
     /** Registers a view for repaint. */
     public abstract void requestPaint(Rect aRect);
     

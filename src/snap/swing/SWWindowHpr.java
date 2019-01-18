@@ -69,6 +69,11 @@ public Window getNative()
 }
 
 /**
+ * Returns the native for the window content.
+ */
+public JComponent getContentNative()  { return _rviewNtv; }
+
+/**
  * Initialze native window.
  */
 public void initWindow()
