@@ -38,9 +38,9 @@ public void show(View aView, double aX, double aY)
     // Show node
     super.show(aView, aX, aY);
     
-    // Set this popup as aView.RootView.Popup
-    RootView rview = aView!=null? aView.getRootView() : null;
-    if(rview!=null) rview.setPopup(this);
+    // Set this popup as aView.Window.Popup
+    WindowView win = aView!=null? aView.getWindow() : null;
+    if(win!=null) win.setPopup(this);
 }
 
 }

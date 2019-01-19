@@ -16,6 +16,9 @@ public class SWRootView extends JComponent implements DragGestureListener {
     // The RootView
     RootView              _rview;
     
+    // The Window
+    WindowView            _win;
+    
     // The DragSource
     DragSource            _dragSource;
     
@@ -34,6 +37,7 @@ public void setRootView(RootView aRootView)
 {
     // RootView only beyond this point
     _rview = aRootView;
+    _win = aRootView.getWindow();
     
     // Add component listener to sync SWRootView bounds changes with Snap RootView
     addComponentListener(new ComponentAdapter() {
@@ -142,7 +146,7 @@ protected void processEvent(AWTEvent anEvent)
         
         // Create new event and dispatch
         ViewEvent event = SwingViewEnv.get().createEvent(_rview, me, null, null);
-        _rview.dispatchEvent(event);
+        _win.dispatchEvent(event);
         
         // Bogus! (not sure why this is here)
         if(!isFocusOwner()) requestFocusInWindow(true);
@@ -154,7 +158,7 @@ protected void processEvent(AWTEvent anEvent)
     // Handle KeyEvents
     else if(anEvent instanceof KeyEvent) { KeyEvent ke = (KeyEvent)anEvent; int id = ke.getID();
         ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, null, null);
-        _rview.dispatchEvent(event);
+        _win.dispatchEvent(event);
     }
 }
 
@@ -185,7 +189,7 @@ public String getToolTipText(MouseEvent anEvent)
 {
     if(_rview==null) return null;
     ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, null, null);
-    return _rview.getToolTip(event);
+    return _win.getToolTip(event);
 }
 
 /**
@@ -194,7 +198,7 @@ public String getToolTipText(MouseEvent anEvent)
 public void dragGestureRecognized(DragGestureEvent anEvent)
 {
     ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, ViewEvent.Type.DragGesture, null);
-    _rview.dispatchEvent(event);
+    _win.dispatchEvent(event);
 }
 
 /**
@@ -203,7 +207,7 @@ public void dragGestureRecognized(DragGestureEvent anEvent)
 public void sendDropTargetEvent(DropTargetEvent anEvent, ViewEvent.Type aType)
 {
     ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, aType, null);
-    _rview.dispatchEvent(event);
+    _win.dispatchEvent(event);
 }
 
 }

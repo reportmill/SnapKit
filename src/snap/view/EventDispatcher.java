@@ -11,8 +11,8 @@ import static snap.view.ViewEvent.Type.*;
  */
 public class EventDispatcher {
     
-    // The RootView
-    RootView               _rview;
+    // The Window
+    WindowView             _win;
 
      // The last mouse press point
      double                _mpx, _mpy;
@@ -41,7 +41,7 @@ public class EventDispatcher {
 /**
  * Creates a new EventDispatcher for given RootView.
  */
-public EventDispatcher(RootView aRV)  { _rview = aRV; }
+public EventDispatcher(WindowView aWin)  { _win = aWin; }
 
 /**
  * Returns the popup window, if one was added to root view during last event.
@@ -104,12 +104,13 @@ public void dispatchMouseEvent(ViewEvent anEvent)
         anEvent.setClickCount(getClickCount()); }
 
     // Get target view (at mouse point, or mouse press, or mouse press point)
-    View targ = ViewUtils.getDeepestViewAt(_rview, anEvent.getX(), anEvent.getY());
+    RootView rview = _win.getRootView();
+    View targ = ViewUtils.getDeepestViewAt(rview, anEvent.getX(), anEvent.getY());
     if(anEvent.isMouseExit()) targ = null;
     if(anEvent.isMouseDrag() || anEvent.isMouseRelease()) {
         targ = _mousePressView;
-        if(targ.getRootView()!=_rview)
-            targ = _mousePressView = ViewUtils.getDeepestViewAt(_rview, _mpx, _mpy);
+        if(targ.getRootView()!=rview)
+            targ = _mousePressView = ViewUtils.getDeepestViewAt(rview, _mpx, _mpy);
     }
     
     // Get target parents
@@ -123,7 +124,7 @@ public void dispatchMouseEvent(ViewEvent anEvent)
              if(!ArrayUtils.containsId(pars,view)) {
                  _mouseOvers.remove(i); _mouseOverView = i>0? _mouseOvers.get(i-1) : null;
                 if(!view.getEventAdapter().isEnabled(MouseExit)) continue;
-                 ViewEvent e2 = _rview.getEnv().createEvent(view, anEvent.getEvent(), MouseExit, null);
+                 ViewEvent e2 = rview.getEnv().createEvent(view, anEvent.getEvent(), MouseExit, null);
                  view.fireEvent(e2);
                  if(e2.isConsumed()) anEvent.consume();
              }
@@ -134,13 +135,13 @@ public void dispatchMouseEvent(ViewEvent anEvent)
         for(int i=_mouseOvers.size();i<pars.length;i++) { View view = pars[i];
             _mouseOvers.add(view); _mouseOverView = view;
             if(!view.getEventAdapter().isEnabled(MouseEnter)) continue;
-             ViewEvent e2 = _rview.getEnv().createEvent(view, anEvent.getEvent(), MouseEnter, null);
+             ViewEvent e2 = rview.getEnv().createEvent(view, anEvent.getEvent(), MouseEnter, null);
              view.fireEvent(e2);
              if(e2.isConsumed()) anEvent.consume();
         }
         
         // Update CurrentCursor
-        _rview.getWindow().resetActiveCursor();
+        rview.getWindow().resetActiveCursor();
     }
     
     // Handle MousePress: Update MousePressView and mouse pressed point
@@ -185,8 +186,9 @@ public void dispatchKeyEvent(ViewEvent anEvent)
         trackDebugKeys(anEvent);
 
     // Get current focused view and array of parents
-    View focusedView = _rview.getFocusedView();
-    if(focusedView==null) focusedView = _rview.getContent(); // This is bogus
+    RootView rview = _win.getRootView();
+    View focusedView = rview.getFocusedView();
+    if(focusedView==null) focusedView = rview.getContent(); // This is bogus
     View pars[] = getParents(focusedView);
     
     // Iterate down and see if any should filter
@@ -199,7 +201,7 @@ public void dispatchKeyEvent(ViewEvent anEvent)
     // If key pressed and tab and FocusedView.FocusKeysEnabled, switch focus
     if(anEvent.isKeyPress() && anEvent.isTabKey() && focusedView!=null && focusedView.isFocusKeysEnabled()) {
         View next = anEvent.isShiftDown()? focusedView.getFocusPrev() : focusedView.getFocusNext();
-        if(next!=null) { _rview.requestFocus(next); return; }
+        if(next!=null) { rview.requestFocus(next); return; }
     }
     
     // Iterate back up and see if any parents should handle
@@ -245,7 +247,8 @@ public void dispatchDragSourceEvent(ViewEvent anEvent)
 public void dispatchDragTargetEvent(ViewEvent anEvent)
 {
     // Get target view and parents
-    View targ = ViewUtils.getDeepestViewAt(_rview, anEvent.getX(), anEvent.getY());
+    View rview = _win.getRootView();
+    View targ = ViewUtils.getDeepestViewAt(rview, anEvent.getX(), anEvent.getY());
     View pars[] = getParents(targ);
     
     // Remove old DragOver views and dispatch appropriate MouseExited events
@@ -260,7 +263,7 @@ public void dispatchDragTargetEvent(ViewEvent anEvent)
     }
     
     // Add new DragOver views and dispatch appropriate MouseEntered events
-    int start = getParentCount(_dragOverView!=null? _dragOverView : _rview);
+    int start = getParentCount(_dragOverView!=null? _dragOverView : rview);
     for(int i=start;i<pars.length;i++) { View view = pars[i]; _dragOverView = view;
         if(!view.getEventAdapter().isEnabled(DragEnter)) continue;
         ViewEvent e2 = anEvent.copyForView(view); e2._type = DragEnter;
@@ -281,8 +284,8 @@ public void dispatchDragTargetEvent(ViewEvent anEvent)
 /** Returns the number of parents of given view including RootView. */
 private int getParentCount(View aView)
 {
-    if(aView==null) return 0;
-    int pc = 1; for(View n=aView;n!=_rview;n=n.getParent()) pc++;
+    if(aView==null) return 0; View rview = _win.getRootView();
+    int pc = 1; for(View n=aView;n!=rview;n=n.getParent()) pc++;
     return pc;
 }
 
@@ -290,7 +293,8 @@ private int getParentCount(View aView)
 private View[] getParents(View aView)
 {
     int pc = getParentCount(aView); View pars[] = new View[pc]; if(pc==0) return pars;
-    for(View n=aView;n!=_rview;n=n.getParent()) pars[--pc] = n; pars[0] = _rview;
+    View rview = _win.getRootView();
+    for(View n=aView;n!=rview;n=n.getParent()) pars[--pc] = n; pars[0] = rview;
     return pars;
 }
 

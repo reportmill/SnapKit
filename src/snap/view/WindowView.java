@@ -55,6 +55,9 @@ public class WindowView extends ParentView {
     // The helper to map window functionality to native platform
     WindowHpr                 _helper;
     
+    // The EventDispatcher
+    EventDispatcher           _eventDispatcher = new EventDispatcher(this);
+    
     // The View that referenced on last show
     View                      _clientView;
     
@@ -359,8 +362,8 @@ public void show()
  */
 public void hide()
 {
-    if(getRootView().getPopup()!=null)
-        getRootView().getPopup().hide();
+    if(getPopup()!=null)
+        getPopup().hide();
     if(isShowing())
         getHelper().hide();
 }
@@ -467,10 +470,42 @@ public void setActiveCursor(Cursor aCursor)
  */
 public void resetActiveCursor()
 {
-    View mouseOverView = getRootView()._eventDispatcher._mouseOverView;
+    View mouseOverView = _eventDispatcher._mouseOverView;
     if(mouseOverView!=null && mouseOverView.getCursor()!=getActiveCursor())
         setActiveCursor(mouseOverView.getCursor());
 }
+
+/** 
+ * Override to try to get tool tip from mouse over stack.
+ */
+public String getToolTip(ViewEvent anEvent)
+{
+    for(int i=_eventDispatcher._mouseOvers.size()-1;i>=0;i--) { View view = _eventDispatcher._mouseOvers.get(i);
+        String text = view.isToolTipEnabled()? view.getToolTip(anEvent.copyForView(view)) : view.getToolTip();
+        if(text!=null) return text;
+    }
+    return null;
+}
+
+/**
+ * Returns the EventDispatcher.
+ */
+public EventDispatcher getDispatcher()  { return _eventDispatcher; }
+
+/**
+ * Dispatch event.
+ */
+public void dispatchEvent(ViewEvent anEvent)  { _eventDispatcher.dispatchEvent(anEvent); }
+
+/**
+ * Returns the popup window, if one was added to root view during last event.
+ */
+public PopupWindow getPopup()  { return _eventDispatcher.getPopup(); }
+
+/**
+ * Sets the popup window, if one added to this root view during last event.
+ */
+protected void setPopup(PopupWindow aPopup)  { _eventDispatcher.setPopup(aPopup); }
 
 /**
  * Returns the preferred width.

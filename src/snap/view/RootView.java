@@ -24,9 +24,6 @@ public class RootView extends ParentView {
     // The RootView.Lister that is notified on certain root view actions
     RootView.Listener        _lsnr;
     
-    // The EventDispatcher
-    EventDispatcher          _eventDispatcher = new EventDispatcher(this);
-    
     // A map of dirty info
     Map <View,Rect>          _dirtyRects = new HashMap();
     
@@ -93,16 +90,6 @@ public WindowView getWindow()
 }
 
 /**
- * Returns the popup window, if one was added to root view during last event.
- */
-public PopupWindow getPopup()  { return _eventDispatcher.getPopup(); }
-
-/**
- * Sets the popup window, if one added to this root view during last event.
- */
-protected void setPopup(PopupWindow aPopup)  { _eventDispatcher.setPopup(aPopup); }
-
-/**
  * Adds a RootView listener.
  */
 public void addRootViewListener(RootView.Listener aLsnr)
@@ -121,18 +108,6 @@ public void removeRootViewListener(RootView.Listener aLsnr)  { if(_lsnr==aLsnr) 
  */
 public RootView getRootView()  { return this; }
 
-/** 
- * Override to try to get tool tip from mouse over stack.
- */
-public String getToolTip(ViewEvent anEvent)
-{
-    for(int i=_eventDispatcher._mouseOvers.size()-1;i>=0;i--) { View view = _eventDispatcher._mouseOvers.get(i);
-        String text = view.isToolTipEnabled()? view.getToolTip(anEvent.copyForView(view)) : view.getToolTip();
-        if(text!=null) return text;
-    }
-    return null;
-}
-
 /**
  * Override to handle when RootView is ordered out.
  */
@@ -144,7 +119,7 @@ protected void setShowing(boolean aVal)
     if(!aVal) {
         ViewEvent event = getEnv().createEvent(this, null, MouseMove, null);
         event = event.copyForViewPoint(this, getWidth()+100, 0, 0);
-        dispatchEvent(event);
+        getWindow().dispatchEvent(event);
     }
 }
 
@@ -359,16 +334,6 @@ protected void paintDebug(View aView, Painter aPntr, Shape aShape)
  * Activate PaintLater.
  */
 private final void activatePaintLater()  { if(_plater==null) getEnv().runLater(_plater = _platerShared); }
-
-/**
- * Returns the EventDispatcher.
- */
-public EventDispatcher getDispatcher()  { return _eventDispatcher; }
-
-/**
- * Dispatch event.
- */
-public void dispatchEvent(ViewEvent anEvent)  { _eventDispatcher.dispatchEvent(anEvent); }
 
 /** Returns the preferred width. */
 protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _content, aH); }

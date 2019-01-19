@@ -263,8 +263,8 @@ protected void swingWindowBoundsChanged()
     _win.setBounds(_winNtv.getX(), _winNtv.getY(), _winNtv.getWidth(), _winNtv.getHeight());
 
     // If window deactivated and it has Popup, hide popup
-    if(_rview.getPopup()!=null)
-        _rview.getPopup().hide();
+    if(_win.getPopup()!=null)
+        _win.getPopup().hide();
 }
 
 /**
@@ -284,8 +284,8 @@ protected void swingWindowActiveChanged()
         sendWinEvent(null, etype);
     
     // If window deactivated and it has Popup, hide popup
-    if(!active && _rview.getPopup()!=null)
-        _rview.getPopup().hide();
+    if(!active && _win.getPopup()!=null)
+        _win.getPopup().hide();
 }
 
 /**
