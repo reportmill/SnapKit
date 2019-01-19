@@ -49,9 +49,7 @@ public class RootView extends ParentView {
     static boolean           _debug = false; static int _pc; static long _frames[] = null;//new long[20];
     
     // Constants for properties
-    public static final String MenuBar_Prop = "MenuBar";
     public static final String Content_Prop = "Content";
-    public static final String CurrentCursor_Prop = "CurrentCursor";
 
 /**
  * Creates a RootView.
@@ -122,20 +120,6 @@ public void removeRootViewListener(RootView.Listener aLsnr)  { if(_lsnr==aLsnr) 
  * Returns the root view.
  */
 public RootView getRootView()  { return this; }
-
-/**
- * Returns the current cursor.
- */
-public Cursor getCurrentCursor()  { return _ccursor; } Cursor _ccursor = Cursor.DEFAULT;
-
-/**
- * Sets the current cursor.
- */
-public void setCurrentCursor(Cursor aCursor)
-{
-    if(aCursor==_ccursor) return;
-    firePropChange(CurrentCursor_Prop, _ccursor, _ccursor=aCursor);
-}
 
 /** 
  * Override to try to get tool tip from mouse over stack.

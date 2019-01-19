@@ -140,8 +140,7 @@ public void dispatchMouseEvent(ViewEvent anEvent)
         }
         
         // Update CurrentCursor
-        if(_mouseOverView!=null && _mouseOverView.getCursor()!=_rview.getCurrentCursor())
-            _rview.setCurrentCursor(_mouseOverView.getCursor());
+        _rview.getWindow().resetActiveCursor();
     }
     
     // Handle MousePress: Update MousePressView and mouse pressed point

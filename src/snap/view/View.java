@@ -641,7 +641,7 @@ public void setCursor(Cursor aCursor)
 {
     if(aCursor==null) aCursor = Cursor.DEFAULT; if(aCursor==_cursor) return;
     firePropChange(Cursor_Prop, _cursor, _cursor=aCursor);
-    RootView rview = getRootView(); if(rview!=null) rview.setCurrentCursor(_cursor);
+    WindowView win = getWindow(); if(win!=null) win.resetActiveCursor();
 }
 
 /**

@@ -385,7 +385,7 @@ protected void processDividerEvent(ViewEvent anEvent)
     // Handle MouseMove
     if(anEvent.isMouseMove()) {
         Divider div = getDividerAt(anEvent.getX(), anEvent.getY());
-        if(div!=null) getRootView().setCurrentCursor(div.getCursor());
+        if(div!=null) { WindowView win = getWindow(); if(win!=null) win.setActiveCursor(div.getCursor()); }
     }
     
     // Handle MouseDrag: Calculate new location and set

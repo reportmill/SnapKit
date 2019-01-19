@@ -14,16 +14,22 @@ import snap.web.WebURL;
 public class SWWindowHpr extends WindowView.WindowHpr <Window> {
     
     // The snap Window
-    WindowView     _win;
+    WindowView        _win;
     
     // The Swing Window
-    Window         _winNtv;
+    Window            _winNtv;
     
     // The snap RootView
-    RootView       _rview;
+    RootView          _rview;
     
     // The native RootView
-    SWRootView     _rviewNtv;
+    SWRootView        _rviewNtv;
+    
+    // The current cursor
+    snap.view.Cursor  _cursor;
+    
+    // Runnable to update cursor
+    Runnable          _cursRun, _cursRunShared = () -> { _rviewNtv.setCursor(AWT.get(_cursor)); _cursRun = null; };
     
 /**
  * Returns the snap Window.
@@ -47,6 +53,9 @@ public void setWindow(WindowView aWin)
     
     // Add listener to update bounds
     _win.addPropChangeListener(pc -> snapWindowPropertyChanged(pc));
+    
+    // Add listener to update native cursor
+    _win.addPropChangeListener(pc -> snapWindowActiveCursorChanged(), WindowView.ActiveCursor_Prop);
 }
     
 /**
@@ -301,6 +310,15 @@ private void setY(double aValue)  { _winNtv.setLocation(_winNtv.getX(), (int)aVa
 private void setWidth(double aValue)  { _winNtv.setSize((int)aValue, _winNtv.getHeight()); }
 private void setHeight(double aValue)  { _winNtv.setSize(_winNtv.getWidth(), (int)aValue); }
 
+/**
+ * Called when RootView CurrentCursor changes.
+ */
+void snapWindowActiveCursorChanged()
+{
+    _cursor = _win.getActiveCursor();
+    if(_cursRun==null) SwingUtilities.invokeLater(_cursRun = _cursRunShared);
+}
+    
 /**
  * Sends the given event.
  */

@@ -70,6 +70,7 @@ public class WindowView extends ParentView {
     public static enum Style { Small }
     
     // Constants for properties
+    public static final String ActiveCursor_Prop = "ActiveCursor";
     public static final String AlwaysOnTop_Prop = "AlwaysOnTop";
     public static final String Image_Prop = "Image";
     public static final String Maximized_Prop = "Maximized";
@@ -445,6 +446,30 @@ protected void setFocused(boolean aValue)
 {
     if(aValue==isFocused()) return; super.setFocused(aValue);
     if(aValue) ListUtils.moveToFront(_openWins, this);
+}
+
+/**
+ * Returns the active cursor.
+ */
+public Cursor getActiveCursor()  { return _activeCursor; } Cursor _activeCursor = Cursor.DEFAULT;
+
+/**
+ * Sets the current cursor.
+ */
+public void setActiveCursor(Cursor aCursor)
+{
+    if(aCursor==_activeCursor) return;
+    firePropChange(ActiveCursor_Prop, _activeCursor, _activeCursor=aCursor);
+}
+
+/**
+ * Resets the active cursor.
+ */
+public void resetActiveCursor()
+{
+    View mouseOverView = getRootView()._eventDispatcher._mouseOverView;
+    if(mouseOverView!=null && mouseOverView.getCursor()!=getActiveCursor())
+        setActiveCursor(mouseOverView.getCursor());
 }
 
 /**
