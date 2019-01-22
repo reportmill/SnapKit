@@ -52,6 +52,9 @@ public class WindowView extends ParentView {
     // Save frame size
     boolean                   _saveSize;
     
+    // The focused view
+    View                      _focusedView = this, _focusedViewLast;
+    
     // The helper to map window functionality to native platform
     WindowHpr                 _helper;
     
@@ -281,6 +284,44 @@ public boolean isModal()  { return _modal; }
  * Sets the modal mode of the window (defaults to false).
  */
 public void setModal(boolean aValue)  { _modal = aValue; }
+
+/**
+ * Returns the view that currently receives KeyEvents.
+ */
+public View getFocusedView()
+{
+    if(_focusedView!=null && !_focusedView.isFocused())
+        _focusedView = null;
+    return _focusedView;
+}
+
+/**
+ * Returns the previous focus view.
+ */
+public View getFocusedViewLast()  { return _focusedViewLast; }
+
+/**
+ * Tries to makes the given view the view that receives KeyEvents.
+ */
+protected void requestFocus(View aView)
+{
+    // Make sure this happens on Event thread
+    if(!getEnv().isEventThread()) { getEnv().runLater(() -> requestFocus(aView)); return; }
+    
+    // If already set, just return
+    if(aView==_focusedView) return;
+    
+    // If existing FocusedView, clear View.Focused
+    if(_focusedView!=null)
+        _focusedView.setFocused(false);
+    
+    // Update FocusViewLast, FocusView
+    _focusedViewLast = _focusedView; _focusedView = aView;
+    
+    // If new FocusedView, set View.Focused
+    if(_focusedView!=null)
+        _focusedView.setFocused(true);
+}
 
 /**
  * Returns the view helper.

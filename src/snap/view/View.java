@@ -1870,7 +1870,7 @@ public void setFocusPainted(boolean aValue)  { _focusPainted = aValue; }
 public void requestFocus()
 {
     if(isFocused()) return;
-    RootView rview = getRootView(); if(rview!=null) rview.requestFocus(this);
+    WindowView win = getWindow(); if(win!=null) win.requestFocus(this);
 }
 
 /**

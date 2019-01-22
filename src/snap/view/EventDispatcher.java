@@ -186,9 +186,8 @@ public void dispatchKeyEvent(ViewEvent anEvent)
         trackDebugKeys(anEvent);
 
     // Get current focused view and array of parents
-    RootView rview = _win.getRootView();
-    View focusedView = rview.getFocusedView();
-    if(focusedView==null) focusedView = rview.getContent(); // This is bogus
+    View focusedView = _win.getFocusedView();
+    if(focusedView==null) focusedView = _win.getContent(); // This is bogus
     View pars[] = getParents(focusedView);
     
     // Iterate down and see if any should filter
@@ -201,7 +200,7 @@ public void dispatchKeyEvent(ViewEvent anEvent)
     // If key pressed and tab and FocusedView.FocusKeysEnabled, switch focus
     if(anEvent.isKeyPress() && anEvent.isTabKey() && focusedView!=null && focusedView.isFocusKeysEnabled()) {
         View next = anEvent.isShiftDown()? focusedView.getFocusPrev() : focusedView.getFocusNext();
-        if(next!=null) { rview.requestFocus(next); return; }
+        if(next!=null) { _win.requestFocus(next); return; }
     }
     
     // Iterate back up and see if any parents should handle

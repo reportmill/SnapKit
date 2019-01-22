@@ -736,8 +736,8 @@ protected Image getSelectedRectImage(Rect aRect)
 /** Returns whether this view or child view has focus. */
 boolean isFoc()
 {
-    RootView rv = getRootView(); if(rv==null) return false;
-    View fv = rv.getFocusedView(); for(View v = fv; v!=null; v = v.getParent()) if(v==this) return true;
+    WindowView win = getWindow(); if(win==null) return false;
+    View fv = win.getFocusedView(); for(View v = fv; v!=null; v = v.getParent()) if(v==this) return true;
     return false;
 }
 

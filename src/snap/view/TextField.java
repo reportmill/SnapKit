@@ -860,8 +860,8 @@ public void escape(ViewEvent anEvent)
     }
     
     // Otherwise hand focus to previous view
-    else if(getRootView().getFocusedViewLast()!=null)
-        getRootView().getFocusedViewLast().requestFocus();
+    else if(getWindow().getFocusedViewLast()!=null)
+        getWindow().getFocusedViewLast().requestFocus();
     else selectAll();
 }
 

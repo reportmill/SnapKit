@@ -359,9 +359,9 @@ protected void textFieldKeyPressed(ViewEvent anEvent)
         }
         
         // Otherwise have RootView.FocusedViewLast request focus
-        else if(getRootView().getFocusedViewLast()!=null) {
+        else if(getWindow().getFocusedViewLast()!=null) {
             if(isPopup() && isPopupShowing()) getPopupList().hide();
-            getRootView().getFocusedViewLast().requestFocus();
+            getWindow().getFocusedViewLast().requestFocus();
         }
         
         anEvent.consume();
