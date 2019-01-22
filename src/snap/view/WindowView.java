@@ -447,14 +447,14 @@ public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
     // Modify x for given HPos
     switch(aPos.getHPos()) {
         case LEFT: x += rect.x; break;
-        case CENTER: x += Math.round(rect.x + (rect.getWidth()-getWidth())/2); break;
+        case CENTER: x += Math.round(rect.x + (rect.width-getWidth())/2); break;
         case RIGHT: x += rect.getMaxX() - getWidth(); break;
     }
     
     // Modify y for given VPos
     switch(aPos.getVPos()) {
         case TOP: y += rect.y; break;
-        case CENTER: y += Math.round(rect.y + (rect.getHeight()-getHeight())/2); break;
+        case CENTER: y += Math.round(rect.y + (rect.height-getHeight())/2); break;
         case BOTTOM: y += rect.getMaxY() - getHeight(); break;
     }
     
@@ -587,9 +587,7 @@ public static WindowView[] getOpenWindows()  { return _openWins.toArray(new Wind
  */
 public static <T extends ViewOwner> T getOpenWindowOwner(Class <T> aClass)
 {
-    for(WindowView wnode : _openWins) {
-        RootView rview = wnode.getRootView();
-        View content = rview.getContent();
+    for(WindowView win : _openWins) { View content = win.getContent();
         ViewOwner ownr = content.getOwner();
         if(ownr!=null && (aClass==null || aClass.isAssignableFrom(ownr.getClass())))
             return (T)ownr;
@@ -603,9 +601,7 @@ public static <T extends ViewOwner> T getOpenWindowOwner(Class <T> aClass)
 public static <T extends ViewOwner> T[] getOpenWindowOwners(Class <T> aClass)
 {
     List <T> ownrs = new ArrayList();
-    for(WindowView wnode : _openWins) {
-        RootView rview = wnode.getRootView();
-        View content = rview.getContent();
+    for(WindowView win : _openWins) { View content = win.getContent();
         ViewOwner ownr = content.getOwner();
         if(ownr!=null && (aClass==null || aClass.isAssignableFrom(ownr.getClass())))
             ownrs.add((T)ownr);

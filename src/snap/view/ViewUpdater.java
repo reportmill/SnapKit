@@ -67,27 +67,6 @@ public synchronized void relayoutViews()
 }
 
 /**
- * Adds a view to set of Views that are being animated.
- */
-public void startAnim(View aView)
-{
-    _animViews.add(aView);                     //System.out.println("Add Anim " + name(aView));
-    if(_animViews.size()==1) _timer.start();
-    ViewAnim anim = aView.getAnim(0); anim._updater = this;
-    if(!anim.isSuspended() || anim.getStartTime()<0) anim.setStartTime(_timer.getTime());
-}
-
-/**
- * Removes a view to set of Views that are being animated.
- */
-public void stopAnim(View aView)
-{
-    if(!_animViews.remove(aView)) return;
-    if(_animViews.size()==0) _timer.stop();   //System.out.println("Remove Anim " + name(aView));
-    ViewAnim anim = aView.getAnim(0); anim._updater = null;
-}
-
-/**
  * Called to register a repaint.
  */
 public synchronized void repaint(View aView, double aX, double aY, double aW, double aH)
@@ -209,6 +188,27 @@ protected void paintDebug(View aView, Painter aPntr, Shape aShape)
  * Activate PaintLater.
  */
 private final void activatePaintLater()  { if(_plater==null) ViewUtils.runLater(_plater = _platerShared); }
+
+/**
+ * Adds a view to set of Views that are being animated.
+ */
+public void startAnim(View aView)
+{
+    _animViews.add(aView);                     //System.out.println("Add Anim " + name(aView));
+    if(_animViews.size()==1) _timer.start();
+    ViewAnim anim = aView.getAnim(0); anim._updater = this;
+    if(!anim.isSuspended() || anim.getStartTime()<0) anim.setStartTime(_timer.getTime());
+}
+
+/**
+ * Removes a view to set of Views that are being animated.
+ */
+public void stopAnim(View aView)
+{
+    if(!_animViews.remove(aView)) return;
+    if(_animViews.size()==0) _timer.stop();   //System.out.println("Remove Anim " + name(aView));
+    ViewAnim anim = aView.getAnim(0); anim._updater = null;
+}
 
 /**
  * Adds a ViewUpdater listener.
