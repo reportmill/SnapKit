@@ -498,6 +498,11 @@ public EventDispatcher getDispatcher()  { return _eventDispatcher; }
 public void dispatchEvent(ViewEvent anEvent)  { _eventDispatcher.dispatchEvent(anEvent); }
 
 /**
+ * Returns the Updater.
+ */
+public ViewUpdater getUpdater()  { return _rview._updater; }
+
+/**
  * Returns the popup window, if one was added to root view during last event.
  */
 public PopupWindow getPopup()  { return _eventDispatcher.getPopup(); }

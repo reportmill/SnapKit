@@ -1050,7 +1050,12 @@ public RootView getRootView()  { return _parent!=null? _parent.getRootView() : n
 /**
  * Returns the window.
  */
-public WindowView getWindow()  { ParentView par = getParent(); return par!=null? par.getWindow() : null; }
+public WindowView getWindow()  { return _parent!=null? _parent.getWindow() : null; }
+
+/**
+ * Returns the ViewUpdater.
+ */
+public ViewUpdater getUpdater()  { return _parent!=null? _parent.getUpdater() : null; }
 
 /**
  * Returns the position this view would prefer to take when inside a pane.
@@ -1776,8 +1781,8 @@ public void repaint(Rect aRect)  { repaint(aRect.x,aRect.y,aRect.width,aRect.hei
  */
 public void repaint(double aX, double aY, double aW, double aH)
 {
-    RootView rview = getRootView(); if(rview==null) return;
-    rview.repaint(this, aX, aY, aW, aH);
+    ViewUpdater updater = getUpdater(); if(updater==null) return;
+    updater.repaint(this, aX, aY, aW, aH);
 }
 
 /**

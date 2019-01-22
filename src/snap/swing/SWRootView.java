@@ -113,7 +113,7 @@ protected void paintComponent(Graphics aGr)
 {
     Painter pntr = new J2DPainter(aGr);
     java.awt.Rectangle crect = aGr.getClipBounds();
-    _rview.paintViews(pntr, new Rect(crect.x, crect.y, crect.width, crect.height));
+    _win.getUpdater().paintViews(pntr, new Rect(crect.x, crect.y, crect.width, crect.height));
 }
 
 /**

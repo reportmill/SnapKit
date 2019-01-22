@@ -56,8 +56,8 @@ public class ViewAnim implements XMLArchiver.Archivable {
     // Whether this anim was suspended because it's not visible
     boolean              _suspended;
     
-    // The root view currently playing this anim
-    RootView             _rview;
+    // The ViewUpdater currently playing this anim
+    ViewUpdater          _updater;
     
 /**
  * Creates a new ViewAnim.
@@ -184,7 +184,7 @@ public Integer[] getKeyFrameTimes()
 /**
  * Whether anim is playing.
  */
-public boolean isPlaying()  { return _rview!=null; }
+public boolean isPlaying()  { return _updater!=null; }
 
 /**
  * Returns whether anim is suspended.
@@ -501,8 +501,8 @@ public ViewAnim setInterpolator(Interpolator anInterp)  { _interp = anInterp; re
 public void play()
 {
     if(_parent!=null) { _parent.play(); return; }
-    RootView rview = _view.getRootView();
-    if(rview!=null) { rview.playAnim(_view); _suspended = false; }
+    ViewUpdater updater = _view.getUpdater();
+    if(updater!=null) { updater.startAnim(_view); _suspended = false; }
     else _suspended = true;
 }
 
@@ -512,7 +512,7 @@ public void play()
 public void stop()
 {
     if(_parent!=null) { _parent.stop(); return; }
-    if(_rview!=null) _rview.stopAnim(_view);
+    if(_updater!=null) _updater.stopAnim(_view);
     _suspended = false; _startTime = -1;
 }
 
@@ -523,7 +523,7 @@ public void suspend()
 {
     _suspended = true;
     if(_parent!=null) { _parent.suspend(); return; }
-    if(_rview!=null) _rview.stopAnim(_view);
+    if(_updater!=null) _updater.stopAnim(_view);
 }
 
 /**

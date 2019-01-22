@@ -192,12 +192,6 @@ public String showSavePanel(View aView)  { setSaving(true); return showFilePanel
  */
 protected String showFilePanel(View aView)
 {
-    // Get component
-    RootView rview = aView!=null? aView.getRootView() : null;
-    
-    // Declare local variable for chooser
-    //chooser.setFileFilter(new UIUtilsFileFilter(theExtensions, aDesc));
-    
     // If no file/dir set, set from RecentPath (prefs)
     if(getDir()==null) {
         String path = getRecentPath(getType());
