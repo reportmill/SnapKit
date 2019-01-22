@@ -134,11 +134,6 @@ protected void requestFocus(View aView)
  */
 protected void setNeedsLayoutDeep(boolean aVal)
 {
-    // If Painting, complaint (nothing should change during paint)
-    if(_updater._painting)
-        System.err.println("RootView.setNeedsLayoutDeep: Illegal view changes during paint.");
-
-    // If already set, just return
     if(aVal==isNeedsLayoutDeep()) return;
     super.setNeedsLayoutDeep(aVal);
     _updater.relayoutViews();

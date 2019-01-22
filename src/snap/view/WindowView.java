@@ -500,7 +500,7 @@ public void dispatchEvent(ViewEvent anEvent)  { _eventDispatcher.dispatchEvent(a
 /**
  * Returns the Updater.
  */
-public ViewUpdater getUpdater()  { return _rview._updater; }
+public ViewUpdater getUpdater()  { return _rview!=null? _rview._updater : null; }
 
 /**
  * Returns the popup window, if one was added to root view during last event.
