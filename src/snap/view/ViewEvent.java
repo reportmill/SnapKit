@@ -144,7 +144,7 @@ public boolean isClickCandidate()
     if(getWhen() - last.getWhen() >= CLICK_TIME) return false;
     
     // If event is in another window, return false
-    if(getView().getRootView()!=last.getView().getRootView()) return false;
+    if(getView().getWindow()!=last.getView().getWindow()) return false;
     
     // If event not within 1 point of last mouse, return false
     Point pnt = getView()==last.getView()? last.getPoint() : last.getPoint(getView());

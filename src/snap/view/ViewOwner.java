@@ -15,8 +15,8 @@ public class ViewOwner implements EventListener {
     // The UI View
     View                      _ui;
     
-    // The RootView
-    RootView                  _rview;
+    // The Window
+    WindowView                _win;
     
     // Whether owner will fire events 
     boolean                   _sendEventDisabled;
@@ -495,32 +495,24 @@ public void setFirstFocus(Object anObj)  { _firstFocus = anObj; }
 public void requestFocus(Object anObj)  { View view = getView(anObj); if(view!=null) view.requestFocus(); }
 
 /**
- * Returns whether RootView has been created.
+ * Returns whether Window has been created (happens when first accessed).
  */
-public boolean isRootViewSet()  { return _rview!=null; }
+public boolean isWindowSet()  { return _win!=null; }
 
 /**
- * Returns the root view (creates, if needed).
+ * Returns the Window to manage this ViewOwner's window.
  */
-public RootView getRootView()
+public WindowView getWindow()
 {
-    if(_rview!=null) return _rview;
+    // If already set, just return
+    if(_win!=null) return _win;
+    
+    // Create window, set content to UI, set owner to this ViewOwner and return
+    _win = new WindowView();
     View ui = getUI();
-    RootView rview = new RootView();
-    rview.setContent(ui); rview.setOwner(this);
-    _rview = rview;
-    return _rview;
+    _win.setContent(ui); _win.setOwner(this);
+    return _win;
 }
-
-/**
- * Returns the Window to manage this ViewOwner's window.
- */
-public boolean isWindowSet()  { return isRootViewSet() && getRootView().isWindowSet(); }
-
-/**
- * Returns the Window to manage this ViewOwner's window.
- */
-public WindowView getWindow()  { return getRootView().getWindow(); }
 
 /**
  * Returns whether window is visible.
@@ -535,6 +527,9 @@ public void setWindowVisible(boolean aValue)
     if(aValue) getWindow().showCentered(null);
     else getWindow().hide();
 }
+
+/** Returns the Window RootView. */
+//public RootView getRootView()  { return getWindow().getRootView(); }
 
 /**
  * Returns the map of maps, each of which is used to perform value conversions.

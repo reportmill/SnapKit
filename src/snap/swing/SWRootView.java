@@ -13,11 +13,11 @@ import snap.view.*;
  */
 public class SWRootView extends JComponent implements DragGestureListener {
     
-    // The RootView
-    RootView              _rview;
-    
     // The Window
     WindowView            _win;
+    
+    // The RootView
+    RootView              _rview;
     
     // The DragSource
     DragSource            _dragSource;
@@ -26,18 +26,13 @@ public class SWRootView extends JComponent implements DragGestureListener {
     int                   _lx, _ly;
 
 /**
- * Returns the RootView.
+ * Creates a SWRootView.
  */
-public View getRootView()  { return _rview; }
-
-/**
- * Sets the RootView.
- */
-public void setRootView(RootView aRootView)
+public SWRootView(WindowView aWin, RootView aRootView)
 {
     // RootView only beyond this point
+    _win = aWin;
     _rview = aRootView;
-    _win = aRootView.getWindow();
     
     // Add component listener to sync SWRootView bounds changes with Snap RootView
     addComponentListener(new ComponentAdapter() {

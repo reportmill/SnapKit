@@ -49,7 +49,7 @@ public void setWindow(WindowView aWin)
     
     // Set RootView var and create native RootView
     _rview = aWin.getRootView();
-    _rviewNtv = new SWRootView(); _rviewNtv.setRootView(_rview);
+    _rviewNtv = new SWRootView(_win, _rview);
     
     // Add listener to update bounds
     _win.addPropChangeListener(pc -> snapWindowPropertyChanged(pc));
@@ -119,8 +119,7 @@ public void initWindow()
     rpc.setContentPane(_rviewNtv);
     
     // Size window to root view
-    winNtv.pack();
-    winNtv.setLocation((int)win.getX(),(int)win.getY());
+    winNtv.pack(); //winNtv.setLocation((int)win.getX(),(int)win.getY());
     
     // Set WindowView insets
     java.awt.Insets insAWT = winNtv.getInsets();
@@ -153,9 +152,8 @@ public void initWindow()
  */
 public void show()
 {
-    // Get native window and window view
+    // Get window
     WindowView win = _win;
-    Window winNtv = _winNtv;
     
     // If always-on-top, turn this on (since this is can be turned off in setWindowVisible(false))
     //if(wview.isAlwaysOnTop()) win.setAlwaysOnTop(true);
@@ -174,8 +172,8 @@ public void show()
     }
     
     // Set window location, make visible and notify ShowingChanged
-    winNtv.setLocation(x,y);
-    winNtv.setVisible(true);
+    _winNtv.setLocation(x,y);
+    _winNtv.setVisible(true);
     swingWindowShowingChanged(); // So change is reflected immediately
     
     // If window is modal, just return
@@ -186,7 +184,7 @@ public void show()
     if(win.getSaveName()!=null && win.getProp("FrameSaveListener")==null) {
         FrameSaveListener fsl = new FrameSaveListener(win);
         win.setProp("FrameSaveListener", fsl);
-        winNtv.addComponentListener(fsl);
+        _winNtv.addComponentListener(fsl);
     }
     
     // If window is always-on-top or does hide-on-deactivate, add listener to handle app deactivate stuff
@@ -260,7 +258,8 @@ protected void swingWindowShowingChanged()
  */
 protected void swingWindowBoundsChanged()
 {
-    _win.setBounds(_winNtv.getX(), _winNtv.getY(), _winNtv.getWidth(), _winNtv.getHeight());
+    int x = _winNtv.getX(), y = _winNtv.getY(), w = _winNtv.getWidth(), h = _winNtv.getHeight();
+    _win.setBounds(x, y, w, h);
 
     // If window deactivated and it has Popup, hide popup
     if(_win.getPopup()!=null)
@@ -270,7 +269,10 @@ protected void swingWindowBoundsChanged()
 /**
  * Registers a view for repaint.
  */
-public void requestPaint(Rect aRect)  { _rviewNtv.repaint(aRect); }
+public void requestPaint(Rect aRect)
+{
+    _rviewNtv.repaint(aRect);
+}
 
 /**
  * Handles active changed.
@@ -335,19 +337,18 @@ protected void sendWinEvent(WindowEvent anEvent, ViewEvent.Type aType)
 private Window getClientWindow(boolean doReal)
 {
     View cview = _win.getClientView();
-    RootView rview = cview!=null? cview.getRootView() : null;
-    WindowView win = rview!=null && rview.isWindowSet()? rview.getWindow() : null;
-    SWWindowHpr winHpr = win!=null? (SWWindowHpr)win.getHelper() : null;
-    Window winNtv = winHpr!=null? winHpr._winNtv : null;
+    WindowView cwin = cview!=null? cview.getWindow() : null;
+    SWWindowHpr cwinHpr = cwin!=null? (SWWindowHpr)cwin.getHelper() : null;
+    Window cwinNtv = cwinHpr!=null? cwinHpr._winNtv : null;
     
     // If ClientView found, but not in window that is showing, get win from RootView.Native instead
-    if(cview!=null && rview!=null && (win==null || !win.isShowing()) && doReal) {
-        JComponent rcomp = winHpr._rviewNtv;
-        winNtv = SwingUtils.getParent(rcomp, Window.class);
+    if(cview!=null && (cwin==null || !cwin.isShowing()) && doReal) {
+        JComponent rcomp = cwinHpr._rviewNtv;
+        cwinNtv = SwingUtils.getParent(rcomp, Window.class);
     }
     
     // Return window
-    return winNtv;
+    return cwinNtv;
 }
 
 /** Returns whether ClientView.RootView is in Snap WindowView or explicitly installed in Swing component hierarch. */

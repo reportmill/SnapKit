@@ -17,17 +17,8 @@ public PopupWindow()
     setType(TYPE_PLAIN);
     setAlwaysOnTop(true);
     setOpacity(.9);
-}
 
-/**
- * Returns the RootView.
- */
-public RootView getRootView()
-{
-    if(_rview!=null) return _rview;
-    RootView rview = new RootView(); rview.setFill(Color.WHITE); rview.setBorder(Color.LIGHTGRAY,1);
-    setRootView(rview); _rview._win = this; _rview._updater._win = this;
-    return _rview;
+    RootView rview = getRootView(); rview.setFill(Color.WHITE); rview.setBorder(Color.LIGHTGRAY,1);
 }
 
 /**

@@ -53,10 +53,13 @@ public class WindowView extends ParentView {
     boolean                   _saveSize;
     
     // The focused view
-    View                      _focusedView = this, _focusedViewLast;
+    View                      _focusedView, _focusedViewLast;
     
     // The helper to map window functionality to native platform
     WindowHpr                 _helper;
+    
+    // A class to handle view updates (repaint, relayout, resetUI, animation)
+    ViewUpdater               _updater;
     
     // The EventDispatcher
     EventDispatcher           _eventDispatcher = new EventDispatcher(this);
@@ -82,6 +85,16 @@ public class WindowView extends ParentView {
     public static final String Maximized_Prop = "Maximized";
     public static final String Resizable_Prop = "Resizable";
     public static final String Title_Prop = "Title";
+
+/**
+ * Creates a WindowView.
+ */
+public WindowView()
+{
+    // Create and add RootView
+    _rview = new RootView();
+    addChild(_rview);
+}
 
 /**
  * Returns the title of the window.
@@ -208,16 +221,6 @@ public void saveFrame()
 public RootView getRootView()  { return _rview; }
 
 /**
- * Sets the root view.
- */
-protected void setRootView(RootView aRV)
-{
-    _rview = aRV;
-    setOwner(aRV.getOwner());
-    addChild(aRV);
-}
-
-/**
  * Returns the content associated with this window.
  */
 public View getContent()  { return getRootView().getContent(); }
@@ -341,6 +344,7 @@ protected void initNativeWindow()
 {
     getHelper().initWindow();
     pack();
+    _updater = new ViewUpdater(_rview);
 }
 
 /** Initializes the native window once. */
@@ -363,7 +367,7 @@ public void show(View aView, double aX, double aY)
     // Set ClientView
     _clientView = aView;
     
-    // Make window is initialized
+    // Make sure window is initialized
     initNativeWindowOnce();
     
     // If aView provided, convert point
@@ -459,6 +463,11 @@ public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
 }
 
 /**
+ * Override to return this window.
+ */
+public WindowView getWindow()  { return this; }
+
+/**
  * Override to do layout immediately.
  */
 public void relayout()  { layout(); }
@@ -541,7 +550,7 @@ public void dispatchEvent(ViewEvent anEvent)  { _eventDispatcher.dispatchEvent(a
 /**
  * Returns the Updater.
  */
-public ViewUpdater getUpdater()  { return _rview!=null? _rview._updater : null; }
+public ViewUpdater getUpdater()  { return _updater; }
 
 /**
  * Returns the popup window, if one was added to root view during last event.

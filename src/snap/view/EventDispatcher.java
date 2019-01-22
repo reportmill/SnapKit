@@ -104,7 +104,7 @@ public void dispatchMouseEvent(ViewEvent anEvent)
         anEvent.setClickCount(getClickCount()); }
 
     // Get target view (at mouse point, or mouse press, or mouse press point)
-    RootView rview = _win.getRootView();
+    View rview = _win.getRootView();
     View targ = ViewUtils.getDeepestViewAt(rview, anEvent.getX(), anEvent.getY());
     if(anEvent.isMouseExit()) targ = null;
     if(anEvent.isMouseDrag() || anEvent.isMouseRelease()) {

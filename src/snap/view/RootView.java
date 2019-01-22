@@ -9,14 +9,8 @@ import snap.gfx.*;
  */
 public class RootView extends ParentView {
     
-    // The window used to show this root view on screen
-    WindowView               _win;
-    
     // The content
     View                     _content;
-    
-    // A class to handle view updates (repaint, relayout, resetUI, animation)
-    ViewUpdater              _updater;
     
     // Constants for properties
     public static final String Content_Prop = "Content";
@@ -28,7 +22,6 @@ public RootView()
 {
     enableEvents(KeyEvents); setFocusable(true); setFocusPainted(false);
     setFill(ViewUtils.getBackFill());
-    _updater = new ViewUpdater(this);
 }
 
 /**
@@ -48,30 +41,9 @@ public void setContent(View aView)
 }
 
 /**
- * Returns the Window to manage this ViewOwner's window.
- */
-public boolean isWindowSet()  { return _win!=null; }
-
-/**
- * Returns the window for this root view.
- */
-public WindowView getWindow()
-{
-    if(_win!=null) return _win;
-    WindowView win = new WindowView();
-    win.setRootView(this);
-    return _win = win;
-}
-
-/**
- * Returns the root view.
+ * Override to return this RootView.
  */
 public RootView getRootView()  { return this; }
-
-/**
- * Returns the ViewUpdater.
- */
-public ViewUpdater getUpdater()  { return _updater; }
 
 /**
  * Override to handle when RootView is ordered out.
@@ -95,7 +67,7 @@ protected void setNeedsLayoutDeep(boolean aVal)
 {
     if(aVal==isNeedsLayoutDeep()) return;
     super.setNeedsLayoutDeep(aVal);
-    _updater.relayoutViews();
+    ViewUpdater updater = getUpdater(); if(updater!=null) updater.relayoutViews();
 }
 
 /**
