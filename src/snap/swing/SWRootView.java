@@ -34,12 +34,6 @@ public SWRootView(WindowView aWin, RootView aRootView)
     _win = aWin;
     _rview = aRootView;
     
-    // Add component listener to sync SWRootView bounds changes with Snap RootView
-    addComponentListener(new ComponentAdapter() {
-        public void componentShown(ComponentEvent e) { showingChanged(); }
-        public void componentHidden(ComponentEvent e) { showingChanged(); }
-    });
-    
     // Suppress Tab key handling
     setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, java.util.Collections.EMPTY_SET);
     setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, java.util.Collections.EMPTY_SET);
@@ -75,16 +69,6 @@ public void setBounds(int aX, int aY, int aW, int aH)
 {
     super.setBounds(aX, aY, aW, aH);
     _rview.setSize(aW, aH); //_rview.setBounds(aX,aY,aW,aH);
-}
-
-/**
- * Called when window is shown/hidden to forward to RootView.
- */
-protected void showingChanged()
-{
-    boolean showing = isShowing();
-    ViewUtils.setShowing(_rview, showing);
-    if(showing) _rview.repaint();
 }
 
 /**

@@ -483,13 +483,19 @@ public boolean isVisible()  { return isShowing(); }
 public void setVisible(boolean aValue)  { if(aValue) showCentered(null); else hide(); }
 
 /**
- * Override to add/remove window to/from global windows list.
+ * Override to update global windows list.
  */
-public void setShowing(boolean aVal)
+protected void setShowing(boolean aValue)
 {
-    if(aVal==isShowing()) return; super.setShowing(aVal);
-    if(aVal) ListUtils.moveToFront(_openWins, this);
+    // Do normal version (or return if already set)
+    if(aValue==isShowing()) return; super.setShowing(aValue);
+    
+    // Update OpenWins list
+    if(aValue) ListUtils.moveToFront(_openWins, this);
     else _openWins.remove(this);
+    
+    // If no longer showing, dispatch mouse move outside bounds to trigger any mouse exit code
+    if(!aValue) _eventDispatcher.dispatchMouseMoveOutsideWindow();
 }
 
 /**

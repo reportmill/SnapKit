@@ -510,6 +510,7 @@ protected void configureCellText(ListCell <T> aCell)
     if(_itemTextFunc!=null) text = item!=null? _itemTextFunc.apply(item) : null;
     else if(item instanceof String) text = (String)item;
     else if(item instanceof Enum) text = item.toString();
+    else if(item instanceof Number) text = item.toString();
     else if(getCellConfigure()==null && item!=null) text = item.toString();
     aCell.setText(text);
 }

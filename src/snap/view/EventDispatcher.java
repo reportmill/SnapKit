@@ -124,7 +124,7 @@ public void dispatchMouseEvent(ViewEvent anEvent)
              if(!ArrayUtils.containsId(pars,view)) {
                  _mouseOvers.remove(i); _mouseOverView = i>0? _mouseOvers.get(i-1) : null;
                 if(!view.getEventAdapter().isEnabled(MouseExit)) continue;
-                 ViewEvent e2 = rview.getEnv().createEvent(view, anEvent.getEvent(), MouseExit, null);
+                 ViewEvent e2 = createEvent(view, anEvent.getEvent(), MouseExit, null);
                  view.fireEvent(e2);
                  if(e2.isConsumed()) anEvent.consume();
              }
@@ -135,7 +135,7 @@ public void dispatchMouseEvent(ViewEvent anEvent)
         for(int i=_mouseOvers.size();i<pars.length;i++) { View view = pars[i];
             _mouseOvers.add(view); _mouseOverView = view;
             if(!view.getEventAdapter().isEnabled(MouseEnter)) continue;
-             ViewEvent e2 = rview.getEnv().createEvent(view, anEvent.getEvent(), MouseEnter, null);
+             ViewEvent e2 = createEvent(view, anEvent.getEvent(), MouseEnter, null);
              view.fireEvent(e2);
              if(e2.isConsumed()) anEvent.consume();
         }
@@ -278,6 +278,23 @@ public void dispatchDragTargetEvent(ViewEvent anEvent)
             }
         }
     }
+}
+
+/**
+ * Dispatch MouseMove event to trigger exit.
+ */
+public void dispatchMouseMoveOutsideWindow()
+{
+    ViewEvent event = createEvent(_win, null, MouseMove, null);
+    event = event.copyForViewPoint(_win, _win.getWidth()+100, 0, 0);
+    dispatchEvent(event);
+}
+
+/** Convenience wrapper for ViewEnv createEvent(). */
+ViewEvent createEvent(View aView, Object anEvent, ViewEvent.Type aType, String aName)
+{
+    ViewEvent event = ViewEnv.getEnv().createEvent(aView, anEvent, aType, aName);
+    return event;
 }
 
 /** Returns the number of parents of given view including RootView. */

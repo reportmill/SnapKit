@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.*;
+import snap.gfx.Rect;
 
 /**
  * The top level View in a window.
@@ -44,21 +44,6 @@ public void setContent(View aView)
  * Override to return this RootView.
  */
 public RootView getRootView()  { return this; }
-
-/**
- * Override to handle when RootView is ordered out.
- */
-protected void setShowing(boolean aVal)
-{
-    if(aVal==isShowing()) return; super.setShowing(aVal);
-    
-    // If no longer showing, dispatch mouse move outside bounds to trigger any mouse exit code
-    if(!aVal) {
-        ViewEvent event = getEnv().createEvent(this, null, MouseMove, null);
-        event = event.copyForViewPoint(this, getWidth()+100, 0, 0);
-        getWindow().dispatchEvent(event);
-    }
-}
 
 /**
  * Override to register for layout.
