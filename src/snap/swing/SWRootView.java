@@ -67,8 +67,12 @@ public SWRootView(WindowView aWin, RootView aRootView)
  */
 public void setBounds(int aX, int aY, int aW, int aH)
 {
-    super.setBounds(aX, aY, aW, aH);
-    _rview.setSize(aW, aH); //_rview.setBounds(aX,aY,aW,aH);
+    // Do normal set bounds
+    super.setBounds(aX, aY, aW, aH); //_rview.setSize(aW, aH);
+    
+    // Correct X/Y for RootView in Window
+    for(Component c=getParent(); c!=null && c.getParent()!=null; c=c.getParent()) { aX += c.getX(); aY += c.getY(); }
+    _rview.setBounds(aX,aY,aW,aH);
 }
 
 /**

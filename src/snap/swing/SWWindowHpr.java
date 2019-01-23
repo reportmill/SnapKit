@@ -163,10 +163,10 @@ public void show()
     
     // If ClientView exists, but not in WindowView (i.e., CV.RootView was installed in Swing), convert point to screen)
     if(!isClientViewInWindowView()) {
-        RootView rview = win.getClientView().getRootView();
-        WindowView rviewWin = rview.getWindow();
-        SWWindowHpr rviewWinHpr = (SWWindowHpr)rviewWin.getHelper();
-        JComponent rcomp = rviewWinHpr._rviewNtv;
+        View cview = win.getClientView();
+        WindowView cwin = cview.getWindow();
+        SWWindowHpr cwinHpr = (SWWindowHpr)cwin.getHelper();
+        JComponent rcomp = cwinHpr._rviewNtv;
         java.awt.Point pnt = new java.awt.Point(0,0); SwingUtilities.convertPointToScreen(pnt, rcomp);
         x += pnt.getX(); y += pnt.getY();
     }
