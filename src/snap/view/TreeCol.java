@@ -94,7 +94,7 @@ protected void processEvent(ViewEvent anEvent)
 /**
  * Override to have tree fireAction.
  */
-public void fireActionEvent()  { _tree.fireActionEvent(); }
+public void fireActionEvent(ViewEvent anEvent)  { _tree.fireActionEvent(anEvent); }
 
 /**
  * Called to set method for rendering.

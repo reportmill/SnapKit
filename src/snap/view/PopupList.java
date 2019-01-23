@@ -69,9 +69,9 @@ public void setItems(java.util.List <T> theItems)
 /**
  * Override to hide popuplist.
  */
-public void fireActionEvent()
+public void fireActionEvent(ViewEvent anEvent)
 {
-    super.fireActionEvent();
+    super.fireActionEvent(anEvent);
     hide();
 }
 

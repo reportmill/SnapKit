@@ -622,7 +622,7 @@ protected void processEvent(ViewEvent anEvent)
         ListCell cell = getCellForRow(index);
         if(cell!=null && cell.isEnabled() && index!=getSelIndex()) {
             setSelIndex(index);
-            fireActionEvent();
+            fireActionEvent(anEvent);
             anEvent.consume();
         }
     }
@@ -643,7 +643,7 @@ protected void processEvent(ViewEvent anEvent)
         switch(kcode) {
             case KeyCode.UP: selectUp(); anEvent.consume(); break;
             case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
-            case KeyCode.ENTER: fireActionEvent(); anEvent.consume(); break;
+            case KeyCode.ENTER: fireActionEvent(anEvent); anEvent.consume(); break;
         }
     }
 }

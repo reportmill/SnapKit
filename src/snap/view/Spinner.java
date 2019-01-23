@@ -166,7 +166,7 @@ public void increment()
     // If new value, set and fire action
     if(SnapUtils.equals(val, getValue())) return;
     setValue((T)val);
-    fireActionEvent();
+    fireActionEvent(null);
 }
 
 /**
@@ -186,7 +186,7 @@ public void decrement()
     // If new value, set and fire action
     if(SnapUtils.equals(val, getValue())) return;
     setValue((T)val);
-    fireActionEvent();
+    fireActionEvent(null);
 }
 
 /**
@@ -205,7 +205,7 @@ public void textChanged()
     else { System.err.println("Spinner: Unsuported value type: " + getValueClass()); return; }
     
     setValue((T)nval);
-    fireActionEvent();
+    fireActionEvent(null);
 }
 
 /**

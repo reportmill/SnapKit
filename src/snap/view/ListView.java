@@ -40,7 +40,7 @@ public ListView()
 {
     // Create/configure ListArea
     _listArea = createListArea();
-    _listArea.addEventHandler(e -> fireActionEvent(), Action);
+    _listArea.addEventHandler(e -> fireActionEvent(e), Action);
     _listArea.addPropChangeListener(pce -> listAreaPropChange(pce));
     _listArea.setCellConfigure(lc -> configureCell(lc));
     
@@ -295,7 +295,7 @@ protected void processEvent(ViewEvent anEvent)
         switch(kcode) {
             case KeyCode.UP: selectUp(); anEvent.consume(); break;
             case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
-            case KeyCode.ENTER: _listArea.fireActionEvent(); anEvent.consume(); break;
+            case KeyCode.ENTER: _listArea.fireActionEvent(anEvent); anEvent.consume(); break;
         }
     }
 }

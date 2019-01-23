@@ -97,7 +97,7 @@ public void setValue(double aValue)
 
     // Set value, fire action and repaint
     _value = aValue;
-    fireActionEvent();
+    fireActionEvent(null);
     repaint();
 }
 

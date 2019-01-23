@@ -627,7 +627,7 @@ protected void processEvent(ViewEvent anEvent)
         int index = col!=null? col.getColIndex() : -1;
         if(index>=0 && index!=getSelCol()) {
             setSelCol(index);
-            fireActionEvent();
+            fireActionEvent(anEvent);
             anEvent.consume();
         }
     }
@@ -650,10 +650,10 @@ protected void processKeyEvent(ViewEvent anEvent)
 {
     int kcode = anEvent.getKeyCode();
     switch(kcode) {
-        case KeyCode.UP: selectUp(); fireActionEvent(); anEvent.consume(); break;
-        case KeyCode.DOWN: selectDown(); fireActionEvent(); anEvent.consume(); break;
-        case KeyCode.LEFT: selectLeft(); fireActionEvent(); anEvent.consume(); break;
-        case KeyCode.RIGHT: selectRight(); fireActionEvent(); anEvent.consume(); break;
+        case KeyCode.UP: selectUp(); fireActionEvent(anEvent); anEvent.consume(); break;
+        case KeyCode.DOWN: selectDown(); fireActionEvent(anEvent); anEvent.consume(); break;
+        case KeyCode.LEFT: selectLeft(); fireActionEvent(anEvent); anEvent.consume(); break;
+        case KeyCode.RIGHT: selectRight(); fireActionEvent(anEvent); anEvent.consume(); break;
         default: {
             char c = anEvent.getKeyChar();
             boolean printable = Character.isJavaIdentifierPart(c); // Lame
@@ -679,10 +679,10 @@ protected void processEventFilters(ViewEvent anEvent)
         switch(kcode) {
             case KeyCode.TAB:
                 if(anEvent.isShiftDown()) selectLeft(); else selectRight();
-                fireActionEvent(); anEvent.consume(); requestFocus(); break;
+                fireActionEvent(anEvent); anEvent.consume(); requestFocus(); break;
             case KeyCode.ENTER:
                 if(anEvent.isShiftDown()) selectUp(); else selectDown();
-                fireActionEvent(); anEvent.consume(); requestFocus(); break;
+                fireActionEvent(anEvent); anEvent.consume(); requestFocus(); break;
         }
     }
 }
@@ -695,7 +695,7 @@ protected void colDidMousePress(TableCol aCol, ViewEvent anEvent)
     int row = aCol.getRowAt(anEvent.getY()), col = aCol.getColIndex();
     if(row!=getSelRow() || col!=getSelCol()) {
         setSelCell(row, col);
-        fireActionEvent();
+        fireActionEvent(anEvent);
         anEvent.consume();
     }
 }

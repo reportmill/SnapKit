@@ -128,7 +128,7 @@ protected void processEvent(AWTEvent anEvent)
         if(id==MouseEvent.MOUSE_CLICKED) return;
         
         // Create new event and dispatch
-        ViewEvent event = SwingViewEnv.get().createEvent(_rview, me, null, null);
+        ViewEvent event = ViewEvent.createEvent(_rview, me, null, null);
         _win.dispatchEvent(event);
         
         // Bogus! (not sure why this is here)
@@ -140,7 +140,7 @@ protected void processEvent(AWTEvent anEvent)
     
     // Handle KeyEvents
     else if(anEvent instanceof KeyEvent) { KeyEvent ke = (KeyEvent)anEvent; int id = ke.getID();
-        ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, null, null);
+        ViewEvent event = ViewEvent.createEvent(_rview, anEvent, null, null);
         _win.dispatchEvent(event);
     }
 }
@@ -171,7 +171,7 @@ public Dimension getPreferredSize()
 public String getToolTipText(MouseEvent anEvent)
 {
     if(_rview==null) return null;
-    ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, null, null);
+    ViewEvent event = ViewEvent.createEvent(_rview, anEvent, null, null);
     return _win.getToolTip(event);
 }
 
@@ -180,7 +180,7 @@ public String getToolTipText(MouseEvent anEvent)
  */
 public void dragGestureRecognized(DragGestureEvent anEvent)
 {
-    ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, ViewEvent.Type.DragGesture, null);
+    ViewEvent event = ViewEvent.createEvent(_rview, anEvent, ViewEvent.Type.DragGesture, null);
     _win.dispatchEvent(event);
 }
 
@@ -189,7 +189,7 @@ public void dragGestureRecognized(DragGestureEvent anEvent)
  */
 public void sendDropTargetEvent(DropTargetEvent anEvent, ViewEvent.Type aType)
 {
-    ViewEvent event = SwingViewEnv.get().createEvent(_rview, anEvent, aType, null);
+    ViewEvent event = ViewEvent.createEvent(_rview, anEvent, aType, null);
     _win.dispatchEvent(event);
 }
 

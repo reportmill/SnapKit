@@ -190,7 +190,7 @@ protected void processEvent(ViewEvent anEvent)
         double ts = isHorizontal()? tbnds.getWidth() : tbnds.getHeight();
         double value = getMin() + (tp/ts)*(getMax() - getMin()); if(MathUtils.equals(value,getValue())) return;
         setValue(value);
-        fireActionEvent();
+        fireActionEvent(anEvent);
     }
 }
 

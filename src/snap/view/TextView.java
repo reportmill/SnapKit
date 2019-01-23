@@ -176,7 +176,7 @@ public void setFireActionOnEnterKey(boolean aValue)
 }
 
 // Listener to propogate Action from TextArea to TextView
-private EventListener _actionEvtLsnr = e -> fireActionEvent();
+private EventListener _actionEvtLsnr = e -> fireActionEvent(e);
 
 /**
  * Returns whether text view fires action on focus lost (if text changed).

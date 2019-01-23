@@ -255,7 +255,7 @@ protected void processEvent(ViewEvent anEvent)
 /**
  * Perform button click.
  */
-public void fire()  { if(isEnabled()) fireActionEvent(); }
+public void fire()  { if(isEnabled()) fireActionEvent(null); }
 
 /**
  * Paint Button.

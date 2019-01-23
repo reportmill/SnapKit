@@ -327,7 +327,7 @@ void snapWindowActiveCursorChanged()
 protected void sendWinEvent(WindowEvent anEvent, ViewEvent.Type aType)
 {
     if(!_win.getEventAdapter().isEnabled(aType)) return;
-    ViewEvent event = _win.getEnv().createEvent(_win, anEvent, aType, null);
+    ViewEvent event = ViewEvent.createEvent(_win, anEvent, aType, null);
     _win.fireEvent(event);
     if(aType==ViewEvent.Type.WinClose && _winNtv instanceof JFrame && event.isConsumed())
         ((JFrame)_winNtv).setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);

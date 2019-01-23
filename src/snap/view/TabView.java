@@ -192,7 +192,7 @@ public void setSelIndex(int anIndex)
     
     // FirePropChange and fireActionEvent
     firePropChange(SelIndex_Prop, _sindex, _sindex=anIndex);
-    fireActionEvent();
+    fireActionEvent(null);
 }
 
 /**

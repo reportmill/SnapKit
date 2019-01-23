@@ -200,7 +200,7 @@ public void dragDropEnd(DragSourceDropEvent anEvent)
 private void dispatchToRootView(Object anEvent, ViewEvent.Type aType)
 {
     RootView rview = _view.getRootView();
-    ViewEvent nevent = SwingViewEnv.get().createEvent(rview, anEvent, aType, null);
+    ViewEvent nevent = ViewEvent.createEvent(rview, anEvent, aType, null);
     rview.getWindow().dispatchEvent(nevent);
 }
 

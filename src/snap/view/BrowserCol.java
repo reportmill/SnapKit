@@ -52,11 +52,11 @@ protected void configureCell(ListCell <T> aCell)
 /**
  * Override to suppress.
  */
-public void fireActionEvent()
+public void fireActionEvent(ViewEvent anEvent)
 {
     _browser.setSelColIndex(_index);
     _browser.scrollSelToVisible();
-    _browser.fireActionEvent();
+    _browser.fireActionEvent(anEvent);
 }
 
 /**

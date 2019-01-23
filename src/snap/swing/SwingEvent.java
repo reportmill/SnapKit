@@ -7,19 +7,14 @@ import java.awt.event.*;
 import snap.view.*;
 
 /**
- * A custom class.
+ * An ViewEvent implementation for Swing.
  */
 public class SwingEvent extends ViewEvent {
-    
-    // The mouse location
-    double            _mx = Float.MIN_VALUE, _my = Float.MIN_VALUE;
     
     // Shortcut key mask
     private static final int SHORTCUT_KEY_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-/**
- * Returns the input event.
- */
+/** Returns the input event. */
 private InputEvent getInputEvent()  { return getEvent(InputEvent.class); }
 
 /** Returns whether alt key is down. */
@@ -60,9 +55,6 @@ public boolean isShortcutDown()
 /** Returns whether popup trigger is down. */
 public boolean isPopupTrigger()  { return isMouseEvent() && getEvent(MouseEvent.class).isPopupTrigger(); }
 
-/** Returns the click count for a mouse event. */
-//public int getClickCount() { if(_cnt>=0) return _cnt; MouseEvent me = getEvent(); return _cnt = me.getClickCount(); }
-
 /**
  * Returns the location for a mouse event or drop event.
  */
@@ -80,11 +72,14 @@ private Point getLocation()
     return new Point();
 }
 
-/** Returns the mouse event x. */
-public double getX()  { return _mx!=Float.MIN_VALUE? _mx : (_mx=getLocation().getX()); }
-
-/** Returns the mouse event y. */
-public double getY()  { return _my!=Float.MIN_VALUE? _my : (_my=getLocation().getY()); }
+/**
+ * Returns the location for a mouse event or drop event.
+ */
+protected snap.gfx.Point getPointImpl()
+{
+    Point pnt = getLocation();
+    return new snap.gfx.Point(pnt.getX(), pnt.getY());
+}
 
 /**
  * Returns the scroll amount X.
@@ -131,23 +126,12 @@ public void dropComplete()  { getEvent(DropTargetDropEvent.class).dropComplete(t
 public Clipboard getClipboard()  { return SwingClipboard.getDrag(this); }
 
 /**
- * Returns a ViewEvent at new point.
- */
-public ViewEvent copyForViewPoint(View aView, double aX, double aY, int aClickCount)
-{
-    String name = getName(); if(name!=null && (name.length()==0 || name.equals(getView().getName()))) name = null;
-    SwingEvent copy = (SwingEvent)SwingViewEnv.get().createEvent(aView, getEvent(), getType(), name);
-    copy._mx = aX; copy._my = aY; copy.setClickCount(aClickCount>0? aClickCount : getClickCount());
-    return copy;
-}
-
-/**
  * Consume event.
  */
 public void consume()
 {
-    if(getInputEvent()!=null) getInputEvent().consume();
     super.consume();
+    if(getInputEvent()!=null) getInputEvent().consume();
 }
 
 /**

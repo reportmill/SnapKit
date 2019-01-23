@@ -79,7 +79,7 @@ public void fire()
 {
     if(getGroup()==null || !isSelected())
         setSelected(!isSelected());
-    fireActionEvent();
+    fireActionEvent(null);
 }
 
 /**

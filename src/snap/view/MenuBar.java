@@ -70,7 +70,7 @@ protected void processEvent(ViewEvent anEvent)
     for(View item : getChildren()) {
         MenuItem match = getMatchingMenuItem((MenuItem)item, anEvent);
         if(match!=null) {
-            match.fireActionEvent(); return; }
+            match.fireActionEvent(anEvent); return; }
     }
 }
 

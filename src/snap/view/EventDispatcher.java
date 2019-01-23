@@ -124,9 +124,8 @@ public void dispatchMouseEvent(ViewEvent anEvent)
              if(!ArrayUtils.containsId(pars,view)) {
                  _mouseOvers.remove(i); _mouseOverView = i>0? _mouseOvers.get(i-1) : null;
                 if(!view.getEventAdapter().isEnabled(MouseExit)) continue;
-                 ViewEvent e2 = createEvent(view, anEvent.getEvent(), MouseExit, null);
-                 view.fireEvent(e2);
-                 if(e2.isConsumed()) anEvent.consume();
+                 ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseExit, null);
+                 view.fireEvent(e2); if(e2.isConsumed()) anEvent.consume();
              }
              else break;
         }
@@ -135,9 +134,8 @@ public void dispatchMouseEvent(ViewEvent anEvent)
         for(int i=_mouseOvers.size();i<pars.length;i++) { View view = pars[i];
             _mouseOvers.add(view); _mouseOverView = view;
             if(!view.getEventAdapter().isEnabled(MouseEnter)) continue;
-             ViewEvent e2 = createEvent(view, anEvent.getEvent(), MouseEnter, null);
-             view.fireEvent(e2);
-             if(e2.isConsumed()) anEvent.consume();
+             ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseEnter, null);
+             view.fireEvent(e2); if(e2.isConsumed()) anEvent.consume();
         }
         
         // Update CurrentCursor
@@ -157,14 +155,15 @@ public void dispatchMouseEvent(ViewEvent anEvent)
         if(view.getEventAdapter().isEnabled(anEvent.getType())) {
             ViewEvent e2 = anEvent.copyForView(view);
             view.processEventFilters(e2);
-            if(e2.isConsumed()) { anEvent.consume(); return; }  }
+            if(e2.isConsumed()) return;
+        }
         
     // Iterate back up and see if any parents should handle
     for(int i=pars.length-1;i>=0;i--) { View view = pars[i];
         if(view.getEventAdapter().isEnabled(anEvent.getType())) {
             ViewEvent e2 = anEvent.copyForView(view);
             view.processEventHandlers(e2);
-            if(e2.isConsumed()) { anEvent.consume(); break; }
+            if(e2.isConsumed()) break;
         }
     }
 }
@@ -195,7 +194,8 @@ public void dispatchKeyEvent(ViewEvent anEvent)
         if(view.getEventAdapter().isEnabled(anEvent.getType())) {
             ViewEvent e2 = anEvent.copyForView(view);
             view.processEventFilters(e2);
-            if(e2.isConsumed()) { anEvent.consume(); return; }  }
+            if(e2.isConsumed()) return;
+        }
 
     // If key pressed and tab and FocusedView.FocusKeysEnabled, switch focus
     if(anEvent.isKeyPress() && anEvent.isTabKey() && focusedView!=null && focusedView.isFocusKeysEnabled()) {
@@ -208,12 +208,9 @@ public void dispatchKeyEvent(ViewEvent anEvent)
         if(view.getEventAdapter().isEnabled(anEvent.getType())) {
             ViewEvent event = anEvent.copyForView(view);
             view.processEventHandlers(event);
-            if(event.isConsumed()) { anEvent.consume(); return; }
+            if(event.isConsumed()) return;
         }
     }
-    
-    // Send to MenuBar
-    //if(e.isKeyPress() && e.isShortcutDown() && _rview.getMenuBar()!=null) _rview.getMenuBar().processEvent(e);
 }
 
 /**
@@ -226,14 +223,15 @@ public void dispatchDragSourceEvent(ViewEvent anEvent)
         for(View view=_mousePressView;view!=null;view=view.getParent())
             if(view.getEventAdapter().isEnabled(DragGesture)) { _dragSourceView = view;
                 ViewEvent event = anEvent.copyForView(view);
-                view.fireEvent(event); if(event.isConsumed()) anEvent.consume(); break; }
+                view.fireEvent(event); if(event.isConsumed()) break;
+            }
     }
     
     // Handle DragSource
     else if(_dragSourceView!=null) {
         if(_dragSourceView.getEventAdapter().isEnabled(anEvent.getType())) {
             ViewEvent event = anEvent.copyForView(_dragSourceView);
-            _dragSourceView.fireEvent(event); if(event.isConsumed()) anEvent.consume();
+            _dragSourceView.fireEvent(event);
         }
         if(anEvent.isDragSourceEnd())
             _dragSourceView = null;
@@ -285,16 +283,9 @@ public void dispatchDragTargetEvent(ViewEvent anEvent)
  */
 public void dispatchMouseMoveOutsideWindow()
 {
-    ViewEvent event = createEvent(_win, null, MouseMove, null);
+    ViewEvent event = ViewEvent.createEvent(_win, null, MouseMove, null);
     event = event.copyForViewPoint(_win, _win.getWidth()+100, 0, 0);
     dispatchEvent(event);
-}
-
-/** Convenience wrapper for ViewEnv createEvent(). */
-ViewEvent createEvent(View aView, Object anEvent, ViewEvent.Type aType, String aName)
-{
-    ViewEvent event = ViewEnv.getEnv().createEvent(aView, anEvent, aType, aName);
-    return event;
 }
 
 /** Returns the number of parents of given view including RootView. */

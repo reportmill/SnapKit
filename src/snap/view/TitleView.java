@@ -124,7 +124,7 @@ public void setCollapsible(boolean aValue)
     // If collapsible: Enable action event and listen for label click
     if(aValue) {
         enableEvents(Action);
-        _label.addEventHandler(_labelPressLsnr = e -> TitleView.this.fireActionEvent(), MousePress);
+        _label.addEventHandler(_labelPressLsnr = e -> TitleView.this.fireActionEvent(e), MousePress);
     }
     
     // If not collapsible: Disable action event and stop listen for lable click
@@ -301,9 +301,9 @@ protected void paintStyleEtchBorder(Painter aPntr)
 /**
  * Override to flip expanded.
  */
-public void fireActionEvent()
+public void fireActionEvent(ViewEvent anEvent)
 {
-    super.fireActionEvent();
+    super.fireActionEvent(anEvent);
     setExpandedAnimated(!isExpanded());
 }
 

@@ -9,7 +9,7 @@ import snap.util.*;
 /**
  * Represents node UI events sent to a Views for input events.
  */
-public abstract class ViewEvent {
+public abstract class ViewEvent implements Cloneable {
     
     // The node that this event is associated with
     View                _view;
@@ -26,8 +26,17 @@ public abstract class ViewEvent {
     // When the event was sent
     long                _when;
     
+    // The mouse location
+    double              _mx = Float.MIN_VALUE, _my = Float.MIN_VALUE;
+    
+    // The mouse location (point)
+    Point               _point;
+    
     // The click count
     int                 _clickCount = 1;
+    
+    // The event that precipitated this event (usually null)
+    ViewEvent           _parent;
     
     // Whether event was consumed
     boolean             _consumed;
@@ -93,6 +102,25 @@ protected abstract Type getTypeImpl();
  * Sets the event type.
  */
 public void setType(Type aType)  { _type = aType; }
+
+/**
+ * Sets the event that precipitated this event (optional).
+ */
+public ViewEvent getParentEvent()  { return _parent; }
+
+/**
+ * Sets the event that precipitated this event (optional).
+ */
+protected void setParentEvent(ViewEvent anEvent)  { _parent = anEvent; }
+
+/**
+ * Sets the event that precipitated this event (optional).
+ */
+public ViewEvent getRootEvent()
+{
+    ViewEvent root = _parent; while(root!=null && root._parent!=null) root = root._parent;
+    return root;
+}
 
 /**
  * Returns the time the event was sent.
@@ -369,22 +397,32 @@ public int getClickCount()  { return _clickCount; }
 /**
  * Sets the click count for a mouse event.
  */
-protected void setClickCount(int aValue)  { _clickCount = aValue; }
+public void setClickCount(int aValue)  { _clickCount = aValue; }
 
 /**
  * Returns the mouse event x.
  */
-public double getX()  { return 0; }
+public double getX()  { return _mx!=Float.MIN_VALUE? _mx : (_mx=getPoint().x); }
 
 /**
  * Returns the mouse event y.
  */
-public double getY()  { return 0; }
+public double getY()  { return _my!=Float.MIN_VALUE? _my : (_my=getPoint().y); }
+
+/**
+ * Sets the x/y.
+ */
+protected void setXY(double aX, double aY)  { _mx = aX; _my = aY; _point = new Point(_mx,_my); }
 
 /**
  * Returns the event location.
  */
-public Point getPoint()  { return new Point(getX(),getY()); }
+public Point getPoint()  { return _point!=null? _point : (_point = getPointImpl()); }
+
+/**
+ * Returns the event location.
+ */
+protected Point getPointImpl()  { return new Point(getX(), getY()); }
 
 /**
  * Returns the event location in coords of given view.
@@ -461,7 +499,11 @@ public void dropComplete()  { complain("dropComplete"); }
 public boolean isConsumed()  { return _consumed; }
 
 /** Consume event. */
-public void consume()  { _consumed = true; }
+public void consume()
+{
+    _consumed = true;
+    if(_parent!=null) _parent.consume();
+}
 
 /**
  * Returns whether this event triggers a UI reset.
@@ -480,7 +522,7 @@ public ViewEvent copyForView(View aView)
 {
     View thisView = getView(); double x = getX(), y = getY();
     View par = ViewUtils.getCommonAncetor(thisView, aView);
-    snap.gfx.Point point = par==thisView? aView.parentToLocal(x,y,par) : thisView.localToParent(x,y,par);
+    Point point = par==thisView? aView.parentToLocal(x,y,par) : thisView.localToParent(x,y,par);
     return copyForViewPoint(aView, point.x, point.y, -1);
 }
 
@@ -494,13 +536,32 @@ public ViewEvent copyForPoint(double aX, double aY)  { return copyForViewPoint(g
  */
 public ViewEvent copyForClickCount(int aClickCount)
 {
-    return copyForViewPoint(getView(), getX(),getY(), aClickCount);
+    return copyForViewPoint(getView(), getX(), getY(), aClickCount);
 }
 
 /**
  * Returns a ViewEvent at new point.
  */
-public ViewEvent copyForViewPoint(View aView, double aX, double aY, int aClickCount)  { return null; }
+public ViewEvent copyForViewPoint(View aView, double aX, double aY, int aClickCount)
+{
+    ViewEvent copy = clone(); //getEnv().createEvent(aView, getEvent(), getType(), name);
+    copy.setView(aView);
+    String name = getName();
+    if(name!=null && (name.length()==0 || name.equals(getView().getName()))) copy.setName(null); //name = null;
+    copy.setXY(aX, aY); if(aClickCount>0) copy.setClickCount(aClickCount);
+    return copy;
+}
+
+/**
+ * Copy event.
+ */
+public ViewEvent clone()
+{
+    ViewEvent copy = null; try { copy = (ViewEvent)super.clone(); }
+    catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
+    copy.setParentEvent(this);
+    return copy;
+}
 
 /**
  * Returns whether event represents component with given name.
@@ -526,6 +587,15 @@ public boolean equals(Object anObj)
  * Standard toString implementation.
  */
 public String toString()  { return getClass().getSimpleName() + " " + getName() + " " + getType(); }
+
+/**
+ * Creates an Event.
+ */
+public static ViewEvent createEvent(View aView, Object anEvent, ViewEvent.Type aType, String aName)
+{
+    ViewEvent event = ViewEnv.getEnv().createEvent(aView, anEvent, aType, aName);
+    return event;
+}
 
 /**
  * Types for events.
@@ -555,7 +625,7 @@ public enum Type {
 }
 
 /** Prints "not implemented" for string (method name). */
-public void complain(String s)  { String msg = getClass().getSimpleName() + ": Not implemented:" + s;
+void complain(String s)  { String msg = getClass().getSimpleName() + ": Not implemented:" + s;
     if(!_cmpln.contains(msg)) System.err.println(msg); _cmpln.add(msg); } static Set _cmpln = new HashSet();
 
 }

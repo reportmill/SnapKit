@@ -865,7 +865,7 @@ protected void keyPressed(ViewEvent anEvent)
     else switch(keyCode) {
         case KeyCode.TAB: replaceChars("\t"); anEvent.consume(); break;
         case KeyCode.ENTER:
-            if(isFireActionOnEnterKey()) { selectAll(); fireActionEvent(); }
+            if(isFireActionOnEnterKey()) { selectAll(); fireActionEvent(anEvent); }
             else { replaceChars("\n"); anEvent.consume(); } break; // Handle enter
         case KeyCode.LEFT: selectBackward(shiftDown); anEvent.consume(); break; // Handle left arrow
         case KeyCode.RIGHT: selectForward(shiftDown); anEvent.consume(); break; // Handle right arrow
@@ -1222,7 +1222,7 @@ protected void setFocused(boolean aValue)
         
         // If focus lost and FocusGainedVal changed, fire action
         else if(!SnapUtils.equals(_focusGainedText, getText()))
-            fireActionEvent();
+            fireActionEvent(null);
     }
 }
 

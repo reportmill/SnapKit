@@ -131,7 +131,7 @@ public boolean isPopupShowing()  { return _pop!=null && _pop.isShowing(); }
 /**
  * Override to show popup.
  */
-public void fireActionEvent()
+public void fireActionEvent(ViewEvent anEvent)
 {
     double x = getParent() instanceof ColView? getWidth()-1 : 0;
     double y = getParent() instanceof MenuBar? getHeight()-1 : 0;
@@ -149,12 +149,12 @@ protected void setTargeted(boolean aValue)
     if(getParent() instanceof MenuBar && aValue) { MenuBar mbar = (MenuBar)getParent();
         Menu showing = mbar.getMenuShowing(); if(showing==null) return;
         showing.hide();
-        fireActionEvent();
+        fireActionEvent(null);
     }
     
     // Handle when in Menu
     if(getParent() instanceof ColView) {
-        if(aValue) fireActionEvent();
+        if(aValue) fireActionEvent(null);
         //else hide();
     }
 }

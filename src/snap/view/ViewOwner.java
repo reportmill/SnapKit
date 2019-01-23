@@ -596,11 +596,11 @@ public void sendEvent(Object anObj)
     // If view found for object, fire and return
     View view = getView(anObj);
     if(view!=null && view.isEnabled()) {
-        view.fireActionEvent(); return; }
+        view.fireActionEvent(null); return; }
     
     // Otherwise, if object is string, create event for UI and fire
     if(anObj instanceof String) { String name = (String)anObj;
-        ViewEvent event = _env.createEvent(getUI(), null, null, name);
+        ViewEvent event = ViewEvent.createEvent(getUI(), null, null, name);
         fireEvent(event);
     }
 }

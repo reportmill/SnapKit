@@ -436,7 +436,7 @@ protected void textFieldFiredAction()
     if(isPopup() && isPopupShowing())
         getPopupList().hide();
     //getListView().setText(_text.getText());
-    fireActionEvent();
+    fireActionEvent(null);
 }
 
 /**
@@ -445,7 +445,7 @@ protected void textFieldFiredAction()
 protected void listViewFiredAction()
 {
     if(getListView() instanceof PopupList)
-        fireActionEvent();
+        fireActionEvent(null);
 }
 
 /**

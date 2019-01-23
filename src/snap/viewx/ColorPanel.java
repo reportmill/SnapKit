@@ -61,7 +61,7 @@ public void setColor(Color aColor)
     // If color well is present, set new color in color well and fireActionPerformed
     if(_colorWell!=null) {
         _colorWell.setColor(aColor);
-        _colorWell.fireActionEvent();
+        _colorWell.fireActionEvent(null);
     }
 }
 
@@ -337,7 +337,7 @@ public static class ImagePicker extends View {
             int x = mx - dx, y = my - dy;
             if(x>=0 && x<_img.getWidth() && y>=0 && y<_img.getHeight())
                 _color = new Color(_img.getRGB(x,y));
-            fireActionEvent();
+            fireActionEvent(anEvent);
         }
     }
     

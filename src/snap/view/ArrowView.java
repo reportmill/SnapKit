@@ -179,7 +179,7 @@ public boolean isRight()  { return _lastBtn==_rbtn; }
 protected void buttonDidFire(Button aBtn)
 {
     _lastBtn = aBtn;
-    fireActionEvent();
+    fireActionEvent(null);
 }
 
 /**

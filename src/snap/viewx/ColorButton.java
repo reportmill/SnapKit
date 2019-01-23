@@ -139,7 +139,7 @@ protected void processEvent(ViewEvent anEvent)
 public void fire(ViewEvent anEvent)
 {
     if(anEvent==null || anEvent.getX()<getWidth()-10)
-        fireActionEvent();
+        fireActionEvent(anEvent);
     else getPopup().show(this,0,getHeight());
 }
 
@@ -179,7 +179,7 @@ protected void handlePopupMenuEvent(ViewEvent anEvent)
     // Handle None: Set null color and fireActionEvent for ColorButton
     if(anEvent.equals("NoneMenu")) {
         setColor(null);
-        fireActionEvent();
+        fireActionEvent(anEvent);
     }
     
     // Handle MoreMenu: Make ColorPanel visible

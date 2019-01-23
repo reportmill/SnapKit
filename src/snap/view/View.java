@@ -2129,9 +2129,10 @@ public void removeEventHandler(EventListener aLsnr, ViewEvent.Type ... theTypes)
  * This should only be called in response to user input events (mouse, key) when a complete change has been made
  * to the primary value of a control view. Perhaps this method should even take an event to wrap in Action event.
  */
-public void fireActionEvent()
+public void fireActionEvent(ViewEvent anEvent)
 {
-    ViewEvent event = getEnv().createEvent(this, null, null, null);
+    ViewEvent event = ViewEvent.createEvent(this, null, null, null);
+    if(anEvent!=null) event.setParentEvent(anEvent);
     fireEvent(event);
 }
 
