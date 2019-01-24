@@ -60,7 +60,7 @@ public boolean isSelected()  { return _selected; }
 public void setSelected(boolean aValue)
 {
     // If disabled, just return
-    if(!isEnabled()) return;
+    if(aValue==_selected || !isEnabled()) return;
     
     // Set new value
     _selected = aValue;
@@ -94,8 +94,8 @@ public void setSelectable(boolean flag)  { _selectable = flag; repaint(); }
  */
 public void setDisabled(boolean aValue)
 {
-    super.setDisabled(aValue);
     if(aValue) setSelected(false);
+    super.setDisabled(aValue);
 }
 
 /**
@@ -176,6 +176,7 @@ protected void processEvent(ViewEvent anEvent)
         Color color = dboard.getColor();
         setColor(color);
         anEvent.dropComplete(); //true //else dtde.rejectDrop();
+        fireActionEvent(anEvent);
     }
     
     // Handle DragGesture

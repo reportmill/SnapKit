@@ -42,7 +42,7 @@ public static ColorPanel getShared()  { return _shared!=null? _shared : (_shared
 /**
  * Returns the current color of the color panel.
  */
-public Color getColor()  { return _colorWell!=null? (_color = _colorWell.getColor()) : _color; }
+public Color getColor()  { return _color; }
 
 /**
  * Sets the current color of the color panel.
@@ -50,19 +50,18 @@ public Color getColor()  { return _colorWell!=null? (_color = _colorWell.getColo
 public void setColor(Color aColor)
 {
     // Set new color
+    if(aColor==null) aColor = Color.BLACK;
+    if(aColor.equals(_color)) return;
     _color = aColor;
 
     // If not interactively setting color (like from a mouse or slider drag), add color to _recentColorList
-    if(!ViewUtils.isMouseDown() && _color!=null) {
+    if(!ViewUtils.isMouseDown()) {
         addRecentColor(aColor);
         resetLater();
     }
    
     // If color well is present, set new color in color well and fireActionPerformed
-    if(_colorWell!=null) {
-        _colorWell.setColor(aColor);
-        _colorWell.fireActionEvent(null);
-    }
+    //if(_colorWell!=null) { _colorWell.setColor(aColor); _colorWell.fireActionEvent(null); }
 }
 
 /**
@@ -107,17 +106,15 @@ public ColorWell getColorWell()  { return _colorWell; }
 public void setColorWell(ColorWell aColorWell)
 {
     // If old color well is preset, unselect it
-    if(_colorWell!=null && _colorWell.isSelected())
+    if(_colorWell!=null)
         _colorWell.setSelected(false);
     
     // Set new color well
     _colorWell = aColorWell;
     
     // If new color well is present, select it
-    if(_colorWell!=null) {
-        if (!_colorWell.isSelected()) _colorWell.setSelected(true);
+    if(_colorWell!=null)
         setColor(aColorWell.getColor()); 
-    }
     
     // Reset color panel
     resetLater();
@@ -164,7 +161,7 @@ protected void initUI()
 /**
  * Resets UI controls.
  */
-public void resetUI()
+protected void resetUI()
 {
     // Get color (if null, replace with color clear)
     Color color = getColor(); if(color==null) color = new Color(0,0,0,0);
@@ -224,7 +221,7 @@ public void resetUI()
 /**
  * Responds to changes to the UI controls.
  */
-public void respondUI(ViewEvent anEvent)
+protected void respondUI(ViewEvent anEvent)
 {
     // Handle ImagePickerButton, RGBPickerButton, GrayPickerButton, SwatchPickerButton
     if(anEvent.equals("ImagePickerButton")) setSelectedPicker(0);
@@ -233,8 +230,9 @@ public void respondUI(ViewEvent anEvent)
     if(anEvent.equals("SwatchPickerButton")) setSelectedPicker(3);
         
     // Handle ImageLabel
+    Color newColor = null;
     if(anEvent.equals("ImagePickerLabel"))
-        setColor(anEvent.getView(ImagePicker.class).getColor());
+        newColor = anEvent.getView(ImagePicker.class).getColor();
     
     // Handle ImageComboBox
     if(anEvent.equals("ImageComboBox"))
@@ -243,7 +241,7 @@ public void respondUI(ViewEvent anEvent)
     // Handle GraySlider or GrayAlphaSlider
     if(anEvent.equals("GraySlider") || anEvent.equals("GrayAlphaSlider")) {
         int g = getViewIntValue("GraySlider"), a = getViewIntValue("GrayAlphaSlider");
-        setColor(new Color(g, g, g, a));
+        newColor = new Color(g, g, g, a);
     }
     
     // Handle RedSlider, GreenSlider, BlueSlider, AlphaSlider
@@ -251,14 +249,14 @@ public void respondUI(ViewEvent anEvent)
         || anEvent.equals("AlphaSlider")) {
         int r = getViewIntValue("RedSlider"), g = getViewIntValue("GreenSlider");
         int b = getViewIntValue("BlueSlider"), a = getViewIntValue("AlphaSlider");
-        setColor(new Color(r, g, b, a));
+        newColor = new Color(r, g, b, a);
     }
     
     // Handle GrayText, GrayAlphaText 
     if(anEvent.equals("GrayText") || anEvent.equals("GrayAlphaText")) {
         int g = getViewIntValue("GrayText"), a = getViewIntValue("GrayAlphaText");
         g = g<0? 0 : g>255 ? 255 : g; a = a<0? 0 : a>255 ? 255 : a;
-        setColor(new Color(g, g, g, a));
+        newColor = new Color(g, g, g, a);
     }
     
     // Handle RedText, GreenText, BlueText, AlphaText
@@ -268,16 +266,38 @@ public void respondUI(ViewEvent anEvent)
         int b = getViewIntValue("BlueText"), a = getViewIntValue("AlphaText");
         r = r<0? 0 : r>255 ? 255 : r; g = g<0? 0 : g>255 ? 255 : g;
         b = b<0? 0 : b>255 ? 255 : b; a = a<0? 0 : a>255 ? 255 : a;
-        setColor(new Color(r, g, b, a));
+        newColor = new Color(r, g, b, a);
     }
     
     // Handle Recent Colors Dropdown menu
     //if(anEvent.getTarget() instanceof ColorMenuItem)
     //    setColor(anEvent.getTarget(ColorMenuItem.class).getColor());
         
+    // Handle SwatchPanel
+    if(anEvent.equals("SwatchPanel"))
+        newColor = ((SwatchPanel)anEvent.getView()).getColor();
+        
     // Handle HexText
     if(anEvent.equals("HexText"))
-        setColor(fromHexString(anEvent.getStringValue()));
+        newColor = fromHexString(anEvent.getStringValue());
+        
+    // If new color, set and fireActionEvent
+    if(newColor!=null) {
+        setColor(newColor);
+        fireActionEvent(anEvent);
+    }
+}
+
+/**
+ * Called when color changed by user.
+ */
+protected void fireActionEvent(ViewEvent anEvent)
+{
+    // If ColorWell present, update color and fireActionEvent
+    if(_colorWell!=null) {
+        _colorWell.setColor(getColor());
+        ViewUtils.fireActionEvent(_colorWell, anEvent);
+    }
 }
 
 /** Convert to/from hex string. */
@@ -355,7 +375,14 @@ private class SwatchPanel extends View {
     int WIDTH = 16, HEIGHT = 14, SIZE = 12;
     
     /** Creates new SwatchPanel. */
-    public SwatchPanel()  { enableEvents(MouseRelease); setBounds(30,10,WIDTH*SIZE,HEIGHT*SIZE); }
+    public SwatchPanel()
+    {
+        enableEvents(MouseRelease, Action);
+        setName("SwatchPanel"); setBounds(30,10,WIDTH*SIZE,HEIGHT*SIZE);
+    }
+    
+    /** Returns the color. */
+    public Color getColor()  { return _color; } Color _color = Color.BLACK;
     
     /** Paint component. */
     protected void paintFront(Painter aPntr)
@@ -372,8 +399,8 @@ private class SwatchPanel extends View {
     public void processEvent(ViewEvent anEvent)
     {
         int x = (int)anEvent.getX()/SIZE, y = (int)anEvent.getY()/SIZE;
-        Color color = new Color(_webColors[y*WIDTH+x].substring(2));
-        setColor(color);
+        _color = new Color(_webColors[y*WIDTH+x].substring(2));
+        fireActionEvent(anEvent);
     }
 }
 

@@ -11,7 +11,7 @@ import snap.view.*;
 /**
  * A ColorWell subclass that handle a whole grid of color swatches, including drag and drop support.
  */
-public class ColorDock extends ColorWell {
+public class ColorDock extends View {
 
     // A hashtable to map row,col coordinates to colors in the dock (which is a sparse array of unlimited size)
     Map <String,Color>      _colors = new Hashtable();
@@ -25,6 +25,9 @@ public class ColorDock extends ColorWell {
     // The drag point (swatch) in color dock
     Point                   _dragPoint = null;
     
+    // Indicates that this well is the current drag source
+    boolean                 _dragging;
+    
     // The size of the individual swatches
     static int              SWATCH_SIZE = 13;
     
@@ -36,7 +39,8 @@ public class ColorDock extends ColorWell {
  */
 public ColorDock()
 {
-    enableEvents(MousePress);
+    enableEvents(MousePress, MouseRelease, Action);
+    enableEvents(DragGesture, DragSourceEnd); enableEvents(DragEvents);
     setBorder(COLOR_DOCK_BORDER);
 }
 
@@ -160,6 +164,16 @@ public int getSelIndex()  { return _selSwatch!=null? _selSwatch.getIndex() : -1;
 public void resetColors()  { _colors.clear(); }
 
 /**
+ * Returns the color.
+ */
+public Color getColor()
+{
+    if(getSelSwatch()!=null)
+        return getSelSwatch().getColor();
+    return Color.WHITE;
+}
+
+/**
  * Override to set color of selected swatch.
  */
 public void setColor(Color aColor)
@@ -168,7 +182,7 @@ public void setColor(Color aColor)
     if(getSelSwatch()!=null) getSelSwatch().setColor(aColor);
     
     // Do normal version
-    super.setColor(aColor);
+    //super.setColor(aColor);
 }
 
 /**
@@ -230,8 +244,9 @@ protected void processEvent(ViewEvent anEvent)
     
     // Handle MouseRelease: Set selection or just show color panel
     else if(anEvent.isMouseRelease()) {
-        if(isSelectable()) setSelected(true);
-        else showColorPanel();
+        //if(isSelectable())  setSelected(true); else showColorPanel();
+        ColorPanel.getShared().setColor(getColor());
+        ColorPanel.getShared().fireActionEvent(anEvent);
     }
     
     // Handle DragEnter, DragOver
@@ -251,8 +266,22 @@ protected void processEvent(ViewEvent anEvent)
         anEvent.dropComplete(); _dragPoint = null; repaint();
     }
     
-    // Otherwise, do normal version
-    else super.processEvent(anEvent);
+    // Handle DragGesture
+    else if(anEvent.isDragGesture()) {
+        Color color = getColor();
+        Image image = Image.get(14,14,true); Painter pntr = image.getPainter();
+        ColorWell.paintSwatch(pntr,color,0,0,14,14);
+        pntr.setColor(Color.BLACK); pntr.drawRect(0,0,14-1,14-1); pntr.flush();
+        Clipboard cboard = anEvent.getClipboard();
+        cboard.addData(color);
+        cboard.setDragImage(image);
+        cboard.startDrag();
+        _dragging = true;
+    }
+    
+    // Handle DragSourceEnd
+    else if(anEvent.isDragSourceEnd())
+        _dragging = false;
 }
 
 /** 
