@@ -90,17 +90,20 @@ public View getChild(String aName)
  */
 public PopupWindow getPopup()
 {
-    hide();
-    PopupWindow pop = new PopupWindow(); pop.setFont(getDefaultFont());
+    // If already set, just return
+    if(_pop!=null) return _pop;
+    
+    // Create PopupWindow, configure with items and return
+    _pop = new PopupWindow(); _pop.setFont(getDefaultFont());
     ColView vbox = new ColView(); vbox.setMinWidth(125); vbox.setFillWidth(true); vbox.setPadding(4,1,4,1);
-    for(View node : _items) { vbox.addChild(node); node.addEventHandler(_lsnr, Action); }
-    pop.setContent(vbox);
-    return _pop = pop;
+    for(View item : _items) { vbox.addChild(item); item.addEventHandler(_lsnr, Action); }
+    _pop.setContent(vbox);
+    return _pop ;
 }
 
 // A listener to close popup
 PopupWindow _pop;
-EventListener _lsnr = e -> hide();
+EventListener _lsnr = e -> itemFiredActionEvent(e);
 
 /**
  * Show menu.
@@ -119,7 +122,7 @@ public void hide()
     if(_pop==null) return;
     _pop.hide();
     ColView vbox = (ColView)_pop.getContent();
-    for(View node : vbox.getChildren()) node.removeEventHandler(_lsnr, Action);
+    for(View item : vbox.getChildren()) item.removeEventHandler(_lsnr, Action);
     _pop = null;
 }
 
@@ -127,6 +130,21 @@ public void hide()
  * Returns whether popup is showing.
  */
 public boolean isPopupShowing()  { return _pop!=null && _pop.isShowing(); }
+
+/**
+ * Hides this menu and parent menus.
+ */
+protected void hideAll()
+{
+    if(_parentMenu!=null)
+        _parentMenu.hideAll();
+    else hide();
+}
+
+/**
+ * Called when child MenuItem fires action.
+ */
+protected void itemFiredActionEvent(ViewEvent anEvent)  { hideAll(); }
 
 /**
  * Override to show popup.
