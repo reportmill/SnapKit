@@ -131,7 +131,7 @@ public boolean isPopupShowing()  { return _pop!=null && _pop.isShowing(); }
 /**
  * Override to show popup.
  */
-public void fireActionEvent(ViewEvent anEvent)
+protected void fireActionEvent(ViewEvent anEvent)
 {
     double x = getParent() instanceof ColView? getWidth()-1 : 0;
     double y = getParent() instanceof MenuBar? getHeight()-1 : 0;

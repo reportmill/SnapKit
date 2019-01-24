@@ -302,7 +302,7 @@ protected void textDidChange()
 /**
  * Override to reset FocusedGainedVal.
  */
-public void fireActionEvent(ViewEvent anEvent)
+protected void fireActionEvent(ViewEvent anEvent)
 {
     _focusGainedText = getText(); _edited = false;
     super.fireActionEvent(anEvent);
