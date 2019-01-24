@@ -587,7 +587,15 @@ public boolean equals(Object anObj)
 /**
  * Standard toString implementation.
  */
-public String toString()  { return getClass().getSimpleName() + " " + getName() + " " + getType(); }
+public String toString()
+{
+    String str = getClass().getSimpleName() + " { ";
+    str += "Type:" + getType(); if(getName()!=null && getName().length()>0) str += ", Name:" + getName();
+    if(isMouseEvent()) str += ", X:" + getX() + ", Y:" + getY() + ", ClickCount:" + getClickCount();
+    if(isKeyEvent()) str += ", KeyChar:" + getKeyString() + ", KeyCode:" + getKeyCode();
+    if(getView()!=null) str += ", View:" + getView().getClass().getSimpleName();
+    str += ", Consumed:" + isConsumed() + " }"; return str;
+}
 
 /**
  * Creates an Event.
