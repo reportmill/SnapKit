@@ -547,7 +547,8 @@ public ViewEvent copyForViewPoint(View aView, double aX, double aY, int aClickCo
     ViewEvent copy = clone(); //getEnv().createEvent(aView, getEvent(), getType(), name);
     copy.setView(aView);
     String name = getName();
-    if(name!=null && (name.length()==0 || name.equals(getView().getName()))) copy.setName(null); //name = null;
+    if(name==null || name.length()==0 || name.equals(getView().getName())) name = aView.getName();
+    copy.setName(name);
     copy.setXY(aX, aY); if(aClickCount>0) copy.setClickCount(aClickCount);
     return copy;
 }

@@ -220,21 +220,6 @@ public static void layoutDeep(View aView)
 }
 
 /**
- * Set a View showing.
- */
-public static void setShowing(View aView, boolean aValue)  { aView.setShowing(aValue); }
-
-/**
- * Set a View focused.
- */
-public static void setFocused(View aView, boolean aValue)  { aView.setFocused(aValue); }
-
-/**
- * Process an event.
- */
-public static void processEvent(View aView, ViewEvent anEvent)  { aView.processEvent(anEvent); }
-
-/**
  * Returns the align x factor.
  */
 public static final double getAlignX(View aView)  { return getAlignX(aView.getAlign()); }
@@ -484,5 +469,25 @@ static void handleDrag(ViewEvent anEvent)
 
 // For dragging
 static Point _mpt;
+
+/**
+ * Backdoor for protected View method.
+ */
+public static void setShowing(View aView, boolean aValue)  { aView.setShowing(aValue); }
+
+/**
+ * Backdoor for protected View method.
+ */
+public static void setFocused(View aView, boolean aValue)  { aView.setFocused(aValue); }
+
+/**
+ * Backdoor for protected View method.
+ */
+public static void processEvent(View aView, ViewEvent anEvent)  { aView.processEvent(anEvent); }
+
+/**
+ * Backdoor for protected View method.
+ */
+public static void fireActionEvent(View aView, ViewEvent anEvent)  { aView.fireActionEvent(anEvent); }
 
 }
