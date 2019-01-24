@@ -431,7 +431,7 @@ protected void initUI()
     super.initUI();
     
     // Add Enter, Escape key bindings
-    if(isConfirmOnEnter()) addKeyActionHandler("EnterAction", "ENTER");  
+    if(isConfirmOnEnter()) addKeyActionFilter("EnterAction", "ENTER");  
     addKeyActionHandler("EscapeAction", "ESCAPE");  
 }
 
