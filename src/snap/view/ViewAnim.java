@@ -239,8 +239,10 @@ public int getTime()  { return _time; }
  */
 public void setTime(int aTime)
 {
-    // Get new time adjusted for looping and StartTime
-    int newTime = aTime, oldTime = _time, maxTime = getMaxTime();
+    // Get newTime and oldTime. If MaxTime is zero, make sure there's a change
+    int newTime = aTime, oldTime = _time, maxTime = getMaxTime(); if(maxTime==0) oldTime = -1;
+    
+    // If looping, adjust newTime
     if(_loopCount>0) {
         int start = getStart(), loopCount = _loopCount -1;
         int loopLen = maxTime - start;
@@ -250,7 +252,7 @@ public void setTime(int aTime)
     }
     
     // If time already set, just return
-    if(newTime==_time) return;
+    if(newTime==oldTime) return;
     _time = newTime;
     
     // If new values need to be set, set them
@@ -534,7 +536,7 @@ public ViewAnim setInterpolator(Interpolator anInterp)  { _interp = anInterp; re
 public ViewAnim clear()
 {
     stop(); _loopCount = 0; _onFinish = null; _interp = Interpolator.EASE_BOTH;
-    _time = 0; _onFrame = _onFinish = null;
+    _time = 0; _maxTime = -1; _onFrame = _onFinish = null;
     _keys.clear(); _endVals.clear(); _anims.clear();
     return this;
 }

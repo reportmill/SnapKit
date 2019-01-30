@@ -13,7 +13,7 @@ public class ViewTimer {
     int                  _period = 40;
     
     // The timer elapsed time
-    int                  _time;
+    int                  _time = -1;
     
     // The timer start time
     long                 _startTime;
@@ -81,7 +81,7 @@ public boolean isPaused()  { return _pauseTime>0; }
 /**
  * Returns the elapsed time.
  */
-public int getTime()  { return _time; }
+public int getTime()  { return _time>0? _time : (int)(System.currentTimeMillis() - _startTime); }
 
 /**
  * Returns the number of times the timer has fired.
@@ -105,7 +105,6 @@ public synchronized void start(int aDelay)
     _run = () -> sendEvent();
     
     // Initialize times and Schedule task
-    _time = 0;
     _startTime = System.currentTimeMillis() - (_pauseTime>0? (_pauseTime - _startTime) : 0);
     _pauseTime = 0;
     _env.runIntervals(_run, getPeriod(), aDelay, false, true);
@@ -132,7 +131,7 @@ public void pause()  { stop(); _pauseTime = System.currentTimeMillis(); }
 protected void sendEvent()
 {
     _time = (int)(System.currentTimeMillis() - _startTime);
-    _onFire.accept(this); _count++;
+    _onFire.accept(this); _count++; _time = -1;
 }
 
 }
