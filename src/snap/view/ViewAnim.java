@@ -531,7 +531,8 @@ public void suspend()
  */
 public ViewAnim clear()
 {
-    stop(); _loopCount = 0; _onFinish = null;
+    stop(); _loopCount = 0; _onFinish = null; _interp = Interpolator.EASE_BOTH;
+    _time = 0; _onFrame = _onFinish = null;
     _keys.clear(); _endVals.clear(); _anims.clear();
     return this;
 }
