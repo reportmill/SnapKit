@@ -98,8 +98,8 @@ public synchronized void paintLater()
         View aviews[] = _animViews.toArray(new View[0]); int time = _timer.getTime();
         for(View av : aviews) { ViewAnim anim = av.getAnim(-1);
             if(!av.isShowing()) anim.finish();
-            else if(anim==null || anim.isSuspended()) stopAnim(av);
-            else anim.setTime(time);
+            else if(anim==null) stopAnim(av);
+            else anim.setTime(time - anim._startTime);
         }
     }
 
@@ -194,10 +194,13 @@ private final void activatePaintLater()  { if(_plater==null) ViewUtils.runLater(
  */
 public void startAnim(View aView)
 {
-    _animViews.add(aView);                     //System.out.println("Add Anim " + name(aView));
+    // Add view to AnimViews and start timer (if first AnimView)
+    _animViews.add(aView);
     if(_animViews.size()==1) _timer.start();
-    ViewAnim anim = aView.getAnim(0); anim._updater = this;
-    if(!anim.isSuspended() || anim.getStartTime()<0) anim.setStartTime(_timer.getTime());
+    
+    // Record Anim.StartTime, so we can always set View.Anim.Time relative to start
+    ViewAnim anim = aView.getAnim(0);
+    anim._startTime = _timer.getTime() - anim.getTime();
 }
 
 /**
@@ -206,8 +209,8 @@ public void startAnim(View aView)
 public void stopAnim(View aView)
 {
     if(!_animViews.remove(aView)) return;
-    if(_animViews.size()==0) _timer.stop();   //System.out.println("Remove Anim " + name(aView));
-    ViewAnim anim = aView.getAnim(0); anim._updater = null;
+    if(_animViews.size()==0) _timer.stop();
+    ViewAnim anim = aView.getAnim(0);
 }
 
 /**

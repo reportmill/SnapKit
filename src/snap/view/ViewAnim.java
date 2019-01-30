@@ -50,14 +50,14 @@ public class ViewAnim implements XMLArchiver.Archivable {
     // The max time
     int                  _maxTime = -1;
     
-    // The start time
-    int                  _startTime = -1;
-    
     // Whether this anim was suspended because it's not visible
     boolean              _suspended;
     
     // The ViewUpdater currently playing this anim
     ViewUpdater          _updater;
+    
+    // A convenience for ViewUpdater
+    int                  _startTime;
     
 /**
  * Creates a new ViewAnim.
@@ -182,29 +182,52 @@ public Integer[] getKeyFrameTimes()
 }
 
 /**
- * Whether anim is playing.
+ * Returns whether anim is playing.
  */
-public boolean isPlaying()  { return _updater!=null; }
+public boolean isPlaying()  { return _parent!=null? _parent.isPlaying() : (_updater!=null); }
 
 /**
- * Returns whether anim is suspended.
+ * Returns whether anim should be playing, but didn't have access to ViewUpdater (probably wasn't showing).
  */
-public boolean isSuspended()  { return _suspended; }
+public boolean isSuspended()  { return _parent!=null? _parent.isSuspended() : _suspended; }
 
 /**
- * Sets whether anim is suspended.
+ * Play the anim.
  */
-public void setSuspended(boolean aValue)  { _suspended = aValue; }
+public void play()
+{
+    // If Parent, forward to it. If already playing, just return
+    if(_parent!=null) { _parent.play(); return; }
+    if(isPlaying()) return;
+    
+    // Get ViewUpdater and startAnim() (or mark suspended if updater not available)
+    _updater = _view.getUpdater();
+    if(_updater!=null) { _updater.startAnim(_view); _suspended = false; }
+    else _suspended = true;
+}
 
 /**
- * Returns the start time.
+ * Stop the anim.
  */
-public int getStartTime()  { return _startTime; }
+public void stop()
+{
+    // If Parent, forward to it. If already stopped, just return
+    if(_parent!=null) { _parent.stop(); return; }
+    if(!isPlaying()) return;
+    
+    // If ViewUpdater set, stopAnim() and clear Updater/Suspended
+    if(_updater!=null) _updater.stopAnim(_view);
+    _updater = null; _suspended = false;
+}
 
 /**
- * Sets the start time.
+ * Suspends the anim. Called when anim was playing but view no longer showing. Should restart when conditions are right.
  */
-protected void setStartTime(int aTime)  { _startTime = aTime; }
+protected void suspend()
+{
+    if(_parent!=null) { _parent.suspend(); return; }
+    if(_updater!=null) { _updater.stopAnim(_view); _updater = null; _suspended = true; }
+}
 
 /**
  * Returns the current time.
@@ -217,7 +240,7 @@ public int getTime()  { return _time; }
 public void setTime(int aTime)
 {
     // Get new time adjusted for looping and StartTime
-    int newTime = aTime - _startTime, oldTime = _time, maxTime = getMaxTime();
+    int newTime = aTime, oldTime = _time, maxTime = getMaxTime();
     if(_loopCount>0) {
         int start = getStart(), loopCount = _loopCount -1;
         int loopLen = maxTime - start;
@@ -250,7 +273,7 @@ public void setTime(int aTime)
         stop();
     
     // If completed and there is an OnFinish, trigger it
-    if(completed && needsUpdate && _onFinish!=null)
+    if(completed && oldTime<maxTime && _onFinish!=null)
         _onFinish.accept(this);
 }
 
@@ -463,22 +486,32 @@ public ViewAnim setLoopCount(int aValue)  { _loopCount = aValue; return this; }
 /**
  * Returns the consumer to be called on each frame.
  */
-public Consumer <ViewAnim> getOnFrame()  { return _onFrame; }
+public Consumer <ViewAnim> getOnFrame()  { return _parent!=null? _parent.getOnFrame() : _onFrame; }
 
 /**
  * Sets the consumer to be called on each frame.
  */
-public ViewAnim setOnFrame(Consumer <ViewAnim> aCall)  { _onFrame = aCall; return this; }
+public ViewAnim setOnFrame(Consumer <ViewAnim> aCall)
+{
+    if(_parent!=null) _parent.setOnFrame(aCall);
+    else _onFrame = aCall;
+    return this;
+}
     
 /**
- * Returns the on finished.
+ * Returns the function to be called when anim is finished.
  */
-public Consumer <ViewAnim> getOnFinish()  { return _onFinish; }
+public Consumer <ViewAnim> getOnFinish()  { return _parent!=null? _parent.getOnFinish(): _onFinish; }
 
 /**
- * Sets the on finished.
+ * Sets a function to be called when anim is finished.
  */
-public ViewAnim setOnFinish(Consumer <ViewAnim> aFinish)  { _onFinish = aFinish; return this; }
+public ViewAnim setOnFinish(Consumer <ViewAnim> aFinish)
+{
+    if(_parent!=null) _parent.setOnFinish(aFinish);
+    else _onFinish = aFinish;
+    return this;
+}
 
 /**
  * Sets whether animation should start fast.
@@ -494,37 +527,6 @@ public ViewAnim setLinear()  { setInterpolator(Interpolator.LINEAR); return this
  * Sets whether to ease animation in
  */
 public ViewAnim setInterpolator(Interpolator anInterp)  { _interp = anInterp; return this; }
-    
-/**
- * Play the anim.
- */
-public void play()
-{
-    if(_parent!=null) { _parent.play(); return; }
-    ViewUpdater updater = _view.getUpdater();
-    if(updater!=null) { updater.startAnim(_view); _suspended = false; }
-    else _suspended = true;
-}
-
-/**
- * Stop the anim.
- */
-public void stop()
-{
-    if(_parent!=null) { _parent.stop(); return; }
-    if(_updater!=null) _updater.stopAnim(_view);
-    _suspended = false; _startTime = -1;
-}
-
-/**
- * Suspend the anim (will autostart when conditions are right).
- */
-public void suspend()
-{
-    _suspended = true;
-    if(_parent!=null) { _parent.suspend(); return; }
-    if(_updater!=null) _updater.stopAnim(_view);
-}
 
 /**
  * Clears the anim.
