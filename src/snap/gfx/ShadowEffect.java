@@ -17,6 +17,9 @@ public class ShadowEffect extends Effect {
     
     // Fill color
     Color       _color = Color.BLACK;
+    
+    // Whether effect is simple
+    boolean     _simple;
 
 /**
  * Creates a new ShadowEffect.
@@ -52,6 +55,11 @@ public double getDY()  { return _dy; }
 public Color getColor()  { return _color; }
 
 /**
+ * Returns whether this shadow should just be rect.
+ */
+public boolean isSimple()  { return _simple; }
+
+/**
  * Override to account for blur radius and shadow offset.
  */
 public Rect getBounds(Rect aRect) { Rect rect = aRect.getOffsetRect(_dx,_dy); rect.inset(-getRadius()); return rect; }
@@ -73,8 +81,10 @@ public void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect)
 public Image getShadowImage(PainterDVR aPDVR, Rect aRect)
 {
     // If marked shape is rect and opaque, return simple shadow image
+    if(_simple)
+        return getShadowImage(aRect, getRadius(), getColor());
     if(aPDVR.getMarkedShape() instanceof Rect && aPDVR.isMarkedShapeOpaque())
-        return getShadowImageSimple(aPDVR.getMarkedShape().getBounds());
+        return getShadowImage(aPDVR.getMarkedShape().getBounds(), getRadius(), getColor());
 
     // Create new image for dvr
     int radius = (int)getRadius(); //if(radius>2) return getShadowImageSimple(aRect);
@@ -87,34 +97,6 @@ public Image getShadowImage(PainterDVR aPDVR, Rect aRect)
    
     // Blur image and return
     simg.blur(radius);
-    return simg;
-}
-
-/**
- * Returns the effect image for an opaque rect by making a small shadow and blitting over the 8 pieces.
- */
-private Image getShadowImageSimple(Rect aRect)
-{
-    // Create small shadow
-    int rad = (int)getRadius(), rad2 = rad*2, rad3 = rad*3, rad4 = rad*4, rad5 = rad*5, rad6 = rad*6;
-    int w = (int)Math.round(aRect.getWidth()), h = (int)Math.round(aRect.getHeight());
-    int sw = rad*2+1, sh = sw;
-    Image s0 = Image.get(rad6+1,rad6+1, true);
-    Painter spntr = s0.getPainter(); spntr.setColor(getColor()); spntr.fillRect(rad2,rad2,rad2+1,rad2+1); spntr.flush();
-    s0.blur(rad);
-    
-    // Blit on fullsize shadow
-    Image simg = Image.get(w + rad4, h + rad4, true);
-    Painter pntr = simg.getPainter(); pntr.setColor(getColor()); pntr.fillRect(rad3, rad3, w-rad2, h-rad2);
-    pntr.drawImage(s0, 0, 0, rad3, rad3, 0, 0, rad3, rad3);                    // Upper left
-    pntr.drawImage(s0, rad3, 0, 1, rad3, rad3, 0, w-rad2, rad3);               // Upper Center
-    pntr.drawImage(s0, rad3+1, 0, rad3, rad3, rad+w, 0, rad3, rad3);           // Upper right
-    pntr.drawImage(s0, 0, rad3, rad3, 1, 0, rad3, rad3, h-rad2);               // Left
-    pntr.drawImage(s0, rad3+1, rad3, rad3, 1, rad+w, rad3, rad3, h-rad2);      // Right
-    pntr.drawImage(s0, 0, rad3+1, rad3, rad3, 0, rad+h, rad3, rad3);           // Lower left
-    pntr.drawImage(s0, rad3, rad3+1, 1, rad3, rad3, rad+h, w-rad2, rad3);      // Lower Center
-    pntr.drawImage(s0, rad3+1, rad3+1, rad3, rad3, rad+w, rad+h, rad3, rad3);  // Lower right
-    pntr.flush();
     return simg;
 }
 
@@ -132,6 +114,14 @@ public ShadowEffect copyForOffset(double aDX, double aDY)  { return new ShadowEf
  * Returns a copy of this shadow with given color.
  */
 public ShadowEffect copyForColor(Color aColor)  { return new ShadowEffect(_radius, aColor, _dx, _dy); }
+
+/**
+ * Returns a copy of this shadow with given color.
+ */
+public ShadowEffect copySimple()
+{
+    ShadowEffect eff = new ShadowEffect(_radius, _color, _dx, _dy); eff._simple = true; return eff;
+}
 
 /**
  * Standard equals implementation.
@@ -186,6 +176,34 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     
     // Return this effect
     return this;
+}
+
+/**
+ * Returns the effect image for an opaque rect by making a small shadow and blitting over the 8 pieces.
+ */
+public static Image getShadowImage(Rect aRect, double aRad, Color aColor)
+{
+    // Create small shadow
+    int rad = (int)aRad, rad2 = rad*2, rad3 = rad*3, rad4 = rad*4, rad5 = rad*5, rad6 = rad*6;
+    int w = (int)Math.round(aRect.getWidth()), h = (int)Math.round(aRect.getHeight());
+    int sw = rad*2+1, sh = sw;
+    Image s0 = Image.get(rad6+1,rad6+1, true);
+    Painter spntr = s0.getPainter(); spntr.setColor(aColor); spntr.fillRect(rad2,rad2,rad2+1,rad2+1); spntr.flush();
+    s0.blur(rad);
+    
+    // Blit on fullsize shadow
+    Image simg = Image.get(w + rad4, h + rad4, true);
+    Painter pntr = simg.getPainter(); pntr.setColor(aColor); pntr.fillRect(rad3, rad3, w-rad2, h-rad2);
+    pntr.drawImage(s0, 0, 0, rad3, rad3, 0, 0, rad3, rad3);                    // Upper left
+    pntr.drawImage(s0, rad3, 0, 1, rad3, rad3, 0, w-rad2, rad3);               // Upper Center
+    pntr.drawImage(s0, rad3+1, 0, rad3, rad3, rad+w, 0, rad3, rad3);           // Upper right
+    pntr.drawImage(s0, 0, rad3, rad3, 1, 0, rad3, rad3, h-rad2);               // Left
+    pntr.drawImage(s0, rad3+1, rad3, rad3, 1, rad+w, rad3, rad3, h-rad2);      // Right
+    pntr.drawImage(s0, 0, rad3+1, rad3, rad3, 0, rad+h, rad3, rad3);           // Lower left
+    pntr.drawImage(s0, rad3, rad3+1, 1, rad3, rad3, rad+h, w-rad2, rad3);      // Lower Center
+    pntr.drawImage(s0, rad3+1, rad3+1, rad3, rad3, rad+w, rad+h, rad3, rad3);  // Lower right
+    pntr.flush();
+    return simg;
 }
 
 }

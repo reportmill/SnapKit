@@ -288,6 +288,20 @@ public void dispatchMouseMoveOutsideWindow()
     dispatchEvent(event);
 }
 
+/**
+ * Returns whether given view is current under the mouse.
+ */
+public boolean isMouseOver(View aView)
+{
+    for(View v : _mouseOvers) if(v==aView) return true;
+    return false;
+}
+
+/**
+ * Returns whether given view is currently in mouse press.
+ */
+public boolean isMouseDown(View aView)  { return _mousePressView==aView && ViewUtils.isMouseDown(); }
+
 /** Returns the number of parents of given view including RootView. */
 private int getParentCount(View aView)
 {

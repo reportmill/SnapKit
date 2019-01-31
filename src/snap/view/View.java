@@ -1043,6 +1043,26 @@ public void setManaged(boolean aValue)
 public boolean isManagedVisible()  { return isManaged() && isVisible(); }
 
 /**
+ * Returns whether current mouse location is over this view.
+ */
+public boolean isMouseOver()
+{
+    WindowView win = getWindow(); if(win==null) return false;
+    EventDispatcher disp = win.getDispatcher();
+    return disp.isMouseOver(this);
+}
+
+/**
+ * Returns whether current mouse location is over this view.
+ */
+public boolean isMouseDown()
+{
+    WindowView win = getWindow(); if(win==null) return false;
+    EventDispatcher disp = win.getDispatcher();
+    return disp.isMouseDown(this);
+}
+
+/**
  * Returns the root view.
  */
 public RootView getRootView()  { return _parent!=null? _parent.getRootView() : null; }
