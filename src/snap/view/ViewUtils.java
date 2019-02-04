@@ -488,6 +488,11 @@ public static void processEvent(View aView, ViewEvent anEvent)  { aView.processE
 /**
  * Backdoor for protected View method.
  */
+public static void enableEvents(View aView, ViewEvent.Type ... theEvents)  { aView.enableEvents(theEvents); }
+
+/**
+ * Backdoor for protected View method.
+ */
 public static void fireActionEvent(View aView, ViewEvent anEvent)  { aView.fireActionEvent(anEvent); }
 
 }
