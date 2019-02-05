@@ -144,6 +144,9 @@ public class View implements XMLArchiver.Archivable {
     // Provides animation for View
     ViewAnim        _anim;
     
+    // The current rect that needs to be repainted in this view
+    Rect            _repaintRect;
+    
     // Provides information for physics simulations
     ViewPhysics     _physics;
     
@@ -1684,6 +1687,9 @@ protected void paintAll(Painter aPntr)
     // Restore opacity
     if(opacity!=1)
         aPntr.setOpacity(opacityOld);
+        
+    // Clear RepaintRect
+    _repaintRect = null;
 }
 
 /**
@@ -1781,15 +1787,7 @@ public void relayoutParent()
 /**
  * Called to register view for repaint.
  */
-public void repaint()
-{
-    double x = 0, y = 0, w = getWidth(), h = getHeight();
-    if(isFocused() && isFocusPainted()) { Rect r = ViewEffect.getFocusEffect().getBounds(getBoundsLocal());
-        x = r.x; y = r.y; w = r.width; h = r.height; }
-    else if(getEffect()!=null) { Rect r = getEffect().getBounds(getBoundsLocal());
-        x = r.x; y = r.y; w = r.width; h = r.height; }
-    repaint(x,y,w,h);
-}
+public void repaint()  { repaint(0, 0, getWidth(), getHeight()); }
 
 /**
  * Called to register view for repaint.
@@ -1801,8 +1799,17 @@ public void repaint(Rect aRect)  { repaint(aRect.x,aRect.y,aRect.width,aRect.hei
  */
 public void repaint(double aX, double aY, double aW, double aH)
 {
+    // If RepaintRect already set, just union with given bounds and return
+    if(_repaintRect!=null) {
+        _repaintRect.union(aX, aY, aW, aH); return; }
+        
+    // Get ViewUpdater (if not available, just return)
     ViewUpdater updater = getUpdater(); if(updater==null) return;
-    updater.repaint(this, aX, aY, aW, aH);
+    
+    // Create repaint rect, register for repaintLater and call Parent.setNeedsRepaintDeep()
+    _repaintRect = new Rect(aX, aY, aW, aH);
+    updater.repaintLater(this);
+    if(_parent!=null) _parent.setNeedsRepaintDeep(true);
 }
 
 /**
@@ -1814,6 +1821,24 @@ protected void repaintInParent(Rect aRect)
     Rect rect = localToParent(aRect!=null? aRect : getBoundsLocal()).getBounds();
     par.repaint(rect);
 }
+
+/**
+ * Returns the repaint rect.
+ */
+public Rect getRepaintRect()
+{
+    Rect rect = _repaintRect;
+    if(isFocused() && isFocusPainted())
+        rect = ViewEffect.getFocusEffect().getBounds(rect);
+    else if(getEffect()!=null)
+        rect = getEffect().getBounds(rect);
+    return rect;
+}
+
+/**
+ * Returns whether needs repaint.
+ */
+public boolean isNeedsRepaint()  { return _repaintRect!=null; }
 
 /**
  * Returns whether this view is the RootView.FocusedView.

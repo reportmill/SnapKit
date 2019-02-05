@@ -13,11 +13,11 @@ public class ViewUpdater {
     // The RootView
     RootView                 _rview;
 
-    // A map of dirty info
-    Map <View,Rect>          _dirtyRects = new HashMap();
+    // The set of views that have requested repaint
+    Set <View>               _repaintViews = new HashSet();
     
     // PaintLater runnable
-    Runnable                 _plater, _platerShared = () -> paintLater();
+    Runnable                 _updateRun, _updateRunShared = () -> updateViews();
     
     // A set of ViewOwners that want to be reset on next UI update call
     Set <ViewOwner>          _resetLaters = Collections.synchronizedSet(new HashSet());
@@ -26,7 +26,7 @@ public class ViewUpdater {
     Set <View>               _animViews = Collections.synchronizedSet(new HashSet());
     
     // The timer for animated views
-    ViewTimer                _timer = new ViewTimer(25, t -> activatePaintLater());
+    ViewTimer                _timer = new ViewTimer(25, t -> updateLater());
     
     // The ViewUpdater.Lister that is notified on certain update actions
     ViewUpdater.Listener     _lsnr;
@@ -40,10 +40,10 @@ public class ViewUpdater {
 /**
  * Creates a ViewUpdater.
  */
-public ViewUpdater(RootView aRV)
+public ViewUpdater(WindowView aWin)
 {
-    _rview = aRV;
-    _win = aRV.getWindow();
+    _win = aWin;
+    _rview = _win.getRootView();
 }
 
 /**
@@ -52,46 +52,47 @@ public ViewUpdater(RootView aRV)
 public void resetLater(ViewOwner anOwnr)
 {
     _resetLaters.add(anOwnr);
-    activatePaintLater();
+    updateLater();
 }
 
 /**
  * Registers to do layout for views.
  */
-public synchronized void relayoutViews()
+public synchronized void relayoutLater()
 {
     // If Painting, complain (nothing should change during paint)
     if(_painting)
-        System.err.println("RootView.setNeedsLayoutDeep: Illegal view changes during paint.");
-    activatePaintLater();
+        System.err.println("ViewUpdater.relayoutLater: Illegal view changes during paint.");
+    updateLater();
 }
 
 /**
- * Called to register a repaint.
+ * Called to register a view for repaint.
  */
-public synchronized void repaint(View aView, double aX, double aY, double aW, double aH)
+public synchronized void repaintLater(View aView)
 {
     // If Painting, complaint (nothing should change during paint)
     if(_painting)
-        System.err.println("RootView.repaint: Illegal repaint call during paint.");
+        System.err.println("ViewUpdater.repaintLater: Illegal repaint call during paint.");
 
-    // Register for paintLater
-    activatePaintLater();
-    
-    // Set or combine dirty rect
-    Rect drect = _dirtyRects.get(aView);
-    if(drect==null) _dirtyRects.put(aView,new Rect(aX,aY,aW,aH));
-    else {
-        double x = drect.x, y = drect.y, w = drect.width, h = drect.height;
-        drect.x = Math.min(x,aX); drect.width = Math.max(x+w, aX+aW) - drect.x;
-        drect.y = Math.min(y,aY); drect.height = Math.max(y+h, aY+aH) - drect.y;
-    }
+    // Register for updateLater and add view to RepaintViews
+    updateLater();
+    _repaintViews.add(aView);
 }
 
 /**
- * Called to request a paint after current event.
+ * Register call to update via runLater.
  */
-public synchronized void paintLater()
+protected final void updateLater()  { if(_updateRun==null) ViewUtils.runLater(_updateRun = _updateRunShared); }
+
+/**
+ * Main update method: Updates these view things:
+ *   - View animation
+ *   - ViewOwner resetUI calls
+ *   - View layout
+ *   - View painting.
+ */
+protected synchronized void updateViews()
 {
     // If timer is running, send Anim calls
     if(_timer.isRunning()) {
@@ -112,31 +113,9 @@ public synchronized void paintLater()
     // Layout all views that need it
     _rview.layoutDeep();
 
-    // Calculate composite repaint rect from all dirty views/rects
-    Rect rect = null; if(_dirtyRects.size()==0)  { _plater = null; return; }
-    View views[] = _dirtyRects.keySet().toArray(new View[_dirtyRects.size()]);
-    for(View view : views) { Rect r = _dirtyRects.get(view);
-    
-        // Constrain to ancestor clips
-        r = view.getClippedRect(r); if(r.isEmpty()) continue;
+    // Get composite repaint rect from all repaint views
+    Rect rect = getRepaintRect(); if(rect==null) { _updateRun = null; return; }
         
-        // Transform to root coords
-        r = view.localToParent(r, _rview).getBounds();
-        
-        // Combine
-        if(rect==null) rect = r;
-        else rect.union(r);
-    }
-    
-    // Round rect and constrain to root bounds
-    if(rect==null) { _plater = null; return; }
-    rect.snap(); if(rect.x<0) rect.x = 0; if(rect.y<0) rect.y = 0;
-    if(rect.width>_rview.getWidth()) rect.width = _rview.getWidth();
-    if(rect.height>_rview.getHeight()) rect.height = _rview.getHeight();
-        
-    // Notify listener
-    if(_lsnr!=null) rect = _lsnr.rootViewWillPaint(_rview, rect);
-    
     // Do repaint (in exception handler so we can reset things on failure)
     try {
         _painting = true;
@@ -144,8 +123,8 @@ public synchronized void paintLater()
             _win._helper.requestPaint(rect);
     }
     
-    // Clear dirty rects, reset runnable, update PaintCount and set Painting false
-    finally { _dirtyRects.clear(); _plater = null; _pc++; _painting = false; }
+    // Clear RepaintViews, reset runnable, update PaintCount and set Painting false
+    finally { _repaintViews.clear(); _updateRun = null; _pc++; _painting = false; }
 }
 
 /**
@@ -164,6 +143,12 @@ public synchronized void paintViews(Painter aPntr, Rect aRect)
     
     // Restore painter state and update frame counts
     aPntr.restore(); if(_frames!=null) { stopTime(); if(_pc%20==0) printTime(); }
+    
+    // If paint was called outside of paintLater (maybe Window.show() or resize), repaint all
+    if(!_painting) { //System.out.println("ViewUpdater: Repaint not from paintLater");
+        _repaintViews.clear();
+        _rview.repaint();
+    }
 }
 
 /**
@@ -185,9 +170,39 @@ protected void paintDebug(View aView, Painter aPntr, Shape aShape)
 }
 
 /**
- * Activate PaintLater.
+ * Returns the current repaint rect combined rects of RepaintViews.RepaintRects.
  */
-private final void activatePaintLater()  { if(_plater==null) ViewUtils.runLater(_plater = _platerShared); }
+public Rect getRepaintRect()
+{
+    // Get array of RepaintViews (just return if none)
+    int count = _repaintViews.size(); if(count==0)  return null;
+    View views[] = _repaintViews.toArray(new View[count]);
+
+    // Iterate over RepaintViews to calculate composite repaint rect from all views
+    Rect rect = null;
+    for(View view : views) { Rect r = view.getRepaintRect(); if(r==null) continue;
+    
+        // Constrain to ancestor clips
+        r = view.getClippedRect(r); if(r.isEmpty()) continue;
+        
+        // Transform to root coords
+        r = view.localToParent(r, _rview).getBounds();
+        
+        // Combine
+        if(rect==null) rect = r;
+        else rect.union(r);
+    }
+    
+    // Round rect and constrain to root bounds
+    if(rect==null) return null;
+    rect.snap(); if(rect.x<0) rect.x = 0; if(rect.y<0) rect.y = 0;
+    if(rect.width>_rview.getWidth()) rect.width = _rview.getWidth();
+    if(rect.height>_rview.getHeight()) rect.height = _rview.getHeight();
+        
+    // Give listener a chance to modify rect
+    if(_lsnr!=null) rect = _lsnr.updaterWillPaint(_rview, rect);
+    return rect;
+}
 
 /**
  * Adds a view to set of Views that are being animated.
@@ -247,12 +262,12 @@ private void printTime()
 }
 
 /**
- * An interface to listen to RootView events.
+ * An interface to listen to ViewUpdater events.
  */
 public static interface Listener {
     
     /** Called before paint request. */
-    public Rect rootViewWillPaint(RootView aRV, Rect aRect);
+    public Rect updaterWillPaint(RootView aRV, Rect aRect);
 }
     
 }

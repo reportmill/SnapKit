@@ -207,12 +207,17 @@ public Rect getAddRect(Rect r2)  { Rect r = clone(); r.add(r2); return r; }
 /**
  * Sets this rect to combined area with given rect. If either rect is empty, bounds are set to other rect.
  */
-public void union(Rect r2)
+public void union(Rect r2)  { union(r2.x, r2.y, r2.width, r2.height); }
+
+/**
+ * Sets this rect to combined area with given rect. If either rect is empty, bounds are set to other rect.
+ */
+public void union(double aX, double aY, double aW, double aH)
 {
-    if(isEmpty()) { setRect(r2); return; }
-    if(r2.isEmpty()) return;
-    double nx = Math.min(x, r2.x), nw = Math.max(x + width, r2.x + r2.width) - nx;
-    double ny = Math.min(y, r2.y), nh = Math.max(y + height, r2.y + r2.height) - ny;
+    if(width<=0 || height<=0) { setRect(aX, aY, aW, aH); return; }
+    if(aW<=0 || aH<=0) return;
+    double nx = Math.min(x, aX), nw = Math.max(x + width, aX + aW) - nx;
+    double ny = Math.min(y, aY), nh = Math.max(y + height, aY + aH) - ny;
     setRect(nx, ny, nw, nh);
 }
 

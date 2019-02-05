@@ -344,7 +344,8 @@ protected void initNativeWindow()
 {
     getHelper().initWindow();
     pack();
-    _updater = new ViewUpdater(_rview);
+    _updater = new ViewUpdater(this);
+    _rview.repaint();
 }
 
 /** Initializes the native window once. */

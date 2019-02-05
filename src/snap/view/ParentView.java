@@ -14,6 +14,9 @@ public class ParentView extends View {
     // The children
     ViewList       _children = new ViewList();
     
+    // Wether view has children that need repaint
+    boolean        _needsRepaintDeep;
+    
     // Whether view needs layout, or has children that need layout
     boolean        _needsLayout, _needsLayoutDeep;
 
@@ -263,6 +266,7 @@ protected void paintAll(Painter aPntr)
         paintChildren(aPntr);
         paintAbove(aPntr);
     }
+    _needsRepaintDeep = false;
 }
 
 /**
@@ -305,6 +309,20 @@ protected void paintAbove(Painter aPntr)
     Border bdr = getBorder();
     if(bdr!=null && bdr.isPaintAbove())
         bdr.paint(aPntr, getBoundsShape());
+}
+
+/**
+ * Returns whether any children need repaint.
+ */
+public boolean isNeedsRepaintDeep()  { return _needsRepaintDeep; }
+
+/**
+ * Sets whether any children need repaint.
+ */
+protected void setNeedsRepaintDeep(boolean aVal)
+{
+    if(_needsRepaintDeep) return; _needsRepaintDeep = true;
+    ParentView par = getParent(); if(par!=null) par.setNeedsRepaintDeep(true);
 }
 
 /**

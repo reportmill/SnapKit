@@ -52,7 +52,7 @@ protected void setNeedsLayoutDeep(boolean aVal)
 {
     if(aVal==isNeedsLayoutDeep()) return;
     super.setNeedsLayoutDeep(aVal);
-    ViewUpdater updater = getUpdater(); if(updater!=null) updater.relayoutViews();
+    ViewUpdater updater = getUpdater(); if(updater!=null) updater.relayoutLater();
 }
 
 /**
