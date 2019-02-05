@@ -1819,7 +1819,7 @@ protected void repaintInParent(Rect aRect)
 {
     ParentView par = getParent(); if(par==null) return;
     Rect rect = localToParent(aRect!=null? aRect : getBoundsLocal()).getBounds();
-    par.repaint(rect);
+    par.repaint(rect); repaint(0,0,0,0);
 }
 
 /**

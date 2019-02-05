@@ -12,11 +12,11 @@ class ViewEffect {
     // The Effect
     Effect             _eff;
 
-    // A PainterDVR to hold plain render from last pass for checking cache on future renders
-    PainterDVR         _pdvr1;
+    // A PainterDVR to hold cached effect render from last pass (and one to hold plain render for compare)
+    PainterDVR         _pdvr, _pdvrX;
     
-    // A PainterDVR to hold cached effect render from last pass
-    PainterDVR         _pdvr2;
+    // The view size when DVR was cached
+    double             _vw, _vh;
     
     // The Focus Effect
     static Effect      _focEff;
@@ -30,15 +30,26 @@ class ViewEffect {
 /**
  * Creates a ViewEffect for a given view and effect.
  */
-public ViewEffect(View aView, Effect anEff)
-{
-    _view = aView; _eff = anEff;
-}
+public ViewEffect(View aView, Effect anEff)  { _view = aView; _eff = anEff; }
 
 /**
  * Main paint method.
  */
 protected void paintAll(Painter aPntr)
+{
+    // If view has changed since last cache, update cached PainterDVR for effect
+    double vw = _view.getWidth(), vh = _view.getHeight();
+    if(_pdvr==null || vw!=_vw || vh!=_vh || _view.isNeedsRepaint() || isNeedsRepaintDeep(_view) && !isSimpleShadow())
+        updateEffectPainterDVR();
+    
+    // Execute PainterDVR to given painter
+    _pdvr.exec(aPntr);
+}
+
+/**
+ * Updates the cached effect PainterDVR.
+ */
+void updateEffectPainterDVR()
 {
     // Do normal painting to new PainterDVR
     PainterDVR pdvr = new PainterDVR();
@@ -46,19 +57,19 @@ protected void paintAll(Painter aPntr)
     _view.paintFront(pdvr);
     
     // If effect should include child views, paint children
-    if(!isSimpleShadow()) {
-        ((ParentView)_view).paintChildren(pdvr);
-        ((ParentView)_view).paintAbove(pdvr);
+    if(!isSimpleShadow()) { ParentView pv = (ParentView)_view;
+        pv.paintChildren(pdvr);
+        pv.paintAbove(pdvr);
     }
     
-    // If painting has changed since last pass, render and cache effect of painting to second PainterDVR
-    if(_pdvr1==null || !pdvr.equals(_pdvr1)) {
-        _pdvr1 = pdvr; _pdvr2 = new PainterDVR();
-        _eff.applyEffect(pdvr, _pdvr2, _view.getBoundsLocal());
-    }
+    // If painting hasn't changed since last cache, just return
+    double vw = _view.getWidth(), vh = _view.getHeight();
+    if(vw==_vw && vh==_vh && pdvr.equals(_pdvrX)) return;
     
-    // Execute PainterDVR to given painter
-    _pdvr2.exec(aPntr);
+    // Render and cache effect of painting to second PainterDVR
+    _pdvr = new PainterDVR();
+    _eff.applyEffect(pdvr, _pdvr, _view.getBoundsLocal());
+    _vw = vw; _vh = vh; _pdvrX = pdvr;
 }
 
 /**
@@ -91,5 +102,9 @@ public static ViewEffect getFocusViewEffect(View aView)
     if(_focVEff!=null && _focVEff._view==aView) return _focVEff;
     return _focVEff = new ViewEffect(aView, getFocusEffect());
 }
+
+/** Convenience. */
+private static final boolean isNeedsRepaintDeep(View aView)  {
+    return aView instanceof ParentView &&  ((ParentView)aView).isNeedsRepaintDeep(); }
 
 }
