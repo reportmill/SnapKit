@@ -133,6 +133,7 @@ public boolean equals(Object anObj)
     if(other._radius!=_radius) return false;
     if(other._dx!=_dx || other._dy!=_dy) return false;
     if(other._color!=_color) return false;
+    if(other._simple!=_simple) return false;
     return true;
 }
 

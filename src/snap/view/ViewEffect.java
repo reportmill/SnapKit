@@ -66,6 +66,7 @@ protected void paintAll(Painter aPntr)
  */
 public boolean isSimpleShadow()
 {
+    if(_eff instanceof ShadowEffect && ((ShadowEffect)_eff).isSimple()) return true;
     if(!(_view instanceof ParentView)) return true;
     if(!(_eff instanceof ShadowEffect)) return false;
     if(_view.getFill()==null) return false;
