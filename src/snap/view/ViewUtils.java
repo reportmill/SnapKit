@@ -201,12 +201,10 @@ public static String getId(View aView)
  */
 public static void paintAll(View aView, Painter aPntr)
 {
-    boolean needsRepaint = aView.isNeedsRepaint();
     aPntr.save();
     layoutDeep(aView);
     aView.paintAll(aPntr);
     aPntr.restore();
-    if(needsRepaint) aView.repaint();
 }
 
 /**
