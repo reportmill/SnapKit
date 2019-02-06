@@ -37,30 +37,59 @@ public ViewEffect(View aView, Effect anEff)  { _view = aView; _eff = anEff; }
  */
 protected void paintAll(Painter aPntr)
 {
-    // If view has changed since last cache, update cached PainterDVR for effect
-    double vw = _view.getWidth(), vh = _view.getHeight();
-    if(_pdvr==null || vw!=_vw || vh!=_vh || _view.isNeedsRepaint() || isNeedsRepaintDeep(_view) && !isSimpleShadow())
-        updateEffectPainterDVR();
+    // Make sure cache is up to date
+    if(!isCacheValid())
+        updateCache();
     
     // Execute PainterDVR to given painter
     _pdvr.exec(aPntr);
+    
+    // Shadow needs to draw front
+    if(isShadow())
+        paintAllView(aPntr);
 }
 
 /**
- * Updates the cached effect PainterDVR.
+ * Returns whether cache is dirty.
  */
-void updateEffectPainterDVR()
+boolean isCacheValid()
+{
+    // If no cache, return false
+    if(_pdvr==null) return false;
+    
+    // If view size has changed, return false
+    double vw = _view.getWidth(), vh = _view.getHeight();
+    if(vw!=_vw || vh!=_vh) return false;
+    
+    // If simple shadow and size hasn't changed, return true
+    if(isShadow() && getShadow().isSimple())
+        return true;
+        
+    // If there have been paint changes to view, return false
+    if(_view.isNeedsRepaint() || isNeedsRepaintDeep(_view))
+        return false;
+    
+    // Return true since view hasn't changed size or needed repaint
+    return true;
+}
+
+/**
+ * Updates the PainterDVR that draws the effect and provides caching.
+ */
+void updateCache()
+{
+    if(isShadow()) updateCacheShadow();
+    else updateCacheGeneric();
+}
+
+/**
+ * Updates the PainterDVR that draws the effect and provides caching.
+ */
+void updateCacheGeneric()
 {
     // Do normal painting to new PainterDVR
     PainterDVR pdvr = new PainterDVR();
-    _view.paintBack(pdvr);
-    _view.paintFront(pdvr);
-    
-    // If effect should include child views, paint children
-    if(!isSimpleShadow()) { ParentView pv = (ParentView)_view;
-        pv.paintChildren(pdvr);
-        pv.paintAbove(pdvr);
-    }
+    paintAllView(pdvr);
     
     // If painting hasn't changed since last cache, just return
     double vw = _view.getWidth(), vh = _view.getHeight();
@@ -73,16 +102,65 @@ void updateEffectPainterDVR()
 }
 
 /**
- * Returns whether effect should include children.
+ * Updates the PainterDVR that draws the effect and provides caching.
  */
-public boolean isSimpleShadow()
+void updateCacheShadow()
 {
-    if(_eff instanceof ShadowEffect && ((ShadowEffect)_eff).isSimple()) return true;
-    if(!(_view instanceof ParentView)) return true;
-    if(!(_eff instanceof ShadowEffect)) return false;
-    if(_view.getFill()==null) return false;
-    if(!(_view.getBoundsShape() instanceof Rect)) return false;
-    return true;
+    // Get new PainterDVR and shadow and view size
+    PainterDVR pdvr = new PainterDVR();
+    ShadowEffect shadow = getShadow();
+    double vw = _view.getWidth(), vh = _view.getHeight();
+    
+    // If simple, no shadow needed - otherwise if view covers bounds, just paint bounds, otherwise paint all
+    if(!shadow.isSimple()) {
+        if(_view.getFill()!=null && _view.getBoundsShape() instanceof Rect)
+            pdvr.fillRect(0, 0, vw, vh);
+        else paintAllView(pdvr);
+    }
+    
+    // If painting hasn't changed since last cache, just return
+    if(vw==_vw && vh==_vh && pdvr.equals(_pdvrX)) return;
+    
+    // Render and cache effect of painting to second PainterDVR
+    _pdvr = new PainterDVR();
+    shadow.applyEffectShadowOnly(pdvr, _pdvr, _view.getBoundsLocal());
+    _vw = vw; _vh = vh; _pdvrX = pdvr;
+}
+
+/**
+ * Returns whether effect is shadow.
+ */
+public boolean isShadow()  { return _eff instanceof ShadowEffect; }
+
+/**
+ * Returns effect as shadow.
+ */
+public ShadowEffect getShadow()  { return (ShadowEffect)_eff; }
+
+/**
+ * Returns whether view is parent.
+ */
+public boolean isParentView()  { return _view instanceof ParentView; }
+
+/**
+ * Returns view as parent.
+ */
+public ParentView getParentView()  { return (ParentView)_view; }
+
+/**
+ * Paints the view to given painter with standard paintAll.
+ */
+protected void paintAllView(Painter aPntr)
+{
+    // Normal view paint
+    _view.paintBack(aPntr);
+    _view.paintFront(aPntr);
+    
+    // ParentView paint
+    if(isParentView()) { ParentView pv = getParentView();
+        pv.paintChildren(aPntr);
+        pv.paintAbove(aPntr);
+    }
 }
 
 /**

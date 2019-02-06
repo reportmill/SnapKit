@@ -76,6 +76,16 @@ public void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect)
 }
 
 /**
+ * Performs the ShadowEffect with given PainterDVR.
+ */
+public void applyEffectShadowOnly(PainterDVR aPDVR, Painter aPntr, Rect aRect)
+{
+    int radius = (int)getRadius(), dx = (int)getDX(), dy = (int)getDY();
+    Image img = getShadowImage(aPDVR, aRect);
+    aPntr.drawImage(img, -radius*2 + dx, -radius*2 + dy, img.getWidth(), img.getHeight());
+}
+
+/**
  * Returns the effect image.
  */
 public Image getShadowImage(PainterDVR aPDVR, Rect aRect)

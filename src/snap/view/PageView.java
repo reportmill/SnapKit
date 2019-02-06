@@ -19,7 +19,7 @@ public PageView()
 {
     setFill(Color.WHITE);
     setBorder(PAGE_VIEW_BORDER);
-    setEffect(new ShadowEffect());
+    setEffect(new ShadowEffect().copySimple());
 }
 
 /**

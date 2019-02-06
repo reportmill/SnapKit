@@ -262,7 +262,7 @@ public boolean intersects(Shape aShape)
 protected void paintAll(Painter aPntr)
 {
     super.paintAll(aPntr);
-    if(_viewEff==null || _viewEff.isSimpleShadow()) {
+    if(_viewEff==null) {
         paintChildren(aPntr);
         paintAbove(aPntr);
     }

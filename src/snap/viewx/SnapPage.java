@@ -36,7 +36,7 @@ protected View createUI()
     if(!(superUI instanceof DocView)) {
         superUI.setFill(ViewUtils.getBackFill());
         superUI.setBorder(Color.BLACK, 1);
-        superUI.setEffect(new ShadowEffect());
+        superUI.setEffect(new ShadowEffect().copySimple());
         BoxView box = new BoxView(superUI); box.setFill(ViewUtils.getBackDarkFill());
         if(!(superUI instanceof SpringView)) superUI.setMinSize(500,500);
         superUI = box;
