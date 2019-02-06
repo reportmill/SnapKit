@@ -42,7 +42,7 @@ protected double getAspect()
 /**
  * Returns preferred width of layout.
  */
-public double getPrefWidthImpl(double aH)
+protected double getPrefWidthImpl(double aH)
 {
     // If scaling and value provided, return value by aspect
     if(aH>=0 && (isFillHeight() || aH<getPrefHeight(-1))) return aH*getAspect();
@@ -52,7 +52,7 @@ public double getPrefWidthImpl(double aH)
 /**
  * Returns preferred height of layout.
  */
-public double getPrefHeightImpl(double aW)
+protected double getPrefHeightImpl(double aW)
 {
     // If scaling and value provided, return value by aspect
     if(aW>=0 && (isFillWidth() || aW<getPrefWidth(-1))) return aW/getAspect();
@@ -62,7 +62,7 @@ public double getPrefHeightImpl(double aW)
 /**
  * Performs layout.
  */
-public void layoutImpl()  { layout(this, getContent(), null, isFillWidth(), isFillHeight()); }
+protected void layoutImpl()  { layout(this, getContent(), null, isFillWidth(), isFillHeight()); }
     
 /**
  * Performs Box layout for given parent, child and fill width/height.
