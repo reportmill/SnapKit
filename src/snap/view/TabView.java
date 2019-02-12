@@ -95,12 +95,10 @@ public void addTab(Tab aTab, int anIndex)
 {
     // Add Tab to Tabs list
     _tabs.add(anIndex, aTab);
-    
-    // Create ToggleButton for tab and configure
-    ToggleButton btn = new ToggleButton(); btn.setText(aTab.getTitle()); btn.getLabel().setPadding(4,7,4,7);
-    btn.setMinWidth(getTabMinWidth()); btn.setAlign(Pos.TOP_CENTER); btn.setPosition(Pos.TOP_CENTER);
+    aTab._tabView = this;
     
     // Add ToggleButton to Shelf
+    ToggleButton btn = aTab.getButton(); btn.setMinWidth(getTabMinWidth());
     _shelf.addChild(btn, anIndex); btn.addEventHandler(e -> shelfButtonPressed(e), Action);
     
     // Add Tab.Content to HiddenKids
@@ -219,7 +217,8 @@ public View getShelf()  { return _shelf; }
  */
 private ToggleButton getTabButton(int anIndex)
 {
-    return anIndex>=0 && anIndex<getTabCount()? (ToggleButton)_shelf.getChild(anIndex) : null;
+    if(anIndex<0 || anIndex>=getTabCount()) return null;
+    return getTab(anIndex).getButton();
 }
 
 /**
