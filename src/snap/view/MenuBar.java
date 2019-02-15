@@ -70,7 +70,9 @@ protected void processEvent(ViewEvent anEvent)
     for(View item : getChildren()) {
         MenuItem match = getMatchingMenuItem((MenuItem)item, anEvent);
         if(match!=null) {
-            match.fireActionEvent(anEvent); return; }
+            match.fireActionEvent(anEvent);
+            anEvent.consume(); return;
+        }
     }
 }
 
@@ -166,7 +168,7 @@ public static ColView createMenuBarView(MenuBar aMenuBar, View aView)
     aView.setGrowHeight(true);
     
     // Add EventListener (filter) to intercept any KeyPress + ShortCut events and run by MenuBar
-    colView.addEventFilter(e -> menuBarViewContentDidKeyPress(aMenuBar, e), KeyPress);
+    colView.addEventHandler(e -> menuBarViewContentDidKeyPress(aMenuBar, e), KeyPress);
     return colView;
 }
 
