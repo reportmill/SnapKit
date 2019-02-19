@@ -60,6 +60,12 @@ public SWRootView(WindowView aWin, RootView aRootView)
     
     // Enable DropTarget for RootView
     new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, dtl);
+    
+    // Add component listener to check for rare case of Snap RootView manually installed in JComponent hierarchy
+    addComponentListener(new ComponentAdapter() {
+        public void componentShown(ComponentEvent e) { swingShowingChanged(); }
+        public void componentHidden(ComponentEvent e) { swingShowingChanged(); }
+    });
 }
 
 /**
@@ -68,10 +74,11 @@ public SWRootView(WindowView aWin, RootView aRootView)
 public void setBounds(int aX, int aY, int aW, int aH)
 {
     // Do normal set bounds
-    super.setBounds(aX, aY, aW, aH); //_rview.setSize(aW, aH);
+    super.setBounds(aX, aY, aW, aH);
     
     // Correct X/Y for RootView in Window
-    for(Component c=getParent(); c!=null && c.getParent()!=null; c=c.getParent()) { aX += c.getX(); aY += c.getY(); }
+    Window winNtv = SwingUtils.getParent(this, Window.class);
+    for(Component c=getParent(); c!=winNtv; c=c.getParent()) { aX += c.getX(); aY += c.getY(); }
     _rview.setBounds(aX,aY,aW,aH);
 }
 
@@ -192,5 +199,40 @@ public void sendDropTargetEvent(DropTargetEvent anEvent, ViewEvent.Type aType)
     ViewEvent event = ViewEvent.createEvent(_rview, anEvent, aType, null);
     _win.dispatchEvent(event);
 }
+
+/**
+ * Called when Showing attribute changes for this SWRootView.
+ * Only needed for rare case of Snap RootView manually installed in JComponent hierarchy.
+ */
+void swingShowingChanged()
+{
+    // Get native window and just return if it is Snap Window native
+    Window winNtv = SwingUtils.getParent(this, Window.class);
+    if(winNtv==_win.getHelper().getNative()) return;
+    
+    // Add component listener to sync native Window X/Y to Snap Window
+    if(winNtv!=_winNtvNoSnap) {
+        if(_winNtvNoSnap!=null) _winNtvNoSnap.removeComponentListener(_winNtvLsnr);
+        _winNtvNoSnap = winNtv;
+        if(_winNtvNoSnap!=null) {
+            winNtv.addComponentListener(_winNtvLsnr = new ComponentAdapter() {
+                public void componentMoved(ComponentEvent e) { _win.setXY(winNtv.getX(), winNtv.getY()); } });
+            _win.setXY(winNtv.getX(), winNtv.getY());
+        }
+    }
+    
+    // Update Snap RootView Showing
+    ViewUtils.setShowing(_rview, isShowing());
+    
+    // If not showing and Window.Popup.Showing, hide Popup.
+    if(!isShowing() && _win.getPopup()!=null)
+        _win.getPopup().hide();
+    if(!isShowing())
+        _win.getDispatcher().dispatchMouseMoveOutsideWindow();
+}
+
+// Ivars for above case
+Window _winNtvNoSnap;
+ComponentListener _winNtvLsnr;
 
 }

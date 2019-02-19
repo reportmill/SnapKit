@@ -231,6 +231,15 @@ public View getContent()  { return getRootView().getContent(); }
 public void setContent(View aView)  { getRootView().setContent(aView); }
 
 /**
+ * Returns the native for the window content.
+ */
+public Object getContentNative()
+{
+    if(_updater==null) _updater = new ViewUpdater(this);
+    return getHelper().getContentNative();
+}
+    
+/**
  * Returns whether the window is always on top.
  */
 public boolean isAlwaysOnTop()  { return _alwaysOnTop; }
@@ -344,7 +353,7 @@ protected void initNativeWindow()
 {
     getHelper().initWindow();
     pack();
-    _updater = new ViewUpdater(this);
+    if(_updater==null) _updater = new ViewUpdater(this);
     _rview.repaint();
 }
 
