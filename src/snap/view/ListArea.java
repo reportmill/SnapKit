@@ -667,18 +667,32 @@ public String getText()
  */
 public void setText(String aString)
 {
-    // Get item for string
-    T item = null;
-    for(T itm : getItems()) if(SnapUtils.equals(aString, getText(itm))) { item = itm; break; }
-    if(item==null && getItemCount()>0) { T itm = getItem(0);
-        if(itm instanceof String) item = (T)aString;
-        else if(itm instanceof Integer) item = (T)SnapUtils.getInteger(aString);
-        else if(itm instanceof Float) item = (T)SnapUtils.getFloat(aString);
-        else if(itm instanceof Double) item = (T)SnapUtils.getDouble(aString);
-    }
-    
-    // Set selected item
+    T item = getItemForText(aString);
     setSelItem(item);
+}
+
+/**
+ * Return list item that matches string.
+ */
+public T getItemForText(String aString)
+{
+    // Iterate over items and if item text is exact match for string, return it
+    for(T item : getItems()) { String str = getText(item);
+        if(SnapUtils.equals(aString, str))
+            return item; }
+
+    // If items are primitive type, get primitive type for item string. Return matching item
+    T item0 = getItemCount()>0? getItem(0) : null, itemX = null;
+    if(item0 instanceof String) itemX = (T)aString;
+    else if(item0 instanceof Integer) itemX = (T)SnapUtils.getInteger(aString);
+    else if(item0 instanceof Float) itemX = (T)SnapUtils.getFloat(aString);
+    else if(item0 instanceof Double) itemX = (T)SnapUtils.getDouble(aString);
+    int index = itemX!=null? getItems().indexOf(itemX) : -1;
+    if(index>=0)
+        return getItem(index);
+    
+    // Return null
+    return null;
 }
 
 /**

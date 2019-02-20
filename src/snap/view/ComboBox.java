@@ -306,9 +306,15 @@ public String getText()
  */
 public void setText(String aString)
 {
+    // If matching item, set in ListView
+    T item = getListView().getListArea().getItemForText(aString);
+    if(item!=null)
+        getListView().setSelItem(item);
+        
+    // Set in TextField or Button
+    String str = item!=null? getListView().getText(item) : aString;
     if(isShowTextField()) _text.setText(aString);
     else _button.setText(aString);
-    getListView().setText(aString);
 }
 
 /**
@@ -351,7 +357,7 @@ protected void textFieldKeyPressed(ViewEvent anEvent)
     else if(anEvent.isEscapeKey()) {
 
         // If value has changed, reset to focus gained values
-        if(!SnapUtils.equals(_text.getText(), _text._focusGainedText)) {
+        if(_text.isEdited()) {
             _list.setItems(_items);
             _list.setText(_text._focusGainedText);
             _text.selectAll();
