@@ -520,7 +520,7 @@ public void setTriggersReset(boolean aValue)  { _triggersReset = aValue; }
  */
 public ViewEvent copyForView(View aView)
 {
-    View thisView = getView(); double x = getX(), y = getY();
+    View thisView = getView(); double x = getX(), y = getY(); if(aView==thisView) return this;
     View par = ViewUtils.getCommonAncetor(thisView, aView);
     Point point = par==thisView? aView.parentToLocal(x,y,par) : thisView.localToParent(x,y,par);
     return copyForViewPoint(aView, point.x, point.y, -1);

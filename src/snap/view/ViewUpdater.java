@@ -180,7 +180,11 @@ public Rect getRepaintRect()
 
     // Iterate over RepaintViews to calculate composite repaint rect from all views
     Rect rect = null;
-    for(View view : views) { Rect r = view.getRepaintRect(); if(r==null) continue;
+    for(View view : views) {
+    
+        // If view no longer in hierarchy or has no Repaint rect, just continue
+        if(view.getRootView()!=_rview) continue;
+        Rect r = view.getRepaintRect(); if(r==null) continue;
     
         // Constrain to ancestor clips
         r = view.getClippedRect(r); if(r.isEmpty()) continue;
