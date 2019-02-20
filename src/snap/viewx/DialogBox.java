@@ -431,7 +431,7 @@ protected void initUI()
     super.initUI();
     
     // Add Enter, Escape key bindings
-    if(isConfirmOnEnter()) addKeyActionFilter("EnterAction", "ENTER");  
+    if(isConfirmOnEnter()) addKeyActionHandler("EnterAction", "ENTER");  
     addKeyActionHandler("EscapeAction", "ESCAPE");  
 }
 
@@ -456,6 +456,15 @@ public void respondUI(ViewEvent anEvent)
         for(int i=0; i<options.length; i++)
             if(name.equals(options[i])) {
                 _index = i; hide(); }
+    }
+    
+    // Handle TextFields: If original event was Enter key and ConfirmEnabled, confirm
+    else if(anEvent.getView() instanceof TextField) {
+        boolean enterAction = false;
+        for(ViewEvent e=anEvent;e!=null;e=e.getParentEvent()) if(e.isEnterKey()) enterAction = true;
+        if(!enterAction) return;
+        if(!isConfirmEnabled()) { beep(); return; }
+        confirm(); anEvent.consume();
     }
     
     // Do normal version

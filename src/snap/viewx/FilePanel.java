@@ -293,7 +293,7 @@ protected void initUI()
     setFirstFocus(_fileText);
     
     // Set handler to update DialogBox.ConfirmEnabled when text changes
-    _fileText.addEventHandler(e -> runLater(() -> handleFileTextKeyReleased()), KeyRelease);
+    _fileText.addEventHandler(e -> runLater(() -> fileTextDidKeyRelease()), KeyRelease);
 }
 
 /**
@@ -335,6 +335,9 @@ protected void respondUI(ViewEvent anEvent)
         WebFile file = getFileTextFile();
         if(file!=null && file.isDir())
             setFile(file);
+        else if(isFileTextFileValid())
+            _dbox.confirm();
+        anEvent.consume();
     }
     
     // Handle HomeButton
@@ -423,41 +426,59 @@ private WebFile getFileTextFile()
  */
 private boolean isFileTextFileValid()
 {
+    // Get file for path based on FilePanel Dir and FileText (filename) - just return false if null
     WebFile file = getFileTextFile();
-    return file!=null && file.isFile() && ArrayUtils.contains(getTypes(), file.getType());
+    if(file==null) return false;
+    
+    // If file is plain file and matches requested type, return true
+    if(file.isFile() && ArrayUtils.contains(getTypes(), file.getType()))
+        return true;
+    return false;
 }
 
 /**
- * Returns a file completion.
+ * Returns a file completion file if found.
  */
-private String getFileCompletion(String aPath)
+private WebFile getFileCompletion(String aPath)
 {
+    // Get directory for path and file name
     String dirPath = FilePathUtils.getParent(aPath), fname = FilePathUtils.getFileName(aPath);
     WebFile dir = getFile(dirPath);
     
-    for(WebFile file : dir.getFiles()) {
-        if(StringUtils.startsWithIC(file.getName(), fname))
-            return file.getName();
+    // Look for completion file of any requested type (types are checked in order to allow for precidence)
+    for(String type : getTypes()) {
+        for(WebFile file : dir.getFiles()) {
+            if(StringUtils.startsWithIC(file.getName(), fname) && file.getType().equals(type))
+                return file; }
     }
+    
+    // Look for completion of type dir
+    for(WebFile file : dir.getFiles()) {
+        if(StringUtils.startsWithIC(file.getName(), fname) && file.isDir())
+            return file; }
     return null;
 }
 
 /**
  * Called after FileText KeyRelease.
  */
-private void handleFileTextKeyReleased()
+private void fileTextDidKeyRelease()
 {
-    // Get whether FileTextFileValid
+    // Get whether FileTextFile is valid (exists and is right type)
     boolean fileTextFileValid = isFileTextFileValid();
     
     // If not valid and opening, check for completion
-    if(!fileTextFileValid && isOpening() && getFileTextFile()==null && _fileText.getText().trim().length()>0) {
+    if(!fileTextFileValid && isOpening()) {
+        WebFile file = getFileTextFile();
+        String ftext = _fileText.getText().trim();
         String path = getFileTextPath();
-        String fname = getFileCompletion(path);
+        WebFile cfile = file==null && ftext.length()>0? getFileCompletion(path) : null;
         
         // If completion found, set filename remainder in FileText and select
-        if(fname!=null) {
-            _fileText.setCompletionText(fname);
+        if(cfile!=null) {
+            String cpath = cfile.getPath(), cname = cfile.getName();
+            String completion = StringUtils.startsWithIC(path, ftext)? cpath : cname;
+            _fileText.setCompletionText(completion);
             fileTextFileValid = true;
         }
     }
