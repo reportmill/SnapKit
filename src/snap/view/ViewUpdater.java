@@ -186,7 +186,8 @@ public Rect getRepaintRect()
         r = view.getClippedRect(r); if(r.isEmpty()) continue;
         
         // Transform to root coords
-        r = view.localToParent(r, _rview).getBounds();
+        if(view!=_rview)
+            r = view.localToParent(r, _rview).getBounds();
         
         // Combine
         if(rect==null) rect = r;

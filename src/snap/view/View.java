@@ -778,11 +778,13 @@ public Transform getLocalToParent()
  */
 public Transform getLocalToParent(View aPar)
 {
-    Transform tfm = getLocalToParent();
-    for(View n=getParent();n!=aPar&&n!=null;n=n.getParent()) {
+    Transform tfm = getLocalToParent(); View n;
+    for(n=getParent(); n!=aPar && n!=null; n=n.getParent()) {
         if(n.isLocalToParentSimple()) tfm.preTranslate(n._x+n._tx,n._y+n._ty);
         else tfm.multiply(n.getLocalToParent());
     }
+    if(n!=aPar)
+        System.err.println("View.getLocalToParent: Parent not found " + aPar);
     return tfm;
 }
 
@@ -1851,9 +1853,11 @@ public boolean isFocused()  { return _focused; }
 protected void setFocused(boolean aValue)
 {
     if(aValue==_focused) return;
-    if(!aValue) repaint();
     firePropChange(Focused_Prop, _focused, _focused=aValue);
-    if(aValue) repaint();
+    if(isFocusPainted()) {
+        if(aValue) repaint();
+        else repaint(ViewEffect.getFocusEffect().getBounds(getBoundsLocal()));
+    }
 }
 
 /**

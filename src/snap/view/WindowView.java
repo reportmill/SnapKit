@@ -233,11 +233,7 @@ public void setContent(View aView)  { getRootView().setContent(aView); }
 /**
  * Returns the native for the window content.
  */
-public Object getContentNative()
-{
-    if(_updater==null) _updater = new ViewUpdater(this);
-    return getHelper().getContentNative();
-}
+public Object getContentNative()  { return getHelper().getContentNative(); }
     
 /**
  * Returns whether the window is always on top.
@@ -343,6 +339,7 @@ public WindowHpr getHelper()
     if(_helper!=null) return _helper;
     _helper = getEnv().createHelper(this);
     _helper.setWindow(this);
+    _updater = new ViewUpdater(this); repaint();
     return _helper;
 }
 
@@ -353,8 +350,6 @@ protected void initNativeWindow()
 {
     getHelper().initWindow();
     pack();
-    if(_updater==null) _updater = new ViewUpdater(this);
-    _rview.repaint();
 }
 
 /** Initializes the native window once. */
@@ -481,6 +476,15 @@ public WindowView getWindow()  { return this; }
  * Override to do layout immediately.
  */
 public void relayout()  { layout(); }
+
+/**
+ * Override to change to root view.
+ */
+public void repaint(double aX, double aY, double aW, double aH)
+{
+    RootView rview = getRootView();
+    rview.repaint(aX - rview.getX(), aY - rview.getY(), aW, aH);
+}
 
 /**
  * Override to return showing, since it is eqivalent for window.
