@@ -5,7 +5,7 @@
     <ToggleButton Name="RGBPickerButton" PrefWidth="40" PrefHeight="27" image="rgb-icon.png" ToggleGroup="bg1" />
     <ToggleButton Name="GrayPickerButton" PrefWidth="40" PrefHeight="27" image="grayscale-icon.png" ToggleGroup="bg1" />
     <ToggleButton Name="SwatchPickerButton" PrefWidth="40" PrefHeight="27" image="swatches-icon.png" ToggleGroup="bg1" />
-    <Separator PrefWidth="20" Vertical="true" Visible="false" />
+    <Label PrefWidth="20" PrefHeight="8" />
     <ColorWell Name="DisplayColorWell" PrefWidth="40" PrefHeight="27" Selectable="false" />
     <MenuButton Name="HistoryMenuButton" PrefWidth="16" PrefHeight="11" ToolTip="Recent Colors" ShowBorder="false" PopupX="-40" PopupY="10" PopupWidth="56" PopupHeight="120" />
   </HBox>
