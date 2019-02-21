@@ -89,9 +89,6 @@ protected void initUI()
     getView("FindText", TextField.class).setPromptText("Find");
     getView("FindText", TextField.class).getLabel().setImage(Image.get(TextPane.class, "Find.png"));
     
-    // Add binding for SelectionText
-    addViewBinding("SelectionText", "Text", "SelectionInfo");
-    
     // Register command-s for save, command-f for find, command-l for line number and escape
     addKeyActionHandler("SaveButton", "Shortcut+S");
     addKeyActionHandler("FindButton", "Shortcut+F");
@@ -111,6 +108,11 @@ protected void resetUI()
     
     // Reset TextModified
     setTextModified(getTextArea().getUndoer().hasUndos());
+    
+    // Update SelectionText, UndoButton, RedoButton
+    setViewText("SelectionText", getSelectionInfo());
+    setViewEnabled("UndoButton", getTextArea().getUndoer().hasUndos());
+    setViewEnabled("RedoButton", getTextArea().getUndoer().hasRedos());
 }
 
 /**
