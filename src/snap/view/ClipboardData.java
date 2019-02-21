@@ -1,6 +1,7 @@
 package snap.view;
 import java.io.*;
 import java.util.*;
+import java.util.function.Consumer;
 import snap.gfx.Color;
 import snap.gfx.Image;
 import snap.util.*;
@@ -28,6 +29,12 @@ public class ClipboardData {
     
     // The bytes
     byte           _bytes[];
+    
+    // Whether data is loaded
+    boolean        _loaded = true;
+
+    // A consumer to be called when data is loaded
+    Consumer <ClipboardData> _loadLsnr;
 
 /**
  * Creates a ClipboardData from source.
@@ -108,6 +115,32 @@ public String getExtension()
 public String getMIMEType()  { return _mimeType; }
 
 /**
+ * Returns whether data is loaded.
+ */
+public boolean isLoaded()  { return _loaded; }
+
+/**
+ * Sets whether data is loaded.
+ */
+protected void setLoaded(boolean aValue)
+{
+    if(aValue==_loaded) return;
+    _loaded = aValue;
+    if(aValue && _loadLsnr!=null) {
+        _loadLsnr.accept(this); _loadLsnr = null; }
+}
+
+/**
+ * Adds a load listener.
+ */
+public void addLoadListener(Consumer <ClipboardData> aLoadLsnr)
+{
+    if(isLoaded()) aLoadLsnr.accept(this);
+    else if(_loadLsnr!=null) System.err.println("ClipboardData.addLoadListener: Multiple listeners not yet supported");
+    _loadLsnr = aLoadLsnr;
+}
+
+/**
  * Returns the data as string.
  */
 public String getString()
@@ -148,6 +181,15 @@ public byte[] getBytes()
     // Complain and return null
     System.err.println("ClipboardData.getBytes: Bytes not available for source " + _src);
     return null;
+}
+
+/**
+ * Sets the bytes.
+ */
+protected void setBytes(byte theBytes[])
+{
+    _bytes = theBytes;
+    setLoaded(true);
 }
 
 /**
