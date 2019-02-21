@@ -98,6 +98,14 @@ public String getName()
 }
 
 /**
+ * Sets the file name.
+ */
+protected void setName(String aValue)
+{
+    _name = aValue;
+}
+
+/**
  * Returns the file extension.
  */
 public String getExtension()
