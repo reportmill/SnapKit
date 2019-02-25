@@ -470,8 +470,8 @@ public static String getBuildInfo()
  */
 public static int getProcessorCount()
 {
-    try { return isMac? 1 : Math.min(Runtime.getRuntime().availableProcessors(), 4); }
-    catch(Throwable t) { }
+    //try { return isMac? 1 : Math.min(Runtime.getRuntime().availableProcessors(), 4); }
+    //catch(Throwable t) { }
     return 1;
 }
 
