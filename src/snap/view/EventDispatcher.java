@@ -116,34 +116,30 @@ public void dispatchMouseEvent(ViewEvent anEvent)
     // Get target parents
     View pars[] = getParents(targ);
     
-    // Update MouseOvers
-    if(anEvent.isMouseMove() || anEvent.isMouseRelease() || anEvent.isMouseEnter() || anEvent.isMouseExit()) {
-    
-        // Remove old MouseOver views and dispatch appropriate MouseExited events
-        for(int i=_mouseOvers.size()-1;i>=0;i--) { View view = _mouseOvers.get(i);
-             if(!ArrayUtils.containsId(pars,view)) {
-                 _mouseOvers.remove(i); _mouseOverView = i>0? _mouseOvers.get(i-1) : null;
-                if(!view.getEventAdapter().isEnabled(MouseExit)) continue;
-                 ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseExit, null);
-                 view.fireEvent(e2);
-             }
-             else break;
-        }
-        
-        // Add new MouseOver views and dispatch appropriate MouseEntered events
-        for(int i=_mouseOvers.size();i<pars.length;i++) { View view = pars[i];
-            _mouseOvers.add(view); _mouseOverView = view;
-            if(!view.getEventAdapter().isEnabled(MouseEnter)) continue;
-             ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseEnter, null);
+    // Update MouseOvers: Remove views no longer under mouse and dispatch MouseExit events
+    for(int i=_mouseOvers.size()-1;i>=0;i--) { View view = _mouseOvers.get(i);
+         if(!ArrayUtils.containsId(pars,view)) {
+             _mouseOvers.remove(i); _mouseOverView = i>0? _mouseOvers.get(i-1) : null;
+            if(!view.getEventAdapter().isEnabled(MouseExit)) continue;
+             ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseExit, null);
              view.fireEvent(e2);
-        }
-        
-        // Update CurrentCursor
-        _win.resetActiveCursor();
+         }
+         else break;
     }
     
+    // Update MouseOvers: Add views now under mouse and dispatch MouseEnter events
+    for(int i=_mouseOvers.size();i<pars.length;i++) { View view = pars[i];
+        _mouseOvers.add(view); _mouseOverView = view;
+        if(!view.getEventAdapter().isEnabled(MouseEnter)) continue;
+         ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseEnter, null);
+         view.fireEvent(e2);
+    }
+    
+    // Update CurrentCursor
+    _win.resetActiveCursor();
+    
     // Handle MousePress: Update MousePressView and mouse pressed point
-    else if(anEvent.isMousePress()) {
+    if(anEvent.isMousePress()) {
         _mousePressView = targ; _mpx = anEvent.getX(); _mpy = anEvent.getY();
         for(View n=targ;n!=null;n=n.getParent())
             if(n.isFocusWhenPressed()) {
