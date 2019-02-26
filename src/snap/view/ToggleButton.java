@@ -75,11 +75,11 @@ public boolean isPressed()  { return super.isPressed() || _selected; }
 /**
  * Override to toggle Selected state (if no ToggleGroup or not selected).
  */
-public void fire()
+protected void fireActionEvent(ViewEvent anEvent)
 {
     if(getGroup()==null || !isSelected())
         setSelected(!isSelected());
-    fireActionEvent(null);
+    super.fireActionEvent(anEvent);
 }
 
 /**

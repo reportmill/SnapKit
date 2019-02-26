@@ -91,15 +91,16 @@ protected void processEvent(ViewEvent anEvent)
     // Handle MouseEnter, MouseExit, MousePress, MouseRelease
     if(anEvent.isMouseEnter()) { setTargeted(true); repaint(); }
     else if(anEvent.isMouseExit())  { setTargeted(false); repaint(); }
-    else if(anEvent.isMousePress())  { setPressed(false); setTargeted(false); fire(); repaint(); }
+    else if(anEvent.isMousePress())  { setPressed(false); setTargeted(false); fireActionEvent(anEvent); repaint(); }
     else if(anEvent.isMouseRelease())  { setPressed(false); setTargeted(false); repaint(); }
 }
 
 /**
- * Handles button click.
+ * Override to show menu.
  */
-public void fire()
+protected void fireActionEvent(ViewEvent anEvent)
 {
+    super.fireActionEvent(anEvent);
     Menu popup = new Menu();
     for(MenuItem item : getItems()) popup.addItem(item);
     popup.show(this,0,getHeight());

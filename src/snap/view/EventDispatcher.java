@@ -125,7 +125,7 @@ public void dispatchMouseEvent(ViewEvent anEvent)
                  _mouseOvers.remove(i); _mouseOverView = i>0? _mouseOvers.get(i-1) : null;
                 if(!view.getEventAdapter().isEnabled(MouseExit)) continue;
                  ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseExit, null);
-                 view.fireEvent(e2); if(e2.isConsumed()) anEvent.consume();
+                 view.fireEvent(e2);
              }
              else break;
         }
@@ -135,18 +135,18 @@ public void dispatchMouseEvent(ViewEvent anEvent)
             _mouseOvers.add(view); _mouseOverView = view;
             if(!view.getEventAdapter().isEnabled(MouseEnter)) continue;
              ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseEnter, null);
-             view.fireEvent(e2); if(e2.isConsumed()) anEvent.consume();
+             view.fireEvent(e2);
         }
         
         // Update CurrentCursor
-        rview.getWindow().resetActiveCursor();
+        _win.resetActiveCursor();
     }
     
     // Handle MousePress: Update MousePressView and mouse pressed point
     else if(anEvent.isMousePress()) {
         _mousePressView = targ; _mpx = anEvent.getX(); _mpy = anEvent.getY();
         for(View n=targ;n!=null;n=n.getParent())
-            if(n.isFocusWhenPressed()) {// && (_rview.getFocusedView()==null || !_rview.getFocusedView().isAncestor(n))) {
+            if(n.isFocusWhenPressed()) {
                 n.requestFocus(); break; }
     }
     

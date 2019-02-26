@@ -240,22 +240,36 @@ public Insets getInsetsAll()
  */
 protected void processEvent(ViewEvent anEvent)
 {
+    // If disabled, just return
+    if(isDisabled()) return;
+    
     // Handle MouseEnter, MouseExit, MousePress, MouseRelease
     if(anEvent.isMouseEnter()) { setTargeted(true); setPressed(_tracked); repaint(); }
     else if(anEvent.isMouseExit())  { setTargeted(false); setPressed(false); repaint(); }
-    else if(anEvent.isMousePress())  { _tracked = true; setPressed(true); repaint(); }
-    else if(anEvent.isMouseRelease())  { if(_pressed) fire(); _pressed = _tracked = false; repaint(); }
-    if(anEvent.isMouseEvent()) anEvent.consume();
+    else if(anEvent.isMousePress())  { _tracked = true; setPressed(true); repaint(); anEvent.consume(); }
+    else if(anEvent.isMouseRelease())  {
+        if(_pressed) fireActionEvent(anEvent);
+        _pressed = _tracked = false; repaint();
+    }
     
     // Handle KeyPress + Enter
     if(anEvent.isKeyPress() && anEvent.getKeyCode()==KeyCode.SPACE)
-        fire();
+        fireActionEvent(anEvent);
 }
 
 /**
  * Perform button click.
  */
-public void fire()  { if(isEnabled()) fireActionEvent(null); }
+public void fire()  { fireActionEvent(null); }
+
+/**
+ * Override to consume event.
+ */
+protected void fireActionEvent(ViewEvent anEvent)
+{
+    super.fireActionEvent(anEvent);
+    if(anEvent!=null) anEvent.consume();
+}
 
 /**
  * Paint Button.
