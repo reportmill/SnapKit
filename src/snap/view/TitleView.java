@@ -124,7 +124,7 @@ public void setCollapsible(boolean aValue)
     // If collapsible: Enable action event and listen for label click
     if(aValue) {
         enableEvents(Action);
-        _label.addEventHandler(_labelPressLsnr = e -> labelWasPressed(), MousePress);
+        _label.addEventHandler(_labelPressLsnr = e -> labelWasPressed(e), MousePress);
     }
     
     // If not collapsible: Disable action event and stop listen for lable click
@@ -301,8 +301,9 @@ protected void paintStyleEtchBorder(Painter aPntr)
 /**
  * Called when Label receives a MousePress.
  */
-protected void labelWasPressed()
+protected void labelWasPressed(ViewEvent anEvent)
 {
+    fireActionEvent(anEvent);
     setExpandedAnimated(!isExpanded());
 }
 
