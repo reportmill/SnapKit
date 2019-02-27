@@ -83,6 +83,9 @@ public static class StatementHandler extends ParseHandler <KeyChain> {
         else if(anId=="=") _op = 1;
         else if(anId=="+=") _op = 2;
     }
+    
+    /** Returns the part class. */
+    protected Class <KeyChain> getPartClass()  { return KeyChain.class; }
 }
 
 /**
@@ -100,6 +103,9 @@ public static class ExpressionHandler extends ParseHandler <KeyChain> {
             else _part.addChild(kc);
         }
     }
+    
+    /** Returns the part class. */
+    protected Class <KeyChain> getPartClass()  { return KeyChain.class; }
 }
 
 /**
@@ -165,6 +171,9 @@ public static abstract class BinaryExprHandler extends ParseHandler <KeyChain> {
         else if(anId=="||") _op = Op.Or;
         else if(anId=="&&") _op = Op.And;
     }
+    
+    /** Returns the part class. */
+    protected Class <KeyChain> getPartClass()  { return KeyChain.class; }
 }
 
 /**
@@ -188,6 +197,9 @@ public static class UnaryExprHandler extends ParseHandler <KeyChain> {
         else if(anId=="-") _op = Op.Negate;
         else if(anId=="!") _op = Op.Not;
     }
+    
+    /** Returns the part class. */
+    protected Class <KeyChain> getPartClass()  { return KeyChain.class; }
 }
 
 /**
@@ -206,6 +218,9 @@ public static class KeyChainHandler extends ParseHandler <KeyChain> {
             else _part.addChild(kc);
         }
     }
+    
+    /** Returns the part class. */
+    protected Class <KeyChain> getPartClass()  { return KeyChain.class; }
 }
 
 /**
@@ -256,6 +271,9 @@ public static class ObjectHandler extends ParseHandler <KeyChain> {
             _part = _part!=null? new KeyChain(Op.ArrayIndex, _part, expr) : expr;
         }
     }
+    
+    /** Returns the part class. */
+    protected Class <KeyChain> getPartClass()  { return KeyChain.class; }
 }
 
 /**
@@ -273,6 +291,9 @@ public static class ArgListHandler extends ParseHandler <KeyChain> {
             else _part.addChild(arg);
         }
     }
+    
+    /** Returns the part class. */
+    protected Class <KeyChain> getPartClass()  { return KeyChain.class; }
 }
 
 }

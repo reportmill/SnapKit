@@ -30,6 +30,9 @@ public class XMLElement extends XMLAttribute {
     // Whether element should ignore case when asking for attributes/elements by name
     boolean              _ignoreCase;
     
+    // A shared XMLParser
+    static XMLParser     _xmlParser;
+    
 /**
  * Creates a new element.
  */
@@ -73,14 +76,15 @@ public void setProcInstrData(String aStr)  { _pidata = aStr; }
 /**
  * Returns a new element hierarchy loaded from aSource (File, String path, InputStream or whatever).
  */
-public static XMLElement getElement(Object aSource)
+public static synchronized XMLElement getElement(Object aSource)
 {
     // If source is xml element, just return it
     if(aSource instanceof XMLElement)
         return (XMLElement)aSource;
     
     // Create and return new element from source
-    try { return new XMLParser().parseXML(aSource); }
+    if(_xmlParser==null) _xmlParser = new XMLParser();
+    try { return _xmlParser.parseXML(aSource); }
     catch(Throwable t) { throw new RuntimeException(t); } // Catch and re-throw exceptions
 }
 
