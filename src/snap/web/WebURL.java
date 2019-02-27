@@ -18,8 +18,8 @@ public class WebURL {
     // The source object (String, File, URL)
     Object          _src;
     
-    // The source object as URL (if possible)
-    URL             _srcURL;
+    // The source object as URL
+    URL             _srcURL, _jurl;
     
     // The URL string
     URLString       _ustr;
@@ -38,7 +38,7 @@ protected WebURL(Object aSource)
     // Set source
     _src = aSource;
     
-    // Get/set Java URL (if available)
+    // Get/set Source Java URL
     _srcURL = WebGetter.getJavaURL(aSource);
     
     // Get URLString for parts
@@ -81,6 +81,11 @@ public static WebURL getURL(Class aClass, String aName)
  * Returns the source of this URL (java.net.URL, File, String).
  */
 public Object getSource()  { return _src; }
+
+/**
+ * Returns the source as standard Java URL. Might contain site-path separator. See getJavaURL().
+ */
+public URL getSourceURL()  { return _srcURL; }
 
 /**
  * Returns the full URL string.
@@ -197,7 +202,19 @@ public WebURL getQueryURL()  { return isQueryURL()? this : getURL(_ustr.getQuery
 /**
  * Returns the source as standard Java URL (if possible).
  */
-public URL getJavaURL()  { return _srcURL; }
+public URL getJavaURL()
+{
+    // If already set, just return
+    if(_jurl!=null) return _jurl;
+    
+    // If URL doesn't have site path, just set/return SourceURL
+    if(getString().indexOf('!')<0) return _jurl = _srcURL;
+    
+    // Get URL string without site path separator and create/set/return URL
+    String urls = getString().replace("!", "");
+    try { return _jurl = new URL(urls); }
+    catch(Exception e) { throw new RuntimeException(e); }
+}
 
 /**
  * Returns the source as standard Java File (if possible).
@@ -222,12 +239,15 @@ public boolean isFound()
  */
 public long getLastModTime()
 {
+    // For the time being, just return bogus value when TeaVM checks
+    if(SnapUtils.isTeaVM) return 1000000L;
+    
     // Handle File or URL
-    if(!SnapUtils.isTeaVM && _src instanceof File)
+    if(_src instanceof File)
         return ((File)_src).lastModified();
         
     // Handle URL
-    if(_src instanceof URL) { URL url = (URL)_src;
+    if(_src instanceof URL) { URL url = getJavaURL();
         try { return url.openConnection().getLastModified(); }
         catch(IOException e) { return 0; }
     }
