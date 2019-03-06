@@ -61,7 +61,7 @@ protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
  */
 private boolean isDir(WebURL aURL, HTTPResponse aResp)
 {
-    String ctype = aResp.getContentType().toLowerCase();
+    String ctype = aResp.getContentType(); if(ctype==null) return false; ctype = ctype.toLowerCase();
     String path = aURL.getPath(); if(path==null) path = "/";
     boolean isdir = FilePathUtils.getExtension(path).length()==0 && ctype.startsWith("text") &&
         aURL.getQuery()==null;
