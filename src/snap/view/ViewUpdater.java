@@ -36,6 +36,7 @@ public class ViewUpdater {
 
     // Whether painting in debug mode
     static boolean           _debug = false; static int _pc; static long _frames[] = null;//new long[20];
+    Rect                     _debugRepaintRect;
 
 /**
  * Creates a ViewUpdater.
@@ -157,16 +158,17 @@ public synchronized void paintViews(Painter aPntr, Rect aRect)
 protected void paintDebug(View aView, Painter aPntr, Shape aShape)
 {
     // If odd paint call, sleep for a moment to give debug paint a moment to register then do normal paint
-    if(_pc%2==1) {
+    if(_debugRepaintRect!=null) {
         try { Thread.sleep(30); } catch(Exception e) { }
-        _rview.paintAll(aPntr); return;
+        _rview.paintAll(aPntr); _debugRepaintRect = null; return;
     }
     
     // Fill paint bounds with yellow
     aPntr.setColor(Color.YELLOW); aPntr.fill(aShape);
     
     // Schedule repaint to do real paint
-    ViewUtils.runLater(() -> _rview.getChild(0).repaint(aShape.getBounds()));
+    Rect rect = _debugRepaintRect = aShape.getBounds();
+    ViewUtils.runLater(() -> _rview.repaint(rect));
 }
 
 /**
