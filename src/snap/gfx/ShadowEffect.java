@@ -100,13 +100,8 @@ public Image getShadowImage(PainterDVR aPDVR, Rect aRect)
     int radius = (int)getRadius(); //if(radius>2) return getShadowImageSimple(aRect);
     Image simg = aPDVR.getImage(aRect, radius*2);
     
-    // Set composite to change mask colors to shadow color (black) and multiply mask alpha by shadow alpha (.65f)
-    Painter pntr = simg.getPainter(); pntr.setComposite(Painter.Composite.SRC_IN);
-    pntr.setColor(getColor()); pntr.fillRect(0, 0, simg.getWidth(), simg.getHeight());
-    pntr.flush();
-   
     // Blur image and return
-    simg.blur(radius);
+    simg.blur(radius, getColor());
     return simg;
 }
 
@@ -199,8 +194,8 @@ public static Image getShadowImage(Rect aRect, double aRad, Color aColor)
     int w = (int)Math.round(aRect.getWidth()), h = (int)Math.round(aRect.getHeight());
     int sw = rad*2+1, sh = sw;
     Image s0 = Image.get(rad6+1,rad6+1, true);
-    Painter spntr = s0.getPainter(); spntr.setColor(aColor); spntr.fillRect(rad2,rad2,rad2+1,rad2+1); spntr.flush();
-    s0.blur(rad);
+    Painter spntr = s0.getPainter(); spntr.setColor(Color.BLACK); spntr.fillRect(rad2,rad2,rad2+1,rad2+1);
+    s0.blur(rad, aColor);
     
     // Blit on fullsize shadow
     Image simg = Image.get(w + rad4, h + rad4, true);
@@ -213,7 +208,6 @@ public static Image getShadowImage(Rect aRect, double aRad, Color aColor)
     pntr.drawImage(s0, 0, rad3+1, rad3, rad3, 0, rad+h, rad3, rad3);           // Lower left
     pntr.drawImage(s0, rad3, rad3+1, 1, rad3, rad3, rad+h, w-rad2, rad3);      // Lower Center
     pntr.drawImage(s0, rad3+1, rad3+1, rad3, rad3, rad+w, rad+h, rad3, rad3);  // Lower right
-    pntr.flush();
     return simg;
 }
 

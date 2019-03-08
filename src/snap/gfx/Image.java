@@ -317,8 +317,14 @@ public abstract void setPremultiplied(boolean aValue);
 /**
  * Blurs the image by mixing pixels with those around it to given radius.
  */
-public void blur(int aRad)
+public void blur(int aRad, Color aColor)
 {
+    // If color provided, apply to image with SRC_IN
+    if(aColor!=null) {
+        Painter pntr = getPainter(); pntr.setComposite(Painter.Composite.SRC_IN);
+        pntr.setColor(aColor); pntr.fillRect(0, 0, getWidth(), getHeight());
+    }
+   
     // Make image premultiplied
     setPremultiplied(true);
     
@@ -349,8 +355,7 @@ public void emboss(double aRadius, double anAzi, double anAlt)
     Image bumpImg = Image.get(w+rad*2, h+rad*2, true);
     Painter ipntr = bumpImg.getPainter(); ipntr.setImageQuality(1); //ipntr.clipRect(0, 0, width, height);
     ipntr.drawImage(this, rad, rad, w, h);
-    ipntr.flush();
-    bumpImg.blur(rad);
+    bumpImg.blur(rad, null);
 
     // Get source and bump pixels as int arrays and call general emboss method
     int spix[] = getArrayARGB(); if(spix==null) { System.err.println("Image.emboss: No data"); return; }

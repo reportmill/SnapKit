@@ -58,7 +58,7 @@ public Image getBlurImage(PainterDVR aPDVR, Rect aRect)
 {
     int radius = (int)getRadius();
     Image bimg = aPDVR.getImage(aRect, radius*2);
-    bimg.blur(radius);
+    bimg.blur(radius, null);
     return bimg;
 }
 
