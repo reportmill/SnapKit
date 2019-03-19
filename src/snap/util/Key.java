@@ -308,20 +308,21 @@ public static class KeyAccessor {
                 // Catch InvocationTargetException and complain
                 catch(InvocationTargetException  e) {
                     String name = _getMethod.getName(), cname = anObj.getClass().getName();
-                    System.err.println("Key: Exception evaluating key " + name + " on object of class " + cname);
+                    System.err.println("Key: ITException evaluating key " + name + " on object of class " + cname);
                     e.getCause().printStackTrace();
                 }
                 
                 // Catch IllegalAccessException and complain
                 catch(IllegalAccessException e) {
                     String name = _getMethod.getName(), cname = anObj.getClass().getName();
-                    System.err.println("Key: Exception evaluating key " + name + " on object of class " + cname);
-                    e.printStackTrace(); _getMethod = null;
+                    System.err.println("Key: IAException evaluating key " + name + " on object of class " + cname);
+                    e.printStackTrace();
                 }
                 
                 // Catch anything else
                 catch(Throwable e) {
-                    String name = _getMethod.getName(), cname = anObj.getClass().getName();
+                    String name = _getMethod.getName(); if(name.equals("valueForKey")) return null;
+                    String cname = anObj.getClass().getName();
                     System.err.println("Key: Exception evaluating key " + name + " on object of class " + cname);
                     e.printStackTrace();
                     return null;
@@ -355,14 +356,10 @@ public static class KeyAccessor {
     public Method getGetMethod()
     {
         // If get method already found, just return it
-        if(_getMethod!=null)
-            return _getMethod;
+        if(_getMethod!=null) return _getMethod;
         
-        // Look for "get" method
-        if(_getMethod==null)
-            _getMethod = getMethod(_class, "get" + _key);
-        
-        // Look for "is" method
+        // Look for "get" or "is" method
+        _getMethod = getMethod(_class, "get" + _key);
         if(_getMethod==null)
             _getMethod = getMethod(_class, "is" + _key);
             
