@@ -242,16 +242,6 @@ public abstract byte[] getBytesPNG();
 public abstract Painter getPainter();
 
 /**
- * Returns whether image data is premultiplied.
- */
-public abstract boolean isPremultiplied();
-
-/**
- * Sets whether image data is premultiplied.
- */
-public abstract void setPremultiplied(boolean aValue);
-
-/**
  * Returns the image set.
  */
 public ImageSet getImageSet()
@@ -311,58 +301,14 @@ public Image getSpriteSheetFrames(int aCount)
 }
 
 /**
- * Returns the ARGB array of this image.
- */
-public int[] getArrayARGB()  { System.err.println("Image.getArrayARGB: Not implemented"); return null; }
-
-/**
  * Blurs the image by mixing pixels with those around it to given radius.
  */
-public void blur(int aRad, Color aColor)
-{
-    // If color provided, apply to image with SRC_IN
-    if(aColor!=null) {
-        Painter pntr = getPainter(); pntr.setComposite(Painter.Composite.SRC_IN);
-        pntr.setColor(aColor); pntr.fillRect(0, 0, getWidth(), getHeight());
-    }
-   
-    // Make image premultiplied
-    setPremultiplied(true);
-    
-    // Get image data (and temp data)
-    int w = getPixWidth(), h = getPixHeight();
-    int spix[] = getArrayARGB(); if(spix==null) { System.err.println("Image.blur: No data"); return; }
-    int tpix[] = new int[w*h];
-    
-    // Apply 1D gausian kernal for speed, as horizontal, then vertical (order = 2*rad instead of rad^2)
-    float kern1[] = GFXUtils.getGaussianKernel(aRad,0); // size = aRad*2+1 x 1
-    GFXUtils.convolve(spix, tpix, w, h, kern1, aRad*2+1);  // Horizontal 1D, kern size = aRad*2+1 x 1
-    GFXUtils.convolve(tpix, spix, w, h, kern1, 1);         // Vertical 1D, kern size = 1 x aRad*2+1
-    
-    // Convert blur image to non-premultiplied and return
-    setPremultiplied(false);
-}
+public void blur(int aRad, Color aColor)  { System.err.println("Image.blur: Not impl"); }
 
 /**
  * Embosses the image by mixing pixels with those around it to given radius.
  */
-public void emboss(double aRadius, double anAzi, double anAlt)
-{
-    // Get basic info
-    int w = getPixWidth(), h = getPixHeight();
-    int radius = (int)Math.round(aRadius), rad = Math.abs(radius);
-    
-    // Create bump map: original graphics offset by radius, blurred. Color doesn't matter - only alpha channel used.
-    Image bumpImg = Image.get(w+rad*2, h+rad*2, true);
-    Painter ipntr = bumpImg.getPainter(); ipntr.setImageQuality(1); //ipntr.clipRect(0, 0, width, height);
-    ipntr.drawImage(this, rad, rad, w, h);
-    bumpImg.blur(rad, null);
-
-    // Get source and bump pixels as int arrays and call general emboss method
-    int spix[] = getArrayARGB(); if(spix==null) { System.err.println("Image.emboss: No data"); return; }
-    int bpix[] = bumpImg.getArrayARGB();
-    GFXUtils.emboss(spix, bpix, w, h, radius, anAzi*Math.PI/180, anAlt*Math.PI/180);
-}
+public void emboss(double aRadius, double anAzi, double anAlt)  { System.err.println("Image.emboss: Not impl"); }
 
 /**
  * Add listener.

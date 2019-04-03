@@ -109,19 +109,6 @@ protected byte[] getBytesRGBAImpl()
 }
 
 /**
- * Returns the ARGB array of this image.
- */
-public int[] getArrayARGB()
-{
-    Raster raster = _native.getRaster();
-    DataBuffer buf = raster.getDataBuffer();
-    if(buf.getDataType() != DataBuffer.TYPE_INT || buf.getNumBanks() != 1)
-        throw new RuntimeException("unknown data format");
-    int pix[] = ((DataBufferInt)buf).getData();
-    return pix;
-}
-
-/**
  * Returns the JPEG bytes for image.
  */
 public byte[] getBytesJPEG()  { return AWTImageUtils.getBytesJPEG(getNative()); }
@@ -142,20 +129,75 @@ public Painter getPainter()
 }
 
 /**
- * Returns whether image data is premultiplied.
- */
-public boolean isPremultiplied()  { return _native.isAlphaPremultiplied(); }
-
-/**
- * Sets whether image data is premultiplied.
- */
-public void setPremultiplied(boolean aValue)  { _native.coerceData(aValue); }
-
-/**
  * Blurs the image by mixing pixels with those around it to given radius.
  */
-public void blur2(int aRad)
+public void blur(int aRad, Color aColor)
 {
+    // If color provided, apply to image with SRC_IN
+    if(aColor!=null) {
+        Painter pntr = getPainter(); pntr.setComposite(Painter.Composite.SRC_IN);
+        pntr.setColor(aColor); pntr.fillRect(0, 0, getWidth(), getHeight());
+    }
+   
+    // Make image premultiplied
+    setPremultiplied(true);
+    
+    // Get image data (and temp data)
+    int w = getPixWidth(), h = getPixHeight();
+    int spix[] = getArrayARGB(); if(spix==null) { System.err.println("Image.blur: No data"); return; }
+    int tpix[] = new int[w*h];
+    
+    // Apply 1D gausian kernal for speed, as horizontal, then vertical (order = 2*rad instead of rad^2)
+    float kern1[] = AWTImageUtils.getGaussianKernel(aRad,0); // size = aRad*2+1 x 1
+    AWTImageUtils.convolve(spix, tpix, w, h, kern1, aRad*2+1);  // Horizontal 1D, kern size = aRad*2+1 x 1
+    AWTImageUtils.convolve(tpix, spix, w, h, kern1, 1);         // Vertical 1D, kern size = 1 x aRad*2+1
+    
+    // Convert blur image to non-premultiplied and return
+    setPremultiplied(false);
+}
+
+/**
+ * Embosses the image by mixing pixels with those around it to given radius.
+ */
+public void emboss(double aRadius, double anAzi, double anAlt)
+{
+    // Get basic info
+    int w = getPixWidth(), h = getPixHeight();
+    int radius = (int)Math.round(aRadius), rad = Math.abs(radius);
+    
+    // Create bump map: original graphics offset by radius, blurred. Color doesn't matter - only alpha channel used.
+    J2DImage bumpImg = (J2DImage)Image.get(w+rad*2, h+rad*2, true);
+    Painter ipntr = bumpImg.getPainter(); ipntr.setImageQuality(1); //ipntr.clipRect(0, 0, width, height);
+    ipntr.drawImage(this, rad, rad, w, h);
+    bumpImg.blur(rad, null);
+
+    // Get source and bump pixels as int arrays and call general emboss method
+    int spix[] = getArrayARGB(); if(spix==null) { System.err.println("Image.emboss: No data"); return; }
+    int bpix[] = bumpImg.getArrayARGB();
+    AWTImageUtils.emboss(spix, bpix, w, h, radius, anAzi*Math.PI/180, anAlt*Math.PI/180);
+}
+
+/**
+ * Returns/sets whether image data is premultiplied.
+ */
+private boolean isPremultiplied()  { return _native.isAlphaPremultiplied(); }
+private void setPremultiplied(boolean aValue)  { _native.coerceData(aValue); }
+
+/**
+ * Returns the ARGB array of this image.
+ */
+private int[] getArrayARGB()
+{
+    Raster raster = _native.getRaster();
+    DataBuffer buf = raster.getDataBuffer();
+    if(buf.getDataType() != DataBuffer.TYPE_INT || buf.getNumBanks() != 1)
+        throw new RuntimeException("unknown data format");
+    int pix[] = ((DataBufferInt)buf).getData();
+    return pix;
+}
+
+/** Blurs the image by mixing pixels with those around it to given radius. */
+/*public void blur2(int aRad)  {
     // Check whether premultiplied
     if(!isPremultiplied()) System.err.println("J2DImage.blur: Need to set premultiply for convolve");
 
@@ -167,9 +209,8 @@ public void blur2(int aRad)
     ConvolveOp cop2 = new ConvolveOp(kern2, ConvolveOp.EDGE_NO_OP, null); //ConvolveOp.EDGE_ZERO_FILL, null);
     cop2.filter(temp, _native);
     
-    // Convert blur image to non-premultiplied and return
-    _native.coerceData(false);
-}
+    // Convert blur image to non-premultiplied
+    _native.coerceData(false); }*/
 
 /**
  * Returns the native image.
