@@ -17,21 +17,30 @@ public abstract class Image {
      // The image source URL
      WebURL           _url;
      
-     // The image source bytes
-     byte             _bytes[];
-     
      // The image type
      String           _type;
-     
-     // Whether the image is loaded
-     boolean          _loaded = true;;
-     
-     // The native image
-     Object           _native;
      
      // The cached width/height
      double           _width = -1, _height = -1;
      
+     // The pixel width/height
+     int              _pw = -1, _ph = -1;
+     
+     // The X/Y DPI
+     double           _dpiX = -1, _dpiY = -1;
+     
+     // Whether image has alpha
+     Boolean          _hasAlpha;
+     
+     // The image source bytes
+     byte             _bytes[];
+     
+     // Whether the image is loaded
+     boolean          _loaded = true;;
+     
+     // The decoded bytes
+     byte             _bytesRGB[], _bytesRGBA[];
+
      // The image set, if animated image
      ImageSet         _imgSet;
 
@@ -71,77 +80,77 @@ public WebURL getSourceURL()
 /**
  * Returns the width of given image.
  */
-public double getWidth()  { return _width>=0? _width : (_width=getPixWidth()*72/getWidthDPI()); }
+public double getWidth()  { return _width>=0? _width : (_width=getWidthImpl()); }
 
 /**
  * Returns the height of given image.
  */
-public double getHeight()  { return _height>=0? _height : (_height=getPixHeight()*72/getHeightDPI()); }
-
-/**
- * Returns the width of given image.
- */
-public double getWidthDPI()  { return 72; }
-
-/**
- * Returns the height of given image.
- */
-public double getHeightDPI()  { return 72; }
+public double getHeight()  { return _height>=0? _height : (_height=getHeightImpl()); }
 
 /**
  * Returns the width of given image in pixels.
  */
-public abstract int getPixWidth();
+public int getPixWidth()  { return _pw>=0? _pw : (_pw = getPixWidthImpl()); }
 
 /**
  * Returns the height of given image in pixels.
  */
-public abstract int getPixHeight();
+public int getPixHeight()  { return _ph>=0? _ph : (_ph = getPixHeightImpl()); }
+
+/**
+ * Returns the horizontal image DPI.
+ */
+public double getDPIX()  { return _dpiX>=0? _dpiX : (_dpiX=getDPIXImpl()); }
+
+/**
+ * Returns the vertical image DPI.
+ */
+public double getDPIY()  { return _dpiY>=0? _dpiY : (_dpiY=getDPIYImpl()); }
 
 /**
  * Returns whether image has alpha.
  */
-public abstract boolean hasAlpha();
+public boolean hasAlpha()  { return _hasAlpha!=null? _hasAlpha : (_hasAlpha=hasAlphaImpl()); }
 
 /**
- * Returns whether the image is non-grayscale.
+ * Returns the native object.
  */
-public boolean isColor()  { return isIndexedColor() || getSamplesPerPixel()>2; }
+public abstract Object getNative();
 
 /**
- * Returns number of components.
+ * Returns the width of given image.
  */
-public abstract int getSamplesPerPixel();
+protected double getWidthImpl()  { return getPixWidth()*72/getDPIX(); }
 
 /**
- * Returns the number of bits per sample.
+ * Returns the height of given image.
  */
-public abstract int getBitsPerSample();
+protected double getHeightImpl()  { return getPixHeight()*72/getDPIY(); }
 
 /**
- * Returns the number of bits per pixel (derived from bits per sample and samples per pixel).
+ * Returns the width of given image in pixels.
  */
-public int getBitsPerPixel()  { return getBitsPerSample()*getSamplesPerPixel(); }
+protected abstract int getPixWidthImpl();
 
 /**
- * Returns the number of bytes per row (derived from width and bits per pixel).
+ * Returns the height of given image in pixels.
  */
-public int getBytesPerRow()  { return (getPixWidth()*getBitsPerPixel()+7)/8; }
+protected abstract int getPixHeightImpl();
 
 /**
- * Returns whether index color model.
+ * Returns the width of given image.
  */
-public abstract boolean isIndexedColor();
+protected double getDPIXImpl()  { return 72; }
 
 /**
- * Color map support: returns the bytes of color map from a color map image.
+ * Returns the height of given image.
  */
-public abstract byte[] getColorMap();
+protected double getDPIYImpl()  { return 72; }
 
 /**
- * Color map support: returns the index of the transparent color in a color map image.
+ * Returns whether image has alpha.
  */
-public abstract int getAlphaColorIndex();
+protected abstract boolean hasAlphaImpl();
 
 /**
  * Returns the source bytes.
@@ -151,7 +160,7 @@ public byte[] getBytes()  { return _bytes!=null? _bytes : (_bytes=getBytesImpl()
 /**
  * Returns the source bytes.
  */
-public byte[] getBytesImpl()
+protected byte[] getBytesImpl()
 {
     // Get bytes for URL and return
     WebURL url = getSourceURL();
@@ -193,56 +202,29 @@ protected void setLoaded(boolean aValue)
 }
 
 /**
- * Returns the image set.
- */
-public ImageSet getImageSet()
-{
-    getNative();
-    return _imgSet;
-}
-
-/**
- * Sets the image set.
- */
-protected void setImageSet(ImageSet anIS)  { _imgSet = anIS; }
-
-/**
- * Add listener.
- */
-public void addPropChangeListener(PropChangeListener aPCL)
-{
-    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-    _pcs.addPropChangeListener(aPCL);
-}
-
-/**
- * Remove listener.
- */
-public void removePropChangeListener(PropChangeListener aPCL)  { _pcs.removePropChangeListener(aPCL); }
-
-/**
- * Fires a property change for given property name, old value, new value and index.
- */
-protected void firePropChange(String aProp, Object oldVal, Object newVal)
-{
-    if(!_pcs.hasListener(aProp)) return;
-    _pcs.firePropChange(new PropChange(this, aProp, oldVal, newVal));
-}
-
-/**
  * Returns an RGB integer for given x, y.
  */
 public abstract int getRGB(int aX, int aY);
 
 /**
- * Returns the ARGB array of this image.
+ * Returns the decoded RGB bytes of this image.
  */
-public int[] getArrayARGB()  { System.err.println("Image.getArrayARGB: Not implemented"); return null; }
+public byte[] getBytesRGB()  { return _bytesRGB!=null? _bytesRGB : (_bytesRGB=getBytesRGBImpl()); }
 
 /**
  * Returns the decoded RGBA bytes of this image.
  */
-public abstract byte[] getBytesRGBA();
+public byte[] getBytesRGBA()  { return _bytesRGBA!=null? _bytesRGBA : (_bytesRGBA=getBytesRGBAImpl()); }
+
+/**
+ * Returns the decoded RGB bytes of this image.
+ */
+protected abstract byte[] getBytesRGBImpl();
+
+/**
+ * Returns the decoded RGBA bytes of this image.
+ */
+protected abstract byte[] getBytesRGBAImpl();
 
 /**
  * Returns the JPEG bytes for image.
@@ -258,6 +240,30 @@ public abstract byte[] getBytesPNG();
  * Returns a painter to mark up image.
  */
 public abstract Painter getPainter();
+
+/**
+ * Returns whether image data is premultiplied.
+ */
+public abstract boolean isPremultiplied();
+
+/**
+ * Sets whether image data is premultiplied.
+ */
+public abstract void setPremultiplied(boolean aValue);
+
+/**
+ * Returns the image set.
+ */
+public ImageSet getImageSet()
+{
+    getNative();
+    return _imgSet;
+}
+
+/**
+ * Sets the image set.
+ */
+protected void setImageSet(ImageSet anIS)  { _imgSet = anIS; }
 
 /**
  * Returns a new image scaled by given percent.
@@ -305,14 +311,9 @@ public Image getSpriteSheetFrames(int aCount)
 }
 
 /**
- * Returns whether image data is premultiplied.
+ * Returns the ARGB array of this image.
  */
-public abstract boolean isPremultiplied();
-
-/**
- * Sets whether image data is premultiplied.
- */
-public abstract void setPremultiplied(boolean aValue);
+public int[] getArrayARGB()  { System.err.println("Image.getArrayARGB: Not implemented"); return null; }
 
 /**
  * Blurs the image by mixing pixels with those around it to given radius.
@@ -364,9 +365,27 @@ public void emboss(double aRadius, double anAzi, double anAlt)
 }
 
 /**
- * Returns the native object.
+ * Add listener.
  */
-public abstract Object getNative();
+public void addPropChangeListener(PropChangeListener aPCL)
+{
+    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+    _pcs.addPropChangeListener(aPCL);
+}
+
+/**
+ * Remove listener.
+ */
+public void removePropChangeListener(PropChangeListener aPCL)  { _pcs.removePropChangeListener(aPCL); }
+
+/**
+ * Fires a property change for given property name, old value, new value and index.
+ */
+protected void firePropChange(String aProp, Object oldVal, Object newVal)
+{
+    if(!_pcs.hasListener(aProp)) return;
+    _pcs.firePropChange(new PropChange(this, aProp, oldVal, newVal));
+}
 
 /**
  * Creates a new image from source.

@@ -21,12 +21,6 @@ public class J2DImage extends Image {
     // The buffered image
     BufferedImage     _native;
     
-    // The decoded bytes
-    byte              _bytesRGBA[];
-
-    // The color map
-    byte              _colorMap[];
-    
 /**
  * Returns the native image object for image.
  */
@@ -42,58 +36,29 @@ public J2DImage(int aWidth, int aHeight, boolean hasAlpha)
 }
 
 /**
- * Returns the width of given image.
- */
-public double getWidthDPI()  { return _wdpi; }
-
-/**
- * Returns the height of given image.
- */
-public double getHeightDPI()  { return _hdpi; }
-
-/**
  * Returns the width of given image in pixels.
  */
-public int getPixWidth()  { return getNative().getWidth(); }
+protected int getPixWidthImpl()  { return getNative().getWidth(); }
 
 /**
  * Returns the height of given image in pixels.
  */
-public int getPixHeight()  { return getNative().getHeight(); }
+protected int getPixHeightImpl()  { return getNative().getHeight(); }
+
+/**
+ * Returns the width of given image.
+ */
+protected double getDPIXImpl()  { return _wdpi; }
+
+/**
+ * Returns the height of given image.
+ */
+protected double getDPIYImpl()  { return _hdpi; }
 
 /**
  * Returns whether image has alpha.
  */
-public boolean hasAlpha()  { return getNative().getColorModel().hasAlpha(); }
-
-/**
- * Returns number of components.
- */
-public int getSamplesPerPixel()
-{
-    int spp = isIndexedColor()? 1 : getNative().getColorModel().getNumComponents();
-    return spp!=2? spp : 4; // We don't really support gray/alpha
-}
-
-/**
- * Returns the number of bits per sample.
- */
-public int getBitsPerSample()  { return getNative().getColorModel().getComponentSize(0); }
-
-/**
- * Returns whether index color model.
- */
-public boolean isIndexedColor()  { return getNative().getColorModel() instanceof IndexColorModel; }
-
-/**
- * Color map support: returns the bytes of color map from a color map image.
- */
-public byte[] getColorMap()  { return _colorMap!=null? _colorMap : (_colorMap=AWTImageUtils.getColorMap(getNative())); }
-
-/**
- * Color map support: returns the index of the transparent color in a color map image.
- */
-public int getAlphaColorIndex()  { return AWTImageUtils.getAlphaColorIndex(getNative()); }
+protected boolean hasAlphaImpl()  { return getNative().getColorModel().hasAlpha(); }
 
 /**
  * Returns the integer representing the color at the given x,y point.
@@ -101,11 +66,59 @@ public int getAlphaColorIndex()  { return AWTImageUtils.getAlphaColorIndex(getNa
 public int getRGB(int aX, int aY)  { return getNative().getRGB(aX, aY); }
 
 /**
+ * Returns the decoded RGB bytes of this image.
+ */
+protected byte[] getBytesRGBImpl()
+{
+    // Get ARGB pixel int array    
+    int w = getPixWidth(), h = getPixHeight(), boff = 0;
+    int pixInts[] = getNative().getRGB(0, 0, w, h, null, 0, w);
+    
+    // Create RGB byte array and load from pixel int array
+    byte rgb[] = new byte[w*h*3];
+    for(int y=0;y<h;y++) for(int x=0;x<w;x++) { int pix = pixInts[y*w+x];
+        rgb[boff++] = (byte)(pix>>16 & 0xff);
+        rgb[boff++] = (byte)(pix>>8 & 0xff);
+        rgb[boff++] = (byte)(pix & 0xff);
+    }
+    
+    // Return RGB byte array
+    return rgb;
+}
+
+/**
  * Returns the decoded RGBA bytes of this image.
  */
-public byte[] getBytesRGBA()
+protected byte[] getBytesRGBAImpl()
 {
-    return _bytesRGBA!=null? _bytesRGBA : (_bytesRGBA=AWTImageUtils.getBytesRGBA(getNative()));
+    // Get ARGB pixel int array    
+    int w = getPixWidth(), h = getPixHeight(), boff = 0;
+    int pixInts[] = getNative().getRGB(0, 0, w, h, null, 0, w);
+    
+    // Create RGBA byte array and load from pixel int array
+    byte rgba[] = new byte[w*h*4];
+    for(int y=0;y<h;y++) for(int x=0;x<w;x++) { int pix = pixInts[y*w+x];
+        rgba[boff++] = (byte)(pix>>16 & 0xff);
+        rgba[boff++] = (byte)(pix>>8 & 0xff);
+        rgba[boff++] = (byte)(pix & 0xff);
+        rgba[boff++] = (byte)(pix>>24 & 0xff);
+    }
+    
+    // Return RGBA byte array
+    return rgba;
+}
+
+/**
+ * Returns the ARGB array of this image.
+ */
+public int[] getArrayARGB()
+{
+    Raster raster = _native.getRaster();
+    DataBuffer buf = raster.getDataBuffer();
+    if(buf.getDataType() != DataBuffer.TYPE_INT || buf.getNumBanks() != 1)
+        throw new RuntimeException("unknown data format");
+    int pix[] = ((DataBufferInt)buf).getData();
+    return pix;
 }
 
 /**
@@ -137,19 +150,6 @@ public boolean isPremultiplied()  { return _native.isAlphaPremultiplied(); }
  * Sets whether image data is premultiplied.
  */
 public void setPremultiplied(boolean aValue)  { _native.coerceData(aValue); }
-
-/**
- * Returns the ARGB array of this image.
- */
-public int[] getArrayARGB()
-{
-    Raster raster = _native.getRaster();
-    DataBuffer buf = raster.getDataBuffer();
-    if(buf.getDataType() != DataBuffer.TYPE_INT || buf.getNumBanks() != 1)
-        throw new RuntimeException("unknown data format");
-    int pix[] = ((DataBufferInt)buf).getData();
-    return pix;
-}
 
 /**
  * Blurs the image by mixing pixels with those around it to given radius.
