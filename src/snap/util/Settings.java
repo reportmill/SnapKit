@@ -283,7 +283,7 @@ public void setJSONValue(String aKey, Object aValue)  { simplePut(aKey, aValue);
 public Object getJSONValue(String aKey)  { return get(aKey); }
 public Collection <String> getJSONKeys()  { return _map.keySet(); }
 public Object getKeyValue(String aKey)  { return get(aKey); }
-public boolean setKeyValue(String aKey, Object aValue)  { put(aKey, aValue); return true; }
+public void setKeyValue(String aKey, Object aValue)  { put(aKey, aValue); }
 
 /**
  * Standard toString implementation.

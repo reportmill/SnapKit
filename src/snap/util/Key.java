@@ -25,7 +25,7 @@ public class Key {
      * This is interface is implemented by objects that can get/set key value themselves.
      */
     public interface GetSet extends Get {
-        public boolean setKeyValue(String aKey, Object aValue);
+        public void setKeyValue(String aKey, Object aValue);
     }
 
 /**

@@ -82,7 +82,9 @@ public void redoChange()  { doChange(getOldValue(), getNewValue()); }
  */
 protected void doChange(Object oldVal, Object newVal)
 {
-    doChange(getSource(), getPropertyName(), oldVal, newVal, getIndex());
+    if(getSource() instanceof DoChange) { DoChange dc = (DoChange)getSource();
+        dc.doChange(this, oldVal, newVal); }
+    else doChange(getSource(), getPropertyName(), oldVal, newVal, getIndex());
 }
 
 /**
@@ -123,8 +125,17 @@ public static void doChange(Object aSource, String aProp, Object oldVal, Object 
     else {
         if(aSource instanceof View) { View view = (View)aSource;
             view.setValue(aProp, newVal); }
+        else if(aSource instanceof Key.GetSet) { Key.GetSet gs = (Key.GetSet)aSource;
+            gs.setKeyValue(aProp, newVal); }
         else KeyChain.setValueSafe(aSource, aProp, newVal);
     }
+}
+
+/**
+ * An interface for objects that can do a PropChange.
+ */
+public interface DoChange {
+    void doChange(PropChange aPC, Object oldVal, Object newVal);
 }
 
 }
