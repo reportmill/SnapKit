@@ -243,7 +243,7 @@ public static class KeyAccessor {
     Method    _setMethod;
     
     // The field, if type is Field
-    Field     _field;
+    //Field     _field;
     
     // A bogus method to act as void
     static Method  _nullMethod = getMethod(String.class, "toString");
@@ -274,8 +274,8 @@ public static class KeyAccessor {
             _type = Type.Methods; return; }
         
         // See if object has field (ivar)
-        try { _field = anObj.getClass().getField(_rawKey); if(_field!=null) { _type = Type.Field; return; } }
-        catch(Exception e) { }
+        //try { _field = anObj.getClass().getField(_rawKey); if(_field!=null) { _type = Type.Field; return; } }
+        //catch(Exception e) { }
         
         // See if key is list key
         //try { new KeyList(anObj, _rawKey); _type = Type.ListKey; return; }
@@ -329,9 +329,8 @@ public static class KeyAccessor {
                 }
                 
             // Handle TYPE_FIELD
-            case Field:
-                try { return _field.get(anObj); }
-                catch(Throwable e) { e.printStackTrace(); return null; }
+            case Field: return null;
+                //try { return _field.get(anObj); } catch(Throwable e) { e.printStackTrace(); return null; }
                 
             // Handle TYPE_ENUM
             case Enum: {

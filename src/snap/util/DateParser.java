@@ -10,15 +10,13 @@ import java.util.*;
  */
 public class DateParser {
 
+    // A map to hold date parsers
+    static Map <String,SimpleDateFormat> _formatters = new HashMap();
+    
 public static Date parseDate(String aString)
 {
-    try { return new java.text.SimpleDateFormat("MM/dd/yy").parse(aString); }
-    catch(Exception e) { }
-    try { return new java.text.SimpleDateFormat().parse(aString); }
-    catch(Exception e) { }
-
-    String fmt = getDateFormat(aString);
-    try { return new SimpleDateFormat(fmt).parse(aString); }
+    SimpleDateFormat fmt = getDateFormatter(aString);
+    try { return fmt.parse(aString); }
     catch(Exception e) { System.err.println("DateParser.parseDate: Failed to parse date - " + aString); }
     return null;
 }
@@ -50,19 +48,28 @@ private static final Map <String, String> DATE_FORMAT_REGEXPS = new HashMap<Stri
 }};
 
 /**
- * Determine SimpleDateFormat pattern matching with the given date string. Returns null if
- * format is unknown. You can simply extend DateUtil with more formats if needed.
+ * Returns a SimpleDateFormat for given date string (null if format is unknown).
  * @param dateString The date string to determine the SimpleDateFormat pattern for.
- * @return The matching SimpleDateFormat pattern, or null if format is unknown.
+ * @return The matching SimpleDateFormat, or null if format is unknown.
  * @see SimpleDateFormat
  */
-public static String getDateFormat(String dateString)
+private static SimpleDateFormat getDateFormatter(String dateString)
 {
-    for (String regexp : DATE_FORMAT_REGEXPS.keySet()) {
-        if (dateString.toLowerCase().matches(regexp)) {
+    String dstr = dateString.toLowerCase();
+    String pat = getDatePattern(dateString); if(pat==null) return null;
+    SimpleDateFormat fmt = _formatters.get(pat);
+    if(fmt==null) _formatters.put(pat, fmt = new SimpleDateFormat(pat));
+    return fmt;
+}
+
+/**
+ * Returns a SimpleDateFormat pattern matching given date string (null if format is unknown).
+ */
+private static String getDatePattern(String dateString)
+{
+    for(String regexp : DATE_FORMAT_REGEXPS.keySet())
+        if(dateString.toLowerCase().matches(regexp))
             return DATE_FORMAT_REGEXPS.get(regexp);
-        }
-    }
     return null; // Unknown format.
 }
 
