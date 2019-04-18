@@ -317,7 +317,7 @@ protected void requestFocus(View aView)
     if(!getEnv().isEventThread()) { getEnv().runLater(() -> requestFocus(aView)); return; }
     
     // If already set, just return
-    if(aView==_focusedView) return;
+    if(aView==getFocusedView()) return;
     
     // If existing FocusedView, clear View.Focused
     if(_focusedView!=null)
