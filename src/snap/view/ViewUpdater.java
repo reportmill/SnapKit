@@ -125,7 +125,10 @@ protected synchronized void updateViews()
     }
     
     // Clear RepaintViews, reset runnable, update PaintCount and set Painting false
-    finally { _repaintViews.clear(); _updateRun = null; _pc++; _painting = false; }
+    finally {
+        for(View v : _repaintViews) v._repaintRect = null; _repaintViews.clear();
+        _updateRun = null; _pc++; _painting = false;
+    }
 }
 
 /**
@@ -147,7 +150,7 @@ public synchronized void paintViews(Painter aPntr, Rect aRect)
     
     // If paint was called outside of paintLater (maybe Window.show() or resize), repaint all
     if(!_painting) { //System.out.println("ViewUpdater: Repaint not from paintLater");
-        _repaintViews.clear();
+        for(View v : _repaintViews) v._repaintRect = null; _repaintViews.clear();
         _rview.repaint();
     }
 }
@@ -187,7 +190,6 @@ public Rect getRepaintRect()
         // If view no longer in hierarchy or has no Repaint rect, just continue
         if(view.getRootView()!=_rview) continue;
         Rect r = view.getRepaintRect(); if(r==null) continue;
-        view._repaintRect = null;
     
         // Constrain to ancestor clips
         r = view.getClippedRect(r); if(r.isEmpty()) continue;
