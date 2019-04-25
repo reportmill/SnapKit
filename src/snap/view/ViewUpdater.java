@@ -187,6 +187,7 @@ public Rect getRepaintRect()
         // If view no longer in hierarchy or has no Repaint rect, just continue
         if(view.getRootView()!=_rview) continue;
         Rect r = view.getRepaintRect(); if(r==null) continue;
+        view._repaintRect = null;
     
         // Constrain to ancestor clips
         r = view.getClippedRect(r); if(r.isEmpty()) continue;
