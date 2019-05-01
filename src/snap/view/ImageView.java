@@ -30,9 +30,6 @@ public class ImageView extends View {
     
     // The frame
     int                 _frame;
-    
-    // The image finished loading listener.
-    PropChangeListener  _lsnr;
 
     // Constants for properties
     public static final String Image_Prop = "Image";
@@ -80,18 +77,11 @@ public void setImage(Image anImage)
     
     // If image not done loading - listen for load
     if(_image!=null && !_image.isLoaded())
-        _image.addPropChangeListener(_lsnr = pce -> imageFinishedLoading());
+        _image.addLoadListener(pce -> imageFinishedLoading());
 }
 
-/**
- * Called when image finishes loading.
- */
-void imageFinishedLoading()
-{
-    if(_image==null || !_image.isLoaded()) return;
-    _image.removePropChangeListener(_lsnr); _lsnr = null;
-    relayoutParent(); repaint();
-}
+/** Called when image finishes loading. */
+void imageFinishedLoading()  { relayoutParent(); repaint(); }
 
 /**
  * Returns the image name, if loaded from local resource.

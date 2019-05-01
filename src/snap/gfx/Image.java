@@ -45,7 +45,7 @@ public abstract class Image {
      ImageSet         _imgSet;
 
     // PropertyChangeSupport
-    PropChangeSupport _pcs = PropChangeSupport.EMPTY;
+    PropChangeSupport _pcs = PropChangeSupport.EMPTY, _loadLsnr;
 
     // Supported image type strings
     static String     _types[] = { "gif", "jpg", "jpeg", "png", "tif", "tiff", "bmp" };
@@ -199,6 +199,8 @@ protected void setLoaded(boolean aValue)
     if(aValue==_loaded) return;
     _width = _height = -1;
     firePropChange(Loaded_Prop, _loaded, _loaded=aValue);
+    if(aValue && _loadLsnr!=null) {
+        _loadLsnr.firePropChange(new PropChange(this, Loaded_Prop, false, true)); _loadLsnr = null; }
 }
 
 /**
@@ -309,6 +311,16 @@ public void blur(int aRad, Color aColor)  { System.err.println("Image.blur: Not 
  * Embosses the image by mixing pixels with those around it to given radius.
  */
 public void emboss(double aRadius, double anAzi, double anAlt)  { System.err.println("Image.emboss: Not impl"); }
+
+/**
+ * Adds a load listener. This is cleared automatically when image is loaded.
+ */
+public void addLoadListener(PropChangeListener aLoadLsnr)
+{
+    if(isLoaded()) { aLoadLsnr.propertyChange(new PropChange(this, Loaded_Prop, false, true)); return; }
+    if(_loadLsnr==null) _loadLsnr = new PropChangeSupport(this);
+    _loadLsnr.addPropChangeListener(aLoadLsnr);
+}
 
 /**
  * Add listener.

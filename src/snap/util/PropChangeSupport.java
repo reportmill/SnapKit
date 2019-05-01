@@ -132,8 +132,11 @@ public void firePropChange(String aProp, Object oldVal, Object newVal, int anInd
  */
 public void firePropChange(PropChange aPCE)
 {
-    if(_pcl!=null && (_pclProp==null || _pclProp.equals(aPCE.getPropertyName())))
+    if(_pcl!=null && (_pclProp==null || _pclProp.equals(aPCE.getPropertyName()))) {
         _pcl.propertyChange(aPCE);
+        if(_pcl instanceof PropChangeListener.OneShot)
+            _pcl = null;
+    }
     if(_pcs!=null)
         _pcs.firePropChange(aPCE);
 }
