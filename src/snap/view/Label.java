@@ -25,6 +25,9 @@ public class Label extends ParentView {
     // The spacing between text and graphic
     double          _spacing = 4;
     
+    // The rounding radius
+    double          _rad;
+    
     // Whether label text is editable
     boolean         _editable, _editing;
     
@@ -36,6 +39,7 @@ public class Label extends ParentView {
     public static final String Editing_Prop = "Editing";
     public static final String Graphic_Prop = "Graphic";
     public static final String GraphicAfter_Prop = "GraphicAfter";
+    public static final String Radius_Prop = "Radius";
     public static final String StringView_Prop = "StringView";
     
 /**
@@ -191,6 +195,21 @@ public void setSpacing(double aValue)
 }
 
 /**
+ * Returns the rounding radius.
+ */
+public double getRadius()  { return _rad; }
+
+/**
+ * Sets the rounding radius.
+ */
+public void setRadius(double aValue)
+{
+    if(aValue==_rad) return;
+    firePropChange(Radius_Prop, _rad, _rad = aValue);
+    repaint();
+}
+
+/**
  * Returns whether label text is editable.
  */
 public boolean isEditable()  { return _editable; }
@@ -272,6 +291,18 @@ void editorFiredAction()
 }
 
 /**
+ * Override to handle optional rounding radius.
+ */
+public Shape getBoundsShape()
+{
+    if(_rad>=0)
+        return new RoundRect(0,0,getWidth(),getHeight(),_rad);
+    return super.getBoundsShape();
+}
+    
+
+
+/**
  * Handle events.
  */
 protected void processEvent(ViewEvent anEvent)
@@ -339,6 +370,10 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive Text and ImageName
     String text = getText(); if(text!=null && text.length()>0) e.add("text", text);
     String iname = getImageName(); if(iname!=null) e.add("image", iname);
+    
+    // Archive Spacing, Radius
+    if(getSpacing()!=4) e.add(Spacing_Prop, getSpacing());
+    if(getRadius()!=0) e.add(Radius_Prop, getRadius());
 
     // Return element
     return e;
@@ -360,6 +395,10 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
         Image image = ViewArchiver.getImage(anArchiver, iname);
         if(image!=null) setImage(image);
     }
+    
+    // Unarchive Spacing, Radius
+    if(anElement.hasAttribute(Spacing_Prop)) setSpacing(anElement.getAttributeDoubleValue(Spacing_Prop));
+    if(anElement.hasAttribute(Radius_Prop)) setRadius(anElement.getAttributeDoubleValue(Radius_Prop));
 }
 
 /**
