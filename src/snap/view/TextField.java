@@ -572,12 +572,7 @@ protected void paintFront(Painter aPntr)
     Rect bnds = getTextBounds(true); double tx = bnds.x, ty = bnds.y;
         
     // Paint selection
-    if(isFocused()) {
-        Rect sbnds = getSelBounds(); double sx = sbnds.x, sy = sbnds.y, sh = sbnds.height;
-        if(isSelEmpty()) { if(!_hideCaret) {
-            aPntr.setPaint(_textFill); aPntr.setStroke(Stroke.Stroke1); aPntr.drawLine(sx,sy,sx,sy+sh); }}
-        else { aPntr.setPaint(SELECTION_COLOR); aPntr.fill(sbnds); }
-    }
+    paintSel(aPntr);
         
     // Paint text
     if(length()==0) return;
@@ -586,6 +581,19 @@ protected void paintFront(Painter aPntr)
     aPntr.setFont(font); aPntr.setPaint(_textFill);
     aPntr.drawString(str, tx, ty + Math.ceil(font.getAscent()));
     aPntr.restore();
+}
+
+/**
+ * Paints TextField Selection.
+ */
+protected void paintSel(Painter aPntr)
+{
+    if(isFocused()) {
+        Rect sbnds = getSelBounds(); double sx = sbnds.x, sy = sbnds.y, sh = sbnds.height;
+        if(isSelEmpty()) { if(!_hideCaret) {
+            aPntr.setPaint(_textFill); aPntr.setStroke(Stroke.Stroke1); aPntr.drawLine(sx,sy,sx,sy+sh); }}
+        else { aPntr.setPaint(SELECTION_COLOR); aPntr.fill(sbnds); }
+    }
 }
 
 /**
