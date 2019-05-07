@@ -272,6 +272,16 @@ private void printTime()
 }
 
 /**
+ * Returns whether painting is debug.
+ */
+public static boolean isDebug()  { return _debug; }
+
+/**
+ * Set whether painting is debug.
+ */
+public static void setDebug(boolean aValue)  { _debug = aValue; }
+
+/**
  * An interface to listen to ViewUpdater events.
  */
 public static interface Listener {
