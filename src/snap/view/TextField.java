@@ -56,6 +56,7 @@ public class TextField extends ParentView {
     public static final String ColCount_Prop = "ColCount";
     public static final String Edited_Prop = "Edited";
     public static final String PromptText_Prop = "PromptText";
+    public static final String Sel_Prop = "Selection";
     public static final String TextFill_Prop = "TextFill";
     
     // The color of the border when focused
@@ -387,7 +388,7 @@ public void setSel(int aStart, int anEnd)
     _selStart = aStart; _selEnd = anEnd;
     
     // Fire property change
-    firePropChange("Selection", aStart + ((long)anEnd)<<32, 0);
+    firePropChange(Sel_Prop, aStart + ((long)anEnd)<<32, 0);
     repaint();
     _compSel = false;
 }
