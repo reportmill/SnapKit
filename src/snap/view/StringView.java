@@ -76,6 +76,21 @@ public Rect getTextBounds()
 }
 
 /**
+ * Returns the char index for the X location.
+ */
+public int getCharIndexForX(double aX)
+{
+    String str = getText(); Font font = getFont();
+    double x = getTextBounds().x;
+    for(int i=0, iMax=str.length(); i<iMax; i++) {
+        double dx = font.charAdvance(str.charAt(i));
+        if(aX<=x+dx/2) return i;
+        x += dx;
+    }
+    return str.length();
+}
+
+/**
  * Override to make default center-left.
  */    
 public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
