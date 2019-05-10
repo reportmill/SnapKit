@@ -41,11 +41,8 @@ public abstract class ViewEvent implements Cloneable {
     // Whether event was consumed
     boolean             _consumed;
     
-    // Whether event triggers a UI reset
-    boolean             _triggersReset = true;
-    
     // Constants for double/triple click constraints
-    static long         CLICK_TIME = 550;
+    static long         CLICK_TIME = 500;
     static double       CLICK_DIST = 1;
 
 /**
@@ -504,16 +501,6 @@ public void consume()
     _consumed = true;
     if(_parent!=null) _parent.consume();
 }
-
-/**
- * Returns whether this event triggers a UI reset.
- */
-public boolean getTriggersReset()  { return _triggersReset; }
-
-/**
- * Sets whether this event triggers a UI reset.
- */
-public void setTriggersReset(boolean aValue)  { _triggersReset = aValue; }
 
 /**
  * Returns a ViewEvent at new point.

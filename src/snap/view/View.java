@@ -2199,7 +2199,7 @@ protected void processEventAll(ViewEvent anEvent)
     processEventFilters(anEvent);
             
     // If event consumed, just return
-    //if(anEvent.isConsumed()) return;
+    if(anEvent.isConsumed()) return;
 
     // Forward to Handlers from last to first
     processEventHandlers(anEvent);
@@ -2210,9 +2210,9 @@ protected void processEventAll(ViewEvent anEvent)
  */
 protected void processEventFilters(ViewEvent anEvent)
 {
-    // Forward to Filters from last to first, short-circuit if event is consume
+    // Forward to Filters, short-circuit if event is consumed
     EventListener filters[] = getEventAdapter()._filters;
-    for(int i=filters.length-1; i>=0; i--) { EventListener lsnr = filters[i];
+    for(int i=0; i<filters.length; i++) { EventListener lsnr = filters[i];
         if(getEventAdapter()._types.get(lsnr).contains(anEvent.getType())) {
             lsnr.fireEvent(anEvent); if(anEvent.isConsumed()) break; }}
 }
@@ -2226,13 +2226,13 @@ protected void processEventHandlers(ViewEvent anEvent)
     processEvent(anEvent);
 
     // If event consumed, just return
-    //if(anEvent.isConsumed()) return;
+    if(anEvent.isConsumed()) return;
 
-    // Forward to Handlers from last to first
+    // Forward to Handlers, short-circuit if event is consumed
     EventListener handlers[] = getEventAdapter()._handlers;
-    for(int i=handlers.length-1; i>=0; i--) { EventListener lsnr = handlers[i];
+    for(int i=0; i<handlers.length; i++) { EventListener lsnr = handlers[i];
         if(getEventAdapter()._types.get(lsnr).contains(anEvent.getType()))
-            lsnr.fireEvent(anEvent); }
+            lsnr.fireEvent(anEvent); if(anEvent.isConsumed()) break; }
 }
 
 /**

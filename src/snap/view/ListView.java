@@ -40,7 +40,7 @@ public ListView()
 {
     // Create/configure ListArea
     _listArea = createListArea();
-    _listArea.addEventHandler(e -> fireActionEvent(e), Action);
+    _listArea.addEventHandler(e -> listAreaDidFireActionEvent(e), Action);
     _listArea.addPropChangeListener(pce -> listAreaPropChange(pce));
     _listArea.setCellConfigure(lc -> configureCell(lc));
     
@@ -304,6 +304,15 @@ protected void processEvent(ViewEvent anEvent)
  * Returns a mapped property name.
  */
 public String getValuePropName()  { return getBinding(SelIndex_Prop)!=null? SelIndex_Prop : SelItem_Prop; }
+
+/**
+ * Catches ListArea Action event to resend from this ListView (and suppress original).
+ */
+void listAreaDidFireActionEvent(ViewEvent anEvent)
+{
+    fireActionEvent(anEvent);
+    anEvent.consume();
+}
 
 /**
  * Catches property changes from ListArea and redispatches for this ListView.

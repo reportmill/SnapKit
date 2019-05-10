@@ -45,6 +45,9 @@ public class ViewOwner implements EventListener {
     // Whether UI needs to be reset when next shown
     boolean                   _resetLater;
     
+    // Whether this ViewOwner should suppress the next automatic reset that normally happens after respondUI
+    boolean                   _cancelReset;
+    
     // Convenience for common events
     public static final ViewEvent.Type Action = ViewEvent.Type.Action;
     public static final ViewEvent.Type KeyPress = ViewEvent.Type.KeyPress;
@@ -337,6 +340,11 @@ public void resetLater()
 }
 
 /**
+ * Whether this ViewOwner should suppress the next automatic reset that normally happens after respondUI.
+ */
+protected void cancelReset()  { _cancelReset = true; }
+
+/**
  * Called to reset bindings and resetUI().
  */
 protected void processResetUI()
@@ -378,8 +386,9 @@ public void fireEvent(ViewEvent anEvent)
     finally { setSendEventDisabled(false); }
     
     // Trigger UI reset
-    if(anEvent.getTriggersReset() && getUI().isShowing())
+    if(!_cancelReset && getUI().isShowing())
         resetLater();
+    _cancelReset = false;
 }
 
 /**

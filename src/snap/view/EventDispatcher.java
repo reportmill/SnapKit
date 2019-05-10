@@ -99,9 +99,15 @@ public void dispatchMouseEvent(ViewEvent anEvent)
 {
     // Update ViewEnv.MouseDown
     if(anEvent.isMousePress()) ViewUtils.setMouseDown(anEvent);
-    else if(anEvent.isMouseDrag()) { ViewUtils._mouseDrag = true; anEvent.setClickCount(getClickCount()); }
-    else if(anEvent.isMouseRelease()) { ViewUtils._mouseDown = ViewUtils._mouseDrag = false;
-        anEvent.setClickCount(getClickCount()); }
+    else if(anEvent.isMouseDrag()) {
+        if(ViewUtils._lastMouseDown==null) return;
+        ViewUtils._mouseDrag = true; anEvent.setClickCount(getClickCount());
+    }
+    else if(anEvent.isMouseRelease()) {
+        if(ViewUtils._lastMouseDown==null) { ViewUtils.runLater(() -> dispatchMouseEvent(anEvent)); return; }
+        ViewUtils._mouseDown = ViewUtils._mouseDrag = false;
+        anEvent.setClickCount(getClickCount());
+    }
 
     // Get target view (at mouse point, or mouse press, or mouse press point)
     View rview = _win.getRootView();
@@ -141,9 +147,11 @@ public void dispatchMouseEvent(ViewEvent anEvent)
     // Handle MousePress: Update MousePressView and mouse pressed point
     if(anEvent.isMousePress()) {
         _mousePressView = targ; _mpx = anEvent.getX(); _mpy = anEvent.getY();
-        for(View n=targ;n!=null;n=n.getParent())
-            if(n.isFocusWhenPressed()) {
-                n.requestFocus(); break; }
+        for(View v=targ;v!=null;v=v.getParent())
+            if(v.isFocusWhenPressed() && !v.isFocused() && ViewUtils._lastMouseDown!=null) {
+                v.requestFocus(); ViewUtils._lastMouseDown = null;
+                ViewUtils.runLater(() -> dispatchMouseEvent(anEvent)); return;
+            }
     }
     
     // Iterate down and see if any should filter
@@ -302,7 +310,7 @@ public boolean isMouseDown(View aView)  { return _mousePressView==aView && ViewU
 private int getParentCount(View aView)
 {
     if(aView==null) return 0; View rview = _win.getRootView();
-    int pc = 1; for(View n=aView;n!=rview;n=n.getParent()) pc++;
+    int pc = 1; for(View v=aView;v!=rview;v=v.getParent()) pc++;
     return pc;
 }
 
@@ -311,7 +319,7 @@ private View[] getParents(View aView)
 {
     int pc = getParentCount(aView); View pars[] = new View[pc]; if(pc==0) return pars;
     View rview = _win.getRootView();
-    for(View n=aView;n!=rview;n=n.getParent()) pars[--pc] = n; pars[0] = rview;
+    for(View v=aView;v!=rview;v=v.getParent()) pars[--pc] = v; pars[0] = rview;
     return pars;
 }
 
