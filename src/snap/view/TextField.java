@@ -273,7 +273,6 @@ protected void setFocused(boolean aValue)
     // If focus gained, set FocusedGainedValue and select all (if not from mouse press)
     if(aValue) {
         _focusGainedText = getText(); _edited = false;
-        if(!ViewUtils.isMouseDown()) selectAll();
     }
     
     // If focus lost and FocusGainedVal changed, fire action

@@ -148,9 +148,11 @@ protected void uiShowingChanged()
     if(_resetLater) {
         resetLater(); _resetLater = false; }
         
-    if(getUI().isShowing()) {
-        if(getFirstFocus()!=null)
-            getView(getFirstFocus()).requestFocus();
+    if(getUI().isShowing() && getFirstFocus()!=null) {
+        View view = getView(getFirstFocus()); if(view==null) return;
+        view.requestFocus();
+        if(view instanceof TextField)
+            ((TextField)view).selectAll();
     }
 }
 
