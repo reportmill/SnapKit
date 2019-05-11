@@ -76,6 +76,29 @@ public Rect getTextBounds()
 }
 
 /**
+ * Returns the text bounds for the given range of characters.
+ */
+public Rect getTextBounds(int aStart, int aEnd)
+{
+    // Get string, font and full text bounds
+    String str = getText(); Font font = getFont();
+    Rect bnds = getTextBounds();
+
+    // Trim left edge by characters up to start
+    for(int i=0; i<aStart; i++) {
+        double dx = font.charAdvance(str.charAt(i));
+        bnds.x += dx; bnds.width -= dx;
+    }
+    
+    // Trim right edge by characters after end
+    for(int i=aEnd, iMax=str.length(); i<iMax; i++)
+        bnds.width -= font.charAdvance(str.charAt(i));
+    
+    // Return bounds
+    return bnds;
+}
+
+/**
  * Returns the char index for the X location.
  */
 public int getCharIndexForX(double aX)
