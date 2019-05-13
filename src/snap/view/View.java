@@ -1829,7 +1829,7 @@ protected void repaintInParent(Rect aRect)
  */
 public Rect getRepaintRect()
 {
-    Rect rect = _repaintRect;
+    Rect rect = _repaintRect; if(rect==null) return null;
     if(isFocused() && isFocusPainted())
         rect = ViewEffect.getFocusEffect().getBounds(rect);
     else if(getEffect()!=null)

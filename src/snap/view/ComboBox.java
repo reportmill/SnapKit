@@ -81,7 +81,7 @@ public TextField getTextField()
     _text = new TextField(); _text.setGrowWidth(true); _text.setColCount(0);
     _text.addEventHandler(e -> textFieldFiredAction(), Action);
     _text.addEventFilter(e -> textFieldKeyPressed(e), KeyPress);
-    _text.addEventHandler(e -> textFieldKeyTyped(e), KeyType);
+    _text.addEventFilter(e -> ViewUtils.runLater(() -> textFieldKeyTyped(e)), KeyType);
     _text.addPropChangeListener(pce -> textFieldFocusChanged(), View.Focused_Prop);
     return _text;
 }
