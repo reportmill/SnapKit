@@ -2226,13 +2226,13 @@ protected void processEventHandlers(ViewEvent anEvent)
     processEvent(anEvent);
 
     // If event consumed, just return
-    if(anEvent.isConsumed()) return;
+    //if(anEvent.isConsumed()) return;
 
     // Forward to Handlers, short-circuit if event is consumed
     EventListener handlers[] = getEventAdapter()._handlers;
     for(int i=0; i<handlers.length; i++) { EventListener lsnr = handlers[i];
         if(getEventAdapter()._types.get(lsnr).contains(anEvent.getType()))
-            lsnr.fireEvent(anEvent); if(anEvent.isConsumed()) break; }
+            lsnr.fireEvent(anEvent); }
 }
 
 /**
