@@ -10,7 +10,7 @@ import snap.util.*;
  * A standard view implementation to show graphics and handle events and form the basis of all views (buttons, sliders,
  * text fields, etc.).
  */
-public class View implements XMLArchiver.Archivable {
+public class View implements PropChange.DoChange, XMLArchiver.Archivable {
 
     // The name of this view
     String          _name;
@@ -2045,6 +2045,14 @@ public void setValue(String aPropName, Object aValue)
  * Returns a mapped property name name.
  */
 protected String getValuePropName()  { return "Value"; }
+
+/**
+ * PropChange.DoChange method.
+ */
+public void doChange(PropChange aPC, Object oldVal, Object newVal)
+{
+    setValue(aPC.getPropName(), newVal);
+}
 
 /**
  * Returns the text value of this view.

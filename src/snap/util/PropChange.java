@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
-import snap.view.View;
 
 /**
  * A class to describe object property changes.
@@ -118,17 +117,13 @@ public String toString()
 public static void doChange(Object aSource, String aProp, Object oldVal, Object newVal, int anIndex)
 {
     // If indexed change, create KeyList and add/remove
-    if(anIndex>=0)
-        KeyList.setValue(aSource, aProp, newVal, anIndex);
+    if(anIndex>=0) //KeyList.setValue(aSource, aProp, newVal, anIndex);
+        System.out.println("PropChange.doChange: No support for indexed prop: aProp");
     
     // If plain change, do KeyChain.setValue on new value
-    else {
-        if(aSource instanceof View) { View view = (View)aSource;
-            view.setValue(aProp, newVal); }
-        else if(aSource instanceof Key.GetSet) { Key.GetSet gs = (Key.GetSet)aSource;
-            gs.setKeyValue(aProp, newVal); }
-        else KeyChain.setValueSafe(aSource, aProp, newVal);
-    }
+    if(aSource instanceof Key.GetSet) { Key.GetSet gs = (Key.GetSet)aSource;
+        gs.setKeyValue(aProp, newVal); }
+    else KeyChain.setValueSafe(aSource, aProp, newVal);
 }
 
 /**

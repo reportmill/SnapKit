@@ -453,6 +453,22 @@ protected void layoutDeepImpl()
 }
 
 /**
+ * Override to handle ParentView changes.
+ */
+public void doChange(PropChange aPC, Object oldVal, Object newVal)
+{
+    String pname = aPC.getPropName();
+    if(pname==Child_Prop) {
+        int ind = aPC.getIndex();
+        if(newVal!=null) addChild((View)newVal, ind);
+        else removeChild(ind);
+    }
+    
+    // Do normal version
+    else super.doChange(aPC, oldVal, newVal);
+}
+
+/**
  * Override to forward to children.
  */
 public void playAnimDeep()

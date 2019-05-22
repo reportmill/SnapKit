@@ -354,6 +354,26 @@ public static Image getFileIconImage(WebFile aFile)
 }
 
 /**
+ * Backdoor for protected ParentView method.
+ */
+public static void addChild(ParentView aPar, View aChild)  { aPar.addChild(aChild); }
+
+/**
+ * Backdoor for protected ParentView method.
+ */
+public static void addChild(ParentView aPar, View aChild, int anIndex)  { aPar.addChild(aChild, anIndex); }
+
+/**
+ * Backdoor for protected ParentView method.
+ */
+public static void removeChild(ParentView aPar, View aChild)  { aPar.removeChild(aChild); }
+
+/**
+ * Backdoor for protected ParentView method.
+ */
+public static void removeChild(ParentView aPar, int anIndex)  { aPar.removeChild(anIndex); }
+
+/**
  * Replace given view with new view.
  */
 public static void replaceView(View aView, View newView)
