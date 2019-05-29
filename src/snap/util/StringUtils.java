@@ -747,4 +747,16 @@ public static String format(String aFmt, Object ... theArgs)
     return sb.toString();
 }
 
+/**
+ * Formats a number with given Decimal format pattern.
+ */
+public static String formatNum(String aPattern, Object aNum)
+{
+    DecimalFormat fmt = _formats.get(aPattern);
+    if(fmt==null) _formats.put(aPattern, fmt=new DecimalFormat(aPattern));
+    return fmt.format(aNum);
+}
+
+static Map <String,DecimalFormat> _formats = new HashMap();
+
 }
