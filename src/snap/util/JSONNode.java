@@ -253,12 +253,43 @@ public Map getAsMap()
     if(getType()!=Type.Object) { System.err.println("JSONNode.getAsMap: Type isn't Object"); return null; }
     
     // Create map, iterate over keys to add values and return map
-    Map map = new HashMap();
+    Map map = new LinkedHashMap();
     for(int i=0;i<getNodeCount();i++) { String key = getKey(i);
         Object val = getNodeValue(key);
         map.put(key,val);
     }
     return map;
+}
+
+/**
+ * Returns the node as a native object.
+ */
+public Object getNative()
+{
+    switch(getType()) {
+        
+        // Handle Object (map): Create map, iterate over keys to add values and return map
+        case Object: { Map map = new LinkedHashMap();
+            for(int i=0;i<getNodeCount();i++) { String key = getKey(i);
+                JSONNode node = getNode(key);
+                Object val = node.getNative();
+                map.put(key,val);
+            }
+            return map;
+        }
+        
+        // Handle Array
+        case Array: { List list = new ArrayList();
+            for(int i=0;i<getNodeCount();i++) { JSONNode node = getNode(i);
+                Object val = node.getNative();
+                list.add(val);
+            }
+            return list;
+        }
+        
+        // Handle anything else
+        default: return getValue();
+    }
 }
 
 /**

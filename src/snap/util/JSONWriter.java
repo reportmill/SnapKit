@@ -142,7 +142,10 @@ protected StringBuffer append(StringBuffer aSB, JSONNode aNode)
         } break;
         
         // Handle Number
-        case Number: aSB.append(aNode.getNumber()); break;
+        case Number: {
+            Number num = aNode.getNumber(); String str = StringUtils.formatNum("#.##", num);
+            aSB.append(str); break;
+        }
         
         // Handle Boolean
         case Boolean: aSB.append(aNode.getBoolean()? "true" : "false"); break;
