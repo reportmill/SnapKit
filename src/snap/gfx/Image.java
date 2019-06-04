@@ -36,7 +36,7 @@ public abstract class Image {
      byte             _bytes[];
      
      // Whether the image is loaded
-     boolean          _loaded = true;;
+     boolean          _loaded = true;
      
      // The decoded bytes
      byte             _bytesRGB[], _bytesRGBA[];
@@ -196,11 +196,17 @@ public boolean isLoaded()  { return _loaded; }
  */
 protected void setLoaded(boolean aValue)
 {
+    // If already set, just return
     if(aValue==_loaded) return;
-    _width = _height = -1;
-    firePropChange(Loaded_Prop, _loaded, _loaded=aValue);
-    if(aValue && _loadLsnr!=null) {
-        _loadLsnr.firePropChange(new PropChange(this, Loaded_Prop, false, true)); _loadLsnr = null; }
+    _loaded = aValue;
+    
+    // If setting, reset size, fire prop change, fire load listeners
+    if(aValue) {
+        _width = _height = -1;
+        firePropChange(Loaded_Prop, !_loaded, _loaded);
+        if(_loadLsnr!=null) {
+            _loadLsnr.firePropChange(new PropChange(this, Loaded_Prop, false, true)); _loadLsnr = null; }
+    }
 }
 
 /**
