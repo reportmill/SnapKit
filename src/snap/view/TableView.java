@@ -224,7 +224,7 @@ public int getColCount()  { return _split.getItemCount(); }
 /**
  * Returns the column at given index.
  */
-public TableCol getCol(int anIndex)
+public TableCol <T> getCol(int anIndex)
 {
     if(anIndex==-1 && isShowHeaderCol()) return getHeaderCol();
     return (TableCol)_split.getItem(anIndex);
