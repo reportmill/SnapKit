@@ -1,13 +1,9 @@
 
-Object { "{" Member* "}" }
-
-Member { Pair ("," Member)* }
+Object { "{" Pair ("," Pair)* "}" }
 
 Pair { String ":" Value }
 
-Array { "[" Element* "]" }
-
-Element { Value ("," Element)* }
+Array { "[" Value ("," Value)* "]" }
 
 Value { String | Number | Object | Array | Boolean | Null }
 
