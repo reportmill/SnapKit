@@ -130,6 +130,7 @@ public void pause()  { stop(); _pauseTime = System.currentTimeMillis(); }
  */
 protected void sendEvent()
 {
+    if(_run==null) { System.out.println("ViewTimer.sendEvent: Run is null - shouldn't happen"); return; }
     _time = (int)(System.currentTimeMillis() - _startTime);
     _onFire.accept(this); _count++; _time = -1;
 }
