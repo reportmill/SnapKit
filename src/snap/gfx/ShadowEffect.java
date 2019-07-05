@@ -62,7 +62,11 @@ public boolean isSimple()  { return _simple; }
 /**
  * Override to account for blur radius and shadow offset.
  */
-public Rect getBounds(Rect aRect) { Rect rect = aRect.getOffsetRect(_dx,_dy); rect.inset(-getRadius()); return rect; }
+public Rect getBounds(Rect aRect)
+{
+    Rect rect = aRect.getOffsetRect(_dx,_dy); rect.inset(-getRadius()-2); rect.union(aRect);
+    return rect;
+}
 
 /**
  * Performs the ShadowEffect with given PainterDVR.
