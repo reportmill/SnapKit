@@ -398,9 +398,11 @@ private class SwatchPanel extends View {
     /** Handle Events. */
     public void processEvent(ViewEvent anEvent)
     {
-        int x = (int)anEvent.getX()/SIZE, y = (int)anEvent.getY()/SIZE;
-        _color = new Color(_webColors[y*WIDTH+x].substring(2));
-        fireActionEvent(anEvent);
+        if(anEvent.isMouseEvent()) {
+            int x = (int)anEvent.getX()/SIZE, y = (int)anEvent.getY()/SIZE;
+            _color = new Color(_webColors[y*WIDTH+x].substring(2));
+            fireActionEvent(anEvent);
+        }
     }
 }
 
