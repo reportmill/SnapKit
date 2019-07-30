@@ -172,15 +172,12 @@ public static Object getValue(Object aRoot, Object anObj, KeyChain aKeyChain)
     if(anObj==null) return null;
     
     // If list, use aggregator
-    if(anObj instanceof List) { List list = (List)anObj; //&& !RMGroup.isLeaf(anObj) && !RMGroup.isTopNOthers(anObj))
+    if(anObj instanceof List) { List list = (List)anObj;
         Object val = getValueImpl(aRoot, anObj, aKeyChain);
         if(val==null && list.size()>0) val = getValueImpl(aRoot, list.get(0), aKeyChain);
-        return val; //return KeyChainAggr.getValue(aRoot, (List)anObj, aKeyChain);
+        return val;
     }
     
-    // If object implements getKeyChainValue, just forward on to it
-    //if(anObj instanceof KeyChain.Get) return ((KeyChain.Get)anObj).getKeyChainValue(aRoot, aKeyChain);
-
     // Invoke the general implementation
     return getValueImpl(aRoot, anObj, aKeyChain);
 }
@@ -348,12 +345,7 @@ private static Object getValueArrayIndex(Object aRoot, Object anObj, KeyChain aK
  */
 private static Object getValueFunctionCall(Object aRoot, Object anObj, KeyChain aKeyChain)
 {
-    // If functionCall was found, invoke it and return
-    //KeyChainFuncs fcall = KeyChainFuncs.getFunctionCall(aRoot, anObj, aKeyChain);
-    //if(fcall!=null) try { return fcall.invoke(anObj); } // Invoke method
-    //    catch(Exception e) { System.err.println(e); }
-    System.out.println("KeyChain.getValueFunctionCall: Not implemented (" + aKeyChain + ")");
-    return null;
+    System.out.println("KeyChain.getValueFunctionCall: Not implemented"); return null;
 }
 
 /**
@@ -363,9 +355,7 @@ private static Object getValueChain(Object aRoot, Object anObj, KeyChain aKeyCha
 {
     Object value = anObj;
     for(int i=0, iMax=aKeyChain.getChildCount(); i<iMax; i++) { KeyChain child = aKeyChain.getChildKeyChain(i);
-        value = getValue(aRoot, value, child);
-        //if(value instanceof List && i+1<iMax) return KeyChainAggr.getValue(aRoot,(List)value,aKeyChain.subchain(i+1));
-    }
+        value = getValue(aRoot, value, child); }
     return value;
 }
 
@@ -392,31 +382,6 @@ public static double getDoubleValue(Object anObj, Object aKeyChain)
 /** Convenience - returns a boolean for an object and key chain. */
 public static boolean getBoolValue(Object anObj, Object aKeyChain)
 { return SnapUtils.boolValue(getValue(anObj, aKeyChain)); }
-
-/** Convenience - returns a list for an object and key chain. */
-/*public static List getListValue(Object anObj, Object aKeyChain)
-{
-    KeyChain kc = getKeyChain(aKeyChain);
-    Object value = KeyChainAggr.getListValue(anObj, kc);
-    return value instanceof List? (List)value : value!=null? Arrays.asList(value) : null;
-}*/
-
-/**
- * Returns a key value if it is of given class (otherwise null).
- */
-public static <T> T getValue(Object anObj, Object aKeyChain, Class <T> aClass)
-{
-    return ClassUtils.getInstance(getValue(anObj, aKeyChain), aClass);
-}
-
-/** Returns whether given key has a Page/PageMax key reference. */
-//public boolean hasPageReference()  { return false; }
-
-/** Returns whether given key is present anywhere in expression. */
-//private boolean anyKeyReferencesKey(String aKey)  { return false; }
-
-/** Returns whether key contains given op. */
-public boolean hasOp(Op anOp)  { return false; }
 
 /**
  * Returns the last error encountered by the key chain parser (or null).
@@ -457,32 +422,10 @@ public static void setValue(Object anObj, KeyChain aKeyChain, Object aValue)
     // If not Key, just return
     if(kchain.getOp()!=Op.Key)  { System.err.println("KeyChain.setValue: Last op not key."); return; }
     
-    // If object is Enum, do weird setEnumValue() instead
-    if(obj instanceof Enum) { setEnumValue(anObj, aKeyChain); return; }
-    
     // Get key and set
     String key = kchain.getChildString(0);
     try { Key.setValue(obj, key, aValue); }
     catch(Exception e)  { throw new RuntimeException(e); }
-}
-
-/**
- * Sets the given value for the given key chain + property.
- * This is a real bogus loser implementation.
- */
-public static void setEnumValue(Object anObj, KeyChain aKeyChain)
-{
-    if(aKeyChain.getOp()!=Op.Chain) return;
-    Object obj = anObj;
-    int ccount = aKeyChain.getChildCount();
-    for(int i=0, iMax=ccount-2; i<iMax; i++) { KeyChain child = aKeyChain.getChildKeyChain(i);
-        obj = getValue(anObj, obj, child); }
-
-    // Get KeyChain.Key for enum, get current enum, get new enum and set
-    KeyChain kchain = aKeyChain.getChildKeyChain(ccount-2);
-    Enum enum1 = (Enum)getValue(obj, kchain);
-    Enum enum2 = Enum.valueOf(enum1.getClass(), aKeyChain.getChildKeyChain(ccount-1).getValueString());
-    setValue(obj, kchain, enum2);
 }
 
 /**
@@ -538,9 +481,6 @@ public String toString()
     }
     return sb.toString();
 } 
-
-/** Adds a class to the list of classes that RM queries for functions. */
-//public static void addFunctionClass(Class aClass) { KeyChainFuncs.addFunctionClass(aClass); }
 
 /**
  * Simple main implementation, so RM's expressions can be used for simple math.

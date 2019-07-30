@@ -102,14 +102,21 @@ public static void setValue(Object anObj, String aKey, Object aValue) throws Exc
     else if(anObj instanceof GetSet)
         ((GetSet)anObj).setKeyValue(aKey, aValue);
     
-    // If object is POJO, use accessor
-    else if(anObj!=null) {
-        KeyAccessor accessor = getAccessor(anObj, aKey);
-        accessor.set(anObj, aValue);
-    }
+    // Otherwise use reflection
+    else setValueReflect(anObj, aKey, aValue);
+}
+
+/**
+ * Sets a value for given object and key and value.
+ */
+public static void setValueReflect(Object anObj, String aKey, Object aValue) throws Exception
+{
+    // If object is null, throw NPE
+    if(anObj==null) throw new NullPointerException("Key.setValue: trying to set key " + aKey + " on null");
     
-    // If object null, throw NPE
-    else throw new NullPointerException("Key.setValue: trying to set key " + aKey + " on null");
+    // Get accessor and set
+    KeyAccessor acsr = getAccessor(anObj, aKey);
+    acsr.set(anObj, aValue);
 }
 
 /**
@@ -118,9 +125,20 @@ public static void setValue(Object anObj, String aKey, Object aValue) throws Exc
 public static void setValueSafe(Object anObj, String aKey, Object aValue)
 {
     try { setValue(anObj, aKey, aValue); }
-    catch(Exception e) {
-        Class cls = ClassUtils.getClass(anObj);
-        String msg = (cls!=null? cls.getSimpleName() : "null") + " " + aKey + " " + aValue;
+    catch(Exception e) { Class cls = ClassUtils.getClass(anObj);
+        String msg = (cls!=null? cls.getSimpleName() : "null") + ", " + aKey + ", " + aValue;
+        System.err.println("Key.setValue (" + msg + ") failed: " + e);
+    }
+}
+
+/**
+ * Sets the value but only prints a warning if it fails.
+ */
+public static void setValueReflectSafe(Object anObj, String aKey, Object aValue)
+{
+    try { setValueReflect(anObj, aKey, aValue); }
+    catch(Exception e) { Class cls = ClassUtils.getClass(anObj);
+        String msg = (cls!=null? cls.getSimpleName() : "null") + ", " + aKey + ", " + aValue;
         System.err.println("Key.setValue (" + msg + ") failed: " + e);
     }
 }
