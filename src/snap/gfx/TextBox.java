@@ -668,7 +668,7 @@ protected boolean isHitRight(double aX, double aY, double aH)
 }
 
 /**
- * Returns the minimum x value that doesn't hit left border for given y and style.
+ * Returns the min x value that doesn't hit left border for given y/height and indent.
  */
 protected double getMinHitX(double aY, double aH, double anIndent)
 {
@@ -679,14 +679,14 @@ protected double getMinHitX(double aY, double aH, double anIndent)
 }
 
 /**
- * Returns the minimum x value that doesn't hit left border for given y and style.
+ * Returns the max x value that doesn't hit right border for given y/height.
  */
 protected double getMaxHitX(double aY, double aH)
 {
-    if(_bpath==null || aY+aH>getMaxY()) return getWidth(); 
+    if(_bpath==null || aY+aH>getMaxY()) return getMaxX(); 
     Rect rect = new Rect(getMaxX()-1,aY,1,aH);
     while(!_bpath.contains(rect) && rect.x>1) rect.x--;
-    return rect.x - getX();
+    return rect.x;
 }
 
 /**

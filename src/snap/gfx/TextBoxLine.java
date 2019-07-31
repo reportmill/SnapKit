@@ -250,7 +250,7 @@ public void resetSizes()
     else if(_rtline.getAlignX()!=HPos.LEFT && _tbox.getWidth()<9999) {
         double ax = _rtline.getAlignX().asDouble(), y = getY();
         double tmx = _tbox.getMaxHitX(y, _height), lmx = getMaxX(), rem = tmx - lmx;
-        _alignX = Math.round(ax*(rem));
+        _alignX = Math.round(ax*rem);
     }
 }
 
