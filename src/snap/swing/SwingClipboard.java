@@ -63,6 +63,47 @@ protected ClipboardData getDataImpl(String aMIMEType)
 }
 
 /**
+ * Override to support DataFlavor.imageFlavor.
+ */
+public boolean hasImage()
+{
+    // Try normal version
+    boolean hasImg = super.hasImage(); if(hasImg) return true;
+    
+    // Return whether transferable supports DataFlavor.imageFlavor
+    Transferable trans = getTrans();
+    return trans!=null && trans.isDataFlavorSupported(DataFlavor.imageFlavor);
+}
+
+/**
+ * Override to support DataFlavor.imageFlavor.
+ */
+public Image getImage()
+{
+    // Try normal version
+    Image img = super.getImage(); if(img!=null) return img;
+    
+    // Get awt image for DataFlavor.imageFlavor from transferable
+    Transferable trans = getTrans();
+    java.awt.Image img2 = null; try { img2 = (java.awt.Image)trans.getTransferData(DataFlavor.imageFlavor); }
+    catch(Exception e) { throw new RuntimeException(e); }
+    return Image.get(img2);
+}
+
+/**
+ * Override to support DataFlavor.imageFlavor.
+ */
+public ClipboardData getImageData()
+{
+    // Try normal version
+    ClipboardData cd = super.getImageData(); if(cd!=null) return cd;
+    
+    // Get awt image for DataFlavor.imageFlavor from transferable
+    Image img = getImage(); if(img==null) return null;
+    return new ClipboardData(img.getBytesPNG());
+}
+
+/**
  * Sets the clipboard content.
  */
 protected void addDataImpl(String aMIMEType, ClipboardData aData)
