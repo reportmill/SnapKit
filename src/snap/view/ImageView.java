@@ -77,7 +77,7 @@ public void setImage(Image anImage)
     
     // If image not done loading - listen for load
     if(_image!=null && !_image.isLoaded())
-        _image.addLoadListener(pce -> imageFinishedLoading());
+        _image.addLoadListener(() -> imageFinishedLoading());
 }
 
 /** Called when image finishes loading. */

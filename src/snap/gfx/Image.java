@@ -9,7 +9,7 @@ import snap.web.*;
 /**
  * Represents an Image, such as JPEG, PNG, GIF, TIFF, BMP.
  */
-public abstract class Image {
+public abstract class Image implements Loadable {
 
      // The image source
      Object           _source;
@@ -45,7 +45,7 @@ public abstract class Image {
      ImageSet         _imgSet;
 
     // PropertyChangeSupport
-    PropChangeSupport _pcs = PropChangeSupport.EMPTY, _loadLsnr;
+    PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
     // Supported image type strings
     static String     _types[] = { "gif", "jpg", "jpeg", "png", "tif", "tiff", "bmp" };
@@ -204,8 +204,7 @@ protected void setLoaded(boolean aValue)
     if(aValue) {
         _width = _height = -1;
         firePropChange(Loaded_Prop, !_loaded, _loaded);
-        if(_loadLsnr!=null) {
-            _loadLsnr.firePropChange(new PropChange(this, Loaded_Prop, false, true)); _loadLsnr = null; }
+        _pcs = PropChangeSupport.EMPTY;
     }
 }
 
@@ -319,13 +318,12 @@ public void blur(int aRad, Color aColor)  { System.err.println("Image.blur: Not 
 public void emboss(double aRadius, double anAzi, double anAlt)  { System.err.println("Image.emboss: Not impl"); }
 
 /**
- * Adds a load listener. This is cleared automatically when image is loaded.
+ * Adds a load listener (cleared automatically when loaded).
  */
-public void addLoadListener(PropChangeListener aLoadLsnr)
+public void addLoadListener(Runnable aLoadLsnr)
 {
-    if(isLoaded()) { aLoadLsnr.propertyChange(new PropChange(this, Loaded_Prop, false, true)); return; }
-    if(_loadLsnr==null) _loadLsnr = new PropChangeSupport(this);
-    _loadLsnr.addPropChangeListener(aLoadLsnr);
+    if(isLoaded()) { aLoadLsnr.run(); return; }
+    addPropChangeListener(pc -> aLoadLsnr.run());
 }
 
 /**
@@ -336,11 +334,6 @@ public void addPropChangeListener(PropChangeListener aPCL)
     if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
     _pcs.addPropChangeListener(aPCL);
 }
-
-/**
- * Remove listener.
- */
-public void removePropChangeListener(PropChangeListener aPCL)  { _pcs.removePropChangeListener(aPCL); }
 
 /**
  * Fires a property change for given property name, old value, new value and index.
