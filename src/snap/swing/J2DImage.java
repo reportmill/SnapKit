@@ -11,7 +11,7 @@ import org.w3c.dom.NodeList;
 import snap.gfx.*;
 
 /**
- * A custom class.
+ * An Image subclass for Java2D.
  */
 public class J2DImage extends Image {
     
@@ -29,10 +29,18 @@ public J2DImage(Object aSource)  { setSource(aSource); }
 /**
  * Returns the native image object for image.
  */
-public J2DImage(int aWidth, int aHeight, boolean hasAlpha)
+public J2DImage(double aWidth, double aHeight, boolean hasAlpha, double aScale)
 {
-    if(hasAlpha) _native = new BufferedImage(aWidth, aHeight, BufferedImage.TYPE_INT_ARGB);
-    else _native = new BufferedImage(aWidth, aHeight, BufferedImage.TYPE_INT_RGB);
+    // Get pixel width/height by rounding scaled width/height
+    int pw = (int)Math.round(aWidth*aScale);
+    int ph = (int)Math.round(aHeight*aScale);
+    
+    // Create internal buffered image for pixel width/height and alpha
+    if(hasAlpha) _native = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_ARGB);
+    else _native = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_RGB);
+    
+    // Reset dpi for scale
+    if(aScale!=1)  { _wdpi *= aScale; _hdpi *= aScale; }
 }
 
 /**
@@ -111,19 +119,46 @@ protected byte[] getBytesRGBAImpl()
 /**
  * Returns the JPEG bytes for image.
  */
-public byte[] getBytesJPEG()  { return AWTImageUtils.getBytesJPEG(getNative()); }
+public byte[] getBytesJPEG()
+{
+    // If HiDPI, get 72 dpi image and return that instead
+    if(getScale()!=1) {
+        System.out.println("J2DImage.getBytesJPEG: Downsampling to 72 dpi since other dpi not suppored");
+        return cloneForSizeAndScale(getWidth(), getHeight(), 1).getBytesJPEG();
+    }
+    
+    // Return JPEG bytes
+    return AWTImageUtils.getBytesJPEG(getNative());
+}
 
 /**
  * Returns the PNG bytes for image.
  */
-public byte[] getBytesPNG()  { return AWTImageUtils.getBytesPNG(getNative()); }
+public byte[] getBytesPNG()
+{
+    // If HiDPI, get 72 dpi image and return that instead
+    if(getScale()!=1) {
+        System.out.println("J2DImage.getBytesPNG: Downsampling to 72 dpi since other dpi not suppored");
+        return cloneForSizeAndScale(getWidth(), getHeight(), 1).getBytesPNG();
+    }
+    
+    // Return PNG bytes
+    return AWTImageUtils.getBytesPNG(getNative());
+}
 
 /**
  * Returns a painter for image.
  */
 public Painter getPainter()
 {
+    // Get painter for Graphics
     Painter pntr = new J2DPainter(getNative().createGraphics());
+    
+    // If hidpi, scale default transform
+    double scale = getScale();
+    if(scale!=1) pntr.transform(scale,0,0,scale,0,0);
+
+    // Clip to image bounds and return
     pntr.clipRect(0,0,getWidth(),getHeight());
     return pntr;
 }
@@ -257,21 +292,26 @@ public BufferedImage getNative()
  */
 private void getDPI(byte theBytes[]) throws IOException
 {
+    // Get ImageIO Readers
     InputStream istream = new ByteArrayInputStream(theBytes);
     ImageInputStream stream = ImageIO.createImageInputStream(istream);
     Iterator <ImageReader> readers = ImageIO.getImageReaders(stream);
+    
+    // Iterate over readers to find DPI
     if(readers.hasNext()) {
         ImageReader reader = readers.next();
         reader.setInput(stream);
         IIOMetadata mdata = reader.getImageMetadata(0);
         IIOMetadataNode root = (IIOMetadataNode)mdata.getAsTree(IIOMetadataFormatImpl.standardMetadataFormatName);
         
+        // Check for horizontal DPI
         NodeList hps = root.getElementsByTagName("HorizontalPixelSize");
         IIOMetadataNode hps2 = hps.getLength()>0? (IIOMetadataNode)hps.item(0) : null;
         NamedNodeMap hnnm = hps2!=null? hps2.getAttributes() : null;
         Node hitem = hnnm!=null? hnnm.item(0) : null;
         if(hitem!=null) _wdpi = Math.round(25.4/Double.parseDouble(hitem.getNodeValue()));
         
+        // Check for vertical DPI
         NodeList vps = root.getElementsByTagName("VerticalPixelSize");
         IIOMetadataNode vps2 = vps.getLength()>0? (IIOMetadataNode)vps.item(0) : null;
         NamedNodeMap vnnm = vps2!=null? vps2.getAttributes() : null;

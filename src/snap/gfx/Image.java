@@ -263,6 +263,21 @@ public ImageSet getImageSet()
 protected void setImageSet(ImageSet anIS)  { _imgSet = anIS; }
 
 /**
+ * Returns the image scale.
+ */
+public double getScale()  { return getDPIX()!=72? getDPIX()/72 : 1; }
+
+/**
+ * Returns a copy of this image at new size and scale.
+ */
+public Image cloneForSizeAndScale(double aW, double aH, double aScale)
+{
+    Image img2 = Image.getImageForSizeAndScale(aW, aH, hasAlpha(), aScale);
+    Painter pntr = img2.getPainter(); pntr.drawImage(this, 0, 0, aW, aH);
+    return img2;
+}
+
+/**
  * Returns a new image scaled by given percent.
  */
 public Image getImageScaled(double aRatio)
@@ -345,12 +360,27 @@ protected void firePropChange(String aProp, Object oldVal, Object newVal)
 }
 
 /**
- * Creates a new image from source.
+ * Standard toString implementation.
+ */
+public String toString()
+{
+    StringBuffer sb = new StringBuffer(getClass().getSimpleName()).append(" {");
+    sb.append(" Width:").append(StringUtils.formatNum("#.##", getWidth()));
+    sb.append(", Height:").append(StringUtils.formatNum("#.##", getHeight()));
+    if(getPixWidth()!=getWidth()) sb.append(", PixWidth:").append(getPixWidth());
+    if(getPixHeight()!=getHeight()) sb.append(", PixHeight:").append(getPixHeight());
+    if(getName()!=null) sb.append(", Name:\"").append(getName()).append("\"");
+    if(getSourceURL()!=null) sb.append(", URL:").append(getSourceURL());
+    return sb.append(" }").toString();
+}
+
+/**
+ * Creates image from source.
  */
 public static Image get(Object aSource)  { return GFXEnv.getEnv().getImage(aSource); }
 
 /**
- * Creates a new image from class and resource path.
+ * Creates image from class and resource path.
  */
 public static Image get(Class aClass, String aPath)
 {
@@ -361,7 +391,7 @@ public static Image get(Class aClass, String aPath)
 }
 
 /**
- * Returns the image from URL and resource path.
+ * Creates image from URL and resource path.
  */
 public static Image get(WebURL aBaseURL, String aName)
 {
@@ -374,11 +404,27 @@ public static Image get(WebURL aBaseURL, String aName)
 }
 
 /**
- * Creates a new image for width, height and alpha.
+ * Creates image for width, height and alpha at 72 dpi.
  */
 public static Image get(int aWidth, int aHeight, boolean hasAlpha)
 {
-    return GFXEnv.getEnv().getImage(aWidth,aHeight,hasAlpha);
+    return getImageForSizeAndScale(aWidth, aHeight, hasAlpha, 1);
+}
+
+/**
+ * Creates image for width, height and alpha at screen dpi scale (72 dpi normal, 144 dpi for retina/hidpi).
+ */
+public static Image getImageForSize(double aWidth, double aHeight, boolean hasAlpha)
+{
+    return getImageForSizeAndScale(aWidth, aHeight, hasAlpha, 0);
+}
+
+/**
+ * Creates image for width, height, alpha and dpi scale (0 = screen dpi, 1 = 72 dpi, 2 = 144 dpi).
+ */
+public static Image getImageForSizeAndScale(double aWidth, double aHeight, boolean hasAlpha, double aScale)
+{
+    return GFXEnv.getEnv().getImageForSizeAndScale(aWidth, aHeight, hasAlpha, aScale);
 }
 
 /**

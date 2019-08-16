@@ -137,7 +137,10 @@ public void fill(Shape aShape)  { _gfx.fill(AWT.get(aShape)); }
 /**
  * Draw image with transform.
  */
-public void drawImage(Image anImg, Transform xform)  { _gfx.drawImage(AWT.get(anImg), AWT.get(xform), null); }
+public void drawImage(Image anImg, Transform xform)
+{
+    _gfx.drawImage(AWT.get(anImg), AWT.get(xform), null);
+}
 
 /**
  * Draw image in rect.

@@ -74,14 +74,14 @@ public abstract String[] getFontNames(String aFamilyName);
 public abstract FontFile getFontFile(String aName);
 
 /**
- * Creates a new image from source.
+ * Creates image from source.
  */
 public abstract Image getImage(Object aSource);
 
 /**
- * Creates a new image for width, height and alpha.
+ * Creates image for width, height and alpha and dpi scale (0 = screen dpi, 1 = 72 dpi, 2 = 144 dpi).
  */
-public abstract Image getImage(int aWidth, int aHeight, boolean hasAlpha);
+public abstract Image getImageForSizeAndScale(double aWidth, double aHeight, boolean hasAlpha, double aScale);
 
 /**
  * Returns a sound for given source.
@@ -107,6 +107,11 @@ public abstract void openURL(Object aSource);
  * Returns the screen resolution.
  */
 public abstract double getScreenResolution();
+
+/**
+ * Returns the screen scale. Usually 1, but could be 2 for HiDPI/Retina displays.
+ */
+public abstract double getScreenScale();
 
 /**
  * Plays a beep.

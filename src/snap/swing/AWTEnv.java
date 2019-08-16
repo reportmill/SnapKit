@@ -1,7 +1,12 @@
 package snap.swing;
 import java.awt.Desktop;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
+import java.awt.geom.AffineTransform;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.*;
 import snap.gfx.*;
 import snap.util.*;
@@ -44,14 +49,18 @@ public String[] getFontNames(String aFamilyName)  { return AWTFontUtils.getFontN
 public FontFile getFontFile(String aName)  { return new AWTFontFile(aName); }
 
 /**
- * Creates a new image from source.
+ * Creates image from source.
  */
 public Image getImage(Object aSource)  { return new J2DImage(aSource); }
 
 /**
- * Creates a new image for width, height and alpha.
+ * Creates image for width, height and alpha and dpi scale (0 = screen dpi, 1 = 72 dpi, 2 = 144 dpi).
  */
-public Image getImage(int aWidth, int aHeight, boolean hasAlpha)  { return new J2DImage(aWidth,aHeight,hasAlpha); }
+public Image getImageForSizeAndScale(double aWidth, double aHeight, boolean hasAlpha, double aScale)
+{
+    double scale = aScale<=0? getScreenScale() : aScale;
+    return new J2DImage(aWidth, aHeight, hasAlpha, scale);
+}
 
 /**
  * Returns a sound for given source.
@@ -107,6 +116,31 @@ public double getScreenResolution()
 {
     try { return Toolkit.getDefaultToolkit().getScreenResolution(); }
     catch(java.awt.HeadlessException he) { return 72; }
+}
+
+/**
+ * Returns the screen scale. Usually 1, but could be 2 for HiDPI/Retina displays.
+ */
+public double getScreenScale()
+{
+    // Get graphics configuration
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice gd = ge.getDefaultScreenDevice();
+
+    // The method was private in Java 8.
+    try {
+        Method  meth = gd.getClass().getMethod("getScaleFactor");
+        Number scale = (Number)meth.invoke(gd);
+        double ds = scale.doubleValue(); if(ds==1 || ds==2) return ds;
+        System.err.println("AWTEnv.getScreenScale: Unexepected value: " + ds); return 1;
+    }
+    catch(Exception e) { System.out.println("AWTEnv.getScreenScale: Unexepected error: " + e); }
+    
+    // This is the way to do it in Java 9.
+    GraphicsConfiguration gc = gd.getDefaultConfiguration();
+    AffineTransform xfm = gc.getDefaultTransform();
+    double ds = xfm.getScaleX(); if(ds==1 || ds==2) return ds;
+    System.err.println("AWTEnv.getScreenScale: Unexepected value: " + ds); return 1;
 }
 
 /**

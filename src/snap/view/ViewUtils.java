@@ -409,13 +409,18 @@ private static void loadFileIconImages()
 }
 
 /**
- * Returns an image for a View.
+ * Returns an image for a View (at device dpi scale (2 for retina)).
  */
-public static Image getImage(View aView)
+public static Image getImage(View aView)  { return getImageForScale(aView, 0); }
+    
+/**
+ * Returns an image for a View (1 = 72 dpi, 2 = 144 dpi, 0 = device dpi).
+ */
+public static Image getImageForScale(View aView, double aScale)
 {
-    Image img = Image.get((int)Math.ceil(aView.getWidth()), (int)Math.ceil(aView.getHeight()), true);
+    Image img = Image.getImageForSizeAndScale(aView.getWidth(), aView.getHeight(), true, aScale);
     Painter pntr = img.getPainter();
-    paintAll(aView, pntr); pntr.flush();
+    paintAll(aView, pntr);
     return img;
 }
     
