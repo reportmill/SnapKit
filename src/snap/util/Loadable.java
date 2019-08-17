@@ -29,6 +29,42 @@ public static Loadable getAsLoadable(List <? extends Loadable> theLoadables)
 {
     return new MultiLoadable(theLoadables.toArray(new Loadable[theLoadables.size()]));
 }
+
+/**
+ * A class to store a list of loadables.
+ */
+public static class Support {
+    
+    // The Loadable
+    Loadable      _loadable;
+    
+    // The array of Loadables
+    Runnable      _lsnrs[] = null;
+    
+    /** Creates a new Support for a Loadable. */
+    public Support(Loadable aLoadable)  { _loadable = aLoadable; }
+    
+    /** Adds a load listener (cleared automatically when loaded). */
+    public void addLoadListener(Runnable aLoadLsnr)
+    {
+        // If Loadable is loaded, just run and return
+        if(_loadable!=null && _loadable.isLoaded()) { aLoadLsnr.run(); return; }
+        
+        // Exetnd Lsnr array and add
+        if(_lsnrs==null) _lsnrs = new Runnable[1];
+        else _lsnrs = Arrays.copyOf(_lsnrs, _lsnrs.length+1);
+        _lsnrs[_lsnrs.length-1] = aLoadLsnr;
+    }
+    
+    /** Triggers callbacks to load listeners and clears listeners. */
+    public void fireListeners()
+    {
+        if(_lsnrs==null) return;
+        for(Runnable run : _lsnrs)
+            run.run();
+        _lsnrs = null;
+    }
+}
     
 /**
  * A class to load a list of loadables.

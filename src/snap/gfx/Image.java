@@ -44,14 +44,14 @@ public abstract class Image implements Loadable {
      // The image set, if animated image
      ImageSet         _imgSet;
 
-    // PropertyChangeSupport
-    PropChangeSupport _pcs = PropChangeSupport.EMPTY;
+    // Loadable Support
+    Loadable.Support  _loadLsnrs = new Loadable.Support(this);
 
     // Supported image type strings
     static String     _types[] = { "gif", "jpg", "jpeg", "png", "tif", "tiff", "bmp" };
 
     // Constants for properties
-    public static final String Loaded_Prop = "Name";
+    //public static final String Loaded_Prop = "Loaded";
 
 /**
  * Returns the name of image (if from URL/file).
@@ -203,8 +203,7 @@ protected void setLoaded(boolean aValue)
     // If setting, reset size, fire prop change, fire load listeners
     if(aValue) {
         _width = _height = -1;
-        firePropChange(Loaded_Prop, !_loaded, _loaded);
-        _pcs = PropChangeSupport.EMPTY;
+        fireLoadListeners();
     }
 }
 
@@ -335,29 +334,22 @@ public void emboss(double aRadius, double anAzi, double anAlt)  { System.err.pri
 /**
  * Adds a load listener (cleared automatically when loaded).
  */
-public void addLoadListener(Runnable aLoadLsnr)
-{
-    if(isLoaded()) { aLoadLsnr.run(); return; }
-    addPropChangeListener(pc -> aLoadLsnr.run());
-}
+public void addLoadListener(Runnable aLoadLsnr)  { _loadLsnrs.addLoadListener(aLoadLsnr); }
+
+/**
+ * Triggers calls to load listeners.
+ */
+public void fireLoadListeners()  { _loadLsnrs.fireListeners(); }
 
 /**
  * Add listener.
  */
-public void addPropChangeListener(PropChangeListener aPCL)
+/*public void addPropChangeListener(PropChangeListener aPCL)
 {
-    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-    _pcs.addPropChangeListener(aPCL);
-}
-
-/**
- * Fires a property change for given property name, old value, new value and index.
- */
-protected void firePropChange(String aProp, Object oldVal, Object newVal)
-{
-    if(!_pcs.hasListener(aProp)) return;
-    _pcs.firePropChange(new PropChange(this, aProp, oldVal, newVal));
-}
+    System.out.println("Image.addPropChangeListener: Stop using this");
+    Runnable loadLsnr = () -> aPCL.propertyChange(new PropChange(this, Loaded_Prop, false, true));
+    addLoadListener(loadLsnr);
+}*/
 
 /**
  * Standard toString implementation.
