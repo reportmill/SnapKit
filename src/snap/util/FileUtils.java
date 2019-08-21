@@ -85,6 +85,22 @@ public static File getDirectory(File aParent, String aChild, boolean create)
 }
 
 /**
+ * Returns a directory for given source (path, url, string path) with option to create if missing.
+ */
+public static File getDirForSource(Object aSource, boolean doCreate)
+{
+    // Get File
+    File file = getFile(aSource);
+    if(file==null) {
+        System.err.println("FileUtils.mkdirs: Couldn't create file for source: " + aSource); return null; }
+        
+    // Create dir
+    if(doCreate && !file.exists())
+        file.mkdirs();
+    return file;
+}
+
+/**
  * Tries to open the given file name with the platform reader.
  */
 public static void openFile(File aFile)  { snap.gfx.GFXEnv.getEnv().openFile(aFile); }
