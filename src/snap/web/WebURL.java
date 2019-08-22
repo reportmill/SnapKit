@@ -339,6 +339,28 @@ public WebResponse getResponse()
 }
 
 /**
+ * Returns the parent URL.
+ */
+public WebURL getParent()
+{
+    String path = getPath(); if(path.equals("/")) return null;
+    String parPath = PathUtils.getParent(path);
+    WebURL parURL = getSite().getURL(parPath);
+    return parURL;
+}
+
+/**
+ * Returns the child URL for given name.
+ */
+public WebURL getChild(String aName)
+{
+    String path = getPath();
+    String childPath = PathUtils.getChild(path, aName);
+    WebURL childURL = getSite().getURL(childPath);
+    return childURL;
+}
+
+/**
  * Standard equals implementation.
  */
 public boolean equals(Object anObj)
