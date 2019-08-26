@@ -56,12 +56,17 @@ public abstract boolean matches(Object anObj);
 /**
  * Override to return false (segment can never contain another segment (well, I suppose a weird Cubic could)).
  */
-public boolean contains(Segment aSeg)  { return false; }
+public boolean containsSeg(Segment aSeg)  { return false; }
 
 /**
- * Returns whether this segment intersects shape.
+ * Returns whether this segment intersects given segment.
  */
-public boolean intersects(Segment aSeg)  { return getHit(aSeg)!=null; }
+public boolean intersectsSeg(Segment aSeg)  { return getHit(aSeg)!=null; }
+
+/**
+ * Returns whether this segment intersects given segment.
+ */
+public boolean crossesSeg(Segment aSeg)  { return getHit(aSeg)!=null; }
 
 /**
  * Returns the hit for given segment.

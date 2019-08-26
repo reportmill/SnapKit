@@ -96,7 +96,7 @@ public boolean containsEndPoint(double x, double y)
 /**
  * Returns whether segement list contains segement (regardless of direction).
  */
-public boolean contains(Segment aSeg)
+public boolean hasSeg(Segment aSeg)
 {
     for(Segment seg : _segs)
         if(seg.matches(aSeg))
@@ -217,7 +217,7 @@ public boolean splitSegments()
         for(int j=i+1;j<sc;j++) { Segment seg2 = getSeg(j);
         
             // If segments intersect
-            if(seg1.intersects(seg2)) {
+            if(seg1.intersectsSeg(seg2)) {
                     
                 // Find intersection point for seg2 and split/add if inside
                 double hp2 = seg2.getHitPoint(seg1);
@@ -247,7 +247,7 @@ public boolean isSimple()
         for(int j=i+1;j<sc;j++) { Segment seg2 = getSeg(j);
         
             // If segments intersect somewhere not on an end-point, return false
-            if(seg1.intersects(seg2)) {
+            if(seg1.intersectsSeg(seg2)) {
                 double hp2 = seg2.getHitPoint(seg1);
                 if(hp2>.001 && hp2<.999)
                     return false;
@@ -302,7 +302,7 @@ public void splitSegments(SegList aSegList)
         for(int j=0;j<sc2;j++) { Segment seg2 = aSegList.getSeg(j);
         
             // If segments intersect
-            if(seg1.intersects(seg2)) {
+            if(seg1.intersectsSeg(seg2)) {
                 
                 // Find intersection point for seg1 and split/add if inside
                 double hp1 = seg1.getHitPoint(seg2);
@@ -361,7 +361,7 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
         List <Segment> segs = owner.getSegments(seg);
         Segment nextSeg = null;
         for(Segment sg : segs) {
-            if(opp.contains(sg.getX1(), sg.getY1()) && !shape3.contains(sg)) {
+            if(opp.contains(sg.getX1(), sg.getY1()) && !shape3.hasSeg(sg)) {
                 nextSeg = sg; break; }
         }
         
@@ -369,7 +369,7 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
         if(nextSeg==null) {
             segs = opp.getSegments(seg);
             for(Segment sg : segs) {
-                if(owner.contains(sg.getX1(), sg.getY1()) && !shape3.contains(sg)) {
+                if(owner.contains(sg.getX1(), sg.getY1()) && !shape3.hasSeg(sg)) {
                     nextSeg = sg; owner = opp; opp = opp==shape1? shape2 : shape1; break; }
             }
         }
@@ -387,9 +387,11 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
  */
 public static Shape add(Shape aShape1, Shape aShape2)
 {
-    // Simple cases
+    // Simple case: If shapes don't intersect, just add them and return
     if(!aShape1.intersects(aShape2)) { Path path = new Path(aShape1);
         path.append(aShape2); return path; }
+        
+    // Simple case: If either shape contains other, return outer shape
     if(aShape1.contains(aShape2))
         return aShape1;
     if(aShape2.contains(aShape1))
@@ -400,39 +402,30 @@ public static Shape add(Shape aShape1, Shape aShape2)
     SegList shape2 = new SegList(aShape2);
     SegList shape3 = new SegList(null);
     
-    // Split segments in shape1 & shape2
+    // Split segments in shapes so each contains endpoint at every crossing
     shape1.splitSegments(shape2);
     
-    // Find first segement on perimeter of shape1 and shape2
+    // Find first segement of shape1 outside shape2
     Segment seg = shape1.getFirstSegOutside(shape2);
     if(seg==null) { System.err.println("SegList.add: No intersections!"); return aShape1; } // Should never happen
     
-    // Iterate over segements to find those with endpoints in opposing shape and add to new shape
-    SegList owner = shape1, opp = shape2;
+    // Iterate over segements to find those outside other shape and add to new shape
     while(seg!=null) {
         
-        // Add segment to new list
+        // Add segment to new shape
         shape3.addSeg(seg);
-    
-        // Get segment at end point for current seg shape
-        List <Segment> segs = owner.getSegments(seg);
-        Segment nextSeg = null;
-        for(Segment sg : segs) {
-            if(!opp.containsSegMid(sg) && !shape3.contains(sg)) {
-                nextSeg = sg; break; }
-        }
         
-        // If not found, look for seg from other shape
+        // Search SegLists for next outside segment
+        Segment nextSeg = getNextSegOutside(shape1, shape2, shape3, seg);
+        
+        // If not found, swap order to search second seglist
         if(nextSeg==null) {
-            segs = opp.getSegments(seg);
-            for(Segment sg : segs) {
-                if(!owner.containsSegMid(sg) && !shape3.contains(sg)) {
-                    nextSeg = sg; owner = opp; opp = opp==shape1? shape2 : shape1; break; }
-            }
+            SegList swap = shape1; shape1 = shape2; shape2 = swap;
+            nextSeg = getNextSegOutside(shape1, shape2, shape3, seg);
         }
-        
+    
         // Update seg and add to list if non-null
-        seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("SegList: too many segs"); }
+        seg = nextSeg; if(shape3.getSegCount()>50) { seg = null; System.err.println("SegList: too many segs"); }
     }
     
     // Return path for segments list
@@ -440,22 +433,40 @@ public static Shape add(Shape aShape1, Shape aShape2)
 }
 
 /**
+ * Returns the next segment outside of both SegLists.
+ */
+private static Segment getNextSegOutside(SegList aShp1, SegList aShp2, SegList aShp3, Segment aSeg)
+{
+    List <Segment> segs = aShp1.getSegments(aSeg);
+    for(Segment sg : segs) {
+        boolean outside = !aShp2.containsSegMid(sg) || aShp2.hasSeg(sg);
+        if(outside && !aShp3.hasSeg(sg))
+            return sg;
+    }
+    return null;
+}
+
+/**
  * Returns the area of the first shape minus the overlapping area of second shape.
  */
 public static Shape subtract(Shape aShape1, Shape aShape2)
 {
-    // Simple cases
-    if(!aShape1.intersects(aShape2) || aShape2.contains(aShape1))
+    // Simple case: If shapes don't intersect, return shape 1 (should be null)
+    if(!aShape1.intersects(aShape2))
         return aShape1;
+        
+    // If either shape contains the other, return concatinated shape
     if(aShape1.contains(aShape2)) {
         Path path = new Path(aShape1); path.append(aShape2); return path; }
+    if(aShape2.contains(aShape1)) {
+        Path path = new Path(aShape2); path.append(aShape1); return path; }
 
     // Create SegLists for given shapes and new shape
-    SegList shape1 = new SegList(aShape1);
+    SegList shape1 = new SegList(aShape1), refShp = shape1;
     SegList shape2 = new SegList(aShape2);
     SegList shape3 = new SegList(null);
     
-    // Split segments in shape1 & shape2
+    // Split segments in shapes so each contains endpoint at every crossing
     shape1.splitSegments(shape2);
     
     // Find first segement on perimeter of shape1 and shape2
@@ -463,37 +474,40 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
     if(seg==null) { System.err.println("SegList.subtr: No intersections!"); return aShape1; } // Should never happen
     
     // Iterate over segements to find those with endpoints in opposing shape and add to new shape
-    SegList owner = shape1, opp = shape2;
     while(seg!=null) {
         
         // Add segment to new list
         shape3.addSeg(seg);
     
-        // Get segment at end point for current seg shape
-        List <Segment> segs = owner.getSegments(seg);
-        Segment nextSeg = null;
-        for(Segment sg : segs) {
-            boolean b1 = owner==shape1? !shape2.containsSegMid(sg) : shape1.containsSegMid(sg);
-            if(b1 && !shape3.contains(sg)) {
-                nextSeg = sg; break; }
-        }
+        // Search SegLists for next subtract segment
+        Segment nextSeg = getNextSegSubtract(refShp, shape1, shape2, shape3, seg);
         
-        // If not found, look for seg from other shape
+        // If not found, swap order to search second seglist
         if(nextSeg==null) {
-            segs = opp.getSegments(seg);
-            for(Segment sg : segs) {
-                boolean b1 = opp==shape1? !shape2.containsSegMid(sg) : shape1.containsSegMid(sg);
-                if(b1 && !shape3.contains(sg)) {
-                    nextSeg = sg; owner = opp; opp = opp==shape1? shape2 : shape1; break; }
-            }
+            SegList swap = shape1; shape1 = shape2; shape2 = swap;
+            nextSeg = getNextSegSubtract(refShp, shape1, shape2, shape3, seg);
         }
-        
+    
         // Update seg and add to list if non-null
-        seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("SegList: too many segs"); }
+        seg = nextSeg; if(shape3.getSegCount()>50) { seg = null; System.err.println("SegList: too many segs"); }
     }
     
     // Return path for segments list
     return shape3.createPath();
+}
+
+/**
+ * Returns the next segment outside of both SegLists.
+ */
+private static Segment getNextSegSubtract(SegList aRefShp, SegList aShp1, SegList aShp2, SegList aShp3, Segment aSeg)
+{
+    List <Segment> segs = aShp1.getSegments(aSeg);
+    for(Segment sg : segs) {
+        boolean b1 = aShp1==aRefShp? !aShp2.containsSegMid(sg) : aShp2.containsSegMid(sg);
+        if(b1 && !aShp3.hasSeg(sg))
+            return sg;
+    }
+    return null;
 }
 
 /**
