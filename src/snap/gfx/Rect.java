@@ -43,35 +43,6 @@ public PathIter getPathIter(Transform aTrans)  { return new RectIter(this, aTran
 public Point getPoint(Pos aPos)  { return getPoint(x, y, width, height, aPos); }
 
 /**
- * Returns whether the receiver intersects with the given rect.
- */
-public boolean intersectsRect(Rect aRect)
-{
-    if(width<=0 || height<=0 || aRect.getWidth()<=0 || aRect.getHeight()<=0) return false;
-    return intersectsEvenIfEmpty(aRect);
-}
-
-/**
- * Returns whether the receiver intersects with the given rect.
- */
-public boolean intersectsEvenIfEmpty(Rect r)
-{
-    return intersectsEvenIfEmpty(r.getX(),r.getY(),r.getWidth(),r.getHeight());
-}
-
-/**
- * Returns whether the receiver intersects with the given rect.
- */
-public boolean intersectsEvenIfEmpty(double aX, double aY, double aW, double aH)
-{
-    if(getX()<aX) { if(getMaxX()<=aX) return false; }
-    else if(aX+aW <= getX()) return false;
-    if(getY()<aY) { if(getMaxY()<=aY) return false; }
-    else if(aY+aH <= getY()) return false;
-    return true;
-}
-
-/**
  * Returns the rect that is an intersection of this rect and given rect.
  */
 public void intersect(Rect aRect)
@@ -96,14 +67,9 @@ public Rect getIntersectRect(Rect aRect)
 /**
  * Returns whether rect contains x/y.
  */
-public boolean contains(double aX, double aY)  { return (x<=aX) && (aX<=x+width) && (y<=aY) && (aY<=y+height); }
-
-/**
- * Returns whether rect contains another rect.
- */
-public boolean contains(Rect aRect)
+public boolean contains(double aX, double aY)
 {
-    return contains(aRect.x,aRect.y) && contains(aRect.getMaxX(),aRect.getMaxY());
+    return (x<=aX) && (aX<=x+width) && (y<=aY) && (aY<=y+height);
 }
 
 /**
@@ -111,17 +77,7 @@ public boolean contains(Rect aRect)
  */
 public boolean contains(Shape aShape)
 {
-    return contains(aShape.getBounds());
-}
-
-/**
- * Returns whether rect intersects x/y/w/h.
- */
-public boolean intersects(Rect aRect)
-{
-    // if(isEmpty() || aRect.isEmpty()) return false;
-    double aX = aRect.x, aY = aRect.y, aW = aRect.width, aH = aRect.height;
-    return x<aX+aW && aX<x+width && y<aY+aH && aY<y+height;
+    return containsRect(aShape.getBounds());
 }
 
 /**
@@ -130,8 +86,34 @@ public boolean intersects(Rect aRect)
 public boolean intersects(Shape aShape)
 {
     if(aShape instanceof Rect)
-        return intersects((Rect)aShape);
+        return intersectsRect((Rect)aShape);
     return super.intersects(aShape);
+}
+
+/**
+ * Returns whether rect contains another rect.
+ */
+public boolean containsRect(Rect aRect)
+{
+    return contains(aRect.x, aRect.y) && contains(aRect.getMaxX(), aRect.getMaxY());
+}
+
+/**
+ * Returns whether the receiver intersects with the given rect.
+ */
+public boolean intersectsRect(Rect aRect)
+{
+    double aX = aRect.x, aY = aRect.y, aW = aRect.width, aH = aRect.height;
+    return x<aX+aW && aX<x+width && y<aY+aH && aY<y+height;
+}
+
+/**
+ * Returns whether this rect intersects with given rect and both are not empty.
+ */
+public boolean intersectsRectAndNotEmpty(Rect aRect)
+{
+    boolean intersectsRect = intersectsRect(aRect);
+    return intersectsRect && !isEmpty() && !aRect.isEmpty();
 }
 
 /**
@@ -149,7 +131,7 @@ public boolean contains(double x, double y, double aLineWidth)
 public boolean intersects(Shape aShape, double aLineWidth)
 {
     if(aShape instanceof Rect)
-        return getInsetRect(-aLineWidth/2).intersects((Rect)aShape);
+        return getInsetRect(-aLineWidth/2).intersectsRect((Rect)aShape);
     return super.intersects(aShape, aLineWidth);
 }
 

@@ -288,7 +288,7 @@ protected void paintChildren(Painter aPntr)
     for(View child : getChildren()) {
         if(!child.isVisible() || !child.isPaintable()) continue;
         Rect clip = child.parentToLocal(pclip).getBounds();
-        if(clip.intersects(child.getBoundsLocal())) {
+        if(clip.intersectsRectAndNotEmpty(child.getBoundsLocal())) {
             aPntr.save();
             aPntr.transform(child.getLocalToParent());
             child.paintAll(aPntr);

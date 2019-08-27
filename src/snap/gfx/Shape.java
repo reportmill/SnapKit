@@ -202,7 +202,7 @@ public boolean intersectsSeg(Segment aSeg)
 public boolean crossesSeg(Segment aSeg)
 {
     // If bounds don't intersect, just return false
-    if(!getBounds().intersects(aSeg.getBounds())) return false;
+    if(!getBounds().intersectsRect(aSeg.getBounds())) return false;
     
     // Iterate over local segments, if any segment intersects, return true
     PathIter pi = getPathIter(null); Line line = new Line(0,0,0,0); Quad quad = null; Cubic cub = null;
