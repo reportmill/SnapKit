@@ -20,14 +20,33 @@ public interface Loadable {
 /**
  * Returns a combined loadable for given array of loadables.
  */
-public static Loadable getAsLoadable(Loadable theLoadables[])  { return new MultiLoadable(theLoadables); }
+public static Loadable getAsLoadable(Loadable ... theLoadables)
+{
+    // Get number of loadables (just return null if zero)
+    int c = 0; for(Loadable ldb : theLoadables) if(ldb!=null && !ldb.isLoaded()) c++;
+    if(c==0) return null;
+    if(c==1) {
+        for(Loadable ldb : theLoadables) if(ldb!=null && !ldb.isLoaded())
+            return ldb;
+        return null;
+    }
+    
+    // If all need loading, return MultiLoadable for all
+    if(c==theLoadables.length) return new MultiLoadable(theLoadables);
+    
+    // Create sub-array of those needing loading and return MultiLoadable for those
+    Loadable loadables[] = new Loadable[c]; c = 0;
+    for(Loadable ldb : theLoadables) if(ldb!=null && !ldb.isLoaded()) loadables[c++] = ldb;
+    return new MultiLoadable(loadables);
+}
     
 /**
  * Returns a combined loadable for given array of loadables.
  */
 public static Loadable getAsLoadable(List <? extends Loadable> theLoadables)
 {
-    return new MultiLoadable(theLoadables.toArray(new Loadable[theLoadables.size()]));
+    Loadable loadables[] = theLoadables.toArray(new Loadable[theLoadables.size()]);
+    return getAsLoadable(loadables);
 }
 
 /**

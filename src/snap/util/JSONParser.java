@@ -143,8 +143,8 @@ public static class ValueHandler extends ParseHandler <Object> {
         else if(anId=="Boolean")
             _part = Boolean.valueOf(aNode.getString());
             
-        // Handle Object or Array
-        else if(anId=="Object" || anId=="Array")
+        // Handle Object or Array - We need equals() for TeaVM bug (can go soon, bug was fixed)
+        else if(anId.equals("Object") || anId=="Array")
             _part = aNode.getCustomNode();
     }
 }
