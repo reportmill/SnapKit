@@ -194,7 +194,7 @@ public boolean isLoaded()  { return _loaded; }
 /**
  * Sets whether image is loaded.
  */
-protected void setLoaded(boolean aValue)
+public void setLoaded(boolean aValue)
 {
     // If already set, just return
     if(aValue==_loaded) return;

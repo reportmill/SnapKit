@@ -1,6 +1,5 @@
 package snap.util;
 import java.util.*;
-import snap.view.ViewUtils;
 
 /**
  * An interface to identify classes that have external resources that may not be immediately available.
@@ -118,7 +117,7 @@ public static class MultiLoadable implements Loadable {
             setLoaded(true); return; }
         
         // Add load listener for next unloaded loadable
-        loadable.addLoadListener(() -> ViewUtils.runLater(() -> checkLoaded()));
+        loadable.addLoadListener(() -> checkLoaded());
     }
     
     /** Returns last unloaded Loadable in list. */
