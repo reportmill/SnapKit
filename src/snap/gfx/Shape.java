@@ -91,10 +91,13 @@ public int getCrossings(double aX, double aY)
 public boolean contains(Shape aShape)
 {
     // If given shape is segment, do segment version instead
-    if(aShape instanceof Segment) return containsSeg((Segment)aShape);
+    if(aShape instanceof Segment)
+        return containsSeg((Segment)aShape);
     
     // If bounds don't contain shape, just return false
-    if(!getBounds().contains(aShape.getBounds())) return false;
+    Rect bnds0 = getBounds(), bnds1 = aShape.getBounds();
+    if(!bnds0.containsRect(bnds1))
+        return false;
     
     // Iterate over shape segments, if any segment edge intersects, return false
     PathIter pi = aShape.getPathIter(null); Line line = new Line(0,0,0,0); Quad quad = null; Cubic cub = null;
@@ -134,11 +137,18 @@ public boolean contains(Shape aShape)
 public boolean intersects(Shape aShape)
 {
     // If given shape is segment, do segment version instead
-    if(aShape instanceof Segment) return intersectsSeg((Segment)aShape);
+    if(aShape instanceof Segment)
+        return intersectsSeg((Segment)aShape);
     
     // If bounds don't intersect, just return false
-    if(!getBounds().intersects(aShape.getBounds())) return false;
+    Rect bnds0 = getBounds(), bnds1 = aShape.getBounds();
+    if(!bnds0.intersectsRect(bnds1))
+        return false;
     
+    // If other shape bounds contains this shape bounds, have other shape do check
+    if(bnds1.containsRect(bnds0))
+        return aShape.intersects(this);
+
     // Iterate over shape segments, if any segment intersects, return true
     PathIter pi = aShape.getPathIter(null); Line line = new Line(0,0,0,0); Quad quad = null; Cubic cub = null;
     double pts[] = new double[6], mx = 0, my = 0, lx = 0, ly = 0;
