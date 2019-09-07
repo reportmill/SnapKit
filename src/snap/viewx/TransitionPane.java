@@ -35,7 +35,6 @@ public void setContent(View aView)
     
     // Get last content (remove any previous content that might be transitioning out)
     View oldView = _content;
-    while(getChildCount()>1) removeChild(1);
     
     // Set new Content (if null, remove children and return)
     _content = aView; if(_content==null) { removeChildren(); return; }
@@ -46,6 +45,9 @@ public void setContent(View aView)
     // Make sure new content has no residual animation/transform
     _content.getAnimCleared(0);
     _content.setTransX(0); _content.setTransY(0);
+
+    // Make sure last animation is finished
+    getAnim(0).finish();
     
     // Configure transition
     _transition.configure(this, _content, oldView);
@@ -90,6 +92,7 @@ public static class Transition {
         if(oldView.getParent()!=null) aTP._transition = MoveDown;
         aTP.removeChild(oldView);
         oldView.setTransX(0); oldView.setTransY(0);
+        oldView.setOpacity(1);
     }
 }
 
@@ -155,6 +158,22 @@ public static Transition MoveRight = new Transition() {
         if(oview==null) return;
         oview.setTransX(0);
         oview.getAnimCleared(500).setTransX(-aTP.getWidth()).setOnFinish(a -> finish(aTP, oview)).play();
+    }
+};
+
+/**
+ * A class to perform transitions.
+ */
+public static Transition FadeIn = new Transition() {
+
+    /** Configure. */
+    public void configure(TransitionPane aTP, View nview, View oview)
+    {
+        nview.setOpacity(0);
+        nview.getAnimCleared(800).setOpacity(1).play();
+        if(oview==null) return;
+        oview.setTransX(0);
+        oview.getAnimCleared(800).setOpacity(0).setOnFinish(a -> finish(aTP, oview)).play();
     }
 };
 
