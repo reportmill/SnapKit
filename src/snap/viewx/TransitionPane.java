@@ -9,8 +9,11 @@ import snap.view.*;
  */
 public class TransitionPane extends ParentView {
 
-    // The current content node
+    // The current content view
     View                 _content;
+    
+    // The last content view
+    View                 _contentOld;
 
     // The Transition
     Transition           _transition = MoveDown;
@@ -33,8 +36,14 @@ public void setContent(View aView)
     // If view already set, just return
     if(aView==_content) return;
     
+    // Make sure animations are finished
+    if(_content!=null)
+        _content.getAnim(0).finish();
+    if(_contentOld!=null)
+        _contentOld.getAnim(0).finish();
+    
     // Get last content (remove any previous content that might be transitioning out)
-    View oldView = _content;
+    _contentOld = _content;
     
     // Set new Content (if null, remove children and return)
     _content = aView; if(_content==null) { removeChildren(); return; }
@@ -46,11 +55,8 @@ public void setContent(View aView)
     _content.getAnimCleared(0);
     _content.setTransX(0); _content.setTransY(0);
 
-    // Make sure last animation is finished
-    getAnim(0).finish();
-    
     // Configure transition
-    _transition.configure(this, _content, oldView);
+    _transition.configure(this, _content, _contentOld);
 }
 
 /**
@@ -93,6 +99,7 @@ public static class Transition {
         aTP.removeChild(oldView);
         oldView.setTransX(0); oldView.setTransY(0);
         oldView.setOpacity(1);
+        aTP._contentOld = null;
     }
 }
 
@@ -172,8 +179,7 @@ public static Transition FadeIn = new Transition() {
         nview.setOpacity(0);
         nview.getAnimCleared(800).setOpacity(1).play();
         if(oview==null) return;
-        oview.setTransX(0);
-        oview.getAnimCleared(800).setOpacity(0).setOnFinish(a -> finish(aTP, oview)).play();
+        oview.getAnimCleared(800).setOnFinish(a -> finish(aTP, oview)).play();
     }
 };
 
