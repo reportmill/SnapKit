@@ -272,7 +272,8 @@ public double getScale()  { return getDPIX()!=72? getDPIX()/72 : 1; }
 public Image cloneForSizeAndScale(double aW, double aH, double aScale)
 {
     Image img2 = Image.getImageForSizeAndScale(aW, aH, hasAlpha(), aScale);
-    Painter pntr = img2.getPainter(); pntr.drawImage(this, 0, 0, aW, aH);
+    Painter pntr = img2.getPainter(); pntr.setImageQuality(1);
+    pntr.drawImage(this, 0, 0, aW, aH);
     return img2;
 }
 
