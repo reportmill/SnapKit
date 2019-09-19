@@ -4,6 +4,8 @@
 package snap.web;
 import java.io.File;
 import java.util.*;
+import java.util.function.Consumer;
+import snap.gfx.GFXEnv;
 import snap.util.*;
 
 /**
@@ -121,6 +123,24 @@ public WebResponse getResponse(WebRequest aReq)
     
     // Return response
     return resp;
+}
+
+/**
+ * Executes request and invokes callback with response.
+ */
+public void getResponseAndCall(WebRequest aReq, Consumer <WebResponse> aCallback)
+{
+    // If platform can handle this request, just return
+    if(GFXEnv.getEnv().getResponseAndCall(aReq, aCallback))
+        return;
+    
+    // Otherwise wrap in thread and start
+    Runnable run = () -> {
+        WebResponse resp = getResponse(aReq);
+        aCallback.accept(resp);
+    };
+    Thread thread = new Thread(run);
+    thread.start();
 }
 
 /**

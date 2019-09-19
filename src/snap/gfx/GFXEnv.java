@@ -2,7 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import java.util.function.Consumer;
 import snap.util.*;
+import snap.web.*;
 
 /**
  * An adapter class for drawing in a native environment (Java2D, JavaFX).
@@ -102,6 +104,14 @@ public abstract void openFile(Object aSource);
  * Tries to open the given URL source with the platform URL reader.
  */
 public abstract void openURL(Object aSource);
+
+/**
+ * Executes request and invokes callback with response.
+ */
+public boolean getResponseAndCall(WebRequest aReq, Consumer <WebResponse> aCallback)
+{
+    return false;
+}
 
 /**
  * Returns the screen resolution.

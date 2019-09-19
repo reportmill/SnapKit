@@ -4,6 +4,7 @@
 package snap.web;
 import java.io.*;
 import java.net.*;
+import java.util.function.Consumer;
 import snap.util.*;
 
 /**
@@ -336,6 +337,16 @@ public WebResponse getResponse()
     WebSite site = getSite();
     WebRequest req = new WebRequest(this);
     return site.getResponse(req);
+}
+
+/**
+ * Returns bytes for this URL.
+ */
+public void getResponseAndCall(Consumer <WebResponse> aCallback)
+{
+    WebSite site = getSite();
+    WebRequest req = new WebRequest(this);
+    site.getResponseAndCall(req, aCallback);
 }
 
 /**
