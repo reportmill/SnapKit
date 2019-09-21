@@ -7,7 +7,7 @@ import snap.util.*;
 import snap.view.*;
 
 /**
- * This Swing control class displays a color value and kicks off the ColorPanel when clicked.
+ * This control view displays a color value and interacts with ColorPanel when selected.
  */
 public class ColorWell extends View {
     
@@ -44,9 +44,16 @@ public Color getColor()  { return _color; }
  */
 public void setColor(Color aColor)
 {
+    // If already set, just return
     if(SnapUtils.equals(aColor, _color)) return;
+    
+    // Set value, fire prop change and repaint
     firePropChange(Color_Prop, _color, _color = aColor);
     repaint();
+    
+    // If selected, forward to ColorPanel
+    if(isSelected())
+        ColorPanel.getShared().setColor(getColor());
 }
 
 /**
@@ -215,7 +222,8 @@ public void showColorPanel()
 protected void setShowing(boolean aValue)
 {
     if(aValue==isShowing()) return;
-    super.setShowing(aValue); setSelected(false);
+    super.setShowing(aValue);
+    setSelected(false);
 }
 
 /**
@@ -241,6 +249,16 @@ public void setValue(String aPropName, Object aValue)
     else super.setValue(aPropName, aValue);
 }
 
+/**
+ * Called by ColorPanel when user selects color in color panel.
+ */
+protected void colorPanelChangedColor(ColorPanel aCP, ViewEvent anEvent)
+{
+    Color color = aCP.getColor();
+    setColor(color);
+    fireActionEvent(anEvent);
+}
+    
 /**
  * XML archival.
  */

@@ -12,19 +12,22 @@ import snap.view.*;
 public class ColorPanel extends ViewOwner {
     
     // The currently selected color
-    Color           _color = Color.BLACK;
+    Color              _color = Color.BLACK;
     
-    // The currently selected color well
-    ColorWell       _colorWell;
+    // The ColorWell that gets notification of color changes
+    ColorWell          _colorWell;
+    
+    // The ColorWell to fall back on when no current ColorWell set
+    ColorWell          _defColorWell;
     
     // The list of previously selected colors
-    List <Color>    _recentColors = new ArrayList();
+    List <Color>       _recentColors = new ArrayList();
     
     // The shared instance of the color panel
-    static ColorPanel   _shared;
+    private static ColorPanel   _shared;
 
     // Image names
-    static String _iNames[] = { "Spectrum", "Paradise", "Floral", "Fall Leaves", "Metal", "Wood" };
+    private static String _iNames[] = { "Spectrum", "Paradise", "Floral", "Fall Leaves", "Metal", "Wood" };
     
     // Image file names
     static Object _images[] = { "spectrum.jpg", "paradise.jpg", "tulips.jpg", "fall.jpg","metal.jpg","wood.jpg" };
@@ -53,15 +56,6 @@ public void setColor(Color aColor)
     if(aColor==null) aColor = Color.BLACK;
     if(aColor.equals(_color)) return;
     _color = aColor;
-
-    // If not interactively setting color (like from a mouse or slider drag), add color to _recentColorList
-    if(!ViewUtils.isMouseDown()) {
-        addRecentColor(aColor);
-        resetLater();
-    }
-   
-    // If color well is present, set new color in color well and fireActionPerformed
-    //if(_colorWell!=null) { _colorWell.setColor(aColor); _colorWell.fireActionEvent(null); }
 }
 
 /**
@@ -82,42 +76,58 @@ public void addRecentColor(Color aColor)
     // old ones fall off the end of the list.  If you want to keep a color forever, stick it in the dock.
     while(_recentColors.size()>8) _recentColors.remove(_recentColors.size()-1);
     
-    // Get HistoryMenuButton and its popup menu
+    // Update HistoryMenuButton
     //MenuButton mbutton = getNative("HistoryMenuButton", MenuButton.class);
-    //JPopupMenu pmenu = mbutton.getPopupMenu();
-    
-    // Remove all items and add them back from updated list
-    //pmenu.removeAll();
+    //JPopupMenu pmenu = mbutton.getPopupMenu(); pmenu.removeAll();
     //for(int i=0, iMax=_recentColors.size(); i<iMax; i++) pmenu.add(new ColorMenuItem(_recentColors.get(i)));
-    //pmenu.pack();
-    
-    // Arm popup menu items to send ViewEvent to this color panel
     //for(Object mitem : pmenu.getComponents()) initUI(mitem);
 }
 
 /**
- * Returns the currently selected color well.
+ * Returns the ColorWell that receives notifications of color panel changes.
  */
 public ColorWell getColorWell()  { return _colorWell; }
 
 /**
- * Sets the currently selected color well.
+ * Sets the ColorWell that receives notifications of color panel changes.
  */
 public void setColorWell(ColorWell aColorWell)
 {
-    // If old color well is preset, unselect it
-    if(_colorWell!=null)
+    // If already set, just return
+    ColorWell newCW = aColorWell!=null? aColorWell : getDefaultColorWell();
+    if(newCW==_colorWell) return;
+    
+    // Set new ColorWell
+    ColorWell oldCW = _colorWell;
+    _colorWell = newCW;
+    
+    // If new ColorWell non-null, notifify of change (to set color)
+    if(_colorWell!=null) {
+        setColor(_colorWell.getColor());
+        _colorWell.setSelected(true);
+    }
+        
+    // If old ColorWell non-null, notifify of change
+    if(oldCW!=null)
         _colorWell.setSelected(false);
-    
-    // Set new color well
-    _colorWell = aColorWell;
-    
-    // If new color well is present, select it
-    if(_colorWell!=null)
-        setColor(aColorWell.getColor()); 
     
     // Reset color panel
     resetLater();
+}
+
+/**
+ * Returns the ColorWell to fall back on when no ColorWell set.
+ */
+public ColorWell getDefaultColorWell()  { return _defColorWell; }
+
+/**
+ * Sets the ColorWell to fall back on when no ColorWell set.
+ */
+public void setDefaultColorWell(ColorWell aColorWell)
+{
+    _defColorWell = aColorWell;
+    if(getColorWell()==null)
+        setColorWell(_defColorWell);
 }
 
 /**
@@ -151,7 +161,9 @@ protected void initUI()
     addRecentColor(Color.BLACK);
             
     // Load Dock's colors from preferences
-    getView("ColorDock", ColorDock.class).setPersistent(true);
+    ColorDock cdock = getView("ColorDock", ColorDock.class);
+    cdock.setPersistent(true);
+    cdock.setSelectable(false);
 
     // Configure SwatchPicker
     getView("SwatchPicker", ChildView.class).addChild(new SwatchPanel());
@@ -270,8 +282,7 @@ protected void respondUI(ViewEvent anEvent)
     }
     
     // Handle Recent Colors Dropdown menu
-    //if(anEvent.getTarget() instanceof ColorMenuItem)
-    //    setColor(anEvent.getTarget(ColorMenuItem.class).getColor());
+    //if(anEvent.getView() instanceof ColorMenuItem) setColor(anEvent.getView(ColorMenuItem.class).getColor());
         
     // Handle SwatchPanel
     if(anEvent.equals("SwatchPanel"))
@@ -281,6 +292,12 @@ protected void respondUI(ViewEvent anEvent)
     if(anEvent.equals("HexText"))
         newColor = fromHexString(anEvent.getStringValue());
         
+    // Handle ColorDock
+    if(anEvent.equals("ColorDock")) {
+        ColorDock cdock = getView("ColorDock", ColorDock.class);
+        newColor = cdock.getColor();
+    }
+
     // If new color, set and fireActionEvent
     if(newColor!=null) {
         setColor(newColor);
@@ -293,11 +310,13 @@ protected void respondUI(ViewEvent anEvent)
  */
 protected void fireActionEvent(ViewEvent anEvent)
 {
-    // If ColorWell present, update color and fireActionEvent
-    if(_colorWell!=null) {
-        _colorWell.setColor(getColor());
-        ViewUtils.fireActionEvent(_colorWell, anEvent);
-    }
+    // If ColorWell present, notify of user initiated color change
+    if(_colorWell!=null)
+        _colorWell.colorPanelChangedColor(this, anEvent);
+    
+    // If not interactively setting color (like from a mouse or slider drag), add color to RecentColorList
+    if(!ViewUtils.isMouseDown())
+        addRecentColor(getColor());
 }
 
 /** Convert to/from hex string. */

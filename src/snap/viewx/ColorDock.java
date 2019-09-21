@@ -22,6 +22,9 @@ public class ColorDock extends View {
     // The selected swatch
     Swatch                  _selSwatch;
     
+    // The hidden ColorWell to talk to ColorPanel
+    ColorWell               _colorWell;
+    
     // The drag point (swatch) in color dock
     Point                   _dragPoint = null;
     
@@ -39,9 +42,32 @@ public class ColorDock extends View {
  */
 public ColorDock()
 {
+    // Configure this view
     enableEvents(MousePress, MouseRelease, Action);
     enableEvents(DragGesture, DragSourceEnd); enableEvents(DragEvents);
     setBorder(COLOR_DOCK_BORDER);
+    
+    // Create ColorWell
+    _colorWell = new ColorWell();
+    _colorWell.addEventHandler(e -> colorWellDidFireAction(e), Action);
+}
+
+/**
+ * Returns the color of the selected swatch.
+ */
+public Color getColor()
+{
+    Swatch swatch = getSelSwatch();
+    return swatch!=null? swatch.getColor() : Color.WHITE;
+}
+
+/**
+ * Sets the color of the selected swatch.
+ */
+public void setColor(Color aColor)
+{
+    Swatch swatch = getSelSwatch(); if(swatch==null) return;
+    swatch.setColor(aColor);
 }
 
 /**
@@ -56,11 +82,11 @@ public Color getColor(int aRow, int aCol)
 /**
  * Sets the color at the given row & column.
  */
-public void setColor(Color aColor, int aRow, int aCol)
+public void setColor(int aRow, int aCol, Color aColor)
 {
-    String key = aRow + "," + aCol;                // Get key
-    if(aColor!=null) _colors.put(key, aColor);     // If color isn't null, add to map
-    else _colors.remove(key);                      // If color is null, remove map key
+    String key = aRow + "," + aCol;
+    if(aColor!=null) _colors.put(key, aColor);
+    else _colors.remove(key);
     if(_persist) saveToPrefs(getName(), aRow, aCol);
 }
 
@@ -129,7 +155,7 @@ public int getRowCount()
 public int getColCount()
 {
     int width = (int)Math.round(getWidth() - getInsetsAll().getWidth());
-    return width/SWATCH_SIZE;// + (width%swatchW != 0 ? 1 : 0);
+    return width/SWATCH_SIZE;
 }
 
 /**
@@ -149,7 +175,6 @@ public void setSelSwatch(Swatch aSwatch)
 {
     if(SnapUtils.equals(aSwatch,_selSwatch)) return;
     _selSwatch = aSwatch;
-    setColor(_selSwatch!=null? _selSwatch.getColor() : null);
     repaint();
 }
 
@@ -164,26 +189,28 @@ public int getSelIndex()  { return _selSwatch!=null? _selSwatch.getIndex() : -1;
 public void resetColors()  { _colors.clear(); }
 
 /**
- * Returns the color.
+ * Returns whether color dock is selected.
  */
-public Color getColor()
+public boolean isSelected()  { return _colorWell.isSelected(); }
+
+/**
+ * Sets whether color dock is selected.
+ */
+public void setSelected(boolean aValue)
 {
-    if(getSelSwatch()!=null)
-        return getSelSwatch().getColor();
-    return Color.WHITE;
+    _colorWell.setColor(getColor());
+    _colorWell.setSelected(aValue);
 }
 
 /**
- * Override to set color of selected swatch.
+ * Returns whether or not the dock can be selected.
  */
-public void setColor(Color aColor)
-{
-    // If there is selected swatch, set color
-    if(getSelSwatch()!=null) getSelSwatch().setColor(aColor);
-    
-    // Do normal version
-    //super.setColor(aColor);
-}
+public boolean isSelectable()  { return _colorWell.isSelectable(); }
+
+/**
+ * Sets whether or not the dock can be selected.
+ */
+public void setSelectable(boolean aValue)  { _colorWell.setSelectable(aValue); }
 
 /**
  * Paints this color dock component.
@@ -236,21 +263,22 @@ protected void paintFront(Painter aPntr)
  */
 protected void processEvent(ViewEvent anEvent)
 {
-    // Handle MousePress: Select swatch under at point
+    // Handle MousePress: Select swatch at event point
     if(anEvent.isMousePress()) { if(!isEnabled()) return;
         Swatch swatch = getSwatchAt(anEvent.getPoint());
         setSelSwatch(swatch);
     }
     
-    // Handle MouseRelease: Set selection or just show color panel
+    // Handle MouseRelease: Select this ColorDock or fireActionEvent
     else if(anEvent.isMouseRelease()) {
-        //if(isSelectable())  setSelected(true); else showColorPanel();
-        ColorPanel.getShared().setColor(getColor());
-        ColorPanel.getShared().fireActionEvent(anEvent);
+        if(isSelectable())
+            setSelected(true);
+        else fireActionEvent(anEvent);
     }
     
     // Handle DragEnter, DragOver
-    else if(anEvent.isDragEnter() || anEvent.isDragOver()) { Clipboard dboard = anEvent.getClipboard();
+    else if(anEvent.isDragEnter() || anEvent.isDragOver()) {
+        Clipboard dboard = anEvent.getClipboard();
         if(!_dragging && dboard.hasColor()) {
             anEvent.acceptDrag(); _dragPoint = anEvent.getPoint(); repaint(); }
     }
@@ -260,28 +288,70 @@ protected void processEvent(ViewEvent anEvent)
         _dragPoint = null; repaint(); }
     
     // Handle DragDrop
-    else if(anEvent.isDragDrop()) { Clipboard dboard = anEvent.getClipboard();
-        Color color = dboard.getColor();
-        Swatch swatch = getSwatchAt(anEvent.getPoint()); swatch.setColor(color);
-        anEvent.dropComplete(); _dragPoint = null; repaint();
-    }
+    else if(anEvent.isDragDrop())
+        colorDropped(anEvent);
     
     // Handle DragGesture
-    else if(anEvent.isDragGesture()) {
-        Color color = getColor();
-        Image image = Image.get(14,14,true); Painter pntr = image.getPainter();
-        ColorWell.paintSwatch(pntr,color,0,0,14,14);
-        pntr.setColor(Color.BLACK); pntr.drawRect(0,0,14-1,14-1); pntr.flush();
-        Clipboard cboard = anEvent.getClipboard();
-        cboard.addData(color);
-        cboard.setDragImage(image);
-        cboard.startDrag();
-        _dragging = true;
-    }
+    else if(anEvent.isDragGesture())
+        startColorDrag(anEvent);
     
     // Handle DragSourceEnd
     else if(anEvent.isDragSourceEnd())
         _dragging = false;
+}
+
+/**
+ * Called when color is dropped on dock.
+ */
+protected void colorDropped(ViewEvent anEvent)
+{
+    // Get color from clipboard
+    Clipboard dboard = anEvent.getClipboard();
+    Color color = dboard.getColor();
+    
+    // Get swatch at point, set color and select swatch
+    Swatch swatch = getSwatchAt(anEvent.getPoint());
+    swatch.setColor(color);
+    setSelSwatch(swatch);
+    
+    // Finish drop, repaint, clear point
+    anEvent.dropComplete();
+    repaint(); _dragPoint = null;
+}
+
+/**
+ * Called when color is dropped on dock.
+ */
+protected void startColorDrag(ViewEvent anEvent)
+{
+    // Get color and create image
+    Color color = getColor();
+    Image image = Image.get(14,14,true); Painter pntr = image.getPainter();
+    ColorWell.paintSwatch(pntr,color,0,0,14,14);
+    pntr.setColor(Color.BLACK); pntr.drawRect(0,0,14-1,14-1); pntr.flush();
+    
+    // Get clipboard and add color+image
+    Clipboard cboard = anEvent.getClipboard();
+    cboard.addData(color);
+    cboard.setDragImage(image);
+    
+    // Start drag
+    cboard.startDrag(); _dragging = true;
+}
+
+/**
+ * Called when color well fires action event.
+ */
+protected void colorWellDidFireAction(ViewEvent anEvent)
+{
+    // Get color from hidden ColorWell and set in current swatch
+    Color color = _colorWell.getColor();
+    Swatch swatch = getSelSwatch(); if(swatch==null) return;
+    swatch.setColor(color);
+    
+    // Fire action event
+    ViewEvent inputEvent = anEvent.getParentEvent();
+    fireActionEvent(inputEvent);
 }
 
 /** 
@@ -319,6 +389,17 @@ protected void readFromPrefs(String aName)
 }
 
 /**
+ * Override to set Selected to false when hidden.
+ */
+protected void setShowing(boolean aValue)
+{
+    if(aValue==isShowing()) return;
+    super.setShowing(aValue);
+    setSelected(false);
+    setSelSwatch(null);
+}
+
+/**
  * Override to return dock border.
  */
 public Border getDefaultBorder()  { return COLOR_DOCK_BORDER; }
@@ -326,7 +407,7 @@ public Border getDefaultBorder()  { return COLOR_DOCK_BORDER; }
 /**
  * A class to represent a color swatch.
  */
-private class Swatch {
+protected class Swatch {
     
     // The row, column
     int          _row, _col;
@@ -357,7 +438,7 @@ private class Swatch {
     public void setColor(Color aColor)
     {
         _color = aColor;
-        ColorDock.this.setColor(aColor, _row, _col);
+        ColorDock.this.setColor(_row, _col, aColor);
     }
     
     /** Standard equals. */
