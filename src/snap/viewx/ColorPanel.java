@@ -109,7 +109,7 @@ public void setColorWell(ColorWell aColorWell)
         
     // If old ColorWell non-null, notifify of change
     if(oldCW!=null)
-        _colorWell.setSelected(false);
+        oldCW.setSelected(false);
     
     // Reset color panel
     resetLater();
