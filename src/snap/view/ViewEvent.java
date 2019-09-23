@@ -307,7 +307,7 @@ public boolean isWinClose()  { return getType()==Type.WinClose; }
 public Object getValue()
 {
     // Handle DragDropEvent: Return String value
-    if(isDragDropEvent())
+    if(isDragDrop())
         return getClipboard().getString();
     
     // Otherwise, return node value
