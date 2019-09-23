@@ -134,9 +134,13 @@ protected void processEvent(ViewEvent anEvent)
     // Handle scroll
     else if(anEvent.isScroll()) {
         double units = hor? anEvent.getScrollX()*4 : anEvent.getScrollY()*4;
-        double size = hor? getWidth() : getHeight(), tsize = getThumbSize(), csize = size*size/tsize;
+        double size = hor? getWidth() : getHeight();
+        double tsize = getThumbSize();
+        double csize = size*size/tsize;
         double dv = csize - size;
-        if(dv>0 && Math.abs(units)>0) setScroll(getScroll() + units/dv);
+        if(dv>0 && Math.abs(units)>0)
+            setScroll(getScroll() + units/dv);
+        else return;
     }
     
     // Consume event

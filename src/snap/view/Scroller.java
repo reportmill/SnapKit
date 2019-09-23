@@ -342,10 +342,22 @@ protected void layoutImpl()
  */
 public void processEvent(ViewEvent anEvent)
 {
+    // Handle Scroll event
     if(anEvent.isScroll()) {
-        setScrollH(getScrollH() + anEvent.getScrollX()*4);
-        setScrollV(getScrollV() + anEvent.getScrollY()*4);
-        anEvent.consume();
+        
+        // Handle Horizontal scroll
+        double scrollX = anEvent.getScrollX();
+        if(scrollX!=0 && getScrollHMax()!=0) {
+            setScrollH(getScrollH() + scrollX*4);
+            anEvent.consume();
+        }
+        
+        // Handle vertical scroll
+        double scrollY = anEvent.getScrollY();
+        if(scrollY!=0 && getScrollVMax()!=0) {
+            setScrollV(getScrollV() + scrollY*4);
+            anEvent.consume();
+        }
     }
 }
 

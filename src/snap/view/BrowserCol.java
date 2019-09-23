@@ -29,6 +29,7 @@ public BrowserCol(BrowserView aBrsr)
     // Configure ScrollView
     ScrollView scroll = getScrollView();
     scroll.setShowHBar(false); scroll.setShowVBar(true);
+    scroll.setBarSize(12);
 }
 
 /**
@@ -65,7 +66,8 @@ protected void fireActionEvent(ViewEvent anEvent)
 protected double getPrefWidthImpl(double aH)
 {
     double width = _browser.getScrollView().getScroller().getWidth();
-    double pw = width/_browser.getPrefColCount();
+    int colCount = Math.min(_browser.getColCount(), _browser.getPrefColCount());
+    double pw = width/colCount;
     return pw;
 }
     

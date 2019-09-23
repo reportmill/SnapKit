@@ -60,7 +60,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     PropChangeListener    _itemsLsnr = pc -> pickListSelChange(pc);
     
     // Shared CellPadding default
-    public static final Insets         CELL_PAD_DEFAULT = new Insets(4);
+    public static final Insets         CELL_PAD_DEFAULT = new Insets(2);
     
     // Shared constants for colors
     private static Paint ALT_GRAY = Color.get("#F8F8F8");
@@ -202,7 +202,10 @@ public double getRowHeight()
 /**
  * Sets the row height.
  */
-public void setRowHeight(double aValue)  { _rowHeight = aValue; }
+public void setRowHeight(double aValue)
+{
+    _rowHeight = aValue;
+}
 
 /**
  * Returns the cell padding.
