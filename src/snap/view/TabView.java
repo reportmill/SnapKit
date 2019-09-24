@@ -163,7 +163,12 @@ public double getTabMinWidth()  { return _tabMinWidth; }
 /**
  * Sets the tab min width.
  */
-public void setTabMinWidth(double aValue)  { _tabMinWidth = aValue; }
+public void setTabMinWidth(double aValue)
+{
+    _tabMinWidth = aValue;
+    for(Tab tab : _tabs)
+        tab.getButton().setMinWidth(aValue);
+}
 
 /**
  * Returns the tap pane's selected index.
