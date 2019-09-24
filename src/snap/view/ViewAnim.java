@@ -546,7 +546,7 @@ public ViewAnim clear()
  */
 public ViewAnim finish()
 {
-    int maxTime = getMaxTime();
+    int maxTime = getMaxTime()*(getLoopCount() + 1);
     setTime(maxTime);
     return this;
 }
