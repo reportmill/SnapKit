@@ -133,15 +133,19 @@ private Path getPath()
     
     // If HoleRatio, append reverse sweep
     if(holeRatio>0) {
+        
+        // Append line to inner arc (or close/move if full circle)
         double x = midX + cos(endAngle)*hw*holeRatio;
         double y = midY + sin(endAngle)*hh*holeRatio;
         if(sweep<360) path.lineTo(x, y);
-        else path.moveTo(x, y);
+        else { path.close(); path.moveTo(x, y); }
+        
+        // Append reverse arc for hole
         appendArc(path, midX, midY, hw*holeRatio, hh*holeRatio, endAngle, -sweep);
     }
     
-    // Otherwise, just close path
-    else path.close();
+    // Close path
+    path.close();
     
     // Return path
     return path;
