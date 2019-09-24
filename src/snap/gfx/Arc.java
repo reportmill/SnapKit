@@ -15,6 +15,9 @@ public class Arc extends RectBase {
     // The Arc sweep angle
     double     _sweep;
     
+    // The ratio of the radius that describes the hole
+    double     _holeRatio;
+    
     // The Closure
     Closure    _closure = Closure.Pie;
     
@@ -27,6 +30,14 @@ public class Arc extends RectBase {
 public Arc(double aX, double aY, double aW, double aH, double aStart, double aSweep)
 {
      x = aX; y = aY; width = aW; height = aH; _start = aStart; _sweep = aSweep;
+}
+
+/**
+ * Creates a new Arc.
+ */
+public Arc(double aX, double aY, double aW, double aH, double aStart, double aSweep, double aHoleRatio)
+{
+     x = aX; y = aY; width = aW; height = aH; _start = aStart; _sweep = aSweep; _holeRatio = aHoleRatio;
 }
 
 /**
@@ -50,6 +61,16 @@ public double getSweepAngle()  { return _sweep; }
 public void setSweepAngle(double aValue)  { _sweep = aValue; }
 
 /**
+ * Returns the ratio that describes the hole (0 = no hole, 1 = no wedge).
+ */
+public double getHoleRatio()  { return _holeRatio; }
+
+/**
+ * Sets the ratio that describes the hole (0 = no hole, 1 = no wedge).
+ */
+public void setHoleRatio(double aValue)  { _holeRatio = aValue; }
+
+/**
  * Returns how an open arc is handles the gap.
  */
 public Closure getClosure()  { return _closure; }
@@ -69,7 +90,7 @@ public PathIter getPathIter(Transform aTrans)  { return getPath().getPathIter(aT
  */
 public Shape copyFor(Rect aRect)
 {
-    return new Arc(aRect.x, aRect.y, aRect.width, aRect.height, _start, _sweep);
+    return new Arc(aRect.x, aRect.y, aRect.width, aRect.height, _start, _sweep, _holeRatio);
 }
 
 /**
@@ -77,45 +98,81 @@ public Shape copyFor(Rect aRect)
  */
 private Path getPath()
 {
-    // Get half-width/height, the x/y mid-points and the "magic" oval factor I calculated in Mathematica one time
-    Rect bounds = getBounds(); double startAngle = getStartAngle(), sweep = getSweepAngle();
+    // Get basic arc info
+    double startAngle = getStartAngle();
+    double sweep = getSweepAngle();
+    double endAngle = startAngle + sweep;
+    double holeRatio = getHoleRatio();
+    
+    // Get basic bounds info: half-width/height, the x/y mid-points
+    Rect bounds = getBounds();
     double hw = bounds.width/2f, hh = bounds.height/2f;
     double midX = bounds.getMidX(), midY = bounds.getMidY();
-    double magic = .5523f;
+    
+    // Create new path and set the "magic" oval factor I calculated in Mathematica one time
     Path path = new Path();
+    double magic = .5523f;
+    
+    // Calculate inner start point, outer point
+    double x0 = midX + cos(startAngle)*hw*holeRatio;
+    double y0 = midY + sin(startAngle)*hh*holeRatio;
+    double x1 = midX + cos(startAngle)*hw;
+    double y1 = midY + sin(startAngle)*hh;
     
     // If connect was requested draw line from current point (or rect center) to start point of oval
     if(getClosure()==Closure.Pie && sweep<360) {
-        path.moveTo(midX, midY);
-        path.lineTo(midX + MathUtils.cos(startAngle)*hw, midY + MathUtils.sin(startAngle)*hh);
+        path.moveTo(x0, y0);
+        path.lineTo(x1, y1);
     }
     
     // If connect wasn't requested move to start point of oval. */
-    else path.moveTo(midX + MathUtils.cos(startAngle)*hw, midY + MathUtils.sin(startAngle)*hh);
-
-    // Make bezier for upper right quadrant PScurveto(-hw*f, -hh, -hw, -hh*f, -hw, 0);
-    double angle = startAngle, endAngle = startAngle + sweep;
-    for(; angle + 90 <= endAngle; angle += 90)
-        path.curveTo(midX + MathUtils.cos(angle)*hw - MathUtils.sin(angle)*hw*magic,
-                midY + MathUtils.sin(angle)*hh + MathUtils.cos(angle)*hh*magic,
-                midX + MathUtils.cos(angle+90)*hw + MathUtils.sin(angle+90)*hw*magic,
-                midY + MathUtils.sin(angle+90)*hh - MathUtils.cos(angle+90)*hh*magic,
-                midX + MathUtils.cos(angle+90)*hw,
-                midY + MathUtils.sin(angle+90)*hh);
-
-    // If sweep did not end on a quadrant boundary, add remainder of quadrant
-    if(angle < startAngle + sweep) {
-        double sweepRatio = MathUtils.mod(sweep, 90f)/90f; // Math.IEEEremainder(sweep, 90)/90;
-        path.curveTo(midX + MathUtils.cos(angle)*hw - MathUtils.sin(angle)*hw*magic*sweepRatio,
-                midY + MathUtils.sin(angle)*hh + MathUtils.cos(angle)*hh*magic*sweepRatio,
-                midX + MathUtils.cos(startAngle+sweep)*hw + MathUtils.sin(startAngle+sweep)*hw*magic*sweepRatio,
-                midY + MathUtils.sin(startAngle+sweep)*hh - MathUtils.cos(startAngle+sweep)*hh*magic*sweepRatio,
-                midX + MathUtils.cos(startAngle+sweep)*hw,
-                midY + MathUtils.sin(startAngle+sweep)*hh);
+    else path.moveTo(x1, y1);
+    
+    // Append sweep
+    appendArc(path, midX, midY, hw, hh, startAngle, sweep);
+    
+    // If HoleRatio, append reverse sweep
+    if(holeRatio>0) {
+        double x = midX + cos(endAngle)*hw*holeRatio;
+        double y = midY + sin(endAngle)*hh*holeRatio;
+        if(sweep<360) path.lineTo(x, y);
+        else path.moveTo(x, y);
+        appendArc(path, midX, midY, hw*holeRatio, hh*holeRatio, endAngle, -sweep);
     }
     
-    // Close path and return
-    path.close(); return path;
+    // Otherwise, just close path
+    else path.close();
+    
+    // Return path
+    return path;
+}
+
+/**
+ * Appends a 90 deg sweep to given path.
+ */
+private static void appendArc(Path aPath, double midX, double midY, double hw, double hh, double angle, double aSweep)
+{
+    // Limit sweep to 90, take care of remainder via recursion, later
+    double sweep = aSweep>90? 90 : aSweep<-90? -90 : aSweep;
+    double sweepRem = sweep==90 || sweep==-90? aSweep - sweep : 0;
+    double sweepRatio = sweep==90? 1 : sweep==-90? -1 : sweep/90;
+    double angle2 = angle + sweep;
+
+    // Calculate control points (magic was a value I calculated in Mathematica one time)
+    final double magic = .5523f;
+    double cp0x = midX + cos(angle)*hw - sin(angle)*hw*magic*sweepRatio;
+    double cp0y = midY + sin(angle)*hh + cos(angle)*hh*magic*sweepRatio;
+    double cp1x = midX + cos(angle2)*hw + sin(angle2)*hw*magic*sweepRatio;
+    double cp1y = midY + sin(angle2)*hh - cos(angle2)*hh*magic*sweepRatio;
+    double x2 = midX + cos(angle2)*hw;
+    double y2 = midY + sin(angle2)*hh;
+    
+    // Append path
+    aPath.curveTo(cp0x, cp0y, cp1x, cp1y, x2, y2);
+    
+    // If remainder, recurse
+    if(sweepRem!=0)
+        appendArc(aPath, midX, midY, hw, hh, angle+sweep, sweepRem);
 }
 
 /**
@@ -128,5 +185,9 @@ public boolean equals(Object anObj)
     Arc other = anObj instanceof Arc? (Arc)anObj : null; if(other==null) return false;
     return MathUtils.equals(other._start,_start) && MathUtils.equals(other._sweep,_sweep) && other._closure==_closure;
 }
+
+// Convenience wraps for sin/cos.
+private static final double sin(double angle)  { return MathUtils.sin(angle); }
+private static final double cos(double angle)  { return MathUtils.cos(angle); }
 
 }

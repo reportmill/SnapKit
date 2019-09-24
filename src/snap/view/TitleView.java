@@ -259,15 +259,17 @@ protected void layoutImpl()
 {
     // Get inset bounds
     Insets ins = getInsetsAll();
-    double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
+    double x = ins.left, w = getWidth() - ins.getWidth();
+    double y = ins.top,  h = getHeight() - ins.getHeight();
     
     // Layout label
-    double lw = _label.getPrefWidth(), lh = _label.getPrefHeight();
+    double lw = _label.getPrefWidth();
+    double lh = _label.getPrefHeight();
     _label.setBounds(0,0,lw,lh);
     
     // Layout content
     if(isContentVisible())
-        _content.setBounds(x, y + lh, w, h - lh + 2);
+        _content.setBounds(x, y + lh - 1, w, h - lh + 1);
     else if(_content!=null) _content.setBounds(x,y,0,0);
 }
 
