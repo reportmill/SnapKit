@@ -77,7 +77,7 @@ public boolean isRoot()  { return _parent==null; }
 /**
  * Returns the root ViewAnim.
  */
-public ViewAnim getRoot(int aTime)  { return _parent!=null? _parent.getRoot(aTime) : getAnim(aTime); } 
+public ViewAnim getRoot()  { return _parent!=null? _parent : this; } 
 
 /**
  * Returns the parent ViewAnim.
@@ -535,6 +535,10 @@ public ViewAnim setInterpolator(Interpolator anInterp)  { _interp = anInterp; re
  */
 public ViewAnim clear()
 {
+    // If parent, have it do clear instead
+    if(_parent!=null) return getRoot().clear().getAnim(_end);
+    
+    // Do clear
     stop(); _loopCount = 0; _onFinish = null; _interp = Interpolator.EASE_BOTH;
     _time = 0; _maxTime = -1; _onFrame = _onFinish = null;
     _keys.clear(); _endVals.clear(); _anims.clear();
@@ -546,6 +550,10 @@ public ViewAnim clear()
  */
 public ViewAnim finish()
 {
+    // If parent, have it do finish instead
+    if(_parent!=null) { getRoot().finish(); return this; }
+    
+    // Do finish
     int maxTime = getMaxTime()*(getLoopCount() + 1);
     setTime(maxTime);
     return this;
