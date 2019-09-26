@@ -80,6 +80,11 @@ public boolean isRoot()  { return _parent==null; }
 public ViewAnim getRoot()  { return _parent!=null? _parent : this; } 
 
 /**
+ * Returns the root ViewAnim.
+ */
+public ViewAnim getRoot(int aTime)  { return getRoot().getAnim(aTime); }
+
+/**
  * Returns the parent ViewAnim.
  */
 public ViewAnim getParent()  { return _parent; } 
