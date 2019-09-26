@@ -65,9 +65,11 @@ protected void fireActionEvent(ViewEvent anEvent)
  */
 protected double getPrefWidthImpl(double aH)
 {
+    double prefWidth0 = super.getPrefWidthImpl(aH);
     double width = _browser.getScrollView().getScroller().getWidth();
     int colCount = Math.min(_browser.getColCount(), _browser.getPrefColCount());
-    double pw = width/colCount;
+    double minWidth = width/colCount;
+    double pw = Math.max(prefWidth0, minWidth);
     return pw;
 }
     
