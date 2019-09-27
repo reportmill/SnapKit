@@ -1179,10 +1179,12 @@ public void setVertical(boolean aValue)
 /**
  * Returns the autosizing settings as a string with hyphens for struts and tilde for sprints (horiz,vert).
  */
-public String getAutosizing()  //{ return _asize!=null && _asize.length()>6? _asize : getAutosizingDefault(); }
+public String getAutosizing()
 {
-    HPos lx = getLeanX(); boolean left = lx==null || lx==HPos.LEFT, right = lx!=null && lx==HPos.RIGHT;
-    VPos ly = getLeanY(); boolean top = ly==null || ly==VPos.TOP, btm = ly!=null && ly==VPos.BOTTOM;
+    HPos lx = getLeanX();
+    VPos ly = getLeanY();
+    boolean left = lx==null || lx==HPos.LEFT, right = lx==null || lx==HPos.RIGHT;
+    boolean top = ly==null || ly==VPos.TOP, btm = ly==null || ly==VPos.BOTTOM;
     char c1 = left? '-' : '~', c2 = isGrowWidth()? '~' : '-', c3 = right? '-' : '~';
     char c4 = top? '-' : '~', c5 = isGrowHeight()? '~' : '-', c6 = btm? '-' : '~';
     return "" + c1 + c2 + c3 + ',' + c4 + c5 + c6;
@@ -1197,8 +1199,8 @@ public void setAutosizing(String aVal)
     char c1 = val.charAt(0), c2 = val.charAt(1), c3 = val.charAt(2);
     char c4 = val.charAt(4), c5 = val.charAt(5), c6 = val.charAt(6);
     setGrowWidth(c2=='~'); setGrowHeight(c5=='~');
-    setLeanX(c1=='~' && c3=='~'? HPos.CENTER : c1=='~'? HPos.RIGHT : null);
-    setLeanY(c4=='~' && c6=='~'? VPos.CENTER : c4=='~'? VPos.BOTTOM : null);
+    setLeanX(c1=='~' && c3=='~'? HPos.CENTER : c1=='~'? HPos.RIGHT : c3=='~'? HPos.LEFT : null);
+    setLeanY(c4=='~' && c6=='~'? VPos.CENTER : c4=='~'? VPos.BOTTOM : c6=='~'? VPos.TOP : null);
 }
 
 /**
