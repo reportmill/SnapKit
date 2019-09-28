@@ -569,15 +569,20 @@ protected void paintBack(Painter aPntr)
 protected void paintFront(Painter aPntr)
 {
     // Get text bounds
-    Rect bnds = getTextBounds(true); double tx = bnds.x, ty = bnds.y;
-        
+    Rect bnds = getTextBounds(true);
+    double tx = bnds.x, ty = bnds.y;
+
+    // Clip to bounds        
+    aPntr.save(); aPntr.clip(bnds);
+    
     // Paint selection
     paintSel(aPntr);
+    
+    // If no text, just return
+    if(length()==0) { aPntr.restore(); return; }
         
     // Paint text
-    if(length()==0) return;
     String str = getText(); Font font = getFont();
-    aPntr.save(); aPntr.clip(bnds);
     aPntr.setFont(font); aPntr.setPaint(_textFill);
     aPntr.drawString(str, tx, ty + Math.ceil(font.getAscent()));
     aPntr.restore();
