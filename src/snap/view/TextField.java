@@ -568,19 +568,20 @@ protected void paintBack(Painter aPntr)
  */
 protected void paintFront(Painter aPntr)
 {
+    // If empty, just paint selection and return
+    if(length()==0) {
+        paintSel(aPntr); return; }
+
     // Get text bounds
     Rect bnds = getTextBounds(true);
     double tx = bnds.x, ty = bnds.y;
 
-    // Clip to bounds        
+    // Clip to text bounds
     aPntr.save(); aPntr.clip(bnds);
     
     // Paint selection
     paintSel(aPntr);
     
-    // If no text, just return
-    if(length()==0) { aPntr.restore(); return; }
-        
     // Paint text
     String str = getText(); Font font = getFont();
     aPntr.setFont(font); aPntr.setPaint(_textFill);
