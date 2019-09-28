@@ -246,33 +246,33 @@ public void setName(String aName)
 /**
  * Returns the X location of the view.
  */
-public double getX()  { return _x; } //_width<0? _x + _width : _x; }
+public double getX()  { return _x; }
 
 /**
  * Sets the X location of the view.
  */
 public void setX(double aValue)
 {
+    // Set value and fire prop change
     if(aValue==_x) return;
     repaintInParent(null);
     firePropChange(X_Prop, _x, _x=aValue);
-    repaintInParent(null);
 }
 
 /**
  * Returns the Y location of the view.
  */
-public double getY()  { return _y; } //_height<0? _y + _height : _y; }
+public double getY()  { return _y; }
 
 /**
  * Sets the Y location of the view.
  */
 public void setY(double aValue)
 {
+    // Set value and fire prop change
     if(aValue==_y) return;
     repaintInParent(null);
     firePropChange(Y_Prop, _y, _y=aValue);
-    repaintInParent(null);
 }
 
 /**
@@ -285,10 +285,11 @@ public double getWidth()  { return _width; }
  */
 public void setWidth(double aValue)
 {
-    double old = _width; if(aValue==old) return;
-    firePropChange(Width_Prop, old, _width=aValue);
+    // Set value, fire prop change and register for relayout
+    if(aValue==_width) return;
+    repaintInParent(null);
+    firePropChange(Width_Prop, _width, _width=aValue);
     relayout();
-    repaintInParent(new Rect(0,0,Math.max(old,aValue),getHeight()));
 }
 
 /**
@@ -301,10 +302,11 @@ public double getHeight()  { return _height; }
  */
 public void setHeight(double aValue)
 {
-    double old = _height; if(aValue==old) return;
-    firePropChange(Height_Prop, old, _height=aValue);
+    // Set value, fire prop change and register for relayout
+    if(aValue==_height) return;
+    repaintInParent(null);
+    firePropChange(Height_Prop, _height, _height=aValue);
     relayout();
-    repaintInParent(new Rect(0,0,getWidth(),Math.max(old,aValue)));
 }
 
 /**
@@ -439,7 +441,6 @@ public void setTransX(double aValue)
     if(aValue==_tx) return;
     repaintInParent(null);
     firePropChange(TransX_Prop, _tx, _tx=aValue);
-    repaintInParent(null);
 }
 
 /**
@@ -455,7 +456,6 @@ public void setTransY(double aValue)
     if(aValue==_ty) return;
     repaintInParent(null);
     firePropChange(TransY_Prop, _ty, _ty=aValue);
-    repaintInParent(null);
 }
 
 /**
@@ -471,7 +471,6 @@ public void setRotate(double theDegrees)
     if(theDegrees==_rot) return;
     repaintInParent(null);
     firePropChange(Rotate_Prop, _rot, _rot=theDegrees);
-    repaintInParent(null);
 }
 
 /**
@@ -487,7 +486,6 @@ public void setScaleX(double aValue)
     if(aValue==_sx) return;
     repaintInParent(null);
     firePropChange(ScaleX_Prop, _sx, _sx=aValue);
-    repaintInParent(null);
 }
 
 /**
@@ -503,7 +501,6 @@ public void setScaleY(double aValue)
     if(aValue==_sy) return;
     repaintInParent(null);
     firePropChange(ScaleY_Prop, _sy, _sy=aValue);
-    repaintInParent(null);
 }
 
 /**
@@ -578,9 +575,9 @@ public void setEffect(Effect anEff)
     Effect old = getEffect(); if(SnapUtils.equals(anEff,getEffect())) return;
     
     // Set new ViewEffect, fire prop change and repaint
+    repaintInParent(null);
     _viewEff = anEff!=null? new ViewEffect(this, anEff) : null;
     firePropChange(Effect_Prop, old, anEff);
-    repaint();
 }
 
 /**
@@ -972,11 +969,19 @@ public boolean isVisible()  { return _visible; }
  */
 public void setVisible(boolean aValue)
 {
+    // Set value, fire prop change
     if(aValue==_visible) return;
     firePropChange(Visible_Prop, _visible, _visible=aValue);
+    
+    // Update Showing
     setShowing(_visible && _parent!=null && _parent.isShowing());
+    
+    // Repaint in parent
     repaintInParent(null);
-    ParentView par = getParent(); if(par!=null) { par._children._managed = null; relayoutParent(); }
+    
+    // Trigger Parent relayout
+    ParentView par = getParent(); if(par!=null) {
+        par._children._managed = null; relayoutParent(); }
 }
 
 /**
@@ -1582,10 +1587,13 @@ public void setMargin(double aTp, double aRt, double aBtm, double aLt)  { setMar
  */
 public void setMargin(Insets theIns)
 {
+    // If value already set, just return
     if(theIns==null) theIns = getDefaultMargin();
-    if(SnapUtils.equals(theIns,_margin)) return;
+    if(SnapUtils.equals(theIns, _margin)) return;
+    
+    // Set value, fire prop change, relayout parent
     firePropChange(Padding_Prop, _margin, _margin = theIns);
-    relayout(); relayoutParent();
+    relayoutParent();
 }
 
 /**
@@ -1821,21 +1829,45 @@ public void repaint(double aX, double aY, double aW, double aH)
  */
 protected void repaintInParent(Rect aRect)
 {
+    // Get parent (just return if not set)
     ParentView par = getParent(); if(par==null) return;
-    Rect rect = localToParent(aRect!=null? aRect : getBoundsLocal()).getBounds();
-    par.repaint(rect); repaint(0,0,0,0);
+    
+    // Do normal repaint
+    if(aRect==null) repaint(0, 0, getWidth(), getHeight());
+    else repaint(aRect);
+    
+    // Get expanded repaint rect and rect in parent, and have parent repaint
+    Rect rectExp = getRepaintRect(); if(rectExp==null) return;
+    Rect parRect = localToParent(rectExp).getBounds();
+    parRect.snap(); parRect.inset(-1); // Shouldn't need this unless someone paints out of bounds (lookin at U, Button)
+    par.repaint(parRect);
 }
 
 /**
- * Returns the repaint rect.
+ * Returns the rect of view that has been registered for repaint, expanded for focus/effects.
  */
 public Rect getRepaintRect()
 {
     Rect rect = _repaintRect; if(rect==null) return null;
+    Rect rectExp = getRepaintRectExpanded(rect);
+    return rectExp;
+}
+
+/**
+ * Returns the given repaint rect, expanded for focus/effects.
+ */
+protected Rect getRepaintRectExpanded(Rect aRect)
+{
+    // If focused, combine with focus bounds
+    Rect rect = aRect;
     if(isFocused() && isFocusPainted())
         rect = ViewEffect.getFocusEffect().getBounds(rect);
+        
+    // If effect, combine effect bounds
     else if(getEffect()!=null)
         rect = getEffect().getBounds(rect);
+    
+    // Return rect
     return rect;
 }
 

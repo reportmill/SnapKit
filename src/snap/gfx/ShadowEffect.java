@@ -64,7 +64,8 @@ public boolean isSimple()  { return _simple; }
  */
 public Rect getBounds(Rect aRect)
 {
-    Rect rect = aRect.getOffsetRect(_dx,_dy); rect.inset(-getRadius()-2); rect.union(aRect);
+    Rect rect = aRect.getInsetRect(-getRadius());
+    if(_dx!=0 || _dy!=0) { rect.offset(_dx, _dy); rect.union(aRect); }
     return rect;
 }
 
