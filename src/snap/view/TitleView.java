@@ -169,6 +169,10 @@ protected void setExpandedAnimated(boolean aValue)
     setPrefSize(w,h);
     setExpanded(true);
     
+    // Clip content to bounds?
+    if(getContent()!=null)
+        getContent().setClipToBounds(true);
+    
     // Configure anim to new size
     ViewAnim anim = getAnim(0).clear();
     anim.getAnim(500).setPrefSize(pw,ph).setOnFinish(() -> setExpanded(aValue)).needsFinish().play();
