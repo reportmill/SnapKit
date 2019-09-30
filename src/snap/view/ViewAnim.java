@@ -39,10 +39,15 @@ public class ViewAnim implements XMLArchiver.Archivable {
     Interpolator         _interp = Interpolator.EASE_BOTH;
     
     // A runnable to be called on each anim frame
-    Consumer <ViewAnim>  _onFrame;
+    //Consumer <ViewAnim>  _onFrame;
+    Runnable             _onFrame;
     
     // A runnable to be called when anim is finished
-    Consumer <ViewAnim>  _onFinish;
+    //Consumer <ViewAnim>  _onFinish;
+    Runnable             _onFinish;
+    
+    // Whether the anim needs to finished when cleared
+    boolean              _needsFinish;
     
     // The start time, current time
     int                  _time;
@@ -62,7 +67,16 @@ public class ViewAnim implements XMLArchiver.Archivable {
 /**
  * Creates a new ViewAnim.
  */
-public ViewAnim(View aView, int aStart, int anEnd)  { _view = aView; _start = aStart; _end = anEnd; }
+public ViewAnim(View aView)  { _view = aView; }
+
+/**
+ * Creates a new ViewAnim.
+ */
+protected ViewAnim(View aView, int aStart, int anEnd)
+{
+    this(aView);
+    _start = aStart; _end = anEnd;
+}
 
 /**
  * Returns the View.
@@ -207,7 +221,7 @@ public void play()
     
     // Get ViewUpdater and startAnim() (or mark suspended if updater not available)
     _updater = _view.getUpdater();
-    if(_updater!=null) { _updater.startAnim(_view); _suspended = false; }
+    if(_updater!=null) { _updater.startAnim(this); _suspended = false; }
     else _suspended = true;
 }
 
@@ -221,7 +235,7 @@ public void stop()
     if(!isPlaying()) return;
     
     // If ViewUpdater set, stopAnim() and clear Updater/Suspended
-    if(_updater!=null) _updater.stopAnim(_view);
+    if(_updater!=null) _updater.stopAnim(this);
     _updater = null; _suspended = false;
 }
 
@@ -231,7 +245,7 @@ public void stop()
 protected void suspend()
 {
     if(_parent!=null) { _parent.suspend(); return; }
-    if(_updater!=null) { _updater.stopAnim(_view); _updater = null; _suspended = true; }
+    if(_updater!=null) { _updater.stopAnim(this); _updater = null; _suspended = true; }
 }
 
 /**
@@ -272,7 +286,7 @@ public void setTime(int aTime)
     
     // If on frame set, call it
     if(_onFrame!=null)
-        _onFrame.accept(this);
+        _onFrame.run();
     
     // If completed and root anim, stop playing
     boolean completed = _time >= maxTime;
@@ -281,7 +295,7 @@ public void setTime(int aTime)
     
     // If completed and there is an OnFinish, trigger it
     if(completed && oldTime<maxTime && _onFinish!=null)
-        _onFinish.accept(this);
+        _onFinish.run();
 }
 
 /**
@@ -493,30 +507,49 @@ public ViewAnim setLoopCount(int aValue)  { _loopCount = aValue; return this; }
 /**
  * Returns the consumer to be called on each frame.
  */
-public Consumer <ViewAnim> getOnFrame()  { return _parent!=null? _parent.getOnFrame() : _onFrame; }
+public Runnable getOnFrame()  { return _parent!=null? _parent.getOnFrame() : _onFrame; }
 
 /**
  * Sets the consumer to be called on each frame.
  */
-public ViewAnim setOnFrame(Consumer <ViewAnim> aCall)
+public ViewAnim setOnFrame(Runnable aRun)
 {
-    if(_parent!=null) _parent.setOnFrame(aCall);
-    else _onFrame = aCall;
+    if(_parent!=null) _parent.setOnFrame(aRun);
+    else _onFrame = aRun;
     return this;
 }
     
 /**
+ * Sets the consumer to be called on each frame.
+ */
+public ViewAnim setOnFrame(Consumer <ViewAnim> aCall)  { return setOnFrame(() -> aCall.accept(this)); }
+    
+/**
  * Returns the function to be called when anim is finished.
  */
-public Consumer <ViewAnim> getOnFinish()  { return _parent!=null? _parent.getOnFinish(): _onFinish; }
+public Runnable getOnFinish()  { return _parent!=null? _parent.getOnFinish(): _onFinish; }
 
 /**
  * Sets a function to be called when anim is finished.
  */
-public ViewAnim setOnFinish(Consumer <ViewAnim> aFinish)
+public ViewAnim setOnFinish(Runnable aRun)
 {
-    if(_parent!=null) _parent.setOnFinish(aFinish);
-    else _onFinish = aFinish;
+    if(_parent!=null) _parent.setOnFinish(aRun);
+    else _onFinish = aRun;
+    return this;
+}
+
+/**
+ * Sets a function to be called when anim is finished.
+ */
+public ViewAnim setOnFinish(Consumer <ViewAnim> aFinish)  { return setOnFinish(() -> aFinish.accept(this)); }
+
+/**
+ * Sets anim to finish when cleared.
+ */
+public ViewAnim needsFinish()
+{
+    if(_parent!=null) _parent.needsFinish();
     return this;
 }
 
@@ -542,6 +575,11 @@ public ViewAnim clear()
 {
     // If parent, have it do clear instead
     if(_parent!=null) return getRoot().clear().getAnim(_end);
+    
+    // If needs finish, do finish
+    if(_needsFinish) {
+        finish(); _needsFinish = false;
+    }
     
     // Do clear
     stop(); _loopCount = 0; _onFinish = null; _interp = Interpolator.EASE_BOTH;

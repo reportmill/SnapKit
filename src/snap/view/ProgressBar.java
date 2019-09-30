@@ -80,7 +80,7 @@ private void setAnim(boolean aValue)
 {
     if(aValue==isAnim()) return;
     if(aValue)
-        getAnim(Integer.MAX_VALUE).setOnFrame(a -> repaint()).play();
+        getAnim(Integer.MAX_VALUE).setOnFrame(() -> repaint()).play();
     else getAnim(0).clear();
 }
 

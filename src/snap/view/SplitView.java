@@ -187,14 +187,20 @@ public void removeItemWithAnim(View aView)
     Divider div = index==0? getDivider(0) : getDivider(index-1);
     double size = isVertical()? aView.getHeight() : aView.getWidth();
     
+    // If first item, set Location
     if(index==0) {
         div.setLocation(size);
-        div.getAnimCleared(500).setValue(Divider.Location_Prop, size, 1d).setOnFinish(a -> removeItem(aView)).play();
+        ViewAnim anim = div.getAnim(0).clear();
+        anim.getAnim(500).setValue(Divider.Location_Prop, size, 1d);
+        anim.setOnFinish(() -> removeItem(aView)).needsFinish().play();
     }
     
+    // If not first item, set Remainder
     else {
         div.setRemainder(size);
-        div.getAnimCleared(500).setValue(Divider.Remainder_Prop, size, 1d).setOnFinish(a -> removeItem(aView)).play();
+        ViewAnim anim = div.getAnim(0).clear();
+        anim.getAnim(500).setValue(Divider.Remainder_Prop, size, 1d);
+        anim.setOnFinish(() -> removeItem(aView)).needsFinish().play();
     }
 }
 
@@ -216,25 +222,60 @@ public void setItemVisibleWithAnim(View aView, boolean aValue)
     
     // Handle visible true
     if(aValue) {
+        
+        // If first item, set Location
         double dsize = div.getSpan();
-        if(index==0) { div.setLocation(0); div.getAnim(time).setValue(Divider.Location_Prop, dsize, size).play(); }
-        else { div.setRemainder(1); div.getAnim(time).setValue(Divider.Remainder_Prop, dsize, size).play(); }
-        aView.setVisible(true); aView.setOpacity(0); div.setOpacity(0);
+        if(index==0) {
+            div.setLocation(0);
+            div.getAnim(time).setValue(Divider.Location_Prop, dsize, size).play();
+        }
+        
+        // If not first item, set Remainder
+        else {
+            div.setRemainder(1);
+            div.getAnim(time).setValue(Divider.Remainder_Prop, dsize, size).play();
+        }
+        
+        //  Show view and divider
+        aView.setVisible(true); aView.setOpacity(0);
+        div.setOpacity(0);
         aView.getAnim(time).setOpacity(1).play();
         div.getAnim(time).setOpacity(1).play();
     }
     
     // Handle visible false
     else {
-        if(index==0) { div.setLocation(size); div.getAnim(time).setValue(Divider.Location_Prop, size, 1d).play(); }
-        else { div.setRemainder(size); div.getAnim(time).setValue(Divider.Remainder_Prop, size, 1d).play(); }
+        
+        // If first item, set location
+        if(index==0) {
+            div.setLocation(size);
+            div.getAnim(time).setValue(Divider.Location_Prop, size, 1d).play();
+        }
+        
+        // If non-first item, set remainder
+        else {
+            div.setRemainder(size);
+            div.getAnim(time).setValue(Divider.Remainder_Prop, size, 1d).play();
+        }
+        
+        // Clear
         aView.setOpacity(1); div.setOpacity(1);
         div.getAnim(time).setOpacity(0).play();
-        aView.getAnim(time).setOpacity(0).setOnFinish(a -> {
-            aView.setVisible(false); aView.setOpacity(1); div.setOpacity(1);
-            if(isVertical()) aView.setHeight(size); else aView.setWidth(size);
-        }).play();
+        
+        // Configure anim
+        aView.getAnim(time).setOpacity(0).setOnFinish(() -> setItemVisibleWithAnimDone(aView, div, size)).play();
     }
+}
+
+/**
+ * Called when setItemVisibleWithAnim is done.
+ */
+private void setItemVisibleWithAnimDone(View aView,Divider aDiv, double size)
+{
+    aView.setVisible(false); aView.setOpacity(1);
+    aDiv.setOpacity(1);
+    if(isVertical()) aView.setHeight(size);
+    else aView.setWidth(size);
 }
 
 /**

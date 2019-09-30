@@ -22,8 +22,8 @@ public class ViewUpdater {
     // A set of ViewOwners that want to be reset on next UI update call
     Set <ViewOwner>          _resetLaters = Collections.synchronizedSet(new HashSet());
     
-    // A set of Views with active animations
-    Set <View>               _animViews = Collections.synchronizedSet(new HashSet());
+    // A set of ViewAnims with active animations
+    Set <ViewAnim>           _viewAnims = Collections.synchronizedSet(new HashSet());
     
     // The timer for animated views
     ViewTimer                _timer = new ViewTimer(25, t -> updateLater());
@@ -97,10 +97,19 @@ protected synchronized void updateViews()
 {
     // If timer is running, send Anim calls
     if(_timer.isRunning()) {
-        View aviews[] = _animViews.toArray(new View[0]); int time = _timer.getTime();
-        for(View av : aviews) { ViewAnim anim = av.getAnim(-1);
-            if(!av.isShowing()) anim.finish();
-            else if(anim==null) stopAnim(av);
+        
+        // Get anims array and current timer time
+        ViewAnim anims[] = _viewAnims.toArray(new ViewAnim[0]);
+        int time = _timer.getTime();
+        
+        // Iterate over anims and update time
+        for(ViewAnim anim : anims) {
+        
+            // If view isn't showing, just finish (should get suspended instead)
+            View view = anim.getView();
+            if(!view.isShowing()) anim.finish();
+            
+            // Update anim time
             else anim.setTime(time - anim._startTime);
         }
     }
@@ -215,27 +224,25 @@ public Rect getRepaintRect()
 }
 
 /**
- * Adds a view to set of Views that are being animated.
+ * Adds given ViewAnim to set of anims that are running.
  */
-public void startAnim(View aView)
+public void startAnim(ViewAnim anAnim)
 {
-    // Add view to AnimViews and start timer (if first AnimView)
-    _animViews.add(aView);
-    if(_animViews.size()==1) _timer.start();
+    // Add anim to ViewAnims and start timer (if first anim)
+    _viewAnims.add(anAnim);
+    if(_viewAnims.size()==1) _timer.start();
     
     // Record Anim.StartTime, so we can always set View.Anim.Time relative to start
-    ViewAnim anim = aView.getAnim(0);
-    anim._startTime = _timer.getTime() - anim.getTime();
+    anAnim._startTime = _timer.getTime() - anAnim.getTime();
 }
 
 /**
- * Removes a view to set of Views that are being animated.
+ * Removes given ViewAnim to set of anims that are running.
  */
-public void stopAnim(View aView)
+public void stopAnim(ViewAnim anAnim)
 {
-    if(!_animViews.remove(aView)) return;
-    if(_animViews.size()==0) _timer.stop();
-    ViewAnim anim = aView.getAnim(0);
+    if(!_viewAnims.remove(anAnim)) return;
+    if(_viewAnims.size()==0) _timer.stop();
 }
 
 /**

@@ -119,7 +119,7 @@ public static Transition MoveUp = new Transition() {
         nview.setTransY(aTP.getHeight()); nview.getAnimCleared(500).setTransY(0).play();
         if(oview==null) return;
         oview.setTransY(0);
-        oview.getAnimCleared(500).setTransY(-aTP.getHeight()).setOnFinish(a -> finish(aTP, oview)).play();
+        oview.getAnimCleared(500).setTransY(-aTP.getHeight()).setOnFinish(() -> finish(aTP, oview)).play();
     }
 };
 
@@ -134,7 +134,7 @@ public static Transition MoveDown = new Transition() {
         nview.setTransY(-aTP.getHeight()); nview.getAnimCleared(500).setTransY(0).play();
         if(oview==null) return;
         oview.setTransY(0);
-        oview.getAnimCleared(500).setTransY(aTP.getHeight()).setOnFinish(a -> finish(aTP, oview)).play();
+        oview.getAnimCleared(500).setTransY(aTP.getHeight()).setOnFinish(() -> finish(aTP, oview)).play();
     }
 };
 
@@ -149,7 +149,7 @@ public static Transition MoveLeft = new Transition() {
         nview.setTransX(-aTP.getWidth()); nview.getAnimCleared(500).setTransX(0).play();
         if(oview==null) return;
         oview.setTransX(0);
-        oview.getAnimCleared(500).setTransX(aTP.getWidth()).setOnFinish(a -> finish(aTP, oview)).play();
+        oview.getAnimCleared(500).setTransX(aTP.getWidth()).setOnFinish(() -> finish(aTP, oview)).play();
     }
 };
 
@@ -164,7 +164,7 @@ public static Transition MoveRight = new Transition() {
         nview.setTransX(aTP.getWidth()); nview.getAnimCleared(500).setTransX(0).play();
         if(oview==null) return;
         oview.setTransX(0);
-        oview.getAnimCleared(500).setTransX(-aTP.getWidth()).setOnFinish(a -> finish(aTP, oview)).play();
+        oview.getAnimCleared(500).setTransX(-aTP.getWidth()).setOnFinish(() -> finish(aTP, oview)).play();
     }
 };
 
@@ -179,7 +179,7 @@ public static Transition FadeIn = new Transition() {
         nview.setOpacity(0);
         nview.getAnimCleared(800).setOpacity(1).play();
         if(oview==null) return;
-        oview.getAnimCleared(800).setOnFinish(a -> finish(aTP, oview)).play();
+        oview.getAnimCleared(800).setOnFinish(() -> finish(aTP, oview)).play();
     }
 };
 

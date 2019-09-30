@@ -165,10 +165,13 @@ protected void setExpandedAnimated(boolean aValue)
     setPrefSize(-1,-1);
     double pw = getPrefWidth(), ph = getPrefHeight();
     
-    // Set pref size to current size and expanded to true (for duration of anim) and trigger anim to new size
+    // Set pref size to current size and expanded to true (for duration of anim)
     setPrefSize(w,h);
     setExpanded(true);
-    getAnimCleared(500).setPrefSize(pw,ph).setOnFinish(a -> setExpanded(aValue)).play();
+    
+    // Configure anim to new size
+    ViewAnim anim = getAnim(0).clear();
+    anim.getAnim(500).setPrefSize(pw,ph).setOnFinish(() -> setExpanded(aValue)).needsFinish().play();
 }
 
 /**
