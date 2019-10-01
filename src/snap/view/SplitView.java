@@ -106,9 +106,10 @@ public void addItem(View aView, int anIndex)
  */
 public View removeItem(int anIndex)
 {
-    // Remove item and child
+    // Remove item and child and listener
     View view = _items.remove(anIndex);
     removeChild(view);
+    view.removePropChangeListener(_visLsnr, Visible_Prop);
     
     // If at least one item left, remove extra divider
     if(getItemCount()>0)
