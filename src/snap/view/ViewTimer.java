@@ -130,7 +130,10 @@ public void pause()  { stop(); _pauseTime = System.currentTimeMillis(); }
  */
 protected void sendEvent()
 {
-    if(_run==null) { System.out.println("ViewTimer.sendEvent: Run is null - shouldn't happen"); return; }
+    // If no run, just return. Can happen because final interval fires?
+    if(_run==null) return; //System.out.println("ViewTimer.sendEvent: Run is null - shouldn't happen");
+    
+    // Set time and fire
     _time = (int)(System.currentTimeMillis() - _startTime);
     _onFire.accept(this); _count++; _time = -1;
 }

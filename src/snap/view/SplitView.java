@@ -38,6 +38,7 @@ public class SplitView extends ParentView {
 public SplitView()
 {
     setBorder(SPLIT_VIEW_BORDER);
+    setClipToBounds(true);
     addEventFilter(e -> processDividerEvent(e), MouseMove, MousePress, MouseDrag, MouseRelease);
 }
 
