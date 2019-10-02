@@ -8,53 +8,103 @@ import snap.gfx.*;
  * A View subclass for CheckBox.
  */
 public class CheckBox extends ToggleButton {
+    
+    // The view to render the actual check box
+    CheckArea        _check;
+    
+    // Constants
+    private static final int SPACING = 5;
 
 /**
- * Creates a new CheckBox.
+ * Creates CheckBox.
  */
-public CheckBox()  { }
-
-/**
- * Creates a new CheckBox with given text.
- */
-public CheckBox(String aStr)  { setText(aStr); }
-
-/**
- * Paint Button.
- */
-public void paintFront(Painter aPntr)
+public CheckBox()
 {
-    int state = isPressed()? Painter.BUTTON_PRESSED : _targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
-    Insets ins = getInsetsAll();
-    double x = ins.left - 16 - 6, y = ins.top + 2 + Math.round((getHeight() - ins.top - 2 - 16 - 2 - ins.bottom)/2);
-    aPntr.drawButton2(x,y,16,16, state);
-    if(isSelected()) {
-        aPntr.setPaint(Color.BLACK); Stroke str = aPntr.getStroke(); aPntr.setStroke(new Stroke(2));
-        aPntr.drawLine(x+5,y+5,x+11,y+11); aPntr.drawLine(x+11,y+5,x+5,y+11); aPntr.setStroke(str);
-    }
+    // Create/add check
+    _check = new CheckArea();
+    addChild(_check);
 }
 
 /**
- * Returns the default alignment for button.
+ * Creates CheckBox with given text.
+ */
+public CheckBox(String aStr)  { this(); setText(aStr); }
+
+/**
+ * Override to suppress normal painting.
+ */
+public void paintFront(Painter aPntr)  { }
+
+/**
+ * Override to situate Check view.
+ */
+public void setPosition(Pos aPos)
+{
+    // If already set, just return
+    if(aPos==getPosition()) return;
+    
+    // Set new position and make sure label is loaded
+    super.setPosition(aPos);
+    getLabel();
+    
+    // If CENTER_RIGHT, put Check after label, otherwise put Check first
+    removeChild(_check);
+    if(aPos==Pos.CENTER_RIGHT) addChild(_check);
+    else addChild(_check, 0);
+}
+
+/**
+ * Returns the default alignment for CheckBox.
  */
 public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
 /**
- * Returns the insets for checkbox.
+ * Returns the default padding for CheckBox.
  */
-public Insets getInsetsAll()
-{
-    Insets ins = super.getInsetsAll();
-    return new Insets(ins.top, ins.right, ins.bottom, ins.left + 2 + 16 + 6);
-}
+public Insets getDefaultPadding()  { return _def; } static Insets _def = new Insets(1);
+
+/**
+ * Returns the preferred width.
+ */
+protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, null, SPACING, aH); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)
-{
-    Insets ins = getInsetsAll();
-    return Math.max(super.getPrefHeightImpl(aW), ins.top + 2 + 16 + 2 + ins.bottom);
+protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, null, aW); }
+
+/**
+ * Override to layout children.
+ */
+protected void layoutImpl()  { RowView.layout(this, null, null, false, SPACING); }
+
+/**
+ * The View to render the check.
+ */
+protected class CheckArea extends View {
+    
+    /** Create CheckArea. */
+    public CheckArea()  { setPrefSize(16, 16); }
+    
+    /** Paint CheckArea. */
+    public void paintFront(Painter aPntr)
+    {
+        // Get button state
+        int state = isPressed()? Painter.BUTTON_PRESSED : _targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
+        
+        // Draw button background
+        aPntr.drawButton2(0, 0, 16, 16, state);
+        
+        // If selected, draw X
+        if(isSelected()) {
+            Stroke str = aPntr.getStroke();
+            aPntr.setPaint(Color.BLACK);
+            aPntr.setStroke(new Stroke(2));
+            aPntr.drawLine(5, 5, 11, 11);
+            aPntr.drawLine(11, 5, 5, 11);
+            aPntr.setStroke(str);
+        }
+    }
 }
 
 }

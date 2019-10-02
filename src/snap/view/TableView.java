@@ -606,8 +606,10 @@ protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this
  */
 protected double getPrefHeightImpl(double aW)
 {
-    double ph = isShowHeader()? _header.getPrefHeight(aW) : 0;
-    ph += getRowHeight()*getItems().size();
+    Insets ins = getInsetsAll();
+    double hdrPH = isShowHeader()? _header.getPrefHeight(aW) : 0;
+    double rowsPH = getRowHeight()*getItems().size();
+    double ph = hdrPH + rowsPH + ins.getHeight();
     return ph;
 }
 

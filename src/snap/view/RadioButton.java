@@ -9,27 +9,48 @@ import snap.gfx.*;
  */
 public class RadioButton extends ToggleButton {
 
-/**
- * Creates a new RadioButton.
- */
-public RadioButton()  { }
+    // The view to render the actual Radio button
+    RadioArea        _radio;
+    
+    // Constants
+    private static final int SPACING = 5;
 
 /**
- * Creates a new RadioButton with given text.
+ * Creates RadioButton.
  */
-public RadioButton(String aStr)  { setText(aStr); }
-
-/**
- * Paint Button.
- */
-public void paintFront(Painter aPntr)
+public RadioButton()
 {
-    int state = isPressed()? Painter.BUTTON_PRESSED : _targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
-    Insets ins = getInsetsAll();
-    double x = ins.left - 16 - 6, y = ins.top + 2 + Math.round((getHeight() - ins.top - 2 - 16 - 2 - ins.bottom)/2);
-    aPntr.drawButton2(x,y,16,16,state,8);
-    if(isSelected()) {
-        aPntr.setPaint(Color.DARKGRAY); aPntr.fill(new Ellipse(x+3,y+3,10,10)); }
+    // Create/add radio
+    _radio = new RadioArea();
+    addChild(_radio);
+}
+
+/**
+ * Creates RadioButton with given text.
+ */
+public RadioButton(String aStr)  { this(); setText(aStr); }
+
+/**
+ * Override to suppress normal version.
+ */
+public void paintFront(Painter aPntr)  { }
+
+/**
+ * Override to situate Radio view.
+ */
+public void setPosition(Pos aPos)
+{
+    // If already set, just return
+    if(aPos==getPosition()) return;
+    
+    // Set new position and make sure label is loaded
+    super.setPosition(aPos);
+    getLabel();
+    
+    // If CENTER_RIGHT, put Radio after label, otherwise put first
+    removeChild(_radio);
+    if(aPos==Pos.CENTER_RIGHT) addChild(_radio);
+    else addChild(_radio, 0);
 }
 
 /**
@@ -38,21 +59,48 @@ public void paintFront(Painter aPntr)
 public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
 /**
- * Returns the insets for checkbox.
+ * Returns the default padding for RadioButton.
  */
-public Insets getInsetsAll()
-{
-    Insets ins = super.getInsetsAll();
-    return new Insets(ins.top, ins.right, ins.bottom, ins.left + 2 + 16 + 6);
-}
+public Insets getDefaultPadding()  { return _def; } static Insets _def = new Insets(1);
+
+/**
+ * Returns the preferred width.
+ */
+protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, null, SPACING, aH); }
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)
-{
-    Insets ins = getInsetsAll();
-    return Math.max(super.getPrefHeightImpl(aW), ins.top + 2 + 16 + 2 + ins.bottom);
+protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, null, aW); }
+
+/**
+ * Override to layout children.
+ */
+protected void layoutImpl()  { RowView.layout(this, null, null, false, SPACING); }
+
+/**
+ * The View to render the Radio button.
+ */
+protected class RadioArea extends View {
+    
+    /** Create RadioArea. */
+    public RadioArea()  { setPrefSize(16, 16); }
+    
+    /** Paint RadioArea. */
+    public void paintFront(Painter aPntr)
+    {
+        // Get button state
+        int state = isPressed()? Painter.BUTTON_PRESSED : _targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
+        
+        // Draw button background
+        aPntr.drawButton2(0, 0, 16, 16, state, 8);
+        
+        // If selected, draw inner circle
+        if(isSelected()) {
+            aPntr.setPaint(Color.DARKGRAY);
+            aPntr.fill(new Ellipse(3, 3, 10, 10));
+        }
+    }
 }
 
 }
