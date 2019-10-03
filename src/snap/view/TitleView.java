@@ -161,9 +161,10 @@ protected void setExpandedAnimated(boolean aValue)
     double w = getWidth(), h = getHeight();
     setExpanded(aValue);
     
-    // Gget new PrefSize
+    // Reset/get new PrefSize
     setPrefSize(-1,-1);
-    double pw = getPrefWidth(), ph = getPrefHeight();
+    double pw = getPrefWidth();
+    double ph = getPrefHeight();
     
     // Set pref size to current size and expanded to true (for duration of anim)
     setPrefSize(w,h);
@@ -175,7 +176,16 @@ protected void setExpandedAnimated(boolean aValue)
     
     // Configure anim to new size
     ViewAnim anim = getAnim(0).clear();
-    anim.getAnim(500).setPrefSize(pw,ph).setOnFinish(() -> setExpanded(aValue)).needsFinish().play();
+    anim.getAnim(500).setPrefSize(pw,ph).setOnFinish(() -> setExpandedAnimDone(aValue)).needsFinish().play();
+}
+
+/**
+ * Called when setExpanded animation is done.
+ */
+private void setExpandedAnimDone(boolean aValue)
+{
+    setExpanded(aValue);
+    setPrefSize(-1, -1);
 }
 
 /**
