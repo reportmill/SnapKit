@@ -29,7 +29,7 @@ public class Spinner <T> extends ParentView {
     // Constants for properties
     public static final String Min_Prop = "Min";
     public static final String Max_Prop = "Max";
-    public static final String Step_Prop = "StepSize";
+    public static final String Step_Prop = "Step";
     public static final String Value_Prop = "Value";
     
     // Constant for Button width
