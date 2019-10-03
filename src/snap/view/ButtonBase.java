@@ -17,7 +17,7 @@ public class ButtonBase extends ParentView {
     String                  _iname;
     
     // Whether button has border
-    boolean                 _showBorder = true;
+    boolean                 _showBorder = getDefaultShowBorder();
     
     // The position of the button when in a group (determines corner rendering)
     Pos                     _pos;
@@ -186,6 +186,11 @@ public void setShowBorder(boolean aValue)
 }
 
 /**
+ * Returns whether button border is painted by default.
+ */
+protected boolean getDefaultShowBorder()  { return true; }
+
+/**
  * Returns the position of the button when in a group (determines corner rendering).
  */
 public Pos getPosition()  { return _pos; }
@@ -336,7 +341,7 @@ protected XMLElement toXMLView(XMLArchiver anArchiver)
     String iname = getImageName(); if(iname!=null) e.add("image", iname);
     
     // Archive ShowBorder, Position
-    if(!isShowBorder()) e.add(ShowBorder_Prop, isShowBorder());
+    if(isShowBorder()!=getDefaultShowBorder()) e.add(ShowBorder_Prop, isShowBorder());
     if(getPosition()!=null) e.add(Position_Prop, getPosition());
     
     // Return element

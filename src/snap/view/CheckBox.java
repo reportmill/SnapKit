@@ -61,7 +61,12 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 /**
  * Returns the default padding for CheckBox.
  */
-public Insets getDefaultPadding()  { return _def; } static Insets _def = new Insets(1);
+public Insets getDefaultPadding()  { return _def; } static Insets _def = new Insets(2);
+
+/**
+ * Returns whether button border is painted by default.
+ */
+protected boolean getDefaultShowBorder()  { return false; }
 
 /**
  * Returns the preferred width.
