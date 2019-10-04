@@ -91,9 +91,12 @@ public SoundClip createSound()
  */
 public void openFile(Object aSource)
 {
+    // Get file
     if(aSource instanceof WebFile) aSource = ((WebFile)aSource).getJavaFile();
     if(aSource instanceof WebURL) aSource = ((WebURL)aSource).getJavaURL();
     File file = FileUtils.getFile(aSource);
+    
+    // Open with Desktop API
     try { Desktop.getDesktop().open(file); return; }
     catch(Throwable e) { System.err.println(e.getMessage()); }
 }
@@ -103,10 +106,29 @@ public void openFile(Object aSource)
  */
 public void openURL(Object aSource)
 {
+    // Get URL string
     WebURL url = WebURL.getURL(aSource);
     String urls = url!=null? url.getString() : null;
+    
+    // Open with Desktop API    
     try { Desktop.getDesktop().browse(new URI(urls)); return; } // RM13 has a pre-JVM 6 implementation
     catch(Throwable e) { System.err.println(e.getMessage()); }
+}
+
+/**
+ * Tries to open the given file source with the platform text file reader.
+ */
+public void openTextFile(Object aSource)
+{
+    // Get file
+    if(aSource instanceof WebFile) aSource = ((WebFile)aSource).getJavaFile();
+    if(aSource instanceof WebURL) aSource = ((WebURL)aSource).getJavaURL();
+    File file = FileUtils.getFile(aSource);
+    
+    // Open with Runtime.exec "open -e <file-name>"
+    String commands[] = { "open",  "-e", file.getAbsolutePath() };
+    try { Runtime.getRuntime().exec(commands); }
+    catch(Exception e) { e.printStackTrace(); }
 }
 
 /**

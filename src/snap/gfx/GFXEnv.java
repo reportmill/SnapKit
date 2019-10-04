@@ -106,6 +106,11 @@ public abstract void openFile(Object aSource);
 public abstract void openURL(Object aSource);
 
 /**
+ * Tries to open the given file source with the platform text file reader.
+ */
+public void openTextFile(Object aSource)  { openFile(aSource); }
+
+/**
  * Executes request and invokes callback with response.
  */
 public boolean getResponseAndCall(WebRequest aReq, Consumer <WebResponse> aCallback)
