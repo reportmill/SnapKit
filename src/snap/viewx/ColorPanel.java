@@ -332,7 +332,8 @@ private Image getImage(int anIndex)
     // If image at given index is still a String, convert to image
     if(_images[anIndex] instanceof String) {
         String iname = (String)_images[anIndex];
-        _images[anIndex] = Image.get(getClass(), iname);
+        Image img = Image.get(ColorPanel.class, iname);
+        _images[anIndex] = img;
     }
     
     // Return image at index
