@@ -318,10 +318,14 @@ public static int compare(Object anObj1, Object anObj2)
  */
 public static String getTempDir()
 {
-    String tempDir = System.getProperty("java.io.tmpdir");
-    if(!tempDir.endsWith(java.io.File.separator))
-        tempDir += java.io.File.separator;
-    return tempDir;
+    // Hack for TeaVM
+    if(isTeaVM) return "/";
+    
+    // Get System property and make sure it ends with dir char
+    String tdir = System.getProperty("java.io.tmpdir");
+    if(!tdir.endsWith(java.io.File.separator))
+        tdir += java.io.File.separator;
+    return tdir;
 }
 
 /**
@@ -447,6 +451,7 @@ public static void writeBytes(byte bytes[], Object aDest)
  */
 public static String getHostname()
 {
+    if(isTeaVM) return "localhost";
     try { InetAddress h = InetAddress.getLocalHost(); return h==null? "localhost" : h.getHostName(); }
     catch(Exception e) { return "localhost"; }
 }

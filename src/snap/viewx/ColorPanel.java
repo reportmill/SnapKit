@@ -151,7 +151,6 @@ protected void initUI()
 {
     // Configure ImagePickerLabel
     getView("ImagePickerLabel", ImagePicker.class).setImage(getImage(0));
-    getView("ImagePickerLabel").setCursor(Cursor.CROSSHAIR);
     
     // Configure ImageComboBox
     setViewItems("ImageComboBox", _iNames);
@@ -247,8 +246,10 @@ protected void respondUI(ViewEvent anEvent)
         newColor = anEvent.getView(ImagePicker.class).getColor();
     
     // Handle ImageComboBox
-    if(anEvent.equals("ImageComboBox"))
-        getView("ImagePickerLabel", ImagePicker.class).setImage(getImage(anEvent.getSelIndex()));
+    if(anEvent.equals("ImageComboBox")) {
+        Image img = getImage(anEvent.getSelIndex());
+        getView("ImagePickerLabel", ImagePicker.class).setImage(img);
+    }
     
     // Handle GraySlider or GrayAlphaSlider
     if(anEvent.equals("GraySlider") || anEvent.equals("GrayAlphaSlider")) {
@@ -329,8 +330,12 @@ private Color fromHexString(String aHS)  { Color c = Color.get(aHS); return c!=n
 private Image getImage(int anIndex)
 {
     // If image at given index is still a String, convert to image
-    if(_images[anIndex] instanceof String)
-        _images[anIndex] = Image.get(ColorPanel.class, (String)_images[anIndex]);
+    if(_images[anIndex] instanceof String) {
+        String iname = (String)_images[anIndex];
+        _images[anIndex] = Image.get(getClass(), iname);
+    }
+    
+    // Return image at index
     return (Image)_images[anIndex];
 }
 
@@ -346,13 +351,22 @@ public static class ImagePicker extends View {
     Color  _color = Color.WHITE;
     
     /** Creates new ImagePicker. */
-    public ImagePicker()  { enableEvents(MousePress, MouseDrag, MouseRelease, Action); repaint(); }
+    public ImagePicker()
+    {
+        enableEvents(MousePress, MouseDrag, MouseRelease, Action);
+        setCursor(Cursor.CROSSHAIR);
+    }
     
     /** Returns the image. */
     public Image getImage()  { return _img; }
     
     /** Sets the image. */
-    public void setImage(Image anImage)  { _img = anImage; repaint(); }
+    public void setImage(Image anImage)
+    {
+        _img = anImage; repaint();
+        if(!_img.isLoaded())
+            _img.addLoadListener(() -> relayoutParent());
+    }
     
     /** Returns the color. */
     public Color getColor()  { return _color; }

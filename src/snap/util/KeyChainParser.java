@@ -210,8 +210,8 @@ public static class KeyChainHandler extends ParseHandler <KeyChain> {
     /** ParseHandler method. */
     public void parsedOne(ParseNode aNode, String anId)
     {
-        // Handle Object
-        if(anId=="Object") {
+        // Handle Object (TeaVM having issue with ==)
+        if(anId.equals("Object")) {
             KeyChain kc = aNode.getCustomNode(KeyChain.class);
             if(_part==null) _part = kc;
             else if(_part.getOp()!=Op.Chain) _part = new KeyChain(Op.Chain, _part, kc);
