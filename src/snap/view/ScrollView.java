@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * A View for scrolling other views.
  */
-public class ScrollView extends HostView {
+public class ScrollView extends ParentView implements ViewHost {
     
     // The scroll view
     Scroller        _scroller;
@@ -56,22 +56,22 @@ public View getContent()  { return _scroller.getContent(); }
 public void setContent(View aView)  { _scroller.setContent(aView); }
 
 /**
- * HostView method.
+ * ViewHost method: Override to send to Scroller.
  */
 public int getGuestCount()  { return _scroller.getGuestCount(); }
 
 /**
- * HostView method.
+ * ViewHost method: Override to send to Scroller.
  */
 public View getGuest(int anIndex)  { return _scroller.getGuest(anIndex); }
 
 /**
- * HostView method.
+ * ViewHost method: Override to send to Scroller.
  */
 public void addGuest(View aChild, int anIndex)  { _scroller.addGuest(aChild, anIndex); }
 
 /**
- * HostView method.
+ * ViewHost method: Override to send to Scroller.
  */
 public View removeGuest(int anIndex)  { return _scroller.removeGuest(anIndex); }
 

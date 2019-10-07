@@ -381,10 +381,10 @@ public static void replaceView(View aView, View newView)
     // Get parent
     View par = aView.getParent(); if(par==null) { System.err.println("ViewUtils.replaceView: null parent"); return; }
     
-    // Handle HostView
-    if(par instanceof HostView) { HostView hostView = (HostView)par;
-        int ind = hostView.removeGuest(aView);
-        hostView.addGuest(newView, ind);
+    // Handle ViewHost
+    if(aView.isGuest()) { ViewHost host = aView.getHost();
+        int ind = host.removeGuest(aView);
+        host.addGuest(newView, ind);
     }
     
     // Handle ChildView

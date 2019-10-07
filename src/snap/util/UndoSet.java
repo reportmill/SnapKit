@@ -87,7 +87,7 @@ public void setRedoSelection(Object aSelection)  { _redoSelection = aSelection; 
 /**
  * Adds a property change.
  */
-public void addPropertyChange(PropChange anEvent)
+public void addPropChange(PropChange anEvent)
 {
     // Iterate over changes and if duplicate exists, coalesce (go backward so we only check last same prop name event)
     for(int i=_changes.size()-1; i>=0; i--) { PropChange e = _changes.get(i);

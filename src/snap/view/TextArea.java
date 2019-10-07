@@ -1043,7 +1043,7 @@ protected void undoerAddPropertyChange(PropChange anEvent)
         activeUndoSet.setUndoSelection(getUndoSelection());
     
     // Add property
-    undoer.addPropertyChange(anEvent);
+    undoer.addPropChange(anEvent);
 }
 
 /**

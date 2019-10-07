@@ -8,7 +8,10 @@ import snap.util.*;
 /**
  * A View that holds another view.
  */
-public class BoxView extends ChildView {
+public class BoxView extends ParentView implements ViewHost {
+    
+    // The content view
+    View          _content;
 
     // The spacing between nodes
     double        _spacing;
@@ -41,16 +44,20 @@ public BoxView(View aContent, boolean isFillWidth, boolean isFillHeight)
 /**
  * Returns the box content.
  */
-public View getContent()  { return getGuestCount()>0? getGuest(0) : null; }
+public View getContent()  { return _content; }
 
 /**
  * Sets the box content.
  */
 public void setContent(View aView)
 {
+    // If already set, just return
     if(aView==getContent()) return;
-    removeGuests();
-    if(aView!=null) addGuest(aView);
+    
+    // Remove old content, set/add new content
+    if(_content!=null) removeChild(_content);
+    _content = aView;
+    if(_content!=null) addChild(_content);
 }
 
 /**
@@ -132,6 +139,39 @@ protected void layoutImpl()
     if(isHorizontal())
         RowView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
     else ColView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
+}
+
+/**
+ * ViewHost method: Override to return 1 if content is present.
+ */
+public int getGuestCount()  { return getContent()!=null? 1 : 0; }
+
+/**
+ * ViewHost method: Override to return content (and complain if index beyond 0).
+ */
+public View getGuest(int anIndex)
+{
+    if(anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+    return getContent();
+}
+
+/**
+ * ViewHost method: Override to set content.
+ */
+public void addGuest(View aChild, int anIndex)
+{
+    if(anIndex>0) System.err.println("BoxView: Attempt to addGuest beyond 0");
+    setContent(aChild);
+}
+
+/**
+ * ViewHost method: Override to clear content (and complain if index beyond 0).
+ */
+public View removeGuest(int anIndex)
+{
+    if(anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+    View cont = getContent(); setContent(null);
+    return cont;
 }
 
 /**

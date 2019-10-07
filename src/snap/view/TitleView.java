@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * A view to attach a title to another view.
  */
-public class TitleView extends HostView {
+public class TitleView extends ParentView implements ViewHost {
 
     // The title label
     Label          _label;
@@ -214,31 +214,34 @@ protected void updateTitleStyle()
 }
 
 /**
- * HostView method.
+ * ViewHost method: Override to return 1 if content is present.
  */
 public int getGuestCount()  { return getContent()!=null? 1 : 0; }
 
 /**
- * HostView method.
+ * ViewHost method: Override to return content (and complain if index beyond 0).
  */
-public View getGuest(int anIndex)  { return getContent(); }
+public View getGuest(int anIndex)
+{
+    if(anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+    return getContent();
+}
 
 /**
- * HostView method.
+ * ViewHost method: Override to set content.
  */
 public void addGuest(View aChild, int anIndex)
 {
     setContent(aChild);
-    fireGuestPropChange(null,aChild,0);
 }
 
 /**
- * HostView method.
+ * ViewHost method: Override to clear content (and complain if index beyond 0).
  */
 public View removeGuest(int anIndex)
 {
+    if(anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
     View cont = getContent(); setContent(null);
-    fireGuestPropChange(cont,null,0);
     return cont;
 }
 

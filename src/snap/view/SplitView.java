@@ -507,9 +507,9 @@ public static SplitView makeSplitView(View aView)
     split.setLeanX(aView.getLeanX()); split.setLeanY(aView.getLeanY());
     split.setGrowWidth(aView.isGrowWidth()); split.setGrowHeight(aView.isGrowHeight());
     
-    // Handle HostView
-    if(aView instanceof HostView) { HostView hview = (HostView)aView;
-        split.setItems(hview.getGuests());
+    // Handle ViewHost
+    if(aView instanceof ViewHost) { ViewHost host = (ViewHost)aView;
+        split.setItems(host.getGuests());
     }
     
     // Replace

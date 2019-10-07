@@ -941,23 +941,19 @@ public boolean isAncestor(View aView)
 public int indexInParent()  { ParentView par = getParent(); return par!=null? par.indexOfChild(this) : -1; }
 
 /**
- * Returns the HostView if this view is guest view of parent HostView.
+ * Returns the ViewHost if this view is guest view of parent ViewHost.
  */
-public HostView getHost()  { return indexInHost()>=0? (HostView)getParent() : null; }
+public ViewHost getHost()  { return isGuest()? (ViewHost)getParent() : null; }
 
 /**
- * Returns whether view is a "guest" child of a HostView.
+ * Returns whether view is a "guest" child of a ViewHost.
  */
 public boolean isGuest()  { return indexInHost()>=0; }
 
 /**
- * Returns the index of this view in HostView parent (or -1 if parent isn't host).
+ * Returns the index of this view in ViewHost parent (or -1 if parent isn't host).
  */
-public int indexInHost()
-{
-    ParentView par = getParent();
-    return par instanceof HostView? ((HostView)par).indexOfGuest(this) : -1;
-}
+public int indexInHost()  { return ViewHost.indexInHost(this); }
 
 /**
  * Returns whether this view is visible.

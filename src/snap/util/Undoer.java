@@ -87,14 +87,14 @@ public void setRedoSelection(Object aList)  { _activeUndoSet._redoSelection = aL
 /**
  * Adds a property change.
  */
-public void addPropertyChange(PropChange anEvent)
+public void addPropChange(PropChange anEvent)
 {
     // If undoer is disabled, just return
     if(!isEnabled())
         return;
     
     // Add change
-    _activeUndoSet.addPropertyChange(anEvent);
+    _activeUndoSet.addPropChange(anEvent);
 }
 
 /**

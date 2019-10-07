@@ -125,9 +125,14 @@ protected void setChildren(View ... theChildren)  { removeChildren(); for(View c
 public View getChild(String aName)
 {
     for(View child : getChildren()) {
-        if(aName.equals(child.getName())) return child;
+        if(aName.equals(child.getName()))
+            return child;
         if(child instanceof ParentView && child.getOwner()==getOwner()) {
-            View n = ((ParentView)child).getChild(aName); if(n!=null) return n; }
+            ParentView par = (ParentView)child;
+            View n = par.getChild(aName);
+            if(n!=null)
+                return n;
+        }
     }
     return null;
 }
@@ -569,7 +574,11 @@ protected XMLElement toXMLView(XMLArchiver anArchiver)  { return super.toXML(anA
 /**
  * XML archival of children.
  */
-protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)  { }
+protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
+{
+    if(this instanceof ViewHost)
+        ViewHost.toXMLGuests((ViewHost)this, anArchiver, anElement);
+}
 
 /**
  * Override to break fromXML into fromXMLView and fromXMLChildren.
@@ -590,6 +599,10 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)  { supe
 /**
  * XML unarchival for shape children.
  */
-protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)  { }
+protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
+{
+    if(this instanceof ViewHost)
+        ViewHost.fromXMLGuests((ViewHost)this, anArchiver, anElement);
+}
 
 }
