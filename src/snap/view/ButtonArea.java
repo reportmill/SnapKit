@@ -27,6 +27,11 @@ public class ButtonArea {
     // The button state
     int           _state = Button.BUTTON_NORMAL;
     
+    // Button states
+    public static final int BUTTON_NORMAL = ButtonBase.BUTTON_NORMAL;
+    public static final int BUTTON_OVER = ButtonBase.BUTTON_OVER;
+    public static final int BUTTON_PRESSED = ButtonBase.BUTTON_PRESSED;
+
     // Outer ring and outer lighted ring
     static Color ring2 = Color.get("#a6a6a6"), _c6 = Color.get("#ffffffBB");
     static Color _over = Color.get("#FFFFFF50"), _prsd = Color.get("#0000001A");
@@ -120,7 +125,7 @@ public void configureFromButton(ButtonBase aButton)
     
     // Get/set state
     boolean pressed = aButton.isPressed(), targeted = aButton.isTargeted();
-    int state = pressed? Painter.BUTTON_PRESSED : targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
+    int state = pressed? BUTTON_PRESSED : targeted? BUTTON_OVER : BUTTON_NORMAL;
     setState(state);
     
     // Set fill
@@ -144,18 +149,72 @@ public void paint(Painter aPntr)
     rect.setRect(_x+.5,_y+.5,_w-1,_h-1); aPntr.setPaint(ring2); aPntr.draw(rect);
     
     // Handle BUTTON_OVER
-    if(_state==Button.BUTTON_OVER) {
+    if(_state==BUTTON_OVER) {
         aPntr.setPaint(_over);
         rect.setRect(_x,_y,_w,_h);
         aPntr.fill(rect);
     }
     
     // Handle BUTTON_PRESSED
-    else if(_state==Button.BUTTON_PRESSED && _fill==FILL_NORMAL_BUTTON) {
+    else if(_state==BUTTON_PRESSED && _fill==FILL_NORMAL_BUTTON) {
         aPntr.setPaint(_prsd);
         rect.setRect(_x,_y,_w,_h);
         aPntr.fill(rect);
     }
 }
+
+/**
+ * Draws a button for the given rect with an option for pressed.
+ */
+public static void drawButton(Painter aPntr, double x, double y, double w, double h)
+{
+    drawButton(aPntr, x, y, w, h, 0);
+}
+
+/**
+ * Draws a button for the given rect with an option for pressed.
+ */
+public static void drawButton(Painter aPntr, double x, double y, double w, double h, int aState)
+{
+    drawButton(aPntr, x, y, w, h, aState, 3);
+}
+
+/**
+ * Draws a button for the given rect with an option for pressed.
+ */
+public static void drawButton(Painter aPntr, double x, double y, double w, double h, int aState, int aRounding)
+{
+    // Paint background gradient
+    RoundRect rect = new RoundRect(x,y,w,h,aRounding);
+    aPntr.setPaint(_gpaint1); aPntr.fill(rect);
+    
+    // Paint outer bottom ring light gray
+    rect.setRect(x+.5,y+.5,w-1,h); aPntr.setColor(_c6); aPntr.draw(rect);
+    
+    // Paint inner ring light gray
+    rect.setRect(x+1.5,y+1.5,w-3,h-4); aPntr.setPaint(_gpaint2); aPntr.draw(rect);
+    
+    // Paint outer ring
+    rect.setRect(x+.5,y+.5,w-1,h-1); aPntr.setColor(_c0); aPntr.draw(rect);
+    
+    // Handle BUTTON_OVER
+    if(aState==BUTTON_OVER) {
+        rect.setRect(x,y,w,h); aPntr.setPaint(_over); aPntr.fill(rect); }
+        
+    // Handle BUTTON_PRESSED
+    else if(aState==BUTTON_PRESSED) {
+        rect.setRect(x,y,w,h); aPntr.setPaint(_prsd); aPntr.fill(rect); }
+}
+
+// Outer ring and outer lighted ring
+private static Color _c0 = Color.get("#a6a6a6");
+
+// Button background gradient (light gray top to dark gray bottom)
+private static GradientPaint.Stop _stops1[] = { new GradientPaint.Stop(0,_c1), new GradientPaint.Stop(1,_c2) };
+private static GradientPaint _gpaint1 = new GradientPaint(.5,0,.5,1,_stops1);
+
+// Button inner ring gradient (light gray top to dark gray bottom)
+private static GradientPaint.Stop _stops2[] = { new GradientPaint.Stop(0,_c3), new GradientPaint.Stop(1,_c4) };
+private static GradientPaint _gpaint2 = new GradientPaint(.5,0,.5,1,_stops2);
 
 }

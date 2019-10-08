@@ -95,10 +95,10 @@ protected class RadioArea extends View {
     public void paintFront(Painter aPntr)
     {
         // Get button state
-        int state = isPressed()? Painter.BUTTON_PRESSED : _targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
+        int state = isPressed()? BUTTON_PRESSED : _targeted? BUTTON_OVER : BUTTON_NORMAL;
         
         // Draw button background
-        aPntr.drawButton2(0, 0, 16, 16, state, 8);
+        ButtonArea.drawButton(aPntr, 0, 0, 16, 16, state, 8);
         
         // If selected, draw inner circle
         if(isSelected()) {

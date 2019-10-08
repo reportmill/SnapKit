@@ -159,49 +159,6 @@ static Color _white = new Color(.9f, .95f, 1), _lightGray = new Color(.9f, .9f, 
 static Color _darkGray = new Color(.58f, .58f, .58f), _darkerGray = new Color(.5f, .5f, .5f);
 static Color _gray = new Color(.7f, .7f, .7f);
 
-// Button states
-public static final int BUTTON_NORMAL = 0;
-public static final int BUTTON_OVER = 1;
-public static final int BUTTON_PRESSED = 2;
-
-/**
- * Draws a button for the given rect with an option for pressed.
- */
-public void drawButton2(double x, double y, double w, double h)  { drawButton2(x,y,w,h,0); }
-
-/**
- * Draws a button for the given rect with an option for pressed.
- */
-public void drawButton2(double x, double y, double w, double h, int aState)  { drawButton2(x,y,w,h,aState,3); }
-/**
- * Draws a button for the given rect with an option for pressed.
- */
-public void drawButton2(double x, double y, double w, double h, int aState, int aRounding)
-{
-    RoundRect rect = new RoundRect(x,y,w,h,aRounding); setPaint(_gpaint1); fill(rect);    // Paint background gradient
-    rect.setRect(x+.5,y+.5,w-1,h); setColor(_c6); draw(rect);                         // Paint outer bottom ring light gray
-    rect.setRect(x+1.5,y+1.5,w-3,h-4); setPaint(_gpaint2); draw(rect);                // Paint inner ring light gray
-    rect.setRect(x+.5,y+.5,w-1,h-1); setColor(_c0); draw(rect);                       // Paint outer ring
-    
-    // Handle BUTTON_OVER, BUTTON_PRESSED
-    if(aState==BUTTON_OVER) { setPaint(_over); rect.setRect(x,y,w,h); fill(rect); }
-    else if(aState==BUTTON_PRESSED) { setPaint(_prsd); rect.setRect(x,y,w,h); fill(rect); }
-}
-
-// Outer ring and outer lighted ring
-static Color _c0 = Color.get("#a6a6a6"), _c6 = Color.get("#ffffffBB");
-static Color _over = Color.get("#FFFFFF50"), _prsd = Color.get("#0000001A");
-
-// Button background gradient (light gray top to dark gray bottom)
-static Color _c1 = Color.get("#e8e8e8"), _c2 = Color.get("#d3d3d3");
-static GradientPaint.Stop _stops1[] = { new GradientPaint.Stop(0,_c1), new GradientPaint.Stop(1,_c2) };
-static GradientPaint _gpaint1 = new GradientPaint(.5,0,.5,1,_stops1);
-
-// Button inner ring gradient (light gray top to dark gray bottom)
-static Color _c3 = Color.get("#fbfbfb"), _c4 = Color.get("#dbdbdb");
-static GradientPaint.Stop _stops2[] = { new GradientPaint.Stop(0,_c3), new GradientPaint.Stop(1,_c4) };
-static GradientPaint _gpaint2 = new GradientPaint(.5,0,.5,1,_stops2);
-
 /**
  * Draw image with transform.
  */

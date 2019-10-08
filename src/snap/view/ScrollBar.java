@@ -155,7 +155,7 @@ protected void paintFront(Painter aPntr)
     double w = getWidth(), h = getHeight(); boolean hor = isHorizontal(), ver = !hor;
     paintBack(aPntr, 0, 0, w, h, hor); if(hor && w<20 || ver && h<20) return;
     Rect tbnds = getThumbBounds(); if(getThumbRatio()>=1) return;
-    int state = _pressed? Painter.BUTTON_PRESSED : _targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
+    int state = _pressed? Button.BUTTON_PRESSED : _targeted? Button.BUTTON_OVER : Button.BUTTON_NORMAL;
     paintThumb(aPntr, tbnds.x, tbnds.y, tbnds.width, tbnds.height, hor, state);
 }
 

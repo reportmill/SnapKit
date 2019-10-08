@@ -48,7 +48,7 @@ public void setDefaultButton(boolean aValue)
 public void paintFront(Painter aPntr)
 {
     if(isShowArea() && isDefaultButton()) {
-        int state = isPressed()? Painter.BUTTON_PRESSED : _targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
+        int state = isPressed()? BUTTON_PRESSED : _targeted? BUTTON_OVER : BUTTON_NORMAL;
         paintDefaultButton(aPntr, 0,0,getWidth(),getHeight(), state);
     }
     else super.paintFront(aPntr);
