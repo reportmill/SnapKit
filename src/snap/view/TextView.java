@@ -19,7 +19,7 @@ public class TextView extends ParentView {
     
     // Constants for properties
     public static final String Editable_Prop = "Editable";
-    public static final String WrapText_Prop = "WrapText";
+    public static final String WrapLines_Prop = TextArea.WrapLines_Prop;
     public static final String FireActionOnEnterKey_Prop = "FireActionOnEnterKey";
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
     public static final String Selection_Prop = "Selection";
@@ -107,16 +107,16 @@ public boolean isEditable()  { return _textArea.isEditable(); }
 public void setEditable(boolean aValue)  { _textArea.setEditable(aValue); }
 
 /**
- * Returns whether text wraps.
+ * Returns whether to wrap lines that overrun bounds.
  */
-public boolean isWrapText()  { return _textArea.isWrapText(); }
+public boolean isWrapLines()  { return _textArea.isWrapLines(); }
 
 /**
- * Sets whether text wraps.
+ * Sets whether to wrap lines that overrun bounds.
  */
-public void setWrapText(boolean aValue)
+public void setWrapLines(boolean aValue)
 {
-    _textArea.setWrapText(aValue);
+    _textArea.setWrapLines(aValue);
     _scroll.setFillWidth(aValue);
 }
 
@@ -423,10 +423,10 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXMLView(anArchiver);
     
-    // Archive Rich, Editable, WrapText
+    // Archive Rich, Editable, WrapLines
     if(isRich()) e.add("Rich", true);
     if(!isEditable()) e.add("Editable", false);
-    if(isWrapText()) e.add("WrapText", true);
+    if(isWrapLines()) e.add(WrapLines_Prop, true);
 
     // If RichText, archive rich text
     if(isRich()) {
@@ -457,10 +457,11 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     if(rtxml==null && anElement.get("string")!=null) rtxml = anElement;
     if(rtxml!=null) setPlainText(false);
     
-    // Unarchive Rich, Editable, WrapText
+    // Unarchive Rich, Editable, WrapLines
     if(anElement.hasAttribute("Rich")) setPlainText(!anElement.getAttributeBoolValue("Rich"));
     if(anElement.hasAttribute("Editable")) setEditable(anElement.getAttributeBoolValue("Editable"));
-    if(anElement.hasAttribute("WrapText")) setWrapText(anElement.getAttributeBoolValue("WrapText"));
+    if(anElement.hasAttribute(WrapLines_Prop)) setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
+    if(anElement.hasAttribute("WrapText")) setWrapLines(anElement.getAttributeBoolValue("WrapText"));
     
     // If Rich, unarchive rich text
     if(isRich()) {

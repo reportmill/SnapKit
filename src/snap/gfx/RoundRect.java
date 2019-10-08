@@ -51,6 +51,26 @@ public RoundRect copyForCorners(boolean doNW, boolean doNE, boolean doSE, boolea
 }
 
 /**
+ * Returns a copy of this RoundRect only rounding corners appropriate for given position.
+ */
+public RoundRect copyForPosition(Pos aPos)
+{
+    if(aPos==null) return this;
+    switch(aPos) {
+        case CENTER_LEFT: return copyForCorners(true, false, false, true);
+        case CENTER: return copyForCorners(false, false, false, false);
+        case CENTER_RIGHT: return copyForCorners(false, true, true, false);
+        case TOP_CENTER: return copyForCorners(true, true, false, false);
+        case BOTTOM_CENTER: return copyForCorners(false, false, true, true);
+        case TOP_LEFT: return copyForCorners(true, false, false, false);
+        case TOP_RIGHT: return copyForCorners(false, true, false, false);
+        case BOTTOM_LEFT: return copyForCorners(false, false, false, true);
+        case BOTTOM_RIGHT: return copyForCorners(false, false, true, false);
+        default: return this;
+    }
+}
+
+/**
  * Returns a path iterator.
  */
 public PathIter getPathIter(Transform aTrans)

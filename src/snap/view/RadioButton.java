@@ -64,9 +64,9 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 public Insets getDefaultPadding()  { return _def; } static Insets _def = new Insets(2);
 
 /**
- * Returns whether button border is painted by default.
+ * Returns whether button displays standard background by default.
  */
-protected boolean getDefaultShowBorder()  { return false; }
+protected boolean getDefaultShowArea()  { return false; }
 
 /**
  * Returns the preferred width.

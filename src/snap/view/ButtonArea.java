@@ -5,9 +5,9 @@ package snap.view;
 import snap.gfx.*;
 
 /**
- * A class to handle button painting.
+ * A class to paint standard button backgrounds.
  */
-public class ButtonPainter {
+public class ButtonArea {
     
     // The location
     double        _x, _y;
@@ -18,8 +18,8 @@ public class ButtonPainter {
     // The button fill
     Paint         _fill = FILL_NORMAL_BUTTON;
     
-    // The rounding
-    double        _rnd = 4;
+    // The rounding radius
+    double        _rad = 4;
     
     // The position of the button when in a group (determines corner rendering).
     Pos           _pos;
@@ -100,31 +100,33 @@ public void setPosition(Pos aPos)  { _pos = aPos; }
 /**
  * Returns the radius of the round.
  */
-public double getRadius()  { return _rnd; }
+public double getRadius()  { return _rad; }
 
 /**
  * Sets the radius of the round.
  */
-public void setRadius(double aValue)  { _rnd = aValue;  }
+public void setRadius(double aValue)  { _rad = aValue;  }
 
 /**
- * Returns the rect for current position.
+ * Sets ButtonArea attributes from a button.
  */
-public RoundRect getRoundRectForPosition()
+public void configureFromButton(ButtonBase aButton)
 {
-    RoundRect rect = new RoundRect(_x,_y,_w,_h,_rnd);
-    if(_pos!=null) switch(_pos) {
-        case CENTER_LEFT: rect = rect.copyForCorners(true, false, false, true); break;
-        case CENTER: rect = rect.copyForCorners(false, false, false, false); break;
-        case CENTER_RIGHT: rect = rect.copyForCorners(false, true, true, false); break;
-        case TOP_CENTER: rect = rect.copyForCorners(true, true, false, false); break;
-        case BOTTOM_CENTER: rect = rect.copyForCorners(false, false, true, true); break;
-        case TOP_LEFT: rect = rect.copyForCorners(true, false, false, false); break;
-        case TOP_RIGHT: rect = rect.copyForCorners(false, true, false, false); break;
-        case BOTTOM_LEFT: rect = rect.copyForCorners(false, false, false, true); break;
-        case BOTTOM_RIGHT: rect = rect.copyForCorners(false, false, true, false); break;
-    }
-    return rect;
+    // Basic attrs
+    setWidth(aButton.getWidth());
+    setHeight(aButton.getHeight());
+    setRadius(aButton.getRadius());
+    setPosition(aButton.getPosition());
+    
+    // Get/set state
+    boolean pressed = aButton.isPressed(), targeted = aButton.isTargeted();
+    int state = pressed? Painter.BUTTON_PRESSED : targeted? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
+    setState(state);
+    
+    // Set fill
+    Paint bfill = aButton.getButtonFill();
+    if(bfill!=null)
+        setFill(bfill);
 }
 
 /**
@@ -133,7 +135,7 @@ public RoundRect getRoundRectForPosition()
 public void paint(Painter aPntr)
 {
     // Get shape and paint fill
-    RoundRect rect = getRoundRectForPosition();
+    RoundRect rect = new RoundRect(_x, _y, _w, _h, _rad).copyForPosition(_pos);
     aPntr.setPaint(_fill); aPntr.fill(rect);
     
     // Draw rings: (1) Outer-bottom: light gray, (2) inner: light gray gradient, (3) outer: gray
@@ -141,10 +143,19 @@ public void paint(Painter aPntr)
     rect.setRect(_x+1.5,_y+1.5,_w-3,_h-4); aPntr.setPaint(ring1); aPntr.draw(rect);
     rect.setRect(_x+.5,_y+.5,_w-1,_h-1); aPntr.setPaint(ring2); aPntr.draw(rect);
     
-    // Handle BUTTON_OVER, BUTTON_PRESSED
-    if(_state==Button.BUTTON_OVER) { aPntr.setPaint(_over); rect.setRect(_x,_y,_w,_h); aPntr.fill(rect); }
+    // Handle BUTTON_OVER
+    if(_state==Button.BUTTON_OVER) {
+        aPntr.setPaint(_over);
+        rect.setRect(_x,_y,_w,_h);
+        aPntr.fill(rect);
+    }
+    
+    // Handle BUTTON_PRESSED
     else if(_state==Button.BUTTON_PRESSED && _fill==FILL_NORMAL_BUTTON) {
-        aPntr.setPaint(_prsd); rect.setRect(_x,_y,_w,_h); aPntr.fill(rect); }
+        aPntr.setPaint(_prsd);
+        rect.setRect(_x,_y,_w,_h);
+        aPntr.fill(rect);
+    }
 }
 
 }

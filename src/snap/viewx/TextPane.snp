@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <HBox PrefHeight="28" Padding="0,4,0,4" Spacing="3">
-  <Button Name="SaveButton" PrefWidth="22" PrefHeight="22" ToolTip="Save" image="File_Save.png" ShowBorder="false" />
+  <Button Name="SaveButton" PrefWidth="22" PrefHeight="22" ToolTip="Save" image="File_Save.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
-  <Button Name="CutButton" PrefWidth="22" PrefHeight="22" ToolTip="Cut" image="Edit_Cut.png" ShowBorder="false" />
-  <Button Name="CopyButton" PrefWidth="22" PrefHeight="22" ToolTip="Copy" image="Edit_Copy.png" ShowBorder="false" />
-  <Button Name="PasteButton" PrefWidth="22" PrefHeight="22" ToolTip="Paste" image="Edit_Paste.png" ShowBorder="false" />
-  <Button Name="DeleteButton" PrefWidth="22" PrefHeight="22" ToolTip="Delete" image="Edit_Delete.png" ShowBorder="false" />
+  <Button Name="CutButton" PrefWidth="22" PrefHeight="22" ToolTip="Cut" image="Edit_Cut.png" ShowArea="false" />
+  <Button Name="CopyButton" PrefWidth="22" PrefHeight="22" ToolTip="Copy" image="Edit_Copy.png" ShowArea="false" />
+  <Button Name="PasteButton" PrefWidth="22" PrefHeight="22" ToolTip="Paste" image="Edit_Paste.png" ShowArea="false" />
+  <Button Name="DeleteButton" PrefWidth="22" PrefHeight="22" ToolTip="Delete" image="Edit_Delete.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
   <TextField Name="FontSizeText" PrefWidth="32" PrefHeight="22" />
-  <Button Name="IncreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Increase Font Size" image="Font_Increase.png" ShowBorder="false" />
-  <Button Name="DecreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Decrease Font Size" image="Font_Decrease.png" ShowBorder="false" />
+  <Button Name="IncreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Increase Font Size" image="Font_Increase.png" ShowArea="false" />
+  <Button Name="DecreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Decrease Font Size" image="Font_Decrease.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
-  <Button Name="UndoButton" PrefWidth="22" PrefHeight="22" ToolTip="Undo" image="Edit_Undo.png" ShowBorder="false" />
-  <Button Name="RedoButton" PrefWidth="22" PrefHeight="22" ToolTip="Redo" image="Edit_Redo.png" ShowBorder="false" />
+  <Button Name="UndoButton" PrefWidth="22" PrefHeight="22" ToolTip="Undo" image="Edit_Undo.png" ShowArea="false" />
+  <Button Name="RedoButton" PrefWidth="22" PrefHeight="22" ToolTip="Redo" image="Edit_Redo.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
   <TextField Name="FindText" PrefWidth="172" PrefHeight="22" />
   <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" text="IC" Selected="true" />

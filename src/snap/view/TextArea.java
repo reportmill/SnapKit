@@ -17,8 +17,8 @@ public class TextArea extends View {
     // Whether text is editable
     boolean               _editable;
     
-    // Whether text should wrap
-    boolean               _wrapText;
+    // Whether text should wrap lines that overrun bounds
+    boolean               _wrapLines;
     
     // The selection char indexes
     int                   _selIndex, _selAnchor, _selStart, _selEnd;
@@ -61,7 +61,7 @@ public class TextArea extends View {
     
     // Constants for properties
     public static final String Editable_Prop = "Editable";
-    public static final String WrapText_Prop = "WrapText";
+    public static final String WrapLines_Prop = "WrapLines";
     public static final String FireActionOnEnterKey_Prop = "FireActionOnEnterKey";
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
     public static final String Selection_Prop = "Selection";
@@ -192,18 +192,18 @@ public void setEditable(boolean aValue)
 }
 
 /**
- * Returns whether text wraps.
+ * Returns whether to wrap lines that overrun bounds.
  */
-public boolean isWrapText()  { return _wrapText; }
+public boolean isWrapLines()  { return _wrapLines; }
 
 /**
- * Sets whether text wraps.
+ * Sets whether to wrap lines that overrun bounds.
  */
-public void setWrapText(boolean aValue)
+public void setWrapLines(boolean aValue)
 {
-    if(aValue==_wrapText) return;
-    firePropChange(WrapText_Prop, _wrapText, _wrapText=aValue);
-    getTextBox().setWrapText(aValue);
+    if(aValue==_wrapLines) return;
+    firePropChange(WrapLines_Prop, _wrapLines, _wrapLines=aValue);
+    getTextBox().setWrapLines(aValue);
 }
 
 /**
@@ -1248,10 +1248,10 @@ public XMLElement toXML(XMLArchiver anArchiver)
     // Archive basic view attributes
     XMLElement e = super.toXML(anArchiver);
     
-    // Archive Rich, Editable, WrapText
+    // Archive Rich, Editable, WrapLines
     if(isRich()) e.add("Rich", true);
     if(!isEditable()) e.add("Editable", false);
-    if(isWrapText()) e.add("WrapText", true);
+    if(isWrapLines()) e.add(WrapLines_Prop, true);
 
     // If RichText, archive rich text
     if(isRich()) {
@@ -1282,10 +1282,11 @@ public TextArea fromXML(XMLArchiver anArchiver, XMLElement anElement)
     if(rtxml==null && anElement.get("string")!=null) rtxml = anElement;
     if(rtxml!=null) setPlainText(false);
     
-    // Unarchive Rich, Editable, WrapText
+    // Unarchive Rich, Editable, WrapLines
     if(anElement.hasAttribute("Rich")) setPlainText(!anElement.getAttributeBoolValue("Rich"));
     if(anElement.hasAttribute("Editable")) setEditable(anElement.getAttributeBoolValue("Editable"));
-    if(anElement.hasAttribute("WrapText")) setWrapText(anElement.getAttributeBoolValue("WrapText"));
+    if(anElement.hasAttribute(WrapLines_Prop)) setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
+    if(anElement.hasAttribute("WrapText")) setWrapLines(anElement.getAttributeBoolValue("WrapText"));
 
     // If Rich, unarchive rich text
     if(isRich()) {

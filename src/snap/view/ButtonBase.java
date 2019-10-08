@@ -16,8 +16,8 @@ public class ButtonBase extends ParentView {
     // The image name, if loaded from local resource
     String                  _iname;
     
-    // Whether button has border
-    boolean                 _showBorder = getDefaultShowBorder();
+    // Whether button displays the standard background area
+    boolean                 _showArea = getDefaultShowArea();
     
     // The position of the button when in a group (determines corner rendering)
     Pos                     _pos;
@@ -41,7 +41,7 @@ public class ButtonBase extends ParentView {
     public static final String Image_Prop = "Image";
     public static final String ImageName_Prop = "ImageName";
     public static final String Pressed_Prop = "Pressed";
-    public static final String ShowBorder_Prop = "ShowBorder";
+    public static final String ShowArea_Prop = "ShowArea";
     public static final String Position_Prop = "Position";
     public static final String Radius_Prop = "Radius";
     public static final String Targeted_Prop = "Targeted";
@@ -172,23 +172,23 @@ protected void setTargeted(boolean aValue)
 }
 
 /**
- * Returns whether button border is painted.
+ * Returns whether button displays the standard background area.
  */
-public boolean isShowBorder()  { return _showBorder; }
+public boolean isShowArea()  { return _showArea; }
 
 /**
- * Sets whether button border is painted.
+ * Sets whether button displays the standard background area.
  */
-public void setShowBorder(boolean aValue)
+public void setShowArea(boolean aValue)
 {
-    if(aValue==_showBorder) return;
-    firePropChange(ShowBorder_Prop, _showBorder, _showBorder=aValue);
+    if(aValue==_showArea) return;
+    firePropChange(ShowArea_Prop, _showArea, _showArea=aValue);
 }
 
 /**
- * Returns whether button border is painted by default.
+ * Returns whether button displays standard background area by default.
  */
-protected boolean getDefaultShowBorder()  { return true; }
+protected boolean getDefaultShowArea()  { return true; }
 
 /**
  * Returns the position of the button when in a group (determines corner rendering).
@@ -236,7 +236,7 @@ public void setButtonFill(Paint aPaint)  { _btnFill = aPaint; }
 public Insets getInsetsAll()
 {
     Insets pad = getPadding();
-    if(isShowBorder()) pad = new Insets(pad.top+2,pad.right+2,pad.bottom+2,pad.left+2);
+    if(isShowArea()) pad = new Insets(pad.top+2,pad.right+2,pad.bottom+2,pad.left+2);
     return pad;
 }
 
@@ -284,10 +284,9 @@ public void paintFront(Painter aPntr)
     // Reset stroke
     aPntr.setStroke(Stroke.Stroke1);
 
-    if(isShowBorder()) {
-        int state = isPressed()? Painter.BUTTON_PRESSED : isTargeted()? Painter.BUTTON_OVER : Painter.BUTTON_NORMAL;
-        ButtonPainter bp = new ButtonPainter(); bp.setWidth(getWidth()); bp.setHeight(getHeight()); bp.setRadius(_rad);
-        bp.setState(state); if(getButtonFill()!=null) bp.setFill(getButtonFill()); bp.setPosition(getPosition());
+    if(isShowArea()) {
+        ButtonArea bp = new ButtonArea();
+        bp.configureFromButton(this);
         bp.paint(aPntr);
     }
     else {
@@ -340,8 +339,8 @@ protected XMLElement toXMLView(XMLArchiver anArchiver)
     String text = getText(); if(text!=null && text.length()>0) e.add("text", text);
     String iname = getImageName(); if(iname!=null) e.add("image", iname);
     
-    // Archive ShowBorder, Position
-    if(isShowBorder()!=getDefaultShowBorder()) e.add(ShowBorder_Prop, isShowBorder());
+    // Archive ShowArea, Position
+    if(isShowArea()!=getDefaultShowArea()) e.add(ShowArea_Prop, isShowArea());
     if(getPosition()!=null) e.add(Position_Prop, getPosition());
     
     // Return element
@@ -365,8 +364,9 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
         if(image!=null) setImage(image);
     }
     
-    // Unarchive ShowBorder, Position
-    if(anElement.hasAttribute(ShowBorder_Prop)) setShowBorder(anElement.getAttributeBoolValue(ShowBorder_Prop));
+    // Unarchive ShowArea, Position
+    if(anElement.hasAttribute(ShowArea_Prop)) setShowArea(anElement.getAttributeBoolValue(ShowArea_Prop));
+    if(anElement.hasAttribute("ShowBorder")) setShowArea(anElement.getAttributeBoolValue("ShowBorder"));
     if(anElement.hasAttribute(Position_Prop)) setPosition(Pos.valueOf(anElement.getAttributeValue(Position_Prop)));
 }
 

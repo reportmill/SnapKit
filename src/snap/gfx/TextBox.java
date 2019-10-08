@@ -17,8 +17,8 @@ public class TextBox {
     // The bounds of the text block
     double               _x, _y, _width = Float.MAX_VALUE, _height;
     
-    // Whether to wrap text in box
-    boolean              _wrapText;
+    // Whether to wrap lines that overrun bounds
+    boolean              _wrapLines;
     
     // Whether to hyphenate text
     boolean              _hyphenate;
@@ -136,7 +136,7 @@ public void setWidth(double aValue)
 {
     if(aValue==_width) return;
     _width = aValue;
-    if(isWrapText()) setNeedsUpdateAll();
+    if(isWrapLines()) setNeedsUpdateAll();
 }
 
 /**
@@ -199,14 +199,14 @@ public void setAlignY(VPos aPos)
 public double getAlignedY()  { return getY() + _alignedY; }
 
 /**
- * Returns whether text wraps.
+ * Returns whether to wrap lines that overrun bounds.
  */
-public boolean isWrapText()  { return _wrapText; }
+public boolean isWrapLines()  { return _wrapLines; }
 
 /**
- * Sets whether text wraps.
+ * Sets whether to wrap lines that overrun bounds.
  */
-public void setWrapText(boolean aValue)  { _wrapText = aValue; }
+public void setWrapLines(boolean aValue)  { _wrapLines = aValue; }
 
 /**
  * Returns whether layout tries to hyphenate wrapped words.
@@ -581,7 +581,7 @@ protected TextBoxLine createLine(RichTextLine aTextLine, int aStart, int aLineIn
     RichTextRun run = aTextLine.getRun(0); int rend = run.getEnd();
     TextStyle style = run.getStyle(); if(_fontScale!=1) style = style.copyFor(style.getFont().scaleFont(_fontScale));
     double lineHt = style.getLineHeight();
-    boolean wrap = isWrapText(), hyphenate = isHyphenate();
+    boolean wrap = isWrapLines(), hyphenate = isHyphenate();
     
     // Get start x/y
     TextBoxLine lastLn = aLineIndex>0? getLine(aLineIndex-1) : null;
@@ -870,8 +870,8 @@ public double getPrefWidth(double aH)  { return Math.ceil(getRichText().getPrefW
  */
 public double getPrefHeight(double aW)
 {
-    // If WrapText and given Width doesn't match current Width, setWidth
-    if(isWrapText() && !MathUtils.equals(aW,getWidth()) && aW>0) { //double oldW = getWidth();
+    // If WrapLines and given Width doesn't match current Width, setWidth
+    if(isWrapLines() && !MathUtils.equals(aW,getWidth()) && aW>0) { //double oldW = getWidth();
         setWidth(aW);
         double ph = getPrefHeight(aW); //setWidth(oldW); Should really reset old width - but why would they ask,
         return ph;                     // if they didn't plan to use this width?

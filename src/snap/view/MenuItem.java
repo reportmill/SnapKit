@@ -32,7 +32,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
  */
 public MenuItem()
 {
-    enableEvents(Action); setShowBorder(false);
+    enableEvents(Action);
 }
 
 /**
@@ -111,6 +111,11 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 public Insets getDefaultPadding()  { return _mitemIns; } static Insets _mitemIns = new Insets(4,8,4,6);
 
 /**
+ * Returns whether button displays standard background by default.
+ */
+protected boolean getDefaultShowArea()  { return false; }
+
+/**
  * Returns a mapped property name.
  */
 public String getValuePropName()  { return this instanceof CheckBoxMenuItem? "Selected" : "Text"; }
@@ -184,7 +189,6 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
 {
     // Archive basic attributes
     XMLElement e = super.toXMLView(anArchiver);
-    e.removeAttribute(ShowBorder_Prop);
 
     // Archive Accelerator
     if(getShortcut()!=null && getShortcut().length()>0) e.add("key", getShortcut());

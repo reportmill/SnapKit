@@ -89,9 +89,11 @@ private void setAnim(boolean aValue)
  */
 protected void paintFront(Painter aPntr)
 {
-    ButtonPainter bp = new ButtonPainter(); bp.setWidth(getWidth()); bp.setHeight(getHeight());
-    bp.setFill(ButtonPainter.FILL_PROGRESS_BAR);
-    bp.paint(aPntr);
+    // Use ButtonArea to paint ProgressBar background
+    ButtonArea bpntr = new ButtonArea();
+    bpntr.setWidth(getWidth()); bpntr.setHeight(getHeight());
+    bpntr.setFill(ButtonArea.FILL_PROGRESS_BAR);
+    bpntr.paint(aPntr);
     
     // Paint normal bar
     if(_prog>=0) {
