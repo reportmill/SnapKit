@@ -103,11 +103,6 @@ public static class Transition {
     }
 }
 
-
-/**
- * A Transition.
- */
-
 /**
  * A class to perform transitions.
  */

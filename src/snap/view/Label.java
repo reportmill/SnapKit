@@ -299,8 +299,6 @@ public Shape getBoundsShape()
         return new RoundRect(0,0,getWidth(),getHeight(),_rad);
     return super.getBoundsShape();
 }
-    
-
 
 /**
  * Handle events.

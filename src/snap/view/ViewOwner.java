@@ -101,7 +101,7 @@ public synchronized View getUI()
     _ui.setOwner(this);
     setSendEventDisabled(false);
     resetLater();
-    _ui.addPropChangeListener(pce -> uiShowingChanged(), View.Showing_Prop);
+    _ui.addPropChangeListener(pce -> showingChanged(), View.Showing_Prop);
     return _ui;
 }
 
@@ -143,7 +143,7 @@ protected void initUI()  { }
 /**
  * Called when UI showing has changed.
  */
-protected void uiShowingChanged()
+protected void showingChanged()
 {
     if(_resetLater) {
         resetLater(); _resetLater = false; }

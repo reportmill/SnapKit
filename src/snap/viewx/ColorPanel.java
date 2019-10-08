@@ -320,6 +320,15 @@ protected void fireActionEvent(ViewEvent anEvent)
         addRecentColor(getColor());
 }
 
+/**
+ * Override to de-select color well on hide.
+ */
+protected void showingChanged()
+{
+    if(!getUI().isShowing())
+        setColorWell(null);
+}
+
 /** Convert to/from hex string. */
 private String toHexString(Color aColor)  { return '#' + aColor.toHexString(); }
 private Color fromHexString(String aHS)  { Color c = Color.get(aHS); return c!=null? c : Color.BLACK; }
