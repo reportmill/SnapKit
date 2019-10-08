@@ -322,11 +322,15 @@ public XMLElement toXML(XMLArchiver anArchiver)
     // Archive basic shape attributes
     XMLElement e = super.toXML(anArchiver);
     
-    // Archive Image or ImageName
+    // Get image and image name
     Image image = getImage();
-    String iname = getImageName(); if(iname!=null) e.add(ImageName_Prop, iname);
+    String iname = getImageName();
     
-    // Archive image bytes as archiver resource
+    // If image name available, just archive it
+    if(iname!=null)
+        e.add(ImageName_Prop, iname);
+    
+    // Otherwise if image available, archive image bytes as archiver resource
     else if(image!=null) {
         String rname = anArchiver.addResource(image.getBytes(), "" + System.identityHashCode(this));
         e.add("resource", rname);

@@ -388,11 +388,20 @@ public static Image get(Class aClass, String aPath)
  */
 public static Image get(WebURL aBaseURL, String aName)
 {
+    // If either param is null, just return
     if(aBaseURL==null || aName==null) return null;
+    
+    // Get BaseURL directory
     WebFile file = aBaseURL.getFile(); if(file==null) return null;
     WebFile dir = file.isDir()? file : file.getParent(); if(dir==null) return null;
+
+    // Get directory file for name
     WebFile ifile = dir.getFile(aName);
-    if(ifile==null) ifile = dir.getFile("pkg.images/" + aName); if(ifile==null) return null;
+    if(ifile==null)
+        ifile = dir.getFile("pkg.images/" + aName);
+    if(ifile==null) return null;
+    
+    // Return image for file
     return get(ifile);
 }
 

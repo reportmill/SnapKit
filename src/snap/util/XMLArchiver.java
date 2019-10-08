@@ -70,6 +70,11 @@ public interface Archivable {
 public WebURL getSourceURL()  { return _surl; }
 
 /**
+ * Sets the WebURL of the currently loading archive.
+ */
+public void setSourceURL(WebURL aURL)  { _surl = aURL; }
+
+/**
  * Returns the owner.
  */
 public Object getOwner()  { return _owner; }
@@ -150,7 +155,10 @@ public Object readObject(Object aSource)
         throw new RuntimeException("XMLArchiver.readObject: Cannot read source: " + aSource);
         
     // Try to get SourceURL from source
-    _surl = WebURL.getURL(aSource);
+    if(getSourceURL()==null) {
+        WebURL surl = WebURL.getURL(aSource);
+        setSourceURL(surl);
+    }
         
     // ReadObject(bytes) and return
     return readObject(bytes);

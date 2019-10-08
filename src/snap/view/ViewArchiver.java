@@ -199,6 +199,24 @@ protected void addAliases(Map cmap)
 }
 
 /**
+ * Returns an image for given name/path.
+ */
+public Image getImage(String aPath)
+{
+    // If there is an Archiver.Owner, look for image as class resource
+    Class cls = getOwnerClass();
+    for(Class c=cls; c!=null && c!=ViewOwner.class; c=c.getSuperclass()) {
+        Image img = Image.get(c, aPath);
+        if(img!=null)
+            return img;
+    }
+    
+    // Otherwise, try to find image name as path relative to Archiver.SourceURL
+    WebURL url = getSourceURL();
+    return Image.get(url, aPath);
+}
+
+/**
  * Returns whether to use real classes.
  */
 public static boolean getUseRealClass()  { return _useRealCls; }
@@ -213,11 +231,9 @@ public static void setUseRealClass(boolean aFlag)  { _useRealCls = aFlag; }
  */
 public static Image getImage(XMLArchiver anArchiver, String aPath)
 {
-    Class cls = anArchiver.getOwnerClass();
-    for(Class c=cls;c!=null && c!=ViewOwner.class;c=c.getSuperclass()) { Image img = Image.get(c, aPath);
-        if(img!=null) return img; }
-    WebURL url = anArchiver.getSourceURL();
-    return Image.get(url, aPath);
+    if(anArchiver instanceof ViewArchiver)
+        return ((ViewArchiver)anArchiver).getImage(aPath);
+    return null;
 }
 
 }
