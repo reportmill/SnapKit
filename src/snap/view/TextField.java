@@ -67,10 +67,14 @@ public class TextField extends ParentView {
  */
 public TextField()
 {
-    setFill(Color.WHITE); setBorder(Color.LIGHTGRAY, 1); getBorder().setInsets(Insets.EMPTY);
+    setFill(Color.WHITE);
+    setBorder(Color.LIGHTGRAY, 1);
+    getBorder().setInsets(Insets.EMPTY);
     enableEvents(Action);
-    enableEvents(MouseEvents); enableEvents(KeyEvents);
-    setFocusable(true); setFocusWhenPressed(true);
+    enableEvents(MouseEvents);
+    enableEvents(KeyEvents);
+    setFocusable(true);
+    setFocusWhenPressed(true);
     
     // Configure label and set
     _label.setPadding(0,0,0,0);
@@ -159,12 +163,18 @@ public Paint getDefaultFill()  { return Color.WHITE; }
 /**
  * Returns the text width.
  */
-public double getTextWidth()  { return length()>0? Math.ceil(getFont().getStringAdvance(getText())) : 0; }
+public double getTextWidth()
+{
+    return length()>0? Math.ceil(getFont().getStringAdvance(getText())) : 0;
+}
 
 /**
  * Returns the text height.
  */
-public double getTextHeight()  { return Math.ceil(getFont().getLineHeight()); }
+public double getTextHeight()
+{
+    return Math.ceil(getFont().getLineHeight());
+}
 
 /**
  * Returns the text bounds.
@@ -235,8 +245,9 @@ protected double getPrefWidthImpl(double aH)
 {
     Insets ins = getInsetsAll();
     double pw1 = getColCount()>0? getTotalColWidth() : getTextWidth() + 10;
-    double pw2 = _label.getPrefWidth(), pw3 = Math.max(pw1, pw2);
-    return ins.left + pw3 + ins.right;
+    double pw2 = _label.getPrefWidth();
+    double pw3 = Math.max(pw1, pw2);
+    return pw3 + ins.getWidth();
 }
 
 /**
@@ -245,8 +256,10 @@ protected double getPrefWidthImpl(double aH)
 protected double getPrefHeightImpl(double aW)
 {
     Insets ins = getInsetsAll();
-    double ph1 = getTextHeight(), ph2 = _label.getPrefHeight(), ph3 = Math.max(ph1, ph2);
-    return ins.top + ph3 + ins.bottom + 6;
+    double ph1 = getTextHeight();
+    double ph2 = _label.getPrefHeight();
+    double ph3 = Math.max(ph1, ph2);
+    return ph3 + ins.getHeight() + 4;
 }
 
 /**
@@ -255,7 +268,8 @@ protected double getPrefHeightImpl(double aW)
 protected void layoutImpl()
 {
     Insets ins = getInsetsAll();
-    double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
+    double x = ins.left, w = getWidth() - ins.getWidth();
+    double y = ins.top, h = getHeight() - ins.getHeight();
     _label.setBounds(x, y, w, h);
 }
 

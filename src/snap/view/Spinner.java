@@ -33,8 +33,8 @@ public class Spinner <T> extends ParentView {
     public static final String Value_Prop = "Value";
     
     // Constant for Button width
-    static final int BTN_W = 14;
-    static DecimalFormat _fmt = new DecimalFormat("#.##");
+    private static final int SPACING = 2;
+    private static DecimalFormat _fmt = new DecimalFormat("#.##");
 
 /**
  * Creates a new Spinner.
@@ -46,6 +46,7 @@ public Spinner()
     
     // Create/configure Text
     _text = new TextField();
+    _text.setGrowWidth(true);
     _text.addEventHandler(e -> textChanged(), Action);
     addChild(_text);
     
@@ -211,29 +212,25 @@ public void textChanged()
 /**
  * Returns the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _text.getPrefWidth()+BTN_W; }
+protected double getPrefWidthImpl(double aH)
+{
+    return RowView.getPrefWidth(this, null, SPACING, aH);
+}
 
 /**
  * Returns the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _text.getPrefHeight(); }
+protected double getPrefHeightImpl(double aW)
+{
+    return RowView.getPrefHeight(this, null, aW);
+}
 
 /**
  * Layout children.
  */
 protected void layoutImpl()
 {
-    double w = getWidth(), h = getHeight();
-    Insets ins = getInsetsAll(); double px = ins.left, py = ins.top, pw = w - px - ins.right, ph = h - py - ins.bottom;
-    
-    // Layout text in bounds minus Button width - 2 (spacing)
-    double tw = pw - BTN_W - 2;
-    _text.setBounds(px, py, tw, ph);
-    
-    // Layout ArrowView
-    double bh = (ph/2-1); // Math.round()?
-    double bx = px + tw + 2, by = py + 1;
-    _arrowView.setBounds(bx, by, BTN_W, bh*2);
+    RowView.layout(this, null, null, true, SPACING);
 }
 
 /**
