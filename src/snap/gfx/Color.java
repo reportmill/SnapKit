@@ -25,7 +25,7 @@ public class Color implements Paint, XMLArchiver.Archivable {
     public static Color DARKGRAY = new Color(.333f);
     public static Color GRAY = new Color(.5f);
     public static Color GREEN = new Color(0f, 1f, 0f);
-    public static Color LIGHTGRAY = new Color(.753f);
+    public static Color LIGHTGRAY = new Color("#C0C0C0");
     public static Color MAGENTA = new Color(0f, 1f, 0f, 0f, 1f);
     public static Color ORANGE = new Color(1f, 200/255f, 0f);
     public static Color PINK = new Color(1f, 175/255f, 175/255f);
@@ -242,10 +242,10 @@ public boolean equals(Object anObj)
     Color other = anObj instanceof Color? (Color)anObj : null; if(other==null) return false;
     
     // Check components
-    if(other._red!=_red) return false;
-    if(other._green!=_green) return false;
-    if(other._blue!=_blue) return false;
-    if(other._alpha!=_alpha) return false;
+    if(!MathUtils.equals(other._red, _red)) return false;
+    if(!MathUtils.equals(other._green, _green)) return false;
+    if(!MathUtils.equals(other._blue, _blue)) return false;
+    if(!MathUtils.equals(other._alpha, _alpha)) return false;
     return true; // Return true since all checks passed
 }
 
@@ -257,7 +257,7 @@ public int hashCode()  { return getRGBA(); }
 /**
  * Returns a string representation of this color.
  */
-public String toString()  { return "{" + _red + " " + _green + " " + _blue + "}"; }
+public String toString()  { return "Color: " + toHexString(); }
 
 /**
  * Returns a hex string representation of this color.

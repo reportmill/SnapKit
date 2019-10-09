@@ -68,8 +68,7 @@ public class TextField extends ParentView {
 public TextField()
 {
     setFill(Color.WHITE);
-    setBorder(Color.LIGHTGRAY, 1);
-    getBorder().setInsets(Insets.EMPTY);
+    setBorder(getDefaultBorder());
     enableEvents(Action);
     enableEvents(MouseEvents);
     enableEvents(KeyEvents);
@@ -149,6 +148,19 @@ public void setRadius(double aValue)  { _rad = aValue; }
  * Returns the default alignment.
  */    
 public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
+
+/**
+ * Returns the default border.
+ */
+public Border getDefaultBorder()
+{
+    if(_defBorder!=null) return _defBorder;
+    Border bdr = Border.createLineBorder(Color.LIGHTGRAY, 1);
+    bdr.setInsets(Insets.EMPTY);
+    System.out.println("Color.LIGHTGRAY: " + Color.LIGHTGRAY.toHexString());
+    return _defBorder = bdr;
+}
+private static Border _defBorder;
 
 /**
  * Returns the padding default.

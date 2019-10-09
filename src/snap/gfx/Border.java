@@ -65,6 +65,23 @@ public void setPaintAbove(boolean aValue)  { _paintAbove = aValue; }
 public void paint(Painter aPntr, Shape aShape)  { }
 
 /**
+ * Standard equals implementation.
+ */
+public boolean equals(Object anObj)
+{
+    // Check identity and get other
+    if(anObj==this) return true;
+    Border other = anObj instanceof Border? (Border)anObj : null; if(other==null) return false;
+    
+    // Check Color, Width
+    if(!other.getColor().equals(getColor())) return false;
+    if(other.getWidth()!=getWidth()) return false;
+    
+    // Return true since all checks passed
+    return true;
+}
+
+/**
  * Creates an empty border for inset.
  */
 public static Border.EmptyBorder createEmptyBorder(double w)  { return new EmptyBorder(w,w,w,w); }
@@ -103,15 +120,19 @@ public static Border.BevelBorder createLoweredBevelBorder()
  */
 public static Border fromXMLBorder(XMLArchiver anArchiver, XMLElement anElement)
 {
+    // Get type
     String type = anElement.getAttributeValue("type", "");
     Border border = null;
+    
+    // Create instance based on type
     if(type.equals("line")) border = new LineBorder();
     else if(type.equals("bevel")) border = new BevelBorder();
     else if(type.equals("etched")) border = new EtchBorder();
     else if(type.equals("empty")) border = new EmptyBorder();
     else border = new NullBorder();
+    
+    // Unarchive border and return
     border.fromXML(anArchiver, anElement);
-    if(anElement.getAttributeValue("title")!=null) System.err.println("Border.fromXML: No more titles!");
     return border;
 }
 
@@ -217,7 +238,10 @@ public static class LineBorder extends Border {
     }
     
     /** Standard toString implementation. */
-    public String toString()  { return "LineBorder { Color=" + _color + ", Width=" + _width + " }"; }
+    public String toString()
+    {
+        return "LineBorder { Color=" + _color.toHexString() + ", Width=" + _width + " }";
+    }
 }
 
 /**
