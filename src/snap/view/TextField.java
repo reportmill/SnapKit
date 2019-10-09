@@ -157,7 +157,6 @@ public Border getDefaultBorder()
     if(_defBorder!=null) return _defBorder;
     Border bdr = Border.createLineBorder(Color.LIGHTGRAY, 1);
     bdr.setInsets(Insets.EMPTY);
-    System.out.println("Color.LIGHTGRAY: " + Color.LIGHTGRAY.toHexString());
     return _defBorder = bdr;
 }
 private static Border _defBorder;
