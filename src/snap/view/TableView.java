@@ -69,7 +69,8 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
  */
 public TableView()
 {
-    // Enable Action event for selection change
+    // Set border, enable Action event for selection change
+    setBorder(getDefaultBorder());
     enableEvents(MousePress, KeyPress, Action);
     setFocusable(true); setFocusWhenPressed(true);
     
@@ -79,7 +80,7 @@ public TableView()
     
     // Create/configure/add ScrollGroup
     _scrollGroup = new ScrollGroup(_split);
-    setBorder(_scrollGroup.getBorder()); _scrollGroup.setBorder(null);
+    _scrollGroup.setBorder(null);
     addChild(_scrollGroup);
     
     // Register PickList to notify when selection changes
@@ -304,7 +305,10 @@ public boolean isShowHeader()  { return _showHeader; }
  */
 public void setShowHeader(boolean aValue)
 {
+    // If already set, just return
     if(aValue==isShowHeader()) return;
+    
+    // Set value, fire prop change
     firePropChange("ShowHeader", _showHeader, _showHeader = aValue);
     
     // Add/remove header
@@ -839,6 +843,11 @@ protected void setFocused(boolean aValue)  { if(aValue==isFocused()) return; sup
 public String getValuePropName()  { return SelItem_Prop; }
 
 /**
+ * Returns the default border.
+ */
+public Border getDefaultBorder()  { return ScrollView.SCROLL_VIEW_BORDER; }
+
+/**
  * XML archival.
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
@@ -847,7 +856,7 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     XMLElement e = super.toXMLView(anArchiver);
     
     // Archive ShowHeader
-    if(!isShowHeader()) e.add("ShowHeader", false);
+    if(isShowHeader()) e.add("ShowHeader", false);
     
     // Archive GridColor, ShowLinesX, ShowLinesY
     if(getGridColor()!=null) e.add("GridColor", '#' + getGridColor().toHexString());
