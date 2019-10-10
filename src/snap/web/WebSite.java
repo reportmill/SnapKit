@@ -191,7 +191,12 @@ public synchronized WebFile getFile(String aPath) throws ResponseException
         
     // Get file header from response, create file and return
     FileHeader fhdr = resp.getFileHeader();
-    file = createFile(fhdr); file._verified = true; file._saved = true; file._url = url;
+    file = createFile(fhdr);
+    file._verified = true;
+    file._saved = true;
+    file._modTime = fhdr.getModTime();
+    file._size = fhdr.getSize();
+    file._url = url;
     return file;
 }
 
@@ -212,8 +217,12 @@ protected synchronized WebFile createFile(FileHeader fileHdr)
         return file;
     
     // Create/configure new file
-    file = new WebFile(); file._path = path; file._dir = fileHdr.isDir(); file._site = this;
-    file._modTime = fileHdr.getModTime(); file._size = fileHdr.getSize();
+    file = new WebFile();
+    file._path = path;
+    file._dir = fileHdr.isDir();
+    file._site = this;
+    file._modTime = fileHdr.getModTime();
+    file._size = fileHdr.getSize();
     file.setMIMEType(fileHdr.getMIMEType());
     
     // Put in cache, start listening to file changes and return

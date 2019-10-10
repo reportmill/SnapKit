@@ -149,15 +149,27 @@ public boolean isVerified()  { return _verified; }
  */
 protected void setVerified(boolean aValue)
 {
+    // If already set, just return
     if(aValue==_verified) return;
-    if(!aValue) { _modTime = 0; _size = 0; _saved = false; }
+    
+    // If false, clear ModTime, Size, Saved
+    if(!aValue) {
+        _modTime = 0; _size = 0; _saved = false;
+    }
+    
+    // Set new value, fire prop change
     firePropChange(Verified_Prop, _verified, _verified = aValue);
 }
 
 /**
  * Returns the file, ensuring that it's status has been checked with the site.
  */
-public WebFile getVerified()  { if(!isVerified()) getSite().getFile(getPath()); return this; }
+public WebFile getVerified()
+{
+    if(!isVerified())
+        getSite().getFile(getPath());
+    return this;
+}
 
 /**
  * Returns whether this file has been saved at site..
@@ -177,11 +189,6 @@ protected void setSaved(boolean aValue)
  * Conventional file method that simply wraps isSaved().
  */
 public boolean getExists()  { return isSaved(); }
-
-/**
- * Conventional file method that simply wraps getModTime().
- */
-public long getLastModTime()  { return _modTime; }
 
 /**
  * Returns the file modification time.
@@ -213,6 +220,11 @@ public void setModTimeSaved(long aTime)
 public Date getModDate()  { return new Date(_modTime); }
 
 /**
+ * Conventional file method that simply wraps getModTime().
+ */
+public long getLastModTime()  { return _modTime; }
+
+/**
  * Returns the file size.
  */
 public long getSize()  { return _size; }
@@ -236,8 +248,15 @@ public boolean isLoaded()  { return _dir? (_files!=null) : (_bytes!=null); }
  */
 protected void setLoaded(boolean aValue)
 {
+    // If already set, just return
     if(aValue==isLoaded()) return;
-    if(!aValue) { _files = null; _bytes = null; _updater = null; }
+    
+    // If clearing, clear info
+    if(!aValue) {
+        _files = null; _bytes = null; _updater = null;
+    }
+    
+    // Set value and fire prop change
     firePropChange(Loaded_Prop, !aValue, aValue);
 }
 
@@ -252,12 +271,17 @@ public synchronized byte[] getBytes()
     // Set request for bytes for URL
     WebURL url = getURL();
     WebResponse resp = url.getResponse();
-    if(resp.getCode()==WebResponse.OK) _saved = true;
+    
+    // Handle response
+    if(resp.getCode()==WebResponse.OK)
+        _saved = true;
     if(resp.getException()!=null)
         throw new ResponseException(resp);
+        
+    // Update file attributes
     _bytes = resp.getBytes();
-    _size = _bytes!=null? _bytes.length : 0;
     _modTime = resp.getModTime();
+    _size = _bytes!=null? _bytes.length : 0;
     return _bytes;
 }
 
@@ -266,9 +290,14 @@ public synchronized byte[] getBytes()
  */
 public void setBytes(byte theBytes[])
 {
+    // If already set, just return
     if(ArrayUtils.equals(theBytes, _bytes)) return;
+    
+    // Set bytes and fire PropChange
     firePropChange(Bytes_Prop, _bytes, _bytes = theBytes);
-    setSize(theBytes!=null? theBytes.length : 0); // Update size
+    
+    // Update size
+    setSize(theBytes!=null? theBytes.length : 0);
 }
 
 /**
@@ -292,18 +321,28 @@ public synchronized List <WebFile> getFiles()
     // Get response for files
     WebURL url = getURL();
     WebResponse resp = url.getResponse();
-    if(resp.getCode()==WebResponse.OK) _saved = true;
+    
+    // Handle Response.Code
+    if(resp.getCode()==WebResponse.OK)
+        _saved = true;
     if(resp.getException()!=null)
         throw new ResponseException(resp);
     
     // Get file headers
     WebSite site = getSite();
-    List <FileHeader> fhdrs = resp.getFileHeaders(); if(fhdrs==null) return Collections.EMPTY_LIST;
+    List <FileHeader> fhdrs = resp.getFileHeaders();
+    if(fhdrs==null) return Collections.EMPTY_LIST;
+    
+    // Get files
     List <WebFile> files = new ArrayList(fhdrs.size());
-    for(FileHeader fhdr : fhdrs) { WebFile file = site.createFile(fhdr);
-        file.setParent(this); file._saved = true; files.add(file); }
+    for(FileHeader fhdr : fhdrs) {
+        WebFile file = site.createFile(fhdr);
+        file.setParent(this);
+        file._saved = true;
+        files.add(file);
+    }
         
-    // Sort files, put in safe array and return
+    // Sort files, set and return
     Collections.sort(files);
     _files = files;
     _modTime = resp.getModTime();
@@ -349,9 +388,12 @@ public void resetContent()  { setLoaded(false); }
 public void reload()
 {
     // Reset content (just return if not verified)
-    resetContent(); if(!isVerified()) return;
+    resetContent();
+    if(!isVerified())
+        return;
     
     // Reset and verify
+    long modTime = getModTime();
     reset();
     getVerified();
     
@@ -359,6 +401,12 @@ public void reload()
     if(!isSaved()) {
         getParent().resetContent();
         _saved = true; setSaved(false);
+    }
+    
+    // If ModTime changed, trigger ModTime prop change
+    else if(modTime!=0 && isFile() && modTime!=getModTime()) {
+        modTime = getModTime(); _modTime = 0;
+        setModTime(modTime);
     }
 }
 
