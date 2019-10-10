@@ -26,6 +26,39 @@ public void addPropChangeListener(PropChangeListener aLsnr)
 public void removePropChangeListener(PropChangeListener aLsnr)  { _pcs.removePropChangeListener(aLsnr); }
 
 /**
+ * Fires a property change for given property name, old value, new value and index.
+ */
+protected void firePropChange(String aProp, Object oldVal, Object newVal)
+{
+    if(!_pcs.hasListener(aProp)) return;
+    PropChange pc = new PropChange(this, aProp, oldVal, newVal);
+    firePropChange(pc);
+}
+
+/**
+ * Fires a property change for given property name, old value, new value and index.
+ */
+protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
+{
+    if(!_pcs.hasListener(aProp)) return;
+    PropChange pc = new PropChange(this, aProp, oldVal, newVal, anIndex);
+    firePropChange(pc);
+}
+
+/**
+ * Fires a given property change.
+ */
+protected void firePropChange(PropChange aPC)
+{
+    _pcs.firePropChange(aPC);
+}
+
+/**
+ * Returns whether has PropChangeListener.
+ */
+public boolean hasPropChangeListener()  { return _pcs.hasListener(null); }
+
+/**
  * Adds a deep change listener to shape to listen for shape changes and property changes received by shape.
  */
 public void addDeepChangeListener(DeepChangeListener aLsnr)
@@ -40,43 +73,15 @@ public void addDeepChangeListener(DeepChangeListener aLsnr)
 public void removeDeepChangeListener(DeepChangeListener aLsnr)  { _pcs.removeDeepChangeListener(aLsnr); }
 
 /**
- * Fires a property change for given property name, old value, new value and index.
- */
-protected void firePropChange(String aProp, Object oldVal, Object newVal)
-{
-    if(!_pcs.hasListener(aProp)) return;
-    firePropChange(new PropChange(this, aProp, oldVal, newVal));
-}
-
-/**
- * Fires a property change for given property name, old value, new value and index.
- */
-protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
-{
-    if(!_pcs.hasListener(aProp)) return;
-    firePropChange(new PropChange(this, aProp, oldVal, newVal, anIndex));
-}
-
-/**
- * Fires a given property change.
- */
-protected void firePropChange(PropChange aPCE)  {  _pcs.firePropChange(aPCE); }
-
-/**
- * Returns whether has PropChangeListener.
- */
-public boolean hasPropChangeListener()  { return _pcs.hasListener(null); }
-
-/**
  * Returns whether has DeepChangeListener.
  */
 public boolean hasDeepChangeListener()  { return _pcs.hasDeepListener(); }
 
 /** Property change listener implementation to forward changes on to deep listeners. */
-//protected void propertyChange(PropChange aPCE)  { _pcs.fireDeepChange(this, aPCE); }
+//protected void propertyChange(PropChange aPC)  { _pcs.fireDeepChange(this, aPC); }
 
 /** Deep property change listener implementation to forward to this View's deep listeners. */
-//protected void deepChange(Object aLsnr, PropChange aPCE)  { _pcs.fireDeepChange(aLsnr, aPCE); }
+//protected void deepChange(Object aLsnr, PropChange aPC)  { _pcs.fireDeepChange(aLsnr, aPC); }
 
 /**
  * Standard clone implementation.

@@ -40,6 +40,22 @@ public static <T> T newInstance(Class <T> aClass)
 }
 
 /**
+ * Returns a clone of given Cloneable object using reflection.
+ */
+public static Object cloneCloneable(Cloneable anObj)
+{
+    // Get clone method from Obj.Class
+    Class cls = anObj.getClass();
+    Method meth = null;
+    try { meth = cls.getMethod("clone"); }
+    catch(NoSuchMethodException e) { throw new RuntimeException(e); }
+    
+    // Invoke clone and return result
+    try { return meth.invoke(anObj); }
+    catch(Throwable e) { throw new RuntimeException(e); }
+}
+
+/**
  * Returns the class for an object.
  */
 public static Class getClass(Object anObj)

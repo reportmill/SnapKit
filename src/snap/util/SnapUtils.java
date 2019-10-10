@@ -236,7 +236,8 @@ public static int getRandomInt(int aValue)  { return MathUtils.randomInt()%aValu
 public static double getRandomDouble(double aValue)  { return MathUtils.randomFloat((float)aValue); }
 
 /**
- * Returns a clone of the given object (supports List, Map, RMObject, null and others by reflection).
+ * Returns a clone of the given object (supports List, Map, Cloneable and null).
+ * If object not cloneable, returns object.
  */
 public static <T> T clone(T anObj)
 {
@@ -248,14 +249,9 @@ public static <T> T clone(T anObj)
     if(anObj instanceof Map)
         return (T)MapUtils.clone((Map)anObj);
     
-    // Handle SnapObject
-    if(anObj instanceof SnapObject)
-        return (T)((SnapObject)anObj).clone();
-    
     // Handle Cloneable: Invoke clone method with reflection
     if(anObj instanceof Cloneable)
-        try { return (T)ClassUtils.getMethodOrThrow(anObj.getClass(), "clone").invoke(anObj); }
-        catch(Throwable t) { }
+        return (T)ClassUtils.cloneCloneable((Cloneable)anObj);
         
     // If all else fails, just return given object
     return anObj;
@@ -272,12 +268,14 @@ public static <T> T cloneDeep(T anObj)
     // If object is Map, duplicate entries and clone values
     if(clone instanceof Map) { Map map = (Map)clone;
         for(Map.Entry entry : (Set<Map.Entry>)map.entrySet())
-            map.put(entry.getKey(), cloneDeep(entry.getValue())); }
+            map.put(entry.getKey(), cloneDeep(entry.getValue()));
+    }
     
     // If object is List, duplicate it's elements
     else if(clone instanceof List) { List list = (List)clone;
         for(int i=0, iMax=list.size(); i<iMax; i++) { Object item = list.get(i);
-            list.set(i, cloneDeep(item)); } }
+            list.set(i, cloneDeep(item)); }
+    }
 
     // Return object
     return clone;
