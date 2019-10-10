@@ -34,8 +34,11 @@ public abstract class WebSite {
     // PropChangeListener for file changes
     PropChangeListener        _fileLsnr = pc -> fileDidPropChange(pc);
     
-    // The PropChangeSupport
+    // The PropChangeSupport for site listeners
     PropChangeSupport         _pcs = PropChangeSupport.EMPTY;
+
+    // The PropChangeSupport for site file listeners
+    PropChangeSupport         _filePCS = PropChangeSupport.EMPTY;
 
 /**
  * Returns the URL.
@@ -436,25 +439,25 @@ protected void firePropChange(String aProp, Object oldVal, Object newVal)
 }
 
 /**
- * Adds a deep change listener to shape to listen for shape changes and property changes received by shape.
+ * Adds a PropChangeListener to listen for any site file PropChange.
  */
-public void addDeepChangeListener(DeepChangeListener aLsnr)
+public void addFileChangeListener(PropChangeListener aLsnr)
 {
-    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-    _pcs.addDeepChangeListener(aLsnr);
+    if(_filePCS==PropChangeSupport.EMPTY) _filePCS = new PropChangeSupport(this);
+    _filePCS.addPropChangeListener(aLsnr);
 }
 
 /**
- * Removes a deep change listener from shape.
+ * Removes a site file PropChangeListener.
  */
-public void removeDeepChangeListener(DeepChangeListener aLsnr)  { _pcs.removeDeepChangeListener(aLsnr); }
+public void removeFileChangeListener(PropChangeListener aLsnr)  { _filePCS.removePropChangeListener(aLsnr); }
 
 /**
- * Property change listener on site files to forward changes to deep listeners.
+ * Called when any site file changes.
  */
 protected void fileDidPropChange(PropChange aPC)
 {
-    _pcs.fireDeepChange(this, aPC);
+    _filePCS.firePropChange(aPC);
 }
 
 /**
