@@ -9,22 +9,25 @@ import snap.web.WebFile;
 /**
  * An object to get, set and store site settings.
  */
-public class Settings extends SnapObject implements GetKeys, GetValue, SetValue, GetClass, Key.GetSet, WebFile.Updater {
+public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetSet, WebFile.Updater {
 
     // The file for the source of settings
-    WebFile          _file;
+    WebFile            _file;
     
     // The file bytes after last read
-    byte             _fileBytes[];
+    byte               _fileBytes[];
 
     // The parent settings
-    Settings         _parent;
+    Settings           _parent;
     
     // The key of this settings in parent settings
-    String           _key;
+    String             _key;
 
     // The map
-    Map              _map = new HashMap();
+    Map                _map = new HashMap();
+
+    // The PropChangeSupport
+    PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
 
 /**
  * Creates new Settings.
@@ -206,27 +209,99 @@ public Settings getSettings(String aKey)  { return getSettings(aKey, false); }
  */
 public Settings getSettings(String aKey, boolean doCreate)
 {
-    Object value = get(aKey); if(value instanceof Settings) return (Settings)value;
-    if(value==null && !doCreate) return null;
+    // Get value
+    Object value = get(aKey);
+    if(value instanceof Settings)
+        return (Settings)value;
+    if(value==null && !doCreate)
+        return null;
+    
+    // Create new settings
     Settings settings = new Settings();
     settings._parent = this; settings._key = aKey;
+    
+    // If value is map, add each entry
     if(value instanceof Map) { Map<String,Object> map = (Map)value;
         for(Map.Entry<String,Object> entry : map.entrySet())
-            settings.simplePut(entry.getKey(), entry.getValue()); }
+            settings.simplePut(entry.getKey(), entry.getValue());
+    }
+    
+    // Add the key/value and return
     simplePut(aKey, settings);
     return settings;
 }
 
 /**
+ * Saves the file.
+ */
+public void updateFile(WebFile aFile)
+{
+    _fileBytes = StringUtils.getBytes(toString());
+    aFile.setBytes(_fileBytes);
+}
+
+/**
+ * Add listener.
+ */
+public void addPropChangeListener(PropChangeListener aLsnr)
+{
+    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+    _pcs.addPropChangeListener(aLsnr);
+}
+
+/**
+ * Remove listener.
+ */
+public void removePropChangeListener(PropChangeListener aLsnr)
+{
+    _pcs.removePropChangeListener(aLsnr);
+}
+
+/**
  * Override to forward to parents if present.
  */
-protected void firePropChange(String aName, Object oldVal, Object newVal, int anIndex)
+protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
 {
-    if(_parent!=null) _parent.firePropChange(_key + '.' + aName, oldVal, newVal, anIndex);
-    else {
-        super.firePropChange(aName, oldVal, newVal, anIndex);
-        getFile().setUpdater(this);
+    // If parent is set, forward to it instead
+    if(_parent!=null) {
+        _parent.firePropChange(_key + '.' + aProp, oldVal, newVal, anIndex);
+        return;
     }
+    
+    // Do normal firePropChange
+    if(!_pcs.hasListener(aProp)) return;
+    PropChange pc = new PropChange(this, aProp, oldVal, newVal, anIndex);
+    _pcs.firePropChange(pc);
+    
+    // Update file
+    getFile().setUpdater(this);
+}
+
+/** JSON Archival methods. */
+public String getJSONClass()  { return _parent!=null? HashMap.class.getName() : getClass().getName(); }
+public void setJSONValue(String aKey, Object aValue)  { simplePut(aKey, aValue); }
+public Object getJSONValue(String aKey)  { return get(aKey); }
+public Collection <String> getJSONKeys()  { return _map.keySet(); }
+public Object getKeyValue(String aKey)  { return get(aKey); }
+public void setKeyValue(String aKey, Object aValue)  { put(aKey, aValue); }
+
+/**
+ * Standard toString implementation.
+ */
+public String toString()
+{
+    JSONArchiver archiver = new JSONArchiver();
+    return archiver.writeObject(this).toString();
+}
+
+/**
+ * Returns the settings for given file.
+ */
+public static synchronized Settings get(WebFile aFile)
+{
+    Settings stgs = (Settings)aFile.getProp("Settings");
+    if(stgs==null) stgs = new Settings(aFile);
+    return stgs;
 }
 
 /**
@@ -264,53 +339,27 @@ public class SettingsList<E> extends AbstractList<E> {
     /** Returns settings at index. */
     public Settings getSettings(int anIndex, boolean doCreate)
     {
+        // Get value
         Object value = anIndex<size() || !doCreate? get(anIndex) : null;
-        if(value instanceof Settings) return (Settings)value;
+        if(value instanceof Settings)
+            return (Settings)value;
+        
+        // Create new settings
         Settings settings = new Settings();
         settings._parent = Settings.this; settings._key = _key + '[' + anIndex + ']';
+        
+        // If value is map, add each entry
         if(value instanceof Map) { Map<String,Object> map = (Map)value;
             for(Map.Entry<String,Object> entry : map.entrySet())
-                settings.simplePut(entry.getKey(), entry.getValue()); }
+                settings.simplePut(entry.getKey(), entry.getValue());
+        }
+        
+        // Add/set settings
         if(anIndex<size())
             _list.set(anIndex, (E)settings);
         else add(anIndex, (E)settings);
         return settings;
     }
-}
-
-public String getJSONClass()  { return _parent!=null? HashMap.class.getName() : getClass().getName(); }
-public void setJSONValue(String aKey, Object aValue)  { simplePut(aKey, aValue); }
-public Object getJSONValue(String aKey)  { return get(aKey); }
-public Collection <String> getJSONKeys()  { return _map.keySet(); }
-public Object getKeyValue(String aKey)  { return get(aKey); }
-public void setKeyValue(String aKey, Object aValue)  { put(aKey, aValue); }
-
-/**
- * Standard toString implementation.
- */
-public String toString()
-{
-    JSONArchiver archiver = new JSONArchiver();
-    return archiver.writeObject(this).toString();
-}
-
-/**
- * Saves the file.
- */
-public void updateFile(WebFile aFile)
-{
-    _fileBytes = StringUtils.getBytes(toString());
-    aFile.setBytes(_fileBytes);
-}
-
-/**
- * Returns the settings for given file.
- */
-public static synchronized Settings get(WebFile aFile)
-{
-    Settings stgs = (Settings)aFile.getProp("Settings");
-    if(stgs==null) stgs = new Settings(aFile);
-    return stgs;
 }
 
 }

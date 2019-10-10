@@ -83,9 +83,12 @@ public boolean hasDeepChangeListener()  { return _pcs.hasDeepListener(); }
  */
 public Object clone()
 {
+    // Do normal clone
     SnapObject clone = null; try { clone = (SnapObject)super.clone(); }
     catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
-    clone._pcs = PropChangeSupport.EMPTY;  // Clear listeners and return clone
+    
+    // Clear PropChangeSupport and return
+    clone._pcs = PropChangeSupport.EMPTY;
     return clone;
 }
   

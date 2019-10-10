@@ -9,7 +9,7 @@ import snap.util.*;
 /**
  * Represents a file from a WebSite.
  */
-public class WebFile extends SnapObject implements Comparable<WebFile> {
+public class WebFile implements Comparable <WebFile> {
 
     // The WebSite that provided this file
     WebSite           _site;
@@ -50,6 +50,9 @@ public class WebFile extends SnapObject implements Comparable<WebFile> {
     // The URL for this file
     WebURL            _url;
     
+    // The PropChangeSupport
+    PropChangeSupport _pcs = PropChangeSupport.EMPTY;
+
     // Constants for properties
     final public static String Bytes_Prop = "Bytes";
     final public static String File_Prop = "File";
@@ -494,6 +497,33 @@ public WebURL getURL(String aPath)
     if(aPath.startsWith("/")) getSite().getURL(aPath);
     String urls = PathUtils.getChild(getURL().getString(), aPath);
     return WebURL.getURL(urls);
+}
+
+/**
+ * Add listener.
+ */
+public void addPropChangeListener(PropChangeListener aLsnr)
+{
+    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+    _pcs.addPropChangeListener(aLsnr);
+}
+
+/**
+ * Remove listener.
+ */
+public void removePropChangeListener(PropChangeListener aLsnr)
+{
+    _pcs.removePropChangeListener(aLsnr);
+}
+
+/**
+ * Fires a property change for given property name, old value, new value and index.
+ */
+protected void firePropChange(String aProp, Object oldVal, Object newVal)
+{
+    if(!_pcs.hasListener(aProp)) return;
+    PropChange pc = new PropChange(this, aProp, oldVal, newVal);
+    _pcs.firePropChange(pc);
 }
 
 /**

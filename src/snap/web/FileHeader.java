@@ -7,23 +7,26 @@ import snap.util.*;
 /**
  * A class to hold basic information for a generic file.
  */
-public class FileHeader extends SnapObject {
+public class FileHeader {
 
     // The file path
-    String            _path;
+    String             _path;
     
     // Whether file is a directory
-    boolean           _dir;
+    boolean            _dir;
     
     // The file modified time
-    long              _modTime;
+    long               _modTime;
     
     // The file size
-    long              _size;
+    long               _size;
     
     // The MIME type
-    String            _mimeType;
+    String             _mimeType;
     
+    // The PropChangeSupport
+    PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
+
     // Constants for properties
     final public static String LastModTime_Prop = "LastModTime";
     final public static String Size_Prop = "Size";
@@ -118,6 +121,33 @@ public void setMIMEtype(String aMIMEType)
 {
     if(SnapUtils.equals(aMIMEType, _mimeType)) return;
     firePropChange(MIMEType_Prop, _mimeType, _mimeType = aMIMEType);
+}
+
+/**
+ * Add listener.
+ */
+public void addPropChangeListener(PropChangeListener aLsnr)
+{
+    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+    _pcs.addPropChangeListener(aLsnr);
+}
+
+/**
+ * Remove listener.
+ */
+public void removePropChangeListener(PropChangeListener aLsnr)
+{
+    _pcs.removePropChangeListener(aLsnr);
+}
+
+/**
+ * Fires a property change for given property name, old value, new value and index.
+ */
+protected void firePropChange(String aProp, Object oldVal, Object newVal)
+{
+    if(!_pcs.hasListener(aProp)) return;
+    PropChange pc = new PropChange(this, aProp, oldVal, newVal);
+    _pcs.firePropChange(pc);
 }
 
 /**

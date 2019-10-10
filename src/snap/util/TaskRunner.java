@@ -6,32 +6,35 @@ package snap.util;
 /**
  * A class for running operations in the background.
  */
-public abstract class TaskRunner <T> extends SnapObject implements TaskMonitor {
+public abstract class TaskRunner <T> implements TaskMonitor {
 
     // The name of this runner
-    String           _name = "TaskRunner Thread";
+    String             _name = "TaskRunner Thread";
     
     // The TaskMonitor
-    TaskMonitor      _monitor = TaskMonitor.NULL;
+    TaskMonitor        _monitor = TaskMonitor.NULL;
     
     // The runner status
-    Status           _status = Status.Idle;
+    Status             _status = Status.Idle;
 
     // The runner thread
-    Thread           _thread;
+    Thread             _thread;
     
     // The runner start time (milliseconds)
-    long             _startTime;
+    long               _startTime;
     
     // The runner end time (milliseconds)
-    long             _endTime;
+    long               _endTime;
     
     // The result of the run method
-    T                _result;
+    T                  _result;
     
     // The exception thrown if run failed
-    Exception        _exception;
+    Exception          _exception;
     
+    // The PropChangeSupport
+    PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
+
     // Constants for status
     public enum Status { Idle, Running, Finished, Cancelled, Failed }
     
@@ -110,7 +113,11 @@ public Status getStatus()  { return _status; }
 /**
  * Sets the status.
  */
-protected void setStatus(Status aStatus)  { firePropChange(Status_Prop, _status, _status = aStatus); }
+protected void setStatus(Status aStatus)
+{
+    if(aStatus==getStatus()) return;
+    firePropChange(Status_Prop, _status, _status = aStatus);
+}
 
 /**
  * Returns the thread.
@@ -252,6 +259,33 @@ protected void invokeFinished()
         cancelled(_exception);
     else failure(_exception);
     finished();
+}
+
+/**
+ * Add listener.
+ */
+public void addPropChangeListener(PropChangeListener aLsnr)
+{
+    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+    _pcs.addPropChangeListener(aLsnr);
+}
+
+/**
+ * Remove listener.
+ */
+public void removePropChangeListener(PropChangeListener aLsnr)
+{
+    _pcs.removePropChangeListener(aLsnr);
+}
+
+/**
+ * Fires a property change for given property name, old value, new value and index.
+ */
+protected void firePropChange(String aProp, Object oldVal, Object newVal)
+{
+    if(!_pcs.hasListener(aProp)) return;
+    PropChange pc = new PropChange(this, aProp, oldVal, newVal);
+    _pcs.firePropChange(pc);
 }
 
 }

@@ -9,7 +9,7 @@ import snap.web.*;
 /**
  * This class represents a block of text (lines).
  */
-public class RichText extends SnapObject implements CharSequence, Cloneable, XMLArchiver.Archivable {
+public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable {
 
     // The Source of the current content
     Object               _source;
@@ -38,6 +38,9 @@ public class RichText extends SnapObject implements CharSequence, Cloneable, XML
     // The width of the rich text
     double               _width = -1;
 
+    // The PropChangeSupport
+    PropChangeSupport    _pcs = PropChangeSupport.EMPTY;
+    
     // Constants for properties
     public static final String Chars_Prop = "Chars";
     public static final String Style_Prop = "Style";
@@ -647,6 +650,75 @@ public RichText subtext(int aStart, int aEnd)
 }
 
 /**
+ * Add listener.
+ */
+public void addPropChangeListener(PropChangeListener aLsnr)
+{
+    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+    _pcs.addPropChangeListener(aLsnr);
+}
+
+/**
+ * Remove listener.
+ */
+public void removePropChangeListener(PropChangeListener aLsnr)
+{
+    _pcs.removePropChangeListener(aLsnr);
+}
+
+/**
+ * Fires a property change for given property name, old value, new value and index.
+ */
+protected void firePropChange(String aProp, Object oldVal, Object newVal)
+{
+    if(!_pcs.hasListener(aProp)) return;
+    PropChange pc = new PropChange(this, aProp, oldVal, newVal);
+    firePropChange(pc);
+}
+
+/**
+ * Fires a property change for given property name, old value, new value and index.
+ */
+protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
+{
+    if(!_pcs.hasListener(aProp)) return;
+    PropChange pc = new PropChange(this, aProp, oldVal, newVal, anIndex);
+    firePropChange(pc);
+}
+
+/**
+ * Fires a given property change.
+ */
+protected void firePropChange(PropChange aPC)
+{
+    _pcs.firePropChange(aPC);
+}
+
+/**
+ * Standard clone implementation.
+ */
+public RichText clone()
+{
+    // Do normal clone
+    RichText clone = null; try { clone = (RichText)super.clone(); }
+    catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
+    
+    // Reset lines array and length
+    clone._lines = new ArrayList(getLineCount());
+    clone._length = 0;
+    
+    // Copy lines deep
+    for(int i=0,iMax=getLineCount();i<iMax;i++) {
+        RichTextLine line = getLine(i), lclone = line.clone();
+        clone.addLine(lclone,i);
+    }
+    
+    // Reset PropChangeSupport and return
+    clone._pcs = PropChangeSupport.EMPTY;
+    return clone;
+}
+
+/**
  * XML archival.
  */
 public XMLElement toXML(XMLArchiver anArchiver)
@@ -805,19 +877,6 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     
     // Return this xstring
     return this;
-}
-
-/**
- * Standard clone implementation.
- */
-public RichText clone()
-{
-    // Get standard clone, copy Lines, clear Length and return
-    RichText clone = (RichText)super.clone();
-    clone._lines = new ArrayList(); clone._length = 0;
-    for(int i=0,iMax=getLineCount();i<iMax;i++) { RichTextLine line = getLine(i), lclone = line.clone();
-        clone.addLine(lclone,i); }
-    return clone;
 }
 
 /**

@@ -11,7 +11,7 @@ import snap.util.*;
 /**
  * This is an abstract class to provide data management (create, get, put, delete) and file management.
  */
-public abstract class WebSite extends SnapObject {
+public abstract class WebSite {
     
     // The URL describing this WebSite
     WebURL                    _url;
@@ -34,6 +34,9 @@ public abstract class WebSite extends SnapObject {
     // PropChangeListener for file changes
     PropChangeListener        _fileLsnr = pc -> fileDidPropChange(pc);
     
+    // The PropChangeSupport
+    PropChangeSupport         _pcs = PropChangeSupport.EMPTY;
+
 /**
  * Returns the URL.
  */
@@ -397,16 +400,60 @@ public synchronized void refresh()  { }
 public void flush() throws Exception { }
 
 /**
- * Property change listener implementation to forward changes on to deep listeners.
+ * Add listener.
  */
-public void fileDidPropChange(PropChange aPCE)  { _pcs.fireDeepChange(this, aPCE); }
+public void addPropChangeListener(PropChangeListener aLsnr)
+{
+    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+    _pcs.addPropChangeListener(aLsnr);
+}
 
-/** Returns a "not implemented" exception for string (method name). */
-private Exception notImpl(String aStr)  { return new Exception(getClass().getName() + ": Not implemented:" + aStr); }
+/**
+ * Remove listener.
+ */
+public void removePropChangeListener(PropChangeListener aLsnr)
+{
+    _pcs.removePropChangeListener(aLsnr);
+}
+
+/**
+ * Fires a property change for given property name, old value, new value and index.
+ */
+protected void firePropChange(String aProp, Object oldVal, Object newVal)
+{
+    if(!_pcs.hasListener(aProp)) return;
+    PropChange pc = new PropChange(this, aProp, oldVal, newVal);
+    _pcs.firePropChange(pc);
+}
+
+/**
+ * Adds a deep change listener to shape to listen for shape changes and property changes received by shape.
+ */
+public void addDeepChangeListener(DeepChangeListener aLsnr)
+{
+    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+    _pcs.addDeepChangeListener(aLsnr);
+}
+
+/**
+ * Removes a deep change listener from shape.
+ */
+public void removeDeepChangeListener(DeepChangeListener aLsnr)  { _pcs.removeDeepChangeListener(aLsnr); }
+
+/**
+ * Property change listener on site files to forward changes to deep listeners.
+ */
+protected void fileDidPropChange(PropChange aPC)
+{
+    _pcs.fireDeepChange(this, aPC);
+}
 
 /**
  * Standard toString implementation.
  */
 public String toString()  { return getClass().getSimpleName() + ' ' + getURLString(); }
+
+/** Returns a "not implemented" exception for string (method name). */
+private Exception notImpl(String aStr)  { return new Exception(getClass().getName() + ": Not implemented:" + aStr); }
 
 }
