@@ -141,6 +141,15 @@ protected Object getUISource()  { return _env.getUISource(getClass()); }
 protected void initUI()  { }
 
 /**
+ * Returns whether ViewOwner UI is showing.
+ */
+public boolean isShowing()
+{
+    boolean showing = isUISet() && getUI().isShowing();
+    return showing;
+}
+
+/**
  * Called when UI showing has changed.
  */
 protected void showingChanged()
