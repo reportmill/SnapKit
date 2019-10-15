@@ -162,18 +162,23 @@ public int indexOfItem(View anItem)  { return ListUtils.indexOfId(_items, anItem
 public void addItemWithAnim(View aView, double aSize)  { addItemWithAnim(aView, aSize, getItemCount()); }
 
 /**
- * Adds a child with animation.
+ * Adds a item with animation.
  */
 public void addItemWithAnim(View aView, double aSize, int anIndex)
 {
+    // Add view as item
     addItem(aView, anIndex);
+    
+    // Get new Divider for view
     Divider div = anIndex==0? getDivider(0) : getDivider(anIndex-1);
     
+    // If first view, configure anim for given size as Location
     if(anIndex==0) {
         div.setLocation(0);
         div.getAnimCleared(500).setValue(Divider.Location_Prop, 1d, aSize).play();
     }
     
+    // If successive view, configure anim for given size as Remainder
     else {
         div.setRemainder(1);
         div.getAnimCleared(500).setValue(Divider.Remainder_Prop, 1d, aSize).play();
@@ -181,15 +186,16 @@ public void addItemWithAnim(View aView, double aSize, int anIndex)
 }
 
 /**
- * Removes a child with animation.
+ * Removes a item with animation.
  */
 public void removeItemWithAnim(View aView)
 {
+    // Get index, divider and Location/Remainder for given view
     int index = indexOfItem(aView);
     Divider div = index==0? getDivider(0) : getDivider(index-1);
     double size = isVertical()? aView.getHeight() : aView.getWidth();
     
-    // If first item, set Location
+    // If first item, set Location animated
     if(index==0) {
         div.setLocation(size);
         ViewAnim anim = div.getAnim(0).clear();
@@ -197,7 +203,7 @@ public void removeItemWithAnim(View aView)
         anim.setOnFinish(() -> removeItem(aView)).needsFinish().play();
     }
     
-    // If not first item, set Remainder
+    // If not first item, set Remainder animated
     else {
         div.setRemainder(size);
         ViewAnim anim = div.getAnim(0).clear();
@@ -222,7 +228,7 @@ public void setItemVisibleWithAnim(View aView, boolean aValue)
     // Clear running anims
     aView.getAnimCleared(0); div.getAnimCleared(0);
     
-    // Handle visible true
+    // Handle show item
     if(aValue) {
         
         // If first item, set Location
@@ -238,14 +244,15 @@ public void setItemVisibleWithAnim(View aView, boolean aValue)
             div.getAnim(time).setValue(Divider.Remainder_Prop, dsize, size).play();
         }
         
-        //  Show view and divider
-        aView.setVisible(true); aView.setOpacity(0);
-        div.setOpacity(0);
+        // Show view and divider
+        aView.setVisible(true);
+        aView.setOpacity(0);
         aView.getAnim(time).setOpacity(1).play();
+        div.setOpacity(0);
         div.getAnim(time).setOpacity(1).play();
     }
     
-    // Handle visible false
+    // Handle hide item
     else {
         
         // If first item, set location
@@ -261,7 +268,8 @@ public void setItemVisibleWithAnim(View aView, boolean aValue)
         }
         
         // Clear
-        aView.setOpacity(1); div.setOpacity(1);
+        aView.setOpacity(1);
+        div.setOpacity(1);
         div.getAnim(time).setOpacity(0).play();
         
         // Configure anim
@@ -274,7 +282,8 @@ public void setItemVisibleWithAnim(View aView, boolean aValue)
  */
 private void setItemVisibleWithAnimDone(View aView,Divider aDiv, double size)
 {
-    aView.setVisible(false); aView.setOpacity(1);
+    aView.setVisible(false);
+    aView.setOpacity(1);
     aDiv.setOpacity(1);
     if(isVertical()) aView.setHeight(size);
     else aView.setWidth(size);
@@ -283,14 +292,18 @@ private void setItemVisibleWithAnimDone(View aView,Divider aDiv, double size)
 /**
  * Called when an item changes the value of visible property.
  */
-void itemVisibleChanged(PropChange aPC)
+private void itemVisibleChanged(PropChange aPC)
 {
+    // If no dividers, just return
     if(getItemCount()<2) return;
 
+    // Get whether divider should be visible and fix
     View view = (View)aPC.getSource();
     int ind = getItems().indexOf(view);
     Divider div = getDivider(ind>0? ind-1 : 0);
-    boolean vis = view.isVisible(); if(ind==1) vis &= getItem(0).isVisible();
+    boolean vis = view.isVisible();
+    if(ind==1)
+        vis &= getItem(0).isVisible();
     div.setVisible(vis);
 }
 
@@ -304,7 +317,8 @@ public Divider getDivider()
     
     // Create and return
     Divider div = new Divider();
-    div.setVertical(!isVertical()); div.setBorder(Divider.DIVIDER_BORDER);
+    div.setVertical(!isVertical());
+    div.setBorder(Divider.DIVIDER_BORDER);
     div.addPropChangeListener(pc -> dividerPropChange(pc), Fill_Prop, Border_Prop);
     return _divider = div;
 }
@@ -314,9 +328,12 @@ public Divider getDivider()
  */
 protected Divider createDivider()
 {
-    Divider div0 = getDivider(), div = new Divider();
+    Divider div0 = getDivider();
+    Divider div = new Divider();
     div.setVertical(!isVertical());
-    div.setFill(div0.getFill()); div.setBorder(div0.getBorder()); div.setReach(div0.getReach());
+    div.setFill(div0.getFill());
+    div.setBorder(div0.getBorder());
+    div.setReach(div0.getReach());
     div.setPrefSpan(getSpacing());
     return div;
 }
@@ -358,26 +375,32 @@ public Divider getDividerAt(double aX, double aY)
 {
     // Handle vertical
     if(isVertical()) { for(Divider div : _divs) { if(!div.isVisible()) continue;
-        double min = div.getY() - div.getReach(), max = div.getMaxY() + div.getReach();
-        if(aY>=min && aY<=max) return div;
+        double min = div.getY() - div.getReach();
+        double max = div.getMaxY() + div.getReach();
+        if(aY>=min && aY<=max)
+            return div;
     }}
     
     // Handle horizontal
     else { for(Divider div : _divs) { if(!div.isVisible()) continue;
-        double min = div.getX() - div.getReach(), max = div.getMaxX() + div.getReach();
-        if(aX>=min && aX<=max) return div;
+        double min = div.getX() - div.getReach();
+        double max = div.getMaxX() + div.getReach();
+        if(aX>=min && aX<=max)
+            return div;
     }}
     return null;
 }
 
 /**
- * Called when divider has prop change.
+ * Called when prototype divider has prop change to propogate to active dividers.
  */
-void dividerPropChange(PropChange aPC)
+private void dividerPropChange(PropChange aPC)
 {
     String pname = aPC.getPropName();
-    if(pname==Fill_Prop) for(Divider d : _divs) d.setFill(_divider.getFill());
-    else if(pname==Border_Prop) for(Divider d : _divs) d.setBorder(_divider.getBorder());
+    if(pname==Fill_Prop)
+        for(Divider d : _divs) d.setFill(_divider.getFill());
+    else if(pname==Border_Prop)
+        for(Divider d : _divs) d.setBorder(_divider.getBorder());
 }
 
 /**
@@ -410,13 +433,18 @@ protected void layoutImpl()
         RowView.layout(this, null, null, true, 0);
     else ColView.layout(this, null, null, true, 0);
     
-    // If children don't fill main axis, grow last child
-    Insets ins = getInsetsAll();
-    double x = ins.left, y = ins.top, w = getWidth() - x - ins.right, h = getHeight() - y - ins.bottom;
+    // If children don't fill main axis, grow last child to fit
     View child = getChildLast(); if(child==null) return;
-    if(isHorizontal() && MathUtils.lt(child.getMaxX(),w))
+    Insets ins = getInsetsAll();
+    double w = getWidth() - ins.getWidth();
+    double h = getHeight() - ins.getHeight();
+    
+    // Adjust last child to fit
+    if(isHorizontal() && MathUtils.lt(child.getMaxX(), w))
         child.setWidth(w - child.getX());
-    else if(isVertical() && MathUtils.lt(child.getMaxY(),h))
+        
+    // Adjust last child to fit
+    else if(isVertical() && MathUtils.lt(child.getMaxY(), h))
         child.setHeight(h - child.getY());
 }
 
@@ -425,33 +453,34 @@ protected void layoutImpl()
  */
 protected void processDividerEvent(ViewEvent anEvent)
 {
-    // Handle MouseMove
+    // Handle MouseMove: If over divider, update cursor
     if(anEvent.isMouseMove()) {
         Divider div = getDividerAt(anEvent.getX(), anEvent.getY());
-        if(div!=null) { WindowView win = getWindow(); if(win!=null) win.setActiveCursor(div.getCursor()); }
-    }
-    
-    // Handle MouseDrag: Calculate new location and set
-    else if(anEvent.isMouseDrag()) { if(_dragDiv==null) return;
-        
-        // Get view before divider and adjust divider location
-        Divider div = _dragDiv; double x = anEvent.getX(), y = anEvent.getY();
-        int index = indexOfChild(div); View peer0 = getChild(index-1);
-        double loc = div.isVertical()? (x - div.getWidth()/2 - peer0.getX()) : (y - div.getHeight()/2 - peer0.getY());
-        div.setLocation(loc + _dragOff);
-        anEvent.consume();
+        if(div!=null) { WindowView win = getWindow();
+            if(win!=null) win.setActiveCursor(div.getCursor());
+        }
     }
     
     // Handle MousePress: Check for divider hit
     else if(anEvent.isMousePress()) {
         _dragDiv = getDividerAt(anEvent.getX(), anEvent.getY());
-        if(_dragDiv!=null) { anEvent.consume();
-            _dragOff = isVertical()? _dragDiv.getMidY() - anEvent.getY() : _dragDiv.getMidX() - anEvent.getX(); }
+        if(_dragDiv==null) return;
+        _dragOff = isVertical()? _dragDiv.getY() - anEvent.getY() : _dragDiv.getX() - anEvent.getX();
+        anEvent.consume();
     }
         
-    // Handle MousePress: Clear DragDiv
-    else if(anEvent.isMouseRelease()) {
-        if(_dragDiv!=null) { _dragDiv = null; anEvent.consume(); }
+    // Handle MouseDrag: Calculate new location and set
+    else if(anEvent.isMouseDrag() && _dragDiv!=null) {
+        View peer0 = _dragDiv.getViewBefore();
+        double loc = _dragDiv.isVertical()? (anEvent.getX() - peer0.getX()) : (anEvent.getY() - peer0.getY());
+        _dragDiv.setLocation(loc + _dragOff);
+        anEvent.consume();
+    }
+    
+    // Handle MouseRelease: Clear DragDiv
+    else if(anEvent.isMouseRelease() && _dragDiv!=null) {
+       _dragDiv = null;
+       anEvent.consume();
     }
 }
 
@@ -502,18 +531,22 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
  */
 public static SplitView makeSplitView(View aView)
 {
+    // Create SplitView to match given view
     SplitView split = new SplitView();
     split.setVertical(aView.isVertical());
-    split.setLeanX(aView.getLeanX()); split.setLeanY(aView.getLeanY());
-    split.setGrowWidth(aView.isGrowWidth()); split.setGrowHeight(aView.isGrowHeight());
+    split.setLeanX(aView.getLeanX());
+    split.setLeanY(aView.getLeanY());
+    split.setGrowWidth(aView.isGrowWidth());
+    split.setGrowHeight(aView.isGrowHeight());
     
     // Handle ViewHost
     if(aView instanceof ViewHost) { ViewHost host = (ViewHost)aView;
         split.setItems(host.getGuests());
     }
     
-    // Replace
-    if(aView.getParent()!=null) ViewUtils.replaceView(aView, split);
+    // Replace given View with new SplitView and return SplitView
+    if(aView.getParent()!=null)
+       ViewUtils.replaceView(aView, split);
     return split;
 }
 

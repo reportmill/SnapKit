@@ -14,10 +14,10 @@ public class Divider extends View {
     double         _reach;
     
     // Constants for Divider Fill
-    static final Color c1 = Color.get("#fbfbfb"), c2 = Color.get("#e3e3e3");
-    static final Paint DIVIDER_FILL_HOR = new GradientPaint(c1, c2, 90);
-    static final Paint DIVIDER_FILL_VER = new GradientPaint(c1, c2, 0);
-    static final Border DIVIDER_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
+    private static final Color c1 = Color.get("#fbfbfb"), c2 = Color.get("#e3e3e3");
+    private static final Paint DIVIDER_FILL_HOR = new GradientPaint(c1, c2, 90);
+    private static final Paint DIVIDER_FILL_VER = new GradientPaint(c1, c2, 0);
+    public static final Border DIVIDER_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
     
     // Constants for properties
     public static final String Location_Prop = "Location";
@@ -63,12 +63,33 @@ public double getReach()  { return _reach; }
 public void setReach(double aValue)  { _reach = aValue; }
 
 /**
+ * Returns the view before divider.
+ */
+public View getViewBefore()
+{
+    ParentView par = getParent();
+    int index = par.indexOfChild(this);
+    View peer0 = par.getChild(index-1);
+    return peer0;
+}
+
+/**
+ * Returns the view after divider.
+ */
+public View getViewAfter()
+{
+    ParentView par = getParent();
+    int index = par.indexOfChild(this);
+    View peer1 = par.getChild(index+1);
+    return peer1;
+}
+
+/**
  * Returns the distance from the min x of preceeding View to min x of divider (or y if vertical).
  */
 public double getLocation()
 {
-    ParentView par = getParent(); int index = par.indexOfChild(this);
-    View peer0 = par.getChild(index-1);
+    View peer0 = getViewBefore();
     double loc = isVertical()? (getX() - peer0.getX()) : (getY() - peer0.getY());
     return loc;
 }
@@ -82,11 +103,15 @@ public void setLocation(double aValue)
     else setLocationH(aValue);
 }
 
-/** Implementation of setLocation for Vertical divider. */
+/**
+ * Implementation of setLocation for Vertical divider.
+ */
 protected void setLocationV(double aX)
 {
     // Get parent and peer0
-    ParentView par = getParent(); int index = par.indexOfChild(this), childCount = par.getChildCount();
+    ParentView par = getParent();
+    int index = par.indexOfChild(this);
+    int childCount = par.getChildCount();
     View peer0 = par.getChild(index-1);
     
     // Set pref size of peer0
@@ -99,9 +124,10 @@ protected void setLocationV(double aX)
     
     // Handle somebody grows: Iterate over successive items and distribute extra size
     if(growCount>0) {
-        for(int i=indexInParent()+1;i<par.getChildCount();i++) { View child = par.getChild(i);
+        for(int i=index+1;i<childCount;i++) { View child = par.getChild(i);
             if(child.isGrowWidth())
-                child.setPrefWidth(child.getWidth() + extra/growCount); }
+                child.setPrefWidth(child.getWidth() + extra/growCount);
+        }
     }
     
     // Handle nobody grows (compensate using last item)
@@ -111,15 +137,21 @@ protected void setLocationV(double aX)
     }
 }
 
-/** Implementation of setLocation for Horizontal divider. */
+/**
+ * Implementation of setLocation for Horizontal divider.
+ */
 protected void setLocationH(double aY)
 {
     // Get parent and peer0
-    ParentView par = getParent(); int index = par.indexOfChild(this), childCount = par.getChildCount();
+    ParentView par = getParent();
+    int index = par.indexOfChild(this);
+    int childCount = par.getChildCount();
     View peer0 = par.getChild(index-1);
     
     // Set pref size of peer0
     peer0.setPrefHeight(aY);
+    
+    // Get extra size added/removed from view before
     double extra = peer0.getHeight() - aY;
     
     // Find out how many remaining items grow
@@ -128,9 +160,10 @@ protected void setLocationH(double aY)
     
     // Handle somebody grows: Iterate over successive items and distribute extra size
     if(growCount>0) {
-        for(int i=indexInParent()+1;i<par.getChildCount();i++) { View child = par.getChild(i);
+        for(int i=index+1;i<childCount;i++) { View child = par.getChild(i);
             if(child.isGrowHeight())
-                child.setPrefHeight(child.getHeight() + extra/growCount); }
+                child.setPrefHeight(child.getHeight() + extra/growCount);
+        }
     }
     
     // Handle nobody grows (compensate using last item)
@@ -145,8 +178,7 @@ protected void setLocationH(double aY)
  */
 public double getRemainder()
 {
-    ParentView par = getParent(); int index = par.indexOfChild(this);
-    View peer1 = par.getChild(index+1);
+    View peer1 = getViewAfter();
     double rem = isVertical()? (peer1.getMaxX() - getMaxX()) : (peer1.getMaxY() - getMaxY());
     return rem;
 }
@@ -156,14 +188,17 @@ public double getRemainder()
  */
 public void setRemainder(double aValue)
 {
-    // Get parent and peers on ether side of divider
-    ParentView par = getParent(); int index = par.indexOfChild(this);
-    View peer0 = par.getChild(index-1), peer1 = par.getChild(index+1);
-    
     // If Parent.NeedsLayout, do this (otherwise remainder could be bogus)
+    ParentView par = getParent();
     if(par.isNeedsLayout())
         par.layout();
-        
+    
+    // Get peers on ether side of divider
+    int index = par.indexOfChild(this);
+    View peer0 = par.getChild(index-1);
+    View peer1 = par.getChild(index+1);
+    
+    // Get location for given remainder and set location
     double loc = isVertical()? (peer1.getMaxX() - aValue - getSpan() - peer0.getX()) :
         (peer1.getMaxY() - aValue - getSpan() - peer0.getY());
     setLocation(loc);
@@ -175,16 +210,19 @@ public void setRemainder(double aValue)
 public void setVertical(boolean aValue)
 {
     // Do normal version
-    if(aValue==isVertical()) return; super.setVertical(aValue);
+    if(aValue==isVertical()) return;
+    super.setVertical(aValue);
     
     // Set Cursor and Fill based on Vertical
     setCursor(aValue? Cursor.E_RESIZE:Cursor.N_RESIZE);
-    if(getFill()==DIVIDER_FILL_VER) setFill(DIVIDER_FILL_HOR);
-    else if(getFill()==DIVIDER_FILL_HOR) setFill(DIVIDER_FILL_VER);
+    if(getFill()==DIVIDER_FILL_VER)
+        setFill(DIVIDER_FILL_HOR);
+    else if(getFill()==DIVIDER_FILL_HOR)
+        setFill(DIVIDER_FILL_VER);
 }
 
 /**
- * Override because TeaVM hates reflection.
+ * Override to handle extra props.
  */
 public Object getValue(String aPropName)
 {
@@ -194,7 +232,7 @@ public Object getValue(String aPropName)
 }
 
 /**
- * Override because TeaVM hates reflection.
+ * Override to handle extra props.
  */
 public void setValue(String aPropName, Object aValue)
 {
