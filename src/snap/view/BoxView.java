@@ -85,8 +85,9 @@ public boolean isFillWidth()  { return _fillWidth; }
  */
 public void setFillWidth(boolean aValue)
 {
-    _fillWidth = aValue;
-    repaint(); relayoutParent();
+    if(aValue==_fillWidth) return;
+    firePropChange(FillWidth_Prop, _fillWidth, _fillWidth = aValue);
+    relayout();
 }
 
 /**
@@ -99,8 +100,9 @@ public boolean isFillHeight()  { return _fillHeight; }
  */
 public void setFillHeight(boolean aValue)
 {
-    _fillHeight = aValue;
-    repaint(); relayoutParent();
+    if(aValue==_fillHeight) return;
+    firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
+    relayout();
 }
 
 /**

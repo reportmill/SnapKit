@@ -155,8 +155,11 @@ public void setExpanded(boolean aValue)
 /**
  * Sets the expanded animated.
  */
-protected void setExpandedAnimated(boolean aValue)
+public void setExpandedAnimated(boolean aValue)
 {
+    // If already set, just return
+    if(aValue==_expanded) return;
+    
     // Cache current size and set new Expanded value
     double w = getWidth(), h = getHeight();
     setExpanded(aValue);

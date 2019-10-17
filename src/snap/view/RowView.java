@@ -16,6 +16,9 @@ public class RowView extends ChildView {
     // Whether to fill to height
     boolean       _fillHeight;
     
+    // Constants for properties
+    public static final String FillHeight_Prop = "FillHeight";
+    
 /**
  * Returns the spacing.
  */
@@ -39,7 +42,12 @@ public boolean isFillHeight()  { return _fillHeight; }
 /**
  * Sets whether children will be resized to fill height.
  */
-public void setFillHeight(boolean aValue)  { _fillHeight = aValue; }
+public void setFillHeight(boolean aValue)
+{
+    if(aValue==_fillHeight) return;
+    firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
+    relayout();
+}
 
 /**
  * Returns the default alignment.
