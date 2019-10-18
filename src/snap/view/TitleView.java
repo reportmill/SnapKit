@@ -124,17 +124,16 @@ public void setCollapsible(boolean aValue)
     // If collapsible: Enable action event and listen for label click
     if(aValue) {
         enableEvents(Action);
+        _label.setGraphic(getCollapseGraphic());
         _label.addEventHandler(_labelPressLsnr = e -> labelWasPressed(e), MousePress);
     }
     
     // If not collapsible: Disable action event and stop listen for lable click
     else {
         disableEvents(Action);
+        _label.setGraphic(null);
         _label.removeEventHandler(_labelPressLsnr, MousePress);
     }
-    
-    // Update graphic
-    updateGraphic();
 }
 
 /**
@@ -147,9 +146,15 @@ public boolean isExpanded()  { return _expanded; }
  */
 public void setExpanded(boolean aValue)
 {
+    // If value already set, just return
     if(aValue==_expanded) return;
+    
+    // Set value and fire prop change
     firePropChange(Expanded_Prop, _expanded, _expanded=aValue);
-    updateGraphic();
+    
+    // Update graphic
+    View graphic = _label.getGraphic(); if(graphic==null) return;
+    graphic.setRotate(aValue? 90 : 0);
 }
 
 /**
@@ -180,6 +185,16 @@ public void setExpandedAnimated(boolean aValue)
     // Configure anim to new size
     ViewAnim anim = getAnim(0).clear();
     anim.getAnim(500).setPrefSize(pw,ph).setOnFinish(() -> setExpandedAnimDone(aValue)).needsFinish().play();
+    
+    // Get graphic and set initial anim rotate
+    View graphic = _label.getGraphic(); if(graphic==null) return;
+    graphic.setRotate(aValue? 0 : 90);
+    
+    // Configure anim for graphic
+    anim = graphic.getAnim(0).clear();
+    if(aValue)
+        anim.getAnim(500).setRotate(90).play();
+    else anim.getAnim(500).setRotate(0).play();
 }
 
 /**
@@ -189,15 +204,6 @@ private void setExpandedAnimDone(boolean aValue)
 {
     setExpanded(aValue);
     setPrefSize(-1, -1);
-}
-
-/**
- * Updates the graphic.
- */
-protected void updateGraphic()
-{
-    View graphic = isCollapsible()? (isExpanded()? getExpandedGraphic() : getCollapsedGraphic()) : null;
-    _label.setGraphic(graphic);
 }
 
 /**
@@ -333,22 +339,9 @@ protected void labelWasPressed(ViewEvent anEvent)
 }
 
 /**
- * Returns an Icon of a down arrow.
- */
-public View getExpandedGraphic()
-{
-    // If down arrow icon hasn't been created, create it
-    if(_expView!=null) return _expView;
-    Polygon poly = new Polygon(.5, 1.5, 8.5, 1.5, 4.5, 7.5);
-    ShapeView sview = new ShapeView(poly); sview.setPrefSize(9,9);
-    sview.setFill(Color.GRAY); sview.setBorder(Color.GRAY, 1);
-    return _expView = sview;
-}
-
-/**
  * Returns an image of a down arrow.
  */
-public View getCollapsedGraphic()
+public View getCollapseGraphic()
 {
     // If down arrow icon hasn't been created, create it
     if(_clpView!=null) return _clpView;
