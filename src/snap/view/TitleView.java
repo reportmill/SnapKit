@@ -10,6 +10,9 @@ import snap.util.*;
  */
 public class TitleView extends ParentView implements ViewHost {
 
+    // The view that paints title view decorations
+    TitleArea      _area;
+    
     // The title label
     Label          _label;
 
@@ -32,7 +35,7 @@ public class TitleView extends ParentView implements ViewHost {
     EventListener  _labelPressLsnr;
     
     // Constants for TitleView styles
-    public enum TitleStyle { Plain, EtchBorder }
+    public enum TitleStyle { Plain, EtchBorder, Button }
     
     // Constants for properties
     public static final String Collapsible_Prop = "Collapsible";
@@ -44,10 +47,11 @@ public class TitleView extends ParentView implements ViewHost {
  */
 public TitleView()
 {
-    setPadding(2,2,2,2);
-    _label = new Label();
+    // Create/add TitleArea
     setTitleStyle(TitleStyle.EtchBorder);
-    addChild(_label);
+    
+    // Configure TitleView
+    setPadding(2,2,2,2);
 }
 
 /**
@@ -101,10 +105,57 @@ public TitleStyle getTitleStyle()  { return _tstyle; }
  */
 public void setTitleStyle(TitleStyle aTS)
 {
+    // If already set, just return
     if(aTS==_tstyle) return;
+    
+    // Set value and fire prop change
     firePropChange(TitleStyle_Prop, _tstyle, _tstyle=aTS);
+    
+    // Relayout, repaint
     relayout(); relayoutParent(); repaint();
-    updateTitleStyle();
+    
+    // If Area needs to change, change it
+    TitleArea area = createArea();
+    setArea(area);
+}
+
+/**
+ * Returns the TitleArea.
+ */
+protected TitleArea getArea()  { return _area; }
+
+/**
+ * Sets the TitleArea.
+ */
+protected void setArea(TitleArea aTA)
+{
+    // Remove old
+    String text = null;
+    if(_area!=null) {
+        text = getText();
+        removeChild(_area);
+    }
+    
+    // Set/add new
+    _area = aTA;
+    _area.setTitleView(this);
+    _area.setPadding(getPadding());
+    addChild(_area, 0);
+    _label = _area._label;
+    if(text!=null) _label.setText(text);
+}
+
+/**
+ * Creates the Area.
+ */
+protected TitleArea createArea()
+{
+    switch(getTitleStyle()) {
+        case Plain: return new TitleAreaPlain();
+        case EtchBorder: return new TitleAreaEtched();
+        case Button: return new TitleAreaButton();
+        default: return new TitleAreaPlain();
+    }
 }
 
 /**
@@ -125,14 +176,12 @@ public void setCollapsible(boolean aValue)
     if(aValue) {
         enableEvents(Action);
         _label.setGraphic(getCollapseGraphic());
-        _label.addEventHandler(_labelPressLsnr = e -> labelWasPressed(e), MousePress);
     }
     
     // If not collapsible: Disable action event and stop listen for lable click
     else {
         disableEvents(Action);
         _label.setGraphic(null);
-        _label.removeEventHandler(_labelPressLsnr, MousePress);
     }
 }
 
@@ -151,6 +200,7 @@ public void setExpanded(boolean aValue)
     
     // Set value and fire prop change
     firePropChange(Expanded_Prop, _expanded, _expanded=aValue);
+    relayout();
     
     // Update graphic
     View graphic = _label.getGraphic(); if(graphic==null) return;
@@ -207,19 +257,12 @@ private void setExpandedAnimDone(boolean aValue)
 }
 
 /**
- * Updates the TitleStyle.
+ * Called when Label receives a MousePress.
  */
-protected void updateTitleStyle()
+protected void toggleExpandedAnimated(ViewEvent anEvent)
 {
-    TitleStyle tstyle = getTitleStyle();
-    
-    // Configure EtchBorder
-    if(tstyle==TitleStyle.EtchBorder)
-        _label.setPadding(0,0,0,10);
-        
-    // Configure Plain
-    else if(tstyle==TitleStyle.Plain)
-        _label.setPadding(0,0,0,0);
+    fireActionEvent(anEvent);
+    setExpandedAnimated(!isExpanded());
 }
 
 /**
@@ -255,87 +298,39 @@ public View removeGuest(int anIndex)
 }
 
 /**
- * Returns whether content is visible.
+ * Returns whether content is showing.
  */
-public boolean isContentVisible()  { return _content!=null && (!isCollapsible() || isExpanded()); }
+public boolean isContentShowing()
+{
+    return _content!=null && (!isCollapsible() || isExpanded());
+}
 
 /**
  * Override to return preferred width of content.
  */
-protected double getPrefWidthImpl(double aH)
-{
-    Insets ins = getInsetsAll();
-    double cw = _label.getPrefWidth();
-    View c = getContent(); if(c!=null && isContentVisible()) cw = Math.max(cw, c.getPrefWidth());
-    return ins.left + cw + ins.right;
-}
+protected double getPrefWidthImpl(double aH)  { return _area.getPrefWidth(aH); }
 
 /**
  * Override to return preferred height of content.
  */
-protected double getPrefHeightImpl(double aW)
-{
-    Insets ins = getInsetsAll();
-    double ch = _label.getPrefHeight();
-    View c = getContent(); if(c!=null && isContentVisible()) ch += c.getPrefHeight();
-    return ins.top + ch + ins.bottom;
-}
+protected double getPrefHeightImpl(double aW)  { return _area.getPrefHeight(aW); }
 
 /**
  * Override to layout content.
  */
 protected void layoutImpl()
 {
-    // Get inset bounds
-    Insets ins = getInsetsAll();
-    double x = ins.left, w = getWidth() - ins.getWidth();
-    double y = ins.top,  h = getHeight() - ins.getHeight();
-    
-    // Layout label
-    double lw = _label.getPrefWidth();
-    double lh = _label.getPrefHeight();
-    _label.setBounds(0,0,lw,lh);
+    // Layout TitleArea to full bounds
+    _area.setBounds(0, 0, getWidth(), getHeight());
     
     // Layout content
-    if(isContentVisible())
-        _content.setBounds(x, y + lh - 1, w, h - lh + 1);
-    else if(_content!=null) _content.setBounds(x,y,0,0);
-}
-
-/**
- * Override to paint title and stroke.
- */
-protected void paintFront(Painter aPntr)
-{
-    switch(_tstyle) {
-        case EtchBorder: paintStyleEtchBorder(aPntr); break;
+    Rect cbnds = _area.getContentBounds();
+    if(isContentShowing())
+        _content.setBounds(cbnds.x, cbnds.y, cbnds.width, cbnds.height);
+    else if(_content!=null) {
+        Insets ins = getInsetsAll();
+        _content.setBounds(ins.left, ins.top, 0, 0);
     }
-}
-
-/**
- * Override to paint title and stroke.
- */
-protected void paintStyleEtchBorder(Painter aPntr)
-{
-    double w = getWidth(), h = getHeight();
-    double sw = _label.getMaxX(), sh = _label.getHeight();
-    double x1 = 5+sw, y1 = sh/2;
-    
-    // Paint chisel border
-    Path path = new Path(); path.moveTo(x1,y1); path.lineTo(w-2,y1); path.lineTo(w-2,h-2); path.lineTo(.5,h-2);
-    path.lineTo(.5,y1); path.lineTo(5,y1);
-    aPntr.translate(1,1); aPntr.setPaint(Color.WHITE); aPntr.setStroke(Stroke.Stroke1); aPntr.draw(path);
-    aPntr.translate(-1,-1);
-    aPntr.setPaint(Color.LIGHTGRAY); aPntr.draw(path);
-}
-
-/**
- * Called when Label receives a MousePress.
- */
-protected void labelWasPressed(ViewEvent anEvent)
-{
-    fireActionEvent(anEvent);
-    setExpandedAnimated(!isExpanded());
 }
 
 /**
@@ -352,7 +347,16 @@ public View getCollapseGraphic()
 }
 
 /**
- * Override because TeaVM hates reflection.
+ * Override to forward to area.
+ */
+public void setPadding(Insets theIns)
+{
+    super.setPadding(theIns);
+    _area.setPadding(theIns);
+}
+
+/**
+ * Override to handle additional properties.
  */
 public Object getValue(String aPropName)
 {
@@ -361,7 +365,7 @@ public Object getValue(String aPropName)
 }
 
 /**
- * Override because TeaVM hates reflection.
+ * Override to handle additional properties.
  */
 public void setValue(String aPropName, Object aValue)
 {
@@ -412,6 +416,220 @@ protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     // Unrchive Expandable, Expanded
     if(anElement.hasAttribute(Collapsible_Prop)) setCollapsible(anElement.getAttributeBoolValue(Collapsible_Prop));
     if(anElement.hasAttribute(Expanded_Prop)) setExpanded(anElement.getAttributeBoolValue(Expanded_Prop));
+}
+
+/**
+ * A View to draw content of TitleView.
+ */
+public static class TitleArea extends ParentView {
+    
+    // The TitleView
+    TitleView     _titleView;
+    
+    // The label
+    Label         _label;
+    
+    /** Sets the TitleView. */
+    public void setTitleView(TitleView aTV)  { _titleView = aTV; }
+    
+    /** Returns the content. */
+    public View getContent()  { return _titleView._content; }
+    
+    /** Returns whether content is visible. */
+    public boolean isContentShowing()  { return _titleView.isContentShowing(); }
+    
+    /** Override to return preferred width of TitleArea. */
+    protected double getPrefWidthImpl(double aH)
+    {
+        // Get max of Content.PrefWidth and TitleArea.PrefWidth
+        double pw = _label.getPrefWidth();
+        View content = getContent();
+        if(isContentShowing())
+            pw = Math.max(pw, content.getPrefWidth());
+            
+        // Get insets and return Content.PrefWidth + insets width
+        Insets ins = getInsetsAll();
+        return pw + ins.getWidth();
+    }
+    
+    /** Override to return preferred height of TitleArea. */
+    protected double getPrefHeightImpl(double aW)
+    {
+        // Get combined of Content.PrefHeight and Label.PrefHeight
+        double ph = _label.getPrefHeight();
+        View content = getContent();
+        if(isContentShowing())
+            ph += content.getPrefHeight();
+            
+        // Get insets and return Content.PrefHeight + insets height
+        Insets ins = getInsetsAll();
+        return ph + ins.getHeight();
+    }
+
+    /** Override to layout TitleArea. */
+    protected void layoutImpl()
+    {
+        // Layout label
+        double lw = _label.getPrefWidth();
+        double lh = _label.getPrefHeight();
+        _label.setBounds(0, 0, lw, lh);
+    }
+    
+    /** Returns the content bounds. */
+    public Rect getContentBounds()
+    {
+        // Get inset bounds and label height
+        Insets ins = getInsetsAll();
+        double px = ins.left, pw = getWidth() - ins.getWidth();
+        double py = ins.top,  ph = getHeight() - ins.getHeight();
+        double lh = _label.getPrefHeight();
+        
+        // Return rect
+        Rect rect = new Rect(px, py + lh - 1, pw, ph - lh + 1);
+        return rect;
+    }
+    
+    /** Triggers. */
+    protected void fireActionEvent(ViewEvent anEvent)
+    {
+        //super.fireActionEvent(anEvent);
+        if(_titleView.isCollapsible())
+            _titleView.toggleExpandedAnimated(anEvent);
+    }
+}
+
+/**
+ * A TitleArea subclass to just create Label.
+ */
+private static class TitleAreaPlain extends TitleArea {
+    
+    /** Create TitleAreaPlain. */
+    public TitleAreaPlain()
+    {
+        // Create/configure label (for EtchBorder)
+        _label = new Label();
+        addChild(_label);
+        
+        // Listen for Label MousePress to trigger expand
+        _label.addEventHandler(e -> fireActionEvent(e), MousePress);
+    }
+}
+
+/**
+ * A TitleArea subclass to display label inside Etched border.
+ */
+private static class TitleAreaEtched extends TitleAreaPlain {
+    
+    /** Create TitleAreaEtched. */
+    public TitleAreaEtched()
+    {
+        _label.setPadding(0,0,0,10);
+    }
+    
+    /** Override to paint title and stroke. */
+    protected void paintFront(Painter aPntr)
+    {
+        // Get TitleView bounds
+        double w = getWidth(), h = getHeight();
+        double sw = _label.getMaxX(), sh = _label.getHeight();
+        
+        // Create path for border
+        double x1 = 5+sw, y1 = sh/2;
+        Path path = new Path();
+        path.moveTo(x1, y1);
+        path.lineTo(w-2, y1);
+        path.lineTo(w-2, h-2);
+        path.lineTo(.5, h-2);
+        path.lineTo(.5, y1);
+        path.lineTo(5, y1);
+        
+        // Paint path once in white and 
+        aPntr.translate(1,1); aPntr.setPaint(Color.WHITE); aPntr.setStroke(Stroke.Stroke1); aPntr.draw(path);
+        aPntr.translate(-1,-1); aPntr.setPaint(Color.LIGHTGRAY); aPntr.draw(path);
+    }
+}
+
+/**
+ * A TitleArea subclass to display as button.
+ */
+private static class TitleAreaButton extends TitleArea {
+    
+    // The Button
+    Button      _button;
+    
+    /** Create TitleAreaButton. */
+    public TitleAreaButton()
+    {
+        // Create/configure button
+        _button = new Button();
+        _button.setPadding(3,3,3,3);
+        _button.setAlign(HPos.LEFT);
+        _button.setRadius(0);
+        addChild(_button);
+        
+        // Listen for Button click to trigger expand
+        _button.addEventHandler(e -> fireActionEvent(e), Action);
+        
+        // Get label
+        _label = _button.getLabel();
+    }
+    
+    /** Override to return preferred width of TitleArea. */
+    protected double getPrefWidthImpl(double aH)
+    {
+        // Get Button.PrefWidth and Content.PrefWidth
+        double bw = _button.getPrefWidth();
+        double cw = 0;
+        if(isContentShowing()) {
+            View content = getContent();
+            Insets ins = getInsetsAll();
+            cw = content.getPrefWidth() + ins.getWidth();
+        }
+            
+        // Return max of Button.PrefWidth and Content.PrefWidth
+        double pw = Math.max(bw, cw);
+        return pw;
+    }
+    
+    /** Override to return preferred height of TitleArea. */
+    protected double getPrefHeightImpl(double aW)
+    {
+        // Get Button.PrefWidth and Content.PrefWidth
+        double bh = _button.getPrefHeight();
+        double ch = 0;
+        if(isContentShowing()) {
+            View content = getContent();
+            Insets ins = getInsetsAll();
+            ch = content.getPrefHeight() + ins.getHeight();
+        }
+            
+        // Return combined Button.PrefWidth and Content.PrefWidth
+        double ph = bh + ch;
+        return ph;
+    }
+
+    /** Override to layout TitleArea. */
+    protected void layoutImpl()
+    {
+        // Layout Button
+        double bw = getWidth();
+        double bh = _button.getPrefHeight();
+        _button.setBounds(0, 0, bw, bh);
+    }
+    
+    /** Returns the content bounds. */
+    public Rect getContentBounds()
+    {
+        // Get inset bounds and label height
+        Insets ins = getInsetsAll();
+        double px = ins.left, pw = getWidth() - ins.getWidth();
+        double py = ins.top,  ph = getHeight() - ins.getHeight();
+        double bh = _button.getPrefHeight();
+        
+        // Return rect
+        Rect rect = new Rect(px, py + bh, pw, ph - bh);
+        return rect;
+    }
 }
 
 }
