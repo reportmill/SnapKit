@@ -6,6 +6,7 @@ import java.util.*;
 import snap.gfx.*;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
+import snap.util.StringUtils;
 import snap.view.*;
 
 /**
@@ -13,8 +14,8 @@ import snap.view.*;
  */
 public class ColorDock extends View {
 
-    // A hashtable to map row,col coordinates to colors in the dock (which is a sparse array of unlimited size)
-    Map <String,Color>      _colors = new Hashtable();
+    // A list of colors to show in dock
+    List <Color>            _colors = new ArrayList();
     
     // Whether dock colors are saved to prefs
     boolean                 _persist;
@@ -32,10 +33,10 @@ public class ColorDock extends View {
     boolean                 _dragging;
     
     // The size of the individual swatches
-    static int              SWATCH_SIZE = 13;
+    private static int      SWATCH_SIZE = 13;
     
     // The border for color dock
-    static final Border     COLOR_DOCK_BORDER = Border.createLoweredBevelBorder();
+    private static final Border  COLOR_DOCK_BORDER = Border.createLoweredBevelBorder();
     
 /**
  * Creates a new color dock.
@@ -71,12 +72,57 @@ public void setColor(Color aColor)
 }
 
 /**
+ * Returns the color at the given swatch index.
+ */
+public Color getColor(int anIndex)
+{
+    // If index beyond range, return white
+    if(anIndex>=_colors.size())
+        return Color.WHITE;
+
+    // Return color at given index
+    return _colors.get(anIndex);
+}
+
+/**
+ * Sets the color at the given swatch index.
+ */
+public void setColor(Color aColor, int anIndex)
+{
+    // If beyond 1000, just bail
+    if(anIndex>1000) return;
+    
+    // Fill list to index
+    while(anIndex>=_colors.size())
+        _colors.add(Color.WHITE);
+        
+    // Set value at index and repaint
+    _colors.set(anIndex, aColor!=null? aColor : Color.WHITE);
+    repaint();
+    
+    // If Persist, save
+    if(_persist)
+        saveToPrefs(getName(), anIndex);
+}
+
+/**
+ * Sets the colors.
+ */
+public void setColors(List <? extends Color> theColors)
+{
+    resetColors();
+    for(int i=0, iMax=theColors.size(); i<iMax; i++)
+        setColor(theColors.get(i), i); 
+}
+
+/**
  * Returns the color at given row & column.
  */
 public Color getColor(int aRow, int aCol)
 {
-    Color color = _colors.get(aRow + "," + aCol);
-    return color!=null? color : Color.WHITE;
+    int cc = getColCount();
+    int index = aRow*cc + aCol;
+    return getColor(index);
 }
 
 /**
@@ -84,10 +130,11 @@ public Color getColor(int aRow, int aCol)
  */
 public void setColor(int aRow, int aCol, Color aColor)
 {
-    String key = aRow + "," + aCol;
-    if(aColor!=null) _colors.put(key, aColor);
-    else _colors.remove(key);
-    if(_persist) saveToPrefs(getName(), aRow, aCol);
+    // Get index and set color (the whole row/col thing was (is) so bogus)
+    int cc = getColCount();
+    if(cc==0) cc = 20;
+    int index = aRow*cc + aCol;
+    setColor(aColor, index);
 }
 
 /**
@@ -129,16 +176,6 @@ public Swatch getSwatchAt(double aX, double aY)
     int col = (int)((aX - ins.left)/SWATCH_SIZE);
     return getSwatch(row,col);
 }
-
-/**
- * Returns the color at the given swatch index.
- */
-public Color getColor(int anIndex)  { return getSwatch(anIndex).getColor(); }
-
-/**
- * Sets the color at the given swatch index.
- */
-public void setColor(Color aColor, int anIndex)  { getSwatch(anIndex).setColor(aColor); }
 
 /**
  * Returns the number of rows in this color dock.
@@ -357,15 +394,17 @@ protected void colorWellDidFireAction(ViewEvent anEvent)
 /** 
  * Update an individual color at {row,column} in the preferences
  */
-protected void saveToPrefs(String aName, int aRow, int aCol) 
+protected void saveToPrefs(String aName, int anIndex) 
 {
     // Get the app's preferences node and sub-node for the list of colors
     Prefs prefs = Prefs.get().getChild(aName);
     
     // Get color, rgb value, key, then if not white put value, otherwise remove
-    Color c = getColor(aRow, aCol);
+    Color c = getColor(anIndex); // Legacy: c = getColor(aRow, aCol);
     int rgb = c.getRGBA();
-    String key = aRow + "," + aCol;
+    
+    // Get key, if not white put value, otherwise remove
+    String key = String.valueOf(anIndex); // Legacy: key = aRow + "," + aCol;
     if(rgb!=0xFFFFFFFF) prefs.set(key, rgb);
     else prefs.remove(key);
 }
@@ -382,9 +421,24 @@ protected void readFromPrefs(String aName)
     Prefs prefs = Prefs.get().getChild(aName);
     String keys[] = prefs.getKeys();
     for(String key : keys) {
-        int rgba = prefs.getInt(key,0xFFFFFFFF);  // Get color rgb for current loop key
-        Color color = new Color(rgba);             // Get color from rgb
-        _colors.put(key, color);                    // Add color to map
+        
+        // Get color for key
+        int rgba = prefs.getInt(key, 0xFFFFFFFF);
+        Color color = new Color(rgba);
+        
+        // Legacy: If key contains separator, add by row/col
+        if(key.indexOf(',')>0) {
+            String rcStr[] = key.split(","); if(rcStr.length<2) continue;
+            int row = StringUtils.intValue(rcStr[0]);
+            int col = StringUtils.intValue(rcStr[1]);
+            setColor(row, col, color);
+        }
+        
+        // Otherwise get index
+        else {
+            int ind = StringUtils.intValue(key);
+            setColor(color, ind);
+        }
     }
 }
 
