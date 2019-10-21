@@ -109,17 +109,18 @@ public static double getPrefWidth(ParentView aPar, View theChildren[], double aS
     // Iterate over children and add spacing, margin-left (collapsable) and child width
     double pw = 0, spc = 0;
     for(View child : children) {
-        Insets marg = child.getMargin(); double marL = marg.getLeft(), marR = marg.getRight();
+        Insets marg = child.getMargin();
         double cbw = child.getBestWidth(-1);
-        pw += Math.max(spc, marL) + cbw;
-        spc = Math.max(aSpacing, marR);
+        pw += Math.max(spc, marg.left) + cbw;
+        spc = Math.max(aSpacing, marg.right);
     }
     
     // Add margin for final child
     pw += children[ccount-1].getMargin().getRight();
     
-    // Return preferred width + inset width
-    return pw + ins.getWidth();
+    // Return preferred width + inset width (rounded)
+    double pw2 = pw + ins.getWidth(); pw2 = Math.round(pw2);
+    return pw2;
 }
 
 /**
@@ -140,8 +141,9 @@ public static double getPrefHeight(ParentView aPar, View theChildren[], double a
         ph = Math.max(ph, cbh + marH);
     }
     
-    // Return preferred height + inset height
-    return ph + ins.getHeight();
+    // Return preferred height + inset height (rounded is best)
+    double ph2 = ph + ins.getHeight(); ph2 = Math.round(ph2);
+    return ph2;
 }
     
 /**
@@ -163,21 +165,21 @@ public static void layout(ParentView aPar, View theChilds[], Insets theIns, bool
     
     // Get parent bounds for insets
     Insets ins = theIns!=null? theIns : aPar.getInsetsAll();
-    double px = ins.left, py = ins.top;
-    double pw = aPar.getWidth() - px - ins.right; if(pw<0) pw = 0; if(pw<=0) return;
-    double ph = aPar.getHeight() - py - ins.bottom; if(ph<0) ph = 0; if(ph<=0) return;
+    double px = ins.left, pw = aPar.getWidth() - ins.getWidth(); if(pw<0) pw = 0; //if(pw<=0) return;
+    double py = ins.top, ph = aPar.getHeight() - ins.getHeight(); if(ph<0) ph = 0; //if(ph<=0) return;
     
     // Get child bounds
     Rect cbnds[] = new Rect[children.length];
-    double cx = px, ay = ViewUtils.getAlignY(aPar);
+    double ay = ViewUtils.getAlignY(aPar);
     int grow = 0;
     
     // Layout children
-    double spc = 0;
+    double cx = px, spc = 0;
     for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i];
     
         // Get child margin
-        Insets marg = child.getMargin(); double marL = marg.getLeft(), marR = marg.getRight();
+        Insets marg = child.getMargin();
+        double marL = marg.left, marR = marg.right;
         
         // Get child height 
         double maxH = Math.max(ph - marg.getHeight(), 0);
@@ -185,8 +187,10 @@ public static void layout(ParentView aPar, View theChilds[], Insets theIns, bool
         
         // Calc y accounting for margin and alignment
         double cy = py + marg.getTop();
-        if(ch<maxH) { double ay2 = Math.max(ay,ViewUtils.getLeanY(child));
-            cy = Math.max(cy, py + Math.round((ph-ch)*ay2)); }
+        if(ch<maxH) {
+            double ay2 = Math.max(ay,ViewUtils.getLeanY(child));
+            cy = Math.max(cy, py + Math.round((ph-ch)*ay2));
+        }
         
         // Get child width and update child x for spacing/margin-left
         double cw = child.getBestWidth(ch);
@@ -200,36 +204,68 @@ public static void layout(ParentView aPar, View theChilds[], Insets theIns, bool
         if(child.isGrowWidth()) grow++;
     }
     
-    // Add margin for final child
+    // Add margin for last child, calculate extra space and add to growers or alignment
     cx += children[children.length-1].getMargin().getRight();
+    int extra = (int)Math.round(px + pw - cx);
+    if(extra!=0)
+        addExtraSpace(aPar, children, cbnds, extra, grow, isFillWidth);
     
-    // Calculate extra space
-    double extra = px + pw - cx;
-    
+    // Reset child bounds
+    for(int i=0;i<children.length;i++) children[i].setBounds(cbnds[i]);
+}
+
+/**
+ * Adds extra space to growers or alignment.
+ */
+private static void addExtraSpace(View par, View children[], Rect cbnds[], int extra, int grow, boolean fillW)
+{
     // If grow shapes, add grow
-    if(extra!=0 && grow>0) { double dx = 0;
-        for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect cbnd = cbnds[i];
-            if(dx!=0) cbnd.setX(cbnd.getX() + dx);
-            if(child.isGrowWidth()) { cbnd.setWidth(cbnd.getWidth()+extra/grow); dx += extra/grow; }
-        }
-    }
+    if(grow>0)
+        addExtraSpaceToGrowers(children, cbnds, extra, grow);
     
-    // Otherwise, if FillWidth and last child doesn't fill width, extend it
-    else if(isFillWidth && extra!=0 && grow==0)
-        cbnds[children.length-1].width = px + pw - cbnds[children.length-1].x;
+    // Otherwise, if FillWidth, extend last child
+    else if(fillW)
+        cbnds[children.length-1].width = extra;
     
     // Otherwise, check for horizontal alignment/lean shift
-    else if(extra>0) {
-        double ax = ViewUtils.getAlignX(aPar);
-        for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect cbnd = cbnds[i];
-            ax = Math.max(ax, ViewUtils.getLeanX(child)); double dx = extra*ax;
-            if(dx>0) cbnd.setX(cbnd.getX() + extra*ax);
+    else if(extra>0)
+        addExtraSpaceToAlign(par, children, cbnds, extra);
+}
+
+/**
+ * Adds extra space to growers.
+ */
+private static void addExtraSpaceToGrowers(View children[], Rect cbnds[], int extra, int grow)
+{
+    // Get amount to add to each grower (plus 1 for some if not evenly divisible by grow)
+    int each = extra/grow;
+    int eachP1 = each + MathUtils.sign(extra);
+    int count2 = Math.abs(extra%grow);
+
+    // Iterate over children and add their share (plus 1 for some if not evenly divisible by grow)
+    for(int i=0, j=0, dx = 0,iMax=children.length;i<iMax;i++) { View child = children[i];
+        Rect cbnd = cbnds[i];
+        if(dx!=0)
+            cbnd.setX(cbnd.x + dx);
+        if(child.isGrowWidth()) {
+            int each3 = j<count2? eachP1 : each;
+            cbnd.setWidth(cbnd.width + each3);
+            dx += each3; j++;
         }
     }
-        
-    // Reset child bounds
-    for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i]; Rect bnds = cbnds[i];
-        child.setBounds(bnds); }
+}
+
+/**
+ * Adds extra space to alignment.
+ */
+private static void addExtraSpaceToAlign(View par, View children[], Rect cbnds[], double extra)
+{
+    double ax = ViewUtils.getAlignX(par);
+    for(int i=0,iMax=children.length;i<iMax;i++) { View child = children[i];
+        Rect cbnd = cbnds[i];
+        ax = Math.max(ax, ViewUtils.getLeanX(child)); double dx = extra*ax;
+        if(dx>0) cbnd.setX(cbnd.x + extra*ax);
+    }
 }
 
 }

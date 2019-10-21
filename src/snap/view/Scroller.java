@@ -331,13 +331,14 @@ protected double getPrefHeightImpl(double aW)  { return _content!=null? _content
 protected void layoutImpl()
 {
     if(_content==null) return;
-    double w = getWidth(), h = getHeight(); Size csize = getContentSize();
+    double pw = getWidth(), ph = getHeight();
+    Size csize = getContentSize();
     double cw = csize.width, ch = csize.height;
     
     // Get content bounds
-    double sx = getScrollH(); if(sx>cw-w) sx = Math.round(cw-w);
-    double sy = getScrollV(); if(sy>ch-h) sy = Math.round(ch-h);
-    _content.setBounds(-sx,-sy,cw,ch);
+    double sx = getScrollH(); if(sx>cw-pw) sx = Math.round(cw-pw);
+    double sy = getScrollV(); if(sy>ch-ph) sy = Math.round(ch-ph);
+    _content.setBounds(-sx, -sy, cw, ch);
 }
 
 /**

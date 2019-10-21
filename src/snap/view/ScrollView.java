@@ -120,7 +120,11 @@ public Boolean getShowHBar()  { return _showHBar; }
 /**
  * Sets whether to show horizontal scroll bar (null means 'as-needed').
  */
-public void setShowHBar(Boolean aValue)  { firePropChange(ShowHBar_Prop, _showHBar, _showHBar=aValue); relayout(); }
+public void setShowHBar(Boolean aValue)
+{
+    firePropChange(ShowHBar_Prop, _showHBar, _showHBar=aValue);
+    relayout();
+}
 
 /**
  * Returns whether to show vertical scroll bar (null means 'as-needed').
@@ -130,7 +134,11 @@ public Boolean getShowVBar()  { return _showVBar; }
 /**
  * Returns whether to show vertical scroll bar (null means 'as-needed').
  */
-public void setShowVBar(Boolean aValue)  { firePropChange(ShowVBar_Prop, _showVBar, _showVBar=aValue); relayout(); }
+public void setShowVBar(Boolean aValue)
+{
+    firePropChange(ShowVBar_Prop, _showVBar, _showVBar=aValue);
+    relayout();
+}
 
 /**
  * Returns whether HBar is showing.
@@ -240,11 +248,12 @@ protected double getPrefHeightImpl(double aW)
 protected void layoutImpl()
 {
     // Get Scroller size (minus insets)
-    Insets ins = getInsetsAll(); int barSize = getBarSize();
-    double x = ins.left, w = getWidth() - x - ins.right;
-    double y = ins.top, h = getHeight() - y - ins.bottom;
+    Insets ins = getInsetsAll();
+    double x = ins.left, w = getWidth() - ins.getWidth();
+    double y = ins.top, h = getHeight() - ins.getHeight();
     
     // Account for ScrollBars
+    int barSize = getBarSize();
     if(isVBarShowing()) w -= barSize;
     if(isHBarShowing()) h -= barSize;
     
@@ -256,17 +265,31 @@ protected void layoutImpl()
     double cpw = cpsize.getWidth(), cph = cpsize.getHeight();
     
     // Get whether to show scroll bars
-    boolean asneedH = _showHBar==null, alwaysH = _showHBar==Boolean.TRUE, showHBar = alwaysH || asneedH && cpw>w;
-    boolean asneedV = _showVBar==null, alwaysV = _showVBar==Boolean.TRUE, showVBar = alwaysV || asneedV && cph>h;
+    boolean asneedH = _showHBar==null, alwaysH = _showHBar==Boolean.TRUE;
+    boolean asneedV = _showVBar==null, alwaysV = _showVBar==Boolean.TRUE;
+    boolean showHBar = alwaysH || asneedH && cpw>w;
+    boolean showVBar = alwaysV || asneedV && cph>h;
     
     // If showing both ScrollBars, but only because both ScrollBars are showing, hide them and try again
     if(isVBarShowing() && isHBarShowing() && showVBar && showHBar && asneedH && asneedV &&
         cpw<=w+getVBar().getWidth() && cph<=h+getHBar().getHeight()) {
-            setVBarShowing(false); setHBarShowing(false); layoutImpl(); return; }
+        setVBarShowing(false);
+        setHBarShowing(false);
+        layoutImpl();
+        return;
+    }
     
     // If either ScrollBar in wrong Showing state, set and try again
-    if(showVBar!=isVBarShowing()) { setVBarShowing(showVBar); layoutImpl(); return; }
-    if(showHBar!=isHBarShowing()) { setHBarShowing(showHBar); layoutImpl(); return; }
+    if(showVBar!=isVBarShowing()) {
+        setVBarShowing(showVBar);
+        layoutImpl();
+        return;
+    }
+    if(showHBar!=isHBarShowing()) {
+        setHBarShowing(showHBar);
+        layoutImpl();
+        return;
+    }
     
     // If horizontal scrollbar showing, update it
     if(showHBar) { ScrollBar hbar = getHBar();
