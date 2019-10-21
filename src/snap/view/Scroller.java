@@ -13,16 +13,17 @@ public class Scroller extends ParentView implements ViewHost {
     // The content
     View            _content;
     
-    // The scroll amounts
-    double          _scrollH, _scrollV;
-    
     // Whether to fit content to scroller width/height
     boolean         _fitWidth, _fitHeight;
 
     // Whether to grow content to scroller width/height if smaller than scroller (overrides content setting if true)
     boolean         _growContWidth = true, _growContHeight = true;
 
+    // The scroll amounts
+    double          _scrollH, _scrollV;
+    
     // Constants for properties
+    public static final String Content_Prop = "Content";
     public static final String ScrollH_Prop = "ScrollH";
     public static final String ScrollV_Prop = "ScrollV";
 
@@ -45,11 +46,72 @@ public View getContent()  { return _content; }
  */
 public void setContent(View aView)
 {
+    // If already set, just return
     View old = _content; if(aView==old) return;
+    
+    // Remove old content, set and add new content
     if(_content!=null) removeChild(_content);
     _content = aView;
     if(_content!=null) addChild(aView);
-    firePropChange("Content", old, aView);
+    
+    // Fire prop change
+    firePropChange(Content_Prop, old, aView);
+}
+
+/**
+ * Returns whether this scroller fits content to its width.
+ */
+public boolean isFillWidth()  { return _fitWidth; }
+
+/**
+ * Sets whether this scroller fits content to its width.
+ */
+public void setFillWidth(boolean aValue)
+{
+    if(aValue==isFillWidth()) return;
+    firePropChange("FitWidth", _fitWidth, _fitWidth = aValue);
+}
+
+/**
+ * Returns whether this scroller fits content to its height.
+ */
+public boolean isFillHeight()  { return _fitHeight; }
+
+/**
+ * Sets whether this scroller fits content to its height.
+ */
+public void setFillHeight(boolean aValue)
+{
+    if(aValue==isFillHeight()) return;
+    firePropChange("FitHeight", _fitHeight, _fitHeight = aValue);
+}
+
+/**
+ * Returns whether to grow content to scroller width if smaller than scroller (overrides content setting if true).
+ */
+public boolean isGrowContentWidth()  { return _growContWidth; }
+
+/**
+ * Sets whether to grow content to scroller width if smaller than scroller (overrides content setting if true).
+ */
+public void setGrowContentWidth(boolean aValue)
+{
+    if(aValue==isGrowContentWidth()) return;
+    firePropChange("GrowContentWidth", _growContWidth, _growContWidth = aValue);
+}
+
+/**
+ * Returns whether to grow content to scroller height if smaller than scroller (overrides content setting if true).
+ */
+public boolean isGrowContentHeight()  { return _growContHeight; }
+
+/**
+ * Sets whether to grow content to scroller height if smaller than scroller (overrides content setting if true).
+ */
+public void setGrowContentHeight(boolean aValue)
+{
+    if(aValue==isGrowContentHeight()) return;
+    firePropChange("GrowContentHeight", _growContHeight, _growContHeight = aValue);
 }
 
 /**
@@ -134,12 +196,13 @@ public double getScrollH()  { return _scrollH; }
  */
 public void setScrollH(double aValue)
 {
-    // Get value rounded and in valid range
+    // Get value rounded and in valid range (just return if already set)
     aValue = Math.round(aValue);
-    if(aValue<0) aValue = 0; else if(aValue>getScrollHMax()) aValue = getScrollHMax();
+    if(aValue<0) aValue = 0;
+    else if(aValue>getScrollHMax()) aValue = getScrollHMax();
+    if(MathUtils.equals(aValue, _scrollH)) return;
     
-    // Set value and relayout/repaint (just return if already set)
-    if(MathUtils.equals(aValue,_scrollH)) return;
+    // Set value and relayout/repaint
     firePropChange(ScrollH_Prop, _scrollH, _scrollH=aValue);
     relayout(); repaint();
 }
@@ -163,12 +226,13 @@ public double getScrollV()  { return _scrollV; }
  */
 public void setScrollV(double aValue)
 {
-    // Get value rounded and in valid range
+    // Get value rounded and in valid range (just return if already set)
     aValue = Math.round(aValue);
-    if(aValue<0) aValue = 0; else if(aValue>getScrollVMax()) aValue = getScrollVMax();
+    if(aValue<0) aValue = 0;
+    else if(aValue>getScrollVMax()) aValue = getScrollVMax();
+    if(MathUtils.equals(aValue, _scrollV)) return;
     
-    // Set value and relayout/repaint (just return if already set)
-    if(MathUtils.equals(aValue,_scrollV)) return;
+    // Set value and relayout/repaint
     firePropChange(ScrollV_Prop, _scrollV, _scrollV=aValue);
     relayout(); repaint();
 }
@@ -203,73 +267,25 @@ public double getRatioV()  { double svm = getScrollVMax(); return svm>0? _scroll
 public void setRatioV(double aValue)  { setScrollV(aValue*getScrollVMax()); }
 
 /**
- * Returns whether this scroller fits content to its width.
- */
-public boolean isFillWidth()  { return _fitWidth; }
-
-/**
- * Sets whether this scroller fits content to its width.
- */
-public void setFillWidth(boolean aValue)
-{
-    if(aValue==isFillWidth()) return;
-    firePropChange("FitWidth", _fitWidth, _fitWidth = aValue);
-}
-
-/**
- * Returns whether this scroller fits content to its height.
- */
-public boolean isFillHeight()  { return _fitHeight; }
-
-/**
- * Sets whether this scroller fits content to its height.
- */
-public void setFillHeight(boolean aValue)
-{
-    if(aValue==isFillHeight()) return;
-    firePropChange("FitHeight", _fitHeight, _fitHeight = aValue);
-}
-
-/**
- * Returns whether to grow content to scroller width if smaller than scroller (overrides content setting if true).
- */
-public boolean isGrowContentWidth()  { return _growContWidth; }
-
-/**
- * Sets whether to grow content to scroller width if smaller than scroller (overrides content setting if true).
- */
-public void setGrowContentWidth(boolean aValue)
-{
-    if(aValue==isGrowContentWidth()) return;
-    firePropChange("GrowContentWidth", _growContWidth, _growContWidth = aValue);
-}
-
-/**
- * Returns whether to grow content to scroller height if smaller than scroller (overrides content setting if true).
- */
-public boolean isGrowContentHeight()  { return _growContHeight; }
-
-/**
- * Sets whether to grow content to scroller height if smaller than scroller (overrides content setting if true).
- */
-public void setGrowContentHeight(boolean aValue)
-{
-    if(aValue==isGrowContentHeight()) return;
-    firePropChange("GrowContentHeight", _growContHeight, _growContHeight = aValue);
-}
-
-/**
  * Called to scroll the given shape in this node coords to visible.
  */
 public void scrollToVisible(Shape aShape)
 {
-    // Calculate/set new visible x and y: If shape rect is outside vrect, shift vrect to it; if bigger, center it
-    double vx = getScrollH(), vy = getScrollV(), vw = getWidth(), vh = getHeight(); if(vw==0 || vh==0) return;
+    // Get Scroller scroll and size
+    double vx = getScrollH(), vw = getWidth();
+    double vy = getScrollV(), vh = getHeight(); if(vw==0 || vh==0) return;
+    
+    // Get given shape
     Rect srect = aShape.getBounds();
-    double sx = vx+srect.getX(), sy = vy+srect.getY(), sw = srect.getWidth(), sh = srect.getHeight();
+    double sx = vx + srect.x, sw = srect.getWidth();
+    double sy = vy + srect.y, sh = srect.getHeight();
+    
+    // Calculate/set new visible x and y: If shape rect is outside vrect, shift vrect to it; if bigger, center it
     double nvx = sx<vx? sx : sx+sw>vx+vw? sx+sw-vw : vx; if(sw>vw) nvx += (sw-vw)/2;
     double nvy = sy<vy? sy : sy+sh>vy+vh? sy+sh-vh : vy; if(sh>vh) nvy += (sh-vh)/2;
     //setScrollH(nvx); setScrollV(nvy);
+    
+    // Set new value (with anim)
     getAnimCleared(250).setValue(ScrollH_Prop, nvx).setValue(ScrollV_Prop, nvy).play();
 }
 
@@ -308,22 +324,34 @@ public View removeGuest(int anIndex)
 /**
  * Calculates the minimum width.
  */
-protected double getMinWidthImpl()  { return _content!=null? _content.getMinWidth() : 0; }
+protected double getMinWidthImpl()
+{
+    return _content!=null? _content.getMinWidth() : 0;
+}
 
 /**
  * Calculates the minimum height.
  */
-protected double getMinHeightImpl()  { return _content!=null? _content.getMinHeight() : 0; }
+protected double getMinHeightImpl()
+{
+    return _content!=null? _content.getMinHeight() : 0;
+}
 
 /**
  * Calculates the preferred width.
  */
-protected double getPrefWidthImpl(double aH)  { return _content!=null? _content.getBestWidth(aH) : 0; }
+protected double getPrefWidthImpl(double aH)
+{
+    return _content!=null? _content.getBestWidth(aH) : 0;
+}
 
 /**
  * Calculates the preferred height.
  */
-protected double getPrefHeightImpl(double aW)  { return _content!=null? _content.getBestHeight(aW) : 0; }
+protected double getPrefHeightImpl(double aW)
+{
+    return _content!=null? _content.getBestHeight(aW) : 0;
+}
 
 /**
  * Override to layout children.
@@ -366,7 +394,7 @@ public void processEvent(ViewEvent anEvent)
 }
 
 /**
- * Override to avoid reflection (TeaVM).
+ * Override for Scroller properties.
  */
 public Object getValue(String aPropName)
 {
@@ -376,7 +404,7 @@ public Object getValue(String aPropName)
 }
 
 /**
- * Override to avoid reflection (TeaVM).
+ * Override for Scroller properties.
  */
 public void setValue(String aPropName, Object aValue)
 {
