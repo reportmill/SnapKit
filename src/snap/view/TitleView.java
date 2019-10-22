@@ -26,7 +26,7 @@ public class TitleView extends ParentView implements ViewHost {
     boolean        _collapsible;
     
     // Whether Title view is expanded
-    boolean        _expanded;
+    boolean        _expanded = true;
     
     // Images for collapsed/expanded
     View           _clpView, _expView;
@@ -175,13 +175,16 @@ public void setCollapsible(boolean aValue)
     // If collapsible: Enable action event and listen for label click
     if(aValue) {
         enableEvents(Action);
-        _label.setGraphic(getCollapseGraphic());
+        View graphic = getCollapseGraphic();
+        _label.setGraphic(graphic);
+        graphic.setRotate(aValue? 90 : 0);
     }
     
     // If not collapsible: Disable action event and stop listen for lable click
     else {
         disableEvents(Action);
         _label.setGraphic(null);
+        setExpanded(true);
     }
 }
 
