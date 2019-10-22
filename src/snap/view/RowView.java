@@ -115,8 +115,8 @@ public static double getPrefWidth(ParentView aPar, View theChildren[], double aS
         spc = Math.max(aSpacing, marg.right);
     }
     
-    // Add margin for final child
-    pw += children[ccount-1].getMargin().getRight();
+    // Add margin for last child
+    pw += children[ccount-1].getMargin().right;
     
     // Return preferred width + inset width (rounded)
     double pw2 = pw + ins.getWidth(); pw2 = Math.round(pw2);
@@ -205,7 +205,7 @@ public static void layout(ParentView aPar, View theChilds[], Insets theIns, bool
     }
     
     // Add margin for last child, calculate extra space and add to growers or alignment
-    cx += children[children.length-1].getMargin().getRight();
+    cx += children[children.length-1].getMargin().right;
     int extra = (int)Math.round(px + pw - cx);
     if(extra!=0)
         addExtraSpace(aPar, children, cbnds, extra, grow, isFillWidth);
@@ -225,7 +225,7 @@ private static void addExtraSpace(View par, View children[], Rect cbnds[], int e
     
     // Otherwise, if FillWidth, extend last child
     else if(fillW)
-        cbnds[children.length-1].width = extra;
+        cbnds[children.length-1].width += extra;
     
     // Otherwise, check for horizontal alignment/lean shift
     else if(extra>0)

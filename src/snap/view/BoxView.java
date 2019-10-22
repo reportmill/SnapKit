@@ -115,10 +115,9 @@ public Pos getDefaultAlign()  { return Pos.CENTER; }
  */
 protected double getPrefWidthImpl(double aH)
 {
-    //return getPrefWidth(this, getContent(), aH);
-    if(isHorizontal())
-        return RowView.getPrefWidth(this, null, getSpacing(), aH);
-    return ColView.getPrefWidth(this, null, aH);
+    return getPrefWidth(this, getContent(), aH);
+    //if(isHorizontal()) return RowView.getPrefWidth(this, null, getSpacing(), aH);
+    //return ColView.getPrefWidth(this, null, aH);
 }
 
 /**
@@ -126,10 +125,9 @@ protected double getPrefWidthImpl(double aH)
  */
 protected double getPrefHeightImpl(double aW)
 {
-    //return getPrefHeight(this, getContent(), aW);
-    if(isHorizontal())
-        return RowView.getPrefHeight(this, null, aW);
-    return ColView.getPrefHeight(this, null, _spacing, aW);
+    return getPrefHeight(this, getContent(), aW);
+    //if(isHorizontal()) return RowView.getPrefHeight(this, null, aW);
+    //return ColView.getPrefHeight(this, null, _spacing, aW);
 }
 
 /**
@@ -137,10 +135,9 @@ protected double getPrefHeightImpl(double aW)
  */
 protected void layoutImpl()
 {
-    //layout(this, getContent(), null, _fillWidth, _fillHeight);
-    if(isHorizontal())
-        RowView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
-    else ColView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
+    layout(this, getContent(), null, _fillWidth, _fillHeight);
+    //if(isHorizontal()) RowView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
+    //else ColView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
 }
 
 /**
@@ -212,10 +209,11 @@ public static double getPrefWidth(ParentView aPar, View aChild, double aH)
 {
     // Get insets (just return if empty)
     Insets ins = aPar.getInsetsAll(); if(aChild==null) return ins.getWidth();
+    Insets marg = aChild.getMargin();
     
     // Get height without insets, get best width and return
     double h = aH>=0? (aH - ins.getHeight()) : aH;
-    double bw = aChild.getBestWidth(h);
+    double bw = aChild.getBestWidth(h) + marg.getWidth();
     return bw + ins.getWidth();
 }
 
@@ -226,10 +224,11 @@ public static double getPrefHeight(ParentView aPar, View aChild, double aW)
 {
     // Get insets (just return if empty)
     Insets ins = aPar.getInsetsAll(); if(aChild==null) return ins.getHeight();
+    Insets marg = aChild.getMargin();
     
     // Get width without insets, get best height and return
     double w = aW>=0? (aW - ins.getWidth()) : aW;
-    double bh = aChild.getBestHeight(w);
+    double bh = aChild.getBestHeight(w) + marg.getHeight();
     return bh + ins.getHeight();
 }
 
@@ -243,19 +242,20 @@ public static void layout(ParentView aPar, View aChild, Insets theIns, boolean i
     
     // Get parent bounds for insets (just return if empty)
     Insets ins = theIns!=null? theIns : aPar.getInsetsAll();
-    double px = ins.left, py = ins.top;
-    double pw = aPar.getWidth() - px - ins.right; if(pw<0) pw = 0; if(pw<=0) return;
-    double ph = aPar.getHeight() - py - ins.bottom; if(ph<0) ph = 0; if(ph<=0) return;
+    Insets marg = aChild.getMargin();
+    double px = ins.left + marg.left, pw = aPar.getWidth() - ins.getWidth() - marg.getWidth(); if(pw<=0) return;
+    double py = ins.top + marg.top, ph = aPar.getHeight() - ins.getHeight() - marg.getHeight(); if(ph<=0) return;
     
     // Get content width/height
     double cw = isFillWidth || aChild.isGrowWidth()? pw : aChild.getBestWidth(-1); if(cw>pw) cw = pw;
     double ch = isFillHeight? ph : aChild.getBestHeight(cw);
     
     // Handle normal layout
-    double dx = pw - cw, dy = ph - ch;
+    double dx = pw - cw;
+    double dy = ph - ch;
     double sx = aChild.getLeanX()!=null? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
     double sy = aChild.getLeanY()!=null? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
-    aChild.setBounds(px+dx*sx, py+dy*sy, cw, ch);
+    aChild.setBounds(px + dx*sx, py + dy*sy, cw, ch);
 }
     
 }

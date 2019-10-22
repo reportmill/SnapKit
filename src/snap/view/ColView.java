@@ -230,7 +230,7 @@ private static void addExtraSpace(View par, View children[], Rect cbnds[], int e
     
     // Otherwise, if FillHeight, extend last child
     else if(fillH)
-        cbnds[children.length-1].width = extra;
+        cbnds[children.length-1].width += extra;
     
     // Otherwise, check for vertical alignment/lean shift
     else if(extra>0)
