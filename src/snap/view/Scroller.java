@@ -18,12 +18,17 @@ public class Scroller extends ParentView implements ViewHost {
 
     // Whether to grow content to scroller width/height if smaller than scroller (overrides content setting if true)
     boolean         _growContWidth = true, _growContHeight = true;
+    
+    // The scroller to content ratios of width/height
+    double          _widthRatio, _heightRatio;
 
     // The scroll amounts
     double          _scrollH, _scrollV;
     
     // Constants for properties
     public static final String Content_Prop = "Content";
+    public static final String WidthRatio_Prop = "WidthRatio";
+    public static final String HeightRatio_Prop = "HeightRatio";
     public static final String ScrollH_Prop = "ScrollH";
     public static final String ScrollV_Prop = "ScrollV";
 
@@ -115,75 +120,31 @@ public void setGrowContentHeight(boolean aValue)
 }
 
 /**
- * Returns the content size.
+ * Returns the ratio of Scroller.Width to Content.Width.
  */
-public Size getContentSize()
+public double getWidthRatio()  { return _widthRatio; }
+
+/**
+ * Sets the ratio of Scroller.Width to Content.Width.
+ */
+public void setWidthRatio(double aValue)
 {
-    // If no content return (1,1)
-    if(_content==null) return new Size(1,1);
-    
-    // Handle Horizontal
-    if(_content.isHorizontal()) {
-        double w = isFillWidth()? getWidth() : _content.getBestWidth(-1);
-        if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
-        double h = isFillHeight()? getHeight() : _content.getBestHeight(w);
-        if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
-        return new Size(w,h);
-    }
-    
-    // Handle Vertical
-    double h = isFillHeight()? getHeight() : _content.getBestHeight(-1);
-    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
-    double w = isFillWidth()? getWidth() : _content.getBestWidth(h);
-    if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
-    return new Size(w,h);
+    if(aValue==_widthRatio) return;
+    firePropChange(WidthRatio_Prop, _widthRatio, _widthRatio = aValue);
 }
 
 /**
- * Returns the content width.
+ * Returns the ratio of Scroller.Height to Content.Height.
  */
-public double getContentWidth()
-{
-    // If no content return 1. If FillWidth, return Width
-    if(_content==null) return 1;
-    if(isFillWidth()) return getWidth();
-    
-    // Handle Horizontal
-    if(_content.isHorizontal()) {
-        double w = _content.getBestWidth(-1);
-        if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
-        return w;
-    }
-    
-    // Handle Vertical
-    double h = getContentHeight();
-    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
-    double w = _content.getBestWidth(h);
-    if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
-    return w;
-}
+public double getHeightRatio()  { return _heightRatio; }
 
 /**
- * Returns the content height.
+ * Sets the ratio of Scroller.Height to Content.Height.
  */
-public double getContentHeight()
+public void setHeightRatio(double aValue)
 {
-    // If no content return 1. If FillHeight, return Height
-    if(_content==null) return 1;
-    if(isFillHeight()) return getHeight();
-    
-    // Handle Horizontal
-    if(_content.isHorizontal()) {
-        double w = getContentWidth();
-        double h = _content.getBestHeight(w);
-        if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
-        return h;
-    }
-    
-    // Handle Vertical
-    double h = _content.getBestHeight(-1);
-    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
-    return h;
+    if(aValue==_heightRatio) return;
+    firePropChange(HeightRatio_Prop, _heightRatio, _heightRatio = aValue);
 }
 
 /**
@@ -265,6 +226,78 @@ public double getRatioV()  { double svm = getScrollVMax(); return svm>0? _scroll
  * Sets the vertical scroll.
  */
 public void setRatioV(double aValue)  { setScrollV(aValue*getScrollVMax()); }
+
+/**
+ * Returns the content size.
+ */
+public Size getContentSize()
+{
+    // If no content return (1,1)
+    if(_content==null) return new Size(1,1);
+    
+    // Handle Horizontal
+    if(_content.isHorizontal()) {
+        double w = isFillWidth()? getWidth() : _content.getBestWidth(-1);
+        if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
+        double h = isFillHeight()? getHeight() : _content.getBestHeight(w);
+        if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+        return new Size(w,h);
+    }
+    
+    // Handle Vertical
+    double h = isFillHeight()? getHeight() : _content.getBestHeight(-1);
+    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+    double w = isFillWidth()? getWidth() : _content.getBestWidth(h);
+    if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
+    return new Size(w,h);
+}
+
+/**
+ * Returns the content width.
+ */
+public double getContentWidth()
+{
+    // If no content return 1. If FillWidth, return Width
+    if(_content==null) return 1;
+    if(isFillWidth()) return getWidth();
+    
+    // Handle Horizontal
+    if(_content.isHorizontal()) {
+        double w = _content.getBestWidth(-1);
+        if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
+        return w;
+    }
+    
+    // Handle Vertical
+    double h = getContentHeight();
+    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+    double w = _content.getBestWidth(h);
+    if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
+    return w;
+}
+
+/**
+ * Returns the content height.
+ */
+public double getContentHeight()
+{
+    // If no content return 1. If FillHeight, return Height
+    if(_content==null) return 1;
+    if(isFillHeight()) return getHeight();
+    
+    // Handle Horizontal
+    if(_content.isHorizontal()) {
+        double w = getContentWidth();
+        double h = _content.getBestHeight(w);
+        if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+        return h;
+    }
+    
+    // Handle Vertical
+    double h = _content.getBestHeight(-1);
+    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+    return h;
+}
 
 /**
  * Called to scroll the given shape in this node coords to visible.
@@ -367,6 +400,12 @@ protected void layoutImpl()
     double sx = getScrollH(); if(sx>cw-pw) sx = Math.round(cw-pw);
     double sy = getScrollV(); if(sy>ch-ph) sy = Math.round(ch-ph);
     _content.setBounds(-sx, -sy, cw, ch);
+    
+    // Update WidthRatio/HeightRatio
+    double wr = cw!=0? pw/cw : 1;
+    double hr = ch!=0? ph/ch : 1;
+    setWidthRatio(wr);
+    setHeightRatio(hr);
 }
 
 /**
@@ -391,6 +430,28 @@ public void processEvent(ViewEvent anEvent)
             anEvent.consume();
         }
     }
+}
+
+/**
+ * Override to update WidthRatio.
+ */
+public void setWidth(double aValue)
+{
+    if(aValue==getWidth()) return; super.setWidth(aValue);
+    double cw = _content!=null? _content.getWidth() : 0;
+    double wr = cw!=0? getWidth()/cw : 1;
+    setWidthRatio(wr);
+}
+
+/**
+ * Override to update HeightRatio.
+ */
+public void setHeight(double aValue)
+{
+    if(aValue==getHeight()) return; super.setHeight(aValue);
+    double ch = _content!=null? _content.getHeight() : 0;
+    double hr = ch!=0? getHeight()/ch : 1;
+    setHeightRatio(hr);
 }
 
 /**

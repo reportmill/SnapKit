@@ -34,10 +34,14 @@ public class ScrollView extends ParentView implements ViewHost {
  */
 public ScrollView()
 {
-    _scroller = new Scroller();
-    _scroller.addPropChangeListener(pc -> scrollerDidPropChange(pc), Scroller.ScrollH_Prop, Scroller.ScrollV_Prop);
-    addChild(_scroller);
+    // Configure ScrollView
     setBorder(SCROLL_VIEW_BORDER);
+    
+    // Create Scroller and add listeners for scroll changes
+    _scroller = new Scroller();
+    _scroller.addPropChangeListener(pc -> scrollerDidPropChange(pc),
+        Scroller.ScrollH_Prop, Scroller.ScrollV_Prop, Scroller.WidthRatio_Prop, Scroller.HeightRatio_Prop);
+    addChild(_scroller);
 }
     
 /**
@@ -122,8 +126,8 @@ public Boolean getShowHBar()  { return _showHBar; }
  */
 public void setShowHBar(Boolean aValue)
 {
+    if(aValue==_showHBar) return;
     firePropChange(ShowHBar_Prop, _showHBar, _showHBar=aValue);
-    relayout();
 }
 
 /**
@@ -136,8 +140,8 @@ public Boolean getShowVBar()  { return _showVBar; }
  */
 public void setShowVBar(Boolean aValue)
 {
+    if(aValue==_showVBar) return;
     firePropChange(ShowVBar_Prop, _showVBar, _showVBar=aValue);
-    relayout();
 }
 
 /**
@@ -150,10 +154,21 @@ public boolean isHBarShowing()  { return getHBar().getParent()!=null; }
  */
 protected void setHBarShowing(boolean aValue)
 {
+    // If already set, just return
     if(aValue==isHBarShowing()) return;
+    
+    // If showing, add and update
     ScrollBar hbar = getHBar();
-    if(aValue) addChild(hbar);
+    if(aValue) {
+        addChild(hbar);
+        hbar.setThumbRatio(_scroller.getWidthRatio());
+        hbar.setScroll(_scroller.getRatioH());
+    }
+    
+    // Otherwise, remove
     else removeChild(hbar);
+    
+    // Fire prop change
     firePropChange(HBarShowing_Prop, !aValue, aValue);
 }
 
@@ -167,10 +182,21 @@ public boolean isVBarShowing()  { return getVBar().getParent()!=null; }
  */
 protected void setVBarShowing(boolean aValue)
 {
+    // If already set, just return
     if(aValue==isVBarShowing()) return;
+    
+    // If showing, add and update
     ScrollBar vbar = getVBar();
-    if(aValue) addChild(vbar);
+    if(aValue) {
+        addChild(vbar);
+        vbar.setThumbRatio(_scroller.getHeightRatio());
+        vbar.setScroll(_scroller.getRatioV());
+    }
+    
+    // Otherwise, remove
     else removeChild(vbar);
+    
+    // Fire prop change
     firePropChange(VBarShowing_Prop, !aValue, aValue);
 }
 
@@ -258,7 +284,7 @@ protected void layoutImpl()
     if(isHBarShowing()) h -= barSize;
     
     // Set Scroller bounds
-    _scroller.setBounds(x,y,w,h);
+    _scroller.setBounds(x, y, w, h);
     
     // Get content size
     Size cpsize = _scroller.getContentSize();
@@ -291,19 +317,13 @@ protected void layoutImpl()
         return;
     }
     
-    // If horizontal scrollbar showing, update it
-    if(showHBar) { ScrollBar hbar = getHBar();
-        hbar.setBounds(x,y+h,w,barSize);
-        hbar.setThumbRatio(w/cpw);
-        hbar.setScroll(_scroller.getRatioH());
-    }
+    // If horizontal scrollbar showing, set bounds
+    if(isHBarShowing()) { ScrollBar hbar = getHBar();
+        hbar.setBounds(x, y+h, w, barSize); }
     
-    // If vertical scrollbar needed, add it
-    if(showVBar) { ScrollBar vbar = getVBar();
-        vbar.setBounds(x+w,y,barSize,h);
-        vbar.setThumbRatio(h/cph);
-        vbar.setScroll(_scroller.getRatioV());
-    }
+    // If vertical scrollbar showing, set bounds
+    if(isVBarShowing()) { ScrollBar vbar = getVBar();
+        vbar.setBounds(x+w, y, barSize, h); }
 }
 
 /**
@@ -314,13 +334,26 @@ public Border getDefaultBorder()  { return SCROLL_VIEW_BORDER; }
 /**
  * Handle Scroller property changes.
  */
-public void scrollerDidPropChange(PropChange anEvent)
+protected void scrollerDidPropChange(PropChange anEvent)
 {
+    // Get Property Name
     String pname = anEvent.getPropertyName();
+    
+    // Handle Scroller.ScrollV change
     if(pname==Scroller.ScrollV_Prop)
         getVBar().setScroll(_scroller.getRatioV());
+        
+    // Handle Scroller.ScrollH change
     else if(pname==Scroller.ScrollH_Prop)
         getHBar().setScroll(_scroller.getRatioH());
+        
+    // Handle Scroller.WidthRatio change
+    else if(pname==Scroller.WidthRatio_Prop)
+        getHBar().setThumbRatio(_scroller.getWidthRatio());
+        
+    // Handle Scroller.HeightRatio change
+    else if(pname==Scroller.HeightRatio_Prop)
+        getVBar().setThumbRatio(_scroller.getHeightRatio());
 }
 
 /**
