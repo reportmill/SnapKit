@@ -148,12 +148,12 @@ public void setHeightRatio(double aValue)
 }
 
 /**
- * Returns the horizontal scroll.
+ * Returns the horizontal offset into content.
  */
 public double getScrollH()  { return _scrollH; }
 
 /**
- * Sets the horizontal scroll.
+ * Sets the horizontal offset into content.
  */
 public void setScrollH(double aValue)
 {
@@ -169,21 +169,21 @@ public void setScrollH(double aValue)
 }
 
 /**
- * Returns the maximum possible horizontal scroll.
+ * Returns the maximum possible horizontal offset.
  */
 public double getScrollHMax()
 {
-    double cw = getContentWidth();
+    double cw = _content!=null? _content.getWidth() : 1;
     return Math.round(Math.max(cw - getWidth(),0));
 }
 
 /**
- * Returns the vertical scroll.
+ * Returns the vertical offset into content.
  */
 public double getScrollV()  { return _scrollV; }
 
 /**
- * Sets the vertical scroll.
+ * Sets the vertical offset into content.
  */
 public void setScrollV(double aValue)
 {
@@ -199,104 +199,83 @@ public void setScrollV(double aValue)
 }
 
 /**
- * Returns the maximum possible vertical scroll.
+ * Returns the maximum possible vertical offset.
  */
 public double getScrollVMax()
 {
-    double ch = getContentHeight();
+    double ch = _content!=null? _content.getHeight() : 1;
     return Math.round(Math.max(ch - getHeight(),0));
 }
 
 /**
- * Returns the horizontal scroll.
+ * Returns the ratio of ScrollH to ScrollHMax.
  */
-public double getRatioH()  { double shm = getScrollHMax(); return shm>0? _scrollH/shm : 0; }
+public double getScrollRatioH()
+{
+    double shm = getScrollHMax();
+    return shm>0? _scrollH/shm : 0;
+}
 
 /**
- * Sets the horizontal scroll.
+ * Sets ScrollH from the given ratio of ScrollH to ScrollHMax.
  */
-public void setRatioH(double aValue)  { setScrollH(aValue*getScrollHMax()); }
+public void setScrollRatioH(double aValue)
+{
+    double sh = aValue*getScrollHMax();
+    setScrollH(sh);
+}
 
 /**
- * Returns the vertical scroll.
+ * Returns the ratio of ScrollV to ScrollVMax.
  */
-public double getRatioV()  { double svm = getScrollVMax(); return svm>0? _scrollV/svm : 0; }
+public double getScrollRatioV()
+{
+    double svm = getScrollVMax();
+    return svm>0? _scrollV/svm : 0;
+}
 
 /**
- * Sets the vertical scroll.
+ * Sets ScrollV from the given ratio of ScrollV to ScrollVMax.
  */
-public void setRatioV(double aValue)  { setScrollV(aValue*getScrollVMax()); }
+public void setScrollRatioV(double aValue)
+{
+    double sv = aValue*getScrollVMax();
+    setScrollV(sv);
+}
 
 /**
- * Returns the content size.
+ * Returns preferred size of content view in Scroller.
  */
-public Size getContentSize()
+protected Size getContentPrefSize()
 {
     // If no content return (1,1)
     if(_content==null) return new Size(1,1);
     
     // Handle Horizontal
     if(_content.isHorizontal()) {
+        
+        // Get PrefWidth (expand to width if needed)
         double w = isFillWidth()? getWidth() : _content.getBestWidth(-1);
-        if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
+        if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth()))
+           w = getWidth();
+           
+        // Get PrefHeight (expand to height if needed)
         double h = isFillHeight()? getHeight() : _content.getBestHeight(w);
-        if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+        if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight()))
+            h = getHeight();
+            
+        // Return size
         return new Size(w,h);
     }
     
     // Handle Vertical
     double h = isFillHeight()? getHeight() : _content.getBestHeight(-1);
-    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
+    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight()))
+        h = getHeight();
     double w = isFillWidth()? getWidth() : _content.getBestWidth(h);
-    if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
+    if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth()))
+        w = getWidth();
     return new Size(w,h);
-}
-
-/**
- * Returns the content width.
- */
-public double getContentWidth()
-{
-    // If no content return 1. If FillWidth, return Width
-    if(_content==null) return 1;
-    if(isFillWidth()) return getWidth();
-    
-    // Handle Horizontal
-    if(_content.isHorizontal()) {
-        double w = _content.getBestWidth(-1);
-        if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
-        return w;
-    }
-    
-    // Handle Vertical
-    double h = getContentHeight();
-    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
-    double w = _content.getBestWidth(h);
-    if(w<getWidth() && (isGrowContentWidth() || _content.isGrowWidth())) w = getWidth();
-    return w;
-}
-
-/**
- * Returns the content height.
- */
-public double getContentHeight()
-{
-    // If no content return 1. If FillHeight, return Height
-    if(_content==null) return 1;
-    if(isFillHeight()) return getHeight();
-    
-    // Handle Horizontal
-    if(_content.isHorizontal()) {
-        double w = getContentWidth();
-        double h = _content.getBestHeight(w);
-        if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
-        return h;
-    }
-    
-    // Handle Vertical
-    double h = _content.getBestHeight(-1);
-    if(h<getHeight() && (isGrowContentHeight() || _content.isGrowHeight())) h = getHeight();
-    return h;
 }
 
 /**
@@ -393,7 +372,7 @@ protected void layoutImpl()
 {
     if(_content==null) return;
     double pw = getWidth(), ph = getHeight();
-    Size csize = getContentSize();
+    Size csize = getContentPrefSize();
     double cw = csize.width, ch = csize.height;
     
     // Get content bounds

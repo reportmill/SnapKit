@@ -2019,8 +2019,6 @@ public Object getValue(String aPropName)
         case Selectable.Items_Prop: return ((Selectable)this).getItems();
         case Selectable.SelItem_Prop: return ((Selectable)this).getSelItem();
         case Selectable.SelIndex_Prop: return ((Selectable)this).getSelIndex();
-        case Scroller.ScrollH_Prop: return ((Scroller)this).getScrollH();
-        case Scroller.ScrollV_Prop: return ((Scroller)this).getScrollV();
         default: break;
     }
     
@@ -2065,8 +2063,6 @@ public void setValue(String aPropName, Object aValue)
             sview.setSelIndex(index);
             break;
         }
-        case Scroller.ScrollH_Prop: ((Scroller)this).setScrollH(SnapUtils.doubleValue(aValue)); break;
-        case Scroller.ScrollV_Prop: ((Scroller)this).setScrollV(SnapUtils.doubleValue(aValue)); break;
         default: KeyChain.setValueSafe(this, pname, aValue);
     }
 }

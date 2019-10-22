@@ -85,16 +85,6 @@ public View removeGuest(int anIndex)  { return _scroller.removeGuest(anIndex); }
 public Scroller getScroller()  { return _scroller; }
 
 /**
- * Returns the horizontal scroll.
- */
-public double getScrollH()  { return getHBar().getScroll(); }
-
-/**
- * Returns the vertical scroll.
- */
-public double getScrollV()  { return getVBar().getScroll(); }
-
-/**
  * Returns the Horizontal ScrollBar.
  */
 public ScrollBar getHBar()
@@ -162,7 +152,7 @@ protected void setHBarShowing(boolean aValue)
     if(aValue) {
         addChild(hbar);
         hbar.setThumbRatio(_scroller.getWidthRatio());
-        hbar.setScroll(_scroller.getRatioH());
+        hbar.setScrollRatio(_scroller.getScrollRatioH());
     }
     
     // Otherwise, remove
@@ -190,7 +180,7 @@ protected void setVBarShowing(boolean aValue)
     if(aValue) {
         addChild(vbar);
         vbar.setThumbRatio(_scroller.getHeightRatio());
-        vbar.setScroll(_scroller.getRatioV());
+        vbar.setScrollRatio(_scroller.getScrollRatioV());
     }
     
     // Otherwise, remove
@@ -286,33 +276,8 @@ protected void layoutImpl()
     // Set Scroller bounds
     _scroller.setBounds(x, y, w, h);
     
-    // Get content size
-    Size cpsize = _scroller.getContentSize();
-    double cpw = cpsize.getWidth(), cph = cpsize.getHeight();
-    
-    // Get whether to show scroll bars
-    boolean asneedH = _showHBar==null, alwaysH = _showHBar==Boolean.TRUE;
-    boolean asneedV = _showVBar==null, alwaysV = _showVBar==Boolean.TRUE;
-    boolean showHBar = alwaysH || asneedH && cpw>w;
-    boolean showVBar = alwaysV || asneedV && cph>h;
-    
-    // If showing both ScrollBars, but only because both ScrollBars are showing, hide them and try again
-    if(isVBarShowing() && isHBarShowing() && showVBar && showHBar && asneedH && asneedV &&
-        cpw<=w+getVBar().getWidth() && cph<=h+getHBar().getHeight()) {
-        setVBarShowing(false);
-        setHBarShowing(false);
-        layoutImpl();
-        return;
-    }
-    
-    // If either ScrollBar in wrong Showing state, set and try again
-    if(showVBar!=isVBarShowing()) {
-        setVBarShowing(showVBar);
-        layoutImpl();
-        return;
-    }
-    if(showHBar!=isHBarShowing()) {
-        setHBarShowing(showHBar);
+    // Check whether either ScrollBar.Showing needs updating
+    if(updateScrollBarsShowing()) {
         layoutImpl();
         return;
     }
@@ -324,6 +289,47 @@ protected void layoutImpl()
     // If vertical scrollbar showing, set bounds
     if(isVBarShowing()) { ScrollBar vbar = getVBar();
         vbar.setBounds(x+w, y, barSize, h); }
+}
+
+/**
+ * Called to update whether ScrollBars are showing. Returns true if any changes.
+ */
+protected boolean updateScrollBarsShowing()
+{
+    // Get Scroller Size and Content size
+    double sw = _scroller.getWidth();
+    double sh = _scroller.getHeight();
+    Size csize = _scroller.getContentPrefSize();
+    double cw = csize.getWidth();
+    double ch = csize.getHeight();
+    
+    // Get whether to show scroll bars
+    boolean alwaysH = _showHBar==Boolean.TRUE, asneedH = _showHBar==null;
+    boolean alwaysV = _showVBar==Boolean.TRUE, asneedV = _showVBar==null;
+    boolean showHBar = alwaysH || asneedH && cw>sw;
+    boolean showVBar = alwaysV || asneedV && ch>sh;
+    
+    // If showing both ScrollBars, but only because both ScrollBars are showing, hide them and try again
+    if(isVBarShowing() && isHBarShowing() && showVBar && showHBar && asneedH && asneedV &&
+        cw<=sw+getVBar().getWidth() && ch<=sh+getHBar().getHeight()) {
+        setVBarShowing(false);
+        setHBarShowing(false);
+        return true;
+    }
+    
+    // If either ScrollBar in wrong Showing state, set and try again
+    if(showVBar!=isVBarShowing()) {
+        setVBarShowing(showVBar);
+        return true;
+    }
+    
+    if(showHBar!=isHBarShowing()) {
+        setHBarShowing(showHBar);
+        return true;
+    }
+    
+    // Return false since ScrollBar showing didn't change
+    return false;
 }
 
 /**
@@ -339,21 +345,25 @@ protected void scrollerDidPropChange(PropChange anEvent)
     // Get Property Name
     String pname = anEvent.getPropertyName();
     
-    // Handle Scroller.ScrollV change
-    if(pname==Scroller.ScrollV_Prop)
-        getVBar().setScroll(_scroller.getRatioV());
-        
     // Handle Scroller.ScrollH change
-    else if(pname==Scroller.ScrollH_Prop)
-        getHBar().setScroll(_scroller.getRatioH());
+    if(pname==Scroller.ScrollH_Prop)
+        getHBar().setScrollRatio(_scroller.getScrollRatioH());
+        
+    // Handle Scroller.ScrollV change
+    else if(pname==Scroller.ScrollV_Prop)
+        getVBar().setScrollRatio(_scroller.getScrollRatioV());
         
     // Handle Scroller.WidthRatio change
-    else if(pname==Scroller.WidthRatio_Prop)
+    else if(pname==Scroller.WidthRatio_Prop) {
         getHBar().setThumbRatio(_scroller.getWidthRatio());
+        getHBar().setScrollRatio(_scroller.getScrollRatioH());
+    }
         
     // Handle Scroller.HeightRatio change
-    else if(pname==Scroller.HeightRatio_Prop)
+    else if(pname==Scroller.HeightRatio_Prop) {
         getVBar().setThumbRatio(_scroller.getHeightRatio());
+        getVBar().setScrollRatio(_scroller.getScrollRatioV());
+    }
 }
 
 /**
@@ -363,8 +373,10 @@ public void scrollBarDidPropChange(PropChange anEvent)
 {
     String pname = anEvent.getPropertyName();
     if(pname==ScrollBar.Scroll_Prop) {
-        if(anEvent.getSource()==_hbar) _scroller.setRatioH(SnapUtils.doubleValue(anEvent.getNewValue()));
-        else _scroller.setRatioV(SnapUtils.doubleValue(anEvent.getNewValue()));
+        double val = SnapUtils.doubleValue(anEvent.getNewValue());
+        if(anEvent.getSource()==_hbar)
+            _scroller.setScrollRatioH(val);
+        else _scroller.setScrollRatioV(val);
     }
 }
 

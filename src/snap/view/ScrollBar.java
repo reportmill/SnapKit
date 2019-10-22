@@ -11,7 +11,7 @@ import snap.util.MathUtils;
  */
 public class ScrollBar extends View {
 
-    // The scroll value (0-1)
+    // The scroll as a ratio (0-1) of offset to offset max (should really just be offset)
     double         _scroll;
     
     // The ratio of the thumb to total available size
@@ -37,12 +37,12 @@ public ScrollBar()  { enableEvents(MouseEvents); enableEvents(Scroll); }
 /**
  * Returns the scroll value (0-1).
  */
-public double getScroll()  { return _scroll; }
+public double getScrollRatio()  { return _scroll; }
 
 /**
  * Sets the scroll value (0-1).
  */
-public void setScroll(double aValue)
+public void setScrollRatio(double aValue)
 {
     if(aValue<0) aValue = 0; else if(aValue>1) aValue = 1;
     if(MathUtils.equals(aValue,_scroll)) return;
@@ -74,8 +74,8 @@ public Rect getThumbBounds()
     double w = getWidth() - 4, h = getHeight() - 4;
     double tw = hor? Math.max(Math.round(getThumbRatio()*w),20) : w;
     double th = ver? Math.max(Math.round(getThumbRatio()*h),20) : h;
-    double tx = hor? Math.round(getScroll()*(w-tw))+2 : 2;
-    double ty = ver? Math.round(getScroll()*(h-th))+2 : 2;
+    double tx = hor? Math.round(getScrollRatio()*(w-tw))+2 : 2;
+    double ty = ver? Math.round(getScrollRatio()*(h-th))+2 : 2;
     return new Rect(tx,ty,tw,th);
 }
 
@@ -90,9 +90,9 @@ public double getThumbSize()
 }
 
 /**
- * Returns the value for the given point.
+ * Returns the resulting ScrollRatio for the given point.
  */
-public double getScroll(double aPnt)
+public double getScrollRatio(double aPnt)
 {
     boolean hor = isHorizontal();
     double tsize = getThumbSize(), size = hor? getWidth() : getHeight(); size -= 4;
@@ -117,7 +117,7 @@ protected void processEvent(ViewEvent anEvent)
         Rect tbnds = getThumbBounds(); double mx = anEvent.getX(), my = anEvent.getY();
         _pressed = true;
         _dv = hor? mx - tbnds.getMidX() : my - tbnds.getMidY();
-        if(!tbnds.contains(mx,my)) { setScroll(getScroll(hor? mx : my)); _dv = 0; }
+        if(!tbnds.contains(mx,my)) { setScrollRatio(getScrollRatio(hor? mx : my)); _dv = 0; }
         repaint();
     }
 
@@ -127,8 +127,8 @@ protected void processEvent(ViewEvent anEvent)
     // Handle MouseDragged
     else if(anEvent.isMouseDrag()) {
         double mv = (hor? anEvent.getX() : anEvent.getY()) - _dv;
-        double val = getScroll(mv);
-        setScroll(val);
+        double val = getScrollRatio(mv);
+        setScrollRatio(val);
     }
     
     // Handle scroll
@@ -139,7 +139,7 @@ protected void processEvent(ViewEvent anEvent)
         double csize = size*size/tsize;
         double dv = csize - size;
         if(dv>0 && Math.abs(units)>0)
-            setScroll(getScroll() + units/dv);
+            setScrollRatio(getScrollRatio() + units/dv);
         else return;
     }
     
