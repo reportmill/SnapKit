@@ -11,11 +11,14 @@ import snap.util.MathUtils;
  */
 public class ScrollBar extends View {
 
-    // The scroll as a ratio (0-1) of offset to offset max (should really just be offset)
+    // The offset into ScrollSize
     double         _scroll;
     
-    // The ratio of the thumb to total available size
-    double         _thumbRatio;
+    // The size of the viewable portion of ScrollSize
+    double         _viewSize;
+    
+    // The size of the content being scrolled
+    double         _scrollSize;
     
     // Whether button is pressed
     boolean        _pressed;
@@ -28,6 +31,8 @@ public class ScrollBar extends View {
     
     // Constants for properties
     public static final String Scroll_Prop = "Scroll";
+    public static final String ViewSize_Prop = "ViewSize";
+    public static final String ScrollSize_Prop = "ScrollSize";
     
 /**
  * Creates a new ScrollBar.
@@ -35,34 +40,94 @@ public class ScrollBar extends View {
 public ScrollBar()  { enableEvents(MouseEvents); enableEvents(Scroll); }
 
 /**
- * Returns the scroll value (0-1).
+ * Returns the offset into ScrollSize.
  */
-public double getScrollRatio()  { return _scroll; }
+public double getScroll()  { return _scroll; }
 
 /**
- * Sets the scroll value (0-1).
+ * Sets the offset into ScrollSize.
  */
-public void setScrollRatio(double aValue)
+public void setScroll(double aValue)
 {
-    if(aValue<0) aValue = 0; else if(aValue>1) aValue = 1;
-    if(MathUtils.equals(aValue,_scroll)) return;
-    firePropChange(Scroll_Prop, _scroll, _scroll=aValue);
+    // Get value clamped to valid range and rounded (return if already set)
+    double value = MathUtils.clamp(aValue, 0, getScrollLimit()); value = Math.round(value);
+    if(MathUtils.equals(value, _scroll)) return;
+    
+    // Set value and fire prop change
+    firePropChange(Scroll_Prop, _scroll, _scroll=value);
     repaint();
 }
 
 /**
- * Returns the visible amount.
+ * Returns the scroll limit.
  */
-public double getThumbRatio()  { return _thumbRatio; }
+public double getScrollLimit()
+{
+    double val = getScrollSize() - getViewSize();
+    return Math.round(Math.max(val, 0));
+}
 
 /**
- * Sets the thumb ratio.
+ * Returns the size of the viewable portion of ScrollSize.
  */
-public void setThumbRatio(double aValue)
+public double getViewSize()  { return _viewSize; }
+
+/**
+ * Sets the size of the viewable portion of ScrollSize.
+ */
+public void setViewSize(double aValue)
 {
-    if(aValue==_thumbRatio) return;
-    firePropChange("ThumbRatio", _thumbRatio, _thumbRatio=aValue);
+    // If already set, just return
+    if(MathUtils.equals(aValue, _viewSize)) return;
+    
+    // Set value and fire prop change
+    firePropChange(Scroll_Prop, _viewSize, _viewSize=aValue);
     repaint();
+}
+
+/**
+ * Returns the size of the content being scrolled.
+ */
+public double getScrollSize()  { return _scrollSize; }
+
+/**
+ * Sets the size of the content being scrolled.
+ */
+public void setScrollSize(double aValue)
+{
+    // If already set, just return
+    if(MathUtils.equals(aValue, _scrollSize)) return;
+    
+    // Set value and fire prop change
+    firePropChange(ScrollSize_Prop, _scrollSize, _scrollSize=aValue);
+    repaint();
+}
+
+/**
+ * Returns the ratio of Scroll to ScrollLimit (0-1).
+ */
+public double getScrollRatio()
+{
+    double smax = getScrollLimit();
+    return smax>0? _scroll/smax : 0;
+}
+
+/**
+ * Sets the ratio of Scroll to ScrollLimit (0-1).
+ */
+public void setScrollRatio(double aValue)
+{
+    double val = aValue*getScrollLimit();
+    setScroll(val);
+}
+
+/**
+ * Returns the ratio of ViewSize to ScrollSize.
+ */
+public double getSizeRatio()
+{
+    double vsize = getViewSize(), ssize = getScrollSize();
+    return ssize>0? vsize/ssize : 1;
 }
 
 /**
@@ -71,9 +136,11 @@ public void setThumbRatio(double aValue)
 public Rect getThumbBounds()
 {
     boolean hor = isHorizontal(), ver = !hor;
-    double w = getWidth() - 4, h = getHeight() - 4;
-    double tw = hor? Math.max(Math.round(getThumbRatio()*w),20) : w;
-    double th = ver? Math.max(Math.round(getThumbRatio()*h),20) : h;
+    double ratio = getSizeRatio();
+    double w = getWidth() - 4;
+    double h = getHeight() - 4;
+    double tw = hor? Math.max(Math.round(ratio*w),20) : w;
+    double th = ver? Math.max(Math.round(ratio*h),20) : h;
     double tx = hor? Math.round(getScrollRatio()*(w-tw))+2 : 2;
     double ty = ver? Math.round(getScrollRatio()*(h-th))+2 : 2;
     return new Rect(tx,ty,tw,th);
@@ -85,8 +152,9 @@ public Rect getThumbBounds()
 public double getThumbSize()
 {
     boolean hor = isHorizontal(), ver = !hor;
+    double ratio = getSizeRatio();
     double size = hor? (getWidth() - 4) : (getHeight() - 4);
-    return Math.max(Math.round(getThumbRatio()*size),20);
+    return Math.max(Math.round(ratio*size),20);
 }
 
 /**
@@ -95,7 +163,8 @@ public double getThumbSize()
 public double getScrollRatio(double aPnt)
 {
     boolean hor = isHorizontal();
-    double tsize = getThumbSize(), size = hor? getWidth() : getHeight(); size -= 4;
+    double tsize = getThumbSize();
+    double size = hor? getWidth() : getHeight(); size -= 4;
     return (aPnt-tsize/2)/(size-tsize);
 }
 
@@ -114,15 +183,21 @@ protected void processEvent(ViewEvent anEvent)
     
     // Handle MousePress
     else if(anEvent.isMousePress())  {
-        Rect tbnds = getThumbBounds(); double mx = anEvent.getX(), my = anEvent.getY();
+        double mx = anEvent.getX();
+        double my = anEvent.getY();
+        Rect tbnds = getThumbBounds();
         _pressed = true;
         _dv = hor? mx - tbnds.getMidX() : my - tbnds.getMidY();
-        if(!tbnds.contains(mx,my)) { setScrollRatio(getScrollRatio(hor? mx : my)); _dv = 0; }
-        repaint();
+        if(!tbnds.contains(mx,my)) {
+            setScrollRatio(getScrollRatio(hor? mx : my));
+            _dv = 0;
+        }
     }
 
     // Handle MouseRelease
-    else if(anEvent.isMouseRelease())  { _pressed = false; repaint(); }
+    else if(anEvent.isMouseRelease())  {
+        _pressed = false; repaint();
+    }
     
     // Handle MouseDragged
     else if(anEvent.isMouseDrag()) {
@@ -152,9 +227,16 @@ protected void processEvent(ViewEvent anEvent)
  */
 protected void paintFront(Painter aPntr)
 {
-    double w = getWidth(), h = getHeight(); boolean hor = isHorizontal(), ver = !hor;
-    paintBack(aPntr, 0, 0, w, h, hor); if(hor && w<20 || ver && h<20) return;
-    Rect tbnds = getThumbBounds(); if(getThumbRatio()>=1) return;
+    // Get orientation, size
+    boolean hor = isHorizontal(), ver = !hor;
+    double w = getWidth(), h = getHeight();
+    
+    // Paint back (just return if too small to draw thumb)
+    paintBack(aPntr, 0, 0, w, h, hor);
+    if(hor && w<20 || ver && h<20) return;
+    
+    // Get thumb bounds and paint thumb
+    Rect tbnds = getThumbBounds(); if(getSizeRatio()>=1) return;
     int state = _pressed? Button.BUTTON_PRESSED : _targeted? Button.BUTTON_OVER : Button.BUTTON_NORMAL;
     paintThumb(aPntr, tbnds.x, tbnds.y, tbnds.width, tbnds.height, hor, state);
 }
@@ -164,8 +246,10 @@ protected void paintFront(Painter aPntr)
  */
 public static void paintBack(Painter aPntr, double x, double y, double w, double h, boolean isHor)
 {
-    // Paint background gradient and outer ring
+    // Paint background gradient
     Rect rect = new Rect(x,y,w,h); aPntr.setPaint(isHor? _backPntH : _backPntV); aPntr.fill(rect);
+    
+    // Paint outer ring
     rect.setRect(x+.5,y+.5,w-1,h-1); aPntr.setColor(_backRing); aPntr.draw(rect);
 }
 

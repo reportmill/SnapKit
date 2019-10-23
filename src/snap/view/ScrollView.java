@@ -152,8 +152,9 @@ protected void setHBarShowing(boolean aValue)
     ScrollBar hbar = getHBar();
     if(aValue) {
         addChild(hbar);
-        hbar.setThumbRatio(_scroller.getWidthRatio());
-        hbar.setScrollRatio(_scroller.getScrollXRatio());
+        hbar.setViewSize(_scroller.getWidth());
+        hbar.setScrollSize(_scroller.getScrollWidth());
+        hbar.setScroll(_scroller.getScrollX());
     }
     
     // Otherwise, remove
@@ -180,8 +181,9 @@ protected void setVBarShowing(boolean aValue)
     ScrollBar vbar = getVBar();
     if(aValue) {
         addChild(vbar);
-        vbar.setThumbRatio(_scroller.getHeightRatio());
-        vbar.setScrollRatio(_scroller.getScrollYRatio());
+        vbar.setViewSize(_scroller.getHeight());
+        vbar.setScrollSize(_scroller.getScrollHeight());
+        vbar.setScroll(_scroller.getScrollY());
     }
     
     // Otherwise, remove
@@ -352,22 +354,24 @@ protected void scrollerDidPropChange(PropChange anEvent)
     
     // Handle Scroller.ScrollX change
     if(pname==Scroller.ScrollX_Prop)
-        getHBar().setScrollRatio(_scroller.getScrollXRatio());
+        getHBar().setScroll(_scroller.getScrollX());
         
     // Handle Scroller.ScrollY change
     else if(pname==Scroller.ScrollY_Prop)
-        getVBar().setScrollRatio(_scroller.getScrollYRatio());
+        getVBar().setScroll(_scroller.getScrollY());
         
     // Handle Scroller.Width or Scroller.ScrollWidth change
     else if(pname==Width_Prop || pname==Scroller.ScrollWidth_Prop) {
-        getHBar().setThumbRatio(_scroller.getWidthRatio());
-        getHBar().setScrollRatio(_scroller.getScrollXRatio());
+        getHBar().setViewSize(_scroller.getWidth());
+        getHBar().setScrollSize(_scroller.getScrollWidth());
+        getHBar().setScroll(_scroller.getScrollX());
     }
         
     // Handle Scroller.Height or Scroller.ScrollHeight change
     else if(pname==Scroller.Height_Prop || pname==Scroller.ScrollHeight_Prop) {
-        getVBar().setThumbRatio(_scroller.getHeightRatio());
-        getVBar().setScrollRatio(_scroller.getScrollYRatio());
+        getVBar().setViewSize(_scroller.getHeight());
+        getVBar().setScrollSize(_scroller.getScrollHeight());
+        getVBar().setScroll(_scroller.getScrollY());
     }
 }
 
