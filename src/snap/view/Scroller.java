@@ -132,7 +132,7 @@ public void setScrollX(double aValue)
     // Get value rounded and in valid range (just return if already set)
     aValue = Math.round(aValue);
     if(aValue<0) aValue = 0;
-    else if(aValue>getScrollXMax()) aValue = getScrollXMax();
+    else if(aValue>getScrollXLimit()) aValue = getScrollXLimit();
     if(MathUtils.equals(aValue, _scrollX)) return;
     
     // Set value and relayout/repaint
@@ -143,7 +143,7 @@ public void setScrollX(double aValue)
 /**
  * Returns the maximum possible horizontal offset.
  */
-public double getScrollXMax()
+public double getScrollXLimit()
 {
     double val = getScrollWidth() - getWidth();
     return Math.round(Math.max(val, 0));
@@ -162,7 +162,7 @@ public void setScrollY(double aValue)
     // Get value rounded and in valid range (just return if already set)
     aValue = Math.round(aValue);
     if(aValue<0) aValue = 0;
-    else if(aValue>getScrollYMax()) aValue = getScrollYMax();
+    else if(aValue>getScrollYLimit()) aValue = getScrollYLimit();
     if(MathUtils.equals(aValue, _scrollY)) return;
     
     // Set value and relayout/repaint
@@ -173,7 +173,7 @@ public void setScrollY(double aValue)
 /**
  * Returns the maximum possible vertical offset.
  */
-public double getScrollYMax()
+public double getScrollYLimit()
 {
     double val = getScrollHeight() - getHeight();
     return Math.round(Math.max(val, 0));
@@ -212,7 +212,7 @@ protected void setScrollHeight(double aValue)
  */
 public double getScrollXRatio()
 {
-    double shm = getScrollXMax();
+    double shm = getScrollXLimit();
     return shm>0? _scrollX/shm : 0;
 }
 
@@ -221,7 +221,7 @@ public double getScrollXRatio()
  */
 public void setScrollXRatio(double aValue)
 {
-    double sh = aValue*getScrollXMax();
+    double sh = aValue*getScrollXLimit();
     setScrollX(sh);
 }
 
@@ -230,7 +230,7 @@ public void setScrollXRatio(double aValue)
  */
 public double getScrollYRatio()
 {
-    double svm = getScrollYMax();
+    double svm = getScrollYLimit();
     return svm>0? _scrollY/svm : 0;
 }
 
@@ -239,7 +239,7 @@ public double getScrollYRatio()
  */
 public void setScrollYRatio(double aValue)
 {
-    double sv = aValue*getScrollYMax();
+    double sv = aValue*getScrollYLimit();
     setScrollY(sv);
 }
 
@@ -413,16 +413,22 @@ public void processEvent(ViewEvent anEvent)
         
         // Handle Horizontal scroll
         double scrollX = anEvent.getScrollX();
-        if(scrollX!=0 && getScrollXMax()!=0) {
-            setScrollX(getScrollX() + scrollX*4);
-            anEvent.consume();
+        if(scrollX!=0) {
+            double scroll2 = MathUtils.clamp(getScrollX() + scrollX*4, 0, getScrollXLimit());
+            if(scroll2!=getScrollX()) {
+                setScrollX(scroll2);
+                anEvent.consume();
+            }
         }
         
         // Handle vertical scroll
         double scrollY = anEvent.getScrollY();
-        if(scrollY!=0 && getScrollYMax()!=0) {
-            setScrollY(getScrollY() + scrollY*4);
-            anEvent.consume();
+        if(scrollY!=0 && getScrollYLimit()!=0) {
+            double scroll2 = MathUtils.clamp(getScrollY() + scrollY*4, 0 , getScrollYLimit());
+            if(scroll2!=getScrollY()) {
+                setScrollY(scroll2);
+                anEvent.consume();
+            }
         }
     }
 }
