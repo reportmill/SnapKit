@@ -19,18 +19,18 @@ public class Scroller extends ParentView implements ViewHost {
     // Whether to grow content to scroller width/height if smaller than scroller (overrides content setting if true)
     boolean         _growContWidth = true, _growContHeight = true;
     
-    // The scroller to content ratios of width/height
-    double          _widthRatio, _heightRatio;
-
     // The scroll amounts
-    double          _scrollH, _scrollV;
+    double          _scrollX, _scrollY;
     
+    // The content width/height being scrolled
+    double          _scrollWidth, _scrollHeight;
+
     // Constants for properties
     public static final String Content_Prop = "Content";
-    public static final String WidthRatio_Prop = "WidthRatio";
-    public static final String HeightRatio_Prop = "HeightRatio";
-    public static final String ScrollH_Prop = "ScrollH";
-    public static final String ScrollV_Prop = "ScrollV";
+    public static final String ScrollX_Prop = "ScrollX";
+    public static final String ScrollY_Prop = "ScrollY";
+    public static final String ScrollWidth_Prop = "ScrollWidth";
+    public static final String ScrollHeight_Prop = "ScrollHeight";
 
 /**
  * Creates a new Scroller.
@@ -120,127 +120,145 @@ public void setGrowContentHeight(boolean aValue)
 }
 
 /**
- * Returns the ratio of Scroller.Width to Content.Width.
- */
-public double getWidthRatio()  { return _widthRatio; }
-
-/**
- * Sets the ratio of Scroller.Width to Content.Width.
- */
-public void setWidthRatio(double aValue)
-{
-    if(aValue==_widthRatio) return;
-    firePropChange(WidthRatio_Prop, _widthRatio, _widthRatio = aValue);
-}
-
-/**
- * Returns the ratio of Scroller.Height to Content.Height.
- */
-public double getHeightRatio()  { return _heightRatio; }
-
-/**
- * Sets the ratio of Scroller.Height to Content.Height.
- */
-public void setHeightRatio(double aValue)
-{
-    if(aValue==_heightRatio) return;
-    firePropChange(HeightRatio_Prop, _heightRatio, _heightRatio = aValue);
-}
-
-/**
  * Returns the horizontal offset into content.
  */
-public double getScrollH()  { return _scrollH; }
+public double getScrollX()  { return _scrollX; }
 
 /**
  * Sets the horizontal offset into content.
  */
-public void setScrollH(double aValue)
+public void setScrollX(double aValue)
 {
     // Get value rounded and in valid range (just return if already set)
     aValue = Math.round(aValue);
     if(aValue<0) aValue = 0;
-    else if(aValue>getScrollHMax()) aValue = getScrollHMax();
-    if(MathUtils.equals(aValue, _scrollH)) return;
+    else if(aValue>getScrollXMax()) aValue = getScrollXMax();
+    if(MathUtils.equals(aValue, _scrollX)) return;
     
     // Set value and relayout/repaint
-    firePropChange(ScrollH_Prop, _scrollH, _scrollH=aValue);
+    firePropChange(ScrollX_Prop, _scrollX, _scrollX=aValue);
     relayout(); repaint();
 }
 
 /**
  * Returns the maximum possible horizontal offset.
  */
-public double getScrollHMax()
+public double getScrollXMax()
 {
-    double cw = _content!=null? _content.getWidth() : 1;
-    return Math.round(Math.max(cw - getWidth(),0));
+    double val = getScrollWidth() - getWidth();
+    return Math.round(Math.max(val, 0));
 }
 
 /**
  * Returns the vertical offset into content.
  */
-public double getScrollV()  { return _scrollV; }
+public double getScrollY()  { return _scrollY; }
 
 /**
  * Sets the vertical offset into content.
  */
-public void setScrollV(double aValue)
+public void setScrollY(double aValue)
 {
     // Get value rounded and in valid range (just return if already set)
     aValue = Math.round(aValue);
     if(aValue<0) aValue = 0;
-    else if(aValue>getScrollVMax()) aValue = getScrollVMax();
-    if(MathUtils.equals(aValue, _scrollV)) return;
+    else if(aValue>getScrollYMax()) aValue = getScrollYMax();
+    if(MathUtils.equals(aValue, _scrollY)) return;
     
     // Set value and relayout/repaint
-    firePropChange(ScrollV_Prop, _scrollV, _scrollV=aValue);
+    firePropChange(ScrollY_Prop, _scrollY, _scrollY=aValue);
     relayout(); repaint();
 }
 
 /**
  * Returns the maximum possible vertical offset.
  */
-public double getScrollVMax()
+public double getScrollYMax()
 {
-    double ch = _content!=null? _content.getHeight() : 1;
-    return Math.round(Math.max(ch - getHeight(),0));
+    double val = getScrollHeight() - getHeight();
+    return Math.round(Math.max(val, 0));
 }
 
 /**
- * Returns the ratio of ScrollH to ScrollHMax.
+ * Returns the width of the content being scrolled.
  */
-public double getScrollRatioH()
+public double getScrollWidth()  { return _scrollWidth; }
+
+/**
+ * Sets the width of the content being scrolled.
+ */
+protected void setScrollWidth(double aValue)
 {
-    double shm = getScrollHMax();
-    return shm>0? _scrollH/shm : 0;
+    if(aValue==_scrollWidth) return;
+    firePropChange(ScrollWidth_Prop, _scrollWidth, _scrollWidth = aValue);
 }
 
 /**
- * Sets ScrollH from the given ratio of ScrollH to ScrollHMax.
+ * Returns the height of the content being scrolled.
  */
-public void setScrollRatioH(double aValue)
+public double getScrollHeight()  { return _scrollHeight; }
+
+/**
+ * Sets the height of the content being scrolled.
+ */
+protected void setScrollHeight(double aValue)
 {
-    double sh = aValue*getScrollHMax();
-    setScrollH(sh);
+    if(aValue==_scrollHeight) return;
+    firePropChange(ScrollHeight_Prop, _scrollHeight, _scrollHeight = aValue);
 }
 
 /**
- * Returns the ratio of ScrollV to ScrollVMax.
+ * Returns the ratio of ScrollX to ScrollXMax.
  */
-public double getScrollRatioV()
+public double getScrollXRatio()
 {
-    double svm = getScrollVMax();
-    return svm>0? _scrollV/svm : 0;
+    double shm = getScrollXMax();
+    return shm>0? _scrollX/shm : 0;
 }
 
 /**
- * Sets ScrollV from the given ratio of ScrollV to ScrollVMax.
+ * Sets ScrollX from the given ratio of ScrollY to ScrollYMax.
  */
-public void setScrollRatioV(double aValue)
+public void setScrollXRatio(double aValue)
 {
-    double sv = aValue*getScrollVMax();
-    setScrollV(sv);
+    double sh = aValue*getScrollXMax();
+    setScrollX(sh);
+}
+
+/**
+ * Returns the ratio of ScrollY to ScrollYMax.
+ */
+public double getScrollYRatio()
+{
+    double svm = getScrollYMax();
+    return svm>0? _scrollY/svm : 0;
+}
+
+/**
+ * Sets ScrollY from the given ratio of ScrollY to ScrollYMax.
+ */
+public void setScrollYRatio(double aValue)
+{
+    double sv = aValue*getScrollYMax();
+    setScrollY(sv);
+}
+
+/**
+ * Returns the ratio of Scroller.Width to Content.Width.
+ */
+public double getWidthRatio()
+{
+    double w = getWidth(), sw = getScrollWidth();
+    return sw>0? w/sw : 1;
+}
+
+/**
+ * Returns the ratio of Scroller.Height to Content.Height.
+ */
+public double getHeightRatio()
+{
+    double h = getHeight(), sh = getScrollHeight();
+    return sh>0? h/sh : 1;
 }
 
 /**
@@ -284,8 +302,8 @@ protected Size getContentPrefSize()
 public void scrollToVisible(Shape aShape)
 {
     // Get Scroller scroll and size
-    double vx = getScrollH(), vw = getWidth();
-    double vy = getScrollV(), vh = getHeight(); if(vw==0 || vh==0) return;
+    double vx = getScrollX(), vw = getWidth();
+    double vy = getScrollY(), vh = getHeight(); if(vw==0 || vh==0) return;
     
     // Get given shape
     Rect srect = aShape.getBounds();
@@ -295,10 +313,10 @@ public void scrollToVisible(Shape aShape)
     // Calculate/set new visible x and y: If shape rect is outside vrect, shift vrect to it; if bigger, center it
     double nvx = sx<vx? sx : sx+sw>vx+vw? sx+sw-vw : vx; if(sw>vw) nvx += (sw-vw)/2;
     double nvy = sy<vy? sy : sy+sh>vy+vh? sy+sh-vh : vy; if(sh>vh) nvy += (sh-vh)/2;
-    //setScrollH(nvx); setScrollV(nvy);
+    //setScrollX(nvx); setScrollY(nvy);
     
     // Set new value (with anim)
-    getAnimCleared(250).setValue(ScrollH_Prop, nvx).setValue(ScrollV_Prop, nvy).play();
+    getAnimCleared(250).setValue(ScrollX_Prop, nvx).setValue(ScrollY_Prop, nvy).play();
 }
 
 /**
@@ -376,15 +394,13 @@ protected void layoutImpl()
     double cw = csize.width, ch = csize.height;
     
     // Get content bounds
-    double sx = getScrollH(); if(sx>cw-pw) sx = Math.round(cw-pw);
-    double sy = getScrollV(); if(sy>ch-ph) sy = Math.round(ch-ph);
+    double sx = getScrollX(); if(sx>cw-pw) sx = Math.round(cw-pw);
+    double sy = getScrollY(); if(sy>ch-ph) sy = Math.round(ch-ph);
     _content.setBounds(-sx, -sy, cw, ch);
     
-    // Update WidthRatio/HeightRatio
-    double wr = cw!=0? pw/cw : 1;
-    double hr = ch!=0? ph/ch : 1;
-    setWidthRatio(wr);
-    setHeightRatio(hr);
+    // Update ScrollWidth/ScrollHeight
+    setScrollWidth(cw);
+    setScrollHeight(ch);
 }
 
 /**
@@ -397,40 +413,18 @@ public void processEvent(ViewEvent anEvent)
         
         // Handle Horizontal scroll
         double scrollX = anEvent.getScrollX();
-        if(scrollX!=0 && getScrollHMax()!=0) {
-            setScrollH(getScrollH() + scrollX*4);
+        if(scrollX!=0 && getScrollXMax()!=0) {
+            setScrollX(getScrollX() + scrollX*4);
             anEvent.consume();
         }
         
         // Handle vertical scroll
         double scrollY = anEvent.getScrollY();
-        if(scrollY!=0 && getScrollVMax()!=0) {
-            setScrollV(getScrollV() + scrollY*4);
+        if(scrollY!=0 && getScrollYMax()!=0) {
+            setScrollY(getScrollY() + scrollY*4);
             anEvent.consume();
         }
     }
-}
-
-/**
- * Override to update WidthRatio.
- */
-public void setWidth(double aValue)
-{
-    if(aValue==getWidth()) return; super.setWidth(aValue);
-    double cw = _content!=null? _content.getWidth() : 0;
-    double wr = cw!=0? getWidth()/cw : 1;
-    setWidthRatio(wr);
-}
-
-/**
- * Override to update HeightRatio.
- */
-public void setHeight(double aValue)
-{
-    if(aValue==getHeight()) return; super.setHeight(aValue);
-    double ch = _content!=null? _content.getHeight() : 0;
-    double hr = ch!=0? getHeight()/ch : 1;
-    setHeightRatio(hr);
 }
 
 /**
@@ -438,8 +432,10 @@ public void setHeight(double aValue)
  */
 public Object getValue(String aPropName)
 {
-    if(aPropName.equals(ScrollH_Prop)) return getScrollH();
-    if(aPropName.equals(ScrollV_Prop)) return getScrollV();
+    if(aPropName.equals(ScrollX_Prop)) return getScrollX();
+    if(aPropName.equals(ScrollY_Prop)) return getScrollY();
+    if(aPropName.equals(ScrollWidth_Prop)) return getScrollWidth();
+    if(aPropName.equals(ScrollHeight_Prop)) return getScrollHeight();
     return super.getValue(aPropName);
 }
 
@@ -448,8 +444,10 @@ public Object getValue(String aPropName)
  */
 public void setValue(String aPropName, Object aValue)
 {
-    if(aPropName.equals(ScrollH_Prop)) setScrollH(SnapUtils.doubleValue(aValue));
-    else if(aPropName.equals(ScrollV_Prop)) setScrollV(SnapUtils.doubleValue(aValue));
+    if(aPropName.equals(ScrollX_Prop)) setScrollX(SnapUtils.doubleValue(aValue));
+    else if(aPropName.equals(ScrollY_Prop)) setScrollY(SnapUtils.doubleValue(aValue));
+    else if(aPropName.equals(ScrollWidth_Prop)) setScrollWidth(SnapUtils.doubleValue(aValue));
+    else if(aPropName.equals(ScrollHeight_Prop)) setScrollY(SnapUtils.doubleValue(aValue));
     else super.setValue(aPropName, aValue);
 }
 

@@ -28,6 +28,7 @@ public class ScrollView extends ParentView implements ViewHost {
     public static final String ShowVBar_Prop = "ShowVBar";
     public static final String HBarShowing_Prop = "HBarShowing";
     public static final String VBarShowing_Prop = "VBarShowing";
+    public static final String BarSize_Prop = "BarSize";
     
 /**
  * Creates a new ScrollView.
@@ -39,8 +40,8 @@ public ScrollView()
     
     // Create Scroller and add listeners for scroll changes
     _scroller = new Scroller();
-    _scroller.addPropChangeListener(pc -> scrollerDidPropChange(pc),
-        Scroller.ScrollH_Prop, Scroller.ScrollV_Prop, Scroller.WidthRatio_Prop, Scroller.HeightRatio_Prop);
+    _scroller.addPropChangeListener(pc -> scrollerDidPropChange(pc), Width_Prop, Height_Prop,
+        Scroller.ScrollX_Prop, Scroller.ScrollY_Prop, Scroller.ScrollWidth_Prop, Scroller.ScrollHeight_Prop);
     addChild(_scroller);
 }
     
@@ -152,7 +153,7 @@ protected void setHBarShowing(boolean aValue)
     if(aValue) {
         addChild(hbar);
         hbar.setThumbRatio(_scroller.getWidthRatio());
-        hbar.setScrollRatio(_scroller.getScrollRatioH());
+        hbar.setScrollRatio(_scroller.getScrollXRatio());
     }
     
     // Otherwise, remove
@@ -180,7 +181,7 @@ protected void setVBarShowing(boolean aValue)
     if(aValue) {
         addChild(vbar);
         vbar.setThumbRatio(_scroller.getHeightRatio());
-        vbar.setScrollRatio(_scroller.getScrollRatioV());
+        vbar.setScrollRatio(_scroller.getScrollYRatio());
     }
     
     // Otherwise, remove
@@ -198,7 +199,11 @@ public int getBarSize()  { return _barSize; }
 /**
  * Sets the scroll bar size.
  */
-public void setBarSize(int aValue)  { _barSize = aValue; }
+public void setBarSize(int aValue)
+{
+    if(aValue==_barSize) return;
+    firePropChange(BarSize_Prop, _barSize, _barSize = aValue);
+}
 
 /**
  * Returns whether this ScrollView fits content to its width.
@@ -345,38 +350,39 @@ protected void scrollerDidPropChange(PropChange anEvent)
     // Get Property Name
     String pname = anEvent.getPropertyName();
     
-    // Handle Scroller.ScrollH change
-    if(pname==Scroller.ScrollH_Prop)
-        getHBar().setScrollRatio(_scroller.getScrollRatioH());
+    // Handle Scroller.ScrollX change
+    if(pname==Scroller.ScrollX_Prop)
+        getHBar().setScrollRatio(_scroller.getScrollXRatio());
         
-    // Handle Scroller.ScrollV change
-    else if(pname==Scroller.ScrollV_Prop)
-        getVBar().setScrollRatio(_scroller.getScrollRatioV());
+    // Handle Scroller.ScrollY change
+    else if(pname==Scroller.ScrollY_Prop)
+        getVBar().setScrollRatio(_scroller.getScrollYRatio());
         
-    // Handle Scroller.WidthRatio change
-    else if(pname==Scroller.WidthRatio_Prop) {
+    // Handle Scroller.Width or Scroller.ScrollWidth change
+    else if(pname==Width_Prop || pname==Scroller.ScrollWidth_Prop) {
         getHBar().setThumbRatio(_scroller.getWidthRatio());
-        getHBar().setScrollRatio(_scroller.getScrollRatioH());
+        getHBar().setScrollRatio(_scroller.getScrollXRatio());
     }
         
-    // Handle Scroller.HeightRatio change
-    else if(pname==Scroller.HeightRatio_Prop) {
+    // Handle Scroller.Height or Scroller.ScrollHeight change
+    else if(pname==Scroller.Height_Prop || pname==Scroller.ScrollHeight_Prop) {
         getVBar().setThumbRatio(_scroller.getHeightRatio());
-        getVBar().setScrollRatio(_scroller.getScrollRatioV());
+        getVBar().setScrollRatio(_scroller.getScrollYRatio());
     }
 }
 
 /**
  * Handle ScrollBar property changes.
  */
-public void scrollBarDidPropChange(PropChange anEvent)
+public void scrollBarDidPropChange(PropChange aPC)
 {
-    String pname = anEvent.getPropertyName();
+    String pname = aPC.getPropertyName();
     if(pname==ScrollBar.Scroll_Prop) {
-        double val = SnapUtils.doubleValue(anEvent.getNewValue());
-        if(anEvent.getSource()==_hbar)
-            _scroller.setScrollRatioH(val);
-        else _scroller.setScrollRatioV(val);
+        ScrollBar sbar = (ScrollBar)aPC.getSource();
+        double val = sbar.getScrollRatio();
+        if(sbar==_hbar)
+            _scroller.setScrollXRatio(val);
+        else _scroller.setScrollYRatio(val);
     }
 }
 
@@ -389,9 +395,9 @@ public XMLElement toXMLView(XMLArchiver anArchiver)
     XMLElement e = super.toXMLView(anArchiver);
     
     // Archive ShowHBar, ShowVBar, BarSize
-    if(getShowHBar()!=null) e.add("ShowHBar", getShowHBar());
-    if(getShowVBar()!=null) e.add("ShowVBar", getShowVBar());
-    if(getBarSize()!=16) e.add("BarSize", getBarSize());
+    if(getShowHBar()!=null) e.add(ShowHBar_Prop, getShowHBar());
+    if(getShowVBar()!=null) e.add(ShowVBar_Prop, getShowVBar());
+    if(getBarSize()!=16) e.add(BarSize_Prop, getBarSize());
     return e;
 }
 
@@ -404,9 +410,9 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     super.fromXMLView(anArchiver, anElement);
     
     // Unarchive ShowHBar, ShowVBar, BarSize
-    if(anElement.hasAttribute("ShowHBar")) setShowHBar(anElement.getAttributeBoolValue("ShowHBar"));
-    if(anElement.hasAttribute("ShowVBar")) setShowVBar(anElement.getAttributeBoolValue("ShowVBar"));
-    if(anElement.hasAttribute("BarSize")) setBarSize(anElement.getAttributeIntValue("BarSize"));
+    if(anElement.hasAttribute(ShowHBar_Prop)) setShowHBar(anElement.getAttributeBoolValue(ShowHBar_Prop));
+    if(anElement.hasAttribute(ShowVBar_Prop)) setShowVBar(anElement.getAttributeBoolValue(ShowVBar_Prop));
+    if(anElement.hasAttribute(BarSize_Prop)) setBarSize(anElement.getAttributeIntValue(BarSize_Prop));
 }
 
 }

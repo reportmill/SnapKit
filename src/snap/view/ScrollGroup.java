@@ -110,9 +110,9 @@ public ColView getTopScrollCol()
     LineView line = new LineView(0,.5,10,.5); line.setPrefHeight(1); line.setBorder(Color.LIGHTGRAY,1);
     _topScrollCol.setChildren(_topScrollRow, line);
     
-    // Bind main ScrollView.Scroller.ScrollH to HeaderScroller (both ways)
+    // Bind main ScrollView.Scroller.ScrollX to HeaderScroller (both ways)
     Scroller scroller = _scroll.getScroller();
-    ViewUtils.bind(scroller, Scroller.ScrollH_Prop, _topScroll, true);
+    ViewUtils.bind(scroller, Scroller.ScrollX_Prop, _topScroll, true);
     
     // Bind ScrollView.VBarShowing to ShowCornerNE
     _scroll.addPropChangeListener(pc -> setShowCornerNE(_scroll.isVBarShowing()), ScrollView.VBarShowing_Prop);
@@ -166,9 +166,9 @@ public RowView getLeftScrollRow()
     LineView line = new LineView(.5,0,.5,10); line.setPrefWidth(1); line.setBorder(Color.LIGHTGRAY,1);
     _leftScrollRow.setChildren(_leftScrollCol, line);
     
-    // Bind main ScrollView.Scroller.ScrollH to HeaderScroller (both ways)
+    // Bind main ScrollView.Scroller.ScrollY to HeaderScroller (both ways)
     Scroller scroller = _scroll.getScroller();
-    ViewUtils.bind(scroller, Scroller.ScrollV_Prop, _leftScroll, true);
+    ViewUtils.bind(scroller, Scroller.ScrollY_Prop, _leftScroll, true);
     
     // Bind ScrollView.VBarShowing to ShowCornerNE
     _scroll.addPropChangeListener(pc -> setShowCornerSW(_scroll.isHBarShowing()), ScrollView.HBarShowing_Prop);
