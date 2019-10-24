@@ -136,31 +136,32 @@ public double getSizeRatio()
 public Rect getThumbBounds()
 {
     boolean hor = isHorizontal(), ver = !hor;
-    double ratio = getSizeRatio();
+    double scrollRatio = getScrollRatio();
+    double sizeRatio = getSizeRatio();
     double w = getWidth() - 4;
     double h = getHeight() - 4;
-    double tw = hor? Math.max(Math.round(ratio*w),20) : w;
-    double th = ver? Math.max(Math.round(ratio*h),20) : h;
-    double tx = hor? Math.round(getScrollRatio()*(w-tw))+2 : 2;
-    double ty = ver? Math.round(getScrollRatio()*(h-th))+2 : 2;
-    return new Rect(tx,ty,tw,th);
+    double tw = hor? Math.max(Math.round(sizeRatio*w),20) : w;
+    double th = ver? Math.max(Math.round(sizeRatio*h),20) : h;
+    double tx = hor? Math.round(scrollRatio*(w-tw)) + 2 : 2;
+    double ty = ver? Math.round(scrollRatio*(h-th)) + 2 : 2;
+    return new Rect(tx, ty, tw, th);
 }
 
 /**
  * Returns the thumb size (along primary axis).
  */
-public double getThumbSize()
+private double getThumbSize()
 {
     boolean hor = isHorizontal(), ver = !hor;
     double ratio = getSizeRatio();
     double size = hor? (getWidth() - 4) : (getHeight() - 4);
-    return Math.max(Math.round(ratio*size),20);
+    return Math.max(Math.round(ratio*size), 20);
 }
 
 /**
  * Returns the resulting ScrollRatio for the given point.
  */
-public double getScrollRatio(double aPnt)
+private double getScrollRatio(double aPnt)
 {
     boolean hor = isHorizontal();
     double tsize = getThumbSize();
