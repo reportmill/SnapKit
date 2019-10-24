@@ -2275,6 +2275,11 @@ protected void processEventHandlers(ViewEvent anEvent)
 protected void processEvent(ViewEvent anEvent)  { }
 
 /**
+ * Called when ViewTheme changes.
+ */
+protected void themeChanged()  { }
+
+/**
  * Returns the anim for the given time.
  */
 public ViewAnim getAnim(int aTime)

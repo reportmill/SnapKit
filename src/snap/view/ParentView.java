@@ -567,6 +567,16 @@ protected void childDidPropChange(PropChange aPC)  { _pcs.fireDeepChange(this, a
 protected void childDidDeepChange(Object aLsnr, PropChange aPC)  { _pcs.fireDeepChange(aLsnr, aPC); }
 
 /**
+ * Called when ViewTheme changes.
+ */
+protected void themeChanged()
+{
+    super.themeChanged();
+    for(View child : getChildren())
+        child.themeChanged();
+}
+
+/**
  * XML Archival of basic view.
  */
 protected XMLElement toXMLView(XMLArchiver anArchiver)  { return super.toXML(anArchiver); }

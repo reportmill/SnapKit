@@ -83,34 +83,39 @@ public static void setMouseDown(ViewEvent anEvent)
 }
 
 /**
- * Returns the selection color.
+ * Returns the background fill.
  */
-public static Paint getSelectFill()  { return SEL_FILL; }
-
-/**
- * Returns the selection color.
- */
-public static Paint getSelectTextFill()  { return SEL_TEXT_FILL; }
-
-/**
- * Returns the selection color.
- */
-public static Paint getTargetFill()  { return TARG_FILL; }
-
-/**
- * Returns the selection color.
- */
-public static Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
+public static Paint getBackFill()  { return ViewTheme.get().getBackFill(); }
 
 /**
  * Returns the background fill.
  */
-public static Paint getBackFill()  { return BACK_FILL; }
+public static Paint getBackDarkFill()  { return ViewTheme.get().getBackDarkFill(); }
 
 /**
- * Returns the background fill.
+ * Returns the text fill.
  */
-public static Paint getBackDarkFill()  { return BACK_DARK_FILL; }
+public static Paint getTextFill()  { return ViewTheme.get().getTextFill(); }
+
+/**
+ * Returns the selection color.
+ */
+public static Paint getSelectFill()  { return ViewTheme.get().getSelectFill(); }
+
+/**
+ * Returns the selection color.
+ */
+public static Paint getSelectTextFill()  { return ViewTheme.get().getSelectTextFill(); }
+
+/**
+ * Returns the selection color.
+ */
+public static Paint getTargetFill()  { return ViewTheme.get().getTargetFill(); }
+
+/**
+ * Returns the selection color.
+ */
+public static Paint getTargetTextFill()  { return ViewTheme.get().getTargetTextFill(); }
 
 /**
  * Returns the bounds of a given view list.

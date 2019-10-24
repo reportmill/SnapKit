@@ -285,7 +285,7 @@ public void paintFront(Painter aPntr)
     aPntr.setStroke(Stroke.Stroke1);
 
     if(isShowArea()) {
-        ButtonArea bp = new ButtonArea();
+        ButtonArea bp = ViewTheme.get().createButtonArea();
         bp.configureFromButton(this);
         bp.paint(aPntr);
     }

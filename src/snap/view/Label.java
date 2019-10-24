@@ -358,6 +358,17 @@ public void setAlign(Pos aPos)
 }
 
 /**
+ * Called when ViewTheme changes.
+ */
+protected void themeChanged()
+{
+    super.themeChanged();
+    if(ViewTheme.getLast()!=null &&
+        (getTextFill()==null || SnapUtils.equals(getTextFill(), ViewTheme.getLast().getTextFill())))
+        setTextFill(ViewTheme.get().getTextFill());
+}
+
+/**
  * XML archival.
  */
 public XMLElement toXMLView(XMLArchiver anArchiver)
