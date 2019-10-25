@@ -88,24 +88,15 @@ protected void layoutImpl()  { RowView.layout(this, null, null, false, SPACING);
  */
 protected class CheckArea extends View {
     
-    // The ButtonArea to paint actual button part
-    ButtonArea  _btnArea;
-    
     /** Create CheckArea. */
     public CheckArea()
     {
         setPrefSize(16, 16);
-        themeChanged();
     }
     
     /** Paint CheckArea. */
     public void paintFront(Painter aPntr)
     {
-        // Update ButtonArea.State and ButtonArea.Selected
-        int state = isPressed()? BUTTON_PRESSED : _targeted? BUTTON_OVER : BUTTON_NORMAL;
-        _btnArea.setState(state);
-        _btnArea.setSelected(isSelected());
-        
         // Paint actual button part
         _btnArea.paint(aPntr);
         
@@ -117,15 +108,6 @@ protected class CheckArea extends View {
             aPntr.drawLine(11, 5, 5, 11);
             aPntr.setStroke(str);
         }
-    }
-    
-    /** Override to set/reset ButtonArea. */
-    protected void themeChanged()
-    {
-        super.themeChanged();
-        _btnArea = ViewTheme.get().createButtonArea();
-        _btnArea.setBounds(0, 0, 16, 16);
-        _btnArea.setRadius(3);
     }
 }
 

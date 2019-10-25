@@ -9,27 +9,11 @@ import snap.gfx.*;
  */
 public class CheckBoxMenuItem extends MenuItem {
 
-    // The ButtonArea to paint actual button part
-    ButtonArea  _btnArea;
-
-/**
- * Creates CheckBoxMenuItem.
- */
-public CheckBoxMenuItem()
-{
-    themeChanged();
-}
-
 /**
  * Paint Button.
  */
 public void paintFront(Painter aPntr)
 {
-    // Update ButtonArea.State and ButtonArea.Selected
-    int state = isPressed()? BUTTON_PRESSED : _targeted? BUTTON_OVER : BUTTON_NORMAL;
-    _btnArea.setState(state);
-    _btnArea.setSelected(isSelected());
-    
     // Get insets to get button X/Y
     Insets ins = getInsetsAll();
     double x = ins.left - 16 - 6;
@@ -67,16 +51,4 @@ protected double getPrefHeightImpl(double aW)
     return Math.max(super.getPrefHeightImpl(aW), ins.top + 2 + 16 + 2 + ins.bottom);
 }
 
-    
-/**
- * Override to set/reset ButtonArea.
- */
-protected void themeChanged()
-{
-    super.themeChanged();
-    _btnArea = ViewTheme.get().createButtonArea();
-    _btnArea.setBounds(0, 0, 16, 16);
-    _btnArea.setRadius(3);
-}
-    
 }

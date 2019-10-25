@@ -56,12 +56,32 @@ public Paint getTargetFill()  { return TARG_FILL; }
 public Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
 
 /**
- * Creates a button area.
+ * Creates an area for given view.
  */
-public ButtonArea createButtonArea()
+public Object createArea(View aView)
 {
-    return new ButtonArea();
+    Object area = null;
+    
+    // Handle ButtonBase
+    if(aView instanceof ButtonBase)
+        area = createButtonArea();
+        
+    // Handle ProgressBar
+    if(aView instanceof ProgressBar)
+        area = createButtonArea();
+    
+    // Set View
+    if(area instanceof ButtonArea)
+        ((ButtonArea)area).setView(aView);
+    
+    // Return area
+    return area;
 }
+
+/**
+ * Creates a ButtonArea.
+ */
+protected ButtonArea createButtonArea()  { return new ButtonArea(); }
 
 /**
  * Returns the current theme.
@@ -78,7 +98,9 @@ public static ViewTheme getLast()  { return _lastTheme; }
  */
 public static void setThemeForName(String aName)
 {
+    // Set LastTheme
     _lastTheme = _theme;
+    
     // Set new theme
     switch(aName) {
         case "Light": _theme = new LightTheme(); break;
@@ -128,7 +150,7 @@ private static class LightTheme extends ViewTheme {
     public Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
     
     /** Creates a button area. */
-    public ButtonArea createButtonArea()
+    protected ButtonArea createButtonArea()
     {
         return new PlainButtonArea();
     }
@@ -150,6 +172,9 @@ private static class PlainButtonArea extends ButtonArea {
      */
     public void paint(Painter aPntr)
     {
+        // Update Area from View
+        updateFromView();
+    
         // Get fill color
         Color fillColor = Color.WHITE;
         if(_state==BUTTON_OVER) fillColor = BUTTON_OVER_COLOR;
@@ -205,7 +230,7 @@ private static class DarkTheme extends ViewTheme {
     public Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
     
     /** Creates a button area. */
-    public ButtonArea createButtonArea()
+    protected ButtonArea createButtonArea()
     {
         return new DarkButtonArea();
     }
@@ -228,6 +253,9 @@ private static class DarkButtonArea extends ButtonArea {
      */
     public void paint(Painter aPntr)
     {
+        // Update Area from View
+        updateFromView();
+    
         // Get fill color
         Color fillColor = BUTTON_COLOR;
         if(_state==BUTTON_OVER) fillColor = BUTTON_OVER_COLOR;

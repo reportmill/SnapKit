@@ -9,6 +9,9 @@ import snap.gfx.*;
  */
 public class ButtonArea {
     
+    // The View associated with this area
+    View          _view;
+    
     // The location
     double        _x, _y;
 
@@ -56,7 +59,33 @@ public class ButtonArea {
     // Button Mouse-over paint and Mouse-pressed paint
     private static Color BUTTON_MOUSE_OVER_PAINT = Color.get("#FFFFFF50");
     private static Color BUTTON_MOUSE_PRESSED_PAINT = Color.get("#0000001A");
+
+/**
+ * Returns the View assoicated with this area.
+ */
+public View getView()  { return _view; }
+
+/**
+ * Sets hte View associated with this area.
+ */
+public void setView(View aView)
+{
+    // Set View
+    _view = aView;
     
+    // Handle CheckBox
+    if(_view instanceof CheckBox) {
+        setBounds(0, 0, 16, 16);
+        setRadius(3);
+    }
+    
+    // Handle RadioButton
+    else if(_view instanceof RadioButton) {
+        setBounds(0, 0, 16, 16);
+        setRadius(8);
+    }
+}
+
 /**
  * Returns the X value.
  */
@@ -174,25 +203,54 @@ public void setFill(Paint aPaint)  { _fill = aPaint; }
 /**
  * Sets ButtonArea attributes from a button.
  */
-public void configureFromButton(ButtonBase aButton)
+protected void updateFromView()
+{
+    // Handle CheckBox, RadioButton
+    if(_view instanceof CheckBox || _view instanceof RadioButton) {
+
+        // Update ButtonArea.State and ButtonArea.Selected
+        ToggleButton btn = (ToggleButton)_view;
+        int state = btn.isPressed()? BUTTON_PRESSED : btn.isTargeted()? BUTTON_OVER : BUTTON_NORMAL;
+        setState(state);
+        setSelected(btn.isSelected());
+    }
+    
+    // Handle CheckBoxMenuItem
+    else if(_view instanceof CheckBoxMenuItem) {
+        
+        // Update ButtonArea.State and ButtonArea.Selected
+        MenuItem btn = (MenuItem)_view;
+        int state = btn.isPressed()? BUTTON_PRESSED : btn.isTargeted()? BUTTON_OVER : BUTTON_NORMAL;
+        setState(state);
+        setSelected(btn.isSelected());
+    }
+    
+    // Handle normal button
+    else if(_view instanceof ButtonBase)
+        updateFromButton();
+}
+
+/**
+ * Sets ButtonArea attributes from a button.
+ */
+protected void updateFromButton()
 {
     // Basic attrs
-    setSize(aButton.getWidth(), aButton.getHeight());
-    setRadius(aButton.getRadius());
-    setPosition(aButton.getPosition());
+    ButtonBase btn = (ButtonBase)_view;
+    setSize(btn.getWidth(), btn.getHeight());
+    setRadius(btn.getRadius());
+    setPosition(btn.getPosition());
     
     // Get/set state
-    boolean pressed = aButton.isPressed();
-    boolean targeted = aButton.isTargeted();
-    int state = pressed? BUTTON_PRESSED : targeted? BUTTON_OVER : BUTTON_NORMAL;
+    int state = btn.isPressed()? BUTTON_PRESSED : btn.isTargeted()? BUTTON_OVER : BUTTON_NORMAL;
     setState(state);
     
     // Handle Selected (ToggleButton only)
-    boolean isSel = aButton instanceof ToggleButton && ((ToggleButton)aButton).isSelected();
+    boolean isSel = btn instanceof ToggleButton && ((ToggleButton)btn).isSelected();
     setSelected(isSel);
     
     // Set fill
-    Paint bfill = aButton.getButtonFill();
+    Paint bfill = btn.getButtonFill();
     if(bfill!=null)
         setFill(bfill);
 }
@@ -202,6 +260,9 @@ public void configureFromButton(ButtonBase aButton)
  */
 public void paint(Painter aPntr)
 {
+    // Update Area from View
+    updateFromView();
+    
     // Get RoundRect shape for bounds, Radius and Position
     RoundRect rect = new RoundRect(_x, _y, _w, _h, _rad).copyForPosition(_pos);
     

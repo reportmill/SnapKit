@@ -163,7 +163,7 @@ protected void paintFront(Painter aPntr)
 protected void themeChanged()
 {
     super.themeChanged();
-    _btnArea = ViewTheme.get().createButtonArea();
+    _btnArea = (ButtonArea)ViewTheme.get().createArea(this);
     _btnArea.setFill(PROGRESS_BAR_FILL);
 }
     

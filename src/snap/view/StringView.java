@@ -14,7 +14,7 @@ public class StringView extends View {
     String         _text;
     
     // The text paint
-    Paint          _textFill = Color.BLACK;
+    Paint          _textFill;
     
 /**
  * Returns the text.
@@ -24,17 +24,30 @@ public String getText()  { return _text; }
 /**
  * Sets the text.
  */
-public void setText(String aValue)  { _text = aValue; relayoutParent(); repaint(); }
+public void setText(String aValue)
+{
+    // if already set, just return
+    if(SnapUtils.equals(aValue, _text)) return;
+    
+    // Set new value, fire prop change, relayout and return
+    _text = aValue;
+    relayoutParent();
+    repaint();
+}
 
 /**
  * Returns the text fill.
  */
-public Paint getTextFill()  { return _textFill; }
+public Paint getTextFill()  { return _textFill!=null? _textFill : ViewUtils.getTextFill(); }
 
 /**
  * Sets the text fill.
  */
-public void setTextFill(Paint aPnt)  { _textFill = aPnt; repaint(); }
+public void setTextFill(Paint aPaint)
+{
+    _textFill = aPaint;
+    repaint();
+}
 
 /**
  * Returns the text length.
@@ -44,7 +57,14 @@ public int length()  { return _text!=null? _text.length() : 0; }
 /**
  * Returns the text width.
  */
-public double getTextWidth()  { return length()>0? Math.ceil(getFont().getStringAdvance(getText())) : 0; }
+public double getTextWidth()
+{
+    if(length()==0) return 0;
+    String text = getText();
+    Font font = getFont();
+    double tw = Math.ceil(font.getStringAdvance(text));
+    return tw;
+}
 
 /**
  * Returns the text height.
@@ -61,18 +81,25 @@ public double getTextHeight()
 public Rect getTextBounds()
 {
     // Get basic bounds for TextField size/insets and font/string width/height
-    Insets ins = getInsetsAll(); double width = getWidth(), height = getHeight();
-    double tx = ins.left, ty = ins.top, tw = getTextWidth(), th = getTextHeight();
+    Insets ins = getInsetsAll();
+    double width = getWidth(), height = getHeight();
+    double tx = ins.left, tw = getTextWidth();
+    double ty = ins.top, th = getTextHeight();
     
     // Adjust rect by alignment
-    double ax = ViewUtils.getAlignX(this), ay = ViewUtils.getAlignY(this);
-    if(ax>0) { double extra = width - tx - ins.right - tw; 
-        tx = Math.max(tx+extra*ax,tx); }
-    if(ay>0) { double extra = height - ty - ins.bottom - th;
-        ty = Math.max(ty+Math.round(extra*ay),ty); }
+    double ax = ViewUtils.getAlignX(this);
+    double ay = ViewUtils.getAlignY(this);
+    if(ax>0) {
+        double extra = width - tx - ins.right - tw; 
+        tx = Math.max(tx+extra*ax,tx);
+    }
+    if(ay>0) {
+        double extra = height - ty - ins.bottom - th;
+        ty = Math.max(ty+Math.round(extra*ay),ty);
+    }
         
     // Create/return rect
-    return new Rect(tx,ty,tw,th);
+    return new Rect(tx, ty, tw, th);
 }
 
 /**
@@ -81,7 +108,8 @@ public Rect getTextBounds()
 public Rect getTextBounds(int aStart, int aEnd)
 {
     // Get string, font and full text bounds
-    String str = getText(); Font font = getFont();
+    String str = getText();
+    Font font = getFont();
     Rect bnds = getTextBounds();
 
     // Trim left edge by characters up to start
@@ -91,8 +119,9 @@ public Rect getTextBounds(int aStart, int aEnd)
     }
     
     // Trim right edge by characters after end
-    for(int i=aEnd, iMax=str.length(); i<iMax; i++)
-        bnds.width -= font.charAdvance(str.charAt(i));
+    for(int i=aEnd, iMax=str.length(); i<iMax; i++) { char c = str.charAt(i);
+        bnds.width -= font.charAdvance(c);
+    }
     
     // Return bounds
     return bnds;
@@ -103,10 +132,11 @@ public Rect getTextBounds(int aStart, int aEnd)
  */
 public int getCharIndexForX(double aX)
 {
-    String str = getText(); Font font = getFont();
+    String str = getText();
+    Font font = getFont();
     double x = getTextBounds().x;
-    for(int i=0, iMax=str.length(); i<iMax; i++) {
-        double dx = font.charAdvance(str.charAt(i));
+    for(int i=0, iMax=str.length(); i<iMax; i++) { char c = str.charAt(i);
+        double dx = font.charAdvance(c);
         if(aX<=x+dx/2) return i;
         x += dx;
     }
@@ -123,7 +153,8 @@ public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
  */
 protected double getPrefWidthImpl(double aH)
 {
-    Insets ins = getInsetsAll(); double tw = getTextWidth();
+    Insets ins = getInsetsAll();
+    double tw = getTextWidth();
     return tw + ins.getWidth();
 }
 
@@ -132,7 +163,8 @@ protected double getPrefWidthImpl(double aH)
  */
 protected double getPrefHeightImpl(double aW)
 {
-    Insets ins = getInsetsAll(); double th = getTextHeight();
+    Insets ins = getInsetsAll();
+    double th = getTextHeight();
     return th + ins.getHeight();
 }
 
@@ -141,9 +173,16 @@ protected double getPrefHeightImpl(double aW)
  */
 protected void paintFront(Painter aPntr)
 {
+    // If no text, just return
     if(length()==0) return;
-    Rect bnds = getTextBounds(); Font font = getFont(); double baseline = Math.ceil(font.getAscent());
-    aPntr.setFont(font); aPntr.setPaint(_textFill);
+    
+    
+    Rect bnds = getTextBounds();
+    Font font = getFont();
+    Paint textFill = getTextFill();
+    double baseline = Math.ceil(font.getAscent());
+    aPntr.setFont(font);
+    aPntr.setPaint(textFill);
     aPntr.drawString(_text, bnds.x, bnds.y + baseline);
 }
 

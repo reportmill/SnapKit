@@ -114,7 +114,10 @@ public Paint getTextFill()  { return _strView!=null? _strView.getTextFill() : nu
 /**
  * Sets the text fill.
  */
-public void setTextFill(Paint aPaint)  { getStringView().setTextFill(aPaint); }
+public void setTextFill(Paint aPaint)
+{
+    getStringView().setTextFill(aPaint);
+}
 
 /**
  * Returns the StringView.
@@ -130,7 +133,9 @@ public StringView getStringView()
     if(_strView!=null) return _strView;
     
     // Create, configure, add StringView and return
-    _strView = new StringView(); _strView.setGrowWidth(isEditable()); _strView.setAlign(getAlign().getHPos());
+    _strView = new StringView();
+    _strView.setGrowWidth(isEditable());
+    _strView.setAlign(getAlign().getHPos());
     addChild(_strView, getGraphic()!=null? 1 : 0);
     return _strView;
 }
@@ -177,7 +182,10 @@ public String getImageName()  { return _iname; }
 /**
  * Sets the image name, if loaded from local resource.
  */
-public void setImageName(String aName)  { _iname = aName; }
+public void setImageName(String aName)
+{
+    _iname = aName;
+}
 
 /**
  * Returns the spacing between text and graphics.
@@ -272,10 +280,15 @@ public TextField getEditor()
     if(_editor!=null) return _editor;
     
     // Create and return editor
-    TextField editor = new TextField(); editor.setManaged(false);editor.setRadius(2);
+    TextField editor = new TextField();
+    editor.setManaged(false);
+    editor.setRadius(2);
     editor.setFill(new Color(1,.95));
-    editor.setBorder(new Color(1,.3,.3,.5), 1); editor.getBorder().setInsets(Insets.EMPTY);
-    editor.setPadding(2,2,2,2); editor.setAlign(getAlign().getHPos()); editor.setFont(getFont());
+    editor.setBorder(new Color(1,.3,.3,.5), 1);
+    editor.getBorder().setInsets(Insets.EMPTY);
+    editor.setPadding(2,2,2,2);
+    editor.setAlign(getAlign().getHPos());
+    editor.setFont(getFont());
     editor.addEventHandler(e -> editorFiredAction(), Action);
     editor.addPropChangeListener(pc -> { if(!editor.isFocused()) setEditing(false); }, Focused_Prop);
     return _editor = editor;
@@ -355,17 +368,6 @@ public void setAlign(Pos aPos)
 {
     super.setAlign(aPos);
     if(isStringViewSet()) getStringView().setAlign(aPos.getHPos());
-}
-
-/**
- * Called when ViewTheme changes.
- */
-protected void themeChanged()
-{
-    super.themeChanged();
-    if(ViewTheme.getLast()!=null &&
-        (getTextFill()==null || SnapUtils.equals(getTextFill(), ViewTheme.getLast().getTextFill())))
-        setTextFill(ViewTheme.get().getTextFill());
 }
 
 /**

@@ -37,6 +37,9 @@ public class ButtonBase extends ParentView {
     // The button fill
     Paint                   _btnFill;
     
+    // The class that renders the button
+    ButtonArea              _btnArea;
+    
     // Constants for properties
     public static final String Image_Prop = "Image";
     public static final String ImageName_Prop = "ImageName";
@@ -59,6 +62,7 @@ public ButtonBase()
 {
     setFocusable(true);
     enableEvents(MouseEvents); enableEvents(KeyPress, Action);
+    themeChanged();
 }
 
 /**
@@ -236,7 +240,7 @@ public void setButtonFill(Paint aPaint)  { _btnFill = aPaint; }
 public Insets getInsetsAll()
 {
     Insets pad = getPadding();
-    if(isShowArea()) pad = new Insets(pad.top+2,pad.right+2,pad.bottom+2,pad.left+2);
+    if(isShowArea()) pad = Insets.add(pad, 2, 2, 2, 2);
     return pad;
 }
 
@@ -281,22 +285,22 @@ protected void fireActionEvent(ViewEvent anEvent)
  */
 public void paintFront(Painter aPntr)
 {
-    // Set stroke
-    aPntr.setStroke(Stroke.Stroke1);
-
     // If ShowArea, use ButtonArea to paint actual button background
-    if(isShowArea()) {
-        ButtonArea bp = ViewTheme.get().createButtonArea();
-        bp.configureFromButton(this);
-        bp.paint(aPntr);
-    }
+    if(isShowArea())
+        _btnArea.paint(aPntr);
     
     // If not ShowArea, paint rects for Pressed or Targeted
     else {
+        
+        // If pressed, paint background
         if(isPressed())
             aPntr.fillRectWithPaint(0, 0, getWidth(), getHeight(), Color.LIGHTGRAY);
-        if(isTargeted())
+            
+        // If Targeted, paint border
+        if(isTargeted()) {
+            aPntr.setStroke(Stroke.Stroke1);
             aPntr.drawRectWithPaint(.5, .5, getWidth()-1, getHeight()-1, Color.GRAY);
+        }
     }
 }
 
@@ -329,7 +333,16 @@ protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(th
  * Override to layout children.
  */
 protected void layoutImpl()  { BoxView.layout(this, getLabel(), null, false, false); }
-
+    
+/**
+ * Override to set/reset ButtonArea.
+ */
+protected void themeChanged()
+{
+    super.themeChanged();
+    _btnArea = (ButtonArea)ViewTheme.get().createArea(this);
+}
+    
 /**
  * XML archival.
  */
