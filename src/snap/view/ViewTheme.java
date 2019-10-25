@@ -154,6 +154,7 @@ private static class PlainButtonArea extends ButtonArea {
         Color fillColor = Color.WHITE;
         if(_state==BUTTON_OVER) fillColor = BUTTON_OVER_COLOR;
         else if(_state==BUTTON_PRESSED) fillColor = BUTTON_PRESSED_COLOR;
+        else if(isSelected()) fillColor = BUTTON_PRESSED_COLOR;
         
         // Get shape and paint fill
         RoundRect rect = new RoundRect(_x, _y, _w, _h, _rad).copyForPosition(_pos);
@@ -231,6 +232,7 @@ private static class DarkButtonArea extends ButtonArea {
         Color fillColor = BUTTON_COLOR;
         if(_state==BUTTON_OVER) fillColor = BUTTON_OVER_COLOR;
         else if(_state==BUTTON_PRESSED) fillColor = BUTTON_PRESSED_COLOR;
+        else if(isSelected()) fillColor = BUTTON_PRESSED_COLOR;
         
         // Get shape and paint fill
         RoundRect rect = new RoundRect(_x, _y, _w, _h, _rad).copyForPosition(_pos);
