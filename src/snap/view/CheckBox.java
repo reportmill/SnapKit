@@ -88,27 +88,43 @@ protected void layoutImpl()  { RowView.layout(this, null, null, false, SPACING);
  */
 protected class CheckArea extends View {
     
+    // The ButtonArea to paint actual button part
+    ButtonArea  _btnArea;
+    
     /** Create CheckArea. */
-    public CheckArea()  { setPrefSize(16, 16); }
+    public CheckArea()
+    {
+        setPrefSize(16, 16);
+        themeChanged();
+    }
     
     /** Paint CheckArea. */
     public void paintFront(Painter aPntr)
     {
-        // Get button state
+        // Get button state and set in ButtonArea
         int state = isPressed()? BUTTON_PRESSED : _targeted? BUTTON_OVER : BUTTON_NORMAL;
+        _btnArea.setState(state);
         
-        // Draw button background
-        ButtonArea.drawButton(aPntr, 0, 0, 16, 16, state);
+        // Paint actual button part
+        _btnArea.paint(aPntr);
         
         // If selected, draw X
         if(isSelected()) {
             Stroke str = aPntr.getStroke();
-            aPntr.setPaint(Color.BLACK);
-            aPntr.setStroke(new Stroke(2));
-            aPntr.drawLine(5, 5, 11, 11);
+            aPntr.setStroke(Stroke.Stroke2);
+            aPntr.drawLineWithPaint(5, 5, 11, 11, Color.BLACK);
             aPntr.drawLine(11, 5, 5, 11);
             aPntr.setStroke(str);
         }
+    }
+    
+    /** Override to set/reset ButtonArea. */
+    protected void themeChanged()
+    {
+        super.themeChanged();
+        _btnArea = ViewTheme.get().createButtonArea();
+        _btnArea.setBounds(0, 0, 16, 16);
+        _btnArea.setRadius(3);
     }
 }
 

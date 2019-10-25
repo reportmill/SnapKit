@@ -16,7 +16,7 @@ public class ButtonArea {
     double        _w, _h;
     
     // The button fill
-    Paint         _fill = FILL_NORMAL_BUTTON;
+    Paint         _fill = BUTTON_FILL;
     
     // The rounding radius
     double        _rad = 4;
@@ -32,26 +32,48 @@ public class ButtonArea {
     public static final int BUTTON_OVER = ButtonBase.BUTTON_OVER;
     public static final int BUTTON_PRESSED = ButtonBase.BUTTON_PRESSED;
 
-    // Outer ring and outer lighted ring
-    static Color ring2 = Color.get("#a6a6a6"), _c6 = Color.get("#ffffffBB");
-    static Color _over = Color.get("#FFFFFF50"), _prsd = Color.get("#0000001A");
+    // Button background fill (gradient, light gray top to dark gray bottom)
+    private static Color _bfc1 = Color.get("#e8e8e8");
+    private static Color _bfc2 = Color.get("#d3d3d3");
+    private static GradientPaint.Stop _bfillStops[] = GradientPaint.getStops(0, _bfc1, 1, _bfc2);
+    private static GradientPaint BUTTON_FILL = new GradientPaint(.5, 0, .5, 1, _bfillStops);
     
-    // Button background gradient (light gray top to dark gray bottom)
-    static Color _c1 = Color.get("#e8e8e8"), _c2 = Color.get("#d3d3d3");
+    // Button inner ring paint (gradient, light gray top to dark gray bottom)
+    private static Color _irc1 = Color.get("#fbfbfb");
+    private static Color _irc2 = Color.get("#dbdbdb");
+    private static GradientPaint.Stop _ring1Stops[] = GradientPaint.getStops(0, _irc1, 1, _irc2);
+    private static GradientPaint INNER_RING_PAINT = new GradientPaint(.5, 0, .5, 1, _ring1Stops);
     
-    // Button inner ring gradient (light gray top to dark gray bottom)
-    static Color _c3 = Color.get("#fbfbfb"), _c4 = Color.get("#dbdbdb");
-    static GradientPaint ring1 = new GradientPaint(.5, 0, .5, 1, GradientPaint.getStops(0,_c3,1,_c4));
+    // Button outer ring paint
+    private static Color OUTER_RING_PAINT = Color.get("#a6a6a6");
     
-    // ProgressBar fill
-    static Color _pb0 = Color.get("#efefef"), _pb1 = Color.get("#fefefe");
-    static Color _pb2 = Color.get("#f7f7f7"), _pb3 = Color.get("#e9e9e9");
-    static GradientPaint.Stop _pbstops[] = GradientPaint.getStops(0,_pb0,.33,_pb1,.66,_pb2,1,_pb3);
+    // Button bottom highlight paint
+    private static Color BOTTOM_HIGHLITE_PAINT = Color.get("#ffffffBB");
+    
+    // Button Mouse-over paint and Mouse-pressed paint
+    private static Color BUTTON_MOUSE_OVER_PAINT = Color.get("#FFFFFF50");
+    private static Color BUTTON_MOUSE_PRESSED_PAINT = Color.get("#0000001A");
+    
+/**
+ * Returns the X value.
+ */
+public double getX()  { return _x; }
 
-    // Constants for fill
-    public static Paint FILL_NORMAL_BUTTON = new GradientPaint(.5, 0, .5, 1, GradientPaint.getStops(0,_c1,1,_c2));
-    public static Paint FILL_PROGRESS_BAR = new GradientPaint(.5, 0, .5, 1, _pbstops);
-    
+/**
+ * Sets the X value.
+ */
+public void setX(double aX)  { _x = aX; }
+
+/**
+ * Returns the Y value.
+ */
+public double getY()  { return _y; }
+
+/**
+ * Sets the Y value.
+ */
+public void setY(double aY)  { _y = aY; }
+
 /**
  * Returns the width.
  */
@@ -71,6 +93,30 @@ public double getHeight()  { return _h; }
  * Sets the height.
  */
 public void setHeight(double aHeight)  { _h = aHeight; }
+
+/**
+ * Sets X/Y.
+ */
+public void setXY(double aX, double aY)
+{
+    setX(aX); setY(aY);
+}
+
+/**
+ * Sets size.
+ */
+public void setSize(double aW, double aH)
+{
+    setWidth(aW); setHeight(aH);
+}
+
+/**
+ * Sets the bounds.
+ */
+public void setBounds(double aX, double aY, double aW, double aH)
+{
+    setX(aX); setY(aY); setWidth(aW); setHeight(aH);
+}
 
 /**
  * Returns the fill.
@@ -118,13 +164,13 @@ public void setRadius(double aValue)  { _rad = aValue;  }
 public void configureFromButton(ButtonBase aButton)
 {
     // Basic attrs
-    setWidth(aButton.getWidth());
-    setHeight(aButton.getHeight());
+    setSize(aButton.getWidth(), aButton.getHeight());
     setRadius(aButton.getRadius());
     setPosition(aButton.getPosition());
     
     // Get/set state
-    boolean pressed = aButton.isPressed(), targeted = aButton.isTargeted();
+    boolean pressed = aButton.isPressed();
+    boolean targeted = aButton.isTargeted();
     int state = pressed? BUTTON_PRESSED : targeted? BUTTON_OVER : BUTTON_NORMAL;
     setState(state);
     
@@ -139,82 +185,46 @@ public void configureFromButton(ButtonBase aButton)
  */
 public void paint(Painter aPntr)
 {
-    // Get shape and paint fill
+    // Get RoundRect shape for bounds, Radius and Position
     RoundRect rect = new RoundRect(_x, _y, _w, _h, _rad).copyForPosition(_pos);
-    aPntr.setPaint(_fill); aPntr.fill(rect);
     
-    // Draw rings: (1) Outer-bottom: light gray, (2) inner: light gray gradient, (3) outer: gray
-    rect.setRect(_x+.5,_y+.5,_w-1,_h); aPntr.setColor(_c6); aPntr.draw(rect);
-    rect.setRect(_x+1.5,_y+1.5,_w-3,_h-4); aPntr.setPaint(ring1); aPntr.draw(rect);
-    rect.setRect(_x+.5,_y+.5,_w-1,_h-1); aPntr.setPaint(ring2); aPntr.draw(rect);
+    // Fill rect
+    fillRect(aPntr, rect, _x, _y, _w, _h, _fill);
     
-    // Handle BUTTON_OVER
-    if(_state==BUTTON_OVER) {
-        aPntr.setPaint(_over);
-        rect.setRect(_x,_y,_w,_h);
-        aPntr.fill(rect);
-    }
+    // Paint bottom highlite ring (white)
+    drawRect(aPntr, rect, _x+.5, _y+.5, _w-1, _h, BOTTOM_HIGHLITE_PAINT);
     
-    // Handle BUTTON_PRESSED
-    else if(_state==BUTTON_PRESSED && _fill==FILL_NORMAL_BUTTON) {
-        aPntr.setPaint(_prsd);
-        rect.setRect(_x,_y,_w,_h);
-        aPntr.fill(rect);
-    }
-}
-
-/**
- * Draws a button for the given rect with an option for pressed.
- */
-public static void drawButton(Painter aPntr, double x, double y, double w, double h)
-{
-    drawButton(aPntr, x, y, w, h, 0);
-}
-
-/**
- * Draws a button for the given rect with an option for pressed.
- */
-public static void drawButton(Painter aPntr, double x, double y, double w, double h, int aState)
-{
-    drawButton(aPntr, x, y, w, h, aState, 3);
-}
-
-/**
- * Draws a button for the given rect with an option for pressed.
- */
-public static void drawButton(Painter aPntr, double x, double y, double w, double h, int aState, int aRounding)
-{
-    // Paint background gradient
-    RoundRect rect = new RoundRect(x,y,w,h,aRounding);
-    aPntr.setPaint(_gpaint1); aPntr.fill(rect);
+    // Paint inner ring (light gray gradient)
+    drawRect(aPntr, rect, _x+1.5, _y+1.5, _w-3, _h-4, INNER_RING_PAINT);
     
-    // Paint outer bottom ring light gray
-    rect.setRect(x+.5,y+.5,w-1,h); aPntr.setColor(_c6); aPntr.draw(rect);
-    
-    // Paint inner ring light gray
-    rect.setRect(x+1.5,y+1.5,w-3,h-4); aPntr.setPaint(_gpaint2); aPntr.draw(rect);
-    
-    // Paint outer ring
-    rect.setRect(x+.5,y+.5,w-1,h-1); aPntr.setColor(_c0); aPntr.draw(rect);
+    // Paint outer ring (gray)
+    drawRect(aPntr, rect, _x+.5, _y+.5, _w-1, _h-1, OUTER_RING_PAINT);
     
     // Handle BUTTON_OVER
-    if(aState==BUTTON_OVER) {
-        rect.setRect(x,y,w,h); aPntr.setPaint(_over); aPntr.fill(rect); }
-        
+    if(_state==BUTTON_OVER)
+        fillRect(aPntr, rect, _x, _y, _w, _h, BUTTON_MOUSE_OVER_PAINT);
+    
     // Handle BUTTON_PRESSED
-    else if(aState==BUTTON_PRESSED) {
-        rect.setRect(x,y,w,h); aPntr.setPaint(_prsd); aPntr.fill(rect); }
+    else if(_state==BUTTON_PRESSED && _fill==BUTTON_FILL)
+        fillRect(aPntr, rect, _x, _y, _w, _h, BUTTON_MOUSE_PRESSED_PAINT);
 }
 
-// Outer ring and outer lighted ring
-private static Color _c0 = Color.get("#a6a6a6");
+/**
+ * Convenience to draw rect shape in bounds with color.
+ */
+public static final void drawRect(Painter aPntr, RectBase aRect, double aX, double aY, double aW, double aH, Paint aPnt)
+{
+    aRect.setRect(aX, aY, aW, aH);
+    aPntr.drawWithPaint(aRect, aPnt);
+}
 
-// Button background gradient (light gray top to dark gray bottom)
-private static GradientPaint.Stop _stops1[] = { new GradientPaint.Stop(0,_c1), new GradientPaint.Stop(1,_c2) };
-private static GradientPaint _gpaint1 = new GradientPaint(.5,0,.5,1,_stops1);
-
-// Button inner ring gradient (light gray top to dark gray bottom)
-private static GradientPaint.Stop _stops2[] = { new GradientPaint.Stop(0,_c3), new GradientPaint.Stop(1,_c4) };
-private static GradientPaint _gpaint2 = new GradientPaint(.5,0,.5,1,_stops2);
+/**
+ * Convenience to draw rect shape in bounds with color.
+ */
+public static final void fillRect(Painter aPntr, RectBase aRect, double aX, double aY, double aW, double aH, Paint aPnt)
+{
+    aRect.setRect(aX, aY, aW, aH);
+    aPntr.fillWithPaint(aRect, aPnt);
+}
 
 }

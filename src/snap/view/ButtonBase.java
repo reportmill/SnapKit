@@ -281,19 +281,22 @@ protected void fireActionEvent(ViewEvent anEvent)
  */
 public void paintFront(Painter aPntr)
 {
-    // Reset stroke
+    // Set stroke
     aPntr.setStroke(Stroke.Stroke1);
 
+    // If ShowArea, use ButtonArea to paint actual button background
     if(isShowArea()) {
         ButtonArea bp = ViewTheme.get().createButtonArea();
         bp.configureFromButton(this);
         bp.paint(aPntr);
     }
+    
+    // If not ShowArea, paint rects for Pressed or Targeted
     else {
-        if(isPressed()) {
-            aPntr.setPaint(Color.LIGHTGRAY); aPntr.fillRect(0,0,getWidth(),getHeight()); }
-        if(isTargeted()) {
-            aPntr.setPaint(Color.GRAY); aPntr.drawRect(.5,.5,getWidth()-1,getHeight()-1); }
+        if(isPressed())
+            aPntr.fillRectWithPaint(0, 0, getWidth(), getHeight(), Color.LIGHTGRAY);
+        if(isTargeted())
+            aPntr.drawRectWithPaint(.5, .5, getWidth()-1, getHeight()-1, Color.GRAY);
     }
 }
 
@@ -303,8 +306,8 @@ public void paintFront(Painter aPntr)
 public void paintAll(Painter aPntr)
 {
     super.paintAll(aPntr);
-    if(isDisabled()) {
-        aPntr.setColor(new Color(1,1,1,.5)); aPntr.fillRect(0,0,getWidth(),getHeight()); }
+    if(isDisabled())
+        aPntr.fillRectWithPaint(0, 0, getWidth(), getHeight(), new Color(1,1,1,.5));
 }
 
 /**

@@ -18,6 +18,12 @@ public abstract class Painter {
     // Whether painting is being done for static output
     boolean        _printing;
     
+    // A shared rect for draw/fill/clipRect calls
+    Rect           _rect = new Rect();
+    
+    // A shared line for drawLine calls
+    Line           _line = new Line(0, 0, 0, 0);
+    
     // Constants for composite
     public enum Composite { SRC_OVER, SRC_IN, DST_IN }
 
@@ -93,71 +99,84 @@ public void clearRect(double aX, double aY, double aW, double aH) { }
 /**
  * Stroke the given shape.
  */
-public abstract void draw(Shape s);
+public abstract void draw(Shape aShape);
 
 /**
  * Fill the given shape.
  */
-public abstract void fill(Shape s);
+public abstract void fill(Shape aShape);
 
 /**
  * Draw the given line.
  */
-public void drawLine(double x1, double y1, double x2, double y2)  { draw(new Line(x1, y1, x2, y2)); }
+public void drawLine(double x1, double y1, double x2, double y2)
+{
+    _line.setPoints(x1, y1, x2, y2);
+    draw(_line);
+}
 
 /**
  * Fill the given rect.
  */
-public void fillRect(double x, double y, double w, double h)  { fill(new Rect(x,y,w,h)); }
+public void fillRect(double x, double y, double w, double h)
+{
+    _rect.setRect(x, y, w, h);
+    fill(_rect);
+}
 
 /**
  * Draw the given rect.
  */
-public void drawRect(double x, double y, double w, double h)  { draw(new Rect(x,y,w,h)); }
-
-/**
- * Paints a 3D rect.
- */
-public void fill3DRect(double x, double y, double w, double h, boolean raised)
+public void drawRect(double x, double y, double w, double h)
 {
-    /*Paint p = getPaint();
-    Color c = getColor(), brighter = c.brighter().brighter(), darker = c.darker();
-    setColor(raised? c : darker); fillRect(x+1, y+1, w-2, h-2);
-    setColor(raised? brighter : darker); fillRect(x, y, 1, h); fillRect(x+1, y, w-2, 1);
-    setColor(raised? darker : brighter); fillRect(x+1, y+h-1, w-1, 1); fillRect(x+w-1, y, 1, h-1);
-    setPaint(p);*/
-    
-    Color c = getColor(), brighter = c.brighter().brighter(), darker = c.darker();
-    if(!raised) setColor(darker); fillRect(x+1, y+1, w-2, h-2);
-    setColor(raised? brighter : darker); drawLine(x, y, x, y+h-1); drawLine(x+1, y, x+w-2, y);
-    setColor(raised? darker : brighter); drawLine(x+1, y+h-1, x+w-1, y+h-1); drawLine(x+w-1, y, x+w-1, y+h-2);
-    setColor(c);
+    _rect.setRect(x, y, w, h);
+    draw(_rect);
 }
 
 /**
- * Draws a button for the given rect with an option for pressed.
+ * Convenience to stroke given shape with given paint.
  */
-public void drawButton(Rect aRect, boolean isPressed)
+public void drawWithPaint(Shape aShape, Paint aPaint)
 {
-    drawButton(aRect.getX(), aRect.getY(), aRect.getWidth(), aRect.getHeight(), isPressed);
+    setPaint(aPaint);
+    draw(aShape);
 }
 
 /**
- * Draws a button for the given rect with an option for pressed.
+ * Convenience to fill given shape with given paint.
  */
-public void drawButton(double x, double y, double w, double h, boolean isPressed)
+public void fillWithPaint(Shape aShape, Paint aPaint)
 {
-    setColor(Color.BLACK); fillRect(x, y, w, h);
-    setColor(_white); fillRect(x, y, --w, --h);
-    setColor(_darkGray); fillRect(++x, ++y, --w, --h);
-    setColor(_lightGray); fillRect(x, y, --w, --h);
-    setColor(isPressed? _darkerGray : _gray); fillRect(++x, ++y, --w, --h);
+    setPaint(aPaint);
+    fill(aShape);
 }
 
-// DrawButton colors
-static Color _white = new Color(.9f, .95f, 1), _lightGray = new Color(.9f, .9f, .9f);
-static Color _darkGray = new Color(.58f, .58f, .58f), _darkerGray = new Color(.5f, .5f, .5f);
-static Color _gray = new Color(.7f, .7f, .7f);
+/**
+ * Draw the given line.
+ */
+public void drawLineWithPaint(double x1, double y1, double x2, double y2, Paint aPaint)
+{
+    setPaint(aPaint);
+    drawLine(x1, y1, x2, y2);
+}
+
+/**
+ * Draw given rect with given paint.
+ */
+public void drawRectWithPaint(double aX, double aY, double aW, double aH, Paint aPaint)
+{
+    setPaint(aPaint);
+    drawRect(aX, aY, aW, aH);
+}
+
+/**
+ * Fill given rect with given paint.
+ */
+public void fillRectWithPaint(double aX, double aY, double aW, double aH, Paint aPaint)
+{
+    setPaint(aPaint);
+    fillRect(aX, aY, aW, aH);
+}
 
 /**
  * Draw image with transform.
@@ -191,16 +210,28 @@ public abstract void drawImage(Image img, double sx, double sy, double sw, doubl
 /**
  * Draw string at location.
  */
-public void drawString(String aStr, double aX, double aY)  { drawString(aStr, aX, aY, 0); }
+public void drawString(String aStr, double aX, double aY)
+{
+    drawString(aStr, aX, aY, 0);
+}
 
 /**
  * Draw string at location with char spacing.
  */
 public void drawString(String aStr, double aX, double aY, double aCSpace)
 {
-    if(aCSpace==0) { drawString(aStr, aX, aY); return; } double x = aX;
+    // Simple case of no extra char space
+    if(aCSpace==0) {
+        drawString(aStr, aX, aY);
+        return;
+    }
+    
+    // Iterate over chars and draw each
+    double x = aX;
     for(int i=0,iMax=aStr.length(); i<iMax; i++) { char c = aStr.charAt(i);
-        drawString(String.valueOf(c), x, aY); x += getFont().charAdvance(c) + aCSpace; }
+        drawString(String.valueOf(c), x, aY);
+        x += getFont().charAdvance(c) + aCSpace;
+    }
 }
 
 /**
@@ -272,7 +303,11 @@ public abstract void clip(Shape s);
 /**
  * Clip to rect.
  */
-public void clipRect(double aX, double aY, double aW, double aH)  { clip(new Rect(aX,aY,aW,aH)); }
+public void clipRect(double aX, double aY, double aW, double aH)
+{
+    _rect.setRect(aX, aY, aW, aH);
+    clip(_rect);
+}
 
 /**
  * Returns the composite mode.
@@ -335,9 +370,56 @@ public abstract void restore();
 public void flush()  { }
 
 /**
+ * Paints a 3D rect.
+ */
+public void fill3DRect(double x, double y, double w, double h, boolean raised)
+{
+    Color c = getColor();
+    Color brighter = c.brighter().brighter();
+    Color darker = c.darker();
+
+    fillRectWithPaint(x+1, y+1, w-2, h-2, raised? c : darker);
+    drawLineWithPaint(x, y, x, y+h-1, raised? brighter : darker);
+    drawLine(x+1, y, x+w-2, y);
+    drawLineWithPaint(x+1, y+h-1, x+w-1, y+h-1, raised? darker : brighter);
+    drawLine(x+w-1, y, x+w-1, y+h-2);
+    setColor(c);
+}
+
+/**
+ * Draws a button for the given rect with an option for pressed.
+ */
+public void drawButton(Rect aRect, boolean isPressed)
+{
+    drawButton(aRect.x, aRect.y, aRect.width, aRect.height, isPressed);
+}
+
+/**
+ * Draws a button for the given rect with an option for pressed.
+ */
+public void drawButton(double x, double y, double w, double h, boolean isPressed)
+{
+    fillRectWithPaint(x, y, w, h, Color.BLACK);
+    fillRectWithPaint(x, y, --w, --h, _white);
+    fillRectWithPaint(++x, ++y, --w, --h, _darkGray);
+    fillRectWithPaint(x, y, --w, --h, _lightGray);
+    fillRectWithPaint(++x, ++y, --w, --h, isPressed? _darkerGray : _gray);
+}
+
+// DrawButton colors
+private static Color _white = new Color(.9f, .95f, 1);
+private static Color _lightGray = new Color(.9f, .9f, .9f);
+private static Color _darkGray = new Color(.58f, .58f, .58f);
+private static Color _darkerGray = new Color(.5f, .5f, .5f);
+private static Color _gray = new Color(.7f, .7f, .7f);
+
+/**
  * Standard toString implementation.
  */
-public String toString() { return getClass().getName() + " { font=" + getFont() + ", color=" + getColor() + " }"; }
+public String toString()
+{
+    return getClass().getName() + " { font=" + getFont() + ", color=" + getColor() + " }";
+}
 
 /**
  * Return native helper for painter, if available.
@@ -347,7 +429,11 @@ public Object getNative()  { return null; }
 /**
  * Return native helper for painter as given class, if available.
  */
-public <T> T getNative(Class <T> aClass)  { Object ntv = getNative(); return aClass.isInstance(ntv)? (T)ntv : null; }
+public <T> T getNative(Class <T> aClass)
+{
+    Object ntv = getNative();
+    return aClass.isInstance(ntv)? (T)ntv : null;
+}
 
 /**
  * A class that provide extra painter properties.
@@ -358,29 +444,21 @@ public static class Props {
     public Object setProp(String aKey, Object aVal)  { return _map.put(aKey, aVal); }
 }
 
-//public boolean hit(Rectangle rect, Shape s, boolean onStroke);
-//public GraphicsConfiguration getDeviceConfiguration();
+//public void draw/fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight);
+//public void draw/fillOval(int x, int y, int width, int height);
+//public void draw/fillArc(int x, int y, int width, int height, int startAngle, int arcAngle);
+//public void drawPolyline(int xPoints[], int yPoints[], int nPoints);
+//public void draw/fillPolygon(int xPoints[], int yPoints[], int nPoints);
+//public void fillPolygon(Polygon p);
 //public void shear(double shx, double shy);
 //public void setBackground(Color color);
-//public Color getBackground();
-//public Graphics create(int x, int y, int width, int height) { }
 //public void setPaintMode();
 //public void setXORMode(Color c1);
-//public FontMetrics getFontMetrics() { return _g2.getFontMetrics(); }
-//public FontRenderContext getFontRenderContext();
+//public Graphics create(int x, int y, int width, int height) { }
 //public void copyArea(int x, int y, int width, int height, int dx, int dy);
-//public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight);
-//public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight);
-//public void drawOval(int x, int y, int width, int height);
-//public void fillOval(int x, int y, int width, int height);
-//public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle);
-//public void fillArc(int x, int y, int width, int height, int startAngle, int arcAngle);
-//public void drawPolyline(int xPoints[], int yPoints[], int nPoints);
-//public void drawPolygon(int xPoints[], int yPoints[], int nPoints);
-//public void fillPolygon(int xPoints[], int yPoints[], int nPoints);
-//public void fillPolygon(Polygon p);
+//public boolean hit(Rectangle rect, Shape s, boolean onStroke);
 //public boolean hitClip(int x, int y, int width, int height);
-//public Composite getComposite();
-//public void setComposite(Composite comp);
+//public GraphicsConfiguration getDeviceConfiguration();
+//public FontMetrics getFontMetrics(), getFontRenderContext();
 
 }

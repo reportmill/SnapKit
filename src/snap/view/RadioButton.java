@@ -88,23 +88,41 @@ protected void layoutImpl()  { RowView.layout(this, null, null, false, SPACING);
  */
 protected class RadioArea extends View {
     
+    // The ButtonArea to paint actual button part
+    ButtonArea _btnArea;
+    
+    // The shape to paint fill button part
+    Shape      _centerShape = new Ellipse(3, 3, 10, 10);
+    
     /** Create RadioArea. */
-    public RadioArea()  { setPrefSize(16, 16); }
+    public RadioArea()
+    {
+        setPrefSize(16, 16);
+        themeChanged();
+    }
     
     /** Paint RadioArea. */
     public void paintFront(Painter aPntr)
     {
         // Get button state
         int state = isPressed()? BUTTON_PRESSED : _targeted? BUTTON_OVER : BUTTON_NORMAL;
+        _btnArea.setState(state);
         
-        // Draw button background
-        ButtonArea.drawButton(aPntr, 0, 0, 16, 16, state, 8);
+        // Paint actual button part
+        _btnArea.paint(aPntr);
         
         // If selected, draw inner circle
-        if(isSelected()) {
-            aPntr.setPaint(Color.DARKGRAY);
-            aPntr.fill(new Ellipse(3, 3, 10, 10));
-        }
+        if(isSelected())
+            aPntr.fillWithPaint(_centerShape, Color.DARKGRAY);
+    }
+    
+    /** Override to set/reset ButtonArea. */
+    protected void themeChanged()
+    {
+        super.themeChanged();
+        _btnArea = ViewTheme.get().createButtonArea();
+        _btnArea.setBounds(0, 0, 16, 16);
+        _btnArea.setRadius(8);
     }
 }
 
