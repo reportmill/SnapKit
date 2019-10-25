@@ -15,17 +15,20 @@ public class ButtonArea {
     // The size
     double        _w, _h;
     
-    // The button fill
-    Paint         _fill = BUTTON_FILL;
-    
     // The rounding radius
     double        _rad = 4;
     
     // The position of the button when in a group (determines corner rendering).
     Pos           _pos;
     
-    // The button state
+    // The button state with regard to mouse (mouse over, mouse pressed)
     int           _state = Button.BUTTON_NORMAL;
+    
+    // Whether button is selected (toggle button only)
+    boolean       _selected;
+    
+    // The button fill
+    Paint         _fill = BUTTON_FILL;
     
     // Button states
     public static final int BUTTON_NORMAL = ButtonBase.BUTTON_NORMAL;
@@ -119,24 +122,14 @@ public void setBounds(double aX, double aY, double aW, double aH)
 }
 
 /**
- * Returns the fill.
+ * Returns the radius of the round.
  */
-public Paint getFill()  { return _fill; }
+public double getRadius()  { return _rad; }
 
 /**
- * Sets the fill.
+ * Sets the radius of the round.
  */
-public void setFill(Paint aPaint)  { _fill = aPaint; }
-
-/**
- * Returns the button state.
- */
-public int getState()  { return _state; }
-
-/**
- * Sets the button state.
- */
-public void setState(int aState)  { _state = aState; }
+public void setRadius(double aValue)  { _rad = aValue;  }
 
 /**
  * Returns the position of the button when in a group (determines corner rendering).
@@ -149,14 +142,34 @@ public Pos getPosition()  { return _pos; }
 public void setPosition(Pos aPos)  { _pos = aPos; }
 
 /**
- * Returns the radius of the round.
+ * Returns the button state.
  */
-public double getRadius()  { return _rad; }
+public int getState()  { return _state; }
 
 /**
- * Sets the radius of the round.
+ * Sets the button state.
  */
-public void setRadius(double aValue)  { _rad = aValue;  }
+public void setState(int aState)  { _state = aState; }
+
+/**
+ * Returns whether button is selected (toggle button only).
+ */
+public boolean isSelected()  { return _selected; }
+
+/**
+ * Set whether button is selected (toggle button only).
+ */
+public void setSelected(boolean aValue)  { _selected = aValue; }
+
+/**
+ * Returns the fill.
+ */
+public Paint getFill()  { return _fill; }
+
+/**
+ * Sets the fill.
+ */
+public void setFill(Paint aPaint)  { _fill = aPaint; }
 
 /**
  * Sets ButtonArea attributes from a button.
@@ -173,6 +186,10 @@ public void configureFromButton(ButtonBase aButton)
     boolean targeted = aButton.isTargeted();
     int state = pressed? BUTTON_PRESSED : targeted? BUTTON_OVER : BUTTON_NORMAL;
     setState(state);
+    
+    // Handle Selected (ToggleButton only)
+    boolean isSel = aButton instanceof ToggleButton && ((ToggleButton)aButton).isSelected();
+    setSelected(isSel);
     
     // Set fill
     Paint bfill = aButton.getButtonFill();

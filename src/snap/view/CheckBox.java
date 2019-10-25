@@ -101,9 +101,10 @@ protected class CheckArea extends View {
     /** Paint CheckArea. */
     public void paintFront(Painter aPntr)
     {
-        // Get button state and set in ButtonArea
+        // Update ButtonArea.State and ButtonArea.Selected
         int state = isPressed()? BUTTON_PRESSED : _targeted? BUTTON_OVER : BUTTON_NORMAL;
         _btnArea.setState(state);
+        _btnArea.setSelected(isSelected());
         
         // Paint actual button part
         _btnArea.paint(aPntr);

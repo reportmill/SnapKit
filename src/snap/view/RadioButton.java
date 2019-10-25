@@ -104,9 +104,10 @@ protected class RadioArea extends View {
     /** Paint RadioArea. */
     public void paintFront(Painter aPntr)
     {
-        // Get button state
+        // Update ButtonArea.State and ButtonArea.Selected
         int state = isPressed()? BUTTON_PRESSED : _targeted? BUTTON_OVER : BUTTON_NORMAL;
         _btnArea.setState(state);
+        _btnArea.setSelected(isSelected());
         
         // Paint actual button part
         _btnArea.paint(aPntr);

@@ -68,11 +68,6 @@ public void setGroup(String aName)
 }
 
 /**
- * Returns whether button is pressed (visibly), regardless of state.
- */
-public boolean isPressed()  { return super.isPressed() || _selected; }
-
-/**
  * Override to toggle Selected state (if no ToggleGroup or not selected).
  */
 protected void fireActionEvent(ViewEvent anEvent)
