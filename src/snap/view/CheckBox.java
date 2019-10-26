@@ -97,17 +97,7 @@ protected class CheckArea extends View {
     /** Paint CheckArea. */
     public void paintFront(Painter aPntr)
     {
-        // Paint actual button part
         _btnArea.paint(aPntr);
-        
-        // If selected, draw X
-        if(isSelected()) {
-            Stroke str = aPntr.getStroke();
-            aPntr.setStroke(Stroke.Stroke2);
-            aPntr.drawLineWithPaint(5, 5, 11, 11, Color.BLACK);
-            aPntr.drawLine(11, 5, 5, 11);
-            aPntr.setStroke(str);
-        }
     }
 }
 

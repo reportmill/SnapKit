@@ -14,23 +14,7 @@ public class CheckBoxMenuItem extends MenuItem {
  */
 public void paintFront(Painter aPntr)
 {
-    // Get insets to get button X/Y
-    Insets ins = getInsetsAll();
-    double x = ins.left - 16 - 6;
-    double y = ins.top + 2 + Math.round((getHeight() - ins.getHeight() - 2 - 16 - 2)/2);
-    
-    // Update ButtonArea.X/Y and paint
-    _btnArea.setXY(x, y);
     _btnArea.paint(aPntr);
-    
-    // If Selected paint X
-    if(isSelected()) {
-        Stroke str = aPntr.getStroke();
-        aPntr.setStroke(Stroke.Stroke2);
-        aPntr.drawLineWithPaint(x+5, y+5, x+11, y+11, Color.BLACK);
-        aPntr.drawLine(x+11, y+5, x+5, y+11);
-        aPntr.setStroke(str);
-    }
 }
 
 /**

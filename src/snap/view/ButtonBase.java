@@ -25,6 +25,9 @@ public class ButtonBase extends ParentView {
     // The radius of the button rounding
     double                  _rad = 4;
     
+    // The button fill
+    Paint                   _btnFill;
+    
     // Whether button is pressed
     boolean                 _pressed;
     
@@ -33,9 +36,6 @@ public class ButtonBase extends ParentView {
     
     // Whether button is being tracked by mouse
     boolean                 _tracked;
-    
-    // The button fill
-    Paint                   _btnFill;
     
     // The class that renders the button
     ButtonArea              _btnArea;
@@ -146,36 +146,6 @@ public void setImageName(String aName)
 }
 
 /**
- * Returns whether button is pressed (visibly).
- */
-public boolean isPressed()  { return _pressed; }
-
-/**
- * Sets whether button is pressed (visibly).
- */
-protected void setPressed(boolean aValue)
-{
-    if(aValue==_pressed) return;
-    firePropChange(Pressed_Prop, _pressed, _pressed=aValue);
-    repaint();
-}
-
-/**
- * Returns whether button is under mouse.
- */
-public boolean isTargeted()  { return _targeted; }
-
-/**
- * Sets whether button is under mouse.
- */
-protected void setTargeted(boolean aValue)
-{
-    if(aValue==_targeted) return;
-    firePropChange(Targeted_Prop, _targeted, _targeted=aValue);
-    repaint();
-}
-
-/**
  * Returns whether button displays the standard background area.
  */
 public boolean isShowArea()  { return _showArea; }
@@ -233,6 +203,41 @@ public Paint getButtonFill()  { return _btnFill; }
  * Sets the button fill.
  */
 public void setButtonFill(Paint aPaint)  { _btnFill = aPaint; }
+
+/**
+ * Returns whether button is pressed (visibly).
+ */
+public boolean isPressed()  { return _pressed; }
+
+/**
+ * Sets whether button is pressed (visibly).
+ */
+protected void setPressed(boolean aValue)
+{
+    if(aValue==_pressed) return;
+    firePropChange(Pressed_Prop, _pressed, _pressed=aValue);
+    repaint();
+}
+
+/**
+ * Returns whether button is under mouse.
+ */
+public boolean isTargeted()  { return _targeted; }
+
+/**
+ * Sets whether button is under mouse.
+ */
+protected void setTargeted(boolean aValue)
+{
+    if(aValue==_targeted) return;
+    firePropChange(Targeted_Prop, _targeted, _targeted=aValue);
+    repaint();
+}
+
+/**
+ * Returns whether button is selected (really for ToggleButton subclasses).
+ */
+public boolean isSelected()  { return false; }
 
 /**
  * Returns the insets.
@@ -293,7 +298,7 @@ public void paintFront(Painter aPntr)
     else {
         
         // If pressed, paint background
-        if(isPressed())
+        if(isPressed() || isSelected())
             aPntr.fillRectWithPaint(0, 0, getWidth(), getHeight(), Color.LIGHTGRAY);
             
         // If Targeted, paint border

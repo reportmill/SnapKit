@@ -192,6 +192,10 @@ private static class PlainButtonArea extends ButtonArea {
         
         // Draw ring
         drawRect(aPntr, rect, _x, _y, _w, _h, strokeColor);
+        
+        // Handle Selected
+        if(isSelected())
+            paintSelected(aPntr);
     }
 }
 
@@ -273,6 +277,10 @@ private static class DarkButtonArea extends ButtonArea {
         
         // Draw outer ring
         drawRect(aPntr, rect, _x, _y, _w, _h, strokeColor);
+        
+        // Handle Selected
+        if(isSelected())
+            paintSelected(aPntr);
     }
 }
 
