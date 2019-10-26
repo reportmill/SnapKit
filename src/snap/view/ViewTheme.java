@@ -7,10 +7,10 @@ import snap.gfx.*;
 public class ViewTheme {
     
     // The current theme
-    private static ViewTheme     _theme = new LightTheme();
+    private static ViewTheme     _theme = new ViewTheme();
 
     // The last theme
-    private static ViewTheme     _lastTheme = new LightTheme();
+    private static ViewTheme     _lastTheme;
 
     // Color constants
     private static Color BACK_FILL = new Color("#E9E8EA");
@@ -105,6 +105,7 @@ public static void setThemeForName(String aName)
     switch(aName) {
         case "Light": _theme = new LightTheme(); break;
         case "Dark": _theme = new DarkTheme(); break;
+        case "BlackAndWhite": _theme = new BlackAndWhiteTheme(); break;
         default: _theme = new ViewTheme();
     }
     
@@ -162,6 +163,7 @@ private static class LightTheme extends ViewTheme {
 private static class PlainButtonArea extends ButtonArea {
     
     // Colors
+    private static Color BUTTON_COLOR = Color.WHITE;
     private static Color BUTTON_RING_COLOR = new Color("#BFBFBF");
     private static Color BUTTON_OVER_COLOR = new Color("#F8F8F8");
     private static Color BUTTON_PRESSED_COLOR = new Color("#DFDFDF");
@@ -176,7 +178,7 @@ private static class PlainButtonArea extends ButtonArea {
         updateFromView();
     
         // Get fill color
-        Color fillColor = Color.WHITE;
+        Color fillColor = BUTTON_COLOR;
         if(_state==BUTTON_OVER) fillColor = BUTTON_OVER_COLOR;
         else if(_state==BUTTON_PRESSED) fillColor = BUTTON_PRESSED_COLOR;
         else if(isSelected()) fillColor = BUTTON_PRESSED_COLOR;
@@ -190,7 +192,7 @@ private static class PlainButtonArea extends ButtonArea {
         if(_state==BUTTON_OVER) strokeColor = BUTTON_BLUE_COLOR;
         else if(_state==BUTTON_PRESSED) strokeColor = BUTTON_BLUE_COLOR;
         
-        // Draw ring
+        // Draw outer ring
         drawRect(aPntr, rect, _x, _y, _w, _h, strokeColor);
         
         // Handle Selected
@@ -245,11 +247,93 @@ private static class DarkTheme extends ViewTheme {
  */
 private static class DarkButtonArea extends ButtonArea {
     
-    // Colors 45494A
+    // Colors
     private static Color BUTTON_COLOR = new Color("#45494A");
     private static Color BUTTON_RING_COLOR = new Color("#BFBFBF");
     private static Color BUTTON_OVER_COLOR = BUTTON_COLOR.brighter();
     private static Color BUTTON_PRESSED_COLOR = BUTTON_OVER_COLOR.brighter();
+    private static Color BUTTON_BLUE_COLOR = new Color("#87AFDA");
+    
+    /**
+     * Draws a button for the given rect with an option for pressed.
+     */
+    public void paint(Painter aPntr)
+    {
+        // Update Area from View
+        updateFromView();
+    
+        // Get fill color
+        Color fillColor = BUTTON_COLOR;
+        if(_state==BUTTON_OVER) fillColor = BUTTON_OVER_COLOR;
+        else if(_state==BUTTON_PRESSED) fillColor = BUTTON_PRESSED_COLOR;
+        else if(isSelected()) fillColor = BUTTON_PRESSED_COLOR;
+        
+        // Get shape and paint fill
+        RoundRect rect = new RoundRect(_x, _y, _w, _h, _rad).copyForPosition(_pos);
+        aPntr.fillWithPaint(rect, fillColor);
+        
+        // Get stroke color
+        Color strokeColor = BUTTON_RING_COLOR;
+        if(_state==BUTTON_OVER) strokeColor = BUTTON_BLUE_COLOR;
+        else if(_state==BUTTON_PRESSED) strokeColor = BUTTON_BLUE_COLOR;
+        
+        // Draw outer ring
+        drawRect(aPntr, rect, _x, _y, _w, _h, strokeColor);
+        
+        // Handle Selected
+        if(isSelected())
+            paintSelected(aPntr);
+    }
+}
+
+/**
+ * A Theme for Black and White rendering.
+ */
+private static class BlackAndWhiteTheme extends ViewTheme {
+    
+    // Color constants
+    private static Color BACK_FILL = Color.WHITE;
+    private static Color BACK_DARK_FILL = Color.WHITE;
+    private static Color SEL_FILL = new Color("#F0");
+    private static Color SEL_TEXT_FILL = Color.BLACK;
+    private static Color TARG_FILL = new Color("#F4");
+    private static Color TARG_TEXT_FILL = Color.BLACK;
+
+    /** Returns the background fill. */
+    public Paint getBackFill()  { return BACK_FILL; }
+    
+    /** Returns the background fill. */
+    public Paint getBackDarkFill()  { return BACK_DARK_FILL; }
+    
+    /** Returns the text fill. */
+    public Paint getTextFill()  { return Color.BLACK; }
+
+    /** Returns the selection color. */
+    public Paint getSelectFill()  { return SEL_FILL; }
+    
+    /** Returns the selection color. */
+    public Paint getSelectTextFill()  { return SEL_TEXT_FILL; }
+    
+    /** Returns the selection color. */
+    public Paint getTargetFill()  { return TARG_FILL; }
+    
+    /** Returns the selection color. */
+    public Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
+    
+    /** Creates a button area. */
+    protected ButtonArea createButtonArea()  { return new BlackAndWhiteButtonArea(); }
+}
+
+/**
+ * A ButtonArea for Black and White buttons.
+ */
+private static class BlackAndWhiteButtonArea extends ButtonArea {
+    
+    // Colors
+    private static Color BUTTON_COLOR = Color.WHITE;
+    private static Color BUTTON_RING_COLOR = Color.BLACK;
+    private static Color BUTTON_OVER_COLOR = new Color("#F8");
+    private static Color BUTTON_PRESSED_COLOR = new Color("#F0");
     private static Color BUTTON_BLUE_COLOR = new Color("#87AFDA");
     
     /**
