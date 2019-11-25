@@ -223,17 +223,26 @@ public RootView getRootView()  { return _rview; }
 /**
  * Returns the content associated with this window.
  */
-public View getContent()  { return getRootView().getContent(); }
+public View getContent()
+{
+    return getRootView().getContent();
+}
 
 /**
  * Sets the content associated with this window.
  */
-public void setContent(View aView)  { getRootView().setContent(aView); }
+public void setContent(View aView)
+{
+    getRootView().setContent(aView);
+}
 
 /**
  * Returns the native for the window content.
  */
-public Object getContentNative()  { return getHelper().getContentNative(); }
+public Object getContentNative()
+{
+    return getHelper().getContentNative();
+}
     
 /**
  * Returns whether the window is always on top.
@@ -353,7 +362,12 @@ protected void initNativeWindow()
 }
 
 /** Initializes the native window once. */
-void initNativeWindowOnce()  { if(!_initWin) { _initWin = true; initNativeWindow(); } } boolean _initWin;
+void initNativeWindowOnce()
+{
+    if(_initWin) return; _initWin = true;
+    initNativeWindow();
+}
+boolean _initWin;
 
 /**
  * Shows window in center of given view.
@@ -365,7 +379,7 @@ public void showCentered(View aView)
 }
 
 /**
- * Show the window relative to given node.
+ * Show the window relative to given view and View X/Y (screen x/y if view is null).
  */
 public void show(View aView, double aX, double aY)
 {
@@ -375,9 +389,11 @@ public void show(View aView, double aX, double aY)
     // Make sure window is initialized
     initNativeWindowOnce();
     
-    // If aView provided, convert point
+    // If aView provided, convert point from view to screen coords
     if(aView!=null) {
-        Point pt = aView.localToParent(aX, aY, null); aX = pt.x; aY = pt.y; }
+        Point pt = aView.localToScreen(aX, aY);
+        aX = pt.x; aY = pt.y;
+    }
         
     // If FrameSaveName provided, set Location from defaults and register to store future window moves
     if(getSaveName()!=null) {
@@ -434,37 +450,29 @@ public void pack()  { setSize(getBestSize()); }
 public void toFront()  { getHelper().toFront(); }
 
 /**
- * Returns the screen location for given node, position and offsets.
+ * Returns the screen location for given view, position and offsets.
  */
 public Point getScreenLocation(View aView, Pos aPos, double aDX, double aDY)
 {
     // Set ClientView
     _clientView = aView;
-    
+
     // Make window is initialized
     initNativeWindowOnce();
-    
-    // Get rect for given node and point for given offsets
-    Rect rect = aView!=null? aView.getBoundsLocal().copyFor(aView.getLocalToParent(null)).getBounds() :
-        getEnv().getScreenBoundsInset();
-    double x = aDX, y = aDY;
-    
-    // Modify x for given HPos
-    switch(aPos.getHPos()) {
-        case LEFT: x += rect.x; break;
-        case CENTER: x += Math.round(rect.x + (rect.width-getWidth())/2); break;
-        case RIGHT: x += rect.getMaxX() - getWidth(); break;
+
+    // If no view, just use screen
+    if(aView==null) {
+        Rect rect = getEnv().getScreenBoundsInset();
+        return getRectLocation(rect, aPos, aDX, aDY);
     }
-    
-    // Modify y for given VPos
-    switch(aPos.getVPos()) {
-        case TOP: y += rect.y; break;
-        case CENTER: y += Math.round(rect.y + (rect.height-getHeight())/2); break;
-        case BOTTOM: y += rect.getMaxY() - getHeight(); break;
-    }
-    
-    // Return point
-    return new Point(x,y);
+
+    // Get View bounds in screen coords
+    Rect rect1 = aView.getBoundsLocal();
+    Rect rect2 = aView.localToParent(rect1, null).getBounds();
+
+    // Return location for rect, position and offset
+    Point point = getRectLocation(rect2, aPos, aDX, aDY);
+    return point;
 }
 
 /**
@@ -524,7 +532,8 @@ protected void setFocused(boolean aValue)
 /**
  * Returns the active cursor.
  */
-public Cursor getActiveCursor()  { return _activeCursor; } Cursor _activeCursor = Cursor.DEFAULT;
+public Cursor getActiveCursor()  { return _activeCursor; }
+Cursor _activeCursor = Cursor.DEFAULT;
 
 /**
  * Sets the current cursor.
@@ -630,6 +639,32 @@ public static <T extends ViewOwner> T[] getOpenWindowOwners(Class <T> aClass)
 }
 
 /**
+ * Returns the location for given rect, position and offsets.
+ */
+private Point getRectLocation(Rect aRect, Pos aPos, double aDX, double aDY)
+{
+    // Get rect for given node and point for given offsets
+    double x = aDX, y = aDY;
+
+    // Modify x for given HPos
+    switch(aPos.getHPos()) {
+        case LEFT: x += aRect.x; break;
+        case CENTER: x += Math.round(aRect.x + (aRect.width-getWidth())/2); break;
+        case RIGHT: x += aRect.getMaxX() - getWidth(); break;
+    }
+
+    // Modify y for given VPos
+    switch(aPos.getVPos()) {
+        case TOP: y += aRect.y; break;
+        case CENTER: y += Math.round(aRect.y + (aRect.height-getHeight())/2); break;
+        case BOTTOM: y += aRect.getMaxY() - getHeight(); break;
+    }
+
+    // Return point
+    return new Point(x,y);
+    }
+
+/**
  * A class to map snap Window functionality to native platform.
  */
 public abstract static class WindowHpr <T> {
@@ -648,7 +683,7 @@ public abstract static class WindowHpr <T> {
     
     /** Registers a view for repaint. */
     public abstract void requestPaint(Rect aRect);
-    
+
     /** Window method: initializes native window. */
     public abstract void initWindow();
     
@@ -660,6 +695,12 @@ public abstract static class WindowHpr <T> {
     
     /** Window/Popup method: Order window to front. */
     public abstract void toFront();
+
+    /** Convert given point x/y from given view to screen. */
+    public Point viewToScreen(View aView, double aX, double aY)
+    {
+        return aView.localToParent(aX, aY, null);
+    }
     
     /** Window/Popup method: Sets the document file url for the window title bar proxy icon. */
     public void setDocURL(WebURL aURL)  { }

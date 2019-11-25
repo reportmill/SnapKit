@@ -78,8 +78,12 @@ public void setBounds(int aX, int aY, int aW, int aH)
     
     // Correct X/Y for RootView in Window
     Window winNtv = SwingUtils.getParent(this, Window.class);
-    for(Component c=getParent(); c!=winNtv; c=c.getParent()) { aX += c.getX(); aY += c.getY(); }
-    _rview.setBounds(aX,aY,aW,aH);
+    for(Component c=getParent(); c!=winNtv; c=c.getParent()) {
+        aX += c.getX(); aY += c.getY();
+    }
+
+    // Set new bounds
+    _rview.setBounds(aX, aY, aW, aH);
 }
 
 /**
@@ -208,19 +212,9 @@ void swingShowingChanged()
 {
     // Get native window and just return if it is Snap Window native
     Window winNtv = SwingUtils.getParent(this, Window.class);
-    if(winNtv==_win.getHelper().getNative()) return;
-    
-    // Add component listener to sync native Window X/Y to Snap Window
-    if(winNtv!=_winNtvNoSnap) {
-        if(_winNtvNoSnap!=null) _winNtvNoSnap.removeComponentListener(_winNtvLsnr);
-        _winNtvNoSnap = winNtv;
-        if(_winNtvNoSnap!=null) {
-            winNtv.addComponentListener(_winNtvLsnr = new ComponentAdapter() {
-                public void componentMoved(ComponentEvent e) { _win.setXY(winNtv.getX(), winNtv.getY()); } });
-            _win.setXY(winNtv.getX(), winNtv.getY());
-        }
-    }
-    
+    if(winNtv==_win.getHelper().getNative())
+        return;
+
     // Update Snap RootView Showing
     ViewUtils.setShowing(_rview, isShowing());
     
@@ -230,9 +224,5 @@ void swingShowingChanged()
     if(!isShowing())
         _win.getDispatcher().dispatchMouseMoveOutsideWindow();
 }
-
-// Ivars for above case
-Window _winNtvNoSnap;
-ComponentListener _winNtvLsnr;
 
 }

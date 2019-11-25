@@ -24,6 +24,9 @@ public class SWWindowHpr extends WindowView.WindowHpr <Window> {
     
     // The native RootView
     SWRootView        _rviewNtv;
+
+    // The listener for catching Swing window bounds changes
+    ComponentAdapter  _ntvWinBndsLsnr;
     
     // The current cursor
     snap.view.Cursor  _cursor;
@@ -84,7 +87,7 @@ public Window getNative()
 public JComponent getContentNative()  { return _rviewNtv; }
 
 /**
- * Initialze native window.
+ * Initialize native window.
  */
 public void initWindow()
 {
@@ -128,12 +131,7 @@ public void initWindow()
     win.setPadding(ins);
 
     // Add component listener to sync win bounds changes with WindowView/RootView
-    winNtv.addComponentListener(new ComponentAdapter() {
-        public void componentMoved(ComponentEvent e) { swingWindowBoundsChanged(); }
-        public void componentResized(ComponentEvent e) { swingWindowBoundsChanged(); }
-        public void componentShown(ComponentEvent e) { swingWindowShowingChanged(); }
-        public void componentHidden(ComponentEvent e) { swingWindowShowingChanged(); }
-    });
+    winNtv.addComponentListener(getNativeWindowBoundsListener());
     
     // Add WindowListener to dispatch window events
     winNtv.addWindowListener(new WindowAdapter() {
@@ -157,7 +155,10 @@ public void show()
     //if(wview.isAlwaysOnTop()) win.setAlwaysOnTop(true);
     
     // Set native window location, make visible and notify ShowingChanged (so change is reflected immediately)
-    int x = (int)Math.round(_win.getX()), y = (int)Math.round(_win.getY());
+    int x = (int)Math.round(_win.getX());
+    int y = (int)Math.round(_win.getY());
+
+    // Set WinNtv location and make visible
     _winNtv.setLocation(x,y);
     _winNtv.setVisible(true);
     swingWindowShowingChanged();
@@ -191,6 +192,32 @@ public void hide()
  * Order window to front.
  */
 public void toFront()  { _winNtv.toFront(); }
+
+/**
+ * Override to correct for case of RootView not in Swing Window.
+ */
+@Override
+public Point viewToScreen(View aView, double aX, double aY)
+{
+    // Make sure we have right window
+    WindowView win = aView.getWindow();
+    if(win!=_win) {
+        WindowView.WindowHpr hpr = win.getHelper();
+        return hpr.viewToScreen(aView, aX, aY);
+    }
+
+    // Get point in RootView
+    Point point = aView.localToParent(aX, aY, _rview);
+
+    // Iterate up to screen, adding offsets
+    for(java.awt.Component comp=_rviewNtv; comp!=null; comp=comp.getParent()) {
+        point.x += comp.getX();
+        point.y += comp.getY();
+    }
+
+    // Return point
+    return point;
+}
 
 /**
  * Sets the title of the window.
@@ -237,13 +264,34 @@ protected void swingWindowShowingChanged()
     boolean showing = _winNtv.isShowing();
     ViewUtils.setShowing(_win, showing);
 }
-    
+
+/**
+ * Returns the listener that listens to Swing window move/resize/show/hide.
+ */
+protected ComponentAdapter getNativeWindowBoundsListener()
+{
+    // If already set, just return
+    if(_ntvWinBndsLsnr!=null) return _ntvWinBndsLsnr;
+
+    // Create listener
+    ComponentAdapter lsnr = new ComponentAdapter() {
+        public void componentMoved(ComponentEvent e) { swingWindowBoundsChanged(); }
+        public void componentResized(ComponentEvent e) { swingWindowBoundsChanged(); }
+        public void componentShown(ComponentEvent e) { swingWindowShowingChanged(); }
+        public void componentHidden(ComponentEvent e) { swingWindowShowingChanged(); }
+    };
+
+    // Set and return
+    return _ntvWinBndsLsnr = lsnr;
+}
+
 /**
  * Handles when Swing window bounds changed.
  */
 protected void swingWindowBoundsChanged()
 {
-    int x = _winNtv.getX(), y = _winNtv.getY(), w = _winNtv.getWidth(), h = _winNtv.getHeight();
+    int x = _winNtv.getX(), y = _winNtv.getY();
+    int w = _winNtv.getWidth(), h = _winNtv.getHeight();
     _win.setBounds(x, y, w, h);
 
     // If window deactivated and it has Popup, hide popup

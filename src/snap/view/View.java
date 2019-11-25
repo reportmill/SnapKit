@@ -708,7 +708,11 @@ public void setClip(Shape aShape)
 /**
  * Returns the clip bounds.
  */
-public Rect getClipBounds()  { Shape clip = getClip(); return clip!=null? clip.getBounds() : null; }
+public Rect getClipBounds()
+{
+    Shape clip = getClip();
+    return clip!=null ? clip.getBounds() : null;
+}
 
 /**
  * Returns the clip of this view due to all parents.
@@ -716,8 +720,10 @@ public Rect getClipBounds()  { Shape clip = getClip(); return clip!=null? clip.g
 public Shape getClipAll()
 {
     Shape vshp = getParent()!=null? getParent().getClipAll() : null;
-    if(vshp!=null) vshp = parentToLocal(vshp);
-    if(getClip()!=null) vshp = vshp!=null? Shape.intersect(vshp, getClip()) : getClip();
+    if(vshp!=null)
+        vshp = parentToLocal(vshp);
+    if(getClip()!=null)
+        vshp = vshp!=null ? Shape.intersect(vshp, getClip()) : getClip();
     return vshp;
 }
 
@@ -732,8 +738,10 @@ public Rect getClipAllBounds()  { Shape clip = getClipAll(); return clip!=null? 
 public Rect getClippedRect(Rect aRect)
 {
     if(!isVisible()) return new Rect();
-    Rect cbnds = getClipAllBounds(); if(cbnds==null) return aRect;
-    Rect crect = aRect.getIntersectRect(cbnds); crect.snap();
+    Rect cbnds = getClipAllBounds();
+    if(cbnds==null) return aRect;
+    Rect crect = aRect.getIntersectRect(cbnds);
+    crect.snap();
     return crect;
 }
 
@@ -745,7 +753,11 @@ public Rect getVisRect()  { return getClippedRect(getBoundsLocal()); }
 /**
  * Called to scroll the given shape in this view coords to visible.
  */
-public void scrollToVisible(Shape aShape)  { if(getParent()!=null) getParent().scrollToVisible(localToParent(aShape)); }
+public void scrollToVisible(Shape aShape)
+{
+    if(getParent()!=null)
+        getParent().scrollToVisible(localToParent(aShape));
+}
 
 /**
  * Returns whether transform to parent is simple (contains no rotate, scale, skew).
@@ -760,14 +772,18 @@ public Transform getLocalToParent()
     if(isLocalToParentSimple()) return new Transform(getX()+_tx, getY()+_ty);
     
     // Get location, size, point of rotation, rotation, scale, skew
-    double x = getX() + getTransX(), y = getY() + getTransY(), w = getWidth(), h = getHeight(), prx = w/2, pry = h/2;
-    double rot = getRotate(), sx = getScaleX(), sy = getScaleY(); //skx = getSkewX(), sky = getSkewY();
+    double x = getX() + getTransX(), y = getY() + getTransY();
+    double w = getWidth(), h = getHeight();
+    double prx = w/2, pry = h/2;
+    double rot = getRotate();
+    double sx = getScaleX(), sy = getScaleY(); //skx = getSkewX(), sky = getSkewY();
     
     // Transform about point of rotation and return
     Transform t = new Transform(x + prx, y + pry);
     if(rot!=0) t.rotate(rot);
     if(sx!=1 || sy!=1) t.scale(sx, sy); //if(skx!=0 || sky!=0) t.skew(skx, sky);
-    t.translate(-prx, -pry); return t;
+    t.translate(-prx, -pry);
+    return t;
 }
 
 /**
@@ -777,7 +793,8 @@ public Transform getLocalToParent(View aPar)
 {
     Transform tfm = getLocalToParent(); View n;
     for(n=getParent(); n!=aPar && n!=null; n=n.getParent()) {
-        if(n.isLocalToParentSimple()) tfm.preTranslate(n._x+n._tx,n._y+n._ty);
+        if(n.isLocalToParentSimple())
+            tfm.preTranslate(n._x+n._tx,n._y+n._ty);
         else tfm.multiply(n.getLocalToParent());
     }
     if(n!=aPar)
@@ -790,7 +807,8 @@ public Transform getLocalToParent(View aPar)
  */
 public Point localToParent(double aX, double aY)
 {
-    if(isLocalToParentSimple()) return new Point(aX+_x+_tx,aY+_y+_ty);
+    if(isLocalToParentSimple())
+        return new Point(aX+_x+_tx,aY+_y+_ty);
     return getLocalToParent().transform(aX, aY);
 }
 
@@ -800,64 +818,101 @@ public Point localToParent(double aX, double aY)
 public Point localToParent(double aX, double aY, View aPar)
 {
     Point point = new Point(aX,aY);
-    for(View n=this;n!=aPar&&n!=null;n=n.getParent()) {
-        if(n.isLocalToParentSimple()) point.offset(n._x+n._tx,n._y+n._ty);
-        else point = n.localToParent(point.x,point.y); }
+    for(View view=this; view!=aPar && view!=null; view=view.getParent()) {
+        if(view.isLocalToParentSimple())
+            point.offset(view._x + view._tx,view._y + view._ty);
+        else point = view.localToParent(point.x, point.y);
+    }
     return point;
 }
 
 /**
  * Converts a shape from local to parent.
  */
-public Shape localToParent(Shape aShape)  { return aShape.copyFor(getLocalToParent()); }
+public Shape localToParent(Shape aShape)
+{
+    return aShape.copyFor(getLocalToParent());
+}
 
 /**
  * Converts a point from local to given parent.
  */
-public Shape localToParent(Shape aShape, View aPar)  { return aShape.copyFor(getLocalToParent(aPar)); }
+public Shape localToParent(Shape aShape, View aPar)
+{
+    return aShape.copyFor(getLocalToParent(aPar));
+}
 
 /**
  * Returns the transform from parent to local coords.
  */
 public Transform getParentToLocal()
 {
-    if(isLocalToParentSimple()) return new Transform(-_x-_tx, -_y-_ty);
-    Transform tfm = getLocalToParent(); tfm.invert(); return tfm;
+    if(isLocalToParentSimple())
+        return new Transform(-_x-_tx, -_y-_ty);
+    Transform tfm = getLocalToParent(); tfm.invert();
+    return tfm;
 }
 
 /**
  * Returns the transform from parent to local coords.
  */
-public Transform getParentToLocal(View aPar)  { Transform tfm = getLocalToParent(aPar); tfm.invert(); return tfm; }
+public Transform getParentToLocal(View aPar)
+{
+    Transform tfm = getLocalToParent(aPar); tfm.invert();
+    return tfm;
+}
 
 /**
  * Converts a point from parent to local.
  */
 public Point parentToLocal(double aX, double aY)
 {
-    if(isLocalToParentSimple()) return new Point(aX-_x-_tx,aY-_y-_ty);
+    if(isLocalToParentSimple())
+        return new Point(aX-_x-_tx,aY-_y-_ty);
     return getParentToLocal().transform(aX, aY);
 }
 
 /**
  * Converts a point from given parent to local.
  */
-public Point parentToLocal(double aX, double aY, View aPar)  { return getParentToLocal(aPar).transform(aX,aY); }
+public Point parentToLocal(double aX, double aY, View aPar)
+{
+    return getParentToLocal(aPar).transform(aX,aY);
+}
 
 /**
  * Converts a shape from parent to local.
  */
-public Shape parentToLocal(Shape aShape)  { return aShape.copyFor(getParentToLocal()); }
+public Shape parentToLocal(Shape aShape)
+{
+    return aShape.copyFor(getParentToLocal());
+}
 
 /**
  * Converts a shape from parent to local.
  */
-public Shape parentToLocal(Shape aShape, View aView)  { return aShape.copyFor(getParentToLocal(aView)); }
+public Shape parentToLocal(Shape aShape, View aView)
+{
+    return aShape.copyFor(getParentToLocal(aView));
+}
 
 /**
  * Converts a point from local to parent.
  */
-public Point localToScreen(double aX, double aY)  { return localToParent(aX, aY,null); }
+public Point localToScreen(double aX, double aY)
+{
+    // Get Window (if none, just convert out of View tree)
+    WindowView win = getWindow();
+    if(win==null) {
+        Point pnt = localToParent(aX, aY, null);
+        return pnt;
+    }
+
+    // Ask WindowHpr to do it
+    WindowView.WindowHpr hpr = win.getHelper();
+    Point pnt = hpr.viewToScreen(this, aX, aY);
+    return pnt;
+}
 
 /**
  * Returns whether view contains point.
