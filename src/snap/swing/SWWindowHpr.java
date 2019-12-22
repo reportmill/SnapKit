@@ -213,6 +213,10 @@ public Point viewToScreen(View aView, double aX, double aY)
     for(java.awt.Component comp=_rviewNtv; comp!=null; comp=comp.getParent()) {
         point.x += comp.getX();
         point.y += comp.getY();
+
+        // If Window, go ahead and bail, in case this is dialog of parent window
+        if(comp instanceof java.awt.Window)
+            break;
     }
 
     // Return point
