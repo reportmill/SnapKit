@@ -176,73 +176,96 @@ protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     if(rgtView instanceof View) setRight((View)rgtView);
 }
 
-/** Returns array of column kids (top, row-proxy, bottom). */
-private static View[] getColKids(View aCtr, View aTp, View aRt, View aBtm, View aLft)
-{
-    _rproxy.relayoutParent(); _cproxy.relayoutParent();
-    _cproxy._kid = aCtr;
-    _rproxy._kids = asArray(aLft, aCtr!=null? _cproxy : null, aRt);
-    return asArray(aTp, _rproxy, aBtm);
-}
-    
-/** RowProxy to model left, center, right of BorderView. */
-private static RowProxy _rproxy = new RowProxy();
-private static class RowProxy extends ParentView {
-    public RowProxy() { setGrowWidth(true); setGrowHeight(true); } View _kids[];
-    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, _kids, 0, aH); }
-    protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, _kids, aW); }
-}
+    /**
+     * Returns preferred width of given parent with given children.
+     */
+    public static double getPrefWidth(ParentView aPar, View aCtr, View aTp, View aRt, View aBtm, View aLft, double aH)
+    {
+        RowProxy rproxy = getRowProxy(aPar);
+        View kids[] = getColKids(rproxy, aCtr, aTp, aRt, aBtm, aLft);
+        return ColView.getPrefWidth(aPar, kids, aH);
+    }
 
-/** CenterProxy to model center as always grow width/height. */
-private static CenterProxy _cproxy = new CenterProxy();
-private static class CenterProxy extends ParentView {
-    public CenterProxy() { setGrowWidth(true); setGrowHeight(true); } View _kid;
-    protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _kid, aH); }
-    protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(this, _kid, aW); }
-}
-    
-/** Returns array of non-null views from given view args. */
-private static View[] asArray(View ... theViews)
-{
-    int i = 0, len = 0; for(View n : theViews) if(n!=null) len++;
-    View views[] = new View[len]; for(View n : theViews) if(n!=null) views[i++] = n;
-    return views;
-}
+    /**
+     * Returns the preferred height.
+     */
+    public static double getPrefHeight(ParentView aPar, View aCtr, View aTp, View aRt, View aBtm, View aLft, double aW)
+    {
+        RowProxy rproxy = getRowProxy(aPar);
+        View kids[] = getColKids(rproxy, aCtr, aTp, aRt, aBtm, aLft);
+        return ColView.getPrefHeight(aPar, kids, 0, aW);
+    }
 
-/**
- * Returns preferred width of given parent with given children.
- */
-public static double getPrefWidth(ParentView aPar, View aCtr, View aTp, View aRt, View aBtm, View aLft, double aH)
-{
-    return ColView.getPrefWidth(aPar, getColKids(aCtr, aTp, aRt, aBtm, aLft), aH);
-}
+    /**
+     * Layout children.
+     */
+    public static void layout(ParentView aPar, View aCtr, View aTp, View aRt, View aBtm, View aLft)
+    {
+        // Do vertical layout (top, horiz-proxy, bottom)
+        RowProxy rproxy = getRowProxy(aPar);
+        View vkids[] = getColKids(rproxy, aCtr, aTp, aRt, aBtm, aLft);
+        ColView.layout(aPar, vkids, null, true, 0);
 
-/**
- * Returns the preferred height.
- */
-public static double getPrefHeight(ParentView aPar, View aCtr, View aTp, View aRt, View aBtm, View aLft, double aW)
-{
-    return ColView.getPrefHeight(aPar, getColKids(aCtr, aTp, aRt, aBtm, aLft), 0, aW);
-}
+        // Do horizontal layout (left, center-proxy, bottom)
+        double right = aPar.getWidth() - rproxy.getX() - rproxy.getWidth();
+        double bottom = aPar.getHeight() - rproxy.getY() - rproxy.getHeight();
+        Insets hins = new Insets(rproxy.getY(), right, bottom, rproxy.getX());
+        RowView.layout(aPar, rproxy._kids, hins, true, 0);
 
-/**
- * Layout children.
- */
-public static void layout(ParentView aPar, View aCtr, View aTp, View aRt, View aBtm, View aLft)
-{
-    // Do vertical layout (top, horiz-proxy, bottom)
-    View vkids[] = getColKids(aCtr, aTp, aRt, aBtm, aLft);
-    ColView.layout(aPar, vkids, null, true, 0);
-    
-    // Do horizontal layout (left, center-proxy, bottom)
-    double right = aPar.getWidth() - _rproxy.getX() - _rproxy.getWidth();
-    double bottom = aPar.getHeight() - _rproxy.getY() - _rproxy.getHeight();
-    Insets hins = new Insets(_rproxy.getY(), right, bottom, _rproxy.getX());
-    RowView.layout(aPar, _rproxy._kids, hins, true, 0);
-    
-    // Do center layout
-    if(aCtr==null) return;
-    aCtr.setBounds(_cproxy.getX(), _cproxy.getY(), _cproxy.getWidth(), _cproxy.getHeight());
-}
-    
+        // Do center layout
+        if(aCtr==null) return;
+        CenterProxy cproxy = rproxy._cproxy;
+        aCtr.setBounds(cproxy.getX(), cproxy.getY(), cproxy.getWidth(), cproxy.getHeight());
+    }
+
+    /** Returns the RowProxy. */
+    private static RowProxy getRowProxy(View aPar)
+    {
+        RowProxy rproxy = (RowProxy)aPar.getProp("RowProxy");
+        if(rproxy==null) aPar.setProp("RowProxy", rproxy = new RowProxy());
+        return rproxy;
+    }
+
+    /** Returns array of column kids (top, row-proxy, bottom). */
+    private static View[] getColKids(RowProxy rproxy, View aCtr, View aTp, View aRt, View aBtm, View aLft)
+    {
+        rproxy.relayoutParent();
+        rproxy._kids = asArray(aLft, aCtr!=null? rproxy._cproxy : null, aRt);
+        rproxy._cproxy.relayoutParent();
+        rproxy._cproxy._kid = aCtr;
+        return asArray(aTp, rproxy, aBtm);
+    }
+
+    /** Returns array of non-null views from given view args. */
+    private static View[] asArray(View ... theViews)
+    {
+        int i = 0, len = 0; for(View n : theViews) if(n!=null) len++;
+        View views[] = new View[len]; for(View n : theViews) if(n!=null) views[i++] = n;
+        return views;
+    }
+
+    /** RowProxy to model left, center, right of BorderView. */
+    private static class RowProxy extends ParentView {
+        View _kids[];
+        CenterProxy _cproxy = new CenterProxy();
+        public RowProxy()
+        {
+            setGrowWidth(true); setGrowHeight(true);
+        }
+        protected double getPrefWidthImpl(double aH)
+        {
+            return RowView.getPrefWidth(this, _kids, 0, aH);
+        }
+        protected double getPrefHeightImpl(double aW)
+        {
+            return RowView.getPrefHeight(this, _kids, aW);
+        }
+    }
+
+    /** CenterProxy to model center as always grow width/height. */
+    private static class CenterProxy extends ParentView {
+        public CenterProxy() { setGrowWidth(true); setGrowHeight(true); } View _kid;
+        protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _kid, aH); }
+        protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(this, _kid, aW); }
+    }
 }

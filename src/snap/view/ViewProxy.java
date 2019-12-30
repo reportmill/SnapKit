@@ -208,16 +208,18 @@ public class ViewProxy {
     /**
      * Returns preferred width of given parent using RowView layout.
      */
-    public static double getRowViewPrefWidth(View aPar, double aSpacing, double aH)
+    public static double getRowViewPrefWidth(View aPar, View theChildren[], double aSpacing, double aH)
     {
         // Get parent as proxy
         ViewProxy par = new ViewProxy(aPar);
         par.setSize(-1, aH);
         par.setSpacing(aSpacing);
+        if(theChildren!=null)
+            par._children = getProxies(theChildren);
 
         // Get child bounds rects and add bounds MaxX to insets right
         Rect bnds[] = getRowViewRects(par, false, false);
-        Insets ins = aPar.getInsetsAll();
+        Insets ins = par.getInsetsAll();
         double maxX = bnds.length>0 ? bnds[bnds.length-1].getMaxX() : 0;
         return maxX + ins.getRight();
     }
@@ -225,29 +227,34 @@ public class ViewProxy {
     /**
      * Returns preferred height of given parent using RowView layout.
      */
-    public static double getRowViewPrefHeight(View aPar, double aW)
+    public static double getRowViewPrefHeight(View aPar, View theChildren[], double aW)
     {
         // Get parent as proxy
         ViewProxy par = new ViewProxy(aPar);
         par.setSize(aW, -1);
+        if(theChildren!=null)
+            par._children = getProxies(theChildren);
 
         // Get child bounds rects and add bounds MaxX to insets right
         Rect bnds[] = getRowViewRects(par, false, false);
-        Insets ins = aPar.getInsetsAll();
-        double maxY = ins.getTop(); for(Rect bnd : bnds) maxY = Math.max(maxY, bnd.getMaxY());
-        return maxY + ins.getBottom();
+        Insets ins = par.getInsetsAll();
+        double maxY = ins.getTop();
+        for(Rect bnd : bnds) maxY = Math.max(maxY, bnd.getMaxY());
+        double ph = maxY + ins.getBottom();
+        ph = Math.round(ph);
+        return ph;
     }
 
     /**
      * Performs layout for given parent View using RowView layout.
      */
-    public static void layoutRowView(ParentView aPar, View theChilds[], Insets theIns, boolean isFillWidth,
+    public static void layoutRowView(ParentView aPar, View theChildren[], Insets theIns, boolean isFillWidth,
          boolean isFillHeight, double aSpacing)
     {
         // Get Parent ViewProxy with Children proxies
         ViewProxy par = new ViewProxy(aPar);
         par.setSpacing(aSpacing);
-        View children[] = theChilds!=null? theChilds : aPar.getChildrenManaged(); if(children.length==0) return;
+        View children[] = theChildren!=null? theChildren : aPar.getChildrenManaged(); if(children.length==0) return;
         par._children = getProxies(children);
 
         // Get layout rects and set back in children
@@ -265,6 +272,7 @@ public class ViewProxy {
         // Get children (just return if empty) and create rects
         ViewProxy children[] = aPar.getChildren(); if(children.length==0) return new Rect[0];
         Rect cbnds[] = new Rect[children.length];
+        for(int i=0;i<cbnds.length;i++) cbnds[i] = new Rect();
 
         // Load layout rects and return
         getRowViewRectsX(aPar, isFillWidth, cbnds);
@@ -362,7 +370,8 @@ public class ViewProxy {
             }
 
             // Set child rect Y and Height
-            cbnds[i].y = cy; cbnds[i].height = ch;
+            cbnds[i].y = cy;
+            cbnds[i].height = ch;
         }
     }
 
