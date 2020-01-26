@@ -96,11 +96,17 @@ public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     setFillHeight(anElement.getAttributeBoolValue("FillHeight", false));
 }
 
+// Whether testing new layout code
+private static boolean TEST_NEW_LAYOUT_CODE = false;
+
 /**
  * Returns preferred width of given parent with given children.
  */
 public static double getPrefWidth(ParentView aPar, View theChildren[], double aSpacing, double aH)
 {
+    if(TEST_NEW_LAYOUT_CODE)
+        return ViewProxy.getRowViewPrefWidth(aPar, theChildren, aSpacing, aH);
+
     // Get insets and children (just return if empty)
     Insets ins = aPar.getInsetsAll();
     View children[] = theChildren!=null? theChildren : aPar.getChildrenManaged();
@@ -128,6 +134,9 @@ public static double getPrefWidth(ParentView aPar, View theChildren[], double aS
  */
 public static double getPrefHeight(ParentView aPar, View theChildren[], double aW)
 {
+    if(TEST_NEW_LAYOUT_CODE)
+        return ViewProxy.getRowViewPrefHeight(aPar, theChildren, aW);
+
     // Get insets and children (just return if empty)
     Insets ins = aPar.getInsetsAll();
     View children[] = theChildren!=null? theChildren : aPar.getChildrenManaged();
@@ -160,6 +169,11 @@ public static void layout(ParentView aPar, View theChilds[], Insets theIns, bool
 public static void layout(ParentView aPar, View theChilds[], Insets theIns, boolean isFillWidth, boolean isFillHeight,
     double aSpacing)
 {
+    if(TEST_NEW_LAYOUT_CODE) {
+        ViewProxy.layoutRowView(aPar, theChilds, theIns, isFillWidth, isFillHeight, aSpacing);
+        return;
+    }
+
     // Get children (just return if empty)
     View children[] = theChilds!=null? theChilds : aPar.getChildrenManaged(); if(children.length==0) return;
     
