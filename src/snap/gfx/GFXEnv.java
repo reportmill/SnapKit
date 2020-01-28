@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import java.net.URL;
 import java.util.function.Consumer;
 import snap.util.*;
 import snap.web.*;
@@ -54,6 +55,11 @@ public static void setDefaultEnv()
     try { ClassUtils.getMethodOrThrow(cls, "set").invoke(null); }
     catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set AWTEnv " + e); }
 }
+
+/**
+ * Returns resource for class and path.
+ */
+public abstract URL getResource(Class aClass, String aPath);
 
 /**
  * Returns a list of all system fontnames (excludes any that don't start with capital A-Z).

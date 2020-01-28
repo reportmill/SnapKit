@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.parse;
-import java.lang.reflect.*;
 
 /**
  * A class called when child rules are parsed.
@@ -60,7 +59,11 @@ protected T createPart()
 /**
  * Returns the part class.
  */
-protected Class<T> getPartClass()  { return getTypeParameterClass(getClass()); }
+protected Class<T> getPartClass()
+{
+    throw new RuntimeException(getClass().getName() + ".getPartClass: Not implemented");
+    //return getTypeParameterClass(getClass());
+}
 
 /**
  * Returns the token where the current part started.
@@ -119,27 +122,27 @@ private ParseHandler getBackupHandler()
  */
 public void reset()  { _part = null; _startToken = null; _inUse = _bypass = _fail = false; }
 
-/** Returns a type parameter class. */
-private static Class getTypeParameterClass(Class aClass)
-{
-    Type type = aClass.getGenericSuperclass();
-    if(type instanceof ParameterizedType) { ParameterizedType ptype = (ParameterizedType)type;
-        Type type2 = ptype.getActualTypeArguments()[0];
-        if(type2 instanceof Class)
-            return (Class)type2;
-        if(type2 instanceof ParameterizedType) { ParameterizedType ptype2 = (ParameterizedType)type2;
-            if(ptype2.getRawType() instanceof Class)
-                return (Class)ptype2.getRawType(); }
-    }
-    
-    // Try superclass
-    Class scls = aClass.getSuperclass();
-    if(scls!=null)
-        return getTypeParameterClass(scls);
-
-    // Complain and return null
-    System.err.println("ParseHandler.getTypeParameterClass: Type Parameter Not Found for " + aClass.getName());
-    return null;
-}
+///** Returns a type parameter class. */
+//private static Class getTypeParameterClass(Class aClass)
+//{
+//    Type type = aClass.getGenericSuperclass();
+//    if(type instanceof ParameterizedType) { ParameterizedType ptype = (ParameterizedType)type;
+//        Type type2 = ptype.getActualTypeArguments()[0];
+//        if(type2 instanceof Class)
+//            return (Class)type2;
+//        if(type2 instanceof ParameterizedType) { ParameterizedType ptype2 = (ParameterizedType)type2;
+//            if(ptype2.getRawType() instanceof Class)
+//                return (Class)ptype2.getRawType(); }
+//    }
+//
+//    // Try superclass
+//    Class scls = aClass.getSuperclass();
+//    if(scls!=null)
+//        return getTypeParameterClass(scls);
+//
+//    // Complain and return null
+//    System.err.println("ParseHandler.getTypeParameterClass: Type Parameter Not Found for " + aClass.getName());
+//    return null;
+//}
 
 }

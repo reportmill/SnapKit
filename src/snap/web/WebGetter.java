@@ -2,6 +2,8 @@ package snap.web;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
+import snap.gfx.GFXEnv;
 import snap.util.FilePathUtils;
 
 /**
@@ -12,9 +14,6 @@ public class WebGetter {
     // A map of existing WebSites
     static Map <WebURL, WebSite>  _sites = Collections.synchronizedMap(new HashMap());
     
-    // Whether TeaVM
-    public static Hpr _hpr;
-
 /**
  * Returns a java.net.URL for given source.
  */
@@ -29,11 +28,14 @@ public static URL getJavaURL(Object anObj) // throws MalformedURLException, IOEx
             
         // If string is Windows/Unix file path, make it a file URL
         if(str.indexOf('\\')>=0) { String strlc = str.toLowerCase();
-            str = str.replace('\\', '/'); if(!str.startsWith("/") || !strlc.startsWith("file:")) str = '/' + str; }
+            str = str.replace('\\', '/');
+            if(!str.startsWith("/") || !strlc.startsWith("file:")) str = '/' + str;
+        }
         if(str.startsWith("/")) str = "file://" + str;
         
         // Get protocol for URL
-        int ind = str.indexOf(':'); if(ind<0) throw new RuntimeException("Missing protocol in URL: " + str);
+        int ind = str.indexOf(':');
+        if(ind<0) throw new RuntimeException("Missing protocol in URL: " + str);
         String scheme = str.substring(0, ind).toLowerCase();
         
         // Try to return URL
@@ -74,13 +76,10 @@ public static URL getJavaURL(Class aClass, String aName)
         if(aName.startsWith("/")) path = aName;
         else { int sep = path.lastIndexOf('/'); path = path.substring(0, sep+1) + aName; }
     }
-    
-    // Handle TeaVM
-    if(_hpr!=null)
-        return _hpr.getURL(aClass, path);
-        
+
     // Get URL for full path
-    return aClass.getResource(path);
+    GFXEnv env = GFXEnv.getEnv();
+    return env.getResource(aClass, path);
 }
 
 /**
@@ -143,7 +142,8 @@ protected static WebSite createSite(WebURL aSiteURL)
  * A URLStreamHandlerFactory.
  */
 private static class BogusURLStreamHandler extends URLStreamHandler {
-    protected URLConnection openConnection(URL u) throws IOException  { return null; }}
+    protected URLConnection openConnection(URL u) { return null; }
+}
     
 /**
  * A class to let SnapTea/TeaVM evaluate URLs.

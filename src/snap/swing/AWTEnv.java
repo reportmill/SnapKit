@@ -29,6 +29,14 @@ public AWTEnv()
 }
 
 /**
+ * Returns resource for class and path.
+ */
+public URL getResource(Class aClass, String aPath)
+{
+    return aClass.getResource(aPath);
+}
+
+/**
  * Returns a list of all system fontnames (excludes any that don't start with capital A-Z).
  */
 public String[] getFontNames()  { return AWTFontUtils.getFontNames(); }
@@ -97,7 +105,7 @@ public void openFile(Object aSource)
     File file = FileUtils.getFile(aSource);
     
     // Open with Desktop API
-    try { Desktop.getDesktop().open(file); return; }
+    try { Desktop.getDesktop().open(file); }
     catch(Throwable e) { System.err.println(e.getMessage()); }
 }
 
@@ -111,7 +119,7 @@ public void openURL(Object aSource)
     String urls = url!=null? url.getString() : null;
     
     // Open with Desktop API    
-    try { Desktop.getDesktop().browse(new URI(urls)); return; } // RM13 has a pre-JVM 6 implementation
+    try { Desktop.getDesktop().browse(new URI(urls)); }
     catch(Throwable e) { System.err.println(e.getMessage()); }
 }
 
