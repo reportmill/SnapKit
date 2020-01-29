@@ -23,9 +23,11 @@ public static URL getJavaURL(Object anObj) // throws MalformedURLException, IOEx
     if(anObj instanceof String) { String str = (String)anObj;
     
         // If it's our silly "Jar:/com/rm" format, return class resource URL
-        if(str.startsWith("Jar:/com/reportmill")) 
+        if(str.startsWith("Jar:/com/reportmill"))
             return getJavaURL(WebURL.class, str.substring(4));
-            
+        if(str.startsWith("Jar:/reportmill"))
+            return getJavaURL(WebURL.class, str.substring(4));
+
         // If string is Windows/Unix file path, make it a file URL
         if(str.indexOf('\\')>=0) { String strlc = str.toLowerCase();
             str = str.replace('\\', '/');
