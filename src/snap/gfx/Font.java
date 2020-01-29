@@ -306,11 +306,21 @@ public Object getNative()  { return _native!=null? _native : (_native=_fontFile.
 /**
  * Returns the font for the given name and size.
  */
-public static Font get(String aName, double aSize)
+public static Font get(String aName, double aSize)  { return getFont(aName, aSize); }
+
+/**
+ * Returns the font for the given name and size.
+ */
+public static Font getFont(String aName, double aSize)
 {
     FontFile ffile = FontFile.getFontFile(aName);
     return ffile!=null? new Font(ffile, aSize) : null;
 }
+
+/**
+ * Returns the user's default font.
+ */
+public static Font getDefaultFont()  { return Arial12; }
 
 /**
  * Returns a list of all system fontnames (excludes any that don't start with capital A-Z).
