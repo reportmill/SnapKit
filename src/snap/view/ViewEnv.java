@@ -170,8 +170,13 @@ private synchronized void runAndNotify(Runnable aRun)
  */
 public Object getUISource(Class aClass)
 {
+    // Look for snap file with same name as class
     String name = aClass.getSimpleName() + ".snp";
-    WebURL url = WebURL.getURL(aClass, name); if(url!=null) return url;
+    WebURL url = WebURL.getURL(aClass, name);
+    if(url!=null)
+        return url;
+
+    // Try again for superclass
     return aClass!=Object.class? getUISource(aClass.getSuperclass()) : null;
 }
 

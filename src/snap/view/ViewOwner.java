@@ -37,7 +37,7 @@ public class ViewOwner implements EventListener {
     Map <String, Map>         _conversionMaps = new HashMap();
     
     // Map of RunOne runnables
-    Map <String,Runnable>     _runOnceMap = new HashMap();
+    private final Map <String,Runnable> _runOnceMap = new HashMap();
     
     // The view environment
     ViewEnv                   _env = ViewEnv.getEnv();
@@ -108,32 +108,53 @@ public synchronized View getUI()
 /**
  * Returns top level view as given class.
  */
-public <T extends View> T getUI(Class <T> aClass)  { return (T)getUI(); }
+public <T extends View> T getUI(Class <T> aClass)
+{
+    return (T)getUI();
+}
 
 /**
  * Creates the top level view for this class.
  */
-protected View createUI()  { return createUI(getUISource()); }
+protected View createUI()
+{
+    Object src = getUISource();
+    return createUI(src);
+}
 
 /**
  * Creates the top level view for given class.
  */
-protected View createUI(Class aClass)  { return createUI(_env.getUISource(aClass)); }
+protected View createUI(Class aClass)
+{
+    Object src = _env.getUISource(aClass);
+    return createUI(src);
+}
 
 /**
  * Creates the top level view for given class.
  */
 protected View createUI(Object aSource)
 {
-    if(aSource==null) return null;
-    ViewArchiver arch = new ViewArchiver(); arch.setOwner(this);
+    // Complain if bogus source
+    if(aSource==null) {
+        System.err.println("ViewOwner.createUI: Can't load from Null Source!");
+        return null;
+    }
+
+    // Create archiver and return view
+    ViewArchiver arch = new ViewArchiver();
+    arch.setOwner(this);
     return arch.getView(aSource);
 }
 
 /**
  * Returns the UI source.
  */
-protected Object getUISource()  { return _env.getUISource(getClass()); }
+protected Object getUISource()
+{
+    return _env.getUISource(getClass());
+}
 
 /**
  * Initializes the UI panel.
@@ -168,7 +189,10 @@ protected void showingChanged()
 /**
  * Returns the native object for the UI (JComponent).
  */
-public Object getNative()  { return getWindow().getContentNative(); }
+public Object getNative()
+{
+    return getWindow().getContentNative();
+}
 
 /**
  * Returns the specific child view for given object (name, event or view).
@@ -176,16 +200,19 @@ public Object getNative()  { return getWindow().getContentNative(); }
 public View getView(Object anObj)
 {
     // If object is View, just return
-    if(anObj instanceof View) return (View)anObj;
+    if(anObj instanceof View)
+        return (View)anObj;
     
     // If object is String, try to find in UI hierarchy as name
     if(anObj instanceof String) { String name = (String)anObj;
     
         // Look for view in UI hierarchy
         View view = getUI();
-        if(name.equals(view.getName())) return view;
+        if(name.equals(view.getName()))
+            return view;
         View cview = view instanceof ParentView? ((ParentView)view).getChild(name) : null;
-        if(cview!=null) return cview;
+        if(cview!=null)
+            return cview;
         
         // If view not found and RootView.MenuBar is set, look in MenuBar
         //return isRootViewSet() && getRootView().getMenuBar()!=null? getRootView().getMenuBar().getChild(name):null;
@@ -206,7 +233,11 @@ public <T> T getView(Object anObj, Class <T> aClass)
 /**
  * Returns the object value for a given name or UI view.
  */
-public Object getViewValue(Object anObj)  { return getView(anObj).getValue("Value"); }
+public Object getViewValue(Object anObj)
+{
+    View view = getView(anObj);
+    return view.getValue("Value");
+}
 
 /**
  * Sets the object value for a given name or UI view.
@@ -214,7 +245,8 @@ public Object getViewValue(Object anObj)  { return getView(anObj).getValue("Valu
 public void setViewValue(Object anObj, Object aValue)
 {
     boolean old = setSendEventDisabled(true);
-    getView(anObj).setValue("Value", aValue);
+    View view = getView(anObj);
+    view.setValue("Value", aValue);
     setSendEventDisabled(old);
 }
 
@@ -658,7 +690,9 @@ public void addKeyActionHandler(String aName, String aKey)
 {
     KeyCombo kcombo = KeyCombo.get(aKey); if(kcombo==null) return;
     if(_keyHandlers.size()==0) {
-        getUI().addEventHandler(e -> checkKeyActions(e, false), KeyPress); _keyHandlers = new HashMap(); }
+        getUI().addEventHandler(e -> checkKeyActions(e, false), KeyPress);
+        _keyHandlers = new HashMap();
+    }
     _keyHandlers.put(kcombo, aName);
 }
 
@@ -717,7 +751,10 @@ private class RunLaterRunnable implements Runnable {
     public void run()
     {
         Runnable runnable;
-        synchronized (_runOnceMap) { _runOnceMap.remove(_name); runnable = _runnable; }
+        synchronized (_runOnceMap) {
+            _runOnceMap.remove(_name);
+            runnable = _runnable;
+        }
         if(runnable!=null) runnable.run();
     }
 }
