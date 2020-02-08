@@ -36,18 +36,18 @@ public J2DPainter(Graphics aGr)
     _gfx.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
     
     // Initialize clip to Graphics clip
-    clip(AWT.get(aGr.getClip()));
+    clip(AWT.awtToSnapShape(aGr.getClip()));
 }
 
 /**
  * Returns the current paint.
  */
-public Paint getPaint()  { return AWT.get(_gfx.getPaint()); }
+public Paint getPaint()  { return AWT.awtToSnapPaint(_gfx.getPaint()); }
 
 /**
  * Sets the paint in painter.
  */
-public void setPaint(Paint aPaint)  { _gfx.setPaint(AWT.get(aPaint)); }
+public void setPaint(Paint aPaint)  { _gfx.setPaint(AWT.snapToAwtPaint(aPaint)); }
 
 /**
  * Returns the current stroke.
@@ -117,7 +117,7 @@ public Font getFont()  { return _font; } Font _font = Font.Arial12;
 /**
  * Sets the font in painter.
  */
-public void setFont(Font aFont)  {_gfx.setFont(AWT.get(aFont)); _font = aFont; }
+public void setFont(Font aFont)  {_gfx.setFont(AWT.snapToAwtFont(aFont)); _font = aFont; }
 
 /**
  * Clears a rect.
@@ -127,19 +127,19 @@ public void clearRect(double aX, double aY, double aW, double aH)  { }
 /**
  * Draws a shape in painter.
  */
-public void draw(Shape aShape)  { _gfx.draw(AWT.get(aShape)); }
+public void draw(Shape aShape)  { _gfx.draw(AWT.snapToAwtShape(aShape)); }
 
 /**
  * Fills a shape in painter.
  */
-public void fill(Shape aShape)  { _gfx.fill(AWT.get(aShape)); }
+public void fill(Shape aShape)  { _gfx.fill(AWT.snapToAwtShape(aShape)); }
 
 /**
  * Draw image with transform.
  */
 public void drawImage(Image anImg, Transform xform)
 {
-    _gfx.drawImage(AWT.get(anImg), AWT.get(xform), null);
+    _gfx.drawImage(AWT.snapToAwtImage(anImg), AWT.snapToAwtTrans(xform), null);
 }
 
 /**
@@ -154,7 +154,7 @@ public void drawImage(Image img, double sx, double sy, double sw, double sh, dou
     // Get points for corner as ints and draw image
     int sx1 = rnd(sx), sy1 = rnd(sy), sx2 = sx1 + rnd(sw), sy2 = sy1 + rnd(sh);
     int dx1 = rnd(dx), dy1 = rnd(dy), dx2 = dx1 + rnd(dw), dy2 = dy1 + rnd(dh);
-    _gfx.drawImage(AWT.get(img), dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
+    _gfx.drawImage(AWT.snapToAwtImage(img), dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
 }
 
 /**
@@ -200,27 +200,27 @@ public Rect getStringBounds(String aStr)
 /**
  * Returns the current transform.
  */
-public Transform getTransform()  { return AWT.get(_gfx.getTransform()); }
+public Transform getTransform()  { return AWT.awtToSnapTrans(_gfx.getTransform()); }
 
 /**
  * Sets the current transform.
  */
-public void setTransform(Transform aTrans)  { _gfx.setTransform(AWT.get(aTrans)); }
+public void setTransform(Transform aTrans)  { _gfx.setTransform(AWT.snapToAwtTrans(aTrans)); }
 
 /**
  * Transform painter.
  */
-public void transform(Transform aTrans)  { _gfx.transform(AWT.get(aTrans)); }
+public void transform(Transform aTrans)  { _gfx.transform(AWT.snapToAwtTrans(aTrans)); }
 
 /**
  * Return clip shape.
  */
-public Shape getClip()  { return AWT.get(_gfx.getClip()); }
+public Shape getClip()  { return AWT.awtToSnapShape(_gfx.getClip()); }
 
 /**
  * Clip by shape.
  */
-public void clip(Shape s)  { _gfx.clip(AWT.get(s)); }
+public void clip(Shape s)  { _gfx.clip(AWT.snapToAwtShape(s)); }
 
 /**
  * Returns whether antialiasing.

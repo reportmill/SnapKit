@@ -19,81 +19,106 @@ import snap.util.SnapUtils;
 public class AWT {
 
 /** Returns an awt point for snap point. */
-public static java.awt.geom.Point2D get(Point p)  { return new java.awt.geom.Point2D.Double(p.getX(),p.getY()); }
+public static java.awt.geom.Point2D snapToAwtPoint(Point p)
+{
+    return new java.awt.geom.Point2D.Double(p.getX(), p.getY());
+}
 
 /** Returns an awt Dimension for snap size. */
-public static java.awt.Dimension get(Size s)  { return new java.awt.Dimension((int)s.getWidth(),(int)s.getHeight()); }
+public static java.awt.Dimension snapToAwtSize(Size s)
+{
+    return new java.awt.Dimension((int)s.getWidth(), (int)s.getHeight());
+}
 
 /** Returns awt image for snap image. */
-public static Rectangle2D get(Rect r)  { return new Rectangle2D.Double(r.getX(),r.getY(),r.getWidth(),r.getHeight()); }
+public static Rectangle2D snapToAwtRect(Rect r)
+{
+    return new Rectangle2D.Double(r.getX(),r.getY(),r.getWidth(),r.getHeight());
+}
 
 /** Returns awt image for snap image. */
-public static Rect get(Rectangle2D r)  { return new Rect(r.getX(),r.getY(),r.getWidth(),r.getHeight()); }
+public static Rect awtToSnapRect(Rectangle2D r)
+{
+    return new Rect(r.getX(),r.getY(),r.getWidth(),r.getHeight());
+}
 
 /** Returns awt shape for snap shape. */
-public static java.awt.Shape get(Shape aSC)
+public static java.awt.Shape snapToAwtShape(Shape aSC)
 {
-    if(aSC instanceof Rect) return get((Rect)aSC);
+    if(aSC instanceof Rect) return snapToAwtRect((Rect)aSC);
     if(aSC instanceof SnapShape) return ((SnapShape)aSC)._shp;
     return aSC!=null? new AWTShape(aSC) : null;
 }
 
 /** Returns awt shape for snap shape. */
-public static Shape get(java.awt.Shape aSC)
+public static Shape awtToSnapShape(java.awt.Shape aSC)
 {
-    if(aSC instanceof Rectangle2D) return get((Rectangle2D)aSC);
+    if(aSC instanceof Rectangle2D) return awtToSnapRect((Rectangle2D)aSC);
     if(aSC instanceof AWTShape) return ((AWTShape)aSC)._shp;
     return aSC!=null? new SnapShape(aSC) : null;
 }
 
 /** Returns awt shape for snap shape. */
-public static PathIterator get(PathIter aPI)  { return new AWTPathIter(aPI); }
+public static PathIterator snapToAwtPathIter(PathIter aPI)  { return new AWTPathIter(aPI); }
 
 /** Returns awt shape for snap shape. */
-public static PathIter get(PathIterator aPI)  { return new SnapPathIter(aPI); }
+public static PathIter awtToSnapPathIter(PathIterator aPI)  { return new SnapPathIter(aPI); }
 
 /** Returns awt tranform for snap transform. */
-public static AffineTransform get(Transform aTrans)
-{ double m[] = new double[6]; aTrans.getMatrix(m); return new AffineTransform(m); }
+public static AffineTransform snapToAwtTrans(Transform aTrans)
+{
+    double m[] = new double[6]; aTrans.getMatrix(m); return new AffineTransform(m);
+}
 
 /** Returns awt tranform for snap transform. */
-public static Transform get(AffineTransform aTrans)
-{ double m[] = new double[6]; aTrans.getMatrix(m); return new Transform(m); }
+public static Transform awtToSnapTrans(AffineTransform aTrans)
+{
+    double m[] = new double[6]; aTrans.getMatrix(m); return new Transform(m);
+}
 
 /** Returns awt paint for snap paint. */
-public static java.awt.Paint get(Paint aSP)
+public static java.awt.Paint snapToAwtPaint(Paint aSP)
 {
     if(aSP==null) return null;
-    if(aSP instanceof Color) return get((Color)aSP);
+    if(aSP instanceof Color) return snapToAwtColor((Color)aSP);
     if(aSP instanceof GradientPaint) return get((GradientPaint)aSP);
     if(aSP instanceof ImagePaint) return get((ImagePaint)aSP);
     throw SnapUtils.notImpl(new AWT(), "Can't convert paint " + aSP);
 }
 
 /** Returns snap Paint for awt Paint. */
-public static Paint get(java.awt.Paint aSP)
+public static Paint awtToSnapPaint(java.awt.Paint aSP)
 {
     if(aSP==null) return null;
-    if(aSP instanceof java.awt.Color) return get((java.awt.Color)aSP);
+    if(aSP instanceof java.awt.Color) return awtToSnapColor((java.awt.Color)aSP);
     //if(aSP instanceof GradientPaintX) return get((GradientPaintX)aSP);
     //if(aSP instanceof java.awt.TexturePaint) return get((java.awt.TexturePaint)aSP);
     throw SnapUtils.notImpl(new AWT(), "Can't convert paint " + aSP);
 }
 
 /** Returns awt paint for snap paint. */
-public static java.awt.Color get(Color aSC)  { return aSC!=null? new java.awt.Color(aSC.getRGBA(), true) : null; }
+public static java.awt.Color snapToAwtColor(Color aSC)
+{
+    return aSC!=null? new java.awt.Color(aSC.getRGBA(), true) : null;
+}
 
 /** Returns awt paint for snap paint. */
-public static Color get(java.awt.Color aC)  { return new Color(aC.getRGB()); }
+public static Color awtToSnapColor(java.awt.Color aC)
+{
+    return new Color(aC.getRGB());
+}
 
 /** Returns awt paint for snap paint. */
-public static GradientPaintX get(GradientPaint aGP)  { return new GradientPaintX(aGP); }
+public static GradientPaintX get(GradientPaint aGP)
+{
+    return new GradientPaintX(aGP);
+}
 
 /** Returns awt TexturePaint for snap TexturePaint. */
 public static java.awt.TexturePaint get(ImagePaint aTP)
 {
     BufferedImage bi = AWTImageUtils.getBufferedImage((java.awt.Image)aTP.getImage().getNative());
-    return new java.awt.TexturePaint(bi, get(aTP.getBounds()));
+    return new java.awt.TexturePaint(bi, snapToAwtRect(aTP.getBounds()));
 }
 
 /** Returns awt stroke for snap stroke. */
@@ -120,17 +145,17 @@ static int get(Stroke.Join aJoin)
 }
 
 /** Returns awt font for snap font. */
-public static java.awt.Font get(Font aFont)
+public static java.awt.Font snapToAwtFont(Font aFont)
 {
     Object ntv = aFont.getNative(); if(ntv instanceof java.awt.Font) return (java.awt.Font)ntv;
     return AWTFontUtils.getFont(aFont.getName(), aFont.getSize());
 }
 
 /** Returns awt image for snap image. */
-public static java.awt.Image get(Image anImage)  { return (java.awt.Image)anImage.getNative(); }
+public static java.awt.Image snapToAwtImage(Image anImage)  { return (java.awt.Image)anImage.getNative(); }
 
 /** Returns awt image for snap image. */
-public static Image get(java.awt.Image anImage)  { return Image.get(anImage); }
+public static Image awtToSnapImage(java.awt.Image anImage)  { return Image.get(anImage); }
 
 /** Returns awt Cursor for snap cursor. */
 public static java.awt.Cursor get(snap.view.Cursor aCursor)
@@ -186,25 +211,25 @@ private static class AWTShape implements java.awt.Shape {
     public boolean contains(Point2D aPnt)  { return _shp.contains(aPnt.getX(), aPnt.getY()); }
 
     /** Returns whether shape contains rect. */
-    public boolean contains(Rectangle2D r)  { return _shp.contains(get(r)); }
+    public boolean contains(Rectangle2D r)  { return _shp.contains(awtToSnapRect(r)); }
 
     /** Returns whether shape intersects x/y/w/h. */
     public boolean intersects(double x, double y, double w, double h)  { return _shp.intersects(new Rect(x,y,w,h)); }
 
     /** Returns whether shape intersects rect. */
-    public boolean intersects(Rectangle2D r)  { return _shp.intersects(get(r)); }
+    public boolean intersects(Rectangle2D r)  { return _shp.intersects(awtToSnapRect(r)); }
 
     /** Returns whether shape contains rect. */
-    public Rectangle getBounds()  { return get(_shp.getBounds()).getBounds(); }
+    public Rectangle getBounds()  { return snapToAwtRect(_shp.getBounds()).getBounds(); }
 
     /** Returns whether shape contains rect. */
-    public Rectangle2D getBounds2D()  { return get(_shp.getBounds()); }
+    public Rectangle2D getBounds2D()  { return snapToAwtRect(_shp.getBounds()); }
 
     /** Returns whether shape contains rect. */
     public PathIterator getPathIterator(AffineTransform aT)
     {
-        Transform t = aT!=null? get(aT) : null;
-        return get(_shp.getPathIter(t));
+        Transform t = aT!=null? awtToSnapTrans(aT) : null;
+        return snapToAwtPathIter(_shp.getPathIter(t));
     }
 
     /** Returns whether shape contains rect. */
@@ -228,13 +253,13 @@ private static class SnapShape extends Shape {
     public boolean contains(Point aPnt)  { return _shp.contains(aPnt.getX(), aPnt.getY()); }
 
     /** Returns whether shape contains rect. */
-    protected Rect getBoundsImpl()  { return get(_shp.getBounds()); }
+    protected Rect getBoundsImpl()  { return awtToSnapRect(_shp.getBounds()); }
 
     /** Returns whether shape contains rect. */
     public PathIter getPathIter(Transform aT)
     {
-        AffineTransform t = aT!=null? get(aT) : null;
-        return get(_shp.getPathIterator(t));
+        AffineTransform t = aT!=null? snapToAwtTrans(aT) : null;
+        return awtToSnapPathIter(_shp.getPathIterator(t));
     }
 }
 

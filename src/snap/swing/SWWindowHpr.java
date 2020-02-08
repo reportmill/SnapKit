@@ -258,7 +258,7 @@ public void setDocURL(WebURL aURL)
 /** 
  * Sets the image property of given object to given string.
  */
-public void setImage(Image anImage)  { _winNtv.setIconImage(AWT.get(anImage)); }
+public void setImage(Image anImage)  { _winNtv.setIconImage(AWT.snapToAwtImage(anImage)); }
 
 /**
  * Called when window is shown/hidden.
