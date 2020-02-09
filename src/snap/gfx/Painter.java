@@ -242,17 +242,34 @@ public Rect getStringBounds(String aStr)  { return getFont().getStringBounds(aSt
 /**
  * Translate by x,y.
  */
-public void translate(double tx, double ty)  { transform(new Transform(tx, ty)); }
+public void translate(double tx, double ty)
+{
+    transform(new Transform(tx, ty));
+}
 
 /**
  * Rotate by angle in degrees.
  */
-public void rotate(double theDegrees)  { transform(Transform.getRotate(theDegrees)); }
+public void rotate(double theDegrees)
+{
+    transform(Transform.getRotate(theDegrees));
+}
 
 /**
+ * Rotate by angle in degrees.
+ */
+public void rotateAround(double theDegrees, double aX, double aY)
+{
+    transform(Transform.getRotateAround(theDegrees, aX, aY));
+}
+
+    /**
  * Scale by sx, sy.
  */
-public void scale(double sx, double sy)  { transform(Transform.getScale(sx, sy)); }
+public void scale(double sx, double sy)
+{
+    transform(Transform.getScale(sx, sy));
+}
 
 /**
  * Return transform.

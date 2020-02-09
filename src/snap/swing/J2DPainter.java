@@ -57,7 +57,7 @@ public Stroke getStroke()  { return _stroke; } Stroke _stroke = new Stroke(1);
 /**
  * Sets the stroke in painter.
  */
-public void setStroke(Stroke aStroke)  { _gfx.setStroke(AWT.get(aStroke)); _stroke = aStroke; }
+public void setStroke(Stroke aStroke)  { _gfx.setStroke(AWT.snapToAwtStroke(aStroke)); _stroke = aStroke; }
 
 /**
  * Returns the opacity.

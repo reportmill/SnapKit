@@ -18,180 +18,243 @@ import snap.util.SnapUtils;
  */
 public class AWT {
 
-/** Returns an awt point for snap point. */
-public static java.awt.geom.Point2D snapToAwtPoint(Point p)
-{
-    return new java.awt.geom.Point2D.Double(p.getX(), p.getY());
-}
+    // The Hide Cursor
+    private static java.awt.Cursor _hcursor;
 
-/** Returns an awt Dimension for snap size. */
-public static java.awt.Dimension snapToAwtSize(Size s)
-{
-    return new java.awt.Dimension((int)s.getWidth(), (int)s.getHeight());
-}
+    /** Returns an awt point for snap point. */
+    public static java.awt.geom.Point2D snapToAwtPoint(Point p)
+    {
+        return new java.awt.geom.Point2D.Double(p.getX(), p.getY());
+    }
 
-/** Returns awt image for snap image. */
-public static Rectangle2D snapToAwtRect(Rect r)
-{
-    return new Rectangle2D.Double(r.getX(),r.getY(),r.getWidth(),r.getHeight());
-}
+    /** Returns an awt Dimension for snap size. */
+    public static java.awt.Dimension snapToAwtSize(Size s)
+    {
+        return new java.awt.Dimension((int)s.getWidth(), (int)s.getHeight());
+    }
 
-/** Returns awt image for snap image. */
-public static Rect awtToSnapRect(Rectangle2D r)
-{
-    return new Rect(r.getX(),r.getY(),r.getWidth(),r.getHeight());
-}
+    /** Returns awt image for snap image. */
+    public static Rectangle2D snapToAwtRect(Rect r)
+    {
+        return new Rectangle2D.Double(r.getX(),r.getY(),r.getWidth(),r.getHeight());
+    }
 
-/** Returns awt shape for snap shape. */
-public static java.awt.Shape snapToAwtShape(Shape aSC)
-{
-    if(aSC instanceof Rect) return snapToAwtRect((Rect)aSC);
-    if(aSC instanceof SnapShape) return ((SnapShape)aSC)._shp;
-    return aSC!=null? new AWTShape(aSC) : null;
-}
+    /** Returns awt image for snap image. */
+    public static Rect awtToSnapRect(Rectangle2D r)
+    {
+        return new Rect(r.getX(),r.getY(),r.getWidth(),r.getHeight());
+    }
 
-/** Returns awt shape for snap shape. */
-public static Shape awtToSnapShape(java.awt.Shape aSC)
-{
-    if(aSC instanceof Rectangle2D) return awtToSnapRect((Rectangle2D)aSC);
-    if(aSC instanceof AWTShape) return ((AWTShape)aSC)._shp;
-    return aSC!=null? new SnapShape(aSC) : null;
-}
+    /** Returns awt shape for snap shape. */
+    public static java.awt.Shape snapToAwtShape(Shape aSC)
+    {
+        if(aSC instanceof Rect) return snapToAwtRect((Rect)aSC);
+        if(aSC instanceof SnapShape) return ((SnapShape)aSC)._shp;
+        return aSC!=null? new AWTShape(aSC) : null;
+    }
 
-/** Returns awt shape for snap shape. */
-public static PathIterator snapToAwtPathIter(PathIter aPI)  { return new AWTPathIter(aPI); }
+    /** Returns awt shape for snap shape. */
+    public static Shape awtToSnapShape(java.awt.Shape aSC)
+    {
+        if(aSC instanceof Rectangle2D) return awtToSnapRect((Rectangle2D)aSC);
+        if(aSC instanceof AWTShape) return ((AWTShape)aSC)._shp;
+        return aSC!=null? new SnapShape(aSC) : null;
+    }
 
-/** Returns awt shape for snap shape. */
-public static PathIter awtToSnapPathIter(PathIterator aPI)  { return new SnapPathIter(aPI); }
+    /** Returns awt shape for snap shape. */
+    public static PathIterator snapToAwtPathIter(PathIter aPI)  { return new AWTPathIter(aPI); }
 
-/** Returns awt tranform for snap transform. */
-public static AffineTransform snapToAwtTrans(Transform aTrans)
-{
-    double m[] = new double[6]; aTrans.getMatrix(m); return new AffineTransform(m);
-}
+    /** Returns awt shape for snap shape. */
+    public static PathIter awtToSnapPathIter(PathIterator aPI)  { return new SnapPathIter(aPI); }
 
-/** Returns awt tranform for snap transform. */
-public static Transform awtToSnapTrans(AffineTransform aTrans)
-{
-    double m[] = new double[6]; aTrans.getMatrix(m); return new Transform(m);
-}
+    /** Returns awt tranform for snap transform. */
+    public static AffineTransform snapToAwtTrans(Transform aTrans)
+    {
+        double m[] = new double[6]; aTrans.getMatrix(m); return new AffineTransform(m);
+    }
 
-/** Returns awt paint for snap paint. */
-public static java.awt.Paint snapToAwtPaint(Paint aSP)
-{
-    if(aSP==null) return null;
-    if(aSP instanceof Color) return snapToAwtColor((Color)aSP);
-    if(aSP instanceof GradientPaint) return get((GradientPaint)aSP);
-    if(aSP instanceof ImagePaint) return get((ImagePaint)aSP);
-    throw SnapUtils.notImpl(new AWT(), "Can't convert paint " + aSP);
-}
+    /** Returns awt tranform for snap transform. */
+    public static Transform awtToSnapTrans(AffineTransform aTrans)
+    {
+        double m[] = new double[6]; aTrans.getMatrix(m); return new Transform(m);
+    }
 
-/** Returns snap Paint for awt Paint. */
-public static Paint awtToSnapPaint(java.awt.Paint aSP)
-{
-    if(aSP==null) return null;
-    if(aSP instanceof java.awt.Color) return awtToSnapColor((java.awt.Color)aSP);
-    //if(aSP instanceof GradientPaintX) return get((GradientPaintX)aSP);
-    //if(aSP instanceof java.awt.TexturePaint) return get((java.awt.TexturePaint)aSP);
-    throw SnapUtils.notImpl(new AWT(), "Can't convert paint " + aSP);
-}
+    /** Returns awt paint for snap paint. */
+    public static java.awt.Color snapToAwtColor(Color aSC)
+    {
+        return aSC!=null? new java.awt.Color(aSC.getRGBA(), true) : null;
+    }
 
-/** Returns awt paint for snap paint. */
-public static java.awt.Color snapToAwtColor(Color aSC)
-{
-    return aSC!=null? new java.awt.Color(aSC.getRGBA(), true) : null;
-}
+    /** Returns awt paint for snap paint. */
+    public static Color awtToSnapColor(java.awt.Color aC)
+    {
+        return new Color(aC.getRGB());
+    }
 
-/** Returns awt paint for snap paint. */
-public static Color awtToSnapColor(java.awt.Color aC)
-{
-    return new Color(aC.getRGB());
-}
+    /** Returns awt paint for snap paint. */
+    public static java.awt.Paint snapToAwtPaint(Paint aSP)
+    {
+        if(aSP==null) return null;
+        if(aSP instanceof Color) return snapToAwtColor((Color)aSP);
+        if(aSP instanceof GradientPaint) return snapToAwtGradientPaint((GradientPaint)aSP);
+        if(aSP instanceof ImagePaint) return snapToAwtImagePaint((ImagePaint)aSP);
+        throw SnapUtils.notImpl(new AWT(), "Can't convert paint " + aSP);
+    }
 
-/** Returns awt paint for snap paint. */
-public static GradientPaintX get(GradientPaint aGP)
-{
-    return new GradientPaintX(aGP);
-}
+    /** Returns snap Paint for awt Paint. */
+    public static Paint awtToSnapPaint(java.awt.Paint aSP)
+    {
+        if(aSP==null) return null;
+        if(aSP instanceof java.awt.Color) return awtToSnapColor((java.awt.Color)aSP);
+        //if(aSP instanceof GradientPaintX) return get((GradientPaintX)aSP);
+        //if(aSP instanceof java.awt.TexturePaint) return get((java.awt.TexturePaint)aSP);
+        throw SnapUtils.notImpl(new AWT(), "Can't convert paint " + aSP);
+    }
 
-/** Returns awt TexturePaint for snap TexturePaint. */
-public static java.awt.TexturePaint get(ImagePaint aTP)
-{
-    BufferedImage bi = AWTImageUtils.getBufferedImage((java.awt.Image)aTP.getImage().getNative());
-    return new java.awt.TexturePaint(bi, snapToAwtRect(aTP.getBounds()));
-}
+    /** Returns awt paint for snap paint. */
+    private static GradientPaintX snapToAwtGradientPaint(GradientPaint aGP)
+    {
+        return new GradientPaintX(aGP);
+    }
 
-/** Returns awt stroke for snap stroke. */
-public static java.awt.Stroke get(Stroke aStroke)
-{
-    float width = (float)aStroke.getWidth(), miter = (float)aStroke.getMiterLimit();
-    int cap = get(aStroke.getCap()), join = get(aStroke.getJoin());
-    float dary[] = ArrayUtils.getFloats(aStroke.getDashArray()), offset = (float)aStroke.getDashOffset();
-    return new BasicStroke(width, cap, join, miter, dary, offset);
-}
+    /** Returns awt TexturePaint for snap TexturePaint. */
+    public static java.awt.TexturePaint snapToAwtImagePaint(ImagePaint aTP)
+    {
+        BufferedImage bi = AWTImageUtils.getBufferedImage((java.awt.Image)aTP.getImage().getNative());
+        return new java.awt.TexturePaint(bi, snapToAwtRect(aTP.getBounds()));
+    }
 
-/** Return awt Stroke Cap for snap Stroke.Cap. */
-static int get(Stroke.Cap aCap)
-{
-    return aCap==Stroke.Cap.Butt? BasicStroke.CAP_BUTT : aCap==Stroke.Cap.Round? BasicStroke.CAP_ROUND :
-        BasicStroke.CAP_SQUARE;
-}
+    /** Returns awt stroke for snap stroke. */
+    public static java.awt.Stroke snapToAwtStroke(Stroke aStroke)
+    {
+        float width = (float)aStroke.getWidth();
+        float miter = (float)aStroke.getMiterLimit();
+        int cap = snapToAwtStrokeCap(aStroke.getCap());
+        int join = snapToAwtStrokeJoin(aStroke.getJoin());
+        float dary[] = ArrayUtils.getFloats(aStroke.getDashArray());
+        float offset = (float)aStroke.getDashOffset();
+        return new BasicStroke(width, cap, join, miter, dary, offset);
+    }
 
-/** Return awt Stroke Join for snap Stroke.Join. */
-static int get(Stroke.Join aJoin)
-{
-    return aJoin==Stroke.Join.Miter? BasicStroke.JOIN_MITER : aJoin==Stroke.Join.Round? BasicStroke.JOIN_ROUND :
-        BasicStroke.JOIN_BEVEL;
-}
+    /** Return awt Stroke Cap for snap Stroke.Cap. */
+    private static int snapToAwtStrokeCap(Stroke.Cap aCap)
+    {
+        switch(aCap) {
+            case Butt: return BasicStroke.CAP_BUTT;
+            case Round: return BasicStroke.CAP_ROUND;
+            default: return BasicStroke.CAP_SQUARE;
+        }
+    }
 
-/** Returns awt font for snap font. */
-public static java.awt.Font snapToAwtFont(Font aFont)
-{
-    Object ntv = aFont.getNative(); if(ntv instanceof java.awt.Font) return (java.awt.Font)ntv;
-    return AWTFontUtils.getFont(aFont.getName(), aFont.getSize());
-}
+    /** Return awt Stroke Join for snap Stroke.Join. */
+    private static int snapToAwtStrokeJoin(Stroke.Join aJoin)
+    {
+        switch(aJoin) {
+            case Miter: return BasicStroke.JOIN_MITER;
+            case Round: return BasicStroke.JOIN_ROUND;
+            default: return BasicStroke.JOIN_BEVEL;
+        }
+    }
 
-/** Returns awt image for snap image. */
-public static java.awt.Image snapToAwtImage(Image anImage)  { return (java.awt.Image)anImage.getNative(); }
+    /** Returns awt stroke for snap stroke. */
+    public static Stroke awtToSnapStroke(java.awt.Stroke aStroke)
+    {
+        BasicStroke stroke = aStroke instanceof BasicStroke ? (BasicStroke)aStroke : null;
+        if (stroke==null) { System.err.println("AWT.awtToSnapStroke: Unknown stroke class " + aStroke); return Stroke.Stroke1; }
 
-/** Returns awt image for snap image. */
-public static Image awtToSnapImage(java.awt.Image anImage)  { return Image.get(anImage); }
+        double width = stroke.getLineWidth();
+        double miter = stroke.getMiterLimit();
+        Stroke.Cap cap = awtToSnapStrokeCap(stroke.getEndCap());
+        Stroke.Join join = awtToSnapStrokeJoin(stroke.getLineJoin());
+        float dary[] = stroke.getDashArray();
+        float offset = stroke.getDashPhase();
+        return new Stroke(width, cap, join, miter, dary, offset);
+    }
 
-/** Returns awt Cursor for snap cursor. */
-public static java.awt.Cursor get(snap.view.Cursor aCursor)
-{
-    if(aCursor==null) return null;
-    String name = aCursor.getName(); name = name + "_CURSOR";
-    if(name.equals("NONE_CURSOR")) return getHideCursor();
-    Field field = null; try { field = java.awt.Cursor.class.getField(name); }
-    catch(Exception e) { }
-    if(field!=null) try { return java.awt.Cursor.getPredefinedCursor((int)field.get(null)); }
-    catch(Exception e) { }
-    System.err.println("AWT: get(snap.view.Cursor): Cursor not found for name: " + name);
-    return java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR);
-}
+    /** Return snap Stroke.Cap for awt Stroke Cap. */
+    private static Stroke.Cap awtToSnapStrokeCap(int aCap)
+    {
+        switch(aCap) {
+            case BasicStroke.CAP_BUTT: return Stroke.Cap.Butt;
+            case BasicStroke.CAP_ROUND: return Stroke.Cap.Round;
+            default: return Stroke.Cap.Square;
+        }
+    }
 
-/** Returns snap Cursor awt snap cursor. */
-public static snap.view.Cursor get(java.awt.Cursor aCursor)
-{
-    if(aCursor==null) return snap.view.Cursor.NONE;
-    String name = aCursor.getName(); name = name.toUpperCase(); if(name.equals("NONE")) return snap.view.Cursor.NONE;
-    name = name.replace(" ", "_"); name = name.replace("_CURSOR", "");
-    Field field = null; try { field = snap.view.Cursor.class.getField(name); }
-    catch(Exception e) { }
-    if(field!=null) try { return (snap.view.Cursor)field.get(null); }
-    catch(Exception e) { }
-    System.err.println("AWT: get(java.awt.Cursor): Cursor not found for name: " + name);
-    return snap.view.Cursor.DEFAULT;
-}
+    /** Return snap Stroke.Join for awt Stroke Join. */
+    private static Stroke.Join awtToSnapStrokeJoin(int aJoin)
+    {
+        switch(aJoin) {
+            case BasicStroke.JOIN_MITER: return Stroke.Join.Miter;
+            case BasicStroke.JOIN_ROUND: return Stroke.Join.Round;
+            default: return Stroke.Join.Bevel;
+        }
+    }
 
-/** Returns a hide cursor. */
-public static java.awt.Cursor getHideCursor()
-{
-    if(_hcursor!=null) return _hcursor;
-    BufferedImage img = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
-    return _hcursor = Toolkit.getDefaultToolkit().createCustomCursor(img, new java.awt.Point(0,0), "NONE");
-} static java.awt.Cursor _hcursor;
+    /** Returns awt font for snap font. */
+    public static java.awt.Font snapToAwtFont(Font aFont)
+    {
+        Object ntv = aFont.getNative();
+        if(ntv instanceof java.awt.Font)
+            return (java.awt.Font)ntv;
+        return AWTFontUtils.getFont(aFont.getName(), aFont.getSize());
+    }
+
+    /** Returns snap font for awt font. */
+    public static Font awtToSnapFont(java.awt.Font aFont)
+    {
+        String name = aFont.getFontName();
+        double size = aFont.getSize2D();
+        return Font.getFont(name, size);
+    }
+
+    /** Returns awt image for snap image. */
+    public static java.awt.Image snapToAwtImage(Image anImage)
+    {
+        return (java.awt.Image)anImage.getNative();
+    }
+
+    /** Returns awt image for snap image. */
+    public static Image awtToSnapImage(java.awt.Image anImage)
+    {
+        return Image.get(anImage);
+    }
+
+    /** Returns awt Cursor for snap cursor. */
+    public static java.awt.Cursor get(snap.view.Cursor aCursor)
+    {
+        if(aCursor==null) return null;
+        String name = aCursor.getName(); name = name + "_CURSOR";
+        if(name.equals("NONE_CURSOR")) return getHideCursor();
+        Field field = null; try { field = java.awt.Cursor.class.getField(name); }
+        catch(Exception e) { }
+        if(field!=null) try { return java.awt.Cursor.getPredefinedCursor((int)field.get(null)); }
+        catch(Exception e) { }
+        System.err.println("AWT: get(snap.view.Cursor): Cursor not found for name: " + name);
+        return java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR);
+    }
+
+    /** Returns snap Cursor awt snap cursor. */
+    public static snap.view.Cursor get(java.awt.Cursor aCursor)
+    {
+        if(aCursor==null) return snap.view.Cursor.NONE;
+        String name = aCursor.getName(); name = name.toUpperCase(); if(name.equals("NONE")) return snap.view.Cursor.NONE;
+        name = name.replace(" ", "_"); name = name.replace("_CURSOR", "");
+        Field field = null; try { field = snap.view.Cursor.class.getField(name); }
+        catch(Exception e) { }
+        if(field!=null) try { return (snap.view.Cursor)field.get(null); }
+        catch(Exception e) { }
+        System.err.println("AWT: get(java.awt.Cursor): Cursor not found for name: " + name);
+        return snap.view.Cursor.DEFAULT;
+    }
+
+    /** Returns a hide cursor. */
+    public static java.awt.Cursor getHideCursor()
+    {
+        if(_hcursor!=null) return _hcursor;
+        BufferedImage img = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
+        return _hcursor = Toolkit.getDefaultToolkit().createCustomCursor(img, new java.awt.Point(0,0), "NONE");
+    }
 
 /**
  * A Shape wrapper to provide snap shape as AWT.

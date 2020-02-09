@@ -53,6 +53,16 @@ public Transform(float a, float b, float c, float d, float tx, float ty)  { _a=a
 public Transform(double a, double b, double c, double d, double tx, double ty)  { _a=a;_b=b;_c=c;_d=d;_tx=tx;_ty=ty; }
 
 /**
+ * Returns the translation x component.
+ */
+public double getX()  { return _tx; }
+
+/**
+ * Returns the translation y component.
+ */
+public double getY()  { return _ty; }
+
+/**
  * Returns whether this transform is identity.
  */
 public final boolean isIdentity() { return equals(IDENTITY); }
@@ -324,13 +334,25 @@ public String toString()
 {
     return StringUtils.format("[ %f %f %f %f %f %f ]", _a, _b, _c, _d, _tx, _ty);
 }
-    
+
 /**
  * Returns a rotation transform.
  */
 public static Transform getRotate(double theta)  { Transform t = new Transform(); t.rotate(theta); return t; }
 
 /**
+ * Returns a rotation transform.
+ */
+public static Transform getRotateAround(double theta, double aX, double aY)
+{
+    Transform t = new Transform();
+    t.translate(aX, aY);
+    t.rotate(theta);
+    t.transform(-aX, -aY);
+    return t;
+}
+
+    /**
  * Returns a scale transform.
  */
 public static Transform getScale(double sx, double sy)  { return new Transform(sx, 0, 0, sy, 0, 0); }
