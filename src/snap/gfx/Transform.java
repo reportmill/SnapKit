@@ -97,6 +97,16 @@ public void rotate(double anAngle)
 }
 
 /**
+ * Returns a rotation transform.
+ */
+public void rotateAround(double anAngle, double aX, double aY)
+{
+    translate(aX, aY);
+    rotate(anAngle);
+    translate(-aX, -aY);
+}
+
+/**
  * Scales this transform by given scale x and scale y.
  */
 public void scale(double sx, double sy)  { concat(sx, 0, 0, sy, 0, 0); }
@@ -336,23 +346,19 @@ public String toString()
 }
 
 /**
- * Returns a rotation transform.
+ * Returns a rotation transform for given angle in degrees.
  */
 public static Transform getRotate(double theta)  { Transform t = new Transform(); t.rotate(theta); return t; }
 
 /**
- * Returns a rotation transform.
+ * Returns a rotation transform for given angle in degrees around given x/y point.
  */
-public static Transform getRotateAround(double theta, double aX, double aY)
+public static Transform getRotateAround(double anAngle, double aX, double aY)
 {
-    Transform t = new Transform();
-    t.translate(aX, aY);
-    t.rotate(theta);
-    t.translate(-aX, -aY);
-    return t;
+    Transform t = new Transform(); t.rotateAround(anAngle, aX, aY); return t;
 }
 
-    /**
+/**
  * Returns a scale transform.
  */
 public static Transform getScale(double sx, double sy)  { return new Transform(sx, 0, 0, sy, 0, 0); }
