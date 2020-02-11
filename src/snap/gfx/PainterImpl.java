@@ -49,10 +49,16 @@ public double getOpacity()  { return _gstate.opacity; }
 public void setOpacity(double aValue)  { _gstate.opacity = aValue; }
 
 /** Stroke the given shape. */
-public void draw(Shape aShape)  { updateMarkedBounds(aShape, false); }
+public void draw(Shape aShape)
+{
+    updateMarkedBounds(aShape, false);
+}
 
 /** Fill the given shape. */
-public void fill(Shape aShape)  { updateMarkedBounds(aShape, getPaint().isOpaque()); }
+public void fill(Shape aShape)
+{
+    updateMarkedBounds(aShape, getPaint().isOpaque());
+}
 
 /** Draw image with transform. */
 public void drawImage(Image anImg, Transform aTrans)
@@ -70,7 +76,8 @@ public void drawImage(Image img, double sx, double sy, double sw, double sh, dou
 /** Draw string at location with char spacing. */
 public void drawString(String aStr, double aX, double aY, double cs)
 {
-    Rect rect = getFont().getStringBounds(aStr); rect.offset(aX,aY);
+    Rect rect = getFont().getStringBounds(aStr);
+    rect.offset(aX,aY);
     updateMarkedBounds(rect, false);
 }
 
@@ -83,11 +90,13 @@ private void updateMarkedBounds(Shape aShape, boolean isOpaque)
     Shape mshp = aShape.copyFor(_gstate.xform);
     
     // If shape not in clip, clip
-    if(!_gstate.clip.contains(mshp))
+    if(!_gstate.clip.contains(mshp) && _gstate.clip.intersects(mshp))
         mshp = Shape.intersect(_gstate.clip, mshp);
     
     // If no marked shape yet, just set
-    if(_mshape==null) { _mshape = mshp; _opaque = isOpaque; }
+    if(_mshape==null) {
+        _mshape = mshp; _opaque = isOpaque;
+    }
     
     // Otherwise if new shape doesn't fit in current marked bounds, set to new shape (if it ecompasses) or union shape
     else if(!_mshape.contains(mshp)) {
@@ -117,15 +126,19 @@ public Transform getTransform()  { return _gstate.xform; }
 public void setTransform(Transform aTrans)
 {
     // Transform clip & mark shape back to world coords
-    if(_gstate.clip!=null) _gstate.clip = _gstate.clip.copyFor(_gstate.xform.getInverse());
-    if(_mshape!=null) _mshape = _mshape.copyFor(_gstate.xform.getInverse());
+    if(_gstate.clip!=null)
+        _gstate.clip = _gstate.clip.copyFor(_gstate.xform.getInverse());
+    if(_mshape!=null)
+        _mshape = _mshape.copyFor(_gstate.xform.getInverse());
     
     // Set new transform
     _gstate.xform = aTrans;
     
     // Transform clip and mark shape back to local coords
-    if(_gstate.clip!=null) _gstate.clip = _gstate.clip.copyFor(aTrans);
-    if(_mshape!=null) _mshape = _mshape.copyFor(aTrans);
+    if(_gstate.clip!=null)
+        _gstate.clip = _gstate.clip.copyFor(aTrans);
+    if(_mshape!=null)
+        _mshape = _mshape.copyFor(aTrans);
 }
 
 /**
@@ -134,8 +147,10 @@ public void setTransform(Transform aTrans)
 public void transform(Transform aTrans)
 {
     _gstate.xform.concat(aTrans);
-    if(_gstate.clip!=null) _gstate.clip = _gstate.clip.copyFor(aTrans);
-    if(_mshape!=null) _mshape = _mshape.copyFor(aTrans);
+    if(_gstate.clip!=null)
+        _gstate.clip = _gstate.clip.copyFor(aTrans);
+    if(_mshape!=null)
+        _mshape = _mshape.copyFor(aTrans);
 }
 
 /**
@@ -156,7 +171,8 @@ public void clip(Shape aShape)
  */
 public void save()
 {
-    if(_gsize==_gstates.length) _gstates = Arrays.copyOf(_gstates, _gstates.length*2);
+    if(_gsize==_gstates.length)
+        _gstates = Arrays.copyOf(_gstates, _gstates.length*2);
     _gstates[_gsize++] = _gstate; _gstate = _gstate.clone();
 }
 

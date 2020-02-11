@@ -203,7 +203,7 @@ public Path[] createPaths()
     }
         
     // Return new path
-    return paths.toArray(new Path[paths.size()]);
+    return paths.toArray(new Path[0]);
 }
 
 /**
@@ -375,7 +375,11 @@ public static Shape intersect(Shape aShape1, Shape aShape2)
         }
         
         // Update seg and add to list if non-null
-        seg = nextSeg; if(shape3.getSegCount()>30) { seg = null; System.err.println("SegList: too many segs"); }
+        seg = nextSeg;
+
+        // Check to see if things are out of hand (should probably go)
+        if(shape3.getSegCount()>30) {
+            seg = null; System.err.println("SegList: too many segs"); }
     }
     
     // Return path for segments list
@@ -425,7 +429,11 @@ public static Shape add(Shape aShape1, Shape aShape2)
         }
     
         // Update seg and add to list if non-null
-        seg = nextSeg; if(shape3.getSegCount()>50) { seg = null; System.err.println("SegList: too many segs"); }
+        seg = nextSeg;
+
+        // Check to see if things are out of hand (should probably go)
+        if(shape3.getSegCount()>50) {
+            seg = null; System.err.println("SegList: too many segs"); }
     }
     
     // Return path for segments list
@@ -471,7 +479,9 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
     
     // Find first segement on perimeter of shape1 and shape2
     Segment seg = shape1.getFirstSegOutside(shape2);
-    if(seg==null) { System.err.println("SegList.subtr: No intersections!"); return aShape1; } // Should never happen
+    if(seg==null) {  // Should never happen
+        System.err.println("SegList.subtr: No intersections!"); return aShape1;
+    }
     
     // Iterate over segements to find those with endpoints in opposing shape and add to new shape
     while(seg!=null) {
@@ -489,7 +499,11 @@ public static Shape subtract(Shape aShape1, Shape aShape2)
         }
     
         // Update seg and add to list if non-null
-        seg = nextSeg; if(shape3.getSegCount()>50) { seg = null; System.err.println("SegList: too many segs"); }
+        seg = nextSeg;
+
+        // Check to see if things are out of hand (should probably go)
+        if(shape3.getSegCount()>50) {
+            seg = null; System.err.println("SegList: too many segs"); }
     }
     
     // Return path for segments list
@@ -503,7 +517,7 @@ private static Segment getNextSegSubtract(SegList aRefShp, SegList aShp1, SegLis
 {
     List <Segment> segs = aShp1.getSegments(aSeg);
     for(Segment sg : segs) {
-        boolean b1 = aShp1==aRefShp? !aShp2.containsSegMid(sg) : aShp2.containsSegMid(sg);
+        boolean b1 = (aShp1 == aRefShp) != aShp2.containsSegMid(sg);
         if(b1 && !aShp3.hasSeg(sg))
             return sg;
     }

@@ -346,9 +346,9 @@ public static Transform getRotate(double theta)  { Transform t = new Transform()
 public static Transform getRotateAround(double theta, double aX, double aY)
 {
     Transform t = new Transform();
-    t.translate(aX, aY);
+    t.translate(-aX, -aY);
     t.rotate(theta);
-    t.transform(-aX, -aY);
+    t.translate(aX, aY);
     return t;
 }
 
