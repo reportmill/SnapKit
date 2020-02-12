@@ -220,7 +220,8 @@ protected void setTabsString(String aString)
  */
 public TextLineStyle copyFor(Object anObj)
 {
-    if(anObj instanceof HPos) return copyFor(ALIGN_KEY, anObj);
+    if(anObj instanceof HPos)
+        return copyFor(ALIGN_KEY, anObj);
     return this;
 }
 
@@ -230,6 +231,17 @@ public TextLineStyle copyFor(Object anObj)
 public TextLineStyle copyFor(String aKey, Object aValue)
 {
     TextLineStyle clone = clone(); clone.setValue(aKey,aValue); return clone;
+}
+
+/**
+ * Returns a paragraph identical to the receiver, but with the given indentation values.
+ */
+public TextLineStyle copyForIndents(double firstIndent, double leftIndent, double rightIndent)
+{
+    TextLineStyle ls =  copyFor(TextLineStyle.FIRST_INDENT_KEY, firstIndent);
+    ls = ls.copyFor(TextLineStyle.LEFT_INDENT_KEY, leftIndent);
+    ls = ls.copyFor(TextLineStyle.RIGHT_INDENT_KEY, rightIndent);
+    return ls;
 }
 
 /**

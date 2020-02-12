@@ -47,14 +47,21 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
     public static final String LineStyle_Prop = "LineStyle";
 
 /**
- * Creates a new RichText.
+ * Creates RichText.
  */
-public RichText()  { addLine(createLine(), 0); }
+public RichText()
+{
+    addLine(createLine(), 0);
+}
 
 /**
- * Creates a TextDoc initialized with the given String and no attributes.
+ * Creates RichText initialized with given String and attributes (font, color).
  */
-public RichText(CharSequence theChars)  { this(); addChars(theChars, null, 0); }
+public RichText(CharSequence theChars, Object ... theAttrs)
+{
+    this();
+    addCharsWithStyleValues(theChars, theAttrs);
+}
 
 /**
  * Returns the source for the current text content.
@@ -68,7 +75,7 @@ public void setSource(Object aSource)
 {
     // Declare text/url vars
     String text = null;
-    WebURL url = null;
+    WebURL url;
     
     // Try WebFile
     if(aSource instanceof WebFile) { WebFile file = (WebFile)aSource;
@@ -89,7 +96,6 @@ public void setSource(Object aSource)
     // Try to get text directly from source 
     if(text==null)
         text = SnapUtils.getText(aSource);
-    
     
     // Set text and source
     setString(text);
@@ -140,8 +146,10 @@ public CharSequence subSequence(int aStart, int anEnd)
  */
 public String getString()
 {
-    StringBuffer sb = new StringBuffer(length());
-    for(RichTextLine line : _lines) for(RichTextRun run : line._runs) sb.append(run._sb);
+    StringBuilder sb = new StringBuilder(length());
+    for(RichTextLine line : _lines)
+        for(RichTextRun run : line._runs)
+            sb.append(run._sb);
     return sb.toString();
 }
 
@@ -197,20 +205,34 @@ public void setPlainText(boolean aValue)  { _plainText = aValue; }
 /**
  * Adds characters with attributes to this text at given index.
  */
+public void addChars(CharSequence theChars)
+{
+    addChars(theChars, null, length());
+}
+
+/**
+ * Adds characters with attributes to this text at given index.
+ */
 public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
 {
+    // If no chars, just return
+    if(theChars==null) return;
+
     // If monofont, clear attributes
-    if(isPlainText()) theStyle = null; if(theChars==null) return;
-    
+    if(isPlainText()) theStyle = null;
+
     // Get line for index - if adding at text end and last line and ends with newline, create/add new line
     RichTextLine line = getLineAt(anIndex);
     if(anIndex==line.getEnd() && line.isLastCharNewline()) {
         RichTextLine nline = line.split(line.length());
-        addLine(nline, line.getIndex()+1); line = nline;
+        addLine(nline, line.getIndex()+1);
+        line = nline;
     }
     
     // Add chars line by line
-    int start = 0, len = theChars.length(), lindex = anIndex - line.getStart();
+    int start = 0;
+    int len = theChars.length();
+    int lindex = anIndex - line.getStart();
     while(start<len) {
         
         // Get index of newline in insertion chars (if there) and end of line block
@@ -218,7 +240,7 @@ public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
         int end = newline>0? newline : len;
         
         // Get chars and add
-        CharSequence chars = start==0 && end==len? theChars : theChars.subSequence(start, end);
+        CharSequence chars = start==0 && end==len ? theChars : theChars.subSequence(start, end);
         line.addChars(chars, theStyle, lindex);
         
         // If newline added and there are more chars in line, split line and add remainder
@@ -236,6 +258,32 @@ public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
     if(isPropChangeEnabled())
         firePropChange(new CharsChange(null, theChars, anIndex));
     _width = -1;
+}
+
+public void addCharsWithStyleMap(CharSequence theChars, Map<String,Object> theAttrs)
+{
+    TextStyle style = getStyleAt(length());
+    style = style.copyFor(theAttrs);
+    addChars(theChars, style, length());
+}
+
+/**
+ * Appends the given chars with the given attribute(s).
+ */
+public void addCharsWithStyleValues(CharSequence theChars, Object ... theAttrs)
+{
+    // Get style at end and get first attribute
+    TextStyle style = getStyleAt(length());
+    Object attr0 = theAttrs!=null && theAttrs.length>0 ? theAttrs[0] : null;
+
+    // Get modified style for given attributes
+    if(attr0 instanceof TextStyle)
+        style = (TextStyle)attr0;
+    else if(attr0!=null)
+        style = style.copyFor(theAttrs);
+
+    // Add chars
+    addChars(theChars, style, length());
 }
 
 /**
@@ -525,14 +573,36 @@ public RichTextRun getRunAt(int anIndex)
 }
 
 /**
+ * Returns the last run.
+ */
+public RichTextRun getRunLast()
+{
+    return getRunAt(length());
+}
+
+/**
+ * Returns the Font for run at given character index.
+ */
+public Font getFontAt(int anIndex)
+{
+    return getRunAt(anIndex).getFont();
+}
+
+/**
  * Returns the TextStyle for the run at the given character index.
  */
-public TextStyle getStyleAt(int anIndex)  { return getRunAt(anIndex).getStyle(); }
+public TextStyle getStyleAt(int anIndex)
+{
+    return getRunAt(anIndex).getStyle();
+}
     
 /**
  * Returns the TextLineStyle for the run at the given character index.
  */
-public TextLineStyle getLineStyleAt(int anIndex)  { return getLineAt(anIndex).getLineStyle(); }
+public TextLineStyle getLineStyleAt(int anIndex)
+{
+    return getLineAt(anIndex).getLineStyle();
+}
     
 /**
  * Returns whether text contains an underlined run.
@@ -700,7 +770,8 @@ protected void firePropChange(PropChange aPC)
 public RichText clone()
 {
     // Do normal clone
-    RichText clone = null; try { clone = (RichText)super.clone(); }
+    RichText clone;
+    try { clone = (RichText)super.clone(); }
     catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
     
     // Reset lines array and length
@@ -885,7 +956,8 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
 public String toString()
 {
     String str = getClass().getSimpleName() + ": " + getLineCount() + " lines, " + length() + " chars";
-    for(int i=0,iMax=Math.min(getLineCount(),5);i<iMax;i++) str += "\n" + getLine(i);
+    for (int i=0,iMax=Math.min(getLineCount(),5); i<iMax; i++)
+        str += "\n" + getLine(i);
     return str;
 }
 
