@@ -323,6 +323,14 @@ public void removeChars(int aStart, int anEnd)
 /**
  * Replaces chars in given range, with given String, using the given attributes.
  */
+public void replaceChars(CharSequence theChars, int aStart, int anEnd)
+{
+    replaceChars(theChars, null, aStart, anEnd);
+}
+
+/**
+ * Replaces chars in given range, with given String, using the given attributes.
+ */
 public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
 {
     // Get style and linestyle for add chars
@@ -612,6 +620,19 @@ public boolean isUnderlined()
     if(isPlainText()) return getStyleAt(0).isUnderlined();
     for(RichTextLine line : _lines) if(line.isUnderlined()) return true;
     return false;
+}
+
+/**
+ * Returns the horizontal alignment of the first paragraph of the RichText.
+ */
+public HPos getAlignX()  { return getLineStyleAt(0).getAlign(); }
+
+/**
+ * Sets the horizontal alignment of the xstring.
+ */
+public void setAlignX(HPos anAlignX)
+{
+    setLineStyleValue(TextLineStyle.ALIGN_KEY, anAlignX, 0, length());
 }
 
 /**

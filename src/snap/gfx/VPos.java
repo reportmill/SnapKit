@@ -26,6 +26,7 @@ public static VPos get(String aStr)
     try { VPos.valueOf(aStr); }
     catch(Exception e) { }
     for(VPos p : VPos.values()) if(p.toString().equalsIgnoreCase(aStr)) return p;
+    if (aStr.toLowerCase().equals("middle")) return CENTER;
     return TOP;
 }
 
