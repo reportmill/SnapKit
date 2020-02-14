@@ -633,9 +633,20 @@ public TextLineStyle getLineStyleAt(int anIndex)
  */
 public boolean isUnderlined()
 {
-    if(isPlainText()) return getStyleAt(0).isUnderlined();
-    for(RichTextLine line : _lines) if(line.isUnderlined()) return true;
+    if (isPlainText())
+        return getStyleAt(0).isUnderlined();
+    for (RichTextLine line : _lines)
+        if(line.isUnderlined())
+            return true;
     return false;
+}
+
+/**
+ * Sets the RichText to be underlined.
+ */
+public void setUnderlined(boolean aFlag)
+{
+    setStyleValue(TextStyle.UNDERLINE_KEY, aFlag? 1 : null, 0, length());
 }
 
 /**
