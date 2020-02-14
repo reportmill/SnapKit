@@ -401,10 +401,26 @@ public void setStyle(TextStyle aStyle, int aStart, int anEnd)
 /**
  * Sets a given style value to given value for a given range.
  */
+public void setStyleValue(Object aValue)
+{
+    setStyleValue(aValue, 0, length());
+}
+
+/**
+ * Sets a given style value to given value for a given range.
+ */
 public void setStyleValue(Object aValue, int aStart, int aEnd)
 {
     String key = TextStyle.getStyleKey(aValue);
     setStyleValue(key, aValue, aStart, aEnd);
+}
+
+/**
+ * Sets a given attribute to a given value for a given range.
+ */
+public void setStyleValue(String aKey, Object aValue)
+{
+    setStyleValue(aKey, aValue, 0, length());
 }
 
 /**
