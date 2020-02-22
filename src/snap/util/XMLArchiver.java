@@ -137,7 +137,10 @@ public XMLElement getRootXML()  { return _root; }
 /**
  * Returns the class map.
  */
-public Map <String, Class> getClassMap()  { return _classMap!=null? _classMap : (_classMap=createClassMap()); }
+public Map <String, Class> getClassMap()
+{
+    return _classMap!=null? _classMap : (_classMap=createClassMap());
+}
 
 /**
  * Creates the class map.
@@ -151,11 +154,11 @@ public Object readObject(Object aSource)
 {
     // Get bytes from source - if not found or empty, complain
     byte bytes[] = SnapUtils.getBytes(aSource);
-    if(bytes==null || bytes.length==0)
+    if (bytes==null || bytes.length==0)
         throw new RuntimeException("XMLArchiver.readObject: Cannot read source: " + aSource);
         
     // Try to get SourceURL from source
-    if(getSourceURL()==null) {
+    if (getSourceURL()==null) {
         WebURL surl = WebURL.getURL(aSource);
         setSourceURL(surl);
     }
@@ -170,7 +173,8 @@ public Object readObject(Object aSource)
 public Object readObject(byte theBytes[])
 {
     XMLElement xml = XMLElement.getElement(theBytes);
-    if(isIgnoreCase()) xml.setIgnoreCase(true);
+    if (isIgnoreCase())
+        xml.setIgnoreCase(true);
     return readObject(xml);
 }
 
@@ -212,7 +216,7 @@ public XMLElement writeObject(Object anObj)
     XMLElement xml = toXML(anObj);
     
     // Archive resources
-    for(XMLArchiver.Resource resource : getResources()) {
+    for (XMLArchiver.Resource resource : getResources()) {
         XMLElement resourceXML = new XMLElement("resource");
         resourceXML.add("name", resource.getName());
         resourceXML.setValueBytes(resource.getBytes());
@@ -226,7 +230,10 @@ public XMLElement writeObject(Object anObj)
 /**
  * Returns an object unarchived from the given element.
  */
-public Object fromXML(XMLElement anElement, Object anOwner)  { return fromXML(anElement, (Class)null, anOwner); }
+public Object fromXML(XMLElement anElement, Object anOwner)
+{
+    return fromXML(anElement, null, anOwner);
+}
 
 /**
  * Returns an object unarchived from the given element by instantiating the given class.
@@ -234,30 +241,31 @@ public Object fromXML(XMLElement anElement, Object anOwner)  { return fromXML(an
 public <T> T fromXML(XMLElement anElement, Class<T> aClass, Object anOwner)
 {
     // Handle Lists Special
-    if(anElement.getName().equals("alist")) { List list = new Vector();
-        for(int i=0, iMax=anElement.size(); i<iMax; i++) list.add(fromXML(anElement.get(i), anOwner));
+    if (anElement.getName().equals("alist")) { List list = new ArrayList();
+        for (int i=0, iMax=anElement.size(); i<iMax; i++)
+            list.add(fromXML(anElement.get(i), anOwner));
         return (T)list;
     }
         
     // See if anElement has already been read
     Object readObject = _readElements.get(anElement);
-    if(readObject!=null && (aClass==null || aClass.isInstance(readObject)))
+    if (readObject!=null && (aClass==null || aClass.isInstance(readObject)))
         return (T)readObject;
     
     // If root element and owner is same class, set read object to owner
-    if(anElement==_root && getRootObject()!=null)
+    if (anElement==_root && getRootObject()!=null)
         readObject = getRootObject();
     
     // If class was provided, try to instantiate
-    else if(aClass!=null)
+    else if (aClass!=null)
         readObject = newInstance(aClass);
     
     // If read object wasn't created, get archiver to create from element
-    if(readObject==null)
+    if (readObject==null)
         readObject = newInstance(anElement);
 
     // If couldn't create new instance, return null (should throw exception instead, I think)
-    if(readObject==null)
+    if (readObject==null)
         return null;
     
     // Add new instance to readElement's map
@@ -267,7 +275,7 @@ public <T> T fromXML(XMLElement anElement, Class<T> aClass, Object anOwner)
     Object obj = fromXML(anElement, readObject, anOwner);
     
     // If fromXML returned a different object, swap it in
-    if(obj!=readObject)
+    if (obj!=readObject)
         _readElements.put(anElement, readObject = obj);
 
     // Return read object
@@ -361,8 +369,7 @@ protected Class getClass(XMLElement anElement)
 protected Object newInstance(Class aClass)
 {
     try { return aClass.newInstance(); }
-    catch(InstantiationException e) { System.err.println(e + " on " + aClass); e.printStackTrace(); }
-    catch(Exception e) { e.printStackTrace(); } return null;
+    catch(InstantiationException | IllegalAccessException e) { throw new RuntimeException(e); }
 }
 
 /**
@@ -371,14 +378,17 @@ protected Object newInstance(Class aClass)
 protected Object newInstance(XMLElement anElement)
 {
     // Get class for element and if non-null, return instance
-    Class clss = getClass(anElement);
-    return clss!=null? newInstance(clss) : null;
+    Class cls = getClass(anElement);
+    return cls!=null ? newInstance(cls) : null;
 }
 
 /**
  * Returns a reference id for the given object (used in archival).
  */
-public int getReference(Object anObj)  { return getReference(anObj, true); }
+public int getReference(Object anObj)
+{
+    return getReference(anObj, true);
+}
 
 /**
  * Returns a reference id for given object if in references list with option to add if absent (used in archival).
@@ -411,11 +421,11 @@ public Object getReference(String aName, XMLElement anElement)
 private Object getReference(int xref, XMLElement anElement)
 {
     // If anElement has matching xref attribute/id, return unarchived object
-    if(anElement.getAttributeIntValue("xref", -1)==xref)
+    if (anElement.getAttributeIntValue("xref", -1)==xref)
         return fromXML(anElement, null);
     
     // Iterate over element's children and recurse
-    for(int i=0, iMax=anElement.size(); i<iMax; i++) {
+    for (int i=0, iMax=anElement.size(); i<iMax; i++) {
         XMLElement e = anElement.get(i);
         Object obj = getReference(xref, e);
         if(obj!=null)
@@ -437,8 +447,8 @@ public int indexOf(XMLElement anElement, Class aClass)  { return indexOf(anEleme
 public int indexOf(XMLElement anElement, Class aClass, int startIndex)
 {
     // Iterate over element children from start index, and if child has matching class, return its index
-    for(int i=startIndex, iMax=anElement.size(); i<iMax; i++) { Class childClass = getClass(anElement.get(i));
-        if(childClass!=null && aClass.isAssignableFrom(childClass))
+    for (int i=startIndex, iMax=anElement.size(); i<iMax; i++) { Class childClass = getClass(anElement.get(i));
+        if (childClass!=null && aClass.isAssignableFrom(childClass))
             return i; }
     return -1; // Return -1 since element name not found
 }
@@ -452,18 +462,18 @@ public List fromXMLList(XMLElement anElement, String aName, Class aClass, Object
     List list = new Vector();
     
     // If name is provided, iterate over elements, unarchive and add to list
-    if(aName!=null) {
-        for(XMLElement e : anElement.getElements(aName)) {
+    if (aName!=null) {
+        for (XMLElement e : anElement.getElements(aName)) {
             Object obj = fromXML(e, aClass, anOwner);
             list.add(obj);
         }
     }
     
     // Iterate over elements, unarchive, and if class, add to list
-    else for(int i=0, iMax=anElement.size(); i<iMax; i++) {
+    else for (int i=0, iMax=anElement.size(); i<iMax; i++) {
         XMLElement e = anElement.get(i);
         Object obj = fromXML(e, anOwner);
-        if(aClass.isInstance(obj))
+        if (aClass.isInstance(obj))
             list.add(obj);
     }
     
@@ -521,8 +531,8 @@ public Resource getResource(int anIndex)  { return _resources.get(anIndex); }
  */
 public byte[] getResource(String aName)
 {
-    for(int i=0, iMax=_resources.size(); i<iMax; i++)
-        if(getResource(i)._name.equals(aName))
+    for (int i=0, iMax=_resources.size(); i<iMax; i++)
+        if (getResource(i)._name.equals(aName))
             return getResource(i)._bytes;
     return null;
 }
@@ -533,8 +543,8 @@ public byte[] getResource(String aName)
 public String addResource(byte bytes[], String aName)
 {
     // If resource has already been added, just return it's name
-    for(int i=0, iMax=_resources.size(); i<iMax; i++)
-        if(getResource(i).equals(bytes))
+    for (int i=0, iMax=_resources.size(); i<iMax; i++)
+        if (getResource(i).equals(bytes))
             return getResource(i).getName();
         
     // If new resource, add it
@@ -551,7 +561,7 @@ public String addResource(byte bytes[], String aName)
 protected void getResources(XMLElement anElement)
 {
     // Get resources from top level <resource> tags
-    for(int i=anElement.indexOf("resource"); i>=0; i=anElement.indexOf("resource", i)) {
+    for (int i=anElement.indexOf("resource"); i>=0; i=anElement.indexOf("resource", i)) {
         
         // Get/remove current resource element
         XMLElement e =  anElement.removeElement(i);
