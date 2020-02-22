@@ -201,11 +201,26 @@ public boolean isOpaque()
             return false;
     return true;
 }
-    
+
+/**
+ * Returns the closest color approximation of this paint.
+ */
+public Color getColor()  { return getStopColor(0); }
+
+/**
+ * Derives an instance of this class from given color.
+ */
+public GradientPaint copyForColor(Color aColor)
+{
+    GradientPaint.Stop stops[] = Arrays.copyOf(getStops(), getStopCount());
+    stops[0] = new Stop(getStopOffset(0), aColor);
+    return copyForStops(stops);
+}
+
 /**
  * Returns an absolute paint for given bounds of primitive to be filled.
  */
-public GradientPaint copyFor(Rect aRect)
+public GradientPaint copyForRect(Rect aRect)
 {
     if(_abs) return this;
     if(_roll!=0) {
@@ -221,10 +236,11 @@ public GradientPaint copyFor(Rect aRect)
 /**
  * Returns a copy of this paint for new start/end points.
  */
-public GradientPaint copyFor(double aSX, double aSY, double aEX, double aEY)
+public GradientPaint copyForPoints(double aSX, double aSY, double aEX, double aEY)
 {
     GradientPaint copy = clone();
-    copy._sx = aSX; copy._sy = aSY; copy._ex = aEX; copy._ey = aEY;
+    copy._sx = aSX; copy._sy = aSY;
+    copy._ex = aEX; copy._ey = aEY;
     return copy;
 }
 
@@ -233,7 +249,9 @@ public GradientPaint copyFor(double aSX, double aSY, double aEX, double aEY)
  */
 public GradientPaint copyForStops(Stop theStops[])
 {
-    GradientPaint clone = clone(); clone._stops = Arrays.copyOf(theStops, theStops.length); return clone;
+    GradientPaint clone = clone();
+    clone._stops = Arrays.copyOf(theStops, theStops.length);
+    return clone;
 }
 
 /**
@@ -242,8 +260,9 @@ public GradientPaint copyForStops(Stop theStops[])
 public GradientPaint copyForType(Type aType)
 {
     if(aType==_type) return this;
-    GradientPaint clone = clone(); clone._type = aType;
-    if(clone.isRadial()) { clone._sx = .5; clone._sy = .5; clone._ex = 1; clone._ey = .5; _roll = 0; }
+    GradientPaint clone = clone();
+    clone._type = aType;
+    if (clone.isRadial()) { clone._sx = .5; clone._sy = .5; clone._ex = 1; clone._ey = .5; _roll = 0; }
     else { clone._sx = 0; clone._sy = .5; clone._ex = 1; clone._ey = .5; }
     return clone;
 }
@@ -253,7 +272,19 @@ public GradientPaint copyForType(Type aType)
  */
 public GradientPaint copyForRoll(double aRoll)
 {
-    GradientPaint clone = clone(); clone.setRoll(aRoll, new Rect(0,0,1,1)); return clone;
+    GradientPaint clone = clone();
+    clone.setRoll(aRoll, new Rect(0,0,1,1));
+    return clone;
+}
+
+/**
+ * Reverse the order of the color stops
+ */
+public GradientPaint copyForReverseStops()
+{
+    int nstops = getStopCount(); Stop stops[] = new Stop[nstops];
+    for(int i=0; i<nstops; i++) stops[nstops-i-1] = new Stop(1 - getStopOffset(i), getStopColor(i));
+    return copyForStops(stops);
 }
 
 /**

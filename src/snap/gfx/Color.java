@@ -226,11 +226,21 @@ public boolean isAbsolute()  { return true; }
  * Returns whether paint is opaque.
  */
 public boolean isOpaque()  { return _alpha>=1; }
-    
+
+/**
+ * Returns the closest color approximation of this paint.
+ */
+public Color getColor()  { return this; }
+
+/**
+ * Returns a copy of this paint modified for given color.
+ */
+public Paint copyForColor(Color aColor)  { return aColor; }
+
 /**
  * Returns an absolute paint for given bounds of primitive to be filled.
  */
-public Color copyFor(Rect aRect)  { return this; }
+public Color copyForRect(Rect aRect)  { return this; }
 
 /**
  * Standard equals implementation.

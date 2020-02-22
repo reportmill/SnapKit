@@ -80,6 +80,21 @@ public double getHeight()  { return _h; }
 public Rect getBounds()  { return new Rect(_x, _y, _w, _h); }
 
 /**
+ * Returns the scale x of the image fill image.
+ */
+public double getScaleX()  { return isAbsolute()? getWidth()/getImage().getWidth() : getWidth(); }
+
+/**
+ * Returns the scale y of the image fill image.
+ */
+public double getScaleY()  { return isAbsolute()? getHeight()/getImage().getHeight() : getHeight(); }
+
+/**
+ * Returns whether paint is defined in terms independent of primitive to be filled.
+ */
+public boolean isTiled()  { return isAbsolute(); }
+
+/**
  * Returns whether paint is defined in terms independent of primitive to be filled.
  */
 public boolean isAbsolute()  { return _abs; }
@@ -90,9 +105,19 @@ public boolean isAbsolute()  { return _abs; }
 public boolean isOpaque()  { return !_image.hasAlpha(); }
 
 /**
+ * Returns the closest color approximation of this paint.
+ */
+public Color getColor()  { return Color.BLACK; }
+
+/**
+ * Returns a copy of this paint modified for given color.
+ */
+public Paint copyForColor(Color aColor)  { return this; }
+
+/**
  * Returns an absolute paint for given bounds of primitive to be filled.
  */
-public ImagePaint copyFor(Rect aRect)
+public ImagePaint copyForRect(Rect aRect)
 {
     if(_abs) return this;
     double x = aRect.x + aRect.width*_x, w = aRect.width*_w;
@@ -103,9 +128,30 @@ public ImagePaint copyFor(Rect aRect)
 /**
  * Returns an paint for given bounds and absolute flag.
  */
-public ImagePaint copyFor(Rect aRect, boolean isAbs)
+public ImagePaint copyForRectAndTile(Rect aRect, boolean isAbs)
 {
     return new ImagePaint(_image, aRect.x, aRect.y, aRect.width, aRect.height, isAbs);
+}
+
+/**
+ * Creates a new image fill identical to this image fill, but with new value for given attribute.
+ */
+public ImagePaint copyTiled(boolean isTiled)
+{
+    ImagePaint copy;
+    if(isTiled) copy = new ImagePaint(getImage());
+    else copy = new ImagePaint(getImage(), new Rect(0,0,1,1), false);
+    return copy;
+}
+
+/**
+ * Creates a new image fill identical to this image fill, but with new value for given attribute.
+ */
+public ImagePaint copyForScale(double aScaleX, double aScaleY)
+{
+    double w = isAbsolute()? getImage().getWidth()*aScaleX : aScaleX;
+    double h = isAbsolute()? getImage().getHeight()*aScaleY : aScaleY;
+    return copyForRectAndTile(new Rect(getX(),getY(),w,h), isAbsolute());
 }
 
 /**

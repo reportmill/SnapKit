@@ -21,11 +21,25 @@ public interface Paint {
     /**
      * Returns an absolute paint for given bounds of primitive to be filled.
      */
-    public Paint copyFor(Rect aRect);
+    public Paint copyForRect(Rect aRect);
     
     /**
      * Returns the name for paint.
      */
     default String getName()  { return getClass().getSimpleName(); }
 
+    /**
+     * Returns the closest color approximation of this paint.
+     */
+    public Color getColor();
+
+    /**
+     * Returns a copy of this paint modified for given color.
+     */
+    public Paint copyForColor(Color aColor);
+
+    /**
+     * Returns the snap version of this fill.
+     */
+    default Paint snap()  { return this; }
 }
