@@ -6,51 +6,48 @@ import java.util.*;
 import snap.web.WebURL;
 
 /**
- * This class manages archival and unarchival to/from RXElements.
+ * This class manages archival and unarchival to/from XMLElements.
  *
- * For archival, objects simply implement the toXML() method to configure and return RXElements. RXArchiver's 
+ * For archival, objects simply implement the toXML() method to configure and return XMLElements. Archiver's
  * toXML() method manages the process, allowing for object references.
  *
- * For unarchival, classes register for particular element names. Then during RXArchiver.fromXML(), RXArchiver will
+ * For unarchival, classes register for particular element names. Then during Archiver.fromXML(), Archiver will
  * call fromXML() on the classes for encountered tags to reconstruct the object graph.
  */
 public class XMLArchiver {
 
     // The owner class that initated archival/unarchival
-    Object                    _owner;
+    private Object _owner;
     
     // The URL of the source the archiver is reading from
-    WebURL                    _surl;
+    private WebURL _surl;
 
     // Root element for unarchival
-    XMLElement                _root;
+    private XMLElement _root;
     
     // The root object to be used in unarchival
-    Object                    _rootObject;
-    
-    // The class loader to be used if classes are needed
-    ClassLoader               _classLoader;
+    private Object _rootObject;
     
     // The version of unarchived object
-    double                    _version;
+    private double _version;
+
+    // Whether element should ignore case when asking for attributes/elements by name
+    private boolean _ignoreCase;
 
     // Unarchival keeps track of read elements to guarantee that each element results in one instance
-    Map <XMLElement, Object>  _readElements = new HashMap();
+    private Map <XMLElement, Object> _readElements = new HashMap();
     
-    // RXArchiver manages list of objects that are archived by reference
-    List                      _references = new ArrayList();
+    // list of objects that are archived by reference
+    private List _references = new ArrayList();
     
-    // RXArchiver manages archival of shared BLOBs external to normal element hierarchy
-    List <Resource>           _resources = new ArrayList();
+    // Archiver manages archival of shared BLOBs external to normal element hierarchy
+    private List<Resource> _resources = new ArrayList();
     
     // The map of classes for unarchival
-    Map                       _classMap;
+    private Map<String,Class> _classMap;
     
     // The stack of parents
-    Deque                     _parentStack = new ArrayDeque();
-    
-    // Whether element should ignore case when asking for attributes/elements by name
-    boolean                   _ignoreCase;
+    private Deque _parentStack = new ArrayDeque();
     
 /**
  * An interface for objects that are archivable.
@@ -100,16 +97,6 @@ public Object getRootObject()  { return _rootObject; }
 public void setRootObject(Object anObj)  { _rootObject = anObj; }
 
 /**
- * Returns the archiver class loader.
- */
-public ClassLoader getClassLoader()  { return _classLoader; }
-
-/**
- * Sets the archiver class loader.
- */
-public void setClassLoader(ClassLoader aClassLoader)  { _classLoader = aClassLoader; }
-
-/**
  * Returns the version of the document.
  */
 public double getVersion()  { return _version; }
@@ -150,7 +137,7 @@ protected Map <String, Class> createClassMap()  { throw new RuntimeException("No
 /**
  * Returns a root object unarchived from a generic input source (a File, String path, InputStream, URL, byte[], etc.).
  */
-public Object readObject(Object aSource)
+public Object readFromXMLSource(Object aSource)
 {
     // Get bytes from source - if not found or empty, complain
     byte bytes[] = SnapUtils.getBytes(aSource);
@@ -164,25 +151,25 @@ public Object readObject(Object aSource)
     }
         
     // ReadObject(bytes) and return
-    return readObject(bytes);
+    return readFromXMLBytes(bytes);
 }
 
 /**
  * Returns a root object unarchived from an RMByteSource.
  */
-public Object readObject(byte theBytes[])
+public Object readFromXMLBytes(byte theBytes[])
 {
     XMLElement xml = XMLElement.getElement(theBytes);
     if (isIgnoreCase())
         xml.setIgnoreCase(true);
-    return readObject(xml);
+    return readFromXML(xml);
 }
 
 /**
  * Returns a root object unarchived from the XML source (a File, String path, InputStream, URL, byte[], etc.).
  * You can also provide a root object to be read "into", and an owner that the object is being read "for".
  */
-public Object readObject(XMLElement theXML)
+public Object readFromXML(XMLElement theXML)
 {
     // Read xml
     _root = theXML;
@@ -210,7 +197,7 @@ public Object readObject(XMLElement theXML)
  * Returns an xml element for a given object.
  * This top level method encodes resources, in addition to doing the basic toXML stuff.
  */
-public XMLElement writeObject(Object anObj)
+public XMLElement writeToXML(Object anObj)
 {
     // Write object
     XMLElement xml = toXML(anObj);
@@ -225,6 +212,15 @@ public XMLElement writeObject(Object anObj)
     
     // Return xml
     return xml;
+}
+
+/**
+ * Writes given object to XML and returns the XML bytes.
+ */
+public byte[] writeToXMLBytes(Object anObj)
+{
+    XMLElement xml = writeToXML(anObj);
+    return xml.getBytes();
 }
 
 /**
@@ -257,16 +253,22 @@ public <T> T fromXML(XMLElement anElement, Class<T> aClass, Object anOwner)
         readObject = getRootObject();
     
     // If class was provided, try to instantiate
-    else if (aClass!=null)
-        readObject = newInstance(aClass);
-    
-    // If read object wasn't created, get archiver to create from element
-    if (readObject==null)
-        readObject = newInstance(anElement);
+    else {
+
+        // Get class
+        Class cls = aClass;
+        if (cls==null)
+            cls = getClassForXML(anElement);
+
+        // Create new object
+        readObject = newInstance(cls);
+    }
 
     // If couldn't create new instance, return null (should throw exception instead, I think)
-    if (readObject==null)
+    if (readObject==null) {
+        System.err.println("XMLArchiver.fromXML: Couldn't find class for: " + anElement.getName());
         return null;
+    }
     
     // Add new instance to readElement's map
     _readElements.put(anElement, readObject);
@@ -330,7 +332,7 @@ public Class getClass(String aName)
     
     // Load class from string
     if(clss!=null) try {
-        ClassLoader classLoader = getClassLoader(); if(classLoader==null) classLoader = getClass().getClassLoader();
+        ClassLoader classLoader = getClass().getClassLoader();
         Class c2 = Class.forName(clss.toString(), true, classLoader);
         getClassMap().put(aName, c2);
         return c2;
@@ -346,15 +348,16 @@ public Class getClass(String aName)
 /**
  * Returns the class for a given element.
  */
-protected Class getClass(XMLElement anElement)
+protected Class getClassForXML(XMLElement anElement)
 {
     // Get class for element name
-    Class cls = getClass(anElement.getName());
+    String name = anElement.getName();
+    Class cls = getClass(name);
     
     // If element has type, see if there is class for type-name
     String type = anElement.getAttributeValue("type");
     if(type!=null) {
-        Class c2 = getClass(type + "-" + anElement.getName());
+        Class c2 = getClass(type + "-" + name);
         if(c2!=null)
             cls = c2;
     }
@@ -373,16 +376,6 @@ protected Object newInstance(Class aClass)
 }
 
 /**
- * Returns a new instance of an object given an element.
- */
-protected Object newInstance(XMLElement anElement)
-{
-    // Get class for element and if non-null, return instance
-    Class cls = getClass(anElement);
-    return cls!=null ? newInstance(cls) : null;
-}
-
-/**
  * Returns a reference id for the given object (used in archival).
  */
 public int getReference(Object anObj)
@@ -397,7 +390,7 @@ public int getReference(Object anObj, boolean add)
 {
     // If object is in list (or if not asked to add) return its current index
     int index = ListUtils.indexOfId(_references, anObj);
-    if(index>=0 || !add)
+    if (index>=0 || !add)
         return index;
     
     // Add object to references and return id
@@ -411,7 +404,8 @@ public int getReference(Object anObj, boolean add)
 public Object getReference(String aName, XMLElement anElement)
 {
     // Get xref id and recursively search for element that contains it
-    int xref = anElement.getAttributeIntValue(aName, -1); if(xref<0) return null;
+    int xref = anElement.getAttributeIntValue(aName, -1);
+    if (xref<0) return null;
     return getReference(xref, _root);
 }
 
@@ -428,7 +422,7 @@ private Object getReference(int xref, XMLElement anElement)
     for (int i=0, iMax=anElement.size(); i<iMax; i++) {
         XMLElement e = anElement.get(i);
         Object obj = getReference(xref, e);
-        if(obj!=null)
+        if (obj!=null)
             return obj;
     }
     
@@ -447,7 +441,8 @@ public int indexOf(XMLElement anElement, Class aClass)  { return indexOf(anEleme
 public int indexOf(XMLElement anElement, Class aClass, int startIndex)
 {
     // Iterate over element children from start index, and if child has matching class, return its index
-    for (int i=startIndex, iMax=anElement.size(); i<iMax; i++) { Class childClass = getClass(anElement.get(i));
+    for (int i=startIndex, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
+        Class childClass = getClassForXML(childXML);
         if (childClass!=null && aClass.isAssignableFrom(childClass))
             return i; }
     return -1; // Return -1 since element name not found
@@ -471,8 +466,8 @@ public List fromXMLList(XMLElement anElement, String aName, Class aClass, Object
     
     // Iterate over elements, unarchive, and if class, add to list
     else for (int i=0, iMax=anElement.size(); i<iMax; i++) {
-        XMLElement e = anElement.get(i);
-        Object obj = fromXML(e, anOwner);
+        XMLElement xml = anElement.get(i);
+        Object obj = fromXML(xml, anOwner);
         if (aClass.isInstance(obj))
             list.add(obj);
     }

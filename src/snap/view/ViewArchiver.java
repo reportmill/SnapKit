@@ -34,15 +34,15 @@ public View getView(Object aSource)
     if(aSource instanceof View) return (View)aSource;
     
     // Return readObject(src)
-    return (View)readObject(aSource);
+    return (View) readFromXMLSource(aSource);
 }
 
 /**
  * Returns the class for a given element.
  */
-protected Class getClass(XMLElement anElement)
+protected Class getClassForXML(XMLElement anElement)
 {
-    Class cls = super.getClass(anElement);
+    Class cls = super.getClassForXML(anElement);
     String cname = anElement.getAttributeValue("class");
     if(cname!=null && getUseRealClass()) {
         Class c = ClassUtils.getClass(cname);

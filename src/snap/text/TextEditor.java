@@ -492,7 +492,7 @@ public void paste()
         RichText rtext = new RichText();
         XMLArchiver archiver = new XMLArchiver();
         archiver.setRootObject(rtext);
-        archiver.readObject(bytes);
+        archiver.readFromXMLBytes(bytes);
         replace(rtext);
     }
     
