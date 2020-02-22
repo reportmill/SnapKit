@@ -2,6 +2,7 @@ package snap.viewx;
 import java.util.*;
 import snap.gfx.*;
 import snap.parse.*;
+import snap.text.TextStyle;
 import snap.view.TextArea;
 import snap.web.WebURL;
 

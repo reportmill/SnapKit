@@ -3,6 +3,8 @@
  */
 package snap.viewx;
 import snap.gfx.*;
+import snap.text.TextBoxLine;
+import snap.text.TextSel;
 import snap.util.*;
 import snap.view.*;
 import snap.web.*;

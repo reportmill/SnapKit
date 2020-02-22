@@ -1,8 +1,10 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.gfx;
+package snap.text;
 import java.util.Arrays;
+
+import snap.gfx.HPos;
 import snap.util.*;
 
 /**
@@ -11,7 +13,7 @@ import snap.util.*;
 public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
 
     // Horizontal text alignment
-    HPos                 _align = HPos.LEFT;
+    HPos _align = HPos.LEFT;
     
     // Whether text in line should be justified
     boolean              _justify;

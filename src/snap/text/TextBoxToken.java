@@ -1,7 +1,10 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.gfx;
+package snap.text;
+
+import snap.gfx.Color;
+import snap.gfx.Font;
 
 /**
  * A class to represent a word in a line of text.
@@ -24,10 +27,10 @@ public class TextBoxToken {
     TextStyle       _style;
     
     // The color for this token
-    Color           _color;
+    Color _color;
     
     // The font for this token
-    Font            _font;
+    Font _font;
     
     // The scripting of this run
     int             _scripting;

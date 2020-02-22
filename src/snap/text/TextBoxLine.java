@@ -1,8 +1,10 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.gfx;
+package snap.text;
 import java.util.*;
+
+import snap.gfx.HPos;
 import snap.util.MathUtils;
 
 /**
@@ -247,7 +249,7 @@ public void resetSizes()
     }
     
     // Calculate X alignment shift
-    else if(_rtline.getAlignX()!=HPos.LEFT && _tbox.getWidth()<9999) {
+    else if(_rtline.getAlignX()!= HPos.LEFT && _tbox.getWidth()<9999) {
         double ax = _rtline.getAlignX().asDouble(), y = getY();
         double tmx = _tbox.getMaxHitX(y, _height), lmx = getMaxX(), rem = tmx - lmx;
         _alignX = Math.round(ax*rem);

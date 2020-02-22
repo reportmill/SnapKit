@@ -1,7 +1,10 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.gfx;
+package snap.text;
+
+import snap.gfx.Color;
+import snap.gfx.Font;
 
 /**
  * This class represents a range of characters in a TextBoxLine that have the same style.

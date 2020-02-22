@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.gfx.*;
+import snap.text.*;
 import snap.util.*;
 import snap.web.*;
 

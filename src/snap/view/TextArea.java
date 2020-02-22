@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.gfx.*;
+import snap.text.*;
 import snap.util.*;
 import snap.web.*;
 
@@ -12,7 +13,7 @@ import snap.web.*;
 public class TextArea extends View {
 
     // The text being edited
-    TextBox               _tbox;
+    TextBox _tbox;
     
     // Whether text is editable
     boolean               _editable;

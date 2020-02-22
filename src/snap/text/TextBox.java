@@ -1,8 +1,10 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.gfx;
+package snap.text;
 import java.util.*;
+
+import snap.gfx.*;
 import snap.util.*;
 import snap.web.*;
 
@@ -24,7 +26,7 @@ public class TextBox {
     boolean              _hyphenate;
     
     // They y alignment
-    VPos                 _alignY = VPos.TOP;
+    VPos _alignY = VPos.TOP;
     
     // The y alignment amount
     double               _alignedY;
@@ -39,7 +41,7 @@ public class TextBox {
     double               _fontScale = 1;
     
     // The bounds path
-    Shape                _bpath;
+    Shape _bpath;
 
     // The lines in this text
     List <TextBoxLine>   _lines = new ArrayList();

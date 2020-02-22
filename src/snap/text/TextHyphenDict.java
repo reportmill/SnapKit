@@ -6,7 +6,7 @@
  * Licensed under the GNU LGPL v2.1. You can find the text of this
  * license at http://www.gnu.org/copyleft/lesser.html
  * ================================================================== */
-package snap.gfx;
+package snap.text;
 import java.io.*;
 import java.util.*;
 import snap.util.*;

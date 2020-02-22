@@ -1,7 +1,11 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.gfx;
+package snap.text;
+
+import snap.gfx.Border;
+import snap.gfx.Color;
+import snap.gfx.Font;
 
 /**
  * The Run class represents a range of characters in an TextLine that share common attributes.

@@ -1,8 +1,12 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.gfx;
+package snap.text;
 import java.util.Map;
+
+import snap.gfx.Border;
+import snap.gfx.Color;
+import snap.gfx.Font;
 import snap.util.SnapUtils;
 
 /**
@@ -11,10 +15,10 @@ import snap.util.SnapUtils;
 public class TextStyle implements Cloneable {
 
     // The font
-    Font               _font = Font.Arial12;
+    Font _font = Font.Arial12;
     
     // The color
-    Color              _color = Color.BLACK;
+    Color _color = Color.BLACK;
     
     // Underline style
     int                _underline;
@@ -32,7 +36,7 @@ public class TextStyle implements Cloneable {
     TextFormat         _format;
     
     // The text border (outline)
-    Border             _border;
+    Border _border;
     
     // Constants for style attribute keys
     public static final String FONT_KEY = "Font";

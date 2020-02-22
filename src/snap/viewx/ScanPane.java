@@ -2,6 +2,7 @@ package snap.viewx;
 import java.io.*;
 import java.util.Arrays;
 import snap.gfx.*;
+import snap.text.TextStyle;
 import snap.view.*;
 
 /**

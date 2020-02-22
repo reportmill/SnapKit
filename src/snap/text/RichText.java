@@ -1,8 +1,13 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.gfx;
+package snap.text;
 import java.util.*;
+
+import snap.gfx.Border;
+import snap.gfx.Color;
+import snap.gfx.Font;
+import snap.gfx.HPos;
 import snap.util.*;
 import snap.web.*;
 
