@@ -192,7 +192,7 @@ public class TextHyphenDict {
     private void loadHyphenDict() throws IOException
     {
         // Get bytes for aSource
-        byte bytes[] = SnapUtils.getBytes(WebURL.getURL(getClass(), "hyph_en_US.dic"));
+        byte bytes[] = SnapUtils.getBytes(WebURL.getURL(getClass(), "TextHyphenDict_US.dic"));
         
         // Get Charset
         String charset = null;
@@ -276,16 +276,15 @@ public class TextHyphenDict {
         }
         
         // put in fallback states
-        Iterator it = hashmap.keySet().iterator();
-        while(it.hasNext()) {
-            String key = (String)it.next();
-            HyphenState e = (HyphenState)hashmap.get(key);
-            for(int j=1; true; j++) {
-                if(j > key.length()) {
+        for (Object obj : hashmap.keySet()) {
+            String key = (String) obj;
+            HyphenState e = (HyphenState) hashmap.get(key);
+            for (int j = 1; true; j++) {
+                if (j > key.length()) {
                     break;
                 }
-                HyphenState state = (HyphenState)hashmap.get(key.substring(j));
-                if(state != null) {
+                HyphenState state = (HyphenState) hashmap.get(key.substring(j));
+                if (state != null) {
                     e.fallbackState = state;
                     break;
                 }
