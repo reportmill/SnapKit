@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpringView width="330" height="220" PrefWidth="330" PrefHeight="220">
+  <Label x="5" y="3" width="131" height="20" text="Not in Dictionary:" />
+  <TextField Name="WordText" x="5" y="23" width="215" height="22" GrowWidth="true" />
+  <ListView Name="SuggestionList" x="5" y="68" width="215" height="147" GrowWidth="true" GrowHeight="true">
+    <font name="Arial" size="12" />
+  </ListView>
+  <Label x="5" y="46" width="131" height="20" text="Suggestions:" />
+  <Button Name="FindNextButton" x="230" y="23" width="90" height="22" LeanX="RIGHT" text="Find Next" />
+  <Button Name="CorrectButton" x="230" y="55" width="90" height="22" LeanX="RIGHT" text="Correct" />
+  <Button Name="LearnButton" x="230" y="88" width="90" height="22" LeanX="RIGHT" text="Learn" />
+  <Button Name="CloseButton" x="230" y="193" width="90" height="22" LeanX="RIGHT" LeanY="BOTTOM" text="Close" />
+</SpringView>

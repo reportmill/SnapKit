@@ -933,13 +933,13 @@ public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
         
         // Unarchive font element
         else if(e.getName().equals("font")) {
-            Font font = (Font)anArchiver.fromXML(e, null);
+            Font font = anArchiver.fromXML(e, Font.class, null);
             style = style.copyFor(font);
         }
         
         // Unarchive color element
         else if(e.getName().equals("color")) {
-            Color color = (Color)anArchiver.fromXML(e, null);
+            Color color = anArchiver.fromXML(e, Color.class,null);
             style = style.copyFor(color);
         }
         
