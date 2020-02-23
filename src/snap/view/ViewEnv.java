@@ -3,7 +3,7 @@
  */
 package snap.view;
 import java.util.*;
-import snap.gfx.Rect;
+import snap.geom.Rect;
 import snap.util.*;
 import snap.web.WebURL;
 

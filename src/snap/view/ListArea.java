@@ -5,6 +5,9 @@ package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import snap.geom.Insets;
+import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -24,7 +27,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     double                _rowHeight;
     
     // The cell padding
-    Insets                _cellPad = getCellPaddingDefault();
+    Insets _cellPad = getCellPaddingDefault();
     
     // The function to format text
     Function <T,String>   _itemTextFunc;

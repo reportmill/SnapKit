@@ -1,4 +1,4 @@
-package snap.gfx;
+package snap.geom;
 
 /**
  * A Segment is a Shape subclass that represents a part of a path: line, quadratic, cubic.

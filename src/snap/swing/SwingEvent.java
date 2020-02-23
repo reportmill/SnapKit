@@ -75,10 +75,10 @@ private Point getLocation()
 /**
  * Returns the location for a mouse event or drop event.
  */
-protected snap.gfx.Point getPointImpl()
+protected snap.geom.Point getPointImpl()
 {
     Point pnt = getLocation();
-    return new snap.gfx.Point(pnt.getX(), pnt.getY());
+    return new snap.geom.Point(pnt.getX(), pnt.getY());
 }
 
 /**

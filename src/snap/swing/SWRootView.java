@@ -5,7 +5,7 @@ import java.awt.event.*;
 import javax.swing.JComponent;
 import javax.swing.ToolTipManager;
 import snap.gfx.Painter;
-import snap.gfx.Rect;
+import snap.geom.Rect;
 import snap.view.*;
 
 /**

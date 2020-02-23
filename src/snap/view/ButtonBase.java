@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.geom.Insets;
+import snap.geom.Pos;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -20,7 +22,7 @@ public class ButtonBase extends ParentView {
     boolean                 _showArea = getDefaultShowArea();
     
     // The position of the button when in a group (determines corner rendering)
-    Pos                     _pos;
+    Pos _pos;
     
     // The radius of the button rounding
     double                  _rad = 4;

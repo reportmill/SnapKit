@@ -3,6 +3,9 @@
  */
 package snap.viewx;
 import java.util.*;
+
+import snap.geom.Path;
+import snap.geom.Point;
 import snap.gfx.*;
 
 /**
@@ -20,7 +23,7 @@ class SnapPen {
     double          _width = 5;
 
     // The current path
-    Path            _path;
+    Path _path;
     
     // The group of paths
     List <PenPath>  _paths = Collections.EMPTY_LIST;

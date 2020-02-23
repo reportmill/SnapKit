@@ -7,7 +7,7 @@ import java.util.*;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.gfx.HPos;
+import snap.geom.HPos;
 import snap.util.*;
 import snap.web.*;
 

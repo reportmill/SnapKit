@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.Pos;
+import snap.geom.Pos;
 
 /**
  * A class to represent a TabView tab.

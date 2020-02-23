@@ -1,4 +1,4 @@
-package snap.gfx;
+package snap.geom;
 
 /**
  * A Shape implementation to present another shape in a given rect.

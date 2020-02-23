@@ -5,7 +5,8 @@ package snap.swing;
 import java.awt.*;
 import java.util.EventObject;
 import javax.swing.*;
-import snap.gfx.*;
+
+import snap.geom.Rect;
 import snap.view.*;
 
 /**
@@ -97,7 +98,7 @@ public void activateApp(View aView)
     
     // Get screen point to click on
     aWin.setAlwaysOnTop(true);
-    snap.gfx.Point point2 = aWin.localToScreen(2,2); point2.x += 100; // bogus
+    snap.geom.Point point2 = aWin.localToScreen(2,2); point2.x += 100; // bogus
     java.awt.Point point1 = java.awt.MouseInfo.getPointerInfo().getLocation();
     
     // Get robot and perform mouse press

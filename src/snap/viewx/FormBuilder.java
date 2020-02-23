@@ -3,6 +3,8 @@
  */
 package snap.viewx;
 import java.util.*;
+
+import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.SnapUtils;
 import snap.view.Button;

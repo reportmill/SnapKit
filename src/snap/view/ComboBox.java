@@ -4,6 +4,9 @@
 package snap.view;
 import java.util.*;
 import java.util.function.*;
+
+import snap.geom.Polygon;
+import snap.geom.Pos;
 import snap.gfx.*;
 import snap.util.*;
 

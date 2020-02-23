@@ -1,4 +1,4 @@
-package snap.gfx;
+package snap.geom;
 import java.util.List;
 import snap.util.ArrayUtils;
 

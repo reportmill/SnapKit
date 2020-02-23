@@ -3,6 +3,10 @@
  */
 package snap.gfx;
 
+import snap.geom.Rect;
+import snap.geom.Shape;
+import snap.geom.Transform;
+
 /**
  * A Painter subclass that forward on to another.
  */

@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
+import snap.geom.HPos;
+import snap.geom.Pos;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
 import snap.view.BorderView;

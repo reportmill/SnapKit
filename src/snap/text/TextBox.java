@@ -4,6 +4,10 @@
 package snap.text;
 import java.util.*;
 
+import snap.geom.Path;
+import snap.geom.Rect;
+import snap.geom.Shape;
+import snap.geom.VPos;
 import snap.gfx.*;
 import snap.util.*;
 import snap.web.*;

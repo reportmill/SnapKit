@@ -1,4 +1,6 @@
 package snap.view;
+import snap.geom.Line;
+import snap.geom.Pos;
 import snap.gfx.*;
 
 /**
@@ -10,7 +12,7 @@ public class LineView extends View {
     double         _x0, _y0, _x1, _y1;
 
     // The line
-    Line           _line;
+    Line _line;
     
 /**
  * Creates a new LineView.

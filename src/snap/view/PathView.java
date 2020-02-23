@@ -2,7 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.*;
+import snap.geom.Insets;
+import snap.geom.Path;
+import snap.geom.Rect;
+import snap.geom.Shape;
 import snap.util.*;
 
 /**
@@ -11,7 +14,7 @@ import snap.util.*;
 public class PathView extends View {
     
     // The path shape
-    Path        _path;
+    Path _path;
 
 /**
  * Returns the path.

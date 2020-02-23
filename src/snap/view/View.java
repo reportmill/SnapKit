@@ -3,6 +3,8 @@
  */
 package snap.view;
 import java.util.*;
+
+import snap.geom.*;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -43,7 +45,7 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     HPos            _leanX;
     
     // The vertical position this view would prefer to take when inside a pane
-    VPos            _leanY;
+    VPos _leanY;
     
     // Whether this view would like to grow horizontally/vertically if possible when inside a pane
     boolean         _growWidth, _growHeight;
@@ -121,7 +123,7 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     String          _ttip;
     
     // The clip (if set)
-    Shape           _clip;
+    Shape _clip;
     
     // Bindings for this view
     List <Binding>  _bindings = Collections.EMPTY_LIST;
@@ -145,7 +147,7 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     ViewAnim        _anim;
     
     // The current rect that needs to be repainted in this view
-    Rect            _repaintRect;
+    Rect _repaintRect;
     
     // Provides information for physics simulations
     ViewPhysics     _physics;

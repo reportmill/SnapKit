@@ -3,6 +3,9 @@
  */
 package snap.view;
 import java.util.*;
+
+import snap.geom.Path;
+import snap.geom.Point;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -41,7 +44,7 @@ public class ThumbWheel extends View {
     boolean          _showMainDash = true;
 
     // Mouse location at last press
-    Point            _pressedMousePoint;
+    Point _pressedMousePoint;
     
     // Value at last press
     double           _pressedValue;

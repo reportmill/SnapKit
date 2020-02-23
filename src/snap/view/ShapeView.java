@@ -2,7 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.*;
+import snap.geom.Insets;
+import snap.geom.Rect;
+import snap.geom.Shape;
 import snap.util.*;
 
 /**
@@ -11,7 +13,7 @@ import snap.util.*;
 public class ShapeView extends View {
     
     // The shape
-    Shape       _shape;
+    Shape _shape;
     
     // Whether to expand shape to view bounds
     boolean     _fillWidth, _fillHeight;

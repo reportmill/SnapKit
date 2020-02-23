@@ -1,4 +1,5 @@
 package snap.view;
+import snap.geom.*;
 import snap.gfx.*;
 import snap.util.MathUtils;
 
@@ -17,16 +18,16 @@ public class ViewProxy {
     private ViewProxy   _children[];
 
     // The insets
-    private Insets       _insets;
+    private Insets _insets;
 
     // The alignment
-    private Pos          _align;
+    private Pos _align;
 
     // The horizontal position this view would prefer to take when inside a pane
-    private HPos         _leanX;
+    private HPos _leanX;
 
     // The vertical position this view would prefer to take when inside a pane
-    private VPos         _leanY;
+    private VPos _leanY;
 
     // The margin
     private Insets       _margin;

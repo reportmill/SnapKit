@@ -1,4 +1,4 @@
-package snap.gfx;
+package snap.geom;
 
 /**
  * A Segment representing a Quadratic curve.

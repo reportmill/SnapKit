@@ -1,5 +1,8 @@
 package snap.view;
 import java.util.*;
+
+import snap.geom.Rect;
+import snap.geom.Shape;
 import snap.gfx.*;
 
 /**
@@ -36,7 +39,7 @@ public class ViewUpdater {
 
     // Whether painting in debug mode
     static boolean           _debug = false; static int _pc; static long _frames[] = null;//new long[20];
-    Rect                     _debugRepaintRect;
+    Rect _debugRepaintRect;
 
 /**
  * Creates a ViewUpdater.

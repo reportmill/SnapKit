@@ -1,4 +1,4 @@
-package snap.gfx;
+package snap.geom;
 
 // Constants for segments
 public enum Seg {

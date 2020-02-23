@@ -4,6 +4,11 @@
 package snap.view;
 import java.lang.reflect.Array;
 import java.util.*;
+
+import snap.geom.Point;
+import snap.geom.Pos;
+import snap.geom.Rect;
+import snap.geom.Size;
 import snap.gfx.*;
 import snap.util.*;
 import snap.web.WebURL;
@@ -44,7 +49,7 @@ public class WindowView extends ParentView {
     boolean                   _maximized;
     
     // The bounds for maximized window
-    Rect                      _maxBounds, _unmaxBounds;
+    Rect _maxBounds, _unmaxBounds;
     
     // The Frame save name
     String                    _saveName;

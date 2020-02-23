@@ -4,6 +4,8 @@
 package snap.view;
 import java.io.File;
 import java.util.*;
+
+import snap.geom.Point;
 import snap.gfx.*;
 import snap.web.MIMEType;
 
@@ -16,7 +18,7 @@ public abstract class Clipboard {
     Image                       _img;
     
     // The point that the drag image should be dragged by
-    Point                       _imgOffset = new Point();
+    Point _imgOffset = new Point();
     
     // The ClipboardData objects
     Map <String,ClipboardData>  _cdatas = new HashMap();

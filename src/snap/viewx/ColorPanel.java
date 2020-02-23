@@ -3,6 +3,9 @@
  */
 package snap.viewx;
 import java.util.*;
+
+import snap.geom.Rect;
+import snap.geom.RoundRect;
 import snap.gfx.*;
 import snap.view.*;
 

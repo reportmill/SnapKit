@@ -3,7 +3,8 @@
  */
 package snap.view;
 import java.text.DecimalFormat;
-import snap.gfx.*;
+
+import snap.geom.Pos;
 import snap.util.*;
 
 /**

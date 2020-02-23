@@ -3,6 +3,9 @@
  */
 package snap.view;
 import java.util.*;
+
+import snap.geom.Point;
+import snap.geom.Size;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -15,10 +18,10 @@ public class MenuButton extends ButtonBase {
     boolean              _showArrow;
 
     // The popup point
-    Point                _popPoint;
+    Point _popPoint;
     
     // The popup size
-    Size                 _popSize;
+    Size _popSize;
     
     // The items
     List <MenuItem>      _items = new ArrayList();

@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.geom.Insets;
+import snap.geom.Size;
 import snap.gfx.*;
 import snap.util.*;
 

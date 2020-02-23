@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.Rect;
+import snap.geom.Rect;
 
 /**
  * The top level View in a window.

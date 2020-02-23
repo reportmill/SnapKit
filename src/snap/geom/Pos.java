@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.gfx;
-import static snap.gfx.HPos.*;
-import static snap.gfx.VPos.*;
+package snap.geom;
+import static snap.geom.HPos.*;
+import static snap.geom.VPos.*;
 
 /**
  * A class to represent a position on both horizonal and vertical axis (e.g. TOP_LEFT, BOTTOM_RIGHT, etc.).

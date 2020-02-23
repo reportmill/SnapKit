@@ -3,6 +3,10 @@
  */
 package snap.viewx;
 import java.util.*;
+
+import snap.geom.Insets;
+import snap.geom.Point;
+import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.Prefs;
 import snap.util.SnapUtils;
@@ -27,7 +31,7 @@ public class ColorDock extends View {
     ColorWell               _colorWell;
     
     // The drag point (swatch) in color dock
-    Point                   _dragPoint = null;
+    Point _dragPoint = null;
     
     // Indicates that this well is the current drag source
     boolean                 _dragging;

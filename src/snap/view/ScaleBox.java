@@ -2,8 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.Insets;
-import snap.gfx.Size;
+import snap.geom.Insets;
+import snap.geom.Size;
 
 /**
  * A Box subclass that scales it's content instead of resize.

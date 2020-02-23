@@ -2,6 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import snap.geom.Path;
+import snap.geom.Rect;
+import snap.geom.Shape;
+
 import java.util.*;
 
 /**
@@ -23,7 +27,7 @@ public abstract class FontFile {
     float                 _charWidths[] = new float[0];
     
     // Cached glyph paths
-    Map <Character,Shape> _glyphPaths = new Hashtable();
+    Map <Character, Shape> _glyphPaths = new Hashtable();
     
     // Cached map of all previously encountered font files
     static Map            _allFontFiles = new Hashtable();

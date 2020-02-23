@@ -2,8 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.gfx.RoundRect;
-import snap.gfx.Shape;
+import snap.geom.RoundRect;
+import snap.geom.Shape;
 
 /**
  * A View subclass for rects.

@@ -2,6 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import snap.geom.Line;
+import snap.geom.Rect;
+import snap.geom.Shape;
+import snap.geom.Transform;
+
 import java.util.*;
 
 /**
@@ -19,10 +24,10 @@ public abstract class Painter {
     boolean        _printing;
     
     // A shared rect for draw/fill/clipRect calls
-    Rect           _rect = new Rect();
+    Rect _rect = new Rect();
     
     // A shared line for drawLine calls
-    Line           _line = new Line(0, 0, 0, 0);
+    Line _line = new Line(0, 0, 0, 0);
     
     // Constants for composite
     public enum Composite { SRC_OVER, SRC_IN, DST_IN }

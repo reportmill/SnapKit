@@ -2,6 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import snap.geom.Insets;
+import snap.geom.Rect;
+import snap.geom.RectBase;
+import snap.geom.Shape;
 import snap.util.*;
 
 /**
@@ -10,7 +14,7 @@ import snap.util.*;
 public abstract class Border implements XMLArchiver.Archivable {
     
     // Cached version of insets
-    Insets           _insets = null;
+    Insets _insets = null;
     
     // Whether to paint above view
     boolean          _paintAbove;

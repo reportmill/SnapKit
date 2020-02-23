@@ -3,6 +3,10 @@
  */
 package snap.gfx;
 import java.util.*;
+
+import snap.geom.Rect;
+import snap.geom.Shape;
+import snap.geom.Transform;
 import snap.util.SnapUtils;
 import snap.util.StringUtils;
 

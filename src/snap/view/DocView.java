@@ -3,8 +3,8 @@
  */
 package snap.view;
 import java.util.*;
-import snap.gfx.Insets;
-import snap.gfx.Pos;
+import snap.geom.Insets;
+import snap.geom.Pos;
 import snap.util.*;
 
 /**

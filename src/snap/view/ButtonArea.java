@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.geom.*;
 import snap.gfx.*;
 
 /**
@@ -22,7 +23,7 @@ public class ButtonArea {
     double        _rad = 4;
     
     // The position of the button when in a group (determines corner rendering).
-    Pos           _pos;
+    Pos _pos;
     
     // The button state with regard to mouse (mouse over, mouse pressed)
     int           _state = Button.BUTTON_NORMAL;
@@ -31,10 +32,10 @@ public class ButtonArea {
     boolean       _selected;
     
     // The button shape
-    RoundRect     _rect = new RoundRect();
+    RoundRect _rect = new RoundRect();
     
     // The center shape (RadioButton)
-    Shape         _radioShape;
+    Shape _radioShape;
     
     // The button fill
     Paint         _fill = BUTTON_FILL;

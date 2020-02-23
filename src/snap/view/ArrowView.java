@@ -1,4 +1,6 @@
 package snap.view;
+import snap.geom.Polygon;
+import snap.geom.Pos;
 import snap.gfx.*;
 import snap.util.*;
 

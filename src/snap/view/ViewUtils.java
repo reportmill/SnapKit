@@ -4,6 +4,8 @@
 package snap.view;
 import java.text.DecimalFormat;
 import java.util.*;
+
+import snap.geom.*;
 import snap.gfx.*;
 import snap.web.WebFile;
 

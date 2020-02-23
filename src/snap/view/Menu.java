@@ -3,6 +3,9 @@
  */
 package snap.view;
 import java.util.*;
+
+import snap.geom.Polygon;
+import snap.geom.Pos;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -15,7 +18,7 @@ public class Menu extends MenuItem {
     List <MenuItem>        _items = new ArrayList();
     
     // The Arrow graphic
-    static Polygon         _arrow = new Polygon(0, 0, 9, 5, 0, 10);
+    static Polygon _arrow = new Polygon(0, 0, 9, 5, 0, 10);
 
 /**
  * Creates a new Menu.

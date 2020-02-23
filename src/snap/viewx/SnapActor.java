@@ -3,6 +3,8 @@
  */
 package snap.viewx;
 import java.util.*;
+
+import snap.geom.Point;
 import snap.gfx.*;
 import snap.view.*;
 

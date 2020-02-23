@@ -3,6 +3,8 @@
  */
 package snap.view;
 import java.util.*;
+
+import snap.geom.*;
 import snap.gfx.*;
 import snap.util.*;
 

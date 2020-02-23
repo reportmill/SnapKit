@@ -2,6 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
+import snap.geom.HPos;
+import snap.geom.Path;
+import snap.geom.Rect;
+import snap.geom.Shape;
 import snap.gfx.*;
 import snap.util.*;
 import snap.view.*;

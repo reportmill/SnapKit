@@ -3,6 +3,8 @@
  */
 package snap.gfx;
 
+import snap.geom.Rect;
+
 /**
  * A class to represent a fill for a Shape or text (Color, GradientPaint, ImagePaint).
  */

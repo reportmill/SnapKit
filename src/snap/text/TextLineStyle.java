@@ -4,7 +4,7 @@
 package snap.text;
 import java.util.Arrays;
 
-import snap.gfx.HPos;
+import snap.geom.HPos;
 import snap.util.*;
 
 /**

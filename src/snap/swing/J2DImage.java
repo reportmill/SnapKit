@@ -8,6 +8,7 @@ import javax.imageio.stream.ImageInputStream;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import snap.geom.Point;
 import snap.gfx.*;
 
 /**

@@ -1,4 +1,5 @@
 package snap.view;
+import snap.geom.Rect;
 import snap.gfx.*;
 
 /**

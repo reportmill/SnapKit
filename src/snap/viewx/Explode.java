@@ -1,5 +1,9 @@
 package snap.viewx;
 import java.util.*;
+
+import snap.geom.Point;
+import snap.geom.Rect;
+import snap.geom.Transform;
 import snap.gfx.*;
 import snap.util.Interpolator;
 import snap.view.*;
@@ -42,7 +46,7 @@ public class Explode extends View {
     double      _iw, _ih, _vw, _vh;
     
     // The offset from this view to explode view
-    Point       _offset;
+    Point _offset;
     double      _scale = 1;
     
     // The array of fragments

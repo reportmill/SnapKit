@@ -8,6 +8,10 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
+
+import snap.geom.Rect;
+import snap.geom.Shape;
+import snap.geom.Transform;
 import snap.gfx.*;
 
 /**

@@ -1,4 +1,5 @@
 package snap.viewx;
+import snap.geom.Size;
 import snap.gfx.*;
 
 /**

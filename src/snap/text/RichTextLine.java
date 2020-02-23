@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import snap.gfx.HPos;
+import snap.geom.HPos;
 
 import java.util.*;
 

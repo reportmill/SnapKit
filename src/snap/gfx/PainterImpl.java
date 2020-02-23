@@ -2,6 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
+import snap.geom.Rect;
+import snap.geom.Shape;
+import snap.geom.Transform;
+
 import java.util.Arrays;
 
 /**
@@ -19,7 +23,7 @@ public abstract class PainterImpl extends Painter {
     protected int         _gsize;
     
     // The current marked shape
-    Shape                 _mshape;
+    Shape _mshape;
     
     // Whether marked shape is opaque
     boolean               _opaque = true;

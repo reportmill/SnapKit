@@ -1,4 +1,4 @@
-package snap.gfx;
+package snap.geom;
 
 /**
  * A class to represent hit information for Segment intersections.

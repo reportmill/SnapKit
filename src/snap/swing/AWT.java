@@ -9,6 +9,8 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
+
+import snap.geom.*;
 import snap.gfx.*;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;

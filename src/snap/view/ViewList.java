@@ -1,6 +1,9 @@
 package snap.view;
 import java.util.*;
-import snap.gfx.*;
+
+import snap.geom.Point;
+import snap.geom.Rect;
+import snap.geom.Shape;
 import snap.util.ArrayUtils;
 
 /**

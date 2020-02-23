@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import snap.gfx.Color;
 import snap.gfx.Paint;
-import snap.gfx.Pos;
+import snap.geom.Pos;
 import snap.util.*;
 
 /**

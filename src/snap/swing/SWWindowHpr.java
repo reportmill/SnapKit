@@ -3,6 +3,10 @@ import java.awt.Window;
 import java.awt.event.*;
 import java.io.File;
 import javax.swing.*;
+
+import snap.geom.Insets;
+import snap.geom.Point;
+import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
 import snap.view.*;

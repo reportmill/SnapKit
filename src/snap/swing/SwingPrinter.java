@@ -2,7 +2,7 @@ package snap.swing;
 import java.awt.print.*;
 import javax.print.*;
 import snap.gfx.Painter;
-import snap.gfx.Size;
+import snap.geom.Size;
 import snap.viewx.*;
 
 /**

@@ -1,5 +1,5 @@
 package snap.view;
-import snap.gfx.Arc;
+import snap.geom.Arc;
 
 /**
  * A view to show an Arc.

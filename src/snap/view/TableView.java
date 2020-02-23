@@ -4,6 +4,10 @@
 package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
+
+import snap.geom.Insets;
+import snap.geom.Point;
+import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -31,7 +35,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     double                  _rowHeight, _rowHeightCached = -1;
 
     // The cell padding
-    Insets                  _cellPad = ListArea.CELL_PAD_DEFAULT;
+    Insets _cellPad = ListArea.CELL_PAD_DEFAULT;
     
     // An optional method hook to configure cell
     Consumer <ListCell<T>>  _cellConf;

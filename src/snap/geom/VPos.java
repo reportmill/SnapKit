@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.gfx;
+package snap.geom;
 
 /**
  * A class to represent a vertical position (TOP, CENTER, BOTTOM).

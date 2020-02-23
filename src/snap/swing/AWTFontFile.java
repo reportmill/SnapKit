@@ -6,8 +6,8 @@ import java.awt.geom.Point2D;
 import java.awt.image.*;
 import java.util.*;
 import snap.gfx.FontFile;
-import snap.gfx.Path;
-import snap.gfx.Shape;
+import snap.geom.Path;
+import snap.geom.Shape;
 import snap.util.*;
 
 /**

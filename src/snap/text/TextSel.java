@@ -3,7 +3,7 @@
  */
 package snap.text;
 
-import snap.gfx.Path;
+import snap.geom.Path;
 
 /**
  * A class to represent a selection of text.
