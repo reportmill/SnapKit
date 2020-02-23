@@ -108,7 +108,7 @@ public void setRichText(RichText aRichText)
     
     // Add/remove PropChangeListener
     if(old!=null) old.removePropChangeListener(_richTextPropLsnr);
-    getTextBox().setText(aRichText);
+    getTextBox().setRichText(aRichText);
     if(aRichText!=null) aRichText.addPropChangeListener(_richTextPropLsnr);
     
     // Reset selection

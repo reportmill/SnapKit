@@ -62,7 +62,7 @@ public class TextBox {
 /**
  * Creates a new TextBox.
  */
-public TextBox()  { setText(new RichText()); }
+public TextBox()  { setRichText(new RichText()); }
 
 /**
  * Creates a new TextBox initialized with the given String and no attributes.
@@ -101,7 +101,7 @@ public RichText getRichText()  { return _text; }
 /**
  * Sets the RichText.
  */
-public void setText(RichText aRichText)
+public void setRichText(RichText aRichText)
 {
     if(aRichText==_text) return;
     if(_text!=null) _text.removePropChangeListener(_richTextLsnr);
