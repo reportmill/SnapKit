@@ -113,7 +113,7 @@ public void doCorrection()
     // Replace in text editor
     if(_word!=null && correctWord!=null) {
         textEditor.setSel(_word.getStart(), _word.getEnd());
-        textEditor.replace(correctWord);
+        textEditor.replaceChars(correctWord);
     }
     
     // Find next misspelling

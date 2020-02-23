@@ -318,12 +318,12 @@ public void setSelStyleValue(String aKey, Object aValue)  { _textArea.setSelStyl
 /**
  * Returns the TextLineStyle for currently selection.
  */
-public TextLineStyle getLineStyle()  { return _textArea.getLineStyle(); }
+public TextLineStyle getLineStyle()  { return _textArea.getSelLineStyle(); }
 
 /**
  * Sets the line attributes that are applied to current selection or newly typed chars.
  */
-public void setLineStyleValue(String aKey, Object aValue)  { _textArea.setLineStyleValue(aKey, aValue); }
+public void setLineStyleValue(String aKey, Object aValue)  { _textArea.setSelLineStyleValue(aKey, aValue); }
 
 /**
  * Adds the given string to end of text.

@@ -14,53 +14,71 @@ import snap.web.*;
 public class TextArea extends View {
 
     // The text being edited
-    TextBox _tbox;
+    private TextBox _tbox;
     
     // Whether text is editable
-    boolean               _editable;
+    private boolean _editable;
     
     // Whether text should wrap lines that overrun bounds
-    boolean               _wrapLines;
+    private boolean _wrapLines;
     
-    // The selection char indexes
-    int                   _selIndex, _selAnchor, _selStart, _selEnd;
+    // The char index of carat
+    private int _selIndex;
+
+    // The char index of last char selection
+    private int _selAnchor;
+
+    // The char index of current selection start/end
+    private int _selStart, _selEnd;
     
     // The text selection
-    TextSel               _sel;
+    private TextSel _sel;
     
     // Whether the editor is word selecting (double click) or paragraph selecting (triple click)
-    boolean               _wordSel, _pgraphSel;
+    private boolean _wordSel, _pgraphSel;
     
     // The current TextStyle for the cursor or selection
-    TextStyle             _selStyle;
+    private TextStyle _selStyle;
     
     // The Selection color
-    Color                 _selColor = new Color(181, 214, 254, 255);
+    private Color _selColor = new Color(181, 214, 254, 255);
     
     // The text pane undoer
-    Undoer                _undoer = new Undoer();
+    private Undoer _undoer = new Undoer();
     
     // The index of the last replace so we can commit undo changes if not adjacent
-    int                   _lastReplaceIndex;
+    private int _lastReplaceIndex;
     
     // The mouse down point
-    double                _downX, _downY;
+    private double _downX, _downY;
     
     // The animator for caret blinking
-    ViewTimer             _caretTimer;
+    private ViewTimer _caretTimer;
     
     // Whether to show text insertion point caret
-    boolean               _showCaret;
+    private boolean _showCaret;
     
     // Whether to send action on enter key press
-    boolean               _fireActionOnEnterKey;
+    private boolean _fireActionOnEnterKey;
 
     // Whether to send action on focus lost (if content changed)
-    boolean               _fireActionOnFocusLost;
+    private boolean _fireActionOnFocusLost;
     
     // The content on focus gained
-    String                _focusGainedText;
-    
+    private String _focusGainedText;
+
+    // Whether RM should be spell checking
+    public static boolean isSpellChecking = Prefs.get().getBoolean("SpellChecking", false);
+
+    // Whether hyphenating is activated
+    static boolean _hyphenating = Prefs.get().getBoolean("Hyphenating", false);
+
+    // The MIME type for SnapKit RichText
+    public static final String SNAP_RICHTEXT_TYPE = "reportmill/xstring";
+
+    // The PropChangeListener to catch RichText PropChanges.
+    private PropChangeListener _richTextPropLsnr = pce -> richTextPropChange(pce);
+
     // Constants for properties
     public static final String Editable_Prop = "Editable";
     public static final String WrapLines_Prop = "WrapLines";
@@ -74,9 +92,9 @@ public class TextArea extends View {
 public TextArea()
 {
     // Create/set default TextBox
-    _tbox = createTextBox();
-    _tbox.getRichText().addPropChangeListener(_richTextPropLsnr);
-    
+    TextBox tbox = createTextBox();
+    setTextBox(tbox);
+
     // Configure
     setPlainText(true);
     setFont(getDefaultFont());
@@ -87,6 +105,22 @@ public TextArea()
  * Returns the text that is being edited.
  */
 public TextBox getTextBox()  { return _tbox; }
+
+/**
+ * Returns the text box used to layout text.
+ */
+public void setTextBox(TextBox aTextBox)
+{
+    // Set TextBox
+    _tbox = aTextBox;
+
+    // Remove PropChangeListener from old RichText
+    RichText old = getRichText();
+    if (old!=null) old.removePropChangeListener(_richTextPropLsnr);
+
+    // Add PropChangeListener to new RichText
+    _tbox.getRichText().addPropChangeListener(_richTextPropLsnr);
+}
 
 /**
  * Creates a new TextBox.
@@ -104,15 +138,15 @@ public RichText getRichText()  { return getTextBox().getRichText(); }
 public void setRichText(RichText aRichText)
 {
     // If already set, just return
-    RichText old = getRichText(); if(aRichText==old) return;
+    RichText old = getRichText(); if (aRichText==old) return;
     
     // Add/remove PropChangeListener
-    if(old!=null) old.removePropChangeListener(_richTextPropLsnr);
+    if (old!=null) old.removePropChangeListener(_richTextPropLsnr);
     getTextBox().setRichText(aRichText);
-    if(aRichText!=null) aRichText.addPropChangeListener(_richTextPropLsnr);
+    if (aRichText!=null) aRichText.addPropChangeListener(_richTextPropLsnr);
     
     // Reset selection
-    if(getSelStart()!=0 || !isSelEmpty()) setSel(0);
+    if (getSelStart()!=0 || !isSelEmpty()) setSel(0);
     repaint();
 }
 
@@ -157,14 +191,14 @@ public void setText(String aString)
 {
     // If string already set, just return
     String str = aString!=null? aString : "";
-    if(str.length()==length() && (str.length()==0 || str.equals(getText()))) return;
+    if (str.length()==length() && (str.length()==0 || str.equals(getText()))) return;
     
     // Set string and notify textDidChange
     getTextBox().setString(aString);
     textDidChange();
     
     // Reset selection (to line end if single-line, otherwise text start)
-    int sindex = getTextBox().getLineCount()==1 && length()<40? length() : 0;
+    int sindex = getTextBox().getLineCount()==1 && length()<40 ? length() : 0;
     setSel(sindex);
 }
 
@@ -178,18 +212,22 @@ public boolean isEditable()  { return _editable; }
  */
 public void setEditable(boolean aValue)
 {
-    if(aValue==isEditable()) return;
+    if (aValue==isEditable()) return;
     firePropChange(Editable_Prop, _editable, _editable=aValue);
     
     // If editable, set some related attributes
-    if(aValue) {
+    if (aValue) {
         enableEvents(MouseEvents); enableEvents(KeyEvents);
-        setFocusable(true); setFocusWhenPressed(true); setFocusKeysEnabled(false);
+        setFocusable(true);
+        setFocusWhenPressed(true);
+        setFocusKeysEnabled(false);
     }
     
     else {
         disableEvents(MouseEvents); disableEvents(KeyEvents);
-        setFocusable(false); setFocusWhenPressed(false); setFocusKeysEnabled(false);
+        setFocusable(false);
+        setFocusWhenPressed(false);
+        setFocusKeysEnabled(true);
     }
 }
 
@@ -207,6 +245,11 @@ public void setWrapLines(boolean aValue)
     firePropChange(WrapLines_Prop, _wrapLines, _wrapLines=aValue);
     getTextBox().setWrapLines(aValue);
 }
+
+/**
+ * Returns whether editor is doing check-as-you-type spelling.
+ */
+public boolean isSpellChecking()  { return isSpellChecking; }
 
 /**
  * Returns whether text supports multiple styles.
@@ -253,8 +296,8 @@ public boolean isFireActionOnEnterKey()  { return _fireActionOnEnterKey; }
  */
 public void setFireActionOnEnterKey(boolean aValue)
 {
-    if(aValue==_fireActionOnEnterKey) return;
-    if(aValue) enableEvents(Action);
+    if (aValue==_fireActionOnEnterKey) return;
+    if (aValue) enableEvents(Action);
     else getEventAdapter().disableEvents(this, Action);
     firePropChange(FireActionOnEnterKey_Prop, _fireActionOnEnterKey, _fireActionOnEnterKey = aValue);
 }
@@ -269,7 +312,7 @@ public boolean isFireActionOnFocusLost()  { return _fireActionOnFocusLost; }
  */
 public void setFireActionOnFocusLost(boolean aValue)
 {
-    if(aValue==_fireActionOnFocusLost) return;
+    if (aValue==_fireActionOnFocusLost) return;
     firePropChange(FireActionOnFocusLost_Prop, _fireActionOnFocusLost, _fireActionOnFocusLost = aValue);
 }
 
@@ -324,15 +367,19 @@ public void setSel(int newStartEnd)  { setSel(newStartEnd, newStartEnd); }
 public void setSel(int aStart, int aEnd)
 {
     // If already set, just return
-    int len = length(), anchor = Math.min(aStart,len), index = Math.min(aEnd,len);
-    if(anchor==_selAnchor && index==_selIndex) return;
+    int len = length();
+    int anchor = Math.min(aStart,len);
+    int index = Math.min(aEnd,len);
+    if (anchor==_selAnchor && index==_selIndex) return;
     
     // Repaint old selection
-    if(isShowing()) repaintSel();
+    if (isShowing()) repaintSel();
     
     // Set new values
-    _selAnchor = aStart; _selIndex = aEnd;
-    _selStart = Math.min(aStart, aEnd); _selEnd = Math.max(aStart, aEnd);
+    _selAnchor = aStart;
+    _selIndex = aEnd;
+    _selStart = Math.min(aStart, aEnd);
+    _selEnd = Math.max(aStart, aEnd);
     
     // Fire selection property change and clear selection
     firePropChange(Selection_Prop, _sel, _sel=null);
@@ -341,7 +388,7 @@ public void setSel(int aStart, int aEnd)
     _selStyle = null;
     
     // Repaint selection and scroll to visible (after delay)
-    if(isShowing()) {
+    if (isShowing()) {
         repaintSel();
         setCaretAnim();
         getEnv().runLater(() -> scrollSelToVisible());
@@ -351,7 +398,10 @@ public void setSel(int aStart, int aEnd)
 /**
  * Selects all the characters in the text editor.
  */
-public void selectAll()  { setSel(0, length()); }
+public void selectAll()
+{
+    setSel(0, length());
+}
 
 /**
  * Repaint the selection.
@@ -370,12 +420,12 @@ protected void scrollSelToVisible()
 {
     // Get selection rect. If empty, outset by 1. If abuts left border, make sure left border is visible.
     Rect srect = getSel().getPath().getBounds();
-    if(srect.isEmpty()) srect.inset(-1,-2);
-    if(srect.getX()-1<=getTextBox().getX()) { srect.setX(-getX()); srect.setWidth(10); }
+    if (srect.isEmpty()) srect.inset(-1,-2);
+    if (srect.getX()-1<=getTextBox().getX()) { srect.setX(-getX()); srect.setWidth(10); }
     
     // If selection rect not fully contained in visible rect, scrollRectToVisible
     Rect vrect = getClipAllBounds(); if(vrect==null || vrect.isEmpty()) return;
-    if(!vrect.contains(srect)) {
+    if (!vrect.contains(srect)) {
         if(!srect.intersects(vrect)) srect.inset(0,-100);
         scrollToVisible(srect);
     }
@@ -386,7 +436,7 @@ protected void scrollSelToVisible()
  */
 public Font getFont()
 {
-    if(isRich()) return getSelStyle().getFont();
+    if (isRich()) return getSelStyle().getFont();
     return super.getFont();
 }
 
@@ -397,6 +447,19 @@ public void setFont(Font aFont)
 {
     super.setFont(aFont);
     if(aFont!=null) setSelStyleValue(TextStyle.FONT_KEY, aFont);
+}
+
+/**
+ * Returns the color of the current selection or cursor.
+ */
+public Color getTextColor()  { return getSelStyle().getColor(); }
+
+/**
+ * Sets the color of the current selection or cursor.
+ */
+public void setTextColor(Paint aColor)
+{
+    setSelStyleValue(TextStyle.COLOR_KEY, aColor instanceof Color? aColor : null);
 }
 
 /**
@@ -413,6 +476,40 @@ public void setTextFill(Paint aColor)
 }
 
 /**
+ * Returns whether current selection is outlined.
+ */
+public Border getTextBorder()  { return getSelStyle().getBorder(); }
+
+/**
+ * Sets whether current selection is outlined.
+ */
+public void setTextBorder(Border aBorder)  { setSelStyleValue(TextStyle.BORDER_KEY, aBorder); }
+
+/**
+ * Returns the format of the current selection or cursor.
+ */
+public TextFormat getFormat()  { return getSelStyle().getFormat(); }
+
+/**
+ * Sets the format of the current selection or cursor, after trying to expand the selection to encompass currently
+ * selected, @-sign delineated key.
+ */
+public void setFormat(TextFormat aFormat)
+{
+    // Get format selection range and select it (if non-null)
+    TextSel sel = smartFindFormatRange();
+    if (sel!=null)
+        setSel(sel.getStart(), sel.getEnd());
+
+    // Return if we are at end of string (this should never happen)
+    if (getSelStart()>=length())
+        return;
+
+    // If there is a format, add it to current attributes and set for selected text
+    setSelStyleValue(TextStyle.FORMAT_KEY, aFormat);
+}
+
+/**
  * Returns whether TextView is underlined.
  */
 public boolean isUnderlined()  { return getSelStyle().isUnderlined(); }
@@ -420,37 +517,73 @@ public boolean isUnderlined()  { return getSelStyle().isUnderlined(); }
 /**
  * Sets whether TextView is underlined.
  */
-public void setUnderlined(boolean aValue)  { setSelStyleValue(TextStyle.UNDERLINE_KEY, aValue? 1 : 0); }
+public void setUnderlined(boolean aValue)
+{
+    setSelStyleValue(TextStyle.UNDERLINE_KEY, aValue? 1 : 0);
+}
+
+/**
+ * Sets current selection to superscript.
+ */
+public void setSuperscript()
+{
+    int state = getSelStyle().getScripting();
+    setSelStyleValue(TextStyle.SCRIPTING_KEY, state==0? 1 : 0);
+}
+
+/**
+ * Sets current selection to subscript.
+ */
+public void setSubscript()
+{
+    int state = getSelStyle().getScripting();
+    setSelStyleValue(TextStyle.SCRIPTING_KEY, state==0? -1 : 0);
+}
 
 /**
  * Returns the text line alignment.
  */
-public HPos getLineAlign()  { return getLineStyle().getAlign(); }
+public HPos getLineAlign()  { return getSelLineStyle().getAlign(); }
 
 /**
  * Sets the text line alignment.
  */
-public void setLineAlign(HPos anAlign)  { setLineStyleValue(TextLineStyle.ALIGN_KEY, anAlign); }
+public void setLineAlign(HPos anAlign)
+{
+    setSelLineStyleValue(TextLineStyle.ALIGN_KEY, anAlign);
+}
 
 /**
  * Returns whether the text line justifies text.
  */
-public boolean isLineJustify()  { return getLineStyle().isJustify(); }
+public boolean isLineJustify()
+{
+    return getSelLineStyle().isJustify();
+}
 
 /**
  * Sets whether the text line justifies text.
  */
-public void setLineJustify(boolean aValue)  { setLineStyleValue(TextLineStyle.JUSTIFY_KEY, aValue); }
+public void setLineJustify(boolean aValue)
+{
+    setSelLineStyleValue(TextLineStyle.JUSTIFY_KEY, aValue);
+}
 
 /**
  * Returns the style at given char index.
  */
-public TextStyle getStyleAt(int anIndex)  { return getRichText().getStyleAt(anIndex); }
+public TextStyle getStyleAt(int anIndex)
+{
+    return getRichText().getStyleAt(anIndex);
+}
 
 /**
  * Returns the TextStyle for the current selection and/or input characters.
  */
-public TextStyle getSelStyle()  { return _selStyle!=null? _selStyle : (_selStyle=getStyleAt(getSelStart())); }
+public TextStyle getSelStyle()
+{
+    return _selStyle!=null ? _selStyle : (_selStyle=getStyleAt(getSelStart()));
+}
 
 /**
  * Sets the attributes that are applied to current selection or newly typed chars.
@@ -458,7 +591,7 @@ public TextStyle getSelStyle()  { return _selStyle!=null? _selStyle : (_selStyle
 public void setSelStyleValue(String aKey, Object aValue)
 {
     // If selection is zero length, just modify input style
-    if(isSelEmpty() && isRich())
+    if (isSelEmpty() && isRich())
         _selStyle = getSelStyle().copyFor(aKey, aValue);
     
     // If selection is multiple chars, apply attribute to text and reset SelStyle
@@ -471,12 +604,12 @@ public void setSelStyleValue(String aKey, Object aValue)
 /**
  * Returns the TextLineStyle for currently selection.
  */
-public TextLineStyle getLineStyle()  { return getRichText().getLineStyleAt(getSelStart()); }
+public TextLineStyle getSelLineStyle()  { return getRichText().getLineStyleAt(getSelStart()); }
 
 /**
  * Sets the line attributes that are applied to current selection or newly typed chars.
  */
-public void setLineStyleValue(String aKey, Object aValue)
+public void setSelLineStyleValue(String aKey, Object aValue)
 {
     getRichText().setLineStyleValue(aKey, aValue, getSelStart(), getSelEnd());
 }
@@ -494,27 +627,42 @@ public void addChars(String aStr, Object ... theAttrs)
 /**
  * Adds the given string with given style to text at given index.
  */
-public void addChars(String aStr, TextStyle aStyle) { replaceChars(aStr, aStyle, length(), length(), true); }
+public void addChars(String aStr, TextStyle aStyle)
+{
+    replaceChars(aStr, aStyle, length(), length(), true);
+}
 
 /**
  * Adds the given string with given style to text at given index.
  */
-public void addChars(String aStr, TextStyle aStyle, int anIndex) { replaceChars(aStr, aStyle, anIndex, anIndex, true); }
+public void addChars(String aStr, TextStyle aStyle, int anIndex)
+{
+    replaceChars(aStr, aStyle, anIndex, anIndex, true);
+}
 
 /**
  * Deletes the current selection.
  */
-public void delete()  { delete(getSelStart(), getSelEnd(), true); }
+public void delete()
+{
+    delete(getSelStart(), getSelEnd(), true);
+}
 
 /**
  * Deletes the given range of chars.
  */
-public void delete(int aStart, int anEnd, boolean doUpdateSel) { replaceChars(null, null, aStart, anEnd, doUpdateSel); }
+public void delete(int aStart, int anEnd, boolean doUpdateSel)
+{
+    replaceChars(null, null, aStart, anEnd, doUpdateSel);
+}
 
 /**
  * Replaces the current selection with the given string.
  */
-public void replaceChars(String aString)  { replaceChars(aString, null, getSelStart(), getSelEnd(), true);}
+public void replaceChars(String aString)
+{
+    replaceChars(aString, null, getSelStart(), getSelEnd(), true);
+}
 
 /**
  * Replaces the current selection with the given string.
@@ -522,22 +670,23 @@ public void replaceChars(String aString)  { replaceChars(aString, null, getSelSt
 public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd, boolean doUpdateSel)
 {
     // Get string length (if no string length and no char range, just return)
-    int strLen = aString!=null? aString.length() : 0; if(strLen==0 && aStart==anEnd) return;
+    int strLen = aString!=null ? aString.length() : 0;
+    if (strLen==0 && aStart==anEnd) return;
     
     // If change is not adjacent to last change, call UndoerSaveChanges
-    if((strLen>0 && aStart!=_lastReplaceIndex) || (strLen==0 && anEnd!=_lastReplaceIndex))
+    if ((strLen>0 && aStart!=_lastReplaceIndex) || (strLen==0 && anEnd!=_lastReplaceIndex))
         undoerSaveChanges();
 
     // Do actual replace chars    
-    TextStyle style = aStyle!=null? aStyle : aStart==getSelStart()? getSelStyle() : getStyleAt(aStart);
+    TextStyle style = aStyle!=null ? aStyle : aStart==getSelStart() ? getSelStyle() : getStyleAt(aStart);
     getTextBox().replaceChars(aString, style, aStart, anEnd);
     
     // Update selection to be at end of new string
-    if(doUpdateSel)
+    if (doUpdateSel)
         setSel(aStart + strLen);
 
     // Otherwise, if replace was before current selection, adjust current selection
-    else if(aStart<=getSelEnd()) {
+    else if (aStart<=getSelEnd()) {
         int delta = strLen - (anEnd - aStart);
         int start = getSelStart(); if(aStart<=start) start += delta;
         setSel(start, getSelEnd() + delta);
@@ -548,12 +697,39 @@ public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd
 }
 
 /**
+ * Replaces the current selection with the given RichText.
+ */
+public void replaceCharsWithRichText(RichText aRichText)
+{
+    replaceCharsWithRichText(aRichText, getSelStart(), getSelEnd(), true);
+}
+
+/**
+ * Replaces the current selection with the given RichText.
+ */
+public void replaceCharsWithRichText(RichText aRichText, int aStart, int anEnd, boolean doUpdateSel)
+{
+    // Iterate over runs and do replace for each one individually
+    int start = aStart, end = anEnd;
+    for(RichTextLine line : aRichText.getLines()) {
+        for(RichTextRun run : line.getRuns()) {
+            replaceChars(run.getString(), run.getStyle(), start, end, false);
+            start = end = start + run.length();
+        }
+    }
+
+    // Update selection to be at end of new string
+    if(doUpdateSel)
+        setSel(aStart + aRichText.length());
+}
+
+/**
  * Moves the selection index forward a character (or if a range is selected, moves to end of range).
  */
 public void selectForward(boolean isShiftDown)
 {
     // If shift is down, extend selection forward
-    if(isShiftDown) {
+    if (isShiftDown) {
         if(getSelAnchor()==getSelStart() && !isSelEmpty()) setSel(getSelStart()+1, getSelEnd());
         else { setSel(getSelStart(), getSelEnd()+1); }
     }
@@ -568,7 +744,7 @@ public void selectForward(boolean isShiftDown)
 public void selectBackward(boolean isShiftDown)
 {
     // If shift is down, extend selection back
-    if(isShiftDown) {
+    if (isShiftDown) {
         if(getSelAnchor()==getSelEnd() && !isSelEmpty()) setSel(getSelStart(), getSelEnd()-1);
         else { setSel(getSelEnd(), getSelStart()-1); }
     }
@@ -653,32 +829,50 @@ public void clear()
 /**
  * Returns the number of lines.
  */
-public int getLineCount()  { return getTextBox().getLineCount(); }
+public int getLineCount()
+{
+    return getTextBox().getLineCount();
+}
 
 /**
  * Returns the individual line at given index.
  */
-public TextBoxLine getLine(int anIndex)  { return getTextBox().getLine(anIndex); }
+public TextBoxLine getLine(int anIndex)
+{
+    return getTextBox().getLine(anIndex);
+}
 
 /**
  * Returns the last line.
  */
-public TextBoxLine getLineLast()  { return getTextBox().getLineLast(); }
+public TextBoxLine getLineLast()
+{
+    return getTextBox().getLineLast();
+}
 
 /**
  * Returns the line for the given character index.
  */
-public TextBoxLine getLineAt(int anIndex)  { return getTextBox().getLineAt(anIndex); }
+public TextBoxLine getLineAt(int anIndex)
+{
+    return getTextBox().getLineAt(anIndex);
+}
 
 /**
  * Returns the token for given character index.
  */
-public TextBoxToken getTokenAt(int anIndex)  { return getTextBox().getTokenAt(anIndex); }
+public TextBoxToken getTokenAt(int anIndex)
+{
+    return getTextBox().getTokenAt(anIndex);
+}
 
 /**
  * Returns the char index for given point in text coordinate space.
  */
-public int getCharIndex(double anX, double aY)  { return getTextBox().getCharIndex(anX, aY); }
+public int getCharIndex(double anX, double aY)
+{
+    return getTextBox().getCharIndex(anX, aY);
+}
 
 /**
  * Returns the selection color.
@@ -690,17 +884,6 @@ public Color getSelColor()  { return _selColor; }
  */
 protected void paintFront(Painter aPntr)
 {
-    // Get bounds in parent
-    Rect clip = aPntr.getClipBounds(); if(clip==null) clip = getBoundsLocal();
-    
-    // If alignment not TOP_LEFT, shift text block
-    /*double dx = ViewUtils.getAlignX(getAlign()), dy = ViewUtils.getAlignY(getAlign());
-    if(dx!=0 || dy!=0) {
-        Rect tbnds = getTextBoxBounds(); TextBox tbox = getTextBox();
-        dx = tbnds.getX() + Math.round(dx*(tbnds.getWidth() - tbox.getPrefWidth(-1)));
-        dy = tbnds.getY() + Math.round(dy*(tbnds.getHeight() - tbox.getPrefHeight(tbox.getWidth())));
-        tbox.setX(dx); tbox.setY(dy); }*/
-    
     // Paint selection
     paintSel(aPntr);
     
@@ -713,20 +896,35 @@ protected void paintFront(Painter aPntr)
  */
 protected void paintSel(Painter aPntr)
 {
-    if(!isEditable()) return;
+    // If not editable, just return
+    if (!isEditable()) return;
+
+    // Get Selection and path
     TextSel sel = getSel();
     Shape spath = sel.getPath();
-    if(sel.isEmpty()) { if(_showCaret) {
-        aPntr.setPaint(Color.BLACK); aPntr.setStroke(Stroke.Stroke1); aPntr.draw(spath); }}
-    else { aPntr.setPaint(getSelColor()); aPntr.fill(spath); }
+
+    // If empty selection, paint carat
+    if(sel.isEmpty()) {
+        if(isShowCaret()) {
+            aPntr.setPaint(Color.BLACK);
+            aPntr.setStroke(Stroke.Stroke1);
+            aPntr.draw(spath);
+        }
+    }
+
+    // Otherwise
+    else {
+        aPntr.setPaint(getSelColor());
+        aPntr.fill(spath);
+    }
 }
 
 /**
- * Process event.
+ * Process event. Make this public so TextArea can be used to edit text outside of normal Views.
  */
-protected void processEvent(ViewEvent anEvent)
+public void processEvent(ViewEvent anEvent)
 {
-    switch(anEvent.getType()) {
+    switch (anEvent.getType()) {
         case MousePress: mousePressed(anEvent); break;
         case MouseDrag: mouseDragged(anEvent); break;
         case MouseRelease: mouseReleased(anEvent); break;
@@ -737,7 +935,7 @@ protected void processEvent(ViewEvent anEvent)
     }
     
     // Consume all mouse events
-    if(anEvent.isMouseEvent()) anEvent.consume();
+    if (anEvent.isMouseEvent()) anEvent.consume();
 }
 
 /**
@@ -752,16 +950,17 @@ protected void mousePressed(ViewEvent anEvent)
     _downX = anEvent.getX(); _downY = anEvent.getY();
     
     // Determine if word or paragraph selecting
-    if(!anEvent.isShiftDown()) _wordSel = _pgraphSel = false;
-    if(anEvent.getClickCount()==2) _wordSel = true;
-    else if(anEvent.getClickCount()==3) _pgraphSel = true;
+    if (!anEvent.isShiftDown()) _wordSel = _pgraphSel = false;
+    if (anEvent.getClickCount()==2) _wordSel = true;
+    else if (anEvent.getClickCount()==3) _pgraphSel = true;
     
     // Get selected range for down point and drag point
     TextSel sel = new TextSel(_tbox, _downX, _downY, _downX, _downY, _wordSel, _pgraphSel);
-    int anchor = sel.getAnchor(), index = sel.getIndex();
+    int anchor = sel.getAnchor();
+    int index = sel.getIndex();
     
     // If shift is down, xor selection
-    if(anEvent.isShiftDown()) {
+    if (anEvent.isShiftDown()) {
         anchor = Math.min(getSelStart(), sel.getStart());
         index = Math.max(getSelEnd(), sel.getEnd());
     }
@@ -777,10 +976,11 @@ protected void mouseDragged(ViewEvent anEvent)
 {
     // Get selected range for down point and drag point
     TextSel sel = new TextSel(_tbox, _downX, _downY, anEvent.getX(), anEvent.getY(), _wordSel, _pgraphSel);
-    int anchor = sel.getAnchor(), index = sel.getIndex();
+    int anchor = sel.getAnchor();
+    int index = sel.getIndex();
     
     // If shift is down, xor selection
-    if(anEvent.isShiftDown()) {
+    if (anEvent.isShiftDown()) {
         anchor = Math.min(getSelStart(), sel.getStart());
         index = Math.max(getSelEnd(), sel.getEnd());
     }
@@ -794,12 +994,14 @@ protected void mouseDragged(ViewEvent anEvent)
  */
 protected void mouseReleased(ViewEvent anEvent)
 {
-    setCaretAnim(); _downX = _downY = 0;
+    setCaretAnim();
+    _downX = _downY = 0;
 
-    if(anEvent.isMouseClick()) {
+    if (anEvent.isMouseClick()) {
         int cindex = getCharIndex(anEvent.getX(), anEvent.getY());
         TextStyle style = getStyleAt(cindex);
-        if(style.getLink()!=null) openLink(style.getLink().getString());
+        if (style.getLink()!=null)
+            openLink(style.getLink().getString());
     }
 }
 
@@ -810,7 +1012,8 @@ protected void mouseMoved(ViewEvent anEvent)
 {
     int cindex = getCharIndex(anEvent.getX(), anEvent.getY());
     TextStyle style = getStyleAt(cindex);
-    if(style.getLink()!=null) setCursor(Cursor.HAND);
+    if (style.getLink()!=null)
+        setCursor(Cursor.HAND);
     else showCursor();
 }
 
@@ -824,10 +1027,11 @@ protected void keyPressed(ViewEvent anEvent)
     boolean commandDown = anEvent.isShortcutDown(), controlDown = anEvent.isControlDown();
     boolean emacsDown = SnapUtils.isWindows? anEvent.isAltDown() : controlDown;
     boolean shiftDown = anEvent.isShiftDown();
-    setCaretAnim(false); _showCaret = true;
+    setCaretAnim(false);
+    setShowCaret(isCaretNeeded());
 
     // Handle command keys
-    if(commandDown) {
+    if (commandDown) {
     
         // If shift-down, just return
         if(shiftDown && keyCode!=KeyCode.Z) return;
@@ -844,13 +1048,13 @@ protected void keyPressed(ViewEvent anEvent)
     }
     
     // Handle control keys (not applicable on Windows, since they are handled by command key code above)
-    else if(emacsDown) {
+    else if (emacsDown) {
         
         // If shift down, just return
-        if(shiftDown) return;
+        if (shiftDown) return;
         
         // Handle common emacs key bindings
-        switch(keyCode) {
+        switch (keyCode) {
             case KeyCode.F: selectForward(false); break; // Handle control-f key forward
             case KeyCode.B: selectBackward(false); break; // Handle control-b key backward
             case KeyCode.P: selectUp(); break; // Handle control-p key up
@@ -892,13 +1096,14 @@ protected void keyTyped(ViewEvent anEvent)
 {
     // Get event info
     String keyChars = anEvent.getKeyString();
-    char keyChar = keyChars.length()>0? keyChars.charAt(0) : 0;
+    char keyChar = keyChars.length()>0 ? keyChars.charAt(0) : 0;
     boolean charDefined = keyChar!=KeyCode.CHAR_UNDEFINED && !Character.isISOControl(keyChar);
-    boolean commandDown = anEvent.isShortcutDown(), controlDown = anEvent.isControlDown();
-    boolean emacsDown = SnapUtils.isWindows? anEvent.isAltDown() : controlDown;
+    boolean commandDown = anEvent.isShortcutDown();
+    boolean controlDown = anEvent.isControlDown();
+    boolean emacsDown = SnapUtils.isWindows ? anEvent.isAltDown() : controlDown;
     
     // If actual text entered, replace
-    if(charDefined && !commandDown && !controlDown && !emacsDown) {
+    if (charDefined && !commandDown && !controlDown && !emacsDown) {
         replaceChars(keyChars);
         hideCursor(); //anEvent.consume();
     }
@@ -920,31 +1125,65 @@ public void showCursor()  { setCursor(Cursor.TEXT); }
 public void hideCursor()  { setCursor(Cursor.NONE); }
 
 /**
- * Returns whether anim is needed.
+ * Returns whether to show carat.
  */
-private boolean isCaretAnimNeeded()  { return isFocused() && getSel().isEmpty() && isShowing(); }
+public boolean isShowCaret()  { return _showCaret; }
+
+/**
+ * Sets whether to show carat.
+ */
+protected void setShowCaret(boolean aValue)
+{
+    if (aValue==_showCaret) return;
+    _showCaret = aValue;
+    repaintSel();
+}
+
+/**
+ * Returns whether caret is needed (true when text is focused, showing and empty selection).
+ */
+private boolean isCaretNeeded()
+{
+    return isFocused() && getSel().isEmpty() && isShowing();
+}
 
 /**
  * Sets the caret animation to whether it's needed.
  */
-private void setCaretAnim()  { setCaretAnim(isCaretAnimNeeded()); }
+private void setCaretAnim()
+{
+    boolean show = isCaretNeeded();
+    setCaretAnim(show);
+}
 
 /**
- * Returns whether ProgressBar is animating.
+ * Returns whether caret is flashing.
  */
 public boolean isCaretAnim()  { return _caretTimer!=null; }
 
 /**
- * Sets anim.
+ * Sets whether caret is flashing.
  */
-public void setCaretAnim(boolean aValue)
+protected void setCaretAnim(boolean aValue)
 {
-    if(aValue==isCaretAnim()) return;
-    if(aValue) {
-        _caretTimer = new ViewTimer(500, t -> { _showCaret = !_showCaret; repaintSel(); });
-        _caretTimer.start(); _showCaret = true; repaintSel();
+    // If already set, just return
+    if (aValue==isCaretAnim()) return;
+
+    // If setting
+    if (aValue) {
+        _caretTimer = new ViewTimer(500, t -> setShowCaret(!isShowCaret()));
+        _caretTimer.start();
+        setShowCaret(true);
     }
-    else { _caretTimer.stop(); _caretTimer = null; _showCaret = false; repaintSel(); }
+
+    // If stopping
+    else {
+        _caretTimer.stop(); _caretTimer = null;
+        setShowCaret(false);
+    }
+
+    // Repaint selection
+    repaintSel();
 }
 
 /**
@@ -964,7 +1203,11 @@ public void setFontScale(double aValue)
 /**
  * Scales font sizes of all text in TextBox to fit in bounds by finding/setting FontScale.
  */
-public void scaleTextToFit()  { getTextBox().scaleTextToFit(); relayoutParent(); }
+public void scaleTextToFit()
+{
+    getTextBox().scaleTextToFit();
+    relayoutParent();
+}
 
 /**
  * Copies the current selection onto the clip board, then deletes the current selection.
@@ -976,12 +1219,18 @@ public void cut()  { copy(); delete(); }
  */
 public void copy()
 {
-    // If valid selection, get text for selection and add to clipboard
-    if(!isSelEmpty()) {
-        String str = getSel().getString();
-        Clipboard cboard = Clipboard.getCleared();
-        cboard.addData(str);
-    }
+    // If no selection, just return
+    if(isSelEmpty()) return;
+
+    // Get RichText for selected characters and get as XML string and plain string
+    RichText rtext = getRichText().subtext(getSelStart(), getSelEnd());
+    String xmlStr = new XMLArchiver().toXML(rtext).toString();
+    String str = rtext.getString();
+
+    // Add to clipboard as RichText and String (text/plain)
+    Clipboard cb = Clipboard.getCleared();
+    cb.addData(SNAP_RICHTEXT_TYPE, xmlStr);
+    cb.addData(str);
 }
 
 /**
@@ -991,13 +1240,24 @@ public void paste()
 {
     // Clear last undo set so paste doesn't get lumped in to coalescing
     undoerSaveChanges();
-    
-    // Get system clipboard and its contents (return if null)
-    Clipboard cb = Clipboard.get();
-    
-    // If contents contains Text, get content bytes, unarchive Text s and replace current selection
-    if(cb.hasString()) { String string = cb.getString();
-        replaceChars(string); }
+
+    // If Clipboard has RichText, paste it
+    Clipboard cboard = Clipboard.get();
+    if(cboard.hasData(SNAP_RICHTEXT_TYPE)) {
+        byte bytes[] = cboard.getDataBytes(SNAP_RICHTEXT_TYPE);
+        RichText rtext = new RichText();
+        XMLArchiver archiver = new XMLArchiver();
+        archiver.setRootObject(rtext);
+        archiver.readFromXMLBytes(bytes);
+        replaceCharsWithRichText(rtext);
+    }
+
+    // If Clipboard has String, paste it
+    else if(cboard.hasString()) {
+        String str = cboard.getString();
+        if(str!=null && str.length()>0)
+            replaceChars(str);
+    }
 }
 
 /**
@@ -1015,7 +1275,10 @@ public Undoer getUndoer()  { return _undoer; }
  */
 public boolean undo()
 {
-    undoerSaveChanges(); boolean b = _undoer.undo()!=null; if(!b) ViewUtils.beep(); return b;
+    undoerSaveChanges();
+    boolean b = _undoer.undo()!=null;
+    if (!b) ViewUtils.beep();
+    return b;
 }
 
 /**
@@ -1023,7 +1286,10 @@ public boolean undo()
  */
 public boolean redo()
 {
-    undoerSaveChanges(); boolean b = _undoer.redo()!=null; if(!b) ViewUtils.beep(); return b;
+    undoerSaveChanges();
+    boolean b = _undoer.redo()!=null;
+    if (!b) ViewUtils.beep();
+    return b;
 }
 
 /**
@@ -1033,15 +1299,15 @@ protected void undoerAddPropertyChange(PropChange anEvent)
 {
     // Get undoer (just return if null or disabled)
     Undoer undoer = getUndoer(); if(undoer==null || !undoer.isEnabled()) return;
-    String pname = anEvent.getPropertyName();
-    
+
     // If PlainText Style_Prop or LineStyle_Prop, just return
-    if(isPlainText() && (pname==RichText.Style_Prop || pname==RichText.LineStyle_Prop))
+    String pname = anEvent.getPropertyName();
+    if (isPlainText() && (pname==RichText.Style_Prop || pname==RichText.LineStyle_Prop))
         return;
     
     // Get ActiveUndoSet - if no previous changes, set UndoSelection
     UndoSet activeUndoSet = undoer.getActiveUndoSet();
-    if(activeUndoSet.getChangeCount()==0)
+    if (activeUndoSet.getChangeCount()==0)
         activeUndoSet.setUndoSelection(getUndoSelection());
     
     // Add property
@@ -1053,8 +1319,9 @@ protected void undoerAddPropertyChange(PropChange anEvent)
  */
 public void undoerSaveChanges()
 {
-    Undoer undoer = getUndoer(); if(undoer==null) return;
-    UndoSet activeUndoSet = undoer.getActiveUndoSet(); activeUndoSet.setRedoSelection(getUndoSelection());
+    Undoer undoer = getUndoer(); if (undoer==null) return;
+    UndoSet activeUndoSet = undoer.getActiveUndoSet();
+    activeUndoSet.setRedoSelection(getUndoSelection());
     undoer.saveChanges();
 }
 
@@ -1067,15 +1334,22 @@ protected Object getUndoSelection()  { return new UndoTextSel(); }
  * A class to act as text selection.
  */
 public class UndoTextSel implements Undoer.Selection {
+
+    // Ivars
     public int start = getSelStart(), end = getSelEnd();  // Use ivars to avoid min()
+
+    // SetSel
     public void setSelection()  { TextArea.this.setSel(start, end); }
-    public boolean equals(Object anObj)  { UndoTextSel other = (UndoTextSel)anObj;
-        return start==other.start && end==other.end; }
+
+    // Equals
+    public boolean equals(Object anObj) {
+        UndoTextSel other = anObj instanceof UndoTextSel ? (UndoTextSel)anObj : null;
+        return other!=null && start==other.start && end==other.end;
+    }
+
+    // HashCode
     public int hashCode()  { return start + end; }
 }
-
-// The PropChangeListener to catch RichText PropChanges.
-private PropChangeListener _richTextPropLsnr = pce -> richTextPropChange(pce);
 
 /**
  * Called when RichText changes (chars added, updated or deleted).
@@ -1232,6 +1506,114 @@ protected void setFocused(boolean aValue)
  * Returns a mapped property name.
  */
 public String getValuePropName()  { return "Text"; }
+
+    /**
+     * Returns the path for the current selection.
+     */
+    public Shape getSelPath()  { return getSel().getPath(); }
+
+    /**
+     * Returns a path for misspelled word underlining.
+     */
+    public Shape getSpellingPath()
+    {
+        // Get text box and text string and path object
+        TextBox tbox = getTextBox();
+        String string = tbox.getString();
+        Path path = new Path();
+
+        // Iterate over text
+        for(SpellCheck.Word word=SpellCheck.getMisspelledWord(string, 0); word!=null;
+            word=SpellCheck.getMisspelledWord(string, word.getEnd())) {
+
+            // Get word bounds
+            int start = word.getStart(); if(start>=tbox.getEnd()) break;
+            int end = word.getEnd(); if(end>tbox.getEnd()) end = tbox.getEnd();
+
+            // If text editor selection starts in word bounds, just continue - they are still working on this word
+            if(start<=getSelStart() && getSelStart()<=end)
+                continue;
+
+            // Get the selection's start line index and end line index
+            int startLineIndex = getLineAt(start).getIndex();
+            int endLineIndex = getLineAt(end).getIndex();
+
+            // Iterate over selected lines
+            for(int i=startLineIndex; i<=endLineIndex; i++) { TextBoxLine line = getLine(i);
+
+                // Get the bounds of line
+                double x1 = line.getX();
+                double x2 = line.getMaxX();
+                double y = line.getBaseline() + 3;
+
+                // If starting line, adjust x1 for starting character
+                if(i==startLineIndex)
+                    x1 = line.getXForChar(start - line.getStart() - tbox.getStart());
+
+                // If ending line, adjust x2 for ending character
+                if(i==endLineIndex)
+                    x2 = line.getXForChar(end - line.getStart() - tbox.getStart());
+
+                // Append rect for line to path
+                path.moveTo(x1,y); path.lineTo(x2,y);
+            }
+        }
+
+        // Return path
+        return path;
+    }
+
+/**
+ * This method returns the range of the @-sign delinated key closest to the current selection (or null if not found).
+ */
+private TextSel smartFindFormatRange()
+{
+    int selStart = getSelStart(), selEnd = getSelEnd();
+    int prevAtSignIndex = -1, nextAtSignIndex = -1;
+    String string = getText();
+
+    // See if selection contains an '@'
+    if(selEnd>selStart)
+        prevAtSignIndex = string.indexOf("@", selStart);
+    if(prevAtSignIndex>=selEnd)
+        prevAtSignIndex = -1;
+
+    // If there wasn't an '@' in selection, see if there is one before the selected range
+    if(prevAtSignIndex<0)
+        prevAtSignIndex = string.lastIndexOf("@", selStart-1);
+
+    // If there wasn't an '@' in or before selection, see if there is one after the selected range
+    if(prevAtSignIndex<0)
+        prevAtSignIndex = string.indexOf("@", selEnd);
+
+    // If there is a '@' in, before or after selection, see if there is another after it
+    if(prevAtSignIndex>=0)
+        nextAtSignIndex = string.indexOf("@", prevAtSignIndex + 1);
+
+    // If there is a '@' in, before or after selection, but not one after it, see if there is one before that
+    if(prevAtSignIndex>=0 && nextAtSignIndex<0)
+        nextAtSignIndex = string.lastIndexOf("@", prevAtSignIndex-1);
+
+    // If both a previous and next '@', select the chars inbetween
+    if(prevAtSignIndex>=0 && nextAtSignIndex>=0 && prevAtSignIndex!=nextAtSignIndex) {
+        int start = Math.min(prevAtSignIndex, nextAtSignIndex);
+        int end = Math.max(prevAtSignIndex, nextAtSignIndex);
+        return new TextSel(_tbox,start, end + 1);
+    }
+
+    // Return null since range not found
+    return null;
+}
+
+/**
+ * Returns whether layout tries to hyphenate wrapped words.
+ */
+public static boolean isHyphenating()  { return _hyphenating; }
+
+/**
+ * Sets whether layout tries to hyphenate wrapped words.
+ */
+public static void setHyphenating(boolean aValue)  { Prefs.get().set("Hyphenating", _hyphenating = aValue); }
 
 /**
  * Standard toString implementation.
