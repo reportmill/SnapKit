@@ -4,7 +4,6 @@
 package snap.text;
 import snap.geom.HPos;
 import snap.geom.Path;
-import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.gfx.*;
 import snap.util.*;
@@ -12,7 +11,7 @@ import snap.view.*;
 
 /**
  * This class provides all of the event and drawing code necessary to edit text in the form of a RichText.
- * (separated from an actual UI Component).
+ * (separated from an actual UI View).
  */
 public class TextEditor {
     
@@ -46,12 +45,18 @@ public class TextEditor {
 /**
  * Returns the text box used to layout text.
  */
-public TextBox getTextBox()  { return _tbox!=null? _tbox : (_tbox=new TextBox()); }
+public TextBox getTextBox()
+{
+    return _tbox!=null? _tbox : (_tbox=new TextBox());
+}
 
 /**
  * Returns the text box used to layout text.
  */
-public void setTextBox(TextBox aTextBox)  { _tbox = aTextBox; }
+public void setTextBox(TextBox aTextBox)
+{
+    _tbox = aTextBox;
+}
 
 /**
  * Returns the rich text.
@@ -72,16 +77,6 @@ public void setRichText(RichText aRichText)
     _rtext = aRichText;
     setSel(0);
 }
-
-/**
- * Returns the text editor bounds.
- */
-public Rect getBounds()  { return _tbox.getBounds(); }
-
-/**
- * Sets the text editor bounds.
- */
-public void setBounds(double aX, double aY, double aW, double aH) { _tbox.setBounds(aX,aY,aW,aH); }
 
 /**
  * Returns the number of characters in the text string.
@@ -412,7 +407,10 @@ public void delete(int aStart, int anEnd, boolean doUpdateSel)
 /**
  * Replaces the current selection with the given string.
  */
-public void replace(String aString)  { replace(aString, null, getSelStart(), getSelEnd(), true); }
+public void replace(String aString)
+{
+    replace(aString, null, getSelStart(), getSelEnd(), true);
+}
 
 /**
  * Replaces the current selection with the given string.
@@ -439,7 +437,10 @@ public void replace(String aString, TextStyle aStyle, int aStart, int anEnd, boo
 /**
  * Replaces the current selection with the given xstring.
  */
-public void replace(RichText aRichText)  { replace(aRichText, getSelStart(), getSelEnd(), true); }
+public void replace(RichText aRichText)
+{
+    replace(aRichText, getSelStart(), getSelEnd(), true);
+}
 
 /**
  * Replaces the current selection with the given xstring.
@@ -593,16 +594,6 @@ public void deleteToLineEnd()
         delete(getSelStart(), index>=0? index : length(), true);
     }
 }
-
-/**
- * Returns the width needed to display all characters.
- */
-public double getPrefWidth()  { return getTextBox().getPrefWidth(-1); }
-
-/**
- * Returns the height needed to display all characters.
- */
-public double getPrefHeight()  { return getTextBox().getPrefHeight(getTextBox().getWidth()); }
 
 /**
  * Handles events.
