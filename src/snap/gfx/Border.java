@@ -61,6 +61,16 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     public void paint(Painter aPntr, Shape aShape)  { }
 
     /**
+     * Copies border for given color.
+     */
+    public Border copyForColor(Color aColor)  { return this; }
+
+    /**
+     * Copies border for given stroke width.
+     */
+    public Border copyForWidth(double aWidth)  { return this; }
+
+    /**
      * Copies border for given insets.
      */
     public Border copyForInsets(Insets theIns)
