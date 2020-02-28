@@ -160,7 +160,7 @@ public Border getDefaultBorder()
 {
     if(_defBorder!=null) return _defBorder;
     Border bdr = Border.createLineBorder(Color.LIGHTGRAY, 1);
-    bdr.setInsets(Insets.EMPTY);
+    bdr = bdr.copyForInsets(Insets.EMPTY);
     return _defBorder = bdr;
 }
 private static Border _defBorder;

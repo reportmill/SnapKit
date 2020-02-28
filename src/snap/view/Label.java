@@ -286,7 +286,7 @@ public TextField getEditor()
     editor.setRadius(2);
     editor.setFill(new Color(1,.95));
     editor.setBorder(new Color(1,.3,.3,.5), 1);
-    editor.getBorder().setInsets(Insets.EMPTY);
+    editor.setBorder(editor.getBorder().copyForInsets(Insets.EMPTY));
     editor.setPadding(2,2,2,2);
     editor.setAlign(getAlign().getHPos());
     editor.setFont(getFont());

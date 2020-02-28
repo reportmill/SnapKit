@@ -9,14 +9,18 @@ import snap.util.*;
 /**
  * A class to represent a painted stroke.
  */
-public abstract class Border implements XMLArchiver.Archivable {
+public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     
     // Cached version of insets
     private Insets _insets = null;
     
     // Whether to paint above view
     private boolean _paintAbove;
-    
+
+    // Constants for properties
+    public static final String Insets_Prop = "Insets";
+    public static final String PaintAbove_Prop = "PaintAbove";
+
     /**
      * Returns the insets.
      */
@@ -25,11 +29,6 @@ public abstract class Border implements XMLArchiver.Archivable {
         if (_insets!=null) return _insets;
         return _insets = createInsets();
     }
-
-    /**
-     * Sets the insets.
-     */
-    public void setInsets(Insets theIns)  { _insets = theIns; }
 
     /**
      * Creates the insets.
@@ -57,14 +56,62 @@ public abstract class Border implements XMLArchiver.Archivable {
     public boolean isPaintAbove()  { return _paintAbove; }
 
     /**
-     * Sets whether the border paints above view.
-     */
-    public void setPaintAbove(boolean aValue)  { _paintAbove = aValue; }
-
-    /**
      * Paint border.
      */
     public void paint(Painter aPntr, Shape aShape)  { }
+
+    /**
+     * Copies border for given insets.
+     */
+    public Border copyForInsets(Insets theIns)
+    {
+        Border copy = clone();
+        setPropValue(Insets_Prop, theIns);
+        return copy;
+    }
+
+    /**
+     * Returns a border with given insets.
+     */
+    public Border copyFor(String aPropName, Object aValue)
+    {
+        Border copy = clone();
+        copy.setPropValue(aPropName, aValue);
+        return copy;
+    }
+
+    /**
+     * Returns a value for a key.
+     */
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+            case Insets_Prop: return _insets;
+            case PaintAbove_Prop: return _paintAbove;
+            default: throw new RuntimeException("Border.getPropValue: Unknown key: " + aPropName);
+        }
+    }
+
+    /**
+     * Sets a value for a key.
+     */
+    protected void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+            case Insets_Prop: _insets = (Insets)aValue; break;
+            case PaintAbove_Prop: _paintAbove = (Boolean)aValue; break;
+            default: throw new RuntimeException("Border.setPropValue: Unknown key: " + aPropName);
+        }
+    }
+
+    /**
+     * Standard clone implementation - only used interally (by copyFor methods).
+     */
+    protected Border clone()
+    {
+        try { return (Border)super.clone(); }
+        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+    }
 
     /**
      * Standard equals implementation.
