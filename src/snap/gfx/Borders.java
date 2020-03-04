@@ -1,8 +1,6 @@
 package snap.gfx;
-
 import snap.geom.Insets;
 import snap.geom.Rect;
-import snap.geom.RectBase;
 import snap.geom.Shape;
 import snap.util.XMLArchiver;
 import snap.util.XMLElement;
@@ -11,6 +9,9 @@ import snap.util.XMLElement;
  * This class holds a selection of Border subclasses.
  */
 public class Borders {
+
+    // Common borders
+    public static final Border BLACK_BORDER = Border.createLineBorder(Color.BLACK, 1);
 
     // Border constants
     private static Color BORDER_GRAY = Color.LIGHTGRAY;
@@ -71,32 +72,76 @@ public class Borders {
         // The color
         Color       _color = Color.BLACK;
 
-        // The width
-        double      _width = 1;
+        // The stroke
+        Stroke      _stroke = Stroke.Stroke1;
 
-        /** Creates a new line border. */
+        /** Creates lineBorder. */
         public LineBorder()  { }
 
-        /** Creates a new line border. */
-        public LineBorder(Color aColor, double aWidth)  { _color = aColor; _width = aWidth; }
+        /** Creates lineBorder. */
+        public LineBorder(Color aColor, double aWidth)  { _color = aColor; _stroke = Stroke.getStroke(aWidth); }
+
+        /** Creates lineBorder. */
+        public LineBorder(Color aColor, Stroke aStroke)  { _color = aColor; _stroke = aStroke; }
 
         /** Returns color. */
         public Color getColor()  { return _color; }
 
         /** Returns the width. */
-        public double getWidth()  { return _width; }
+        public double getWidth()  { return _stroke.getWidth(); }
+
+        /** Returns the stroke. */
+        public Stroke getStroke()  { return _stroke; }
 
         /** Creates the insets. */
-        protected Insets createInsets()  { return new Insets(_width); }
+        protected Insets createInsets()  { return new Insets(getWidth()); }
 
         /** Paint border. */
         public void paint(Painter aPntr, Shape aShape)
         {
-            aPntr.setPaint(getColor()); aPntr.setStroke(_width==1? Stroke.Stroke1 : new Stroke(_width));
-            if(aShape instanceof RectBase) { RectBase r = (RectBase)aShape; double hw = _width/2; r = r.clone();
-                r.inset(_width/2); aPntr.draw(r); }
+            aPntr.setPaint(getColor());
+            aPntr.setStroke(getStroke());
+            if (aShape instanceof Rect) { Rect rect = (Rect)aShape;
+                rect = rect.getInsetRect(getWidth()/2);
+                aPntr.draw(rect);
+            }
             else aPntr.draw(aShape);
             aPntr.setStroke(Stroke.Stroke1);
+        }
+
+        /**
+         * Returns copy of this border with new color.
+         */
+        public LineBorder copyForColor(Color aColor)  { LineBorder c = clone(); c._color = aColor; return c; }
+
+        /**
+         * Returns copy of this border with new stroke width.
+         */
+        public LineBorder copyForStrokeWidth(double aWidth)  { return copyForStroke(getStroke().copyForWidth(aWidth)); }
+
+        /**
+         * Returns copy of this border with new stroke width.
+         */
+        public LineBorder copyForStroke(Stroke aStroke)  { LineBorder c = clone(); c._stroke = aStroke; return c; }
+
+        /**
+         * Override to return as LineBorder.
+         */
+        protected LineBorder clone()
+        {
+            return (LineBorder)super.clone();
+        }
+
+        /**
+         * Standard equals implementation.
+         */
+        public boolean equals(Object anObj)
+        {
+            // Check identity, superclass and get other
+            if(anObj==this) return true;
+            if(!super.equals(anObj)) return false;
+            LineBorder other = (LineBorder)anObj;
+            return other._stroke.equals(_stroke);
         }
 
         /** XML Archival. */
@@ -104,7 +149,7 @@ public class Borders {
         {
             XMLElement e = new XMLElement("LineBorder");
             if(!_color.equals(Color.BLACK)) e.add("Color", '#' + _color.toHexString());
-            if(_width!=1) e.add("Width", _width);
+            if(getWidth()!=1) e.add("Width", getWidth());
             return e;
         }
 
@@ -113,14 +158,14 @@ public class Borders {
         {
             if(anElement.hasAttribute("Color")) _color = new Color(anElement.getAttributeValue("Color"));
             if(anElement.hasAttribute("line-color")) _color = new Color(anElement.getAttributeValue("line-color"));
-            if(anElement.hasAttribute("Width")) _width = anElement.getAttributeFloatValue("Width");
+            if(anElement.hasAttribute("Width")) _stroke = _stroke.copyForWidth(anElement.getAttributeFloatValue("Width"));
             return this;
         }
 
         /** Standard toString implementation. */
         public String toString()
         {
-            return "LineBorder { Color=" + _color.toHexString() + ", Width=" + _width + " }";
+            return "LineBorder { Color=" + _color.toHexString() + ", Width=" + getWidth() + " }";
         }
     }
 

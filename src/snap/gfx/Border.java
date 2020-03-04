@@ -46,6 +46,11 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     public double getWidth()  { return 1; }
 
     /**
+     * Returns the stroke of the border (maybe not be entirely accurate for fancy strokes).
+     */
+    public Stroke getStroke()  { return Stroke.getStroke(getWidth()); }
+
+    /**
      * Returns the name for border.
      */
     public String getName()  { return getClass().getSimpleName(); }
@@ -66,9 +71,14 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     public Border copyForColor(Color aColor)  { return this; }
 
     /**
+     * Copies border for given stroke.
+     */
+    public Border copyForStroke(Stroke aStroke)  { return this; }
+
+    /**
      * Copies border for given stroke width.
      */
-    public Border copyForWidth(double aWidth)  { return this; }
+    public Border copyForStrokeWidth(double aWidth)  { return copyForStroke(getStroke().copyForWidth(aWidth)); }
 
     /**
      * Copies border for given insets.
@@ -141,6 +151,11 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
+     * Returns a simple black border.
+     */
+    public static Border blackBorder()  { return Borders.BLACK_BORDER; }
+
+    /**
      * Creates an empty border for inset.
      */
     public static Borders.EmptyBorder createEmptyBorder(double w)
@@ -157,7 +172,7 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * Creates an empty border.
+     * Creates a line border for given color and width.
      */
     public static Borders.LineBorder createLineBorder(Color aColor, double aWidth)
     {
@@ -173,7 +188,7 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * Creates a compound border.
+     * Creates a beveled border.
      */
     public static Borders.BevelBorder createLoweredBevelBorder()
     {
