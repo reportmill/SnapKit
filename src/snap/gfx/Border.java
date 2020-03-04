@@ -139,12 +139,13 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     public boolean equals(Object anObj)
     {
         // Check identity and get other
-        if(anObj==this) return true;
-        Border other = anObj instanceof Border? (Border)anObj : null; if(other==null) return false;
+        if (anObj==this) return true;
+        Border other = anObj instanceof Border? (Border)anObj : null; if (other==null) return false;
+        if (other.getClass()!=getClass()) return false;
 
         // Check Color, Width
-        if(!other.getColor().equals(getColor())) return false;
-        if(other.getWidth()!=getWidth()) return false;
+        if (!other.getColor().equals(getColor())) return false;
+        if (other.getWidth()!=getWidth()) return false;
 
         // Return true since all checks passed
         return true;

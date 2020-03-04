@@ -1164,7 +1164,7 @@ public boolean isCaretAnim()  { return _caretTimer!=null; }
 /**
  * Sets whether caret is flashing.
  */
-protected void setCaretAnim(boolean aValue)
+public void setCaretAnim(boolean aValue)
 {
     // If already set, just return
     if (aValue==isCaretAnim()) return;
