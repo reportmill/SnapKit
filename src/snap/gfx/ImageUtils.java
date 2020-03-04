@@ -1,11 +1,18 @@
 package snap.gfx;
 import snap.util.ArrayUtils;
 import snap.util.ByteArray;
+import snap.web.WebURL;
 
 /**
  * Some Image utility methods.
  */
 public class ImageUtils {
+
+    // An image placeholder for missing images
+    private static Image  _emptyImage;
+
+    // An image URL for missing images
+    private static WebURL  _emptyImageURL;
 
 /**
  * Returns the type of the image bytes provided.
@@ -134,6 +141,34 @@ public static class ImageInfo {
     public int     width, height;         // Image size
     public int     spp, bps;              // Samples per pixel and bits per sample
     public double  dpiX = 72, dpiY = 72;  // DPI horizontal, vertical
+}
+
+/**
+ * Returns an image place holder for missing images.
+ */
+public static Image getEmptyImage()
+{
+    // If already set, just return
+    if(_emptyImage!=null) return _emptyImage;
+
+    // If URL set, load from URL
+    if (_emptyImageURL!=null) {
+        Image img = Image.get(_emptyImageURL);
+        return _emptyImage = img;
+    }
+
+    // Otherwise, just create empty image
+    Image img = Image.get(10, 10, true);
+    return _emptyImage = img;
+}
+
+/**
+ * Returns an image place holder for missing images.
+ */
+public static void setEmptyImageURL(WebURL aURL)
+{
+    _emptyImageURL = aURL;
+    _emptyImage = null;
 }
 
 }
