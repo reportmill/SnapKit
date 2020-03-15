@@ -111,6 +111,9 @@ public TextBox getTextBox()  { return _tbox; }
  */
 public void setTextBox(TextBox aTextBox)
 {
+    // If already set, just return
+    if (aTextBox==_tbox) return;
+
     // Set TextBox
     _tbox = aTextBox;
 
@@ -1414,12 +1417,20 @@ protected double getPrefHeightImpl(double aW)
 /**
  * Override to update getTextBlock.Rect.
  */
-public void setWidth(double aWidth)  { super.setWidth(aWidth); setTextBoxBounds(); }
+public void setWidth(double aWidth)
+{
+    super.setWidth(aWidth);
+    setTextBoxBounds();
+}
 
 /**
  * Override to update getTextBlock.Rect.
  */
-public void setHeight(double aHeight)  { super.setHeight(aHeight); setTextBoxBounds(); }
+public void setHeight(double aHeight)
+{
+    super.setHeight(aHeight);
+    setTextBoxBounds();
+}
 
 /**
  * Sets the Text.Rect from text area.
@@ -1435,7 +1446,12 @@ protected Rect getTextBoxBounds()
 /**
  * Sets the Text.Rect from text area.
  */
-protected void setTextBoxBounds()  { getTextBox().setBounds(getTextBoxBounds()); }
+protected void setTextBoxBounds()
+{
+    TextBox tbox = getTextBox();
+    Rect tbnds = getTextBoxBounds();
+    tbox.setBounds(tbnds);
+}
 
 /**
  * Override to update font.

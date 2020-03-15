@@ -103,10 +103,15 @@ public RichText getRichText()  { return _text; }
  */
 public void setRichText(RichText aRichText)
 {
-    if(aRichText==_text) return;
-    if(_text!=null) _text.removePropChangeListener(_richTextLsnr);
+    // If already set, just return
+    if (aRichText==_text) return;
+
+    // Stop listening to old RichText PropChanges, start listening to new
+    if (_text!=null) _text.removePropChangeListener(_richTextLsnr);
     _text = aRichText;
     _text.addPropChangeListener(_richTextLsnr);
+
+    // Update all
     setNeedsUpdateAll();
 }
 
