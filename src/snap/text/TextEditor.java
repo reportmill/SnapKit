@@ -2,6 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
+import snap.geom.Shape;
+import snap.gfx.Color;
+import snap.gfx.Painter;
+import snap.gfx.Stroke;
 import snap.view.*;
 
 /**
@@ -84,5 +88,44 @@ public class TextEditor extends TextArea {
     public void setLineHeightMax(float aHeight)
     {
         setSelLineStyleValue(TextLineStyle.MIN_HEIGHT_KEY, aHeight);
+    }
+
+    /**
+     * Paints a given TextEditor.
+     */
+    public void paintActiveText(Painter aPntr)
+    {
+        // Get selection path
+        Shape path = getSelPath();
+
+        // If empty selection, draw caret
+        if(isSelEmpty() && path!=null) {
+            if (isShowCaret()) {
+                aPntr.setColor(Color.BLACK);
+                aPntr.setStroke(Stroke.Stroke1); // Set color and stroke of cursor
+                aPntr.setAntialiasing(false);
+                aPntr.draw(path);
+                aPntr.setAntialiasing(true); // Draw cursor
+            }
+        }
+
+        // If selection, get selection path and fill
+        else {
+            aPntr.setColor(new Color(128, 128, 128, 128));
+            aPntr.fill(path);
+        }
+
+        // If spell checking, get path for misspelled words and draw
+        if (isSpellChecking() && length()>0) {
+            Shape spath = getSpellingPath();
+            if(spath!=null) {
+                aPntr.setColor(Color.RED); aPntr.setStroke(Stroke.StrokeDash1);
+                aPntr.draw(spath);
+                aPntr.setColor(Color.BLACK); aPntr.setStroke(Stroke.Stroke1);
+            }
+        }
+
+        // Paint TextBox
+        getTextBox().paint(aPntr);
     }
 }
