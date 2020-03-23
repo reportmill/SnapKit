@@ -2,7 +2,6 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.jetbrains.intellij' version '0.4.16'
 }
 
 sourceSets.main.java.srcDirs = ['src']
