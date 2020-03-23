@@ -1,0 +1,22 @@
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.jetbrains.intellij' version '0.4.16'
+}
+
+sourceSets.main.java.srcDirs = ['src']
+sourceSets.main.resources.srcDirs = ['src']
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+}
+
+dependencies {
+}
+
+mainClassName = 'snap.viewx.TextPane'
