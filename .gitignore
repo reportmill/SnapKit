@@ -1,5 +1,9 @@
+# Ignore build dirs and Gradle cache directory
 /bin/
+/build/
+/out/
 /target/
+.gradle
+
 .DS_Store
 Project.settings
-/build/
