@@ -146,6 +146,7 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
         // Check Color, Width
         if (!other.getColor().equals(getColor())) return false;
         if (other.getWidth()!=getWidth()) return false;
+        if (other.isPaintAbove()!=isPaintAbove()) return false;
 
         // Return true since all checks passed
         return true;
