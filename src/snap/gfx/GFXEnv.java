@@ -144,4 +144,9 @@ public abstract void beep();
  */
 public Prefs getPrefs(String aName)  { return Prefs.getFake(); }
 
+/**
+ * Returns the root URL string of classes.
+ */
+public abstract String getClassRoot();
+
 }
