@@ -545,18 +545,32 @@ public XMLElement clone()
 /**
  * Returns a string representation of this element (XML).
  */
-public String toString()  { return new String(getBytes()); }
+public String getString()
+{
+    // Create new StringBuffer with XML header, recursively write elements, return StringBuffer string
+    StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    write(sb, null, 0, "  ");
+    while (Character.isWhitespace(sb.charAt(sb.length()-1)))
+        sb.setLength(sb.length()-1);
+    return sb.toString();
+}
+
+/**
+ * Returns a string representation of this element (XML).
+ */
+public String toString()
+{
+    System.out.println("XMLElement.toString: Use getString() instead");
+    return getString();
+}
 
 /**
  * Returns XML bytes for this element.
  */
 public byte[] getBytes()
 {
-    // Create new StringBuffer with XML header, recursively write elements, return StringBuffer bytes
-    StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    write(sb, null, 0, "  ");
-    while(Character.isWhitespace(sb.charAt(sb.length()-1))) sb.setLength(sb.length()-1);
-    return StringUtils.getBytes(sb.toString(), "UTF-8");
+    String str = getString();
+    return StringUtils.getBytes(str, "UTF-8");
 }
 
 /**
