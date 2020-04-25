@@ -219,7 +219,7 @@ protected Class <? extends WebPage> getPageClass(WebResponse aResp)
     if(type.equals("snp")) return SnapPage.class;
     if(type.equals("rpt")) return getPageClass("com.reportmill.app.ReportPage", TextPage.class);
     if(type.equals("wav") || type.equals("snd") || type.equals("mp3") || type.equals("m4a")) return SoundPage.class;
-    if(type.equals("java")) return getPageClass("snap.javatext.JavaPage", TextPage.class);
+    if(type.equals("java")) return getPageClass("javakit.text.JavaPage", TextPage.class);
     if(type.equals("jar")) return ZipPage.class;
     if(type.equals("txt") || (file!=null && file.isText())) return TextPage.class;
     return UnknownPage.class;
