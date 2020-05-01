@@ -12,7 +12,7 @@ import snap.util.*;
 public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     
     // Cached version of insets
-    private Insets _insets = null;
+    private Insets _insets;
     
     // Whether to paint above view
     private boolean _paintAbove;
@@ -129,7 +129,12 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
      */
     protected Border clone()
     {
-        try { return (Border)super.clone(); }
+        try
+        {
+            Border copy = (Border)super.clone();
+            copy._insets = null;
+            return copy;
+        }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
     }
 
