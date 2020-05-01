@@ -26,37 +26,36 @@ public class DataType {
     public static final DataType Unknown = new DataType("unknown");
     
 
-/**
- * Creates a new content type.
- */
-public DataType(String aType)  { _type = aType; }
+    /**
+     * Creates a new content type.
+     */
+    public DataType(String aType)  { _type = aType; }
 
-/**
- * Returns the default content type for a path.
- */
-public static DataType getPathDataType(String aPath)
-{
-    String type = FilePathUtils.getExtension(aPath).toLowerCase();
-    if(type.equals("class")) return Class;
-    if(type.equals("htm") || type.equals("html")) return HTML;
-    if(type.equals("java")) return Java;
-    if(type.equals("mid") || type.equals("midi")) return Midi;
-    if(type.equals("pdf")) return PDF;
-    if(type.equals("rpt")) return ReportFile;
-    if(type.equals("txt")) return Text;
-    if(type.equals("wav") || type.equals("snd")) return Wav;
-    if(type.equals("mp3")) return MP3;
-    if(type.equals("settings")) return Settings;
-    return Unknown;
-}
+    /**
+     * Returns the default content type for a path.
+     */
+    public static DataType getPathDataType(String aPath)
+    {
+        String type = FilePathUtils.getExtension(aPath).toLowerCase();
+        if (type.equals("class")) return Class;
+        if (type.equals("htm") || type.equals("html")) return HTML;
+        if (type.equals("java")) return Java;
+        if (type.equals("mid") || type.equals("midi")) return Midi;
+        if (type.equals("pdf")) return PDF;
+        if (type.equals("rpt")) return ReportFile;
+        if (type.equals("txt")) return Text;
+        if (type.equals("wav") || type.equals("snd")) return Wav;
+        if (type.equals("mp3")) return MP3;
+        if (type.equals("settings")) return Settings;
+        return Unknown;
+    }
 
-/**
- * Returns whether type is image.
- */
-public static boolean isImageType(String aPath)
-{
-    String type = FilePathUtils.getExtension(aPath).toLowerCase();
-    return type.equals("jpg") || type.equals("jpeg") || type.equals("gif") || type.equals("png");
-}
-
+    /**
+     * Returns whether type is image.
+     */
+    public static boolean isImageType(String aPath)
+    {
+        String type = FilePathUtils.getExtension(aPath).toLowerCase();
+        return type.equals("jpg") || type.equals("jpeg") || type.equals("gif") || type.equals("png");
+    }
 }

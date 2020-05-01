@@ -11,19 +11,19 @@ public class ResponseException extends RuntimeException {
     // The Response
     WebResponse           _resp;
     
-/**
- * Creates a new ResponseException.
- */
-public ResponseException(WebResponse aResponse)  { super(aResponse.getException()); _resp = aResponse; }
+    /**
+     * Creates a new ResponseException.
+     */
+    public ResponseException(WebResponse aResponse)  { super(aResponse.getException()); _resp = aResponse; }
 
-/**
- * Returns the response.
- */
-public WebResponse getResponse()  { return _resp; }
+    /**
+     * Returns the response.
+     */
+    public WebResponse getResponse()  { return _resp; }
 
-/**
- * Returns the response code.
- */
-public int getResponseCode()  { return _resp.getCode(); }
+    /**
+     * Returns the response code.
+     */
+    public int getResponseCode()  { return _resp.getCode(); }
 
 }

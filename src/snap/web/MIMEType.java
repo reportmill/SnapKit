@@ -21,49 +21,48 @@ public class MIMEType {
     public static final String SETTINGS = "application/settings";
     public static final String UKNOWN = "application/octet-stream";
     
-/**
- * Returns the extension for a MIME type.
- */
-public static String getExtension(String aMIMEType)
-{
-    switch(aMIMEType) {
-        case JPEG: return "jpg";
-        case PNG: return "png";
-        case GIF: return "gif";
-        case HTML: return "html";
-        case PDF: return "pdf";
-        case TEXT: return "txt";
-        default: return null;
+    /**
+     * Returns the extension for a MIME type.
+     */
+    public static String getExtension(String aMIMEType)
+    {
+        switch (aMIMEType) {
+            case JPEG: return "jpg";
+            case PNG: return "png";
+            case GIF: return "gif";
+            case HTML: return "html";
+            case PDF: return "pdf";
+            case TEXT: return "txt";
+            default: return null;
+        }
     }
-}
 
-/**
- * Returns the MIME type for string path, extension, type.
- */
-public static String getType(String aStr)
-{
-    // Get type for given string
-    String type = FilePathUtils.getType(aStr);
-    if(type.length()==0) type = aStr.toLowerCase();
-    
-    // Return type
-    switch(type) {
-        case "jpg": case "jpeg": return JPEG;
-        case "png": return PNG;
-        case "gif": return GIF;
-        case "html": return HTML;
-        case "pdf": return PDF;
-        case "txt": return TEXT;
-        default: return null;
+    /**
+     * Returns the MIME type for string path, extension, type.
+     */
+    public static String getType(String aStr)
+    {
+        // Get type for given string
+        String type = FilePathUtils.getType(aStr);
+        if (type.length()==0) type = aStr.toLowerCase();
+
+        // Return type
+        switch (type) {
+            case "jpg": case "jpeg": return JPEG;
+            case "png": return PNG;
+            case "gif": return GIF;
+            case "html": return HTML;
+            case "pdf": return PDF;
+            case "txt": return TEXT;
+            default: return null;
+        }
     }
-}
 
-/**
- * Returns all known image types.
- */
-public static String[] getImageTypes()
-{
-    return new String[] { PNG, JPEG, GIF };
-}
-
+    /**
+     * Returns all known image types.
+     */
+    public static String[] getImageTypes()
+    {
+        return new String[] { PNG, JPEG, GIF };
+    }
 }
