@@ -3,6 +3,8 @@ import snap.geom.*;
 import snap.util.XMLArchiver;
 import snap.util.XMLElement;
 
+import java.util.Objects;
+
 /**
  * This class holds a selection of Border subclasses.
  */
@@ -223,6 +225,22 @@ public class Borders {
             if(anElement.hasAttribute("bevel-type")) type = anElement.getAttributeValue("bevel-type");
             if(type.equals("RAISED") || type.equals("raised")) _type = RAISED;
             return this;
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            if (!super.equals(o)) return false;
+            BevelBorder that = (BevelBorder) o;
+            return _type == that._type;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return Objects.hash(_type);
         }
     }
 
