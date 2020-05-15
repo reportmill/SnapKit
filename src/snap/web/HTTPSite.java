@@ -26,20 +26,15 @@ public class HTTPSite extends WebSite {
         catch(IOException e) {
             aResp.setException(e); return; }
 
-        // Handle NOT_FOUND
-        if (hresp.getCode()==HTTPResponse.NOT_FOUND) {
-            aResp.setCode(WebResponse.NOT_FOUND); return; }
+        // Get/set return code
+        int code = hresp.getCode();
+        aResp.setCode(code);
 
-        // Handle UNAUTHORIZED
-        if (hresp.getCode()==HTTPResponse.UNAUTHORIZED) {
-            aResp.setCode(WebResponse.UNAUTHORIZED); return; }
-
-        // Handle anything else not okay
-        if (hresp.getCode()!=HTTPResponse.OK) {
-            aResp.setCode(hresp.getCode()); return; }
+        // If not okay, just return
+        if (code!=HTTPResponse.OK)
+            return;
 
         // Configure response info (just return if isHead)
-        aResp.setCode(WebResponse.OK);
         aResp.setModTime(hresp.getLastModified());
         aResp.setSize(hresp.getContentLength());
         boolean isdir = isDir(url, hresp); aResp.setDir(isdir);

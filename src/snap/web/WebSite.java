@@ -103,12 +103,20 @@ public abstract class WebSite {
     /**
      * Returns whether data source exists.
      */
-    public boolean getExists()  { WebFile f = getFile("/"); return f!=null && f.isSaved(); }
+    public boolean getExists()
+    {
+        WebFile file = getFile("/");
+        return file!=null && file.isSaved();
+    }
 
     /**
      * Returns the root directory.
      */
-    public WebFile getRootDir()  { WebFile f = getFile("/"); return f!=null? f : createFile("/", true); }
+    public WebFile getRootDir()
+    {
+        WebFile file = getFile("/");
+        return file!=null ? file : createFile("/", true);
+    }
 
     /**
      * Returns a response instance for a request.
@@ -192,6 +200,10 @@ public abstract class WebSite {
         if (resp.getException()!=null)
             throw new ResponseException(resp);
 
+        // If not found, return null
+        if (resp.getCode()!=WebResponse.OK)
+            return null;
+
         // Get file header from response, create file and return
         FileHeader fhdr = resp.getFileHeader();
         file = createFile(fhdr);
@@ -252,7 +264,9 @@ public abstract class WebSite {
         // If there is an updater, push update and clear
         WebFile.Updater updater = aFile.getUpdater();
         if (updater!=null) {
-            updater.updateFile(aFile); aFile.setUpdater(null); }
+            updater.updateFile(aFile);
+            aFile.setUpdater(null);
+        }
 
         // If parent doesn't exist, save it (to make sure it exists)
         WebFile par = aFile.getParent();
@@ -266,7 +280,8 @@ public abstract class WebSite {
         // Get response
         WebResponse resp = getResponse(req); // Used to be saveFileImpl()
         if (resp.getCode()==WebResponse.OK) {
-            long mt = resp.getModTime(); if(mt==0) System.out.println("WebSite.saveFile: Unlikely saved mod time of 0");
+            long mt = resp.getModTime();
+            if (mt==0) System.out.println("WebSite.saveFile: Unlikely saved mod time of 0");
             aFile.setModTime(mt);
         }
 

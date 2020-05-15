@@ -252,8 +252,16 @@ public void setResizable(boolean aValue)
  */
 public void setDocURL(WebURL aURL)
 {
+    // If not local, just bail
+    if (aURL==null || !aURL.getScheme().equalsIgnoreCase("file"))
+        return;
+
+    // Get Java file
     File file = aURL!=null? aURL.getJavaFile() : null;
-    if(_winNtv instanceof RootPaneContainer) { RootPaneContainer rpc = (RootPaneContainer)_winNtv;
+
+    // Install in RootPane
+    if (_winNtv instanceof RootPaneContainer) {
+        RootPaneContainer rpc = (RootPaneContainer)_winNtv;
         JRootPane rpane = rpc.getRootPane(); if(rpane==null) return;
         rpane.putClientProperty("Window.documentFile", file);
     }

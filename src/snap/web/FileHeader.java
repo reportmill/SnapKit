@@ -43,6 +43,11 @@ public class FileHeader {
     public String getPath()  { return _path; }
 
     /**
+     * Sets the file path.
+     */
+    public void setPath(String aPath)  { _path = aPath; }
+
+    /**
      * Returns the resource name.
      */
     public String getName()  { return FilePathUtils.getFileName(getPath()); }

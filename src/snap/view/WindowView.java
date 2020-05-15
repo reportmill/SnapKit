@@ -273,7 +273,11 @@ public WebURL getDocURL()  { return _docURL; }
  */
 public void setDocURL(WebURL aURL)
 {
-    if(SnapUtils.equals(aURL, _docURL)) return; _docURL = aURL;
+    // If already set, just return
+    if (SnapUtils.equals(aURL, _docURL)) return;
+
+    // Set
+    _docURL = aURL;
     getHelper().setDocURL(aURL);
 }
 
