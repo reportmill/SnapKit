@@ -4,6 +4,8 @@
 package snap.web;
 import java.util.List;
 import snap.util.FilePathUtils;
+import snap.util.JSONNode;
+import snap.util.JSONParser;
 
 /**
  * The response.
@@ -253,6 +255,24 @@ public class WebResponse {
         if (file==null)
             file = getSite().createFile(getFileHeader());
         return file;
+    }
+
+    /**
+     * Copies an HTTP Response.
+     */
+    public void copyResponse(HTTPResponse aResp)
+    {
+        setCode(aResp.getCode());
+        setBytes(aResp.getBytes());
+    }
+
+    /**
+     * Returns the JSON.
+     */
+    public JSONNode getJSON()
+    {
+        String text = getText();
+        return text!=null ? new JSONParser().readString(text) : null;
     }
 
     /**

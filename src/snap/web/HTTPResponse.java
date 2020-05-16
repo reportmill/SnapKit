@@ -3,6 +3,9 @@
  */
 package snap.web;
 import java.util.*;
+
+import snap.util.JSONNode;
+import snap.util.JSONParser;
 import snap.web.HTTPRequest.Header;
 
 /**
@@ -121,7 +124,19 @@ public class HTTPResponse {
     /**
      * Returns the response byte string.
      */
-    public String getText()  { return getBytes()!=null? new String(getBytes()).trim() : null; }
+    public String getText()
+    {
+        return getBytes()!=null? new String(getBytes()).trim() : null;
+    }
+
+    /**
+     * Returns the JSON.
+     */
+    public JSONNode getJSON()
+    {
+        String text = getText();
+        return text!=null ? new JSONParser().readString(text) : null;
+    }
 
     /**
      * Returns the response time in milliseconds.
