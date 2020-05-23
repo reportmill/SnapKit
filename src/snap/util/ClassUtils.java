@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import snap.gfx.GFXEnv;
+
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -111,7 +113,7 @@ public static Method getMethod(Class aClass, String aName, Class ... theClasses)
  */
 public static Method getMethodOrThrow(Class aClass, String aName, Class ... theClasses) throws NoSuchMethodException
 {
-    return aClass.getMethod(aName, theClasses);
+    return GFXEnv.getEnv().getMethod(aClass, aName, theClasses);
 }
 
 /**

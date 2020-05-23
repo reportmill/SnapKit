@@ -18,14 +18,17 @@ import snap.web.*;
 public class AWTEnv extends GFXEnv {
     
     // The shared AWTEnv
-    static AWTEnv     _shared = new AWTEnv();
+    static AWTEnv     _shared;
 
     /**
      * Creates a new AWTEnv.
      */
     public AWTEnv()
     {
-        ColorSpace._factory = new AWTColorSpaceFactory();
+        if (_env==null) {
+            _env = _shared = this;
+            ColorSpace._factory = new AWTColorSpaceFactory();
+        }
     }
 
     /**
@@ -196,14 +199,34 @@ public class AWTEnv extends GFXEnv {
     public Prefs getPrefs(String aName)  { return AWTPrefs.getPrefs(aName); }
 
     /**
+     * This is really just here to help with TeaVM.
+     */
+    public Method getMethod(Class aClass, String aName, Class ... theClasses) throws NoSuchMethodException
+    {
+        return aClass.getMethod(aName, theClasses);
+    }
+
+    /**
+     * This is really just here to help with TeaVM.
+     */
+    public void exit(int aValue)
+    {
+        System.exit(aValue);
+    }
+
+    /**
      * Returns a shared instance.
      */
-    public static AWTEnv get()  { return _shared; }
+    public static AWTEnv get()
+    {
+        if (_shared!=null) return _shared;
+        return new AWTEnv();
+    }
 
     /**
      * Sets AWTEnv to be the default env.
      */
-    public static void set()  { GFXEnv.setEnv(get()); }
+    public static void set()  { get(); }
 
     /**
      * Implementation of snap ColorSpace using java.awt.color.ColorSpace.

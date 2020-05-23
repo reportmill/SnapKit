@@ -15,21 +15,27 @@ import snap.view.*;
 public class SwingViewEnv extends ViewEnv {
     
     // A shared instance.
-    static SwingViewEnv       _shared = new SwingViewEnv();
+    static SwingViewEnv       _shared;
 
 /**
  * Creates a new SwingViewEnv.
  */
 public SwingViewEnv()
 {
-    // Start Font Loading
-    AWTFontUtils.getFonts(); //new Thread(() -> AWTFontUtils.getFonts()).start();
-    
-    // Turn on dyamic layout
-    Toolkit.getDefaultToolkit().setDynamicLayout(true);
-    
-    // Set Printer.Master to SwingPrinter
-    SwingPrinter.set();
+    if (_env==null) {
+
+        // Set vars
+        _env = _shared = this;
+
+        // Start Font Loading
+        AWTFontUtils.getFonts(); //new Thread(() -> AWTFontUtils.getFonts()).start();
+
+        // Turn on dyamic layout
+        Toolkit.getDefaultToolkit().setDynamicLayout(true);
+
+        // Set Printer.Master to SwingPrinter
+        SwingPrinter.set();
+    }
 }
 
 /**
@@ -113,11 +119,15 @@ public void activateApp(View aView)
 /**
  * Returns a shared instance.
  */
-public static SwingViewEnv get()  { return _shared; }
+public static SwingViewEnv get()
+{
+    if (_shared!=null) return _shared;
+    return new SwingViewEnv();
+}
 
 /**
  * Sets the Swing Node Env.
  */
-public static void set()  { AWTEnv.set(); ViewEnv.setEnv(get()); }
+public static void set()  { AWTEnv.get(); get(); }
 
 }
