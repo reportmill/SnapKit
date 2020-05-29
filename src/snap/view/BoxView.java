@@ -248,7 +248,7 @@ public static void layout(ParentView aPar, View aChild, Insets theIns, boolean i
     double py = ins.top + marg.top, ph = aPar.getHeight() - ins.getHeight() - marg.getHeight(); if(ph<=0) return;
     
     // Get content width/height
-    double cw = isFillWidth || aChild.isGrowWidth()? pw : aChild.getBestWidth(-1); if(cw>pw) cw = pw;
+    double cw = isFillWidth || aChild.isGrowWidth()? pw : aChild.getBestWidth(-1); if (cw>pw) cw = pw;
     double ch = isFillHeight? ph : aChild.getBestHeight(cw);
     
     // Handle normal layout
@@ -256,7 +256,9 @@ public static void layout(ParentView aPar, View aChild, Insets theIns, boolean i
     double dy = ph - ch;
     double sx = aChild.getLeanX()!=null? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
     double sy = aChild.getLeanY()!=null? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
-    aChild.setBounds(px + dx*sx, py + dy*sy, cw, ch);
+    int dx2 = (int) Math.round(dx*sx);
+    int dy2 = (int) Math.round(dy*sy);
+    aChild.setBounds(px + dx2, py + dy2, cw, ch);
 }
     
 }
