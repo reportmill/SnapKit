@@ -38,7 +38,10 @@ public class JSONArchiver {
     /**
      * Creates a new archiver for given import(s).
      */
-    public JSONArchiver(String ... theImports)  { addImport(theImports); }
+    public JSONArchiver(String ... theImports)
+    {
+        addImport(theImports);
+    }
 
     /**
      * Returns the object to be loaded into (null by default).
@@ -198,8 +201,10 @@ public class JSONArchiver {
      */
     protected Object getValue(Object anObj, String aKey)
     {
-        if (anObj instanceof GetValue) return ((GetValue)anObj).getJSONValue(aKey);
-        if (anObj instanceof Map) return ((Map)anObj).get(aKey);
+        if (anObj instanceof GetValue)
+            return ((GetValue)anObj).getJSONValue(aKey);
+        if (anObj instanceof Map)
+            return ((Map)anObj).get(aKey);
         return Key.getValue(anObj, aKey);
     }
 
@@ -353,7 +358,7 @@ public class JSONArchiver {
     public interface GetKeys {
 
         /** Returns a list of keys to be uses to retrieve persistent attributes from an object. */
-        public Collection <String> getJSONKeys();
+        Collection <String> getJSONKeys();
     }
 
     /**
@@ -362,7 +367,7 @@ public class JSONArchiver {
     public interface GetValue {
 
         /** Returns a list of keys to be uses to retrieve persistent attributes from an object. */
-        public Object getJSONValue(String aKey);
+        Object getJSONValue(String aKey);
     }
 
     /**
@@ -371,7 +376,7 @@ public class JSONArchiver {
     public interface SetValue {
 
         /** Returns a list of keys to be uses to retrieve persistent attributes from an object. */
-        public void setJSONValue(String aKey, Object aValue);
+        void setJSONValue(String aKey, Object aValue);
     }
 
     /**
@@ -380,6 +385,6 @@ public class JSONArchiver {
     public interface GetClass {
 
         /** Returns a list of keys to be uses to retrieve persistent attributes from an object. */
-        public String getJSONClass();
+        String getJSONClass();
     }
 }
