@@ -1,7 +1,5 @@
 package snap.view;
 import snap.geom.*;
-import snap.gfx.*;
-import snap.util.MathUtils;
 
 /**
  * This class represents a view for the purpose of layout.
@@ -9,34 +7,37 @@ import snap.util.MathUtils;
 public class ViewProxy {
 
     // The original view (if available)
-    private View        _view;
+    private View  _view;
+
+    // The X/Y
+    private double  _x, _y;
 
     // The size
-    private double      _width = UNSET_DOUBLE, _height = UNSET_DOUBLE;
+    private double  _width = UNSET_DOUBLE, _height = UNSET_DOUBLE;
 
     // The children
-    private ViewProxy   _children[];
+    private ViewProxy  _children[];
 
     // The insets
-    private Insets _insets;
+    private Insets  _insets;
 
     // The alignment
-    private Pos _align;
+    private Pos  _align;
 
     // The horizontal position this view would prefer to take when inside a pane
-    private HPos _leanX;
+    private HPos  _leanX;
 
     // The vertical position this view would prefer to take when inside a pane
-    private VPos _leanY;
+    private VPos  _leanY;
 
     // The margin
-    private Insets       _margin;
+    private Insets  _margin;
 
     // Whether view should grow in X or Y
-    private Boolean      _growX, _growY;
+    private Boolean  _growX, _growY;
 
     // Spacing
-    private double       _spacing = UNSET_DOUBLE;
+    private double  _spacing = UNSET_DOUBLE;
 
     // Constants for unset vars
     private static double UNSET_DOUBLE = -Float.MIN_VALUE;
@@ -47,6 +48,32 @@ public class ViewProxy {
     public ViewProxy(View aView)
     {
         _view = aView;
+    }
+
+    /**
+     * Returns the X.
+     */
+    public double getX()  { return _x; }
+
+    /**
+     * Sets the X.
+     */
+    public void setX(double aValue)
+    {
+        _x = aValue;
+    }
+
+    /**
+     * Returns the Y.
+     */
+    public double getY()  { return _y; }
+
+    /**
+     * Sets the Y.
+     */
+    public void setY(double aValue)
+    {
+        _y = aValue;
     }
 
     /**
@@ -95,6 +122,36 @@ public class ViewProxy {
     }
 
     /**
+     * Sets the bounds.
+     */
+    public void setBounds(double aX, double aY, double aW, double aH)
+    {
+        setX(aX); setY(aY); setWidth(aW); setHeight(aH);
+    }
+
+    /**
+     * Returns the Max X.
+     */
+    public double getMaxX()  { return getX() + getWidth(); }
+
+    /**
+     * Returns the Max Y.
+     */
+    public double getMaxY()  { return getY() + getHeight(); }
+
+    /**
+     * Sets the bounds back in the client.
+     */
+    public void setBoundsInClient()
+    {
+        if (_children!=null)
+            for (ViewProxy child : _children)
+                child.setBoundsInClient();
+        else if (_view!=null)
+            _view.setBounds(_x, _y, _width, _height);
+    }
+
+    /**
      * Returns the children.
      */
     public ViewProxy[] getChildren()
@@ -103,6 +160,22 @@ public class ViewProxy {
         ParentView par = (ParentView)_view;
         View children[] = par.getChildrenManaged();
         return _children = getProxies(children);
+    }
+
+    /**
+     * Returns the children.
+     */
+    public void setChildren(ViewProxy theProxies[])
+    {
+        _children = theProxies;
+    }
+
+    /**
+     * Sets the insets.
+     */
+    public void setInsets(Insets theIns)
+    {
+        _insets = theIns;
     }
 
     /**
@@ -207,262 +280,85 @@ public class ViewProxy {
     }
 
     /**
-     * Returns preferred width of given parent using RowView layout.
+     * Returns the MaxX of last child with insets.
      */
-    public static double getRowViewPrefWidth(View aPar, View theChildren[], double aSpacing, double aH)
+    public double getChildrenMaxXLastWithInsets()
     {
-        // Get parent as proxy
-        ViewProxy par = new ViewProxy(aPar);
-        par.setSize(-1, aH);
-        par.setSpacing(aSpacing);
-        if(theChildren!=null)
-            par._children = getProxies(theChildren);
-
-        // Get child bounds rects and add bounds MaxX to insets right
-        Rect bnds[] = getRowViewRects(par, false, false);
-        Insets ins = par.getInsetsAll();
-        double maxX = bnds.length>0 ? bnds[bnds.length-1].getMaxX() : 0;
+        ViewProxy children[] = getChildren();
+        Insets ins = getInsetsAll();
+        double maxX = children.length>0 ? children[children.length-1].getMaxX() : 0;
         return maxX + ins.getRight();
     }
 
     /**
-     * Returns preferred height of given parent using RowView layout.
+     * Returns the MaxX of children with insets.
      */
-    public static double getRowViewPrefHeight(View aPar, View theChildren[], double aW)
+    public double getChildrenMaxXAllWithInsets()
     {
-        // Get parent as proxy
-        ViewProxy par = new ViewProxy(aPar);
-        par.setSize(aW, -1);
-        if(theChildren!=null)
-            par._children = getProxies(theChildren);
+        ViewProxy children[] = getChildren();
+        Insets ins = getInsetsAll();
+        double maxX = ins.getLeft();
+        for (ViewProxy child : children) maxX = Math.max(maxX, child.getMaxX());
+        double pw = maxX + ins.getRight();
+        pw = Math.round(pw);
+        return pw;
+    }
 
-        // Get child bounds rects and add bounds MaxX to insets right
-        Rect bnds[] = getRowViewRects(par, false, false);
-        Insets ins = par.getInsetsAll();
+    /**
+     * Returns the MaxY of last child with insets.
+     */
+    public double getChildrenMaxYLastWithInsets()
+    {
+        ViewProxy children[] = getChildren();
+        Insets ins = getInsetsAll();
+        double maxY = children.length>0 ? children[children.length-1].getMaxY() : 0;
+        return maxY + ins.getBottom();
+    }
+
+    /**
+     * Returns the MaxY of children with insets.
+     */
+    public double getChildrenMaxYAllWithInsets()
+    {
+        ViewProxy children[] = getChildren();
+        Insets ins = getInsetsAll();
         double maxY = ins.getTop();
-        for(Rect bnd : bnds) maxY = Math.max(maxY, bnd.getMaxY());
+        for (ViewProxy child : children) maxY = Math.max(maxY, child.getMaxY());
         double ph = maxY + ins.getBottom();
         ph = Math.round(ph);
         return ph;
     }
 
     /**
-     * Performs layout for given parent View using RowView layout.
-     */
-    public static void layoutRowView(ParentView aPar, View theChildren[], Insets theIns, boolean isFillWidth,
-         boolean isFillHeight, double aSpacing)
-    {
-        // Get Parent ViewProxy with Children proxies
-        ViewProxy par = new ViewProxy(aPar);
-        par.setSpacing(aSpacing);
-        View children[] = theChildren!=null? theChildren : aPar.getChildrenManaged(); if(children.length==0) return;
-        par._children = getProxies(children);
-
-        // Get layout rects and set back in children
-        Rect cbnds[] = getRowViewRects(par, isFillWidth, isFillHeight);
-        for(int i=0;i<children.length; i++) { View child = children[i]; Rect bnds = cbnds[i];
-            child.setBounds(bnds);
-        }
-    }
-
-    /**
-     * Performs layout for given parent with given children.
-     */
-    public static Rect[] getRowViewRects(ViewProxy aPar, boolean isFillWidth, boolean isFillHeight)
-    {
-        // Get children (just return if empty) and create rects
-        ViewProxy children[] = aPar.getChildren(); if(children.length==0) return new Rect[0];
-        Rect cbnds[] = new Rect[children.length];
-        for(int i=0;i<cbnds.length;i++) cbnds[i] = new Rect();
-
-        // Load layout rects and return
-        getRowViewRectsX(aPar, isFillWidth, cbnds);
-        getRowViewRectsY(aPar, isFillHeight, cbnds);
-        return cbnds;
-    }
-
-    /**
-     * Calculates RowView layout bounds (X & Width) for given Parent and sets in given rects.
-     */
-    private static void getRowViewRectsX(ViewProxy aPar, boolean isFillWidth, Rect cbnds[])
-    {
-        // Get layout info and loop vars
-        ViewProxy children[] = aPar.getChildren();
-        Insets ins = aPar.getInsetsAll();
-        double spacing = aPar.getSpacing();
-        double px = ins.left;
-        double cx = px;
-        double spc = 0;
-        int growersCount = 0;
-
-        // Iterate over children to calculate bounds X and Width
-        for(int i=0,iMax=children.length;i<iMax;i++) { ViewProxy child = children[i];
-
-            // Get child width and update child x for spacing/margin-left
-            Insets marg = child.getMargin();
-            double cw = child.getBestWidth(-1);
-            cx += Math.max(spc, marg.left);
-
-            // Set child bounds X and Width
-            cbnds[i].x = cx; cbnds[i].width = cw;
-
-            // Update spacing, current child x and grow count
-            spc = Math.max(spacing, marg.right);
-            cx += cw;
-            if(child.isGrowWidth()) growersCount++;
-        }
-
-        // If Parent.Width -1, just return rects
-        double pw = aPar.getWidth();
-        if(pw<0)
-            return;
-        pw = Math.max(pw - ins.getWidth(), 0);
-
-        // Add margin for last child, calculate extra space and add to growers or alignment
-        cx += children[children.length-1].getMargin().right;
-        int extra = (int)Math.round(px + pw - cx);
-        if(extra!=0)
-            addExtraSpaceX(aPar, cbnds, extra, growersCount, isFillWidth);
-    }
-
-    /**
-     * Calculates RowView layout bounds (Y & Height) for given Parent and sets in given rects.
-     */
-    private static void getRowViewRectsY(ViewProxy aPar, boolean isFillHeight, Rect cbnds[])
-    {
-        // Get layout info and loop vars
-        ViewProxy children[] = aPar.getChildren();
-        Insets ins = aPar.getInsetsAll();
-        double ay = getAlignY(aPar);
-        double py = ins.top;
-        double ph = aPar.getHeight(); if(ph>=0) ph = Math.max(ph - ins.getHeight(), 0);
-
-        // Iterate over children to calculate bounds rects
-        for(int i=0,iMax=children.length; i<iMax; i++) { ViewProxy child = children[i];
-
-            // Calc y accounting for margin and alignment
-            Insets marg = child.getMargin();
-            double maxH = Math.max(ph - marg.getHeight(), 0);
-            double cw = cbnds[i].width;
-            double cy = py + marg.getTop();
-            double ch;
-
-            // If Parent.Height not set, set height to Child.PrefHeight
-            if(ph<0) {
-                ch = child.getBestHeight(cw);
-            }
-
-            // Otherwise, if Parent.FillHeight or Child.GrowHeight, set to max height
-            else if(isFillHeight || child.isGrowHeight()) {
-                ch = maxH;
-            }
-
-            // Otherwise, set height to Child.PrefHeight and adjust Y
-            else {
-                ch = child.getBestHeight(cw);
-                ch = Math.min(ch, maxH);
-
-                // Calc y accounting for margin and alignment
-                if (ch < maxH) {
-                    double ay2 = Math.max(ay, getLeanY(child));
-                    double dy = Math.round((ph - ch) * ay2);
-                    cy = Math.max(cy, py + dy);
-                }
-            }
-
-            // Set child rect Y and Height
-            cbnds[i].y = cy;
-            cbnds[i].height = ch;
-        }
-    }
-
-    /**
-     * Adds extra space to growers or alignment.
-     */
-    private static void addExtraSpaceX(ViewProxy par, Rect cbnds[], int extra, int grow, boolean fillW)
-    {
-        ViewProxy children[] = par.getChildren();
-
-        // If grow shapes, add grow
-        if(grow>0)
-            addExtraSpaceToGrowers(children, cbnds, extra, grow);
-
-            // Otherwise, if FillWidth, extend last child
-        else if(fillW)
-            cbnds[children.length-1].width += extra;
-
-            // Otherwise, check for horizontal alignment/lean shift
-        else if(extra>0)
-            addExtraSpaceToAlign(par, children, cbnds, extra);
-    }
-
-    /**
-     * Adds extra space to growers.
-     */
-    private static void addExtraSpaceToGrowers(ViewProxy children[], Rect cbnds[], int extra, int grow)
-    {
-        // Get amount to add to each grower (plus 1 for some if not evenly divisible by grow)
-        int each = extra/grow;
-        int eachP1 = each + MathUtils.sign(extra);
-        int count2 = Math.abs(extra%grow);
-
-        // Iterate over children and add their share (plus 1 for some if not evenly divisible by grow)
-        for(int i=0, j=0, dx = 0,iMax=children.length;i<iMax;i++) { ViewProxy child = children[i];
-            Rect cbnd = cbnds[i];
-            if(dx!=0)
-                cbnd.setX(cbnd.x + dx);
-            if(child.isGrowWidth()) {
-                int each3 = j<count2? eachP1 : each;
-                cbnd.setWidth(cbnd.width + each3);
-                dx += each3; j++;
-            }
-        }
-    }
-
-    /**
-     * Adds extra space to alignment.
-     */
-    private static void addExtraSpaceToAlign(ViewProxy par, ViewProxy children[], Rect cbnds[], double extra)
-    {
-        double ax = getAlignX(par);
-        for(int i=0,iMax=children.length;i<iMax;i++) { ViewProxy child = children[i];
-            Rect cbnd = cbnds[i];
-            ax = Math.max(ax, getLeanX(child)); double dx = extra*ax;
-            if(dx>0)
-                cbnd.setX(cbnd.x + extra*ax);
-        }
-    }
-
-    /**
      * Returns the align x factor.
      */
-    public static double getAlignX(ViewProxy aView)
-    {
-        return ViewUtils.getAlignX(aView.getAlign());
-    }
+    public double getAlignXAsDouble()  { return ViewUtils.getAlignX(getAlign()); }
 
     /**
      * Returns the align y factor.
      */
-    public static double getAlignY(ViewProxy aView)
-    {
-        return ViewUtils.getAlignY(aView.getAlign());
-    }
+    public double getAlignYAsDouble()  { return ViewUtils.getAlignY(getAlign()); }
 
     /**
      * Returns the lean x factor.
      */
-    public static double getLeanX(ViewProxy aView)
-    {
-        return ViewUtils.getAlignX(aView.getLeanX());
+    public double getLeanXAsDouble()  { return ViewUtils.getAlignX(getLeanX());
     }
 
     /**
      * Returns the lean y factor.
      */
-    public static double getLeanY(ViewProxy aView)
+    public double getLeanYAsDouble()  { return ViewUtils.getAlignY(getLeanY()); }
+
+    /**
+     * Returns a proxy for given parent with proxies for given children (if null, uses normal view children).
+     */
+    public static ViewProxy getProxyForParentAndChildren(View aPar, View theChildren[])
     {
-        return ViewUtils.getAlignY(aView.getLeanY());
+        ViewProxy par = new ViewProxy(aPar);
+        if (theChildren!=null)
+            par.setChildren(getProxies(theChildren));
+        return par;
     }
 
     /**
