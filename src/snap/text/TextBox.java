@@ -521,7 +521,7 @@ protected void updateLines(int aStart, int linesEnd, int textEnd)
     // Calculated aligned Y
     if(_alignY!=VPos.TOP) {
         double ph = getPrefHeight(getWidth()), height = getHeight();
-        if(height>ph) _alignedY = _alignY.asDouble()*(height-ph);
+        if(height>ph) _alignedY = _alignY.doubleValue()*(height-ph);
     }
 }
 

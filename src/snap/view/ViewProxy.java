@@ -39,6 +39,9 @@ public class ViewProxy {
     // Spacing
     private double  _spacing = UNSET_DOUBLE;
 
+    // The number of children that grow width/height
+    private int _growWidthCount = -1, _growHeightCount = -1;
+
     // Constants for unset vars
     private static double UNSET_DOUBLE = -Float.MIN_VALUE;
 
@@ -285,6 +288,26 @@ public class ViewProxy {
     }
 
     /**
+     * Returns the number of children that grow width.
+     */
+    public int getGrowWidthCount()
+    {
+        if (_growWidthCount>=0) return _growWidthCount;
+        int count = 0; for (ViewProxy c : getChildren()) if (c.isGrowWidth()) count++;
+        return _growWidthCount = count;
+    }
+
+    /**
+     * Returns the number of children that grow height.
+     */
+    public int getGrowHeightCount()
+    {
+        if (_growHeightCount>=0) return _growHeightCount;
+        int count = 0; for (ViewProxy c : getChildren()) if (c.isGrowHeight()) count++;
+        return _growHeightCount = count;
+    }
+
+    /**
      * Returns the MaxX of last child with insets.
      */
     public double getChildrenMaxXLastWithInsets()
@@ -347,8 +370,7 @@ public class ViewProxy {
     /**
      * Returns the lean x factor.
      */
-    public double getLeanXAsDouble()  { return ViewUtils.getAlignX(getLeanX());
-    }
+    public double getLeanXAsDouble()  { return ViewUtils.getAlignX(getLeanX()); }
 
     /**
      * Returns the lean y factor.

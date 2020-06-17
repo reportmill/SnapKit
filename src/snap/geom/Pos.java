@@ -22,70 +22,81 @@ public enum Pos {
     BASELINE_LEFT(BASELINE, LEFT),
     BASELINE_CENTER(BASELINE, HPos.CENTER),
     BASELINE_RIGHT(BASELINE, RIGHT);
-     
+
+    // The Vertical position
     private final VPos vpos;
+
+    // The Horizontal position
     private final HPos hpos;
 
-/** Create new Pos. */
-private Pos(VPos vpos, HPos hpos) { this.vpos = vpos; this.hpos = hpos; }
+    /** Create new Pos. */
+    Pos(VPos vpos, HPos hpos) { this.vpos = vpos; this.hpos = hpos; }
 
-/**
- * Returns the Horizontal position.
- */
-public HPos getHPos()  { return hpos; }
+    /**
+     * Returns the Horizontal position.
+     */
+    public HPos getHPos()  { return hpos; }
 
-/**
- * Returns the vertical position.
- */
-public VPos getVPos()  { return vpos; }
+    /**
+     * Returns the vertical position.
+     */
+    public VPos getVPos()  { return vpos; }
 
-/**
- * Returns whether position is side.
- */
-public boolean isSide()  { return this==TOP_CENTER || this==CENTER_LEFT || this==CENTER_RIGHT || this==BOTTOM_CENTER; }
-
-/**
- * Returns whether position is corner.
- */
-public boolean isCorner()  { return this==TOP_LEFT || this==TOP_RIGHT || this==BOTTOM_LEFT || this==BOTTOM_RIGHT; }
-
-/**
- * Returns the opposing position.
- */
-public Pos getOpposing()
-{
-    switch(this) {
-        case TOP_LEFT: return BOTTOM_RIGHT;
-        case TOP_CENTER: return BOTTOM_CENTER;
-        case TOP_RIGHT: return BOTTOM_LEFT;
-        case CENTER_LEFT: return CENTER_RIGHT;
-        case CENTER_RIGHT: return CENTER_LEFT;
-        case BOTTOM_LEFT: return TOP_RIGHT;
-        case BOTTOM_CENTER: return TOP_CENTER;
-        case BOTTOM_RIGHT: return TOP_LEFT;
-        default: return this;
+    /**
+     * Returns whether position is side.
+     */
+    public boolean isSide()
+    {
+        return this==TOP_CENTER || this==CENTER_LEFT || this==CENTER_RIGHT || this==BOTTOM_CENTER;
     }
-}
 
-/**
- * Returns the Pos for a string.
- */
-public static Pos get(String aString)
-{
-    String str = aString.toUpperCase();
-    if(str.equals("LEFT")) return CENTER_LEFT;
-    if(str.equals("RIGHT")) return CENTER_RIGHT;
-    return valueOf(str);
-}
+    /**
+     * Returns whether position is corner.
+     */
+    public boolean isCorner()
+    {
+        return this==TOP_LEFT || this==TOP_RIGHT || this==BOTTOM_LEFT || this==BOTTOM_RIGHT;
+    }
 
-/**
- * Returns a pos for given HPos and VPos.
- */
-public static Pos get(HPos aHP, VPos aVP)
-{
-    if(aHP==null) aHP = HPos.CENTER; if(aVP==null) aVP = VPos.CENTER;
-    for(Pos p : values()) if(p.getHPos()==aHP && p.getVPos()==aVP) return p;
-    throw new RuntimeException("Pos.get(H,V): Invalid arguement");
-}
+    /**
+     * Returns the opposing position.
+     */
+    public Pos getOpposing()
+    {
+        switch (this) {
+            case TOP_LEFT: return BOTTOM_RIGHT;
+            case TOP_CENTER: return BOTTOM_CENTER;
+            case TOP_RIGHT: return BOTTOM_LEFT;
+            case CENTER_LEFT: return CENTER_RIGHT;
+            case CENTER_RIGHT: return CENTER_LEFT;
+            case BOTTOM_LEFT: return TOP_RIGHT;
+            case BOTTOM_CENTER: return TOP_CENTER;
+            case BOTTOM_RIGHT: return TOP_LEFT;
+            default: return this;
+        }
+    }
 
+    /**
+     * Returns the Pos for a string.
+     */
+    public static Pos get(String aString)
+    {
+        String str = aString.toUpperCase();
+        if (str.equals("LEFT")) return CENTER_LEFT;
+        if (str.equals("RIGHT")) return CENTER_RIGHT;
+        return valueOf(str);
+    }
+
+    /**
+     * Returns a pos for given HPos and VPos.
+     */
+    public static Pos get(HPos aHP, VPos aVP)
+    {
+        if (aHP==null) aHP = HPos.CENTER;
+        if (aVP==null) aVP = VPos.CENTER;
+        for (Pos p : values())
+            if (p.getHPos()==aHP && p.getVPos()==aVP)
+                return p;
+        throw new RuntimeException("Pos.get(H,V): Invalid arguement");
+    }
 }
