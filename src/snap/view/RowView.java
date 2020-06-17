@@ -112,7 +112,6 @@ public class RowView extends ChildView {
     public static double getPrefWidth(View aPar, View theChildren[], double aSpacing, double aH)
     {
         ViewProxy par = ViewProxy.getProxyForParentAndChildren(aPar, theChildren);
-        par.setSize(-1, aH);
         par.setSpacing(aSpacing);
         return getPrefWidthProxy(par, aH);
     }
@@ -123,7 +122,6 @@ public class RowView extends ChildView {
     public static double getPrefHeight(View aPar, View theChildren[], double aW)
     {
         ViewProxy par = ViewProxy.getProxyForParentAndChildren(aPar, theChildren);
-        par.setSize(aW, -1);
         return getPrefHeightProxy(par, aW);
     }
 
@@ -210,12 +208,12 @@ public class RowView extends ChildView {
             child.setX(cx);
             child.setWidth(cw);
 
-            // Update child x loop var last child
+            // Update child x loop var and last child
             cx += cw;
             lastChild = child;
         }
 
-        // If Parent.Width -1, just return rects
+        // If Parent.Width -1, just return (laying out for PrefWidth)
         double pw = aPar.getWidth();
         if (pw<0)
             return;
@@ -236,30 +234,33 @@ public class RowView extends ChildView {
         // Get layout info and loop vars
         ViewProxy children[] = aPar.getChildren();
         Insets ins = aPar.getInsetsAll();
-        double ay = aPar.getAlignYAsDouble();
         double py = ins.top;
         double ph = aPar.getHeight(); if (ph>=0) ph = Math.max(ph - ins.getHeight(), 0);
+        double ay = aPar.getAlignYAsDouble();
 
-        // Iterate over children to calculate bounds rects
+        // Iterate over children to calculate/set child Y & Height
         for (ViewProxy child : children) {
 
-            // Calc y accounting for margin and alignment
+            // Calc Y accounting for margin and alignment
             Insets marg = child.getMargin();
-            double maxH = Math.max(ph - marg.getHeight(), 0);
-            double cw = child.getWidth();
             double cy = py + marg.getTop();
             double ch;
 
             // If Parent.Height not set, set height to Child.PrefHeight
             if (ph<0) {
-                ch = child.getBestHeight(cw); }
+                double cw = child.getWidth();
+                ch = child.getBestHeight(cw);
+            }
 
             // Otherwise, if Parent.FillHeight or Child.GrowHeight, set to max height
             else if (isFillHeight || child.isGrowHeight()) {
-                ch = maxH; }
+                ch = Math.max(ph - marg.getHeight(), 0);
+            }
 
             // Otherwise, set height to Child.PrefHeight and adjust Y
             else {
+                double maxH = Math.max(ph - marg.getHeight(), 0);
+                double cw = child.getWidth();
                 ch = child.getBestHeight(cw);
                 ch = Math.min(ch, maxH);
 
