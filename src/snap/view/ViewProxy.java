@@ -152,6 +152,11 @@ public class ViewProxy {
     }
 
     /**
+     * Returns the number of children.
+     */
+    public int getChildCount()  { return getChildren().length; }
+
+    /**
      * Returns the children.
      */
     public ViewProxy[] getChildren()
@@ -349,6 +354,11 @@ public class ViewProxy {
      * Returns the lean y factor.
      */
     public double getLeanYAsDouble()  { return ViewUtils.getAlignY(getLeanY()); }
+
+    /**
+     * Returns a proxy for given parent.
+     */
+    public static ViewProxy getProxyForParent(View aPar)  { return new ViewProxy(aPar); }
 
     /**
      * Returns a proxy for given parent with proxies for given children (if null, uses normal view children).
