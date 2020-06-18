@@ -41,6 +41,11 @@ public class CheckBox extends ToggleButton {
     public void paintFront(Painter aPntr)  { }
 
     /**
+     * Override to return some space between button and label.
+     */
+    public double getSpacing()  { return DEFAULT_SPACING; }
+
+    /**
      * Override to situate Check view.
      */
     public void setPosition(Pos aPos)
@@ -77,7 +82,7 @@ public class CheckBox extends ToggleButton {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, DEFAULT_SPACING, aH); }
+    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, aH); }
 
     /**
      * Returns the preferred height.
@@ -87,7 +92,7 @@ public class CheckBox extends ToggleButton {
     /**
      * Override to layout children.
      */
-    protected void layoutImpl()  { RowView.layout(this, false, DEFAULT_SPACING); }
+    protected void layoutImpl()  { RowView.layout(this, false); }
 
     /**
      * The View to render the check.

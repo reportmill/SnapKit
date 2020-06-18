@@ -328,7 +328,7 @@ public class Label extends ParentView {
     protected double getPrefWidthImpl(double aH)
     {
         if (isHorizontal())
-            return RowView.getPrefWidth(this, getSpacing(), aH);
+            return RowView.getPrefWidth(this, aH);
         return ColView.getPrefWidth(this, -1);
     }
 
@@ -347,7 +347,7 @@ public class Label extends ParentView {
      */
     protected void layoutImpl()
     {
-        if (isHorizontal()) RowView.layout(this, false, getSpacing());
+        if (isHorizontal()) RowView.layout(this, false);
         else ColView.layout(this, false);
     }
 

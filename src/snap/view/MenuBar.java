@@ -122,7 +122,7 @@ public class MenuBar extends ParentView {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, 0, aH); }
+    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, aH); }
 
     /**
      * Returns the preferred height.
@@ -132,7 +132,7 @@ public class MenuBar extends ParentView {
     /**
      * Layout children.
      */
-    protected void layoutImpl()  { RowView.layout(this, true, 0); }
+    protected void layoutImpl()  { RowView.layout(this, true); }
 
     /**
      * Override to return default.

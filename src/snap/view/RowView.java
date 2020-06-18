@@ -60,7 +60,7 @@ public class RowView extends ChildView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return getPrefWidth(this, getSpacing(), aH);
+        return getPrefWidth(this, aH);
     }
 
     /**
@@ -76,7 +76,7 @@ public class RowView extends ChildView {
      */
     protected void layoutImpl()
     {
-        layout(this, isFillHeight(), getSpacing());
+        layout(this, isFillHeight());
     }
 
     /**
@@ -109,10 +109,9 @@ public class RowView extends ChildView {
     /**
      * Returns preferred width of given parent using RowView layout.
      */
-    public static double getPrefWidth(View aPar, double aSpacing, double aH)
+    public static double getPrefWidth(View aPar, double aH)
     {
         ViewProxy par = ViewProxy.getProxy(aPar);
-        par.setSpacing(aSpacing);
         return getPrefWidthProxy(par, aH);
     }
 
@@ -128,14 +127,13 @@ public class RowView extends ChildView {
     /**
      * Performs layout for given parent with given children.
      */
-    public static void layout(ParentView aPar, boolean isFillHeight, double aSpacing)
+    public static void layout(ParentView aPar, boolean isFillHeight)
     {
         // If no children, just return
         if (aPar.getChildrenManaged().length==0) return;
 
         // Get Parent ViewProxy with Children proxies
         ViewProxy par = ViewProxy.getProxy(aPar);
-        par.setSpacing(aSpacing);
 
         // Do Proxy layout
         layoutProxy(par, isFillHeight);

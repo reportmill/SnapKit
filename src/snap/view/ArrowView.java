@@ -235,7 +235,7 @@ public class ArrowView extends ParentView {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, 0, aH); }
+    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, aH); }
 
     /**
      * Returns the preferred height.
@@ -245,7 +245,7 @@ public class ArrowView extends ParentView {
     /**
      * Layout children.
      */
-    protected void layoutImpl()  { RowView.layout(this, false, 0); }
+    protected void layoutImpl()  { RowView.layout(this, false); }
 
     /**
      * Returns the default alignment.

@@ -218,7 +218,7 @@ public class Spinner <T> extends ParentView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return RowView.getPrefWidth(this, SPACING, aH);
+        return RowView.getPrefWidth(this, aH);
     }
 
     /**
@@ -234,7 +234,7 @@ public class Spinner <T> extends ParentView {
      */
     protected void layoutImpl()
     {
-        RowView.layout(this, true, SPACING);
+        RowView.layout(this, true);
     }
 
     /**

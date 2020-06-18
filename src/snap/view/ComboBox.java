@@ -507,7 +507,7 @@ public class ComboBox <T> extends ParentView implements View.Selectable <T> {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, 0, -1); }
+    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, -1); }
 
     /**
      * Returns the preferred height.
@@ -520,7 +520,7 @@ public class ComboBox <T> extends ParentView implements View.Selectable <T> {
     protected void layoutImpl()
     {
         boolean fillHeight = !isShowTextField();
-        RowView.layout(this, fillHeight, 0);
+        RowView.layout(this, fillHeight);
     }
 
     /**
