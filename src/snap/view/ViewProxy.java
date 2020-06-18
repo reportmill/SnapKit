@@ -125,6 +125,11 @@ public class ViewProxy {
     }
 
     /**
+     * Returns the bounds.
+     */
+    public Rect getBounds()  { return new Rect(getX(), getY(), getWidth(), getHeight()); }
+
+    /**
      * Sets the bounds.
      */
     public void setBounds(double aX, double aY, double aW, double aH)
@@ -202,7 +207,7 @@ public class ViewProxy {
     public Pos getAlign()
     {
         if(_align!=null) return _align;
-        _align = _view!=null? _view.getAlign() : null;
+        _align = _view!=null? _view.getAlign() : Pos.TOP_LEFT;
         return _align;
     }
 
@@ -246,6 +251,11 @@ public class ViewProxy {
     }
 
     /**
+     * Sets whether view grows width.
+     */
+    public void setGrowWidth(boolean aValue)  { _growX = aValue; }
+
+    /**
      * Returns whether view grows height.
      */
     public boolean isGrowHeight()
@@ -253,6 +263,11 @@ public class ViewProxy {
         if(_growY!=null) return _growY;
         return _growY = _view!=null && _view.isGrowHeight();
     }
+
+    /**
+     * Sets whether view grows height.
+     */
+    public void setGrowHeight(boolean aValue)  { _growY = aValue; }
 
     /**
      * Returns spacing.
@@ -376,6 +391,14 @@ public class ViewProxy {
      * Returns the lean y factor.
      */
     public double getLeanYAsDouble()  { return ViewUtils.getAlignY(getLeanY()); }
+
+    @Override
+    public String toString()
+    {
+        if (_view!=null)
+            return "ViewProxy : " + _view.toString();
+        return "ViewProxy { Bounds=" + getBounds() + " }";
+    }
 
     /**
      * Returns a proxy for given parent.
