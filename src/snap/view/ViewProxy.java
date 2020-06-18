@@ -401,20 +401,9 @@ public class ViewProxy {
     }
 
     /**
-     * Returns a proxy for given parent.
+     * Returns a proxy for given view.
      */
-    public static ViewProxy getProxyForParent(View aPar)  { return new ViewProxy(aPar); }
-
-    /**
-     * Returns a proxy for given parent with proxies for given children (if null, uses normal view children).
-     */
-    public static ViewProxy getProxyForParentAndChildren(View aPar, View theChildren[])
-    {
-        ViewProxy par = new ViewProxy(aPar);
-        if (theChildren!=null)
-            par.setChildren(getProxies(theChildren));
-        return par;
-    }
+    public static ViewProxy getProxy(View aView)  { return new ViewProxy(aView); }
 
     /**
      * Returns an array of proxies for given array of views.

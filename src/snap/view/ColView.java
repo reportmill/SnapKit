@@ -58,17 +58,17 @@ public class ColView extends ChildView {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return getPrefWidth(this, null, aH); }
+    protected double getPrefWidthImpl(double aH)  { return getPrefWidth(this, aH); }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)  { return getPrefHeight(this, null, _spacing, aW); }
+    protected double getPrefHeightImpl(double aW)  { return getPrefHeight(this, aW); }
 
     /**
      * Layout children.
      */
-    protected void layoutImpl()  { layout(this, null, null, isFillWidth(), getSpacing()); }
+    protected void layoutImpl()  { layout(this, isFillWidth()); }
 
     /**
      * Override to return true.
@@ -105,34 +105,31 @@ public class ColView extends ChildView {
     /**
      * Returns preferred width of given parent with given children.
      */
-    public static double getPrefWidth(ParentView aPar, View theChildren[], double aH)
+    public static double getPrefWidth(ParentView aPar, double aH)
     {
-        ViewProxy par = ViewProxy.getProxyForParentAndChildren(aPar, theChildren);
+        ViewProxy par = ViewProxy.getProxy(aPar);
         return getPrefWidthProxy(par, aH);
     }
 
     /**
      * Returns preferred height of given parent with given children.
      */
-    public static double getPrefHeight(ParentView aPar, View theChildren[], double aSpacing, double aW)
+    public static double getPrefHeight(ParentView aPar, double aW)
     {
-        ViewProxy par = ViewProxy.getProxyForParentAndChildren(aPar, theChildren);
-        par.setSpacing(aSpacing);
+        ViewProxy par = ViewProxy.getProxy(aPar);
         return getPrefHeightProxy(par, aW);
     }
 
     /**
-     * Performs layout for given parent with given children.
+     * Performs layout for given parent with option to fill width.
      */
-    public static void layout(ParentView aPar, View theChildren[], Insets theIns, boolean isFillWidth, double aSpacing)
+    public static void layout(ParentView aPar, boolean isFillWidth)
     {
         // Get layout children (just return if none)
-        View children[] = theChildren!=null? theChildren : aPar.getChildrenManaged(); if (children.length==0) return;
+        if (aPar.getChildrenManaged().length==0) return;
 
         // Get Parent ViewProxy with Children proxies
-        ViewProxy par = ViewProxy.getProxyForParentAndChildren(aPar, children);
-        if (theIns!=null) par.setInsets(theIns);
-        par.setSpacing(aSpacing);
+        ViewProxy par = ViewProxy.getProxy(aPar);
 
         // Do Proxy layout
         layoutProxy(par, isFillWidth);

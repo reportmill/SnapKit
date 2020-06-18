@@ -411,8 +411,8 @@ public class SplitView extends ParentView implements ViewHost {
     protected double getPrefWidthImpl(double aH)
     {
         if (isHorizontal())
-            return RowView.getPrefWidth(this, null, 0, aH);
-        return ColView.getPrefWidth(this, null, -1);
+            return RowView.getPrefWidth(this, 0, aH);
+        return ColView.getPrefWidth(this, -1);
     }
 
     /**
@@ -421,8 +421,8 @@ public class SplitView extends ParentView implements ViewHost {
     protected double getPrefHeightImpl(double aW)
     {
         if (isHorizontal())
-            return RowView.getPrefHeight(this, null, aW);
-        return ColView.getPrefHeight(this, null, 0, -1);
+            return RowView.getPrefHeight(this, aW);
+        return ColView.getPrefHeight(this, -1);
     }
 
     /**
@@ -432,8 +432,8 @@ public class SplitView extends ParentView implements ViewHost {
     {
         // Do normal layout
         if (isHorizontal())
-            RowView.layout(this, null, null, true, 0);
-        else ColView.layout(this, null, null, true, 0);
+            RowView.layout(this, true, 0);
+        else ColView.layout(this, true);
 
         // If children don't fill main axis, grow last child to fit
         View child = getChildLast(); if(child==null) return;
