@@ -408,7 +408,7 @@ public class ViewProxy {
     /**
      * Returns an array of proxies for given array of views.
      */
-    public static ViewProxy[] getProxies(View theViews[])
+    public static ViewProxy[] getProxies(View ... theViews)
     {
         ViewProxy proxies[] = new ViewProxy[theViews.length];
         for(int i=0;i<theViews.length;i++)

@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.util.*;
-
 import snap.geom.*;
 import snap.gfx.*;
 import snap.util.*;
@@ -160,20 +158,9 @@ public View getChildAt(Point aPnt)  { return _children.getViewAt(aPnt.x, aPnt.y)
 public View getChildAt(double aX, double aY)  { return _children.getViewAt(aX, aY); }
 
 /**
- * Returns the first child view of given class (optional) hit by given shape, excluding given view (optional).
+ * Returns the number of managed children.
  */
-public <T extends View> T getChildAt(Shape aShape, Class <T> aClass, View aChild)
-{
-    return _children.getViewAt(aShape, aClass, aChild);
-}
-
-/**
- * Returns the child at given point.
- */
-public <T extends View> List <T> getChildrenAt(Shape aShape, Class <T> aClass, View aChild)
-{
-    return _children.getViewsAt(aShape, aClass, aChild);
-}
+public int getChildCountManaged()  { return getChildrenManaged().length; }
 
 /**
  * Returns the managed children.
