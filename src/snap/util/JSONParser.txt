@@ -1,9 +1,9 @@
 
-Object { "{" Pair ("," Pair)* "}" }
+Object { "{" (Pair ("," Pair)*)? "}" }
 
 Pair { String ":" Value }
 
-Array { "[" Value ("," Value)* "]" }
+Array { "[" (Value ("," Value)*)? "]" }
 
 Value { String | Number | Object | Array | Boolean | Null }
 
