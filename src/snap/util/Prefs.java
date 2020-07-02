@@ -1,141 +1,176 @@
 package snap.util;
 import snap.gfx.GFXEnv;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A platform implementation of preferences.
  */
 public abstract class Prefs {
 
     // The default preferences
-    static Prefs  _default;
+    private static Prefs  _default;
     
-/**
- * Returns a value for given string.
- */
-public abstract String get(String aKey);
+    /**
+     * Returns a value for given string.
+     */
+    public Object getValue(String aKey)
+    {
+        return getValue(aKey, null);
+    }
 
-/**
- * Returns a value for given string and default.
- */
-public abstract String get(String aKey, String aDefault);
+    /**
+     * Returns a value for given string and default.
+     */
+    public abstract Object getValue(String aKey, Object aDefault);
 
-/**
- * Sets a value for given string.
- */
-public abstract void set(String aKey, Object aValue);
+    /**
+     * Sets a value for given string.
+     */
+    public abstract void setValue(String aKey, Object aValue);
 
-/**
- * Removes a value for given key.
- */
-public abstract void remove(String aKey);
+    /**
+     * Removes a value for given key.
+     */
+    public void remove(String aKey)
+    {
+        setValue(aKey, null);
+    }
 
-/**
- * Returns an int value for given key.
- */
-public abstract int getInt(String aKey, int aDefault);
+    /**
+     * Returns a value for given string.
+     */
+    public String getString(String aKey)
+    {
+        return getString(aKey, null);
+    }
 
-/**
- * Returns a float value for given key.
- */
-public abstract float getFloat(String aKey, float aDefault);
+    /**
+     * Returns a value for given string and default.
+     */
+    public String getString(String aKey, String aDefault)
+    {
+        Object val = getValue(aKey, aDefault);
+        return SnapUtils.stringValue(val);
+    }
 
-/**
- * Returns an boolean value for given key.
- */
-public abstract boolean getBoolean(String aKey, boolean aDefault);
+    /**
+     * Returns an int value for given key.
+     */
+    public int getInt(String aKey, int aDefault)
+    {
+        Object val = getValue(aKey);
+        return val!=null ? SnapUtils.intValue(val) : aDefault;
+    }
 
-/**
- * Returns the currently set prefs keys.
- */
-public abstract String[] getKeys();
+    /**
+     * Returns a float value for given key.
+     */
+    public double getDouble(String aKey, double aDefault)
+    {
+        Object val = getValue(aKey);
+        return val!=null ? SnapUtils.doubleValue(val) : aDefault;
+    }
 
-/**
- * Returns a child prefs for given name.
- */
-public abstract Prefs getChild(String aName);
+    /**
+     * Returns an boolean value for given key.
+     */
+    public boolean getBoolean(String aKey, boolean aDefault)
+    {
+        Object val = getValue(aKey);
+        return val!=null ? SnapUtils.boolValue(val) : aDefault;
+    }
 
-/**
- * Updates any persistant store associated with these preferences.
- */
-public void flush()  { }
+    /**
+     * Returns the currently set prefs keys.
+     */
+    public abstract String[] getKeys();
 
-/**
- * Clears all the preferences.
- */
-public void clear()  { }
+    /**
+     * Returns a child prefs for given name.
+     */
+    public Prefs getChild(String aName)
+    {
+        return this;
+    }
 
-/**
- * Returns the default prefs.
- */
-public static Prefs get()  { return getPrefsDefault(); }
+    /**
+     * Updates any persistant store associated with these preferences.
+     */
+    public void flush()  { }
 
-/**
- * Returns the default prefs.
- */
-public static Prefs getPrefsDefault()
-{
-    if(_default!=null) return _default;
-    return _default = getPrefs("DefaultPrefs");
-}
+    /**
+     * Clears all the preferences.
+     */
+    public void clear()  { }
 
-/**
- * Sets the default preferences instance.
- */
-public static void setPrefsDefault(Prefs thePrefs)  { _default = thePrefs; }
+    /**
+     * Returns the default prefs.
+     */
+    public static Prefs get()  { return getPrefsDefault(); }
 
-/**
- * Returns the preferences for given node name.
- */
-public static Prefs getPrefs(String aName)  { return GFXEnv.getEnv().getPrefs(aName); }
+    /**
+     * Returns the default prefs.
+     */
+    public static Prefs getPrefsDefault()
+    {
+        if (_default!=null) return _default;
+        return _default = getPrefs("DefaultPrefs");
+    }
 
-/**
- * Returns the preferences for given class (package really).
- */
-public static Prefs getPrefs(Class aClass)
-{
-    String cname = aClass.getName();
-    int pkgEndInd = cname.lastIndexOf('.');
-    String pname = pkgEndInd>0? cname.substring(0, pkgEndInd) : "<unnamed>";
-    String ppath = "/" + pname.replace('.', '/');
-    return getPrefs(ppath);
-}
+    /**
+     * Sets the default preferences instance.
+     */
+    public static void setPrefsDefault(Prefs thePrefs)  { _default = thePrefs; }
 
-/**
- * Returns a prefs instance that doesn't do anything.
- */
-public static Prefs getFake()  { return _fp!=null? _fp : (_fp=new FakePrefs()); } static Prefs _fp;
+    /**
+     * Returns the preferences for given node name.
+     */
+    public static Prefs getPrefs(String aName)  { return GFXEnv.getEnv().getPrefs(aName); }
 
-/**
- * A Prefs implementation that doesn't do anything.
- */
-private static class FakePrefs extends Prefs {
-    
-    /** Returns a value for given string. */
-    public String get(String aKey)  { return null; }
+    /**
+     * Returns the preferences for given class (package really).
+     */
+    public static Prefs getPrefs(Class aClass)
+    {
+        String cname = aClass.getName();
+        int pkgEndInd = cname.lastIndexOf('.');
+        String pname = pkgEndInd>0 ? cname.substring(0, pkgEndInd) : "<unnamed>";
+        String ppath = "/" + pname.replace('.', '/');
+        return getPrefs(ppath);
+    }
 
-    /** Returns a value for given string and default. */
-    public String get(String aKey, String aDefault)  { return aDefault; }
+    /**
+     * Returns a prefs instance that doesn't do anything.
+     */
+    public static Prefs getFake()  { return _fp!=null? _fp : (_fp=new MapPrefs()); } static Prefs _fp;
 
-    /** Sets a value for given string. */
-    public void set(String aKey, Object aValue)  { }
-    
-    /** Removes a value for given key. */
-    public void remove(String aKey)  { }
+    /**
+     * A Prefs implementation that doesn't do anything.
+     */
+    private static class MapPrefs extends Prefs {
 
-    /** Returns an int value for given key. */
-    public int getInt(String aKey, int aDefault)  { return aDefault; }
-    
-    /** Returns a float value for given key. */
-    public float getFloat(String aKey, float aDefault)  { return aDefault; }
+        // A map to hold prefs
+        private Map<String,Object> _map = new HashMap<>();
 
-    /** Returns a boolean value for given key. */
-    public boolean getBoolean(String aKey, boolean aDefault)  { return aDefault; }
-    
-    /** Returns the currently set prefs keys. */
-    public String[] getKeys()  { return new String[0]; }
+        /** Returns a value for given string and default. */
+        public Object getValue(String aKey, Object aDefault)
+        {
+            Object val = _map.get(aKey);
+            return val!=null ? val : aDefault;
+        }
 
-    /** Returns a child prefs for given name. */
-    public Prefs getChild(String aName)  { return this; }
-}
+        /** Sets a value for given string. */
+        public void setValue(String aKey, Object aValue)
+        {
+            _map.put(aKey, aValue);
+        }
 
+        /** Returns the currently set prefs keys. */
+        public String[] getKeys()
+        {
+            return _map.keySet().toArray(new String[0]);
+        }
+    }
 }

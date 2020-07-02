@@ -17,31 +17,31 @@ public class FilePanel extends ViewOwner {
     private WebSite  _site;
     
     // Whether choosing file for save
-    boolean                _saving;
+    private boolean  _saving;
     
     // The file types
-    String                 _types[];
+    private String  _types[];
     
     // The description
-    String                 _desc;
+    private String  _desc;
     
     // The current file
-    WebFile                _file;
+    private WebFile  _file;
 
     // The current directory
-    WebFile                _dir;
+    private WebFile  _dir;
     
     // The Directory ComboBox
-    ComboBox <WebFile>     _dirComboBox;
+    private ComboBox <WebFile>  _dirComboBox;
     
     // The FileBrowser
-    BrowserView <WebFile>  _fileBrowser;
+    private BrowserView <WebFile>  _fileBrowser;
     
     // The FileText
-    TextField              _fileText;
+    private TextField  _fileText;
     
     // The DialogBox
-    DialogBox              _dbox;
+    private DialogBox  _dbox;
 
     // The default site
     private static WebSite _defaultSite;
@@ -604,7 +604,7 @@ public class FilePanel extends ViewOwner {
             return "/";
 
         String defaultPath = getHomeDirPath();
-        return Prefs.get().get("MostRecentDocument." + aType, defaultPath);
+        return Prefs.get().getString("MostRecentDocument." + aType, defaultPath);
     }
 
     /**
@@ -615,7 +615,7 @@ public class FilePanel extends ViewOwner {
         if (!getSiteDefault().getURL().getScheme().equalsIgnoreCase("file"))
             return;
 
-        Prefs.get().set("MostRecentDocument." + aType, aPath);
+        Prefs.get().setValue("MostRecentDocument." + aType, aPath);
         Prefs.get().flush();
     }
 
