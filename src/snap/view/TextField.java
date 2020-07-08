@@ -932,9 +932,10 @@ public class TextField extends ParentView {
         }
 
         // Otherwise hand focus to previous view
-        else if (getWindow().getFocusedViewLast()!=null)
-            getWindow().getFocusedViewLast().requestFocus();
-        else selectAll();
+        else {
+            View lastFocus = getWindow().getFocusedViewLast();
+            getWindow().requestFocus(lastFocus);
+        }
     }
 
     /**
