@@ -13,19 +13,19 @@ import snap.web.WebURL;
 public abstract class ViewEnv {
 
     // Map of Run-Once runnables
-    private Set <Runnable>  _runOnceRuns = Collections.synchronizedSet(new HashSet());
+    private Set <Runnable>  _runOnceRuns = Collections.synchronizedSet(new HashSet<>());
     
     // Map of Run-Once names
-    private Set <String>  _runOnceNames = Collections.synchronizedSet(new HashSet());
+    private Set <String>  _runOnceNames = Collections.synchronizedSet(new HashSet<>());
     
     // The timer for runIntervals and runDelayed
     private java.util.Timer  _timer = new java.util.Timer();
     
     // A map of timer tasks
-    private Map <Runnable,TimerTask>  _timerTasks = new HashMap();
+    private Map <Runnable,TimerTask>  _timerTasks = new HashMap<>();
     
     // The node environment
-    protected static ViewEnv            _env;
+    protected static ViewEnv  _env;
     
     /**
      * Returns the node environment.
@@ -66,7 +66,7 @@ public abstract class ViewEnv {
     public void runLaterOnce(Runnable aRun)
     {
         // If runnable already queued, just return
-        if(_runOnceRuns.contains(aRun)) return;
+        if (_runOnceRuns.contains(aRun)) return;
 
         // Queue runnable
         _runOnceRuns.add(aRun);
@@ -79,7 +79,7 @@ public abstract class ViewEnv {
     public void runLaterOnce(String aName, Runnable aRun)
     {
         // If runnable already queued, just return
-        if(_runOnceNames.contains(aName)) return;
+        if (_runOnceNames.contains(aName)) return;
 
         // Queue name and runnable
         _runOnceNames.add(aName);
@@ -91,7 +91,7 @@ public abstract class ViewEnv {
      */
     public void runDelayed(Runnable aRun, int aDelay, boolean inAppThread)
     {
-        TimerTask task = new TimerTask() { public void run() { if(inAppThread) runLater(aRun); else aRun.run(); }};
+        TimerTask task = new TimerTask() { public void run() { if (inAppThread) runLater(aRun); else aRun.run(); }};
         _timer.schedule(task, aDelay);
     }
 
@@ -102,8 +102,8 @@ public abstract class ViewEnv {
     {
         // Create task
         TimerTask task = new TimerTask() { public void run()  {
-            if(inAppThread) {
-                if(doAll) runLater(aRun);
+            if (inAppThread) {
+                if (doAll) runLater(aRun);
                 else runLaterAndWait(aRun);
             }
             else aRun.run();
@@ -111,7 +111,7 @@ public abstract class ViewEnv {
 
         // Add task and schedule
         _timerTasks.put(aRun, task);
-        if(doAll) _timer.scheduleAtFixedRate(task, aDelay, aPeriod);
+        if (doAll) _timer.scheduleAtFixedRate(task, aDelay, aPeriod);
         else _timer.schedule(task, aDelay, aPeriod);
     }
 
@@ -121,7 +121,7 @@ public abstract class ViewEnv {
     public void stopIntervals(Runnable aRun)
     {
         TimerTask task = _timerTasks.get(aRun);
-        if(task!=null) task.cancel();
+        if (task!=null) task.cancel();
     }
 
     /**
@@ -130,7 +130,7 @@ public abstract class ViewEnv {
     public synchronized void runLaterAndWait(Runnable aRun)
     {
         // If isEventThread, just run and return
-        if(isEventThread()) { aRun.run(); return; }
+        if (isEventThread()) { aRun.run(); return; }
 
         // Register for runLater() to run and notify
         runLater(() -> runAndNotify(aRun));
@@ -155,11 +155,11 @@ public abstract class ViewEnv {
         // Look for snap file with same name as class
         String name = aClass.getSimpleName() + ".snp";
         WebURL url = WebURL.getURL(aClass, name);
-        if(url!=null)
+        if (url!=null)
             return url;
 
         // Try again for superclass
-        return aClass!=Object.class? getUISource(aClass.getSuperclass()) : null;
+        return aClass!=Object.class ? getUISource(aClass.getSuperclass()) : null;
     }
 
     /**
@@ -194,7 +194,7 @@ public abstract class ViewEnv {
 
     /** Returns a "not implemented" exception for string (method name). */
     RuntimeException notImpl(String s)  { return new RuntimeException(getMsg(s)); }
-    protected void complain(String s)  { s = getMsg(s); if(!_cmpln.contains(s)) System.err.println(s); _cmpln.add(s); }
+    protected void complain(String s)  { s = getMsg(s); if (!_cmpln.contains(s)) System.err.println(s); _cmpln.add(s); }
     String getMsg(String s) { return getClass().getName() + ": Not implemented:" + s; }
-    static Set _cmpln = new HashSet();
+    static Set<String> _cmpln = new HashSet<>();
 }
