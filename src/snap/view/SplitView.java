@@ -13,13 +13,13 @@ import snap.util.*;
 public class SplitView extends ParentView implements ViewHost {
 
     // The list of items
-    private List <View>  _items = new ArrayList();
+    private List <View>  _items = new ArrayList<>();
     
     // The list of dividers
-    private List <Divider>  _divs = new ArrayList();
+    private List <Divider>  _divs = new ArrayList<>();
     
     // The spacing between items (really the default span of the dividers)
-    private double  _spacing = 8;
+    private double _divSpan = DEFAULT_DIVIDER_SPAN;
     
     // The default divider
     private Divider  _divider;
@@ -30,9 +30,13 @@ public class SplitView extends ParentView implements ViewHost {
 
     // A listener to watch for when item.Visible changes
     private PropChangeListener  _visLsnr = pc -> itemVisibleChanged(pc);
+
+    // Constants for properties
+    public static final String DividerSpan_Prop = "DividerSpan";
     
-    // The default border
+    // Constants for internal use
     private static final Border SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
+    private static final int DEFAULT_DIVIDER_SPAN = 8;
 
     /**
      * Creates a new SplitView.
@@ -42,21 +46,6 @@ public class SplitView extends ParentView implements ViewHost {
         setBorder(SPLIT_VIEW_BORDER);
         setClipToBounds(true);
         addEventFilter(e -> processDividerEvent(e), MouseMove, MousePress, MouseDrag, MouseRelease);
-    }
-
-    /**
-     * Returns the default width of the dividers.
-     */
-    public double getSpacing()  { return _spacing; }
-
-    /**
-     * Sets the default width of the dividers.
-     */
-    public void setSpacing(double aValue)
-    {
-        if (aValue==_spacing) return;
-        for (Divider div : _divs) div.setPrefSpan(aValue);
-        firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
     }
 
     /**
@@ -336,7 +325,7 @@ public class SplitView extends ParentView implements ViewHost {
         div.setFill(div0.getFill());
         div.setBorder(div0.getBorder());
         div.setReach(div0.getReach());
-        div.setPrefSpan(getSpacing());
+        div.setPrefSpan(getDividerSpan());
         return div;
     }
 
@@ -368,7 +357,7 @@ public class SplitView extends ParentView implements ViewHost {
     /**
      * Returns the dividers.
      */
-    public Divider[] getDividers()  { return _divs.toArray(new Divider[_divs.size()]); }
+    public Divider[] getDividers()  { return _divs.toArray(new Divider[0]); }
 
     /**
      * Returns the divider at given point.
@@ -391,6 +380,22 @@ public class SplitView extends ParentView implements ViewHost {
                 return div;
         }}
         return null;
+    }
+
+    /**
+     * Returns the default size of the dividers.
+     */
+    public double getDividerSpan()  { return _divSpan; }
+
+    /**
+     * Sets the default size of the dividers.
+     */
+    public void setDividerSpan(double aValue)
+    {
+        if (aValue== _divSpan) return;
+        for (Divider div : _divs)
+            div.setPrefSpan(aValue);
+        firePropChange(DividerSpan_Prop, _divSpan, _divSpan = aValue);
     }
 
     /**
@@ -528,6 +533,32 @@ public class SplitView extends ParentView implements ViewHost {
      */
     @Override
     public View removeGuest(int anIndex)  { return removeItem(anIndex); }
+
+    /**
+     * XML Archival of basic view.
+     */
+    protected XMLElement toXMLView(XMLArchiver anArchiver)
+    {
+        // Archive basic view attributes
+        XMLElement e = super.toXMLView(anArchiver);
+
+        // Archive DividerSpan
+        if(getDividerSpan()!=DEFAULT_DIVIDER_SPAN) e.add(DividerSpan_Prop, getDividerSpan());
+        return e;
+    }
+
+    /**
+     * XML unarchival of basic view.
+     */
+    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        // Unarchive basic view attributes
+        super.fromXMLView(anArchiver, anElement);
+
+        // Unarchive DividerSpan
+        if(anElement.hasAttribute(DividerSpan_Prop))
+            setDividerSpan(anElement.getAttributeFloatValue(DividerSpan_Prop));
+    }
 
     /**
      * XML archival deep.
