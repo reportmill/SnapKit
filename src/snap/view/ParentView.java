@@ -12,7 +12,7 @@ import snap.util.*;
 public class ParentView extends View {
     
     // The children
-    private ViewList  _children = new ViewList();
+    protected ViewList  _children = new ViewList();
     
     // Whether view has children that need repaint
     private boolean  _needsRepaintDeep;

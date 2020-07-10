@@ -16,21 +16,24 @@ public class ViewUpdater {
     // The RootView
     private RootView  _rview;
 
-    // The set of views that have requested repaint
-    private Set <View>  _repaintViews = new HashSet<>();
-    
-    // PaintLater runnable
-    private Runnable  _updateRun;
-    
-    // PaintLater runnable shared
-    private Runnable  _updateRunShared = () -> updateViews();
+    // A set of Runnables to be called at beginning of update
+    private Set <Runnable>  _runBefores = Collections.synchronizedSet(new HashSet<>());
+
+    // A set of ViewAnims with active animations
+    private Set <ViewAnim>  _viewAnims = Collections.synchronizedSet(new HashSet<>());
 
     // A set of ViewOwners that want to be reset on next UI update call
     private Set <ViewOwner>  _resetLaters = Collections.synchronizedSet(new HashSet<>());
-    
-    // A set of ViewAnims with active animations
-    private Set <ViewAnim>  _viewAnims = Collections.synchronizedSet(new HashSet<>());
-    
+
+    // The set of views that have requested repaint
+    private Set <View>  _repaintViews = new HashSet<>();
+
+    // PaintLater runnable
+    private Runnable  _updateRun;
+
+    // PaintLater runnable (reusable)
+    private Runnable  _updateRunShared = () -> updateViews();
+
     // The timer for animated views
     private ViewTimer  _timer = new ViewTimer(25, t -> updateLater());
     
@@ -41,9 +44,9 @@ public class ViewUpdater {
     private boolean  _painting;
 
     // Whether painting in debug mode
-    private static boolean  _debug = false;
+    protected static boolean  _debug = false;
     private static int  _pc;
-    private static long  _frames[] = null; //new long[20];
+    protected static long  _frames[] = null; //new long[20];
     private Rect  _debugRepaintRect;
 
     /**
@@ -53,6 +56,15 @@ public class ViewUpdater {
     {
         _win = aWin;
         _rview = _win.getRootView();
+    }
+
+    /**
+     * Adds a given ViewOwner to set of owners that need reset on next UI update call.
+     */
+    public void runBeforeUpdate(Runnable aRun)
+    {
+        _runBefores.add(aRun);
+        updateLater();
     }
 
     /**
@@ -103,6 +115,14 @@ public class ViewUpdater {
      */
     protected synchronized void updateViews()
     {
+        // Send RunBefore calls
+        while (_runBefores.size()>0) {
+            Runnable runs[] = _runBefores.toArray(new Runnable[0]);
+            _runBefores.clear();
+            for (Runnable run : runs)
+                run.run();
+        }
+
         // If timer is running, send Anim calls
         if (_timer.isRunning()) {
 
