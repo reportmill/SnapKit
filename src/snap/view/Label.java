@@ -55,12 +55,17 @@ public class Label extends ParentView {
     /**
      * Creates a label node with given graphic, text, and after graphic.
      */
-    public Label(View aGrph, String aStr, View aGrphAfter) { setGraphic(aGrph); setText(aStr); setGraphicAfter(aGrphAfter);}
+    public Label(View aGrph, String aStr, View aGrphAfter)
+    {
+        setGraphic(aGrph);
+        setText(aStr);
+        setGraphicAfter(aGrphAfter);
+    }
 
     /**
      * Returns the text.
      */
-    public String getText()  { return _strView!=null? _strView.getText() : null; }
+    public String getText()  { return _strView!=null ? _strView.getText() : null; }
 
     /**
      * Sets the text.
@@ -79,7 +84,10 @@ public class Label extends ParentView {
     /**
      * Returns the image.
      */
-    public Image getImage()  { return _graphic instanceof ImageView? ((ImageView)_graphic).getImage() : null; }
+    public Image getImage()
+    {
+        return _graphic instanceof ImageView ? ((ImageView)_graphic).getImage() : null;
+    }
 
     /**
      * Sets the image.
@@ -87,14 +95,18 @@ public class Label extends ParentView {
     public void setImage(Image anImage)
     {
         Image image = getImage(); if (anImage==image) return;
-        if (_graphic instanceof ImageView) ((ImageView)_graphic).setImage(anImage);
+        if (_graphic instanceof ImageView)
+            ((ImageView)_graphic).setImage(anImage);
         else setGraphic(new ImageView(anImage)); //firePropChange("Image", image, anImage); delete soon
     }
 
     /**
      * Returns the image after text.
      */
-    public Image getImageAfter() { return _graphicAfter instanceof ImageView? ((ImageView)_graphicAfter).getImage() : null;}
+    public Image getImageAfter()
+    {
+        return _graphicAfter instanceof ImageView ? ((ImageView)_graphicAfter).getImage() : null;
+    }
 
     /**
      * Sets the image after text.
@@ -102,14 +114,15 @@ public class Label extends ParentView {
     public void setImageAfter(Image anImage)
     {
         Image image = getImage(); if (anImage==image) return;
-        if (_graphicAfter instanceof ImageView) ((ImageView)_graphicAfter).setImage(anImage);
+        if (_graphicAfter instanceof ImageView)
+            ((ImageView)_graphicAfter).setImage(anImage);
         else setGraphicAfter(new ImageView(anImage)); //firePropChange("Image", image, anImage); delete soon
     }
 
     /**
      * Returns the text fill.
      */
-    public Paint getTextFill()  { return _strView!=null? _strView.getTextFill() : null; }
+    public Paint getTextFill()  { return _strView!=null ? _strView.getTextFill() : null; }
 
     /**
      * Sets the text fill.
@@ -136,7 +149,7 @@ public class Label extends ParentView {
         _strView = new StringView();
         _strView.setGrowWidth(isEditable());
         _strView.setAlign(getAlign().getHPos());
-        addChild(_strView, getGraphic()!=null? 1 : 0);
+        addChild(_strView, getGraphic()!=null ? 1 : 0);
         return _strView;
     }
 
@@ -254,9 +267,13 @@ public class Label extends ParentView {
 
         // Handle set true
         if (aValue) {
-            TextField editor = getEditor(); editor.setText(getText());
-            Rect bnds = getStringView().getBounds(); bnds.inset(-2); editor.setBounds(bnds);
-            addChild(editor); editor.requestFocus();
+            TextField editor = getEditor();
+            editor.setText(getText());
+            Rect bnds = getStringView().getBounds(); bnds.inset(-2);
+            editor.setBounds(bnds);
+            addChild(editor);
+            editor.selectAll();
+            editor.requestFocus();
             getStringView().setPaintable(false);
         }
 
@@ -264,7 +281,8 @@ public class Label extends ParentView {
         else {
             removeChild(_editor);
             setText(_editor.getText());
-            getStringView().setPaintable(true); _editor = null;
+            getStringView().setPaintable(true);
+            _editor = null;
         }
 
         // Fire prop change

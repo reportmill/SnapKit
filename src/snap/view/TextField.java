@@ -15,46 +15,46 @@ import snap.util.*;
 public class TextField extends ParentView {
     
     // The StringBuffer to hold text
-    StringBuffer          _sb = new StringBuffer();
+    private StringBuffer  _sb = new StringBuffer();
     
     // The column count to be used for preferred width (if set)
-    int                   _colCount = 12;
+    private int  _colCount = 12;
     
     // The paint for the text
-    Paint                 _textFill = Color.BLACK;
+    private Paint  _textFill = Color.BLACK;
     
     // A label in the background for promt text and/or in text controls
-    Label                 _label = new Label();
+    private Label  _label;
     
     // The string to show when textfield is empty
-    String                _promptText;
+    private String  _promptText;
     
     // The radius of border
-    double                _rad = 4;
+    private double  _rad = 4;
     
     // The selection start/end
-    int                   _selStart, _selEnd;
+    private int  _selStart, _selEnd;
     
     // Whether the editor is word selecting (double click) or paragraph selecting (triple click)
-    boolean               _wordSel, _pgraphSel;
+    private boolean  _wordSel, _pgraphSel;
     
     // Whether text field is showing a completion selection
-    boolean               _compSel;
+    private boolean  _compSel;
     
     // The mouse down point
-    double                _downX, _downY;
+    private double  _downX, _downY;
     
     // The animator for caret blinking
-    ViewTimer             _caretTimer;
+    private ViewTimer  _caretTimer;
     
-    // Whether to hide carent
-    boolean               _hideCaret;
+    // Whether to hide caret
+    private boolean  _hideCaret;
     
     // The value of text on focus gained
-    String                _focusGainedText;
+    protected String  _focusGainedText;
     
     // Whether text has been edited since last focus
-    boolean               _edited;
+    private boolean  _edited;
 
     // Constants for properties
     public static final String ColCount_Prop = "ColCount";
@@ -81,7 +81,9 @@ public class TextField extends ParentView {
         setFocusWhenPressed(true);
 
         // Configure label and set
+        _label = new Label();
         _label.setPadding(0,0,0,0);
+        _label.setPickable(false);
         addChild(_label);
     }
 
