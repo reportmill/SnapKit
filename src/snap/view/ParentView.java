@@ -519,16 +519,6 @@ public class ParentView extends View {
     }
 
     /**
-     * Override to break toXML into toXMLView and toXMLChildren.
-     */
-    public XMLElement toXML(XMLArchiver anArchiver)
-    {
-        XMLElement e = toXMLView(anArchiver); // Archive shape
-        toXMLChildren(anArchiver, e); // Archive children
-        return e; // Return xml element
-    }
-
-    /**
      * Override to add this view as change listener to children on first call.
      */
     public void addDeepChangeListener(DeepChangeListener aDCL)
@@ -587,6 +577,16 @@ public class ParentView extends View {
         super.themeChanged();
         for (View child : getChildren())
             child.themeChanged();
+    }
+
+    /**
+     * Override to break toXML into toXMLView and toXMLChildren.
+     */
+    public XMLElement toXML(XMLArchiver anArchiver)
+    {
+        XMLElement e = toXMLView(anArchiver); // Archive shape
+        toXMLChildren(anArchiver, e); // Archive children
+        return e; // Return xml element
     }
 
     /**
