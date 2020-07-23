@@ -54,7 +54,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     int                   _cellStart = -1, _cellEnd;
     
     // List of items that need to be updated
-    Set <T>               _updateItems = new HashSet();
+    Set <T>               _updateItems = new HashSet<>();
     
     // Value of cell width/height
     double                _sampleWidth = -1, _sampleHeight = -1;
@@ -88,7 +88,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
         setFill(Color.WHITE);
 
         // Create/set PickList
-        setPickList(new PickList());
+        setPickList(new PickList<>());
     }
 
     /**
@@ -119,7 +119,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     /**
      * Sets the items.
      */
-    public void setItems(T ... theItems)  { setItems(theItems!=null? Arrays.asList(theItems) : null); }
+    public void setItems(T ... theItems)  { setItems(theItems!=null ? Arrays.asList(theItems) : null); }
 
     /**
      * Sets the underlying picklist.
@@ -140,6 +140,16 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     }
 
     /**
+     * Returns whether list allows multiple selections.
+     */
+    public boolean isMultiSel()  { return _items.isMultiSel(); }
+
+    /**
+     * Sets whether list allows multiple selections.
+     */
+    public void setMultiSel(boolean aValue)  { _items.setMultiSel(aValue); }
+
+    /**
      * Returns the selected index.
      */
     public int getSelIndex()  { return _items.getSelIndex(); }
@@ -150,6 +160,36 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     public void setSelIndex(int anIndex)  { _items.setSelIndex(anIndex); }
 
     /**
+     * Returns the selected indexes.
+     */
+    public int[] getSelIndexes()  { return _items.getSelIndexes(); }
+
+    /**
+     * Sets the selected index.
+     */
+    public void setSelIndexes(int ... theIndexes)  { _items.setSelIndexes(theIndexes); }
+
+    /**
+     * Adds a selected index.
+     */
+    public void addSelIndex(int anIndex)  { _items.addSelIndex(anIndex); }
+
+    /**
+     * Removes a selected index.
+     */
+    public void removeSelIndex(int anIndex)  { _items.removeSelIndex(anIndex); }
+
+    /**
+     * Returns whether given index is selected index.
+     */
+    public boolean isSelIndex(int anIndex)  { return _items.isSelIndex(anIndex); }
+
+    /**
+     * Adds the interval to this index.
+     */
+    public void addSelIntervalToIndex(int anIndex)  { _items.addSelIntervalToIndex(anIndex); }
+
+    /**
      * Returns the selected item.
      */
     public T getSelItem()  { return _items.getSelItem(); }
@@ -158,6 +198,21 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      * Sets the selected index.
      */
     public void setSelItem(T anItem)  { _items.setSelItem(anItem); }
+
+    /**
+     * Returns the selected itemes.
+     */
+    public Object[] getSelItems()  { return _items.getSelItems(); }
+
+    /**
+     * Returns the selected itemes.
+     */
+    public <T> T[] getSelItems(Class <T> aClass)  { return _items.getSelItems(aClass); }
+
+    /**
+     * Sets the selected items.
+     */
+    public void setSelItems(T ... theItems)  { _items.setSelItems(theItems); }
 
     /**
      * Selects up in the list.
@@ -175,13 +230,38 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     protected void pickListSelChange(PropChange aPC)
     {
         // If not SelIndex, just return
-        if (aPC.getPropertyName()!=PickList.SelIndex_Prop) return;
+        String propName = aPC.getPropName();
 
-        // Update old/new indexes
-        int oldInd = (Integer)aPC.getOldValue(), newInd = (Integer)aPC.getNewValue();
-        updateIndex(oldInd);
-        firePropChange(SelIndex_Prop, oldInd, newInd);
-        updateIndex(newInd);
+        // Handle SelIndex
+        if (propName==PickList.SelIndex_Prop) {
+            int oldInd = (Integer) aPC.getOldValue();
+            int newInd = (Integer) aPC.getNewValue();
+            updateIndex(oldInd);
+            firePropChange(SelIndex_Prop, oldInd, newInd);
+            updateIndex(newInd);
+        }
+
+        // Handle SelIndexes
+        if (propName==PickList.SelIndexes_Prop) {
+
+            // Handle Indexed version
+            int ind = aPC.getIndex();
+            if (ind>=0) {
+                updateIndex(ind);
+                firePropChange(SelIndex_Prop, aPC.getOldValue(), aPC.getNewValue(), ind);
+            }
+
+            // Handle complete version
+            else {
+                int oldInds[] = (int[])aPC.getOldValue();
+                int newInds[] = (int[])aPC.getNewValue();
+                for (int i=0; i<oldInds.length; i++)
+                    updateIndex(oldInds[i]);
+                for (int i=0; i<newInds.length; i++)
+                    updateIndex(newInds[i]);
+                firePropChange(SelIndex_Prop, oldInds, newInds);
+            }
+        }
 
         // Scroll selection to visible
         if (isShowing())
@@ -352,7 +432,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      */
     public void updateIndex(int anIndex)
     {
-        T item = anIndex>=0 && anIndex<getItemCount()? getItem(anIndex) : null;
+        T item = anIndex>=0 && anIndex<getItemCount() ? getItem(anIndex) : null;
         if (item!=null)
             updateItems(item);
     }
@@ -372,7 +452,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     /**
      * Returns the cell at given index.
      */
-    public ListCell <T> getCell(int anIndex)  { return anIndex<getChildCount()? (ListCell)getChild(anIndex) : null; }
+    public ListCell <T> getCell(int anIndex)  { return anIndex<getChildCount() ? (ListCell)getChild(anIndex) : null; }
 
     /**
      * Returns the cell for given Y.
@@ -393,7 +473,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     public ListCell <T> getCellForRow(int anIndex)
     {
         int cindex = anIndex - _cellStart;
-        return cindex>=0 && cindex<getChildCount()? (ListCell)getChild(cindex) : null;
+        return cindex>=0 && cindex<getChildCount() ? (ListCell)getChild(cindex) : null;
     }
 
     /**
@@ -467,7 +547,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
         // Update cells in visible range: If row cell already set, update it, otherwise create, configure and add
         for (int i=_cellStart,cindex=0;i<=_cellEnd;i++,cindex++) {
             if (cindex<getChildCount()) {
-                T item = i<getItemCount()? getItem(i) : null;
+                T item = i<getItemCount() ? getItem(i) : null;
                 ListCell cell = getCell(cindex);
                 if (i<cell.getRow()) {
                     ListCell cell2 = createCell(i); addChild(cell2,cindex);
@@ -501,9 +581,8 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      */
     protected ListCell createCell(int anIndex)
     {
-        T item = anIndex>=0 && anIndex<getItemCount()? getItem(anIndex) : null;
-        int selInd = getSelIndex();
-        ListCell cell = new ListCell(item, anIndex, getColIndex(), anIndex==selInd);
+        T item = anIndex>=0 && anIndex<getItemCount() ? getItem(anIndex) : null;
+        ListCell cell = new ListCell(item, anIndex, getColIndex(), isSelIndex(anIndex));
         cell.setPadding(getCellPadding());
         cell.setPrefHeight(getRowHeight());
         return cell;
@@ -531,7 +610,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     {
         T item = aCell.getItem();
         String text = null;
-        if (_itemTextFunc!=null) text = item!=null? _itemTextFunc.apply(item) : null;
+        if (_itemTextFunc!=null) text = item!=null ? _itemTextFunc.apply(item) : null;
         else if (item instanceof String) text = (String)item;
         else if (item instanceof Enum) text = item.toString();
         else if (item instanceof Number) text = item.toString();
@@ -571,13 +650,13 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
         // If CellConfigure, create cell and call
         else if (getCellConfigure()!=null) { Consumer cconf = getCellConfigure();
             ListCell cell = new ListCell(anItem, 0, 0, false);
-            cell.setText(anItem!=null? anItem.toString() : null);
+            cell.setText(anItem!=null ? anItem.toString() : null);
             cconf.accept(cell);
             text = cell.getText();
         }
 
         // Otherwise just get string
-        else text = anItem!=null? anItem.toString() : null;
+        else text = anItem!=null ? anItem.toString() : null;
 
         // Return text
         return text;
@@ -639,7 +718,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
         cell.setFont(getFont());
         cell.setPadding(getCellPadding());
         for (int i=0,iMax=Math.min(getItemCount(),30);i<iMax;i++) {
-            cell._item = i<getItemCount()? getItem(i) : null; cell._row = i;
+            cell._item = i<getItemCount() ? getItem(i) : null; cell._row = i;
             for (int j=cell.getChildCount()-1;j>=0;j--) { View child = cell.getChild(j);
                 if (child!=cell._strView && child!=cell._graphic) cell.removeChild(j); }
             configureCell(cell);
@@ -658,12 +737,35 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     {
         // Handle MousePress
         if (anEvent.isMousePress()) {
+
+            // Handle Cell press
             int index = getRowAt(anEvent.getY());
             ListCell cell = getCellForRow(index);
-            if (cell!=null && cell.isEnabled() && index!=getSelIndex()) {
-                setSelIndex(index);
-                fireActionEvent(anEvent);
-                anEvent.consume();
+            if (cell!=null && cell.isEnabled()) {
+
+                // If cell not selected
+                if (!isSelIndex(index)) {
+
+                    // If Short-cut down, add index
+                    if (anEvent.isShortcutDown())
+                        addSelIndex(index);
+
+                    // If shift down, add interval
+                    else if (anEvent.isShiftDown())
+                        addSelIntervalToIndex(index);
+
+                    // Otherwise, just select
+                    else setSelIndex(index);
+
+                    // Fire action
+                    fireActionEvent(anEvent);
+                    anEvent.consume();
+                }
+
+                // If cell is selected, see if we're unselecting
+                else if (anEvent.isShortcutDown()) {
+                    removeSelIndex(index);
+                }
             }
         }
 
@@ -700,7 +802,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     public String getText()
     {
         T item = getSelItem();
-        return item!=null? getText(item) : null;
+        return item!=null ? getText(item) : null;
     }
 
     /**
@@ -723,12 +825,12 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
                 return item; }
 
         // If items are primitive type, get primitive type for item string. Return matching item
-        T item0 = getItemCount()>0? getItem(0) : null, itemX = null;
+        T item0 = getItemCount()>0 ? getItem(0) : null, itemX = null;
         if (item0 instanceof String) itemX = (T)aString;
         else if (item0 instanceof Integer) itemX = (T)SnapUtils.getInteger(aString);
         else if (item0 instanceof Float) itemX = (T)SnapUtils.getFloat(aString);
         else if (item0 instanceof Double) itemX = (T)SnapUtils.getDouble(aString);
-        int index = itemX!=null? getItems().indexOf(itemX) : -1;
+        int index = itemX!=null ? getItems().indexOf(itemX) : -1;
         if (index>=0)
             return getItem(index);
 
@@ -739,7 +841,10 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     /**
      * Returns a mapped property name.
      */
-    public String getValuePropName()  { return getBinding(SelIndex_Prop)!=null? SelIndex_Prop : SelItem_Prop; }
+    public String getValuePropName()
+    {
+        return getBinding(SelIndex_Prop)!=null ? SelIndex_Prop : SelItem_Prop;
+    }
 
     /**
      * Returns whether given items are equal to set items.

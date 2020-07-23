@@ -8,10 +8,13 @@ import java.util.*;
 public class PickList <E> extends AbstractList <E> implements Cloneable {
     
     // The real list
-    List <E>                     _list = new ArrayList();
+    private List <E>  _list = new ArrayList<>();
+
+    // Whether list supports multiple selection
+    private boolean  _multiSel;
 
     // The selected index
-    int                          _selIndex = -1;
+    private int  _selIndexes[] = EMPTY_SEL;
     
     // The PropChangeSupport
     protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
@@ -19,222 +22,375 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     // Constants for properties
     public static final String Item_Prop = "Item";
     public static final String SelIndex_Prop = "SelIndex";
+    public static final String SelIndexes_Prop = "SelIndexes";
 
-/**
- * Returns whether list allows multiple selections.
- */
-public boolean isMultiSel()  { return false; }
+    // Constants
+    private static final int EMPTY_SEL[] = new int[0];
 
-/**
- * Return list size.
- */
-public int size()  { return _list.size(); }
+    /**
+     * Return list size.
+     */
+    public int size()  { return _list.size(); }
 
-/**
- * Return list item at index.
- */
-public E get(int anIndex)  { return _list.get(anIndex); }
+    /**
+     * Return list item at index.
+     */
+    public E get(int anIndex)  { return _list.get(anIndex); }
 
-/**
- * Add list item.
- */
-public void add(int anIndex, E anItem)
-{
-    _list.add(anIndex, anItem);
-    firePropChange(Item_Prop, null, anItem, anIndex);
-}
+    /**
+     * Add list item.
+     */
+    public void add(int anIndex, E anItem)
+    {
+        _list.add(anIndex, anItem);
+        firePropChange(Item_Prop, null, anItem, anIndex);
+    }
 
-/**
- * Remove list item.
- */
-public E remove(int anIndex)
-{
-    E item = _list.remove(anIndex);
-    firePropChange(Item_Prop, item, null, anIndex);
-    return item;
-}
+    /**
+     * Remove list item.
+     */
+    public E remove(int anIndex)
+    {
+        E item = _list.remove(anIndex);
+        firePropChange(Item_Prop, item, null, anIndex);
+        return item;
+    }
 
-/**
- * Sets all items.
- */
-public void setAll(Collection <? extends E> aCol)
-{
-    Object sitems[] = getSelItems();
-    clear();
-    if(aCol!=null) addAll(aCol);
-    setSelItems(sitems);
-}
+    /**
+     * Sets all items.
+     */
+    public void setAll(Collection <? extends E> aCol)
+    {
+        E sitems[] = (E[]) getSelItems();
+        clear();
+        if (aCol!=null) addAll(aCol);
+        setSelItems(sitems);
+    }
 
-/**
- * Clears the list.
- */
-public void clear()  { _list.clear(); }
+    /**
+     * Clears the list.
+     */
+    public void clear()  { _list.clear(); }
 
-/**
- * Returns the selected index.
- */
-public int getSelIndex()  { return _selIndex; }
+    /**
+     * Returns whether list allows multiple selections.
+     */
+    public boolean isMultiSel()  { return _multiSel; }
 
-/**
- * Adds a selected index.
- */
-public void addSelIndex(int anIndex)
-{
-    setSelIndex(anIndex);
-}
+    /**
+     * Sets whether list allows multiple selections.
+     */
+    public void setMultiSel(boolean aValue)  { _multiSel = aValue; }
 
-/**
- * Sets the selected index.
- */
-public void setSelIndex(int anIndex)
-{
-    if(anIndex==_selIndex) return;
-    firePropChange(SelIndex_Prop, _selIndex, _selIndex = anIndex, -1);
-}
+    /**
+     * Returns the selected index.
+     */
+    public int getSelIndex()
+    {
+        return _selIndexes.length>0 ? _selIndexes[0] : -1;
+    }
 
-/**
- * Returns the minimum selected index.
- */
-public int getSelIndexMin()
-{
-    int indexes[] = getSelIndices();
-    int min = Integer.MAX_VALUE; for(int i : indexes) min = Math.min(min, i);
-    return min!=Integer.MAX_VALUE? min : -1;
-}
+    /**
+     * Sets the selected index.
+     */
+    public void setSelIndex(int anIndex)
+    {
+        // If MultiSel, clear and add
+        if (isMultiSel()) {
+            setSelIndexes(anIndex);
+            return;
+        }
 
-/**
- * Returns the maximum selected index.
- */
-public int getSelIndexMax()
-{
-    int indexes[] = getSelIndices();
-    int max = -1; for(int i : indexes) max = Math.max(max, i);
-    return max;
-}
+        // If already set, just return
+        if (anIndex == getSelIndex()) return;
 
-/**
- * Returns the selected indices.
- */
-public int[] getSelIndices()  { return _selIndex>=0? new int[] { _selIndex } : new int[0]; }
+        // Set new value and fire prop
+        int old = getSelIndex();
+        _selIndexes = anIndex>=0 ? new int[] { anIndex } : EMPTY_SEL;
+        firePropChange(SelIndex_Prop, old, anIndex, -1);
+    }
 
-/**
- * Sets the selection interval.
- */
-public void setSelInterval(int aStart, int anEnd)
-{
-    int min = Math.min(aStart,anEnd), max = Math.max(aStart,anEnd), len = max-min+1;
-    int indexes[] = new int[len]; for(int i=0;i<len;i++) indexes[i] = i + min;
-    setSelIndex(min);
-}
+    /**
+     * Returns the selected indices.
+     */
+    public int[] getSelIndexes()  { return _selIndexes; }
 
-/**
- * Returns the selected item.
- */
-public E getSelItem()  { return _selIndex>=0 && _selIndex<size()? get(_selIndex) : null; }
+    /**
+     * Sets the selected index.
+     */
+    public void setSelIndexes(int ... theIndexes)
+    {
+        // If already set, just return
+        if (Arrays.equals(theIndexes, getSelIndexes())) return;
 
-/**
- * Sets the selected index.
- */
-public void setSelItem(E anItem)
-{
-    int index = indexOf(anItem);
-    setSelIndex(index);
-}
+        // Clear and set
+        int old[] = _selIndexes;
+        _selIndexes = theIndexes;
+        firePropChange(SelIndexes_Prop, old, _selIndexes, -1);
+    }
 
-/**
- * Returns the selected item.
- */
-public Object[] getSelItems()  { return getSelItems(Object.class); }
+    /**
+     * Adds a selected index.
+     */
+    public void addSelIndex(int anIndex)
+    {
+        // If SingleSel, just set and return
+        if (!isMultiSel()) {
+            setSelIndex(anIndex);
+            return;
+        }
 
-/**
- * Returns the selected item.
- */
-public <T> T[] getSelItems(Class <T> aClass)
-{
-    int selInds[] = getSelIndices();
-    T[] items = (T[])Array.newInstance(aClass, selInds.length);
-    for(int i=0;i<selInds.length;i++) items[i] = (T)get(selInds[i]);
-    return items;
-}
+        // If already selected, just return
+        if (isSelIndex(anIndex)) return;
 
-/**
- * Adds a selected item.
- */
-public void addSelItem(E anItem)
-{
-    int ind = indexOf(anItem);
-    addSelIndex(ind);
-}
+        // Add index to SelIndexes (sorted)
+        int len = _selIndexes.length;
+        _selIndexes = Arrays.copyOf(_selIndexes, len + 1);
+        _selIndexes[len] = anIndex;
+        Arrays.sort(_selIndexes);
 
-/**
- * Sets the selected index.
- */
-public void setSelItems(Object theItems[])  { for(Object itm : theItems) addSelItem((E)itm); }
+        // Fire prop change (probably need to do this right one day)
+        firePropChange(SelIndexes_Prop, false, true, anIndex);
+    }
 
-/**
- * Selects up in the list.
- */
-public void selectUp()  { if(getSelIndex()>0)setSelIndex(getSelIndex()-1); }
+    /**
+     * Removes a selected index.
+     */
+    public void removeSelIndex(int anIndex)
+    {
+        // If SingleSel, just set and return
+        if (!isMultiSel()) {
+            if (anIndex==getSelIndex())
+                clearSel();
+            return;
+        }
 
-/**
- * Selects up in the list.
- */
-public void selectDown()  { if(getSelIndex()<size()-1) setSelIndex(getSelIndex()+1); }
+        // Get index of list item index in SelIndexes array (just return if not there)
+        int ind = Arrays.binarySearch(_selIndexes, anIndex);
+        if (ind<0)
+            return;
 
-/**
- * Returns the list items as a single string with items separated by newlines.
- */
-public String getItemsString()  { return ListUtils.joinStrings(this, "\n"); }
+        // Remove index
+        _selIndexes = ArrayUtils.remove(_selIndexes, ind);
 
-/**
- * Sets the list items as a single string with items separated by newlines.
- */
-public void setItemsString(String aString)
-{
-    String items[] = aString!=null? aString.split("\n") : new String[0];
-    for(int i=0; i<items.length; i++) items[i] = items[i].trim();
-    clear();
-    Collections.addAll(this, (E)items);
-}
+        // Fire prop change (probably need to do this right one day)
+        firePropChange(SelIndexes_Prop, true, false, anIndex);
+    }
 
-/**
- * Add listener.
- */
-public void addPropChangeListener(PropChangeListener aLsnr)
-{
-    if(_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-    _pcs.addPropChangeListener(aLsnr);
-}
+    /**
+     * Clears the selection.
+     */
+    public void clearSel()
+    {
+        // If already clear, just return
+        if (getSelIndex()==-1) return;
 
-/**
- * Remove listener.
- */
-public void removePropChangeListener(PropChangeListener aLsnr)  { _pcs.removePropChangeListener(aLsnr); }
+        // If MultiSel, clear
+        if (isMultiSel())
+            setSelIndexes(EMPTY_SEL);
+        else setSelIndex(-1);
+    }
 
-/**
- * Fires a property change for given property name, old value, new value and index.
- */
-protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
-{
-    if(!_pcs.hasListener(aProp)) return;
-    firePropChange(new PropChange(this, aProp, oldVal, newVal, anIndex));
-}
+    /**
+     * Returns whether given index is selected index.
+     */
+    public boolean isSelIndex(int anIndex)
+    {
+        // Handle SingleSel
+        if (!isMultiSel())
+            return anIndex==getSelIndex();
 
-/**
- * Fires a given property change.
- */
-protected void firePropChange(PropChange aPCE)  {  _pcs.firePropChange(aPCE); }
+        // Handle MultiSel
+        int ind = Arrays.binarySearch(_selIndexes, anIndex);
+        return ind>=0;
+    }
 
-/**
- * Standard clone implementation.
- */
-public Object clone()
-{
-    PickList clone = null; try { clone = (PickList)super.clone(); }
-    catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
-    clone._list = new ArrayList(_list);
-    clone._pcs = PropChangeSupport.EMPTY;  // Clear listeners and return clone
-    return clone;
-}
-  
+    /**
+     * Returns the minimum selected index.
+     */
+    public int getSelIndexMin()
+    {
+        return getSelIndex();
+    }
+
+    /**
+     * Returns the maximum selected index.
+     */
+    public int getSelIndexMax()
+    {
+        int len = _selIndexes.length;
+        return len>0 ? _selIndexes[len-1] : -1;
+    }
+
+    /**
+     * Sets the selection interval.
+     */
+    public void setSelInterval(int aStart, int anEnd)
+    {
+        int min = Math.min(aStart, anEnd);
+        int max = Math.max(aStart, anEnd);
+        int len = max - min + 1;
+        int indexes[] = new int[len];
+        for (int i=0;i<len;i++) indexes[i] = i + min;
+        setSelIndex(min);
+    }
+
+    /**
+     * Adds the interval to this index.
+     */
+    public void addSelIntervalToIndex(int anIndex)
+    {
+        // If no selection or not MultiSel, just set index
+        if (getSelIndex()<0 || !isMultiSel())
+            setSelIndex(anIndex);
+
+        // If index above max, add from max to index
+        else if (anIndex>getSelIndexMax()) {
+            for (int i=getSelIndexMax()+1; i<=anIndex; i++)
+                addSelIndex(i);
+        }
+
+        // If index below min, add from min to index
+        else if (anIndex<getSelIndexMin()) { int selInd = getSelIndexMin();
+            for (int i=anIndex; i<selInd; i++)
+                addSelIndex(i);
+        }
+
+        // If above min, add from min to index
+        else {
+            for (int i=getSelIndexMin(); i<=anIndex; i++)
+                addSelIndex(i);
+        }
+    }
+
+    /**
+     * Returns the selected item.
+     */
+    public E getSelItem()
+    {
+        int ind = getSelIndex();
+        return ind>=0 && ind<size() ? get(ind) : null;
+    }
+
+    /**
+     * Sets the selected index.
+     */
+    public void setSelItem(E anItem)
+    {
+        int index = indexOf(anItem);
+        setSelIndex(index);
+    }
+
+    /**
+     * Returns the selected item.
+     */
+    public Object[] getSelItems()  { return getSelItems(Object.class); }
+
+    /**
+     * Returns the selected item.
+     */
+    public <T> T[] getSelItems(Class <T> aClass)
+    {
+        int selInds[] = getSelIndexes();
+        T[] items = (T[]) Array.newInstance(aClass, selInds.length);
+        for (int i=0; i<selInds.length; i++)
+            items[i] = (T) get(selInds[i]);
+        return items;
+    }
+
+    /**
+     * Adds a selected item.
+     */
+    public void addSelItem(E anItem)
+    {
+        int ind = indexOf(anItem);
+        addSelIndex(ind);
+    }
+
+    /**
+     * Sets the selected index.
+     */
+    public void setSelItems(E ... theItems)
+    {
+        for (E item : theItems)
+            addSelItem(item);
+    }
+
+    /**
+     * Selects up in the list.
+     */
+    public void selectUp()
+    {
+        if (getSelIndex()>0)
+            setSelIndex(getSelIndex()-1);
+    }
+
+    /**
+     * Selects up in the list.
+     */
+    public void selectDown()
+    {
+        if (getSelIndex()<size()-1)
+            setSelIndex(getSelIndex()+1);
+    }
+
+    /**
+     * Returns the list items as a single string with items separated by newlines.
+     */
+    public String getItemsString()
+    {
+        return ListUtils.joinStrings(this, "\n");
+    }
+
+    /**
+     * Sets the list items as a single string with items separated by newlines.
+     */
+    public void setItemsString(String aString)
+    {
+        String items[] = aString!=null ? aString.split("\n") : new String[0];
+        for (int i=0; i<items.length; i++)
+            items[i] = items[i].trim();
+        clear();
+        Collections.addAll(this, (E)items);
+    }
+
+    /**
+     * Add listener.
+     */
+    public void addPropChangeListener(PropChangeListener aLsnr)
+    {
+        if (_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+        _pcs.addPropChangeListener(aLsnr);
+    }
+
+    /**
+     * Remove listener.
+     */
+    public void removePropChangeListener(PropChangeListener aLsnr)  { _pcs.removePropChangeListener(aLsnr); }
+
+    /**
+     * Fires a property change for given property name, old value, new value and index.
+     */
+    protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
+    {
+        if (!_pcs.hasListener(aProp)) return;
+        firePropChange(new PropChange(this, aProp, oldVal, newVal, anIndex));
+    }
+
+    /**
+     * Fires a given property change.
+     */
+    protected void firePropChange(PropChange aPCE)  {  _pcs.firePropChange(aPCE); }
+
+    /**
+     * Standard clone implementation.
+     */
+    public Object clone()
+    {
+        PickList clone = null; try { clone = (PickList)super.clone(); }
+        catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
+        clone._list = new ArrayList(_list);
+        clone._pcs = PropChangeSupport.EMPTY;  // Clear listeners and return clone
+        return clone;
+    }
 }
