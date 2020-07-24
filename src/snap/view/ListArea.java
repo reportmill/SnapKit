@@ -21,46 +21,52 @@ import snap.util.*;
 public class ListArea <T> extends ParentView implements View.Selectable <T> {
 
     // The items
-    PickList <T>          _items;
+    private PickList <T>  _items;
     
     // The row height
-    double                _rowHeight;
+    private double  _rowHeight;
     
     // The cell padding
-    Insets _cellPad = getCellPaddingDefault();
+    private Insets  _cellPad = getCellPaddingDefault();
     
     // The function to format text
-    Function <T,String>   _itemTextFunc;
+    private Function <T,String>  _itemTextFunc;
     
     // The Cell Configure method
-    Consumer <ListCell<T>>  _cellConf;
+    private Consumer <ListCell<T>>  _cellConf;
     
     // A simple alternate way to set ListArea item text using Key
-    String                _itemKey;
+    private String  _itemKey;
     
     // The paint for alternating cells
-    Paint                 _altPaint = ALT_GRAY;
+    private Paint  _altPaint = ALT_GRAY;
     
     // Whether list distinguishes item under the mouse
-    boolean               _targeting;
+    private boolean  _targeting;
     
     // The index of the item currently being targeted
-    int                   _targetedIndex = -1;
+    private int  _targetedIndex = -1;
     
     // Whether list is editable
-    boolean               _editable;
+    private boolean  _editable;
     
-    // The index of the first visible cell
-    int                   _cellStart = -1, _cellEnd;
+    // The index of first visible cell
+    private int  _cellStart = -1;
+
+    // The index of last visible cell
+    private int _cellEnd;
     
-    // List of items that need to be updated
-    Set <T>               _updateItems = new HashSet<>();
+    // Set of items that need to be updated
+    private Set <T>  _updateItems = new HashSet<>();
     
     // Value of cell width/height
-    double                _sampleWidth = -1, _sampleHeight = -1;
+    private double  _sampleWidth = -1, _sampleHeight = -1;
     
     // The PropChangeListener to handle PickList selection change
-    PropChangeListener    _itemsLsnr = pc -> pickListSelChange(pc);
+    private PropChangeListener  _itemsLsnr = pc -> pickListSelChange(pc);
+
+    // A helper object to handle list selection
+    private ListSelector  _selector = new ListSelector();
     
     // Shared CellPadding default
     public static final Insets         CELL_PAD_DEFAULT = new Insets(2);
@@ -83,7 +89,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      */
     public ListArea()
     {
-        enableEvents(MousePress, KeyPress, Action);
+        enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress, Action);
         setFocusable(true); setFocusWhenPressed(true);
         setFill(Color.WHITE);
 
@@ -147,7 +153,14 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     /**
      * Sets whether list allows multiple selections.
      */
-    public void setMultiSel(boolean aValue)  { _items.setMultiSel(aValue); }
+    public void setMultiSel(boolean aValue)
+    {
+        // Forward to PickList
+        _items.setMultiSel(aValue);
+
+        // Update Selector
+        _selector = aValue ? new ListSelectorMulti() : new ListSelector();
+    }
 
     /**
      * Returns the selected index.
@@ -178,6 +191,11 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      * Removes a selected index.
      */
     public void removeSelIndex(int anIndex)  { _items.removeSelIndex(anIndex); }
+
+    /**
+     * Clears the selection.
+     */
+    public void clearSel()  { _items.clearSel(); }
 
     /**
      * Returns whether given index is selected index.
@@ -316,7 +334,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     /**
      * Returns the row at given Y location.
      */
-    public int getRowAt(double aY)
+    public int getRowForY(double aY)
     {
         int index = (int)(aY/getRowHeight());
         return Math.min(index, getItemCount()-1);
@@ -457,7 +475,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     /**
      * Returns the cell for given Y.
      */
-    public ListCell <T> getCellAtY(double aY)
+    public ListCell <T> getCellForY(double aY)
     {
         for (View cell : getChildren()) {
             if (!(cell instanceof ListCell)) continue;
@@ -735,38 +753,15 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      */
     protected void processEvent(ViewEvent anEvent)
     {
-        // Handle MousePress
-        if (anEvent.isMousePress()) {
-
-            // Handle Cell press
-            int index = getRowAt(anEvent.getY());
-            ListCell cell = getCellForRow(index);
-            if (cell!=null && cell.isEnabled()) {
-
-                // If cell not selected
-                if (!isSelIndex(index)) {
-
-                    // If Short-cut down, add index
-                    if (anEvent.isShortcutDown())
-                        addSelIndex(index);
-
-                    // If shift down, add interval
-                    else if (anEvent.isShiftDown())
-                        addSelIntervalToIndex(index);
-
-                    // Otherwise, just select
-                    else setSelIndex(index);
-
-                    // Fire action
-                    fireActionEvent(anEvent);
-                    anEvent.consume();
-                }
-
-                // If cell is selected, see if we're unselecting
-                else if (anEvent.isShortcutDown()) {
-                    removeSelIndex(index);
-                }
-            }
+        // Handle MousePress: Forward to Selector and consume
+        if (anEvent.isMouseEvent()) {
+            if (anEvent.isMousePress())
+                _selector.mousePress(anEvent);
+            if (anEvent.isMouseDrag())
+                _selector.mouseDrag(anEvent);
+            if (anEvent.isMouseRelease())
+                _selector.mouseRelease(anEvent);
+            anEvent.consume();
         }
 
         // Handle MouseExit
@@ -775,7 +770,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
 
         // Handle MouseMove
         if (anEvent.isMouseMove() && isTargeting()) {
-            int index = getRowAt(anEvent.getY());
+            int index = getRowForY(anEvent.getY());
             if (index>=getItemCount()) index = -1;
             setTargetedIndex(index);
         }
@@ -883,5 +878,143 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
             setRowHeight(anElement.getAttributeIntValue(RowHeight_Prop));
         if (anElement.hasAttribute(ItemKey_Prop))
             setItemKey(anElement.getAttributeValue(ItemKey_Prop));
+    }
+
+    /**
+     * A class to handle List selection for SingleSel.
+     */
+    private class ListSelector {
+
+        // Whether selection allowed on MouseDrag
+        protected boolean  _dragSelect;
+
+        /** MousePress */
+        public void mousePress(ViewEvent anEvent)
+        {
+            // Set DragSelect
+            _dragSelect = !getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount()>1;
+
+            // Do basic Press or Drag selection
+            mousePressOrDrag(anEvent);
+        }
+
+        /** MouseDrag. */
+        public void mouseDrag(ViewEvent anEvent)
+        {
+            if (isDragSelect() && !anEvent.isShortcutDown())
+                mousePressOrDrag(anEvent);
+        }
+
+        /** Basic Press or Drag selection. */
+        protected void mousePressOrDrag(ViewEvent anEvent)
+        {
+            // Get row-index/cell at mouse point (if no cell, just return)
+            int index = getRowForY(anEvent.getY());
+            ListCell cell = getCellForRow(index);
+            if (cell==null || !cell.isEnabled())
+                return;
+
+            // If cell not selected, select it
+            if (!isSelIndex(index))
+                setSelIndex(index);
+
+            // If cell selected and ShortCut-Clicked, unselect
+            else if (anEvent.isShortcutDown() && anEvent.isMousePress())
+                clearSel();
+        }
+
+        /** MouseRelease. */
+        public void mouseRelease(ViewEvent anEvent)
+        {
+            fireActionEvent(anEvent);
+        }
+
+        /**
+         * Returns whether selection allowed on MouseDrag.
+         * Need to disable if DragEvents are enabled, unless event is double-click.
+         */
+        public boolean isDragSelect()
+        {
+            return _dragSelect;
+        }
+    }
+
+    /**
+     * A class to handle List selection for MultiSel.
+     */
+    private class ListSelectorMulti extends ListSelector {
+
+        // The Selection on MousePress
+        private int _mouseDownSel[];
+
+        // Whether list previously wanted drag
+        private boolean _dragGestureEnabled;
+
+        /** MousePress */
+        public void mousePress(ViewEvent anEvent)
+        {
+            // Do normal version
+            super.mousePress(anEvent);
+
+            // Cache MouseDown Selection
+            _mouseDownSel = getSelIndexes();
+
+            // Set whether wants drag
+            _dragGestureEnabled = isDragSelect() && getEventAdapter().isEnabled(DragGesture);
+            if (_dragGestureEnabled)
+                getEventAdapter().setEnabled(DragGesture, false);
+        }
+
+        /** MouseDrag. */
+        public void mouseDrag(ViewEvent anEvent)
+        {
+            // Restore MouseDown Selection
+            setSelIndexes(_mouseDownSel);
+
+            // Do normal mousePressOrDrag
+            if (isDragSelect())
+                mousePressOrDrag(anEvent);
+        }
+
+        /** Basic Press or Drag selection. */
+        protected void mousePressOrDrag(ViewEvent anEvent)
+        {
+            // Get row-index/cell at mouse point (if no cell, just return)
+            int index = getRowForY(anEvent.getY());
+            ListCell cell = getCellForRow(index);
+            if (cell==null || !cell.isEnabled())
+                return;
+
+            // If cell not selected
+            if (!isSelIndex(index)) {
+
+                // If Short-cut down, add index
+                if (anEvent.isShortcutDown() && anEvent.isMousePress())
+                    addSelIndex(index);
+
+                // If shift down, add interval
+                else if (anEvent.isShiftDown() || anEvent.isMouseDrag())
+                    addSelIntervalToIndex(index);
+
+                // If MousePress, just select
+                else if (anEvent.isMousePress())
+                    setSelIndex(index);
+
+                // If MouseDrag, add select
+                else addSelIndex(index);
+            }
+
+            // If cell is selected, see if we're unselecting
+            else if (anEvent.isShortcutDown() && anEvent.isMousePress())
+                removeSelIndex(index);
+        }
+
+        /** MouseRelease. */
+        public void mouseRelease(ViewEvent anEvent)
+        {
+            super.mouseRelease(anEvent);
+            if (_dragGestureEnabled)
+                getEventAdapter().setEnabled(DragGesture, true);
+        }
     }
 }

@@ -551,7 +551,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     {
         TableCol <T> col = getColAtX(aX); if (col==null) return null;
         Point pnt = col.parentToLocal(aX, aY, this);
-        return col.getCellAtY(pnt.y);
+        return col.getCellForY(pnt.y);
     }
 
     /**
@@ -666,7 +666,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     protected void processKeyEvent(ViewEvent anEvent)
     {
         int kcode = anEvent.getKeyCode();
-        switch(kcode) {
+        switch (kcode) {
             case KeyCode.UP: selectUp(); fireActionEvent(anEvent); anEvent.consume(); break;
             case KeyCode.DOWN: selectDown(); fireActionEvent(anEvent); anEvent.consume(); break;
             case KeyCode.LEFT: selectLeft(); fireActionEvent(anEvent); anEvent.consume(); break;
@@ -693,7 +693,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         // Handle KeyPress Tab
         if (anEvent.isKeyPress()) {
             int kcode = anEvent.getKeyCode();
-            switch(kcode) {
+            switch (kcode) {
                 case KeyCode.TAB:
                     if (anEvent.isShiftDown()) selectLeft(); else selectRight();
                     fireActionEvent(anEvent); anEvent.consume(); requestFocus(); break;
@@ -709,7 +709,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      */
     protected void colDidMousePress(TableCol aCol, ViewEvent anEvent)
     {
-        int row = aCol.getRowAt(anEvent.getY()), col = aCol.getColIndex();
+        int row = aCol.getRowForY(anEvent.getY()), col = aCol.getColIndex();
         if (row!=getSelRow() || col!=getSelCol()) {
             setSelCell(row, col);
             fireActionEvent(anEvent);
