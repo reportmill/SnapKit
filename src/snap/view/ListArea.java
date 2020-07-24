@@ -63,7 +63,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     private double  _sampleWidth = -1, _sampleHeight = -1;
     
     // The PropChangeListener to handle PickList selection change
-    private PropChangeListener  _itemsLsnr = pc -> pickListSelChange(pc);
+    private PropChangeListener  _itemsLsnr = pc -> pickListPropChange(pc);
 
     // A helper object to handle list selection
     private ListSelector  _selector = new ListSelector();
@@ -132,9 +132,15 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      */
     protected void setPickList(PickList <T> aPL)
     {
+        // Remove old PickList
         if (_items!=null) _items.removePropChangeListener(_itemsLsnr);
+
+        // Set New one
         _items = aPL;
+
+        // Configure for new PickList
         _items.addPropChangeListener(_itemsLsnr);
+        updateListSelector();
     }
 
     /**
@@ -153,14 +159,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     /**
      * Sets whether list allows multiple selections.
      */
-    public void setMultiSel(boolean aValue)
-    {
-        // Forward to PickList
-        _items.setMultiSel(aValue);
-
-        // Update Selector
-        _selector = aValue ? new ListSelectorMulti() : new ListSelector();
-    }
+    public void setMultiSel(boolean aValue)  { _items.setMultiSel(aValue); }
 
     /**
      * Returns the selected index.
@@ -245,7 +244,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     /**
      * Called when PickList changes selection.
      */
-    protected void pickListSelChange(PropChange aPC)
+    protected void pickListPropChange(PropChange aPC)
     {
         // If not SelIndex, just return
         String propName = aPC.getPropName();
@@ -260,7 +259,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
         }
 
         // Handle SelIndexes
-        if (propName==PickList.SelIndexes_Prop) {
+        else if (propName==PickList.SelIndexes_Prop) {
 
             // Handle Indexed version
             int ind = aPC.getIndex();
@@ -281,9 +280,22 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
             }
         }
 
+        // Handle MultiSel: Update Selector
+        else if (propName==PickList.MultiSel_Prop) {
+            updateListSelector();
+        }
+
         // Scroll selection to visible
         if (isShowing())
             scrollSelToVisible();
+    }
+
+    /**
+     * Called to update ListSelector.
+     */
+    private void updateListSelector()
+    {
+        _selector = isMultiSel() ? new ListSelectorMulti() : new ListSelector();
     }
 
     /**
@@ -628,11 +640,16 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     {
         T item = aCell.getItem();
         String text = null;
-        if (_itemTextFunc!=null) text = item!=null ? _itemTextFunc.apply(item) : null;
-        else if (item instanceof String) text = (String)item;
-        else if (item instanceof Enum) text = item.toString();
-        else if (item instanceof Number) text = item.toString();
-        else if (getCellConfigure()==null && item!=null) text = item.toString();
+        if (_itemTextFunc!=null)
+            text = item!=null ? _itemTextFunc.apply(item) : null;
+        else if (item instanceof String)
+            text = (String)item;
+        else if (item instanceof Enum)
+            text = item.toString();
+        else if (item instanceof Number)
+            text = item.toString();
+        else if (getCellConfigure()==null && item!=null)
+            text = item.toString();
         aCell.setText(text);
     }
 

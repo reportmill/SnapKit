@@ -518,14 +518,22 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     }
 
     /**
-     * Returns the row index at given point.
+     * Get rid of this.
      */
-    public int getRowAt(double aX, double aY)  { return (int)(aY/getRowHeight()); }
+    public int getRowAt(double aX, double aY)  { return getRowForY(aY); }
+
+    /**
+     * Returns the row index for given Y.
+     */
+    public int getRowForY(double aY)
+    {
+        return (int)(aY/getRowHeight());
+    }
 
     /**
      * Returns the column at given X coord.
      */
-    public TableCol <T> getColAtX(double aX)
+    public TableCol <T> getColForX(double aX)
     {
         // Check normal columns
         Point pnt = _split.parentToLocal(aX, 0, this);
@@ -534,7 +542,8 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
                 return col;
 
         // If header column is showing, check it
-        if (isShowHeaderCol()) { TableCol hdrCol = getHeaderCol();
+        if (isShowHeaderCol()) {
+            TableCol hdrCol = getHeaderCol();
             pnt = hdrCol.parentToLocal(aX,0);
             if (hdrCol.contains(aX,1))
                 return hdrCol;
@@ -547,9 +556,9 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     /**
      * Returns the cell at given Y coord.
      */
-    public ListCell <T> getCellAtXY(double aX, double aY)
+    public ListCell <T> getCellForXY(double aX, double aY)
     {
-        TableCol <T> col = getColAtX(aX); if (col==null) return null;
+        TableCol <T> col = getColForX(aX); if (col==null) return null;
         Point pnt = col.parentToLocal(aX, aY, this);
         return col.getCellForY(pnt.y);
     }
@@ -559,10 +568,29 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      */
     protected void configureCell(TableCol <T> aCol, ListCell <T> aCell)
     {
-        aCol.configureCellText(aCell);
-        aCol.configureCellFills(aCell);
+        //aCol.configureCellText(aCell);
+        //aCol.configureCellFills(aCell);
+        aCol.configureCellSuper(aCell);
         Consumer cconf = getCellConfigure();
-        if (cconf!=null) cconf.accept(aCell);
+        if (cconf!=null)
+            cconf.accept(aCell);
+    }
+
+    /**
+     * Returns whether list allows multiple selections.
+     */
+    public boolean isMultiSel()  { return _items.isMultiSel(); }
+
+    /**
+     * Sets whether list allows multiple selections.
+     */
+    public void setMultiSel(boolean aValue)
+    {
+        // Forward to PickList
+        _items.setMultiSel(aValue);
+
+        // Update Selector
+        //_selector = aValue ? new ListArea.ListSelectorMulti() : new ListArea.ListSelector();
     }
 
     /**
@@ -582,6 +610,9 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     {
         // If already set, just return
         if (anIndex==getSelCol()) return;
+
+        // Stop cell editing
+        editCellStop();
 
         // Set value
         _selCol = anIndex;
@@ -640,7 +671,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     {
         // Handle MousePress: If hit column isn't selected, select + fire action + consume event
         if (anEvent.isMousePress()) {
-            TableCol col = getColAtX(anEvent.getX());
+            TableCol col = getColForX(anEvent.getX());
             int index = col!=null ? col.getColIndex() : -1;
             if (index>=0 && index!=getSelCol()) {
                 setSelCol(index);
@@ -651,7 +682,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
 
         // Handle Mouse double-click
         if (anEvent.isMouseClick() && anEvent.getClickCount()==2 && isEditable()) {
-            ListCell cell = getCellAtXY(anEvent.getX(), anEvent.getY());
+            ListCell cell = getCellForXY(anEvent.getX(), anEvent.getY());
             editCell(cell);
         }
 
@@ -709,11 +740,10 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      */
     protected void colDidMousePress(TableCol aCol, ViewEvent anEvent)
     {
-        int row = aCol.getRowForY(anEvent.getY()), col = aCol.getColIndex();
-        if (row!=getSelRow() || col!=getSelCol()) {
-            setSelCell(row, col);
-            fireActionEvent(anEvent);
-            anEvent.consume();
+        int col = aCol.getColIndex();
+        if (col!=getSelCol()) {
+            setSelCol(col);
+            //setSelCell(row,col); fireActionEvent(anEvent); anEvent.consume();
         }
     }
 

@@ -23,6 +23,7 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     public static final String Item_Prop = "Item";
     public static final String SelIndex_Prop = "SelIndex";
     public static final String SelIndexes_Prop = "SelIndexes";
+    public static final String MultiSel_Prop = "MultiSel";
 
     // Constants
     private static final int EMPTY_SEL[] = new int[0];
@@ -80,7 +81,11 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     /**
      * Sets whether list allows multiple selections.
      */
-    public void setMultiSel(boolean aValue)  { _multiSel = aValue; }
+    public void setMultiSel(boolean aValue)
+    {
+        if (aValue==isMultiSel()) return;
+        firePropChange(MultiSel_Prop, _multiSel, _multiSel = aValue, -1);
+    }
 
     /**
      * Returns the selected index.
