@@ -473,8 +473,10 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     protected void updateCellAt(int anIndex)
     {
         int cindex = anIndex - _cellStart;
-        ListCell cell = createCell(anIndex), oldCell = getCell(cindex);
-        configureCell(cell); cell.setBounds(oldCell.getBounds());
+        ListCell cell = createCell(anIndex);
+        ListCell oldCell = getCell(cindex);
+        configureCell(cell);
+        cell.setBounds(oldCell.getBounds());
         cell.layout();
         removeChild(cindex); addChild(cell, cindex);
     }
@@ -482,7 +484,10 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     /**
      * Returns the cell at given index.
      */
-    public ListCell <T> getCell(int anIndex)  { return anIndex<getChildCount() ? (ListCell)getChild(anIndex) : null; }
+    public ListCell <T> getCell(int anIndex)
+    {
+        return anIndex<getChildCount() ? (ListCell)getChild(anIndex) : null;
+    }
 
     /**
      * Returns the cell for given Y.
@@ -528,15 +533,18 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
 
         // Get selection rect. If empty, outset by 1
         Rect srect = getItemBounds(getSelIndex());
-        if (srect.isEmpty()) srect.inset(-1,-2); else srect.width = 30;
+        if (srect.isEmpty()) srect.inset(-1,-2);
+        else srect.width = 30;
 
         // If visible rect not set or empty or fully contains selection rect, just return
         Rect vrect = getClipAllBounds(); if (vrect==null || vrect.isEmpty()) return;
         if (vrect.contains(srect)) return;
 
         // If totally out of view, add buffer. Then scroll rect to visible
-        if (!srect.intersects(vrect)) srect.inset(0,-4*getRowHeight());
-        scrollToVisible(srect); repaint();
+        if (!srect.intersects(vrect))
+            srect.inset(0,-4*getRowHeight());
+        scrollToVisible(srect);
+        repaint();
     }
 
     /**
@@ -567,35 +575,50 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
         double rh = getRowHeight();
 
         // Update CellStart/CellEnd for current ClipBounds
-        _cellStart = (int)Math.max(clip.getY()/rh,0);
-        _cellEnd = (int)(clip.getMaxY()/rh);
+        _cellStart = (int) Math.max(clip.getY()/rh,0);
+        _cellEnd = (int) (clip.getMaxY()/rh);
 
         // Remove cells before and/or after new visible range
-        while (getChildCount()>0 && getCell(0).getRow()<_cellStart) removeChild(0);
-        for (int i=getChildCount()-1; i>=0 && getCell(i).getRow()>_cellEnd; i--) removeChild(i);
+        while (getChildCount()>0 && getCell(0).getRow()<_cellStart)
+            removeChild(0);
+        for (int i=getChildCount()-1; i>=0 && getCell(i).getRow()>_cellEnd; i--)
+            removeChild(i);
 
-        // Update cells in visible range: If row cell already set, update it, otherwise create, configure and add
+        // Update cells in visible range
         for (int i=_cellStart,cindex=0;i<=_cellEnd;i++,cindex++) {
+
+            // If row cell already set, update it
             if (cindex<getChildCount()) {
                 T item = i<getItemCount() ? getItem(i) : null;
                 ListCell cell = getCell(cindex);
                 if (i<cell.getRow()) {
-                    ListCell cell2 = createCell(i); addChild(cell2,cindex);
+                    ListCell cell2 = createCell(i);
+                    addChild(cell2,cindex);
                     configureCell(cell2);
-                    cell.setBounds(0,i*rh,getWidth(),rh); cell.layout();
+                    cell.setBounds(0,i*rh, getWidth(), rh);
+                    cell.layout();
                 }
                 else if (item!=cell.getItem())
                     updateCellAt(i);
             }
+
+            // Otherwise create, configure and add
             else {
-                ListCell cell = createCell(i); addChild(cell);
+                ListCell cell = createCell(i);
+                addChild(cell);
                 configureCell(cell);
-                cell.setBounds(0,i*rh,getWidth(),rh); cell.layout();
+                cell.setBounds(0,i*rh, getWidth(), rh);
+                cell.layout();
             }
         }
 
+        // Get copy of items and clear
+        T items[] = null; synchronized (_updateItems) {
+            items = (T[])_updateItems.toArray();
+            _updateItems.clear();
+        }
+
         // Update items
-        T items[] = null; synchronized (_updateItems) { items = (T[])_updateItems.toArray(); _updateItems.clear(); }
         for (T item : items) {
             int index = getItems().indexOf(item);
             if (index>=_cellStart && index<=_cellEnd)

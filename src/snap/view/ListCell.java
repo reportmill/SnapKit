@@ -9,40 +9,39 @@ package snap.view;
 public class ListCell <T> extends Label {
     
     // The cell item
-    T                  _item;
+    protected T  _item;
     
     // The cell row/column
-    int                _row, _col;
+    protected int  _row, _col;
     
     // Whether cell is selected
-    boolean            _sel;
+    private boolean  _sel;
     
-/**
- * Creates a new ListCell.
- */
-public ListCell(T anItem, int aRow, int aCol, boolean isSel)
-{
-    _item = anItem; _row = aRow; _col = aCol; _sel = isSel;
-}
+    /**
+     * Creates a new ListCell.
+     */
+    public ListCell(T anItem, int aRow, int aCol, boolean isSel)
+    {
+        _item = anItem; _row = aRow; _col = aCol; _sel = isSel;
+    }
 
-/**
- * Returns the item.
- */
-public T getItem()  { return _item; }
+    /**
+     * Returns the item.
+     */
+    public T getItem()  { return _item; }
 
-/**
- * Returns the row.
- */
-public int getRow()  { return _row; }
+    /**
+     * Returns the row.
+     */
+    public int getRow()  { return _row; }
 
-/**
- * Returns the column.
- */
-public int getCol()  { return _col; }
+    /**
+     * Returns the column.
+     */
+    public int getCol()  { return _col; }
 
-/**
- * Returns whether cell is selected.
- */
-public boolean isSelected()  { return _sel; }
-
+    /**
+     * Returns whether cell is selected.
+     */
+    public boolean isSelected()  { return _sel; }
 }

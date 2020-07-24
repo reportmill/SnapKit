@@ -23,9 +23,12 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     private int  _selCol;
     
     // Whether to show table header
-    private boolean  _showHeader, _showHeaderCol;
+    private boolean  _showHeader;
     
-    // Whether to show horziontal/vertical grid lines
+    // Whether to show table header column
+    private boolean  _showHeaderCol;
+
+    // Whether to show horizontal/vertical grid lines
     private boolean  _showGridX, _showGridY;
     
     // Grid color
@@ -41,8 +44,11 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     private Consumer <ListCell<T>>  _cellConf;
     
     // An optional method hook to configure cell for editing
-    private Consumer <ListCell<T>>  _cellEditStart, _cellEditEnd;
+    private Consumer <ListCell<T>>  _cellEditStart;
     
+    // An optional method hook to configure cell for editing
+    private Consumer <ListCell<T>>  _cellEditEnd;
+
     // Whether table cells are editable
     private boolean  _editable;
     
@@ -94,8 +100,8 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         _scrollGroup.setBorder(null);
         addChild(_scrollGroup);
 
-        // Register PickList to notify when selection changes
-        _items.addPropChangeListener(pc -> pickListSelChange(pc));
+        // Register PickList to notify when prop changes
+        _items.addPropChangeListener(pc -> pickListPropChange(pc));
     }
 
     /**
@@ -123,10 +129,14 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
 
         // Set items
         _items.setAll(theItems);
-        relayout(); relayoutParent(); repaint();
-        for (TableCol tc : getCols()) tc.setItems(theItems);
-        if (_headerCol!=null) _headerCol.setItems(theItems);
+        for (TableCol tc : getCols())
+            tc.setItems(theItems);
+        if (_headerCol!=null)
+            _headerCol.setItems(theItems);
         itemsChanged();
+
+        // Register for relayout/repaint
+        relayout(); relayoutParent(); repaint();
     }
 
     /**
@@ -206,10 +216,11 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     /**
      * Called when PickList changes selection.
      */
-    protected void pickListSelChange(PropChange aPC)
+    protected void pickListPropChange(PropChange aPC)
     {
         // If not SelIndex, just return
-        if (aPC.getPropertyName()!=PickList.SelIndex_Prop) return;
+        String propName = aPC.getPropName();
+        if (propName!=PickList.SelIndex_Prop) return;
 
         // FirePropChange
         int oldInd = (Integer)aPC.getOldValue(), newInd = (Integer)aPC.getNewValue();
@@ -225,7 +236,8 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      */
     public void updateItems(T ... theItems)
     {
-        for (TableCol tcol : getCols()) tcol.updateItems(theItems);
+        for (TableCol tcol : getCols())
+            tcol.updateItems(theItems);
     }
 
     /**
@@ -272,8 +284,10 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         hsplit.addItem(hdrBox);
 
         // Configure split dividers
-        for (Divider div : _split.getDividers()) { div.setFill(DIVIDER_FILL); div.setBorder(null); }
-        for (Divider div : hsplit.getDividers()) { div.setFill(DIVIDER_FILLH); div.setBorder(null); }
+        for (Divider div : _split.getDividers()) {
+            div.setFill(DIVIDER_FILL); div.setBorder(null); }
+        for (Divider div : hsplit.getDividers()) {
+            div.setFill(DIVIDER_FILLH); div.setBorder(null); }
 
         // Replace column picklist with tableView picklist
         aCol.setPickList(_items);
@@ -335,9 +349,14 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         if (_header!=null) return _header;
 
         // Create and return
-        SplitView split = new SplitView(); split.setGrowWidth(true); split.setBorder(null);
+        SplitView split = new SplitView();
+        split.setGrowWidth(true);
+        split.setBorder(null);
         split.setDividerSpan(_split.getDividerSpan());
-        Divider div = split.getDivider(); div.setFill(DIVIDER_FILLH); div.setBorder(null); div.setReach(3);
+        Divider div = split.getDivider();
+        div.setFill(DIVIDER_FILLH);
+        div.setBorder(null);
+        div.setReach(3);
         return _header = split;
     }
 
@@ -368,7 +387,8 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         if (_headerCol!=null) return _headerCol;
 
         // Create and return
-        _headerCol = new TableCol(); _headerCol._table = this; _headerCol.setFill(null);
+        _headerCol = new TableCol(); _headerCol._table = this;
+        _headerCol.setFill(null);
         _headerCol.setPickList(_items);
         _headerCol.setCellPadding(getCellPadding());
         _headerCol.setItems(getItems());
@@ -428,8 +448,10 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         if (_rowHeightCached>0) return _rowHeightCached;
 
         _rowHeightCached = 1;
-        for (TableCol col : getCols()) _rowHeightCached = Math.max(_rowHeightCached, col.getRowHeightSuper());
-        if (isShowHeaderCol()) _rowHeightCached = Math.max(_rowHeightCached, getHeaderCol().getRowHeightSuper());
+        for (TableCol col : getCols())
+            _rowHeightCached = Math.max(_rowHeightCached, col.getRowHeightSuper());
+        if (isShowHeaderCol())
+            _rowHeightCached = Math.max(_rowHeightCached, getHeaderCol().getRowHeightSuper());
         return _rowHeightCached;
     }
 
@@ -453,7 +475,8 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     {
         if (aPad==null) aPad = ListArea.CELL_PAD_DEFAULT; if (aPad.equals(_cellPad)) return;
         firePropChange(CellPadding_Prop, _cellPad, _cellPad=aPad);
-        for (TableCol col : getCols()) col.setCellPadding(_cellPad);
+        for (TableCol col : getCols())
+            col.setCellPadding(_cellPad);
         relayout(); relayoutParent();
     }
 
@@ -502,7 +525,8 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
 
         // Set value, fire prop change and enable MouseRelease events
         firePropChange(Editable_Prop, _editable, _editable = aValue);
-        if (aValue) enableEvents(MouseRelease, KeyPress);
+        if (aValue)
+            enableEvents(MouseRelease, KeyPress);
         else disableEvents(MouseRelease, KeyPress);
     }
 
