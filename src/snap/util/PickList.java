@@ -13,8 +13,14 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     // Whether list supports multiple selection
     private boolean  _multiSel;
 
-    // The selected index
+    // The selected indexes
     private int  _selIndexes[] = EMPTY_SEL;
+
+    // The selection anchor index (usually last mouse down)
+    private int  _selAnchor = -1;
+
+    // The selection lead index (usually last mouse up)
+    private int  _selLead = -1;
     
     // The PropChangeSupport
     protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
@@ -88,6 +94,11 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     }
 
     /**
+     * Returns whether selection is empty.
+     */
+    public boolean isSelEmpty()  { return getSelIndex()<0; }
+
+    /**
      * Returns the selected index.
      */
     public int getSelIndex()
@@ -128,9 +139,14 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
         // If already set, just return
         if (Arrays.equals(theIndexes, getSelIndexes())) return;
 
-        // Clear and set
+        // Cache and set
         int old[] = _selIndexes;
         _selIndexes = theIndexes;
+
+        // Reset Anchor/Lead
+        _selAnchor = _selLead = -1;
+
+        // Fire prop change
         firePropChange(SelIndexes_Prop, old, _selIndexes, -1);
     }
 
@@ -154,7 +170,10 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
         _selIndexes[len] = anIndex;
         Arrays.sort(_selIndexes);
 
-        // Fire prop change (probably need to do this right one day)
+        // Reset Anchor/Lead
+        _selAnchor = _selLead = -1;
+
+        // Fire prop change
         firePropChange(SelIndexes_Prop, false, true, anIndex);
     }
 
@@ -177,6 +196,9 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
 
         // Remove index
         _selIndexes = ArrayUtils.remove(_selIndexes, ind);
+
+        // Reset Anchor/Lead
+        _selAnchor = _selLead = -1;
 
         // Fire prop change (probably need to do this right one day)
         firePropChange(SelIndexes_Prop, true, false, anIndex);
@@ -228,44 +250,85 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     }
 
     /**
-     * Sets the selection interval.
+     * Returns the selection anchor index (usually last mouse down).
      */
-    public void setSelInterval(int aStart, int anEnd)
+    public int getSelAnchor()
     {
-        int min = Math.min(aStart, anEnd);
-        int max = Math.max(aStart, anEnd);
-        int len = max - min + 1;
-        int indexes[] = new int[len];
-        for (int i=0;i<len;i++) indexes[i] = i + min;
-        setSelIndex(min);
+        return _selAnchor>=0 ? _selAnchor : getSelIndexMin();
     }
 
     /**
-     * Adds the interval to this index.
+     * Returns the selection lead index (usually last mouse up).
      */
-    public void addSelIntervalToIndex(int anIndex)
+    public int getSelLead()
     {
-        // If no selection or not MultiSel, just set index
-        if (getSelIndex()<0 || !isMultiSel())
-            setSelIndex(anIndex);
+        return _selLead>=0 ? _selLead : getSelIndexMax();
+    }
 
-        // If index above max, add from max to index
-        else if (anIndex>getSelIndexMax()) {
-            for (int i=getSelIndexMax()+1; i<=anIndex; i++)
-                addSelIndex(i);
+    /**
+     * Sets the selection interval.
+     */
+    public void setSelInterval(int anAnchor, int aLead)
+    {
+        // If SingleSel, just select lead
+        if (!isMultiSel()) {
+            setSelIndex(aLead);
+            return;
         }
 
-        // If index below min, add from min to index
-        else if (anIndex<getSelIndexMin()) { int selInd = getSelIndexMin();
-            for (int i=anIndex; i<selInd; i++)
-                addSelIndex(i);
+        // Get array of intervals from min to max and setSelIndexes
+        int min = Math.min(anAnchor, aLead);
+        int max = Math.max(anAnchor, aLead);
+        int len = max - min + 1;
+        int indexes[] = new int[len];
+        for (int i=0;i<len;i++) indexes[i] = i + min;
+        setSelIndexes(indexes);
+
+        // Set SelAnchor, SelLead
+        _selAnchor = anAnchor;
+        _selLead = aLead;
+    }
+
+    /**
+     * Adds the selection interval.
+     */
+    public void addSelInterval(int anAnchor, int aLead)
+    {
+        // If SingleSel, just select lead
+        if (!isMultiSel()) {
+            setSelIndex(aLead);
+            return;
         }
 
-        // If above min, add from min to index
-        else {
-            for (int i=getSelIndexMin(); i<=anIndex; i++)
-                addSelIndex(i);
+        // Get min/max and iterate over to addSelIndex for each
+        int min = Math.min(anAnchor, aLead);
+        int max = Math.max(anAnchor, aLead);
+        int len = max - min + 1;
+        for (int i=0;i<len;i++)
+            addSelIndex(min + i);
+
+        // Set SelAnchor, SelLead
+        _selAnchor = anAnchor;
+        _selLead = aLead;
+    }
+
+    /**
+     * Removes the selection interval.
+     */
+    public void removeSelInterval(int anAnchor, int aLead)
+    {
+        // If SingleSel, just select lead
+        if (!isMultiSel()) {
+            setSelIndex(aLead==getSelIndex() ? -1 : aLead);
+            return;
         }
+
+        // Get min/max and iterate over to removeSelIndex for each
+        int min = Math.min(anAnchor, aLead);
+        int max = Math.max(anAnchor, aLead);
+        int len = max - min + 1;
+        for (int i=0;i<len;i++)
+            removeSelIndex(min + i);
     }
 
     /**
