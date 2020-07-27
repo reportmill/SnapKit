@@ -617,14 +617,22 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      */
     protected void configureCell(ListCell <T> aCell)
     {
-        // Set Fill/TextFill based on selection
-        configureCellText(aCell);
-        configureCellFills(aCell);
+        // Do basic cell configure
+        cellConfigureBasic(aCell);
 
         // If cell configure set, call it
         Consumer cconf = getCellConfigure();
         if (cconf!=null)
             cconf.accept(aCell);
+    }
+
+    /**
+     * Called to do standard cell configure.
+     */
+    public void cellConfigureBasic(ListCell<T> aCell)
+    {
+        configureCellText(aCell);
+        configureCellFills(aCell);
     }
 
     /**

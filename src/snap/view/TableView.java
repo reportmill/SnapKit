@@ -5,6 +5,7 @@ package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
 
+import snap.geom.HPos;
 import snap.geom.Insets;
 import snap.geom.Point;
 import snap.geom.Rect;
@@ -62,17 +63,20 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     private SplitView  _header;
     
     // The header column
-    private TableCol  _headerCol;
+    private TableCol<T>  _headerCol;
     
     // A listener to watch for Cell.Editing set to false
     private PropChangeListener  _editEndLsnr;
 
-    // Constants
+    // Constants for properties
     public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
     public static final String RowHeight_Prop = "RowHeight";
-    static final Paint DIVIDER_FILL = new Color("#EEEEEE");
-    static final Paint DIVIDER_FILLH = new Color("#E0E0E0");
+    public static final String ShowHeader_Prop = "ShowHeader";
+
+    // Internal constants
+    private static final Paint DIVIDER_FILL = new Color("#EEEEEE");
+    private static final Paint DIVIDER_FILLH = new Color("#E0E0E0");
     
     /**
      * Creates a new TableView.
@@ -334,7 +338,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         if (aValue==isShowHeader()) return;
 
         // Set value, fire prop change
-        firePropChange("ShowHeader", _showHeader, _showHeader = aValue);
+        firePropChange(ShowHeader_Prop, _showHeader, _showHeader = aValue);
 
         // Add/remove header
         _scrollGroup.setTopView(aValue ? getHeaderView() : null);
@@ -370,7 +374,10 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      */
     public void setShowHeaderCol(boolean aValue)
     {
+        // If already set, just return
         if (aValue==isShowHeaderCol()) return;
+
+        // Set value and firePropChange
         firePropChange("ShowHeaderCol", _showHeaderCol, _showHeaderCol = aValue);
 
         // Add/remove header
@@ -387,12 +394,23 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         if (_headerCol!=null) return _headerCol;
 
         // Create and return
-        _headerCol = new TableCol(); _headerCol._table = this;
+        _headerCol = new TableCol();
+        _headerCol._table = this;
         _headerCol.setFill(null);
         _headerCol.setPickList(_items);
         _headerCol.setCellPadding(getCellPadding());
         _headerCol.setItems(getItems());
+        _headerCol.setCellConfigure(cell -> configureHeaderColCell(cell));
         return _headerCol;
+    }
+
+    /**
+     * Default configure for HeaderCol cells (use index).
+     */
+    private void configureHeaderColCell(ListCell <T> aCell)
+    {
+        aCell.setText(String.valueOf(aCell.getRow()+1));
+        aCell.setAlign(HPos.CENTER);
     }
 
     /**
@@ -585,19 +603,6 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         TableCol <T> col = getColForX(aX); if (col==null) return null;
         Point pnt = col.parentToLocal(aX, aY, this);
         return col.getCellForY(pnt.y);
-    }
-
-    /**
-     * Override to give control to table.
-     */
-    protected void configureCell(TableCol <T> aCol, ListCell <T> aCell)
-    {
-        //aCol.configureCellText(aCell);
-        //aCol.configureCellFills(aCell);
-        aCol.configureCellSuper(aCell);
-        Consumer cconf = getCellConfigure();
-        if (cconf!=null)
-            cconf.accept(aCell);
     }
 
     /**
@@ -922,7 +927,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive ShowHeader
-        if (isShowHeader()) e.add("ShowHeader", false);
+        if (isShowHeader()) e.add(ShowHeader_Prop, false);
 
         // Archive GridColor, ShowLinesX, ShowLinesY
         if (getGridColor()!=null) e.add("GridColor", '#' + getGridColor().toHexString());
@@ -943,16 +948,18 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         super.fromXMLView(anArchiver, anElement);
 
         // Unarchive TableHeader
-        if (anElement.hasAttribute("ShowHeader"))
-            setShowHeader(anElement.getAttributeBooleanValue("ShowHeader"));
+        if (anElement.hasAttribute(ShowHeader_Prop))
+            setShowHeader(anElement.getAttributeBooleanValue(ShowHeader_Prop));
 
         // Unarchive GridColor, ShowLinesX, ShowLinesY
-        if (anElement.hasAttribute("GridColor")) setGridColor(new Color(anElement.getAttributeValue("GridColor")));
+        if (anElement.hasAttribute("GridColor"))
+            setGridColor(new Color(anElement.getAttributeValue("GridColor")));
         setShowGridX(anElement.getAttributeBoolValue("ShowGridX", false));
         setShowGridY(anElement.getAttributeBoolValue("ShowGridY", false));
 
         // Unarchive RowHeight
-        if (anElement.hasAttribute(RowHeight_Prop)) setRowHeight(anElement.getAttributeIntValue(RowHeight_Prop));
+        if (anElement.hasAttribute(RowHeight_Prop))
+            setRowHeight(anElement.getAttributeIntValue(RowHeight_Prop));
     }
 
     /**

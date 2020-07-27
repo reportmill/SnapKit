@@ -81,22 +81,6 @@ public class TableCol <T> extends ListArea <T> {
     public int getColIndex()  { return ArrayUtils.indexOfId(getTable().getCols(), this); }
 
     /**
-     * Override to give control to table.
-     */
-    protected void configureCell(ListCell <T> aCell)
-    {
-        getTable().configureCell(this, aCell);
-    }
-
-    /**
-     * Override to give control to table.
-     */
-    protected void configureCellSuper(ListCell <T> aCell)
-    {
-        super.configureCell(aCell);
-    }
-
-    /**
      * Override to return table cell configure if one isn't set for col.
      */
     public Consumer <ListCell<T>> getCellConfigure()
