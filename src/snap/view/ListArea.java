@@ -49,13 +49,16 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     
     // Whether list is editable
     private boolean  _editable;
-    
+
+    // The list cell that is currently being edited
+    private ListCell<T>  _editingCell;
+
     // The index of first visible cell
     private int  _cellStart = -1;
 
     // The index of last visible cell
     private int _cellEnd;
-    
+
     // Set of items that need to be updated
     private Set <T>  _updateItems = new HashSet<>();
     
@@ -69,7 +72,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     private ListSelector  _selector = new ListSelector();
     
     // Shared CellPadding default
-    public static final Insets         CELL_PAD_DEFAULT = new Insets(2);
+    public static final Insets  CELL_PAD_DEFAULT = new Insets(2);
     
     // Shared constants for colors
     private static Paint ALT_GRAY = Color.get("#F8F8F8");
@@ -79,8 +82,9 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     private static Paint TARG_TEXT_FILL = ViewUtils.getTargetTextFill();
     
     // Constants for properties
-    public static final String Editable_Prop = "Editable";
     public static final String CellPadding_Prop = "CellPadding";
+    public static final String Editable_Prop = "Editable";
+    public static final String EditingCell_Prop = "EditingCell";
     public static final String ItemKey_Prop = "ItemKey";
     public static final String RowHeight_Prop = "RowHeight";
 
@@ -402,20 +406,6 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     }
 
     /**
-     * Returns whether list cells are editable.
-     */
-    public boolean isEditable()  { return _editable; }
-
-    /**
-     * Sets whether list cells are editable.
-     */
-    public void setEditable(boolean aValue)
-    {
-        if (aValue==isEditable()) return;
-        firePropChange(Editable_Prop, _editable, _editable = aValue);
-    }
-
-    /**
      * Called to update items in list that have changed.
      */
     public void updateItems(T ... theItems)
@@ -480,6 +470,15 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     {
         int cindex = anIndex - _cellStart;
         return cindex>=0 && cindex<getChildCount() ? (ListCell)getChild(cindex) : null;
+    }
+
+    /**
+     * Returns the cell for selected index/item.
+     */
+    public ListCell<T> getSelCell()
+    {
+        int ind = getSelIndex();
+        return getCellForRow(ind);
     }
 
     /**
@@ -606,7 +605,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     protected ListCell createCell(int anIndex)
     {
         T item = anIndex>=0 && anIndex<getItemCount() ? getItem(anIndex) : null;
-        ListCell cell = new ListCell(item, anIndex, getColIndex(), isSelIndex(anIndex));
+        ListCell cell = new ListCell(this, item, anIndex, getColIndex(), isSelIndex(anIndex));
         cell.setPadding(getCellPadding());
         cell.setPrefHeight(getRowHeight());
         return cell;
@@ -686,7 +685,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
 
         // If CellConfigure, create cell and call
         else if (getCellConfigure()!=null) { Consumer cconf = getCellConfigure();
-            ListCell cell = new ListCell(anItem, 0, 0, false);
+            ListCell cell = new ListCell(this, anItem, 0, 0, false);
             cell.setText(anItem!=null ? anItem.toString() : null);
             cconf.accept(cell);
             text = cell.getText();
@@ -751,7 +750,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      */
     protected void calcSampleSize()
     {
-        ListCell cell = new ListCell(null, 0, getColIndex(), false);
+        ListCell cell = new ListCell(this, null, 0, getColIndex(), false);
         cell.setFont(getFont());
         cell.setPadding(getCellPadding());
         for (int i=0,iMax=Math.min(getItemCount(),30);i<iMax;i++) {
@@ -765,6 +764,56 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
         }
         if (_sampleWidth<0) _sampleWidth = 100;
         if (_sampleHeight<0) _sampleHeight = Math.ceil(getFont().getLineHeight()+4);
+    }
+
+    /**
+     * Returns whether list cells are editable.
+     */
+    public boolean isEditable()  { return _editable; }
+
+    /**
+     * Sets whether list cells are editable.
+     */
+    public void setEditable(boolean aValue)
+    {
+        if (aValue==isEditable()) return;
+        firePropChange(Editable_Prop, _editable, _editable = aValue);
+    }
+
+    /**
+     * Returns the cell currently editing.
+     */
+    public ListCell<T> getEditingCell()  { return _editingCell; }
+
+    /**
+     * Sets the cell currently editing.
+     */
+    protected void setEditingCell(ListCell<T> aCell)
+    {
+        if (aCell==getEditingCell()) return;
+        firePropChange(EditingCell_Prop, _editingCell, _editingCell = aCell);
+    }
+
+    /**
+     * Edit cell.
+     */
+    public void editCell(ListCell<T> aCell)
+    {
+        // If not possible, complain and return
+        if (aCell==null) { ViewUtils.beep(); return; }
+
+        // Set editing
+        aCell.setEditing(true);
+    }
+
+    /**
+     * Called when cell editing starts.
+     */
+    protected void cellEditingChanged(ListCell<T> aCell)
+    {
+        // Update EditingCell
+        ListCell<T> cell = aCell.isEditing() ? aCell : null;
+        setEditingCell(cell);
     }
 
     /**
@@ -1009,8 +1058,15 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
         {
             fireActionEvent(anEvent);
 
+            // Re-instate DragGesture if needed
             if (_dragGestureEnabled)
                 getEventAdapter().setEnabled(DragGesture, true);
+
+            // Start editing if needed
+            if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && isEditable()) {
+                ListCell<T> cell = getSelCell();
+                editCell(cell);
+            }
         }
 
         /**

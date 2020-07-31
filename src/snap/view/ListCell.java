@@ -7,7 +7,10 @@ package snap.view;
  * A label subclass used to render items in Lists, Tables, Trees, Browsers.
  */
 public class ListCell <T> extends Label {
-    
+
+    // The ListArea that created this cell
+    protected ListArea<T>  _listArea;
+
     // The cell item
     protected T  _item;
     
@@ -20,10 +23,18 @@ public class ListCell <T> extends Label {
     /**
      * Creates a new ListCell.
      */
-    public ListCell(T anItem, int aRow, int aCol, boolean isSel)
+    public ListCell(ListArea<T> theList, T anItem, int aRow, int aCol, boolean isSel)
     {
-        _item = anItem; _row = aRow; _col = aCol; _sel = isSel;
+        _listArea = theList;
+        _item = anItem;
+        _row = aRow; _col = aCol;
+        _sel = isSel;
     }
+
+    /**
+     * Returns the ListArea.
+     */
+    public ListArea<T> getListArea()  { return _listArea; }
 
     /**
      * Returns the item.
@@ -44,4 +55,19 @@ public class ListCell <T> extends Label {
      * Returns whether cell is selected.
      */
     public boolean isSelected()  { return _sel; }
+
+    /**
+     * Override to notify ListArea.
+     */
+    @Override
+    public void setEditing(boolean aValue)
+    {
+        // If already set, just return, otherwise do normal
+        if (aValue==isEditing()) return;
+        super.setEditing(aValue);
+
+        // Nofity ListArea
+        if (_listArea!=null)
+            _listArea.cellEditingChanged(this);
+    }
 }

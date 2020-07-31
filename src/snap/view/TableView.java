@@ -44,15 +44,12 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     // An optional method hook to configure cell
     private Consumer <ListCell<T>>  _cellConf;
     
-    // An optional method hook to configure cell for editing
-    private Consumer <ListCell<T>>  _cellEditStart;
-    
-    // An optional method hook to configure cell for editing
-    private Consumer <ListCell<T>>  _cellEditEnd;
-
     // Whether table cells are editable
     private boolean  _editable;
-    
+
+    // The list cell that is currently being edited
+    private ListCell<T>  _editingCell;
+
     // The SplitView to hold columns
     private SplitView  _split;
     
@@ -64,13 +61,11 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     
     // The header column
     private TableCol<T>  _headerCol;
-    
-    // A listener to watch for Cell.Editing set to false
-    private PropChangeListener  _editEndLsnr;
 
     // Constants for properties
     public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
+    public static final String EditingCell_Prop = "EditingCell";
     public static final String RowHeight_Prop = "RowHeight";
     public static final String ShowHeader_Prop = "ShowHeader";
 
@@ -509,46 +504,6 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     public void setCellConfigure(Consumer<ListCell<T>> aCC)  { _cellConf = aCC; }
 
     /**
-     * Called to set method to start cell editing.
-     */
-    public Consumer<ListCell<T>> getCellEditStart()  { return _cellEditStart; }
-
-    /**
-     * Called to set method to start cell editing.
-     */
-    public void setCellEditStart(Consumer<ListCell<T>> aCC)  { _cellEditStart = aCC; }
-
-    /**
-     * Called to set method to stop cell for editing.
-     */
-    public Consumer<ListCell<T>> getCellEditEnd()  { return _cellEditEnd; }
-
-    /**
-     * Called to set method to stop cell for editing.
-     */
-    public void setCellEditEnd(Consumer<ListCell<T>> aCC)  { _cellEditEnd = aCC; }
-
-    /**
-     * Returns whether table cells are editable.
-     */
-    public boolean isEditable()  { return _editable; }
-
-    /**
-     * Sets whether table cells are editable.
-     */
-    public void setEditable(boolean aValue)
-    {
-        // If already set, just return
-        if (aValue==isEditable()) return;
-
-        // Set value, fire prop change and enable MouseRelease events
-        firePropChange(Editable_Prop, _editable, _editable = aValue);
-        if (aValue)
-            enableEvents(MouseRelease, KeyPress);
-        else disableEvents(MouseRelease, KeyPress);
-    }
-
-    /**
      * Returns the cell at given row and col.
      */
     public ListCell <T> getCell(int aRow, int aCol)
@@ -613,14 +568,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     /**
      * Sets whether list allows multiple selections.
      */
-    public void setMultiSel(boolean aValue)
-    {
-        // Forward to PickList
-        _items.setMultiSel(aValue);
-
-        // Update Selector
-        //_selector = aValue ? new ListArea.ListSelectorMulti() : new ListArea.ListSelector();
-    }
+    public void setMultiSel(boolean aValue)  { _items.setMultiSel(aValue); }
 
     /**
      * Returns the selected row.
@@ -791,31 +739,75 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
 
         // Get fuzzy border image for selected cell bounds
         Rect bnds = cell.localToParent(cell.getBoundsLocal(), this).getBounds();
-        Image img = getSelectedRectImage(bnds);
+        Image img = getSelRectImage(bnds);
         aPntr.drawImage(img, bnds.x-1, bnds.y-1);
     }
 
     /**
      * A fuzzy cell border image to highlight cell.
      */
-    protected Image getSelectedRectImage(Rect aRect)
+    protected Image getSelRectImage(Rect aRect)
     {
+        // If already set and at right size, just return
         if (_selImg!=null && _selImg.getWidth()==aRect.width+2 && _selImg.getHeight()==aRect.height+2) return _selImg;
+
+        // Create, set and return
         Rect rect = aRect.getInsetRect(0,0); rect.x = rect.y = 1;
         ShapeView shpView = new ShapeView(rect); boolean focused = isFoc();
         shpView.setSize(aRect.width+2, aRect.height+2);
         shpView.setBorder(focused ? ViewEffect.FOCUSED_COLOR.brighter() : Color.GRAY,1);
         shpView.setEffect(focused ? ViewEffect.getFocusEffect() : new ShadowEffect(5, Color.GRAY, 0, 0));
         return _selImg = ViewUtils.getImage(shpView);
-    } Image _selImg;
+    }
+
+    // A fuzzy cell border image to highlight cell
+    private Image _selImg;
 
     /** Returns whether this view or child view has focus. */
     boolean isFoc()
     {
         WindowView win = getWindow(); if (win==null) return false;
         View fv = win.getFocusedView();
-        for (View v = fv; v!=null; v = v.getParent()) if (v==this) return true;
+        for (View v = fv; v!=null; v = v.getParent())
+            if (v==this)
+                return true;
         return false;
+    }
+
+    /**
+     * Returns whether table cells are editable.
+     */
+    public boolean isEditable()  { return _editable; }
+
+    /**
+     * Sets whether table cells are editable.
+     */
+    public void setEditable(boolean aValue)
+    {
+        // If already set, just return
+        if (aValue==isEditable()) return;
+        _editable = aValue;
+
+        // Set value, fire prop change and enable MouseRelease events
+        if (aValue)
+            enableEvents(MouseRelease, KeyPress);
+        else disableEvents(MouseRelease, KeyPress);
+
+        firePropChange(Editable_Prop, !_editable, _editable);
+    }
+
+    /**
+     * Returns the cell currently editing.
+     */
+    public ListCell<T> getEditingCell()  { return _editingCell; }
+
+    /**
+     * Sets the cell currently editing.
+     */
+    protected void setEditingCell(ListCell<T> aCell)
+    {
+        if (aCell==getEditingCell()) return;
+        firePropChange(EditingCell_Prop, _editingCell, _editingCell = aCell);
     }
 
     /**
@@ -823,8 +815,11 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      */
     public void editCell(ListCell aCell)
     {
+        // If not appropriate, just return
         if (aCell==null || !isEditable() || aCell.isEditing()) return;
-        cellEditStart(aCell);
+
+        // Call CellEditStart (or just set Cell.Editing true)
+        aCell.setEditing(true);
     }
 
     /**
@@ -835,32 +830,17 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
         if (!isEditable()) return;
         ListCell cell = getSelCell();
         if (cell!=null && cell.isEditing())
-            cellEditEnd(cell);
+            cell.setEditing(false);
     }
 
     /**
-     * Called to configure a cell for edit.
+     * Called when cell editing starts.
      */
-    protected void cellEditStart(ListCell <T> aCell)
+    protected void cellEditingChanged(ListCell<T> aCell)
     {
-        // Call CellEditStart (or just set Cell.Editing true)
-        if (getCellEditStart()!=null)
-            getCellEditStart().accept(aCell);
-        else aCell.setEditing(true);
-
-        // Add listener to catch Cell.Editing false
-        aCell.addPropChangeListener(_editEndLsnr = pc -> cellEditEnd(aCell), Label.Editing_Prop);
-    }
-
-    /**
-     * Called when Cell.Editing set false to stop cell editing.
-     */
-    protected void cellEditEnd(ListCell <T> aCell)
-    {
-        aCell.removePropChangeListener(_editEndLsnr, Label.Editing_Prop); _editEndLsnr = null;
-        aCell.setEditing(false);
-        if (getCellEditEnd()!=null)
-            getCellEditEnd().accept(aCell);
+        // Update EditingCell
+        ListCell<T> cell = aCell.isEditing() ? aCell : null;
+        setEditingCell(cell);
     }
 
     /**

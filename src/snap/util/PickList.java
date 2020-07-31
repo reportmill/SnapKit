@@ -372,7 +372,8 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     public void addSelItem(E anItem)
     {
         int ind = indexOf(anItem);
-        addSelIndex(ind);
+        if (ind>=0)
+            addSelIndex(ind);
     }
 
     /**

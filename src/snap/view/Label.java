@@ -308,17 +308,26 @@ public class Label extends ParentView {
         editor.setAlign(getAlign().getHPos());
         editor.setFont(getFont());
         editor.addEventHandler(e -> editorFiredAction(), Action);
-        editor.addPropChangeListener(pc -> { if (!editor.isFocused()) setEditing(false); }, Focused_Prop);
+        editor.addPropChangeListener(pc -> editorFocusChanged(editor), Focused_Prop);
         return _editor = editor;
     }
 
     /**
      * Called when editor fires action.
      */
-    void editorFiredAction()
+    protected void editorFiredAction()
     {
         setEditing(false);
         fireActionEvent(null);
+    }
+
+    /**
+     * Called when editor focus changes.
+     */
+    protected void editorFocusChanged(TextField editor)
+    {
+        if (!editor.isFocused())
+            setEditing(false);
     }
 
     /**

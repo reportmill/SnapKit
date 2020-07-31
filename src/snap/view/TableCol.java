@@ -120,6 +120,17 @@ public class TableCol <T> extends ListArea <T> {
     }
 
     /**
+     * Override to forward to TableView.
+     */
+    @Override
+    protected void cellEditingChanged(ListCell<T> aCell)
+    {
+        super.cellEditingChanged(aCell);
+        TableView table = getTable(); if (table==null) return;
+        table.cellEditingChanged(aCell);
+    }
+
+    /**
      * Override to forward to table.
      */
     protected View getFocusNext(View aChild)  { return getTable().getFocusNext(); }
