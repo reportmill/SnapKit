@@ -21,7 +21,7 @@ import snap.util.*;
 public class ListArea <T> extends ParentView implements View.Selectable <T> {
 
     // The items
-    private PickList <T>  _items;
+    protected PickList <T>  _items;
     
     // The row height
     private double  _rowHeight;
@@ -69,7 +69,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     private PropChangeListener  _itemsLsnr = pc -> pickListPropChange(pc);
 
     // A helper object to handle list selection
-    private ListSelector  _selector = new ListSelector();
+    private ListAreaSelector _selector = new ListAreaSelector(this);
     
     // Shared CellPadding default
     public static final Insets  CELL_PAD_DEFAULT = new Insets(2);
@@ -129,7 +129,11 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     /**
      * Sets the items.
      */
-    public void setItems(T ... theItems)  { setItems(theItems!=null ? Arrays.asList(theItems) : null); }
+    public void setItems(T ... theItems)
+    {
+        List<T> items = theItems!=null ? Arrays.asList(theItems) : null;
+        setItems(items);
+    }
 
     /**
      * Sets the underlying picklist.
@@ -790,14 +794,21 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      */
     protected void setEditingCell(ListCell<T> aCell)
     {
+        // If already set, just return
         if (aCell==getEditingCell()) return;
+
+        // If clearing, request focus
+        if (aCell==null)
+            requestFocus();
+
+        // Fire PropChange
         firePropChange(EditingCell_Prop, _editingCell, _editingCell = aCell);
     }
 
     /**
      * Edit cell.
      */
-    public void editCell(ListCell<T> aCell)
+    public void editCell(ListCell aCell)
     {
         // If not possible, complain and return
         if (aCell==null) { ViewUtils.beep(); return; }
@@ -821,37 +832,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      */
     protected void processEvent(ViewEvent anEvent)
     {
-        // Handle MousePress: Forward to Selector and consume
-        if (anEvent.isMouseEvent()) {
-            if (anEvent.isMousePress())
-                _selector.mousePress(anEvent);
-            if (anEvent.isMouseDrag())
-                _selector.mouseDrag(anEvent);
-            if (anEvent.isMouseRelease())
-                _selector.mouseRelease(anEvent);
-            anEvent.consume();
-        }
-
-        // Handle MouseExit
-        if (anEvent.isMouseExit())
-            setTargetedIndex(-1);
-
-        // Handle MouseMove
-        if (anEvent.isMouseMove() && isTargeting()) {
-            int index = getRowForY(anEvent.getY());
-            if (index>=getItemCount()) index = -1;
-            setTargetedIndex(index);
-        }
-
-        // Handle KeyPress
-        if (anEvent.isKeyPress()) {
-            int kcode = anEvent.getKeyCode();
-            switch(kcode) {
-                case KeyCode.UP: selectUp(); anEvent.consume(); break;
-                case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
-                case KeyCode.ENTER: fireActionEvent(anEvent); anEvent.consume(); break;
-            }
-        }
+        _selector.processEvent(anEvent);
     }
 
     /**
@@ -948,134 +929,4 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
             setItemKey(anElement.getAttributeValue(ItemKey_Prop));
     }
 
-    /**
-     * A class to handle List selection for SingleSel.
-     */
-    private class ListSelector {
-
-        // Whether selection allowed on MouseDrag
-        protected boolean  _dragSelect;
-
-        // The old SelAnchor/SelLead on MousePress
-        protected int _oldAnchor, _oldLead;
-
-        // The new SelAnchor (index of MousePress)
-        protected int _newAnchor;
-
-        // Whether selection loop is to remove selection (MousePress hit selected cell)
-        protected boolean  _anchorCellSelected;
-
-        // The Selection on MousePress
-        private int _mouseDownSel[];
-
-        // Whether list previously wanted drag
-        private boolean _dragGestureEnabled;
-
-        /** MousePress */
-        public void mousePress(ViewEvent anEvent)
-        {
-            // Get SelAnchor, SelLead on MousePress
-            _oldAnchor = _items.getSelAnchor();
-            _oldLead = _items.getSelLead();
-
-            // Get SelAnchor of MousePress
-            _newAnchor = getRowForY(anEvent.getY());
-
-            // Get whether MousePress hit selected cell
-            ListCell anchorCell = getCellForRow(_newAnchor);
-            _anchorCellSelected = anchorCell!=null && anchorCell.isSelected();
-
-            // Cache MouseDown Selection
-            _mouseDownSel = getSelIndexes();
-
-            // Set DragSelect
-            _dragSelect = !getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount()>1;
-
-            // Do basic Press or Drag selection
-            mousePressOrDrag(anEvent);
-
-            // Set whether wants drag
-            _dragGestureEnabled = isDragSelect() && getEventAdapter().isEnabled(DragGesture);
-            if (_dragGestureEnabled)
-                getEventAdapter().setEnabled(DragGesture, false);
-        }
-
-        /** MouseDrag. */
-        public void mouseDrag(ViewEvent anEvent)
-        {
-            if (isDragSelect())
-                mousePressOrDrag(anEvent);
-        }
-
-        /** Basic Press or Drag selection. */
-        protected void mousePressOrDrag(ViewEvent anEvent)
-        {
-            // Get row-index/cell at mouse point (if no cell, just return)
-            int newLead = getRowForY(anEvent.getY());
-            ListCell cell = getCellForRow(newLead);
-            if (cell==null || !cell.isEnabled())
-                return;
-
-            // Handle ShortCut down: If AnchorCellSelected then add, otherwise remove
-            if (anEvent.isShortcutDown()) {
-
-                // Restore MouseDown selection
-                setSelIndexes(_mouseDownSel);
-
-                // Handle adding
-                if (!_anchorCellSelected)
-                    _items.addSelInterval(_newAnchor, newLead);
-                else _items.removeSelInterval(_newAnchor, newLead);
-            }
-
-            // Handle Shift down: Select
-            else if (anEvent.isShiftDown() && _mouseDownSel.length>0) {
-
-                // Restore MouseDown selection
-                setSelIndexes(_mouseDownSel);
-
-                // Clear OldRange
-                _items.removeSelInterval(_oldAnchor, _oldLead);
-
-                // Get NewAnchor: If NewAnchor is before OldAnchor+OldLead then use OldLead, otherwise use OldAnchor
-                boolean isBefore = _newAnchor<_oldAnchor && _oldAnchor<=_oldLead || _newAnchor>_oldAnchor && _oldAnchor>=_oldLead;
-                int newAnchor = isBefore ? _oldLead : _oldAnchor;
-
-                // Add interval from NewAnchor to NewLead
-                _items.addSelInterval(newAnchor, newLead);
-            }
-
-            // Handle normal drag selection
-            else {
-                if (_anchorCellSelected && isMultiSel())
-                    return;
-                _items.setSelInterval(_newAnchor, newLead);
-            }
-        }
-
-        /** MouseRelease. */
-        public void mouseRelease(ViewEvent anEvent)
-        {
-            fireActionEvent(anEvent);
-
-            // Re-instate DragGesture if needed
-            if (_dragGestureEnabled)
-                getEventAdapter().setEnabled(DragGesture, true);
-
-            // Start editing if needed
-            if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && isEditable()) {
-                ListCell<T> cell = getSelCell();
-                editCell(cell);
-            }
-        }
-
-        /**
-         * Returns whether selection allowed on MouseDrag.
-         * Need to disable if DragEvents are enabled, unless event is double-click.
-         */
-        public boolean isDragSelect()
-        {
-            return _dragSelect;
-        }
-    }
 }

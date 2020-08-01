@@ -270,7 +270,7 @@ public class ParentView extends View {
     protected void paintAll(Painter aPntr)
     {
         super.paintAll(aPntr);
-        if (_viewEff==null) {
+        if (_effect ==null) {
             paintChildren(aPntr);
             paintAbove(aPntr);
         }

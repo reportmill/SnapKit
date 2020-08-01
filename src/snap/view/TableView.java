@@ -62,6 +62,9 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     // The header column
     private TableCol<T>  _headerCol;
 
+    // A helper to handle selection
+    private TableViewSelector  _selector = new TableViewSelector(this);
+
     // Constants for properties
     public static final String CellPadding_Prop = "CellPadding";
     public static final String Editable_Prop = "Editable";
@@ -646,48 +649,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      */
     protected void processEvent(ViewEvent anEvent)
     {
-        // Handle MousePress: If hit column isn't selected, select + fire action + consume event
-        if (anEvent.isMousePress()) {
-            TableCol col = getColForX(anEvent.getX());
-            int index = col!=null ? col.getColIndex() : -1;
-            if (index>=0 && index!=getSelCol()) {
-                setSelCol(index);
-                fireActionEvent(anEvent);
-                anEvent.consume();
-            }
-        }
-
-        // Handle Mouse double-click
-        if (anEvent.isMouseClick() && anEvent.getClickCount()==2 && isEditable()) {
-            ListCell cell = getCellForXY(anEvent.getX(), anEvent.getY());
-            editCell(cell);
-        }
-
-        // Handle KeyPress
-        else if (anEvent.isKeyPress())
-            processKeyEvent(anEvent);
-    }
-
-    /**
-     * Handle events.
-     */
-    protected void processKeyEvent(ViewEvent anEvent)
-    {
-        int kcode = anEvent.getKeyCode();
-        switch (kcode) {
-            case KeyCode.UP: selectUp(); fireActionEvent(anEvent); anEvent.consume(); break;
-            case KeyCode.DOWN: selectDown(); fireActionEvent(anEvent); anEvent.consume(); break;
-            case KeyCode.LEFT: selectLeft(); fireActionEvent(anEvent); anEvent.consume(); break;
-            case KeyCode.RIGHT: selectRight(); fireActionEvent(anEvent); anEvent.consume(); break;
-            default: {
-                char c = anEvent.getKeyChar();
-                boolean printable = Character.isJavaIdentifierPart(c); // Lame
-                if (isEditable() && printable) {
-                    ListCell cell = getSelCell();
-                    editCell(cell);
-                }
-            }
-        }
+        _selector.processEvent(anEvent);
     }
 
     /**
