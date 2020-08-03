@@ -1,30 +1,26 @@
 package snap.view;
 
+import snap.util.ListSel;
+
 /**
  * A class to handle ListArea selection.
  */
 class ListAreaSelector {
 
     // This ListArea
-    private final ListArea _list;
+    private final ListArea  _list;
 
     // Whether selection allowed on MouseDrag
     protected boolean  _dragSelect;
 
-    // The old SelAnchor/SelLead on MousePress
-    protected int _oldAnchor, _oldLead;
+    // The Selection on MousePress
+    private ListSel  _mouseDownSel;
 
     // The new SelAnchor (index of MousePress)
-    protected int _newAnchor;
-
-    // Whether selection loop is to remove selection (MousePress hit selected cell)
-    protected boolean  _anchorCellSelected;
-
-    // The Selection on MousePress
-    private int _mouseDownSel[];
+    protected int  _newAnchor;
 
     // Whether list previously wanted drag
-    private boolean _dragGestureEnabled;
+    private boolean  _dragGestureEnabled;
 
     /**
      * Constructor.
@@ -91,19 +87,11 @@ class ListAreaSelector {
      */
     public void mousePress(ViewEvent anEvent)
     {
-        // Get SelAnchor, SelLead on MousePress
-        _oldAnchor = _list._items.getSelAnchor();
-        _oldLead = _list._items.getSelLead();
+        // Cache MouseDown Selection
+        _mouseDownSel = _list._items.getSel();
 
         // Get SelAnchor of MousePress
         _newAnchor = _list.getRowForY(anEvent.getY());
-
-        // Get whether MousePress hit selected cell
-        ListCell anchorCell = _list.getCellForRow(_newAnchor);
-        _anchorCellSelected = anchorCell!=null && anchorCell.isSelected();
-
-        // Cache MouseDown Selection
-        _mouseDownSel = _list.getSelIndexes();
 
         // Set DragSelect
         _dragSelect = !_list.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount()>1;
@@ -139,38 +127,20 @@ class ListAreaSelector {
 
         // Handle ShortCut down: If AnchorCellSelected then add, otherwise remove
         if (anEvent.isShortcutDown()) {
-
-            // Restore MouseDown selection
-            _list.setSelIndexes(_mouseDownSel);
-
-            // Handle adding
-            if (!_anchorCellSelected)
-                _list._items.addSelInterval(_newAnchor, newLead);
-            else _list._items.removeSelInterval(_newAnchor, newLead);
+            ListSel sel = _mouseDownSel.copyForMetaAdd(_newAnchor, newLead);
+            _list._items.setSel(sel);
         }
 
         // Handle Shift down: Select
-        else if (anEvent.isShiftDown() && _mouseDownSel.length>0) {
-
-            // Restore MouseDown selection
-            _list.setSelIndexes(_mouseDownSel);
-
-            // Clear OldRange
-            _list._items.removeSelInterval(_oldAnchor, _oldLead);
-
-            // Get NewAnchor: If NewAnchor is before OldAnchor+OldLead then use OldLead, otherwise use OldAnchor
-            boolean isBefore = _newAnchor<_oldAnchor && _oldAnchor<=_oldLead || _newAnchor>_oldAnchor && _oldAnchor>=_oldLead;
-            int newAnchor = isBefore ? _oldLead : _oldAnchor;
-
-            // Add interval from NewAnchor to NewLead
-            _list._items.addSelInterval(newAnchor, newLead);
+        else if (anEvent.isShiftDown()) {
+            ListSel sel = _mouseDownSel.copyForShiftAdd(_newAnchor, newLead);
+            _list._items.setSel(sel);
         }
 
         // Handle normal drag selection
         else {
-            if (_anchorCellSelected && _list.isMultiSel())
-                return;
-            _list._items.setSelInterval(_newAnchor, newLead);
+            ListSel sel = new ListSel(_newAnchor, newLead);
+            _list._items.setSel(sel);
         }
     }
 

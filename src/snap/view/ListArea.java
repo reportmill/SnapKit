@@ -241,35 +241,13 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
         // If not SelIndex, just return
         String propName = aPC.getPropName();
 
-        // Handle SelIndex
-        if (propName==PickList.SelIndex_Prop) {
-            int oldInd = (Integer) aPC.getOldValue();
-            int newInd = (Integer) aPC.getNewValue();
-            updateIndex(oldInd);
-            firePropChange(SelIndex_Prop, oldInd, newInd);
-            updateIndex(newInd);
-        }
-
-        // Handle SelIndexes
-        else if (propName==PickList.SelIndexes_Prop) {
-
-            // Handle Indexed version
-            int ind = aPC.getIndex();
-            if (ind>=0) {
-                updateIndex(ind);
-                firePropChange(SelIndex_Prop, aPC.getOldValue(), aPC.getNewValue(), ind);
-            }
-
-            // Handle complete version
-            else {
-                int oldInds[] = (int[])aPC.getOldValue();
-                int newInds[] = (int[])aPC.getNewValue();
-                for (int i=0; i<oldInds.length; i++)
-                    updateIndex(oldInds[i]);
-                for (int i=0; i<newInds.length; i++)
-                    updateIndex(newInds[i]);
-                firePropChange(SelIndex_Prop, oldInds, newInds);
-            }
+        // Handle Sel_Prop: Get array of changed indexes and update
+        if (propName==PickList.Sel_Prop) {
+            ListSel sel1 = (ListSel)aPC.getOldValue();
+            ListSel sel2 = (ListSel)aPC.getNewValue();
+            int changed[] = ListSel.getChangedIndexes(sel1, sel2);
+            for (int i : changed)
+                updateIndex(i);
         }
 
         // Scroll selection to visible

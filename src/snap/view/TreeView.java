@@ -243,12 +243,19 @@ public class TreeView <T> extends ParentView implements View.Selectable <T> {
      */
     protected void pickListSelChange(PropChange aPC)
     {
-        // If not SelIndex, just return
-        if (aPC.getPropertyName()!=PickList.SelIndex_Prop) return;
+        // Handle Sel_Prop: Get array of changed indexes and update
+        String propName = aPC.getPropName();
+        if (propName==PickList.Sel_Prop) {
+            ListSel sel1 = (ListSel)aPC.getOldValue();
+            ListSel sel2 = (ListSel)aPC.getNewValue();
+            int changed[] = ListSel.getChangedIndexes(sel1, sel2);
+            //for (int i : changed)
+            //    updateIndex(i);
 
-        // FirePropChange
-        int oldInd = (Integer)aPC.getOldValue(), newInd = (Integer)aPC.getNewValue();
-        firePropChange(SelIndex_Prop, oldInd, newInd);
+            int oldInd = changed.length>1 ? changed[0] : -1;
+            int newInd = changed.length>1 ? changed[changed.length-1] : -1;
+            firePropChange(SelIndex_Prop, oldInd, newInd);
+        }
 
         // Scroll selection to visible
         //if (isShowing()) scrollSelToVisible();
