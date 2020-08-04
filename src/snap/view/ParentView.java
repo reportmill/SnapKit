@@ -30,7 +30,6 @@ public class ParentView extends View {
     public static final String Child_Prop = "Child";
     
     // Constants for properties
-    public static final String ClipToBounds_Prop = "ClipToBounds";
     public static final String NeedsLayout_Prop = "NeedsLayout";
 
     /**
@@ -477,45 +476,6 @@ public class ParentView extends View {
 
         // Do normal version
         else super.doChange(aPC, oldVal, newVal);
-    }
-
-    /**
-     * Override to forward to children.
-     */
-    public void playAnimDeep()
-    {
-        super.playAnimDeep();
-        for (View child : getChildren()) child.playAnimDeep();
-    }
-
-    /**
-     * Override to forward to children.
-     */
-    public void stopAnimDeep()
-    {
-        super.stopAnimDeep();
-        for (View child : getChildren()) child.stopAnimDeep();
-    }
-
-    /**
-     * Returns the anim time.
-     */
-    public int getAnimTimeDeep()
-    {
-        ViewAnim anim = getAnim(-1); if (anim!=null) return anim.getTime();
-        for (View child : getChildren())
-            if (child.getAnim(-1)!=null)
-                return child.getAnim(-1).getTime();
-        return 0;
-    }
-
-    /**
-     * Sets the anim time deep.
-     */
-    public void setAnimTimeDeep(int aValue)
-    {
-        super.setAnimTimeDeep(aValue);
-        for (View child : getChildren()) child.setAnimTimeDeep(aValue);
     }
 
     /**

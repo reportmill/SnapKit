@@ -109,6 +109,11 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     public boolean isSelEmpty()  { return _sel.isEmpty(); }
 
     /**
+     * Returns whether given index is selected index.
+     */
+    public boolean isSelIndex(int anIndex)  { return _sel.isSel(anIndex); }
+
+    /**
      * Returns the selected index.
      */
     public int getSelIndex()
@@ -139,56 +144,12 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     }
 
     /**
-     * Adds a selected index.
-     */
-    public void addSelIndex(int anIndex)
-    {
-        // If SingleSel, just set and return
-        if (!isMultiSel()) {
-            setSelIndex(anIndex);
-            return;
-        }
-
-        // If already selected, just return
-        if (isSelIndex(anIndex)) return;
-
-        // Create ListSel for index and set
-        ListSel sel = getSel().copyForMetaAdd(anIndex, anIndex);
-        setSel(sel);
-    }
-
-    /**
-     * Removes a selected index.
-     */
-    public void removeSelIndex(int anIndex)
-    {
-        // If SingleSel, just set and return
-        if (!isMultiSel()) {
-            if (anIndex==getSelIndex())
-                clearSel();
-            return;
-        }
-
-        // If not selected, just return
-        if (!isSelIndex(anIndex)) return;
-
-        // Create ListSel for index and set
-        ListSel sel = getSel().copyForMetaAdd(anIndex, anIndex);
-        setSel(sel);
-    }
-
-    /**
      * Clears the selection.
      */
     public void clearSel()
     {
         setSel(ListSel.EMPTY);
     }
-
-    /**
-     * Returns whether given index is selected index.
-     */
-    public boolean isSelIndex(int anIndex)  { return _sel.isSel(anIndex); }
 
     /**
      * Returns the selected item.
@@ -226,22 +187,32 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     }
 
     /**
-     * Adds a selected item.
-     */
-    public void addSelItem(E anItem)
-    {
-        int ind = indexOf(anItem);
-        if (ind>=0)
-            addSelIndex(ind);
-    }
-
-    /**
      * Sets the selected index.
      */
     public void setSelItems(E ... theItems)
     {
-        for (E item : theItems)
-            addSelItem(item);
+        int indexes[] = getIndexesForItems(theItems);
+        setSelIndexes(indexes);
+    }
+
+    /**
+     * Returns indexes for items.
+     */
+    public int[] getIndexesForItems(E ... theItems)
+    {
+        // Iterate over items and return array of indexes
+        int len = theItems.length, len2 = 0;
+        int indexes[] = new int[len];
+        for (int i=0; i<len; i++) { E item = theItems[i];
+            int ind = indexOf(item);
+            if (ind>=0)
+                indexes[len2++] = ind;
+        }
+
+        // Trim list and return
+        if (len2!=len)
+            indexes = Arrays.copyOf(indexes, len2);
+        return indexes;
     }
 
     /**
@@ -260,26 +231,6 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     {
         if (getSelIndex()<size()-1)
             setSelIndex(getSelIndex()+1);
-    }
-
-    /**
-     * Returns the list items as a single string with items separated by newlines.
-     */
-    public String getItemsString()
-    {
-        return ListUtils.joinStrings(this, "\n");
-    }
-
-    /**
-     * Sets the list items as a single string with items separated by newlines.
-     */
-    public void setItemsString(String aString)
-    {
-        String items[] = aString!=null ? aString.split("\n") : new String[0];
-        for (int i=0; i<items.length; i++)
-            items[i] = items[i].trim();
-        clear();
-        Collections.addAll(this, (E)items);
     }
 
     /**

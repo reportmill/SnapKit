@@ -2439,38 +2439,22 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     /**
      * Play animations deep.
      */
-    public void playAnimDeep()
-    {
-        ViewAnim anim = getAnim(-1);
-        if (anim!=null) anim.play();
-    }
+    public void playAnimDeep()  { ViewAnim.playDeep(this); }
 
     /**
      * Stop animations deep.
      */
-    public void stopAnimDeep()
-    {
-        ViewAnim anim = getAnim(-1);
-        if (anim!=null) anim.stop();
-    }
+    public void stopAnimDeep()  { ViewAnim.stopDeep(this); }
 
     /**
      * Returns the anim time.
      */
-    public int getAnimTimeDeep()
-    {
-        ViewAnim anim = getAnim(-1);
-        return anim!=null ? anim.getTime() : 0;
-    }
+    public int getAnimTimeDeep()  { return ViewAnim.getTimeDeep(this); }
 
     /**
      * Sets the anim time deep.
      */
-    public void setAnimTimeDeep(int aValue)
-    {
-        ViewAnim anim = getAnim(-1);
-        if (anim!=null) anim.setTime(aValue);
-    }
+    public void setAnimTimeDeep(int aValue)  { ViewAnim.setTimeDeep(this, aValue); }
 
     /**
      * Returns the physics objects that provides information for physics simulations.
@@ -2480,7 +2464,11 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     /**
      * Returns the physics objects that provides information for physics simulations.
      */
-    public ViewPhysics getPhysics(boolean doCreate)  { return _physics!=null ? _physics : (_physics=new ViewPhysics()); }
+    public ViewPhysics getPhysics(boolean doCreate)
+    {
+        if (_physics!=null || !doCreate) return _physics;
+        return _physics = new ViewPhysics();
+    }
 
     /**
      * XML Archival.
@@ -2488,7 +2476,7 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         // Get class name for element
-        String cname = null;
+        String cname;
         for (Class c=getClass();;c=c.getSuperclass()) {
             if (c==ParentView.class) continue;
             if (c.getName().startsWith("snap.view")) {
@@ -2691,7 +2679,10 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     /**
      * Standard clone implementation.
      */
-    public View clone()  { return new ViewArchiver().copy(this); }
+    public View copyUsingArchiver()
+    {
+        return new ViewArchiver().copy(this);
+    }
 
     /**
      * Standard toString implementation.
@@ -2732,8 +2723,8 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
         default void setSelItem(T anItem)  { int i = getItems().indexOf(anItem); setSelIndex(i); }
 
         // Constants for properties
-        public static final String Items_Prop = "Items";
-        public static final String SelIndex_Prop = "SelIndex";
-        public static final String SelItem_Prop = "SelItem";
+        String Items_Prop = "Items";
+        String SelIndex_Prop = "SelIndex";
+        String SelItem_Prop = "SelItem";
     }
 }

@@ -135,7 +135,6 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
             tc.setItems(theItems);
         if (_headerCol!=null)
             _headerCol.setItems(theItems);
-        itemsChanged();
 
         // Register for relayout/repaint
         relayout(); relayoutParent(); repaint();
@@ -145,14 +144,6 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      * Sets the items.
      */
     public void setItems(T ... theItems)  { setItems(theItems!=null ? Arrays.asList(theItems) : null); }
-
-    /**
-     * Called when PickList items changed.
-     */
-    protected void itemsChanged()
-    {
-        _rowHeightCached = -1;
-    }
 
     /**
      * Returns the selected index.
@@ -232,6 +223,11 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
             int oldInd = changed.length>1 ? changed[0] : -1;
             int newInd = changed.length>1 ? changed[changed.length-1] : -1;
             firePropChange(SelIndex_Prop, oldInd, newInd);
+        }
+
+        // Handle Items_Prop: Reset RowHeightCached
+        else if (propName==PickList.Item_Prop) {
+            _rowHeightCached = -1;
         }
 
         // Scroll selection to visible
