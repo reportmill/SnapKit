@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Represents a selection for a table.
  */
-public class TableSel implements Cloneable {
+public class ListSel2D implements Cloneable {
 
     // The Anchor X/Y
     private int _anchX, _anchY;
@@ -17,10 +17,10 @@ public class TableSel implements Cloneable {
     private boolean  _isBlacklist;
 
     // The next rect
-    private TableSel _next;
+    private ListSel2D _next;
 
     // Shared empty selection
-    public static final TableSel EMPTY = new TableSel(-1, -1, -1, -1);
+    public static final ListSel2D EMPTY = new ListSel2D(-1, -1, -1, -1);
 
     // Shared empty indexes
     private static final int[] EMPTY_INDEXES = new int[0];
@@ -28,7 +28,7 @@ public class TableSel implements Cloneable {
     /**
      * Constructor.
      */
-    public TableSel(int anchX, int anchY, int leadX, int leadY)
+    public ListSel2D(int anchX, int anchY, int leadX, int leadY)
     {
         _anchX = anchX; _anchY = anchY;
         _leadX = leadX; _leadY = leadY;
@@ -96,7 +96,7 @@ public class TableSel implements Cloneable {
     /**
      * Returns the selection encompassing all.
      */
-    public TableSel getSelAll()
+    public ListSel2D getSelAll()
     {
         // If not deep, just return this
         if (_next==null)
@@ -106,7 +106,7 @@ public class TableSel implements Cloneable {
         int minY = getMinY();
         int maxX = getMaxX();
         int maxY = getMaxY();
-        TableSel next = _next;
+        ListSel2D next = _next;
         while (next!=null) {
             if (!next._isBlacklist) {
                 minX = Math.min(minX, next.getMinX());
@@ -116,15 +116,15 @@ public class TableSel implements Cloneable {
             }
             next = next._next;
         }
-        return new TableSel(minX, minY, maxX, maxY);
+        return new ListSel2D(minX, minY, maxX, maxY);
     }
 
     /**
      * Returns the tail selection.
      */
-    public TableSel getTail()
+    public ListSel2D getTail()
     {
-        TableSel tail = this;
+        ListSel2D tail = this;
         while(tail._next!=null) tail = tail._next;
         return tail;
     }
@@ -134,7 +134,7 @@ public class TableSel implements Cloneable {
      */
     public int[] getIndexesYForX(int aX)
     {
-        TableSel selAll = getSelAll();
+        ListSel2D selAll = getSelAll();
         int minY = selAll.getMinY();
         int maxY = selAll.getMaxY();
         int len = maxY - minY + 1;
@@ -181,10 +181,10 @@ public class TableSel implements Cloneable {
     /**
      * Returns a copy of this SelRect resulting from 'Shift-adding' new selection (shift key is down).
      */
-    public TableSel copyForShiftAdd(int anchX, int anchY, int leadX, int leadY)
+    public ListSel2D copyForShiftAdd(int anchX, int anchY, int leadX, int leadY)
     {
         // Do basic clone
-        TableSel clone = new TableSel(_anchX, _anchY, _leadX, _leadY);
+        ListSel2D clone = new ListSel2D(_anchX, _anchY, _leadX, _leadY);
 
         // If next SelRect, just copy next
         if (_next!=null) {
@@ -208,15 +208,15 @@ public class TableSel implements Cloneable {
     /**
      * Returns a copy of this SelRect resulting from 'Meta-adding' new selection (short-cut key is down).
      */
-    public TableSel copyForMetaAdd(int anchX, int anchY, int leadX, int leadY)
+    public ListSel2D copyForMetaAdd(int anchX, int anchY, int leadX, int leadY)
     {
         // Create new tail for new anchor/lead (set Blacklist if new anchor hits selected cell)
-        TableSel newTail = new TableSel(anchX, anchY, leadX, leadY);
+        ListSel2D newTail = new ListSel2D(anchX, anchY, leadX, leadY);
         newTail._isBlacklist = isSel(anchX, anchY);
 
         // Get current tail and add new tail
-        TableSel clone = clone();
-        TableSel tail = clone; while (tail._next!=null) tail = tail._next;
+        ListSel2D clone = clone();
+        ListSel2D tail = clone; while (tail._next!=null) tail = tail._next;
         tail._next = newTail;
         return clone;
     }
@@ -236,20 +236,20 @@ public class TableSel implements Cloneable {
     {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TableSel tableSel = (TableSel) o;
-        return _anchX == tableSel._anchX && _anchY == tableSel._anchY &&
-                _leadX == tableSel._leadX && _leadY == tableSel._leadY &&
-                _isBlacklist == tableSel._isBlacklist &&
-                Objects.equals(_next, tableSel._next);
+        ListSel2D other = (ListSel2D) o;
+        return _anchX == other._anchX && _anchY == other._anchY &&
+                _leadX == other._leadX && _leadY == other._leadY &&
+                _isBlacklist == other._isBlacklist &&
+                Objects.equals(_next, other._next);
     }
 
     /**
      * Standard clone implementation.
      */
-    protected TableSel clone()
+    protected ListSel2D clone()
     {
-        TableSel clone;
-        try { clone = (TableSel)super.clone(); }
+        ListSel2D clone;
+        try { clone = (ListSel2D)super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
         if (_next!=null)
             clone._next = _next.clone();
@@ -261,7 +261,7 @@ public class TableSel implements Cloneable {
      */
     public String toString()
     {
-        return "TableSel {" + "AnchX=" + _anchX + ", AnchY=" + _anchY + ", LeadX=" + _leadX + ", LeadY=" + _leadY +
+        return "ListSel2D {" + "AnchX=" + _anchX + ", AnchY=" + _anchY + ", LeadX=" + _leadX + ", LeadY=" + _leadY +
             ", isBlacklist=" + _isBlacklist + ", Next=" + _next + '}';
     }
 }

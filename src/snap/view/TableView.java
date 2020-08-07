@@ -21,7 +21,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     private PickList <T>  _items = new PickList<>();
 
     // The Table selection
-    private TableSel  _sel = TableSel.EMPTY;
+    private ListSel2D _sel = ListSel2D.EMPTY;
     
     // The selected column
     private int  _selCol;
@@ -146,35 +146,54 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Sets the items.
      */
-    public void setItems(T ... theItems)  { setItems(theItems!=null ? Arrays.asList(theItems) : null); }
+    public void setItems(T ... theItems)
+    {
+        setItems(theItems!=null ? Arrays.asList(theItems) : null);
+    }
 
     /**
      * Returns the selection.
      */
-    public TableSel getSel()
+    public ListSel getSel()
     {
-        ListSel sel = _items.getSel();
-        if (sel.isEmpty())
-            return TableSel.EMPTY;
-        return new TableSel(0, sel.getAnchor(), getColCount()-1, sel.getLead());
+        return _items.getSel();
     }
 
     /**
      * Sets the table selection.
      */
-    public void setSel(TableSel aSel)
+    public void setSel(ListSel aSel)
+    {
+        _items.setSel(aSel);
+    }
+
+    /**
+     * Returns the selection.
+     */
+    public ListSel2D getSel2D()
+    {
+        ListSel sel = getSel();
+        if (sel.isEmpty())
+            return ListSel2D.EMPTY;
+        return new ListSel2D(0, sel.getAnchor(), getColCount()-1, sel.getLead());
+    }
+
+    /**
+     * Sets the table selection.
+     */
+    public void setSel2D(ListSel2D aSel)
     {
         // If already set, just return
-        if (aSel.equals(getSel())) return;
+        if (aSel.equals(getSel2D())) return;
 
-        // If TableSel Empty, set ListSel.Empty
+        // If Empty, set ListSel.Empty
         if (aSel.isEmpty())
-            _items.setSel(ListSel.EMPTY);
+            setSel(ListSel.EMPTY);
 
         // Otherwise, create ListSel and set
         else {
             ListSel sel = new ListSel(aSel.getAnchorY(), aSel.getLeadY());
-            _items.setSel(sel);
+            setSel(sel);
         }
     }
 
@@ -204,7 +223,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public void selectUp()
     {
         int row = getSelRow();
-        if (row>0) setSelIndex(row-1);
+        if (row>0)
+            setSelIndex(row-1);
         else ViewUtils.beep();
     }
 

@@ -1,5 +1,5 @@
 package snap.view;
-import snap.util.TableSel;
+import snap.util.ListSel2D;
 
 /**
  * A class to handle TableView input interaction.
@@ -13,7 +13,7 @@ class TableViewSelector {
     protected boolean  _dragSelect;
 
     // The Selection on MousePress
-    private TableSel  _mouseDownSel;
+    private ListSel2D _mouseDownSel;
 
     // The new SelAnchor (index of MousePress)
     protected int  _newAnchorX, _newAnchorY;
@@ -70,7 +70,7 @@ class TableViewSelector {
         }
 
         // Cache MouseDown Selection
-        _mouseDownSel = _table.getSel();
+        _mouseDownSel = _table.getSel2D();
 
         // Get SelAnchor of MousePress
         _newAnchorX = _table.getColIndexForX(anEvent.getX());
@@ -111,20 +111,20 @@ class TableViewSelector {
 
         // Handle ShortCut down: If AnchorCellSelected then add, otherwise remove
         if (anEvent.isShortcutDown()) {
-            TableSel sel = _mouseDownSel.copyForMetaAdd(_newAnchorX, _newAnchorY, newLeadX, newLeadY);
-            _table.setSel(sel);
+            ListSel2D sel = _mouseDownSel.copyForMetaAdd(_newAnchorX, _newAnchorY, newLeadX, newLeadY);
+            _table.setSel2D(sel);
         }
 
         // Handle Shift down: Select
         else if (anEvent.isShiftDown()) {
-            TableSel sel = _mouseDownSel.copyForShiftAdd(_newAnchorX, _newAnchorY, newLeadX, newLeadY);
-            _table.setSel(sel);
+            ListSel2D sel = _mouseDownSel.copyForShiftAdd(_newAnchorX, _newAnchorY, newLeadX, newLeadY);
+            _table.setSel2D(sel);
         }
 
         // Handle normal drag selection
         else {
-            TableSel sel = new TableSel(_newAnchorX, _newAnchorY, newLeadX, newLeadY);
-            _table.setSel(sel);
+            ListSel2D sel = new ListSel2D(_newAnchorX, _newAnchorY, newLeadX, newLeadY);
+            _table.setSel2D(sel);
         }
     }
 
