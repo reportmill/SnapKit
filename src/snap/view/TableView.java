@@ -19,6 +19,9 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
 
     // The items
     private PickList <T>  _items = new PickList<>();
+
+    // The Table selection
+    private TableSel  _sel = TableSel.EMPTY;
     
     // The selected column
     private int  _selCol;
@@ -83,7 +86,7 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     {
         // Set border, enable Action event for selection change
         setBorder(getDefaultBorder());
-        enableEvents(MousePress, KeyPress, Action);
+        enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress, Action);
         setFocusable(true);
         setFocusWhenPressed(true);
 
@@ -144,6 +147,31 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      * Sets the items.
      */
     public void setItems(T ... theItems)  { setItems(theItems!=null ? Arrays.asList(theItems) : null); }
+
+    /**
+     * Returns the selection.
+     */
+    public TableSel getSel()
+    {
+        ListSel sel = _items.getSel();
+        if (sel.isEmpty())
+            return TableSel.EMPTY;
+        return new TableSel(0, sel.getAnchor(), getColCount()-1, sel.getLead());
+    }
+
+    /**
+     * Sets the table selection.
+     */
+    public void setSel(TableSel aSel)
+    {
+        if (aSel.equals(getSel())) return;
+        if (aSel.isEmpty())
+            _items.setSel(ListSel.EMPTY);
+        else {
+            ListSel sel = new ListSel(aSel.getAnchorY(), aSel.getLeadY());
+            _items.setSel(sel);
+        }
+    }
 
     /**
      * Returns the selected index.
@@ -462,8 +490,10 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      */
     public double getRowHeight()
     {
-        if (_rowHeight>0) return _rowHeight;
-        if (_rowHeightCached>0) return _rowHeightCached;
+        if (_rowHeight>0)
+            return _rowHeight;
+        if (_rowHeightCached>0)
+            return _rowHeightCached;
 
         _rowHeightCached = 1;
         for (TableCol col : getCols())
@@ -522,14 +552,30 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
     /**
      * Get rid of this.
      */
-    public int getRowAt(double aX, double aY)  { return getRowForY(aY); }
+    public int getRowAt(double aX, double aY)  { return getRowIndexForY(aY); }
+
+    /**
+     * Returns the col index for given X.
+     */
+    public int getColIndexForX(double aX)
+    {
+        Point pnt = _split.parentToLocal(aX, 0, this);
+        TableCol cols[] = getCols();
+        for (int i=0; i<cols.length; i++) {
+            TableCol col = cols[i];
+            if (pnt.x >= col.getX() && pnt.x <= col.getMaxX())
+                return i;
+        }
+        return -1;
+    }
 
     /**
      * Returns the row index for given Y.
      */
-    public int getRowForY(double aY)
+    public int getRowIndexForY(double aY)
     {
-        return (int)(aY/getRowHeight());
+        Point pnt = _split.parentToLocal(0, aY, this);
+        return (int) (pnt.y/getRowHeight());
     }
 
     /**

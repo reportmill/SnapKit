@@ -157,8 +157,7 @@ public abstract class Clipboard {
     public boolean hasImage()
     {
         // If Clipboard is image, return true
-        ClipboardData data = getData(IMAGE);
-        if (data!=null)
+        if (hasData(IMAGE))
             return true;
 
         // Iterate over common image types and return true if any supported

@@ -1,5 +1,6 @@
 package snap.util;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Represents a selection for a List.
@@ -167,6 +168,16 @@ public class ListSel implements Cloneable {
     }
 
     /**
+     * Returns a ListSel guaranteed to have no more than one selection.
+     */
+    public ListSel copyForSingleSel()
+    {
+        if (isEmpty() || getMin()==getMax())
+            return this;
+        return new ListSel(getLead(), getLead());
+    }
+
+    /**
      * Returns a copy of this ListSel resulting from 'Shift-adding' new selection (shift key is down).
      */
     public ListSel copyForShiftAdd(int anch, int lead)
@@ -236,8 +247,7 @@ public class ListSel implements Cloneable {
     /**
      * Standard clone implementation.
      */
-    @Override
-    public ListSel clone()
+    protected ListSel clone()
     {
         ListSel clone;
         try { clone = (ListSel)super.clone(); }
@@ -245,6 +255,35 @@ public class ListSel implements Cloneable {
         if (_next!=null)
             clone._next = _next.clone();
         return clone;
+    }
+
+    /**
+     * Standard hashCode implementation.
+     */
+    public int hashCode()
+    {
+        return Objects.hash(_anch, _lead, _isBlacklist, _next);
+    }
+
+    /**
+     * Standard equals implementation.
+     */
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ListSel listSel = (ListSel) o;
+        return _anch == listSel._anch && _lead == listSel._lead &&
+            _isBlacklist == listSel._isBlacklist && Objects.equals(_next, listSel._next);
+    }
+
+    /**
+     * Standard toString implementation.
+     */
+    public String toString()
+    {
+        return "ListSel {" + "Anch=" + _anch + ", Lead=" + _lead +
+                ", isBlacklist=" + _isBlacklist + ", Next=" + _next + '}';
     }
 
     /**

@@ -1,5 +1,6 @@
 package snap.util;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Represents a selection for a table.
@@ -18,6 +19,12 @@ public class TableSel implements Cloneable {
     // The next rect
     private TableSel _next;
 
+    // Shared empty selection
+    public static final TableSel EMPTY = new TableSel(-1, -1, -1, -1);
+
+    // Shared empty indexes
+    private static final int[] EMPTY_INDEXES = new int[0];
+
     /**
      * Constructor.
      */
@@ -26,6 +33,11 @@ public class TableSel implements Cloneable {
         _anchX = anchX; _anchY = anchY;
         _leadX = leadX; _leadY = leadY;
     }
+
+    /**
+     * Returns whether the selection is empty.
+     */
+    public boolean isEmpty()  { return _anchX<0 || _anchY<0 || _leadX<0 || _leadY<0; }
 
     /**
      * Returns the anchor X.
@@ -210,10 +222,31 @@ public class TableSel implements Cloneable {
     }
 
     /**
+     * Standard hashCode implementation.
+     */
+    public int hashCode()
+    {
+        return Objects.hash(_anchX, _anchY, _leadX, _leadY, _isBlacklist, _next);
+    }
+
+    /**
+     * Standard equals implementation.
+     */
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TableSel tableSel = (TableSel) o;
+        return _anchX == tableSel._anchX && _anchY == tableSel._anchY &&
+                _leadX == tableSel._leadX && _leadY == tableSel._leadY &&
+                _isBlacklist == tableSel._isBlacklist &&
+                Objects.equals(_next, tableSel._next);
+    }
+
+    /**
      * Standard clone implementation.
      */
-    @Override
-    public TableSel clone()
+    protected TableSel clone()
     {
         TableSel clone;
         try { clone = (TableSel)super.clone(); }
@@ -221,5 +254,14 @@ public class TableSel implements Cloneable {
         if (_next!=null)
             clone._next = _next.clone();
         return clone;
+    }
+
+    /**
+     * Standard toString implemetation.
+     */
+    public String toString()
+    {
+        return "TableSel {" + "AnchX=" + _anchX + ", AnchY=" + _anchY + ", LeadX=" + _leadX + ", LeadY=" + _leadY +
+            ", isBlacklist=" + _isBlacklist + ", Next=" + _next + '}';
     }
 }

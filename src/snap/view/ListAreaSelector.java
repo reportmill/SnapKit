@@ -1,5 +1,4 @@
 package snap.view;
-
 import snap.util.ListSel;
 
 /**
@@ -73,7 +72,7 @@ class ListAreaSelector {
 
         // Handle MouseMove
         else if (anEvent.isMouseMove() && _list.isTargeting()) {
-            int index = _list.getRowForY(anEvent.getY());
+            int index = _list.getRowIndexForY(anEvent.getY());
             if (index>= _list.getItemCount()) index = -1;
             _list.setTargetedIndex(index);
         }
@@ -88,10 +87,10 @@ class ListAreaSelector {
     public void mousePress(ViewEvent anEvent)
     {
         // Cache MouseDown Selection
-        _mouseDownSel = _list._items.getSel();
+        _mouseDownSel = _list.getSel();
 
         // Get SelAnchor of MousePress
-        _newAnchor = _list.getRowForY(anEvent.getY());
+        _newAnchor = _list.getRowIndexForY(anEvent.getY());
 
         // Set DragSelect
         _dragSelect = !_list.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount()>1;
@@ -100,7 +99,7 @@ class ListAreaSelector {
         mousePressOrDrag(anEvent);
 
         // Set whether wants drag
-        _dragGestureEnabled = isDragSelect() && _list.getEventAdapter().isEnabled(View.DragGesture);
+        _dragGestureEnabled = _dragSelect && _list.getEventAdapter().isEnabled(View.DragGesture);
         if (_dragGestureEnabled)
             _list.getEventAdapter().setEnabled(View.DragGesture, false);
     }
@@ -110,7 +109,7 @@ class ListAreaSelector {
      */
     public void mouseDrag(ViewEvent anEvent)
     {
-        if (isDragSelect())
+        if (_dragSelect)
             mousePressOrDrag(anEvent);
     }
 
@@ -120,7 +119,7 @@ class ListAreaSelector {
     protected void mousePressOrDrag(ViewEvent anEvent)
     {
         // Get row-index/cell at mouse point (if no cell, just return)
-        int newLead = _list.getRowForY(anEvent.getY());
+        int newLead = _list.getRowIndexForY(anEvent.getY());
         ListCell cell = _list.getCellForRow(newLead);
         if (cell==null || !cell.isEnabled())
             return;
@@ -128,19 +127,19 @@ class ListAreaSelector {
         // Handle ShortCut down: If AnchorCellSelected then add, otherwise remove
         if (anEvent.isShortcutDown()) {
             ListSel sel = _mouseDownSel.copyForMetaAdd(_newAnchor, newLead);
-            _list._items.setSel(sel);
+            _list.setSel(sel);
         }
 
         // Handle Shift down: Select
         else if (anEvent.isShiftDown()) {
             ListSel sel = _mouseDownSel.copyForShiftAdd(_newAnchor, newLead);
-            _list._items.setSel(sel);
+            _list.setSel(sel);
         }
 
         // Handle normal drag selection
         else {
             ListSel sel = new ListSel(_newAnchor, newLead);
-            _list._items.setSel(sel);
+            _list.setSel(sel);
         }
     }
 
@@ -161,14 +160,5 @@ class ListAreaSelector {
             ListCell cell = _list.getCellForY(anEvent.getY()); if (cell==null) return;
             _list.editCell(cell);
         }
-    }
-
-    /**
-     * Returns whether selection allowed on MouseDrag.
-     * Need to disable if DragEvents are enabled, unless event is double-click.
-     */
-    public boolean isDragSelect()
-    {
-        return _dragSelect;
     }
 }

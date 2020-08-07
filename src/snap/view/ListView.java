@@ -44,11 +44,14 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
         _listArea.setCellConfigure(lc -> configureCell(lc));
 
         // Fix so that ListView handles focus instead of ListArea
-        setFocusable(true); setFocusWhenPressed(true);
-        _listArea.setFocusable(false); _listArea.setFocusWhenPressed(false);
+        setFocusable(true);
+        setFocusWhenPressed(true);
+        //_listArea.setFocusable(false);
+        //_listArea.setFocusWhenPressed(false);
 
         // Create/configure ScrollView
-        _scroll = createScrollView(); _scroll.setBorder(null);
+        _scroll = createScrollView();
+        _scroll.setBorder(null);
         _scroll.setContent(_listArea);
         addChild(_scroll);
 
@@ -168,7 +171,7 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
     /**
      * Returns the row at given Y location.
      */
-    public int getRowForY(double aY)  { return _listArea.getRowForY(aY); }
+    public int getRowForY(double aY)  { return _listArea.getRowIndexForY(aY); }
 
     /**
      * Returns function for deteriming text for an item.

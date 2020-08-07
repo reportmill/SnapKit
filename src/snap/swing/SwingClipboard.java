@@ -208,10 +208,19 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
     public View getDragSourceView()  { return _view; }
 
     /** DragSourceListener methods. */
-    public void dragEnter(DragSourceDragEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceEnter); }
-    public void dragOver(DragSourceDragEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceOver); }
+    public void dragEnter(DragSourceDragEvent anEvent)
+    {
+        dispatchToRootView(anEvent, ViewEvent.Type.DragSourceEnter);
+    }
+    public void dragOver(DragSourceDragEvent anEvent)
+    {
+        dispatchToRootView(anEvent, ViewEvent.Type.DragSourceOver);
+    }
+    public void dragExit(DragSourceEvent anEvent)
+    {
+        dispatchToRootView(anEvent, ViewEvent.Type.DragSourceExit);
+    }
     public void dropActionChanged(DragSourceDragEvent anEvent)  { }
-    public void dragExit(DragSourceEvent anEvent)  { dispatchToRootView(anEvent, ViewEvent.Type.DragSourceExit); }
 
     /**
      * DragSourceMotionListener method.

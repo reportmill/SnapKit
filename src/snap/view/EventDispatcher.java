@@ -47,8 +47,11 @@ public class EventDispatcher {
     // The last MouseDown event
     private static ViewEvent  _lastMouseDown;
 
+    // Constant to allow getTarget() to indicate short-circuit
+    private static final View TRY_AGAIN_LATER_VIEW = new Separator();
+
     /**
-     * Creates a new EventDispatcher for given RootView.
+     * Creates a new EventDispatcher for given Window.
      */
     public EventDispatcher(WindowView aWin)  { _win = aWin; }
 
@@ -146,90 +149,152 @@ public class EventDispatcher {
             anEvent.setClickCount(getClickCount());
         }
 
-        // Update LastMouseDown, MouseDrag
+        // Update MouseDown, MouseDrag
         else if (anEvent.isMouseRelease()) {
-            if (_lastMouseDown==null) { ViewUtils.runLater(() -> dispatchMouseEvent(anEvent)); return; }
+            if (_lastMouseDown==null) return; // Was: return ViewUtils.runLater(() -> dispatchMouseEvent(anEvent))
             _mouseDown = _mouseDrag = false;
             anEvent.setClickCount(getClickCount());
         }
 
-        // Get target view (at mouse point, or mouse press, or mouse press point)
-        View rview = _win.getRootView();
-        View targ = ViewUtils.getDeepestViewAt(rview, anEvent.getX(), anEvent.getY());
-        if (anEvent.isMouseExit()) targ = null;
-        if (anEvent.isMouseDrag() || anEvent.isMouseRelease()) {
-            targ = _mousePressView;
-            if (targ.getRootView()!=rview)
-                targ = _mousePressView = ViewUtils.getDeepestViewAt(rview, _mpx, _mpy);
-        }
+        // Get DeepView for event and update MouseOvers for DeepView+Event
+        View deepView = ViewUtils.getDeepestViewAt(_win.getRootView(), anEvent.getX(), anEvent.getY());
+        View deepParents[] = getParents(deepView);
+        updateMouseOvers(deepParents, anEvent);
+
+        // Get target view (if bogus, just return)
+        View targView = getTargetView(anEvent, deepView);
+        if (targView==TRY_AGAIN_LATER_VIEW)
+            return;
 
         // Get target parents
-        View pars[] = getParents(targ);
+        View targParents[] = targView!=deepView ? getParents(targView) : deepParents;
 
-        // Update MouseOvers: Remove views no longer under mouse and dispatch MouseExit events
-        for (int i=_mouseOvers.size()-1;i>=0;i--) { View view = _mouseOvers.get(i);
-             if (!ArrayUtils.containsId(pars,view)) {
-                 _mouseOvers.remove(i);
-                 _mouseOverView = i>0 ? _mouseOvers.get(i-1) : null;
-                if (!view.getEventAdapter().isEnabled(MouseExit)) continue;
-                 ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseExit, null);
-                 view.fireEvent(e2);
-             }
-             else break;
+        // Forward event to View EventFilters (iterate from root to target)
+        for (View view : targParents) {
+            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+                ViewEvent e2 = anEvent.copyForView(view);
+                view.processEventFilters(e2);
+                if (e2.isConsumed())
+                    return;
+            }
         }
 
-        // Update MouseOvers: Add views now under mouse and dispatch MouseEnter events
-        for (int i=_mouseOvers.size();i<pars.length;i++) { View view = pars[i];
-            _mouseOvers.add(view);
-            _mouseOverView = view;
-            if (!view.getEventAdapter().isEnabled(MouseEnter)) continue;
-             ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseEnter, null);
-             view.fireEvent(e2);
+        // Forward event to View EventHandlers: (iterate from target to root)
+        for (int i=targParents.length-1; i>=0; i--) { View view = targParents[i];
+            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
+                ViewEvent e2 = anEvent.copyForView(view);
+                view.processEventHandlers(e2);
+                if (e2.isConsumed())
+                    break;
+            }
         }
+    }
 
-        // Update CurrentCursor
-        _win.resetActiveCursor();
-
-        // Handle MousePress: Update MousePressView and MousePressed-X/Y, and handle FocusWhenPressed
+    /**
+     * Returns the target view for deepest view and event.
+     */
+    private View getTargetView(ViewEvent anEvent, View deepView)
+    {
+        // Handle MousePress special: Update MousePressView, MousePressed-X/Y, and handle FocusWhenPressed
         if (anEvent.isMousePress()) {
 
-            // Update MousePressView and MousePressed-X/Y
-            _mousePressView = targ;
-            _mpx = anEvent.getX(); _mpy = anEvent.getY();
+            // Update MousePressed-X/Y
+            _mpx = anEvent.getX();
+            _mpy = anEvent.getY();
 
             // Don't know where this came from - should not be possible
             if (_lastMouseDown==null) {
-                System.err.println("EventDispatcher.dispatchMouseEvent: Impossible condition LastMouse==null"); return; }
+                System.err.println("EventDispatcher.dispatchMouse: Impossible condition LastMouse==null");
+                return TRY_AGAIN_LATER_VIEW;
+            }
 
             // Update Focus if any targ parent not focused but wants focus
-            for (View view=targ; view!=null; view=view.getParent()) {
+            for (View view=deepView; view!=null; view=view.getParent()) {
+
+                // Update MousePressView
+                _mousePressView = view;
+
+                // If View focused, break
                 if (view.isFocused())
                     break;
+
+                // If View can be focused, focus and return
                 if (view.isFocusWhenPressed()) {
                     view.requestFocus();
                     _lastMouseDown = null;
                     ViewUtils.runLater(() -> dispatchMouseEvent(anEvent));
-                    return;
+                    return TRY_AGAIN_LATER_VIEW;
                 }
-            }
-        }
 
-        // Iterate down and see if any should filter
-        for (View view : pars)
-            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
-                ViewEvent e2 = anEvent.copyForView(view);
-                view.processEventFilters(e2);
-                if (e2.isConsumed()) return;
+                // If view accepts event, break
+                if (view.isFocusable() && view.getEventAdapter().isEnabled(MousePress))
+                    break;
             }
 
-        // Iterate back up and see if any parents should handle
-        for (int i=pars.length-1;i>=0;i--) { View view = pars[i];
-            if (view.getEventAdapter().isEnabled(anEvent.getType())) {
-                ViewEvent e2 = anEvent.copyForView(view);
-                view.processEventHandlers(e2);
-                if (e2.isConsumed()) break;
-            }
+            // Return MousePressView (make sure it's at least the RootView)
+            if (_mousePressView==null || _mousePressView instanceof WindowView)
+                _mousePressView = _win.getRootView();
+            return _mousePressView;
         }
+
+        // Handle other event types
+        switch (anEvent.getType()) {
+
+            // Handle Move, Enter, Scroll: Get deepest view
+            case MouseMove: case MouseEnter: case Scroll:
+                return deepView;
+
+            // Handle Drag, Release: Get MousePressView
+            case MouseDrag:
+            case MouseRelease: {
+                View targView = _mousePressView, rootView = _win.getRootView();
+                if (targView.getRootView() != rootView)
+                    targView = _mousePressView = ViewUtils.getDeepestViewAt(rootView, _mpx, _mpy);
+                return targView;
+            }
+
+            // Handle Exit
+            case MouseExit: return null;
+
+            // Can't happen
+            default: System.err.println("EventDispatcher.getTarget: Unknown type: " + anEvent.getType()); return null;
+        }
+    }
+
+    /**
+     * Update MouseOvers for new deepView/parents.
+     */
+    private void updateMouseOvers(View deepParents[], ViewEvent anEvent)
+    {
+        // Update MouseOvers: Remove views no longer under mouse and dispatch MouseExit events
+        for (int i=_mouseOvers.size()-1; i>=0; i--) { View view = _mouseOvers.get(i);
+
+            // Remove views no longer under mouse
+            if (!ArrayUtils.containsId(deepParents, view)) {
+                _mouseOvers.remove(i);
+                _mouseOverView = i>0 ? _mouseOvers.get(i-1) : null;
+                if (!view.getEventAdapter().isEnabled(MouseExit)) continue;
+
+                // Dispatch MouseExit event
+                ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseExit, null);
+                view.fireEvent(e2);
+            }
+            else break;
+        }
+
+        // Update MouseOvers: Add views now under mouse and dispatch MouseEnter events
+        for (int i=_mouseOvers.size(); i<deepParents.length; i++) { View view = deepParents[i];
+            _mouseOvers.add(view);
+            _mouseOverView = view;
+            if (!view.getEventAdapter().isEnabled(MouseEnter)) continue;
+
+            // Dispatch MouseEnter event
+            ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseEnter, null);
+            view.fireEvent(e2);
+        }
+
+        // Update CurrentCursor
+        _win.resetActiveCursor();
     }
 
     /**
@@ -379,7 +444,7 @@ public class EventDispatcher {
     {
         if (aView==null) return 0;
         View rview = _win.getRootView();
-        int pc = 1; for (View v=aView;v!=rview;v=v.getParent()) pc++;
+        int pc = 1; for (View v=aView; v!=rview; v=v.getParent()) pc++;
         return pc;
     }
 

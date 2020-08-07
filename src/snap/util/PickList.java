@@ -95,6 +95,8 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     {
         // Trim to size
         ListSel sel = aSel!=null ? aSel.copyForMaxSize(size()) : ListSel.EMPTY;
+        if (!isMultiSel())
+            sel = aSel.copyForSingleSel();
 
         // If already set, just return
         if (SnapUtils.equals(sel, _sel)) return;

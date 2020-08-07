@@ -169,6 +169,19 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     public void setMultiSel(boolean aValue)  { _items.setMultiSel(aValue); }
 
     /**
+     * Returns the List selection.
+     */
+    public ListSel getSel()  { return _items.getSel(); }
+
+    /**
+     * Sets the List selection.
+     */
+    public void setSel(ListSel aSel)
+    {
+        _items.setSel(aSel);
+    }
+
+    /**
      * Returns the selected index.
      */
     public int getSelIndex()  { return _items.getSelIndex(); }
@@ -301,11 +314,11 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     public Insets getCellPaddingDefault()  { return CELL_PAD_DEFAULT; }
 
     /**
-     * Returns the row at given Y location.
+     * Returns the row index at given Y location.
      */
-    public int getRowForY(double aY)
+    public int getRowIndexForY(double aY)
     {
-        int index = (int)(aY/getRowHeight());
+        int index = (int) (aY/getRowHeight());
         return Math.min(index, getItemCount()-1);
     }
 
