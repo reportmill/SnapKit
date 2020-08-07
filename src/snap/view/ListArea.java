@@ -5,7 +5,6 @@ package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import snap.geom.Insets;
 import snap.geom.Rect;
 import snap.gfx.*;
@@ -18,7 +17,7 @@ import snap.util.*;
  * 
  * To custom configure list cell, simply call list.setCellConfigure(cell -> cell.setImage(img));
  */
-public class ListArea <T> extends ParentView implements View.Selectable <T> {
+public class ListArea <T> extends ParentView implements Selectable<T> {
 
     // The items
     protected PickList <T>  _items;

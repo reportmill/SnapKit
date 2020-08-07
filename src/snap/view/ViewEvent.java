@@ -352,12 +352,12 @@ public String getText()  { return getView().getText(); }
 /**
  * Returns the selected index for encapsulated widget.
  */
-public int getSelIndex()  { return getView(View.Selectable.class).getSelIndex(); }
+public int getSelIndex()  { return getView(Selectable.class).getSelIndex(); }
 
 /**
  * Returns the selected item for encapsulated widget.
  */
-public Object getSelItem()  { return getView(View.Selectable.class).getSelItem(); }
+public Object getSelItem()  { return getView(Selectable.class).getSelItem(); }
 
 /** Returns whether shift key is down. */
 public boolean isShiftDown()  { return false; }

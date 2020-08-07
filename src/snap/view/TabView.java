@@ -11,7 +11,7 @@ import snap.util.*;
 /**
  * A View subclass to show multiple children under user selectable tabs.
  */
-public class TabView extends ParentView implements View.Selectable <Tab> {
+public class TabView extends ParentView implements Selectable<Tab> {
     
     // The tabs
     List <Tab>      _tabs = new ArrayList();

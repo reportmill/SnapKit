@@ -12,7 +12,7 @@ import snap.util.*;
 /**
  * A View subclass to show a list of hierarchical items.
  */
-public class TreeView <T> extends ParentView implements View.Selectable <T> {
+public class TreeView <T> extends ParentView implements Selectable<T> {
     
     // The items
     private PickList <T>  _items = new PickList<>();

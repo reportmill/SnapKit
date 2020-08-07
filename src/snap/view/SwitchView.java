@@ -8,7 +8,7 @@ import snap.util.*;
 /**
  * A pane to show a specific child pane from a list.
  */
-public class SwitchView extends ChildView implements View.Selectable {
+public class SwitchView extends ChildView implements Selectable {
 
     // The selected index
     int        _sindex;

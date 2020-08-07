@@ -15,7 +15,7 @@ import snap.util.*;
 /**
  * A View subclass to show a table of items.
  */
-public class TableView <T> extends ParentView implements View.Selectable <T> {
+public class TableView <T> extends ParentView implements Selectable<T> {
 
     // The items
     private PickList <T>  _items = new PickList<>();

@@ -15,7 +15,7 @@ import snap.util.*;
  * 
  * To custom configure list cell, simply call list.setCellConfigure(cell -> cell.setImage(img));
  */
-public class ListView <T> extends ParentView implements View.Selectable <T> {
+public class ListView <T> extends ParentView implements Selectable<T> {
     
     // The ListArea (real ListView functionality without scroll)
     private ListArea <T>  _listArea;

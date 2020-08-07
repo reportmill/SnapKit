@@ -2596,18 +2596,24 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
 
         // Unarchive Border
         int bind = anArchiver.indexOf(anElement, Border.class);
-        if (bind>=0) { Border border = (Border)anArchiver.fromXML(anElement.get(bind), this);
-            setBorder(border); }
+        if (bind>=0) {
+            Border border = (Border)anArchiver.fromXML(anElement.get(bind), this);
+            setBorder(border);
+        }
 
         // Unarchive Fill
         int pind = anArchiver.indexOf(anElement, Paint.class);
-        if (pind>=0) { Paint fill = (Paint)anArchiver.fromXML(anElement.get(pind), this);
-            setFill(fill); }
+        if (pind>=0) {
+            Paint fill = (Paint)anArchiver.fromXML(anElement.get(pind), this);
+            setFill(fill);
+        }
 
         // Unarchive Effect
         int eind = anArchiver.indexOf(anElement, Effect.class);
-        if (eind>=0) { Effect eff = (Effect)anArchiver.fromXML(anElement.get(eind), this);
-            setEffect(eff); }
+        if (eind>=0) {
+            Effect eff = (Effect)anArchiver.fromXML(anElement.get(eind), this);
+            setEffect(eff);
+        }
 
         // Unarchive Fill, Border (Legacy)
         XMLElement sxml = anElement.getElement("stroke");
@@ -2694,37 +2700,5 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
         if (getText()!=null && getText().length()>0) StringUtils.toStringAdd(sb, "Text", getText());
         StringUtils.toStringAdd(sb, "Bounds", getBounds());
         return sb.toString();
-    }
-
-    /**
-     * An interface for views that are selectable.
-     */
-    public interface Selectable <T> {
-
-        /** Returns the items for a given name or UI view. */
-        default List <T> getItems() { return null; }
-
-        /** Sets the items for a given name or UI view. */
-        default void setItems(List <T> theItems)  { }
-
-        /** Sets the items for a given name or UI view. */
-        default void setItems(T ... theItems)  { }
-
-        /** Returns the selected index for given name or UI view. */
-        int getSelIndex();
-
-        /** Sets the selected index for given name or UI view. */
-        void setSelIndex(int aValue);
-
-        /** Returns the selected item for given name or UI view. */
-        default T getSelItem()  { int i = getSelIndex(); return i>=0 ? getItems().get(i) : null; }
-
-        /** Sets the selected item for given name or UI view. */
-        default void setSelItem(T anItem)  { int i = getItems().indexOf(anItem); setSelIndex(i); }
-
-        // Constants for properties
-        String Items_Prop = "Items";
-        String SelIndex_Prop = "SelIndex";
-        String SelItem_Prop = "SelItem";
     }
 }

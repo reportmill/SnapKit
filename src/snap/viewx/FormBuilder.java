@@ -6,6 +6,7 @@ import java.util.*;
 
 import snap.geom.Insets;
 import snap.gfx.*;
+import snap.util.Selectable;
 import snap.util.SnapUtils;
 import snap.view.*;
 
@@ -147,7 +148,7 @@ public class FormBuilder extends ViewOwner {
         hbox.addChild(label); hbox.addChild(cbox); addView(hbox);
 
         // Add binding
-        addViewBinding(cbox, View.Selectable.SelItem_Prop, aTitle.replace(" ", ""));
+        addViewBinding(cbox, Selectable.SelItem_Prop, aTitle.replace(" ", ""));
         setValue(aTitle, aDefault);
 
         // Return combobox

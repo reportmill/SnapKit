@@ -13,7 +13,7 @@ import snap.util.*;
 /**
  * A browser class.
  */
-public class BrowserView <T> extends ParentView implements View.Selectable <T> {
+public class BrowserView <T> extends ParentView implements Selectable<T> {
     
     // The first column
     private BrowserCol <T>  _col0;

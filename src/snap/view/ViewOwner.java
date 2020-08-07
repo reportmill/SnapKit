@@ -293,22 +293,22 @@ public class ViewOwner implements EventListener {
     /**
      * Returns the items for a given name or UI view.
      */
-    public List getViewItems(Object anObj)  { return getView(anObj, View.Selectable.class).getItems(); }
+    public List getViewItems(Object anObj)  { return getView(anObj, Selectable.class).getItems(); }
 
     /**
      * Sets the items for a given name or UI view.
      */
-    public void setViewItems(Object anObj, List theItems)  { getView(anObj, View.Selectable.class).setItems(theItems); }
+    public void setViewItems(Object anObj, List theItems)  { getView(anObj, Selectable.class).setItems(theItems); }
 
     /**
      * Sets the items for a given name or UI view.
      */
-    public void setViewItems(Object anObj, Object theItems[])  { getView(anObj, View.Selectable.class).setItems(theItems); }
+    public void setViewItems(Object anObj, Object theItems[])  { getView(anObj, Selectable.class).setItems(theItems); }
 
     /**
      * Returns the selected index for given name or UI view.
      */
-    public int getViewSelIndex(Object anObj)  { return getView(anObj, View.Selectable.class).getSelIndex(); }
+    public int getViewSelIndex(Object anObj)  { return getView(anObj, Selectable.class).getSelIndex(); }
 
     /**
      * Sets the selected index for given name or UI view.
@@ -316,14 +316,14 @@ public class ViewOwner implements EventListener {
     public void setViewSelIndex(Object anObj, int aValue)
     {
         boolean old = setSendEventDisabled(true);
-        getView(anObj, View.Selectable.class).setSelIndex(aValue);
+        getView(anObj, Selectable.class).setSelIndex(aValue);
         setSendEventDisabled(old);
     }
 
     /**
      * Returns the selected item for given name or UI view.
      */
-    public Object getViewSelItem(Object anObj)  { return getView(anObj, View.Selectable.class).getSelItem(); }
+    public Object getViewSelItem(Object anObj)  { return getView(anObj, Selectable.class).getSelItem(); }
 
     /**
      * Sets the selected item for given name or UI view.
@@ -331,7 +331,7 @@ public class ViewOwner implements EventListener {
     public void setViewSelItem(Object anObj, Object anItem)
     {
         boolean old = setSendEventDisabled(true);
-        getView(anObj, View.Selectable.class).setSelItem(anItem);
+        getView(anObj, Selectable.class).setSelItem(anItem);
         setSendEventDisabled(old);
     }
 

@@ -15,7 +15,7 @@ import snap.util.*;
  * and/or button. The default form just shows a button that triggers a popup list. The ShowTextField option adds a
  * TextField for editing. This form can also be attached to any ListView to conveniently find items in a long list.
  */
-public class ComboBox <T> extends ParentView implements View.Selectable <T> {
+public class ComboBox <T> extends ParentView implements Selectable<T> {
 
     // The TextField (if showing)
     private TextField  _text;
