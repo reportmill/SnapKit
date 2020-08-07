@@ -28,8 +28,14 @@ public class TableCol <T> extends ListArea <T> {
      */
     public TableCol()
     {
+        // Basic
+        super();
         _header.setPadding(4,4,4,4);
-        setFocusable(false); setFocusWhenPressed(false);
+
+        // Events
+        setFocusable(false);
+        setFocusWhenPressed(false);
+        disableEvents(MousePress, MouseDrag, MouseRelease, KeyPress, Action);
     }
 
     /**

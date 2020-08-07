@@ -164,9 +164,14 @@ public class TableView <T> extends ParentView implements View.Selectable <T> {
      */
     public void setSel(TableSel aSel)
     {
+        // If already set, just return
         if (aSel.equals(getSel())) return;
+
+        // If TableSel Empty, set ListSel.Empty
         if (aSel.isEmpty())
             _items.setSel(ListSel.EMPTY);
+
+        // Otherwise, create ListSel and set
         else {
             ListSel sel = new ListSel(aSel.getAnchorY(), aSel.getLeadY());
             _items.setSel(sel);

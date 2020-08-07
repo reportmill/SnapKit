@@ -93,9 +93,14 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
      */
     public ListArea()
     {
-        enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress, Action);
-        setFocusable(true); setFocusWhenPressed(true);
+        // Basic
+        super();
         setFill(Color.WHITE);
+
+        // Events
+        setFocusable(true);
+        setFocusWhenPressed(true);
+        enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress, Action);
 
         // Create/set PickList
         setPickList(new PickList<>());

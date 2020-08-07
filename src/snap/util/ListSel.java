@@ -41,6 +41,25 @@ public class ListSel implements Cloneable {
     }
 
     /**
+     * Returns whether the selection is empty.
+     */
+    public boolean isEmpty()  { return _anch<0 || _lead<0; }
+
+    /**
+     * Returns whether given index is selected.
+     */
+    public boolean isSel(int anIndex)
+    {
+        // If Next SelRect and X/Y inside any, return it's value
+        if (_next!=null && _next.isInsideAny(anIndex))
+            return _next.isSel(anIndex);
+
+        // If inside and not blacklist
+        boolean inside = anIndex>=getMin() && anIndex<=getMax();
+        return inside && !_isBlacklist;
+    }
+
+    /**
      * Returns the anchor.
      */
     public int getAnchor()  { return _anch; }
@@ -59,25 +78,6 @@ public class ListSel implements Cloneable {
      * Return the max.
      */
     public int getMax()  { return Math.max(_anch, _lead); }
-
-    /**
-     * Returns whether the selection is empty.
-     */
-    public boolean isEmpty()  { return _anch<0 || _lead<0; }
-
-    /**
-     * Returns whether given index is selected.
-     */
-    public boolean isSel(int anIndex)
-    {
-        // If Next SelRect and X/Y inside any, return it's value
-        if (_next!=null && _next.isInsideAny(anIndex))
-            return _next.isSel(anIndex);
-
-        // If inside and not blacklist
-        boolean inside = anIndex>=getMin() && anIndex<=getMax();
-        return inside && !_isBlacklist;
-    }
 
     /**
      * Returns the selection encompassing all.
@@ -172,9 +172,15 @@ public class ListSel implements Cloneable {
      */
     public ListSel copyForSingleSel()
     {
+        // If empty or already single sel, just return
         if (isEmpty() || getMin()==getMax())
             return this;
-        return new ListSel(getLead(), getLead());
+
+        // Return new ListSel for multi sel
+        // I would rather use getLead(), so list would update during drags, but this can cause problem when
+        // DragGesture steals things
+        int index = getAnchor(); //getLead()
+        return new ListSel(index, index);
     }
 
     /**

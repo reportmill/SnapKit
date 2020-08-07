@@ -40,6 +40,20 @@ public class TableSel implements Cloneable {
     public boolean isEmpty()  { return _anchX<0 || _anchY<0 || _leadX<0 || _leadY<0; }
 
     /**
+     * Returns whether given X/Y are selected.
+     */
+    public boolean isSel(int aX, int aY)
+    {
+        // If Next SelRect and X/Y inside any, return it's value
+        if (_next!=null && _next.isInsideAny(aX, aY))
+            return _next.isSel(aX, aY);
+
+        // If inside and not blacklist
+        boolean inside = aX>=getMinX() && aX<=getMaxX() && aY>=getMinY() && aY<=getMaxY();
+        return inside && !_isBlacklist;
+    }
+
+    /**
      * Returns the anchor X.
      */
     public int getAnchorX()  { return _anchX; }
@@ -78,20 +92,6 @@ public class TableSel implements Cloneable {
      * Returns the max Y.
      */
     public int getMaxY()  { return Math.max(_anchY, _leadY); }
-
-    /**
-     * Returns whether given X/Y are selected.
-     */
-    public boolean isSel(int aX, int aY)
-    {
-        // If Next SelRect and X/Y inside any, return it's value
-        if (_next!=null && _next.isInsideAny(aX, aY))
-            return _next.isSel(aX, aY);
-
-        // If inside and not blacklist
-        boolean inside = aX>=getMinX() && aX<=getMaxX() && aY>=getMinY() && aY<=getMaxY();
-        return inside && !_isBlacklist;
-    }
 
     /**
      * Returns the selection encompassing all.

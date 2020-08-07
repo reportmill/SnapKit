@@ -30,6 +30,9 @@ public class BrowserCol <T> extends ListView <T> {
         scroll.setShowHBar(false);
         scroll.setShowVBar(true);
         scroll.setBarSize(12);
+
+        // Add listener for ListArea.MousePress to update Browser.SelCol
+        getListArea().addEventFilter(e -> listAreaMousePressed(e), MousePress);
     }
 
     /**
@@ -51,12 +54,21 @@ public class BrowserCol <T> extends ListView <T> {
     }
 
     /**
-     * Override to suppress.
+     * Called before ListArea.MousePress.
+     */
+    protected void listAreaMousePressed(ViewEvent anEvent)
+    {
+        getUpdater().runBeforeUpdate(() -> {
+            _browser.setSelColIndex(_index);
+            _browser.scrollSelToVisible();
+        });
+    }
+
+    /**
+     * Override to suppress ListArea and fire Browser.
      */
     protected void fireActionEvent(ViewEvent anEvent)
     {
-        _browser.setSelColIndex(_index);
-        _browser.scrollSelToVisible();
         _browser.fireActionEvent(anEvent);
     }
 
