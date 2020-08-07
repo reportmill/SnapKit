@@ -120,7 +120,7 @@ public class ComboBox <T> extends ParentView implements View.Selectable <T> {
 
         // Start listening to Action and SelIndex changes
         _list.addEventHandler(e -> listViewFiredAction(), Action);
-        _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.SelIndex_Prop);
+        _list.addPropChangeListener(pce -> listViewSelectionChanged(), ListView.Sel_Prop);
 
         // If not PopupList, turn off button and start listening to TextField KeyType events
         if (!(aListView instanceof PopupList))

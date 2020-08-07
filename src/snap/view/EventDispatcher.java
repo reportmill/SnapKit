@@ -227,7 +227,8 @@ public class EventDispatcher {
                 }
 
                 // If view accepts event, break
-                if (view.getEventAdapter().isEnabled(MousePress))
+                EventAdapter eventAdapter = view.getEventAdapter();
+                if (eventAdapter.isEnabled(MousePress) || eventAdapter.isEnabled(MouseRelease))
                     break;
             }
 

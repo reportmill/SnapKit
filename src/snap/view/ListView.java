@@ -31,6 +31,7 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
 
     // Constants for properties
     public static final String ItemKey_Prop = "ItemKey";
+    public static final String Sel_Prop = ListArea.Sel_Prop;
 
     /**
      * Creates a new ListView.
@@ -328,8 +329,8 @@ public class ListView <T> extends ParentView implements View.Selectable <T> {
     void listAreaPropChange(PropChange aPC)
     {
         String pname = aPC.getPropName();
-        if (pname==SelIndex_Prop)
-            firePropChange(SelIndex_Prop, aPC.getOldValue(), aPC.getNewValue());
+        if (pname==ListArea.Sel_Prop)
+            firePropChange(Sel_Prop, aPC.getOldValue(), aPC.getNewValue());
     }
 
     /**

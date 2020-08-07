@@ -87,6 +87,7 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
     public static final String EditingCell_Prop = "EditingCell";
     public static final String ItemKey_Prop = "ItemKey";
     public static final String RowHeight_Prop = "RowHeight";
+    public static final String Sel_Prop = PickList.Sel_Prop;
 
     /**
      * Creates a new ListArea.
@@ -266,6 +267,9 @@ public class ListArea <T> extends ParentView implements View.Selectable <T> {
             int changed[] = ListSel.getChangedIndexes(sel1, sel2);
             for (int i : changed)
                 updateIndex(i);
+
+            // Repackage and forward
+            firePropChange(Sel_Prop, aPC.getOldValue(), aPC.getNewValue());
         }
 
         // Scroll selection to visible
