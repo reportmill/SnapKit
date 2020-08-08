@@ -487,8 +487,8 @@ public class TextField extends ParentView {
             setSel(aStart + strLen);
 
         // Otherwise, if replace was before current selection, adjust current selection
-        //else if(aStart<=getSelEnd()) {
-        //    int delta = strLen - (anEnd - aStart), start = getSelStart(); if(aStart<=start) start += delta;
+        //else if (aStart<=getSelEnd()) {
+        //    int delta = strLen - (anEnd - aStart), start = getSelStart(); if (aStart<=start) start += delta;
         //    setSel(start, getSelEnd() + delta); }
 
         // Notify textDidChange
@@ -650,7 +650,7 @@ public class TextField extends ParentView {
     {
         if (isFocused()) {
             Rect sbnds = getSelBounds(); double sx = sbnds.x, sy = sbnds.y, sh = sbnds.height;
-            if (isSelEmpty()) { if(!_hideCaret) {
+            if (isSelEmpty()) { if (!_hideCaret) {
                 aPntr.setPaint(_textFill); aPntr.setStroke(Stroke.Stroke1); aPntr.drawLine(sx,sy,sx,sy+sh);
             }}
             else {
@@ -835,14 +835,14 @@ public class TextField extends ParentView {
         boolean emacsDown = SnapUtils.isWindows? anEvent.isAltDown() : controlDown;
 
         // If actual text entered, replace
-        if(charDefined && !commandDown && !controlDown && !emacsDown) {
+        if (charDefined && !commandDown && !controlDown && !emacsDown) {
             replaceChars(keyChars);
             hideCursor();
             anEvent.consume();
         }
 
         // If alt-TAB or alt-ENTER
-        //if(altDown && anEvent.isEnterKey() || anEvent.isTabKey()) {
+        //if (altDown && anEvent.isEnterKey() || anEvent.isTabKey()) {
         //    replaceChars(keyChars); hideCursor(); anEvent.consume(); }
     }
 
@@ -913,8 +913,10 @@ public class TextField extends ParentView {
     public void paste()
     {
         Clipboard cb = Clipboard.get();
-        if (cb.hasString()) { String string = cb.getString();
-            replaceChars(string); }
+        if (cb.hasString()) {
+            String string = cb.getString();
+            replaceChars(string);
+        }
     }
 
     /**
@@ -928,16 +930,15 @@ public class TextField extends ParentView {
 
         // If value has changed since focus gained, reset to original value
         if (isEdited()) {
-            setText(_focusGainedText); setEdited(false);
+            setText(_focusGainedText);
+            setEdited(false);
             selectAll();
-            if(anEvent!=null) anEvent.consume();
+            if (anEvent!=null)
+                anEvent.consume();
         }
 
         // Otherwise hand focus to previous view
-        else {
-            View lastFocus = getWindow().getFocusedViewLast();
-            getWindow().requestFocus(lastFocus);
-        }
+        else getWindow().requestFocus(null);
     }
 
     /**
@@ -946,7 +947,8 @@ public class TextField extends ParentView {
     protected void setShowing(boolean aValue)
     {
         if (aValue==isShowing()) return; super.setShowing(aValue);
-        if (isFocused()) setCaretAnim();
+        if (isFocused())
+            setCaretAnim();
     }
 
     /**

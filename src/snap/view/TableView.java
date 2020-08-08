@@ -76,6 +76,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public static final String ShowHeader_Prop = "ShowHeader";
 
     // Internal constants
+    public static final int DIVIDER_SPAN = 2;
     private static final Paint DIVIDER_FILL = new Color("#EEEEEE");
     private static final Paint DIVIDER_FILLH = new Color("#E0E0E0");
     
@@ -94,7 +95,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         _split = new SplitView();
         _split.setBorder(null);
         _split.setGrowWidth(true);
-        _split.setDividerSpan(2);
+        _split.setDividerSpan(DIVIDER_SPAN);
         Divider div = _split.getDivider();
         div.setFill(DIVIDER_FILL);
         div.setBorder(null);
@@ -409,7 +410,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         SplitView split = new SplitView();
         split.setGrowWidth(true);
         split.setBorder(null);
-        split.setDividerSpan(_split.getDividerSpan());
+        split.setDividerSpan(DIVIDER_SPAN);
         Divider div = split.getDivider();
         div.setFill(DIVIDER_FILLH);
         div.setBorder(null);

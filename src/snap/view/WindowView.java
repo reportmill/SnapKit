@@ -334,6 +334,9 @@ public class WindowView extends ParentView {
         // Make sure this happens on Event thread
         if (!getEnv().isEventThread()) { getEnv().runLater(() -> requestFocus(aView)); return; }
 
+        // Get view - if null, try to find something better
+        View view = aView!=null ? aView : getFocusViewForNull();
+
         // If already set, just return
         if (aView==getFocusedView()) return;
 
@@ -347,6 +350,19 @@ public class WindowView extends ParentView {
         // If new FocusedView, set View.Focused
         if (_focusedView!=null)
             _focusedView.setFocused(true);
+    }
+
+    /**
+     * Returns a view to use when focus is null.
+     */
+    private View getFocusViewForNull()
+    {
+        if (getFocusedViewLast()!=null)
+            return getFocusedViewLast();
+        for (View view=getFocusedView(); view!=null; view=view.getParent())
+            if (view.isFocusable())
+                return view;
+        return null;
     }
 
     /**

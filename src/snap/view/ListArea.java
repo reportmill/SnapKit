@@ -128,7 +128,6 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     {
         if (equalsItems(theItems)) return;
         _items.setAll(theItems);
-        itemsChanged();
     }
 
     /**
@@ -153,14 +152,6 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
 
         // Configure for new PickList
         _items.addPropChangeListener(_itemsLsnr);
-    }
-
-    /**
-     * Called when PickList items changed.
-     */
-    protected void itemsChanged()
-    {
-        relayout(); relayoutParent(); repaint(); _sampleWidth = _sampleHeight = -1;
     }
 
     /**
@@ -269,6 +260,12 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
 
             // Repackage and forward
             firePropChange(Sel_Prop, aPC.getOldValue(), aPC.getNewValue());
+        }
+
+        // Handle Items_Prop
+        else if (propName==PickList.Item_Prop) {
+            relayout(); relayoutParent(); repaint();
+            _sampleWidth = _sampleHeight = -1;
         }
 
         // Scroll selection to visible
@@ -753,20 +750,38 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     protected void calcSampleSize()
     {
+        // Create/configure sample cell
         ListCell cell = new ListCell(this, null, 0, getColIndex(), false);
         cell.setFont(getFont());
         cell.setPadding(getCellPadding());
-        for (int i=0,iMax=Math.min(getItemCount(),30);i<iMax;i++) {
-            cell._item = i<getItemCount() ? getItem(i) : null; cell._row = i;
+
+        // Iterate over cells (max 30) to get reasonable sample size
+        int count = Math.min(getItemCount(), 30);
+        for (int i=0; i<count; i++) {
+
+            // Reset cell
+            cell._item = i<getItemCount() ? getItem(i) : null;
+            cell._row = i;
             for (int j=cell.getChildCount()-1;j>=0;j--) { View child = cell.getChild(j);
-                if (child!=cell._strView && child!=cell._graphic) cell.removeChild(j); }
+                if (child!=cell._strView && child!=cell._graphic)
+                    cell.removeChild(j);
+            }
+
+            // Configure (make sure text is not empty)
             configureCell(cell);
-            if (cell.getText()==null || cell.getText().length()==0) cell.setText("X");
+            if (cell.getText()==null || cell.getText().length()==0)
+                cell.setText("X");
+
+            // Get Sample Width/Height
             _sampleWidth = Math.max(_sampleWidth, cell.getPrefWidth());
             _sampleHeight = Math.max(_sampleHeight, cell.getPrefHeight());
         }
-        if (_sampleWidth<0) _sampleWidth = 100;
-        if (_sampleHeight<0) _sampleHeight = Math.ceil(getFont().getLineHeight()+4);
+
+        // Make sure there's some minimum
+        if (_sampleWidth<0)
+            _sampleWidth = 100;
+        if (_sampleHeight<0)
+            _sampleHeight = Math.ceil(getFont().getLineHeight()+4);
     }
 
     /**
@@ -797,8 +812,8 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         if (aCell==getEditingCell()) return;
 
         // If clearing, request focus
-        if (aCell==null)
-            requestFocus();
+        if (aCell==null && getWindow()!=null)
+            getWindow().requestFocus(null);
 
         // Fire PropChange
         firePropChange(EditingCell_Prop, _editingCell, _editingCell = aCell);

@@ -98,7 +98,7 @@ public class TableCol <T> extends ListArea <T> {
     /**
      * Override to suppress setting items in pick list (already done by TableView).
      */
-    public void setItems(List <T> theItems)  { itemsChanged(); }
+    public void setItems(List <T> theItems)  { }
 
     /**
      * Override to set Table.SelCol.
