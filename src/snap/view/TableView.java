@@ -254,6 +254,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     {
         int row = getSelRowIndex();
         int col = getSelColIndex();
+        if (row<0 || col<0)
+            return null;
         return getCell(row, col);
     }
 
@@ -620,7 +622,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     {
         if (aRow<0) return null; // || aCol<0
         TableCol col = getCol(aCol);
-        ListCell <T> cell = col.getCellForRow(aRow);
+        ListCell <T> cell = col!=null ? col.getCellForRow(aRow) : null;
         return cell;
     }
 

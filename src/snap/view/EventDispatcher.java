@@ -235,6 +235,18 @@ public class EventDispatcher {
             // Return MousePressView (make sure it's at least the RootView)
             if (_mousePressView==null || _mousePressView instanceof WindowView)
                 _mousePressView = _win.getRootView();
+
+            // If MousePressView not focused, see if any parents want focus
+            for (View view=_mousePressView; view!=null; view=view.getParent()) {
+                if (view.isFocused())
+                    break;
+                if (view.isFocusWhenPressed()) {
+                    view.requestFocus();
+                    break;
+                }
+            }
+
+            // Return MousePressView
             return _mousePressView;
         }
 

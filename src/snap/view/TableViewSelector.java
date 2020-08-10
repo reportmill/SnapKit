@@ -146,6 +146,11 @@ class TableViewSelector {
      */
     protected void processKeyEvent(ViewEvent anEvent)
     {
+        // If shortcut key, just return
+        if (anEvent.isShortcutDown() || anEvent.isControlDown())
+            return;
+
+        // Handle special keys
         int kcode = anEvent.getKeyCode();
         switch (kcode) {
             case KeyCode.UP: _table.selectUp(); _table.fireActionEvent(anEvent); anEvent.consume(); break;
