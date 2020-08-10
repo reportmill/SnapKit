@@ -288,8 +288,9 @@ public class ListSel implements Cloneable {
      */
     public String toString()
     {
+        String indStr = getIndexes().length<100 ? Arrays.toString(getIndexes()) : "[ very_long ]";
         return "ListSel {" + "Anch=" + _anch + ", Lead=" + _lead +
-                ", isBlacklist=" + _isBlacklist + ", Next=" + _next + '}';
+                ", isBlacklist=" + _isBlacklist + ", Next=" + _next + ", Indexes=" + indStr + '}';
     }
 
     /**
@@ -324,11 +325,13 @@ public class ListSel implements Cloneable {
      */
     public static int[] getChangedIndexes(ListSel aSel1, ListSel aSel2)
     {
+        // If either is null or empty, return contents of other
         if (aSel1==null || aSel1.isEmpty())
             return aSel2!=null ? aSel2.getIndexes() : EMPTY_INDEXES;
         if (aSel2==null || aSel2.isEmpty())
             return aSel1!=null ? aSel1.getIndexes() : EMPTY_INDEXES;
 
+        // Get contents and length of each
         int ind1[] = aSel1.getIndexes();
         int ind2[] = aSel2.getIndexes();
         int len1 = ind1.length;
@@ -336,12 +339,19 @@ public class ListSel implements Cloneable {
         int changed[] = new int[len1+len2];
         int len3 = 0;
 
+        // Add indexes from Sel1 not found in Sel2
         for (int i : ind1)
             if (Arrays.binarySearch(ind2, i)<0)
                 changed[len3++] = i;
+
+        // Add indexes from Sel2 not found in Sel1 or in Changed array
         for (int i : ind2)
-            if (Arrays.binarySearch(ind1, i)<0 && Arrays.binarySearch(changed, i)<0)
+            if (Arrays.binarySearch(ind1, i)<0 && Arrays.binarySearch(changed, 0, len3, i)<0)
                 changed[len3++] = i;
-        return Arrays.copyOf(changed, len3);
+
+        // Trim changed array (if needed) and return
+        if (len3!=len1+len2)
+            changed = Arrays.copyOf(changed, len3);
+        return changed;
     }
 }
