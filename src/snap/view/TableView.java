@@ -23,9 +23,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     // The Table selection
     private ListSel2D _sel = ListSel2D.EMPTY;
     
-    // The selected column
-    private int  _selCol;
-    
     // Whether to show table header
     private boolean  _showHeader;
     
@@ -153,6 +150,16 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
+     * Returns whether list allows multiple selections.
+     */
+    public boolean isMultiSel()  { return _items.isMultiSel(); }
+
+    /**
+     * Sets whether list allows multiple selections.
+     */
+    public void setMultiSel(boolean aValue)  { _items.setMultiSel(aValue); }
+
+    /**
      * Returns the selection.
      */
     public ListSel getSel()
@@ -165,6 +172,13 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void setSel(ListSel aSel)
     {
+        // If already set, just return
+        if (aSel.equals(getSel())) return;
+
+        // Stop cell editing
+        editCellStop();
+
+        // Set selection
         _items.setSel(aSel);
     }
 
@@ -187,6 +201,9 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         // If already set, just return
         if (aSel.equals(getSel2D())) return;
 
+        // Stop cell editing
+        editCellStop();
+
         // If Empty, set ListSel.Empty
         if (aSel.isEmpty())
             setSel(ListSel.EMPTY);
@@ -196,6 +213,10 @@ public class TableView <T> extends ParentView implements Selectable<T> {
             ListSel sel = new ListSel(aSel.getAnchorY(), aSel.getLeadY());
             setSel(sel);
         }
+
+        // Update Sel
+        _sel = aSel;
+        repaint();
     }
 
     /**
@@ -207,6 +228,34 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      * Sets the selected index.
      */
     public void setSelIndex(int anIndex)  { _items.setSelIndex(anIndex); }
+
+    /**
+     * Returns the selected row.
+     */
+    public int getSelRowIndex()  { return getSelIndex(); }
+
+    /**
+     * Returns the selected column.
+     */
+    public int getSelColIndex()  { return _sel.getLeadX(); }
+
+    /**
+     * Returns the selected cell.
+     */
+    public void setSelRowColIndex(int aRow, int aCol)
+    {
+        setSel2D(new ListSel2D(aCol, aRow, aCol, aRow));
+    }
+
+    /**
+     * Returns the selected cell.
+     */
+    public ListCell <T> getSelCell()
+    {
+        int row = getSelRowIndex();
+        int col = getSelColIndex();
+        return getCell(row, col);
+    }
 
     /**
      * Returns the selected item.
@@ -223,7 +272,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void selectUp()
     {
-        int row = getSelRow();
+        int row = getSelRowIndex();
         if (row>0)
             setSelIndex(row-1);
         else ViewUtils.beep();
@@ -234,7 +283,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void selectDown()
     {
-        int row = getSelRow();
+        int row = getSelRowIndex();
         if (row<getItems().size()-1)
             setSelIndex(row+1);
         else ViewUtils.beep();
@@ -245,9 +294,9 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void selectRight()
     {
-        int row = getSelRow(); if (row<0) row = 0;
-        int col = getSelCol()+1; if (col>=getColCount()) { col = 0; row = (row+1)%getRowCount(); }
-        setSelCell(row, col);
+        int row = getSelRowIndex(); if (row<0) row = 0;
+        int col = getSelColIndex()+1; if (col>=getColCount()) { col = 0; row = (row+1)%getRowCount(); }
+        setSelRowColIndex(row, col);
     }
 
     /**
@@ -255,9 +304,9 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void selectLeft()
     {
-        int row = getSelRow(); if (row<0) row = 0;
-        int col = getSelCol()-1; if (col<0) { col = getColCount()-1; row = (row+getRowCount()-1)%getRowCount(); }
-        setSelCell(row, col);
+        int row = getSelRowIndex(); if (row<0) row = 0;
+        int col = getSelColIndex()-1; if (col<0) { col = getColCount()-1; row = (row+getRowCount()-1)%getRowCount(); }
+        setSelRowColIndex(row, col);
     }
 
     /**
@@ -638,65 +687,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns whether list allows multiple selections.
-     */
-    public boolean isMultiSel()  { return _items.isMultiSel(); }
-
-    /**
-     * Sets whether list allows multiple selections.
-     */
-    public void setMultiSel(boolean aValue)  { _items.setMultiSel(aValue); }
-
-    /**
-     * Returns the selected row.
-     */
-    public int getSelRow()  { return getSelIndex(); }
-
-    /**
-     * Returns the selected column.
-     */
-    public int getSelCol()  { return _selCol; }
-
-    /**
-     * Sets the selected column.
-     */
-    public void setSelCol(int anIndex)
-    {
-        // If already set, just return
-        if (anIndex==getSelCol()) return;
-
-        // Stop cell editing
-        editCellStop();
-
-        // Set value
-        _selCol = anIndex;
-        repaint();
-    }
-
-    /**
-     * Returns the selected cell.
-     */
-    public ListCell <T> getSelCell()  { return getCell(getSelRow(), getSelCol()); }
-
-    /**
-     * Returns the selected cell.
-     */
-    public void setSelCell(int aRow, int aCol)
-    {
-        // If already selected, just return
-        if (aRow==getSelRow() && aCol==getSelCol()) return;
-
-        // Stop cell editing
-        editCellStop();
-
-        // Set selected column and row
-        if (aCol<getColCount())
-            setSelCol(aCol);
-        if (aRow<getRowCount())
-            setSelIndex(aRow);
-    }
-
-    /**
      * Returns the preferred width.
      */
     protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _scrollGroup, aH); }
@@ -745,18 +735,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
                     if (anEvent.isShiftDown()) selectUp(); else selectDown();
                     fireActionEvent(anEvent); anEvent.consume(); requestFocus(); break;
             }
-        }
-    }
-
-    /**
-     * Called when TableCol gets mouse press.
-     */
-    protected void colDidMousePress(TableCol aCol, ViewEvent anEvent)
-    {
-        int col = aCol.getColIndex();
-        if (col!=getSelCol()) {
-            setSelCol(col);
-            //setSelCell(row,col); fireActionEvent(anEvent); anEvent.consume();
         }
     }
 

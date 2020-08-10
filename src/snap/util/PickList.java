@@ -120,7 +120,7 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
      */
     public int getSelIndex()
     {
-        return !_sel.isEmpty() ? getSelIndexes()[0] : -1;
+        return _sel.getLead();
     }
 
     /**

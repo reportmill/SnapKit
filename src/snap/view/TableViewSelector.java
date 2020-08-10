@@ -63,12 +63,6 @@ class TableViewSelector {
      */
     public void mousePress(ViewEvent anEvent)
     {
-        TableCol col = _table.getColForX(anEvent.getX());
-        int index = col!=null ? col.getColIndex() : -1;
-        if (index>=0 && index!=_table.getSelCol()) {
-            _table.setSelCol(index);
-        }
-
         // Cache MouseDown Selection
         _mouseDownSel = _table.getSel2D();
 

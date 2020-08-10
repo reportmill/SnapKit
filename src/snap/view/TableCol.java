@@ -101,19 +101,6 @@ public class TableCol <T> extends ListArea <T> {
     public void setItems(List <T> theItems)  { }
 
     /**
-     * Override to set Table.SelCol.
-     */
-    protected void processEvent(ViewEvent anEvent)
-    {
-        // Handle MousePress: Forward to table
-        if (anEvent.isMousePress())
-            getTable().colDidMousePress(this, anEvent);
-
-        // Do normal version
-        super.processEvent(anEvent);
-    }
-
-    /**
      * Override to account for header (if showing).
      */
     protected double getPrefWidthImpl(double aH)
