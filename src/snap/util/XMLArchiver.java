@@ -246,6 +246,10 @@ public class XMLArchiver {
             if (cls==null)
                 cls = getClassForXML(anElement);
 
+            // If no class, throw exception
+            if (cls==null)
+                throw new RuntimeException("XMLArchiver: Can't find class for element: " + anElement.getName());
+
             // Create new object
             readObject = newInstance(cls);
         }
