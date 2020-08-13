@@ -28,10 +28,10 @@ public class ViewOwner implements EventListener {
     private Object  _firstFocus;
     
     // Map of key combos to action (names)
-    private Map <KeyCombo,String>  _keyFilters = Collections.EMPTY_MAP;
+    private Map <KeyCombo,String>  _keyFilters = Collections.emptyMap();
 
     // Map of key combos to action (names)
-    private Map <KeyCombo,String>  _keyHandlers = Collections.EMPTY_MAP;
+    private Map <KeyCombo,String>  _keyHandlers = Collections.emptyMap();
 
     // A map of binding values not explicitly defined in model
     private Map  _modelValues = new HashMap<>();
@@ -246,6 +246,10 @@ public class ViewOwner implements EventListener {
     public Object getViewValue(Object anObj)
     {
         View view = getView(anObj);
+        if (view==null) {
+            System.out.println("ViewOwner.getViewValue: Couldn't find view for: " + anObj);
+            return null;
+        }
         return view.getValue("Value");
     }
 
@@ -256,7 +260,9 @@ public class ViewOwner implements EventListener {
     {
         boolean old = setSendEventDisabled(true);
         View view = getView(anObj);
-        view.setValue("Value", aValue);
+        if (view!=null)
+            view.setValue("Value", aValue);
+        else System.err.println("ViewOwner.setViewValue: Couldn't find view for: " + anObj);
         setSendEventDisabled(old);
     }
 
