@@ -33,6 +33,9 @@ public class ViewOwner implements EventListener {
     // Map of key combos to action (names)
     private Map <KeyCombo,String>  _keyHandlers = Collections.emptyMap();
 
+    // Whether initShowing has happened
+    private boolean  _initShowingDone;
+
     // A map of binding values not explicitly defined in model
     private Map  _modelValues = new HashMap<>();
     
@@ -188,13 +191,27 @@ public class ViewOwner implements EventListener {
         if (_resetLater) {
             resetLater(); _resetLater = false; }
 
-        if (getUI().isShowing() && getFirstFocus()!=null) {
-            View view = getView(getFirstFocus()); if (view==null) return;
-            view.requestFocus();
-            if (view instanceof TextField)
-                ((TextField)view).selectAll();
+        if (isShowing() && !_initShowingDone) {
+            _initShowingDone = true;
+
+            // Handle First focus
+            Object firstFoc = getFirstFocus();
+            View view = firstFoc!=null ? getView(firstFoc) : null;
+            if (view != null) {
+                view.requestFocus();
+                if (view instanceof TextField)
+                    ((TextField) view).selectAll();
+            }
+
+            // Trigger initShowing
+            initShowing();
         }
     }
+
+    /**
+     * Called when ViewOwner is first shown.
+     */
+    protected void initShowing()  { }
 
     /**
      * Returns the native object for the UI (JComponent).

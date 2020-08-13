@@ -240,13 +240,16 @@ public class ListSel implements Cloneable {
      */
     public ListSel copyForMaxSize(int aSize)
     {
+        // If this ListSel less than max, just return
         int max = getSelAll().getMax();
         if (max<aSize)
             return this;
 
-        System.out.println("ListSel.copyForMaxSize: Trimming to size " + aSize);
+        // If size zero, return empty
         if (aSize==0)
             return EMPTY;
+
+        // Return copy for size limit
         return copyForMetaAdd(max, aSize-1);
     }
 
