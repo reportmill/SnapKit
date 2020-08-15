@@ -4,6 +4,7 @@
 package snap.view;
 import java.io.File;
 import java.util.*;
+import java.util.function.Consumer;
 
 import snap.geom.Point;
 import snap.gfx.*;
@@ -272,6 +273,14 @@ public abstract class Clipboard {
      * Returns the view that started the
      */
     public View getDragSourceView()  { return null; }
+
+    /**
+     * If Clipboard needs to be 'approved', get approved and call given consumer.
+     */
+    public void getApprovedClipboardAndRun(Consumer<Clipboard> aConsumer)
+    {
+        ViewUtils.runLater(() -> aConsumer.accept(this));
+    }
 
     /**
      * Returns the system clipboard.
