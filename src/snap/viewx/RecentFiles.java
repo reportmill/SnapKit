@@ -27,11 +27,13 @@ public class RecentFiles extends ViewOwner {
     public WebFile showFilesPanel(View aView)
     {
         // Create DialogBox with UI, and showConfirmDialog (just return if cancelled)
-        _dbox = new DialogBox("Recent Files"); _dbox.setContent(getUI()); _dbox.setOptions("Open", "Cancel");
-        if (!_dbox.showConfirmDialog(null)) return null;
+        _dbox = new DialogBox("Recent Files");
+        _dbox.setContent(getUI());
+        _dbox.setOptions("Open", "Cancel");
+        if (!_dbox.showConfirmDialog(aView)) return null;
 
         // If not cancelled, return selected file
-        WebFile file = (WebFile)getViewSelItem("FilesList");
+        WebFile file = (WebFile) getViewSelItem("FilesList");
         return file;
     }
 
@@ -78,10 +80,11 @@ public class RecentFiles extends ViewOwner {
         Prefs prefs = Prefs.get().getChild(aName);
 
         // Add to the list only if the file is around and readable
-        List list = new ArrayList();
+        List<String> list = new ArrayList<>();
         for (int i=0; ; i++) {
             String path = prefs.getString("index" + i, null); if (path==null) break;
-            if (!list.contains(path)) list.add(path);
+            if (!list.contains(path))
+                list.add(path);
         }
 
         // Return list
@@ -120,9 +123,12 @@ public class RecentFiles extends ViewOwner {
     {
         // Get RecentPaths
         List <String> paths = getPaths(aName);
-        List <WebURL> urls = new ArrayList();
-        for (String path : paths) { WebURL url = WebURL.getURL(path);
-            if (url!=null) urls.add(url); }
+        List <WebURL> urls = new ArrayList<>();
+        for (String path : paths) {
+            WebURL url = WebURL.getURL(path);
+            if (url!=null)
+                urls.add(url);
+        }
         return urls;
     }
 
@@ -133,9 +139,12 @@ public class RecentFiles extends ViewOwner {
     {
         // Get RecentPaths
         List <WebURL> urls = getURLs(aName);
-        List <WebFile> files = new ArrayList();
-        for (WebURL url : urls) { WebFile file = url.getFile();
-            if (file!=null) files.add(file); }
+        List <WebFile> files = new ArrayList<>();
+        for (WebURL url : urls) {
+            WebFile file = url.getFile();
+            if (file!=null)
+                files.add(file);
+        }
         return files;
     }
 
@@ -146,7 +155,7 @@ public class RecentFiles extends ViewOwner {
     {
         RecentFiles rf = new RecentFiles(aName);
         WebFile file = rf.showFilesPanel(aView);
-        return file!=null? file.getPath() : null;
+        return file!=null ? file.getPath() : null;
     }
 
     /**
