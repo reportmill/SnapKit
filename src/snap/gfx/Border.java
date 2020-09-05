@@ -86,7 +86,7 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     public Border copyForInsets(Insets theIns)
     {
         Border copy = clone();
-        setPropValue(Insets_Prop, theIns);
+        copy.setPropValue(Insets_Prop, theIns);
         return copy;
     }
 
