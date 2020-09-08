@@ -510,8 +510,11 @@ public class FilePanel extends ViewOwner {
     private WebFile getFileCompletion(String aPath)
     {
         // Get directory for path and file name
-        String dirPath = FilePathUtils.getParent(aPath), fname = FilePathUtils.getFileName(aPath);
+        String dirPath = FilePathUtils.getParent(aPath);
+        String fname = FilePathUtils.getFileName(aPath);
         WebFile dir = getFile(dirPath);
+        if (dir==null)
+            return null;
 
         // Look for completion file of any requested type (types are checked in order to allow for precidence)
         for (String type : getTypes()) {
@@ -636,22 +639,21 @@ public class FilePanel extends ViewOwner {
         _defaultSite = aSite;
     }
 
-/**
- * The TreeResolver to provide data to File browser.
- */
-private class FileResolver extends TreeResolver <WebFile> {
-    
-    /** Returns the parent of given item. */
-    public WebFile getParent(WebFile anItem)  { return anItem.getParent(); }
+    /**
+     * The TreeResolver to provide data to File browser.
+     */
+    private class FileResolver extends TreeResolver <WebFile> {
 
-    /** Whether given object is a parent (has children). */
-    public boolean isParent(WebFile anItem)  { return anItem.isDir(); }
+        /** Returns the parent of given item. */
+        public WebFile getParent(WebFile anItem)  { return anItem.getParent(); }
 
-    /** Returns the children. */
-    public WebFile[] getChildren(WebFile aPar)  { return getFilteredFiles(aPar.getFiles()); }
+        /** Whether given object is a parent (has children). */
+        public boolean isParent(WebFile anItem)  { return anItem.isDir(); }
 
-    /** Returns the text to be used for given item. */
-    public String getText(WebFile anItem)  { return anItem.getName(); }
-}
+        /** Returns the children. */
+        public WebFile[] getChildren(WebFile aPar)  { return getFilteredFiles(aPar.getFiles()); }
 
+        /** Returns the text to be used for given item. */
+        public String getText(WebFile anItem)  { return anItem.getName(); }
+    }
 }
