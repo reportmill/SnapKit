@@ -114,7 +114,8 @@ public class TextBox {
         if (aRichText==_text) return;
 
         // Stop listening to old RichText PropChanges, start listening to new
-        if (_text!=null) _text.removePropChangeListener(_richTextLsnr);
+        if (_text!=null)
+            _text.removePropChangeListener(_richTextLsnr);
         _text = aRichText;
         _text.addPropChangeListener(_richTextLsnr);
 
@@ -180,12 +181,18 @@ public class TextBox {
     /**
      * Sets the rect location and size.
      */
-    public void setBounds(Rect aRect)  { setBounds(aRect.getX(), aRect.getY(), aRect.getWidth(), aRect.getHeight()); }
+    public void setBounds(Rect aRect)
+    {
+        setBounds(aRect.getX(), aRect.getY(), aRect.getWidth(), aRect.getHeight());
+    }
 
     /**
      * Sets the rect location and size.
      */
-    public void setBounds(double aX, double aY, double aW, double aH)  { setX(aX); setY(aY); setWidth(aW); setHeight(aH); }
+    public void setBounds(double aX, double aY, double aW, double aH)
+    {
+        setX(aX); setY(aY); setWidth(aW); setHeight(aH);
+    }
 
     /**
      * Returns the max X.
@@ -273,7 +280,12 @@ public class TextBox {
     /**
      * Returns the end char in RichText.
      */
-    public int getEnd()  { return getStart() + (getLineCount()>0 ? getLineLast().getEnd() : 0); }
+    public int getEnd()
+    {
+        int start = getStart();
+        int lastLineEnd = getLineCount()>0 ? getLineLast().getEnd() : 0;
+        return start + lastLineEnd;
+    }
 
     /**
      * Returns the font scale of the text box.
@@ -286,7 +298,8 @@ public class TextBox {
     public void setFontScale(double aValue)
     {
         if (aValue==_fontScale) return;
-        _fontScale = aValue; setNeedsUpdateAll();
+        _fontScale = aValue;
+        setNeedsUpdateAll();
     }
 
     /**
@@ -360,7 +373,8 @@ public class TextBox {
     protected int boxlen()
     {
         int lcount = getLineCount(); if (lcount==0) return 0;
-        int start = getStart(), end = getLineLast().getEnd();
+        int start = getStart();
+        int end = getLineLast().getEnd();
         return end - start;
     }
 
@@ -369,7 +383,8 @@ public class TextBox {
      */
     public int getLineCount()
     {
-        if (_needsUpdate && !_updating) update();
+        if (_needsUpdate && !_updating)
+            update();
         return _lines.size();
     }
 
@@ -378,7 +393,8 @@ public class TextBox {
      */
     public TextBoxLine getLine(int anIndex)
     {
-        if (_needsUpdate && !_updating) update();
+        if (_needsUpdate && !_updating)
+            update();
         return _lines.get(anIndex);
     }
 
@@ -387,7 +403,8 @@ public class TextBox {
      */
     public List <TextBoxLine> getLines()
     {
-        if (_needsUpdate && !_updating) update();
+        if (_needsUpdate && !_updating)
+            update();
         return _lines;
     }
 
@@ -420,10 +437,10 @@ public class TextBox {
     public TextBoxLine getLineLongest()
     {
         TextBoxLine line = getLineCount()>0 ? getLine(0) : null; if (line==null) return null;
-        double w = line.getWidth();
+        double lineW = line.getWidth();
         for (TextBoxLine ln : _lines)
-            if (ln.getWidth()>w) {
-                line = ln; w = ln.getWidth(); }
+            if (ln.getWidth()>lineW) {
+                line = ln; lineW = ln.getWidth(); }
         return line;
     }
 
@@ -434,12 +451,18 @@ public class TextBox {
     {
         // Handle CharsChange: Update lines for old/new range
         if (aPC instanceof RichText.CharsChange) { RichText.CharsChange cc = (RichText.CharsChange)aPC;
-            CharSequence nval = cc.getNewValue(), oval = cc.getOldValue(); int index = cc.getIndex();
-            if (oval!=null) textRemovedChars(index, index+oval.length());
-            if (nval!=null) textAddedChars(index, index+nval.length());
+            CharSequence nval = cc.getNewValue();
+            CharSequence oval = cc.getOldValue();
+            int index = cc.getIndex();
+            if (oval!=null)
+                textRemovedChars(index, index+oval.length());
+            if (nval!=null)
+                textAddedChars(index, index+nval.length());
         }
+
         else if (aPC instanceof RichText.StyleChange) { RichText.StyleChange sc = (RichText.StyleChange)aPC;
             textChangedChars(sc.getStart(), sc.getEnd()); }
+
         else if (aPC instanceof RichText.LineStyleChange) { RichText.LineStyleChange lsc = (RichText.LineStyleChange)aPC;
             RichTextLine rtl = getRichText().getLine(lsc.getIndex());
             textChangedChars(rtl.getStart(), rtl.getEnd());
@@ -530,12 +553,16 @@ public class TextBox {
         // Iterate over lines beyond start line and update lines Index, Start and Y_Local
         int len = sline>0 ? getLine(sline-1).getEnd() : 0;
         for (int i=sline, iMax=_lines.size(); i<iMax; i++) { TextBoxLine line = getLine(i);
-            line._index = i; line._start = len; len += line.length(); line._yloc = -1; }
+            line._index = i; line._start = len;
+            len += line.length(); line._yloc = -1;
+        }
 
         // Calculated aligned Y
         if (_alignY!=VPos.TOP) {
-            double ph = getPrefHeight(getWidth()), height = getHeight();
-            if (height>ph) _alignedY = _alignY.doubleValue()*(height-ph);
+            double prefH = getPrefHeight(getWidth());
+            double height = getHeight();
+            if (height>prefH)
+                _alignedY = _alignY.doubleValue()*(height-prefH);
         }
     }
 
@@ -551,10 +578,12 @@ public class TextBox {
 
         // Extend end-line-index to end of RichTextLine
         RichTextLine endRTL = getLine(eline).getRichTextLine();
-        while (eline+1<lcount && getLine(eline+1).getRichTextLine()==endRTL) eline++;
+        while (eline+1<lcount && getLine(eline+1).getRichTextLine()==endRTL)
+            eline++;
 
         // Remove lines in range
-        for (int i=eline;i>=sline;i--) _lines.remove(i);
+        for (int i=eline;i>=sline;i--)
+            _lines.remove(i);
     }
 
     /**
@@ -567,11 +596,12 @@ public class TextBox {
         int start = Math.max(aStart, getStart()); if (start>length()) return;
 
         // Get RichText start-line-index, end-line-index
-        int startRTL = getRichText().getLineAt(start).getIndex();
-        int endRTL = getRichText().getLineAt(aEnd).getIndex();
+        RichText richText = getRichText();
+        int startRTL = richText.getLineAt(start).getIndex();
+        int endRTL = richText.getLineAt(aEnd).getIndex();
 
         // Iterate over RichText lines, create TextBox lines and add
-        for (int i=startRTL, lindex=aLineIndex;i<=endRTL;i++) { RichTextLine rtl = getRichText().getLine(i);
+        for (int i=startRTL, lindex=aLineIndex; i<=endRTL; i++) { RichTextLine rtl = richText.getLine(i);
 
             // Get start-char-index for line
             int lstart = Math.max(start-rtl.getStart(),0); if (lstart==rtl.length()) continue;
@@ -579,15 +609,18 @@ public class TextBox {
             // Add TextBoxLine(s) for RichTextLine
             while (lstart<rtl.length()) {
                 TextBoxLine line = createLine(rtl, lstart, lindex);
-                if ((isLinked() || _bpath!=null) && line.getMaxY()>getMaxY()) { i = Short.MAX_VALUE; break; }
+                if ((isLinked() || _bpath!=null) && line.getMaxY()>getMaxY()) {
+                    i = Short.MAX_VALUE;
+                    break;
+                }
                 _lines.add(lindex++, line);
                 lstart += line.length();
             }
         }
 
         // If we added last line and it is empty or ends with newline, add blank line
-        if (endRTL==getRichText().getLineCount()-1) {
-            RichTextLine rtl = getRichText().getLine(endRTL);
+        if (endRTL==richText.getLineCount()-1) {
+            RichTextLine rtl = richText.getLine(endRTL);
             if (rtl.length()==0 || rtl.isLastCharNewline()) {
                 TextBoxLine line = createLine(rtl, rtl.length(), getLineCount());
                 if (!((isLinked() || _bpath!=null) && line.getMaxY()>getMaxY()))
@@ -608,7 +641,8 @@ public class TextBox {
         RichTextRun run = aTextLine.getRun(0);
         int rend = run.getEnd();
         TextStyle style = run.getStyle();
-        if (_fontScale!=1) style = style.copyFor(style.getFont().scaleFont(_fontScale));
+        if (_fontScale!=1)
+            style = style.copyFor(style.getFont().scaleFont(_fontScale));
         double lineHt = style.getLineHeight();
         boolean wrap = isWrapLines();
         boolean hyphenate = isHyphenate();
@@ -617,9 +651,10 @@ public class TextBox {
         TextBoxLine lastLn = aLineIndex>0 ? getLine(aLineIndex-1) : null;
         double y = lastLn!=null ? lastLn.getY() + lastLn.getLineAdvance() : getY();
         double indent = aStart==0 ? aTextLine.getLineStyle().getFirstIndent() : aTextLine.getLineStyle().getLeftIndent();
-        double x = getMinHitX(y,lineHt,indent);
+        double x = getMinHitX(y, lineHt, indent);
         while (x>getMaxX() && y<=getMaxY()) { y++; x = getMinHitX(y,lineHt,indent); }
-        double w = 0, cspace = style.getCharSpacing();
+        double w = 0;
+        double cspace = style.getCharSpacing();
         char c;
 
         // Create lines list and create/add first line
@@ -634,47 +669,63 @@ public class TextBox {
                 run = aTextLine.getRun(run.getIndex()+1);
                 rend = run.getEnd();
                 style = run.getStyle();
-                if (_fontScale!=1) style = style.copyFor(style.getFont().scaleFont(_fontScale));
+                if (_fontScale!=1)
+                    style = style.copyFor(style.getFont().scaleFont(_fontScale));
                 lineHt = Math.max(lineHt, style.getLineHeight());
                 cspace = style.getCharSpacing();
             }
 
             // Skip past whitespace
             while (start<len && Character.isWhitespace(c=aTextLine.charAt(start))) {
-                if (c=='\t') x = line.getXForTabAtIndexAndX(start, x + getX()) - getX();
+                if (c=='\t')
+                    x = line.getXForTabAtIndexAndX(start, x + getX()) - getX();
                 else x += style.getCharAdvance(c) + cspace; //aTextLine.getLineStyle().getTabForX(x)-getX()
                 start++;
-                if (start>=rend && start<len) break;
+                if (start>=rend && start<len)
+                    break;
             }
 
             // Iterate through non-whitespace
             int end = start;
             while (end<len && end<rend && !Character.isWhitespace(c=aTextLine.charAt(end))) {
-                w += style.getCharAdvance(c) + cspace; end++; }
+                w += style.getCharAdvance(c) + cspace;
+                end++;
+            }
 
             // If char range was found, create and add token
             if (start<end) {
 
                 // If last char ouside box, try for hyphen or add new line
                 boolean didHyph = false;
-                if (wrap && isHitRight(x+w-cspace,y,lineHt)) {
+                if (wrap && isHitRight(x+w-cspace, y, lineHt)) {
 
                     // If hyphenating, see if we can break token
                     if (hyphenate) {
                         int hyph = end, end2 = end;
                         double w2 = w, hypw = 0;
-                        while (hyph>0 && isHitRight(x+w2-cspace+hypw,y,lineHt)) {
+                        while (hyph>0 && isHitRight(x+w2-cspace+hypw, y, lineHt)) {
                             hyph = TextHyphenDict.getShared().getHyphen(aTextLine, start, hyph);
-                            if (hyph>0) { hypw = cspace+style.getCharAdvance('-');
-                                while (end2>hyph) { --end2; w2 -= style.getCharAdvance(aTextLine.charAt(end2)) + cspace; }}
+                            if (hyph>0) {
+                                hypw = cspace+style.getCharAdvance('-');
+                                while (end2>hyph) {
+                                    --end2;
+                                    w2 -= style.getCharAdvance(aTextLine.charAt(end2)) + cspace;
+                                }
+                            }
                         }
-                        if (hyph>0 && hyph<end) { end = end2; w = w2 + hypw; didHyph = true; }
+                        if (hyph>0 && hyph<end) {
+                            end = end2;
+                            w = w2 + hypw;
+                            didHyph = true;
+                        }
                     }
 
                     // If no hyphen and token start is line start, shorten token until it fits
                     if (!didHyph && start==aStart)
-                        while (isHitRight(x+w-cspace,y,lineHt) && end>lineStart+1) {
-                            --end; w -= style.getCharAdvance(aTextLine.charAt(end)) + cspace; }
+                        while (isHitRight(x+w-cspace, y, lineHt) && end>lineStart+1) {
+                            --end;
+                            w -= style.getCharAdvance(aTextLine.charAt(end)) + cspace;
+                        }
 
                     // If no hyphen, break
                     else if (!didHyph)
@@ -683,10 +734,13 @@ public class TextBox {
 
                 // Create new token and add to line
                 TextBoxToken token = new TextBoxToken(line, style, start - lineStart, end - lineStart);
-                token.setXLocal(x); token.setWidth(w - cspace);
-                if (didHyph) token.setHyphenated(true);
+                token.setXLocal(x);
+                token.setWidth(w - cspace);
+                if (didHyph)
+                    token.setHyphenated(true);
                 line.addToken(token);
-                start = end; x += w; w = 0;
+                start = end;
+                x += w; w = 0;
             }
         }
 
@@ -740,12 +794,18 @@ public class TextBox {
     /**
      * Returns the TextRun that contains the given index.
      */
-    public RichTextRun getRunAt(int anIndex)  { return getRichText().getRunAt(anIndex); }
+    public RichTextRun getRunAt(int anIndex)
+    {
+        return getRichText().getRunAt(anIndex);
+    }
 
     /**
      * Returns the TextStyle for the run at the given character index.
      */
-    public TextStyle getStyleAt(int anIndex)  { return getRichText().getStyleAt(anIndex); }
+    public TextStyle getStyleAt(int anIndex)
+    {
+        return getRichText().getStyleAt(anIndex);
+    }
 
     /**
      * Returns whether text box contains an underlined run.
@@ -863,7 +923,9 @@ public class TextBox {
         aPntr.clip(clip);
 
         // Iterate over lines
-        for (int i=0, iMax=getLineCount(); i<iMax; i++) { TextBoxLine line = getLine(i); double ly = line.getBaseline();
+        for (int i=0, iMax=getLineCount(); i<iMax; i++) {
+            TextBoxLine line = getLine(i);
+            double lineY = line.getBaseline();
             if (line.getMaxY()<clip.getMinY()) continue;
             if (line.getY()>=clip.getMaxY()) break;
 
@@ -871,13 +933,16 @@ public class TextBox {
             for (int j=0,jMax=line.getTokenCount(); j<jMax;j++) { TextBoxToken token = line.getToken(j);
 
                 // Do normal paint token
-                double tx = token.getX();
-                aPntr.setFont(token.getFont()); aPntr.setPaint(token.getColor()); //aPntr.setPaint(SnapColor.RED);
-                aPntr.drawString(token.getString(), tx, ly, token.getStyle().getCharSpacing());
+                String tokenStr = token.getString();
+                double tokenX = token.getX();
+                aPntr.setFont(token.getFont());
+                aPntr.setPaint(token.getColor()); //aPntr.setPaint(SnapColor.RED);
+                aPntr.drawString(tokenStr, tokenX, lineY, token.getStyle().getCharSpacing());
 
                 // Handle TextBorder: Get outline and stroke
-                if (token.getStyle().getBorder()!=null) { Border border = token.getStyle().getBorder();
-                    Shape shape = token.getFont().getOutline(token.getString(), tx, ly, token.getStyle().getCharSpacing());
+                Border border = token.getStyle().getBorder();
+                if (border!=null) {
+                    Shape shape = token.getFont().getOutline(tokenStr, tokenX, lineY, token.getStyle().getCharSpacing());
                     aPntr.setPaint(border.getColor());
                     aPntr.setStroke(Stroke.Stroke1.copyForWidth(border.getWidth()));
                     aPntr.draw(shape);
@@ -886,20 +951,26 @@ public class TextBox {
         }
 
         // Paint underlines
-        if (isUnderlined()) { for (TextBoxRun run : getUnderlineRuns(clip)) {
+        if (isUnderlined()) {
 
-            // Set underline color and width
-            TextBoxLine line = run.getLine();
-            double uy = run.getFont().getUnderlineOffset(), uw = run.getFont().getUnderlineThickness();
-            aPntr.setColor(run.getColor()); aPntr.setStrokeWidth(uw);
+            for (TextBoxRun run : getUnderlineRuns(clip)) {
 
-            // Get under line endpoints and draw line
-            double x0 = run.getX(), y0 = line.getBaseline() - uy;
-            double x1 = run.getMaxX();
-            if (run.getEnd()==line.getEnd())
-                x1 = line.getX() + line.getWidthNoWhiteSpace();
-            aPntr.drawLine(x0, y0, x1, y0);
-        }}
+                // Set underline color and width
+                TextBoxLine line = run.getLine();
+                double uy = run.getFont().getUnderlineOffset();
+                double uw = run.getFont().getUnderlineThickness();
+                aPntr.setColor(run.getColor());
+                aPntr.setStrokeWidth(uw);
+
+                // Get under line endpoints and draw line
+                double x0 = run.getX();
+                double y0 = line.getBaseline() - uy;
+                double x1 = run.getMaxX();
+                if (run.getEnd()==line.getEnd())
+                    x1 = line.getX() + line.getWidthNoWhiteSpace();
+                aPntr.drawLine(x0, y0, x1, y0);
+            }
+        }
 
         // Restore state
         aPntr.restore();
@@ -910,7 +981,11 @@ public class TextBox {
      */
     public double getPrefWidth(double aH)
     {
-        return Math.ceil(getRichText().getPrefWidth());
+        RichText richText = getRichText();
+        double rtextW = richText.getPrefWidth();
+        double fontScale = getFontScale();
+        double prefW = Math.ceil(rtextW * fontScale);
+        return prefW;
     }
 
     /**
@@ -921,14 +996,16 @@ public class TextBox {
         // If WrapLines and given Width doesn't match current Width, setWidth
         if (isWrapLines() && !MathUtils.equals(aW,getWidth()) && aW>0) { //double oldW = getWidth();
             setWidth(aW);
-            double ph = getPrefHeight(aW); //setWidth(oldW); Should really reset old width - but why would they ask,
-            return ph;                     // if they didn't plan to use this width?
+            double prefH = getPrefHeight(aW); //setWidth(oldW); Should really reset old width - but why would they ask,
+            return prefH;                     // if they didn't plan to use this width?
         }
 
         // Return bottom of last line minus box Y
-        TextBoxLine ln = getLineLast();
-        if (ln==null) return 0;
-        return Math.ceil(ln.getMaxY() - getAlignedY());
+        TextBoxLine lastLine = getLineLast();
+        if (lastLine==null) return 0;
+        double lineMaxY = lastLine.getMaxY();
+        double alignedY = getAlignedY();
+        return Math.ceil(lineMaxY - alignedY);
     }
 
     /**
@@ -940,7 +1017,11 @@ public class TextBox {
         if (!isTextOutOfBounds()) return;
 
         // Declare starting fontScale factor and dampening variables
-        double fontScale = 1, fsLo = 0, fsHi = 1;
+        double fontScale = 1;
+        double textW = getWidth();
+        double textH = getHeight();
+        double fsLo = 0;
+        double fsHi = 1;
 
         // Loop while dampening variables are normal
         while (true) {
@@ -958,8 +1039,25 @@ public class TextBox {
 
             // If text didn't exceed layout bounds, reset fsLo to fontScale
             else {
+
+                // Set new low (if almost fsHi, just return)
                 fsLo = fontScale;
-                if (getHeight()-getPrefHeight(getWidth())<1 || fsHi-fsLo<.05)
+                double detaFS = fsHi - fsLo;
+                if (detaFS<.05)
+                    break;
+
+                // If no line-wrap and PrefWidth almost TextBox.Width, stop
+                if (!isWrapLines()) {
+                    double prefW = getPrefWidth(-1);
+                    double diffW = textW - prefW;
+                    if (diffW < 1)
+                        break;
+                }
+
+                // If PrefHeight almost TextBox.Height, stop
+                double prefH = getPrefHeight(textW);
+                double diffH = textH - prefH;
+                if (diffH<1)
                     break;
             }
         }
@@ -972,15 +1070,21 @@ public class TextBox {
     {
         // Check Y no matter what
         int lcount = getLineCount();
-        double maxY = lcount > 0 ? getLine(lcount - 1).getMaxY() : 0;
-        if (maxY >= getMaxY() || getEnd() < getRichText().length())
+        double lineMaxY = lcount > 0 ? getLine(lcount - 1).getMaxY() : 0;
+        double tboxMaxY = getMaxY();
+        if (lineMaxY >= tboxMaxY || getEnd() < getRichText().length())
             return true;
 
         // If not WrapLines, check X
         if (!isWrapLines()) {
             TextBoxLine line = getLineLongest();
-            double maxX = line != null ? line.getMaxX() : 0;
-            if (maxX > getMaxX())
+            //double lineMaxX = line != null ? line.getMaxX() : 0;
+            //double tboxMaxX = getMaxX();
+            //if (lineMaxX > tboxMaxX)
+            //    return true;
+            double lineW = line != null ? line.getWidth() : 0;
+            double tboxW = getWidth();
+            if (lineW > tboxW)
                 return true;
         }
 
