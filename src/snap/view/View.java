@@ -6,6 +6,7 @@ import java.util.*;
 
 import snap.geom.*;
 import snap.gfx.*;
+import snap.text.StringBox;
 import snap.util.*;
 
 /**
@@ -1842,12 +1843,9 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
                 aPntr.draw(getBoundsLocal().getInsetRect(1));
                 aPntr.setStroke(Stroke.Stroke1);
             }
-            aPntr.setFont(Font.Arial14.getBold());
-            aPntr.setPaint(Color.WHITE);
-            Rect r = aPntr.getStringBounds(cname);
-            double x = Math.round((getWidth() - r.width)/2);
-            double y = Math.round((getHeight() - r.height)/2) + Font.Arial14.getBold().getAscent();
-            aPntr.drawString(cname, x, y);
+            StringBox sbox = StringBox.getForStringAndAttributes(cname, Font.Arial14.getBold(), Color.WHITE);
+            sbox.setCenteredXY(getWidth()/2, getHeight()/2);
+            sbox.paint(aPntr);
         }
     }
 

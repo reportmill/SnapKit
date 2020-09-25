@@ -37,7 +37,7 @@ public J2DPainter(Graphics aGr)
     setAntialiasing(true); setAntialiasingText(true); setFractionalMetrics(true);
     _gfx.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
     _gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-    _gfx.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+    //_gfx.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
     
     // Initialize clip to Graphics clip
     clip(AWT.awtToSnapShape(aGr.getClip()));
