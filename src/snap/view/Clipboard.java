@@ -22,7 +22,7 @@ public abstract class Clipboard {
     Point _imgOffset = new Point();
     
     // The ClipboardData objects
-    Map <String,ClipboardData>  _cdatas = new HashMap<>();
+    Map <String,ClipboardData>  _cdatas = new TreeMap<>();
     
     // Constants for clipboard types
     public static String  STRING = "text/plain";
