@@ -303,7 +303,7 @@ protected void processEvent(ViewEvent anEvent)
         else if(anEvent.isMouseRelease()) _mouseDown = null;
         else if(anEvent.isMouseClick()) _mouseClicked = anEvent;
         else if(anEvent.isMouseMove() && getShowCoords())
-            repaint(Rect.get(anEvent.getPoint(),new Point(_mx,_my)).getInsetRect(-80,-25));
+            repaint(Rect.getRectForPoints(anEvent.getPoint(), new Point(_mx,_my)).getInsetRect(-80,-25));
         _mx = anEvent.getX(); _my = anEvent.getY();
     }
     
