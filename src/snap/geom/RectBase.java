@@ -32,7 +32,8 @@ public abstract class RectBase extends Shape implements Cloneable {
      */
     public void setX(double aValue)
     {
-        x = aValue; _bounds = null;
+        x = aValue;
+        shapeChanged();
     }
 
     /**
@@ -45,7 +46,8 @@ public abstract class RectBase extends Shape implements Cloneable {
      */
     public void setY(double aValue)
     {
-        y = aValue; _bounds = null;
+        y = aValue;
+        shapeChanged();
     }
 
     /**
@@ -58,7 +60,8 @@ public abstract class RectBase extends Shape implements Cloneable {
      */
     public void setWidth(double aValue)
     {
-        width = aValue; _bounds = null;
+        width = aValue;
+        shapeChanged();
     }
 
     /**
@@ -71,7 +74,8 @@ public abstract class RectBase extends Shape implements Cloneable {
      */
     public void setHeight(double aValue)
     {
-        height = aValue; _bounds = null;
+        height = aValue;
+        shapeChanged();
     }
 
     /**
