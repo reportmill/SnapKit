@@ -12,7 +12,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
 
     // The array of segments
     private Seg  _segs[] = new Seg[8];
-    
+
     // The segment count
     private int  _scount;
     
@@ -24,13 +24,6 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     
     // The winding -how a path determines what to fill when segments intersect
     private int  _wind = WIND_EVEN_ODD;
-    
-    // Constants for segements
-    public static final Seg MoveTo = Seg.MoveTo;
-    public static final Seg LineTo = Seg.LineTo;
-    public static final Seg QuadTo = Seg.QuadTo;
-    public static final Seg CubicTo = Seg.CubicTo;
-    public static final Seg Close = Seg.Close;
     
     // Constants for winding
     public static final int WIND_EVEN_ODD = PathIter.WIND_EVEN_ODD;
@@ -49,7 +42,10 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     /**
      * Creates a path for given shape.
      */
-    public Path(Shape aShape)  { append(aShape.getPathIter(null)); }
+    public Path(Shape aShape)
+    {
+        append(aShape.getPathIter(null));
+    }
 
     /**
      * Returns the winding - how a path determines what to fill when segments intersect.
@@ -62,45 +58,124 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     public void setWinding(int aValue)  { _wind = aValue; }
 
     /**
+     * Returns the number of segments.
+     */
+    public int getSegCount()  { return _scount; }
+
+    /**
+     * Returns the individual segement at index.
+     */
+    public Seg getSeg(int anIndex)  { return _segs[anIndex]; }
+
+    /**
+     * Adds a segment.
+     */
+    protected void addSeg(Seg aSeg)
+    {
+        // If at end of Segs array, extend by 2x
+        if (_scount+1>_segs.length)
+            _segs = Arrays.copyOf(_segs, _segs.length*2);
+
+        // Add Seg at end, increment SegCount, notify shapeChanged
+        _segs[_scount++] = aSeg;
+        shapeChanged();
+    }
+
+    /**
+     * Returns the number of points.
+     */
+    public int getPointCount()  { return _pcount; }
+
+    /**
+     * Returns individual point at given index.
+     */
+    public Point getPoint(int anIndex)
+    {
+        double px = _points[anIndex*2];
+        double py = _points[anIndex*2+1];
+        return new Point(px, py);
+    }
+
+    /**
+     * Adds a point.
+     */
+    protected void addPoint(double x, double y)
+    {
+        // If at end of Points array, extend by 2x
+        if (_pcount*2+1>_points.length)
+            _points = Arrays.copyOf(_points, _points.length*2);
+
+        // Add points at end and increment PointCount
+        _points[_pcount*2] = x;
+        _points[_pcount*2+1] = y;
+        _pcount++;
+    }
+
+    /**
      * Moveto.
      */
-    public void moveTo(double x, double y)  { addSeg(Seg.MoveTo); addPoint(x, y); }
+    public void moveTo(double x, double y)
+    {
+        addSeg(Seg.MoveTo);
+        addPoint(x, y);
+    }
 
     /**
      * LineTo.
      */
-    public void lineTo(double x, double y)  { addSeg(Seg.LineTo); addPoint(x, y); }
+    public void lineTo(double x, double y)
+    {
+        addSeg(Seg.LineTo);
+        addPoint(x, y);
+    }
 
     /**
      * LineTo.
      */
     public void lineBy(double x, double y)
     {
-        x += _points[_pcount*2-2]; y += _points[_pcount*2-1];
-        addSeg(Seg.LineTo); addPoint(x, y);
+        x += _points[_pcount*2-2];
+        y += _points[_pcount*2-1];
+        lineTo(x, y);
     }
 
     /**
      * Horizontal LineTo.
      */
-    public void hlineTo(double x)  { double y = _points[_pcount*2-1]; lineTo(x,y); }
+    public void hlineTo(double x)
+    {
+        double y = _points[_pcount*2-1];
+        lineTo(x,y);
+    }
 
     /**
      * Vertical LineTo.
      */
-    public void vlineTo(double y)  { double x = _points[_pcount*2-2]; lineTo(x,y); }
+    public void vlineTo(double y)
+    {
+        double x = _points[_pcount*2-2];
+        lineTo(x,y);
+    }
 
     /**
      * QuadTo.
      */
-    public void quadTo(double cpx, double cpy, double x, double y)  { addSeg(Seg.QuadTo); addPoint(cpx,cpy); addPoint(x,y);}
+    public void quadTo(double cpx, double cpy, double x, double y)
+    {
+        addSeg(Seg.QuadTo);
+        addPoint(cpx,cpy);
+        addPoint(x,y);
+    }
 
     /**
      * CubicTo.
      */
     public void curveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y)
     {
-        addSeg(Seg.CubicTo); addPoint(cp1x, cp1y); addPoint(cp2x, cp2y); addPoint(x, y);
+        addSeg(Seg.CubicTo);
+        addPoint(cp1x, cp1y);
+        addPoint(cp2x, cp2y);
+        addPoint(x, y);
     }
 
     /**
@@ -109,10 +184,13 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     public void arcTo(double cx, double cy, double x, double y)
     {
         double magic = .5523f; // I calculated this in mathematica one time - probably only valid for 90 deg corner.
-        double lx = _points[_pcount*2-2], ly = _points[_pcount*2-1];
-        double cpx1 = lx + (cx-lx)*magic, cpy1 = ly + (cy-ly)*magic;
-        double cpx2 = x + (cx-x)*magic, cpy2 = y + (cy-y)*magic;
-        curveTo(cpx1,cpy1,cpx2,cpy2,x,y);
+        double lx = _points[_pcount*2-2];
+        double ly = _points[_pcount*2-1];
+        double cpx1 = lx + (cx-lx)*magic;
+        double cpy1 = ly + (cy-ly)*magic;
+        double cpx2 = x + (cx-x)*magic;
+        double cpy2 = y + (cy-y)*magic;
+        curveTo(cpx1, cpy1, cpx2, cpy2, x, y);
     }
 
     /**
@@ -127,7 +205,8 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
             lineTo(x,y); return; }
 
         // Split curve at midpoint and add parts
-        Quad c0 = new Quad(last.x, last.y, cpx, cpy, x, y), c1 = c0.split(.5);
+        Quad c0 = new Quad(last.x, last.y, cpx, cpy, x, y);
+        Quad c1 = c0.split(.5);
         quadToFlat(c0.cpx, c0.cpy, c0.x1, c0.y1);
         quadToFlat(c1.cpx, c1.cpy, c1.x1, c1.y1);
     }
@@ -145,7 +224,8 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
             lineTo(x,y); return; }
 
         // Split curve at midpoint and add parts
-        Cubic c0 = new Cubic(last.x, last.y, cp1x, cp1y, cp2x, cp2y, x, y), c1 = c0.split(.5);
+        Cubic c0 = new Cubic(last.x, last.y, cp1x, cp1y, cp2x, cp2y, x, y);
+        Cubic c1 = c0.split(.5);
         curveToFlat(c0.cp0x, c0.cp0y, c0.cp1x, c0.cp1y, c0.x1, c0.y1);
         curveToFlat(c1.cp0x, c1.cp0y, c1.cp1x, c1.cp1y, c1.x1, c1.y1);
     }
@@ -156,27 +236,18 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     public void close() { addSeg(Seg.Close); }
 
     /**
-     * Returns the number of segments.
-     */
-    public int getSegCount()  { return _scount; }
-
-    /**
-     * Returns the individual segement at index.
-     */
-    public Seg getSeg(int anIndex)  { return _segs[anIndex]; }
-
-    /**
      * Returns the last segement.
      */
     public Seg getSegLast()  { return _scount>0 ? _segs[_scount-1] : null; }
 
     /**
-     * Adds a segment.
+     * Removes the last element from the path.
      */
-    private void addSeg(Seg aSeg)
+    public void removeLastSeg()
     {
-        if (_scount+1>_segs.length) _segs = Arrays.copyOf(_segs, _segs.length*2);
-        _segs[_scount++] = aSeg;
+        Seg seg = getSegLast();
+        _pcount -= seg.getCount();
+        _scount--;
         shapeChanged();
     }
 
@@ -232,37 +303,6 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * Removes the last element from the path.
-     */
-    public void removeLastSeg()
-    {
-        Seg seg = getSegLast();
-        _pcount -= seg.getCount();
-        _scount--;
-        shapeChanged();
-    }
-
-    /**
-     * Returns the number of points.
-     */
-    public int getPointCount()  { return _pcount; }
-
-    /**
-     * Returns individual point at given index.
-     */
-    public Point getPoint(int anIndex)  { return new Point(_points[anIndex*2], _points[anIndex*2+1]); }
-
-    /**
-     * Sets the individual point at given index.
-     */
-    public void setPoint(int anIndex, double aX, double aY)
-    {
-        _points[anIndex*2] = aX;
-        _points[anIndex*2+1] = aY;
-        shapeChanged();
-    }
-
-    /**
      * Returns last path point.
      */
     public Point getPointLast()
@@ -275,21 +315,19 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
      */
     public Point getCurrentPoint()
     {
-        if (getSegLast()==Close && getPointCount()>0)
+        if (getSegLast()==Seg.Close && getPointCount()>0)
             return getPoint(0);
         return getPointLast();
     }
 
     /**
-     * Adds a point.
+     * Sets the individual point at given index.
      */
-    private void addPoint(double x, double y)
+    public void setPoint(int anIndex, double aX, double aY)
     {
-        if (_pcount*2+1>_points.length)
-            _points = Arrays.copyOf(_points, _points.length*2);
-        _points[_pcount*2] = x;
-        _points[_pcount*2+1] = y;
-        _pcount++;
+        _points[anIndex*2] = aX;
+        _points[anIndex*2+1] = aY;
+        shapeChanged();
     }
 
     /**
