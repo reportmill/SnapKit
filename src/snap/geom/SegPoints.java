@@ -1,5 +1,6 @@
 package snap.geom;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A class to manage an array of Segs, an array of points, and an array of Seg-to-Point-Indexes so that it can quickly
@@ -22,8 +23,11 @@ public class SegPoints extends Shape {
     // The indexes to start point for each seg (or to ClosePointIndexes for Close seg)
     private int  _segPointIndexes[] = new int[8];
 
-    // The array of { startPointIndex, endPointIndex } for each close seg
-    private int  _closePointIndexes[][] = new int[0][];
+    // Whether path is closed
+    private boolean  _closed;
+
+    // The next path (if segs added after close)
+    private SegPoints  _nextPath;
 
     // The winding - how a path determines what to fill when segments intersect
     private int  _wind = WIND_EVEN_ODD;
@@ -31,6 +35,11 @@ public class SegPoints extends Shape {
     // Constants for winding
     public static final int WIND_EVEN_ODD = PathIter.WIND_EVEN_ODD;
     public static final int WIND_NON_ZERO = PathIter.WIND_NON_ZERO;
+
+    /**
+     * Constructor.
+     */
+    public SegPoints()  { }
 
     /**
      * Constructor.
@@ -55,7 +64,7 @@ public class SegPoints extends Shape {
     public int getSegCount()  { return _scount; }
 
     /**
-     * Returns the individual segement at index.
+     * Returns the individual segment at given index.
      */
     public Seg getSeg(int anIndex)  { return _segs[anIndex]; }
 
@@ -132,13 +141,10 @@ public class SegPoints extends Shape {
 
         // Handle Close special: PointIndex is to index in ClosePointIndexes (an array of each close {start,end} index)
         if (seg==Seg.Close) {
-            int pointIndexes[] = _closePointIndexes[pointIndex];
-            int index0 = pointIndexes[0];
-            int index1 = pointIndexes[1];
-            theCoords[0] = _points[index0];
-            theCoords[1] = _points[index0+1];
-            theCoords[2] = _points[index1];
-            theCoords[3] = _points[index1+1];
+            theCoords[0] = _points[pointIndex];
+            theCoords[1] = _points[pointIndex+1];
+            theCoords[2] = _points[0];
+            theCoords[3] = _points[1];
         }
 
         // Copy Seg points to given point coord array
@@ -175,6 +181,16 @@ public class SegPoints extends Shape {
      */
     public void moveTo(double x, double y)
     {
+        // If closed, forward
+        if (_closed) {
+            getNextPathWithIntentToExtend().moveTo(x, y);
+            return;
+        }
+
+        // Check for consecutive moveTo
+        if (getSegCount()>0 && getSeg(getSegCount()-1)==Seg.MoveTo)
+            System.err.println("SegPoints.moveTo: Consecutive MoveTo");
+
         // Add MoveTo
         addSeg(Seg.MoveTo);
 
@@ -189,7 +205,13 @@ public class SegPoints extends Shape {
      */
     public void lineTo(double x, double y)
     {
-        // Add MoveTo
+        // If closed, forward
+        if (_closed) {
+            getNextPathWithIntentToExtend().lineTo(x, y);
+            return;
+        }
+
+        // Add LineTo
         addSeg(Seg.LineTo);
 
         // Get pointIndex to last point (make sure there is a moveTo)
@@ -206,6 +228,12 @@ public class SegPoints extends Shape {
      */
     public void quadTo(double cpx, double cpy, double x, double y)
     {
+        // If closed, forward
+        if (_closed) {
+            getNextPathWithIntentToExtend().quadTo(cpx, cpy, x, y);
+            return;
+        }
+
         // Add QuadTo
         addSeg(Seg.QuadTo);
 
@@ -226,6 +254,12 @@ public class SegPoints extends Shape {
      */
     public void curveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y)
     {
+        // If closed, forward
+        if (_closed) {
+            getNextPathWithIntentToExtend().curveTo(cp1x, cp1x, cp2x, cp2y, x, y);
+            return;
+        }
+
         // Add CubicTo
         addSeg(Seg.CubicTo);
 
@@ -247,42 +281,37 @@ public class SegPoints extends Shape {
      */
     public void close()
     {
+        // If closed, forward
+        if (_closed) {
+            getNextPathWithIntentToExtend().close();
+            return;
+        }
+
+        // Get pointIndex to last point (if no points, just return - don't close empty path)
+        int pointIndex = getPointCount() - 1;
+        if (pointIndex<0)
+            return;
+
         // Add Close
         addSeg(Seg.Close);
-
-        // Get pointIndex to last point (make sure there is a moveTo)
-        int pointIndex = getPointCount() - 1;
-        if (pointIndex<0) { moveTo(0, 0); pointIndex = 0; }
-        int moveToPointIndex = getLastMoveToPointIndex();
-
-        // Add ClosePointIndexes close seg { lastPointIndex, lastMoveToPointIndex }
-        int endIndex = _closePointIndexes.length;
-        _closePointIndexes = Arrays.copyOf(_closePointIndexes, endIndex + 1);
-        _closePointIndexes[endIndex] = new int[] { moveToPointIndex, pointIndex };
+        addSegPointIndex(pointIndex);
+        _closed = true;
     }
 
     /**
-     * Returns the last move to point.
+     * Returns the next path.
      */
-    private int getLastMoveToPointIndex()
+    public SegPoints getNextPath()  { return _nextPath; }
+
+    /**
+     * Returns the next path.
+     */
+    protected SegPoints getNextPathWithIntentToExtend()
     {
-        // Iterate back through segs and return last MoveTo Index
-        for (int segIndex = getSegCount() - 1; segIndex>=0; segIndex--) {
-
-            // If MoveTo, return PointIndex
-            Seg seg = getSeg(segIndex);
-            if (seg==Seg.MoveTo)
-                return getSegPointIndex(segIndex);
-
-            // If Close (no MoveTo?) return close line end point
-            if (seg==Seg.Close) {
-                int closePointIndexes[] = _closePointIndexes[_closePointIndexes.length-1];
-                return closePointIndexes[1];
-            }
-        }
-
-        // No MoveTo (shouldn't happen)
-        return 0;
+        if (_nextPath==null)
+            _nextPath = new SegPoints();
+        shapeChanged();
+        return _nextPath;
     }
 
     /**
@@ -295,6 +324,8 @@ public class SegPoints extends Shape {
         copy._segs = Arrays.copyOf(_segs, _segs.length);
         copy._segPointIndexes = Arrays.copyOf(_segPointIndexes, _segs.length);
         copy._points = Arrays.copyOf(_points, _points.length);
+        if (_nextPath!=null)
+            copy._nextPath = _nextPath.clone();
         return copy;
     }
 
@@ -305,12 +336,19 @@ public class SegPoints extends Shape {
     {
         // Check identity & class and get other path
         if (anObj==this) return true;
-        SegPoints other = anObj instanceof Path ? (SegPoints) anObj : null; if (other==null) return false;
+        SegPoints other = anObj instanceof Path ? (SegPoints) anObj : null;
+        if (other==null)
+            return false;
 
         // Check ElementCount, WindingRule, Elements and Points
-        if (other._scount!=_scount || other._pcount!=_pcount) return false;
-        if (!Arrays.equals(other._segs, _segs)) return false;
-        if (!Arrays.equals(other._points, _points)) return false;
+        if (other._scount!=_scount || other._pcount!=_pcount)
+            return false;
+        if (!Arrays.equals(other._segs, _segs))
+            return false;
+        if (!Arrays.equals(other._points, _points))
+            return false;
+        if (!Objects.equals(other._nextPath, _nextPath))
+            return false;
         return true; // Return true since all checks passed
     }
 
@@ -331,24 +369,29 @@ public class SegPoints extends Shape {
         private int  _segCount;
         private int  _sindex;
         private double  _pnts[] = new double[8];
+        private PathIter  _nextIter;
 
         /** Constructor. */
         SPPathIter(Transform aTrans)
         {
             super(aTrans);
             _segCount = getSegCount();
+            if (_nextPath!=null)
+                _nextIter = _nextPath.getPathIter(aTrans);
         }
 
-        /** Returns whether PathIter has another segement. */
+        /** Returns whether PathIter has another segment. */
         public boolean hasNext()
         {
-            return _sindex < _segCount;
+            return _sindex < _segCount || (_nextIter!=null && _nextIter.hasNext());
         }
 
         /** Returns the next segment. */
         public Seg getNext(double coords[])
         {
-            return getSegEndPointsForIndex(_sindex++, _pnts);
+            if (_sindex < _segCount)
+                return getSegEndPointsForIndex(_sindex++, _pnts);
+            return _nextIter.getNext(coords);
         }
 
         /** Returns the winding - how a path determines what to fill when segments intersect. */
