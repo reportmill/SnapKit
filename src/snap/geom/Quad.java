@@ -35,6 +35,16 @@ public class Quad extends Segment {
     }
 
     /**
+     * Returns the point coords.
+     */
+    public double[] getEndCoords(double coords[])
+    {
+        if (coords==null) coords = new double[4];
+        coords[0] = cpx; coords[1] = cpy; coords[2] = x1; coords[3] = y1;
+        return coords;
+    }
+
+    /**
      * Calculates and returns length of this segment.
      */
     protected double getArcLengthImpl()

@@ -3,10 +3,9 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * A class to manage an array of Segs, an array of points, and an array of Seg-to-Point-Indexes so that it can quickly
- * return all points for a given Seg index.
+ * A standard path shape that can be built/modified by standard moveTo/lineTo/curveTo methods.
  */
-public class SegPoints extends Shape {
+public class Path2D extends Shape implements Cloneable {
 
     // The array of segments
     protected Seg  _segs[] = new Seg[8];
@@ -27,7 +26,7 @@ public class SegPoints extends Shape {
     private boolean  _closed;
 
     // The next path (if segs added after close)
-    private SegPoints  _nextPath;
+    private Path2D _nextPath;
 
     // The total arc length of path
     private double  _arcLength;
@@ -45,12 +44,12 @@ public class SegPoints extends Shape {
     /**
      * Constructor.
      */
-    public SegPoints()  { }
+    public Path2D()  { }
 
     /**
      * Constructor.
      */
-    public SegPoints(Shape aShape)
+    public Path2D(Shape aShape)
     {
     }
 
@@ -139,11 +138,11 @@ public class SegPoints extends Shape {
     /**
      * Returns the points for a given seg index, by copying to given array (should be length of 8).
      */
-    public Seg getSegAndPointsForIndex(int anIndex, double theCoords[])
+    public Seg getSegAndPointsForIndex(int anIndex, double theCoords[], Transform aTrans)
     {
         // Get Seg and Seg PointIndex
         Seg seg = getSeg(anIndex);
-        int pointIndex = getSegPointIndex(anIndex);
+        int pointIndex = getSegPointIndex(anIndex) * 2;
 
         // Handle Close special: PointIndex is to index in ClosePointIndexes (an array of each close {start,end} index)
         if (seg==Seg.Close) {
@@ -156,9 +155,12 @@ public class SegPoints extends Shape {
         // Copy Seg points to given point coord array
         else {
             int pointCount = seg.getCount() + 1;
-            for (int i=0; i<pointCount; i++)
-                theCoords[i] = _points[pointIndex + i];
+            System.arraycopy(_points, pointIndex, theCoords, 0, pointCount*2);
         }
+
+        // If Transform, transform
+        if (aTrans!=null)
+            aTrans.transform(theCoords, seg.getCount() + 1);
 
         // Return seg
         return seg;
@@ -167,18 +169,23 @@ public class SegPoints extends Shape {
     /**
      * Returns the points for a given seg index, by copying to given array (should be length of 8).
      */
-    public Seg getSegEndPointsForIndex(int anIndex, double theCoords[])
+    public Seg getSegEndPointsForIndex(int anIndex, double theCoords[], Transform aTrans)
     {
-        // Get seg and point index
+        // Get seg (just return if Close)
         Seg seg = getSeg(anIndex);
-        int pointIndex = getSegPointIndex(anIndex) + 1;
+        if (seg==Seg.Close)
+            return seg;
 
-        // Copy end points to given point coord array
+        // Get Seg PointIndex. If not MoveTo, skip forward 2 coords
+        int pointIndex = getSegPointIndex(anIndex) * 2;
+        if (seg!=Seg.MoveTo)
+            pointIndex += 2;
+
+        // Copy end points to given point coord array and return
         int pointCount = seg.getCount();
-        for (int i=0; i<pointCount; i++)
-            theCoords[i] = _points[pointIndex + i];
-
-        // Return seg
+        System.arraycopy(_points, pointIndex, theCoords, 0, pointCount*2);
+        if (aTrans!=null)
+            aTrans.transform(theCoords, pointCount);
         return seg;
     }
 
@@ -307,15 +314,15 @@ public class SegPoints extends Shape {
     /**
      * Returns the next path.
      */
-    public SegPoints getNextPath()  { return _nextPath; }
+    public Path2D getNextPath()  { return _nextPath; }
 
     /**
      * Returns the next path.
      */
-    protected SegPoints getNextPathWithIntentToExtend()
+    protected Path2D getNextPathWithIntentToExtend()
     {
         if (_nextPath==null)
-            _nextPath = new SegPoints();
+            _nextPath = new Path2D();
         shapeChanged();
         return _nextPath;
     }
@@ -323,51 +330,11 @@ public class SegPoints extends Shape {
     /**
      * Returns the segment at index.
      */
-    public Segment getSegment(int anIndex)
+    public Segment getSegment(int anIndex, Transform aTrans)
     {
-        // Get Seg and Seg PointIndex
-        Seg seg = getSeg(anIndex);
-        int pointIndex = getSegPointIndex(anIndex);
-
-        double p0x = _points[pointIndex];
-        double p0y = _points[pointIndex+1];
-
-        // Handle Line
-        if (seg==Seg.LineTo) {
-            double p1x = _points[pointIndex+2];
-            double p1y = _points[pointIndex+3];
-            return new Line(p0x, p0y, p1x, p1y);
-        }
-
-        // Handle QuadTo
-        else if (seg==Seg.QuadTo) {
-            double cpx = _points[pointIndex+2];
-            double cpy = _points[pointIndex+3];
-            double p1x = _points[pointIndex+4];
-            double p1y = _points[pointIndex+5];
-            return new Quad(p0x, p0y, cpx, cpy, p1x, p1y);
-        }
-
-        // Handle CubicTo
-        else if (seg==Seg.CubicTo) {
-            double cp0x = _points[pointIndex+2];
-            double cp0y = _points[pointIndex+3];
-            double cp1x = _points[pointIndex+4];
-            double cp1y = _points[pointIndex+5];
-            double p1x = _points[pointIndex+6];
-            double p1y = _points[pointIndex+7];
-            return new Cubic(p0x, p0y, cp0x, cp0y, cp1x, cp1y, p1x, p1y);
-        }
-
-        // Handle Close special: PointIndex is to index in ClosePointIndexes (an array of each close {start,end} index)
-        else if (seg==Seg.Close) {
-            double p1x = _points[0];
-            double p1y = _points[1];
-            return new Line(p0x, p0y, p1x, p1y);
-        }
-
-        // No segement
-        return null;
+        double pnts[] = new double[8];
+        Seg seg = getSegAndPointsForIndex(anIndex, pnts, aTrans);
+        return Segment.newSegmentForSegAndPoints(seg, pnts);
     }
 
     /**
@@ -406,7 +373,7 @@ public class SegPoints extends Shape {
         // Iterate over segs and calc lengths
         for (int i=0; i<segCount; i++) {
 
-            Seg seg = getSegAndPointsForIndex(i, pnts);
+            Seg seg = getSegAndPointsForIndex(i, pnts, null);
             double len = 0;
 
             // Get arcLength for seg
@@ -444,9 +411,9 @@ public class SegPoints extends Shape {
     /**
      * Standard clone implementation.
      */
-    public SegPoints clone()
+    public Path2D clone()
     {
-        SegPoints copy; try { copy = (SegPoints) super.clone(); }
+        Path2D copy; try { copy = (Path2D) super.clone(); }
         catch(Exception e) { throw new RuntimeException(e); }
         copy._segs = Arrays.copyOf(_segs, _segs.length);
         copy._segPointIndexes = Arrays.copyOf(_segPointIndexes, _segs.length);
@@ -463,7 +430,7 @@ public class SegPoints extends Shape {
     {
         // Check identity & class and get other path
         if (anObj==this) return true;
-        SegPoints other = anObj instanceof Path ? (SegPoints) anObj : null;
+        Path2D other = anObj instanceof Path ? (Path2D) anObj : null;
         if (other==null)
             return false;
 
@@ -495,7 +462,6 @@ public class SegPoints extends Shape {
         // Ivars
         private int  _segCount;
         private int  _sindex;
-        private double  _pnts[] = new double[8];
         private PathIter  _nextIter;
 
         /** Constructor. */
@@ -517,11 +483,11 @@ public class SegPoints extends Shape {
         public Seg getNext(double coords[])
         {
             if (_sindex < _segCount)
-                return getSegEndPointsForIndex(_sindex++, _pnts);
+                return getSegEndPointsForIndex(_sindex++, coords, _trans);
             return _nextIter.getNext(coords);
         }
 
         /** Returns the winding - how a path determines what to fill when segments intersect. */
-        public int getWinding()  { return SegPoints.this.getWinding(); }
+        public int getWinding()  { return Path2D.this.getWinding(); }
     }
 }

@@ -9,7 +9,7 @@ package snap.geom;
 public abstract class PathIter {
     
     // The transform
-    private Transform  _trans;
+    protected Transform  _trans;
     
     // Constants for winding
     public static final int WIND_EVEN_ODD = 0;

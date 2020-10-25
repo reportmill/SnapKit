@@ -40,6 +40,16 @@ public abstract class Segment extends Shape {
     }
 
     /**
+     * Returns the point coords.
+     */
+    public double[] getEndCoords(double coords[])
+    {
+        if (coords==null) coords = new double[2];
+        coords[0] = x1; coords[1] = y1;
+        return coords;
+    }
+
+    /**
      * Returns the x value at given parametric location.
      */
     public abstract double getX(double aLoc);
@@ -189,5 +199,19 @@ public abstract class Segment extends Shape {
     public static final boolean equals(double v1, double v2)
     {
         return Math.abs(v1 - v2) < 0.1;
+    }
+
+    /**
+     * Creates a Segment for given Seg and points.
+     */
+    public static Segment newSegmentForSegAndPoints(Seg aSeg, double coords[])
+    {
+        if (aSeg==Seg.LineTo)
+            return new Line(coords[0], coords[1], coords[2], coords[3]);
+        if (aSeg==Seg.QuadTo)
+            return new Quad(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+        if (aSeg==Seg.CubicTo)
+            return new Cubic(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], coords[6], coords[7]);
+        return null;
     }
 }

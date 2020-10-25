@@ -35,6 +35,16 @@ public class Cubic extends Segment {
     }
 
     /**
+     * Returns the point coords.
+     */
+    public double[] getEndCoords(double coords[])
+    {
+        if (coords==null) coords = new double[6];
+        coords[0] = cp1x; coords[1] = cp1y; coords[2] = cp1x; coords[3] = cp1y; coords[4] = x1; coords[5] = y1;
+        return coords;
+    }
+
+    /**
      * Calculates and returns length of this segment.
      */
     protected double getArcLengthImpl()
