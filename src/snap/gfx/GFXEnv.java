@@ -141,4 +141,12 @@ public abstract class GFXEnv {
      * This is really just here to help with TeaVM.
      */
     public abstract void exit(int aValue);
+
+    /**
+     * This is really just here to help with TeaVM.
+     */
+    public String getHostname()
+    {
+        return "localhost";
+    }
 }

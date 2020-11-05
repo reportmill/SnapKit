@@ -215,6 +215,18 @@ public class AWTEnv extends GFXEnv {
     }
 
     /**
+     * This is really just here to help with TeaVM.
+     */
+    public String getHostname()
+    {
+        try {
+            InetAddress h = InetAddress.getLocalHost();
+            return h==null ? "localhost" : h.getHostName();
+        }
+        catch(Exception e) { return "localhost"; }
+    }
+
+    /**
      * Returns a shared instance.
      */
     public static AWTEnv get()
