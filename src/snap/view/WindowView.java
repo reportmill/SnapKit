@@ -338,14 +338,15 @@ public class WindowView extends ParentView {
         View view = aView!=null ? aView : getFocusViewForNull();
 
         // If already set, just return
-        if (aView==getFocusedView()) return;
+        if (view==getFocusedView()) return;
 
         // If existing FocusedView, clear View.Focused
         if (_focusedView!=null)
             _focusedView.setFocused(false);
 
         // Update FocusViewLast, FocusView
-        _focusedViewLast = _focusedView; _focusedView = aView;
+        _focusedViewLast = _focusedView;
+        _focusedView = view;
 
         // If new FocusedView, set View.Focused
         if (_focusedView!=null)
