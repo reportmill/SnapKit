@@ -13,7 +13,7 @@ public class StringBox extends RoundRect {
     private String  _string;
 
     // The TextStyle for characters in this run
-    private TextStyle  _style = TextStyle.DEFAULT;
+    protected TextStyle  _style = TextStyle.DEFAULT;
 
     // The padding
     private Insets  _padding = Insets.EMPTY;
@@ -39,8 +39,17 @@ public class StringBox extends RoundRect {
     /**
      * Constructor.
      */
+    public StringBox()
+    {
+        super();
+    }
+
+    /**
+     * Constructor.
+     */
     public StringBox(String aString)
     {
+        super();
         setString(aString);
     }
 
@@ -59,6 +68,20 @@ public class StringBox extends RoundRect {
     }
 
     /**
+     * Returns the TextStyle.
+     */
+    public TextStyle getStyle()  { return _style; }
+
+    /**
+     * Sets the TextStyle.
+     */
+    public void setStyle(TextStyle aStyle)
+    {
+        _style = aStyle;
+        _ascent = -1;
+    }
+
+    /**
      * Returns the font.
      */
     public Font getFont()  { return _style.getFont(); }
@@ -68,22 +91,39 @@ public class StringBox extends RoundRect {
      */
     public void setFont(Font aFont)
     {
-        setTextStyle(_style.copyFor(aFont));
+        setStyle(_style.copyFor(aFont));
     }
 
     /**
-     * Returns the TextStyle.
+     * Returns the color for string text.
      */
-    public TextStyle getTextStyle()  { return _style; }
+    public Color getColor()  { return _style.getColor(); }
 
     /**
-     * Sets the TextStyle.
+     * Sets the color for string text.
      */
-    public void setTextStyle(TextStyle aStyle)
+    public void setColor(Color aColor)
     {
-        _style = aStyle;
-        _ascent = -1;
+        setStyle(_style.copyFor(aColor));
     }
+
+    /**
+     * Returns whether this run is underlined.
+     */
+    public boolean isUnderlined()  { return _style.isUnderlined(); }
+
+    /**
+     * Sets whether this run is underlined.
+     */
+    public void setUnderlined(boolean aValue)
+    {
+        setStyle(_style.copyFor(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0));
+    }
+
+    /**
+     * Returns the run's scripting.
+     */
+    public int getScripting()  { return _style.getScripting(); }
 
     /**
      * Returns the padding.
@@ -135,7 +175,26 @@ public class StringBox extends RoundRect {
     /**
      * Sets whether to size to font (looser) instead of glyphs (tighter).
      */
-    public void setFontSizing(boolean aValue)  { _fontSizing = aValue; }
+    public void setFontSizing(boolean aValue)
+    {
+        _fontSizing = aValue;
+    }
+
+    /**
+     * Returns whether this run has a hyphen at the end.
+     */
+    public boolean isHyphenated()  { return getString().endsWith("-"); }
+
+    /**
+     * Sets whether this run has a hyphen at the end.
+     */
+    public void setHyphenated(boolean aFlag)
+    {
+        if (aFlag==isHyphenated()) return;
+        String str = getString();
+        String str2 = aFlag ? (str + '-') : (str.substring(0, str.length()-1));
+        setString(str2);
+    }
 
     /**
      * Returns the total insets due to border and/or padding.
@@ -240,8 +299,8 @@ public class StringBox extends RoundRect {
         double strX = getStringX();
         double strY = getStringY();
         Font font = getFont();
-        Color color = getTextStyle().getColor();
-        double cspace = getTextStyle().getCharSpacing();
+        Color color = getColor();
+        double cspace = getStyle().getCharSpacing();
 
         // Set style and draw string
         aPntr.setFont(font);
@@ -326,7 +385,8 @@ public class StringBox extends RoundRect {
     @Override
     public String toString()
     {
-        return "StringBox { String='" + _string + '\'' + ", Style=" + _style + ", Rect=[" + super.getString() + ']' +
+        String cname = getClass().getSimpleName();
+        return cname + " { String='" + _string + '\'' + ", Style=" + _style + ", Rect=[" + super.getString() + ']' +
             ", Padding=" + _padding + ", Border=" + _border +
             ", Ascent=" + getAscent() + ", Descent=" + getDescent() + ", GlyphHeight=" + _glyphHeight +
             ", Advance=" + _advance + " }";
@@ -338,8 +398,8 @@ public class StringBox extends RoundRect {
     public static StringBox getForStringAndAttributes(String aStr, Object ... theAttrs)
     {
         StringBox sbox = new StringBox(aStr);
-        TextStyle textStyle = sbox.getTextStyle().copyFor(theAttrs);
-        sbox.setTextStyle(textStyle);
+        TextStyle textStyle = sbox.getStyle().copyFor(theAttrs);
+        sbox.setStyle(textStyle);
         return sbox;
     }
 }
