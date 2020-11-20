@@ -734,7 +734,7 @@ public class TextBox {
 
                 // Create new token and add to line
                 TextBoxToken token = new TextBoxToken(line, style, start - lineStart, end - lineStart);
-                token.setXLocal(x);
+                token.setX(x);
                 token.setWidth(w - cspace);
                 if (didHyph)
                     token.setHyphenated(true);
@@ -934,7 +934,7 @@ public class TextBox {
 
                 // Do normal paint token
                 String tokenStr = token.getString();
-                double tokenX = token.getX();
+                double tokenX = token.getTextBoxX();
                 aPntr.setFont(token.getFont());
                 aPntr.setPaint(token.getColor()); //aPntr.setPaint(SnapColor.RED);
                 aPntr.drawString(tokenStr, tokenX, lineY, token.getStyle().getCharSpacing());

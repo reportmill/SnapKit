@@ -224,7 +224,7 @@ public class TextBoxLine implements CharSequence {
         TextLineStyle lstyle = _rtline.getLineStyle();
 
         // Set width, height and LineAdvance
-        _width = _widthAll = etok!=null ? etok.getMaxX() - getX() : 0;
+        _width = _widthAll = etok!=null ? etok.getTextBoxMaxX() - getX() : 0;
         _height = _ascent + _descent;
 
         // Calculate LineAdvance
@@ -353,10 +353,10 @@ public class TextBoxLine implements CharSequence {
      */
     public TextBoxToken getTokenForPointX(double anX)
     {
-        TextBoxToken tok = getTokenCount()>0 ? getToken(0) : null; if (tok==null || tok.getX()>anX) return null;
+        TextBoxToken tok = getTokenCount()>0 ? getToken(0) : null; if (tok==null || tok.getTextBoxX()>anX) return null;
         for (int i=0, iMax=getTokenCount(); i<iMax; i++) {
             TextBoxToken next = i+1<iMax ? getToken(i+1) : null;
-            if (next!=null && next.getX()<=anX)
+            if (next!=null && next.getTextBoxX()<=anX)
                 tok = next;
             else return tok;
         }
@@ -372,7 +372,7 @@ public class TextBoxLine implements CharSequence {
         TextBoxToken token = getTokenForPointX(anX);
         int index = token!=null ? token.getStart() : 0, len = length();
         TextStyle style = token!=null ? token.getStyle() : getStartStyle();
-        double x = token!=null ? token.getX() : getX();
+        double x = token!=null ? token.getTextBoxX() : getX();
         while (index<len) {
             char c = charAt(index);
             double w = c=='\t' ? getXForTabAtIndexAndX(index,x) - x : style.getCharAdvance(c);
@@ -394,7 +394,7 @@ public class TextBoxLine implements CharSequence {
         if (anIndex==length()) return getMaxXAll();
         TextBoxToken tok = getTokenAt(anIndex); if (tok!=null && anIndex<tok.getStart()) tok = null;
         TextStyle style = tok!=null ? tok.getStyle() : getStartStyle();
-        double x = tok!=null ? tok.getX() : getX();
+        double x = tok!=null ? tok.getTextBoxX() : getX();
         for (int i=tok!=null ? tok.getStart() : 0; i<anIndex; i++) { char c = charAt(i);
             if (c=='\t')
                 x = getXForTabAtIndexAndX(i,x);

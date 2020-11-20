@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-
 import snap.gfx.Color;
 import snap.gfx.Font;
 
@@ -12,199 +11,188 @@ import snap.gfx.Font;
 public class TextBoxToken {
 
     // The box line that contains this token
-    TextBoxLine     _line;
+    private TextBoxLine     _line;
     
     // The bounds of this token in TextLine
-    double          _xloc, _yloc, _width, _height, _shiftX;
+    private double _x, _y, _width, _height;
+
+    // Shift
+    protected double  _shiftX;
     
     // The start/end position of this token in line
-    int             _start, _end;
+    private int  _start, _end;
     
     // The string for this token
-    String          _str;
+    private String  _str;
     
     // The attributes run for this token from line
-    TextStyle       _style;
+    private TextStyle  _style;
     
     // The color for this token
-    Color _color;
-    
-    // The font for this token
-    Font _font;
-    
-    // The scripting of this run
-    int             _scripting;
-    
-    // Whether token is underlined
-    boolean         _underlined;
+    private Color _color;
     
     // Whether token is hyphenated
-    boolean         _hyphenated;
+    private boolean  _hyphenated;
     
-    // The link for token
-    TextLink        _link;
-    
-/**
- * Creates a new Token for given box line, TextStyle and character start/end.
- */
-public TextBoxToken(TextBoxLine aLine, TextStyle aStyle, int aStart, int anEnd)
-{
-    _line = aLine; _start = aStart; _end = anEnd;
-    _style = aStyle;
-    _font = aStyle.getFont();
-    _color = aStyle.getColor();
-    _scripting = aStyle.getScripting();
-    _underlined = aStyle.isUnderlined();
-    _link = aStyle.getLink(); if(_link!=null) { _color = Color.BLUE; _underlined = true; }
-}
+    /**
+     * Creates a new Token for given box line, TextStyle and character start/end.
+     */
+    public TextBoxToken(TextBoxLine aLine, TextStyle aStyle, int aStart, int anEnd)
+    {
+        _line = aLine;
+        _start = aStart;
+        _end = anEnd;
+        _style = aStyle;
+        _color = aStyle.getColor();
 
-/**
- * Returns the TextBoxLine.
- */
-public TextBoxLine getLine()  { return _line; }
+        if(aStyle.getLink()!=null) {
+            setColor(Color.BLUE); setUnderlined(true);
+        }
+    }
 
-/**
- * Returns the X location in text global coords.
- */
-public double getX()  { return _line.getX() + _xloc + _shiftX; }
+    /**
+     * Returns the TextBoxLine.
+     */
+    public TextBoxLine getLine()  { return _line; }
 
-/**
- * Returns the X location in line coords.
- */
-public double getXLocal()  { return _xloc; }
+    /**
+     * Returns the token string.
+     */
+    public String getString()
+    {
+        if(_str!=null) return _str;
+        _str = getLine().subSequence(_start, _end).toString(); if(isHyphenated()) _str += '-';
+        return _str;
+    }
 
-/**
- * Sets the X location of token in line.
- */
-public void setXLocal(double aX)  { _xloc = aX; }
+    /**
+     * Returns the X location in line coords.
+     */
+    public double getX()  { return _x; }
 
-/**
- * Returns the Y location.
- */
-public double getY()  { return _line.getY() + _yloc; }
+    /**
+     * Sets the X location of token in line.
+     */
+    public void setX(double aX)  { _x = aX; }
 
-/**
- * Sets the Y location of token in line.
- */
-public void setYLocal(double aY)  { _yloc = aY; }
+    /**
+     * Returns the width.
+     */
+    public double getWidth()  { return _width; }
 
-/**
- * Returns the y position for this run text global coords.
- */
-public double getBaseline()  { return getY() + getBaselineLocal(); }
+    /**
+     * Sets the width.
+     */
+    public void setWidth(double aWidth)  { _width = aWidth; }
 
-/**
- * Returns the baseline in line coords.
- */
-public double getBaselineLocal()
-{
-    double offset = getScripting()==0? 0 : getFont().getSize()*(getScripting()<0? .4f : -.6f);
-    return _style.getAscent() + offset;
-}
+    /**
+     * Returns the height.
+     */
+    public double getHeight()  { return _height>0? _height : (_height=_style.getLineHeight()); }
 
-/**
- * Sets the token baseline in line coords.
- */
-public void setBaselineLocal(double aValue)  { setYLocal(aValue - _style.getAscent()); }
+    /**
+     * Returns the X location in text global coords.
+     */
+    public double getTextBoxX()  { return _line.getX() + _x + _shiftX; }
 
-/**
- * Returns the width.
- */
-public double getWidth()  { return _width; }
+    /**
+     * Returns the Y location.
+     */
+    public double getTextBoxY()  { return _line.getY() + _y; }
 
-/**
- * Sets the width.
- */
-public void setWidth(double aWidth)  { _width = aWidth; }
+    /**
+     * Returns the y position for this run text global coords.
+     */
+    public double getTextBoxStringY()
+    {
+        // Get offset from y
+        double offsetY = _style.getAscent();
+        if (getScripting()!=0)
+            offsetY += getFont().getSize()*(getScripting()<0? .4f : -.6f);
 
-/**
- * Returns the height.
- */
-public double getHeight()  { return _height>0? _height : (_height=_style.getLineHeight()); }
+        // Return TextBoxY plus offset
+        return getTextBoxY() + offsetY;
+    }
 
-/**
- * Returns the max X.
- */
-public double getMaxX()  { return getX() + getWidth(); }
+    /**
+     * Returns the max X.
+     */
+    public double getTextBoxMaxX()  { return getTextBoxX() + getWidth(); }
 
-/**
- * Returns the max Y.
- */
-public double getMaxY()  { return getY() + getHeight(); }
+    /**
+     * Returns the max Y.
+     */
+    public double getTextBoxMaxY()  { return getTextBoxY() + getHeight(); }
 
-/**
- * Returns the start character position of this token in line.
- */
-public int getStart()  { return _start; }
+    /**
+     * Returns the start character position of this token in line.
+     */
+    public int getStart()  { return _start; }
 
-/**
- * Returns the end character position of this token in line.
- */
-public int getEnd()  { return _end; }
+    /**
+     * Returns the end character position of this token in line.
+     */
+    public int getEnd()  { return _end; }
 
-/**
- * Returns the token string.
- */
-public String getString()
-{
-    if(_str!=null) return _str;
-    _str = getLine().subSequence(_start, _end).toString(); if(isHyphenated()) _str += '-';
-    return _str;
-}
+    /**
+     * Returns the run associated with this token.
+     */
+    public TextStyle getStyle()  { return _style; }
 
-/**
- * Returns the run associated with this token.
- */
-public TextStyle getStyle()  { return _style; }
+    /**
+     * Sets the TextStyle.
+     */
+    public void setStyle(TextStyle aStyle)
+    {
+        _style = aStyle;
+        _height = 0;
+    }
 
-/**
- * Returns the font for this token.
- */
-public Font getFont()  { return _font; }
+    /**
+     * Returns the font for this token.
+     */
+    public Font getFont()  { return _style.getFont(); }
 
-/**
- * Returns the color for this token.
- */
-public Color getColor()  { return _color; }
+    /**
+     * Returns the color for this token.
+     */
+    public Color getColor()  { return _color; }
 
-/**
- * Sets the color for this token.
- */
-public void setColor(Color aColor)  { _color = aColor; }
+    /**
+     * Sets the color for this token.
+     */
+    public void setColor(Color aColor)  { _color = aColor; }
 
-/**
- * Returns whether this run is underlined.
- */
-public boolean isUnderlined()  { return _underlined; }
+    /**
+     * Returns whether this run is underlined.
+     */
+    public boolean isUnderlined()  { return _style.isUnderlined(); }
 
-/**
- * Sets whether this run is underlined.
- */
-public void setUnderlined(boolean aValue)  { _underlined = aValue; }
+    /**
+     * Sets whether this run is underlined.
+     */
+    public void setUnderlined(boolean aValue)
+    {
+        setStyle(_style.copyFor(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0));
+    }
 
-/**
- * Returns the run's scripting.
- */
-public int getScripting()  { return _scripting; }
+    /**
+     * Returns the run's scripting.
+     */
+    public int getScripting()  { return _style.getScripting(); }
 
-/**
- * Returns the token's link.
- */
-public TextLink getLink()  { return _link; }
+    /**
+     * Returns whether this run has a hyphen at the end.
+     */
+    public boolean isHyphenated()  { return _hyphenated; }
 
-/**
- * Returns whether this run has a hyphen at the end.
- */
-public boolean isHyphenated()  { return _hyphenated; }
+    /**
+     * Sets whether this run has a hyphen at the end.
+     */
+    public void setHyphenated(boolean aFlag)  { _hyphenated = aFlag; _str = null; }
 
-/**
- * Sets whether this run has a hyphen at the end.
- */
-public void setHyphenated(boolean aFlag)  { _hyphenated = aFlag; _str = null; }
-
-/**
- * Standard toString implementation.
- */
-public String toString()  { return getClass().getSimpleName() + ": " + getString(); }
-
+    /**
+     * Standard toString implementation.
+     */
+    public String toString()  { return getClass().getSimpleName() + ": " + getString(); }
 }
