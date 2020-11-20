@@ -1,5 +1,4 @@
 package snap.view;
-import snap.geom.Rect;
 import snap.geom.RectBase;
 import snap.gfx.*;
 
@@ -12,7 +11,7 @@ class ViewEffect {
     private View  _view;
     
     // The Effect
-    private Effect  _eff;
+    protected Effect  _eff;
 
     // A PainterDVR to hold cached effect render from last pass (and one to hold plain render for compare)
     private PainterDVR  _pdvr, _pdvrX;
