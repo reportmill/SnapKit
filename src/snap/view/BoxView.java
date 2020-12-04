@@ -24,241 +24,262 @@ public class BoxView extends ParentView implements ViewHost {
     public static final String FillWidth_Prop = "FillWidth";
     public static final String FillHeight_Prop = "FillHeight";
     
-/**
- * Creates a new Box.
- */
-public BoxView()  { }
+    /**
+     * Creates a new Box.
+     */
+    public BoxView()  { }
 
-/**
- * Creates a new Box for content.
- */
-public BoxView(View aContent)  { setContent(aContent); }
+    /**
+     * Creates a new Box for content.
+     */
+    public BoxView(View aContent)  { setContent(aContent); }
 
-/**
- * Creates a new Box for content with FillWidth, FillHeight params.
- */
-public BoxView(View aContent, boolean isFillWidth, boolean isFillHeight)
-{
-    setContent(aContent); setFillWidth(isFillWidth); setFillHeight(isFillHeight);
-}
+    /**
+     * Creates a new Box for content with FillWidth, FillHeight params.
+     */
+    public BoxView(View aContent, boolean isFillWidth, boolean isFillHeight)
+    {
+        setContent(aContent); setFillWidth(isFillWidth); setFillHeight(isFillHeight);
+    }
 
-/**
- * Returns the box content.
- */
-public View getContent()  { return _content; }
+    /**
+     * Returns the box content.
+     */
+    public View getContent()  { return _content; }
 
-/**
- * Sets the box content.
- */
-public void setContent(View aView)
-{
-    // If already set, just return
-    if(aView==getContent()) return;
-    
-    // Remove old content, set/add new content
-    if(_content!=null) removeChild(_content);
-    _content = aView;
-    if(_content!=null) addChild(_content);
-}
+    /**
+     * Sets the box content.
+     */
+    public void setContent(View aView)
+    {
+        // If already set, just return
+        if (aView==getContent()) return;
 
-/**
- * Returns the spacing.
- */
-public double getSpacing()  { return _spacing; }
+        // Remove old content, set/add new content
+        if (_content!=null) removeChild(_content);
+        _content = aView;
+        if (_content!=null) addChild(_content);
+    }
 
-/**
- * Sets the spacing.
- */
-public void setSpacing(double aValue)
-{
-    if(aValue==_spacing) return;
-    firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
-    relayout(); relayoutParent();
-}
+    /**
+     * Returns the spacing.
+     */
+    public double getSpacing()  { return _spacing; }
 
-/**
- * Returns whether children will be resized to fill width.
- */
-public boolean isFillWidth()  { return _fillWidth; }
+    /**
+     * Sets the spacing.
+     */
+    public void setSpacing(double aValue)
+    {
+        if (aValue==_spacing) return;
+        firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
+        relayout(); relayoutParent();
+    }
 
-/**
- * Sets whether children will be resized to fill width.
- */
-public void setFillWidth(boolean aValue)
-{
-    if(aValue==_fillWidth) return;
-    firePropChange(FillWidth_Prop, _fillWidth, _fillWidth = aValue);
-    relayout();
-}
+    /**
+     * Returns whether children will be resized to fill width.
+     */
+    public boolean isFillWidth()  { return _fillWidth; }
 
-/**
- * Returns whether children will be resized to fill height.
- */
-public boolean isFillHeight()  { return _fillHeight; }
+    /**
+     * Sets whether children will be resized to fill width.
+     */
+    public void setFillWidth(boolean aValue)
+    {
+        if (aValue==_fillWidth) return;
+        firePropChange(FillWidth_Prop, _fillWidth, _fillWidth = aValue);
+        relayout();
+    }
 
-/**
- * Sets whether children will be resized to fill height.
- */
-public void setFillHeight(boolean aValue)
-{
-    if(aValue==_fillHeight) return;
-    firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
-    relayout();
-}
+    /**
+     * Returns whether children will be resized to fill height.
+     */
+    public boolean isFillHeight()  { return _fillHeight; }
 
-/**
- * Override to change to CENTER.
- */    
-public Pos getDefaultAlign()  { return Pos.CENTER; }
+    /**
+     * Sets whether children will be resized to fill height.
+     */
+    public void setFillHeight(boolean aValue)
+    {
+        if (aValue==_fillHeight) return;
+        firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
+        relayout();
+    }
 
-/**
- * Override.
- */
-protected double getPrefWidthImpl(double aH)
-{
-    return getPrefWidth(this, getContent(), aH);
-    //if(isHorizontal()) return RowView.getPrefWidth(this, null, getSpacing(), aH);
-    //return ColView.getPrefWidth(this, null, aH);
-}
+    // Whether child will crop to height if not enough space available
+    private boolean  _cropHeight;
 
-/**
- * Override.
- */
-protected double getPrefHeightImpl(double aW)
-{
-    return getPrefHeight(this, getContent(), aW);
-    //if(isHorizontal()) return RowView.getPrefHeight(this, null, aW);
-    //return ColView.getPrefHeight(this, null, _spacing, aW);
-}
+    /**
+     * Returns whether child will crop to height if needed.
+     */
+    public boolean isCropHeight()  { return _cropHeight; }
 
-/**
- * Override.
- */
-protected void layoutImpl()
-{
-    layout(this, getContent(), null, _fillWidth, _fillHeight);
-    //if(isHorizontal()) RowView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
-    //else ColView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
-}
+    /**
+     * Sets whether child will crop to height if needed.
+     */
+    public void setCropHeight(boolean aValue)
+    {
+        _cropHeight = aValue;
+    }
 
-/**
- * ViewHost method: Override to return 1 if content is present.
- */
-public int getGuestCount()  { return getContent()!=null? 1 : 0; }
+    /**
+     * Override to change to CENTER.
+     */
+    public Pos getDefaultAlign()  { return Pos.CENTER; }
 
-/**
- * ViewHost method: Override to return content (and complain if index beyond 0).
- */
-public View getGuest(int anIndex)
-{
-    if(anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
-    return getContent();
-}
+    /**
+     * Override.
+     */
+    protected double getPrefWidthImpl(double aH)
+    {
+        return getPrefWidth(this, getContent(), aH);
+        //if (isHorizontal()) return RowView.getPrefWidth(this, null, getSpacing(), aH);
+        //return ColView.getPrefWidth(this, null, aH);
+    }
 
-/**
- * ViewHost method: Override to set content.
- */
-public void addGuest(View aChild, int anIndex)
-{
-    if(anIndex>0) System.err.println("BoxView: Attempt to addGuest beyond 0");
-    setContent(aChild);
-}
+    /**
+     * Override.
+     */
+    protected double getPrefHeightImpl(double aW)
+    {
+        return getPrefHeight(this, getContent(), aW);
+        //if (isHorizontal()) return RowView.getPrefHeight(this, null, aW);
+        //return ColView.getPrefHeight(this, null, _spacing, aW);
+    }
 
-/**
- * ViewHost method: Override to clear content (and complain if index beyond 0).
- */
-public View removeGuest(int anIndex)
-{
-    if(anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
-    View cont = getContent(); setContent(null);
-    return cont;
-}
+    /**
+     * Override.
+     */
+    protected void layoutImpl()
+    {
+        layout(this, getContent(), null, _fillWidth, _fillHeight);
+        //if (isHorizontal()) RowView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
+        //else ColView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
+    }
 
-/**
- * XML archival.
- */
-public XMLElement toXMLView(XMLArchiver anArchiver)
-{
-    // Archive basic view attributes
-    XMLElement e = super.toXMLView(anArchiver);
-    
-    // Archive Spacing, FillWidth, FillHeight
-    if(getSpacing()!=0) e.add(Spacing_Prop, getSpacing());
-    if(isFillWidth()) e.add(FillWidth_Prop, true);
-    if(isFillHeight()) e.add(FillHeight_Prop, true);
-    return e;
-}
+    /**
+     * ViewHost method: Override to return 1 if content is present.
+     */
+    public int getGuestCount()  { return getContent()!=null ? 1 : 0; }
 
-/**
- * XML unarchival.
- */
-public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Unarchive basic view attributes
-    super.fromXMLView(anArchiver, anElement);
+    /**
+     * ViewHost method: Override to return content (and complain if index beyond 0).
+     */
+    public View getGuest(int anIndex)
+    {
+        if (anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+        return getContent();
+    }
 
-    // Unarchive Spacing, FillWidth, FillHeight
-    if(anElement.hasAttribute(Spacing_Prop))setSpacing(anElement.getAttributeFloatValue(Spacing_Prop));
-    if(anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
-    if(anElement.hasAttribute(FillHeight_Prop)) setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop));
-}
+    /**
+     * ViewHost method: Override to set content.
+     */
+    public void addGuest(View aChild, int anIndex)
+    {
+        if (anIndex>0) System.err.println("BoxView: Attempt to addGuest beyond 0");
+        setContent(aChild);
+    }
 
-/**
- * Returns preferred width of layout.
- */
-public static double getPrefWidth(ParentView aPar, View aChild, double aH)
-{
-    // Get insets (just return if empty)
-    Insets ins = aPar.getInsetsAll(); if(aChild==null) return ins.getWidth();
-    Insets marg = aChild.getMargin();
-    
-    // Get height without insets, get best width and return
-    double h = aH>=0? (aH - ins.getHeight()) : aH;
-    double bw = aChild.getBestWidth(h) + marg.getWidth();
-    return bw + ins.getWidth();
-}
+    /**
+     * ViewHost method: Override to clear content (and complain if index beyond 0).
+     */
+    public View removeGuest(int anIndex)
+    {
+        if (anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+        View cont = getContent(); setContent(null);
+        return cont;
+    }
 
-/**
- * Returns preferred height of layout.
- */
-public static double getPrefHeight(ParentView aPar, View aChild, double aW)
-{
-    // Get insets (just return if empty)
-    Insets ins = aPar.getInsetsAll(); if(aChild==null) return ins.getHeight();
-    Insets marg = aChild.getMargin();
-    
-    // Get width without insets, get best height and return
-    double w = aW>=0? (aW - ins.getWidth()) : aW;
-    double bh = aChild.getBestHeight(w) + marg.getHeight();
-    return bh + ins.getHeight();
-}
+    /**
+     * XML archival.
+     */
+    public XMLElement toXMLView(XMLArchiver anArchiver)
+    {
+        // Archive basic view attributes
+        XMLElement e = super.toXMLView(anArchiver);
 
-/**
- * Performs Box layout for given parent, child and fill width/height.
- */
-public static void layout(ParentView aPar, View aChild, Insets theIns, boolean isFillWidth, boolean isFillHeight)
-{
-    // If no child, just return
-    if(aChild==null) return;
-    
-    // Get parent bounds for insets (just return if empty)
-    Insets ins = theIns!=null? theIns : aPar.getInsetsAll();
-    Insets marg = aChild.getMargin();
-    double px = ins.left + marg.left, pw = aPar.getWidth() - ins.getWidth() - marg.getWidth(); if(pw<=0) return;
-    double py = ins.top + marg.top, ph = aPar.getHeight() - ins.getHeight() - marg.getHeight(); if(ph<=0) return;
-    
-    // Get content width/height
-    double cw = isFillWidth || aChild.isGrowWidth()? pw : aChild.getBestWidth(-1); if (cw>pw) cw = pw;
-    double ch = isFillHeight? ph : aChild.getBestHeight(cw);
-    
-    // Handle normal layout
-    double dx = pw - cw;
-    double dy = ph - ch;
-    double sx = aChild.getLeanX()!=null? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
-    double sy = aChild.getLeanY()!=null? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
-    int dx2 = (int) Math.round(dx*sx);
-    int dy2 = (int) Math.round(dy*sy);
-    aChild.setBounds(px + dx2, py + dy2, cw, ch);
-}
-    
+        // Archive Spacing, FillWidth, FillHeight
+        if (getSpacing()!=0) e.add(Spacing_Prop, getSpacing());
+        if (isFillWidth()) e.add(FillWidth_Prop, true);
+        if (isFillHeight()) e.add(FillHeight_Prop, true);
+        return e;
+    }
+
+    /**
+     * XML unarchival.
+     */
+    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        // Unarchive basic view attributes
+        super.fromXMLView(anArchiver, anElement);
+
+        // Unarchive Spacing, FillWidth, FillHeight
+        if (anElement.hasAttribute(Spacing_Prop))setSpacing(anElement.getAttributeFloatValue(Spacing_Prop));
+        if (anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
+        if (anElement.hasAttribute(FillHeight_Prop)) setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop));
+    }
+
+    /**
+     * Returns preferred width of layout.
+     */
+    public static double getPrefWidth(ParentView aPar, View aChild, double aH)
+    {
+        // Get insets (just return if empty)
+        Insets ins = aPar.getInsetsAll(); if (aChild==null) return ins.getWidth();
+        Insets marg = aChild.getMargin();
+
+        // Get height without insets, get best width and return
+        double h = aH>=0 ? (aH - ins.getHeight()) : aH;
+        double bw = aChild.getBestWidth(h) + marg.getWidth();
+        return bw + ins.getWidth();
+    }
+
+    /**
+     * Returns preferred height of layout.
+     */
+    public static double getPrefHeight(ParentView aPar, View aChild, double aW)
+    {
+        // Get insets (just return if empty)
+        Insets ins = aPar.getInsetsAll(); if (aChild==null) return ins.getHeight();
+        Insets marg = aChild.getMargin();
+
+        // Get width without insets, get best height and return
+        double w = aW>=0 ? (aW - ins.getWidth()) : aW;
+        double bh = aChild.getBestHeight(w) + marg.getHeight();
+        return bh + ins.getHeight();
+    }
+
+    /**
+     * Performs Box layout for given parent, child and fill width/height.
+     */
+    public static void layout(ParentView aPar, View aChild, Insets theIns, boolean isFillWidth, boolean isFillHeight)
+    {
+        // If no child, just return
+        if (aChild==null) return;
+
+        // Get parent bounds for insets (just return if empty)
+        Insets ins = theIns!=null ? theIns : aPar.getInsetsAll();
+        Insets marg = aChild.getMargin();
+        double areaX = ins.left + marg.left;
+        double areaY = ins.top + marg.top;
+        double areaW = aPar.getWidth() - ins.getWidth() - marg.getWidth(); if (areaW<=0) return;
+        double areaH = aPar.getHeight() - ins.getHeight() - marg.getHeight(); if (areaH<=0) return;
+
+        // Get content width/height
+        double childW = isFillWidth || aChild.isGrowWidth() ? areaW : aChild.getBestWidth(-1); if (childW>areaW) childW = areaW;
+        double childH = isFillHeight ? areaH : aChild.getBestHeight(childW);
+
+        // If child needs crop, make sure it fits in space
+        if (aPar instanceof BoxView && ((BoxView)aPar).isCropHeight())
+            childH = Math.min(childH, areaH);
+
+        // Handle normal layout
+        double dx = areaW - childW;
+        double dy = areaH - childH;
+        double sx = aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
+        double sy = aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
+        int dx2 = (int) Math.round(dx*sx);
+        int dy2 = (int) Math.round(dy*sy);
+        aChild.setBounds(areaX + dx2, areaY + dy2, childW, childH);
+    }
 }
