@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RowView>
+  <BrowserView Name="BrowserView" PrefWidth="420" PrefHeight="300" PrefColCount="3">
+    <font name="Arial" size="13" />
+  </BrowserView>
+</RowView>
