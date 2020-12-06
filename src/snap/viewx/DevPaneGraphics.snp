@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RowView Padding="25" FillHeight="true">
+  <ColView Padding="5" Spacing="5" FillWidth="true">
+    <font name="Arial" size="13" />
+    <CheckBox Name="ShowFlashButton" Padding="2,6,2,6" PrefHeight="22" text="Flash Painted Areas" />
+    <CheckBox Name="ShowFrameRateButton" Padding="2,6,2,6" PrefHeight="22" text="Show Frame rate" />
+  </ColView>
+</RowView>

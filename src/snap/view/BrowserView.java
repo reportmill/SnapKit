@@ -210,6 +210,10 @@ public class BrowserView <T> extends ParentView implements Selectable<T> {
             bcol.setItems(items);
         }
 
+        // Reset all cached widths
+        for (BrowserCol col : getCols())
+            col.relayoutParent();
+
         // Return column
         return bcol;
     }

@@ -19,13 +19,16 @@ public class DevPane extends ViewOwner {
     private View  _content;
 
     // The SplitView
-    private SplitView  _splitView;
+    protected SplitView  _splitView;
 
     // The TabView
     private TabView  _tabView;
 
     // The ViewTree inspector
     private DevPaneViewTree  _viewTree = new DevPaneViewTree(this);
+
+    // The Graphics inspector
+    private DevPaneGraphics  _gfxInsp = new DevPaneGraphics(this);
 
     // Constants
     private static int DEFAULT_HEIGHT = 300;
@@ -92,6 +95,7 @@ public class DevPane extends ViewOwner {
         // Create SplitView
         _splitView = new DPSplitView();
         _splitView.setVertical(true);
+        _splitView.setBorder(null);
         return _splitView;
     }
 
@@ -102,6 +106,7 @@ public class DevPane extends ViewOwner {
     protected void initUI()
     {
         _tabView.addTab("View Tree", _viewTree.getUI());
+        _tabView.addTab("Graphics", _gfxInsp.getUI());
     }
 
     /**
@@ -165,7 +170,11 @@ public class DevPane extends ViewOwner {
         protected void paintAbove(Painter aPntr)
         {
             if (!_viewTree.isShowing()) return;
-            View selView = _viewTree.getSelView(); if (selView==null) return;
+            View selView = _viewTree.getTargView();
+            if (selView == null)
+                selView = _viewTree.getSelView();
+            if (selView==null) return;
+            if (selView.getRootView()==null) return;
 
             Rect rect = selView.getBoundsLocal().getInsetRect(-1);
             Shape rect2 = new RoundRect(rect.x, rect.y, rect.width, rect.height, 4);

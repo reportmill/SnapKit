@@ -44,7 +44,7 @@ public class ViewUpdater {
     private boolean  _painting;
 
     // Whether painting in debug mode
-    protected static boolean  _debug = false;
+    public static boolean  _debug = false;
     private static int  _pc;
     protected static long  _frames[] = null; //new long[20];
     private Rect  _debugRepaintRect;
