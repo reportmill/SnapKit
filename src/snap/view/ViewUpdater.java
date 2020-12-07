@@ -45,9 +45,9 @@ public class ViewUpdater {
 
     // Whether painting in debug mode
     public static boolean  _debug = false;
+    private static boolean _clearFlash;
     private static int  _pc;
     protected static long  _frames[] = null; //new long[20];
-    private Rect  _debugRepaintRect;
 
     /**
      * Creates a ViewUpdater.
@@ -104,7 +104,11 @@ public class ViewUpdater {
     /**
      * Register call to update via runLater.
      */
-    protected final void updateLater()  { if (_updateRun==null) ViewUtils.runLater(_updateRun = _updateRunShared); }
+    protected final void updateLater()
+    {
+        if (_updateRun==null)
+            ViewUtils.runLater(_updateRun = _updateRunShared);
+    }
 
     /**
      * Main update method: Updates these view things:
@@ -135,7 +139,8 @@ public class ViewUpdater {
 
                 // If view isn't showing, just finish (should get suspended instead)
                 View view = anim.getView();
-                if (!view.isShowing()) anim.finish();
+                if (!view.isShowing())
+                    anim.finish();
 
                 // Update anim time
                 else anim.setTime(time - anim._startTime);
@@ -154,7 +159,10 @@ public class ViewUpdater {
         _rview.layoutDeep();
 
         // Get composite repaint rect from all repaint views
-        Rect rect = getRepaintRect(); if (rect==null) { _updateRun = null; return; }
+        Rect rect = getRepaintRect();
+        if (rect==null) {
+            _updateRun = null; return;
+        }
 
         // Do repaint (in exception handler so we can reset things on failure)
         try {
@@ -165,9 +173,12 @@ public class ViewUpdater {
 
         // Clear RepaintViews, reset runnable, update PaintCount and set Painting false
         finally {
-            for (View v : _repaintViews) v._repaintRect = null;
+            for (View v : _repaintViews)
+                v._repaintRect = null;
             _repaintViews.clear();
-            _updateRun = null; _pc++; _painting = false;
+            _updateRun = null;
+            _pc++;
+            _painting = false;
         }
     }
 
@@ -177,41 +188,60 @@ public class ViewUpdater {
     public synchronized void paintViews(Painter aPntr, Rect aRect)
     {
         // Save painter state, clip to rect, clear background
-        aPntr.save(); if (_frames!=null) startTime();
+        aPntr.save();
+        if (_frames!=null)
+            startTime();
         aPntr.clip(aRect);
-        if (_rview.getFill()==null) aPntr.clearRect(aRect.x,aRect.y,aRect.width,aRect.height);
+        if (_rview.getFill()==null)
+            aPntr.clearRect(aRect.x, aRect.y, aRect.width, aRect.height);
 
         // Paint views
-        if (_debug) paintDebug(_rview, aPntr, aRect);
+        if (_debug)
+            paintDebug(aPntr, aRect);
         else _rview.paintAll(aPntr);
 
         // Restore painter state and update frame counts
-        aPntr.restore(); if (_frames!=null) { stopTime(); if (_pc%20==0) printTime(); }
+        aPntr.restore();
+        if (_frames!=null) {
+            stopTime();
+            if (_pc%20==0) printTime();
+        }
 
         // If paint was called outside of paintLater (maybe Window.show() or resize), repaint all
         if (!_painting) { //System.out.println("ViewUpdater: Repaint not from paintLater");
-            for (View v : _repaintViews) v._repaintRect = null; _repaintViews.clear();
+            for (View v : _repaintViews)
+                v._repaintRect = null;
+            _repaintViews.clear();
             _rview.repaint();
         }
     }
 
     /**
-     * Do debug paint.
+     * Do debug paint: Paints a yellow flash and registers for a later paint to clear flash.
      */
-    protected void paintDebug(View aView, Painter aPntr, Shape aShape)
+    protected void paintDebug(Painter aPntr, Shape aShape)
     {
-        // If odd paint call, sleep for a moment to give debug paint a moment to register then do normal paint
-        if (_debugRepaintRect!=null) {
-            try { Thread.sleep(30); } catch(Exception e) { }
-            _rview.paintAll(aPntr); _debugRepaintRect = null; return;
+        // If animator running, just paint and return
+        if (_timer.isRunning()) {
+            _rview.paintAll(aPntr); _clearFlash = false; return;
+        }
+
+        // If ClearFlash, pause for a moment, paint and return
+        if (_clearFlash) {
+            try { Thread.sleep(120); } catch(Exception e) { }
+            _rview.paintAll(aPntr);
+            _clearFlash = false;
+            return;
         }
 
         // Fill paint bounds with yellow
-        aPntr.setColor(Color.YELLOW); aPntr.fill(aShape);
+        aPntr.setColor(Color.YELLOW);
+        aPntr.fill(aShape);
 
         // Schedule repaint to do real paint
-        Rect rect = _debugRepaintRect = aShape.getBounds();
+        Rect rect = aShape.getBounds();
         ViewUtils.runLater(() -> _rview.repaint(rect));
+        _clearFlash = true;
     }
 
     /**
@@ -296,9 +326,8 @@ public class ViewUpdater {
     /** Timing method: Returns animation stop time. */
     private void stopTime()
     {
-        //System.arraycopy(_frames,1,_frames,0,_frames.length-1);
-        //_frames[_frames.length-1] = System.currentTimeMillis() - _time;
-        long time = System.currentTimeMillis(), dt = time - _time; _time = time;
+        long time = System.currentTimeMillis();
+        long dt = time - _time; _time = time;
         _frames[_pc%_frames.length] = dt;
     }
 
