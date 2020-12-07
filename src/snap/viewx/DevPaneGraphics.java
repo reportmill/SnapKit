@@ -26,6 +26,6 @@ public class DevPaneGraphics extends ViewOwner {
     {
         // Handle ShowFlashButton
         if (anEvent.equals("ShowFlashButton"))
-            ViewUpdater._debug = anEvent.getBoolValue();
+            ViewUpdater.setDebug(anEvent.getBoolValue());
     }
 }

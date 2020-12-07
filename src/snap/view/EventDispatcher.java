@@ -480,12 +480,18 @@ public class EventDispatcher {
 
         // If last sequence was "ddd1" toggle draw debug
         String str = _debugKeys.toString();
-        if (str.equals("ddd1")) { boolean val = !ViewUpdater._debug;
-            ViewUpdater._debug = val; beep(val); _debugKeys.setLength(0); }
+        if (str.equals("ddd1")) {
+            boolean val = !ViewUpdater.isDebug();
+            ViewUpdater.setDebug(val);
+            beep(val); _debugKeys.setLength(0);
+        }
 
         // If last sequence was "ddd2" toggle draw debug
-        if (str.equals("ddd2")) { boolean val = ViewUpdater._frames==null;
-            ViewUpdater._frames = val ? new long[20] : null; beep(val); _debugKeys.setLength(0); }
+        if (str.equals("ddd2")) {
+            boolean val = ViewUpdater._frames==null;
+            ViewUpdater._frames = val ? new long[20] : null;
+            beep(val); _debugKeys.setLength(0);
+        }
     }
 
     // A beep method to beep once for true or twice for false.
