@@ -179,6 +179,10 @@ public class ViewUpdater {
             _updateRun = null;
             _pc++;
             _painting = false;
+
+            // If ClearFlash, register for proper repaint to clear highlight
+            if (_clearFlash)
+                _rview.repaint(rect);
         }
     }
 
@@ -208,7 +212,7 @@ public class ViewUpdater {
         }
 
         // If paint was called outside of paintLater (maybe Window.show() or resize), repaint all
-        if (!_painting) { //System.out.println("ViewUpdater: Repaint not from paintLater");
+        if (!_painting) {
             for (View v : _repaintViews)
                 v._repaintRect = null;
             _repaintViews.clear();
@@ -238,9 +242,7 @@ public class ViewUpdater {
         aPntr.setColor(Color.YELLOW);
         aPntr.fill(aShape);
 
-        // Schedule repaint to do real paint
-        Rect rect = aShape.getBounds();
-        ViewUtils.runLater(() -> _rview.repaint(rect));
+        // Set ClearFlash to trigger repaint to clear highlight
         _clearFlash = true;
     }
 
