@@ -77,6 +77,24 @@ public enum Pos {
     }
 
     /**
+     * Returns the Side most associated with position (corners go to LEFT/RIGHT, center to null).
+     */
+    public Side getSide()
+    {
+        switch (this) {
+            case TOP_LEFT: return Side.LEFT;
+            case TOP_CENTER: return Side.TOP;
+            case TOP_RIGHT: return Side.RIGHT;
+            case CENTER_LEFT: return Side.LEFT;
+            case CENTER_RIGHT: return Side.RIGHT;
+            case BOTTOM_LEFT: return Side.LEFT;
+            case BOTTOM_CENTER: return Side.BOTTOM;
+            case BOTTOM_RIGHT: return Side.RIGHT;
+            default: return null;
+        }
+    }
+
+    /**
      * Returns the Pos for a string.
      */
     public static Pos get(String aString)

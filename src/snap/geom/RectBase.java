@@ -198,7 +198,7 @@ public abstract class RectBase extends Shape implements Cloneable {
     public void inset(Insets anIns)
     {
         if (anIns==null) return;
-        setRect(x+anIns.left,y+anIns.top,width-anIns.left-anIns.right,height-anIns.top-anIns.bottom);
+        setRect(x + anIns.left,y + anIns.top,width - anIns.getWidth(),height - anIns.getHeight());
     }
 
     /**

@@ -1,13 +1,15 @@
 package snap.view;
 import snap.geom.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a view for the purpose of layout.
  */
-public class ViewProxy {
+public class ViewProxy<T extends View> {
 
     // The original view (if available)
-    private View  _view;
+    private T  _view;
 
     // The X/Y
     private double  _x, _y;
@@ -16,7 +18,7 @@ public class ViewProxy {
     private double  _width = UNSET_DOUBLE, _height = UNSET_DOUBLE;
 
     // The children
-    private ViewProxy  _children[];
+    private ViewProxy<?>  _children[];
 
     // The insets
     private Insets  _insets;
@@ -50,8 +52,13 @@ public class ViewProxy {
      */
     public ViewProxy(View aView)
     {
-        _view = aView;
+        _view = (T) aView;
     }
+
+    /**
+     * Returns the view.
+     */
+    public T getView()  { return _view; }
 
     /**
      * Returns the X.
@@ -116,6 +123,15 @@ public class ViewProxy {
     }
 
     /**
+     * Sets the location.
+     */
+    public void setXY(double aX, double aY)
+    {
+        setX(aX);
+        setY(aY);
+    }
+
+    /**
      * Sets the size.
      */
     public void setSize(double aW, double aH)
@@ -128,6 +144,14 @@ public class ViewProxy {
      * Returns the bounds.
      */
     public Rect getBounds()  { return new Rect(getX(), getY(), getWidth(), getHeight()); }
+
+    /**
+     * Sets the bounds.
+     */
+    public void setBounds(Rect aRect)
+    {
+        setBounds(aRect.x, aRect.y, aRect.width, aRect.height);
+    }
 
     /**
      * Sets the bounds.
@@ -170,7 +194,7 @@ public class ViewProxy {
     public ViewProxy[] getChildren()
     {
         if(_children!=null || _view==null) return _children;
-        ParentView par = (ParentView)_view;
+        ParentView par = (ParentView) _view;
         View children[] = par.getChildrenManaged();
         return _children = getProxies(children);
     }
@@ -181,6 +205,29 @@ public class ViewProxy {
     public void setChildren(ViewProxy theProxies[])
     {
         _children = theProxies;
+    }
+
+    /**
+     * Returns the child for given component class.
+     */
+    public <E extends View> ViewProxy<E> getChildForClass(Class<E> aClass)
+    {
+        for (ViewProxy<?> proxy : getChildren())
+            if (aClass.isInstance(proxy.getView()))
+                return (ViewProxy<E>) proxy;
+        return null;
+    }
+
+    /**
+     * Returns the children for given component class.
+     */
+    public <E extends View> ViewProxy<E>[] getChildrenForClass(Class<E> aClass)
+    {
+        List<ViewProxy<E>> children = new ArrayList<>();
+        for (ViewProxy<?> proxy : getChildren())
+            if (aClass.isInstance(proxy.getView()))
+                children.add((ViewProxy<E>) proxy);
+        return children.toArray(new ViewProxy[0]);
     }
 
     /**
@@ -202,6 +249,14 @@ public class ViewProxy {
     }
 
     /**
+     * Returns whether proxy is visible.
+     */
+    public boolean isVisible()
+    {
+        return _view!=null && _view.isVisible();
+    }
+
+    /**
      * Returns the alignment.
      */
     public Pos getAlign()
@@ -209,6 +264,14 @@ public class ViewProxy {
         if(_align!=null) return _align;
         _align = _view!=null? _view.getAlign() : Pos.TOP_LEFT;
         return _align;
+    }
+
+    /**
+     * Sets the alignment.
+     */
+    public void setAlign(Pos aPos)
+    {
+        _align = aPos;
     }
 
     /**
