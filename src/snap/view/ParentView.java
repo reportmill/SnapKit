@@ -6,6 +6,10 @@ import snap.geom.*;
 import snap.gfx.*;
 import snap.util.*;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A View subclass for views with children.
  */
@@ -156,6 +160,29 @@ public class ParentView extends View {
      * Returns the last child of this view.
      */
     public View getChildLast()  { return _children.getLast(); }
+
+    /**
+     * Returns the child for given component class.
+     */
+    public <E extends View> E getChildForClass(Class<E> aClass)
+    {
+        for (View child : getChildren())
+            if (aClass.isInstance(child))
+                return (E) child;
+        return null;
+    }
+
+    /**
+     * Returns the children for given component class.
+     */
+    public <E extends View> E[] getChildrenForClass(Class<E> aClass)
+    {
+        List<E> children = new ArrayList<>();
+        for (View child : getChildren())
+            if (aClass.isInstance(child))
+                children.add((E) child);
+        return children.toArray((E[]) Array.newInstance(aClass, children.size()));
+    }
 
     /**
      * Returns the child at given point.

@@ -6,16 +6,10 @@ import java.util.List;
 /**
  * This class represents a view for the purpose of layout.
  */
-public class ViewProxy<T extends View> {
+public class ViewProxy<T extends View> extends Rect {
 
     // The original view (if available)
     private T  _view;
-
-    // The X/Y
-    private double  _x, _y;
-
-    // The size
-    private double  _width = UNSET_DOUBLE, _height = UNSET_DOUBLE;
 
     // The children
     private ViewProxy<?>  _children[];
@@ -53,6 +47,7 @@ public class ViewProxy<T extends View> {
     public ViewProxy(View aView)
     {
         _view = (T) aView;
+        width = height = UNSET_DOUBLE;
     }
 
     /**
@@ -61,47 +56,13 @@ public class ViewProxy<T extends View> {
     public T getView()  { return _view; }
 
     /**
-     * Returns the X.
-     */
-    public double getX()  { return _x; }
-
-    /**
-     * Sets the X.
-     */
-    public void setX(double aValue)
-    {
-        _x = aValue;
-    }
-
-    /**
-     * Returns the Y.
-     */
-    public double getY()  { return _y; }
-
-    /**
-     * Sets the Y.
-     */
-    public void setY(double aValue)
-    {
-        _y = aValue;
-    }
-
-    /**
      * Returns the width.
      */
     public double getWidth()
     {
-        if(_width!=UNSET_DOUBLE) return _width;
-        _width = _view!=null ? _view.getWidth() : 0;
-        return _width;
-    }
-
-    /**
-     * Sets the width.
-     */
-    public void setWidth(double aValue)
-    {
-        _width = aValue;
+        if(width!=UNSET_DOUBLE) return width;
+        width = _view!=null ? _view.getWidth() : 0;
+        return width;
     }
 
     /**
@@ -109,41 +70,10 @@ public class ViewProxy<T extends View> {
      */
     public double getHeight()
     {
-        if(_height!=UNSET_DOUBLE) return _height;
-        _height = _view!=null ? _view.getHeight() : 0;
-        return _height;
+        if(height!=UNSET_DOUBLE) return height;
+        height = _view!=null ? _view.getHeight() : 0;
+        return height;
     }
-
-    /**
-     * Sets the height.
-     */
-    public void setHeight(double aValue)
-    {
-        _height = aValue;
-    }
-
-    /**
-     * Sets the location.
-     */
-    public void setXY(double aX, double aY)
-    {
-        setX(aX);
-        setY(aY);
-    }
-
-    /**
-     * Sets the size.
-     */
-    public void setSize(double aW, double aH)
-    {
-        setWidth(aW);
-        setHeight(aH);
-    }
-
-    /**
-     * Returns the bounds.
-     */
-    public Rect getBounds()  { return new Rect(getX(), getY(), getWidth(), getHeight()); }
 
     /**
      * Sets the bounds.
@@ -180,7 +110,7 @@ public class ViewProxy<T extends View> {
             for (ViewProxy child : _children)
                 child.setBoundsInClient();
         else if (_view!=null)
-            _view.setBounds(_x, _y, _width, _height);
+            _view.setBounds(x, y, width, height);
     }
 
     /**
