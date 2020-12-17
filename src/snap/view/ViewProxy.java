@@ -323,7 +323,8 @@ public class ViewProxy<T extends View> extends Rect {
         ViewProxy children[] = getChildren();
         Insets ins = getInsetsAll();
         double maxX = children.length>0 ? children[children.length-1].getMaxX() : 0;
-        return maxX + ins.getRight();
+        maxX = Math.ceil(maxX + ins.right);
+        return maxX;
     }
 
     /**
@@ -335,9 +336,8 @@ public class ViewProxy<T extends View> extends Rect {
         Insets ins = getInsetsAll();
         double maxX = ins.getLeft();
         for (ViewProxy child : children) maxX = Math.max(maxX, child.getMaxX());
-        double pw = maxX + ins.getRight();
-        pw = Math.round(pw);
-        return pw;
+        maxX = Math.ceil(maxX + ins.right);
+        return maxX;
     }
 
     /**
@@ -348,7 +348,8 @@ public class ViewProxy<T extends View> extends Rect {
         ViewProxy children[] = getChildren();
         Insets ins = getInsetsAll();
         double maxY = children.length>0 ? children[children.length-1].getMaxY() : 0;
-        return maxY + ins.getBottom();
+        maxY = Math.ceil(maxY + ins.getBottom());
+        return maxY;
     }
 
     /**
@@ -360,9 +361,7 @@ public class ViewProxy<T extends View> extends Rect {
         Insets ins = getInsetsAll();
         double maxY = ins.getTop();
         for (ViewProxy child : children) maxY = Math.max(maxY, child.getMaxY());
-        double ph = maxY + ins.getBottom();
-        ph = Math.round(ph);
-        return ph;
+        return Math.ceil(maxY + ins.getBottom());
     }
 
     /**
