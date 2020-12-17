@@ -126,9 +126,10 @@ public class FilePanel extends ViewOwner {
      */
     public WebFile getDir()
     {
-        if (_dir!=null) return _dir;
-        WebFile defDir = getSite().getRootDir();
-        return _dir = defDir;
+        return _dir;
+        //if (_dir!=null) return _dir;
+        //WebFile defDir = getSite().getRootDir();
+        //return _dir = defDir;
     }
 
     /**
@@ -328,7 +329,7 @@ public class FilePanel extends ViewOwner {
         // Get FileBrowser and configure
         _fileBrowser = getView("FileBrowser", BrowserView.class);
         _fileBrowser.setRowHeight(22);
-        enableEvents(_fileBrowser, MouseRelease);
+        _fileBrowser.addEventFilter(e -> runLater(() -> fileBrowserMouseReleased(e)), MouseRelease);
         _fileBrowser.setResolver(new FileResolver());
         _fileBrowser.setCellConfigure(itm -> configureFileBrowserCell(itm));
 
@@ -358,6 +359,23 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
+     * Called when FileBrowser gets MouseRelease.
+     */
+    private void fileBrowserMouseReleased(ViewEvent anEvent)
+    {
+        // If double-click and valid file, do confirm
+        if (anEvent.getClickCount()==2 && _dbox.isConfirmEnabled())
+            _dbox.confirm();
+
+        // I don't know about this
+        else if (getFile()==null && getDir()!=null) {
+            WebFile dir = getDir();
+            setFile(dir.getParent());
+            setFile(dir);
+        }
+    }
+
+    /**
      * Configures a FileBrowser cell.
      */
     protected void configureFileBrowserCell(ListCell<WebFile> aCell)
@@ -375,23 +393,8 @@ public class FilePanel extends ViewOwner {
     {
         // Handle FileBrowser
         if (anEvent.equals("FileBrowser")) {
-
-            // Handle MouseRelease
-            if (anEvent.isMouseRelease()) {
-                if (anEvent.getClickCount()==2 && _dbox.isConfirmEnabled())
-                    _dbox.confirm();
-                else if (getFile()==null && getDir()!=null) {
-                    WebFile dir = getDir();
-                    setFile(dir.getParent());
-                    setFile(dir);
-                }
-            }
-
-            // Handle Action
-            else {
-                WebFile file = _fileBrowser.getSelItem();
-                setFile(file);
-            }
+            WebFile file = _fileBrowser.getSelItem();
+            setFile(file);
         }
 
         // Handle FileText: If directory, set
