@@ -192,19 +192,6 @@ public class Font implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns the bounds rect for glyphs in given string.
-     */
-    public Rect getGlyphBoundsRound(String aString)
-    {
-        Rect rect = getGlyphBounds(aString);
-        double roundY = Math.round(rect.y);
-        double roundW = Math.ceil(rect.width);
-        double roundH = Math.round(rect.height);
-        rect.setRect(rect.x, roundY, roundW, roundH);
-        return rect;
-    }
-
-    /**
      * Returns the path for given string with character spacing.
      */
     public Shape getOutline(CharSequence aStr, double aX, double aY, double aCharSpace)

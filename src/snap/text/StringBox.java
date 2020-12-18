@@ -28,7 +28,7 @@ public class StringBox extends RoundRect {
     private double  _ascent, _descent;
 
     // The height of glyphs for current string/font
-    private double  _glyphHeight;
+    private double _lineHeight;
 
     // The advance of glyphs for current string/font
     private double  _advance;
@@ -225,7 +225,7 @@ public class StringBox extends RoundRect {
     {
         Insets ins = getInsetsAll();
         double sboxW = getAdvance() + ins.getWidth();
-        double sboxH = getGlyphHeight() + ins.getHeight();
+        double sboxH = getLineHeight() + ins.getHeight();
         setSize(sboxW, sboxH);
     }
 
@@ -259,10 +259,60 @@ public class StringBox extends RoundRect {
     /**
      * Returns the height of the current string/font.
      */
-    public double getGlyphHeight()
+    public double getLineHeight()
     {
         if (_ascent<0) loadMetrics();
-        return _glyphHeight;
+        return _lineHeight;
+    }
+
+    /**
+     * Loads the metrics.
+     */
+    private void loadMetrics()
+    {
+        if (isFontSizing())
+            loadMetricsForFontSizing();
+        else loadMetricsForGlyphSizing();
+    }
+
+    /**
+     * Loads the metrics for default 'Glyph sizing', where text box is snug around glyphs for string+font.
+     */
+    private void loadMetricsForGlyphSizing()
+    {
+        // Get exact bounds around string glyphs for font
+        Font font = getFont();
+        String str = getString();
+        Rect bnds = font.getGlyphBounds(str);
+
+        // Get Ascent, Descent, LineHeight from GlyphBounds
+        _ascent = Math.round(-bnds.y);
+        _descent = Math.round(bnds.height + bnds.y);
+        _lineHeight = _ascent + _descent;
+        _advance = Math.ceil(bnds.width);
+    }
+
+    /** Was using this. */
+    /*private Rect getGlyphBoundsRound() {
+        Rect rect = getFont().getGlyphBounds(getString());
+        rect.y = Math.round(rect.y); rect.height = Math.round(rect.height);
+        return rect;
+    }*/
+
+    /**
+     * Loads the metrics.
+     */
+    private void loadMetricsForFontSizing()
+    {
+        // Get Font Ascent, Descent, LineHeight
+        Font font = getFont();
+        _ascent = Math.ceil(font.getAscent());
+        _descent = Math.ceil(font.getDescent());
+        _lineHeight = _ascent + _descent;
+
+        // Get Advance for string + font
+        String str = getString();
+        _advance = Math.ceil(font.getStringAdvance(str));
     }
 
     /**
@@ -356,23 +406,6 @@ public class StringBox extends RoundRect {
     }
 
     /**
-     * Loads the metrics.
-     */
-    private void loadMetrics()
-    {
-        // Get exact bounds around string glyphs for font
-        Font font = getFont();
-        String str = getString();
-        Rect bnds = font.getGlyphBoundsRound(str);
-
-        // Set Ascent, Descent, GlyphHeight and Advance
-        _ascent = Math.round(-bnds.y);
-        _descent = Math.round(bnds.height + bnds.y);
-        _glyphHeight = Math.round(bnds.height);
-        _advance = bnds.width;
-    }
-
-    /**
      * Override to mark sized.
      */
     @Override
@@ -401,7 +434,7 @@ public class StringBox extends RoundRect {
         String cname = getClass().getSimpleName();
         return cname + " { String='" + _string + '\'' + ", Style=" + _style + ", Rect=[" + super.getString() + ']' +
             ", Padding=" + _padding + ", Border=" + _border +
-            ", Ascent=" + getAscent() + ", Descent=" + getDescent() + ", GlyphHeight=" + _glyphHeight +
+            ", Ascent=" + getAscent() + ", Descent=" + getDescent() + ", GlyphHeight=" + _lineHeight +
             ", Advance=" + _advance + " }";
     }
 
