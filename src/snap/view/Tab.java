@@ -10,87 +10,85 @@ import snap.geom.Pos;
 public class Tab {
     
     // The TabView
-    TabView       _tabView;
+    protected TabView  _tabView;
 
-    // The title
-    String        _title;
-    
     // The tab button
-    ToggleButton  _button;
+    private ToggleButton  _button;
     
     // The content
-    View          _content;
+    private View  _content;
     
-/**
- * Creates a new Tab.
- */
-public Tab()
-{
-    _button = new ToggleButton(); _button.getLabel().setPadding(4,7,4,7);
-    _button.setAlign(Pos.TOP_CENTER); _button.setPosition(Pos.TOP_CENTER);
-}
-    
-/**
- * Returns the title.
- */
-public String getTitle()  { return _button.getText(); }
+    /**
+     * Creates a new Tab.
+     */
+    public Tab()
+    {
+        _button = new ToggleButton();
+        _button.getLabel().setPadding(4,7,4,7);
+        _button.setAlign(Pos.TOP_CENTER);
+        _button.setPosition(Pos.TOP_CENTER);
+    }
 
-/**
- * Sets the title.
- */
-public void setTitle(String aTitle)  { _button.setText(aTitle); }
+    /**
+     * Returns the title.
+     */
+    public String getTitle()  { return _button.getText(); }
 
-/**
- * Returns the button.
- */
-public ToggleButton getButton()  { return _button; }
+    /**
+     * Sets the title.
+     */
+    public void setTitle(String aTitle)  { _button.setText(aTitle); }
 
-/**
- * Returns the content.
- */
-public View getContent()  { return _content; }
+    /**
+     * Returns the button.
+     */
+    public ToggleButton getButton()  { return _button; }
 
-/**
- * Sets the content.
- */
-public void setContent(View aView)  { _content = aView; }
+    /**
+     * Returns the content.
+     */
+    public View getContent()  { return _content; }
 
-/**
- * Returns the index of this tab in TabView.
- */
-public int getIndex()
-{
-    for(int i=0;i<_tabView.getTabCount();i++)
-        if(_tabView.getTab(i)==this)
-            return i;
-    return -1;
-}
+    /**
+     * Sets the content.
+     */
+    public void setContent(View aView)  { _content = aView; }
 
-/**
- * Returns whether tab is visible.
- */
-public boolean isVisible()  { return _button.isVisible(); }
+    /**
+     * Returns the index of this tab in TabView.
+     */
+    public int getIndex()
+    {
+        for (int i=0;i<_tabView.getTabCount();i++)
+            if (_tabView.getTab(i)==this)
+                return i;
+        return -1;
+    }
 
-/**
- * Sets whether tab is visible.
- */
-public void setVisible(boolean aValue)
-{
-    if(aValue==isVisible()) return;
-    _button.setVisible(aValue);
-    if(!aValue && _tabView.getSelIndex()==getIndex())
-        _tabView.setSelIndex(getIndex()!=0? 0 : 1);
-}
+    /**
+     * Returns whether tab is visible.
+     */
+    public boolean isVisible()  { return _button.isVisible(); }
 
-/**
- * Standard toString implementation.
- */
-public String toString()
-{
-    String str = "Tab { ";
-    str += "Title:" + getTitle();
-    str += ", Index:" + getIndex();
-    return str + " }";
-}
+    /**
+     * Sets whether tab is visible.
+     */
+    public void setVisible(boolean aValue)
+    {
+        if (aValue==isVisible()) return;
+        _button.setVisible(aValue);
+        if (!aValue && _tabView.getSelIndex()==getIndex())
+            _tabView.setSelIndex(getIndex()!=0 ? 0 : 1);
+    }
 
+    /**
+     * Standard toString implementation.
+     */
+    public String toString()
+    {
+        String str = "Tab { ";
+        str += "Title:" + getTitle();
+        str += ", Index:" + getIndex();
+        return str + " }";
+    }
 }

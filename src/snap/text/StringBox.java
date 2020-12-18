@@ -33,8 +33,8 @@ public class StringBox extends RoundRect {
     // The advance of glyphs for current string/font
     private double  _advance;
 
-    // Whether box has ever been sized
-    private boolean  _neverBeenSized = true;
+    // Whether box needs to be sized
+    private boolean _needsResize = true;
 
     /**
      * Constructor.
@@ -59,11 +59,17 @@ public class StringBox extends RoundRect {
     public String getString()  { return _string; }
 
     /**
+     * Returns the length of the string.
+     */
+    public int length()  { return _string!=null ? _string.length() : 0; }
+
+    /**
      * Sets the string.
      */
     public void setString(String aString)
     {
         _string = aString;
+        _needsResize = true;
         _ascent = -1;
     }
 
@@ -78,6 +84,7 @@ public class StringBox extends RoundRect {
     public void setStyle(TextStyle aStyle)
     {
         _style = aStyle;
+        _needsResize = true;
         _ascent = -1;
     }
 
@@ -104,6 +111,7 @@ public class StringBox extends RoundRect {
      */
     public void setColor(Color aColor)
     {
+        if (aColor.equals(getColor())) return;
         setStyle(_style.copyFor(aColor));
     }
 
@@ -126,27 +134,6 @@ public class StringBox extends RoundRect {
     public int getScripting()  { return _style.getScripting(); }
 
     /**
-     * Returns the padding.
-     */
-    public Insets getPadding()  { return _padding; }
-
-    /**
-     * Sets the padding.
-     */
-    public void setPadding(Insets theInsets)
-    {
-        _padding = theInsets;
-    }
-
-    /**
-     * Sets the padding to given insets.
-     */
-    public void setPadding(double aTop, double aRgt, double aBtm, double aLft)
-    {
-        setPadding(new Insets(aTop, aRgt, aBtm, aLft));
-    }
-
-    /**
      * Returns the border.
      */
     public Border getBorder()  { return _border; }
@@ -157,6 +144,29 @@ public class StringBox extends RoundRect {
     public void setBorder(Border aBorder)
     {
         _border = aBorder;
+        _needsResize = true;
+    }
+
+    /**
+     * Returns the padding.
+     */
+    public Insets getPadding()  { return _padding; }
+
+    /**
+     * Sets the padding.
+     */
+    public void setPadding(Insets theInsets)
+    {
+        _padding = theInsets;
+        _needsResize = true;
+    }
+
+    /**
+     * Sets the padding to given insets.
+     */
+    public void setPadding(double aTop, double aRgt, double aBtm, double aLft)
+    {
+        setPadding(new Insets(aTop, aRgt, aBtm, aLft));
     }
 
     /**
@@ -292,7 +302,7 @@ public class StringBox extends RoundRect {
     public void drawString(Painter aPntr)
     {
         // If NeverBeenSized, sizeToFit
-        if (_neverBeenSized) resize();
+        if (_needsResize) resize();
 
         // Get info
         String str = getString();
@@ -314,7 +324,7 @@ public class StringBox extends RoundRect {
     public void drawRect(Painter aPntr)
     {
         // If NeverBeenSized, sizeToFit
-        if (_neverBeenSized) resize();
+        if (_needsResize) resize();
 
         // Get info
         Border border = getBorder();
@@ -350,9 +360,12 @@ public class StringBox extends RoundRect {
      */
     private void loadMetrics()
     {
+        // Get exact bounds around string glyphs for font
         Font font = getFont();
         String str = getString();
         Rect bnds = font.getGlyphBoundsRound(str);
+
+        // Set Ascent, Descent, GlyphHeight and Advance
         _ascent = Math.round(-bnds.y);
         _descent = Math.round(bnds.height + bnds.y);
         _glyphHeight = Math.round(bnds.height);
@@ -366,7 +379,7 @@ public class StringBox extends RoundRect {
     public void setWidth(double aValue)
     {
         super.setWidth(aValue);
-        _neverBeenSized = false;
+        _needsResize = false;
     }
 
     /**
@@ -375,7 +388,7 @@ public class StringBox extends RoundRect {
     @Override
     public void setCenteredXY(double aX, double aY)
     {
-        if (_neverBeenSized) resize();
+        if (_needsResize) resize();
         super.setCenteredXY(aX, aY);
     }
 
