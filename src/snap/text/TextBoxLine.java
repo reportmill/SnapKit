@@ -504,8 +504,9 @@ public class TextBoxLine implements CharSequence {
         // Get RichTextRun and TextStyle at char index
         RichTextRun rtrun = getRichTextRun(aStart);
         TextStyle style = rtrun.getStyle();
-        if (_tbox._fontScale!=1)
-            style = style.copyFor(style.getFont().scaleFont(_tbox._fontScale));
+        double fontScale = _tbox.getFontScale();
+        if (fontScale!=1)
+            style = style.copyFor(style.getFont().scaleFont(fontScale));
 
         // Get end of run
         int end = Math.min(length(), rtrun.getEnd() - getRichTextLineStart());

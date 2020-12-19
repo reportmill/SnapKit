@@ -67,18 +67,24 @@ public class ParentView extends View {
     protected void addChild(View aChild, int anIndex)
     {
         // If child already has parent, remove from parent
-        if (aChild.getParent()!=null) aChild.getParent().removeChild(aChild);
+        if (aChild.getParent()!=null)
+            aChild.getParent().removeChild(aChild);
 
         // Add child to children list and set child's parent to this view
         aChild.setParent(this);
 
         // Add child to Children list
         _children.add(aChild, anIndex);
-        relayout(); relayoutParent(); repaint(); setNeedsLayoutDeep(true);
+        relayout();
+        relayoutParent();
+        repaint();
+        setNeedsLayoutDeep(true);
 
         // If this view has child prop listeners, add to this child as well
         if (_childPCL!=null) {
-            aChild.addPropChangeListener(_childPCL); aChild.addDeepChangeListener(_childDCL); }
+            aChild.addPropChangeListener(_childPCL);
+            aChild.addDeepChangeListener(_childDCL);
+        }
 
         // Fire property change
         firePropChange(Child_Prop, null, aChild, anIndex);
@@ -95,10 +101,14 @@ public class ParentView extends View {
 
         // If this view has child prop listeners, clear from child
         if (_childPCL!=null) {
-            child.removePropChangeListener(_childPCL); child.removeDeepChangeListener(_childDCL); }
+            child.removePropChangeListener(_childPCL);
+            child.removeDeepChangeListener(_childDCL);
+        }
 
         // Register for layout
-        relayout(); relayoutParent(); repaint();
+        relayout();
+        relayoutParent();
+        repaint();
 
         // Fire property change and return
         firePropChange(Child_Prop, child, null, anIndex);

@@ -20,6 +20,12 @@ public class StringView extends View {
     // The text paint
     Paint          _textFill;
 
+    // Whether text should shrink to fit
+    public boolean  _shrinkToFit;
+
+    // Constants for properties
+    public static final String ShrinkToFit_Prop = "ShrinkToFit";
+
     /**
      * Constructor.
      */
@@ -62,9 +68,36 @@ public class StringView extends View {
     }
 
     /**
+     * Returns whether text should shrink to fit.
+     */
+    public boolean isShrinkToFit()  { return _shrinkToFit; }
+
+    /**
+     * Sets whether text should shrink to fit.
+     */
+    public void setShrinkToFit(boolean aValue)
+    {
+        if (aValue == isShrinkToFit()) return;
+        firePropChange(ShrinkToFit_Prop, _shrinkToFit, _shrinkToFit = aValue);
+    }
+
+    /**
      * Returns the text length.
      */
     public int length()  { return _text!=null ? _text.length() : 0; }
+
+    /**
+     * Returns whether text fits in box.
+     */
+    public boolean isTextFits()
+    {
+        Insets ins = getInsetsAll();
+        double areaW = getWidth() - ins.getWidth();
+        double areaH = getHeight() - ins.getHeight();
+        double strW = getTextWidth();
+        double strH = getTextHeight();
+        return strW <= areaW && strH <= areaH;
+    }
 
     /**
      * Returns the text width.
@@ -72,9 +105,9 @@ public class StringView extends View {
     public double getTextWidth()
     {
         if (length()==0) return 0;
-        String text = getText();
         Font font = getFont();
-        return Math.ceil(font.getStringAdvance(text));
+        String str = getText();
+        return Math.ceil(font.getStringAdvance(str));
     }
 
     /**
@@ -93,22 +126,24 @@ public class StringView extends View {
     {
         // Get basic bounds for TextField size/insets and font/string width/height
         Insets ins = getInsetsAll();
-        double viewW = getWidth();
-        double viewH = getHeight();
         double areaX = ins.left;
         double areaY = ins.top;
         double textW = getTextWidth();
         double textH = getTextHeight();
 
-        // Adjust rect by alignment
+        // Shift AreaX for X alignment
         double alignX = ViewUtils.getAlignX(this);
-        double alignY = ViewUtils.getAlignY(this);
         if (alignX>0) {
-            double extraW = viewW - areaX - ins.right - textW;
+            double areaW = getWidth() - ins.getWidth();
+            double extraW = areaW - textW;
             areaX = Math.max(areaX + extraW*alignX, areaX);
         }
+
+        // Shift AreaY for Y alignment
+        double alignY = ViewUtils.getAlignY(this);
         if (alignY>0) {
-            double extraH = viewH - areaY - ins.bottom - textH;
+            double areaH = getHeight() - ins.getHeight();
+            double extraH = areaH - textH;
             areaY = Math.max(areaY + Math.round(extraH*alignY), areaY);
         }
 
@@ -191,13 +226,36 @@ public class StringView extends View {
         // If no text, just return
         if (length()==0) return;
 
-        Rect bnds = getTextBounds();
+        // If ShrinkToFit and text doesn't fit, paint special
+        if (isShrinkToFit() && !isTextFits()) {
+            StringBox sbox = createStringBox().getBoxThatFits();
+            sbox.drawString(aPntr);
+            return;
+        }
+
+        // Set font and text fill
         Font font = getFont();
-        Paint textFill = getTextFill();
-        double baseline = Math.ceil(font.getAscent());
         aPntr.setFont(font);
-        aPntr.setPaint(textFill);
-        aPntr.drawString(_text, bnds.x, bnds.y + baseline);
+        aPntr.setPaint(getTextFill());
+
+        // Get String X/Y and paint
+        Rect bnds = getTextBounds();
+        double strY = bnds.y + Math.ceil(font.getAscent());
+        aPntr.drawString(_text, bnds.x, strY);
+    }
+
+    /**
+     * Creates a StringBox.
+     */
+    private StringBox createStringBox()
+    {
+        StringBox sbox = new StringBox(getText());
+        sbox.setFont(getFont());
+        sbox.setColor(getTextFill().getColor());
+        sbox.setSize(getWidth(), getHeight());
+        sbox.setPadding(getPadding());
+        sbox.setBorder(getBorder());
+        return sbox;
     }
 
     /**

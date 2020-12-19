@@ -641,8 +641,9 @@ public class TextBox {
         RichTextRun run = aTextLine.getRun(0);
         int rend = run.getEnd();
         TextStyle style = run.getStyle();
-        if (_fontScale!=1)
-            style = style.copyFor(style.getFont().scaleFont(_fontScale));
+        double fontScale = getFontScale();
+        if (fontScale!=1)
+            style = style.copyFor(style.getFont().scaleFont(fontScale));
         double lineHt = style.getLineHeight();
         boolean wrap = isWrapLines();
         boolean hyphenate = isHyphenate();
@@ -669,8 +670,8 @@ public class TextBox {
                 run = aTextLine.getRun(run.getIndex()+1);
                 rend = run.getEnd();
                 style = run.getStyle();
-                if (_fontScale!=1)
-                    style = style.copyFor(style.getFont().scaleFont(_fontScale));
+                if (fontScale!=1)
+                    style = style.copyFor(style.getFont().scaleFont(fontScale));
                 lineHt = Math.max(lineHt, style.getLineHeight());
                 cspace = style.getCharSpacing();
             }

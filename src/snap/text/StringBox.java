@@ -34,7 +34,10 @@ public class StringBox extends RoundRect {
     private double  _advance;
 
     // Whether box needs to be sized
-    private boolean _needsResize = true;
+    private boolean  _needsResize = true;
+
+    // The version of this box with font such that string fits
+    private StringBox  _boxThatFits;
 
     /**
      * Constructor.
@@ -426,6 +429,105 @@ public class StringBox extends RoundRect {
     }
 
     /**
+     * Returns whether text fits in box.
+     */
+    public boolean isTextFits()
+    {
+        Insets ins = getInsetsAll();
+        double areaW = getWidth() - ins.getWidth();
+        double areaH = getHeight() - ins.getHeight();
+        double strW = getAdvance();
+        double strH = getLineHeight();
+        return strW <= areaW && strH <= areaH;
+    }
+
+    /**
+     * Sets the font so that it fits.
+     */
+    public void setFontToFit()
+    {
+        // If text fits, just return
+        if (isTextFits()) return;
+
+        // Get Text area available
+        Insets ins = getInsetsAll();
+        double areaW = getWidth() - ins.getWidth();
+        double areaH = getHeight() - ins.getHeight();
+
+        // Declare dampening variables
+        Font font = getFont();
+        double fontSize = font.getSize();
+        double scaleLow = 0;
+        double scaleHigh = 1;
+
+        // Loop while dampening variables are normal
+        while (true) {
+
+            // Reset fontScale to mid-point of fsHi and fsLo
+            double fontScale = (scaleLow + scaleHigh)/2;
+            double fontSize2 = fontSize * fontScale;
+            setFont(font.deriveFont(fontSize2));
+
+            double strW = getAdvance();
+            double strH = getLineHeight();
+            boolean textFits = strW <= areaW && strH <= areaH;
+
+            // If text exceeded layout bounds, reset fsHi to fontScale
+            if (!textFits) {
+                scaleHigh = fontScale;
+                if ((scaleHigh + scaleLow)/2 == 0) {
+                    System.err.println("StringBox.setFontToFit: Couldn't fit text in box at any size (wft)"); break; }
+            }
+
+            // If text didn't exceed layout bounds, reset scaleLow to fontScale
+            else {
+
+                // Set new low (if almost fsHi, just return)
+                scaleLow = fontScale;
+                double detaFS = scaleHigh - scaleLow;
+                if (detaFS<.05)
+                    break;
+
+                // If almost fit width, stop
+                double diffW = areaW - strW;
+                if (diffW < 1)
+                    break;
+
+                // If almost fit height, stop
+                double diffH = areaH - strH;
+                if (diffH<1)
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Returns a version of this box with font such that text fits.
+     */
+    public StringBox getBoxThatFits()
+    {
+        // If already set, just return
+        if (_boxThatFits!=null) return _boxThatFits;
+
+        // If TextFits, just set/return this
+        if (isTextFits())
+            return _boxThatFits = this;
+
+        // Clone box, setFontToFit() and set/return
+        StringBox clone = clone();
+        clone.setFontToFit();
+        return _boxThatFits = clone;
+    }
+
+    /**
+     * Standard clone implementation.
+     */
+    public StringBox clone()
+    {
+        return (StringBox) super.clone();
+    }
+
+    /**
      * Standard toString implementation.
      */
     @Override
@@ -434,7 +536,7 @@ public class StringBox extends RoundRect {
         String cname = getClass().getSimpleName();
         return cname + " { String='" + _string + '\'' + ", Style=" + _style + ", Rect=[" + super.getString() + ']' +
             ", Padding=" + _padding + ", Border=" + _border +
-            ", Ascent=" + getAscent() + ", Descent=" + getDescent() + ", GlyphHeight=" + _lineHeight +
+            ", Ascent=" + getAscent() + ", Descent=" + getDescent() + ", LineHeight=" + _lineHeight +
             ", Advance=" + _advance + " }";
     }
 
