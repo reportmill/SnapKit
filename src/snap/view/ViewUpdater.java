@@ -44,7 +44,7 @@ public class ViewUpdater {
     private boolean  _painting;
 
     // Whether painting in debug mode
-    protected static boolean  _debug = false;
+    protected static boolean _paintDebug = false;
     private static boolean _clearFlash;
     private static int  _pc;
     protected static long  _frames[] = null; //new long[20];
@@ -200,7 +200,7 @@ public class ViewUpdater {
             aPntr.clearRect(aRect.x, aRect.y, aRect.width, aRect.height);
 
         // Paint views
-        if (_debug)
+        if (_paintDebug)
             paintDebug(aPntr, aRect);
         else _rview.paintAll(aPntr);
 
@@ -344,12 +344,25 @@ public class ViewUpdater {
     /**
      * Returns whether painting is debug.
      */
-    public static boolean isDebug()  { return _debug; }
+    public static boolean isPaintDebug()  { return _paintDebug; }
 
     /**
      * Set whether painting is debug.
      */
-    public static void setDebug(boolean aValue)  { _debug = aValue; }
+    public static void setPaintDebug(boolean aValue)  { _paintDebug = aValue; }
+
+    /**
+     * Returns whether to show frame rate.
+     */
+    public static boolean isShowFrameRate()  { return _frames!=null; }
+
+    /**
+     * Set whether whether to show frame rate.
+     */
+    public static void setShowFrameRate(boolean aValue)
+    {
+        _frames = aValue ? new long[20] : null;
+    }
 
     /**
      * An interface to listen to ViewUpdater events.

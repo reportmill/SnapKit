@@ -4,6 +4,8 @@
 package snap.view;
 import java.util.*;
 import snap.util.ArrayUtils;
+import snap.viewx.DevPane;
+
 import static snap.view.ViewEvent.Type.*;
 
 /**
@@ -35,8 +37,8 @@ public class EventDispatcher {
     // A popup window, if one was added to root view during last event
     private PopupWindow  _popup;
     
-    // A buffer to hold debug keys (after "snp" sequence is typed)
-    private StringBuilder  _debugKeys = new StringBuilder();
+    // A counter to track if user is requesting debug panel (hit control key 3 times)
+    private int  _debugTrigger;
 
     // Whether mouse is currently down
     private static boolean  _mouseDown;
@@ -322,9 +324,12 @@ public class EventDispatcher {
         ViewUtils._shiftDown = anEvent.isShiftDown();
         ViewUtils._shortcutDown = anEvent.isShortcutDown();
 
-        // Track keys whenever "snp" + anything typed in to enable certain debug options
-        if (anEvent.isKeyType() && (anEvent.getKeyChar()=='d' || _debugKeys.length()>0))
-            trackDebugKeys(anEvent);
+        // If CONTROL key is hit 3 times in a row, trigger DevPane
+        if (anEvent.isKeyPress()) {
+            if (anEvent.getKeyCode()==KeyCode.CONTROL)
+                trackShowDevPane(anEvent);
+            else _debugTrigger = 0;
+        }
 
         // Get current focused view and array of parents
         View focusedView = _win.getFocusedView();
@@ -471,34 +476,16 @@ public class EventDispatcher {
         return pars;
     }
 
-    // A method to
-    void trackDebugKeys(ViewEvent anEvent)
+    /**
+     * Tracks whether user is requesting DevPane.
+     */
+    private void trackShowDevPane(ViewEvent anEvent)
     {
-        // Add char and clear if too long
-        _debugKeys.append(anEvent.getKeyChar());
-        if (_debugKeys.length()>5) _debugKeys.setLength(0);
-
-        // If last sequence was "ddd1" toggle draw debug
-        String str = _debugKeys.toString();
-        if (str.equals("ddd1")) {
-            boolean val = !ViewUpdater.isDebug();
-            ViewUpdater.setDebug(val);
-            beep(val); _debugKeys.setLength(0);
+        _debugTrigger++;
+        if (_debugTrigger > 2) {
+            DevPane.setDevPaneShowing(anEvent.getView(), !DevPane.isDevPaneShowing(anEvent.getView()));
+            _debugTrigger = 0;
         }
-
-        // If last sequence was "ddd2" toggle draw debug
-        if (str.equals("ddd2")) {
-            boolean val = ViewUpdater._frames==null;
-            ViewUpdater._frames = val ? new long[20] : null;
-            beep(val); _debugKeys.setLength(0);
-        }
-    }
-
-    // A beep method to beep once for true or twice for false.
-    void beep(boolean aFlag)
-    {
-        ViewUtils.beep();
-        if (!aFlag) ViewUtils.runDelayed(() -> ViewUtils.beep(), 300, true);
     }
 
     // Returns the current click count

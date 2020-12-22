@@ -1,5 +1,4 @@
 package snap.viewx;
-
 import snap.view.ViewEvent;
 import snap.view.ViewOwner;
 import snap.view.ViewUpdater;
@@ -26,6 +25,10 @@ public class DevPaneGraphics extends ViewOwner {
     {
         // Handle ShowFlashButton
         if (anEvent.equals("ShowFlashButton"))
-            ViewUpdater.setDebug(anEvent.getBoolValue());
+            ViewUpdater.setPaintDebug(anEvent.getBoolValue());
+
+        // Handle ShowFrameRateButton
+        if (anEvent.equals("ShowFrameRateButton"))
+            ViewUpdater.setShowFrameRate(anEvent.getBoolValue());
     }
 }
