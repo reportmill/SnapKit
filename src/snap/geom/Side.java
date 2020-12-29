@@ -24,4 +24,14 @@ public enum Side {
             default: throw new RuntimeException("Side: Unknown side: " + this);
         }
     }
+
+    /**
+     * Returns whether side is horizontal (LEFT or RIGHT).
+     */
+    public boolean isHorizontal()  { return this==LEFT || this==RIGHT; }
+
+    /**
+     * Returns whether side is vertical (TOP or BOTTOM).
+     */
+    public boolean isVertical()  { return this==TOP || this==BOTTOM; }
 }
