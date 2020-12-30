@@ -71,6 +71,10 @@ public class DevPane extends ViewOwner {
      */
     public void removeFromWindow()
     {
+        // Make sure content is Pickable (DevPaneViewTree.Targeting turns this off)
+        getContent().setPickable(true);
+
+        // Remove item animated
         _splitView.removeItemWithAnim(_tabView);
         _splitView.getDivider(0).getAnim(0).setOnFinish(() -> removeFromWindowAnimDone());
     }
