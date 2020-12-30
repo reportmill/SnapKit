@@ -1,7 +1,5 @@
 package snap.text;
-import snap.geom.Insets;
-import snap.geom.Rect;
-import snap.geom.RoundRect;
+import snap.geom.*;
 import snap.gfx.*;
 
 /**
@@ -15,23 +13,26 @@ public class StringBox extends RoundRect {
     // The TextStyle for characters in this run
     protected TextStyle  _style = TextStyle.DEFAULT;
 
+    // The border
+    private Border  _border;
+
     // The padding
     private Insets  _padding = Insets.EMPTY;
 
-    // The border
-    private Border  _border;
+    // The alignment
+    private Pos  _align = Pos.TOP_LEFT;
 
     // Whether to size to font instead of glyphs
     private boolean  _fontSizing;
 
-    // The ascent, descent for current string/font
-    private double  _ascent, _descent;
+    // The width/advance of glyphs for current string/font
+    private double _strWidth;
 
     // The height of glyphs for current string/font
-    private double _lineHeight;
+    private double _strHeight;
 
-    // The advance of glyphs for current string/font
-    private double  _advance;
+    // The ascent, descent for current string/font
+    private double  _ascent, _descent;
 
     // Whether box needs to be sized
     private boolean  _needsResize = true;
@@ -151,6 +152,14 @@ public class StringBox extends RoundRect {
     }
 
     /**
+     * Sets the border for given color and stroke width.
+     */
+    public void setBorder(Color aColor, double aWidth)
+    {
+        setBorder(Border.createLineBorder(aColor, aWidth));
+    }
+
+    /**
      * Returns the padding.
      */
     public Insets getPadding()  { return _padding; }
@@ -173,11 +182,16 @@ public class StringBox extends RoundRect {
     }
 
     /**
-     * Sets the border for given color and stroke width.
+     * Returns how the string is positioned in the box if larger than String width/height (default is Top-Left).
      */
-    public void setBorder(Color aColor, double aWidth)
+    public Pos getAlign()  { return _align; }
+
+    /**
+     * Sets how the string is positioned in the box if larger than String width/height (default is Top-Left).
+     */
+    public void setAlign(Pos aPos)
     {
-        setBorder(Border.createLineBorder(aColor, aWidth));
+        _align = aPos;
     }
 
     /**
@@ -227,9 +241,27 @@ public class StringBox extends RoundRect {
     public void resize()
     {
         Insets ins = getInsetsAll();
-        double sboxW = getAdvance() + ins.getWidth();
-        double sboxH = getLineHeight() + ins.getHeight();
+        double sboxW = getStringWidth() + ins.getWidth();
+        double sboxH = getStringHeight() + ins.getHeight();
         setSize(sboxW, sboxH);
+    }
+
+    /**
+     * Returns the width of the string (aka the 'advance').
+     */
+    public double getStringWidth()
+    {
+        if (_ascent<0) loadMetrics();
+        return _strWidth;
+    }
+
+    /**
+     * Returns the height of the current string/font (aka the 'line height').
+     */
+    public double getStringHeight()
+    {
+        if (_ascent<0) loadMetrics();
+        return _strHeight;
     }
 
     /**
@@ -251,21 +283,23 @@ public class StringBox extends RoundRect {
     }
 
     /**
-     * Returns the advance.
+     * Returns the preferred width of box.
      */
-    public double getAdvance()
+    public double getPrefWidth()
     {
-        if (_ascent<0) loadMetrics();
-        return _advance;
+        Insets ins = getInsetsAll();
+        double strW = getStringWidth();
+        return strW + ins.getWidth();
     }
 
     /**
-     * Returns the height of the current string/font.
+     * Returns the preferred height of box.
      */
-    public double getLineHeight()
+    public double getPrefHeight()
     {
-        if (_ascent<0) loadMetrics();
-        return _lineHeight;
+        Insets ins = getInsetsAll();
+        double strH = getStringHeight();
+        return strH + ins.getHeight();
     }
 
     /**
@@ -286,13 +320,15 @@ public class StringBox extends RoundRect {
         // Get exact bounds around string glyphs for font
         Font font = getFont();
         String str = getString();
-        Rect bnds = font.getGlyphBounds(str);
+        Rect bnds = str!=null && str.length()>0 ? font.getGlyphBounds(str) : Rect.ZeroRect;
+
+        // Get StringWidth from GlyphBounds
+        _strWidth = Math.ceil(bnds.width);
 
         // Get Ascent, Descent, LineHeight from GlyphBounds
         _ascent = Math.round(-bnds.y);
         _descent = Math.round(bnds.height + bnds.y);
-        _lineHeight = _ascent + _descent;
-        _advance = Math.ceil(bnds.width);
+        _strHeight = _ascent + _descent;
     }
 
     /** Was using this. */
@@ -307,15 +343,15 @@ public class StringBox extends RoundRect {
      */
     private void loadMetricsForFontSizing()
     {
-        // Get Font Ascent, Descent, LineHeight
+        // Get StringWidth for string + font (aka Advance)
+        String str = getString();
         Font font = getFont();
+        _strWidth = Math.ceil(font.getStringAdvance(str));
+
+        // Get Font Ascent, Descent, StringHeight (aka LineHeight)
         _ascent = Math.ceil(font.getAscent());
         _descent = Math.ceil(font.getDescent());
-        _lineHeight = _ascent + _descent;
-
-        // Get Advance for string + font
-        String str = getString();
-        _advance = Math.ceil(font.getStringAdvance(str));
+        _strHeight = _ascent + _descent;
     }
 
     /**
@@ -323,8 +359,23 @@ public class StringBox extends RoundRect {
      */
     public double getStringX()
     {
+        // Get String X
         Insets ins = getInsetsAll();
-        return getX() + ins.left;
+        double strX = getX() + ins.left;
+
+        // If alignment is not Left, adjust
+        HPos alignX = getAlign().getHPos();
+        if (alignX != HPos.LEFT) {
+            double areaW = getWidth() - ins.getWidth();
+            double strW = getStringWidth();
+            if (areaW > strW) {
+                double dx = Math.round((areaW - strW) * alignX.doubleValue());
+                strX += dx;
+            }
+        }
+
+        // Return String X
+        return strX;
     }
 
     /**
@@ -332,9 +383,24 @@ public class StringBox extends RoundRect {
      */
     public double getStringY()
     {
+        // Get String Y
         Insets ins = getInsetsAll();
         double ascent = getAscent();
-        return getY() + ins.top + ascent;
+        double strY = getY() + ins.top + ascent;
+
+        // If alignment is not Top, adjust
+        VPos alignY = getAlign().getVPos();
+        if (alignY != VPos.TOP) {
+            double areaH = getHeight() - ins.getHeight();
+            double strH = getStringHeight();
+            if (areaH > strH) {
+                double dx = Math.round((areaH - strH) * alignY.doubleValue());
+                strY += dx;
+            }
+        }
+
+        // Return String Y
+        return strY;
     }
 
     /**
@@ -354,6 +420,9 @@ public class StringBox extends RoundRect {
      */
     public void drawString(Painter aPntr)
     {
+        // If no string, just bail
+        if (length() == 0) return;
+
         // If NeverBeenSized, sizeToFit
         if (_needsResize) resize();
 
@@ -404,7 +473,12 @@ public class StringBox extends RoundRect {
      */
     public void paint(Painter aPntr)
     {
-        drawRect(aPntr);
+        // If Border, paint border
+        Border border = getBorder();
+        if (border != null)
+            border.paint(aPntr, this);
+
+        // Paint string
         drawString(aPntr);
     }
 
@@ -436,8 +510,8 @@ public class StringBox extends RoundRect {
         Insets ins = getInsetsAll();
         double areaW = getWidth() - ins.getWidth();
         double areaH = getHeight() - ins.getHeight();
-        double strW = getAdvance();
-        double strH = getLineHeight();
+        double strW = getStringWidth();
+        double strH = getStringHeight();
         return strW <= areaW && strH <= areaH;
     }
 
@@ -468,8 +542,8 @@ public class StringBox extends RoundRect {
             double fontSize2 = fontSize * fontScale;
             setFont(font.deriveFont(fontSize2));
 
-            double strW = getAdvance();
-            double strH = getLineHeight();
+            double strW = getStringWidth();
+            double strH = getStringHeight();
             boolean textFits = strW <= areaW && strH <= areaH;
 
             // If text exceeded layout bounds, reset fsHi to fontScale
@@ -536,8 +610,8 @@ public class StringBox extends RoundRect {
         String cname = getClass().getSimpleName();
         return cname + " { String='" + _string + '\'' + ", Style=" + _style + ", Rect=[" + super.getString() + ']' +
             ", Padding=" + _padding + ", Border=" + _border +
-            ", Ascent=" + getAscent() + ", Descent=" + getDescent() + ", LineHeight=" + _lineHeight +
-            ", Advance=" + _advance + " }";
+            ", Ascent=" + getAscent() + ", Descent=" + getDescent() + ", LineHeight=" + _strHeight +
+            ", Advance=" + _strWidth + " }";
     }
 
     /**
