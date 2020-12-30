@@ -38,7 +38,7 @@ public class EventDispatcher {
     private PopupWindow  _popup;
     
     // A counter to track if user is requesting debug panel (hit control key 3 times)
-    private int  _debugTrigger;
+    private long  _debugTrigger;
 
     // Whether mouse is currently down
     private static boolean  _mouseDown;
@@ -481,11 +481,13 @@ public class EventDispatcher {
      */
     private void trackShowDevPane(ViewEvent anEvent)
     {
-        _debugTrigger++;
-        if (_debugTrigger > 2) {
+        final int SHOW_DEV_PANE_CONTROL_KEY_DOUBLE_CLICK_MIN_TIME = 500;
+        long time = System.currentTimeMillis();
+        if (time - _debugTrigger < SHOW_DEV_PANE_CONTROL_KEY_DOUBLE_CLICK_MIN_TIME) {
             DevPane.setDevPaneShowing(anEvent.getView(), !DevPane.isDevPaneShowing(anEvent.getView()));
             _debugTrigger = 0;
         }
+        else _debugTrigger = time;
     }
 
     // Returns the current click count
