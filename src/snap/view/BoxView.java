@@ -273,13 +273,13 @@ public class BoxView extends ParentView implements ViewHost {
         if (aPar instanceof BoxView && ((BoxView)aPar).isCropHeight())
             childH = Math.min(childH, areaH);
 
-        // Handle normal layout
-        double dx = areaW - childW;
-        double dy = areaH - childH;
-        double sx = aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
-        double sy = aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
-        int dx2 = (int) Math.round(dx*sx);
-        int dy2 = (int) Math.round(dy*sy);
-        aChild.setBounds(areaX + dx2, areaY + dy2, childW, childH);
+        // Get content alignment as modifer/factor (0 = left, 1 = right)
+        double alignX = aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
+        double alignY = aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
+
+        // Calc X/Y and set bounds
+        double childX = areaX + Math.round((areaW - childW)*alignX);
+        double childY = areaY + Math.round((areaH - childH)*alignY);
+        aChild.setBounds(childX, childY, childW, childH);
     }
 }
