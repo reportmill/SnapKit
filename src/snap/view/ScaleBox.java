@@ -11,6 +11,12 @@ import snap.geom.Size;
  */
 public class ScaleBox extends BoxView {
 
+    // Whether to preserve natural aspect when scaling
+    private boolean  _keepAspect;
+
+    // Constants for properties
+    public static final String KeepAspect_Prop = "KeepAspect";
+
     /**
      * Creates a new ScaleBox.
      */
@@ -29,6 +35,21 @@ public class ScaleBox extends BoxView {
         this(aContent);
         setFillWidth(isFillWidth);
         setFillHeight(isFillHeight);
+    }
+
+    /**
+     * Returns whether to preserve natural aspect of content when scaling.
+     */
+    public boolean isKeepAspect()  { return _keepAspect; }
+
+    /**
+     * Sets whether to preserve natural aspect of content when scaling.
+     */
+    public void setKeepAspect(boolean aValue)
+    {
+        if (aValue==isKeepAspect()) return;
+        firePropChange(KeepAspect_Prop, _keepAspect, _keepAspect = aValue);
+        relayout();
     }
 
     /**
@@ -79,12 +100,16 @@ public class ScaleBox extends BoxView {
         // If no child, just return
         if (aChild==null) return;
 
-        // Get parent bounds for insets (just return if empty)
+        // Get area bounds
         Insets ins = theIns!=null ? theIns : aPar.getInsetsAll();
         double areaX = ins.left;
         double areaY = ins.top;
-        double areaW = aPar.getWidth() - areaX - ins.right; if (areaW<0) areaW = 0; if (areaW<=0) return;
-        double areaH = aPar.getHeight() - areaY - ins.bottom; if (areaH<0) areaH = 0; if (areaH<=0) return;
+        double areaW = aPar.getWidth() - ins.getWidth();
+        double areaH = aPar.getHeight() - ins.getHeight();
+
+        // If area is empty, just return
+        if (areaW<=0 || areaH<=0)
+            return;
 
         // Get content width/height
         double childW = aChild.getBestWidth(-1);
@@ -92,13 +117,20 @@ public class ScaleBox extends BoxView {
 
         // Handle ScaleToFit: Set content bounds centered, calculate scale and set
         if (isFillWidth || isFillHeight || childW>areaW || childH>areaH)  {
+
+            // Get/set Child bounds, and calculate scale X/Y to fit
             double childX = areaX + (areaW-childW)/2;
             double childY = areaY + (areaH-childH)/2;
             aChild.setBounds(childX, childY, childW, childH);
             double scaleX = isFillWidth || childW>areaW ? areaW/childW : 1;
             double scaleY = isFillHeight || childH>areaH ? areaH/childH : 1;
-            if (isFillWidth && isFillHeight)
+
+            // If KeepAspect (or both FillWidth/FillHeight), constrain scale X/Y to min
+            boolean isKeepAspect = aPar instanceof ScaleBox && ((ScaleBox)aPar).isKeepAspect();
+            if (isKeepAspect || isFillWidth && isFillHeight)
                 scaleX = scaleY = Math.min(scaleX,scaleY); // KeepAspect?
+
+            // Set child scale and return
             aChild.setScaleX(scaleX);
             aChild.setScaleY(scaleY);
             return;
