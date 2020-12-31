@@ -119,9 +119,6 @@ public class ScaleBox extends BoxView {
         if (isFillWidth || isFillHeight || childW>areaW || childH>areaH)  {
 
             // Get/set Child bounds, and calculate scale X/Y to fit
-            double childX = areaX + (areaW-childW)/2;
-            double childY = areaY + (areaH-childH)/2;
-            aChild.setBounds(childX, childY, childW, childH);
             double scaleX = isFillWidth || childW>areaW ? areaW/childW : 1;
             double scaleY = isFillHeight || childH>areaH ? areaH/childH : 1;
 
@@ -130,6 +127,13 @@ public class ScaleBox extends BoxView {
             if (isKeepAspect || isFillWidth && isFillHeight)
                 scaleX = scaleY = Math.min(scaleX,scaleY); // KeepAspect?
 
+            // Set child bounds
+            double alignX = .5; //aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
+            double alignY = .5; //aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
+            double childX = Math.round(areaX + (areaW - childW) * alignX);
+            double childY = Math.round(areaY + (areaH - childH) * alignY);
+            aChild.setBounds(childX, childY, childW, childH);
+
             // Set child scale and return
             aChild.setScaleX(scaleX);
             aChild.setScaleY(scaleY);
@@ -137,10 +141,10 @@ public class ScaleBox extends BoxView {
         }
 
         // Handle normal layout
-        double dx = areaW - childW;
-        double dy = areaH - childH;
-        double sx = aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
-        double sy = aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
-        aChild.setBounds(areaX+dx*sx, areaY+dy*sy, childW, childH);
+        double alignX = aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
+        double alignY = aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
+        double childX = Math.round(areaX + (areaW - childW) * alignX);
+        double childY = Math.round(areaY + (areaH - childH) * alignY);
+        aChild.setBounds(childX, childY, childW, childH);
     }
 }
