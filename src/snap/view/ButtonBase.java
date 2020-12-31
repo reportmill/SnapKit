@@ -4,6 +4,7 @@
 package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
+import snap.geom.RoundRect;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -317,8 +318,12 @@ public class ButtonBase extends ParentView {
     public void paintAll(Painter aPntr)
     {
         super.paintAll(aPntr);
-        if (isDisabled())
-            aPntr.fillRectWithPaint(0, 0, getWidth(), getHeight(), new Color(1,1,1,.5));
+        if (isDisabled()) {
+            Color DISABLED_FILL = new Color(1, 1, 1, .4);
+            aPntr.setColor(DISABLED_FILL);
+            RoundRect rect = new RoundRect(0, 0, getWidth(), getHeight(), 4);
+            aPntr.fill(rect);
+        }
     }
 
     /**

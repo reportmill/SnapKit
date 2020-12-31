@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.geom.Insets;
+import snap.geom.Point;
 import snap.geom.Size;
 
 /**
@@ -113,7 +114,11 @@ public class ScaleBox extends BoxView {
 
         // Get content width/height
         double childW = aChild.getBestWidth(-1);
-        double childH = aChild.getBestHeight(childW);
+        double childH = aChild.getBestHeight(-1);
+
+        // Get content alignment as modifer/factor (0 = left, 1 = right)
+        double alignX = aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
+        double alignY = aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
 
         // Handle ScaleToFit: Set content bounds centered, calculate scale and set
         if (isFillWidth || isFillHeight || childW>areaW || childH>areaH)  {
@@ -127,22 +132,18 @@ public class ScaleBox extends BoxView {
             if (isKeepAspect || isFillWidth && isFillHeight)
                 scaleX = scaleY = Math.min(scaleX,scaleY); // KeepAspect?
 
-            // Set child bounds
-            double alignX = .5; //aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
-            double alignY = .5; //aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
-            double childX = Math.round(areaX + (areaW - childW) * alignX);
-            double childY = Math.round(areaY + (areaH - childH) * alignY);
-            aChild.setBounds(childX, childY, childW, childH);
-
-            // Set child scale and return
+            // Set child scale
             aChild.setScaleX(scaleX);
             aChild.setScaleY(scaleY);
+
+            // Get/set child bounds
+            double childX = Math.round(areaX + (areaW - childW * scaleX) * alignX + childW/2 * scaleX - childW/2);
+            double childY = Math.round(areaY + (areaH - childH * scaleY) * alignY + childH/2 * scaleY - childH/2);
+            aChild.setBounds(childX, childY, childW, childH);
             return;
         }
 
         // Handle normal layout
-        double alignX = aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
-        double alignY = aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
         double childX = Math.round(areaX + (areaW - childW) * alignX);
         double childY = Math.round(areaY + (areaH - childH) * alignY);
         aChild.setBounds(childX, childY, childW, childH);
