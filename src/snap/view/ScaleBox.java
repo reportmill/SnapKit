@@ -3,7 +3,6 @@
  */
 package snap.view;
 import snap.geom.Insets;
-import snap.geom.Point;
 import snap.geom.Size;
 
 /**
