@@ -12,13 +12,13 @@ import snap.util.*;
 public class ProgressBar extends View {
     
     // The progress
-    double       _prog;
+    private double  _prog;
     
     // The animator
-    ViewAnim     _anim;
+    private ViewAnim  _anim;
     
     // The ButtonArea used to paint background
-    ButtonArea   _btnArea;
+    private ButtonArea  _btnArea;
 
     // Constants for properties
     public static final String Progress_Prop = "Progress";
@@ -43,151 +43,160 @@ public class ProgressBar extends View {
     private static Paint INDET_FILL = new GradientPaint(0, .5, 1, .5, _indetStops);
     private static Paint INDET_BACK_FILL = new GradientPaint(0, .5, 1, .5, _indetStopsBack);
     
-/**
- * Create ProgressBar.
- */
-public ProgressBar()
-{
-    themeChanged();
-}
-
-/**
- * Returns the value of progress bar.
- */
-public double getProgress()  { return _prog; }
-
-/**
- * Sets the value of the progress bar.
- */
-public void setProgress(double aValue)
-{
-    if(aValue>1) aValue = 1;
-    if(aValue==_prog) return;
-    firePropChange(Progress_Prop, _prog, _prog=aValue);
-    
-    // Reset animator
-    setAnim(isAnimNeeded());
-    repaint();
-}
-
-/**
- * Returns whether progress bar is indeterminate.
- */
-public boolean isIndeterminate()  { return _prog<0; }
-
-/**
- * Sets whether progress bar is indetermiante.
- */
-public void setIndeterminate(boolean aValue)  { setProgress(aValue? -1 : 0); }
-
-/**
- * Override to check animation.
- */
-public void setVisible(boolean aValue)  { super.setVisible(aValue); setAnim(isAnimNeeded()); }
-
-/**
- * Returns whether anim is needed.
- */
-private boolean isAnimNeeded()  { return _prog<0 && isVisible(); }
-
-/**
- * Returns whether ProgressBar is animating.
- */
-private boolean isAnim()  { return _anim!=null; }
-
-/**
- * Sets anim.
- */
-private void setAnim(boolean aValue)
-{
-    // If already set, just return
-    if(aValue==isAnim()) return;
-    
-    // If starting, create/configure/play anim
-    if(aValue) {
-        _anim = new ViewAnim(this);
-        _anim.getAnim(Integer.MAX_VALUE).setOnFrame(() -> repaint()).play();
+    /**
+     * Create ProgressBar.
+     */
+    public ProgressBar()
+    {
+        themeChanged();
     }
-    
-    // Otherwise, stop and clear
-    else { _anim.clear(); _anim = null; }
-}
 
-/**
- * Override to paint.
- */
-protected void paintFront(Painter aPntr)
-{
-    // Paint ProgressBar background as button using ButtonArea
-    double width = getWidth();
-    double height = getHeight();
-    _btnArea.setSize(width, height);
-    _btnArea.paint(aPntr);
-    
-    // Paint normal bar
-    if(_prog>=0) {
-        double ix = 3, iy = 3;
-        double iw = width - 6; iw = Math.round(ix + _prog*iw);
-        double ih = height - 6;
-        RoundRect rrect = new RoundRect(ix, iy, iw, ih, 3);
-        aPntr.fillWithPaint(rrect, INNER_FILL);
+    /**
+     * Returns the value of progress bar.
+     */
+    public double getProgress()  { return _prog; }
+
+    /**
+     * Sets the value of the progress bar.
+     */
+    public void setProgress(double aValue)
+    {
+        if (aValue>1) aValue = 1;
+        if (aValue==_prog) return;
+        firePropChange(Progress_Prop, _prog, _prog=aValue);
+
+        // Reset animator
+        setAnim(isAnimNeeded());
+        repaint();
     }
-    
-    // Paint indeterminate bar
-    else {
-        
-        // Get bounds of indeterminate bar
-        int ix = 3, iy = 3;
-        int iw = (int)width - 6;
-        int ih = (int)height - 6;
-        int aw = 50;
-        int ix2 = ix - aw;
-        int iw2 = iw + aw*2;
-        int imax2 = ix2 + iw2;
-        int etime = _anim!=null? _anim.getTime() : 0;
-        int imax3 = ix2 + (aw + etime/10)%(iw2*2);
-        int ix3 = imax3 - aw;
-        boolean back = false; if(imax3>imax2) { ix3 = imax2 - (imax3 - imax2); back = true; }
-        
-        // Create rect for anim and paint
-        RoundRect rrect = new RoundRect(ix3, iy, aw, ih, 3);
-        aPntr.save();
-        aPntr.clip(new RoundRect(ix, iy, iw, ih, 3));
-        aPntr.fillWithPaint(rrect, back? INDET_BACK_FILL : INDET_FILL);
-        aPntr.restore();
+
+    /**
+     * Returns whether progress bar is indeterminate.
+     */
+    public boolean isIndeterminate()  { return _prog<0; }
+
+    /**
+     * Sets whether progress bar is indetermiante.
+     */
+    public void setIndeterminate(boolean aValue)
+    {
+        setProgress(aValue ? -1 : 0);
     }
-}
 
-/**
- * Override to set/reset ButtonArea.
- */
-protected void themeChanged()
-{
-    super.themeChanged();
-    _btnArea = (ButtonArea)ViewTheme.get().createArea(this);
-    _btnArea.setFill(PROGRESS_BAR_FILL);
-}
-    
-/**
- * XML archival.
- */
-public XMLElement toXML(XMLArchiver anArchiver)
-{
-    // Do normal archival, Archive Indeterimate and return
-    XMLElement e = super.toXML(anArchiver);
-    if(isIndeterminate()) e.add("indeterminate", true);
-    return e;
-}
+    /**
+     * Override to check animation.
+     */
+    public void setVisible(boolean aValue)  { super.setVisible(aValue); setAnim(isAnimNeeded()); }
 
-/**
- * XML unarchival.
- */
-public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
-{
-    // Do normal unarchival, Unarchive Indeterminate and return
-    super.fromXML(anArchiver, anElement);
-    if(anElement.getAttributeBoolValue("indeterminate", false)) setIndeterminate(true);
-    return this;
-}
+    /**
+     * Returns whether anim is needed.
+     */
+    private boolean isAnimNeeded()  { return _prog<0 && isVisible(); }
 
+    /**
+     * Returns whether ProgressBar is animating.
+     */
+    private boolean isAnim()  { return _anim!=null; }
+
+    /**
+     * Sets anim.
+     */
+    private void setAnim(boolean aValue)
+    {
+        // If already set, just return
+        if (aValue==isAnim()) return;
+
+        // If starting, create/configure/play anim
+        if (aValue) {
+            _anim = new ViewAnim(this);
+            _anim.getAnim(Integer.MAX_VALUE).setOnFrame(() -> repaint()).play();
+        }
+
+        // Otherwise, stop and clear
+        else { _anim.clear(); _anim = null; }
+    }
+
+    /**
+     * Override to paint.
+     */
+    protected void paintFront(Painter aPntr)
+    {
+        // Paint ProgressBar background as button using ButtonArea
+        double viewW = getWidth();
+        double viewH = getHeight();
+        _btnArea.setSize(viewW, viewH);
+        _btnArea.paint(aPntr);
+
+        // Paint normal bar
+        if (_prog>=0) {
+            double areaX = 3;
+            double areaY = 3;
+            double areaW = Math.round(areaX + _prog * (viewW - 6));
+            double areaH = viewH - 6;
+            RoundRect areaRect = new RoundRect(areaX, areaY, areaW, areaH, 3);
+            aPntr.fillWithPaint(areaRect, INNER_FILL);
+        }
+
+        // Paint indeterminate bar
+        else {
+
+            // Get bounds of indeterminate bar
+            int areaX = 3;
+            int areaY = 3;
+            int areaW = (int) viewW - 6;
+            int areaH = (int) viewH - 6;
+            int aw = 50;
+            int ix2 = areaX - aw;
+            int iw2 = areaW + aw*2;
+            int imax2 = ix2 + iw2;
+            int etime = _anim!=null ? _anim.getTime() : 0;
+            int imax3 = ix2 + (aw + etime/10) % (iw2*2);
+            int ix3 = imax3 - aw;
+            boolean back = false;
+            if (imax3>imax2) {
+                ix3 = imax2 - (imax3 - imax2);
+                back = true;
+            }
+
+            // Create rect for anim and paint
+            RoundRect rrect = new RoundRect(ix3, areaY, aw, areaH, 3);
+            aPntr.save();
+            aPntr.clip(new RoundRect(areaX, areaY, areaW, areaH, 3));
+            aPntr.fillWithPaint(rrect, back ? INDET_BACK_FILL : INDET_FILL);
+            aPntr.restore();
+        }
+    }
+
+    /**
+     * Override to set/reset ButtonArea.
+     */
+    protected void themeChanged()
+    {
+        super.themeChanged();
+        _btnArea = (ButtonArea) ViewTheme.get().createArea(this);
+        _btnArea.setFill(PROGRESS_BAR_FILL);
+    }
+
+    /**
+     * XML archival.
+     */
+    public XMLElement toXML(XMLArchiver anArchiver)
+    {
+        // Do normal archival, Archive Indeterimate and return
+        XMLElement e = super.toXML(anArchiver);
+        if (isIndeterminate()) e.add("indeterminate", true);
+        return e;
+    }
+
+    /**
+     * XML unarchival.
+     */
+    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        // Do normal unarchival, Unarchive Indeterminate and return
+        super.fromXML(anArchiver, anElement);
+        if (anElement.getAttributeBoolValue("indeterminate", false))
+            setIndeterminate(true);
+        return this;
+    }
 }

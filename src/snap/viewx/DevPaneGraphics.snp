@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView Padding="25" FillHeight="true">
-  <ColView Padding="5" Spacing="5" FillWidth="true">
-    <font name="Arial" size="13" />
-    <CheckBox Name="ShowFlashButton" Padding="2,6,2,6" PrefHeight="22" text="Flash Painted Areas" />
-    <CheckBox Name="ShowFrameRateButton" Padding="2,6,2,6" PrefHeight="22" text="Show Frame rate" />
+<RowView Padding="25" Spacing="8" FillHeight="true">
+  <ColView Padding="4" GrowHeight="true" Spacing="4">
+    <Label text="Themes" />
+    <ListView Name="ThemeList" MinWidth="140" GrowHeight="true">
+      <LineBorder Color="#c0c0c0" />
+      <font name="Arial" size="14" />
+    </ListView>
   </ColView>
+  <TitleView MinWidth="120" MinHeight="60" Text="Debug Options">
+    <ColView Padding="8" Spacing="7" FillWidth="true">
+      <font name="Arial" size="13" />
+      <CheckBox Name="ShowFlashButton" PrefHeight="22" Padding="2,6,2,6" text="Flash Painted Areas" />
+      <CheckBox Name="ShowFrameRateButton" PrefHeight="22" Padding="2,6,2,6" text="Show Frame rate" />
+    </ColView>
+  </TitleView>
 </RowView>

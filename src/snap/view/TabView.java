@@ -209,9 +209,16 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Update old/new ToggleButtons
         ToggleButton ob = getTabButton(_sindex);
-        if (ob!=null) { ob.setSelected(false); ob.setButtonFill(null); }
+        if (ob!=null) {
+            ob.setSelected(false);
+            ob.setButtonFill(null);
+        }
+
         ToggleButton nb = getTabButton(anIndex);
-        if (nb!=null) { nb.setSelected(true); nb.setButtonFill(BACK_FILL); }
+        if (nb!=null) {
+            nb.setSelected(true);
+            nb.setButtonFill(BACK_FILL);
+        }
 
         // Set content to tab.Content
         setContent(tab!=null ? tab.getContent() : null);
@@ -279,10 +286,11 @@ public class TabView extends ParentView implements Selectable<Tab> {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        View shelf = getShelf(); View content = getContent();
-        double cw = content!=null ? content.getBestWidth(-1) : 0;
-        double shw = shelf.getPrefWidth();
-        return Math.max(shw,cw);
+        View shelf = getShelf();
+        double shelfW = shelf.getPrefWidth();
+        View content = getContent();
+        double childW = content!=null ? content.getBestWidth(-1) : 0;
+        return Math.max(shelfW, childW);
     }
 
     /**
@@ -290,7 +298,6 @@ public class TabView extends ParentView implements Selectable<Tab> {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        View shelf = getShelf();
         View content = getContent();
         double ch = content!=null ? content.getBestHeight(-1) : 0;
         return 30 + ch;
@@ -303,20 +310,20 @@ public class TabView extends ParentView implements Selectable<Tab> {
     {
         // Get insets and inner bounds
         Insets ins = getInsetsAll();
-        double x = ins.left;
-        double y = ins.top+28;
-        double w = getWidth() - x - ins.right;
-        double h = getHeight() - y - ins.bottom;
+        double areaX = ins.left;
+        double areaY = ins.top + 28;
+        double areaW = getWidth() - ins.getWidth();
+        double areaH = getHeight() - areaY - ins.bottom;
 
         // Resize Shelf and ContentBox
-        _shelf.setWidth(w);
+        _shelf.setWidth(areaW);
         _shelf.layout();
-        _contentBox.setBounds(x,y,w,h);
+        _contentBox.setBounds(areaX, areaY, areaW, areaH);
 
         // Reset BorderBlockerBox to obscure border under selected tab
         ToggleButton tbtn = getTabButton(_sindex);
         if (tbtn!=null)
-            _borderBlockerBox.setBounds(tbtn.getX()+1,_contentBox.getY(),tbtn.getWidth()-2,1);
+            _borderBlockerBox.setBounds(tbtn.getX()+1, _contentBox.getY(),tbtn.getWidth()-2,1);
         else _borderBlockerBox.setBounds(0,0,0,0);
     }
 
@@ -337,6 +344,19 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Fire action event
         fireActionEvent(anEvent);
+    }
+
+    /**
+     * Called when Theme changes.
+     */
+    @Override
+    protected void themeChanged()
+    {
+        super.themeChanged();
+        _contentBox.setFill(ViewUtils.getBackFill());
+        _borderBlockerBox.setFill(ViewUtils.getBackFill());
+        Paint shelfFill = ViewTheme.get().getClass().getSimpleName().equals("ViewTheme") ? SHELF_FILL : ViewUtils.getBackDarkFill();
+        _shelf.setFill(shelfFill);
     }
 
     /**
