@@ -321,10 +321,9 @@ public class ViewProxy<T extends View> extends Rect {
     public double getChildrenMaxXLastWithInsets()
     {
         ViewProxy children[] = getChildren();
+        double childMaxX = children.length>0 ? children[children.length-1].getMaxX() : 0;
         Insets ins = getInsetsAll();
-        double maxX = children.length>0 ? children[children.length-1].getMaxX() : 0;
-        maxX = Math.ceil(maxX + ins.right);
-        return maxX;
+        return Math.ceil(childMaxX + ins.right);
     }
 
     /**
@@ -334,10 +333,10 @@ public class ViewProxy<T extends View> extends Rect {
     {
         ViewProxy children[] = getChildren();
         Insets ins = getInsetsAll();
-        double maxX = ins.getLeft();
-        for (ViewProxy child : children) maxX = Math.max(maxX, child.getMaxX());
-        maxX = Math.ceil(maxX + ins.right);
-        return maxX;
+        double childMaxX = ins.getLeft();
+        for (ViewProxy child : children)
+            childMaxX = Math.max(childMaxX, child.getMaxX());
+        return Math.ceil(childMaxX + ins.right);
     }
 
     /**
@@ -346,10 +345,9 @@ public class ViewProxy<T extends View> extends Rect {
     public double getChildrenMaxYLastWithInsets()
     {
         ViewProxy children[] = getChildren();
+        double childMaxY = children.length>0 ? children[children.length-1].getMaxY() : 0;
         Insets ins = getInsetsAll();
-        double maxY = children.length>0 ? children[children.length-1].getMaxY() : 0;
-        maxY = Math.ceil(maxY + ins.getBottom());
-        return maxY;
+        return Math.ceil(childMaxY + ins.bottom);
     }
 
     /**
@@ -359,9 +357,10 @@ public class ViewProxy<T extends View> extends Rect {
     {
         ViewProxy children[] = getChildren();
         Insets ins = getInsetsAll();
-        double maxY = ins.getTop();
-        for (ViewProxy child : children) maxY = Math.max(maxY, child.getMaxY());
-        return Math.ceil(maxY + ins.getBottom());
+        double childMaxY = ins.top;
+        for (ViewProxy child : children)
+            childMaxY = Math.max(childMaxY, child.getMaxY());
+        return Math.ceil(childMaxY + ins.bottom);
     }
 
     /**

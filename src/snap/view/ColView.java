@@ -176,50 +176,53 @@ public class ColView extends ChildView {
      */
     public static void layoutProxyX(ViewProxy aPar, boolean isFillWidth)
     {
-        // Get layout info and loop vars
+        // Get parent info
         ViewProxy children[] = aPar.getChildren();
+        double alignX = aPar.getAlignXAsDouble();
+
+        // Get area bounds
+        double viewW = aPar.getWidth();
         Insets ins = aPar.getInsetsAll();
-        double px = ins.left;
-        double pw = aPar.getWidth(); if (pw>=0) pw = Math.max(pw - ins.getWidth(), 0);
-        double ax = aPar.getAlignXAsDouble();
+        double areaX = ins.left;
+        double areaW = Math.max(viewW - ins.getWidth(), 0);
 
         // Iterate over children to calculate/set child X & Width
         for (ViewProxy child : children) {
 
             // Calc X accounting for margin and alignment
-            Insets marg = child.getMargin();
-            double cx = px + marg.getLeft();
-            double cw;
+            Insets childMarg = child.getMargin();
+            double childX = areaX + childMarg.left;
+            double childW;
 
             // If Parent.Width not set, set width to Child.PrefWidth
-            if (pw<0) {
-                double ch = child.getHeight();
-                cw = child.getBestWidth(ch);
+            if (viewW<0) {
+                double childH = child.getHeight();
+                childW = child.getBestWidth(childH);
             }
 
             // Otherwise, if Parent.FillWidth or Child.GrowWidth, set to max width
             else if (isFillWidth || child.isGrowWidth()) {
-                cw = Math.max(pw - marg.getWidth(), 0);
+                childW = Math.max(areaW - childMarg.getWidth(), 0);
             }
 
             // Otherwise, set width to Child.PrefWidth and adjust X
             else {
-                double maxW = Math.max(pw - marg.getWidth(), 0);
-                double ch = child.getHeight();
-                cw = child.getBestWidth(ch);
-                cw = Math.min(cw, maxW);
+                double childMaxW = Math.max(areaW - childMarg.getWidth(), 0);
+                double childH = child.getHeight();
+                childW = child.getBestWidth(childH);
+                childW = Math.min(childW, childMaxW);
 
                 // Calc X accounting for margin and alignment
-                if (cw < maxW) {
-                    double ax2 = Math.max(ax, child.getLeanXAsDouble());
-                    double dx = Math.round((pw - cw) * ax2);
-                    cx = Math.max(cx, px + dx);
+                if (childW < childMaxW) {
+                    double alignX2 = Math.max(alignX, child.getLeanXAsDouble());
+                    double shiftX = Math.round((areaW - childW) * alignX2);
+                    childX = Math.max(childX, areaX + shiftX);
                 }
             }
 
             // Set child rect X and Width
-            child.setX(cx);
-            child.setWidth(cw);
+            child.setX(childX);
+            child.setWidth(childW);
         }
     }
 
@@ -228,47 +231,51 @@ public class ColView extends ChildView {
      */
     public static void layoutProxyY(ViewProxy aPar)
     {
-        // Get parent bounds for insets
+        // Get parent info
         ViewProxy children[] = aPar.getChildren();
-        Insets ins = aPar.getInsetsAll();
         double spacing = aPar.getSpacing();
-        double py = ins.top;
-        double cy = 0;
+
+        // Get area bounds
+        double viewH = aPar.getHeight();
+        Insets ins = aPar.getInsetsAll();
+        double areaY = ins.top;
+        double areaH = Math.max(viewH - ins.getHeight(), 0);
+
+        // Loop vars
+        double childY = 0;
         ViewProxy lastChild = null;
 
         // Iterate over children to calculate bounds Y and Height
         for (ViewProxy child : children) {
 
             // Get child height
-            double ch = child.getBestHeight(-1); // cw?
+            double childH = child.getBestHeight(-1); // cw?
 
             // Update child x: advance for max of spacing and margins
-            double lastMargin = lastChild!=null ? lastChild.getMargin().getBottom() : ins.getTop();
-            double loopMargin = child.getMargin().getTop();
+            double lastMargin = lastChild!=null ? lastChild.getMargin().bottom : ins.top;
+            double loopMargin = child.getMargin().top;
             double maxMargin = Math.max(lastMargin, loopMargin);
-            double spc = lastChild!=null ? Math.max(spacing, maxMargin) : maxMargin;
-            cy += spc;
+            double childSpacing = lastChild!=null ? Math.max(spacing, maxMargin) : maxMargin;
+            childY += childSpacing;
 
             // Set child bounds Y and Height
-            child.setY(cy);
-            child.setHeight(ch);
+            child.setY(childY);
+            child.setHeight(childH);
 
             // Update child Y loop var and last child
-            cy += ch;
+            childY += childH;
             lastChild = child;
         }
 
         // If Parent.Height -1, just return (laying out for PrefHeight)
-        double ph = aPar.getHeight();
-        if (ph<0)
+        if (viewH<0)
             return;
-        ph = Math.max(ph - ins.getHeight(), 0);
 
         // Add margin for last child, calculate extra space and add to growers or alignment
-        cy += children[children.length-1].getMargin().bottom;
-        int extra = (int)Math.round(py + ph - cy);
-        if (extra!=0)
-            addExtraSpaceY(aPar, extra);
+        double childMaxY = childY + children[children.length-1].getMargin().bottom;
+        int extraY = (int) Math.round(areaY + areaH - childMaxY);
+        if (extraY!=0)
+            addExtraSpaceY(aPar, extraY);
     }
 
     /**
@@ -301,14 +308,14 @@ public class ColView extends ChildView {
 
         // Iterate over children and add their share (plus 1 for some if not evenly divisible by grow)
         ViewProxy children[] = aPar.getChildren();
-        for (int i=0, j=0, dy = 0,iMax=children.length; i<iMax; i++) {
+        for (int i=0, j=0, shiftY = 0, iMax=children.length; i<iMax; i++) {
             ViewProxy child = children[i];
-            if (dy!=0)
-                child.setY(child.getY() + dy);
+            if (shiftY!=0)
+                child.setY(child.getY() + shiftY);
             if (child.isGrowHeight()) {
                 int each3 = j<count2? eachP1 : each;
                 child.setHeight(child.getHeight() + each3);
-                dy += each3; j++;
+                shiftY += each3; j++;
             }
         }
     }
@@ -319,12 +326,12 @@ public class ColView extends ChildView {
     private static void addExtraSpaceY_ToAlign(ViewProxy aPar, double extra)
     {
         ViewProxy children[] = aPar.getChildren();
-        double ay = aPar.getAlignYAsDouble();
+        double alignY = aPar.getAlignYAsDouble();
         for (ViewProxy child : children) {
-            ay = Math.max(ay, child.getLeanYAsDouble());
-            double dy = extra*ay;
-            if (dy>0)
-                child.setY(child.getY() + extra*ay);
+            alignY = Math.max(alignY, child.getLeanYAsDouble());
+            double shiftY = extra * alignY;
+            if (shiftY>0)
+                child.setY(child.getY() + extra*alignY);
         }
     }
 }
