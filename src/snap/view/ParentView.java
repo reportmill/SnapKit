@@ -329,10 +329,17 @@ public class ParentView extends View {
         Shape pclip = aPntr.getClip();
 
         // Iterate over children and paint any that intersect clip
-        for (View child : getChildren()) {
-            if (!child.isVisible() || !child.isPaintable()) continue;
-            Rect clip = child.parentToLocal(pclip).getBounds();
-            if (clip.intersectsRectAndNotEmpty(child.getBoundsLocal())) {
+        View[] children = getChildren();
+        for (View child : children) {
+
+            // If not visible or paintable, just continue
+            if (!child.isVisible() || !child.isPaintable())
+                continue;
+
+            // If child hit by clip, paint
+            Rect clipBnds = child.parentToLocal(pclip).getBounds();
+            Rect childBnds = child.getBoundsLocal();
+            if (clipBnds.intersectsRectAndNotEmpty(childBnds)) {
                 aPntr.save();
                 aPntr.transform(child.getLocalToParent());
                 child.paintAll(aPntr);
