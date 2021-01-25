@@ -4,27 +4,25 @@
     <font name="Arial" size="13" />
     <RowView PrefHeight="24" Padding="0,4,0,4">
       <Label text="View Hierarchy" />
-      <ToggleButton Name="TargetingButton" Padding="2,6,2,6" PrefHeight="22" text="Mouse Over Targeting..." LeanX="RIGHT">
+      <ToggleButton Name="TargetingButton" PrefHeight="22" Padding="2,6,2,6" LeanX="RIGHT" text="Mouse Over Targeting...">
         <font name="Arial" size="11" />
       </ToggleButton>
     </RowView>
-    <BrowserView Name="BrowserView" PrefWidth="420" PrefHeight="300" GrowHeight="true" PrefColCount="3" PrefColWidth="140">
-    </BrowserView>
+    <BrowserView Name="BrowserView" PrefWidth="420" PrefHeight="300" GrowHeight="true" PrefColCount="3" PrefColWidth="140" />
   </ColView>
   <ColView Padding="5" GrowWidth="true" FillWidth="true">
     <RowView PrefHeight="24" Padding="0,4,0,4">
       <Label text="View XML" />
     </RowView>
-    <TextView Name="TextView" GrowHeight="true">
-      <font name="Arial" size="11" />
-    </TextView>
+    <TextView Name="TextView" GrowHeight="true" />
   </ColView>
   <ColView Padding="5,10,5,10" Spacing="8" FillWidth="true">
-    <RowView PrefHeight="29" Padding="0,4,10,4">
-      <Button Name="CloseButton" Padding="3,6" text="X" LeanX="Right" />
-    </RowView>
     <font name="Arial" size="12" />
-    <Button Name="ShowSourceButton" Padding="3,6" text="Open Source" />
-    <Button Name="ShowJavaDocButton" Padding="3,6" text="Open JavaDoc" />
+    <RowView PrefHeight="29" Padding="0,4,10,4">
+      <Button Name="CloseButton" Padding="3,6,3,6" LeanX="RIGHT" text="X" />
+    </RowView>
+    <Button Name="ShowSourceButton" Padding="3,6,3,6" text="Open Source" />
+    <Button Name="ShowJavaDocButton" Padding="3,6,3,6" text="Open JavaDoc" />
+    <Button Name="ShowOwnerSourceButton" Padding="3,6,3,6" text="Open Controller" />
   </ColView>
 </RowView>

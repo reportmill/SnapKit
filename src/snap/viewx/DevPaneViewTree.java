@@ -206,6 +206,10 @@ public class DevPaneViewTree extends ViewOwner {
         // Handle ShowJavaDocButton
         if (anEvent.equals("ShowJavaDocButton"))
             showJavaDoc();
+
+        // Handle ShowOwnerSourceButton
+        if (anEvent.equals("ShowOwnerSourceButton"))
+            showOwnerSource();
     }
 
     /**
@@ -214,6 +218,16 @@ public class DevPaneViewTree extends ViewOwner {
     private void showSource()
     {
         String urlStr = getSourceURL();
+        if (urlStr==null) { ViewUtils.beep(); return; }
+        GFXEnv.getEnv().openURL(urlStr);
+    }
+
+    /**
+     * Shows the source for the owner of current selection.
+     */
+    private void showOwnerSource()
+    {
+        String urlStr = getOwnerSourceURL();
         if (urlStr==null) { ViewUtils.beep(); return; }
         GFXEnv.getEnv().openURL(urlStr);
     }
@@ -247,19 +261,41 @@ public class DevPaneViewTree extends ViewOwner {
     }
 
     /**
+     * Returns the Owner source url for currently selected type.
+     */
+    public String getOwnerSourceURL()
+    {
+        // Get class name for selected view
+        View selView = getSelView();
+        ViewOwner owner = selView!=null ? selView.getOwner() : null;
+        Class cls = owner!=null ? owner.getClass() : ViewOwner.class; if (cls==null) return null;
+
+        // Iterate up through class parents until URL found or null
+        while (cls!=null) {
+            String url = getSourceURL(cls); if (url!=null) return url;
+            Class scls = cls.getSuperclass(); cls = scls!=null && scls!=Object.class ? scls : null;
+        }
+        return null;
+    }
+
+    /**
      * Returns the JavaDoc url for currently selected type.
      */
     public String getSourceURL(Class aClass)
     {
-        // Get class name for selected JNode
+        // Get class name for selected JNode (if inner class, strip that out)
         String cname = aClass.getName();
+        if (cname.contains("$")) {
+            int ind = cname.indexOf("$");
+            cname = cname.substring(0, ind);
+        }
 
         // Handle snap/snapcharts classes
         String url = null;
         if (cname.startsWith("snap."))
             url = "https://github.com/reportmill/SnapKit/blob/master/src/" + cname.replace('.', '/') + ".java";
         else if (cname.startsWith("snapcharts."))
-            url = "https://github.com/reportmill/SnapCharts/tree/master/src/" + cname.replace('.', '/') + ".java";
+            url = "https://github.com/reportmill/SnapCharts/blob/master/src/" + cname.replace('.', '/') + ".java";
 
         // Return url
         return url;
