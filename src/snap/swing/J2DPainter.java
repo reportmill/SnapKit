@@ -45,7 +45,6 @@ public class J2DPainter extends Painter {
         setFractionalMetrics(true);
         _gfx.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         _gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        //_gfx.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
         // Initialize clip to Graphics clip
         clip(AWT.awtToSnapShape(aGr.getClip()));
@@ -334,11 +333,33 @@ public class J2DPainter extends Painter {
      */
     public void setImageQuality(double aValue)
     {
+        // Do normal version
+        super.setImageQuality(aValue);
+
+        // If above 2/3: BI-CUBIC interpolation
         if (aValue>.67)
             _gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
+        // If above 1/3: Bilinear
         else if (aValue>.33)
             _gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+        // Nearest neighbor
         else _gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+    }
+
+    /**
+     * Sets whether stroke is rounded to nearest pixel.
+     */
+    public void setStrokePure(boolean aValue)
+    {
+        // Do normal version
+        super.setStrokePure(aValue);
+
+        // If true, set STROKE_CONTROL to STROKE_PURE
+        if (aValue)
+            _gfx.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        else _gfx.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT);
     }
 
     /**

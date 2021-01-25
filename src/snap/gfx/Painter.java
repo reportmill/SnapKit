@@ -15,19 +15,22 @@ import java.util.*;
 public abstract class Painter {
     
     // The image quality
-    double         _imageQuality = .5;
+    private double  _imageQuality = .5;
     
+    // Whether stroked path is used as is (otherwise, points might be rounded)
+    private boolean _strokePure;
+
     // The composite mode
-    Composite      _composite = Composite.SRC_OVER;
+    private Composite  _composite = Composite.SRC_OVER;
 
     // Whether painting is being done for static output
-    boolean        _printing;
+    private boolean  _printing;
     
     // A shared rect for draw/fill/clipRect calls
-    Rect _rect = new Rect();
+    private Rect  _rect = new Rect();
     
     // A shared line for drawLine calls
-    Line _line = new Line(0, 0, 0, 0);
+    private Line  _line = new Line(0, 0, 0, 0);
     
     // Constants for composite
     public enum Composite { SRC_OVER, SRC_IN, DST_IN }
@@ -358,6 +361,16 @@ public abstract class Painter {
      * Sets image rendering quality.
      */
     public void setImageQuality(double aValue)  { _imageQuality = aValue; }
+
+    /**
+     * Returns whether stroked path is used as is (otherwise, points might be rounded).
+     */
+    public boolean isStrokePure()  { return _strokePure; }
+
+    /**
+     * Sets whether stroked path is used as is (otherwise, points might be rounded).
+     */
+    public void setStrokePure(boolean aValue)  { _strokePure = aValue; }
 
     /**
      * Returns whether painting is for static output.
