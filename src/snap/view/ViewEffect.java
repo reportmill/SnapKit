@@ -17,7 +17,7 @@ class ViewEffect {
     private PainterDVR  _pdvr, _pdvrX;
     
     // The view size when DVR was cached
-    private double  _vw, _vh;
+    private double  _viewW, _viewH;
     
     // The Focus Effect
     private static Effect  _focEff;
@@ -26,7 +26,7 @@ class ViewEffect {
     private static ViewEffect  _focVEff;
     
     // The Focused color
-    public static Color    FOCUSED_COLOR = Color.get("#039ed3");
+    public static Color  FOCUSED_COLOR = Color.get("#039ed3");
     
     /**
      * Creates a ViewEffect for a given view and effect.
@@ -63,9 +63,9 @@ class ViewEffect {
         if (_pdvr==null) return false;
 
         // If view size has changed, return false
-        double vw = _view.getWidth();
-        double vh = _view.getHeight();
-        if (vw!=_vw || vh!=_vh) return false;
+        double viewW = _view.getWidth();
+        double viewH = _view.getHeight();
+        if (viewW!= _viewW || viewH!= _viewH) return false;
 
         // If simple shadow and size hasn't changed, return true
         if (isShadow() && getShadow().isSimple())
@@ -84,7 +84,8 @@ class ViewEffect {
      */
     void updateCache()
     {
-        if (isShadow()) updateCacheShadow();
+        if (isShadow())
+            updateCacheShadow();
         else updateCacheGeneric();
     }
 
@@ -98,14 +99,17 @@ class ViewEffect {
         paintAllView(pdvr);
 
         // If painting hasn't changed since last cache, just return
-        double vw = _view.getWidth();
-        double vh = _view.getHeight();
-        if (vw==_vw && vh==_vh && pdvr.equals(_pdvrX)) return;
+        double viewW = _view.getWidth();
+        double viewH = _view.getHeight();
+        if (viewW== _viewW && viewH== _viewH && pdvr.equals(_pdvrX))
+            return;
 
         // Render and cache effect of painting to second PainterDVR
         _pdvr = new PainterDVR();
         _eff.applyEffect(pdvr, _pdvr, _view.getBoundsLocal());
-        _vw = vw; _vh = vh; _pdvrX = pdvr;
+        _viewW = viewW;
+        _viewH = viewH;
+        _pdvrX = pdvr;
     }
 
     /**
@@ -116,7 +120,8 @@ class ViewEffect {
         // Get new PainterDVR and shadow and view size
         PainterDVR pdvr = new PainterDVR();
         ShadowEffect shadow = getShadow();
-        double vw = _view.getWidth(), vh = _view.getHeight();
+        double viewW = _view.getWidth();
+        double viewH = _view.getHeight();
 
         // If simple, no shadow needed - otherwise if view covers bounds, just paint bounds, otherwise paint all
         if (!shadow.isSimple()) {
@@ -126,12 +131,15 @@ class ViewEffect {
         }
 
         // If painting hasn't changed since last cache, just return
-        if (vw==_vw && vh==_vh && pdvr.equals(_pdvrX)) return;
+        if (viewW == _viewW && viewH == _viewH && pdvr.equals(_pdvrX))
+            return;
 
         // Render and cache effect of painting to second PainterDVR
         _pdvr = new PainterDVR();
         shadow.applyEffectShadowOnly(pdvr, _pdvr, _view.getBoundsLocal());
-        _vw = vw; _vh = vh; _pdvrX = pdvr;
+        _viewW = viewW;
+        _viewH = viewH;
+        _pdvrX = pdvr;
     }
 
     /**

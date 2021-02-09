@@ -446,30 +446,39 @@ public class ParentView extends View {
     {
         // If no floating, just return
         if (getChildrenManaged().length==getChildCount()) return;
-        double pw = getWidth(), ph = getHeight();
+        double viewW = getWidth();
+        double viewH = getHeight();
 
         // Layout floating (unmanaged + leaning) children
         for (View child : getChildren()) { if (child.isManaged()) continue;
 
             // Get child lean, grow, margin and current bounds
-            HPos leanX = child.getLeanX(); VPos leanY = child.getLeanY(); if (leanX==null && leanY==null) continue;
-            Insets marg = child.getMargin(); boolean growX = child.isGrowWidth(), growY = child.isGrowHeight();
-            double x = child.getX(), y = child.getY(), w = child.getWidth(), h = child.getHeight();
+            HPos leanX = child.getLeanX();
+            VPos leanY = child.getLeanY(); if (leanX==null && leanY==null) continue;
+            Insets marg = child.getMargin();
+            boolean growX = child.isGrowWidth();
+            boolean growY = child.isGrowHeight();
+            double childX = child.getX();
+            double childY = child.getY();
+            double childW = child.getWidth();
+            double childH = child.getHeight();
 
             // Handle LeanX: If grow, make width fill parent (minus margin). Set X for lean, width, margin.
             if (leanX!=null) {
-                if (growX) w = pw - marg.getWidth();
-                x = marg.left + (pw - marg.getWidth() - w)*ViewUtils.getAlignX(leanX);
+                if (growX)
+                    childW = viewW - marg.getWidth();
+                childX = marg.left + (viewW - marg.getWidth() - childW) * ViewUtils.getAlignX(leanX);
             }
 
             // Handle LeanY: If grow, make height fill parent (minus margin). Set Y for lean, height, margin.
             if (leanY!=null) {
-                if (growY) h = ph - marg.getHeight();
-                y = marg.top + (ph - marg.getHeight() - h)*ViewUtils.getAlignY(leanY);
+                if (growY)
+                    childH = viewH - marg.getHeight();
+                childY = marg.top + (viewH - marg.getHeight() - childH) * ViewUtils.getAlignY(leanY);
             }
 
             // Set bounds
-            child.setBounds(x, y, w, h);
+            child.setBounds(childX, childY, childW, childH);
         }
     }
 
@@ -596,7 +605,10 @@ public class ParentView extends View {
     /**
      * XML Archival of basic view.
      */
-    protected XMLElement toXMLView(XMLArchiver anArchiver)  { return super.toXML(anArchiver); }
+    protected XMLElement toXMLView(XMLArchiver anArchiver)
+    {
+        return super.toXML(anArchiver);
+    }
 
     /**
      * XML archival of children.
@@ -621,7 +633,10 @@ public class ParentView extends View {
     /**
      * XML unarchival of basic view.
      */
-    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)  { super.fromXML(anArchiver,anElement); }
+    protected void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        super.fromXML(anArchiver,anElement);
+    }
 
     /**
      * XML unarchival for shape children.
