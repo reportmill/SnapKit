@@ -13,8 +13,8 @@ Please interpret that liberally. If you have any doubt, send me a note
 and I will issue a waiver/license for your use case.
 
 If you are a wealthy commercial entity in need of a license, contact
-me directly so we can best determine a solution to meet your needs
-and provide for the health and future of this project.
+us directly to best determine a solution to meet your needs and
+provide for the health and future of this project.
 
 Jeff Martin <jeff@reportmill.com>
 ReportMill Software, Inc.
