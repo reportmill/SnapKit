@@ -1,0 +1,42 @@
+Copyright (c) Since 2009, ReportMill Software, Inc.
+All rights reserved.
+
+Intentions
+
+I (ReportMill) intend for SnapKit to be free for any use that needs
+it to be free. However, I would like to retain the hope/possibility
+of generating income to fund continued development - if ever a
+commercial entity of sufficient means, other than ReportMill, finds
+value in it.
+
+Please interpret that liberally. If you have any doubt, send me a note
+and I will issue a waiver/license for your use case.
+
+If you are a wealthy commercial entity in need of a license, contact
+me directly so we can best determine a solution to meet your needs
+and provide for the health and future of this project.
+
+Jeff Martin <jeff@reportmill.com>
+ReportMill Software, Inc.
+
+Formal license
+
+This is a placeholder for the actual license - if you know which license
+best describes the intentions above, please send the link.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the above conditions
+are met.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
