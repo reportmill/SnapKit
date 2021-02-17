@@ -786,8 +786,20 @@ public class StringUtils {
      */
     public static String formatNum(String aPattern, Object aNum)
     {
+        // Get format and string
         DecimalFormat fmt = getDecimalFormat(aPattern);
-        return fmt.format(aNum);
+        String str = fmt.format(aNum);
+
+        // TeaVM seem to have issues with: #.## and .977757 ?
+        if (SnapUtils.isTeaVM) {
+            if (str.indexOf(':')>=0) {
+                System.out.println("StringUtils.formatNum: TeaVM formatted: " + aNum + " to " + str + " for " + aPattern);
+                return String.valueOf(aNum);
+            }
+        }
+
+        // Return string
+        return str;
     }
 
     /**
