@@ -412,8 +412,8 @@ public abstract class Image implements Loadable {
     public String toString()
     {
         StringBuffer sb = new StringBuffer(getClass().getSimpleName()).append(" {");
-        sb.append(" Width:").append(StringUtils.formatNum("#.##", getWidth()));
-        sb.append(", Height:").append(StringUtils.formatNum("#.##", getHeight()));
+        sb.append(" Width:").append(FormatUtils.formatNum("#.##", getWidth()));
+        sb.append(", Height:").append(FormatUtils.formatNum("#.##", getHeight()));
         if (getPixWidth()!=getWidth()) sb.append(", PixWidth:").append(getPixWidth());
         if (getPixHeight()!=getHeight()) sb.append(", PixHeight:").append(getPixHeight());
         if (getName()!=null) sb.append(", Name:\"").append(getName()).append("\"");

@@ -144,7 +144,7 @@ public class JSONWriter {
 
             // Handle Number
             case Number: {
-                Number num = aNode.getNumber(); String str = StringUtils.formatNum("#.##", num);
+                Number num = aNode.getNumber(); String str = FormatUtils.formatNum("#.##", num);
                 aSB.append(str); break;
             }
 
