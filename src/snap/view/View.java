@@ -2176,7 +2176,7 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
             case View.PrefHeight_Prop: setPrefHeight(SnapUtils.doubleValue(aValue)); break;
             case View.Fill_Prop: setFill(aValue instanceof Paint ? (Paint)aValue : null); break;
             case View.Opacity_Prop: setOpacity(SnapUtils.doubleValue(aValue)); break;
-            case View.Text_Prop: setText(aValue!=null ? aValue.toString() : null); break;
+            case View.Text_Prop: setText(SnapUtils.stringValue(aValue)); break;
             case "Enabled": setDisabled(!SnapUtils.boolValue(aValue)); break;
             case Selectable.Items_Prop: { Selectable sview = (Selectable)this;
                 if (aValue instanceof List) sview.setItems((List)aValue);

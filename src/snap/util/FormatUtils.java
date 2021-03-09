@@ -1,5 +1,8 @@
 package snap.util;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,20 +12,33 @@ import java.util.Map;
 public class FormatUtils {
 
     // A map of known Decimal formats for pattern
-    private static Map<String,DecimalFormat> _formats = new HashMap<>();
+    private static Map<String, DecimalFormat> _formats = new HashMap<>();
+
+    // A simple date format
+    private static SimpleDateFormat  _dateFormat;
 
     /**
      * Formats a number to a reasonable precision.
      */
     public static String formatNum(double aVal)
     {
-        if (aVal >= 1000)
-            return String.valueOf((int) aVal);
+        if (aVal >= 1000 || aVal == (long) aVal)
+            return String.valueOf((long) aVal);
         if (aVal >= 1)
-            formatNum("#.##", aVal);
+            return formatNum("#.##", aVal);
         if (aVal >= .1)
-            formatNum("#.###", aVal);
+            return formatNum("#.###", aVal);
         return String.valueOf(aVal);
+    }
+
+    /**
+     * Formats a number to a reasonable precision.
+     */
+    public static String formatNum(Number aVal)
+    {
+        if (aVal instanceof Float || aVal instanceof Double)
+            return formatNum(aVal.doubleValue());
+        return aVal.toString();
     }
 
     /**
@@ -36,7 +52,7 @@ public class FormatUtils {
 
         // TeaVM seem to have issues with: #.## and .977757 ?
         if (SnapUtils.isTeaVM) {
-            if (str.indexOf(':')>=0) {
+            if (str.indexOf(':') >= 0) {
                 System.out.println("StringUtils.formatNum: TeaVM formatted: " + aNum + " to " + str + " for " + aPattern);
                 return String.valueOf(aNum);
             }
@@ -52,8 +68,26 @@ public class FormatUtils {
     public static DecimalFormat getDecimalFormat(String aPattern)
     {
         DecimalFormat fmt = _formats.get(aPattern);
-        if (fmt==null)
+        if (fmt == null)
             _formats.put(aPattern, fmt = new DecimalFormat(aPattern));
         return fmt;
+    }
+
+    /**
+     * Formats a Date to a reasonable precision.
+     */
+    public static String formatDate(Date aDate)
+    {
+        DateFormat dateFormat = getDateFormat();
+        return dateFormat.format(aDate);
+    }
+
+    /**
+     * Returns a SimpleDateFormat.
+     */
+    public static SimpleDateFormat getDateFormat()
+    {
+        if (_dateFormat != null) return _dateFormat;
+        return _dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     }
 }

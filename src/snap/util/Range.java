@@ -28,4 +28,13 @@ public class Range {
      * Returns whether range is empty.
      */
     public boolean isEmpty()  { return length==0; }
+
+    /**
+     * Standard toString implementation.
+     */
+    @Override
+    public String toString()
+    {
+        return "Range { Start=" + start + ", End=" + end + ", Length=" + length + ", Anchor=" + anchor + " }";
+    }
 }

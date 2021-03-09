@@ -5,7 +5,6 @@ package snap.util;
 import java.io.*;
 import java.math.*;
 import java.net.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import snap.gfx.GFXEnv;
 import snap.web.*;
@@ -34,7 +33,7 @@ public class SnapUtils {
     private static Map <String, Integer> _doOnceMap = new HashMap();
     
     // Constants for platform
-    public static enum Platform { WINDOWS, MAC, CHEERP, TEAVM, UNKNOWN };
+    public enum Platform { WINDOWS, MAC, CHEERP, TEAVM, UNKNOWN };
 
     /**
      * Returns the current platform.
@@ -107,20 +106,16 @@ public class SnapUtils {
         if (anObj==null) return null;
 
         // If object is string, just return it
-        if (anObj instanceof String) return (String)anObj;
+        if (anObj instanceof String)
+            return (String) anObj;
 
         // If object is number, string format it
-        if (anObj instanceof Number) {
-            if (anObj instanceof Float || anObj instanceof Double)
-                return StringUtils.toString(((Number)anObj).doubleValue());
-            return anObj.toString();
-        }
-
-        // If object is File, get absolute path
-        //if (anObj instanceof File) return ((File)anObj).getAbsolutePath();
+        if (anObj instanceof Number)
+            return FormatUtils.formatNum( (Number) anObj);
 
         // If object is Date, date format it
-        if (anObj instanceof Date) return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Date)anObj);
+        if (anObj instanceof Date)
+            return FormatUtils.formatDate( (Date) anObj);
 
         // If byte array, format as base64
         if (anObj instanceof byte[]) {
@@ -130,7 +125,8 @@ public class SnapUtils {
         }
 
         // If class get standard name
-        if (anObj instanceof Class) return ((Class)anObj).getName().replace('$', '.');
+        if (anObj instanceof Class)
+            return ((Class)anObj).getName().replace('$', '.');
 
         // Return object's toString
         return anObj.toString();

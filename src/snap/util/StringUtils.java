@@ -3,8 +3,6 @@
  */
 package snap.util;
 import java.io.*;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.regex.*;
 
@@ -18,9 +16,6 @@ public class StringUtils {
 
     // A regex pattern to find numbers in strings (supports positive/negative, floating point & exponents)
     private static Pattern  _numberPattern = Pattern.compile("[-+]?(([0-9]+\\.?[0-9]*)|([0-9]*\\.[0-9]+))([eE][-+]?[0-9]+)?");
-
-    // A map of known Decimal formats for pattern
-    private static Map<String,DecimalFormat> _formats = new HashMap<>();
 
     /**
      * Returns whether string is null or empty.
@@ -73,13 +68,8 @@ public class StringUtils {
      */
     public static String toString(double aValue)
     {
-        long lval = (long)aValue; if (lval==aValue) return Long.toString(lval);
-        return toStrFmtSynch(aValue);
+        return FormatUtils.formatNum(aValue);
     }
-
-    // A toString(double) with formatter
-    private synchronized static String toStrFmtSynch(double aValue)  { return _fmt.format(aValue); }
-    static DecimalFormat _fmt = new DecimalFormat("#.###", new DecimalFormatSymbols(Locale.ENGLISH));
 
     /**
      * Returns a basic toString for given object.
