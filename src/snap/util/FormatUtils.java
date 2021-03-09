@@ -12,6 +12,20 @@ public class FormatUtils {
     private static Map<String,DecimalFormat> _formats = new HashMap<>();
 
     /**
+     * Formats a number to a reasonable precision.
+     */
+    public static String formatNum(double aVal)
+    {
+        if (aVal >= 1000)
+            return String.valueOf((int) aVal);
+        if (aVal >= 1)
+            formatNum("#.##", aVal);
+        if (aVal >= .1)
+            formatNum("#.###", aVal);
+        return String.valueOf(aVal);
+    }
+
+    /**
      * Formats a number with given Decimal format pattern.
      */
     public static String formatNum(String aPattern, Object aNum)
