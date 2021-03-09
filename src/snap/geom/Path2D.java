@@ -51,6 +51,7 @@ public class Path2D extends Shape implements Cloneable {
      */
     public Path2D(Shape aShape)
     {
+        addShape(aShape);
     }
 
     /**
@@ -309,6 +310,32 @@ public class Path2D extends Shape implements Cloneable {
         addSeg(Seg.Close);
         addSegPointIndex(pointIndex);
         _closed = true;
+    }
+
+    /**
+     * Adds a Shape.
+     */
+    public void addShape(Shape aShape)
+    {
+        PathIter pathIter = aShape.getPathIter(null);
+        addPathIter(pathIter);
+    }
+
+    /**
+     * Adds a PathIter.
+     */
+    public void addPathIter(PathIter aPathIter)
+    {
+        double[] pnts = new double[6];
+        while (aPathIter.hasNext()) {
+            switch (aPathIter.getNext(pnts)) {
+                case MoveTo: moveTo(pnts[0], pnts[1]); break;
+                case LineTo: lineTo(pnts[0], pnts[1]); break;
+                case QuadTo: quadTo(pnts[0], pnts[1], pnts[2], pnts[3]); break;
+                case CubicTo: curveTo(pnts[0], pnts[1], pnts[2], pnts[3], pnts[4], pnts[5]); break;
+                case Close: close(); break;
+            }
+        }
     }
 
     /**
