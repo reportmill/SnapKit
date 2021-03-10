@@ -14,20 +14,41 @@ public class Range {
     /**
      * Creates a range with start/end.
      */
-    public Range(int aStart, int anEnd)  { this(aStart, anEnd, aStart<=anEnd? anEnd : aStart); }
+    public Range(int aStart, int anEnd)
+    {
+        this(aStart, anEnd, aStart<=anEnd ? anEnd : aStart);
+    }
 
     /**
      * Creates a range, with start/end/anchor.
      */
     public Range(int aStart, int anEnd, int anAnchor)
     {
-        start = Math.min(aStart, anEnd); end = Math.max(aStart, anEnd); length = end - start; anchor = anAnchor;
+        start = Math.min(aStart, anEnd);
+        end = Math.max(aStart, anEnd);
+        length = end - start;
+        anchor = anAnchor;
     }
-    
+
+    /**
+     * Returns the start.
+     */
+    public int getStart()  { return start; }
+
+    /**
+     * Returns the end.
+     */
+    public int getEnd()  { return end; }
+
+    /**
+     * Returns the length.
+     */
+    public int getLength()  { return end - start; }
+
     /**
      * Returns whether range is empty.
      */
-    public boolean isEmpty()  { return length==0; }
+    public boolean isEmpty()  { return getLength()==0; }
 
     /**
      * Standard toString implementation.
@@ -35,6 +56,6 @@ public class Range {
     @Override
     public String toString()
     {
-        return "Range { Start=" + start + ", End=" + end + ", Length=" + length + ", Anchor=" + anchor + " }";
+        return "Range { Start=" + start + ", End=" + end + ", Length=" + getLength() + ", Anchor=" + anchor + " }";
     }
 }
