@@ -344,7 +344,7 @@ public class SWWindowHpr extends WindowView.WindowHpr <Window> {
      */
     protected void snapWindowPropertyChanged(PropChange aPC)
     {
-        String pname = aPC.getPropertyName();
+        String pname = aPC.getPropName();
         if (pname==View.X_Prop) setX((Double)aPC.getNewValue());
         else if (pname==View.Y_Prop) setY((Double)aPC.getNewValue());
         else if (pname==View.Width_Prop) setWidth((Double)aPC.getNewValue());

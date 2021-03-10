@@ -1304,7 +1304,7 @@ public class TextArea extends View {
         Undoer undoer = getUndoer(); if(undoer==null || !undoer.isEnabled()) return;
 
         // If PlainText Style_Prop or LineStyle_Prop, just return
-        String pname = anEvent.getPropertyName();
+        String pname = anEvent.getPropName();
         if (isPlainText() && (pname==RichText.Style_Prop || pname==RichText.LineStyle_Prop))
             return;
 

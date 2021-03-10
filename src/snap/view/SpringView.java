@@ -127,7 +127,7 @@ public class SpringView extends ChildView {
     protected void childPropChange(PropChange aPCE)
     {
         if (isInLayout()) return;
-        String pname = aPCE.getPropertyName();
+        String pname = aPCE.getPropName();
         if (pname==X_Prop || pname==Y_Prop || pname==Width_Prop || pname==Height_Prop)
             resetSpringInfo((View)aPCE.getSource());
     }

@@ -368,7 +368,7 @@ public class ScrollView extends ParentView implements ViewHost {
     protected void scrollerDidPropChange(PropChange anEvent)
     {
         // Get Property Name
-        String pname = anEvent.getPropertyName();
+        String pname = anEvent.getPropName();
 
         // Handle Scroller.ScrollX change
         if (pname==Scroller.ScrollX_Prop)
@@ -398,7 +398,7 @@ public class ScrollView extends ParentView implements ViewHost {
      */
     public void scrollBarDidPropChange(PropChange aPC)
     {
-        String pname = aPC.getPropertyName();
+        String pname = aPC.getPropName();
         if (pname==ScrollBar.Scroll_Prop) {
             ScrollBar sbar = (ScrollBar)aPC.getSource();
             double val = sbar.getScrollRatio();

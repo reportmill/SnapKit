@@ -44,7 +44,7 @@ public Settings(WebFile aFile)
 
     // Watch for file reverted
     aFile.addPropChangeListener(e -> {
-        if(e.getPropertyName()==WebFile.Bytes_Prop && e.getNewValue()!=_fileBytes) readFile(); });
+        if(e.getPropName()==WebFile.Bytes_Prop && e.getNewValue()!=_fileBytes) readFile(); });
 }
 
 /**
