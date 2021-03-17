@@ -4,6 +4,7 @@
 /out/
 /target/
 .gradle
+gradle.properties
 
 .DS_Store
 Project.settings
