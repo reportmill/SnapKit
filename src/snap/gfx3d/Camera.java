@@ -224,7 +224,12 @@ public class Camera {
     /**
      * Sets whether to adjust Z to keep scene positive.
      */
-    public void setAdjustZ(boolean aValue)  { _adjustZ = aValue; rebuildPaths(); }
+    public void setAdjustZ(boolean aValue)
+    {
+        if (aValue == isAdjustZ()) return;
+        _adjustZ = aValue;
+        rebuildPaths();
+    }
 
     /**
      * Returns whether scene is rendered in pseudo 3d.
@@ -307,7 +312,8 @@ public class Camera {
 
         // If pseudo 3d, just return skewed transform
         if (isPseudo3D()) {
-            Transform3D t = new Transform3D(); t.skew(_pseudoSkewX, _pseudoSkewY);
+            Transform3D t = new Transform3D();
+            t.skew(_pseudoSkewX, _pseudoSkewY);
             t.perspective(getFocalLength());
             return t;
         }
@@ -316,10 +322,13 @@ public class Camera {
         //t.rotateY(_yaw); t.rotate(new Vector3D(1,0,0), _pitch); t.rotate(new Vector3D(0,0,1), _roll);
 
         // Normal transform: translate about center, rotate X & Y, translate by Z, perspective, translate back
-        double midx = getWidth()/2, midy = getHeight()/2, midz = getDepth()/2;
+        double midx = getWidth()/2;
+        double midy = getHeight()/2;
+        double midz = getDepth()/2;
         Transform3D t = new Transform3D(-midx, -midy, -midz);
         t.rotate(_pitch, _yaw, _roll);
-        t.translate(0, 0, getOffsetZ() - _offsetZ2);
+        double offsetZ = getOffsetZ() - _offsetZ2;
+        t.translate(0, 0, offsetZ);
         if (_focalLen>0)
             t.perspective(getFocalLength());
         t.translate(midx, midy, midz);
@@ -332,29 +341,34 @@ public class Camera {
     protected void adjustZ()
     {
         // Cache and clear Z offset and second Z offset
-        double offZ = getOffsetZ(),  _offsetZ = _offsetZ2 = 0; _xform3D = null;
+        double offZ = getOffsetZ();
+        _offsetZ2 = 0;
+        _xform3D = null;
 
         // Get bounding box in camera coords with no Z offset
-        double w = getWidth();
-        double h = getHeight();
-        double d = getDepth();
+        double boxW = getWidth();
+        double boxH = getHeight();
+        double boxD = getDepth();
         Path3D bbox = new Path3D();
         bbox.moveTo(0, 0, 0);
-        bbox.lineTo(0, 0, d);
-        bbox.lineTo(w, 0, d);
-        bbox.lineTo(w, 0, 0);
-        bbox.lineTo(w, h, 0);
-        bbox.lineTo(w, h, d);
-        bbox.lineTo(0, h, d);
-        bbox.lineTo(0, h, 0);
-        bbox.transform(getTransform());
+        bbox.lineTo(0, 0, boxD);
+        bbox.lineTo(boxW, 0, boxD);
+        bbox.lineTo(boxW, 0, 0);
+        bbox.lineTo(boxW, boxH, 0);
+        bbox.lineTo(boxW, boxH, boxD);
+        bbox.lineTo(0, boxH, boxD);
+        bbox.lineTo(0, boxH, 0);
+
+        // Transform
+        Transform3D xform = getTransform();
+        bbox.transform(xform);
 
         // Get second offset Z from bounding box and restore original Z offset
         _offsetZ2 = bbox.getZMin();
         _offsetZ = offZ;
         _xform3D = null;
-        if (Math.abs(_offsetZ2)>w)
-            _offsetZ2 = w*MathUtils.sign(_offsetZ2); // Something is brokey
+        if (Math.abs(_offsetZ2)>boxW)
+            _offsetZ2 = boxW*MathUtils.sign(_offsetZ2); // Something is brokey
     }
 
     /**
@@ -433,10 +447,12 @@ public class Camera {
     protected void rebuildPathsNow()
     {
         // Adjust Z
-        if (isAdjustZ()) adjustZ();
+        if (isAdjustZ())
+            adjustZ();
 
         // Remove all existing Path3Ds
-        removePaths(); _sceneBounds = null;
+        removePaths();
+        _sceneBounds = null;
 
         // Iterate over shapes and add paths
         List <Shape3D> shapes = _scene._shapes;
@@ -578,7 +594,10 @@ public class Camera {
             int SCROLL_SCALE = 10;
             double scroll = anEvent.getScrollY();
             double distZ = scroll * SCROLL_SCALE;
-            setOffsetZ(getOffsetZ() + distZ);
+            double focalLen = getFocalLength();
+            double offZ = Math.max(getOffsetZ() + distZ, -focalLen + 100);
+            setOffsetZ(offZ);
+            setAdjustZ(false);
         }
     }
 
@@ -636,10 +655,14 @@ public class Camera {
     public void copy3D(Camera aCam)
     {
         setDepth(aCam.getDepth());
-        setYaw(aCam.getYaw()); setPitch(aCam.getPitch()); setRoll(aCam.getRoll());
-        setFocalLength(aCam.getFocalLength()); setOffsetZ(aCam.getOffsetZ());
+        setYaw(aCam.getYaw());
+        setPitch(aCam.getPitch());
+        setRoll(aCam.getRoll());
+        setFocalLength(aCam.getFocalLength());
+        setOffsetZ(aCam.getOffsetZ());
         setPseudo3D(aCam.isPseudo3D());
-        setPseudoSkewX(aCam.getPseudoSkewX()); setPseudoSkewY(aCam.getPseudoSkewY());
+        setPseudoSkewX(aCam.getPseudoSkewX());
+        setPseudoSkewY(aCam.getPseudoSkewY());
     }
 
     /**
