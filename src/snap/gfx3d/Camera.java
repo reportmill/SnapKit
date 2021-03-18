@@ -573,8 +573,13 @@ public class Camera {
         else if (anEvent.isMouseDrag())
             mouseDragged(anEvent);
 
-        // Handle MouseReleased
-        //else if (anEvent.isMouseRelease()) { _valueAdjusting = false; repaint(); relayout(); }
+        // Handle Scroll: Assume + 1x per 60 points (1 inches)
+        else if (anEvent.isScroll()) {
+            int SCROLL_SCALE = 10;
+            double scroll = anEvent.getScrollY();
+            double distZ = scroll * SCROLL_SCALE;
+            setOffsetZ(getOffsetZ() + distZ);
+        }
     }
 
     /**

@@ -30,7 +30,7 @@ public class CameraView extends ParentView {
         _scene = new Scene3D();
         _camera = _scene.getCamera();
         _camera.addPropChangeListener(pce -> cameraChanged(pce));
-        enableEvents(MousePress, MouseDrag, MouseRelease);
+        enableEvents(MousePress, MouseDrag, MouseRelease, Scroll);
     }
 
     /**
@@ -231,17 +231,28 @@ public class CameraView extends ParentView {
     /**
      * Viewer method.
      */
-    public void processEvent(ViewEvent anEvent)  { _camera.processEvent(anEvent); }
+    public void processEvent(ViewEvent anEvent)
+    {
+        _camera.processEvent(anEvent);
+    }
 
     /**
      * Override to forward to Scene3D.
      */
-    public void setWidth(double aValue)  { super.setWidth(aValue); _camera.setWidth(aValue); }
+    public void setWidth(double aValue)
+    {
+        super.setWidth(aValue);
+        _camera.setWidth(aValue);
+    }
 
     /**
      * Override to forward to Scene3D.
      */
-    public void setHeight(double aValue)  { super.setHeight(aValue); _camera.setHeight(aValue); }
+    public void setHeight(double aValue)
+    {
+        super.setHeight(aValue);
+        _camera.setHeight(aValue);
+    }
 
     /**
      * Override to account for Scene3D bounds.
