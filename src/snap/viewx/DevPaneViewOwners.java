@@ -285,19 +285,56 @@ public class DevPaneViewOwners extends ViewOwner {
     /**
      * Shows the UI current selection.
      */
+    private void showInSnapBuilder2(boolean isLocal)
+    {
+        if (SnapUtils.isTeaVM) {
+            showInSnapBuilder2(isLocal);
+            return;
+        }
+
+        // Get HTML String
+        String htmlStr = getHTMLString(isLocal);
+        if (htmlStr==null) { ViewUtils.beep(); return; }
+
+        // Write HTML string to temp HTML file
+        ViewOwner selOwner = getSelViewOwner(); if (selOwner == null) return;
+        String filename = selOwner.getClass().getSimpleName() + ".html";
+        File file = FileUtils.getTempFile(filename);
+        SnapUtils.writeBytes(htmlStr.getBytes(), file);
+
+        // Open temp HTML file
+        GFXEnv.getEnv().openURL(file);
+    }
+
     private void showInSnapBuilder(boolean isLocal)
     {
         // Get HTML String
         String htmlStr = getHTMLString(isLocal);
         if (htmlStr==null) { ViewUtils.beep(); return; }
 
-        // Write HTML string to temp HTML file
-        String filename = getSelView().getOwner().getClass().getSimpleName() + ".html";
-        File file = FileUtils.getTempFile(filename);
-        SnapUtils.writeBytes(htmlStr.getBytes(), file);
+        // Get name
+        ViewOwner selOwner = getSelViewOwner(); if (selOwner == null) return;
+        String htmlName = selOwner.getClass().getSimpleName() + ".html";
 
-        // Open temp HTML file
-        GFXEnv.getEnv().openURL(file);
+        // Get filename and file
+        String filename = SnapUtils.getTempDir() + htmlName;
+        File file = FileUtils.getFile(filename);
+
+        // TeaVM seems to sometimes use remnants of old file?
+        if (SnapUtils.isTeaVM) {
+            try { file.delete(); }
+            catch (Exception e) { System.err.println("DevPaneViewOwners.showInSnapBuilder: Error deleting file"); }
+        }
+
+        // Get bytes
+        byte[] bytes = htmlStr.getBytes();
+
+        // Write bytes to file
+        try { FileUtils.writeBytes(file, bytes); }
+        catch(Exception e) { throw new RuntimeException(e); }
+
+        // Open file
+        FileUtils.openFile(file);
     }
 
     /**
@@ -461,7 +498,7 @@ public class DevPaneViewOwners extends ViewOwner {
         public String getText(View anItem)
         {
             ViewOwner owner = anItem.getOwner();
-            String str = owner.getClass().getSimpleName();
+            String str = owner != null ? owner.getClass().getSimpleName() : "No Owner";
             return str;
         }
 
