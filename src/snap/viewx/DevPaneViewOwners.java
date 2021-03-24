@@ -12,6 +12,7 @@ import snap.view.EventListener;
 import snap.web.WebURL;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -287,54 +288,45 @@ public class DevPaneViewOwners extends ViewOwner {
      */
     private void showInSnapBuilder(boolean isLocal)
     {
-        if (SnapUtils.isTeaVM) {
-            showInSnapBuilder2(isLocal);
+        // Get filename
+        ViewOwner selOwner = getSelViewOwner(); if (selOwner == null) return;
+        String filename = selOwner.getClass().getSimpleName() + ".html";
+
+        // Get HTML String and bytes
+        String htmlStr = getHTMLString(isLocal);
+        if (htmlStr==null) { ViewUtils.beep(); return; }
+        byte[] htmlBytes = htmlStr.getBytes();
+
+        // Open filename + bytes
+        openFilenameBytes(filename, htmlBytes);
+    }
+
+    /**
+     * Opens the given filename + bytes as a file.
+     */
+    private void openFilenameBytes(String aFilename, byte[] theBytes)
+    {
+        // Get file
+        File file = SnapUtils.isTeaVM ? new File('/' + aFilename) :
+            FileUtils.getTempFile(aFilename);
+
+        // TeaVM seems to sometimes use remnants of old file. This has been fixed
+        if (SnapUtils.isTeaVM)
+            try { file.delete(); }
+            catch (Exception e) { System.err.println("DevPaneViewOwners.showInSnapBuilder: Error deleting file"); }
+
+        // Write HTML string to temp HTML file
+        try { FileUtils.writeBytes(file, theBytes); }
+        catch (IOException e)
+        {
+            System.err.println("openFilenameBytes write error: " + e);
             return;
         }
 
-        // Get HTML String
-        String htmlStr = getHTMLString(isLocal);
-        if (htmlStr==null) { ViewUtils.beep(); return; }
-
-        // Write HTML string to temp HTML file
-        ViewOwner selOwner = getSelViewOwner(); if (selOwner == null) return;
-        String filename = selOwner.getClass().getSimpleName() + ".html";
-        File file = FileUtils.getTempFile(filename);
-        SnapUtils.writeBytes(htmlStr.getBytes(), file);
-
         // Open temp HTML file
-        GFXEnv.getEnv().openURL(file);
-    }
-
-    private void showInSnapBuilder2(boolean isLocal)
-    {
-        // Get HTML String
-        String htmlStr = getHTMLString(isLocal);
-        if (htmlStr==null) { ViewUtils.beep(); return; }
-
-        // Get name
-        ViewOwner selOwner = getSelViewOwner(); if (selOwner == null) return;
-        String htmlName = selOwner.getClass().getSimpleName() + ".html";
-
-        // Get filename and file
-        String filename = SnapUtils.getTempDir() + htmlName;
-        File file = FileUtils.getFile(filename);
-
-        // TeaVM seems to sometimes use remnants of old file?
-        if (SnapUtils.isTeaVM) {
-            try { file.delete(); }
-            catch (Exception e) { System.err.println("DevPaneViewOwners.showInSnapBuilder: Error deleting file"); }
-        }
-
-        // Get bytes
-        byte[] bytes = htmlStr.getBytes();
-
-        // Write bytes to file
-        try { FileUtils.writeBytes(file, bytes); }
-        catch(Exception e) { throw new RuntimeException(e); }
-
-        // Open file
-        FileUtils.openFile(file);
+        if (SnapUtils.isTeaVM)
+            GFXEnv.getEnv().openFile(file);
+        else GFXEnv.getEnv().openURL(file);
     }
 
     /**
