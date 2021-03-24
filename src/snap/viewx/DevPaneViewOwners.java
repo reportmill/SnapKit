@@ -285,7 +285,7 @@ public class DevPaneViewOwners extends ViewOwner {
     /**
      * Shows the UI current selection.
      */
-    private void showInSnapBuilder2(boolean isLocal)
+    private void showInSnapBuilder(boolean isLocal)
     {
         if (SnapUtils.isTeaVM) {
             showInSnapBuilder2(isLocal);
@@ -306,7 +306,7 @@ public class DevPaneViewOwners extends ViewOwner {
         GFXEnv.getEnv().openURL(file);
     }
 
-    private void showInSnapBuilder(boolean isLocal)
+    private void showInSnapBuilder2(boolean isLocal)
     {
         // Get HTML String
         String htmlStr = getHTMLString(isLocal);
