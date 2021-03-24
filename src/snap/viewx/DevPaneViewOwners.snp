@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RowView Padding="5" FillHeight="true">
+  <ColView Padding="5" FillWidth="true">
+    <font name="Arial" size="13" />
+    <RowView Padding="2,4,3,4">
+      <Label text="ViewOwner Hierarchy" />
+      <ToggleButton Name="TargetingButton" Padding="2,6,2,6" LeanX="RIGHT" text="Mouse Over Select...">
+        <font name="Arial" size="11" />
+      </ToggleButton>
+    </RowView>
+    <BrowserView Name="BrowserView" PrefWidth="420" PrefHeight="300" GrowHeight="true" PrefColCount="3" PrefColWidth="140" />
+  </ColView>
+  <ColView Padding="5" GrowWidth="true" FillWidth="true">
+    <RowView Padding="2,4,3,4" Spacing="8">
+      <Label Name="XMLTextLabel" text="View XML">
+        <font name="Arial" size="13" />
+      </Label>
+      <Button Name="ShowUIButton" PrefWidth="90" Padding="2,6,2,6" LeanX="RIGHT" text="Open UI" />
+      <Button Name="ShowSourceButton" PrefWidth="90" Padding="2,6,2,6" text="Open Source" />
+    </RowView>
+    <TextView Name="XMLText" GrowHeight="true" />
+  </ColView>
+  <ColView Padding="4,4,4,4" FillWidth="true">
+    <font name="Arial" size="12" />
+    <RowView PrefHeight="29" Padding="0,4,10,4">
+      <Button Name="CloseButton" Padding="3,6,3,6" LeanX="RIGHT" text="X" />
+    </RowView>
+  </ColView>
+</RowView>

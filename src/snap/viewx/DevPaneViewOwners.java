@@ -1,11 +1,23 @@
 package snap.viewx;
+import snap.geom.Rect;
+import snap.geom.RoundRect;
+import snap.geom.Shape;
 import snap.gfx.GFXEnv;
+import snap.gfx.Painter;
+import snap.util.FileUtils;
+import snap.util.ListUtils;
+import snap.util.SnapUtils;
 import snap.view.*;
+import snap.view.EventListener;
+import snap.web.WebURL;
+
+import java.io.File;
+import java.util.*;
 
 /**
  * A DevPane tab for inspecting the view tree.
  */
-public class DevPaneViewTree extends ViewOwner {
+public class DevPaneViewOwners extends ViewOwner {
 
     // The DevPane
     private DevPane  _devPane;
@@ -31,7 +43,7 @@ public class DevPaneViewTree extends ViewOwner {
     /**
      * Constructor.
      */
-    public DevPaneViewTree(DevPane aDevPane)
+    public DevPaneViewOwners(DevPane aDevPane)
     {
         super();
         _devPane = aDevPane;
@@ -94,6 +106,40 @@ public class DevPaneViewTree extends ViewOwner {
     }
 
     /**
+     * Returns the selected view owner.
+     */
+    public ViewOwner getSelViewOwner()
+    {
+        View selView = getSelView();
+        return selView != null ? selView.getOwner() : null;
+    }
+
+    /**
+     * Returns the XML for selection.
+     */
+    public String getSelXML()
+    {
+        // If targeting, return empty?
+        if (isTargeting())
+            return "";
+
+        // Get selected ViewOwner
+        ViewOwner owner = getSelViewOwner(); if (owner == null) return "";
+
+        // If owner has UI file, get text
+        WebURL url = ViewEnv.getEnv().getUISource(owner.getClass());
+        if (url != null) {
+            String str = url.getText();
+            return str;
+        }
+
+        // Otherwise, just get XML from SelView
+        View selView = getSelView(); if (selView == null) return "";
+        String xml = new ViewArchiver().writeToXML(selView).getString();
+        return xml;
+    }
+
+    /**
      * Called when the DevPane.SplitView gets a mouse event.
      */
     private void devPaneMouseEvent(ViewEvent anEvent)
@@ -128,12 +174,36 @@ public class DevPaneViewTree extends ViewOwner {
     {
         View view = ViewUtils.getDeepestViewAt(_devPane.getContent(), aX, aY);
         View par = view!=null ? view.getParent() : null;
-        if (par instanceof Label || par instanceof ButtonBase || par instanceof TextField || par instanceof ComboBox) {
-            view = par; par = par.getParent();
-            if (par instanceof ButtonBase || par instanceof TextField || par instanceof ComboBox)
-                view = par;
+        while (par != null && (par.getOwner() == view.getOwner() || view.getOwner() == null)) {
+            view = par;
+            par = view.getParent();
         }
         return view;
+    }
+
+    /**
+     * Called to paint SelView.
+     */
+    public void paintViewSelection(Painter aPntr, View aHostView)
+    {
+        // Get SelView (use TargView if targeting)
+        View selView = getTargView();
+        if (selView == null)
+            selView = getSelView();
+        if (selView == null || selView.getRootView() == null) return;
+
+        // Get SelView visiible bounds
+        Rect rect = selView.getVisRect(); if (rect.isEmpty()) return;
+        rect = rect.getInsetRect(-1);
+
+        // Get SelView bounds as round rect in HostView coords
+        Shape rect2 = new RoundRect(rect.x, rect.y, rect.width, rect.height, 4);
+        Shape rect3 = selView.localToParent(rect2, aHostView);
+
+        // Draw rect
+        aPntr.setStroke(DevPane.HIGHLIGHT_BORDER_STROKE);
+        aPntr.setColor(DevPane.HIGHLIGHT_BORDER_COLOR);
+        aPntr.draw(rect3);
     }
 
     /**
@@ -144,12 +214,12 @@ public class DevPaneViewTree extends ViewOwner {
     {
         // Configure BrowserView
         _browserView = getView("BrowserView", BrowserView.class);
-        _browserView.setResolver(new ViewTreeResolver());
+        _browserView.setResolver(new ViewOwnersTreeResolver());
         _browserView.setItems(_devPane.getContent());
         _browserView.setPrefColWidth(120);
 
         // Get TextView
-        _textView = getView("TextView", TextView.class);
+        _textView = getView("XMLText", TextView.class);
 
         // Handle Escape
         addKeyActionHandler("EscapeAction", "ESCAPE");
@@ -161,10 +231,14 @@ public class DevPaneViewTree extends ViewOwner {
         // Update TargetingButton
         setViewValue("TargetingButton", isTargeting());
 
+        // Update XMLTextLabel
+        ViewOwner selOwner = getSelViewOwner();
+        String selOwnerName = selOwner != null ? selOwner.getClass().getSimpleName() + ".snp" : "ViewOwner XML";
+        setViewValue("XMLTextLabel", selOwnerName);
+
         // Update XML
         if (_updateXML) {
-            View view = getSelView();
-            String xml = view!=null && !isTargeting() ? new ViewArchiver().writeToXML(view).getString() : "";
+            String xml = getSelXML();
             int header = xml.indexOf('\n');
             if (header>0) xml = xml.substring(header+1);
             _textView.setText(xml);
@@ -199,27 +273,80 @@ public class DevPaneViewTree extends ViewOwner {
         if (anEvent.equals("CloseButton"))
             runLater(() -> DevPane.setDevPaneShowing(_devPane.getContent(), false));
 
+        // Handle ShowUIButton
+        if (anEvent.equals("ShowUIButton"))
+            showInSnapBuilder(anEvent.isAltDown());
+
         // Handle ShowSourceButton
         if (anEvent.equals("ShowSourceButton"))
-            showSource();
-
-        // Handle ShowJavaDocButton
-        if (anEvent.equals("ShowJavaDocButton"))
-            showJavaDoc();
-
-        // Handle ShowOwnerSourceButton
-        if (anEvent.equals("ShowOwnerSourceButton"))
             showOwnerSource();
     }
 
     /**
-     * Shows the source for the current selection.
+     * Shows the UI current selection.
      */
-    private void showSource()
+    private void showInSnapBuilder(boolean isLocal)
     {
-        String urlStr = getSourceURL();
-        if (urlStr==null) { ViewUtils.beep(); return; }
-        GFXEnv.getEnv().openURL(urlStr);
+        // Get HTML String
+        String htmlStr = getHTMLString(isLocal);
+        if (htmlStr==null) { ViewUtils.beep(); return; }
+
+        // Write HTML string to temp HTML file
+        String filename = getSelView().getOwner().getClass().getSimpleName() + ".html";
+        File file = FileUtils.getTempFile(filename);
+        SnapUtils.writeBytes(htmlStr.getBytes(), file);
+
+        // Open temp HTML file
+        GFXEnv.getEnv().openURL(file);
+    }
+
+    /**
+     * Returns the HTML to open UI in SnapBuilder web.
+     */
+    private String getHTMLString(boolean isLocal)
+    {
+        // Get URL string for SnapBuilder script
+        String urls = "http://reportmill.com/snaptea/SnapBuilder/classes.js";
+        if (isLocal)
+            urls = "http://localhost:8080/classes.js";
+
+        // Get SelOwner and XML string
+        ViewOwner selOwner = getSelViewOwner();
+        Class selClass = selOwner.getClass();
+        String xmlFilename = selClass.getSimpleName() + ".snp";
+        String xmlPath = selClass.getName().replace('.', '/') + ".snp";
+        String xmlStr = getSelXML();
+
+        // Create StringBuffer and add header
+        StringBuffer sb = new StringBuffer();
+        sb.append("<!DOCTYPE html>\n");
+        sb.append("<html>\n");
+
+        // Add header/title
+        String title = "SnapBuilder: " + xmlPath;
+        sb.append("<head>\n");
+        sb.append("<title>").append(title).append("</title>\n");
+        sb.append("</head>\n");
+
+        // Add body
+        sb.append("<body>\n");
+        sb.append("</body>\n");
+
+        // Add SnapBuilder Script
+        sb.append("<script type=\"text/javascript\" charset=\"utf-8\" src=\"" + urls + "\"></script>\n");
+
+        // Add script with inline XMLString and main() entry point
+        sb.append("<script>\n\n");
+        sb.append("const xmlFilename = '").append(xmlFilename).append("';\n");
+        sb.append("const xmlString = `\n");
+        sb.append(xmlStr);
+        sb.append("\n`;\n\n");
+        sb.append("main(['XMLFilename', xmlFilename, 'XMLString', xmlString]);\n\n");
+        sb.append("</script>\n\n");
+
+        // Close HTML and return string
+        sb.append("</html>\n");
+        return sb.toString();
     }
 
     /**
@@ -230,34 +357,6 @@ public class DevPaneViewTree extends ViewOwner {
         String urlStr = getOwnerSourceURL();
         if (urlStr==null) { ViewUtils.beep(); return; }
         GFXEnv.getEnv().openURL(urlStr);
-    }
-
-    /**
-     * Shows the JavaDoc for the current selection.
-     */
-    private void showJavaDoc()
-    {
-        String urlStr = getSourceURL();
-        if (urlStr==null) { ViewUtils.beep(); return; }
-        GFXEnv.getEnv().openURL(urlStr);
-    }
-
-    /**
-     * Returns the Source url for currently selected type.
-     */
-    public String getSourceURL()
-    {
-        // Get class name for selected view
-        View selView = getSelView();
-        Class cls = selView!=null ? selView.getClass() : null; if (cls==null) return null;
-        if (cls.isArray()) cls = cls.getComponentType();
-
-        // Iterate up through class parents until URL found or null
-        while (cls!=null) {
-            String url = getSourceURL(cls); if (url!=null) return url;
-            Class scls = cls.getSuperclass(); cls = scls!=null && scls!=Object.class ? scls : null;
-        }
-        return null;
     }
 
     /**
@@ -302,9 +401,37 @@ public class DevPaneViewTree extends ViewOwner {
     }
 
     /**
+     * Returns all ViewOwners for given View and its children.
+     */
+    private static List<ViewOwner> getChildViewOwnersForView(View aView)
+    {
+        List<ViewOwner> list = new ArrayList<>();
+        getChildViewOwnersForView(aView, list);
+        ViewOwner owner = aView.getOwner();
+        if (owner != null)
+            list.remove(owner);
+        return list;
+    }
+
+    /**
+     * Returns all ViewOwners for given View and its children.
+     */
+    private static void getChildViewOwnersForView(View aView, List<ViewOwner> aList)
+    {
+        ViewOwner owner = aView.getOwner();
+        if (owner != null && !aList.contains(owner))
+            aList.add(owner);
+        if (aView instanceof ParentView) {
+            ParentView par = (ParentView) aView;
+            for (View child : par.getChildren())
+                getChildViewOwnersForView(child, aList);
+        }
+    }
+
+    /**
      * A resolver for Views.
      */
-    public class ViewTreeResolver extends TreeResolver<View> {
+    public class ViewOwnersTreeResolver extends TreeResolver<View> {
 
         /** Returns the parent of given item. */
         public View getParent(View anItem)
@@ -315,29 +442,26 @@ public class DevPaneViewTree extends ViewOwner {
         /** Whether given object is a parent (has children). */
         public boolean isParent(View anItem)
         {
-            if (!(anItem instanceof ParentView)) return false;
-            if (anItem instanceof Label || anItem instanceof ButtonBase || anItem instanceof Spinner ||
-                    anItem instanceof ArrowView || anItem instanceof TextField) return false;
-            if (anItem instanceof ComboBox || anItem instanceof ListView) return false;
-            return ((ParentView)anItem).getChildCount()>0;
+            List<ViewOwner> list = getChildViewOwnersForView(anItem);
+            return list.size() > 0;
         }
 
         /** Returns the children. */
         public View[] getChildren(View aParent)
         {
-            ParentView par = (ParentView)aParent;
-            if (par instanceof ScrollView) { ScrollView sp = (ScrollView)par;
-                return sp.getContent()!=null ? new View[] { sp.getContent() } : new View[0]; }
-            return par.getChildren();
+            List<ViewOwner> list = getChildViewOwnersForView(aParent);
+            ViewOwner[] owners = list.toArray(new ViewOwner[0]);
+            View[] views = new View[owners.length];
+            for (int i=0; i<owners.length; i++)
+                views[i] = owners[i].getUI();
+            return views;
         }
 
         /** Returns the text to be used for given item. */
         public String getText(View anItem)
         {
-            String str = anItem.getClass().getSimpleName();
-            String name = anItem.getName();
-            if (name!=null) str = name; //name.contains(str) ? name : (str + " - " + name);
-            //String text = anItem.getText(); if (text!=null) str += " \"" + text + "\" ";
+            ViewOwner owner = anItem.getOwner();
+            String str = owner.getClass().getSimpleName();
             return str;
         }
 

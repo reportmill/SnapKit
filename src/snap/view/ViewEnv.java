@@ -150,7 +150,7 @@ public abstract class ViewEnv {
     /**
      * Returns a UI source for given class.
      */
-    public Object getUISource(Class aClass)
+    public WebURL getUISource(Class aClass)
     {
         // Look for snap file with same name as class
         String name = aClass.getSimpleName() + ".snp";

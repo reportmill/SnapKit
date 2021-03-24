@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.util.*;
 import snap.gfx.*;
 import snap.util.*;
+import snap.web.WebURL;
 
 /**
  * A base controller class class that manages a SwingPanel usually loaded from a rib file.
@@ -140,7 +141,7 @@ public class ViewOwner implements EventListener {
      */
     protected View createUI(Class aClass)
     {
-        Object src = _env.getUISource(aClass);
+        WebURL src = _env.getUISource(aClass);
         return createUI(src);
     }
 

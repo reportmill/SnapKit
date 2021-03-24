@@ -1,7 +1,4 @@
 package snap.viewx;
-import snap.geom.Rect;
-import snap.geom.RoundRect;
-import snap.geom.Shape;
 import snap.gfx.Color;
 import snap.gfx.Painter;
 import snap.gfx.Stroke;
@@ -24,16 +21,19 @@ public class DevPane extends ViewOwner {
     // The TabView
     private TabView  _tabView;
 
+    // The ViewOwners inspector
+    private DevPaneViewOwners  _viewOwners = new DevPaneViewOwners(this);
+
     // The ViewTree inspector
-    private DevPaneViewTree  _viewTree = new DevPaneViewTree(this);
+    private DevPaneViews _viewTree = new DevPaneViews(this);
 
     // The Graphics inspector
     private DevPaneGraphics  _gfxInsp = new DevPaneGraphics(this);
 
     // Constants
     private static int DEFAULT_HEIGHT = 300;
-    private static Stroke HIGHLIGHT_BORDER_STROKE = new Stroke(3);
-    private static Color HIGHLIGHT_BORDER_COLOR = Color.RED.blend(Color.CLEARWHITE, .34);
+    protected static Stroke HIGHLIGHT_BORDER_STROKE = new Stroke(3);
+    protected static Color HIGHLIGHT_BORDER_COLOR = Color.RED.blend(Color.CLEARWHITE, .34);
 
     /**
      * Constructor.
@@ -109,8 +109,15 @@ public class DevPane extends ViewOwner {
     @Override
     protected void initUI()
     {
-        _tabView.addTab("View Tree", _viewTree.getUI());
+        _tabView.addTab("View Owners", _viewOwners.getUI());
+        _tabView.addTab("Views", _viewTree.getUI());
         _tabView.addTab("Graphics", _gfxInsp.getUI());
+    }
+
+    @Override
+    protected void respondUI(ViewEvent anEvent)
+    {
+        _splitView.repaint();
     }
 
     /**
@@ -173,19 +180,10 @@ public class DevPane extends ViewOwner {
         @Override
         protected void paintAbove(Painter aPntr)
         {
-            if (!_viewTree.isShowing()) return;
-            View selView = _viewTree.getTargView();
-            if (selView == null)
-                selView = _viewTree.getSelView();
-            if (selView==null) return;
-            if (selView.getRootView()==null) return;
-
-            Rect rect = selView.getBoundsLocal().getInsetRect(-1);
-            Shape rect2 = new RoundRect(rect.x, rect.y, rect.width, rect.height, 4);
-            Shape rect3 = selView.localToParent(rect2, _splitView);
-            aPntr.setStroke(HIGHLIGHT_BORDER_STROKE);
-            aPntr.setColor(HIGHLIGHT_BORDER_COLOR);
-            aPntr.draw(rect3);
+            if (_viewOwners.isShowing())
+                _viewOwners.paintViewSelection(aPntr, _splitView);
+            else if (_viewTree.isShowing())
+                _viewTree.paintViewSelection(aPntr, _splitView);
         }
     }
 }
