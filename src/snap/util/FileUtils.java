@@ -102,12 +102,18 @@ public class FileUtils {
     /**
      * Tries to open the given file name with the platform reader.
      */
-    public static void openFile(File aFile)  { snap.gfx.GFXEnv.getEnv().openFile(aFile); }
+    public static void openFile(File aFile)
+    {
+        snap.gfx.GFXEnv.getEnv().openFile(aFile);
+    }
 
     /**
      * Tries to open the given file name with the platform reader.
      */
-    public static void openFile(String aName)  { openFile(new File(aName)); }
+    public static void openFile(String aName)
+    {
+        openFile(new File(aName));
+    }
 
     /**
      * Returns bytes for a file.
