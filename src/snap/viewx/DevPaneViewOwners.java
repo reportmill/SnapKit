@@ -5,7 +5,6 @@ import snap.geom.Shape;
 import snap.gfx.GFXEnv;
 import snap.gfx.Painter;
 import snap.util.FileUtils;
-import snap.util.ListUtils;
 import snap.util.SnapUtils;
 import snap.view.*;
 import snap.view.EventListener;
@@ -40,6 +39,10 @@ public class DevPaneViewOwners extends ViewOwner {
 
     // The targeting handler
     private EventListener  _targLsnr = e -> devPaneMouseEvent(e);
+
+    // Constants
+    private static final String SNAPBUILDER_URL = "https://reportmill.com/snaptea/SnapBuilder/classes.js";
+    private static final String SNAPBUILDER_URL_LOCAL = "http://localhost:8080/classes.js";
 
     /**
      * Constructor.
@@ -335,9 +338,9 @@ public class DevPaneViewOwners extends ViewOwner {
     private String getHTMLString(boolean isLocal)
     {
         // Get URL string for SnapBuilder script
-        String urls = "http://reportmill.com/snaptea/SnapBuilder/classes.js";
+        String urls = SNAPBUILDER_URL;
         if (isLocal)
-            urls = "http://localhost:8080/classes.js";
+            urls = SNAPBUILDER_URL_LOCAL;
 
         // Get SelOwner and XML string
         ViewOwner selOwner = getSelViewOwner();

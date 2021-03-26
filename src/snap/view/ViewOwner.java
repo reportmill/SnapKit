@@ -131,8 +131,10 @@ public class ViewOwner implements EventListener {
     protected View createUI()
     {
         Object src = getUISource();
-        if (src==null)
-            throw new RuntimeException("ViewOwner.createUI: Couldn't find source for class: " + getClass());
+        if (src==null) {
+            System.err.println("ViewOwner.createUI: Couldn't find source for class: " + getClass().getName());
+            throw new RuntimeException("ViewOwner.createUI: Couldn't find source for class: " + getClass().getName());
+        }
         return createUI(src);
     }
 
