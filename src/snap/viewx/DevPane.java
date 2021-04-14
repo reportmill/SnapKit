@@ -30,6 +30,9 @@ public class DevPane extends ViewOwner {
     // The Graphics inspector
     private DevPaneGraphics  _gfxInsp = new DevPaneGraphics(this);
 
+    // The Console inspector
+    private DevPaneConsole  _consoleInsp = new DevPaneConsole();
+
     // Constants
     private static int DEFAULT_HEIGHT = 300;
     protected static Stroke HIGHLIGHT_BORDER_STROKE = new Stroke(3);
@@ -112,6 +115,7 @@ public class DevPane extends ViewOwner {
         _tabView.addTab("View Owners", _viewOwners.getUI());
         _tabView.addTab("Views", _viewTree.getUI());
         _tabView.addTab("Graphics", _gfxInsp.getUI());
+        _tabView.addTab("Console", _consoleInsp.getUI());
     }
 
     @Override
