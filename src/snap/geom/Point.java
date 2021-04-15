@@ -105,7 +105,10 @@ public class Point implements Cloneable {
     /**
      * Rounds a point to neared integers.
      */
-    public void snap()  { setXY(Math.round(getX()), Math.round(getY())); }
+    public void snap()
+    {
+        setXY(Math.round(getX()), Math.round(getY()));
+    }
 
     /**
      * Standard equals implementation.

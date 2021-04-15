@@ -50,13 +50,9 @@ public class FormatUtils {
         DecimalFormat fmt = getDecimalFormat(aPattern);
         String str = fmt.format(aNum);
 
-        // TeaVM seem to have issues with: #.## and .977757 ?
-        if (SnapUtils.isTeaVM) {
-            if (str.indexOf(':') >= 0) {
-                System.out.println("StringUtils.formatNum: TeaVM formatted: " + aNum + " to " + str + " for " + aPattern);
-                return String.valueOf(aNum);
-            }
-        }
+        // TeaVM seem to have issues with: #.## and .977757? Fixed: https://github.com/konsoletyper/teavm/issues/557
+        if (SnapUtils.isTeaVM && str.indexOf(':') >= 0)
+            return String.valueOf(aNum);
 
         // Return string
         return str;

@@ -45,7 +45,7 @@ public class Rect extends RectBase {
      */
     public Point getPoint(Pos aPos)
     {
-        return getPoint(x, y, width, height, aPos);
+        return getPointForPosition(x, y, width, height, aPos);
     }
 
     /**
@@ -351,7 +351,7 @@ public class Rect extends RectBase {
     /**
      * Returns a point for x, y, w, h and position.
      */
-    public static Point getPoint(double aX, double aY, double aW, double aH, Pos aPos)
+    public static Point getPointForPosition(double aX, double aY, double aW, double aH, Pos aPos)
     {
         switch(aPos) {
             case TOP_LEFT: return new Point(aX, aY);
@@ -365,6 +365,25 @@ public class Rect extends RectBase {
             case BOTTOM_RIGHT: return new Point(aX+aW, aY+aH);
             default: return null;
         }
+    }
+
+    /**
+     * Returns a point for x, y, w, h and position.
+     */
+    public static Point getPointForPositionAndSize(Rect aRect, Pos aPos, double aW2, double aH2)
+    {
+        return getPointForPositionAndSize(aRect.x, aRect.y, aRect.width, aRect.height, aPos, aW2, aH2);
+    }
+
+    /**
+     * Returns a point for x, y, w, h and position.
+     */
+    public static Point getPointForPositionAndSize(double aX, double aY, double aW, double aH, Pos aPos, double aW2, double aH2)
+    {
+        Point point = getPointForPosition(aX, aY, aW, aH, aPos);
+        point.x -= aW2 * aPos.getHPos().doubleValue();
+        point.y -= aH2 * aPos.getVPos().doubleValue();
+        return point;
     }
 
     /**
