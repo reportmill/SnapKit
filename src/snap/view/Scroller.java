@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.geom.Insets;
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.geom.Size;
@@ -140,7 +141,7 @@ public class Scroller extends ParentView implements ViewHost {
         if (MathUtils.equals(aValue, _scrollX)) return;
 
         // Set value and relayout/repaint
-        firePropChange(ScrollX_Prop, _scrollX, _scrollX=aValue);
+        firePropChange(ScrollX_Prop, _scrollX, _scrollX = aValue);
         relayout(); repaint();
     }
 
@@ -170,7 +171,7 @@ public class Scroller extends ParentView implements ViewHost {
         if (MathUtils.equals(aValue, _scrollY)) return;
 
         // Set value and relayout/repaint
-        firePropChange(ScrollY_Prop, _scrollY, _scrollY=aValue);
+        firePropChange(ScrollY_Prop, _scrollY, _scrollY = aValue);
         relayout(); repaint();
     }
 
@@ -276,34 +277,57 @@ public class Scroller extends ParentView implements ViewHost {
         if (_content==null) return new Size(1,1);
 
         // Get info
-        double viewW = getWidth();
-        double viewH = getHeight();
+        Insets ins = getInsetsAll();
+        double areaW = getWidth() - ins.getWidth();
+        double areaH = getHeight() - ins.getHeight();
+
+        // Handle FixedWidth special
+        boolean isFixedWidth = isFillWidth();
+        boolean isFixedHeight = isFillHeight();
+        if (isFixedWidth && isFixedHeight)
+            return new Size(areaW, areaH);
+
+        // Handle FixedWidth
+        if (isFixedWidth) {
+            double prefW = areaW;
+            double prefH = _content.getBestHeight(prefW);
+            return new Size(prefW, prefH);
+        }
+
+        // Handle FixedHeight
+        if (isFixedHeight) {
+            double prefH = areaH;
+            double prefW = _content.getBestWidth(prefH);
+            return new Size(prefW, prefH);
+        }
 
         // Handle Horizontal
+        boolean isGrowW = isGrowContentWidth() || _content.isGrowWidth();
+        boolean isGrowH = isGrowContentHeight() || _content.isGrowHeight();
         if (_content.isHorizontal()) {
 
             // Get PrefWidth (expand to width if needed)
-            double prefW = isFillWidth() ? viewW : _content.getBestWidth(-1);
-            if (prefW<viewW && (isGrowContentWidth() || _content.isGrowWidth()))
-               prefW = viewW;
+            double prefW = _content.getBestWidth(-1);
+            if (prefW < areaW && isGrowW)
+               prefW = areaW;
 
             // Get PrefHeight (expand to height if needed)
-            double prefH = isFillHeight() ? viewH : _content.getBestHeight(prefW);
-            if (prefH<viewH && (isGrowContentHeight() || _content.isGrowHeight()))
-                prefH = viewH;
+            double prefH = _content.getBestHeight(prefW);
+            if (prefH < areaH && isGrowH)
+                prefH = areaH;
 
             // Return size
-            return new Size(prefW,prefH);
+            return new Size(prefW, prefH);
         }
 
         // Handle Vertical
-        double prefH = isFillHeight() ? viewH : _content.getBestHeight(-1);
-        if (prefH<viewH && (isGrowContentHeight() || _content.isGrowHeight()))
-            prefH = viewH;
-        double prefW = isFillWidth() ? viewW : _content.getBestWidth(prefH);
-        if (prefW<viewW && (isGrowContentWidth() || _content.isGrowWidth()))
-            prefW = viewW;
-        return new Size(prefW,prefH);
+        double prefH = _content.getBestHeight(-1);
+        if (prefH < areaH && isGrowH)
+            prefH = areaH;
+        double prefW = _content.getBestWidth(prefH);
+        if (prefW < areaW && isGrowW)
+            prefW = areaW;
+        return new Size(prefW, prefH);
     }
 
     /**
@@ -390,7 +414,9 @@ public class Scroller extends ParentView implements ViewHost {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return _content!=null ? _content.getBestWidth(aH) : 0;
+        Insets ins = getInsetsAll();
+        double prefW = _content!=null ? _content.getBestWidth(aH) : 0;
+        return prefW + ins.getWidth();
     }
 
     /**
@@ -398,7 +424,9 @@ public class Scroller extends ParentView implements ViewHost {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return _content!=null ? _content.getBestHeight(aW) : 0;
+        Insets ins = getInsetsAll();
+        double prefH = _content!=null ? _content.getBestHeight(aW) : 0;
+        return prefH + ins.getHeight();
     }
 
     /**
@@ -409,29 +437,38 @@ public class Scroller extends ParentView implements ViewHost {
         // If no content, just return
         if (_content==null) return;
 
-        // Get view size
-        double viewW = getWidth();
-        double viewH = getHeight();
+        // Get area bounds
+        Insets ins = getInsetsAll();
+        double areaX = ins.left;
+        double areaY = ins.top;
+        double areaW = getWidth() - ins.getWidth();
+        double areaH = getHeight() - ins.getHeight();
 
-        // Get child size
-        Size childSize = getContentPrefSize();
-        double childW = childSize.width;
-        double childH = childSize.height;
+        // Get content size
+        Size contentSize = getContentPrefSize();
+        double contentW = contentSize.width;
+        double contentH = contentSize.height;
 
-        // Get child XY
-        double childX = getScrollX();
-        if (childX>childW-viewW)
-            childX = Math.round(childW-viewW);
-        double childY = getScrollY();
-        if (childY>childH-viewH)
-            childY = Math.round(childH-viewH);
+        // Get content X
+        double contentX = getScrollX();
+        if (contentX > contentW - areaW) {
+            double alignX = _content.getLeanX() != null ? ViewUtils.getLeanX(_content) : ViewUtils.getAlignX(this);
+            contentX = areaX + Math.round(contentW - areaW) * alignX;
+        }
 
-        // Set child bounds
-        _content.setBounds(-childX, -childY, childW, childH);
+        // Get content Y
+        double contentY = getScrollY();
+        if (contentY > contentH - areaH) {
+            double alignY = _content.getLeanY() != null ? ViewUtils.getLeanY(_content) : ViewUtils.getAlignY(this);
+            contentY = areaY + Math.round(contentH - areaH) * alignY;
+        }
+
+        // Set content bounds
+        _content.setBounds(-contentX, -contentY, contentW, contentH);
 
         // Update ScrollWidth/ScrollHeight
-        setScrollWidth(childW);
-        setScrollHeight(childH);
+        setScrollWidth(contentW);
+        setScrollHeight(contentH);
     }
 
     /**

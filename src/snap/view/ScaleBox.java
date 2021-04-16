@@ -59,7 +59,7 @@ public class ScaleBox extends BoxView {
     {
         View child = getContent(); if (child==null) return 1;
         Size bestSize = child.getBestSize();
-        return child.isHorizontal() ? bestSize.width/bestSize.height : bestSize.height/bestSize.width;
+        return bestSize.width / bestSize.height;
     }
 
     /**
@@ -68,8 +68,12 @@ public class ScaleBox extends BoxView {
     protected double getPrefWidthImpl(double aH)
     {
         // If scaling and value provided, return value by aspect
-        if (aH>=0 && (isFillHeight() || aH<getPrefHeight(-1)))
-            return aH*getAspect();
+        if (aH >= 0) {
+            if (isFillHeight() || aH < getPrefHeight(-1))
+                return Math.ceil(aH * getAspect());
+        }
+
+        // Do normal version
         return super.getPrefWidthImpl(aH);
     }
 
@@ -79,8 +83,12 @@ public class ScaleBox extends BoxView {
     protected double getPrefHeightImpl(double aW)
     {
         // If scaling and value provided, return value by aspect
-        if (aW>=0 && (isFillWidth() || aW<getPrefWidth(-1)))
-            return aW/getAspect();
+        if (aW >= 0) {
+            if (isFillWidth() || aW < getPrefWidth(-1))
+                return Math.ceil(aW / getAspect());
+        }
+
+        // Do normal version
         return super.getPrefHeightImpl(aW);
     }
 
@@ -116,15 +124,15 @@ public class ScaleBox extends BoxView {
         double childH = aChild.getBestHeight(-1);
 
         // Get content alignment as modifer/factor (0 = left, 1 = right)
-        double alignX = aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
-        double alignY = aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
+        double alignX = aChild.getLeanX() != null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
+        double alignY = aChild.getLeanY() != null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
 
         // Handle ScaleToFit: Set content bounds centered, calculate scale and set
-        if (isFillWidth || isFillHeight || childW>areaW || childH>areaH)  {
+        if (isFillWidth || isFillHeight || childW > areaW || childH > areaH)  {
 
             // Get/set Child bounds, and calculate scale X/Y to fit
-            double scaleX = isFillWidth || childW>areaW ? areaW/childW : 1;
-            double scaleY = isFillHeight || childH>areaH ? areaH/childH : 1;
+            double scaleX = isFillWidth || childW > areaW ? areaW/childW : 1;
+            double scaleY = isFillHeight || childH > areaH ? areaH/childH : 1;
 
             // If KeepAspect (or both FillWidth/FillHeight), constrain scale X/Y to min
             boolean isKeepAspect = aPar instanceof ScaleBox && ((ScaleBox)aPar).isKeepAspect();

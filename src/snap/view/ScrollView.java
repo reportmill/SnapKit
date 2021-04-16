@@ -217,7 +217,11 @@ public class ScrollView extends ParentView implements ViewHost {
     /**
      * Sets whether this ScrollView fits content to its width.
      */
-    public void setFillWidth(boolean aValue)  { _scroller.setFillWidth(aValue); relayout(); }
+    public void setFillWidth(boolean aValue)
+    {
+        _scroller.setFillWidth(aValue);
+        relayout();
+    }
 
     /**
      * Returns whether this ScrollView fits content to its height.
@@ -227,7 +231,11 @@ public class ScrollView extends ParentView implements ViewHost {
     /**
      * Sets whether this ScrollView fits content to its height.
      */
-    public void setFillHeight(boolean aValue)  { _scroller.setFillHeight(aValue); relayout(); }
+    public void setFillHeight(boolean aValue)
+    {
+        _scroller.setFillHeight(aValue);
+        relayout();
+    }
 
     /**
      * Calculates the minimum width.
@@ -256,7 +264,7 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         Insets ins = getInsetsAll();
         double prefW = _scroller.getBestWidth(aH);
-        if (_showVBar==Boolean.TRUE)
+        if (_showVBar == Boolean.TRUE)
             prefW += getBarSize();
         return prefW + ins.getWidth();
     }
@@ -268,7 +276,7 @@ public class ScrollView extends ParentView implements ViewHost {
     {
         Insets ins = getInsetsAll();
         double prefH = _scroller.getBestHeight(aW);
-        if (_showHBar==Boolean.TRUE)
+        if (_showHBar == Boolean.TRUE)
             prefH += getBarSize();
         return prefH + ins.getHeight();
     }
@@ -286,10 +294,12 @@ public class ScrollView extends ParentView implements ViewHost {
         double areaH = getHeight() - ins.getHeight();
 
         // Account for ScrollBars
+        boolean isVBarShowing = isVBarShowing();
+        boolean isHBarShowing = isHBarShowing();
         int barSize = getBarSize();
-        if (isVBarShowing())
+        if (isVBarShowing)
             areaW -= barSize;
-        if (isHBarShowing())
+        if (isHBarShowing)
             areaH -= barSize;
 
         // Set Scroller bounds
@@ -297,22 +307,33 @@ public class ScrollView extends ParentView implements ViewHost {
 
         // Check whether either ScrollBar.Showing needs updating
         if (updateScrollBarsShowing()) {
-            layoutImpl();
-            return;
+            if (!_recursingLayout) {
+                _recursingLayout = true;
+                layoutImpl();
+                _recursingLayout = false;
+                return;
+            }
+            else {
+                //updateScrollBarsShowing();
+                System.err.println("ScrollView: Confused about whether we get eliminate scrollbars");
+            }
         }
 
         // If horizontal scrollbar showing, set bounds
-        if (isHBarShowing()) {
+        if (isHBarShowing) {
             ScrollBar hbar = getHBar();
             hbar.setBounds(areaX, areaY + areaH, areaW, barSize);
         }
 
         // If vertical scrollbar showing, set bounds
-        if (isVBarShowing()) {
+        if (isVBarShowing) {
             ScrollBar vbar = getVBar();
             vbar.setBounds(areaX + areaW, areaY, barSize, areaH);
         }
     }
+
+    // Whether recursing into layoutImpl
+    private boolean _recursingLayout;
 
     /**
      * Called to update whether ScrollBars are showing. Returns true if any changes.
@@ -320,35 +341,44 @@ public class ScrollView extends ParentView implements ViewHost {
     protected boolean updateScrollBarsShowing()
     {
         // Get Scroller Size
-        double scrollW = _scroller.getWidth();
-        double scrollH = _scroller.getHeight();
+        double scrollerW = _scroller.getWidth();
+        double scrollerH = _scroller.getHeight();
 
         // Get child size
-        Size childSize = _scroller.getContentPrefSize();
-        double childW = childSize.getWidth();
-        double childH = childSize.getHeight();
+        Size contentSize = _scroller.getContentPrefSize();
+        double contentW = contentSize.getWidth();
+        double contentH = contentSize.getHeight();
 
         // Get whether to show scroll bars
-        boolean alwaysH = _showHBar==Boolean.TRUE, asneedH = _showHBar==null;
-        boolean alwaysV = _showVBar==Boolean.TRUE, asneedV = _showVBar==null;
-        boolean showHBar = alwaysH || asneedH && childW>scrollW;
-        boolean showVBar = alwaysV || asneedV && childH>scrollH;
+        boolean alwaysH = _showHBar == Boolean.TRUE;
+        boolean alwaysV = _showVBar == Boolean.TRUE;
+        boolean asneedH = _showHBar == null;
+        boolean asneedV = _showVBar == null;
+        boolean showHBar = alwaysH || asneedH && contentW > scrollerW;
+        boolean showVBar = alwaysV || asneedV && contentH > scrollerH;
+
+        // Get whether scroll bars are currently showing
+        boolean isHBarShowing = isHBarShowing();
+        boolean isVBarShowing = isVBarShowing();
 
         // If showing both ScrollBars, but only because both ScrollBars are showing, hide them and try again
-        if (isVBarShowing() && isHBarShowing() && showVBar && showHBar && asneedH && asneedV &&
-            childW<=scrollW+getVBar().getWidth() && childH<=scrollH+getHBar().getHeight()) {
-            setVBarShowing(false);
-            setHBarShowing(false);
-            return true;
+        if (isVBarShowing && isHBarShowing && showVBar && showHBar && asneedH && asneedV) {
+            boolean vbarNotReallyNeeded = contentW <= scrollerW + getVBar().getWidth();
+            boolean hbarNotReallyNeeded = contentH <= scrollerH + getHBar().getHeight();
+            if (vbarNotReallyNeeded && hbarNotReallyNeeded) {
+                setVBarShowing(false);
+                setHBarShowing(false);
+                return true;
+            }
         }
 
         // If either ScrollBar in wrong Showing state, set and try again
-        if (showVBar!=isVBarShowing()) {
+        if (showVBar != isVBarShowing) {
             setVBarShowing(showVBar);
             return true;
         }
 
-        if (showHBar!=isHBarShowing()) {
+        if (showHBar != isHBarShowing) {
             setHBarShowing(showHBar);
             return true;
         }

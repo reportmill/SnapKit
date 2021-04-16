@@ -316,9 +316,9 @@ public class DevPaneViews extends ViewOwner {
         /** Returns the children. */
         public View[] getChildren(View aParent)
         {
-            ParentView par = (ParentView)aParent;
-            if (par instanceof ScrollView) { ScrollView sp = (ScrollView)par;
-                return sp.getContent()!=null ? new View[] { sp.getContent() } : new View[0]; }
+            ParentView par = (ParentView) aParent;
+            //if (par instanceof ScrollView) { ScrollView sp = (ScrollView)par;
+            //    return sp.getContent()!=null ? new View[] { sp.getContent() } : new View[0]; }
             return par.getChildren();
         }
 
