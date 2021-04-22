@@ -236,19 +236,19 @@ public String getValuePropName()  { return Color_Prop; }
 /**
  * Override because TeaVM hates reflection.
  */
-public Object getValue(String aPropName)
+public Object getPropValue(String aPropName)
 {
     if(aPropName.equals("Value") || aPropName.equals(Color_Prop)) return getColor();
-    return super.getValue(aPropName);
+    return super.getPropValue(aPropName);
 }
 
 /**
  * Override because TeaVM hates reflection.
  */
-public void setValue(String aPropName, Object aValue)
+public void setPropValue(String aPropName, Object aValue)
 {
     if(aPropName.equals("Value") || aPropName.equals(Color_Prop)) setColor((Color)aValue);
-    else super.setValue(aPropName, aValue);
+    else super.setPropValue(aPropName, aValue);
 }
 
 /**

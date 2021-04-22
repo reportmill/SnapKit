@@ -311,13 +311,13 @@ public Object getValue()
         return getClipboard().getString();
     
     // Otherwise, return node value
-    View view = getView(); return view!=null? view.getValue("Value") : null;
+    View view = getView(); return view!=null? view.getPropValue("Value") : null;
 }
 
 /**
  * Sets the value encapsulated by the event widget.
  */
-public void setValue(Object aValue)  { getView().setValue("Value", aValue); }
+public void setValue(Object aValue)  { getView().setPropValue("Value", aValue); }
 
 /**
  * Returns the String value encapsulated by the event widget.

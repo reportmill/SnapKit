@@ -2119,9 +2119,9 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     public ViewEnv getEnv()  { return ViewEnv.getEnv(); }
 
     /**
-     * Returns the value for given key.
+     * Returns the value for given prop name.
      */
-    public Object getValue(String aPropName)
+    public Object getPropValue(String aPropName)
     {
         // Map property name
         String pname = aPropName.equals("Value") ? getValuePropName() : aPropName;
@@ -2154,9 +2154,9 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     }
 
     /**
-     * Sets the value for given key.
+     * Sets the value for given prop name.
      */
-    public void setValue(String aPropName, Object aValue)
+    public void setPropValue(String aPropName, Object aValue)
     {
         // Map property name
         String pname = aPropName.equals("Value") ? getValuePropName() : aPropName;
@@ -2204,7 +2204,7 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
      */
     public void doChange(PropChange aPC, Object oldVal, Object newVal)
     {
-        setValue(aPC.getPropName(), newVal);
+        setPropValue(aPC.getPropName(), newVal);
     }
 
     /**

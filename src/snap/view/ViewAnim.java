@@ -304,7 +304,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
     {
         for (String key : getKeys()) {
             Object val = getValue(key, _time);
-            _view.setValue(key, val);
+            _view.setPropValue(key, val);
         }
     }
 
@@ -480,7 +480,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
 
         // If not found, get from current view
         if (sval==null) {
-            sval = _view.getValue(aKey);
+            sval = _view.getPropValue(aKey);
             if (sval==null) {
                 if (aVal instanceof Integer) sval = 0;
                 else if (aVal instanceof Double) sval = 0d;

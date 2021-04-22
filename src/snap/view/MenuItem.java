@@ -154,19 +154,19 @@ protected double getPrefHeightImpl(double aW)  { return isSeparator()? 3 : super
 /**
  * Override because TeaVM hates reflection.
  */
-public Object getValue(String aPropName)
+public Object getPropValue(String aPropName)
 {
     if(aPropName.equals("Value") || aPropName.equals(Selected_Prop)) return isSelected();
-    return super.getValue(aPropName);
+    return super.getPropValue(aPropName);
 }
 
 /**
  * Override because TeaVM hates reflection.
  */
-public void setValue(String aPropName, Object aValue)
+public void setPropValue(String aPropName, Object aValue)
 {
     if(aPropName.equals("Value") || aPropName.equals(Selected_Prop)) setSelected(SnapUtils.boolValue(aValue));
-    else super.setValue(aPropName, aValue);
+    else super.setPropValue(aPropName, aValue);
 }
 
 /**

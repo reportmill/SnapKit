@@ -224,21 +224,21 @@ public void setVertical(boolean aValue)
 /**
  * Override to handle extra props.
  */
-public Object getValue(String aPropName)
+public Object getPropValue(String aPropName)
 {
     if(aPropName==Location_Prop) return getLocation();
     if(aPropName==Remainder_Prop) return getRemainder();
-    return super.getValue(aPropName);
+    return super.getPropValue(aPropName);
 }
 
 /**
  * Override to handle extra props.
  */
-public void setValue(String aPropName, Object aValue)
+public void setPropValue(String aPropName, Object aValue)
 {
     if(aPropName==Location_Prop) setLocation(SnapUtils.doubleValue(aValue));
     else if(aPropName==Remainder_Prop) setRemainder(SnapUtils.doubleValue(aValue));
-    else super.setValue(aPropName, aValue);
+    else super.setPropValue(aPropName, aValue);
 }
 
 }

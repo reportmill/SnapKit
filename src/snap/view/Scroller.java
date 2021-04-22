@@ -504,24 +504,24 @@ public class Scroller extends ParentView implements ViewHost {
     /**
      * Override for Scroller properties.
      */
-    public Object getValue(String aPropName)
+    public Object getPropValue(String aPropName)
     {
         if (aPropName.equals(ScrollX_Prop)) return getScrollX();
         if (aPropName.equals(ScrollY_Prop)) return getScrollY();
         if (aPropName.equals(ScrollWidth_Prop)) return getScrollWidth();
         if (aPropName.equals(ScrollHeight_Prop)) return getScrollHeight();
-        return super.getValue(aPropName);
+        return super.getPropValue(aPropName);
     }
 
     /**
      * Override for Scroller properties.
      */
-    public void setValue(String aPropName, Object aValue)
+    public void setPropValue(String aPropName, Object aValue)
     {
         if (aPropName.equals(ScrollX_Prop)) setScrollX(SnapUtils.doubleValue(aValue));
         else if (aPropName.equals(ScrollY_Prop)) setScrollY(SnapUtils.doubleValue(aValue));
         else if (aPropName.equals(ScrollWidth_Prop)) setScrollWidth(SnapUtils.doubleValue(aValue));
         else if (aPropName.equals(ScrollHeight_Prop)) setScrollY(SnapUtils.doubleValue(aValue));
-        else super.setValue(aPropName, aValue);
+        else super.setPropValue(aPropName, aValue);
     }
 }

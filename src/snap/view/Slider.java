@@ -94,21 +94,21 @@ public class Slider extends View {
     /**
      * Returns the value for given key.
      */
-    public Object getValue(String aPropName)
+    public Object getPropValue(String aPropName)
     {
         if (aPropName.equals("Value"))
             return getValue();
-        return super.getValue(aPropName);
+        return super.getPropValue(aPropName);
     }
 
     /**
      * Sets the value for given key.
      */
-    public void setValue(String aPropName, Object aValue)
+    public void setPropValue(String aPropName, Object aValue)
     {
         if (aPropName.equals("Value"))
             setValue(SnapUtils.doubleValue(aValue));
-        else super.setValue(aPropName, aValue);
+        else super.setPropValue(aPropName, aValue);
     }
 
     /**

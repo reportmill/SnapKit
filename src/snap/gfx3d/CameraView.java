@@ -291,7 +291,7 @@ public class CameraView extends ParentView {
     /**
      * Returns the value for given key.
      */
-    public Object getValue(String aPropName)
+    public Object getPropValue(String aPropName)
     {
         if (aPropName.equals(Yaw_Prop))
             return getYaw();
@@ -301,13 +301,13 @@ public class CameraView extends ParentView {
             return getRoll();
         if (aPropName.equals(OffsetZ_Prop))
             return getOffsetZ();
-        return super.getValue(aPropName);
+        return super.getPropValue(aPropName);
     }
 
     /**
      * Sets the value for given key.
      */
-    public void setValue(String aPropName, Object aValue)
+    public void setPropValue(String aPropName, Object aValue)
     {
         if (aPropName.equals(Yaw_Prop))
             setYaw(SnapUtils.doubleValue(aValue));
@@ -317,6 +317,6 @@ public class CameraView extends ParentView {
             setRoll(SnapUtils.doubleValue(aValue));
         else if (aPropName.equals(OffsetZ_Prop))
             setOffsetZ(SnapUtils.doubleValue(aValue));
-        else super.setValue(aPropName, aValue);
+        else super.setPropValue(aPropName, aValue);
     }
 }

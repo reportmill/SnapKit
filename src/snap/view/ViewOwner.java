@@ -270,7 +270,7 @@ public class ViewOwner implements EventListener {
             System.out.println("ViewOwner.getViewValue: Couldn't find view for: " + anObj);
             return null;
         }
-        return view.getValue("Value");
+        return view.getPropValue("Value");
     }
 
     /**
@@ -281,7 +281,7 @@ public class ViewOwner implements EventListener {
         boolean old = setSendEventDisabled(true);
         View view = getView(anObj);
         if (view!=null)
-            view.setValue("Value", aValue);
+            view.setPropValue("Value", aValue);
         else System.err.println("ViewOwner.setViewValue: Couldn't find view for: " + anObj);
         setSendEventDisabled(old);
     }
@@ -505,7 +505,7 @@ public class ViewOwner implements EventListener {
     {
         // Get value from UI view
         View view = aBinding.getView(View.class); if (view==null) return null;
-        Object value = view.getValue(aBinding.getPropertyName());
+        Object value = view.getPropValue(aBinding.getPropertyName());
 
         // If conversion key is present, do conversion
         String convKey = aBinding.getConversionKey();
@@ -528,7 +528,7 @@ public class ViewOwner implements EventListener {
         View view = aBinding.getView(View.class); if (view==null) return;
         String pname = aBinding.getPropertyName();
         Object value = getBindingModelValue(aBinding);
-        view.setValue(pname, value);
+        view.setPropValue(pname, value);
     }
 
     /**

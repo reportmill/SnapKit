@@ -334,9 +334,9 @@ public class ViewUtils {
      */
     public static void bind(View aView1, String aProp, View aView2, boolean doBoth)
     {
-        aView1.addPropChangeListener(pc -> aView2.setValue(aProp, pc.getNewValue()), aProp);
+        aView1.addPropChangeListener(pc -> aView2.setPropValue(aProp, pc.getNewValue()), aProp);
         if (doBoth)
-            aView2.addPropChangeListener(pc -> aView1.setValue(aProp, pc.getNewValue()), aProp);
+            aView2.addPropChangeListener(pc -> aView1.setPropValue(aProp, pc.getNewValue()), aProp);
     }
 
     /**

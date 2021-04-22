@@ -380,21 +380,21 @@ public class TitleView extends ParentView implements ViewHost {
         /**
      * Override to handle additional properties.
      */
-    public Object getValue(String aPropName)
+    public Object getPropValue(String aPropName)
     {
         if (aPropName.equals("Value") || aPropName==Expanded_Prop)
             return isExpanded();
-        return super.getValue(aPropName);
+        return super.getPropValue(aPropName);
     }
 
     /**
      * Override to handle additional properties.
      */
-    public void setValue(String aPropName, Object aValue)
+    public void setPropValue(String aPropName, Object aValue)
     {
         if (aPropName.equals("Value") || aPropName==Expanded_Prop)
             setExpanded(SnapUtils.boolValue(aValue));
-        else super.setValue(aPropName, aValue);
+        else super.setPropValue(aPropName, aValue);
     }
 
     /**
