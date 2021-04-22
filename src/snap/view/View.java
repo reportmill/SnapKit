@@ -13,7 +13,7 @@ import snap.util.*;
  * A standard view implementation to show graphics and handle events and form the basis of all views (buttons, sliders,
  * text fields, etc.).
  */
-public class View implements PropChange.DoChange, XMLArchiver.Archivable {
+public class View extends PropObject implements XMLArchiver.Archivable {
 
     // The name of this view
     private String  _name;
@@ -135,9 +135,6 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     // The real class name, if shape component is really a custom subclass
     private String  _realClassName;
     
-    // PropertyChangeSupport
-    protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
-
     // The event adapter
     private EventAdapter  _evtAdptr;
     
@@ -2200,14 +2197,6 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
     protected String getValuePropName()  { return "Value"; }
 
     /**
-     * PropChange.DoChange method.
-     */
-    public void doChange(PropChange aPC, Object oldVal, Object newVal)
-    {
-        setPropValue(aPC.getPropName(), newVal);
-    }
-
-    /**
      * Returns the text value of this view.
      */
     public String getText()  { return null; }
@@ -2216,76 +2205,6 @@ public class View implements PropChange.DoChange, XMLArchiver.Archivable {
      * Sets the text value of this view.
      */
     public void setText(String aString)  { }
-
-    /**
-     * Add listener.
-     */
-    public void addPropChangeListener(PropChangeListener aPCL)
-    {
-        if (_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-        _pcs.addPropChangeListener(aPCL);
-    }
-
-    /**
-     * Add listener.
-     */
-    public void addPropChangeListener(PropChangeListener aPCL, String ... theProps)
-    {
-        if (_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-        for (String prop : theProps)
-            _pcs.addPropChangeListener(aPCL, prop);
-    }
-
-    /**
-     * Remove listener.
-     */
-    public void removePropChangeListener(PropChangeListener aPCL)  { _pcs.removePropChangeListener(aPCL); }
-
-    /**
-     * Remove listener.
-     */
-    public void removePropChangeListener(PropChangeListener aPCL, String ... theProps)
-    {
-        for (String prop : theProps)
-           _pcs.removePropChangeListener(aPCL, prop);
-    }
-
-    /**
-     * Fires a property change for given property name, old value, new value and index.
-     */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal)
-    {
-        if (!_pcs.hasListener(aProp)) return;
-        firePropChange(new PropChange(this, aProp, oldVal, newVal));
-    }
-
-    /**
-     * Fires a property change for given property name, old value, new value and index.
-     */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
-    {
-        if (!_pcs.hasListener(aProp)) return;
-        firePropChange(new PropChange(this, aProp, oldVal, newVal, anIndex));
-    }
-
-    /**
-     * Fires a given property change.
-     */
-    protected void firePropChange(PropChange aPC)  { _pcs.firePropChange(aPC); }
-
-    /**
-     * Add DeepChange listener.
-     */
-    public void addDeepChangeListener(DeepChangeListener aDCL)
-    {
-        if (_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-        _pcs.addDeepChangeListener(aDCL);
-    }
-
-    /**
-     * Remove DeepChange listener.
-     */
-    public void removeDeepChangeListener(DeepChangeListener aPCL)  { _pcs.removeDeepChangeListener(aPCL); }
 
     /**
      * Returns the event adapter for view.

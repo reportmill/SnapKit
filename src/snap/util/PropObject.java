@@ -1,15 +1,19 @@
 package snap.util;
+import java.util.*;
 
 /**
  * A base class for anything that wants to work with props.
  */
-public class PropObject {
+public class PropObject implements PropChange.DoChange {
 
     // PropertyChangeSupport
     protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
 
+    // A map to hold prop keys for unique classes
+    private static Map<Class<? extends PropObject>, String[]>  _classProps = new HashMap<>();
+
     /**
-     * Returns the value for given key.
+     * Returns the value for given prop name.
      */
     public Object getPropValue(String aPropName)
     {
@@ -17,9 +21,17 @@ public class PropObject {
     }
 
     /**
-     * Sets the value for given key.
+     * Sets the value for given prop name.
      */
     public void setPropValue(String aPropName, Object aValue)  { }
+
+    /**
+     * Returns the value for given key.
+     */
+    public Object getPropDefault(String aPropName)
+    {
+        return null;
+    }
 
     /**
      * Add listener.
@@ -43,7 +55,10 @@ public class PropObject {
     /**
      * Remove listener.
      */
-    public void removePropChangeListener(PropChangeListener aPCL)  { _pcs.removePropChangeListener(aPCL); }
+    public void removePropChangeListener(PropChangeListener aPCL)
+    {
+        _pcs.removePropChangeListener(aPCL);
+    }
 
     /**
      * Remove listener.
@@ -57,7 +72,7 @@ public class PropObject {
     /**
      * Fires a property change for given property name, old value, new value and index.
      */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal)
+    protected final void firePropChange(String aProp, Object oldVal, Object newVal)
     {
         if (!_pcs.hasListener(aProp)) return;
         firePropChange(new PropChange(this, aProp, oldVal, newVal));
@@ -66,7 +81,7 @@ public class PropObject {
     /**
      * Fires a property change for given property name, old value, new value and index.
      */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
+    protected final void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
     {
         if (!_pcs.hasListener(aProp)) return;
         firePropChange(new PropChange(this, aProp, oldVal, newVal, anIndex));
@@ -92,6 +107,64 @@ public class PropObject {
     /**
      * Remove DeepChange listener.
      */
-    public void removeDeepChangeListener(DeepChangeListener aPCL)  { _pcs.removeDeepChangeListener(aPCL); }
+    public void removeDeepChangeListener(DeepChangeListener aPCL)
+    {
+        _pcs.removeDeepChangeListener(aPCL);
+    }
 
+    /**
+     * PropChange.DoChange method.
+     */
+    public void processPropChange(PropChange aPC, Object oldVal, Object newVal)
+    {
+        setPropValue(aPC.getPropName(), newVal);
+    }
+
+    /**
+     * Returns the prop keys.
+     */
+    public String[] getPropKeysAll()
+    {
+        Class cls = getClass();
+        return getPropKeysAllForClass(cls);
+    }
+
+    /**
+     * Returns the prop keys.
+     */
+    protected String[] getPropKeysLocal()
+    {
+        return new String[0];
+    }
+
+    /**
+     * Returns the prop keys.
+     */
+    public static String[] getPropKeysAllForClass(Class<? extends PropObject> aClass)
+    {
+        // Get props from cache and just return if found
+        String props[] = _classProps.get(aClass);
+        if (props != null)
+            return props;
+
+        // Create list and add super props to it
+        List<String> propsList = new ArrayList<>();
+        Class superClass = aClass.getSuperclass();
+        String[] superProps = PropObject.class.isAssignableFrom(superClass) ? getPropKeysAllForClass(superClass) : null;
+        if (superProps != null)
+            Collections.addAll(propsList, superProps);
+
+        // Add props for class
+        try {
+            PropObject object = aClass.newInstance();
+            String[] classProps = object.getPropKeysLocal();
+            Collections.addAll(propsList, classProps);
+        }
+        catch (Exception e) { throw new RuntimeException("ChartPart.getPropKeysAllForClass failed: " + aClass); }
+
+        // Add props array to Class map and return
+        props = propsList.toArray(new String[0]);
+        _classProps.put(aClass, props);
+        return props;
+    }
 }

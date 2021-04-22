@@ -89,7 +89,7 @@ public class PropChange {
     {
         Object src = getSource();
         if (src instanceof DoChange) { DoChange dc = (DoChange) src;
-            dc.doChange(this, oldVal, newVal);
+            dc.processPropChange(this, oldVal, newVal);
         }
         else doChange(src, getPropName(), oldVal, newVal, getIndex());
     }
@@ -145,6 +145,6 @@ public class PropChange {
      * An interface for objects that can do a PropChange.
      */
     public interface DoChange {
-        void doChange(PropChange aPC, Object oldVal, Object newVal);
+        void processPropChange(PropChange aPC, Object oldVal, Object newVal);
     }
 }

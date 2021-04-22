@@ -518,7 +518,8 @@ public class ParentView extends View {
     /**
      * Override to handle ParentView changes.
      */
-    public void doChange(PropChange aPC, Object oldVal, Object newVal)
+    @Override
+    public void processPropChange(PropChange aPC, Object oldVal, Object newVal)
     {
         String pname = aPC.getPropName();
         if (pname==Child_Prop) {
@@ -528,12 +529,13 @@ public class ParentView extends View {
         }
 
         // Do normal version
-        else super.doChange(aPC, oldVal, newVal);
+        else super.processPropChange(aPC, oldVal, newVal);
     }
 
     /**
      * Override to add this view as change listener to children on first call.
      */
+    @Override
     public void addDeepChangeListener(DeepChangeListener aDCL)
     {
         // Do normal version
@@ -553,6 +555,7 @@ public class ParentView extends View {
     /**
      * Override to remove this view as change listener to children when not needed.
      */
+    @Override
     public void removeDeepChangeListener(DeepChangeListener aDCL)
     {
         // Do normal version
