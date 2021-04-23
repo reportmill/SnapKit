@@ -113,6 +113,7 @@ public class J2DPainter extends Painter {
         switch(rule) {
             case AlphaComposite.SRC_IN: return Composite.SRC_IN;
             case AlphaComposite.DST_IN: return Composite.DST_IN;
+            case AlphaComposite.DST_OUT: return Composite.DST_OUT;
             default: return Composite.SRC_OVER;
         }
     }
@@ -127,6 +128,7 @@ public class J2DPainter extends Painter {
             case SRC_OVER: _gfx.setComposite(AlphaComposite.SrcOver.derive(opac)); break;
             case SRC_IN: _gfx.setComposite(AlphaComposite.SrcIn.derive(opac)); break;
             case DST_IN: _gfx.setComposite(AlphaComposite.DstIn.derive(opac)); break;
+            case DST_OUT: _gfx.setComposite(AlphaComposite.DstOut.derive(opac)); break;
         }
     }
 

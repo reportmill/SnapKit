@@ -866,7 +866,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
             // Get next view (complain and break if given par not found
             view = view.getParent();
-            if (view == null) {
+            if (view == null && aPar != null) {
                 System.err.println("View.getLocalToParent: Parent not found " + aPar);
                 break;
             }

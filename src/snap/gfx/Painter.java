@@ -33,7 +33,7 @@ public abstract class Painter {
     private Line  _line = new Line(0, 0, 0, 0);
     
     // Constants for composite
-    public enum Composite { SRC_OVER, SRC_IN, DST_IN }
+    public enum Composite { SRC_OVER, SRC_IN, DST_IN, DST_OUT }
 
     /**
      * Returns the current color.
