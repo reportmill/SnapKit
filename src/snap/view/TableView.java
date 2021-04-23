@@ -5,10 +5,7 @@ package snap.view;
 import java.util.*;
 import java.util.function.Consumer;
 
-import snap.geom.HPos;
-import snap.geom.Insets;
-import snap.geom.Point;
-import snap.geom.Rect;
+import snap.geom.*;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -746,38 +743,41 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     protected void paintAbove(Painter aPntr)
     {
         // Get Selected Cell (just return if null)
-        ListCell cell = getSelCell(); if (cell==null) return;
+        ListCell cell = getSelCell(); if (cell == null) return;
 
         // Clip to Scroller bounds
         Scroller scroller = getScrollView().getScroller();
-        Rect scrollerBnds = scroller.localToParent(scroller.getBoundsLocal(), this).getBounds();
-        aPntr.clip(scrollerBnds);
+        Rect scrollerBnds = scroller.getBoundsLocal();
+        Rect scrollerBndsInTable = scroller.localToParent(scrollerBnds, this).getBounds();
+        aPntr.clip(scrollerBndsInTable);
 
         // Get fuzzy border image for selected cell bounds
-        Rect bnds = cell.localToParent(cell.getBoundsLocal(), this).getBounds();
-        Image img = getSelRectImage(bnds);
-        aPntr.drawImage(img, bnds.x-1, bnds.y-1);
+        Rect cellBounds = cell.getBoundsLocal();
+        Rect cellBoundsInTable = cell.localToParent(cellBounds, this).getBounds();
+        ImageBox imgBox = getSelRectImage(cellBoundsInTable);
+        imgBox.paintImageBox(aPntr, cellBoundsInTable.x, cellBoundsInTable.y);
     }
 
     /**
      * A fuzzy cell border image to highlight cell.
      */
-    protected Image getSelRectImage(Rect aRect)
+    protected ImageBox getSelRectImage(Rect aRect)
     {
         // If already set and at right size, just return
-        if (_selImg!=null && _selImg.getWidth()==aRect.width+2 && _selImg.getHeight()==aRect.height+2) return _selImg;
+        if (_selImgBox!=null && _selImgBox.width==aRect.width && _selImgBox.height==aRect.height)
+            return _selImgBox;
 
         // Create, set and return
-        Rect rect = aRect.getInsetRect(0,0); rect.x = rect.y = 1;
-        ShapeView shpView = new ShapeView(rect); boolean focused = isFoc();
-        shpView.setSize(aRect.width+2, aRect.height+2);
+        Shape shape = aRect.copyForBounds(0,0, aRect.width, aRect.height);
+        ShapeView shpView = new ShapeView(shape);
+        boolean focused = isFoc();
         shpView.setBorder(focused ? ViewEffect.FOCUSED_COLOR.brighter() : Color.GRAY,1);
         shpView.setEffect(focused ? ViewEffect.getFocusEffect() : new ShadowEffect(5, Color.GRAY, 0, 0));
-        return _selImg = ViewUtils.getImage(shpView);
+        return _selImgBox = ViewUtils.getImageBoxForScale(shpView, -1);
     }
 
     // A fuzzy cell border image to highlight cell
-    private Image _selImg;
+    private ImageBox _selImgBox;
 
     /** Returns whether this view or child view has focus. */
     boolean isFoc()
@@ -902,7 +902,12 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Override to clear focus image.
      */
-    protected void setFocused(boolean aValue)  { if (aValue==isFocused()) return; super.setFocused(aValue); _selImg = null; }
+    protected void setFocused(boolean aValue)
+    {
+        if (aValue==isFocused()) return;
+        super.setFocused(aValue);
+        _selImgBox = null;
+    }
 
     /**
      * Returns a mapped property name.

@@ -411,17 +411,54 @@ public class ViewUtils {
     /**
      * Returns an image for a View (at device dpi scale (2 for retina)).
      */
-    public static Image getImage(View aView)  { return getImageForScale(aView, 0); }
+    public static Image getImage(View aView)
+    {
+        return getImageForScale(aView, 0);
+    }
 
     /**
      * Returns an image for a View (1 = 72 dpi, 2 = 144 dpi, 0 = device dpi).
      */
     public static Image getImageForScale(View aView, double aScale)
     {
-        Image img = Image.getImageForSizeAndScale(aView.getWidth(), aView.getHeight(), true, aScale);
+        ImageBox imgBox = getImageBoxForScale(aView, aScale);
+        return imgBox.getImage();
+    }
+
+    /**
+     * Returns an image box for a View (1 = 72 dpi, 2 = 144 dpi, 0 = device dpi).
+     */
+    public static ImageBox getImageBoxForScale(View aView, double aScale)
+    {
+        // Get size of view and image and offset of view in image (if effect)
+        double viewW = aView.getWidth();
+        double viewH = aView.getHeight();
+        int imageW = (int) Math.ceil(viewW);
+        int imageH = (int) Math.ceil(viewH);
+        int imageX = 0;
+        int imageY = 0;
+
+        // If View has effect, image will likely be larger and not positioned at view origin
+        Effect effect = aView.getEffect();
+        if (effect != null) {
+            Rect viewBnds = aView.getBoundsLocal();
+            Rect effBnds = effect.getBounds(viewBnds);
+            imageX = (int) Math.round(effBnds.x - viewBnds.x);
+            imageY = (int) Math.round(effBnds.y - viewBnds.y);
+            imageW = (int) Math.ceil(effBnds.width);
+            imageH = (int) Math.ceil(effBnds.height);
+        }
+
+        // Create image, paint view and return
+        Image img = Image.getImageForSizeAndScale(imageW, imageH, true, aScale);
         Painter pntr = img.getPainter();
+        pntr.translate(-imageX, -imageY);
         paintAll(aView, pntr);
-        return img;
+
+        // Create ImageBox for image and image bounds
+        ImageBox imgBox = new ImageBox(img, viewW, viewH);
+        imgBox.setImageBounds(imageX, imageY, imageW, imageH);
+        return imgBox;
     }
 
     /**

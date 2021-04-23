@@ -16,16 +16,24 @@ public class RoundRect extends RectBase {
     boolean     _nw = true, _ne = true, _sw = true, _se = true;
     
     /**
-     * Creates new Rect.
+     * Constructor.
      */
     public RoundRect()  { }
 
     /**
-     * Creates new Rect.
+     * Constructor.
      */
-    public RoundRect(double aX, double aY, double aW, double aH, double aR)
+    public RoundRect(Rect aRect, double aRadius)
     {
-        x = aX; y = aY; width = aW; height = aH; _rad = aR;
+        this(aRect.x, aRect.y, aRect.width, aRect.height, aRadius);
+    }
+
+    /**
+     * Constructor.
+     */
+    public RoundRect(double aX, double aY, double aW, double aH, double aRadius)
+    {
+        x = aX; y = aY; width = aW; height = aH; _rad = aRadius;
     }
 
     /**

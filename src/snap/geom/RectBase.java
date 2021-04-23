@@ -280,4 +280,12 @@ public abstract class RectBase extends Shape implements Cloneable {
     {
         return getClass().getSimpleName() + " [" + getString() + "]";
     }
+
+    /**
+     * Standard equals implementation.
+     */
+    public static boolean equals(Rect aRect, double aX, double aY, double aW, double aH)
+    {
+        return Point.equals(aRect.x, aRect.y, aX, aY) && Size.equals(aRect.width, aRect.height, aW, aH);
+    }
 }

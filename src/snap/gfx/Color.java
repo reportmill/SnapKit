@@ -26,7 +26,7 @@ public class Color implements Paint, XMLArchiver.Archivable {
     private ColorSpace  _cspace;
     
     // THe components in original ColorSpace
-    private float  _comps[];
+    private float[]  _comps;
     
     // Common Colors
     public static Color BLACK = new Color(0d);
@@ -231,22 +231,34 @@ public class Color implements Paint, XMLArchiver.Archivable {
     /**
      * Returns whether paint is defined in terms independent of primitive to be filled.
      */
+    @Override
     public boolean isAbsolute()  { return true; }
 
     /**
      * Returns whether paint is opaque.
      */
+    @Override
     public boolean isOpaque()  { return _alpha>=1; }
 
     /**
      * Returns the closest color approximation of this paint.
      */
+    @Override
     public Color getColor()  { return this; }
 
     /**
      * Returns a copy of this paint modified for given color.
      */
+    @Override
     public Paint copyForColor(Color aColor)  { return aColor; }
+
+    /**
+     * Returns a copy of this paint modified for given color.
+     */
+    public Color copyForAlpha(double anAlpha)
+    {
+        return new Color(_red, _green, _blue, anAlpha);
+    }
 
     /**
      * Returns an absolute paint for given bounds of primitive to be filled.

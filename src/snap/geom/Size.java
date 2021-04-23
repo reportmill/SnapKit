@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.geom;
+import snap.util.MathUtils;
 import snap.util.StringUtils;
 
 /**
@@ -99,6 +100,14 @@ public class Size implements Cloneable {
      * Standard toString implementation.
      */
     public String toString()  { return "{" + width + "," + height + "}"; }
+
+    /**
+     * Standard equals implementation.
+     */
+    public static boolean equals(double x0, double y0, double x1, double y1)
+    {
+        return MathUtils.equals(x0, x1) && MathUtils.equals(y0, y1);
+    }
 
     /**
      * Creates a size from a string (assumes comma separated).

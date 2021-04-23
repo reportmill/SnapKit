@@ -334,47 +334,77 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets the view x/y.
      */
-    public void setXY(double aX, double aY)  { setX(aX); setY(aY); }
+    public void setXY(double aX, double aY)
+    {
+        setX(aX); setY(aY);
+    }
 
     /**
      * Returns the view size.
      */
-    public Size getSize()  { return new Size(getWidth(), getHeight()); }
+    public Size getSize()
+    {
+        return new Size(getWidth(), getHeight());
+    }
 
     /**
      * Sets the size.
      */
-    public void setSize(Size aSize)  { setSize(aSize.getWidth(), aSize.getHeight()); }
+    public void setSize(Size aSize)
+    {
+        setSize(aSize.width, aSize.height);
+    }
 
     /**
      * Sets the size.
      */
-    public void setSize(double aW, double aH)  { setWidth(aW); setHeight(aH); }
+    public void setSize(double aW, double aH)
+    {
+        setWidth(aW); setHeight(aH);
+    }
 
     /**
      * Sets the size to preferred size.
      */
-    public void setSizeToPrefSize()  { setSize(getPrefWidth(), getPrefHeight()); }
+    public void setSizeToPrefSize()
+    {
+        double prefW = getPrefWidth();
+        double prefH = getPrefHeight();
+        setSize(prefW, prefH);
+    }
 
     /**
      * Returns the bounds.
      */
-    public Rect getBounds()  { return new Rect(getX(),getY(),getWidth(),getHeight()); }
+    public Rect getBounds()
+    {
+        return new Rect(getX(), getY(), getWidth(), getHeight());
+    }
 
     /**
      * Sets the bounds.
      */
-    public void setBounds(Rect aRect)  { setBounds(aRect.x, aRect.y, aRect.width, aRect.height); }
+    public void setBounds(Rect aRect)
+    {
+        setBounds(aRect.x, aRect.y, aRect.width, aRect.height);
+    }
 
     /**
      * Sets the bounds.
      */
-    public void setBounds(double aX, double aY, double aW, double aH)  { setX(aX); setY(aY); setWidth(aW); setHeight(aH); }
+    public void setBounds(double aX, double aY, double aW, double aH)
+    {
+        setX(aX); setY(aY);
+        setWidth(aW); setHeight(aH);
+    }
 
     /**
      * Returns the bounds inside view.
      */
-    public Rect getBoundsLocal()  { return new Rect(0,0,getWidth(),getHeight()); }
+    public Rect getBoundsLocal()
+    {
+        return new Rect(0,0, getWidth(), getHeight());
+    }
 
     /**
      * Sets the view bounds with given rect in current local coords such that it will have that rect as new local bounds.
@@ -393,8 +423,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (isLocalToParentSimple()) { setXY(getX() + aX, getY() + aY); return; }
         Point p0 = localToParent(0,0);
         Point p1 = localToParent(aX,aY);
-        double p2x = p1.x - p0.x, p2y = p1.y - p0.y;
-        setXY(Math.round(getX() + p2x), Math.round(getY() + p2y));
+        double p2x = Math.round(getX() + p1.x - p0.x);
+        double p2y = Math.round(getY() + p1.y - p0.y);
+        setXY(p2x, p2y);
     }
 
     /**
@@ -406,24 +437,34 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         Point p0 = localToParent(0,0);
         setSize(aW,aH);
         Point p1 = localToParent(0,0);
-        double p2x = p1.x - p0.x, p2y = p1.y - p0.y;
-        setXY(Math.round(getX() - p2x), Math.round(getY() - p2y));
+        double p2x = Math.round(getX() - (p1.x - p0.x));
+        double p2y = Math.round(getY() - (p1.y - p0.y));
+        setXY(Math.round(p2x), p2y);
     }
 
     /**
      * Returns the bounds in parent coords.
      */
-    public Rect getBoundsParent()  { return getBoundsShapeParent().getBounds(); }
+    public Rect getBoundsParent()
+    {
+        return getBoundsShapeParent().getBounds();
+    }
 
     /**
      * Returns the bounds shape in view coords.
      */
-    public Shape getBoundsShape()  { return getBoundsLocal(); }
+    public Shape getBoundsShape()
+    {
+        return getBoundsLocal();
+    }
 
     /**
      * Returns the bounds shape in parent coords.
      */
-    public Shape getBoundsShapeParent()  { return localToParent(getBoundsShape()); }
+    public Shape getBoundsShapeParent()
+    {
+        return localToParent(getBoundsShape());
+    }
 
     /**
      * Returns the translation of this view from X.
@@ -744,7 +785,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         if (!isVisible()) return new Rect();
         Rect cbnds = getClipAllBounds();
-        if (cbnds==null) return aRect;
+        if (cbnds == null) return aRect;
         Rect crect = aRect.getIntersectRect(cbnds);
         crect.snap();
         return crect;
@@ -753,15 +794,22 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the visible bounds for a view based on ancestor clips (just bound local if no clipping found).
      */
-    public Rect getVisRect()  { return getClippedRect(getBoundsLocal()); }
+    public Rect getVisRect()
+    {
+        Rect bnds = getBoundsLocal();
+        return getClippedRect(bnds);
+    }
 
     /**
      * Called to scroll the given shape in this view coords to visible.
      */
     public void scrollToVisible(Shape aShape)
     {
-        if (getParent()!=null)
-            getParent().scrollToVisible(localToParent(aShape));
+        ParentView parent = getParent();
+        if (parent != null) {
+            Shape shape = localToParent(aShape);
+            parent.scrollToVisible(shape);
+        }
     }
 
     /**
@@ -774,22 +822,28 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Transform getLocalToParent()
     {
+        double viewX = getX();
+        double viewY = getY();
         if (isLocalToParentSimple())
-            return new Transform(getX()+_tx, getY()+_ty);
+            return new Transform(viewX + _tx, viewY +_ty);
 
         // Get location, size, point of rotation, rotation, scale, skew
-        double x = getX() + getTransX(), y = getY() + getTransY();
-        double w = getWidth(), h = getHeight();
+        double x = viewX + getTransX();
+        double y = viewY + getTransY();
+        double w = getWidth();
+        double h = getHeight();
         double prx = w/2, pry = h/2;
         double rot = getRotate();
-        double sx = getScaleX(), sy = getScaleY(); //skx = getSkewX(), sky = getSkewY();
+        double sx = getScaleX();
+        double sy = getScaleY(); //skx = getSkewX(), sky = getSkewY();
 
         // Transform about point of rotation and return
-        Transform t = new Transform(x + prx, y + pry);
-        if (rot!=0) t.rotate(rot);
-        if (sx!=1 || sy!=1) t.scale(sx, sy); //if (skx!=0 || sky!=0) t.skew(skx, sky);
-        t.translate(-prx, -pry);
-        return t;
+        Transform xfm = new Transform(x + prx, y + pry);
+        if (rot != 0) xfm.rotate(rot);
+        if (sx != 1 || sy != 1)
+            xfm.scale(sx, sy); //if (skx!=0 || sky!=0) t.skew(skx, sky);
+        xfm.translate(-prx, -pry);
+        return xfm;
     }
 
     /**
@@ -797,15 +851,29 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Transform getLocalToParent(View aPar)
     {
-        Transform tfm = getLocalToParent(); View n;
-        for (n=getParent(); n!=aPar && n!=null; n=n.getParent()) {
-            if (n.isLocalToParentSimple())
-                tfm.preTranslate(n._x+n._tx,n._y+n._ty);
-            else tfm.multiply(n.getLocalToParent());
+        Transform xfm = getLocalToParent();
+        for (View view=getParent(); view != aPar; ) {
+
+            // If simple, just add translation
+            if (view.isLocalToParentSimple())
+                xfm.preTranslate(view._x + view._tx,view._y + view._ty);
+
+            // Otherwise multiply full transform
+            else {
+                Transform localToParent = view.getLocalToParent();
+                xfm.multiply(localToParent);
+            }
+
+            // Get next view (complain and break if given par not found
+            view = view.getParent();
+            if (view == null) {
+                System.err.println("View.getLocalToParent: Parent not found " + aPar);
+                break;
+            }
         }
-        if (n!=aPar)
-            System.err.println("View.getLocalToParent: Parent not found " + aPar);
-        return tfm;
+
+        // Return transform
+        return xfm;
     }
 
     /**
@@ -813,9 +881,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Point localToParent(double aX, double aY)
     {
+        // If simple, just add offset
         if (isLocalToParentSimple())
-            return new Point(aX+_x+_tx,aY+_y+_ty);
-        return getLocalToParent().transform(aX, aY);
+            return new Point(aX + _x + _tx,aY + _y + _ty);
+
+        // Otherwise do full transform
+        Transform localToParent = getLocalToParent();
+        return localToParent.transform(aX, aY);
     }
 
     /**
@@ -823,7 +895,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Point localToParent(double aX, double aY, View aPar)
     {
-        Point point = new Point(aX,aY);
+        Point point = new Point(aX, aY);
         for (View view=this; view!=aPar && view!=null; view=view.getParent()) {
             if (view.isLocalToParentSimple())
                 point.offset(view._x + view._tx,view._y + view._ty);
@@ -855,7 +927,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         if (isLocalToParentSimple())
             return new Transform(-_x-_tx, -_y-_ty);
-        Transform tfm = getLocalToParent(); tfm.invert();
+        Transform tfm = getLocalToParent();
+        tfm.invert();
         return tfm;
     }
 
@@ -864,7 +937,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Transform getParentToLocal(View aPar)
     {
-        Transform tfm = getLocalToParent(aPar); tfm.invert();
+        Transform tfm = getLocalToParent(aPar);
+        tfm.invert();
         return tfm;
     }
 
@@ -873,9 +947,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Point parentToLocal(double aX, double aY)
     {
+        // If simple, just subtract offset
         if (isLocalToParentSimple())
-            return new Point(aX-_x-_tx,aY-_y-_ty);
-        return getParentToLocal().transform(aX, aY);
+            return new Point(aX - _x - _tx,aY - _y - _ty);
+
+        // Otherwise do full transform
+        Transform parentToLocal = getParentToLocal();
+        return parentToLocal.transform(aX, aY);
     }
 
     /**
@@ -883,7 +961,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Point parentToLocal(double aX, double aY, View aPar)
     {
-        return getParentToLocal(aPar).transform(aX,aY);
+        Transform parentToLocal = getParentToLocal(aPar);
+        return parentToLocal.transform(aX,aY);
     }
 
     /**
@@ -891,7 +970,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Shape parentToLocal(Shape aShape)
     {
-        return aShape.copyFor(getParentToLocal());
+        Transform parentToLocal = getParentToLocal();
+        return aShape.copyFor(parentToLocal);
     }
 
     /**
@@ -899,7 +979,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Shape parentToLocal(Shape aShape, View aView)
     {
-        return aShape.copyFor(getParentToLocal(aView));
+        Transform parentToLocal = getParentToLocal(aView);
+        return aShape.copyFor(parentToLocal);
     }
 
     /**
@@ -1958,7 +2039,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Rect getRepaintRect()
     {
-        Rect rect = _repaintRect; if (rect==null) return null;
+        Rect rect = _repaintRect; if (rect == null) return null;
         Rect rectExp = getRepaintRectExpanded(rect);
         return rectExp;
     }

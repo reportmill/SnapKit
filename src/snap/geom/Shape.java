@@ -603,13 +603,29 @@ public abstract class Shape {
      */
     public Shape copyFor(Rect aRect)
     {
-        Rect bnds = getBounds(); if (bnds.equals(aRect)) return this;
-        double bw = bnds.width, bh = bnds.height;
-        double sx = bw!=0 ? aRect.width/bw : 0;
-        double sy = bh!=0 ? aRect.height/bh : 0;
-        Transform trans = Transform.getScale(sx, sy);
-        trans.translate(aRect.x - bnds.x, aRect.y - bnds.y);
-        return new Path(getPathIter(trans));
+        return copyForBounds(aRect.x, aRect.y, aRect.width, aRect.height);
+    }
+
+    /**
+     * Returns the shape in rect.
+     */
+    public Shape copyForBounds(double aX, double aY, double aW, double aH)
+    {
+        // Get this shape bounds
+        Rect bnds = getBounds();
+        if (RectBase.equals(bnds, aX, aY, aW, aH)) return this;
+        double bndsW = bnds.width;
+        double bndsH = bnds.height;
+
+        // Get scale to rect
+        double scaleX = bndsW != 0 ? aW/bndsW : 0;
+        double scaleY = bndsH != 0 ? aH/bndsH : 0;
+        double transX = aX - bnds.x;
+        double transY = aY - bnds.y;
+        Transform xfm = Transform.getScale(scaleX, scaleY);
+        xfm.translate(transX, transY);
+        PathIter pathIter = getPathIter(xfm);
+        return new Path(pathIter);
     }
 
     /**
