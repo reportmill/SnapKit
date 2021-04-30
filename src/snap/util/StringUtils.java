@@ -727,15 +727,19 @@ public class StringUtils {
     public static String getStackTraceString(Throwable aThrowable)
     {
         // Get root exception
-        while (aThrowable.getCause()!=null) aThrowable = aThrowable.getCause();
+        while (aThrowable.getCause() != null)
+            aThrowable = aThrowable.getCause();
 
         // Get string
         try {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
-            aThrowable.printStackTrace(pw); pw.flush();
+            aThrowable.printStackTrace(pw);
+            pw.flush();
             return sw.toString();
         }
+
+        // Lord help us
         catch(Exception e) { throw new RuntimeException(e); }
     }
 

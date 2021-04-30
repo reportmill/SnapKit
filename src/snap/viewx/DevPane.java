@@ -33,6 +33,9 @@ public class DevPane extends ViewOwner {
     // The Console inspector
     private DevPaneConsole  _consoleInsp = new DevPaneConsole();
 
+    // The Exception inspector
+    private DevPaneExceptions  _exceptionInsp;
+
     // Constants
     private static int DEFAULT_HEIGHT = 300;
     protected static Stroke HIGHLIGHT_BORDER_STROKE = new Stroke(3);
@@ -53,6 +56,28 @@ public class DevPane extends ViewOwner {
      * Returns the real content.
      */
     public View getContent()  { return _content; }
+
+    /**
+     * Shows an exception.
+     */
+    public void showException(Exception anExc)
+    {
+        // If first exception, create UI, add TabView, select it
+        if (_exceptionInsp == null) {
+            System.out.println("ShowException");
+            getUI();
+            System.out.println("ShowException: Loaded UI");
+            _exceptionInsp = new DevPaneExceptions();
+            _tabView.addTab("Exceptions", _exceptionInsp.getUI());
+            System.out.println("ShowException: Added tab");
+            _tabView.setSelIndex(_tabView.getTabCount()-1);
+            System.out.println("ShowException: Set sel");
+        }
+
+        // Show Exception
+        _exceptionInsp.showException(anExc);
+        System.out.println("ShowException: Forwarded");
+    }
 
     /**
      * Install in rootView
@@ -154,7 +179,11 @@ public class DevPane extends ViewOwner {
     /**
      * Returns whether DevPane is showing for view.
      */
-    public static boolean isDevPaneShowing(View aView)  { return getDevPane(aView)!=null; }
+    public static boolean isDevPaneShowing(View aView)
+    {
+        DevPane devPane = getDevPane(aView);
+        return devPane != null;
+    }
 
     /**
      * Sets a DevPane visible for view.
@@ -174,6 +203,20 @@ public class DevPane extends ViewOwner {
         else if (!aValue && devPane != null) {
             devPane.removeFromWindow();
         }
+    }
+
+    /**
+     * Sets a DevPane visible for view.
+     */
+    public static void showException(View aView, Exception anExc)
+    {
+        ViewUtils.runLater(() -> {
+            setDevPaneShowing(aView, true);
+            ViewUtils.runLater(() -> {
+                DevPane devPane = getDevPane(aView);
+                devPane.showException(anExc);
+            });
+        });
     }
 
     /**
