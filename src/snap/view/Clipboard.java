@@ -8,12 +8,13 @@ import java.util.function.Consumer;
 
 import snap.geom.Point;
 import snap.gfx.*;
+import snap.util.Loadable;
 import snap.web.MIMEType;
 
 /**
  * A class to handle system copy/paste and to initiate drag and drop.
  */
-public abstract class Clipboard {
+public abstract class Clipboard implements Loadable {
     
     // The drag image
     Image                       _img;
@@ -275,12 +276,14 @@ public abstract class Clipboard {
     public View getDragSourceView()  { return null; }
 
     /**
-     * If Clipboard needs to be 'approved', get approved and call given consumer.
+     * Returns whether clipboard is loaded.
      */
-    public void getApprovedClipboardAndRun(Consumer<Clipboard> aConsumer)
-    {
-        ViewUtils.runLater(() -> aConsumer.accept(this));
-    }
+    public boolean isLoaded()  { return true; }
+
+    /**
+     * Adds a callback to be triggered when resources loaded.
+     */
+    public void addLoadListener(Runnable aRun)  { }
 
     /**
      * Returns the system clipboard.
