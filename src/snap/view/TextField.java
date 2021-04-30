@@ -994,8 +994,9 @@ public class TextField extends ParentView {
         if (anElement.hasAttribute(ColCount_Prop))
             setColCount(anElement.getAttributeIntValue(ColCount_Prop));
         String str = anElement.getAttributeValue("text");
-        if (str==null) str = anElement.getAttributeValue("value", anElement.getValue());
-        if (str!=null && str.length()>0)
+        if (str == null)
+            str = anElement.getAttributeValue("value", anElement.getValue());
+        if (str != null && str.length() > 0)
             setText(str);
         if (anElement.hasAttribute(PromptText_Prop))
             setPromptText(anElement.getAttributeValue(PromptText_Prop));
@@ -1011,8 +1012,8 @@ public class TextField extends ParentView {
         aTextField.getLabel().setAlign(Pos.CENTER);
         aTextField.addPropChangeListener(pce -> {
             if (aTextField.isFocused())
-                ViewAnim.setAlign(aTextField.getLabel(), Pos.CENTER_LEFT, 200);
-            else ViewAnim.setAlign(aTextField.getLabel(), Pos.CENTER, 600);
+                ViewAnimUtils.setAlign(aTextField.getLabel(), Pos.CENTER_LEFT, 200);
+            else ViewAnimUtils.setAlign(aTextField.getLabel(), Pos.CENTER, 600);
         }, View.Focused_Prop);
     }
 }

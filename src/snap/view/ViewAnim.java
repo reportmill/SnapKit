@@ -788,14 +788,6 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     public static void setAlign(View aView, Pos aPos, int aTime)
     {
-        ParentView par = aView instanceof ParentView? (ParentView)aView : null; if (par==null) return;
-        View child0 = par.getChildCount()>0? par.getChild(0) : null; if (child0==null) return;
-        double x0 = child0.getX(), y0 = child0.getY();
-        par.setAlign(aPos); par.layoutDeep();
-        double x1 = child0.getX(), y1 = child0.getY();
-        for (View child : par.getChildren()) {
-            child.setTransX(x0-x1); child.setTransY(y0-y1);
-            child.getAnimCleared(aTime).setTransX(0).setTransY(0).play();
-        }
+        ViewAnimUtils.setAlign(aView, aPos, aTime);
     }
 }
