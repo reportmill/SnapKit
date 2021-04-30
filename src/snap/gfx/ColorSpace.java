@@ -86,134 +86,136 @@ public abstract class ColorSpace {
     // The object that creates new ColorSpaces for current graphics environment. */
     public static ColorSpaceFactory  _factory;
 
-/**
- * Constructs a ColorSpace object given a color space type and the number of components.
- */
-protected ColorSpace (int type, int numcomponents)  { this.type = type; this.numComponents = numcomponents; }
+    /**
+     * Constructs a ColorSpace object given a color space type and the number of components.
+     */
+    protected ColorSpace (int type, int numcomponents)  { this.type = type; this.numComponents = numcomponents; }
 
-/**
- * Returns true if the ColorSpace is CS_sRGB.
- */
-public boolean isCS_sRGB () { return (this == sRGBspace); }
+    /**
+     * Returns true if the ColorSpace is CS_sRGB.
+     */
+    public boolean isCS_sRGB () { return (this == sRGBspace); }
 
-/**
- * Transforms a color value assumed to be in this ColorSpace
- * into a value in the default CS_sRGB color space.
- */
-public abstract float[] toRGB(float[] colorvalue);
+    /**
+     * Transforms a color value assumed to be in this ColorSpace
+     * into a value in the default CS_sRGB color space.
+     */
+    public abstract float[] toRGB(float[] colorvalue);
 
-/**
- * Transforms a color value assumed to be in the default CS_sRGB
- * color space into this ColorSpace.
- */
-public abstract float[] fromRGB(float[] rgbvalue);
+    /**
+     * Transforms a color value assumed to be in the default CS_sRGB
+     * color space into this ColorSpace.
+     */
+    public abstract float[] fromRGB(float[] rgbvalue);
 
-/**
- * Transforms a color value assumed to be in this ColorSpace
- * into the CS_CIEXYZ conversion color space.
- */
-public abstract float[] toCIEXYZ(float[] colorvalue);
+    /**
+     * Transforms a color value assumed to be in this ColorSpace
+     * into the CS_CIEXYZ conversion color space.
+     */
+    public abstract float[] toCIEXYZ(float[] colorvalue);
 
-/**
- * Transforms a color value assumed to be in the CS_CIEXYZ conversion
- * color space into this ColorSpace.
- */
-public abstract float[] fromCIEXYZ(float[] colorvalue);
+    /**
+     * Transforms a color value assumed to be in the CS_CIEXYZ conversion
+     * color space into this ColorSpace.
+     */
+    public abstract float[] fromCIEXYZ(float[] colorvalue);
 
-/**
- * Returns the color space type of this ColorSpace (for example TYPE_RGB, TYPE_XYZ, ...).  The type defines the
- * number of components of the color space and the interpretation, e.g. TYPE_RGB identifies a color space with
- * three components - red, green, and blue.  It does not define the particular color
- * characteristics of the space, e.g. the chromaticities of the primaries.
- */
-public int getType()  { return type; }
+    /**
+     * Returns the color space type of this ColorSpace (for example TYPE_RGB, TYPE_XYZ, ...).  The type defines the
+     * number of components of the color space and the interpretation, e.g. TYPE_RGB identifies a color space with
+     * three components - red, green, and blue.  It does not define the particular color
+     * characteristics of the space, e.g. the chromaticities of the primaries.
+     */
+    public int getType()  { return type; }
 
-/**
- * Returns the number of components of this ColorSpace.
- */
-public int getNumComponents()  { return numComponents; }
+    /**
+     * Returns the number of components of this ColorSpace.
+     */
+    public int getNumComponents()  { return numComponents; }
 
-/**
- * Returns the name of the component given the component index.
- */
-public String getName(int idx)
-{
-    // Handle common cases here */
-    if(idx<0 || idx>numComponents-1) throw new IllegalArgumentException("Component index out of range: " + idx);
+    /**
+     * Returns the name of the component given the component index.
+     */
+    public String getName(int idx)
+    {
+        // Handle common cases here
+        if (idx < 0 || idx > numComponents-1)
+            throw new IllegalArgumentException("Component index out of range: " + idx);
 
-    if (compName == null) {
-        switch (type) {
-            //case ColorSpace.TYPE_XYZ: compName = new String[] {"X", "Y", "Z"}; break;
-            case ColorSpace.TYPE_Lab: compName = new String[] {"L", "a", "b"}; break;
-            //case ColorSpace.TYPE_Luv: compName = new String[] {"L", "u", "v"}; break;
-            //case ColorSpace.TYPE_YCbCr: compName = new String[] {"Y", "Cb", "Cr"}; break;
-            //case ColorSpace.TYPE_Yxy: compName = new String[] {"Y", "x", "y"}; break;
-            case ColorSpace.TYPE_RGB: compName = new String[] {"Red", "Green", "Blue"}; break;
-            case ColorSpace.TYPE_GRAY: compName = new String[] {"Gray"}; break;
-            //case ColorSpace.TYPE_HSV: compName = new String[] {"Hue", "Saturation", "Value"}; break;
-            //case ColorSpace.TYPE_HLS: compName = new String[] {"Hue", "Lightness", "Saturation"}; break;
-            case ColorSpace.TYPE_CMYK: compName = new String[] {"Cyan", "Magenta", "Yellow", "Black"}; break;
-            case ColorSpace.TYPE_CMY: compName = new String[] {"Cyan", "Magenta", "Yellow"}; break;
-            default: String [] tmp = new String[numComponents];
-                for(int i=0;i<tmp.length;i++) tmp[i] = "Unnamed color component(" + i + ")";
-                compName = tmp;
+        if (compName == null) {
+            switch (type) {
+                //case ColorSpace.TYPE_XYZ: compName = new String[] { "X", "Y", "Z" }; break;
+                case ColorSpace.TYPE_Lab: compName = new String[] { "L", "a", "b" }; break;
+                //case ColorSpace.TYPE_Luv: compName = new String[] { "L", "u", "v" }; break;
+                //case ColorSpace.TYPE_YCbCr: compName = new String[] { "Y", "Cb", "Cr" }; break;
+                //case ColorSpace.TYPE_Yxy: compName = new String[] { "Y", "x", "y" }; break;
+                case ColorSpace.TYPE_RGB: compName = new String[] { "Red", "Green", "Blue" }; break;
+                case ColorSpace.TYPE_GRAY: compName = new String[] { "Gray" }; break;
+                //case ColorSpace.TYPE_HSV: compName = new String[] { "Hue", "Saturation", "Value" }; break;
+                //case ColorSpace.TYPE_HLS: compName = new String[] { "Hue", "Lightness", "Saturation" }; break;
+                case ColorSpace.TYPE_CMYK: compName = new String[] { "Cyan", "Magenta", "Yellow", "Black" }; break;
+                case ColorSpace.TYPE_CMY: compName = new String[] { "Cyan", "Magenta", "Yellow" }; break;
+                default: String[] tmp = new String[numComponents];
+                    for (int i=0; i<tmp.length; i++) tmp[i] = "Unnamed color component(" + i + ")";
+                    compName = tmp;
+            }
+        }
+        return compName[idx];
+    }
+
+    /**
+     * Returns the minimum normalized color component value for the specified component.
+     */
+    public float getMinValue(int comp)
+    {
+        if (comp < 0 || comp > numComponents-1)
+            throw new IllegalArgumentException("Component index out of range: " + comp);
+        return 0f;
+    }
+
+    /**
+     * Returns the maximum normalized color component value for the specified component.
+     */
+    public float getMaxValue(int comp)
+    {
+        if (comp < 0 || comp > numComponents-1)
+            throw new IllegalArgumentException("Component index out of range: " + comp);
+        return 1f;
+    }
+
+    /**
+     * Returns a ColorSpace representing one of the specific predefined color spaces.
+     * @param colorspace a specific color space identified by one of the predefined class constants (e.g.
+     * CS_sRGB, CS_LINEAR_RGB, CS_CIEXYZ, CS_GRAY, or CS_PYCC)
+     */
+    public static ColorSpace getInstance(int aCS)
+    {
+        switch (aCS) {
+            case CS_sRGB: return sRGBspace != null ? sRGBspace : (sRGBspace = _factory.getInstance(aCS));
+            case CS_CIEXYZ: return XYZspace != null ? XYZspace : (XYZspace = _factory.getInstance(aCS));
+            case CS_GRAY: return GRAYspace != null ? GRAYspace : (GRAYspace = _factory.getInstance(aCS));
+            case CS_LINEAR_RGB: return LINEAR_RGBspace!=null? LINEAR_RGBspace : (LINEAR_RGBspace=_factory.getInstance(aCS));
+            default: throw new IllegalArgumentException ("Unknown color space");
         }
     }
-    return compName[idx];
-}
 
-/**
- * Returns the minimum normalized color component value for the specified component.
- */
-public float getMinValue(int comp)
-{
-    if(comp<0 || comp>numComponents-1) throw new IllegalArgumentException("Component index out of range: " + comp);
-    return 0.0f;
-}
-
-/**
- * Returns the maximum normalized color component value for the specified component.
- */
-public float getMaxValue(int comp)
-{
-    if(comp<0 || comp>numComponents-1) throw new IllegalArgumentException("Component index out of range: " + comp);
-    return 1.0f;
-}
-
-/**
- * Returns a ColorSpace representing one of the specific predefined color spaces.
- * @param colorspace a specific color space identified by one of the predefined class constants (e.g.
- * CS_sRGB, CS_LINEAR_RGB, CS_CIEXYZ, CS_GRAY, or CS_PYCC)
- */
-public static ColorSpace getInstance(int aCS)
-{
-    switch(aCS) {
-        case CS_sRGB: return sRGBspace!=null? sRGBspace : (sRGBspace=_factory.getInstance(aCS));
-        case CS_CIEXYZ: return XYZspace!=null? XYZspace : (XYZspace=_factory.getInstance(aCS));
-        case CS_GRAY: return GRAYspace!=null? GRAYspace : (GRAYspace=_factory.getInstance(aCS));
-        case CS_LINEAR_RGB: return LINEAR_RGBspace!=null? LINEAR_RGBspace : (LINEAR_RGBspace=_factory.getInstance(aCS));
-        default: throw new IllegalArgumentException ("Unknown color space");
+    /**
+     * Create ICC ColorSpace from source (stream or bytes)
+     */
+    public static ColorSpace createColorSpaceICC(Object aSource)
+    {
+        return _factory.createColorSpaceICC(aSource);
     }
-}
 
-/**
- * Create ICC ColorSpace from source (stream or bytes)
- */
-public static ColorSpace createColorSpaceICC(Object aSource)
-{
-    return _factory.createColorSpaceICC(aSource);
-}
+    /**
+     * The ColorSpaceFactory.
+     */
+    public interface ColorSpaceFactory {
 
-/**
- * The ColorSpaceFactory.
- */
-public interface ColorSpaceFactory {
-    
-    /** Returns a ColorSpace for given type. */
-    public ColorSpace getInstance(int aCS);
-    
-    /** Create ICC ColorSpace from source. */
-    public ColorSpace createColorSpaceICC(Object aSource);
-}
+        /** Returns a ColorSpace for given type. */
+        public ColorSpace getInstance(int aCS);
 
+        /** Create ICC ColorSpace from source. */
+        public ColorSpace createColorSpaceICC(Object aSource);
+    }
 }
