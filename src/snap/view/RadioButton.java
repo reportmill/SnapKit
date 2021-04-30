@@ -41,7 +41,8 @@ public class RadioButton extends ToggleButton {
     /**
      * Override to suppress normal version.
      */
-    public void paintFront(Painter aPntr)  { }
+    @Override
+    protected void paintButton(Painter aPntr)  { }
 
     /**
      * Override to return some space between button and label.

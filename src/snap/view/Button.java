@@ -46,13 +46,17 @@ public class Button extends ButtonBase {
     /**
      * Paint Button.
      */
-    public void paintFront(Painter aPntr)
+    @Override
+    protected void paintButton(Painter aPntr)
     {
+        // Handle ShowArea + DefaultButton
         if (isShowArea() && isDefaultButton()) {
             int state = isPressed() ? BUTTON_PRESSED : _targeted ? BUTTON_OVER : BUTTON_NORMAL;
             paintDefaultButton(aPntr, 0,0,getWidth(),getHeight(), state);
         }
-        else super.paintFront(aPntr);
+
+        // Otherwise, do normal version
+        else super.paintButton(aPntr);
     }
 
     /**

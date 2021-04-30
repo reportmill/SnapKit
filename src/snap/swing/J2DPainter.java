@@ -43,8 +43,8 @@ public class J2DPainter extends Painter {
         setAntialiasing(true);
         setAntialiasingText(true);
         setFractionalMetrics(true);
-        _gfx.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        _gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        //_gfx.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        //_gfx.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         // Initialize clip to Graphics clip
         clip(AWT.awtToSnapShape(aGr.getClip()));

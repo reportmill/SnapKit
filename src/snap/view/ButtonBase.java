@@ -248,7 +248,8 @@ public class ButtonBase extends ParentView {
     public Insets getInsetsAll()
     {
         Insets pad = getPadding();
-        if (isShowArea()) pad = Insets.add(pad, 2, 2, 2, 2);
+        if (isShowArea())
+            pad = Insets.add(pad, 2, 2, 2, 2);
         return pad;
     }
 
@@ -291,7 +292,15 @@ public class ButtonBase extends ParentView {
     /**
      * Paint Button.
      */
-    public void paintFront(Painter aPntr)
+    protected final void paintFront(Painter aPntr)
+    {
+        paintButton(aPntr);
+    }
+
+    /**
+     * Paint Button.
+     */
+    protected void paintButton(Painter aPntr)
     {
         // If ShowArea, use ButtonArea to paint actual button background
         if (isShowArea())
@@ -306,8 +315,10 @@ public class ButtonBase extends ParentView {
 
             // If Targeted, paint border
             if (isTargeted()) {
+                boolean oldAA = aPntr.setAntialiasing(false);
                 aPntr.setStroke(Stroke.Stroke1);
-                aPntr.drawRectWithPaint(0, 0, getWidth()-1, getHeight()-1, Color.GRAY);
+                aPntr.drawRectWithPaint(.5, .5, getWidth()-1, getHeight()-1, Color.LIGHTGRAY);
+                aPntr.setAntialiasing(oldAA);
             }
         }
     }
@@ -317,13 +328,24 @@ public class ButtonBase extends ParentView {
      */
     public void paintAll(Painter aPntr)
     {
-        super.paintAll(aPntr);
+        // If disabled, paint semi-transparent, with round-rect above
         if (isDisabled()) {
-            Color DISABLED_FILL = new Color(1, 1, 1, .4);
+
+            // Do normal paint at half transparent
+            double oldOpacity = aPntr.getOpacity();
+            aPntr.setOpacity(oldOpacity * .5);
+            super.paintAll(aPntr);
+            aPntr.setOpacity(oldOpacity);
+
+            // Paint semi-transparent round rect on top
+            Color DISABLED_FILL = new Color(1, 1, 1, .2);
             aPntr.setColor(DISABLED_FILL);
             RoundRect rect = new RoundRect(0, 0, getWidth(), getHeight(), 4);
             aPntr.fill(rect);
         }
+
+        // Otherwise paint normal version
+        else super.paintAll(aPntr);
     }
 
     /**
@@ -334,17 +356,26 @@ public class ButtonBase extends ParentView {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, getLabel(), aH); }
+    protected double getPrefWidthImpl(double aH)
+    {
+        return BoxView.getPrefWidth(this, getLabel(), aH);
+    }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(this, getLabel(), aW); }
+    protected double getPrefHeightImpl(double aW)
+    {
+        return BoxView.getPrefHeight(this, getLabel(), aW);
+    }
 
     /**
      * Override to layout children.
      */
-    protected void layoutImpl()  { BoxView.layout(this, getLabel(), null, false, false); }
+    protected void layoutImpl()
+    {
+        BoxView.layout(this, getLabel(), null, false, false);
+    }
 
     /**
      * Override to set/reset ButtonArea.
@@ -364,12 +395,18 @@ public class ButtonBase extends ParentView {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive Text and ImageName
-        String text = getText(); if (text!=null && text.length()>0) e.add("text", text);
-        String iname = getImageName(); if (iname!=null) e.add("image", iname);
+        String text = getText();
+        if (text != null && text.length() > 0)
+            e.add("text", text);
+        String iname = getImageName();
+        if (iname != null)
+            e.add("image", iname);
 
         // Archive ShowArea, Position
-        if (isShowArea()!=getDefaultShowArea()) e.add(ShowArea_Prop, isShowArea());
-        if (getPosition()!=null) e.add(Position_Prop, getPosition());
+        if (isShowArea() != getDefaultShowArea())
+            e.add(ShowArea_Prop, isShowArea());
+        if (getPosition() != null)
+            e.add(Position_Prop, getPosition());
 
         // Return element
         return e;
@@ -389,7 +426,8 @@ public class ButtonBase extends ParentView {
         if (iname!=null) {
             setImageName(iname);
             Image image = ViewArchiver.getImage(anArchiver, iname);
-            if (image!=null) setImage(image);
+            if (image != null)
+                setImage(image);
         }
 
         // Unarchive ShowArea, Position

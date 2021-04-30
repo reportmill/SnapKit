@@ -13,7 +13,8 @@ public class CheckBoxMenuItem extends MenuItem {
     /**
      * Paint Button.
      */
-    public void paintFront(Painter aPntr)
+    @Override
+    protected void paintButton(Painter aPntr)
     {
         _btnArea.paint(aPntr);
     }
