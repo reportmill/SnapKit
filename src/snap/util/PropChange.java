@@ -129,12 +129,21 @@ public class PropChange {
     public static void doChange(Object aSource, String aProp, Object oldVal, Object newVal, int anIndex)
     {
         // If indexed change, create KeyList and add/remove
-        if (anIndex>=0) //KeyList.setValue(aSource, aProp, newVal, anIndex);
+        if (anIndex >= 0) { //KeyList.setValue(aSource, aProp, newVal, anIndex);
             System.out.println("PropChange.doChange: No support for indexed prop: aProp");
+            return;
+        }
+
+        // If PropObject, use
+        if (aSource instanceof PropObject) {
+            PropObject propObject = (PropObject) aSource;
+            propObject.setPropValue(aProp, newVal);
+        }
 
         // If source is GetSet, use GetSet interface
-        if (aSource instanceof Key.GetSet) { Key.GetSet gs = (Key.GetSet) aSource;
-            gs.setKeyValue(aProp, newVal);
+        else if (aSource instanceof Key.GetSet) {
+            Key.GetSet getSet = (Key.GetSet) aSource;
+            getSet.setKeyValue(aProp, newVal);
         }
 
         // Otherwise, do KeyChain.setValue
