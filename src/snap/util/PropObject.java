@@ -34,6 +34,33 @@ public class PropObject implements PropChange.DoChange {
     }
 
     /**
+     * Returns prop default as int.
+     */
+    public final int getPropDefaultInt(String aPropName)
+    {
+        Object val = getPropDefault(aPropName);
+        return SnapUtils.intValue(val);
+    }
+
+    /**
+     * Returns prop default as double.
+     */
+    public final double getPropDefaultDouble(String aPropName)
+    {
+        Object val = getPropDefault(aPropName);
+        return SnapUtils.doubleValue(val);
+    }
+
+    /**
+     * Returns prop default as String.
+     */
+    public final String getPropDefaultString(String aPropName)
+    {
+        Object val = getPropDefault(aPropName);
+        return SnapUtils.stringValue(val);
+    }
+
+    /**
      * Add listener.
      */
     public void addPropChangeListener(PropChangeListener aPCL)
