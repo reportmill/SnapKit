@@ -355,7 +355,8 @@ public class EventDispatcher {
             if (view.getEventAdapter().isEnabled(anEvent.getType())) {
                 ViewEvent event = anEvent.copyForView(view);
                 view.processEventHandlers(event);
-                if (event.isConsumed()) return;
+                if (event.isConsumed())
+                    return;
             }
         }
     }

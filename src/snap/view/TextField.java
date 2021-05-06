@@ -675,7 +675,8 @@ public class TextField extends ParentView {
         }
 
         // Consume all mouse events
-        if (anEvent.isMouseEvent()) anEvent.consume();
+        if (anEvent.isMouseEvent())
+            anEvent.consume();
     }
 
     /**
@@ -933,12 +934,15 @@ public class TextField extends ParentView {
             setText(_focusGainedText);
             setEdited(false);
             selectAll();
-            if (anEvent!=null)
+            if (anEvent != null)
                 anEvent.consume();
         }
 
         // Otherwise hand focus to previous view
-        else getWindow().requestFocus(null);
+        else {
+            getWindow().requestFocus(null);
+            anEvent.consume();
+        }
     }
 
     /**
