@@ -45,12 +45,18 @@ public class Label extends ParentView {
     /**
      * Creates a label node.
      */
-    public Label()  { }
+    public Label()
+    {
+        super();
+    }
 
     /**
      * Creates a label node with given text.
      */
-    public Label(String aStr)  { setText(aStr); }
+    public Label(String aStr)
+    {
+        setText(aStr);
+    }
 
     /**
      * Creates a label node with given graphic, text, and after graphic.
@@ -65,7 +71,10 @@ public class Label extends ParentView {
     /**
      * Returns the text.
      */
-    public String getText()  { return _strView!=null ? _strView.getText() : null; }
+    public String getText()
+    {
+        return _strView != null ? _strView.getText() : null;
+    }
 
     /**
      * Sets the text.
@@ -74,10 +83,12 @@ public class Label extends ParentView {
     {
         // If value already set or setting null in label with no StringView, just return
         String oldVal = getText(); if (SnapUtils.equals(aValue, oldVal)) return;
-        if (aValue==null && !isStringViewSet()) return;
+        if (aValue == null && !isStringViewSet())
+            return;
 
         // Set value and fire prop change
-        StringView sview = getStringView(); sview.setText(aValue);
+        StringView sview = getStringView();
+        sview.setText(aValue);
         firePropChange(Text_Prop, oldVal, aValue);
     }
 
@@ -94,7 +105,7 @@ public class Label extends ParentView {
      */
     public void setImage(Image anImage)
     {
-        Image image = getImage(); if (anImage==image) return;
+        Image image = getImage(); if (anImage == image) return;
         if (_graphic instanceof ImageView)
             ((ImageView)_graphic).setImage(anImage);
         else setGraphic(new ImageView(anImage)); //firePropChange("Image", image, anImage); delete soon
@@ -113,7 +124,7 @@ public class Label extends ParentView {
      */
     public void setImageAfter(Image anImage)
     {
-        Image image = getImage(); if (anImage==image) return;
+        Image image = getImage(); if (anImage == image) return;
         if (_graphicAfter instanceof ImageView)
             ((ImageView)_graphicAfter).setImage(anImage);
         else setGraphicAfter(new ImageView(anImage)); //firePropChange("Image", image, anImage); delete soon
@@ -122,7 +133,10 @@ public class Label extends ParentView {
     /**
      * Returns the text fill.
      */
-    public Paint getTextFill()  { return _strView!=null ? _strView.getTextFill() : null; }
+    public Paint getTextFill()
+    {
+        return _strView != null ? _strView.getTextFill() : null;
+    }
 
     /**
      * Sets the text fill.
@@ -143,13 +157,13 @@ public class Label extends ParentView {
     public StringView getStringView()
     {
         // If StringView already set, just return
-        if (_strView!=null) return _strView;
+        if (_strView != null) return _strView;
 
         // Create, configure, add StringView and return
         _strView = new StringView();
         _strView.setGrowWidth(isEditable());
         _strView.setAlign(getAlign().getHPos());
-        addChild(_strView, getGraphic()!=null ? 1 : 0);
+        addChild(_strView, getGraphic() != null ? 1 : 0);
         return _strView;
     }
 
@@ -163,10 +177,21 @@ public class Label extends ParentView {
      */
     public void setGraphic(View aGraphic)
     {
-        View old = getGraphic(); if (aGraphic==old) return;
-        if (_graphic!=null && _graphic.getParent()!=null) removeChild(_graphic);
+        // If already set, just return
+        View old = getGraphic(); if (aGraphic == old) return;
+
+        // Remove old
+        if (_graphic != null && _graphic.getParent() != null)
+            removeChild(_graphic);
+
+        // Set
         _graphic = aGraphic;
-        if (_graphic!=null) addChild(_graphic, 0);
+
+        // Add new
+        if (_graphic != null)
+            addChild(_graphic, 0);
+
+        // Fire prop change
         firePropChange(Graphic_Prop, old, _graphic);
     }
 
@@ -180,10 +205,21 @@ public class Label extends ParentView {
      */
     public void setGraphicAfter(View aGraphic)
     {
-        View old = getGraphicAfter(); if (aGraphic==old) return;
-        if (_graphicAfter!=null && _graphicAfter.getParent()!=null) removeChild(_graphicAfter);
+        // If already set, just return
+        View old = getGraphicAfter(); if (aGraphic == old) return;
+
+        // Remove old
+        if (_graphicAfter != null && _graphicAfter.getParent() != null)
+            removeChild(_graphicAfter);
+
+        // Set new
         _graphicAfter = aGraphic;
-        if (_graphicAfter!=null) addChild(_graphicAfter);
+
+        // Add new
+        if (_graphicAfter != null)
+            addChild(_graphicAfter);
+
+        // Fire prop change
         firePropChange(GraphicAfter_Prop, old, _graphicAfter);
     }
 
@@ -210,9 +246,10 @@ public class Label extends ParentView {
      */
     public void setSpacing(double aValue)
     {
-        if (aValue==_spacing) return;
+        if (aValue == _spacing) return;
         firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
-        relayout(); relayoutParent();
+        relayout();
+        relayoutParent();
     }
 
     /**
@@ -225,7 +262,7 @@ public class Label extends ParentView {
      */
     public void setRadius(double aValue)
     {
-        if (aValue==_rad) return;
+        if (aValue == _rad) return;
         firePropChange(Radius_Prop, _rad, _rad = aValue);
         repaint();
     }
@@ -240,15 +277,17 @@ public class Label extends ParentView {
      */
     public void setEditable(boolean aValue)
     {
-        if (aValue==isEditable()) return;
+        if (aValue == isEditable()) return;
         firePropChange(Editable_Prop, _editable, _editable = aValue);
 
         // Enable/Disable MosueRelease
-        if (aValue) enableEvents(MouseRelease);
+        if (aValue)
+            enableEvents(MouseRelease);
         else disableEvents(MouseRelease);
 
         // If Editable, StringView should fill width
-        if (isStringViewSet()) getStringView().setGrowWidth(isEditable());
+        if (isStringViewSet())
+            getStringView().setGrowWidth(isEditable());
     }
 
     /**
@@ -262,14 +301,15 @@ public class Label extends ParentView {
     public void setEditing(boolean aValue)
     {
         // If value already set, just return
-        if (aValue==isEditing()) return;
+        if (aValue == isEditing()) return;
         _editing = aValue;
 
         // Handle set true
         if (aValue) {
             TextField editor = getEditor();
             editor.setText(getText());
-            Rect bnds = getStringView().getBounds(); bnds.inset(-2);
+            Rect bnds = getStringView().getBounds();
+            bnds.inset(-2);
             editor.setBounds(bnds);
             addChild(editor);
             editor.selectAll();
@@ -295,7 +335,7 @@ public class Label extends ParentView {
     public TextField getEditor()
     {
         // If editor set, return
-        if (_editor!=null) return _editor;
+        if (_editor != null) return _editor;
 
         // Create and return editor
         TextField editor = new TextField();

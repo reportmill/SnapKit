@@ -2,11 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
-import snap.geom.Insets;
 import snap.geom.Path;
 import snap.gfx.*;
 import snap.util.*;
 import snap.view.*;
+
+import java.util.Objects;
 
 /**
  * A View to show/set a simple color selection.
@@ -37,12 +38,16 @@ public class ColorButton extends View {
     // The down arrow image
     private static Image   _arrowImg;
 
+    // Constants for properties
+    public static final String Color_Prop = "Color";
+
     /**
      * Creates a new ColorButton.
      */
     public ColorButton()
     {
-        enableEvents(MouseEvents); enableEvents(Action);
+        enableEvents(MouseEvents);
+        enableEvents(Action);
         setPrefSize(32,22);
     }
 
@@ -56,10 +61,17 @@ public class ColorButton extends View {
      */
     public void setColor(Color aColor)
     {
-        _color = aColor; repaint();
+        // If already set, just return
+        if (Objects.equals(aColor, _color)) return;
 
-        if (getTitle()!=null)
-            Prefs.get().setValue(_title, _color==null ? null : _color.toHexString());
+        // Set, fire prop change, repaint
+        firePropChange(Color_Prop, _color, _color = aColor);
+        repaint();
+
+        // If Title set, save to prefs under that name
+        if (getTitle() != null) {
+            Prefs.get().setValue(_title, _color == null ? null : _color.toHexString());
+        }
     }
 
     /**
@@ -76,7 +88,7 @@ public class ColorButton extends View {
 
         // If color string is found, set color
         String cstr = Prefs.get().getString(_title);
-        if (cstr!=null)
+        if (cstr != null)
             _color = Color.get(cstr);
         repaint();
     }
@@ -86,19 +98,29 @@ public class ColorButton extends View {
      */
     public Image getImage()
     {
-        if (_image!=null)
-            return _image;
+        // If already set, just return
+        if (_image != null) return _image;
+
+        // Handle standard stroke color image
         if (_title.startsWith("Stroke"))
             return _image = Image.get(getClass(), "pkg.images/Color_StrokeColor.png");
+
+        // Handle standard text color image
         if (_title.startsWith("Text"))
             return _image = Image.get(getClass(), "pkg.images/Color_TextColor.png");
+
+        // Return default color button image
         return _image = Image.get(getClass(), "pkg.images/Color_FillColor.png");
     }
 
     /**
      * Sets the image.
      */
-    public void setImage(Image anImage)  { _image = anImage; repaint(); }
+    public void setImage(Image anImage)
+    {
+        _image = anImage;
+        repaint();
+    }
 
     /**
      * Paints the button.
@@ -106,17 +128,18 @@ public class ColorButton extends View {
     protected void paintFront(Painter aPntr)
     {
         // Paint background (clear if normal, grey if armed)
-        double w = getWidth()-1, h = getHeight()-1;
+        double areaW = getWidth() - 1;
+        double areaH = getHeight() - 1;
         if (_armed) {
             aPntr.setPaint(Color.LIGHTGRAY);
-            aPntr.fillRect(0,0,w,h);
+            aPntr.fillRect(0, 0, areaW, areaH);
         }
 
         // Paint border if targeted (under mouse)
         if (_targeted) {
             aPntr.setColor(Color.BLACK);
-            aPntr.drawRect(.5,.5,w-1,h-1);
-            aPntr.drawLine(w-10,0,w-10,h);
+            aPntr.drawRect(.5,.5,areaW - 1,areaH - 1);
+            aPntr.drawLine(areaW - 10,0,areaW - 10, areaH);
         }
 
         // Paint base icon
@@ -125,14 +148,18 @@ public class ColorButton extends View {
         // Paint arrow
         aPntr.drawImage(getDownArrowImage(), 21, 9);
 
-        // Paint color swatch
-        if (_color==null) {
-            aPntr.setColor(Color.DARKGRAY);
+        // If color set, paint color swatch
+        if (_color != null) {
+            aPntr.setColor(_color);
+            aPntr.fillRect(3, 15, 14, 4);
+            aPntr.setColor(_color.darker());
             aPntr.drawRect(3, 15, 14, 4);
         }
+
+        // Otherwise paint null color
         else {
-            aPntr.setColor(_color); aPntr.fillRect(3, 15, 14, 4);
-            aPntr.setColor(_color.darker()); aPntr.drawRect(3, 15, 14, 4);
+            aPntr.setColor(Color.DARKGRAY);
+            aPntr.drawRect(3, 15, 14, 4);
         }
     }
 
@@ -141,16 +168,32 @@ public class ColorButton extends View {
      */
     protected void processEvent(ViewEvent anEvent)
     {
-        // Handle MouseEnter, MouseExit, MousePress, MouseRelease
+        // Handle MouseEnter
         if (anEvent.isMouseEnter()) {
-            _targeted = true; _armed = _tracked; repaint(); }
+            _targeted = true;
+            _armed = _tracked;
+            repaint();
+        }
+
+        // Handle MouseExit
         else if (anEvent.isMouseExit())  {
-            _targeted = _armed = false; repaint(); }
+            _targeted = _armed = false;
+            repaint();
+        }
+
+        // Handle MousePress
         else if (anEvent.isMousePress())  {
-            _tracked = true; _armed = true; repaint(); }
+            _tracked = true;
+            _armed = true;
+            repaint();
+        }
+
+        // Handle MouseRelease
         else if (anEvent.isMouseRelease())  {
-            if (_armed) fire(anEvent);
-            _armed = _tracked = false; repaint();
+            if (_armed)
+                fire(anEvent);
+            _armed = _tracked = false;
+            repaint();
         }
     }
 
@@ -159,9 +202,15 @@ public class ColorButton extends View {
      */
     public void fire(ViewEvent anEvent)
     {
-        if (anEvent==null || anEvent.getX()<getWidth()-10)
+        // If mouse click in button part, fireActionEvent
+        if (anEvent == null || anEvent.getX() < getWidth() - 10)
             fireActionEvent(anEvent);
-        else getPopup().show(this,0,getHeight());
+
+        // Otherwise (in menu part), show popup
+        else {
+            PopupWindow popup = getPopup();
+            popup.show(this,0, getHeight());
+        }
     }
 
     /**
@@ -170,25 +219,40 @@ public class ColorButton extends View {
     public PopupWindow getPopup()
     {
         // If already created, just return
-        if (_popup!=null) return _popup;
+        if (_popup != null) return _popup;
 
-        // Create PopupWindow and content
-        PopupWindow popup = new PopupWindow(); Insets pad = new Insets(2,2,2,20);
-        ColView content = new ColView(); content.setFillWidth(true); content.setPadding(2,2,2,2);
-        popup.setContent(content);
+        // Create/configure titleLabel
+        Label titleLabel = new Label(getTitle());
+        titleLabel.setPadding(2, 2, 2, 20);
 
-        // Add title and ColorBoxesPane
-        Label titleLabel = new Label(); titleLabel.setText(getTitle()); titleLabel.setPadding(pad);
+        // Create/configure "None" Menu
+        MenuItem noneMenu = new MenuItem();
+        noneMenu.setName("NoneMenu");
+        noneMenu.setText("None");
+        noneMenu.addEventHandler(e -> handlePopupMenuEvent(e), Action);
+
+        // Create/configure "More..." menu
+        MenuItem moreMenu = new MenuItem();
+        moreMenu.setName("MoreMenu");
+        moreMenu.setText("More...");
+        moreMenu.addEventHandler(e -> handlePopupMenuEvent(e), Action);
+
+        // Create/configure main content view (ColView)
+        ColView content = new ColView();
+        content.setFillWidth(true);
+        content.setPadding(2,2,2,2);
         content.addChild(titleLabel);
         content.addChild(new Separator());
         content.addChild(new ColorBoxesPane());
-
-        // Add Menus
         content.addChild(new Separator());
-        MenuItem noneMenu = new MenuItem(); noneMenu.setName("NoneMenu"); noneMenu.setText("None");
-        content.addChild(noneMenu); noneMenu.addEventHandler(e -> handlePopupMenuEvent(e), Action);
-        MenuItem moreMenu = new MenuItem(); moreMenu.setName("MoreMenu"); moreMenu.setText("More...");
-        content.addChild(moreMenu); moreMenu.addEventHandler(e -> handlePopupMenuEvent(e), Action);
+        content.addChild(noneMenu);
+        content.addChild(moreMenu);
+
+        // Create PopupWindow and content
+        PopupWindow popup = new PopupWindow();
+        popup.setContent(content);
+
+        // Set/return
         return _popup = popup;
     }
 
@@ -216,12 +280,42 @@ public class ColorButton extends View {
      */
     private Image getDownArrowImage()
     {
-        // If down arrow icon hasn't been created, create it
-        if (_arrowImg!=null) return _arrowImg;
-        Image img = Image.get(11,10,true); Painter pntr = img.getPainter();
-        Path p = new Path(); p.moveTo(2.5f, 1f); p.lineTo(5.5f, 6f); p.lineTo(8.5f, 1f); p.close();
-        pntr.setColor(Color.BLACK); pntr.fill(p); pntr.flush();
+        // If already set, just return
+        if (_arrowImg != null) return _arrowImg;
+
+        // Create DownArrow image
+        Image img = Image.get(11,10,true);
+        Painter pntr = img.getPainter();
+        Path p = new Path(); p.moveTo(2.5f, 1f);
+        p.lineTo(5.5f, 6f); p.lineTo(8.5f, 1f); p.close();
+        pntr.setColor(Color.BLACK);
+        pntr.fill(p);
         return _arrowImg = img;
+    }
+
+    /**
+     * Returns a mapped property name.
+     */
+    public String getValuePropName()  { return Color_Prop; }
+
+    /**
+     * Override because TeaVM hates reflection.
+     */
+    public Object getPropValue(String aPropName)
+    {
+        if (aPropName.equals("Value") || aPropName.equals(Color_Prop))
+            return getColor();
+        return super.getPropValue(aPropName);
+    }
+
+    /**
+     * Override because TeaVM hates reflection.
+     */
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        if (aPropName.equals("Value") || aPropName.equals(Color_Prop))
+            setColor((Color) aValue);
+        else super.setPropValue(aPropName, aValue);
     }
 
     /**
@@ -230,7 +324,8 @@ public class ColorButton extends View {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         XMLElement e = super.toXML(anArchiver);
-        if (getTitle()!=null && getTitle().length()>0) e.add("Title", getTitle());
+        if (getTitle() != null && getTitle().length() > 0)
+            e.add("Title", getTitle());
         return e;
     }
 
@@ -240,7 +335,8 @@ public class ColorButton extends View {
     public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
         super.fromXML(anArchiver, anElement);
-        if (anElement.hasAttribute("Title")) setTitle(anElement.getAttributeValue("Title"));
+        if (anElement.hasAttribute("Title"))
+            setTitle(anElement.getAttributeValue("Title"));
         return this;
     }
 
@@ -249,28 +345,42 @@ public class ColorButton extends View {
      */
     public class ColorBoxesPane extends View {
 
-        // Mouse x/y, Armed x/y
-        int  _mx = -1, _my = -1, _armx = -1, _army = -1;
+        // Mouse x/y
+        int  _mx = -1, _my = -1;
+
+        // Armed x/y
+        int _armx = -1, _army = -1;
 
         /** Creates new ColorBoxesPane. */
-        public ColorBoxesPane()  { setPrefSize(8*20,5*20); enableEvents(MouseEvents); }
+        public ColorBoxesPane()
+        {
+            setPrefSize(8*20,5*20);
+            enableEvents(MouseEvents);
+        }
 
         /** Paint ColorBoxesPane. */
         protected void paintFront(Painter aPntr)
         {
-            int mx = _mx, my = _my, armx = _armx, army = _army;
-            if (armx>=0 && (armx!=mx || army!=my)) { mx = my = armx = army = -1; }
-            for (int i=0;i<8;i++) for (int j=0;j<5;j++) {
-                if (i==armx && j==army) {
-                    aPntr.setColor(Color.GRAY);
-                    aPntr.fillRect(i*20+1,j*20+1,18,18);
+            int mx = _mx, my = _my;
+            int armx = _armx, army = _army;
+            if (armx >= 0 && (armx != mx || army != my)) {
+                mx = my = armx = army = -1;
+            }
+
+            for (int i=0; i<8; i++) {
+                for (int j = 0; j < 5; j++) {
+                    if (i == armx && j == army) {
+                        aPntr.setColor(Color.GRAY);
+                        aPntr.fillRect(i * 20 + 1, j * 20 + 1, 18, 18);
+                    }
+
+                    aPntr.setColor(_colors[i + j * 8]);
+                    aPntr.fillRect(i * 20 + 4, j * 20 + 4, 12, 12);
+                    aPntr.setColor(Color.BLACK);
+                    aPntr.drawRect(i * 20 + 4.5, j * 20 + 4.5, 11, 11);
+                    if (i == mx && j == my)
+                        aPntr.drawRect(i * 20 + 1.5, j * 20 + 1.5, 17, 17);
                 }
-                aPntr.setColor(_colors[i+j*8]);
-                aPntr.fillRect(i*20+4,j*20+4,12,12);
-                aPntr.setColor(Color.BLACK);
-                aPntr.drawRect(i*20+4.5,j*20+4.5,11,11);
-                if (i==mx && j==my)
-                    aPntr.drawRect(i*20+1.5,j*20+1.5,17,17);
             }
         }
 
@@ -278,18 +388,36 @@ public class ColorButton extends View {
         protected void processEvent(ViewEvent anEvent)
         {
             if (anEvent.isMouseMove()) {
-                _mx = (int)anEvent.getX()/20; _my = (int)anEvent.getY()/20; repaint(); }
+                _mx = (int) anEvent.getX()/20;
+                _my = (int) anEvent.getY()/20;
+                repaint();
+            }
+
             if (anEvent.isMouseExit()) {
-                _mx = _my = -1; repaint(); }
+                _mx = _my = -1; repaint();
+            }
+
             if (anEvent.isMousePress()) {
-                _armx = (int)anEvent.getX()/20; _army = (int)anEvent.getY()/20; repaint(); }
+                _armx = (int) anEvent.getX()/20;
+                _army = (int) anEvent.getY()/20;
+                repaint();
+            }
             if (anEvent.isMouseDrag()) {
-                _mx = (int)anEvent.getX()/20; _my = (int)anEvent.getY()/20; repaint(); }
+                _mx = (int) anEvent.getX()/20;
+                _my = (int) anEvent.getY()/20;
+                repaint();
+            }
+
             if (anEvent.isMouseRelease()) {
-                int mx = (int)anEvent.getX()/20, my = (int)anEvent.getY()/20;
-                if (_armx==mx && _army==my) {
-                    setColor(_colors[_armx+_army*8]); fire(null); getPopup().hide(); }
-                _mx = _my = _armx = _army = -1; repaint();
+                int mx = (int) anEvent.getX()/20;
+                int my = (int) anEvent.getY()/20;
+                if (_armx == mx && _army == my) {
+                    setColor(_colors[_armx+_army*8]);
+                    fire(null);
+                    getPopup().hide();
+                }
+                _mx = _my = _armx = _army = -1;
+                repaint();
             }
         }
     }
