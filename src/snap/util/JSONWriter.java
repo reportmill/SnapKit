@@ -26,7 +26,11 @@ public class JSONWriter {
     /**
      * Sets the current indent string.
      */
-    public JSONWriter setIndent(String anIndent)  { _indent = anIndent; return this; }
+    public JSONWriter setIndent(String anIndent)
+    {
+        _indent = anIndent;
+        return this;
+    }
 
     /**
      * Returns whether writer compacts JSON (no indent or newline).
@@ -36,17 +40,28 @@ public class JSONWriter {
     /**
      * Sets whether writer compacts JSON (no indent or newline).
      */
-    public JSONWriter setCompacted(boolean aValue)  { _compacted = aValue; return this; }
+    public JSONWriter setCompacted(boolean aValue)
+    {
+        _compacted = aValue;
+        return this;
+    }
 
     /**
      * Returns a string for given JSON node.
      */
-    public String getString(JSONNode aNode)  { return getStringBuffer(aNode).toString(); }
+    public String getString(JSONNode aNode)
+    {
+        return getStringBuffer(aNode).toString();
+    }
 
     /**
      * Returns a string buffer for given JSON node.
      */
-    public StringBuffer getStringBuffer(JSONNode aNode)  { return append(new StringBuffer(1024), aNode); }
+    public StringBuffer getStringBuffer(JSONNode aNode)
+    {
+        StringBuffer sb = new StringBuffer(1024);
+        return append(sb, aNode);
+    }
 
     /**
      * Returns a string buffer for given JSON node.
@@ -55,7 +70,7 @@ public class JSONWriter {
     {
         // Append key
         String key = aNode.getKey();
-        if (key!=null) {
+        if (key != null) {
             aSB.append('"').append(key).append('"').append(':');
             if (aNode.isArray() || aNode.isObject())
                 aSB.append(' ');
@@ -72,25 +87,29 @@ public class JSONWriter {
 
                 // Append map opening
                 aSB.append('{');
-                if (deep) appendNewlineIndent(aSB, ++_indentLevel);
+                if (deep)
+                    appendNewlineIndent(aSB, ++_indentLevel);
                 else aSB.append(' ');
 
                 // Append keys, values and separators
                 List <JSONNode> nodes = aNode.getNodes();
-                for (int i=0, iMax=nodes.size(); i<iMax; i++) { JSONNode child = nodes.get(i);
+                for (int i=0, iMax=nodes.size(); i<iMax; i++) {
 
                     // Append child
+                    JSONNode child = nodes.get(i);
                     append(aSB, child);
 
                     // If has next, append separator and whitespace
-                    if (i+1<iMax) {
-                        if (deep) appendNewlineIndent(aSB.append(','));
+                    if (i+1 < iMax) {
+                        if (deep)
+                            appendNewlineIndent(aSB.append(','));
                         else aSB.append(", ");
                     }
                 }
 
                 // Append trailing whitespace and close
-                if (deep) appendNewlineIndent(aSB, --_indentLevel).append('}');
+                if (deep)
+                    appendNewlineIndent(aSB, --_indentLevel).append('}');
                 else aSB.append(" }");
 
             } break;
@@ -103,24 +122,30 @@ public class JSONWriter {
 
                 // Append list opening
                 aSB.append('[');
-                if (deep) appendNewlineIndent(aSB, ++_indentLevel);
+                if (deep)
+                    appendNewlineIndent(aSB, ++_indentLevel);
                 else aSB.append(' ');
 
                 // Iterate over items to append items and separators
-                for (int i=0, iMax=aNode.getNodeCount(); i<iMax; i++) { boolean hasNext = i+1<iMax;
+                int count = aNode.getNodeCount();
+                for (int i=0; i<count; i++) {
 
                     // Append item
-                    append(aSB, aNode.getNode(i));
+                    JSONNode item = aNode.getNode(i);
+                    append(aSB, item);
 
                     // If has next, append separator
+                    boolean hasNext = i+1 < count;
                     if (hasNext) {
-                        if (deep) appendNewlineIndent(aSB.append(','));
+                        if (deep)
+                            appendNewlineIndent(aSB.append(','));
                         else aSB.append(", ");
                     }
                 }
 
                 // Append trailing whitespace and close
-                if (deep) appendNewlineIndent(aSB, --_indentLevel).append(']');
+                if (deep)
+                    appendNewlineIndent(aSB, --_indentLevel).append(']');
                 else aSB.append(" ]");
 
             } break;
@@ -128,7 +153,8 @@ public class JSONWriter {
             // Handle String
             case String: {
                 aSB.append('"');
-                for (int i=0, iMax=aNode.getString().length(); i<iMax; i++) { char c = aNode.getString().charAt(i);
+                for (int i=0, iMax=aNode.getString().length(); i<iMax; i++) {
+                    char c = aNode.getString().charAt(i);
                     if (c=='"' || c=='\\' || c=='/') aSB.append('\\').append(c);
                     else if (c=='\b') aSB.append("\\b");
                     else if (c=='\f') aSB.append("\\f");
@@ -144,12 +170,14 @@ public class JSONWriter {
 
             // Handle Number
             case Number: {
-                Number num = aNode.getNumber(); String str = FormatUtils.formatNum("#.##", num);
-                aSB.append(str); break;
+                Number num = aNode.getNumber();
+                String str = FormatUtils.formatNum("#.##", num);
+                aSB.append(str);
+                break;
             }
 
             // Handle Boolean
-            case Boolean: aSB.append(aNode.getBoolean()? "true" : "false"); break;
+            case Boolean: aSB.append(aNode.getBoolean() ? "true" : "false"); break;
 
             // Handle Null
             case Null: aSB.append("null"); break;
@@ -162,7 +190,10 @@ public class JSONWriter {
     /**
      * Appends newline and indent.
      */
-    protected StringBuffer appendNewlineIndent(StringBuffer aSB)  { return appendNewlineIndent(aSB, _indentLevel); }
+    protected StringBuffer appendNewlineIndent(StringBuffer aSB)
+    {
+        return appendNewlineIndent(aSB, _indentLevel);
+    }
 
     /**
      * Appends newline and indent.

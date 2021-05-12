@@ -51,7 +51,7 @@ public class FormatUtils {
         String str = fmt.format(aNum);
 
         // TeaVM seem to have issues with: #.## and .977757? Fixed: https://github.com/konsoletyper/teavm/issues/557
-        if (SnapUtils.isTeaVM && str.indexOf(':') >= 0)
+        if (SnapUtils.isTeaVM && str.indexOf(':') >= 0 || str.equals("-"))
             return String.valueOf(aNum);
 
         // Return string
