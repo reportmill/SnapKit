@@ -207,20 +207,22 @@ public class ArrayUtils {
     /**
      * Returns whether two byte arrays are equal.
      */
-    public static boolean equals(byte array1[], byte array2[])
+    public static boolean equals(byte[] array1, byte[] array2)
     {
-        if (array1==array2) return true;
-        if (array1==null || array2==null || array1.length!=array2.length) return false;
+        if (array1 == array2) return true;
+        if (array1 == null || array2 == null || array1.length != array2.length)
+            return false;
         return equals(array1, array2, array1.length);
     }
 
     /**
      * Returns whether two byte arrays are equal to the given length.
      */
-    public static boolean equals(byte array1[], byte array2[], int length)
+    public static boolean equals(byte[] array1, byte[] array2, int length)
     {
-        if (array1==array2) return true;
-        if (array1==null || array2==null || array1.length<length || array2.length<length) return false;
+        if (array1 == array2) return true;
+        if (array1 == null || array2 == null || array1.length < length || array2.length < length)
+            return false;
         for (int i=0; i<length; i++)
             if (array1[i] != array2[i])
                 return false;
@@ -230,71 +232,79 @@ public class ArrayUtils {
     /**
      * Returns whether two float arrays are equal.
      */
-    public static boolean equals(float array1[], float array2[])
+    public static boolean equals(float[] array1, float[] array2)
     {
-        if (array1==array2) return true;
-        if (array1==null || array2==null || array1.length!=array2.length) return false;
+        if (array1 == array2) return true;
+        if (array1 == null || array2 == null || array1.length != array2.length)
+            return false;
         return equals(array1, array2, array1.length);
     }
 
     /**
      * Returns whether two float arrays are equal to the given length.
      */
-    public static boolean equals(float array1[], float array2[], int length)
+    public static boolean equals(float[] array1, float[] array2, int length)
     {
-        if (array1==array2) return true;
-        if (array1==null || array2==null || array1.length<length || array2.length<length) return false;
-        for (int i=0; i<length; i++) if (array1[i] != array2[i]) return false;
+        if (array1 == array2) return true;
+        if (array1 == null || array2 == null || array1.length < length || array2.length < length)
+            return false;
+        for (int i=0; i<length; i++)
+            if (array1[i] != array2[i])
+                return false;
         return true;
     }
 
     /**
      * Returns whether two double arrays are equal.
      */
-    public static boolean equals(double array1[], double array2[])
+    public static boolean equals(double[] array1, double[] array2)
     {
-        if (array1==array2) return true;
-        if (array1==null || array2==null || array1.length!=array2.length) return false;
+        if (array1 == array2) return true;
+        if (array1 == null || array2 == null || array1.length != array2.length)
+            return false;
         return equals(array1, array2, array1.length);
     }
 
     /**
      * Returns whether two float arrays are equal to the given length.
      */
-    public static boolean equals(double array1[], double array2[], int length)
+    public static boolean equals(double[] array1, double[] array2, int length)
     {
-        if (array1==array2) return true;
-        if (array1==null || array2==null || array1.length<length || array2.length<length) return false;
-        for (int i=0; i<length; i++) if (array1[i] != array2[i]) return false;
+        if (array1 == array2) return true;
+        if (array1 == null || array2 == null || array1.length < length || array2.length < length)
+            return false;
+        for (int i=0; i<length; i++)
+            if (array1[i] != array2[i])
+                return false;
         return true;
     }
 
     /**
      * Returns a double array for given floats.
      */
-    public static double[] getDoubles(float theFloats[])
+    public static double[] doubleArray(float[] theFloats)
     {
-        if (theFloats==null) return null;
-        double d[] = new double[theFloats.length];
-        for (int i=0; i<theFloats.length; i++) d[i] = theFloats[i];
-        return d;
+        if (theFloats == null) return null;
+        double[] doubleArray = new double[theFloats.length];
+        for (int i=0; i<theFloats.length; i++) doubleArray[i] = theFloats[i];
+        return doubleArray;
     }
 
     /**
      * Returns a float array for given doubles.
      */
-    public static float[] getFloats(double theDoubles[])
+    public static float[] floatArray(double[] theDoubles)
     {
         if (theDoubles==null) return null;
-        float f[] = new float[theDoubles.length];
-        for (int i=0; i<theDoubles.length; i++) f[i] = (float)theDoubles[i];
-        return f;
+        float[] floatArray = new float[theDoubles.length];
+        for (int i=0; i<theDoubles.length; i++) floatArray[i] = (float) theDoubles[i];
+        return floatArray;
     }
 
     /**
      * Returns the index of the given object in the given array.
      */
-    public static int indexOf(Object anArray[], Object anObj)
+    public static int indexOf(Object[] anArray, Object anObj)
     {
         for (int i=0, iMax=anArray.length; i<iMax; i++)
             if (anArray[i].equals(anObj))
@@ -305,15 +315,18 @@ public class ArrayUtils {
     /**
      * Returns whether the given array contains the given object.
      */
-    public static boolean contains(Object anArray[], Object anObj)  { return indexOf(anArray, anObj)>=0; }
+    public static boolean contains(Object[] anArray, Object anObj)
+    {
+        return indexOf(anArray, anObj) >= 0;
+    }
 
     /**
      * Returns the index of the given object in the given array using "==" instead of equals.
      */
-    public static <T> int indexOfId(T anArray[], T aValue)
+    public static <T> int indexOfId(T[] anArray, T aValue)
     {
         for (int i=0, iMax=length(anArray); i<iMax; i++)
-            if (anArray[i]==aValue)
+            if (anArray[i] == aValue)
                 return i;
         return -1;
     }
@@ -321,7 +334,10 @@ public class ArrayUtils {
     /**
      * Returns whether the given array contains the identical given object.
      */
-    public static <T> boolean containsId(T anArray[], T aValue)  { return indexOfId(anArray, aValue)>=0; }
+    public static <T> boolean containsId(T[] anArray, T aValue)
+    {
+        return indexOfId(anArray, aValue) >= 0;
+    }
 
     /**
      * Returns a copy of given range of given array (this method is in Java 6 Arrays class).
@@ -329,7 +345,7 @@ public class ArrayUtils {
     public static int[] copyOfRange(int[] anArray, int from, int to)
     {
         int newLength = to - from;
-        if (newLength<0) throw new IllegalArgumentException(from + " > " + to);
+        if (newLength < 0) throw new IllegalArgumentException(from + " > " + to);
         int[] copy = new int[newLength];
         System.arraycopy(anArray, from, copy, 0, Math.min(anArray.length - from, newLength));
         return copy;
@@ -338,8 +354,12 @@ public class ArrayUtils {
     /**
      * Reverse and array.
      */
-    public static void reverse(Object anArray[])
+    public static void reverse(Object[] anArray)
     {
-        for (int i=0, j=anArray.length-1; i<j; i++, j--) { Object t = anArray[i]; anArray[i] = anArray[j]; anArray[j] = t; }
+        for (int i=0, j=anArray.length-1; i<j; i++, j--) {
+            Object temp = anArray[i];
+            anArray[i] = anArray[j];
+            anArray[j] = temp;
+        }
     }
 }

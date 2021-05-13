@@ -239,38 +239,78 @@ public class XMLElement implements Cloneable {
     }
 
     /**
+     * Returns child element list size.
+     */
+    public int size()
+    {
+        return getElementCount();
+    }
+
+    /**
+     * Returns the specific child element at the given index.
+     */
+    public XMLElement get(int anIndex)
+    {
+        return getElement(anIndex);
+    }
+
+    /**
+     * Returns the first child element with the given name.
+     */
+    public XMLElement get(String aName)
+    {
+        return getElement(aName);
+    }
+
+    /**
      * Returns the number of child elements.
      */
-    public int getElementCount()  { return _elements==null ? 0 : _elements.size(); }
+    public int getElementCount()
+    {
+        return _elements == null ? 0 : _elements.size();
+    }
 
     /**
      * Returns the individual element at given index.
      */
-    public XMLElement getElement(int anIndex)  { return _elements.get(anIndex); }
+    public XMLElement getElement(int anIndex)
+    {
+        return _elements.get(anIndex);
+    }
 
     /**
      * Returns the list of elements.
      */
-    public List <XMLElement> getElements()
+    public List<XMLElement> getElements()
     {
-        if (_elements!=null) return _elements;
+        if (_elements != null) return _elements;
         return _elements = new ArrayList<>();
     }
 
     /**
      * Adds given element to elements list.
      */
-    public void addElement(XMLElement anElement)  { addElement(anElement, getElementCount()); }
+    public void addElement(XMLElement anElement)
+    {
+        addElement(anElement, getElementCount());
+    }
 
     /**
      * Adds given element to elements list at given index.
      */
-    public void addElement(XMLElement anElement, int anIndex)  { getElements().add(anIndex, anElement); }
+    public void addElement(XMLElement anElement, int anIndex)
+    {
+        List<XMLElement> elements = getElements();
+        elements.add(anIndex, anElement);
+    }
 
     /**
      * Removes element at given index.
      */
-    public XMLElement removeElement(int anIndex)  { return _elements.remove(anIndex); }
+    public XMLElement removeElement(int anIndex)
+    {
+        return _elements.remove(anIndex);
+    }
 
     /**
      * Removes given element.
@@ -278,14 +318,18 @@ public class XMLElement implements Cloneable {
     public int removeElement(XMLElement anElement)
     {
         int index = getElementIndex(anElement);
-        if (index>=0) removeElement(index);
+        if (index >= 0)
+            removeElement(index);
         return index;
     }
 
     /**
      * Returns the index of the given element.
      */
-    public int getElementIndex(XMLElement anElement)  { return ListUtils.indexOfId(getElements(), anElement); }
+    public int getElementIndex(XMLElement anElement)
+    {
+        return ListUtils.indexOfId(getElements(), anElement);
+    }
 
     /**
      * Returns the number of child elements with the given name.
@@ -327,16 +371,17 @@ public class XMLElement implements Cloneable {
     public XMLElement removeElement(String aName)
     {
         XMLElement e = getElement(aName);
-        if (e!=null) removeElement(e);
+        if (e != null)
+            removeElement(e);
         return e;
     }
 
     /**
      * Returns the list of child elements with given name.
      */
-    public List <XMLElement> getElements(String aName)
+    public List<XMLElement> getElements(String aName)
     {
-        List <XMLElement> elements = new ArrayList<>();
+        List<XMLElement> elements = new ArrayList<>();
         for (int i=0, iMax=getElementCount(); i<iMax; i++)
             if (equals(getElement(i).getName(), aName))
                 elements.add(getElement(i));
@@ -346,9 +391,9 @@ public class XMLElement implements Cloneable {
     /**
      * Removes elements for given element name.
      */
-    public List <XMLElement> removeElements(String aName)
+    public List<XMLElement> removeElements(String aName)
     {
-        List <XMLElement> elements = getElements(aName);
+        List<XMLElement> elements = getElements(aName);
         for (XMLElement e : elements) removeElement(e);
         return elements;
     }
@@ -368,8 +413,8 @@ public class XMLElement implements Cloneable {
      */
     public String getAttributeValue(String aName, String defaultValue)
     {
-        XMLAttribute a = getAttribute(aName);
-        return a==null ? defaultValue : a.getValue();
+        XMLAttribute attr = getAttribute(aName);
+        return attr == null ? defaultValue : attr.getValue();
     }
 
     /**
@@ -382,8 +427,8 @@ public class XMLElement implements Cloneable {
      */
     public boolean getAttributeBoolValue(String aName, boolean defaultValue)
     {
-        XMLAttribute a = getAttribute(aName);
-        return a==null ? defaultValue : a.getValue().equals("true");
+        XMLAttribute attr = getAttribute(aName);
+        return attr == null ? defaultValue : attr.getValue().equals("true");
     }
 
     /**
@@ -396,36 +441,42 @@ public class XMLElement implements Cloneable {
      */
     public Boolean getAttributeBooleanValue(String aName, Boolean defaultValue)
     {
-        XMLAttribute a = getAttribute(aName);
-        return a!=null ? a.getValue().equals("true") : defaultValue;
+        XMLAttribute attr = getAttribute(aName);
+        return attr != null ? attr.getValue().equals("true") : defaultValue;
     }
 
     /**
      * Returns the int value for the given attribute name.
      */
-    public int getAttributeIntValue(String aName)  { return getAttributeIntValue(aName, 0); }
+    public int getAttributeIntValue(String aName)
+    {
+        return getAttributeIntValue(aName, 0);
+    }
 
     /**
      * Returns the int value for the given attribute name (or the given default value, if name not found).
      */
     public int getAttributeIntValue(String aName, int defaultValue)
     {
-        XMLAttribute a = getAttribute(aName);
-        return a==null ? defaultValue : a.getIntValue();
+        XMLAttribute attr = getAttribute(aName);
+        return attr == null ? defaultValue : attr.getIntValue();
     }
 
     /**
      * Returns the float value for the given attribute name.
      */
-    public float getAttributeFloatValue(String aName)  { return getAttributeFloatValue(aName, 0); }
+    public float getAttributeFloatValue(String aName)
+    {
+        return getAttributeFloatValue(aName, 0);
+    }
 
     /**
      * Returns the float value for the given attribute name (or the given default value, if name not found).
      */
     public float getAttributeFloatValue(String aName, float defaultValue)
     {
-        XMLAttribute a = getAttribute(aName);
-        return a==null ? defaultValue : a.getFloatValue();
+        XMLAttribute attr = getAttribute(aName);
+        return attr == null ? defaultValue : attr.getFloatValue();
     }
 
     /**
@@ -438,22 +489,25 @@ public class XMLElement implements Cloneable {
      */
     public double getAttributeDoubleValue(String aName, double defaultValue)
     {
-        XMLAttribute a = getAttribute(aName);
-        return a==null ? defaultValue : a.getFloatValue();
+        XMLAttribute attr = getAttribute(aName);
+        return attr == null ? defaultValue : attr.getFloatValue();
     }
 
     /**
      * Returns the Number value for the given attribute name.
      */
-    public Number getAttributeNumberValue(String aName)  { return getAttributeNumberValue(aName, new Integer(0)); }
+    public Number getAttributeNumberValue(String aName)
+    {
+        return getAttributeNumberValue(aName, 0);
+    }
 
     /**
      * Returns the Number value for the given attribute name (or the given default value, if name not found).
      */
     public Number getAttributeNumberValue(String aName, Number defaultValue)
     {
-        XMLAttribute a = getAttribute(aName);
-        return a==null ? defaultValue : a.getNumberValue();
+        XMLAttribute attr = getAttribute(aName);
+        return attr == null ? defaultValue : attr.getNumberValue();
     }
 
     /**
@@ -461,64 +515,61 @@ public class XMLElement implements Cloneable {
      */
     public Enum getAttributeEnumValue(String aName, Class enumClass, Enum defaultValue)
     {
-        XMLAttribute a = getAttribute(aName);
-        return a==null ? defaultValue : Enum.valueOf(enumClass, a.getValue());
+        XMLAttribute attr = getAttribute(aName);
+        return attr == null ? defaultValue : Enum.valueOf(enumClass, attr.getValue());
     }
 
     /**
      * Adds a new attribute with the given name and string value.
      */
-    public XMLElement add(String aName, String aValue)  { return add(new XMLAttribute(aName, aValue)); }
+    public XMLElement add(String aName, String aValue)
+    {
+        return add(new XMLAttribute(aName, aValue));
+    }
 
     /**
      * Adds a new attribute with the given name using the object's toString() method.
      */
-    public XMLElement add(String aName, Object aValue)  { return add(aName, aValue.toString()); }
+    public XMLElement add(String aName, Object aValue)
+    {
+        return add(aName, aValue.toString());
+    }
 
     /**
      * Adds a new attribute with the given name and boolean value.
      */
-    public XMLElement add(String aName, boolean aValue)  { return add(new XMLAttribute(aName, aValue)); }
+    public XMLElement add(String aName, boolean aValue)
+    {
+        XMLAttribute attr = new XMLAttribute(aName, aValue);
+        return add(attr);
+    }
 
     /**
      * Adds a new attribute with the given name and Boolean value.
      */
-    public XMLElement add(String aName, Boolean aValue)  { return add(new XMLAttribute(aName, aValue)); }
+    public XMLElement add(String aName, Boolean aValue)
+    {
+        XMLAttribute attr = new XMLAttribute(aName, aValue);
+        return add(attr);
+    }
 
     /**
      * Adds a new attribute with the given name and int value.
      */
-    public XMLElement add(String aName, int aValue)  { return add(new XMLAttribute(aName, aValue)); }
+    public XMLElement add(String aName, int aValue)
+    {
+        XMLAttribute attr = new XMLAttribute(aName, aValue);
+        return add(attr);
+    }
 
     /**
      * Adds a new attribute with the given name and float value.
      */
-    public XMLElement add(String aName, double aValue)  { return add(new XMLAttribute(aName, aValue)); }
-
-    /**
-     * Returns child element list size.
-     */
-    public int size()  { return getElementCount(); }
-
-    /**
-     * Returns the specific child element at the given index.
-     */
-    public XMLElement get(int anIndex)  { return getElement(anIndex); }
-
-    /**
-     * Returns the first child element with the given name.
-     */
-    public XMLElement get(String aName)  { return getElement(aName); }
-
-    /**
-     * Returns the index of the first child element with the given name.
-     */
-    public int indexOf(String aName)  { return getElementIndex(aName, 0); }
-
-    /**
-     * Returns the index of the first child element with the given name at or beyond the given index.
-     */
-    public int indexOf(String aName, int startIndex)  { return getElementIndex(aName, startIndex); }
+    public XMLElement add(String aName, double aValue)
+    {
+        XMLAttribute attr = new XMLAttribute(aName, aValue);
+        return add(attr);
+    }
 
     /**
      * Adds the given attribute to this element's list of attributes.
@@ -550,6 +601,22 @@ public class XMLElement implements Cloneable {
         // Add all child elements
         for (int i=0, iMax=anElement.getElementCount(); i<iMax; i++)
             addElement(anElement.getElement(i));
+    }
+
+    /**
+     * Returns the index of the first child element with the given name.
+     */
+    public int indexOf(String aName)
+    {
+        return getElementIndex(aName, 0);
+    }
+
+    /**
+     * Returns the index of the first child element with the given name at or beyond the given index.
+     */
+    public int indexOf(String aName, int startIndex)
+    {
+        return getElementIndex(aName, startIndex);
     }
 
     /**

@@ -3,29 +3,30 @@
  */
 package snap.gfx;
 import snap.util.*;
+import java.util.Objects;
 
 /**
  * A class to describe strokes.
  */
-public class Stroke implements Cloneable {
+public class Stroke implements Cloneable, XMLArchiver.Archivable {
     
     // The stroke width
-    private double  _width = 1;
+    private double  _width = DEFAULT_WIDTH;
     
     // The cap - how a stroke renders endpoints
-    private Cap  _cap = Cap.Butt;
+    private Cap  _cap = DEFAULT_CAP;
     
     // The join - how a stroke renders the join between two segements
-    private Join  _join = Join.Miter;
+    private Join  _join = DEFAULT_JOIN;
     
     // The limit to miter joins
-    private double  _miterLitmit = 10;
+    private double  _miterLimit = DEFAULT_MITER_LIMIT;
     
     // The dash array
-    private double  _dashArray[];
+    private double[]  _dashArray = DEFAULT_DASH_ARRAY;
     
     // The dash offset
-    private double  _dashOffset = 0;
+    private double  _dashOffset = DEFAULT_DASH_OFFSET;
     
     // Constants for cap
     public enum Cap { Butt, Round, Square }
@@ -38,6 +39,22 @@ public class Stroke implements Cloneable {
     public static final Stroke StrokeRound2 = new Stroke(2, Cap.Round, Join.Round, 0);
     public static final Stroke StrokeDash1 = new Stroke(1, new double[] { 2,2 }, 0);
 
+    // Constants for properties
+    public static final String Width_Prop = "Width";
+    public static final String Cap_Prop = "Cap";
+    public static final String Join_Prop = "Join";
+    public static final String MiterLimit_Prop = "MiterLimit";
+    public static final String DashArray_Prop = "DashArray";
+    public static final String DashOffset_Prop = "DashOffset";
+
+    // Constants for property defaults
+    public static final double DEFAULT_WIDTH = 1;
+    public static final Cap DEFAULT_CAP = Cap.Butt;
+    public static final Join DEFAULT_JOIN = Join.Miter;
+    public static final double DEFAULT_MITER_LIMIT = 10;
+    public static final double[] DEFAULT_DASH_ARRAY = null;
+    public static final double DEFAULT_DASH_OFFSET = 0;
+
     /**
      * Creates a plain, black stroke.
      */
@@ -48,40 +65,53 @@ public class Stroke implements Cloneable {
      */
     public Stroke(double aWidth)
     {
-        _width = aWidth; _cap = Cap.Round;
+        _width = aWidth;
+        _cap = Cap.Round;
     }
 
     /**
-     * Creates a stroke with the given line width, dash array and phase.
+     * Creates a stroke with the given line width, cap, joint, miter-limit.
      */
     public Stroke(double aWidth, Cap aCap, Join aJoin, double aMiterLimit)
     {
-        _width = aWidth; _cap = aCap; _join = aJoin; _miterLitmit = aMiterLimit;
+        this(aWidth, aCap, aJoin, aMiterLimit, DEFAULT_DASH_ARRAY, DEFAULT_DASH_OFFSET);
     }
 
     /**
-     * Creates a stroke with the given line width, dash array and phase.
+     * Creates a stroke with the given line width, dash array and offset.
      */
-    public Stroke(double aWidth, float aDashAry[], float aDashPhase)
+    public Stroke(double aWidth, float[] aDashAry, float aDashOffset)
     {
-        _width = aWidth; _dashArray = ArrayUtils.getDoubles(aDashAry); _dashOffset = aDashPhase;
+        this(aWidth, ArrayUtils.doubleArray(aDashAry), aDashOffset);
     }
 
     /**
-     * Creates a stroke with the given line width, dash array and phase.
+     * Creates a stroke with the given line width, dash array and offset.
      */
-    public Stroke(double aWidth, Cap aCap, Join aJoin, double aMiterLimit, float aDashAry[], float aDashPhase)
+    public Stroke(double aWidth, double[] aDashAry, double aDashOffset)
     {
-        _width = aWidth; _cap = aCap; _join = aJoin; _miterLitmit = aMiterLimit;
-        _dashArray = ArrayUtils.getDoubles(aDashAry); _dashOffset = aDashPhase;
+        this(aWidth, DEFAULT_CAP, DEFAULT_JOIN, DEFAULT_MITER_LIMIT, aDashAry, aDashOffset);
     }
 
     /**
-     * Creates a stroke with the given line width, dash array and phase.
+     * Creates a stroke with the given line width, dash array and offset.
      */
-    public Stroke(double aWidth, double aDashAry[], double aDashPhase)
+    public Stroke(double aWidth, Cap aCap, Join aJoin, double aMiterLimit, float[] aDashAry, float aDashOffset)
     {
-        _width = aWidth; _dashArray = aDashAry; _dashOffset = aDashPhase;
+        this(aWidth, aCap, aJoin, aMiterLimit, ArrayUtils.doubleArray(aDashAry), aDashOffset);
+    }
+
+    /**
+     * Creates a stroke with the given line width, dash array and offset.
+     */
+    public Stroke(double aWidth, Cap aCap, Join aJoin, double aMiterLimit, double[] aDashAry, double aDashOffset)
+    {
+        _width = aWidth;
+        _cap = aCap;
+        _join = aJoin;
+        _miterLimit = aMiterLimit;
+        _dashArray = aDashAry;
+        _dashOffset = aDashOffset;
     }
 
     /**
@@ -102,52 +132,12 @@ public class Stroke implements Cloneable {
     /**
      * Returns the limit to miter joins.
      */
-    public double getMiterLimit()  { return _miterLitmit; }
+    public double getMiterLimit()  { return _miterLimit; }
 
     /**
      * Returns the dash array for this stroke.
      */
     public double[] getDashArray()  { return _dashArray; }
-
-    /**
-     * Returns the dash array for this stroke as a string.
-     */
-    public String getDashArrayString()
-    {
-        return getDashArrayString(getDashArray(), ", ");
-    }
-
-    /**
-     * Returns a dash array for given dash array string and delimeter.
-     */
-    public static double[] getDashArray(String aString, String aDelimeter)
-    {
-        // Just return null if empty
-        if (aString==null || aString.length()==0) return null;
-
-        String dashStrings[] = aString.split(",");
-        double dashArray[] = new double[dashStrings.length];
-        for (int i=0; i<dashStrings.length; i++)
-            dashArray[i] = SnapUtils.floatValue(dashStrings[i]);
-        return dashArray;
-    }
-
-    /**
-     * Returns the dash array for this stroke as a string.
-     */
-    public static String getDashArrayString(double dashArray[], String aDelimiter)
-    {
-        // Just return null if empty
-        if (dashArray==null || dashArray.length==0) return null;
-
-        // Build dash array string
-        String dashArrayString = SnapUtils.stringValue(dashArray[0]);
-        for (int i=1; i<dashArray.length; i++)
-            dashArrayString += aDelimiter + SnapUtils.stringValue(dashArray[i]);
-
-        // Return dash array string
-        return dashArrayString;
-    }
 
     /**
      * Returns the dash offset.
@@ -160,7 +150,9 @@ public class Stroke implements Cloneable {
     public Stroke copyForWidth(double aWidth)
     {
         if (_width==aWidth) return this;
-        Stroke clone = clone(); clone._width = aWidth; return clone;
+        Stroke clone = clone();
+        clone._width = aWidth;
+        return clone;
     }
 
     /**
@@ -168,7 +160,9 @@ public class Stroke implements Cloneable {
      */
     public Stroke copyForDashes(double ... theDashAry)
     {
-        Stroke clone = clone(); clone._dashArray = theDashAry; return clone;
+        Stroke clone = clone();
+        clone._dashArray = theDashAry;
+        return clone;
     }
 
     /**
@@ -176,7 +170,9 @@ public class Stroke implements Cloneable {
      */
     public Stroke copyForDashOffset(double anOffset)
     {
-        Stroke clone = clone(); clone._dashOffset = anOffset; return clone;
+        Stroke clone = clone();
+        clone._dashOffset = anOffset;
+        return clone;
     }
 
     /**
@@ -185,14 +181,28 @@ public class Stroke implements Cloneable {
     public boolean equals(Object anObj)
     {
         // Check identity and get other
-        if (anObj==this) return true;
-        Stroke other = anObj instanceof Stroke? (Stroke)anObj : null; if (other==null) return false;
+        if (anObj == this) return true;
+        Stroke other = anObj instanceof Stroke ? (Stroke) anObj : null;
+        if (other == null) return false;
 
-        // Check Width, DashArray, DashPhase
-        if (!MathUtils.equals(other._width, _width)) return false;
-        if (!ArrayUtils.equals(other._dashArray, _dashArray)) return false;
-        if (other._dashOffset!=_dashOffset) return false;
-        return true; // Return true since all checks passed
+        // Check Width, Cap, Join, MiterLimit
+        if (!MathUtils.equals(other._width, _width))
+            return false;
+        if (other._cap != _cap)
+            return false;
+        if (other._join != _join)
+            return false;
+        if (!MathUtils.equals(other._miterLimit, _miterLimit))
+            return false;
+
+        // Check DashArray, DashPhase
+        if (!ArrayUtils.equals(other._dashArray, _dashArray))
+            return false;
+        if (other._dashOffset != _dashOffset)
+            return false;
+
+        // Return true since all checks passed
+        return true;
     }
 
     /**
@@ -205,12 +215,73 @@ public class Stroke implements Cloneable {
     }
 
     /**
+     * Standard toString implementation.
+     */
+    public String toString()
+    {
+        String str = toXML(null).getString();
+        return str;
+    }
+
+    /**
+     * XML Archival.
+     */
+    public XMLElement toXML(XMLArchiver anArchiver)
+    {
+        // Create xml element
+        XMLElement e = new XMLElement("Stroke");
+
+        // Archive Width, Cap, Join, MiterLimit
+        e.add(Width_Prop, getWidth());
+        if (getCap() != DEFAULT_CAP)
+            e.add(Cap_Prop, getCap());
+        if (getJoin() != DEFAULT_JOIN)
+            e.add(Join_Prop, getJoin());
+        if (getMiterLimit() != DEFAULT_MITER_LIMIT)
+            e.add(Join_Prop, getJoin());
+
+        // Archive DashArray, DashOffset
+        if (!Objects.equals(getDashArray(), DEFAULT_DASH_ARRAY))
+            e.add(DashArray_Prop, getDashArrayString(this));
+        if (getDashOffset() != DEFAULT_DASH_OFFSET)
+            e.add(DashOffset_Prop, getDashOffset());
+
+        // Return xml
+        return e;
+    }
+
+    /**
+     * XML Unarchival.
+     */
+    public Stroke fromXML(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        // Unarchive Width, Cap, Join, MiterLimit
+        if(anElement.hasAttribute(Width_Prop))
+            _width = anElement.getAttributeDoubleValue(Width_Prop);
+        if(anElement.hasAttribute(Cap_Prop))
+            _cap = Cap.valueOf(anElement.getAttributeValue(Cap_Prop));
+        if(anElement.hasAttribute(Join_Prop))
+            _join = Join.valueOf(anElement.getAttributeValue(Join_Prop));
+        if(anElement.hasAttribute(MiterLimit_Prop))
+            _miterLimit = anElement.getAttributeDoubleValue(MiterLimit_Prop);
+
+        // Unarchive DashArray, DashOffset
+        if(anElement.hasAttribute(DashArray_Prop))
+            _dashArray = getDashArray(anElement.getAttributeValue(DashArray_Prop));
+        if(anElement.hasAttribute(DashOffset_Prop))
+            _dashOffset = anElement.getAttributeDoubleValue(DashOffset_Prop);
+
+        // Return this stroke
+        return this;
+    }
+
+    /**
      * Returns a stroke for given line width.
      */
     public static Stroke getStroke(double aLineWidth)
     {
-        if (aLineWidth==1) return Stroke1;
-        if (aLineWidth==2) return Stroke2;
+        if (aLineWidth == 1) return Stroke1;
+        if (aLineWidth == 2) return Stroke2;
         return new Stroke(aLineWidth);
     }
 
@@ -219,8 +290,8 @@ public class Stroke implements Cloneable {
      */
     public static Stroke getStrokeRound(double aLineWidth)
     {
-        if (aLineWidth==1) return StrokeRound1;
-        if (aLineWidth==2) return StrokeRound2;
+        if (aLineWidth == 1) return StrokeRound1;
+        if (aLineWidth == 2) return StrokeRound2;
         return StrokeRound1.copyForWidth(aLineWidth);
     }
 
@@ -229,21 +300,33 @@ public class Stroke implements Cloneable {
      */
     public static String getDashArrayString(Stroke aStroke)
     {
-        double dashes[] = aStroke!=null ? aStroke.getDashArray() : null;
+        double[] dashes = aStroke!=null ? aStroke.getDashArray() : null;
         return getDashArrayString(dashes);
     }
 
     /**
      * Returns the dash array for this stroke as a string.
      */
-    private static String getDashArrayString(double dashArray[])
+    private static String getDashArrayString(double[] dashArray)
     {
-        if (dashArray==null || dashArray.length==0) return null;
-        String dstring = SnapUtils.stringValue(dashArray[0]);
-        String delimiter = ", ";
+        return getDashArrayString(dashArray, ", ");
+    }
+
+    /**
+     * Returns the dash array for this stroke as a string.
+     */
+    public static String getDashArrayString(double[] dashArray, String aDelimiter)
+    {
+        // Just return null if empty
+        if (dashArray == null || dashArray.length == 0) return null;
+
+        // Build dash array string
+        String str = SnapUtils.stringValue(dashArray[0]);
         for (int i=1; i<dashArray.length; i++)
-            dstring += delimiter + SnapUtils.stringValue(dashArray[i]);
-        return dstring;
+            str += aDelimiter + SnapUtils.stringValue(dashArray[i]);
+
+        // Return dash array string
+        return str;
     }
 
     /**
@@ -252,10 +335,10 @@ public class Stroke implements Cloneable {
     public static double[] getDashArray(String aString)
     {
         // Just return null if empty
-        if (aString==null || aString.length()==0) return null;
+        if (aString == null || aString.length() == 0) return null;
 
-        String dashStrings[] = aString.split(",");
-        double dashArray[] = new double[dashStrings.length];
+        String[] dashStrings = aString.split(",");
+        double[] dashArray = new double[dashStrings.length];
         for (int i=0; i<dashStrings.length; i++)
             dashArray[i] = SnapUtils.doubleValue(dashStrings[i]);
         return dashArray;
