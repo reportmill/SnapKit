@@ -93,7 +93,11 @@ public class ShapeView extends View {
     /**
      * Sets whether to fill shape to view bounds.
      */
-    public void setFillSize(boolean aValue)  { setFillWidth(true); setFillHeight(true); }
+    public void setFillSize(boolean aValue)
+    {
+        setFillWidth(true);
+        setFillHeight(true);
+    }
 
     /**
      * Resizes view to shape size.
@@ -101,8 +105,10 @@ public class ShapeView extends View {
     public void sizeToShape()
     {
         Insets ins = getInsetsAll();
-        Shape shp = getShape(); double w = shp.getWidth() + ins.getWidth(), h = shp.getHeight() + ins.getHeight();
-        setSize(w, h);
+        Shape shape = getShape();
+        double shapeW = shape.getWidth() + ins.getWidth();
+        double shapeH = shape.getHeight() + ins.getHeight();
+        setSize(shapeW, shapeH);
     }
 
     /**

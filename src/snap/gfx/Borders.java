@@ -112,17 +112,26 @@ public class Borders {
         /**
          * Returns copy of this border with new color.
          */
-        public LineBorder copyForColor(Color aColor)  { LineBorder c = clone(); c._color = aColor; return c; }
+        public LineBorder copyForColor(Color aColor)
+        {
+            LineBorder c = clone(); c._color = aColor; return c;
+        }
 
         /**
          * Returns copy of this border with new stroke width.
          */
-        public LineBorder copyForStrokeWidth(double aWidth)  { return copyForStroke(getStroke().copyForWidth(aWidth)); }
+        public LineBorder copyForStrokeWidth(double aWidth)
+        {
+            return copyForStroke(getStroke().copyForWidth(aWidth));
+        }
 
         /**
          * Returns copy of this border with new stroke width.
          */
-        public LineBorder copyForStroke(Stroke aStroke)  { LineBorder c = clone(); c._stroke = aStroke; return c; }
+        public LineBorder copyForStroke(Stroke aStroke)
+        {
+            LineBorder c = clone(); c._stroke = aStroke; return c;
+        }
 
         /**
          * Override to return as LineBorder.

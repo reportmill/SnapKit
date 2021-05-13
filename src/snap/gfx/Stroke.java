@@ -3,7 +3,6 @@
  */
 package snap.gfx;
 import snap.util.*;
-import java.util.Objects;
 
 /**
  * A class to describe strokes.
@@ -32,13 +31,6 @@ public class Stroke implements Cloneable, XMLArchiver.Archivable {
     public enum Cap { Butt, Round, Square }
     public enum Join { Miter, Round, Bevel }
     
-    // Constant for common stroke
-    public static final Stroke Stroke1 = new Stroke();
-    public static final Stroke Stroke2 = new Stroke(2);
-    public static final Stroke StrokeRound1 = new Stroke(1, Cap.Round, Join.Round, 0);
-    public static final Stroke StrokeRound2 = new Stroke(2, Cap.Round, Join.Round, 0);
-    public static final Stroke StrokeDash1 = new Stroke(1, new double[] { 2,2 }, 0);
-
     // Constants for properties
     public static final String Width_Prop = "Width";
     public static final String Cap_Prop = "Cap";
@@ -55,10 +47,30 @@ public class Stroke implements Cloneable, XMLArchiver.Archivable {
     public static final double[] DEFAULT_DASH_ARRAY = null;
     public static final double DEFAULT_DASH_OFFSET = 0;
 
+    // Constants for dashes
+    public static final double[] DASH_SOLID = null;
+    public static final double[] DASH_DOT = new double[] { 4, 4 };
+    public static final double[] DASH_DASH = new double[] { 8, 8 };
+    public static final double[] DASH_LONG_DASH = new double[] { 12, 12 };
+    public static final double[] DASH_DASH_DOT = new double[] { 8, 4, 4, 4 };
+    public static final double[] DASH_LONG_DASH_DOT = new double[] { 12, 8, 4, 8 };
+    public static final String[] DASHES_ALL_NAMES = { "Solid", "Dot", "Dash", "LongDash", "DashDot", "LongDashDot" };
+    public static final double[][] DASHES_ALL = { DASH_SOLID, DASH_DOT, DASH_DASH, DASH_LONG_DASH, DASH_DASH_DOT, DASH_LONG_DASH_DOT };
+
+    // Constant for common strokes
+    public static final Stroke Stroke1 = new Stroke();
+    public static final Stroke Stroke2 = new Stroke(2);
+    public static final Stroke StrokeRound1 = new Stroke(1, Cap.Round, Join.Round, 0);
+    public static final Stroke StrokeRound2 = new Stroke(2, Cap.Round, Join.Round, 0);
+    public static final Stroke StrokeDash1 = new Stroke(1, new double[] { 2,2 }, 0);
+
     /**
      * Creates a plain, black stroke.
      */
-    public Stroke()  { }
+    public Stroke()
+    {
+        super();
+    }
 
     /**
      * Creates a stroke with the given line width.
@@ -149,9 +161,20 @@ public class Stroke implements Cloneable, XMLArchiver.Archivable {
      */
     public Stroke copyForWidth(double aWidth)
     {
-        if (_width==aWidth) return this;
+        if (aWidth == _width) return this;
         Stroke clone = clone();
         clone._width = aWidth;
+        return clone;
+    }
+
+    /**
+     * Returns a copy of this stroke with given width.
+     */
+    public Stroke copyForCap(Cap aCap)
+    {
+        if (aCap == _cap) return this;
+        Stroke clone = clone();
+        clone._cap = aCap;
         return clone;
     }
 
@@ -241,7 +264,7 @@ public class Stroke implements Cloneable, XMLArchiver.Archivable {
             e.add(Join_Prop, getJoin());
 
         // Archive DashArray, DashOffset
-        if (!Objects.equals(getDashArray(), DEFAULT_DASH_ARRAY))
+        if (!ArrayUtils.equals(getDashArray(), DEFAULT_DASH_ARRAY))
             e.add(DashArray_Prop, getDashArrayString(this));
         if (getDashOffset() != DEFAULT_DASH_OFFSET)
             e.add(DashOffset_Prop, getDashOffset());
@@ -327,6 +350,26 @@ public class Stroke implements Cloneable, XMLArchiver.Archivable {
 
         // Return dash array string
         return str;
+    }
+
+    /**
+     * Returns the dash array for this stroke as a string.
+     */
+    public static String getDashArrayNameOrString(double[] dashArray)
+    {
+        // Handle null/empty dash array
+        if (dashArray == null || dashArray.length == 0)
+            return "Solid";
+
+        // Handle dash array constants
+        for (int i=1; i<DASHES_ALL.length; i++) {
+            double[] constDashArray = DASHES_ALL[i];
+            if (ArrayUtils.equals(dashArray, constDashArray))
+                return DASHES_ALL_NAMES[i];
+        }
+
+        // Return explicit dash string (array not recognized as constant)
+        return getDashArrayString(dashArray);
     }
 
     /**

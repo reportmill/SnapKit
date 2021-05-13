@@ -78,6 +78,9 @@ public class ViewOwner implements EventListener {
     public ViewEvent.Type KeyEvents[] = { KeyPress, KeyRelease, KeyType };
     public ViewEvent.Type MouseEvents[] = { MousePress, MouseDrag, MouseRelease, MouseEnter, MouseMove, MouseExit };
     public ViewEvent.Type DragEvents[] = { DragEnter, DragExit, DragOver, DragDrop };
+
+    // Constants
+    private final View VIEW_NOT_FOUND_VIEW = new View();
     
     /**
      * Creates a new ViewOwner.
@@ -231,10 +234,10 @@ public class ViewOwner implements EventListener {
     {
         // If object is View, just return
         if (anObj instanceof View)
-            return (View)anObj;
+            return (View) anObj;
 
         // If object is String, try to find in UI hierarchy as name
-        if (anObj instanceof String) { String name = (String)anObj;
+        if (anObj instanceof String) { String name = (String) anObj;
 
             // Look for view in UI hierarchy
             View view = getUI();
@@ -243,13 +246,10 @@ public class ViewOwner implements EventListener {
             View cview = view instanceof ParentView? ((ParentView)view).getChild(name) : null;
             if (cview!=null)
                 return cview;
-
-            // If view not found and RootView.MenuBar is set, look in MenuBar
-            //return isRootViewSet() && getRootView().getMenuBar()!=null? getRootView().getMenuBar().getChild(name):null;
         }
 
         // Return null since view not found
-        return null;
+        return null; // VIEW_NOT_FOUND_VIEW;
     }
 
     /**
@@ -257,7 +257,8 @@ public class ViewOwner implements EventListener {
      */
     public <T> T getView(Object anObj, Class <T> aClass)
     {
-        return ClassUtils.getInstance(getView(anObj), aClass);
+        View view = getView(anObj);
+        return ClassUtils.getInstance(view, aClass);
     }
 
     /**
@@ -369,7 +370,11 @@ public class ViewOwner implements EventListener {
     /**
      * Sets whether given name or UI view is enabled.
      */
-    public void setViewEnabled(Object anObj, boolean aValue)  { getView(anObj).setDisabled(!aValue); }
+    public void setViewEnabled(Object anObj, boolean aValue)
+    {
+        View view = getView(anObj);
+        view.setDisabled(!aValue);
+    }
 
     /**
      * Returns whether given name or UI view is disabled.
@@ -379,7 +384,25 @@ public class ViewOwner implements EventListener {
     /**
      * Sets whether given name or UI view is disabled.
      */
-    public void setViewDisabled(Object anObj, boolean aValue)  { getView(anObj).setDisabled(aValue); }
+    public void setViewDisabled(Object anObj, boolean aValue)
+    {
+        View view = getView(anObj);
+        view.setDisabled(aValue);
+    }
+
+    /**
+     * Returns whether given name or UI view is visible.
+     */
+    public boolean isViewVisible(Object anObj)  { return getView(anObj).isVisible(); }
+
+    /**
+     * Sets whether given name or UI view is visible.
+     */
+    public void setViewVisible(Object anObj, boolean aValue)
+    {
+        View view = getView(anObj);
+        view.setVisible(aValue);
+    }
 
     /**
      * Returns an image with given name or path from this class.
