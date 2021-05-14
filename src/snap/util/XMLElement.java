@@ -513,10 +513,11 @@ public class XMLElement implements Cloneable {
     /**
      * Returns the Enum of a specific type for the given attribute name (or the given default value, if name not found).
      */
-    public Enum getAttributeEnumValue(String aName, Class enumClass, Enum defaultValue)
+    public <T extends Enum<T>> T getAttributeEnumValue(String aName, Class<T> enumClass, T defaultValue)
     {
-        XMLAttribute attr = getAttribute(aName);
-        return attr == null ? defaultValue : Enum.valueOf(enumClass, attr.getValue());
+        String attrVal = getAttributeValue(aName);
+        T enumVal = attrVal != null ? EnumUtils.valueOfIC(enumClass, attrVal) : null;
+        return enumVal != null ? enumVal : defaultValue;
     }
 
     /**
