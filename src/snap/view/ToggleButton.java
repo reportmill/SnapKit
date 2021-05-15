@@ -43,7 +43,7 @@ public class ToggleButton extends ButtonBase {
     public void setSelected(boolean aValue)
     {
         if (aValue == isSelected()) return;
-        firePropChange(Selected_Prop, _selected, _selected=aValue);
+        firePropChange(Selected_Prop, _selected, _selected = aValue);
         repaint();
     }
 
@@ -59,15 +59,15 @@ public class ToggleButton extends ButtonBase {
     /**
      * Returns the button group name.
      */
-    public String getGroup()  { return _groupName; }
+    public String getGroupName()  { return _groupName; }
 
     /**
      * Sets the button group name.
      */
-    public void setGroup(String aName)
+    public void setGroupName(String aName)
     {
         if (SnapUtils.equals(aName,_groupName)) return;
-        firePropChange(Group_Prop, _groupName, _groupName=aName);
+        firePropChange(Group_Prop, _groupName, _groupName = aName);
     }
 
     /**
@@ -75,8 +75,11 @@ public class ToggleButton extends ButtonBase {
      */
     protected void fireActionEvent(ViewEvent anEvent)
     {
-        if (getGroup() == null || !isSelected())
+        // Toggle Selected property (unless ToggleGroup is set and doesn't allow it)
+        if (getGroupName() == null || getToggleGroup().isAllowEmpty() || !isSelected())
             setSelected(!isSelected());
+
+        // Do normal version
         super.fireActionEvent(anEvent);
     }
 
@@ -94,7 +97,8 @@ public class ToggleButton extends ButtonBase {
      */
     public void setPropValue(String aPropName, Object aValue)
     {
-        if (aPropName.equals("Value") || aPropName == Selected_Prop) setSelected(SnapUtils.boolValue(aValue));
+        if (aPropName.equals("Value") || aPropName == Selected_Prop)
+            setSelected(SnapUtils.boolValue(aValue));
         else super.setPropValue(aPropName, aValue);
     }
 
@@ -108,9 +112,15 @@ public class ToggleButton extends ButtonBase {
      */
     public void setOwner(ViewOwner anOwner)
     {
+        // Do normal version
         super.setOwner(anOwner);
-        if (getGroup() != null)
-            anOwner.getToggleGroup(getGroup()).add(this);
+
+        // If GroupName provided, add this button to ToggleGroup
+        String groupName = getGroupName();
+        if (groupName != null) {
+            ToggleGroup toggleGroup = anOwner.getToggleGroup(groupName);
+            toggleGroup.add(this);
+        }
     }
 
     /**
@@ -126,8 +136,8 @@ public class ToggleButton extends ButtonBase {
             e.add(Selected_Prop, true);
 
         // Archive ToggleGroup
-        if (getGroup() != null)
-            e.add(Group_Prop, getGroup());
+        if (getGroupName() != null)
+            e.add(Group_Prop, getGroupName());
         return e;
     }
 
@@ -144,6 +154,6 @@ public class ToggleButton extends ButtonBase {
 
         // Unarchive ToggleGroup
         if (anElement.hasAttribute(Group_Prop) || anElement.hasAttribute("ToggleGroup"))
-            setGroup(anElement.getAttributeValue(Group_Prop, anElement.getAttributeValue("ToggleGroup")));
+            setGroupName(anElement.getAttributeValue(Group_Prop, anElement.getAttributeValue("ToggleGroup")));
     }
 }

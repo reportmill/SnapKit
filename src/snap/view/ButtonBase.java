@@ -261,17 +261,35 @@ public class ButtonBase extends ParentView {
         // If disabled, just return
         if (isDisabled()) return;
 
-        // Handle MouseEnter, MouseExit, MousePress, MouseRelease
-        if (anEvent.isMouseEnter()) { setTargeted(true); setPressed(_tracked); repaint(); }
-        else if (anEvent.isMouseExit())  { setTargeted(false); setPressed(false); repaint(); }
-        else if (anEvent.isMousePress())  { _tracked = true; setPressed(true); repaint(); anEvent.consume(); }
-        else if (anEvent.isMouseRelease())  {
-            if (_pressed) fireActionEvent(anEvent);
-            _pressed = _tracked = false; repaint();
+        // Handle MouseEnter
+        if (anEvent.isMouseEnter()) {
+            setTargeted(true);
+            setPressed(_tracked);
+        }
+
+        // Handle MouseExit
+        else if (anEvent.isMouseExit()) {
+            setTargeted(false);
+            setPressed(false);
+        }
+
+        // Handle MousePress
+        else if (anEvent.isMousePress()) {
+            _tracked = true;
+            setPressed(true);
+            anEvent.consume();
+        }
+
+        // Handle MouseReleased
+        else if (anEvent.isMouseRelease()) {
+            if (_pressed)
+                fireActionEvent(anEvent);
+            _pressed = _tracked = false;
+            repaint();
         }
 
         // Handle KeyPress + Enter
-        if (anEvent.isKeyPress() && anEvent.getKeyCode()==KeyCode.SPACE)
+        if (anEvent.isKeyPress() && anEvent.getKeyCode() == KeyCode.SPACE)
             fireActionEvent(anEvent);
     }
 
@@ -286,7 +304,8 @@ public class ButtonBase extends ParentView {
     protected void fireActionEvent(ViewEvent anEvent)
     {
         super.fireActionEvent(anEvent);
-        if (anEvent!=null) anEvent.consume();
+        if (anEvent != null)
+            anEvent.consume();
     }
 
     /**

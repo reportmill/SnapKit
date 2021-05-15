@@ -207,7 +207,7 @@ public class FormBuilder extends ViewOwner {
         if (isSelected) {
             rb.setSelected(true); setValue(aTitle, theText);
         }
-        rb.setGroup(aTitle);
+        rb.setGroupName(aTitle);
 
         // Add/return button
         return addView(rb);

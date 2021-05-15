@@ -11,72 +11,108 @@ import snap.util.*;
 public class ToggleGroup {
     
     // The name
-    String                _name;
+    private String  _name;
+
+    // Whether ToggleGroup allows empty
+    private boolean  _allowEmpty;
     
     // The buttons
-    List <ToggleButton>   _toggles = new ArrayList();
+    private List<ToggleButton>  _toggles = new ArrayList<>();
     
     // The selected node
-    ToggleButton          _sel;
+    private ToggleButton  _sel;
     
     // A Listener to watch for button Selection change
-    PropChangeListener    _btnLsnr = pc -> buttonSelectionDidChange(pc);
+    private PropChangeListener  _btnLsnr = pc -> buttonSelectionDidChange(pc);
 
-/**
- * Returns the name.
- */
-public String getName()  { return _name; }
+    /**
+     * Returns the name.
+     */
+    public String getName()  { return _name; }
 
-/**
- * Sets the name.
- */
-public void setName(String aName)  { _name = aName; }
+    /**
+     * Sets the name.
+     */
+    public void setName(String aName)  { _name = aName; }
 
-/**
- * Returns the selected toggle.
- */
-public ToggleButton getSelected()  { return _sel; }
+    /**
+     * Returns whether group can be empty.
+     */
+    public boolean isAllowEmpty()  { return _allowEmpty; }
 
-/**
- * Sets the selected toggle.
- */
-public void setSelected(ToggleButton aToggle)
-{
-    if(aToggle==_sel) return;
-    if(_sel!=null) _sel.setSelected(false);
-    _sel = aToggle;
-    if(_sel!=null) _sel.setSelected(true);
-}
+    /**
+     * Sets whether group can be empty.
+     */
+    public void setAllowEmpty(boolean aValue)
+    {
+        _allowEmpty = aValue;
+    }
 
-/**
- * Add adds a toggle.
- */
-public void add(ToggleButton aToggle)
-{
-    _toggles.add(aToggle);
-    aToggle.addPropChangeListener(_btnLsnr, ToggleButton.Selected_Prop);
-    if(aToggle.isSelected())
-        setSelected(aToggle);
-}
+    /**
+     * Returns the selected toggle.
+     */
+    public ToggleButton getSelected()  { return _sel; }
 
-/**
- * Removes a toggle.
- */
-public void remove(ToggleButton aToggle)
-{
-    _toggles.remove(aToggle);
-    aToggle.removePropChangeListener(_btnLsnr, ToggleButton.Selected_Prop);
-    if(aToggle==_sel)
-        setSelected(null);
-}
+    /**
+     * Sets the selected toggle.
+     */
+    public void setSelected(ToggleButton aToggle)
+    {
+        // If already set, just return
+        if (aToggle == _sel) return;
 
-/**
- * PropChangeListener method.
- */
-protected void buttonSelectionDidChange(PropChange anEvent)
-{
-    if(SnapUtils.boolValue(anEvent.getNewValue()))
-        setSelected((ToggleButton)anEvent.getSource());
-}
+        // Clear old selected button
+        if (_sel != null)
+            _sel.setSelected(false);
 
+        // Set new button
+        _sel = aToggle;
+
+        // Select new button
+        if (_sel != null)
+            _sel.setSelected(true);
+    }
+
+    /**
+     * Returns the buttons.
+     */
+    public List<ToggleButton> getButtons()  { return _toggles; }
+
+    /**
+     * Add adds a toggle.
+     */
+    public void add(ToggleButton aToggle)
+    {
+        _toggles.add(aToggle);
+        aToggle.addPropChangeListener(_btnLsnr, ToggleButton.Selected_Prop);
+        if (aToggle.isSelected())
+            setSelected(aToggle);
+    }
+
+    /**
+     * Removes a toggle.
+     */
+    public void remove(ToggleButton aToggle)
+    {
+        _toggles.remove(aToggle);
+        aToggle.removePropChangeListener(_btnLsnr, ToggleButton.Selected_Prop);
+        if (aToggle == _sel)
+            setSelected(null);
+    }
+
+    /**
+     * PropChangeListener method.
+     */
+    protected void buttonSelectionDidChange(PropChange anEvent)
+    {
+        // If button turned on, make it selected
+        ToggleButton toggleButton = (ToggleButton) anEvent.getSource();
+        boolean isSelected = toggleButton.isSelected();
+        if (isSelected)
+            setSelected(toggleButton);
+
+        // If button turned off and group allows empty, clear selection
+        else if (toggleButton == getSelected() && isAllowEmpty())
+            setSelected(null);
+    }
 }
