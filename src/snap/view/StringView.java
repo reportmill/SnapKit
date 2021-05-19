@@ -251,7 +251,7 @@ public class StringView extends View {
     {
         StringBox sbox = new StringBox(getText());
         sbox.setFont(getFont());
-        sbox.setColor(getTextFill().getColor());
+        sbox.setTextColor(getTextFill().getColor());
         sbox.setSize(getWidth(), getHeight());
         sbox.setPadding(getPadding());
         sbox.setBorder(getBorder());

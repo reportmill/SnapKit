@@ -1,6 +1,7 @@
 package snap.text;
 import snap.geom.*;
 import snap.gfx.*;
+import java.util.Objects;
 
 /**
  * This class manages a string and a bounding rect.
@@ -108,14 +109,14 @@ public class StringBox extends RoundRect {
     /**
      * Returns the color for string text.
      */
-    public Color getColor()  { return _style.getColor(); }
+    public Color getTextColor()  { return _style.getColor(); }
 
     /**
      * Sets the color for string text.
      */
-    public void setColor(Color aColor)
+    public void setTextColor(Color aColor)
     {
-        if (aColor.equals(getColor())) return;
+        if (Objects.equals(aColor, getTextColor())) return;
         setStyle(_style.copyFor(aColor));
     }
 
@@ -431,7 +432,7 @@ public class StringBox extends RoundRect {
         double strX = getStringX();
         double strY = getStringY();
         Font font = getFont();
-        Color color = getColor();
+        Color color = getTextColor();
         double cspace = getStyle().getCharSpacing();
 
         // Set style and draw string
