@@ -374,6 +374,31 @@ public class ViewUtils {
     public static void removeChild(ParentView aPar, int anIndex)  { aPar.removeChild(anIndex); }
 
     /**
+     * Moves given child to end of given parent child list, so it paints in front.
+     */
+    public static void moveToFront(ParentView aPar, View aChild)
+    {
+        int childCount = aPar.getChildCount();
+        int childIndex = aChild.indexInHost();
+        if (childIndex != childCount - 1) {
+            ViewUtils.removeChild(aPar, aChild);
+            ViewUtils.addChild(aPar, aChild);
+        }
+    }
+
+    /**
+     * Moves given child to start of given parent child list, so it paints in back.
+     */
+    public static void moveToBack(ParentView aPar, View aChild)
+    {
+        int childIndex = aChild.indexInHost();
+        if (childIndex != 0) {
+            ViewUtils.removeChild(aPar, aChild);
+            ViewUtils.addChild(aPar, aChild, 0);
+        }
+    }
+
+    /**
      * Replace given view with new view.
      */
     public static void replaceView(View aView, View newView)

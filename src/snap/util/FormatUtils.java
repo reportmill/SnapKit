@@ -20,15 +20,25 @@ public class FormatUtils {
     /**
      * Formats a number to a reasonable precision.
      */
-    public static String formatNum(double aVal)
+    public static String formatNum(double aValue)
     {
-        if (aVal >= 1000 || aVal == (long) aVal)
-            return String.valueOf((long) aVal);
-        if (aVal >= 1)
-            return formatNum("#.##", aVal);
-        if (aVal >= .1)
-            return formatNum("#.###", aVal);
-        return String.valueOf(aVal);
+        // Get absolute value
+        double val = Math.abs(aValue);
+
+        // If greater than 1000 or whole number, just use whole
+        if (val >= 1000 || val == (long) val)
+            return String.valueOf((long) aValue);
+
+        // If greater than one, provide for 2 decimal places
+        if (val >= 1)
+            return formatNum("#.##", aValue);
+
+        // If greater than .1, provide for 3 decimal places
+        if (val >= .1)
+            return formatNum("#.###", aValue);
+
+        // Just splat it all
+        return String.valueOf(aValue);
     }
 
     /**
