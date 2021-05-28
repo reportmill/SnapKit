@@ -6,68 +6,67 @@ package snap.view;
 public class ViewPhysics <T> {
 
     // Whether view is subject to forces in simulation
-    boolean        _dynamic;
+    private boolean  _dynamic;
     
     // Whether view is joint
-    boolean        _joint;
+    private boolean  _joint;
     
     // The density
-    double         _density = 1;
+    private double  _density = 1;
     
     // A group index
-    int            _groupIndex;
+    private int  _groupIndex;
     
     // An ivar to hold a native object for simulation library (Body for Box2D)
-    T              _ntv;
+    private T  _native;
 
-/**
- * Returns whether view is subject to forces in simulation.
- */
-public boolean isDynamic()  { return _dynamic; }
+    /**
+     * Returns whether view is subject to forces in simulation.
+     */
+    public boolean isDynamic()  { return _dynamic; }
 
-/**
- * Sets whether view is subject to forces in simulation.
- */
-public void setDynamic(boolean aValue)  { _dynamic = aValue; }
+    /**
+     * Sets whether view is subject to forces in simulation.
+     */
+    public void setDynamic(boolean aValue)  { _dynamic = aValue; }
 
-/**
- * Returns whether view is a joint.
- */
-public boolean isJoint()  { return _joint; }
+    /**
+     * Returns whether view is a joint.
+     */
+    public boolean isJoint()  { return _joint; }
 
-/**
- * Sets whether view is a joint.
- */
-public void setJoint(boolean aValue)  { _joint = aValue; }
+    /**
+     * Sets whether view is a joint.
+     */
+    public void setJoint(boolean aValue)  { _joint = aValue; }
 
-/**
- * Returns the body density.
- */
-public double getDensity()  { return _density; }
+    /**
+     * Returns the body density.
+     */
+    public double getDensity()  { return _density; }
 
-/**
- * Sets the body density.
- */
-public void setDensity(double aValue)  { _density = aValue; }
+    /**
+     * Sets the body density.
+     */
+    public void setDensity(double aValue)  { _density = aValue; }
 
-/**
- * Returns the group index.
- */
-public int getGroupIndex()  { return _groupIndex; }
+    /**
+     * Returns the group index.
+     */
+    public int getGroupIndex()  { return _groupIndex; }
 
-/**
- * Sets the group index.
- */
-public void setGroupIndex(int aValue)  { _groupIndex = aValue; }
+    /**
+     * Sets the group index.
+     */
+    public void setGroupIndex(int aValue)  { _groupIndex = aValue; }
 
-/**
- * Returns the native object.
- */
-public T getNative()  { return _ntv; }
+    /**
+     * Returns the native object.
+     */
+    public T getNative()  { return _native; }
 
-/**
- * Sets the native object.
- */
-public void setNative(T anObj)  { _ntv = anObj; }
-
+    /**
+     * Sets the native object.
+     */
+    public void setNative(T anObj)  { _native = anObj; }
 }

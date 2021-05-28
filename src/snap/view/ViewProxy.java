@@ -60,7 +60,7 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public double getWidth()
     {
-        if(width!=UNSET_DOUBLE) return width;
+        if (width != UNSET_DOUBLE) return width;
         width = _view!=null ? _view.getWidth() : 0;
         return width;
     }
@@ -70,7 +70,7 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public double getHeight()
     {
-        if(height!=UNSET_DOUBLE) return height;
+        if (height != UNSET_DOUBLE) return height;
         height = _view!=null ? _view.getHeight() : 0;
         return height;
     }
@@ -123,16 +123,16 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public ViewProxy[] getChildren()
     {
-        if(_children!=null || _view==null) return _children;
+        if (_children != null || _view == null) return _children;
         ParentView par = (ParentView) _view;
-        View children[] = par.getChildrenManaged();
+        View[] children = par.getChildrenManaged();
         return _children = getProxies(children);
     }
 
     /**
      * Returns the children.
      */
-    public void setChildren(ViewProxy theProxies[])
+    public void setChildren(ViewProxy[] theProxies)
     {
         _children = theProxies;
     }
@@ -173,8 +173,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public Insets getInsetsAll()
     {
-        if(_insets!=null) return _insets;
-        _insets = _view!=null? _view.getInsetsAll() : Insets.EMPTY;
+        if (_insets != null) return _insets;
+        _insets = _view != null ? _view.getInsetsAll() : Insets.EMPTY;
         return _insets;
     }
 
@@ -191,8 +191,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public Pos getAlign()
     {
-        if(_align!=null) return _align;
-        _align = _view!=null? _view.getAlign() : Pos.TOP_LEFT;
+        if (_align != null) return _align;
+        _align = _view != null ? _view.getAlign() : Pos.TOP_LEFT;
         return _align;
     }
 
@@ -209,8 +209,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public HPos getLeanX()
     {
-        if(_leanX!=null) return _leanX;
-        _leanX = _view!=null ? _view.getLeanX() : null;
+        if (_leanX != null) return _leanX;
+        _leanX = _view != null ? _view.getLeanX() : null;
         return _leanX;
     }
 
@@ -219,8 +219,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public VPos getLeanY()
     {
-        if(_leanY!=null) return _leanY;
-        _leanY = _view!=null ? _view.getLeanY() : null;
+        if (_leanY != null) return _leanY;
+        _leanY = _view != null ? _view.getLeanY() : null;
         return _leanY;
     }
 
@@ -229,8 +229,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public Insets getMargin()
     {
-        if(_margin!=null) return _margin;
-        _margin = _view!=null? _view.getMargin() : Insets.EMPTY;
+        if (_margin != null) return _margin;
+        _margin = _view != null ? _view.getMargin() : Insets.EMPTY;
         return _margin;
     }
 
@@ -239,8 +239,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public boolean isGrowWidth()
     {
-        if(_growX!=null) return _growX;
-        return _growX = _view!=null && _view.isGrowWidth();
+        if (_growX != null) return _growX;
+        return _growX = _view != null && _view.isGrowWidth();
     }
 
     /**
@@ -253,8 +253,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public boolean isGrowHeight()
     {
-        if(_growY!=null) return _growY;
-        return _growY = _view!=null && _view.isGrowHeight();
+        if (_growY != null) return _growY;
+        return _growY = _view != null && _view.isGrowHeight();
     }
 
     /**
@@ -267,8 +267,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public double getSpacing()
     {
-        if(_spacing!=UNSET_DOUBLE) return _spacing;
-        return _spacing = _view!=null ? _view.getSpacing() : 0;
+        if (_spacing != UNSET_DOUBLE) return _spacing;
+        return _spacing = _view != null ? _view.getSpacing() : 0;
     }
 
     /**
@@ -300,7 +300,7 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public int getGrowWidthCount()
     {
-        if (_growWidthCount>=0) return _growWidthCount;
+        if (_growWidthCount >= 0) return _growWidthCount;
         int count = 0; for (ViewProxy c : getChildren()) if (c.isGrowWidth()) count++;
         return _growWidthCount = count;
     }
@@ -310,7 +310,7 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public int getGrowHeightCount()
     {
-        if (_growHeightCount>=0) return _growHeightCount;
+        if (_growHeightCount >= 0) return _growHeightCount;
         int count = 0; for (ViewProxy c : getChildren()) if (c.isGrowHeight()) count++;
         return _growHeightCount = count;
     }
@@ -320,8 +320,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public double getChildrenMaxXLastWithInsets()
     {
-        ViewProxy children[] = getChildren();
-        double childMaxX = children.length>0 ? children[children.length-1].getMaxX() : 0;
+        ViewProxy[] children = getChildren();
+        double childMaxX = children.length > 0 ? children[children.length-1].getMaxX() : 0;
         Insets ins = getInsetsAll();
         return Math.ceil(childMaxX + ins.right);
     }
@@ -331,7 +331,7 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public double getChildrenMaxXAllWithInsets()
     {
-        ViewProxy children[] = getChildren();
+        ViewProxy[] children = getChildren();
         Insets ins = getInsetsAll();
         double childMaxX = ins.getLeft();
         for (ViewProxy child : children)
@@ -344,8 +344,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public double getChildrenMaxYLastWithInsets()
     {
-        ViewProxy children[] = getChildren();
-        double childMaxY = children.length>0 ? children[children.length-1].getMaxY() : 0;
+        ViewProxy[] children = getChildren();
+        double childMaxY = children.length > 0 ? children[children.length-1].getMaxY() : 0;
         Insets ins = getInsetsAll();
         return Math.ceil(childMaxY + ins.bottom);
     }
@@ -355,7 +355,7 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public double getChildrenMaxYAllWithInsets()
     {
-        ViewProxy children[] = getChildren();
+        ViewProxy[] children = getChildren();
         Insets ins = getInsetsAll();
         double childMaxY = ins.top;
         for (ViewProxy child : children)
@@ -386,7 +386,7 @@ public class ViewProxy<T extends View> extends Rect {
     @Override
     public String toString()
     {
-        if (_view!=null)
+        if (_view != null)
             return "ViewProxy : " + _view.toString();
         return "ViewProxy { Bounds=" + getBounds() + " }";
     }
@@ -401,8 +401,8 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public static ViewProxy[] getProxies(View ... theViews)
     {
-        ViewProxy proxies[] = new ViewProxy[theViews.length];
-        for(int i=0;i<theViews.length;i++)
+        ViewProxy[] proxies = new ViewProxy[theViews.length];
+        for(int i=0; i<theViews.length; i++)
             proxies[i] = new ViewProxy(theViews[i]);
         return proxies;
     }
