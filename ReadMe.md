@@ -1,11 +1,13 @@
 # SnapKit
-SnapKit is a Java UI kit. Check out a [demo of SnapKit running in the browser](http://www.reportmill.com/snaptea/BusyBox).
-Why do we need another UI kit? Because JavaFX is missing many great aspects of Swing, and Swing is missing great aspects of JavaFX.
-And neither can be compiled to JavaScript to run natively in the browser.
+SnapKit is a new Java UI kit. Check out [demos of SnapKit running in the browser](http://www.reportmill.com/snaptea/).
+Why do we need another UI kit? Because Swing is out of date, and JavaFX missed the boat.
+And neither run natively in the browser.
 
 What's to love about Swing?
 
-	- The full set of geometric shape primitives: Line, Rect, Ellipse, Path, Polygon, etc.
+    - Solid view hierarchy and set of controls/components
+    - Relatively easy to create and update UI and respond to user input and UI changes
+	- Full set of geometric shape primitives: Line, Rect, Ellipse, Path, Polygon, etc.
 	- Easily set border, background, font on any component with simple API
 	- The whole convenient painting model - just override paint() to customize
 	- It handles property changes in conventional Java property change manner
