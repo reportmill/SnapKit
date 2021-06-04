@@ -21,9 +21,6 @@ public abstract class Shape3D {
     // Shape opacity
     private double  _opacity = 1;
     
-    // Whether to fix stroke color
-    protected boolean  _fixEdges;
-
     /**
      * Constructor.
      */
@@ -64,7 +61,7 @@ public abstract class Shape3D {
     /**
      * Returns the stroke color of shape.
      */
-    public Color getStrokeColor()  { return _fixEdges ? _color : _strokeColor; }
+    public Color getStrokeColor()  { return _strokeColor; }
 
     /**
      * Sets the stroke color of shape.

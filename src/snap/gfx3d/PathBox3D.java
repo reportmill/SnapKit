@@ -20,20 +20,16 @@ public class PathBox3D extends Shape3D {
     // The min/max depth
     private double  _z1, _z2;
     
-    // Indicates whether to stroke polygons created during extrusion, to try to make them mesh better
-    private boolean  _fixEdges;
-    
     // The path3ds
     private Path3D[]  _path3ds;
 
     /**
      * Creates a PathBox3D from the given Path3D.
      */
-    public PathBox3D(Path aPath, double z1, double z2, boolean fixEdges)
+    public PathBox3D(Path aPath, double z1, double z2)
     {
         _path = aPath;
         _z1 = z1; _z2 = z2;
-        _fixEdges = fixEdges;
     }
 
     /**
@@ -45,7 +41,7 @@ public class PathBox3D extends Shape3D {
         if (_path3ds != null) return _path3ds;
 
         // Create paths for Z1 & Z2
-        Path3D[] paths = getPaths(_path, _z1, _z2, _fixEdges ? .001 : 0);
+        Path3D[] paths = getPaths(_path, _z1, _z2);
 
         // Get Color, Stroke, Opacity
         Color color = getColor();
@@ -58,14 +54,8 @@ public class PathBox3D extends Shape3D {
             Path3D path = paths[i];
             path.setColor(color);
             path.setOpacity(opacity);
-            if (_fixEdges && i != 0 && i != iMax-1) {
-                path.setStroke(color, 1.5);
-                path._fixEdges = true;
-            }
-            else {
-                path.setStrokeColor(strokeColor);
-                path.setStroke(stroke);
-            }
+            path.setStrokeColor(strokeColor);
+            path.setStroke(stroke);
         }
 
         // Return paths
@@ -76,7 +66,7 @@ public class PathBox3D extends Shape3D {
      * Creates and returns a list of paths in 3D for a given 2D path and extrusion.
      * Also can take into account the width of a stroke applied to the side (extrusion) panels.
      */
-    public static Path3D[] getPaths(Path aPath, double z1, double z2, double strokeWidth)
+    public static Path3D[] getPaths(Path aPath, double z1, double z2)
     {
         // Create list to hold paths
         List<Path3D> paths = new ArrayList<>();
@@ -102,10 +92,6 @@ public class PathBox3D extends Shape3D {
                 aPath = back.getPath();
             }
         }
-
-        // Make room for path stroke
-        z1 += strokeWidth;
-        z2 -= strokeWidth;
 
         // Get PathIter and loop vars
         PathIter piter = aPath.getPathIter(null);

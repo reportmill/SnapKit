@@ -8,6 +8,8 @@ import snap.gfx.*;
 import snap.util.*;
 import snap.view.ViewEvent;
 
+import java.util.List;
+
 /**
  * This class represent a camera focusing on a scene and manages a display list of simple paths based on
  * the scene shapes and the camera transform.
@@ -459,6 +461,16 @@ public class Camera {
     {
         Renderer renderer = getRenderer();
         return renderer.getSceneBounds();
+    }
+
+    /**
+     * Returns the scene as a set of Path3Ds, if possible.
+     */
+    public List<Path3D> getPaths()
+    {
+        Renderer renderer = getRenderer();
+        Renderer2D r2d = renderer instanceof Renderer2D ? (Renderer2D) renderer : new Renderer2D(this);
+        return r2d.getPaths();
     }
 
     /**
