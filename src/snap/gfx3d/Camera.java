@@ -2,11 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
-import java.util.*;
-
 import snap.geom.Point;
 import snap.geom.Rect;
-import snap.geom.Shape;
 import snap.gfx.*;
 import snap.util.*;
 import snap.view.ViewEvent;
@@ -60,13 +57,10 @@ public class Camera {
     
     // The currently cached transform 3d
     private Transform3D  _xform3D;
-    
-    // List of Path3Ds - for rendering
-    private List <Path3D>  _paths = new ArrayList();
-    
-    // Whether paths list needs to be rebuilt
-    private boolean  _rebuildPaths;
-    
+
+    // The Renderer
+    private Renderer  _renderer;
+
     // Mouse drag variable - mouse drag last point
     private Point  _pointLast;
     
@@ -74,7 +68,21 @@ public class Camera {
     private int  _dragConstraint;
     
     // The PropChangeSupport
-    protected PropChangeSupport    _pcs = PropChangeSupport.EMPTY;
+    protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
+
+    // Constants for properties
+    public static final String Width_Prop = "Width";
+    public static final String Height_Prop = "Height";
+    public static final String Depth_Prop = "Depth";
+    public static final String Yaw_Prop = "Yaw";
+    public static final String Pitch_Prop = "Pitch";
+    public static final String Roll_Prop = "Roll";
+    public static final String FocalLength_Prop = "FocalLength";
+    public static final String OffsetZ_Prop = "OffsetZ";
+    public static final String AdjustZ_Prop = "AdjustZ";
+    public static final String Pseudo3D_Prop = "Pseudo3D";
+    public static final String PseudoSkewX_Prop = "PseudoSkewX";
+    public static final String PseudoSkewY_Prop = "PseudoSkewY";
 
     // Constants for mouse drag constraints
     public final int CONSTRAIN_NONE = 0;
@@ -106,9 +114,9 @@ public class Camera {
      */
     public void setWidth(double aValue)
     {
-        if (aValue==_width) return;
-        firePropChange("Width", _width, _width = aValue);
-        rebuildPaths(); _xform3D = null;
+        if (aValue == _width) return;
+        firePropChange(Width_Prop, _width, _width = aValue);
+        _xform3D = null;
     }
 
     /**
@@ -121,9 +129,9 @@ public class Camera {
      */
     public void setHeight(double aValue)
     {
-        if (aValue==_height) return;
-        firePropChange("Height", _height, _height = aValue);
-        rebuildPaths(); _xform3D = null;
+        if (aValue == _height) return;
+        firePropChange(Height_Prop, _height, _height = aValue);
+        _xform3D = null;
     }
 
     /**
@@ -136,9 +144,9 @@ public class Camera {
      */
     public void setDepth(double aValue)
     {
-        if (aValue==_depth) return;
-        firePropChange("Depth", _depth, _depth = aValue);
-        rebuildPaths(); _xform3D = null;
+        if (aValue == _depth) return;
+        firePropChange(Depth_Prop, _depth, _depth = aValue);
+        _xform3D = null;
     }
 
     /**
@@ -151,9 +159,9 @@ public class Camera {
      */
     public void setYaw(double aValue)
     {
-        if (aValue==_yaw) return;
-        firePropChange("Yaw", _yaw, _yaw = aValue);
-        rebuildPaths(); _xform3D = null;
+        if (aValue == _yaw) return;
+        firePropChange(Yaw_Prop, _yaw, _yaw = aValue);
+        _xform3D = null;
     }
 
     /**
@@ -166,9 +174,9 @@ public class Camera {
      */
     public void setPitch(double aValue)
     {
-        if (aValue==_pitch) return;
-        firePropChange("Pitch", _pitch, _pitch = aValue);
-        rebuildPaths(); _xform3D = null;
+        if (aValue == _pitch) return;
+        firePropChange(Pitch_Prop, _pitch, _pitch = aValue);
+        _xform3D = null;
     }
 
     /**
@@ -181,9 +189,9 @@ public class Camera {
      */
     public void setRoll(double aValue)
     {
-        if (aValue==_roll) return;
-        firePropChange("Roll", _roll, _roll = aValue);
-        rebuildPaths(); _xform3D = null;
+        if (aValue == _roll) return;
+        firePropChange(Roll_Prop, _roll, _roll = aValue);
+        _xform3D = null;
     }
 
     /**
@@ -196,9 +204,9 @@ public class Camera {
      */
     public void setFocalLength(double aValue)
     {
-        if (aValue==_focalLen) return;
-        firePropChange("FocalLength", _focalLen, _focalLen = aValue);
-        rebuildPaths(); _xform3D = null;
+        if (aValue == _focalLen) return;
+        firePropChange(FocalLength_Prop, _focalLen, _focalLen = aValue);
+        _xform3D = null;
     }
 
     /**
@@ -211,9 +219,9 @@ public class Camera {
      */
     public void setOffsetZ(double aValue)
     {
-        if (aValue==_offsetZ) return;
-        firePropChange("OffsetZ", _offsetZ, _offsetZ = aValue);
-        rebuildPaths(); _xform3D = null;
+        if (aValue == _offsetZ) return;
+        firePropChange(OffsetZ_Prop, _offsetZ, _offsetZ = aValue);
+        _xform3D = null;
     }
 
     /**
@@ -227,8 +235,7 @@ public class Camera {
     public void setAdjustZ(boolean aValue)
     {
         if (aValue == isAdjustZ()) return;
-        _adjustZ = aValue;
-        rebuildPaths();
+        firePropChange(AdjustZ_Prop, _adjustZ, _adjustZ = aValue);
     }
 
     /**
@@ -241,9 +248,9 @@ public class Camera {
      */
     public void setPseudo3D(boolean aFlag)
     {
-        if (_pseudo3D==aFlag) return;
-        firePropChange("Pseudo3D", _pseudo3D, _pseudo3D = aFlag);
-        rebuildPaths(); _xform3D = null;
+        if (_pseudo3D == aFlag) return;
+        firePropChange(Pseudo3D_Prop, _pseudo3D, _pseudo3D = aFlag);
+        _xform3D = null;
     }
 
     /**
@@ -256,9 +263,9 @@ public class Camera {
      */
     public void setPseudoSkewX(double anAngle)
     {
-        if (anAngle==_pseudoSkewX) return;
-        firePropChange("PseudoSkewX", _pseudoSkewX, _pseudoSkewX = anAngle);
-        rebuildPaths(); _xform3D = null;
+        if (anAngle == _pseudoSkewX) return;
+        firePropChange(PseudoSkewX_Prop, _pseudoSkewX, _pseudoSkewX = anAngle);
+        _xform3D = null;
     }
 
     /**
@@ -271,9 +278,9 @@ public class Camera {
      */
     public void setPseudoSkewY(double anAngle)
     {
-        if (anAngle==_pseudoSkewY) return;
-        firePropChange("PseudoSkewY", _pseudoSkewY, _pseudoSkewY = anAngle);
-        rebuildPaths(); _xform3D = null;
+        if (anAngle == _pseudoSkewY) return;
+        firePropChange(PseudoSkewY_Prop, _pseudoSkewY, _pseudoSkewY = anAngle);
+        _xform3D = null;
     }
 
     /**
@@ -367,209 +374,101 @@ public class Camera {
         _offsetZ2 = bbox.getZMin();
         _offsetZ = offZ;
         _xform3D = null;
-        if (Math.abs(_offsetZ2)>boxW)
+        if (Math.abs(_offsetZ2) > boxW)
             _offsetZ2 = boxW*MathUtils.sign(_offsetZ2); // Something is brokey
     }
 
     /**
      * Returns a point in camera coords for given point in scene coords.
      */
-    public Point3D sceneToCamera(Point3D aPoint)  { return sceneToCamera(aPoint.x, aPoint.y, aPoint.z); }
+    public Point3D sceneToCamera(Point3D aPoint)
+    {
+        return sceneToCamera(aPoint.x, aPoint.y, aPoint.z);
+    }
 
     /**
      * Returns a point in camera coords for given point in scene coords.
      */
-    public Point3D sceneToCamera(double aX, double aY, double aZ)  { return getTransform().transformPoint(aX, aY, aZ); }
+    public Point3D sceneToCamera(double aX, double aY, double aZ)
+    {
+        return getTransform().transformPoint(aX, aY, aZ);
+    }
 
     /**
      * Returns a path in camera coords for given path in scene coords.
      */
-    public Path3D sceneToCamera(Path3D aPath)  { return aPath.copyFor(getTransform()); }
+    public Path3D sceneToCamera(Path3D aPath)
+    {
+        return aPath.copyFor(getTransform());
+    }
 
     /**
      * Returns whether a vector is facing camera.
      */
-    public boolean isFacing(Vector3D aV3D)  { return aV3D.isAway(getNormal(), true); }
+    public boolean isFacing(Vector3D aV3D)
+    {
+        return aV3D.isAway(getNormal(), true);
+    }
 
     /**
      * Returns whether a vector is facing away from camera.
      */
-    public boolean isFacingAway(Vector3D aV3D)  { return aV3D.isAligned(getNormal(), false); }
+    public boolean isFacingAway(Vector3D aV3D)
+    {
+        return aV3D.isAligned(getNormal(), false);
+    }
 
     /**
      * Returns whether a Path3d is facing camera.
      */
-    public boolean isFacing(Path3D aPath)  { return isFacing(aPath.getNormal()); }
+    public boolean isFacing(Path3D aPath)
+    {
+        return isFacing(aPath.getNormal());
+    }
 
     /**
      * Returns whether a Path3d is facing away from camera.
      */
-    public boolean isFacingAway(Path3D aPath)  { return isFacingAway(aPath.getNormal()); }
-
-    /**
-     * Returns the specific Path3D at the given index from the display list.
-     */
-    public List <Path3D> getPaths()
+    public boolean isFacingAway(Path3D aPath)
     {
-        if (_rebuildPaths)
-            rebuildPathsNow();
-        return _paths;
+        return isFacingAway(aPath.getNormal());
     }
 
     /**
-     * Returns the number of Path3Ds in the display list.
+     * Returns the renderer.
      */
-    public int getPathCount()  { return getPaths().size(); }
-
-    /**
-     * Returns the specific Path3D at the given index from the display list.
-     */
-    public Path3D getPath(int anIndex)  { return getPaths().get(anIndex); }
-
-    /**
-     * Adds a path to the end of the display list.
-     */
-    protected void addPath(Path3D aShape)  { _paths.add(aShape); }
-
-    /**
-     * Removes the shape at the given index from the shape list.
-     */
-    protected void removePaths()  { _paths.clear(); }
-
-    /**
-     * Called to indicate that paths list needs to be rebuilt.
-     */
-    protected void rebuildPaths()  { _rebuildPaths = true; }
-
-    /**
-     * Rebuilds display list of Path3Ds from Shapes.
-     */
-    protected void rebuildPathsNow()
+    public Renderer getRenderer()
     {
-        // Adjust Z
-        if (isAdjustZ())
-            adjustZ();
-
-        // Remove all existing Path3Ds
-        removePaths();
-        _sceneBounds = null;
-
-        // Iterate over shapes and add paths
-        List <Shape3D> shapes = _scene._shapes;
-        for (Shape3D shp : shapes)
-            addPathsForShape(shp);
-
-        // Resort paths
-        Path3D.sort(_paths);
-        _rebuildPaths = false;
+        if (_renderer != null) return _renderer;
+        return _renderer = Renderer.newRenderer(this);
     }
 
     /**
-     * Adds the paths for shape.
+     * Paints the scene from the view of this camera for given painter.
      */
-    protected void addPathsForShape(Shape3D aShape)
+    public void paintScene(Painter aPntr)
     {
-        // Get the camera transform & optionally align it to the screen
-        Transform3D xform = getTransform();
-        Light light = _scene.getLight();
-        Color color = aShape.getColor();
-
-        // Iterate over paths
-        for (Path3D path3d : aShape.getPath3Ds()) {
-
-            // Get path copy transformed by scene transform
-            path3d = path3d.copyFor(xform);
-
-            // Backface culling : Only add paths that face the camera
-            if (isFacingAway(path3d.getNormal())) continue;
-
-            // If color on shape, set color on path for scene lights
-            if (color!=null) {
-                Color rcol = light.getRenderColor(this, path3d, color);
-                path3d.setColor(rcol);
-            }
-
-            // Add path
-            addPath(path3d);
-        }
+        Renderer renderer = getRenderer();
+        renderer.renderAll(aPntr);
     }
-
-    /**
-     * Paints shape children.
-     */
-    public void paintPaths(Painter aPntr)
-    {
-        // Iterate over Path3Ds and paint
-        List <Path3D> paths = getPaths();
-        for (int i=0, iMax=paths.size(); i<iMax; i++) { Path3D child = paths.get(i);
-
-            // Paint path and path layers
-            paintPath3D(aPntr, child);
-            if (child.getLayers().size()>0)
-                for (Path3D layer : child.getLayers())
-                    paintPath3D(aPntr, layer);
-        }
-    }
-
-    /**
-     * Paints a Path3D.
-     */
-    protected void paintPath3D(Painter aPntr, Path3D aPath3D)
-    {
-        // Get path, fill and stroke
-        Shape path = aPath3D.getPath();
-        Paint fill = aPath3D.getColor(), stroke = aPath3D.getStrokeColor();
-
-        // Get opacity and set if needed
-        double op = aPath3D.getOpacity(), oldOP = 0;
-        if (op<1) {
-            oldOP = aPntr.getOpacity();
-            aPntr.setOpacity(op*oldOP);
-        }
-
-        // Do fill and stroke
-        if (fill!=null) {
-            aPntr.setPaint(fill);
-            aPntr.fill(path);
-        }
-        if (stroke!=null) {
-            aPntr.setPaint(stroke);
-            aPntr.setStroke(aPath3D.getStroke());
-            aPntr.draw(path);
-        }
-
-        // Reset opacity if needed
-        if (op<1)
-            aPntr.setOpacity(oldOP);
-    }
-
-    /** Paints a Path3D with labels on sides. */
-    /*private void paintPath3DDebug(Painter aPntr, Path3D aPath3D, String aStr) {
-        aPntr.setOpacity(.8); paintPath3D(aPntr, aPath3D); aPntr.setOpacity(1);
-        Font font = Font.Arial14.getBold(); double asc = font.getAscent(); aPntr.setFont(font);
-        Rect r = font.getStringBounds(aStr), r2 = aPath3D.getPath().getBounds();
-        aPntr.drawString(aStr, r2.x + (r2.width - r.width)/2, r2.y + (r2.height - r.height)/2 + asc);
-    }*/
 
     /**
      * Returns the bounding rect for camera paths.
      */
     public Rect getSceneBounds()
     {
-        // If already set, just return
-        if (_sceneBounds!=null) return _sceneBounds;
+        Renderer renderer = getRenderer();
+        return renderer.getSceneBounds();
+    }
 
-        // Iterate over paths
-        List <Path3D> paths = getPaths();
-        double xmin = Float.MAX_VALUE, ymin = Float.MAX_VALUE, xmax = -xmin, ymax = -ymin;
-        for (Path3D path : paths) { Point3D bb2[] = path.getBBox();
-            xmin = Math.min(xmin, bb2[0].x);
-            ymin = Math.min(ymin, bb2[0].y);
-            xmax = Math.max(xmax, bb2[1].x);
-            ymax = Math.max(ymax, bb2[1].y);
-        }
-        return _sceneBounds = new Rect(xmin, ymin, xmax - xmin, ymax - ymin);
-    } Rect _sceneBounds;
+    /**
+     * Called when Scene changes.
+     */
+    protected void sceneDidChange()
+    {
+        if (_renderer != null)
+            _renderer.sceneDidChange();
+    }
 
     /**
      * Viewer method.
@@ -627,7 +526,7 @@ public class Camera {
 
                 // If no constraint
                 if (_dragConstraint==CONSTRAIN_NONE) {
-                    if (Math.abs(point.y-_pointLast.y)>Math.abs(point.x-_pointLast.x))
+                    if (Math.abs(point.y-_pointLast.y) > Math.abs(point.x-_pointLast.x))
                         _dragConstraint = CONSTRAIN_PITCH;
                     else _dragConstraint = CONSTRAIN_YAW;
                 }
@@ -670,19 +569,22 @@ public class Camera {
      */
     public void addPropChangeListener(PropChangeListener aLsnr)
     {
-        if (_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+        if (_pcs == PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
         _pcs.addPropChangeListener(aLsnr);
     }
 
     /**
      * Remove listener.
      */
-    public void removePropChangeListener(PropChangeListener aLsnr)  { _pcs.removePropChangeListener(aLsnr); }
+    public void removePropChangeListener(PropChangeListener aLsnr)
+    {
+        _pcs.removePropChangeListener(aLsnr);
+    }
 
     /**
      * Fires a property change for given property name, old value, new value and index.
      */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal)
+    protected final void firePropChange(String aProp, Object oldVal, Object newVal)
     {
         if (!_pcs.hasListener(aProp)) return;
         firePropChange(new PropChange(this, aProp, oldVal, newVal));
@@ -691,5 +593,8 @@ public class Camera {
     /**
      * Fires a given property change.
      */
-    protected void firePropChange(PropChange aPCE)  { _pcs.firePropChange(aPCE); }
+    protected void firePropChange(PropChange aPCE)
+    {
+        _pcs.firePropChange(aPCE);
+    }
 }

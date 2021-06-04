@@ -144,7 +144,7 @@ public class Trackball extends ParentView {
      */
     protected void paintAbove(Painter aPntr)
     {
-        _camera.paintPaths(aPntr);
+        _camera.paintScene(aPntr);
     }
 
     /**

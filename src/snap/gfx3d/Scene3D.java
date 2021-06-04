@@ -53,12 +53,20 @@ public class Scene3D {
     /**
      * Adds a shape to the end of the shape list.
      */
-    public void addShape(Shape3D aShape)  { _shapes.add(aShape); _camera.rebuildPaths(); }
+    public void addShape(Shape3D aShape)
+    {
+        _shapes.add(aShape);
+        _camera.sceneDidChange();
+    }
 
     /**
      * Removes the shape at the given index from the shape list.
      */
-    public void removeShapes()  { _shapes.clear(); _camera.rebuildPaths(); }
+    public void removeShapes()
+    {
+        _shapes.clear();
+        _camera.sceneDidChange();
+    }
 
     /**
      * Returns the transform 3d for the scene's camera.
