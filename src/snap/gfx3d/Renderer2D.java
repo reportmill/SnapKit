@@ -109,7 +109,7 @@ public class Renderer2D extends Renderer {
             addPathsForShape(shp);
 
         // Resort paths
-        Path3D.sort(_paths);
+        Path3D.sortPaths(_paths);
         _rebuildPaths = false;
     }
 

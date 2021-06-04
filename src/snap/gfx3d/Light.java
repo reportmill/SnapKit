@@ -37,9 +37,9 @@ public class Light {
         double _ka = .6, _kd = .5;
 
         // Calculate color components based on original color, surface normal, reflection constants and light source
-        double r = aColor.getRed()*_ka + aColor.getRed()*_kd*normalDotLight; r = Math.min(r,1);
-        double g = aColor.getGreen()*_ka + aColor.getGreen()*_kd*normalDotLight; g = Math.min(g,1);
-        double b = aColor.getBlue()*_ka + aColor.getBlue()*_kd*normalDotLight; b = Math.min(b,1);
+        double r = aColor.getRed() * _ka + aColor.getRed() * _kd * normalDotLight; r = Math.min(r, 1);
+        double g = aColor.getGreen() * _ka + aColor.getGreen() * _kd * normalDotLight; g = Math.min(g, 1);
+        double b = aColor.getBlue() * _ka + aColor.getBlue() * _kd * normalDotLight; b = Math.min(b, 1);
 
         // Set new color
         return new Color(r, g, b, aColor.getAlpha());

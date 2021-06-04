@@ -270,10 +270,14 @@ public class CameraView extends ParentView {
     {
         Rect bounds = getBoundsLocal();
         Rect camBnds = _camera.getSceneBounds();
-        if (camBnds.x<bounds.x) bounds.x = camBnds.x;
-        if (camBnds.y<bounds.y) bounds.y = camBnds.y;
-        if (camBnds.getMaxX()>bounds.getMaxX()) bounds.width = camBnds.getMaxX() - bounds.x;
-        if (camBnds.getMaxY()>bounds.getMaxY()) bounds.height = camBnds.getMaxY() - bounds.y;
+        if (camBnds.x < bounds.x)
+            bounds.x = camBnds.x;
+        if (camBnds.y < bounds.y)
+            bounds.y = camBnds.y;
+        if (camBnds.getMaxX() > bounds.getMaxX())
+            bounds.width = camBnds.getMaxX() - bounds.x;
+        if (camBnds.getMaxY() > bounds.getMaxY())
+            bounds.height = camBnds.getMaxY() - bounds.y;
         bounds.inset(-2);
         return bounds;
     }

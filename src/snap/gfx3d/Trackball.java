@@ -80,8 +80,10 @@ public class Trackball extends ParentView {
         addChild(_tball);
 
         // Create/configure scene and camera
-        _scene = new Scene3D(); _camera = _scene.getCamera();
-        _camera.setWidth(IMAGE_SIZE); _camera.setHeight(IMAGE_SIZE); // set X to 2 ???
+        _scene = new Scene3D();
+        _camera = _scene.getCamera();
+        _camera.setWidth(IMAGE_SIZE);
+        _camera.setHeight(IMAGE_SIZE); // set X to 2 ???
 
         // Enable mouse/action events
         enableEvents(MousePress, MouseDrag, MouseRelease, Action); //setFill(null);
@@ -93,7 +95,7 @@ public class Trackball extends ParentView {
      */
     public void setWidth(double aValue)
     {
-        if (aValue==getWidth()) return;
+        if (aValue == getWidth()) return;
         super.setWidth(aValue);
         addScuffMarks();
     }
@@ -103,7 +105,8 @@ public class Trackball extends ParentView {
      */
     protected void addScuffMarks()
     {
-        _scene.removeShapes(); Random ran = new Random();
+        _scene.removeShapes();
+        Random ran = new Random();
         for (int i=0; i<50; i++) {
             double th = ran.nextDouble()*360;
             double ph = ran.nextDouble()*360;
@@ -166,22 +169,23 @@ public class Trackball extends ParentView {
     protected void mousePressed(ViewEvent anEvent)
     {
         double scale = 1; //getZoomFactor(); ???
-        Point p = anEvent.getPoint(); p.x /= scale; p.y /= scale;
-        double distance = p.getDistance(CENTER_X,CENTER_Y);
+        Point point = anEvent.getPoint(); point.x /= scale; point.y /= scale;
+        double distance = point.getDistance(CENTER_X,CENTER_Y);
 
         // If inside trackball, replace image with lit version
-        if (distance<=INNER_RADIUS) {
+        if (distance <= INNER_RADIUS) {
             _hitPart = HIT_TRACKBALL; // turn on hilight
-            removeChild(_tball); addChild(_tball_lit);
+            removeChild(_tball);
+            addChild(_tball_lit);
             _camera.processEvent(anEvent);
         }
 
         // Else if in collar, add knob
-        else if (distance<=INNER_RADIUS+COLLAR_THICKNESS && !_camera.isPseudo3D()) {
+        else if (distance <= INNER_RADIUS+COLLAR_THICKNESS && !_camera.isPseudo3D()) {
             _hitPart = HIT_COLLAR;
             addChild(_knob);
-            _lastRollAngle = getMouseAngle(p);
-            positionKnob(p);
+            _lastRollAngle = getMouseAngle(point);
+            positionKnob(point);
         }
 
         // Else
@@ -194,13 +198,14 @@ public class Trackball extends ParentView {
     protected void mouseDragged(ViewEvent anEvent)
     {
         // If
-        if (_hitPart==HIT_COLLAR) {
+        if (_hitPart == HIT_COLLAR) {
             double scale = 1; //getZoomFactor(); ???
-            Point p = anEvent.getPoint(); p.x /= scale; p.y /= scale;
-            double theta = getMouseAngle(p);
-            _camera.setRoll(_camera.getRoll() + Math.toDegrees(theta - _lastRollAngle));
+            Point point = anEvent.getPoint(); point.x /= scale; point.y /= scale;
+            double theta = getMouseAngle(point);
+            double newRoll = _camera.getRoll() + Math.toDegrees(theta - _lastRollAngle);
+            _camera.setRoll(newRoll);
             _lastRollAngle = theta;
-            positionKnob(p);
+            positionKnob(point);
         }
 
         // Otherwise, forward to scene
@@ -216,11 +221,12 @@ public class Trackball extends ParentView {
      */
     protected void mouseReleased(ViewEvent anEvent)
     {
-        if (_hitPart==HIT_TRACKBALL) {
+        if (_hitPart == HIT_TRACKBALL) {
             _camera.processEvent(anEvent);
-            removeChild(_tball_lit); addChild(_tball);
+            removeChild(_tball_lit);
+            addChild(_tball);
         }
-        else if (_hitPart==HIT_COLLAR)
+        else if (_hitPart == HIT_COLLAR)
             removeChild(_knob);
 
         // Send ViewEvent to owner
@@ -230,28 +236,40 @@ public class Trackball extends ParentView {
     /**
      * Returns the angle from the mousePoint to the center of the control, in radians.
      */
-    private double getMouseAngle(Point p)  { double dx = p.x - CENTER_X, dy = p.y - CENTER_Y; return Math.atan2(dy, dx); }
+    private double getMouseAngle(Point p)
+    {
+        double dx = p.x - CENTER_X;
+        double dy = p.y - CENTER_Y;
+        return Math.atan2(dy, dx);
+    }
 
     /**
      * Move the collar knob to the correct location for the given mouse point.
      */
     private void positionKnob(Point p)
     {
-        double theta = getMouseAngle(p), r = INNER_RADIUS + KNOB_WIDTH/2;
-        double x = CENTER_X + r*Math.cos(theta) - KNOB_CENTER_X;
-        double y = CENTER_Y + r*Math.sin(theta) - KNOB_CENTER_Y;
+        double theta = getMouseAngle(p);
+        double radius = INNER_RADIUS + KNOB_WIDTH / 2;
+        double x = CENTER_X + radius * Math.cos(theta) - KNOB_CENTER_X;
+        double y = CENTER_Y + radius * Math.sin(theta) - KNOB_CENTER_Y;
         _knob.setXY(x, y);
     }
 
     /**
      * Sync from given camera to this trackball.
      */
-    public void syncFrom(Camera aScene)  { sync(aScene, _camera); }
+    public void syncFrom(Camera aScene)
+    {
+        sync(aScene, _camera);
+    }
 
     /**
      * Sync to a given camera from this trackball.
      */
-    public void syncTo(Camera aScene)  { sync(_camera, aScene); }
+    public void syncTo(Camera aScene)
+    {
+        sync(_camera, aScene);
+    }
 
     /** Sync cameras. */
     private void sync(Camera s1, Camera s2)

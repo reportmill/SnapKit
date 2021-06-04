@@ -24,7 +24,7 @@ public class PathBox3D extends Shape3D {
     private boolean  _fixEdges;
     
     // The path3ds
-    private Path3D  _path3ds[];
+    private Path3D[]  _path3ds;
 
     /**
      * Creates a PathBox3D from the given Path3D.
@@ -42,26 +42,29 @@ public class PathBox3D extends Shape3D {
     public Path3D[] getPath3Ds()
     {
         // If already set, just return
-        if (_path3ds!=null) return _path3ds;
+        if (_path3ds != null) return _path3ds;
 
         // Create paths for Z1 & Z2
-        Path3D paths[] = getPaths(_path, _z1, _z2, _fixEdges? .001 : 0);
+        Path3D[] paths = getPaths(_path, _z1, _z2, _fixEdges ? .001 : 0);
 
-        // Set Color, Stroke, Opacity
+        // Get Color, Stroke, Opacity
         Color color = getColor();
         Color strokeColor = getStrokeColor();
         Stroke stroke = getStroke();
-        double op = getOpacity();
-        for (int i=0, iMax=paths.length; i<iMax; i++) { Path3D p = paths[i];
-            p.setColor(color);
-            p.setOpacity(op);
-            if (_fixEdges && i!=0 && i!=iMax-1) {
-                p.setStroke(color, 1.5);
-                p._fixEdges = true;
+        double opacity = getOpacity();
+
+        // Iterate over paths and set color, stroke, opacity
+        for (int i=0, iMax=paths.length; i<iMax; i++) {
+            Path3D path = paths[i];
+            path.setColor(color);
+            path.setOpacity(opacity);
+            if (_fixEdges && i != 0 && i != iMax-1) {
+                path.setStroke(color, 1.5);
+                path._fixEdges = true;
             }
             else {
-                p.setStrokeColor(strokeColor);
-                p.setStroke(stroke);
+                path.setStrokeColor(strokeColor);
+                path.setStroke(stroke);
             }
         }
 
@@ -76,7 +79,7 @@ public class PathBox3D extends Shape3D {
     public static Path3D[] getPaths(Path aPath, double z1, double z2, double strokeWidth)
     {
         // Create list to hold paths
-        List <Path3D> paths = new ArrayList();
+        List<Path3D> paths = new ArrayList<>();
         Path3D back = null;
 
         // If path is closed, create path3d for front from aPath and z1
@@ -101,20 +104,29 @@ public class PathBox3D extends Shape3D {
         }
 
         // Make room for path stroke
-        z1 += strokeWidth; z2 -= strokeWidth;
+        z1 += strokeWidth;
+        z2 -= strokeWidth;
+
+        // Get PathIter and loop vars
+        PathIter piter = aPath.getPathIter(null);
+        double[] pts = new double[6];
+        double lastX = 0, lastY = 0;
+        double lastMoveX = 0, lastMoveY = 0;
 
         // Iterate over path elements
-        PathIter piter = aPath.getPathIter(null);
-        double pts[] = new double[6], lastX = 0, lastY = 0, lastMoveX = 0, lastMoveY = 0;
         while (piter.hasNext()) switch (piter.getNext(pts)) {
 
             // MoveTo
-            case MoveTo: lastX = lastMoveX = pts[0]; lastY = lastMoveY = pts[1]; break;
+            case MoveTo:
+                lastX = lastMoveX = pts[0];
+                lastY = lastMoveY = pts[1];
+                break;
 
             // LineTo
             case LineTo: {
-                if (Point.equals(lastX,lastY,pts[0],pts[1])) continue;
-                Path3D path = new Path3D(); path.moveTo(lastX, lastY, z1);
+                if (Point.equals(lastX, lastY, pts[0], pts[1])) continue;
+                Path3D path = new Path3D();
+                path.moveTo(lastX, lastY, z1);
                 path.lineTo(pts[0], pts[1], z1); path.lineTo(pts[0], pts[1], z2);
                 path.lineTo(lastX, lastY, z2); path.close();
                 paths.add(path);
@@ -123,27 +135,36 @@ public class PathBox3D extends Shape3D {
 
             // QuadTo
             case QuadTo: {
-                Path3D path = new Path3D(); path.moveTo(lastX, lastY, z1);
-                path.quadTo(pts[0], pts[1], z1, pts[2], pts[3], z1); path.lineTo(pts[4], pts[5], z2);
-                path.quadTo(pts[0], pts[1], z2, lastX, lastY, z2); path.close();
+                Path3D path = new Path3D();
+                path.moveTo(lastX, lastY, z1);
+                path.quadTo(pts[0], pts[1], z1, pts[2], pts[3], z1);
+                path.lineTo(pts[4], pts[5], z2);
+                path.quadTo(pts[0], pts[1], z2, lastX, lastY, z2);
+                path.close();
                 paths.add(path);
                 lastX = pts[2]; lastY = pts[3];
             } break;
 
             // CubicTo
             case CubicTo: {
-                Path3D path = new Path3D(); path.moveTo(lastX, lastY, z1);
-                path.curveTo(pts[0], pts[1], z1, pts[2], pts[3], z1, pts[4], pts[5], z1); path.lineTo(pts[4], pts[5], z2);
-                path.curveTo(pts[2], pts[3], z2, pts[0], pts[1], z2, lastX, lastY, z2); path.close();
+                Path3D path = new Path3D();
+                path.moveTo(lastX, lastY, z1);
+                path.curveTo(pts[0], pts[1], z1, pts[2], pts[3], z1, pts[4], pts[5], z1);
+                path.lineTo(pts[4], pts[5], z2);
+                path.curveTo(pts[2], pts[3], z2, pts[0], pts[1], z2, lastX, lastY, z2);
+                path.close();
                 paths.add(path);
                 lastX = pts[4]; lastY = pts[5];
             } break;
 
             // Close
             case Close: {
-                Path3D path = new Path3D(); path.moveTo(lastX, lastY, z1);
-                path.lineTo(lastMoveX, lastMoveY, z1); path.lineTo(lastMoveX, lastMoveY, z2);
-                path.lineTo(lastX, lastY, z2); path.close();
+                Path3D path = new Path3D();
+                path.moveTo(lastX, lastY, z1);
+                path.lineTo(lastMoveX, lastMoveY, z1);
+                path.lineTo(lastMoveX, lastMoveY, z2);
+                path.lineTo(lastX, lastY, z2);
+                path.close();
                 paths.add(path);
             } break;
         }
@@ -153,6 +174,6 @@ public class PathBox3D extends Shape3D {
             paths.add(back);
 
         // Return paths
-        return paths.toArray(new Path3D[paths.size()]);
+        return paths.toArray(new Path3D[0]);
     }
 }

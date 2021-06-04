@@ -35,8 +35,8 @@ public class Point3D implements Cloneable {
      */
     public boolean equals(Object anObj)
     {
-        Point3D p = (Point3D)anObj;
-        return p==this || (p.x==x && p.y==y && p.z==z);
+        Point3D p = (Point3D) anObj;
+        return p == this || (p.x == x && p.y == y && p.z == z);
     }
 
     /**

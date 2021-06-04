@@ -14,13 +14,13 @@ import java.util.*;
 public class Path3D extends Shape3D implements Cloneable {
     
     // The list of elements in this path
-    private List <Seg>  _elements = new ArrayList();
+    private List<Seg>  _elements = new ArrayList<>();
     
     // The list of point3Ds in this path
-    private List <Point3D>  _points = new ArrayList();
+    private List<Point3D>  _points = new ArrayList<>();
     
     // A list of Path3Ds to be drawn in front of this Path3D
-    private List <Path3D>  _layers;
+    private List<Path3D>  _layers;
 
     // The path center point
     private Point3D  _center;
@@ -29,7 +29,7 @@ public class Path3D extends Shape3D implements Cloneable {
     private Vector3D  _normal;
     
     // The path bounding box
-    private Point3D  _bbox[];
+    private Point3D[]  _bbox;
     
     // The cached path (2d)
     private Path  _path;
@@ -84,10 +84,12 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Returns the element at the given index.
      */
-    public Seg getElement(int anIndex, Point3D pts[])
+    public Seg getElement(int anIndex, Point3D[] pts)
     {
         // Get element type (if no points, just return type)
-        Seg type = getElement(anIndex); if (pts==null) return type;
+        Seg type = getElement(anIndex);
+        if (pts == null)
+            return type;
 
         // If given index isn't equal to "next index" optimizer, reset next index ivar
         if (anIndex != _nextElementIndex) {
@@ -101,10 +103,18 @@ public class Path3D extends Shape3D implements Cloneable {
         // Handle element types
         switch (type) {
             case MoveTo:
-            case LineTo: pts[0] = getPoint(_nextPointIndex++); break;
-            case QuadTo: pts[0] = getPoint(_nextPointIndex++); pts[1] = getPoint(_nextPointIndex++); break;
-            case CubicTo: pts[0] = getPoint(_nextPointIndex++); pts[1] = getPoint(_nextPointIndex++);
-                pts[2] = getPoint(_nextPointIndex++); break;
+            case LineTo:
+                pts[0] = getPoint(_nextPointIndex++);
+                break;
+            case QuadTo:
+                pts[0] = getPoint(_nextPointIndex++);
+                pts[1] = getPoint(_nextPointIndex++);
+                break;
+            case CubicTo:
+                pts[0] = getPoint(_nextPointIndex++);
+                pts[1] = getPoint(_nextPointIndex++);
+                pts[2] = getPoint(_nextPointIndex++);
+                break;
             case Close: break;
         }
 
@@ -159,7 +169,10 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Adds a close element to the path3d.
      */
-    public void close()  { _elements.add(CLOSE); }
+    public void close()
+    {
+        _elements.add(CLOSE);
+    }
 
     /**
      * Adds a 2D path to the path3D at the given depth.
@@ -167,14 +180,23 @@ public class Path3D extends Shape3D implements Cloneable {
     public void addPath(Path aPath, double aDepth)
     {
         // Iterate over elements in given path
-        PathIter piter = aPath.getPathIter(null); double pts[] = new double[6];
+        PathIter piter = aPath.getPathIter(null);
+        double[] pts = new double[6];
         for (int i=0; piter.hasNext(); i++) {
             switch (piter.getNext(pts)) {
-                case MoveTo: if (i+1<aPath.getSegCount() && aPath.getSeg(i+1)!=Seg.MoveTo)
-                    moveTo(pts[0], pts[1], aDepth); break;
-                case LineTo: lineTo(pts[0], pts[1], aDepth); break;
-                case QuadTo: quadTo(pts[0], pts[1], aDepth, pts[2], pts[3], aDepth); break;
-                case CubicTo: curveTo(pts[0], pts[1], aDepth, pts[2], pts[3], aDepth, pts[4], pts[5], aDepth); break;
+                case MoveTo:
+                    if (i+1 < aPath.getSegCount() && aPath.getSeg(i+1) != Seg.MoveTo)
+                        moveTo(pts[0], pts[1], aDepth);
+                    break;
+                case LineTo:
+                    lineTo(pts[0], pts[1], aDepth);
+                    break;
+                case QuadTo:
+                    quadTo(pts[0], pts[1], aDepth, pts[2], pts[3], aDepth);
+                    break;
+                case CubicTo:
+                    curveTo(pts[0], pts[1], aDepth, pts[2], pts[3], aDepth, pts[4], pts[5], aDepth);
+                    break;
                 case Close: close(); break;
             }
         }
@@ -186,13 +208,13 @@ public class Path3D extends Shape3D implements Cloneable {
     public Point3D getCenter()
     {
         // If already set, just return
-        if (_center!=null) return _center;
+        if (_center != null) return _center;
 
         // If center point hasn't been cached, calculate and cache it
-        Point3D bbox[] = getBBox();
-        double cx = bbox[0].x + (bbox[1].x-bbox[0].x)/2;
-        double cy = bbox[0].y + (bbox[1].y-bbox[0].y)/2;
-        double cz = bbox[0].z + (bbox[1].z-bbox[0].z)/2;
+        Point3D[] bbox = getBBox();
+        double cx = bbox[0].x + (bbox[1].x - bbox[0].x) / 2;
+        double cy = bbox[0].y + (bbox[1].y - bbox[0].y) / 2;
+        double cz = bbox[0].z + (bbox[1].z - bbox[0].z) / 2;
         return _center = new Point3D(cx, cy, cz);
     }
 
@@ -202,27 +224,33 @@ public class Path3D extends Shape3D implements Cloneable {
     public Vector3D getNormal()
     {
         // If already set, just return
-        if (_normal!=null) return _normal;
+        if (_normal != null) return _normal;
 
         // Calculate least-square-fit normal. Works for either convex or concave polygons.
         // Reference is Newell's Method for Computing the Plane Equation of a Polygon.
         //   Graphics Gems III, David Kirk (Ed.), AP Professional, 1992.
         Vector3D normal = new Vector3D(0, 0, 0);
-        for (int i=0, pc=getPointCount(); i<pc; i++) { Point3D cur = getPoint(i), next = getPoint((i+1)%pc);
+        for (int i=0, pc=getPointCount(); i<pc; i++) {
+            Point3D cur = getPoint(i);
+            Point3D next = getPoint((i+1) % pc);
             normal.x += (cur.y - next.y) * (cur.z + next.z);
             normal.y += (cur.z - next.z) * (cur.x + next.x);
             normal.z += (cur.x - next.x) * (cur.y + next.y);
         }
 
         // Normalize the result and swap sign so it matches right hand rule
-        normal.normalize(); normal.negate();
+        normal.normalize();
+        normal.negate();
         return _normal = normal;
     }
 
     /**
      * Reverses the path3d.
      */
-    public void reverse()  { reverse(0, null, null); }
+    public void reverse()
+    {
+        reverse(0, null, null);
+    }
 
     /**
      * Reverse method worker method.
@@ -230,11 +258,15 @@ public class Path3D extends Shape3D implements Cloneable {
     private void reverse(int element, Point3D lastPoint, Point3D lastMoveTo)
     {
         // Simply return if element is beyond bounds
-        if (element==getElementCount()) {
-            _elements.clear(); _points.clear(); clearCache(); return; }
+        if (element == getElementCount()) {
+            _elements.clear(); _points.clear(); clearCache();
+            return;
+        }
 
         // Get info for this element
-        Point3D pts[] = new Point3D[3], lp = null, lmt = lastMoveTo;
+        Point3D[] pts = new Point3D[3];
+        Point3D lp = null;
+        Point3D lmt = lastMoveTo;
         Seg type = getElement(element, pts);
         switch (type) {
             case MoveTo: lmt = pts[0];
@@ -245,20 +277,22 @@ public class Path3D extends Shape3D implements Cloneable {
         }
 
         // Recursively add following elements before this one
-        Seg nextType = element+1<getElementCount() ? getElement(element+1,null) : null;
+        Seg nextType = element+1 < getElementCount() ? getElement(element+1,null) : null;
         reverse(element+1, lp, lmt);
 
         // Add reverse element to path for current element
         switch (type) {
             case MoveTo:
-                if (nextType!=MOVE_TO)
+                if (nextType != MOVE_TO)
                     close();
                 break;
             case LineTo:
                 if (!lastPoint.equals(lastMoveTo))
                     lineTo(lastPoint.x, lastPoint.y, lastPoint.z);
                 break;
-            case QuadTo: quadTo(pts[0].x, pts[0].y, pts[0].z, lastPoint.x, lastPoint.y, lastPoint.z); break;
+            case QuadTo:
+                quadTo(pts[0].x, pts[0].y, pts[0].z, lastPoint.x, lastPoint.y, lastPoint.z);
+                break;
             case CubicTo:
                 curveTo(pts[1].x, pts[1].y, pts[1].z, pts[0].x, pts[0].y, pts[0].z, lastPoint.x, lastPoint.y, lastPoint.z);
                 break;
@@ -320,11 +354,10 @@ public class Path3D extends Shape3D implements Cloneable {
         // Create new path
         Path path = new Path();
 
-        // Iterate over this path3d
-        Point3D pts[] = new Point3D[3];
-        for (int i=0, iMax=getElementCount(); i<iMax; i++) { Seg type = getElement(i, pts);
-
-            // Do 2d operation
+        // Iterate over this path3d and add segments as 2D
+        Point3D[] pts = new Point3D[3];
+        for (int i=0, iMax=getElementCount(); i<iMax; i++) {
+            Seg type = getElement(i, pts);
             switch (type) {
                 case MoveTo: path.moveTo(pts[0].x, pts[0].y); break;
                 case LineTo: path.lineTo(pts[0].x, pts[0].y); break;
@@ -345,10 +378,10 @@ public class Path3D extends Shape3D implements Cloneable {
     public Point3D[] getBBox()
     {
         // If already set, just return
-        if (_bbox!=null) return _bbox;
+        if (_bbox != null) return _bbox;
 
         // Set
-        Point3D bbox[] = new Point3D[2];
+        Point3D[] bbox = new Point3D[2];
         bbox[0] = new Point3D(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
         bbox[1] = new Point3D(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
 
@@ -408,27 +441,35 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public void addLayer(Path3D aPath)
     {
-        if (_layers==null) _layers = new ArrayList();
+        if (_layers == null) _layers = new ArrayList<>();
         _layers.add(aPath);
     }
 
     /**
      * Clears cached values when path changes.
      */
-    protected void clearCache()  { _center = null; _normal = null; _bbox = null; _path = null; }
+    protected void clearCache()
+    {
+        _center = null;
+        _normal = null;
+        _bbox = null;
+        _path = null;
+    }
 
-    // Constants for ordering
+    // Constants for comparison/ordering of Path3Ds
     public static final int ORDER_BACK_TO_FRONT = -1;
     public static final int ORDER_FRONT_TO_BACK = 1;
-    public static final int ORDER_SAME = 0, ORDER_INEDETERMINATE = 2;
+    public static final int ORDER_SAME = 0;
+    public static final int ORDER_INEDETERMINATE = 2;
 
     /**
      * Compares ZMin for this path and given path.
      */
     public int compareZMin(Path3D path2)
     {
-        double z0 = getZMin(), z1 = path2.getZMin();
-        return z0<z1 ? ORDER_BACK_TO_FRONT : z1<z0 ? ORDER_FRONT_TO_BACK : 0;
+        double z0 = getZMin();
+        double z1 = path2.getZMin();
+        return z0 < z1 ? ORDER_BACK_TO_FRONT : z1 < z0 ? ORDER_FRONT_TO_BACK : 0;
     }
 
     /**
@@ -438,14 +479,17 @@ public class Path3D extends Shape3D implements Cloneable {
     public int comparePlane(Path3D aPath)
     {
         double d1 = 0;
-        for (int i=0, iMax=aPath.getPointCount(); i<iMax; i++) { Point3D pnt = aPath.getPoint(i);
+        for (int i=0, iMax=aPath.getPointCount(); i<iMax; i++) {
+            Point3D pnt = aPath.getPoint(i);
             double d2 = getDistance(pnt);
-            if (d1==0) d1 = d2;
-            if (d2!=0 && d1*d2<0) return 2; // Indeterminate
+            if (d1 == 0)
+                d1 = d2;
+            if (d2 != 0 && d1*d2 < 0)
+                return ORDER_INEDETERMINATE;
         }
 
         // If all points are above aPath's plane, return BACK_TO_FRONT (receiver in front), otherwise ORDER_DESCEND
-        return d1>0 ? ORDER_BACK_TO_FRONT : d1<0 ? ORDER_FRONT_TO_BACK : ORDER_SAME;
+        return d1 > 0 ? ORDER_BACK_TO_FRONT : d1 < 0 ? ORDER_FRONT_TO_BACK : ORDER_SAME;
     }
 
     /**
@@ -455,9 +499,9 @@ public class Path3D extends Shape3D implements Cloneable {
     {
         Vector3D normal = getNormal();
         Point3D p0 = getPoint(0);
-        double d = -normal.x*p0.x - normal.y*p0.y - normal.z*p0.z;
-        double dist = normal.x*aPoint.x + normal.y*aPoint.y + normal.z*aPoint.z + d;
-        return Math.abs(dist)<.01 ? 0 : dist;
+        double d = -normal.x * p0.x - normal.y * p0.y - normal.z * p0.z;
+        double dist = normal.x * aPoint.x + normal.y * aPoint.y + normal.z * aPoint.z + d;
+        return Math.abs(dist) < .01 ? 0 : dist;
     }
 
     /**
@@ -465,8 +509,9 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public Path3D copyFor(Transform3D aTrans)
     {
-        Path3D copy = clone(); copy.transform(aTrans);
-        if (_layers!=null)
+        Path3D copy = clone();
+        copy.transform(aTrans);
+        if (_layers != null)
             for (Path3D layer : copy._layers)
                 layer.transform(aTrans);
         return copy;
@@ -477,14 +522,18 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public Path3D clone()
     {
-        Path3D clone = null; try { clone = (Path3D)super.clone(); }
+        // Normal clone
+        Path3D clone;
+        try { clone = (Path3D) super.clone(); }
         catch(Exception e) { throw new RuntimeException(e); }
-        clone._elements = new ArrayList(_elements);
-        clone._points = new ArrayList(_points.size());
+
+        // Copy elements
+        clone._elements = new ArrayList<>(_elements);
+        clone._points = new ArrayList<>(_points.size());
         for (Point3D p : _points)
             clone._points.add(p.clone());
-        if (_layers!=null) {
-            clone._layers = new ArrayList(_layers.size());
+        if (_layers != null) {
+            clone._layers = new ArrayList<>(_layers.size());
             for (Path3D p : _layers)
                 clone._layers.add(p.clone());
         }
@@ -494,50 +543,82 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Returns the array of Path3D that can render this shape.
      */
-    public Path3D[] getPath3Ds()  { return _path3ds; }  Path3D _path3ds[] = { this };
+    public Path3D[] getPath3Ds()  { return _path3ds; }
+
+    // Cached array of this Path3D to efficiently satisfy super method
+    private Path3D[]  _path3ds = { this };
 
     /**
      * Standard toString implementation.
      */
-    public String toString()  { return "Path3D: " + getBBox()[0] + ", " + getBBox()[1]; }
+    public String toString()
+    {
+        Point3D[] bbox = getBBox();
+        return "Path3D: " + bbox[0] + ", " + bbox[1];
+    }
 
     /**
      * Resorts a Path3D list from back to front using Depth Sort Algorithm.
      */
-    public static void sort(List <Path3D> paths)
+    public static void sortPaths(List<Path3D> thePaths)
     {
         // Get list of paths and sort from front to back with simple Z min sort
-        Collections.sort(paths, (p0,p1) -> p0.compareZMin(p1));
+        Collections.sort(thePaths, (p0,p1) -> p0.compareZMin(p1));
 
         // Sort again front to back with exhaustive sort satisfying Depth Sort Algorithm
-        for (int i=paths.size()-1; i>0; i--) { Path3D path1 = paths.get(i); int i2 = i;
+        for (int i=thePaths.size()-1; i>0; i--) {
+
+            // Get loop path
+            Path3D path1 = thePaths.get(i);
+            int i2 = i;
 
             // Iterate over remaining paths
-            for (int j=0; j<i; j++) { Path3D path2 = paths.get(j); if (path2==path1) continue;
+            for (int j=0; j<i; j++) {
+
+                // Get loop path (if same path, just skip)
+                Path3D path2 = thePaths.get(j);
+                if (path2 == path1)
+                    continue;
 
                 // If no X/Y/Z overlap, just continue
-                if (path1.getZMin()>=path2.getZMax()) continue;
-                if (path1.getXMax()<=path2.getXMin() || path1.getXMin()>=path2.getXMax()) continue;
-                if (path1.getYMax()<=path2.getYMin() || path1.getYMin()>=path2.getYMax()) continue;
+                if (path1.getZMin() >= path2.getZMax())
+                    continue;
+                if (path1.getXMax() <= path2.getXMin() || path1.getXMin() >= path2.getXMax())
+                    continue;
+                if (path1.getYMax() <= path2.getYMin() || path1.getYMin() >= path2.getYMax())
+                    continue;
 
                 // Test path planes - if on same plane or in correct order, they don't overlap
-                int comp1 = path1.comparePlane(path2); if (comp1==ORDER_SAME || comp1==ORDER_BACK_TO_FRONT) continue;
-                int comp2 = path2.comparePlane(path1); if (comp2==ORDER_FRONT_TO_BACK) continue;
+                int comp1 = path1.comparePlane(path2);
+                if (comp1 == ORDER_SAME || comp1 == ORDER_BACK_TO_FRONT)
+                    continue;
+                int comp2 = path2.comparePlane(path1);
+                if (comp2 == ORDER_FRONT_TO_BACK)
+                    continue;
 
                 // If 2d paths don't intersect, just continue
-                if (!path1.getPath().intersects(path2.getPath(),0)) continue;
+                if (!path1.getPath().intersects(path2.getPath(),0))
+                    continue;
 
                 // If all five tests fail, try next path up from path1
-                if (i2==0) { System.err.println("Path3D.sort: Sort fail."); i = 0; } // Not sure why this can happen
-                else { path1 = paths.get(--i2); j = -1; }
+                if (i2 == 0) {  // Not sure why this can happen
+                    System.err.println("Path3D.sort: Sort fail.");
+                    i = 0;
+                }
+                else {
+                    path1 = thePaths.get(--i2);
+                    j = -1;
+                }
             }
 
             // Move poly
-            if (i2!=i) {
-                paths.remove(i2); paths.add(i, path1); }
+            if (i2 != i) {
+                thePaths.remove(i2);
+                thePaths.add(i, path1);
+            }
         }
 
         // Reverse child list so it is back to front (so front most shape will be drawn last)
-        Collections.reverse(paths);
+        Collections.reverse(thePaths);
     }
 }
