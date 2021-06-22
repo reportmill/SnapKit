@@ -52,6 +52,6 @@ public class Point3D implements Cloneable {
      */
     public String toString()
     {
-        return "Point [" + StringUtils.toString(x) + " " + StringUtils.toString(y) + " " + StringUtils.toString(z) + "]";
+        return "Point3D [" + StringUtils.toString(x) + " " + StringUtils.toString(y) + " " + StringUtils.toString(z) + "]";
     }
 }

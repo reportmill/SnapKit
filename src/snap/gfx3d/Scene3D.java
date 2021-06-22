@@ -97,7 +97,7 @@ public class Scene3D {
      */
     public Path3D localToCamera(Path3D aPath)
     {
-        return aPath.copyFor(getLocalToCamera());
+        return aPath.copyForTransform(getLocalToCamera());
     }
 
     /**

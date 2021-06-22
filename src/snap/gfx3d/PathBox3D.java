@@ -21,7 +21,7 @@ public class PathBox3D extends Shape3D {
     private double  _z1, _z2;
     
     // The path3ds
-    private Path3D[]  _path3ds;
+    private Path3D[] _path3Ds;
 
     /**
      * Creates a PathBox3D from the given Path3D.
@@ -38,7 +38,7 @@ public class PathBox3D extends Shape3D {
     public Path3D[] getPath3Ds()
     {
         // If already set, just return
-        if (_path3ds != null) return _path3ds;
+        if (_path3Ds != null) return _path3Ds;
 
         // Create paths for Z1 & Z2
         Path3D[] paths = getPaths(_path, _z1, _z2);
@@ -51,15 +51,15 @@ public class PathBox3D extends Shape3D {
 
         // Iterate over paths and set color, stroke, opacity
         for (int i=0, iMax=paths.length; i<iMax; i++) {
-            Path3D path = paths[i];
-            path.setColor(color);
-            path.setOpacity(opacity);
-            path.setStrokeColor(strokeColor);
-            path.setStroke(stroke);
+            Path3D path3D = paths[i];
+            path3D.setColor(color);
+            path3D.setOpacity(opacity);
+            path3D.setStrokeColor(strokeColor);
+            path3D.setStroke(stroke);
         }
 
         // Return paths
-        return _path3ds = paths;
+        return _path3Ds = paths;
     }
 
     /**

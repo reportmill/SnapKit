@@ -14,6 +14,9 @@ public abstract class Renderer {
     // The Scene
     protected Scene3D  _scene;
 
+    // The Renderer class
+    private static Renderer  _defaultRenderer;
+
     /**
      * Constructor.
      */
@@ -24,6 +27,21 @@ public abstract class Renderer {
 
         _camera.addPropChangeListener(pc -> cameraDidPropChange(pc));
     }
+
+    /**
+     * Returns the Camera.
+     */
+    public Camera getCamera()  { return _camera; }
+
+    /**
+     * Returns the Scene.
+     */
+    public Scene3D getScene()  { return _scene; }
+
+    /**
+     * Returns the Scene.
+     */
+    public Shape3D[] getSceneShapes()  { return _scene._shapes.toArray(new Shape3D[0]); }
 
     /**
      * Returns the 2D bounding rect for scene in camera bounds.
@@ -46,10 +64,29 @@ public abstract class Renderer {
     protected void sceneDidChange()  { }
 
     /**
+     * Creates a new Renderer for given camera.
+     */
+    public Renderer createRenderer(Camera aCamera)
+    {
+        return new Renderer2D(aCamera);
+    }
+
+    /**
      * Returns a new default renderer.
      */
     public static Renderer newRenderer(Camera aCamera)
     {
+        if (_defaultRenderer != null)
+            return _defaultRenderer.createRenderer(aCamera);
+
         return new Renderer2D(aCamera);
+    }
+
+    /**
+     * Sets a default renderer.
+     */
+    public static void setDefaultRenderer(Renderer aRenderer)
+    {
+        _defaultRenderer = aRenderer;
     }
 }

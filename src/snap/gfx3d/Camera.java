@@ -401,7 +401,7 @@ public class Camera {
      */
     public Path3D sceneToCamera(Path3D aPath)
     {
-        return aPath.copyFor(getTransform());
+        return aPath.copyForTransform(getTransform());
     }
 
     /**

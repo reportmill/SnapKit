@@ -4,6 +4,7 @@
 package snap.gfx3d;
 import snap.geom.Path;
 import snap.geom.PathIter;
+import snap.geom.Polygon;
 import snap.geom.Seg;
 
 import java.util.*;
@@ -33,6 +34,9 @@ public class Path3D extends Shape3D implements Cloneable {
     
     // The cached path (2d)
     private Path  _path;
+
+    // The Triangle path
+    private Path3D[]  _trianglePaths;
     
     // Cached pointers for iterating efficiently over the path
     private int  _nextElementIndex = -100;
@@ -318,32 +322,41 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public void align(Vector3D aVector)
     {
-        // The dot product of vector and path's normal gives the angle in the rotation plane by which to rotate the path
+        // Get transform to vector (just return if IDENTITY)
+        Transform3D xfm = getTransformToAlignToVector(aVector);
+        if (xfm == Transform3D.IDENTITY)
+            return;
+
+        // Transform this Path3D
+        transform(xfm);
+    }
+
+    /**
+     * Returns the transform to make this Path3D align with given vector.
+     */
+    public Transform3D getTransformToAlignToVector(Vector3D aVector)
+    {
+        // Get angle between Path3D.Normal and given vector
         Vector3D norm = getNormal();
-
-        // Get angle between normal and given vector
         double angle = norm.getAngleBetween(aVector);
+        if (angle == 0 || angle == 180) // THIS IS WRONG - NO 180!!!
+            return Transform3D.IDENTITY;
 
-        // If angle, transform path
-        if (angle != 0) {
+        // Get axis about which to rotate the path (its the cross product of Path3D.Normal and given vectors)
+        Vector3D rotAxis = norm.getCrossProduct(aVector);
 
-            // The axis about which to rotate the path is given by the cross product of the two vectors
-            Vector3D rotAxis = norm.getCrossProduct(aVector);
-            Transform3D xform = new Transform3D();
-            Transform3D rotMatrix = new Transform3D();
+        // Create the rotation matrix
+        Transform3D rotMatrix = new Transform3D();
+        rotMatrix.rotate(rotAxis, angle);
 
-            // create the rotation matrix
-            rotMatrix.rotate(rotAxis, angle);
+        // The point of rotation is located at the shape's center
+        Point3D rotOrigin = getCenter();
 
-            // The point of rotation is located at the shape's center
-            Point3D rotOrigin = getCenter();
-
-            xform.translate(-rotOrigin.x, -rotOrigin.y, -rotOrigin.z);
-            xform.multiply(rotMatrix);
-            xform.translate(rotOrigin.x, rotOrigin.y, rotOrigin.z);
-
-            transform(xform);
-        }
+        Transform3D xform = new Transform3D();
+        xform.translate(-rotOrigin.x, -rotOrigin.y, -rotOrigin.z);
+        xform.multiply(rotMatrix);
+        xform.translate(rotOrigin.x, rotOrigin.y, rotOrigin.z);
+        return xform;
     }
 
     /**
@@ -370,6 +383,57 @@ public class Path3D extends Shape3D implements Cloneable {
         // Draw surface normals - handy for debugging
         //Point3D c = getCenter(); Vector3D n = getNormal(); path.moveTo(c.x,c.y); path.lineTo(c.x+n.x*20,c.y+.y*20);
         return path;
+    }
+
+    /**
+     * Returns the triangle paths.
+     */
+    public Path3D[] getTrianglePaths()
+    {
+        // If already set, just return
+        if (_trianglePaths != null) return _trianglePaths;
+
+        // Create, set, return
+        Path3D[] triPaths = createTrianglePaths();
+        return _trianglePaths = triPaths;
+    }
+
+    /**
+     * Creates the triangle paths.
+     */
+    protected Path3D[] createTrianglePaths()
+    {
+        // If no normal, just return empty
+        if (Double.isNaN(getNormal().x))
+            return new Path3D[0];
+
+        // Get copy facing Z
+        Vector3D zFacing = new Vector3D(0, 0, 1);
+        Transform3D xfmToZ = getTransformToAlignToVector(zFacing);
+        Transform3D xfmFromZ = xfmToZ.invert();
+        Path3D copy = copyForTransform(xfmToZ);
+
+        // Get Path2D
+        Path path2D = copy.getPath();
+        Point3D[] bbox = copy.getBBox();
+        Polygon[] triangles = Polygon.getConvexPolys(path2D, 3);
+        double zVal = bbox[0].z;
+
+        // Get Path3Ds
+        Path3D[] triPaths = new Path3D[triangles.length];
+        for (int i=0, iMax=triangles.length; i<iMax; i++) {
+            Polygon triangle = triangles[i];
+            Path3D triPath = new Path3D();
+            triPath.moveTo(triangle.getX(0), triangle.getY(0), zVal);
+            triPath.lineTo(triangle.getX(1), triangle.getY(1), zVal);
+            triPath.lineTo(triangle.getX(2), triangle.getY(2), zVal);
+            triPath.close();
+            triPath.transform(xfmFromZ);
+            triPaths[i] = triPath;
+        }
+
+        // Return Triangle paths
+        return triPaths;
     }
 
     /**
@@ -507,7 +571,7 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Copies path for given transform.
      */
-    public Path3D copyFor(Transform3D aTrans)
+    public Path3D copyForTransform(Transform3D aTrans)
     {
         Path3D copy = clone();
         copy.transform(aTrans);
@@ -530,12 +594,12 @@ public class Path3D extends Shape3D implements Cloneable {
         // Copy elements
         clone._elements = new ArrayList<>(_elements);
         clone._points = new ArrayList<>(_points.size());
-        for (Point3D p : _points)
-            clone._points.add(p.clone());
+        for (Point3D pnt : _points)
+            clone._points.add(pnt.clone());
         if (_layers != null) {
             clone._layers = new ArrayList<>(_layers.size());
-            for (Path3D p : _layers)
-                clone._layers.add(p.clone());
+            for (Path3D path3D : _layers)
+                clone._layers.add(path3D.clone());
         }
         return clone;
     }
@@ -554,7 +618,7 @@ public class Path3D extends Shape3D implements Cloneable {
     public String toString()
     {
         Point3D[] bbox = getBBox();
-        return "Path3D: " + bbox[0] + ", " + bbox[1];
+        return "Path3D { PointCount=" + getPointCount() + ", BBox[0] = " + bbox[0] + ", BBox[1]=" + bbox[1] + " }";
     }
 
     /**

@@ -142,11 +142,13 @@ public class Polygon extends Shape implements Cloneable {
      */
     public boolean isSimple()
     {
-        // Get point count
-        int pc = getPointCount(); if (pc<3) return false;
+        // Get point count (if not at least 3 points, return false)
+        int pc = getPointCount();
+        if (pc < 3)
+            return false;
 
         // Iterate over all lines
-        for (int i=0;i<pc-1;i++) { int j = (i+1)%pc;
+        for (int i=0; i<pc-1; i++) { int j = (i+1)%pc;
 
             // Get line endpoint and see if next point is collinear
             double x0 = getX(i), y0 = getY(i);
@@ -154,15 +156,18 @@ public class Polygon extends Shape implements Cloneable {
 
             // If next point is collinear and backtracks over previous segment, return false.
             int jp1 = (j+1)%pc;
-            double jp1x = getX(jp1), jp1y = getY(jp1);
-            if (Line.isCollinear(x0, y0, x1, y1, jp1x, jp1y) && (jp1x-x0)/(x1-x0)<1)
+            double jp1x = getX(jp1);
+            double jp1y = getY(jp1);
+            boolean isCollinear = Line.isCollinear(x0, y0, x1, y1, jp1x, jp1y);
+            if (isCollinear && (jp1x-x0)/(x1-x0) < 1)
                 return false;
 
             // Iterate over remaining lines and see if they intersect
             for (int k=j+1;k<pc;k++) { int l = (k+1)%pc;
                 double x2 = getX(k), y2 = getY(k);
                 double x3 = getX(l), y3 = getY(l);
-                if (Line.intersectsLine(x0, y0, x1, y1, x2, y2, x3, y3) && i!=l) // Suppress last
+                boolean intersectsLine = Line.intersectsLine(x0, y0, x1, y1, x2, y2, x3, y3);
+                if (intersectsLine && i != l) // Suppress last
                     return false;
             }
         }
@@ -176,9 +181,9 @@ public class Polygon extends Shape implements Cloneable {
      */
     public boolean isConvex()
     {
-        if (getPointCount()<3) return true;
+        if (getPointCount() < 3) return true;
         double extAngles = Math.toDegrees(getExtAngleSum());
-        return MathUtils.equals(extAngles, 360); // Could also do intAngles==(SideCount-2)*180
+        return MathUtils.equals(extAngles, 360); // Could also do intAngles == (SideCount-2)*180
     }
 
     /**
@@ -187,15 +192,19 @@ public class Polygon extends Shape implements Cloneable {
     public double getAngle(int anIndex)
     {
         // Get 3 points surrounding index, get vector points, and return angle between
-        int pc = getPointCount(); if (pc<3) return 0;
-        int i0 = (anIndex-1+pc)%pc, i1 = anIndex, i2 = (anIndex+1)%pc;
+        int pc = getPointCount(); if (pc < 3) return 0;
+        int i0 = (anIndex-1+pc)%pc;
+        int i1 = anIndex;
+        int i2 = (anIndex+1)%pc;
         double x0 = getX(i0), y0 = getY(i0);
         double x1 = getX(i1), y1 = getY(i1);
         double x2 = getX(i2), y2 = getY(i2);
 
         // Get vector v0, from point to previous point, and v1, from point to next point
-        double v0x = x0 - x1, v0y = y0 - y1;
-        double v1x = x2 - x1, v1y = y2 - y1;
+        double v0x = x0 - x1;
+        double v0y = y0 - y1;
+        double v1x = x2 - x1;
+        double v1y = y2 - y1;
 
         // Return angle between vectors
         return Vect.getAngleBetween(v0x, v0y, v1x, v1y);
@@ -211,8 +220,10 @@ public class Polygon extends Shape implements Cloneable {
      */
     public double getExtAngleSum()
     {
-        double angle = 0; int pc = getPointCount(); if (pc<3) return 0;
-        for (int i=0;i<pc;i++) angle += getExtAngle(i);
+        double angle = 0;
+        int pc = getPointCount(); if (pc < 3) return 0;
+        for (int i=0; i<pc; i++)
+            angle += getExtAngle(i);
         return angle;
     }
 
@@ -226,27 +237,28 @@ public class Polygon extends Shape implements Cloneable {
             System.err.println("Polygon.getConvexPolys: Not simple - shouldn't happen");
             Shape shp = Shape.makeSimple(this);
             PolygonList plist = new PolygonList(shp);
-            Polygon polys0[] = plist.getPolys();
-            List <Polygon> polys1 = new ArrayList();
+            Polygon[] polys0 = plist.getPolys();
+            List<Polygon> polys1 = new ArrayList<>();
             for (Polygon poly : polys0) {
-                Polygon plist1[] = poly.getConvexPolys(aMax);
-                Collections.addAll(polys1, plist.getPolys());
+                Polygon[] plist1 = poly.getConvexPolys(aMax);
+                Collections.addAll(polys1, plist1);
             }
             return new PolygonList(polys1).getPolys();
         }
 
         // Create list with clone of first poly
         Polygon poly = clone();
-        List <Polygon> polys = new ArrayList(); polys.add(poly);
+        List<Polygon> polys = new ArrayList<>();
+        polys.add(poly);
 
         // While current is concave or has too many points, split
-        while (!poly.isConvex() || poly.getPointCount()>aMax) {
+        while (!poly.isConvex() || poly.getPointCount() > aMax) {
             poly = poly.splitConvex(aMax);
             polys.add(poly);
         }
 
         // Return Polygon array
-        return polys.toArray(new Polygon[polys.size()]);
+        return polys.toArray(new Polygon[0]);
     }
 
     /**
@@ -342,8 +354,14 @@ public class Polygon extends Shape implements Cloneable {
     {
         if (_pnts.length==0) return new Rect();
         double xmin = _pnts[0], xmax = _pnts[0], ymin = _pnts[1], ymax = _pnts[1];
-        for (int i=2;i<_pnts.length;i+=2) { double x = _pnts[i], y = _pnts[i+1];
-            xmin = Math.min(xmin,x); xmax = Math.max(xmax,x); ymin = Math.min(ymin,y); ymax = Math.max(ymax,y); }
+        for (int i=2;i<_pnts.length;i+=2) {
+            double x = _pnts[i];
+            double y = _pnts[i+1];
+            xmin = Math.min(xmin, x);
+            xmax = Math.max(xmax, x);
+            ymin = Math.min(ymin, y);
+            ymax = Math.max(ymax, y);
+        }
         return new Rect(xmin, ymin, xmax-xmin, ymax-ymin);
     }
 
@@ -359,7 +377,7 @@ public class Polygon extends Shape implements Cloneable {
     {
         try {
             Polygon clone = (Polygon)super.clone();
-            clone._pnts = Arrays.copyOf(_pnts, _pnts.length);
+            clone._pnts = _pnts.clone();
             return clone;
         }
         catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
@@ -381,17 +399,17 @@ public class Polygon extends Shape implements Cloneable {
     public static Polygon[] getConvexPolys(Shape aShape, int aMax)
     {
         // Get simple polygons
-        Polygon simplePolys[] = getSimplePolys(aShape);
+        Polygon[] simplePolys = getSimplePolys(aShape);
 
         // Get convex polygons
-        List <Polygon> cpolys = new ArrayList();
+        List<Polygon> cpolys = new ArrayList<>();
         for (Polygon spoly : simplePolys) {
-            Polygon cpolys2[] = spoly.getConvexPolys(aMax);
+            Polygon[] cpolys2 = spoly.getConvexPolys(aMax);
             Collections.addAll(cpolys, cpolys2);
         }
 
         // Return convex polygons
-        return cpolys.toArray(new Polygon[cpolys.size()]);
+        return cpolys.toArray(new Polygon[0]);
     }
 
     /**

@@ -14,16 +14,13 @@ import java.util.List;
 public class Renderer2D extends Renderer {
 
     // List of Path3Ds - for rendering
-    private List <Path3D>  _paths = new ArrayList();
+    private List<Path3D>  _paths = new ArrayList<>();
 
     // Bounds of paths in scene
     private Rect  _sceneBounds;
 
     // Whether paths list needs to be rebuilt
     private boolean  _rebuildPaths;
-
-    // The Painter
-    private Painter  _pntr;
 
     /**
      * Constructor.
@@ -104,13 +101,22 @@ public class Renderer2D extends Renderer {
         _sceneBounds = null;
 
         // Iterate over shapes and add paths
-        List <Shape3D> shapes = _scene._shapes;
-        for (Shape3D shp : shapes)
-            addPathsForShape(shp);
+        rebuildPathsImpl();
 
         // Resort paths
         Path3D.sortPaths(_paths);
         _rebuildPaths = false;
+    }
+
+    /**
+     * Rebuilds display list of Path3Ds from Shapes.
+     */
+    protected void rebuildPathsImpl()
+    {
+        // Iterate over shapes and add paths
+        List <Shape3D> shapes = _scene._shapes;
+        for (Shape3D shp : shapes)
+            addPathsForShape(shp);
     }
 
     /**
@@ -124,17 +130,18 @@ public class Renderer2D extends Renderer {
         Color color = aShape.getColor();
 
         // Iterate over paths
-        for (Path3D path3d : aShape.getPath3Ds()) {
+        Path3D[] path3Ds = aShape.getPath3Ds();
+        for (Path3D path3d : path3Ds) {
 
             // Get path copy transformed by scene transform
-            path3d = path3d.copyFor(xform);
+            path3d = path3d.copyForTransform(xform);
 
             // Backface culling : Only add paths that face the camera
             if (_camera.isFacingAway(path3d.getNormal()))
                 continue;
 
             // If color on shape, set color on path for scene lights
-            if (color!=null) {
+            if (color != null) {
                 Color rcol = light.getRenderColor(_camera, path3d, color);
                 path3d.setColor(rcol);
             }
@@ -180,34 +187,33 @@ public class Renderer2D extends Renderer {
     /**
      * Renders scene for given painter, camera and scene.
      */
-    public void renderAll(Painter aPainter)
+    public void renderAll(Painter aPntr)
     {
-        _pntr = aPainter;
-
-        paintPaths();
+        paintPaths(aPntr);
     }
 
     /**
      * Paints shape children.
      */
-    public void paintPaths()
+    public void paintPaths(Painter aPntr)
     {
         // Iterate over Path3Ds and paint
         List<Path3D> paths = getPaths();
-        for (int i=0, iMax=paths.size(); i<iMax; i++) { Path3D child = paths.get(i);
+        for (int i=0, iMax=paths.size(); i<iMax; i++) {
 
             // Paint path and path layers
-            paintPath3D(child);
+            Path3D child = paths.get(i);
+            paintPath3D(aPntr, child);
             if (child.getLayers().size()>0)
                 for (Path3D layer : child.getLayers())
-                    paintPath3D(layer);
+                    paintPath3D(aPntr, layer);
         }
     }
 
     /**
      * Paints a Path3D.
      */
-    protected void paintPath3D(Path3D aPath3D)
+    protected void paintPath3D(Painter aPntr, Path3D aPath3D)
     {
         // Get path, fill and stroke
         Shape path = aPath3D.getPath();
@@ -216,24 +222,24 @@ public class Renderer2D extends Renderer {
         // Get opacity and set if needed
         double op = aPath3D.getOpacity(), oldOP = 0;
         if (op<1) {
-            oldOP = _pntr.getOpacity();
-            _pntr.setOpacity(op*oldOP);
+            oldOP = aPntr.getOpacity();
+            aPntr.setOpacity(op*oldOP);
         }
 
         // Do fill and stroke
         if (fill!=null) {
-            _pntr.setPaint(fill);
-            _pntr.fill(path);
+            aPntr.setPaint(fill);
+            aPntr.fill(path);
         }
         if (stroke!=null) {
-            _pntr.setPaint(stroke);
-            _pntr.setStroke(aPath3D.getStroke());
-            _pntr.draw(path);
+            aPntr.setPaint(stroke);
+            aPntr.setStroke(aPath3D.getStroke());
+            aPntr.draw(path);
         }
 
         // Reset opacity if needed
         if (op<1)
-            _pntr.setOpacity(oldOP);
+            aPntr.setOpacity(oldOP);
     }
 
     /** Paints a Path3D with labels on sides. */

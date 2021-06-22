@@ -3,6 +3,8 @@
  */
 package snap.gfx3d;
 
+import java.util.Arrays;
+
 /**
  * This class represents a 3D transform. 
  */
@@ -10,6 +12,9 @@ public class Transform3D implements Cloneable {
     
     // All of the transform components
     public double[][] m = new double[][] { { 1, 0, 0, 0 }, { 0, 1, 0, 0 }, { 0, 0, 1, 0 }, { 0, 0, 0, 1 } };
+
+    // Constant for Identity transform
+    public static Transform3D  IDENTITY = new Transform3D();
     
     /**
      * Creates a Transform3D with the identity matrix.
@@ -201,6 +206,10 @@ public class Transform3D implements Cloneable {
      */
     public Transform3D invert()
     {
+        // If IDENTITY, just return
+        if (this == IDENTITY)
+            return this;
+
         double[][] mat = toArray();
         double[][] matInv = new Transform3D().toArray();
         double determinant = 1;
@@ -335,5 +344,16 @@ public class Transform3D implements Cloneable {
     {
         Transform3D copy = new Transform3D();
         return copy.fromArray(m);
+    }
+
+    /**
+     * Standard toString implementation.
+     */
+    @Override
+    public String toString()
+    {
+        return "Transform3D { " +
+            Arrays.toString(m) +
+            " }";
     }
 }
