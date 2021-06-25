@@ -23,18 +23,16 @@ public class Light {
     public Light()  { }
 
     /**
-     * Returns the render color for this light for given camera, path in camera coords and color.
+     * Returns the render color for this light for given normal and color.
      */
-    public Color getRenderColor(Camera aCam, Path3D aPath3D, Color aColor)
+    public Color getRenderColor(Vector3D normal, Color aColor)
     {
-        // Get path normal
-        Vector3D normal = aPath3D.getNormal();
-
         // Get dot product of path normal and light normal
         double normalDotLight = normal.getDotProduct(_normal);
 
         // Get coefficient of ambient (KA) and diffuse (KD) reflection for shading
-        double _ka = .6, _kd = .5;
+        double _ka = .7;
+        double _kd = .6;
 
         // Calculate color components based on original color, surface normal, reflection constants and light source
         double r = aColor.getRed() * _ka + aColor.getRed() * _kd * normalDotLight; r = Math.min(r, 1);

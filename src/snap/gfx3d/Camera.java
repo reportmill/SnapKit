@@ -7,7 +7,7 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
 import snap.view.ViewEvent;
-
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -319,29 +319,38 @@ public class Camera {
         // If already set, just return
         if (_xform3D!=null) return _xform3D;
 
+        // Get transform, set, return
+        Transform3D xfm = getTransformImpl();
+        return _xform3D = xfm;
+    }
+
+    /**
+     * Returns the transform from scene coords to camera coords.
+     */
+    private Transform3D getTransformImpl()
+    {
+        // Create transform
+        Transform3D xfm = new Transform3D();
+
+        // Add translation from Scene center to world origin
+        double midx = getWidth() / 2;
+        double midy = getHeight() / 2;
+        double midz = getDepth() / 2;
+        xfm.translate(-midx, -midy, -midz);
+
         // If pseudo 3d, just return skewed transform
         if (isPseudo3D()) {
-            Transform3D t = new Transform3D();
-            t.skew(_pseudoSkewX, _pseudoSkewY);
-            t.perspective(getFocalLength());
-            return t;
+            xfm.skew(_pseudoSkewX, _pseudoSkewY);
+            return xfm;
         }
 
-        // Bar chart used to do this rotation to "make pitch always relative to camera" instead of rotate below
-        //t.rotateY(_yaw); t.rotate(new Vector3D(1,0,0), _pitch); t.rotate(new Vector3D(0,0,1), _roll);
+        // Rotate
+        xfm.rotate(_pitch, _yaw, _roll);
 
-        // Normal transform: translate about center, rotate X & Y, translate by Z, perspective, translate back
-        double midx = getWidth()/2;
-        double midy = getHeight()/2;
-        double midz = getDepth()/2;
-        Transform3D t = new Transform3D(-midx, -midy, -midz);
-        t.rotate(_pitch, _yaw, _roll);
+        // Translate by Offset Z
         double offsetZ = getOffsetZ() - _offsetZ2;
-        t.translate(0, 0, offsetZ);
-        if (_focalLen>0)
-            t.perspective(getFocalLength());
-        t.translate(midx, midy, midz);
-        return _xform3D = t;
+        xfm.translate(0, 0, offsetZ);
+        return xfm;
     }
 
     /**
@@ -351,6 +360,7 @@ public class Camera {
     {
         // Cache and clear Z offset and second Z offset
         double offZ = getOffsetZ();
+        _offsetZ = 0;
         _offsetZ2 = 0;
         _xform3D = null;
 
@@ -369,39 +379,17 @@ public class Camera {
         bbox.lineTo(0, boxH, 0);
 
         // Transform
-        Transform3D xform = getTransform();
-        bbox.transform(xform);
+        Transform3D xfm = getTransform();
+        bbox.transform(xfm);
 
         // Get second offset Z from bounding box and restore original Z offset
         _offsetZ2 = bbox.getZMin();
         _offsetZ = offZ;
         _xform3D = null;
+
+        // Something is brokey
         if (Math.abs(_offsetZ2) > boxW)
-            _offsetZ2 = boxW*MathUtils.sign(_offsetZ2); // Something is brokey
-    }
-
-    /**
-     * Returns a point in camera coords for given point in scene coords.
-     */
-    public Point3D sceneToCamera(Point3D aPoint)
-    {
-        return sceneToCamera(aPoint.x, aPoint.y, aPoint.z);
-    }
-
-    /**
-     * Returns a point in camera coords for given point in scene coords.
-     */
-    public Point3D sceneToCamera(double aX, double aY, double aZ)
-    {
-        return getTransform().transformPoint(aX, aY, aZ);
-    }
-
-    /**
-     * Returns a path in camera coords for given path in scene coords.
-     */
-    public Path3D sceneToCamera(Path3D aPath)
-    {
-        return aPath.copyForTransform(getTransform());
+            _offsetZ2 = boxW*MathUtils.sign(_offsetZ2);
     }
 
     /**
@@ -468,9 +456,19 @@ public class Camera {
      */
     public List<Path3D> getPaths()
     {
+        // Get paths from renderer
         Renderer renderer = getRenderer();
         Renderer2D r2d = renderer instanceof Renderer2D ? (Renderer2D) renderer : new Renderer2D(this);
-        return r2d.getPaths();
+        List<Path3D> paths = r2d.getPaths();
+
+        // This is bogus, but it's only used by PDF and I don't want to change that right now
+        List<Path3D> paths2 = new ArrayList<>();
+        double dispMidX = getWidth() / 2;
+        double dispMidY = getHeight() / 2;
+        Transform3D cameraToDisplay = new Transform3D(dispMidX, dispMidY, 0);
+        for (Path3D path3D : paths)
+            paths2.add(path3D.copyForTransform(cameraToDisplay));
+        return paths2;
     }
 
     /**

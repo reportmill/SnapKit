@@ -685,4 +685,66 @@ public class Path3D extends Shape3D implements Cloneable {
         // Reverse child list so it is back to front (so front most shape will be drawn last)
         Collections.reverse(thePaths);
     }
+
+    /**
+     * Resorts a Path3D list from back to front using Depth Sort Algorithm.
+     */
+    public static void sortPaths2(List<Path3D> thePaths)
+    {
+        // Get list of paths and sort from front to back with simple Z min sort
+        Collections.sort(thePaths, (p0,p1) -> p0.compareZMin(p1));
+
+        // Sort again front to back with exhaustive sort satisfying Depth Sort Algorithm
+        for (int i=thePaths.size()-1; i>0; i--) {
+
+            // Get loop path
+            Path3D path2 = thePaths.get(i);
+            int i2 = i;
+
+            // Iterate over remaining paths
+            for (int j=0; j<i; j++) {
+
+                // Get loop path (if same path, just skip)
+                Path3D path1 = thePaths.get(j);
+                if (path1 == path2)
+                    continue;
+
+                // If no X/Y/Z overlap, just continue
+                if (path2.getZMin() >= path1.getZMax())
+                    continue;
+                if (path2.getXMax() <= path1.getXMin() || path2.getXMin() >= path1.getXMax())
+                    continue;
+                if (path2.getYMax() <= path1.getYMin() || path2.getYMin() >= path1.getYMax())
+                    continue;
+
+                // Test path planes - if on same plane or in correct order, they don't overlap
+                int comp1 = path2.comparePlane(path1);
+                if (comp1 == ORDER_SAME || comp1 == ORDER_FRONT_TO_BACK)
+                    continue;
+                int comp2 = path1.comparePlane(path2);
+                if (comp2 == ORDER_BACK_TO_FRONT)
+                    continue;
+
+                // If 2d paths don't intersect, just continue
+                if (!path2.getPath().intersects(path1.getPath(),0))
+                    continue;
+
+                // If all five tests fail, try next path up from path1
+                if (i2 == 0) {  // Not sure why this can happen
+                    System.err.println("Path3D.sort: Sort fail.");
+                    i = 0;
+                }
+                else {
+                    path2 = thePaths.get(--i2);
+                    j = -1;
+                }
+            }
+
+            // Move poly
+            if (i2 != i) {
+                thePaths.remove(i2);
+                thePaths.add(i, path2);
+            }
+        }
+    }
 }

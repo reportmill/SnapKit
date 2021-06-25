@@ -59,18 +59,21 @@ public class Renderer2D extends Renderer {
             xmax = Math.max(xmax, bb2[1].x);
             ymax = Math.max(ymax, bb2[1].y);
         }
-        return _sceneBounds = new Rect(xmin, ymin, xmax - xmin, ymax - ymin);
+
+        // Get camera midpoints
+        Camera camera = getCamera();
+        double dispMidX = camera.getWidth() / 2;
+        double dispMidY = camera.getHeight() / 2;
+
+        // Get scene bounds (shift to camera view mid point)
+        double sceneX = xmin + dispMidX;
+        double sceneY = ymin + dispMidY;
+        double sceneW = xmax - xmin;
+        double sceneH = ymax - ymin;
+
+        // Create, set, return bounds rect
+        return _sceneBounds = new Rect(sceneX, sceneY, sceneW, sceneH);
     }
-
-    /**
-     * Returns the number of Path3Ds in the display list.
-     */
-    public int getPathCount()  { return getPaths().size(); }
-
-    /**
-     * Returns the specific Path3D at the given index from the display list.
-     */
-    public Path3D getPath(int anIndex)  { return getPaths().get(anIndex); }
 
     /**
      * Adds a path to the end of the display list.
@@ -105,6 +108,18 @@ public class Renderer2D extends Renderer {
 
         // Resort paths
         Path3D.sortPaths(_paths);
+
+        // Replace with paths for projection
+        double focalLen = getCamera().getFocalLength();
+        if (focalLen > 0) {
+            Transform3D xfm = new Transform3D().perspective(focalLen);
+            for (int i=0, iMax=_paths.size(); i<iMax; i++) {
+                Path3D path3D = _paths.get(i);
+                _paths.set(i, path3D.copyForTransform(xfm));
+            }
+        }
+
+        // Clear RebuildPaths
         _rebuildPaths = false;
     }
 
@@ -125,7 +140,7 @@ public class Renderer2D extends Renderer {
     protected void addPathsForShape(Shape3D aShape)
     {
         // Get the camera transform & optionally align it to the screen
-        Transform3D xform = _camera.getTransform();
+        Transform3D worldToCameraXfm = _camera.getTransform();
         Light light = _scene.getLight();
         Color color = aShape.getColor();
 
@@ -133,21 +148,26 @@ public class Renderer2D extends Renderer {
         Path3D[] path3Ds = aShape.getPath3Ds();
         for (Path3D path3d : path3Ds) {
 
-            // Get path copy transformed by scene transform
-            path3d = path3d.copyForTransform(xform);
+            // Get normal
+            Vector3D pathNormal = path3d.getNormal();
+            Vector3D camPathNormal = worldToCameraXfm.transform(pathNormal);
+            camPathNormal.normalize();
 
             // Backface culling : Only add paths that face the camera
-            if (_camera.isFacingAway(path3d.getNormal()))
+            if (_camera.isFacingAway(camPathNormal))
                 continue;
+
+            // Get path copy transformed by scene transform
+            Path3D dispPath3D = path3d.copyForTransform(worldToCameraXfm);
 
             // If color on shape, set color on path for scene lights
             if (color != null) {
-                Color rcol = light.getRenderColor(_camera, path3d, color);
-                path3d.setColor(rcol);
+                Color rcol = light.getRenderColor(camPathNormal, color);
+                dispPath3D.setColor(rcol);
             }
 
             // Add path
-            addPath(path3d);
+            addPath(dispPath3D);
         }
     }
 
@@ -197,6 +217,12 @@ public class Renderer2D extends Renderer {
      */
     public void paintPaths(Painter aPntr)
     {
+        // Translate to center
+        Camera camera = getCamera();
+        double dispMidX = camera.getWidth() / 2;
+        double dispMidY = camera.getHeight() / 2;
+        aPntr.translate(dispMidX, dispMidY);
+
         // Iterate over Path3Ds and paint
         List<Path3D> paths = getPaths();
         for (int i=0, iMax=paths.size(); i<iMax; i++) {
@@ -208,6 +234,9 @@ public class Renderer2D extends Renderer {
                 for (Path3D layer : child.getLayers())
                     paintPath3D(aPntr, layer);
         }
+
+        // Translate back
+        aPntr.translate(-dispMidX, -dispMidY);
     }
 
     /**

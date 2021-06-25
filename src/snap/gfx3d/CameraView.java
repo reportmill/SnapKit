@@ -164,54 +164,6 @@ public class CameraView extends ParentView {
     public void removeShapes()  { _scene.removeShapes(); }
 
     /**
-     * Returns a path in camera coords for given path in local coords.
-     */
-    public Path3D localToCamera(Path3D aPath)
-    {
-        return _scene.localToCamera(aPath);
-    }
-
-    /**
-     * Returns the given vector in camera coords.
-     */
-    public Vector3D localToCameraForVector(double x, double y, double z)
-    {
-        return _scene.localToCameraForVector(x,y,z);
-    }
-
-    /**
-     * Returns whether a vector is facing camera.
-     */
-    public boolean isFacing(Vector3D aV3D)
-    {
-        return _camera.isFacing(aV3D);
-    }
-
-    /**
-     * Returns whether a vector is facing away from camera.
-     */
-    public boolean isFacingAway(Vector3D aV3D)
-    {
-        return _camera.isFacingAway(aV3D);
-    }
-
-    /**
-     * Returns whether a Path3d is facing camera.
-     */
-    public boolean isFacing(Path3D aPath)
-    {
-        return _camera.isFacing(aPath);
-    }
-
-    /**
-     * Returns whether a Path3d is facing away from camera.
-     */
-    public boolean isFacingAway(Path3D aPath)
-    {
-        return _camera.isFacingAway(aPath);
-    }
-
-    /**
      * Rebuilds display list of Path3Ds from Shapes.
      */
     protected void layoutImpl()  { }

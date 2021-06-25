@@ -69,43 +69,12 @@ public class Scene3D {
     }
 
     /**
-     * Returns the transform 3d for the scene's camera.
-     */
-    public Transform3D getLocalToCamera()
-    {
-        return _camera.getTransform();
-    }
-
-    /**
-     * Returns a point in camera coords for given point in local coords.
-     */
-    public Point3D localToCamera(Point3D aPoint)
-    {
-        return localToCamera(aPoint.x, aPoint.y, aPoint.z);
-    }
-
-    /**
-     * Returns a point in camera coords for given point in local coords.
-     */
-    public Point3D localToCamera(double aX, double aY, double aZ)
-    {
-        return getLocalToCamera().transformPoint(aX, aY, aZ);
-    }
-
-    /**
      * Returns a path in camera coords for given path in local coords.
      */
     public Path3D localToCamera(Path3D aPath)
     {
-        return aPath.copyForTransform(getLocalToCamera());
-    }
-
-    /**
-     * Returns the given vector in camera coords.
-     */
-    public Vector3D localToCamera(Vector3D aV3D)
-    {
-        return localToCameraForVector(aV3D.x, aV3D.y, aV3D.z);
+        Transform3D localToCamera = _camera.getTransform();
+        return aPath.copyForTransform(localToCamera);
     }
 
     /**
@@ -113,6 +82,9 @@ public class Scene3D {
      */
     public Vector3D localToCameraForVector(double aX, double aY, double aZ)
     {
-        Vector3D v2 = new Vector3D(aX, aY, aZ); v2.transform(getLocalToCamera()); return v2;
+        Vector3D v2 = new Vector3D(aX, aY, aZ);
+        Transform3D localToCamera = _camera.getTransform();
+        v2.transform(localToCamera);
+        return v2;
     }
 }
