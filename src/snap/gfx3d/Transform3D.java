@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
-
 import java.util.Arrays;
 
 /**
@@ -297,11 +296,7 @@ public class Transform3D implements Cloneable {
      */
     public Point3D transformPoint(double aX, double aY, double aZ)
     {
-        double x2 = m[0][0] * aX + m[1][0] * aY + m[2][0] * aZ + m[3][0];
-        double y2 = m[0][1] * aX + m[1][1] * aY + m[2][1] * aZ + m[3][1];
-        double z2 = m[0][2] * aX + m[1][2] * aY + m[2][2] * aZ + m[3][2];
-        double w =  m[0][3] * aX + m[1][3] * aY + m[2][3] * aZ + m[3][3];
-        return new Point3D(x2 / w, y2 / w, z2 / w);
+        return transform(new Point3D(aX, aY, aZ));
     }
 
     /**
@@ -309,11 +304,10 @@ public class Transform3D implements Cloneable {
      */
     public Vector3D transform(Vector3D aVector)
     {
-        Point3D p1 = transform(new Point3D(0, 0, 0));
-        Point3D p2 = transform(new Point3D(aVector.x, aVector.y, aVector.z));
-        aVector.x = p2.x - p1.x;
-        aVector.y = p2.y - p1.y;
-        aVector.z = p2.z - p1.z;
+        double x2 = m[0][0] * aVector.x + m[1][0] * aVector.y + m[2][0] * aVector.z;
+        double y2 = m[0][1] * aVector.x + m[1][1] * aVector.y + m[2][1] * aVector.z;
+        double z2 = m[0][2] * aVector.x + m[1][2] * aVector.y + m[2][2] * aVector.z;
+        aVector.x = x2; aVector.y = y2; aVector.z = z2;
         return aVector;
     }
 
@@ -322,7 +316,6 @@ public class Transform3D implements Cloneable {
      */
     public double[][] toArray()
     {
-        //double[][] mat2 = new double[4][4]; for (int i=0; i<4; i++) for (int j=0; j<4; j++) mat2[i][j] = m[i][j];
         return m.clone();
     }
 

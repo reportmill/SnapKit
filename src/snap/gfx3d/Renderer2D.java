@@ -148,6 +148,13 @@ public class Renderer2D extends Renderer {
         Path3D[] path3Ds = aShape.getPath3Ds();
         for (Path3D path3d : path3Ds) {
 
+            // If not surface (just line), do simple add
+            if (!path3d.isSurface()) {
+                Path3D dispPath3D = path3d.copyForTransform(worldToCameraXfm);
+                addPath(dispPath3D);
+                continue;
+            }
+
             // Get normal
             Vector3D pathNormal = path3d.getNormal();
             Vector3D camPathNormal = worldToCameraXfm.transform(pathNormal);
@@ -246,28 +253,29 @@ public class Renderer2D extends Renderer {
     {
         // Get path, fill and stroke
         Shape path = aPath3D.getPath();
-        Paint fill = aPath3D.getColor(), stroke = aPath3D.getStrokeColor();
+        Paint fill = aPath3D.getColor();
+        Paint stroke = aPath3D.getStrokeColor();
 
         // Get opacity and set if needed
         double op = aPath3D.getOpacity(), oldOP = 0;
-        if (op<1) {
+        if (op < 1) {
             oldOP = aPntr.getOpacity();
-            aPntr.setOpacity(op*oldOP);
+            aPntr.setOpacity(op * oldOP);
         }
 
         // Do fill and stroke
-        if (fill!=null) {
+        if (fill != null) {
             aPntr.setPaint(fill);
             aPntr.fill(path);
         }
-        if (stroke!=null) {
+        if (stroke != null) {
             aPntr.setPaint(stroke);
             aPntr.setStroke(aPath3D.getStroke());
             aPntr.draw(path);
         }
 
         // Reset opacity if needed
-        if (op<1)
+        if (op < 1)
             aPntr.setOpacity(oldOP);
     }
 

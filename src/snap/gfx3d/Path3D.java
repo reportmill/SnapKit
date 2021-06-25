@@ -249,6 +249,15 @@ public class Path3D extends Shape3D implements Cloneable {
     }
 
     /**
+     * Returns whether path is surface.
+     */
+    public boolean isSurface()
+    {
+        Vector3D normal = getNormal();
+        return !Double.isNaN(normal.x);
+    }
+
+    /**
      * Reverses the path3d.
      */
     public void reverse()
