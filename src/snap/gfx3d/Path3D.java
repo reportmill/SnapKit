@@ -35,6 +35,9 @@ public class Path3D extends Shape3D implements Cloneable {
     // The cached path (2d)
     private Path  _path;
 
+    // Cached array of this Path3D to efficiently satisfy getPath3Ds() method
+    private Path3D[]  _path3Ds = { this };
+
     // The Triangle path
     private Path3D[]  _trianglePaths;
     
@@ -600,6 +603,9 @@ public class Path3D extends Shape3D implements Cloneable {
         try { clone = (Path3D) super.clone(); }
         catch(Exception e) { throw new RuntimeException(e); }
 
+        // Reset _path3ds
+        clone._path3Ds = new Path3D[] { clone };
+
         // Copy elements
         clone._elements = new ArrayList<>(_elements);
         clone._points = new ArrayList<>(_points.size());
@@ -610,16 +616,15 @@ public class Path3D extends Shape3D implements Cloneable {
             for (Path3D path3D : _layers)
                 clone._layers.add(path3D.clone());
         }
+
+        // Return clone
         return clone;
     }
 
     /**
      * Returns the array of Path3D that can render this shape.
      */
-    public Path3D[] getPath3Ds()  { return _path3ds; }
-
-    // Cached array of this Path3D to efficiently satisfy super method
-    private Path3D[]  _path3ds = { this };
+    public Path3D[] getPath3Ds()  { return _path3Ds; }
 
     /**
      * Standard toString implementation.

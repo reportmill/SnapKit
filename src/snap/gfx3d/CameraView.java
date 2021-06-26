@@ -240,7 +240,7 @@ public class CameraView extends ParentView {
     protected void cameraChanged(PropChange aPC)
     {
         //_pcs.fireDeepChange(this, aPC);
-        relayout();
+        //relayout();
         repaint();
     }
 
