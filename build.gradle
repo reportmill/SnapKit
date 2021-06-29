@@ -1,8 +1,11 @@
 
 plugins {
-    id 'java'
-    id 'application'
+    id 'java-library'
+    id 'maven-publish'
 }
+
+group 'com.reportmill'
+version '1.0.0'
 
 sourceSets.main.java.srcDirs = ['src']
 sourceSets.main.resources.srcDirs = ['src']
@@ -18,4 +21,24 @@ repositories {
 dependencies {
 }
 
-mainClassName = 'snap.viewx.TextPane'
+publishing {
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/reportmill/SnapKit"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+                println "GitHubPackages Publish Artifact:\n\tusername=$username\n\ttoken=$password"
+            }
+        }
+    }
+
+    publications {
+        gpr(MavenPublication) {
+            artifactId 'snapkit'
+            from(components.java)
+        }
+    }
+}
