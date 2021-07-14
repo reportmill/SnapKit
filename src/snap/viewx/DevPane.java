@@ -210,7 +210,6 @@ public class DevPane extends ViewOwner {
      */
     public static void showException(View aView, Exception anExc)
     {
-        anExc.printStackTrace();
         ViewUtils.runLater(() -> {
             setDevPaneShowing(aView, true);
             ViewUtils.runLater(() -> {

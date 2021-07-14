@@ -46,13 +46,13 @@ public class ZipFileSite extends WebSite {
             catch(IOException e) { throw new RuntimeException(e); }
         }
 
-        // If HTTP or .pack.gz, use "jar:" url
-        if(getURL().getScheme().equals("http") || getURLString().endsWith(".pack.gz")) try {
+        // If HTTP or .pack.gz, use "jar:" url   -  No TeaVM support for this yet!
+        /*if(getURL().getScheme().equals("http") || getURLString().endsWith(".pack.gz")) try {
             URL url = new URL("jar:" + getURLString() + "!/");
             JarURLConnection conn = (JarURLConnection)url.openConnection();
             return _zipFile = conn.getJarFile();
         }
-        catch(IOException e) { System.err.println(e); }
+        catch(IOException e) { System.err.println(e); } */
 
         // Otherwise, get local file and create JarFile
         File sfile = getJavaFile(); if(sfile==null) return null; // Get local file
