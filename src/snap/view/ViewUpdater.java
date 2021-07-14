@@ -191,32 +191,44 @@ public class ViewUpdater {
      */
     public synchronized void paintViews(Painter aPntr, Rect aRect)
     {
-        // Save painter state, clip to rect, clear background
+        // Save painter state
         aPntr.save();
-        if (_frames!=null)
-            startTime();
-        aPntr.clip(aRect);
-        if (_rview.getFill()==null)
-            aPntr.clearRect(aRect.x, aRect.y, aRect.width, aRect.height);
 
-        // Paint views
-        if (_paintDebug)
-            paintDebug(aPntr, aRect);
-        else _rview.paintAll(aPntr);
+        // Exception handler so we make sure we always restore
+        try {
 
-        // Restore painter state and update frame counts
-        aPntr.restore();
-        if (_frames!=null) {
-            stopTime();
-            if (_pc%20==0) printTime();
+            // If calculating frame rate, call startTime
+            if (_frames != null)
+                startTime();
+
+            // Clip to rect, clear background
+            aPntr.clip(aRect);
+            if (_rview.getFill() == null)
+                aPntr.clearRect(aRect.x, aRect.y, aRect.width, aRect.height);
+
+            // Paint views
+            if (_paintDebug)
+                paintDebug(aPntr, aRect);
+            else _rview.paintAll(aPntr);
+
+            // Restore painter state and update frame counts
+            if (_frames != null) {
+                stopTime();
+                if (_pc % 20 == 0) printTime();
+            }
+
+            // If paint was called outside of paintLater (maybe Window.show() or resize), repaint all
+            if (!_painting) {
+                for (View v : _repaintViews)
+                    v._repaintRect = null;
+                _repaintViews.clear();
+                _rview.repaint();
+            }
         }
 
-        // If paint was called outside of paintLater (maybe Window.show() or resize), repaint all
-        if (!_painting) {
-            for (View v : _repaintViews)
-                v._repaintRect = null;
-            _repaintViews.clear();
-            _rview.repaint();
+        // Restore painter state
+        finally {
+            aPntr.restore();
         }
     }
 
