@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpringView width="275" height="140" PrefWidth="275" PrefHeight="140">
+  <CheckBox Name="TiledCheckBox" x="110" y="10" width="150" height="20" text="Tiled" />
+  <Label x="43" y="30" width="50" height="18" Align="CENTER" text="Offset:" />
+  <Label x="22" y="51" width="20" height="22" Align="CENTER_RIGHT" text="X:" />
+  <Spinner Name="XSpinner" x="44" y="51" width="60" height="22" Align="CENTER" />
+  <Label x="22" y="80" width="20" height="22" Align="CENTER_RIGHT" text="Y:" />
+  <Spinner Name="YSpinner" x="44" y="80" width="60" height="22" Align="CENTER" />
+  <Label x="165" y="30" width="50" height="18" Align="CENTER" text="Scale:" />
+  <Label x="144" y="51" width="20" height="22" Align="CENTER_RIGHT" text="X:" />
+  <Spinner Name="ScaleXSpinner" x="166" y="51" width="60" height="22" Align="CENTER" Step=".1" />
+  <Label x="144" y="80" width="20" height="22" Align="CENTER_RIGHT" text="Y:" />
+  <Spinner Name="ScaleYSpinner" x="166" y="80" width="60" height="22" Align="CENTER" Step=".1" />
+  <Button Name="ChooseButton" x="90" y="115" width="93" height="22" text="Choose..." />
+</SpringView>

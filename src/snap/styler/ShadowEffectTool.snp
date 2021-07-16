@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView Padding="10,4,4,4" Spacing="2" FillWidth="true">
+  <RowView Padding="4" GrowWidth="true" Spacing="2">
+    <Label PrefWidth="46" text="Softness:" />
+    <Slider Name="SoftnessSlider" GrowWidth="true" Min="1" Max="50" Value="4" />
+    <TextField Name="SoftnessText" PrefWidth="40" Padding="2,2,2,5" LeanX="RIGHT">
+      <LineBorder Color="#c0c0c0" />
+    </TextField>
+  </RowView>
+  <RowView Align="CENTER" Padding="4" GrowWidth="true" Spacing="8">
+    <ColView Align="CENTER" Padding="4" GrowHeight="true" Spacing="4">
+      <Label text="Color" />
+      <ColorWell Name="ShadowColorWell" PrefWidth="60" PrefHeight="30" />
+    </ColView>
+    <ColView Padding="4" GrowHeight="true">
+      <RowView Padding="4" GrowWidth="true" Spacing="2">
+        <Label Align="CENTER_RIGHT" text="X:" />
+        <Spinner Name="ShadowDXSpinner" PrefWidth="50" Align="CENTER" Value="0" />
+      </RowView>
+      <RowView Padding="4" GrowWidth="true" Spacing="2">
+        <Label Align="CENTER_RIGHT" text="Y:" />
+        <Spinner Name="ShadowDYSpinner" PrefWidth="50" Align="CENTER" Value="0" />
+      </RowView>
+    </ColView>
+    <ColView Align="CENTER" Padding="4" GrowHeight="true" Spacing="1">
+      <Label text="Offset:" />
+      <View Name="ShadowOffsetPanel" PrefWidth="50" PrefHeight="50" Class="rmdraw.editors.ShadowEffectTool$OffsetPanel" />
+    </ColView>
+  </RowView>
+</ColView>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView PrefWidth="275" FillWidth="true">
+  <ColView Name="MiscPane" Padding="8" FillWidth="true">
+    <RowView Spacing="5">
+      <Slider Name="TransparencySlider" GrowWidth="true" />
+      <TextField Name="TransparencyText" PrefWidth="50" PrefHeight="20" Align="CENTER" />
+    </RowView>
+  </ColView>
+</ColView>

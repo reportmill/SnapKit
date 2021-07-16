@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView Padding="15,8,8,8" Spacing="15" FillWidth="true">
+  <RowView Spacing="40" Align="CENTER">
+    <ColView Spacing="3" Align="CENTER">
+      <Label text="Color" />
+      <ColorWell Name="StrokeColorWell" PrefWidth="60" PrefHeight="30" />
+    </ColView>
+    <ColView Spacing="3" Align="CENTER">
+      <Label text="Width" />
+      <TextField Name="StrokeWidthText" PrefWidth="50" Align="CENTER" />
+      <ThumbWheel Name="StrokeWidthThumb" PrefWidth="110" PrefHeight="16" max="20" absmin="0" round="1" />
+    </ColView>
+  </RowView>
+  <ColView Spacing="5" FillWidth="true">
+    <RowView Padding="0,0,0,30">
+      <Label PrefWidth="70" text="Dash Array:" />
+      <TextField Name="DashArrayText" PrefWidth="104" PrefHeight="22" />
+    </RowView>
+    <RowView Padding="0,0,0,30">
+      <Label PrefWidth="70" text="Dash Phase:" />
+      <Spinner Name="DashPhaseSpinner" PrefWidth="58" Value="0" />
+    </RowView>
+  </ColView>
+</ColView>

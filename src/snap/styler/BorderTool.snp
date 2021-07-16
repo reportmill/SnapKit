@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView Padding="4,8,2,8" FillWidth="true">
+  <RowView Spacing="-1">
+    <CheckBox Name="StrokeCheckBox" Padding="0,0,0,8" />
+    <ToggleButton Name="LineBdrButton" PrefWidth="28" PrefHeight="24" Margin="0,0,0,32" Padding="4" ToolTip="Line Border" Position="CENTER_LEFT" />
+    <ToggleButton Name="LowerBdrButton" PrefWidth="28" PrefHeight="24" Margin="0" Padding="4" ToolTip="RaisedBorder" Position="CENTER" />
+    <ToggleButton Name="RaiseBdrButton" PrefWidth="28" PrefHeight="24" Padding="4" ToolTip="Lowered Border" Position="CENTER" />
+    <ToggleButton Name="EtchBdrButton" PrefWidth="28" PrefHeight="24" Padding="4" ToolTip="Etched Border" Position="CENTER" />
+    <ToggleButton Name="EdgeBdrButton" PrefWidth="28" PrefHeight="24" Padding="4" ToolTip="Edge Border" Position="CENTER_RIGHT" />
+  </RowView>
+  <BoxView Name="StrokePane" FillWidth="true" />
+</ColView>

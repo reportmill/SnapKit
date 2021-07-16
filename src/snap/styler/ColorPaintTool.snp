@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView Padding="20,0,20,0" Spacing="5" Align="CENTER">
+  <Label text="Color" />
+  <ColorWell Name="FillColorWell" PrefWidth="60" PrefHeight="30" />
+</ColView>

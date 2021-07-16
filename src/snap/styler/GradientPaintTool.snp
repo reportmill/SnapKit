@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView Padding="8,4,4,4" Spacing="4" FillWidth="true">
+  <View Name="ColorStopPicker" Class="rmdraw.editors.GradientStopPicker" />
+  <RowView Spacing="15" Align="CENTER">
+    <ColView Padding="4" Spacing="15" Align="CENTER">
+      <ComboBox Name="TypeComboBox" PrefWidth="95" PrefHeight="22" />
+      <Button Name="ReverseStopsButton" PrefWidth="31" PrefHeight="35" ToolTip="reverse colors" image="Reverse.png" ShowBorder="false" />
+    </ColView>
+    <View Name="RadialPicker" PrefWidth="80" PrefHeight="80" Class="rmdraw.editors.GradientAxisPicker" />
+    <ColView Name="LinearControls" PrefWidth="90" PrefHeight="80" Align="CENTER" FillWidth="true">
+      <RowView Align="CENTER" Spacing="2">
+        <Label text="Angle" />
+        <TextField Name="AngleText" PrefWidth="40" PrefHeight="20" Align="CENTER" text="300" />
+        <Label text="&#176;" />
+      </RowView>
+      <ThumbWheel Name="AngleThumb" Margin="5,4,4,4" PrefHeight="17" />
+    </ColView>
+  </RowView>
+</ColView>

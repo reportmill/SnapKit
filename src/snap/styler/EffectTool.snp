@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ColView Padding="4,8,2,8" FillWidth="true">
+  <RowView Spacing="30">
+    <CheckBox Name="EffectCheckBox" Padding="0,0,0,8" />
+    <ComboBox Name="EffectComboBox" PrefWidth="135" PrefHeight="23" />
+  </RowView>
+  <BoxView Name="EffectPane" FillWidth="true" />
+</ColView>
