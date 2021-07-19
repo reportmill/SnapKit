@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.util;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -36,6 +39,14 @@ public class FormatUtils {
         // If greater than .1, provide for 3 decimal places
         if (val >= .1)
             return formatNum("#.###", aValue);
+
+        // If greater than .01, provide for 4 decimal places
+        if (val >= .01)
+            return formatNum("#.####", aValue);
+
+        // If greater than .001, provide for 5 decimal places
+        if (val >= .001)
+            return formatNum("#.#####", aValue);
 
         // Just splat it all
         return String.valueOf(aValue);
