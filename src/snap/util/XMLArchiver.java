@@ -343,6 +343,14 @@ public class XMLArchiver {
      */
     protected Class getClassForXML(XMLElement anElement)
     {
+        // If ClassName attribute is present, try that
+        String className = anElement.getAttributeValue("ClassName");
+        if (className != null) {
+            Class cls = getClass(className);
+            if (cls != null)
+                return cls;
+        }
+
         // Get class for element name
         String name = anElement.getName();
         Class cls = getClass(name);

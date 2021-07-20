@@ -40,7 +40,8 @@ public class Effect implements XMLArchiver.Archivable {
      */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
-        XMLElement e = new XMLElement("effect");
+        String name = getClass().getSimpleName(); // "effect"
+        XMLElement e = new XMLElement(name);
         return e;
     }
 

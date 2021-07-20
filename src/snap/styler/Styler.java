@@ -159,7 +159,7 @@ public class Styler {
     /**
      * Returns the text color current text.
      */
-    public Color getTextColor()  { return null; }
+    public Color getTextColor()  { return Color.BLACK; }
 
     /**
      * Sets the text color current text.
@@ -189,7 +189,7 @@ public class Styler {
     /**
      * Sets the font size of editor's selected shape(s).
      */
-    public void setFontSize(float aSize, boolean isRelative)
+    public void setFontSize(double aSize, boolean isRelative)
     {
         Font font = getFont();
         double size = isRelative ? font.getSize() + aSize : aSize;

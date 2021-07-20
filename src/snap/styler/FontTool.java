@@ -56,13 +56,17 @@ public class FontTool extends StylerOwner {
         String fstext = _fontSizeComboBox.getText(font.getSize());
         _fontSizeComboBox.setText(fstext);
 
+        // Reset TextColorButton
+        Color textColor = styler.getTextColor();
+        setViewValue("TextColorButton", textColor != null ? textColor : Color.BLACK);
+
         // Reset BoldButton, ItalicButton, UnderlineButton, OutlineButton
         setViewValue("BoldButton", font.isBold());
-        setViewEnabled("BoldButton", font.getBold()!=null);
+        setViewEnabled("BoldButton", font.getBold() != null);
         setViewValue("ItalicButton", font.isItalic());
-        setViewEnabled("ItalicButton", font.getItalic()!=null);
+        setViewEnabled("ItalicButton", font.getItalic() != null);
         setViewValue("UnderlineButton", styler.isUnderlined());
-        setViewValue("OutlineButton", styler.getTextBorder()!=null);
+        setViewValue("OutlineButton", styler.getTextBorder() != null);
     }
 
     /**
@@ -85,14 +89,22 @@ public class FontTool extends StylerOwner {
         }
 
         // Handle TextColorButton
-        if (anEvent.equals("TextColorButton"))
-            styler.setTextColor(anEvent.getView(ColorButton.class).getColor());
+        if (anEvent.equals("TextColorButton")) {
+            Color color = anEvent.getView(ColorButton.class).getColor();
+            styler.setTextColor(color);
+        }
 
         // Handle FontSizeUpButton, FontSizeDownButton
-        if (anEvent.equals("FontSizeUpButton")) { Font font = styler.getFont();
-            styler.setFontSize(font.getSize()<16? 1 : 2, true); }
-        if (anEvent.equals("FontSizeDownButton")) { Font font = styler.getFont();
-            styler.setFontSize(font.getSize()<16? -1 : -2, true); }
+        if (anEvent.equals("FontSizeUpButton")) {
+            Font font = styler.getFont();
+            double size = font.getSize() < 16 ? 1 : 2;
+            styler.setFontSize(size, true);
+        }
+        if (anEvent.equals("FontSizeDownButton")) {
+            Font font = styler.getFont();
+            double size = font.getSize() < 16 ? -1 : -2;
+            styler.setFontSize(size, true);
+        }
 
         // Handle BoldButton, ItalicButton, UnderlineButton, OutlineButton
         if (anEvent.equals("BoldButton"))
@@ -113,7 +125,7 @@ public class FontTool extends StylerOwner {
         if (anEvent.equals("FontPickerButton")) {
             Font ofont = styler.getFont();
             Font font = new FontPicker().showPicker(styler.getClientView(), ofont);
-            if(font!=null)
+            if(font != null)
                 styler.setFontFamily(font.getFamily());
         }
     }

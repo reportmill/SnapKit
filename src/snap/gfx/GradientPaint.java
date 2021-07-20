@@ -347,7 +347,8 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         // Archive basic fill attributes
-        XMLElement e = new XMLElement("fill");
+        String name = getClass().getSimpleName(); // "fill"
+        XMLElement e = new XMLElement(name);
 
         // Archive Type
         if (isLinear()) e.add("type", "gradient");

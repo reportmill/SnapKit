@@ -533,7 +533,21 @@ public class XMLElement implements Cloneable {
      */
     public XMLElement add(String aName, Object aValue)
     {
-        return add(aName, aValue.toString());
+        // Handle XMLElement
+        if (aValue instanceof XMLElement) {
+            XMLElement xml = (XMLElement) aValue;
+            if (!aName.equals(xml.getName())) {
+                XMLAttribute classNameAttr = new XMLAttribute("ClassName", xml.getName());
+                xml.addAttribute(classNameAttr, 0);
+                xml.setName(aName);
+            }
+            addElement(xml);
+            return this;
+        }
+
+        // Otherwise, just add as string
+        String valStr = aValue.toString();
+        return add(aName, valStr);
     }
 
     /**

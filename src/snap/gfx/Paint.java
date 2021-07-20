@@ -2,13 +2,13 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-
 import snap.geom.Rect;
+import snap.util.XMLArchiver;
 
 /**
  * A class to represent a fill for a Shape or text (Color, GradientPaint, ImagePaint).
  */
-public interface Paint {
+public interface Paint extends XMLArchiver.Archivable {
 
     /**
      * Returns whether paint is defined in terms independent of primitive to be filled.
