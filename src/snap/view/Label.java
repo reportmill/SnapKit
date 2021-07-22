@@ -89,6 +89,7 @@ public class Label extends ParentView {
         // Set value and fire prop change
         StringView sview = getStringView();
         sview.setText(aValue);
+        sview.setVisible(aValue != null && aValue.length() > 0);
         firePropChange(Text_Prop, oldVal, aValue);
     }
 

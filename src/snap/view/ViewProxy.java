@@ -12,7 +12,7 @@ public class ViewProxy<T extends View> extends Rect {
     private T  _view;
 
     // The children
-    private ViewProxy<?>  _children[];
+    private ViewProxy<?>[]  _children;
 
     // The insets
     private Insets  _insets;
@@ -320,10 +320,16 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public double getChildrenMaxXLastWithInsets()
     {
+        // Get LastChildMaxX, LastChildMarginRight
         ViewProxy[] children = getChildren();
-        double childMaxX = children.length > 0 ? children[children.length-1].getMaxX() : 0;
+        ViewProxy lastChild = children.length > 0 ? children[children.length-1] : null;
+        double childMaxX = lastChild != null ? lastChild.getMaxX() : 0;
+        double lastChildMarginRight = lastChild != null ? lastChild.getMargin().right : 0;
+
+        // Return LastChildMaxX plus padding right
         Insets ins = getInsetsAll();
-        return Math.ceil(childMaxX + ins.right);
+        double rightInset = Math.max(ins.right, lastChildMarginRight);
+        return Math.ceil(childMaxX + rightInset);
     }
 
     /**
@@ -344,10 +350,16 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public double getChildrenMaxYLastWithInsets()
     {
+        // Get LastChildMaxY, LastChildMarginBottom
         ViewProxy[] children = getChildren();
-        double childMaxY = children.length > 0 ? children[children.length-1].getMaxY() : 0;
+        ViewProxy lastChild = children.length > 0 ? children[children.length-1] : null;
+        double lastChildMaxY = lastChild != null ? lastChild.getMaxY() : 0;
+        double lastChildMarginBottom = lastChild != null ? lastChild.getMargin().bottom : 0;
+
+        // Return LastChildMaxY plus padding bottom
         Insets ins = getInsetsAll();
-        return Math.ceil(childMaxY + ins.bottom);
+        double bottomInset = Math.max(ins.bottom, lastChildMarginBottom);
+        return Math.ceil(lastChildMaxY + bottomInset);
     }
 
     /**
