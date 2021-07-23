@@ -1,9 +1,11 @@
 package snap.viewx;
+import snap.geom.Insets;
 import snap.geom.Rect;
 import snap.geom.RoundRect;
 import snap.geom.Shape;
 import snap.gfx.GFXEnv;
 import snap.gfx.Painter;
+import snap.util.SnapUtils;
 import snap.view.*;
 
 /**
@@ -26,11 +28,32 @@ public class DevPaneViews extends ViewOwner {
     // The BrowserView
     private BrowserView<View>  _browserView;
 
+    // The Property TableView
+    private TableView<PropValuePair>  _propTable;
+
     // The TextView
     private TextView  _textView;
 
+    // The array of PropValuePairs for PropTable
+    private PropValuePair[]  _propPairs;
+
     // The targeting handler
     private EventListener  _targLsnr = e -> devPaneMouseEvent(e);
+
+    // Constant for visible property names
+    private static final String MaxX_Prop = "MaxX";
+    private static final String MaxY_Prop = "MaxY";
+    private static String[]  PROP_NAMES = {
+            View.X_Prop, View.Y_Prop,
+            View.Width_Prop, View.Height_Prop,
+            MaxX_Prop, MaxY_Prop,
+            View.PrefWidth_Prop, View.PrefHeight_Prop,
+            View.Align_Prop, View.Padding_Prop, View.Spacing_Prop,
+            View.GrowWidth_Prop, View.GrowHeight_Prop,
+            View.LeanX_Prop, View.LeanY_Prop,
+            View.Font_Prop,
+            View.Margin_Prop
+    };
 
     /**
      * Constructor.
@@ -80,6 +103,8 @@ public class DevPaneViews extends ViewOwner {
     {
         if (aView==getSelView()) return;
         _browserView.setSelItem(aView);
+        _propPairs = null;
+        _propTable.setItems(getPropValuePairs());
     }
 
     /**
@@ -96,6 +121,26 @@ public class DevPaneViews extends ViewOwner {
         _targView = aView;
         _devPane._splitView.repaint();
     }
+
+    /**
+     * Returns the list of properties.
+     */
+    private PropValuePair[] getPropValuePairs()
+    {
+        // If already set, just return
+        if (_propPairs != null) return _propPairs;
+
+        // If no SelView, return empty list
+        if (getSelView() == null)
+            return _propPairs = new PropValuePair[0];
+
+        // Create new array of PropValuePairs to clear values
+        PropValuePair[] propPairs = new PropValuePair[PROP_NAMES.length];
+        for (int i=0; i<PROP_NAMES.length; i++)
+            propPairs[i] = new PropValuePair(PROP_NAMES[i]);
+        return _propPairs = propPairs;
+    }
+
 
     /**
      * Called when the DevPane.SplitView gets a mouse event.
@@ -171,6 +216,11 @@ public class DevPaneViews extends ViewOwner {
         _browserView.setItems(_devPane.getContent());
         _browserView.setPrefColWidth(120);
 
+        // Configure PropTableView
+        _propTable = getView("PropTableView", TableView.class);
+        _propTable.setCellConfigure(this :: configurePropTableCell);
+        _propTable.setCellPadding(new Insets(4));
+
         // Get TextView
         _textView = getView("TextView", TextView.class);
 
@@ -183,6 +233,9 @@ public class DevPaneViews extends ViewOwner {
     {
         // Update TargetingButton
         setViewValue("TargetingButton", isTargeting());
+
+        // Update PropTable pairs
+        _propTable.setItems(getPropValuePairs());
 
         // Update XML
         if (_updateXML) {
@@ -206,6 +259,7 @@ public class DevPaneViews extends ViewOwner {
             _devPane.getUI().repaint();
             setTargeting(false);
             _updateXML = true;
+            _propPairs = null;
         }
 
         // Handle TargetingButton
@@ -258,13 +312,14 @@ public class DevPaneViews extends ViewOwner {
     {
         // Get class name for selected view
         View selView = getSelView();
-        Class cls = selView!=null ? selView.getClass() : null; if (cls==null) return null;
+        Class cls = selView != null ? selView.getClass() : null; if (cls == null) return null;
         if (cls.isArray()) cls = cls.getComponentType();
 
         // Iterate up through class parents until URL found or null
-        while (cls!=null) {
-            String url = getSourceURL(cls); if (url!=null) return url;
-            Class scls = cls.getSuperclass(); cls = scls!=null && scls!=Object.class ? scls : null;
+        while (cls != null) {
+            String url = getSourceURL(cls); if (url != null) return url;
+            Class scls = cls.getSuperclass();
+            cls = scls != null && scls != Object.class ? scls : null;
         }
         return null;
     }
@@ -290,6 +345,95 @@ public class DevPaneViews extends ViewOwner {
 
         // Return url
         return url;
+    }
+
+    /**
+     * Configures a PropTable cell.
+     */
+    private void configurePropTableCell(ListCell<PropValuePair> aCell)
+    {
+        // Get PropValuePair for Cell (just return if empty cell)
+        PropValuePair propPair = aCell.getItem();
+        if (propPair == null)
+            return;
+
+        // Configure Col 0, Col 1
+        int col = aCell.getCol();
+        if (col == 0)
+            aCell.setText(propPair.getPropName());
+        else aCell.setText(propPair.getValueString());
+    }
+
+    /**
+     * A class to represent a Prop/Prop-Value pair.
+     */
+    private class PropValuePair {
+
+        // The property name
+        private String  _propName;
+
+        // The property value
+        private Object  _propValue;
+
+        // The property value string
+        private String  _propValueStr;
+
+        /**
+         * Constructor.
+         */
+        public PropValuePair(String aPropName)
+        {
+            _propName = aPropName;
+        }
+
+        /**
+         * Returns the property name.
+         */
+        public String getPropName()  { return _propName; }
+
+        /**
+         * Returns the value.
+         */
+        public Object getValue()
+        {
+            if (_propValue != null) return _propValue;
+            return _propValue = getValueImpl();
+        }
+
+        /**
+         * Returns the value.
+         */
+        private Object getValueImpl()
+        {
+            View selView = getSelView();
+            switch (_propName) {
+                case MaxX_Prop: return selView.getX() + selView.getWidth();
+                case MaxY_Prop: return selView.getY() + selView.getHeight();
+                case View.PrefWidth_Prop: return selView.getPrefWidth();
+                case View.PrefHeight_Prop: return selView.getPrefHeight();
+                default: return getSelView().getPropValue(_propName);
+            }
+        }
+
+        /**
+         * Returns the value string.
+         */
+        public String getValueString()
+        {
+            if (_propValueStr != null) return _propValueStr;
+            return _propValueStr = getValueStringImpl();
+        }
+
+        /**
+         * Returns the value string.
+         */
+        private String getValueStringImpl()
+        {
+            Object propValue = getValue();
+            if (propValue instanceof Insets)
+                return ((Insets) propValue).getString();
+            return SnapUtils.stringValue(propValue);
+        }
     }
 
     /**
