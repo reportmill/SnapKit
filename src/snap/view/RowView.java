@@ -30,9 +30,10 @@ public class RowView extends ChildView {
      */
     public void setSpacing(double aValue)
     {
-        if (aValue==_spacing) return;
+        if (aValue == _spacing) return;
         firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
-        relayout(); relayoutParent();
+        relayout();
+        relayoutParent();
     }
 
     /**
@@ -45,7 +46,7 @@ public class RowView extends ChildView {
      */
     public void setFillHeight(boolean aValue)
     {
-        if (aValue==_fillHeight) return;
+        if (aValue == _fillHeight) return;
         firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
         relayout();
     }
@@ -88,8 +89,10 @@ public class RowView extends ChildView {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive Spacing, FillHeight
-        if (getSpacing()!=0) e.add("Spacing", getSpacing());
-        if (isFillHeight()) e.add("FillHeight", true);
+        if (getSpacing() != 0)
+            e.add("Spacing", getSpacing());
+        if (isFillHeight())
+            e.add("FillHeight", true);
         return e;
     }
 
@@ -130,7 +133,7 @@ public class RowView extends ChildView {
     public static void layout(ParentView aPar, boolean isFillHeight)
     {
         // If no children, just return
-        if (aPar.getChildrenManaged().length==0) return;
+        if (aPar.getChildrenManaged().length == 0) return;
 
         // Get Parent ViewProxy with Children proxies
         ViewProxy par = ViewProxy.getProxy(aPar);
@@ -168,7 +171,7 @@ public class RowView extends ChildView {
     public static void layoutProxy(ViewProxy aPar, boolean isFillHeight)
     {
         // If no children, just return
-        if (aPar.getChildCount()==0) return;
+        if (aPar.getChildCount() == 0) return;
 
         // Load layout rects and return
         layoutProxyX(aPar);
@@ -181,14 +184,9 @@ public class RowView extends ChildView {
     private static void layoutProxyX(ViewProxy aPar)
     {
         // Get parent info
-        ViewProxy children[] = aPar.getChildren();
+        ViewProxy[] children = aPar.getChildren();
         double spacing = aPar.getSpacing();
-
-        // Get area bounds
-        double viewW = aPar.getWidth();
         Insets ins = aPar.getInsetsAll();
-        double areaX = ins.left;
-        double areaW = Math.max(viewW - ins.getWidth(), 0);
 
         // Loop vars
         double childX = 0;
@@ -201,10 +199,10 @@ public class RowView extends ChildView {
             double childW = child.getBestWidth(-1);
 
             // Update child x: advance for max of spacing and margins
-            double lastMargin = lastChild!=null ? lastChild.getMargin().getRight() : ins.getLeft();
-            double loopMargin = child.getMargin().getLeft();
+            double lastMargin = lastChild != null ? lastChild.getMargin().right : ins.left;
+            double loopMargin = child.getMargin().left;
             double maxMargin = Math.max(lastMargin, loopMargin);
-            double childSpacing = lastChild!=null ? Math.max(spacing, maxMargin) : maxMargin;
+            double childSpacing = lastChild != null ? Math.max(spacing, maxMargin) : maxMargin;
             childX += childSpacing;
 
             // Set child bounds X and Width
@@ -217,13 +215,17 @@ public class RowView extends ChildView {
         }
 
         // If Parent.Width -1, just return (laying out for PrefWidth)
-        if (viewW<0)
+        double viewW = aPar.getWidth();
+        if (viewW < 0)
             return;
 
-        // Add margin for last child, calculate extra space and add to growers or alignment
-        double childMaxX = childX + children[children.length-1].getMargin().right;
-        int extraX = (int) Math.round(areaX + areaW - childMaxX);
-        if (extraX!=0)
+        // Calculate total layout width (last child MaxX + margin/padding)
+        double rightSpacing = Math.max(lastChild.getMargin().right, ins.right);
+        double layoutW = childX + rightSpacing;
+
+        // Calculate extra space and add to growers or alignment
+        int extraX = (int) Math.round(viewW - layoutW);
+        if (extraX != 0)
             addExtraSpaceX(aPar, extraX);
     }
 
@@ -233,7 +235,7 @@ public class RowView extends ChildView {
     private static void layoutProxyY(ViewProxy aPar, boolean isFillHeight)
     {
         // Get parent info
-        ViewProxy children[] = aPar.getChildren();
+        ViewProxy[] children = aPar.getChildren();
         double alignY = aPar.getAlignYAsDouble();
 
         // Get area bounds
@@ -247,7 +249,7 @@ public class RowView extends ChildView {
 
             // Calc Y accounting for margin and alignment
             Insets childMarg = child.getMargin();
-            double childY = areaY + childMarg.getTop();
+            double childY = areaY + childMarg.top;
             double childH;
 
             // If Parent.Height not set, set height to Child.PrefHeight
@@ -288,14 +290,14 @@ public class RowView extends ChildView {
     private static void addExtraSpaceX(ViewProxy aPar, int extra)
     {
         // If grow shapes, add grow
-        if (aPar.getGrowWidthCount()>0)
+        if (aPar.getGrowWidthCount() > 0)
             addExtraSpaceX_ToGrowers(aPar, extra);
 
         // Otherwise, if FillWidth, extend last child
         //else if (fillWidth) { ViewProxy ch = children[children.length - 1]; ch.setWidth(ch.getWidth() + extra); }
 
         // Otherwise, check for horizontal alignment/lean shift
-        else if (extra>0)
+        else if (extra > 0)
             addExtraSpaceX_ToAlign(aPar, extra);
     }
 
@@ -306,18 +308,18 @@ public class RowView extends ChildView {
     {
         // Get amount to add to each grower (plus 1 for some if not evenly divisible by grow)
         int grow = aPar.getGrowWidthCount();
-        int each = extra/grow;
+        int each = extra / grow;
         int eachP1 = each + MathUtils.sign(extra);
-        int count2 = Math.abs(extra%grow);
+        int count2 = Math.abs(extra % grow);
 
         // Iterate over children and add their share (plus 1 for some if not evenly divisible by grow)
-        ViewProxy children[] = aPar.getChildren();
+        ViewProxy[] children = aPar.getChildren();
         for (int i=0, j=0, shiftX = 0, iMax=children.length; i<iMax; i++) {
             ViewProxy child = children[i];
-            if (shiftX!=0)
+            if (shiftX != 0)
                 child.setX(child.getX() + shiftX);
             if (child.isGrowWidth()) {
-                int each3 = j<count2? eachP1 : each;
+                int each3 = j < count2 ? eachP1 : each;
                 child.setWidth(child.getWidth() + each3);
                 shiftX += each3; j++;
             }
@@ -329,13 +331,13 @@ public class RowView extends ChildView {
      */
     private static void addExtraSpaceX_ToAlign(ViewProxy par, double extra)
     {
-        ViewProxy children[] = par.getChildren();
+        ViewProxy[] children = par.getChildren();
         double alignX = par.getAlignXAsDouble();
         for (ViewProxy child : children) {
             alignX = Math.max(alignX, child.getLeanXAsDouble());
             double shiftX = extra * alignX;
-            if (shiftX>0)
-                child.setX(child.getX() + extra*alignX);
+            if (shiftX > 0)
+                child.setX(child.getX() + extra * alignX);
         }
     }
 }

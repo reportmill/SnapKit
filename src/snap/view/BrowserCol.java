@@ -31,8 +31,8 @@ public class BrowserCol <T> extends ListView <T> {
         scroll.setShowVBar(true);
         scroll.setBarSize(12);
 
-        // Add listener for ListArea.MousePress to update Browser.SelCol
-        getListArea().addEventFilter(e -> listAreaMousePressed(e), MousePress);
+        // Add listener for ListArea.MouseRelease to update Browser.SelCol
+        getListArea().addEventFilter(e -> listAreaMouseReleased(e), MouseRelease);
     }
 
     /**
@@ -56,12 +56,10 @@ public class BrowserCol <T> extends ListView <T> {
     /**
      * Called before ListArea.MousePress.
      */
-    protected void listAreaMousePressed(ViewEvent anEvent)
+    protected void listAreaMouseReleased(ViewEvent anEvent)
     {
-        getUpdater().runBeforeUpdate(() -> {
-            _browser.setSelColIndex(_index);
-            _browser.scrollSelToVisible();
-        });
+        _browser.setSelColIndex(_index);
+        _browser.scrollSelToVisible();
     }
 
     /**
@@ -77,11 +75,14 @@ public class BrowserCol <T> extends ListView <T> {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        double prefWidth0 = super.getPrefWidthImpl(aH);
-        double width = _browser.getScrollView().getScroller().getWidth();
+        // Calculate MinWidth
+        Scroller scroller = _browser.getScrollView().getScroller();
+        double scrollerW = scroller.getWidth();
         int colCount = Math.min(_browser.getColCount(), _browser.getPrefColCount());
-        double minWidth = width/colCount;
-        double pw = Math.max(prefWidth0, minWidth);
-        return pw;
+        double minW = Math.floor(scrollerW / colCount);
+
+        // Get normal PrefWidth and return
+        double prefW = super.getPrefWidthImpl(aH);
+        return Math.max(prefW, minW);
     }
 }

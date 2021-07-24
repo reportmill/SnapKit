@@ -194,7 +194,7 @@ public class Scroller extends ParentView implements ViewHost {
      */
     protected void setScrollWidth(double aValue)
     {
-        if (aValue==_scrollWidth) return;
+        if (aValue == _scrollWidth) return;
         firePropChange(ScrollWidth_Prop, _scrollWidth, _scrollWidth = aValue);
     }
 
@@ -208,7 +208,7 @@ public class Scroller extends ParentView implements ViewHost {
      */
     protected void setScrollHeight(double aValue)
     {
-        if (aValue==_scrollHeight) return;
+        if (aValue == _scrollHeight) return;
         firePropChange(ScrollHeight_Prop, _scrollHeight, _scrollHeight = aValue);
     }
 
@@ -336,29 +336,39 @@ public class Scroller extends ParentView implements ViewHost {
     public void scrollToVisible(Shape aShape)
     {
         // Get Scroller scroll and size
-        double visX = getScrollX();
-        double visY = getScrollY();
-        double visW = getWidth();
-        double visH = getHeight(); if (visW==0 || visH==0) return;
+        double scrollX = getScrollX();
+        double scrollY = getScrollY();
+        double scrollW = getWidth(); if (scrollW == 0) return;
+        double scrollH = getHeight(); if (scrollH == 0) return;
 
-        // Get given shape
+        // Get shape bounds
         Rect shapeBnds = aShape.getBounds();
-        double shapeX = visX + shapeBnds.x;
-        double shapeY = visY + shapeBnds.y;
-        double shapeW = shapeBnds.getWidth();
-        double shapeH = shapeBnds.getHeight();
+        double shapeX = shapeBnds.x;
+        double shapeY = shapeBnds.y;
+        double shapeW = shapeBnds.width;
+        double shapeH = shapeBnds.height;
 
-        // Calculate/set new visible x and y: If shape rect is outside vrect, shift vrect to it; if bigger, center it
-        double visX2 = shapeX<visX ? shapeX : shapeX+shapeW>visX+visW ? shapeX+shapeW-visW : visX;
-        if (shapeW>visW)
-            visX2 += (shapeW-visW)/2;
-        double visY2 = shapeY<visY ? shapeY : shapeY+shapeH>visY+visH ? shapeY+shapeH-visH : visY;
-        if (shapeH>visH)
-            visY2 += (shapeH-visH)/2;
-        //setScrollX(nvx); setScrollY(nvy);
+        // Calculate new ScrollX: If shape rect is outside vrect, shift vrect to it; if bigger, center it
+        double scrollX2 = scrollX;
+        if (shapeX < 0)
+            scrollX2 = scrollX + shapeX;
+        else if (shapeX + shapeW > scrollW)
+            scrollX2 = scrollX + (shapeX + shapeW - scrollW);
+        if (shapeW > scrollW)
+            scrollX2 += Math.round((shapeW - scrollW) / 2);
+
+        // Calculate new ScrollY: If shape rect is outside vrect, shift vrect to it; if bigger, center it
+        double scrollY2 = scrollY;
+        if (shapeY < 0)
+            scrollY2 = scrollY + shapeY;
+        else if (shapeY + shapeH > scrollH)
+            scrollY2 = scrollY + (shapeY + shapeH - scrollH);
+        if (shapeH > scrollH)
+            scrollY2 += Math.round((shapeH - scrollH) / 2);
 
         // Set new value (with anim)
-        getAnimCleared(250).setValue(ScrollX_Prop, visX2).setValue(ScrollY_Prop, visY2).play();
+        getAnimCleared(250).setValue(ScrollX_Prop, scrollX2).setValue(ScrollY_Prop, scrollY2).play();
+        //setScrollX(scrollX2); setScrollY(scrollY2);
     }
 
     /**
@@ -435,7 +445,7 @@ public class Scroller extends ParentView implements ViewHost {
     protected void layoutImpl()
     {
         // If no content, just return
-        if (_content==null) return;
+        if (_content == null) return;
 
         // Get area bounds
         Insets ins = getInsetsAll();
@@ -449,18 +459,28 @@ public class Scroller extends ParentView implements ViewHost {
         double contentW = contentSize.width;
         double contentH = contentSize.height;
 
-        // Get content X
+        // Get content X from current scroll position (if now too far, pull back)
         double contentX = getScrollX();
-        if (contentX > contentW - areaW) {
+        if (contentW < areaW) {
             double alignX = _content.getLeanX() != null ? ViewUtils.getLeanX(_content) : ViewUtils.getAlignX(this);
             contentX = areaX + Math.round(contentW - areaW) * alignX;
+            _scrollX = 0;
+        }
+        else if (contentX > contentW - areaW) {
+            contentX = contentW - areaW;
+            _scrollX = contentX;
         }
 
-        // Get content Y
+        // Get content Y from current scroll position (if now too far, pull back)
         double contentY = getScrollY();
-        if (contentY > contentH - areaH) {
+        if (contentH < areaH) {
             double alignY = _content.getLeanY() != null ? ViewUtils.getLeanY(_content) : ViewUtils.getAlignY(this);
             contentY = areaY + Math.round(contentH - areaH) * alignY;
+            _scrollY = 0;
+        }
+        else if (contentY > contentH - areaH) {
+            contentY = contentH - areaH;
+            _scrollY = contentY;
         }
 
         // Set content bounds
