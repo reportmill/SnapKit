@@ -163,6 +163,11 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     public static Border blackBorder()  { return Borders.BLACK_BORDER; }
 
     /**
+     * Returns a simple empty border.
+     */
+    public static Border emptyBorder()  { return Borders.EMPTY_BORDER; }
+
+    /**
      * Creates an empty border for inset.
      */
     public static Borders.EmptyBorder createEmptyBorder(double w)

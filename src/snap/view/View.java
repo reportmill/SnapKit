@@ -1849,7 +1849,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         Insets ins = getPadding();
         Border border = getBorder();
-        if (border!=null) ins = Insets.add(ins, border.getInsets());
+        if (border != null)
+            ins = Insets.add(ins, border.getInsets());
         return ins;
     }
 

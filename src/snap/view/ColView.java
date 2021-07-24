@@ -85,9 +85,9 @@ public class ColView extends ChildView {
 
         // Archive Spacing, FillWidth
         if (getSpacing() != 0)
-            e.add("Spacing", getSpacing());
+            e.add(Spacing_Prop, getSpacing());
         if (isFillWidth())
-            e.add("FillWidth", true);
+            e.add(FillWidth_Prop, true);
         return e;
     }
 
@@ -100,10 +100,10 @@ public class ColView extends ChildView {
         super.fromXMLView(anArchiver, anElement);
 
         // Unarchive Spacing, FillWidth
-        if (anElement.hasAttribute("Spacing"))
-            setSpacing(anElement.getAttributeFloatValue("Spacing"));
-        if (anElement.hasAttribute("FillWidth"))
-            setFillWidth(anElement.getAttributeBoolValue("FillWidth"));
+        if (anElement.hasAttribute(Spacing_Prop))
+            setSpacing(anElement.getAttributeFloatValue(Spacing_Prop));
+        if (anElement.hasAttribute(FillWidth_Prop))
+            setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
     }
 
     /**
@@ -168,7 +168,7 @@ public class ColView extends ChildView {
     public static void layoutProxy(ViewProxy aPar, boolean isFillWidth)
     {
         // If no children, just return
-        if (aPar.getChildCount()==0) return;
+        if (aPar.getChildCount() == 0) return;
 
         // Load layout rects and return
         layoutProxyY(aPar);
@@ -237,25 +237,26 @@ public class ColView extends ChildView {
     {
         // Get parent info
         ViewProxy[] children = aPar.getChildren();
-        Insets ins = aPar.getInsetsAll();
-        double spacing = aPar.getSpacing();
+        Insets ins = aPar.getInsetsAll(); // Should really just use Padding
+        double parentSpacing = aPar.getSpacing();
 
         // Loop vars
         double childY = 0;
         ViewProxy lastChild = null;
+        double lastMargin = ins.top;
 
         // Iterate over children to calculate bounds Y and Height
         for (ViewProxy child : children) {
 
-            // Get child height
-            double childH = child.getBestHeight(-1); // cw?
-
-            // Update child x: advance for max of spacing and margins
-            double lastMargin = lastChild != null ? lastChild.getMargin().bottom : ins.top;
+            // Calculate spacing between lastChild and loop child
             double loopMargin = child.getMargin().top;
-            double maxMargin = Math.max(lastMargin, loopMargin);
-            double childSpacing = lastChild != null ? Math.max(spacing, maxMargin) : maxMargin;
+            double childSpacing = Math.max(lastMargin, loopMargin);
+            if (lastChild != null)
+                childSpacing = Math.max(childSpacing, parentSpacing);
+
+            // Update ChildY with spacing and calculate ChildH
             childY += childSpacing;
+            double childH = child.getBestHeight(-1);
 
             // Set child bounds Y and Height
             child.setY(childY);
@@ -264,6 +265,7 @@ public class ColView extends ChildView {
             // Update child Y loop var and last child
             childY += childH;
             lastChild = child;
+            lastMargin = child.getMargin().bottom;
         }
 
         // If Parent.Height -1, just return (laying out for PrefHeight)
@@ -272,7 +274,7 @@ public class ColView extends ChildView {
             return;
 
         // Calculate total layout height (last child MaxY + margin/padding)
-        double bottomSpacing = Math.max(lastChild.getMargin().bottom, ins.bottom);
+        double bottomSpacing = Math.max(lastMargin, ins.bottom);
         double layoutH = childY + bottomSpacing;
 
         // Calculate extra space and add to growers or alignment

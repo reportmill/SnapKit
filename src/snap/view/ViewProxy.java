@@ -1,5 +1,6 @@
 package snap.view;
 import snap.geom.*;
+import snap.gfx.Border;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +15,11 @@ public class ViewProxy<T extends View> extends Rect {
     // The children
     private ViewProxy<?>[]  _children;
 
-    // The insets
-    private Insets  _insets;
+    // The border
+    private Border  _border;
+
+    // The Padding
+    private Insets  _padding;
 
     // The alignment
     private Pos  _align;
@@ -161,11 +165,46 @@ public class ViewProxy<T extends View> extends Rect {
     }
 
     /**
-     * Sets the insets.
+     * Returns the border.
      */
-    public void setInsets(Insets theIns)
+    public Border getBorder()
     {
-        _insets = theIns;
+        if (_border != null) return _border;
+        return _border = _view != null ? _view.getBorder() : null;
+    }
+
+    /**
+     * Sets the border.
+     */
+    public void setBorder(Border aBorder)
+    {
+        _border = aBorder;
+    }
+
+    /**
+     * Returns the border insets.
+     */
+    public Insets getBorderInsets()
+    {
+        Border border = getBorder();
+        return border != null ? border.getInsets() : Insets.EMPTY;
+    }
+
+    /**
+     * Returns the padding.
+     */
+    public Insets getPadding()
+    {
+        if (_padding != null) return _padding;
+        return _padding = _view != null ? _view.getPadding() : Insets.EMPTY;
+    }
+
+    /**
+     * Sets the padding.
+     */
+    public void setPadding(Insets theIns)
+    {
+        _padding = theIns;
     }
 
     /**
@@ -173,9 +212,11 @@ public class ViewProxy<T extends View> extends Rect {
      */
     public Insets getInsetsAll()
     {
-        if (_insets != null) return _insets;
-        _insets = _view != null ? _view.getInsetsAll() : Insets.EMPTY;
-        return _insets;
+        Insets ins = getPadding();
+        Border border = getBorder();
+        if (border != null)
+            ins = Insets.add(ins, border.getInsets());
+        return ins;
     }
 
     /**

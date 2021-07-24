@@ -90,9 +90,9 @@ public class RowView extends ChildView {
 
         // Archive Spacing, FillHeight
         if (getSpacing() != 0)
-            e.add("Spacing", getSpacing());
+            e.add(Spacing_Prop, getSpacing());
         if (isFillHeight())
-            e.add("FillHeight", true);
+            e.add(FillHeight_Prop, true);
         return e;
     }
 
@@ -105,8 +105,10 @@ public class RowView extends ChildView {
         super.fromXMLView(anArchiver, anElement);
 
         // Unarchive Spacing, FillHeight
-        setSpacing(anElement.getAttributeFloatValue("Spacing", 0));
-        setFillHeight(anElement.getAttributeBoolValue("FillHeight", false));
+        if (anElement.hasAttribute(Spacing_Prop))
+            setSpacing(anElement.getAttributeFloatValue(Spacing_Prop, 0));
+        if (anElement.hasAttribute(FillHeight_Prop))
+            setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop, false));
     }
 
     /**
@@ -185,25 +187,26 @@ public class RowView extends ChildView {
     {
         // Get parent info
         ViewProxy[] children = aPar.getChildren();
-        double spacing = aPar.getSpacing();
         Insets ins = aPar.getInsetsAll();
+        double parentSpacing = aPar.getSpacing();
 
         // Loop vars
         double childX = 0;
         ViewProxy lastChild = null;
+        double lastMargin = ins.left;
 
         // Iterate over children to calculate bounds X and Width
         for (ViewProxy child : children) {
 
-            // Get child width
-            double childW = child.getBestWidth(-1);
-
-            // Update child x: advance for max of spacing and margins
-            double lastMargin = lastChild != null ? lastChild.getMargin().right : ins.left;
+            // Calculate spacing between lastChild and loop child
             double loopMargin = child.getMargin().left;
-            double maxMargin = Math.max(lastMargin, loopMargin);
-            double childSpacing = lastChild != null ? Math.max(spacing, maxMargin) : maxMargin;
+            double childSpacing = Math.max(lastMargin, loopMargin);
+            if (lastChild != null)
+                childSpacing = Math.max(childSpacing, parentSpacing);
+
+            // Update ChildY with spacing and calculate ChildH
             childX += childSpacing;
+            double childW = child.getBestWidth(-1);
 
             // Set child bounds X and Width
             child.setX(childX);
@@ -212,6 +215,7 @@ public class RowView extends ChildView {
             // Update child x loop var and last child
             childX += childW;
             lastChild = child;
+            lastMargin = lastChild.getMargin().right;
         }
 
         // If Parent.Width -1, just return (laying out for PrefWidth)
@@ -220,7 +224,7 @@ public class RowView extends ChildView {
             return;
 
         // Calculate total layout width (last child MaxX + margin/padding)
-        double rightSpacing = Math.max(lastChild.getMargin().right, ins.right);
+        double rightSpacing = Math.max(lastMargin, ins.right);
         double layoutW = childX + rightSpacing;
 
         // Calculate extra space and add to growers or alignment

@@ -12,6 +12,7 @@ public class Borders {
 
     // Common borders
     public static final Border BLACK_BORDER = Border.createLineBorder(Color.BLACK, 1);
+    public static final Border EMPTY_BORDER = Border.createEmptyBorder(0);
 
     // Border constants
     private static Color BORDER_GRAY = Color.LIGHTGRAY;
