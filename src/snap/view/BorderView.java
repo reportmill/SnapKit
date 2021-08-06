@@ -219,8 +219,8 @@ public class BorderView extends ParentView {
      */
     private static void layoutProxy(BorderViewProxy aPar)
     {
-        ColView.layoutProxy(aPar, true);
-        RowView.layoutProxy(aPar.rowProxy, true);
+        ColView.layoutProxy(aPar);
+        RowView.layoutProxy(aPar.rowProxy);
     }
 
     /**
@@ -235,6 +235,7 @@ public class BorderView extends ParentView {
         BorderViewProxy(ParentView aPar, View aCtr, View aTop, View aRgt, View aBtm, View aLft)
         {
             super(aPar);
+            setFillWidth(true);
 
             // Create RowProxy
             rowProxy = new RowViewProxy(aCtr, aLft, aRgt);
@@ -283,6 +284,7 @@ public class BorderView extends ParentView {
         RowViewProxy(View aCtr, View aLft, View aRgt)
         {
             super(null);
+            setFillHeight(true);
 
             // Create proxy child array and create/add proxies
             ViewProxy children[] = new ViewProxy[3];

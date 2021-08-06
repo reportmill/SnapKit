@@ -114,70 +114,71 @@ public class RowView extends ChildView {
     /**
      * Returns preferred width of given parent using RowView layout.
      */
-    public static double getPrefWidth(View aPar, double aH)
+    public static double getPrefWidth(View aParent, double aH)
     {
-        ViewProxy par = ViewProxy.getProxy(aPar);
+        ViewProxy par = ViewProxy.getProxy(aParent);
         return getPrefWidthProxy(par, aH);
     }
 
     /**
      * Returns preferred height of given parent using RowView layout.
      */
-    public static double getPrefHeight(View aPar, double aW)
+    public static double getPrefHeight(View aParent, double aW)
     {
-        ViewProxy par = ViewProxy.getProxy(aPar);
+        ViewProxy par = ViewProxy.getProxy(aParent);
         return getPrefHeightProxy(par, aW);
     }
 
     /**
      * Performs layout for given parent with given children.
      */
-    public static void layout(ParentView aPar, boolean isFillHeight)
+    public static void layout(ParentView aParent, boolean isFillHeight)
     {
         // If no children, just return
-        if (aPar.getChildrenManaged().length == 0) return;
+        if (aParent.getChildrenManaged().length == 0) return;
 
         // Get Parent ViewProxy with Children proxies
-        ViewProxy par = ViewProxy.getProxy(aPar);
+        ViewProxy parentProxy = ViewProxy.getProxy(aParent);
+        parentProxy.setFillHeight(isFillHeight);
 
         // Do Proxy layout
-        layoutProxy(par, isFillHeight);
+        layoutProxy(parentProxy);
 
         // Push layout bounds back to real views
-        par.setBoundsInClient();
+        parentProxy.setBoundsInClient();
     }
 
     /**
      * Returns preferred width of given parent proxy using RowView layout.
      */
-    public static double getPrefWidthProxy(ViewProxy aPar, double aH)
+    public static double getPrefWidthProxy(ViewProxy aParentProxy, double aH)
     {
-        aPar.setSize(-1, aH);
-        layoutProxy(aPar, false);
-        return aPar.getChildrenMaxXLastWithInsets();
+        aParentProxy.setSize(-1, aH);
+        layoutProxy(aParentProxy);
+        return aParentProxy.getChildrenMaxXLastWithInsets();
     }
 
     /**
      * Returns preferred height of given parent proxy using RowView layout.
      */
-    public static double getPrefHeightProxy(ViewProxy aPar, double aW)
+    public static double getPrefHeightProxy(ViewProxy aParentProxy, double aW)
     {
-        aPar.setSize(aW, -1);
-        layoutProxy(aPar, false);
-        return aPar.getChildrenMaxYAllWithInsets();
+        aParentProxy.setSize(aW, -1);
+        layoutProxy(aParentProxy);
+        return aParentProxy.getChildrenMaxYAllWithInsets();
     }
 
     /**
      * Performs layout for given ViewProxy.
      */
-    public static void layoutProxy(ViewProxy aPar, boolean isFillHeight)
+    public static void layoutProxy(ViewProxy aParentProxy)
     {
         // If no children, just return
-        if (aPar.getChildCount() == 0) return;
+        if (aParentProxy.getChildCount() == 0) return;
 
         // Load layout rects and return
-        layoutProxyX(aPar);
-        layoutProxyY(aPar, isFillHeight);
+        layoutProxyX(aParentProxy);
+        layoutProxyY(aParentProxy);
     }
 
     /**
@@ -236,11 +237,12 @@ public class RowView extends ChildView {
     /**
      * Calculates RowView layout Y & Height for given Parent proxy.
      */
-    private static void layoutProxyY(ViewProxy aPar, boolean isFillHeight)
+    private static void layoutProxyY(ViewProxy aPar)
     {
         // Get parent info
         ViewProxy[] children = aPar.getChildren();
         double alignY = aPar.getAlignYAsDouble();
+        boolean isFillHeight = aPar.isFillHeight();
 
         // Get area bounds
         double viewH = aPar.getHeight();

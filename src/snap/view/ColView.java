@@ -134,9 +134,10 @@ public class ColView extends ChildView {
 
         // Get Parent ViewProxy with Children proxies
         ViewProxy par = ViewProxy.getProxy(aPar);
+        par.setFillWidth(isFillWidth);
 
         // Do Proxy layout
-        layoutProxy(par, isFillWidth);
+        layoutProxy(par);
 
         // Push layout bounds back to real views
         par.setBoundsInClient();
@@ -148,7 +149,7 @@ public class ColView extends ChildView {
     public static double getPrefWidthProxy(ViewProxy aPar, double aH)
     {
         aPar.setSize(-1, aH);
-        layoutProxy(aPar, false);
+        layoutProxy(aPar);
         return aPar.getChildrenMaxXAllWithInsets();
     }
 
@@ -158,31 +159,32 @@ public class ColView extends ChildView {
     public static double getPrefHeightProxy(ViewProxy aPar, double aW)
     {
         aPar.setSize(aW, -1);
-        layoutProxy(aPar, false);
+        layoutProxy(aPar);
         return aPar.getChildrenMaxYLastWithInsets();
     }
 
     /**
      * Performs layout for given ViewProxy.
      */
-    public static void layoutProxy(ViewProxy aPar, boolean isFillWidth)
+    public static void layoutProxy(ViewProxy aPar)
     {
         // If no children, just return
         if (aPar.getChildCount() == 0) return;
 
         // Load layout rects and return
         layoutProxyY(aPar);
-        layoutProxyX(aPar, isFillWidth);
+        layoutProxyX(aPar);
     }
 
     /**
      * Calculates RowView layout X & Width for given Parent proxy.
      */
-    public static void layoutProxyX(ViewProxy aPar, boolean isFillWidth)
+    private static void layoutProxyX(ViewProxy aPar)
     {
         // Get parent info
         ViewProxy[] children = aPar.getChildren();
         double alignX = aPar.getAlignXAsDouble();
+        boolean isFillWidth = aPar.isFillWidth();
 
         // Get area bounds
         double viewW = aPar.getWidth();
@@ -233,7 +235,7 @@ public class ColView extends ChildView {
     /**
      * Calculates ColView layout Y & Height for given Parent proxy.
      */
-    public static void layoutProxyY(ViewProxy aPar)
+    private static void layoutProxyY(ViewProxy aPar)
     {
         // Get parent info
         ViewProxy[] children = aPar.getChildren();

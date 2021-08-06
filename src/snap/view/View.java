@@ -2207,24 +2207,51 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Handle properties
         switch(pname) {
+
+            // Size props: X, Y, Width, Height
             case View.X_Prop: return getX();
             case View.Y_Prop: return getY();
             case View.Width_Prop: return getWidth();
             case View.Height_Prop: return getHeight();
+
+            // Transform props: Rotate, ScaleX, ScaleY, TransX, TransY
             case View.Rotate_Prop: return getRotate();
             case View.ScaleX_Prop: return getScaleX();
             case View.ScaleY_Prop: return getScaleY();
             case View.TransX_Prop: return getTransX();
             case View.TransY_Prop: return getTransY();
+
+            // Sizing: Padding, Spacing, Margin, GrowWidth, GrowHeight
+            case View.Padding_Prop: return getPadding();
+            case View.Spacing_Prop:_Prop: return getSpacing();
+            case View.Margin_Prop: return getMargin();
+            case View.GrowWidth_Prop: return isGrowWidth();
+            case View.GrowHeight_Prop: return isGrowHeight();
+
+            // Alignment: Align, LeanX, LeanY
+            case View.Align_Prop: return getAlign();
+            case View.LeanX_Prop: return getLeanX();
+            case View.LeanY_Prop: return getLeanY();
+
+            // Pref Sizing: PrefWidth, PrefHeight
             case View.PrefWidth_Prop: return getPrefWidth();
             case View.PrefHeight_Prop: return getPrefHeight();
+
+            // Paint Props: Border, Fill, Effect, Opacity
+            case View.Border_Prop: return getBorder();
             case View.Fill_Prop: return getFill();
+            case View.Effect_Prop: return getEffect();
             case View.Opacity_Prop: return getOpacity();
+
+            // Text Props: Font, Text
+            case View.Font_Prop: return getFont();
             case View.Text_Prop: return getText();
             case "Enabled": return isEnabled();
-            case Selectable.Items_Prop: return ((Selectable)this).getItems();
-            case Selectable.SelItem_Prop: return ((Selectable)this).getSelItem();
-            case Selectable.SelIndex_Prop: return ((Selectable)this).getSelIndex();
+
+            // List Props: Items, SelItem, SelIndex
+            case Selectable.Items_Prop: return ((Selectable) this).getItems();
+            case Selectable.SelItem_Prop: return ((Selectable) this).getSelItem();
+            case Selectable.SelIndex_Prop: return ((Selectable) this).getSelIndex();
             default: break;
         }
 
@@ -2242,30 +2269,61 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Handle properties
         switch(pname) {
+
+            // Size props: X, Y, Width, Height
             case View.X_Prop: setX(SnapUtils.doubleValue(aValue)); break;
             case View.Y_Prop: setY(SnapUtils.doubleValue(aValue)); break;
             case View.Width_Prop: setWidth(SnapUtils.doubleValue(aValue)); break;
             case View.Height_Prop: setHeight(SnapUtils.doubleValue(aValue)); break;
+
+            // Transform props: Rotate, ScaleX, ScaleY, TransX, TransY
             case View.Rotate_Prop: setRotate(SnapUtils.doubleValue(aValue)); break;
             case View.ScaleX_Prop: setScaleX(SnapUtils.doubleValue(aValue)); break;
             case View.ScaleY_Prop: setScaleY(SnapUtils.doubleValue(aValue)); break;
             case View.TransX_Prop: setTransX(SnapUtils.doubleValue(aValue)); break;
             case View.TransY_Prop: setTransY(SnapUtils.doubleValue(aValue)); break;
+
+            // Sizing: Padding, Spacing, Margin, GrowWidth, GrowHeight
+            case View.Padding_Prop: setPadding((Insets) aValue); break;
+            case View.Spacing_Prop: setSpacing(SnapUtils.doubleValue(aValue)); break;
+            case View.Margin_Prop: setMargin((Insets) aValue); break;
+            case View.GrowWidth_Prop: setGrowWidth(SnapUtils.boolValue(aValue)); break;
+            case View.GrowHeight_Prop: setGrowHeight(SnapUtils.boolValue(aValue)); break;
+
+            // Alignment: Align, LeanX, LeanY
+            case Align_Prop: setAlign((Pos) aValue); break;
+            case LeanX_Prop: setLeanX((HPos) aValue); break;
+            case LeanY_Prop: setLeanY((VPos) aValue); break;
+
+            // Pref Sizing: PrefWidth, PrefHeight
             case View.PrefWidth_Prop: setPrefWidth(SnapUtils.doubleValue(aValue)); break;
             case View.PrefHeight_Prop: setPrefHeight(SnapUtils.doubleValue(aValue)); break;
-            case View.Fill_Prop: setFill(aValue instanceof Paint ? (Paint)aValue : null); break;
+
+            // Paint Props: Border, Fill, Effect, Opacity
+            case View.Border_Prop: setBorder((Border) aValue); break;
+            case View.Fill_Prop: setFill(aValue instanceof Paint ? (Paint) aValue : null); break;
+            case View.Effect_Prop: setEffect((Effect) aValue); break;
             case View.Opacity_Prop: setOpacity(SnapUtils.doubleValue(aValue)); break;
+
+            // Text Props: Font, Text
+            case Font_Prop: setFont((Font) aValue); break;
             case View.Text_Prop: setText(SnapUtils.stringValue(aValue)); break;
             case "Enabled": setDisabled(!SnapUtils.boolValue(aValue)); break;
-            case Selectable.Items_Prop: { Selectable sview = (Selectable)this;
-                if (aValue instanceof List) sview.setItems((List)aValue);
-                else if (aValue!=null && aValue.getClass().isArray()) sview.setItems((Object[])aValue);
+
+            // List Props: Items, SelItem, SelIndex
+            case Selectable.Items_Prop: {
+                Selectable sview = (Selectable) this;
+                if (aValue instanceof List)
+                    sview.setItems((List) aValue);
+                else if (aValue != null && aValue.getClass().isArray())
+                    sview.setItems((Object[]) aValue);
                 else sview.setItems(Collections.emptyList());
                 break;
             }
-            case Selectable.SelItem_Prop: ((Selectable)this).setSelItem(aValue); break;
-            case Selectable.SelIndex_Prop: { Selectable sview = (Selectable)this;
-                int index = aValue==null ? -1 : SnapUtils.intValue(aValue);
+            case Selectable.SelItem_Prop: ((Selectable) this).setSelItem(aValue); break;
+            case Selectable.SelIndex_Prop: {
+                Selectable sview = (Selectable) this;
+                int index = aValue == null ? -1 : SnapUtils.intValue(aValue);
                 sview.setSelIndex(index);
                 break;
             }

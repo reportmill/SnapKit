@@ -39,6 +39,9 @@ public class ViewProxy<T extends View> extends Rect {
     // Spacing
     private double  _spacing = UNSET_DOUBLE;
 
+    // Whether this proxy should fillWidth, fillHeight (common attributes for ParentView)
+    private boolean  _fillWidth, _fillHeight;
+
     // The number of children that grow width/height
     private int _growWidthCount = -1, _growHeightCount = -1;
 
@@ -319,6 +322,32 @@ public class ViewProxy<T extends View> extends Rect {
     {
         _spacing = aValue;
     }
+
+    /**
+     * Returns whether view fills width.
+     */
+    public boolean isFillWidth()
+    {
+        return _fillWidth;
+    }
+
+    /**
+     * Sets whether view fills width.
+     */
+    public void setFillWidth(boolean aValue)  { _fillWidth = aValue; }
+
+    /**
+     * Returns whether view fills height.
+     */
+    public boolean isFillHeight()
+    {
+        return _fillHeight;
+    }
+
+    /**
+     * Sets whether view fills height.
+     */
+    public void setFillHeight(boolean aValue)  { _fillHeight = aValue; }
 
     /**
      * Returns the best width.
