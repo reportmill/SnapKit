@@ -86,17 +86,26 @@ public class RadioButton extends ToggleButton {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, aH); }
+    protected double getPrefWidthImpl(double aH)
+    {
+        return RowView.getPrefWidth(this, aH);
+    }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, aW); }
+    protected double getPrefHeightImpl(double aW)
+    {
+        return RowView.getPrefHeight(this, aW);
+    }
 
     /**
      * Override to layout children.
      */
-    protected void layoutImpl()  { RowView.layout(this, false); }
+    protected void layoutImpl()
+    {
+        RowView.layout(this, false);
+    }
 
     /**
      * The View to render the Radio button.

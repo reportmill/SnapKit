@@ -243,17 +243,6 @@ public class ButtonBase extends ParentView {
     public boolean isSelected()  { return false; }
 
     /**
-     * Returns the insets.
-     */
-    public Insets getInsetsAll()
-    {
-        Insets pad = getPadding();
-        if (isShowArea())
-            pad = Insets.add(pad, 2, 2, 2, 2);
-        return pad;
-    }
-
-    /**
      * Handle events.
      */
     protected void processEvent(ViewEvent anEvent)
@@ -377,7 +366,8 @@ public class ButtonBase extends ParentView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return BoxView.getPrefWidth(this, getLabel(), aH);
+        ViewProxy<?> viewProxy = getViewProxy();
+        return BoxView.getPrefWidthProxy(viewProxy, aH);
     }
 
     /**
@@ -385,7 +375,8 @@ public class ButtonBase extends ParentView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return BoxView.getPrefHeight(this, getLabel(), aW);
+        ViewProxy<?> viewProxy = getViewProxy();
+        return BoxView.getPrefHeightProxy(viewProxy, aW);
     }
 
     /**
@@ -393,7 +384,28 @@ public class ButtonBase extends ParentView {
      */
     protected void layoutImpl()
     {
-        BoxView.layout(this, getLabel(), null, false, false);
+        ViewProxy<?> viewProxy = getViewProxy();
+        BoxView.layoutProxy(viewProxy);
+        viewProxy.setBoundsInClient();
+    }
+
+    /**
+     * Returns the ViewProxy to layout button.
+     */
+    protected ViewProxy<?> getViewProxy()
+    {
+        // Create ViewProxy with Label ViewProxy as Content
+        ViewProxy<?> viewProxy = new ViewProxy<>(this);
+        viewProxy.setContent(ViewProxy.getProxy(getLabel()));
+
+        // If ShowArea, add padding
+        if (isShowArea()) {
+            Insets padding = Insets.add(viewProxy.getPadding(), 2, 2, 2, 2);
+            viewProxy.setPadding(padding);
+        }
+
+        // Return ViewProxy
+        return viewProxy;
     }
 
     /**

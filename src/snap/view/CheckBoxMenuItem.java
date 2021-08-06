@@ -10,6 +10,12 @@ import snap.gfx.*;
  */
 public class CheckBoxMenuItem extends MenuItem {
 
+    // Constants
+    private static final int DEFAULT_BUTTON_PAD = 2;
+    private static final int CHECKBOX_GRAPHIC_WIDTH = 16;
+    private static final int CHECKBOX_GRAPHIC_SPACING = 6;
+    private static final int CHECKBOX_GRAPHIC_INSET_ALL = DEFAULT_BUTTON_PAD + CHECKBOX_GRAPHIC_WIDTH + CHECKBOX_GRAPHIC_SPACING;
+
     /**
      * Paint Button.
      */
@@ -20,20 +26,13 @@ public class CheckBoxMenuItem extends MenuItem {
     }
 
     /**
-     * Returns the insets for checkbox.
+     * Override to customize left padding for checkbox graphic.
      */
-    public Insets getInsetsAll()
+    @Override
+    protected ViewProxy<?> getViewProxy()
     {
-        Insets ins = super.getInsetsAll();
-        return new Insets(ins.top, ins.right, ins.bottom, ins.left + 2 + 16 + 6);
-    }
-
-    /**
-     * Returns the preferred height.
-     */
-    protected double getPrefHeightImpl(double aW)
-    {
-        Insets ins = getInsetsAll();
-        return Math.max(super.getPrefHeightImpl(aW), ins.top + 2 + 16 + 2 + ins.bottom);
+        ViewProxy<?> viewProxy = super.getViewProxy();
+        viewProxy.setPadding(Insets.add(getPadding(), 0, 0, 0, CHECKBOX_GRAPHIC_INSET_ALL));
+        return viewProxy;
     }
 }

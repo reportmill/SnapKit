@@ -68,7 +68,7 @@ public class ViewProxy<T extends View> extends Rect {
     public double getWidth()
     {
         if (width != UNSET_DOUBLE) return width;
-        width = _view!=null ? _view.getWidth() : 0;
+        width = _view != null ? _view.getWidth() : 0;
         return width;
     }
 
@@ -78,7 +78,7 @@ public class ViewProxy<T extends View> extends Rect {
     public double getHeight()
     {
         if (height != UNSET_DOUBLE) return height;
-        height = _view!=null ? _view.getHeight() : 0;
+        height = _view != null ? _view.getHeight() : 0;
         return height;
     }
 
@@ -114,10 +114,28 @@ public class ViewProxy<T extends View> extends Rect {
     public void setBoundsInClient()
     {
         if (_children!=null)
-            for (ViewProxy child : _children)
+            for (ViewProxy<?> child : _children)
                 child.setBoundsInClient();
         else if (_view!=null)
             _view.setBounds(x, y, width, height);
+    }
+
+    /**
+     * Returns the content.
+     */
+    public ViewProxy<?> getContent()
+    {
+        ViewProxy<?>[] children = getChildren();
+        return children.length > 0 ? children[0] : null;
+    }
+
+    /**
+     * Sets the content.
+     */
+    public void setContent(ViewProxy<?> aViewProxy)
+    {
+        ViewProxy<?>[] children = aViewProxy != null ? new ViewProxy[] { aViewProxy } : new ViewProxy[0];
+        setChildren(children);
     }
 
     /**
@@ -128,7 +146,7 @@ public class ViewProxy<T extends View> extends Rect {
     /**
      * Returns the children.
      */
-    public ViewProxy[] getChildren()
+    public ViewProxy<?>[] getChildren()
     {
         if (_children != null || _view == null) return _children;
         ParentView par = (ParentView) _view;
@@ -139,7 +157,7 @@ public class ViewProxy<T extends View> extends Rect {
     /**
      * Returns the children.
      */
-    public void setChildren(ViewProxy[] theProxies)
+    public void setChildren(ViewProxy<?>[] theProxies)
     {
         _children = theProxies;
     }
@@ -469,23 +487,26 @@ public class ViewProxy<T extends View> extends Rect {
     public String toString()
     {
         if (_view != null)
-            return "ViewProxy : " + _view.toString();
+            return "ViewProxy : " + _view;
         return "ViewProxy { Bounds=" + getBounds() + " }";
     }
 
     /**
      * Returns a proxy for given view.
      */
-    public static ViewProxy getProxy(View aView)  { return new ViewProxy(aView); }
+    public static ViewProxy<?> getProxy(View aView)
+    {
+        return aView != null ? new ViewProxy<>(aView) : null;
+    }
 
     /**
      * Returns an array of proxies for given array of views.
      */
-    public static ViewProxy[] getProxies(View ... theViews)
+    public static ViewProxy<?>[] getProxies(View ... theViews)
     {
-        ViewProxy[] proxies = new ViewProxy[theViews.length];
-        for(int i=0; i<theViews.length; i++)
-            proxies[i] = new ViewProxy(theViews[i]);
+        ViewProxy<?>[] proxies = new ViewProxy[theViews.length];
+        for(int i = 0; i < theViews.length; i++)
+            proxies[i] = new ViewProxy<>(theViews[i]);
         return proxies;
     }
 }

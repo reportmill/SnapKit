@@ -12,14 +12,20 @@ import snap.util.*;
 public class BoxView extends ParentView implements ViewHost {
     
     // The content view
-    View          _content;
+    private View  _content;
 
     // The spacing between nodes
-    double        _spacing;
+    private double  _spacing;
     
-    // Whether to fill width, height
-    boolean       _fillWidth, _fillHeight;
+    // Whether to fill width
+    private boolean  _fillWidth;
     
+    // Whether to fill height
+    private boolean  _fillHeight;
+
+    // Whether child will crop to height if not enough space available
+    private boolean  _cropHeight;
+
     // Constants for properties
     public static final String FillWidth_Prop = "FillWidth";
     public static final String FillHeight_Prop = "FillHeight";
@@ -39,7 +45,9 @@ public class BoxView extends ParentView implements ViewHost {
      */
     public BoxView(View aContent, boolean isFillWidth, boolean isFillHeight)
     {
-        setContent(aContent); setFillWidth(isFillWidth); setFillHeight(isFillHeight);
+        setContent(aContent);
+        setFillWidth(isFillWidth);
+        setFillHeight(isFillHeight);
     }
 
     /**
@@ -53,12 +61,12 @@ public class BoxView extends ParentView implements ViewHost {
     public void setContent(View aView)
     {
         // If already set, just return
-        if (aView==getContent()) return;
+        if (aView == getContent()) return;
 
         // Remove old content, set/add new content
-        if (_content!=null) removeChild(_content);
+        if (_content != null) removeChild(_content);
         _content = aView;
-        if (_content!=null) addChild(_content);
+        if (_content != null) addChild(_content);
     }
 
     /**
@@ -71,9 +79,10 @@ public class BoxView extends ParentView implements ViewHost {
      */
     public void setSpacing(double aValue)
     {
-        if (aValue==_spacing) return;
+        if (aValue == _spacing) return;
         firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
-        relayout(); relayoutParent();
+        relayout();
+        relayoutParent();
     }
 
     /**
@@ -86,7 +95,7 @@ public class BoxView extends ParentView implements ViewHost {
      */
     public void setFillWidth(boolean aValue)
     {
-        if (aValue==_fillWidth) return;
+        if (aValue == _fillWidth) return;
         firePropChange(FillWidth_Prop, _fillWidth, _fillWidth = aValue);
         relayout();
     }
@@ -101,13 +110,10 @@ public class BoxView extends ParentView implements ViewHost {
      */
     public void setFillHeight(boolean aValue)
     {
-        if (aValue==_fillHeight) return;
+        if (aValue == _fillHeight) return;
         firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
         relayout();
     }
-
-    // Whether child will crop to height if not enough space available
-    private boolean  _cropHeight;
 
     /**
      * Returns whether child will crop to height if needed.
@@ -133,8 +139,6 @@ public class BoxView extends ParentView implements ViewHost {
     protected double getPrefWidthImpl(double aH)
     {
         return getPrefWidth(this, getContent(), aH);
-        //if (isHorizontal()) return RowView.getPrefWidth(this, null, getSpacing(), aH);
-        //return ColView.getPrefWidth(this, null, aH);
     }
 
     /**
@@ -143,8 +147,6 @@ public class BoxView extends ParentView implements ViewHost {
     protected double getPrefHeightImpl(double aW)
     {
         return getPrefHeight(this, getContent(), aW);
-        //if (isHorizontal()) return RowView.getPrefHeight(this, null, aW);
-        //return ColView.getPrefHeight(this, null, _spacing, aW);
     }
 
     /**
@@ -152,9 +154,7 @@ public class BoxView extends ParentView implements ViewHost {
      */
     protected void layoutImpl()
     {
-        layout(this, getContent(), null, _fillWidth, _fillHeight);
-        //if (isHorizontal()) RowView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
-        //else ColView.layout(this, null, null, isFillWidth(), isFillHeight(), getSpacing());
+        layout(this, getContent(), _fillWidth, _fillHeight);
     }
 
     /**
@@ -222,64 +222,123 @@ public class BoxView extends ParentView implements ViewHost {
     /**
      * Returns preferred width of layout.
      */
-    public static double getPrefWidth(ParentView aPar, View aChild, double aH)
+    public static double getPrefWidth(ParentView aParent, View aChild, double aH)
     {
-        // Get insets (just return if empty)
-        Insets ins = aPar.getInsetsAll(); if (aChild==null) return ins.getWidth();
-        Insets marg = aChild.getMargin();
-
-        // Get height without insets, get best width and return
-        double h = aH>=0 ? (aH - ins.getHeight()) : aH;
-        double bw = aChild.getBestWidth(h) + marg.getWidth();
-        return bw + ins.getWidth();
+        ViewProxy<?> viewProxy = ViewProxy.getProxy(aParent);
+        viewProxy.setContent(ViewProxy.getProxy(aChild));
+        double prefW = getPrefWidthProxy(viewProxy, aH);
+        return prefW;
     }
 
     /**
      * Returns preferred height of layout.
      */
-    public static double getPrefHeight(ParentView aPar, View aChild, double aW)
+    public static double getPrefHeight(ParentView aParent, View aChild, double aW)
     {
-        // Get insets (just return if empty)
-        Insets ins = aPar.getInsetsAll(); if (aChild==null) return ins.getHeight();
-        Insets marg = aChild.getMargin();
-
-        // Get width without insets, get best height and return
-        double w = aW>=0 ? (aW - ins.getWidth()) : aW;
-        double bh = aChild.getBestHeight(w) + marg.getHeight();
-        return bh + ins.getHeight();
+        ViewProxy<?> viewProxy = ViewProxy.getProxy(aParent);
+        viewProxy.setContent(ViewProxy.getProxy(aChild));
+        double prefH = getPrefHeightProxy(viewProxy, aW);
+        return prefH;
     }
 
     /**
      * Performs Box layout for given parent, child and fill width/height.
      */
-    public static void layout(ParentView aPar, View aChild, Insets theIns, boolean isFillWidth, boolean isFillHeight)
+    public static void layout(ParentView aPar, View aChild, boolean isFillWidth, boolean isFillHeight)
     {
         // If no child, just return
-        if (aChild==null) return;
+        if (aChild == null) return;
+
+        // Create ViewProxy for parent/child view
+        ViewProxy<?> viewProxy = new ViewProxy<>(aPar);
+        viewProxy.setContent(ViewProxy.getProxy(aChild));
+        viewProxy.setFillWidth(isFillWidth);
+        viewProxy.setFillHeight(isFillHeight);
+
+        // Layout
+        layoutProxy(viewProxy);
+
+        // Apply bounds
+        viewProxy.setBoundsInClient();
+    }
+
+    /**
+     * Returns preferred width of given parent proxy using RowView layout.
+     */
+    public static double getPrefWidthProxy(ViewProxy<?> aParentProxy, double aH)
+    {
+        aParentProxy.setSize(-1, aH);
+        layoutProxy(aParentProxy);
+        return aParentProxy.getChildrenMaxXLastWithInsets();
+    }
+
+    /**
+     * Returns preferred height of given parent proxy using RowView layout.
+     */
+    public static double getPrefHeightProxy(ViewProxy<?> aParentProxy, double aW)
+    {
+        aParentProxy.setSize(aW, -1);
+        layoutProxy(aParentProxy);
+        return aParentProxy.getChildrenMaxYLastWithInsets();
+    }
+
+    /**
+     * Performs Box layout for given parent, child and fill width/height.
+     */
+    public static void layoutProxy(ViewProxy<?> aParentProxy)
+    {
+        // Get parent info
+        double viewW = aParentProxy.getWidth();
+        double viewH = aParentProxy.getHeight();
+        boolean isFillWidth = aParentProxy.isFillWidth();
+        boolean isFillHeight = aParentProxy.isFillHeight();
+
+        // Get child
+        ViewProxy<?> child = aParentProxy.getContent(); if (child == null) return;
 
         // Get parent bounds for insets (just return if empty)
-        Insets ins = theIns!=null ? theIns : aPar.getInsetsAll();
-        Insets marg = aChild.getMargin();
-        double areaX = ins.left + marg.left;
-        double areaY = ins.top + marg.top;
-        double areaW = aPar.getWidth() - ins.getWidth() - marg.getWidth(); if (areaW<=0) return;
-        double areaH = aPar.getHeight() - ins.getHeight() - marg.getHeight(); if (areaH<=0) return;
+        Insets borderInsets = aParentProxy.getBorderInsets();
+        Insets pad = aParentProxy.getPadding();
+        Insets marg = child.getMargin();
+        double areaX = borderInsets.left + Math.max(pad.left, marg.left);
+        double areaY = borderInsets.top + Math.max(pad.top, marg.top);
+        double areaW = Math.max(viewW - borderInsets.right - Math.max(pad.right, marg.right) - areaX, 0);
+        double areaH = Math.max(viewH - borderInsets.bottom - Math.max(pad.bottom, marg.bottom) - areaY, 0);
 
-        // Get content width/height
-        double childW = isFillWidth || aChild.isGrowWidth() ? areaW : aChild.getBestWidth(-1); if (childW>areaW) childW = areaW;
-        double childH = isFillHeight ? areaH : aChild.getBestHeight(childW);
+        // Get content width
+        double childW;
+        if (viewW < 0)
+            childW = child.getBestWidth(-1);
+        else if (isFillWidth || child.isGrowWidth())
+            childW = areaW;
+        else childW = child.getBestWidth(-1);  // if (childW > areaW) childW = areaW;
+
+        // Get content height
+        double childH;
+        if (viewH < 0)
+            childH = child.getBestHeight(childW);
+        else if (isFillHeight || child.isGrowHeight())
+            childH = areaH;
+        else childH = child.getBestHeight(childW);
+
+        // If Parent.Width -1, just return (laying out for PrefWidth/PrefHeight)
+        if (viewW < 0 || viewH < 0) {
+            child.setBounds(areaX, areaY, childW, childH);
+            return;
+        }
 
         // If child needs crop, make sure it fits in space
-        if (aPar instanceof BoxView && ((BoxView)aPar).isCropHeight())
+        View parentView = aParentProxy.getView();
+        if (parentView instanceof BoxView && ((BoxView) parentView).isCropHeight())
             childH = Math.min(childH, areaH);
 
         // Get content alignment as modifer/factor (0 = left, 1 = right)
-        double alignX = aChild.getLeanX()!=null ? ViewUtils.getLeanX(aChild) : ViewUtils.getAlignX(aPar);
-        double alignY = aChild.getLeanY()!=null ? ViewUtils.getLeanY(aChild) : ViewUtils.getAlignY(aPar);
+        double alignX = child.getLeanX() != null ? child.getLeanXAsDouble() : aParentProxy.getAlignXAsDouble();
+        double alignY = child.getLeanY() != null ? child.getLeanYAsDouble() : aParentProxy.getAlignYAsDouble();
 
         // Calc X/Y and set bounds
-        double childX = areaX + Math.round((areaW - childW)*alignX);
-        double childY = areaY + Math.round((areaH - childH)*alignY);
-        aChild.setBounds(childX, childY, childW, childH);
+        double childX = areaX + Math.round((areaW - childW) * alignX);
+        double childY = areaY + Math.round((areaH - childH) * alignY);
+        child.setBounds(childX, childY, childW, childH);
     }
 }

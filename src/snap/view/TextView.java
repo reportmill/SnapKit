@@ -429,7 +429,7 @@ public class TextView extends ParentView {
      */
     protected void layoutImpl()
     {
-        BoxView.layout(this, _scroll, null, true, true);
+        BoxView.layout(this, _scroll, true, true);
     }
 
     /**

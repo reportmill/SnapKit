@@ -36,11 +36,11 @@ public class RootView extends ParentView {
      */
     public void setContent(View aView)
     {
-        View old = _content; if(aView==old) return;
-        if (_content!=null)
+        View old = _content; if(aView == old) return;
+        if (_content != null)
             removeChild(_content);
         _content = aView;
-        if (_content!=null)
+        if (_content != null)
             addChild(_content);
         firePropChange(Content_Prop, old, _content);
     }
@@ -55,10 +55,10 @@ public class RootView extends ParentView {
      */
     protected void setNeedsLayoutDeep(boolean aVal)
     {
-        if (aVal==isNeedsLayoutDeep()) return;
+        if (aVal == isNeedsLayoutDeep()) return;
         super.setNeedsLayoutDeep(aVal);
         ViewUpdater updater = getUpdater();
-        if (updater!=null)
+        if (updater != null)
             updater.relayoutLater();
     }
 
@@ -88,6 +88,6 @@ public class RootView extends ParentView {
      */
     protected void layoutImpl()
     {
-        BoxView.layout(this, _content, null, true, true);
+        BoxView.layout(this, _content, true, true);
     }
 }

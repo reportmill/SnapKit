@@ -97,7 +97,7 @@ public class TransitionPane extends ParentView {
      */
     protected void layoutImpl()
     {
-        BoxView.layout(this, getContent(), null, true, true);
+        BoxView.layout(this, getContent(), true, true);
     }
 
     /**

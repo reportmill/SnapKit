@@ -237,7 +237,10 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _scroll, aH); }
+    protected double getPrefWidthImpl(double aH)
+    {
+        return BoxView.getPrefWidth(this, _scroll, aH);
+    }
 
     /**
      * Returns the preferred height.
@@ -245,11 +248,19 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     protected double getPrefHeightImpl(double aW)
     {
         // If PrefRowCount set, return PrefRowCount*RowHeight
-        if (getPrefRowCount()>0)
-            return getPrefRowCount()*getRowHeight() + getInsetsAll().getHeight();
+        if (getPrefRowCount() > 0)
+            return getPrefRowCount() * getRowHeight() + getInsetsAll().getHeight();
 
         // Return pref height of Scroll
         return BoxView.getPrefHeight(this, _scroll, aW);
+    }
+
+    /**
+     * Override to layout ScrollView.
+     */
+    protected void layoutImpl()
+    {
+        BoxView.layout(this, _scroll, true, true);
     }
 
     /**
@@ -264,11 +275,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         // Return normal version
         return super.getMaxHeight();
     }
-
-    /**
-     * Override to layout ScrollView.
-     */
-    protected void layoutImpl()  { BoxView.layout(this, _scroll, null, true, true); }
 
     /**
      * Returns text for item.

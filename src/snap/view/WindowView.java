@@ -628,17 +628,26 @@ public class WindowView extends ParentView {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, getRootView(), aH); }
+    protected double getPrefWidthImpl(double aH)
+    {
+        return BoxView.getPrefWidth(this, getRootView(), aH);
+    }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)  { return BoxView.getPrefHeight(this, getRootView(), aW); }
+    protected double getPrefHeightImpl(double aW)
+    {
+        return BoxView.getPrefHeight(this, getRootView(), aW);
+    }
 
     /**
      * Layout children.
      */
-    protected void layoutImpl()  { BoxView.layout(this, getRootView(), null, true, true); }
+    protected void layoutImpl()
+    {
+        BoxView.layout(this, getRootView(), true, true);
+    }
 
     /**
      * Returns an array of all open windows.

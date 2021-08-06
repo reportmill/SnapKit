@@ -30,6 +30,9 @@ public class MenuItem extends ButtonBase implements Cloneable {
     public static final String Selected_Prop = "Selected";
     public static final String Shortcut_Prop = "Shortcut";
 
+    // Default Inset
+    private static Insets  DEFAULT_MENU_ITEM_PADDING = new Insets(4,8,4,6);
+
     /**
      * Constructor.
      */
@@ -115,7 +118,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
     /**
      * Returns the padding default.
      */
-    public Insets getDefaultPadding()  { return _mitemIns; } static Insets _mitemIns = new Insets(4,8,4,6);
+    public Insets getDefaultPadding()  { return DEFAULT_MENU_ITEM_PADDING; }
 
     /**
      * Returns whether button displays standard background by default.

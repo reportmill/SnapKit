@@ -463,8 +463,10 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     public void setY(double aValue)
     {
-        if (aValue==getY()) return; super.setY(aValue);
-        for (TreeCol tcol : getCols()) tcol.relayout();
+        if (aValue == getY()) return;
+        super.setY(aValue);
+        for (TreeCol tcol : getCols())
+            tcol.relayout();
     }
 
     /**
@@ -472,14 +474,19 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     public void setHeight(double aValue)
     {
-        if (aValue==getHeight()) return; super.setHeight(aValue);
-        for (TreeCol tcol : getCols()) tcol.relayout();
+        if (aValue == getHeight()) return;
+        super.setHeight(aValue);
+        for (TreeCol tcol : getCols())
+            tcol.relayout();
     }
 
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _scroll, aH); }
+    protected double getPrefWidthImpl(double aH)
+    {
+        return BoxView.getPrefWidth(this, _scroll, aH);
+    }
 
     /**
      * Returns the preferred height.
@@ -487,11 +494,19 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     protected double getPrefHeightImpl(double aW)
     {
         // If PrefRowCount set, return PrefRowCount*RowHeight
-        if (getPrefRowCount()>0)
-            return getPrefRowCount()*getRowHeight() + getInsetsAll().getHeight();
+        if (getPrefRowCount() > 0)
+            return getPrefRowCount() * getRowHeight() + getInsetsAll().getHeight();
 
         // Return pref height of Scroll
         return BoxView.getPrefHeight(this, _scroll, aW);
+    }
+
+    /**
+     * Override to layout ScrollView.
+     */
+    protected void layoutImpl()
+    {
+        BoxView.layout(this, _scroll, true, true);
     }
 
     /**
@@ -500,17 +515,12 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     public double getMaxHeight()
     {
         // If MaxRowCount set, return MaxRowCount*RowHeight
-        if (getMaxRowCount()>0)
-            return getMaxRowCount()*getRowHeight() + getInsetsAll().getHeight();
+        if (getMaxRowCount() > 0)
+            return getMaxRowCount() * getRowHeight() + getInsetsAll().getHeight();
 
         // Return normal version
         return super.getMaxHeight();
     }
-
-    /**
-     * Override to layout ScrollView.
-     */
-    protected void layoutImpl()  { BoxView.layout(this, _scroll, null, true, true); }
 
     /**
      * Override to ensure that DragGesture events.
@@ -518,9 +528,12 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     protected void processEvent(ViewEvent anEvent)
     {
         // If DragGesture outside ScrollView.Scroller, just return
-        if (anEvent.isDragGesture())
+        if (anEvent.isDragGesture()) {
             if (!_scroll.getScroller().contains(anEvent.getX(), anEvent.getY())) {
-                anEvent.consume(); return; }
+                anEvent.consume();
+                return;
+            }
+        }
     }
 
     /**

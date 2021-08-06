@@ -688,7 +688,10 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return BoxView.getPrefWidth(this, _scrollGroup, aH); }
+    protected double getPrefWidthImpl(double aH)
+    {
+        return BoxView.getPrefWidth(this, _scrollGroup, aH);
+    }
 
     /**
      * Returns the preferred height.
@@ -705,7 +708,10 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Override to layout children with VBox layout.
      */
-    protected void layoutImpl()  { BoxView.layout(this, _scrollGroup, null, true, true); }
+    protected void layoutImpl()
+    {
+        BoxView.layout(this, _scrollGroup, true, true);
+    }
 
     /**
      * Handle events.

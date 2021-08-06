@@ -233,7 +233,7 @@ public class ButtonArea {
 
             // Update x/y
             Insets ins = _view.getInsetsAll();
-            double x = ins.left - 16 - 6;
+            double x = ins.left;
             double y = ins.top + 2 + Math.round((_view.getHeight() - ins.getHeight() - 2 - 16 - 2)/2);
             setXY(x, y);
         }

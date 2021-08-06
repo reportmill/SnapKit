@@ -635,7 +635,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the ViewProxy to do layout.
      */
-    private ViewProxy<?> getViewProxy()
+    protected ViewProxy<?> getViewProxy()
     {
         // Create proxy
         ViewProxy<?> viewProxy = new ViewProxy<>(this);

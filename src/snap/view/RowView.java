@@ -259,9 +259,9 @@ public class RowView extends ChildView {
             double childH;
 
             // If Parent.Height not set, set height to Child.PrefHeight
-            if (viewH<0) {
-                double cw = child.getWidth();
-                childH = child.getBestHeight(cw);
+            if (viewH < 0) {
+                double childW = child.getWidth();
+                childH = child.getBestHeight(childW);
             }
 
             // Otherwise, if Parent.FillHeight or Child.GrowHeight, set to max height
