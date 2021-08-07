@@ -59,7 +59,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     private int _cellEnd;
 
     // Set of items that need to be updated
-    private Set <T>  _updateItems = new HashSet<>();
+    private final Set <T>  _updateItems = new HashSet<>();
     
     // Value of cell width/height
     private double  _sampleWidth = -1, _sampleHeight = -1;
@@ -415,11 +415,25 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     public void updateItems(T ... theItems)
     {
+        // Sync while adding to UpdateItems
         synchronized (_updateItems) {
+
+            // If items provided, add them to list
             if (theItems != null && theItems.length > 0)
                 Collections.addAll(_updateItems, theItems);
-            else _updateItems.addAll(getItems());
+
+            // Otherwise, add items from all visible/existing cells
+            else {
+                for (View child : getChildren()) {
+                    ListCell<T> cell = child instanceof ListCell ? (ListCell) child : null;
+                    T item = cell != null ? cell.getItem() : null;
+                    if (item != null)
+                        _updateItems.add(item);
+                }
+            }
         }
+
+        // Relayout
         relayout();
     }
 
@@ -597,8 +611,8 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
                     cell.layout();
                 }
 
-                // Otherwise, if cell isn't point to item, update cell
-                else if (item != cell.getItem())
+                // Otherwise, if cell isn't point to item or registered for update, update cell
+                else if (item != cell.getItem() || _updateItems.contains(item))
                     updateCellAt(i);
             }
 
@@ -612,18 +626,9 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
             }
         }
 
-        // Get copy of items and clear
-        T[] items;
+        // Clear UpdateItems
         synchronized (_updateItems) {
-            items = (T[]) _updateItems.toArray();
             _updateItems.clear();
-        }
-
-        // Update items
-        for (T item : items) {
-            int index = getItems().indexOf(item);
-            if (index >= _cellStart && index <= _cellEnd)
-                updateCellAt(index);
         }
 
         // Do real layout
