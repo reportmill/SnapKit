@@ -24,7 +24,7 @@
     </ColView>
     <ColView Align="CENTER" Padding="4" GrowHeight="true" Spacing="1">
       <Label text="Offset:" />
-      <View Name="ShadowOffsetPanel" PrefWidth="50" PrefHeight="50" Class="rmdraw.editors.ShadowEffectTool$OffsetPanel" />
+      <View Name="ShadowOffsetPanel" PrefWidth="50" PrefHeight="50" Class="snap.styler.ShadowEffectTool$OffsetPanel" />
     </ColView>
   </RowView>
 </ColView>
