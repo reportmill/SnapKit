@@ -221,10 +221,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public static final ViewEvent.Type WinDeactivate = ViewEvent.Type.WinDeactivate;
     public static final ViewEvent.Type WinOpen = ViewEvent.Type.WinOpen;
     public static final ViewEvent.Type WinClose = ViewEvent.Type.WinClose;
-    public static final ViewEvent.Type KeyEvents[] = { KeyPress, KeyRelease, KeyType };
-    public static final ViewEvent.Type MouseEvents[] = { MousePress, MouseDrag, MouseRelease,
+    public static final ViewEvent.Type[] KeyEvents = { KeyPress, KeyRelease, KeyType };
+    public static final ViewEvent.Type[] MouseEvents = { MousePress, MouseDrag, MouseRelease,
         MouseEnter, MouseMove, MouseExit };
-    public static final ViewEvent.Type DragEvents[] = { DragEnter, DragExit, DragOver, DragDrop };
+    public static final ViewEvent.Type[] DragEvents = { DragEnter, DragExit, DragOver, DragDrop };
 
     /**
      * Returns the name for the view.
