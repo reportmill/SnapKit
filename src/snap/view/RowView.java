@@ -11,31 +11,12 @@ import snap.util.*;
  */
 public class RowView extends ChildView {
     
-    // The spacing between nodes
-    private double  _spacing;
-    
     // Whether to fill to height
     private boolean  _fillHeight;
     
     // Constants for properties
     public static final String FillHeight_Prop = "FillHeight";
     
-    /**
-     * Returns the spacing.
-     */
-    public double getSpacing()  { return _spacing; }
-
-    /**
-     * Sets the spacing.
-     */
-    public void setSpacing(double aValue)
-    {
-        if (aValue == _spacing) return;
-        firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
-        relayout();
-        relayoutParent();
-    }
-
     /**
      * Returns whether children will be resized to fill height.
      */
@@ -88,9 +69,7 @@ public class RowView extends ChildView {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive Spacing, FillHeight
-        if (getSpacing() != 0)
-            e.add(Spacing_Prop, getSpacing());
+        // Archive FillHeight
         if (isFillHeight())
             e.add(FillHeight_Prop, true);
         return e;
@@ -104,9 +83,7 @@ public class RowView extends ChildView {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive Spacing, FillHeight
-        if (anElement.hasAttribute(Spacing_Prop))
-            setSpacing(anElement.getAttributeFloatValue(Spacing_Prop, 0));
+        // Unarchive FillHeight
         if (anElement.hasAttribute(FillHeight_Prop))
             setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop, false));
     }

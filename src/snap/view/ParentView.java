@@ -14,7 +14,7 @@ import java.util.List;
  * A View subclass for views with children.
  */
 public class ParentView extends View {
-    
+
     // The children
     protected ViewList  _children = new ViewList();
     
@@ -35,6 +35,14 @@ public class ParentView extends View {
     
     // Constants for properties
     public static final String NeedsLayout_Prop = "NeedsLayout";
+
+    /**
+     * Constructor.
+     */
+    public ParentView()
+    {
+        super();
+    }
 
     /**
      * Returns the ViewList that holds children.

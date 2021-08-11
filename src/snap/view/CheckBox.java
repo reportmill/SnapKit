@@ -15,10 +15,10 @@ public class CheckBox extends ToggleButton {
     private CheckArea  _check;
     
     // Constants for overridden defaults
-    private static final Pos DEFAULT_ALIGN = Pos.CENTER_LEFT;
-    private static final Insets DEFAULT_PADDING = new Insets(2);
-    private static final boolean DEFAULT_SHOW_AREA = false;
-    private static final int DEFAULT_SPACING = 5;
+    private static final boolean DEFAULT_CHECK_BOX_SHOW_AREA = false;
+    private static final Pos DEFAULT_CHECK_BOX_ALIGN = Pos.CENTER_LEFT;
+    private static final Insets DEFAULT_CHECK_BOX_PADDING = new Insets(2);
+    private static final int DEFAULT_CHECK_BOX_SPACING = 5;
 
     /**
      * Creates CheckBox.
@@ -42,11 +42,6 @@ public class CheckBox extends ToggleButton {
     protected void paintButton(Painter aPntr)  { }
 
     /**
-     * Override to return some space between button and label.
-     */
-    public double getSpacing()  { return DEFAULT_SPACING; }
-
-    /**
      * Override to situate Check view.
      */
     public void setPosition(Pos aPos)
@@ -68,17 +63,7 @@ public class CheckBox extends ToggleButton {
     /**
      * Returns the default alignment for CheckBox.
      */
-    public Pos getDefaultAlign()  { return DEFAULT_ALIGN; }
-
-    /**
-     * Returns the default padding for CheckBox.
-     */
-    public Insets getDefaultPadding()  { return DEFAULT_PADDING; }
-
-    /**
-     * Returns whether button displays standard background by default.
-     */
-    protected boolean getDefaultShowArea()  { return DEFAULT_SHOW_AREA; }
+    public Pos getDefaultAlign()  { return DEFAULT_CHECK_BOX_ALIGN; }
 
     /**
      * Returns the preferred width.
@@ -102,6 +87,27 @@ public class CheckBox extends ToggleButton {
     protected void layoutImpl()
     {
         RowView.layout(this, false);
+    }
+
+    /**
+     * Override to customize.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        switch (aPropName) {
+
+            // ShowArea
+            case ShowArea_Prop: return DEFAULT_CHECK_BOX_SHOW_AREA;
+
+            // Align, Padding, Spacing
+            case Align_Prop: return DEFAULT_CHECK_BOX_ALIGN;
+            case Padding_Prop: return DEFAULT_CHECK_BOX_PADDING;
+            case Spacing_Prop: return DEFAULT_CHECK_BOX_SPACING;
+
+            // Do normal version
+            default: return super.getPropDefault(aPropName);
+        }
     }
 
     /**

@@ -20,7 +20,7 @@ public class ButtonBase extends ParentView {
     private String  _iname;
     
     // Whether button displays the standard background area
-    private boolean  _showArea = getDefaultShowArea();
+    private boolean  _showArea;
     
     // The position of the button when in a group (determines corner rendering)
     private Pos  _pos;
@@ -51,8 +51,10 @@ public class ButtonBase extends ParentView {
     public static final String Position_Prop = "Position";
     public static final String Radius_Prop = "Radius";
     public static final String Targeted_Prop = "Targeted";
-    public static final String Text_Prop = "Text";
-    
+
+    // Constants for property defaults
+    private static final boolean DEFAULT_SHOW_AREA = true;
+
     // Button states
     public static final int BUTTON_NORMAL = 0;
     public static final int BUTTON_OVER = 1;
@@ -63,8 +65,13 @@ public class ButtonBase extends ParentView {
      */
     public ButtonBase()
     {
+        // Set default properties
+        _showArea = getPropDefaultBool(ShowArea_Prop);
+
+        // Config
         setFocusable(true);
-        enableEvents(MouseEvents); enableEvents(KeyPress, Action);
+        enableEvents(MouseEvents);
+        enableEvents(KeyPress, Action);
         themeChanged();
     }
 
@@ -73,7 +80,7 @@ public class ButtonBase extends ParentView {
      */
     public Label getLabel()
     {
-        if (_label!=null) return _label;
+        if (_label != null) return _label;
         _label = new Label();
         addChild(_label);
         return _label;
@@ -82,26 +89,37 @@ public class ButtonBase extends ParentView {
     /**
      * Returns the text.
      */
-    public String getText()  { return getLabel().getText(); }
+    public String getText()
+    {
+        return getLabel().getText();
+    }
 
     /**
      * Sets the text.
      */
     public void setText(String aStr)
     {
-        if (SnapUtils.equals(aStr,getText())) return;
-        getLabel().setText(aStr); relayout();
+        if (SnapUtils.equals(aStr, getText())) return;
+        getLabel().setText(aStr);
+        relayout();
     }
 
     /**
      * Returns the image.
      */
-    public Image getImage()  { return getLabel().getImage(); }
+    public Image getImage()
+    {
+        return getLabel().getImage();
+    }
 
     /**
      * Sets the image.
      */
-    public void setImage(Image anImage)  { getLabel().setImage(anImage); relayout(); }
+    public void setImage(Image anImage)
+    {
+        getLabel().setImage(anImage);
+        relayout();
+    }
 
     /**
      * Returns the image after text.
@@ -111,27 +129,43 @@ public class ButtonBase extends ParentView {
     /**
      * Sets the image after text.
      */
-    public void setImageAfter(Image anImage)  { getLabel().setImageAfter(anImage); relayout(); }
+    public void setImageAfter(Image anImage)
+    {
+        getLabel().setImageAfter(anImage);
+        relayout();
+    }
 
     /**
      * Returns the graphic node.
      */
-    public View getGraphic()  { return getLabel().getGraphic(); }
+    public View getGraphic()
+    {
+        return getLabel().getGraphic();
+    }
 
     /**
      * Sets the graphic node.
      */
-    public void setGraphic(View aGraphic)  { getLabel().setGraphic(aGraphic); }
+    public void setGraphic(View aGraphic)
+    {
+        getLabel().setGraphic(aGraphic);
+    }
 
     /**
      * Returns the graphic node after text.
      */
-    public View getGraphicAfter()  { return getLabel().getGraphicAfter(); }
+    public View getGraphicAfter()
+    {
+        return getLabel().getGraphicAfter();
+    }
 
     /**
      * Sets the graphic node after text.
      */
-    public void setGraphicAfter(View aGraphic)  { getLabel().setGraphicAfter(aGraphic); }
+    public void setGraphicAfter(View aGraphic)
+    {
+        getLabel().setGraphicAfter(aGraphic);
+    }
 
     /**
      * Returns the image name, if loaded from local resource.
@@ -158,14 +192,9 @@ public class ButtonBase extends ParentView {
      */
     public void setShowArea(boolean aValue)
     {
-        if (aValue==_showArea) return;
-        firePropChange(ShowArea_Prop, _showArea, _showArea=aValue);
+        if (aValue == _showArea) return;
+        firePropChange(ShowArea_Prop, _showArea, _showArea = aValue);
     }
-
-    /**
-     * Returns whether button displays standard background area by default.
-     */
-    protected boolean getDefaultShowArea()  { return true; }
 
     /**
      * Returns the position of the button when in a group (determines corner rendering).
@@ -218,7 +247,7 @@ public class ButtonBase extends ParentView {
     protected void setPressed(boolean aValue)
     {
         if (aValue==_pressed) return;
-        firePropChange(Pressed_Prop, _pressed, _pressed=aValue);
+        firePropChange(Pressed_Prop, _pressed, _pressed = aValue);
         repaint();
     }
 
@@ -232,8 +261,8 @@ public class ButtonBase extends ParentView {
      */
     protected void setTargeted(boolean aValue)
     {
-        if (aValue==_targeted) return;
-        firePropChange(Targeted_Prop, _targeted, _targeted=aValue);
+        if (aValue == _targeted) return;
+        firePropChange(Targeted_Prop, _targeted, _targeted = aValue);
         repaint();
     }
 
@@ -418,6 +447,45 @@ public class ButtonBase extends ParentView {
     }
 
     /**
+     * Override to customize defaults.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        if (aPropName == ShowArea_Prop)
+            return DEFAULT_SHOW_AREA;
+        return super.getPropDefault(aPropName);
+    }
+
+    /**
+     * Override for ButtonBase properties.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // ShowArea
+        if (aPropName == ShowArea_Prop)
+            return isShowArea();
+
+        // Do normal version
+        return super.getPropValue(aPropName);
+    }
+
+    /**
+     * Override for ButtonBase properties.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // ShowArea
+        if (aPropName == ShowArea_Prop)
+            setShowArea(SnapUtils.boolValue(aValue));
+
+        // Do normal version
+        super.setPropValue(aPropName, aValue);
+    }
+
+    /**
      * XML archival.
      */
     protected XMLElement toXMLView(XMLArchiver anArchiver)
@@ -425,16 +493,18 @@ public class ButtonBase extends ParentView {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive Text and ImageName
+        // Archive Text
         String text = getText();
         if (text != null && text.length() > 0)
             e.add("text", text);
+
+        // Archive ImageName
         String iname = getImageName();
         if (iname != null)
             e.add("image", iname);
 
         // Archive ShowArea, Position
-        if (isShowArea() != getDefaultShowArea())
+        if (!isPropDefault(ShowArea_Prop))
             e.add(ShowArea_Prop, isShowArea());
         if (getPosition() != null)
             e.add(Position_Prop, getPosition());
@@ -451,19 +521,27 @@ public class ButtonBase extends ParentView {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive Text and ImageName
-        setText(anElement.getAttributeValue("text", anElement.getAttributeValue("value")));
-        String iname = anElement.getAttributeValue("image");
-        if (iname!=null) {
-            setImageName(iname);
-            Image image = ViewArchiver.getImage(anArchiver, iname);
+        // Unarchive Text (or legacy 'value')
+        if (anElement.hasAttribute("text"))
+            setText(anElement.getAttributeValue("text"));
+        else if (anElement.hasAttribute("value"))
+            setText(anElement.getAttributeValue("value"));
+
+        // Unarchive ImageName
+        String imageName = anElement.getAttributeValue("image");
+        if (imageName != null) {
+            setImageName(imageName);
+            Image image = ViewArchiver.getImage(anArchiver, imageName);
             if (image != null)
                 setImage(image);
         }
 
         // Unarchive ShowArea, Position
-        if (anElement.hasAttribute(ShowArea_Prop)) setShowArea(anElement.getAttributeBoolValue(ShowArea_Prop));
-        if (anElement.hasAttribute("ShowBorder")) setShowArea(anElement.getAttributeBoolValue("ShowBorder"));
-        if (anElement.hasAttribute(Position_Prop)) setPosition(Pos.valueOf(anElement.getAttributeValue(Position_Prop)));
+        if (anElement.hasAttribute(ShowArea_Prop))
+            setShowArea(anElement.getAttributeBoolValue(ShowArea_Prop));
+        if (anElement.hasAttribute("ShowBorder"))
+            setShowArea(anElement.getAttributeBoolValue("ShowBorder"));
+        if (anElement.hasAttribute(Position_Prop))
+            setPosition(anElement.getAttributeEnumValue(Position_Prop, Pos.class, null));
     }
 }

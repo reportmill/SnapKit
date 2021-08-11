@@ -14,9 +14,6 @@ public class BoxView extends ParentView implements ViewHost {
     // The content view
     private View  _content;
 
-    // The spacing between nodes
-    private double  _spacing;
-    
     // Whether to fill width
     private boolean  _fillWidth;
     
@@ -67,22 +64,6 @@ public class BoxView extends ParentView implements ViewHost {
         if (_content != null) removeChild(_content);
         _content = aView;
         if (_content != null) addChild(_content);
-    }
-
-    /**
-     * Returns the spacing.
-     */
-    public double getSpacing()  { return _spacing; }
-
-    /**
-     * Sets the spacing.
-     */
-    public void setSpacing(double aValue)
-    {
-        if (aValue == _spacing) return;
-        firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
-        relayout();
-        relayoutParent();
     }
 
     /**
@@ -198,10 +179,11 @@ public class BoxView extends ParentView implements ViewHost {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive Spacing, FillWidth, FillHeight
-        if (getSpacing()!=0) e.add(Spacing_Prop, getSpacing());
-        if (isFillWidth()) e.add(FillWidth_Prop, true);
-        if (isFillHeight()) e.add(FillHeight_Prop, true);
+        // Archive FillWidth, FillHeight
+        if (isFillWidth())
+            e.add(FillWidth_Prop, true);
+        if (isFillHeight())
+            e.add(FillHeight_Prop, true);
         return e;
     }
 
@@ -213,10 +195,11 @@ public class BoxView extends ParentView implements ViewHost {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive Spacing, FillWidth, FillHeight
-        if (anElement.hasAttribute(Spacing_Prop))setSpacing(anElement.getAttributeFloatValue(Spacing_Prop));
-        if (anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
-        if (anElement.hasAttribute(FillHeight_Prop)) setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop));
+        // Unarchive FillWidth, FillHeight
+        if (anElement.hasAttribute(FillWidth_Prop))
+            setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
+        if (anElement.hasAttribute(FillHeight_Prop))
+            setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop));
     }
 
     /**

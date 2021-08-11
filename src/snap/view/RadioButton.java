@@ -15,10 +15,10 @@ public class RadioButton extends ToggleButton {
     private RadioArea  _radio;
 
     // Constants for overridden defaults
-    private static final Pos DEFAULT_ALIGN = Pos.CENTER_LEFT;
-    private static final Insets DEFAULT_PADDING = new Insets(2);
-    private static final boolean DEFAULT_SHOW_AREA = false;
-    private static final int DEFAULT_SPACING = 5;
+    private static final boolean DEFAULT_RADIO_BUTTON_SHOW_AREA = false;
+    private static final Pos DEFAULT_RADIO_BUTTON_ALIGN = Pos.CENTER_LEFT;
+    private static final Insets DEFAULT_RADIO_BUTTON_PADDING = new Insets(2);
+    private static final int DEFAULT_RADIO_BUTTON_SPACING = 5;
 
     /**
      * Creates RadioButton.
@@ -45,11 +45,6 @@ public class RadioButton extends ToggleButton {
     protected void paintButton(Painter aPntr)  { }
 
     /**
-     * Override to return some space between button and label.
-     */
-    public double getSpacing()  { return DEFAULT_SPACING; }
-
-    /**
      * Override to situate Radio view.
      */
     public void setPosition(Pos aPos)
@@ -71,17 +66,7 @@ public class RadioButton extends ToggleButton {
     /**
      * Returns the default alignment for button.
      */
-    public Pos getDefaultAlign()  { return DEFAULT_ALIGN; }
-
-    /**
-     * Returns the default padding for RadioButton.
-     */
-    public Insets getDefaultPadding()  { return DEFAULT_PADDING; }
-
-    /**
-     * Returns whether button displays standard background by default.
-     */
-    protected boolean getDefaultShowArea()  { return DEFAULT_SHOW_AREA; }
+    public Pos getDefaultAlign()  { return DEFAULT_RADIO_BUTTON_ALIGN; }
 
     /**
      * Returns the preferred width.
@@ -105,6 +90,27 @@ public class RadioButton extends ToggleButton {
     protected void layoutImpl()
     {
         RowView.layout(this, false);
+    }
+
+    /**
+     * Override to customize.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        switch (aPropName) {
+
+            // ShowArea
+            case ShowArea_Prop: return DEFAULT_RADIO_BUTTON_SHOW_AREA;
+
+            // Align, Padding, Spacing
+            case Align_Prop: return DEFAULT_RADIO_BUTTON_ALIGN;
+            case Padding_Prop: return DEFAULT_RADIO_BUTTON_PADDING;
+            case Spacing_Prop: return DEFAULT_RADIO_BUTTON_SPACING;
+
+            // Do normal version
+            default: return super.getPropDefault(aPropName);
+        }
     }
 
     /**

@@ -39,7 +39,10 @@ public class TitleView extends ParentView implements ViewHost {
     public static final String Collapsible_Prop = "Collapsible";
     public static final String Expanded_Prop = "Expanded";
     public static final String TitleStyle_Prop = "TitleStyle";
-    
+
+    // Constants for property defaults
+    private static Insets DEFAULT_TITLE_VIEW_PADDING = new Insets(2);
+
     /**
      * Creates a new TitleView.
      */
@@ -366,18 +369,6 @@ public class TitleView extends ParentView implements ViewHost {
     }
 
     /**
-     * Override to define default padding.
-     */
-    @Override
-    public Insets getDefaultPadding()
-    {
-        return DEFAULT_PADDING;
-    }
-
-    // The default padding
-    private static Insets DEFAULT_PADDING = new Insets(2);
-
-        /**
      * Override to handle additional properties.
      */
     public Object getPropValue(String aPropName)
@@ -401,6 +392,20 @@ public class TitleView extends ParentView implements ViewHost {
      * Returns a mapped property name name.
      */
     protected String getValuePropName()  { return Expanded_Prop; }
+
+    /**
+     * Override for custom defaults.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        // Padding
+        if (aPropName == Padding_Prop)
+            return DEFAULT_TITLE_VIEW_PADDING;
+
+        // Do normal version
+        return super.getPropDefault(aPropName);
+    }
 
     /**
      * XML archival.

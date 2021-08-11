@@ -23,9 +23,6 @@ public class Label extends ParentView {
     // The image name, if loaded from local resource
     private String  _iname;
     
-    // The spacing between text and graphic
-    private double  _spacing = 4;
-    
     // The rounding radius
     private double  _rad;
     
@@ -41,6 +38,9 @@ public class Label extends ParentView {
     public static final String Graphic_Prop = "Graphic";
     public static final String GraphicAfter_Prop = "GraphicAfter";
     public static final String Radius_Prop = "Radius";
+
+    // Constants for property defaults
+    private static final int DEFAULT_LABEL_SPACING = 4;
 
     /**
      * Creates a label node.
@@ -238,22 +238,6 @@ public class Label extends ParentView {
     }
 
     /**
-     * Returns the spacing between text and graphics.
-     */
-    public double getSpacing()  { return _spacing; }
-
-    /**
-     * Sets the spacing between text and graphics.
-     */
-    public void setSpacing(double aValue)
-    {
-        if (aValue == _spacing) return;
-        firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
-        relayout();
-        relayoutParent();
-    }
-
-    /**
      * Returns the rounding radius.
      */
     public double getRadius()  { return _rad; }
@@ -439,6 +423,20 @@ public class Label extends ParentView {
     }
 
     /**
+     * Override for custom defaults.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        // Spacing
+        if (aPropName == Spacing_Prop)
+            return DEFAULT_LABEL_SPACING;
+
+        // Do normal version
+        return super.getPropDefault(aPropName);
+    }
+
+    /**
      * XML archival.
      */
     public XMLElement toXMLView(XMLArchiver anArchiver)
@@ -448,13 +446,15 @@ public class Label extends ParentView {
 
         // Archive Text and ImageName
         String text = getText();
-        if (text!=null && text.length()>0) e.add("text", text);
+        if (text != null && text.length() > 0)
+            e.add("text", text);
         String iname = getImageName();
-        if (iname!=null) e.add("image", iname);
+        if (iname != null)
+            e.add("image", iname);
 
-        // Archive Spacing, Radius
-        if (getSpacing()!=4) e.add(Spacing_Prop, getSpacing());
-        if (getRadius()!=0) e.add(Radius_Prop, getRadius());
+        // Archive Radius
+        if (getRadius() != 0)
+            e.add(Radius_Prop, getRadius());
 
         // Return element
         return e;
@@ -471,15 +471,14 @@ public class Label extends ParentView {
         // Unarchive Text and ImageName
         setText(anElement.getAttributeValue("text", anElement.getAttributeValue("value")));
         String iname = anElement.getAttributeValue("image");
-        if (iname!=null) {
+        if (iname != null) {
             setImageName(iname);
             Image image = ViewArchiver.getImage(anArchiver, iname);
-            if (image!=null) setImage(image);
+            if (image != null)
+                setImage(image);
         }
 
-        // Unarchive Spacing, Radius
-        if (anElement.hasAttribute(Spacing_Prop))
-            setSpacing(anElement.getAttributeDoubleValue(Spacing_Prop));
+        // Unarchive Radius
         if (anElement.hasAttribute(Radius_Prop))
             setRadius(anElement.getAttributeDoubleValue(Radius_Prop));
     }

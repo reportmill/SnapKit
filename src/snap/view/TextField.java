@@ -63,7 +63,10 @@ public class TextField extends ParentView {
     public static final String Radius_Prop = "Radius";
     public static final String Sel_Prop = "Selection";
     public static final String TextFill_Prop = "TextFill";
-    
+
+    // Constants for property defaults
+    private static final Insets DEFAULT_TEXT_FIELD_PADDING = new Insets(2,2,2,5);
+
     // The color of the border when focused
     static Color    SELECTION_COLOR = new Color(181, 214, 254, 255);
     
@@ -172,12 +175,6 @@ public class TextField extends ParentView {
         return _defBorder = bdr;
     }
     private static Border _defBorder;
-
-    /**
-     * Returns the padding default.
-     */
-    public Insets getDefaultPadding()  { return _def; }
-    static Insets _def = new Insets(2,2,2,5);
 
     /**
      * Override to return white.
@@ -968,6 +965,20 @@ public class TextField extends ParentView {
         String str = getText();
         if (str.length()>40) str = str.substring(0,40) + "...";
         return getClass().getSimpleName() + ": " + str;
+    }
+
+    /**
+     * Override for custom defaults.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        // Padding
+        if (aPropName == Padding_Prop)
+            return DEFAULT_TEXT_FIELD_PADDING;
+
+        // Do normal version
+        return super.getPropDefault(aPropName);
     }
 
     /**

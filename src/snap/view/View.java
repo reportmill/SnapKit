@@ -31,17 +31,20 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private double  _rot;
     
     // The view scale from x and y
-    private double  _sx = 1, _sy = 1;
+    private double  _sx, _sy;
     
     // The alignment of content in this view
-    private Pos  _align = getDefaultAlign();
+    protected Pos  _align;
     
     // The margin to be provided around this view
-    private Insets  _margin = getDefaultMargin();
+    protected Insets  _margin;
     
     // The padding between the border and content in this view
-    private Insets  _padding = getDefaultPadding();
-    
+    protected Insets  _padding;
+
+    // Spacing between children
+    protected double  _spacing;
+
     // The horizontal position this view would prefer to take when inside a pane
     private HPos  _leanX;
     
@@ -52,16 +55,16 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private boolean  _growWidth, _growHeight;
     
     // Whether this view has a vertical orientation.
-    private boolean  _vertical = getDefaultVertical();
+    private boolean  _vertical;
     
     // The view minimum width and height
-    private double  _minWidth = -1, _minHeight = -1;
+    private double  _minWidth, _minHeight;
     
     // The view maximum width and height
-    private double  _maxWidth = -1, _maxHeight = -1;
+    private double  _maxWidth, _maxHeight;
     
     // The view preferred width and height
-    private double  _prefWidth = -1, _prefHeight = -1;
+    private double  _prefWidth, _prefHeight;
     
     // The view best width and height
     private double  _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
@@ -79,25 +82,25 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private boolean  _focusWhenPrsd;
 
     // Whether view focus should change when traveral key is pressed (Tab)
-    private boolean  _focusKeysEnbld = true;
+    private boolean  _focusKeysEnbld;
     
     // Whether view should paint focus ring when focused
-    private boolean  _focusPainted = true;
+    private boolean  _focusPainted;
  
     // Whether view is visible
-    private boolean  _visible = true;
+    private boolean  _visible;
     
     // Whether view is visible and has parent that is showing
     protected boolean  _showing;
  
     // Whether view can be hit by mouse
-    private boolean  _pickable = true;
+    private boolean  _pickable;
     
     // Whether view should be painted
-    private boolean  _paintable = true;
+    private boolean  _paintable;
     
     // Whether view should be included in layout
-    private boolean  _managed = true;
+    private boolean  _managed;
     
     // The view fill
     private Paint  _fill;
@@ -109,13 +112,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected ViewEffect  _effect;
     
     // The opacity
-    private double  _opacity = 1;
+    private double  _opacity;
     
     // The view font
     protected Font  _font;
     
     // The view cursor
-    private Cursor  _cursor = Cursor.DEFAULT;
+    private Cursor  _cursor;
     
     // The tooltip
     private String  _ttip;
@@ -149,10 +152,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     
     // The view owner of this view
     private ViewOwner  _owner;
-    
-    // Shared empty insets
-    private static final Insets _emptyIns = new Insets(0);
-    
+
     // Constants for properties
     public static final String Name_Prop = "Name";
     public static final String X_Prop = "X";
@@ -195,7 +195,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public static final String Showing_Prop = "Showing";
     public static final String Text_Prop = "Text";
     public static final String ToolTip_Prop = "ToolTip";
-    
+
+    // Constants for property defaults
+    private static final boolean DEFAULT_VERTICAL = false;
+    public static final Insets DEFAULT_MARGIN = Insets.EMPTY;
+    public static final Insets DEFAULT_PADDING = Insets.EMPTY;
+    public static final double DEFAULT_SPACING = 0;
+
     // Convenience for common events
     public static final ViewEvent.Type Action = ViewEvent.Type.Action;
     public static final ViewEvent.Type KeyPress = ViewEvent.Type.KeyPress;
@@ -225,6 +231,33 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public static final ViewEvent.Type[] MouseEvents = { MousePress, MouseDrag, MouseRelease,
         MouseEnter, MouseMove, MouseExit };
     public static final ViewEvent.Type[] DragEvents = { DragEnter, DragExit, DragOver, DragDrop };
+
+    /**
+     * Constructor.
+     */
+    public View()
+    {
+        super();
+
+        // Set property defaults
+        _sx = _sy = 1;
+        _align = getDefaultAlign();
+        _margin = (Insets) getPropDefault(Margin_Prop);
+        _padding = (Insets) getPropDefault(Padding_Prop);
+        _spacing = getPropDefaultDouble(Spacing_Prop);
+        _vertical = getPropDefaultBool(Vertical_Prop);
+        _minWidth = _minHeight = -1;
+        _maxWidth = _maxHeight = -1;
+        _prefWidth = _prefHeight = -1;
+        _focusKeysEnbld = true;
+        _focusPainted = true;
+        _visible = true;
+        _pickable = true;
+        _paintable = true;
+        _managed = true;
+        _opacity = 1;
+        _cursor = Cursor.DEFAULT;
+    }
 
     /**
      * Returns the name for the view.
@@ -1775,8 +1808,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setMargin(Insets theIns)
     {
+        // If given null, use default
+        if (theIns == null)
+            theIns = (Insets) getPropDefault(Margin_Prop);
+
         // If value already set, just return
-        if (theIns==null) theIns = getDefaultMargin();
         if (SnapUtils.equals(theIns, _margin)) return;
 
         // Set value, fire prop change, relayout parent
@@ -1799,21 +1835,34 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setPadding(Insets theIns)
     {
-        if (theIns==null) theIns = getDefaultPadding();
+        // If given null, use default
+        if (theIns == null)
+            theIns = (Insets) getPropDefault(Padding_Prop);
+
+        // If value already set, just return
         if (SnapUtils.equals(theIns,_padding)) return;
+
+        // Set value, fire prop change, relayout, relayout parent
         firePropChange(Padding_Prop, _padding, _padding = theIns);
-        relayout(); relayoutParent();
+        relayout();
+        relayoutParent();
     }
 
     /**
-     * Returns the spacing for views that support it (Label, Button, ColView, RowView etc.).
+     * Returns the spacing for content (usually children).
      */
-    public double getSpacing()  { return 0; }
+    public double getSpacing()  { return _spacing; }
 
     /**
-     * Sets the spacing for views that support it (Label, Button, ColView, RowView etc.).
+     * Sets the spacing for content (usually children).
      */
-    public void setSpacing(double aValue)  { }
+    public void setSpacing(double aValue)
+    {
+        if (aValue == _spacing) return;
+        firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
+        relayout();
+        relayoutParent();
+    }
 
     /**
      * Returns the default alignment.
@@ -1838,21 +1887,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         View par = getParent();
         return par!=null ? par.getFont() : Font.Arial11;
     }
-
-    /**
-     * Returns the margin default.
-     */
-    public Insets getDefaultMargin()  { return _emptyIns; }
-
-    /**
-     * Returns the padding default.
-     */
-    public Insets getDefaultPadding()  { return _emptyIns; }
-
-    /**
-     * Returns the padding default.
-     */
-    public boolean getDefaultVertical()  { return false; }
 
     /**
      * Returns the insets due to border and/or padding.
@@ -2221,43 +2255,44 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         switch(pname) {
 
             // Size props: X, Y, Width, Height
-            case View.X_Prop: return getX();
-            case View.Y_Prop: return getY();
-            case View.Width_Prop: return getWidth();
-            case View.Height_Prop: return getHeight();
+            case X_Prop: return getX();
+            case Y_Prop: return getY();
+            case Width_Prop: return getWidth();
+            case Height_Prop: return getHeight();
 
             // Transform props: Rotate, ScaleX, ScaleY, TransX, TransY
-            case View.Rotate_Prop: return getRotate();
-            case View.ScaleX_Prop: return getScaleX();
-            case View.ScaleY_Prop: return getScaleY();
-            case View.TransX_Prop: return getTransX();
-            case View.TransY_Prop: return getTransY();
+            case Rotate_Prop: return getRotate();
+            case ScaleX_Prop: return getScaleX();
+            case ScaleY_Prop: return getScaleY();
+            case TransX_Prop: return getTransX();
+            case TransY_Prop: return getTransY();
 
-            // Sizing: Padding, Spacing, Margin, GrowWidth, GrowHeight
-            case View.Padding_Prop: return getPadding();
-            case View.Spacing_Prop:_Prop: return getSpacing();
-            case View.Margin_Prop: return getMargin();
-            case View.GrowWidth_Prop: return isGrowWidth();
-            case View.GrowHeight_Prop: return isGrowHeight();
+            // Sizing: Align, Margin, Padding, Spacing
+            case Align_Prop: return getAlign();
+            case Margin_Prop: return getMargin();
+            case Padding_Prop: return getPadding();
+            case Spacing_Prop:_Prop: return getSpacing();
 
-            // Alignment: Align, LeanX, LeanY
-            case View.Align_Prop: return getAlign();
-            case View.LeanX_Prop: return getLeanX();
-            case View.LeanY_Prop: return getLeanY();
+            // Alignment: LeanX, LeanY, GrowWidth, GrowHeight
+            case LeanX_Prop: return getLeanX();
+            case LeanY_Prop: return getLeanY();
+            case GrowWidth_Prop: return isGrowWidth();
+            case GrowHeight_Prop: return isGrowHeight();
+            case Vertical_Prop: return isVertical();
 
             // Pref Sizing: PrefWidth, PrefHeight
             case View.PrefWidth_Prop: return getPrefWidth();
             case View.PrefHeight_Prop: return getPrefHeight();
 
             // Paint Props: Border, Fill, Effect, Opacity
-            case View.Border_Prop: return getBorder();
-            case View.Fill_Prop: return getFill();
-            case View.Effect_Prop: return getEffect();
-            case View.Opacity_Prop: return getOpacity();
+            case Border_Prop: return getBorder();
+            case Fill_Prop: return getFill();
+            case Effect_Prop: return getEffect();
+            case Opacity_Prop: return getOpacity();
 
             // Text Props: Font, Text
-            case View.Font_Prop: return getFont();
-            case View.Text_Prop: return getText();
+            case Font_Prop: return getFont();
+            case Text_Prop: return getText();
             case "Enabled": return isEnabled();
 
             // List Props: Items, SelItem, SelIndex
@@ -2283,43 +2318,44 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         switch(pname) {
 
             // Size props: X, Y, Width, Height
-            case View.X_Prop: setX(SnapUtils.doubleValue(aValue)); break;
-            case View.Y_Prop: setY(SnapUtils.doubleValue(aValue)); break;
-            case View.Width_Prop: setWidth(SnapUtils.doubleValue(aValue)); break;
-            case View.Height_Prop: setHeight(SnapUtils.doubleValue(aValue)); break;
+            case X_Prop: setX(SnapUtils.doubleValue(aValue)); break;
+            case Y_Prop: setY(SnapUtils.doubleValue(aValue)); break;
+            case Width_Prop: setWidth(SnapUtils.doubleValue(aValue)); break;
+            case Height_Prop: setHeight(SnapUtils.doubleValue(aValue)); break;
 
             // Transform props: Rotate, ScaleX, ScaleY, TransX, TransY
-            case View.Rotate_Prop: setRotate(SnapUtils.doubleValue(aValue)); break;
-            case View.ScaleX_Prop: setScaleX(SnapUtils.doubleValue(aValue)); break;
-            case View.ScaleY_Prop: setScaleY(SnapUtils.doubleValue(aValue)); break;
-            case View.TransX_Prop: setTransX(SnapUtils.doubleValue(aValue)); break;
-            case View.TransY_Prop: setTransY(SnapUtils.doubleValue(aValue)); break;
+            case Rotate_Prop: setRotate(SnapUtils.doubleValue(aValue)); break;
+            case ScaleX_Prop: setScaleX(SnapUtils.doubleValue(aValue)); break;
+            case ScaleY_Prop: setScaleY(SnapUtils.doubleValue(aValue)); break;
+            case TransX_Prop: setTransX(SnapUtils.doubleValue(aValue)); break;
+            case TransY_Prop: setTransY(SnapUtils.doubleValue(aValue)); break;
 
-            // Sizing: Padding, Spacing, Margin, GrowWidth, GrowHeight
-            case View.Padding_Prop: setPadding((Insets) aValue); break;
-            case View.Spacing_Prop: setSpacing(SnapUtils.doubleValue(aValue)); break;
-            case View.Margin_Prop: setMargin((Insets) aValue); break;
-            case View.GrowWidth_Prop: setGrowWidth(SnapUtils.boolValue(aValue)); break;
-            case View.GrowHeight_Prop: setGrowHeight(SnapUtils.boolValue(aValue)); break;
-
-            // Alignment: Align, LeanX, LeanY
+            // Sizing: Align, Margin, Padding, Spacing
             case Align_Prop: setAlign((Pos) aValue); break;
+            case Margin_Prop: setMargin((Insets) aValue); break;
+            case Padding_Prop: setPadding((Insets) aValue); break;
+            case Spacing_Prop: setSpacing(SnapUtils.doubleValue(aValue)); break;
+
+            // Alignment: LeanX, LeanY, GrowWidth, GrowHeight, Vertical
             case LeanX_Prop: setLeanX((HPos) aValue); break;
             case LeanY_Prop: setLeanY((VPos) aValue); break;
+            case GrowWidth_Prop: setGrowWidth(SnapUtils.boolValue(aValue)); break;
+            case GrowHeight_Prop: setGrowHeight(SnapUtils.boolValue(aValue)); break;
+            case Vertical_Prop: setVertical(SnapUtils.boolValue(aValue));
 
             // Pref Sizing: PrefWidth, PrefHeight
-            case View.PrefWidth_Prop: setPrefWidth(SnapUtils.doubleValue(aValue)); break;
-            case View.PrefHeight_Prop: setPrefHeight(SnapUtils.doubleValue(aValue)); break;
+            case PrefWidth_Prop: setPrefWidth(SnapUtils.doubleValue(aValue)); break;
+            case PrefHeight_Prop: setPrefHeight(SnapUtils.doubleValue(aValue)); break;
 
             // Paint Props: Border, Fill, Effect, Opacity
-            case View.Border_Prop: setBorder((Border) aValue); break;
-            case View.Fill_Prop: setFill(aValue instanceof Paint ? (Paint) aValue : null); break;
-            case View.Effect_Prop: setEffect((Effect) aValue); break;
-            case View.Opacity_Prop: setOpacity(SnapUtils.doubleValue(aValue)); break;
+            case Border_Prop: setBorder((Border) aValue); break;
+            case Fill_Prop: setFill(aValue instanceof Paint ? (Paint) aValue : null); break;
+            case Effect_Prop: setEffect((Effect) aValue); break;
+            case Opacity_Prop: setOpacity(SnapUtils.doubleValue(aValue)); break;
 
             // Text Props: Font, Text
             case Font_Prop: setFont((Font) aValue); break;
-            case View.Text_Prop: setText(SnapUtils.stringValue(aValue)); break;
+            case Text_Prop: setText(SnapUtils.stringValue(aValue)); break;
             case "Enabled": setDisabled(!SnapUtils.boolValue(aValue)); break;
 
             // List Props: Items, SelItem, SelIndex
@@ -2340,6 +2376,27 @@ public class View extends PropObject implements XMLArchiver.Archivable {
                 break;
             }
             default: KeyChain.setValueSafe(this, pname, aValue);
+        }
+    }
+
+    /**
+     * Override property defaults for View.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Vertical
+            case Vertical_Prop: return DEFAULT_VERTICAL;
+
+            // Margin, Padding, Spacing
+            case Margin_Prop: return DEFAULT_MARGIN;
+            case Padding_Prop: return DEFAULT_PADDING;
+            case Spacing_Prop: return DEFAULT_SPACING;
+
+            // Do normal version
+            default: return super.getPropDefault(aPropName);
         }
     }
 
@@ -2602,7 +2659,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             e.add(ScaleY_Prop, getScaleY());
 
         // Archive Vertical
-        if (isVertical() != getDefaultVertical())
+        if (!isPropDefault(Vertical_Prop))
             e.add(Vertical_Prop, isVertical());
 
         // Archive border, Fill, Effect
@@ -2628,13 +2685,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (getOpacity() < 1)
             e.add(Opacity_Prop, getOpacity());
 
-        // Archive Alignment, Margin, Padding
+        // Archive Align, Margin, Padding, Spacing
         if (getAlign() != getDefaultAlign())
             e.add(Align_Prop, getAlign());
-        if (!getMargin().equals(getDefaultMargin()))
+        if (!isPropDefault(Margin_Prop))
             e.add(Margin_Prop, getMargin().getString());
-        if (!getPadding().equals(getDefaultPadding()))
+        if (!isPropDefault(Padding_Prop))
             e.add(Padding_Prop, getPadding().getString());
+        if (!isPropDefault(Spacing_Prop))
+            e.add(Spacing_Prop, getSpacing());
 
         // Archive GrowWidth, GrowHeight, LeanX, LeanY
         if (isGrowWidth())
@@ -2768,7 +2827,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (anElement.hasAttribute(Opacity_Prop))
             setOpacity(anElement.getAttributeFloatValue(Opacity_Prop));
 
-        // Unarchive Alignment, Margin, Padding
+        // Unarchive Align, Margin, Padding, Spacing
         if (anElement.hasAttribute(Align_Prop))
             setAlign(Pos.get(anElement.getAttributeValue(Align_Prop)));
         if (anElement.hasAttribute(Margin_Prop)) {
@@ -2779,6 +2838,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             Insets ins = Insets.get(anElement.getAttributeValue(Padding_Prop));
             setPadding(ins);
         }
+        if (anElement.hasAttribute(Spacing_Prop))
+            setSpacing(anElement.getAttributeDoubleValue(Spacing_Prop));
 
         // Unarchive GrowWidth, GrowHeight, LeanX, LeanY
         if (anElement.hasAttribute(GrowWidth_Prop))

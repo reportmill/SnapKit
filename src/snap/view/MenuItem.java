@@ -26,12 +26,12 @@ public class MenuItem extends ButtonBase implements Cloneable {
     protected Menu  _parentMenu;
     
     // Constants for properties
-    public static final String Image_Prop = "Image";
     public static final String Selected_Prop = "Selected";
     public static final String Shortcut_Prop = "Shortcut";
 
-    // Default Inset
-    private static Insets  DEFAULT_MENU_ITEM_PADDING = new Insets(4,8,4,6);
+    // Custom property defaults
+    private static boolean DEFAULT_MENU_ITEM_SHOW_AREA = false;
+    private static Insets  DEFAULT_MENU_ITEM_PADDING = new Insets(4, 8, 4, 6);
 
     /**
      * Constructor.
@@ -116,16 +116,6 @@ public class MenuItem extends ButtonBase implements Cloneable {
     public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
     /**
-     * Returns the padding default.
-     */
-    public Insets getDefaultPadding()  { return DEFAULT_MENU_ITEM_PADDING; }
-
-    /**
-     * Returns whether button displays standard background by default.
-     */
-    protected boolean getDefaultShowArea()  { return false; }
-
-    /**
      * Returns a mapped property name.
      */
     public String getValuePropName()
@@ -197,6 +187,25 @@ public class MenuItem extends ButtonBase implements Cloneable {
         if (aPropName.equals("Value") || aPropName.equals(Selected_Prop))
             setSelected(SnapUtils.boolValue(aValue));
         else super.setPropValue(aPropName, aValue);
+    }
+
+    /**
+     * Override for custom defaults.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        switch (aPropName) {
+
+            // ShowArea
+            case ShowArea_Prop: return DEFAULT_MENU_ITEM_SHOW_AREA;
+
+            // Padding
+            case Padding_Prop: return DEFAULT_MENU_ITEM_PADDING;
+
+            // Do normal version
+            default: return super.getPropDefault(aPropName);
+        }
     }
 
     /**

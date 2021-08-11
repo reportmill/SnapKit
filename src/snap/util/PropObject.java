@@ -26,11 +26,30 @@ public class PropObject implements PropChange.DoChange {
     public void setPropValue(String aPropName, Object aValue)  { }
 
     /**
+     * Returns whether give prop is set to default.
+     */
+    public boolean isPropDefault(String aPropName)
+    {
+        Object propValue = getPropValue(aPropName);
+        Object propDefault = getPropDefault(aPropName);
+        return Objects.equals(propValue, propDefault);
+    }
+
+    /**
      * Returns the value for given key.
      */
     public Object getPropDefault(String aPropName)
     {
         return null;
+    }
+
+    /**
+     * Returns prop default as int.
+     */
+    public final boolean getPropDefaultBool(String aPropName)
+    {
+        Object val = getPropDefault(aPropName);
+        return SnapUtils.boolValue(val);
     }
 
     /**

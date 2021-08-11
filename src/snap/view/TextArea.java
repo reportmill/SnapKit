@@ -86,6 +86,9 @@ public class TextArea extends View {
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
     public static final String Selection_Prop = "Selection";
 
+    // Constants for property defaults
+    private static final Insets DEFAULT_TEXT_AREA_PADDING = new Insets(2);
+
     /**
      * Creates a new TextArea.
      */
@@ -1383,11 +1386,6 @@ public class TextArea extends View {
     public Font getDefaultFont()  { return Font.Arial11; }
 
     /**
-     * Overrride to return 2,2,2,2.
-     */
-    public Insets getDefaultPadding()  { return _def; } static Insets _def = new Insets(2);
-
-    /**
      * Override to return white.
      */
     public Paint getDefaultFill()  { return isEditable()? Color.WHITE : null; }
@@ -1523,61 +1521,61 @@ public class TextArea extends View {
      */
     public String getValuePropName()  { return "Text"; }
 
-        /**
-         * Returns the path for the current selection.
-         */
-        public Shape getSelPath()  { return getSel().getPath(); }
+    /**
+     * Returns the path for the current selection.
+     */
+    public Shape getSelPath()  { return getSel().getPath(); }
 
-        /**
-         * Returns a path for misspelled word underlining.
-         */
-        public Shape getSpellingPath()
-        {
-            // Get text box and text string and path object
-            TextBox tbox = getTextBox();
-            String string = tbox.getString();
-            Path path = new Path();
+    /**
+     * Returns a path for misspelled word underlining.
+     */
+    public Shape getSpellingPath()
+    {
+        // Get text box and text string and path object
+        TextBox tbox = getTextBox();
+        String string = tbox.getString();
+        Path path = new Path();
 
-            // Iterate over text
-            for (SpellCheck.Word word=SpellCheck.getMisspelledWord(string, 0); word!=null;
-                word=SpellCheck.getMisspelledWord(string, word.getEnd())) {
+        // Iterate over text
+        for (SpellCheck.Word word=SpellCheck.getMisspelledWord(string, 0); word != null;
+            word=SpellCheck.getMisspelledWord(string, word.getEnd())) {
 
-                // Get word bounds
-                int start = word.getStart(); if(start>=tbox.getEnd()) break;
-                int end = word.getEnd(); if(end>tbox.getEnd()) end = tbox.getEnd();
+            // Get word bounds
+            int start = word.getStart(); if (start >= tbox.getEnd()) break;
+            int end = word.getEnd(); if (end > tbox.getEnd()) end = tbox.getEnd();
 
-                // If text editor selection starts in word bounds, just continue - they are still working on this word
-                if(start<=getSelStart() && getSelStart()<=end)
-                    continue;
+            // If text editor selection starts in word bounds, just continue - they are still working on this word
+            if (start <= getSelStart() && getSelStart() <= end)
+                continue;
 
-                // Get the selection's start line index and end line index
-                int startLineIndex = getLineAt(start).getIndex();
-                int endLineIndex = getLineAt(end).getIndex();
+            // Get the selection's start line index and end line index
+            int startLineIndex = getLineAt(start).getIndex();
+            int endLineIndex = getLineAt(end).getIndex();
 
-                // Iterate over selected lines
-                for (int i=startLineIndex; i<=endLineIndex; i++) { TextBoxLine line = getLine(i);
+            // Iterate over selected lines
+            for (int i = startLineIndex; i <= endLineIndex; i++) { TextBoxLine line = getLine(i);
 
-                    // Get the bounds of line
-                    double x1 = line.getX();
-                    double x2 = line.getMaxX();
-                    double y = line.getBaseline() + 3;
+                // Get the bounds of line
+                double x1 = line.getX();
+                double x2 = line.getMaxX();
+                double y = line.getBaseline() + 3;
 
-                    // If starting line, adjust x1 for starting character
-                    if(i==startLineIndex)
-                        x1 = line.getXForChar(start - line.getStart() - tbox.getStart());
+                // If starting line, adjust x1 for starting character
+                if (i == startLineIndex)
+                    x1 = line.getXForChar(start - line.getStart() - tbox.getStart());
 
-                    // If ending line, adjust x2 for ending character
-                    if(i==endLineIndex)
-                        x2 = line.getXForChar(end - line.getStart() - tbox.getStart());
+                // If ending line, adjust x2 for ending character
+                if (i == endLineIndex)
+                    x2 = line.getXForChar(end - line.getStart() - tbox.getStart());
 
-                    // Append rect for line to path
-                    path.moveTo(x1,y); path.lineTo(x2,y);
-                }
+                // Append rect for line to path
+                path.moveTo(x1,y); path.lineTo(x2,y);
             }
-
-            // Return path
-            return path;
         }
+
+        // Return path
+        return path;
+    }
 
     /**
      * This method returns the range of the @-sign delinated key closest to the current selection (or null if not found).
@@ -1638,6 +1636,20 @@ public class TextArea extends View {
     {
         String str = getText(); if(str.length()>40) str = str.substring(0,40) + "...";
         return getClass().getSimpleName() + ": " + str;
+    }
+
+    /**
+     * Override for custom defaults.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        // Padding
+        if (aPropName == Padding_Prop)
+            return DEFAULT_TEXT_AREA_PADDING;
+
+        // Do normal version
+        return super.getPropDefault(aPropName);
     }
 
     /**

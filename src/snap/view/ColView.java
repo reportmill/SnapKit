@@ -11,30 +11,15 @@ import snap.util.*;
  */
 public class ColView extends ChildView {
 
-    // The spacing between nodes
-    private double  _spacing;
-    
     // Whether to fill to with
     private boolean  _fillWidth;
     
     // Constants for properties
     public static final String FillWidth_Prop = "FillWidth";
+
+    // Constants for property defaults
+    private static final boolean DEFAULT_COL_VIEW_VERTICAL = true;
     
-    /**
-     * Returns the spacing.
-     */
-    public double getSpacing()  { return _spacing; }
-
-    /**
-     * Sets the spacing.
-     */
-    public void setSpacing(double aValue)
-    {
-        if (aValue == _spacing) return;
-        firePropChange(Spacing_Prop, _spacing, _spacing = aValue);
-        relayout(); relayoutParent();
-    }
-
     /**
      * Returns whether children will be resized to fill width.
      */
@@ -71,9 +56,18 @@ public class ColView extends ChildView {
     protected void layoutImpl()  { layout(this, isFillWidth()); }
 
     /**
-     * Override to return true.
+     * Override for custom defaults.
      */
-    public boolean getDefaultVertical()  { return true; }
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        // Vertical
+        if (aPropName == Vertical_Prop)
+            return DEFAULT_COL_VIEW_VERTICAL;
+
+        // Do normal version
+        return super.getPropDefault(aPropName);
+    }
 
     /**
      * XML archival.
@@ -83,9 +77,7 @@ public class ColView extends ChildView {
         // Archive basic view attributes
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive Spacing, FillWidth
-        if (getSpacing() != 0)
-            e.add(Spacing_Prop, getSpacing());
+        // Archive FillWidth
         if (isFillWidth())
             e.add(FillWidth_Prop, true);
         return e;
@@ -99,9 +91,7 @@ public class ColView extends ChildView {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive Spacing, FillWidth
-        if (anElement.hasAttribute(Spacing_Prop))
-            setSpacing(anElement.getAttributeFloatValue(Spacing_Prop));
+        // Unarchive FillWidth
         if (anElement.hasAttribute(FillWidth_Prop))
             setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
     }
