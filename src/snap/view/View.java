@@ -237,7 +237,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setName(String aName)
     {
         if (SnapUtils.equals(aName, _name)) return;
-        firePropChange(Name_Prop, _name, _name=StringUtils.min(aName));
+        firePropChange(Name_Prop, _name, _name = StringUtils.min(aName));
     }
 
     /**
@@ -251,9 +251,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setX(double aValue)
     {
         // Set value and fire prop change
-        if (aValue==_x) return;
+        if (aValue == _x) return;
         repaintInParent(null);
-        firePropChange(X_Prop, _x, _x=aValue);
+        firePropChange(X_Prop, _x, _x = aValue);
     }
 
     /**
@@ -267,9 +267,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setY(double aValue)
     {
         // Set value and fire prop change
-        if (aValue==_y) return;
+        if (aValue == _y) return;
         repaintInParent(null);
-        firePropChange(Y_Prop, _y, _y=aValue);
+        firePropChange(Y_Prop, _y, _y = aValue);
     }
 
     /**
@@ -300,9 +300,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setHeight(double aValue)
     {
         // Set value, fire prop change and register for relayout
-        if (aValue==_height) return;
+        if (aValue == _height) return;
         repaintInParent(null);
-        firePropChange(Height_Prop, _height, _height=aValue);
+        firePropChange(Height_Prop, _height, _height = aValue);
         relayout();
     }
 
@@ -329,7 +329,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view x/y.
      */
-    public Point getXY()  { return new Point(getX(),getY()); }
+    public Point getXY()  { return new Point(getX(), getY()); }
 
     /**
      * Sets the view x/y.
@@ -360,7 +360,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setSize(double aW, double aH)
     {
-        setWidth(aW); setHeight(aH);
+        setWidth(aW);
+        setHeight(aH);
     }
 
     /**
@@ -476,9 +477,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setTransX(double aValue)
     {
-        if (aValue==_tx) return;
+        if (aValue == _tx) return;
         repaintInParent(null);
-        firePropChange(TransX_Prop, _tx, _tx=aValue);
+        firePropChange(TransX_Prop, _tx, _tx = aValue);
     }
 
     /**
@@ -491,9 +492,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setTransY(double aValue)
     {
-        if (aValue==_ty) return;
+        if (aValue == _ty) return;
         repaintInParent(null);
-        firePropChange(TransY_Prop, _ty, _ty=aValue);
+        firePropChange(TransY_Prop, _ty, _ty = aValue);
     }
 
     /**
@@ -506,9 +507,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setRotate(double theDegrees)
     {
-        if (theDegrees==_rot) return;
+        if (theDegrees == _rot) return;
         repaintInParent(null);
-        firePropChange(Rotate_Prop, _rot, _rot=theDegrees);
+        firePropChange(Rotate_Prop, _rot, _rot = theDegrees);
     }
 
     /**
@@ -521,9 +522,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setScaleX(double aValue)
     {
-        if (aValue==_sx) return;
+        if (aValue == _sx) return;
         repaintInParent(null);
-        firePropChange(ScaleX_Prop, _sx, _sx=aValue);
+        firePropChange(ScaleX_Prop, _sx, _sx = aValue);
     }
 
     /**
@@ -536,9 +537,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setScaleY(double aValue)
     {
-        if (aValue==_sy) return;
+        if (aValue == _sy) return;
         repaintInParent(null);
-        firePropChange(ScaleY_Prop, _sy, _sy=aValue);
+        firePropChange(ScaleY_Prop, _sy, _sy = aValue);
     }
 
     /**
@@ -561,8 +562,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setFill(Paint aPaint)
     {
-        if (SnapUtils.equals(aPaint,getFill())) return;
-        firePropChange(Fill_Prop, _fill, _fill=aPaint);
+        if (SnapUtils.equals(aPaint, getFill())) return;
+        firePropChange(Fill_Prop, _fill, _fill = aPaint);
         repaint();
     }
 
@@ -571,8 +572,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Color getFillColor()
     {
-        Paint fill = getFill(); if (fill==null || fill instanceof Color) return (Color)fill;
-        if (fill instanceof GradientPaint) return ((GradientPaint)fill).getStopColor(0);
+        Paint fill = getFill();
+        if (fill == null || fill instanceof Color)
+            return (Color) fill;
+        if (fill instanceof GradientPaint)
+            return ((GradientPaint) fill).getStopColor(0);
         return null;
     }
 
@@ -586,8 +590,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setBorder(Border aBorder)
     {
-        if (SnapUtils.equals(aBorder,getBorder())) return;
-        firePropChange(Border_Prop, _border, _border=aBorder);
+        if (SnapUtils.equals(aBorder, getBorder())) return;
+        firePropChange(Border_Prop, _border, _border = aBorder);
         relayout(); relayoutParent(); repaint();
     }
 
@@ -596,7 +600,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setBorder(Color aColor, double aWidth)
     {
-        setBorder(aColor!=null ? Border.createLineBorder(aColor, aWidth) : null);
+        setBorder(aColor != null ? Border.createLineBorder(aColor, aWidth) : null);
     }
 
     /**
@@ -604,7 +608,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Effect getEffect()
     {
-        return _effect !=null ? _effect._eff : null;
+        return _effect != null ? _effect._eff : null;
     }
 
     /**
@@ -617,7 +621,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Set new ViewEffect, fire prop change and repaint
         repaintInParent(null);
-        _effect = anEff!=null ? new ViewEffect(this, anEff) : null;
+        _effect = anEff != null ? new ViewEffect(this, anEff) : null;
         firePropChange(Effect_Prop, old, anEff);
     }
 
@@ -631,8 +635,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setOpacity(double aValue)
     {
-        if (aValue==_opacity) return;
-        firePropChange(Opacity_Prop, _opacity, _opacity=aValue);
+        if (aValue == _opacity) return;
+        firePropChange(Opacity_Prop, _opacity, _opacity = aValue);
         repaint();
     }
 
@@ -641,19 +645,23 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public double getOpacityAll()
     {
-        double opacity = getOpacity(); ParentView par = getParent();
-        return par!=null ? opacity*par.getOpacityAll() : opacity;
+        double opacity = getOpacity();
+        ParentView par = getParent();
+        return par != null ? opacity * par.getOpacityAll() : opacity;
     }
 
     /**
      * Returns whether font has been explicitly set for this view.
      */
-    public boolean isFontSet()  { return _font!=null; }
+    public boolean isFontSet()  { return _font != null; }
 
     /**
      * Returns the font for the view (defaults to parent font).
      */
-    public Font getFont()  { return _font!=null ? _font : getDefaultFont(); }
+    public Font getFont()
+    {
+        return _font != null ? _font : getDefaultFont();
+    }
 
     /**
      * Sets the font for the view.
@@ -661,12 +669,14 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setFont(Font aFont)
     {
         // Special case: If both fonts are null, assume parent updated
-        if (aFont==null && _font==null) {
-            relayout(); relayoutParent(); repaint(); return; }
+        if (aFont == null && _font == null) {
+            relayout(); relayoutParent(); repaint();
+            return;
+        }
 
         // Do normal version
         if (SnapUtils.equals(aFont, _font)) return;
-        firePropChange(Font_Prop, _font, _font=aFont);
+        firePropChange(Font_Prop, _font, _font = aFont);
         relayout(); relayoutParent(); repaint();
     }
 
@@ -680,10 +690,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setCursor(Cursor aCursor)
     {
-        if (aCursor==null) aCursor = Cursor.DEFAULT; if (aCursor==_cursor) return;
-        firePropChange(Cursor_Prop, _cursor, _cursor=aCursor);
+        if (aCursor == null) aCursor = Cursor.DEFAULT;
+        if (aCursor == _cursor) return;
+        firePropChange(Cursor_Prop, _cursor, _cursor = aCursor);
         WindowView win = getWindow();
-        if (win!=null) win.resetActiveCursor();
+        if (win != null)
+            win.resetActiveCursor();
     }
 
     /**
@@ -696,8 +708,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setDisabled(boolean aValue)
     {
-        if (aValue==_disabled) return;
-        firePropChange(Disabled_Prop, _disabled, _disabled=aValue);
+        if (aValue == _disabled) return;
+        firePropChange(Disabled_Prop, _disabled, _disabled = aValue);
         repaint();
     }
 
@@ -714,14 +726,14 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether view should clip to bounds.
      */
-    public boolean isClipToBounds()  { return _clip==ClipToBoundsRect; }
+    public boolean isClipToBounds()  { return _clip == ClipToBoundsRect; }
 
     /**
      * Sets whether view should clip to bounds.
      */
     public void setClipToBounds(boolean aValue)
     {
-        if (aValue==isClipToBounds()) return;
+        if (aValue == isClipToBounds()) return;
         setClip(aValue ? ClipToBoundsRect : null);
     }
 
@@ -733,7 +745,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Shape getClip()
     {
-        if (_clip==ClipToBoundsRect)
+        if (_clip == ClipToBoundsRect)
             return getBoundsShape();
         return _clip;
     }
@@ -743,7 +755,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setClip(Shape aShape)
     {
-        if (SnapUtils.equals(aShape,_clip)) return;
+        if (SnapUtils.equals(aShape, _clip)) return;
         firePropChange(Clip_Prop, _clip, _clip = aShape);
     }
 
@@ -761,11 +773,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Shape getClipAll()
     {
-        Shape vshp = getParent()!=null ? getParent().getClipAll() : null;
-        if (vshp!=null)
+        Shape vshp = getParent() != null ? getParent().getClipAll() : null;
+        if (vshp != null)
             vshp = parentToLocal(vshp);
-        if (getClip()!=null)
-            vshp = vshp!=null ? Shape.intersect(vshp, getClip()) : getClip();
+        if (getClip() != null)
+            vshp = vshp != null ? Shape.intersect(vshp, getClip()) : getClip();
         return vshp;
     }
 
@@ -775,7 +787,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Rect getClipAllBounds()
     {
         Shape clip = getClipAll();
-        return clip!=null ? clip.getBounds() : null;
+        return clip != null ? clip.getBounds() : null;
     }
 
     /**
@@ -1768,7 +1780,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (SnapUtils.equals(theIns, _margin)) return;
 
         // Set value, fire prop change, relayout parent
-        firePropChange(Padding_Prop, _margin, _margin = theIns);
+        firePropChange(Margin_Prop, _margin, _margin = theIns);
         relayoutParent();
     }
 
@@ -2439,12 +2451,18 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void processEventFilters(ViewEvent anEvent)
     {
-        // Forward to Filters, short-circuit if event is consumed
-        EventListener filters[] = getEventAdapter()._filters;
-        for (int i=0; i<filters.length; i++) { EventListener lsnr = filters[i];
-            if (getEventAdapter()._types.get(lsnr).contains(anEvent.getType())) {
+        // Get event filters and event type
+        EventAdapter eventAdapter = getEventAdapter();
+        EventListener[] filters = eventAdapter._filters;
+        ViewEvent.Type eventType = anEvent.getType();
+
+        // Iterate over filters: If event type supported, send to filter
+        for (EventListener lsnr : filters) {
+            Set<ViewEvent.Type> types = eventAdapter._types.get(lsnr);
+            if (types.contains(eventType)) {
                 lsnr.fireEvent(anEvent);
-                if (anEvent.isConsumed()) break;
+                if (anEvent.isConsumed())
+                    break;
             }
         }
     }
@@ -2457,13 +2475,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // If event not consumed, send to view
         processEvent(anEvent);
 
-        // If event consumed, just return
-        //if (anEvent.isConsumed()) return;
+        // Get event handlers and event type
+        EventAdapter eventAdapter = getEventAdapter();
+        EventListener[] handlers = eventAdapter._handlers;
+        ViewEvent.Type eventType = anEvent.getType();
 
-        // Forward to Handlers, short-circuit if event is consumed
-        EventListener handlers[] = getEventAdapter()._handlers;
-        for (int i=0; i<handlers.length; i++) { EventListener lsnr = handlers[i];
-            if (getEventAdapter()._types.get(lsnr).contains(anEvent.getType()))
+        // Iterate over handlers: If event type supported, send to handler
+        for (EventListener lsnr : handlers) {
+            Set<ViewEvent.Type> types = eventAdapter._types.get(lsnr);
+            if (types.contains(eventType))
                 lsnr.fireEvent(anEvent);
         }
     }
@@ -2483,15 +2503,20 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public ViewAnim getAnim(int aTime)
     {
-        if (aTime<0) return _anim;
-        if (_anim==null) _anim = new ViewAnim(this, 0, 0);
-        return aTime>0 ? _anim.getAnim(aTime) : _anim;
+        if (aTime < 0) return _anim;
+        if (_anim == null) _anim = new ViewAnim(this, 0, 0);
+        return aTime > 0 ? _anim.getAnim(aTime) : _anim;
     }
 
     /**
      * Returns a cleared anim at given time.
      */
-    public ViewAnim getAnimCleared(int aTime)  { return getAnim(0).clear().getAnim(aTime); }
+    public ViewAnim getAnimCleared(int aTime)
+    {
+        ViewAnim viewAnim = getAnim(0);
+        viewAnim.clear();
+        return viewAnim.getAnim(aTime);
+    }
 
     /**
      * Play animations deep.
@@ -2523,7 +2548,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public ViewPhysics getPhysics(boolean doCreate)
     {
-        if (_physics!=null || !doCreate) return _physics;
+        if (_physics != null || !doCreate) return _physics;
         return _physics = new ViewPhysics();
     }
 
@@ -2534,68 +2559,95 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // Get class name for element
         String cname;
-        for (Class c=getClass();;c=c.getSuperclass()) {
-            if (c==ParentView.class) continue;
+        for (Class c = getClass(); ; c = c.getSuperclass()) {
+            if (c == ParentView.class) continue;
             if (c.getName().startsWith("snap.view")) {
-                cname = c.getSimpleName(); break; }
+                cname = c.getSimpleName();
+                break;
+            }
         }
 
         // Get new element with class name
         XMLElement e = new XMLElement(cname);
 
         // Archive name
-        if (getName()!=null && getName().length()>0) e.add(Name_Prop, getName());
+        if (getName() != null && getName().length() > 0)
+            e.add(Name_Prop, getName());
 
         // Archive X, Y, Width, Height
         View par = getParent();
         if (this instanceof SpringView || par instanceof SpringView || par instanceof PageView) {
-            if (getX()!=0) e.add("x", getX());
-            if (getY()!=0) e.add("y", getY());
-            if (getWidth()!=0) e.add("width", getWidth());
-            if (getHeight()!=0) e.add("height", getHeight());
+            if (getX() != 0) e.add("x", getX());
+            if (getY() != 0) e.add("y", getY());
+            if (getWidth() != 0) e.add("width", getWidth());
+            if (getHeight() != 0) e.add("height", getHeight());
         }
 
         // Archive MinWidth, MinHeight, PrefWidth, PrefHeight
-        if (isMinWidthSet()) e.add(MinWidth_Prop, getMinWidth());
-        if (isMinHeightSet()) e.add(MinHeight_Prop, getMinHeight());
-        if (isPrefWidthSet()) e.add(PrefWidth_Prop, getPrefWidth());
-        if (isPrefHeightSet()) e.add(PrefHeight_Prop, getPrefHeight());
+        if (isMinWidthSet())
+            e.add(MinWidth_Prop, getMinWidth());
+        if (isMinHeightSet())
+            e.add(MinHeight_Prop, getMinHeight());
+        if (isPrefWidthSet())
+            e.add(PrefWidth_Prop, getPrefWidth());
+        if (isPrefHeightSet())
+            e.add(PrefHeight_Prop, getPrefHeight());
 
         // Archive Rotate, ScaleX, ScaleY
-        if (getRotate()!=0) e.add(Rotate_Prop, getRotate());
-        if (getScaleX()!=1) e.add(ScaleX_Prop, getScaleX());
-        if (getScaleY()!=1) e.add(ScaleY_Prop, getScaleY());
+        if (getRotate() != 0)
+            e.add(Rotate_Prop, getRotate());
+        if (getScaleX() != 1)
+            e.add(ScaleX_Prop, getScaleX());
+        if (getScaleY() != 1)
+            e.add(ScaleY_Prop, getScaleY());
 
         // Archive Vertical
-        if (isVertical()!=getDefaultVertical()) e.add(Vertical_Prop, isVertical());
+        if (isVertical() != getDefaultVertical())
+            e.add(Vertical_Prop, isVertical());
 
         // Archive border, Fill, Effect
-        Paint fill = getFill(); Border brdr = getBorder(); Effect eff = getEffect();
-        if (brdr!=null && !SnapUtils.equals(brdr,getDefaultBorder())) e.add(anArchiver.toXML(brdr, this));
-        if (fill!=null && !SnapUtils.equals(fill,getDefaultFill())) e.add(anArchiver.toXML(fill, this));
-        if (eff!=null) e.add(anArchiver.toXML(eff, this));
+        Border brdr = getBorder();
+        if (brdr != null && !SnapUtils.equals(brdr, getDefaultBorder()))
+            e.add(anArchiver.toXML(brdr, this));
+        Paint fill = getFill();
+        if (fill != null && !SnapUtils.equals(fill, getDefaultFill()))
+            e.add(anArchiver.toXML(fill, this));
+        Effect eff = getEffect();
+        if (eff != null)
+            e.add(anArchiver.toXML(eff, this));
 
         // Archive font
-        if (!SnapUtils.equals(getFont(),getDefaultFont())) e.add(getFont().toXML(anArchiver));
+        if (!SnapUtils.equals(getFont(), getDefaultFont()))
+            e.add(getFont().toXML(anArchiver));
 
         // Archive Disabled, Visible, Opacity
-        if (isDisabled()) e.add(Disabled_Prop, true);
-        if (!isVisible()) e.add(Visible_Prop, false);
-        if (getOpacity()<1) e.add(Opacity_Prop, getOpacity());
+        if (isDisabled())
+            e.add(Disabled_Prop, true);
+        if (!isVisible())
+            e.add(Visible_Prop, false);
+        if (getOpacity() < 1)
+            e.add(Opacity_Prop, getOpacity());
 
         // Archive Alignment, Margin, Padding
-        if (getAlign()!=getDefaultAlign()) e.add(Align_Prop, getAlign());
-        if (!getMargin().equals(getDefaultMargin())) e.add(Margin_Prop, getMargin().getString());
-        if (!getPadding().equals(getDefaultPadding())) e.add(Padding_Prop, getPadding().getString());
+        if (getAlign() != getDefaultAlign())
+            e.add(Align_Prop, getAlign());
+        if (!getMargin().equals(getDefaultMargin()))
+            e.add(Margin_Prop, getMargin().getString());
+        if (!getPadding().equals(getDefaultPadding()))
+            e.add(Padding_Prop, getPadding().getString());
 
         // Archive GrowWidth, GrowHeight, LeanX, LeanY
-        if (isGrowWidth()) e.add(GrowWidth_Prop, true);
-        if (isGrowHeight()) e.add(GrowHeight_Prop, true);
-        if (getLeanX()!=null) e.add(LeanX_Prop, getLeanX());
-        if (getLeanY()!=null) e.add(LeanY_Prop, getLeanY());
+        if (isGrowWidth())
+            e.add(GrowWidth_Prop, true);
+        if (isGrowHeight())
+            e.add(GrowHeight_Prop, true);
+        if (getLeanX() != null)
+            e.add(LeanX_Prop, getLeanX());
+        if (getLeanY() != null)
+            e.add(LeanY_Prop, getLeanY());
 
         // Archive animation
-        if (getAnim(-1)!=null && !getAnim(0).isEmpty()) {
+        if (getAnim(-1) != null && !getAnim(0).isEmpty()) {
             ViewAnim anim = getAnim(0);
             e.add(anim.toXML(anArchiver));
         }
@@ -2605,11 +2657,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             e.add(b.toXML(anArchiver));
 
         // Archive ToolTip
-        if (getToolTip()!=null) e.add(ToolTip_Prop, getToolTip());
+        if (getToolTip() != null)
+            e.add(ToolTip_Prop, getToolTip());
 
         // Archive RealClassName
         cname = getRealClassName();
-        if (cname!=null && cname.length()>0) e.add("Class", cname);
+        if (cname != null && cname.length() > 0)
+            e.add("Class", cname);
 
         // Return the element
         return e;
@@ -2631,105 +2685,132 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Unarchive X, Y, Width, Height
         if (anElement.hasAttribute("x") || anElement.hasAttribute("y") ||
             anElement.hasAttribute("width") || anElement.hasAttribute("height")) {
-            double x = anElement.getAttributeFloatValue("x"), y = anElement.getAttributeFloatValue("y");
-            double w = anElement.getAttributeFloatValue("width"), h = anElement.getAttributeFloatValue("height");
+            double x = anElement.getAttributeFloatValue("x");
+            double y = anElement.getAttributeFloatValue("y");
+            double w = anElement.getAttributeFloatValue("width");
+            double h = anElement.getAttributeFloatValue("height");
             setBounds(x, y, w, h);
         }
 
         // Unarchive MinWidth, MinHeight, PrefWidth, PrefHeight
-        if (anElement.hasAttribute(MinWidth_Prop)) setMinWidth(anElement.getAttributeFloatValue(MinWidth_Prop));
-        if (anElement.hasAttribute(MinHeight_Prop)) setMinHeight(anElement.getAttributeFloatValue(MinHeight_Prop));
-        if (anElement.hasAttribute(PrefWidth_Prop)) setPrefWidth(anElement.getAttributeFloatValue(PrefWidth_Prop));
-        if (anElement.hasAttribute(PrefHeight_Prop)) setPrefHeight(anElement.getAttributeFloatValue(PrefHeight_Prop));
+        if (anElement.hasAttribute(MinWidth_Prop))
+            setMinWidth(anElement.getAttributeFloatValue(MinWidth_Prop));
+        if (anElement.hasAttribute(MinHeight_Prop))
+            setMinHeight(anElement.getAttributeFloatValue(MinHeight_Prop));
+        if (anElement.hasAttribute(PrefWidth_Prop))
+            setPrefWidth(anElement.getAttributeFloatValue(PrefWidth_Prop));
+        if (anElement.hasAttribute(PrefHeight_Prop))
+            setPrefHeight(anElement.getAttributeFloatValue(PrefHeight_Prop));
 
         // Unarchive Roll, ScaleX, ScaleY
-        if (anElement.hasAttribute("roll")) setRotate(anElement.getAttributeFloatValue("roll"));
-        if (anElement.hasAttribute(Rotate_Prop)) setRotate(anElement.getAttributeFloatValue(Rotate_Prop));
-        if (anElement.hasAttribute(ScaleX_Prop)) setScaleX(anElement.getAttributeFloatValue(ScaleX_Prop));
-        if (anElement.hasAttribute(ScaleY_Prop)) setScaleY(anElement.getAttributeFloatValue(ScaleY_Prop));
+        if (anElement.hasAttribute("roll"))
+            setRotate(anElement.getAttributeFloatValue("roll"));
+        if (anElement.hasAttribute(Rotate_Prop))
+            setRotate(anElement.getAttributeFloatValue(Rotate_Prop));
+        if (anElement.hasAttribute(ScaleX_Prop))
+            setScaleX(anElement.getAttributeFloatValue(ScaleX_Prop));
+        if (anElement.hasAttribute(ScaleY_Prop))
+            setScaleY(anElement.getAttributeFloatValue(ScaleY_Prop));
 
         // Unarchive Vertical
-        if (anElement.hasAttribute(Vertical_Prop)) setVertical(anElement.getAttributeBoolValue(Vertical_Prop));
+        if (anElement.hasAttribute(Vertical_Prop))
+            setVertical(anElement.getAttributeBoolValue(Vertical_Prop));
 
         // Unarchive Border
-        int bind = anArchiver.indexOf(anElement, Border.class);
-        if (bind>=0) {
-            Border border = (Border)anArchiver.fromXML(anElement.get(bind), this);
+        int borderIndex = anArchiver.indexOf(anElement, Border.class);
+        if (borderIndex >= 0) {
+            Border border = (Border) anArchiver.fromXML(anElement.get(borderIndex), this);
             setBorder(border);
         }
 
         // Unarchive Fill
-        int pind = anArchiver.indexOf(anElement, Paint.class);
-        if (pind>=0) {
-            Paint fill = (Paint)anArchiver.fromXML(anElement.get(pind), this);
+        int fillIndex = anArchiver.indexOf(anElement, Paint.class);
+        if (fillIndex >= 0) {
+            Paint fill = (Paint) anArchiver.fromXML(anElement.get(fillIndex), this);
             setFill(fill);
         }
 
         // Unarchive Effect
-        int eind = anArchiver.indexOf(anElement, Effect.class);
-        if (eind>=0) {
-            Effect eff = (Effect)anArchiver.fromXML(anElement.get(eind), this);
+        int effectIndex = anArchiver.indexOf(anElement, Effect.class);
+        if (effectIndex >= 0) {
+            Effect eff = (Effect)anArchiver.fromXML(anElement.get(effectIndex), this);
             setEffect(eff);
         }
 
         // Unarchive Fill, Border (Legacy)
         XMLElement sxml = anElement.getElement("stroke");
-        if (sxml!=null) { String cstr = sxml.getAttributeValue("color");
-            Color sc = cstr!=null ? new Color(cstr):Color.BLACK;
+        if (sxml != null) { String cstr = sxml.getAttributeValue("color");
+            Color sc = cstr != null ? new Color(cstr) : Color.BLACK;
             double sw = sxml.getAttributeFloatValue("width", 1);
             setBorder(sc, sw);
         }
         XMLElement fxml = anElement.getElement("fill");
-        if (fxml!=null) {
+        if (fxml != null) {
             Paint fill = (Paint)anArchiver.fromXML(fxml, this);
             setFill(fill);
         }
         XMLElement bxml = anElement.getElement("border");
-        if (bxml!=null) {
+        if (bxml != null) {
             Border border = Border.fromXMLBorder(anArchiver, bxml);
             setBorder(border);
         }
 
         // Unarchive font
         XMLElement fontXML = anElement.getElement(Font_Prop);
-        if (fontXML!=null) setFont((Font)anArchiver.fromXML(fontXML, this));
+        if (fontXML != null)
+            setFont((Font)anArchiver.fromXML(fontXML, this));
 
         // Unarchive Disabled, Visible, Opacity
-        if (anElement.hasAttribute(Disabled_Prop)) setDisabled(anElement.getAttributeBoolValue(Disabled_Prop));
-        if (anElement.hasAttribute(Visible_Prop)) setVisible(anElement.getAttributeBoolValue(Visible_Prop));
-        if (anElement.hasAttribute(Opacity_Prop)) setOpacity(anElement.getAttributeFloatValue(Opacity_Prop));
+        if (anElement.hasAttribute(Disabled_Prop))
+            setDisabled(anElement.getAttributeBoolValue(Disabled_Prop));
+        if (anElement.hasAttribute(Visible_Prop))
+            setVisible(anElement.getAttributeBoolValue(Visible_Prop));
+        if (anElement.hasAttribute(Opacity_Prop))
+            setOpacity(anElement.getAttributeFloatValue(Opacity_Prop));
 
         // Unarchive Alignment, Margin, Padding
-        else if (anElement.hasAttribute(Align_Prop)) setAlign(Pos.get(anElement.getAttributeValue(Align_Prop)));
-        if (anElement.hasAttribute(Margin_Prop)) { Insets ins = Insets.get(anElement.getAttributeValue(Margin_Prop));
-            setMargin(ins); }
-        if (anElement.hasAttribute(Padding_Prop)) { Insets ins = Insets.get(anElement.getAttributeValue(Padding_Prop));
-            setPadding(ins); }
+        if (anElement.hasAttribute(Align_Prop))
+            setAlign(Pos.get(anElement.getAttributeValue(Align_Prop)));
+        if (anElement.hasAttribute(Margin_Prop)) {
+            Insets ins = Insets.get(anElement.getAttributeValue(Margin_Prop));
+            setMargin(ins);
+        }
+        if (anElement.hasAttribute(Padding_Prop)) {
+            Insets ins = Insets.get(anElement.getAttributeValue(Padding_Prop));
+            setPadding(ins);
+        }
 
         // Unarchive GrowWidth, GrowHeight, LeanX, LeanY
-        if (anElement.hasAttribute(GrowWidth_Prop)) setGrowWidth(anElement.getAttributeBoolValue(GrowWidth_Prop));
-        if (anElement.hasAttribute(GrowHeight_Prop)) setGrowHeight(anElement.getAttributeBoolValue(GrowHeight_Prop));
-        if (anElement.hasAttribute(LeanX_Prop)) setLeanX(HPos.get(anElement.getAttributeValue(LeanX_Prop)));
-        if (anElement.hasAttribute(LeanY_Prop)) setLeanY(VPos.get(anElement.getAttributeValue(LeanY_Prop)));
+        if (anElement.hasAttribute(GrowWidth_Prop))
+            setGrowWidth(anElement.getAttributeBoolValue(GrowWidth_Prop));
+        if (anElement.hasAttribute(GrowHeight_Prop))
+            setGrowHeight(anElement.getAttributeBoolValue(GrowHeight_Prop));
+        if (anElement.hasAttribute(LeanX_Prop))
+            setLeanX(HPos.get(anElement.getAttributeValue(LeanX_Prop)));
+        if (anElement.hasAttribute(LeanY_Prop))
+            setLeanY(VPos.get(anElement.getAttributeValue(LeanY_Prop)));
 
         // Unarchive Autosizing
-        if (anElement.hasAttribute("asize")) setAutosizing(anElement.getAttributeValue("asize"));
+        if (anElement.hasAttribute("asize"))
+            setAutosizing(anElement.getAttributeValue("asize"));
 
         // Unarchive animation
         XMLElement animXML = anElement.getElement("Anim");
-        if (animXML==null) animXML = anElement.getElement("KeyFrame")!=null ? anElement : null;
-        if (animXML!=null)
+        if (animXML == null) animXML = anElement.getElement("KeyFrame") != null ? anElement : null;
+        if (animXML != null)
             getAnim(0).fromXML(anArchiver, animXML);
 
         // Unarchive bindings
-        for (int i=anElement.indexOf("binding");i>=0;i=anElement.indexOf("binding",i+1)) {
+        for (int i = anElement.indexOf("binding"); i >= 0; i = anElement.indexOf("binding",i+1)) {
             XMLElement bx = anElement.get(i);
             addBinding(new Binding().fromXML(anArchiver, bx));
         }
 
         // Unarchive ToolTip
-        if (anElement.hasAttribute("ttip")) setToolTip(anElement.getAttributeValue("ttip"));
-        if (anElement.hasAttribute(ToolTip_Prop)) setToolTip(anElement.getAttributeValue(ToolTip_Prop));
+        if (anElement.hasAttribute("ttip"))
+            setToolTip(anElement.getAttributeValue("ttip"));
+        if (anElement.hasAttribute(ToolTip_Prop))
+            setToolTip(anElement.getAttributeValue(ToolTip_Prop));
 
         // Unarchive class property for subclass substitution, if available
         if (anElement.hasAttribute("Class"))
@@ -2753,8 +2834,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public String toString()
     {
         StringBuffer sb = StringUtils.toString(this);
-        if (getName()!=null && getName().length()>0) StringUtils.toStringAdd(sb, "Name", getName());
-        if (getText()!=null && getText().length()>0) StringUtils.toStringAdd(sb, "Text", getText());
+        if (getName() != null && getName().length() > 0) StringUtils.toStringAdd(sb, "Name", getName());
+        if (getText() != null && getText().length() > 0) StringUtils.toStringAdd(sb, "Text", getText());
         StringUtils.toStringAdd(sb, "Bounds", getBounds());
         return sb.toString();
     }
