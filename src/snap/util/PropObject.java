@@ -6,6 +6,9 @@ import java.util.*;
  */
 public class PropObject implements PropChange.DoChange {
 
+    // The PropSheet to hold actual property values
+    private PropSheet  _propSheet;
+
     // PropertyChangeSupport
     protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
 
@@ -13,17 +16,73 @@ public class PropObject implements PropChange.DoChange {
     private static Map<Class<? extends PropObject>, String[]>  _classProps = new HashMap<>();
 
     /**
+     * Returns the PropSheet.
+     */
+    public PropSheet getPropSheet()
+    {
+        // If already set, just return
+        if (_propSheet != null) return _propSheet;
+
+        // Create PropSheet, set and return
+        PropSheet propSheet = new PropSheet(this);
+        return _propSheet = propSheet;
+    }
+
+    /**
+     * Returns the parent PropObject (if available).
+     */
+    public PropObject getPropParent()  { return null; }
+
+    /**
+     * Initialize PropDefaults. Override to provide custom defaults.
+     */
+    protected void initPropDefaults(PropDefaults aPropDefaults)
+    {
+        // super.initPropDefaults(aPropDefaults);
+        // aPropDefaults.setPropDefault(Something_Prop, DEFAULT_SOMETHING_VALUE);
+    }
+
+    /**
      * Returns the value for given prop name.
      */
     public Object getPropValue(String aPropName)
     {
+        // switch (aPropName) {
+        //     case Something_Prop: return getSomething();
+        //     default: return super.getPropValue(aPropName);
+        // }
+
         return null;
     }
 
     /**
      * Sets the value for given prop name.
      */
-    public void setPropValue(String aPropName, Object aValue)  { }
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // switch (aPropName) {
+        //     case Something_Prop: setSomething(aValue); break;
+        //     default: super.setPropValue(aPropName, aValue);
+        // }
+    }
+
+    /**
+     * Returns a property value.
+     */
+    // public Object getSomething()
+    // {
+    //     PropSheet propSheet = getPropSheet();
+    //     return propSheet.getPropValue(Something_Prop);
+    // }
+
+    /**
+     * Returns a property value.
+     */
+    // public void setSomething(Object aValue)
+    // {
+    //     PropSheet propSheet = getPropSheet();
+    //     return propSheet.setPropValue(Something_Prop, aValue);
+    // }
 
     /**
      * Returns whether give prop is set to default.
