@@ -39,37 +39,60 @@ public class PropArchiver {
 
             // Get PropValue
             Object value = aPropObj.getPropValue(propName);
+            if (value instanceof List)
+                value = ((List) value).toArray();
 
             // If value is PropObject, convert to recurse to get as PropNode
             if (value instanceof PropObject)
                 value = propObjectToPropNode((PropObject) value);
 
-            // If value is List, convert
-            else if (value instanceof List) {
-                List list = (List) value;
-
-                // Handle empty list
-                if (list.isEmpty())
-                    value = new PropNode[0];
-
-                // Handle list of PropObject
-                else if (list.get(0) instanceof PropObject) {
-                    PropNode[] propNodes = new PropNode[list.size()];
-                    for (int i = 0; i < list.size(); i++)
-                        propNodes[i] = propObjectToPropNode((PropObject) list.get(i));
-                    value = propNodes;
-                }
-
-                // Handle list of primitives
-                else value = list.toArray();
-            }
+            // If value is list/array, convert
+            else if (value instanceof List || value instanceof Object[])
+                value = vectorConversion(value);
 
             // Add prop/value
             propNode.addPropValue(propName, value);
         }
 
+        // Iterate over relations
+        String[] relationNames = propDefaults.getRelationNames();
+        for (String relationName : relationNames) {
+
+            // Handle single relation
+            Object relObj = aPropObj.getPropValue(relationName);
+            if (relObj instanceof PropObject) {
+                PropObject relPropObj = relObj instanceof PropObject ? (PropObject) relObj : null;
+                PropNode relPropNode = propObjectToPropNode(relPropObj);
+                propNode.addPropValue(relationName, relPropNode);
+            }
+
+            // Handle relation list
+            else if (relObj instanceof List || relObj instanceof Object[]) {
+                Object[] relNodes = vectorConversion(relObj);
+                propNode.addPropValue(relationName, relNodes);
+            }
+        }
+
         // Return PropNode
         return propNode;
+    }
+
+    /**
+     * Returns an array of nodes or primatives for given array.
+     */
+    private Object[] vectorConversion(Object aListOrArray)
+    {
+        Object[] array = aListOrArray instanceof List ? ((List) aListOrArray).toArray() : (Object[]) aListOrArray;
+        if (array.length == 0 || !(array[0] instanceof PropObject))
+            return array;
+
+        PropNode[] propNodes = new PropNode[array.length];
+        for (int i = 0; i < array.length; i++) {
+            PropObject propObject = (PropObject) array[i];
+            propNodes[i] = propObjectToPropNode(propObject);
+        }
+
+        return propNodes;
     }
 
     /**

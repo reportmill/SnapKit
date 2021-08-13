@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -64,7 +65,24 @@ public class PropNode {
 
             // Handle array
             if (propValue instanceof Object[]) {
-                System.err.println("PropNode.getXML: Array property not yet implemented");
+                Object[] array = (Object[]) propValue;
+                XMLElement propXML = new XMLElement(propName);
+                xml.addElement(propXML);
+
+                // Handle array of PropNode
+                if (array.length > 0 && array[0] instanceof PropNode) {
+                    for (Object obj : array) {
+                        PropNode childNode = (PropNode) obj;
+                        XMLElement childXML = childNode.getXML(propName);
+                        propXML.addElement(childXML);
+                    }
+                }
+
+                // Handle array of primitive
+                else {
+                    String valStr = Arrays.toString(array);
+                    propXML.setValue(valStr);
+                }
             }
 
             // Handle primitive

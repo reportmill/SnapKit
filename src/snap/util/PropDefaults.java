@@ -26,11 +26,11 @@ public class PropDefaults {
     // A map of key/values
     private Map<String,Object>  _propVals = new HashMap<>();
 
-    // A map of all known properties for class as a list
-    private List<String>  _propsList = new ArrayList<>();
+    // An array of all known properties for class
+    private String[]  _props = new String[0];
 
-    // An array of all known properties for class as array
-    private String[]  _props;
+    // An array of all known relations for class
+    private String[]  _relations = new String[0];
 
     // A Map of PropDefaults for Classes
     private static final Map<Class,PropDefaults>  _propDefaults = new HashMap<>();
@@ -76,21 +76,38 @@ public class PropDefaults {
     }
 
     /**
-     * Returns all known properties.
+     * Returns all known property names.
      */
-    public String[] getPropNames()
+    public String[] getPropNames()  { return _props; }
+
+    /**
+     * Adds property names.
+     */
+    public void addProps(String ... thePropNames)
     {
-        if (_props != null) return _props;
-        return _props = _propsList.toArray(new String[0]);
+        _props = ArrayUtils.addAll(_props, thePropNames);
     }
 
     /**
-     * Adds properties.
+     * Returns all known relation names.
      */
-    public void addProps(String ... theProps)
+    public String[] getRelationNames()  { return _relations; }
+
+    /**
+     * Adds relation names.
+     */
+    public void addRelations(String ... theNames)
     {
-        Collections.addAll(_propsList, theProps);
-        _props = null;
+        _relations = ArrayUtils.addAll(_relations, theNames);
+    }
+
+    /**
+     * Removes relation names.
+     */
+    public void removeRelations(String ... theNames)
+    {
+        for (String name : theNames)
+            _relations = ArrayUtils.remove(_relations, name);
     }
 
     /**
