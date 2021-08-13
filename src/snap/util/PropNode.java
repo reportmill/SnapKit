@@ -14,6 +14,9 @@ public class PropNode {
     // The prop value
     private Object  _value;
 
+    // The ClassName, if available
+    private String  _className;
+
     // A map of property names to child nodes
     private Map<String,Object>  _children = new TreeMap<>();
 
@@ -32,6 +35,19 @@ public class PropNode {
      * Returns the value.
      */
     public Object getValue()  { return _value; }
+
+    /**
+     * Returns the class name.
+     */
+    public String getClassName()  { return _className; }
+
+    /**
+     * Sets the class name.
+     */
+    public void setClassName(String aName)
+    {
+        _className = aName;
+    }
 
     /**
      * Adds a key/value child.
@@ -64,7 +80,7 @@ public class PropNode {
             }
 
             // Handle array
-            if (propValue instanceof Object[]) {
+            else if (propValue instanceof Object[]) {
                 Object[] array = (Object[]) propValue;
                 XMLElement propXML = new XMLElement(propName);
                 xml.addElement(propXML);
@@ -73,7 +89,7 @@ public class PropNode {
                 if (array.length > 0 && array[0] instanceof PropNode) {
                     for (Object obj : array) {
                         PropNode childNode = (PropNode) obj;
-                        XMLElement childXML = childNode.getXML(propName);
+                        XMLElement childXML = childNode.getXML(childNode.getClassName());
                         propXML.addElement(childXML);
                     }
                 }
@@ -93,4 +109,25 @@ public class PropNode {
         return xml;
     }
 
+    /**
+     * Standard toString implementation.
+     */
+    public String toString()
+    {
+        StringBuffer sb = new StringBuffer("PropNode { ");
+        if (getClassName() != null)
+            sb.append("ClassName=").append(getClassName());
+
+        // Iterate over children
+        for (Map.Entry<String,Object> entry : _children.entrySet()) {
+            String propName = entry.getKey();
+            Object propValue = entry.getValue();
+            if (propValue instanceof PropNode)
+                continue;
+            sb.append(", ").append(propName).append("=").append(propValue);
+        }
+
+        // Return string
+        return sb.toString();
+    }
 }

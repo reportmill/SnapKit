@@ -84,7 +84,7 @@ public class PropSheet {
      */
     public boolean isPropDefault(String aPropName)
     {
-        return _setProps.contains(aPropName);
+        return !_setProps.contains(aPropName);
     }
 
     /**

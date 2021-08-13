@@ -155,6 +155,21 @@ public class SnapUtils {
     }
 
     /**
+     * Returns an enum value for given enum class and object.
+     */
+    public static <T extends Enum<T>> T enumValue(Class<T> enumClass, Object anObj)
+    {
+        // If given object already enum, just return
+        if (enumClass.isInstance(anObj))
+            return (T) anObj;
+
+        // Otherwise, get string, try to match with enum and return
+        String str = stringValue(anObj);
+        T enumVal = str != null ? EnumUtils.valueOfIC(enumClass, str) : null;
+        return enumVal;
+    }
+
+    /**
      * Returns the Integer for a given object.
      */
     public static Integer getInteger(Object anObj)

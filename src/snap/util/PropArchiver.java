@@ -28,7 +28,10 @@ public class PropArchiver {
         PropSheet propSheet = aPropObj.getPropSheet();
         PropDefaults propDefaults = propSheet.getPropDefaults();
         String[] propNames = propDefaults.getPropNames();
+
+        // Create new PropNode
         PropNode propNode = new PropNode(null);
+        propNode.setClassName(aPropObj.getClass().getSimpleName());
 
         // Iterate over properties and add to prop node
         for (String propName : propNames) {
