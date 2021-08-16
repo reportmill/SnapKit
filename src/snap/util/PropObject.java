@@ -179,7 +179,7 @@ public class PropObject implements PropChange.DoChange {
      */
     protected final void firePropChange(String aProp, Object oldVal, Object newVal)
     {
-        if (!_pcs.hasListener(aProp)) return;
+        if (_pcs == PropChangeSupport.EMPTY) return; // if (!_pcs.hasListener(aProp)) return;
         PropChange propChange = new PropChange(this, aProp, oldVal, newVal);
         firePropChange(propChange);
     }
@@ -189,7 +189,7 @@ public class PropObject implements PropChange.DoChange {
      */
     protected final void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
     {
-        if (!_pcs.hasListener(aProp)) return;
+        if (_pcs == PropChangeSupport.EMPTY) return; // if (!_pcs.hasListener(aProp)) return;
         PropChange propChange = new PropChange(this, aProp, oldVal, newVal, anIndex);
         firePropChange(propChange);
     }

@@ -3,8 +3,8 @@
  */
 package snap.util;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * A class to represent an archived PlotObject.
@@ -18,7 +18,7 @@ public class PropNode {
     private String  _className;
 
     // A map of property names to child nodes
-    private Map<String,Object>  _children = new TreeMap<>();
+    private Map<String,Object>  _children = new LinkedHashMap<>();
 
     // A constant to represent null value
     public static final Object NULL_VALUE = new Object();
@@ -102,7 +102,15 @@ public class PropNode {
             }
 
             // Handle primitive
-            else xml.add(propName, propValue);
+            else {
+
+                // If float/double, format to avoid many decimals
+                if (propValue instanceof Double || propValue instanceof Float)
+                    propValue = FormatUtils.formatNum((Number) propValue);
+
+                // Add prop
+                xml.add(propName, propValue);
+            }
         }
 
         // Return xml
