@@ -1778,20 +1778,39 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setAlign(Pos aPos)
     {
-        if (aPos==_align) return;
-        firePropChange(Align_Prop, _align, _align=aPos);
+        if (aPos == _align) return;
+        firePropChange(Align_Prop, _align, _align = aPos);
         relayout();
     }
 
     /**
+     * Returns the horizontal alignment.
+     */
+    public HPos getAlignX()  { return getAlign().getHPos(); }
+
+    /**
      * Sets the horizontal alignment.
      */
-    public void setAlign(HPos aPos)  { setAlign(Pos.get(aPos, getAlign().getVPos())); }
+    public void setAlignX(HPos aPos)
+    {
+        setAlign(Pos.get(aPos, getAlignY()));
+    }
+
+    /**
+     * Returns the vertical alignment.
+     */
+    public VPos getAlignY()  { return getAlign().getVPos(); }
 
     /**
      * Sets the vertical alignment.
      */
-    public void setAlign(VPos aPos)  { setAlign(Pos.get(getAlign().getHPos(), aPos)); }
+    public void setAlignY(VPos aPos)
+    {
+        setAlign(Pos.get(getAlignX(), aPos));
+    }
+
+    @Deprecated
+    public void setAlign(HPos aPos)  { setAlign(Pos.get(aPos, getAlign().getVPos())); }
 
     /**
      * Returns the spacing insets requested between parent/neighbors and the border of this view.

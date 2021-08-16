@@ -85,7 +85,7 @@ protected class ToolBar extends ViewOwner {
         Label speedLbl = new Label("Frame Rate:"); speedLbl.setLeanX(HPos.CENTER); speedLbl.setFont(Font.Arial14);
         Slider speedSldr = new Slider(); speedSldr.setName("SpeedSlider"); speedSldr.setPrefWidth(180);
         TextField speedText = new TextField(); speedText.setName("SpeedText"); speedText.setPrefWidth(40);
-        speedText.setAlign(HPos.CENTER);
+        speedText.setAlignX(HPos.CENTER);
     
         // Create toolbar
         RowView toolBar = new RowView(); toolBar.setAlign(Pos.CENTER); toolBar.setPadding(18,25,18,25); toolBar.setSpacing(15);

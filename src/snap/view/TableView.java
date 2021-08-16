@@ -512,7 +512,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     private void configureHeaderColCell(ListCell <T> aCell)
     {
         aCell.setText(String.valueOf(aCell.getRow()+1));
-        aCell.setAlign(HPos.CENTER);
+        aCell.setAlignX(HPos.CENTER);
     }
 
     /**

@@ -243,7 +243,7 @@ public class Spinner <T> extends ParentView {
     public void setAlign(Pos aPos)
     {
         super.setAlign(aPos);
-        _text.setAlign(aPos.getHPos());
+        _text.setAlignX(getAlignX());
     }
 
     /**

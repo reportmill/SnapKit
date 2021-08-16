@@ -591,7 +591,7 @@ public class TitleView extends ParentView implements ViewHost {
             // Create/configure button
             _button = new Button();
             _button.setPadding(3,3,3,3);
-            _button.setAlign(HPos.LEFT);
+            _button.setAlignX(HPos.LEFT);
             _button.setRadius(0);
             addChild(_button);
 

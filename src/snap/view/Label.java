@@ -163,7 +163,7 @@ public class Label extends ParentView {
         // Create, configure, add StringView and return
         _strView = new StringView();
         _strView.setGrowWidth(isEditable());
-        _strView.setAlign(getAlign().getHPos());
+        _strView.setAlignX(getAlignX());
         addChild(_strView, getGraphic() != null ? 1 : 0);
         return _strView;
     }
@@ -330,7 +330,7 @@ public class Label extends ParentView {
         editor.setBorder(new Color(1,.3,.3,.5), 1);
         editor.setBorder(editor.getBorder().copyForInsets(Insets.EMPTY));
         editor.setPadding(2,2,2,2);
-        editor.setAlign(getAlign().getHPos());
+        editor.setAlignX(getAlignX());
         editor.setFont(getFont());
         editor.addEventHandler(e -> editorFiredAction(), Action);
         editor.addPropChangeListener(pc -> editorFocusChanged(editor), Focused_Prop);
@@ -419,7 +419,8 @@ public class Label extends ParentView {
     public void setAlign(Pos aPos)
     {
         super.setAlign(aPos);
-        if (isStringViewSet()) getStringView().setAlign(aPos.getHPos());
+        if (isStringViewSet())
+            getStringView().setAlignX(getAlignX());
     }
 
     /**
