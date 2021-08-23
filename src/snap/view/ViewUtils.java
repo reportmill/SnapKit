@@ -15,7 +15,11 @@ import snap.web.WebFile;
 public class ViewUtils {
     
     // Booleans for input event state and modifiers
-    static boolean          _altDown, _cntrDown, _metaDown, _shiftDown, _shortcutDown;
+    protected static boolean  _altDown;
+    protected static boolean  _cntrDown;
+    protected static boolean  _metaDown;
+    protected static boolean  _shiftDown;
+    protected static boolean  _shortcutDown;
     
     // Color constants
     private static Color BACK_FILL = new Color("#E9E8EA");
@@ -26,7 +30,7 @@ public class ViewUtils {
     private static Color TARG_TEXT_FILL = Color.WHITE;
 
     // Image Constants
-    static Image        RootFile, DirFile, ClassFile, JavaFile, TableFile, PlainFile;
+    private static Image  RootFile, DirFile, ClassFile, JavaFile, TableFile, PlainFile;
 
     /**
      * Returns whether alt is down.
@@ -109,7 +113,7 @@ public class ViewUtils {
     public static Rect getBoundsOfViews(View aPar, List <? extends View> aList)
     {
         // If list is null or empty, return this shape's bounds inside
-        if (aList==null || aList.size()==0)
+        if (aList == null || aList.size() == 0)
             return aPar.getBoundsLocal();
 
         // Declare and initialize a rect to frame of first shape in list
@@ -117,7 +121,8 @@ public class ViewUtils {
         Rect rect = child0.localToParent(child0.getBoundsLocal()).getBounds();
 
         // Iterate over successive shapes in list and union their frames
-        for (int i=1, iMax=aList.size(); i<iMax; i++) { View child = aList.get(i);
+        for (int i = 1, iMax = aList.size(); i < iMax; i++) {
+            View child = aList.get(i);
             Rect bnds = child.localToParent(child.getBoundsLocal()).getBounds();
             rect.unionEvenIfEmpty(bnds);
         }
@@ -129,14 +134,19 @@ public class ViewUtils {
     /**
      * Run given runnable on event thread.
      */
-    public static void runLater(Runnable aRun)  { ViewEnv.getEnv().runLater(aRun); }
+    public static void runLater(Runnable aRun)
+    {
+        ViewEnv viewEnv = ViewEnv.getEnv();
+        viewEnv.runLater(aRun);
+    }
 
     /**
      * Runs given runnable after delay.
      */
     public static void runDelayed(Runnable aRun, int aDelay, boolean inAppThread)
     {
-        ViewEnv.getEnv().runDelayed(aRun, aDelay, inAppThread);
+        ViewEnv viewEnv = ViewEnv.getEnv();
+        viewEnv.runDelayed(aRun, aDelay, inAppThread);
     }
 
     /**
@@ -145,20 +155,28 @@ public class ViewUtils {
     public static void runOnMouseUp(Runnable aRun)
     {
         // If not mouse down, just run later and return
-        if (!isMouseDown()) { runLater(aRun); return; }
+        if (!isMouseDown()) {
+            runLater(aRun);
+            return;
+        }
 
         // Add MouseUpRun (just return if already present)
-        if (_mouseUpRuns.contains(aRun)) return;
+        if (_mouseUpRuns.contains(aRun))
+            return;
         _mouseUpRuns.add(aRun);
 
         // Set MouseUpLsnr from shared (just return if already set)
-        if (_mouseUpLsnr!=null) return;
+        if (_mouseUpLsnr != null)
+            return;
         _mouseUpLsnr = _mouseUpLsnrShared;
 
         // Get mouse down view (just return if none)
         ViewEvent lastMouseDown = getMouseDown();
         View view = lastMouseDown!=null ? lastMouseDown.getView() : null;
-        if (view==null) { runLater(aRun); return; }
+        if (view == null) {
+            runLater(aRun);
+            return;
+        }
 
         // Add EventListener to execute run on MouseRelease
         view.addEventFilter(_mouseUpLsnr, View.MouseRelease);
@@ -168,12 +186,15 @@ public class ViewUtils {
     static void runMouseUpRuns() {
 
         // Schedule runs and clear
-        for (Runnable run : _mouseUpRuns) runLater(run); _mouseUpRuns.clear();
+        for (Runnable run : _mouseUpRuns)
+            runLater(run);
+        _mouseUpRuns.clear();
 
         // Remove MouseUpLsnr
         ViewEvent lastMouseDown = getMouseDown();
         View view = lastMouseDown.getView();
-        view.removeEventFilter(_mouseUpLsnr, View.MouseRelease); _mouseUpLsnr = null;
+        view.removeEventFilter(_mouseUpLsnr, View.MouseRelease);
+        _mouseUpLsnr = null;
     }
 
     // The current list of MouseUp runs
@@ -187,7 +208,7 @@ public class ViewUtils {
      */
     public static String getId(View aView)
     {
-        String name = aView.getName()!=null ? aView.getName() : aView.getClass().getSimpleName();
+        String name = aView.getName() != null ? aView.getName() : aView.getClass().getSimpleName();
         return name + " " + System.identityHashCode(aView);
     }
 
@@ -207,7 +228,7 @@ public class ViewUtils {
      */
     public static void layoutDeep(View aView)
     {
-        ParentView par = aView instanceof ParentView ? (ParentView)aView : null; if (par==null) return;
+        ParentView par = aView instanceof ParentView ? (ParentView) aView : null; if (par == null) return;
         if (par.isNeedsLayout())
             par.layout();
         for (View child : par.getChildren())
@@ -264,13 +285,15 @@ public class ViewUtils {
      */
     public static <T extends View> T getChildAt(View aView, double aX, double aY, Class <T> aClass)
     {
-        ParentView par = aView instanceof ParentView ? (ParentView)aView : null; if (par==null) return null;
-        View children[] = par.getChildren();
-        for (int i=children.length-1; i>=0; i--) { View child = children[i];
-            if (!child.isPickableVisible()) continue;
+        ParentView par = aView instanceof ParentView ? (ParentView) aView : null; if (par == null) return null;
+        View[] children = par.getChildren();
+        for (int i = children.length - 1; i >= 0; i--) {
+            View child = children[i];
+            if (!child.isPickableVisible())
+                continue;
             Point p = child.parentToLocal(aX, aY);
-            if (child.contains(p.x,p.y) && (aClass==null || aClass.isInstance(child)))
-                return (T)child;
+            if (child.contains(p.x,p.y) && (aClass == null || aClass.isInstance(child)))
+                return (T) child;
         }
         return null;
     }
@@ -278,7 +301,10 @@ public class ViewUtils {
     /**
      * Returns the view or child view hit by given coords, starting at given view.
      */
-    public static View getDeepestViewAt(View aView, double aX, double aY)  { return getDeepestViewAt(aView,aX,aY,null); }
+    public static View getDeepestViewAt(View aView, double aX, double aY)
+    {
+        return getDeepestViewAt(aView,aX,aY,null);
+    }
 
     /**
      * Returns the view or child view of given class hit by given coords, starting at given view.
@@ -286,32 +312,37 @@ public class ViewUtils {
     public static <T extends View> T getDeepestViewAt(View aView, double aX, double aY, Class <T> aClass)
     {
         T view = getDeepestChildAt(aView, aX, aY, aClass);
-        if (view==null && aView.contains(aX,aY) && (aClass==null || aClass.isInstance(aView)))
-            view = (T)aView;
+        if (view == null && aView.contains(aX,aY) && (aClass == null || aClass.isInstance(aView)))
+            view = (T) aView;
         return view;
     }
 
     /**
      * Returns the deepest child hit by given coords starting with children of given view.
      */
-    public static View getDeepestChildAt(View aView, double aX, double aY)  { return getDeepestChildAt(aView,aX,aY,null); }
+    public static View getDeepestChildAt(View aView, double aX, double aY)
+    {
+        return getDeepestChildAt(aView,aX,aY,null);
+    }
 
     /**
      * Returns the deepest child of given class hit by given coords starting with children of given view.
      */
     public static <T extends View> T getDeepestChildAt(View aView, double aX, double aY, Class <T> aClass)
     {
-        ParentView par = aView instanceof ParentView ? (ParentView)aView : null; if (par==null) return null;
-        View children[] = par.getChildren();
-        for (int i=children.length-1; i>=0; i--) { View child = children[i];
-            if (!child.isPickableVisible()) continue;
+        ParentView par = aView instanceof ParentView ? (ParentView) aView : null; if (par == null) return null;
+        View[] children = par.getChildren();
+        for (int i = children.length - 1; i >= 0; i--) {
+            View child = children[i];
+            if (!child.isPickableVisible())
+                continue;
             Point p = child.parentToLocal(aX, aY);
             if (child.contains(p.x,p.y)) {
                 T hcdeep = getDeepestChildAt(child, p.x, p.y, aClass);
-                if (hcdeep!=null)
+                if (hcdeep != null)
                     return hcdeep;
-                if (aClass==null || aClass.isInstance(child))
-                    return (T)child;
+                if (aClass == null || aClass.isInstance(child))
+                    return (T) child;
             }
         }
         return null;
@@ -322,9 +353,9 @@ public class ViewUtils {
      */
     public static View getCommonAncetor(View aView1, View aView2)
     {
-        for (View n1=aView1; n1!=null; n1=n1.getParent())
-            for (View n2=aView2; n2!=null; n2=n2.getParent())
-                if (n1==n2)
+        for (View n1 = aView1; n1 != null; n1 = n1.getParent())
+            for (View n2 = aView2; n2 != null; n2 = n2.getParent())
+                if (n1 == n2)
                     return n1;
         return null;
     }
@@ -344,7 +375,11 @@ public class ViewUtils {
      */
     public static Image getFileIconImage(WebFile aFile)
     {
-        if (RootFile==null) loadFileIconImages();
+        // If first time, load files
+        if (RootFile == null)
+            loadFileIconImages();
+
+        // Handle File types
         if (aFile.isRoot()) return RootFile;
         if (aFile.isDir()) return DirFile;
         if (aFile.getType().equals("class")) return ClassFile;
@@ -356,22 +391,34 @@ public class ViewUtils {
     /**
      * Backdoor for protected ParentView method.
      */
-    public static void addChild(ParentView aPar, View aChild)  { aPar.addChild(aChild); }
+    public static void addChild(ParentView aPar, View aChild)
+    {
+        aPar.addChild(aChild);
+    }
 
     /**
      * Backdoor for protected ParentView method.
      */
-    public static void addChild(ParentView aPar, View aChild, int anIndex)  { aPar.addChild(aChild, anIndex); }
+    public static void addChild(ParentView aPar, View aChild, int anIndex)
+    {
+        aPar.addChild(aChild, anIndex);
+    }
 
     /**
      * Backdoor for protected ParentView method.
      */
-    public static void removeChild(ParentView aPar, View aChild)  { aPar.removeChild(aChild); }
+    public static void removeChild(ParentView aPar, View aChild)
+    {
+        aPar.removeChild(aChild);
+    }
 
     /**
      * Backdoor for protected ParentView method.
      */
-    public static void removeChild(ParentView aPar, int anIndex)  { aPar.removeChild(anIndex); }
+    public static void removeChild(ParentView aPar, int anIndex)
+    {
+        aPar.removeChild(anIndex);
+    }
 
     /**
      * Moves given child to end of given parent child list, so it paints in front.
@@ -404,16 +451,22 @@ public class ViewUtils {
     public static void replaceView(View aView, View newView)
     {
         // Get parent
-        View par = aView.getParent(); if (par==null) { System.err.println("ViewUtils.replaceView: null parent"); return; }
+        View par = aView.getParent();
+        if (par == null) {
+            System.err.println("ViewUtils.replaceView: null parent");
+            return;
+        }
 
         // Handle ViewHost
-        if (aView.isGuest()) { ViewHost host = aView.getHost();
+        if (aView.isGuest()) {
+            ViewHost host = aView.getHost();
             int ind = host.removeGuest(aView);
             host.addGuest(newView, ind);
         }
 
         // Handle ChildView
-        else if (par instanceof ChildView) { ChildView childView = (ChildView)par;
+        else if (par instanceof ChildView) {
+            ChildView childView = (ChildView) par;
             int ind = childView.removeChild(aView);
             childView.addChild(newView, ind);
         }
@@ -509,8 +562,9 @@ public class ViewUtils {
      */
     public static List <MenuItem> copyMenuItems(List <MenuItem> theItems)
     {
-        List <MenuItem> copy = new ArrayList();
-        for (MenuItem mi : theItems) copy.add(copyMenuItem(mi));
+        List<MenuItem> copy = new ArrayList<>();
+        for (MenuItem mi : theItems)
+            copy.add(copyMenuItem(mi));
         return copy;
     }
 
@@ -521,13 +575,15 @@ public class ViewUtils {
     {
         MenuItem mi = null;
         //if (anItem instanceof SeparatorMenuItem) mi = new SeparatorMenuItem(); else
-        if (anItem instanceof Menu) { Menu menu = (Menu)anItem;
+        if (anItem instanceof Menu) { Menu menu = (Menu) anItem;
             Menu menu2 = new Menu(); mi = menu2;
-            List <MenuItem> citems = copyMenuItems(menu.getItems());
+            List<MenuItem> citems = copyMenuItems(menu.getItems());
             for (MenuItem i : citems) menu2.addItem(i);
         }
         else mi = new MenuItem();
-        mi.setText(anItem.getText()); mi.setName(anItem.getName()); mi.setShortcut(anItem.getShortcut());
+        mi.setText(anItem.getText());
+        mi.setName(anItem.getName());
+        mi.setShortcut(anItem.getShortcut());
         return mi;
     }
 
@@ -546,8 +602,11 @@ public class ViewUtils {
     /** Helper for enableDragging. */
     static void handleDrag(ViewEvent anEvent)
     {
-        View view = anEvent.getView(); view.setManaged(false); anEvent.consume();
-        Point mpt = _mpt; _mpt = anEvent.getPoint(view.getParent());
+        View view = anEvent.getView();
+        view.setManaged(false);
+        anEvent.consume();
+        Point mpt = _mpt;
+        _mpt = anEvent.getPoint(view.getParent());
 
         if (anEvent.isMousePress()) return;
 
