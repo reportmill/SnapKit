@@ -106,12 +106,13 @@ public class Borders {
             aPntr.setPaint(color);
             aPntr.setStroke(stroke);
 
-            // Handle Rect special
+            // Handle Rect special: Paint border just inside rect (if thinner/shorter than border stroke, don't go negative)
             if (aShape instanceof Rect) {
                 Rect rect = (Rect) aShape;
-                rect = rect.getInsetRect(getWidth() / 2);
-                rect.width = Math.max(rect.width, 0);
-                rect.height = Math.max(rect.height, 0);
+                double borderW = getWidth();
+                double insX = rect.width >= borderW ? borderW / 2 : rect.width / 2;
+                double insY = rect.height >= borderW ? borderW / 2 : rect.height / 2;
+                rect = rect.getInsetRect(insX, insY);
                 aPntr.draw(rect);
             }
 
