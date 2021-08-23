@@ -139,7 +139,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private String  _realClassName;
     
     // The event adapter
-    private EventAdapter  _evtAdptr;
+    private EventAdapter _eventAdapter;
     
     // Provides animation for View
     private ViewAnim  _anim;
@@ -1926,17 +1926,19 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // Set opacity
         double opacity = getOpacityAll(), opacityOld = 0;
-        if (opacity!=1) {
+        if (opacity != 1) {
             opacityOld = aPntr.getOpacity();
             aPntr.setOpacity(opacity);
         }
 
         // If focused, render focused
-        if (isFocused() && isFocusPainted())
-            ViewEffect.getFocusViewEffect(this).paintAll(aPntr);
+        if (isFocused() && isFocusPainted()) {
+            ViewEffect focusViewEffect = ViewEffect.getFocusViewEffect(this);
+            focusViewEffect.paintAll(aPntr);
+        }
 
         // If view has effect, get/create effect painter to speed up successive paints
-        else if (_effect !=null)
+        else if (_effect != null)
             _effect.paintAll(aPntr);
 
         // Otherwise, do normal draw
@@ -1946,7 +1948,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         }
 
         // Restore opacity
-        if (opacity!=1)
+        if (opacity != 1)
             aPntr.setOpacity(opacityOld);
 
         // Clear RepaintRect
@@ -1958,13 +1960,23 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void paintBack(Painter aPntr)
     {
+        // Get fill and border (just return if both null)
         Paint fill = getFill();
-        Border border = getBorder(); if (fill==null && border==null) return;
+        Border border = getBorder();
+        if (fill == null && border == null)
+            return;
+
+        // Get BoundsShape
         Shape shape = getBoundsShape();
-        if (fill!=null) {
-            aPntr.setPaint(fill); aPntr.fill(shape);
+
+        // If fill set, fill inside BoundsShape
+        if (fill != null) {
+            aPntr.setPaint(fill);
+            aPntr.fill(shape);
         }
-        if (border!=null)
+
+        // If border set, draw border around BoundsShape
+        if (border != null)
             border.paint(aPntr, shape);
     }
 
@@ -1974,16 +1986,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected void paintFront(Painter aPntr)
     {
         // If View with unrealized RealClassName, paint it
-        if (getClass()==View.class) {
+        if (getClass() == View.class) {
             String cname = getRealClassName();
-            if (cname==null) cname = "Custom View";
+            if (cname == null) cname = "Custom View";
             else cname = cname.substring(cname.lastIndexOf('.')+1);
-            if (getFill()==null) {
+            if (getFill() == null) {
                 aPntr.setPaint(Color.LIGHTGRAY);
                 aPntr.fill(getBoundsLocal());
             }
-            if (getBorder()==null) {
-                aPntr.setPaint(Color.GRAY); aPntr.setStroke(Stroke.Stroke2);
+            if (getBorder() == null) {
+                aPntr.setPaint(Color.GRAY);
+                aPntr.setStroke(Stroke.Stroke2);
                 aPntr.draw(getBoundsLocal().getInsetRect(1));
                 aPntr.setStroke(Stroke.Stroke1);
             }
@@ -2003,19 +2016,26 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setToolTip(String aString)
     {
-        if (SnapUtils.equals(aString,_ttip)) return;
-        firePropChange(ToolTip_Prop, _ttip, _ttip=aString);
+        if (SnapUtils.equals(aString, _ttip)) return;
+        firePropChange(ToolTip_Prop, _ttip, _ttip = aString);
     }
 
-    /**
-     * Returns wether tooltip is enabled.
-     */
-    public boolean isToolTipEnabled()  { return _ttipEnbld; } boolean _ttipEnbld;
+    // Whether tool tip is enabled
+    private boolean _toolTipEnabled;
 
     /**
-     * Returns wether tooltip is enabled.
+     * Returns whether tooltip is enabled.
      */
-    public void setToolTipEnabled(boolean aValue)  { firePropChange("ToolTipEnabled", _ttipEnbld, _ttipEnbld=aValue); }
+    public boolean isToolTipEnabled()  { return _toolTipEnabled; }
+
+    /**
+     * Sets whether tooltip is enabled.
+     */
+    public void setToolTipEnabled(boolean aValue)
+    {
+        if (aValue == isToolTipEnabled()) return;
+        firePropChange("ToolTipEnabled", _toolTipEnabled, _toolTipEnabled = aValue);
+    }
 
     /**
      * Returns a tool tip string for given event.
@@ -2054,12 +2074,18 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Called to register view for repaint.
      */
-    public void repaint()  { repaint(0, 0, getWidth(), getHeight()); }
+    public void repaint()
+    {
+        repaint(0, 0, getWidth(), getHeight());
+    }
 
     /**
      * Called to register view for repaint.
      */
-    public void repaint(Rect aRect)  { repaint(aRect.x,aRect.y,aRect.width,aRect.height); }
+    public void repaint(Rect aRect)
+    {
+        repaint(aRect.x, aRect.y, aRect.width, aRect.height);
+    }
 
     /**
      * Called to register view for repaint.
@@ -2067,18 +2093,19 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void repaint(double aX, double aY, double aW, double aH)
     {
         // If RepaintRect already set, just union with given bounds and return
-        if (_repaintRect!=null) {
+        if (_repaintRect != null) {
             _repaintRect.union(aX, aY, aW, aH);
             return;
         }
 
         // Get ViewUpdater (if not available, just return)
-        ViewUpdater updater = getUpdater(); if (updater==null) return;
+        ViewUpdater updater = getUpdater(); if (updater == null) return;
 
         // Create repaint rect, register for repaintLater and call Parent.setNeedsRepaintDeep()
         _repaintRect = new Rect(aX, aY, aW, aH);
         updater.repaintLater(this);
-        if (_parent!=null) _parent.setNeedsRepaintDeep(true);
+        if (_parent != null)
+            _parent.setNeedsRepaintDeep(true);
     }
 
     /**
@@ -2087,14 +2114,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected void repaintInParent(Rect aRect)
     {
         // Get parent (just return if not set)
-        ParentView par = getParent(); if (par==null) return;
+        ParentView par = getParent(); if (par == null) return;
 
         // Do normal repaint
-        if (aRect==null) repaint(0, 0, getWidth(), getHeight());
+        if (aRect == null)
+            repaint(0, 0, getWidth(), getHeight());
         else repaint(aRect);
 
         // Get expanded repaint rect and rect in parent, and have parent repaint
-        Rect rectExp = getRepaintRect(); if (rectExp==null) return;
+        Rect rectExp = getRepaintRect(); if (rectExp == null) return;
         Rect parRect = localToParent(rectExp).getBounds();
         parRect.snap(); parRect.inset(-1); // Shouldn't need this unless someone paints out of bounds (lookin at U, Button)
         par.repaint(parRect);
@@ -2121,7 +2149,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             rect = ViewEffect.getFocusEffect().getBounds(rect);
 
         // If effect, combine effect bounds
-        else if (getEffect()!=null)
+        else if (getEffect() != null)
             rect = getEffect().getBounds(rect);
 
         // Return rect
@@ -2131,7 +2159,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether needs repaint.
      */
-    public boolean isNeedsRepaint()  { return _repaintRect!=null; }
+    public boolean isNeedsRepaint()  { return _repaintRect != null; }
 
     /**
      * Returns whether this view is the RootView.FocusedView.
@@ -2143,8 +2171,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void setFocused(boolean aValue)
     {
-        if (aValue==_focused) return;
-        firePropChange(Focused_Prop, _focused, _focused=aValue);
+        if (aValue == _focused) return;
+        firePropChange(Focused_Prop, _focused, _focused = aValue);
+
+        // Register for repaint
         if (isFocusPainted()) {
             if (aValue) repaint();
             else repaint(ViewEffect.getFocusEffect().getBounds(getBoundsLocal()));
@@ -2161,8 +2191,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setFocusable(boolean aValue)
     {
-        if (aValue==_focusable) return;
-        firePropChange(Focusable_Prop, _focusable, _focusable=aValue);
+        if (aValue == _focusable) return;
+        firePropChange(Focusable_Prop, _focusable, _focusable = aValue);
     }
 
     /**
@@ -2175,8 +2205,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setFocusWhenPressed(boolean aValue)
     {
-        if (aValue==_focusWhenPrsd) return;
-        firePropChange(FocusWhenPressed_Prop, _focusWhenPrsd, _focusWhenPrsd=aValue);
+        if (aValue == _focusWhenPrsd) return;
+        firePropChange(FocusWhenPressed_Prop, _focusWhenPrsd, _focusWhenPrsd = aValue);
     }
 
     /**
@@ -2195,7 +2225,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public boolean isFocusPainted()
     {
         if (!_focusPainted) return false;
-        if (getWidth()*getHeight()>90000) return false;
+        if (getWidth() * getHeight() > 90000)
+            return false;
         return _focusPainted;
     }
 
@@ -2211,7 +2242,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         if (isFocused()) return;
         WindowView win = getWindow();
-        if (win!=null)
+        if (win != null)
             win.requestFocus(this);
     }
 
@@ -2220,7 +2251,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public View getFocusNext()
     {
-        return getParent()!=null ? getParent().getFocusNext(this) : null;
+        return getParent() != null ? getParent().getFocusNext(this) : null;
     }
 
     /**
@@ -2228,7 +2259,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public View getFocusPrev()
     {
-        return getParent()!=null ? getParent().getFocusPrev(this) : null;
+        return getParent() != null ? getParent().getFocusPrev(this) : null;
     }
 
     /**
@@ -2241,9 +2272,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setOwner(ViewOwner anOwner)
     {
-        if (_owner!=null) return;
+        if (_owner != null) return;
         _owner = anOwner;
-        if (_evtAdptr!=null && _evtAdptr.isEnabled(Action))
+        if (_eventAdapter != null && _eventAdapter.isEnabled(Action))
             anOwner.enableEvents(this, Action);
     }
 
@@ -2252,9 +2283,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public <T> T getOwner(Class <T> aClass)
     {
-        if (getOwner()!=null && aClass.isAssignableFrom(getOwner().getClass()))
-            return (T)getOwner();
-        return getParent()!=null ? getParent().getOwner(aClass) : null;
+        // If ViewOwner is of given class, return it
+        ViewOwner viewOwner = getOwner();
+        if (viewOwner != null && aClass.isAssignableFrom(viewOwner.getClass()))
+            return (T) viewOwner;
+
+        // Otherwise, forward to parent
+        return getParent() != null ? getParent().getOwner(aClass) : null;
     }
 
     /**
@@ -2439,7 +2474,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public EventAdapter getEventAdapter()
     {
-        return _evtAdptr!=null ? _evtAdptr : (_evtAdptr=new EventAdapter());
+        return _eventAdapter !=null ? _eventAdapter : (_eventAdapter =new EventAdapter());
     }
 
     /**
