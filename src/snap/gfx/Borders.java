@@ -108,12 +108,23 @@ public class Borders {
 
             // Handle Rect special: Paint border just inside rect (if thinner/shorter than border stroke, don't go negative)
             if (aShape instanceof Rect) {
+
+                // Get shape rect inset by half stroke width to keep border inside bounds
                 Rect rect = (Rect) aShape;
                 double borderW = getWidth();
                 double insX = rect.width >= borderW ? borderW / 2 : rect.width / 2;
                 double insY = rect.height >= borderW ? borderW / 2 : rect.height / 2;
                 rect = rect.getInsetRect(insX, insY);
-                aPntr.draw(rect);
+
+                // If stroke is dashed, see if we need to draw as horizontal or vertical line to avoid dash overlaps
+                if (!Objects.equals(stroke.getDashArray(), Stroke.DASH_SOLID) && (rect.width < .001 || rect.height < .001)) {
+                    if (rect.width < .001)
+                        aPntr.drawLine(rect.x, rect.y, rect.x, rect.getMaxY());
+                    aPntr.drawLine(rect.x, rect.y, rect.getMaxX(), rect.y);
+                }
+
+                // Otherwise just draw (stroke) rect
+                else aPntr.draw(rect);
             }
 
             // Handle arbitrary shape
