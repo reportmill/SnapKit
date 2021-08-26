@@ -18,6 +18,9 @@ public class ViewProxy<T extends View> extends Rect {
     // The border
     private Border  _border;
 
+    // The margin
+    private Insets  _margin;
+
     // The Padding
     private Insets  _padding;
 
@@ -29,9 +32,6 @@ public class ViewProxy<T extends View> extends Rect {
 
     // The vertical position this view would prefer to take when inside a pane
     private VPos  _leanY;
-
-    // The margin
-    private Insets  _margin;
 
     // Whether view should grow in X or Y
     private Boolean  _growX, _growY;
@@ -212,6 +212,24 @@ public class ViewProxy<T extends View> extends Rect {
     }
 
     /**
+     * Returns the margin.
+     */
+    public Insets getMargin()
+    {
+        if (_margin != null) return _margin;
+        _margin = _view != null ? _view.getMargin() : Insets.EMPTY;
+        return _margin;
+    }
+
+    /**
+     * Sets the margin.
+     */
+    public void setMargin(Insets theIns)
+    {
+        _margin = theIns;
+    }
+
+    /**
      * Returns the padding.
      */
     public Insets getPadding()
@@ -284,16 +302,6 @@ public class ViewProxy<T extends View> extends Rect {
         if (_leanY != null) return _leanY;
         _leanY = _view != null ? _view.getLeanY() : null;
         return _leanY;
-    }
-
-    /**
-     * Returns the margin.
-     */
-    public Insets getMargin()
-    {
-        if (_margin != null) return _margin;
-        _margin = _view != null ? _view.getMargin() : Insets.EMPTY;
-        return _margin;
     }
 
     /**
