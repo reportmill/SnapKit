@@ -145,6 +145,33 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns new double array by adding given value to given array.
+     */
+    public static double[] add(double[] anArray, double anObj)  { return add(anArray, anObj, anArray.length); }
+
+    /**
+     * Returns new double array by adding given value to given array at given index.
+     */
+    public static double[] add(double[] anArray, double anObj, int anIndex)
+    {
+        // Get array length (throw exception if index out of bounds)
+        int length = anArray.length;
+        if (anIndex < 0 || anIndex > length)
+            throw new ArrayIndexOutOfBoundsException(anIndex);
+
+        // Copy array with extra space
+        double[] newArray = Arrays.copyOf(anArray, length + 1);
+
+        // Copy elements prior to index, add value at index, and copy elements beyond index
+        newArray[anIndex] = anObj;
+        if (anIndex < length)
+            System.arraycopy(anArray, anIndex, newArray, anIndex + 1, length - anIndex);
+
+        // Return new array
+        return newArray;
+    }
+
+    /**
      * Returns the number of object in array of a given class.
      */
     public static int getCount(Object anArray[], Class aClass)
