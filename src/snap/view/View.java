@@ -1729,12 +1729,18 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public double getBestWidth(double aH)
     {
         // If cached case, return cached value
-        if (MathUtils.equals(aH, _bestWidthParam) && _bestWidth>=0)
+        if (MathUtils.equals(aH, _bestWidthParam) && _bestWidth >= 0)
             return _bestWidth;
 
-        // Otherwise, return uncached value
+        // Calculate best width
+        double prefW = getPrefWidth(aH);
+        double minW = getMinWidth();
+        double maxW = getMaxWidth();
+        double bestW = MathUtils.clamp(prefW, minW, maxW);
+
+        // Set and return
         _bestWidthParam = aH;
-        return _bestWidth = MathUtils.clamp(getPrefWidth(aH), getMinWidth(), getMaxWidth());
+        return _bestWidth = bestW;
     }
 
     /**
@@ -1743,12 +1749,18 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public double getBestHeight(double aW)
     {
         // If common case, return cached value (set if needed)
-        if (MathUtils.equals(aW, _bestHeightParam) && _bestHeight>=0)
+        if (MathUtils.equals(aW, _bestHeightParam) && _bestHeight >= 0)
             return _bestHeight;
 
-        // Otherwise, return uncached value
+        // Calculate best height
+        double prefH = getPrefHeight(aW);
+        double minH = getMinHeight();
+        double maxH = getMaxHeight();
+        double bestH = MathUtils.clamp(prefH, minH, maxH);
+
+        // Set and return
         _bestHeightParam = aW;
-        return _bestHeight = MathUtils.clamp(getPrefHeight(aW), getMinHeight(), getMaxHeight());
+        return _bestHeight = bestH;
     }
 
     /**
@@ -1756,16 +1768,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Size getBestSize()
     {
-        double bw, bh;
+        // Handle Horizontal
         if (isHorizontal()) {
-            bw = getBestWidth(-1);
-            bh = getBestHeight(bw);
+            double bestW = getBestWidth(-1);
+            double bestH = getBestHeight(bestW);
+            return new Size(bestW, bestH);
         }
-        else {
-            bh = getBestHeight(-1);
-            bw = getBestWidth(bh);
-        }
-        return new Size(bw, bh);
+
+        // Handle vertical
+        double bestH = getBestHeight(-1);
+        double bestW = getBestWidth(bestH);
+        return new Size(bestW, bestH);
     }
 
     /**
@@ -1820,7 +1833,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets the spacing insets requested between parent/neighbors and the border of this view.
      */
-    public void setMargin(double aTp, double aRt, double aBtm, double aLt)  { setMargin(new Insets(aTp,aRt,aBtm,aLt)); }
+    public void setMargin(double aTp, double aRt, double aBtm, double aLt)
+    {
+        setMargin(new Insets(aTp, aRt, aBtm, aLt));
+    }
 
     /**
      * Sets the spacing insets requested between parent/neighbors and the border of this view.
@@ -1847,7 +1863,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets the spacing insets between the border of this view and it's content.
      */
-    public void setPadding(double aTp, double aRt, double aBtm, double aLt)  { setPadding(new Insets(aTp,aRt,aBtm,aLt)); }
+    public void setPadding(double aTp, double aRt, double aBtm, double aLt)
+    {
+        setPadding(new Insets(aTp, aRt, aBtm, aLt));
+    }
 
     /**
      * Sets the spacing insets between the border of this view and it's content.
@@ -1859,7 +1878,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             theIns = (Insets) getPropDefault(Padding_Prop);
 
         // If value already set, just return
-        if (SnapUtils.equals(theIns,_padding)) return;
+        if (SnapUtils.equals(theIns, _padding)) return;
 
         // Set value, fire prop change, relayout, relayout parent
         firePropChange(Padding_Prop, _padding, _padding = theIns);
@@ -1904,7 +1923,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Font getDefaultFont()
     {
         View par = getParent();
-        return par!=null ? par.getFont() : Font.Arial11;
+        return par != null ? par.getFont() : Font.Arial11;
     }
 
     /**
@@ -2067,8 +2086,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void relayoutParent()
     {
         _bestWidth = _bestHeight = -1;
-        ParentView par = getParent(); if (par==null) return;
-        par.relayout(); par.relayoutParent();
+        ParentView par = getParent(); if (par == null) return;
+        par.relayout();
+        par.relayoutParent();
     }
 
     /**
@@ -2251,7 +2271,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public View getFocusNext()
     {
-        return getParent() != null ? getParent().getFocusNext(this) : null;
+        ParentView par = getParent();
+        return par != null ? par.getFocusNext(this) : null;
     }
 
     /**
@@ -2259,7 +2280,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public View getFocusPrev()
     {
-        return getParent() != null ? getParent().getFocusPrev(this) : null;
+        ParentView par = getParent();
+        return par != null ? par.getFocusPrev(this) : null;
     }
 
     /**
@@ -2289,7 +2311,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             return (T) viewOwner;
 
         // Otherwise, forward to parent
-        return getParent() != null ? getParent().getOwner(aClass) : null;
+        ParentView par = getParent();
+        return par != null ? par.getOwner(aClass) : null;
     }
 
     /**
