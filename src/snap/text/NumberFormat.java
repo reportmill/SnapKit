@@ -24,7 +24,7 @@ public class NumberFormat implements TextFormat {
     private ExpStyle  _expStyle = ExpStyle.None;
 
     // A pattern constant to indicate format should make guess at decimal places
-    protected static String NULL_PATTERN = "NullPattern #";
+    protected static String NULL_PATTERN = "";
 
     // Constant for upper value at which ExpStyle.Scientific starts formatting in Scientific notation
     private static final double SCI_UPPER_START = 10000;
@@ -53,6 +53,15 @@ public class NumberFormat implements TextFormat {
     {
         this(aPattern);
         _expStyle = anExpStyle;
+    }
+
+    /**
+     * Returns whether pattern is set.
+     */
+    public boolean isPatternSet()
+    {
+        String pattern = getPattern();
+        return pattern != NULL_PATTERN;
     }
 
     /**
@@ -130,8 +139,8 @@ public class NumberFormat implements TextFormat {
      */
     private String formatBasicDecimal(double aValue)
     {
-        // If 'NULL_PATTERN', format for best guess
-        if (getPattern() == NULL_PATTERN)
+        // If no pattern, format for best guess
+        if (!isPatternSet())
             return FormatUtils.formatNum(aValue);
 
         // Return formatted value
