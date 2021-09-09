@@ -111,4 +111,23 @@ public class FormatUtils {
         if (_dateFormat != null) return _dateFormat;
         return _dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     }
+
+    /**
+     * Returns a pattern for given number of fraction digits.
+     */
+    public static String getPatternForFractionDigits(int aFractionDigitCount)
+    {
+        // Basic pattern for whole number intervals is just "0"
+        String pattern = "0";
+
+        // If fractional digits, add fractional digits to pattern
+        if (aFractionDigitCount > 0) {
+            pattern = "#.#";
+            for (int i = 1; i < aFractionDigitCount; i++)
+                pattern += '#';
+        }
+
+        // Return pattern
+        return pattern;
+    }
 }
