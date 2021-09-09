@@ -13,12 +13,12 @@ public interface TextFormat extends Archivable {
     public String getPattern();
     
     /** Sets a format pattern string. */
-    public void setPattern(String format);
+    default void setPattern(String format)  { System.err.println("TextFormat.setPattern: This should go"); }
 
     /** Returns a formatted string. */
     public String format(Object anObj);
     
-    /** Returns a format sytle. */
-    public TextStyle formatStyle(Object anObj);
+    /** Returns a format style. This should go - need formatRich() returning RichText instead. */
+    default TextStyle formatStyle(Object anObj)  { return null; }
 
 }

@@ -48,6 +48,10 @@ public class FormatUtils {
         if (val >= .001)
             return formatNum("#.#####", aValue);
 
+        // If greater than .0001, provide for 6 decimal places
+        if (val >= .0001)
+            return formatNum("#.######", aValue);
+
         // Just splat it all
         return String.valueOf(aValue);
     }
