@@ -48,6 +48,14 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
     /**
      * Constructor.
      */
+    public NumberFormat()
+    {
+        this(null);
+    }
+
+    /**
+     * Constructor.
+     */
     public NumberFormat(String aPattern)
     {
         _pattern = aPattern != null ? aPattern : NULL_PATTERN;
