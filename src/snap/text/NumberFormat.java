@@ -2,17 +2,14 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import snap.util.FormatUtils;
-import snap.util.SnapUtils;
-import snap.util.XMLArchiver;
-import snap.util.XMLElement;
+import snap.util.*;
 import java.text.DecimalFormat;
 import java.util.Objects;
 
 /**
  * A class to format tick labels.
  */
-public class NumberFormat implements TextFormat {
+public class NumberFormat extends PropObject implements TextFormat, Cloneable {
 
     // The format pattern
     protected String  _pattern;
@@ -21,10 +18,7 @@ public class NumberFormat implements TextFormat {
     protected DecimalFormat  _format;
 
     // The Exponent Style
-    private ExpStyle  _expStyle = ExpStyle.None;
-
-    // A pattern constant to indicate format should make guess at decimal places
-    protected static String NULL_PATTERN = "";
+    private ExpStyle  _expStyle = DEFAULT_EXP_STYLE;
 
     // Constant for upper value at which ExpStyle.Scientific starts formatting in Scientific notation
     private static final double SCI_UPPER_START = 10000;
@@ -35,8 +29,21 @@ public class NumberFormat implements TextFormat {
     // Constant for exponent string
     private static final String EXPONENT_STRING = "x10^";
 
+    // A pattern constant to indicate no pattern is set and format should make guess at decimal places
+    protected static String NULL_PATTERN = "";
+
     // Constants for Tick Label exponent style
     public enum ExpStyle { None, Scientific, Financial }
+
+    // Constants for properties
+    public static final String Pattern_Prop = "Pattern";
+    public static final String ExpStyle_Prop = "ExpStyle";
+
+    // Constants for property defaults
+    private static final ExpStyle DEFAULT_EXP_STYLE = ExpStyle.None;
+
+    // A default instance
+    public static final NumberFormat DEFAULT = new NumberFormat(null);
 
     /**
      * Constructor.
@@ -74,8 +81,15 @@ public class NumberFormat implements TextFormat {
      */
     public void setPattern(String aPattern)
     {
+        // If already set, just return
         if (Objects.equals(aPattern, _pattern)) return;
-        _pattern = aPattern;
+
+        // If null or NULL_PATTERN, use official NULL_PATTERN
+        if (aPattern == null || aPattern.equals(NULL_PATTERN))
+            aPattern = NULL_PATTERN;
+
+        // Set value, firePropChange, clear Format
+        firePropChange(Pattern_Prop, _pattern, _pattern = aPattern);
         _format = null;
     }
 
@@ -103,7 +117,8 @@ public class NumberFormat implements TextFormat {
      */
     protected void setExpStyle(ExpStyle anExpStyle)
     {
-        _expStyle = anExpStyle;
+        if (anExpStyle == _expStyle) return;
+        firePropChange(ExpStyle_Prop, _expStyle, _expStyle = anExpStyle);
     }
 
     /**
@@ -238,6 +253,55 @@ public class NumberFormat implements TextFormat {
     }
 
     /**
+     * Copy object for given array of property names and values.
+     */
+    public NumberFormat copyForProps(Object ... theProps)
+    {
+        NumberFormat clone = clone();
+        for (int i = 0; i < theProps.length; i+= 2) {
+            String propName = (String) theProps[i];
+            Object propValue = theProps[i + 1];
+            clone.setPropValue(propName, propValue);
+        }
+        return clone;
+    }
+
+    /**
+     * Standard clone implementation.
+     */
+    @Override
+    public NumberFormat clone()
+    {
+        NumberFormat clone;
+        try { clone = (NumberFormat) super.clone(); }
+        catch(Exception e) { throw new RuntimeException(e); }
+        return clone;
+    }
+
+    /**
+     * Standard equals implementation.
+     */
+    @Override
+    public boolean equals(Object anObj)
+    {
+        if (this == anObj) return true;
+        if (anObj == null || getClass() != anObj.getClass()) return false;
+        NumberFormat other = (NumberFormat) anObj;
+        if (!Objects.equals(other._pattern, _pattern)) return false;
+        if (other._expStyle != _expStyle) return false;
+        return true;
+    }
+
+    /**
+     * Standard hashCode implementation.
+     */
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(_pattern, _expStyle);
+    }
+
+    /**
      * Standard toString implementation.
      */
     @Override
@@ -248,15 +312,121 @@ public class NumberFormat implements TextFormat {
                 '}';
     }
 
+    /**
+     * Override to register props.
+     */
+    @Override
+    protected void initPropDefaults(PropDefaults aPropDefaults)
+    {
+        // Do normal version
+        super.initPropDefaults(aPropDefaults);
+
+        // Add Props
+        aPropDefaults.addProps(Pattern_Prop, ExpStyle_Prop);
+    }
+
+    /**
+     * Returns the prop value for given key.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // Pattern, ExpStyle
+            case Pattern_Prop: return getPattern();
+            case ExpStyle_Prop: return getExpStyle();
+
+            // Handle super class properties (or unknown)
+            default: System.err.println("ChartPart.getPropValue: Unknown prop: " + aPropName); return null;
+        }
+    }
+
+    /**
+     * Sets the prop value for given key.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // Pattern, ExpStyle
+            case Pattern_Prop: setPattern(SnapUtils.stringValue(aValue)); break;
+            case ExpStyle_Prop: setExpStyle((ExpStyle) aValue); break;
+
+            // Handle super class properties (or unknown)
+            default: System.err.println("ChartPart.setPropValue: Unknown prop: " + aPropName);
+        }
+    }
+
+    /**
+     * Returns the value for given key.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        // Handle properties
+        switch (aPropName) {
+
+            // Pattern, ExpStyle
+            case Pattern_Prop: return NULL_PATTERN;
+            case ExpStyle_Prop: return DEFAULT_EXP_STYLE;
+
+            // Superclass props
+            default: System.err.println("ChartPart.getPropDefault: Unknown prop: " + aPropName); return null;
+        }
+    }
+
+    /**
+     * Archival.
+     */
     @Override
     public XMLElement toXML(XMLArchiver anArchiver)
     {
-        return null;
+        // Create element
+        XMLElement e = new XMLElement("NumberFormat");
+
+        // Archive Pattern, ExpStyle
+        if (!isPropDefault(Pattern_Prop))
+            e.add(Pattern_Prop, getPattern());
+        if (!isPropDefault(ExpStyle_Prop))
+            e.add(ExpStyle_Prop, getExpStyle());
+
+        // Return XML
+        return e;
     }
 
+    /**
+     * Unarchival.
+     */
     @Override
     public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
-        return null;
+        // Unarchive Pattern, ExpStyle
+        if (anElement.hasAttribute(Pattern_Prop))
+            setPattern(anElement.getAttributeValue(Pattern_Prop));
+        if (anElement.hasAttribute(ExpStyle_Prop))
+            setExpStyle(anElement.getAttributeEnumValue(ExpStyle_Prop, ExpStyle.class, DEFAULT_EXP_STYLE));
+
+        // Return this NumberFormat
+        return this;
+    }
+
+    /**
+     * Returns a NumberFormat or null.
+     */
+    public static NumberFormat getFormat(TextFormat aFormat)
+    {
+        return aFormat instanceof NumberFormat ? (NumberFormat) aFormat : null;
+    }
+
+    /**
+     * Returns a NumberFormat or DEFAULT.
+     */
+    public static NumberFormat getFormatOrDefault(TextFormat aFormat)
+    {
+        return aFormat instanceof NumberFormat ? (NumberFormat) aFormat : DEFAULT;
     }
 }
