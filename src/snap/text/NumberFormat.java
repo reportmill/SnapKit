@@ -347,7 +347,7 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
             case ExpStyle_Prop: return getExpStyle();
 
             // Handle super class properties (or unknown)
-            default: System.err.println("ChartPart.getPropValue: Unknown prop: " + aPropName); return null;
+            default: System.err.println("NumberFormat.getPropValue: Unknown prop: " + aPropName); return null;
         }
     }
 
@@ -365,7 +365,7 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
             case ExpStyle_Prop: setExpStyle((ExpStyle) aValue); break;
 
             // Handle super class properties (or unknown)
-            default: System.err.println("ChartPart.setPropValue: Unknown prop: " + aPropName);
+            default: System.err.println("NumberFormat.setPropValue: Unknown prop: " + aPropName);
         }
     }
 
@@ -383,7 +383,7 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
             case ExpStyle_Prop: return DEFAULT_EXP_STYLE;
 
             // Superclass props
-            default: System.err.println("ChartPart.getPropDefault: Unknown prop: " + aPropName); return null;
+            default: System.err.println("NumberFormat.getPropDefault: Unknown prop: " + aPropName); return null;
         }
     }
 
