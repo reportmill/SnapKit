@@ -143,7 +143,7 @@ public class PropObject implements PropChange.DoChange {
      */
     public void addPropChangeListener(PropChangeListener aPCL)
     {
-        if (_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+        if (_pcs == PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
         _pcs.addPropChangeListener(aPCL);
     }
 
@@ -152,7 +152,7 @@ public class PropObject implements PropChange.DoChange {
      */
     public void addPropChangeListener(PropChangeListener aPCL, String ... theProps)
     {
-        if (_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+        if (_pcs == PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
         for (String prop : theProps)
             _pcs.addPropChangeListener(aPCL, prop);
     }

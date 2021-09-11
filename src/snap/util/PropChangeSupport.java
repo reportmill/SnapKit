@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import java.util.Objects;
 
 /**
  * A class to easily add propery change support to a class (and DeepChange support).
@@ -12,24 +13,29 @@ public class PropChangeSupport {
     private Object  _src;
     
     // The PropChangeListener
-    private PropChangeListener  _pcl;
+    private PropChangeListener[]  _lsnrs = EMPTY_LISTENER_ARRAY;
     
     // The named prop (optional)
-    private String  _pclProp;
+    private String[]  _lsnrProps = EMPTY_PROP_ARRAY;
     
     // The DeepChangeListener
-    private DeepChangeListener  _dcl;
+    private DeepChangeListener[]  _deepLsnrs = EMPTY_DEEP_ARRAY;
     
-    // Nested PropChangeSupport
-    private PropChangeSupport  _pcs;
-    
+    // Constants
+    private static final PropChangeListener[] EMPTY_LISTENER_ARRAY = new PropChangeListener[0];
+    private static final String[] EMPTY_PROP_ARRAY = new String[0];
+    private static final DeepChangeListener[] EMPTY_DEEP_ARRAY = new DeepChangeListener[0];
+
     // An empty PropChangeSupport
     public static final PropChangeSupport EMPTY = new PropChangeSupport("");
-    
+
     /**
      * Constructor.
      */
-    public PropChangeSupport(Object aSrc)  { _src = aSrc; }
+    public PropChangeSupport(Object aSrc)
+    {
+        _src = aSrc;
+    }
 
     /**
      * Adds a PropChangeListener.
@@ -42,14 +48,9 @@ public class PropChangeSupport {
             return;
         }
 
-        // If none, just set, otherwise forward to nested PCS
-        if (_pcl == null)
-            _pcl = aLsnr;
-        else {
-            if (_pcs == null)
-                _pcs = new PropChangeSupport(_src);
-            _pcs.addPropChangeListener(aLsnr);
-        }
+        // Add to listener and prop array
+        _lsnrs = ArrayUtils.add(_lsnrs, aLsnr);
+        _lsnrProps = ArrayUtils.add(_lsnrProps, null);
     }
 
     /**
@@ -57,10 +58,12 @@ public class PropChangeSupport {
      */
     public void removePropChangeListener(PropChangeListener aLsnr)
     {
-        if (_pcl == aLsnr && _pclProp == null)
-            _pcl = null;
-        if (_pcs != null)
-            _pcs.removePropChangeListener(aLsnr);
+        for (int i = _lsnrs.length - 1; i >= 0; i--) {
+            if (aLsnr == _lsnrs[i]) {
+                _lsnrs = ArrayUtils.remove(_lsnrs, i);
+                _lsnrProps = ArrayUtils.remove(_lsnrProps, i);
+            }
+        }
     }
 
     /**
@@ -69,21 +72,14 @@ public class PropChangeSupport {
     public void addPropChangeListener(PropChangeListener aLsnr, String aProp)
     {
         // Do check for given listener
-        if (hasListener(aLsnr,aProp)) {
-            System.err.println("PropChangeSupport.add: Adding duplicate listener");
+        if (hasListener(aLsnr, aProp)) {
+            System.err.println("PropChangeSupport.add: Adding duplicate listener for prop: " + aProp);
             return;
         }
 
-        // If none, just set, otherwise forward to nested PCS
-        if (_pcl == null) {
-            _pcl = aLsnr;
-            _pclProp = aProp;
-        }
-        else {
-            if (_pcs == null)
-                _pcs = new PropChangeSupport(_src);
-            _pcs.addPropChangeListener(aLsnr, aProp);
-        }
+        // Add to listener and prop array
+        _lsnrs = ArrayUtils.add(_lsnrs, aLsnr);
+        _lsnrProps = ArrayUtils.add(_lsnrProps, aProp);
     }
 
     /**
@@ -91,12 +87,12 @@ public class PropChangeSupport {
      */
     public void removePropChangeListener(PropChangeListener aLsnr, String aProp)
     {
-        if (_pcl == aLsnr && aProp.equals(_pclProp)) {
-            _pcl = null;
-            _pclProp = null;
+        for (int i = _lsnrs.length - 1; i >= 0; i--) {
+            if (Objects.equals(aProp, _lsnrProps[i]) && aLsnr == _lsnrs[i]) {
+                _lsnrs = ArrayUtils.remove(_lsnrs, i);
+                _lsnrProps = ArrayUtils.remove(_lsnrProps, i);
+            }
         }
-        if (_pcs != null)
-            _pcs.removePropChangeListener(aLsnr, aProp);
     }
 
     /**
@@ -104,10 +100,10 @@ public class PropChangeSupport {
      */
     public boolean hasListener(String aProp)
     {
-        if (_pcl != null && (_pclProp == null || aProp == null || _pclProp.equals(aProp)))
-            return true;
-        if (_pcs != null)
-            return _pcs.hasListener(aProp);
+        for (int i = 0; i < _lsnrs.length; i++) {
+            if (_lsnrProps[i] == null || aProp == null || Objects.equals(_lsnrProps[i], aProp))
+                return true;
+        }
         return false;
     }
 
@@ -116,10 +112,10 @@ public class PropChangeSupport {
      */
     private boolean hasListener(PropChangeListener aLsnr, String aProp)
     {
-        if (_pcl == aLsnr && SnapUtils.equals(_pclProp,aProp))
-            return true;
-        if (_pcs != null)
-            return _pcs.hasListener(aLsnr, aProp);
+        for (int i = 0; i < _lsnrs.length; i++) {
+            if (_lsnrs[i] == aLsnr && Objects.equals(_lsnrProps[i], aProp))
+                return true;
+        }
         return false;
     }
 
@@ -144,15 +140,31 @@ public class PropChangeSupport {
     /**
      * Sends the property change.
      */
-    public void firePropChange(PropChange aPCE)
+    public void firePropChange(PropChange aPC)
     {
-        if (_pcl != null && (_pclProp == null || _pclProp.equals(aPCE.getPropName()))) {
-            _pcl.propertyChange(aPCE);
-            if (_pcl instanceof PropChangeListener.OneShot)
-                _pcl = null;
+        String propName = aPC.getPropName();
+        boolean hasOneShot = false;
+        for (int i = 0; i < _lsnrs.length; i++) {
+            PropChangeListener lsnr = _lsnrs[i];
+            String prop = _lsnrProps[i];
+            if (prop == null || prop.equals(propName)) {
+                lsnr.propertyChange(aPC);
+                hasOneShot |= lsnr instanceof PropChangeListener.OneShot;
+            }
         }
-        if (_pcs != null)
-            _pcs.firePropChange(aPCE);
+
+        if (hasOneShot) {
+            for (int i = _lsnrs.length - 1; i >= 0; i--) {
+                PropChangeListener lsnr = _lsnrs[i];
+                if (lsnr instanceof PropChangeListener.OneShot) {
+                    String prop = _lsnrProps[i];
+                    if (prop == null || prop.equals(propName)) {
+                        _lsnrs = ArrayUtils.remove(_lsnrs, i);
+                        _lsnrProps = ArrayUtils.remove(_lsnrProps, i);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -160,7 +172,7 @@ public class PropChangeSupport {
      */
     public boolean hasDeepListener()
     {
-        return _dcl!=null || (_pcs!=null && _pcs.hasDeepListener());
+        return _deepLsnrs.length > 0;
     }
 
     /**
@@ -168,13 +180,7 @@ public class PropChangeSupport {
      */
     public void addDeepChangeListener(DeepChangeListener aLsnr)
     {
-        if (_dcl == null)
-            _dcl = aLsnr;
-        else {
-            if (_pcs == null)
-                _pcs = new PropChangeSupport(_src);
-            _pcs.addDeepChangeListener(aLsnr);
-        }
+        _deepLsnrs = ArrayUtils.add(_deepLsnrs, aLsnr);
     }
 
     /**
@@ -182,20 +188,15 @@ public class PropChangeSupport {
      */
     public void removeDeepChangeListener(DeepChangeListener aLsnr)
     {
-        if (_dcl == aLsnr)
-            _dcl = null;
-        if (_pcs != null)
-            _pcs.removeDeepChangeListener(aLsnr);
+        _deepLsnrs = ArrayUtils.remove(_deepLsnrs, aLsnr);
     }
 
     /**
      * Sends the deep change.
      */
-    public void fireDeepChange(Object aSrc, PropChange aPCE)
+    public void fireDeepChange(Object aSrc, PropChange aPC)
     {
-        if (_dcl != null)
-            _dcl.deepChange(aSrc, aPCE);
-        if (_pcs != null)
-            _pcs.fireDeepChange(aSrc, aPCE);
+        for (DeepChangeListener lsnr : _deepLsnrs)
+            lsnr.deepChange(aSrc, aPC);
     }
 }
