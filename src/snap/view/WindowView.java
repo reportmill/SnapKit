@@ -26,7 +26,10 @@ public class WindowView extends ParentView {
     
     // The root view
     private RootView  _rview;
-    
+
+    // The Active cursor
+    private Cursor  _activeCursor = Cursor.DEFAULT;
+
     // Whether the panel's window is always on top
     private boolean  _alwaysOnTop;
     
@@ -111,8 +114,8 @@ public class WindowView extends ParentView {
      */
     public void setTitle(String aValue)
     {
-        if (SnapUtils.equals(aValue,_title)) return;
-        firePropChange(Title_Prop, _title, _title=aValue);
+        if (SnapUtils.equals(aValue, _title)) return;
+        firePropChange(Title_Prop, _title, _title = aValue);
     }
 
     /**
@@ -135,8 +138,8 @@ public class WindowView extends ParentView {
      */
     public void setResizable(boolean aValue)
     {
-        if (aValue==_resizable) return;
-        firePropChange(Resizable_Prop, _resizable, _resizable=aValue);
+        if (aValue == _resizable) return;
+        firePropChange(Resizable_Prop, _resizable, _resizable = aValue);
     }
 
     /**
@@ -150,7 +153,7 @@ public class WindowView extends ParentView {
     public void setMaximized(boolean aValue)
     {
         // If already set, just return
-        if (aValue==_maximized) return;
+        if (aValue == _maximized) return;
         _maximized = aValue;
 
         // If Maximizing
@@ -162,7 +165,7 @@ public class WindowView extends ParentView {
 
         // If Un-Maximizing, reset bounds
         else {
-            if (_unmaxBounds!=null && !_unmaxBounds.isEmpty())
+            if (_unmaxBounds != null && !_unmaxBounds.isEmpty())
                 setBounds(_unmaxBounds);
             else {
                 Size psize = getPrefSize();
@@ -213,10 +216,13 @@ public class WindowView extends ParentView {
      */
     public void saveFrame()
     {
-        int x = (int)getX(), y = (int)getY();
-        int w = (int)getWidth(), h = (int)getHeight();
+        int x = (int) getX();
+        int y = (int) getY();
+        int w = (int) getWidth();
+        int h = (int) getHeight();
         StringBuffer sb = new StringBuffer().append(x).append(' ').append(y);
-        if (_saveSize) sb.append(' ').append(w).append(' ').append(h);
+        if (_saveSize)
+            sb.append(' ').append(w).append(' ').append(h);
         Prefs.get().setValue(_saveName + "Loc", sb.toString());
     }
 
@@ -259,7 +265,7 @@ public class WindowView extends ParentView {
      */
     public void setAlwaysOnTop(boolean aValue)
     {
-        if (aValue==_alwaysOnTop) return;
+        if (aValue == _alwaysOnTop) return;
         firePropChange(AlwaysOnTop_Prop, _alwaysOnTop, _alwaysOnTop = aValue);
     }
 
@@ -289,7 +295,10 @@ public class WindowView extends ParentView {
     /**
      * Sets the icon image for the window.
      */
-    public void setImage(Image anImage)  { firePropChange(Image_Prop, _image, _image = anImage); }
+    public void setImage(Image anImage)
+    {
+        firePropChange(Image_Prop, _image, _image = anImage);
+    }
 
     /**
      * Returns whether the window will hide on deactivate.
@@ -316,7 +325,7 @@ public class WindowView extends ParentView {
      */
     public View getFocusedView()
     {
-        if (_focusedView!=null && !_focusedView.isFocused())
+        if (_focusedView != null && !_focusedView.isFocused())
             _focusedView = null;
         return _focusedView;
     }
@@ -332,16 +341,19 @@ public class WindowView extends ParentView {
     protected void requestFocus(View aView)
     {
         // Make sure this happens on Event thread
-        if (!getEnv().isEventThread()) { getEnv().runLater(() -> requestFocus(aView)); return; }
+        if (!getEnv().isEventThread()) {
+            getEnv().runLater(() -> requestFocus(aView));
+            return;
+        }
 
         // Get view - if null, try to find something better
-        View view = aView!=null ? aView : getFocusViewForNull();
+        View view = aView != null ? aView : getFocusViewForNull();
 
         // If already set, just return
-        if (view==getFocusedView()) return;
+        if (view == getFocusedView()) return;
 
         // If existing FocusedView, clear View.Focused
-        if (_focusedView!=null)
+        if (_focusedView != null)
             _focusedView.setFocused(false);
 
         // Update FocusViewLast, FocusView
@@ -349,7 +361,7 @@ public class WindowView extends ParentView {
         _focusedView = view;
 
         // If new FocusedView, set View.Focused
-        if (_focusedView!=null)
+        if (_focusedView != null)
             _focusedView.setFocused(true);
     }
 
@@ -358,9 +370,9 @@ public class WindowView extends ParentView {
      */
     private View getFocusViewForNull()
     {
-        if (getFocusedViewLast()!=null)
+        if (getFocusedViewLast() != null)
             return getFocusedViewLast();
-        for (View view=getFocusedView(); view!=null; view=view.getParent())
+        for (View view = getFocusedView(); view != null; view = view.getParent())
             if (view.isFocusable())
                 return view;
         return null;
@@ -371,7 +383,7 @@ public class WindowView extends ParentView {
      */
     public WindowHpr getHelper()
     {
-        if (_helper!=null) return _helper;
+        if (_helper != null) return _helper;
         _helper = getEnv().createHelper(this);
         _helper.setWindow(this);
         _updater = new ViewUpdater(this); repaint();
@@ -390,7 +402,8 @@ public class WindowView extends ParentView {
     /** Initializes the native window once. */
     void initNativeWindowOnce()
     {
-        if (_initWin) return; _initWin = true;
+        if (_initWin) return;
+        _initWin = true;
         initNativeWindow();
     }
     boolean _initWin;
@@ -416,21 +429,24 @@ public class WindowView extends ParentView {
         initNativeWindowOnce();
 
         // If aView provided, convert point from view to screen coords
-        if (aView!=null) {
+        if (aView != null) {
             Point pt = aView.localToScreen(aX, aY);
-            aX = pt.x; aY = pt.y;
+            aX = pt.x;
+            aY = pt.y;
         }
 
         // If FrameSaveName provided, set Location from defaults and register to store future window moves
-        if (getSaveName()!=null) {
-            String locString = Prefs.get().getString(getSaveName() + "Loc");
-            if (locString!=null) {
-                String strings[] = locString.split(" ");
+        String saveName = getSaveName();
+        if (saveName != null) {
+            String locString = Prefs.get().getString(saveName + "Loc");
+            if (locString != null) {
+                String[] strings = locString.split(" ");
                 aX = StringUtils.intValue(strings[0]);
                 aY = StringUtils.intValue(strings[1]);
-                int w = getSaveSize() && strings.length>2? StringUtils.intValue(strings[2]) : 0;
-                int h = getSaveSize() && strings.length>3? StringUtils.intValue(strings[3]) : 0;
-                if (w>0 && h>0) setSize(w,h);
+                int w = getSaveSize() && strings.length > 2 ? StringUtils.intValue(strings[2]) : 0;
+                int h = getSaveSize() && strings.length > 3 ? StringUtils.intValue(strings[3]) : 0;
+                if (w > 0 && h > 0)
+                    setSize(w, h);
             }
         }
 
@@ -454,7 +470,7 @@ public class WindowView extends ParentView {
      */
     public void hide()
     {
-        if (getPopup()!=null)
+        if (getPopup() != null)
             getPopup().hide();
         if (isShowing())
             getHelper().hide();
@@ -468,12 +484,19 @@ public class WindowView extends ParentView {
     /**
      * Packs the window.
      */
-    public void pack()  { setSize(getBestSize()); }
+    public void pack()
+    {
+        Size bestSize = getBestSize();
+        setSize(bestSize);
+    }
 
     /**
      * Order window to front.
      */
-    public void toFront()  { getHelper().toFront(); }
+    public void toFront()
+    {
+        getHelper().toFront();
+    }
 
     /**
      * Returns the screen location for given view, position and offsets.
@@ -516,8 +539,10 @@ public class WindowView extends ParentView {
      */
     public void repaint(double aX, double aY, double aW, double aH)
     {
-        RootView rview = getRootView();
-        rview.repaint(aX - rview.getX(), aY - rview.getY(), aW, aH);
+        RootView rootView = getRootView();
+        double rootX = aX - rootView.getX();
+        double rootY = aY - rootView.getY();
+        rootView.repaint(rootX, rootY, aW, aH);
     }
 
     /**
@@ -541,7 +566,8 @@ public class WindowView extends ParentView {
     protected void setShowing(boolean aValue)
     {
         // Do normal version (or return if already set)
-        if (aValue==isShowing()) return; super.setShowing(aValue);
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
 
         // Update OpenWins list
         if (aValue)
@@ -558,7 +584,8 @@ public class WindowView extends ParentView {
      */
     protected void setFocused(boolean aValue)
     {
-        if (aValue==isFocused()) return; super.setFocused(aValue);
+        if (aValue == isFocused()) return;
+        super.setFocused(aValue);
         if (aValue)
             ListUtils.moveToFront(_openWins, this);
     }
@@ -567,15 +594,14 @@ public class WindowView extends ParentView {
      * Returns the active cursor.
      */
     public Cursor getActiveCursor()  { return _activeCursor; }
-    Cursor _activeCursor = Cursor.DEFAULT;
 
     /**
      * Sets the current cursor.
      */
     public void setActiveCursor(Cursor aCursor)
     {
-        if (aCursor==_activeCursor) return;
-        firePropChange(ActiveCursor_Prop, _activeCursor, _activeCursor=aCursor);
+        if (aCursor == _activeCursor) return;
+        firePropChange(ActiveCursor_Prop, _activeCursor, _activeCursor = aCursor);
     }
 
     /**
@@ -584,8 +610,9 @@ public class WindowView extends ParentView {
     public void resetActiveCursor()
     {
         View mouseOverView = _eventDispatcher._mouseOverView;
-        if (mouseOverView!=null && mouseOverView.getCursor()!=getActiveCursor())
-            setActiveCursor(mouseOverView.getCursor());
+        Cursor cursor = mouseOverView != null ? mouseOverView.getCursor() : Cursor.DEFAULT;
+        if (cursor != getActiveCursor())
+            setActiveCursor(cursor);
     }
 
     /**
@@ -593,9 +620,12 @@ public class WindowView extends ParentView {
      */
     public String getToolTip(ViewEvent anEvent)
     {
-        for (int i=_eventDispatcher._mouseOvers.size()-1;i>=0;i--) { View view = _eventDispatcher._mouseOvers.get(i);
-            String text = view.isToolTipEnabled()? view.getToolTip(anEvent.copyForView(view)) : view.getToolTip();
-            if (text!=null) return text;
+        List<View> mouseOvers = _eventDispatcher._mouseOvers;
+        for (int i = mouseOvers.size() - 1; i >= 0; i--) {
+            View view = mouseOvers.get(i);
+            String text = view.isToolTipEnabled() ? view.getToolTip(anEvent.copyForView(view)) : view.getToolTip();
+            if (text != null)
+                return text;
         }
         return null;
     }
@@ -608,7 +638,10 @@ public class WindowView extends ParentView {
     /**
      * Dispatch event.
      */
-    public void dispatchEvent(ViewEvent anEvent)  { _eventDispatcher.dispatchEvent(anEvent); }
+    public void dispatchEvent(ViewEvent anEvent)
+    {
+        _eventDispatcher.dispatchEvent(anEvent);
+    }
 
     /**
      * Returns the Updater.

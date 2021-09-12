@@ -256,7 +256,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         _paintable = true;
         _managed = true;
         _opacity = 1;
-        _cursor = Cursor.DEFAULT;
     }
 
     /**
@@ -716,7 +715,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the cursor.
      */
-    public Cursor getCursor()  { return _cursor; }
+    public Cursor getCursor()
+    {
+        if (_cursor != null)
+            return _cursor;
+        ParentView parent = getParent();
+        if (parent != null)
+            return parent.getCursor();
+        return Cursor.DEFAULT;
+    }
 
     /**
      * Sets the cursor.
