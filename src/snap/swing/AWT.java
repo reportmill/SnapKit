@@ -225,13 +225,21 @@ public class AWT {
     /** Returns awt Cursor for snap cursor. */
     public static java.awt.Cursor get(snap.view.Cursor aCursor)
     {
-        if(aCursor==null) return null;
-        String name = aCursor.getName(); name = name + "_CURSOR";
-        if(name.equals("NONE_CURSOR")) return getHideCursor();
-        Field field = null; try { field = java.awt.Cursor.class.getField(name); }
+        if(aCursor == null) return null;
+
+        String name = aCursor.getName();
+        name = name + "_CURSOR";
+        if(name.equals("NONE_CURSOR"))
+            return getHideCursor();
+
+        Field field = null;
+        try { field = java.awt.Cursor.class.getField(name); }
         catch(Exception e) { }
-        if(field!=null) try { return java.awt.Cursor.getPredefinedCursor((int)field.get(null)); }
-        catch(Exception e) { }
+
+        if(field != null)
+            try { return java.awt.Cursor.getPredefinedCursor((int) field.get(null)); }
+            catch(Exception e) { }
+
         System.err.println("AWT: get(snap.view.Cursor): Cursor not found for name: " + name);
         return java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR);
     }

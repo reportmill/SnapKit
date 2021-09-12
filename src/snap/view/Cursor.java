@@ -10,7 +10,7 @@ import snap.geom.Pos;
 public class Cursor {
     
     // The cursor name
-    String          _name;
+    private String  _name;
 
     // Predefined cursor types
     public static final Cursor DEFAULT = new Cursor("DEFAULT");
@@ -28,32 +28,40 @@ public class Cursor {
     public static final Cursor SE_RESIZE = new Cursor("SE_RESIZE");
     public static final Cursor SW_RESIZE = new Cursor("SW_RESIZE");
 
-/**
- * Creates a new Cursor.
- */
-protected Cursor(String aName)  { _name = aName; }
+    /**
+     * Creates a new Cursor.
+     */
+    protected Cursor(String aName)  { _name = aName; }
 
-/**
- * Returns the cursor name.
- */
-public String getName()  { return _name; }
+    /**
+     * Returns the cursor name.
+     */
+    public String getName()  { return _name; }
 
-/**
- * Returns the cursor for given position.
- */
-public static Cursor get(Pos aHandle)
-{
-    switch(aHandle) {
-        case TOP_CENTER: return Cursor.N_RESIZE;
-        case BOTTOM_CENTER: return Cursor.S_RESIZE;
-        case CENTER_RIGHT: return Cursor.E_RESIZE;
-        case CENTER_LEFT: return Cursor.W_RESIZE;
-        case TOP_LEFT: return Cursor.NW_RESIZE;
-        case TOP_RIGHT: return Cursor.NE_RESIZE;
-        case BOTTOM_LEFT: return Cursor.SW_RESIZE;
-        case BOTTOM_RIGHT: return Cursor.SE_RESIZE;
-        default: return null;
+    /**
+     * Standard toString implementation.
+     */
+    @Override
+    public String toString()
+    {
+        return "Cursor { " + "Name='" + _name + '\'' + '}';
     }
-}
 
+    /**
+     * Returns the cursor for given position.
+     */
+    public static Cursor get(Pos aHandle)
+    {
+        switch(aHandle) {
+            case TOP_CENTER: return Cursor.N_RESIZE;
+            case BOTTOM_CENTER: return Cursor.S_RESIZE;
+            case CENTER_RIGHT: return Cursor.E_RESIZE;
+            case CENTER_LEFT: return Cursor.W_RESIZE;
+            case TOP_LEFT: return Cursor.NW_RESIZE;
+            case TOP_RIGHT: return Cursor.NE_RESIZE;
+            case BOTTOM_LEFT: return Cursor.SW_RESIZE;
+            case BOTTOM_RIGHT: return Cursor.SE_RESIZE;
+            default: return null;
+        }
+    }
 }
