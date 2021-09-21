@@ -649,7 +649,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setEffect(Effect anEff)
     {
         // If already set, just return
-        Effect old = getEffect(); if (SnapUtils.equals(anEff, getEffect())) return;
+        Effect old = getEffect();
+        if (SnapUtils.equals(anEff, getEffect())) return;
 
         // Set new ViewEffect, fire prop change and repaint
         repaintInParent(null);
@@ -709,7 +710,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Do normal version
         if (SnapUtils.equals(aFont, _font)) return;
         firePropChange(Font_Prop, _font, _font = aFont);
-        relayout(); relayoutParent(); repaint();
+        relayout();
+        relayoutParent();
+        repaint();
     }
 
     /**
@@ -2691,6 +2694,21 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         if (_physics != null || !doCreate) return _physics;
         return _physics = new ViewPhysics();
+    }
+
+    /**
+     * Standard clone implementation.
+     */
+    @Override
+    protected PropObject clone() throws CloneNotSupportedException
+    {
+        View clone;
+        try { clone = (View) super.clone(); }
+        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+        clone._parent = null;
+        clone._eventAdapter = null;
+        clone._owner = null;
+        return clone;
     }
 
     /**

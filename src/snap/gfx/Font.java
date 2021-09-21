@@ -185,9 +185,9 @@ public class Font implements XMLArchiver.Archivable {
     {
         Rect rect = _fontFile.getGlyphBounds(aString);
         double size = getSize();
-        rect.y = rect.y/1000d*size;
-        rect.width = rect.width/1000d*size;
-        rect.height = rect.height/1000d*size;
+        rect.y = rect.y / 1000 * size;
+        rect.width = rect.width / 1000 * size;
+        rect.height = rect.height / 1000 * size;
         return rect;
     }
 

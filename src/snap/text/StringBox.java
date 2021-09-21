@@ -38,9 +38,6 @@ public class StringBox extends RoundRect {
     // Whether box needs to be sized
     private boolean  _needsResize = true;
 
-    // The version of this box with font such that string fits
-    private StringBox  _boxThatFits;
-
     /**
      * Constructor.
      */
@@ -117,7 +114,8 @@ public class StringBox extends RoundRect {
     public void setTextColor(Color aColor)
     {
         if (Objects.equals(aColor, getTextColor())) return;
-        setStyle(_style.copyFor(aColor));
+        TextStyle textStyle = _style.copyFor(aColor);
+        setStyle(textStyle);
     }
 
     /**
@@ -130,7 +128,8 @@ public class StringBox extends RoundRect {
      */
     public void setUnderlined(boolean aValue)
     {
-        setStyle(_style.copyFor(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0));
+        TextStyle textStyle = _style.copyFor(TextStyle.UNDERLINE_KEY, aValue ? 1 : 0);
+        setStyle(textStyle);
     }
 
     /**
@@ -218,9 +217,9 @@ public class StringBox extends RoundRect {
      */
     public void setHyphenated(boolean aFlag)
     {
-        if (aFlag==isHyphenated()) return;
+        if (aFlag == isHyphenated()) return;
         String str = getString();
-        String str2 = aFlag ? (str + '-') : (str.substring(0, str.length()-1));
+        String str2 = aFlag ? (str + '-') : (str.substring(0, str.length() - 1));
         setString(str2);
     }
 
@@ -229,11 +228,11 @@ public class StringBox extends RoundRect {
      */
     public Insets getInsetsAll()
     {
-        Insets pad = getPadding();
+        Insets padding = getPadding();
         Border border = getBorder();
-        if (border==null) return pad;
+        if (border == null) return padding;
         Insets borderIns = border.getInsets();
-        return Insets.add(pad, borderIns);
+        return Insets.add(padding, borderIns);
     }
 
     /**
@@ -252,7 +251,7 @@ public class StringBox extends RoundRect {
      */
     public double getStringWidth()
     {
-        if (_ascent<0) loadMetrics();
+        if (_ascent < 0) loadMetrics();
         return _strWidth;
     }
 
@@ -261,7 +260,7 @@ public class StringBox extends RoundRect {
      */
     public double getStringHeight()
     {
-        if (_ascent<0) loadMetrics();
+        if (_ascent < 0) loadMetrics();
         return _strHeight;
     }
 
@@ -270,7 +269,7 @@ public class StringBox extends RoundRect {
      */
     public double getAscent()
     {
-        if (_ascent<0) loadMetrics();
+        if (_ascent < 0) loadMetrics();
         return _ascent;
     }
 
@@ -279,7 +278,7 @@ public class StringBox extends RoundRect {
      */
     public double getDescent()
     {
-        if (_ascent<0) loadMetrics();
+        if (_ascent < 0) loadMetrics();
         return _descent;
     }
 
@@ -321,7 +320,7 @@ public class StringBox extends RoundRect {
         // Get exact bounds around string glyphs for font
         Font font = getFont();
         String str = getString();
-        Rect bnds = str!=null && str.length()>0 ? font.getGlyphBounds(str) : Rect.ZeroRect;
+        Rect bnds = str != null && str.length() > 0 ? font.getGlyphBounds(str) : Rect.ZeroRect;
 
         // Get StringWidth from GlyphBounds
         _strWidth = Math.ceil(bnds.width);
@@ -451,7 +450,7 @@ public class StringBox extends RoundRect {
 
         // Get info
         Border border = getBorder();
-        Stroke stroke = border!=null ? border.getStroke() : aPntr.getStroke();
+        Stroke stroke = border != null ? border.getStroke() : aPntr.getStroke();
         double strokeWidth = stroke.getWidth();
         double strokeInset = strokeWidth/2;
 
@@ -501,97 +500,6 @@ public class StringBox extends RoundRect {
     {
         if (_needsResize) resize();
         super.setCenteredXY(aX, aY);
-    }
-
-    /**
-     * Returns whether text fits in box.
-     */
-    public boolean isTextFits()
-    {
-        Insets ins = getInsetsAll();
-        double areaW = getWidth() - ins.getWidth();
-        double areaH = getHeight() - ins.getHeight();
-        double strW = getStringWidth();
-        double strH = getStringHeight();
-        return strW <= areaW && strH <= areaH;
-    }
-
-    /**
-     * Sets the font so that it fits.
-     */
-    public void setFontToFit()
-    {
-        // If text fits, just return
-        if (isTextFits()) return;
-
-        // Get Text area available
-        Insets ins = getInsetsAll();
-        double areaW = getWidth() - ins.getWidth();
-        double areaH = getHeight() - ins.getHeight();
-
-        // Declare dampening variables
-        Font font = getFont();
-        double fontSize = font.getSize();
-        double scaleLow = 0;
-        double scaleHigh = 1;
-
-        // Loop while dampening variables are normal
-        while (true) {
-
-            // Reset fontScale to mid-point of fsHi and fsLo
-            double fontScale = (scaleLow + scaleHigh)/2;
-            double fontSize2 = fontSize * fontScale;
-            setFont(font.deriveFont(fontSize2));
-
-            double strW = getStringWidth();
-            double strH = getStringHeight();
-            boolean textFits = strW <= areaW && strH <= areaH;
-
-            // If text exceeded layout bounds, reset fsHi to fontScale
-            if (!textFits) {
-                scaleHigh = fontScale;
-                if ((scaleHigh + scaleLow)/2 == 0) {
-                    System.err.println("StringBox.setFontToFit: Couldn't fit text in box at any size (wft)"); break; }
-            }
-
-            // If text didn't exceed layout bounds, reset scaleLow to fontScale
-            else {
-
-                // Set new low (if almost fsHi, just return)
-                scaleLow = fontScale;
-                double detaFS = scaleHigh - scaleLow;
-                if (detaFS<.05)
-                    break;
-
-                // If almost fit width, stop
-                double diffW = areaW - strW;
-                if (diffW < 1)
-                    break;
-
-                // If almost fit height, stop
-                double diffH = areaH - strH;
-                if (diffH<1)
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Returns a version of this box with font such that text fits.
-     */
-    public StringBox getBoxThatFits()
-    {
-        // If already set, just return
-        if (_boxThatFits!=null) return _boxThatFits;
-
-        // If TextFits, just set/return this
-        if (isTextFits())
-            return _boxThatFits = this;
-
-        // Clone box, setFontToFit() and set/return
-        StringBox clone = clone();
-        clone.setFontToFit();
-        return _boxThatFits = clone;
     }
 
     /**

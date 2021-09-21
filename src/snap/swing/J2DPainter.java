@@ -29,7 +29,7 @@ public class J2DPainter extends Painter {
     private Graphics2D  _gfx;
     
     // The graphics stack
-    private Graphics2D  _gfxs[] = new Graphics2D[8];
+    private Graphics2D[]  _gfxs = new Graphics2D[8];
     
     // The size of graphics stack
     private int  _gsize;
@@ -55,7 +55,9 @@ public class J2DPainter extends Painter {
      */
     public Paint getPaint()
     {
-        return AWT.awtToSnapPaint(_gfx.getPaint());
+        java.awt.Paint awtPaint = _gfx.getPaint();
+        Paint snapPaint = AWT.awtToSnapPaint(awtPaint);
+        return snapPaint;
     }
 
     /**
@@ -63,7 +65,8 @@ public class J2DPainter extends Painter {
      */
     public void setPaint(Paint aPaint)
     {
-        _gfx.setPaint(AWT.snapToAwtPaint(aPaint));
+        java.awt.Paint awtPaint = AWT.snapToAwtPaint(aPaint);
+        _gfx.setPaint(awtPaint);
     }
 
     /**
@@ -181,8 +184,8 @@ public class J2DPainter extends Painter {
     public void drawImage(Image img, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh)
     {
         // Correct source width/height for image dpi
-        if (img.getDPIX()!=72) sw *= img.getDPIX()/72;
-        if (img.getDPIY()!=72) sh *= img.getDPIY()/72;
+        if (img.getDPIX() != 72) sw *= img.getDPIX()/72;
+        if (img.getDPIY() != 72) sh *= img.getDPIY()/72;
 
         // Get points for corner as ints and draw image
         int sx1 = rnd(sx), sy1 = rnd(sy), sx2 = sx1 + rnd(sw), sy2 = sy1 + rnd(sh);
@@ -196,8 +199,8 @@ public class J2DPainter extends Painter {
     public void drawString(String aStr, double aX, double aY, double cs)
     {
         // Handle no char spacing
-        if (cs==0)
-            _gfx.drawString(aStr, (float)aX, (float)aY);
+        if (cs == 0)
+            _gfx.drawString(aStr, (float) aX, (float) aY);
 
         // Handle char spacing
         else {

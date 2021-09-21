@@ -111,8 +111,9 @@ public class AWTFontFile extends FontFile {
         Rectangle2D bounds = new TextLayout(aString, _awt, frc).getBounds();
 
         // Get parts
+        double glyphX = bounds.getX();
         double glyphAsc = bounds.getY();
-        double glyphW = bounds.getWidth();
+        double glyphW = bounds.getWidth() + glyphX;
         double glyphH = bounds.getHeight();
         return new Rect(0, glyphAsc, glyphW, glyphH);
     }
