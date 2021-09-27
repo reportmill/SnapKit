@@ -397,6 +397,22 @@ public class Transform implements Cloneable {
     }
 
     /**
+     * Transforms the given X value.
+     */
+    public final double transformX(double aX, double aY)
+    {
+        return aX * _a + aY * _c + _tx;
+    }
+
+    /**
+     * Transforms the given Y value.
+     */
+    public final double transformY(double aX, double aY)
+    {
+        return aX * _b + aY * _d + _ty;
+    }
+
+    /**
      * Transforms the given size.
      */
     public void transform(Size aSize)
