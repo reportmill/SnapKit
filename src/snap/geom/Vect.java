@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.geom;
+import snap.util.MathUtils;
 import snap.util.StringUtils;
 
 /**
@@ -163,14 +164,36 @@ public class Vect implements Cloneable {
     }
 
     /**
-     * Returns the angle between the receiver and the given vector.
+     * Returns cosine of angle between given vectors (using given vector points).
+     */
+    private static double getCosAngleBetween(double aX, double aY, double bX, double bY)
+    {
+        // Get dot product of normalized vector points (make sure value in cosine range - could be off by rounding error)
+        double m1 = getMagnitude(aX, aY);
+        double m2 = getMagnitude(bX, bY);
+        double dot = getDotProduct(aX, aY, bX, bY) / (m1 * m2);
+
+        // Make sure value in cosine range (could be off by rounding error) and return
+        double cosTheta = MathUtils.clamp(dot, -1, 1);
+        return cosTheta;
+    }
+
+    /**
+     * Returns the angle between vectors (using given vector points).
      */
     public static double getAngleBetween(double aX, double aY, double bX, double bY)
     {
-        double m1 = getMagnitude(aX, aY);
-        double m2 = getMagnitude(bX, bY);
-        double m3 = m1 * m2;
-        double dot = getDotProduct(aX, aY, bX, bY);
-        return Math.acos(dot / m3);
+        double cosTheta = getCosAngleBetween(aX, aY, bX, bY);
+        return Math.acos(cosTheta);
+    }
+
+    /**
+     * Returns the length of V1 as projected onto V2 (using given vector points).
+     */
+    public static double getProjectedDistance(double aX, double aY, double bX, double bY)
+    {
+        double cosTheta = getCosAngleBetween(aX, aY, bX, bY);
+        double mag = getMagnitude(aX, aY);
+        return mag * cosTheta;
     }
 }
