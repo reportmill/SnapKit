@@ -374,6 +374,17 @@ public class StringView extends View implements Cloneable {
     }
 
     /**
+     * A paint method for painting StringView outside of View hierarchy.
+     */
+    public void paintStringView(Painter aPntr)
+    {
+        aPntr.save();
+        aPntr.transform(getLocalToParent());
+        paintAll(aPntr);
+        aPntr.restore();
+    }
+
+    /**
      * Paints StringView.
      */
     protected void paintFront(Painter aPntr)
