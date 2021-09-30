@@ -4,6 +4,7 @@
 package snap.util;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * A collection of array utility methods.
@@ -388,5 +389,41 @@ public class ArrayUtils {
             anArray[i] = anArray[j];
             anArray[j] = temp;
         }
+    }
+
+    /**
+     * Returns a filtered array for given original and Predicate (or original if all satisfy).
+     */
+    public static <T> T[] filter(T[] anArray, Predicate<? super T> aPredicate)
+    {
+        T[] array = anArray;
+        int length = 0;
+
+        // Iterate over array items until one fails
+        for (int i = 0; i < anArray.length; i++) {
+            T item = anArray[i];
+            if (!aPredicate.test(item)) {
+                array = anArray.clone();
+                length = i;
+                break;
+            }
+        }
+
+        // If one failed, iterate over remaining and copy over
+        if (array != anArray) {
+
+            for (int i = length + 1; i < anArray.length; i++) {
+                T item = anArray[i];
+                if (aPredicate.test(item)) {
+                    array[length++] = item;
+                }
+            }
+
+            // Trim array
+            array = Arrays.copyOf(array, length);
+        }
+
+        // Return array
+        return array;
     }
 }
