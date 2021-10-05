@@ -44,25 +44,21 @@ public class StylerPane extends StylerOwner {
         // Install FontTool
         _fontTool = new FontTool();
         _fontTool.setStyler(getStyler());
-        mainView.addChild(_fontTool.getUI());
-        Collapser.createCollapserAndLabel(_fontTool.getUI(), "Text / Font");
+        addInspector(_fontTool, "Text / Font", true);
 
         // Create/install FillTool
         _fillTool = new PaintTool();
         _fillTool.setStyler(getStyler());
-        mainView.addChild(_fillTool.getUI());
-        Collapser.createCollapserAndLabel(_fillTool.getUI(), "Fill / Paint");
+        addInspector(_fillTool, "Fill / Paint", true);
 
         // Create/install BorderTool
         _borderTool = new BorderTool(getStyler());
-        mainView.addChild(_borderTool.getUI());
-        Collapser.createCollapserAndLabel(_borderTool.getUI(), "Border / Stroke");
+        addInspector(_borderTool, "Border / Stroke", true);
 
         // Create/install EffectTool
         _effectTool = new EffectTool();
         _effectTool.setStyler(getStyler());
-        mainView.addChild(_effectTool.getUI());
-        Collapser.createCollapserAndLabel(_effectTool.getUI(), "Effect").setCollapsed(true);
+        addInspector(_effectTool, "Effect", false);
 
         // Add MiscPane
         mainView.addChild(miscPane);
@@ -103,6 +99,29 @@ public class StylerPane extends StylerOwner {
             double val = 1 - eval/100;
             styler.setOpacity(val);
         }
+    }
+
+
+    /**
+     * Adds an inspector.
+     */
+    private void addInspector(StylerOwner aStylerOwner, String aName, boolean isShowing)
+    {
+        // Get UI view and add to inspector
+        View inspUI = aStylerOwner.getUI();
+        ColView mainView = getUI(ColView.class);
+        mainView.addChild(inspUI);
+
+        // Trigger Collapser create
+        Collapser collapser = aStylerOwner.getCollapser();
+        if (!isShowing)
+            collapser.setCollapsed(true);
+        else aStylerOwner.setSelected(true);
+
+        aStylerOwner.getLabel().setText(aName);
+        // Add listener to update ChartPartInsp.Sel when label is clicked
+        //Label label = aChartPartInsp.getLabel();
+        //label.addEventFilter(e -> runLater(() -> chartPartInspLabelMousePress(aChartPartInsp)), MousePress);
     }
 
     /**

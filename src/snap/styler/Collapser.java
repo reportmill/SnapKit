@@ -1,10 +1,14 @@
 package snap.styler;
-
 import snap.geom.Polygon;
 import snap.geom.Pos;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.view.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A class to collapse any view.
@@ -17,11 +21,23 @@ public class Collapser {
     // The label
     private Label  _label;
 
+    // The first focus view
+    private View  _firstFocus;
+
     // Indicator view for collapse
     private View  _clpView;
 
     // Whether Title view is expanded
     private boolean  _expanded = true;
+
+    // Whether view is GrowHeight
+    private boolean _growHeight;
+
+    // A Collapse group
+    private CollapseGroup  _group;
+
+    // Known Collapse groups by name
+    private static Map<String,CollapseGroup> _groups = new HashMap<>();
 
     /**
      * Creates a Collapser for given View and Label.
@@ -44,6 +60,7 @@ public class Collapser {
     {
         if (aView==_view) return;
         _view = aView;
+        _growHeight = aView.isGrowHeight();
     }
 
     /**
@@ -69,6 +86,14 @@ public class Collapser {
         View graphic = getCollapseGraphic();
         _label.setGraphic(graphic);
         graphic.setRotate(isExpanded() ? 90 : 0);
+    }
+
+    /**
+     * Sets the first focus component.
+     */
+    public void setFirstFocus(View aView)
+    {
+        _firstFocus = aView;
     }
 
     /**
@@ -111,11 +136,19 @@ public class Collapser {
         // If expanding
         if (aValue) {
             _view.setPrefHeight(-1);
+            _view.setGrowHeight(_growHeight);
+            if (_group!=null)
+                _group.collapserDidExpand(this);
         }
 
         // If callapsing
         else {
+            _view.setVisible(false);
+            _view.setManaged(false);
             _view.setPrefHeight(0);
+            _view.setGrowHeight(false);
+            if (_group!=null)
+                _group.collapserDidCollapse(this);
         }
 
         // Update graphic
@@ -136,6 +169,8 @@ public class Collapser {
         setExpanded(aValue);
 
         // Reset/get new PrefSize
+        _view.setVisible(true);
+        _view.setManaged(true);
         _view.setPrefHeight(-1);
         double ph = aValue ? _view.getPrefHeight() : 0;
 
@@ -165,8 +200,18 @@ public class Collapser {
      */
     private void setExpandedAnimDone(boolean aValue)
     {
-        if (aValue)
+        // If Showing, restore full pref size
+        if (aValue) {
             _view.setPrefHeight(-1);
+            if (_firstFocus != null)
+                _firstFocus.requestFocus();
+        }
+
+        // If Hiding, make really hidden
+        else {
+            _view.setVisible(false);
+            _view.setManaged(false);
+        }
     }
 
     /**
@@ -176,6 +221,26 @@ public class Collapser {
     {
         //ViewUtils.fireActionEvent(_view, anEvent);
         setExpandedAnimated(!isExpanded());
+    }
+
+    /**
+     * Sets a collapse group by name.
+     */
+    public void setGroupForName(String aName)
+    {
+        _group = getCollapseGroupForName(aName);
+        _group.addCollapser(this);
+    }
+
+    /**
+     * Sets a collapse group by name.
+     */
+    public CollapseGroup getCollapseGroupForName(String aName)
+    {
+        CollapseGroup cg = _groups.get(aName);
+        if (cg==null)
+            _groups.put(aName, cg = new CollapseGroup());
+        return cg;
     }
 
     /**
@@ -207,6 +272,17 @@ public class Collapser {
         // Create Label
         Label label = createLabel(aLabelTitle);
 
+        // Handle TitleView
+        if (aView instanceof TitleView) { TitleView titleView = (TitleView)aView;
+            View content = titleView.getContent();
+            BoxView boxView = new BoxView(content, true, true);
+            boxView.setPadding(titleView.getPadding());
+            ColView colView = new ColView();
+            colView.addChild(boxView);
+            ViewUtils.replaceView(titleView, colView);
+            aView = colView;
+        }
+
         // Add above given view
         ViewHost host = aView.getHost();
         int index = aView.indexInHost();
@@ -229,8 +305,60 @@ public class Collapser {
         label.setTextFill(Color.GRAY);
         label.setAlign(Pos.CENTER);
         label.setPadding(4,4,4,10);
-        label.setMargin(2,8,2,8);
-        label.setRadius(10);
+        label.setMargin(4,8,4,8);
+        label.setRadius(5);
         return label;
+    }
+
+    /**
+     * A class that tracks multiple collapsers, making sure only one is visible at a time.
+     */
+    public static class CollapseGroup {
+
+        // The list of collapsers
+        private List<Collapser> _collapsers = new ArrayList<>();
+
+        // Whether doing group work
+        private boolean  _groupWork;
+
+        /**
+         * Adds a collapser.
+         */
+        public void addCollapser(Collapser aCollapser)
+        {
+            _collapsers.add(aCollapser);
+        }
+
+        /**
+         * Called when a collapser collapses.
+         */
+        protected void collapserDidExpand(Collapser aCollapser)
+        {
+            if (_groupWork) return;
+            _groupWork = true;
+
+            for (Collapser c : _collapsers)
+                if (c!=aCollapser && c.isExpanded())
+                    c.setExpandedAnimated(false);
+
+            _groupWork = false;
+        }
+
+        /**
+         * Called when a collapser collapses.
+         */
+        protected void collapserDidCollapse(Collapser aCollapser)
+        {
+            if (_groupWork) return;
+            _groupWork = true;
+
+            for (Collapser c : _collapsers)
+                if (c!=aCollapser && !c.isExpanded()) {
+                    c.setExpandedAnimated(true);
+                    break;
+                }
+
+            _groupWork = false;
+        }
     }
 }
