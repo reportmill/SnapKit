@@ -7,6 +7,7 @@ import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.geom.Transform;
 import snap.gfx.*;
+import snap.text.TextRun;
 import snap.text.TextStyle;
 import snap.util.*;
 import java.util.Objects;
@@ -16,26 +17,11 @@ import java.util.Objects;
  */
 public class StringView extends View implements Cloneable {
 
-    // Text
-    private String  _text;
+    // TextRun
+    private TextRun  _textRun;
     
-    // The text style
-    protected TextStyle  _textStyle = TextStyle.DEFAULT;
-
-    // Whether to size to font instead of glyphs
-    protected boolean  _fontSizing;
-
     // Whether text should shrink to fit
     private boolean  _shrinkToFit;
-
-    // The width/advance of glyphs for current string/font
-    private double  _textWidth;
-
-    // The height of glyphs for current string/font
-    private double  _textHeight;
-
-    // The ascent, descent for current string/font
-    private double  _ascent, _descent;
 
     // Whether box needs to be sized
     private boolean  _needsResize = true;
@@ -44,7 +30,6 @@ public class StringView extends View implements Cloneable {
     private StringView  _copyThatFits;
 
     // Constants for properties
-    //public static final String Text_Prop = "Text";
     public static final String TextStyle_Prop = "TextStyle";
     public static final String FontSizing_Prop = "FontSizing";
     public static final String ShrinkToFit_Prop = "ShrinkToFit";
@@ -59,8 +44,10 @@ public class StringView extends View implements Cloneable {
     {
         super();
 
-        // Set property defaults
-        _fontSizing = DEFAULT_FONT_SIZING;
+        // Create TextRun
+        _textRun = new TextRun();
+        _textRun.setFontSizing(DEFAULT_FONT_SIZING);
+        _textRun.setHostView(this);
     }
 
     /**
@@ -75,7 +62,7 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns the text.
      */
-    public String getText()  { return _text; }
+    public String getText()  { return _textRun.getText(); }
 
     /**
      * Sets the text.
@@ -83,10 +70,12 @@ public class StringView extends View implements Cloneable {
     public void setText(String aValue)
     {
         // if already set, just return
-        if (SnapUtils.equals(aValue, _text)) return;
+        String old = getText();
+        if (SnapUtils.equals(aValue, old)) return;
 
         // Set new value, fire prop change, relayout and return
-        firePropChange(Text_Prop, _text, _text = aValue);
+        _textRun.setText(aValue);
+        firePropChange(Text_Prop, old, aValue);
         relayoutParent();
         repaint();
     }
@@ -94,15 +83,20 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns the TextStyle.
      */
-    public TextStyle getStyle()  { return _textStyle; }
+    public TextStyle getStyle()  { return _textRun.getStyle(); }
 
     /**
      * Sets the TextStyle.
      */
     public void setStyle(TextStyle aStyle)
     {
-        if (Objects.equals(aStyle, _textStyle)) return;
-        firePropChange(TextStyle_Prop, _textStyle, _textStyle = aStyle);
+        // if already set, just return
+        TextStyle old = getStyle();
+        if (Objects.equals(aStyle, old)) return;
+
+        // Set new value, fire prop change, relayout and return
+        _textRun.setStyle(aStyle);
+        firePropChange(TextStyle_Prop, old, aStyle);
         relayoutParent();
         repaint();
     }
@@ -112,11 +106,7 @@ public class StringView extends View implements Cloneable {
      */
     public Paint getTextFill()
     {
-        Color color = getStyle().getColor();
-        Color defColor = (Color) ViewUtils.getTextFill();
-        if (defColor != Color.BLACK && color == Color.BLACK)
-            color = defColor;
-        return color;
+        return _textRun.getTextFill();
     }
 
     /**
@@ -132,15 +122,20 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns whether to size to font (looser) instead of glyphs (tighter).
      */
-    public boolean isFontSizing()  { return _fontSizing; }
+    public boolean isFontSizing()  { return _textRun.isFontSizing(); }
 
     /**
      * Sets whether to size to font (looser) instead of glyphs (tighter).
      */
     public void setFontSizing(boolean aValue)
     {
-        if (aValue == _fontSizing) return;
-        firePropChange(FontSizing_Prop, _fontSizing, _fontSizing = aValue);
+        // If already set, just return
+        boolean old = isFontSizing();
+        if (aValue == old) return;
+
+        // Set, fire prop change, relayout parent, return
+        _textRun.setFontSizing(aValue);
+        firePropChange(FontSizing_Prop, old, aValue);
         relayoutParent();
     }
 
@@ -161,15 +156,14 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns the text length.
      */
-    public int length()  { return _text != null ? _text.length() : 0; }
+    public int length()  { return _textRun.length(); }
 
     /**
      * Returns the width of the string (aka the 'advance').
      */
     public double getTextWidth()
     {
-        if (_ascent < 0) loadMetrics();
-        return _textWidth;
+        return _textRun.getTextWidth();
     }
 
     /**
@@ -177,8 +171,7 @@ public class StringView extends View implements Cloneable {
      */
     public double getTextHeight()
     {
-        if (_ascent < 0) loadMetrics();
-        return _textHeight;
+        return _textRun.getTextHeight();
     }
 
     /**
@@ -186,8 +179,7 @@ public class StringView extends View implements Cloneable {
      */
     public double getAscent()
     {
-        if (_ascent < 0) loadMetrics();
-        return _ascent;
+        return _textRun.getAscent();
     }
 
     /**
@@ -195,53 +187,7 @@ public class StringView extends View implements Cloneable {
      */
     public double getDescent()
     {
-        if (_ascent < 0) loadMetrics();
-        return _descent;
-    }
-
-    /**
-     * Loads the metrics.
-     */
-    private void loadMetrics()
-    {
-        if (isFontSizing())
-            loadMetricsForFontSizing();
-        else loadMetricsForGlyphSizing();
-    }
-
-    /**
-     * Loads the metrics for default 'Glyph sizing', where text box is snug around glyphs for string+font.
-     */
-    private void loadMetricsForGlyphSizing()
-    {
-        // Get exact bounds around string glyphs for font
-        Font font = getFont();
-        String text = getText();
-        Rect bnds = text != null && text.length() > 0 ? font.getGlyphBounds(text) : Rect.ZeroRect;
-
-        // Get StringWidth from GlyphBounds
-        _textWidth = Math.ceil(bnds.width);
-
-        // Get Ascent, Descent, LineHeight from GlyphBounds
-        _ascent = Math.ceil(-bnds.y);
-        _descent = Math.ceil(bnds.height + bnds.y);
-        _textHeight = _ascent + _descent;
-    }
-
-    /**
-     * Loads the metrics.
-     */
-    private void loadMetricsForFontSizing()
-    {
-        // Get StringWidth for string + font (aka Advance)
-        String text = getText();
-        Font font = getFont();
-        _textWidth = text != null ? Math.ceil(font.getStringAdvance(text)) : 0;
-
-        // Get Font Ascent, Descent, StringHeight (aka LineHeight)
-        _ascent = Math.ceil(font.getAscent());
-        _descent = Math.ceil(font.getDescent());
-        _textHeight = _ascent + _descent;
+        return _textRun.getDescent();
     }
 
     /**
@@ -252,9 +198,9 @@ public class StringView extends View implements Cloneable {
         Insets ins = getInsetsAll();
         double areaW = getWidth() - ins.getWidth();
         double areaH = getHeight() - ins.getHeight();
-        double strW = getTextWidth();
-        double strH = getTextHeight();
-        return strW <= areaW && strH <= areaH;
+        double textW = getTextWidth();
+        double textH = getTextHeight();
+        return textW <= areaW && textH <= areaH;
     }
 
     /**
@@ -322,17 +268,9 @@ public class StringView extends View implements Cloneable {
      */
     public int getCharIndexForX(double aX)
     {
-        String text = getText();
-        Font font = getFont();
         double textX = getTextBounds().x;
-        for (int i = 0, iMax = text.length(); i < iMax; i++) {
-            char c = text.charAt(i);
-            double dx = font.charAdvance(c);
-            if (aX <= textX + dx / 2)
-                return i;
-            textX += dx;
-        }
-        return text.length();
+        double runX = aX - textX;
+        return _textRun.getCharIndexForX(runX);
     }
 
     /**
@@ -357,7 +295,6 @@ public class StringView extends View implements Cloneable {
     public void relayoutParent()
     {
         super.relayoutParent();
-        _ascent = -1;
         if (getParent() == null)
             _needsResize = true;
         _copyThatFits = null;
@@ -426,18 +363,8 @@ public class StringView extends View implements Cloneable {
      */
     protected void paintString(Painter aPntr)
     {
-        // Set font and text fill
-        Font font = getFont();
-        Paint textFill = getTextFill();
-        aPntr.setFont(font);
-        aPntr.setPaint(textFill);
-
-        // Get String X/Y and paint
-        String text = getText();
         Rect textBounds = getTextBounds();
-        double textX = textBounds.x;
-        double textY = textBounds.y + getAscent();
-        aPntr.drawString(text, textX, textY);
+        _textRun.paintStringTopLeft(aPntr, textBounds.x, textBounds.y);
     }
 
     /**
@@ -521,6 +448,21 @@ public class StringView extends View implements Cloneable {
     }
 
     /**
+     * Override to update TextRun.
+     */
+    @Override
+    public void setFont(Font aFont)
+    {
+        if (Objects.equals(aFont, getFont())) return;
+        super.setFont(aFont);
+
+        if (aFont != null) {
+            TextStyle textStyle = getStyle().copyFor(aFont);
+            setStyle(textStyle);
+        }
+    }
+
+    /**
      * Override to clear NeedsResize.
      */
     @Override
@@ -550,6 +492,8 @@ public class StringView extends View implements Cloneable {
         StringView copy;
         try { copy = (StringView) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+        copy._textRun = _textRun.clone();
+        copy._textRun.setHostView(copy);
         return copy;
     }
 
