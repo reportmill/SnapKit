@@ -5,6 +5,7 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.geom.Rect;
+import snap.geom.Transform;
 import snap.gfx.*;
 import snap.text.TextStyle;
 import snap.util.*;
@@ -60,6 +61,15 @@ public class StringView extends View implements Cloneable {
 
         // Set property defaults
         _fontSizing = DEFAULT_FONT_SIZING;
+    }
+
+    /**
+     * Constructor with string.
+     */
+    public StringView(String aString)
+    {
+        this();
+        setText(aString);
     }
 
     /**
@@ -379,7 +389,8 @@ public class StringView extends View implements Cloneable {
     public void paintStringView(Painter aPntr)
     {
         aPntr.save();
-        aPntr.transform(getLocalToParent());
+        Transform xfm = getLocalToParent();
+        aPntr.transform(xfm);
         paintAll(aPntr);
         aPntr.restore();
     }
@@ -406,6 +417,15 @@ public class StringView extends View implements Cloneable {
             return;
         }
 
+        // Paint string
+        paintString(aPntr);
+    }
+
+    /**
+     * Paints StringView.
+     */
+    protected void paintString(Painter aPntr)
+    {
         // Set font and text fill
         Font font = getFont();
         Paint textFill = getTextFill();
