@@ -580,6 +580,15 @@ public class ParentView extends View {
     }
 
     /**
+     * Returns a ViewProxy for this View. Some classes already have this, but I'm hoping to do something really clever
+     * with this one day, like maybe caching PrefSize info.
+     */
+    protected ViewProxy<?> getViewProxy()
+    {
+        return new ViewProxy<>(this);
+    }
+
+    /**
      * Override to handle ParentView changes.
      */
     @Override
