@@ -7,9 +7,7 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Paint;
 import snap.gfx.Painter;
-import snap.view.View;
 import snap.view.ViewUtils;
-import java.util.Objects;
 
 /**
  * This class holds a text string and TextStyle and provides sizing information.
@@ -24,9 +22,6 @@ public class TextRun implements Cloneable {
 
     // Whether to size to font instead of glyphs
     protected boolean  _fontSizing;
-
-    // An optional host view to get font from
-    private View  _hostView;
 
     // The width/advance of glyphs for current string/font
     private double  _textWidth;
@@ -151,14 +146,6 @@ public class TextRun implements Cloneable {
     }
 
     /**
-     * Sets the host view.
-     */
-    public void setHostView(View aView)
-    {
-        _hostView = aView;
-    }
-
-    /**
      * Returns the text length.
      */
     public int length()  { return _text != null ? _text.length() : 0; }
@@ -204,13 +191,6 @@ public class TextRun implements Cloneable {
      */
     private void loadMetrics()
     {
-        // Update font if needed
-        if (_hostView != null) {
-            Font hostFont = _hostView.getFont();
-            if (!Objects.equals(hostFont, getFont()))
-                setFont(hostFont);
-        }
-
         if (isFontSizing())
             loadMetricsForFontSizing();
         else loadMetricsForGlyphSizing();
@@ -301,7 +281,6 @@ public class TextRun implements Cloneable {
         TextRun copy;
         try { copy = (TextRun) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-        copy._hostView = null;
         return copy;
     }
 }

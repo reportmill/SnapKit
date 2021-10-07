@@ -287,18 +287,29 @@ public class ParentView extends View {
      */
     public void setFont(Font aFont)
     {
-        // If no change and not null, just return
-        if (SnapUtils.equals(aFont, _font) && aFont != null) return;
-
         // Do normal version
+        if (SnapUtils.equals(aFont, _font)) return;
         super.setFont(aFont);
 
-        // Let all children that inherrit font know
-        for (int i = 0, iMax = getChildCount(); i < iMax; i++) {
-            View child = getChild(i);
+        // Notify children that inherit font
+        for (View child : getChildren())
             if (!child.isFontSet())
-                child.setFont(null);
-        }
+                child.parentFontChanged();
+    }
+
+    /**
+     * Override to forward to children that inherit font.
+     */
+    @Override
+    protected void parentFontChanged()
+    {
+        // Do normal version
+        super.parentFontChanged();
+
+        // Notify children that inherit font
+        for (View child : getChildren())
+            if (!child.isFontSet())
+                child.parentFontChanged();
     }
 
     /**

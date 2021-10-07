@@ -8,6 +8,8 @@ import snap.text.*;
 import snap.util.*;
 import snap.web.*;
 
+import java.util.Objects;
+
 /**
  * A view subclass for displaying and editing large blocks of text and rich text using a TextBox with RichText.
  */
@@ -442,7 +444,13 @@ public class TextArea extends View {
      */
     public Font getFont()
     {
-        if (isRich()) return getSelStyle().getFont();
+        // If RichText, return SelStyle.Font
+        if (isRich()) {
+            TextStyle selStyle = getSelStyle();
+            return selStyle.getFont();
+        }
+
+        // Do normal version
         return super.getFont();
     }
 
@@ -451,8 +459,35 @@ public class TextArea extends View {
      */
     public void setFont(Font aFont)
     {
+        // If RichText, just update SelStyle.Font and return
+        if (isRich()) {
+            if (aFont != null)
+                setSelStyleValue(TextStyle.FONT_KEY, aFont);
+            return;
+        }
+
+        // Do normal version
+        if (Objects.equals(aFont, getFont())) return;
         super.setFont(aFont);
-        if(aFont!=null) setSelStyleValue(TextStyle.FONT_KEY, aFont);
+
+        // Update SelStyle.Font
+        setSelStyleValue(TextStyle.FONT_KEY, aFont);
+    }
+
+    /**
+     * Override to update font.
+     */
+    @Override
+    protected void parentFontChanged()
+    {
+        // Do normal version
+        super.parentFontChanged();
+
+        // Update SelStyle.Font
+        if (!isRich()) {
+            Font font = getFont();
+            setSelStyleValue(TextStyle.FONT_KEY, font);
+        }
     }
 
     /**
@@ -602,7 +637,8 @@ public class TextArea extends View {
 
         // If selection is multiple chars, apply attribute to text and reset SelStyle
         else {
-            getRichText().setStyleValue(aKey, aValue, getSelStart(), getSelEnd()); _selStyle = null;
+            getRichText().setStyleValue(aKey, aValue, getSelStart(), getSelEnd());
+            _selStyle = null;
             repaint();
         }
     }
@@ -736,8 +772,11 @@ public class TextArea extends View {
     {
         // If shift is down, extend selection forward
         if (isShiftDown) {
-            if(getSelAnchor()==getSelStart() && !isSelEmpty()) setSel(getSelStart()+1, getSelEnd());
-            else { setSel(getSelStart(), getSelEnd()+1); }
+            if(getSelAnchor() == getSelStart() && !isSelEmpty())
+                setSel(getSelStart() + 1, getSelEnd());
+            else {
+                setSel(getSelStart(), getSelEnd() + 1);
+            }
         }
 
         // Set new selection
@@ -751,8 +790,11 @@ public class TextArea extends View {
     {
         // If shift is down, extend selection back
         if (isShiftDown) {
-            if(getSelAnchor()==getSelEnd() && !isSelEmpty()) setSel(getSelStart(), getSelEnd()-1);
-            else { setSel(getSelEnd(), getSelStart()-1); }
+            if(getSelAnchor() == getSelEnd() && !isSelEmpty())
+                setSel(getSelStart(), getSelEnd() - 1);
+            else {
+                setSel(getSelEnd(), getSelStart() - 1);
+            }
         }
 
         // Set new selection

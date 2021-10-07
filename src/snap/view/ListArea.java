@@ -452,14 +452,11 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     protected void updateCellAt(int anIndex)
     {
-        int cindex = anIndex - _cellStart;
+        int cellIndex = anIndex - _cellStart;
         ListCell cell = createCell(anIndex);
-        ListCell oldCell = getCell(cindex);
         configureCell(cell);
-        cell.setBounds(oldCell.getBounds());
-        removeChild(cindex);
-        addChild(cell, cindex);
-        cell.layout();
+        removeChild(cellIndex);
+        addChild(cell, cellIndex);
     }
 
     /**

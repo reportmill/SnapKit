@@ -716,6 +716,21 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Called when parent font changes.
+     */
+    protected void parentFontChanged()
+    {
+        // If Font is explicitly set, just return
+        if (isFontSet())
+            return;
+
+        // Trigger layout updates for new font
+        relayout();
+        relayoutParent();
+        repaint();
+    }
+
+    /**
      * Returns the cursor.
      */
     public Cursor getCursor()
@@ -1101,13 +1116,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected void setParent(ParentView aPar)
     {
         // FirePropChange
-        firePropChange(Parent_Prop, _parent, _parent=aPar);
+        firePropChange(Parent_Prop, _parent, _parent = aPar);
 
-        // Propagate Showing to children
-        setShowing(aPar!=null && aPar.isShowing());
+        // Update Showing property
+        boolean showing = aPar != null && aPar.isShowing();
+        setShowing(showing);
 
-        // If inherrit font, propagate to children
-        if (!isFontSet()) setFont(null);
+        // If inherit font, propagate to children
+        if (!isFontSet())
+            parentFontChanged();
     }
 
     /**

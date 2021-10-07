@@ -47,7 +47,6 @@ public class StringView extends View implements Cloneable {
         // Create TextRun
         _textRun = new TextRun();
         _textRun.setFontSizing(DEFAULT_FONT_SIZING);
-        _textRun.setHostView(this);
     }
 
     /**
@@ -453,13 +452,23 @@ public class StringView extends View implements Cloneable {
     @Override
     public void setFont(Font aFont)
     {
+        // Do normal version
         if (Objects.equals(aFont, getFont())) return;
         super.setFont(aFont);
 
-        if (aFont != null) {
-            TextStyle textStyle = getStyle().copyFor(aFont);
-            setStyle(textStyle);
-        }
+        // Set font in TextRun
+        Font font = getFont();
+        _textRun.setFont(font);
+    }
+
+    /**
+     * Override to update TextRun.
+     */
+    @Override
+    protected void parentFontChanged()
+    {
+        Font font = getFont();
+        _textRun.setFont(font);
     }
 
     /**
@@ -493,7 +502,6 @@ public class StringView extends View implements Cloneable {
         try { copy = (StringView) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
         copy._textRun = _textRun.clone();
-        copy._textRun.setHostView(copy);
         return copy;
     }
 
