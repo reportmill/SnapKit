@@ -701,16 +701,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setFont(Font aFont)
     {
-        // Special case: If both fonts are null, assume parent updated
-        if (aFont == null && _font == null) {
-            relayout(); relayoutParent(); repaint();
-            return;
-        }
-
-        // Do normal version
+        // If already set, just return
         if (SnapUtils.equals(aFont, _font)) return;
+
+        // Set, fire prop change, relayout parent, repaint
         firePropChange(Font_Prop, _font, _font = aFont);
-        relayout();
         relayoutParent();
         repaint();
     }
@@ -725,7 +720,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             return;
 
         // Trigger layout updates for new font
-        relayout();
         relayoutParent();
         repaint();
     }

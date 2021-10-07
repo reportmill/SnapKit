@@ -5,10 +5,10 @@ package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
 import snap.util.*;
-
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A View subclass for views with children.
@@ -288,7 +288,7 @@ public class ParentView extends View {
     public void setFont(Font aFont)
     {
         // Do normal version
-        if (SnapUtils.equals(aFont, _font)) return;
+        if (Objects.equals(aFont, _font)) return;
         super.setFont(aFont);
 
         // Notify children that inherit font
