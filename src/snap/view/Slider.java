@@ -47,8 +47,8 @@ public class Slider extends View {
      */
     public void setValue(double aValue)
     {
-        if (aValue==_value) return;
-        firePropChange(Value_Prop, _value, _value=aValue);
+        if (aValue == _value) return;
+        firePropChange(Value_Prop, _value, _value = aValue);
         repaint();
     }
 
@@ -57,8 +57,13 @@ public class Slider extends View {
      */
     public double getValueRatio()
     {
-        double val = getValue(), min = getMin(), max = getMax();
-        return (val - min)/(max - min);
+        double val = getValue();
+        double min = getMin();
+        double max = getMax();
+        double range = max - min;
+        if (range == 0)
+            return 0;
+        return (val - min) / (max - min);
     }
 
     /**
@@ -71,8 +76,8 @@ public class Slider extends View {
      */
     public void setMin(double aValue)
     {
-        if (aValue==_min) return;
-        firePropChange(Min_Prop, _min, _min=aValue);
+        if (aValue == _min) return;
+        firePropChange(Min_Prop, _min, _min = aValue);
         repaint();
     }
 
@@ -86,8 +91,8 @@ public class Slider extends View {
      */
     public void setMax(double aValue)
     {
-        if (aValue==_max) return;
-        firePropChange(Max_Prop, _max, _max=aValue);
+        if (aValue == _max) return;
+        firePropChange(Max_Prop, _max, _max = aValue);
         repaint();
     }
 
@@ -116,7 +121,7 @@ public class Slider extends View {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return isHorizontal() ? 100 : (SIZE+4);
+        return isHorizontal() ? 100 : (SIZE + 4);
     }
 
     /**
@@ -124,7 +129,7 @@ public class Slider extends View {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return isVertical() ? 100 : (SIZE+4);
+        return isVertical() ? 100 : (SIZE + 4);
     }
 
     /**
@@ -143,7 +148,8 @@ public class Slider extends View {
     {
         Rect trect = getTrackBounds();
         RoundRect trectRound = new RoundRect(trect.x, trect.y, trect.width, trect.height, 2);
-        aPntr.setPaint(Color.LIGHTGRAY); aPntr.fill(trectRound);
+        aPntr.setPaint(Color.LIGHTGRAY);
+        aPntr.fill(trectRound);
     }
 
     /**
@@ -152,9 +158,11 @@ public class Slider extends View {
     protected void paintKnob(Painter aPntr)
     {
         Point kpnt = getKnobPoint();
-        Arc circle = new Arc(kpnt.x-HSIZE, kpnt.y-HSIZE, SIZE, SIZE, 0, 360);
-        aPntr.setColor(Color.WHITE); aPntr.fill(circle);
-        aPntr.setPaint(Color.LIGHTGRAY); aPntr.draw(circle);
+        Arc circle = new Arc(kpnt.x - HSIZE, kpnt.y - HSIZE, SIZE, SIZE, 0, 360);
+        aPntr.setColor(Color.WHITE);
+        aPntr.fill(circle);
+        aPntr.setPaint(Color.LIGHTGRAY);
+        aPntr.draw(circle);
     }
 
     /**
@@ -173,15 +181,15 @@ public class Slider extends View {
         if (isHorizontal()) {
             double trackX = areaX + HSIZE + 1;
             double trackW = areaW - SIZE - 2;
-            double midy = Math.round(areaY+areaH/2);
-            return new Rect(trackX, midy-2, trackW, 4);
+            double midy = Math.round(areaY + areaH / 2);
+            return new Rect(trackX, midy - 2, trackW, 4);
         }
 
         // Handle vertical
         double trackY = areaY + HSIZE + 1;
         double trackH = areaH - SIZE - 2;
-        double midx = Math.round(areaX+areaW/2);
-        return new Rect(midx-2, trackY, 4, trackH);
+        double midx = Math.round(areaX + areaW / 2);
+        return new Rect(midx - 2, trackY, 4, trackH);
     }
 
     /**
@@ -203,8 +211,8 @@ public class Slider extends View {
         double trackH = areaH - SIZE - 2;
 
         // Calc point x/y and return
-        double midy = isHorizontal() ? Math.round(areaY+areaH/2) : Math.round(trackY + trackH*getValueRatio());
-        double midx = isHorizontal() ? Math.round(trackX + trackW*getValueRatio()) : Math.round(areaX+areaW/2);
+        double midy = isHorizontal() ? Math.round(areaY + areaH / 2) : Math.round(trackY + trackH * getValueRatio());
+        double midx = isHorizontal() ? Math.round(trackX + trackW * getValueRatio()) : Math.round(areaX + areaW / 2);
         return new Point(midx, midy);
     }
 
@@ -219,17 +227,22 @@ public class Slider extends View {
             // Get Mouse X/Y
             Rect tbnds = getTrackBounds();
             double mx = anEvent.getX();
-            if (mx<tbnds.x) mx = tbnds.x;
-            if (mx>tbnds.getMaxX()) mx = tbnds.getMaxX();
+            if (mx < tbnds.x)
+                mx = tbnds.x;
+            if (mx > tbnds.getMaxX())
+                mx = tbnds.getMaxX();
             double my = anEvent.getY();
-            if (my<tbnds.y) my = tbnds.y;
-            if (my>tbnds.getMaxY()) my = tbnds.getMaxY();
+            if (my < tbnds.y)
+                my = tbnds.y;
+            if (my > tbnds.getMaxY())
+                my = tbnds.getMaxY();
 
             // Calc value at point
             double tp = isHorizontal() ? (mx - tbnds.x) : (my - tbnds.y);
             double ts = isHorizontal() ? tbnds.width : tbnds.height;
-            double value = getMin() + (tp/ts)*(getMax() - getMin());
-            if (MathUtils.equals(value, getValue())) return;
+            double value = getMin() + (tp / ts) * (getMax() - getMin());
+            if (MathUtils.equals(value, getValue()))
+                return;
 
             // Set value, fire Action event
             setValue(value);
@@ -246,9 +259,12 @@ public class Slider extends View {
         XMLElement e = super.toXML(anArchiver);
 
         // Archive Min, Max, Value
-        if (getMin()!=0) e.add(Min_Prop, getMin());
-        if (getMax()!=100) e.add(Max_Prop, getMax());
-        if (getValue()!=50) e.add(Value_Prop, getValue());
+        if (getMin() != 0)
+            e.add(Min_Prop, getMin());
+        if (getMax() != 100)
+            e.add(Max_Prop, getMax());
+        if (getValue() != 50)
+            e.add(Value_Prop, getValue());
         return e;
     }
 

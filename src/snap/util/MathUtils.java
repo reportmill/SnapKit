@@ -170,6 +170,20 @@ public class MathUtils {
     }
 
     /**
+     * Returns the given double clamped between the two values.
+     */
+    public static double mapValueForRanges(double aValue, double min1, double max1, double min2, double max2)
+    {
+        double offset1 = aValue - min1;
+        double range1 = max1 - min1;
+        double range2 = max2 - min2;
+        if (range1 == 0)
+            return min1;
+        double mval = min2 + offset1 / range1 * range2;
+        return mval;
+    }
+
+    /**
      * Returns the negative of the given Number.
      */
     public static Number negate(Number aNumber)
