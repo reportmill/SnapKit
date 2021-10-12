@@ -2,75 +2,94 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+
 import java.util.*;
 
 /**
  * The <code>RXElement</code> class represents an XML element and simply manages a list of XML elements
  * (recursively) and a list of attributes.
- *
+ * <p>
  * For the sake of efficiency, when you need to iterate over a list of elements for a given name, you can do this:
- *
- *    for (int i=anElement.indexOf(elementName); i>=0; i=anElement.indexOf(elementName, i+1))
- *      anElement.get(i).doThis();
+ * <p>
+ * for (int i=anElement.indexOf(elementName); i>=0; i=anElement.indexOf(elementName, i+1))
+ * anElement.get(i).doThis();
  */
 public class XMLElement implements Cloneable {
 
     // The name of the attribute
-    private String  _name;
+    private String _name;
 
     // The full name of the attribute (if namespaced)
-    private String  _fname;
+    private String _fname;
 
     // The value string of the attribute
-    private String  _value;
+    private String _value;
 
     // The list of attributes associated with this element
-    private List <XMLAttribute>  _attributes;
-    
+    private List<XMLAttribute> _attributes;
+
     // The list of child elements associated with this element
-    private List <XMLElement>  _elements;
-    
+    private List<XMLElement> _elements;
+
     // The namespace
-    private String  _nspace;
-    
+    private String _nspace;
+
     // Processing instruction data
-    private String  _pidata;
-    
+    private String _pidata;
+
     // Whether element should ignore case when asking for attributes/elements by name
-    private boolean  _ignoreCase;
-    
+    private boolean _ignoreCase;
+
     // A shared XMLParser
-    private static XMLParser  _xmlParser;
-    
+    private static XMLParser _xmlParser;
+
     /**
      * Creates a new element.
      */
-    public XMLElement() { }
+    public XMLElement()
+    {
+    }
 
     /**
      * Creates a new element with given name.
      */
-    public XMLElement(String aName)  { setName(aName); }
+    public XMLElement(String aName)
+    {
+        setName(aName);
+    }
 
     /**
      * Creates a new element with given name and value.
      */
-    public XMLElement(String aName, String aValue)  { setName(aName); setValue(aValue); }
+    public XMLElement(String aName, String aValue)
+    {
+        setName(aName);
+        setValue(aValue);
+    }
 
     /**
      * Returns the name for this attribute.
      */
-    public String getName()  { return _name; }
+    public String getName()
+    {
+        return _name;
+    }
 
     /**
      * Sets the name for this attribute.
      */
-    public void setName(String aName)  { _name = aName; }
+    public void setName(String aName)
+    {
+        _name = aName;
+    }
 
     /**
      * Returns the full name for this attribute.
      */
-    public String getFullName()  { return _fname!=null ? _fname : _name; }
+    public String getFullName()
+    {
+        return _fname != null ? _fname : _name;
+    }
 
     /**
      * Sets the full name for this attribute.
@@ -79,7 +98,7 @@ public class XMLElement implements Cloneable {
     {
         _fname = aName;
         int ind = aName.indexOf(':');
-        if (ind>0) aName = aName.substring(ind+1);
+        if (ind > 0) aName = aName.substring(ind + 1);
         setName(aName);
     }
 
@@ -90,44 +109,65 @@ public class XMLElement implements Cloneable {
     {
         if (getFullName().equals(getName())) return null;
         int ind = getFullName().indexOf(':');
-        if (ind>0) return getFullName().substring(0, ind);
+        if (ind > 0) return getFullName().substring(0, ind);
         return null;
     }
 
     /**
      * Returns the value for this attribute.
      */
-    public String getValue()  { return _value; }
+    public String getValue()
+    {
+        return _value;
+    }
 
     /**
      * Sets the value for this attribute.
      */
-    public void setValue(String aValue)  { _value = aValue; }
+    public void setValue(String aValue)
+    {
+        _value = aValue;
+    }
 
     /**
      * Returns the namespace.
      */
-    public String getNamespace()  { return _nspace; }
+    public String getNamespace()
+    {
+        return _nspace;
+    }
 
     /**
      * Sets the namespace.
      */
-    public void setNamespace(String aURI)  { _nspace = aURI; }
+    public void setNamespace(String aURI)
+    {
+        _nspace = aURI;
+    }
 
     /**
      * Returns whether element is processing instruction.
      */
-    public boolean isProcInstr()  { return _pidata!=null; }
+    public boolean isProcInstr()
+    {
+        return _pidata != null;
+    }
 
     /**
      * Returns the processing instruction.
      */
-    public String getProcInstrData()  { return _pidata; }
+    public String getProcInstrData()
+    {
+        return _pidata;
+    }
 
     /**
      * Sets the processing instruction data.
      */
-    public void setProcInstrData(String aStr)  { _pidata = aStr; }
+    public void setProcInstrData(String aStr)
+    {
+        _pidata = aStr;
+    }
 
     /**
      * Returns a new element hierarchy loaded from aSource (File, String path, InputStream or whatever).
@@ -136,28 +176,40 @@ public class XMLElement implements Cloneable {
     {
         // If source is xml element, just return it
         if (aSource instanceof XMLElement)
-            return (XMLElement)aSource;
+            return (XMLElement) aSource;
 
         // Create and return new element from source
-        if (_xmlParser==null) _xmlParser = new XMLParser();
-        try { return _xmlParser.parseXML(aSource); }
-        catch(Throwable t) { throw new RuntimeException(t); } // Catch and re-throw exceptions
+        if (_xmlParser == null) _xmlParser = new XMLParser();
+        try {
+            return _xmlParser.parseXML(aSource);
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        } // Catch and re-throw exceptions
     }
 
     /**
      * Returns the number of child attributes for this element.
      */
-    public int getAttributeCount()  { return _attributes==null ? 0 : _attributes.size(); }
+    public int getAttributeCount()
+    {
+        return _attributes == null ? 0 : _attributes.size();
+    }
 
     /**
      * Returns the specific child attribute at the given index.
      */
-    public XMLAttribute getAttribute(int anIndex)  { return _attributes.get(anIndex); }
+    public XMLAttribute getAttribute(int anIndex)
+    {
+        return _attributes.get(anIndex);
+    }
 
     /**
      * Returns the list of child attributes for this element.
      */
-    public List <XMLAttribute> getAttributes()  { return _attributes; }
+    public List<XMLAttribute> getAttributes()
+    {
+        return _attributes;
+    }
 
     /**
      * Adds an attribute.
@@ -168,7 +220,7 @@ public class XMLElement implements Cloneable {
         XMLAttribute oldValue = getAttribute(anAttribute.getName());
 
         // If attribute with same name already exists, replace it at same index
-        if (oldValue!=null) {
+        if (oldValue != null) {
             int index = removeAttribute(oldValue);
             addAttribute(anAttribute, index);
         }
@@ -182,14 +234,17 @@ public class XMLElement implements Cloneable {
      */
     public void addAttribute(XMLAttribute anAttribute, int anIndex)
     {
-        if (_attributes==null) _attributes = new ArrayList<>();  // Create attributes list if absent
+        if (_attributes == null) _attributes = new ArrayList<>();  // Create attributes list if absent
         _attributes.add(anIndex, anAttribute);                // Add attribute at given index
     }
 
     /**
      * Removes the attribute at given index.
      */
-    public XMLAttribute removeAttribute(int anIndex)  { return _attributes.remove(anIndex); }
+    public XMLAttribute removeAttribute(int anIndex)
+    {
+        return _attributes.remove(anIndex);
+    }
 
     /**
      * Removes the given attribute.
@@ -197,7 +252,7 @@ public class XMLElement implements Cloneable {
     public int removeAttribute(XMLAttribute anAttribute)
     {
         int index = getAttributeIndex(anAttribute);
-        if (index>=0) removeAttribute(index);
+        if (index >= 0) removeAttribute(index);
         return index;
     }
 
@@ -207,21 +262,24 @@ public class XMLElement implements Cloneable {
     public XMLAttribute removeAttribute(String aName)
     {
         XMLAttribute attribute = getAttribute(aName);
-        if (attribute!=null) removeAttribute(attribute);
+        if (attribute != null) removeAttribute(attribute);
         return attribute;
     }
 
     /**
      * Returns this index of the given attribute.
      */
-    public int getAttributeIndex(XMLAttribute anAttribute)  { return ListUtils.indexOfId(getAttributes(), anAttribute); }
+    public int getAttributeIndex(XMLAttribute anAttribute)
+    {
+        return ListUtils.indexOfId(getAttributes(), anAttribute);
+    }
 
     /**
      * Returns the specific child attribute with the given name (or null if not found).
      */
     public XMLAttribute getAttribute(String aName)
     {
-        for (int i=0, iMax=getAttributeCount(); i<iMax; i++)
+        for (int i = 0, iMax = getAttributeCount(); i < iMax; i++)
             if (equals(getAttribute(i).getName(), aName))
                 return getAttribute(i);
         return null;
@@ -232,7 +290,7 @@ public class XMLElement implements Cloneable {
      */
     public int getAttributeIndex(String aName)
     {
-        for (int i=0, iMax=getAttributeCount(); i<iMax; i++)
+        for (int i = 0, iMax = getAttributeCount(); i < iMax; i++)
             if (equals(getAttribute(i).getName(), aName))
                 return i;
         return -1;
@@ -337,7 +395,7 @@ public class XMLElement implements Cloneable {
     public int getElementCount(String aName)
     {
         int count = 0;
-        for (int i=0, iMax=getElementCount(); i<iMax; i++)
+        for (int i = 0, iMax = getElementCount(); i < iMax; i++)
             if (equals(getElement(i).getName(), aName))
                 count++;
         return count;
@@ -348,7 +406,7 @@ public class XMLElement implements Cloneable {
      */
     public int getElementIndex(String aName, int start)
     {
-        for (int i=start, iMax=getElementCount(); i<iMax; i++)
+        for (int i = start, iMax = getElementCount(); i < iMax; i++)
             if (equals(getElement(i).getName(), aName))
                 return i;
         return -1;
@@ -359,7 +417,7 @@ public class XMLElement implements Cloneable {
      */
     public XMLElement getElement(String aName)
     {
-        for (int i=0, iMax=getElementCount(); i<iMax; i++)
+        for (int i = 0, iMax = getElementCount(); i < iMax; i++)
             if (equals(getElement(i).getName(), aName))
                 return getElement(i);
         return null;
@@ -382,7 +440,7 @@ public class XMLElement implements Cloneable {
     public List<XMLElement> getElements(String aName)
     {
         List<XMLElement> elements = new ArrayList<>();
-        for (int i=0, iMax=getElementCount(); i<iMax; i++)
+        for (int i = 0, iMax = getElementCount(); i < iMax; i++)
             if (equals(getElement(i).getName(), aName))
                 elements.add(getElement(i));
         return elements;
@@ -401,12 +459,18 @@ public class XMLElement implements Cloneable {
     /**
      * Checks for presence of an attribute.
      */
-    public boolean hasAttribute(String aName)  { return getAttribute(aName)!=null; }
+    public boolean hasAttribute(String aName)
+    {
+        return getAttribute(aName) != null;
+    }
 
     /**
      * Returns the attribute string value for the given attribute name.
      */
-    public String getAttributeValue(String aName)  { return getAttributeValue(aName, null); }
+    public String getAttributeValue(String aName)
+    {
+        return getAttributeValue(aName, null);
+    }
 
     /**
      * Returns the string value for the given attribute name (or the given default value, if name not found).
@@ -420,7 +484,10 @@ public class XMLElement implements Cloneable {
     /**
      * Returns the boolean value for the given attribute name.
      */
-    public boolean getAttributeBoolValue(String aName)  { return getAttributeBoolValue(aName, false); }
+    public boolean getAttributeBoolValue(String aName)
+    {
+        return getAttributeBoolValue(aName, false);
+    }
 
     /**
      * Returns the boolean value for the given attribute name (or the given default value, if name not found).
@@ -434,7 +501,10 @@ public class XMLElement implements Cloneable {
     /**
      * Returns the Boolean value for the given attribute name.
      */
-    public Boolean getAttributeBooleanValue(String aName)  { return getAttributeBooleanValue(aName, null); }
+    public Boolean getAttributeBooleanValue(String aName)
+    {
+        return getAttributeBooleanValue(aName, null);
+    }
 
     /**
      * Returns the Boolean value for the given attribute name (or the given default value, if name not found).
@@ -482,7 +552,10 @@ public class XMLElement implements Cloneable {
     /**
      * Returns the double value for the given attribute name.
      */
-    public double getAttributeDoubleValue(String aName)  { return getAttributeDoubleValue(aName, 0); }
+    public double getAttributeDoubleValue(String aName)
+    {
+        return getAttributeDoubleValue(aName, 0);
+    }
 
     /**
      * Returns the double value for the given attribute name (or the given default value, if name not found).
@@ -610,11 +683,11 @@ public class XMLElement implements Cloneable {
     public void addAll(XMLElement anElement)
     {
         // Add all attributes
-        for (int i=0, iMax=anElement.getAttributeCount(); i<iMax; i++)
+        for (int i = 0, iMax = anElement.getAttributeCount(); i < iMax; i++)
             addAttribute(anElement.getAttribute(i));
 
         // Add all child elements
-        for (int i=0, iMax=anElement.getElementCount(); i<iMax; i++)
+        for (int i = 0, iMax = anElement.getElementCount(); i < iMax; i++)
             addElement(anElement.getElement(i));
     }
 
@@ -660,7 +733,10 @@ public class XMLElement implements Cloneable {
     /**
      * Returns whether element should ignore case when asking for attributes/elements by name.
      */
-    public boolean isIgnoreCase()  { return _ignoreCase; }
+    public boolean isIgnoreCase()
+    {
+        return _ignoreCase;
+    }
 
     /**
      * Sets whether element should ignore case when asking for attributes/elements by name.
@@ -668,7 +744,7 @@ public class XMLElement implements Cloneable {
     public void setIgnoreCase(boolean aVal)
     {
         _ignoreCase = aVal;
-        if (_elements!=null)
+        if (_elements != null)
             for (XMLElement e : _elements) e.setIgnoreCase(aVal);
     }
 
@@ -686,12 +762,16 @@ public class XMLElement implements Cloneable {
     public XMLElement clone()
     {
         XMLElement clone;
-        try { clone = (XMLElement)super.clone(); }
-        catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
+        try {
+            clone = (XMLElement) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
 
-        clone._attributes = null; clone._elements = null;
-        for (int i=0; i<getAttributeCount(); i++) clone.addAttribute(getAttribute(i).clone());
-        for (int i=0; i<getElementCount(); i++) clone.addElement(getElement(i).clone());
+        clone._attributes = null;
+        clone._elements = null;
+        for (int i = 0; i < getAttributeCount(); i++) clone.addAttribute(getAttribute(i).clone());
+        for (int i = 0; i < getElementCount(); i++) clone.addElement(getElement(i).clone());
         return clone;
     }
 
@@ -703,8 +783,8 @@ public class XMLElement implements Cloneable {
         // Create new StringBuffer with XML header, recursively write elements, return StringBuffer string
         StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         write(sb, null, 0, "  ");
-        while (Character.isWhitespace(sb.charAt(sb.length()-1)))
-            sb.setLength(sb.length()-1);
+        while (Character.isWhitespace(sb.charAt(sb.length() - 1)))
+            sb.setLength(sb.length() - 1);
         return sb.toString();
     }
 
@@ -729,7 +809,10 @@ public class XMLElement implements Cloneable {
     /**
      * Writes the element to the given string buffer using the given indent level and indent string.
      */
-    public void write(StringBuffer aSB, String indentStr)  { write(aSB, null, 0, indentStr); }
+    public void write(StringBuffer aSB, String indentStr)
+    {
+        write(aSB, null, 0, indentStr);
+    }
 
     /**
      * Writes the element to the given string buffer using the given indent level and indent string.
@@ -737,11 +820,13 @@ public class XMLElement implements Cloneable {
     public void write(StringBuffer aSB, String aNameSpace, int indent, String indentStr)
     {
         // Append indentation
-        for (int i=0; i<indent; i++) aSB.append(indentStr);
+        for (int i = 0; i < indent; i++) aSB.append(indentStr);
 
         // If processing instruction, just append name and data and return
         if (isProcInstr()) {
-            aSB.append("<?").append(getName()).append(' ').append(getProcInstrData()).append("?>\n"); return; }
+            aSB.append("<?").append(getName()).append(' ').append(getProcInstrData()).append("?>\n");
+            return;
+        }
 
         // Append tag start (<) and name
         aSB.append('<');
@@ -750,22 +835,27 @@ public class XMLElement implements Cloneable {
         // Append namespace
         if (!SnapUtils.equals(getNamespace(), aNameSpace)) {
             aSB.append(' ').append("xmlns");
-            String prfx = getPrefix(); if (prfx!=null) aSB.append(':').append(prfx);
+            String prfx = getPrefix();
+            if (prfx != null) aSB.append(':').append(prfx);
             aSB.append("=\"").append(getNamespace()).append('"');
         }
 
         // Append attributes
-        for (int i=0, iMax=getAttributeCount(); i<iMax; i++) { XMLAttribute attr = getAttribute(i);
+        for (int i = 0, iMax = getAttributeCount(); i < iMax; i++) {
+            XMLAttribute attr = getAttribute(i);
             aSB.append(' ').append(attr.getFullName()).append("=\"");
-            append(aSB, attr.getValue()); aSB.append('"');
+            append(aSB, attr.getValue());
+            aSB.append('"');
         }
 
         // If no child elements and no element value, close and return
-        if (getElementCount()==0 && getValue()==null) {
-            aSB.append(" />\n"); return; }
+        if (getElementCount() == 0 && getValue() == null) {
+            aSB.append(" />\n");
+            return;
+        }
 
         // If element value, close start tag, add element value and add end tag
-        else if (getValue()!=null) {
+        else if (getValue() != null) {
 
             // Close opening tag
             aSB.append('>');
@@ -773,27 +863,31 @@ public class XMLElement implements Cloneable {
             // If there is a byte encoding, write out value as CDATA: <![CDATA[ {value} ]]>
             if (hasAttribute("rm-byte-encoding")) {
                 aSB.append('\n');
-                for (int i=0; i<indent+1; i++) aSB.append(indentStr);
+                for (int i = 0; i < indent + 1; i++) aSB.append(indentStr);
                 aSB.append("<![CDATA[\n");
                 aSB.append(getValue());
                 aSB.append("]]>\n");
-                for (int i=0; i<indent; i++) aSB.append(indentStr);
+                for (int i = 0; i < indent; i++) aSB.append(indentStr);
             }
 
             // If not CData, just write the value
             else append(aSB, getValue());
 
             // Append closing tag
-            aSB.append("</"); aSB.append(getFullName()); aSB.append(">\n");
+            aSB.append("</");
+            aSB.append(getFullName());
+            aSB.append(">\n");
         }
 
         // Append child element value
         else {
             aSB.append(">\n");
-            for (int i=0, iMax=size(); i<iMax; i++)
-                get(i).write(aSB, getNamespace(), indent+1, indentStr);
-            for (int i=0; i<indent; i++) aSB.append(indentStr);
-            aSB.append("</"); aSB.append(getFullName()); aSB.append(">\n");
+            for (int i = 0, iMax = size(); i < iMax; i++)
+                get(i).write(aSB, getNamespace(), indent + 1, indentStr);
+            for (int i = 0; i < indent; i++) aSB.append(indentStr);
+            aSB.append("</");
+            aSB.append(getFullName());
+            aSB.append(">\n");
         }
     }
 
@@ -802,18 +896,30 @@ public class XMLElement implements Cloneable {
      */
     private void append(StringBuffer aSB, String aString)
     {
-        for (int i=0, iMax=aString.length(); i<iMax; i++) {
+        for (int i = 0, iMax = aString.length(); i < iMax; i++) {
             char c = aString.charAt(i);
-            switch(c) {
-                case '&': aSB.append("&amp;"); break;
-                case '"': aSB.append("&quot;"); break;
-                case '\'': aSB.append("&apos;"); break;
-                case '<': aSB.append("&lt;"); break;
-                case '>': aSB.append("&gt;"); break;
+            switch (c) {
+                case '&':
+                    aSB.append("&amp;");
+                    break;
+                case '"':
+                    aSB.append("&quot;");
+                    break;
+                case '\'':
+                    aSB.append("&apos;");
+                    break;
+                case '<':
+                    aSB.append("&lt;");
+                    break;
+                case '>':
+                    aSB.append("&gt;");
+                    break;
                 case '\n':
-                case '\r': aSB.append("&#").append((int)c).append(";"); break;
+                case '\r':
+                    aSB.append("&#").append((int) c).append(";");
+                    break;
                 default:
-                    if (c>127 || c<32) aSB.append("&#").append((int)c).append(";"); // Only 7 bit ASCII?
+                    if (c > 127 || c < 32) aSB.append("&#").append((int) c).append(";"); // Only 7 bit ASCII?
                     else aSB.append(c);
             }
         }

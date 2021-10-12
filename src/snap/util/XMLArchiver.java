@@ -2,15 +2,17 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+
 import java.util.*;
+
 import snap.web.WebURL;
 
 /**
  * This class manages archival and unarchival to/from XMLElements.
- *
+ * <p>
  * For archival, objects simply implement the toXML() method to configure and return XMLElements. Archiver's
  * toXML() method manages the process, allowing for object references.
- *
+ * <p>
  * For unarchival, classes register for particular element names. Then during Archiver.fromXML(), Archiver will
  * call fromXML() on the classes for encountered tags to reconstruct the object graph.
  */
@@ -18,16 +20,16 @@ public class XMLArchiver {
 
     // The owner class that initated archival/unarchival
     private Object _owner;
-    
+
     // The URL of the source the archiver is reading from
     private WebURL _surl;
 
     // Root element for unarchival
     private XMLElement _root;
-    
+
     // The root object to be used in unarchival
     private Object _rootObject;
-    
+
     // The version of unarchived object
     private double _version;
 
@@ -35,92 +37,131 @@ public class XMLArchiver {
     private boolean _ignoreCase;
 
     // Unarchival keeps track of read elements to guarantee that each element results in one instance
-    private Map <XMLElement, Object> _readElements = new HashMap<>();
-    
+    private Map<XMLElement, Object> _readElements = new HashMap<>();
+
     // list of objects that are archived by reference
     private List _references = new ArrayList();
-    
+
     // Archiver manages archival of shared BLOBs external to normal element hierarchy
     private List<Resource> _resources = new ArrayList<>();
-    
+
     // The map of classes for unarchival
-    private Map<String,Class> _classMap;
-    
+    private Map<String, Class> _classMap;
+
     // The stack of parents
     private Deque _parentStack = new ArrayDeque();
-    
+
     /**
      * Returns the WebURL of the currently loading archive.
      */
-    public WebURL getSourceURL()  { return _surl; }
+    public WebURL getSourceURL()
+    {
+        return _surl;
+    }
 
     /**
      * Sets the WebURL of the currently loading archive.
      */
-    public void setSourceURL(WebURL aURL)  { _surl = aURL; }
+    public void setSourceURL(WebURL aURL)
+    {
+        _surl = aURL;
+    }
 
     /**
      * Returns the owner.
      */
-    public Object getOwner()  { return _owner; }
+    public Object getOwner()
+    {
+        return _owner;
+    }
 
     /**
      * Sets the owner.
      */
-    public void setOwner(Object anOwner)  { _owner = anOwner; }
+    public void setOwner(Object anOwner)
+    {
+        _owner = anOwner;
+    }
 
     /**
      * Returns the owner class.
      */
-    public Class getOwnerClass()  { return _owner!=null? _owner.getClass() : null; }
+    public Class getOwnerClass()
+    {
+        return _owner != null ? _owner.getClass() : null;
+    }
 
     /**
      * Returns the object that the archiver should read "into".
      */
-    public Object getRootObject()  { return _rootObject; }
+    public Object getRootObject()
+    {
+        return _rootObject;
+    }
 
     /**
      * Sets the object that the archiver should read "into".
      */
-    public void setRootObject(Object anObj)  { _rootObject = anObj; }
+    public void setRootObject(Object anObj)
+    {
+        _rootObject = anObj;
+    }
 
     /**
      * Returns the version of the document.
      */
-    public double getVersion()  { return _version; }
+    public double getVersion()
+    {
+        return _version;
+    }
 
     /**
      * Sets the version of the document.
      */
-    public void setVersion(double aVersion)  { _version = aVersion; }
+    public void setVersion(double aVersion)
+    {
+        _version = aVersion;
+    }
 
     /**
      * Returns whether element should ignore case when asking for attributes/elements by name.
      */
-    public boolean isIgnoreCase()  { return _ignoreCase; }
+    public boolean isIgnoreCase()
+    {
+        return _ignoreCase;
+    }
 
     /**
      * Sets whether element should ignore case when asking for attributes/elements by name.
      */
-    public void setIgnoreCase(boolean aVal)  { _ignoreCase = aVal; }
+    public void setIgnoreCase(boolean aVal)
+    {
+        _ignoreCase = aVal;
+    }
 
     /**
      * Returns the root xml.
      */
-    public XMLElement getRootXML()  { return _root; }
+    public XMLElement getRootXML()
+    {
+        return _root;
+    }
 
     /**
      * Returns the class map.
      */
-    public Map <String, Class> getClassMap()
+    public Map<String, Class> getClassMap()
     {
-        return _classMap!=null? _classMap : (_classMap=createClassMap());
+        return _classMap != null ? _classMap : (_classMap = createClassMap());
     }
 
     /**
      * Creates the class map.
      */
-    protected Map <String, Class> createClassMap()  { throw new RuntimeException("No class map"); }
+    protected Map<String, Class> createClassMap()
+    {
+        throw new RuntimeException("No class map");
+    }
 
     /**
      * Returns a root object unarchived from a generic input source (a File, String path, InputStream, URL, byte[], etc.).
@@ -129,11 +170,11 @@ public class XMLArchiver {
     {
         // Get bytes from source - if not found or empty, complain
         byte bytes[] = SnapUtils.getBytes(aSource);
-        if (bytes==null || bytes.length==0)
+        if (bytes == null || bytes.length == 0)
             throw new RuntimeException("XMLArchiver.readObject: Cannot read source: " + aSource);
 
         // Try to get SourceURL from source
-        if (getSourceURL()==null) {
+        if (getSourceURL() == null) {
             WebURL surl = WebURL.getURL(aSource);
             setSourceURL(surl);
         }
@@ -223,31 +264,32 @@ public class XMLArchiver {
     public <T> T fromXML(XMLElement anElement, Class<T> aClass, Object anOwner)
     {
         // Handle Lists Special
-        if (anElement.getName().equals("alist")) { List list = new ArrayList();
-            for (int i=0, iMax=anElement.size(); i<iMax; i++)
+        if (anElement.getName().equals("alist")) {
+            List list = new ArrayList();
+            for (int i = 0, iMax = anElement.size(); i < iMax; i++)
                 list.add(fromXML(anElement.get(i), anOwner));
-            return (T)list;
+            return (T) list;
         }
 
         // See if anElement has already been read
         Object readObject = _readElements.get(anElement);
-        if (readObject!=null && (aClass==null || aClass.isInstance(readObject)))
-            return (T)readObject;
+        if (readObject != null && (aClass == null || aClass.isInstance(readObject)))
+            return (T) readObject;
 
         // If root element and owner is same class, set read object to owner
-        if (anElement==_root && getRootObject()!=null)
+        if (anElement == _root && getRootObject() != null)
             readObject = getRootObject();
 
-        // If class was provided, try to instantiate
+            // If class was provided, try to instantiate
         else {
 
             // Get class
             Class cls = aClass;
-            if (cls==null)
+            if (cls == null)
                 cls = getClassForXML(anElement);
 
             // If no class, throw exception
-            if (cls==null)
+            if (cls == null)
                 throw new RuntimeException("XMLArchiver: Can't find class for element: " + anElement.getName());
 
             // Create new object
@@ -255,7 +297,7 @@ public class XMLArchiver {
         }
 
         // If couldn't create new instance, return null (should throw exception instead, I think)
-        if (readObject==null) {
+        if (readObject == null) {
             System.err.println("XMLArchiver.fromXML: Couldn't find class for: " + anElement.getName());
             return null;
         }
@@ -267,11 +309,11 @@ public class XMLArchiver {
         Object obj = fromXML(anElement, readObject, anOwner);
 
         // If fromXML returned a different object, swap it in
-        if (obj!=readObject)
+        if (obj != readObject)
             _readElements.put(anElement, readObject = obj);
 
         // Return read object
-        return (T)readObject;
+        return (T) readObject;
     }
 
     /**
@@ -280,10 +322,10 @@ public class XMLArchiver {
     public Object fromXML(XMLElement anElement, Object anObj, Object anOwner)
     {
         // Archive given object (with given owner on top of ParentStack)
-        if (anOwner!=null)
+        if (anOwner != null)
             pushParent(anOwner);
-        Object obj = ((Archivable)anObj).fromXML(this, anElement);
-        if (anOwner!=null)
+        Object obj = ((Archivable) anObj).fromXML(this, anElement);
+        if (anOwner != null)
             popParent();
         return obj;
     }
@@ -291,7 +333,10 @@ public class XMLArchiver {
     /**
      * Writes the given object to XML elements.
      */
-    public XMLElement toXML(Object anObj)  { return toXML(anObj, null); }
+    public XMLElement toXML(Object anObj)
+    {
+        return toXML(anObj, null);
+    }
 
     /**
      * Writes the given object to XML elements.
@@ -299,17 +344,18 @@ public class XMLArchiver {
     public XMLElement toXML(Object anObj, Object anOwner)
     {
         // Handle Lists Special
-        if (anObj instanceof List) { List list = (List)anObj;
+        if (anObj instanceof List) {
+            List list = (List) anObj;
             XMLElement e = new XMLElement("alist");
-            for (int i=0, iMax=list.size(); i<iMax; i++)
+            for (int i = 0, iMax = list.size(); i < iMax; i++)
                 e.add(toXML(list.get(i)));
             return e;
         }
 
         // Unarchive given object (with given Owner on top of ParentStack)
-        if (anOwner!=null) pushParent(anOwner);
-        XMLElement xml = ((Archivable)anObj).toXML(this);
-        if (anOwner!=null) popParent();
+        if (anOwner != null) pushParent(anOwner);
+        XMLElement xml = ((Archivable) anObj).toXML(this);
+        if (anOwner != null) popParent();
         return xml;
     }
 
@@ -321,10 +367,10 @@ public class XMLArchiver {
         // Get class from map (if found, just return)
         Object clss = getClassMap().get(aName);
         if (clss instanceof Class)
-            return (Class)clss;
+            return (Class) clss;
 
         // Load class from string
-        if (clss!=null) try {
+        if (clss != null) try {
             ClassLoader classLoader = getClass().getClassLoader();
             Class c2 = Class.forName(clss.toString(), true, classLoader);
             getClassMap().put(aName, c2);
@@ -332,7 +378,9 @@ public class XMLArchiver {
         }
 
         // Catch exceptions - print stack and return null
-        catch(Exception e) { e.printStackTrace(); }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Return null since class not found
         return null;
@@ -357,9 +405,9 @@ public class XMLArchiver {
 
         // If element has type, see if there is class for type-name
         String type = anElement.getAttributeValue("type");
-        if (type!=null) {
+        if (type != null) {
             Class c2 = getClass(type + "-" + name);
-            if (c2!=null)
+            if (c2 != null)
                 cls = c2;
         }
 
@@ -372,8 +420,11 @@ public class XMLArchiver {
      */
     protected Object newInstance(Class aClass)
     {
-        try { return aClass.newInstance(); }
-        catch(InstantiationException | IllegalAccessException e) { throw new RuntimeException(e); }
+        try {
+            return aClass.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -391,7 +442,7 @@ public class XMLArchiver {
     {
         // If object is in list (or if not asked to add) return its current index
         int index = ListUtils.indexOfId(_references, anObj);
-        if (index>=0 || !add)
+        if (index >= 0 || !add)
             return index;
 
         // Add object to references and return id
@@ -406,7 +457,7 @@ public class XMLArchiver {
     {
         // Get xref id and recursively search for element that contains it
         int xref = anElement.getAttributeIntValue(aName, -1);
-        if (xref<0) return null;
+        if (xref < 0) return null;
         return getReference(xref, _root);
     }
 
@@ -416,14 +467,14 @@ public class XMLArchiver {
     private Object getReference(int xref, XMLElement anElement)
     {
         // If anElement has matching xref attribute/id, return unarchived object
-        if (anElement.getAttributeIntValue("xref", -1)==xref)
+        if (anElement.getAttributeIntValue("xref", -1) == xref)
             return fromXML(anElement, null);
 
         // Iterate over element's children and recurse
-        for (int i=0, iMax=anElement.size(); i<iMax; i++) {
+        for (int i = 0, iMax = anElement.size(); i < iMax; i++) {
             XMLElement e = anElement.get(i);
             Object obj = getReference(xref, e);
-            if (obj!=null)
+            if (obj != null)
                 return obj;
         }
 
@@ -434,7 +485,10 @@ public class XMLArchiver {
     /**
      * Returns the index of the first child element with the given name.
      */
-    public int indexOf(XMLElement anElement, Class aClass)  { return indexOf(anElement, aClass, 0); }
+    public int indexOf(XMLElement anElement, Class aClass)
+    {
+        return indexOf(anElement, aClass, 0);
+    }
 
     /**
      * Returns the index of the first child element with the given name at or beyond the given index.
@@ -442,9 +496,10 @@ public class XMLArchiver {
     public int indexOf(XMLElement anElement, Class aClass, int startIndex)
     {
         // Iterate over element children from start index, and if child has matching class, return its index
-        for (int i=startIndex, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
+        for (int i = startIndex, iMax = anElement.size(); i < iMax; i++) {
+            XMLElement childXML = anElement.get(i);
             Class childClass = getClassForXML(childXML);
-            if (childClass!=null && aClass.isAssignableFrom(childClass))
+            if (childClass != null && aClass.isAssignableFrom(childClass))
                 return i;
         }
         return -1; // Return -1 since element name not found
@@ -459,7 +514,7 @@ public class XMLArchiver {
         List list = new Vector();
 
         // If name is provided, iterate over elements, unarchive and add to list
-        if (aName!=null) {
+        if (aName != null) {
             for (XMLElement e : anElement.getElements(aName)) {
                 Object obj = fromXML(e, aClass, anOwner);
                 list.add(obj);
@@ -467,7 +522,7 @@ public class XMLArchiver {
         }
 
         // Iterate over elements, unarchive, and if class, add to list
-        else for (int i=0, iMax=anElement.size(); i<iMax; i++) {
+        else for (int i = 0, iMax = anElement.size(); i < iMax; i++) {
             XMLElement xml = anElement.get(i);
             Object obj = fromXML(xml, anOwner);
             if (aClass.isInstance(obj))
@@ -486,51 +541,66 @@ public class XMLArchiver {
         XMLElement xml = toXML(anObj);
         if (isIgnoreCase())
             xml.setIgnoreCase(true);
-        return (T)fromXML(xml, null);
+        return (T) fromXML(xml, null);
     }
 
     /**
      * Returns the top parent from the parent stack.
      */
-    public Object getParent()  { return _parentStack.peekFirst(); }
+    public Object getParent()
+    {
+        return _parentStack.peekFirst();
+    }
 
     /**
      * Returns the first parent from the parent stack of given class.
      */
-    public <T> T getParent(Class <T> aClass)
+    public <T> T getParent(Class<T> aClass)
     {
         for (Object o : _parentStack)
             if (aClass.isInstance(o))
-                return (T)o;
+                return (T) o;
         return null;
     }
 
     /**
      * Pushes a parent on the parent stack.
      */
-    protected void pushParent(Object anObj)  { _parentStack.addFirst(anObj); }
+    protected void pushParent(Object anObj)
+    {
+        _parentStack.addFirst(anObj);
+    }
 
     /**
      * Pops a parent from the parent stack.
      */
-    protected Object popParent()  { return _parentStack.removeFirst(); }
+    protected Object popParent()
+    {
+        return _parentStack.removeFirst();
+    }
 
     /**
      * Returns the list of optional resources associated with this archiver.
      */
-    public List <Resource> getResources()  { return _resources; }
+    public List<Resource> getResources()
+    {
+        return _resources;
+    }
 
     /**
      * Returns an individual resource associated with this archiver, by index.
      */
-    public Resource getResource(int anIndex)  { return _resources.get(anIndex); }
+    public Resource getResource(int anIndex)
+    {
+        return _resources.get(anIndex);
+    }
 
     /**
      * Returns an individual resource associated with this archiver, by name.
      */
     public byte[] getResource(String aName)
     {
-        for (int i=0, iMax=_resources.size(); i<iMax; i++)
+        for (int i = 0, iMax = _resources.size(); i < iMax; i++)
             if (getResource(i)._name.equals(aName))
                 return getResource(i)._bytes;
         return null;
@@ -542,7 +612,7 @@ public class XMLArchiver {
     public String addResource(byte bytes[], String aName)
     {
         // If resource has already been added, just return it's name
-        for (int i=0, iMax=_resources.size(); i<iMax; i++)
+        for (int i = 0, iMax = _resources.size(); i < iMax; i++)
             if (getResource(i).equals(bytes))
                 return getResource(i).getName();
 
@@ -560,10 +630,10 @@ public class XMLArchiver {
     protected void getResources(XMLElement anElement)
     {
         // Get resources from top level <resource> tags
-        for (int i=anElement.indexOf("resource"); i>=0; i=anElement.indexOf("resource", i)) {
+        for (int i = anElement.indexOf("resource"); i >= 0; i = anElement.indexOf("resource", i)) {
 
             // Get/remove current resource element
-            XMLElement e =  anElement.removeElement(i);
+            XMLElement e = anElement.removeElement(i);
 
             // Get resource name and bytes
             String name = e.getAttributeValue("name");
@@ -579,10 +649,14 @@ public class XMLArchiver {
      */
     public interface Archivable {
 
-        /** Archival. */
+        /**
+         * Archival.
+         */
         XMLElement toXML(XMLArchiver anArchiver);
 
-        /** Unarchival. */
+        /**
+         * Unarchival.
+         */
         Object fromXML(XMLArchiver anArchiver, XMLElement anElement);
     }
 
@@ -592,26 +666,36 @@ public class XMLArchiver {
     public static class Resource {
 
         // The resource bytes
-        byte    _bytes[];
+        byte _bytes[];
 
         // The resource name
-        String  _name;
+        String _name;
 
         // Returns resource bytes
-        public byte[] getBytes() { return _bytes; }
+        public byte[] getBytes()
+        {
+            return _bytes;
+        }
 
         // Returns resource name
-        public String getName() { return _name; }
+        public String getName()
+        {
+            return _name;
+        }
 
         // Creates new resource for given bytes and name
-        public Resource(byte bytes[], String aName) { _bytes = bytes; _name = aName; }
+        public Resource(byte bytes[], String aName)
+        {
+            _bytes = bytes;
+            _name = aName;
+        }
 
         // Standard equals implementation
         public boolean equals(byte bytes[])
         {
-            if (bytes.length!=_bytes.length) return false;
-            for (int i=0, iMax=bytes.length; i<iMax; i++)
-                if (bytes[i]!=_bytes[i])
+            if (bytes.length != _bytes.length) return false;
+            for (int i = 0, iMax = bytes.length; i < iMax; i++)
+                if (bytes[i] != _bytes[i])
                     return false;
             return true;
         }

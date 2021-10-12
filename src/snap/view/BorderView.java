@@ -2,34 +2,40 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+
 import snap.geom.Pos;
 import snap.util.*;
+
 import java.util.Arrays;
 
 /**
  * A View subclass to manage subviews along edges (top, bottom, left, right) and center.
  */
 public class BorderView extends ParentView {
-    
+
     // The panes
-    private View  _top, _center, _bottom, _left, _right;
-    
+    private View _top, _center, _bottom, _left, _right;
+
     // Whether to fill center
-    private boolean  _fillCenter = true;
-    
+    private boolean _fillCenter = true;
+
     /**
      * Returns the center node.
      */
-    public View getCenter()  { return _center; }
+    public View getCenter()
+    {
+        return _center;
+    }
 
     /**
      * Sets the center node.
      */
     public void setCenter(View aView)
     {
-        View old = getCenter(); if (aView==old) return;
-        if (old!=null) removeChild(old);
-        if (aView!=null) addChild(aView);
+        View old = getCenter();
+        if (aView == old) return;
+        if (old != null) removeChild(old);
+        if (aView != null) addChild(aView);
         _center = aView;
         firePropChange("Center", old, aView);
     }
@@ -37,16 +43,20 @@ public class BorderView extends ParentView {
     /**
      * Returns the top node.
      */
-    public View getTop()  { return _top; }
+    public View getTop()
+    {
+        return _top;
+    }
 
     /**
      * Sets the top node.
      */
     public void setTop(View aView)
     {
-        View old = getTop(); if (aView==old) return;
-        if(old!=null) removeChild(old);
-        if (aView!=null) addChild(aView);
+        View old = getTop();
+        if (aView == old) return;
+        if (old != null) removeChild(old);
+        if (aView != null) addChild(aView);
         _top = aView;
         firePropChange("Top", old, aView);
     }
@@ -54,16 +64,20 @@ public class BorderView extends ParentView {
     /**
      * Returns the bottom node.
      */
-    public View getBottom()  { return _bottom; }
+    public View getBottom()
+    {
+        return _bottom;
+    }
 
     /**
      * Sets the bottom node.
      */
     public void setBottom(View aView)
     {
-        View old = getBottom(); if (aView==old) return;
-        if (old!=null) removeChild(old);
-        if (aView!=null) addChild(aView);
+        View old = getBottom();
+        if (aView == old) return;
+        if (old != null) removeChild(old);
+        if (aView != null) addChild(aView);
         _bottom = aView;
         firePropChange("Bottom", old, aView);
     }
@@ -71,16 +85,20 @@ public class BorderView extends ParentView {
     /**
      * Returns the left node.
      */
-    public View getLeft()  { return _left; }
+    public View getLeft()
+    {
+        return _left;
+    }
 
     /**
      * Sets the left node.
      */
     public void setLeft(View aView)
     {
-        View old = getLeft(); if (aView==old) return;
-        if (old!=null) removeChild(old);
-        if (aView!=null) addChild(aView);
+        View old = getLeft();
+        if (aView == old) return;
+        if (old != null) removeChild(old);
+        if (aView != null) addChild(aView);
         _left = aView;
         firePropChange("Left", old, aView);
     }
@@ -88,16 +106,20 @@ public class BorderView extends ParentView {
     /**
      * Returns the right node.
      */
-    public View getRight()  { return _right; }
+    public View getRight()
+    {
+        return _right;
+    }
 
     /**
      * Sets the right node.
      */
     public void setRight(View aView)
     {
-        View old = getRight(); if (aView==old) return;
-        if (old!=null) removeChild(old);
-        if (aView!=null) addChild(aView);
+        View old = getRight();
+        if (aView == old) return;
+        if (old != null) removeChild(old);
+        if (aView != null) addChild(aView);
         _right = aView;
         firePropChange("Right", old, aView);
     }
@@ -105,32 +127,50 @@ public class BorderView extends ParentView {
     /**
      * Returns whether layout should fill center when bigger than pref size.
      */
-    public boolean isFillCenter()  { return _fillCenter; }
+    public boolean isFillCenter()
+    {
+        return _fillCenter;
+    }
 
     /**
      * Sets whether to fill center when bigger than pref size.
      */
-    public void setFillCenter(boolean aValue)  { _fillCenter = aValue; }
+    public void setFillCenter(boolean aValue)
+    {
+        _fillCenter = aValue;
+    }
 
     /**
      * Returns the default alignment.
      */
-    public Pos getDefaultAlign()  { return Pos.CENTER; }
+    public Pos getDefaultAlign()
+    {
+        return Pos.CENTER;
+    }
 
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return getPrefWidth(this, _center, _top, _right, _bottom, _left, aH); }
+    protected double getPrefWidthImpl(double aH)
+    {
+        return getPrefWidth(this, _center, _top, _right, _bottom, _left, aH);
+    }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)  { return getPrefHeight(this, _center, _top, _right, _bottom, _left, aW); }
+    protected double getPrefHeightImpl(double aW)
+    {
+        return getPrefHeight(this, _center, _top, _right, _bottom, _left, aW);
+    }
 
     /**
      * Layout children.
      */
-    protected void layoutImpl()  { layout(this, _center, _top, _right, _bottom, _left); }
+    protected void layoutImpl()
+    {
+        layout(this, _center, _top, _right, _bottom, _left);
+    }
 
     /**
      * XML archival of children.
@@ -138,16 +178,31 @@ public class BorderView extends ParentView {
     protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Archive Top, Left, Center, Bottom, Right
-        if (getTop()!=null) { XMLElement top = new XMLElement("Top"); anElement.add(top);
-            top.add(anArchiver.toXML(getTop(), this)); }
-        if (getLeft()!=null) { XMLElement lft = new XMLElement("Left"); anElement.add(lft);
-            lft.add(anArchiver.toXML(getLeft(), this)); }
-        if (getCenter()!=null) { XMLElement ctr = new XMLElement("Center"); anElement.add(ctr);
-            ctr.add(anArchiver.toXML(getCenter(), this)); }
-        if (getBottom()!=null) { XMLElement btm = new XMLElement("Bottom"); anElement.add(btm);
-            btm.add(anArchiver.toXML(getBottom(), this)); }
-        if (getRight()!=null) { XMLElement rgt = new XMLElement("Right"); anElement.add(rgt);
-            rgt.add(anArchiver.toXML(getRight(), this)); }
+        if (getTop() != null) {
+            XMLElement top = new XMLElement("Top");
+            anElement.add(top);
+            top.add(anArchiver.toXML(getTop(), this));
+        }
+        if (getLeft() != null) {
+            XMLElement lft = new XMLElement("Left");
+            anElement.add(lft);
+            lft.add(anArchiver.toXML(getLeft(), this));
+        }
+        if (getCenter() != null) {
+            XMLElement ctr = new XMLElement("Center");
+            anElement.add(ctr);
+            ctr.add(anArchiver.toXML(getCenter(), this));
+        }
+        if (getBottom() != null) {
+            XMLElement btm = new XMLElement("Bottom");
+            anElement.add(btm);
+            btm.add(anArchiver.toXML(getBottom(), this));
+        }
+        if (getRight() != null) {
+            XMLElement rgt = new XMLElement("Right");
+            anElement.add(rgt);
+            rgt.add(anArchiver.toXML(getRight(), this));
+        }
     }
 
     /**
@@ -156,34 +211,39 @@ public class BorderView extends ParentView {
     protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Unarchive Top
-        XMLElement top = anElement.get("Top"); top = top!=null && top.getElementCount()>0? top.getElement(0) : null;
-        Object topView = top!=null? anArchiver.fromXML(top, this) : null;
+        XMLElement top = anElement.get("Top");
+        top = top != null && top.getElementCount() > 0 ? top.getElement(0) : null;
+        Object topView = top != null ? anArchiver.fromXML(top, this) : null;
         if (topView instanceof View)
-            setTop((View)topView);
+            setTop((View) topView);
 
         // Unarchive Left
-        XMLElement lft = anElement.get("Left"); lft = lft!=null && lft.getElementCount()>0? lft.getElement(0) : null;
-        Object lftView = lft!=null? anArchiver.fromXML(lft, this) : null;
+        XMLElement lft = anElement.get("Left");
+        lft = lft != null && lft.getElementCount() > 0 ? lft.getElement(0) : null;
+        Object lftView = lft != null ? anArchiver.fromXML(lft, this) : null;
         if (lftView instanceof View)
-            setLeft((View)lftView);
+            setLeft((View) lftView);
 
         // Unarchive Center
-        XMLElement ctr = anElement.get("Center"); ctr = ctr!=null && ctr.getElementCount()>0? ctr.getElement(0) : null;
-        Object ctrView = ctr!=null? anArchiver.fromXML(ctr, this) : null;
+        XMLElement ctr = anElement.get("Center");
+        ctr = ctr != null && ctr.getElementCount() > 0 ? ctr.getElement(0) : null;
+        Object ctrView = ctr != null ? anArchiver.fromXML(ctr, this) : null;
         if (ctrView instanceof View)
-            setCenter((View)ctrView);
+            setCenter((View) ctrView);
 
         // Unarchive Bottom
-        XMLElement btm = anElement.get("Bottom"); btm = btm!=null && btm.getElementCount()>0? btm.getElement(0) : null;
-        Object btmView = btm!=null? anArchiver.fromXML(btm, this) : null;
+        XMLElement btm = anElement.get("Bottom");
+        btm = btm != null && btm.getElementCount() > 0 ? btm.getElement(0) : null;
+        Object btmView = btm != null ? anArchiver.fromXML(btm, this) : null;
         if (btmView instanceof View)
-            setBottom((View)btmView);
+            setBottom((View) btmView);
 
         // Unarchive Right
-        XMLElement rgt = anElement.get("Right"); rgt = rgt!=null && rgt.getElementCount()>0? rgt.getElement(0) : null;
-        Object rgtView = rgt!=null? anArchiver.fromXML(rgt, this) : null;
+        XMLElement rgt = anElement.get("Right");
+        rgt = rgt != null && rgt.getElementCount() > 0 ? rgt.getElement(0) : null;
+        Object rgtView = rgt != null ? anArchiver.fromXML(rgt, this) : null;
         if (rgtView instanceof View)
-            setRight((View)rgtView);
+            setRight((View) rgtView);
     }
 
     /**
@@ -243,9 +303,9 @@ public class BorderView extends ParentView {
             // Create proxy child array and create/add proxies
             ViewProxy colKids[] = new ViewProxy[3];
             int colKidCount = 0;
-            if (aTop!=null) colKids[colKidCount++] = new ViewProxy(aTop);
+            if (aTop != null) colKids[colKidCount++] = new ViewProxy(aTop);
             colKids[colKidCount++] = rowProxy;
-            if (aBtm!=null) colKids[colKidCount++] = new ViewProxy(aBtm);
+            if (aBtm != null) colKids[colKidCount++] = new ViewProxy(aBtm);
 
             // Set trimmed children
             setChildren(Arrays.copyOf(colKids, colKidCount));
@@ -280,7 +340,9 @@ public class BorderView extends ParentView {
      */
     private static class RowViewProxy extends ViewProxy {
 
-        /** Constructor for BorderView Center, Right, Left. */
+        /**
+         * Constructor for BorderView Center, Right, Left.
+         */
         RowViewProxy(View aCtr, View aLft, View aRgt)
         {
             super(null);
@@ -289,13 +351,13 @@ public class BorderView extends ParentView {
             // Create proxy child array and create/add proxies
             ViewProxy children[] = new ViewProxy[3];
             int count = 0;
-            if (aLft!=null) children[count++] = new ViewProxy(aLft);
-            if (aCtr!=null) {
+            if (aLft != null) children[count++] = new ViewProxy(aLft);
+            if (aCtr != null) {
                 ViewProxy ctrProxy = children[count++] = new ViewProxy(aCtr);
                 ctrProxy.setGrowWidth(true);
                 ctrProxy.setGrowHeight(true);
             }
-            if (aRgt!=null) children[count++] = new ViewProxy(aRgt);
+            if (aRgt != null) children[count++] = new ViewProxy(aRgt);
 
             // Set trimmed children and GrowHeight
             setChildren(Arrays.copyOf(children, count));
@@ -303,9 +365,15 @@ public class BorderView extends ParentView {
         }
 
         @Override
-        public double getBestWidth(double aH)  { return RowView.getPrefWidthProxy(this, aH); }
+        public double getBestWidth(double aH)
+        {
+            return RowView.getPrefWidthProxy(this, aH);
+        }
 
         @Override
-        public double getBestHeight(double aW)  { return RowView.getPrefHeightProxy(this, aW); }
+        public double getBestHeight(double aW)
+        {
+            return RowView.getPrefHeightProxy(this, aW);
+        }
     }
 }

@@ -1,4 +1,5 @@
 package snap.view;
+
 import snap.geom.Polygon;
 import snap.geom.Pos;
 import snap.gfx.*;
@@ -8,25 +9,25 @@ import snap.util.*;
  * A view to show up to four arrows.
  */
 public class ArrowView extends ParentView {
-    
+
     // The ColView to hold up/down buttons
-    ColView          _col;
+    ColView _col;
 
     // The arrow buttons
-    Button           _ubtn, _dbtn, _lbtn, _rbtn, _lastBtn;
-    
+    Button _ubtn, _dbtn, _lbtn, _rbtn, _lastBtn;
+
     // Constants for buttons
-    public enum Arrow { Up, Down, Left, Right }
-    
+    public enum Arrow {Up, Down, Left, Right}
+
     // The arrow images
-    static Image     _uimg, _dimg, _limg, _rimg;
-  
+    static Image _uimg, _dimg, _limg, _rimg;
+
     // Constants for properties
     public static final String ShowUp_Prop = "ShowUp";
     public static final String ShowDown_Prop = "ShowDown";
     public static final String ShowLeft_Prop = "ShowLeft";
     public static final String ShowRight_Prop = "ShowRight";
-    
+
     /**
      * Creates a new ArrowView.
      */
@@ -36,17 +37,22 @@ public class ArrowView extends ParentView {
         enableEvents(Action);
 
         // Create/configure Col view to hold up/down buttons
-        _col = new ColView(); _col.setAlign(Pos.CENTER);
+        _col = new ColView();
+        _col.setAlign(Pos.CENTER);
         addChild(_col);
 
         // Enable up/down buttons by default
-        setShowUp(true); setShowDown(true);
+        setShowUp(true);
+        setShowDown(true);
     }
 
     /**
      * Returns whether to show up button.
      */
-    public boolean isShowUp()  { return _ubtn!=null; }
+    public boolean isShowUp()
+    {
+        return _ubtn != null;
+    }
 
     /**
      * Sets whether to show up button.
@@ -54,24 +60,34 @@ public class ArrowView extends ParentView {
     public void setShowUp(boolean aValue)
     {
         // If already set, just return
-        if (aValue==isShowUp()) return;
+        if (aValue == isShowUp()) return;
 
         // Add button
         if (aValue) {
-            _ubtn = new Button(); _ubtn.setPrefWidth(14); _ubtn.setMinHeight(9);
-            _ubtn.setRadius(3); _ubtn.setPosition(Pos.TOP_CENTER); _ubtn.setImage(getUpArrowImage());
+            _ubtn = new Button();
+            _ubtn.setPrefWidth(14);
+            _ubtn.setMinHeight(9);
+            _ubtn.setRadius(3);
+            _ubtn.setPosition(Pos.TOP_CENTER);
+            _ubtn.setImage(getUpArrowImage());
             _ubtn.addEventHandler(e -> buttonDidFire(_ubtn), Action);
             _col.addChild(_ubtn, 0);
         }
 
         // Remove button
-        else { _col.removeChild(_ubtn); _ubtn = null; }
+        else {
+            _col.removeChild(_ubtn);
+            _ubtn = null;
+        }
     }
 
     /**
      * Returns whether to show down button.
      */
-    public boolean isShowDown()  { return _dbtn!=null; }
+    public boolean isShowDown()
+    {
+        return _dbtn != null;
+    }
 
     /**
      * Sets whether to show down button.
@@ -79,24 +95,34 @@ public class ArrowView extends ParentView {
     public void setShowDown(boolean aValue)
     {
         // If already set, just return
-        if (aValue==isShowDown()) return;
+        if (aValue == isShowDown()) return;
 
         // Add button
         if (aValue) {
-            _dbtn = new Button(); _dbtn.setPrefWidth(14); _dbtn.setMinHeight(9);
-            _dbtn.setRadius(3); _dbtn.setPosition(Pos.BOTTOM_CENTER); _dbtn.setImage(getDownArrowImage());
+            _dbtn = new Button();
+            _dbtn.setPrefWidth(14);
+            _dbtn.setMinHeight(9);
+            _dbtn.setRadius(3);
+            _dbtn.setPosition(Pos.BOTTOM_CENTER);
+            _dbtn.setImage(getDownArrowImage());
             _dbtn.addEventHandler(e -> buttonDidFire(_dbtn), Action);
             _col.addChild(_dbtn);
         }
 
         // Remove button
-        else { _col.removeChild(_dbtn); _dbtn = null; }
+        else {
+            _col.removeChild(_dbtn);
+            _dbtn = null;
+        }
     }
 
     /**
      * Returns whether to show left button.
      */
-    public boolean isShowLeft()  { return _lbtn!=null; }
+    public boolean isShowLeft()
+    {
+        return _lbtn != null;
+    }
 
     /**
      * Sets whether to show left button.
@@ -104,24 +130,34 @@ public class ArrowView extends ParentView {
     public void setShowLeft(boolean aValue)
     {
         // If already set, just return
-        if (aValue==isShowLeft()) return;
+        if (aValue == isShowLeft()) return;
 
         // Add button
         if (aValue) {
-            _lbtn = new Button(); _lbtn.setPrefHeight(14); _lbtn.setMinWidth(9);
-            _lbtn.setRadius(3); _lbtn.setPosition(Pos.CENTER_LEFT); _lbtn.setImage(getLeftArrowImage());
+            _lbtn = new Button();
+            _lbtn.setPrefHeight(14);
+            _lbtn.setMinWidth(9);
+            _lbtn.setRadius(3);
+            _lbtn.setPosition(Pos.CENTER_LEFT);
+            _lbtn.setImage(getLeftArrowImage());
             _lbtn.addEventHandler(e -> buttonDidFire(_lbtn), Action);
             addChild(_lbtn, 0);
         }
 
         // Remove button
-        else { removeChild(_lbtn); _lbtn = null; }
+        else {
+            removeChild(_lbtn);
+            _lbtn = null;
+        }
     }
 
     /**
      * Returns whether to show right button.
      */
-    public boolean isShowRight()  { return _rbtn!=null; }
+    public boolean isShowRight()
+    {
+        return _rbtn != null;
+    }
 
     /**
      * Sets whether to show right button.
@@ -129,18 +165,25 @@ public class ArrowView extends ParentView {
     public void setShowRight(boolean aValue)
     {
         // If already set, just return
-        if (aValue==isShowRight()) return;
+        if (aValue == isShowRight()) return;
 
         // Add button
         if (aValue) {
-            _rbtn = new Button(); _rbtn.setPrefHeight(14); _rbtn.setMinWidth(9);
-            _rbtn.setRadius(3); _rbtn.setPosition(Pos.CENTER_RIGHT); _rbtn.setImage(getRightArrowImage());
+            _rbtn = new Button();
+            _rbtn.setPrefHeight(14);
+            _rbtn.setMinWidth(9);
+            _rbtn.setRadius(3);
+            _rbtn.setPosition(Pos.CENTER_RIGHT);
+            _rbtn.setImage(getRightArrowImage());
             _rbtn.addEventHandler(e -> buttonDidFire(_rbtn), Action);
             addChild(_rbtn);
         }
 
         // Remove button
-        else { removeChild(_rbtn); _rbtn = null; }
+        else {
+            removeChild(_rbtn);
+            _rbtn = null;
+        }
     }
 
     /**
@@ -148,32 +191,44 @@ public class ArrowView extends ParentView {
      */
     public Arrow getLastArrow()
     {
-        if (_lastBtn==_ubtn) return Arrow.Up;
-        if (_lastBtn==_dbtn) return Arrow.Down;
-        if (_lastBtn==_lbtn) return Arrow.Left;
-        if (_lastBtn==_rbtn) return Arrow.Right;
+        if (_lastBtn == _ubtn) return Arrow.Up;
+        if (_lastBtn == _dbtn) return Arrow.Down;
+        if (_lastBtn == _lbtn) return Arrow.Left;
+        if (_lastBtn == _rbtn) return Arrow.Right;
         return null;
     }
 
     /**
      * Returns whether last button was up.
      */
-    public boolean isUp()  { return _lastBtn==_ubtn; }
+    public boolean isUp()
+    {
+        return _lastBtn == _ubtn;
+    }
 
     /**
      * Returns whether last button was down.
      */
-    public boolean isDown()  { return _lastBtn==_dbtn; }
+    public boolean isDown()
+    {
+        return _lastBtn == _dbtn;
+    }
 
     /**
      * Returns whether last button was left.
      */
-    public boolean isLeft()  { return _lastBtn==_lbtn; }
+    public boolean isLeft()
+    {
+        return _lastBtn == _lbtn;
+    }
 
     /**
      * Returns whether last button was right.
      */
-    public boolean isRight()  { return _lastBtn==_rbtn; }
+    public boolean isRight()
+    {
+        return _lastBtn == _rbtn;
+    }
 
     /**
      * Called when button fires.
@@ -189,10 +244,13 @@ public class ArrowView extends ParentView {
      */
     public static Image getUpArrowImage()
     {
-        if (_uimg!=null) return _uimg;
-        Image img = Image.get(9,7,true); Painter pntr = img.getPainter();
+        if (_uimg != null) return _uimg;
+        Image img = Image.get(9, 7, true);
+        Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 5.5, 7.5, 5.5, 4.5, 1.5);
-        pntr.setColor(Color.DARKGRAY); pntr.draw(poly); pntr.fill(poly);
+        pntr.setColor(Color.DARKGRAY);
+        pntr.draw(poly);
+        pntr.fill(poly);
         return _uimg = img;
     }
 
@@ -201,10 +259,13 @@ public class ArrowView extends ParentView {
      */
     public static Image getDownArrowImage()
     {
-        if (_dimg!=null) return _dimg;
-        Image img = Image.get(9,7,true); Painter pntr = img.getPainter();
+        if (_dimg != null) return _dimg;
+        Image img = Image.get(9, 7, true);
+        Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 1.5, 7.5, 1.5, 4.5, 5.5);
-        pntr.setColor(Color.DARKGRAY); pntr.draw(poly); pntr.fill(poly);
+        pntr.setColor(Color.DARKGRAY);
+        pntr.draw(poly);
+        pntr.fill(poly);
         return _dimg = img;
     }
 
@@ -213,10 +274,13 @@ public class ArrowView extends ParentView {
      */
     public static Image getLeftArrowImage()
     {
-        if (_limg!=null) return _limg;
-        Image img = Image.get(7,9,true); Painter pntr = img.getPainter();
+        if (_limg != null) return _limg;
+        Image img = Image.get(7, 9, true);
+        Painter pntr = img.getPainter();
         Polygon poly = new Polygon(5.5, 1.5, 5.5, 7.5, 1.5, 4.5);
-        pntr.setColor(Color.DARKGRAY); pntr.draw(poly); pntr.fill(poly);
+        pntr.setColor(Color.DARKGRAY);
+        pntr.draw(poly);
+        pntr.fill(poly);
         return _limg = img;
     }
 
@@ -225,32 +289,47 @@ public class ArrowView extends ParentView {
      */
     public static Image getRightArrowImage()
     {
-        if (_rimg!=null) return _rimg;
-        Image img = Image.get(7,9,true); Painter pntr = img.getPainter();
+        if (_rimg != null) return _rimg;
+        Image img = Image.get(7, 9, true);
+        Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 1.5, 1.5, 7.5, 5.5, 4.5);
-        pntr.setColor(Color.DARKGRAY); pntr.draw(poly); pntr.fill(poly);
+        pntr.setColor(Color.DARKGRAY);
+        pntr.draw(poly);
+        pntr.fill(poly);
         return _rimg = img;
     }
 
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, aH); }
+    protected double getPrefWidthImpl(double aH)
+    {
+        return RowView.getPrefWidth(this, aH);
+    }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, aW); }
+    protected double getPrefHeightImpl(double aW)
+    {
+        return RowView.getPrefHeight(this, aW);
+    }
 
     /**
      * Layout children.
      */
-    protected void layoutImpl()  { RowView.layout(this, false); }
+    protected void layoutImpl()
+    {
+        RowView.layout(this, false);
+    }
 
     /**
      * Returns the default alignment.
      */
-    public Pos getDefaultAlign()  { return Pos.CENTER; }
+    public Pos getDefaultAlign()
+    {
+        return Pos.CENTER;
+    }
 
     /**
      * XML archival.
