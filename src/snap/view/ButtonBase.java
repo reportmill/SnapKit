@@ -395,8 +395,9 @@ public class ButtonBase extends ParentView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        ViewProxy<?> viewProxy = getViewProxy();
-        return BoxView.getPrefWidthProxy(viewProxy, aH);
+        BoxViewProxy<?> viewProxy = getViewProxy();
+        double prefW = viewProxy.getPrefWidth(aH);
+        return prefW;
     }
 
     /**
@@ -404,8 +405,9 @@ public class ButtonBase extends ParentView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        ViewProxy<?> viewProxy = getViewProxy();
-        return BoxView.getPrefHeightProxy(viewProxy, aW);
+        BoxViewProxy<?> viewProxy = getViewProxy();
+        double prefH = viewProxy.getPrefHeight(aW);
+        return prefH;
     }
 
     /**
@@ -413,19 +415,19 @@ public class ButtonBase extends ParentView {
      */
     protected void layoutImpl()
     {
-        ViewProxy<?> viewProxy = getViewProxy();
-        BoxView.layoutProxy(viewProxy);
-        viewProxy.setBoundsInClient();
+        BoxViewProxy<?> viewProxy = getViewProxy();
+        viewProxy.layoutView();
     }
 
     /**
      * Returns the ViewProxy to layout button.
      */
-    protected ViewProxy<?> getViewProxy()
+    protected BoxViewProxy<?> getViewProxy()
     {
         // Create ViewProxy with Label ViewProxy as Content
-        ViewProxy<?> viewProxy = new ViewProxy<>(this);
-        viewProxy.setContent(ViewProxy.getProxy(getLabel()));
+        BoxViewProxy<?> viewProxy = new BoxViewProxy<>(this);
+        ViewProxy labelProxy = ViewProxy.getProxy(getLabel());
+        viewProxy.setContent(labelProxy);
 
         // If ShowArea, add padding
         if (isShowArea()) {

@@ -29,9 +29,9 @@ public class CheckBoxMenuItem extends MenuItem {
      * Override to customize left padding for checkbox graphic.
      */
     @Override
-    protected ViewProxy<?> getViewProxy()
+    protected BoxViewProxy<?> getViewProxy()
     {
-        ViewProxy<?> viewProxy = super.getViewProxy();
+        BoxViewProxy<?> viewProxy = super.getViewProxy();
         viewProxy.setPadding(Insets.add(getPadding(), 0, 0, 0, CHECKBOX_GRAPHIC_INSET_ALL));
         return viewProxy;
     }
