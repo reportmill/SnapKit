@@ -629,18 +629,17 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         }
 
         // Do real layout
-        ViewProxy<?> viewProxy = getViewProxy();
-        ColView.layoutProxy(viewProxy);
-        viewProxy.setBoundsInClient();
+        ColViewProxy<?> viewProxy = getViewProxy();
+        viewProxy.layoutView();
     }
 
     /**
      * Returns the ViewProxy to do layout.
      */
-    protected ViewProxy<?> getViewProxy()
+    protected ColViewProxy<?> getViewProxy()
     {
         // Create proxy
-        ViewProxy<?> viewProxy = new ViewProxy<>(this);
+        ColViewProxy<?> viewProxy = new ColViewProxy<>(this);
         viewProxy.setFillWidth(true);
 
         // Set padding.top to include space for hidden rows at top
