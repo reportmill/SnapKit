@@ -58,7 +58,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     }
 
     /**
-     * Calculates RowView layout X & Width for given Parent proxy.
+     * Calculates ColView layout X & Width for given Parent proxy.
      */
     private void layoutProxyX()
     {
@@ -122,6 +122,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
         ViewProxy<?>[] children = getChildren();
         Insets ins = getInsetsAll(); // Should really just use Padding
         double parentSpacing = getSpacing();
+        boolean isFillWidth = isFillWidth() && getWidth() > 0;
 
         // Loop vars
         double childY = 0;
@@ -137,9 +138,14 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
             if (lastChild != null)
                 childSpacing = Math.max(childSpacing, parentSpacing);
 
+            // If child width is fixed because of FillWidth or GrowWidth, get child width value for PrefHeight calc
+            double childW = -1;
+            if (isFillWidth || child.isGrowWidth())
+                childW = getChildFixedWidth(this, child);
+
             // Update ChildY with spacing and calculate ChildH
             childY += childSpacing;
-            double childH = child.getBestHeight(-1);
+            double childH = child.getBestHeight(childW);
 
             // Set child bounds Y and Height
             child.setY(childY);
@@ -164,6 +170,20 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
         int extraY = (int) Math.round(viewH - layoutH);
         if (extraY != 0)
             addExtraSpaceY(this, extraY);
+    }
+
+    /**
+     * Returns the child fixed width.
+     */
+    private static double getChildFixedWidth(ViewProxy<?> aParent, ViewProxy<?> aChild)
+    {
+        double parW = aParent.getWidth();
+        Insets parPadding = aParent.getPadding();
+        Insets childMargin = aChild.getMargin();
+        double insLeft = Math.max(parPadding.left, childMargin.left);
+        double insRight = Math.max(parPadding.right, childMargin.right);
+        double fixedW = Math.max(parW - insLeft - insRight, 0);
+        return fixedW;
     }
 
     /**
