@@ -131,51 +131,23 @@ public class ColView extends ChildView {
     /**
      * Returns preferred height of given parent with given children.
      */
-    public static double getPrefHeight(ParentView aPar, double aW)
+    public static double getPrefHeight(ParentView aParent, double aW)
     {
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aPar);
+        ColViewProxy<?> viewProxy = new ColViewProxy<>(aParent);
         return viewProxy.getPrefHeight(aW);
     }
 
     /**
      * Performs layout for given parent with option to fill width.
      */
-    public static void layout(ParentView aPar, boolean isFillWidth)
+    public static void layout(ParentView aParent, boolean isFillWidth)
     {
         // Get layout children (just return if none)
-        if (aPar.getChildrenManaged().length == 0) return;
+        if (aParent.getChildrenManaged().length == 0) return;
 
         // Get Parent ColViewProxy and layout views
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aPar);
+        ColViewProxy<?> viewProxy = new ColViewProxy<>(aParent);
         viewProxy.setFillWidth(isFillWidth);
-        viewProxy.layoutView();
-    }
-
-    /**
-     * Returns preferred width of given parent proxy using ColView layout.
-     */
-    public static double getPrefWidthProxy(ViewProxy<?> aPar, double aH)
-    {
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aPar.getView());
-        return viewProxy.getPrefWidth(aH);
-    }
-
-    /**
-     * Returns preferred height of given parent proxy using ColView layout.
-     */
-    public static double getPrefHeightProxy(ViewProxy<?> aPar, double aW)
-    {
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aPar.getView());
-        return viewProxy.getPrefHeight(aW);
-    }
-
-    /**
-     * Performs layout for given ViewProxy.
-     */
-    public static void layoutProxy(ViewProxy<?> aPar)
-    {
-        if (aPar.getChildCount() == 0) return;
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aPar.getView());
         viewProxy.layoutView();
     }
 }

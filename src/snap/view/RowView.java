@@ -130,23 +130,4 @@ public class RowView extends ChildView {
         viewProxy.setFillHeight(isFillHeight);
         viewProxy.layoutView();
     }
-
-    /**
-     * Returns preferred width of given parent proxy using RowView layout.
-     */
-    public static double getPrefWidthProxy(ViewProxy<?> aParent, double aH)
-    {
-        RowViewProxy<?> viewProxy = new RowViewProxy<>(aParent.getView());
-        return viewProxy.getPrefWidth(aH);
-    }
-
-    /**
-     * Performs layout for given ViewProxy.
-     */
-    public static void layoutProxy(ViewProxy<?> aParent)
-    {
-        if (aParent.getChildCount() == 0) return;
-        RowViewProxy<?> viewProxy = new RowViewProxy<>(aParent.getView());
-        viewProxy.layoutView();
-    }
 }
