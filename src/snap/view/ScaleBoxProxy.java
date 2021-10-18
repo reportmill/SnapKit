@@ -100,24 +100,42 @@ public class ScaleBoxProxy extends BoxViewProxy<View> {
         ViewProxy<?> child = getContent(); if (child == null) return;
 
         // Get layout info
+        double viewW = getWidth();
+        double viewH = getHeight();
         boolean isFillWidth = isFillWidth();
         boolean isFillHeight = isFillHeight();
         boolean isKeepAspect = isKeepAspect();
 
-        // Get area bounds
-        Insets ins = getInsetsAll();
-        double areaX = ins.left;
-        double areaY = ins.top;
-        double areaW = getWidth() - ins.getWidth();
-        double areaH = getHeight() - ins.getHeight();
+        // Get parent bounds for insets (just return if empty)
+        Insets borderInsets = getBorderInsets();
+        Insets pad = getPadding();
+        Insets marg = child.getMargin();
+        double areaX = borderInsets.left + Math.max(pad.left, marg.left);
+        double areaY = borderInsets.top + Math.max(pad.top, marg.top);
+        double areaW = Math.max(viewW - borderInsets.right - Math.max(pad.right, marg.right) - areaX, 0);
+        double areaH = Math.max(viewH - borderInsets.bottom - Math.max(pad.bottom, marg.bottom) - areaY, 0);
 
-        // If area is empty, just return
-        if (areaW <= 0 || areaH <= 0)
+        // Get content width
+        double childW;
+        if (viewW < 0)
+            childW = child.getBestWidth(-1);
+        else if (isFillWidth || child.isGrowWidth())
+            childW = areaW;
+        else childW = child.getBestWidth(-1);  // if (childW > areaW) childW = areaW;
+
+        // Get content height
+        double childH;
+        if (viewH < 0)
+            childH = child.getBestHeight(childW);
+        else if (isFillHeight || child.isGrowHeight())
+            childH = areaH;
+        else childH = child.getBestHeight(childW);
+
+        // If Parent.Width -1, just return (laying out for PrefWidth/PrefHeight)
+        if (viewW < 0 || viewH < 0) {
+            child.setBounds(areaX, areaY, childW, childH);
             return;
-
-        // Get content width/height
-        double childW = child.getBestWidth(-1);
-        double childH = child.getBestHeight(-1);
+        }
 
         // Get content alignment as modifier/factor (0 = left, 1 = right)
         double alignX = child.getLeanX() != null ? child.getLeanXAsDouble() : getAlignXAsDouble();
