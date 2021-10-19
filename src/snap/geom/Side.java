@@ -26,12 +26,12 @@ public enum Side {
     }
 
     /**
-     * Returns whether side is horizontal (LEFT or RIGHT).
+     * Returns whether side is LEFT or RIGHT.
      */
-    public boolean isHorizontal()  { return this==LEFT || this==RIGHT; }
+    public boolean isLeftOrRight()  { return this==LEFT || this==RIGHT; }
 
     /**
-     * Returns whether side is vertical (TOP or BOTTOM).
+     * Returns whether side is TOP or BOTTOM.
      */
-    public boolean isVertical()  { return this==TOP || this==BOTTOM; }
+    public boolean isTopOrBottom()  { return this==TOP || this==BOTTOM; }
 }
