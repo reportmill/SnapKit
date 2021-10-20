@@ -3,9 +3,6 @@
  */
 package snap.view;
 import snap.geom.Insets;
-import snap.geom.Pos;
-import snap.util.XMLArchiver;
-import snap.util.XMLElement;
 
 /**
  * A ViewProxy that can layout content in the manner of BoxView for any View.
@@ -114,20 +111,18 @@ public class BoxViewProxy<T extends View> extends ViewProxy<T> {
         double areaH = Math.max(viewH - borderInsets.bottom - Math.max(pad.bottom, marg.bottom) - areaY, 0);
 
         // Get content width
-        double childW;
-        if (viewW < 0)
+        double childW = areaW;
+        boolean fitChildW = viewW >= 0 && (isFillWidth || child.isGrowWidth());
+        if (!fitChildW)
             childW = child.getBestWidth(-1);
-        else if (isFillWidth || child.isGrowWidth())
-            childW = areaW;
-        else childW = child.getBestWidth(-1);  // if (childW > areaW) childW = areaW;
 
         // Get content height
-        double childH;
-        if (viewH < 0)
-            childH = child.getBestHeight(childW);
-        else if (isFillHeight || child.isGrowHeight())
-            childH = areaH;
-        else childH = child.getBestHeight(childW);
+        double childH = areaH;
+        boolean fitChildH = viewH >= 0 && (isFillHeight || child.isGrowHeight());
+        if (!fitChildH) {
+            double fitW = fitChildW ? childW : -1;
+            childH = child.getBestHeight(fitW);
+        }
 
         // If Parent.Width -1, just return (laying out for PrefWidth/PrefHeight)
         if (viewW < 0 || viewH < 0) {

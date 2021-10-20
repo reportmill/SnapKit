@@ -116,20 +116,8 @@ public class ScaleBoxProxy extends BoxViewProxy<View> {
         double areaH = Math.max(viewH - borderInsets.bottom - Math.max(pad.bottom, marg.bottom) - areaY, 0);
 
         // Get content width
-        double childW;
-        if (viewW < 0)
-            childW = child.getBestWidth(-1);
-        else if (isFillWidth || child.isGrowWidth())
-            childW = areaW;
-        else childW = child.getBestWidth(-1);  // if (childW > areaW) childW = areaW;
-
-        // Get content height
-        double childH;
-        if (viewH < 0)
-            childH = child.getBestHeight(childW);
-        else if (isFillHeight || child.isGrowHeight())
-            childH = areaH;
-        else childH = child.getBestHeight(childW);
+        double childW = child.getBestWidth(-1);
+        double childH = child.getBestHeight(-1);
 
         // If Parent.Width -1, just return (laying out for PrefWidth/PrefHeight)
         if (viewW < 0 || viewH < 0) {
