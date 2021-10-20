@@ -330,21 +330,32 @@ public class ViewUtils {
      */
     public static <T extends View> T getDeepestChildAt(View aView, double aX, double aY, Class <T> aClass)
     {
-        ParentView par = aView instanceof ParentView ? (ParentView) aView : null; if (par == null) return null;
-        View[] children = par.getChildren();
+        // Get view as parent, get children
+        ParentView parent = aView instanceof ParentView ? (ParentView) aView : null; if (parent == null) return null;
+        View[] children = parent.getChildren();
+
+        // Iterate over children
         for (int i = children.length - 1; i >= 0; i--) {
+
+            // If child not visible or not pickable, just skip
             View child = children[i];
             if (!child.isPickableVisible())
                 continue;
-            Point p = child.parentToLocal(aX, aY);
-            if (child.contains(p.x,p.y)) {
-                T hcdeep = getDeepestChildAt(child, p.x, p.y, aClass);
-                if (hcdeep != null)
-                    return hcdeep;
+
+            // Convert point to child
+            Point point = child.parentToLocal(aX, aY);
+            if (child.contains(point.x, point.y)) {
+
+                // See if hit child has nested hit child
+                T deepChild = getDeepestChildAt(child, point.x, point.y, aClass);
+                if (deepChild != null)
+                    return deepChild;
                 if (aClass == null || aClass.isInstance(child))
                     return (T) child;
             }
         }
+
+        // Return null since XY didn't hit child
         return null;
     }
 
