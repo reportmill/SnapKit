@@ -170,7 +170,17 @@ public class MathUtils {
     }
 
     /**
-     * Returns the given double clamped between the two values.
+     * Returns the given fractional value expressed in range 0 to 1 mapped to given range (min/max).
+     */
+    public static double mapFractionalToRange(double aValue, double aMin, double aMax)
+    {
+        double range = aMax - aMin;
+        double mval = aMin + aValue * range;
+        return mval;
+    }
+
+    /**
+     * Returns the given double expressed in the first given range (min/max) as its relative value in second range.
      */
     public static double mapValueForRanges(double aValue, double min1, double max1, double min2, double max2)
     {
