@@ -172,11 +172,23 @@ public class MathUtils {
     /**
      * Returns the given fractional value expressed in range 0 to 1 mapped to given range (min/max).
      */
-    public static double mapFractionalToRange(double aValue, double aMin, double aMax)
+    public static double mapFractionalToRangeValue(double aValue, double aMin, double aMax)
     {
         double range = aMax - aMin;
-        double mval = aMin + aValue * range;
-        return mval;
+        double rangeVal = aMin + aValue * range;
+        return rangeVal;
+    }
+
+    /**
+     * Returns the given value expressed in given range (min/max) mapped to unit range (0 - 1).
+     */
+    public static double mapRangeValueToFractional(double aValue, double aMin, double aMax)
+    {
+        double range = aMax - aMin;
+        if (range == 0)
+            return aMin;
+        double fract = (aValue - aMin) / range;
+        return fract;
     }
 
     /**
