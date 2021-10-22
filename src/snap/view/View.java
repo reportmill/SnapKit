@@ -742,9 +742,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setCursor(Cursor aCursor)
     {
-        if (aCursor == null) aCursor = Cursor.DEFAULT;
+        // If already set, just return
         if (aCursor == _cursor) return;
+
+        // Set and fire prop change
         firePropChange(Cursor_Prop, _cursor, _cursor = aCursor);
+
+        // Notify window to update cursor
         WindowView win = getWindow();
         if (win != null)
             win.resetActiveCursor();
