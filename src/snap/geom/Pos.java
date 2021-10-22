@@ -10,18 +10,37 @@ import static snap.geom.VPos.*;
  */
 public enum Pos {
 
+    // Top-Left
     TOP_LEFT(TOP, LEFT),
+
+    // Top-Center
     TOP_CENTER(TOP, HPos.CENTER),
+
+    // Top-Right
     TOP_RIGHT(TOP, RIGHT),
+
+    // Center-Left
     CENTER_LEFT(VPos.CENTER, LEFT),
+
+    // Center
     CENTER(VPos.CENTER, HPos.CENTER),
+
+    // Center-Right
     CENTER_RIGHT(VPos.CENTER, RIGHT),
+
+    // Bottom-Left
     BOTTOM_LEFT(BOTTOM, LEFT),
+
+    // Bottom-Center
     BOTTOM_CENTER(BOTTOM, HPos.CENTER),
-    BOTTOM_RIGHT(BOTTOM, RIGHT),
-    BASELINE_LEFT(BASELINE, LEFT),
-    BASELINE_CENTER(BASELINE, HPos.CENTER),
-    BASELINE_RIGHT(BASELINE, RIGHT);
+
+    // Bottom-Right
+    BOTTOM_RIGHT(BOTTOM, RIGHT);
+
+    // Baseline. Probably wont do this as Pos
+    //BASELINE_LEFT(BASELINE, LEFT),
+    //BASELINE_CENTER(BASELINE, HPos.CENTER),
+    //BASELINE_RIGHT(BASELINE, RIGHT);
 
     // The Vertical position
     private final VPos vpos;
@@ -29,8 +48,20 @@ public enum Pos {
     // The Horizontal position
     private final HPos hpos;
 
-    /** Create new Pos. */
-    Pos(VPos vpos, HPos hpos) { this.vpos = vpos; this.hpos = hpos; }
+    // Constant for all Outer Pos
+    public static final Pos[] ALL_OUTER = new Pos[] {
+            Pos.TOP_LEFT, Pos.TOP_CENTER, Pos.TOP_RIGHT,
+            Pos.CENTER_LEFT, Pos.CENTER_RIGHT,
+            Pos.BOTTOM_LEFT, Pos.BOTTOM_CENTER, Pos.BOTTOM_RIGHT
+    };
+
+    /**
+     * Create new Pos.
+     */
+    Pos(VPos vpos, HPos hpos)
+    {
+        this.vpos = vpos; this.hpos = hpos;
+    }
 
     /**
      * Returns the Horizontal position.
@@ -47,7 +78,7 @@ public enum Pos {
      */
     public boolean isSide()
     {
-        return this==TOP_CENTER || this==CENTER_LEFT || this==CENTER_RIGHT || this==BOTTOM_CENTER;
+        return this == TOP_CENTER || this == CENTER_LEFT || this == CENTER_RIGHT || this == BOTTOM_CENTER;
     }
 
     /**
@@ -55,7 +86,7 @@ public enum Pos {
      */
     public boolean isCorner()
     {
-        return this==TOP_LEFT || this==TOP_RIGHT || this==BOTTOM_LEFT || this==BOTTOM_RIGHT;
+        return this == TOP_LEFT || this == TOP_RIGHT || this == BOTTOM_LEFT || this == BOTTOM_RIGHT;
     }
 
     /**
@@ -100,8 +131,10 @@ public enum Pos {
     public static Pos get(String aString)
     {
         String str = aString.toUpperCase();
-        if (str.equals("LEFT")) return CENTER_LEFT;
-        if (str.equals("RIGHT")) return CENTER_RIGHT;
+        if (str.equals("LEFT"))
+            return CENTER_LEFT;
+        if (str.equals("RIGHT"))
+            return CENTER_RIGHT;
         return valueOf(str);
     }
 
@@ -110,11 +143,13 @@ public enum Pos {
      */
     public static Pos get(HPos aHP, VPos aVP)
     {
-        if (aHP==null) aHP = HPos.CENTER;
-        if (aVP==null) aVP = VPos.CENTER;
-        for (Pos p : values())
-            if (p.getHPos()==aHP && p.getVPos()==aVP)
-                return p;
+        if (aHP == null)
+            aHP = HPos.CENTER;
+        if (aVP == null)
+            aVP = VPos.CENTER;
+        for (Pos pos : values())
+            if (pos.getHPos() == aHP && pos.getVPos() == aVP)
+                return pos;
         throw new RuntimeException("Pos.get(H,V): Invalid arguement");
     }
 }
