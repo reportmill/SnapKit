@@ -126,6 +126,24 @@ public enum Pos {
     }
 
     /**
+     * Returns whether position is top or bottom.
+     */
+    public boolean isLeftOrRight()
+    {
+        Side side = getSide();
+        return side != null && side.isLeftOrRight();
+    }
+
+    /**
+     * Returns whether position is top or bottom.
+     */
+    public boolean isTopOrBottom()
+    {
+        Side side = getSide();
+        return side != null && side.isTopOrBottom();
+    }
+
+    /**
      * Returns the Pos for a string.
      */
     public static Pos get(String aString)
