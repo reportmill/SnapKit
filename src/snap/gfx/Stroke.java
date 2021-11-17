@@ -380,7 +380,19 @@ public class Stroke implements Cloneable, XMLArchiver.Archivable {
         // Just return null if empty
         if (aString == null || aString.length() == 0) return null;
 
+        // If string matches known name, return that
+        int index = ArrayUtils.indexOf(DASHES_ALL_NAMES, aString);
+        if (index >= 0)
+            return DASHES_ALL[index];
+
+        // Split strings
         String[] dashStrings = aString.split(",");
+        if (dashStrings.length < 2) {
+            System.err.println("Stroke.getDashArray: Invalid dash string: " + aString);
+            return null;
+        }
+
+        // Create dash array, parse doubles and return
         double[] dashArray = new double[dashStrings.length];
         for (int i=0; i<dashStrings.length; i++)
             dashArray[i] = SnapUtils.doubleValue(dashStrings[i]);
