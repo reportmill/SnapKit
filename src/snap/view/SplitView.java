@@ -3,7 +3,6 @@
  */
 package snap.view;
 import java.util.*;
-import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -392,7 +391,7 @@ public class SplitView extends ParentView implements ViewHost {
      */
     public void setDividerSpan(double aValue)
     {
-        if (aValue== _divSpan) return;
+        if (aValue == _divSpan) return;
         for (Divider div : _divs)
             div.setPrefSpan(aValue);
         firePropChange(DividerSpan_Prop, _divSpan, _divSpan = aValue);
@@ -404,10 +403,12 @@ public class SplitView extends ParentView implements ViewHost {
     private void dividerPropChange(PropChange aPC)
     {
         String pname = aPC.getPropName();
-        if (pname==Fill_Prop)
-            for (Divider d : _divs) d.setFill(_divider.getFill());
-        else if (pname==Border_Prop)
-            for (Divider d : _divs) d.setBorder(_divider.getBorder());
+        if (pname == Fill_Prop)
+            for (Divider div : _divs)
+                div.setFill(_divider.getFill());
+        else if (pname == Border_Prop)
+            for (Divider div : _divs)
+                div.setBorder(_divider.getBorder());
     }
 
     /**
@@ -415,9 +416,8 @@ public class SplitView extends ParentView implements ViewHost {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        if (isHorizontal())
-            return RowView.getPrefWidth(this, aH);
-        return ColView.getPrefWidth(this, -1);
+        ParentViewProxy<?> viewProxy = getViewProxy();
+        return viewProxy.getPrefWidth(aH);
     }
 
     /**
@@ -425,9 +425,8 @@ public class SplitView extends ParentView implements ViewHost {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        if (isHorizontal())
-            return RowView.getPrefHeight(this, aW);
-        return ColView.getPrefHeight(this, -1);
+        ParentViewProxy<?> viewProxy = getViewProxy();
+        return viewProxy.getPrefHeight(aW);
     }
 
     /**
@@ -435,28 +434,21 @@ public class SplitView extends ParentView implements ViewHost {
      */
     protected void layoutImpl()
     {
-        // Do normal layout
-        if (isHorizontal())
-            RowView.layout(this, true);
-        else ColView.layout(this, true);
+        ParentViewProxy<?> viewProxy = getViewProxy();
+        viewProxy.layoutView();
+    }
 
-        // If children don't fill main axis, grow last child to fit
-        View child = getChildLast(); if(child==null) return;
-        Insets ins = getInsetsAll();
-        double w = getWidth() - ins.getWidth();
-        double h = getHeight() - ins.getHeight();
-
-        // Adjust last child to fit
-        if (isHorizontal() && !MathUtils.equals(child.getMaxX(), w)) {
-            double w2 = Math.max(w - child.getX(), 0);
-            child.setWidth(w2);
-        }
-
-        // Adjust last child to fit
-        else if (isVertical() && !MathUtils.equals(child.getMaxY(), h)) {
-            double h2 = Math.max(h - child.getY(), 0);
-            child.setHeight(h2);
-        }
+    /**
+     * Override to return RowViewProxy or ColViewProxy.
+     */
+    @Override
+    protected ParentViewProxy<?> getViewProxy()
+    {
+        ParentViewProxy<?> viewProxy = isHorizontal() ? new RowViewProxy<>(this) :
+            new ColViewProxy<>(this);
+        viewProxy.setFillWidth(true);
+        viewProxy.setFillHeight(true);
+        return viewProxy;
     }
 
     /**

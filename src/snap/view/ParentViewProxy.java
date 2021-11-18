@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-
+import snap.geom.Insets;
 import snap.util.MathUtils;
 
 /**
@@ -10,12 +10,95 @@ import snap.util.MathUtils;
  */
 public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
 
+    // The number of children that grow width/height
+    protected int _growWidthCount = -1, _growHeightCount = -1;
+
     /**
      * Constructor for given parent view.
      */
     public ParentViewProxy(View aParent)
     {
         super(aParent);
+    }
+
+    /**
+     * Returns the number of children that grow width.
+     */
+    public int getGrowWidthCount()
+    {
+        if (_growWidthCount >= 0) return _growWidthCount;
+        int count = 0; for (ViewProxy c : getChildren()) if (c.isGrowWidth()) count++;
+        return _growWidthCount = count;
+    }
+
+    /**
+     * Returns the number of children that grow height.
+     */
+    public int getGrowHeightCount()
+    {
+        if (_growHeightCount >= 0) return _growHeightCount;
+        int count = 0; for (ViewProxy c : getChildren()) if (c.isGrowHeight()) count++;
+        return _growHeightCount = count;
+    }
+
+    /**
+     * Returns the MaxX of last child with insets.
+     */
+    public double getChildrenMaxXLastWithInsets()
+    {
+        // Get LastChildMaxX, LastChildMarginRight
+        ViewProxy[] children = getChildren();
+        ViewProxy lastChild = children.length > 0 ? children[children.length-1] : null;
+        double childMaxX = lastChild != null ? lastChild.getMaxX() : 0;
+        double lastChildMarginRight = lastChild != null ? lastChild.getMargin().right : 0;
+
+        // Return LastChildMaxX plus padding right
+        Insets ins = getInsetsAll();
+        double rightInset = Math.max(ins.right, lastChildMarginRight);
+        return Math.ceil(childMaxX + rightInset);
+    }
+
+    /**
+     * Returns the MaxX of children with insets.
+     */
+    public double getChildrenMaxXAllWithInsets()
+    {
+        ViewProxy[] children = getChildren();
+        Insets ins = getInsetsAll();
+        double childMaxX = ins.getLeft();
+        for (ViewProxy child : children)
+            childMaxX = Math.max(childMaxX, child.getMaxX());
+        return Math.ceil(childMaxX + ins.right);
+    }
+
+    /**
+     * Returns the MaxY of last child with insets.
+     */
+    public double getChildrenMaxYLastWithInsets()
+    {
+        // Get LastChildMaxY, LastChildMarginBottom
+        ViewProxy[] children = getChildren();
+        ViewProxy lastChild = children.length > 0 ? children[children.length-1] : null;
+        double lastChildMaxY = lastChild != null ? lastChild.getMaxY() : 0;
+        double lastChildMarginBottom = lastChild != null ? lastChild.getMargin().bottom : 0;
+
+        // Return LastChildMaxY plus padding bottom
+        Insets ins = getInsetsAll();
+        double bottomInset = Math.max(ins.bottom, lastChildMarginBottom);
+        return Math.ceil(lastChildMaxY + bottomInset);
+    }
+
+    /**
+     * Returns the MaxY of children with insets.
+     */
+    public double getChildrenMaxYAllWithInsets()
+    {
+        ViewProxy[] children = getChildren();
+        Insets ins = getInsetsAll();
+        double childMaxY = ins.top;
+        for (ViewProxy child : children)
+            childMaxY = Math.max(childMaxY, child.getMaxY());
+        return Math.ceil(childMaxY + ins.bottom);
     }
 
     /**

@@ -49,6 +49,13 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
         // If no children, just return
         if (getChildCount() == 0) return;
 
+        // If FillWidth and no children grow, make last child grow
+        if (isFillWidth() && getGrowWidthCount() == 0) {
+            ViewProxy<?> lastChild = getChildren()[getChildCount() - 1];
+            lastChild.setGrowWidth(true);
+            _growWidthCount++;
+        }
+
         // Load layout rects and return
         layoutProxyX();
         layoutProxyY();
@@ -79,7 +86,7 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
             if (lastChild != null)
                 childSpacing = Math.max(childSpacing, parentSpacing);
 
-            // If child width is fixed because of FillWidth or GrowWidth, get child width value for PrefHeight calc
+            // If child height is fixed because of FillHeight/GrowHeight, get child height value for PrefWidth calc
             double childH = -1;
             if (isFillHeight || child.isGrowHeight())
                 childH = getChildFixedHeight(this, child);
@@ -186,14 +193,11 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Adds extra space to growers or alignment.
      */
-    private static void addExtraSpaceX(ViewProxy<?> aPar, int extra)
+    private static void addExtraSpaceX(ParentViewProxy<?> aPar, int extra)
     {
         // If grow shapes, add grow
         if (aPar.getGrowWidthCount() > 0)
             addExtraSpaceX_ToGrowers(aPar, extra);
-
-        // Otherwise, if FillWidth, extend last child
-        //else if (fillWidth) { ViewProxy ch = children[children.length - 1]; ch.setWidth(ch.getWidth() + extra); }
 
         // Otherwise, check for horizontal alignment/lean shift
         else if (extra > 0)
@@ -203,7 +207,7 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Adds extra space X to children that GrowWidth.
      */
-    private static void addExtraSpaceX_ToGrowers(ViewProxy<?> aPar, int extra)
+    private static void addExtraSpaceX_ToGrowers(ParentViewProxy<?> aPar, int extra)
     {
         // Get amount to add to each grower (plus 1 for some if not evenly divisible by grow)
         int grow = aPar.getGrowWidthCount();

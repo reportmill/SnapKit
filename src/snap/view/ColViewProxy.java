@@ -52,6 +52,13 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
         // If no children, just return
         if (getChildCount() == 0) return;
 
+        // If FillHeight and no children grow, make last child grow
+        if (isFillHeight() && getGrowHeightCount() == 0) {
+            ViewProxy lastChild = getChildren()[getChildCount() - 1];
+            lastChild.setGrowHeight(true);
+            _growHeightCount++;
+        }
+
         // Load layout rects and return
         layoutProxyY();
         layoutProxyX();
@@ -189,14 +196,11 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Adds extra space to growers or alignment.
      */
-    private static void addExtraSpaceY(ViewProxy<?> aPar, int extra)
+    private static void addExtraSpaceY(ParentViewProxy<?> aPar, int extra)
     {
         // If grow shapes, add grow
         if (aPar.getGrowHeightCount() > 0)
             addExtraSpaceY_ToGrowers(aPar, extra);
-
-        // Otherwise, if FillHeight, extend last child
-        //else if (fillH) children[children.length-1].width += extra;
 
         // Otherwise, check for vertical alignment/lean shift
         else if (extra > 0)
@@ -206,7 +210,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Adds extra space Y to children that GrowWidth.
      */
-    private static void addExtraSpaceY_ToGrowers(ViewProxy<?> aPar, int extra)
+    private static void addExtraSpaceY_ToGrowers(ParentViewProxy<?> aPar, int extra)
     {
         // Get amount to add to each grower (plus 1 for some if not evenly divisible by grow)
         int grow = aPar.getGrowHeightCount();

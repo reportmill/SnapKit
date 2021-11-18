@@ -7,7 +7,7 @@ import snap.geom.Insets;
 /**
  * A ViewProxy that can layout content in the manner of BoxView for any View.
  */
-public class BoxViewProxy<T extends View> extends ViewProxy<T> {
+public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
 
     // Whether child will crop to height if not enough space available
     private boolean  _cropHeight;
@@ -55,10 +55,9 @@ public class BoxViewProxy<T extends View> extends ViewProxy<T> {
     /**
      * Returns preferred width of layout.
      */
-    public double getPrefWidth(double aH)
+    @Override
+    protected double getPrefWidthImpl(double aH)
     {
-        setSize(-1, aH);
-        layoutProxy();
         double prefW = getChildrenMaxXLastWithInsets();
         return prefW;
     }
@@ -66,29 +65,17 @@ public class BoxViewProxy<T extends View> extends ViewProxy<T> {
     /**
      * Returns preferred height of layout.
      */
-    public double getPrefHeight(double aW)
+    @Override
+    protected double getPrefHeightImpl(double aW)
     {
-        setSize(aW, -1);
-        layoutProxy();
         double prefH = getChildrenMaxYLastWithInsets();
         return prefH;
     }
 
     /**
-     * Performs BoxView layout.
-     */
-    public void layoutView()
-    {
-        // Layout
-        layoutProxy();
-
-        // Apply bounds
-        setBoundsInClient();
-    }
-
-    /**
      * Performs Box layout for given parent, child and fill width/height.
      */
+    @Override
     public void layoutProxy()
     {
         // Get parent info
