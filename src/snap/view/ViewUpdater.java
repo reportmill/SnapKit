@@ -47,7 +47,7 @@ public class ViewUpdater {
     protected static boolean _paintDebug = false;
     private static boolean _clearFlash;
     private static int  _pc;
-    protected static long  _frames[] = null; //new long[20];
+    protected static long[]  _frames = null; //new long[20];
 
     /**
      * Creates a ViewUpdater.
@@ -106,7 +106,7 @@ public class ViewUpdater {
      */
     protected final void updateLater()
     {
-        if (_updateRun==null)
+        if (_updateRun == null)
             ViewUtils.runLater(_updateRun = _updateRunShared);
     }
 
@@ -120,8 +120,8 @@ public class ViewUpdater {
     protected synchronized void updateViews()
     {
         // Send RunBefore calls
-        while (_runBefores.size()>0) {
-            Runnable runs[] = _runBefores.toArray(new Runnable[0]);
+        while (_runBefores.size() > 0) {
+            Runnable[] runs = _runBefores.toArray(new Runnable[0]);
             _runBefores.clear();
             for (Runnable run : runs)
                 run.run();
@@ -131,7 +131,7 @@ public class ViewUpdater {
         if (_timer.isRunning()) {
 
             // Get anims array and current timer time
-            ViewAnim anims[] = _viewAnims.toArray(new ViewAnim[0]);
+            ViewAnim[] anims = _viewAnims.toArray(new ViewAnim[0]);
             int time = _timer.getTime();
 
             // Iterate over anims and update time
@@ -148,8 +148,8 @@ public class ViewUpdater {
         }
 
         // Send reset later calls
-        while (_resetLaters.size()>0) {
-            ViewOwner owners[] = _resetLaters.toArray(new ViewOwner[0]);
+        while (_resetLaters.size() > 0) {
+            ViewOwner[] owners = _resetLaters.toArray(new ViewOwner[0]);
             _resetLaters.clear();
             for (ViewOwner owner : owners)
                 owner.processResetUI();
@@ -160,14 +160,15 @@ public class ViewUpdater {
 
         // Get composite repaint rect from all repaint views
         Rect rect = getRepaintRect();
-        if (rect==null) {
-            _updateRun = null; return;
+        if (rect == null) {
+            _updateRun = null;
+            return;
         }
 
         // Do repaint (in exception handler so we can reset things on failure)
         try {
             _painting = true;
-            if (_win!=null && _win._helper!=null)
+            if (_win != null && _win._helper != null)
                 _win._helper.requestPaint(rect);
         }
 
@@ -239,7 +240,9 @@ public class ViewUpdater {
     {
         // If animator running, just paint and return
         if (_timer.isRunning()) {
-            _rview.paintAll(aPntr); _clearFlash = false; return;
+            _rview.paintAll(aPntr);
+            _clearFlash = false;
+            return;
         }
 
         // If ClearFlash, pause for a moment, paint and return
@@ -264,38 +267,54 @@ public class ViewUpdater {
     public Rect getRepaintRect()
     {
         // Get array of RepaintViews (just return if none)
-        int count = _repaintViews.size(); if (count==0)  return null;
-        View views[] = _repaintViews.toArray(new View[count]);
+        int count = _repaintViews.size(); if (count == 0)  return null;
+        View[] views = _repaintViews.toArray(new View[count]);
 
         // Iterate over RepaintViews to calculate composite repaint rect from all views
-        Rect rect = null;
+        Rect totalRect = null;
         for (View view : views) {
 
             // If view no longer in hierarchy or has no Repaint rect, just continue
-            if (view.getRootView()!=_rview) continue;
-            Rect r = view.getRepaintRect(); if (r==null) continue;
+            if (view.getRootView() != _rview)
+                continue;
+            Rect viewRect = view.getRepaintRect();
+            if (viewRect == null)
+                continue;
 
             // Constrain to ancestor clips
-            r = view.getClippedRect(r); if (r.isEmpty()) continue;
+            viewRect = view.getClippedRect(viewRect);
+            if (viewRect.isEmpty())
+                continue;
 
             // Transform to root coords
-            if (view!=_rview)
-                r = view.localToParent(r, _rview).getBounds();
+            if (view != _rview)
+                viewRect = view.localToParent(viewRect, _rview).getBounds();
 
             // Combine
-            if (rect==null) rect = r;
-            else rect.union(r);
+            if (totalRect == null)
+                totalRect = viewRect;
+            else totalRect.union(viewRect);
         }
 
         // Round rect and constrain to root bounds
-        if (rect==null) return null;
-        rect.snap(); if (rect.x<0) rect.x = 0; if (rect.y<0) rect.y = 0;
-        if (rect.width>_rview.getWidth()) rect.width = _rview.getWidth();
-        if (rect.height>_rview.getHeight()) rect.height = _rview.getHeight();
+        if (totalRect == null)
+            return null;
+        totalRect.snap();
+        if (totalRect.x < 0)
+            totalRect.x = 0;
+        if (totalRect.y < 0)
+            totalRect.y = 0;
+        if (totalRect.width > _rview.getWidth())
+            totalRect.width = _rview.getWidth();
+        if (totalRect.height > _rview.getHeight())
+            totalRect.height = _rview.getHeight();
 
         // Give listener a chance to modify rect
-        if (_lsnr!=null) rect = _lsnr.updaterWillPaint(_rview, rect);
-        return rect;
+        if (_lsnr != null)
+            totalRect = _lsnr.updaterWillPaint(_rview, totalRect);
+
+        // Return rect
+        return totalRect;
     }
 
     /**
@@ -305,7 +324,8 @@ public class ViewUpdater {
     {
         // Add anim to ViewAnims and start timer (if first anim)
         _viewAnims.add(anAnim);
-        if (_viewAnims.size()==1) _timer.start();
+        if (_viewAnims.size() == 1)
+            _timer.start();
 
         // Record Anim.StartTime, so we can always set View.Anim.Time relative to start
         anAnim._startTime = _timer.getTime() - anAnim.getTime();
@@ -316,8 +336,10 @@ public class ViewUpdater {
      */
     public void stopAnim(ViewAnim anAnim)
     {
-        if (!_viewAnims.remove(anAnim)) return;
-        if (_viewAnims.size()==0) _timer.stop();
+        if (!_viewAnims.remove(anAnim))
+            return;
+        if (_viewAnims.size() == 0)
+            _timer.stop();
     }
 
     /**
@@ -325,23 +347,33 @@ public class ViewUpdater {
      */
     public void addListener(ViewUpdater.Listener aLsnr)
     {
-        if (_lsnr!=null) System.err.println("ViewUpdater.addListener: Multiple listeners not yet supported");
+        if (_lsnr != null)
+            System.err.println("ViewUpdater.addListener: Multiple listeners not yet supported");
         _lsnr = aLsnr;
     }
 
     /**
      * Removes a ViewUpdater listener.
      */
-    public void removeListener(ViewUpdater.Listener aLsnr)  { if (_lsnr==aLsnr) _lsnr = null; }
+    public void removeListener(ViewUpdater.Listener aLsnr)
+    {
+        if (_lsnr == aLsnr)
+            _lsnr = null;
+    }
 
     /** Timing method: Returns animation start time. */
-    private void startTime()  { _time = System.currentTimeMillis(); } long _time;
+    private void startTime()
+    {
+        _time = System.currentTimeMillis();
+    }
+    long _time;
 
     /** Timing method: Returns animation stop time. */
     private void stopTime()
     {
         long time = System.currentTimeMillis();
-        long dt = time - _time; _time = time;
+        long dt = time - _time;
+        _time = time;
         _frames[_pc%_frames.length] = dt;
     }
 
@@ -349,8 +381,8 @@ public class ViewUpdater {
     private void printTime()
     {
         long time = 0; for (long frame : _frames) time += frame;
-        double avg = time/(double)_frames.length;
-        System.out.println("FrameRate: " + (int)(1000/avg));
+        double avg = time / (double) _frames.length;
+        System.out.println("FrameRate: " + (int) (1000 / avg));
     }
 
     /**
@@ -361,12 +393,15 @@ public class ViewUpdater {
     /**
      * Set whether painting is debug.
      */
-    public static void setPaintDebug(boolean aValue)  { _paintDebug = aValue; }
+    public static void setPaintDebug(boolean aValue)
+    {
+        _paintDebug = aValue;
+    }
 
     /**
      * Returns whether to show frame rate.
      */
-    public static boolean isShowFrameRate()  { return _frames!=null; }
+    public static boolean isShowFrameRate()  { return _frames != null; }
 
     /**
      * Set whether whether to show frame rate.

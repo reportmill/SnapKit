@@ -282,9 +282,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setX(double aValue)
     {
-        // Set value and fire prop change
         if (aValue == _x) return;
+
+        // Repaint in parent to mark old bounds
         repaintInParent(null);
+
+        // Set value and fire prop change
         firePropChange(X_Prop, _x, _x = aValue);
     }
 
@@ -298,9 +301,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setY(double aValue)
     {
-        // Set value and fire prop change
         if (aValue == _y) return;
+
+        // Repaint in parent to mark old bounds
         repaintInParent(null);
+
+        // Set value and fire prop change
         firePropChange(Y_Prop, _y, _y = aValue);
     }
 
@@ -314,10 +320,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setWidth(double aValue)
     {
+        if (aValue == _width) return;
+
+        // Repaint max of new and old
+        repaint(0, 0, Math.max(_width, aValue), getHeight());
+
         // Set value, fire prop change and register for relayout
-        if (aValue==_width) return;
-        repaintInParent(null);
-        firePropChange(Width_Prop, _width, _width=aValue);
+        firePropChange(Width_Prop, _width, _width = aValue);
         relayout();
     }
 
@@ -331,9 +340,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setHeight(double aValue)
     {
-        // Set value, fire prop change and register for relayout
         if (aValue == _height) return;
-        repaintInParent(null);
+
+        // Repaint max of new and old
+        repaint(0, 0, getWidth(), Math.max(_height, aValue));
+
+        // Set value, fire prop change and register for relayout
         firePropChange(Height_Prop, _height, _height = aValue);
         relayout();
     }
