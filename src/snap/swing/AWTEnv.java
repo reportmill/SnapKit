@@ -108,11 +108,8 @@ public class AWTEnv extends GFXEnv {
      */
     public SoundClip getSound(Object aSource)
     {
-        try {
-            Class cls = Class.forName("snap.swing.JFXSoundClip");
-            return (SoundClip) cls.getDeclaredConstructor(Object.class).newInstance(aSource);
-        }
-        catch(Exception e) { throw new RuntimeException(e); }
+        // return new JFXSoundClip(aSource);
+        return new SwingSoundClip(aSource);
     }
 
     /**
@@ -120,11 +117,8 @@ public class AWTEnv extends GFXEnv {
      */
     public SoundClip createSound()
     {
-        try {
-            Class cls = Class.forName("snap.swing.JFXSoundClip");
-            return (SoundClip) cls.newInstance();
-        }
-        catch(Exception e) { throw new RuntimeException(e); }
+        // return new JFXSoundClip();
+        return new SwingSoundClip(null);
     }
 
     /**
