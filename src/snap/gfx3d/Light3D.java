@@ -12,7 +12,7 @@ import snap.gfx.Color;
  * Future versions could expand this into full support for ambient lights, distant lights and spot lights. There
  * could even be a class called LightSet, so multiple lights could be supported but the simple API could be preserved.
  */
-public class Light {
+public class Light3D {
 
     // The normal
     private Vector3D  _normal = new Vector3D(0, 0, -1);
@@ -20,7 +20,7 @@ public class Light {
     /**
      * Constructor.
      */
-    public Light()  { }
+    public Light3D()  { }
 
     /**
      * Returns the render color for this light for given normal and color.

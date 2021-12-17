@@ -9,7 +9,7 @@ import snap.util.PropChange;
 public abstract class Renderer {
 
     // The Camera
-    protected Camera  _camera;
+    protected Camera3D _camera;
 
     // The Scene
     protected Scene3D  _scene;
@@ -20,7 +20,7 @@ public abstract class Renderer {
     /**
      * Constructor.
      */
-    public Renderer(Camera aCamera)
+    public Renderer(Camera3D aCamera)
     {
         _camera = aCamera;
         _scene = _camera.getScene();
@@ -31,7 +31,7 @@ public abstract class Renderer {
     /**
      * Returns the Camera.
      */
-    public Camera getCamera()  { return _camera; }
+    public Camera3D getCamera()  { return _camera; }
 
     /**
      * Returns the Scene.
@@ -66,7 +66,7 @@ public abstract class Renderer {
     /**
      * Creates a new Renderer for given camera.
      */
-    public Renderer createRenderer(Camera aCamera)
+    public Renderer createRenderer(Camera3D aCamera)
     {
         return new Renderer2D(aCamera);
     }
@@ -74,7 +74,7 @@ public abstract class Renderer {
     /**
      * Returns a new default renderer.
      */
-    public static Renderer newRenderer(Camera aCamera)
+    public static Renderer newRenderer(Camera3D aCamera)
     {
         if (_defaultRenderer != null)
             return _defaultRenderer.createRenderer(aCamera);

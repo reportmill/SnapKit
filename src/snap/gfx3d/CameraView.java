@@ -11,7 +11,7 @@ import snap.view.*;
 public class CameraView extends ParentView {
 
     // The Camera
-    private Camera  _camera;
+    private Camera3D _camera;
     
     // The Scene
     private Scene3D  _scene;
@@ -36,7 +36,7 @@ public class CameraView extends ParentView {
     /**
      * Returns the camera as a vector.
      */
-    public Camera getCamera()  { return _camera; }
+    public Camera3D getCamera()  { return _camera; }
 
     /**
      * Returns the Scene3D.

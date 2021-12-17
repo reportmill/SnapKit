@@ -30,7 +30,7 @@ public class Trackball extends ParentView {
     private Scene3D  _scene;
 
     // The Camera used to draw 3d (renders scene)
-    private Camera  _camera;
+    private Camera3D _camera;
 
     // The radius of the trackball sphere, which sits at the origin
     private double  _radius = 36;
@@ -258,7 +258,7 @@ public class Trackball extends ParentView {
     /**
      * Sync from given camera to this trackball.
      */
-    public void syncFrom(Camera aScene)
+    public void syncFrom(Camera3D aScene)
     {
         sync(aScene, _camera);
     }
@@ -266,13 +266,13 @@ public class Trackball extends ParentView {
     /**
      * Sync to a given camera from this trackball.
      */
-    public void syncTo(Camera aScene)
+    public void syncTo(Camera3D aScene)
     {
         sync(_camera, aScene);
     }
 
     /** Sync cameras. */
-    private void sync(Camera s1, Camera s2)
+    private void sync(Camera3D s1, Camera3D s2)
     {
         if (s1.isPseudo3D()) {
             s2.setPseudoSkewX(s1.getPseudoSkewX());

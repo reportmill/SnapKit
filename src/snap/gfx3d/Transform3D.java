@@ -112,7 +112,7 @@ public class Transform3D implements Cloneable {
     /**
      * Rotate about arbitrary axis.
      */
-    public Transform3D rotate(Vector3D anAxis, double anAngle)
+    public Transform3D rotateAboutAxis(Vector3D anAxis, double anAngle)
     {
         Transform3D rm = new Transform3D();
         double angle = Math.toRadians(anAngle);
@@ -134,7 +134,7 @@ public class Transform3D implements Cloneable {
     /**
      * Rotate x,y,z with three Euler angles (same as rotateX(rx).rotateY(ry).rotateZ(rz)).
      */
-    public Transform3D rotate(double rx, double ry, double rz)
+    public Transform3D rotateXYZ(double rx, double ry, double rz)
     {
         Transform3D rm = new Transform3D();
         double ax = Math.toRadians(rx);
@@ -317,6 +317,18 @@ public class Transform3D implements Cloneable {
     public double[][] toArray()
     {
         return m.clone();
+    }
+
+    /**
+     * Returns a float array for the transform.
+     */
+    public double[] toArray(double[] anArray)
+    {
+        if (anArray == null) anArray = new double[16];
+        for (int i = 0; i < 4; i++)
+            for (int j = 0; j < 4; j++)
+                anArray[i * 4 + j] = m[i][j];
+        return anArray;
     }
 
     /**

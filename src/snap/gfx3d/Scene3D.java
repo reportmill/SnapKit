@@ -13,10 +13,10 @@ import java.util.*;
 public class Scene3D {
     
     // Camera that renders the scene
-    private Camera  _camera;
+    private Camera3D _camera;
     
     // Light that illuminates the scene
-    private Light  _light = new Light();
+    private Light3D _light = new Light3D();
     
     // List of Shape3ds - the model
     protected List <Shape3D>  _shapes = new ArrayList<>();
@@ -26,19 +26,19 @@ public class Scene3D {
      */
     public Scene3D()
     {
-        _camera = new Camera();
+        _camera = new Camera3D();
         _camera.setScene(this);
     }
 
     /**
      * Returns the camera that renders this scene.
      */
-    public Camera getCamera()  { return _camera; }
+    public Camera3D getCamera()  { return _camera; }
 
     /**
      * Returns the light that illumiates this scene.
      */
-    public Light getLight()  { return _light; }
+    public Light3D getLight()  { return _light; }
 
     /**
      * Returns the number of shapes in the shape list.

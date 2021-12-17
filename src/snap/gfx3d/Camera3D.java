@@ -22,7 +22,7 @@ import java.util.List;
  *   Polygon front: Right hand rule (counter-clockwise defined polygons face forward)
  *   Transforms: Row major notation (as opposed to column major, points are assumed row vectors) 
  */
-public class Camera {
+public class Camera3D {
     
     // The scene being viewed
     private Scene3D  _scene;
@@ -94,7 +94,7 @@ public class Camera {
     /**
      * Constructor.
      */
-    public Camera()  { }
+    public Camera3D()  { }
 
     /**
      * Returns the scene this camera is associated with.
@@ -296,6 +296,26 @@ public class Camera {
     }
 
     /**
+     * Returns the field of view of the camera (derived from focalLength).
+     */
+    public double getFieldOfViewX()
+    {
+        double height = getWidth();
+        double fieldOfView = Math.toDegrees(Math.atan(height / (2 * _focalLen)));
+        return fieldOfView * 2;
+    }
+
+    /**
+     * Returns the field of view of the camera (derived from focalLength).
+     */
+    public double getFieldOfViewY()
+    {
+        double height = getHeight();
+        double fieldOfView = Math.toDegrees(Math.atan( height / (2 * _focalLen)));
+        return fieldOfView * 2;
+    }
+
+    /**
      * Sets the field of view of the camera.
      */
     public void setFieldOfView(double aValue)
@@ -345,7 +365,7 @@ public class Camera {
         }
 
         // Rotate
-        xfm.rotate(_pitch, _yaw, _roll);
+        xfm.rotateXYZ(_pitch, _yaw, _roll);
 
         // Translate by Offset Z
         double offsetZ = getOffsetZ() - _offsetZ2;
@@ -561,7 +581,7 @@ public class Camera {
     /**
      * Copy attributes of another scene.
      */
-    public void copy3D(Camera aCam)
+    public void copy3D(Camera3D aCam)
     {
         setDepth(aCam.getDepth());
         setYaw(aCam.getYaw());

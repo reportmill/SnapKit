@@ -25,7 +25,7 @@ public class Renderer2D extends Renderer {
     /**
      * Constructor.
      */
-    public Renderer2D(Camera aCamera)
+    public Renderer2D(Camera3D aCamera)
     {
         super(aCamera);
     }
@@ -61,7 +61,7 @@ public class Renderer2D extends Renderer {
         }
 
         // Get camera midpoints
-        Camera camera = getCamera();
+        Camera3D camera = getCamera();
         double dispMidX = camera.getWidth() / 2;
         double dispMidY = camera.getHeight() / 2;
 
@@ -141,7 +141,7 @@ public class Renderer2D extends Renderer {
     {
         // Get the camera transform & optionally align it to the screen
         Transform3D worldToCameraXfm = _camera.getTransform();
-        Light light = _scene.getLight();
+        Light3D light = _scene.getLight();
         Color color = aShape.getColor();
 
         // Iterate over paths
@@ -186,18 +186,18 @@ public class Renderer2D extends Renderer {
     {
         String propName = aPC.getPropName();
         switch (propName) {
-            case Camera.Width_Prop:
-            case Camera.Height_Prop:
-            case Camera.Depth_Prop:
-            case Camera.Yaw_Prop:
-            case Camera.Pitch_Prop:
-            case Camera.Roll_Prop:
-            case Camera.FocalLength_Prop:
-            case Camera.OffsetZ_Prop:
-            case Camera.AdjustZ_Prop:
-            case Camera.Pseudo3D_Prop:
-            case Camera.PseudoSkewX_Prop:
-            case Camera.PseudoSkewY_Prop:
+            case Camera3D.Width_Prop:
+            case Camera3D.Height_Prop:
+            case Camera3D.Depth_Prop:
+            case Camera3D.Yaw_Prop:
+            case Camera3D.Pitch_Prop:
+            case Camera3D.Roll_Prop:
+            case Camera3D.FocalLength_Prop:
+            case Camera3D.OffsetZ_Prop:
+            case Camera3D.AdjustZ_Prop:
+            case Camera3D.Pseudo3D_Prop:
+            case Camera3D.PseudoSkewX_Prop:
+            case Camera3D.PseudoSkewY_Prop:
                 rebuildPaths();
         }
         super.cameraDidPropChange(aPC);
@@ -225,7 +225,7 @@ public class Renderer2D extends Renderer {
     public void paintPaths(Painter aPntr)
     {
         // Translate to center
-        Camera camera = getCamera();
+        Camera3D camera = getCamera();
         double dispMidX = camera.getWidth() / 2;
         double dispMidY = camera.getHeight() / 2;
         aPntr.translate(dispMidX, dispMidY);

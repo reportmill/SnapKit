@@ -359,7 +359,7 @@ public class Path3D extends Shape3D implements Cloneable {
 
         // Create the rotation matrix
         Transform3D rotMatrix = new Transform3D();
-        rotMatrix.rotate(rotAxis, angle);
+        rotMatrix.rotateAboutAxis(rotAxis, angle);
 
         // The point of rotation is located at the shape's center
         Point3D rotOrigin = getCenter();
