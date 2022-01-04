@@ -20,7 +20,10 @@ public abstract class Shape3D {
     
     // Shape opacity
     private double  _opacity = 1;
-    
+
+    // The path bounding box
+    private Box3D  _boundsBox;
+
     /**
      * Constructor.
      */
@@ -85,7 +88,81 @@ public abstract class Shape3D {
     }
 
     /**
+     * Returns the bounds box.
+     */
+    public Box3D getBoundsBox()
+    {
+        if (_boundsBox != null) return _boundsBox;
+        Box3D boundsBox = createBoundsBox();
+        return _boundsBox = boundsBox;
+    }
+
+    /**
+     * Creates the bounds box.
+     */
+    protected abstract Box3D createBoundsBox();
+
+    /**
+     * Returns the max X for the path.
+     */
+    public double getMinX()  { return getBoundsBox().getMinX(); }
+
+    /**
+     * Returns the max Y for the path.
+     */
+    public double getMinY()  { return getBoundsBox().getMinY(); }
+
+    /**
+     * Returns the max Z for the path.
+     */
+    public double getMinZ()  { return getBoundsBox().getMinZ(); }
+
+    /**
+     * Returns the max X for the path.
+     */
+    public double getMaxX()  { return getBoundsBox().getMaxX(); }
+
+    /**
+     * Returns the max Y for the path.
+     */
+    public double getMaxY()  { return getBoundsBox().getMaxY(); }
+
+    /**
+     * Returns the max Z for the path.
+     */
+    public double getMaxZ()  { return getBoundsBox().getMaxZ(); }
+
+    /**
      * Returns the array of Path3D that can render this shape.
      */
     public abstract Path3D[] getPath3Ds();
+
+    /**
+     * Clears cached values when shape changes.
+     */
+    protected void clearCachedValues()
+    {
+        _boundsBox = null;
+    }
+
+    /**
+     * Standard toString implementation.
+     */
+    public String toString()
+    {
+        String className = getClass().getSimpleName();
+        String propsStr = toStringProps();
+        return className + " { " + propsStr + " }";
+    }
+
+    /**
+     * Standard toStringProps implementation.
+     */
+    public String toStringProps()
+    {
+        Box3D boundsBox = getBoundsBox();
+        Point3D minXYZ = boundsBox.getMinXYZ();
+        Point3D maxXYZ = boundsBox.getMaxXYZ();
+        return "MinXYZ=" + minXYZ + ", MaxXYZ=" + maxXYZ;
+    }
 }

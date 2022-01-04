@@ -403,7 +403,7 @@ public class Camera3D {
         bbox.transform(xfm);
 
         // Get second offset Z from bounding box and restore original Z offset
-        _offsetZ2 = bbox.getZMin();
+        _offsetZ2 = bbox.getMinZ();
         _offsetZ = offZ;
         _xform3D = null;
 

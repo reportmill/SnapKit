@@ -53,11 +53,11 @@ public class Renderer2D extends Renderer {
         double xmin = Float.MAX_VALUE, xmax = -xmin;
         double ymin = Float.MAX_VALUE, ymax = -ymin;
         for (Path3D path : paths) {
-            Point3D[] bb2 = path.getBBox();
-            xmin = Math.min(xmin, bb2[0].x);
-            ymin = Math.min(ymin, bb2[0].y);
-            xmax = Math.max(xmax, bb2[1].x);
-            ymax = Math.max(ymax, bb2[1].y);
+            Box3D boundsBox = path.getBoundsBox();
+            xmin = Math.min(xmin, boundsBox.getMinX());
+            ymin = Math.min(ymin, boundsBox.getMinY());
+            xmax = Math.max(xmax, boundsBox.getMaxX());
+            ymax = Math.max(ymax, boundsBox.getMaxY());
         }
 
         // Get camera midpoints
@@ -107,7 +107,7 @@ public class Renderer2D extends Renderer {
         rebuildPathsImpl();
 
         // Resort paths
-        Path3D.sortPaths(_paths);
+        Sort3D.sortPaths(_paths);
 
         // Replace with paths for projection
         double focalLen = getCamera().getFocalLength();

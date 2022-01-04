@@ -21,7 +21,7 @@ public class PathBox3D extends Shape3D {
     private double  _z1, _z2;
     
     // The path3ds
-    private Path3D[] _path3Ds;
+    private Path3D[]  _path3Ds;
 
     /**
      * Creates a PathBox3D from the given Path3D.
@@ -35,11 +35,22 @@ public class PathBox3D extends Shape3D {
     /**
      * Returns the array of Path3D that can render this shape.
      */
+    @Override
     public Path3D[] getPath3Ds()
     {
         // If already set, just return
         if (_path3Ds != null) return _path3Ds;
 
+        // Create paths, set and return
+        Path3D[] paths = createPath3Ds();
+        return _path3Ds = paths;
+    }
+
+    /**
+     * Creates the array of Path3D that can render this shape.
+     */
+    protected Path3D[] createPath3Ds()
+    {
         // Create paths for Z1 & Z2
         Path3D[] paths = getPaths(_path, _z1, _z2);
 
@@ -50,7 +61,7 @@ public class PathBox3D extends Shape3D {
         double opacity = getOpacity();
 
         // Iterate over paths and set color, stroke, opacity
-        for (int i=0, iMax=paths.length; i<iMax; i++) {
+        for (int i = 0, iMax = paths.length; i < iMax; i++) {
             Path3D path3D = paths[i];
             path3D.setColor(color);
             path3D.setOpacity(opacity);
@@ -59,7 +70,7 @@ public class PathBox3D extends Shape3D {
         }
 
         // Return paths
-        return _path3Ds = paths;
+        return paths;
     }
 
     /**
@@ -161,5 +172,25 @@ public class PathBox3D extends Shape3D {
 
         // Return paths
         return paths.toArray(new Path3D[0]);
+    }
+
+    /**
+     * Returns the bounds box.
+     */
+    @Override
+    protected Box3D createBoundsBox()
+    {
+        // Create and init bounds box
+        Box3D boundsBox = new Box3D();
+        boundsBox.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+        boundsBox.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+
+        // Iterate over Path3Ds and add each bounds box
+        Path3D[] path3Ds = getPath3Ds();
+        for (Path3D path3D : path3Ds)
+            boundsBox.addBox(path3D.getBoundsBox());
+
+        // Return
+        return boundsBox;
     }
 }

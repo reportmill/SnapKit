@@ -22,14 +22,8 @@ public class Path3D extends Shape3D implements Cloneable {
     // A list of Path3Ds to be drawn in front of this Path3D
     private List<Path3D>  _layers;
 
-    // The path center point
-    private Point3D  _center;
-    
     // The path normal vector
     private Vector3D  _normal;
-    
-    // The path bounding box
-    private Point3D[]  _bbox;
     
     // Cached array of this Path3D to efficiently satisfy getPath3Ds() method
     private Path3D[]  _path3Ds = { this };
@@ -133,7 +127,7 @@ public class Path3D extends Shape3D implements Cloneable {
     {
         _elements.add(MOVE_TO);
         _points.add(new Point3D(x, y, z));
-        clearCache();
+        clearCachedValues();
     }
 
     /**
@@ -143,7 +137,7 @@ public class Path3D extends Shape3D implements Cloneable {
     {
         _elements.add(LINE_TO);
         _points.add(new Point3D(x, y, z));
-        clearCache();
+        clearCachedValues();
     }
 
     /**
@@ -154,7 +148,7 @@ public class Path3D extends Shape3D implements Cloneable {
         _elements.add(QUAD_TO);
         _points.add(new Point3D(cpx, cpy, cpz));
         _points.add(new Point3D(x, y, z));
-        clearCache();
+        clearCachedValues();
     }
 
     /**
@@ -166,7 +160,7 @@ public class Path3D extends Shape3D implements Cloneable {
         _points.add(new Point3D(cp1x, cp1y, cp1z));
         _points.add(new Point3D(cp2x, cp2y, cp2z));
         _points.add(new Point3D(x, y, z));
-        clearCache();
+        clearCachedValues();
     }
 
     /**
@@ -210,15 +204,8 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public Point3D getCenter()
     {
-        // If already set, just return
-        if (_center != null) return _center;
-
-        // If center point hasn't been cached, calculate and cache it
-        Point3D[] bbox = getBBox();
-        double cx = bbox[0].x + (bbox[1].x - bbox[0].x) / 2;
-        double cy = bbox[0].y + (bbox[1].y - bbox[0].y) / 2;
-        double cz = bbox[0].z + (bbox[1].z - bbox[0].z) / 2;
-        return _center = new Point3D(cx, cy, cz);
+        Box3D boundsBox = getBoundsBox();
+        return boundsBox.getCenter();
     }
 
     /**
@@ -271,7 +258,7 @@ public class Path3D extends Shape3D implements Cloneable {
     {
         // Simply return if element is beyond bounds
         if (element == getElementCount()) {
-            _elements.clear(); _points.clear(); clearCache();
+            _elements.clear(); _points.clear(); clearCachedValues();
             return;
         }
 
@@ -322,7 +309,7 @@ public class Path3D extends Shape3D implements Cloneable {
     {
         for (int i=0, iMax=getPointCount(); i<iMax; i++)
             getPoint(i).transform(xform);
-        clearCache();
+        clearCachedValues();
     }
 
     /**
@@ -374,10 +361,10 @@ public class Path3D extends Shape3D implements Cloneable {
     {
         // Create new path
         Path path = new Path();
+        Point3D[] pts = new Point3D[3];
 
         // Iterate over this path3d and add segments as 2D
-        Point3D[] pts = new Point3D[3];
-        for (int i=0, iMax=getElementCount(); i<iMax; i++) {
+        for (int i = 0, iMax = getElementCount(); i < iMax; i++) {
             Seg type = getElement(i, pts);
             switch (type) {
                 case MoveTo: path.moveTo(pts[0].x, pts[0].y); break;
@@ -424,7 +411,7 @@ public class Path3D extends Shape3D implements Cloneable {
         Transform3D xfmToZ = getTransformToAlignToVector(zFacing);
         Transform3D xfmFromZ = xfmToZ.invert();
         Path3D copy = copyForTransform(xfmToZ);
-        double zVal = copy.getZMin();
+        double zVal = copy.getMinZ();
 
         // Get Path2D, break into triangles
         Path path2D = copy.getPath();
@@ -474,63 +461,23 @@ public class Path3D extends Shape3D implements Cloneable {
     }
 
     /**
-     * Returns the bounding box for the path as {min,max}.
+     * Returns the bounds box.
      */
-    public Point3D[] getBBox()
+    @Override
+    protected Box3D createBoundsBox()
     {
-        // If already set, just return
-        if (_bbox != null) return _bbox;
-
-        // Set
-        Point3D[] bbox = new Point3D[2];
-        bbox[0] = new Point3D(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-        bbox[1] = new Point3D(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
-
-        for (int i=0, iMax=getPointCount(); i<iMax; i++) { Point3D pt = getPoint(i);
-            bbox[0].x = Math.min(bbox[0].x, pt.x);
-            bbox[0].y = Math.min(bbox[0].y, pt.y);
-            bbox[0].z = Math.min(bbox[0].z, pt.z);
-            bbox[1].x = Math.max(bbox[1].x, pt.x);
-            bbox[1].y = Math.max(bbox[1].y, pt.y);
-            bbox[1].z = Math.max(bbox[1].z, pt.z);
+        // Create and init bounds box
+        Box3D boundsBox = new Box3D();
+        boundsBox.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+        boundsBox.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+        for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
+            Point3D pt = getPoint(i);
+            boundsBox.addXYZ(pt.x, pt.y, pt.z);
         }
-        return _bbox = bbox;
+
+        // Return
+        return boundsBox;
     }
-
-    /**
-     * Returns the max X for the path.
-     */
-    public double getXMin()  { return getBBox()[0].x; }
-
-    /**
-     * Returns the max X for the path.
-     */
-    public double getXMax()  { return getBBox()[1].x; }
-
-    /**
-     * Returns the max Y for the path.
-     */
-    public double getYMin()  { return getBBox()[0].y; }
-
-    /**
-     * Returns the max Y for the path.
-     */
-    public double getYMax()  { return getBBox()[1].y; }
-
-    /**
-     * Returns the max Z for the path.
-     */
-    public double getZMin()  { return getBBox()[0].z; }
-
-    /**
-     * Returns the max Z for the path.
-     */
-    public double getZMax()  { return getBBox()[1].z; }
-
-    /**
-     * Returns the mid Z for the path.
-     */
-    public double getZMid()  { return getZMin() + (getZMax() - getZMin())/2; }
 
     /**
      * Returns layers to be drawn in front of this path.
@@ -549,28 +496,22 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Clears cached values when path changes.
      */
-    protected void clearCache()
+    @Override
+    protected void clearCachedValues()
     {
-        _center = null;
+        super.clearCachedValues();
         _normal = null;
-        _bbox = null;
         _trianglesVB = null;
     }
-
-    // Constants for comparison/ordering of Path3Ds
-    public static final int ORDER_BACK_TO_FRONT = -1;
-    public static final int ORDER_FRONT_TO_BACK = 1;
-    public static final int ORDER_SAME = 0;
-    public static final int ORDER_INEDETERMINATE = 2;
 
     /**
      * Compares ZMin for this path and given path.
      */
     public int compareZMin(Path3D path2)
     {
-        double z0 = getZMin();
-        double z1 = path2.getZMin();
-        return z0 < z1 ? ORDER_BACK_TO_FRONT : z1 < z0 ? ORDER_FRONT_TO_BACK : 0;
+        double z0 = getMinZ();
+        double z1 = path2.getMinZ();
+        return z0 < z1 ? Sort3D.ORDER_BACK_TO_FRONT : z1 < z0 ? Sort3D.ORDER_FRONT_TO_BACK : 0;
     }
 
     /**
@@ -580,17 +521,17 @@ public class Path3D extends Shape3D implements Cloneable {
     public int comparePlane(Path3D aPath)
     {
         double d1 = 0;
-        for (int i=0, iMax=aPath.getPointCount(); i<iMax; i++) {
+        for (int i = 0, iMax = aPath.getPointCount(); i < iMax; i++) {
             Point3D pnt = aPath.getPoint(i);
             double d2 = getDistance(pnt);
             if (d1 == 0)
                 d1 = d2;
-            if (d2 != 0 && d1*d2 < 0)
-                return ORDER_INEDETERMINATE;
+            if (d2 != 0 && d1 * d2 < 0)
+                return Sort3D.ORDER_INEDETERMINATE;
         }
 
         // If all points are above aPath's plane, return BACK_TO_FRONT (receiver in front), otherwise ORDER_DESCEND
-        return d1 > 0 ? ORDER_BACK_TO_FRONT : d1 < 0 ? ORDER_FRONT_TO_BACK : ORDER_SAME;
+        return d1 > 0 ? Sort3D.ORDER_BACK_TO_FRONT : d1 < 0 ? Sort3D.ORDER_FRONT_TO_BACK : Sort3D.ORDER_SAME;
     }
 
     /**
@@ -652,138 +593,11 @@ public class Path3D extends Shape3D implements Cloneable {
     public Path3D[] getPath3Ds()  { return _path3Ds; }
 
     /**
-     * Standard toString implementation.
+     * Standard toStringProps implementation.
      */
-    public String toString()
+    public String toStringProps()
     {
-        Point3D[] bbox = getBBox();
-        return "Path3D { PointCount=" + getPointCount() + ", BBox[0] = " + bbox[0] + ", BBox[1]=" + bbox[1] + " }";
-    }
-
-    /**
-     * Resorts a Path3D list from back to front using Depth Sort Algorithm.
-     */
-    public static void sortPaths(List<Path3D> thePaths)
-    {
-        // Get list of paths and sort from front to back with simple Z min sort
-        Collections.sort(thePaths, (p0,p1) -> p0.compareZMin(p1));
-
-        // Sort again front to back with exhaustive sort satisfying Depth Sort Algorithm
-        for (int i=thePaths.size()-1; i>0; i--) {
-
-            // Get loop path
-            Path3D path1 = thePaths.get(i);
-            int i2 = i;
-
-            // Iterate over remaining paths
-            for (int j=0; j<i; j++) {
-
-                // Get loop path (if same path, just skip)
-                Path3D path2 = thePaths.get(j);
-                if (path2 == path1)
-                    continue;
-
-                // If no X/Y/Z overlap, just continue
-                if (path1.getZMin() >= path2.getZMax())
-                    continue;
-                if (path1.getXMax() <= path2.getXMin() || path1.getXMin() >= path2.getXMax())
-                    continue;
-                if (path1.getYMax() <= path2.getYMin() || path1.getYMin() >= path2.getYMax())
-                    continue;
-
-                // Test path planes - if on same plane or in correct order, they don't overlap
-                int comp1 = path1.comparePlane(path2);
-                if (comp1 == ORDER_SAME || comp1 == ORDER_BACK_TO_FRONT)
-                    continue;
-                int comp2 = path2.comparePlane(path1);
-                if (comp2 == ORDER_FRONT_TO_BACK)
-                    continue;
-
-                // If 2d paths don't intersect, just continue
-                if (!path1.getPath().intersects(path2.getPath(),0))
-                    continue;
-
-                // If all five tests fail, try next path up from path1
-                if (i2 == 0) {  // Not sure why this can happen
-                    System.err.println("Path3D.sort: Sort fail.");
-                    i = 0;
-                }
-                else {
-                    path1 = thePaths.get(--i2);
-                    j = -1;
-                }
-            }
-
-            // Move poly
-            if (i2 != i) {
-                thePaths.remove(i2);
-                thePaths.add(i, path1);
-            }
-        }
-
-        // Reverse child list so it is back to front (so front most shape will be drawn last)
-        Collections.reverse(thePaths);
-    }
-
-    /**
-     * Resorts a Path3D list from back to front using Depth Sort Algorithm.
-     */
-    public static void sortPaths2(List<Path3D> thePaths)
-    {
-        // Get list of paths and sort from front to back with simple Z min sort
-        Collections.sort(thePaths, (p0,p1) -> p0.compareZMin(p1));
-
-        // Sort again front to back with exhaustive sort satisfying Depth Sort Algorithm
-        for (int i=thePaths.size()-1; i>0; i--) {
-
-            // Get loop path
-            Path3D path2 = thePaths.get(i);
-            int i2 = i;
-
-            // Iterate over remaining paths
-            for (int j=0; j<i; j++) {
-
-                // Get loop path (if same path, just skip)
-                Path3D path1 = thePaths.get(j);
-                if (path1 == path2)
-                    continue;
-
-                // If no X/Y/Z overlap, just continue
-                if (path2.getZMin() >= path1.getZMax())
-                    continue;
-                if (path2.getXMax() <= path1.getXMin() || path2.getXMin() >= path1.getXMax())
-                    continue;
-                if (path2.getYMax() <= path1.getYMin() || path2.getYMin() >= path1.getYMax())
-                    continue;
-
-                // Test path planes - if on same plane or in correct order, they don't overlap
-                int comp1 = path2.comparePlane(path1);
-                if (comp1 == ORDER_SAME || comp1 == ORDER_FRONT_TO_BACK)
-                    continue;
-                int comp2 = path1.comparePlane(path2);
-                if (comp2 == ORDER_BACK_TO_FRONT)
-                    continue;
-
-                // If 2d paths don't intersect, just continue
-                if (!path2.getPath().intersects(path1.getPath(),0))
-                    continue;
-
-                // If all five tests fail, try next path up from path1
-                if (i2 == 0) {  // Not sure why this can happen
-                    System.err.println("Path3D.sort: Sort fail.");
-                    i = 0;
-                }
-                else {
-                    path2 = thePaths.get(--i2);
-                    j = -1;
-                }
-            }
-
-            // Move poly
-            if (i2 != i) {
-                thePaths.remove(i2);
-                thePaths.add(i, path2);
-            }
-        }
+        String boundsProps = getBoundsBox().toStringProps();
+        return "PointCount=" + getPointCount() + ", " + boundsProps;
     }
 }
