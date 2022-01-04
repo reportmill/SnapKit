@@ -164,4 +164,24 @@ public class Vector3D implements Cloneable {
     {
         return MathUtils.equals(v0x, v1x) && MathUtils.equals(v0y, v1y) && MathUtils.equals(v0z, v1z);
     }
+
+    /**
+     * Returns the normal of given points. See Path3D.getNormal().
+     */
+    public static Vector3D getNormalForPoints(Vector3D aVect, Point3D ... thePoints)
+    {
+        aVect.x = aVect.y = aVect.z = 0;
+        for (int i = 0, iMax = thePoints.length; i < iMax; i++) {
+            Point3D cur = thePoints[i];
+            Point3D next = thePoints[(i + 1) % iMax];
+            aVect.x += (cur.y - next.y) * (cur.z + next.z);
+            aVect.y += (cur.z - next.z) * (cur.x + next.x);
+            aVect.z += (cur.x - next.x) * (cur.y + next.y);
+        }
+
+        // Normalize the result and swap sign so it matches right hand rule
+        aVect.normalize();
+        aVect.negate();
+        return aVect;
+    }
 }

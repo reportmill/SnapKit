@@ -6,7 +6,6 @@ import snap.geom.Path;
 import snap.geom.PathIter;
 import snap.geom.Polygon;
 import snap.geom.Seg;
-
 import java.util.*;
 
 /**
@@ -32,14 +31,11 @@ public class Path3D extends Shape3D implements Cloneable {
     // The path bounding box
     private Point3D[]  _bbox;
     
-    // The cached path (2d)
-    private Path  _path;
-
     // Cached array of this Path3D to efficiently satisfy getPath3Ds() method
     private Path3D[]  _path3Ds = { this };
 
-    // The Triangle path
-    private Path3D[]  _trianglePaths;
+    // The VertexBuffer holding triangles of Path3D
+    private VertexBuffer  _trianglesVB;
     
     // Cached pointers for iterating efficiently over the path
     private int  _nextElementIndex = -100;
@@ -189,7 +185,7 @@ public class Path3D extends Shape3D implements Cloneable {
         // Iterate over elements in given path
         PathIter piter = aPath.getPathIter(null);
         double[] pts = new double[6];
-        for (int i=0; piter.hasNext(); i++) {
+        for (int i = 0; piter.hasNext(); i++) {
             switch (piter.getNext(pts)) {
                 case MoveTo:
                     if (i+1 < aPath.getSegCount() && aPath.getSeg(i+1) != Seg.MoveTo)
@@ -400,52 +396,81 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Returns the triangle paths.
      */
-    public Path3D[] getTrianglePaths()
+    public VertexBuffer getTrianglesVB()
     {
         // If already set, just return
-        if (_trianglePaths != null) return _trianglePaths;
+        if (_trianglesVB != null) return _trianglesVB;
 
         // Create, set, return
-        Path3D[] triPaths = createTrianglePaths();
-        return _trianglePaths = triPaths;
+        VertexBuffer triVB = createTrianglesVB();
+        return _trianglesVB = triVB;
     }
 
     /**
      * Creates the triangle paths.
      */
-    protected Path3D[] createTrianglePaths()
+    protected VertexBuffer createTrianglesVB()
     {
+        // Create VertexBuffer
+        VertexBuffer vbuf = new VertexBuffer();
+
         // If no normal, just return empty
-        if (Double.isNaN(getNormal().x))
-            return new Path3D[0];
+        Vector3D pathNormal = getNormal();
+        if (Double.isNaN(pathNormal.x))
+            return vbuf;
 
         // Get copy facing Z
         Vector3D zFacing = new Vector3D(0, 0, 1);
         Transform3D xfmToZ = getTransformToAlignToVector(zFacing);
         Transform3D xfmFromZ = xfmToZ.invert();
         Path3D copy = copyForTransform(xfmToZ);
+        double zVal = copy.getZMin();
 
-        // Get Path2D
+        // Get Path2D, break into triangles
         Path path2D = copy.getPath();
-        Point3D[] bbox = copy.getBBox();
         Polygon[] triangles = Polygon.getConvexPolys(path2D, 3);
-        double zVal = bbox[0].z;
+
+        // Create loop variables
+        Point3D p0 = new Point3D(0, 0, 0);
+        Point3D p1 = new Point3D(0, 0, 0);
+        Point3D p2 = new Point3D(0, 0, 0);
+        Point3D[] points = { p0, p1, p2 };
+        Vector3D pointsNormal = new Vector3D(0, 0, 0);
 
         // Get Path3Ds
-        Path3D[] triPaths = new Path3D[triangles.length];
-        for (int i=0, iMax=triangles.length; i<iMax; i++) {
+        for (int i = 0, iMax = triangles.length; i < iMax; i++) {
+
+            // Get triangle points
             Polygon triangle = triangles[i];
-            Path3D triPath = new Path3D();
-            triPath.moveTo(triangle.getX(0), triangle.getY(0), zVal);
-            triPath.lineTo(triangle.getX(1), triangle.getY(1), zVal);
-            triPath.lineTo(triangle.getX(2), triangle.getY(2), zVal);
-            triPath.close();
-            triPath.transform(xfmFromZ);
-            triPaths[i] = triPath;
+            p0.x = triangle.getX(0);
+            p0.y = triangle.getY(0);
+            p1.x = triangle.getX(1);
+            p1.y = triangle.getY(1);
+            p2.x = triangle.getX(2);
+            p2.y = triangle.getY(2);
+            p0.z = p1.z = p2.z = zVal;
+
+            // Transform points back and add to VertexBuffer
+            p0.transform(xfmFromZ);
+            p1.transform(xfmFromZ);
+            p2.transform(xfmFromZ);
+
+            // If points normal facing backwards, reverse points (swap p0 and p2)
+            Vector3D.getNormalForPoints(pointsNormal, points);
+            if (pointsNormal.equals(pathNormal)) {
+                double px = p0.x, py = p0.y, pz = p0.z;
+                p0.x = p2.x; p0.y = p2.y; p0.z = p2.z;
+                p2.x = px; p2.y = py; p2.z = pz;
+            }
+
+            // Add points to VertexBuffer
+            vbuf.addValues3(p0.x, p0.y, p0.z);
+            vbuf.addValues3(p1.x, p1.y, p1.z);
+            vbuf.addValues3(p2.x, p2.y, p2.z);
         }
 
-        // Return Triangle paths
-        return triPaths;
+        // Return Triangle VertexBuffer
+        return vbuf;
     }
 
     /**
@@ -529,7 +554,7 @@ public class Path3D extends Shape3D implements Cloneable {
         _center = null;
         _normal = null;
         _bbox = null;
-        _path = null;
+        _trianglesVB = null;
     }
 
     // Constants for comparison/ordering of Path3Ds
