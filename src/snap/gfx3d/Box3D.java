@@ -17,9 +17,15 @@ public class Box3D {
     /**
      * Constructor.
      */
-    public Box3D()
+    public Box3D()  { }
+
+    /**
+     * Constructor.
+     */
+    public Box3D(double aMinX, double aMinY, double aMinZ, double aMaxX, double aMaxY, double aMaxZ)
     {
-        _minX = _minY = _minZ = Float.MAX_VALUE;
+        _minX = aMinX; _minY = aMinY; _minZ = aMinZ;
+        _maxX = aMaxX; _maxY = aMaxY; _maxZ = aMaxZ;
     }
 
     /**
@@ -60,7 +66,10 @@ public class Box3D {
     /**
      * Sets the max X value.
      */
-    public void setMaxX(double aValue)  { _maxX = aValue; }
+    public void setMaxX(double aValue)
+    {
+        _maxX = aValue;
+    }
 
     /**
      * Returns the max Y value.
@@ -70,7 +79,10 @@ public class Box3D {
     /**
      * Sets the max Y value.
      */
-    public void setMaxY(double aValue)  { _maxY = aValue; }
+    public void setMaxY(double aValue)
+    {
+        _maxY = aValue;
+    }
 
     /**
      * Returns the max Z value.
@@ -80,7 +92,10 @@ public class Box3D {
     /**
      * Sets the max Z value.
      */
-    public void setMaxZ(double aValue)  { _maxZ = aValue; }
+    public void setMaxZ(double aValue)
+    {
+        _maxZ = aValue;
+    }
 
     /**
      * Returns the mid X for the path.
@@ -169,6 +184,19 @@ public class Box3D {
     {
         addXYZ(aBox._minX, aBox._minY, aBox._minZ);
         addXYZ(aBox._maxX, aBox._maxY, aBox._maxZ);
+    }
+
+    /**
+     * Transforms the path by the given transform3d.
+     */
+    public void transform(Transform3D xform)
+    {
+        Point3D minXYZ = xform.transformPoint(_minX, _minY, _minZ);
+        Point3D maxXYZ = xform.transformPoint(_maxX, _maxY, _maxZ);
+        setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+        setMinXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+        addXYZ(minXYZ.x, minXYZ.y, minXYZ.z);
+        addXYZ(maxXYZ.x, maxXYZ.y, maxXYZ.z);
     }
 
     /**

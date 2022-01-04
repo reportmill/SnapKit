@@ -388,22 +388,12 @@ public class Camera3D {
         double boxW = getWidth();
         double boxH = getHeight();
         double boxD = getDepth();
-        Path3D bbox = new Path3D();
-        bbox.moveTo(0, 0, 0);
-        bbox.lineTo(0, 0, boxD);
-        bbox.lineTo(boxW, 0, boxD);
-        bbox.lineTo(boxW, 0, 0);
-        bbox.lineTo(boxW, boxH, 0);
-        bbox.lineTo(boxW, boxH, boxD);
-        bbox.lineTo(0, boxH, boxD);
-        bbox.lineTo(0, boxH, 0);
-
-        // Transform
-        Transform3D xfm = getTransform();
-        bbox.transform(xfm);
+        Box3D boundsBox = new Box3D(0, 0, 0, boxW, boxH, boxD);
+        Transform3D cameraTrans = getTransform();
+        boundsBox.transform(cameraTrans);
 
         // Get second offset Z from bounding box and restore original Z offset
-        _offsetZ2 = bbox.getMinZ();
+        _offsetZ2 = boundsBox.getMinZ();
         _offsetZ = offZ;
         _xform3D = null;
 
