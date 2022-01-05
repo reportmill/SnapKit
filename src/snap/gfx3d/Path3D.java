@@ -91,9 +91,9 @@ public class Path3D extends Shape3D implements Cloneable {
         // If given index isn't equal to "next index" optimizer, reset next index ivar
         if (anIndex != _nextElementIndex) {
             _nextPointIndex = 0;
-            for (int i=0; i<anIndex; i++) {
-                Seg t = _elements.get(i);
-                _nextPointIndex += t==MOVE_TO || t==LINE_TO ? 1 : t==QUAD_TO ? 2 : t==CURVE_TO ? 3 : 0;
+            for (int i = 0; i < anIndex; i++) {
+                Seg seg = _elements.get(i);
+                _nextPointIndex += seg == MOVE_TO || seg == LINE_TO ? 1 : seg == QUAD_TO ? 2 : seg == CURVE_TO ? 3 : 0;
             }
         }
 
@@ -220,12 +220,12 @@ public class Path3D extends Shape3D implements Cloneable {
         // Reference is Newell's Method for Computing the Plane Equation of a Polygon.
         //   Graphics Gems III, David Kirk (Ed.), AP Professional, 1992.
         Vector3D normal = new Vector3D(0, 0, 0);
-        for (int i=0, pc=getPointCount(); i<pc; i++) {
-            Point3D cur = getPoint(i);
-            Point3D next = getPoint((i+1) % pc);
-            normal.x += (cur.y - next.y) * (cur.z + next.z);
-            normal.y += (cur.z - next.z) * (cur.x + next.x);
-            normal.z += (cur.x - next.x) * (cur.y + next.y);
+        for (int i = 0, pointCount = getPointCount(); i < pointCount; i++) {
+            Point3D thisPoint = getPoint(i);
+            Point3D nextPoint = getPoint((i+1) % pointCount);
+            normal.x += (thisPoint.y - nextPoint.y) * (thisPoint.z + nextPoint.z);
+            normal.y += (thisPoint.z - nextPoint.z) * (thisPoint.x + nextPoint.x);
+            normal.z += (thisPoint.x - nextPoint.x) * (thisPoint.y + nextPoint.y);
         }
 
         // Normalize the result and swap sign so it matches right hand rule
@@ -307,7 +307,7 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public void transform(Transform3D xform)
     {
-        for (int i=0, iMax=getPointCount(); i<iMax; i++)
+        for (int i = 0, iMax = getPointCount(); i < iMax; i++)
             getPoint(i).transform(xform);
         clearCachedValues();
     }
@@ -342,7 +342,7 @@ public class Path3D extends Shape3D implements Cloneable {
 
         // Create the rotation matrix
         Transform3D rotMatrix = new Transform3D();
-        rotMatrix.rotateAboutAxis(rotAxis, angle);
+        rotMatrix.rotateAboutAxis(angle, rotAxis.x, rotAxis.y, rotAxis.z);
 
         // The point of rotation is located at the shape's center
         Point3D rotOrigin = getCenter();
