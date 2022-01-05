@@ -7,23 +7,23 @@ import java.util.Arrays;
 /**
  * This class represents a 3D transform. 
  */
-public class Transform3D implements Cloneable {
-    
-    // All of the transform components
+public class Matrix3D implements Cloneable {
+
+    // Double array holding actual matrix values
     public double[] mtx = new double[] { 1, 0, 0, 0,  0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 
     // Constant for Identity transform
-    public static Transform3D  IDENTITY = new Transform3D();
-    
-    /**
-     * Creates a Transform3D with the identity matrix.
-     */
-    public Transform3D()  { }
+    public static Matrix3D IDENTITY = new Matrix3D();
 
     /**
-     * Creates a Transform3D with given translations.
+     * Constructor (creates identity).
      */
-    public Transform3D(double aX, double aY, double aZ)
+    public Matrix3D()  { }
+
+    /**
+     * Constructor with given translations.
+     */
+    public Matrix3D(double aX, double aY, double aZ)
     {
         translate(aX, aY, aZ);
     }
@@ -31,10 +31,9 @@ public class Transform3D implements Cloneable {
     /**
      * Multiplies receiver by given transform: [this] = [this] x [aTrans]
      */
-    public Transform3D multiply(Transform3D aTransform)
+    public Matrix3D multiply(Matrix3D aTransform)
     {
         // Get this float array, given float array and new float array
-        double[] m1 = mtx;
         double[] m2 = aTransform.mtx;
         double[] m3 = new double[16];
 
@@ -42,7 +41,7 @@ public class Transform3D implements Cloneable {
         for (int i = 0; i < 4; i++)
             for (int j = 0; j < 4; j++)
                 for (int k = 0; k < 4; k++)
-                    m3[i * 4 + j] += m1[i * 4 + k] * m2[k * 4 + j];
+                    m3[i + j * 4] += mtx[i + k * 4] * m2[k + j * 4];
 
         // Return this (loaded from m3)
         return fromArray(m3);
@@ -51,10 +50,9 @@ public class Transform3D implements Cloneable {
     /**
      * Translates by given x, y & z.
      */
-    public Transform3D translate(double x, double y, double z)
+    public Matrix3D translate(double x, double y, double z)
     {
-        //m[3][0] += x; m[3][1] += y; m[3][2] += z;
-        Transform3D rm = new Transform3D();
+        Matrix3D rm = new Matrix3D();
         rm.mtx[3 * 4 + 0] = x;
         rm.mtx[3 * 4 + 1] = y;
         rm.mtx[3 * 4 + 2] = z;
@@ -64,9 +62,9 @@ public class Transform3D implements Cloneable {
     /**
      * Rotate x axis by given degrees.
      */
-    public Transform3D rotateX(double anAngle)
+    public Matrix3D rotateX(double anAngle)
     {
-        Transform3D rm = new Transform3D();
+        Matrix3D rm = new Matrix3D();
         double angle = Math.toRadians(anAngle);
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
@@ -80,9 +78,9 @@ public class Transform3D implements Cloneable {
     /**
      * Rotate y axis by given degrees.
      */
-    public Transform3D rotateY(double anAngle)
+    public Matrix3D rotateY(double anAngle)
     {
-        Transform3D rm = new Transform3D();
+        Matrix3D rm = new Matrix3D();
         double angle = Math.toRadians(anAngle);
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
@@ -96,9 +94,9 @@ public class Transform3D implements Cloneable {
     /**
      * Rotate z axis by given degrees.
      */
-    public Transform3D rotateZ(double anAngle)
+    public Matrix3D rotateZ(double anAngle)
     {
-        Transform3D rm = new Transform3D();
+        Matrix3D rm = new Matrix3D();
         double angle = Math.toRadians(anAngle);
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
@@ -112,9 +110,9 @@ public class Transform3D implements Cloneable {
     /**
      * Rotate about arbitrary axis.
      */
-    public Transform3D rotateAboutAxis(double anAngle, double aX, double aY, double aZ)
+    public Matrix3D rotateAboutAxis(double anAngle, double aX, double aY, double aZ)
     {
-        Transform3D rm = new Transform3D();
+        Matrix3D rm = new Matrix3D();
         double angle = Math.toRadians(anAngle);
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
@@ -134,9 +132,9 @@ public class Transform3D implements Cloneable {
     /**
      * Rotate x,y,z with three Euler angles (same as rotateX(rx).rotateY(ry).rotateZ(rz)).
      */
-    public Transform3D rotateXYZ(double rx, double ry, double rz)
+    public Matrix3D rotateXYZ(double rx, double ry, double rz)
     {
-        Transform3D rm = new Transform3D();
+        Matrix3D rm = new Matrix3D();
         double ax = Math.toRadians(rx);
         double ay = Math.toRadians(ry);
         double az = Math.toRadians(rz);
@@ -162,55 +160,28 @@ public class Transform3D implements Cloneable {
     }
 
     /**
-     * Returns a matrix whose axes are aligned with the world (screen) coordinate system.
-     * All rotations & skews are removed, and perspective is replaced by uniform scaling.
-     */
-    public Transform3D worldAlign(Point3D originPt)
-    {
-       Point3D tp = transform(originPt.clone());
-       double w = mtx[2 * 4 + 3] * originPt.z + mtx[3 * 4 + 3];
-
-       for (int i = 0; i < 4; ++i)
-           for (int j = 0; j < 4; ++j)
-               mtx[i * 4 + j] = i == j ? (i < 2 ? 1f / w : 1) : 0;
-       mtx[3 * 4 + 0] = tp.x - originPt.x / w;
-       mtx[3 * 4 + 1] = tp.y - originPt.y / w;
-       mtx[3 * 4 + 2] = tp.z - originPt.z / w;
-       return this;
-    }
-
-    /**
      * Skew by the given degrees.
      */
-    public Transform3D skew(double skx, double sky)
+    public Matrix3D scale(double aSX, double aSY, double aSZ)
     {
-        Transform3D rm = new Transform3D();
-        rm.mtx[2 * 4 + 0] = skx; //Math.toRadians(skx);
-        rm.mtx[2 * 4 + 1] = sky; //Math.toRadians(sky);
+        Matrix3D rm = new Matrix3D();
+        rm.mtx[0 * 4 + 0] = aSX;
+        rm.mtx[1 * 4 + 1] = aSY;
+        rm.mtx[2 * 4 + 2] = aSZ;
         return multiply(rm);
-    }
-
-    /**
-     * Apply perspective transform.
-     */
-    public Transform3D perspective(double d)
-    {
-        Transform3D xfm = new Transform3D();
-        xfm.mtx[2 * 4 + 3] = 1 / d; //p.m[3][3] = 0;
-        return multiply(xfm);
     }
 
     /**
      * Invert.
      */
-    public Transform3D invert()
+    public Matrix3D invert()
     {
         // If IDENTITY, just return
         if (this == IDENTITY)
             return this;
 
         double[] mat = toArray();
-        double[] matInv = new Transform3D().toArray();
+        double[] matInv = new Matrix3D().toArray();
         double determinant = 1;
         double factor;
 
@@ -279,7 +250,7 @@ public class Transform3D implements Cloneable {
     /**
      * Transforms a given point (and returns it as a convenience).
      */
-    public Point3D transform(Point3D aPoint)
+    public Point3D transformPoint(Point3D aPoint)
     {
         double x2 = mtx[0 * 4 + 0] * aPoint.x + mtx[1 * 4 + 0] * aPoint.y + mtx[2 * 4 + 0] * aPoint.z + mtx[3 * 4 + 0];
         double y2 = mtx[0 * 4 + 1] * aPoint.x + mtx[1 * 4 + 1] * aPoint.y + mtx[2 * 4 + 1] * aPoint.z + mtx[3 * 4 + 1];
@@ -296,13 +267,13 @@ public class Transform3D implements Cloneable {
      */
     public Point3D transformPoint(double aX, double aY, double aZ)
     {
-        return transform(new Point3D(aX, aY, aZ));
+        return transformPoint(new Point3D(aX, aY, aZ));
     }
 
     /**
      * Transforms a given vector (and returns it as a convenience).
      */
-    public Vector3D transform(Vector3D aVector)
+    public Vector3D transformVector(Vector3D aVector)
     {
         double x2 = mtx[0 * 4 + 0] * aVector.x + mtx[1 * 4 + 0] * aVector.y + mtx[2 * 4 + 0] * aVector.z;
         double y2 = mtx[0 * 4 + 1] * aVector.x + mtx[1 * 4 + 1] * aVector.y + mtx[2 * 4 + 1] * aVector.z;
@@ -331,7 +302,7 @@ public class Transform3D implements Cloneable {
     /**
      * Loads the transform from a double array.
      */
-    public Transform3D fromArray(double[] mat2)
+    public Matrix3D fromArray(double[] mat2)
     {
         System.arraycopy(mat2, 0, mtx, 0, 16);
         return this;
@@ -340,9 +311,9 @@ public class Transform3D implements Cloneable {
     /**
      * Standard clone implementation.
      */
-    public Transform3D clone()
+    public Matrix3D clone()
     {
-        Transform3D copy = new Transform3D();
+        Matrix3D copy = new Matrix3D();
         return copy.fromArray(mtx);
     }
 
@@ -353,6 +324,6 @@ public class Transform3D implements Cloneable {
     public String toString()
     {
         String mtxStr = Arrays.toString(mtx);
-        return "Transform3D { " + mtxStr + " }";
+        return "Matrix3D { " + mtxStr + " }";
     }
 }
