@@ -313,43 +313,39 @@ public class Path3D extends Shape3D implements Cloneable {
     }
 
     /**
-     * Transforms the path so the normal is aligned with the given vector.
+     * Transforms the path by the given transform matrix.
      */
-    public void align(Vector3D aVector)
+    public void transform(Matrix3D xform)
     {
-        // Get transform to vector (just return if IDENTITY)
-        Transform3D xfm = getTransformToAlignToVector(aVector);
-        if (xfm == Transform3D.IDENTITY)
-            return;
-
-        // Transform this Path3D
-        transform(xfm);
+        for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
+            Point3D point = getPoint(i);
+            xform.transformPoint(point);
+        }
+        clearCachedValues();
     }
 
     /**
      * Returns the transform to make this Path3D align with given vector.
      */
-    public Transform3D getTransformToAlignToVector(Vector3D aVector)
+    public Matrix3D getTransformToAlignToVector(double aX, double aY, double aZ)
     {
         // Get angle between Path3D.Normal and given vector
+        Vector3D vector = new Vector3D(aX, aY, aZ);
         Vector3D norm = getNormal();
-        double angle = norm.getAngleBetween(aVector);
+        double angle = norm.getAngleBetween(vector);
         if (angle == 0 || angle == 180) // THIS IS WRONG - NO 180!!!
-            return Transform3D.IDENTITY;
-
-        // Get axis about which to rotate the path (its the cross product of Path3D.Normal and given vectors)
-        Vector3D rotAxis = norm.getCrossProduct(aVector);
-
-        // Create the rotation matrix
-        Transform3D rotMatrix = new Transform3D();
-        rotMatrix.rotateAboutAxis(angle, rotAxis.x, rotAxis.y, rotAxis.z);
+            return Matrix3D.IDENTITY;
 
         // The point of rotation is located at the shape's center
         Point3D rotOrigin = getCenter();
 
-        Transform3D xform = new Transform3D();
+        // Get axis about which to rotate the path (its the cross product of Path3D.Normal and given vector)
+        Vector3D rotAxis = norm.getCrossProduct(vector);
+
+        // Get transform
+        Matrix3D xform = new Matrix3D();
         xform.translate(-rotOrigin.x, -rotOrigin.y, -rotOrigin.z);
-        xform.multiply(rotMatrix);
+        xform.rotateAboutAxis(angle, rotAxis.x, rotAxis.y, rotAxis.z);
         xform.translate(rotOrigin.x, rotOrigin.y, rotOrigin.z);
         return xform;
     }
@@ -406,15 +402,16 @@ public class Path3D extends Shape3D implements Cloneable {
         if (Double.isNaN(pathNormal.x))
             return vbuf;
 
-        // Get copy facing Z
-        Vector3D zFacing = new Vector3D(0, 0, 1);
-        Transform3D xfmToZ = getTransformToAlignToVector(zFacing);
-        Transform3D xfmFromZ = xfmToZ.invert();
-        Path3D copy = copyForTransform(xfmToZ);
-        double zVal = copy.getMinZ();
+        // Get transform matrix to transform this path to/from facing Z
+        Matrix3D xfmToZ = getTransformToAlignToVector(0, 0, 1);
+        Matrix3D xfmFromZ = xfmToZ.clone().invert();
+
+        // Get copy of path facing Z
+        Path3D pathFacingZ = copyForMatrix(xfmToZ);
+        double zVal = pathFacingZ.getMinZ();
 
         // Get Path2D, break into triangles
-        Path path2D = copy.getPath();
+        Path path2D = pathFacingZ.getPath();
         Polygon[] triangles = Polygon.getConvexPolys(path2D, 3);
 
         // Create loop variables
@@ -425,10 +422,9 @@ public class Path3D extends Shape3D implements Cloneable {
         Vector3D pointsNormal = new Vector3D(0, 0, 0);
 
         // Get Path3Ds
-        for (int i = 0, iMax = triangles.length; i < iMax; i++) {
+        for (Polygon triangle : triangles) {
 
             // Get triangle points
-            Polygon triangle = triangles[i];
             p0.x = triangle.getX(0);
             p0.y = triangle.getY(0);
             p1.x = triangle.getX(1);
@@ -438,9 +434,9 @@ public class Path3D extends Shape3D implements Cloneable {
             p0.z = p1.z = p2.z = zVal;
 
             // Transform points back and add to VertexBuffer
-            p0.transform(xfmFromZ);
-            p1.transform(xfmFromZ);
-            p2.transform(xfmFromZ);
+            xfmFromZ.transformPoint(p0);
+            xfmFromZ.transformPoint(p1);
+            xfmFromZ.transformPoint(p2);
 
             // If points normal facing backwards, reverse points (swap p0 and p2)
             Vector3D.getNormalForPoints(pointsNormal, points);
@@ -550,6 +546,19 @@ public class Path3D extends Shape3D implements Cloneable {
      * Copies path for given transform.
      */
     public Path3D copyForTransform(Transform3D aTrans)
+    {
+        Path3D copy = clone();
+        copy.transform(aTrans);
+        if (_layers != null)
+            for (Path3D layer : copy._layers)
+                layer.transform(aTrans);
+        return copy;
+    }
+
+    /**
+     * Copies path for given transform matrix.
+     */
+    public Path3D copyForMatrix(Matrix3D aTrans)
     {
         Path3D copy = clone();
         copy.transform(aTrans);

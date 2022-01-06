@@ -121,7 +121,12 @@ public class Vector3D implements Cloneable {
     /**
      * Makes this receiver point in the opposite direction.
      */
-    public void negate()  { x = -x; y = -y; z = -z; }
+    public void negate()
+    {
+        x = x != 0 ? -x : 0;
+        y = y != 0 ? -y : 0;
+        z = z != 0 ? -z : 0;
+    }
 
     /**
      * Transforms the vector by the given transform3d.
@@ -172,11 +177,11 @@ public class Vector3D implements Cloneable {
     {
         aVect.x = aVect.y = aVect.z = 0;
         for (int i = 0, iMax = thePoints.length; i < iMax; i++) {
-            Point3D cur = thePoints[i];
-            Point3D next = thePoints[(i + 1) % iMax];
-            aVect.x += (cur.y - next.y) * (cur.z + next.z);
-            aVect.y += (cur.z - next.z) * (cur.x + next.x);
-            aVect.z += (cur.x - next.x) * (cur.y + next.y);
+            Point3D thisPoint = thePoints[i];
+            Point3D nextPoint = thePoints[(i + 1) % iMax];
+            aVect.x += (thisPoint.y - nextPoint.y) * (thisPoint.z + nextPoint.z);
+            aVect.y += (thisPoint.z - nextPoint.z) * (thisPoint.x + nextPoint.x);
+            aVect.z += (thisPoint.x - nextPoint.x) * (thisPoint.y + nextPoint.y);
         }
 
         // Normalize the result and swap sign so it matches right hand rule
