@@ -186,7 +186,8 @@ public class Vector3D implements Cloneable {
 
         // Normalize the result and swap sign so it matches right hand rule
         aVect.normalize();
-        aVect.negate();
+        if (Renderer.FRONT_FACE_IS_CW)
+            aVect.negate();
         return aVect;
     }
 }

@@ -17,6 +17,9 @@ public abstract class Renderer {
     // The Renderer class
     private static Renderer  _defaultRenderer;
 
+    // Whether FrontFace is clockwise
+    public static boolean FRONT_FACE_IS_CW = true;
+
     /**
      * Constructor.
      */

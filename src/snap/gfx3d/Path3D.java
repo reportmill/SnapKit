@@ -230,7 +230,8 @@ public class Path3D extends Shape3D implements Cloneable {
 
         // Normalize the result and swap sign so it matches right hand rule
         normal.normalize();
-        normal.negate();
+        if (Renderer.FRONT_FACE_IS_CW)
+            normal.negate();
         return _normal = normal;
     }
 
@@ -344,9 +345,9 @@ public class Path3D extends Shape3D implements Cloneable {
 
         // Get transform
         Matrix3D xform = new Matrix3D();
-        xform.translate(-rotOrigin.x, -rotOrigin.y, -rotOrigin.z);
-        xform.rotateAboutAxis(angle, rotAxis.x, rotAxis.y, rotAxis.z);
         xform.translate(rotOrigin.x, rotOrigin.y, rotOrigin.z);
+        xform.rotateAboutAxis(angle, rotAxis.x, rotAxis.y, rotAxis.z);
+        xform.translate(-rotOrigin.x, -rotOrigin.y, -rotOrigin.z);
         return xform;
     }
 
@@ -440,7 +441,7 @@ public class Path3D extends Shape3D implements Cloneable {
 
             // If points normal facing backwards, reverse points (swap p0 and p2)
             Vector3D.getNormalForPoints(pointsNormal, points);
-            if (pointsNormal.equals(pathNormal)) {
+            if (!pointsNormal.equals(pathNormal)) {
                 double px = p0.x, py = p0.y, pz = p0.z;
                 p0.x = p2.x; p0.y = p2.y; p0.z = p2.z;
                 p2.x = px; p2.y = py; p2.z = pz;
