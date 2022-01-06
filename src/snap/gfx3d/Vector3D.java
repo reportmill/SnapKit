@@ -129,14 +129,6 @@ public class Vector3D implements Cloneable {
     }
 
     /**
-     * Transforms the vector by the given transform3d.
-     */
-    public Vector3D transform(Transform3D aTransform)
-    {
-        return aTransform.transform(this);
-    }
-
-    /**
      * Standard clone implementation.
      */
     public Vector3D clone()

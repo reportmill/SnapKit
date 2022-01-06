@@ -84,7 +84,7 @@ public class Scene3D {
     {
         Vector3D v2 = new Vector3D(aX, aY, aZ);
         Transform3D localToCamera = _camera.getTransform();
-        v2.transform(localToCamera);
+        localToCamera.transformVector(v2);
         return v2;
     }
 }

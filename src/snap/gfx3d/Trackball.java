@@ -126,15 +126,19 @@ public class Trackball extends ParentView {
         path.lineTo(1,-1,0);
         path.close();
 
-        // translate out to surface of sphere and rotate to latitude, longitude
-        Transform3D transform = new Transform3D(0, 0, _radius);
-        transform.rotateY(theta).rotateZ(phi);
+        // Get Scene origin
+        double midx = _camera.getWidth() / 2;
+        double midy = _camera.getHeight() / 2;
+        double midz = _camera.getDepth() / 2;
 
-        // translate to scene origin
-        double midx = _camera.getWidth()/2;
-        double midy = _camera.getHeight()/2;
-        double midz = _camera.getDepth()/2;
+        // translate out to surface of sphere and rotate to latitude+longitude, translate to scene origin
+        Transform3D transform = new Transform3D();
+        transform.translate(0, 0, _radius);
+        transform.rotateY(theta);
+        transform.rotateZ(phi);
         transform.translate(midx, midy, midz);
+
+        // Transform path
         path.transform(transform);
 
         // If the trackball is shrunk down, draw the scuffmarks a darker color so they'll show up.

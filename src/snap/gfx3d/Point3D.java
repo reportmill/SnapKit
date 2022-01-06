@@ -23,14 +23,6 @@ public class Point3D implements Cloneable {
     }
 
     /**
-     * Transforms the point by the given transform3d.
-     */
-    public Point3D transform(Transform3D xform)
-    {
-        return xform.transform(this);
-    }
-
-    /**
      * Standard equals implementation.
      */
     public boolean equals(Object anObj)

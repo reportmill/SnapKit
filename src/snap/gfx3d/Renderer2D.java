@@ -157,7 +157,7 @@ public class Renderer2D extends Renderer {
 
             // Get normal
             Vector3D pathNormal = path3d.getNormal();
-            Vector3D camPathNormal = worldToCameraXfm.transform(pathNormal.clone());
+            Vector3D camPathNormal = worldToCameraXfm.transformVector(pathNormal.clone());
             camPathNormal.normalize();
 
             // Backface culling : Only add paths that face the camera

@@ -110,28 +110,6 @@ public class Transform3D implements Cloneable {
     }
 
     /**
-     * Rotate about arbitrary axis.
-     */
-    public Transform3D rotateAboutAxis(double anAngle, double aX, double aY, double aZ)
-    {
-        Transform3D rm = new Transform3D();
-        double angle = Math.toRadians(anAngle);
-        double cos = Math.cos(angle);
-        double sin = Math.sin(angle);
-        double t = 1 - cos;
-        rm.mtx[0 * 4 + 0] = t * aX * aX + cos;
-        rm.mtx[0 * 4 + 1] = t * aX * aY + sin * aZ;
-        rm.mtx[0 * 4 + 2] = t * aX * aZ - sin * aY;
-        rm.mtx[1 * 4 + 0] = t * aX * aY - sin * aZ;
-        rm.mtx[1 * 4 + 1] = t * aY * aY + cos;
-        rm.mtx[1 * 4 + 2] = t * aY * aZ + sin * aX;
-        rm.mtx[2 * 4 + 0] = t * aX * aY + sin * aY;
-        rm.mtx[2 * 4 + 1] = t * aY * aZ - sin * aX;
-        rm.mtx[2 * 4 + 2] = t * aZ * aZ + cos;
-        return multiply(rm);
-    }
-
-    /**
      * Rotate x,y,z with three Euler angles (same as rotateX(rx).rotateY(ry).rotateZ(rz)).
      */
     public Transform3D rotateXYZ(double rx, double ry, double rz)
@@ -159,24 +137,6 @@ public class Transform3D implements Cloneable {
         rm.mtx[1 * 4 + 2] = ad * f + b * e;
         rm.mtx[2 * 4 + 2] = a * c;
         return multiply(rm);
-    }
-
-    /**
-     * Returns a matrix whose axes are aligned with the world (screen) coordinate system.
-     * All rotations & skews are removed, and perspective is replaced by uniform scaling.
-     */
-    public Transform3D worldAlign(Point3D originPt)
-    {
-       Point3D tp = transform(originPt.clone());
-       double w = mtx[2 * 4 + 3] * originPt.z + mtx[3 * 4 + 3];
-
-       for (int i = 0; i < 4; ++i)
-           for (int j = 0; j < 4; ++j)
-               mtx[i * 4 + j] = i == j ? (i < 2 ? 1f / w : 1) : 0;
-       mtx[3 * 4 + 0] = tp.x - originPt.x / w;
-       mtx[3 * 4 + 1] = tp.y - originPt.y / w;
-       mtx[3 * 4 + 2] = tp.z - originPt.z / w;
-       return this;
     }
 
     /**
@@ -279,7 +239,7 @@ public class Transform3D implements Cloneable {
     /**
      * Transforms a given point (and returns it as a convenience).
      */
-    public Point3D transform(Point3D aPoint)
+    public Point3D transformPoint(Point3D aPoint)
     {
         double x2 = mtx[0 * 4 + 0] * aPoint.x + mtx[1 * 4 + 0] * aPoint.y + mtx[2 * 4 + 0] * aPoint.z + mtx[3 * 4 + 0];
         double y2 = mtx[0 * 4 + 1] * aPoint.x + mtx[1 * 4 + 1] * aPoint.y + mtx[2 * 4 + 1] * aPoint.z + mtx[3 * 4 + 1];
@@ -296,13 +256,13 @@ public class Transform3D implements Cloneable {
      */
     public Point3D transformPoint(double aX, double aY, double aZ)
     {
-        return transform(new Point3D(aX, aY, aZ));
+        return transformPoint(new Point3D(aX, aY, aZ));
     }
 
     /**
      * Transforms a given vector (and returns it as a convenience).
      */
-    public Vector3D transform(Vector3D aVector)
+    public Vector3D transformVector(Vector3D aVector)
     {
         double x2 = mtx[0 * 4 + 0] * aVector.x + mtx[1 * 4 + 0] * aVector.y + mtx[2 * 4 + 0] * aVector.z;
         double y2 = mtx[0 * 4 + 1] * aVector.x + mtx[1 * 4 + 1] * aVector.y + mtx[2 * 4 + 1] * aVector.z;

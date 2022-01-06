@@ -308,8 +308,10 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public void transform(Transform3D xform)
     {
-        for (int i = 0, iMax = getPointCount(); i < iMax; i++)
-            getPoint(i).transform(xform);
+        for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
+            Point3D point = getPoint(i);
+            xform.transformPoint(point);
+        }
         clearCachedValues();
     }
 
