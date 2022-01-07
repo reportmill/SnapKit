@@ -62,4 +62,23 @@ public class VertexBuffer {
         aPoint.z = _doubleBuf.get(index + 2);
         return aPoint;
     }
+
+    /**
+     * Returns bounds box.
+     */
+    public Box3D getBoundsBox()
+    {
+        // Create and init bounds box
+        Box3D boundsBox = new Box3D();
+        boundsBox.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+        boundsBox.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+        Point3D point = new Point3D(0, 0, 0);
+        for (int i = 0, iMax = getCount(); i < iMax; i++) {
+            getPoint3D(point, i);
+            boundsBox.addXYZ(point.x, point.y, point.z);
+        }
+
+        // Return
+        return boundsBox;
+    }
 }
