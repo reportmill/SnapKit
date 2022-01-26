@@ -81,7 +81,10 @@ public class Trackball extends ParentView {
 
         // Create/configure scene and camera
         _scene = new Scene3D();
+
+        // Create/configure camera
         _camera = _scene.getCamera();
+        _camera.setRenderer(new Renderer2D(_camera));
         _camera.setWidth(IMAGE_SIZE);
         _camera.setHeight(IMAGE_SIZE); // set X to 2 ???
 

@@ -444,6 +444,17 @@ public class Camera3D {
     }
 
     /**
+     * Sets the renderer.
+     */
+    public void setRenderer(Renderer aRenderer)
+    {
+        if (_renderer != null)
+            System.err.println("Camera3D.setRenderer: Need to free renderer");
+
+        _renderer = aRenderer;
+    }
+
+    /**
      * Paints the scene from the view of this camera for given painter.
      */
     public void paintScene(Painter aPntr)
