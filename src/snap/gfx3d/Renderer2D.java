@@ -22,6 +22,9 @@ public class Renderer2D extends Renderer {
     // Whether paths list needs to be rebuilt
     private boolean  _rebuildPaths;
 
+    // Constant for name
+    private static final String RENDERER_NAME = "Vector 2D";
+
     /**
      * Constructor.
      */
@@ -29,6 +32,12 @@ public class Renderer2D extends Renderer {
     {
         super(aCamera);
     }
+
+    /**
+     * Returns the name.
+     */
+    @Override
+    public String getName()  { return RENDERER_NAME; }
 
     /**
      * Returns the specific Path3D at the given index from the display list.
@@ -232,12 +241,12 @@ public class Renderer2D extends Renderer {
 
         // Iterate over Path3Ds and paint
         List<Path3D> paths = getPaths();
-        for (int i=0, iMax=paths.size(); i<iMax; i++) {
+        for (int i = 0, iMax = paths.size(); i < iMax; i++) {
 
             // Paint path and path layers
             Path3D child = paths.get(i);
             paintPath3D(aPntr, child);
-            if (child.getLayers().size()>0)
+            if (child.getLayers().size() > 0)
                 for (Path3D layer : child.getLayers())
                     paintPath3D(aPntr, layer);
         }
@@ -311,7 +320,7 @@ public class Renderer2D extends Renderer {
         /**
          * Returns the renderer name.
          */
-        public String getRendererName()  { return "Vector 2D"; }
+        public String getRendererName()  { return RENDERER_NAME; }
 
         /**
          * Returns a new default renderer.

@@ -14,6 +14,9 @@ public abstract class Renderer {
     // The Scene
     protected Scene3D  _scene;
 
+    // The factory that made this renderer
+    protected RendererFactory  _factory;
+
     // Whether FrontFace is clockwise
     public static boolean FRONT_FACE_IS_CW = true;
 
@@ -27,6 +30,11 @@ public abstract class Renderer {
 
         _camera.addPropChangeListener(pc -> cameraDidPropChange(pc));
     }
+
+    /**
+     * Returns the name of this renderer.
+     */
+    public abstract String getName();
 
     /**
      * Returns the Camera.

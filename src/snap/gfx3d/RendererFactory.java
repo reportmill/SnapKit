@@ -68,6 +68,30 @@ public abstract class RendererFactory {
     }
 
     /**
+     * Returns the names of all factories.
+     */
+    public static String[] getFactoryNames()
+    {
+        RendererFactory[] factories = getFactories();
+        String[] names = new String[factories.length];
+        for (int i = 0; i < factories.length; i++)
+            names[i] = factories[i].getRendererName();
+        return names;
+    }
+
+    /**
+     * Returns the RendererFactory for given name.
+     */
+    public static RendererFactory getFactoryForName(String aName)
+    {
+        RendererFactory[] factories = getFactories();
+        for (RendererFactory factory : factories)
+            if (factory.getRendererName().equals(aName))
+                return factory;
+        return null;
+    }
+
+    /**
      * Static initializer.
      */
     static

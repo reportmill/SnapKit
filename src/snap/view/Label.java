@@ -40,7 +40,7 @@ public class Label extends ParentView {
     public static final String Radius_Prop = "Radius";
 
     // Constants for property defaults
-    private static final int DEFAULT_LABEL_SPACING = 4;
+    private static final double DEFAULT_LABEL_SPACING = 4;
 
     /**
      * Creates a label node.

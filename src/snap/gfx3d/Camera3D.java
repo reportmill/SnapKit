@@ -85,6 +85,7 @@ public class Camera3D {
     public static final String Pseudo3D_Prop = "Pseudo3D";
     public static final String PseudoSkewX_Prop = "PseudoSkewX";
     public static final String PseudoSkewY_Prop = "PseudoSkewY";
+    public static final String Renderer_Prop = "Renderer";
 
     // Constants for mouse drag constraints
     public final int CONSTRAIN_NONE = 0;
@@ -439,8 +440,12 @@ public class Camera3D {
      */
     public Renderer getRenderer()
     {
+        // If already set, just return
         if (_renderer != null) return _renderer;
-        return _renderer = Renderer.newRenderer(this);
+
+        // Create, set, return
+        Renderer renderer = Renderer.newRenderer(this);
+        return _renderer = renderer;
     }
 
     /**
@@ -448,10 +453,17 @@ public class Camera3D {
      */
     public void setRenderer(Renderer aRenderer)
     {
+        // Clear old renderer
+        Renderer oldRenderer = _renderer;
         if (_renderer != null)
             System.err.println("Camera3D.setRenderer: Need to free renderer");
 
+        // Set new renderer
         _renderer = aRenderer;
+
+        // Fire prop change
+        firePropChange(Renderer_Prop, oldRenderer, _renderer);
+        sceneDidChange();
     }
 
     /**
