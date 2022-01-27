@@ -286,4 +286,39 @@ public class Renderer2D extends Renderer {
         Rect r = font.getStringBounds(aStr), r2 = aPath3D.getPath().getBounds();
         aPntr.drawString(aStr, r2.x + (r2.width - r.width)/2, r2.y + (r2.height - r.height)/2 + asc);
     }*/
+
+    /**
+     * Registers factory.
+     */
+    public static void registerFactory()
+    {
+        // If already set, just return
+        for (RendererFactory factory : RendererFactory.getFactories())
+            if (factory.getClass() == Renderer2DFactory.class)
+                return;
+
+        // Create, add and setDefault
+        RendererFactory factory = new Renderer2DFactory();
+        RendererFactory.addFactory(factory);
+        RendererFactory.setDefaultFactory(factory);
+    }
+
+    /**
+     * A default implementation.
+     */
+    private static class Renderer2DFactory extends RendererFactory {
+
+        /**
+         * Returns the renderer name.
+         */
+        public String getRendererName()  { return "Vector 2D"; }
+
+        /**
+         * Returns a new default renderer.
+         */
+        public Renderer newRenderer(Camera3D aCamera)
+        {
+            return new Renderer2D(aCamera);
+        }
+    }
 }

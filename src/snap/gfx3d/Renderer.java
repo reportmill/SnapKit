@@ -14,9 +14,6 @@ public abstract class Renderer {
     // The Scene
     protected Scene3D  _scene;
 
-    // The Renderer class
-    private static Renderer  _defaultRenderer;
-
     // Whether FrontFace is clockwise
     public static boolean FRONT_FACE_IS_CW = true;
 
@@ -67,29 +64,11 @@ public abstract class Renderer {
     protected void sceneDidChange()  { }
 
     /**
-     * Creates a new Renderer for given camera.
-     */
-    public Renderer createRenderer(Camera3D aCamera)
-    {
-        return new Renderer2D(aCamera);
-    }
-
-    /**
      * Returns a new default renderer.
      */
     public static Renderer newRenderer(Camera3D aCamera)
     {
-        if (_defaultRenderer != null)
-            return _defaultRenderer.createRenderer(aCamera);
-
-        return new Renderer2D(aCamera);
-    }
-
-    /**
-     * Sets a default renderer.
-     */
-    public static void setDefaultRenderer(Renderer aRenderer)
-    {
-        _defaultRenderer = aRenderer;
+        Renderer renderer = RendererFactory.newDefaultRenderer(aCamera);
+        return renderer;
     }
 }
