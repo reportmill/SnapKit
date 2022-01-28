@@ -194,7 +194,7 @@ public class Box3D {
         Point3D minXYZ = xform.transformPoint(_minX, _minY, _minZ);
         Point3D maxXYZ = xform.transformPoint(_maxX, _maxY, _maxZ);
         setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-        setMinXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+        setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
         addXYZ(minXYZ.x, minXYZ.y, minXYZ.z);
         addXYZ(maxXYZ.x, maxXYZ.y, maxXYZ.z);
     }

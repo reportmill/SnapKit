@@ -399,8 +399,10 @@ public class Camera3D {
         _xform3D = null;
 
         // Something is brokey
-        if (Math.abs(_offsetZ2) > boxW)
-            _offsetZ2 = boxW*MathUtils.sign(_offsetZ2);
+        if (Math.abs(_offsetZ2) > boxW) {
+            _offsetZ2 = boxW * MathUtils.sign(_offsetZ2);
+            System.err.println("Camera3D.adjustZ: Error in calculation");
+        }
     }
 
     /**
