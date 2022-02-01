@@ -398,12 +398,16 @@ public class Camera3D {
     public Transform3D getProjectionTransform()
     {
         // Create transform
-        Transform3D xfm = new Transform3D();
-
-        // Apply perspective
         double focalLen = getFocalLength();
-        if (focalLen > 0)
-            xfm.perspective(focalLen);
+        Transform3D xfm = Transform3D.newPerspective(focalLen);
+
+        if (false) {
+            double fovY = getFieldOfViewY();
+            double viewW = getWidth();
+            double viewH = getHeight();
+            double aspect = viewW / viewH;
+            xfm = Transform3D.newPerspective(fovY, aspect, 1, 10000);
+        }
 
         // Return
         return xfm;

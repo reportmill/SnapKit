@@ -153,11 +153,32 @@ public class Transform3D implements Cloneable {
     /**
      * Apply perspective transform.
      */
-    public Transform3D perspective(double d)
+    public static Transform3D newPerspective(double d)
     {
         Transform3D xfm = new Transform3D();
         xfm.mtx[2 * 4 + 3] = 1 / d; //p.m[3][3] = 0;
-        return multiply(xfm);
+        return xfm;
+    }
+
+    /**
+     * Apply perspective transform.
+     */
+    public static Transform3D newPerspective(double fieldOfViewY, double aspect, double nearZ, double farZ)
+    {
+        Transform3D xfm = new Transform3D();
+        double f = 1d / Math.tan(Math.toRadians(fieldOfViewY));
+        double nearMinusFar = nearZ - farZ;
+
+        // Set elements
+        xfm.mtx[0 * 4 + 0] = f / aspect;
+        xfm.mtx[1 * 4 + 1] = f;
+        xfm.mtx[2 * 4 + 2] = (farZ + nearZ) / nearMinusFar;
+        xfm.mtx[2 * 4 + 3] = -1;
+        xfm.mtx[3 * 4 + 2] = 2 * farZ * nearZ / nearMinusFar;
+        xfm.mtx[3 * 4 + 3] = 0;
+
+        // Return
+        return xfm;
     }
 
     /**
