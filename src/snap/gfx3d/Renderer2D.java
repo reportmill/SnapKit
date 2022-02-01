@@ -114,14 +114,15 @@ public class Renderer2D extends Renderer {
         // Resort paths
         Sort3D.sortPaths(_paths);
 
-        // Replace with paths for projection
-        double focalLen = getCamera().getFocalLength();
-        if (focalLen > 0) {
-            Transform3D xfm = new Transform3D().perspective(focalLen);
-            for (int i=0, iMax=_paths.size(); i<iMax; i++) {
-                Path3D path3D = _paths.get(i);
-                _paths.set(i, path3D.copyForTransform(xfm));
-            }
+        // Get projection transform
+        Camera3D camera3D = getCamera();
+        Transform3D projTrans = camera3D.getProjectionTransform();
+
+        // Iterate over paths and replace with paths in display space
+        for (int i = 0, iMax = _paths.size(); i < iMax; i++) {
+            Path3D path = _paths.get(i);
+            Path3D path2 = path.copyForTransform(projTrans);
+            _paths.set(i, path2);
         }
 
         // Clear RebuildPaths

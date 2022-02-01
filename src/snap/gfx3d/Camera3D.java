@@ -393,6 +393,23 @@ public class Camera3D {
     }
 
     /**
+     * Returns the transform from camera coords to display coords.
+     */
+    public Transform3D getProjectionTransform()
+    {
+        // Create transform
+        Transform3D xfm = new Transform3D();
+
+        // Apply perspective
+        double focalLen = getFocalLength();
+        if (focalLen > 0)
+            xfm.perspective(focalLen);
+
+        // Return
+        return xfm;
+    }
+
+    /**
      * Returns the optimal distance from center of scene to camera when in gimbal mode.
      */
     protected double getPrefGimbalRadiusImpl()
