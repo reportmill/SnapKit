@@ -140,6 +140,17 @@ public class Transform3D implements Cloneable {
     }
 
     /**
+     * Scale by the given factors.
+     */
+    public Transform3D scale(double aScaleX, double aScaleY)
+    {
+        Transform3D rm = new Transform3D();
+        rm.mtx[0 * 4 + 0] = aScaleX;
+        rm.mtx[1 * 4 + 1] = aScaleY;
+        return multiply(rm);
+    }
+
+    /**
      * Skew by the given degrees.
      */
     public Transform3D skew(double skx, double sky)
@@ -166,7 +177,7 @@ public class Transform3D implements Cloneable {
     public static Transform3D newPerspective(double fieldOfViewY, double aspect, double nearZ, double farZ)
     {
         Transform3D xfm = new Transform3D();
-        double f = 1d / Math.tan(Math.toRadians(fieldOfViewY));
+        double f = 1d / Math.tan(Math.toRadians(fieldOfViewY / 2));
         double nearMinusFar = nearZ - farZ;
 
         // Set elements
@@ -176,6 +187,10 @@ public class Transform3D implements Cloneable {
         xfm.mtx[2 * 4 + 3] = -1;
         xfm.mtx[3 * 4 + 2] = 2 * farZ * nearZ / nearMinusFar;
         xfm.mtx[3 * 4 + 3] = 0;
+
+        // Transpose
+        xfm.mtx[3 * 4 + 2] = -1;
+        xfm.mtx[2 * 4 + 3] = 2 * farZ * nearZ / nearMinusFar;
 
         // Return
         return xfm;

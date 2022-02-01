@@ -15,7 +15,7 @@ import snap.gfx.Color;
 public class Light3D {
 
     // The normal
-    private Vector3D  _normal = new Vector3D(0, 0, -1);
+    private Vector3D  _normal = new Vector3D(0, 0, 1);
 
     /**
      * Constructor.

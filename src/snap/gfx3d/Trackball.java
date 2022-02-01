@@ -88,6 +88,9 @@ public class Trackball extends ParentView {
         _camera.setWidth(IMAGE_SIZE);
         _camera.setHeight(IMAGE_SIZE); // set X to 2 ???
 
+        // Set GimbalRadius
+        _camera.setPrefGimbalRadius(_camera.getFocalLength());
+
         // Enable mouse/action events
         enableEvents(MousePress, MouseDrag, MouseRelease, Action); //setFill(null);
         setPrefSize(IMAGE_SIZE, IMAGE_SIZE);

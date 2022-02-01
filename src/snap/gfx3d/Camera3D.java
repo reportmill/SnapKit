@@ -55,7 +55,7 @@ public class Camera3D {
     private double  _pseudoSkewX, _pseudoSkewY;
     
     // Camera normal
-    private Vector3D  _normal = new Vector3D(0, 0, 1);
+    private Vector3D  _normal = new Vector3D(0, 0, -1);
     
     // The currently cached transform 3d
     private Transform3D  _xform3D;
@@ -304,25 +304,15 @@ public class Camera3D {
     /**
      * Returns the field of view of the camera (derived from focalLength).
      */
-    public double getFieldOfView()
-    {
-        double height = Math.max(getWidth(), getHeight());
-        double fieldOfView = Math.toDegrees(Math.atan(height/(2*_focalLen)));
-        return fieldOfView*2;
-    }
-
-    /**
-     * Returns the field of view of the camera (derived from focalLength).
-     */
     public double getFieldOfViewX()
     {
-        double height = getWidth();
-        double fieldOfView = Math.toDegrees(Math.atan(height / (2 * _focalLen)));
+        double width = getWidth();
+        double fieldOfView = Math.toDegrees(Math.atan(width / (2 * _focalLen)));
         return fieldOfView * 2;
     }
 
     /**
-     * Returns the field of view of the camera (derived from focalLength).
+     * Returns the field of view Y of camera (derived from focalLength).
      */
     public double getFieldOfViewY()
     {
@@ -332,13 +322,13 @@ public class Camera3D {
     }
 
     /**
-     * Sets the field of view of the camera.
+     * Sets the field of view Y of camera.
      */
-    public void setFieldOfView(double aValue)
+    public void setFieldOfViewY(double aValue)
     {
-        double height = Math.max(getWidth(), getHeight());
-        double tanTheta = Math.tan(Math.toRadians(aValue/2));
-        double focalLength = height/(2*tanTheta);
+        double height = getHeight();
+        double tanTheta = Math.tan(Math.toRadians(aValue / 2));
+        double focalLength = height / (2 * tanTheta);
         setFocalLength(focalLength);
     }
 
@@ -346,6 +336,28 @@ public class Camera3D {
      * Returns the camera normal as a vector.
      */
     public Vector3D getNormal()  { return _normal; }
+
+    /**
+     * Returns the transform from camera coords to display coords.
+     */
+    public Transform3D getProjectionTransform()
+    {
+        // Create transform
+        double focalLen = getFocalLength();
+        Transform3D xfm = Transform3D.newPerspective(focalLen);
+
+        if (true) {
+            double fovY = getFieldOfViewY();
+            double viewW = getWidth();
+            double viewH = getHeight();
+            double aspect = viewW / viewH;
+            xfm = Transform3D.newPerspective(fovY, aspect, 1, 10000);
+            xfm.scale(viewW, viewH);
+        }
+
+        // Return
+        return xfm;
+    }
 
     /**
      * Returns the transform from scene coords to camera coords.
@@ -388,28 +400,7 @@ public class Camera3D {
 
         // Translate by Offset Z
         double gimbalRadius = getGimbalRadius();
-        xfm.translate(0, 0, gimbalRadius);
-        return xfm;
-    }
-
-    /**
-     * Returns the transform from camera coords to display coords.
-     */
-    public Transform3D getProjectionTransform()
-    {
-        // Create transform
-        double focalLen = getFocalLength();
-        Transform3D xfm = Transform3D.newPerspective(focalLen);
-
-        if (false) {
-            double fovY = getFieldOfViewY();
-            double viewW = getWidth();
-            double viewH = getHeight();
-            double aspect = viewW / viewH;
-            xfm = Transform3D.newPerspective(fovY, aspect, 1, 10000);
-        }
-
-        // Return
+        xfm.translate(0, 0, -gimbalRadius);
         return xfm;
     }
 
