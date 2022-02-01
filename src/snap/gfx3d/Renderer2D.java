@@ -104,10 +104,6 @@ public class Renderer2D extends Renderer {
      */
     protected void rebuildPathsNow()
     {
-        // Adjust Z
-        if (_camera.isAdjustZ())
-            _camera.adjustZ();
-
         // Remove all existing Path3Ds
         removePaths();
         _sceneBounds = null;
@@ -202,7 +198,7 @@ public class Renderer2D extends Renderer {
             case Camera3D.Pitch_Prop:
             case Camera3D.Roll_Prop:
             case Camera3D.FocalLength_Prop:
-            case Camera3D.OffsetZ_Prop:
+            case Camera3D.PrefGimbalRadius_Prop:
             case Camera3D.AdjustZ_Prop:
             case Camera3D.Pseudo3D_Prop:
             case Camera3D.PseudoSkewX_Prop:

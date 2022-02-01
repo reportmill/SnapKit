@@ -187,16 +187,37 @@ public class Box3D {
     }
 
     /**
+     * Returns the corner points.
+     */
+    public Point3D[] getCornerPoints()
+    {
+        Point3D[] points = new Point3D[8];
+        points[0] = new Point3D(_minX, _minY, _minZ);
+        points[1] = new Point3D(_maxX, _minY, _minZ);
+        points[2] = new Point3D(_maxX, _maxY, _minZ);
+        points[3] = new Point3D(_minX, _maxY, _minZ);
+        points[4] = new Point3D(_minX, _minY, _maxZ);
+        points[5] = new Point3D(_maxX, _minY, _maxZ);
+        points[6] = new Point3D(_maxX, _maxY, _maxZ);
+        points[7] = new Point3D(_minX, _maxY, _maxZ);
+        return points;
+    }
+
+    /**
      * Transforms the path by the given transform3d.
      */
     public void transform(Transform3D xform)
     {
-        Point3D minXYZ = xform.transformPoint(_minX, _minY, _minZ);
-        Point3D maxXYZ = xform.transformPoint(_maxX, _maxY, _maxZ);
+        // Get corner points in given transform coords
+        Point3D[] cornerPoints = getCornerPoints();
+        for (Point3D point : cornerPoints)
+            xform.transformPoint(point);
+
+        // Reset min/max XYZ values and add transformed points
         setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
         setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
-        addXYZ(minXYZ.x, minXYZ.y, minXYZ.z);
-        addXYZ(maxXYZ.x, maxXYZ.y, maxXYZ.z);
+        for (Point3D point : cornerPoints)
+            addXYZ(point.x, point.y, point.z);
     }
 
     /**

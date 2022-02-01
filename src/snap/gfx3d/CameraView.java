@@ -17,11 +17,10 @@ public class CameraView extends ParentView {
     private Scene3D  _scene;
 
     // Constants for properties
-    public static String   Yaw_Prop = "Yaw";
-    public static String   Pitch_Prop = "Pitch";
-    public static String   Roll_Prop = "Roll";
-    public static String   OffsetZ_Prop = "OffsetZ";
-    
+    public static final String Yaw_Prop = "Yaw";
+    public static final String Pitch_Prop = "Pitch";
+    public static final String Roll_Prop = "Roll";
+
     /**
      * Constructor.
      */
@@ -82,66 +81,6 @@ public class CameraView extends ParentView {
      * Sets the rotation about the Z axis in degrees.
      */
     public void setRoll(double aValue)  { _camera.setRoll(aValue); }
-
-    /**
-     * Returns the focal length of the camera (derived from the field of view and with view size).
-     */
-    public double getFocalLength()  { return _camera.getFocalLength(); }
-
-    /**
-     * Sets the focal length of the camera. Two feet is normal (1728 points).
-     */
-    public void setFocalLength(double aValue)  { _camera.setFocalLength(aValue); }
-
-    /**
-     * Returns the Z offset of the scene (for zooming).
-     */
-    public double getOffsetZ()  { return _camera.getOffsetZ(); }
-
-    /**
-     * Sets the Z offset of the scene (for zooming).
-     */
-    public void setOffsetZ(double aValue)  { _camera.setOffsetZ(aValue); }
-
-    /**
-     * Returns whether scene is rendered in pseudo 3d.
-     */
-    public boolean isPseudo3D()  { return _camera.isPseudo3D(); }
-
-    /**
-     * Sets whether scene is rendered in pseudo 3d.
-     */
-    public void setPseudo3D(boolean aFlag)  { _camera.setPseudo3D(aFlag); }
-
-    /**
-     * Returns the skew angle for X by Z.
-     */
-    public double getPseudoSkewX()  { return _camera.getPseudoSkewX(); }
-
-    /**
-     * Sets the skew angle for X by Z.
-     */
-    public void setPseudoSkewX(double anAngle)  { _camera.setPseudoSkewX(anAngle); }
-
-    /**
-     * Returns the skew angle for Y by Z.
-     */
-    public double getPseudoSkewY()  { return _camera.getPseudoSkewY(); }
-
-    /**
-     * Sets the skew angle for Y by Z.
-     */
-    public void setPseudoSkewY(double anAngle)  { _camera.setPseudoSkewY(anAngle); }
-
-    /**
-     * Returns the field of view of the camera (derived from focalLength).
-     */
-    public double getFieldOfView()  { return _camera.getFieldOfView(); }
-
-    /**
-     * Sets the field of view of the camera.
-     */
-    public void setFieldOfView(double aValue)  { _camera.setFieldOfView(aValue); }
 
     /**
      * Returns the number of shapes in the shape list.
@@ -255,8 +194,6 @@ public class CameraView extends ParentView {
             return getPitch();
         if (aPropName.equals(Roll_Prop))
             return getRoll();
-        if (aPropName.equals(OffsetZ_Prop))
-            return getOffsetZ();
         return super.getPropValue(aPropName);
     }
 
@@ -271,8 +208,6 @@ public class CameraView extends ParentView {
             setPitch(SnapUtils.doubleValue(aValue));
         else if (aPropName.equals(Roll_Prop))
             setRoll(SnapUtils.doubleValue(aValue));
-        else if (aPropName.equals(OffsetZ_Prop))
-            setOffsetZ(SnapUtils.doubleValue(aValue));
         else super.setPropValue(aPropName, aValue);
     }
 }

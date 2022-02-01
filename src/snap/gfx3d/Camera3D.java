@@ -28,7 +28,7 @@ public class Camera3D {
     private Scene3D  _scene;
     
     // Width, height, depth
-    private double _width, _height, _depth = 40;
+    private double  _width, _height, _depth = 40;
     
     // Rotation around y axis
     private double  _yaw = 0;
@@ -39,12 +39,12 @@ public class Camera3D {
     // Rotation around z axis
     private double  _roll = 0;
     
-    // Offset from z axis
-    private double  _offsetZ = 0, _offsetZ2;
-    
-    // Whether to adjust Z to keep scene positive
-    private boolean  _adjustZ;
-    
+    // Distance from center of scene to camera when in gimbal mode
+    private double  _gimbalRadius;
+
+    // Optimal distance from center of scene to camera when in gimbal mode, when explicitly set
+    private double  _prefGimbalRadius;
+
     // Perspective
     private double  _focalLen = 60*72;
     
@@ -80,7 +80,8 @@ public class Camera3D {
     public static final String Pitch_Prop = "Pitch";
     public static final String Roll_Prop = "Roll";
     public static final String FocalLength_Prop = "FocalLength";
-    public static final String OffsetZ_Prop = "OffsetZ";
+    public static final String GimbalRadius_Prop = "GimbalRadius";
+    public static final String PrefGimbalRadius_Prop = "PrefGimbalRadius";
     public static final String AdjustZ_Prop = "AdjustZ";
     public static final String Pseudo3D_Prop = "Pseudo3D";
     public static final String PseudoSkewX_Prop = "PseudoSkewX";
@@ -213,32 +214,46 @@ public class Camera3D {
     }
 
     /**
-     * Returns the Z offset of the scene (for zooming).
+     * Returns the distance from center of scene to camera when in gimbal mode.
      */
-    public double getOffsetZ()  { return _offsetZ; }
+    public double getGimbalRadius()  { return _gimbalRadius; }
 
     /**
-     * Sets the Z offset of the scene (for zooming).
+     * Sets the distance from center of scene to camera when in gimbal mode.
      */
-    public void setOffsetZ(double aValue)
+    protected void setGimbalRadius(double aValue)
     {
-        if (aValue == _offsetZ) return;
-        firePropChange(OffsetZ_Prop, _offsetZ, _offsetZ = aValue);
+        if (aValue == _gimbalRadius) return;
+        firePropChange(GimbalRadius_Prop, _gimbalRadius, _gimbalRadius = aValue);
         _xform3D = null;
     }
 
     /**
-     * Returns whether to adjust Z to keep scene positive.
+     * Returns whether PrefGimbalRadius is explicitly set.
      */
-    public boolean isAdjustZ()  { return _adjustZ; }
+    public boolean isPrefGimbalRadiusSet()  { return _prefGimbalRadius > 0; }
 
     /**
-     * Sets whether to adjust Z to keep scene positive.
+     * Returns the optimal distance from center of scene to camera when in gimbal mode.
      */
-    public void setAdjustZ(boolean aValue)
+    public double getPrefGimbalRadius()
     {
-        if (aValue == isAdjustZ()) return;
-        firePropChange(AdjustZ_Prop, _adjustZ, _adjustZ = aValue);
+        // If explicitly set, just return
+        if (_prefGimbalRadius > 0)
+            return _prefGimbalRadius;
+
+        // Calculate and return
+        return getPrefGimbalRadiusImpl();
+    }
+
+    /**
+     * Sets the optimal distance from center of scene to camera when in gimbal mode.
+     */
+    public void setPrefGimbalRadius(double aValue)
+    {
+        if (aValue == _prefGimbalRadius) return;
+        firePropChange(PrefGimbalRadius_Prop, _prefGimbalRadius, _prefGimbalRadius = aValue);
+        _xform3D = null;
     }
 
     /**
@@ -338,7 +353,10 @@ public class Camera3D {
     public Transform3D getTransform()
     {
         // If already set, just return
-        if (_xform3D!=null) return _xform3D;
+        if (_xform3D != null) return _xform3D;
+
+        // Reset GimbalRadius
+        _gimbalRadius = getPrefGimbalRadius();
 
         // Get transform, set, return
         Transform3D xfm = getTransformImpl();
@@ -369,40 +387,33 @@ public class Camera3D {
         xfm.rotateXYZ(_pitch, _yaw, _roll);
 
         // Translate by Offset Z
-        double offsetZ = getOffsetZ() - _offsetZ2;
-        xfm.translate(0, 0, offsetZ);
+        double gimbalRadius = getGimbalRadius();
+        xfm.translate(0, 0, gimbalRadius);
         return xfm;
     }
 
     /**
-     * Resets secondary Z offset to keep scene in positive axis space.
+     * Returns the optimal distance from center of scene to camera when in gimbal mode.
      */
-    protected void adjustZ()
+    protected double getPrefGimbalRadiusImpl()
     {
-        // Cache and clear Z offset and second Z offset
-        double offZ = getOffsetZ();
-        _offsetZ = 0;
-        _offsetZ2 = 0;
-        _xform3D = null;
+        // Get camera transform for GimbalRadius = 0
+        double gimbalRadius = getGimbalRadius();
+        _gimbalRadius = 0;
+        Transform3D cameraTrans = getTransformImpl();
+        _gimbalRadius = gimbalRadius;
 
         // Get bounding box in camera coords with no Z offset
         double boxW = getWidth();
         double boxH = getHeight();
         double boxD = getDepth();
         Box3D boundsBox = new Box3D(0, 0, 0, boxW, boxH, boxD);
-        Transform3D cameraTrans = getTransform();
         boundsBox.transform(cameraTrans);
 
         // Get second offset Z from bounding box and restore original Z offset
-        _offsetZ2 = boundsBox.getMinZ();
-        _offsetZ = offZ;
-        _xform3D = null;
-
-        // Something is brokey
-        if (Math.abs(_offsetZ2) > boxW) {
-            _offsetZ2 = boxW * MathUtils.sign(_offsetZ2);
-            System.err.println("Camera3D.adjustZ: Error in calculation");
-        }
+        double focalLen = getFocalLength();
+        double prefGR = focalLen + boundsBox.getMaxZ();
+        return prefGR;
     }
 
     /**
@@ -539,9 +550,9 @@ public class Camera3D {
             double scroll = anEvent.getScrollY();
             double distZ = scroll * SCROLL_SCALE;
             double focalLen = getFocalLength();
-            double offZ = Math.max(getOffsetZ() + distZ, -focalLen + 100);
-            setOffsetZ(offZ);
-            setAdjustZ(false);
+            double gimbalRad = getGimbalRadius();
+            double gimbalRad2 = Math.max(gimbalRad + distZ, -focalLen + 100);
+            setPrefGimbalRadius(gimbalRad2);
         }
     }
 
@@ -560,8 +571,10 @@ public class Camera3D {
         }
 
         // If right-mouse, muck with perspective
-        else if (anEvent.isShortcutDown())
-            setOffsetZ(getOffsetZ() + _pointLast.y - point.y);
+        else if (anEvent.isShortcutDown()) {
+            double gimbalRad = getGimbalRadius();
+            setPrefGimbalRadius(gimbalRad + _pointLast.y - point.y);
+        }
 
         // Otherwise, just do pitch and roll
         else {
@@ -603,7 +616,7 @@ public class Camera3D {
         setPitch(aCam.getPitch());
         setRoll(aCam.getRoll());
         setFocalLength(aCam.getFocalLength());
-        setOffsetZ(aCam.getOffsetZ());
+        setPrefGimbalRadius(aCam.isPrefGimbalRadiusSet() ? aCam.getPrefGimbalRadius() : 0);
         setPseudo3D(aCam.isPseudo3D());
         setPseudoSkewX(aCam.getPseudoSkewX());
         setPseudoSkewY(aCam.getPseudoSkewY());
