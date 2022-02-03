@@ -229,9 +229,7 @@ public class Path3D extends Shape3D implements Cloneable {
         }
 
         // Normalize the result and swap sign so it matches right hand rule
-        normal.normalize();
-        if (Renderer.FRONT_FACE_IS_CW)
-            normal.negate();
+        normal.normalize(); //if (Renderer.FRONT_FACE_IS_CW) normal.negate();
         return _normal = normal;
     }
 
@@ -519,18 +517,32 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public int comparePlane(Path3D aPath)
     {
-        double d1 = 0;
+        // Iterate over path points, get distance for each to plane, if distance ever flips sign
+        double pathDist = 0;
         for (int i = 0, iMax = aPath.getPointCount(); i < iMax; i++) {
-            Point3D pnt = aPath.getPoint(i);
-            double d2 = getDistance(pnt);
-            if (d1 == 0)
-                d1 = d2;
-            if (d2 != 0 && d1 * d2 < 0)
+
+            // Get distance from path point to plane
+            Point3D point = aPath.getPoint(i);
+            double pointDist = getDistance(point);
+            if (pathDist == 0)
+                pathDist = pointDist;
+
+            // If distance from loop point is opposite side of path plane (sign flipped), return indeterminate
+            boolean pointsOnBothSidesOfPlane = pointDist != 0 && pointDist * pathDist < 0;
+            if (pointsOnBothSidesOfPlane)
                 return Sort3D.ORDER_INEDETERMINATE;
         }
 
-        // If all points are above aPath's plane, return BACK_TO_FRONT (receiver in front), otherwise ORDER_DESCEND
-        return d1 > 0 ? Sort3D.ORDER_BACK_TO_FRONT : d1 < 0 ? Sort3D.ORDER_FRONT_TO_BACK : Sort3D.ORDER_SAME;
+        // If given path is positive distance from this path, return
+        if (pathDist > 0)
+            return Sort3D.ORDER_FRONT_TO_BACK;
+
+        // If given path is positive distance from this path, return
+        if (pathDist < 0)
+            return Sort3D.ORDER_BACK_TO_FRONT;
+
+        // Planes are co-planar
+        return Sort3D.ORDER_SAME;
     }
 
     /**
@@ -538,11 +550,18 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public double getDistance(Point3D aPoint)
     {
-        Vector3D normal = getNormal();
-        Point3D p0 = getPoint(0);
-        double d = -normal.x * p0.x - normal.y * p0.y - normal.z * p0.z;
-        double dist = normal.x * aPoint.x + normal.y * aPoint.y + normal.z * aPoint.z + d;
-        return Math.abs(dist) < .01 ? 0 : dist;
+        // Get plane normal
+        Vector3D planeNormal = getNormal();
+
+        // Get vector from plane point to given point
+        Point3D planePoint = getPoint(0);
+        double vx = aPoint.x - planePoint.x;
+        double vy = aPoint.y - planePoint.y;
+        double vz = aPoint.z - planePoint.z;
+
+        // Distance is just the length of the projection of points vector onto normal vector (v dot n)
+        double dist = vx * planeNormal.x + vy * planeNormal.y + vz + planeNormal.z;
+        return Math.abs(dist) < .001 ? 0 : dist;
     }
 
     /**

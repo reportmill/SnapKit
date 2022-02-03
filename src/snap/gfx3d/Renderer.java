@@ -17,9 +17,6 @@ public abstract class Renderer {
     // The factory that made this renderer
     protected RendererFactory  _factory;
 
-    // Whether FrontFace is clockwise
-    public static boolean FRONT_FACE_IS_CW = true;
-
     /**
      * Constructor.
      */

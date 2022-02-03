@@ -28,6 +28,16 @@ public class Vector3D implements Cloneable {
     }
 
     /**
+     * Constructor for vector from given point to second given point.
+     */
+    public Vector3D(Point3D p0, Point3D p1)
+    {
+        x = p1.x - p0.x;
+        y = p1.y - p0.y;
+        z = p1.z - p0.z;
+    }
+
+    /**
      * Returns the magnitude of the vector.
      */
     public double getMagnitude()
@@ -177,9 +187,7 @@ public class Vector3D implements Cloneable {
         }
 
         // Normalize the result and swap sign so it matches right hand rule
-        aVect.normalize();
-        if (Renderer.FRONT_FACE_IS_CW)
-            aVect.negate();
+        aVect.normalize(); // if (Renderer.FRONT_FACE_IS_CW) aVect.negate();
         return aVect;
     }
 }
