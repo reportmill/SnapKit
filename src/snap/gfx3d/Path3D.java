@@ -479,7 +479,10 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Returns layers to be drawn in front of this path.
      */
-    public List <Path3D> getLayers()  { return _layers!=null ? _layers : Collections.EMPTY_LIST; }
+    public List <Path3D> getLayers()
+    {
+        return _layers != null ? _layers : Collections.EMPTY_LIST;
+    }
 
     /**
      * Adds a path to be drawn immediately in front of this path.
@@ -502,53 +505,9 @@ public class Path3D extends Shape3D implements Cloneable {
     }
 
     /**
-     * Compares ZMin for this path and given path.
+     * Returns the distance from a point to the plane of this path.
      */
-    public int compareZMin(Path3D path2)
-    {
-        double z0 = getMinZ();
-        double z1 = path2.getMinZ();
-        return z0 < z1 ? Sort3D.ORDER_BACK_TO_FRONT : z1 < z0 ? Sort3D.ORDER_FRONT_TO_BACK : 0;
-    }
-
-    /**
-     * Returns whether this path is in front (FRONT_TO_BACK) or aPath in front (BACK_TO_FRONT).
-     * Returns ORDER_SAME if the two paths are coplanar, or INDETERMINATE if they intersect.
-     */
-    public int comparePlane(Path3D aPath)
-    {
-        // Iterate over path points, get distance for each to plane, if distance ever flips sign
-        double pathDist = 0;
-        for (int i = 0, iMax = aPath.getPointCount(); i < iMax; i++) {
-
-            // Get distance from path point to plane
-            Point3D point = aPath.getPoint(i);
-            double pointDist = getDistance(point);
-            if (pathDist == 0)
-                pathDist = pointDist;
-
-            // If distance from loop point is opposite side of path plane (sign flipped), return indeterminate
-            boolean pointsOnBothSidesOfPlane = pointDist != 0 && pointDist * pathDist < 0;
-            if (pointsOnBothSidesOfPlane)
-                return Sort3D.ORDER_INEDETERMINATE;
-        }
-
-        // If given path is positive distance from this path, return
-        if (pathDist > 0)
-            return Sort3D.ORDER_FRONT_TO_BACK;
-
-        // If given path is positive distance from this path, return
-        if (pathDist < 0)
-            return Sort3D.ORDER_BACK_TO_FRONT;
-
-        // Planes are co-planar
-        return Sort3D.ORDER_SAME;
-    }
-
-    /**
-     * Returns the distance from a point to the plane of this polygon.
-     */
-    public double getDistance(Point3D aPoint)
+    public double getDistanceFromPointToPathPlane(Point3D aPoint)
     {
         // Get plane normal
         Vector3D planeNormal = getNormal();
@@ -560,7 +519,7 @@ public class Path3D extends Shape3D implements Cloneable {
         double vz = aPoint.z - planePoint.z;
 
         // Distance is just the length of the projection of points vector onto normal vector (v dot n)
-        double dist = vx * planeNormal.x + vy * planeNormal.y + vz + planeNormal.z;
+        double dist = vx * planeNormal.x + vy * planeNormal.y + vz * planeNormal.z;
         return Math.abs(dist) < .001 ? 0 : dist;
     }
 
