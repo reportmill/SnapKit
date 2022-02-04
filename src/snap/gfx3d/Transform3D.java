@@ -163,7 +163,7 @@ public class Transform3D implements Cloneable {
     }
 
     /**
-     * Apply perspective transform.
+     * Returns a simple perspective transform.
      */
     public static Transform3D newPerspective(double d)
     {
@@ -173,7 +173,13 @@ public class Transform3D implements Cloneable {
     }
 
     /**
-     * Apply perspective transform.
+     * Returns a perspective transform.
+     *
+     *     [ f / aspect     0                  0                                0              ]     [ px ]
+     *     [    0           f                  0                                0              ]  x  [ py ]
+     *     [    0           0     (far + near) / (near - far)    2 * far * near / (near - far) ]     [ pz ]
+     *     [    0           0                 -1                                0              ]     [ w  ]
+     *
      */
     public static Transform3D newPerspective(double fieldOfViewY, double aspect, double nearZ, double farZ)
     {
