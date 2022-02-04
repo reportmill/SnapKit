@@ -84,9 +84,13 @@ public class Trackball extends ParentView {
 
         // Create/configure camera
         _camera = _scene.getCamera();
-        _camera.setRenderer(new Renderer2D(_camera));
         _camera.setWidth(IMAGE_SIZE);
         _camera.setHeight(IMAGE_SIZE); // set X to 2 ???
+
+        // Set to Renderer2D
+        Renderer2D renderer2D = new Renderer2D(_camera);
+        renderer2D.setSortSurfaces(false);
+        _camera.setRenderer(renderer2D);
 
         // Set GimbalRadius
         _camera.setPrefGimbalRadius(_camera.getFocalLength());

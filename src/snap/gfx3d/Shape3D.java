@@ -9,6 +9,9 @@ import snap.gfx.*;
  */
 public abstract class Shape3D {
 
+    // Shape name
+    private String  _name;
+
     // Shape fill
     private Color  _color;
     
@@ -28,6 +31,16 @@ public abstract class Shape3D {
      * Constructor.
      */
     public Shape3D()  { }
+
+    /**
+     * Returns the name of shape.
+     */
+    public String getName()  { return _name; }
+
+    /**
+     * Sets the name of shape.
+     */
+    public void setName(String aName)  { _name = aName; }
 
     /**
      * Returns the color of shape.
@@ -160,9 +173,13 @@ public abstract class Shape3D {
      */
     public String toStringProps()
     {
+        StringBuffer sb = new StringBuffer();
+        String name = getName();
+        if (name != null) sb.append("Name=").append(name).append(", ");
         Box3D boundsBox = getBoundsBox();
         Point3D minXYZ = boundsBox.getMinXYZ();
         Point3D maxXYZ = boundsBox.getMaxXYZ();
-        return "MinXYZ=" + minXYZ + ", MaxXYZ=" + maxXYZ;
+        sb.append("MinXYZ").append(minXYZ).append(", MaxXYZ").append(maxXYZ);
+        return sb.toString();
     }
 }

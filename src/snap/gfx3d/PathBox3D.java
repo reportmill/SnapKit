@@ -88,7 +88,9 @@ public class PathBox3D extends Shape3D {
 
             // Create path3d for front and back
             Path3D front = new Path3D(aPath, z1);
+            front.setName("BoxBack");
             back = new Path3D(aPath, z2);
+            back.setName("BoxFront");
 
             // Add front to paths list
             paths.add(front);
@@ -109,6 +111,7 @@ public class PathBox3D extends Shape3D {
         double[] pts = new double[6];
         double lastX = 0, lastY = 0;
         double lastMoveX = 0, lastMoveY = 0;
+        int sideNum = 0;
 
         // Iterate over path elements
         while (piter.hasNext()) switch (piter.getNext(pts)) {
@@ -122,7 +125,7 @@ public class PathBox3D extends Shape3D {
             // LineTo
             case LineTo: {
                 if (Point.equals(lastX, lastY, pts[0], pts[1])) continue;
-                Path3D path = new Path3D();
+                Path3D path = new Path3D(); path.setName("BoxSide" + sideNum++);
                 path.moveTo(lastX, lastY, z1);
                 path.lineTo(pts[0], pts[1], z1); path.lineTo(pts[0], pts[1], z2);
                 path.lineTo(lastX, lastY, z2); path.close();
@@ -132,7 +135,7 @@ public class PathBox3D extends Shape3D {
 
             // QuadTo
             case QuadTo: {
-                Path3D path = new Path3D();
+                Path3D path = new Path3D(); path.setName("BoxSide" + sideNum++);
                 path.moveTo(lastX, lastY, z1);
                 path.quadTo(pts[0], pts[1], z1, pts[2], pts[3], z1);
                 path.lineTo(pts[4], pts[5], z2);
@@ -144,7 +147,7 @@ public class PathBox3D extends Shape3D {
 
             // CubicTo
             case CubicTo: {
-                Path3D path = new Path3D();
+                Path3D path = new Path3D(); path.setName("BoxSide" + sideNum++);
                 path.moveTo(lastX, lastY, z1);
                 path.curveTo(pts[0], pts[1], z1, pts[2], pts[3], z1, pts[4], pts[5], z1);
                 path.lineTo(pts[4], pts[5], z2);
@@ -156,7 +159,7 @@ public class PathBox3D extends Shape3D {
 
             // Close
             case Close: {
-                Path3D path = new Path3D();
+                Path3D path = new Path3D(); path.setName("BoxSide" + sideNum++);
                 path.moveTo(lastX, lastY, z1);
                 path.lineTo(lastMoveX, lastMoveY, z1);
                 path.lineTo(lastMoveX, lastMoveY, z2);

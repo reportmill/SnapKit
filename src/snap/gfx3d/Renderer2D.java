@@ -6,12 +6,16 @@ import snap.gfx.Paint;
 import snap.gfx.Painter;
 import snap.util.PropChange;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * This Renderer subclass tries to render the Scene using the standard Painter (2D).
  */
 public class Renderer2D extends Renderer {
+
+    // Whether to sort surfaces
+    private boolean  _sortSurfaces = true;
 
     // List of Path3Ds - for rendering
     private List<Path3D>  _paths = new ArrayList<>();
@@ -38,6 +42,16 @@ public class Renderer2D extends Renderer {
      */
     @Override
     public String getName()  { return RENDERER_NAME; }
+
+    /**
+     * Returns whether to sort surfaces.
+     */
+    public boolean isSortSurfaces()  { return _sortSurfaces; }
+
+    /**
+     * Sets whether to sort surfaces.
+     */
+    public void setSortSurfaces(boolean aValue)  { _sortSurfaces = aValue; }
 
     /**
      * Returns the specific Path3D at the given index from the display list.
@@ -112,18 +126,24 @@ public class Renderer2D extends Renderer {
         rebuildPathsImpl();
 
         // Resort paths
-        Sort3D.sortPaths(_paths);
+        //Sort3D.sortPaths(_paths);
 
         // Get projection transform
         Camera3D camera3D = getCamera();
         Transform3D projTrans = camera3D.getProjectionTransform();
 
         // Iterate over paths and replace with paths in display space
+        List<Path3D> paths = new ArrayList<>();
         for (int i = 0, iMax = _paths.size(); i < iMax; i++) {
             Path3D path = _paths.get(i);
             Path3D path2 = path.copyForTransform(projTrans);
-            _paths.set(i, path2);
+            if (!_camera.isFacingAway(path2.getNormal()))
+                paths.add(path2);
         }
+
+        if (isSortSurfaces())
+            Collections.sort(paths, (p0, p1) -> Sort3D.comparePath3D_MaxZs(p0, p1));
+        _paths = paths;
 
         // Clear RebuildPaths
         _rebuildPaths = false;
@@ -167,8 +187,8 @@ public class Renderer2D extends Renderer {
             camPathNormal.normalize();
 
             // Backface culling : Only add paths that face the camera
-            if (_camera.isFacingAway(camPathNormal))
-                continue;
+            //if (_camera.isFacingAway(camPathNormal))
+            //    continue;
 
             // Get path copy transformed by scene transform
             Path3D dispPath3D = path3d.copyForTransform(worldToCameraXfm);

@@ -78,6 +78,16 @@ public class Sort3D {
     }
 
     /**
+     * Compares given paths MinZ values.
+     */
+    public static int comparePath3D_MaxZs(Path3D path1, Path3D path2)
+    {
+        double z1 = path1.getMaxZ();
+        double z2 = path2.getMaxZ();
+        return z1 > z2 ? Sort3D.ORDER_BACK_TO_FRONT : z2 > z1 ? Sort3D.ORDER_FRONT_TO_BACK : 0;
+    }
+
+    /**
      * Returns whether path1/path are ordered BACK_TO_FRONT OR FRONT_TO_BACK.
      * Returns ORDER_SAME if the two paths are coplanar, or INDETERMINATE if they intersect.
      */

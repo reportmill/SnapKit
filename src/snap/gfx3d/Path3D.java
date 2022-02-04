@@ -585,9 +585,10 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Standard toStringProps implementation.
      */
+    @Override
     public String toStringProps()
     {
-        String boundsProps = getBoundsBox().toStringProps();
-        return "PointCount=" + getPointCount() + ", " + boundsProps;
+        String superProps = super.toStringProps();
+        return superProps + ", PointCount=" + getPointCount();
     }
 }
