@@ -142,11 +142,12 @@ public class Transform3D implements Cloneable {
     /**
      * Scale by the given factors.
      */
-    public Transform3D scale(double aScaleX, double aScaleY)
+    public Transform3D scale(double aScaleX, double aScaleY, double aScaleZ)
     {
         Transform3D rm = new Transform3D();
         rm.mtx[0 * 4 + 0] = aScaleX;
         rm.mtx[1 * 4 + 1] = aScaleY;
+        rm.mtx[2 * 4 + 2] = aScaleZ;
         return multiply(rm);
     }
 
@@ -180,17 +181,13 @@ public class Transform3D implements Cloneable {
         double f = 1d / Math.tan(Math.toRadians(fieldOfViewY / 2));
         double nearMinusFar = nearZ - farZ;
 
-        // Set elements
+        // Set elements like OpenGL: https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml
         xfm.mtx[0 * 4 + 0] = f / aspect;
         xfm.mtx[1 * 4 + 1] = f;
         xfm.mtx[2 * 4 + 2] = (farZ + nearZ) / nearMinusFar;
         xfm.mtx[2 * 4 + 3] = -1;
         xfm.mtx[3 * 4 + 2] = 2 * farZ * nearZ / nearMinusFar;
         xfm.mtx[3 * 4 + 3] = 0;
-
-        // Transpose
-        xfm.mtx[3 * 4 + 2] = -1;
-        xfm.mtx[2 * 4 + 3] = 2 * farZ * nearZ / nearMinusFar;
 
         // Return
         return xfm;
@@ -274,6 +271,31 @@ public class Transform3D implements Cloneable {
 
     /**
      * Transforms a given point (and returns it as a convenience).
+     *
+     * Transform3D currently post-multiplies transforms:
+     *
+     *         3 x 3             3 x 1                    3 x 1
+     *
+     *    [ m00 m10 m20 m30 ]   [ px ]   [ m00 * px + m10 * py + m20 * pz + m30 ]
+     *    [ m01 m11 m21 m31 ] x [ py ] = [ m01 * px + m11 * py + m21 * pz + m31 ]
+     *    [ m02 m12 m22 m32 ]   [ pz ]   [ m02 * px + m12 * py + m22 * pz + m32 ]
+     *    [ m03 m13 m23 m33 ]   [ 1 ]    [ m03 * px + m13 * py + m23 * pz + m33 ] (w)
+     *
+     * But we want to get to pre-multiply OpenGL style:
+     *
+     *         1 x 3             3 x 3                    1 x 3
+     *
+     *    [ px py pz 1 ]   [ m00 m10 m20 m30 ]   [ m00 * px + m10 * py + m20 * pz + m30,
+     *                   x [ m01 m11 m21 m31 ] =   m01 * px + m11 * py + m21 * pz + m31,
+     *                     [ m02 m12 m22 m32 ]     m02 * px + m12 * py + m22 * pz + m32,
+     *                     [ m03 m13 m23 m33 ]     m03 * px + m13 * py + m23 * pz + m33 (w) ]
+     *
+     * JOML looks like this:
+     *
+     *    double W = Math.fma(mat.m03(), x, Math.fma(mat.m13(), y, Math.fma(mat.m23(), z, mat.m33() * w)));
+     *    double rx = Math.fma(mat.m00(), x, Math.fma(mat.m10(), y, Math.fma(mat.m20(), z, mat.m30() * w))) / W;
+     *    double ry = Math.fma(mat.m01(), x, Math.fma(mat.m11(), y, Math.fma(mat.m21(), z, mat.m31() * w))) / W;
+     *    double rz = Math.fma(mat.m02(), x, Math.fma(mat.m12(), y, Math.fma(mat.m22(), z, mat.m32() * w))) / W;
      */
     public Point3D transformPoint(Point3D aPoint)
     {
