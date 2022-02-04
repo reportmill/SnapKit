@@ -125,27 +125,32 @@ public class Renderer2D extends Renderer {
         // Iterate over shapes and add paths
         rebuildPathsImpl();
 
-        // Resort paths
-        //Sort3D.sortPaths(_paths);
+        // Sort surface paths
+        //if (isSortSurfaces())
+        //    Sort3D.sortPaths(_paths);
 
-        // Get projection transform
+        // Get display transform
         Camera3D camera3D = getCamera();
         Transform3D projTrans = camera3D.getProjectionTransform();
+        double viewW = camera3D.getWidth();
+        double viewH = camera3D.getHeight();
+        Transform3D dispTrans = projTrans.clone().scale(viewW, viewH);
 
         // Iterate over paths and replace with paths in display space
         List<Path3D> paths = new ArrayList<>();
         for (int i = 0, iMax = _paths.size(); i < iMax; i++) {
             Path3D path = _paths.get(i);
-            Path3D path2 = path.copyForTransform(projTrans);
+            Path3D path2 = path.copyForTransform(dispTrans);
             if (!_camera.isFacingAway(path2.getNormal()))
                 paths.add(path2);
         }
 
+        // Sort surface paths
         if (isSortSurfaces())
             Collections.sort(paths, (p0, p1) -> Sort3D.comparePath3D_MaxZs(p0, p1));
-        _paths = paths;
 
-        // Clear RebuildPaths
+        // Set Paths and clear RebuildPaths
+        _paths = paths;
         _rebuildPaths = false;
     }
 

@@ -352,7 +352,6 @@ public class Camera3D {
             double viewH = getHeight();
             double aspect = viewW / viewH;
             xfm = Transform3D.newPerspective(fovY, aspect, 1, 10000);
-            xfm.scale(viewW, viewH);
         }
 
         // Return
