@@ -17,6 +17,16 @@ public class Sort3D {
 
     /**
      * Compares two paths.
+     *
+     *    Returns -1 (Back_to_Front) if path1 should be painted first
+     *    Returns  1 (Front_to_Back) if path2 should be painted first
+     *    Returns 0 (Same) if either path can be drawn first
+     *
+     *    1. Do the Z extents not overlap? Return Z order
+     *    2. Do the X/Y extents not overlap? Return Z order
+     *    3. Is P entirely on the opposite side of Q’s plane from the viewpoint?
+     *    4. Is Q entirely on the same side of P ’s plane as the viewpoint?
+     *    5. Do the projections of the polygons not overlap?
      */
     public static int comparePath3Ds(Path3D path1, Path3D path2)
     {
@@ -28,14 +38,23 @@ public class Sort3D {
         if (path1.getMinZ() >= path2.getMaxZ())
             return ORDER_FRONT_TO_BACK;
 
+        // If no X/Y overlap, return MinZ order
+        if (path1.getMaxX() <= path2.getMinX() || path1.getMinX() >= path2.getMaxX() ||
+            path1.getMaxY() <= path2.getMinY() || path1.getMinY() >= path2.getMaxY()) {
+            int compZ = comparePath3D_MinZs(path1, path2);
+            return compZ;
+        }
+
         // If all path2 points in front or back of path1, return that order
         int comp1 = comparePath3D_Planes(path1, path2);
         if (comp1 == ORDER_BACK_TO_FRONT || comp1 == ORDER_FRONT_TO_BACK)
             return comp1;
 
         // If path1/path2 points are coplanar, return MinZ order
-        if (comp1 == ORDER_SAME)
-            return comparePath3D_MinZs(path1, path2);
+        if (comp1 == ORDER_SAME) {
+            int compZ = comparePath3D_MinZs(path1, path2);
+            return compZ;
+        }
 
         // If all path1 points in front or back of path2, return reverse order
         int comp2 = comparePath3D_Planes(path2, path1);
