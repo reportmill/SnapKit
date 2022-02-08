@@ -126,8 +126,10 @@ public class Renderer2D extends Renderer {
         rebuildPathsImpl();
 
         // Sort surface paths
-        if (isSortSurfaces())
+        if (isSortSurfaces()) {
+            Collections.sort(_paths, (p0, p1) -> Sort3D.comparePath3D_MinZs(p0, p1));
             Collections.sort(_paths, (p0, p1) -> Sort3D.comparePath3Ds(p0, p1));
+        }
 
         // Get display transform
         Camera3D camera3D = getCamera();

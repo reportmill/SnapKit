@@ -131,7 +131,7 @@ public class Sort3D {
     /**
      * Compares given paths MinZ values.
      */
-    private static int comparePath3D_MinZs(Path3D path1, Path3D path2)
+    public static int comparePath3D_MinZs(Path3D path1, Path3D path2)
     {
         double z0 = path1.getMinZ();
         double z1 = path2.getMinZ();
