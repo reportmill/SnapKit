@@ -2,8 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
-import java.util.Collections;
-import java.util.List;
+import snap.util.MathUtils;
 
 /**
  * This class supports various 3D sorting functionality.
@@ -17,18 +16,9 @@ public class Sort3D {
     public static final int ORDER_INEDETERMINATE = 2;
 
     /**
-     * Resorts a Path3D list from back to front using Depth Sort Algorithm.
-     */
-    public static void sortPaths(List<Path3D> thePaths)
-    {
-        Collections.sort(thePaths, (p0, p1) -> comparePath3Ds(p0, p1));
-        return;
-    }
-
-    /**
      * Compares two paths.
      */
-    private static int comparePath3Ds(Path3D path1, Path3D path2)
+    public static int comparePath3Ds(Path3D path1, Path3D path2)
     {
         // If all path1 points are behind all path2 points, return BACK_TO_FRONT
         if (path1.getMaxZ() <= path2.getMinZ())
@@ -37,13 +27,6 @@ public class Sort3D {
         // If all path1 points are in front of all path2 points, return FRONT_TO_BACK
         if (path1.getMinZ() >= path2.getMaxZ())
             return ORDER_FRONT_TO_BACK;
-
-        // If no X/Y overlap, return MinZ order
-        if (path1.getMaxX() <= path2.getMinX() || path1.getMinX() >= path2.getMaxX() ||
-            path1.getMaxY() <= path2.getMinY() || path1.getMinY() >= path2.getMaxY()) {
-            int compZ = comparePath3D_MinZs(path1, path2);
-            return compZ;
-        }
 
         // If all path2 points in front or back of path1, return that order
         int comp1 = comparePath3D_Planes(path1, path2);
@@ -62,29 +45,9 @@ public class Sort3D {
             return ORDER_BACK_TO_FRONT;
 
         // This should never happen
-        System.err.println("Path3D.sort: Sort fail.");
+        System.err.println("Path3D.comparePath3Ds: Sort fail.");
         int compZ = comparePath3D_MinZs(path1, path2);
         return compZ;
-    }
-
-    /**
-     * Compares given paths MinZ values.
-     */
-    private static int comparePath3D_MinZs(Path3D path1, Path3D path2)
-    {
-        double z0 = path1.getMinZ();
-        double z1 = path2.getMinZ();
-        return z0 < z1 ? Sort3D.ORDER_BACK_TO_FRONT : z1 < z0 ? Sort3D.ORDER_FRONT_TO_BACK : 0;
-    }
-
-    /**
-     * Compares given paths MinZ values.
-     */
-    public static int comparePath3D_MaxZs(Path3D path1, Path3D path2)
-    {
-        double z1 = path1.getMaxZ();
-        double z2 = path2.getMaxZ();
-        return z1 > z2 ? Sort3D.ORDER_BACK_TO_FRONT : z2 > z1 ? Sort3D.ORDER_FRONT_TO_BACK : 0;
     }
 
     /**
@@ -99,7 +62,13 @@ public class Sort3D {
 
             // Get distance from path point to plane
             Point3D point = path2.getPoint(i);
-            double pointDist = path1.getDistanceFromPointToPathPlane(point);
+            double pointDist = getDistanceFromPathPlaneToPoint(path1, point);
+
+            // If negligible distance, assume point is on path1 plane and skip
+            if (MathUtils.equalsZero(pointDist))
+                continue;
+
+            // If ref distance not yet set, set
             if (path2Dist == 0)
                 path2Dist = pointDist;
 
@@ -119,5 +88,34 @@ public class Sort3D {
 
         // Planes are co-planar
         return Sort3D.ORDER_SAME;
+    }
+
+    /**
+     * Returns the distance from a point to the plane of this path.
+     */
+    private static double getDistanceFromPathPlaneToPoint(Path3D aPath3D, Point3D aPoint)
+    {
+        // Get plane normal
+        Vector3D planeNormal = aPath3D.getNormal();
+
+        // Get vector from plane point to given point
+        Point3D planePoint = aPath3D.getCenter();
+        double vx = aPoint.x - planePoint.x;
+        double vy = aPoint.y - planePoint.y;
+        double vz = aPoint.z - planePoint.z;
+
+        // Distance is just the length of the projection of points vector onto normal vector (v dot n)
+        double dist = vx * planeNormal.x + vy * planeNormal.y + vz * planeNormal.z;
+        return Math.abs(dist) < .001 ? 0 : dist;
+    }
+
+    /**
+     * Compares given paths MinZ values.
+     */
+    private static int comparePath3D_MinZs(Path3D path1, Path3D path2)
+    {
+        double z0 = path1.getMinZ();
+        double z1 = path2.getMinZ();
+        return z0 < z1 ? Sort3D.ORDER_BACK_TO_FRONT : z1 < z0 ? Sort3D.ORDER_FRONT_TO_BACK : 0;
     }
 }

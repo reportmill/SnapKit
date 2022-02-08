@@ -126,8 +126,8 @@ public class Renderer2D extends Renderer {
         rebuildPathsImpl();
 
         // Sort surface paths
-        //if (isSortSurfaces())
-        //    Sort3D.sortPaths(_paths);
+        if (isSortSurfaces())
+            Collections.sort(_paths, (p0, p1) -> Sort3D.comparePath3Ds(p0, p1));
 
         // Get display transform
         Camera3D camera3D = getCamera();
@@ -141,13 +141,8 @@ public class Renderer2D extends Renderer {
         for (int i = 0, iMax = _paths.size(); i < iMax; i++) {
             Path3D path = _paths.get(i);
             Path3D path2 = path.copyForTransform(dispTrans);
-            if (!_camera.isFacingAway(path2.getNormal()))
-                paths.add(path2);
+            paths.add(path2);
         }
-
-        // Sort surface paths
-        if (isSortSurfaces())
-            Collections.sort(paths, (p0, p1) -> Sort3D.comparePath3D_MaxZs(p0, p1));
 
         // Set Paths and clear RebuildPaths
         _paths = paths;
@@ -186,21 +181,26 @@ public class Renderer2D extends Renderer {
                 continue;
             }
 
-            // Get normal
-            Vector3D pathNormal = path3d.getNormal();
-            Vector3D camPathNormal = worldToCameraXfm.transformVector(pathNormal.clone());
-            camPathNormal.normalize();
+            // Get path normal in camera coords
+            Vector3D pathNormLocal = path3d.getNormal();
+            Vector3D pathNormCamera = worldToCameraXfm.transformVector(pathNormLocal.clone());
+            pathNormCamera.normalize();
 
-            // Backface culling : Only add paths that face the camera
-            //if (_camera.isFacingAway(camPathNormal))
-            //    continue;
+            // Get camera-to-path vector in camera coords
+            Point3D pathCenterLocal = path3d.getCenter();
+            Point3D pathCenterCamera = worldToCameraXfm.transformPoint(pathCenterLocal.clone());
+            Vector3D cameraToPathVect = new Vector3D(pathCenterCamera.x, pathCenterCamera.y, pathCenterCamera.z);
+
+            // Backface culling : If path pointed away from camera, skip path
+            if (cameraToPathVect.isAligned(pathNormCamera, false))
+                continue;
 
             // Get path copy transformed by scene transform
             Path3D dispPath3D = path3d.copyForTransform(worldToCameraXfm);
 
             // If color on shape, set color on path for scene lights
             if (color != null) {
-                Color rcol = light.getRenderColor(camPathNormal, color);
+                Color rcol = light.getRenderColor(pathNormCamera, color);
                 dispPath3D.setColor(rcol);
             }
 
