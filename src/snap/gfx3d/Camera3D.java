@@ -48,12 +48,6 @@ public class Camera3D {
     // Perspective
     private double  _focalLen = 60*72;
     
-    // Whether to do simple 3d rendering effect by skewing geometry a little bit
-    private boolean  _pseudo3D;
-    
-    // The skew in radians along x/y axis when doing pseudo 3d
-    private double  _pseudoSkewX, _pseudoSkewY;
-    
     // Camera normal
     private Vector3D  _normal = new Vector3D(0, 0, -1);
     
@@ -82,10 +76,6 @@ public class Camera3D {
     public static final String FocalLength_Prop = "FocalLength";
     public static final String GimbalRadius_Prop = "GimbalRadius";
     public static final String PrefGimbalRadius_Prop = "PrefGimbalRadius";
-    public static final String AdjustZ_Prop = "AdjustZ";
-    public static final String Pseudo3D_Prop = "Pseudo3D";
-    public static final String PseudoSkewX_Prop = "PseudoSkewX";
-    public static final String PseudoSkewY_Prop = "PseudoSkewY";
     public static final String Renderer_Prop = "Renderer";
 
     // Constants for mouse drag constraints
@@ -257,51 +247,6 @@ public class Camera3D {
     }
 
     /**
-     * Returns whether scene is rendered in pseudo 3d.
-     */
-    public boolean isPseudo3D()  { return _pseudo3D; }
-
-    /**
-     * Sets whether scene is rendered in pseudo 3d.
-     */
-    public void setPseudo3D(boolean aFlag)
-    {
-        if (_pseudo3D == aFlag) return;
-        firePropChange(Pseudo3D_Prop, _pseudo3D, _pseudo3D = aFlag);
-        _xform3D = null;
-    }
-
-    /**
-     * Returns the skew angle for X by Z.
-     */
-    public double getPseudoSkewX()  { return _pseudoSkewX; }
-
-    /**
-     * Sets the skew angle for X by Z.
-     */
-    public void setPseudoSkewX(double anAngle)
-    {
-        if (anAngle == _pseudoSkewX) return;
-        firePropChange(PseudoSkewX_Prop, _pseudoSkewX, _pseudoSkewX = anAngle);
-        _xform3D = null;
-    }
-
-    /**
-     * Returns the skew angle for Y by Z.
-     */
-    public double getPseudoSkewY()  { return _pseudoSkewY; }
-
-    /**
-     * Sets the skew angle for Y by Z.
-     */
-    public void setPseudoSkewY(double anAngle)
-    {
-        if (anAngle == _pseudoSkewY) return;
-        firePropChange(PseudoSkewY_Prop, _pseudoSkewY, _pseudoSkewY = anAngle);
-        _xform3D = null;
-    }
-
-    /**
      * Returns the field of view of the camera (derived from focalLength).
      */
     public double getFieldOfViewX()
@@ -379,12 +324,6 @@ public class Camera3D {
         double midy = getHeight() / 2;
         double midz = getDepth() / 2;
         xfm.translate(-midx, -midy, -midz);
-
-        // If pseudo 3d, just return skewed transform
-        if (isPseudo3D()) {
-            xfm.skew(_pseudoSkewX, _pseudoSkewY);
-            return xfm;
-        }
 
         // Rotate
         xfm.rotateXYZ(_pitch, _yaw, _roll);
@@ -567,14 +506,8 @@ public class Camera3D {
         // Get event location in this scene shape coords
         Point point = anEvent.getPoint();
 
-        // If pseudo3d, set skew using event offset
-        if (isPseudo3D()) {
-            setPseudoSkewX(getPseudoSkewX() + (point.x - _pointLast.x)/100);
-            setPseudoSkewY(getPseudoSkewY() + (point.y - _pointLast.y)/100);
-        }
-
         // If right-mouse, muck with perspective
-        else if (anEvent.isShortcutDown()) {
+        if (anEvent.isShortcutDown()) {
             double gimbalRad = getGimbalRadius();
             setPrefGimbalRadius(gimbalRad + _pointLast.y - point.y);
         }
@@ -620,9 +553,6 @@ public class Camera3D {
         setRoll(aCam.getRoll());
         setFocalLength(aCam.getFocalLength());
         setPrefGimbalRadius(aCam.isPrefGimbalRadiusSet() ? aCam.getPrefGimbalRadius() : 0);
-        setPseudo3D(aCam.isPseudo3D());
-        setPseudoSkewX(aCam.getPseudoSkewX());
-        setPseudoSkewY(aCam.getPseudoSkewY());
     }
 
     /**

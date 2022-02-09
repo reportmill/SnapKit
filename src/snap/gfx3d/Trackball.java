@@ -195,7 +195,7 @@ public class Trackball extends ParentView {
         }
 
         // Else if in collar, add knob
-        else if (distance <= INNER_RADIUS+COLLAR_THICKNESS && !_camera.isPseudo3D()) {
+        else if (distance <= INNER_RADIUS+COLLAR_THICKNESS) {
             _hitPart = HIT_COLLAR;
             addChild(_knob);
             _lastRollAngle = getMouseAngle(point);
@@ -288,14 +288,8 @@ public class Trackball extends ParentView {
     /** Sync cameras. */
     private void sync(Camera3D s1, Camera3D s2)
     {
-        if (s1.isPseudo3D()) {
-            s2.setPseudoSkewX(s1.getPseudoSkewX());
-            s2.setPseudoSkewY(s1.getPseudoSkewY());
-        }
-        else {
-            s2.setPitch(s1.getPitch());
-            s2.setYaw(s1.getYaw());
-            s2.setRoll(s1.getRoll());
-        }
+        s2.setPitch(s1.getPitch());
+        s2.setYaw(s1.getYaw());
+        s2.setRoll(s1.getRoll());
     }
 }

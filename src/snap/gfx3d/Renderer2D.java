@@ -227,10 +227,6 @@ public class Renderer2D extends Renderer {
             case Camera3D.Roll_Prop:
             case Camera3D.FocalLength_Prop:
             case Camera3D.PrefGimbalRadius_Prop:
-            case Camera3D.AdjustZ_Prop:
-            case Camera3D.Pseudo3D_Prop:
-            case Camera3D.PseudoSkewX_Prop:
-            case Camera3D.PseudoSkewY_Prop:
                 rebuildPaths();
         }
         super.cameraDidPropChange(aPC);
