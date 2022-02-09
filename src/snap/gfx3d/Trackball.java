@@ -143,7 +143,7 @@ public class Trackball extends ParentView {
 
         // translate out to surface of sphere and rotate to latitude+longitude, translate to scene origin
         Transform3D transform = new Transform3D();
-        transform.translate(0, 0, _radius);
+        transform.translate(0, 0, -_radius);
         transform.rotateY(theta);
         transform.rotateZ(phi);
         transform.translate(midx, midy, midz);
@@ -213,10 +213,10 @@ public class Trackball extends ParentView {
     {
         // If
         if (_hitPart == HIT_COLLAR) {
-            double scale = 1; //getZoomFactor(); ???
-            Point point = anEvent.getPoint(); point.x /= scale; point.y /= scale;
+            //double scale = 1; //getZoomFactor(); ??? point.x /= scale; point.y /= scale;
+            Point point = anEvent.getPoint();
             double theta = getMouseAngle(point);
-            double newRoll = _camera.getRoll() + Math.toDegrees(theta - _lastRollAngle);
+            double newRoll = _camera.getRoll() - Math.toDegrees(theta - _lastRollAngle);
             _camera.setRoll(newRoll);
             _lastRollAngle = theta;
             positionKnob(point);

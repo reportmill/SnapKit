@@ -602,7 +602,7 @@ public class Camera3D {
 
             // Set pitch & yaw
             setPitch(getPitch() + (point.y - _pointLast.y)/1.5f);
-            setYaw(getYaw() - (point.x - _pointLast.x)/1.5f);
+            setYaw(getYaw() + (point.x - _pointLast.x)/1.5f);
         }
 
         // Set last point
