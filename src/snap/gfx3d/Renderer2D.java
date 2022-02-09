@@ -136,7 +136,7 @@ public class Renderer2D extends Renderer {
         Transform3D projTrans = camera3D.getProjectionTransform();
         double viewW = camera3D.getWidth();
         double viewH = camera3D.getHeight();
-        Transform3D dispTrans = projTrans.clone().scale(viewW / 2, viewH / 2, 100);
+        Transform3D dispTrans = projTrans.clone().scale(viewW / 2, -viewH / 2, 1);
 
         // Iterate over paths and replace with paths in display space
         List<Path3D> paths = new ArrayList<>();
