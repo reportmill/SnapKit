@@ -17,9 +17,9 @@ public class CameraView extends ParentView {
     private Scene3D  _scene;
 
     // Constants for properties
-    public static final String Yaw_Prop = "Yaw";
-    public static final String Pitch_Prop = "Pitch";
-    public static final String Roll_Prop = "Roll";
+    public static final String Yaw_Prop = Camera3D.Yaw_Prop;
+    public static final String Pitch_Prop = Camera3D.Pitch_Prop;
+    public static final String Roll_Prop = Camera3D.Roll_Prop;
 
     /**
      * Constructor.
@@ -169,7 +169,7 @@ public class CameraView extends ParentView {
     protected void cameraChanged(PropChange aPC)
     {
         //_pcs.fireDeepChange(this, aPC);
-        //relayout();
+        relayout();
         repaint();
     }
 
