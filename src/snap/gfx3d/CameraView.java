@@ -43,16 +43,6 @@ public class CameraView extends ParentView {
     public Scene3D getScene()  { return _scene; }
 
     /**
-     * Returns the depth of the scene.
-     */
-    public double getDepth()  { return _camera.getDepth(); }
-
-    /**
-     * Sets the depth of the scene.
-     */
-    public void setDepth(double aValue)  { _camera.setDepth(aValue); }
-
-    /**
      * Returns the rotation about the Y axis in degrees.
      */
     public double getYaw()  { return _camera.getYaw(); }
