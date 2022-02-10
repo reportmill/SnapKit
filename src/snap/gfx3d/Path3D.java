@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
-import snap.geom.Path;
-import snap.geom.PathIter;
-import snap.geom.Polygon;
-import snap.geom.Seg;
+import snap.geom.*;
 import java.util.*;
 
 /**
@@ -14,7 +11,7 @@ import java.util.*;
 public class Path3D extends Shape3D implements Cloneable {
     
     // The list of elements in this path
-    private List<Seg>  _elements = new ArrayList<>();
+    private List<Seg>  _segs = new ArrayList<>();
     
     // The list of point3Ds in this path
     private List<Point3D>  _points = new ArrayList<>();
@@ -53,38 +50,38 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Constructor for a 2D path with a depth.
      */
-    public Path3D(Path aPath, double aDepth)
+    public Path3D(Shape aShape, double aDepth)
     {
-        addPath(aPath, aDepth);
+        addShapePath(aShape, aDepth);
     }
 
     /**
-     * Returns the number of elements in the path3d.
+     * Returns the number of segments in this Path3d.
      */
-    public int getElementCount()  { return _elements.size(); }
+    public int getSegCount()  { return _segs.size(); }
 
     /**
-     * Returns the element type at the given index.
+     * Returns the Seg at given index.
      */
-    public Seg getElement(int anIndex)  { return _elements.get(anIndex); }
+    public Seg getSeg(int anIndex)  { return _segs.get(anIndex); }
 
     /**
-     * Returns the number of points in the path3d.
+     * Returns the number of points in this Path3d.
      */
     public int getPointCount()  { return _points.size(); }
 
     /**
-     * Returns the point3d at the given index.
+     * Returns the Point3D at given index.
      */
     public Point3D getPoint(int anIndex)  { return _points.get(anIndex); }
 
     /**
      * Returns the element at the given index.
      */
-    public Seg getElement(int anIndex, Point3D[] pts)
+    public Seg getSeg(int anIndex, Point3D[] pts)
     {
         // Get element type (if no points, just return type)
-        Seg type = getElement(anIndex);
+        Seg type = getSeg(anIndex);
         if (pts == null)
             return type;
 
@@ -92,7 +89,7 @@ public class Path3D extends Shape3D implements Cloneable {
         if (anIndex != _nextElementIndex) {
             _nextPointIndex = 0;
             for (int i = 0; i < anIndex; i++) {
-                Seg seg = _elements.get(i);
+                Seg seg = _segs.get(i);
                 _nextPointIndex += seg == MOVE_TO || seg == LINE_TO ? 1 : seg == QUAD_TO ? 2 : seg == CURVE_TO ? 3 : 0;
             }
         }
@@ -125,7 +122,16 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public void moveTo(double x, double y, double z)
     {
-        _elements.add(MOVE_TO);
+        // If previous Seg is MoveTo, remove Seg/Point to avoid consecutive MoveTos
+        int segCount = getSegCount();
+        if (segCount > 0 && getSeg(segCount - 1) == Seg.MoveTo) {
+            _segs.remove(segCount - 1);
+            int pointCount = getPointCount();
+            _points.remove(pointCount - 1);
+        }
+
+        // Add Seg and Point
+        _segs.add(MOVE_TO);
         _points.add(new Point3D(x, y, z));
         clearCachedValues();
     }
@@ -135,7 +141,7 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public void lineTo(double x, double y, double z)
     {
-        _elements.add(LINE_TO);
+        _segs.add(LINE_TO);
         _points.add(new Point3D(x, y, z));
         clearCachedValues();
     }
@@ -145,7 +151,7 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public void quadTo(double cpx, double cpy, double cpz, double x, double y, double z)
     {
-        _elements.add(QUAD_TO);
+        _segs.add(QUAD_TO);
         _points.add(new Point3D(cpx, cpy, cpz));
         _points.add(new Point3D(x, y, z));
         clearCachedValues();
@@ -156,7 +162,7 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public void curveTo(double cp1x,double cp1y,double cp1z,double cp2x,double cp2y,double cp2z,double x,double y,double z)
     {
-        _elements.add(CURVE_TO);
+        _segs.add(CURVE_TO);
         _points.add(new Point3D(cp1x, cp1y, cp1z));
         _points.add(new Point3D(cp2x, cp2y, cp2z));
         _points.add(new Point3D(x, y, z));
@@ -168,29 +174,41 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public void close()
     {
-        _elements.add(CLOSE);
+        _segs.add(CLOSE);
     }
 
     /**
-     * Adds a 2D path to the path3D at the given depth.
+     * Adds a Shape path to this path3D at given depth.
      */
-    public void addPath(Path aPath, double aDepth)
+    public void addShapePath(Shape aPath, double aDepth)
     {
         // Iterate over elements in given path
         PathIter piter = aPath.getPathIter(null);
         double[] pts = new double[6];
-        for (int i = 0; piter.hasNext(); i++) {
-            switch (piter.getNext(pts)) {
+
+        // Iterate over elements in given path
+        while (piter.hasNext()) {
+
+            // Get/handle Seg
+            Seg seg = piter.getNext(pts);
+            switch (seg) {
+
+                // Handle MoveTo
                 case MoveTo:
-                    if (i+1 < aPath.getSegCount() && aPath.getSeg(i+1) != Seg.MoveTo)
-                        moveTo(pts[0], pts[1], aDepth);
+                    moveTo(pts[0], pts[1], aDepth);
                     break;
+
+                // Handle LineTo
                 case LineTo:
                     lineTo(pts[0], pts[1], aDepth);
                     break;
+
+                // Handle QuadTo
                 case QuadTo:
                     quadTo(pts[0], pts[1], aDepth, pts[2], pts[3], aDepth);
                     break;
+
+                // Handle CubicTo
                 case CubicTo:
                     curveTo(pts[0], pts[1], aDepth, pts[2], pts[3], aDepth, pts[4], pts[5], aDepth);
                     break;
@@ -256,8 +274,8 @@ public class Path3D extends Shape3D implements Cloneable {
     private void reverse(int element, Point3D lastPoint, Point3D lastMoveTo)
     {
         // Simply return if element is beyond bounds
-        if (element == getElementCount()) {
-            _elements.clear(); _points.clear(); clearCachedValues();
+        if (element == getSegCount()) {
+            _segs.clear(); _points.clear(); clearCachedValues();
             return;
         }
 
@@ -265,7 +283,7 @@ public class Path3D extends Shape3D implements Cloneable {
         Point3D[] pts = new Point3D[3];
         Point3D lp = null;
         Point3D lmt = lastMoveTo;
-        Seg type = getElement(element, pts);
+        Seg type = getSeg(element, pts);
         switch (type) {
             case MoveTo: lmt = pts[0];
             case LineTo: lp = pts[0]; break;
@@ -275,7 +293,7 @@ public class Path3D extends Shape3D implements Cloneable {
         }
 
         // Recursively add following elements before this one
-        Seg nextType = element+1 < getElementCount() ? getElement(element+1,null) : null;
+        Seg nextType = element+1 < getSegCount() ? getSeg(element+1,null) : null;
         reverse(element+1, lp, lmt);
 
         // Add reverse element to path for current element
@@ -361,8 +379,8 @@ public class Path3D extends Shape3D implements Cloneable {
         Point3D[] pts = new Point3D[3];
 
         // Iterate over this path3d and add segments as 2D
-        for (int i = 0, iMax = getElementCount(); i < iMax; i++) {
-            Seg type = getElement(i, pts);
+        for (int i = 0, iMax = getSegCount(); i < iMax; i++) {
+            Seg type = getSeg(i, pts);
             switch (type) {
                 case MoveTo: path.moveTo(pts[0].x, pts[0].y); break;
                 case LineTo: path.lineTo(pts[0].x, pts[0].y); break;
@@ -563,7 +581,7 @@ public class Path3D extends Shape3D implements Cloneable {
         clone._path3Ds = new Path3D[] { clone };
 
         // Copy elements
-        clone._elements = new ArrayList<>(_elements);
+        clone._segs = new ArrayList<>(_segs);
         clone._points = new ArrayList<>(_points.size());
         for (Point3D pnt : _points)
             clone._points.add(pnt.clone());

@@ -4,9 +4,9 @@
 package snap.gfx3d;
 import java.util.*;
 
-import snap.geom.Path;
 import snap.geom.PathIter;
 import snap.geom.Point;
+import snap.geom.Shape;
 import snap.gfx.*;
 
 /**
@@ -14,8 +14,8 @@ import snap.gfx.*;
  */
 public class PathBox3D extends Shape3D {
     
-    // The path
-    private Path  _path;
+    // The 2D path shape
+    private Shape _pathShape;
     
     // The min/max depth
     private double  _z1, _z2;
@@ -24,11 +24,11 @@ public class PathBox3D extends Shape3D {
     private Path3D[]  _path3Ds;
 
     /**
-     * Creates a PathBox3D from the given Path3D.
+     * Constructor for given path Shape and Z min/max.
      */
-    public PathBox3D(Path aPath, double z1, double z2)
+    public PathBox3D(Shape aPath, double z1, double z2)
     {
-        _path = aPath;
+        _pathShape = aPath;
         _z1 = z1; _z2 = z2;
     }
 
@@ -52,7 +52,7 @@ public class PathBox3D extends Shape3D {
     protected Path3D[] createPath3Ds()
     {
         // Create paths for Z1 & Z2
-        Path3D[] paths = getPaths(_path, _z1, _z2);
+        Path3D[] paths = getPath3Ds(_pathShape, _z1, _z2);
 
         // Get Color, Stroke, Opacity
         Color color = getColor();
@@ -61,8 +61,7 @@ public class PathBox3D extends Shape3D {
         double opacity = getOpacity();
 
         // Iterate over paths and set color, stroke, opacity
-        for (int i = 0, iMax = paths.length; i < iMax; i++) {
-            Path3D path3D = paths[i];
+        for (Path3D path3D : paths) {
             path3D.setColor(color);
             path3D.setOpacity(opacity);
             path3D.setStrokeColor(strokeColor);
@@ -74,10 +73,29 @@ public class PathBox3D extends Shape3D {
     }
 
     /**
-     * Creates and returns a list of paths in 3D for a given 2D path and extrusion.
-     * Also can take into account the width of a stroke applied to the side (extrusion) panels.
+     * Returns the bounds box.
      */
-    public static Path3D[] getPaths(Path aPath, double z1, double z2)
+    @Override
+    protected Box3D createBoundsBox()
+    {
+        // Create and init bounds box
+        Box3D boundsBox = new Box3D();
+        boundsBox.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+        boundsBox.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+
+        // Iterate over Path3Ds and add each bounds box
+        Path3D[] path3Ds = getPath3Ds();
+        for (Path3D path3D : path3Ds)
+            boundsBox.addBox(path3D.getBoundsBox());
+
+        // Return
+        return boundsBox;
+    }
+
+    /**
+     * Creates and returns a list of Path3Ds for a given 2D path and extrusion.
+     */
+    public static Path3D[] getPath3Ds(Shape aPath, double z1, double z2)
     {
         // Create list to hold paths
         List<Path3D> paths = new ArrayList<>();
@@ -175,25 +193,5 @@ public class PathBox3D extends Shape3D {
 
         // Return paths
         return paths.toArray(new Path3D[0]);
-    }
-
-    /**
-     * Returns the bounds box.
-     */
-    @Override
-    protected Box3D createBoundsBox()
-    {
-        // Create and init bounds box
-        Box3D boundsBox = new Box3D();
-        boundsBox.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-        boundsBox.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
-
-        // Iterate over Path3Ds and add each bounds box
-        Path3D[] path3Ds = getPath3Ds();
-        for (Path3D path3D : path3Ds)
-            boundsBox.addBox(path3D.getBoundsBox());
-
-        // Return
-        return boundsBox;
     }
 }
