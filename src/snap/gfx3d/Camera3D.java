@@ -320,9 +320,11 @@ public class Camera3D {
         Transform3D xfm = new Transform3D();
 
         // Add translation from Scene center to world origin
-        double midx = getWidth() / 2;
-        double midy = getHeight() / 2;
-        double midz = getDepth() / 2;
+        Scene3D scene = getScene();
+        Box3D sceneBounds = scene.getBoundsBox();
+        double midx = sceneBounds.getMidX();
+        double midy = sceneBounds.getMidY();
+        double midz = sceneBounds.getMidZ();
         xfm.translate(-midx, -midy, -midz);
 
         // Rotate
@@ -346,10 +348,9 @@ public class Camera3D {
         _gimbalRadius = gimbalRadius;
 
         // Get bounding box in camera coords with no Z offset
-        double boxW = getWidth();
-        double boxH = getHeight();
-        double boxD = getDepth();
-        Box3D boundsBox = new Box3D(0, 0, 0, boxW, boxH, boxD);
+        Scene3D scene = getScene();
+        Box3D sceneBounds = scene.getBoundsBox();
+        Box3D boundsBox = sceneBounds.clone();
         boundsBox.transform(cameraTrans);
 
         // Get second offset Z from bounding box and restore original Z offset

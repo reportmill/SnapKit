@@ -137,9 +137,9 @@ public class Trackball extends ParentView {
         path.close();
 
         // Get Scene origin
-        double midx = _camera.getWidth() / 2;
-        double midy = _camera.getHeight() / 2;
-        double midz = _camera.getDepth() / 2;
+        double midx = IMAGE_SIZE / 2;
+        double midy = IMAGE_SIZE / 2;
+        double midz = IMAGE_SIZE / 2;
 
         // translate out to surface of sphere and rotate to latitude+longitude, translate to scene origin
         Transform3D transform = new Transform3D();

@@ -20,6 +20,9 @@ public class Scene3D {
     
     // List of Shape3ds - the model
     protected List <Shape3D>  _shapes = new ArrayList<>();
+
+    // The scene bounding box
+    private Box3D  _boundsBox;
     
     /**
      * Constructor.
@@ -41,6 +44,11 @@ public class Scene3D {
     public Light3D getLight()  { return _light; }
 
     /**
+     * Returns the shapes.
+     */
+    public List<Shape3D> getShapes()  { return _shapes; }
+
+    /**
      * Returns the number of shapes in the shape list.
      */
     public int getShapeCount()  { return _shapes.size(); }
@@ -57,6 +65,7 @@ public class Scene3D {
     {
         _shapes.add(aShape);
         _camera.sceneDidChange();
+        _boundsBox = null;
     }
 
     /**
@@ -66,6 +75,43 @@ public class Scene3D {
     {
         _shapes.clear();
         _camera.sceneDidChange();
+        _boundsBox = null;
+    }
+
+    /**
+     * Returns the bounds box.
+     */
+    public Box3D getBoundsBox()
+    {
+        // If already set, just return
+        if (_boundsBox != null) return _boundsBox;
+
+        // Get, set and return
+        Box3D boundsBox = getBoundsBoxImpl();
+        return _boundsBox = boundsBox;
+    }
+
+    /**
+     * Returns the bounds box.
+     */
+    protected Box3D getBoundsBoxImpl()
+    {
+        // Get all shapes and first shape
+        List<Shape3D> shapes = getShapes();
+        Shape3D shape0 = shapes.size() > 0 ? shapes.get(0) : null;
+
+        // Create new Box3D from first shape
+        Box3D boundsBox0 = shape0 != null ? shape0.getBoundsBox() : null;
+        Box3D boundsBox = boundsBox0 != null ? boundsBox0.clone() : new Box3D();
+
+        // Iterate over shapes to get total boundsBox
+        for (Shape3D shape : shapes) {
+            boundsBox.addXYZ(shape.getMinX(), shape.getMinY(), shape.getMinZ());
+            boundsBox.addXYZ(shape.getMaxX(), shape.getMaxY(), shape.getMaxZ());
+        }
+
+        // Return total boundsBox
+        return boundsBox;
     }
 
     /**
