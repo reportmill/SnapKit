@@ -7,8 +7,6 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
 import snap.view.ViewEvent;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represent a camera focusing on a scene and manages a display list of simple paths based on
@@ -438,26 +436,6 @@ public class Camera3D {
     {
         Renderer renderer = getRenderer();
         return renderer.getSceneBounds();
-    }
-
-    /**
-     * Returns the scene as a set of Path3Ds, if possible.
-     */
-    public List<Path3D> getPaths()
-    {
-        // Get paths from renderer
-        Renderer renderer = getRenderer();
-        Renderer2D r2d = renderer instanceof Renderer2D ? (Renderer2D) renderer : new Renderer2D(this);
-        List<Path3D> paths = r2d.getPaths();
-
-        // This is bogus, but it's only used by PDF and I don't want to change that right now
-        List<Path3D> paths2 = new ArrayList<>();
-        double dispMidX = getWidth() / 2;
-        double dispMidY = getHeight() / 2;
-        Transform3D cameraToDisplay = new Transform3D(dispMidX, dispMidY, 0);
-        for (Path3D path3D : paths)
-            paths2.add(path3D.copyForTransform(cameraToDisplay));
-        return paths2;
     }
 
     /**
