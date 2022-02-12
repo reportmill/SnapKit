@@ -150,7 +150,7 @@ public class CameraView extends ParentView {
     public Rect getBoundsMarked()
     {
         Rect bounds = getBoundsLocal();
-        Rect camBnds = _camera.getSceneBounds();
+        Rect camBnds = _camera.getSceneBounds2D();
         if (camBnds.x < bounds.x)
             bounds.x = camBnds.x;
         if (camBnds.y < bounds.y)

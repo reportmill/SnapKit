@@ -51,7 +51,7 @@ public abstract class Renderer {
     /**
      * Returns the 2D bounding rect for scene in camera bounds.
      */
-    public abstract Rect getSceneBounds();
+    public abstract Rect getSceneBounds2D();
 
     /**
      * Renders scene for given painter, camera and scene.

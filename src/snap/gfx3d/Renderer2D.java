@@ -17,14 +17,11 @@ public class Renderer2D extends Renderer {
     // Whether to sort surfaces
     private boolean  _sortSurfaces = true;
 
-    // List of Path3Ds - for rendering
-    private List<Path3D>  _paths = new ArrayList<>();
+    // List of all Scene Shape Path3Ds in view coords
+    private List<Path3D>  _surfacesInViewCoords = new ArrayList<>();
 
     // Bounds of paths in scene
-    private Rect  _sceneBounds;
-
-    // Whether paths list needs to be rebuilt
-    private boolean  _rebuildPaths;
+    private Rect _sceneBounds2D;
 
     // Constant for name
     private static final String RENDERER_NAME = "Vector 2D";
@@ -54,28 +51,136 @@ public class Renderer2D extends Renderer {
     public void setSortSurfaces(boolean aValue)  { _sortSurfaces = aValue; }
 
     /**
-     * Returns the specific Path3D at the given index from the display list.
+     * Returns a list of all Scene.Shapes component surfaces Path3Ds in view coords.
      */
-    public List <Path3D> getPaths()
+    public List<Path3D> getSurfacesInViewCoords()
     {
-        if (_rebuildPaths)
-            rebuildPathsNow();
-        return _paths;
+        // If already set, just return
+        if (_surfacesInViewCoords != null) return _surfacesInViewCoords;
+
+        // Get paths, set and return
+        List<Path3D> paths = getSurfacesInViewCoordsImpl();
+        return _surfacesInViewCoords = paths;
+    }
+
+    /**
+     * Returns a list of all Scene.Shapes component surfaces Path3Ds in view coords.
+     */
+    protected List<Path3D> getSurfacesInViewCoordsImpl()
+    {
+        // Get surfaces in camera coords
+        List<Path3D> pathsInCameraCoords = getSurfacesInCameraCoords();
+
+        // Sort surface paths
+        if (isSortSurfaces()) {
+            Collections.sort(pathsInCameraCoords, (p0, p1) -> Sort3D.comparePath3D_MinZs(p0, p1));
+            Collections.sort(pathsInCameraCoords, (p0, p1) -> Sort3D.comparePath3Ds(p0, p1));
+        }
+
+        // Get Camera projection transform
+        Camera3D camera = getCamera();
+        Transform3D projTrans = camera.getProjectionTransform();
+
+        // Get Camera display transform
+        double viewW = camera.getViewWidth();
+        double viewH = camera.getViewHeight();
+        Transform3D dispTrans = projTrans.clone().scale(viewW / 2, -viewH / 2, 1);
+
+        // Iterate over paths and replace with paths in view coords
+        List<Path3D> pathsInViewCoords = new ArrayList<>();
+        for (int i = 0, iMax = pathsInCameraCoords.size(); i < iMax; i++) {
+            Path3D pathInWorld = pathsInCameraCoords.get(i);
+            Path3D pathInView = pathInWorld.copyForTransform(dispTrans);
+            pathsInViewCoords.add(pathInView);
+        }
+
+        // Return paths in view coords
+        return pathsInViewCoords;
+    }
+
+    /**
+     * Returns a list of all Scene.Shapes component surfaces Path3Ds in camera coords.
+     */
+    protected List<Path3D> getSurfacesInCameraCoords()
+    {
+        // Get all Scene.Shapes
+        List<Shape3D> sceneShapes = _scene._shapes;
+
+        // Create Path3D list
+        List<Path3D> pathsList = new ArrayList<>();
+
+        // Iterate over shapes and add paths
+        for (Shape3D shape : sceneShapes)
+            addShapeSurfacesInCameraCoords(shape, pathsList);
+
+        // Return list of shape surface paths in world coords
+        return pathsList;
+    }
+
+    /**
+     * Adds the paths for shape.
+     */
+    protected void addShapeSurfacesInCameraCoords(Shape3D aShape, List<Path3D> thePathsList)
+    {
+        // Get the camera transform & optionally align it to the screen
+        Transform3D worldToCameraXfm = _camera.getTransform();
+        Light3D light = _scene.getLight();
+        Color color = aShape.getColor();
+
+        // Iterate over paths
+        Path3D[] surfacePaths = aShape.getPath3Ds();
+        for (Path3D surfacePath : surfacePaths) {
+
+            // If not surface (just line), do simple add
+            if (!surfacePath.isSurface()) {
+                Path3D dispPath3D = surfacePath.copyForTransform(worldToCameraXfm);
+                thePathsList.add(dispPath3D);
+                continue;
+            }
+
+            // Get path normal in camera coords
+            Vector3D pathNormLocal = surfacePath.getNormal();
+            Vector3D pathNormCamera = worldToCameraXfm.transformVector(pathNormLocal.clone());
+            pathNormCamera.normalize();
+
+            // Get camera-to-path vector in camera coords
+            Point3D pathCenterLocal = surfacePath.getCenter();
+            Point3D pathCenterCamera = worldToCameraXfm.transformPoint(pathCenterLocal.clone());
+            Vector3D cameraToPathVect = new Vector3D(pathCenterCamera.x, pathCenterCamera.y, pathCenterCamera.z);
+
+            // Backface culling : If path pointed away from camera, skip path
+            if (cameraToPathVect.isAligned(pathNormCamera, false))
+                continue;
+
+            // Get path copy transformed by scene transform
+            Path3D dispPath3D = surfacePath.copyForTransform(worldToCameraXfm);
+
+            // If color on shape, set color on path for scene lights
+            if (color != null) {
+                Color rcol = light.getRenderColor(pathNormCamera, color);
+                dispPath3D.setColor(rcol);
+            }
+
+            // Add path
+            thePathsList.add(dispPath3D);
+        }
     }
 
     /**
      * Returns the bounding rect for camera paths.
      */
-    public Rect getSceneBounds()
+    public Rect getSceneBounds2D()
     {
         // If already set, just return
-        if (_sceneBounds != null) return _sceneBounds;
+        if (_sceneBounds2D != null) return _sceneBounds2D;
 
-        // Iterate over paths
-        List<Path3D> paths = getPaths();
+        // Get all surface paths in view coords
+        List<Path3D> surfacePathsInViewCoords = getSurfacesInViewCoords();
+
+        // Iterate over all surface paths and get combined X/Y min/max points
         double xmin = Float.MAX_VALUE, xmax = -xmin;
         double ymin = Float.MAX_VALUE, ymax = -ymin;
-        for (Path3D path : paths) {
+        for (Path3D path : surfacePathsInViewCoords) {
             Box3D boundsBox = path.getBoundsBox();
             xmin = Math.min(xmin, boundsBox.getMinX());
             ymin = Math.min(ymin, boundsBox.getMinY());
@@ -85,130 +190,26 @@ public class Renderer2D extends Renderer {
 
         // Get camera midpoints
         Camera3D camera = getCamera();
-        double dispMidX = camera.getViewWidth() / 2;
-        double dispMidY = camera.getViewHeight() / 2;
+        double viewW = camera.getViewWidth();
+        double viewH = camera.getViewHeight();
 
         // Get scene bounds (shift to camera view mid point)
-        double sceneX = xmin + dispMidX;
-        double sceneY = ymin + dispMidY;
+        double sceneX = xmin + viewW / 2;
+        double sceneY = ymin + viewH / 2;
         double sceneW = xmax - xmin;
         double sceneH = ymax - ymin;
 
         // Create, set, return bounds rect
-        return _sceneBounds = new Rect(sceneX, sceneY, sceneW, sceneH);
+        return _sceneBounds2D = new Rect(sceneX, sceneY, sceneW, sceneH);
     }
-
-    /**
-     * Adds a path to the end of the display list.
-     */
-    protected void addPath(Path3D aShape)  { _paths.add(aShape); }
-
-    /**
-     * Removes the shape at the given index from the shape list.
-     */
-    protected void removePaths()  { _paths.clear(); }
 
     /**
      * Called to indicate that paths list needs to be rebuilt.
      */
-    protected void rebuildPaths()  { _rebuildPaths = true; }
-
-    /**
-     * Rebuilds display list of Path3Ds from Shapes.
-     */
-    protected void rebuildPathsNow()
+    protected void rebuildPaintSurfaces()
     {
-        // Remove all existing Path3Ds
-        removePaths();
-        _sceneBounds = null;
-
-        // Iterate over shapes and add paths
-        rebuildPathsImpl();
-
-        // Sort surface paths
-        if (isSortSurfaces()) {
-            Collections.sort(_paths, (p0, p1) -> Sort3D.comparePath3D_MinZs(p0, p1));
-            Collections.sort(_paths, (p0, p1) -> Sort3D.comparePath3Ds(p0, p1));
-        }
-
-        // Get display transform
-        Camera3D camera3D = getCamera();
-        Transform3D projTrans = camera3D.getProjectionTransform();
-        double viewW = camera3D.getViewWidth();
-        double viewH = camera3D.getViewHeight();
-        Transform3D dispTrans = projTrans.clone().scale(viewW / 2, -viewH / 2, 1);
-
-        // Iterate over paths and replace with paths in display space
-        List<Path3D> paths = new ArrayList<>();
-        for (int i = 0, iMax = _paths.size(); i < iMax; i++) {
-            Path3D path = _paths.get(i);
-            Path3D path2 = path.copyForTransform(dispTrans);
-            paths.add(path2);
-        }
-
-        // Set Paths and clear RebuildPaths
-        _paths = paths;
-        _rebuildPaths = false;
-    }
-
-    /**
-     * Rebuilds display list of Path3Ds from Shapes.
-     */
-    protected void rebuildPathsImpl()
-    {
-        // Iterate over shapes and add paths
-        List <Shape3D> shapes = _scene._shapes;
-        for (Shape3D shp : shapes)
-            addPathsForShape(shp);
-    }
-
-    /**
-     * Adds the paths for shape.
-     */
-    protected void addPathsForShape(Shape3D aShape)
-    {
-        // Get the camera transform & optionally align it to the screen
-        Transform3D worldToCameraXfm = _camera.getTransform();
-        Light3D light = _scene.getLight();
-        Color color = aShape.getColor();
-
-        // Iterate over paths
-        Path3D[] path3Ds = aShape.getPath3Ds();
-        for (Path3D path3d : path3Ds) {
-
-            // If not surface (just line), do simple add
-            if (!path3d.isSurface()) {
-                Path3D dispPath3D = path3d.copyForTransform(worldToCameraXfm);
-                addPath(dispPath3D);
-                continue;
-            }
-
-            // Get path normal in camera coords
-            Vector3D pathNormLocal = path3d.getNormal();
-            Vector3D pathNormCamera = worldToCameraXfm.transformVector(pathNormLocal.clone());
-            pathNormCamera.normalize();
-
-            // Get camera-to-path vector in camera coords
-            Point3D pathCenterLocal = path3d.getCenter();
-            Point3D pathCenterCamera = worldToCameraXfm.transformPoint(pathCenterLocal.clone());
-            Vector3D cameraToPathVect = new Vector3D(pathCenterCamera.x, pathCenterCamera.y, pathCenterCamera.z);
-
-            // Backface culling : If path pointed away from camera, skip path
-            if (cameraToPathVect.isAligned(pathNormCamera, false))
-                continue;
-
-            // Get path copy transformed by scene transform
-            Path3D dispPath3D = path3d.copyForTransform(worldToCameraXfm);
-
-            // If color on shape, set color on path for scene lights
-            if (color != null) {
-                Color rcol = light.getRenderColor(pathNormCamera, color);
-                dispPath3D.setColor(rcol);
-            }
-
-            // Add path
-            addPath(dispPath3D);
-        }
+        _surfacesInViewCoords = null;
+        _sceneBounds2D = null;
     }
 
     /**
@@ -227,7 +228,7 @@ public class Renderer2D extends Renderer {
             case Camera3D.Roll_Prop:
             case Camera3D.FocalLength_Prop:
             case Camera3D.PrefGimbalRadius_Prop:
-                rebuildPaths();
+                rebuildPaintSurfaces();
         }
         super.cameraDidPropChange(aPC);
     }
@@ -237,7 +238,7 @@ public class Renderer2D extends Renderer {
      */
     protected void sceneDidChange()
     {
-        rebuildPaths();
+        rebuildPaintSurfaces();
     }
 
     /**
@@ -253,14 +254,16 @@ public class Renderer2D extends Renderer {
      */
     public void paintPaths(Painter aPntr)
     {
-        // Translate to center
+        // Translate to center of camera view
         Camera3D camera = getCamera();
-        double dispMidX = camera.getViewWidth() / 2;
-        double dispMidY = camera.getViewHeight() / 2;
-        aPntr.translate(dispMidX, dispMidY);
+        double viewW = camera.getViewWidth();
+        double viewH = camera.getViewHeight();
+        double viewMidX = viewW / 2;
+        double viewMidY = viewH / 2;
+        aPntr.translate(viewMidX, viewMidY);
 
         // Iterate over Path3Ds and paint
-        List<Path3D> paths = getPaths();
+        List<Path3D> paths = getSurfacesInViewCoords();
         for (int i = 0, iMax = paths.size(); i < iMax; i++) {
 
             // Paint path and path layers
@@ -272,7 +275,7 @@ public class Renderer2D extends Renderer {
         }
 
         // Translate back
-        aPntr.translate(-dispMidX, -dispMidY);
+        aPntr.translate(-viewMidX, -viewMidY);
     }
 
     /**

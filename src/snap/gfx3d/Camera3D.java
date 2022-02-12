@@ -249,8 +249,8 @@ public class Camera3D {
      */
     public double getFieldOfViewX()
     {
-        double width = getViewWidth();
-        double fieldOfView = Math.toDegrees(Math.atan(width / (2 * _focalLen)));
+        double viewW = getViewWidth();
+        double fieldOfView = Math.toDegrees( Math.atan( viewW / (2 * _focalLen) ) );
         return fieldOfView * 2;
     }
 
@@ -259,8 +259,8 @@ public class Camera3D {
      */
     public double getFieldOfViewY()
     {
-        double height = getViewHeight();
-        double fieldOfView = Math.toDegrees(Math.atan( height / (2 * _focalLen)));
+        double viewH = getViewHeight();
+        double fieldOfView = Math.toDegrees( Math.atan( viewH / (2 * _focalLen) ) );
         return fieldOfView * 2;
     }
 
@@ -269,9 +269,9 @@ public class Camera3D {
      */
     public void setFieldOfViewY(double aValue)
     {
-        double height = getViewHeight();
-        double tanTheta = Math.tan(Math.toRadians(aValue / 2));
-        double focalLength = height / (2 * tanTheta);
+        double viewH = getViewHeight();
+        double tanTheta = Math.tan( Math.toRadians(aValue / 2) );
+        double focalLength = viewH / (2 * tanTheta);
         setFocalLength(focalLength);
     }
 
@@ -432,10 +432,10 @@ public class Camera3D {
     /**
      * Returns the bounding rect for camera paths.
      */
-    public Rect getSceneBounds()
+    public Rect getSceneBounds2D()
     {
         Renderer renderer = getRenderer();
-        return renderer.getSceneBounds();
+        return renderer.getSceneBounds2D();
     }
 
     /**
