@@ -26,7 +26,7 @@ public class Camera3D {
     private Scene3D  _scene;
     
     // Width, height, depth
-    private double  _width, _height, _depth = 40;
+    private double _viewWidth, _viewHeight, _depth = 40;
     
     // Rotation around y axis
     private double  _yaw = 0;
@@ -65,8 +65,8 @@ public class Camera3D {
     protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
 
     // Constants for properties
-    public static final String Width_Prop = "Width";
-    public static final String Height_Prop = "Height";
+    public static final String ViewWidth_Prop = "ViewWidth";
+    public static final String ViewHeight_Prop = "ViewHeight";
     public static final String Depth_Prop = "Depth";
     public static final String Yaw_Prop = "Yaw";
     public static final String Pitch_Prop = "Pitch";
@@ -99,30 +99,30 @@ public class Camera3D {
     /**
      * Returns the width of the camera viewing plane.
      */
-    public double getWidth()  { return _width; }
+    public double getViewWidth()  { return _viewWidth; }
 
     /**
      * Sets the width of the camera viewing plane.
      */
-    public void setWidth(double aValue)
+    public void setViewWidth(double aValue)
     {
-        if (aValue == _width) return;
-        firePropChange(Width_Prop, _width, _width = aValue);
+        if (aValue == _viewWidth) return;
+        firePropChange(ViewWidth_Prop, _viewWidth, _viewWidth = aValue);
         _xform3D = null;
     }
 
     /**
      * Returns the height of the camera viewing plane.
      */
-    public double getHeight()  { return _height; }
+    public double getViewHeight()  { return _viewHeight; }
 
     /**
      * Sets the height of the camera viewing plane.
      */
-    public void setHeight(double aValue)
+    public void setViewHeight(double aValue)
     {
-        if (aValue == _height) return;
-        firePropChange(Height_Prop, _height, _height = aValue);
+        if (aValue == _viewHeight) return;
+        firePropChange(ViewHeight_Prop, _viewHeight, _viewHeight = aValue);
         _xform3D = null;
     }
 
@@ -249,7 +249,7 @@ public class Camera3D {
      */
     public double getFieldOfViewX()
     {
-        double width = getWidth();
+        double width = getViewWidth();
         double fieldOfView = Math.toDegrees(Math.atan(width / (2 * _focalLen)));
         return fieldOfView * 2;
     }
@@ -259,7 +259,7 @@ public class Camera3D {
      */
     public double getFieldOfViewY()
     {
-        double height = getHeight();
+        double height = getViewHeight();
         double fieldOfView = Math.toDegrees(Math.atan( height / (2 * _focalLen)));
         return fieldOfView * 2;
     }
@@ -269,7 +269,7 @@ public class Camera3D {
      */
     public void setFieldOfViewY(double aValue)
     {
-        double height = getHeight();
+        double height = getViewHeight();
         double tanTheta = Math.tan(Math.toRadians(aValue / 2));
         double focalLength = height / (2 * tanTheta);
         setFocalLength(focalLength);
@@ -286,8 +286,8 @@ public class Camera3D {
     public Transform3D getProjectionTransform()
     {
         double fovY = getFieldOfViewY();
-        double viewW = getWidth();
-        double viewH = getHeight();
+        double viewW = getViewWidth();
+        double viewH = getViewHeight();
         double aspect = viewW / viewH;
         Transform3D xfm = Transform3D.newPerspective(fovY, aspect, 10, 1000);
         return xfm;

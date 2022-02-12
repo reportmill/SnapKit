@@ -118,21 +118,21 @@ public class CameraView extends ParentView {
     }
 
     /**
-     * Override to forward to Scene3D.
+     * Override to forward to camera.
      */
     public void setWidth(double aValue)
     {
         super.setWidth(aValue);
-        _camera.setWidth(aValue);
+        _camera.setViewWidth(aValue);
     }
 
     /**
-     * Override to forward to Scene3D.
+     * Override to forward to camera.
      */
     public void setHeight(double aValue)
     {
         super.setHeight(aValue);
-        _camera.setHeight(aValue);
+        _camera.setViewHeight(aValue);
     }
 
     /**

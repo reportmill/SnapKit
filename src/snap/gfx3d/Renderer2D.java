@@ -85,8 +85,8 @@ public class Renderer2D extends Renderer {
 
         // Get camera midpoints
         Camera3D camera = getCamera();
-        double dispMidX = camera.getWidth() / 2;
-        double dispMidY = camera.getHeight() / 2;
+        double dispMidX = camera.getViewWidth() / 2;
+        double dispMidY = camera.getViewHeight() / 2;
 
         // Get scene bounds (shift to camera view mid point)
         double sceneX = xmin + dispMidX;
@@ -134,8 +134,8 @@ public class Renderer2D extends Renderer {
         // Get display transform
         Camera3D camera3D = getCamera();
         Transform3D projTrans = camera3D.getProjectionTransform();
-        double viewW = camera3D.getWidth();
-        double viewH = camera3D.getHeight();
+        double viewW = camera3D.getViewWidth();
+        double viewH = camera3D.getViewHeight();
         Transform3D dispTrans = projTrans.clone().scale(viewW / 2, -viewH / 2, 1);
 
         // Iterate over paths and replace with paths in display space
@@ -219,8 +219,8 @@ public class Renderer2D extends Renderer {
     {
         String propName = aPC.getPropName();
         switch (propName) {
-            case Camera3D.Width_Prop:
-            case Camera3D.Height_Prop:
+            case Camera3D.ViewWidth_Prop:
+            case Camera3D.ViewHeight_Prop:
             case Camera3D.Depth_Prop:
             case Camera3D.Yaw_Prop:
             case Camera3D.Pitch_Prop:
@@ -255,8 +255,8 @@ public class Renderer2D extends Renderer {
     {
         // Translate to center
         Camera3D camera = getCamera();
-        double dispMidX = camera.getWidth() / 2;
-        double dispMidY = camera.getHeight() / 2;
+        double dispMidX = camera.getViewWidth() / 2;
+        double dispMidY = camera.getViewHeight() / 2;
         aPntr.translate(dispMidX, dispMidY);
 
         // Iterate over Path3Ds and paint
