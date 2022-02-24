@@ -176,6 +176,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public static final String LeanY_Prop = "LeanY";
     public static final String Disabled_Prop = "Disabled";
     public static final String Visible_Prop = "Visible";
+    public static final String Pickable_Prop = "Pickable";
+    public static final String Paintable_Prop = "Paintable";
     public static final String Vertical_Prop = "Vertical";
     public static final String Focused_Prop = "Focused";
     public static final String Focusable_Prop = "Focusable";
@@ -1255,7 +1257,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets whether view can be hit by mouse.
      */
-    public void setPickable(boolean aValue)  { _pickable = aValue; }
+    public void setPickable(boolean aValue)
+    {
+        if (aValue == isPickable()) return;
+        firePropChange(Pickable_Prop, _pickable, _pickable = aValue);
+    }
 
     /**
      * Returns whether view can be hit by mouse and visible.
@@ -1270,7 +1276,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets whether view should be painted.
      */
-    public void setPaintable(boolean aValue)  { _paintable = aValue; }
+    public void setPaintable(boolean aValue)
+    {
+        if (aValue == isPaintable()) return;
+        firePropChange(Paintable_Prop, _paintable, _paintable = aValue);
+        repaint();
+    }
 
     /**
      * Returns whether view should be included when a parent does layout.
