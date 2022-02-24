@@ -2,15 +2,15 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
-import java.nio.DoubleBuffer;
+import java.util.Arrays;
 
 /**
  * This class manages raw vertex data (position, normal vector, color).
  */
-public class VertexBuffer {
+public class VertexArray {
 
-    // The DoubleBuffer to hold actual doubles
-    private DoubleBuffer  _doubleBuf = DoubleBuffer.allocate(24);
+    // The double array to hold actual doubles
+    private double[]  _doubleArray = new double[24];
 
     // The number of vertexes
     private int  _vertexCount = 0;
@@ -19,7 +19,7 @@ public class VertexBuffer {
     private int  _vertexSize = 3;
 
     /**
-     * Returns the number of vertices in buffer.
+     * Returns the number of vertices in array.
      */
     public int getCount()  { return _vertexCount; }
 
@@ -29,17 +29,22 @@ public class VertexBuffer {
     public double getValueForVertexAndOffset(int anIndex, int anOffset)
     {
         int index = anIndex * _vertexSize + anOffset;
-        return _doubleBuf.get(index);
+        return _doubleArray[index];
     }
 
     /**
-     * Adds value triplet to buffer.
+     * Adds value triplet to array.
      */
     public void addValues3(double aVal1, double aVal2, double aVal3)
     {
-        _doubleBuf.put(aVal1);
-        _doubleBuf.put(aVal2);
-        _doubleBuf.put(aVal3);
+        int index = _vertexCount * _vertexSize;
+        if (index + 3 > _doubleArray.length)
+            _doubleArray = Arrays.copyOf(_doubleArray, _doubleArray.length * 2);
+
+        // Add values
+        _doubleArray[index] = aVal1;
+        _doubleArray[index + 1] = aVal2;
+        _doubleArray[index + 2] = aVal3;
         _vertexCount++;
     }
 
@@ -57,9 +62,9 @@ public class VertexBuffer {
     public Point3D getPoint3D(Point3D aPoint, int anIndex)
     {
         int index = anIndex * _vertexSize;
-        aPoint.x = _doubleBuf.get(index);
-        aPoint.y = _doubleBuf.get(index + 1);
-        aPoint.z = _doubleBuf.get(index + 2);
+        aPoint.x = _doubleArray[index];
+        aPoint.y = _doubleArray[index + 1];
+        aPoint.z = _doubleArray[index + 2];
         return aPoint;
     }
 

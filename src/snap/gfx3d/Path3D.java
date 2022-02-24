@@ -26,7 +26,7 @@ public class Path3D extends Shape3D implements Cloneable {
     private Path3D[]  _path3Ds = { this };
 
     // The VertexBuffer holding triangles of Path3D
-    private VertexBuffer  _trianglesVB;
+    private VertexArray _trianglesVB;
     
     // Cached pointers for iterating efficiently over the path
     private int  _nextElementIndex = -100;
@@ -398,23 +398,23 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Returns the triangle paths.
      */
-    public VertexBuffer getTrianglesVB()
+    public VertexArray getTrianglesVA()
     {
         // If already set, just return
         if (_trianglesVB != null) return _trianglesVB;
 
         // Create, set, return
-        VertexBuffer triVB = createTrianglesVB();
-        return _trianglesVB = triVB;
+        VertexArray triVA = createTrianglesVA();
+        return _trianglesVB = triVA;
     }
 
     /**
      * Creates the triangle paths.
      */
-    protected VertexBuffer createTrianglesVB()
+    protected VertexArray createTrianglesVA()
     {
         // Create VertexBuffer
-        VertexBuffer vbuf = new VertexBuffer();
+        VertexArray vbuf = new VertexArray();
 
         // If no normal, just return empty
         Vector3D pathNormal = getNormal();
