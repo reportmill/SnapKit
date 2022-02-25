@@ -73,8 +73,13 @@ public class Renderer2D extends Renderer {
 
         // Sort surface paths
         if (isSortSurfaces()) {
-            Collections.sort(pathsInCameraCoords, (p0, p1) -> Sort3D.comparePath3D_MinZs(p0, p1));
-            Collections.sort(pathsInCameraCoords, (p0, p1) -> Sort3D.comparePath3Ds(p0, p1));
+            try {
+                Collections.sort(pathsInCameraCoords, (p0, p1) -> Sort3D.comparePath3D_MinZs(p0, p1));
+                Collections.sort(pathsInCameraCoords, (p0, p1) -> Sort3D.comparePath3Ds(p0, p1));
+            }
+            catch (Exception e) {
+                System.err.println("Renderer2D.getSurfacesInViewCoordsImpl: Sort failed: " + e);
+            }
         }
 
         // Get Camera projection transform
