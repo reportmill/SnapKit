@@ -3,6 +3,8 @@
  */
 package snap.gfx3d;
 import snap.geom.*;
+import snap.gfx.Color;
+
 import java.util.*;
 
 /**
@@ -16,6 +18,9 @@ public class Path3D extends Shape3D implements Cloneable {
     // The list of point3Ds in this path
     private List<Point3D>  _points = new ArrayList<>();
     
+    // The list of colors in this path
+    private List<Color>  _colors = new ArrayList<>();
+
     // A list of Path3Ds to be drawn in front of this Path3D
     private List<Path3D>  _layers;
 
@@ -25,8 +30,8 @@ public class Path3D extends Shape3D implements Cloneable {
     // Cached array of this Path3D to efficiently satisfy getPath3Ds() method
     private Path3D[]  _path3Ds = { this };
 
-    // The VertexBuffer holding triangles of Path3D
-    private VertexArray _trianglesVB;
+    // The VertexArray holding triangles of Path3D
+    private VertexArray  _vertexArray;
     
     // Cached pointers for iterating efficiently over the path
     private int  _nextElementIndex = -100;
@@ -175,6 +180,14 @@ public class Path3D extends Shape3D implements Cloneable {
     public void close()
     {
         _segs.add(CLOSE);
+    }
+
+    /**
+     * Adds a color.
+     */
+    public void addColor(Color aColor)
+    {
+        _colors.add(aColor);
     }
 
     /**
@@ -396,30 +409,31 @@ public class Path3D extends Shape3D implements Cloneable {
     }
 
     /**
-     * Returns the triangle paths.
+     * Returns a VertexArray of path triangles.
      */
-    public VertexArray getTrianglesVA()
+    public VertexArray getVertexArray()
     {
         // If already set, just return
-        if (_trianglesVB != null) return _trianglesVB;
+        if (_vertexArray != null) return _vertexArray;
 
         // Create, set, return
-        VertexArray triVA = createTrianglesVA();
-        return _trianglesVB = triVA;
+        VertexArray triVA = createVertexArray();
+        return _vertexArray = triVA;
     }
 
     /**
-     * Creates the triangle paths.
+     * Creates a VertexArray of path triangles.
      */
-    protected VertexArray createTrianglesVA()
+    protected VertexArray createVertexArray()
     {
-        // Create VertexBuffer
-        VertexArray vbuf = new VertexArray();
+        // Create VertexArray
+        VertexArray vertexArray = new VertexArray();
+        vertexArray.setColor(getColor());
 
         // If no normal, just return empty
         Vector3D pathNormal = getNormal();
         if (Double.isNaN(pathNormal.x))
-            return vbuf;
+            return vertexArray;
 
         // Get transform matrix to transform this path to/from facing Z
         Matrix3D xfmToZ = getTransformToAlignToVector(0, 0, 1);
@@ -452,7 +466,7 @@ public class Path3D extends Shape3D implements Cloneable {
             p2.y = triangle.getY(2);
             p0.z = p1.z = p2.z = zVal;
 
-            // Transform points back and add to VertexBuffer
+            // Transform points back and add to VertexArray
             xfmFromZ.transformPoint(p0);
             xfmFromZ.transformPoint(p1);
             xfmFromZ.transformPoint(p2);
@@ -465,14 +479,18 @@ public class Path3D extends Shape3D implements Cloneable {
                 p2.x = px; p2.y = py; p2.z = pz;
             }
 
-            // Add points to VertexBuffer
-            vbuf.addValues3(p0.x, p0.y, p0.z);
-            vbuf.addValues3(p1.x, p1.y, p1.z);
-            vbuf.addValues3(p2.x, p2.y, p2.z);
+            // Add points to VertexArray
+            vertexArray.addPoint(p0.x, p0.y, p0.z);
+            vertexArray.addPoint(p1.x, p1.y, p1.z);
+            vertexArray.addPoint(p2.x, p2.y, p2.z);
         }
 
-        // Return Triangle VertexBuffer
-        return vbuf;
+        // Add colors
+        for (Color color : _colors)
+            vertexArray.addColor(color);
+
+        // Return
+        return vertexArray;
     }
 
     /**
@@ -519,7 +537,7 @@ public class Path3D extends Shape3D implements Cloneable {
     {
         super.clearCachedValues();
         _normal = null;
-        _trianglesVB = null;
+        _vertexArray = null;
     }
 
     /**
@@ -590,6 +608,9 @@ public class Path3D extends Shape3D implements Cloneable {
             for (Path3D path3D : _layers)
                 clone._layers.add(path3D.clone());
         }
+
+        // Clone colors
+        clone._colors = new ArrayList<>(_colors);
 
         // Return clone
         return clone;
