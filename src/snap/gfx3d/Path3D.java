@@ -4,6 +4,7 @@
 package snap.gfx3d;
 import snap.geom.*;
 import snap.gfx.Color;
+import snap.util.ListUtils;
 import snap.util.MathUtils;
 import java.util.*;
 
@@ -279,6 +280,14 @@ public class Path3D extends Shape3D implements Cloneable {
     public void reverse()
     {
         reverse(0, null, null);
+
+        // Reverse colors
+        if (_colors.size() == 3) {
+            Color color = _colors.remove(1);
+            _colors.add(color);
+        }
+        else if (_colors.size() > 3)
+            System.err.println("Path3D.reverse: Colors not supported");
     }
 
     /**
