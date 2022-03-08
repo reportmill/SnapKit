@@ -4,7 +4,7 @@
 package snap.gfx3d;
 import snap.geom.*;
 import snap.gfx.Color;
-
+import snap.util.MathUtils;
 import java.util.*;
 
 /**
@@ -21,8 +21,8 @@ public class Path3D extends Shape3D implements Cloneable {
     // The list of colors in this path
     private List<Color>  _colors = new ArrayList<>();
 
-    // A list of Path3Ds to be drawn in front of this Path3D
-    private List<Path3D>  _layers;
+    // A Painter3D to paint the surface of path
+    private Painter3D  _painter;
 
     // The path normal vector
     private Vector3D  _normal;
@@ -489,9 +489,134 @@ public class Path3D extends Shape3D implements Cloneable {
         for (Color color : _colors)
             vertexArray.addColor(color);
 
+        // Handle Stroke: Create/add stroke VertexArray
+        if (getStrokeColor() != null) {
+            VertexArray strokeVA = getStrokeVertexArray();
+            vertexArray.setLast(strokeVA);
+        }
+
+        // Handle Painter: Create/add painterVertexArray
+        Painter3D painter3D = getPainter();
+        if (painter3D != null) {
+            VertexArray painterVA = getPainterVertexArray();
+            vertexArray.setLast(painterVA);
+        }
+
         // Return
         return vertexArray;
     }
+
+    /**
+     * Returns a VertexArray for path stroke.
+     */
+    protected VertexArray getStrokeVertexArray()
+    {
+        // Get vars
+        VertexArray vertexArray = new VertexArray();
+        Color strokeColor = getStrokeColor();
+        vertexArray.setColor(strokeColor != null ? strokeColor : Color.BLACK);
+
+        // Path3D iteration vars
+        int segCount = getSegCount();
+        Point3D[] points = new Point3D[3];
+        Point3D movePoint = new Point3D(0, 0, 0);
+        Point3D lastPoint = movePoint;
+
+        // Iterate over segments and render lines
+        for (int i = 0; i < segCount; i++) {
+            Seg seg = getSeg(i, points);
+            switch (seg) {
+
+                case MoveTo:
+                    movePoint = lastPoint = points[0];
+                    break;
+
+                case LineTo: {
+                    Point3D p0 = lastPoint, p1 = points[0];
+                    addLineStrokePoints(vertexArray, p0, p1);
+                    lastPoint = p1;
+                    break;
+                }
+
+                case Close: {
+                    Point3D p0 = lastPoint, p1 = movePoint;
+                    addLineStrokePoints(vertexArray, p0, p1);
+                    lastPoint = p1;
+                    break;
+                }
+
+                default:
+                    if (!_didRenderPath3DStrokedError) {
+                        System.err.println("Path3D:getStrokeVertexArray: Unsupported Seg: " + seg);
+                        _didRenderPath3DStrokedError = true;
+                    }
+                    break;
+            }
+        }
+
+        // Return
+        return vertexArray;
+    }
+
+    /**
+     * Constructor.
+     */
+    private void addLineStrokePoints(VertexArray vertexArray, Point3D p0, Point3D p1)
+    {
+        // Get vector across line and perpendicular to line
+        Vector3D pathNormal = getNormal();
+        Vector3D acrossVector = new Vector3D(p1.x - p0.x, p1.y - p0.y, p1.z - p0.z).normalize();
+        Vector3D downVector = pathNormal.getCrossProduct(acrossVector).normalize();
+
+        // Get offset so line moves 'above' path triangles
+        Vector3D offsetNormal = pathNormal.clone();
+        offsetNormal.scale(.5);
+
+        // Upper left point
+        Point3D p0a = p0.clone();
+        p0a.x += downVector.x - acrossVector.x + offsetNormal.x;
+        p0a.y += downVector.y - acrossVector.y + offsetNormal.y;
+        p0a.z += downVector.z - acrossVector.z + offsetNormal.z;
+
+        // Lower left point
+        Point3D p0b = p0.clone();
+        p0b.x += -downVector.x - acrossVector.x + offsetNormal.x;
+        p0b.y += -downVector.y - acrossVector.y + offsetNormal.y;
+        p0b.z += -downVector.z - acrossVector.z + offsetNormal.z;
+
+        // Upper right point
+        Point3D p1a = p1.clone();
+        p1a.x += downVector.x + acrossVector.x + offsetNormal.x;
+        p1a.y += downVector.y + acrossVector.y + offsetNormal.y;
+        p1a.z += downVector.z + acrossVector.z + offsetNormal.z;
+
+        // Lower right point
+        Point3D p1b = p1.clone();
+        p1b.x += -downVector.x + acrossVector.x + offsetNormal.x;
+        p1b.y += -downVector.y + acrossVector.y + offsetNormal.y;
+        p1b.z += -downVector.z + acrossVector.z + offsetNormal.z;
+
+        // Get triangle A. If not aligned with normal, swap points
+        Point3D[] triangleA = { p0a, p0b, p1b };
+        Vector3D pointsNormal = Vector3D.getNormalForPoints(new Vector3D(0, 0, 0), triangleA);
+        if (!pointsNormal.equals(pathNormal)) {
+            triangleA[1] = p1b; triangleA[2] = p0b; }
+
+        // Get triangle A. If not aligned with normal, swap points
+        Point3D[] triangleB = { p1a, p0a, p1b };
+        Vector3D.getNormalForPoints(pointsNormal, triangleB);
+        if (!pointsNormal.equals(pathNormal)) {
+            triangleB[1] = p1b; triangleB[2] = p0a; }
+
+        // Add triangle points
+        for (Point3D p3d : triangleA)
+            vertexArray.addPoint(p3d.x, p3d.y, p3d.z);
+        for (Point3D p3d : triangleB)
+            vertexArray.addPoint(p3d.x, p3d.y, p3d.z);
+    }
+
+    // Error var
+    private static boolean  _didRenderPath3DStrokedError;
 
     /**
      * Returns the bounds box.
@@ -513,20 +638,62 @@ public class Path3D extends Shape3D implements Cloneable {
     }
 
     /**
-     * Returns layers to be drawn in front of this path.
+     * Returns the painter to render texture for this path.
      */
-    public List <Path3D> getLayers()
+    public Painter3D getPainter()  { return _painter; }
+
+    /**
+     * Sets the painter to render texture for this path.
+     */
+    public void setPainter(Painter3D aPntr)
     {
-        return _layers != null ? _layers : Collections.EMPTY_LIST;
+        _painter = aPntr;
     }
 
     /**
-     * Adds a path to be drawn immediately in front of this path.
+     * Returns the painter VertexArray for 'painted' triangles on shape surface.
      */
-    public void addLayer(Path3D aPath)
+    public VertexArray getPainterVertexArray()
     {
-        if (_layers == null) _layers = new ArrayList<>();
-        _layers.add(aPath);
+        Matrix3D painterToLocal = getPainterToLocal();
+        VertexArray vertexArray = _painter.getVertexArray();
+        VertexArray vertexArrayLocal = vertexArray.copyForTransform(painterToLocal);
+        return vertexArrayLocal;
+    }
+
+    /**
+     * Returns the transform from Painter to this shape.
+     */
+    public Matrix3D getPainterToLocal()
+    {
+        // Create transform and translate to Path.Center
+        Matrix3D painterToLocal = new Matrix3D();
+        Point3D pathCenter = getCenter();
+        painterToLocal.translate(pathCenter.x, pathCenter.y, pathCenter.z);
+
+        // Rotate by angle between painter and path normals (around axis perpendicular to them)
+        Vector3D pntrNormal = new Vector3D(0, 0, 1);
+        Vector3D pathNormal = getNormal();
+        double angle = pntrNormal.getAngleBetween(pathNormal);
+
+        // If angle 180 deg, rotate about Y
+        if (MathUtils.equals(angle, 180))
+            painterToLocal.rotateY(180);
+
+        // If angle non-zero, get perpendicular and rotate about that
+        else if (!MathUtils.equalsZero(angle)) {
+            Vector3D rotateAxis = pntrNormal.getCrossProduct(pathNormal);
+            painterToLocal.rotateAboutAxis(angle, rotateAxis.x, rotateAxis.y, rotateAxis.z);
+        }
+
+        // Translate to Painter.Center
+        double pntrW = _painter.getWidth();
+        double pntrH = _painter.getHeight();
+        Point3D pntrCenter = new Point3D(pntrW / 2, pntrH / 2, 0);
+        painterToLocal.translate(-pntrCenter.x, -pntrCenter.y, -pntrCenter.z);
+
+        // Return
+        return painterToLocal;
     }
 
     /**
@@ -566,9 +733,6 @@ public class Path3D extends Shape3D implements Cloneable {
     {
         Path3D copy = clone();
         copy.transform(aTrans);
-        if (_layers != null)
-            for (Path3D layer : copy._layers)
-                layer.transform(aTrans);
         return copy;
     }
 
@@ -579,9 +743,6 @@ public class Path3D extends Shape3D implements Cloneable {
     {
         Path3D copy = clone();
         copy.transform(aTrans);
-        if (_layers != null)
-            for (Path3D layer : copy._layers)
-                layer.transform(aTrans);
         return copy;
     }
 
@@ -603,14 +764,13 @@ public class Path3D extends Shape3D implements Cloneable {
         clone._points = new ArrayList<>(_points.size());
         for (Point3D pnt : _points)
             clone._points.add(pnt.clone());
-        if (_layers != null) {
-            clone._layers = new ArrayList<>(_layers.size());
-            for (Path3D path3D : _layers)
-                clone._layers.add(path3D.clone());
-        }
 
         // Clone colors
         clone._colors = new ArrayList<>(_colors);
+
+        // Clone painter
+        if (_painter != null)
+            clone._painter = _painter.clone();
 
         // Return clone
         return clone;

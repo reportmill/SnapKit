@@ -66,6 +66,26 @@ public class Vector3D implements Cloneable {
     }
 
     /**
+     * Scales this vector by given factor.
+     */
+    public void scale(double aScale)
+    {
+        x *= aScale;
+        y *= aScale;
+        z *= aScale;
+    }
+
+    /**
+     * Makes this receiver point in the opposite direction.
+     */
+    public void negate()
+    {
+        x = x != 0 ? -x : 0;
+        y = y != 0 ? -y : 0;
+        z = z != 0 ? -z : 0;
+    }
+
+    /**
      * Returns the vector perpendicular to the receiver and the given vector.
      */
     public Vector3D getCrossProduct(Vector3D v2)
@@ -126,16 +146,6 @@ public class Vector3D implements Cloneable {
         double dot = getDotProduct(aVector);
         double angleRad = Math.acos(dot / m3);
         return Math.toDegrees(angleRad);
-    }
-
-    /**
-     * Makes this receiver point in the opposite direction.
-     */
-    public void negate()
-    {
-        x = x != 0 ? -x : 0;
-        y = y != 0 ? -y : 0;
-        z = z != 0 ? -z : 0;
     }
 
     /**

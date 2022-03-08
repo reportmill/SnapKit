@@ -16,7 +16,7 @@ public abstract class Shape3D {
     private Color  _color;
     
     // Shape stroke
-    private Stroke  _stroke = Stroke.Stroke1;
+    private Stroke  _stroke;
     
     // Shape Stroke color
     private Color  _strokeColor;

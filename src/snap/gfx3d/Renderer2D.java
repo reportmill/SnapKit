@@ -6,7 +6,6 @@ import snap.gfx.Paint;
 import snap.gfx.Painter;
 import snap.util.PropChange;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -74,8 +73,8 @@ public class Renderer2D extends Renderer {
         // Sort surface paths
         if (isSortSurfaces()) {
             try {
-                Collections.sort(pathsInCameraCoords, (p0, p1) -> Sort3D.comparePath3D_MinZs(p0, p1));
-                Collections.sort(pathsInCameraCoords, (p0, p1) -> Sort3D.comparePath3Ds(p0, p1));
+                pathsInCameraCoords.sort((p0, p1) -> Sort3D.comparePath3D_MinZs(p0, p1));
+                pathsInCameraCoords.sort((p0, p1) -> Sort3D.comparePath3Ds(p0, p1));
             }
             catch (Exception e) {
                 System.err.println("Renderer2D.getSurfacesInViewCoordsImpl: Sort failed: " + e);
@@ -93,8 +92,7 @@ public class Renderer2D extends Renderer {
 
         // Iterate over paths and replace with paths in view coords
         List<Path3D> pathsInViewCoords = new ArrayList<>();
-        for (int i = 0, iMax = pathsInCameraCoords.size(); i < iMax; i++) {
-            Path3D pathInWorld = pathsInCameraCoords.get(i);
+        for (Path3D pathInWorld : pathsInCameraCoords) {
             Path3D pathInView = pathInWorld.copyForTransform(dispTrans);
             pathsInViewCoords.add(pathInView);
         }
@@ -269,15 +267,8 @@ public class Renderer2D extends Renderer {
 
         // Iterate over Path3Ds and paint
         List<Path3D> paths = getSurfacesInViewCoords();
-        for (int i = 0, iMax = paths.size(); i < iMax; i++) {
-
-            // Paint path and path layers
-            Path3D child = paths.get(i);
+        for (Path3D child : paths)
             paintPath3D(aPntr, child);
-            if (child.getLayers().size() > 0)
-                for (Path3D layer : child.getLayers())
-                    paintPath3D(aPntr, layer);
-        }
 
         // Translate back
         aPntr.translate(-viewMidX, -viewMidY);
