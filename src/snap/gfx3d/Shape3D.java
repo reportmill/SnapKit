@@ -24,6 +24,9 @@ public abstract class Shape3D {
     // Shape opacity
     private double  _opacity = 1;
 
+    // Whether shape surfaces are double-sided
+    private boolean  _doubleSided;
+
     // The path bounding box
     private Box3D  _boundsBox;
 
@@ -98,6 +101,19 @@ public abstract class Shape3D {
     public void setOpacity(double aValue)
     {
         _opacity = aValue;
+    }
+
+    /**
+     * Returns whether shape surfaces are double-sided.
+     */
+    public boolean isDoubleSided()  { return _doubleSided; }
+
+    /**
+     * Sets whether shape surfaces are double-sided.
+     */
+    public void setDoubleSided(boolean aValue)
+    {
+        _doubleSided = aValue;
     }
 
     /**

@@ -152,8 +152,15 @@ public class Renderer2D extends Renderer {
             Vector3D cameraToPathVect = new Vector3D(pathCenterCamera.x, pathCenterCamera.y, pathCenterCamera.z);
 
             // Backface culling : If path pointed away from camera, skip path
-            if (cameraToPathVect.isAligned(pathNormCamera, false))
-                continue;
+            if (cameraToPathVect.isAligned(pathNormCamera, false)) {
+
+                // If not double-sided, just skip
+                if (!surfacePath.isDoubleSided())
+                    continue;
+
+                // Otherwise, negate normal
+                pathNormCamera.negate();
+            }
 
             // Get path copy transformed by scene transform
             Path3D dispPath3D = surfacePath.copyForTransform(worldToCameraXfm);

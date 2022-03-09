@@ -22,14 +22,17 @@ public class VertexArray implements Cloneable {
     // The number of components in vertex color array
     private int  _colorArrayLen = 0;
 
-    // A global color
-    private Color  _color;
-
     // The number of components per vertex point
     private int  _pointCompCount = 3;
 
     // The number of components per vertex color
     private int  _colorCompCount = 3;
+
+    // A global color
+    private Color  _color;
+
+    // Whether triangles are double-sided
+    private boolean  _doubleSided;
 
     // The next VertexArray if this one is part of a chain
     private VertexArray  _next;
@@ -144,6 +147,16 @@ public class VertexArray implements Cloneable {
     }
 
     /**
+     * Returns the number of components for a vertex point.
+     */
+    public int getPointCompCount()  { return _pointCompCount; }
+
+    /**
+     * Returns the number of components for a vertex color.
+     */
+    public int getColorCompCount()  { return _colorCompCount; }
+
+    /**
      * Returns the global color.
      */
     public Color getColor()  { return _color; }
@@ -157,14 +170,17 @@ public class VertexArray implements Cloneable {
     }
 
     /**
-     * Returns the number of components for a vertex point.
+     * Returns whether shape surfaces are double-sided.
      */
-    public int getPointCompCount()  { return _pointCompCount; }
+    public boolean isDoubleSided()  { return _doubleSided; }
 
     /**
-     * Returns the number of components for a vertex color.
+     * Sets whether shape surfaces are double-sided.
      */
-    public int getColorCompCount()  { return _colorCompCount; }
+    public void setDoubleSided(boolean aValue)
+    {
+        _doubleSided = aValue;
+    }
 
     /**
      * Returns the next VertexArray, if part of a chain.

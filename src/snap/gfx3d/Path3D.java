@@ -435,9 +435,10 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     protected VertexArray createVertexArray()
     {
-        // Create VertexArray
+        // Create/configure VertexArray
         VertexArray vertexArray = new VertexArray();
         vertexArray.setColor(getColor());
+        vertexArray.setDoubleSided(isDoubleSided());
 
         // If no normal, just return empty
         Vector3D pathNormal = getNormal();
