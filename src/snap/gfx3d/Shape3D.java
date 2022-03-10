@@ -148,6 +148,14 @@ public abstract class Shape3D {
     protected abstract Box3D createBoundsBox();
 
     /**
+     * Sets the bounds box.
+     */
+    public void setBoundsBox(Box3D aBox)
+    {
+        _boundsBox = aBox;
+    }
+
+    /**
      * Returns the max X for the path.
      */
     public double getMinX()  { return getBoundsBox().getMinX(); }

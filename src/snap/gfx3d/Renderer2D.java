@@ -194,30 +194,25 @@ public class Renderer2D extends Renderer {
         // If already set, just return
         if (_sceneBounds2D != null) return _sceneBounds2D;
 
-        // Get all surface paths in view coords
-        List<Path3D> surfacePathsInViewCoords = getSurfacesInViewCoords();
+        // Get Scene to View transform
+        Transform3D sceneToCamera = _camera.getTransform();
+        Transform3D cameraToNDC = _camera.getProjectionTransform();
+        double viewW = _camera.getViewWidth();
+        double viewH = _camera.getViewHeight();
+        Transform3D cameraToView = cameraToNDC.clone().scale(viewW / 2, -viewH / 2, 1);
+        Transform3D sceneToView = sceneToCamera.multiply(cameraToView);
 
-        // Iterate over all surface paths and get combined X/Y min/max points
-        double xmin = Float.MAX_VALUE, xmax = -xmin;
-        double ymin = Float.MAX_VALUE, ymax = -ymin;
-        for (Path3D path : surfacePathsInViewCoords) {
-            Box3D boundsBox = path.getBoundsBox();
-            xmin = Math.min(xmin, boundsBox.getMinX());
-            ymin = Math.min(ymin, boundsBox.getMinY());
-            xmax = Math.max(xmax, boundsBox.getMaxX());
-            ymax = Math.max(ymax, boundsBox.getMaxY());
-        }
-
-        // Get camera midpoints
-        Camera3D camera = getCamera();
-        double viewW = camera.getViewWidth();
-        double viewH = camera.getViewHeight();
+        // Get Scene bounds in View
+        Scene3D scene = getScene();
+        Box3D sceneBounds = scene.getBoundsBox();
+        Box3D sceneBoundsInView = sceneBounds.clone();
+        sceneBoundsInView.transform(sceneToView);
 
         // Get scene bounds (shift to camera view mid point)
-        double sceneX = xmin + viewW / 2;
-        double sceneY = ymin + viewH / 2;
-        double sceneW = xmax - xmin;
-        double sceneH = ymax - ymin;
+        double sceneX = sceneBoundsInView.getMinX() + viewW / 2;
+        double sceneY = sceneBoundsInView.getMinY() + viewH / 2;
+        double sceneW = sceneBoundsInView.getWidth();
+        double sceneH = sceneBoundsInView.getHeight();
 
         // Create, set, return bounds rect
         return _sceneBounds2D = new Rect(sceneX, sceneY, sceneW, sceneH);
