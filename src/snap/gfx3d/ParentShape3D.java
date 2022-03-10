@@ -40,7 +40,7 @@ public class ParentShape3D extends Shape3D {
     /**
      * Sets the children.
      */
-    public void setChildren(Shape3D[] theChildren)
+    public void setChildren(Shape3D ... theChildren)
     {
         // Cache old, set new
         Shape3D[] oldChildren = _children;
