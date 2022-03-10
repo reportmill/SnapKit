@@ -123,7 +123,7 @@ public class Sort3D {
         Vector3D planeNormal = aPath3D.getNormal();
 
         // Get vector from plane point to given point
-        Point3D planePoint = aPath3D.getCenter();
+        Point3D planePoint = aPath3D.getBoundsCenter();
         double vx = aPoint.x - planePoint.x;
         double vy = aPoint.y - planePoint.y;
         double vz = aPoint.z - planePoint.z;

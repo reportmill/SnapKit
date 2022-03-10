@@ -4,7 +4,7 @@
 package snap.gfx3d;
 
 /**
- * This class represents a 3D box.
+ * This class represents bounds for 3D shapes (XYZ min/max).
  */
 public class Bounds3D implements Cloneable {
 
@@ -233,6 +233,16 @@ public class Bounds3D implements Cloneable {
         setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
         for (Point3D point : cornerPoints)
             addXYZ(point.x, point.y, point.z);
+    }
+
+    /**
+     * Returns a copy of the bounds for given transform.
+     */
+    public Bounds3D copyForTransform(Transform3D aTransform)
+    {
+        Bounds3D copy = clone();
+        copy.transform(aTransform);
+        return copy;
     }
 
     /**

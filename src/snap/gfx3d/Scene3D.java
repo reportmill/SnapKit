@@ -61,24 +61,4 @@ public class Scene3D extends ParentShape3D {
         _camera.sceneDidChange();
         return child;
     }
-
-    /**
-     * Returns a path in camera coords for given path in local coords.
-     */
-    public Path3D localToCamera(Path3D aPath)
-    {
-        Transform3D localToCamera = _camera.getTransform();
-        return aPath.copyForTransform(localToCamera);
-    }
-
-    /**
-     * Returns the given vector in camera coords.
-     */
-    public Vector3D localToCameraForVector(double aX, double aY, double aZ)
-    {
-        Vector3D v2 = new Vector3D(aX, aY, aZ);
-        Transform3D localToCamera = _camera.getTransform();
-        localToCamera.transformVector(v2);
-        return v2;
-    }
 }

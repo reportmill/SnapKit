@@ -186,6 +186,15 @@ public abstract class Shape3D {
     public double getMaxZ()  { return getBounds3D().getMaxZ(); }
 
     /**
+     * Returns the center point of the path.
+     */
+    public Point3D getBoundsCenter()
+    {
+        Bounds3D bounds = getBounds3D();
+        return bounds.getCenter();
+    }
+
+    /**
      * Returns the array of Path3D that can render this shape.
      */
     public abstract VertexArray getVertexArray();

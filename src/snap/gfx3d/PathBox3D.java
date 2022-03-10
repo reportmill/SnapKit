@@ -87,7 +87,7 @@ public class PathBox3D extends ParentShape3D {
             // Otherwise, reverse back
             else {
                 back.reverse();
-                aPath = back.getPath();
+                aPath = back.getShape2D();
             }
         }
 

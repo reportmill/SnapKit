@@ -20,7 +20,7 @@ public class Renderer2D extends Renderer {
     private List<Path3D>  _surfacesInViewCoords = new ArrayList<>();
 
     // Bounds of paths in scene
-    private Rect _sceneBounds2D;
+    private Rect  _sceneBounds2D;
 
     // Constant for name
     private static final String RENDERER_NAME = "Vector 2D";
@@ -145,20 +145,19 @@ public class Renderer2D extends Renderer {
         Light3D light = _scene.getLight();
         Color color = surfacePath.getColor();
 
-        // If not surface (just line), do simple add
-        if (!surfacePath.isSurface()) {
-            Path3D dispPath3D = surfacePath.copyForTransform(worldToCameraXfm);
-            thePathsList.add(dispPath3D);
+        // Get path normal (if bogus, complain and return - not sure this happens anymore)
+        Vector3D pathNormLocal = surfacePath.getNormal();
+        if (Double.isNaN(pathNormLocal.x)) {
+            System.err.println("Renderer2D.addShapeSurfacesInCameraCoords: Invalid path");
             return;
         }
 
         // Get path normal in camera coords
-        Vector3D pathNormLocal = surfacePath.getNormal();
         Vector3D pathNormCamera = worldToCameraXfm.transformVector(pathNormLocal.clone());
         pathNormCamera.normalize();
 
         // Get camera-to-path vector in camera coords
-        Point3D pathCenterLocal = surfacePath.getCenter();
+        Point3D pathCenterLocal = surfacePath.getBoundsCenter();
         Point3D pathCenterCamera = worldToCameraXfm.transformPoint(pathCenterLocal.clone());
         Vector3D cameraToPathVect = new Vector3D(pathCenterCamera.x, pathCenterCamera.y, pathCenterCamera.z);
 
@@ -187,9 +186,10 @@ public class Renderer2D extends Renderer {
     }
 
     /**
-     * Returns the bounding rect for camera paths.
+     * Returns the bounding rect of scene in view coords.
      */
-    public Rect getSceneBounds2D()
+    @Override
+    public Rect getSceneBoundsInView()
     {
         // If already set, just return
         if (_sceneBounds2D != null) return _sceneBounds2D;
@@ -205,8 +205,7 @@ public class Renderer2D extends Renderer {
         // Get Scene bounds in View
         Scene3D scene = getScene();
         Bounds3D sceneBounds = scene.getBounds3D();
-        Bounds3D sceneBoundsInView = sceneBounds.clone();
-        sceneBoundsInView.transform(sceneToView);
+        Bounds3D sceneBoundsInView = sceneBounds.copyForTransform(sceneToView);
 
         // Get scene bounds (shift to camera view mid point)
         double sceneX = sceneBoundsInView.getMinX() + viewW / 2;
@@ -292,7 +291,7 @@ public class Renderer2D extends Renderer {
     protected void paintPath3D(Painter aPntr, Path3D aPath3D)
     {
         // Get path, fill and stroke
-        Shape path = aPath3D.getPath();
+        Shape path = aPath3D.getShape2D();
         Paint fill = aPath3D.getColor();
         Paint stroke = aPath3D.getStrokeColor();
 

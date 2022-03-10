@@ -348,12 +348,11 @@ public class Camera3D {
         // Get bounds in camera coords with no Z offset
         Scene3D scene = getScene();
         Bounds3D sceneBounds = scene.getBounds3D();
-        Bounds3D bounds3D = sceneBounds.clone();
-        bounds3D.transform(cameraTrans);
+        Bounds3D sceneBoundsInCamera = sceneBounds.copyForTransform(cameraTrans);
 
         // Get second offset Z from bounding box and restore original Z offset
         double focalLen = getFocalLength();
-        double prefGR = focalLen + bounds3D.getMaxZ();
+        double prefGR = focalLen + sceneBoundsInCamera.getMaxZ();
         return prefGR;
     }
 
@@ -435,7 +434,7 @@ public class Camera3D {
     public Rect getSceneBounds2D()
     {
         Renderer renderer = getRenderer();
-        return renderer.getSceneBounds2D();
+        return renderer.getSceneBoundsInView();
     }
 
     /**
