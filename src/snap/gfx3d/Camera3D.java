@@ -319,7 +319,7 @@ public class Camera3D {
 
         // Add translation from Scene center to world origin
         Scene3D scene = getScene();
-        Box3D sceneBounds = scene.getBoundsBox();
+        Bounds3D sceneBounds = scene.getBounds3D();
         double midx = sceneBounds.getMidX();
         double midy = sceneBounds.getMidY();
         double midz = sceneBounds.getMidZ();
@@ -345,15 +345,15 @@ public class Camera3D {
         Transform3D cameraTrans = getTransformImpl();
         _gimbalRadius = gimbalRadius;
 
-        // Get bounding box in camera coords with no Z offset
+        // Get bounds in camera coords with no Z offset
         Scene3D scene = getScene();
-        Box3D sceneBounds = scene.getBoundsBox();
-        Box3D boundsBox = sceneBounds.clone();
-        boundsBox.transform(cameraTrans);
+        Bounds3D sceneBounds = scene.getBounds3D();
+        Bounds3D bounds3D = sceneBounds.clone();
+        bounds3D.transform(cameraTrans);
 
         // Get second offset Z from bounding box and restore original Z offset
         double focalLen = getFocalLength();
-        double prefGR = focalLen + boundsBox.getMaxZ();
+        double prefGR = focalLen + bounds3D.getMaxZ();
         return prefGR;
     }
 

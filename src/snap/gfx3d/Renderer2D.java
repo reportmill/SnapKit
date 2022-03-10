@@ -204,8 +204,8 @@ public class Renderer2D extends Renderer {
 
         // Get Scene bounds in View
         Scene3D scene = getScene();
-        Box3D sceneBounds = scene.getBoundsBox();
-        Box3D sceneBoundsInView = sceneBounds.clone();
+        Bounds3D sceneBounds = scene.getBounds3D();
+        Bounds3D sceneBoundsInView = sceneBounds.clone();
         sceneBoundsInView.transform(sceneToView);
 
         // Get scene bounds (shift to camera view mid point)

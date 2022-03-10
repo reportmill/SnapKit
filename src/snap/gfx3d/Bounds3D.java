@@ -6,7 +6,7 @@ package snap.gfx3d;
 /**
  * This class represents a 3D box.
  */
-public class Box3D implements Cloneable {
+public class Bounds3D implements Cloneable {
 
     // Min XYZ
     private double  _minX, _minY, _minZ;
@@ -17,12 +17,12 @@ public class Box3D implements Cloneable {
     /**
      * Constructor.
      */
-    public Box3D()  { }
+    public Bounds3D()  { }
 
     /**
      * Constructor.
      */
-    public Box3D(double aMinX, double aMinY, double aMinZ, double aMaxX, double aMaxY, double aMaxZ)
+    public Bounds3D(double aMinX, double aMinY, double aMinZ, double aMaxX, double aMaxY, double aMaxZ)
     {
         _minX = aMinX; _minY = aMinY; _minZ = aMinZ;
         _maxX = aMaxX; _maxY = aMaxY; _maxZ = aMaxZ;
@@ -195,7 +195,7 @@ public class Box3D implements Cloneable {
     /**
      * Expands this Box3D to include given point.
      */
-    public void addBox(Box3D aBox)
+    public void addBox(Bounds3D aBox)
     {
         addXYZ(aBox._minX, aBox._minY, aBox._minZ);
         addXYZ(aBox._maxX, aBox._maxY, aBox._maxZ);
@@ -239,10 +239,10 @@ public class Box3D implements Cloneable {
      * Override to support Cloneable.
      */
     @Override
-    public Box3D clone()
+    public Bounds3D clone()
     {
-        Box3D clone;
-        try { clone = (Box3D) super.clone(); }
+        Bounds3D clone;
+        try { clone = (Bounds3D) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException("Box3D.clone: " + e); }
         return clone;
     }

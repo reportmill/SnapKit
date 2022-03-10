@@ -232,8 +232,8 @@ public class Path3D extends Shape3D implements Cloneable {
      */
     public Point3D getCenter()
     {
-        Box3D boundsBox = getBoundsBox();
-        return boundsBox.getCenter();
+        Bounds3D bounds = getBounds3D();
+        return bounds.getCenter();
     }
 
     /**
@@ -625,22 +625,22 @@ public class Path3D extends Shape3D implements Cloneable {
     private static boolean  _didRenderPath3DStrokedError;
 
     /**
-     * Returns the bounds box.
+     * Returns the bounds.
      */
     @Override
-    protected Box3D createBoundsBox()
+    protected Bounds3D createBounds3D()
     {
-        // Create and init bounds box
-        Box3D boundsBox = new Box3D();
-        boundsBox.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-        boundsBox.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+        // Create and init bounds
+        Bounds3D bounds = new Bounds3D();
+        bounds.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+        bounds.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
         for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
             Point3D pt = getPoint(i);
-            boundsBox.addXYZ(pt.x, pt.y, pt.z);
+            bounds.addXYZ(pt.x, pt.y, pt.z);
         }
 
         // Return
-        return boundsBox;
+        return bounds;
     }
 
     /**

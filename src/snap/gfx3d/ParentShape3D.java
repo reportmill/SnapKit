@@ -108,27 +108,27 @@ public class ParentShape3D extends Shape3D {
     }
 
     /**
-     * Override to calculate BoundsBox from children.
+     * Override to calculate bounds from children.
      */
     @Override
-    protected Box3D createBoundsBox()
+    protected Bounds3D createBounds3D()
     {
         // Get all shapes and first shape
         Shape3D[] shapes = getChildren();
         Shape3D shape0 = shapes.length > 0 ? shapes[0] : null;
 
         // Create new Box3D from first shape
-        Box3D boundsBox0 = shape0 != null ? shape0.getBoundsBox() : null;
-        Box3D boundsBox = boundsBox0 != null ? boundsBox0.clone() : new Box3D();
+        Bounds3D bounds0 = shape0 != null ? shape0.getBounds3D() : null;
+        Bounds3D bounds = bounds0 != null ? bounds0.clone() : new Bounds3D();
 
-        // Iterate over shapes to get total boundsBox
+        // Iterate over shapes to get total bounds
         for (Shape3D shape : shapes) {
-            boundsBox.addXYZ(shape.getMinX(), shape.getMinY(), shape.getMinZ());
-            boundsBox.addXYZ(shape.getMaxX(), shape.getMaxY(), shape.getMaxZ());
+            bounds.addXYZ(shape.getMinX(), shape.getMinY(), shape.getMinZ());
+            bounds.addXYZ(shape.getMaxX(), shape.getMaxY(), shape.getMaxZ());
         }
 
-        // Return total boundsBox
-        return boundsBox;
+        // Return
+        return bounds;
     }
 
     /**

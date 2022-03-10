@@ -31,7 +31,7 @@ public abstract class Shape3D {
     private boolean  _doubleSided;
 
     // The path bounding box
-    private Box3D  _boundsBox;
+    private Bounds3D  _bounds3D;
 
     /**
      * Constructor.
@@ -133,57 +133,57 @@ public abstract class Shape3D {
     }
 
     /**
-     * Returns the bounds box.
+     * Returns the bounds.
      */
-    public Box3D getBoundsBox()
+    public Bounds3D getBounds3D()
     {
-        if (_boundsBox != null) return _boundsBox;
-        Box3D boundsBox = createBoundsBox();
-        return _boundsBox = boundsBox;
+        if (_bounds3D != null) return _bounds3D;
+        Bounds3D bounds3D = createBounds3D();
+        return _bounds3D = bounds3D;
     }
 
     /**
-     * Creates the bounds box.
+     * Creates the bounds.
      */
-    protected abstract Box3D createBoundsBox();
+    protected abstract Bounds3D createBounds3D();
 
     /**
-     * Sets the bounds box.
+     * Sets the bounds.
      */
-    public void setBoundsBox(Box3D aBox)
+    public void setBounds3D(Bounds3D aBox)
     {
-        _boundsBox = aBox;
+        _bounds3D = aBox;
     }
 
     /**
      * Returns the max X for the path.
      */
-    public double getMinX()  { return getBoundsBox().getMinX(); }
+    public double getMinX()  { return getBounds3D().getMinX(); }
 
     /**
      * Returns the max Y for the path.
      */
-    public double getMinY()  { return getBoundsBox().getMinY(); }
+    public double getMinY()  { return getBounds3D().getMinY(); }
 
     /**
      * Returns the max Z for the path.
      */
-    public double getMinZ()  { return getBoundsBox().getMinZ(); }
+    public double getMinZ()  { return getBounds3D().getMinZ(); }
 
     /**
      * Returns the max X for the path.
      */
-    public double getMaxX()  { return getBoundsBox().getMaxX(); }
+    public double getMaxX()  { return getBounds3D().getMaxX(); }
 
     /**
      * Returns the max Y for the path.
      */
-    public double getMaxY()  { return getBoundsBox().getMaxY(); }
+    public double getMaxY()  { return getBounds3D().getMaxY(); }
 
     /**
      * Returns the max Z for the path.
      */
-    public double getMaxZ()  { return getBoundsBox().getMaxZ(); }
+    public double getMaxZ()  { return getBounds3D().getMaxZ(); }
 
     /**
      * Returns the array of Path3D that can render this shape.
@@ -195,7 +195,7 @@ public abstract class Shape3D {
      */
     protected void clearCachedValues()
     {
-        _boundsBox = null;
+        _bounds3D = null;
     }
 
     /**
@@ -216,9 +216,9 @@ public abstract class Shape3D {
         StringBuffer sb = new StringBuffer();
         String name = getName();
         if (name != null) sb.append("Name=").append(name).append(", ");
-        Box3D boundsBox = getBoundsBox();
-        Point3D minXYZ = boundsBox.getMinXYZ();
-        Point3D maxXYZ = boundsBox.getMaxXYZ();
+        Bounds3D bounds3D = getBounds3D();
+        Point3D minXYZ = bounds3D.getMinXYZ();
+        Point3D maxXYZ = bounds3D.getMaxXYZ();
         sb.append("MinXYZ").append(minXYZ).append(", MaxXYZ").append(maxXYZ);
         return sb.toString();
     }

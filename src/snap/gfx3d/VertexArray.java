@@ -251,22 +251,22 @@ public class VertexArray implements Cloneable {
     }
 
     /**
-     * Returns bounds box.
+     * Returns bounds.
      */
-    public Box3D getBoundsBox()
+    public Bounds3D getBounds3D()
     {
-        // Create and init bounds box
-        Box3D boundsBox = new Box3D();
-        boundsBox.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-        boundsBox.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
+        // Create and init bounds
+        Bounds3D bounds = new Bounds3D();
+        bounds.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+        bounds.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
         Point3D point = new Point3D(0, 0, 0);
         for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
             getPoint3D(point, i);
-            boundsBox.addXYZ(point.x, point.y, point.z);
+            bounds.addXYZ(point.x, point.y, point.z);
         }
 
         // Return
-        return boundsBox;
+        return bounds;
     }
 
     /**
