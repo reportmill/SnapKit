@@ -9,6 +9,9 @@ import snap.gfx.*;
  */
 public abstract class Shape3D {
 
+    // The parent shape that holds this shape
+    private ParentShape3D  _parent;
+
     // Shape name
     private String  _name;
 
@@ -34,6 +37,19 @@ public abstract class Shape3D {
      * Constructor.
      */
     public Shape3D()  { }
+
+    /**
+     * Returns the parent that holds this shape.
+     */
+    public ParentShape3D getParent()  { return _parent; }
+
+    /**
+     * Sets the parent that holds this shape.
+     */
+    protected void setParent(ParentShape3D aParent)
+    {
+        _parent = aParent;
+    }
 
     /**
      * Returns the name of shape.
@@ -164,7 +180,7 @@ public abstract class Shape3D {
     /**
      * Returns the array of Path3D that can render this shape.
      */
-    public abstract Path3D[] getPath3Ds();
+    public abstract VertexArray getVertexArray();
 
     /**
      * Clears cached values when shape changes.

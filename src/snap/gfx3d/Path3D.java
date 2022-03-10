@@ -4,7 +4,6 @@
 package snap.gfx3d;
 import snap.geom.*;
 import snap.gfx.Color;
-import snap.util.ListUtils;
 import snap.util.MathUtils;
 import java.util.*;
 
@@ -28,9 +27,6 @@ public class Path3D extends Shape3D implements Cloneable {
     // The path normal vector
     private Vector3D  _normal;
     
-    // Cached array of this Path3D to efficiently satisfy getPath3Ds() method
-    private Path3D[]  _path3Ds = { this };
-
     // The VertexArray holding triangles of Path3D
     private VertexArray  _vertexArray;
     
@@ -766,9 +762,6 @@ public class Path3D extends Shape3D implements Cloneable {
         try { clone = (Path3D) super.clone(); }
         catch(Exception e) { throw new RuntimeException(e); }
 
-        // Reset _path3ds
-        clone._path3Ds = new Path3D[] { clone };
-
         // Copy elements
         clone._segs = new ArrayList<>(_segs);
         clone._points = new ArrayList<>(_points.size());
@@ -785,11 +778,6 @@ public class Path3D extends Shape3D implements Cloneable {
         // Return clone
         return clone;
     }
-
-    /**
-     * Returns the array of Path3D that can render this shape.
-     */
-    public Path3D[] getPath3Ds()  { return _path3Ds; }
 
     /**
      * Standard toStringProps implementation.

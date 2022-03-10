@@ -44,11 +44,6 @@ public abstract class Renderer {
     public Scene3D getScene()  { return _scene; }
 
     /**
-     * Returns the Scene.
-     */
-    public Shape3D[] getSceneShapes()  { return _scene._shapes.toArray(new Shape3D[0]); }
-
-    /**
      * Returns the 2D bounding rect for scene in camera bounds.
      */
     public abstract Rect getSceneBounds2D();

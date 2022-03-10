@@ -73,26 +73,6 @@ public class CameraView extends ParentView {
     public void setRoll(double aValue)  { _camera.setRoll(aValue); }
 
     /**
-     * Returns the number of shapes in the shape list.
-     */
-    public int getShapeCount()  { return _scene.getShapeCount(); }
-
-    /**
-     * Returns the specific shape at the given index from the shape list.
-     */
-    public Shape3D getShape(int anIndex)  { return _scene.getShape(anIndex); }
-
-    /**
-     * Adds a shape to the end of the shape list.
-     */
-    public void addShape(Shape3D aShape)  { _scene.addShape(aShape); }
-
-    /**
-     * Removes the shape at the given index from the shape list.
-     */
-    public void removeShapes()  { _scene.removeShapes(); }
-
-    /**
      * Rebuilds display list of Path3Ds from Shapes.
      */
     protected void layoutImpl()  { }

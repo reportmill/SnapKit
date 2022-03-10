@@ -12,16 +12,13 @@ import snap.gfx.*;
 /**
  * A Shape3D subclass that represents a path extruded to a box.
  */
-public class PathBox3D extends Shape3D {
+public class PathBox3D extends ParentShape3D {
     
     // The 2D path shape
-    private Shape _pathShape;
+    private Shape  _pathShape;
     
     // The min/max depth
     private double  _z1, _z2;
-    
-    // The path3ds
-    private Path3D[]  _path3Ds;
 
     /**
      * Constructor for given path Shape and Z min/max.
@@ -30,26 +27,16 @@ public class PathBox3D extends Shape3D {
     {
         _pathShape = aPath;
         _z1 = z1; _z2 = z2;
+
+        // Register to rebuild children
+        rebuildShape();
     }
 
     /**
-     * Returns the array of Path3D that can render this shape.
+     * Override to extrusion surfaces (sides and back).
      */
     @Override
-    public Path3D[] getPath3Ds()
-    {
-        // If already set, just return
-        if (_path3Ds != null) return _path3Ds;
-
-        // Create paths, set and return
-        Path3D[] paths = createPath3Ds();
-        return _path3Ds = paths;
-    }
-
-    /**
-     * Creates the array of Path3D that can render this shape.
-     */
-    protected Path3D[] createPath3Ds()
+    protected void buildShapeImpl()
     {
         // Create paths for Z1 & Z2
         Path3D[] paths = getPath3Ds(_pathShape, _z1, _z2);
@@ -68,28 +55,8 @@ public class PathBox3D extends Shape3D {
             path3D.setStroke(stroke);
         }
 
-        // Return paths
-        return paths;
-    }
-
-    /**
-     * Returns the bounds box.
-     */
-    @Override
-    protected Box3D createBoundsBox()
-    {
-        // Create and init bounds box
-        Box3D boundsBox = new Box3D();
-        boundsBox.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-        boundsBox.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
-
-        // Iterate over Path3Ds and add each bounds box
-        Path3D[] path3Ds = getPath3Ds();
-        for (Path3D path3D : path3Ds)
-            boundsBox.addBox(path3D.getBoundsBox());
-
-        // Return
-        return boundsBox;
+        // Set children
+        setChildren(paths);
     }
 
     /**

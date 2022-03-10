@@ -106,15 +106,10 @@ public class Renderer2D extends Renderer {
      */
     protected List<Path3D> getSurfacesInCameraCoords()
     {
-        // Get all Scene.Shapes
-        List<Shape3D> sceneShapes = _scene._shapes;
-
-        // Create Path3D list
+        // Get scene and add surfaces deep
+        Scene3D scene = getScene();
         List<Path3D> pathsList = new ArrayList<>();
-
-        // Iterate over shapes and add paths
-        for (Shape3D shape : sceneShapes)
-            addShapeSurfacesInCameraCoords(shape, pathsList);
+        addShapeSurfacesInCameraCoords(scene, pathsList);
 
         // Return list of shape surface paths in world coords
         return pathsList;
@@ -125,55 +120,70 @@ public class Renderer2D extends Renderer {
      */
     protected void addShapeSurfacesInCameraCoords(Shape3D aShape, List<Path3D> thePathsList)
     {
+        // Handle ParentShape: Get children and recurse
+        if (aShape instanceof ParentShape3D) {
+            ParentShape3D parentShape = (ParentShape3D) aShape;
+            Shape3D[] children = parentShape.getChildren();
+            for (Shape3D child : children)
+                addShapeSurfacesInCameraCoords(child, thePathsList);
+        }
+
+        // Handle Path3D
+        else if (aShape instanceof Path3D) {
+            Path3D path3D = (Path3D) aShape;
+            addShapeSurfacesInCameraCoords(path3D, thePathsList);
+        }
+    }
+
+    /**
+     * Adds the paths for shape.
+     */
+    protected void addShapeSurfacesInCameraCoords(Path3D surfacePath, List<Path3D> thePathsList)
+    {
         // Get the camera transform & optionally align it to the screen
         Transform3D worldToCameraXfm = _camera.getTransform();
         Light3D light = _scene.getLight();
-        Color color = aShape.getColor();
+        Color color = surfacePath.getColor();
 
-        // Iterate over paths
-        Path3D[] surfacePaths = aShape.getPath3Ds();
-        for (Path3D surfacePath : surfacePaths) {
-
-            // If not surface (just line), do simple add
-            if (!surfacePath.isSurface()) {
-                Path3D dispPath3D = surfacePath.copyForTransform(worldToCameraXfm);
-                thePathsList.add(dispPath3D);
-                continue;
-            }
-
-            // Get path normal in camera coords
-            Vector3D pathNormLocal = surfacePath.getNormal();
-            Vector3D pathNormCamera = worldToCameraXfm.transformVector(pathNormLocal.clone());
-            pathNormCamera.normalize();
-
-            // Get camera-to-path vector in camera coords
-            Point3D pathCenterLocal = surfacePath.getCenter();
-            Point3D pathCenterCamera = worldToCameraXfm.transformPoint(pathCenterLocal.clone());
-            Vector3D cameraToPathVect = new Vector3D(pathCenterCamera.x, pathCenterCamera.y, pathCenterCamera.z);
-
-            // Backface culling : If path pointed away from camera, skip path
-            if (cameraToPathVect.isAligned(pathNormCamera, false)) {
-
-                // If not double-sided, just skip
-                if (!surfacePath.isDoubleSided())
-                    continue;
-
-                // Otherwise, negate normal
-                pathNormCamera.negate();
-            }
-
-            // Get path copy transformed by scene transform
+        // If not surface (just line), do simple add
+        if (!surfacePath.isSurface()) {
             Path3D dispPath3D = surfacePath.copyForTransform(worldToCameraXfm);
-
-            // If color on shape, set color on path for scene lights
-            if (color != null) {
-                Color rcol = light.getRenderColor(pathNormCamera, color);
-                dispPath3D.setColor(rcol);
-            }
-
-            // Add path
             thePathsList.add(dispPath3D);
+            return;
         }
+
+        // Get path normal in camera coords
+        Vector3D pathNormLocal = surfacePath.getNormal();
+        Vector3D pathNormCamera = worldToCameraXfm.transformVector(pathNormLocal.clone());
+        pathNormCamera.normalize();
+
+        // Get camera-to-path vector in camera coords
+        Point3D pathCenterLocal = surfacePath.getCenter();
+        Point3D pathCenterCamera = worldToCameraXfm.transformPoint(pathCenterLocal.clone());
+        Vector3D cameraToPathVect = new Vector3D(pathCenterCamera.x, pathCenterCamera.y, pathCenterCamera.z);
+
+        // Backface culling : If path pointed away from camera, skip path
+        if (cameraToPathVect.isAligned(pathNormCamera, false)) {
+
+            // If not double-sided, just skip
+            if (!surfacePath.isDoubleSided())
+                return;
+
+            // Otherwise, negate normal
+            pathNormCamera.negate();
+        }
+
+        // Get path copy transformed by scene transform
+        Path3D dispPath3D = surfacePath.copyForTransform(worldToCameraXfm);
+
+        // If color on shape, set color on path for scene lights
+        if (color != null) {
+            Color rcol = light.getRenderColor(pathNormCamera, color);
+            dispPath3D.setColor(rcol);
+        }
+
+        // Add path
+        thePathsList.add(dispPath3D);
     }
 
     /**

@@ -115,7 +115,7 @@ public class Trackball extends ParentView {
      */
     protected void addScuffMarks()
     {
-        _scene.removeShapes();
+        _scene.removeChildren();
         Random ran = new Random();
         for (int i=0; i<50; i++) {
             double th = ran.nextDouble()*360;
@@ -153,7 +153,7 @@ public class Trackball extends ParentView {
 
         // If the trackball is shrunk down, draw the scuffmarks a darker color so they'll show up.
         path.setColor(SCUFF_COLOR); //if (getZoomFactor()<.75) path.setColor(new Color(0,0,0,.75f));
-        _scene.addShape(path);
+        _scene.addChild(path);
     }
 
     /**
