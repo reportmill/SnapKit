@@ -46,7 +46,14 @@ public abstract class Renderer {
     /**
      * Returns the 2D bounding rect for scene in camera bounds.
      */
-    public abstract Rect getSceneBoundsInView();
+    public Rect getSceneBoundsInView()
+    {
+        // This is a totally bogus implementation - just returns View bounds
+        Camera3D camera = getCamera();
+        double viewW = camera.getViewWidth();
+        double viewH = camera.getViewHeight();
+        return new Rect(0, 0, viewW, viewH);
+    }
 
     /**
      * Renders scene for given painter, camera and scene.
