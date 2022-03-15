@@ -11,16 +11,16 @@ import java.util.Arrays;
 public class VertexArray implements Cloneable {
 
     // The float array to hold actual vertex point components
-    private float[]  _pointArray = new float[24];
+    private float[]  _pointsArray = new float[24];
 
-    // The number of components in vertex point array
-    private int  _pointArrayLen = 0;
+    // The number of components in vertex points array
+    private int  _pointsArrayLen = 0;
 
     // The float array to hold actual vertex color components
-    private float[]  _colorArray = new float[0];
+    private float[]  _colorsArray = new float[0];
 
-    // The number of components in vertex color array
-    private int  _colorArrayLen = 0;
+    // The number of components in vertex colors array
+    private int  _colorsArrayLen = 0;
 
     // The number of components per vertex point
     private int  _pointCompCount = 3;
@@ -45,7 +45,7 @@ public class VertexArray implements Cloneable {
     /**
      * Returns the number of vertex points in array.
      */
-    public int getPointCount()  { return _pointArrayLen / _pointCompCount; }
+    public int getPointCount()  { return _pointsArrayLen / _pointCompCount; }
 
     /**
      * Adds value triplet to array.
@@ -53,13 +53,13 @@ public class VertexArray implements Cloneable {
     public void addPoint(double aVal1, double aVal2, double aVal3)
     {
         // Expand Vertex components array if needed
-        if (_pointArrayLen + 3 > _pointArray.length)
-            _pointArray = Arrays.copyOf(_pointArray, Math.max(_pointArray.length * 2, 24));
+        if (_pointsArrayLen + 3 > _pointsArray.length)
+            _pointsArray = Arrays.copyOf(_pointsArray, Math.max(_pointsArray.length * 2, 24));
 
         // Add values
-        _pointArray[_pointArrayLen++] = (float) aVal1;
-        _pointArray[_pointArrayLen++] = (float) aVal2;
-        _pointArray[_pointArrayLen++] = (float) aVal3;
+        _pointsArray[_pointsArrayLen++] = (float) aVal1;
+        _pointsArray[_pointsArrayLen++] = (float) aVal2;
+        _pointsArray[_pointsArrayLen++] = (float) aVal3;
     }
 
     /**
@@ -76,9 +76,9 @@ public class VertexArray implements Cloneable {
     public Point3D getPoint3D(Point3D aPoint, int anIndex)
     {
         int index = anIndex * _pointCompCount;
-        aPoint.x = _pointArray[index];
-        aPoint.y = _pointArray[index + 1];
-        aPoint.z = _pointArray[index + 2];
+        aPoint.x = _pointsArray[index];
+        aPoint.y = _pointsArray[index + 1];
+        aPoint.z = _pointsArray[index + 2];
         return aPoint;
     }
 
@@ -135,15 +135,15 @@ public class VertexArray implements Cloneable {
     public void addColor(Color aColor)
     {
         // Expand color components array if needed
-        if (_colorArrayLen + _colorCompCount > _colorArray.length)
-            _colorArray = Arrays.copyOf(_colorArray, Math.max(_colorArray.length * 2, 24));
+        if (_colorsArrayLen + _colorCompCount > _colorsArray.length)
+            _colorsArray = Arrays.copyOf(_colorsArray, Math.max(_colorsArray.length * 2, 24));
 
         // Add values
-        _colorArray[_colorArrayLen++] = (float) aColor.getRed();
-        _colorArray[_colorArrayLen++] = (float) aColor.getGreen();
-        _colorArray[_colorArrayLen++] = (float) aColor.getBlue();
+        _colorsArray[_colorsArrayLen++] = (float) aColor.getRed();
+        _colorsArray[_colorsArrayLen++] = (float) aColor.getGreen();
+        _colorsArray[_colorsArrayLen++] = (float) aColor.getBlue();
         if (_colorCompCount > 3)
-            _colorArray[_colorArrayLen++] = (float) aColor.getAlpha();
+            _colorsArray[_colorsArrayLen++] = (float) aColor.getAlpha();
     }
 
     /**
@@ -214,35 +214,35 @@ public class VertexArray implements Cloneable {
     /**
      * Returns the vertex points components array.
      */
-    public float[] getPointArray()
+    public float[] getPointsArray()
     {
         trim();
-        return _pointArray;
+        return _pointsArray;
     }
 
     /**
-     * Returns the vertex color components array.
+     * Returns the vertex colorscomponents array.
      */
-    public float[] getColorArray()
+    public float[] getColorsArray()
     {
         trim();
-        return _colorArray;
+        return _colorsArray;
     }
 
     /**
      * Returns whether color components array is set.
      */
-    public boolean isColorArraySet()
+    public boolean isColorsArraySet()
     {
         // If no colors, just return false
-        if (_colorArrayLen == 0)
+        if (_colorsArrayLen == 0)
             return false;
 
         // If fewer colors than points, complain and return false
-        int colorCount = _colorArrayLen / getColorCompCount();
+        int colorCount = _colorsArrayLen / getColorCompCount();
         int pointCount = getPointCount();
         if (colorCount < pointCount) {
-            System.err.println("VertexArray.isColorArraySet: Insufficient colors for vertex count");
+            System.err.println("VertexArray.isColorsArraySet: Insufficient colors for vertex count");
             return false;
         }
 
@@ -259,11 +259,11 @@ public class VertexArray implements Cloneable {
         Bounds3D bounds = new Bounds3D();
         bounds.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
         bounds.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
-        float[] pointArray = getPointArray();
-        for (int i = 0, iMax = pointArray.length; i < iMax; ) {
-            float x = pointArray[i++];
-            float y = pointArray[i++];
-            float z = pointArray[i++];
+        float[] pointsArray = getPointsArray();
+        for (int i = 0, iMax = pointsArray.length; i < iMax; ) {
+            float x = pointsArray[i++];
+            float y = pointsArray[i++];
+            float z = pointsArray[i++];
             bounds.addXYZ(x, y, z);
         }
 
@@ -276,13 +276,13 @@ public class VertexArray implements Cloneable {
      */
     public void trim()
     {
-        // Trim VertexArray
-        if (_pointArray.length != _pointArrayLen)
-            _pointArray = Arrays.copyOf(_pointArray, _pointArrayLen);
+        // Trim PointsArray
+        if (_pointsArray.length != _pointsArrayLen)
+            _pointsArray = Arrays.copyOf(_pointsArray, _pointsArrayLen);
 
-        // Trim ColorArray
-        if (_colorArray.length != _colorArrayLen)
-            _colorArray = Arrays.copyOf(_colorArray, _colorArrayLen);
+        // Trim ColorsArray
+        if (_colorsArray.length != _colorsArrayLen)
+            _colorsArray = Arrays.copyOf(_colorsArray, _colorsArrayLen);
     }
 
     /**
@@ -294,9 +294,9 @@ public class VertexArray implements Cloneable {
         for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
             getPoint3D(point, i);
             aTrans.transformPoint(point);
-            _pointArray[i * 3] = (float) point.x;
-            _pointArray[i * 3 + 1] = (float) point.y;
-            _pointArray[i * 3 + 2] = (float) point.z;
+            _pointsArray[i * 3] = (float) point.x;
+            _pointsArray[i * 3 + 1] = (float) point.y;
+            _pointsArray[i * 3 + 2] = (float) point.z;
         }
     }
 
@@ -325,8 +325,8 @@ public class VertexArray implements Cloneable {
         catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
 
         // Clone arrays
-        clone._pointArray = _pointArray.clone();
-        clone._colorArray = _colorArray.clone();
+        clone._pointsArray = _pointsArray.clone();
+        clone._colorsArray = _colorsArray.clone();
 
         // Clone next
         if (_next != null)
