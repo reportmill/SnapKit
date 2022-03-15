@@ -259,10 +259,12 @@ public class VertexArray implements Cloneable {
         Bounds3D bounds = new Bounds3D();
         bounds.setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
         bounds.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
-        Point3D point = new Point3D(0, 0, 0);
-        for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
-            getPoint3D(point, i);
-            bounds.addXYZ(point.x, point.y, point.z);
+        float[] pointArray = getPointArray();
+        for (int i = 0, iMax = pointArray.length; i < iMax; ) {
+            float x = pointArray[i++];
+            float y = pointArray[i++];
+            float z = pointArray[i++];
+            bounds.addXYZ(x, y, z);
         }
 
         // Return
