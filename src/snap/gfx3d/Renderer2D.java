@@ -81,6 +81,9 @@ public class Renderer2D extends Renderer {
             }
         }
 
+        // Add in Path3D painter paths
+        addPathPainterPathsInCameraCoords(pathsInCameraCoords);
+
         // Get Camera projection transform
         Camera3D camera = getCamera();
         Transform3D projTrans = camera.getProjectionTransform();
@@ -141,7 +144,7 @@ public class Renderer2D extends Renderer {
     protected void addShapeSurfacesInCameraCoords(Path3D surfacePath, List<Path3D> thePathsList)
     {
         // Get the camera transform & optionally align it to the screen
-        Transform3D worldToCameraXfm = _camera.getTransform();
+        Transform3D sceneToCamera = _camera.getTransform();
         Light3D light = _scene.getLight();
         Color color = surfacePath.getColor();
 
@@ -153,12 +156,12 @@ public class Renderer2D extends Renderer {
         }
 
         // Get path normal in camera coords
-        Vector3D pathNormCamera = worldToCameraXfm.transformVector(pathNormLocal.clone());
+        Vector3D pathNormCamera = sceneToCamera.transformVector(pathNormLocal.clone());
         pathNormCamera.normalize();
 
         // Get camera-to-path vector in camera coords
         Point3D pathCenterLocal = surfacePath.getBoundsCenter();
-        Point3D pathCenterCamera = worldToCameraXfm.transformPoint(pathCenterLocal.clone());
+        Point3D pathCenterCamera = sceneToCamera.transformPoint(pathCenterLocal.clone());
         Vector3D cameraToPathVect = new Vector3D(pathCenterCamera.x, pathCenterCamera.y, pathCenterCamera.z);
 
         // Backface culling : If path pointed away from camera, skip path
@@ -173,7 +176,7 @@ public class Renderer2D extends Renderer {
         }
 
         // Get path copy transformed by scene transform
-        Path3D dispPath3D = surfacePath.copyForTransform(worldToCameraXfm);
+        Path3D dispPath3D = surfacePath.copyForTransform(sceneToCamera);
 
         // If color on shape, set color on path for scene lights
         if (color != null) {
@@ -183,6 +186,58 @@ public class Renderer2D extends Renderer {
 
         // Add path
         thePathsList.add(dispPath3D);
+    }
+
+    /**
+     * Iterates over path list and adds Path.Painter.PainterTasks as Path3Ds in Camera coords.
+     */
+    private void addPathPainterPathsInCameraCoords(List<Path3D> thePaths)
+    {
+        // Iterate over paths
+        for (int i = thePaths.size() - 1; i >= 0; i--) {
+
+            // Get path (just skip if no Painter)
+            Path3D path3D = thePaths.get(i); if (path3D.getPainter() == null) continue;
+
+            // Get Paths for painter
+            Matrix3D cameraToScene = new Matrix3D().fromArray(_camera.getTransform().toArray()).invert();
+            Path3D path3DInSceneCoords = path3D.copyForMatrix(cameraToScene);
+            Path3D[] painterPathsInCameraCoords = getPathPainterPathsInCameraCoords(path3DInSceneCoords);
+
+            // Add paths to list right behind the original path
+            for (int j = 0; j < painterPathsInCameraCoords.length; j++) {
+                Path3D painterPath = painterPathsInCameraCoords[j];
+                thePaths.add(i + j + 1, painterPath);
+            }
+        }
+    }
+
+    /**
+     * Returns a path.
+     */
+    private Path3D[] getPathPainterPathsInCameraCoords(Path3D path3D)
+    {
+        // Get Painter, PainterTasks and pathPainterPaths array
+        Painter3D painter3D = path3D.getPainter();
+        Painter3D.PaintTask[] paintTasks = painter3D.getPaintTasks();
+        Path3D[] pathPainterPaths = new Path3D[paintTasks.length];
+
+        // Get transform from painter to camera
+        Matrix3D painterToPath = path3D.getPainterToLocal();
+        Matrix3D pathToCamera = new Matrix3D().fromArray(_camera.getTransform().toArray());
+
+        // Get transform from painter to view
+        for (int i = 0; i < paintTasks.length; i++) {
+            Painter3D.PaintTask paintTask = paintTasks[i];
+            Path3D paintTaskPath3D = new Path3D(paintTask.getShape(), 0);
+            paintTaskPath3D.transform(painterToPath);
+            paintTaskPath3D.transform(pathToCamera);
+            paintTaskPath3D.setStroke(paintTask.getColor(), paintTask.getStroke().getWidth());
+            pathPainterPaths[i] = paintTaskPath3D;
+        }
+
+        // Return
+        return pathPainterPaths;
     }
 
     /**

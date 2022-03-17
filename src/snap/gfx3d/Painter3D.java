@@ -231,7 +231,7 @@ public class Painter3D implements Cloneable {
     /**
      * This class represents a discrete paint task.
      */
-    private static class PaintTask implements Cloneable {
+    public static class PaintTask implements Cloneable {
 
         // The shape
         private Shape  _shape;
