@@ -1,9 +1,80 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.gfx3d;
+import snap.geom.PathIter;
+import snap.geom.Seg;
+import snap.geom.Shape;
+import snap.gfx.Color;
+import snap.gfx.Stroke;
 
 /**
  * Utility methods for VertexArray.
  */
 public class VertexArrayUtils {
+
+    /**
+     * Returns a VertexArray for stroked path.
+     */
+    public static VertexArray getStrokedShapeVertexArray(Shape aShape, Color aColor, Stroke aStroke, double anOffset)
+    {
+        // Create VertexArray
+        VertexArray vertexArray = new VertexArray();
+        vertexArray.setColor(aColor);
+
+        // Get PathIter and path iteration vars
+        PathIter pathIter = aShape.getPathIter(null);
+        double[] pnts = new double[6];
+        double moveX = 0, moveY = 0;
+        double lastX = 0, lastY = 0;
+        Point3D p1 = new Point3D(0, 0, anOffset);
+        Point3D p2 = new Point3D(0, 0, anOffset);
+        Vector3D zNormal = new Vector3D(0, 0, 1);
+
+        // Iterate over PathIter segs to add with moveTo, lineTo, etc.
+        while (pathIter.hasNext()) {
+
+            // Get next segment. Add stand-in for QuadT/CubicTo
+            Seg seg = pathIter.getNext(pnts);
+            if (seg == Seg.QuadTo || seg == Seg.CubicTo) {
+                System.err.println("VertexArrayUtils.getStrokedShapeVertexArray: " + seg + " not implemented");
+                pnts[0] = seg == Seg.QuadTo ? pnts[2] : pnts[4];
+                pnts[1] = seg == Seg.QuadTo ? pnts[3] : pnts[5];
+                seg = Seg.LineTo;
+            }
+
+            // Handle Seg
+            switch (seg) {
+
+                // Handle MoveTo
+                case MoveTo:
+                    moveX = lastX = pnts[0];
+                    moveY = lastY = pnts[1];
+                    break;
+
+                // Handle LineTo
+                case LineTo:
+                    p1.x = lastX; p1.y = lastY;
+                    p2.x = pnts[0]; p2.y = pnts[1];
+                    addLineStrokePoints(vertexArray, p1, p2, zNormal, aStroke.getWidth());
+                    lastX = pnts[0];
+                    lastY = pnts[1];
+                    break;
+
+                // Handle close
+                case Close:
+                    p1.x = lastX; p1.y = lastY;
+                    p2.x = moveX; p2.y = moveY;
+                    addLineStrokePoints(vertexArray, p1, p2, zNormal, aStroke.getWidth());
+                    lastX = moveX;
+                    lastY = moveY;
+                    break;
+            }
+        }
+
+        // Return
+        return vertexArray;
+    }
 
     /**
      * Adds triangles to VertexArray for a stroked line between given points.
@@ -15,8 +86,9 @@ public class VertexArrayUtils {
         Vector3D downVector = lineNormal.getCrossProduct(acrossVector).normalize();
 
         // Scale by lineWidth
-        acrossVector.scale(lineWidth);
-        downVector.scale(lineWidth);
+        double halfWidth = lineWidth / 2 * 1.2; // Let's fudge up a little
+        acrossVector.scale(halfWidth);
+        downVector.scale(halfWidth);
 
         // Get offset so line moves 'above' path triangles
         Vector3D offsetNormal = lineNormal.clone();

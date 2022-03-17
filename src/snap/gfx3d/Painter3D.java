@@ -5,6 +5,7 @@ package snap.gfx3d;
 import snap.geom.*;
 import snap.gfx.Color;
 import snap.gfx.Stroke;
+import snap.util.ArrayUtils;
 
 /**
  * This class renders 2D painting on a 3D plane.
@@ -23,17 +24,14 @@ public class Painter3D implements Cloneable {
     // The offset for layers
     private double  _layerOffset;
 
-    // The last moveTo location
-    private double  _moveX, _moveY;
+    // The array of discrete tasks
+    private PaintTask[]  _tasks = new PaintTask[0];
 
-    // The last lineTo location
-    private double  _lastX, _lastY;
+    // The current task path
+    private Path2D  _taskPath;
 
-    // The VertexArray holding all rendered triangles (head of list)
+    // The VertexArray
     private VertexArray  _vertexArray;
-
-    // The end of the VertexArray list
-    private VertexArray  _vertexArrayEnd;
 
     /**
      * Constructor.
@@ -82,21 +80,11 @@ public class Painter3D implements Cloneable {
      */
     public void draw(Shape aShape)
     {
-        // Get PathIter and path iteration vars
-        PathIter pathIter = aShape.getPathIter(null);
-        double[] pnts = new double[6];
+        flushTask();
 
-        // Iterate over PathIter segs to add with moveTo, lineTo, etc.
-        while (pathIter.hasNext()) {
-            Seg seg = pathIter.getNext(pnts);
-            switch (seg) {
-                case MoveTo: moveTo(pnts[0], pnts[1]); break;
-                case LineTo: lineTo(pnts[0], pnts[1]); break;
-                case QuadTo: quadTo(pnts[0], pnts[1], pnts[2], pnts[3]); break;
-                case CubicTo: cubicTo(pnts[0], pnts[1], pnts[2], pnts[3], pnts[4], pnts[5]); break;
-                case Close: closePath(); break;
-            }
-        }
+        // Create new PaintTask, add to Tasks property - - Need to transform shape!
+        PaintTask task = new PaintTask(aShape, getColor(), getStroke(), _layerOffset);
+        addPaintTask(task);
     }
 
     /**
@@ -112,8 +100,8 @@ public class Painter3D implements Cloneable {
      */
     public void moveTo(double aX, double aY)
     {
-        _moveX = _lastX = aX;
-        _moveY = _lastY = aY;
+        if (_taskPath == null) _taskPath = new Path2D();
+        _taskPath.moveTo(aX, aY);
     }
 
     /**
@@ -121,40 +109,8 @@ public class Painter3D implements Cloneable {
      */
     public void lineTo(double aX, double aY)
     {
-        // Get vectors for across the line and perpendicular to line
-        Vector3D acrossVector = new Vector3D(aX - _lastX, aY - _lastY, 0).normalize();
-        Vector3D downVector = new Vector3D(0, 0, 1).getCrossProduct(acrossVector).normalize();
-
-        // Scale across/down vectors by stroke half width
-        double halfWidth = _stroke.getWidth() / 2;
-        acrossVector.scale(halfWidth);
-        downVector.scale(halfWidth);
-
-        // Get upper left point
-        double upperLeftX = _lastX + downVector.x - acrossVector.x;
-        double upperLeftY = _lastY + downVector.y - acrossVector.y;
-
-        // Get lower left point
-        double lowerLeftX = _lastX - downVector.x - acrossVector.x;
-        double lowerLeftY = _lastY - downVector.y - acrossVector.y;
-
-        // Get upper right point
-        double upperRightX = aX + downVector.x + acrossVector.x;
-        double upperRightY = aY + downVector.y + acrossVector.y;
-
-        // Get lower right point
-        double lowerRightX = aX - downVector.x + acrossVector.x;
-        double lowerRightY = aY - downVector.y + acrossVector.y;
-        double z = _layerOffset;
-
-        // Add vertexes for points
-        VertexArray vertexArray = getVertexArrayEnd();
-        vertexArray.addStripPoints(upperLeftX, upperLeftY, z, lowerLeftX, lowerLeftY, z,
-                                   upperRightX, upperRightY, z, lowerRightX, lowerRightY, z);
-
-        // Update lastX/Y
-        _lastX = aX;
-        _lastY = aY;
+        if (_taskPath == null) _taskPath = new Path2D();
+        _taskPath.lineTo(aX, aY);
     }
 
     /**
@@ -162,8 +118,8 @@ public class Painter3D implements Cloneable {
      */
     public void quadTo(double aCX, double aCY, double aX, double aY)
     {
-        System.err.println("Painter3D:quadTo: Not implemented");
-        lineTo(aX, aY);
+        if (_taskPath == null) _taskPath = new Path2D();
+        _taskPath.quadTo(aCX, aCY, aX, aY);
     }
 
     /**
@@ -171,8 +127,8 @@ public class Painter3D implements Cloneable {
      */
     public void cubicTo(double aC1X, double aC1Y, double aC2X, double aC2Y, double aX, double aY)
     {
-        System.err.println("Painter3D:cubicTo: Not implemented");
-        lineTo(aX, aY);
+        if (_taskPath == null) _taskPath = new Path2D();
+        _taskPath.curveTo(aC1X, aC1Y, aC2X, aC2Y, aX, aY);
     }
 
     /**
@@ -180,7 +136,8 @@ public class Painter3D implements Cloneable {
      */
     public void closePath()
     {
-        lineTo(_moveX, _moveY);
+        if (_taskPath == null) _taskPath = new Path2D();
+        _taskPath.close();
     }
 
     /**
@@ -192,30 +149,62 @@ public class Painter3D implements Cloneable {
     }
 
     /**
-     * Returns the end of the VertexArray for writing.
+     * Flushes the current task.
      */
-    protected VertexArray getVertexArrayEnd()
+    public void flushTask()
     {
-        // If already set, just return
-        if (_vertexArrayEnd != null) return _vertexArrayEnd;
+        // If no TaskPath, just return
+        if (_taskPath == null) return;
 
-        // Create new VertexArrayEnd and add to VertexArray
-        _vertexArrayEnd = new VertexArray();
-        _vertexArrayEnd.setColor(getColor());
+        // Create Task for TaskPath, add to Tasks and clear TaskPath
+        PaintTask task = new PaintTask(_taskPath, getColor(), getStroke(), _layerOffset);
+        addPaintTask(task);
+        _taskPath = null;
+    }
 
-        // Add to VertexArray
-        if (_vertexArray != null)
-            _vertexArray.setNext(_vertexArrayEnd);
-        else _vertexArray = _vertexArrayEnd;
+    /**
+     * Returns the PaintTasks.
+     */
+    public PaintTask[] getPaintTasks()
+    {
+        flushTask();
+        return _tasks;
+    }
 
-        // Return VertexArrayEnd
-        return _vertexArrayEnd;
+    /**
+     * Adds a PaintTask.
+     */
+    protected void addPaintTask(PaintTask aTask)
+    {
+        _tasks = ArrayUtils.add(_tasks, aTask);
+        _vertexArray = null;
     }
 
     /**
      * Returns the VertexArray for drawing.
      */
-    public VertexArray getVertexArray()  { return _vertexArray; }
+    public VertexArray getVertexArray()
+    {
+        // If already set, just return
+        if (_vertexArray != null) return _vertexArray;
+
+        // Get tasks (if none, return empty VertexArray)
+        PaintTask[] tasks = getPaintTasks();
+        if (tasks.length == 0)
+            return new VertexArray();
+
+        // Create/build VertexArray list for each Task
+        VertexArray vertexArray = tasks[0].getVertexArray();
+        VertexArray vertexArrayEnd = vertexArray;
+        for (int i = 1; i < tasks.length; i++) {
+            VertexArray vertexArrayNext = tasks[i].getVertexArray();
+            vertexArrayEnd.setNext(vertexArrayNext);
+            vertexArrayEnd = vertexArrayNext;
+        }
+
+        // Return
+        return _vertexArray = vertexArray;
+    }
 
     /**
      * Standard clone implementation.
@@ -223,20 +212,84 @@ public class Painter3D implements Cloneable {
     @Override
     public Painter3D clone()
     {
+        flushTask();
+
         // Do normal clone
         Painter3D clone;
         try { clone = (Painter3D) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
 
-        // Clone VertexArray, VertexArrayEnd
-        if (_vertexArray != null) {
-            clone._vertexArray = _vertexArray.clone();
-            clone._vertexArrayEnd = clone._vertexArray;
-            while (clone._vertexArrayEnd.getNext() != null)
-                clone._vertexArrayEnd = clone._vertexArrayEnd.getNext();
-        }
+        // Clone PaintTasks
+        clone._tasks = _tasks.clone();
+        for (int i = 0; i < _tasks.length; i++)
+            clone._tasks[i] = _tasks[i].clone();
 
         // Return clone
         return clone;
+    }
+
+    /**
+     * This class represents a discrete paint task.
+     */
+    private static class PaintTask implements Cloneable {
+
+        // The shape
+        private Shape  _shape;
+
+        // The paint color
+        private Color  _color;
+
+        // The stroke
+        private Stroke  _stroke;
+
+        // The layer offset
+        private double  _layerOffset;
+
+        /**
+         * Constructor.
+         */
+        public PaintTask(Shape aShape, Color aColor, Stroke aStroke, double anOffset)
+        {
+            _shape = aShape;
+            _color = aColor;
+            _stroke = aStroke;
+            _layerOffset = anOffset;
+        }
+
+        /**
+         * Returns shape.
+         */
+        public Shape getShape()  { return _shape; }
+
+        /**
+         * Returns color.
+         */
+        public Color getColor()  { return _color; }
+
+        /**
+         * Returns stroke.
+         */
+        public Stroke getStroke()  { return _stroke; }
+
+        /**
+         * Returns a VertexArray.
+         */
+        public VertexArray getVertexArray()
+        {
+            VertexArray vertexArray = VertexArrayUtils.getStrokedShapeVertexArray(_shape, _color, _stroke, _layerOffset);
+            return vertexArray;
+        }
+
+        /**
+         * Standard clone implementation.
+         */
+        @Override
+        public PaintTask clone()
+        {
+            PaintTask clone;
+            try { clone = (PaintTask) super.clone(); }
+            catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+            return clone;
+        }
     }
 }

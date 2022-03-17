@@ -83,53 +83,6 @@ public class VertexArray implements Cloneable {
     }
 
     /**
-     * Adds points for given doubles assumed to be in (x, y, z, ...) format where each new two points after the first
-     * form a triangle.
-     */
-    public void addStripPoints(double ... points)
-    {
-        // Get vars
-        int compCount = points.length;
-        Point3D p1 = new Point3D(0, 0, 0);
-        Point3D p2 = new Point3D(0, 0, 0);
-        Point3D p3 = new Point3D(0, 0, 0);
-        Point3D[] cw = { p1, p2, p3 };
-        Point3D[] ccw = { p3, p2, p1 };
-        Vector3D normal = new Vector3D(0, 0, 0);
-        Vector3D normal0 = null;
-
-        // While there are still 3 points (9 components) add 3 points
-        for (int compIndex = 0; compIndex + 9 <= compCount; compIndex += 3) {
-
-            // Get next 3 points components for next triangle
-            p1.x = points[compIndex + 0];
-            p1.y = points[compIndex + 1];
-            p1.z = points[compIndex + 2];
-            p2.x = points[compIndex + 3];
-            p2.y = points[compIndex + 4];
-            p2.z = points[compIndex + 5];
-            p3.x = points[compIndex + 6];
-            p3.y = points[compIndex + 7];
-            p3.z = points[compIndex + 8];
-
-            // Get triangle normal (init first triangle normal on first pass)
-            Vector3D.getNormalForPoints(normal, p1, p2, p3);
-            if (normal0 == null)
-                normal0 = normal.clone();
-
-            // Make sure all triangles have same normal as first
-            Point3D[] pnts = cw;
-            if (!normal.equals(normal0))
-                pnts = ccw;
-
-            // Add the 3 points
-            addPoint(pnts[0].x, pnts[0].y, pnts[0].z);
-            addPoint(pnts[1].x, pnts[1].y, pnts[1].z);
-            addPoint(pnts[2].x, pnts[2].y, pnts[2].z);
-        }
-    }
-
-    /**
      * Adds a color to vertex color components array.
      */
     public void addColor(Color aColor)
@@ -298,6 +251,10 @@ public class VertexArray implements Cloneable {
             _pointsArray[i * 3 + 1] = (float) point.y;
             _pointsArray[i * 3 + 2] = (float) point.z;
         }
+
+        // If Next VertexArray, forward on
+        if (_next != null)
+            _next.transformPoints(aTrans);
     }
 
     /**
