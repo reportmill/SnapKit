@@ -444,6 +444,7 @@ public class Camera3D {
     {
         if (_renderer != null)
             _renderer.sceneDidChange();
+        _xform3D = null;
     }
 
     /**
