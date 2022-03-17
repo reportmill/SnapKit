@@ -136,6 +136,40 @@ public class Renderer2D extends Renderer {
             Path3D path3D = (Path3D) aShape;
             addShapeSurfacesInCameraCoords(path3D, thePathsList);
         }
+
+        // Handle VertexArrayShape
+        else if (aShape instanceof VertexArrayShape) {
+            VertexArrayShape vertexArrayShape = (VertexArrayShape) aShape;
+            VertexArray vertexArray = vertexArrayShape.getVertexArray();
+            float[] pointsArray = vertexArray.getPointsArray();
+            float[] colorsArray = vertexArray.isColorsArraySet() ? vertexArray.getColorsArray() : null;
+            Color color = vertexArray.getColor();
+
+            int pointCount = vertexArray.getPointCount();
+            int triangleCount = pointCount / 3;
+            for (int triangleIndex = 0, i = 0; triangleIndex < triangleCount; triangleIndex++) {
+                float p1x = pointsArray[i], c1x = colorsArray != null ? colorsArray[i++] : (float) color.getRed();
+                float p1y = pointsArray[i], c1y = colorsArray != null ? colorsArray[i++] : (float) color.getGreen();
+                float p1z = pointsArray[i], c1z = colorsArray != null ? colorsArray[i++] : (float) color.getBlue();
+                float p2x = pointsArray[i], c2x = colorsArray != null ? colorsArray[i++] : (float) color.getRed();
+                float p2y = pointsArray[i], c2y = colorsArray != null ? colorsArray[i++] : (float) color.getGreen();
+                float p2z = pointsArray[i], c2z = colorsArray != null ? colorsArray[i++] : (float) color.getBlue();
+                float p3x = pointsArray[i], c3x = colorsArray != null ? colorsArray[i++] : (float) color.getRed();
+                float p3y = pointsArray[i], c3y = colorsArray != null ? colorsArray[i++] : (float) color.getGreen();
+                float p3z = pointsArray[i], c3z = colorsArray != null ? colorsArray[i++] : (float) color.getBlue();
+                Path3D path3D = new Path3D();
+                path3D.moveTo(p1x, p1y, p1z);
+                path3D.lineTo(p2x, p2y, p2z);
+                path3D.lineTo(p3x, p3y, p3z);
+                path3D.close();
+                float red = (c1x + c2x + c3x) / 3;
+                float green = (c1y + c2y + c3y) / 3;
+                float blue = (c1z + c2z + c3z) / 3;
+                path3D.setColor(new Color(red, green, blue));
+                path3D.setDoubleSided(true);
+                addShapeSurfacesInCameraCoords(path3D, thePathsList);
+            }
+        }
     }
 
     /**
