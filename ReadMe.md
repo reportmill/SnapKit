@@ -1,14 +1,21 @@
-# SnapKit
+# SnapKit - a Java UI Kit for the Modern World
 
-SnapKit is a new Java UI kit for creating rich Write-Once-Run-Anywhere UI applications that run
-pixel-perfect on the desktop and in the browser.
-
-Why do we need another UI kit? Because Swing is out of date, and JavaFX missed the boat.
-And neither run natively in the browser.
+SnapKit is a new Java UI kit for creating rich Java Client applications that achieve the original promise of Java
+by running pixel-perfect and native on the desktop and in the browser ([WORA](https://en.wikipedia.org/wiki/Write_once,_run_anywhere)).
 
 Check out [demos of SnapKit running in the browser](http://www.reportmill.com/snaptea/).
 
-## Much to love about Swing
+## Everything in its place
+
+SnapKit runs optimally everywhere utilizing a high level design where low-level functionality (such as painting, user
+input, windowing, system clipboard and drag-and-drop) is provided via interfaces to native platform implementations.
+This makes SnapKit itself comparatively small and simple, light-weight and performant. When compiled to the browser
+(via [TeaVM](http://teavm.org), many applications are 1 Mb in size (compressed).
+
+## So much to love about Swing
+
+Why do we need another UI kit? Because Swing is out of date, and JavaFX missed the boat.
+And neither run natively in the browser. A list of things to love about Swing:
 
     - Solid view hierarchy and set of controls/components
     
@@ -25,7 +32,9 @@ Check out [demos of SnapKit running in the browser](http://www.reportmill.com/sn
     - It binds easily with POJOs
 	
 
-## Much to love about JavaFX
+## And much to love about JavaFX
+
+JavaFX rewrote the rulebook for Java UI by doing everything different. Still, there was much to love:
 
     - Easily mix graphics and app controls
 
@@ -46,13 +55,67 @@ Check out [demos of SnapKit running in the browser](http://www.reportmill.com/sn
 	
     - It runs on top of Swing, JavaFX and HTML DOM
 	
-    - It is portable to any future UI kit
+    - It is easily portable to any future UI kit and platform
 	
     - The base class is called View. Now that puts the V in MVC!
 	
     - The ViewOwner class provides control functionally (whoops, there goes the C)
 	
     - The ViewEvent class unifies all input events for more consistent handling
+    
+    
+## The ViewOwner
+
+Now here's the thing that really hurt Swing: There was no standard convention for the basics of UI: Create, Init, Reset, Respond.
+    
+This resulted in confusing controller code where UI controls often had code to do all four functions
+in the same place. This initially seems simple and attractive, but falls apart when dozens of inter-dependent
+controls are present.
+
+Here is a simple Swing example that quickly gets out of control when extended to many
+properties and controls:
+
+```
+_textField = new JTextField();
+_textField.setText("Initial Value");
+_textField.addActionListener(event -> {
+    _myModel.updatePropertyForTextField(_textField.getText());
+    _textField.setText(_myModel.getPropertyForTextField());
+});
+```
+
+Here is the same thing with a ViewOwner:
+
+```
+/** Create UI. */
+public View createUI()
+{
+    _textField = new TextField();
+    return _textField;
+}
+
+/** Initialize UI. */
+public void initUI()
+{
+    _textField.setText("Initial Value");
+}
+
+/** Reset UI. */
+public void resetUI()
+{
+    // Update TextField from Model
+    _textField.setText(_myModel.getPropertyForTextField());
+}
+
+/** Respond UI. */
+public void respondUI(ViewEvent anEvent)
+{
+    // Update Model from TextField
+    if (anEvent.equals(_textField))
+        _myModel.updatePropertyForTextField(_textField.getText());
+}
+```
+
 	
 ## The Graphics Package
 
@@ -84,6 +147,7 @@ the UI layer. SnapKit provides this same separation with the snap.gfx package th
     - TextBox object for managing RichText in a geometric region (with spelling and hyphenation)
 	
     - SoundClip for playing sounds
+    
 
 ## The View Package
 
@@ -131,3 +195,37 @@ standard UI controls.
     - ViewEvent for encapsulating all input events in unified object
 
     - DialogBox, FormBuilder: For quickly generating UI for common user input
+    
+## Integrated Developer Tools
+
+If you double-tap the control key in any SnapKit app, a developer console will appear. There are many features
+here to make it easier to debug visual layouts and explore new or large code bases:
+
+    - Mouse-Over to select and inspect any individual nested ViewOwner controller and UI
+    
+    - Mouse-Over to select and inspect any View
+    
+    - Open any UI in the UI Builder, or controller in GitHub code, or View JavaDoc
+    
+    - Select different UI themes (standard, light, dark, light-blue, etc.)
+    
+    - Enable debug flashing of repaint regions to ensure efficient repaints
+    
+    - Enable Frames-Per-Second paint speed measurement tool
+
+
+## The 3D Graphics Package
+
+SnapKit also has a basic 3D package based on OpenGL that uses JOGL on the desktop and WebGL in the browser.
+There is also a simple built-in renderer that renders 3D using standard 2D graphics (this avoids unnecessary
+external JOGL dependencies when 3D isn't really needed and can actually look better in PDF, SVG or print).
+
+The 3D package has:
+
+    - Basic geometry classes for matrices, vectors and points
+    
+    - Fundamental scene elements for Camera, Lights and Scene
+    
+    - Fundamental VertexArray class to model and render and mesh of triangles, lines and points
+
+
