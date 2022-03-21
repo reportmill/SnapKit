@@ -6,7 +6,8 @@ promise of Java by running pixel-perfect and native on the desktop and in the br
 Desktop Java development is hard to beat: the iterative development cycle is fast, debugging is powerful, refactoring is easy, and type-checking plus advanced developer tools solve many problems at compile time. The biggest drawback of Java
 development is deployment: browser deployment is impossible to beat. SnapKit is designed to resolve this with no compromises.
 
-Check out demos of [SnapKit running in the browser](http://www.reportmill.com/snaptea/).
+Check out demos of [SnapKit running in the browser](http://www.reportmill.com/snaptea/):
+[ ![SnapKit](https://reportmill.com/snaptea/Samples.png)](http://www.reportmill.com/snaptea/)
 
 ## Everything in its place
 
