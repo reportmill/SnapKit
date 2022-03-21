@@ -3,10 +3,15 @@
 SnapKit is a modern Java UI library + tools for creating rich Java Client applications that achieve the original
 promise of Java by running pixel-perfect and native on the desktop and in the browser ([WORA](https://en.wikipedia.org/wiki/Write_once,_run_anywhere)).
 
-Desktop Java development is hard to beat: the iterative development cycle is fast, debugging is powerful, refactoring is easy, and type-checking plus advanced developer tools solve many problems at compile time. The biggest drawback of Java
-development is deployment: browser deployment is impossible to beat. SnapKit is designed to resolve this with no compromises.
+Why do we need another UI kit? Because Swing is out of date, JavaFX missed the boat, and neither run natively
+in the browser. But Java desktop development is hard to beat: the iterative dev cycle is fast,
+debugging is powerful, refactoring is easy, and advanced dev tools solve many problems at compile time.
+The drawback is deployment: browser deployment is impossible to beat. This situation alone has led to the decline of
+Java Client adoption and prevented it from being a serious contender for most new development.
+SnapKit is designed to resolve this with no compromises.
 
 Check out demos of [SnapKit running in the browser](http://www.reportmill.com/snaptea/):
+
 [ ![SnapKit](https://reportmill.com/snaptea/Samples.png)](http://www.reportmill.com/snaptea/)
 
 ## Everything in its place
@@ -18,9 +23,8 @@ This makes SnapKit itself comparatively small and simple, light-weight and perfo
 
 ## So much to love about Swing
 
-Why do we need another UI kit? Because Swing is out of date, JavaFX missed the boat, and neither run natively
-in the browser. This situation has prevented Java Client from being a serious contender for most new development.
-But there are still many things to love about Swing:
+SnapKit is primarily inspired by Swing, still a favorite with remaining Java desktop developers, despite its age and lack
+of care and attention. Indeed, there are still many things to love about Swing:
 
     - Solid view hierarchy and set of controls/components
     
