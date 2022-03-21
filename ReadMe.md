@@ -131,17 +131,17 @@ public void respondUI(ViewEvent anEvent)
 
 Some things to note:
 
-**CreateUI()** is usually handled automatically by loading a '.snp' UI file created in SnapBuilder
+**CreateUI()** is usually handled automatically by loading a '.snp' UI file created in SnapBuilder.
     
-**InitUI()** is also usually not needed, because UI is configured in createUI() and updated in ResetUI()
+**InitUI()** is also usually not needed, because UI is configured in createUI() and updated in ResetUI().
     
-**ResetUI()** updates are deferred, coalesced and "protected" (will not cause respondUI() side effects)
-    
-**ResetUI()** is called automatically when the user interacts with any UI (or explicitly via resetLater())
+**ResetUI()** updates are deferred, coalesced and "protected" (will not cause respondUI() side effects) and
+is called automatically when the user interacts with any UI (or explicitly via resetLater()).
     
 **RespondUI()** is called automatically by controls (they are preconfigured to do this by default)
     
-The consistency of **resetUI()/respondUI()** make tracking UI interactions convenient and easy
+**ResetUI()** and **RespondUI()** make tracking UI interactions convenient and easy by providing a consistent
+place to look for all get/set code between controls and the model.
     
     
 ## ViewOwner "Universal Accessors"
