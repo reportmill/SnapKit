@@ -1,21 +1,25 @@
-# SnapKit - a Java UI library for the modern world
+# SnapKit - a Java UI toolkit
 
-SnapKit is a new Java UI kit for creating rich Java Client applications that achieve the original promise of Java
-by running pixel-perfect and native on the desktop and in the browser ([WORA](https://en.wikipedia.org/wiki/Write_once,_run_anywhere)).
+SnapKit is a modern Java UI library + tools for creating rich Java Client applications that achieve the original
+promise of Java by running pixel-perfect and native on the desktop and in the browser ([WORA](https://en.wikipedia.org/wiki/Write_once,_run_anywhere)).
+
+Desktop Java development is hard to beat: the iterative development cycle is fast, debugging is powerful, refactoring is easy, and type-checking plus advanced developer tools solve many problems at compile time. The biggest drawback of Java
+development is deployment: browser deployment is impossible to beat. SnapKit is designed to resolve this with no compromises.
 
 Check out demos of [SnapKit running in the browser](http://www.reportmill.com/snaptea/).
 
 ## Everything in its place
 
 SnapKit runs optimally everywhere via a high level design where low-level functionality (such as painting, user
-input, system clipboard, drag-and-drop and windowing) is provided via interfaces to native platform implementations.
+input, system clipboard, drag-and-drop and windowing) is provided via interfaces to the native platform implementation.
 This makes SnapKit itself comparatively small and simple, light-weight and performant. When compiled to the browser
-(via [TeaVM](http://teavm.org)), many apps are only 1 Mb in size.
+(via [TeaVM](http://teavm.org)), many apps are only 1 MB in size.
 
 ## So much to love about Swing
 
 Why do we need another UI kit? Because Swing is out of date, JavaFX missed the boat, and neither run natively
-in the browser. But there are still many things to love about Swing:
+in the browser. This situation has prevented Java Client from being a serious contender for most new development.
+But there are still many things to love about Swing:
 
     - Solid view hierarchy and set of controls/components
     
@@ -51,8 +55,8 @@ JavaFX rewrote the rulebook for Java UI by doing everything different. Still, th
 
 ## What's to love about SnapKit?
 
-SnapKit tries to be more of a "Swing 2.0". More precisely, it keeps the basic simplicity of Swing while adding
-the richness of JavaFX and bringing the whole thing to the browser:
+SnapKit tries to be more of a "Swing 2.0". More precisely, it keeps the basic simplicity and standard conventions
+of Swing while adding the visual richness of JavaFX and bringing the whole thing to the browser:
 
     - It provides all the most popular features of Swing and JavaFX (above)
 	
@@ -71,7 +75,7 @@ the richness of JavaFX and bringing the whole thing to the browser:
 
 Now here's the thing that really hurt Swing: There was no standard convention for the basics of UI: Create, Init, Reset, Respond.
     
-This resulted in confusing controller code where UI controls often had code doing all four functions
+This resulted in confusing controller code, with UI controls often having code for all four functions
 in the same place. This is initially simple and attractive, but falls apart when dozens of inter-dependent
 controls are present and order-dependent updates are necessary.
 
@@ -130,14 +134,16 @@ Some things to note:
     
     - InitUI() is also usually not needed, because UI is configured in createUI() and updated in ResetUI()
     
-    - ResetUI() updates are "protected" and will not cause a respondUI() side effect
+    - ResetUI() updates are deferred, coalesced and "protected" (will not cause respondUI() side effects)
     
-    - ResetUI() is called automatically when the user interacts with any UI (deferred and coalesced)
+    - ResetUI() is called automatically when the user interacts with any UI (or explicitly via resetLater())
     
-    - RespondUI() is called automatically by controls (they are preconfigured to do this)
+    - RespondUI() is called automatically by controls (they are preconfigured to do this by default)
+    
+    - The consistency of resetUI/respondUI make tracking UI interactions convenient and easy
     
     
-## ViewOwner Universal Accessors
+## ViewOwner "Universal Accessors"
 
 As a convenience, ViewOwner will let you get/set values using standard methods and support all controls, which
 avoids having to lookup or remember specific get/set methods for controls. It also provides common type conversions
@@ -168,7 +174,8 @@ public void respondUI(ViewEvent anEvent)
 ```
 
 In addition to get/setViewValue(), there are methods for get/set other View properties: Enabled, Visible, Text, SelectedItem, SelectedIndex.
-	
+
+
 ## The Graphics Package
 
 One of the great aspects of Swing is the separation and synergy between the core graphics layer (Java2D) and
@@ -255,6 +262,8 @@ and stored in simple XML files ('.snp' files). Simply create/save a .snp file wi
 
 As a bonus, you can run SnapBuilder in the browser and even open any UI file from a running application using the 
 "Developer Tools Console", also available in any running app (see below).
+
+[ ![SnapBuilder](https://reportmill.com/snaptea/SnapBuilder/SnapBuilder.gif)](https://reportmill.com/snaptea/SnapBuilder/)
     
 ## Integrated Developer Tools
 
@@ -288,4 +297,4 @@ The 3D package has:
     
     - Fundamental VertexArray class to model and render and mesh of triangles, lines and points
 
-
+[ [Sample 3D](http://reportmill.com/SnapCharts/Sample3D.png)](https://reportmill.com/SnapCharts/)
