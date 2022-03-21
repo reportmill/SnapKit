@@ -1,21 +1,21 @@
-# SnapKit - a Java UI Kit for the Modern World
+# SnapKit - a Java UI library for the modern world
 
 SnapKit is a new Java UI kit for creating rich Java Client applications that achieve the original promise of Java
 by running pixel-perfect and native on the desktop and in the browser ([WORA](https://en.wikipedia.org/wiki/Write_once,_run_anywhere)).
 
-Check out [demos of SnapKit running in the browser](http://www.reportmill.com/snaptea/).
+Check out demos of [SnapKit running in the browser](http://www.reportmill.com/snaptea/).
 
 ## Everything in its place
 
-SnapKit runs optimally everywhere utilizing a high level design where low-level functionality (such as painting, user
-input, windowing, system clipboard and drag-and-drop) is provided via interfaces to native platform implementations.
+SnapKit runs optimally everywhere via a high level design where low-level functionality (such as painting, user
+input, system clipboard, drag-and-drop and windowing) is provided via interfaces to native platform implementations.
 This makes SnapKit itself comparatively small and simple, light-weight and performant. When compiled to the browser
-(via [TeaVM](http://teavm.org), many applications are 1 Mb in size (compressed).
+(via [TeaVM](http://teavm.org)), many apps are only 1 Mb in size.
 
 ## So much to love about Swing
 
-Why do we need another UI kit? Because Swing is out of date, and JavaFX missed the boat.
-And neither run natively in the browser. A list of things to love about Swing:
+Why do we need another UI kit? Because Swing is out of date, JavaFX missed the boat, and neither run natively
+in the browser. But there are still many things to love about Swing:
 
     - Solid view hierarchy and set of controls/components
     
@@ -23,7 +23,7 @@ And neither run natively in the browser. A list of things to love about Swing:
     
     - Full set of geometric shape primitives: Line, Rect, Ellipse, Path, Polygon, etc.
 	
-    - Easily set border, background, font on any component with simple API
+    - Easily set component borders, fills, and fonts with simple API
 	
     - The whole convenient painting model - just override paint() to customize
 	
@@ -51,7 +51,10 @@ JavaFX rewrote the rulebook for Java UI by doing everything different. Still, th
 
 ## What's to love about SnapKit?
 
-    - It provides all these features
+SnapKit tries to be more of a "Swing 2.0". More precisely, it keeps the basic simplicity of Swing while adding
+the richness of JavaFX and bringing the whole thing to the browser:
+
+    - It provides all the most popular features of Swing and JavaFX (above)
 	
     - It runs on top of Swing, JavaFX and HTML DOM
 	
@@ -68,16 +71,21 @@ JavaFX rewrote the rulebook for Java UI by doing everything different. Still, th
 
 Now here's the thing that really hurt Swing: There was no standard convention for the basics of UI: Create, Init, Reset, Respond.
     
-This resulted in confusing controller code where UI controls often had code to do all four functions
-in the same place. This initially seems simple and attractive, but falls apart when dozens of inter-dependent
-controls are present.
+This resulted in confusing controller code where UI controls often had code doing all four functions
+in the same place. This is initially simple and attractive, but falls apart when dozens of inter-dependent
+controls are present and order-dependent updates are necessary.
 
 Here is a simple Swing example that quickly gets out of control when extended to many
 properties and controls:
 
 ```
+// Create UI
 _textField = new JTextField();
+
+// Init UI
 _textField.setText("Initial Value");
+
+// Respond/Update UI (TextField only)
 _textField.addActionListener(event -> {
     _myModel.updatePropertyForTextField(_textField.getText());
     _textField.setText(_myModel.getPropertyForTextField());
@@ -116,6 +124,50 @@ public void respondUI(ViewEvent anEvent)
 }
 ```
 
+Some things to note:
+
+    - CreateUI() is usually handled for you by loading a '.snp' UI file created in SnapBuilder
+    
+    - InitUI() is also usually not needed, because UI is configured in createUI() and updated in ResetUI()
+    
+    - ResetUI() updates are "protected" and will not cause a respondUI() side effect
+    
+    - ResetUI() is called automatically when the user interacts with any UI (deferred and coalesced)
+    
+    - RespondUI() is called automatically by controls (they are preconfigured to do this)
+    
+    
+## ViewOwner Universal Accessors
+
+As a convenience, ViewOwner will let you get/set values using standard methods and support all controls, which
+avoids having to lookup or remember specific get/set methods for controls. It also provides common type conversions
+to avoid tedious conversions to/from String/number/boolean formats.
+
+```
+public void resetUI()
+{
+    // Update MyTextField, MySlider, ...
+    setViewValue("MyTextField", _myModel.getPropertyForTextField());
+    setViewValue("MySlider", _myModel.getPropertyForSlider());
+    ...
+}
+```
+
+The same applies to ViewEvent (the sole parameter to respondUI()):
+
+```
+public void respondUI(ViewEvent anEvent)
+{
+    // Handle MyTextField, MySlider, ...
+    if (anEvent.equals("MyTextField"))
+        _myModel.updatePropertyForTextField(anEvent.getStringValue());
+    if (anEvent.equals("MySlider"))
+        _myModel.updatePropertyForSlider(anEvent.getFloatValue());
+    ...
+}
+```
+
+In addition to get/setViewValue(), there are methods for get/set other View properties: Enabled, Visible, Text, SelectedItem, SelectedIndex.
 	
 ## The Graphics Package
 
@@ -195,6 +247,14 @@ standard UI controls.
     - ViewEvent for encapsulating all input events in unified object
 
     - DialogBox, FormBuilder: For quickly generating UI for common user input
+    
+## SnapBuilder for Building UI
+
+Because the best line of code is the one you don't have to write, UI is almost always created using the UI builder
+and stored in simple XML files ('.snp' files). Simply create/save a .snp file with the same name as your custom ViewOwner class, and the default ViewOwner.createUI() method will load it.
+
+As a bonus, you can run SnapBuilder in the browser and even open any UI file from a running application using the 
+"Developer Tools Console", also available in any running app (see below).
     
 ## Integrated Developer Tools
 
