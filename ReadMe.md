@@ -74,7 +74,7 @@ of Swing while adding the visual richness of JavaFX and bringing the whole thing
     
 ## The ViewOwner
 
-Now here's the thing that really hurt Swing: There was no standard convention for the basics of UI: Create, Init, Reset, Respond.
+Now here's the thing that really hurt Swing: There was no standard convention for the basics of UI management: Create, Init, Reset, Respond (otherwise known as a "Controller").
     
 This resulted in confusing controller code, with UI controls often having code for all four functions
 in the same place. This is initially simple and attractive, but falls apart when dozens of inter-dependent
@@ -99,7 +99,7 @@ _textField.addActionListener(event -> {
 
 Here is the same thing with a ViewOwner:
 
-```
+```java
 /** Create UI. */
 public View createUI()
 {
@@ -131,17 +131,17 @@ public void respondUI(ViewEvent anEvent)
 
 Some things to note:
 
-    - CreateUI() is usually handled for you by loading a '.snp' UI file created in SnapBuilder
+**CreateUI()** is usually handled automatically by loading a '.snp' UI file created in SnapBuilder
     
-    - InitUI() is also usually not needed, because UI is configured in createUI() and updated in ResetUI()
+**InitUI()** is also usually not needed, because UI is configured in createUI() and updated in ResetUI()
     
-    - ResetUI() updates are deferred, coalesced and "protected" (will not cause respondUI() side effects)
+**ResetUI()** updates are deferred, coalesced and "protected" (will not cause respondUI() side effects)
     
-    - ResetUI() is called automatically when the user interacts with any UI (or explicitly via resetLater())
+**ResetUI()** is called automatically when the user interacts with any UI (or explicitly via resetLater())
     
-    - RespondUI() is called automatically by controls (they are preconfigured to do this by default)
+**RespondUI()** is called automatically by controls (they are preconfigured to do this by default)
     
-    - The consistency of resetUI/respondUI make tracking UI interactions convenient and easy
+The consistency of **resetUI()/respondUI()** make tracking UI interactions convenient and easy
     
     
 ## ViewOwner "Universal Accessors"
