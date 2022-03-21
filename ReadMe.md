@@ -297,4 +297,4 @@ The 3D package has:
     
     - Fundamental VertexArray class to model and render and mesh of triangles, lines and points
 
-[ [Sample 3D](http://reportmill.com/SnapCharts/Sample3D.png)](https://reportmill.com/SnapCharts/)
+[ ![Sample 3D](http://reportmill.com/SnapCharts/Sample3D.png)](https://reportmill.com/SnapCharts/)
