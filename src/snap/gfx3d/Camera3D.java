@@ -424,6 +424,9 @@ public class Camera3D {
      */
     public void paintScene(Painter aPntr)
     {
+        if (getScene().getChildCount() == 0)
+            return;
+
         Renderer renderer = getRenderer();
         renderer.renderAll(aPntr);
     }

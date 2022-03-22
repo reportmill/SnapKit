@@ -283,13 +283,19 @@ public class Renderer2D extends Renderer {
         // If already set, just return
         if (_sceneBounds2D != null) return _sceneBounds2D;
 
+        // If empty view, just return
+        double viewW = _camera.getViewWidth();
+        double viewH = _camera.getViewHeight();
+        if (viewW < 1 || viewH < 1)
+            return Rect.ZeroRect;
+        if (getScene().getChildCount() == 0)
+            return Rect.ZeroRect;
+
         // Get Scene to View transform
         Transform3D sceneToCamera = _camera.getTransform();
         Transform3D cameraToNDC = _camera.getProjectionTransform();
-        double viewW = _camera.getViewWidth();
-        double viewH = _camera.getViewHeight();
         Transform3D cameraToView = cameraToNDC.clone().scale(viewW / 2, -viewH / 2, 1);
-        Transform3D sceneToView = sceneToCamera.multiply(cameraToView);
+        Transform3D sceneToView = sceneToCamera.clone().multiply(cameraToView);
 
         // Get Scene bounds in View
         Scene3D scene = getScene();
