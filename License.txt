@@ -1,42 +1,22 @@
 Copyright (c) Since 2009, ReportMill Software, Inc.
 All rights reserved.
 
-Intentions
 
-I (ReportMill) intend for SnapKit to be free for any use that needs
-it to be free. However, I would like to retain the hope/possibility
-of generating income to fund continued development - if ever a
-commercial entity of sufficient means, other than ReportMill, finds
-value in it.
+SnapKit is available via either of two licenses:
 
-Please interpret that liberally. If you have any doubt, send me a note
-and I will issue a waiver/license for your use case.
+    1. Free GNU General Public License v3.0
+       (https://www.gnu.org/licenses/gpl-3.0.txt)
 
-If you are a wealthy commercial entity in need of a license, contact
-us directly to best determine a solution to meet your needs and
-provide for the health and future of this project.
+    2. Purchased Commercial Unlimited Use and Redistribution License
+       (http://reportmill.com/legal/ISV_License.html)
+
+ReportMill intends for SnapKit to be free for any use that needs it to be free.
+Please interpret that liberally: If you have any doubt, contact ReportMill to
+receive a waiver/license for your use case.
+
+For commercial entities in need of a license, contact ReportMill directly for
+a license to meet your needs and provide for the health and future of the
+project.
 
 Jeff Martin <jeff@reportmill.com>
 ReportMill Software, Inc.
-
-Formal license
-
-This is a placeholder for the actual license - if you know which license
-best describes the intentions above, please send the link.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the above conditions
-are met.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
