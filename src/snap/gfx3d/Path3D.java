@@ -522,18 +522,6 @@ public class Path3D extends Shape3D implements Cloneable {
     }
 
     /**
-     * Transforms the path by the given transform3d.
-     */
-    public void transform(Transform3D xform)
-    {
-        for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
-            Point3D point = getPoint(i);
-            xform.transformPoint(point);
-        }
-        clearCachedValues();
-    }
-
-    /**
      * Transforms the path by the given transform matrix.
      */
     public void transform(Matrix3D xform)
@@ -543,16 +531,6 @@ public class Path3D extends Shape3D implements Cloneable {
             xform.transformPoint(point);
         }
         clearCachedValues();
-    }
-
-    /**
-     * Copies path for given transform.
-     */
-    public Path3D copyForTransform(Transform3D aTrans)
-    {
-        Path3D copy = clone();
-        copy.transform(aTrans);
-        return copy;
     }
 
     /**

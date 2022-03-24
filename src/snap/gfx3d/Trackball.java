@@ -142,11 +142,11 @@ public class Trackball extends ParentView {
         double midz = IMAGE_SIZE / 2;
 
         // translate out to surface of sphere and rotate to latitude+longitude, translate to scene origin
-        Transform3D transform = new Transform3D();
-        transform.translate(0, 0, -_radius);
-        transform.rotateY(theta);
-        transform.rotateZ(phi);
+        Matrix3D transform = new Matrix3D();
         transform.translate(midx, midy, midz);
+        transform.rotateZ(phi);
+        transform.rotateY(theta);
+        transform.translate(0, 0, -_radius);
 
         // Transform path
         path.transform(transform);

@@ -49,8 +49,8 @@ public class Camera3D {
     // Camera normal
     private Vector3D  _normal = new Vector3D(0, 0, -1);
     
-    // The currently cached transform 3d
-    private Transform3D  _xform3D;
+    // Cached SceneToCamera transform
+    private Matrix3D  _sceneToCamera;
 
     // The Renderer
     private Renderer  _renderer;
@@ -108,7 +108,7 @@ public class Camera3D {
     {
         if (aValue == _viewWidth) return;
         firePropChange(ViewWidth_Prop, _viewWidth, _viewWidth = aValue);
-        _xform3D = null;
+        clearCachedValues();
     }
 
     /**
@@ -123,7 +123,7 @@ public class Camera3D {
     {
         if (aValue == _viewHeight) return;
         firePropChange(ViewHeight_Prop, _viewHeight, _viewHeight = aValue);
-        _xform3D = null;
+        clearCachedValues();
     }
 
     /**
@@ -138,7 +138,7 @@ public class Camera3D {
     {
         if (aValue == _depth) return;
         firePropChange(Depth_Prop, _depth, _depth = aValue);
-        _xform3D = null;
+        clearCachedValues();
     }
 
     /**
@@ -153,7 +153,7 @@ public class Camera3D {
     {
         if (aValue == _yaw) return;
         firePropChange(Yaw_Prop, _yaw, _yaw = aValue);
-        _xform3D = null;
+        clearCachedValues();
     }
 
     /**
@@ -168,7 +168,7 @@ public class Camera3D {
     {
         if (aValue == _pitch) return;
         firePropChange(Pitch_Prop, _pitch, _pitch = aValue);
-        _xform3D = null;
+        clearCachedValues();
     }
 
     /**
@@ -183,7 +183,7 @@ public class Camera3D {
     {
         if (aValue == _roll) return;
         firePropChange(Roll_Prop, _roll, _roll = aValue);
-        _xform3D = null;
+        clearCachedValues();
     }
 
     /**
@@ -198,7 +198,7 @@ public class Camera3D {
     {
         if (aValue == _focalLen) return;
         firePropChange(FocalLength_Prop, _focalLen, _focalLen = aValue);
-        _xform3D = null;
+        clearCachedValues();
     }
 
     /**
@@ -213,7 +213,7 @@ public class Camera3D {
     {
         if (aValue == _gimbalRadius) return;
         firePropChange(GimbalRadius_Prop, _gimbalRadius, _gimbalRadius = aValue);
-        _xform3D = null;
+        clearCachedValues();
     }
 
     /**
@@ -241,7 +241,7 @@ public class Camera3D {
     {
         if (aValue == _prefGimbalRadius) return;
         firePropChange(PrefGimbalRadius_Prop, _prefGimbalRadius, _prefGimbalRadius = aValue);
-        _xform3D = null;
+        clearCachedValues();
     }
 
     /**
@@ -249,16 +249,16 @@ public class Camera3D {
      */
     protected double calcPrefGimbalRadius()
     {
-        // Get camera transform for GimbalRadius = 0
+        // Get scene to camera transform for GimbalRadius = 0
         double gimbalRadius = getGimbalRadius();
         _gimbalRadius = 0;
-        Transform3D cameraTrans = getSceneToCameraImpl();
+        Matrix3D sceneToCamera = getSceneToCameraImpl();
         _gimbalRadius = gimbalRadius;
 
         // Get bounds in camera coords with no Z offset
         Scene3D scene = getScene();
         Bounds3D sceneBounds = scene.getBounds3D();
-        Bounds3D sceneBoundsInCamera = sceneBounds.copyForTransform(cameraTrans);
+        Bounds3D sceneBoundsInCamera = sceneBounds.copyForMatrix(sceneToCamera);
 
         // Get second offset Z from bounding box and restore original Z offset
         double focalLen = getFocalLength();
@@ -305,26 +305,33 @@ public class Camera3D {
     /**
      * Returns the transform from scene coords to camera coords.
      */
-    public Transform3D getSceneToCamera()
+    public Matrix3D getSceneToCamera()
     {
         // If already set, just return
-        if (_xform3D != null) return _xform3D;
+        if (_sceneToCamera != null) return _sceneToCamera;
 
         // Reset GimbalRadius
         _gimbalRadius = getPrefGimbalRadius();
 
         // Get transform, set, return
-        Transform3D xfm = getSceneToCameraImpl();
-        return _xform3D = xfm;
+        Matrix3D xfm = getSceneToCameraImpl();
+        return _sceneToCamera = xfm;
     }
 
     /**
      * Returns the transform from scene coords to camera coords.
      */
-    private Transform3D getSceneToCameraImpl()
+    private Matrix3D getSceneToCameraImpl()
     {
         // Create transform
-        Transform3D xfm = new Transform3D();
+        Matrix3D sceneToCamera = new Matrix3D();
+
+        // Translate by gimbalRadius
+        double gimbalRadius = getGimbalRadius();
+        sceneToCamera.translate(0, 0, -gimbalRadius);
+
+        // Rotate
+        sceneToCamera.rotateXYZ(_pitch, _yaw, _roll);
 
         // Add translation from Scene center to world origin
         Scene3D scene = getScene();
@@ -332,40 +339,53 @@ public class Camera3D {
         double midx = sceneBounds.getMidX();
         double midy = sceneBounds.getMidY();
         double midz = sceneBounds.getMidZ();
-        xfm.translate(-midx, -midy, -midz);
+        sceneToCamera.translate(-midx, -midy, -midz);
 
-        // Rotate
-        xfm.rotateXYZ(_pitch, _yaw, _roll);
-
-        // Translate by Offset Z
-        double gimbalRadius = getGimbalRadius();
-        xfm.translate(0, 0, -gimbalRadius);
-        return xfm;
+        // Return
+        return sceneToCamera;
     }
 
     /**
      * Returns the transform from camera coords to clip space (AKA the 'Projection' matrix).
      */
-    public Transform3D getCameraToClip()
+    public Matrix3D getCameraToClip()
     {
         double fovY = getFieldOfViewY();
         double viewW = getViewWidth();
         double viewH = getViewHeight();
         double aspect = viewW / viewH;
-        Transform3D xfm = Transform3D.newPerspective(fovY, aspect, 10, 10000);
+        Matrix3D xfm = Matrix3D.newPerspective(fovY, aspect, 10, 10000);
         return xfm;
     }
 
     /**
      * Returns the transform from camera coords to View (center).
      */
-    public Transform3D getCameraToViewCenter()
+    public Matrix3D getCameraToViewCenter()
     {
-        Transform3D cameraToClip = getCameraToClip();
+        Matrix3D cameraToClip = getCameraToClip();
         double viewW = getViewWidth();
         double viewH = getViewHeight();
-        Transform3D cameraToView = cameraToClip.scale(viewW / 2, -viewH / 2, 1);
+        Matrix3D cameraToView = cameraToClip.scale(viewW / 2, -viewH / 2, 1);
         return cameraToView;
+    }
+
+    /**
+     * Returns the SceneToCamera transform as double array.
+     */
+    public double[] getSceneToCameraArray()
+    {
+        Matrix3D sceneToCamera = getSceneToCamera();
+        return sceneToCamera.mtx;
+    }
+
+    /**
+     * Returns the CameraToClip transform as double array.
+     */
+    public double[] getCameraToClipArray()
+    {
+        Matrix3D cameraToClip = getCameraToClip();
+        return cameraToClip.mtx;
     }
 
     /**
@@ -459,7 +479,15 @@ public class Camera3D {
     {
         if (_renderer != null)
             _renderer.sceneDidChange();
-        _xform3D = null;
+        clearCachedValues();
+    }
+
+    /**
+     * Clears cached values.
+     */
+    protected void clearCachedValues()
+    {
+        _sceneToCamera = null;
     }
 
     /**

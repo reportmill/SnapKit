@@ -86,12 +86,12 @@ public class Renderer2D extends Renderer {
 
         // Get Camera projection transform
         Camera3D camera = getCamera();
-        Transform3D cameraToView = camera.getCameraToViewCenter();
+        Matrix3D cameraToView = camera.getCameraToViewCenter();
 
         // Iterate over paths and replace with paths in view coords
         List<Path3D> pathsInViewCoords = new ArrayList<>();
         for (Path3D pathInWorld : pathsInCameraCoords) {
-            Path3D pathInView = pathInWorld.copyForTransform(cameraToView);
+            Path3D pathInView = pathInWorld.copyForMatrix(cameraToView);
             pathsInViewCoords.add(pathInView);
         }
 
@@ -173,7 +173,7 @@ public class Renderer2D extends Renderer {
     protected void addShapeSurfacesInCameraCoords(Path3D surfacePath, List<Path3D> thePathsList)
     {
         // Get the camera transform & optionally align it to the screen
-        Transform3D sceneToCamera = _camera.getSceneToCamera();
+        Matrix3D sceneToCamera = _camera.getSceneToCamera();
         Light3D light = _scene.getLight();
         Color color = surfacePath.getColor();
 
@@ -205,7 +205,7 @@ public class Renderer2D extends Renderer {
         }
 
         // Get path copy transformed by scene transform
-        Path3D dispPath3D = surfacePath.copyForTransform(sceneToCamera);
+        Path3D dispPath3D = surfacePath.copyForMatrix(sceneToCamera);
 
         // If color on shape, set color on path for scene lights
         if (color != null) {
@@ -229,8 +229,8 @@ public class Renderer2D extends Renderer {
             Path3D path3D = thePaths.get(i); if (path3D.getPainter() == null) continue;
 
             // Get Paths for painter
-            double[] sceneToCamera = _camera.getSceneToCamera().toArray();
-            Matrix3D cameraToScene = new Matrix3D(sceneToCamera).invert();
+            Matrix3D sceneToCamera = _camera.getSceneToCamera();
+            Matrix3D cameraToScene = sceneToCamera.clone().invert();
             Path3D path3DInSceneCoords = path3D.copyForMatrix(cameraToScene);
             Path3D[] painterPathsInCameraCoords = getPathPainterPathsInCameraCoords(path3DInSceneCoords);
 
@@ -254,7 +254,7 @@ public class Renderer2D extends Renderer {
 
         // Get transform from painter to camera
         Matrix3D painterToPath = path3D.getPainterToLocal();
-        Matrix3D pathToCamera = new Matrix3D(_camera.getSceneToCamera().toArray());
+        Matrix3D pathToCamera = _camera.getSceneToCamera();
 
         // Get transform from painter to view
         for (int i = 0; i < paintTasks.length; i++) {
@@ -288,14 +288,14 @@ public class Renderer2D extends Renderer {
             return Rect.ZeroRect;
 
         // Get Scene to View transform
-        Transform3D sceneToCamera = _camera.getSceneToCamera();
-        Transform3D cameraToViewCenter = _camera.getCameraToViewCenter();
-        Transform3D sceneToView = sceneToCamera.clone().multiply(cameraToViewCenter);
+        Matrix3D sceneToCamera = _camera.getSceneToCamera();
+        Matrix3D cameraToViewCenter = _camera.getCameraToViewCenter();
+        Matrix3D sceneToView = cameraToViewCenter.clone().multiply(sceneToCamera);
 
         // Get Scene bounds in View
         Scene3D scene = getScene();
         Bounds3D sceneBounds = scene.getBounds3D();
-        Bounds3D sceneBoundsInView = sceneBounds.copyForTransform(sceneToView);
+        Bounds3D sceneBoundsInView = sceneBounds.copyForMatrix(sceneToView);
 
         // Get scene bounds (shift to camera view mid point)
         double sceneX = sceneBoundsInView.getMinX() + viewW / 2;

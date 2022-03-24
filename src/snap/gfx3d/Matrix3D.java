@@ -337,4 +337,41 @@ public class Matrix3D implements Cloneable {
         String mtxStr = Arrays.toString(mtx);
         return "Matrix3D { " + mtxStr + " }";
     }
+
+    /**
+     * Returns a simple perspective transform.
+     */
+    public static Matrix3D newPerspective(double d)
+    {
+        Matrix3D xfm = new Matrix3D();
+        xfm.mtx[2 * 4 + 3] = 1 / d; //p.m[3][3] = 0;
+        return xfm;
+    }
+
+    /**
+     * Returns a perspective transform.
+     *
+     *     [ f / aspect     0                  0                                0              ]     [ px ]
+     *     [    0           f                  0                                0              ]  x  [ py ]
+     *     [    0           0     (far + near) / (near - far)    2 * far * near / (near - far) ]     [ pz ]
+     *     [    0           0                 -1                                0              ]     [ w  ]
+     *
+     */
+    public static Matrix3D newPerspective(double fieldOfViewY, double aspect, double nearZ, double farZ)
+    {
+        Matrix3D xfm = new Matrix3D();
+        double f = 1d / Math.tan(Math.toRadians(fieldOfViewY / 2));
+        double nearMinusFar = nearZ - farZ;
+
+        // Set elements like OpenGL: https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml
+        xfm.mtx[0 * 4 + 0] = f / aspect;
+        xfm.mtx[1 * 4 + 1] = f;
+        xfm.mtx[2 * 4 + 2] = (farZ + nearZ) / nearMinusFar;
+        xfm.mtx[2 * 4 + 3] = -1;
+        xfm.mtx[3 * 4 + 2] = 2 * farZ * nearZ / nearMinusFar;
+        xfm.mtx[3 * 4 + 3] = 0;
+
+        // Return
+        return xfm;
+    }
 }

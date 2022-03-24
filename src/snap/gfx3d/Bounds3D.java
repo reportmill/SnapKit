@@ -221,12 +221,12 @@ public class Bounds3D implements Cloneable {
     /**
      * Transforms the path by the given transform3d.
      */
-    public void transform(Transform3D xform)
+    public void transform(Matrix3D aMatrix)
     {
         // Get corner points in given transform coords
         Point3D[] cornerPoints = getCornerPoints();
         for (Point3D point : cornerPoints)
-            xform.transformPoint(point);
+            aMatrix.transformPoint(point);
 
         // Reset min/max XYZ values and add transformed points
         setMinXYZ(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
@@ -238,10 +238,10 @@ public class Bounds3D implements Cloneable {
     /**
      * Returns a copy of the bounds for given transform.
      */
-    public Bounds3D copyForTransform(Transform3D aTransform)
+    public Bounds3D copyForMatrix(Matrix3D aMatrix)
     {
         Bounds3D copy = clone();
-        copy.transform(aTransform);
+        copy.transform(aMatrix);
         return copy;
     }
 
