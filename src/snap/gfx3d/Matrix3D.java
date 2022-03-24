@@ -21,6 +21,14 @@ public class Matrix3D implements Cloneable {
     public Matrix3D()  { }
 
     /**
+     * Constructor (creates identity).
+     */
+    public Matrix3D(double[] theDoubles)
+    {
+        System.arraycopy(theDoubles, 0, mtx, 0, 16);
+    }
+
+    /**
      * Constructor with given translations.
      */
     public Matrix3D(double aX, double aY, double aZ)
@@ -313,8 +321,11 @@ public class Matrix3D implements Cloneable {
      */
     public Matrix3D clone()
     {
-        Matrix3D copy = new Matrix3D();
-        return copy.fromArray(mtx);
+        Matrix3D clone;
+        try { clone = (Matrix3D) super.clone(); }
+        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+        clone.mtx = mtx.clone();
+        return clone;
     }
 
     /**

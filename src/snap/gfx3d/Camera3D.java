@@ -231,7 +231,7 @@ public class Camera3D {
             return _prefGimbalRadius;
 
         // Calculate and return
-        return getPrefGimbalRadiusImpl();
+        return calcPrefGimbalRadius();
     }
 
     /**
@@ -242,6 +242,28 @@ public class Camera3D {
         if (aValue == _prefGimbalRadius) return;
         firePropChange(PrefGimbalRadius_Prop, _prefGimbalRadius, _prefGimbalRadius = aValue);
         _xform3D = null;
+    }
+
+    /**
+     * Returns the optimal distance from center of scene to camera when in gimbal mode.
+     */
+    protected double calcPrefGimbalRadius()
+    {
+        // Get camera transform for GimbalRadius = 0
+        double gimbalRadius = getGimbalRadius();
+        _gimbalRadius = 0;
+        Transform3D cameraTrans = getSceneToCameraImpl();
+        _gimbalRadius = gimbalRadius;
+
+        // Get bounds in camera coords with no Z offset
+        Scene3D scene = getScene();
+        Bounds3D sceneBounds = scene.getBounds3D();
+        Bounds3D sceneBoundsInCamera = sceneBounds.copyForTransform(cameraTrans);
+
+        // Get second offset Z from bounding box and restore original Z offset
+        double focalLen = getFocalLength();
+        double prefGR = focalLen + sceneBoundsInCamera.getMaxZ();
+        return prefGR;
     }
 
     /**
@@ -281,22 +303,9 @@ public class Camera3D {
     public Vector3D getNormal()  { return _normal; }
 
     /**
-     * Returns the transform from camera coords to display coords.
-     */
-    public Transform3D getProjectionTransform()
-    {
-        double fovY = getFieldOfViewY();
-        double viewW = getViewWidth();
-        double viewH = getViewHeight();
-        double aspect = viewW / viewH;
-        Transform3D xfm = Transform3D.newPerspective(fovY, aspect, 10, 10000);
-        return xfm;
-    }
-
-    /**
      * Returns the transform from scene coords to camera coords.
      */
-    public Transform3D getTransform()
+    public Transform3D getSceneToCamera()
     {
         // If already set, just return
         if (_xform3D != null) return _xform3D;
@@ -305,14 +314,14 @@ public class Camera3D {
         _gimbalRadius = getPrefGimbalRadius();
 
         // Get transform, set, return
-        Transform3D xfm = getTransformImpl();
+        Transform3D xfm = getSceneToCameraImpl();
         return _xform3D = xfm;
     }
 
     /**
      * Returns the transform from scene coords to camera coords.
      */
-    private Transform3D getTransformImpl()
+    private Transform3D getSceneToCameraImpl()
     {
         // Create transform
         Transform3D xfm = new Transform3D();
@@ -335,25 +344,28 @@ public class Camera3D {
     }
 
     /**
-     * Returns the optimal distance from center of scene to camera when in gimbal mode.
+     * Returns the transform from camera coords to clip space (AKA the 'Projection' matrix).
      */
-    protected double getPrefGimbalRadiusImpl()
+    public Transform3D getCameraToClip()
     {
-        // Get camera transform for GimbalRadius = 0
-        double gimbalRadius = getGimbalRadius();
-        _gimbalRadius = 0;
-        Transform3D cameraTrans = getTransformImpl();
-        _gimbalRadius = gimbalRadius;
+        double fovY = getFieldOfViewY();
+        double viewW = getViewWidth();
+        double viewH = getViewHeight();
+        double aspect = viewW / viewH;
+        Transform3D xfm = Transform3D.newPerspective(fovY, aspect, 10, 10000);
+        return xfm;
+    }
 
-        // Get bounds in camera coords with no Z offset
-        Scene3D scene = getScene();
-        Bounds3D sceneBounds = scene.getBounds3D();
-        Bounds3D sceneBoundsInCamera = sceneBounds.copyForTransform(cameraTrans);
-
-        // Get second offset Z from bounding box and restore original Z offset
-        double focalLen = getFocalLength();
-        double prefGR = focalLen + sceneBoundsInCamera.getMaxZ();
-        return prefGR;
+    /**
+     * Returns the transform from camera coords to View (center).
+     */
+    public Transform3D getCameraToViewCenter()
+    {
+        Transform3D cameraToClip = getCameraToClip();
+        double viewW = getViewWidth();
+        double viewH = getViewHeight();
+        Transform3D cameraToView = cameraToClip.scale(viewW / 2, -viewH / 2, 1);
+        return cameraToView;
     }
 
     /**
