@@ -13,13 +13,36 @@ public class Point3D implements Cloneable {
     public double x, y, z;
     
     /**
-     * Creates a Point3D from the x, y, z coords.
+     * Constructor.
+     */
+    public Point3D()  { }
+
+    /**
+     * Constructor for the x, y, z components.
      */
     public Point3D(double x, double y, double z)
     {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    /**
+     * Sets the point from components.
+     */
+    public void setPoint(double x, double y, double z)
+    {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    /**
+     * Sets the point from components.
+     */
+    public void setPoint(Point3D aPoint)
+    {
+        setPoint(aPoint.x, aPoint.y, aPoint.z);
     }
 
     /**

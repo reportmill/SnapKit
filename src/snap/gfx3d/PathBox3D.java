@@ -38,8 +38,8 @@ public class PathBox3D extends ParentShape3D {
     @Override
     protected void buildShapeImpl()
     {
-        // Create paths for Z1 & Z2
-        Path3D[] paths = getPath3Ds(_pathShape, _z1, _z2);
+        // Create extrusion shapes for 2D shape
+        Shape3D[] extrusionShapes = createExtrusionShape3Ds(_pathShape, _z1, _z2);
 
         // Get Color, Stroke, Opacity
         Color color = getColor();
@@ -48,24 +48,24 @@ public class PathBox3D extends ParentShape3D {
         double opacity = getOpacity();
 
         // Iterate over paths and set color, stroke, opacity
-        for (Path3D path3D : paths) {
-            path3D.setColor(color);
-            path3D.setOpacity(opacity);
-            path3D.setStrokeColor(strokeColor);
-            path3D.setStroke(stroke);
+        for (Shape3D shape3D : extrusionShapes) {
+            shape3D.setColor(color);
+            shape3D.setOpacity(opacity);
+            shape3D.setStrokeColor(strokeColor);
+            shape3D.setStroke(stroke);
         }
 
         // Set children
-        setChildren(paths);
+        setChildren(extrusionShapes);
     }
 
     /**
-     * Creates and returns a list of Path3Ds for a given 2D path and extrusion.
+     * Creates and returns an array of Shape3Ds for a given 2D shape and extrusion front/back z values.
      */
-    public static Path3D[] getPath3Ds(Shape aPath, double z1, double z2)
+    public static Shape3D[] createExtrusionShape3Ds(Shape aPath, double z1, double z2)
     {
         // Create list to hold paths
-        List<Path3D> paths = new ArrayList<>();
+        List<Shape3D> paths = new ArrayList<>();
         Path3D back = null;
 
         // If path is closed, create path3d for front from aPath and z1
@@ -110,10 +110,12 @@ public class PathBox3D extends ParentShape3D {
             // LineTo
             case LineTo: {
                 if (Point.equals(lastX, lastY, pts[0], pts[1])) continue;
-                Path3D path = new Path3D(); path.setName("BoxSide" + sideNum++);
-                path.moveTo(lastX, lastY, z1);
-                path.lineTo(pts[0], pts[1], z1); path.lineTo(pts[0], pts[1], z2);
-                path.lineTo(lastX, lastY, z2); path.close();
+                Poly3D path = new Poly3D();
+                path.setName("BoxSide" + sideNum++);
+                path.addPoint(lastX, lastY, z1);
+                path.addPoint(pts[0], pts[1], z1);
+                path.addPoint(pts[0], pts[1], z2);
+                path.addPoint(lastX, lastY, z2);
                 paths.add(path);
                 lastX = pts[0]; lastY = pts[1];
             } break;
@@ -144,12 +146,12 @@ public class PathBox3D extends ParentShape3D {
 
             // Close
             case Close: {
-                Path3D path = new Path3D(); path.setName("BoxSide" + sideNum++);
-                path.moveTo(lastX, lastY, z1);
-                path.lineTo(lastMoveX, lastMoveY, z1);
-                path.lineTo(lastMoveX, lastMoveY, z2);
-                path.lineTo(lastX, lastY, z2);
-                path.close();
+                Poly3D path = new Poly3D();
+                path.setName("BoxSide" + sideNum++);
+                path.addPoint(lastX, lastY, z1);
+                path.addPoint(lastMoveX, lastMoveY, z1);
+                path.addPoint(lastMoveX, lastMoveY, z2);
+                path.addPoint(lastX, lastY, z2);
                 paths.add(path);
             } break;
         }
@@ -159,6 +161,6 @@ public class PathBox3D extends ParentShape3D {
             paths.add(back);
 
         // Return paths
-        return paths.toArray(new Path3D[0]);
+        return paths.toArray(new Shape3D[0]);
     }
 }

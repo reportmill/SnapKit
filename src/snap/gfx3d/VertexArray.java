@@ -67,7 +67,7 @@ public class VertexArray implements Cloneable {
      */
     public Point3D getPoint3D(int anIndex)
     {
-        return getPoint3D(new Point3D(0, 0, 0), anIndex);
+        return getPoint3D(new Point3D(), anIndex);
     }
 
     /**
@@ -85,18 +85,26 @@ public class VertexArray implements Cloneable {
     /**
      * Adds a color to vertex color components array.
      */
-    public void addColor(Color aColor)
+    public void addColor(double aRed, double aGreen, double aBlue, double anAlpha)
     {
         // Expand color components array if needed
         if (_colorsArrayLen + _colorCompCount > _colorsArray.length)
             _colorsArray = Arrays.copyOf(_colorsArray, Math.max(_colorsArray.length * 2, 24));
 
         // Add values
-        _colorsArray[_colorsArrayLen++] = (float) aColor.getRed();
-        _colorsArray[_colorsArrayLen++] = (float) aColor.getGreen();
-        _colorsArray[_colorsArrayLen++] = (float) aColor.getBlue();
+        _colorsArray[_colorsArrayLen++] = (float) aRed;
+        _colorsArray[_colorsArrayLen++] = (float) aGreen;
+        _colorsArray[_colorsArrayLen++] = (float) aBlue;
         if (_colorCompCount > 3)
-            _colorsArray[_colorsArrayLen++] = (float) aColor.getAlpha();
+            _colorsArray[_colorsArrayLen++] = (float) anAlpha;
+    }
+
+    /**
+     * Adds a color to vertex color components array.
+     */
+    public void addColor(Color aColor)
+    {
+        addColor(aColor.getRed(), aColor.getGreen(), aColor.getBlue(), aColor.getAlpha());
     }
 
     /**

@@ -13,7 +13,12 @@ public class Vector3D implements Cloneable {
     public double x, y, z;
     
     /**
-     * Creates a new vector from the given coords.
+     * Constructor.
+     */
+    public Vector3D()  { }
+
+    /**
+     * Constructor for the given vector components.
      */
     public Vector3D(double x, double y, double z)  { this.x = x; this.y = y; this.z = z; }
 
@@ -198,6 +203,31 @@ public class Vector3D implements Cloneable {
 
         // Normalize the result and swap sign so it matches right hand rule
         aVect.normalize(); // if (Renderer.FRONT_FACE_IS_CW) aVect.negate();
+        return aVect;
+    }
+
+    /**
+     * Returns the normal of given points. See Path3D.getNormal().
+     */
+    public static Vector3D getNormalForPoints3fv(Vector3D aVect, float[] pointsArray, int pointCount)
+    {
+        aVect.x = aVect.y = aVect.z = 0;
+        for (int i = 0; i < pointCount; i++) {
+            int pointsArrayIndex = i * 3;
+            float thisX = pointsArray[pointsArrayIndex + 0];
+            float thisY = pointsArray[pointsArrayIndex + 1];
+            float thisZ = pointsArray[pointsArrayIndex + 2];
+            int nextIndex = (i + 1) % pointCount * 3;
+            float nextX = pointsArray[nextIndex];
+            float nextY = pointsArray[nextIndex + 1];
+            float nextZ = pointsArray[nextIndex + 2];
+            aVect.x += (thisY - nextY) * (thisZ + nextZ);
+            aVect.y += (thisZ - nextZ) * (thisX + nextX);
+            aVect.z += (thisX - nextX) * (thisY + nextY);
+        }
+
+        // Normalize the result
+        aVect.normalize();
         return aVect;
     }
 }

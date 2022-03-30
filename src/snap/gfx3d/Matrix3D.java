@@ -279,6 +279,26 @@ public class Matrix3D implements Cloneable {
     }
 
     /**
+     * Transforms a given point (and returns it as a convenience).
+     */
+    public void transformArrayPoints(float[] pointsArray, int aPointCount)
+    {
+        for (int i = 0; i < aPointCount; i++) {
+            int pointsArrayIndex = i * 3;
+            float x1 = pointsArray[pointsArrayIndex + 0];
+            float y1 = pointsArray[pointsArrayIndex + 1];
+            float z1 = pointsArray[pointsArrayIndex + 2];
+            double x2 = mtx[0 * 4 + 0] * x1 + mtx[1 * 4 + 0] * y1 + mtx[2 * 4 + 0] * z1 + mtx[3 * 4 + 0];
+            double y2 = mtx[0 * 4 + 1] * x1 + mtx[1 * 4 + 1] * y1 + mtx[2 * 4 + 1] * z1 + mtx[3 * 4 + 1];
+            double z2 = mtx[0 * 4 + 2] * x1 + mtx[1 * 4 + 2] * y1 + mtx[2 * 4 + 2] * z1 + mtx[3 * 4 + 2];
+            double w =  mtx[0 * 4 + 3] * x1 + mtx[1 * 4 + 3] * y1 + mtx[2 * 4 + 3] * z1 + mtx[3 * 4 + 3];
+            pointsArray[pointsArrayIndex + 0] = (float) (x2 / w);
+            pointsArray[pointsArrayIndex + 1] = (float) (y2 / w);
+            pointsArray[pointsArrayIndex + 2] = (float) (z2 / w);
+        }
+    }
+
+    /**
      * Transforms a given vector (and returns it as a convenience).
      */
     public Vector3D transformVector(Vector3D aVector)
