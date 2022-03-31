@@ -7,7 +7,7 @@ import snap.util.ArrayUtils;
 /**
  * This Shape3D subclass holds child shapes.
  */
-public class ParentShape3D extends Shape3D {
+public class ParentShape extends Shape3D {
 
     // The child shape array
     private Shape3D[]  _children = EMPTY_SHAPE_ARRAY;

@@ -119,8 +119,8 @@ public class Renderer2D extends Renderer {
     protected void addFacetShapesInCameraCoords(Shape3D aShape, List<FacetShape> facetShapeList)
     {
         // Handle ParentShape: Get children and recurse
-        if (aShape instanceof ParentShape3D) {
-            ParentShape3D parentShape = (ParentShape3D) aShape;
+        if (aShape instanceof ParentShape) {
+            ParentShape parentShape = (ParentShape) aShape;
             Shape3D[] children = parentShape.getChildren();
             for (Shape3D child : children)
                 addFacetShapesInCameraCoords(child, facetShapeList);

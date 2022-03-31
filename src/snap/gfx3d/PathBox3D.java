@@ -12,7 +12,7 @@ import snap.gfx.*;
 /**
  * A Shape3D subclass that represents a path extruded to a box.
  */
-public class PathBox3D extends ParentShape3D {
+public class PathBox3D extends ParentShape {
     
     // The 2D path shape
     private Shape  _pathShape;

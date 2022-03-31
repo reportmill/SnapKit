@@ -10,7 +10,7 @@ import snap.gfx.*;
 public abstract class Shape3D {
 
     // The parent shape that holds this shape
-    private ParentShape3D  _parent;
+    private ParentShape _parent;
 
     // Shape name
     private String  _name;
@@ -41,12 +41,12 @@ public abstract class Shape3D {
     /**
      * Returns the parent that holds this shape.
      */
-    public ParentShape3D getParent()  { return _parent; }
+    public ParentShape getParent()  { return _parent; }
 
     /**
      * Sets the parent that holds this shape.
      */
-    protected void setParent(ParentShape3D aParent)
+    protected void setParent(ParentShape aParent)
     {
         _parent = aParent;
     }

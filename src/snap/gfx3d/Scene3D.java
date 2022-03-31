@@ -6,7 +6,7 @@ package snap.gfx3d;
 /**
  * This class is the root ParentShape of all scene shapes. It also manages cameras and lights.
  */
-public class Scene3D extends ParentShape3D {
+public class Scene3D extends ParentShape {
     
     // Camera that renders the scene
     private Camera3D _camera;
