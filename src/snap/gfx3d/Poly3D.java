@@ -128,9 +128,9 @@ public class Poly3D extends FacetShape implements Cloneable {
     public Shape getShape2D()
     {
         return new Shape() {
-            public PathIter getPathIter(Transform aT)
+            public PathIter getPathIter(Transform aTransform)
             {
-                return new PointArrayPathIter2D(_pointsArray, _pointsArrayLen, null);
+                return new PointArrayPathIter2D(_pointsArray, _pointsArrayLen, aTransform);
             }
         };
     }
