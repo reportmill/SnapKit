@@ -4,13 +4,12 @@
 package snap.gfx3d;
 import snap.geom.*;
 import snap.gfx.Color;
-import snap.util.MathUtils;
 import java.util.*;
 
 /**
  * This class represents a path in 3D space.
  */
-public class Path3D extends Shape3D implements Cloneable {
+public class Path3D extends FacetShape implements Cloneable {
     
     // The list of elements in this path
     private List<Seg>  _segs = new ArrayList<>();
@@ -21,15 +20,6 @@ public class Path3D extends Shape3D implements Cloneable {
     // The list of colors in this path
     private List<Color>  _colors = new ArrayList<>();
 
-    // A Painter3D to paint the surface of path
-    private Painter3D  _painter;
-
-    // The path normal vector
-    private Vector3D  _normal;
-    
-    // The VertexArray holding triangles of Path3D
-    private VertexArray  _vertexArray;
-    
     // Cached pointers for iterating efficiently over the path
     private int  _nextElementIndex = -100;
     private int  _nextPointIndex = -100;
@@ -70,11 +60,13 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Returns the number of points in this Path3d.
      */
+    @Override
     public int getPointCount()  { return _points.size(); }
 
     /**
      * Returns the Point3D at given index.
      */
+    @Override
     public Point3D getPoint(int anIndex)  { return _points.get(anIndex); }
 
     /**
@@ -230,11 +222,9 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Returns the normal of the path3d. Right hand rule for clockwise/counter-clockwise defined polygons.
      */
-    public Vector3D getNormal()
+    @Override
+    protected Vector3D createNormal()
     {
-        // If already set, just return
-        if (_normal != null) return _normal;
-
         // Calculate least-square-fit normal. Works for either convex or concave polygons.
         // Reference is Newell's Method for Computing the Plane Equation of a Polygon.
         //   Graphics Gems III, David Kirk (Ed.), AP Professional, 1992.
@@ -248,13 +238,14 @@ public class Path3D extends Shape3D implements Cloneable {
         }
 
         // Normalize the result and swap sign so it matches right hand rule
-        normal.normalize(); //if (Renderer.FRONT_FACE_IS_CW) normal.negate();
-        return _normal = normal;
+        normal.normalize();
+        return normal;
     }
 
     /**
      * Returns the 2D shape for the path3d (should only be called when path is facing Z).
      */
+    @Override
     public Shape getShape2D()
     {
         // Create new path
@@ -279,21 +270,9 @@ public class Path3D extends Shape3D implements Cloneable {
     }
 
     /**
-     * Returns a VertexArray of path triangles.
-     */
-    public VertexArray getVertexArray()
-    {
-        // If already set, just return
-        if (_vertexArray != null) return _vertexArray;
-
-        // Create, set, return
-        VertexArray triVA = createVertexArray();
-        return _vertexArray = triVA;
-    }
-
-    /**
      * Creates a VertexArray of path triangles.
      */
+    @Override
     protected VertexArray createVertexArray()
     {
         // Create/configure VertexArray
@@ -437,91 +416,6 @@ public class Path3D extends Shape3D implements Cloneable {
     private static boolean  _didRenderPath3DStrokedError;
 
     /**
-     * Returns the painter to render texture for this path.
-     */
-    public Painter3D getPainter()  { return _painter; }
-
-    /**
-     * Sets the painter to render texture for this path.
-     */
-    public void setPainter(Painter3D aPntr)
-    {
-        _painter = aPntr;
-    }
-
-    /**
-     * Returns the painter VertexArray for 'painted' triangles on shape surface.
-     */
-    public VertexArray getPainterVertexArray()
-    {
-        Matrix3D painterToLocal = getPainterToLocal();
-        VertexArray vertexArray = _painter.getVertexArray();
-        VertexArray vertexArrayLocal = vertexArray.copyForTransform(painterToLocal);
-        return vertexArrayLocal;
-    }
-
-    /**
-     * Returns the transform from Painter to this shape.
-     */
-    public Matrix3D getPainterToLocal()
-    {
-        // Create transform and translate to Path.Center
-        Matrix3D painterToLocal = new Matrix3D();
-        Point3D pathCenter = getBoundsCenter();
-        painterToLocal.translate(pathCenter.x, pathCenter.y, pathCenter.z);
-
-        // Rotate by angle between painter and path normals (around axis perpendicular to them)
-        Vector3D pntrNormal = new Vector3D(0, 0, 1);
-        Vector3D pathNormal = getNormal();
-        double angle = pntrNormal.getAngleBetween(pathNormal);
-
-        // If angle 180 deg, rotate about Y
-        if (MathUtils.equals(angle, 180))
-            painterToLocal.rotateY(180);
-
-        // If angle non-zero, get perpendicular and rotate about that
-        else if (!MathUtils.equalsZero(angle)) {
-            Vector3D rotateAxis = pntrNormal.getCrossProduct(pathNormal);
-            painterToLocal.rotateAboutAxis(angle, rotateAxis.x, rotateAxis.y, rotateAxis.z);
-        }
-
-        // Translate to Painter.Center
-        double pntrW = _painter.getWidth();
-        double pntrH = _painter.getHeight();
-        Point3D pntrCenter = new Point3D(pntrW / 2, pntrH / 2, 0);
-        painterToLocal.translate(-pntrCenter.x, -pntrCenter.y, -pntrCenter.z);
-
-        // Return
-        return painterToLocal;
-    }
-
-    /**
-     * Returns the transform to make this Path3D align with given vector.
-     */
-    public Matrix3D getTransformToAlignToVector(double aX, double aY, double aZ)
-    {
-        // Get angle between Path3D.Normal and given vector
-        Vector3D vector = new Vector3D(aX, aY, aZ);
-        Vector3D norm = getNormal();
-        double angle = norm.getAngleBetween(vector);
-        if (angle == 0 || angle == 180) // THIS IS WRONG - NO 180!!!
-            return Matrix3D.IDENTITY;
-
-        // The point of rotation is located at the shape's center
-        Point3D rotOrigin = getBoundsCenter();
-
-        // Get axis about which to rotate the path (its the cross product of Path3D.Normal and given vector)
-        Vector3D rotAxis = norm.getCrossProduct(vector);
-
-        // Get transform
-        Matrix3D xform = new Matrix3D();
-        xform.translate(rotOrigin.x, rotOrigin.y, rotOrigin.z);
-        xform.rotateAboutAxis(angle, rotAxis.x, rotAxis.y, rotAxis.z);
-        xform.translate(-rotOrigin.x, -rotOrigin.y, -rotOrigin.z);
-        return xform;
-    }
-
-    /**
      * Transforms the path by the given transform matrix.
      */
     public void transform(Matrix3D xform)
@@ -536,6 +430,7 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Copies path for given transform matrix.
      */
+    @Override
     public Path3D copyForMatrix(Matrix3D aTrans)
     {
         Path3D copy = clone();
@@ -546,6 +441,7 @@ public class Path3D extends Shape3D implements Cloneable {
     /**
      * Reverses the path3d.
      */
+    @Override
     public void reverse()
     {
         reverse(0, null, null);
@@ -611,17 +507,6 @@ public class Path3D extends Shape3D implements Cloneable {
     }
 
     /**
-     * Clears cached values when path changes.
-     */
-    @Override
-    protected void clearCachedValues()
-    {
-        super.clearCachedValues();
-        _normal = null;
-        _vertexArray = null;
-    }
-
-    /**
      * Returns the bounds.
      */
     @Override
@@ -647,9 +532,7 @@ public class Path3D extends Shape3D implements Cloneable {
     public Path3D clone()
     {
         // Normal clone
-        Path3D clone;
-        try { clone = (Path3D) super.clone(); }
-        catch(Exception e) { throw new RuntimeException(e); }
+        Path3D clone  = (Path3D) super.clone();
 
         // Copy elements
         clone._segs = new ArrayList<>(_segs);
@@ -659,10 +542,6 @@ public class Path3D extends Shape3D implements Cloneable {
 
         // Clone colors
         clone._colors = new ArrayList<>(_colors);
-
-        // Clone painter
-        if (_painter != null)
-            clone._painter = _painter.clone();
 
         // Return clone
         return clone;

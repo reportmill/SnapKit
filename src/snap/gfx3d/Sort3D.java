@@ -28,7 +28,7 @@ public class Sort3D {
      *    4. Is Q entirely on the same side of P ’s plane as the viewpoint?
      *    5. Do the projections of the polygons not overlap?
      */
-    public static int comparePath3Ds(Path3D path1, Path3D path2)
+    public static int compareFacetShapes(FacetShape path1, FacetShape path2)
     {
         // If all path1 points are behind all path2 points, return BACK_TO_FRONT
         if (path1.getMaxZ() <= path2.getMinZ())
@@ -39,7 +39,7 @@ public class Sort3D {
             return ORDER_FRONT_TO_BACK;
 
         // Get simple Z min order
-        int compZ = comparePath3D_MinZs(path1, path2);
+        int compZ = compareFacetShape_MinZs(path1, path2);
 
         // If no X/Y overlap, return MinZ order
         if (path1.getMaxX() <= path2.getMinX() || path1.getMinX() >= path2.getMaxX() ||
@@ -78,7 +78,7 @@ public class Sort3D {
      * Returns whether path1/path are ordered BACK_TO_FRONT OR FRONT_TO_BACK.
      * Returns ORDER_SAME if the two paths are coplanar, or INDETERMINATE if they intersect.
      */
-    private static int comparePath3D_Planes(Path3D path1, Path3D path2)
+    private static int comparePath3D_Planes(FacetShape path1, FacetShape path2)
     {
         // Iterate over path points, get distance for each to plane, if distance ever flips sign
         double path2Dist = 0;
@@ -117,7 +117,7 @@ public class Sort3D {
     /**
      * Returns the distance from a point to the plane of this path.
      */
-    private static double getDistanceFromPathPlaneToPoint(Path3D aPath3D, Point3D aPoint)
+    private static double getDistanceFromPathPlaneToPoint(FacetShape aPath3D, Point3D aPoint)
     {
         // Get plane normal
         Vector3D planeNormal = aPath3D.getNormal();
@@ -136,7 +136,7 @@ public class Sort3D {
     /**
      * Compares given paths MinZ values.
      */
-    public static int comparePath3D_MinZs(Path3D path1, Path3D path2)
+    public static int compareFacetShape_MinZs(FacetShape path1, FacetShape path2)
     {
         double z0 = path1.getMinZ();
         double z1 = path2.getMinZ();

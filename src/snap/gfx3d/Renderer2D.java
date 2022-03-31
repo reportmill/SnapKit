@@ -16,10 +16,10 @@ public class Renderer2D extends Renderer {
     // Whether to sort surfaces
     private boolean  _sortSurfaces = true;
 
-    // List of all Scene Shape Path3Ds in view coords
-    private List<Path3D>  _surfacesInViewCoords = new ArrayList<>();
+    // List of all Scene FacetShapes in view coords
+    private List<FacetShape>  _surfacesInViewCoords = new ArrayList<>();
 
-    // Bounds of paths in scene
+    // Bounds of shapes in scene
     private Rect  _sceneBounds2D;
 
     // Constant for name
@@ -50,86 +50,86 @@ public class Renderer2D extends Renderer {
     public void setSortSurfaces(boolean aValue)  { _sortSurfaces = aValue; }
 
     /**
-     * Returns a list of all Scene.Shapes component surfaces Path3Ds in view coords.
+     * Returns a list of all Scene FacetShapes in view coords.
      */
-    public List<Path3D> getSurfacesInViewCoords()
+    public List<FacetShape> getFacetShapesInViewCoords()
     {
         // If already set, just return
         if (_surfacesInViewCoords != null) return _surfacesInViewCoords;
 
-        // Get paths, set and return
-        List<Path3D> paths = getSurfacesInViewCoordsImpl();
-        return _surfacesInViewCoords = paths;
+        // Get FacetShape, set and return
+        List<FacetShape> facetShapes = getFacetShapesInViewCoordsImpl();
+        return _surfacesInViewCoords = facetShapes;
     }
 
     /**
-     * Returns a list of all Scene.Shapes component surfaces Path3Ds in view coords.
+     * Returns a list of all Scene FacetShape in view coords.
      */
-    protected List<Path3D> getSurfacesInViewCoordsImpl()
+    protected List<FacetShape> getFacetShapesInViewCoordsImpl()
     {
         // Get surfaces in camera coords
-        List<Path3D> pathsInCameraCoords = getSurfacesInCameraCoords();
+        List<FacetShape> facetShapesInCameraCoords = getFacetShapesInCameraCoords();
 
-        // Sort surface paths
+        // Sort FacetShapes
         if (isSortSurfaces()) {
             try {
-                pathsInCameraCoords.sort((p0, p1) -> Sort3D.comparePath3D_MinZs(p0, p1));
-                pathsInCameraCoords.sort((p0, p1) -> Sort3D.comparePath3Ds(p0, p1));
+                facetShapesInCameraCoords.sort((p0, p1) -> Sort3D.compareFacetShape_MinZs(p0, p1));
+                facetShapesInCameraCoords.sort((p0, p1) -> Sort3D.compareFacetShapes(p0, p1));
             }
             catch (Exception e) {
-                System.err.println("Renderer2D.getSurfacesInViewCoordsImpl: Sort failed: " + e);
+                System.err.println("Renderer2D.getFacetShapesInViewCoordsImpl: Sort failed: " + e);
             }
         }
 
-        // Add in Path3D painter paths
-        addPathPainterPathsInCameraCoords(pathsInCameraCoords);
+        // Add in FacetShape painter paths
+        addFacetShapePainterPathsInCameraCoords(facetShapesInCameraCoords);
 
-        // Get Camera projection transform
+        // Get transform from camera to View center space
         Camera3D camera = getCamera();
-        Matrix3D cameraToView = camera.getCameraToViewCenter();
+        Matrix3D cameraToViewCenter = camera.getCameraToViewCenter();
 
-        // Iterate over paths and replace with paths in view coords
-        List<Path3D> pathsInViewCoords = new ArrayList<>();
-        for (Path3D pathInWorld : pathsInCameraCoords) {
-            Path3D pathInView = pathInWorld.copyForMatrix(cameraToView);
-            pathsInViewCoords.add(pathInView);
+        // Iterate over FacetShape and replace with paths in view coords
+        List<FacetShape> facetsInViewCoords = new ArrayList<>();
+        for (FacetShape facetShapeInCamera : facetShapesInCameraCoords) {
+            FacetShape facetShapeInView = facetShapeInCamera.copyForMatrix(cameraToViewCenter);
+            facetsInViewCoords.add(facetShapeInView);
         }
 
-        // Return paths in view coords
-        return pathsInViewCoords;
+        // Return FacetShapes in view coords
+        return facetsInViewCoords;
     }
 
     /**
-     * Returns a list of all Scene.Shapes component surfaces Path3Ds in camera coords.
+     * Returns a list of all Scene FacetShapes in camera coords.
      */
-    protected List<Path3D> getSurfacesInCameraCoords()
+    protected List<FacetShape> getFacetShapesInCameraCoords()
     {
         // Get scene and add surfaces deep
         Scene3D scene = getScene();
-        List<Path3D> pathsList = new ArrayList<>();
-        addShapeSurfacesInCameraCoords(scene, pathsList);
+        List<FacetShape> facetShapeList = new ArrayList<>();
+        addFacetShapesInCameraCoords(scene, facetShapeList);
 
-        // Return list of shape surface paths in world coords
-        return pathsList;
+        // Return
+        return facetShapeList;
     }
 
     /**
      * Adds the paths for shape.
      */
-    protected void addShapeSurfacesInCameraCoords(Shape3D aShape, List<Path3D> thePathsList)
+    protected void addFacetShapesInCameraCoords(Shape3D aShape, List<FacetShape> facetShapeList)
     {
         // Handle ParentShape: Get children and recurse
         if (aShape instanceof ParentShape3D) {
             ParentShape3D parentShape = (ParentShape3D) aShape;
             Shape3D[] children = parentShape.getChildren();
             for (Shape3D child : children)
-                addShapeSurfacesInCameraCoords(child, thePathsList);
+                addFacetShapesInCameraCoords(child, facetShapeList);
         }
 
-        // Handle Path3D
-        else if (aShape instanceof Path3D) {
-            Path3D path3D = (Path3D) aShape;
-            addShapeSurfacesInCameraCoords(path3D, thePathsList);
+        // Handle FacetShape
+        else if (aShape instanceof FacetShape) {
+            FacetShape facetShape = (FacetShape) aShape;
+            addFacetShapeInCameraCoords(facetShape, facetShapeList);
         }
 
         // Handle VertexArrayShape
@@ -152,108 +152,108 @@ public class Renderer2D extends Renderer {
                 float p3x = pointsArray[i], c3x = colorsArray != null ? colorsArray[i++] : (float) color.getRed();
                 float p3y = pointsArray[i], c3y = colorsArray != null ? colorsArray[i++] : (float) color.getGreen();
                 float p3z = pointsArray[i], c3z = colorsArray != null ? colorsArray[i++] : (float) color.getBlue();
-                Path3D path3D = new Path3D();
-                path3D.moveTo(p1x, p1y, p1z);
-                path3D.lineTo(p2x, p2y, p2z);
-                path3D.lineTo(p3x, p3y, p3z);
-                path3D.close();
+                Poly3D poly3D = new Poly3D();
+                poly3D.addPoint(p1x, p1y, p1z);
+                poly3D.addPoint(p2x, p2y, p2z);
+                poly3D.addPoint(p3x, p3y, p3z);
                 float red = (c1x + c2x + c3x) / 3;
                 float green = (c1y + c2y + c3y) / 3;
                 float blue = (c1z + c2z + c3z) / 3;
-                path3D.setColor(new Color(red, green, blue));
-                path3D.setDoubleSided(true);
-                addShapeSurfacesInCameraCoords(path3D, thePathsList);
+                poly3D.setColor(new Color(red, green, blue));
+                poly3D.setDoubleSided(true);
+                addFacetShapeInCameraCoords(poly3D, facetShapeList);
             }
         }
     }
 
     /**
-     * Adds the paths for shape.
+     * Adds given FacetShape in camera space if visible.
      */
-    protected void addShapeSurfacesInCameraCoords(Path3D surfacePath, List<Path3D> thePathsList)
+    protected void addFacetShapeInCameraCoords(FacetShape facetShape, List<FacetShape> facetShapeList)
     {
         // Get the camera transform & optionally align it to the screen
         Matrix3D sceneToCamera = _camera.getSceneToCamera();
         Light3D light = _scene.getLight();
-        Color color = surfacePath.getColor();
+        Color color = facetShape.getColor();
 
-        // Get path normal (if bogus, complain and return - not sure this happens anymore)
-        Vector3D pathNormLocal = surfacePath.getNormal();
-        if (Double.isNaN(pathNormLocal.x)) {
-            System.err.println("Renderer2D.addShapeSurfacesInCameraCoords: Invalid path");
+        // Get facet normal (if bogus, complain and return - not sure this happens anymore)
+        Vector3D facetNormLocal = facetShape.getNormal();
+        if (Double.isNaN(facetNormLocal.x)) {
+            System.err.println("Renderer2D.addShapeSurfacesInCameraCoords: Invalid facet normal");
             return;
         }
 
-        // Get path normal in camera coords
-        Vector3D pathNormCamera = sceneToCamera.transformVector(pathNormLocal.clone());
-        pathNormCamera.normalize();
+        // Get facet normal in camera coords
+        Vector3D facetNormalInCamera = sceneToCamera.transformVector(facetNormLocal.clone());
+        facetNormalInCamera.normalize();
 
-        // Get camera-to-path vector in camera coords
-        Point3D pathCenterLocal = surfacePath.getBoundsCenter();
-        Point3D pathCenterCamera = sceneToCamera.transformPoint(pathCenterLocal.clone());
-        Vector3D cameraToPathVect = new Vector3D(pathCenterCamera.x, pathCenterCamera.y, pathCenterCamera.z);
+        // Get camera-to-facet vector in camera coords
+        Point3D facetCenterLocal = facetShape.getBoundsCenter();
+        Point3D facetCenterCamera = sceneToCamera.transformPoint(facetCenterLocal.clone());
+        Vector3D cameraToFacetVector = new Vector3D(facetCenterCamera.x, facetCenterCamera.y, facetCenterCamera.z);
 
-        // Backface culling : If path pointed away from camera, skip path
-        if (cameraToPathVect.isAligned(pathNormCamera, false)) {
+        // Backface culling : If facet pointed away from camera, skip facet
+        if (cameraToFacetVector.isAligned(facetNormalInCamera, false)) {
 
             // If not double-sided, just skip
-            if (!surfacePath.isDoubleSided())
+            if (!facetShape.isDoubleSided())
                 return;
 
             // Otherwise, negate normal
-            pathNormCamera.negate();
+            facetNormalInCamera.negate();
         }
 
-        // Get path copy transformed by scene transform
-        Path3D dispPath3D = surfacePath.copyForMatrix(sceneToCamera);
+        // Get facetShape in camera space
+        FacetShape facetShapeInCamera = facetShape.copyForMatrix(sceneToCamera);
 
-        // If color on shape, set color on path for scene lights
+        // If color on shape, set color on facet for scene lights
         if (color != null) {
-            Color rcol = light.getRenderColor(pathNormCamera, color);
-            dispPath3D.setColor(rcol);
+            Color rcol = light.getRenderColor(facetNormalInCamera, color);
+            facetShapeInCamera.setColor(rcol);
         }
 
-        // Add path
-        thePathsList.add(dispPath3D);
+        // Add facetShape
+        facetShapeList.add(facetShapeInCamera);
     }
 
     /**
-     * Iterates over path list and adds Path.Painter.PainterTasks as Path3Ds in Camera coords.
+     * Iterates over FacetShape list and adds FacetShape.Painter.PainterTasks as Path3Ds in Camera coords.
      */
-    private void addPathPainterPathsInCameraCoords(List<Path3D> thePaths)
+    private void addFacetShapePainterPathsInCameraCoords(List<FacetShape> facetShapeList)
     {
         // Iterate over paths
-        for (int i = thePaths.size() - 1; i >= 0; i--) {
+        for (int i = facetShapeList.size() - 1; i >= 0; i--) {
 
-            // Get path (just skip if no Painter)
-            Path3D path3D = thePaths.get(i); if (path3D.getPainter() == null) continue;
+            // Get facetShape (just skip if no Painter)
+            FacetShape facetShape = facetShapeList.get(i);
+            if (facetShape.getPainter() == null) continue;
 
             // Get Paths for painter
             Matrix3D sceneToCamera = _camera.getSceneToCamera();
             Matrix3D cameraToScene = sceneToCamera.clone().invert();
-            Path3D path3DInSceneCoords = path3D.copyForMatrix(cameraToScene);
-            Path3D[] painterPathsInCameraCoords = getPathPainterPathsInCameraCoords(path3DInSceneCoords);
+            FacetShape facetShapeInScene = facetShape.copyForMatrix(cameraToScene);
+            Path3D[] painterPathsInCamera = getPainterPathsInCameraCoords(facetShapeInScene);
 
             // Add paths to list right behind the original path
-            for (int j = 0; j < painterPathsInCameraCoords.length; j++) {
-                Path3D painterPath = painterPathsInCameraCoords[j];
-                thePaths.add(i + j + 1, painterPath);
+            for (int j = 0; j < painterPathsInCamera.length; j++) {
+                Path3D painterPath = painterPathsInCamera[j];
+                facetShapeList.add(i + j + 1, painterPath);
             }
         }
     }
 
     /**
-     * Returns a path.
+     * Returns the FacetShape.Painter.PainterPaths as Path3D in Camera space.
      */
-    private Path3D[] getPathPainterPathsInCameraCoords(Path3D path3D)
+    private Path3D[] getPainterPathsInCameraCoords(FacetShape aFacetShape)
     {
         // Get Painter, PainterTasks and pathPainterPaths array
-        Painter3D painter3D = path3D.getPainter();
+        Painter3D painter3D = aFacetShape.getPainter();
         Painter3D.PaintTask[] paintTasks = painter3D.getPaintTasks();
         Path3D[] pathPainterPaths = new Path3D[paintTasks.length];
 
         // Get transform from painter to camera
-        Matrix3D painterToPath = path3D.getPainterToLocal();
+        Matrix3D painterToPath = aFacetShape.getPainterToLocal();
         Matrix3D pathToCamera = _camera.getSceneToCamera();
 
         // Get transform from painter to view
@@ -308,16 +308,16 @@ public class Renderer2D extends Renderer {
     }
 
     /**
-     * Called to indicate that paths list needs to be rebuilt.
+     * Called to indicate that FacetShapes list needs to be rebuilt.
      */
-    protected void rebuildPaintSurfaces()
+    protected void rebuildFacetShapes()
     {
         _surfacesInViewCoords = null;
         _sceneBounds2D = null;
     }
 
     /**
-     * Override to rebuild paths for camera changes.
+     * Override to rebuild FacetShapes for camera changes.
      */
     @Override
     protected void cameraDidPropChange(PropChange aPC)
@@ -332,7 +332,7 @@ public class Renderer2D extends Renderer {
             case Camera3D.Roll_Prop:
             case Camera3D.FocalLength_Prop:
             case Camera3D.PrefGimbalRadius_Prop:
-                rebuildPaintSurfaces();
+                rebuildFacetShapes();
         }
         super.cameraDidPropChange(aPC);
     }
@@ -342,7 +342,7 @@ public class Renderer2D extends Renderer {
      */
     protected void sceneDidChange()
     {
-        rebuildPaintSurfaces();
+        rebuildFacetShapes();
     }
 
     /**
@@ -350,13 +350,13 @@ public class Renderer2D extends Renderer {
      */
     public void renderAll(Painter aPntr)
     {
-        paintPaths(aPntr);
+        paintFacetShapes(aPntr);
     }
 
     /**
      * Paints shape children.
      */
-    public void paintPaths(Painter aPntr)
+    public void paintFacetShapes(Painter aPntr)
     {
         // Translate to center of camera view
         Camera3D camera = getCamera();
@@ -366,10 +366,10 @@ public class Renderer2D extends Renderer {
         double viewMidY = viewH / 2;
         aPntr.translate(viewMidX, viewMidY);
 
-        // Iterate over Path3Ds and paint
-        List<Path3D> paths = getSurfacesInViewCoords();
-        for (Path3D child : paths)
-            paintPath3D(aPntr, child);
+        // Iterate over FacetShapes and paint
+        List<FacetShape> facetShapeList = getFacetShapesInViewCoords();
+        for (FacetShape facetShape : facetShapeList)
+            paintFacetShape(aPntr, facetShape);
 
         // Translate back
         aPntr.translate(-viewMidX, -viewMidY);
@@ -378,15 +378,15 @@ public class Renderer2D extends Renderer {
     /**
      * Paints a Path3D.
      */
-    protected void paintPath3D(Painter aPntr, Path3D aPath3D)
+    protected void paintFacetShape(Painter aPntr, FacetShape aFacetShape)
     {
         // Get path, fill and stroke
-        Shape path = aPath3D.getShape2D();
-        Paint fill = aPath3D.getColor();
-        Paint stroke = aPath3D.getStrokeColor();
+        Shape path = aFacetShape.getShape2D();
+        Paint fill = aFacetShape.getColor();
+        Paint stroke = aFacetShape.getStrokeColor();
 
         // Get opacity and set if needed
-        double op = aPath3D.getOpacity(), oldOP = 0;
+        double op = aFacetShape.getOpacity(), oldOP = 0;
         if (op < 1) {
             oldOP = aPntr.getOpacity();
             aPntr.setOpacity(op * oldOP);
@@ -399,7 +399,7 @@ public class Renderer2D extends Renderer {
         }
         if (stroke != null) {
             aPntr.setPaint(stroke);
-            aPntr.setStroke(aPath3D.getStroke());
+            aPntr.setStroke(aFacetShape.getStroke());
             aPntr.draw(path);
         }
 

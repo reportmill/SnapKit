@@ -4,13 +4,12 @@
 package snap.gfx3d;
 import snap.geom.*;
 import snap.gfx.Color;
-import snap.util.MathUtils;
 import java.util.Arrays;
 
 /**
  * This class represents a polygon surface in 3D space.
  */
-public class Poly3D extends Shape3D implements Cloneable {
+public class Poly3D extends FacetShape implements Cloneable {
 
     // The float array to hold actual vertex point components
     private float[]  _pointsArray = new float[24];
@@ -23,15 +22,6 @@ public class Poly3D extends Shape3D implements Cloneable {
 
     // The number of components in vertex colors array
     private int  _colorsArrayLen = 0;
-
-    // A Painter3D to paint the surface of path
-    private Painter3D  _painter;
-
-    // The path normal vector
-    private Vector3D  _normal;
-
-    // The VertexArray holding triangles of Path3D
-    private VertexArray  _vertexArray;
 
     // Constants
     public static final int POINT_COMP_COUNT = 3;
@@ -57,7 +47,29 @@ public class Poly3D extends Shape3D implements Cloneable {
     /**
      * Returns the number of vertex points in array.
      */
+    @Override
     public int getPointCount()  { return _pointsArrayLen / POINT_COMP_COUNT; }
+
+    /**
+     * Returns the Point3D at index.
+     */
+    @Override
+    public Point3D getPoint(int anIndex)
+    {
+        return getPoint(new Point3D(), anIndex);
+    }
+
+    /**
+     * Returns the Point3D at index.
+     */
+    public Point3D getPoint(Point3D aPoint, int anIndex)
+    {
+        int index = anIndex * POINT_COMP_COUNT;
+        aPoint.x = _pointsArray[index + 0];
+        aPoint.y = _pointsArray[index + 1];
+        aPoint.z = _pointsArray[index + 2];
+        return aPoint;
+    }
 
     /**
      * Adds value triplet to array.
@@ -72,26 +84,6 @@ public class Poly3D extends Shape3D implements Cloneable {
         _pointsArray[_pointsArrayLen++] = (float) aVal1;
         _pointsArray[_pointsArrayLen++] = (float) aVal2;
         _pointsArray[_pointsArrayLen++] = (float) aVal3;
-    }
-
-    /**
-     * Returns the Point3D at index.
-     */
-    public Point3D getPoint3D(int anIndex)
-    {
-        return getPoint3D(new Point3D(), anIndex);
-    }
-
-    /**
-     * Returns the Point3D at index.
-     */
-    public Point3D getPoint3D(Point3D aPoint, int anIndex)
-    {
-        int index = anIndex * POINT_COMP_COUNT;
-        aPoint.x = _pointsArray[index];
-        aPoint.y = _pointsArray[index + 1];
-        aPoint.z = _pointsArray[index + 2];
-        return aPoint;
     }
 
     /**
@@ -123,19 +115,16 @@ public class Poly3D extends Shape3D implements Cloneable {
     /**
      * Returns the normal of the path3d. Right hand rule for clockwise/counter-clockwise defined polygons.
      */
-    public Vector3D getNormal()
+    @Override
+    protected Vector3D createNormal()
     {
-        // If already set, just return
-        if (_normal != null) return _normal;
-
-        // Get/set normal
-        Vector3D normal = Vector3D.getNormalForPoints3fv(new Vector3D(), _pointsArray, getPointCount());
-        return _normal = normal;
+        return Vector3D.getNormalForPoints3fv(new Vector3D(), _pointsArray, getPointCount());
     }
 
     /**
      * Returns the 2D shape for the path3d (should only be called when path is facing Z).
      */
+    @Override
     public Shape getShape2D()
     {
         return new Shape() {
@@ -147,21 +136,9 @@ public class Poly3D extends Shape3D implements Cloneable {
     }
 
     /**
-     * Returns a VertexArray of path triangles.
-     */
-    public VertexArray getVertexArray()
-    {
-        // If already set, just return
-        if (_vertexArray != null) return _vertexArray;
-
-        // Create, set, return
-        VertexArray triVA = createVertexArray();
-        return _vertexArray = triVA;
-    }
-
-    /**
      * Creates a VertexArray of path triangles.
      */
+    @Override
     protected VertexArray createVertexArray()
     {
         // Create/configure VertexArray
@@ -247,7 +224,7 @@ public class Poly3D extends Shape3D implements Cloneable {
     protected VertexArray getStrokeVertexArray()
     {
         // Get info
-        Vector3D pathNormal = getNormal();
+        Vector3D facetNormal = getNormal();
         Color strokeColor = getStrokeColor();
         double strokeWidth = getStroke() != null ? getStroke().getWidth() : 1;
 
@@ -257,106 +234,21 @@ public class Poly3D extends Shape3D implements Cloneable {
 
         // Path3D iteration vars
         int pointCount = getPointCount();
-        float[] pointsArray = _vertexArray.getPointsArray();
+        float[] pointsArray = getPointsArray();
         Point3D p0 = new Point3D(pointsArray[0], pointsArray[1], pointsArray[2]);
         Point3D p1 = new Point3D();
 
         // Iterate over points and add line stroke
-        for (int i = 0; i < pointCount; i++) {
-            p1.x = pointsArray[i];
-            p1.y = pointsArray[i + 1];
-            p1.z = pointsArray[i + 2];
-            VertexArrayUtils.addLineStrokePoints(vertexArray, p0, p1, pathNormal, strokeWidth);
+        for (int i = 0, i3 = 0; i < pointCount; i++, i3 += 3) {
+            p1.x = pointsArray[i3];
+            p1.y = pointsArray[i3 + 1];
+            p1.z = pointsArray[i3 + 2];
+            VertexArrayUtils.addLineStrokePoints(vertexArray, p0, p1, facetNormal, strokeWidth);
             p0.setPoint(p1);
         }
 
         // Return
         return vertexArray;
-    }
-
-    /**
-     * Returns the painter to render texture for this path.
-     */
-    public Painter3D getPainter()  { return _painter; }
-
-    /**
-     * Sets the painter to render texture for this path.
-     */
-    public void setPainter(Painter3D aPntr)
-    {
-        _painter = aPntr;
-    }
-
-    /**
-     * Returns the painter VertexArray for 'painted' triangles on shape surface.
-     */
-    public VertexArray getPainterVertexArray()
-    {
-        Matrix3D painterToLocal = getPainterToLocal();
-        VertexArray vertexArray = _painter.getVertexArray();
-        VertexArray vertexArrayLocal = vertexArray.copyForTransform(painterToLocal);
-        return vertexArrayLocal;
-    }
-
-    /**
-     * Returns the transform from Painter to this shape.
-     */
-    public Matrix3D getPainterToLocal()
-    {
-        // Create transform and translate to Path.Center
-        Matrix3D painterToLocal = new Matrix3D();
-        Point3D pathCenter = getBoundsCenter();
-        painterToLocal.translate(pathCenter.x, pathCenter.y, pathCenter.z);
-
-        // Rotate by angle between painter and path normals (around axis perpendicular to them)
-        Vector3D pntrNormal = new Vector3D(0, 0, 1);
-        Vector3D pathNormal = getNormal();
-        double angle = pntrNormal.getAngleBetween(pathNormal);
-
-        // If angle 180 deg, rotate about Y
-        if (MathUtils.equals(angle, 180))
-            painterToLocal.rotateY(180);
-
-        // If angle non-zero, get perpendicular and rotate about that
-        else if (!MathUtils.equalsZero(angle)) {
-            Vector3D rotateAxis = pntrNormal.getCrossProduct(pathNormal);
-            painterToLocal.rotateAboutAxis(angle, rotateAxis.x, rotateAxis.y, rotateAxis.z);
-        }
-
-        // Translate to Painter.Center
-        double pntrW = _painter.getWidth();
-        double pntrH = _painter.getHeight();
-        Point3D pntrCenter = new Point3D(pntrW / 2, pntrH / 2, 0);
-        painterToLocal.translate(-pntrCenter.x, -pntrCenter.y, -pntrCenter.z);
-
-        // Return
-        return painterToLocal;
-    }
-
-    /**
-     * Returns the transform to make this Path3D align with given vector.
-     */
-    public Matrix3D getTransformToAlignToVector(double aX, double aY, double aZ)
-    {
-        // Get angle between Path3D.Normal and given vector
-        Vector3D vector = new Vector3D(aX, aY, aZ);
-        Vector3D norm = getNormal();
-        double angle = norm.getAngleBetween(vector);
-        if (angle == 0 || angle == 180) // THIS IS WRONG - NO 180!!!
-            return Matrix3D.IDENTITY;
-
-        // The point of rotation is located at the shape's center
-        Point3D rotOrigin = getBoundsCenter();
-
-        // Get axis about which to rotate the path (its the cross product of Path3D.Normal and given vector)
-        Vector3D rotAxis = norm.getCrossProduct(vector);
-
-        // Get transform
-        Matrix3D xform = new Matrix3D();
-        xform.translate(rotOrigin.x, rotOrigin.y, rotOrigin.z);
-        xform.rotateAboutAxis(angle, rotAxis.x, rotAxis.y, rotAxis.z);
-        xform.translate(-rotOrigin.x, -rotOrigin.y, -rotOrigin.z);
-        return xform;
     }
 
     /**
@@ -373,6 +265,7 @@ public class Poly3D extends Shape3D implements Cloneable {
     /**
      * Copies path for given transform matrix.
      */
+    @Override
     public Poly3D copyForMatrix(Matrix3D aTrans)
     {
         Poly3D copy = clone();
@@ -414,17 +307,6 @@ public class Poly3D extends Shape3D implements Cloneable {
     }
 
     /**
-     * Clears cached values when path changes.
-     */
-    @Override
-    protected void clearCachedValues()
-    {
-        super.clearCachedValues();
-        _normal = null;
-        _vertexArray = null;
-    }
-
-    /**
      * Returns the bounds.
      */
     @Override
@@ -459,17 +341,11 @@ public class Poly3D extends Shape3D implements Cloneable {
         trim();
 
         // Do normal version
-        Poly3D clone;
-        try { clone = (Poly3D) super.clone(); }
-        catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
+        Poly3D clone  = (Poly3D) super.clone();
 
         // Clone arrays
         clone._pointsArray = _pointsArray.clone();
         clone._colorsArray = _colorsArray.clone();
-
-        // Clone painter
-        if (_painter != null)
-            clone._painter = _painter.clone();
 
         // Return clone
         return clone;
