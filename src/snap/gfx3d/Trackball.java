@@ -130,11 +130,10 @@ public class Trackball extends ParentView {
     private void addScuffMark(double theta, double phi)
     {
         // Small triangle at the origin to represent a scuff mark
-        Path3D path = new Path3D();
-        path.moveTo(-1,-1,0);
-        path.lineTo(0,1,0);
-        path.lineTo(1,-1,0);
-        path.close();
+        Poly3D path = new Poly3D();
+        path.addPoint(-1,-1,0);
+        path.addPoint(0,1,0);
+        path.addPoint(1,-1,0);
 
         // Get Scene origin
         double midx = IMAGE_SIZE / 2;

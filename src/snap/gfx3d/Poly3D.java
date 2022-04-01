@@ -36,6 +36,15 @@ public class Poly3D extends FacetShape implements Cloneable {
     }
 
     /**
+     * Constructor.
+     */
+    public Poly3D(Shape aShape, double aDepth)
+    {
+        super();
+        addShapePath(aShape, aDepth);
+    }
+
+    /**
      * Returns the vertex points components array.
      */
     public float[] getPointsArray()
@@ -239,7 +248,8 @@ public class Poly3D extends FacetShape implements Cloneable {
         Point3D p1 = new Point3D();
 
         // Iterate over points and add line stroke
-        for (int i = 0, i3 = 0; i < pointCount; i++, i3 += 3) {
+        for (int i = 0; i <= pointCount; i++) {
+            int i3 = i % pointCount * 3;
             p1.x = pointsArray[i3];
             p1.y = pointsArray[i3 + 1];
             p1.z = pointsArray[i3 + 2];
@@ -304,6 +314,50 @@ public class Poly3D extends FacetShape implements Cloneable {
         // Trim ColorsArray
         if (_colorsArray.length != _colorsArrayLen)
             _colorsArray = Arrays.copyOf(_colorsArray, _colorsArrayLen);
+    }
+
+    /**
+     * Adds a Shape path to this path3D at given depth.
+     */
+    public void addShapePath(Shape aPath, double aDepth)
+    {
+        // Iterate over elements in given path
+        PathIter pathIter = aPath.getPathIter(null);
+        double[] pts = new double[6];
+
+        // Iterate over elements in given path
+        while (pathIter.hasNext()) {
+
+            // Get/handle Seg
+            Seg seg = pathIter.getNext(pts);
+            switch (seg) {
+
+                // Handle MoveTo
+                case MoveTo:
+                    if (getPointCount() > 0)
+                        System.err.println("Poly3D.addShapePath: Poly3D cannot have multiple moveTos");
+                    addPoint(pts[0], pts[1], aDepth);
+                    break;
+
+                // Handle LineTo
+                case LineTo:
+                    addPoint(pts[0], pts[1], aDepth);
+                    break;
+
+                // Handle QuadTo
+                case QuadTo:
+                    System.err.println("Poly3D.addShapePath: Poly3D cannot add non-flat path (QuadTo)");
+                    break;
+
+                // Handle CubicTo
+                case CubicTo:
+                    System.err.println("Poly3D.addShapePath: Poly3D cannot add non-flat path (CubicTo)");
+                    break;
+
+                // Handle Close
+                case Close: break;
+            }
+        }
     }
 
     /**
