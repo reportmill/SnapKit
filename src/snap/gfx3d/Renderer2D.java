@@ -86,12 +86,12 @@ public class Renderer2D extends Renderer {
 
         // Get transform from camera to View center space
         Camera3D camera = getCamera();
-        Matrix3D cameraToViewCenter = camera.getCameraToViewCenter();
+        Matrix3D cameraToView = camera.getCameraToView();
 
         // Iterate over FacetShape and replace with paths in view coords
         List<FacetShape> facetsInViewCoords = new ArrayList<>();
         for (FacetShape facetShapeInCamera : facetShapesInCameraCoords) {
-            FacetShape facetShapeInView = facetShapeInCamera.copyForMatrix(cameraToViewCenter);
+            FacetShape facetShapeInView = facetShapeInCamera.copyForMatrix(cameraToView);
             facetsInViewCoords.add(facetShapeInView);
         }
 
@@ -288,9 +288,7 @@ public class Renderer2D extends Renderer {
             return Rect.ZeroRect;
 
         // Get Scene to View transform
-        Matrix3D sceneToCamera = _camera.getSceneToCamera();
-        Matrix3D cameraToViewCenter = _camera.getCameraToViewCenter();
-        Matrix3D sceneToView = cameraToViewCenter.clone().multiply(sceneToCamera);
+        Matrix3D sceneToView = _camera.getSceneToView();
 
         // Get Scene bounds in View
         Scene3D scene = getScene();
@@ -298,8 +296,8 @@ public class Renderer2D extends Renderer {
         Bounds3D sceneBoundsInView = sceneBounds.copyForMatrix(sceneToView);
 
         // Get scene bounds (shift to camera view mid point)
-        double sceneX = sceneBoundsInView.getMinX() + viewW / 2;
-        double sceneY = sceneBoundsInView.getMinY() + viewH / 2;
+        double sceneX = sceneBoundsInView.getMinX();
+        double sceneY = sceneBoundsInView.getMinY();
         double sceneW = sceneBoundsInView.getWidth();
         double sceneH = sceneBoundsInView.getHeight();
 
@@ -358,21 +356,10 @@ public class Renderer2D extends Renderer {
      */
     public void paintFacetShapes(Painter aPntr)
     {
-        // Translate to center of camera view
-        Camera3D camera = getCamera();
-        double viewW = camera.getViewWidth();
-        double viewH = camera.getViewHeight();
-        double viewMidX = viewW / 2;
-        double viewMidY = viewH / 2;
-        aPntr.translate(viewMidX, viewMidY);
-
         // Iterate over FacetShapes and paint
         List<FacetShape> facetShapeList = getFacetShapesInViewCoords();
         for (FacetShape facetShape : facetShapeList)
             paintFacetShape(aPntr, facetShape);
-
-        // Translate back
-        aPntr.translate(-viewMidX, -viewMidY);
     }
 
     /**

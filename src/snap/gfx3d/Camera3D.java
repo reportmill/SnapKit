@@ -50,7 +50,7 @@ public class Camera3D {
     private Vector3D  _normal = new Vector3D(0, 0, -1);
     
     // Cached SceneToCamera transform
-    private Matrix3D  _sceneToCamera;
+    private Matrix3D  _sceneToCamera, _cameraToClip, _cameraToView, _sceneToView;
 
     // The Renderer
     private Renderer  _renderer;
@@ -350,12 +350,15 @@ public class Camera3D {
      */
     public Matrix3D getCameraToClip()
     {
+        // If already set, just return
+        if (_cameraToClip != null) return _cameraToClip;
+
+        // Calc, set and return
         double fovY = getFieldOfViewY();
         double viewW = getViewWidth();
         double viewH = getViewHeight();
         double aspect = viewW / viewH;
-        Matrix3D xfm = Matrix3D.newPerspective(fovY, aspect, 10, 10000);
-        return xfm;
+        return _cameraToClip = Matrix3D.newPerspective(fovY, aspect, 10, 10000);
     }
 
     /**
@@ -363,6 +366,9 @@ public class Camera3D {
      */
     public Matrix3D getCameraToView()
     {
+        // If already set, just return
+        if (_cameraToView != null) return _cameraToView;
+
         // Translate from View origin to View center
         double viewW = getViewWidth();
         double viewH = getViewHeight();
@@ -376,7 +382,7 @@ public class Camera3D {
         cameraToView.multiply(cameraToClip);
 
         // Return
-        return cameraToView;
+        return _cameraToView = cameraToView;
     }
 
     /**
@@ -384,21 +390,14 @@ public class Camera3D {
      */
     public Matrix3D getSceneToView()
     {
+        // If already set, just return
+        if (_sceneToView != null) return _sceneToView;
+
+        // Calc, set and return
         Matrix3D cameraToView = getCameraToView();
         Matrix3D sceneToCamera = getSceneToCamera();
-        return cameraToView.multiply(sceneToCamera);
-    }
-
-    /**
-     * Returns the transform from camera coords to View (center).
-     */
-    public Matrix3D getCameraToViewCenter()
-    {
-        Matrix3D cameraToClip = getCameraToClip();
-        double viewW = getViewWidth();
-        double viewH = getViewHeight();
-        Matrix3D cameraToView = cameraToClip.scale(viewW / 2, -viewH / 2, 1);
-        return cameraToView;
+        Matrix3D sceneToView = cameraToView.clone().multiply(sceneToCamera);
+        return _sceneToView = sceneToView;
     }
 
     /**
@@ -519,6 +518,9 @@ public class Camera3D {
     protected void clearCachedValues()
     {
         _sceneToCamera = null;
+        _cameraToClip = null;
+        _cameraToView = null;
+        _sceneToView = null;
     }
 
     /**
