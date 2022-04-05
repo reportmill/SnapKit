@@ -56,6 +56,25 @@ public class Matrix3D implements Cloneable {
     }
 
     /**
+     * Multiplies receiver by given transform: [this] =  [aTrans] x [this]
+     */
+    public Matrix3D premultiply(Matrix3D aTransform)
+    {
+        // Get this float array, given float array and new float array
+        double[] m2 = aTransform.mtx;
+        double[] m3 = new double[16];
+
+        // Perform multiplication
+        for (int i = 0; i < 4; i++)
+            for (int j = 0; j < 4; j++)
+                for (int k = 0; k < 4; k++)
+                    m3[i + j * 4] += m2[i + k * 4] * mtx[k + j * 4];
+
+        // Return this (loaded from m3)
+        return fromArray(m3);
+    }
+
+    /**
      * Translates by given x, y & z.
      */
     public Matrix3D translate(double x, double y, double z)
@@ -257,6 +276,22 @@ public class Matrix3D implements Cloneable {
 
     /**
      * Transforms a given point (and returns it as a convenience).
+     *
+     * This pre-multiplies OpenGL style:  [ P' ] = [ Matrix ] x [ P ]
+     *
+     *     3 x 1          3 x 3            3 x 1              3 x 1
+     *
+     *    [ px' ]   [ m00 m10 m20 m30 ]   [ px ]   [ m00 * px + m10 * py + m20 * pz + m30,
+     *    [ py' ] = [ m01 m11 m21 m31 ] x [ py ] =   m01 * px + m11 * py + m21 * pz + m31,
+     *    [ pz' ]   [ m02 m12 m22 m32 ]   [ pz ]     m02 * px + m12 * py + m22 * pz + m32,
+     *    [  w  ]   [ m03 m13 m23 m33 ]   [ 1 ]      m03 * px + m13 * py + m23 * pz + m33 (w) ]
+     *
+     * JOML looks like this:
+     *
+     *    double W = Math.fma(mat.m03(), x, Math.fma(mat.m13(), y, Math.fma(mat.m23(), z, mat.m33() * w)));
+     *    double rx = Math.fma(mat.m00(), x, Math.fma(mat.m10(), y, Math.fma(mat.m20(), z, mat.m30() * w))) / W;
+     *    double ry = Math.fma(mat.m01(), x, Math.fma(mat.m11(), y, Math.fma(mat.m21(), z, mat.m31() * w))) / W;
+     *    double rz = Math.fma(mat.m02(), x, Math.fma(mat.m12(), y, Math.fma(mat.m22(), z, mat.m32() * w))) / W;
      */
     public Point3D transformPoint(Point3D aPoint)
     {

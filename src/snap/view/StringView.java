@@ -273,6 +273,18 @@ public class StringView extends View implements Cloneable {
     }
 
     /**
+     * Sets the box centered around given X/Y.
+     */
+    public void setCenteredXY(double aX, double aY)
+    {
+        double width = getTextWidth();
+        double height = getTextHeight();
+        int x2 = (int) Math.round(aX - width/2d);
+        int y2 = (int) Math.round(aY - height/2d);
+        setXY(x2, y2);
+    }
+
+    /**
      * Override to make default center-left.
      */
     public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }

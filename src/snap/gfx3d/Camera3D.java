@@ -359,6 +359,37 @@ public class Camera3D {
     }
 
     /**
+     * Returns the transform from camera to View space.
+     */
+    public Matrix3D getCameraToView()
+    {
+        // Translate from View origin to View center
+        double viewW = getViewWidth();
+        double viewH = getViewHeight();
+        Matrix3D cameraToView = new Matrix3D().translate(viewW / 2, viewH / 2, 0);
+
+        // Scale from Clip space (NDC) to View space
+        cameraToView.scale(viewW / 2, -viewH / 2, 1);
+
+        // Transform from Camera space to Clip space (NDC)
+        Matrix3D cameraToClip = getCameraToClip();
+        cameraToView.multiply(cameraToClip);
+
+        // Return
+        return cameraToView;
+    }
+
+    /**
+     * Returns the transform from scene to View space.
+     */
+    public Matrix3D getSceneToView()
+    {
+        Matrix3D cameraToView = getCameraToView();
+        Matrix3D sceneToCamera = getSceneToCamera();
+        return cameraToView.multiply(sceneToCamera);
+    }
+
+    /**
      * Returns the transform from camera coords to View (center).
      */
     public Matrix3D getCameraToViewCenter()
