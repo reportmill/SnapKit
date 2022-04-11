@@ -27,6 +27,9 @@ public abstract class Shape3D {
     // Shape opacity
     private double  _opacity = 1;
 
+    // Whether shape is visible
+    private boolean  _visible = true;
+
     // Whether shape surfaces are double-sided
     private boolean  _doubleSided;
 
@@ -117,6 +120,19 @@ public abstract class Shape3D {
     public void setOpacity(double aValue)
     {
         _opacity = aValue;
+    }
+
+    /**
+     * Returns whether shape is visible.
+     */
+    public boolean isVisible()  { return _visible; }
+
+    /**
+     * Sets whether shape is visible.
+     */
+    public void setVisible(boolean aValue)
+    {
+        _visible = aValue;
     }
 
     /**

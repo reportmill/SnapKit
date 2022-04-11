@@ -118,6 +118,10 @@ public class Renderer2D extends Renderer {
      */
     protected void addFacetShapesInCameraCoords(Shape3D aShape, List<FacetShape> facetShapeList)
     {
+        // If shape not visible, just return
+        if (!aShape.isVisible())
+            return;
+
         // Handle ParentShape: Get children and recurse
         if (aShape instanceof ParentShape) {
             ParentShape parentShape = (ParentShape) aShape;
