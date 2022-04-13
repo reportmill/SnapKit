@@ -19,6 +19,14 @@ public class ParentShape extends Shape3D {
     private static final Shape3D[] EMPTY_SHAPE_ARRAY = new Shape3D[0];
 
     /**
+     * Constructor.
+     */
+    public ParentShape()
+    {
+        super();
+    }
+
+    /**
      * Returns the number of children.
      */
     public int getChildCount()  { return getChildren().length; }
