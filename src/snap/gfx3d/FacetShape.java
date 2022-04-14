@@ -30,6 +30,7 @@ public abstract class FacetShape extends Shape3D {
     public void setPainter(Painter3D aPntr)
     {
         _painter = aPntr;
+        _vertexArray = null;
     }
 
     /**
