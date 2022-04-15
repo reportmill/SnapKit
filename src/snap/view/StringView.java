@@ -277,10 +277,10 @@ public class StringView extends View implements Cloneable {
      */
     public void setCenteredXY(double aX, double aY)
     {
-        double width = getTextWidth();
-        double height = getTextHeight();
-        int x2 = (int) Math.round(aX - width/2d);
-        int y2 = (int) Math.round(aY - height/2d);
+        double width = getWidth();
+        double height = getHeight();
+        int x2 = (int) Math.round(aX - width / 2);
+        int y2 = (int) Math.round(aY - height / 2);
         setXY(x2, y2);
     }
 
