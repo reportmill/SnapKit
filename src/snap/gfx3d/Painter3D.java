@@ -60,7 +60,11 @@ public class Painter3D implements Cloneable {
     /**
      * Sets the current paint.
      */
-    public void setColor(Color aColor)  { _color = aColor; }
+    public void setColor(Color aColor)
+    {
+        flushTask();
+        _color = aColor;
+    }
 
     /**
      * Returns the current stroke.
@@ -145,6 +149,7 @@ public class Painter3D implements Cloneable {
      */
     public void addLayerOffset(double aDist)
     {
+        flushTask();
         _layerOffset += aDist;
     }
 
