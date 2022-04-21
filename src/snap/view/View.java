@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+
 import java.util.*;
 
 import snap.geom.*;
@@ -17,28 +18,28 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
     // The name of this view
     private String  _name;
-    
+
     // The view location
     private double  _x, _y;
-    
+
     // The view size
     private double  _width, _height;
-    
+
     // The view translation from x and y
     private double  _tx, _ty;
-    
+
     // The view rotation
     private double  _rot;
-    
+
     // The view scale from x and y
     private double  _sx, _sy;
-    
+
     // The alignment of content in this view
     protected Pos  _align;
-    
+
     // The margin to be provided around this view
     protected Insets  _margin;
-    
+
     // The padding between the border and content in this view
     protected Insets  _padding;
 
@@ -47,109 +48,109 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
     // The horizontal position this view would prefer to take when inside a pane
     private HPos  _leanX;
-    
+
     // The vertical position this view would prefer to take when inside a pane
     private VPos  _leanY;
-    
+
     // Whether this view would like to grow horizontally/vertically if possible when inside a pane
     private boolean  _growWidth, _growHeight;
-    
+
     // Whether this view has a vertical orientation.
     private boolean  _vertical;
-    
+
     // The view minimum width and height
     private double  _minWidth, _minHeight;
-    
+
     // The view maximum width and height
     private double  _maxWidth, _maxHeight;
-    
+
     // The view preferred width and height
     private double  _prefWidth, _prefHeight;
-    
+
     // The view best width and height
     private double  _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
-    
+
     // Whether view is disabled
     private boolean  _disabled;
-    
+
     // Whether view is currently the RootView.FocusedView
     private boolean  _focused;
-    
+
     // Whether view can receive focus
     private boolean  _focusable;
-    
+
     // Whether view should request focus when pressed
     private boolean  _focusWhenPrsd;
 
     // Whether view focus should change when traveral key is pressed (Tab)
     private boolean  _focusKeysEnbld;
-    
+
     // Whether view should paint focus ring when focused
     private boolean  _focusPainted;
- 
+
     // Whether view is visible
     private boolean  _visible;
-    
+
     // Whether view is visible and has parent that is showing
     protected boolean  _showing;
- 
+
     // Whether view can be hit by mouse
     private boolean  _pickable;
-    
+
     // Whether view should be painted
     private boolean  _paintable;
-    
+
     // Whether view should be included in layout
     private boolean  _managed;
-    
+
     // The view fill
     private Paint  _fill;
-    
+
     // The view border
     private Border  _border;
-    
+
     // The ViewEffect to manage effect rendering for this view and current effect
     protected ViewEffect  _effect;
-    
+
     // The opacity
     private double  _opacity;
-    
+
     // The view font
     protected Font  _font;
-    
+
     // The view cursor
     private Cursor  _cursor;
-    
+
     // The tooltip
     private String  _ttip;
-    
+
     // The clip (if set)
     private Shape  _clip;
-    
+
     // Bindings for this view
     private List <Binding>  _bindings = Collections.EMPTY_LIST;
-    
+
     // Client properties
     private Map  _props = Collections.EMPTY_MAP;
-    
+
     // The parent of this view
     private ParentView  _parent;
-    
+
     // The real class name, if shape component is really a custom subclass
     private String  _realClassName;
-    
+
     // The event adapter
     private EventAdapter _eventAdapter;
-    
+
     // Provides animation for View
     private ViewAnim  _anim;
-    
+
     // The current rect that needs to be repainted in this view
     protected Rect  _repaintRect;
-    
+
     // Provides information for physics simulations
     private ViewPhysics  _physics;
-    
+
     // The view owner of this view
     private ViewOwner  _owner;
 
@@ -355,34 +356,50 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the mid x.
      */
-    public double getMidX()  { return getX() + getWidth()/2; }
+    public double getMidX()
+    {
+        return getX() + getWidth() / 2;
+    }
 
     /**
      * Returns the mid y.
      */
-    public double getMidY()  { return getY() + getHeight()/2; }
+    public double getMidY()
+    {
+        return getY() + getHeight() / 2;
+    }
 
     /**
      * Returns the max x.
      */
-    public double getMaxX()  { return getX() + getWidth(); }
+    public double getMaxX()
+    {
+        return getX() + getWidth();
+    }
 
     /**
      * Returns the max x.
      */
-    public double getMaxY()  { return getY() + getHeight(); }
+    public double getMaxY()
+    {
+        return getY() + getHeight();
+    }
 
     /**
      * Returns the view x/y.
      */
-    public Point getXY()  { return new Point(getX(), getY()); }
+    public Point getXY()
+    {
+        return new Point(getX(), getY());
+    }
 
     /**
      * Sets the view x/y.
      */
     public void setXY(double aX, double aY)
     {
-        setX(aX); setY(aY);
+        setX(aX);
+        setY(aY);
     }
 
     /**
@@ -441,8 +458,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setBounds(double aX, double aY, double aW, double aH)
     {
-        setX(aX); setY(aY);
-        setWidth(aW); setHeight(aH);
+        setX(aX);
+        setY(aY);
+        setWidth(aW);
+        setHeight(aH);
     }
 
     /**
@@ -450,7 +469,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Rect getBoundsLocal()
     {
-        return new Rect(0,0, getWidth(), getHeight());
+        return new Rect(0, 0, getWidth(), getHeight());
     }
 
     /**
@@ -467,9 +486,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setXYLocal(double aX, double aY)
     {
-        if (isLocalToParentSimple()) { setXY(getX() + aX, getY() + aY); return; }
-        Point p0 = localToParent(0,0);
-        Point p1 = localToParent(aX,aY);
+        if (isLocalToParentSimple()) {
+            setXY(getX() + aX, getY() + aY);
+            return;
+        }
+        Point p0 = localToParent(0, 0);
+        Point p1 = localToParent(aX, aY);
         double p2x = Math.round(getX() + p1.x - p0.x);
         double p2y = Math.round(getY() + p1.y - p0.y);
         setXY(p2x, p2y);
@@ -480,10 +502,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setSizeLocal(double aW, double aH)
     {
-        if (isLocalToParentSimple()) { setSize(aW, aH); return; }
-        Point p0 = localToParent(0,0);
-        setSize(aW,aH);
-        Point p1 = localToParent(0,0);
+        if (isLocalToParentSimple()) {
+            setSize(aW, aH);
+            return;
+        }
+        Point p0 = localToParent(0, 0);
+        setSize(aW, aH);
+        Point p1 = localToParent(0, 0);
         double p2x = Math.round(getX() - (p1.x - p0.x));
         double p2y = Math.round(getY() - (p1.y - p0.y));
         setXY(Math.round(p2x), p2y);
@@ -596,7 +621,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets the scale of this view from Y.
      */
-    public void setScale(double aValue)  { setScaleX(aValue); setScaleY(aValue); }
+    public void setScale(double aValue)
+    {
+        setScaleX(aValue);
+        setScaleY(aValue);
+    }
 
     /**
      * Returns fill paint.
@@ -638,7 +667,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         if (SnapUtils.equals(aBorder, getBorder())) return;
         firePropChange(Border_Prop, _border, _border = aBorder);
-        relayout(); relayoutParent(); repaint();
+        relayout();
+        relayoutParent();
+        repaint();
     }
 
     /**
@@ -791,7 +822,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets whether view is enabled.
      */
-    public void setEnabled(boolean aValue)  { setDisabled(!aValue); }
+    public void setEnabled(boolean aValue)
+    {
+        setDisabled(!aValue);
+    }
 
     /**
      * Returns whether view should clip to bounds.
@@ -835,7 +869,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Rect getClipBounds()
     {
         Shape clip = getClip();
-        return clip!=null ? clip.getBounds() : null;
+        return clip != null ? clip.getBounds() : null;
     }
 
     /**
@@ -897,7 +931,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether transform to parent is simple (contains no rotate, scale, skew).
      */
-    public boolean isLocalToParentSimple()  { return _rot==0 && _sx==1 && _sy==1; }
+    public boolean isLocalToParentSimple()
+    {
+        return _rot == 0 && _sx == 1 && _sy == 1;
+    }
 
     /**
      * Returns the transform.
@@ -907,14 +944,14 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         double viewX = getX();
         double viewY = getY();
         if (isLocalToParentSimple())
-            return new Transform(viewX + _tx, viewY +_ty);
+            return new Transform(viewX + _tx, viewY + _ty);
 
         // Get location, size, point of rotation, rotation, scale, skew
         double x = viewX + getTransX();
         double y = viewY + getTransY();
         double w = getWidth();
         double h = getHeight();
-        double prx = w/2, pry = h/2;
+        double prx = w / 2, pry = h / 2;
         double rot = getRotate();
         double sx = getScaleX();
         double sy = getScaleY(); //skx = getSkewX(), sky = getSkewY();
@@ -934,13 +971,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Transform getLocalToParent(View aPar)
     {
         Transform xfm = getLocalToParent();
-        for (View view=getParent(); view != aPar; ) {
+        for (View view = getParent(); view != aPar; ) {
 
             // If simple, just add translation
             if (view.isLocalToParentSimple())
-                xfm.preTranslate(view._x + view._tx,view._y + view._ty);
+                xfm.preTranslate(view._x + view._tx, view._y + view._ty);
 
-            // Otherwise multiply full transform
+                // Otherwise multiply full transform
             else {
                 Transform localToParent = view.getLocalToParent();
                 xfm.multiply(localToParent);
@@ -965,7 +1002,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // If simple, just add offset
         if (isLocalToParentSimple())
-            return new Point(aX + _x + _tx,aY + _y + _ty);
+            return new Point(aX + _x + _tx, aY + _y + _ty);
 
         // Otherwise do full transform
         Transform localToParent = getLocalToParent();
@@ -978,9 +1015,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Point localToParent(double aX, double aY, View aPar)
     {
         Point point = new Point(aX, aY);
-        for (View view=this; view!=aPar && view!=null; view=view.getParent()) {
+        for (View view = this; view != aPar && view != null; view = view.getParent()) {
             if (view.isLocalToParentSimple())
-                point.offset(view._x + view._tx,view._y + view._ty);
+                point.offset(view._x + view._tx, view._y + view._ty);
             else point = view.localToParent(point.x, point.y);
         }
         return point;
@@ -1008,7 +1045,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Transform getParentToLocal()
     {
         if (isLocalToParentSimple())
-            return new Transform(-_x-_tx, -_y-_ty);
+            return new Transform(-_x - _tx, -_y - _ty);
         Transform tfm = getLocalToParent();
         tfm.invert();
         return tfm;
@@ -1031,7 +1068,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // If simple, just subtract offset
         if (isLocalToParentSimple())
-            return new Point(aX - _x - _tx,aY - _y - _ty);
+            return new Point(aX - _x - _tx, aY - _y - _ty);
 
         // Otherwise do full transform
         Transform parentToLocal = getParentToLocal();
@@ -1044,7 +1081,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Point parentToLocal(double aX, double aY, View aPar)
     {
         Transform parentToLocal = getParentToLocal(aPar);
-        return parentToLocal.transform(aX,aY);
+        return parentToLocal.transform(aX, aY);
     }
 
     /**
@@ -1072,7 +1109,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // Get Window (if none, just convert out of View tree)
         WindowView win = getWindow();
-        if (win==null) {
+        if (win == null) {
             Point pnt = localToParent(aX, aY, null);
             return pnt;
         }
@@ -1086,14 +1123,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether view contains point.
      */
-    public boolean contains(Point aPnt)  { return contains(aPnt.x, aPnt.y); }
+    public boolean contains(Point aPnt)
+    {
+        return contains(aPnt.x, aPnt.y);
+    }
 
     /**
      * Returns whether view contains point.
      */
     public boolean contains(double aX, double aY)
     {
-        return 0<=aX && aX<=getWidth() && 0<=aY && aY<=getHeight();
+        return 0 <= aX && aX <= getWidth() && 0 <= aY && aY <= getHeight();
         //if (!(0<=aX && aX<=getWidth() && 0<=aY && aY<=getHeight())) return false;
         //if (isPickBounds()) return getBoundsInside().contains(aX, aY);
         //return getBoundsShape().contains(aX, aY);
@@ -1144,8 +1184,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public <T extends View> T getParent(Class<T> aClass)
     {
-        for (ParentView s=getParent(); s!=null; s=s.getParent())
-            if (aClass.isInstance(s)) return (T)s;
+        for (ParentView s = getParent(); s != null; s = s.getParent())
+            if (aClass.isInstance(s)) return (T) s;
         return null; // Return null since parent of class wasn't found
     }
 
@@ -1154,7 +1194,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public int getParentCount()
     {
-        int pc = 0; for (View n=getParent(); n!=null; n=n.getParent()) pc++;
+        int pc = 0;
+        for (View n = getParent(); n != null; n = n.getParent()) pc++;
         return pc;
     }
 
@@ -1163,8 +1204,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public boolean isAncestor(View aView)
     {
-        for (View n=getParent();n!=null;n=n.getParent())
-            if (n==aView) return true;
+        for (View n = getParent(); n != null; n = n.getParent())
+            if (n == aView) return true;
         return false;
     }
 
@@ -1174,7 +1215,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public int indexInParent()
     {
         ParentView par = getParent();
-        return par!=null ? par.indexOfChild(this) : -1;
+        return par != null ? par.indexOfChild(this) : -1;
     }
 
     /**
@@ -1182,18 +1223,24 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public ViewHost getHost()
     {
-        return isGuest() ? (ViewHost)getParent() : null;
+        return isGuest() ? (ViewHost) getParent() : null;
     }
 
     /**
      * Returns whether view is a "guest" child of a ViewHost.
      */
-    public boolean isGuest()  { return indexInHost()>=0; }
+    public boolean isGuest()
+    {
+        return indexInHost() >= 0;
+    }
 
     /**
      * Returns the index of this view in ViewHost parent (or -1 if parent isn't host).
      */
-    public int indexInHost()  { return ViewHost.indexInHost(this); }
+    public int indexInHost()
+    {
+        return ViewHost.indexInHost(this);
+    }
 
     /**
      * Returns whether this view is visible.
@@ -1206,18 +1253,18 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setVisible(boolean aValue)
     {
         // Set value, fire prop change
-        if (aValue==_visible) return;
-        firePropChange(Visible_Prop, _visible, _visible=aValue);
+        if (aValue == _visible) return;
+        firePropChange(Visible_Prop, _visible, _visible = aValue);
 
         // Update Showing
-        setShowing(_visible && _parent!=null && _parent.isShowing());
+        setShowing(_visible && _parent != null && _parent.isShowing());
 
         // Repaint in parent
         repaintInParent(null);
 
         // Trigger Parent relayout
         ParentView par = getParent();
-        if (par!=null) {
+        if (par != null) {
             par._children._managed = null;
             relayoutParent();
         }
@@ -1233,9 +1280,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void setShowing(boolean aValue)
     {
-        if (aValue==_showing) return;
+        if (aValue == _showing) return;
         if (aValue) repaint();
-        firePropChange(Showing_Prop, _showing, _showing=aValue);
+        firePropChange(Showing_Prop, _showing, _showing = aValue);
 
         // If focused, turn off
         if (!aValue && isFocused())
@@ -1243,9 +1290,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // If Anim set, play/suspend
         ViewAnim anim = getAnim(-1);
-        if (aValue && anim!=null  && anim.isSuspended())
+        if (aValue && anim != null && anim.isSuspended())
             anim.play();
-        else if (!aValue && anim!=null && anim.isPlaying())
+        else if (!aValue && anim != null && anim.isPlaying())
             anim.suspend();
     }
 
@@ -1266,7 +1313,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether view can be hit by mouse and visible.
      */
-    public boolean isPickableVisible()  { return isPickable() && isVisible(); }
+    public boolean isPickableVisible()
+    {
+        return isPickable() && isVisible();
+    }
 
     /**
      * Returns whether view should be painted.
@@ -1295,7 +1345,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         _managed = aValue;
         ParentView par = getParent();
-        if (par!=null) {
+        if (par != null) {
             par._children._managed = null;
             relayoutParent();
         }
@@ -1304,14 +1354,18 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether view should be included when a parent does layout.
      */
-    public boolean isManagedVisible()  { return isManaged() && isVisible(); }
+    public boolean isManagedVisible()
+    {
+        return isManaged() && isVisible();
+    }
 
     /**
      * Returns whether current mouse location is over this view.
      */
     public boolean isMouseOver()
     {
-        WindowView win = getWindow(); if (win==null) return false;
+        WindowView win = getWindow();
+        if (win == null) return false;
         EventDispatcher disp = win.getDispatcher();
         return disp.isMouseOver(this);
     }
@@ -1321,7 +1375,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public boolean isMouseDown()
     {
-        WindowView win = getWindow(); if (win==null) return false;
+        WindowView win = getWindow();
+        if (win == null) return false;
         EventDispatcher disp = win.getDispatcher();
         return disp.isMouseDown(this);
     }
@@ -1329,30 +1384,42 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the root view.
      */
-    public RootView getRootView()  { return _parent!=null ? _parent.getRootView() : null; }
+    public RootView getRootView()
+    {
+        return _parent != null ? _parent.getRootView() : null;
+    }
 
     /**
      * Returns the window.
      */
-    public WindowView getWindow()  { return _parent!=null ? _parent.getWindow() : null; }
+    public WindowView getWindow()
+    {
+        return _parent != null ? _parent.getWindow() : null;
+    }
 
     /**
      * Returns the ViewUpdater.
      */
-    public ViewUpdater getUpdater()  { return _parent!=null ? _parent.getUpdater() : null; }
+    public ViewUpdater getUpdater()
+    {
+        return _parent != null ? _parent.getUpdater() : null;
+    }
 
     /**
      * Returns the position this view would prefer to take when inside a pane.
      */
-    public Pos getLean()  { return Pos.get(_leanX, _leanY); }
+    public Pos getLean()
+    {
+        return Pos.get(_leanX, _leanY);
+    }
 
     /**
      * Sets the lean this view would prefer to take when inside a pane.
      */
     public void setLean(Pos aPos)
     {
-        setLeanX(aPos!=null ? aPos.getHPos() : null);
-        setLeanY(aPos!=null ? aPos.getVPos() : null);
+        setLeanX(aPos != null ? aPos.getHPos() : null);
+        setLeanY(aPos != null ? aPos.getVPos() : null);
     }
 
     /**
@@ -1365,7 +1432,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setLeanX(HPos aPos)
     {
-        if (aPos==_leanX) return;
+        if (aPos == _leanX) return;
         firePropChange(LeanX_Prop, _leanX, _leanX = aPos);
         relayoutParent();
     }
@@ -1380,7 +1447,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setLeanY(VPos aPos)
     {
-        if (aPos==_leanY) return;
+        if (aPos == _leanY) return;
         firePropChange(LeanY_Prop, _leanY, _leanY = aPos);
         relayoutParent();
     }
@@ -1395,7 +1462,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setGrowWidth(boolean aValue)
     {
-        if (aValue==_growWidth) return;
+        if (aValue == _growWidth) return;
         firePropChange(GrowWidth_Prop, _growWidth, _growWidth = aValue);
         relayoutParent();
     }
@@ -1410,7 +1477,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setGrowHeight(boolean aValue)
     {
-        if (aValue==_growHeight) return;
+        if (aValue == _growHeight) return;
         firePropChange(GrowHeight_Prop, _growHeight, _growHeight = aValue);
         relayoutParent();
     }
@@ -1430,7 +1497,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setVertical(boolean aValue)
     {
-        if (aValue==_vertical) return;
+        if (aValue == _vertical) return;
         firePropChange(Vertical_Prop, _vertical, _vertical = aValue);
         relayoutParent();
     }
@@ -1442,8 +1509,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         HPos lx = getLeanX();
         VPos ly = getLeanY();
-        boolean left = lx==null || lx==HPos.LEFT, right = lx==null || lx==HPos.RIGHT;
-        boolean top = ly==null || ly==VPos.TOP, btm = ly==null || ly==VPos.BOTTOM;
+        boolean left = lx == null || lx == HPos.LEFT, right = lx == null || lx == HPos.RIGHT;
+        boolean top = ly == null || ly == VPos.TOP, btm = ly == null || ly == VPos.BOTTOM;
         char c1 = left ? '-' : '~', c2 = isGrowWidth() ? '~' : '-', c3 = right ? '-' : '~';
         char c4 = top ? '-' : '~', c5 = isGrowHeight() ? '~' : '-', c6 = btm ? '-' : '~';
         return "" + c1 + c2 + c3 + ',' + c4 + c5 + c6;
@@ -1454,12 +1521,14 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setAutosizing(String aVal)
     {
-        String val = aVal!=null ? aVal : "--~,--~"; if (val.length()<7) return;
+        String val = aVal != null ? aVal : "--~,--~";
+        if (val.length() < 7) return;
         char c1 = val.charAt(0), c2 = val.charAt(1), c3 = val.charAt(2);
         char c4 = val.charAt(4), c5 = val.charAt(5), c6 = val.charAt(6);
-        setGrowWidth(c2=='~'); setGrowHeight(c5=='~');
-        setLeanX(c1=='~' && c3=='~' ? HPos.CENTER : c1=='~' ? HPos.RIGHT : c3=='~' ? HPos.LEFT : null);
-        setLeanY(c4=='~' && c6=='~' ? VPos.CENTER : c4=='~' ? VPos.BOTTOM : c6=='~' ? VPos.TOP : null);
+        setGrowWidth(c2 == '~');
+        setGrowHeight(c5 == '~');
+        setLeanX(c1 == '~' && c3 == '~' ? HPos.CENTER : c1 == '~' ? HPos.RIGHT : c3 == '~' ? HPos.LEFT : null);
+        setLeanY(c4 == '~' && c6 == '~' ? VPos.CENTER : c4 == '~' ? VPos.BOTTOM : c6 == '~' ? VPos.TOP : null);
     }
 
     /**
@@ -1480,14 +1549,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the individual binding at given index.
      */
-    public Binding getBinding(int anIndex)  { return _bindings.get(anIndex); }
+    public Binding getBinding(int anIndex)
+    {
+        return _bindings.get(anIndex);
+    }
 
     /**
      * Adds the individual binding to the shape's bindings list.
      */
     public void addBinding(Binding aBinding)
     {
-        if (_bindings==Collections.EMPTY_LIST) _bindings = new ArrayList();
+        if (_bindings == Collections.EMPTY_LIST) _bindings = new ArrayList();
         removeBinding(aBinding.getPropertyName());     // Remove current binding for property (if it exists)
         _bindings.add(aBinding);
         aBinding.setView(this);
@@ -1496,7 +1568,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Removes the binding at the given index from view bindings list.
      */
-    public Binding removeBinding(int anIndex)  { return _bindings.remove(anIndex); }
+    public Binding removeBinding(int anIndex)
+    {
+        return _bindings.remove(anIndex);
+    }
 
     /**
      * Removes the given binding from view bindings list.
@@ -1504,8 +1579,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public boolean removeBinding(Binding aBinding)
     {
         int index = ListUtils.indexOfId(getBindings(), aBinding);
-        if (index>=0) removeBinding(index);
-        return index>=0;
+        if (index >= 0) removeBinding(index);
+        return index >= 0;
     }
 
     /**
@@ -1532,7 +1607,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public boolean removeBinding(String aPropName)
     {
-        for (int i=0, iMax=getBindingCount(); i<iMax; i++) { Binding binding = getBinding(i);
+        for (int i = 0, iMax = getBindingCount(); i < iMax; i++) {
+            Binding binding = getBinding(i);
             if (binding.getPropertyName().equals(aPropName)) {
                 removeBinding(i);
                 return true;
@@ -1558,14 +1634,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns a named client property.
      */
-    public Object getProp(String aName)  { return _props.get(aName); }
+    public Object getProp(String aName)
+    {
+        return _props.get(aName);
+    }
 
     /**
      * Puts a named client property.
      */
     public Object setProp(String aName, Object aValue)
     {
-        if (_props==Collections.EMPTY_MAP) _props = new HashMap();
+        if (_props == Collections.EMPTY_MAP) _props = new HashMap();
         Object val = _props.put(aName, aValue); //firePropChange(aName, val, aValue);
         return val;
     }
@@ -1573,19 +1652,22 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether view minimum width is set.
      */
-    public boolean isMinWidthSet()  { return _minWidth>=0; }
+    public boolean isMinWidthSet()  { return _minWidth >= 0; }
 
     /**
      * Returns the view minimum width.
      */
-    public double getMinWidth()  { return _minWidth>=0 ? _minWidth : getMinWidthImpl(); }
+    public double getMinWidth()
+    {
+        return _minWidth >= 0 ? _minWidth : getMinWidthImpl();
+    }
 
     /**
      * Sets the view minimum width.
      */
     public void setMinWidth(double aWidth)
     {
-        if (aWidth==_minWidth) return;
+        if (aWidth == _minWidth) return;
         firePropChange(MinWidth_Prop, _minWidth, _minWidth = aWidth);
         relayoutParent();
     }
@@ -1593,19 +1675,22 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether view minimum height is set.
      */
-    public boolean isMinHeightSet()  { return _minHeight>=0; }
+    public boolean isMinHeightSet()  { return _minHeight >= 0; }
 
     /**
      * Returns the view minimum height.
      */
-    public double getMinHeight()  { return _minHeight>=0 ? _minHeight : getMinHeightImpl(); }
+    public double getMinHeight()
+    {
+        return _minHeight >= 0 ? _minHeight : getMinHeightImpl();
+    }
 
     /**
      * Sets the view minimum height.
      */
     public void setMinHeight(double aHeight)
     {
-        if (aHeight==_minHeight) return;
+        if (aHeight == _minHeight) return;
         firePropChange(MinHeight_Prop, _minHeight, _minHeight = aHeight);
         relayoutParent();
     }
@@ -1623,34 +1708,47 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view minimum size.
      */
-    public Size getMinSize()  { return new Size(getMinWidth(), getMinHeight()); }
+    public Size getMinSize()
+    {
+        return new Size(getMinWidth(), getMinHeight());
+    }
 
     /**
      * Sets the view minimum size.
      */
-    public void setMinSize(Size aSize)  { setMinSize(aSize.getWidth(), aSize.getHeight()); }
+    public void setMinSize(Size aSize)
+    {
+        setMinSize(aSize.getWidth(), aSize.getHeight());
+    }
 
     /**
      * Sets the view minimum size.
      */
-    public void setMinSize(double aWidth, double aHeight)  { setMinWidth(aWidth); setMinHeight(aHeight); }
+    public void setMinSize(double aWidth, double aHeight)
+    {
+        setMinWidth(aWidth);
+        setMinHeight(aHeight);
+    }
 
     /**
      * Returns whether view maximum width is set.
      */
-    public boolean isMaxWidthSet()  { return _maxWidth>=0; }
+    public boolean isMaxWidthSet()  { return _maxWidth >= 0; }
 
     /**
      * Returns the view maximum width.
      */
-    public double getMaxWidth()  { return _maxWidth>=0 ? _maxWidth : Float.MAX_VALUE; }
+    public double getMaxWidth()
+    {
+        return _maxWidth >= 0 ? _maxWidth : Float.MAX_VALUE;
+    }
 
     /**
      * Sets the view maximum width.
      */
     public void setMaxWidth(double aWidth)
     {
-        if (aWidth==_maxWidth) return;
+        if (aWidth == _maxWidth) return;
         firePropChange(MaxWidth_Prop, _maxWidth, _maxWidth = aWidth);
         relayoutParent();
     }
@@ -1658,19 +1756,22 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether view maximum height is set.
      */
-    public boolean isMaxHeightSet()  { return _maxHeight>=0; }
+    public boolean isMaxHeightSet()  { return _maxHeight >= 0; }
 
     /**
      * Returns the view maximum height.
      */
-    public double getMaxHeight()  { return _maxHeight>=0 ? _maxHeight : Float.MAX_VALUE; }
+    public double getMaxHeight()
+    {
+        return _maxHeight >= 0 ? _maxHeight : Float.MAX_VALUE;
+    }
 
     /**
      * Sets the view maximum height.
      */
     public void setMaxHeight(double aHeight)
     {
-        if (aHeight==_maxHeight) return;
+        if (aHeight == _maxHeight) return;
         firePropChange(MaxHeight_Prop, _maxHeight, _maxHeight = aHeight);
         relayoutParent();
     }
@@ -1678,34 +1779,47 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view maximum size.
      */
-    public Size getMaxSize()  { return new Size(getMaxWidth(), getMaxHeight()); }
+    public Size getMaxSize()
+    {
+        return new Size(getMaxWidth(), getMaxHeight());
+    }
 
     /**
      * Sets the view maximum size.
      */
-    public void setMaxSize(Size aSize)  { setMaxSize(aSize.getWidth(), aSize.getHeight()); }
+    public void setMaxSize(Size aSize)
+    {
+        setMaxSize(aSize.getWidth(), aSize.getHeight());
+    }
 
     /**
      * Sets the view maximum size.
      */
-    public void setMaxSize(double aWidth, double aHeight)  { setMaxWidth(aWidth); setMaxHeight(aHeight); }
+    public void setMaxSize(double aWidth, double aHeight)
+    {
+        setMaxWidth(aWidth);
+        setMaxHeight(aHeight);
+    }
 
     /**
      * Returns whether preferred width is set.
      */
-    public boolean isPrefWidthSet()  { return _prefWidth>=0; }
+    public boolean isPrefWidthSet()  { return _prefWidth >= 0; }
 
     /**
      * Returns the view preferred width.
      */
-    public double getPrefWidth()  { return getPrefWidth(-1); }
+    public double getPrefWidth()
+    {
+        return getPrefWidth(-1);
+    }
 
     /**
      * Returns the view preferred width.
      */
     public double getPrefWidth(double aH)
     {
-        return _prefWidth>=0 ? _prefWidth : getPrefWidthImpl(aH);
+        return _prefWidth >= 0 ? _prefWidth : getPrefWidthImpl(aH);
     }
 
     /**
@@ -1713,7 +1827,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setPrefWidth(double aWidth)
     {
-        if (aWidth==_prefWidth) return;
+        if (aWidth == _prefWidth) return;
         firePropChange(PrefWidth_Prop, _prefWidth, _prefWidth = aWidth);
         relayoutParent();
     }
@@ -1721,19 +1835,22 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns whether preferred width is set.
      */
-    public boolean isPrefHeightSet()  { return _prefHeight>=0; }
+    public boolean isPrefHeightSet()  { return _prefHeight >= 0; }
 
     /**
      * Returns the view preferred height.
      */
-    public double getPrefHeight()  { return getPrefHeight(-1); }
+    public double getPrefHeight()
+    {
+        return getPrefHeight(-1);
+    }
 
     /**
      * Returns the view preferred height.
      */
     public double getPrefHeight(double aW)
     {
-        return _prefHeight>=0 ? _prefHeight : getPrefHeightImpl(aW);
+        return _prefHeight >= 0 ? _prefHeight : getPrefHeightImpl(aW);
     }
 
     /**
@@ -1741,7 +1858,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setPrefHeight(double aHeight)
     {
-        if (aHeight==_prefHeight) return;
+        if (aHeight == _prefHeight) return;
         firePropChange(PrefHeight_Prop, _prefHeight, _prefHeight = aHeight);
         relayoutParent();
     }
@@ -1759,17 +1876,27 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view preferred size.
      */
-    public Size getPrefSize()  { return new Size(getPrefWidth(), getPrefHeight()); }
+    public Size getPrefSize()
+    {
+        return new Size(getPrefWidth(), getPrefHeight());
+    }
 
     /**
      * Sets the view preferred size.
      */
-    public void setPrefSize(Size aSize)  { setPrefSize(aSize.getWidth(), aSize.getHeight()); }
+    public void setPrefSize(Size aSize)
+    {
+        setPrefSize(aSize.getWidth(), aSize.getHeight());
+    }
 
     /**
      * Sets the view preferred size.
      */
-    public void setPrefSize(double aWidth, double aHeight)  { setPrefWidth(aWidth); setPrefHeight(aHeight); }
+    public void setPrefSize(double aWidth, double aHeight)
+    {
+        setPrefWidth(aWidth);
+        setPrefHeight(aHeight);
+    }
 
     /**
      * Returns the best width for view - accounting for pref/min/max.
@@ -1847,7 +1974,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the horizontal alignment.
      */
-    public HPos getAlignX()  { return getAlign().getHPos(); }
+    public HPos getAlignX()
+    {
+        return getAlign().getHPos();
+    }
 
     /**
      * Sets the horizontal alignment.
@@ -1860,7 +1990,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the vertical alignment.
      */
-    public VPos getAlignY()  { return getAlign().getVPos(); }
+    public VPos getAlignY()
+    {
+        return getAlign().getVPos();
+    }
 
     /**
      * Sets the vertical alignment.
@@ -1871,7 +2004,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     @Deprecated
-    public void setAlign(HPos aPos)  { setAlign(Pos.get(aPos, getAlign().getVPos())); }
+    public void setAlign(HPos aPos)
+    {
+        setAlign(Pos.get(aPos, getAlign().getVPos()));
+    }
 
     /**
      * Returns the spacing insets requested between parent/neighbors and the border of this view.
@@ -2056,7 +2192,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (getClass() == View.class) {
             String cname = getRealClassName();
             if (cname == null) cname = "Custom View";
-            else cname = cname.substring(cname.lastIndexOf('.')+1);
+            else cname = cname.substring(cname.lastIndexOf('.') + 1);
             if (getFill() == null) {
                 aPntr.setPaint(Color.LIGHTGRAY);
                 aPntr.fill(getBoundsLocal());
@@ -2068,7 +2204,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
                 aPntr.setStroke(Stroke.Stroke1);
             }
             StringBox sbox = StringBox.getForStringAndAttributes(cname, Font.Arial14.getBold(), Color.WHITE);
-            sbox.setCenteredXY(getWidth()/2, getHeight()/2);
+            sbox.setCenteredXY(getWidth() / 2, getHeight() / 2);
             sbox.paint(aPntr);
         }
     }
@@ -2119,7 +2255,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setRealClassName(String aName)
     {
-        if (SnapUtils.equals(aName,getRealClassName()) || getClass().getName().equals(aName)) return;
+        if (SnapUtils.equals(aName, getRealClassName()) || getClass().getName().equals(aName)) return;
         firePropChange("RealClassString", _realClassName, _realClassName = aName);
     }
 
@@ -2134,7 +2270,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void relayoutParent()
     {
         _bestWidth = _bestHeight = -1;
-        ParentView par = getParent(); if (par == null) return;
+        ParentView par = getParent();
+        if (par == null) return;
         par.relayout();
         par.relayoutParent();
     }
@@ -2166,8 +2303,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             return;
         }
 
+        // If not showing or paintable, just return
+        if (!isShowing() || !isPaintable())
+            return;
+
         // Get ViewUpdater (if not available, just return)
-        ViewUpdater updater = getUpdater(); if (updater == null) return;
+        ViewUpdater updater = getUpdater();
+        if (updater == null) return;
 
         // Create repaint rect, register for repaintLater and call Parent.setNeedsRepaintDeep()
         _repaintRect = new Rect(aX, aY, aW, aH);
@@ -2182,7 +2324,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected void repaintInParent(Rect aRect)
     {
         // Get parent (just return if not set)
-        ParentView par = getParent(); if (par == null) return;
+        ParentView par = getParent();
+        if (par == null) return;
 
         // Do normal repaint
         if (aRect == null)
@@ -2190,9 +2333,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         else repaint(aRect);
 
         // Get expanded repaint rect and rect in parent, and have parent repaint
-        Rect rectExp = getRepaintRect(); if (rectExp == null) return;
+        Rect rectExp = getRepaintRect();
+        if (rectExp == null) return;
         Rect parRect = localToParent(rectExp).getBounds();
-        parRect.snap(); parRect.inset(-1); // Shouldn't need this unless someone paints out of bounds (lookin at U, Button)
+        parRect.snap();
+        parRect.inset(-1); // Shouldn't need this unless someone paints out of bounds (lookin at U, Button)
         par.repaint(parRect);
     }
 
@@ -2201,7 +2346,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Rect getRepaintRect()
     {
-        Rect rect = _repaintRect; if (rect == null) return null;
+        Rect rect = _repaintRect;
+        if (rect == null) return null;
         Rect rectExp = getRepaintRectExpanded(rect);
         return rectExp;
     }
@@ -2301,7 +2447,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets whether focus ring should be painted when view is focused.
      */
-    public void setFocusPainted(boolean aValue)  { _focusPainted = aValue; }
+    public void setFocusPainted(boolean aValue)
+    {
+        _focusPainted = aValue;
+    }
 
     /**
      * Tells view to request focus.
@@ -2351,7 +2500,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the owner of given class.
      */
-    public <T> T getOwner(Class <T> aClass)
+    public <T> T getOwner(Class<T> aClass)
     {
         // If ViewOwner is of given class, return it
         ViewOwner viewOwner = getOwner();
@@ -2366,7 +2515,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the view environment.
      */
-    public ViewEnv getEnv()  { return ViewEnv.getEnv(); }
+    public ViewEnv getEnv()
+    {
+        return ViewEnv.getEnv();
+    }
 
     /**
      * Returns the value for given prop name.
@@ -2377,7 +2529,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         String pname = aPropName.equals("Value") ? getValuePropName() : aPropName;
 
         // Handle properties
-        switch(pname) {
+        switch (pname) {
 
             // Size props: X, Y, Width, Height
             case X_Prop: return getX();
@@ -2440,7 +2592,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         String pname = aPropName.equals("Value") ? getValuePropName() : aPropName;
 
         // Handle properties
-        switch(pname) {
+        switch (pname) {
 
             // Size props: X, Y, Width, Height
             case X_Prop: setX(SnapUtils.doubleValue(aValue)); break;
@@ -2545,13 +2697,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public EventAdapter getEventAdapter()
     {
-        return _eventAdapter !=null ? _eventAdapter : (_eventAdapter =new EventAdapter());
+        return _eventAdapter != null ? _eventAdapter : (_eventAdapter = new EventAdapter());
     }
 
     /**
      * Sets an array of enabled events.
      */
-    protected void enableEvents(ViewEvent.Type ... theTypes)
+    protected void enableEvents(ViewEvent.Type... theTypes)
     {
         getEventAdapter().enableEvents(this, theTypes);
     }
@@ -2559,7 +2711,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets an array of enabled events.
      */
-    protected void disableEvents(ViewEvent.Type ... theTypes)
+    protected void disableEvents(ViewEvent.Type... theTypes)
     {
         getEventAdapter().disableEvents(this, theTypes);
     }
@@ -2567,7 +2719,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Adds an event filter.
      */
-    public void addEventFilter(EventListener aLsnr, ViewEvent.Type ... theTypes)
+    public void addEventFilter(EventListener aLsnr, ViewEvent.Type... theTypes)
     {
         getEventAdapter().addFilter(aLsnr, theTypes);
     }
@@ -2575,7 +2727,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Removes an event filter.
      */
-    public void removeEventFilter(EventListener aLsnr, ViewEvent.Type ... theTypes)
+    public void removeEventFilter(EventListener aLsnr, ViewEvent.Type... theTypes)
     {
         getEventAdapter().removeFilter(aLsnr, theTypes);
     }
@@ -2583,7 +2735,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Adds an event handler.
      */
-    public void addEventHandler(EventListener aLsnr, ViewEvent.Type ... theTypes)
+    public void addEventHandler(EventListener aLsnr, ViewEvent.Type... theTypes)
     {
         getEventAdapter().addHandler(aLsnr, theTypes);
     }
@@ -2591,7 +2743,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Removes an event handler.
      */
-    public void removeEventHandler(EventListener aLsnr, ViewEvent.Type ... theTypes)
+    public void removeEventHandler(EventListener aLsnr, ViewEvent.Type... theTypes)
     {
         getEventAdapter().removeHandler(aLsnr, theTypes);
     }
@@ -2604,14 +2756,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected void fireActionEvent(ViewEvent anEvent)
     {
         ViewEvent event = ViewEvent.createEvent(this, null, null, null);
-        if (anEvent!=null) event.setParentEvent(anEvent);
+        if (anEvent != null) event.setParentEvent(anEvent);
         fireEvent(event);
     }
 
     /**
      * Sends an event to this view.
      */
-    public void fireEvent(ViewEvent anEvent)  { processEventAll(anEvent); }
+    public void fireEvent(ViewEvent anEvent)
+    {
+        processEventAll(anEvent);
+    }
 
     /**
      * Sends an event to this view.
@@ -2703,22 +2858,34 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Play animations deep.
      */
-    public void playAnimDeep()  { ViewAnim.playDeep(this); }
+    public void playAnimDeep()
+    {
+        ViewAnim.playDeep(this);
+    }
 
     /**
      * Stop animations deep.
      */
-    public void stopAnimDeep()  { ViewAnim.stopDeep(this); }
+    public void stopAnimDeep()
+    {
+        ViewAnim.stopDeep(this);
+    }
 
     /**
      * Returns the anim time.
      */
-    public int getAnimTimeDeep()  { return ViewAnim.getTimeDeep(this); }
+    public int getAnimTimeDeep()
+    {
+        return ViewAnim.getTimeDeep(this);
+    }
 
     /**
      * Sets the anim time deep.
      */
-    public void setAnimTimeDeep(int aValue)  { ViewAnim.setTimeDeep(this, aValue); }
+    public void setAnimTimeDeep(int aValue)
+    {
+        ViewAnim.setTimeDeep(this, aValue);
+    }
 
     /**
      * Returns the physics objects that provides information for physics simulations.
@@ -2741,8 +2908,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected PropObject clone() throws CloneNotSupportedException
     {
         View clone;
-        try { clone = (View) super.clone(); }
-        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+        try {
+            clone = (View) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
         clone._parent = null;
         clone._eventAdapter = null;
         clone._owner = null;
@@ -2883,7 +3053,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Unarchive X, Y, Width, Height
         if (anElement.hasAttribute("x") || anElement.hasAttribute("y") ||
-            anElement.hasAttribute("width") || anElement.hasAttribute("height")) {
+                anElement.hasAttribute("width") || anElement.hasAttribute("height")) {
             double x = anElement.getAttributeFloatValue("x");
             double y = anElement.getAttributeFloatValue("y");
             double w = anElement.getAttributeFloatValue("width");
@@ -2932,20 +3102,21 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Unarchive Effect
         int effectIndex = anArchiver.indexOf(anElement, Effect.class);
         if (effectIndex >= 0) {
-            Effect eff = (Effect)anArchiver.fromXML(anElement.get(effectIndex), this);
+            Effect eff = (Effect) anArchiver.fromXML(anElement.get(effectIndex), this);
             setEffect(eff);
         }
 
         // Unarchive Fill, Border (Legacy)
         XMLElement sxml = anElement.getElement("stroke");
-        if (sxml != null) { String cstr = sxml.getAttributeValue("color");
+        if (sxml != null) {
+            String cstr = sxml.getAttributeValue("color");
             Color sc = cstr != null ? new Color(cstr) : Color.BLACK;
             double sw = sxml.getAttributeFloatValue("width", 1);
             setBorder(sc, sw);
         }
         XMLElement fxml = anElement.getElement("fill");
         if (fxml != null) {
-            Paint fill = (Paint)anArchiver.fromXML(fxml, this);
+            Paint fill = (Paint) anArchiver.fromXML(fxml, this);
             setFill(fill);
         }
         XMLElement bxml = anElement.getElement("border");
@@ -2957,7 +3128,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Unarchive font
         XMLElement fontXML = anElement.getElement(Font_Prop);
         if (fontXML != null)
-            setFont((Font)anArchiver.fromXML(fontXML, this));
+            setFont((Font) anArchiver.fromXML(fontXML, this));
 
         // Unarchive Disabled, Visible, Opacity
         if (anElement.hasAttribute(Disabled_Prop))
@@ -3002,7 +3173,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             getAnim(0).fromXML(anArchiver, animXML);
 
         // Unarchive bindings
-        for (int i = anElement.indexOf("binding"); i >= 0; i = anElement.indexOf("binding",i+1)) {
+        for (int i = anElement.indexOf("binding"); i >= 0; i = anElement.indexOf("binding", i + 1)) {
             XMLElement bx = anElement.get(i);
             addBinding(new Binding().fromXML(anArchiver, bx));
         }
