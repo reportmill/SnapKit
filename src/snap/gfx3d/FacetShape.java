@@ -10,6 +10,9 @@ import snap.util.MathUtils;
  */
 public abstract class FacetShape extends Shape3D {
 
+    // The texture for the facet
+    private Texture  _texture;
+
     // A Painter3D to paint the surface of path
     private Painter3D  _painter;
 
@@ -18,6 +21,20 @@ public abstract class FacetShape extends Shape3D {
 
     // The VertexArray holding triangles of Path3D
     private VertexArray  _vertexArray;
+
+    /**
+     * Returns the texture to render on the facet shape surface.
+     */
+    public Texture getTexture()  { return _texture; }
+
+    /**
+     * Sets the texture to render on the facet shape surface.
+     */
+    public void setTexture(Texture aTexture)
+    {
+        _texture = aTexture;
+        _vertexArray = null;
+    }
 
     /**
      * Returns the painter to render texture for this path.

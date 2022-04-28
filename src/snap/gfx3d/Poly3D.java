@@ -210,6 +210,19 @@ public class Poly3D extends FacetShape implements Cloneable {
         //for (Color color : _colors)
         //    vertexArray.addColor(color);
 
+        // Add texture
+        Texture texture = getTexture();
+        if (texture != null) {
+            vertexArray.setTexture(texture);
+
+            vertexArray.addTexCoord(0, 1);
+            vertexArray.addTexCoord(1, 1);
+            vertexArray.addTexCoord(1, 0);
+            vertexArray.addTexCoord(0, 1);
+            vertexArray.addTexCoord(1, 0);
+            vertexArray.addTexCoord(0, 0);
+        }
+
         // Handle Stroke: Create/add stroke VertexArray
         if (getStrokeColor() != null) {
             VertexArray strokeVA = getStrokeVertexArray();

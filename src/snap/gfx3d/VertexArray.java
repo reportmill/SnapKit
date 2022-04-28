@@ -10,17 +10,23 @@ import java.util.Arrays;
  */
 public class VertexArray implements Cloneable {
 
-    // The float array to hold actual vertex point components
+    // The float array to hold vertex point components
     private float[]  _pointsArray = new float[24];
 
     // The number of components in vertex points array
     private int  _pointsArrayLen = 0;
 
-    // The float array to hold actual vertex color components
+    // The float array to hold vertex color components
     private float[]  _colorsArray = new float[0];
 
-    // The number of components in vertex colors array
+    // The number of colors in vertex colors array
     private int  _colorsArrayLen = 0;
+
+    // The float array to hold vertex texture coords
+    private float[]  _texCoordsArray = new float[0];
+
+    // The number of entries in vertex texture coords array
+    private int  _texCoordsArrayLen = 0;
 
     // The number of components per vertex point
     private int  _pointCompCount = 3;
@@ -34,8 +40,14 @@ public class VertexArray implements Cloneable {
     // Whether triangles are double-sided
     private boolean  _doubleSided;
 
+    // A texture associated with the geometry
+    private Texture  _texture;
+
     // The next VertexArray if this one is part of a chain
     private VertexArray  _next;
+
+    // Constant for number of components in texture coords
+    private static final int TEX_COORD_COMP_COUNT = 2;
 
     /**
      * Constructor.
@@ -108,6 +120,20 @@ public class VertexArray implements Cloneable {
     }
 
     /**
+     * Adds a texture coord to vertex texture coords array.
+     */
+    public void addTexCoord(double aU, double aV)
+    {
+        // Expand color components array if needed
+        if (_texCoordsArrayLen + TEX_COORD_COMP_COUNT > _texCoordsArray.length)
+            _texCoordsArray = Arrays.copyOf(_texCoordsArray, Math.max(_texCoordsArray.length * 2, 24));
+
+        // Add values
+        _texCoordsArray[_texCoordsArrayLen++] = (float) aU;
+        _texCoordsArray[_texCoordsArrayLen++] = (float) aV;
+    }
+
+    /**
      * Returns the number of components for a vertex point.
      */
     public int getPointCompCount()  { return _pointCompCount; }
@@ -128,6 +154,19 @@ public class VertexArray implements Cloneable {
     public void setColor(Color aColor)
     {
         _color = aColor;
+    }
+
+    /**
+     * Returns the texture to render on geometry surface.
+     */
+    public Texture getTexture()  { return _texture; }
+
+    /**
+     * Sets the texture to render on geometry surface.
+     */
+    public void setTexture(Texture aTexture)
+    {
+        _texture = aTexture;
     }
 
     /**
@@ -182,7 +221,7 @@ public class VertexArray implements Cloneable {
     }
 
     /**
-     * Returns the vertex colorscomponents array.
+     * Returns the vertex colors components array.
      */
     public float[] getColorsArray()
     {
@@ -209,6 +248,15 @@ public class VertexArray implements Cloneable {
 
         // Return true
         return true;
+    }
+
+    /**
+     * Returns the vertex texture coords array.
+     */
+    public float[] getTexCoordsArray()
+    {
+        trim();
+        return _texCoordsArray;
     }
 
     /**
@@ -244,6 +292,10 @@ public class VertexArray implements Cloneable {
         // Trim ColorsArray
         if (_colorsArray.length != _colorsArrayLen)
             _colorsArray = Arrays.copyOf(_colorsArray, _colorsArrayLen);
+
+        // Trim TexCoordsArray
+        if (_texCoordsArray.length != _texCoordsArrayLen)
+            _texCoordsArray = Arrays.copyOf(_texCoordsArray, _texCoordsArrayLen);
     }
 
     /**
@@ -292,6 +344,7 @@ public class VertexArray implements Cloneable {
         // Clone arrays
         clone._pointsArray = _pointsArray.clone();
         clone._colorsArray = _colorsArray.clone();
+        clone._texCoordsArray = _texCoordsArray.clone();
 
         // Clone next
         if (_next != null)
