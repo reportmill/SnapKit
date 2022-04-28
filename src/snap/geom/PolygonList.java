@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.geom;
 import java.util.List;
 import snap.util.ArrayUtils;
@@ -8,13 +11,13 @@ import snap.util.ArrayUtils;
 public class PolygonList extends Shape {
 
     // The polygons
-    Polygon     _polys[] = new Polygon[0];
-    
+    private Polygon  _polys[] = new Polygon[0];
+
     // The number of polygons
-    int         _plen;
-    
+    private int  _polyCount;
+
     // The current polygon
-    Polygon     _poly;
+    private Polygon  _poly;
 
     /**
      * Creates a new PolygonList.
@@ -24,17 +27,18 @@ public class PolygonList extends Shape {
     /**
      * Creates a new PolygonList for given Polygons.
      */
-    public PolygonList(Polygon ... thePolys)
+    public PolygonList(Polygon... thePolys)
     {
-        _polys = thePolys; _plen = thePolys.length;
+        _polys = thePolys;
+        _polyCount = thePolys.length;
     }
 
     /**
      * Creates a new PolygonList for given Polygons.
      */
-    public PolygonList(List <Polygon> thePolys)
+    public PolygonList(List<Polygon> thePolys)
     {
-        this(thePolys.toArray(new Polygon[thePolys.size()]));
+        this(thePolys.toArray(new Polygon[0]));
     }
 
     /**
@@ -48,16 +52,22 @@ public class PolygonList extends Shape {
     /**
      * Creates a PolygonList for given PathIter.
      */
-    public PolygonList(PathIter aPI)
+    public PolygonList(PathIter aPathIter)
     {
-        aPI = new Path(aPI).getFlat().getPathIter(null);
-        double pnts[] = new double[6];
-        while (aPI.hasNext()) switch (aPI.getNext(pnts)) {
-            case MoveTo: moveTo(pnts[0], pnts[1]); break;
-            case LineTo: lineTo(pnts[0], pnts[1]); break;
-            case QuadTo: quadTo(pnts[0], pnts[1], pnts[2], pnts[3]); break;
-            case CubicTo: curveTo(pnts[0], pnts[1], pnts[2], pnts[3], pnts[4], pnts[5]); break;
-            case Close: break; // All Polygons assumed to be closed
+        Shape flatPath = new Path(aPathIter).getFlat();
+        PathIter flatPathIter = flatPath.getPathIter(null);
+        double[] pnts = new double[6];
+        while (flatPathIter.hasNext()) switch (flatPathIter.getNext(pnts)) {
+            case MoveTo:
+                moveTo(pnts[0], pnts[1]); break;
+            case LineTo:
+                lineTo(pnts[0], pnts[1]); break;
+            case QuadTo:
+                quadTo(pnts[0], pnts[1], pnts[2], pnts[3]); break;
+            case CubicTo:
+                curveTo(pnts[0], pnts[1], pnts[2], pnts[3], pnts[4], pnts[5]); break;
+            case Close:
+                break; // All Polygons assumed to be closed
         }
     }
 
@@ -69,31 +79,41 @@ public class PolygonList extends Shape {
     /**
      * Returns the number of polygons.
      */
-    public int getPolyCount()  { return _plen; }
+    public int getPolyCount()  { return _polyCount; }
 
     /**
      * Returns the individual polygon at given index.
      */
-    public Polygon getPoly(int anIndex)  { return _polys[anIndex]; }
+    public Polygon getPoly(int anIndex)
+    {
+        return _polys[anIndex];
+    }
 
     /**
      * Adds a polygon.
      */
     public void addPoly(Polygon aPoly, int anIndex)
     {
-        _polys = ArrayUtils.add(_polys, aPoly, anIndex); _plen++;
+        _polys = ArrayUtils.add(_polys, aPoly, anIndex);
+        _polyCount++;
         shapeChanged();
     }
 
     /**
      * Returns the last polygon.
      */
-    public Polygon getLast()  { return _plen>0 ? _polys[_plen-1] : null; }
+    public Polygon getLast()
+    {
+        return _polyCount > 0 ? _polys[_polyCount - 1] : null;
+    }
 
     /**
      * Returns the last polygon last point.
      */
-    public Point getLastPoint()  { return _plen>0 ? getLast().getLastPoint() : null; }
+    public Point getLastPoint()
+    {
+        return _polyCount > 0 ? getLast().getLastPoint() : null;
+    }
 
     /**
      * Moveto.
@@ -101,7 +121,7 @@ public class PolygonList extends Shape {
     public void moveTo(double x, double y)
     {
         // Handle two consecutive MoveTos
-        if (_poly!=null && _poly.getPointCount()==1)
+        if (_poly != null && _poly.getPointCount() == 1)
             _poly.setPoint(0, x, y);
         else {
             _poly = new Polygon();
@@ -117,13 +137,15 @@ public class PolygonList extends Shape {
     public void lineTo(double x, double y)
     {
         // If no poly, start one
-        if (_poly==null) moveTo(0,0);
+        if (_poly == null)
+            moveTo(0, 0);
 
         // If closing last poly, just return
-        if (_poly.getPointCount()>0 && Point.equals(x, y, _poly.getX(0), _poly.getY(0))) return;
+        if (_poly.getPointCount() > 0 && Point.equals(x, y, _poly.getX(0), _poly.getY(0)))
+            return;
 
         // Add point and clear bounds
-        _poly.addPoint(x,y);
+        _poly.addPoint(x, y);
         shapeChanged();
     }
 
@@ -134,10 +156,13 @@ public class PolygonList extends Shape {
     {
         // If distance from control point to base line less than tolerance, just add line
         Point last = getLastPoint();
-        double dist0 = Point.getDistance(last.x, last.y, x, y); if (dist0<.5) return;
+        double dist0 = Point.getDistance(last.x, last.y, x, y);
+        if (dist0 < .5) return;
         double dist1 = Line.getDistance(last.x, last.y, x, y, cpx, cpy);
-        if (dist1<.5) {
-            lineTo(x,y); return; }
+        if (dist1 < .5) {
+            lineTo(x, y);
+            return;
+        }
 
         // Split curve at midpoint and add parts
         Quad c0 = new Quad(last.x, last.y, cpx, cpy, x, y), c1 = c0.split(.5);
@@ -152,11 +177,14 @@ public class PolygonList extends Shape {
     {
         // If distance from control points to base line less than tolerance, just add line
         Point last = getLastPoint();
-        double dist0 = Point.getDistance(last.x, last.y, x, y); if (dist0<.5) return;
+        double dist0 = Point.getDistance(last.x, last.y, x, y);
+        if (dist0 < .5) return;
         double dist1 = Line.getDistance(last.x, last.y, x, y, cp1x, cp1y);
         double dist2 = Line.getDistance(last.x, last.y, x, y, cp2x, cp2y);
-        if (dist1<.5 && dist2<.5) {
-            lineTo(x,y); return; }
+        if (dist1 < .5 && dist2 < .5) {
+            lineTo(x, y);
+            return;
+        }
 
         // Split curve at midpoint and add parts
         Cubic c0 = new Cubic(last.x, last.y, cp1x, cp1y, cp2x, cp2y, x, y), c1 = c0.split(.5);
@@ -169,16 +197,25 @@ public class PolygonList extends Shape {
      */
     protected Rect getBoundsImpl()
     {
-        int pc = getPolyCount(); if (pc==0) return new Rect(0,0,0,0);
-        Rect bnds = getPoly(0).getBounds();
-        for (int i=1;i<pc;i++) bnds.union(getPoly(i).getBounds());
-        return bnds;
+        // If no polys, return empty rect
+        int polyCount = getPolyCount();
+        if (polyCount == 0)
+            return new Rect();
+
+        // Get union of all polys
+        Rect totalBounds = getPoly(0).getBounds();
+        for (int i = 1; i < polyCount; i++)
+            totalBounds.union(getPoly(i).getBounds());
+        return totalBounds;
     }
 
     /**
      * Returns the path iterator.
      */
-    public PathIter getPathIter(Transform aTrans)  { return new PolyListIter(_polys, aTrans); }
+    public PathIter getPathIter(Transform aTrans)
+    {
+        return new PolyListIter(_polys, aTrans);
+    }
 
     /**
      * PathIter for Line.
@@ -186,28 +223,40 @@ public class PolygonList extends Shape {
     private static class PolyListIter extends PathIter {
 
         // Ivars
-        PathIter _polyIters[], _pi;
-        int plen, index;
+        PathIter[]  _pathIters;
+        PathIter _pathIter;
+        int  _polyCount;
+        int  _polyIndex;
 
-        /** Create new LineIter. */
-        PolyListIter(Polygon thePolys[], Transform at)
+        /**
+         * Create new LineIter.
+         */
+        PolyListIter(Polygon[] thePolys, Transform at)
         {
-            super(at); plen = thePolys.length;
-            _polyIters = new PathIter[plen];
-            for (int i=0;i<plen;i++)
-                _polyIters[i] = thePolys[i].getPathIter(at);
-            _pi = plen>0 ? _polyIters[0] : null;
+            super(at);
+            _polyCount = thePolys.length;
+            _pathIters = new PathIter[_polyCount];
+            for (int i = 0; i < _polyCount; i++)
+                _pathIters[i] = thePolys[i].getPathIter(at);
+            _pathIter = _polyCount > 0 ? _pathIters[0] : null;
         }
 
-        /** Returns whether there are more polygons. */
-        public boolean hasNext() { return _pi!=null && _pi.hasNext(); }
+        /**
+         * Returns whether there are more polygons.
+         */
+        public boolean hasNext()
+        {
+            return _pathIter != null && _pathIter.hasNext();
+        }
 
-        /** Returns the coordinates and type of the current path segment in the iteration. */
+        /**
+         * Returns the coordinates and type of the current path segment in the iteration.
+         */
         public Seg getNext(double[] coords)
         {
-            Seg seg = _pi.getNext(coords);
-            while (!_pi.hasNext() && index<plen)
-                _pi = _polyIters[index++];
+            Seg seg = _pathIter.getNext(coords);
+            while (!_pathIter.hasNext() && _polyIndex < _polyCount)
+                _pathIter = _pathIters[_polyIndex++];
             return seg;
         }
     }

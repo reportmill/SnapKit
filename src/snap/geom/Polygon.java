@@ -11,7 +11,7 @@ import snap.util.MathUtils;
 public class Polygon extends Shape implements Cloneable {
 
     // The points
-    private double  _pnts[] = new double[0];
+    private double[]  _pnts = new double[0];
 
     /**
      * Creates a new Polygon.
@@ -21,7 +21,10 @@ public class Polygon extends Shape implements Cloneable {
     /**
      * Creates a new Polygon from given x y coords.
      */
-    public Polygon(double ... theCoords)  { _pnts = theCoords; }
+    public Polygon(double ... theCoords)
+    {
+        _pnts = theCoords;
+    }
 
     /**
      * Creates a new Polygon from given x y coords.
@@ -29,22 +32,25 @@ public class Polygon extends Shape implements Cloneable {
     public Polygon(Point ... thePoints)
     {
         int pc = thePoints.length;
-        _pnts = new double[pc*2];
-        for (int i=0;i<pc;i++) {
-            _pnts[i*2] = thePoints[i].x;
-            _pnts[i*2+1] = thePoints[i].y;
+        _pnts = new double[pc * 2];
+        for (int i = 0; i < pc; i++) {
+            _pnts[i * 2] = thePoints[i].x;
+            _pnts[i * 2 + 1] = thePoints[i].y;
         }
     }
 
     /**
      * Returns the raw points array.
      */
-    public double[] getPoints()  { return _pnts; }
+    public double[] getPoints()
+    {
+        return _pnts;
+    }
 
     /**
      * Sets the points.
      */
-    public void setPoints(double thePoints[])
+    public void setPoints(double[] thePoints)
     {
         _pnts = thePoints;
         shapeChanged();
@@ -53,30 +59,43 @@ public class Polygon extends Shape implements Cloneable {
     /**
      * Returns the point count.
      */
-    public int getPointCount()  { return _pnts.length/2; }
+    public int getPointCount()
+    {
+        return _pnts.length / 2;
+    }
 
     /**
      * Returns the x at given point index.
      */
-    public double getX(int anIndex)  { return _pnts[anIndex*2]; }
+    public double getX(int anIndex)
+    {
+        return _pnts[anIndex * 2];
+    }
 
     /**
      * Returns the y at given point index.
      */
-    public double getY(int anIndex)  { return _pnts[anIndex*2+1]; }
+    public double getY(int anIndex)
+    {
+        return _pnts[anIndex * 2 + 1];
+    }
 
     /**
      * Returns the point at given index.
      */
-    public Point getPoint(int anIndex)  { return new Point(_pnts[anIndex*2], _pnts[anIndex*2+1]); }
+    public Point getPoint(int anIndex)
+    {
+        return new Point(_pnts[anIndex * 2], _pnts[anIndex * 2 + 1]);
+    }
 
     /**
      * Adds a point at given x/y.
      */
     public void addPoint(double aX, double aY)
     {
-        _pnts = Arrays.copyOf(_pnts, _pnts.length+2);
-        _pnts[_pnts.length-2] = aX; _pnts[_pnts.length-1] = aY;
+        _pnts = Arrays.copyOf(_pnts, _pnts.length + 2);
+        _pnts[_pnts.length - 2] = aX;
+        _pnts[_pnts.length - 1] = aY;
         shapeChanged();
     }
 
@@ -85,8 +104,8 @@ public class Polygon extends Shape implements Cloneable {
      */
     public void setPoint(int anIndex, double aX, double aY)
     {
-        _pnts[anIndex*2] = aX;
-        _pnts[anIndex*2+1] = aY;
+        _pnts[anIndex * 2] = aX;
+        _pnts[anIndex * 2 + 1] = aY;
         shapeChanged();
     }
 
@@ -96,7 +115,7 @@ public class Polygon extends Shape implements Cloneable {
     public double getLastX()
     {
         int plen = _pnts.length;
-        return plen>0 ? _pnts[plen-2] : -1;
+        return plen > 0 ? _pnts[plen - 2] : -1;
     }
 
     /**
@@ -105,7 +124,7 @@ public class Polygon extends Shape implements Cloneable {
     public double getLastY()
     {
         int plen = _pnts.length;
-        return plen>0 ? _pnts[plen-1] : -1;
+        return plen > 0 ? _pnts[plen - 1] : -1;
     }
 
     /**
@@ -114,7 +133,7 @@ public class Polygon extends Shape implements Cloneable {
     public Point getLastPoint()
     {
         int plen = _pnts.length;
-        return plen>0 ? new Point(_pnts[plen-2],_pnts[plen-1]) : null;
+        return plen > 0 ? new Point(_pnts[plen - 2], _pnts[plen - 1]) : null;
     }
 
     /**
@@ -131,8 +150,8 @@ public class Polygon extends Shape implements Cloneable {
      */
     public int getPointAt(double aX, double aY, double aRad)
     {
-        for (int i=0,pc=getPointCount();i<pc;i++)
-            if (Point.getDistance(aX, aY, getX(i), getY(i))<=aRad)
+        for (int i = 0, pc = getPointCount(); i < pc; i++)
+            if (Point.getDistance(aX, aY, getX(i), getY(i)) <= aRad)
                 return i;
         return -1;
     }
@@ -148,22 +167,24 @@ public class Polygon extends Shape implements Cloneable {
             return false;
 
         // Iterate over all lines
-        for (int i=0; i<pc-1; i++) { int j = (i+1)%pc;
+        for (int i = 0; i < pc - 1; i++) {
+            int j = (i + 1) % pc;
 
             // Get line endpoint and see if next point is collinear
             double x0 = getX(i), y0 = getY(i);
             double x1 = getX(j), y1 = getY(j);
 
             // If next point is collinear and backtracks over previous segment, return false.
-            int jp1 = (j+1)%pc;
+            int jp1 = (j + 1) % pc;
             double jp1x = getX(jp1);
             double jp1y = getY(jp1);
             boolean isCollinear = Line.isCollinear(x0, y0, x1, y1, jp1x, jp1y);
-            if (isCollinear && (jp1x-x0)/(x1-x0) < 1)
+            if (isCollinear && (jp1x - x0) / (x1 - x0) < 1)
                 return false;
 
             // Iterate over remaining lines and see if they intersect
-            for (int k=j+1;k<pc;k++) { int l = (k+1)%pc;
+            for (int k = j + 1; k < pc; k++) {
+                int l = (k + 1) % pc;
                 double x2 = getX(k), y2 = getY(k);
                 double x3 = getX(l), y3 = getY(l);
                 boolean intersectsLine = Line.intersectsLine(x0, y0, x1, y1, x2, y2, x3, y3);
@@ -192,10 +213,11 @@ public class Polygon extends Shape implements Cloneable {
     public double getAngle(int anIndex)
     {
         // Get 3 points surrounding index, get vector points, and return angle between
-        int pc = getPointCount(); if (pc < 3) return 0;
-        int i0 = (anIndex-1+pc)%pc;
+        int pc = getPointCount();
+        if (pc < 3) return 0;
+        int i0 = (anIndex - 1 + pc) % pc;
         int i1 = anIndex;
-        int i2 = (anIndex+1)%pc;
+        int i2 = (anIndex + 1) % pc;
         double x0 = getX(i0), y0 = getY(i0);
         double x1 = getX(i1), y1 = getY(i1);
         double x2 = getX(i2), y2 = getY(i2);
@@ -213,7 +235,10 @@ public class Polygon extends Shape implements Cloneable {
     /**
      * Returns the exterior angle at given point index.
      */
-    public double getExtAngle(int anIndex)  { return Math.PI - getAngle(anIndex); }
+    public double getExtAngle(int anIndex)
+    {
+        return Math.PI - getAngle(anIndex);
+    }
 
     /**
      * Returns the sum of exterior angles.
@@ -221,8 +246,9 @@ public class Polygon extends Shape implements Cloneable {
     public double getExtAngleSum()
     {
         double angle = 0;
-        int pc = getPointCount(); if (pc < 3) return 0;
-        for (int i=0; i<pc; i++)
+        int pc = getPointCount();
+        if (pc < 3) return 0;
+        for (int i = 0; i < pc; i++)
             angle += getExtAngle(i);
         return angle;
     }
@@ -267,11 +293,15 @@ public class Polygon extends Shape implements Cloneable {
     public Polygon splitConvex(int aMax)
     {
         // Iterate over points to find first one with enough convex segments to split
-        int start = 0, cmax = 0;
-        for (int i=0,pc=getPointCount();i<pc;i++) {
+        int start = 0;
+        int cmax = 0;
+        for (int i = 0, pc = getPointCount(); i < pc; i++) {
             int ccc = getConvexCrossbarCount(i, aMax);
-            if (ccc>cmax) { //return split(i, ccc); }
-                start = i; cmax = ccc; if (cmax==aMax) break; }
+            if (ccc > cmax) { //return split(i, ccc); }
+                start = i;
+                cmax = ccc;
+                if (cmax == aMax) break;
+            }
         }
 
         // Split on convex part with max points
@@ -285,13 +315,14 @@ public class Polygon extends Shape implements Cloneable {
     {
         // Iterate over crossbars from given index
         int ccc = 1;
-        for (int i=anIndex+2;i<anIndex+aMax;i++,ccc++)
+        for (int i = anIndex + 2; i < anIndex + aMax; i++, ccc++)
             if (!containsCrossbar(anIndex, i))
                 break;
 
         // If viable count found for index, check next index to see if it supports it as well
-        if (ccc>2 && aMax>0)
-            ccc = Math.min(ccc, getConvexCrossbarCount(anIndex+1, aMax-1) + 1);
+        if (ccc > 2 && aMax > 0) {
+            ccc = Math.min(ccc, getConvexCrossbarCount(anIndex + 1, aMax - 1) + 1);
+        }
 
         // Return value
         return ccc;
@@ -303,15 +334,18 @@ public class Polygon extends Shape implements Cloneable {
     boolean containsCrossbar(int ind0, int ind1)
     {
         // Make sure indexes are valid
-        int pc = getPointCount(); ind0 %= pc; ind1 %= pc;
+        int pc = getPointCount();
+        ind0 %= pc;
+        ind1 %= pc;
 
         // Get endpoints for crossbar
         double x0 = getX(ind0), y0 = getY(ind0);
         double x1 = getX(ind1), y1 = getY(ind1);
 
         // Iterate over polygon points and if any sides intersect crossbar, return false
-        for (int i=0,iMax=getPointCount();i<iMax;i++) { int j = (i+1)%iMax;
-            if (i==ind0 || i==ind1 || j==ind0 || j==ind1) continue;
+        for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
+            int j = (i + 1) % iMax;
+            if (i == ind0 || i == ind1 || j == ind0 || j == ind1) continue;
             double px0 = getX(i), py0 = getY(i);
             double px1 = getX(j), py1 = getY(j);
             if (Line.intersectsLine(px0, py0, px1, py1, x0, y0, x1, y1))
@@ -319,7 +353,7 @@ public class Polygon extends Shape implements Cloneable {
         }
 
         // If polygon also contains midpoint, it contains crossbar
-        double mpx = x0 + (x1 - x0)/2, mpy = y0 + (y1 - y0)/2;
+        double mpx = x0 + (x1 - x0) / 2, mpy = y0 + (y1 - y0) / 2;
         return contains(mpx, mpy);
     }
 
@@ -329,18 +363,28 @@ public class Polygon extends Shape implements Cloneable {
     Polygon split(int start, int len)
     {
         // Get points for remainder
-        int pc = getPointCount(), end = start + len;
+        int pc = getPointCount();
+        int end = start + len;
         int pcr = pc - len + 1;
-        double pnts[] = new double[pcr*2];
-        for (int i=end>pc ? end%pc : 0, k=0;k<pcr;i++) { if (i<=start || i>=end) {
-            pnts[k*2] = getX(i%pc); pnts[k*2+1] = getY(i%pc); k++; } }
-        //for (int j=0;j<start+1;j++) { pnts[j*2] = getX(j); pnts[j*2+1] = getY(j); }
-        //for (int j=end,k=start+1;j<pc;j++,k++) { pnts[k*2] = getX(j%pc); pnts[k*2+1] = getY(j%pc); }
+        double pnts[] = new double[pcr * 2];
+        for (int i = end > pc ? end % pc : 0, k = 0; k < pcr; i++) {
+            if (i <= start || i >= end) {
+                pnts[k * 2] = getX(i % pc);
+                pnts[k * 2 + 1] = getY(i % pc);
+                k++;
+            }
+        }
+
+        // Create remainder
         Polygon remainder = new Polygon(pnts);
 
-        // Get pnts
-        int pc2 = len + 1; pnts = new double[pc2*2];
-        for (int j=start,k=0;j<start+pc2;j++,k++) { pnts[k*2] = getX(j%pc); pnts[k*2+1] = getY(j%pc); }
+        // Get points for this
+        int pc2 = len + 1;
+        pnts = new double[pc2 * 2];
+        for (int j = start, k = 0; j < start + pc2; j++, k++) {
+            pnts[k * 2] = getX(j % pc);
+            pnts[k * 2 + 1] = getY(j % pc);
+        }
         setPoints(pnts);
 
         // Create and return remainder
@@ -352,23 +396,27 @@ public class Polygon extends Shape implements Cloneable {
      */
     protected Rect getBoundsImpl()
     {
-        if (_pnts.length==0) return new Rect();
-        double xmin = _pnts[0], xmax = _pnts[0], ymin = _pnts[1], ymax = _pnts[1];
-        for (int i=2;i<_pnts.length;i+=2) {
+        if (_pnts.length == 0) return new Rect();
+        double xmin = _pnts[0], xmax = _pnts[0];
+        double ymin = _pnts[1], ymax = _pnts[1];
+        for (int i = 2; i < _pnts.length; i += 2) {
             double x = _pnts[i];
-            double y = _pnts[i+1];
+            double y = _pnts[i + 1];
             xmin = Math.min(xmin, x);
             xmax = Math.max(xmax, x);
             ymin = Math.min(ymin, y);
             ymax = Math.max(ymax, y);
         }
-        return new Rect(xmin, ymin, xmax-xmin, ymax-ymin);
+        return new Rect(xmin, ymin, xmax - xmin, ymax - ymin);
     }
 
     /**
      * Returns the path iterator.
      */
-    public PathIter getPathIter(Transform aTrans)  { return new PolyIter(_pnts, aTrans); }
+    public PathIter getPathIter(Transform aTrans)
+    {
+        return new PolyIter(_pnts, aTrans);
+    }
 
     /**
      * Standard clone implementation.
@@ -376,11 +424,12 @@ public class Polygon extends Shape implements Cloneable {
     public Polygon clone()
     {
         try {
-            Polygon clone = (Polygon)super.clone();
+            Polygon clone = (Polygon) super.clone();
             clone._pnts = _pnts.clone();
             return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
         }
-        catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
     }
 
     /**
@@ -418,24 +467,42 @@ public class Polygon extends Shape implements Cloneable {
     private static class PolyIter extends PathIter {
 
         // Ivars
-        double _pnts[]; int plen, index;
+        double[]  _points;
+        int  _pointCount;
+        int  _pointIndex;
 
-        /** Create new LineIter. */
-        PolyIter(double thePnts[], Transform at)  { super(at); _pnts = thePnts; plen = _pnts.length; }
+        /**
+         * Create new LineIter.
+         */
+        PolyIter(double thePnts[], Transform at)
+        {
+            super(at);
+            _points = thePnts;
+            _pointCount = _points.length;
+        }
 
-        /** Returns whether there are more segments. */
-        public boolean hasNext() { return plen>0 && index<plen+2; }
+        /**
+         * Returns whether there are more segments.
+         */
+        public boolean hasNext()
+        {
+            return _pointCount > 0 && _pointIndex < _pointCount + 2;
+        }
 
-        /** Returns the coordinates and type of the current path segment in the iteration. */
+        /**
+         * Returns the coordinates and type of the current path segment in the iteration.
+         */
         public Seg getNext(double[] coords)
         {
-            if (index==0)
-                return moveTo(_pnts[index++], _pnts[index++], coords);
-            if (index<plen)
-                return lineTo(_pnts[index++], _pnts[index++], coords);
-            if (index==plen) {
-                index += 2; return close(); }
-            throw new RuntimeException("PolygonIter: Index beyond bounds " + index + " " + plen);
+            if (_pointIndex == 0)
+                return moveTo(_points[_pointIndex++], _points[_pointIndex++], coords);
+            if (_pointIndex < _pointCount)
+                return lineTo(_points[_pointIndex++], _points[_pointIndex++], coords);
+            if (_pointIndex == _pointCount) {
+                _pointIndex += 2;
+                return close();
+            }
+            throw new RuntimeException("PolygonIter: Index beyond bounds " + _pointIndex + " " + _pointCount);
         }
     }
 }
