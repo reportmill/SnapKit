@@ -11,7 +11,7 @@ import snap.util.MathUtils;
 public class Polygon extends Shape implements Cloneable {
 
     // The points
-    private double[]  _pnts = new double[0];
+    private double[]  _pointsArray = new double[0];
 
     /**
      * Creates a new Polygon.
@@ -23,7 +23,7 @@ public class Polygon extends Shape implements Cloneable {
      */
     public Polygon(double ... theCoords)
     {
-        _pnts = theCoords;
+        _pointsArray = theCoords;
     }
 
     /**
@@ -32,10 +32,10 @@ public class Polygon extends Shape implements Cloneable {
     public Polygon(Point ... thePoints)
     {
         int pc = thePoints.length;
-        _pnts = new double[pc * 2];
+        _pointsArray = new double[pc * 2];
         for (int i = 0; i < pc; i++) {
-            _pnts[i * 2] = thePoints[i].x;
-            _pnts[i * 2 + 1] = thePoints[i].y;
+            _pointsArray[i * 2] = thePoints[i].x;
+            _pointsArray[i * 2 + 1] = thePoints[i].y;
         }
     }
 
@@ -44,7 +44,7 @@ public class Polygon extends Shape implements Cloneable {
      */
     public double[] getPoints()
     {
-        return _pnts;
+        return _pointsArray;
     }
 
     /**
@@ -52,7 +52,7 @@ public class Polygon extends Shape implements Cloneable {
      */
     public void setPoints(double[] thePoints)
     {
-        _pnts = thePoints;
+        _pointsArray = thePoints;
         shapeChanged();
     }
 
@@ -61,7 +61,7 @@ public class Polygon extends Shape implements Cloneable {
      */
     public int getPointCount()
     {
-        return _pnts.length / 2;
+        return _pointsArray.length / 2;
     }
 
     /**
@@ -69,7 +69,7 @@ public class Polygon extends Shape implements Cloneable {
      */
     public double getX(int anIndex)
     {
-        return _pnts[anIndex * 2];
+        return _pointsArray[anIndex * 2];
     }
 
     /**
@@ -77,7 +77,7 @@ public class Polygon extends Shape implements Cloneable {
      */
     public double getY(int anIndex)
     {
-        return _pnts[anIndex * 2 + 1];
+        return _pointsArray[anIndex * 2 + 1];
     }
 
     /**
@@ -85,7 +85,7 @@ public class Polygon extends Shape implements Cloneable {
      */
     public Point getPoint(int anIndex)
     {
-        return new Point(_pnts[anIndex * 2], _pnts[anIndex * 2 + 1]);
+        return new Point(_pointsArray[anIndex * 2], _pointsArray[anIndex * 2 + 1]);
     }
 
     /**
@@ -93,9 +93,9 @@ public class Polygon extends Shape implements Cloneable {
      */
     public void addPoint(double aX, double aY)
     {
-        _pnts = Arrays.copyOf(_pnts, _pnts.length + 2);
-        _pnts[_pnts.length - 2] = aX;
-        _pnts[_pnts.length - 1] = aY;
+        _pointsArray = Arrays.copyOf(_pointsArray, _pointsArray.length + 2);
+        _pointsArray[_pointsArray.length - 2] = aX;
+        _pointsArray[_pointsArray.length - 1] = aY;
         shapeChanged();
     }
 
@@ -104,8 +104,8 @@ public class Polygon extends Shape implements Cloneable {
      */
     public void setPoint(int anIndex, double aX, double aY)
     {
-        _pnts[anIndex * 2] = aX;
-        _pnts[anIndex * 2 + 1] = aY;
+        _pointsArray[anIndex * 2] = aX;
+        _pointsArray[anIndex * 2 + 1] = aY;
         shapeChanged();
     }
 
@@ -114,8 +114,8 @@ public class Polygon extends Shape implements Cloneable {
      */
     public double getLastX()
     {
-        int plen = _pnts.length;
-        return plen > 0 ? _pnts[plen - 2] : -1;
+        int plen = _pointsArray.length;
+        return plen > 0 ? _pointsArray[plen - 2] : -1;
     }
 
     /**
@@ -123,8 +123,8 @@ public class Polygon extends Shape implements Cloneable {
      */
     public double getLastY()
     {
-        int plen = _pnts.length;
-        return plen > 0 ? _pnts[plen - 1] : -1;
+        int plen = _pointsArray.length;
+        return plen > 0 ? _pointsArray[plen - 1] : -1;
     }
 
     /**
@@ -132,8 +132,8 @@ public class Polygon extends Shape implements Cloneable {
      */
     public Point getLastPoint()
     {
-        int plen = _pnts.length;
-        return plen > 0 ? new Point(_pnts[plen - 2], _pnts[plen - 1]) : null;
+        int plen = _pointsArray.length;
+        return plen > 0 ? new Point(_pointsArray[plen - 2], _pointsArray[plen - 1]) : null;
     }
 
     /**
@@ -141,7 +141,7 @@ public class Polygon extends Shape implements Cloneable {
      */
     public void clear()
     {
-        _pnts = new double[0];
+        _pointsArray = new double[0];
         shapeChanged();
     }
 
@@ -396,12 +396,12 @@ public class Polygon extends Shape implements Cloneable {
      */
     protected Rect getBoundsImpl()
     {
-        if (_pnts.length == 0) return new Rect();
-        double xmin = _pnts[0], xmax = _pnts[0];
-        double ymin = _pnts[1], ymax = _pnts[1];
-        for (int i = 2; i < _pnts.length; i += 2) {
-            double x = _pnts[i];
-            double y = _pnts[i + 1];
+        if (_pointsArray.length == 0) return new Rect();
+        double xmin = _pointsArray[0], xmax = _pointsArray[0];
+        double ymin = _pointsArray[1], ymax = _pointsArray[1];
+        for (int i = 2; i < _pointsArray.length; i += 2) {
+            double x = _pointsArray[i];
+            double y = _pointsArray[i + 1];
             xmin = Math.min(xmin, x);
             xmax = Math.max(xmax, x);
             ymin = Math.min(ymin, y);
@@ -415,7 +415,7 @@ public class Polygon extends Shape implements Cloneable {
      */
     public PathIter getPathIter(Transform aTrans)
     {
-        return new PolyIter(_pnts, aTrans);
+        return new PolyIter(_pointsArray, aTrans);
     }
 
     /**
@@ -425,7 +425,7 @@ public class Polygon extends Shape implements Cloneable {
     {
         try {
             Polygon clone = (Polygon) super.clone();
-            clone._pnts = _pnts.clone();
+            clone._pointsArray = _pointsArray.clone();
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
