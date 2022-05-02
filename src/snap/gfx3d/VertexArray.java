@@ -28,6 +28,12 @@ public class VertexArray implements Cloneable {
     // The number of entries in vertex texture coords array
     private int  _texCoordsArrayLen = 0;
 
+    // The index array
+    private int[]  _indexArray = new int[0];
+
+    // The number of entries in vertex index array
+    private int  _indexArrayLen = 0;
+
     // The number of components per vertex point
     private int  _pointCompCount = 3;
 
@@ -221,6 +227,15 @@ public class VertexArray implements Cloneable {
     }
 
     /**
+     * Sets the vertex points components array.
+     */
+    public void setPointArray(float[] pointArray)
+    {
+        _pointsArray = pointArray;
+        _pointsArrayLen = pointArray.length;
+    }
+
+    /**
      * Returns the vertex colors components array.
      */
     public float[] getColorsArray()
@@ -260,6 +275,38 @@ public class VertexArray implements Cloneable {
     }
 
     /**
+     * Sets the vertex texture coords array.
+     */
+    public void setTexCoordArray(float[] texCoordArray)
+    {
+        _texCoordsArray = texCoordArray;
+        _texCoordsArrayLen = texCoordArray.length;
+    }
+
+    /**
+     * Returns whether index array is set.
+     */
+    public boolean isIndexArraySet()  { return _indexArray != null && _indexArrayLen > 0; }
+
+    /**
+     * Returns the index array, if points have special ordering.
+     */
+    public int[] getIndexArray()
+    {
+        trim();
+        return _indexArray;
+    }
+
+    /**
+     * Sets the index array, if points have special ordering.
+     */
+    public void setIndexArray(int[] indexArray)
+    {
+        _indexArray = indexArray;
+        _indexArrayLen = indexArray.length;
+    }
+
+    /**
      * Returns bounds.
      */
     public Bounds3D getBounds3D()
@@ -296,6 +343,10 @@ public class VertexArray implements Cloneable {
         // Trim TexCoordsArray
         if (_texCoordsArray.length != _texCoordsArrayLen)
             _texCoordsArray = Arrays.copyOf(_texCoordsArray, _texCoordsArrayLen);
+
+        // Trim IndexArray
+        if (_indexArray.length != _indexArrayLen)
+            _indexArray = Arrays.copyOf(_indexArray, _indexArrayLen);
     }
 
     /**
@@ -345,6 +396,7 @@ public class VertexArray implements Cloneable {
         clone._pointsArray = _pointsArray.clone();
         clone._colorsArray = _colorsArray.clone();
         clone._texCoordsArray = _texCoordsArray.clone();
+        clone._indexArray = _indexArray.clone();
 
         // Clone next
         if (_next != null)

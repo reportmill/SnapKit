@@ -23,9 +23,16 @@ public class Poly3D extends FacetShape implements Cloneable {
     // The number of components in vertex colors array
     private int  _colorsArrayLen = 0;
 
+    // The float array to hold vertex texture coords
+    private float[]  _texCoordArray = new float[0];
+
+    // The number of entries in vertex texture coords array
+    private int  _texCoordArrayLen = 0;
+
     // Constants
     public static final int POINT_COMP_COUNT = 3;
     public static final int COLOR_COMP_COUNT = 4;
+    public static final int TEX_COORD_COMP_COUNT = 2;
 
     /**
      * Constructor.
@@ -122,6 +129,34 @@ public class Poly3D extends FacetShape implements Cloneable {
     }
 
     /**
+     * Returns whether texture coords array is set.
+     */
+    public boolean isTexCoordArraySet()  { return _texCoordArray != null && _texCoordArray.length > 0; }
+
+    /**
+     * Returns the vertex texture coords array.
+     */
+    public float[] getTexCoordArray()
+    {
+        trim();
+        return _texCoordArray;
+    }
+
+    /**
+     * Adds a texture coord to vertex texture coords array.
+     */
+    public void addTexCoord(double aU, double aV)
+    {
+        // Expand color components array if needed
+        if (_texCoordArrayLen + TEX_COORD_COMP_COUNT > _texCoordArray.length)
+            _texCoordArray = Arrays.copyOf(_texCoordArray, Math.max(_texCoordArray.length * 2, 24));
+
+        // Add values
+        _texCoordArray[_texCoordArrayLen++] = (float) aU;
+        _texCoordArray[_texCoordArrayLen++] = (float) aV;
+    }
+
+    /**
      * Returns the normal of the path3d. Right hand rule for clockwise/counter-clockwise defined polygons.
      */
     @Override
@@ -160,68 +195,25 @@ public class Poly3D extends FacetShape implements Cloneable {
         if (Double.isNaN(pathNormal.x))
             return vertexArray;
 
-        // Get transform matrix to transform this path to/from facing Z
-        Matrix3D localToFacingZ = getTransformToAlignToVector(0, 0, 1);
-        Matrix3D facingZToLocal = localToFacingZ.clone().invert();
-
-        // Get copy of path facing Z
-        Poly3D polyFacingZ = copyForMatrix(localToFacingZ);
-        float zVal = (float) polyFacingZ.getMinZ();
-
-        // Get Poly2D, break into triangles
-        Shape poly2D = polyFacingZ.getShape2D();
-        Polygon[] triangles = Polygon.getConvexPolys(poly2D, 3);
-
-        // Create loop variables
-        Vector3D pointsNormal = new Vector3D();
-        float[] pointsArray = new float[9];
-
-        // Get Path3Ds
-        for (Polygon triangle : triangles) {
-
-            // Get triangle points
-            for (int i = 0, i3 = 0; i < 3; i++, i3 += 3) {
-                pointsArray[i3 + 0] = (float) triangle.getX(i);
-                pointsArray[i3 + 1] = (float) triangle.getY(i);
-                pointsArray[i3 + 2] = zVal;
-            }
-
-            // Transform points back and add to VertexArray
-            facingZToLocal.transformArrayPoints(pointsArray, 3);
-
-            // If points normal facing backwards, reverse points (swap p0 and p2)
-            Vector3D.getNormalForPoints3fv(pointsNormal, pointsArray, 3);
-            boolean addReversed = !pointsNormal.equals(pathNormal);
-
-            // Add points
-            if (addReversed) {
-                vertexArray.addPoint(pointsArray[6], pointsArray[7], pointsArray[8]);
-                vertexArray.addPoint(pointsArray[3], pointsArray[4], pointsArray[5]);
-                vertexArray.addPoint(pointsArray[0], pointsArray[1], pointsArray[2]);
-            }
-            else {
-                vertexArray.addPoint(pointsArray[0], pointsArray[1], pointsArray[2]);
-                vertexArray.addPoint(pointsArray[3], pointsArray[4], pointsArray[5]);
-                vertexArray.addPoint(pointsArray[6], pointsArray[7], pointsArray[8]);
-            }
-        }
+        // Get/set polygon points in VertexArray
+        float[] pointArray = getPointsArray();
+        vertexArray.setPointArray(pointArray);
 
         // Add colors
         //for (Color color : _colors)
         //    vertexArray.addColor(color);
 
-        // Add texture
+        // If Texture/TexCoordArray is set, configure in VertexArray
         Texture texture = getTexture();
-        if (texture != null) {
+        if (texture != null && isTexCoordArraySet()) {
             vertexArray.setTexture(texture);
-
-            vertexArray.addTexCoord(0, 1);
-            vertexArray.addTexCoord(1, 1);
-            vertexArray.addTexCoord(1, 0);
-            vertexArray.addTexCoord(0, 1);
-            vertexArray.addTexCoord(1, 0);
-            vertexArray.addTexCoord(0, 0);
+            float[] texCoordArray = getTexCoordArray();
+            vertexArray.setTexCoordArray(texCoordArray);
         }
+
+        // Get/set point index array for triangle points in VertexArray
+        int[] indexArrayForTrianglePoints = getIndexArrayForTrianglePoints();
+        vertexArray.setIndexArray(indexArrayForTrianglePoints);
 
         // Handle Stroke: Create/add stroke VertexArray
         if (getStrokeColor() != null) {
@@ -238,6 +230,24 @@ public class Poly3D extends FacetShape implements Cloneable {
 
         // Return
         return vertexArray;
+    }
+
+    /**
+     * Returns the array of indexes to points for triangles from polygon points.
+     */
+    protected int[] getIndexArrayForTrianglePoints()
+    {
+        // Get copy of path facing Z
+        Matrix3D localToFacingZ = getTransformToAlignToVector(0, 0, 1);
+        Poly3D polyFacingZ = copyForMatrix(localToFacingZ);
+
+        // Get Poly2D, break into triangles
+        Shape poly2D = polyFacingZ.getShape2D();
+        PointArrayIndex trianglePointArray = PointArrayIndex.newTrianglePointArrayForShape(poly2D);
+
+        // Get/set point index array in VertexArray
+        int[] indexArray = trianglePointArray.getIndexArray();
+        return indexArray;
     }
 
     /**
@@ -327,6 +337,10 @@ public class Poly3D extends FacetShape implements Cloneable {
         // Trim ColorsArray
         if (_colorsArray.length != _colorsArrayLen)
             _colorsArray = Arrays.copyOf(_colorsArray, _colorsArrayLen);
+
+        // Trim TexCoordArray
+        if (_texCoordArray.length != _texCoordArrayLen)
+            _texCoordArray = Arrays.copyOf(_texCoordArray, _texCoordArrayLen);
     }
 
     /**
@@ -413,6 +427,7 @@ public class Poly3D extends FacetShape implements Cloneable {
         // Clone arrays
         clone._pointsArray = _pointsArray.clone();
         clone._colorsArray = _colorsArray.clone();
+        clone._texCoordArray = _texCoordArray.clone();
 
         // Return clone
         return clone;
