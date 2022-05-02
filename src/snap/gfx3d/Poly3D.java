@@ -12,16 +12,16 @@ import java.util.Arrays;
 public class Poly3D extends FacetShape implements Cloneable {
 
     // The float array to hold actual vertex point components
-    private float[]  _pointsArray = new float[24];
+    private float[]  _pointArray = new float[24];
 
     // The number of components in vertex points array
-    private int  _pointsArrayLen = 0;
+    private int  _pointArrayLen = 0;
 
     // The float array to hold actual vertex color components
-    private float[]  _colorsArray = new float[0];
+    private float[]  _colorArray = new float[0];
 
     // The number of components in vertex colors array
-    private int  _colorsArrayLen = 0;
+    private int  _colorArrayLen = 0;
 
     // The float array to hold vertex texture coords
     private float[]  _texCoordArray = new float[0];
@@ -54,17 +54,17 @@ public class Poly3D extends FacetShape implements Cloneable {
     /**
      * Returns the vertex points components array.
      */
-    public float[] getPointsArray()
+    public float[] getPointArray()
     {
         trim();
-        return _pointsArray;
+        return _pointArray;
     }
 
     /**
      * Returns the number of vertex points in array.
      */
     @Override
-    public int getPointCount()  { return _pointsArrayLen / POINT_COMP_COUNT; }
+    public int getPointCount()  { return _pointArrayLen / POINT_COMP_COUNT; }
 
     /**
      * Returns the Point3D at index.
@@ -81,9 +81,9 @@ public class Poly3D extends FacetShape implements Cloneable {
     public Point3D getPoint(Point3D aPoint, int anIndex)
     {
         int index = anIndex * POINT_COMP_COUNT;
-        aPoint.x = _pointsArray[index + 0];
-        aPoint.y = _pointsArray[index + 1];
-        aPoint.z = _pointsArray[index + 2];
+        aPoint.x = _pointArray[index + 0];
+        aPoint.y = _pointArray[index + 1];
+        aPoint.z = _pointArray[index + 2];
         return aPoint;
     }
 
@@ -93,22 +93,22 @@ public class Poly3D extends FacetShape implements Cloneable {
     public void addPoint(double aVal1, double aVal2, double aVal3)
     {
         // Expand Vertex components array if needed
-        if (_pointsArrayLen + 3 > _pointsArray.length)
-            _pointsArray = Arrays.copyOf(_pointsArray, Math.max(_pointsArray.length * 2, 24));
+        if (_pointArrayLen + 3 > _pointArray.length)
+            _pointArray = Arrays.copyOf(_pointArray, Math.max(_pointArray.length * 2, 24));
 
         // Add values
-        _pointsArray[_pointsArrayLen++] = (float) aVal1;
-        _pointsArray[_pointsArrayLen++] = (float) aVal2;
-        _pointsArray[_pointsArrayLen++] = (float) aVal3;
+        _pointArray[_pointArrayLen++] = (float) aVal1;
+        _pointArray[_pointArrayLen++] = (float) aVal2;
+        _pointArray[_pointArrayLen++] = (float) aVal3;
     }
 
     /**
      * Returns the vertex colorscomponents array.
      */
-    public float[] getColorsArray()
+    public float[] getColorArray()
     {
         trim();
-        return _colorsArray;
+        return _colorArray;
     }
 
     /**
@@ -117,15 +117,15 @@ public class Poly3D extends FacetShape implements Cloneable {
     public void addColor(Color aColor)
     {
         // Expand color components array if needed
-        if (_colorsArrayLen + COLOR_COMP_COUNT > _colorsArray.length)
-            _colorsArray = Arrays.copyOf(_colorsArray, Math.max(_colorsArray.length * 2, 24));
+        if (_colorArrayLen + COLOR_COMP_COUNT > _colorArray.length)
+            _colorArray = Arrays.copyOf(_colorArray, Math.max(_colorArray.length * 2, 24));
 
         // Add values
-        _colorsArray[_colorsArrayLen++] = (float) aColor.getRed();
-        _colorsArray[_colorsArrayLen++] = (float) aColor.getGreen();
-        _colorsArray[_colorsArrayLen++] = (float) aColor.getBlue();
+        _colorArray[_colorArrayLen++] = (float) aColor.getRed();
+        _colorArray[_colorArrayLen++] = (float) aColor.getGreen();
+        _colorArray[_colorArrayLen++] = (float) aColor.getBlue();
         if (COLOR_COMP_COUNT > 3)
-            _colorsArray[_colorsArrayLen++] = (float) aColor.getAlpha();
+            _colorArray[_colorArrayLen++] = (float) aColor.getAlpha();
     }
 
     /**
@@ -162,7 +162,7 @@ public class Poly3D extends FacetShape implements Cloneable {
     @Override
     protected Vector3D createNormal()
     {
-        return Vector3D.getNormalForPoints3fv(new Vector3D(), _pointsArray, getPointCount());
+        return Vector3D.getNormalForPoints3fv(new Vector3D(), _pointArray, getPointCount());
     }
 
     /**
@@ -174,7 +174,7 @@ public class Poly3D extends FacetShape implements Cloneable {
         return new Shape() {
             public PathIter getPathIter(Transform aTransform)
             {
-                return new PointArrayPathIter2D(_pointsArray, _pointsArrayLen, aTransform);
+                return new PointArrayPathIter2D(_pointArray, _pointArrayLen, aTransform);
             }
         };
     }
@@ -196,7 +196,7 @@ public class Poly3D extends FacetShape implements Cloneable {
             return vertexArray;
 
         // Get/set polygon points in VertexArray
-        float[] pointArray = getPointsArray();
+        float[] pointArray = getPointArray();
         vertexArray.setPointArray(pointArray);
 
         // Add colors
@@ -266,16 +266,16 @@ public class Poly3D extends FacetShape implements Cloneable {
 
         // Path3D iteration vars
         int pointCount = getPointCount();
-        float[] pointsArray = getPointsArray();
-        Point3D p0 = new Point3D(pointsArray[0], pointsArray[1], pointsArray[2]);
+        float[] pointArray = getPointArray();
+        Point3D p0 = new Point3D(pointArray[0], pointArray[1], pointArray[2]);
         Point3D p1 = new Point3D();
 
         // Iterate over points and add line stroke
         for (int i = 0; i <= pointCount; i++) {
             int i3 = i % pointCount * 3;
-            p1.x = pointsArray[i3];
-            p1.y = pointsArray[i3 + 1];
-            p1.z = pointsArray[i3 + 2];
+            p1.x = pointArray[i3];
+            p1.y = pointArray[i3 + 1];
+            p1.z = pointArray[i3 + 2];
             VertexArrayUtils.addLineStrokePoints(vertexArray, p0, p1, facetNormal, strokeWidth);
             p0.setPoint(p1);
         }
@@ -289,9 +289,9 @@ public class Poly3D extends FacetShape implements Cloneable {
      */
     public void transform(Matrix3D xform)
     {
-        float[] pointsArray = getPointsArray();
+        float[] pointArray = getPointArray();
         int pointCount = getPointCount();
-        xform.transformArrayPoints(pointsArray, pointCount);
+        xform.transformArrayPoints(pointArray, pointCount);
         clearCachedValues();
     }
 
@@ -311,15 +311,15 @@ public class Poly3D extends FacetShape implements Cloneable {
      */
     public void reverse()
     {
-        // Reverse PointsArray
-        float[] pointsArray = getPointsArray();
+        // Reverse PointArray
+        float[] pointArray = getPointArray();
         int pointCount = getPointCount();
-        reverseArray(pointsArray, pointCount, POINT_COMP_COUNT);
+        reverseArray(pointArray, pointCount, POINT_COMP_COUNT);
 
-        // Reverse ColorsArray
-        float[] colorsArray = getColorsArray();
-        int colorCount = _colorsArrayLen / COLOR_COMP_COUNT;
-        reverseArray(colorsArray, colorCount, COLOR_COMP_COUNT);
+        // Reverse ColorArray
+        float[] colorArray = getColorArray();
+        int colorCount = _colorArrayLen / COLOR_COMP_COUNT;
+        reverseArray(colorArray, colorCount, COLOR_COMP_COUNT);
 
         // Clear cached values
         clearCachedValues();
@@ -330,13 +330,13 @@ public class Poly3D extends FacetShape implements Cloneable {
      */
     public void trim()
     {
-        // Trim PointsArray
-        if (_pointsArray.length != _pointsArrayLen)
-            _pointsArray = Arrays.copyOf(_pointsArray, _pointsArrayLen);
+        // Trim PointArray
+        if (_pointArray.length != _pointArrayLen)
+            _pointArray = Arrays.copyOf(_pointArray, _pointArrayLen);
 
-        // Trim ColorsArray
-        if (_colorsArray.length != _colorsArrayLen)
-            _colorsArray = Arrays.copyOf(_colorsArray, _colorsArrayLen);
+        // Trim ColorArray
+        if (_colorArray.length != _colorArrayLen)
+            _colorArray = Arrays.copyOf(_colorArray, _colorArrayLen);
 
         // Trim TexCoordArray
         if (_texCoordArray.length != _texCoordArrayLen)
@@ -399,12 +399,12 @@ public class Poly3D extends FacetShape implements Cloneable {
         bounds.setMaxXYZ(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
 
         // Iterate over points
-        float[] pointsArray = getPointsArray();
+        float[] pointArray = getPointArray();
         int arrayCount = getPointCount() * POINT_COMP_COUNT;
         for (int i = 0; i < arrayCount; i += POINT_COMP_COUNT) {
-            float x = pointsArray[i + 0];
-            float y = pointsArray[i + 1];
-            float z = pointsArray[i + 2];
+            float x = pointArray[i + 0];
+            float y = pointArray[i + 1];
+            float z = pointArray[i + 2];
             bounds.addXYZ(x, y, z);
         }
 
@@ -425,8 +425,8 @@ public class Poly3D extends FacetShape implements Cloneable {
         Poly3D clone  = (Poly3D) super.clone();
 
         // Clone arrays
-        clone._pointsArray = _pointsArray.clone();
-        clone._colorsArray = _colorsArray.clone();
+        clone._pointArray = _pointArray.clone();
+        clone._colorArray = _colorArray.clone();
         clone._texCoordArray = _texCoordArray.clone();
 
         // Return clone
@@ -474,18 +474,18 @@ public class Poly3D extends FacetShape implements Cloneable {
     public static class PointArrayPathIter2D extends PathIter {
 
         // Ivars
-        private float[]  _pointsArray;
+        private float[]  _pointArray;
         private int  _pointCount;
         private int  _pointIndex;
 
         /**
          * Constructor.
          */
-        public PointArrayPathIter2D(float[] aPointsArray, int aPointsArrayLength, Transform aTransform)
+        public PointArrayPathIter2D(float[] aPointArray, int aPointArrayLength, Transform aTransform)
         {
             super(aTransform);
-            _pointsArray = aPointsArray;
-            _pointCount = aPointsArrayLength / POINT_COMP_COUNT;
+            _pointArray = aPointArray;
+            _pointCount = aPointArrayLength / POINT_COMP_COUNT;
             if (_pointCount == 0)
                 _pointIndex = 999;
         }
@@ -504,9 +504,9 @@ public class Poly3D extends FacetShape implements Cloneable {
             if (_pointIndex < _pointCount) {
 
                 // Get X/Y for PointIndex
-                int pointsArrayIndex = _pointIndex * POINT_COMP_COUNT;
-                float x = _pointsArray[pointsArrayIndex + 0];
-                float y = _pointsArray[pointsArrayIndex + 1];
+                int pointArrayIndex = _pointIndex * POINT_COMP_COUNT;
+                float x = _pointArray[pointArrayIndex + 0];
+                float y = _pointArray[pointArrayIndex + 1];
                 _pointIndex++;
 
                 // Handle first segment

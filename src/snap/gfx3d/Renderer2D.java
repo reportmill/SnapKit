@@ -140,8 +140,8 @@ public class Renderer2D extends Renderer {
         else if (aShape instanceof VertexArrayShape) {
             VertexArrayShape vertexArrayShape = (VertexArrayShape) aShape;
             VertexArray vertexArray = vertexArrayShape.getVertexArray();
-            float[] pointsArray = vertexArray.getPointsArray();
-            float[] colorsArray = vertexArray.isColorsArraySet() ? vertexArray.getColorsArray() : null;
+            float[] pointsArray = vertexArray.getPointArray();
+            float[] colorsArray = vertexArray.isColorArraySet() ? vertexArray.getColorArray() : null;
             Color color = vertexArray.getColor();
 
             int pointCount = vertexArray.getPointCount();
