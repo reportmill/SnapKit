@@ -429,4 +429,31 @@ public class Matrix3D implements Cloneable {
         // Return
         return xfm;
     }
+
+    /**
+     * Returns a orthographic transform.
+     *
+     *     [ 2 / (r - l)     0            0              tx ]     [ px ]
+     *     [    0       2 / (t - b)       0              ty ]  x  [ py ]
+     *     [    0           0        -2 / (far - near)   tz ]     [ pz ]
+     *     [    0           0           -1               0  ]     [ w  ]
+     *
+     */
+    public static Matrix3D newOrtho(double left, double right, double bottom, double top, double nearZ, double farZ)
+    {
+        Matrix3D xfm = new Matrix3D();
+
+        // Set elements like OpenGL: https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glOrtho.xml
+        xfm.mtx[0 * 4 + 0] = 2 / (right - left);
+        xfm.mtx[1 * 4 + 1] = 2 / (top - bottom);
+        xfm.mtx[2 * 4 + 2] = -2 / (farZ - nearZ);
+
+        // Set tx, ty, tz
+        xfm.mtx[3 * 4 + 0] = - (right + left) / (right - left);
+        xfm.mtx[3 * 4 + 1] = - (top + bottom) / (top - bottom);
+        xfm.mtx[3 * 4 + 2] = - (farZ + nearZ) / (farZ - nearZ);
+
+        // Return
+        return xfm;
+    }
 }

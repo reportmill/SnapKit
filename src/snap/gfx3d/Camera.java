@@ -27,7 +27,7 @@ public class Camera {
     
     // Width, height, depth
     private double  _viewWidth, _viewHeight;
-    
+
     // Rotation around y axis
     private double  _yaw = 0;
     
@@ -45,7 +45,10 @@ public class Camera {
 
     // Perspective
     private double  _focalLen = 60*72;
-    
+
+    // Whether camera is showing in Orthographic projection
+    private boolean  _ortho;
+
     // Camera normal
     private Vector3D  _normal = new Vector3D(0, 0, -1);
     
@@ -67,12 +70,12 @@ public class Camera {
     // Constants for properties
     public static final String ViewWidth_Prop = "ViewWidth";
     public static final String ViewHeight_Prop = "ViewHeight";
-    public static final String Depth_Prop = "Depth";
     public static final String Yaw_Prop = "Yaw";
     public static final String Pitch_Prop = "Pitch";
     public static final String Roll_Prop = "Roll";
     public static final String FocalLength_Prop = "FocalLength";
     public static final String GimbalRadius_Prop = "GimbalRadius";
+    public static final String Ortho_Prop = "Ortho";
     public static final String PrefGimbalRadius_Prop = "PrefGimbalRadius";
     public static final String Renderer_Prop = "Renderer";
 
@@ -283,6 +286,21 @@ public class Camera {
     }
 
     /**
+     * Returns whether camera is viewing in orthographic projection (no perspective).
+     */
+    public boolean isOrtho()  { return _ortho; }
+
+    /**
+     * Sets whether camera is viewing in orthographic projection (no perspective).
+     */
+    public void setOrtho(boolean aValue)
+    {
+        if (aValue == _ortho) return;
+        firePropChange(Ortho_Prop, _ortho, _ortho = aValue);
+        clearCachedValues();
+    }
+
+    /**
      * Returns the camera normal as a vector.
      */
     public Vector3D getNormal()  { return _normal; }
@@ -337,6 +355,14 @@ public class Camera {
     {
         // If already set, just return
         if (_cameraToClip != null) return _cameraToClip;
+
+        // If Orthographic projection, do that
+        if (isOrtho()) {
+            double viewW = getViewWidth(), halfW = viewW / 2;
+            double viewH = getViewHeight(), halfH = viewH / 2;
+            Matrix3D ortho = Matrix3D.newOrtho(-halfW, halfW, -halfH, halfH, 10, 1000);
+            return _cameraToClip = ortho;
+        }
 
         // Calc, set and return
         double fovY = getFieldOfViewY();
@@ -607,7 +633,7 @@ public class Camera {
     }
 
     /**
-     * Copy attributes of another scene.
+     * Copy attributes of another camera.
      */
     public void copy3D(Camera aCam)
     {
@@ -616,6 +642,7 @@ public class Camera {
         setRoll(aCam.getRoll());
         setFocalLength(aCam.getFocalLength());
         setPrefGimbalRadius(aCam.isPrefGimbalRadiusSet() ? aCam.getPrefGimbalRadius() : 0);
+        setOrtho(aCam.isOrtho());
     }
 
     /**

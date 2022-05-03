@@ -328,7 +328,6 @@ public class Renderer2D extends Renderer {
         switch (propName) {
             case Camera.ViewWidth_Prop:
             case Camera.ViewHeight_Prop:
-            case Camera.Depth_Prop:
             case Camera.Yaw_Prop:
             case Camera.Pitch_Prop:
             case Camera.Roll_Prop:
