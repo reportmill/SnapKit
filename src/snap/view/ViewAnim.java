@@ -607,6 +607,52 @@ public class ViewAnim implements XMLArchiver.Archivable {
     }
 
     /**
+     * Watches given View for changes and registers animation.
+     */
+    public void startAutoRegisterChanges(String ... theProps)
+    {
+        _autoRegisterChangesListener = pc -> autoRegisterPropChange(pc);
+        _autoRegisterChanges = new ArrayList<>();
+        View view = getView();
+        view.addPropChangeListener(_autoRegisterChangesListener, theProps);
+    }
+
+    /**
+     * Stops watching and register changes.
+     */
+    public void stopAutoRegisterChanges()
+    {
+        // Remove/clear AutoRegisterChangeListener
+        View view = getView();
+        view.removePropChangeListener(_autoRegisterChangesListener);
+        _autoRegisterChangesListener = null;
+
+        // Reset old values for changes and clear changes
+        for (PropChange propChange : _autoRegisterChanges) {
+            String propName = propChange.getPropName();
+            Object oldValue = propChange.getOldValue();
+            view.setPropValue(propName, oldValue);
+        }
+        _autoRegisterChanges = null;
+    }
+
+    /**
+     * Register anim for changes.
+     */
+    public void autoRegisterPropChange(PropChange aPC)
+    {
+        String propName = aPC.getPropName();
+        setValue(propName, aPC.getOldValue(), aPC.getNewValue());
+        _autoRegisterChanges.add(aPC);
+    }
+
+    // AutoRegisterChanges PropChangeListener
+    private PropChangeListener  _autoRegisterChangesListener;
+
+    // List of changes encountered by AutoRegisterChanges PropChangeListener
+    private List<PropChange>  _autoRegisterChanges;
+
+    /**
      * Standard toString implementation.
      */
     public String toString()

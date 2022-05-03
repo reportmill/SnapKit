@@ -232,7 +232,7 @@ public class Camera {
     /**
      * Returns the optimal distance from center of scene to camera when in gimbal mode.
      */
-    protected double calcPrefGimbalRadius()
+    public double calcPrefGimbalRadius()
     {
         // Get scene to camera transform for GimbalRadius = 0
         double gimbalRadius = getGimbalRadius();
@@ -401,6 +401,30 @@ public class Camera {
     {
         Matrix3D cameraToClip = getCameraToClip();
         return cameraToClip.mtx;
+    }
+
+    /**
+     * Set camera view to given side.
+     */
+    public void setYawPitchRollForSide(Side3D aSide)
+    {
+        switch (aSide) {
+
+            // Handle Top/Bottom
+            case TOP: setYaw(0); setPitch(90); setRoll(0); break;
+            case BOTTOM: setYaw(0); setPitch(-90); setRoll(0); break;
+
+            // Handle Left/right
+            case LEFT: setYaw(90); setPitch(0); setRoll(0); break;
+            case RIGHT: setYaw(-90); setPitch(0); setRoll(0); break;
+
+            // Handle Front/Back
+            case FRONT: setYaw(0); setPitch(0); setRoll(0); break;
+            case BACK: setYaw(180); setPitch(0); setRoll(0); break;
+
+            // Handle the impossible
+            default: throw new RuntimeException("Camera: setYawPitchRollForSide: Unknown side: " + aSide);
+        }
     }
 
     /**

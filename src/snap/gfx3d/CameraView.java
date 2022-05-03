@@ -20,6 +20,7 @@ public class CameraView extends ParentView {
     public static final String Yaw_Prop = Camera.Yaw_Prop;
     public static final String Pitch_Prop = Camera.Pitch_Prop;
     public static final String Roll_Prop = Camera.Roll_Prop;
+    public static final String PrefGimbalRadius_Prop = Camera.PrefGimbalRadius_Prop;
 
     /**
      * Constructor.
@@ -148,8 +149,12 @@ public class CameraView extends ParentView {
      */
     protected void cameraChanged(PropChange aPC)
     {
-        //_pcs.fireDeepChange(this, aPC);
-        relayout();
+        // Forward on basic Camera prop changes
+        String propName = aPC.getPropName();
+        if (propName == Yaw_Prop || propName == Pitch_Prop || propName == Roll_Prop || propName == PrefGimbalRadius_Prop)
+            _pcs.firePropChange(aPC);
+
+        // Repaint
         repaint();
     }
 
@@ -158,13 +163,17 @@ public class CameraView extends ParentView {
      */
     public Object getPropValue(String aPropName)
     {
-        if (aPropName.equals(Yaw_Prop))
-            return getYaw();
-        if (aPropName.equals(Pitch_Prop))
-            return getPitch();
-        if (aPropName.equals(Roll_Prop))
-            return getRoll();
-        return super.getPropValue(aPropName);
+        switch (aPropName) {
+
+            // Handle Yaw, Pitch, Roll, PrefGimbalRadius
+            case Yaw_Prop: return getYaw();
+            case Pitch_Prop: return getPitch();
+            case Roll_Prop: return getRoll();
+            case PrefGimbalRadius_Prop: return _camera.getPrefGimbalRadius();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
     }
 
     /**
@@ -172,12 +181,16 @@ public class CameraView extends ParentView {
      */
     public void setPropValue(String aPropName, Object aValue)
     {
-        if (aPropName.equals(Yaw_Prop))
-            setYaw(SnapUtils.doubleValue(aValue));
-        else if (aPropName.equals(Pitch_Prop))
-            setPitch(SnapUtils.doubleValue(aValue));
-        else if (aPropName.equals(Roll_Prop))
-            setRoll(SnapUtils.doubleValue(aValue));
-        else super.setPropValue(aPropName, aValue);
+        switch (aPropName) {
+
+            // Handle Yaw, Pitch, Roll, PrefGimbalRadius
+            case Yaw_Prop: setYaw(SnapUtils.doubleValue(aValue)); break;
+            case Pitch_Prop: setPitch(SnapUtils.doubleValue(aValue)); break;
+            case Roll_Prop: setRoll(SnapUtils.doubleValue(aValue)); break;
+            case PrefGimbalRadius_Prop: _camera.setPrefGimbalRadius(SnapUtils.doubleValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 }
