@@ -11,15 +11,15 @@ import snap.view.*;
 public class CameraView extends ParentView {
 
     // The Camera
-    private Camera3D _camera;
+    private Camera  _camera;
     
     // The Scene
     private Scene3D  _scene;
 
     // Constants for properties
-    public static final String Yaw_Prop = Camera3D.Yaw_Prop;
-    public static final String Pitch_Prop = Camera3D.Pitch_Prop;
-    public static final String Roll_Prop = Camera3D.Roll_Prop;
+    public static final String Yaw_Prop = Camera.Yaw_Prop;
+    public static final String Pitch_Prop = Camera.Pitch_Prop;
+    public static final String Roll_Prop = Camera.Roll_Prop;
 
     /**
      * Constructor.
@@ -35,7 +35,7 @@ public class CameraView extends ParentView {
     /**
      * Returns the camera as a vector.
      */
-    public Camera3D getCamera()  { return _camera; }
+    public Camera getCamera()  { return _camera; }
 
     /**
      * Returns the Scene3D.

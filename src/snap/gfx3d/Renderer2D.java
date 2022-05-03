@@ -28,7 +28,7 @@ public class Renderer2D extends Renderer {
     /**
      * Constructor.
      */
-    public Renderer2D(Camera3D aCamera)
+    public Renderer2D(Camera aCamera)
     {
         super(aCamera);
     }
@@ -85,7 +85,7 @@ public class Renderer2D extends Renderer {
         addFacetShapePainterPathsInCameraCoords(facetShapesInCameraCoords);
 
         // Get transform from camera to View center space
-        Camera3D camera = getCamera();
+        Camera camera = getCamera();
         Matrix3D cameraToView = camera.getCameraToView();
 
         // Iterate over FacetShape and replace with paths in view coords
@@ -326,14 +326,14 @@ public class Renderer2D extends Renderer {
     {
         String propName = aPC.getPropName();
         switch (propName) {
-            case Camera3D.ViewWidth_Prop:
-            case Camera3D.ViewHeight_Prop:
-            case Camera3D.Depth_Prop:
-            case Camera3D.Yaw_Prop:
-            case Camera3D.Pitch_Prop:
-            case Camera3D.Roll_Prop:
-            case Camera3D.FocalLength_Prop:
-            case Camera3D.PrefGimbalRadius_Prop:
+            case Camera.ViewWidth_Prop:
+            case Camera.ViewHeight_Prop:
+            case Camera.Depth_Prop:
+            case Camera.Yaw_Prop:
+            case Camera.Pitch_Prop:
+            case Camera.Roll_Prop:
+            case Camera.FocalLength_Prop:
+            case Camera.PrefGimbalRadius_Prop:
                 rebuildFacetShapes();
         }
         super.cameraDidPropChange(aPC);
@@ -436,7 +436,7 @@ public class Renderer2D extends Renderer {
         /**
          * Returns a new default renderer.
          */
-        public Renderer newRenderer(Camera3D aCamera)
+        public Renderer newRenderer(Camera aCamera)
         {
             return new Renderer2D(aCamera);
         }

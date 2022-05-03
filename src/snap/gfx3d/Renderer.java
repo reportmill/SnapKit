@@ -9,7 +9,7 @@ import snap.util.PropChange;
 public abstract class Renderer {
 
     // The Camera
-    protected Camera3D _camera;
+    protected Camera  _camera;
 
     // The Scene
     protected Scene3D  _scene;
@@ -20,7 +20,7 @@ public abstract class Renderer {
     /**
      * Constructor.
      */
-    public Renderer(Camera3D aCamera)
+    public Renderer(Camera aCamera)
     {
         _camera = aCamera;
         _scene = _camera.getScene();
@@ -36,7 +36,7 @@ public abstract class Renderer {
     /**
      * Returns the Camera.
      */
-    public Camera3D getCamera()  { return _camera; }
+    public Camera getCamera()  { return _camera; }
 
     /**
      * Returns the Scene.
@@ -49,7 +49,7 @@ public abstract class Renderer {
     public Rect getSceneBoundsInView()
     {
         // This is a totally bogus implementation - just returns View bounds
-        Camera3D camera = getCamera();
+        Camera camera = getCamera();
         double viewW = camera.getViewWidth();
         double viewH = camera.getViewHeight();
         return new Rect(0, 0, viewW, viewH);
@@ -73,7 +73,7 @@ public abstract class Renderer {
     /**
      * Returns a new default renderer.
      */
-    public static Renderer newRenderer(Camera3D aCamera)
+    public static Renderer newRenderer(Camera aCamera)
     {
         Renderer renderer = RendererFactory.newDefaultRenderer(aCamera);
         return renderer;

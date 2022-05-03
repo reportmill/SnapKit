@@ -9,7 +9,7 @@ package snap.gfx3d;
 public class Scene3D extends ParentShape {
     
     // Camera that renders the scene
-    private Camera3D _camera;
+    private Camera  _camera;
     
     // Light that illuminates the scene
     private Light3D  _light = new Light3D();
@@ -19,14 +19,14 @@ public class Scene3D extends ParentShape {
      */
     public Scene3D()
     {
-        _camera = new Camera3D();
+        _camera = new Camera();
         _camera.setScene(this);
     }
 
     /**
      * Returns the camera that renders this scene.
      */
-    public Camera3D getCamera()  { return _camera; }
+    public Camera getCamera()  { return _camera; }
 
     /**
      * Returns the light that illumiates this scene.

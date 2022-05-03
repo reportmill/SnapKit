@@ -20,12 +20,12 @@ public abstract class RendererFactory {
     /**
      * Returns a new default renderer.
      */
-    public abstract Renderer newRenderer(Camera3D aCamera);
+    public abstract Renderer newRenderer(Camera aCamera);
 
     /**
      * Returns a new default renderer.
      */
-    public static Renderer newDefaultRenderer(Camera3D aCamera)
+    public static Renderer newDefaultRenderer(Camera aCamera)
     {
         if (_defaultFactory != null)
             return _defaultFactory.newRenderer(aCamera);

@@ -20,13 +20,13 @@ import snap.view.ViewEvent;
  *   Polygon front: Right hand rule (counter-clockwise defined polygons face forward)
  *   Transforms: Row major notation (as opposed to column major, points are assumed row vectors) 
  */
-public class Camera3D {
+public class Camera {
     
     // The scene being viewed
     private Scene3D  _scene;
     
     // Width, height, depth
-    private double _viewWidth, _viewHeight, _depth = 40;
+    private double  _viewWidth, _viewHeight;
     
     // Rotation around y axis
     private double  _yaw = 0;
@@ -84,7 +84,7 @@ public class Camera3D {
     /**
      * Constructor.
      */
-    public Camera3D()  { }
+    public Camera()  { }
 
     /**
      * Returns the scene this camera is associated with.
@@ -123,21 +123,6 @@ public class Camera3D {
     {
         if (aValue == _viewHeight) return;
         firePropChange(ViewHeight_Prop, _viewHeight, _viewHeight = aValue);
-        clearCachedValues();
-    }
-
-    /**
-     * Returns the depth of the scene.
-     */
-    public double getDepth()  { return _depth; }
-
-    /**
-     * Sets the depth of the scene.
-     */
-    public void setDepth(double aValue)
-    {
-        if (aValue == _depth) return;
-        firePropChange(Depth_Prop, _depth, _depth = aValue);
         clearCachedValues();
     }
 
@@ -471,7 +456,7 @@ public class Camera3D {
         // Clear old renderer
         Renderer oldRenderer = _renderer;
         if (_renderer != null)
-            System.err.println("Camera3D.setRenderer: Need to free renderer");
+            System.err.println("Camera.setRenderer: Need to free renderer");
 
         // Set new renderer
         _renderer = aRenderer;
@@ -600,9 +585,8 @@ public class Camera3D {
     /**
      * Copy attributes of another scene.
      */
-    public void copy3D(Camera3D aCam)
+    public void copy3D(Camera aCam)
     {
-        setDepth(aCam.getDepth());
         setYaw(aCam.getYaw());
         setPitch(aCam.getPitch());
         setRoll(aCam.getRoll());
