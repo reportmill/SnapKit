@@ -400,6 +400,14 @@ public class ViewUtils {
     }
 
     /**
+     * Backdoor for protected View method.
+     */
+    public static void setParent(View aView, ParentView aParent)
+    {
+        aView.setParent(aParent);
+    }
+
+    /**
      * Backdoor for protected ParentView method.
      */
     public static void addChild(ParentView aPar, View aChild)
