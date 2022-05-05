@@ -284,9 +284,12 @@ public class VertexArray implements Cloneable {
     }
 
     /**
-     * Returns whether index array is set.
+     * Returns whether texture coords array is set.
      */
-    public boolean isIndexArraySet()  { return _indexArray != null && _indexArrayLen > 0; }
+    public boolean isTexCoordArraySet()
+    {
+        return _texCoordArrayLen > 0 && getTexture() != null;
+    }
 
     /**
      * Returns the index array, if points have special ordering.
@@ -305,6 +308,11 @@ public class VertexArray implements Cloneable {
         _indexArray = indexArray;
         _indexArrayLen = indexArray.length;
     }
+
+    /**
+     * Returns whether index array is set.
+     */
+    public boolean isIndexArraySet()  { return _indexArray != null && _indexArrayLen > 0; }
 
     /**
      * Returns bounds.
