@@ -360,7 +360,7 @@ public class Camera {
         if (isOrtho()) {
             double viewW = getViewWidth(), halfW = viewW / 2;
             double viewH = getViewHeight(), halfH = viewH / 2;
-            Matrix3D ortho = Matrix3D.newOrtho(-halfW, halfW, -halfH, halfH, 10, 1000);
+            Matrix3D ortho = Matrix3D.newOrtho(-halfW, halfW, -halfH, halfH, 10, 5000);
             return _cameraToClip = ortho;
         }
 
