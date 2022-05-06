@@ -1,24 +1,26 @@
 package snap.gfx3d;
-import snap.geom.Pos;
-import snap.geom.Rect;
-import snap.gfx.*;
+import snap.gfx.Painter;
 import snap.util.PropChange;
 import snap.util.SnapUtils;
-import snap.view.*;
+import snap.view.View;
+import snap.view.ViewEvent;
 
 /**
  * A View subclass to render.
  */
-public class CameraView extends ParentView {
+public class CubeView extends View {
 
     // The Camera
     private Camera  _camera;
-    
+
     // The Scene
     private Scene3D  _scene;
 
-    // The control cube
-    private CubeView  _cubeView;
+    // The Cube
+    private CubeShape  _cubeShape;
+
+    // The CameraView to control
+    private CameraView  _cameraView;
 
     // Constants for properties
     public static final String Yaw_Prop = Camera.Yaw_Prop;
@@ -29,14 +31,45 @@ public class CameraView extends ParentView {
     /**
      * Constructor.
      */
-    public CameraView()
+    public CubeView()
     {
         _scene = new Scene3D();
+
+        // Get/config camera
         _camera = _scene.getCamera();
+        _camera.setFocalLength(2 * 72);
         _camera.addPropChangeListener(pce -> cameraChanged(pce));
 
-        // Enable events
+        // Set preferred size
+        setPrefSize(75, 75);
+
+        // Add Cube to CubeView
+        addCube();
+
+        // Enable events for rotations
         enableEvents(MousePress, MouseDrag, MouseRelease, Scroll);
+    }
+
+    /**
+     * Returns the CameraView to sync with.
+     */
+    public CameraView getCameraView()  { return _cameraView; }
+
+    /**
+     * Sets the CameraView to sync with.
+     */
+    public void setCameraView(CameraView aCameraView)
+    {
+        // If already set, just return
+        if (aCameraView == _cameraView) return;
+
+        // Set value
+        _cameraView = aCameraView;
+
+        // Sync Yaw/Pitch/Roll
+        setYaw(_cameraView.getYaw());
+        setPitch(_cameraView.getPitch());
+        setRoll(_cameraView.getRoll());
     }
 
     /**
@@ -80,48 +113,18 @@ public class CameraView extends ParentView {
     public void setRoll(double aValue)  { _camera.setRoll(aValue); }
 
     /**
-     * Returns whether to show CubeView.
+     * Adds cube to view.
      */
-    public boolean isShowCubeView()  { return _cubeView != null && _cubeView.isShowing(); }
-
-    /**
-     * Sets whether to show CubeView.
-     */
-    public void setShowCubeView(boolean aValue)
+    protected void addCube()
     {
-        // If already set, just return
-        if (aValue == isShowCubeView()) return;
-
-        // Either show or remove
-        CubeView cubeView = getCubeView();
-        if (aValue) {
-            addChild(cubeView);
-            cubeView.setCameraView(this);
-        }
-        else removeChild(cubeView);
+        _cubeShape = new CubeShape();
+        _scene.addChild(_cubeShape);
     }
 
     /**
-     * Returns the control cube.
+     * Paints camera.
      */
-    public CubeView getCubeView()
-    {
-        // If already set, just return
-        if (_cubeView != null) return _cubeView;
-
-        // Create CubeView
-        CubeView cubeView = new CubeView();
-        cubeView.setSizeToPrefSize();
-        cubeView.setManaged(false);
-        cubeView.setLean(Pos.TOP_RIGHT);
-
-        // Set and return
-        return _cubeView = cubeView;
-    }
-
-    /**
-     * Paints Camera.
-     */
+    @Override
     protected void paintFront(Painter aPntr)
     {
         _camera.paintScene(aPntr);
@@ -154,34 +157,6 @@ public class CameraView extends ParentView {
     }
 
     /**
-     * Override to account for Scene3D bounds.
-     */
-    public void repaint()
-    {
-        Rect bnds = getBoundsMarked();
-        repaintInParent(bnds);
-    }
-
-    /**
-     * Override to account for Scene3D bounds.
-     */
-    public Rect getBoundsMarked()
-    {
-        Rect bounds = getBoundsLocal();
-        Rect camBnds = _camera.getSceneBounds2D();
-        if (camBnds.x < bounds.x)
-            bounds.x = camBnds.x;
-        if (camBnds.y < bounds.y)
-            bounds.y = camBnds.y;
-        if (camBnds.getMaxX() > bounds.getMaxX())
-            bounds.width = camBnds.getMaxX() - bounds.x;
-        if (camBnds.getMaxY() > bounds.getMaxY())
-            bounds.height = camBnds.getMaxY() - bounds.y;
-        bounds.inset(-2);
-        return bounds;
-    }
-
-    /**
      * Called when scene changes.
      */
     protected void cameraChanged(PropChange aPC)
@@ -190,11 +165,9 @@ public class CameraView extends ParentView {
         String propName = aPC.getPropName();
         if (propName == Yaw_Prop || propName == Pitch_Prop || propName == Roll_Prop) {
             _pcs.firePropChange(aPC);
-            if (_cubeView != null)
-                _cubeView.setPropValue(propName, aPC.getNewValue());
+            if (_cameraView != null)
+                _cameraView.setPropValue(propName, aPC.getNewValue());
         }
-        else if (propName == PrefGimbalRadius_Prop)
-            _pcs.firePropChange(aPC);
 
         // Repaint
         repaint();
