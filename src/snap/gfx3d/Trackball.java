@@ -41,6 +41,9 @@ public class Trackball extends ParentView {
     // saved angle for calculating new roll during drags on the collar
     private double  _lastRollAngle;
 
+    // MouseHandler for normal drags
+    private MouseHandler  _mouseHandler;
+
     // The trackball image, highlight image and knob image
     private ImageView  _tball = new ImageView(Image.get(getClass(), "pkg.images/Trackball.png"));
     private ImageView  _tball_lit = new ImageView(Image.get(getClass(), "pkg.images/Trackball_lit.png"));
@@ -71,6 +74,9 @@ public class Trackball extends ParentView {
      */
     public Trackball()
     {
+        // Set size
+        setPrefSize(IMAGE_SIZE, IMAGE_SIZE);
+
         // Fix image sizes
         _tball.setSize(IMAGE_SIZE, IMAGE_SIZE);
         _tball_lit.setSize(IMAGE_SIZE, IMAGE_SIZE);
@@ -96,8 +102,8 @@ public class Trackball extends ParentView {
         _camera.setPrefGimbalRadius(_camera.getFocalLength());
 
         // Enable mouse/action events
-        enableEvents(MousePress, MouseDrag, MouseRelease, Action); //setFill(null);
-        setPrefSize(IMAGE_SIZE, IMAGE_SIZE);
+        enableEvents(MousePress, MouseDrag, MouseRelease, Action);
+        _mouseHandler = new MouseHandler(_camera);
     }
 
     /**
@@ -190,7 +196,7 @@ public class Trackball extends ParentView {
             _hitPart = HIT_TRACKBALL; // turn on hilight
             removeChild(_tball);
             addChild(_tball_lit);
-            _camera.processEvent(anEvent);
+            _mouseHandler.processEvent(anEvent);
         }
 
         // Else if in collar, add knob
@@ -222,7 +228,7 @@ public class Trackball extends ParentView {
         }
 
         // Otherwise, forward to scene
-        else _camera.processEvent(anEvent);
+        else _mouseHandler.processEvent(anEvent);
 
         // Repaint and fire action event
         repaint();
@@ -235,7 +241,7 @@ public class Trackball extends ParentView {
     protected void mouseReleased(ViewEvent anEvent)
     {
         if (_hitPart == HIT_TRACKBALL) {
-            _camera.processEvent(anEvent);
+            _mouseHandler.processEvent(anEvent);
             removeChild(_tball_lit);
             addChild(_tball);
         }

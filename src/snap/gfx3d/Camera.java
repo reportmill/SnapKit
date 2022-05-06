@@ -2,11 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
-import snap.geom.Point;
 import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
-import snap.view.ViewEvent;
 
 /**
  * This class represent a camera focusing on a scene and manages a display list of simple paths based on
@@ -58,12 +56,6 @@ public class Camera {
     // The Renderer
     private Renderer  _renderer;
 
-    // Mouse drag variable - mouse drag last point
-    private Point  _pointLast;
-    
-    // used for shift-drag to indicate which axis to constrain rotation to
-    private int  _dragConstraint;
-    
     // The PropChangeSupport
     protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
 
@@ -78,11 +70,6 @@ public class Camera {
     public static final String Ortho_Prop = "Ortho";
     public static final String PrefGimbalRadius_Prop = "PrefGimbalRadius";
     public static final String Renderer_Prop = "Renderer";
-
-    // Constants for mouse drag constraints
-    public final int CONSTRAIN_NONE = 0;
-    public final int CONSTRAIN_PITCH = 1;
-    public final int CONSTRAIN_YAW = 2;
 
     /**
      * Constructor.
@@ -556,80 +543,6 @@ public class Camera {
         _cameraToClip = null;
         _cameraToView = null;
         _sceneToView = null;
-    }
-
-    /**
-     * Viewer method.
-     */
-    public void processEvent(ViewEvent anEvent)
-    {
-        // Do normal version
-        if (anEvent.isConsumed()) return;
-
-        // Handle MousePressed: Set last point to event location in scene coords and _dragConstraint
-        if (anEvent.isMousePress()) {
-            _pointLast = anEvent.getPoint(); //_valueAdjusting = true;
-            _dragConstraint = CONSTRAIN_NONE;
-        }
-
-        // Handle MouseDragged
-        else if (anEvent.isMouseDrag())
-            mouseDragged(anEvent);
-
-        // Handle Scroll: Assume + 1x per 60 points (1 inches)
-        else if (anEvent.isScroll()) {
-            int SCROLL_SCALE = 10;
-            double scroll = anEvent.getScrollY();
-            double distZ = scroll * SCROLL_SCALE;
-            double focalLen = getFocalLength();
-            double gimbalRad = getGimbalRadius();
-            double gimbalRad2 = Math.max(gimbalRad + distZ, -focalLen + 100);
-            setPrefGimbalRadius(gimbalRad2);
-        }
-    }
-
-    /**
-     * Viewer method.
-     */
-    public void mouseDragged(ViewEvent anEvent)
-    {
-        // Get event location in this scene shape coords
-        Point point = anEvent.getPoint();
-
-        // If right-mouse, muck with perspective
-        if (anEvent.isShortcutDown()) {
-            double gimbalRad = getGimbalRadius();
-            setPrefGimbalRadius(gimbalRad + _pointLast.y - point.y);
-        }
-
-        // Otherwise, just do pitch and roll
-        else {
-
-            // Shift-drag constrains to just one axis at a time
-            if (anEvent.isShiftDown()) {
-
-                // If no constraint
-                if (_dragConstraint==CONSTRAIN_NONE) {
-                    if (Math.abs(point.y-_pointLast.y) > Math.abs(point.x-_pointLast.x))
-                        _dragConstraint = CONSTRAIN_PITCH;
-                    else _dragConstraint = CONSTRAIN_YAW;
-                }
-
-                // If Pitch constrained
-                if (_dragConstraint==CONSTRAIN_PITCH)
-                    point.x = _pointLast.x;
-
-                // If Yaw constrained
-                else point.y = _pointLast.y;
-            }
-
-            // Set pitch & yaw
-            setPitch(getPitch() + (point.y - _pointLast.y)/1.5f);
-            setYaw(getYaw() + (point.x - _pointLast.x)/1.5f);
-        }
-
-        // Set last point
-        _pointLast = point;
     }
 
     /**
