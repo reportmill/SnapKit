@@ -50,7 +50,7 @@ public class CubeView extends View {
         addCube();
 
         // Enable events for rotations
-        enableEvents(MousePress, MouseDrag, MouseRelease);
+        enableEvents(MousePress, MouseDrag, MouseRelease, MouseMove);
         _mouseHandler = new MouseHandler(_camera);
     }
 
@@ -139,7 +139,19 @@ public class CubeView extends View {
      */
     public void processEvent(ViewEvent anEvent)
     {
-        _mouseHandler.processEvent(anEvent);
+        if (anEvent.isMouseMove())
+            processMouseMove(anEvent);
+
+        // Handle MousePress, MouseDrag, MouseRelease, Scroll
+        else _mouseHandler.processEvent(anEvent);
+    }
+
+    /**
+     * Handle MouseMove.
+     */
+    private void processMouseMove(ViewEvent anEvent)
+    {
+        anEvent.consume();
     }
 
     /**

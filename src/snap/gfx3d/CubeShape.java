@@ -197,16 +197,16 @@ public class CubeShape extends ParentShape {
 
         // Add side points
         if (sideY != 0) {
-            side.addPoint(width, sideY, 0);
-            side.addPoint(0, sideY, 0);
             side.addPoint(0, sideY, depth);
             side.addPoint(width, sideY, depth);
+            side.addPoint(width, sideY, 0);
+            side.addPoint(0, sideY, 0);
         }
         else {
-            side.addPoint(width, sideY, depth);
-            side.addPoint(0, sideY, depth);
             side.addPoint(0, sideY, 0);
             side.addPoint(width, sideY, 0);
+            side.addPoint(width, sideY, depth);
+            side.addPoint(0, sideY, depth);
         }
 
         // Return
