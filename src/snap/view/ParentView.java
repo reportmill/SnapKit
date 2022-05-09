@@ -82,8 +82,11 @@ public class ParentView extends View {
     protected void addChild(View aChild, int anIndex)
     {
         // If child already has parent, remove from parent
-        if (aChild.getParent() != null)
-            aChild.getParent().removeChild(aChild);
+        ParentView parentView = aChild.getParent();
+        if (parentView == this) {
+            System.err.println("ParentView.addChild: Trying to re-add child to parent"); return; }
+        if (parentView != null)
+            parentView.removeChild(aChild);
 
         // Add child to children list and set child's parent to this view
         aChild.setParent(this);
