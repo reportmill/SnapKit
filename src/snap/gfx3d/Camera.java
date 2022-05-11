@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
+import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
@@ -419,25 +420,45 @@ public class Camera {
     /**
      * Set camera view to given side.
      */
-    public void setYawPitchRollForSide(Side3D aSide)
+    public void setYawPitchRollForSide(Side3D aSide, Pos aPos)
     {
+        double yaw = 0;
+        double pitch = 0;
+        double roll = 0;
         switch (aSide) {
 
             // Handle Top/Bottom
-            case TOP: setYaw(0); setPitch(90); setRoll(0); break;
-            case BOTTOM: setYaw(0); setPitch(-90); setRoll(0); break;
+            case TOP: pitch = 90; break;
+            case BOTTOM: pitch = -90; break;
 
             // Handle Left/right
-            case LEFT: setYaw(90); setPitch(0); setRoll(0); break;
-            case RIGHT: setYaw(-90); setPitch(0); setRoll(0); break;
+            case LEFT: yaw = 90; break;
+            case RIGHT: yaw = -90; break;
 
             // Handle Front/Back
-            case FRONT: setYaw(0); setPitch(0); setRoll(0); break;
-            case BACK: setYaw(180); setPitch(0); setRoll(0); break;
+            case FRONT: break;
+            case BACK: yaw = 180; break;
 
             // Handle the impossible
             default: throw new RuntimeException("Camera: setYawPitchRollForSide: Unknown side: " + aSide);
         }
+
+        // Handle Pos
+        if (aPos != null) {
+            switch (aPos.getHPos()) {
+                case LEFT: yaw += 45; break;
+                case RIGHT: yaw -= 45; break;
+            }
+            switch (aPos.getVPos()) {
+                case TOP: pitch += 45; break;
+                case BOTTOM: pitch -= 45; break;
+            }
+        }
+
+
+        setYaw(yaw);
+        setPitch(pitch);
+        setRoll(roll);
     }
 
     /**

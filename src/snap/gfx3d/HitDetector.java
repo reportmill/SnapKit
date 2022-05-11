@@ -124,9 +124,9 @@ public class HitDetector {
             _vertex2.setPoint(pointArray[v2i], pointArray[v2i + 1], pointArray[v2i + 2]);
             boolean hit = isRayHitTriangle(rayOrigin, rayDir);
             if (hit) {
-                _hitTriangleIndexArray[0] = v0i;
-                _hitTriangleIndexArray[1] = v1i;
-                _hitTriangleIndexArray[2] = v2i;
+                _hitTriangleIndexArray[0] = indexArray[i];
+                _hitTriangleIndexArray[1] = indexArray[i + 1];
+                _hitTriangleIndexArray[2] = indexArray[i + 2];
                 return true;
             }
         }
@@ -177,10 +177,11 @@ public class HitDetector {
             double hitX = rayOrigin.x + rayDir.x * t;
             double hitY = rayOrigin.y + rayDir.y * t;
             double hitZ = rayOrigin.z + rayDir.z * t;
+            double w = 1 - u - v;
 
             // Set HitPoint and Barycentric point
             _hitPoint.setPoint(hitX, hitY, hitZ); //hitPoint.scaleAdd(t, rayVector, rayOrigin);
-            _baryPoint.setPoint(u, v, 1 - u - v);
+            _baryPoint.setPoint(w, u, v);
             return true;
         }
 

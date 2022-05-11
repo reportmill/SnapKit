@@ -3,10 +3,8 @@
  */
 package snap.gfx3d;
 import snap.geom.Pos;
-import snap.gfx.Color;
-import snap.gfx.Font;
-import snap.gfx.GradientPaint;
-import snap.gfx.Image;
+import snap.geom.Rect;
+import snap.gfx.*;
 import snap.view.StringView;
 import snap.view.ViewUtils;
 import java.util.HashMap;
@@ -32,6 +30,9 @@ public class CubeShape extends ParentShape {
     // Map cache of textures for sides
     private static Map<Side3D,Texture>  _textures = new HashMap<>();
 
+    // Map cache of textures for sides and positions
+    private static Map<String,Texture>  _texturesForPos = new HashMap<>();
+
     // Constants
     private static final Color SIDE_COLOR = Color.WHITE;
     private static final Color SIDE_BORDER_COLOR = Color.LIGHTGRAY.darker();
@@ -40,6 +41,7 @@ public class CubeShape extends ParentShape {
     private static final Color c1 = Color.WHITE, c2 =  new Color("#F8"), c3 =  new Color("#D8");
     private static final GradientPaint.Stop[] side_stops = GradientPaint.getStops(0, c1, .5, c2, 1, c3);
     private static final GradientPaint SIDE_PAINT = new GradientPaint(90, side_stops);
+    private static final Color  HIGHLITE_COLOR = Color.BLUE.blend(Color.CYAN, .5).copyForAlpha(.15);
 
     /**
      * Constructor.
@@ -276,5 +278,63 @@ public class CubeShape extends ParentShape {
         sideShape.addTexCoord(1, 0);
         sideShape.addTexCoord(1, 1);
         sideShape.addTexCoord(0, 1);
+    }
+
+    /**
+     * Sets the texture for given side and position.
+     */
+    public void setTextureForSideAndPos(Side3D aSide, Pos aPos)
+    {
+        for (Side3D side : Side3D.values()) {
+            Texture texture = side != aSide ? getTextureForSide(side) : getTextureForSideAndPos(side, aPos);
+            setTextureForSide(texture, side);
+        }
+    }
+
+    /**
+     * Returns the texture for a given side.
+     */
+    private Texture getTextureForSideAndPos(Side3D aSide, Pos aPos)
+    {
+        // If texture already cached, just return
+        String key = aSide.name() + aPos.name();
+        Texture texture = _texturesForPos.get(key);
+        if (texture != null)
+            return texture;
+
+        // Create, cache and return texture
+        texture = createTextureForSideAndPos(aSide, aPos);
+        _texturesForPos.put(key, texture);
+        return texture;
+    }
+
+    /**
+     * Generates a texture for a side and position by adding a highlight rect to normal side texture.
+     */
+    private Texture createTextureForSideAndPos(Side3D aSide, Pos aPos)
+    {
+        // Get normal texture for side
+        Texture texture = createTextureForSide(aSide);
+        Image image = texture.getImage();
+
+        // Calculate highlight rect
+        Rect rect = new Rect(0, 0, image.getWidth(), image.getHeight());
+        double factor = .2;
+        switch (aPos.getHPos()) {
+            case LEFT: rect.width *= factor; break;
+            case CENTER: rect.x = rect.width * factor; rect.width *= (1 - factor * 2); break;
+            case RIGHT: rect.x = rect.width * (1 - factor); rect.width *= factor; break;
+        }
+        switch (aPos.getVPos()) {
+            case TOP: rect.height *= factor; break;
+            case CENTER: rect.y = rect.height * factor; rect.height *= (1 - factor * 2); break;
+            case BOTTOM: rect.y = rect.height * (1 - factor); rect.height *= factor; break;
+        }
+
+        // Paint highlight rect on to texture and return
+        Painter pntr = image.getPainter();
+        pntr.setColor(HIGHLITE_COLOR);
+        pntr.fill(rect);
+        return texture;
     }
 }

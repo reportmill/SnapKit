@@ -2,6 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
+import snap.geom.HPos;
+import snap.geom.Point;
+import snap.geom.Pos;
+import snap.geom.VPos;
 import snap.gfx.Painter;
 import snap.util.PropChange;
 import snap.util.SnapUtils;
@@ -29,6 +33,16 @@ public class CubeView extends View {
     // The CameraView to control
     private CameraView  _cameraView;
 
+    // A HitDetector for mouse move highlite updating
+    private HitDetector  _hitDetector = new HitDetector();
+
+    // The last hit pos if getSideAtViewXY() hits a side
+    private Pos  _hitPos;
+
+    // The side/pos currently under the mouse
+    private Side3D  _mouseSide;
+    private Pos  _mousePos;
+
     // Constants for properties
     public static final String Yaw_Prop = Camera.Yaw_Prop;
     public static final String Pitch_Prop = Camera.Pitch_Prop;
@@ -54,7 +68,7 @@ public class CubeView extends View {
         addCube();
 
         // Enable events for rotations
-        enableEvents(MousePress, MouseDrag, MouseRelease, MouseMove);
+        enableEvents(MousePress, MouseDrag, MouseRelease, MouseMove, MouseExit);
         _mouseHandler = new MouseHandler(_camera);
     }
 
@@ -140,15 +154,21 @@ public class CubeView extends View {
         Vector3D rayDir = new Vector3D();
         camera.getRayToViewPoint(aX, aY, rayOrigin, rayDir);
 
-        // Get HitDetector
-        HitDetector hitDetector = new HitDetector();
-
         // Iterate over cube sides
         for (Side3D side : Side3D.values()) {
+
+            // Get side and see if hit
             FacetShape sideShape = _cubeShape.getSideShape(side);
-            boolean isHit = hitDetector.isRayHitShape(rayOrigin, rayDir, sideShape);
-            if (isHit)
+            boolean isHit = _hitDetector.isRayHitShape(rayOrigin, rayDir, sideShape);
+
+            // if hit, calculate Pos on side under mouse, then return side
+            if (isHit) {
+                Point hitTexCoord = _hitDetector.getHitTexCoord();
+                HPos hpos = hitTexCoord.x < .3 ? HPos.LEFT : hitTexCoord.x <= .7 ? HPos.CENTER : HPos.RIGHT;
+                VPos vpos = hitTexCoord.y < .3 ? VPos.BOTTOM : hitTexCoord.y <= .7 ? VPos.CENTER : VPos.TOP;
+                _hitPos = Pos.get(hpos, vpos);
                 return side;
+            }
         }
 
         // Return null since no side hit
@@ -158,7 +178,7 @@ public class CubeView extends View {
     /**
      * Set camera view to given side.
      */
-    public void setCameraViewToSideAnimated(Side3D aSide)
+    public void setCameraViewToSideAndPosAnimated(Side3D aSide, Pos aPos)
     {
         // Get animator and startAutoRegisterChanges
         CameraView cameraView = getCameraView(); if (cameraView == null) return;
@@ -167,7 +187,7 @@ public class CubeView extends View {
 
         // Change Camera to view side
         Camera camera = cameraView.getCamera();
-        camera.setYawPitchRollForSide(aSide);
+        camera.setYawPitchRollForSide(aSide, aPos);
 
         // stopAutoRegisterChanges and register to clear PrefGimbalRadius if it was set
         anim.stopAutoRegisterChanges();
@@ -195,12 +215,15 @@ public class CubeView extends View {
 
         // Handle MousePress, MouseDrag, MouseRelease, Scroll
         else {
+
+            // Have standard MouseHander handle drag
             _mouseHandler.processEvent(anEvent);
 
+            // If MouseRelease click, rotate to HitSide/HitPos
             if (anEvent.isMouseRelease() && anEvent.isMouseClick()) {
                 Side3D hitSide = getSideAtViewXY(anEvent.getX(), anEvent.getY());
                 if (hitSide != null)
-                    setCameraViewToSideAnimated(hitSide);
+                    setCameraViewToSideAndPosAnimated(hitSide, _hitPos);
             }
         }
     }
@@ -210,6 +233,15 @@ public class CubeView extends View {
      */
     private void processMouseMove(ViewEvent anEvent)
     {
+        // Recalculate HitSide/HitPos and reset CubeShape
+        Side3D hitSide = getSideAtViewXY(anEvent.getX(), anEvent.getY());
+        if (hitSide != _mouseSide || _hitPos != _mousePos) {
+            _cubeShape.setTextureForSideAndPos(hitSide, _hitPos);
+            _mouseSide = hitSide;
+            _mousePos = _hitPos;
+            repaint();
+        }
+
         anEvent.consume();
     }
 
