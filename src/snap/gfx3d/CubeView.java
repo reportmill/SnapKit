@@ -187,7 +187,7 @@ public class CubeView extends View {
 
         // Change Camera to view side
         Camera camera = cameraView.getCamera();
-        camera.setYawPitchRollForSide(aSide, aPos);
+        camera.setYawPitchRollForSideAndPos(aSide, aPos);
 
         // stopAutoRegisterChanges and register to clear PrefGimbalRadius if it was set
         anim.stopAutoRegisterChanges();

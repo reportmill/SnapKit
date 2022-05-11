@@ -420,11 +420,14 @@ public class Camera {
     /**
      * Set camera view to given side.
      */
-    public void setYawPitchRollForSide(Side3D aSide, Pos aPos)
+    public void setYawPitchRollForSideAndPos(Side3D aSide, Pos aPos)
     {
+        // Declare base rotations
         double yaw = 0;
         double pitch = 0;
         double roll = 0;
+
+        // Update rotations for side
         switch (aSide) {
 
             // Handle Top/Bottom
@@ -443,7 +446,7 @@ public class Camera {
             default: throw new RuntimeException("Camera: setYawPitchRollForSide: Unknown side: " + aSide);
         }
 
-        // Handle Pos
+        // Handle Pos: Shift rotations by addition amount based on Pos
         if (aPos != null) {
             switch (aPos.getHPos()) {
                 case LEFT: yaw += 45; break;
@@ -455,7 +458,7 @@ public class Camera {
             }
         }
 
-
+        // Set new rotations
         setYaw(yaw);
         setPitch(pitch);
         setRoll(roll);
