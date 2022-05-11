@@ -95,15 +95,10 @@ public class Vector3D implements Cloneable {
      */
     public Vector3D getCrossProduct(Vector3D v2)
     {
-        // Get cross components
         double a = y * v2.z - v2.y * z;
         double b = z * v2.x - v2.z * x;
         double c = x * v2.y - v2.x * y;
-
-        // Return new vecotr with components (normalized)
-        Vector3D cross = new Vector3D(a, b, c);
-        cross.normalize();
-        return cross;
+        return new Vector3D(a, b, c);
     }
 
     /**
@@ -151,6 +146,26 @@ public class Vector3D implements Cloneable {
         double dot = getDotProduct(aVector);
         double angleRad = Math.acos(dot / m3);
         return Math.toDegrees(angleRad);
+    }
+
+    /**
+     * Constructor for vector from given point to second given point.
+     */
+    public void setVector(double aX, double aY, double aZ)
+    {
+        x = aX;
+        y = aY;
+        z = aZ;
+    }
+
+    /**
+     * Constructor for vector from given point to second given point.
+     */
+    public void setVectorBetweenPoints(Point3D p0, Point3D p1)
+    {
+        x = p1.x - p0.x;
+        y = p1.y - p0.y;
+        z = p1.z - p0.z;
     }
 
     /**

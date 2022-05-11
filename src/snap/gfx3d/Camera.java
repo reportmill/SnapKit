@@ -504,6 +504,38 @@ public class Camera {
     }
 
     /**
+     * Calculates and sets the ray (origin,dir) from camera origin to 2D point in camera view coords.
+     */
+    public void getRayToViewPoint(double aX, double aY, Point3D rayOrigin, Vector3D rayDir)
+    {
+        // Get transform from camera to view
+        double viewW = getViewWidth();
+        double viewH = getViewHeight();
+        Matrix3D cameraToView = new Matrix3D().translate(viewW / 2, viewH / 2, 0);
+        cameraToView.scale(2 / 2, -2 / 2, 1);
+
+        // Convert camera view XY point to 3D point in camera coords
+        Matrix3D viewToCamera = cameraToView.clone().invert();
+        Point3D cameraPoint = new Point3D(aX, aY, 0);
+        viewToCamera.transformPoint(cameraPoint);
+        double camX = cameraPoint.x;
+        double camY = cameraPoint.y;
+        Point3D rayViewPoint = new Point3D(camX, camY, -getFocalLength());
+
+        // Get transform from camera to scene
+        Matrix3D sceneToCamera = getSceneToCamera();
+        Matrix3D cameraToScene = sceneToCamera.clone().invert();
+
+        // Convert camera origin from zero to scene
+        rayOrigin.setPoint(0, 0, 0);
+        cameraToScene.transformPoint(rayOrigin);
+
+        // Convert camera view point
+        cameraToScene.transformPoint(rayViewPoint);
+        rayDir.setVectorBetweenPoints(rayOrigin, rayViewPoint);
+    }
+
+    /**
      * Paints the scene from the view of this camera for given painter.
      */
     public void paintScene(Painter aPntr)

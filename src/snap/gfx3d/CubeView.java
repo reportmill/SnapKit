@@ -1,8 +1,12 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.gfx3d;
 import snap.gfx.Painter;
 import snap.util.PropChange;
 import snap.util.SnapUtils;
 import snap.view.View;
+import snap.view.ViewAnim;
 import snap.view.ViewEvent;
 
 /**
@@ -126,6 +130,53 @@ public class CubeView extends View {
     }
 
     /**
+     * Returns the shape hit by camera ray going through point in view coords.
+     */
+    public Side3D getSideAtViewXY(double aX, double aY)
+    {
+        // Get ray from camera origin to camera view point in scene space
+        Camera camera = getCamera();
+        Point3D rayOrigin = new Point3D();
+        Vector3D rayDir = new Vector3D();
+        camera.getRayToViewPoint(aX, aY, rayOrigin, rayDir);
+
+        // Get HitDetector
+        HitDetector hitDetector = new HitDetector();
+
+        // Iterate over cube sides
+        for (Side3D side : Side3D.values()) {
+            FacetShape sideShape = _cubeShape.getSideShape(side);
+            boolean isHit = hitDetector.isRayHitShape(rayOrigin, rayDir, sideShape);
+            if (isHit)
+                return side;
+        }
+
+        // Return null since no side hit
+        return null;
+    }
+
+    /**
+     * Set camera view to given side.
+     */
+    public void setCameraViewToSideAnimated(Side3D aSide)
+    {
+        // Get animator and startAutoRegisterChanges
+        CameraView cameraView = getCameraView(); if (cameraView == null) return;
+        ViewAnim anim = cameraView.getAnimCleared(1000);
+        anim.startAutoRegisterChanges(Camera.Yaw_Prop, Camera.Pitch_Prop, Camera.Roll_Prop);
+
+        // Change Camera to view side
+        Camera camera = cameraView.getCamera();
+        camera.setYawPitchRollForSide(aSide);
+
+        // stopAutoRegisterChanges and register to clear PrefGimbalRadius if it was set
+        anim.stopAutoRegisterChanges();
+
+        // Play animations
+        anim.play();
+    }
+
+    /**
      * Paints camera.
      */
     @Override
@@ -143,7 +194,15 @@ public class CubeView extends View {
             processMouseMove(anEvent);
 
         // Handle MousePress, MouseDrag, MouseRelease, Scroll
-        else _mouseHandler.processEvent(anEvent);
+        else {
+            _mouseHandler.processEvent(anEvent);
+
+            if (anEvent.isMouseRelease() && anEvent.isMouseClick()) {
+                Side3D hitSide = getSideAtViewXY(anEvent.getX(), anEvent.getY());
+                if (hitSide != null)
+                    setCameraViewToSideAnimated(hitSide);
+            }
+        }
     }
 
     /**
