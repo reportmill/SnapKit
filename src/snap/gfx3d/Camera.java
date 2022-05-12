@@ -568,7 +568,7 @@ public class Camera {
             return;
 
         Renderer renderer = getRenderer();
-        renderer.renderAll(aPntr);
+        renderer.renderAndPaint(aPntr);
     }
 
     /**

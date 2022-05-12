@@ -349,7 +349,7 @@ public class Renderer2D extends Renderer {
     /**
      * Renders scene for given painter, camera and scene.
      */
-    public void renderAll(Painter aPntr)
+    public void renderAndPaint(Painter aPntr)
     {
         paintFacetShapes(aPntr);
     }

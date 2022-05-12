@@ -58,7 +58,7 @@ public abstract class Renderer {
     /**
      * Renders scene for given painter, camera and scene.
      */
-    public abstract void renderAll(Painter aPainter);
+    public abstract void renderAndPaint(Painter aPainter);
 
     /**
      * Called when camera changes.
