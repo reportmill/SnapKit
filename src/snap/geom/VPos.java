@@ -9,14 +9,22 @@ package snap.geom;
 public enum VPos {
 
     TOP,
+
     CENTER,
+
     BOTTOM,
+
     BASELINE;
         
     /**
      * Returns the pos as a double from 0 to 1.
      */
-    public double doubleValue()  { return this==TOP ? 0 : this==CENTER ? .5 : 1; }
+    public double doubleValue()  { return this == TOP ? 0 : this == CENTER ? .5 : 1; }
+
+    /**
+     * Returns the opposing side.
+     */
+    public VPos getOpposing()  { return this == TOP ? BOTTOM : this == BOTTOM ? TOP : this; }
 
     /**
      * Returns the VPos.

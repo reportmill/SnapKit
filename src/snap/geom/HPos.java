@@ -9,13 +9,20 @@ package snap.geom;
 public enum HPos {
 
     LEFT,
+
     CENTER,
+
     RIGHT;
 
     /**
      * Returns the pos as a double from 0 to 1.
      */
-    public double doubleValue()  { return this==LEFT ? 0 : this==CENTER ? .5 : 1; }
+    public double doubleValue()  { return this == LEFT ? 0 : this == CENTER ? .5 : 1; }
+
+    /**
+     * Returns the opposing side.
+     */
+    public HPos getOpposing()  { return this == LEFT ? RIGHT : this == RIGHT ? LEFT : this; }
 
     /**
      * Returns the HPos.

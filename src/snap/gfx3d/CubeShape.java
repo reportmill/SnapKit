@@ -272,8 +272,12 @@ public class CubeShape extends ParentShape {
      */
     private void setTextureForSide(Texture aTexture, Side3D aSide)
     {
+        // Get side and set texture
         Poly3D sideShape = getSideShape(aSide);
         sideShape.setTexture(aTexture);
+
+        // Add standard texture coords if not yet added
+        if (sideShape.getTexCoordArray().length > 0) return;
         sideShape.addTexCoord(0, 0);
         sideShape.addTexCoord(1, 0);
         sideShape.addTexCoord(1, 1);
@@ -285,9 +289,36 @@ public class CubeShape extends ParentShape {
      */
     public void setTextureForSideAndPos(Side3D aSide, Pos aPos)
     {
+        // Reset all sides to standard
         for (Side3D side : Side3D.values()) {
             Texture texture = side != aSide ? getTextureForSide(side) : getTextureForSideAndPos(side, aPos);
             setTextureForSide(texture, side);
+        }
+
+        // Check/reset texture for adjacent sides if pos is off center
+        if (aSide != null && aPos != null) {
+
+            // If corner Pos, get corner sides and set texture for side + pos
+            if (aPos.isCorner()) {
+                Side3D.Corner corner = aSide.getCornerForPos(aPos);
+                Side3D[] cornerSides = corner.getSides();
+                for (Side3D side : cornerSides) {
+                    Pos sidePos = side.getPosForCorner(corner);
+                    Texture texture = getTextureForSideAndPos(side, sidePos);
+                    setTextureForSide(texture, side);
+                }
+            }
+
+            // If Pos is edge, get edge sides and set texture for side + pos
+            if (aPos.isSide()) {
+                Side3D.Edge edge = aSide.getEdgeForPos(aPos);
+                Side3D[] edgeSides = edge.getSides();
+                for (Side3D side : edgeSides) {
+                    Pos edgePos = side.getPosForEdge(edge);
+                    Texture texture = getTextureForSideAndPos(side, edgePos);
+                    setTextureForSide(texture, side);
+                }
+            }
         }
     }
 
@@ -319,7 +350,7 @@ public class CubeShape extends ParentShape {
 
         // Calculate highlight rect
         Rect rect = new Rect(0, 0, image.getWidth(), image.getHeight());
-        double factor = .2;
+        double factor = .22;
         switch (aPos.getHPos()) {
             case LEFT: rect.width *= factor; break;
             case CENTER: rect.x = rect.width * factor; rect.width *= (1 - factor * 2); break;
