@@ -31,7 +31,7 @@ public class Painter3D implements Cloneable {
     private Path2D  _taskPath;
 
     // The VertexArray
-    private VertexArray  _vertexArray;
+    private VertexArray  _triangleArray;
 
     /**
      * Constructor.
@@ -182,16 +182,16 @@ public class Painter3D implements Cloneable {
     protected void addPaintTask(PaintTask aTask)
     {
         _tasks = ArrayUtils.add(_tasks, aTask);
-        _vertexArray = null;
+        _triangleArray = null;
     }
 
     /**
      * Returns the VertexArray for drawing.
      */
-    public VertexArray getVertexArray()
+    public VertexArray getTriangleArray()
     {
         // If already set, just return
-        if (_vertexArray != null) return _vertexArray;
+        if (_triangleArray != null) return _triangleArray;
 
         // Get tasks (if none, return empty VertexArray)
         PaintTask[] tasks = getPaintTasks();
@@ -199,16 +199,16 @@ public class Painter3D implements Cloneable {
             return new VertexArray();
 
         // Create/build VertexArray list for each Task
-        VertexArray vertexArray = tasks[0].getVertexArray();
-        VertexArray vertexArrayEnd = vertexArray;
+        VertexArray triangleArray = tasks[0].getTriangleArray();
+        VertexArray triangleArrayEnd = triangleArray;
         for (int i = 1; i < tasks.length; i++) {
-            VertexArray vertexArrayNext = tasks[i].getVertexArray();
-            vertexArrayEnd.setNext(vertexArrayNext);
-            vertexArrayEnd = vertexArrayNext;
+            VertexArray vertexArrayNext = tasks[i].getTriangleArray();
+            triangleArrayEnd.setNext(vertexArrayNext);
+            triangleArrayEnd = vertexArrayNext;
         }
 
         // Return
-        return _vertexArray = vertexArray;
+        return _triangleArray = triangleArray;
     }
 
     /**
@@ -279,10 +279,10 @@ public class Painter3D implements Cloneable {
         /**
          * Returns a VertexArray.
          */
-        public VertexArray getVertexArray()
+        public VertexArray getTriangleArray()
         {
-            VertexArray vertexArray = VertexArrayUtils.getStrokedShapeVertexArray(_shape, _color, _stroke, _layerOffset);
-            return vertexArray;
+            VertexArray triangleArray = VertexArrayUtils.getStrokedShapeTriangleArray(_shape, _color, _stroke, _layerOffset);
+            return triangleArray;
         }
 
         /**

@@ -139,12 +139,12 @@ public class Renderer2D extends Renderer {
         // Handle VertexArrayShape
         else if (aShape instanceof VertexArrayShape) {
             VertexArrayShape vertexArrayShape = (VertexArrayShape) aShape;
-            VertexArray vertexArray = vertexArrayShape.getVertexArray();
-            float[] pointsArray = vertexArray.getPointArray();
-            float[] colorsArray = vertexArray.isColorArraySet() ? vertexArray.getColorArray() : null;
-            Color color = vertexArray.getColor();
+            VertexArray triangleArray = vertexArrayShape.getTriangleArray();
+            float[] pointsArray = triangleArray.getPointArray();
+            float[] colorsArray = triangleArray.isColorArraySet() ? triangleArray.getColorArray() : null;
+            Color color = triangleArray.getColor();
 
-            int pointCount = vertexArray.getPointCount();
+            int pointCount = triangleArray.getPointCount();
             int triangleCount = pointCount / 3;
             for (int triangleIndex = 0, i = 0; triangleIndex < triangleCount; triangleIndex++) {
                 float p1x = pointsArray[i], c1x = colorsArray != null ? colorsArray[i++] : (float) color.getRed();

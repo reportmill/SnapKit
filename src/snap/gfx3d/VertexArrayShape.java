@@ -31,8 +31,13 @@ public class VertexArrayShape extends Shape3D {
     /**
      * Returns the VertexArray.
      */
+    public VertexArray getVertexArray()  { return _vertexArray; }
+
+    /**
+     * Returns the VertexArray.
+     */
     @Override
-    public VertexArray getVertexArray()
+    public VertexArray getTriangleArray()
     {
         return _vertexArray;
     }
@@ -43,7 +48,7 @@ public class VertexArrayShape extends Shape3D {
     @Override
     protected Bounds3D createBounds3D()
     {
-        VertexArray vertexArray = getVertexArray();
+        VertexArray vertexArray = getTriangleArray();
         return vertexArray.getBounds3D();
     }
 

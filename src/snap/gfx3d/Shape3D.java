@@ -213,7 +213,7 @@ public abstract class Shape3D {
     /**
      * Returns the array of Path3D that can render this shape.
      */
-    public abstract VertexArray getVertexArray();
+    public abstract VertexArray getTriangleArray();
 
     /**
      * Clears cached values when shape changes.

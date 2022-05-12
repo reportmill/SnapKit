@@ -92,7 +92,7 @@ public class HitDetector {
             }
 
             // Get triangles VertexArray and check triangles
-            _hitTriangleArray = aShape.getVertexArray();
+            _hitTriangleArray = aShape.getTriangleArray();
             boolean isHit = isRayHitTriangleArray(rayOrigin, rayDir);
             if (isHit)
                 _hitShape = facetShape;

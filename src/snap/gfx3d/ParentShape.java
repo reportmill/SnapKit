@@ -167,5 +167,5 @@ public class ParentShape extends Shape3D {
     /**
      * Override to return null (parent don't have VertexArray).
      */
-    public VertexArray getVertexArray()  { return null; }
+    public VertexArray getTriangleArray()  { return null; }
 }

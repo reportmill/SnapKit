@@ -16,7 +16,7 @@ public class VertexArrayUtils {
     /**
      * Returns a VertexArray for stroked path.
      */
-    public static VertexArray getStrokedShapeVertexArray(Shape aShape, Color aColor, Stroke aStroke, double anOffset)
+    public static VertexArray getStrokedShapeTriangleArray(Shape aShape, Color aColor, Stroke aStroke, double anOffset)
     {
         // Create VertexArray
         VertexArray vertexArray = new VertexArray();

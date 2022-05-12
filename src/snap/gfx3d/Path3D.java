@@ -273,17 +273,17 @@ public class Path3D extends FacetShape implements Cloneable {
      * Creates a VertexArray of path triangles.
      */
     @Override
-    protected VertexArray createVertexArray()
+    protected VertexArray createTriangleArray()
     {
         // Create/configure VertexArray
-        VertexArray vertexArray = new VertexArray();
-        vertexArray.setColor(getColor());
-        vertexArray.setDoubleSided(isDoubleSided());
+        VertexArray triangleArray = new VertexArray();
+        triangleArray.setColor(getColor());
+        triangleArray.setDoubleSided(isDoubleSided());
 
         // If no normal, just return empty
         Vector3D pathNormal = getNormal();
         if (Double.isNaN(pathNormal.x))
-            return vertexArray;
+            return triangleArray;
 
         // Get transform matrix to transform this path to/from facing Z
         Matrix3D xfmToZ = getTransformToAlignToVector(0, 0, 1);
@@ -330,36 +330,36 @@ public class Path3D extends FacetShape implements Cloneable {
             }
 
             // Add points to VertexArray
-            vertexArray.addPoint(p0.x, p0.y, p0.z);
-            vertexArray.addPoint(p1.x, p1.y, p1.z);
-            vertexArray.addPoint(p2.x, p2.y, p2.z);
+            triangleArray.addPoint(p0.x, p0.y, p0.z);
+            triangleArray.addPoint(p1.x, p1.y, p1.z);
+            triangleArray.addPoint(p2.x, p2.y, p2.z);
         }
 
         // Add colors
         for (Color color : _colors)
-            vertexArray.addColor(color);
+            triangleArray.addColor(color);
 
         // Handle Stroke: Create/add stroke VertexArray
         if (getStrokeColor() != null) {
-            VertexArray strokeVA = getStrokeVertexArray();
-            vertexArray.setLast(strokeVA);
+            VertexArray strokeVA = getStrokeTriangleArray();
+            triangleArray.setLast(strokeVA);
         }
 
         // Handle Painter: Create/add painterVertexArray
         Painter3D painter3D = getPainter();
         if (painter3D != null) {
-            VertexArray painterVA = getPainterVertexArray();
-            vertexArray.setLast(painterVA);
+            VertexArray painterVA = getPainterTriangleArray();
+            triangleArray.setLast(painterVA);
         }
 
         // Return
-        return vertexArray;
+        return triangleArray;
     }
 
     /**
      * Returns a VertexArray for path stroke.
      */
-    protected VertexArray getStrokeVertexArray()
+    protected VertexArray getStrokeTriangleArray()
     {
         // Get info
         Vector3D pathNormal = getNormal();

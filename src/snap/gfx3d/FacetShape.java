@@ -13,14 +13,14 @@ public abstract class FacetShape extends Shape3D {
     // The texture for the facet
     private Texture  _texture;
 
-    // A Painter3D to paint the surface of path
+    // A Painter3D to paint the surface of shape
     private Painter3D  _painter;
 
-    // The path normal vector
+    // The surface normal vector
     private Vector3D  _normal;
 
-    // The VertexArray holding triangles of Path3D
-    private VertexArray  _vertexArray;
+    // The VertexArray holding triangles of surface
+    private VertexArray  _triangleArray;
 
     /**
      * Returns the texture to render on the facet shape surface.
@@ -33,7 +33,7 @@ public abstract class FacetShape extends Shape3D {
     public void setTexture(Texture aTexture)
     {
         _texture = aTexture;
-        _vertexArray = null;
+        _triangleArray = null;
     }
 
     /**
@@ -47,7 +47,7 @@ public abstract class FacetShape extends Shape3D {
     public void setPainter(Painter3D aPntr)
     {
         _painter = aPntr;
-        _vertexArray = null;
+        _triangleArray = null;
     }
 
     /**
@@ -81,33 +81,33 @@ public abstract class FacetShape extends Shape3D {
     public abstract Shape getShape2D();
 
     /**
-     * Returns a VertexArray of path triangles.
+     * Returns a VertexArray of shape surface triangles.
      */
-    public VertexArray getVertexArray()
+    public VertexArray getTriangleArray()
     {
         // If already set, just return
-        if (_vertexArray != null) return _vertexArray;
+        if (_triangleArray != null) return _triangleArray;
 
         // Create, set, return
-        VertexArray triVA = createVertexArray();
-        return _vertexArray = triVA;
+        VertexArray triVA = createTriangleArray();
+        return _triangleArray = triVA;
     }
 
     /**
-     * Creates a VertexArray of path triangles.
+     * Creates a VertexArray of shape surface triangles.
      */
-    protected abstract VertexArray createVertexArray();
+    protected abstract VertexArray createTriangleArray();
 
     /**
      * Returns the painter VertexArray for 'painted' triangles on shape surface.
      */
-    protected VertexArray getPainterVertexArray()
+    protected VertexArray getPainterTriangleArray()
     {
         Painter3D painter = getPainter();
         Matrix3D painterToLocal = getPainterToLocal();
-        VertexArray vertexArray = painter.getVertexArray();
-        VertexArray vertexArrayLocal = vertexArray.copyForTransform(painterToLocal);
-        return vertexArrayLocal;
+        VertexArray triangleArray = painter.getTriangleArray();
+        VertexArray triangleArrayLocal = triangleArray.copyForTransform(painterToLocal);
+        return triangleArrayLocal;
     }
 
     /**
@@ -185,7 +185,7 @@ public abstract class FacetShape extends Shape3D {
     {
         super.clearCachedValues();
         _normal = null;
-        _vertexArray = null;
+        _triangleArray = null;
     }
 
     /**

@@ -183,21 +183,21 @@ public class Poly3D extends FacetShape implements Cloneable {
      * Creates a VertexArray of path triangles.
      */
     @Override
-    protected VertexArray createVertexArray()
+    protected VertexArray createTriangleArray()
     {
         // Create/configure VertexArray
-        VertexArray vertexArray = new VertexArray();
-        vertexArray.setColor(getColor());
-        vertexArray.setDoubleSided(isDoubleSided());
+        VertexArray triangleArray = new VertexArray();
+        triangleArray.setColor(getColor());
+        triangleArray.setDoubleSided(isDoubleSided());
 
         // If no normal, just return empty
         Vector3D pathNormal = getNormal();
         if (Double.isNaN(pathNormal.x))
-            return vertexArray;
+            return triangleArray;
 
         // Get/set polygon points in VertexArray
         float[] pointArray = getPointArray();
-        vertexArray.setPointArray(pointArray);
+        triangleArray.setPointArray(pointArray);
 
         // Add colors
         //for (Color color : _colors)
@@ -206,30 +206,30 @@ public class Poly3D extends FacetShape implements Cloneable {
         // If Texture/TexCoordArray is set, configure in VertexArray
         Texture texture = getTexture();
         if (texture != null && isTexCoordArraySet()) {
-            vertexArray.setTexture(texture);
+            triangleArray.setTexture(texture);
             float[] texCoordArray = getTexCoordArray();
-            vertexArray.setTexCoordArray(texCoordArray);
+            triangleArray.setTexCoordArray(texCoordArray);
         }
 
         // Get/set point index array for triangle points in VertexArray
         int[] indexArrayForTrianglePoints = getIndexArrayForTrianglePoints();
-        vertexArray.setIndexArray(indexArrayForTrianglePoints);
+        triangleArray.setIndexArray(indexArrayForTrianglePoints);
 
         // Handle Stroke: Create/add stroke VertexArray
         if (getStrokeColor() != null) {
-            VertexArray strokeVA = getStrokeVertexArray();
-            vertexArray.setLast(strokeVA);
+            VertexArray strokeVA = getStrokeTriangleArray();
+            triangleArray.setLast(strokeVA);
         }
 
         // Handle Painter: Create/add painterVertexArray
         Painter3D painter3D = getPainter();
         if (painter3D != null) {
-            VertexArray painterVA = getPainterVertexArray();
-            vertexArray.setLast(painterVA);
+            VertexArray painterVA = getPainterTriangleArray();
+            triangleArray.setLast(painterVA);
         }
 
         // Return
-        return vertexArray;
+        return triangleArray;
     }
 
     /**
@@ -253,7 +253,7 @@ public class Poly3D extends FacetShape implements Cloneable {
     /**
      * Returns a VertexArray for path stroke.
      */
-    protected VertexArray getStrokeVertexArray()
+    protected VertexArray getStrokeTriangleArray()
     {
         // Get info
         Vector3D facetNormal = getNormal();
@@ -261,8 +261,8 @@ public class Poly3D extends FacetShape implements Cloneable {
         double strokeWidth = getStroke() != null ? getStroke().getWidth() : 1;
 
         // Create/configure VertexArray
-        VertexArray vertexArray = new VertexArray();
-        vertexArray.setColor(strokeColor != null ? strokeColor : Color.BLACK);
+        VertexArray triangleArray = new VertexArray();
+        triangleArray.setColor(strokeColor != null ? strokeColor : Color.BLACK);
 
         // Path3D iteration vars
         int pointCount = getPointCount();
@@ -276,12 +276,12 @@ public class Poly3D extends FacetShape implements Cloneable {
             p1.x = pointArray[i3];
             p1.y = pointArray[i3 + 1];
             p1.z = pointArray[i3 + 2];
-            VertexArrayUtils.addLineStrokePoints(vertexArray, p0, p1, facetNormal, strokeWidth);
+            VertexArrayUtils.addLineStrokePoints(triangleArray, p0, p1, facetNormal, strokeWidth);
             p0.setPoint(p1);
         }
 
         // Return
-        return vertexArray;
+        return triangleArray;
     }
 
     /**
