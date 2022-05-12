@@ -131,7 +131,7 @@ public enum Side3D {
     {
         switch (this) {
             case FRONT: return new Edge[] { Edge.FRONT_BOTTOM, Edge.FRONT_RIGHT, Edge.FRONT_TOP, Edge.FRONT_LEFT };
-            case BACK: return new Edge[] { Edge.BACK_BOTTOM, Edge.BACK_RIGHT, Edge.BACK_TOP, Edge.BACK_LEFT };
+            case BACK: return new Edge[] { Edge.BACK_BOTTOM, Edge.BACK_LEFT, Edge.BACK_TOP, Edge.BACK_RIGHT };
             case LEFT: return new Edge[] { Edge.LEFT_BOTTOM, Edge.FRONT_LEFT, Edge.LEFT_TOP, Edge.BACK_LEFT };
             case RIGHT: return new Edge[] { Edge.RIGHT_BOTTOM, Edge.BACK_RIGHT, Edge.RIGHT_TOP, Edge.FRONT_RIGHT };
             case TOP: return new Edge[] { Edge.FRONT_TOP, Edge.RIGHT_TOP, Edge.BACK_TOP, Edge.LEFT_TOP };
