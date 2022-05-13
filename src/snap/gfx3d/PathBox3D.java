@@ -113,6 +113,7 @@ public class PathBox3D extends ParentShape {
                 // Handle LineTo:
                 case LineTo: {
                     Poly3D polyShape = lineTo(lastX, lastY, lastX = pts[0], lastY = pts[1], z1, z2);
+                    if (polyShape == null) break;
                     polyShape.setName("BoxSide" + sideNum++);
                     paths.add(polyShape);
                 }
@@ -126,6 +127,7 @@ public class PathBox3D extends ParentShape {
                 // Handle Close
                 case Close: {
                     Poly3D polyShape = lineTo(lastX, lastY, lastX = lastMoveX, lastY = lastMoveY, z1, z2);
+                    if (polyShape == null) break;
                     polyShape.setName("BoxSide" + sideNum++);
                     paths.add(polyShape);
                 }
@@ -169,7 +171,8 @@ public class PathBox3D extends ParentShape {
         double dist2 = Line.getDistance(lastX, lastY, x, y, cp2x, cp2y);
         if (dist1 < .25 && dist2 < .25) {
             Poly3D polyShape = lineTo(lastX, lastY, x, y, z1, z2);
-            polyList.add(polyShape);
+            if (polyShape != null)
+                polyList.add(polyShape);
             return;
         }
 
