@@ -16,14 +16,13 @@ public class VertexArrayUtils {
     /**
      * Returns a VertexArray for stroked path.
      */
-    public static VertexArray getStrokedShapeTriangleArray(Shape aShape, Color aColor, Stroke aStroke, double anOffset)
+    public static VertexArray getStrokedShapeTriangleArray(PathIter pathIter, Color aColor, Stroke aStroke, double anOffset)
     {
         // Create VertexArray
         VertexArray vertexArray = new VertexArray();
         vertexArray.setColor(aColor);
 
         // Get PathIter and path iteration vars
-        PathIter pathIter = aShape.getPathIter(null);
         double[] pnts = new double[6];
         double moveX = 0, moveY = 0;
         double lastX = 0, lastY = 0;

@@ -24,6 +24,9 @@ public class Painter3D implements Cloneable {
     // The offset for layers
     private double  _layerOffset;
 
+    // Whether to flip X/Y
+    private boolean  _flipX, _flipY;
+
     // The array of discrete tasks
     private PaintTask[]  _tasks = new PaintTask[0];
 
@@ -186,6 +189,16 @@ public class Painter3D implements Cloneable {
     }
 
     /**
+     * Flips painter by X.
+     */
+    public void flipX()  { _flipX = !_flipX; }
+
+    /**
+     * Flips painter by Y.
+     */
+    public void flipY()  { _flipY = !_flipY; }
+
+    /**
      * Returns the VertexArray for drawing.
      */
     public VertexArray getTriangleArray()
@@ -227,7 +240,7 @@ public class Painter3D implements Cloneable {
         // Clone PaintTasks
         clone._tasks = _tasks.clone();
         for (int i = 0; i < _tasks.length; i++)
-            clone._tasks[i] = _tasks[i].clone();
+            clone._tasks[i] = _tasks[i].cloneForPainter(clone);
 
         // Return clone
         return clone;
@@ -236,7 +249,7 @@ public class Painter3D implements Cloneable {
     /**
      * This class represents a discrete paint task.
      */
-    public static class PaintTask implements Cloneable {
+    public class PaintTask {
 
         // The shape
         private Shape  _shape;
@@ -281,19 +294,23 @@ public class Painter3D implements Cloneable {
          */
         public VertexArray getTriangleArray()
         {
-            VertexArray triangleArray = VertexArrayUtils.getStrokedShapeTriangleArray(_shape, _color, _stroke, _layerOffset);
+            // Declare transform and set if flipX or flipY
+            Transform trans = null;
+            if (_flipX) { trans = new Transform(); trans.translate(_width, 0); trans.scale(-1, 1); }
+            else if (_flipY) { trans = new Transform(); trans.translate(0, _height); trans.scale(1, -1); }
+
+            // Create triangles VertexArray for PathIter and return
+            PathIter pathIter = _shape.getPathIter(trans);
+            VertexArray triangleArray = VertexArrayUtils.getStrokedShapeTriangleArray(pathIter, _color, _stroke, _layerOffset);
             return triangleArray;
         }
 
         /**
-         * Standard clone implementation.
+         * Weird clone to deal with inner class.
          */
-        @Override
-        public PaintTask clone()
+        public PaintTask cloneForPainter(Painter3D aPainter3D)
         {
-            PaintTask clone;
-            try { clone = (PaintTask) super.clone(); }
-            catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+            PaintTask clone = aPainter3D.new PaintTask(_shape, _color, _stroke, _layerOffset);
             return clone;
         }
     }
