@@ -9,8 +9,11 @@ import snap.geom.Point;
  */
 public class HitDetector {
 
+    // Whether to only find first hit
+    private boolean  _findFirstHit;
+
     // The current shape
-    private FacetShape  _hitShape;
+    private Shape3D  _hitShape;
 
     // The current triangle VertexArray
     private VertexArray  _hitTriangleArray;
@@ -24,6 +27,9 @@ public class HitDetector {
     // The current barycentric point
     private Point3D  _baryPoint = new Point3D();
 
+    // The hit distance parameter
+    private double  _hitT;
+
     // The current triangle points
     private Point3D  _vertex0 = new Point3D(), _vertex1 = new Point3D(), _vertex2 = new Point3D();
 
@@ -31,9 +37,24 @@ public class HitDetector {
     private static final double EPSILON = 0.0000001;
 
     /**
+     * Constructor.
+     */
+    public HitDetector()  { }
+
+    /**
+     * Returns whether this hit detector finds only first hit.
+     */
+    public boolean isFindFirstHit()  { return _findFirstHit; }
+
+    /**
+     * Sets whether this hit detector finds only first hit.
+     */
+    public void setFindFirstHit(boolean aValue)  { _findFirstHit = aValue; }
+
+    /**
      * Returns the last hit shape.
      */
-    public FacetShape getHitShape()  { return _hitShape; }
+    public Shape3D getHitShape()  { return _hitShape; }
 
     /**
      * Returns the last hit triangle VertexArray.
@@ -76,10 +97,32 @@ public class HitDetector {
     }
 
     /**
+     * Returns the vertex index of the vertex closest to hit point.
+     */
+    public int getHitVertexIndex()
+    {
+        if (_baryPoint.x >= _baryPoint.y && _baryPoint.x >= _baryPoint.z)
+            return _hitTriangleIndexArray[0];
+        if (_baryPoint.y >= _baryPoint.x && _baryPoint.y >= _baryPoint.z)
+            return _hitTriangleIndexArray[1];
+        return _hitTriangleIndexArray[2];
+    }
+
+    /**
      * Returns whether ray hits shape.
      */
     public boolean isRayHitShape(Point3D rayOrigin, Vector3D rayDir, Shape3D aShape)
     {
+        // Handle ParentShape
+        if (aShape instanceof ParentShape) {
+            ParentShape parentShape = (ParentShape) aShape;
+            Shape3D[] children = parentShape.getChildren();
+            for (Shape3D child : children)
+                if (child.isVisible())
+                    isRayHitShape(rayOrigin, rayDir, child);
+            return _hitShape != null;
+        }
+
         // Handle FacetShape
         if (aShape instanceof FacetShape) {
 
@@ -91,11 +134,32 @@ public class HitDetector {
                     return false;
             }
 
+            // Cache FindFirstHit and set to true since facet shape surface can only have one hit
+            boolean isFindFirstHit = isFindFirstHit();
+            _findFirstHit = true;
+
             // Get triangles VertexArray and check triangles
-            _hitTriangleArray = aShape.getTriangleArray();
-            boolean isHit = isRayHitTriangleArray(rayOrigin, rayDir);
-            if (isHit)
+            VertexArray triangleArray = aShape.getTriangleArray();
+            boolean isHit = isRayHitTriangleArray(rayOrigin, rayDir, triangleArray);
+            if (isHit) {
                 _hitShape = facetShape;
+                _hitTriangleArray = _hitShape.getTriangleArray();
+            }
+
+            // Restore FindFirstHit and return
+            _findFirstHit = isFindFirstHit;
+            return isHit;
+        }
+
+        // Handle VertexArrayShape
+        if (aShape instanceof VertexArrayShape) {
+            VertexArrayShape vertexArrayShape = (VertexArrayShape) aShape;
+            VertexArray triangleArray = vertexArrayShape.getTriangleArray();
+            boolean isHit = isRayHitTriangleArray(rayOrigin, rayDir, triangleArray);
+            if (isHit) {
+                _hitShape = vertexArrayShape;
+                _hitTriangleArray = _hitShape.getTriangleArray();
+            }
             return isHit;
         }
 
@@ -107,14 +171,20 @@ public class HitDetector {
     /**
      * Returns whether ray hits VertexArray.
      */
-    public boolean isRayHitTriangleArray(Point3D rayOrigin, Vector3D rayDir)
+    public boolean isRayHitTriangleArray(Point3D rayOrigin, Vector3D rayDir, VertexArray triangleArray)
     {
+        // If no index, do direct pointArray version
+        if (!triangleArray.isIndexArraySet())
+            return isRayHitTriangleArrayNoIndex(rayOrigin, rayDir, triangleArray);
+
         // Get pointArray, indexArray and pointCount
-        float[] pointArray = _hitTriangleArray.getPointArray();
-        int[] indexArray = _hitTriangleArray.getIndexArray();
+        float[] pointArray = triangleArray.getPointArray();
+        int[] indexArray = triangleArray.getIndexArray();
         int pointCount = indexArray.length;
+        boolean doubleSided = triangleArray.isDoubleSided();
 
         // Iterate over indexArray points
+        boolean isHit = false;
         for (int i = 0; i + 2 < pointCount; i += 3) {
             int v0i = indexArray[i] * 3;
             int v1i = indexArray[i + 1] * 3;
@@ -122,17 +192,53 @@ public class HitDetector {
             _vertex0.setPoint(pointArray[v0i], pointArray[v0i + 1], pointArray[v0i + 2]);
             _vertex1.setPoint(pointArray[v1i], pointArray[v1i + 1], pointArray[v1i + 2]);
             _vertex2.setPoint(pointArray[v2i], pointArray[v2i + 1], pointArray[v2i + 2]);
-            boolean hit = isRayHitTriangle(rayOrigin, rayDir);
+            boolean hit = isRayHitTriangle(rayOrigin, rayDir, doubleSided);
             if (hit) {
                 _hitTriangleIndexArray[0] = indexArray[i];
                 _hitTriangleIndexArray[1] = indexArray[i + 1];
                 _hitTriangleIndexArray[2] = indexArray[i + 2];
-                return true;
+                if (isFindFirstHit())
+                    return true;
+                isHit = true;
             }
         }
 
-        // Return false since no hit
-        return false;
+        // Return
+        return isHit;
+    }
+
+    /**
+     * Returns whether ray hits VertexArray.
+     */
+    public boolean isRayHitTriangleArrayNoIndex(Point3D rayOrigin, Vector3D rayDir, VertexArray triangleArray)
+    {
+        // Get pointArray and pointCount
+        float[] pointArray = triangleArray.getPointArray();
+        int pointCount = triangleArray.getPointCount();
+        boolean doubleSided = triangleArray.isDoubleSided();
+
+        // Iterate over points
+        boolean isHit = false;
+        for (int i = 0; i + 2 < pointCount; i += 3) {
+            int v0i = i * 3;
+            int v1i = (i + 1) * 3;
+            int v2i = (i + 2) * 3;
+            _vertex0.setPoint(pointArray[v0i], pointArray[v0i + 1], pointArray[v0i + 2]);
+            _vertex1.setPoint(pointArray[v1i], pointArray[v1i + 1], pointArray[v1i + 2]);
+            _vertex2.setPoint(pointArray[v2i], pointArray[v2i + 1], pointArray[v2i + 2]);
+            boolean hit = isRayHitTriangle(rayOrigin, rayDir, doubleSided);
+            if (hit) {
+                _hitTriangleIndexArray[0] = i;
+                _hitTriangleIndexArray[1] = i + 1;
+                _hitTriangleIndexArray[2] = i + 2;
+                if (isFindFirstHit())
+                    return true;
+                isHit = true;
+            }
+        }
+
+        // Return
+        return isHit;
     }
 
     /**
@@ -144,7 +250,7 @@ public class HitDetector {
      *     https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/
      *          ./moller-trumbore-ray-triangle-intersection
      */
-    public boolean isRayHitTriangle(Point3D rayOrigin, Vector3D rayDir)
+    public boolean isRayHitTriangle(Point3D rayOrigin, Vector3D rayDir, boolean doubleSided)
     {
         // Get edge vectors
         Vector3D edgeV0V1 = new Vector3D(_vertex0, _vertex1);
@@ -153,7 +259,11 @@ public class HitDetector {
         // Get ray x edge perpendicular and bail if also perpendicular to other edge (ray is parallel to triangle)
         Vector3D rayEdge2Perpendicular = rayDir.getCrossProduct(edgeV0V2);
         double det = edgeV0V1.getDotProduct(rayEdge2Perpendicular);
-        if (-EPSILON < det && det < EPSILON)
+        if (doubleSided) {
+            if (-EPSILON < det && det < EPSILON)
+                return false;
+        }
+        else if (det < EPSILON)
             return false;
 
         // Get barycentric point U value (return if out of range)
@@ -173,6 +283,11 @@ public class HitDetector {
         double t = invDet * edgeV0V2.getDotProduct(q);
         if (t > EPSILON) {
 
+            // If previous hit was closer, just return
+            if (_hitT > 0 && _hitT < t)
+                return false;
+            _hitT = t;
+
             // Calculate hit point XYZ values
             double hitX = rayOrigin.x + rayDir.x * t;
             double hitY = rayOrigin.y + rayDir.y * t;
@@ -187,5 +302,15 @@ public class HitDetector {
 
         // This means that there is a line intersection but not a ray intersection.
         return false;
+    }
+
+    /**
+     * Resets the hit detect for reuse.
+     */
+    public void reset()
+    {
+        _hitShape = null;
+        _hitTriangleArray = null;
+        _hitT = 0;
     }
 }

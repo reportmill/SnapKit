@@ -167,6 +167,7 @@ public class CubeView extends View {
                 HPos hpos = hitTexCoord.x < .3 ? HPos.LEFT : hitTexCoord.x <= .7 ? HPos.CENTER : HPos.RIGHT;
                 VPos vpos = hitTexCoord.y < .3 ? VPos.BOTTOM : hitTexCoord.y <= .7 ? VPos.CENTER : VPos.TOP;
                 _hitPos = Pos.get(hpos, vpos);
+                _hitDetector.reset();
                 return side;
             }
         }
