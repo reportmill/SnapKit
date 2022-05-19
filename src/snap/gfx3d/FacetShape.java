@@ -20,7 +20,7 @@ public abstract class FacetShape extends Shape3D {
     private Vector3D  _normal;
 
     // The VertexArray holding triangles of surface
-    private VertexArray  _triangleArray;
+    protected VertexArray  _triangleArray;
 
     /**
      * Returns the texture to render on the facet shape surface.

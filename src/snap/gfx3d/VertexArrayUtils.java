@@ -8,6 +8,8 @@ import snap.geom.Shape;
 import snap.gfx.Color;
 import snap.gfx.Stroke;
 
+import java.util.Arrays;
+
 /**
  * Utility methods for VertexArray.
  */
@@ -117,22 +119,51 @@ public class VertexArrayUtils {
         p1b.y += -downVector.y + acrossVector.y + offsetNormal.y;
         p1b.z += -downVector.z + acrossVector.z + offsetNormal.z;
 
+        // Add the points
+        int pointCount = vertexArray.getPointCount();
+        vertexArray.addPoint(p0a.x, p0a.y, p0a.z);
+        vertexArray.addPoint(p1a.x, p1a.y, p1a.z);
+        vertexArray.addPoint(p0b.x, p0b.y, p0b.z);
+        vertexArray.addPoint(p1b.x, p1b.y, p1b.z);
+
+        // Get indexes
+        int i0a = pointCount;
+        int i1a = pointCount + 1;
+        int i0b = pointCount + 2;
+        int i1b = pointCount + 3;
+
+        // Get current index array and current size
+        int[] indexArray = vertexArray.getIndexArray();
+        int indexCount = indexArray.length;
+
+        // Extend index array, set triangle point indexes
+        indexArray = Arrays.copyOf(indexArray, indexCount + 6);
+        indexArray[indexCount] = i0a;
+        indexArray[indexCount + 1] = i0b;
+        indexArray[indexCount + 2] = i1b;
+        indexArray[indexCount + 3] = i1a;
+        indexArray[indexCount + 4] = i0a;
+        indexArray[indexCount + 5] = i1b;
+
+        // Set new indexArray in VertexArray. If double-sided, just return
+        vertexArray.setIndexArray(indexArray);
+        if (vertexArray.isDoubleSided())
+            return;
+
         // Get triangle A. If not aligned with normal, swap points
         Point3D[] triangleA = { p0a, p0b, p1b };
         Vector3D pointsNormal = Vector3D.getNormalForPoints(new Vector3D(0, 0, 0), triangleA);
         if (!pointsNormal.equals(lineNormal)) {
-            triangleA[1] = p1b; triangleA[2] = p0b; }
+            indexArray[indexCount + 1] = i1b;
+            indexArray[indexCount + 2] = i0b;
+        }
 
-        // Get triangle A. If not aligned with normal, swap points
+        // Get triangle B. If not aligned with normal, swap points
         Point3D[] triangleB = { p1a, p0a, p1b };
         Vector3D.getNormalForPoints(pointsNormal, triangleB);
         if (!pointsNormal.equals(lineNormal)) {
-            triangleB[1] = p1b; triangleB[2] = p0a; }
-
-        // Add triangle points
-        for (Point3D p3d : triangleA)
-            vertexArray.addPoint(p3d.x, p3d.y, p3d.z);
-        for (Point3D p3d : triangleB)
-            vertexArray.addPoint(p3d.x, p3d.y, p3d.z);
+            indexArray[indexCount + 4] = i1b;
+            indexArray[indexCount + 5] = i0a;
+        }
     }
 }
