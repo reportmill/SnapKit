@@ -639,25 +639,41 @@ public class ViewUtils {
     /**
      * Backdoor for protected View method.
      */
-    public static void setShowing(View aView, boolean aValue)  { aView.setShowing(aValue); }
+    public static void setShowing(View aView, boolean aValue)
+    {
+        aView.setShowing(aValue);
+        aView.repaint();
+    }
 
     /**
      * Backdoor for protected View method.
      */
-    public static void setFocused(View aView, boolean aValue)  { aView.setFocused(aValue); }
+    public static void setFocused(View aView, boolean aValue)
+    {
+        aView.setFocused(aValue);
+    }
 
     /**
      * Backdoor for protected View method.
      */
-    public static void processEvent(View aView, ViewEvent anEvent)  { aView.processEvent(anEvent); }
+    public static void processEvent(View aView, ViewEvent anEvent)
+    {
+        aView.processEvent(anEvent);
+    }
 
     /**
      * Backdoor for protected View method.
      */
-    public static void enableEvents(View aView, ViewEvent.Type ... theEvents)  { aView.enableEvents(theEvents); }
+    public static void enableEvents(View aView, ViewEvent.Type ... theEvents)
+    {
+        aView.enableEvents(theEvents);
+    }
 
     /**
      * Backdoor for protected View method.
      */
-    public static void fireActionEvent(View aView, ViewEvent anEvent)  { aView.fireActionEvent(anEvent); }
+    public static void fireActionEvent(View aView, ViewEvent anEvent)
+    {
+        aView.fireActionEvent(anEvent);
+    }
 }

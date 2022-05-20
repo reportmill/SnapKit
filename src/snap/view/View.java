@@ -1280,8 +1280,10 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void setShowing(boolean aValue)
     {
+        // If already set, just return
         if (aValue == _showing) return;
-        if (aValue) repaint();
+
+        // Set value and firePropChange
         firePropChange(Showing_Prop, _showing, _showing = aValue);
 
         // If focused, turn off
@@ -1290,10 +1292,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // If Anim set, play/suspend
         ViewAnim anim = getAnim(-1);
-        if (aValue && anim != null && anim.isSuspended())
-            anim.play();
-        else if (!aValue && anim != null && anim.isPlaying())
-            anim.suspend();
+        if (anim != null) {
+            if (aValue && anim.isSuspended())
+                anim.play();
+            else if (!aValue && anim.isPlaying())
+                anim.suspend();
+        }
     }
 
     /**
