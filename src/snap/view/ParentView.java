@@ -316,23 +316,29 @@ public class ParentView extends View {
     }
 
     /**
-     * Override to propagate to children.
+     * Override to send to children.
      */
     protected void setShowing(boolean aValue)
     {
+        // Do normal version
         if (aValue == _showing) return;
         super.setShowing(aValue);
+
+        // Send to children
         for (View child : getChildren())
             child.setShowing(aValue && child.isVisible());
     }
 
     /**
-     * Override to propogate to children.
+     * Override to send to children.
      */
     public void setOwner(ViewOwner anOwner)
     {
+        // Do normal version
         if (getOwner() != null) return;
         super.setOwner(anOwner);
+
+        // Send to children
         for (View child : getChildren())
             child.setOwner(anOwner);
     }

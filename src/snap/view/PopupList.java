@@ -6,96 +6,112 @@ package snap.view;
 /**
  * A ListView subclass that displays in a PopupWindow.
  */
-public class PopupList <T> extends ListView <T> {
-    
+public class PopupList<T> extends ListView<T> {
+
     // The PopupNode
-    PopupWindow       _popup;
-    
+    private PopupWindow  _popup;
+
     // The view given with last show
-    View              _showView;
-    
+    private View  _showView;
+
     // EventListener to listen to events from show view
-    EventListener     _lsnr;
-    
-/**
- * Creates a new PopupList.
- */
-public PopupList()
-{
-    getListArea().setFocusWhenPressed(false);
-    getScrollView().setBorder(null);
-}
+    private EventListener  _lsnr;
 
-/**
- * Returns the popup.
- */
-public PopupWindow getPopup()
-{
-    if(_popup!=null) return _popup;
-    PopupWindow popup = new PopupWindow(); popup.setFocusable(false);
-    popup.setContent(this);
-    popup.addPropChangeListener(pce -> popupWindowShowingChanged(), Showing_Prop);
-    return _popup = popup;
-}
+    /**
+     * Creates a new PopupList.
+     */
+    public PopupList()
+    {
+        getListArea().setFocusWhenPressed(false);
+        getScrollView().setBorder(null);
+    }
 
-/**
- * Shows the node.
- */
-public void show(View aView, double aX, double aY)
-{
-    // Get popup and set best size
-    PopupWindow popup = getPopup();
-    popup.pack();
-    
-    // Show window
-    popup.show(_showView = aView, aX, aY);
-}
+    /**
+     * Returns the popup.
+     */
+    public PopupWindow getPopup()
+    {
+        // If already set, just return
+        if (_popup != null) return _popup;
 
-/**
- * Hides the node.
- */
-public void hide()  { getPopup().hide(); }
+        // Create/configure PopupWindow
+        PopupWindow popup = new PopupWindow();
+        popup.setFocusable(false);
+        popup.setContent(this);
+        popup.addPropChangeListener(pce -> popupWindowShowingChanged(), Showing_Prop);
 
-/**
- * Override to resize if showing.
- */
-public void setItems(java.util.List <T> theItems)
-{
-    super.setItems(theItems);
-    if(isShowing())
-        getPopup().pack();
-}
+        // Set and return
+        return _popup = popup;
+    }
 
-/**
- * Override to hide popuplist.
- */
-protected void fireActionEvent(ViewEvent anEvent)
-{
-    super.fireActionEvent(anEvent);
-    hide();
-}
+    /**
+     * Shows the node.
+     */
+    public void show(View aView, double aX, double aY)
+    {
+        // Get popup and set best size
+        PopupWindow popup = getPopup();
+        popup.pack();
 
-/**
- * Called when owner View has KeyPress events.
- */
-protected void handleShowViewEvent(ViewEvent anEvent)
-{
-    if(anEvent.isUpArrow() || anEvent.isDownArrow() || anEvent.isEnterKey())
-        processEvent(anEvent);
-}
+        // Show window
+        popup.show(_showView = aView, aX, aY);
+    }
 
-/**
- * Called when PopupWindow is shown/hidden.
- */
-protected void popupWindowShowingChanged()
-{
-    if(_showView==null) return;
-    PopupWindow popup = getPopup(); boolean showing = popup.isShowing();
-    
-    // If showing, add EventListener, otherwise, remove
-    if(showing)
-        _showView.addEventFilter(_lsnr = e -> handleShowViewEvent(e), KeyPress);
-    else { _showView.removeEventFilter(_lsnr, KeyPress); _lsnr = null; _showView = null; }
-}
+    /**
+     * Hides the node.
+     */
+    public void hide()
+    {
+        getPopup().hide();
+    }
+
+    /**
+     * Override to resize if showing.
+     */
+    public void setItems(java.util.List<T> theItems)
+    {
+        super.setItems(theItems);
+        if (isShowing())
+            getPopup().pack();
+    }
+
+    /**
+     * Override to hide popuplist.
+     */
+    protected void fireActionEvent(ViewEvent anEvent)
+    {
+        super.fireActionEvent(anEvent);
+        hide();
+    }
+
+    /**
+     * Called when owner View has KeyPress events.
+     */
+    protected void handleShowViewEvent(ViewEvent anEvent)
+    {
+        if (anEvent.isUpArrow() || anEvent.isDownArrow() || anEvent.isEnterKey())
+            processEvent(anEvent);
+    }
+
+    /**
+     * Called when PopupWindow is shown/hidden.
+     */
+    protected void popupWindowShowingChanged()
+    {
+        if (_showView == null) return;
+        PopupWindow popup = getPopup();
+        boolean showing = popup.isShowing();
+
+        // If showing, add EventListener, otherwise, remove
+        if (showing)
+            _showView.addEventFilter(_lsnr = e -> handleShowViewEvent(e), KeyPress);
+
+        // Otherwise remove listener
+        else {
+            _showView.removeEventFilter(_lsnr, KeyPress);
+            _lsnr = null;
+            _showView = null;
+        }
+    }
 
 }

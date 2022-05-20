@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+
 import snap.geom.Insets;
 import snap.geom.Rect;
 import snap.geom.Shape;
@@ -11,12 +12,12 @@ import snap.util.*;
  * A View subclass to render shapes.
  */
 public class ShapeView extends View {
-    
+
     // The shape
-    Shape _shape;
-    
+    private Shape  _shape;
+
     // Whether to expand shape to view bounds
-    boolean     _fillWidth, _fillHeight;
+    private boolean  _fillWidth, _fillHeight;
 
     // Constants for properties
     public static final String FillWidth_Prop = "FillWidth";
@@ -45,7 +46,9 @@ public class ShapeView extends View {
      */
     public Shape getShape()
     {
-        return _shape!=null ? _shape : (_shape=new Rect());
+        if (_shape != null) return _shape;
+        Shape shape = new Rect();
+        return _shape = shape;
     }
 
     /**
@@ -67,8 +70,8 @@ public class ShapeView extends View {
      */
     public void setFillWidth(boolean aValue)
     {
-        if (aValue==_fillWidth) return;
-        firePropChange(FillWidth_Prop, _fillWidth, _fillWidth=aValue);
+        if (aValue == _fillWidth) return;
+        firePropChange(FillWidth_Prop, _fillWidth, _fillWidth = aValue);
     }
 
     /**
@@ -81,8 +84,8 @@ public class ShapeView extends View {
      */
     public void setFillHeight(boolean aValue)
     {
-        if (aValue==_fillHeight) return;
-        firePropChange(FillHeight_Prop, _fillHeight, _fillHeight=aValue);
+        if (aValue == _fillHeight) return;
+        firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
     }
 
     /**
