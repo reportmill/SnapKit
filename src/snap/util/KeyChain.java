@@ -9,34 +9,68 @@ import java.util.*;
  * This class evaluates a string expression on a given object: KeyChain.getValue(object, expression).
  */
 public class KeyChain {
-    
+
     // The operator of key chain
     private Op  _op;
-    
+
     // Possible children of key chain
     private Object  _children;
-    
+
     // The KeyChain parser
     private static KeyChainParser  _parser = new KeyChainParser();
 
     // A shared map of previously encountered key chains
-    private static Map <Object,KeyChain>  _keyChains = new Hashtable();
-    
+    private static Map<Object, KeyChain>  _keyChains = new Hashtable();
+
+    // The function handler
+    private static FunctionHandler  _functionHandler;
+
     // A thread local to vend per assignment maps
-    private static ThreadLocal <Map> _assTL = new ThreadLocal() { public Object initialValue() { return new HashMap(); } };
+    private static ThreadLocal<Map>  _assTL = new ThreadLocal() {
+        public Object initialValue()
+        {
+            return new HashMap();
+        }
+    };
 
     // KeyChain Operators
     public enum Op {
-        Literal, Add, Subtract, Multiply, Divide, Mod, Negate,
-        Equal, NotEqual, GreaterThan, LessThan, GreaterThanOrEqual, LessThanOrEqual, And, Or, Not,
-        Key, ArrayIndex, FunctionCall, ArgList, Chain, Conditional, Assignment
+
+        // Literal
+        Literal,
+
+        // Math
+        Add, Subtract, Multiply, Divide, Mod, Negate,
+
+        // Compare
+        Equal, NotEqual, GreaterThan, LessThan, GreaterThanOrEqual, LessThanOrEqual,
+
+        // Logical
+        And, Or, Not,
+
+        // Chains
+        Key, ArrayIndex,
+
+        // Functions
+        FunctionCall, ArgList,
+
+        // Misc
+        Chain, Conditional, Assignment
     };
-    
+
     /**
      * This is interface is implemented by objects that can get key chain values themselves.
      */
     public interface Get {
-        public Object getKeyChainValue(Object aRoot, KeyChain aKeyChain);
+        Object getKeyChainValue(Object aRoot, KeyChain aKeyChain);
+    }
+
+    /**
+     * A function handler.
+     */
+    public interface FunctionHandler {
+
+        Object getValueFunctionCall(Object aRoot, Object anObj, KeyChain aKeyChain);
     }
 
     /**
@@ -46,16 +80,16 @@ public class KeyChain {
     {
         // If passed key chain, just return it
         if (aSource instanceof KeyChain)
-            return (KeyChain)aSource;
+            return (KeyChain) aSource;
 
         // If not passed string, return Null KeyChain
-        if (!(aSource instanceof String) || ((String)aSource).length()==0)
+        if (!(aSource instanceof String) || ((String) aSource).length() == 0)
             return new KeyChain(Op.Literal);
 
         // Get KeyChain (create and cache if needed) and return
         KeyChain kchain = _keyChains.get(aSource);
-        if (kchain==null)
-            _keyChains.put(aSource, kchain = createKeyChain((String)aSource));
+        if (kchain == null)
+            _keyChains.put(aSource, kchain = createKeyChain((String) aSource));
         return kchain;
     }
 
@@ -70,7 +104,10 @@ public class KeyChain {
     /**
      * Returns a thread-local assignments map.
      */
-    public static Map getAssignments()  { return _assTL.get(); }
+    public static Map getAssignments()
+    {
+        return _assTL.get();
+    }
 
     /**
      * Constructor.
@@ -85,7 +122,8 @@ public class KeyChain {
      */
     protected KeyChain(Op anOp, Object child)
     {
-        _op = anOp; addChild(child);
+        _op = anOp;
+        addChild(child);
     }
 
     /**
@@ -93,7 +131,9 @@ public class KeyChain {
      */
     protected KeyChain(Op anOp, Object left, Object right)
     {
-        _op = anOp; addChild(left); addChild(right);
+        _op = anOp;
+        addChild(left);
+        addChild(right);
     }
 
     /**
@@ -104,7 +144,7 @@ public class KeyChain {
         _op = Op.Conditional;
         addChild(cond);
         addChild(tExp);
-        if (fExp!=null)
+        if (fExp != null)
             addChild(fExp);
     }
 
@@ -131,7 +171,7 @@ public class KeyChain {
      */
     public int getChildCount()
     {
-        return _children instanceof List ? ((List)_children).size() : _children!=null ? 1 : 0;
+        return _children instanceof List ? ((List) _children).size() : _children != null ? 1 : 0;
     }
 
     /**
@@ -140,7 +180,7 @@ public class KeyChain {
     public Object getChild(int anIndex)
     {
         if (_children instanceof List)
-            return ((List)_children).get(anIndex);
+            return ((List) _children).get(anIndex);
         if (anIndex == 0)
             return _children;
         return null;
@@ -152,14 +192,14 @@ public class KeyChain {
     public void addChild(Object child)
     {
         // If first child, just set Children to point to it
-        if (_children==null)
+        if (_children == null)
             _children = child;
 
-        // If Children already list, just add child
+            // If Children already list, just add child
         else if (_children instanceof List)
-            ((List)_children).add(child);
+            ((List) _children).add(child);
 
-        // Else, create list and add
+            // Else, create list and add
         else {
             List c = new ArrayList(4);
             c.add(_children);
@@ -180,7 +220,10 @@ public class KeyChain {
     /**
      * Returns the child at the given index in the keychain as a keychain.
      */
-    public KeyChain getChildKeyChain(int i)  { return (KeyChain) getChild(i); }
+    public KeyChain getChildKeyChain(int i)
+    {
+        return (KeyChain) getChild(i);
+    }
 
     /**
      * Override to give list chance to implement this.
@@ -188,10 +231,10 @@ public class KeyChain {
     public KeyChain subchain(int anIndex)
     {
         int ccount = getChildCount();
-        if (anIndex+1 == ccount)
+        if (anIndex + 1 == ccount)
             return getChildKeyChain(anIndex);
         KeyChain kc = new KeyChain(Op.Chain);
-        for (int i=anIndex; i<ccount; i++)
+        for (int i = anIndex; i < ccount; i++)
             kc.addChild(getChild(i));
         return kc;
     }
@@ -219,12 +262,13 @@ public class KeyChain {
     public static Object getValue(Object aRoot, Object anObj, KeyChain aKeyChain)
     {
         // If object is null, just return null
-        if (anObj==null) return null;
+        if (anObj == null) return null;
 
         // If list, use aggregator
-        if (anObj instanceof List) { List list = (List) anObj;
+        if (anObj instanceof List) {
+            List list = (List) anObj;
             Object val = getValueImpl(aRoot, anObj, aKeyChain);
-            if (val==null && list.size()>0)
+            if (val == null && list.size() > 0)
                 val = getValueImpl(aRoot, list.get(0), aKeyChain);
             return val;
         }
@@ -243,19 +287,21 @@ public class KeyChain {
         switch (aKeyChain.getOp()) {
 
             // Handle Literals: String, Number, Null
-            case Literal: return aKeyChain.getValue();
+            case Literal:
+                return aKeyChain.getValue();
 
             // Handle binary math ops: Add, Subtract, Multiply, Divide, Mod
             case Add:
             case Subtract:
             case Multiply:
             case Divide:
-            case Mod: return getValueBinaryMathOp(aRoot, anObj, aKeyChain);
+            case Mod:
+                return getValueBinaryMathOp(aRoot, anObj, aKeyChain);
 
             // Handle Negate
             case Negate: {
                 Object o1 = getValue(aRoot, anObj, aKeyChain.getChildKeyChain(0));
-                return o1 instanceof Number ? MathUtils.negate((Number)o1) : null;
+                return o1 instanceof Number ? MathUtils.negate((Number) o1) : null;
             }
 
             // Handle binary compare ops: GreaterThan, LessThan, Equal, NotEqual, GreaterThanOrEqual, LessThanOrEqual
@@ -264,48 +310,54 @@ public class KeyChain {
             case Equal:
             case NotEqual:
             case GreaterThanOrEqual:
-            case LessThanOrEqual: return getValueBinaryCompareOp(aRoot, anObj, aKeyChain);
+            case LessThanOrEqual:
+                return getValueBinaryCompareOp(aRoot, anObj, aKeyChain);
 
             // Handle Not
-            case Not: return !getBoolValue(aRoot, anObj, aKeyChain.getChildKeyChain(0));
+            case Not:
+                return !getBoolValue(aRoot, anObj, aKeyChain.getChildKeyChain(0));
 
             // Handle binary logical ops: And, Or
             case And:
             case Or: {
                 boolean b1 = getBoolValue(aRoot, anObj, aKeyChain.getChildKeyChain(0));
                 boolean b2 = getBoolValue(aRoot, anObj, aKeyChain.getChildKeyChain(1));
-                return  aKeyChain.getOp()==Op.And ? (b1 && b2) : (b1 || b2);
+                return aKeyChain.getOp() == Op.And ? (b1 && b2) : (b1 || b2);
             }
 
             // Handle basic Key
             case Key: {
                 Object value = Key.getValue(anObj, aKeyChain.getValueString());
-                if (value==null)
+                if (value == null)
                     value = getAssignments().get(aKeyChain.getValue());
                 return value;
             }
 
             // Handle ArrayIndex
-            case ArrayIndex: return getValueArrayIndex(aRoot, anObj, aKeyChain);
+            case ArrayIndex:
+                return getValueArrayIndex(aRoot, anObj, aKeyChain);
 
             // Handle FunctionCall
-            case FunctionCall: return getValueFunctionCall(aRoot, anObj, aKeyChain);
+            case FunctionCall:
+                return getValueFunctionCall(aRoot, anObj, aKeyChain);
 
             // Handle Chain
-            case Chain: return getValueChain(aRoot, anObj, aKeyChain);
+            case Chain:
+                return getValueChain(aRoot, anObj, aKeyChain);
 
             // Handle Conditional
             case Conditional: {
                 boolean result = getBoolValue(aRoot, anObj, aKeyChain.getChildKeyChain(0));
                 if (result)
                     return getValue(aRoot, anObj, aKeyChain.getChildKeyChain(1));
-                return aKeyChain.getChildCount()==3 ? getValue(aRoot, anObj, aKeyChain.getChildKeyChain(2)) : null;
+                return aKeyChain.getChildCount() == 3 ? getValue(aRoot, anObj, aKeyChain.getChildKeyChain(2)) : null;
             }
 
             // Handle Assignment
             case Assignment: {
                 Object value = getValue(aRoot, anObj, aKeyChain.getChildKeyChain(1));
-                getAssignments().put(aKeyChain.getChildString(0), value); return "";
+                getAssignments().put(aKeyChain.getChildString(0), value);
+                return "";
             }
 
             // Handle the impossible
@@ -332,7 +384,7 @@ public class KeyChain {
         Object o2 = getValue(aRoot, anObj, aKeyChain.getChildKeyChain(1));
 
         // If non-numeric operand values (except add), just return
-        if (!(o1 instanceof Number && o2 instanceof Number) && aKeyChain.getOp()!=Op.Add) return null;
+        if (!(o1 instanceof Number && o2 instanceof Number) && aKeyChain.getOp() != Op.Add) return null;
 
         // Handle Math ops: Add, Subtract, Multiply, Divide, Mod
         switch (aKeyChain.getOp()) {
@@ -352,7 +404,7 @@ public class KeyChain {
     {
         // If strings, do string concat (accounting for nulls)
         if (obj1 instanceof String || obj2 instanceof String)
-            try { return (obj1==null ? "" : obj1.toString()) + (obj2==null ? "" : obj2.toString()); }
+            try { return (obj1 == null ? "" : obj1.toString()) + (obj2 == null ? "" : obj2.toString()); }
             catch(Exception e) { return null; }
 
         // If numbers, do Math.add()
@@ -360,10 +412,10 @@ public class KeyChain {
             return MathUtils.add(SnapUtils.numberValue(obj1), SnapUtils.numberValue(obj2));
 
         // If nulls, just return null
-        if (obj1==null && obj2==null) return null;
+        if (obj1 == null && obj2 == null) return null;
 
         // Fallback, try to add as strings or bail with null
-        try { return (obj1==null ? "" : obj1.toString()) + (obj2==null ? "" : obj2.toString()); }
+        try { return (obj1 == null ? "" : obj1.toString()) + (obj2 == null ? "" : obj2.toString()); }
         catch(Exception e) { return null; }
     }
 
@@ -394,10 +446,11 @@ public class KeyChain {
     private static Object getValueArrayIndex(Object aRoot, Object anObj, KeyChain aKeyChain)
     {
         KeyChain arrayKeyChain = aKeyChain.getChildKeyChain(0);
-        Object o1 = getValue(anObj, arrayKeyChain); if (!(o1 instanceof List)) return null;
+        Object o1 = getValue(anObj, arrayKeyChain);
+        if (!(o1 instanceof List)) return null;
         KeyChain indexKeyChain = aKeyChain.getChildKeyChain(1);
         int index = getIntValue(aRoot, indexKeyChain);
-        return ListUtils.get((List)o1, index);
+        return ListUtils.get((List) o1, index);
     }
 
     /**
@@ -405,7 +458,18 @@ public class KeyChain {
      */
     private static Object getValueFunctionCall(Object aRoot, Object anObj, KeyChain aKeyChain)
     {
-        System.out.println("KeyChain.getValueFunctionCall: Not implemented"); return null;
+        if (_functionHandler != null)
+            return _functionHandler.getValueFunctionCall(aRoot, anObj, aKeyChain);
+        System.out.println("KeyChain.getValueFunctionCall: Not implemented");
+        return null;
+    }
+
+    /**
+     * Sets the FunctionHandler.
+     */
+    public static void setFunctionHandler(FunctionHandler aFH)
+    {
+        _functionHandler = aFH;
     }
 
     /**
@@ -414,46 +478,76 @@ public class KeyChain {
     private static Object getValueChain(Object aRoot, Object anObj, KeyChain aKeyChain)
     {
         Object value = anObj;
-        for (int i=0, iMax=aKeyChain.getChildCount(); i<iMax; i++) {
+        for (int i = 0, iMax = aKeyChain.getChildCount(); i < iMax; i++) {
             KeyChain child = aKeyChain.getChildKeyChain(i);
             value = getValue(aRoot, value, child);
         }
         return value;
     }
 
-    /** Convenience - returns a string for an object and key chain. */
+    /**
+     * Convenience - returns a string for an object and key chain.
+     */
     public static String getStringValue(Object anObj, Object aKeyChain)
-    { return SnapUtils.stringValue(getValue(anObj, aKeyChain)); }
+    {
+        return SnapUtils.stringValue(getValue(anObj, aKeyChain));
+    }
 
-    /** Convenience - returns a number for an object and key chain. */
+    /**
+     * Convenience - returns a number for an object and key chain.
+     */
     public static Number getNumberValue(Object anObj, Object aKeyChain)
-    { return SnapUtils.numberValue(getValue(anObj, aKeyChain)); }
+    {
+        return SnapUtils.numberValue(getValue(anObj, aKeyChain));
+    }
 
-    /** Convenience - returns an int for an object and key chain. */
+    /**
+     * Convenience - returns an int for an object and key chain.
+     */
     public static int getIntValue(Object anObj, Object aKeyChain)
-    { return SnapUtils.intValue(getValue(anObj, aKeyChain)); }
+    {
+        return SnapUtils.intValue(getValue(anObj, aKeyChain));
+    }
 
-    /** Convenience - returns a float for an object and key chain. */
+    /**
+     * Convenience - returns a float for an object and key chain.
+     */
     public static float getFloatValue(Object anObj, Object aKeyChain)
-    { return SnapUtils.floatValue(getValue(anObj, aKeyChain)); }
+    {
+        return SnapUtils.floatValue(getValue(anObj, aKeyChain));
+    }
 
-    /** Convenience - returns a double for an object and key chain. */
+    /**
+     * Convenience - returns a double for an object and key chain.
+     */
     public static double getDoubleValue(Object anObj, Object aKeyChain)
-    { return SnapUtils.doubleValue(getValue(anObj, aKeyChain)); }
+    {
+        return SnapUtils.doubleValue(getValue(anObj, aKeyChain));
+    }
 
-    /** Convenience - returns a boolean for an object and key chain. */
+    /**
+     * Convenience - returns a boolean for an object and key chain.
+     */
     public static boolean getBoolValue(Object anObj, Object aKeyChain)
-    { return SnapUtils.boolValue(getValue(anObj, aKeyChain)); }
+    {
+        return SnapUtils.boolValue(getValue(anObj, aKeyChain));
+    }
 
     /**
      * Returns the last error encountered by the key chain parser (or null).
      */
-    public static String getError()  { return _parser.getError(); }
+    public static String getError()
+    {
+        return _parser.getError();
+    }
 
     /**
      * Returns the last error encountered by the key chain parser and resets parser.
      */
-    public static String getAndResetError()  { return _parser.getAndResetError(); }
+    public static String getAndResetError()
+    {
+        return _parser.getAndResetError();
+    }
 
     /**
      * Sets the given value for the given key chain + property.
@@ -478,22 +572,25 @@ public class KeyChain {
         if (kchain.getOp() == Op.Chain) {
             int cc = aKeyChain.getChildCount();
             KeyChain kc = new KeyChain(Op.Chain);
-            for (int i=0;i<cc-1;i++)
+            for (int i = 0; i < cc - 1; i++)
                 kc.addChild(aKeyChain.getChild(i));
             obj = getValue(anObj, kc);
-            kchain = aKeyChain.getChildKeyChain(cc-1);
+            kchain = aKeyChain.getChildKeyChain(cc - 1);
         }
 
         // If not Key, just return
-        if (kchain.getOp()!=Op.Key)  {
+        if (kchain.getOp() != Op.Key) {
             System.err.println("KeyChain.setValue: Last op not key.");
             return;
         }
 
         // Get key and set
         String key = kchain.getChildString(0);
-        try { Key.setValue(obj, key, aValue); }
-        catch(Exception e)  { throw new RuntimeException(e); }
+        try {
+            Key.setValue(obj, key, aValue);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -501,9 +598,11 @@ public class KeyChain {
      */
     public static void setValueSafe(Object anObj, String aKey, Object aValue)
     {
-        try { setValue(anObj, aKey, aValue); }
-        catch(Exception e) { Class cls = ClassUtils.getClass(anObj);
-            String msg = (cls!=null ? cls.getSimpleName() : "null") + " " + aKey + " " + aValue;
+        try {
+            setValue(anObj, aKey, aValue);
+        } catch (Exception e) {
+            Class cls = ClassUtils.getClass(anObj);
+            String msg = (cls != null ? cls.getSimpleName() : "null") + " " + aKey + " " + aValue;
             System.err.println("KeyChain.setValue (" + msg + ") failed: " + e);
         }
     }
@@ -513,8 +612,10 @@ public class KeyChain {
      */
     public static void setValueSilent(Object anObj, String aKey, Object aValue)
     {
-        try { setValue(anObj, aKey, aValue); }
-        catch(Exception e) { }
+        try {
+            setValue(anObj, aKey, aValue);
+        } catch (Exception e) {
+        }
     }
 
     /**
@@ -557,14 +658,13 @@ public class KeyChain {
     public static void main(String args[]) throws IOException
     {
         // If there is an arg, evaluate it, otherwise if no args, read from standard in until control-d
-        if (args.length>0 && args[0].length()>0) {
+        if (args.length > 0 && args[0].length() > 0) {
             Object value = KeyChain.getValue(new Object(), args[0]);
             System.out.println(value instanceof Number ? SnapUtils.getBigDecimal(value) : value);
-        }
-        else {
+        } else {
             BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
-            for (String ln=rdr.readLine(); ln!=null; ln=rdr.readLine())
-                main(new String[] { ln });
+            for (String ln = rdr.readLine(); ln != null; ln = rdr.readLine())
+                main(new String[]{ln});
         }
     }
 }
