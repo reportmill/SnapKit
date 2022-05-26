@@ -24,16 +24,27 @@ public class XMLParser extends Parser {
     /**
      * Kicks off xml parsing from given source and builds on this parser's element.
      */
-    public XMLElement parseXML(Object aSource) throws Exception
+    public XMLElement parseXMLFromSource(Object aSource) throws Exception
     {
-        // Get string from source
-        String str = SnapUtils.getText(aSource);
-        if (str==null) {
-            System.err.println("XMLParser.parseXML: Couldn't load text from source: " + aSource); return null; }
+        // Get XML string from source
+        String xmlString = SnapUtils.getText(aSource);
+        if (xmlString == null) {
+            System.err.println("XMLParser.parseXMLFromSource: Couldn't load text from source: " + aSource);
+            return null;
+        }
 
-        // Parse string, get XML element and return
-        ParseNode node = parse(str);
-        XMLElement xml = (XMLElement)node.getCustomNode();
+        // Parse XML from string and return
+        XMLElement xml = parseXMLFromString(xmlString);
+        return xml;
+    }
+
+    /**
+     * Kicks off xml parsing from given source and builds on this parser's element.
+     */
+    public XMLElement parseXMLFromString(String xmlString) throws Exception
+    {
+        ParseNode node = parse(xmlString);
+        XMLElement xml = (XMLElement) node.getCustomNode();
         return xml;
     }
 
@@ -214,7 +225,7 @@ public class XMLParser extends Parser {
     public static void main(String args[]) throws Exception
     {
         XMLParser parser = new XMLParser();
-        XMLElement xml = parser.parseXML("/Temp/SnapCode/src/snap/app/AppPane.snp");
+        XMLElement xml = parser.parseXMLFromSource("/Temp/SnapCode/src/snap/app/AppPane.snp");
         System.err.println(xml);
     }
 }

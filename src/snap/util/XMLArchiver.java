@@ -169,8 +169,8 @@ public class XMLArchiver {
     public Object readFromXMLSource(Object aSource)
     {
         // Get bytes from source - if not found or empty, complain
-        byte bytes[] = SnapUtils.getBytes(aSource);
-        if (bytes == null || bytes.length == 0)
+        byte[] xmlBytes = SnapUtils.getBytes(aSource);
+        if (xmlBytes == null || xmlBytes.length == 0)
             throw new RuntimeException("XMLArchiver.readObject: Cannot read source: " + aSource);
 
         // Try to get SourceURL from source
@@ -180,17 +180,29 @@ public class XMLArchiver {
         }
 
         // ReadObject(bytes) and return
-        return readFromXMLBytes(bytes);
+        return readFromXMLBytes(xmlBytes);
+    }
+
+    /**
+     * Returns a root object unarchived from a generic input source (a File, String path, InputStream, URL, byte[], etc.).
+     */
+    public Object readFromXMLString(String xmlString)
+    {
+        try {
+            XMLParser xmlParser = new XMLParser();
+            XMLElement xml = xmlParser.parseXMLFromString(xmlString);
+            return readFromXML(xml);
+        }
+
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
      * Returns a root object unarchived from an RMByteSource.
      */
-    public Object readFromXMLBytes(byte theBytes[])
+    public Object readFromXMLBytes(byte[] theBytes)
     {
         XMLElement xml = XMLElement.getElement(theBytes);
-        if (isIgnoreCase())
-            xml.setIgnoreCase(true);
         return readFromXML(xml);
     }
 
@@ -200,6 +212,10 @@ public class XMLArchiver {
      */
     public Object readFromXML(XMLElement theXML)
     {
+        // Set IgnoreCase property
+        if (isIgnoreCase())
+            theXML.setIgnoreCase(true);
+
         // Read xml
         _root = theXML;
 

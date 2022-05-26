@@ -17,31 +17,31 @@ import java.util.*;
 public class XMLElement implements Cloneable {
 
     // The name of the attribute
-    private String _name;
+    private String  _name;
 
     // The full name of the attribute (if namespaced)
-    private String _fname;
+    private String  _fname;
 
     // The value string of the attribute
-    private String _value;
+    private String  _value;
 
     // The list of attributes associated with this element
-    private List<XMLAttribute> _attributes;
+    private List<XMLAttribute>  _attributes;
 
     // The list of child elements associated with this element
-    private List<XMLElement> _elements;
+    private List<XMLElement>  _elements;
 
     // The namespace
-    private String _nspace;
+    private String  _nspace;
 
     // Processing instruction data
-    private String _pidata;
+    private String  _pidata;
 
     // Whether element should ignore case when asking for attributes/elements by name
-    private boolean _ignoreCase;
+    private boolean  _ignoreCase;
 
     // A shared XMLParser
-    private static XMLParser _xmlParser;
+    private static XMLParser  _xmlParser;
 
     /**
      * Creates a new element.
@@ -70,10 +70,7 @@ public class XMLElement implements Cloneable {
     /**
      * Returns the name for this attribute.
      */
-    public String getName()
-    {
-        return _name;
-    }
+    public String getName()  { return _name; }
 
     /**
      * Sets the name for this attribute.
@@ -116,10 +113,7 @@ public class XMLElement implements Cloneable {
     /**
      * Returns the value for this attribute.
      */
-    public String getValue()
-    {
-        return _value;
-    }
+    public String getValue()  { return _value; }
 
     /**
      * Sets the value for this attribute.
@@ -132,10 +126,7 @@ public class XMLElement implements Cloneable {
     /**
      * Returns the namespace.
      */
-    public String getNamespace()
-    {
-        return _nspace;
-    }
+    public String getNamespace()  { return _nspace; }
 
     /**
      * Sets the namespace.
@@ -156,10 +147,7 @@ public class XMLElement implements Cloneable {
     /**
      * Returns the processing instruction.
      */
-    public String getProcInstrData()
-    {
-        return _pidata;
-    }
+    public String getProcInstrData()  { return _pidata; }
 
     /**
      * Sets the processing instruction data.
@@ -180,11 +168,15 @@ public class XMLElement implements Cloneable {
 
         // Create and return new element from source
         if (_xmlParser == null) _xmlParser = new XMLParser();
+
+        // Parse from XML source and return
         try {
-            return _xmlParser.parseXML(aSource);
-        } catch (Throwable t) {
+            return _xmlParser.parseXMLFromSource(aSource);
+        }
+
+        catch (Throwable t) {
             throw new RuntimeException(t);
-        } // Catch and re-throw exceptions
+        }
     }
 
     /**
