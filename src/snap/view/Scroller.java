@@ -274,7 +274,7 @@ public class Scroller extends ParentView implements ViewHost {
     protected Size getContentPrefSize()
     {
         // If no content return (1,1)
-        if (_content==null) return new Size(1,1);
+        if (_content == null) return new Size(1,1);
 
         // Get info
         Insets ins = getInsetsAll();
@@ -287,10 +287,16 @@ public class Scroller extends ParentView implements ViewHost {
         if (isFixedWidth && isFixedHeight)
             return new Size(areaW, areaH);
 
+        // Get Grow width/height values
+        boolean isGrowW = isGrowContentWidth() || _content.isGrowWidth();
+        boolean isGrowH = isGrowContentHeight() || _content.isGrowHeight();
+
         // Handle FixedWidth
         if (isFixedWidth) {
             double prefW = areaW;
             double prefH = _content.getBestHeight(prefW);
+            if (prefH < areaH && isGrowH)
+                prefH = areaH;
             return new Size(prefW, prefH);
         }
 
@@ -298,12 +304,12 @@ public class Scroller extends ParentView implements ViewHost {
         if (isFixedHeight) {
             double prefH = areaH;
             double prefW = _content.getBestWidth(prefH);
+            if (prefW < areaW && isGrowW)
+                prefW = areaW;
             return new Size(prefW, prefH);
         }
 
         // Handle Horizontal
-        boolean isGrowW = isGrowContentWidth() || _content.isGrowWidth();
-        boolean isGrowH = isGrowContentHeight() || _content.isGrowHeight();
         if (_content.isHorizontal()) {
 
             // Get PrefWidth (expand to width if needed)
