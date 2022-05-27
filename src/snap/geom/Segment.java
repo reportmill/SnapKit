@@ -147,7 +147,7 @@ public abstract class Segment extends Shape {
         // Special case for endpoints.  If one (or more) of the control points is the same as an endpoint, the tangent calculation
         // in the de Casteljau algorithm will return a point instead of the real tangent.
         if (t==0) {
-            tpoint.setXY(cpts[0]);
+            tpoint.setPoint(cpts[0]);
             for (int i=1; i<=degree; ++i)
                 if (!cpts[i].equals(cpts[0])) {
                     tan.width = cpts[i].x - cpts[0].x;
@@ -157,7 +157,7 @@ public abstract class Segment extends Shape {
         }
 
         else if (t==1) {
-            tpoint.setXY(cpts[degree]);
+            tpoint.setPoint(cpts[degree]);
             for (int i=degree-1; i>=0; --i)
                 if (!cpts[i].equals(cpts[degree])) {
                     tan.width = cpts[degree].x - cpts[i].x;

@@ -50,12 +50,20 @@ public class Point implements Cloneable {
     /**
      * Sets the x/y.
      */
-    public void setXY(Point aPoint)  { setX(aPoint.getX()); setY(aPoint.getY()); }
+    public final void setXY(double aX, double aY)
+    {
+        setX(aX);
+        setY(aY);
+    }
 
     /**
      * Sets the x/y.
      */
-    public void setXY(double aX, double aY)  { setX(aX); setY(aY); }
+    public void setPoint(Point aPoint)
+    {
+        setX(aPoint.getX());
+        setY(aPoint.getY());
+    }
 
     /**
      * Offsets the receiver by the given x and y.
@@ -90,7 +98,7 @@ public class Point implements Cloneable {
     /**
      * Transforms this point by the given Transform.
      */
-    public void transformBy(Transform aTrans)  { aTrans.transform(this, this); }
+    public void transformBy(Transform aTrans)  { aTrans.transformPoint(this); }
 
     /**
      * Returns the distance from this Point to a specified point.

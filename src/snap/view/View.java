@@ -1006,7 +1006,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Otherwise do full transform
         Transform localToParent = getLocalToParent();
-        return localToParent.transform(aX, aY);
+        return localToParent.transformXY(aX, aY);
     }
 
     /**
@@ -1072,7 +1072,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Otherwise do full transform
         Transform parentToLocal = getParentToLocal();
-        return parentToLocal.transform(aX, aY);
+        return parentToLocal.transformXY(aX, aY);
     }
 
     /**
@@ -1081,7 +1081,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Point parentToLocal(double aX, double aY, View aPar)
     {
         Transform parentToLocal = getParentToLocal(aPar);
-        return parentToLocal.transform(aX, aY);
+        return parentToLocal.transformXY(aX, aY);
     }
 
     /**

@@ -130,7 +130,7 @@ public class SplicerShape extends Shape {
             // Get Tail angle
             _tailAngle = segment.getPointAndAngle(1, _tailPoint);
             if (_trans!=null)
-                _trans.getInverse().transform(_tailPoint);
+                _trans.getInverse().transformPoint(_tailPoint);
 
             // Set finished and return
             _lenRun = _lenMax;

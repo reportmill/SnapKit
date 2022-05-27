@@ -65,7 +65,7 @@ public abstract class PathIter {
         coords[0] = aX;
         coords[1] = aY;
         if (_trans != null)
-            _trans.transform(coords, 1);
+            _trans.transformXYArray(coords, 1);
         return Seg.MoveTo;
     }
 
@@ -77,7 +77,7 @@ public abstract class PathIter {
         coords[0] = aX;
         coords[1] = aY;
         if (_trans != null)
-            _trans.transform(coords, 1);
+            _trans.transformXYArray(coords, 1);
         return Seg.LineTo;
     }
 
@@ -91,7 +91,7 @@ public abstract class PathIter {
         coords[2] = aX;
         coords[3] = aY;
         if (_trans != null)
-            _trans.transform(coords, 2);
+            _trans.transformXYArray(coords, 2);
         return Seg.QuadTo;
     }
 
@@ -107,7 +107,7 @@ public abstract class PathIter {
         coords[4] = aX;
         coords[5] = aY;
         if (_trans != null)
-            _trans.transform(coords, 3);
+            _trans.transformXYArray(coords, 3);
         return Seg.CubicTo;
     }
 

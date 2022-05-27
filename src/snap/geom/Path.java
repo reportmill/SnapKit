@@ -393,7 +393,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     {
         for (int i=0, iMax=getPointCount(); i<iMax; i++) {
             Point p = getPoint(i);
-            aTrans.transform(p,p);
+            aTrans.transformPoint(p);
             setPoint(i, p.x, p.y);
         }
     }
@@ -595,7 +595,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
         {
             Seg seg = _path._segs[_sindex++]; int count = seg.getCount();
             for (int i=0;i<count;i++) { coords[i*2] = _path._points[_pindex++]; coords[i*2+1] = _path._points[_pindex++]; }
-            if (_trans!=null) _trans.transform(coords, count);
+            if (_trans!=null) _trans.transformXYArray(coords, count);
             return seg;
         }
 

@@ -107,8 +107,8 @@ public class Vect implements Cloneable {
      */
     public void transform(Transform aTrans)
     {
-        Point p1 = aTrans.transform(0, 0);
-        Point p2 = aTrans.transform(x, y);
+        Point p1 = aTrans.transformXY(0, 0);
+        Point p2 = aTrans.transformXY(x, y);
         x = p2.x - p1.x;
         y = p2.y - p1.y;
     }

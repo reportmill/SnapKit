@@ -272,7 +272,7 @@ public class Transform implements Cloneable {
     /**
      * Returns the matrix.
      */
-    public double[] getMatrix()
+    public final double[] getMatrix()
     {
         double[] m = new double[6];
         getMatrix(m);
@@ -282,7 +282,7 @@ public class Transform implements Cloneable {
     /**
      * Loads the given matrix.
      */
-    public void getMatrix(double[] m)
+    public final void getMatrix(double[] m)
     {
         m[0] = _a; m[1] = _b;
         m[2] = _c; m[3] = _d;
@@ -293,7 +293,7 @@ public class Transform implements Cloneable {
     /**
      * Sets transform values to given matrix values.
      */
-    public void setMatrix(float[] m)
+    public final void setMatrix(float[] m)
     {
         setMatrix(m[0], m[1], m[2], m[3], m[4], m[5]);
     }
@@ -301,7 +301,7 @@ public class Transform implements Cloneable {
     /**
      * Sets transform values to given matrix values.
      */
-    public void setMatrix(double[] m)
+    public final void setMatrix(double[] m)
     {
         setMatrix(m[0], m[1], m[2], m[3], m[4], m[5]);
     }
@@ -309,7 +309,7 @@ public class Transform implements Cloneable {
     /**
      * Sets transform values to given transform values.
      */
-    public void setMatrix(Transform aTrans)
+    public final void setMatrix(Transform aTrans)
     {
         setMatrix(aTrans._a, aTrans._b, aTrans._c, aTrans._d, aTrans._tx, aTrans._ty);
     }
@@ -317,7 +317,7 @@ public class Transform implements Cloneable {
     /**
      * Sets transform values to given matrix values.
      */
-    public void setMatrix(double a, double b, double c, double d, double tx, double ty)
+    public final void setMatrix(double a, double b, double c, double d, double tx, double ty)
     {
         _a = a; _b = b;
         _c = c; _d = d;
@@ -329,21 +329,21 @@ public class Transform implements Cloneable {
     /**
      * Transforms the given values.
      */
-    public void transform(double[] anAry)
+    public final void transformXYArray(double[] anAry)
     {
-        transform(anAry, anAry.length / 2);
+        transformXYArray(anAry, anAry.length / 2);
     }
 
     /**
      * Transforms the given values.
      */
-    public void transform(double[] anAry, int aPntCnt)
+    public final void transformXYArray(double[] anAry, int aPntCnt)
     {
         // Optimized
         if(isSimple()) {
             for(int i = 0, iMax = aPntCnt * 2; i < iMax; i += 2) {
                 anAry[i] += _tx;
-                anAry[i+1] += _ty;
+                anAry[i + 1] += _ty;
             }
             return;
         }
@@ -358,42 +358,28 @@ public class Transform implements Cloneable {
     }
 
     /**
-     * Transforms the given point.
+     * Transforms the given XY values and return as point.
      */
-    public Point transform(double aX, double aY)
+    public final Point transformXY(double aX, double aY)
     {
-        return transform(new Point(aX,aY), null);
+        Point point = new Point(aX, aY);
+        transformPoint(point);
+        return point;
     }
 
     /**
      * Transforms the given point.
-     */
-    public void transform(Point aPoint)
-    {
-        transform(aPoint, aPoint);
-    }
-
-    /**
-     * Transforms the given values.
      *
      *                     [  _a  _b  0 ]
-     * P' = [ tx ty  1 ] x [  _c  _d  0 ] = [ tx*_a+ty*_c+_tx  tx*_b+ty*_d+ty   1  ]
+     * P' = [ tx ty  1 ] x [  _c  _d  0 ] = [ tx * _a + ty * _c + _tx  tx * _b + ty * _d + ty   1  ]
      *                     [ _tx _ty  1 ]
      *
      */
-    public Point transform(Point aPoint, Point aDest)
+    public final void transformPoint(Point aPoint)
     {
-        // Calc new values
-        double x = aPoint.x;
-        double y = aPoint.y;
-        double x2 = x * _a + y * _c + _tx;
-        double y2 = x * _b + y * _d + _ty;
-
-        // Set new values and return
-        if(aDest == null)
-            aDest = new Point(x2, y2);
-        else aDest.setXY(x2, y2);
-        return aDest;
+        double x2 = aPoint.x * _a + aPoint.y * _c + _tx;
+        double y2 = aPoint.x * _b + aPoint.y * _d + _ty;
+        aPoint.setXY(x2, y2);
     }
 
     /**
@@ -415,7 +401,7 @@ public class Transform implements Cloneable {
     /**
      * Transforms the given size.
      */
-    public void transform(Size aSize)
+    public final void transformSize(Size aSize)
     {
         double w = aSize.width;
         double h = aSize.height;
@@ -427,14 +413,14 @@ public class Transform implements Cloneable {
     /**
      * Transforms the given rect.
      */
-    public void transform(Rect aRect)
+    public final void transformRect(Rect aRect)
     {
         double x1 = aRect.x;
         double y1 = aRect.y;
         double x2 = aRect.getMaxX();
         double y2 = aRect.getMaxY();
         double pts[] = new double[] { x1, y1, x2, y1, x2, y2, x1, y2 };
-        transform(pts, 4);
+        transformXYArray(pts, 4);
         x1 = x2 = pts[0]; for(int i = 1; i < 4; i++) { double x = pts[i*2]; x1 = Math.min(x1,x); x2 = Math.max(x2,x); }
         y1 = y2 = pts[1]; for(int i = 1; i < 4; i++) { double y = pts[i*2+1]; y1 = Math.min(y1,y); y2 = Math.max(y2,y); }
         aRect.setRect(x1, y1,x2 - x1,y2 - y1);
@@ -515,7 +501,7 @@ public class Transform implements Cloneable {
     /**
      * Returns a transform from one rect to another.
      */
-    public static Transform getTrans(Rect fromRect, Rect toRect)
+    public static Transform getTransformBetweenRects(Rect fromRect, Rect toRect)
     {
         // Sanity check for empty rect
         if(fromRect.isEmpty()) {

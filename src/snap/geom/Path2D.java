@@ -161,7 +161,7 @@ public class Path2D extends Shape implements Cloneable {
 
         // If Transform, transform
         if (aTrans!=null)
-            aTrans.transform(theCoords, seg.getCount() + 1);
+            aTrans.transformXYArray(theCoords, seg.getCount() + 1);
 
         // Return seg
         return seg;
@@ -186,7 +186,7 @@ public class Path2D extends Shape implements Cloneable {
         int pointCount = seg.getCount();
         System.arraycopy(_points, pointIndex, theCoords, 0, pointCount*2);
         if (aTrans!=null)
-            aTrans.transform(theCoords, pointCount);
+            aTrans.transformXYArray(theCoords, pointCount);
         return seg;
     }
 
