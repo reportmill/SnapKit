@@ -30,22 +30,22 @@ public class Point implements Cloneable {
     /**
      * Return point x.
      */
-    public double getX()  { return x; }
+    public final double getX()  { return x; }
 
     /**
      * Set point x.
      */
-    public void setX(double aValue)  { x = aValue; }
+    public final void setX(double aValue)  { x = aValue; }
 
     /**
      * Return point y.
      */
-    public double getY()  { return y; }
+    public final double getY()  { return y; }
 
     /**
      * Set point y.
      */
-    public void setY(double aValue)  { y = aValue; }
+    public final void setY(double aValue)  { y = aValue; }
 
     /**
      * Sets the x/y.
@@ -59,7 +59,7 @@ public class Point implements Cloneable {
     /**
      * Sets the x/y.
      */
-    public void setPoint(Point aPoint)
+    public final void setPoint(Point aPoint)
     {
         setX(aPoint.getX());
         setY(aPoint.getY());
