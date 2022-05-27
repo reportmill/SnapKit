@@ -201,7 +201,7 @@ public class Matrix3D implements Cloneable {
     /**
      * Invert.
      */
-    public Matrix3D invert()
+    public final Matrix3D invert()
     {
         // If IDENTITY, just return
         if (this == IDENTITY)
@@ -293,7 +293,7 @@ public class Matrix3D implements Cloneable {
      *    double ry = Math.fma(mat.m01(), x, Math.fma(mat.m11(), y, Math.fma(mat.m21(), z, mat.m31() * w))) / W;
      *    double rz = Math.fma(mat.m02(), x, Math.fma(mat.m12(), y, Math.fma(mat.m22(), z, mat.m32() * w))) / W;
      */
-    public Point3D transformPoint(Point3D aPoint)
+    public final Point3D transformPoint(Point3D aPoint)
     {
         double x2 = mtx[0 * 4 + 0] * aPoint.x + mtx[1 * 4 + 0] * aPoint.y + mtx[2 * 4 + 0] * aPoint.z + mtx[3 * 4 + 0];
         double y2 = mtx[0 * 4 + 1] * aPoint.x + mtx[1 * 4 + 1] * aPoint.y + mtx[2 * 4 + 1] * aPoint.z + mtx[3 * 4 + 1];
@@ -308,7 +308,7 @@ public class Matrix3D implements Cloneable {
     /**
      * Transforms a given point (and returns it as a convenience).
      */
-    public Point3D transformPoint(double aX, double aY, double aZ)
+    public final Point3D transformXYZ(double aX, double aY, double aZ)
     {
         return transformPoint(new Point3D(aX, aY, aZ));
     }
@@ -316,7 +316,7 @@ public class Matrix3D implements Cloneable {
     /**
      * Transforms a given point (and returns it as a convenience).
      */
-    public void transformArrayPoints(float[] pointsArray, int aPointCount)
+    public final void transformXYZArray(float[] pointsArray, int aPointCount)
     {
         for (int i = 0; i < aPointCount; i++) {
             int pointsArrayIndex = i * 3;
@@ -336,7 +336,7 @@ public class Matrix3D implements Cloneable {
     /**
      * Transforms a given vector (and returns it as a convenience).
      */
-    public Vector3D transformVector(Vector3D aVector)
+    public final Vector3D transformVector(Vector3D aVector)
     {
         double x2 = mtx[0 * 4 + 0] * aVector.x + mtx[1 * 4 + 0] * aVector.y + mtx[2 * 4 + 0] * aVector.z;
         double y2 = mtx[0 * 4 + 1] * aVector.x + mtx[1 * 4 + 1] * aVector.y + mtx[2 * 4 + 1] * aVector.z;
@@ -348,7 +348,7 @@ public class Matrix3D implements Cloneable {
     /**
      * Returns a double array for the transform.
      */
-    public double[] toArray()
+    public final double[] toArray()
     {
         return mtx.clone();
     }
@@ -356,7 +356,7 @@ public class Matrix3D implements Cloneable {
     /**
      * Returns a double array for the transform.
      */
-    public double[] toArray(double[] anArray)
+    public final double[] toArray(double[] anArray)
     {
         System.arraycopy(mtx, 0, anArray, 0, 16);
         return anArray;
@@ -365,7 +365,7 @@ public class Matrix3D implements Cloneable {
     /**
      * Loads the transform from a double array.
      */
-    public Matrix3D fromArray(double[] mat2)
+    public final Matrix3D fromArray(double[] mat2)
     {
         System.arraycopy(mat2, 0, mtx, 0, 16);
         return this;

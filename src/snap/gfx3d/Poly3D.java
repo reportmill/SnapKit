@@ -291,7 +291,7 @@ public class Poly3D extends FacetShape implements Cloneable {
     {
         float[] pointArray = getPointArray();
         int pointCount = getPointCount();
-        xform.transformArrayPoints(pointArray, pointCount);
+        xform.transformXYZArray(pointArray, pointCount);
         clearCachedValues();
     }
 
