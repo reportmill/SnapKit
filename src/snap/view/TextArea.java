@@ -1446,14 +1446,20 @@ public class TextArea extends View {
 
         // Get RichText for selected characters and get as XML string and plain string
         int selStart = getSelStart(), selEnd = getSelEnd();
-        RichText richText = getRichText().subtext(selStart, selEnd);
-        XMLElement xml = new XMLArchiver().toXML(richText);
-        String xmlStr = xml.getString();
-        String str = richText.getString();
+        RichText selRichText = getRichText().subtext(selStart, selEnd);
 
         // Add to clipboard as RichText and String (text/plain)
         Clipboard cb = Clipboard.getCleared();
-        cb.addData(SNAP_RICHTEXT_TYPE, xmlStr);
+
+        // Add rich text
+        if (!isPlainText()) {
+            XMLElement xml = new XMLArchiver().toXML(selRichText);
+            String xmlStr = xml.getString();
+            cb.addData(SNAP_RICHTEXT_TYPE, xmlStr);
+        }
+
+        // Add plain text
+        String str = selRichText.getString();
         cb.addData(str);
     }
 
@@ -1462,13 +1468,19 @@ public class TextArea extends View {
      */
     public void paste()
     {
+        // Get clipboard - if not loaded, come back loaded
+        Clipboard clipboard = Clipboard.get();
+        if (!clipboard.isLoaded()) {
+            clipboard.addLoadListener(() -> paste());
+            return;
+        }
+
         // Clear last undo set so paste doesn't get lumped in to coalescing
         undoerSaveChanges();
 
         // If Clipboard has RichText, paste it
-        Clipboard cboard = Clipboard.get();
-        if (cboard.hasData(SNAP_RICHTEXT_TYPE)) {
-            byte bytes[] = cboard.getDataBytes(SNAP_RICHTEXT_TYPE);
+        if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
+            byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
             RichText rtext = new RichText();
             XMLArchiver archiver = new XMLArchiver();
             archiver.setRootObject(rtext);
@@ -1477,8 +1489,8 @@ public class TextArea extends View {
         }
 
         // If Clipboard has String, paste it
-        else if (cboard.hasString()) {
-            String str = cboard.getString();
+        else if (clipboard.hasString()) {
+            String str = clipboard.getString();
             if (str != null && str.length() > 0)
                 replaceChars(str);
         }

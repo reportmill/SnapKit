@@ -910,9 +910,16 @@ public class TextField extends ParentView {
      */
     public void paste()
     {
-        Clipboard cb = Clipboard.get();
-        if (cb.hasString()) {
-            String string = cb.getString();
+        // Get clipboard - if not loaded, come back loaded
+        Clipboard clipboard = Clipboard.get();
+        if (!clipboard.isLoaded()) {
+            clipboard.addLoadListener(() -> paste());
+            return;
+        }
+
+        // Handle clipboard String
+        if (clipboard.hasString()) {
+            String string = clipboard.getString();
             replaceChars(string);
         }
     }
