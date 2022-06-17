@@ -8,6 +8,7 @@ import snap.geom.Point;
 import snap.geom.Rect;
 import snap.gfx.*;
 import snap.gfx.GradientPaint.Stop;
+import snap.props.PropChange;
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.ColorWell;

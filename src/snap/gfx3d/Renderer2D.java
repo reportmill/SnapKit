@@ -4,7 +4,7 @@ import snap.geom.Shape;
 import snap.gfx.Color;
 import snap.gfx.Paint;
 import snap.gfx.Painter;
-import snap.util.PropChange;
+import snap.props.PropChange;
 import java.util.ArrayList;
 import java.util.List;
 

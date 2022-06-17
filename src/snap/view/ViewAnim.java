@@ -7,6 +7,8 @@ import java.util.function.Consumer;
 import snap.gfx.Color;
 import snap.gfx.Paint;
 import snap.geom.Pos;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
 import snap.util.*;
 
 /**
@@ -647,7 +649,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
     }
 
     // AutoRegisterChanges PropChangeListener
-    private PropChangeListener  _autoRegisterChangesListener;
+    private PropChangeListener _autoRegisterChangesListener;
 
     // List of changes encountered by AutoRegisterChanges PropChangeListener
     private List<PropChange>  _autoRegisterChanges;

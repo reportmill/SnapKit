@@ -1,7 +1,10 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.util;
+package snap.props;
+import snap.util.FormatUtils;
+import snap.util.XMLElement;
+
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;

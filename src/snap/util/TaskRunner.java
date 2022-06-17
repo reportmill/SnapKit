@@ -3,6 +3,10 @@
  */
 package snap.util;
 
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
+import snap.props.PropChangeSupport;
+
 /**
  * A class for running operations in the background.
  */

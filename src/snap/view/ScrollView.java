@@ -5,6 +5,7 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Size;
 import snap.gfx.*;
+import snap.props.PropChange;
 import snap.util.*;
 
 /**

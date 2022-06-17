@@ -2,6 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
+import snap.props.PropChangeSupport;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -11,13 +14,13 @@ import java.util.*;
 public class SnapList <E> extends AbstractList <E> {
     
     // The actual list
-    private List <E>  _list = new Vector();
+    private List <E>  _list = new Vector<>();
     
     // A cached array of list
-    private E  _array[];
+    private E[]  _array;
     
     // PropertyChangeSupport
-    PropChangeSupport  _pcs = new PropChangeSupport(this);
+    PropChangeSupport _pcs = new PropChangeSupport(this);
     
     // Constant for Items
     public static final String ITEMS_PROP = "Items";

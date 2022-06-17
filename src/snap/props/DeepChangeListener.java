@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.util;
+package snap.props;
 
 /**
  * A listener to get property changes and nested property changes.

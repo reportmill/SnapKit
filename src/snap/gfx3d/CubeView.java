@@ -7,7 +7,7 @@ import snap.geom.Point;
 import snap.geom.Pos;
 import snap.geom.VPos;
 import snap.gfx.Painter;
-import snap.util.PropChange;
+import snap.props.PropChange;
 import snap.util.SnapUtils;
 import snap.view.View;
 import snap.view.ViewAnim;

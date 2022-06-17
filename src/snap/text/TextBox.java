@@ -9,6 +9,8 @@ import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.geom.VPos;
 import snap.gfx.*;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
 import snap.util.*;
 import snap.web.*;
 
@@ -57,7 +59,7 @@ public class TextBox {
     private int  _updStart, _updEnd, _lastLen;
     
     // A Listener to catch RichText PropChanges
-    private PropChangeListener  _richTextLsnr = pc -> richTextDidPropChange(pc);
+    private PropChangeListener _richTextLsnr = pc -> richTextDidPropChange(pc);
     
     /**
      * Creates a new TextBox.

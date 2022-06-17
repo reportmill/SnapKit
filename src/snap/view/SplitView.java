@@ -4,6 +4,8 @@
 package snap.view;
 import java.util.*;
 import snap.gfx.*;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
 import snap.util.*;
 
 /**
@@ -28,7 +30,7 @@ public class SplitView extends ParentView implements ViewHost {
     private double  _dragOff;
 
     // A listener to watch for when item.Visible changes
-    private PropChangeListener  _visLsnr = pc -> itemVisibleChanged(pc);
+    private PropChangeListener _visLsnr = pc -> itemVisibleChanged(pc);
 
     // Constants for properties
     public static final String DividerSpan_Prop = "DividerSpan";

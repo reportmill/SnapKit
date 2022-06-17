@@ -1,4 +1,8 @@
 package snap.util;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
+import snap.props.PropChangeSupport;
+
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -17,7 +21,7 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     private ListSel  _sel = new ListSel(-1, -1);
 
     // The PropChangeSupport
-    protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
+    protected PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
     // Constants for properties
     public static final String Item_Prop = "Item";

@@ -9,6 +9,7 @@ import snap.geom.Insets;
 import snap.geom.Point;
 import snap.geom.Rect;
 import snap.gfx.*;
+import snap.props.PropChange;
 import snap.util.*;
 import snap.view.*;
 import snap.web.WebURL;

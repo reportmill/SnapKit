@@ -3,6 +3,9 @@
  */
 package snap.view;
 import java.util.*;
+
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
 import snap.util.*;
 
 /**
@@ -17,7 +20,7 @@ public class SpringView extends ChildView {
     Map <Object,SpringInfo> _sinfos = new HashMap();
     
     // A PropChangeListener to resetSpringInfo when child bounds change outside of layout
-    PropChangeListener       _pcl = pce -> childPropChange(pce);
+    PropChangeListener _pcl = pce -> childPropChange(pce);
     
     /**
      * Override to add layout info.

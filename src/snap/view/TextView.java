@@ -4,6 +4,7 @@
 package snap.view;
 import snap.geom.HPos;
 import snap.gfx.*;
+import snap.props.Undoer;
 import snap.text.*;
 import snap.util.*;
 import snap.web.*;

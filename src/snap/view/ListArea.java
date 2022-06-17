@@ -8,6 +8,8 @@ import java.util.function.Function;
 import snap.geom.Insets;
 import snap.geom.Rect;
 import snap.gfx.*;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
 import snap.util.*;
 
 /**
@@ -65,7 +67,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     private double  _sampleWidth = -1, _sampleHeight = -1;
     
     // The PropChangeListener to handle PickList selection change
-    private PropChangeListener  _itemsLsnr = pc -> pickListPropChange(pc);
+    private PropChangeListener _itemsLsnr = pc -> pickListPropChange(pc);
 
     // A helper object to handle list selection
     private ListAreaSelector _selector = new ListAreaSelector(this);

@@ -1,7 +1,10 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.util;
+package snap.props;
+
+import snap.util.Key;
+import snap.util.KeyChain;
 
 /**
  * A class to describe object property changes.

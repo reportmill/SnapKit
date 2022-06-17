@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
+import snap.props.PropDefaults;
+import snap.props.PropObject;
 import snap.util.*;
 import java.text.DecimalFormat;
 import java.util.Objects;

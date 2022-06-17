@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import snap.geom.*;
 import snap.gfx.*;
+import snap.props.PropChange;
 import snap.util.*;
 
 /**

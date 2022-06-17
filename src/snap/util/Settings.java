@@ -3,6 +3,10 @@
  */
 package snap.util;
 import java.util.*;
+
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
+import snap.props.PropChangeSupport;
 import snap.util.JSONArchiver.*;
 import snap.web.WebFile;
 
@@ -27,7 +31,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
     private Map  _map = new HashMap();
 
     // The PropChangeSupport
-    private PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
+    private PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
     /**
      * Creates new Settings.

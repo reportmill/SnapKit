@@ -3,7 +3,9 @@
  */
 package snap.view;
 import java.util.*;
-import snap.util.*;
+
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
 
 /**
  * A class to manage a single selection for a group of objects that can each be selected.
@@ -23,7 +25,7 @@ public class ToggleGroup {
     private ToggleButton  _sel;
     
     // A Listener to watch for button Selection change
-    private PropChangeListener  _btnLsnr = pc -> buttonSelectionDidChange(pc);
+    private PropChangeListener _btnLsnr = pc -> buttonSelectionDidChange(pc);
 
     /**
      * Returns the name.

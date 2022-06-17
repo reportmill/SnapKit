@@ -9,6 +9,9 @@ import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.geom.HPos;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
+import snap.props.PropChangeSupport;
 import snap.util.*;
 import snap.web.*;
 

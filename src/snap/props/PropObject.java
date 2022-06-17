@@ -1,4 +1,6 @@
-package snap.util;
+package snap.props;
+import snap.util.SnapUtils;
+
 import java.util.*;
 
 /**

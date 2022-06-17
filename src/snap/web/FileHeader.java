@@ -2,6 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
+import snap.props.PropChangeSupport;
 import snap.util.*;
 
 /**
@@ -25,7 +28,7 @@ public class FileHeader {
     String             _mimeType;
     
     // The PropChangeSupport
-    PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
+    PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
     // Constants for properties
     final public static String LastModTime_Prop = "LastModTime";

@@ -1,7 +1,7 @@
 package snap.gfx3d;
 import snap.geom.Rect;
 import snap.gfx.Painter;
-import snap.util.PropChange;
+import snap.props.PropChange;
 
 /**
  * This is an abstract class to renders a Scene3D for a Camera.

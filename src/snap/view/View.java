@@ -7,6 +7,7 @@ import java.util.*;
 
 import snap.geom.*;
 import snap.gfx.*;
+import snap.props.PropObject;
 import snap.text.StringBox;
 import snap.util.*;
 

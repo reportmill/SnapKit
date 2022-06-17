@@ -6,6 +6,9 @@ import java.io.File;
 import java.util.*;
 import java.util.function.Consumer;
 import snap.gfx.GFXEnv;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
+import snap.props.PropChangeSupport;
 import snap.util.*;
 
 /**
@@ -32,10 +35,10 @@ public abstract class WebSite {
     Map                       _props = new HashMap();
     
     // PropChangeListener for file changes
-    PropChangeListener        _fileLsnr = pc -> fileDidPropChange(pc);
+    PropChangeListener _fileLsnr = pc -> fileDidPropChange(pc);
     
     // The PropChangeSupport for site listeners
-    PropChangeSupport         _pcs = PropChangeSupport.EMPTY;
+    PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
     // The PropChangeSupport for site file listeners
     PropChangeSupport         _filePCS = PropChangeSupport.EMPTY;

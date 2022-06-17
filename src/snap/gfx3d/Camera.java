@@ -5,7 +5,9 @@ package snap.gfx3d;
 import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.gfx.*;
-import snap.util.*;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
+import snap.props.PropChangeSupport;
 
 /**
  * This class represent a camera focusing on a scene and manages a display list of simple paths based on
@@ -58,7 +60,7 @@ public class Camera {
     private Renderer  _renderer;
 
     // The PropChangeSupport
-    protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
+    protected PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
     // Constants for properties
     public static final String ViewWidth_Prop = "ViewWidth";

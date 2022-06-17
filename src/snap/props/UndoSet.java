@@ -1,8 +1,9 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.util;
-
+package snap.props;
+import snap.util.SnapUtils;
+import snap.util.StringUtils;
 import java.util.*;
 
 /**

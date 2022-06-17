@@ -4,6 +4,10 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
+import snap.props.UndoSet;
+import snap.props.Undoer;
 import snap.text.*;
 import snap.util.*;
 import snap.web.*;

@@ -4,6 +4,9 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
+import snap.props.DeepChangeListener;
+import snap.props.PropChange;
+import snap.props.PropChangeListener;
 import snap.util.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -31,8 +34,8 @@ public class ParentView extends View {
     private boolean  _inLayout, _inLayoutDeep;
 
     // PropChange Listener for Child changes to propagate changes when there is DeepChangeListener
-    private PropChangeListener  _childPCL;
-    private DeepChangeListener  _childDCL;
+    private PropChangeListener _childPCL;
+    private DeepChangeListener _childDCL;
 
     // Constants for properties
     public static final String Child_Prop = "Child";
