@@ -25,9 +25,8 @@ public class PropArchiver {
     public PropNode propObjectToPropNode(PropObject aPropObj)
     {
         // Get properties
-        PropSheet propSheet = aPropObj.getPropSheet();
-        PropDefaults propDefaults = propSheet.getPropDefaults();
-        String[] propNames = propDefaults.getPropNames();
+        PropSet propSet = aPropObj.getPropSet();
+        String[] propNames = propSet.getPropNames();
 
         // Create new PropNode
         PropNode propNode = new PropNode(null);
@@ -37,7 +36,7 @@ public class PropArchiver {
         for (String propName : propNames) {
 
             // If prop hasn't changed, just skip
-            if (propSheet.isPropDefault(propName))
+            if (aPropObj.isPropDefault(propName))
                 continue;
 
             // Get PropValue
@@ -58,7 +57,7 @@ public class PropArchiver {
         }
 
         // Iterate over relations
-        String[] relationNames = propDefaults.getRelationNames();
+        String[] relationNames = propSet.getRelationNames();
         for (String relationName : relationNames) {
 
             // Handle single relation

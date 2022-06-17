@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import snap.props.PropDefaults;
+import snap.props.PropSet;
 import snap.props.PropObject;
 import snap.util.*;
 import java.text.DecimalFormat;
@@ -326,13 +326,13 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
      * Override to register props.
      */
     @Override
-    protected void initPropDefaults(PropDefaults aPropDefaults)
+    protected void initProps(PropSet aPropSet)
     {
         // Do normal version
-        super.initPropDefaults(aPropDefaults);
+        super.initProps(aPropSet);
 
         // Add Props
-        aPropDefaults.addProps(Pattern_Prop, ExpStyle_Prop);
+        aPropSet.addProps(Pattern_Prop, ExpStyle_Prop);
     }
 
     /**

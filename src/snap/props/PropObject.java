@@ -8,8 +8,8 @@ import java.util.*;
  */
 public class PropObject implements PropChange.DoChange {
 
-    // The PropSheet to hold actual property values
-    private PropSheet  _propSheet;
+    // The PropSet to hold prop info
+    private PropSet _propSet;
 
     // PropertyChangeSupport
     protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
@@ -18,16 +18,25 @@ public class PropObject implements PropChange.DoChange {
     private static Map<Class<? extends PropObject>, String[]>  _classProps = new HashMap<>();
 
     /**
-     * Returns the PropSheet.
+     * Returns the PropSet.
      */
-    public PropSheet getPropSheet()
+    public PropSet getPropSet()
     {
         // If already set, just return
-        if (_propSheet != null) return _propSheet;
+        if (_propSet != null) return _propSet;
 
-        // Create PropSheet, set and return
-        PropSheet propSheet = new PropSheet(this);
-        return _propSheet = propSheet;
+        // Create, set and return
+        PropSet propSet = PropSet.getPropSetForPropObject(this);
+        return _propSet = propSet;
+    }
+
+    /**
+     * Returns the prop for given name.
+     */
+    public Prop getPropForName(String aPropName)
+    {
+        Prop prop = getPropSet().getPropForName(aPropName);
+        return prop;
     }
 
     /**
@@ -36,12 +45,12 @@ public class PropObject implements PropChange.DoChange {
     public PropObject getPropParent()  { return null; }
 
     /**
-     * Initialize PropDefaults. Override to provide custom defaults.
+     * Initialize Props. Override to provide custom defaults.
      */
-    protected void initPropDefaults(PropDefaults aPropDefaults)
+    protected void initProps(PropSet aPropSet)
     {
-        // super.initPropDefaults(aPropDefaults);
-        // aPropDefaults.setPropDefault(Something_Prop, DEFAULT_SOMETHING_VALUE);
+        // super.initProps(aPropSet);
+        // aPropSet.addPropNamed(Something_Prop, double.class, DEFAULT_SOMETHING_VALUE);
     }
 
     /**
@@ -69,24 +78,6 @@ public class PropObject implements PropChange.DoChange {
     }
 
     /**
-     * Returns a property value.
-     */
-    // public Object getSomething()
-    // {
-    //     PropSheet propSheet = getPropSheet();
-    //     return propSheet.getPropValue(Something_Prop);
-    // }
-
-    /**
-     * Returns a property value.
-     */
-    // public void setSomething(Object aValue)
-    // {
-    //     PropSheet propSheet = getPropSheet();
-    //     return propSheet.setPropValue(Something_Prop, aValue);
-    // }
-
-    /**
      * Returns whether give prop is set to default.
      */
     public boolean isPropDefault(String aPropName)
@@ -101,6 +92,13 @@ public class PropObject implements PropChange.DoChange {
      */
     public Object getPropDefault(String aPropName)
     {
+        // Get prop and return DefaultValue
+        Prop prop = getPropForName(aPropName);
+        if (prop != null)
+            return prop.getDefaultValue();
+
+        // Complain and return null
+        System.err.println("PropObject.getPropDefault: No default found for: " + aPropName);
         return null;
     }
 
