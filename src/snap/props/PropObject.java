@@ -1,6 +1,8 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.props;
 import snap.util.SnapUtils;
-
 import java.util.*;
 
 /**
@@ -13,9 +15,6 @@ public class PropObject implements PropChange.DoChange {
 
     // PropertyChangeSupport
     protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
-
-    // A map to hold prop keys for unique classes
-    private static Map<Class<? extends PropObject>, String[]>  _classProps = new HashMap<>();
 
     /**
      * Returns the PropSet.
@@ -228,23 +227,6 @@ public class PropObject implements PropChange.DoChange {
     }
 
     /**
-     * Returns the prop keys.
-     */
-    public String[] getPropKeysAll()
-    {
-        Class cls = getClass();
-        return getPropKeysAllForClass(cls);
-    }
-
-    /**
-     * Returns the prop keys.
-     */
-    protected String[] getPropKeysLocal()
-    {
-        return new String[0];
-    }
-
-    /**
      * Standard clone implementation.
      */
     @Override
@@ -253,36 +235,5 @@ public class PropObject implements PropChange.DoChange {
         PropObject clone = (PropObject) super.clone();
         clone._pcs = PropChangeSupport.EMPTY;
         return clone;
-    }
-
-    /**
-     * Returns the prop keys.
-     */
-    public static String[] getPropKeysAllForClass(Class<? extends PropObject> aClass)
-    {
-        // Get props from cache and just return if found
-        String props[] = _classProps.get(aClass);
-        if (props != null)
-            return props;
-
-        // Create list and add super props to it
-        List<String> propsList = new ArrayList<>();
-        Class superClass = aClass.getSuperclass();
-        String[] superProps = PropObject.class.isAssignableFrom(superClass) ? getPropKeysAllForClass(superClass) : null;
-        if (superProps != null)
-            Collections.addAll(propsList, superProps);
-
-        // Add props for class
-        try {
-            PropObject object = aClass.newInstance();
-            String[] classProps = object.getPropKeysLocal();
-            Collections.addAll(propsList, classProps);
-        }
-        catch (Exception e) { throw new RuntimeException("ChartPart.getPropKeysAllForClass failed: " + aClass); }
-
-        // Add props array to Class map and return
-        props = propsList.toArray(new String[0]);
-        _classProps.put(aClass, props);
-        return props;
     }
 }
