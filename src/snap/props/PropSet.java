@@ -71,15 +71,6 @@ public class PropSet {
     }
 
     /**
-     * Adds property names.
-     */
-    public void addProps(String ... thePropNames)
-    {
-        for (String propName : thePropNames)
-            addProp(new Prop(propName));
-    }
-
-    /**
      * Returns all known property names.
      */
     public String[] getPropNames()
@@ -111,15 +102,6 @@ public class PropSet {
 
         // Set and return
         return _relationNames = relNames;
-    }
-
-    /**
-     * Adds relation names.
-     */
-    public void addRelations(String ... theNames)
-    {
-        for (String propName : theNames)
-            addPropNamed(propName, PropObject.class, null);
     }
 
     /**

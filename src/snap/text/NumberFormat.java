@@ -331,8 +331,9 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
         // Do normal version
         super.initProps(aPropSet);
 
-        // Add Props
-        aPropSet.addProps(Pattern_Prop, ExpStyle_Prop);
+        // Pattern, ExpStyle
+        aPropSet.addPropNamed(Pattern_Prop, String.class, NULL_PATTERN);
+        aPropSet.addPropNamed(ExpStyle_Prop, ExpStyle.class, DEFAULT_EXP_STYLE);
     }
 
     /**
@@ -368,24 +369,6 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
 
             // Handle super class properties (or unknown)
             default: System.err.println("NumberFormat.setPropValue: Unknown prop: " + aPropName);
-        }
-    }
-
-    /**
-     * Returns the value for given key.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        // Handle properties
-        switch (aPropName) {
-
-            // Pattern, ExpStyle
-            case Pattern_Prop: return NULL_PATTERN;
-            case ExpStyle_Prop: return DEFAULT_EXP_STYLE;
-
-            // Superclass props
-            default: System.err.println("NumberFormat.getPropDefault: Unknown prop: " + aPropName); return null;
         }
     }
 
