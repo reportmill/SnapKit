@@ -52,6 +52,15 @@ public class PropNode {
     }
 
     /**
+     * Returns the prop values.
+     */
+    public Object getPropValue(String aPropName)
+    {
+        Object propValue = _children.get(aPropName);
+        return propValue;
+    }
+
+    /**
      * Adds a key/value child.
      */
     public void addPropValue(String aPropName, Object aValue)

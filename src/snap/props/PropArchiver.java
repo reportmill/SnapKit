@@ -11,6 +11,15 @@ import java.util.List;
  */
 public class PropArchiver {
 
+    // The current prop object
+    protected PropObject  _propObject;
+
+    // The current prop
+    protected Prop  _prop;
+
+    // The current prop name
+    protected String  _propName;
+
     // A helper class to archive common SnapKit classes (Font, Color, etc.)
     private PropArchiverHpr  _helper;
 
@@ -46,7 +55,16 @@ public class PropArchiver {
             Object objValue = aPropObj.getPropValue(propName);
 
             // Get value for propNode (as PropNode or primitive)
+            PropObject oldPropObj = _propObject;
+            Prop oldProp = _prop;
+            String oldPropName = _propName;
+            _propObject = aPropObj;
+            _prop = prop;
+            _propName = propName;
             Object nodeValue = convertObjectToPropNodeOrPrimitive(objValue);
+            _propObject = oldPropObj;
+            _prop = oldProp;
+            _propName = oldPropName;
 
             // If nodeValue is empty PropNode or array and Prop.DefaultValue is EMPTY_OBJECT, skip
             if (isEmptyObject(nodeValue) && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
