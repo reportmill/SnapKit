@@ -107,6 +107,24 @@ public class StringUtils {
     }
 
     /**
+     * Adds a property name/value to a StringBuffer being configured with multiple comma separated props.
+     */
+    public static StringBuffer appendProp(StringBuffer aSB, String aName, Object aVal)
+    {
+        // Add separator
+        if (aSB.length() > 0)
+            aSB.append(", ");
+
+        // Add prop name
+        aSB.append(aName).append('=');
+
+        // Add prop value
+        String str = SnapUtils.stringValue(aVal);
+        aSB.append(str);
+        return aSB;
+    }
+
+    /**
      * Trims the start of a string.
      */
     public static String trimStart(CharSequence aStr)

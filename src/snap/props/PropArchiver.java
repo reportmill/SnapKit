@@ -2,12 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
-
 import java.util.List;
 
 /**
- * This class archives/unarchives PropObjects to/from a tree of generic PropNodes, which can then easily be
- * written/read from file as XML or JSON.
+ * This class primarily converts a PropObject (graph) to/from a PropNode (graph).
+ *
+ * The graph of PropNodes can easily be converted to/from XML, JSON, etc.
  */
 public class PropArchiver {
 
@@ -22,57 +22,32 @@ public class PropArchiver {
     /**
      * Returns a PropNode for given PropObject.
      */
-    public PropNode propObjectToPropNode(PropObject aPropObj)
+    public PropNode convertPropObjectToPropNode(PropObject aPropObj)
     {
-        // Get properties
+        // Get props
         PropSet propSet = aPropObj.getPropSet();
-        String[] propNames = propSet.getPropNames();
+        Prop[] props = propSet.getProps();
 
         // Create new PropNode
         PropNode propNode = new PropNode(null);
         propNode.setClassName(aPropObj.getClass().getSimpleName());
 
-        // Iterate over properties and add to prop node
-        for (String propName : propNames) {
+        // Iterate over props and add node value for each to PropNode
+        for (Prop prop : props) {
 
             // If prop hasn't changed, just skip
+            String propName = prop.getName();
             if (aPropObj.isPropDefault(propName))
                 continue;
 
-            // Get PropValue
-            Object value = aPropObj.getPropValue(propName);
-            if (value instanceof List)
-                value = ((List) value).toArray();
+            // Get object value from PropObject.PropName
+            Object objValue = aPropObj.getPropValue(propName);
 
-            // If value is PropObject, convert to recurse to get as PropNode
-            if (value instanceof PropObject)
-                value = propObjectToPropNode((PropObject) value);
-
-            // If value is list/array, convert
-            else if (value instanceof List || value instanceof Object[])
-                value = vectorConversion(value);
+            // Get value for propNode (as PropNode or primitive)
+            Object nodeValue = convertObjectToPropNodeOrPrimitive(objValue);
 
             // Add prop/value
-            propNode.addPropValue(propName, value);
-        }
-
-        // Iterate over relations
-        String[] relationNames = propSet.getRelationNames();
-        for (String relationName : relationNames) {
-
-            // Handle single relation
-            Object relObj = aPropObj.getPropValue(relationName);
-            if (relObj instanceof PropObject) {
-                PropObject relPropObj = relObj instanceof PropObject ? (PropObject) relObj : null;
-                PropNode relPropNode = propObjectToPropNode(relPropObj);
-                propNode.addPropValue(relationName, relPropNode);
-            }
-
-            // Handle relation list
-            else if (relObj instanceof List || relObj instanceof Object[]) {
-                Object[] relNodes = vectorConversion(relObj);
-                propNode.addPropValue(relationName, relNodes);
-            }
+            propNode.addPropValue(propName, nodeValue);
         }
 
         // Return PropNode
@@ -80,27 +55,62 @@ public class PropArchiver {
     }
 
     /**
-     * Returns an array of nodes or primatives for given array.
+     * Converts given object to PropNode or primitive.
      */
-    private Object[] vectorConversion(Object aListOrArray)
+    protected Object convertObjectToPropNodeOrPrimitive(Object anObj)
     {
-        Object[] array = aListOrArray instanceof List ? ((List) aListOrArray).toArray() : (Object[]) aListOrArray;
+        // Handle null
+        if (anObj == null)
+            return null;
+
+        // Handle PropObject
+        if (anObj instanceof PropObject) {
+            PropObject propObject = (PropObject) anObj;
+            PropNode propNode = convertPropObjectToPropNode(propObject);
+            return propNode;
+        }
+
+        // Handle List
+        if (anObj instanceof List) {
+            List<?> list = (List<?>) anObj;
+            Object[] array = list.toArray();
+            return convertArrayToPropNodeOrPrimitive(array);
+        }
+
+        // Handle array
+        if (anObj.getClass().isArray()) {
+            Object[] array = (Object[]) anObj;
+            return convertArrayToPropNodeOrPrimitive(array);
+        }
+
+        // Return original object (assumed to be primitive)
+        return anObj;
+    }
+
+    /**
+     * Returns an array of nodes or primitives for given array.
+     */
+    private Object[] convertArrayToPropNodeOrPrimitive(Object[] array)
+    {
+        // If empty array or array components are primitive, just return
         if (array.length == 0 || !(array[0] instanceof PropObject))
             return array;
 
+        // Create array of converted array contents
         PropNode[] propNodes = new PropNode[array.length];
         for (int i = 0; i < array.length; i++) {
             PropObject propObject = (PropObject) array[i];
-            propNodes[i] = propObjectToPropNode(propObject);
+            propNodes[i] = convertPropObjectToPropNode(propObject);
         }
 
+        // Return
         return propNodes;
     }
 
     /**
      * Returns a PropObject for given PropNode.
      */
-    public PropObject propNodeToPropObject(PropNode aPropNode)
+    public PropObject convertPropNodeToPropObject(PropNode aPropNode)
     {
         return null;
     }

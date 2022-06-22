@@ -21,9 +21,6 @@ public class PropSet {
     // An array of all known prop names for class
     private String[]  _propNames;
 
-    // An array of all known relation names for class
-    private String[]  _relationNames;
-
     // A Map of PropSets for Classes
     private static final Map<Class<? extends PropObject>, PropSet>  _propSets = new HashMap<>();
 
@@ -50,7 +47,29 @@ public class PropSet {
         _propsMap.put(aProp.getName(), aProp);
 
         // Clear caches
-        _propNames = _relationNames = null;
+        _propNames = null;
+    }
+
+    /**
+     * Removes prop at given index.
+     */
+    public void removeProp(int anIndex)
+    {
+        // Remove prop
+        _props = ArrayUtils.remove(_props, anIndex);
+
+        // Clear caches
+        _propNames = null;
+    }
+
+    /**
+     * Removes prop at given index.
+     */
+    public void removeProp(Prop aProp)
+    {
+        int index = ArrayUtils.indexOfId(_props, aProp);
+        if (index >= 0)
+            removeProp(index);
     }
 
     /**
@@ -85,33 +104,6 @@ public class PropSet {
 
         // Set/return
         return _propNames = propNames;
-    }
-
-    /**
-     * Returns all known relation names.
-     */
-    public String[] getRelationNames()
-    {
-        // If already set, just return
-        if (_relationNames != null) return _relationNames;
-
-        // Stream props to relationNames via filter, map
-        Stream<Prop> relPropsStream = Arrays.stream(_props).filter(i -> i.isRelation());
-        Stream<String> relNamesStream = relPropsStream.map(i -> i.getName());
-        String[] relNames = relNamesStream.toArray(size -> new String[size]);
-
-        // Set and return
-        return _relationNames = relNames;
-    }
-
-    /**
-     * Removes relation names.
-     */
-    public void removeRelationNamed(String aPropName)
-    {
-        Prop prop = getPropForName(aPropName);
-        _props = ArrayUtils.removeId(_props, prop);
-        _propNames = _relationNames = null;
     }
 
     /**

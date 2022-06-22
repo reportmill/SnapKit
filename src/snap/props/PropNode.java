@@ -2,15 +2,13 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
-import snap.util.FormatUtils;
-import snap.util.XMLElement;
-
-import java.util.Arrays;
+import snap.util.StringUtils;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * A class to represent an archived PlotObject.
+ * A class to represent a PropObject in a generic way for conversion to/from XML, JSON, etc.
  */
 public class PropNode {
 
@@ -20,7 +18,7 @@ public class PropNode {
     // The ClassName, if available
     private String  _className;
 
-    // A map of property names to child nodes
+    // A map of property names to child nodes/values
     private Map<String,Object>  _children = new LinkedHashMap<>();
 
     // A constant to represent null value
@@ -53,6 +51,14 @@ public class PropNode {
     }
 
     /**
+     * Returns the prop values.
+     */
+    public Set<Map.Entry<String,Object>> getPropValues()
+    {
+        return _children.entrySet();
+    }
+
+    /**
      * Adds a key/value child.
      */
     public void addPropValue(String aPropName, Object aValue)
@@ -62,80 +68,32 @@ public class PropNode {
     }
 
     /**
-     * Returns XML for PropNode.
-     */
-    public XMLElement getXML(String aName)
-    {
-        XMLElement xml = new XMLElement(aName);
-
-        // Iterate over child entries and add XML attribute or child element
-        for (Map.Entry<String,Object> entry : _children.entrySet()) {
-
-            // Get prop name/value
-            String propName = entry.getKey();
-            Object propValue = entry.getValue();
-
-            // Handle PropNode
-            if (propValue instanceof PropNode) {
-                PropNode propNode = (PropNode) propValue;
-                XMLElement propXML = propNode.getXML(propName);
-                xml.addElement(propXML);
-            }
-
-            // Handle array
-            else if (propValue instanceof Object[]) {
-                Object[] array = (Object[]) propValue;
-                XMLElement propXML = new XMLElement(propName);
-                xml.addElement(propXML);
-
-                // Handle array of PropNode
-                if (array.length > 0 && array[0] instanceof PropNode) {
-                    for (Object obj : array) {
-                        PropNode childNode = (PropNode) obj;
-                        XMLElement childXML = childNode.getXML(childNode.getClassName());
-                        propXML.addElement(childXML);
-                    }
-                }
-
-                // Handle array of primitive
-                else {
-                    String valStr = Arrays.toString(array);
-                    propXML.setValue(valStr);
-                }
-            }
-
-            // Handle primitive
-            else {
-
-                // If float/double, format to avoid many decimals
-                if (propValue instanceof Double || propValue instanceof Float)
-                    propValue = FormatUtils.formatNum((Number) propValue);
-
-                // Add prop
-                xml.add(propName, propValue);
-            }
-        }
-
-        // Return xml
-        return xml;
-    }
-
-    /**
      * Standard toString implementation.
      */
     public String toString()
     {
-        StringBuffer sb = new StringBuffer("PropNode { ");
-        if (getClassName() != null)
-            sb.append("ClassName=").append(getClassName());
+        String className = getClass().getSimpleName();
+        String propStrings = toStringProps();
+        return className + "{ " + propStrings + " }";
+    }
 
-        // Iterate over children
+    /**
+     * Standard toStringProps implementation.
+     */
+    public String toStringProps()
+    {
+        // Add ClassName
+        StringBuffer sb = new StringBuffer();
+        String className = getClassName();
+        if (className != null)
+            StringUtils.appendProp(sb, "ClassName", className);
+
+        // Add leaf props
         for (Map.Entry<String,Object> entry : _children.entrySet()) {
             String propName = entry.getKey();
             Object propValue = entry.getValue();
-            if (propValue instanceof PropNode)
-                continue;
-            sb.append(", ").append(propName).append("=").append(propValue);
+            if (propValue instanceof PropNode) continue;
+            StringUtils.appendProp(sb, propName, propValue);
         }
 
         // Return string

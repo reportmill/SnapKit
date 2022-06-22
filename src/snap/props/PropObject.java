@@ -236,4 +236,19 @@ public class PropObject implements PropChange.DoChange {
         clone._pcs = PropChangeSupport.EMPTY;
         return clone;
     }
+
+    /**
+     * Standard toString implementation.
+     */
+    public String toString()
+    {
+        String className = getClass().getSimpleName();
+        String propStrings = toStringProps();
+        return className + "{ " + propStrings + " }";
+    }
+
+    /**
+     * Standard toStringProps implementation.
+     */
+    public String toStringProps()  { return ""; }
 }
