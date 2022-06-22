@@ -48,6 +48,10 @@ public class PropArchiver {
             // Get value for propNode (as PropNode or primitive)
             Object nodeValue = convertObjectToPropNodeOrPrimitive(objValue);
 
+            // If nodeValue is empty PropNode or array and Prop.DefaultValue is EMPTY_OBJECT, skip
+            if (isEmptyObject(nodeValue) && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
+                continue;
+
             // Add prop/value
             propNode.addPropValue(propName, nodeValue);
         }
@@ -85,10 +89,8 @@ public class PropArchiver {
         }
 
         // Handle array
-        if (anObj.getClass().isArray()) {
-            Object[] array = (Object[]) anObj;
-            return convertArrayToPropNodeOrPrimitive(array);
-        }
+        if (anObj.getClass().isArray())
+            return convertArrayToPropNodeOrPrimitive(anObj);
 
         // Return original object (assumed to be primitive)
         return anObj;
@@ -97,8 +99,15 @@ public class PropArchiver {
     /**
      * Returns an array of nodes or primitives for given array.
      */
-    private Object[] convertArrayToPropNodeOrPrimitive(Object[] array)
+    private Object convertArrayToPropNodeOrPrimitive(Object arrayObj)
     {
+        // If primitive array, just return
+        if (arrayObj.getClass().getComponentType().isPrimitive())
+            return arrayObj;
+
+        // Get array
+        Object[] array = (Object[]) arrayObj;
+
         // If empty array or array components are primitive, just return
         if (array.length == 0 || !(array[0] instanceof PropObject))
             return array;
@@ -122,4 +131,34 @@ public class PropArchiver {
         return null;
     }
 
+    /**
+     * Returns whether given object is empty PropNode or array.
+     */
+    private static boolean isEmptyObject(Object anObj)
+    {
+        // Handle null?
+        if (anObj == null)
+            return false;
+
+        // Handle PropNode with PropValues size 0
+        if (anObj instanceof PropNode && ((PropNode) anObj).getPropValues().size() == 0)
+            return true;
+
+        // Handle array with length 0
+        if (anObj.getClass().isArray()) {
+            Class compClass = anObj.getClass().getComponentType();
+            if (Object.class.isAssignableFrom(compClass))
+                return ((Object[]) anObj).length == 0;
+            else if (float.class == compClass)
+                return ((float[]) anObj).length == 0;
+            else if (double.class == compClass)
+                return ((double[]) anObj).length == 0;
+            else if (int.class == compClass)
+                return ((int[]) anObj).length == 0;
+            else System.err.println("PropArchiver.isEmptyObject: Unknown comp class: " + compClass);
+        }
+
+        // Return false since no PropNode or array with no values
+        return false;
+    }
 }

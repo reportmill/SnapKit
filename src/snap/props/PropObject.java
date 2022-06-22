@@ -16,6 +16,9 @@ public class PropObject implements PropChange.DoChange {
     // PropertyChangeSupport
     protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
 
+    // A constant for empty instance
+    public static final Object EMPTY_OBJECT = new Object();
+
     /**
      * Returns the PropSet.
      */

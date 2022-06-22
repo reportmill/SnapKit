@@ -84,12 +84,13 @@ public class PropSet {
     }
 
     /**
-     * Adds property names.
+     * Adds new property for given name, class and default value.
      */
-    public void addPropNamed(String aPropName, Class<?> aClass, Object aDefault)
+    public Prop addPropNamed(String aPropName, Class<?> aClass, Object aDefault)
     {
         Prop prop = new Prop(aPropName, aClass, aDefault);
         addProp(prop);
+        return prop;
     }
 
     /**
