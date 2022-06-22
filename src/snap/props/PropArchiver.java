@@ -11,12 +11,15 @@ import java.util.List;
  */
 public class PropArchiver {
 
+    // A helper class to archive common SnapKit classes (Font, Color, etc.)
+    private PropArchiverHpr  _helper;
+
     /**
      * Constructor.
      */
     public PropArchiver()
     {
-
+        _helper = new PropArchiverHpr();
     }
 
     /**
@@ -26,11 +29,10 @@ public class PropArchiver {
     {
         // Get props
         PropSet propSet = aPropObj.getPropSet();
-        Prop[] props = propSet.getProps();
+        Prop[] props = propSet.getArchivalProps();
 
         // Create new PropNode
-        PropNode propNode = new PropNode(null);
-        propNode.setClassName(aPropObj.getClass().getSimpleName());
+        PropNode propNode = new PropNode(aPropObj);
 
         // Iterate over props and add node value for each to PropNode
         for (Prop prop : props) {
@@ -62,6 +64,11 @@ public class PropArchiver {
         // Handle null
         if (anObj == null)
             return null;
+
+        // Give helper first shot
+        Object hprValue = _helper.convertObjectToPropNodeOrPrimitive(anObj);
+        if (hprValue != null)
+            return hprValue;
 
         // Handle PropObject
         if (anObj instanceof PropObject) {

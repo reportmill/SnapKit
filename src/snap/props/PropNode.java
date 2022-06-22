@@ -12,9 +12,6 @@ import java.util.Set;
  */
 public class PropNode {
 
-    // The prop value
-    private Object  _value;
-
     // The ClassName, if available
     private String  _className;
 
@@ -29,13 +26,9 @@ public class PropNode {
      */
     public PropNode(Object aValue)
     {
-        _value = aValue;
+        if (aValue != null)
+            _className = aValue.getClass().getSimpleName();
     }
-
-    /**
-     * Returns the value.
-     */
-    public Object getValue()  { return _value; }
 
     /**
      * Returns the class name.

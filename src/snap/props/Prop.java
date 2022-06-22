@@ -3,8 +3,6 @@
  */
 package snap.props;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 
 /**
  * This class represents a property.
@@ -23,11 +21,12 @@ public class Prop {
     // The property default value
     private Object  _defaultValue;
 
-    // The getter
-    private Callable<?>  _getter;
+    // Whether to skip archival
+    private boolean  _skipArchival;
 
-    // The setter
-    private Consumer<?>  _setter;
+    // The getter/setter
+    //private Callable<?>  _getter;
+    //private Consumer<?>  _setter;
 
     /**
      * Constructor.
@@ -88,28 +87,15 @@ public class Prop {
     }
 
     /**
-     * Returns the getter.
+     * Returns whether this prop is skipped for archival.
      */
-    public Callable<?> getGetter()  { return _getter; }
+    public boolean isSkipArchival()  { return _skipArchival; }
 
     /**
-     * Sets the getter.
+     * Sets whether this prop is skipped for archival.
      */
-    public void setGetter(Callable<?> aValue)
+    public void setSkipArchival(boolean aValue)
     {
-        _getter = aValue;
-    }
-
-    /**
-     * Returns the setter.
-     */
-    public Consumer<?> getSetter()  { return _setter; }
-
-    /**
-     * Sets the setter.
-     */
-    public void setSetter(Consumer<?> aValue)
-    {
-        _setter = aValue;
+        _skipArchival = aValue;
     }
 }

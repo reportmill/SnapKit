@@ -19,7 +19,8 @@ public class PropArchiverXML extends PropArchiver {
     public XMLElement convertPropObjectToXML(PropObject aPropObject)
     {
         PropNode propNode = convertPropObjectToPropNode(aPropObject);
-        XMLElement xml = convertPropNodeToXML(propNode);
+        String propName = propNode.getClassName();
+        XMLElement xml = convertPropNodeToXML(propName, propNode);
         return xml;
     }
 
@@ -36,11 +37,10 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Returns XML for PropNode.
      */
-    protected XMLElement convertPropNodeToXML(PropNode aPropNode)
+    protected XMLElement convertPropNodeToXML(String aPropName, PropNode aPropNode)
     {
         // Create XML element for PropNode
-        String xmlName = aPropNode.getClassName();
-        XMLElement xml = new XMLElement(xmlName);
+        XMLElement xml = new XMLElement(aPropName);
 
         // Get PropNode entries
         Set<Map.Entry<String,Object>> propValues = aPropNode.getPropValues();
@@ -69,7 +69,7 @@ public class PropArchiverXML extends PropArchiver {
         // Handle PropNode
         else if (propValue instanceof PropNode) {
             PropNode propNode = (PropNode) propValue;
-            XMLElement propXML = convertPropNodeToXML(propNode);
+            XMLElement propXML = convertPropNodeToXML(propName, propNode);
             xml.addElement(propXML);
         }
 
@@ -87,7 +87,8 @@ public class PropArchiverXML extends PropArchiver {
             if (array.length > 0 && array[0] instanceof PropNode) {
                 for (Object obj : array) {
                     PropNode childNode = (PropNode) obj;
-                    XMLElement childXML = convertPropNodeToXML(childNode);
+                    String childName = childNode.getClassName();
+                    XMLElement childXML = convertPropNodeToXML(childName, childNode);
                     propXML.addElement(childXML);
                 }
             }

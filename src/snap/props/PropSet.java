@@ -21,6 +21,9 @@ public class PropSet {
     // An array of all known prop names for class
     private String[]  _propNames;
 
+    // A cached array of archival props (Prop.SkipArchival = false)
+    private Prop[]  _archivalProps;
+
     // A Map of PropSets for Classes
     private static final Map<Class<? extends PropObject>, PropSet>  _propSets = new HashMap<>();
 
@@ -47,7 +50,7 @@ public class PropSet {
         _propsMap.put(aProp.getName(), aProp);
 
         // Clear caches
-        _propNames = null;
+        clearCaches();
     }
 
     /**
@@ -59,7 +62,7 @@ public class PropSet {
         _props = ArrayUtils.remove(_props, anIndex);
 
         // Clear caches
-        _propNames = null;
+        clearCaches();
     }
 
     /**
@@ -104,6 +107,32 @@ public class PropSet {
 
         // Set/return
         return _propNames = propNames;
+    }
+
+    /**
+     * Returns array of archival props (Prop.SkipArchival is false).
+     */
+    public Prop[] getArchivalProps()
+    {
+        // If already set, just return
+        if (_archivalProps != null) return _archivalProps;
+
+        // Stream props to archivalProps via filter
+        Stream<Prop> propsStream = Arrays.stream(getProps());
+        Stream<Prop> archivalPropsStream = propsStream.filter(p -> !p.isSkipArchival());
+        Prop[] archivalProps = archivalPropsStream.toArray(size -> new Prop[size]);
+
+        // Set/return
+        return _archivalProps = archivalProps;
+    }
+
+    /**
+     * Clears any caches.
+     */
+    protected void clearCaches()
+    {
+        _propNames = null;
+        _archivalProps = null;
     }
 
     /**
