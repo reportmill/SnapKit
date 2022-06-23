@@ -107,6 +107,13 @@ public class PropArchiverXML extends PropArchiver {
             if (propValue instanceof Double || propValue instanceof Float)
                 propValue = FormatUtils.formatNum((Number) propValue);
 
+            // Handle double array
+            else if (propValue instanceof double[]) {
+                String arrayStr = PropUtils.getStringForDoubleArray((double[]) propValue);
+                xml.addElement(new XMLElement(propName, arrayStr));
+                return;
+            }
+
             // Add prop
             xml.add(propName, propValue);
         }

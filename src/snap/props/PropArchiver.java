@@ -36,9 +36,8 @@ public class PropArchiver {
      */
     public PropNode convertPropObjectToPropNode(PropObject aPropObj)
     {
-        // Get props
-        PropSet propSet = aPropObj.getPropSet();
-        Prop[] props = propSet.getArchivalProps();
+        // Get props for archival
+        Prop[] props = aPropObj.getPropsForArchival();
 
         // Create new PropNode
         PropNode propNode = new PropNode(aPropObj);
