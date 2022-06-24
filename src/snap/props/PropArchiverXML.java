@@ -3,7 +3,10 @@
  */
 package snap.props;
 import snap.util.FormatUtils;
+import snap.util.SnapUtils;
 import snap.util.XMLElement;
+import snap.util.XMLParser;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -117,5 +120,53 @@ public class PropArchiverXML extends PropArchiver {
             // Add prop
             xml.add(propName, propValue);
         }
+    }
+
+    /**
+     * Reads a PropObject from XML source.
+     */
+    public Object readPropObjectFromXMLSource(Object aSource)
+    {
+        // Get bytes from source - if not found or empty, complain
+        byte[] xmlBytes = SnapUtils.getBytes(aSource);
+        if (xmlBytes == null || xmlBytes.length == 0)
+            throw new RuntimeException("XMLArchiver.readObject: Cannot read source: " + aSource);
+
+        // Try to get SourceURL from source
+        //if (getSourceURL() == null) { WebURL surl = WebURL.getURL(aSource); setSourceURL(surl); }
+
+        // Read from bytes and return
+        return readPropObjectFromXMLBytes(xmlBytes);
+    }
+
+    /**
+     * Reads a PropObject from XML String.
+     */
+    public Object readPropObjectFromXMLString(String xmlString)
+    {
+        try {
+            XMLParser xmlParser = new XMLParser();
+            XMLElement xml = xmlParser.parseXMLFromString(xmlString);
+            return readPropObjectFromXML(xml);
+        }
+
+        catch (Exception e) { throw new RuntimeException(e); }
+    }
+
+    /**
+     * Reads a PropObject from XML.
+     */
+    public Object readPropObjectFromXMLBytes(byte[] theBytes)
+    {
+        XMLElement xml = XMLElement.readFromXMLBytes(theBytes);
+        return readPropObjectFromXML(xml);
+    }
+
+    /**
+     * Reads a PropObject from XML.
+     */
+    public PropObject readPropObjectFromXML(XMLElement anElement)
+    {
+        return null;
     }
 }

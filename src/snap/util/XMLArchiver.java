@@ -184,17 +184,12 @@ public class XMLArchiver {
     }
 
     /**
-     * Returns a root object unarchived from a generic input source (a File, String path, InputStream, URL, byte[], etc.).
+     * Returns a root object unarchived from a generic XML source (File, String path, InputStream, URL, byte[], etc.).
      */
     public Object readFromXMLString(String xmlString)
     {
-        try {
-            XMLParser xmlParser = new XMLParser();
-            XMLElement xml = xmlParser.parseXMLFromString(xmlString);
-            return readFromXML(xml);
-        }
-
-        catch (Exception e) { throw new RuntimeException(e); }
+        XMLElement xml = XMLElement.readFromXMLString(xmlString);
+        return readFromXML(xml);
     }
 
     /**
@@ -202,7 +197,7 @@ public class XMLArchiver {
      */
     public Object readFromXMLBytes(byte[] theBytes)
     {
-        XMLElement xml = XMLElement.getElement(theBytes);
+        XMLElement xml = XMLElement.readFromXMLBytes(theBytes);
         return readFromXML(xml);
     }
 

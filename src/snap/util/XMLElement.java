@@ -158,28 +158,6 @@ public class XMLElement implements Cloneable {
     }
 
     /**
-     * Returns a new element hierarchy loaded from aSource (File, String path, InputStream or whatever).
-     */
-    public static synchronized XMLElement getElement(Object aSource)
-    {
-        // If source is xml element, just return it
-        if (aSource instanceof XMLElement)
-            return (XMLElement) aSource;
-
-        // Create and return new element from source
-        if (_xmlParser == null) _xmlParser = new XMLParser();
-
-        // Parse from XML source and return
-        try {
-            return _xmlParser.parseXMLFromSource(aSource);
-        }
-
-        catch (Throwable t) {
-            throw new RuntimeException(t);
-        }
-    }
-
-    /**
      * Returns the number of child attributes for this element.
      */
     public int getAttributeCount()
@@ -915,5 +893,45 @@ public class XMLElement implements Cloneable {
                     else aSB.append(c);
             }
         }
+    }
+
+    /**
+     * Returns XML loaded from aSource (File, String path, InputStream or whatever).
+     */
+    public static synchronized XMLElement readFromXMLSource(Object aSource)
+    {
+        // If source is xml element, just return it
+        //if (aSource instanceof XMLElement) return (XMLElement) aSource;
+        if (aSource instanceof byte[])
+            return readFromXMLBytes((byte[]) aSource);
+
+        // Create and return new element from source
+        if (_xmlParser == null) _xmlParser = new XMLParser();
+
+        // Parse from XML source and return
+        try { return _xmlParser.parseXMLFromSource(aSource); }
+        catch (Throwable t) { throw new RuntimeException(t); }
+    }
+
+    /**
+     * Returns XML loaded from XML String.
+     */
+    public static synchronized XMLElement readFromXMLString(String aString)
+    {
+        // Create and return new element from source
+        if (_xmlParser == null) _xmlParser = new XMLParser();
+
+        // Parse from XML source and return
+        try { return _xmlParser.parseXMLFromString(aString); }
+        catch (Throwable t) { throw new RuntimeException(t); }
+    }
+
+    /**
+     * Returns XML loaded from XML bytes.
+     */
+    public static XMLElement readFromXMLBytes(byte[] theBytes)
+    {
+        String xmlString = new String(theBytes);
+        return readFromXMLString(xmlString);
     }
 }
