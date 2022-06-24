@@ -2,12 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
-import snap.util.FormatUtils;
-import snap.util.SnapUtils;
-import snap.util.XMLElement;
-import snap.util.XMLParser;
-
-import java.util.Arrays;
+import snap.util.*;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,9 +59,21 @@ public class PropArchiverXML extends PropArchiver {
      */
     protected void addNameAndValueToXML(XMLElement xml, String propName, Object propValue)
     {
-        // Handle null
-        if (propValue == null) {
-            xml.add(propName, propValue);
+        // If String-codeable, get coded String and set in XML
+        if (StringCodec.SHARED.isCodeable(propValue)) {
+
+            // Get Coded String
+            String valueString = StringCodec.SHARED.codeString(propValue);
+
+            // Handle primitive array
+            if (propValue != null && propValue.getClass().isArray()) {
+                XMLElement propXML = new XMLElement(propName);
+                xml.addElement(propXML);
+                propXML.setValue(valueString);
+            }
+
+            // Handle primitive value
+            else xml.add(propName, valueString);
         }
 
         // Handle PropNode
@@ -76,8 +83,8 @@ public class PropArchiverXML extends PropArchiver {
             xml.addElement(propXML);
         }
 
-        // Handle array
-        else if (propValue instanceof Object[]) {
+        // Handle array of PropNode
+        else if (isPropNodeArray(propValue)) {
 
             // Get array
             Object[] array = (Object[]) propValue;
@@ -87,39 +94,16 @@ public class PropArchiverXML extends PropArchiver {
             xml.addElement(propXML);
 
             // Handle PropNode array
-            if (array.length > 0 && array[0] instanceof PropNode) {
-                for (Object obj : array) {
-                    PropNode childNode = (PropNode) obj;
-                    String childName = childNode.getClassName();
-                    XMLElement childXML = convertPropNodeToXML(childName, childNode);
-                    propXML.addElement(childXML);
-                }
-            }
-
-            // Handle primitive array
-            else {
-                String valStr = Arrays.toString(array);
-                propXML.setValue(valStr);
+            for (Object obj : array) {
+                PropNode childNode = (PropNode) obj;
+                String childName = childNode.getClassName();
+                XMLElement childXML = convertPropNodeToXML(childName, childNode);
+                propXML.addElement(childXML);
             }
         }
 
-        // Handle primitive value
-        else {
-
-            // If float/double, format to avoid many decimals
-            if (propValue instanceof Double || propValue instanceof Float)
-                propValue = FormatUtils.formatNum((Number) propValue);
-
-            // Handle double array
-            else if (propValue instanceof double[]) {
-                String arrayStr = PropUtils.getStringForDoubleArray((double[]) propValue);
-                xml.addElement(new XMLElement(propName, arrayStr));
-                return;
-            }
-
-            // Add prop
-            xml.add(propName, propValue);
-        }
+        // Otherwise complain
+        else System.err.println("PropArchiver.addNameAndValueToXML: Value not codeable: " + propValue.getClass());
     }
 
     /**
@@ -167,6 +151,31 @@ public class PropArchiverXML extends PropArchiver {
      */
     public PropObject readPropObjectFromXML(XMLElement anElement)
     {
+        PropNode propNode = readPropNodeFromXML(anElement);
+        PropObject propObject = convertPropNodeToPropObject(propNode);
+        return propObject;
+    }
+
+    /**
+     * Reads a PropNode from XML.
+     */
+    protected PropNode readPropNodeFromXML(XMLElement anElement)
+    {
         return null;
+    }
+
+    /**
+     * Returns whether given object is PropNode array.
+     */
+    private static boolean isPropNodeArray(Object anObj)
+    {
+        Class<?> objClass = anObj.getClass();
+        if (!objClass.isArray()) return false;
+        Object[] array = (Object[]) anObj;
+        Class<?> compClass = objClass.getComponentType();
+        if (PropNode.class.isAssignableFrom(compClass))
+            return true;
+        Object comp0 = array.length > 0 ? array[0] : null;
+        return comp0 instanceof PropNode;
     }
 }
