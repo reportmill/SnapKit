@@ -11,6 +11,17 @@ import snap.gfx.Paint;
  */
 public class PropArchiverHpr {
 
+    // The PropArchiver associated with this instance
+    private PropArchiver  _archiver;
+
+    /**
+     * Constructor.
+     */
+    public PropArchiverHpr(PropArchiver anArchiver)
+    {
+        _archiver = anArchiver;
+    }
+
     /**
      * Converts given object to PropNode or primitive.
      */
@@ -28,9 +39,9 @@ public class PropArchiverHpr {
      */
     protected Object convertFontToPropNode(Font aFont)
     {
-        PropNode propNode = new PropNode(aFont);
-        propNode.addPropValue("Name", aFont.getNameEnglish());
-        propNode.addPropValue("Size", aFont.getSize());
+        PropNode propNode = new PropNode(aFont, _archiver);
+        propNode.addNativeValueForPropName("Name", aFont.getNameEnglish());
+        propNode.addNativeValueForPropName("Size", aFont.getSize());
         return propNode;
     }
 
@@ -50,8 +61,8 @@ public class PropArchiverHpr {
      */
     protected PropNode convertColorToPropNode(Color aColor)
     {
-        PropNode propNode = new PropNode(aColor);
-        propNode.addPropValue("Color", '#' + aColor.toHexString());
+        PropNode propNode = new PropNode(aColor, _archiver);
+        propNode.addNativeValueForPropName("Color", '#' + aColor.toHexString());
         return propNode;
     }
 }

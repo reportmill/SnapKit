@@ -28,7 +28,7 @@ public class PropArchiver {
      */
     public PropArchiver()
     {
-        _helper = new PropArchiverHpr();
+        _helper = new PropArchiverHpr(this);
     }
 
     /**
@@ -40,7 +40,7 @@ public class PropArchiver {
         Prop[] props = aPropObj.getPropsForArchival();
 
         // Create new PropNode
-        PropNode propNode = new PropNode(aPropObj);
+        PropNode propNode = new PropNode(aPropObj, this);
 
         // Iterate over props and add node value for each to PropNode
         for (Prop prop : props) {
@@ -70,7 +70,7 @@ public class PropArchiver {
                 continue;
 
             // Add prop/value
-            propNode.addPropValue(propName, nodeValue);
+            propNode.addNativeValueForPropName(propName, nodeValue);
         }
 
         // Return PropNode
@@ -158,7 +158,7 @@ public class PropArchiver {
             return false;
 
         // Handle PropNode with PropValues size 0
-        if (anObj instanceof PropNode && ((PropNode) anObj).getPropValues().size() == 0)
+        if (anObj instanceof PropNode && ((PropNode) anObj).getPropNames().size() == 0)
             return true;
 
         // Handle array with length 0

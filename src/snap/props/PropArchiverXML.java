@@ -3,6 +3,8 @@
  */
 package snap.props;
 import snap.util.*;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,13 +42,12 @@ public class PropArchiverXML extends PropArchiver {
         // Create XML element for PropNode
         XMLElement xml = new XMLElement(aPropName);
 
-        // Get PropNode entries
-        Set<Map.Entry<String,Object>> propValues = aPropNode.getPropValues();
+        // Get list of configured PropNames
+        List<String> propNames = aPropNode.getPropNames();
 
-        // Iterate over child entries and add XML attribute or child element
-        for (Map.Entry<String,Object> entry : propValues) {
-            String propName = entry.getKey();
-            Object propValue = entry.getValue();
+        // Iterate over PropNames and add XML for each
+        for (String propName : propNames) {
+            Object propValue = aPropNode.getNativeValueForPropName(propName);
             addNameAndValueToXML(xml, propName, propValue);
         }
 
