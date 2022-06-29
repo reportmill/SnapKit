@@ -64,30 +64,57 @@ public class PropArchiver {
 
             // Get object value from PropObject.PropName
             Object nativeValue = aPropObj.getPropValue(propName);
+            boolean isSimple = !prop.isRelation();
 
-            // Handle Relation
-            if (prop.isRelation())
-                convertNativeToNodeForPropRelation(propNode, prop, nativeValue);
+            // Get node value
+            Object nodeValue = isSimple ?
+                    convertNativeToNodeForPropSimple(prop, nativeValue) :
+                    convertNativeToNodeForPropRelation(propNode, prop, nativeValue);
 
-                // Handle Simple property (not relation)
-            else convertNativeToNodeForPropSimple(propNode, prop, nativeValue);
+            // If nodeValue, add
+            if (nodeValue != null)
+                propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
         }
+    }
+
+    /**
+     * Adds a given native simple value (String, Number, etc.) to given PropNode for given Prop.
+     */
+    protected String convertNativeToNodeForPropSimple(Prop prop, Object nativeValue)
+    {
+        // If String-codeable, get coded String and return
+        if (StringCodec.SHARED.isCodeable(nativeValue)) {
+
+            // Get coded string
+            String stringValue = StringCodec.SHARED.codeString(nativeValue);
+
+            // If empty array and Prop.DefaultValue is EMPTY_OBJECT, return null
+            if (prop.isArray() && stringValue.equals("[]") && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
+                return null;
+
+            // Return
+            return stringValue;
+        }
+
+        // Otherwise complain and return null
+        System.err.println("PropArchiver.convertNativeToNodeForPropSimple: Value not codeable: " + nativeValue.getClass());
+        return null;
     }
 
     /**
      * Converts and adds given native relation value (PropObject/PropObject[]) to given PropNode for given Prop.
      */
-    protected void convertNativeToNodeForPropRelation(PropNode propNode, Prop prop, Object nativeValue)
+    protected Object convertNativeToNodeForPropRelation(PropNode propNode, Prop prop, Object nativeValue)
     {
         // Convert native relation value to PropNode
         Object nodeValue = convertNativeToNodeForPropRelationImpl(propNode, prop, nativeValue);
 
         // If nodeValue is empty PropNode or array and Prop.DefaultValue is EMPTY_OBJECT, skip
         if (PropUtils.isEmptyNodeOrArray(nodeValue) && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
-            return;
+            return null;
 
-        // Add prop/value
-        propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
+        // Return
+        return nodeValue;
     }
 
     /**
@@ -146,34 +173,16 @@ public class PropArchiver {
     }
 
     /**
-     * Adds a given native simple value (String, Number, etc.) to given PropNode for given Prop.
+     * Returns a native simple value (String, Number, etc.) to given PropNode for given Node string value.
      */
-    protected void convertNativeToNodeForPropSimple(PropNode propNode, Prop prop, Object nativeValue)
+    protected Object convertNodeToNativeForPropSimple(PropNode propNode, Prop prop, String nodeValue)
     {
-        // If String-codeable, get coded String and return
-        if (StringCodec.SHARED.isCodeable(nativeValue)) {
+        // Get coded string
+        Class<?> propClass = prop.getPropClass();
+        Object nativeValue = StringCodec.SHARED.decodeString(nodeValue, propClass);
 
-            // Get coded string
-            String stringValue = StringCodec.SHARED.codeString(nativeValue);
-
-            // If empty array and Prop.DefaultValue is EMPTY_OBJECT, skip
-            if (prop.isArray() && stringValue.equals("[]") && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
-                return;
-
-            // Add prop/value
-            propNode.addNativeAndNodeValueForPropName(prop, nativeValue, stringValue);
-        }
-
-        // Otherwise complain
-        else System.err.println("PropArchiver.convertNativeToNode: Value not codeable: " + nativeValue.getClass());
-    }
-
-    /**
-     * Returns an unarchived PropObject for given PropNode.
-     */
-    public PropObject convertNodeToNative(PropNode aPropNode)
-    {
-        return null;
+        // Return
+        return nativeValue;
     }
 
     /**

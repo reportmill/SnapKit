@@ -73,6 +73,11 @@ public class PropNode {
     }
 
     /**
+     * Returns the list of configured props.
+     */
+    public List<Prop> getProps()  { return _props; }
+
+    /**
      * Returns the list of configured prop names.
      */
     public List<String> getPropNames()  { return _propNames; }
@@ -148,24 +153,6 @@ public class PropNode {
         System.err.println("PropNode.getPropForName: Prop not found in props list: " + aName);
         PropSet propSet = getPropSet();
         return propSet.getPropForName(aName);
-    }
-
-    /**
-     * Returns whether prop is array prop.
-     */
-    public boolean isArrayProp(String aPropName)
-    {
-        Prop prop = getPropForName(aPropName);
-        return prop.isArray();
-    }
-
-    /**
-     * Returns whether prop is node prop object or array.
-     */
-    public boolean isRelationProp(String aPropName)
-    {
-        Prop prop = getPropForName(aPropName);
-        return prop.isRelation();
     }
 
     /**
