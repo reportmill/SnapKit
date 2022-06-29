@@ -5,6 +5,9 @@ package snap.props;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Paint;
+import snap.text.NumberFormat;
+import snap.text.TextFormat;
+import snap.util.SnapUtils;
 
 /**
  * This class helps PropArchiver archive some common SnapKit classes.
@@ -13,6 +16,14 @@ public class PropArchiverHpr {
 
     // The PropArchiver associated with this instance
     private PropArchiver  _archiver;
+
+    // Add classes
+    static
+    {
+        Prop.addRelationClass(Font.class);
+        Prop.addRelationClass(Paint.class);
+        Prop.addRelationClass(TextFormat.class);
+    }
 
     /**
      * Constructor.
@@ -23,46 +34,166 @@ public class PropArchiverHpr {
     }
 
     /**
-     * Converts given object to PropNode or primitive.
+     * Returns a PropObjectProxy for given object, if supported.
      */
-    protected Object convertObjectToPropNodeOrPrimitive(Object anObj)
+    public PropObject getProxyForObject(Object anObj)
     {
         if (anObj instanceof Font)
-            return convertFontToPropNode((Font) anObj);
-        if (anObj instanceof Paint)
-            return convertPaintToPropNode((Paint) anObj);
+            return new FontProxy((Font) anObj);
+        if (anObj instanceof Color)
+            return new ColorProxy((Color) anObj);
+        if (anObj instanceof NumberFormat)
+            return new NumberFormatProxy((NumberFormat) anObj);
         return null;
     }
 
     /**
-     * Converts given font to PropNode.
+     * A PropObjectProxy subclass for Font.
      */
-    protected Object convertFontToPropNode(Font aFont)
-    {
-        PropNode propNode = new PropNode(aFont, _archiver);
-        propNode.addNativeValueForPropName("Name", aFont.getNameEnglish());
-        propNode.addNativeValueForPropName("Size", aFont.getSize());
-        return propNode;
+    private static class FontProxy extends PropObjectProxy {
+
+        // The font
+        private Font  _font;
+
+        // Constants for properties
+        public static final String Name_Prop = "Name";
+        public static final String Size_Prop = "Size";
+
+        /**
+         * Constructor.
+         */
+        public FontProxy(Font aFont)
+        {
+            super(aFont);
+            _font = aFont;
+        }
+
+        @Override
+        protected void initProps(PropSet aPropSet)
+        {
+            super.initProps(aPropSet);
+            aPropSet.addPropNamed(Name_Prop, String.class, null);
+            aPropSet.addPropNamed(Size_Prop, double.class, null);
+        }
+
+        @Override
+        public Object getPropValue(String aPropName)
+        {
+            switch (aPropName) {
+                case Name_Prop: return _font.getNameEnglish();
+                case Size_Prop: return _font.getSize();
+                default: return super.getPropValue(aPropName);
+            }
+        }
+
+        @Override
+        public void setPropValue(String aPropName, Object aValue)
+        {
+            switch (aPropName) {
+                case Name_Prop: _font = new Font(SnapUtils.stringValue(aValue), 12); break;
+                case Size_Prop: _font = _font.deriveFont(SnapUtils.doubleValue(aValue)); break;
+                default: super.setPropValue(aPropName, aValue);
+            }
+        }
     }
 
     /**
-     * Converts given Paint to PropNode.
+     * A PropObjectProxy subclass for Color.
      */
-    protected PropNode convertPaintToPropNode(Paint aPaint)
-    {
-        if (aPaint instanceof Color)
-            return convertColorToPropNode((Color) aPaint);
-        System.err.println("PropArchiverHpr.convertPaintToPropNode: Unsupported paint: " + aPaint.getClass());
-        return null;
+    private static class ColorProxy extends PropObjectProxy {
+
+        // The color
+        private Color  _color = Color.BLACK;
+
+        // Constants for properties
+        public static final String Color_Prop = "Name";
+
+        /**
+         * Constructor.
+         */
+        public ColorProxy(Color aColor)
+        {
+            super(aColor);
+            _color = aColor;
+        }
+
+        @Override
+        protected void initProps(PropSet aPropSet)
+        {
+            super.initProps(aPropSet);
+            aPropSet.addPropNamed(Color_Prop, String.class, null);
+        }
+
+        @Override
+        public Object getPropValue(String aPropName)
+        {
+            switch (aPropName) {
+                case Color_Prop: return '#' + _color.toHexString();
+                default: return super.getPropValue(aPropName);
+            }
+        }
+
+        @Override
+        public void setPropValue(String aPropName, Object aValue)
+        {
+            switch (aPropName) {
+                case Color_Prop: _color = Color.get(SnapUtils.stringValue(aValue)); break;
+                default: super.setPropValue(aPropName, aValue);
+            }
+        }
     }
 
     /**
-     * Converts given Color to PropNode.
+     * A PropObjectProxy subclass for NumberFormat.
      */
-    protected PropNode convertColorToPropNode(Color aColor)
-    {
-        PropNode propNode = new PropNode(aColor, _archiver);
-        propNode.addNativeValueForPropName("Color", '#' + aColor.toHexString());
-        return propNode;
+    private static class NumberFormatProxy extends PropObjectProxy {
+
+        // The number format
+        private NumberFormat  _format;
+
+        // Constants for properties
+        public static final String Pattern_Prop = "Pattern";
+        public static final String ExpStyle_Prop = "ExpStyle";
+
+        // Constants for defaults
+        private static final String DEFAULT_PATTERN = "";
+        private static final NumberFormat.ExpStyle DEFAULT_EXP_STYLE = NumberFormat.ExpStyle.None;
+
+        /**
+         * Constructor.
+         */
+        public NumberFormatProxy(NumberFormat aFormat)
+        {
+            super(aFormat);
+            _format = aFormat;
+        }
+
+        @Override
+        protected void initProps(PropSet aPropSet)
+        {
+            super.initProps(aPropSet);
+            aPropSet.addPropNamed(Pattern_Prop, String.class, DEFAULT_PATTERN);
+            aPropSet.addPropNamed(ExpStyle_Prop, NumberFormat.ExpStyle.class, DEFAULT_EXP_STYLE);
+        }
+
+        @Override
+        public Object getPropValue(String aPropName)
+        {
+            switch (aPropName) {
+                case Pattern_Prop: return _format.getPattern();
+                case ExpStyle_Prop: return _format.getExpStyle();
+                default: return super.getPropValue(aPropName);
+            }
+        }
+
+        @Override
+        public void setPropValue(String aPropName, Object aValue)
+        {
+            switch (aPropName) {
+                case Pattern_Prop: _format.setPattern(SnapUtils.stringValue(aValue)); break;
+                case ExpStyle_Prop: _format = _format.copyForProps((NumberFormat.ExpStyle) aValue); break;
+                default: super.setPropValue(aPropName, aValue);
+            }
+        }
     }
 }

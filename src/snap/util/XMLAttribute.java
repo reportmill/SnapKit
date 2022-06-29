@@ -7,7 +7,7 @@ import java.text.*;
 import java.util.Locale;
 
 /**
- * The <code>RXAttribute</code> class represents an XML attribute by simply having a name and value.
+ * This class represents an XML attribute by simply having a name and value.
  * It also forms the super class of RXElement
  */
 public class XMLAttribute implements Cloneable {
@@ -42,7 +42,7 @@ public class XMLAttribute implements Cloneable {
 
         // Complain if value is null?
         if (aValue == null)
-            System.err.println("RXAttribute: Warning: null value for attribute " + _name);
+            System.err.println("XMLAttribute: Warning: null value for attribute " + _name);
     }
 
     /**

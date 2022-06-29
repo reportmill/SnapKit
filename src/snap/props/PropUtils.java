@@ -13,6 +13,30 @@ public class PropUtils {
     private static DecimalFormat _doubleFmt = new DecimalFormat("0.#########");
 
     /**
+     * Returns whether given object is PropNode array.
+     */
+    public static boolean isPropNodeArray(Object anObj)
+    {
+        // If not array return false
+        Class<?> objClass = anObj.getClass();
+        if (!objClass.isArray()) return false;
+
+        // If array component is PropNode, return true
+        Object[] array = (Object[]) anObj;
+        Class<?> compClass = objClass.getComponentType();
+        if (PropNode.class.isAssignableFrom(compClass))
+            return true;
+
+        // If first array item PropNode, return true
+        Object comp0 = array.length > 0 ? array[0] : null;
+        if (comp0 instanceof PropNode)
+            return true;
+
+        // Return false
+        return false;
+    }
+
+    /**
      * Return string for double array.
      */
     public static String getStringForDoubleArray(double[] theValues)

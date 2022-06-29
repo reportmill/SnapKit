@@ -17,9 +17,6 @@ public class PropArchiver {
     // The current prop
     protected Prop  _prop;
 
-    // The current prop name
-    protected String  _propName;
-
     // A helper class to archive common SnapKit classes (Font, Color, etc.)
     private PropArchiverHpr  _helper;
 
@@ -34,13 +31,13 @@ public class PropArchiver {
     /**
      * Returns a PropNode for given PropObject.
      */
-    public PropNode convertPropObjectToPropNode(PropObject aPropObj)
+    public PropNode convertNativeToNode(PropObject aPropObj)
     {
-        // Get props for archival
-        Prop[] props = aPropObj.getPropsForArchival();
-
         // Create new PropNode
         PropNode propNode = new PropNode(aPropObj, this);
+
+        // Get props for archival
+        Prop[] props = aPropObj.getPropsForArchival();
 
         // Iterate over props and add node value for each to PropNode
         for (Prop prop : props) {
@@ -51,26 +48,38 @@ public class PropArchiver {
                 continue;
 
             // Get object value from PropObject.PropName
-            Object objValue = aPropObj.getPropValue(propName);
+            Object nativeValue = aPropObj.getPropValue(propName);
 
-            // Get value for propNode (as PropNode or primitive)
-            PropObject oldPropObj = _propObject;
-            Prop oldProp = _prop;
-            String oldPropName = _propName;
-            _propObject = aPropObj;
-            _prop = prop;
-            _propName = propName;
-            Object nodeValue = convertObjectToPropNodeOrPrimitive(objValue);
-            _propObject = oldPropObj;
-            _prop = oldProp;
-            _propName = oldPropName;
+            // Handle Relation
+            if (prop.isRelation())
+                addNativeRelationValueForProp(aPropObj, propNode, prop, nativeValue);
 
-            // If nodeValue is empty PropNode or array and Prop.DefaultValue is EMPTY_OBJECT, skip
-            if (isEmptyObject(nodeValue) && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
-                continue;
+            // Handle Simple property (not relation)
+            else addNativeSimpleValueForProp(propNode, prop, nativeValue);
+        }
 
-            // Add prop/value
-            propNode.addNativeValueForPropName(propName, nodeValue);
+        // Get props for archival
+        Prop[] propsExtra = aPropObj.getPropsForArchivalExtra();
+        if (propsExtra != null) {
+
+            // Iterate over props and add node value for each to PropNode
+            for (Prop prop : propsExtra) {
+
+                // If prop hasn't changed, just skip
+                String propName = prop.getName();
+                if (aPropObj.isPropDefault(propName))
+                    continue;
+
+                // Get object value from PropObject.PropName
+                Object nativeValue = aPropObj.getPropValue(propName);
+
+                // Handle Relation
+                if (prop.isRelation())
+                    addNativeRelationValueForProp(aPropObj, propNode, prop, nativeValue);
+
+                    // Handle Simple property (not relation)
+                else addNativeSimpleValueForProp(propNode, prop, nativeValue);
+            }
         }
 
         // Return PropNode
@@ -78,23 +87,70 @@ public class PropArchiver {
     }
 
     /**
-     * Converts given object to PropNode or primitive.
+     * Adds a given native relation value (PropObject/PropObject[]) to given PropNode for given Prop.
      */
-    protected Object convertObjectToPropNodeOrPrimitive(Object anObj)
+    protected void addNativeRelationValueForProp(PropObject aParent, PropNode propNode, Prop prop, Object nativeValue)
+    {
+        // Cache weird state vars, set new values
+        PropObject oldPropObj = _propObject;
+        Prop oldProp = _prop;
+        _propObject = aParent; _prop = prop;
+
+        // Convert native relation value to PropNode
+        Object nodeValue = convertNativeRelationToNode(nativeValue);
+
+        // Restore weird state vars
+        _propObject = oldPropObj; _prop = oldProp;
+
+        // If nodeValue is empty PropNode or array and Prop.DefaultValue is EMPTY_OBJECT, skip
+        if (isEmptyObject(nodeValue) && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
+            return;
+
+        // Add prop/value
+        propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
+    }
+
+    /**
+     * Adds a given native simple value (String, Number, etc.) to given PropNode for given Prop.
+     */
+    protected void addNativeSimpleValueForProp(PropNode propNode, Prop prop, Object nativeValue)
+    {
+        // If String-codeable, get coded String and return
+        if (StringCodec.SHARED.isCodeable(nativeValue)) {
+
+            // Get coded string
+            String stringValue = StringCodec.SHARED.codeString(nativeValue);
+
+            // If empty array and Prop.DefaultValue is EMPTY_OBJECT, skip
+            if (prop.isArray() && stringValue.equals("[]") && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
+                return;
+
+            // Add prop/value
+            propNode.addNativeAndNodeValueForPropName(prop, nativeValue, stringValue);
+        }
+
+        // Otherwise complain
+        else System.err.println("PropArchiver.convertNativeToNode: Value not codeable: " + nativeValue.getClass());
+    }
+
+    /**
+     * Converts given native relation object to PropNode or primitive.
+     */
+    protected Object convertNativeRelationToNode(Object anObj)
     {
         // Handle null
         if (anObj == null)
             return null;
 
         // Give helper first shot
-        Object hprValue = _helper.convertObjectToPropNodeOrPrimitive(anObj);
-        if (hprValue != null)
-            return hprValue;
+        PropObject proxy = _helper.getProxyForObject(anObj);
+        if (proxy != null)
+            return convertNativeRelationToNode(proxy);
 
         // Handle PropObject
         if (anObj instanceof PropObject) {
             PropObject propObject = (PropObject) anObj;
-            PropNode propNode = convertPropObjectToPropNode(propObject);
+            PropNode propNode = convertNativeToNode(propObject);
             return propNode;
         }
 
@@ -102,12 +158,12 @@ public class PropArchiver {
         if (anObj instanceof List) {
             List<?> list = (List<?>) anObj;
             Object[] array = list.toArray();
-            return convertArrayToPropNodeOrPrimitive(array);
+            return convertNativeArrayToNode(array);
         }
 
         // Handle array
         if (anObj.getClass().isArray())
-            return convertArrayToPropNodeOrPrimitive(anObj);
+            return convertNativeArrayToNode(anObj);
 
         // Return original object (assumed to be primitive)
         return anObj;
@@ -116,7 +172,7 @@ public class PropArchiver {
     /**
      * Returns an array of nodes or primitives for given array.
      */
-    private Object convertArrayToPropNodeOrPrimitive(Object arrayObj)
+    private Object convertNativeArrayToNode(Object arrayObj)
     {
         // If primitive array, just return
         if (arrayObj.getClass().getComponentType().isPrimitive())
@@ -133,7 +189,7 @@ public class PropArchiver {
         PropNode[] propNodes = new PropNode[array.length];
         for (int i = 0; i < array.length; i++) {
             PropObject propObject = (PropObject) array[i];
-            propNodes[i] = convertPropObjectToPropNode(propObject);
+            propNodes[i] = convertNativeToNode(propObject);
         }
 
         // Return

@@ -3,10 +3,7 @@
  */
 package snap.props;
 import snap.util.*;
-
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A PropArchiver subclass specifically to convert to/from XML.
@@ -18,9 +15,14 @@ public class PropArchiverXML extends PropArchiver {
      */
     public XMLElement convertPropObjectToXML(PropObject aPropObject)
     {
-        PropNode propNode = convertPropObjectToPropNode(aPropObject);
+        // Convert native to node
+        PropNode propNode = convertNativeToNode(aPropObject);
+
+        // Convert node to XML
         String propName = propNode.getClassName();
-        XMLElement xml = convertPropNodeToXML(propName, propNode);
+        XMLElement xml = convertNodeToXML(propName, propNode);
+
+        // Return
         return xml;
     }
 
@@ -37,7 +39,7 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Returns XML for PropNode.
      */
-    protected XMLElement convertPropNodeToXML(String aPropName, PropNode aPropNode)
+    protected XMLElement convertNodeToXML(String aPropName, PropNode aPropNode)
     {
         // Create XML element for PropNode
         XMLElement xml = new XMLElement(aPropName);
@@ -47,8 +49,26 @@ public class PropArchiverXML extends PropArchiver {
 
         // Iterate over PropNames and add XML for each
         for (String propName : propNames) {
-            Object propValue = aPropNode.getNativeValueForPropName(propName);
-            addNameAndValueToXML(xml, propName, propValue);
+
+            // Get Node value and whether it is node and/or array
+            Object nodeValue = aPropNode.getNodeValueForPropName(propName);
+            boolean isArrayProp = aPropNode.isArrayProp(propName);
+            boolean isRelationProp = aPropNode.isRelationProp(propName);
+
+            // Handle null
+            if (nodeValue == null) {
+                xml.add(propName, "null");
+            }
+
+            // Handle Relation prop
+            else if (isRelationProp)
+                addNodeToXML(xml, propName, nodeValue, isArrayProp);
+
+            // Handle String (non-Node) prop
+            else {
+                String stringValue = (String) nodeValue;
+                addNodeStringToXML(xml, propName, stringValue, isArrayProp);
+            }
         }
 
         // Return xml
@@ -56,55 +76,50 @@ public class PropArchiverXML extends PropArchiver {
     }
 
     /**
-     * Adds XML for given prop name/value pair.
+     * Adds a node prop to XML.
      */
-    protected void addNameAndValueToXML(XMLElement xml, String propName, Object propValue)
+    protected void addNodeToXML(XMLElement xml, String propName, Object nodeValue, boolean isArrayProp)
     {
-        // If String-codeable, get coded String and set in XML
-        if (StringCodec.SHARED.isCodeable(propValue)) {
-
-            // Get Coded String
-            String valueString = StringCodec.SHARED.codeString(propValue);
-
-            // Handle primitive array
-            if (propValue != null && propValue.getClass().isArray()) {
-                XMLElement propXML = new XMLElement(propName);
-                xml.addElement(propXML);
-                propXML.setValue(valueString);
-            }
-
-            // Handle primitive value
-            else xml.add(propName, valueString);
-        }
-
-        // Handle PropNode
-        else if (propValue instanceof PropNode) {
-            PropNode propNode = (PropNode) propValue;
-            XMLElement propXML = convertPropNodeToXML(propName, propNode);
-            xml.addElement(propXML);
-        }
-
-        // Handle array of PropNode
-        else if (isPropNodeArray(propValue)) {
+        // Handle Node array
+        if (isArrayProp) {
 
             // Get array
-            Object[] array = (Object[]) propValue;
+            PropNode[] nodeArray = (PropNode[]) nodeValue;
 
             // Create child XML
             XMLElement propXML = new XMLElement(propName);
             xml.addElement(propXML);
 
             // Handle PropNode array
-            for (Object obj : array) {
-                PropNode childNode = (PropNode) obj;
+            for (PropNode childNode : nodeArray) {
                 String childName = childNode.getClassName();
-                XMLElement childXML = convertPropNodeToXML(childName, childNode);
+                XMLElement childXML = convertNodeToXML(childName, childNode);
                 propXML.addElement(childXML);
             }
         }
 
-        // Otherwise complain
-        else System.err.println("PropArchiver.addNameAndValueToXML: Value not codeable: " + propValue.getClass());
+        // Handle Node object
+        else {
+            PropNode propNode = (PropNode) nodeValue;
+            XMLElement propXML = convertNodeToXML(propName, propNode);
+            xml.addElement(propXML);
+        }
+    }
+
+    /**
+     * Adds a String (non-node) prop to XML.
+     */
+    protected void addNodeStringToXML(XMLElement xml, String propName, String stringValue, boolean isArrayProp)
+    {
+        // Handle primitive array
+        if (isArrayProp) {
+            XMLElement propXML = new XMLElement(propName);
+            xml.addElement(propXML);
+            propXML.setValue(stringValue);
+        }
+
+        // Handle primitive value
+        else xml.add(propName, stringValue);
     }
 
     /**
@@ -163,20 +178,5 @@ public class PropArchiverXML extends PropArchiver {
     protected PropNode readPropNodeFromXML(XMLElement anElement)
     {
         return null;
-    }
-
-    /**
-     * Returns whether given object is PropNode array.
-     */
-    private static boolean isPropNodeArray(Object anObj)
-    {
-        Class<?> objClass = anObj.getClass();
-        if (!objClass.isArray()) return false;
-        Object[] array = (Object[]) anObj;
-        Class<?> compClass = objClass.getComponentType();
-        if (PropNode.class.isAssignableFrom(compClass))
-            return true;
-        Object comp0 = array.length > 0 ? array[0] : null;
-        return comp0 instanceof PropNode;
     }
 }

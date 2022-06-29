@@ -20,6 +20,9 @@ public class PropNode {
     // The ClassName, if available
     private String  _className;
 
+    // A list of props configured for node
+    private List<Prop>  _props = new ArrayList<>();
+
     // A list of prop names configured for node
     private List<String>  _propNames = new ArrayList<>();
 
@@ -27,7 +30,7 @@ public class PropNode {
     private Map<String,Object>  _nativeValues = new HashMap<>();
 
     // A map of prop names to PropObject values as strings
-    private Map<String,String>  _stringValues = new HashMap<>();
+    private Map<String,Object>  _nodeValues = new HashMap<>();
 
     // A constant to represent null value
     public static final Object NULL_VALUE = new Object();
@@ -54,6 +57,17 @@ public class PropNode {
     public String getClassName()  { return _className; }
 
     /**
+     * Returns the PropSet.
+     */
+    public PropSet getPropSet()
+    {
+        if (_native instanceof PropObject)
+            return ((PropObject) _native).getPropSet();
+        System.err.println("PropNode.getPropSet: Not found for class: " + _native.getClass());
+        return null;
+    }
+
+    /**
      * Returns the list of configured prop names.
      */
     public List<String> getPropNames()  { return _propNames; }
@@ -70,11 +84,36 @@ public class PropNode {
     /**
      * Adds a PropObject value in native form for given prop name.
      */
-    public void addNativeValueForPropName(String aPropName, Object aValue)
+    public void addNativeAndNodeValueForPropName(Prop aProp, Object nativeValue, Object nodeValue)
     {
-        Object value = aValue != null ? aValue : NULL_VALUE;
+        // Add PropName to PropNames
+        _props.add(aProp);
+        String propName = aProp.getName();
+        _propNames.add(propName);
+
+        // Add value to NativeValues
+        _nativeValues.put(propName, nativeValue);
+
+        // Add to NodeValues
+        _nodeValues.put(propName, nodeValue);
+    }
+
+    /**
+     * Returns a PropObject value a String for given prop name.
+     */
+    public Object getNodeValueForPropName(String aPropName)
+    {
+        Object nodeValue = _nodeValues.get(aPropName);
+        return nodeValue;
+    }
+
+    /**
+     * Adds a String or Node value for given prop name.
+     */
+    public void addNodeValueForPropName(String aPropName, Object aValue)
+    {
         _propNames.add(aPropName);
-        _nativeValues.put(aPropName, value);
+        _nodeValues.put(aPropName, aValue);
     }
 
     /**
@@ -83,27 +122,45 @@ public class PropNode {
     public String getStringValueForPropName(String aPropName)
     {
         // Get value from StringValues (just return if found)
-        String propValue = _stringValues.get(aPropName);
-        if (propValue != null)
-            return propValue;
+        Object nodeValue = getNodeValueForPropName(aPropName);
+        if (nodeValue == null || nodeValue instanceof String)
+            return (String) nodeValue;
 
-        // Get native value from NativeValues
-        Object nativeValue = _nativeValues.get(aPropName);
-        if (nativeValue != null) {
-
-        }
-
-        // Return
-        return propValue;
+        // Complain and return
+        System.err.println("PropNode.getStringValueForPropName: No node value is not string: " + nodeValue.getClass());
+        return null;
     }
 
     /**
-     * Adds a PropObject value a String for given prop name.
+     * Returns a Prop for given PropName.
      */
-    public void addStringValueForPropName(String aPropName, String aValue)
+    public Prop getPropForName(String aName)
     {
-        _propNames.add(aPropName);
-        _stringValues.put(aPropName, aValue);
+        for (Prop prop : _props)
+            if (prop.getName().equals(aName))
+                return prop;
+
+        System.err.println("PropNode.getPropForName: Prop not found in props list: " + aName);
+        PropSet propSet = getPropSet();
+        return propSet.getPropForName(aName);
+    }
+
+    /**
+     * Returns whether prop is array prop.
+     */
+    public boolean isArrayProp(String aPropName)
+    {
+        Prop prop = getPropForName(aPropName);
+        return prop.isArray();
+    }
+
+    /**
+     * Returns whether prop is node prop object or array.
+     */
+    public boolean isRelationProp(String aPropName)
+    {
+        Prop prop = getPropForName(aPropName);
+        return prop.isRelation();
     }
 
     /**
@@ -125,7 +182,7 @@ public class PropNode {
         StringBuffer sb = new StringBuffer();
         String className = getClassName();
         if (className != null)
-            StringUtils.appendProp(sb, "ClassName", className);
+            StringUtils.appendProp(sb, "Class", className);
 
         // Add leaf props
         List<String> propNames = getPropNames();

@@ -2,6 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
+import snap.util.ArrayUtils;
+import snap.util.StringUtils;
 import java.util.List;
 
 /**
@@ -15,8 +17,11 @@ public class Prop {
     // The property class
     private Class  _propClass;
 
-    // Whether property is relation
-    private boolean  _relation;
+    // Whether property is array class
+    private boolean  _array;
+
+    // Whether property is relation class
+    private Boolean  _relation;
 
     // The property default value
     private Object  _defaultValue;
@@ -59,19 +64,28 @@ public class Prop {
     /**
      * Sets the return class.
      */
-    public void setPropClass(Class aClass)
+    protected void setPropClass(Class<?> aClass)
     {
         _propClass = aClass;
 
-        _relation = PropObject.class.isAssignableFrom(aClass) ||
-                List.class.isAssignableFrom(aClass) ||
-                aClass.isArray() && PropObject.class.isAssignableFrom(aClass.getComponentType());
+        _array = isArrayClass(aClass);
+        //_relation = isRelationPropClass(aClass);
     }
+
+    /**
+     * Returns whether prop is array.
+     */
+    public boolean isArray()  { return _array; }
 
     /**
      * Returns whether prop is relation (not primitive).
      */
-    public boolean isRelation()  { return _relation; }
+    public boolean isRelation()
+    {
+        if (_relation != null) return _relation;
+
+        return _relation = isRelationPropClass(_propClass);
+    }
 
     /**
      * Returns the default value.
@@ -97,5 +111,92 @@ public class Prop {
     public void setSkipArchival(boolean aValue)
     {
         _skipArchival = aValue;
+    }
+
+    /**
+     * Standard toString implementation.
+     */
+    public String toString()
+    {
+        String className = getClass().getSimpleName();
+        String propStrings = toStringProps();
+        return className + "{ " + propStrings + " }";
+    }
+
+    /**
+     * Standard toStringProps implementation.
+     */
+    public String toStringProps()
+    {
+        // Add Name
+        StringBuffer sb = new StringBuffer();
+        String name = getName();
+        StringUtils.appendProp(sb, "Name", name);
+
+        // Add Array, Relation
+        StringUtils.appendProp(sb, "Array", isArray());
+        StringUtils.appendProp(sb, "Relation", isRelation()); _relation = null;
+
+        // Add Default value
+        Object defValue = getDefaultValue();
+        String defStr = defValue != null ? defValue.toString() : "null";
+        StringUtils.appendProp(sb, "DefaultValue", defStr);
+
+        // Return string
+        return sb.toString();
+    }
+
+    /**
+     * Returns whether given class is array/list.
+     */
+    private static boolean isArrayClass(Class<?> aClass)
+    {
+        // Handle array class
+        if (aClass.isArray())
+            return true;
+
+        // Handle List class
+        if (List.class.isAssignableFrom(aClass))
+            return true;
+
+        // Return
+        return false;
+    }
+
+    /**
+     * Returns whether given class is PropObject class or array/list of PropObject.
+     */
+    private static boolean isRelationPropClass(Class<?> aClass)
+    {
+        // Handle PropObject class/subclass
+        if (PropObject.class.isAssignableFrom(aClass))
+            return true;
+
+        // Handle PropObject[] class
+        if (aClass.isArray() && PropObject.class.isAssignableFrom(aClass.getComponentType()))
+            return true;
+
+        // Handle List class
+        if (List.class.isAssignableFrom(aClass))
+            return true;
+
+        // Additional relation classes
+        for (Class<?> cls : _relationClasses)
+            if (cls.isAssignableFrom(aClass))
+                return true;
+
+        // Return
+        return false;
+    }
+
+    // Additional relation classes
+    private static Class[]  _relationClasses = new Class[0];
+
+    /**
+     * Adds additional relation classes.
+     */
+    public static void addRelationClass(Class<?> aClass)
+    {
+        _relationClasses = ArrayUtils.add(_relationClasses, aClass);
     }
 }

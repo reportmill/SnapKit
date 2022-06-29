@@ -52,6 +52,11 @@ public class PropObject implements PropChange.DoChange {
     }
 
     /**
+     * Returns extra props for archival.
+     */
+    public Prop[] getPropsForArchivalExtra()  { return null; }
+
+    /**
      * Returns the parent PropObject (if available).
      */
     public PropObject getPropParent()  { return null; }
