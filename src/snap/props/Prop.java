@@ -120,7 +120,7 @@ public class Prop {
     {
         String className = getClass().getSimpleName();
         String propStrings = toStringProps();
-        return className + "{ " + propStrings + " }";
+        return className + " { " + propStrings + " }";
     }
 
     /**

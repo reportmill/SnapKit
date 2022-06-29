@@ -274,7 +274,7 @@ public class PropObject implements PropChange.DoChange {
     {
         String className = getClass().getSimpleName();
         String propStrings = toStringProps();
-        return className + "{ " + propStrings + " }";
+        return className + " { " + propStrings + " }";
     }
 
     /**

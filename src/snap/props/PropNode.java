@@ -162,7 +162,7 @@ public class PropNode {
     {
         String className = getClass().getSimpleName();
         String propStrings = toStringProps();
-        return className + "{ " + propStrings + " }";
+        return className + " { " + propStrings + " }";
     }
 
     /**
