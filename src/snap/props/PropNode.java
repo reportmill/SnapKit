@@ -177,12 +177,8 @@ public class PropNode {
             StringUtils.appendProp(sb, "Class", className);
 
         // Add leaf props
-        List<String> propNames = getPropNames();
-        for (String propName : propNames) {
-            Object propValue = getStringValueForPropName(propName);
-            if (propValue == null) continue;
-            StringUtils.appendProp(sb, propName, propValue);
-        }
+        String[] propNames = getPropNames().toArray(new String[0]);
+        StringUtils.appendProp(sb, "Props", Arrays.toString(propNames));
 
         // Return string
         return sb.toString();

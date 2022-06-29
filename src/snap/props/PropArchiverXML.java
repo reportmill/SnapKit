@@ -3,7 +3,6 @@
  */
 package snap.props;
 import snap.util.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -267,7 +266,7 @@ public class PropArchiverXML extends PropArchiver {
         }
 
         // Return
-        return null;
+        return propNode;
     }
 
     /**
@@ -306,6 +305,14 @@ public class PropArchiverXML extends PropArchiver {
                 return createPropObjectForClass(cls);
         }
 
+        // If Prop is Array, try XML name next
+        if (aProp != null && aProp.isArray()) {
+            String xmlName = anElement.getName();
+            Class<?> xmlNameClass = getClassForName(xmlName);
+            if (xmlNameClass != null)
+                return createPropObjectForClass(xmlNameClass);
+        }
+
         // Try Prop class attribute
         Class<?> propClass = aProp != null ? aProp.getPropClass() : null;
         if (propClass != null) {
@@ -342,7 +349,9 @@ public class PropArchiverXML extends PropArchiver {
     {
         Object propObject;
         try { propObject = aClass.newInstance(); }
-        catch (Exception e) { throw new RuntimeException(e); }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         // See if we need proxy
         PropObject propObject1 = _helper.getProxyForObject(propObject);

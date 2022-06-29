@@ -133,7 +133,8 @@ public class Prop {
         String name = getName();
         StringUtils.appendProp(sb, "Name", name);
 
-        // Add Array, Relation
+        // Add PropClass, Array, Relation
+        StringUtils.appendProp(sb, "PropClass", _propClass != null ? _propClass.getSimpleName() : "null");
         StringUtils.appendProp(sb, "Array", isArray());
         StringUtils.appendProp(sb, "Relation", isRelation()); _relation = null;
 
