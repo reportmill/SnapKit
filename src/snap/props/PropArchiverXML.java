@@ -171,7 +171,7 @@ public class PropArchiverXML extends PropArchiver {
         PropNode propNode = readPropNodeFromXML(null, null, anElement);
 
         // Convert PropNode (graph) to PropObject
-        PropObject propObject = convertPropNodeToPropObject(propNode);
+        PropObject propObject = convertNodeToNative(propNode);
 
         // Return
         return propObject;
