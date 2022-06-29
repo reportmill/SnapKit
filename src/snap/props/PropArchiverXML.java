@@ -167,16 +167,90 @@ public class PropArchiverXML extends PropArchiver {
      */
     public PropObject readPropObjectFromXML(XMLElement anElement)
     {
-        PropNode propNode = readPropNodeFromXML(anElement);
+        // Configure PropNode (graph) from XML
+        PropNode propNode = readPropNodeFromXML(null, null, anElement);
+
+        // Convert PropNode (graph) to PropObject
         PropObject propObject = convertPropNodeToPropObject(propNode);
+
+        // Return
         return propObject;
     }
 
     /**
      * Reads a PropNode from XML.
      */
-    protected PropNode readPropNodeFromXML(XMLElement anElement)
+    protected PropNode readPropNodeFromXML(PropObject aParent, Prop aProp, XMLElement anElement)
     {
+        // Create PropObject for element
+        PropObject propObject = createPropObjectForXML(aParent, aProp, anElement);
+
+        // Create PropNode for propObject
+        PropNode propNode = new PropNode(propObject, this);
+
+        // Get list of configured XML attributes
+        List<XMLAttribute> attributes = anElement.getAttributes();
+
+        // Iterate over PropNames and add XML for each
+        for (XMLAttribute attr : attributes) {
+
+        }
+
+        // Return
         return null;
+    }
+
+    /**
+     * Creates a PropObject for XML element.
+     */
+    protected PropObject createPropObjectForXML(PropObject aParent, Prop aProp, XMLElement anElement)
+    {
+        // If Class attribute set, try that
+        String xmlClassName = anElement.getAttributeValue("Class");
+        if (xmlClassName != null) {
+            Class<?> cls = getClassForName(xmlClassName);
+            if (cls != null)
+                return createPropObjectForClass(cls);
+        }
+
+        // Try Prop class attribute
+        Class<?> propClass = aProp.getPropClass();
+        if (propClass != null) {
+
+            // If array, swap for component class
+            if (propClass.isArray())
+                propClass = propClass.getComponentType();
+
+            return createPropObjectForClass(propClass);
+        }
+
+        // Try PropName as ClassMap name
+        String propName = aProp.getName();
+        propClass = getClassForName(propName);
+        if (propClass != null) {
+            return createPropObjectForClass(propClass);
+        }
+
+        // Complain and return
+        System.err.println("PropArchiverXML.createPropObjectForXML: Undetermined class for XML: " + anElement);
+        return null;
+    }
+
+    /**
+     * Convenience newInstance.
+     */
+    private PropObject createPropObjectForClass(Class<?> aClass)
+    {
+        Object propObject;
+        try { propObject = aClass.newInstance(); }
+        catch (Exception e) { throw new RuntimeException(e); }
+
+        // See if we need proxy
+        PropObject propObject1 = _helper.getProxyForObject(propObject);
+        if (propObject1 != null)
+            propObject = propObject1;
+
+        // Return
+        return (PropObject) propObject;
     }
 }

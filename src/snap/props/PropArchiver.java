@@ -3,6 +3,7 @@
  */
 package snap.props;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class primarily converts a PropObject (graph) to/from a PropNode (graph).
@@ -11,14 +12,11 @@ import java.util.List;
  */
 public class PropArchiver {
 
-    // The current prop object
-    protected PropObject  _propObject;
-
-    // The current prop
-    protected Prop  _prop;
-
     // A helper class to archive common SnapKit classes (Font, Color, etc.)
-    private PropArchiverHpr  _helper;
+    protected PropArchiverHpr  _helper;
+
+    // A map of names to Class names, for unarchival
+    private Map<String,Class<?>>  _classMap;
 
     /**
      * Constructor.
@@ -52,7 +50,7 @@ public class PropArchiver {
 
             // Handle Relation
             if (prop.isRelation())
-                addNativeRelationValueForProp(aPropObj, propNode, prop, nativeValue);
+                addNativeRelationValueForProp(propNode, prop, nativeValue);
 
             // Handle Simple property (not relation)
             else addNativeSimpleValueForProp(propNode, prop, nativeValue);
@@ -75,7 +73,7 @@ public class PropArchiver {
 
                 // Handle Relation
                 if (prop.isRelation())
-                    addNativeRelationValueForProp(aPropObj, propNode, prop, nativeValue);
+                    addNativeRelationValueForProp(propNode, prop, nativeValue);
 
                     // Handle Simple property (not relation)
                 else addNativeSimpleValueForProp(propNode, prop, nativeValue);
@@ -89,18 +87,10 @@ public class PropArchiver {
     /**
      * Adds a given native relation value (PropObject/PropObject[]) to given PropNode for given Prop.
      */
-    protected void addNativeRelationValueForProp(PropObject aParent, PropNode propNode, Prop prop, Object nativeValue)
+    protected void addNativeRelationValueForProp(PropNode propNode, Prop prop, Object nativeValue)
     {
-        // Cache weird state vars, set new values
-        PropObject oldPropObj = _propObject;
-        Prop oldProp = _prop;
-        _propObject = aParent; _prop = prop;
-
         // Convert native relation value to PropNode
-        Object nodeValue = convertNativeRelationToNode(nativeValue);
-
-        // Restore weird state vars
-        _propObject = oldPropObj; _prop = oldProp;
+        Object nodeValue = convertNativeRelationToNode(propNode, prop, nativeValue);
 
         // If nodeValue is empty PropNode or array and Prop.DefaultValue is EMPTY_OBJECT, skip
         if (isEmptyObject(nodeValue) && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
@@ -136,37 +126,37 @@ public class PropArchiver {
     /**
      * Converts given native relation object to PropNode or primitive.
      */
-    protected Object convertNativeRelationToNode(Object anObj)
+    protected Object convertNativeRelationToNode(PropNode aPropNode, Prop aProp, Object nativeValue)
     {
         // Handle null
-        if (anObj == null)
+        if (nativeValue == null)
             return null;
 
         // Give helper first shot
-        PropObject proxy = _helper.getProxyForObject(anObj);
+        PropObject proxy = _helper.getProxyForObject(nativeValue);
         if (proxy != null)
-            return convertNativeRelationToNode(proxy);
+            return convertNativeRelationToNode(aPropNode, aProp, proxy);
 
         // Handle PropObject
-        if (anObj instanceof PropObject) {
-            PropObject propObject = (PropObject) anObj;
+        if (nativeValue instanceof PropObject) {
+            PropObject propObject = (PropObject) nativeValue;
             PropNode propNode = convertNativeToNode(propObject);
             return propNode;
         }
 
         // Handle List
-        if (anObj instanceof List) {
-            List<?> list = (List<?>) anObj;
+        if (nativeValue instanceof List) {
+            List<?> list = (List<?>) nativeValue;
             Object[] array = list.toArray();
             return convertNativeArrayToNode(array);
         }
 
         // Handle array
-        if (anObj.getClass().isArray())
-            return convertNativeArrayToNode(anObj);
+        if (nativeValue.getClass().isArray())
+            return convertNativeArrayToNode(nativeValue);
 
         // Return original object (assumed to be primitive)
-        return anObj;
+        return nativeValue;
     }
 
     /**
@@ -202,6 +192,33 @@ public class PropArchiver {
     public PropObject convertPropNodeToPropObject(PropNode aPropNode)
     {
         return null;
+    }
+
+    /**
+     * Returns the map of names to class names.
+     */
+    public Map<String,Class<?>> getClassMap()
+    {
+        // If already set, just return
+        if (_classMap != null) return _classMap;
+
+        // Create, set, return
+        Map<String,Class<?>> classMap = createClassMap();
+        return _classMap = classMap;
+    }
+
+    /**
+     * Creates the map of names to class names.
+     */
+    protected Map<String,Class<?>> createClassMap()  { return null; }
+
+    /**
+     * Returns a class for name.
+     */
+    public Class<?> getClassForName(String aName)
+    {
+        Map<String,Class<?>> classMap = getClassMap();
+        return classMap.get(aName);
     }
 
     /**

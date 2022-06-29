@@ -32,9 +32,6 @@ public class PropNode {
     // A map of prop names to PropObject values as strings
     private Map<String,Object>  _nodeValues = new HashMap<>();
 
-    // A constant to represent null value
-    public static final Object NULL_VALUE = new Object();
-
     /**
      * Constructor.
      */
@@ -44,6 +41,14 @@ public class PropNode {
         _archiver = anArchiver;
         if (aValue != null)
             _className = aValue.getClass().getSimpleName();
+    }
+
+    /**
+     * Returns the PropObject.
+     */
+    public PropObject getPropObject()
+    {
+        return _native instanceof PropObject ? (PropObject) _native : null;
     }
 
     /**

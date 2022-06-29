@@ -6,11 +6,10 @@ package snap.util;
 import java.util.*;
 
 /**
- * The <code>RXElement</code> class represents an XML element and simply manages a list of XML elements
- * (recursively) and a list of attributes.
- * <p>
+ * The class represents an XML element and simply manages a list of XML attributes and a list XML elements (recursively).
+ *
  * For the sake of efficiency, when you need to iterate over a list of elements for a given name, you can do this:
- * <p>
+ *
  * for (int i=anElement.indexOf(elementName); i>=0; i=anElement.indexOf(elementName, i+1))
  * anElement.get(i).doThis();
  */
