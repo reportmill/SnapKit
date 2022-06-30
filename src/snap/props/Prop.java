@@ -32,6 +32,9 @@ public class Prop {
     // Whether to skip archival
     private boolean  _skipArchival;
 
+    // Whether prop value already exists in parent (should be used in place during unarchival)
+    private boolean  _preexisting;
+
     // The getter/setter
     //private Callable<?>  _getter;
     //private Consumer<?>  _setter;
@@ -136,6 +139,19 @@ public class Prop {
     }
 
     /**
+     * Returns whether prop value already exists in parent (should be used in place during unarchival).
+     */
+    public boolean isPreexisting()  { return _preexisting; }
+
+    /**
+     * Sets whether prop value already exists in parent (should be used in place during unarchival).
+     */
+    public void setPreexisting(boolean aValue)
+    {
+        _preexisting = aValue;
+    }
+
+    /**
      * Standard toString implementation.
      */
     public String toString()
@@ -157,8 +173,10 @@ public class Prop {
 
         // Add PropClass, Array, Relation, DefaultPropClass
         StringUtils.appendProp(sb, "PropClass", _propClass != null ? _propClass.getSimpleName() : "null");
-        StringUtils.appendProp(sb, "Array", isArray());
-        StringUtils.appendProp(sb, "Relation", isRelation()); _relation = null;
+        if (isArray())
+            StringUtils.appendProp(sb, "Array", true);
+        if (isRelation())
+            StringUtils.appendProp(sb, "Relation", true); _relation = null;
         if (_defaultPropClass != _propClass)
             StringUtils.appendProp(sb, "DefaultPropClass", _defaultPropClass.getSimpleName());
 
@@ -166,6 +184,12 @@ public class Prop {
         Object defValue = getDefaultValue();
         String defStr = defValue != null ? defValue.toString() : "null";
         StringUtils.appendProp(sb, "DefaultValue", defStr);
+
+        // Add SkipArchival, Preexisting
+        if (isSkipArchival())
+            StringUtils.appendProp(sb, "SkipArchival", true);
+        if (isPreexisting())
+            StringUtils.appendProp(sb, "Preexisting", true);
 
         // Return string
         return sb.toString();

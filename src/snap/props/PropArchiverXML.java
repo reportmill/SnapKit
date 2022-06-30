@@ -196,10 +196,10 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Reads a PropNode from XML.
      */
-    protected PropNode convertXMLToNode(PropObject aParent, Prop aProp, XMLElement anElement)
+    protected PropNode convertXMLToNode(PropNode aParent, Prop aProp, XMLElement anElement)
     {
         // Create PropObject for element
-        PropObject propObject = createPropObjectForXML(aProp, anElement);
+        PropObject propObject = createPropObjectForXML(aParent, aProp, anElement);
 
         // Create PropNode for propObject
         PropNode propNode = new PropNode(propObject, this);
@@ -246,8 +246,9 @@ public class PropArchiverXML extends PropArchiver {
 
             // Handle array
             if (prop.isArray()) {
+
                 // Read nodeValue array
-                PropNode[] nodeValue = convertXMLToNodeForXMLArray(aParent, prop, xml);
+                PropNode[] nodeValue = convertXMLToNodeForXMLArray(propNode, prop, xml);
 
                 // Get native value
                 PropObject[] nativeValue = new PropObject[nodeValue.length];
@@ -260,8 +261,9 @@ public class PropArchiverXML extends PropArchiver {
 
             // Handle simple
             else {
+
                 // Read NodeValue for xml
-                PropNode nodeValue = convertXMLToNode(aParent, prop, xml);
+                PropNode nodeValue = convertXMLToNode(propNode, prop, xml);
 
                 // Get native value
                 Object nativeValue = nodeValue.getNative();
@@ -278,7 +280,7 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Reads a PropNode from XML.
      */
-    protected PropNode[] convertXMLToNodeForXMLArray(PropObject aParent, Prop aProp, XMLElement anElement)
+    protected PropNode[] convertXMLToNodeForXMLArray(PropNode aParent, Prop aProp, XMLElement anElement)
     {
         // Get list of configured XML elements
         List<XMLElement> elements = anElement.getElements();
@@ -301,8 +303,16 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Creates a PropObject for XML element.
      */
-    protected PropObject createPropObjectForXML(Prop aProp, XMLElement anElement)
+    protected PropObject createPropObjectForXML(PropNode aParent, Prop aProp, XMLElement anElement)
     {
+        // If Prop.Preexisting, just instance from PropObject instead
+        if (aProp != null && aProp.isPreexisting() && aParent != null) {
+            PropObject propObject = aParent.getPropObject();
+            Object existingInstance = propObject.getPropValue(aProp.getName());
+            if (existingInstance instanceof PropObject)
+                return (PropObject) existingInstance;
+        }
+
         // If Class attribute set, try that
         String xmlClassName = anElement.getAttributeValue("Class");
         if (xmlClassName != null) {
