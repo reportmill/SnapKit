@@ -76,9 +76,9 @@ public class PropArchiver {
                     convertNativeToNodeForPropSimple(prop, nativeValue) :
                     convertNativeToNodeForPropRelation(propNode, prop, nativeValue);
 
-            // If nodeValue, add
+            // If nodeValue, add to PropNode
             if (nodeValue != null)
-                propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
+                propNode.addNodeValueForPropName(prop, nodeValue);
         }
     }
 

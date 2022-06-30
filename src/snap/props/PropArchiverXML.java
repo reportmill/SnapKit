@@ -222,11 +222,11 @@ public class PropArchiverXML extends PropArchiver {
                 continue;
             }
 
-            // Add to
-            Object nativeValue = convertNodeToNativeForPropSimple(propNode, prop, attrValue);
+            // Add node value to PropNode
+            propNode.addNodeValueForPropName(prop, attrValue);
 
-            // Add prop native/node values
-            propNode.addNativeAndNodeValueForPropName(prop, nativeValue, attrValue);
+            // Convert node value to native
+            Object nativeValue = convertNodeToNativeForPropSimple(propNode, prop, attrValue);
 
             // Set native value in propObject
             propObject.setPropValue(prop.getName(), nativeValue);
@@ -257,15 +257,15 @@ public class PropArchiverXML extends PropArchiver {
                     // Read nodeValue array
                     PropNode[] nodeValue = convertXMLToNodeForXMLRelationArray(propNode, prop, xml);
 
+                    // Add node value to PropNode
+                    propNode.addNodeValueForPropName(prop, nodeValue);
+
                     // Get native value
                     Class<?> nativeArrayClass = prop.getDefaultPropClass();
                     Class<?> nativeCompClass = nativeArrayClass.getComponentType();
                     Object nativeValue = Array.newInstance(nativeCompClass, nodeValue.length);
                     for (int i = 0; i < nodeValue.length; i++)
                         Array.set(nativeValue, i, nodeValue[i].getPropObject());
-
-                    // Add prop and native/node values
-                    propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
 
                     // Set native value in propObject
                     propObject.setPropValue(prop.getName(), nativeValue);
@@ -277,11 +277,11 @@ public class PropArchiverXML extends PropArchiver {
                     // Read nodeValue array
                     String nodeValue = xml.getValue();
 
+                    // Add node value to PropNode
+                    propNode.addNodeValueForPropName(prop, nodeValue);
+
                     // Get native value
                     Object nativeValue = convertNodeToNativeForPropSimple(propNode, prop, nodeValue);
-
-                    // Add prop native/node values
-                    propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
 
                     // Set native value in propObject
                     propObject.setPropValue(prop.getName(), nativeValue);
@@ -294,11 +294,11 @@ public class PropArchiverXML extends PropArchiver {
                 // Read NodeValue for xml
                 PropNode nodeValue = convertXMLToNode(propNode, prop, xml);
 
+                // Add node value to PropNode
+                propNode.addNodeValueForPropName(prop, nodeValue);
+
                 // Get native value
                 Object nativeValue = nodeValue.getNative();
-
-                // Add prop and native/node values
-                propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
 
                 // Set native value in propObject
                 if (!prop.isPreexisting())

@@ -29,9 +29,6 @@ public class PropNode {
     // A list of prop names configured for node
     private List<String>  _propNames = new ArrayList<>();
 
-    // A map of prop names to PropObject values in native form
-    private Map<String,Object>  _nativeValues = new HashMap<>();
-
     // A map of prop names to PropObject values as strings
     private Map<String,Object>  _nodeValues = new HashMap<>();
 
@@ -104,33 +101,7 @@ public class PropNode {
     public List<String> getPropNames()  { return _propNames; }
 
     /**
-     * Returns a PropObject value in native form for given prop name.
-     */
-    public Object getNativeValueForPropName(String aPropName)
-    {
-        Object propValue = _nativeValues.get(aPropName);
-        return propValue;
-    }
-
-    /**
-     * Adds a PropObject value in native form for given prop name.
-     */
-    public void addNativeAndNodeValueForPropName(Prop aProp, Object nativeValue, Object nodeValue)
-    {
-        // Add PropName to PropNames
-        _props.add(aProp);
-        String propName = aProp.getName();
-        _propNames.add(propName);
-
-        // Add value to NativeValues
-        _nativeValues.put(propName, nativeValue);
-
-        // Add to NodeValues
-        _nodeValues.put(propName, nodeValue);
-    }
-
-    /**
-     * Returns a PropObject value a String for given prop name.
+     * Returns a node value (String, PropNode, PropNode[]) for given prop name.
      */
     public Object getNodeValueForPropName(String aPropName)
     {
@@ -139,27 +110,17 @@ public class PropNode {
     }
 
     /**
-     * Adds a String or Node value for given prop name.
+     * Adds a node value (String, PropNode, PropNode[]) for given prop name.
      */
-    public void addNodeValueForPropName(String aPropName, Object aValue)
+    public void addNodeValueForPropName(Prop aProp, Object nodeValue)
     {
-        _propNames.add(aPropName);
-        _nodeValues.put(aPropName, aValue);
-    }
+        // Add PropName to PropNames
+        _props.add(aProp);
+        String propName = aProp.getName();
+        _propNames.add(propName);
 
-    /**
-     * Returns a PropObject value a String for given prop name.
-     */
-    public String getStringValueForPropName(String aPropName)
-    {
-        // Get value from StringValues (just return if found)
-        Object nodeValue = getNodeValueForPropName(aPropName);
-        if (nodeValue == null || nodeValue instanceof String)
-            return (String) nodeValue;
-
-        // Complain and return
-        System.err.println("PropNode.getStringValueForPropName: No node value is not string: " + nodeValue.getClass());
-        return null;
+        // Add to NodeValues
+        _nodeValues.put(propName, nodeValue);
     }
 
     /**
