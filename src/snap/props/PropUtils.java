@@ -37,6 +37,43 @@ public class PropUtils {
     }
 
     /**
+     * Returns whether given PropNode needs class declaration when referenced via given prop.
+     */
+    public static boolean isNodeNeedsClassDeclarationForProp(PropNode propNode, Prop prop)
+    {
+        // If no prop, return false (assume class defined by element name or reference key)
+        if (prop == null)
+            return false;
+
+        // If Prop.PropClassConstant, return false (archiver can determine class name from prop Name or PropClass)
+        if (prop.isPropClassConstant())
+            return false;
+
+        // Get Prop.DefaultPropClass (if Prop.isArray, use component class)
+        Class propClass = prop.getDefaultPropClass();
+        if (prop.isArray())
+            propClass = propClass.getComponentType();
+
+        // Get PropObject.Class
+        PropObject propObject = propNode.getPropObject();
+        Class propObjectClass = propObject.getClass();
+        if (propObject instanceof PropObjectProxy)
+            propObjectClass = ((PropObjectProxy) propObject).getReal().getClass();
+
+        // If PropObject.Class matches Prop.DefaultPropClass, return false
+        if (propObjectClass == propClass)
+            return false;
+
+        // If class name matches prop name, return false (assume class will come from prop key reference)
+        String propObjectClassName = propObjectClass.getSimpleName();
+        if (propObjectClassName.equals(prop.getName()))
+            return false;
+
+        // Return true
+        return true;
+    }
+
+    /**
      * Returns whether given object is empty PropNode or array.
      */
     public static boolean isEmptyNodeOrArray(Object anObj)

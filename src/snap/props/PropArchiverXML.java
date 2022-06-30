@@ -17,7 +17,7 @@ public class PropArchiverXML extends PropArchiver {
     public XMLElement convertPropObjectToXML(PropObject aPropObject)
     {
         // Convert native to node
-        PropNode propNode = convertNativeToNode(aPropObject);
+        PropNode propNode = convertNativeToNode(null, aPropObject);
 
         // Convert node to XML
         String propName = propNode.getClassName();
@@ -45,6 +45,13 @@ public class PropArchiverXML extends PropArchiver {
         // Create XML element for PropNode
         XMLElement xml = new XMLElement(aPropName);
 
+        // If PropNode.NeedsClassDeclaration, add Class attribute to XML
+        if (aPropNode.isNeedsClassDeclaration()) {
+            String className = aPropNode.getClassName();
+            if (!className.equals(aPropName))
+                xml.add("Class", className);
+        }
+
         // Get configured Props
         List<Prop> props = aPropNode.getProps();
 
@@ -57,9 +64,8 @@ public class PropArchiverXML extends PropArchiver {
             boolean isRelation = prop.isRelation();
 
             // Handle null
-            if (nodeValue == null) {
+            if (nodeValue == null)
                 xml.add(propName, "null");
-            }
 
             // Handle Relation prop
             else if (isRelation)
@@ -314,7 +320,7 @@ public class PropArchiverXML extends PropArchiver {
         }
 
         // Try Prop class attribute
-        Class<?> propClass = aProp != null ? aProp.getPropClass() : null;
+        Class<?> propClass = aProp != null ? aProp.getDefaultPropClass() : null;
         if (propClass != null) {
 
             // If array, swap for component class

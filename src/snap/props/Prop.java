@@ -17,6 +17,9 @@ public class Prop {
     // The property class
     private Class  _propClass;
 
+    // The default property class
+    private Class  _defaultPropClass;
+
     // Whether property is array class
     private boolean  _array;
 
@@ -67,10 +70,29 @@ public class Prop {
     protected void setPropClass(Class<?> aClass)
     {
         _propClass = aClass;
-
+        _defaultPropClass = aClass;
         _array = isArrayClass(aClass);
-        //_relation = isRelationPropClass(aClass);
     }
+
+    /**
+     * Returns the default property class (if different from prop class).
+     */
+    public Class getDefaultPropClass()  { return _defaultPropClass; }
+
+    /**
+     * Sets the default property class (if different from prop class).
+     */
+    public void setDefaultPropClass(Class<?> aClass)
+    {
+        _defaultPropClass = aClass;
+    }
+
+    /**
+     * Returns whether prop is always instance of PropClass (subclasses not allowed).
+     *
+     * This undoubtedly needs to be a real property one day (PropClassVaries?).
+     */
+    public boolean isPropClassConstant()  { return _propClass == _defaultPropClass; }
 
     /**
      * Returns whether prop is array.
@@ -133,10 +155,12 @@ public class Prop {
         String name = getName();
         StringUtils.appendProp(sb, "Name", name);
 
-        // Add PropClass, Array, Relation
+        // Add PropClass, Array, Relation, DefaultPropClass
         StringUtils.appendProp(sb, "PropClass", _propClass != null ? _propClass.getSimpleName() : "null");
         StringUtils.appendProp(sb, "Array", isArray());
         StringUtils.appendProp(sb, "Relation", isRelation()); _relation = null;
+        if (_defaultPropClass != _propClass)
+            StringUtils.appendProp(sb, "DefaultPropClass", _defaultPropClass.getSimpleName());
 
         // Add Default value
         Object defValue = getDefaultValue();

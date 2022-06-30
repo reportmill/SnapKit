@@ -29,10 +29,15 @@ public class PropArchiver {
     /**
      * Returns a PropNode for given PropObject.
      */
-    public PropNode convertNativeToNode(PropObject aPropObj)
+    public PropNode convertNativeToNode(Prop prop, PropObject aPropObj)
     {
         // Create new PropNode
         PropNode propNode = new PropNode(aPropObj, this);
+
+        // Configure PropNode.NeedsClassDeclaration
+        boolean needsClassDeclaration = PropUtils.isNodeNeedsClassDeclarationForProp(propNode, prop);
+        if (needsClassDeclaration)
+            propNode.setNeedsClassDeclaration(true);
 
         // Get props for archival and iterate
         Prop[] props = aPropObj.getPropsForArchival();
@@ -134,7 +139,7 @@ public class PropArchiver {
         // Handle PropObject
         if (nativeValue instanceof PropObject) {
             PropObject propObject = (PropObject) nativeValue;
-            PropNode propNode = convertNativeToNode(propObject);
+            PropNode propNode = convertNativeToNode(aProp, propObject);
             return propNode;
         }
 
@@ -142,12 +147,12 @@ public class PropArchiver {
         if (nativeValue instanceof List) {
             List<?> list = (List<?>) nativeValue;
             Object[] array = list.toArray();
-            return convertNativeToNodeForPropRelationArray(array);
+            return convertNativeToNodeForPropRelationArray(aProp, array);
         }
 
         // Handle array
         if (nativeValue.getClass().isArray())
-            return convertNativeToNodeForPropRelationArray(nativeValue);
+            return convertNativeToNodeForPropRelationArray(aProp, nativeValue);
 
         // Return original object (assumed to be primitive)
         return nativeValue;
@@ -156,7 +161,7 @@ public class PropArchiver {
     /**
      * Returns an array of nodes or primitives for given array.
      */
-    private Object convertNativeToNodeForPropRelationArray(Object nativeArray)
+    private Object convertNativeToNodeForPropRelationArray(Prop prop, Object nativeArray)
     {
         // Get array and create PropNode array
         Object[] array = (Object[]) nativeArray;
@@ -165,7 +170,7 @@ public class PropArchiver {
         // Iterate over native array objects and try to create/set PropNode for each
         for (int i = 0; i < array.length; i++) {
             PropObject propObject = (PropObject) array[i];
-            propNodes[i] = convertNativeToNode(propObject);
+            propNodes[i] = convertNativeToNode(prop, propObject);
         }
 
         // Return

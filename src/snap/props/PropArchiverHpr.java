@@ -106,7 +106,7 @@ public class PropArchiverHpr {
         private Color  _color = Color.BLACK;
 
         // Constants for properties
-        public static final String Color_Prop = "Name";
+        public static final String Color_Prop = "Color";
 
         /**
          * Constructor.

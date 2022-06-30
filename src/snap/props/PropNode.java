@@ -20,6 +20,9 @@ public class PropNode {
     // The ClassName, if available
     private String  _className;
 
+    // Whether this PropNode needs to declare actual class name
+    private boolean  _needsClassDeclaration;
+
     // A list of props configured for node
     private List<Prop>  _props = new ArrayList<>();
 
@@ -60,6 +63,19 @@ public class PropNode {
      * Returns the native object class name.
      */
     public String getClassName()  { return _className; }
+
+    /**
+     * Returns whether this PropNode needs to declare actual class name
+     */
+    public boolean isNeedsClassDeclaration()  { return _needsClassDeclaration; }
+
+    /**
+     * Sets whether this PropNode needs to declare actual class name
+     */
+    public void setNeedsClassDeclaration(boolean aValue)
+    {
+        _needsClassDeclaration = aValue;
+    }
 
     /**
      * Returns the PropSet.
