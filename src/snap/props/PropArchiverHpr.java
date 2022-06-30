@@ -56,17 +56,22 @@ public class PropArchiverHpr {
         private Font  _font;
 
         // Constants for properties
-        public static final String Name_Prop = "Name";
-        public static final String Size_Prop = "Size";
+        public static final String Name_Prop = Font.Name_Prop;
+        public static final String Size_Prop = Font.Size_Prop;
 
         /**
          * Constructor.
          */
         public FontProxy(Font aFont)
         {
-            super(aFont);
             _font = aFont;
         }
+
+        /**
+         * Override to return Font.
+         */
+        @Override
+        public Object getReal()  { return _font; }
 
         @Override
         protected void initProps(PropSet aPropSet)
@@ -113,9 +118,14 @@ public class PropArchiverHpr {
          */
         public ColorProxy(Color aColor)
         {
-            super(aColor);
             _color = aColor;
         }
+
+        /**
+         * Override to return Color.
+         */
+        @Override
+        public Object getReal()  { return _color; }
 
         @Override
         protected void initProps(PropSet aPropSet)
@@ -152,8 +162,8 @@ public class PropArchiverHpr {
         private NumberFormat  _format;
 
         // Constants for properties
-        public static final String Pattern_Prop = "Pattern";
-        public static final String ExpStyle_Prop = "ExpStyle";
+        public static final String Pattern_Prop = NumberFormat.Pattern_Prop;
+        public static final String ExpStyle_Prop = NumberFormat.ExpStyle_Prop;
 
         // Constants for defaults
         private static final String DEFAULT_PATTERN = "";
@@ -164,9 +174,14 @@ public class PropArchiverHpr {
          */
         public NumberFormatProxy(NumberFormat aFormat)
         {
-            super(aFormat);
             _format = aFormat;
         }
+
+        /**
+         * Override to return Format.
+         */
+        @Override
+        public Object getReal()  { return _format; }
 
         @Override
         protected void initProps(PropSet aPropSet)
@@ -190,8 +205,14 @@ public class PropArchiverHpr {
         public void setPropValue(String aPropName, Object aValue)
         {
             switch (aPropName) {
-                case Pattern_Prop: _format.setPattern(SnapUtils.stringValue(aValue)); break;
-                case ExpStyle_Prop: _format = _format.copyForProps((NumberFormat.ExpStyle) aValue); break;
+                case Pattern_Prop:
+                    String pattern = SnapUtils.stringValue(aValue);
+                    _format.setPattern(pattern);
+                    break;
+                case ExpStyle_Prop:
+                    NumberFormat.ExpStyle expStyle = (NumberFormat.ExpStyle) aValue;
+                    _format = _format.copyForProps(ExpStyle_Prop, expStyle);
+                    break;
                 default: super.setPropValue(aPropName, aValue);
             }
         }

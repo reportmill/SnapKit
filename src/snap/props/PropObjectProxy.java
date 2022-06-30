@@ -6,21 +6,10 @@ package snap.props;
 /**
  * This class is meant to stand in for archival objects that aren't PropObject.
  */
-public class PropObjectProxy extends PropObject {
-
-    // The real object
-    protected Object  _real;
-
-    /**
-     * Constructor.
-     */
-    public PropObjectProxy(Object aRealObject)
-    {
-        _real = aRealObject;
-    }
+public abstract class PropObjectProxy extends PropObject {
 
     /**
      * Returns the real object.
      */
-    public Object getReal()  { return _real; }
+    public abstract Object getReal();
 }

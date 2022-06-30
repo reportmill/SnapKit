@@ -3,6 +3,7 @@
  */
 package snap.props;
 import snap.util.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -226,6 +227,9 @@ public class PropArchiverXML extends PropArchiver {
 
             // Add prop native/node values
             propNode.addNativeAndNodeValueForPropName(prop, nativeValue, attrValue);
+
+            // Set native value in propObject
+            propObject.setPropValue(prop.getName(), nativeValue);
         }
 
         // Get list of configured XML elements
@@ -247,19 +251,44 @@ public class PropArchiverXML extends PropArchiver {
             // Handle array
             if (prop.isArray()) {
 
-                // Read nodeValue array
-                PropNode[] nodeValue = convertXMLToNodeForXMLArray(propNode, prop, xml);
+                // Handle Relation array
+                if (prop.isRelation()) {
 
-                // Get native value
-                PropObject[] nativeValue = new PropObject[nodeValue.length];
-                for (int i = 0; i < nodeValue.length; i++)
-                    nativeValue[i] = nodeValue[i].getPropObject();
+                    // Read nodeValue array
+                    PropNode[] nodeValue = convertXMLToNodeForXMLRelationArray(propNode, prop, xml);
 
-                // Add prop and native/node values
-                propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
+                    // Get native value
+                    Class<?> nativeArrayClass = prop.getDefaultPropClass();
+                    Class<?> nativeCompClass = nativeArrayClass.getComponentType();
+                    Object nativeValue = Array.newInstance(nativeCompClass, nodeValue.length);
+                    for (int i = 0; i < nodeValue.length; i++)
+                        Array.set(nativeValue, i, nodeValue[i].getPropObject());
+
+                    // Add prop and native/node values
+                    propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
+
+                    // Set native value in propObject
+                    propObject.setPropValue(prop.getName(), nativeValue);
+                }
+
+                // Handle simple array
+                else {
+
+                    // Read nodeValue array
+                    String nodeValue = xml.getValue();
+
+                    // Get native value
+                    Object nativeValue = convertNodeToNativeForPropSimple(propNode, prop, nodeValue);
+
+                    // Add prop native/node values
+                    propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
+
+                    // Set native value in propObject
+                    propObject.setPropValue(prop.getName(), nativeValue);
+                }
             }
 
-            // Handle simple
+            // Handle relation
             else {
 
                 // Read NodeValue for xml
@@ -270,6 +299,10 @@ public class PropArchiverXML extends PropArchiver {
 
                 // Add prop and native/node values
                 propNode.addNativeAndNodeValueForPropName(prop, nativeValue, nodeValue);
+
+                // Set native value in propObject
+                if (!prop.isPreexisting())
+                    propObject.setPropValue(prop.getName(), nativeValue);
             }
         }
 
@@ -280,7 +313,7 @@ public class PropArchiverXML extends PropArchiver {
     /**
      * Reads a PropNode from XML.
      */
-    protected PropNode[] convertXMLToNodeForXMLArray(PropNode aParent, Prop aProp, XMLElement anElement)
+    protected PropNode[] convertXMLToNodeForXMLRelationArray(PropNode aParent, Prop aProp, XMLElement anElement)
     {
         // Get list of configured XML elements
         List<XMLElement> elements = anElement.getElements();

@@ -57,7 +57,12 @@ public class PropNode {
     /**
      * Returns the native object.
      */
-    public Object getNative()  { return _native; }
+    public Object getNative()
+    {
+        if (_native instanceof PropObjectProxy)
+            return ((PropObjectProxy) _native).getReal();
+        return _native;
+    }
 
     /**
      * Returns the native object class name.

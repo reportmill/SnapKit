@@ -26,7 +26,11 @@ public class Font implements XMLArchiver.Archivable {
 
     // Whether font not found error has already been printed
     private static boolean  _fontNotFoundErrorPrinted = false;
-    
+
+    // Constants for properties
+    public static final String Name_Prop = "Name";
+    public static final String Size_Prop = "Size";
+
     // Some common fonts (using Arial since it seems more reliable on Windows & Mac)
     public static Font Arial10;
     public static Font Arial11;
