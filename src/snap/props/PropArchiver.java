@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
+import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 
@@ -78,7 +79,7 @@ public class PropArchiver {
 
             // If nodeValue, add to PropNode
             if (nodeValue != null)
-                propNode.addNodeValueForPropName(prop, nodeValue);
+                propNode.addNodeValueForProp(prop, nodeValue);
         }
     }
 
@@ -178,6 +179,75 @@ public class PropArchiver {
     }
 
     /**
+     * Converts a PropNode (graph) to PropObject.
+     */
+    protected PropObject convertNodeToNative(PropNode propNode)
+    {
+        // Get PropObject
+        PropObject propObject = propNode.getPropObject();
+
+        // Get PropNode props
+        List<Prop> props = propNode.getProps();
+
+        // Iterate over props and convert each to native
+        for (Prop prop : props) {
+
+            // Get node value
+            Object nodeValue = propNode.getNodeValueForPropName(prop.getName());
+
+            // Get native value
+            Object nativeValue = null;
+
+            // Handle simple
+            if (nodeValue instanceof String)
+                nativeValue = convertNodeToNativeForPropSimple(propNode, prop, (String) nodeValue);
+
+            // Handle Relation
+            else if (nodeValue instanceof PropNode) {
+
+                // Get relation node
+                PropNode relationNode = (PropNode) nodeValue;
+
+                // Convert to native (if PropObjectProxy, swap for real)
+                nativeValue = convertNodeToNative(relationNode);
+                if (nativeValue instanceof PropObjectProxy)
+                    nativeValue = ((PropObjectProxy) nativeValue).getReal();
+            }
+
+            // Handle Relation array
+            else if (nodeValue instanceof PropNode[]) {
+
+                // Get relation node array
+                PropNode[] relationNodeArray = (PropNode[]) nodeValue;
+
+                // Create native array for prop
+                Class<?> nativeArrayClass = prop.getDefaultPropClass();
+                Class<?> nativeCompClass = nativeArrayClass.getComponentType();
+                nativeValue = Array.newInstance(nativeCompClass, relationNodeArray.length);
+
+                // Fill native array
+                for (int i = 0; i < relationNodeArray.length; i++) {
+                    PropNode relationNode = relationNodeArray[i];
+                    Object relationNative = convertNodeToNative(relationNode);
+                    if (relationNative instanceof PropObjectProxy)
+                        relationNative = ((PropObjectProxy) relationNative).getReal();
+                    Array.set(nativeValue, i, relationNative);
+                }
+            }
+
+            // Complain
+            else System.err.println("PropArchiver: convertNodeToNative: Illegal node value: " + nodeValue.getClass());
+
+            // Set value in prop object
+            if (!prop.isPreexisting())
+                propObject.setPropValue(prop.getName(), nativeValue);
+        }
+
+        // Return
+        return propObject;
+    }
+
+    /**
      * Returns a native simple value (String, Number, etc.) to given PropNode for given Node string value.
      */
     protected Object convertNodeToNativeForPropSimple(PropNode propNode, Prop prop, String nodeValue)
@@ -188,6 +258,26 @@ public class PropArchiver {
 
         // Return
         return nativeValue;
+    }
+
+    /**
+     * Adds a node value to a prop node.
+     */
+    protected void addNodeValueForProp(PropNode propNode, Prop prop, Object nodeValue)
+    {
+        // Add value
+        propNode.addNodeValueForProp(prop, nodeValue);
+
+        // If Prop.PropChanger, push to propObject
+        if (prop.isPropChanger() && (nodeValue instanceof String || nodeValue == null)) {
+
+            // Convert node value to native
+            Object nativeValue = convertNodeToNativeForPropSimple(propNode, prop, (String) nodeValue);
+
+            // Set native value in PropObject
+            PropObject propObject = propNode.getPropObject();
+            propObject.setPropValue(prop.getName(), nativeValue);
+        }
     }
 
     /**

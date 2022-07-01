@@ -3,7 +3,6 @@
  */
 package snap.props;
 import snap.util.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -183,12 +182,14 @@ public class PropArchiverXML extends PropArchiver {
      */
     public PropObject readPropObjectFromXML(XMLElement anElement)
     {
-        // Configure PropNode (graph) from XML
+        // Probably not helpful
         anElement.setIgnoreCase(true);
+
+        // Read PropNode from XML
         PropNode propNode = convertXMLToNode(null, null, anElement);
 
         // Convert PropNode (graph) to PropObject
-        PropObject propObject = propNode.getPropObject();
+        PropObject propObject = convertNodeToNative(propNode);
 
         // Return
         return propObject;
@@ -212,24 +213,15 @@ public class PropArchiverXML extends PropArchiver {
         for (XMLAttribute attr : attributes) {
 
             // Get attribute name/value
-            String attrName = attr.getName();
-            String attrValue = attr.getValue();
+            String propName = attr.getName();
+            String nodeValue = attr.getValue();
 
             // Get prop
-            Prop prop = propObject.getPropForName(attrName);
-            if (prop == null) {
-                System.out.println("PropArchiverXML.convertXMLToNode: No prop found for attr name: " + attrName);
-                continue;
-            }
+            Prop prop = propObject.getPropForName(propName);
+            if (prop == null) continue; // Should never happen
 
             // Add node value to PropNode
-            propNode.addNodeValueForPropName(prop, attrValue);
-
-            // Convert node value to native
-            Object nativeValue = convertNodeToNativeForPropSimple(propNode, prop, attrValue);
-
-            // Set native value in propObject
-            propObject.setPropValue(prop.getName(), nativeValue);
+            addNodeValueForProp(propNode, prop, nodeValue);
         }
 
         // Get list of configured XML elements
@@ -243,66 +235,28 @@ public class PropArchiverXML extends PropArchiver {
 
             // Get prop
             Prop prop = propObject.getPropForName(xmlName);
-            if (prop == null) {
-                System.out.println("PropArchiverXML.convertXMLToNode: No prop found for xml name: " + xmlName);
-                continue;
-            }
+            if (prop == null) continue; // Should never happen
 
             // Handle array
             if (prop.isArray()) {
 
-                // Handle Relation array
+                // Handle Relation array: Get node value for XML and add to PropNode
                 if (prop.isRelation()) {
-
-                    // Read nodeValue array
                     PropNode[] nodeValue = convertXMLToNodeForXMLRelationArray(propNode, prop, xml);
-
-                    // Add node value to PropNode
-                    propNode.addNodeValueForPropName(prop, nodeValue);
-
-                    // Get native value
-                    Class<?> nativeArrayClass = prop.getDefaultPropClass();
-                    Class<?> nativeCompClass = nativeArrayClass.getComponentType();
-                    Object nativeValue = Array.newInstance(nativeCompClass, nodeValue.length);
-                    for (int i = 0; i < nodeValue.length; i++)
-                        Array.set(nativeValue, i, nodeValue[i].getPropObject());
-
-                    // Set native value in propObject
-                    propObject.setPropValue(prop.getName(), nativeValue);
+                    propNode.addNodeValueForProp(prop, nodeValue);
                 }
 
-                // Handle simple array
+                // Handle simple array: Read array string and add to PropNode
                 else {
-
-                    // Read nodeValue array
                     String nodeValue = xml.getValue();
-
-                    // Add node value to PropNode
-                    propNode.addNodeValueForPropName(prop, nodeValue);
-
-                    // Get native value
-                    Object nativeValue = convertNodeToNativeForPropSimple(propNode, prop, nodeValue);
-
-                    // Set native value in propObject
-                    propObject.setPropValue(prop.getName(), nativeValue);
+                    propNode.addNodeValueForProp(prop, nodeValue);
                 }
             }
 
-            // Handle relation
+            // Handle relation: Get node value for XML and add to PropNode
             else {
-
-                // Read NodeValue for xml
                 PropNode nodeValue = convertXMLToNode(propNode, prop, xml);
-
-                // Add node value to PropNode
-                propNode.addNodeValueForPropName(prop, nodeValue);
-
-                // Get native value
-                Object nativeValue = nodeValue.getNative();
-
-                // Set native value in propObject
-                if (!prop.isPreexisting())
-                    propObject.setPropValue(prop.getName(), nativeValue);
+                propNode.addNodeValueForProp(prop, nodeValue);
             }
         }
 

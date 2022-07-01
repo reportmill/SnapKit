@@ -112,7 +112,7 @@ public class PropNode {
     /**
      * Adds a node value (String, PropNode, PropNode[]) for given prop name.
      */
-    public void addNodeValueForPropName(Prop aProp, Object nodeValue)
+    public void addNodeValueForProp(Prop aProp, Object nodeValue)
     {
         // Add PropName to PropNames
         _props.add(aProp);
@@ -128,10 +128,12 @@ public class PropNode {
      */
     public Prop getPropForName(String aName)
     {
+        // Iterate over props and return if name found
         for (Prop prop : _props)
             if (prop.getName().equals(aName))
                 return prop;
 
+        // Complain since PropNode should really only know about configured props
         System.err.println("PropNode.getPropForName: Prop not found in props list: " + aName);
         PropSet propSet = getPropSet();
         return propSet.getPropForName(aName);

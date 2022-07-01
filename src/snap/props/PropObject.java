@@ -37,18 +37,20 @@ public class PropObject implements PropChange.DoChange {
      */
     public Prop getPropForName(String aPropName)
     {
+        // Look for prop in standard prop set
         PropSet propSet = getPropSet();
         Prop prop = propSet.getPropForName(aPropName);
         if (prop != null)
             return prop;
 
+        // Look for prop in extra prop set
         Prop[] propsExtra = getPropsForArchivalExtra();
         if (propsExtra != null)
         for (Prop prp : propsExtra)
             if (prp.getName().equals(aPropName))
                 return prp;
 
-        // Complain
+        // Complain since it's unexpected to ask for a non-existant prop
         System.err.println("PropObject.getPropForName: Prop not found for: " + getClass() + ": " + aPropName);
         return null;
     }
