@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
+import snap.gfx.Color;
 import snap.util.EnumUtils;
 import snap.util.SnapUtils;
 import java.text.DecimalFormat;
@@ -97,6 +98,9 @@ public class StringCodec {
         set.add(String[].class);
         set.add(double[].class);
 
+        // Color
+        set.add(Color.class);
+
         // Return
         return set;
     }
@@ -131,6 +135,10 @@ public class StringCodec {
         // Handle double[]
         if (anObj instanceof double[])
             return getStringForDoubleArray((double[]) anObj);
+
+        // Handle Color
+        if (anObj instanceof Color)
+            return ((Color) anObj).toHexString();
 
         // Handle Array
         Class<?> objClass = anObj.getClass();
@@ -188,6 +196,10 @@ public class StringCodec {
         // Handle double[]
         if (aClass == double[].class)
             return (T) getDoubleArrayForString(aString);
+
+        // Handle Color
+        if (aClass == Color.class)
+            return (T) Color.get(aString);
 
         // Complain and return null
         System.err.println("StringCodec.getObjectForString: Unsupported class: " + aClass);

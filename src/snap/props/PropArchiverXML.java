@@ -212,15 +212,16 @@ public class PropArchiverXML extends PropArchiver {
         // Iterate over XML attributes and add node/native value for each
         for (XMLAttribute attr : attributes) {
 
-            // Get attribute name/value
+            // Get attribute name (skip special Class attr)
             String propName = attr.getName();
-            String nodeValue = attr.getValue();
+            if (propName.equals("Class")) continue;
 
             // Get prop
             Prop prop = propObject.getPropForName(propName);
             if (prop == null) continue; // Should never happen
 
             // Add node value to PropNode
+            String nodeValue = attr.getValue();
             addNodeValueForProp(propNode, prop, nodeValue);
         }
 

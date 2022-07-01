@@ -177,6 +177,7 @@ public class XMLElement implements Cloneable {
      */
     public List<XMLAttribute> getAttributes()
     {
+        if (_attributes == null) return Collections.EMPTY_LIST;
         return _attributes;
     }
 
