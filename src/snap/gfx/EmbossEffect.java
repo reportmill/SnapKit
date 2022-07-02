@@ -3,6 +3,7 @@
  */
 package snap.gfx;
 import snap.geom.Rect;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -11,18 +12,33 @@ import snap.util.*;
 public class EmbossEffect extends Effect {
 
     // Light source position
-    private double  _altitude = 60;
+    private double  _altitude;
     
     // Light source position
-    private double  _azimuth = 120;
+    private double  _azimuth;
     
     // Radius to use when bluring the bump map mask
-    private double  _radius = 10;
+    private double  _radius;
+
+    // Constants for properties
+    public static final String Altitude_Prop = "Altitude";
+    public static final String Azimuth_Prop = "Azimuth";
+    public static final String Radius_Prop = "Radius";
+
+    // Constants for defaults
+    public static final double DEFAULT_ALTITUDE = 60;
+    public static final double DEFAULT_AZIMUTH = 120;
+    public static final double DEFAULT_RADIUS = 10;
 
     /**
      * Creates an emboss effect.
      */
-    public EmbossEffect()  { }
+    public EmbossEffect()
+    {
+        _altitude = DEFAULT_ALTITUDE;
+        _azimuth = DEFAULT_AZIMUTH;
+        _radius = DEFAULT_RADIUS;
+    }
 
     /**
      * Creates an emboss effect for given altitude, azimuth and radius.
@@ -107,6 +123,57 @@ public class EmbossEffect extends Effect {
         if (other._altitude != _altitude) return false;
         if (other._azimuth != _azimuth) return false;
         return true;
+    }
+
+    /**
+     * Override to configure props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Altitude, Azimuth, Radius
+        aPropSet.addPropNamed(Altitude_Prop, double.class, DEFAULT_ALTITUDE);
+        aPropSet.addPropNamed(Azimuth_Prop, double.class, DEFAULT_AZIMUTH);
+        aPropSet.addPropNamed(Radius_Prop, double.class, DEFAULT_RADIUS);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Altitude, Azimuth, Radius
+            case Altitude_Prop: return getAltitude();
+            case Azimuth_Prop: return getAzimuth();
+            case Radius_Prop: return getRadius();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Altitude, Azimuth, Radius
+            case Altitude_Prop: _altitude = SnapUtils.doubleValue(aValue); break;
+            case Azimuth_Prop: _azimuth = SnapUtils.doubleValue(aValue); break;
+            case Radius_Prop: _radius = SnapUtils.doubleValue(aValue); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**

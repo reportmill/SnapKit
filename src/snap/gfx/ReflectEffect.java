@@ -3,6 +3,7 @@
  */
 package snap.gfx;
 import snap.geom.Rect;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -11,25 +12,42 @@ import snap.util.*;
 public class ReflectEffect extends Effect {
 
     // The height of the reflected image as fraction of shape height (defaults to 1)
-    private double  _refHeight = 1;
+    private double  _refHeight;
 
     // The height of the faded region as a fraction of reflection height (defaults to .5)
-    private double  _fadeHeight = .5f;
+    private double  _fadeHeight;
     
     // The height of the gap between the shape and the reflection in points (defaults to 0)
-    private double  _gap = 0;
+    private double  _gap;
+
+    // Constants for properties
+    public static final String ReflectHeight_Prop = "ReflectHeight";
+    public static final String FadeHeight_Prop = "FadeHeight";
+    public static final String Gap_Prop = "Gap";
+
+    // Constants for defaults
+    public static final double DEFAULT_REFLECT_HEIGHT = 1d;
+    public static final double DEFAULT_FADE_HEIGHT = .5d;
+    public static final double DEFAULT_GAP = 0d;
 
     /**
      * Creates a new ReflectEffect.
      */
-    public ReflectEffect()  { }
+    public ReflectEffect()
+    {
+        _refHeight = DEFAULT_REFLECT_HEIGHT;
+        _fadeHeight = DEFAULT_FADE_HEIGHT;
+        _gap = DEFAULT_GAP;
+    }
 
     /**
      * Creates a new ReflectEffect for given reflect height, fade height and gap.
      */
     public ReflectEffect(double aRefHt, double aFadeHt, double aGap)
     {
-        _refHeight = aRefHt; _fadeHeight = aFadeHt; _gap = aGap;
+        _refHeight = aRefHt;
+        _fadeHeight = aFadeHt;
+        _gap = aGap;
     }
 
     /**
@@ -157,6 +175,57 @@ public class ReflectEffect extends Effect {
         if (other._fadeHeight!=_fadeHeight) return false;
         if (other._gap!=_gap) return false;
         return true;
+    }
+
+    /**
+     * Override to configure props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // ReflectHeight, FadeHeight, Gap
+        aPropSet.addPropNamed(ReflectHeight_Prop, double.class, DEFAULT_REFLECT_HEIGHT);
+        aPropSet.addPropNamed(FadeHeight_Prop, double.class, DEFAULT_FADE_HEIGHT);
+        aPropSet.addPropNamed(Gap_Prop, double.class, DEFAULT_GAP);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // ReflectHeight, FadeHeight, Gap
+            case ReflectHeight_Prop: return getReflectHeight();
+            case FadeHeight_Prop: return getFadeHeight();
+            case Gap_Prop: return getGap();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // ReflectHeight, FadeHeight, Gap
+            case ReflectHeight_Prop: setReflectHeight(SnapUtils.doubleValue(aValue)); break;
+            case FadeHeight_Prop: setFadeHeight(SnapUtils.doubleValue(aValue)); break;
+            case Gap_Prop: setGap(SnapUtils.doubleValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**

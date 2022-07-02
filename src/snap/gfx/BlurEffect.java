@@ -3,6 +3,7 @@
  */
 package snap.gfx;
 import snap.geom.Rect;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -11,12 +12,21 @@ import snap.util.*;
 public class BlurEffect extends Effect {
 
     // The radius
-    private double  _radius = 5;
+    private double  _radius;
+
+    // Constants for properties
+    public static final String Radius_Prop = "Radius";
+
+    // Constants for defaults
+    public static final double DEFAULT_RADIUS = 5;
 
     /**
      * Creates a new BlurEffect.
      */
-    public BlurEffect()  { }
+    public BlurEffect()
+    {
+        _radius = DEFAULT_RADIUS;
+    }
 
     /**
      * Creates a new BlurEffect for given radius.
@@ -76,9 +86,55 @@ public class BlurEffect extends Effect {
     public boolean equals(Object anObj)
     {
         if (anObj==this) return true;
-        BlurEffect other = anObj instanceof BlurEffect ? (BlurEffect)anObj : null; if(other==null) return false;
+        BlurEffect other = anObj instanceof BlurEffect ? (BlurEffect) anObj : null;
+        if(other == null) return false;
         if (other._radius != _radius) return false;
         return true;
+    }
+
+    /**
+     * Override to configure props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Radius
+        aPropSet.addPropNamed(Radius_Prop, double.class, DEFAULT_RADIUS);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Radius
+            case Radius_Prop: return getRadius();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Radius
+            case Radius_Prop: _radius = SnapUtils.doubleValue(aValue); break;
+
+                // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**

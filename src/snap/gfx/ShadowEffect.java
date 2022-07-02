@@ -3,6 +3,7 @@
  */
 package snap.gfx;
 import snap.geom.Rect;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -11,21 +12,35 @@ import snap.util.*;
 public class ShadowEffect extends Effect {
 
     // The shadow radius
-    private double  _radius = 10;
+    private double  _radius;
     
     // The shadow offset
     private double  _dx, _dy;
     
     // Fill color
-    private Color  _color = Color.BLACK;
+    private Color  _color;
     
     // Whether effect is simple
     private boolean  _simple;
 
+    // Constants for properties
+    public static final String Radius_Prop = "Radius";
+    public static final String DX_Prop = "DX";
+    public static final String DY_Prop = "DY";
+    public static final String Color_Prop = "Color";
+
+    // Constants for defaults
+    public static final double DEFAULT_RADIUS = 10d;
+    public static final Color DEFAULT_COLOR = Color.BLACK;
+
     /**
      * Creates a new ShadowEffect.
      */
-    public ShadowEffect()  { }
+    public ShadowEffect()
+    {
+        _radius = DEFAULT_RADIUS;
+        _color = DEFAULT_COLOR;
+    }
 
     /**
      * Creates a new ShadowEffect for given radius, color and offset.
@@ -165,11 +180,57 @@ public class ShadowEffect extends Effect {
     }
 
     /**
-     * Standard toString implementation.
+     * Override to configure props for this class.
      */
-    public String toString()
+    @Override
+    protected void initProps(PropSet aPropSet)
     {
-        return StringUtils.toString(this, "Color", "Radius", "DX", "DY").toString();
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Radius, DX, DY, Color
+        aPropSet.addPropNamed(Radius_Prop, double.class, DEFAULT_RADIUS);
+        aPropSet.addPropNamed(DX_Prop, double.class, 0d);
+        aPropSet.addPropNamed(DY_Prop, double.class, 0d);
+        aPropSet.addPropNamed(Color_Prop, double.class, DEFAULT_COLOR);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Radius, DX, DY, Color
+            case Radius_Prop: return getRadius();
+            case DX_Prop: return getDX();
+            case DY_Prop: return getDY();
+            case Color_Prop: return getColor();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Radius, DX, DY, Color
+            case Radius_Prop: _radius = SnapUtils.doubleValue(aValue); break;
+            case DX_Prop: _dx = SnapUtils.doubleValue(aValue); break;
+            case DY_Prop: _dy = SnapUtils.doubleValue(aValue); break;
+            case Color_Prop: _color = (Color) aValue;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**
