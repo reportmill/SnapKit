@@ -152,14 +152,14 @@ public class TextStyle implements Cloneable {
      */
     public boolean equals(Object anObj)
     {
-        if (anObj==this) return true;
-        TextStyle other = anObj instanceof TextStyle ? (TextStyle)anObj : null; if (other==null) return false;
+        if (anObj == this) return true;
+        TextStyle other = anObj instanceof TextStyle ? (TextStyle) anObj : null; if (other == null) return false;
         if (!SnapUtils.equals(other.getFont(), getFont())) return false;
         if (!SnapUtils.equals(other.getColor(), getColor())) return false;
         if (!SnapUtils.equals(other.getFormat(), getFormat())) return false;
-        if (other._underline!=_underline) return false;
-        if (other._scripting!=_scripting) return false;
-        if (other._charSpacing!=_charSpacing) return false;
+        if (other._underline != _underline) return false;
+        if (other._scripting != _scripting) return false;
+        if (other._charSpacing != _charSpacing) return false;
         if (!SnapUtils.equals(other.getBorder(), getBorder())) return false;
         if (!SnapUtils.equals(other.getLink(), getLink())) return false;
         return true;
@@ -168,14 +168,18 @@ public class TextStyle implements Cloneable {
     /**
      * Standard hashCode implementation.
      */
-    public int hashCode()  { return getFont()!=null ? getFont().hashCode() : 0; }
+    public int hashCode()
+    {
+        return getFont() != null ? getFont().hashCode() : 0;
+    }
 
     /**
      * Standard clone implementation.
      */
     public TextStyle clone()
     {
-        TextStyle clone = null; try { clone = (TextStyle)super.clone(); }
+        TextStyle clone = null;
+        try { clone = (TextStyle) super.clone(); }
         catch(CloneNotSupportedException e) { }
         return clone;
     }
@@ -186,7 +190,7 @@ public class TextStyle implements Cloneable {
     public TextStyle copyFor(Object anObj)
     {
         String key = getStyleKey(anObj);
-        return key!=null ? copyFor(key,anObj) : this;
+        return key != null ? copyFor(key,anObj) : this;
     }
 
     /**
@@ -194,11 +198,12 @@ public class TextStyle implements Cloneable {
      */
     public TextStyle copyFor(Object ... theObjs)
     {
-        if (theObjs==null || theObjs.length==0) return this;
+        if (theObjs == null || theObjs.length == 0) return this;
         TextStyle clone = clone();
         for (Object obj : theObjs) {
             String key = getStyleKey(obj);
-            if (key!=null) clone.setValue(key, obj);
+            if (key != null)
+                clone.setValue(key, obj);
         }
         return clone;
     }
@@ -208,7 +213,9 @@ public class TextStyle implements Cloneable {
      */
     public TextStyle copyFor(String aKey, Object aValue)
     {
-        TextStyle clone = clone(); clone.setValue(aKey, aValue); return clone;
+        TextStyle clone = clone();
+        clone.setValue(aKey, aValue);
+        return clone;
     }
 
     /**

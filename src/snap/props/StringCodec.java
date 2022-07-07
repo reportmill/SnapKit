@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
+import snap.geom.Insets;
 import snap.gfx.Color;
 import snap.util.EnumUtils;
 import snap.util.SnapUtils;
@@ -98,8 +99,9 @@ public class StringCodec {
         set.add(String[].class);
         set.add(double[].class);
 
-        // Color
+        // Color, Insets
         set.add(Color.class);
+        set.add(Insets.class);
 
         // Return
         return set;
@@ -139,6 +141,10 @@ public class StringCodec {
         // Handle Color
         if (anObj instanceof Color)
             return ((Color) anObj).toHexString();
+
+        // Handle Insets
+        if (anObj instanceof Insets)
+            return ((Insets) anObj).getString();
 
         // Handle Array
         Class<?> objClass = anObj.getClass();
@@ -200,6 +206,10 @@ public class StringCodec {
         // Handle Color
         if (aClass == Color.class)
             return (T) Color.get(aString);
+
+        // Handle Insets
+        if (aClass == Insets.class)
+            return (T) Insets.get(aString);
 
         // Complain and return null
         System.err.println("StringCodec.getObjectForString: Unsupported class: " + aClass);
