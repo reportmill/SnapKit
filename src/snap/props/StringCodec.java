@@ -6,6 +6,8 @@ import snap.geom.Insets;
 import snap.gfx.Color;
 import snap.util.EnumUtils;
 import snap.util.SnapUtils;
+
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -156,7 +158,7 @@ public class StringCodec {
                 String[] strings = new String[array.length];
                 for (int i = 0; i < array.length; i++)
                     strings[i] = codeString(array[i]);
-                return '[' + Arrays.toString(strings) + ']';
+                return Arrays.toString(strings);
             }
         }
 
@@ -210,6 +212,17 @@ public class StringCodec {
         // Handle Insets
         if (aClass == Insets.class)
             return (T) Insets.get(aString);
+
+        // Handle Array
+        if (aClass.isArray()) {
+            Class compClass = aClass.getComponentType();
+            String string = aString.substring(1, aString.length() - 1);
+            String[] strings = string.split("\\s*,\\s*");
+            Object[] array = (Object[]) Array.newInstance(compClass, strings.length);
+            for (int i = 0; i < array.length; i++)
+                array[i] = decodeString(strings[i], compClass);
+            return (T) array;
+        }
 
         // Complain and return null
         System.err.println("StringCodec.getObjectForString: Unsupported class: " + aClass);
