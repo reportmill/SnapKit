@@ -430,6 +430,14 @@ public abstract class Image implements Loadable {
     }
 
     /**
+     * Creates image from bytes.
+     */
+    public static Image getImageForBytes(byte[] theBytes)
+    {
+        return GFXEnv.getEnv().getImage(theBytes);
+    }
+
+    /**
      * Creates image from class and resource path.
      */
     public static Image get(Class aClass, String aPath)

@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
+import snap.util.ArrayUtils;
 import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,9 @@ public class PropArchiver {
 
     // A map of names to Class names, for unarchival
     private Map<String,Class<?>>  _classMap;
+
+    // Resources
+    private Resource[]  _resources = new Resource[0];
 
     /**
      * Constructor.
@@ -305,5 +309,84 @@ public class PropArchiver {
     {
         Map<String,Class<?>> classMap = getClassMap();
         return classMap.get(aName);
+    }
+
+    /**
+     * Returns the list of optional resources associated with this archiver.
+     */
+    public Resource[] getResources()  { return _resources; }
+
+    /**
+     * Returns an individual resource associated with this archiver, by index.
+     */
+    public Resource getResource(int anIndex)  { return _resources[anIndex]; }
+
+    /**
+     * Returns an individual resource associated with this archiver, by name.
+     */
+    public Resource getResourceForName(String aName)
+    {
+        for (Resource resource : _resources)
+            if (resource.getName().equals(aName))
+                return resource;
+        return null;
+    }
+
+    /**
+     * Adds a byte array resource to this archiver (only if absent).
+     */
+    public String addResource(String aName, byte[] theBytes)
+    {
+        // If resource has already been added, just return its name
+        for (Resource resource : _resources)
+            if (resource.equalsBytes(theBytes))
+                return resource.getName();
+
+        // Add new resource
+        _resources = ArrayUtils.add(_resources, new Resource(aName, theBytes));
+
+        // Return name
+        return aName;
+    }
+
+    /**
+     * This inner class represents a named resource associated with an archiver.
+     */
+    public static class Resource {
+
+        // The resource name
+        private String  _name;
+
+        // The resource bytes
+        private byte[]  _bytes;
+
+        // Creates new resource for given bytes and name
+        public Resource(String aName, byte[] theBytes)
+        {
+            _name = aName;
+            _bytes = theBytes;
+        }
+
+        // Returns resource name
+        public String getName()
+        {
+            return _name;
+        }
+
+        // Returns resource bytes
+        public byte[] getBytes()
+        {
+            return _bytes;
+        }
+
+        // Standard equals implementation
+        public boolean equalsBytes(byte[] bytes)
+        {
+            if (bytes.length != _bytes.length) return false;
+            for (int i = 0, iMax = bytes.length; i < iMax; i++)
+                if (bytes[i] != _bytes[i])
+                    return false;
+            return true;
+        }
     }
 }

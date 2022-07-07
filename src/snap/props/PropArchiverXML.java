@@ -23,6 +23,14 @@ public class PropArchiverXML extends PropArchiver {
         String propName = propNode.getClassName();
         XMLElement xml = convertNodeToXML(propName, propNode);
 
+        // Archive resources
+        for (Resource resource : getResources()) {
+            XMLElement resourceXML = new XMLElement("Resource");
+            resourceXML.add("Name", resource.getName());
+            resourceXML.setValueBytes(resource.getBytes());
+            xml.add(resourceXML);
+        }
+
         // Return
         return xml;
     }
@@ -184,6 +192,9 @@ public class PropArchiverXML extends PropArchiver {
     {
         // Probably not helpful
         anElement.setIgnoreCase(true);
+
+        // Read resources
+        readResources(anElement);
 
         // Read PropNode from XML
         PropNode propNode = convertXMLToNode(null, null, anElement);
@@ -351,6 +362,11 @@ public class PropArchiverXML extends PropArchiver {
      */
     private PropObject createPropObjectForClass(Class<?> aClass)
     {
+        // See if we have proxy
+        PropObject proxyObject = _helper.getProxyForClass(aClass);
+        if (proxyObject != null)
+            return proxyObject;
+
         Object propObject;
         try { propObject = aClass.newInstance(); }
         catch (Exception e) {
@@ -358,11 +374,32 @@ public class PropArchiverXML extends PropArchiver {
         }
 
         // See if we need proxy
-        PropObject propObject1 = _helper.getProxyForObject(propObject);
-        if (propObject1 != null)
-            propObject = propObject1;
+        PropObject proxyObject1 = _helper.getProxyForObject(propObject);
+        if (proxyObject1 != null)
+            propObject = proxyObject1;
 
         // Return
         return (PropObject) propObject;
+    }
+
+    /**
+     * Reads resources from <Resource> elements in given xml (top-level) element, converts from ASCII encoding and
+     * adds to archiver.
+     */
+    protected void readResources(XMLElement anElement)
+    {
+        // Get resources from top level <resource> tags
+        for (int i = anElement.indexOf("Resource"); i >= 0; i = anElement.indexOf("Resource", i)) {
+
+            // Get/remove current resource element
+            XMLElement e = anElement.removeElement(i);
+
+            // Get resource name and bytes
+            String name = e.getAttributeValue("name");
+            byte[] bytes = e.getValueBytes();
+
+            // Add resource bytes for name
+            addResource(name, bytes);
+        }
     }
 }
