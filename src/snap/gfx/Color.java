@@ -275,12 +275,15 @@ public class Color implements Paint, XMLArchiver.Archivable {
         Color other = anObj instanceof Color ? (Color)anObj : null; if (other==null) return false;
 
         // Check components
-        if (!MathUtils.equals(other._red, _red)) return false;
-        if (!MathUtils.equals(other._green, _green)) return false;
-        if (!MathUtils.equals(other._blue, _blue)) return false;
-        if (!MathUtils.equals(other._alpha, _alpha)) return false;
+        if (!MathUtils.equals(other._red, _red, TOLERANCE)) return false;
+        if (!MathUtils.equals(other._green, _green, TOLERANCE)) return false;
+        if (!MathUtils.equals(other._blue, _blue, TOLERANCE)) return false;
+        if (!MathUtils.equals(other._alpha, _alpha, TOLERANCE)) return false;
         return true; // Return true since all checks passed
     }
+
+    // Tolerance to compare values
+    private static final double TOLERANCE = .001d;
 
     /**
      * Standard Hashcode implementation.
