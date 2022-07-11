@@ -52,6 +52,10 @@ public class StringCodec {
         // Enums are inherently codeable
         if (aClass.isEnum()) return true;
 
+        // Codeable
+        if (Codeable.class.isAssignableFrom(aClass))
+            return true;
+
         // If array, check to see if component type is supported
         if (aClass.isArray()) {
             Class<?> compClass = aClass.getComponentType();
@@ -140,6 +144,10 @@ public class StringCodec {
         if (anObj instanceof double[])
             return getStringForDoubleArray((double[]) anObj);
 
+        // Handle Codeable
+        if (anObj instanceof Codeable)
+            return ((Codeable) anObj).codeString();
+
         // Handle Color
         if (anObj instanceof Color)
             return ((Color) anObj).toHexString();
@@ -204,6 +212,15 @@ public class StringCodec {
         // Handle double[]
         if (aClass == double[].class)
             return (T) getDoubleArrayForString(aString);
+
+        // Handle Codeable
+        if (Codeable.class.isAssignableFrom(aClass)) {
+            Codeable codeable;
+            try { codeable = (Codeable) aClass.newInstance(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+            codeable = codeable.decodeString(aString);
+            return (T) codeable;
+        }
 
         // Handle Color
         if (aClass == Color.class)
@@ -328,5 +345,21 @@ public class StringCodec {
         if (objClass.getComponentType().isPrimitive()) return false;
         Object[] array = (Object[]) anObj;
         return array.length == 0;
+    }
+
+    /**
+     * An interface for classes that know how to code/decode themselves.
+     */
+    public interface Codeable {
+
+        /**
+         * Returns a String representation of this object.
+         */
+        String codeString();
+
+        /**
+         * Configures this object from a String representation.
+         */
+        Codeable decodeString(String aString);
     }
 }
