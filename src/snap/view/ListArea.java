@@ -688,9 +688,12 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Called to configure a cell text.
      */
-    protected void configureCellText(ListCell <T> aCell)
+    protected void configureCellText(ListCell<T> aCell)
     {
+        // Get cell item
         T item = aCell.getItem();
+
+        // Get String for cell item
         String text = null;
         if (_itemTextFunc != null)
             text = item != null ? _itemTextFunc.apply(item) : null;
@@ -702,6 +705,8 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
             text = item.toString();
         else if (getCellConfigure() == null && item != null)
             text = item.toString();
+
+        // Set cell text
         aCell.setText(text);
     }
 
@@ -710,18 +715,25 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     protected void configureCellFills(ListCell <T> aCell)
     {
+        // Handle Cell.Selected
         if (aCell.isSelected()) {
             aCell.setFill(SEL_FILL);
             aCell.setTextFill(SEL_TEXT_FILL);
         }
+
+        // Handle ListArea.Targeting given cell
         else if (isTargeting() && aCell.getRow() == getTargetedIndex())  {
             aCell.setFill(TARG_FILL);
             aCell.setTextFill(TARG_TEXT_FILL);
         }
+
+        // Handle alternate rows
         else if (aCell.getRow() % 2 == 0) {
             aCell.setFill(_altPaint);
             aCell.setTextFill(Color.BLACK);
         }
+
+        // Handle normal case
         else {
             aCell.setFill(null);
             aCell.setTextFill(Color.BLACK);

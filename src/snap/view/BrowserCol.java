@@ -31,8 +31,12 @@ public class BrowserCol <T> extends ListView <T> {
         scroll.setShowVBar(true);
         scroll.setBarSize(12);
 
+        // Configure ListArea to use Browser.configureBrowserCell
+        ListArea<T> listArea = getListArea();
+        listArea.setCellConfigure(lc -> _browser.configureBrowserCell(this, lc));
+
         // Add listener for ListArea.MouseRelease to update Browser.SelCol
-        getListArea().addEventFilter(e -> listAreaMouseReleased(e), MouseRelease);
+        listArea.addEventFilter(e -> listAreaMouseReleased(e), MouseRelease);
     }
 
     /**
@@ -44,14 +48,6 @@ public class BrowserCol <T> extends ListView <T> {
      * Returns the column index.
      */
     public int getIndex()  { return _index; }
-
-    /**
-     * Override to forward to browser.
-     */
-    protected void configureCell(ListCell <T> aCell)
-    {
-        _browser.configureBrowserCell(this, aCell);
-    }
 
     /**
      * Called before ListArea.MousePress.

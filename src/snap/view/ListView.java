@@ -19,7 +19,7 @@ import snap.util.*;
 public class ListView <T> extends ParentView implements Selectable<T> {
     
     // The ListArea (real ListView functionality without scroll)
-    private ListArea <T>  _listArea;
+    private ListArea<T>  _listArea;
     
     // The ScrollView
     private ScrollView  _scroll;
@@ -43,7 +43,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         _listArea = createListArea();
         _listArea.addEventHandler(e -> listAreaDidFireActionEvent(e), Action);
         _listArea.addPropChangeListener(pce -> listAreaPropChange(pce));
-        _listArea.setCellConfigure(lc -> configureCell(lc));
 
         // Fix so that ListView handles focus instead of ListArea
         setFocusable(true);

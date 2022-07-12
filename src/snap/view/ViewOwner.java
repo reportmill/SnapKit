@@ -103,7 +103,7 @@ public class ViewOwner implements EventListener {
     public synchronized View getUI()
     {
         // If UI not present, create, init and set
-        if (_ui!=null) return _ui;
+        if (_ui != null) return _ui;
 
         // Create UI
         _ui = createUI();
@@ -125,7 +125,7 @@ public class ViewOwner implements EventListener {
      */
     public <T extends View> T getUI(Class <T> aClass)
     {
-        return (T)getUI();
+        return (T) getUI();
     }
 
     /**
@@ -134,7 +134,7 @@ public class ViewOwner implements EventListener {
     protected View createUI()
     {
         Object src = getUISource();
-        if (src==null) {
+        if (src == null) {
             System.err.println("ViewOwner.createUI: Couldn't find source for class: " + getClass().getName());
             throw new RuntimeException("ViewOwner.createUI: Couldn't find source for class: " + getClass().getName());
         }
@@ -156,7 +156,7 @@ public class ViewOwner implements EventListener {
     protected View createUI(Object aSource)
     {
         // Complain if bogus source
-        if (aSource==null) {
+        if (aSource == null) {
             System.err.println("ViewOwner.createUI: Can't load from Null Source!");
             return null;
         }
@@ -172,7 +172,8 @@ public class ViewOwner implements EventListener {
      */
     protected Object getUISource()
     {
-        return _env.getUISource(getClass());
+        Class cls = getClass();
+        return _env.getUISource(cls);
     }
 
     /**
@@ -202,7 +203,7 @@ public class ViewOwner implements EventListener {
 
             // Handle First focus
             Object firstFoc = getFirstFocus();
-            View view = firstFoc!=null ? getView(firstFoc) : null;
+            View view = firstFoc != null ? getView(firstFoc) : null;
             if (view != null) {
                 view.requestFocus();
                 if (view instanceof TextField)
@@ -224,7 +225,8 @@ public class ViewOwner implements EventListener {
      */
     public Object getNative()
     {
-        return getWindow().getContentNative();
+        WindowView win = getWindow();
+        return win.getContentNative();
     }
 
     /**
@@ -243,8 +245,8 @@ public class ViewOwner implements EventListener {
             View view = getUI();
             if (name.equals(view.getName()))
                 return view;
-            View cview = view instanceof ParentView? ((ParentView)view).getChild(name) : null;
-            if (cview!=null)
+            View cview = view instanceof ParentView ? ((ParentView) view).getChild(name) : null;
+            if (cview != null)
                 return cview;
         }
 
@@ -267,7 +269,7 @@ public class ViewOwner implements EventListener {
     public Object getViewValue(Object anObj)
     {
         View view = getView(anObj);
-        if (view==null) {
+        if (view == null) {
             System.out.println("ViewOwner.getViewValue: Couldn't find view for: " + anObj);
             return null;
         }
@@ -281,7 +283,7 @@ public class ViewOwner implements EventListener {
     {
         boolean old = setSendEventDisabled(true);
         View view = getView(anObj);
-        if (view!=null)
+        if (view != null)
             view.setPropValue("Value", aValue);
         else System.err.println("ViewOwner.setViewValue: Couldn't find view for: " + anObj);
         setSendEventDisabled(old);
@@ -290,52 +292,92 @@ public class ViewOwner implements EventListener {
     /**
      * Returns the string value for a given name or UI view.
      */
-    public String getViewStringValue(Object anObj)  { return SnapUtils.stringValue(getViewValue(anObj)); }
+    public String getViewStringValue(Object anObj)
+    {
+        Object value = getViewValue(anObj);
+        return SnapUtils.stringValue(value);
+    }
 
     /**
      * Returns the boolean value for a given name or UI view.
      */
-    public boolean getViewBoolValue(Object anObj)  { return SnapUtils.boolValue(getViewValue(anObj)); }
+    public boolean getViewBoolValue(Object anObj)
+    {
+        Object value = getViewValue(anObj);
+        return SnapUtils.boolValue(value);
+    }
 
     /**
      * Returns the int value for a given name or UI view.
      */
-    public int getViewIntValue(Object anObj)  { return SnapUtils.intValue(getViewValue(anObj)); }
+    public int getViewIntValue(Object anObj)
+    {
+        Object value = getViewValue(anObj);
+        return SnapUtils.intValue(value);
+    }
 
     /**
      * Returns the float value for a given name or UI view.
      */
-    public float getViewFloatValue(Object anObj)  { return SnapUtils.floatValue(getViewValue(anObj)); }
+    public float getViewFloatValue(Object anObj)
+    {
+        Object value = getViewValue(anObj);
+        return SnapUtils.floatValue(value);
+    }
 
     /**
      * Returns the text value for a given name or UI view.
      */
-    public String getViewText(Object anObj)  { return getView(anObj).getText(); }
+    public String getViewText(Object anObj)
+    {
+        View view = getView(anObj);
+        return view.getText();
+    }
 
     /**
      * Sets the object value for a given name or UI view.
      */
-    public void setViewText(Object anObj, String aValue)  { getView(anObj).setText(aValue); }
+    public void setViewText(Object anObj, String aValue)
+    {
+        View view = getView(anObj);
+        view.setText(aValue);
+    }
 
     /**
      * Returns the items for a given name or UI view.
      */
-    public List getViewItems(Object anObj)  { return getView(anObj, Selectable.class).getItems(); }
+    public List getViewItems(Object anObj)
+    {
+        Selectable selectable = getView(anObj, Selectable.class);
+        return selectable.getItems();
+    }
 
     /**
      * Sets the items for a given name or UI view.
      */
-    public void setViewItems(Object anObj, List theItems)  { getView(anObj, Selectable.class).setItems(theItems); }
+    public void setViewItems(Object anObj, List theItems)
+    {
+        Selectable selectable = getView(anObj, Selectable.class);
+        selectable.setItems(theItems);
+    }
 
     /**
      * Sets the items for a given name or UI view.
      */
-    public void setViewItems(Object anObj, Object theItems[])  { getView(anObj, Selectable.class).setItems(theItems); }
+    public void setViewItems(Object anObj, Object theItems[])
+    {
+        Selectable selectable = getView(anObj, Selectable.class);
+        selectable.setItems(theItems);
+    }
 
     /**
      * Returns the selected index for given name or UI view.
      */
-    public int getViewSelIndex(Object anObj)  { return getView(anObj, Selectable.class).getSelIndex(); }
+    public int getViewSelIndex(Object anObj)
+    {
+        Selectable selectable = getView(anObj, Selectable.class);
+        return selectable.getSelIndex();
+    }
 
     /**
      * Sets the selected index for given name or UI view.
@@ -343,7 +385,8 @@ public class ViewOwner implements EventListener {
     public void setViewSelIndex(Object anObj, int aValue)
     {
         boolean old = setSendEventDisabled(true);
-        getView(anObj, Selectable.class).setSelIndex(aValue);
+        Selectable selectable = getView(anObj, Selectable.class);
+        selectable.setSelIndex(aValue);
         setSendEventDisabled(old);
     }
 
@@ -358,14 +401,19 @@ public class ViewOwner implements EventListener {
     public void setViewSelItem(Object anObj, Object anItem)
     {
         boolean old = setSendEventDisabled(true);
-        getView(anObj, Selectable.class).setSelItem(anItem);
+        Selectable selectable = getView(anObj, Selectable.class);
+        selectable.setSelItem(anItem);
         setSendEventDisabled(old);
     }
 
     /**
      * Returns whether given name or UI view is enabled.
      */
-    public boolean isViewEnabled(Object anObj)  { return getView(anObj).isEnabled(); }
+    public boolean isViewEnabled(Object anObj)
+    {
+        View view = getView(anObj);
+        return view.isEnabled();
+    }
 
     /**
      * Sets whether given name or UI view is enabled.
@@ -379,7 +427,11 @@ public class ViewOwner implements EventListener {
     /**
      * Returns whether given name or UI view is disabled.
      */
-    public boolean isViewDisabled(Object anObj)  { return getView(anObj).isDisabled(); }
+    public boolean isViewDisabled(Object anObj)
+    {
+        View view = getView(anObj);
+        return view.isDisabled();
+    }
 
     /**
      * Sets whether given name or UI view is disabled.
@@ -393,7 +445,11 @@ public class ViewOwner implements EventListener {
     /**
      * Returns whether given name or UI view is visible.
      */
-    public boolean isViewVisible(Object anObj)  { return getView(anObj).isVisible(); }
+    public boolean isViewVisible(Object anObj)
+    {
+        View view = getView(anObj);
+        return view.isVisible();
+    }
 
     /**
      * Sets whether given name or UI view is visible.
@@ -407,17 +463,22 @@ public class ViewOwner implements EventListener {
     /**
      * Returns an image with given name or path from this class.
      */
-    public Image getImage(String aPath)  { return Image.get(getClass(), aPath); }
+    public Image getImage(String aPath)
+    {
+        Class cls = getClass();
+        return Image.get(cls, aPath);
+    }
 
     /**
      * Return the toggle group for the given name (creating if needed).
      */
     public ToggleGroup getToggleGroup(String aName)
     {
-        if (_toggleGroups==null) _toggleGroups = new HashMap();
-        ToggleGroup tg = _toggleGroups.get(aName);
-        if (tg==null) _toggleGroups.put(aName, tg=new ToggleGroup());
-        return tg;
+        if (_toggleGroups == null) _toggleGroups = new HashMap();
+        ToggleGroup toggleGroup = _toggleGroups.get(aName);
+        if (toggleGroup == null)
+            _toggleGroups.put(aName, toggleGroup = new ToggleGroup());
+        return toggleGroup;
     }
 
     /**
@@ -435,9 +496,9 @@ public class ViewOwner implements EventListener {
      */
     public void resetLater()
     {
-        View ui = isUISet() ? getUI() : null; if (ui==null) return;
+        View ui = isUISet() ? getUI() : null; if (ui == null) return;
         ViewUpdater updater = ui.getUpdater();
-        if (updater==null) _resetLater = true;
+        if (updater == null) _resetLater = true;
         else updater.resetLater(this);
     }
 
@@ -466,8 +527,8 @@ public class ViewOwner implements EventListener {
     {
         // Get binding for property name and have it retrieve value
         View view = anEvent.getView();
-        Binding binding = anEvent.isActionEvent()? view.getBinding("Value") : null;
-        if (binding!=null)
+        Binding binding = anEvent.isActionEvent() ? view.getBinding("Value") : null;
+        if (binding != null)
             setBindingModelValue(binding);
 
         // Call main Owner.respondUI method
@@ -516,9 +577,11 @@ public class ViewOwner implements EventListener {
             setBindingViewValue(binding);
 
         // Iterate over view children and recurse
-        if (aView instanceof ParentView) { ParentView pview = (ParentView)aView;
+        if (aView instanceof ParentView) {
+            ParentView pview = (ParentView) aView;
             for (View child : pview.getChildren())
-                resetViewBindings(child); }
+                resetViewBindings(child);
+        }
     }
 
     /**
@@ -527,12 +590,12 @@ public class ViewOwner implements EventListener {
     protected Object getBindingViewValue(Binding aBinding)
     {
         // Get value from UI view
-        View view = aBinding.getView(View.class); if (view==null) return null;
+        View view = aBinding.getView(View.class); if (view == null) return null;
         Object value = view.getPropValue(aBinding.getPropertyName());
 
         // If conversion key is present, do conversion
         String convKey = aBinding.getConversionKey();
-        if (convKey!=null)
+        if (convKey != null)
             value = getConversionMapKey(convKey, value);
 
         // If binding format is available, try to parse
@@ -548,7 +611,7 @@ public class ViewOwner implements EventListener {
      */
     protected void setBindingViewValue(Binding aBinding)
     {
-        View view = aBinding.getView(View.class); if (view==null) return;
+        View view = aBinding.getView(View.class); if (view == null) return;
         String pname = aBinding.getPropertyName();
         Object value = getBindingModelValue(aBinding);
         view.setPropValue(pname, value);
@@ -565,7 +628,7 @@ public class ViewOwner implements EventListener {
 
         // If conversion key is present, do conversion
         String convKey = aBinding.getConversionKey();
-        if (convKey!=null)
+        if (convKey != null)
             value = getConversionMapValue(convKey, value);
 
         // If format is present, format value
@@ -606,14 +669,14 @@ public class ViewOwner implements EventListener {
     public void requestFocus(Object anObj)
     {
         View view = getView(anObj);
-        if (view!=null)
+        if (view != null)
             view.requestFocus();
     }
 
     /**
      * Returns whether Window has been created (happens when first accessed).
      */
-    public boolean isWindowSet()  { return _win!=null; }
+    public boolean isWindowSet()  { return _win != null; }
 
     /**
      * Returns the Window to manage this ViewOwner's window.
@@ -621,27 +684,33 @@ public class ViewOwner implements EventListener {
     public WindowView getWindow()
     {
         // If already set, just return
-        if (_win!=null) return _win;
+        if (_win != null) return _win;
 
         // Create window, set content to UI, set owner to this ViewOwner and return
         _win = new WindowView();
         View ui = getUI();
-        _win.setContent(ui); _win.setOwner(this);
+        _win.setContent(ui);
+        _win.setOwner(this);
         return _win;
     }
 
     /**
      * Returns whether window is visible.
      */
-    public boolean isWindowVisible()  { return isWindowSet() && getWindow().isVisible(); }
+    public boolean isWindowVisible()
+    {
+        return isWindowSet() && getWindow().isVisible();
+    }
 
     /**
      * Sets whether window is visible.
      */
     public void setWindowVisible(boolean aValue)
     {
-        if (aValue) getWindow().showCentered(null);
-        else getWindow().hide();
+        WindowView win = getWindow();
+        if (aValue)
+            win.showCentered(null);
+        else win.hide();
     }
 
     /** Returns the Window RootView. */
@@ -711,11 +780,12 @@ public class ViewOwner implements EventListener {
     {
         // If view found for object, fire and return
         View view = getView(anObj);
-        if (view!=null && view.isEnabled()) {
+        if (view != null && view.isEnabled()) {
             view.fireActionEvent(null); return; }
 
         // Otherwise, if object is string, create event for UI and fire
-        if (anObj instanceof String) { String name = (String)anObj;
+        if (anObj instanceof String) {
+            String name = (String) anObj;
             ViewEvent event = ViewEvent.createEvent(getUI(), null, null, name);
             fireEvent(event);
         }
@@ -740,9 +810,12 @@ public class ViewOwner implements EventListener {
      */
     public void addKeyActionFilter(String aName, String aKey)
     {
-        KeyCombo kcombo = KeyCombo.get(aKey); if (kcombo==null) return;
-        if (_keyFilters.size()==0) {
-            getUI().addEventFilter(e -> checkKeyActions(e, true), KeyPress); _keyFilters = new HashMap(); }
+        KeyCombo kcombo = KeyCombo.get(aKey); if (kcombo == null) return;
+        if (_keyFilters.size() == 0) {
+            View ui = getUI();
+            ui.addEventFilter(e -> checkKeyActions(e, true), KeyPress);
+            _keyFilters = new HashMap();
+        }
         _keyFilters.put(kcombo, aName);
     }
 
@@ -752,9 +825,10 @@ public class ViewOwner implements EventListener {
      */
     public void addKeyActionHandler(String aName, String aKey)
     {
-        KeyCombo kcombo = KeyCombo.get(aKey); if (kcombo==null) return;
-        if (_keyHandlers.size()==0) {
-            getUI().addEventHandler(e -> checkKeyActions(e, false), KeyPress);
+        KeyCombo kcombo = KeyCombo.get(aKey); if (kcombo == null) return;
+        if (_keyHandlers.size() == 0) {
+            View ui = getUI();
+            ui.addEventHandler(e -> checkKeyActions(e, false), KeyPress);
             _keyHandlers = new HashMap();
         }
         _keyHandlers.put(kcombo, aName);
@@ -767,10 +841,10 @@ public class ViewOwner implements EventListener {
     {
         // Get name for action associated with given key event
         KeyCombo kcombo = anEvent.getKeyCombo();
-        String name = isFilter? _keyFilters.get(kcombo) : _keyHandlers.get(kcombo);
+        String name = isFilter ? _keyFilters.get(kcombo) : _keyHandlers.get(kcombo);
 
         // If found, send action
-        if (name!=null) {
+        if (name != null) {
             sendEvent(name);
             anEvent.consume();
         }
@@ -779,17 +853,26 @@ public class ViewOwner implements EventListener {
     /**
      * Returns whether current thread is event thread.
      */
-    protected boolean isEventThread()  { return _env.isEventThread(); }
+    protected boolean isEventThread()
+    {
+        return _env.isEventThread();
+    }
 
     /**
      * Runs the given runnable in the next event.
      */
-    public void runLater(Runnable aRunnable)  { _env.runLater(aRunnable); }
+    public void runLater(Runnable aRunnable)
+    {
+        _env.runLater(aRunnable);
+    }
 
     /**
      * Runs the runnable after the given delay in milliseconds.
      */
-    public void runLaterDelayed(int aDelay, Runnable aRunnable)  { _env.runDelayed(aRunnable, aDelay, true); }
+    public void runLaterDelayed(int aDelay, Runnable aRunnable)
+    {
+        _env.runDelayed(aRunnable, aDelay, true);
+    }
 
     /**
      * Invokes the given runnable for name once (cancels unexecuted previous runLater registered with same name).
@@ -797,8 +880,8 @@ public class ViewOwner implements EventListener {
     public void runLaterOnce(String aName, Runnable aRunnable)
     {
         synchronized (_runOnceMap) {
-            RunLaterRunnable runnable = (RunLaterRunnable)_runOnceMap.get(aName);
-            if (runnable==null) {
+            RunLaterRunnable runnable = (RunLaterRunnable) _runOnceMap.get(aName);
+            if (runnable == null) {
                 _runOnceMap.put(aName, runnable = new RunLaterRunnable(aName, aRunnable));
                 runLater(runnable);
             }
@@ -819,7 +902,8 @@ public class ViewOwner implements EventListener {
                 _runOnceMap.remove(_name);
                 runnable = _runnable;
             }
-            if (runnable!=null) runnable.run();
+            if (runnable != null)
+                runnable.run();
         }
     }
 
@@ -829,7 +913,7 @@ public class ViewOwner implements EventListener {
     public Object getModelValue(String aKey)
     {
         Object value = KeyChain.getValue(this, aKey);
-        if (value==null) value = KeyChain.getValue(_modelValues, aKey);
+        if (value == null) value = KeyChain.getValue(_modelValues, aKey);
         return value;
     }
 
