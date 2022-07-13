@@ -79,6 +79,21 @@ public class PropArchiverJS extends PropArchiver {
             else if (isRelation)
                 convertNodeToJSONForPropRelation(propNodeJS, prop, nodeValue);
 
+            // Handle array of double or String
+            else if (prop.isArray()) {
+
+                // If double[] or String[], add JSArray
+                Class propClass = prop.getPropClass();
+                if (propClass == double[].class || propClass == String.class) {
+                    Object arrayObj = aPropNode.getPropObject().getPropValue(propName);
+                    JSArray arrayJS = new JSArray(arrayObj);
+                    propNodeJS.setValue(propName, arrayJS);
+                }
+
+                // Otherwise add string
+                else propNodeJS.setNativeValue(propName, nodeValue);
+            }
+
             // Handle String (non-Node) prop
             else {
 

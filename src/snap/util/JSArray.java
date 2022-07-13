@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,18 @@ public class JSArray extends JSValue {
     public JSArray()
     {
         super();
+    }
+
+    /**
+     * Constructor.
+     */
+    public JSArray(Object anArray)
+    {
+        int length = Array.getLength(anArray);
+        for (int i = 0; i < length; i++) {
+            Object item = Array.get(anArray, i);
+            addValue(new JSValue(item));
+        }
     }
 
     /**
