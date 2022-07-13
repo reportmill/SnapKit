@@ -3,9 +3,8 @@
  */
 package snap.web;
 import java.util.*;
-
-import snap.util.JSONNode;
-import snap.util.JSONParser;
+import snap.util.JSValue;
+import snap.util.JSParser;
 import snap.web.HTTPRequest.Header;
 
 /**
@@ -67,8 +66,9 @@ public class HTTPResponse {
      */
     public void addHeader(String aKey, String aValue)
     {
-        if (_headers==null) _headers = new ArrayList();
-        _headers.add(new Header(aKey, aValue));
+        if (_headers == null) _headers = new ArrayList();
+        Header header = new Header(aKey, aValue);
+        _headers.add(header);
     }
 
     /**
@@ -76,10 +76,11 @@ public class HTTPResponse {
      */
     public String getHeaderString()
     {
-        if (getHeaders().size()==0) return "";
+        if (getHeaders().size() == 0) return "";
         StringBuffer sb = new StringBuffer();
-        for (Header header : getHeaders()) sb.append(header.key).append('=').append(header.value).append(", ");
-        sb.delete(sb.length()-2, sb.length());
+        for (Header header : getHeaders())
+            sb.append(header.key).append('=').append(header.value).append(", ");
+        sb.delete(sb.length() - 2, sb.length());
         return sb.toString();
     }
 
@@ -93,11 +94,17 @@ public class HTTPResponse {
      */
     public String getCookieString()
     {
-        if (getCookies().size()==0) return null;
-        if (getCookies().size()==1) return getCookies().get(0);
+        // If none or one, just return
+        if (getCookies().size() == 0) return null;
+        if (getCookies().size() == 1) return getCookies().get(0);
+
+        // Add cookie strings joined
         StringBuffer sb = new StringBuffer();
-        for (String cookie : getCookies()) sb.append(cookie).append("; ");
-        sb.delete(sb.length()-2, sb.length());
+        for (String cookie : getCookies())
+            sb.append(cookie).append("; ");
+        sb.delete(sb.length() - 2, sb.length());
+
+        // Return
         return sb.toString();
     }
 
@@ -126,16 +133,20 @@ public class HTTPResponse {
      */
     public String getText()
     {
-        return getBytes()!=null? new String(getBytes()).trim() : null;
+        byte[] bytes = getBytes();
+        String text = bytes != null ? new String(bytes).trim() : null;
+        return text;
     }
 
     /**
      * Returns the JSON.
      */
-    public JSONNode getJSON()
+    public JSValue getJSON()
     {
-        String text = getText();
-        return text!=null ? new JSONParser().readString(text) : null;
+        String text = getText(); if (text == null) return null;
+        JSParser parser = new JSParser();
+        JSValue json = parser.readString(text);
+        return json;
     }
 
     /**
@@ -165,15 +176,39 @@ public class HTTPResponse {
     }
 
     /**
-     * Returns a string representation.
+     * Standard toString implementation.
      */
     public String toString()
     {
+        String className = getClass().getSimpleName();
+        String propStrings = toStringProps();
+        return className + " { " + propStrings + " }";
+    }
+
+    /**
+     * Returns a string representation.
+     */
+    public String toStringProps()
+    {
+        // Add ContentType
         StringBuffer sb = new StringBuffer();
-        sb.append("Content Type: ").append(getContentType()).append('\n');
-        for(Header hdr : getHeaders()) sb.append("Header: ").append(hdr.key).append(" = ").append(hdr.value).append('\n');
-        if (getCookieString()!=null) sb.append("Cookie: ").append(getCookieString()).append('\n');
-        sb.append("Response len: " + (_bytes!=null? _bytes.length : 0)).append('\n');
+        String contentType = getContentType();
+        sb.append("ContentType: ").append(contentType).append(", ");
+
+        // Add Headers
+        for(Header hdr : getHeaders())
+            sb.append("Header: ").append(hdr.key).append(" = ").append(hdr.value).append(", ");
+
+        // Add Cookie
+        String cookieStr = getCookieString();
+        if (cookieStr != null)
+            sb.append("Cookie: ").append(cookieStr).append(", ");
+
+        // Add Bytes.Length
+        int bytesLen = _bytes != null ? _bytes.length : 0;
+        sb.append("Bytes.Length: ").append(bytesLen);
+
+        // Return
         return sb.toString();
     }
 }

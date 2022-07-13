@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * An archiver to read/write objects from/to JSON.
  */
-public class JSONArchiver {
+public class JSArchiver {
 
     // The list of imports
     List <String>        _imports = new ArrayList();
@@ -30,7 +30,7 @@ public class JSONArchiver {
     /**
      * Creates a new archiver.
      */
-    public JSONArchiver()
+    public JSArchiver()
     {
         addImport("java.util.*", "snap.web.*", "snap.websites.*");
     }
@@ -38,7 +38,7 @@ public class JSONArchiver {
     /**
      * Creates a new archiver for given import(s).
      */
-    public JSONArchiver(String ... theImports)
+    public JSArchiver(String ... theImports)
     {
         addImport(theImports);
     }
@@ -51,7 +51,7 @@ public class JSONArchiver {
     /**
      * Sets the object to be loaded into (null by default).
      */
-    public JSONArchiver setRootObject(Object anObj)  { _rootObj = anObj; return this; } Object _rootObj;
+    public JSArchiver setRootObject(Object anObj)  { _rootObj = anObj; return this; } Object _rootObj;
 
     /**
      * Returns the class string.
@@ -63,8 +63,8 @@ public class JSONArchiver {
      */
     public Object readSource(Object aSource)
     {
-        JSONNode node = aSource instanceof JSONNode ? (JSONNode)aSource :
-            new JSONParser().readSource(aSource);
+        JSValue node = aSource instanceof JSValue ? (JSValue)aSource :
+            new JSParser().readSource(aSource);
         return readNode(node);
     }
 
@@ -73,127 +73,186 @@ public class JSONArchiver {
      */
     public Object readString(String aString)
     {
-        JSONNode node = new JSONParser().readString(aString);
+        JSValue node = new JSParser().readString(aString);
         return readNode(node);
     }
 
     /**
      * Read an object from JSON.
      */
-    public Object readNode(JSONNode aNode)
+    public Object readNode(JSValue aNode)
     {
-        // Handle Types
-        switch (aNode.getType()) {
+        // Handle Object
+        if (aNode instanceof JSObject) {
 
-            // Handle Object
-            case Object: {
+            // Get class
+            JSObject objectJS = (JSObject) aNode;
+            JSValue classNode = objectJS.getValue(getClassId());
+            String className = classNode != null ? classNode.getValueAsString() : null;
+            Class classs = className != null ? getClassForName(className) : null;
 
-                // Get class
-                JSONNode classNode = aNode.getNode(getClassId());
-                String className = classNode!=null ? classNode.getString() : null;
-                Class classs = className!=null ? getClassForName(className) : null;
+            // Create object
+            Object intoObj = _rootObj; _rootObj = null;
+            Object object = intoObj != null ? intoObj : classs != null ? ClassUtils.newInstance(classs) : null;
+            if (object == null)
+                object = new HashMap();
 
-                // Create object
-                Object intoObj = _rootObj; _rootObj = null;
-                Object object = intoObj!=null ? intoObj : classs!=null ? ClassUtils.newInstance(classs) : null;
-                if (object==null)
-                    object = new HashMap();
+            // Add to objects
+            if (!(object instanceof Date))
+                _objects.add(object);
 
-                // Add to objects
-                if (!(object instanceof Date))
-                    _objects.add(object);
-
-                // Get values
-                for (JSONNode child : aNode.getNodes()) { String key = child.getKey();
-                    if (!key.equals(getClassId()))
-                        setValue(object, key, readNode(aNode.getNode(key))); }
-
-                // Return object
-                return object;
+            // Get values
+            Map<String, JSValue> keyValues = objectJS.getKeyValues();
+            for (Map.Entry<String, JSValue> entry : keyValues.entrySet()) {
+                String key = entry.getKey();
+                JSValue valueJS = entry.getValue();
+                if (!key.equals(getClassId())) {
+                    Object value = readNode(valueJS);
+                    setValue(object, key, value);
+                }
             }
+
+            // Return object
+            return object;
+        }
 
             // Handle Array: Create list, get values and return list
-            case Array: {
-                List list = new ArrayList();
-                for (int i=0, iMax=aNode.getNodeCount(); i<iMax; i++)
-                    list.add(readNode(aNode.getNode(i)));
-                return list;
+        if (aNode instanceof JSArray) {
+
+            // Get array
+            JSArray arrayJS = (JSArray) aNode;
+            int count = arrayJS.getValueCount();
+            List list = new ArrayList();
+
+            // Iterate over nodes, read and add to new list
+            for (int i = 0; i < count; i++) {
+                JSValue itemJS = arrayJS.getValue(i);
+                Object item = readNode(itemJS);
+                list.add(item);
             }
 
-            // Handle String JSON Reference
-            case String:
-                if (aNode.getString().startsWith(_jsonRefString)) {
-                    int index = SnapUtils.intValue(aNode.getString().substring(_jsonRefString.length()));
-                    return _objects.get(index);
-                }
-                if (aNode.getString().startsWith(_jsonDateString)) {
-                    long time = SnapUtils.longValue(aNode.getString().substring(_jsonDateString.length()));
-                    return new Date(time);
-                }
-
-            // Handle String, Number, Boolean, Null
-            default: return aNode.getValue();
+            // Return
+            return list;
         }
+
+        Object value = aNode.getValue();
+
+        // Handle String JSON Reference
+        if (value instanceof String) {
+            String string = (String) value;
+            if (string.startsWith(_jsonRefString)) {
+                int index = SnapUtils.intValue(string.substring(_jsonRefString.length()));
+                return _objects.get(index);
+            }
+            if (string.startsWith(_jsonDateString)) {
+                long time = SnapUtils.longValue(string.substring(_jsonDateString.length()));
+                return new Date(time);
+            }
+        }
+
+        // Handle String, Number, Boolean, Null
+        return value;
     }
 
     /**
      * Write an object to JSON.
      */
-    public JSONNode writeObject(Object anObj)
+    public JSValue writeObject(Object anObj)
     {
-        // Create node
-        JSONNode node = new JSONNode();
-
         // If POJO or Map, add to read objects list
         if (anObj instanceof GetKeys || anObj instanceof Map) {
+
+            // If already read, return ref
             int index = ListUtils.indexOfId(_objects, anObj);
-            if (index>=0) {
-                node.setValue(_jsonRefString + index); return node; }
-            else _objects.add(anObj);
+            if (index >= 0)
+                return new JSValue(_jsonRefString + index);
+
+            // Otherwise add to ref
+            _objects.add(anObj);
         }
 
         // Handle GetJSONKeys Object
-        if (anObj instanceof GetKeys) { GetKeys getKeys = (GetKeys)anObj;
+        if (anObj instanceof GetKeys) {
+
+            // Get object and objectJS
+            GetKeys getKeys = (GetKeys) anObj;
+            JSObject objectJS = new JSObject();
 
             // Put class
             String classPath = getClassPath(anObj);
-            if (!classPath.equals("HashMap"))
-                node.addKeyValue(getClassId(), getClassPath(anObj));
+            if (!classPath.equals("HashMap")) {
+                String classId = getClassId();
+                objectJS.setNativeValue(classId, classPath);
+            }
 
             // Iterate over keys and put values
             for (String key : getKeys.getJSONKeys()) {
+
+                // Get value and default value
                 Object value = getValue(anObj, key);
                 Object dvalue = getValue(anObj, key + "Default");
-                if (value instanceof Boolean && dvalue==null) dvalue = Boolean.FALSE;
-                if (!SnapUtils.equals(value, dvalue))
-                    node.addKeyValue(key, writeObject(value));
+                if (value instanceof Boolean && dvalue == null)
+                    dvalue = Boolean.FALSE;
+
+                // If not default value, write and add
+                if (!SnapUtils.equals(value, dvalue)) {
+                    JSValue valueJS = writeObject(value);
+                    objectJS.setValue(key, valueJS);
+                }
             }
+
+            // Return
+            return objectJS;
         }
 
         // Handle Map - iterate over keys and put value
-        else if (anObj instanceof Map) { Map <String, Object> map = (Map)anObj;
-            for (String key : map.keySet())
-                node.addKeyValue(key, writeObject(getValue(map, key))); }
+        if (anObj instanceof Map) {
+
+            // Get map and mapJS
+            Map<String,Object> map = (Map) anObj;
+            JSObject mapJS = new JSObject();
+
+            // Iterate over keys, write and add for each
+            for (String key : map.keySet()) {
+                Object value = getValue(map, key);
+                JSValue valueJS = writeObject(value);
+                mapJS.setValue(key, valueJS);
+            }
+
+            // Return
+            return mapJS;
+        }
 
         // Handle List - iterate over items and add value
-        else if (anObj instanceof List) { List list = (List)anObj;
-            for (Object item : list)
-                node.addValue(writeObject(item)); }
+        if (anObj instanceof List) {
+
+            // Get array and arrayJS
+            List list = (List) anObj;
+            JSArray arrayJS = new JSArray();
+
+            // Iterate over items, write and add for each
+            for (Object item : list) {
+                JSValue itemJS = writeObject(item);
+                arrayJS.addValue(itemJS);
+            }
+
+            // Return
+            return arrayJS;
+        }
 
         // Handle String, Enum, Number, Boolean, Null
-        else if (anObj instanceof String || anObj instanceof Enum || anObj instanceof Number ||
-                anObj instanceof Boolean || anObj==null)
-            node.setValue(anObj);
+        if (anObj instanceof String || anObj instanceof Enum || anObj instanceof Number || anObj instanceof Boolean || anObj == null)
+            return new JSValue(anObj);
 
         // Handle Date (was: aNode.addValue(getClassId(),getClassPath(anObj));aNode.addValue("Time",date.getTime()); )
-        else if (anObj instanceof Date) { Date date = (Date)anObj;
-            node.setValue(_jsonDateString + date.getTime()); }
+        if (anObj instanceof Date) {
+            Date date = (Date)anObj;
+            return new JSValue(_jsonDateString + date.getTime());
+        }
 
         // Otherwise complain
-        else System.err.println("RMJSONArchiver.writeObject: Can't write object of class: " + anObj.getClass().getName());
-
-        // Return node
-        return node;
+        System.err.println("JSONArchiver.writeObject: Can't write object of class: " + anObj.getClass().getName());
+        return new JSValue();
     }
 
     /**
@@ -223,7 +282,7 @@ public class JSONArchiver {
     /**
      * Adds an import.
      */
-    public JSONArchiver addImport(String ... theImports)
+    public JSArchiver addImport(String ... theImports)
     {
         for (String imp : theImports)
             _imports.add(0, imp);

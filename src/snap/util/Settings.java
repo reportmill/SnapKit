@@ -7,7 +7,7 @@ import java.util.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
-import snap.util.JSONArchiver.*;
+import snap.util.JSArchiver.*;
 import snap.web.WebFile;
 
 /**
@@ -68,7 +68,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
     {
         _fileBytes = _file.getBytes(); if (_fileBytes==null) return;
         _map.clear();
-        JSONArchiver archiver = new JSONArchiver().addImport("snap.util.*").setRootObject(this);
+        JSArchiver archiver = new JSArchiver().addImport("snap.util.*").setRootObject(this);
         String string = StringUtils.getString(_file.getBytes());
         string = string.replace("SnapSettings", "Settings");
         try { archiver.readString(string); }
@@ -309,7 +309,7 @@ public class Settings implements GetKeys, GetValue, SetValue, GetClass, Key.GetS
      */
     public String toString()
     {
-        JSONArchiver archiver = new JSONArchiver();
+        JSArchiver archiver = new JSArchiver();
         return archiver.writeObject(this).toString();
     }
 

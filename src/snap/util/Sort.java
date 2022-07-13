@@ -22,7 +22,7 @@ import java.util.*;
  *   Sort.sort(myList, mySortList); // Sort myList by revenue and title
  * </blockquote></pre>
  */
-public class Sort implements Comparator, Cloneable, JSONArchiver.GetKeys {
+public class Sort implements Comparator, Cloneable, JSArchiver.GetKeys {
 
     // The key that is evaluated on objects to be sorted
     String _key;

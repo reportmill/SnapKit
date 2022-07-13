@@ -4,8 +4,8 @@
 package snap.web;
 import java.util.List;
 import snap.util.FilePathUtils;
-import snap.util.JSONNode;
-import snap.util.JSONParser;
+import snap.util.JSValue;
+import snap.util.JSParser;
 
 /**
  * The response.
@@ -13,40 +13,40 @@ import snap.util.JSONParser;
 public class WebResponse {
 
     // The request that generated this response
-    WebRequest         _request;
+    private WebRequest  _request;
     
     // The response code
-    int                _code = OK;
+    private int  _code = OK;
     
     // The response time
-    long               _time;
+    private long  _time;
     
     // Whether file is a directory
-    boolean            _dir;
+    private boolean  _dir;
     
     // The file modified time
-    long               _modTime;
+    private long  _modTime;
     
     // The file size
-    long               _size;
+    private long  _size;
     
     // The MIME type
-    String             _mimeType;
+    private String  _mimeType;
     
     // The response bytes
-    byte               _bytes[];
+    private byte[]  _bytes;
     
     // The response text
-    String             _text;
+    private String  _text;
     
     // The response file header
-    FileHeader         _fileHdr;
+    private FileHeader  _fileHdr;
     
     // The response files (if directory get)
-    List <FileHeader>  _files;
+    private List<FileHeader>  _files;
     
     // An exception if response represents an exception
-    Throwable          _exception;
+    private Throwable  _exception;
     
     // Constants for response codes (http://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
     public static final int OK = 200;
@@ -73,12 +73,18 @@ public class WebResponse {
     /**
      * Returns the request URL.
      */
-    public WebURL getURL()  { return _request.getURL(); }
+    public WebURL getURL()
+    {
+        return _request.getURL();
+    }
 
     /**
      * Returns the site for the request/response.
      */
-    public WebSite getSite()  { return _request.getSite(); }
+    public WebSite getSite()
+    {
+        return _request.getSite();
+    }
 
     /**
      * Returns the response code.
@@ -103,31 +109,48 @@ public class WebResponse {
     /**
      * Returns the path.
      */
-    public String getPath()  { return getURL().getPath(); }
+    public String getPath()
+    {
+        WebURL url = getURL();
+        return url.getPath();
+    }
 
     /**
      * Returns the path file name.
      */
-    public String getPathName()  { return getURL().getPathName(); }
+    public String getPathName()
+    {
+        WebURL url = getURL();
+        return url.getPathName();
+    }
 
     /**
      * Returns the path file type (extension in lowercase, no dot).
      */
-    public String getPathType()  { return FilePathUtils.getType(getPath()); }
+    public String getPathType()
+    {
+        String path = getPath();
+        return FilePathUtils.getType(path);
+    }
 
     /**
      * Returns the response MIME type.
      */
     public String getMIMEType()
     {
-        if (_mimeType!=null) return _mimeType;
-        return _mimeType = MIMEType.getType(getURL().getPath());
+        if (_mimeType != null) return _mimeType;
+        String path = getPath();
+        String mimeType = MIMEType.getType(path);
+        return _mimeType = mimeType;
     }
 
     /**
      * Sets the response MIME type.
      */
-    protected void setMIMEType(String aMIMEType)  { _mimeType = aMIMEType; }
+    protected void setMIMEType(String aMIMEType)
+    {
+        _mimeType = aMIMEType;
+    }
 
     /**
      * Returns whether file is a directory.
@@ -170,7 +193,7 @@ public class WebResponse {
     public FileHeader getFileHeader()
     {
         // If already set, just return
-        if (_fileHdr!=null) return _fileHdr;
+        if (_fileHdr != null) return _fileHdr;
 
         // Create and return
         FileHeader fhdr = new FileHeader(getPath(), isDir());
@@ -223,7 +246,8 @@ public class WebResponse {
     public void setException(Throwable aThrowable)
     {
         _exception = aThrowable;
-        if (_code==0) _code = EXCEPTION_THROWN;
+        if (_code == 0)
+            _code = EXCEPTION_THROWN;
     }
 
     /**
@@ -231,8 +255,14 @@ public class WebResponse {
      */
     public boolean isText()
     {
-        byte bytes[] = getBytes(), junk = 0; if(bytes==null) return false;
-        for (byte b : bytes) if((b & 0xFF) > 127) { junk++; if(junk>10) return false; }
+        byte[] bytes = getBytes(); if(bytes == null) return false;
+        byte junk = 0;
+        for (byte b : bytes)
+            if((b & 0xFF) > 127) {
+                junk++;
+                if( junk > 10)
+                    return false;
+            }
         return true;
     }
 
@@ -241,8 +271,8 @@ public class WebResponse {
      */
     public String getText()
     {
-        if (_text!=null) return _text;
-        if (_bytes!=null) _text = new String(_bytes);
+        if (_text != null) return _text;
+        if (_bytes != null) _text = new String(_bytes);
         return _text;
     }
 
@@ -251,9 +281,15 @@ public class WebResponse {
      */
     public WebFile getFile()
     {
-        WebFile file = getURL().getFile();
-        if (file==null)
-            file = getSite().createFile(getFileHeader());
+        WebURL url = getURL();
+        WebFile file = url.getFile();
+        if (file == null) {
+            WebSite site = getSite();
+            FileHeader fileHeader = getFileHeader();
+            file = site.createFile(fileHeader);
+        }
+
+        // Return
         return file;
     }
 
@@ -269,16 +305,38 @@ public class WebResponse {
     /**
      * Returns the JSON.
      */
-    public JSONNode getJSON()
+    public JSValue getJSON()
     {
-        String text = getText();
-        return text!=null ? new JSONParser().readString(text) : null;
+        String text = getText(); if (text == null) return null;
+        JSParser parser = new JSParser();
+        JSValue json = parser.readString(text);
+        return json;
     }
 
     /**
      * Standard toString implementation.
      */
-    public String toString() { return "Response " + getCode() + ' ' + getCodeString() + ' ' + getURL().getString(); }
+    public String toString()
+    {
+        String className = getClass().getSimpleName();
+        String propStrings = toStringProps();
+        return className + " { " + propStrings + " }";
+    }
+
+    /**
+     * Returns a string representation.
+     */
+    public String toStringProps()
+    {
+        // Add Code
+        StringBuffer sb = new StringBuffer();
+        sb.append("Code: ").append(getCode()).append(", ");
+        sb.append("CodeString: ").append(getCodeString()).append(", ");
+        sb.append("URL: ").append(getURL().getString());
+
+        // Return
+        return sb.toString();
+    }
 
     /**
      * Returns the code message.
