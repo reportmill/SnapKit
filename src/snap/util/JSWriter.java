@@ -15,6 +15,9 @@ public class JSWriter {
     
     // The indent string
     private String  _indent = "\t";
+
+    // Whether to quote keys
+    private boolean  _quoteKeys = true;
     
     // Whether writer compacts JSON (no indent or newline)
     private boolean  _compacted = false;
@@ -31,6 +34,19 @@ public class JSWriter {
     {
         _indent = anIndent;
         return this;
+    }
+
+    /**
+     * Returns whether to quote keys.
+     */
+    public boolean isQuoteKeys()  { return _quoteKeys; }
+
+    /**
+     * Sets whether to quote keys.
+     */
+    public void setQuoteKeys(boolean aValue)
+    {
+        _quoteKeys = aValue;
     }
 
     /**
@@ -72,87 +88,110 @@ public class JSWriter {
     {
         // Append key
         if (aKey != null) {
-            aSB.append('"').append(aKey).append('"').append(':');
-            if (aNode instanceof JSObject || aNode instanceof JSArray)
-                aSB.append(' ');
+
+            // Append key + colon + space
+            if (_quoteKeys)
+                aSB.append('"').append(aKey).append('"').append(':').append(' ');
+            else aSB.append(aKey).append(':').append(' ');
         }
 
         // Handle Object
-        if (aNode instanceof JSObject) {
-
-            // Get whether map is deep (not leaf)
-            JSObject objectJS = (JSObject) aNode;
-            boolean deep = _indentLevel == 0 || isDeep(objectJS);
-
-            // Append map opening
-            aSB.append('{');
-            if (deep)
-                appendNewlineIndent(aSB, ++_indentLevel);
-            else aSB.append(' ');
-
-            // Append keys, values and separators
-            Map<String, JSValue> keyValues = objectJS.getKeyValues();
-            String[] keys = keyValues.keySet().toArray(new String[0]);
-            for (int i = 0, iMax = keys.length; i < iMax; i++) {
-
-                // Append child
-                String key = keys[i];
-                JSValue child = keyValues.get(key);
-                append(aSB, key, child);
-
-                // If has next, append separator and whitespace
-                if (i+1 < iMax) {
-                    if (deep)
-                        appendNewlineIndent(aSB.append(','));
-                    else aSB.append(", ");
-                }
-            }
-
-            // Append trailing whitespace and close
-            if (deep)
-                appendNewlineIndent(aSB, --_indentLevel).append('}');
-            else aSB.append(" }");
-            return aSB;
-        }
+        if (aNode instanceof JSObject)
+            return appendJSObject(aSB, (JSObject) aNode);
 
         // Handle Array
-        if (aNode instanceof JSArray) {
+        if (aNode instanceof JSArray)
+            return appendJSArray(aSB, (JSArray) aNode);
 
-            // Get whether list is deep (not leaf)
-            JSArray arrayJS = (JSArray) aNode;
-            boolean deep = isDeep(aNode);
+        // Handle JSValue
+        return appendJSValue(aSB, aNode);
+    }
 
-            // Append list opening
-            aSB.append('[');
-            if (deep)
-                appendNewlineIndent(aSB, ++_indentLevel);
-            else aSB.append(' ');
+    /**
+     * Appends the given JSObject to StringBuffer.
+     */
+    protected StringBuffer appendJSObject(StringBuffer aSB, JSObject objectJS)
+    {
+        // Get whether map is deep (not leaf)
+        boolean deep = _indentLevel == 0 || isDeep(objectJS);
 
-            // Iterate over items to append items and separators
-            int count = arrayJS.getValueCount();
-            for (int i = 0; i < count; i++) {
+        // Append map opening
+        aSB.append('{');
+        if (deep)
+            appendNewlineIndent(aSB, ++_indentLevel);
+        else aSB.append(' ');
 
-                // Append item
-                JSValue item = arrayJS.getValue(i);
-                append(aSB, null, item);
+        // Get JSObject KeyValues and Keys
+        Map<String, JSValue> keyValues = objectJS.getKeyValues();
+        String[] keys = keyValues.keySet().toArray(new String[0]);
 
-                // If has next, append separator
-                boolean hasNext = i+1 < count;
-                if (hasNext) {
-                    if (deep)
-                        appendNewlineIndent(aSB.append(','));
-                    else aSB.append(", ");
-                }
+        // Iterate over keys and append Key/Value for each
+        for (int i = 0, iMax = keys.length; i < iMax; i++) {
+
+            // Append child
+            String key = keys[i];
+            JSValue child = keyValues.get(key);
+            append(aSB, key, child);
+
+            // If has next, append separator and whitespace
+            if (i + 1 < iMax) {
+                if (deep)
+                    appendNewlineIndent(aSB.append(','));
+                else aSB.append(", ");
             }
-
-            // Append trailing whitespace and close
-            if (deep)
-                appendNewlineIndent(aSB, --_indentLevel).append(']');
-            else aSB.append(" ]");
-            return aSB;
         }
 
-        Object value = aNode.getValue();
+        // Append trailing whitespace and close
+        if (deep)
+            appendNewlineIndent(aSB, --_indentLevel).append('}');
+        else aSB.append(" }");
+        return aSB;
+    }
+
+    /**
+     * Appends the given JSArray to StringBuffer.
+     */
+    protected StringBuffer appendJSArray(StringBuffer aSB, JSArray arrayJS)
+    {
+        // Get whether list is deep (not leaf)
+        boolean deep = isDeep(arrayJS);
+
+        // Append list opening
+        aSB.append('[');
+        if (deep)
+            appendNewlineIndent(aSB, ++_indentLevel);
+        else aSB.append(' ');
+
+        // Iterate over items to append items and separators
+        int count = arrayJS.getValueCount();
+        for (int i = 0; i < count; i++) {
+
+            // Append item
+            JSValue item = arrayJS.getValue(i);
+            append(aSB, null, item);
+
+            // If has next, append separator
+            boolean hasNext = i+1 < count;
+            if (hasNext) {
+                if (deep)
+                    appendNewlineIndent(aSB.append(','));
+                else aSB.append(", ");
+            }
+        }
+
+        // Append trailing whitespace and close
+        if (deep)
+            appendNewlineIndent(aSB, --_indentLevel).append(']');
+        else aSB.append(" ]");
+        return aSB;
+    }
+
+    /**
+     * Appends the given JSValue to StringBuffer.
+     */
+    protected StringBuffer appendJSValue(StringBuffer aSB, JSValue valueJS)
+    {
+        Object value = valueJS.getValue();
 
         // Handle String
         if (value instanceof String) {
@@ -184,13 +223,11 @@ public class JSWriter {
         else if (value instanceof Boolean)
             aSB.append(((Boolean) value) ? "true" : "false");
 
-        // Handle Null
+            // Handle Null
         else if (value == null)
             aSB.append("null");
 
         else System.err.println(("JSONWriter.append: Unknown type: " + value.getClass()));
-
-        // Return string buffer
         return aSB;
     }
 

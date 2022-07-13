@@ -24,7 +24,7 @@ public class JSObject extends JSValue {
     /**
      * Returns the KeyValues.
      */
-    public Map<String, JSValue> getKeyValues()  { return _keyValues; }
+    public Map<String,JSValue> getKeyValues()  { return _keyValues; }
 
     /**
      * Returns the number of key values.
