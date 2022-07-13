@@ -81,8 +81,14 @@ public class PropArchiverJS extends PropArchiver {
 
             // Handle String (non-Node) prop
             else {
-                String stringValue = (String) nodeValue;
-                convertNodeToJSValueForPropSimple(propNodeJS, prop, stringValue);
+
+                // If PropClass is Number or Boolean, use original PropObject value
+                Class propClass = prop.getPropClass();
+                if (Number.class.isAssignableFrom(propClass) || propClass == Boolean.class || propClass.isPrimitive())
+                    nodeValue = aPropNode.getPropObject().getPropValue(propName);
+
+                // Set native value
+                propNodeJS.setNativeValue(propName, nodeValue);
             }
         }
 
@@ -123,25 +129,6 @@ public class PropArchiverJS extends PropArchiver {
             JSObject propNodeJS = convertNodeToJSON(propName, propNode);
             parentJS.setValue(propName, propNodeJS);
         }
-    }
-
-    /**
-     * Converts and adds a prop node string value to JSON.
-     */
-    protected void convertNodeToJSValueForPropSimple(JSObject parentJS, Prop prop, String stringValue)
-    {
-        // Get prop info
-        String propName = prop.getName();
-        boolean isArray = prop.isArray();
-
-        // Handle primitive array
-        if (isArray) {
-            JSValue stringValueJS = new JSValue(stringValue);
-            parentJS.setValue(propName, stringValueJS);
-        }
-
-        // Handle primitive value
-        else parentJS.setNativeValue(propName, stringValue);
     }
 
     /**

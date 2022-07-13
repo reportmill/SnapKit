@@ -82,4 +82,12 @@ public class JSArray extends JSValue {
         // Return
         return list;
     }
+
+    /**
+     * Returns the value as String if type is String.
+     */
+    public String getValueAsString()
+    {
+        return toString();
+    }
 }

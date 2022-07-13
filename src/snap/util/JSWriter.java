@@ -268,6 +268,7 @@ public class JSWriter {
      */
     protected boolean isDeep(JSValue aNode)
     {
+        // Handle JSObject
         if (aNode instanceof JSObject) {
             JSObject objectJS = (JSObject) aNode;
             Collection<JSValue> valueSet = objectJS.getKeyValues().values();
@@ -275,12 +276,16 @@ public class JSWriter {
                 if (node instanceof JSObject || node instanceof JSArray)
                     return true;
         }
+
+        // Handle JSArray
         if (aNode instanceof JSArray) {
             JSArray arrayJS = (JSArray) aNode;
             for (JSValue node : arrayJS.getValues())
                 if (node instanceof JSObject || node instanceof JSArray)
                     return true;
         }
+
+        // Return false for anything else
         return false;
     }
 }
