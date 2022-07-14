@@ -303,3 +303,91 @@ The 3D package has:
 - Fundamental VertexArray class to model and render and mesh of triangles, lines and points
 
 [ ![Sample 3D](http://reportmill.com/SnapCharts/Sample3D.png)](https://reportmill.com/SnapCharts/)
+
+## The Parser Package
+
+The SnapKit **[snap.parse](https://github.com/reportmill/SnapKit/tree/master/src/snap/parse)** package
+dynamically generates parsers based on conventional grammar files combined with a rule handler class.
+Several parsers are included in SnapKit to parse JSON, XML and Java expressions. Other parsers based on this
+package to parse PDF and Java are available in separate SnapKit dependent projects.
+
+See [SnapCode](https://github.com/reportmill/SnapCode) and [SnapPDF](https://github.com/reportmill/SnapPDF).
+
+## The Properties Package
+
+The SnapKit **[snap.props](https://github.com/reportmill/SnapKit/tree/master/src/snap/props)** package automates the serialization of objects to files, which provides many benefits:
+
+- Automatically read/write an object graph to XML and JSON
+
+- Automatically provides "Sparce Serialization" (only write attributes that have changed from default)
+
+- Automatically copy/paste an object graph via platform clipboard
+
+- Automatically provide Undo/Redo
+
+- Automatically provide Clone of an object graph
+
+This serialization is done by simply defining each serializable property in this fashion:
+
+```
+/**
+ * This class supports automatic read/write to XML and JSON.
+ *
+ *  To XML: String xmlString = new PropArchiverXML().writeToXML(new MyClass()).getString();
+ *
+ *  To JSON: String jsonString = new PropArchiverJS().writeToJSON(new MyClass()).getString();
+ *
+ *  Clone: MyClass myClone = new PropArchiver().copy(new MyClass());
+ */
+public class MyClass extends PropObject {
+
+    // Serialzable Name property
+    private String  _name;
+
+    // Constants for properties
+    public static final String Name_Prop = "Name";
+
+    // Constants for property defaults
+    public static final String DEFAULT_NAME = "John Doe";
+
+    /**
+     * Constructor.
+     */
+    public MyClass()
+    {
+        _name = DEFAULT_NAME;
+    }
+
+    /**
+     * Override to configure properties for this class.
+     */
+    protected void initProps(PropSet aPropSet)
+    {
+        super.initProps(aPropSet);
+
+        aPropSet.addPropForName(Name_Prop, String.class, DEFAULT_NAME);
+    }
+
+    /**
+     * Override to return propert values for this class.
+     */
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+            case Name_Prop: return getName();
+            default: return super.getPropValue(aPropName);
+        }
+    }
+    
+    /**
+     * Override to set property values for this class.
+     */
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+            case Name_Prop: setName((String) aValue); break;
+            default: super.setPropValue(aPropName, aValue); break;
+        }
+    }
+}
+```
