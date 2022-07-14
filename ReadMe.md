@@ -333,13 +333,17 @@ undo/redo. More specifically the props support provides the following:
 
 This serialization is done by simply defining each serializable property of an object in this fashion:
 
-- Define string constant for property name, e.g.: String Name_Prop = "Name";
+- Define **string constant** for property name  
+```public static String Name_Prop = "Name";```
 
-- Configure prop in initProps() method of class: addPropNamed(Name_Prop, \<PropClass\>, \<DefaultValue\>)
+- Configure prop in **initProps()** method of class  
+```addPropNamed(Name_Prop, <PropClass>, <DefaultValue>)```
 
-- Provide getter in getPropValue(aPropName): if (aPropValue == Name_Prop) return getName();
+- Provide getter in **getPropValue(aPropName)**  
+```if (aPropValue == Name_Prop) return getName();```
 
-- Provide setter in setPropValue(aPropName,aValue): if (aPropValue == Name_Prop) setName((String) aValue);
+- Provide setter in **setPropValue(aPropName,aValue)**  
+```if (aPropValue == Name_Prop) setName((String) aValue);```
 
 Here is an example class that can automatically read/write sparse JSON/XML, handle clipboard copy/pase and handle undo:
 
