@@ -225,7 +225,7 @@ public class PropArchiver {
                 PropNode[] relationNodeArray = (PropNode[]) nodeValue;
 
                 // Create native array for prop
-                Class<?> nativeArrayClass = prop.getDefaultPropClass();
+                Class<?> nativeArrayClass = prop.getPropClass();
                 Class<?> nativeCompClass = nativeArrayClass.getComponentType();
                 nativeValue = Array.newInstance(nativeCompClass, relationNodeArray.length);
 

@@ -17,10 +17,10 @@ public class PropArchiverJS extends PropArchiver {
     {
         // Convert native to node
         PropNode propNode = convertNativeToNode(null, aPropObject);
+        propNode.setNeedsClassDeclaration(true);
 
         // Convert node to JSON
-        String propName = propNode.getClassName();
-        JSObject objectJS = convertNodeToJSON(propName, propNode);
+        JSObject objectJS = convertNodeToJSON(null, propNode);
 
         // Archive resources
         /*for (Resource resource : getResources()) {
@@ -132,8 +132,7 @@ public class PropArchiverJS extends PropArchiver {
 
             // Handle PropNode array
             for (PropNode childNode : nodeArray) {
-                String childName = childNode.getClassName();
-                JSObject childNodeJS = convertNodeToJSON(childName, childNode);
+                JSObject childNodeJS = convertNodeToJSON(null, childNode);
                 arrayJS.addValue(childNodeJS);
             }
         }

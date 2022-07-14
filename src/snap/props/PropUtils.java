@@ -50,9 +50,9 @@ public class PropUtils {
             return false;
 
         // Get Prop.DefaultPropClass (if Prop.isArray, use component class)
-        Class propClass = prop.getDefaultPropClass();
+        Class defaultPropClass = prop.getDefaultPropClass();
         if (prop.isArray())
-            propClass = propClass.getComponentType();
+            defaultPropClass = defaultPropClass.getComponentType();
 
         // Get PropObject.Class
         PropObject propObject = propNode.getPropObject();
@@ -61,7 +61,7 @@ public class PropUtils {
             propObjectClass = ((PropObjectProxy) propObject).getReal().getClass();
 
         // If PropObject.Class matches Prop.DefaultPropClass, return false
-        if (propObjectClass == propClass)
+        if (propObjectClass == defaultPropClass)
             return false;
 
         // If class name matches prop name, return false (assume class will come from prop key reference)
