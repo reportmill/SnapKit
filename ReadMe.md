@@ -260,7 +260,7 @@ standard UI controls.
 
 - DialogBox, FormBuilder: For quickly generating UI for common user input
 
-## SnapBuilder for Building UI
+## <a name="SnapBuilder">SnapBuilder for Building UI</a>
 
 Because the best line of code is the one you don't have to write, UI is almost always created using the UI builder
 and stored in simple XML files ('.snp' files). Simply create/save a .snp file with the same name as your custom ViewOwner class, and the default ViewOwner.createUI() method will load it.
@@ -270,7 +270,7 @@ As a bonus, you can run SnapBuilder in the browser and even open any UI file fro
 
 [ ![SnapBuilder](https://reportmill.com/snaptea/SnapBuilder/SnapBuilder.gif)](https://reportmill.com/snaptea/SnapBuilder/)
     
-## Integrated Developer Tools
+## <a name="DevTools">Integrated Developer Tools</a>
 
 If you double-tap the control key in any SnapKit app, a developer console will appear. There are many features
 here to make it easier to debug visual layouts and explore new or large code bases:
@@ -288,11 +288,13 @@ here to make it easier to debug visual layouts and explore new or large code bas
 - Enable Frames-Per-Second paint speed measurement tool
 
 
-## The 3D Graphics Package
+## <a name="Gfx3dPackage">The 3D Graphics Package</a>
 
-SnapKit also has a basic 3D package based on OpenGL that uses JOGL on the desktop and WebGL in the browser.
-There is also a simple built-in renderer that renders 3D using standard 2D graphics (this avoids unnecessary
-external JOGL dependencies when 3D isn't really needed and can actually look better in PDF, SVG or print).
+The SnapKit **[snap.gfx3d](https://github.com/reportmill/SnapKit/tree/master/src/snap/gfx3d)** package provides a
+elegant 3D api based on OpenGL that uses JOGL on the desktop and WebGL in the browser. This allows
+for write-once-run-anywhere 3D. There is also a simple built-in renderer that renders 3D using standard 2D
+graphics (this avoids unnecessary external JOGL dependencies when 3D isn't really needed and can actually look better
+in PDF, SVG or print).
 
 The 3D package has:
 
@@ -304,7 +306,7 @@ The 3D package has:
 
 [ ![Sample 3D](http://reportmill.com/SnapCharts/Sample3D.png)](https://reportmill.com/SnapCharts/)
 
-## The Parser Package
+## <a name="ParsePackage">The Parser Package</a>
 
 The SnapKit **[snap.parse](https://github.com/reportmill/SnapKit/tree/master/src/snap/parse)** package
 dynamically generates parsers based on conventional grammar files combined with a rule handler class.
@@ -313,21 +315,33 @@ package to parse PDF and Java are available in separate SnapKit dependent projec
 
 See [SnapCode](https://github.com/reportmill/SnapCode) and [SnapPDF](https://github.com/reportmill/SnapPDF).
 
-## The Properties Package
+## <a name="PropsPackage">The Properties Package</a>
 
-The SnapKit **[snap.props](https://github.com/reportmill/SnapKit/tree/master/src/snap/props)** package automates the serialization of objects to files, which provides many benefits:
+The SnapKit **[snap.props](https://github.com/reportmill/SnapKit/tree/master/src/snap/props)** package provides
+an easy way to serialize Java objects and provides automatic support for read/write (JSON/XML), copy/paste and
+undo/redo. More specifically the props support provides the following:
 
-- Automatically read/write an object graph to XML and JSON
+- Read/write an object graph to XML and JSON
 
-- Automatically provides "Sparce Serialization" (only write attributes that have changed from default)
+- "Sparce Serialization" (only write attributes that have changed from default)
 
-- Automatically copy/paste an object graph via platform clipboard
+- Clipboard copy/paste an object or object graph
 
-- Automatically provide Undo/Redo
+- Undo/Redo support
 
-- Automatically provide Clone of an object graph
+- Clone of an object or object graph
 
-This serialization is done by simply defining each serializable property in this fashion:
+This serialization is done by simply defining each serializable property of an object in this fashion:
+
+- Define string constant for property name, e.g.: String Name_Prop = "Name";
+
+- Configure prop in initProps() method of class: addPropNamed(Name_Prop, \<PropClass\>, \<DefaultValue\>)
+
+- Provide getter in getPropValue(aPropName): if (aPropValue == Name_Prop) return getName();
+
+- Provide setter in setPropValue(aPropName,aValue): if (aPropValue == Name_Prop) setName((String) aValue);
+
+Here is an example class that can automatically read/write sparse JSON/XML, handle clipboard copy/pase and handle undo:
 
 ```
 /**
@@ -369,7 +383,7 @@ public class MyClass extends PropObject {
     }
 
     /**
-     * Override to return propert values for this class.
+     * Override to return propery values for this class.
      */
     public Object getPropValue(String aPropName)
     {
