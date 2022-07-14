@@ -318,8 +318,8 @@ See [SnapCode](https://github.com/reportmill/SnapCode) and [SnapPDF](https://git
 ## <a name="PropsPackage">The Properties Package</a>
 
 The SnapKit **[snap.props](https://github.com/reportmill/SnapKit/tree/master/src/snap/props)** package provides
-an easy way to serialize Java objects and provides automatic support for read/write (JSON/XML), copy/paste and
-undo/redo. More specifically the props support provides the following:
+an easy way to serialize Java objects and provides automatic support for read/write (JSON/XML), copy/paste,
+undo/redo and more. Specifically the props support provides the following:
 
 - Read/write an object graph to XML and JSON
 
@@ -329,7 +329,7 @@ undo/redo. More specifically the props support provides the following:
 
 - Undo/Redo support
 
-- Clone of an object or object graph
+- Automatic support for clone(), equals(), hashCode() and toString()
 
 This serialization is done by simply defining each serializable property of an object in this fashion:
 
@@ -349,7 +349,8 @@ Here is an example class that can automatically read/write sparse JSON/XML, hand
 
 ```
 /**
- * This class supports automatic read/write to XML and JSON.
+ * This class supports automatic read/write (JSON/XML), clipboard copy/pase, user
+ * undo/redo and automatic clone()/equals()/hashCode()/toString() implementations.
  *
  *  To XML: String xmlString = new PropArchiverXML().writeToXML(new MyClass()).getString();
  *
