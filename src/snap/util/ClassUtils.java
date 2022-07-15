@@ -78,14 +78,6 @@ public class ClassUtils {
     /**
      * Returns a class for a given name, using the class loader of the given class.
      */
-    public static Class getClass(String aName, Class aClass)
-    {
-        return getClass(aName, aClass.getClassLoader());
-    }
-
-    /**
-     * Returns a class for a given name, using the class loader of the given class.
-     */
     public static Class getClass(String aName, ClassLoader aClassLoader)
     {
         // Handle arrays, either coded or uncoded (e.g. [I, [D, [LClassName; or  int[], double[] or ClassName[])

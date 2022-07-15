@@ -382,7 +382,7 @@ public class JSArchiver {
     protected Class getClassForNameImpl(String aClassName)
     {
         // If has class path, try to just find class
-        Class classs = aClassName.contains(".") ? ClassUtils.getClass(aClassName) : null;
+        Class classs = aClassName.contains(".") ? getClassForNameReal(aClassName) : null;
 
         // Iterate over imports
         if (classs==null)
@@ -390,25 +390,37 @@ public class JSArchiver {
 
             // If import ends with .ClassName, try it and break if found
             if (imp.endsWith("." + aClassName) || imp.endsWith("$" + aClassName)) {
-                classs = ClassUtils.getClass(imp);
+                classs = getClassForNameReal(imp);
                 if (classs!=null) break;
             }
 
             // If import ends with
             else if (imp.endsWith(".*")) {
-                classs = ClassUtils.getClass(imp.substring(0, imp.length()-1) + aClassName);
+                classs = getClassForNameReal(imp.substring(0, imp.length()-1) + aClassName);
                 if (classs==null)
-                    classs = ClassUtils.getClass(imp.substring(0, imp.length()-2) + "$" + aClassName);
+                    classs = getClassForNameReal(imp.substring(0, imp.length()-2) + "$" + aClassName);
                 if (classs!=null) break;
             }
         }
 
         // If still null, just try it
         if (classs==null)
-            classs = ClassUtils.getClass(aClassName);
+            classs = getClassForNameReal(aClassName);
 
         // Return class
         return classs;
+    }
+
+    /**
+     * Returns a class for name.
+     */
+    private static Class getClassForNameReal(String aClassName)
+    {
+        ClassLoader classLoader = JSArchiver.class.getClassLoader();
+        try { return Class.forName(aClassName, false, classLoader); }
+        catch(ClassNotFoundException e) { return null; }
+        catch(NoClassDefFoundError t) { System.err.println("JSArchiver.getClassForNameReal: " + t); return null; }
+        catch(Throwable t) { System.err.println("JSArchiver.getClassForNameReal: " + t); return null; }
     }
 
     /**
