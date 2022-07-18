@@ -51,7 +51,7 @@ public class PropUtils {
 
         // Get Prop.DefaultPropClass (if Prop.isArray, use component class)
         Class defaultPropClass = prop.getDefaultPropClass();
-        if (prop.isArray())
+        if (prop.isArray() && defaultPropClass.isArray())
             defaultPropClass = defaultPropClass.getComponentType();
 
         // Get PropObject.Class
