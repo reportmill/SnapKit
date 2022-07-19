@@ -3,7 +3,6 @@
  */
 package snap.text;
 import java.util.*;
-
 import snap.geom.Path;
 import snap.geom.Rect;
 import snap.geom.Shape;
@@ -21,52 +20,53 @@ public class TextBox {
 
     // The RichText
     private RichText  _text;
-    
+
     // The bounds of the text block
     private double  _x, _y, _width = Float.MAX_VALUE, _height;
-    
+
     // Whether to wrap lines that overrun bounds
     private boolean  _wrapLines;
-    
+
     // Whether to hyphenate text
     private boolean  _hyphenate;
-    
+
     // They y alignment
-    private VPos _alignY = VPos.TOP;
-    
+    private VPos  _alignY = VPos.TOP;
+
     // The y alignment amount
     private double  _alignedY;
-    
+
     // Whether text is linked to another text
     private boolean  _linked;
-    
+
     // The starting character of this box in RichText
     private int  _start;
-    
+
     // The font scale for this box
     protected double  _fontScale = 1;
-    
+
     // The bounds path
     private Shape  _bpath;
 
     // The lines in this text
-    private List <TextBoxLine>  _lines = new ArrayList<>();
-    
+    private List<TextBoxLine>  _lines = new ArrayList<>();
+
     // Whether text box needs updating
     private boolean  _needsUpdate, _updating;
-    
+
     // The update start/end char indexes in RichText
     private int  _updStart, _updEnd, _lastLen;
-    
+
     // A Listener to catch RichText PropChanges
     private PropChangeListener _richTextLsnr = pc -> richTextDidPropChange(pc);
-    
+
     /**
-     * Creates a new TextBox.
+     * Constructor.
      */
     public TextBox()
     {
-        setRichText(new RichText());
+        RichText richText = new RichText();
+        setRichText(richText);
     }
 
     /**
@@ -81,26 +81,39 @@ public class TextBox {
     /**
      * Returns the source of current content (URL, File, String path, etc.)
      */
-    public Object getSource()  { return getRichText().getSource(); }
+    public Object getSource()
+    {
+        RichText richText = getRichText();
+        return richText.getSource();
+    }
 
     /**
      * Loads the text from the given source.
      */
     public void setSource(Object aSource)
     {
-        getRichText().setSource(aSource);
+        RichText richText = getRichText();
+        richText.setSource(aSource);
         setNeedsUpdateAll();
     }
 
     /**
      * Returns the source URL.
      */
-    public WebURL getSourceURL()  { return getRichText().getSourceURL(); }
+    public WebURL getSourceURL()
+    {
+        RichText richText = getRichText();
+        return richText.getSourceURL();
+    }
 
     /**
      * Returns the source file.
      */
-    public WebFile getSourceFile()  { return getRichText().getSourceFile(); }
+    public WebFile getSourceFile()
+    {
+        RichText richText = getRichText();
+        return richText.getSourceFile();
+    }
 
     /**
      * Returns the RichText.
@@ -113,10 +126,10 @@ public class TextBox {
     public void setRichText(RichText aRichText)
     {
         // If already set, just return
-        if (aRichText==_text) return;
+        if (aRichText == _text) return;
 
         // Stop listening to old RichText PropChanges, start listening to new
-        if (_text!=null)
+        if (_text != null)
             _text.removePropChangeListener(_richTextLsnr);
         _text = aRichText;
         _text.addPropChangeListener(_richTextLsnr);
@@ -128,34 +141,49 @@ public class TextBox {
     /**
      * Returns the X location.
      */
-    public double getX()  { return _x; }
+    public double getX()
+    {
+        return _x;
+    }
 
     /**
      * Sets the X location.
      */
-    public void setX(double anX)  { _x = anX; }
+    public void setX(double anX)
+    {
+        _x = anX;
+    }
 
     /**
      * Returns the Y location.
      */
-    public double getY()  { return _y; }
+    public double getY()
+    {
+        return _y;
+    }
 
     /**
      * Sets the Y location.
      */
-    public void setY(double aY)  { _y = aY; }
+    public void setY(double aY)
+    {
+        _y = aY;
+    }
 
     /**
      * Returns the width.
      */
-    public double getWidth()  { return _width; }
+    public double getWidth()
+    {
+        return _width;
+    }
 
     /**
      * Sets the width.
      */
     public void setWidth(double aValue)
     {
-        if (aValue==_width) return;
+        if (aValue == _width) return;
         _width = aValue;
         if (isWrapLines()) setNeedsUpdateAll();
     }
@@ -163,14 +191,17 @@ public class TextBox {
     /**
      * Returns the height.
      */
-    public double getHeight()  { return _height; }
+    public double getHeight()
+    {
+        return _height;
+    }
 
     /**
      * Sets the width.
      */
     public void setHeight(double aValue)
     {
-        if (aValue==_height) return;
+        if (aValue == _height) return;
         _height = aValue;
         setNeedsUpdateAll();
     }
@@ -178,7 +209,10 @@ public class TextBox {
     /**
      * Returns the current bounds.
      */
-    public Rect getBounds()  { return new Rect(_x, _y, _width, _height); }
+    public Rect getBounds()
+    {
+        return new Rect(_x, _y, _width, _height);
+    }
 
     /**
      * Sets the rect location and size.
@@ -193,18 +227,27 @@ public class TextBox {
      */
     public void setBounds(double aX, double aY, double aW, double aH)
     {
-        setX(aX); setY(aY); setWidth(aW); setHeight(aH);
+        setX(aX);
+        setY(aY);
+        setWidth(aW);
+        setHeight(aH);
     }
 
     /**
      * Returns the max X.
      */
-    public double getMaxX()  { return getX() + getWidth(); }
+    public double getMaxX()
+    {
+        return getX() + getWidth();
+    }
 
     /**
      * Returns the max Y.
      */
-    public double getMaxY()  { return getY() + getHeight(); }
+    public double getMaxY()
+    {
+        return getY() + getHeight();
+    }
 
     /**
      * Returns the Y alignment.
@@ -216,14 +259,18 @@ public class TextBox {
      */
     public void setAlignY(VPos aPos)
     {
-        if (aPos==_alignY) return;
-        _alignY = aPos; setNeedsUpdateAll();
+        if (aPos == _alignY) return;
+        _alignY = aPos;
+        setNeedsUpdateAll();
     }
 
     /**
      * Returns the y for alignment.
      */
-    public double getAlignedY()  { return getY() + _alignedY; }
+    public double getAlignedY()
+    {
+        return getY() + _alignedY;
+    }
 
     /**
      * Returns whether to wrap lines that overrun bounds.
@@ -245,8 +292,9 @@ public class TextBox {
      */
     public void setHyphenate(boolean aValue)
     {
-        if (aValue==_hyphenate) return;
-        _hyphenate = aValue; setNeedsUpdateAll();
+        if (aValue == _hyphenate) return;
+        _hyphenate = aValue;
+        setNeedsUpdateAll();
     }
 
     /**
@@ -259,7 +307,7 @@ public class TextBox {
      */
     public void setLinked(boolean aValue)
     {
-        if (aValue==_linked) return;
+        if (aValue == _linked) return;
         _linked = aValue;
         setNeedsUpdateAll();
     }
@@ -274,7 +322,7 @@ public class TextBox {
      */
     public void setStart(int anIndex)
     {
-        if (anIndex==_start) return;
+        if (anIndex == _start) return;
         _start = anIndex;
         setNeedsUpdateAll();
     }
@@ -285,7 +333,7 @@ public class TextBox {
     public int getEnd()
     {
         int start = getStart();
-        int lastLineEnd = getLineCount()>0 ? getLineLast().getEnd() : 0;
+        int lastLineEnd = getLineCount() > 0 ? getLineLast().getEnd() : 0;
         return start + lastLineEnd;
     }
 
@@ -299,7 +347,7 @@ public class TextBox {
      */
     public void setFontScale(double aValue)
     {
-        if (aValue==_fontScale) return;
+        if (aValue == _fontScale) return;
         _fontScale = aValue;
         setNeedsUpdateAll();
     }
@@ -317,26 +365,40 @@ public class TextBox {
     /**
      * Returns the number of characters in the text.
      */
-    public int length()  { return getRichText().length(); }
+    public int length()
+    {
+        RichText richText = getRichText();
+        return richText.length();
+    }
 
     /**
      * Returns the char value at the specified index.
      */
-    public char charAt(int anIndex)  { return getRichText().charAt(anIndex); }
+    public char charAt(int anIndex)
+    {
+        RichText richText = getRichText();
+        return richText.charAt(anIndex);
+    }
 
     /**
      * Returns the string for the text.
      */
-    public String getString()  { return getRichText().getString(); }
+    public String getString()
+    {
+        RichText richText = getRichText();
+        return richText.getString();
+    }
 
     /**
      * Sets the text to the given string.
      */
     public void setString(String aString)
     {
-        String str = aString!=null ? aString : "";
-        if (str.length()==length() && str.equals(getString())) return;
-        getRichText().setString(str);
+        String str = aString != null ? aString : "";
+        if (str.length() == length() && str.equals(getString())) return;
+
+        RichText richText = getRichText();
+        richText.setString(str);
         setNeedsUpdateAll();
     }
 
@@ -345,20 +407,26 @@ public class TextBox {
      */
     public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
-        getRichText().addChars(theChars, theStyle, anIndex);
+        RichText richText = getRichText();
+        richText.addChars(theChars, theStyle, anIndex);
     }
 
     /**
      * Removes characters in given range.
      */
-    public void removeChars(int aStart, int anEnd)  { getRichText().removeChars(aStart, anEnd); }
+    public void removeChars(int aStart, int anEnd)
+    {
+        RichText richText = getRichText();
+        richText.removeChars(aStart, anEnd);
+    }
 
     /**
      * Replaces chars in given range, with given String, using the given attributes.
      */
     public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
     {
-        getRichText().replaceChars(theChars, theStyle, aStart, anEnd);
+        RichText richText = getRichText();
+        richText.replaceChars(theChars, theStyle, aStart, anEnd);
     }
 
     /**
@@ -366,7 +434,8 @@ public class TextBox {
      */
     public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
-        getRichText().setStyleValue(aKey, aValue, aStart, anEnd);
+        RichText richText = getRichText();
+        richText.setStyleValue(aKey, aValue, aStart, anEnd);
     }
 
     /**
@@ -374,7 +443,8 @@ public class TextBox {
      */
     protected int boxlen()
     {
-        int lcount = getLineCount(); if (lcount==0) return 0;
+        int lcount = getLineCount();
+        if (lcount == 0) return 0;
         int start = getStart();
         int end = getLineLast().getEnd();
         return end - start;
@@ -403,7 +473,7 @@ public class TextBox {
     /**
      * Returns the list of lines.
      */
-    public List <TextBoxLine> getLines()
+    public List<TextBoxLine> getLines()
     {
         if (_needsUpdate && !_updating)
             update();
@@ -417,10 +487,10 @@ public class TextBox {
     {
         if (_needsUpdate && !_updating) update();
         for (TextBoxLine line : _lines)
-            if (anIndex<line.getEnd())
+            if (anIndex < line.getEnd())
                 return line;
         TextBoxLine last = getLineLast();
-        if (last!=null && anIndex==last.getEnd()) return last;
+        if (last != null && anIndex == last.getEnd()) return last;
         throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + boxlen());
     }
 
@@ -430,7 +500,7 @@ public class TextBox {
     public TextBoxLine getLineLast()
     {
         int lc = getLineCount();
-        return lc>0 ? getLine(lc-1) : null;
+        return lc > 0 ? getLine(lc - 1) : null;
     }
 
     /**
@@ -438,11 +508,14 @@ public class TextBox {
      */
     public TextBoxLine getLineLongest()
     {
-        TextBoxLine line = getLineCount()>0 ? getLine(0) : null; if (line==null) return null;
+        TextBoxLine line = getLineCount() > 0 ? getLine(0) : null;
+        if (line == null) return null;
         double lineW = line.getWidth();
         for (TextBoxLine ln : _lines)
-            if (ln.getWidth()>lineW) {
-                line = ln; lineW = ln.getWidth(); }
+            if (ln.getWidth() > lineW) {
+                line = ln;
+                lineW = ln.getWidth();
+            }
         return line;
     }
 
@@ -452,20 +525,20 @@ public class TextBox {
     protected void richTextDidPropChange(PropChange aPC)
     {
         // Handle CharsChange: Update lines for old/new range
-        if (aPC instanceof RichText.CharsChange) { RichText.CharsChange cc = (RichText.CharsChange)aPC;
+        if (aPC instanceof RichText.CharsChange) {
+            RichText.CharsChange cc = (RichText.CharsChange) aPC;
             CharSequence nval = cc.getNewValue();
             CharSequence oval = cc.getOldValue();
             int index = cc.getIndex();
-            if (oval!=null)
-                textRemovedChars(index, index+oval.length());
-            if (nval!=null)
-                textAddedChars(index, index+nval.length());
-        }
-
-        else if (aPC instanceof RichText.StyleChange) { RichText.StyleChange sc = (RichText.StyleChange)aPC;
-            textChangedChars(sc.getStart(), sc.getEnd()); }
-
-        else if (aPC instanceof RichText.LineStyleChange) { RichText.LineStyleChange lsc = (RichText.LineStyleChange)aPC;
+            if (oval != null)
+                textRemovedChars(index, index + oval.length());
+            if (nval != null)
+                textAddedChars(index, index + nval.length());
+        } else if (aPC instanceof RichText.StyleChange) {
+            RichText.StyleChange sc = (RichText.StyleChange) aPC;
+            textChangedChars(sc.getStart(), sc.getEnd());
+        } else if (aPC instanceof RichText.LineStyleChange) {
+            RichText.LineStyleChange lsc = (RichText.LineStyleChange) aPC;
             RichTextLine rtl = getRichText().getLine(lsc.getIndex());
             textChangedChars(rtl.getStart(), rtl.getEnd());
         }
@@ -474,22 +547,34 @@ public class TextBox {
     /**
      * Called when chars added to RichText to track range in box and text to be synchronized.
      */
-    protected void textAddedChars(int aStart, int aEnd)  { setUpdateBounds(aStart, length() - aEnd); }
+    protected void textAddedChars(int aStart, int aEnd)
+    {
+        setUpdateBounds(aStart, length() - aEnd);
+    }
 
     /**
      * Called when chars removed from RichText to track range in box and text to be synchronized.
      */
-    protected void textRemovedChars(int aStart, int aEnd)  { setUpdateBounds(aStart, length() - aStart); }
+    protected void textRemovedChars(int aStart, int aEnd)
+    {
+        setUpdateBounds(aStart, length() - aStart);
+    }
 
     /**
      * Called when chars changed in RichText to track range in box and text to be synchronized.
      */
-    protected void textChangedChars(int aStart, int aEnd)  { setUpdateBounds(aStart, length() - aEnd); }
+    protected void textChangedChars(int aStart, int aEnd)
+    {
+        setUpdateBounds(aStart, length() - aEnd);
+    }
 
     /**
      * Updates all lines.
      */
-    protected void setNeedsUpdateAll()  { setUpdateBounds(0,0); }
+    protected void setNeedsUpdateAll()
+    {
+        setUpdateBounds(0, 0);
+    }
 
     /**
      * Sets the update bounds (in characters from start and from end).
@@ -498,7 +583,8 @@ public class TextBox {
     {
         // If first call, set values
         if (!_needsUpdate) {
-            _updStart = aStart; _updEnd = aEnd;
+            _updStart = aStart;
+            _updEnd = aEnd;
             _needsUpdate = true;
         }
 
@@ -519,17 +605,18 @@ public class TextBox {
 
         // Get count, start and end of currently configured lines
         int lcount = _lines.size();
-        int lend = lcount>0 ? _lines.get(lcount-1).getEnd() : getStart();
+        int lend = lcount > 0 ? _lines.get(lcount - 1).getEnd() : getStart();
 
         // Get update start, linesEnd and textEnd to synchronize lines to text
         int start = _updStart; //Math.max(_updStart, getStart());
         int linesEnd = Math.min(_lastLen - _updEnd, lend);
         int textEnd = length() - _updEnd;
-        if (start<=linesEnd || _lastLen==0)
+        if (start <= linesEnd || _lastLen == 0)
             updateLines(start, linesEnd, textEnd);
 
         // Reset Updating, NeedsUpdate and LastLen
-        _updating = false; _needsUpdate = false;
+        _updating = false;
+        _needsUpdate = false;
         _lastLen = length();
     }
 
@@ -543,8 +630,8 @@ public class TextBox {
 
         // Get start-line-index and start-char-index
         int lcount = getLineCount();
-        int sline = lcount>0 ? getLineAt(aStart).getIndex() : 0;
-        int start = lcount>0 ? getLine(sline).getStart() : aStart;
+        int sline = lcount > 0 ? getLineAt(aStart).getIndex() : 0;
+        int start = lcount > 0 ? getLine(sline).getStart() : aStart;
 
         // Remove lines for old range
         removeLines(aStart, linesEnd);
@@ -553,18 +640,21 @@ public class TextBox {
         addLines(sline, start, textEnd);
 
         // Iterate over lines beyond start line and update lines Index, Start and Y_Local
-        int len = sline>0 ? getLine(sline-1).getEnd() : 0;
-        for (int i=sline, iMax=_lines.size(); i<iMax; i++) { TextBoxLine line = getLine(i);
-            line._index = i; line._start = len;
-            len += line.length(); line._yloc = -1;
+        int len = sline > 0 ? getLine(sline - 1).getEnd() : 0;
+        for (int i = sline, iMax = _lines.size(); i < iMax; i++) {
+            TextBoxLine line = getLine(i);
+            line._index = i;
+            line._start = len;
+            len += line.length();
+            line._yloc = -1;
         }
 
         // Calculated aligned Y
-        if (_alignY!=VPos.TOP) {
+        if (_alignY != VPos.TOP) {
             double prefH = getPrefHeight(getWidth());
             double height = getHeight();
-            if (height>prefH)
-                _alignedY = _alignY.doubleValue()*(height-prefH);
+            if (height > prefH)
+                _alignedY = _alignY.doubleValue() * (height - prefH);
         }
     }
 
@@ -574,17 +664,18 @@ public class TextBox {
     protected void removeLines(int aStart, int aEnd)
     {
         // Get LineCount, start-line-index and end-line-index
-        int lcount = getLineCount(); if (lcount==0) return;
+        int lcount = getLineCount();
+        if (lcount == 0) return;
         int sline = getLineAt(aStart).getIndex();
         int eline = getLineAt(aEnd).getIndex();
 
         // Extend end-line-index to end of RichTextLine
         RichTextLine endRTL = getLine(eline).getRichTextLine();
-        while (eline+1<lcount && getLine(eline+1).getRichTextLine()==endRTL)
+        while (eline + 1 < lcount && getLine(eline + 1).getRichTextLine() == endRTL)
             eline++;
 
         // Remove lines in range
-        for (int i=eline;i>=sline;i--)
+        for (int i = eline; i >= sline; i--)
             _lines.remove(i);
     }
 
@@ -595,7 +686,8 @@ public class TextBox {
     {
         // Get start char index
         int lcount = getLineCount();
-        int start = Math.max(aStart, getStart()); if (start>length()) return;
+        int start = Math.max(aStart, getStart());
+        if (start > length()) return;
 
         // Get RichText start-line-index, end-line-index
         RichText richText = getRichText();
@@ -603,15 +695,17 @@ public class TextBox {
         int endRTL = richText.getLineAt(aEnd).getIndex();
 
         // Iterate over RichText lines, create TextBox lines and add
-        for (int i=startRTL, lindex=aLineIndex; i<=endRTL; i++) { RichTextLine rtl = richText.getLine(i);
+        for (int i = startRTL, lindex = aLineIndex; i <= endRTL; i++) {
+            RichTextLine rtl = richText.getLine(i);
 
             // Get start-char-index for line
-            int lstart = Math.max(start-rtl.getStart(),0); if (lstart==rtl.length()) continue;
+            int lstart = Math.max(start - rtl.getStart(), 0);
+            if (lstart == rtl.length()) continue;
 
             // Add TextBoxLine(s) for RichTextLine
-            while (lstart<rtl.length()) {
+            while (lstart < rtl.length()) {
                 TextBoxLine line = createLine(rtl, lstart, lindex);
-                if ((isLinked() || _bpath!=null) && line.getMaxY()>getMaxY()) {
+                if ((isLinked() || _bpath != null) && line.getMaxY() > getMaxY()) {
                     i = Short.MAX_VALUE;
                     break;
                 }
@@ -621,11 +715,11 @@ public class TextBox {
         }
 
         // If we added last line and it is empty or ends with newline, add blank line
-        if (endRTL==richText.getLineCount()-1) {
+        if (endRTL == richText.getLineCount() - 1) {
             RichTextLine rtl = richText.getLine(endRTL);
-            if (rtl.length()==0 || rtl.isLastCharNewline()) {
+            if (rtl.length() == 0 || rtl.isLastCharNewline()) {
                 TextBoxLine line = createLine(rtl, rtl.length(), getLineCount());
-                if (!((isLinked() || _bpath!=null) && line.getMaxY()>getMaxY()))
+                if (!((isLinked() || _bpath != null) && line.getMaxY() > getMaxY()))
                     _lines.add(line);
             }
         }
@@ -644,18 +738,21 @@ public class TextBox {
         int rend = run.getEnd();
         TextStyle style = run.getStyle();
         double fontScale = getFontScale();
-        if (fontScale!=1)
+        if (fontScale != 1)
             style = style.copyFor(style.getFont().scaleFont(fontScale));
         double lineHt = style.getLineHeight();
         boolean wrap = isWrapLines();
         boolean hyphenate = isHyphenate();
 
         // Get start x/y
-        TextBoxLine lastLn = aLineIndex>0 ? getLine(aLineIndex-1) : null;
-        double y = lastLn!=null ? lastLn.getY() + lastLn.getLineAdvance() : getY();
-        double indent = aStart==0 ? aTextLine.getLineStyle().getFirstIndent() : aTextLine.getLineStyle().getLeftIndent();
+        TextBoxLine lastLn = aLineIndex > 0 ? getLine(aLineIndex - 1) : null;
+        double y = lastLn != null ? lastLn.getY() + lastLn.getLineAdvance() : getY();
+        double indent = aStart == 0 ? aTextLine.getLineStyle().getFirstIndent() : aTextLine.getLineStyle().getLeftIndent();
         double x = getMinHitX(y, lineHt, indent);
-        while (x>getMaxX() && y<=getMaxY()) { y++; x = getMinHitX(y,lineHt,indent); }
+        while (x > getMaxX() && y <= getMaxY()) {
+            y++;
+            x = getMinHitX(y, lineHt, indent);
+        }
         double w = 0;
         double cspace = style.getCharSpacing();
         char c;
@@ -665,58 +762,58 @@ public class TextBox {
         line._yloc = y - getY();
 
         // Iterate over line chars
-        while (start<len) {
+        while (start < len) {
 
             // Reset run if needed
-            if (start>=rend) {
-                run = aTextLine.getRun(run.getIndex()+1);
+            if (start >= rend) {
+                run = aTextLine.getRun(run.getIndex() + 1);
                 rend = run.getEnd();
                 style = run.getStyle();
-                if (fontScale!=1)
+                if (fontScale != 1)
                     style = style.copyFor(style.getFont().scaleFont(fontScale));
                 lineHt = Math.max(lineHt, style.getLineHeight());
                 cspace = style.getCharSpacing();
             }
 
             // Skip past whitespace
-            while (start<len && Character.isWhitespace(c=aTextLine.charAt(start))) {
-                if (c=='\t')
+            while (start < len && Character.isWhitespace(c = aTextLine.charAt(start))) {
+                if (c == '\t')
                     x = line.getXForTabAtIndexAndX(start, x + getX()) - getX();
                 else x += style.getCharAdvance(c) + cspace; //aTextLine.getLineStyle().getTabForX(x)-getX()
                 start++;
-                if (start>=rend && start<len)
+                if (start >= rend && start < len)
                     break;
             }
 
             // Iterate through non-whitespace
             int end = start;
-            while (end<len && end<rend && !Character.isWhitespace(c=aTextLine.charAt(end))) {
+            while (end < len && end < rend && !Character.isWhitespace(c = aTextLine.charAt(end))) {
                 w += style.getCharAdvance(c) + cspace;
                 end++;
             }
 
             // If char range was found, create and add token
-            if (start<end) {
+            if (start < end) {
 
                 // If last char ouside box, try for hyphen or add new line
                 boolean didHyph = false;
-                if (wrap && isHitRight(x+w-cspace, y, lineHt)) {
+                if (wrap && isHitRight(x + w - cspace, y, lineHt)) {
 
                     // If hyphenating, see if we can break token
                     if (hyphenate) {
                         int hyph = end, end2 = end;
                         double w2 = w, hypw = 0;
-                        while (hyph>0 && isHitRight(x+w2-cspace+hypw, y, lineHt)) {
+                        while (hyph > 0 && isHitRight(x + w2 - cspace + hypw, y, lineHt)) {
                             hyph = TextHyphenDict.getShared().getHyphen(aTextLine, start, hyph);
-                            if (hyph>0) {
-                                hypw = cspace+style.getCharAdvance('-');
-                                while (end2>hyph) {
+                            if (hyph > 0) {
+                                hypw = cspace + style.getCharAdvance('-');
+                                while (end2 > hyph) {
                                     --end2;
                                     w2 -= style.getCharAdvance(aTextLine.charAt(end2)) + cspace;
                                 }
                             }
                         }
-                        if (hyph>0 && hyph<end) {
+                        if (hyph > 0 && hyph < end) {
                             end = end2;
                             w = w2 + hypw;
                             didHyph = true;
@@ -724,13 +821,13 @@ public class TextBox {
                     }
 
                     // If no hyphen and token start is line start, shorten token until it fits
-                    if (!didHyph && start==aStart)
-                        while (isHitRight(x+w-cspace, y, lineHt) && end>lineStart+1) {
+                    if (!didHyph && start == aStart)
+                        while (isHitRight(x + w - cspace, y, lineHt) && end > lineStart + 1) {
                             --end;
                             w -= style.getCharAdvance(aTextLine.charAt(end)) + cspace;
                         }
 
-                    // If no hyphen, break
+                        // If no hyphen, break
                     else if (!didHyph)
                         break;
                 }
@@ -743,7 +840,8 @@ public class TextBox {
                     token.setHyphenated(true);
                 line.addToken(token);
                 start = end;
-                x += w; w = 0;
+                x += w;
+                w = 0;
             }
         }
 
@@ -757,9 +855,9 @@ public class TextBox {
      */
     protected boolean isHitRight(double aX, double aY, double aH)
     {
-        if (_bpath==null || aY+aH>getMaxY())
-            return aX>getWidth();
-        Rect rect = new Rect(getX()+aX-1,aY,1,aH);
+        if (_bpath == null || aY + aH > getMaxY())
+            return aX > getWidth();
+        Rect rect = new Rect(getX() + aX - 1, aY, 1, aH);
         return !_bpath.contains(rect);
     }
 
@@ -768,9 +866,9 @@ public class TextBox {
      */
     protected double getMinHitX(double aY, double aH, double anIndent)
     {
-        if (_bpath==null || aY+aH>getMaxY()) return anIndent;
+        if (_bpath == null || aY + aH > getMaxY()) return anIndent;
         Rect rect = new Rect(getX() + anIndent, aY, 20, aH);
-        while (!_bpath.contains(rect) && rect.x<=getMaxX()) rect.x++;
+        while (!_bpath.contains(rect) && rect.x <= getMaxX()) rect.x++;
         return rect.x - getX();
     }
 
@@ -779,9 +877,9 @@ public class TextBox {
      */
     protected double getMaxHitX(double aY, double aH)
     {
-        if (_bpath==null || aY+aH>getMaxY()) return getMaxX();
-        Rect rect = new Rect(getMaxX()-1,aY,1,aH);
-        while (!_bpath.contains(rect) && rect.x>1) rect.x--;
+        if (_bpath == null || aY + aH > getMaxY()) return getMaxX();
+        Rect rect = new Rect(getMaxX() - 1, aY, 1, aH);
+        while (!_bpath.contains(rect) && rect.x > 1) rect.x--;
         return rect.x;
     }
 
@@ -813,19 +911,22 @@ public class TextBox {
     /**
      * Returns whether text box contains an underlined run.
      */
-    public boolean isUnderlined()  { return getRichText().isUnderlined(); }
+    public boolean isUnderlined()
+    {
+        return getRichText().isUnderlined();
+    }
 
     /**
      * Returns underlined runs for text box.
      */
-    public List <TextBoxRun> getUnderlineRuns(Rect aRect)
+    public List<TextBoxRun> getUnderlineRuns(Rect aRect)
     {
         // Iterate over lines to add underline runs to list
-        List <TextBoxRun> uruns = new ArrayList();
+        List<TextBoxRun> uruns = new ArrayList();
         for (TextBoxLine line : getLines()) {
 
             // If line above rect, continue, if below, break
-            if (aRect!=null) {
+            if (aRect != null) {
                 if (line.getMaxY() < aRect.y) continue;
                 else if (line.getY() >= aRect.getMaxY())
                     break;
@@ -847,12 +948,14 @@ public class TextBox {
     public TextBoxLine getLineForY(double aY)
     {
         // If y less than zero, return null
-        if (aY<0) return null;
+        if (aY < 0) return null;
 
         // Iterate over lines and return one that spans given y
-        for (int i=0, iMax=getLineCount(); i<iMax; i++) { TextBoxLine line = getLine(i);
+        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
+            TextBoxLine line = getLine(i);
             if (aY < line.getMaxY())
-                return line; }
+                return line;
+        }
 
         // If no line for given y, return last line
         return getLineLast();
@@ -863,7 +966,8 @@ public class TextBox {
      */
     public int getCharIndex(double anX, double aY)
     {
-        TextBoxLine line = getLineForY(aY); if (line==null) return 0;
+        TextBoxLine line = getLineForY(aY);
+        if (line == null) return 0;
         int index = line.getCharIndex(anX);
         return line.getStart() + index;
     }
@@ -877,15 +981,16 @@ public class TextBox {
         Path path = new Path();
 
         // If invalid range, just return
-        if (aStart>getEnd() || anEnd<getStart()) return path;
-        if (anEnd>getEnd()) anEnd = getEnd();
+        if (aStart > getEnd() || anEnd < getStart()) return path;
+        if (anEnd > getEnd()) anEnd = getEnd();
 
         // Get StartLine, EndLine and start/end points
         TextBoxLine startLine = getLineAt(aStart);
-        TextBoxLine endLine = aStart==anEnd ? startLine : getLineAt(anEnd);
-        double startX = startLine.getXForChar(aStart-startLine.getStart()), startY = startLine.getBaseline();
-        double endX = endLine.getXForChar(anEnd-endLine.getStart()), endY = endLine.getBaseline();
-        startX = Math.min(startX,getMaxX()); endX = Math.min(endX,getMaxX());
+        TextBoxLine endLine = aStart == anEnd ? startLine : getLineAt(anEnd);
+        double startX = startLine.getXForChar(aStart - startLine.getStart()), startY = startLine.getBaseline();
+        double endX = endLine.getXForChar(anEnd - endLine.getStart()), endY = endLine.getBaseline();
+        startX = Math.min(startX, getMaxX());
+        endX = Math.min(endX, getMaxX());
 
         // Get start top/height
         double startTop = startLine.getY() - 1;
@@ -894,20 +999,26 @@ public class TextBox {
         // Get path for upper left corner of sel start
         path.moveTo(startX, startTop + startHeight);
         path.lineTo(startX, startTop);
-        if (aStart==anEnd)
+        if (aStart == anEnd)
             return path;
 
         // If selection spans more than one line, add path components for middle lines and end line
-        if (startY!=endY) {  //!SnapMath.equals(startY, endY)
+        if (startY != endY) {  //!SnapMath.equals(startY, endY)
             double endTop = endLine.getY() - 1;
             double endHeight = endLine.getHeight() + 2;
-            path.lineTo(getWidth(), startTop); path.lineTo(getWidth(), endTop);
-            path.lineTo(endX, endTop); path.lineTo(endX, endTop + endHeight);
-            path.lineTo(getX(), endTop + endHeight); path.lineTo(getX(), startTop + startHeight);
+            path.lineTo(getWidth(), startTop);
+            path.lineTo(getWidth(), endTop);
+            path.lineTo(endX, endTop);
+            path.lineTo(endX, endTop + endHeight);
+            path.lineTo(getX(), endTop + endHeight);
+            path.lineTo(getX(), startTop + startHeight);
         }
 
         // If selection spans only one line, add path components for upper-right, lower-right
-        else { path.lineTo(endX, startTop); path.lineTo(endX, startTop + startHeight); }
+        else {
+            path.lineTo(endX, startTop);
+            path.lineTo(endX, startTop + startHeight);
+        }
 
         // Close path and return
         path.close();
@@ -922,18 +1033,19 @@ public class TextBox {
         // Get intersection of clip rect and bounds
         aPntr.save();
         Rect clip = aPntr.getClipBounds();
-        clip = clip!=null ? clip.getIntersectRect(getBounds()) : getBounds();
+        clip = clip != null ? clip.getIntersectRect(getBounds()) : getBounds();
         aPntr.clip(clip);
 
         // Iterate over lines
-        for (int i=0, iMax=getLineCount(); i<iMax; i++) {
+        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
             TextBoxLine line = getLine(i);
             double lineY = line.getBaseline();
-            if (line.getMaxY()<clip.getMinY()) continue;
-            if (line.getY()>=clip.getMaxY()) break;
+            if (line.getMaxY() < clip.getMinY()) continue;
+            if (line.getY() >= clip.getMaxY()) break;
 
             // Iterate over line tokens
-            for (int j=0,jMax=line.getTokenCount(); j<jMax;j++) { TextBoxToken token = line.getToken(j);
+            for (int j = 0, jMax = line.getTokenCount(); j < jMax; j++) {
+                TextBoxToken token = line.getToken(j);
 
                 // Do normal paint token
                 String tokenStr = token.getString();
@@ -944,7 +1056,7 @@ public class TextBox {
 
                 // Handle TextBorder: Get outline and stroke
                 Border border = token.getStyle().getBorder();
-                if (border!=null) {
+                if (border != null) {
                     Shape shape = token.getFont().getOutline(tokenStr, tokenX, lineY, token.getStyle().getCharSpacing());
                     aPntr.setPaint(border.getColor());
                     aPntr.setStroke(Stroke.Stroke1.copyForWidth(border.getWidth()));
@@ -969,7 +1081,7 @@ public class TextBox {
                 double x0 = run.getX();
                 double y0 = line.getBaseline() - uy;
                 double x1 = run.getMaxX();
-                if (run.getEnd()==line.getEnd())
+                if (run.getEnd() == line.getEnd())
                     x1 = line.getX() + line.getWidthNoWhiteSpace();
                 aPntr.drawLine(x0, y0, x1, y0);
             }
@@ -997,7 +1109,7 @@ public class TextBox {
     public double getPrefHeight(double aW)
     {
         // If WrapLines and given Width doesn't match current Width, setWidth
-        if (isWrapLines() && !MathUtils.equals(aW,getWidth()) && aW>0) { //double oldW = getWidth();
+        if (isWrapLines() && !MathUtils.equals(aW, getWidth()) && aW > 0) { //double oldW = getWidth();
             setWidth(aW);
             double prefH = getPrefHeight(aW); //setWidth(oldW); Should really reset old width - but why would they ask,
             return prefH;                     // if they didn't plan to use this width?
@@ -1005,7 +1117,7 @@ public class TextBox {
 
         // Return bottom of last line minus box Y
         TextBoxLine lastLine = getLineLast();
-        if (lastLine==null) return 0;
+        if (lastLine == null) return 0;
         double lineMaxY = lastLine.getMaxY();
         double alignedY = getAlignedY();
         return Math.ceil(lineMaxY - alignedY);
@@ -1030,14 +1142,16 @@ public class TextBox {
         while (true) {
 
             // Reset fontScale to mid-point of fsHi and fsLo
-            fontScale = (fsLo + fsHi)/2;
+            fontScale = (fsLo + fsHi) / 2;
             setFontScale(fontScale);
 
             // If text exceeded layout bounds, reset fsHi to fontScale
             if (isTextOutOfBounds()) {
                 fsHi = fontScale;
-                if ((fsHi + fsLo)/2 == 0) {
-                    System.err.println("Error scaling text. Could only fit " + boxlen() + " of " + length()); break; }
+                if ((fsHi + fsLo) / 2 == 0) {
+                    System.err.println("Error scaling text. Could only fit " + boxlen() + " of " + length());
+                    break;
+                }
             }
 
             // If text didn't exceed layout bounds, reset fsLo to fontScale
@@ -1046,7 +1160,7 @@ public class TextBox {
                 // Set new low (if almost fsHi, just return)
                 fsLo = fontScale;
                 double detaFS = fsHi - fsLo;
-                if (detaFS<.05)
+                if (detaFS < .05)
                     break;
 
                 // If no line-wrap and PrefWidth almost TextBox.Width, stop
@@ -1060,7 +1174,7 @@ public class TextBox {
                 // If PrefHeight almost TextBox.Height, stop
                 double prefH = getPrefHeight(textW);
                 double diffH = textH - prefH;
-                if (diffH<1)
+                if (diffH < 1)
                     break;
             }
         }
