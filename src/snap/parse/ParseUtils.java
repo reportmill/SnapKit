@@ -265,6 +265,23 @@ public class ParseUtils {
     }
 
     /**
+     * Prints handler classes so parsers can include as constant and avoid reflection for handler install.
+     */
+    public static void printHandlerClassesForParentClass(Class<?> aClass, int classesPerLine)
+    {
+        // Get handler classes
+        Class<?>[] handlerClasses = getHandlerClassesInsideClass(aClass);
+
+        // Iterate over and print
+        for (int i = 1; i <= handlerClasses.length; i++) {
+            Class<?> handlerClass = handlerClasses[i];
+            if (i % classesPerLine == 0)
+                System.out.println(handlerClass.getSimpleName() + ".class,");
+            else System.out.print(handlerClass.getSimpleName() + ".class, ");
+        }
+    }
+
+    /**
      * Returns the handler classes for a parent class.
      */
     private static boolean isHandlerClass(Class<?> aClass)
