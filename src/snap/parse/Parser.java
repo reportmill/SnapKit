@@ -2,7 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.parse;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class to parse a given input (string) using given rule(s).
@@ -10,22 +12,22 @@ import java.util.*;
 public class Parser {
 
     // The top level rule
-    ParseRule  _rule;
+    ParseRule _rule;
 
     // The current parse character input
-    CharSequence  _input;
+    CharSequence _input;
 
     // The tokenizer
-    Tokenizer  _tokenizer;
+    Tokenizer _tokenizer;
 
     // The current token
-    Token  _token;
+    Token _token;
 
     // The list of current look ahead tokens
-    List<Token>  _lookAheadTokens = new ArrayList();
+    List<Token> _lookAheadTokens = new ArrayList();
 
     // The shared node used to report parse success
-    ParseNode  _sharedNode = new ParseNode();
+    ParseNode _sharedNode = new ParseNode();
 
     /**
      * Creates a new Parser.
@@ -85,7 +87,10 @@ public class Parser {
     /**
      * Returns the current parse character input.
      */
-    public CharSequence getInput()  { return _input; }
+    public CharSequence getInput()
+    {
+        return _input;
+    }
 
     /**
      * Sets the current parse string.
