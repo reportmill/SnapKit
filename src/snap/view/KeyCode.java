@@ -2,13 +2,15 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A class to facilitate working with keyboard key codes.
  */
 public class KeyCode {
-    
+
     // Constants for key codes (letters)
     public static final int A = 'A';
     public static final int B = 'B';
@@ -56,13 +58,13 @@ public class KeyCode {
     public static final int NUMPAD7 = 0x67;
     public static final int NUMPAD8 = 0x68;
     public static final int NUMPAD9 = 0x69;
-    
+
     // Arrows
     public static final int LEFT = 0x25;    //KeyEvent.VK_LEFT;
     public static final int UP = 0x26;      //KeyEvent.VK_UP;
     public static final int RIGHT = 0x27;   //KeyEvent.VK_RIGHT;
     public static final int DOWN = 0x28;    //KeyEvent.VK_DOWN;
-    
+
     // Modifiers
     public static final int ALT = 0x12;      //KeyEvent.VK_ALT;
     public static final int SHIFT = 0x10;    //KeyEvent.VK_SHIFT;
@@ -90,62 +92,129 @@ public class KeyCode {
     public static final int SEMICOLON = 0x3B;        //KeyEvent.VK_SEMICOLON;
     public static final int SPACE = 0x20;            //KeyEvent.VK_SPACE;
     public static final int TAB = '\t';              //KeyEvent.VK_TAB;
-    
+
     // Constant for char
     public static final char CHAR_UNDEFINED = 0xFFFF; //KeyEvent.CHAR_UNDEFINED;
 
-/**
- * Returns a Snap keycode for JFX key code.
- */
-public static int get(String aName)
-{
-    aName = aName.toUpperCase();
-    Integer val = _keyCodes.get(aName); if(val!=null) return val;
-    System.out.println("KeyCode.get: Undefined: " + aName);
-    return snap.view.KeyCode.CHAR_UNDEFINED;
-}
+    /**
+     * Returns a Snap keycode for JFX key code.
+     */
+    public static int get(String aName)
+    {
+        aName = aName.toUpperCase();
+        Integer val = _keyCodes.get(aName);
+        if (val != null) return val;
+        System.out.println("KeyCode.get: Undefined: " + aName);
+        return snap.view.KeyCode.CHAR_UNDEFINED;
+    }
 
-/**
- * Returns a Snap keycode for JFX key code.
- */
-public static String getName(int aVal)
-{
-    String val = _keyNames.get(aVal); if(val!=null) return val;
-    System.out.println("KeyCode.getName: Undefined: " + aVal);
-    return "";
-}
+    /**
+     * Returns a Snap keycode for JFX key code.
+     */
+    public static String getName(int aVal)
+    {
+        String val = _keyNames.get(aVal);
+        if (val != null) return val;
+        System.out.println("KeyCode.getName: Undefined: " + aVal);
+        return "";
+    }
 
-static Map <String, Integer> _keyCodes = getKeyCodes();
-static Map <Integer, String> _keyNames = getKeyNames();
-private static Map <String, Integer> getKeyCodes()
-{
-    Map m = new HashMap();
-    m.put("A", A); m.put("B", B); m.put("C", C); m.put("D", D); m.put("E", E); m.put("F", F); m.put("G", G);
-    m.put("H", H); m.put("I", I); m.put("J", J); m.put("K", K); m.put("L", L); m.put("M", M); m.put("N", N);
-    m.put("O", O); m.put("P", P); m.put("Q", Q); m.put("R", R); m.put("S", S); m.put("T", T); m.put("U", U);
-    m.put("V", V); m.put("W", W); m.put("X", X); m.put("Y", Y); m.put("Z", Z);
-    m.put("0", DIGIT0); m.put("1", DIGIT1); m.put("2", DIGIT2); m.put("3", DIGIT3); m.put("4", DIGIT4);
-    m.put("5", DIGIT5); m.put("6", DIGIT6); m.put("7", DIGIT7); m.put("8", DIGIT8); m.put("9", DIGIT9);
-    m.put("NUMPAD0", NUMPAD0); m.put("NUMPAD1", NUMPAD1); m.put("NUMPAD2", NUMPAD2); m.put("NUMPAD3", NUMPAD3);
-    m.put("NUMPAD4", NUMPAD4); m.put("NUMPAD5", NUMPAD5); m.put("NUMPAD6", NUMPAD6); m.put("NUMPAD7", NUMPAD7);
-    m.put("NUMPAD8", NUMPAD8); m.put("NUMPAD9", NUMPAD9);
-    m.put("LEFT", LEFT); m.put("UP", UP); m.put("RIGHT", RIGHT); m.put("DOWN", DOWN);
-    m.put("ALT", ALT); m.put("SHIFT", SHIFT); m.put("COMMAND", COMMAND); m.put("CONTROL", CONTROL);
-    m.put("OPEN_BRACKET", OPEN_BRACKET); m.put("CLOSE_BRACKET", CLOSE_BRACKET);
-    m.put("[", OPEN_BRACKET); m.put("]", CLOSE_BRACKET);
-    m.put("BRACELEFT", BRACELEFT); m.put("BRACERIGHT", BRACERIGHT); m.put("{", BRACELEFT); m.put("}", BRACERIGHT);
-    m.put("SLASH", SLASH); m.put("BACK_SLASH", BACK_SLASH); m.put("BACK_SPACE", BACK_SPACE); m.put("COMMA", COMMA);
-    m.put("DELETE", DELETE); m.put("END", END); m.put("ENTER", ENTER); m.put("EQUALS", EQUALS);
-    m.put("ESCAPE", ESCAPE); m.put("HOME", HOME); m.put("MINUS", MINUS); m.put("PERIOD", PERIOD);
-    m.put("PLUS", PLUS); m.put("SEMICOLON", SEMICOLON); m.put("SPACE", SPACE); m.put("TAB", TAB);
-    m.put(";", SEMICOLON); m.put("/", SLASH); m.put("\\", BACK_SLASH); m.put("ESC", ESCAPE);
-    return m;
-}
-private static Map <Integer,String> getKeyNames()
-{
-    Map m = new HashMap();
-    for(Map.Entry <String,Integer> entry : _keyCodes.entrySet()) m.put(entry.getValue(), entry.getKey());
-    return m;
-}
+    static Map<String, Integer> _keyCodes = getKeyCodes();
+    static Map<Integer, String> _keyNames = getKeyNames();
+
+    private static Map<String, Integer> getKeyCodes()
+    {
+        Map m = new HashMap();
+        m.put("A", A);
+        m.put("B", B);
+        m.put("C", C);
+        m.put("D", D);
+        m.put("E", E);
+        m.put("F", F);
+        m.put("G", G);
+        m.put("H", H);
+        m.put("I", I);
+        m.put("J", J);
+        m.put("K", K);
+        m.put("L", L);
+        m.put("M", M);
+        m.put("N", N);
+        m.put("O", O);
+        m.put("P", P);
+        m.put("Q", Q);
+        m.put("R", R);
+        m.put("S", S);
+        m.put("T", T);
+        m.put("U", U);
+        m.put("V", V);
+        m.put("W", W);
+        m.put("X", X);
+        m.put("Y", Y);
+        m.put("Z", Z);
+        m.put("0", DIGIT0);
+        m.put("1", DIGIT1);
+        m.put("2", DIGIT2);
+        m.put("3", DIGIT3);
+        m.put("4", DIGIT4);
+        m.put("5", DIGIT5);
+        m.put("6", DIGIT6);
+        m.put("7", DIGIT7);
+        m.put("8", DIGIT8);
+        m.put("9", DIGIT9);
+        m.put("NUMPAD0", NUMPAD0);
+        m.put("NUMPAD1", NUMPAD1);
+        m.put("NUMPAD2", NUMPAD2);
+        m.put("NUMPAD3", NUMPAD3);
+        m.put("NUMPAD4", NUMPAD4);
+        m.put("NUMPAD5", NUMPAD5);
+        m.put("NUMPAD6", NUMPAD6);
+        m.put("NUMPAD7", NUMPAD7);
+        m.put("NUMPAD8", NUMPAD8);
+        m.put("NUMPAD9", NUMPAD9);
+        m.put("LEFT", LEFT);
+        m.put("UP", UP);
+        m.put("RIGHT", RIGHT);
+        m.put("DOWN", DOWN);
+        m.put("ALT", ALT);
+        m.put("SHIFT", SHIFT);
+        m.put("COMMAND", COMMAND);
+        m.put("CONTROL", CONTROL);
+        m.put("OPEN_BRACKET", OPEN_BRACKET);
+        m.put("CLOSE_BRACKET", CLOSE_BRACKET);
+        m.put("[", OPEN_BRACKET);
+        m.put("]", CLOSE_BRACKET);
+        m.put("BRACELEFT", BRACELEFT);
+        m.put("BRACERIGHT", BRACERIGHT);
+        m.put("{", BRACELEFT);
+        m.put("}", BRACERIGHT);
+        m.put("SLASH", SLASH);
+        m.put("BACK_SLASH", BACK_SLASH);
+        m.put("BACK_SPACE", BACK_SPACE);
+        m.put("COMMA", COMMA);
+        m.put("DELETE", DELETE);
+        m.put("END", END);
+        m.put("ENTER", ENTER);
+        m.put("EQUALS", EQUALS);
+        m.put("ESCAPE", ESCAPE);
+        m.put("HOME", HOME);
+        m.put("MINUS", MINUS);
+        m.put("PERIOD", PERIOD);
+        m.put("PLUS", PLUS);
+        m.put("SEMICOLON", SEMICOLON);
+        m.put("SPACE", SPACE);
+        m.put("TAB", TAB);
+        m.put(";", SEMICOLON);
+        m.put("/", SLASH);
+        m.put("\\", BACK_SLASH);
+        m.put("ESC", ESCAPE);
+        return m;
+    }
+
+    private static Map<Integer, String> getKeyNames()
+    {
+        Map m = new HashMap();
+        for (Map.Entry<String, Integer> entry : _keyCodes.entrySet()) m.put(entry.getValue(), entry.getKey());
+        return m;
+    }
 
 }
