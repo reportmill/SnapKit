@@ -36,6 +36,26 @@ public class ParseUtils {
     }
 
     /**
+     * Prints the names of all rules.
+     */
+    public void printAllRuleNames(ParseRule aRule, int namesPerLine)
+    {
+        // Add all rules recursively
+        addRule(aRule);
+
+        // Get array of names
+        Stream<ParseRule> rulesWithNameStream = _rules.stream().filter(r -> r.getName() != null);
+        Stream<String> nonNullNamesStream = rulesWithNameStream.map(r -> '"' + r.getName() + '"');
+        String[] nonNullNames = nonNullNamesStream.toArray(size -> new String[size]);
+
+        // Iterate over names and print with newline for every namesPerLine
+        for (int i = 0; i < nonNullNames.length; i++) {
+            System.out.print(nonNullNames[i] + ", ");
+            if (i > 0 && i % namesPerLine == 0) System.out.println();
+        }
+    }
+
+    /**
      * Write a ParseRule.
      */
     public void addRule(ParseRule aRule)
@@ -235,7 +255,8 @@ public class ParseUtils {
     public static void installHandlerForClass(Class<? extends ParseHandler<?>> handlerClass, ParseRule aRule)
     {
         // Get rule name and rule by stripping "Handler" from class name
-        String ruleName = handlerClass.getSimpleName().replace("Handler", "");
+        String simpleName = handlerClass.getSimpleName();
+        String ruleName = simpleName.substring(0, simpleName.length() - "Handler".length());
         ParseRule parseRule = aRule.getRule(ruleName);
         if (parseRule == null) {
             System.out.println("ParseUtils.installHandlerForClass: Couldn't find rule for name: " + ruleName);
