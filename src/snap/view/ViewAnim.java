@@ -2,80 +2,83 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.util.*;
-import java.util.function.Consumer;
 import snap.gfx.Color;
 import snap.gfx.Paint;
-import snap.geom.Pos;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.*;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * A class to animate View attributes.
  */
 public class ViewAnim implements XMLArchiver.Archivable {
-    
+
     // The View
-    private View  _view;
-    
+    private View _view;
+
     // The parent anim
-    private ViewAnim  _parent;
+    private ViewAnim _parent;
 
     // The start/end times
-    private int  _start, _end;
-    
+    private int _start, _end;
+
     // The anim keys
-    private List <String>  _keys = new ArrayList<>();
-    
+    private List<String> _keys = new ArrayList<>();
+
     // The end values
-    private Map <String,Object>  _endVals = new HashMap<>();
-    
+    private Map<String, Object> _endVals = new HashMap<>();
+
     // The nested anims
-    private List <ViewAnim>  _anims = new ArrayList<>();
-    
+    private List<ViewAnim> _anims = new ArrayList<>();
+
     // The loop count
-    private int  _loopCount;
-    
+    private int _loopCount;
+
     // The Interpolator
-    private Interpolator  _interp = Interpolator.EASE_BOTH;
-    
+    private Interpolator _interp = Interpolator.EASE_BOTH;
+
     // A runnable to be called on each anim frame
-    private Runnable  _onFrame;
-    
+    private Runnable _onFrame;
+
     // A runnable to be called when anim is finished
-    private Runnable  _onFinish;
-    
+    private Runnable _onFinish;
+
     // Whether the anim needs to finished when cleared
-    private boolean  _needsFinish;
-    
+    private boolean _needsFinish;
+
     // The start time, current time
-    private int  _time;
-    
+    private int _time;
+
     // The max time
-    private int  _maxTime = -1;
-    
+    private int _maxTime = -1;
+
     // Whether this anim was suspended because it's not visible
-    private boolean  _suspended;
-    
+    private boolean _suspended;
+
     // The ViewUpdater currently playing this anim
-    private ViewUpdater  _updater;
-    
+    private ViewUpdater _updater;
+
     // A convenience for ViewUpdater
-    protected int  _startTime;
-    
-    /**
-     * Creates a new ViewAnim.
-     */
-    public ViewAnim(View aView)  { _view = aView; }
+    protected int _startTime;
 
     /**
-     * Creates a new ViewAnim.
+     * Constructor.
+     */
+    public ViewAnim(View aView)
+    {
+        _view = aView;
+    }
+
+    /**
+     * Constructor.
      */
     protected ViewAnim(View aView, int aStart, int anEnd)
     {
         this(aView);
-        _start = aStart; _end = anEnd;
+        _start = aStart;
+        _end = anEnd;
     }
 
     /**
@@ -96,7 +99,10 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Returns the root ViewAnim.
      */
-    public ViewAnim getRoot(int aTime)  { return getRoot().getAnim(aTime); }
+    public ViewAnim getRoot(int aTime)
+    {
+        return getRoot().getAnim(aTime);
+    }
 
     /**
      * Returns the parent ViewAnim.
@@ -123,7 +129,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     public boolean isEmpty()
     {
-        if (_endVals.size()>0)
+        if (_endVals.size() > 0)
             return false;
         for (ViewAnim child : _anims)
             if (!child.isEmpty())
@@ -139,14 +145,17 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Returns the start value for given key.
      */
-    public Object getStartVal(String aKey)  { return _parent!=null? _parent.getEndVal(aKey) : getEndVal(aKey); }
+    public Object getStartVal(String aKey)
+    {
+        return _parent != null ? _parent.getEndVal(aKey) : getEndVal(aKey);
+    }
 
     /**
      * Sets the start value for given key.
      */
     public ViewAnim setStartVal(String aKey, Object aVal)
     {
-        if (_parent!=null)
+        if (_parent != null)
             _parent.setValue(aKey, aVal);
         return this;
     }
@@ -154,7 +163,10 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Returns the end value for given key.
      */
-    public Object getEndVal(String aKey)  { return _endVals.get(aKey); }
+    public Object getEndVal(String aKey)
+    {
+        return _endVals.get(aKey);
+    }
 
     /**
      * Returns the list of child anims.
@@ -166,14 +178,25 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     public ViewAnim getAnim(int aTime)
     {
-        if (aTime<=getEnd()) return this;
-        for (ViewAnim anim : _anims) {
-            if (aTime==anim.getEnd()) return anim; }
-        ViewAnim anim = new ViewAnim(_view, getEnd(), aTime);
-        _anims.add(anim); anim._parent = this;
+        // If this anim covers time, just return
+        if (aTime <= getEnd()) return this;
 
-        // Clear MaxTimes and return
-        for (ViewAnim p=this;p!=null;p=p.getParent()) p._maxTime = -1;
+        // Get anim for time and return if found
+        for (ViewAnim anim : _anims) {
+            if (aTime == anim.getEnd())
+                return anim;
+        }
+
+        // Create anim
+        ViewAnim anim = new ViewAnim(_view, getEnd(), aTime);
+        _anims.add(anim);
+        anim._parent = this;
+
+        // Clear MaxTimes
+        for (ViewAnim p = this; p != null; p = p.getParent())
+            p._maxTime = -1;
+
+        // Return
         return anim;
     }
 
@@ -182,9 +205,15 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     public int getMaxTime()
     {
-        if (_maxTime>=0) return _maxTime;
+        // If already set, just return
+        if (_maxTime >= 0) return _maxTime;
+
+        // Calculate
         int max = getEnd();
-        for (ViewAnim anim : _anims) max = Math.max(max, anim.getMaxTime());
+        for (ViewAnim anim : _anims)
+            max = Math.max(max, anim.getMaxTime());
+
+        // Set/return
         return _maxTime = max;
     }
 
@@ -193,10 +222,12 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     public Integer[] getKeyFrameTimes()
     {
-        Set <Integer> timesSet = new HashSet<>();
-        timesSet.add(getStart()); timesSet.add(getEnd());
-        for (ViewAnim anim : _anims) Collections.addAll(timesSet, anim.getKeyFrameTimes());
-        Integer times[] = timesSet.toArray(new Integer[0]);
+        Set<Integer> timesSet = new HashSet<>();
+        timesSet.add(getStart());
+        timesSet.add(getEnd());
+        for (ViewAnim anim : _anims)
+            Collections.addAll(timesSet, anim.getKeyFrameTimes());
+        Integer[] times = timesSet.toArray(new Integer[0]);
         Arrays.sort(times);
         return times;
     }
@@ -204,12 +235,18 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Returns whether anim is playing.
      */
-    public boolean isPlaying()  { return _parent!=null? _parent.isPlaying() : (_updater!=null); }
+    public boolean isPlaying()
+    {
+        return _parent != null ? _parent.isPlaying() : (_updater != null);
+    }
 
     /**
      * Returns whether anim should be playing, but didn't have access to ViewUpdater (probably wasn't showing).
      */
-    public boolean isSuspended()  { return _parent!=null? _parent.isSuspended() : _suspended; }
+    public boolean isSuspended()
+    {
+        return _parent != null ? _parent.isSuspended() : _suspended;
+    }
 
     /**
      * Play the anim.
@@ -217,13 +254,18 @@ public class ViewAnim implements XMLArchiver.Archivable {
     public void play()
     {
         // If Parent, forward to it. If already playing, just return
-        if (_parent!=null) { _parent.play(); return; }
+        if (_parent != null) {
+            _parent.play();
+            return;
+        }
         if (isPlaying()) return;
 
         // Get ViewUpdater and startAnim() (or mark suspended if updater not available)
         _updater = _view.getUpdater();
-        if (_updater!=null) { _updater.startAnim(this); _suspended = false; }
-        else _suspended = true;
+        if (_updater != null) {
+            _updater.startAnim(this);
+            _suspended = false;
+        } else _suspended = true;
     }
 
     /**
@@ -232,12 +274,16 @@ public class ViewAnim implements XMLArchiver.Archivable {
     public void stop()
     {
         // If Parent, forward to it. If already stopped, just return
-        if (_parent!=null) { _parent.stop(); return; }
+        if (_parent != null) {
+            _parent.stop();
+            return;
+        }
         if (!isPlaying()) return;
 
         // If ViewUpdater set, stopAnim() and clear Updater/Suspended
-        if (_updater!=null) _updater.stopAnim(this);
-        _updater = null; _suspended = false;
+        if (_updater != null) _updater.stopAnim(this);
+        _updater = null;
+        _suspended = false;
     }
 
     /**
@@ -245,8 +291,15 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     protected void suspend()
     {
-        if (_parent!=null) { _parent.suspend(); return; }
-        if (_updater!=null) { _updater.stopAnim(this); _updater = null; _suspended = true; }
+        if (_parent != null) {
+            _parent.suspend();
+            return;
+        }
+        if (_updater != null) {
+            _updater.stopAnim(this);
+            _updater = null;
+            _suspended = true;
+        }
     }
 
     /**
@@ -260,33 +313,39 @@ public class ViewAnim implements XMLArchiver.Archivable {
     public void setTime(int aTime)
     {
         // Get newTime and oldTime. If MaxTime is zero, make sure there's a change
-        int newTime = aTime, oldTime = _time, maxTime = getMaxTime(); if (maxTime==0) oldTime = -1;
+        int newTime = aTime;
+        int oldTime = _time;
+        int maxTime = getMaxTime();
+        if (maxTime == 0)
+            oldTime = -1;
 
         // If looping, adjust newTime
-        if (_loopCount>0) {
-            int start = getStart(), loopCount = _loopCount -1;
+        if (_loopCount > 0) {
+            int start = getStart();
+            int loopCount = _loopCount - 1;
             int loopLen = maxTime - start;
-            int loopTime = (newTime - start) - loopCount*loopLen;
-            if (loopTime<0) loopTime = (newTime - start)%loopLen;
+            int loopTime = (newTime - start) - loopCount * loopLen;
+            if (loopTime < 0)
+                loopTime = (newTime - start) % loopLen;
             newTime = start + loopTime;
         }
 
         // If time already set, just return
-        if (newTime==oldTime) return;
+        if (newTime == oldTime) return;
         _time = newTime;
 
         // If new values need to be set, set them
-        boolean needsUpdate = !(oldTime<=_start && newTime<=_start || oldTime>=_end && newTime>=_end);
+        boolean needsUpdate = !(oldTime <= _start && newTime <= _start || oldTime >= _end && newTime >= _end);
         if (needsUpdate)
             updateValues();
 
         // Forward on to child anims (if within range)
         for (ViewAnim child : _anims)
-            if (_time>child.getStart())
+            if (_time > child.getStart())
                 child.setTime(_time);
 
         // If on frame set, call it
-        if (_onFrame!=null)
+        if (_onFrame != null)
             _onFrame.run();
 
         // If completed and root anim, stop playing
@@ -295,7 +354,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
             stop();
 
         // If completed and there is an OnFinish, trigger it
-        if (completed && oldTime<maxTime && _onFinish!=null)
+        if (completed && oldTime < maxTime && _onFinish != null)
             _onFinish.run();
     }
 
@@ -316,9 +375,9 @@ public class ViewAnim implements XMLArchiver.Archivable {
     public Object interpolate(Object aVal1, Object aVal2)
     {
         double time = getTime(), start = getStart(), end = getEnd();
-        if (time<=start) return aVal1;
-        if (time>=end) return aVal2;
-        return interpolate(aVal1, aVal2, (time-start)/(end - start));
+        if (time <= start) return aVal1;
+        if (time >= end) return aVal2;
+        return interpolate(aVal1, aVal2, (time - start) / (end - start));
     }
 
     /**
@@ -328,14 +387,15 @@ public class ViewAnim implements XMLArchiver.Archivable {
     {
         // Interpolate numbers
         if (aVal1 instanceof Number && aVal2 instanceof Number) {
-            double val1 = ((Number)aVal1).doubleValue(), val2 = ((Number)aVal2).doubleValue();
+            double val1 = ((Number) aVal1).doubleValue();
+            double val2 = ((Number) aVal2).doubleValue();
             return _interp.getValue(aRatio, val1, val2);
         }
 
         // Interpolate colors
         if (aVal1 instanceof Color || aVal2 instanceof Color) {
-            Color c1 = aVal1 instanceof Color? (Color)aVal1 : Color.CLEAR;
-            Color c2 = aVal2 instanceof Color? (Color)aVal2 : Color.CLEAR;
+            Color c1 = aVal1 instanceof Color ? (Color) aVal1 : Color.CLEAR;
+            Color c2 = aVal2 instanceof Color ? (Color) aVal2 : Color.CLEAR;
             double ratio = _interp.getValue(aRatio, 0, 1);
             return c1.blend(c2, ratio);
         }
@@ -346,7 +406,10 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Returns the value for given key at current time.
      */
-    public Object getValue(String aKey)  { return getValue(aKey, _time); }
+    public Object getValue(String aKey)
+    {
+        return getValue(aKey, _time);
+    }
 
     /**
      * Returns the value for given key and time.
@@ -356,14 +419,17 @@ public class ViewAnim implements XMLArchiver.Archivable {
         // Get start/end values (just return if they are equal)
         Object fromVal = getStartVal(aKey);
         Object toVal = getEndVal(aKey);
-        if (SnapUtils.equals(fromVal, toVal)) return fromVal;
+        if (SnapUtils.equals(fromVal, toVal))
+            return fromVal;
 
         // Return value based on time
         Object val;
-        if (aTime<=getStart()) val = fromVal;
-        else if (aTime>=getEnd()) val = toVal;
+        if (aTime <= getStart())
+            val = fromVal;
+        else if (aTime >= getEnd())
+            val = toVal;
         else {
-            double ratio = (aTime-getStart())/(double)getLen();
+            double ratio = (aTime - getStart()) / (double) getLen();
             val = interpolate(fromVal, toVal, ratio);
         }
         return val;
@@ -402,7 +468,11 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Sets preferred size values.
      */
-    public ViewAnim setPrefSize(double aW, double aH)  { setPrefWidth(aW); return setPrefHeight(aH); }
+    public ViewAnim setPrefSize(double aW, double aH)
+    {
+        setPrefWidth(aW);
+        return setPrefHeight(aH);
+    }
 
     /**
      * Sets the TransX value.
@@ -447,7 +517,10 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Returns the end value for given key.
      */
-    public ViewAnim setValue(String aKey, Object aValue)  { return setValue(aKey, null, aValue); }
+    public ViewAnim setValue(String aKey, Object aValue)
+    {
+        return setValue(aKey, null, aValue);
+    }
 
     /**
      * Returns the end value for given key.
@@ -459,11 +532,11 @@ public class ViewAnim implements XMLArchiver.Archivable {
         _endVals.put(aKey, aVal1);
 
         // If Start value provided, set it
-        if (aVal0!=null)
+        if (aVal0 != null)
             setStartVal(aKey, aVal0);
 
-        // If Start value missing, set it from any parent or view
-        else if (_parent!=null && getStartVal(aKey)==null)
+            // If Start value missing, set it from any parent or view
+        else if (_parent != null && getStartVal(aKey) == null)
             _parent.setValue(aKey, findStartValue(aKey, aVal1));
 
         // Return
@@ -477,13 +550,13 @@ public class ViewAnim implements XMLArchiver.Archivable {
     {
         // Iterate up parents to see if start val has been set in previous key frame
         Object sval = null;
-        for (ViewAnim par=_parent; par!=null && sval==null;par=par._parent)
+        for (ViewAnim par = _parent; par != null && sval == null; par = par._parent)
             sval = par.getEndVal(aKey);
 
         // If not found, get from current view
-        if (sval==null) {
+        if (sval == null) {
             sval = _view.getPropValue(aKey);
-            if (sval==null) {
+            if (sval == null) {
                 if (aVal instanceof Integer) sval = 0;
                 else if (aVal instanceof Double) sval = 0d;
                 else if (aVal instanceof Color) sval = Color.CLEAR;
@@ -498,7 +571,10 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Sets the loop count.
      */
-    public ViewAnim setLoops()  { return setLoopCount(Short.MAX_VALUE); }
+    public ViewAnim setLoops()
+    {
+        return setLoopCount(Short.MAX_VALUE);
+    }
 
     /**
      * Returns the LoopCount.
@@ -508,19 +584,26 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Sets the loop count.
      */
-    public ViewAnim setLoopCount(int aValue)  { _loopCount = aValue; return this; }
+    public ViewAnim setLoopCount(int aValue)
+    {
+        _loopCount = aValue;
+        return this;
+    }
 
     /**
      * Returns the consumer to be called on each frame.
      */
-    public Runnable getOnFrame()  { return _parent!=null? _parent.getOnFrame() : _onFrame; }
+    public Runnable getOnFrame()
+    {
+        return _parent != null ? _parent.getOnFrame() : _onFrame;
+    }
 
     /**
      * Sets the consumer to be called on each frame.
      */
     public ViewAnim setOnFrame(Runnable aRun)
     {
-        if (_parent!=null) _parent.setOnFrame(aRun);
+        if (_parent != null) _parent.setOnFrame(aRun);
         else _onFrame = aRun;
         return this;
     }
@@ -528,19 +611,25 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Sets the consumer to be called on each frame.
      */
-    public ViewAnim setOnFrame(Consumer <ViewAnim> aCall)  { return setOnFrame(() -> aCall.accept(this)); }
+    public ViewAnim setOnFrame(Consumer<ViewAnim> aCall)
+    {
+        return setOnFrame(() -> aCall.accept(this));
+    }
 
     /**
      * Returns the function to be called when anim is finished.
      */
-    public Runnable getOnFinish()  { return _parent!=null? _parent.getOnFinish(): _onFinish; }
+    public Runnable getOnFinish()
+    {
+        return _parent != null ? _parent.getOnFinish() : _onFinish;
+    }
 
     /**
      * Sets a function to be called when anim is finished.
      */
     public ViewAnim setOnFinish(Runnable aRun)
     {
-        if (_parent!=null) _parent.setOnFinish(aRun);
+        if (_parent != null) _parent.setOnFinish(aRun);
         else _onFinish = aRun;
         return this;
     }
@@ -548,31 +637,46 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Sets a function to be called when anim is finished.
      */
-    public ViewAnim setOnFinish(Consumer <ViewAnim> aFinish)  { return setOnFinish(() -> aFinish.accept(this)); }
+    public ViewAnim setOnFinish(Consumer<ViewAnim> aFinish)
+    {
+        return setOnFinish(() -> aFinish.accept(this));
+    }
 
     /**
      * Sets anim to finish when cleared.
      */
     public ViewAnim needsFinish()
     {
-        if (_parent!=null) _parent.needsFinish();
+        if (_parent != null) _parent.needsFinish();
         return this;
     }
 
     /**
      * Sets whether animation should start fast.
      */
-    public ViewAnim startFast()  { setInterpolator(Interpolator.EASE_OUT); return this; }
+    public ViewAnim startFast()
+    {
+        setInterpolator(Interpolator.EASE_OUT);
+        return this;
+    }
 
     /**
      * Sets animation to run with linear interpolator.
      */
-    public ViewAnim setLinear()  { setInterpolator(Interpolator.LINEAR); return this; }
+    public ViewAnim setLinear()
+    {
+        setInterpolator(Interpolator.LINEAR);
+        return this;
+    }
 
     /**
      * Sets whether to ease animation in
      */
-    public ViewAnim setInterpolator(Interpolator anInterp)  { _interp = anInterp; return this; }
+    public ViewAnim setInterpolator(Interpolator anInterp)
+    {
+        _interp = anInterp;
+        return this;
+    }
 
     /**
      * Clears the anim.
@@ -580,17 +684,26 @@ public class ViewAnim implements XMLArchiver.Archivable {
     public ViewAnim clear()
     {
         // If parent, have it do clear instead
-        if (_parent!=null) return getRoot().clear().getAnim(_end);
+        if (_parent != null)
+            return getRoot().clear().getAnim(_end);
 
         // If needs finish, do finish
         if (_needsFinish) {
-            finish(); _needsFinish = false;
+            finish();
+            _needsFinish = false;
         }
 
         // Do clear
-        stop(); _loopCount = 0; _onFinish = null; _interp = Interpolator.EASE_BOTH;
-        _time = 0; _maxTime = -1; _onFrame = _onFinish = null;
-        _keys.clear(); _endVals.clear(); _anims.clear();
+        stop();
+        _loopCount = 0;
+        _onFinish = null;
+        _interp = Interpolator.EASE_BOTH;
+        _time = 0;
+        _maxTime = -1;
+        _onFrame = _onFinish = null;
+        _keys.clear();
+        _endVals.clear();
+        _anims.clear();
         return this;
     }
 
@@ -600,10 +713,13 @@ public class ViewAnim implements XMLArchiver.Archivable {
     public ViewAnim finish()
     {
         // If parent, have it do finish instead
-        if (_parent!=null) { getRoot().finish(); return this; }
+        if (_parent != null) {
+            getRoot().finish();
+            return this;
+        }
 
         // Do finish
-        int maxTime = getMaxTime()*(getLoopCount() + 1);
+        int maxTime = getMaxTime() * (getLoopCount() + 1);
         setTime(maxTime);
         return this;
     }
@@ -611,7 +727,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
     /**
      * Watches given View for changes and registers animation.
      */
-    public void startAutoRegisterChanges(String ... theProps)
+    public void startAutoRegisterChanges(String... theProps)
     {
         _autoRegisterChangesListener = pc -> autoRegisterPropChange(pc);
         _autoRegisterChanges = new ArrayList<>();
@@ -652,7 +768,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
     private PropChangeListener _autoRegisterChangesListener;
 
     // List of changes encountered by AutoRegisterChanges PropChangeListener
-    private List<PropChange>  _autoRegisterChanges;
+    private List<PropChange> _autoRegisterChanges;
 
     /**
      * Standard toString implementation.
@@ -661,11 +777,11 @@ public class ViewAnim implements XMLArchiver.Archivable {
     {
         StringBuffer sb = StringUtils.toString(this, "Start", "End");
         String keys = ListUtils.joinStrings(getKeys(), ",");
-        if (keys.length()>0) StringUtils.toStringAdd(sb, "Keys", keys);
-        if (_loopCount==Short.MAX_VALUE) StringUtils.toStringAdd(sb, "Loops", "true");
-        else if (_loopCount>0) StringUtils.toStringAdd(sb, "LoopCount", _loopCount);
+        if (keys.length() > 0) StringUtils.toStringAdd(sb, "Keys", keys);
+        if (_loopCount == Short.MAX_VALUE) StringUtils.toStringAdd(sb, "Loops", "true");
+        else if (_loopCount > 0) StringUtils.toStringAdd(sb, "LoopCount", _loopCount);
         if (isRoot()) sb.append(" for ").append(_view.getClass().getSimpleName());
-        if (isRoot() && _view.getName()!=null) sb.append(' ').append(_view.getName());
+        if (isRoot() && _view.getName() != null) sb.append(' ').append(_view.getName());
         for (ViewAnim va : _anims) sb.append("\n    " + va.toString().replace("\n", "\n    "));
         return sb.toString();
     }
@@ -679,7 +795,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
         XMLElement e = new XMLElement("Anim");
 
         // Unarchive Loops, LoopCount
-        if (getLoopCount()>0)
+        if (getLoopCount() > 0)
             e.add("LoopCount", getLoopCount());
 
         // Archive KeyValues
@@ -698,7 +814,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
             kvxml.add("Time", theAnim.getEnd());
             kvxml.add("Key", key);
             Object val = theAnim.getEndVal(key);
-            if (val instanceof Color) val = '#' + ((Color)val).toHexString();
+            if (val instanceof Color) val = '#' + ((Color) val).toHexString();
             kvxml.add("Value", val);
             aXML.add(kvxml);
         }
@@ -714,7 +830,10 @@ public class ViewAnim implements XMLArchiver.Archivable {
     public ViewAnim fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Legacy
-        if (!anElement.getName().equals("Anim")) { fromXMLLegacy(anElement); return this; }
+        if (!anElement.getName().equals("Anim")) {
+            fromXMLLegacy(anElement);
+            return this;
+        }
 
         // Unarchive LoopCount
         if (anElement.hasAttribute("LoopCount"))
@@ -722,7 +841,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
 
         // Unarchive KeyValue records
         ViewAnim anim = this;
-        for (int i=anElement.indexOf("KeyValue");i>=0;i=anElement.indexOf("KeyValue",i+1)) {
+        for (int i = anElement.indexOf("KeyValue"); i >= 0; i = anElement.indexOf("KeyValue", i + 1)) {
             XMLElement keyVal = anElement.get(i);
 
             // Get time and make sure we have right anim
@@ -731,7 +850,8 @@ public class ViewAnim implements XMLArchiver.Archivable {
 
             // Get key and value
             String key = keyVal.getAttributeValue("Key");
-            String valStr = keyVal.getAttributeValue("Value"); Object val = null;
+            String valStr = keyVal.getAttributeValue("Value");
+            Object val = null;
             if (valStr.startsWith("#")) val = new Color(valStr);
             else if (valStr.equalsIgnoreCase("true")) val = Boolean.TRUE;
             else if (valStr.equalsIgnoreCase("false")) val = Boolean.FALSE;
@@ -749,11 +869,14 @@ public class ViewAnim implements XMLArchiver.Archivable {
     public void fromXMLLegacy(XMLElement anElement)
     {
         ViewAnim anim = this;
-        for (int i=anElement.indexOf("KeyFrame");i>=0;i=anElement.indexOf("KeyFrame",i+1)) {
-            XMLElement kframe = anElement.get(i); int time = kframe.getAttributeIntValue("time");
+        for (int i = anElement.indexOf("KeyFrame"); i >= 0; i = anElement.indexOf("KeyFrame", i + 1)) {
+            XMLElement kframe = anElement.get(i);
+            int time = kframe.getAttributeIntValue("time");
             anim = anim.getAnim(time);
-            for (int j=kframe.indexOf("KeyValue");j>=0;j=kframe.indexOf("KeyValue",j+1)) { XMLElement kval = kframe.get(j);
-                String key = kval.getAttributeValue("key"); double val = kval.getAttributeFloatValue("value");
+            for (int j = kframe.indexOf("KeyValue"); j >= 0; j = kframe.indexOf("KeyValue", j + 1)) {
+                XMLElement kval = kframe.get(j);
+                String key = kval.getAttributeValue("key");
+                double val = kval.getAttributeFloatValue("value");
                 anim.setValue(key, val);
             }
             if (kframe.getAttributeBoolValue("Loops", false)) setLoops();
@@ -768,10 +891,11 @@ public class ViewAnim implements XMLArchiver.Archivable {
     {
         // If anim, play
         ViewAnim anim = aView.getAnim(-1);
-        if (anim!=null) anim.play();
+        if (anim != null) anim.play();
 
         // If parent, forward for children
-        if (aView instanceof ParentView) { ParentView par = (ParentView)aView;
+        if (aView instanceof ParentView) {
+            ParentView par = (ParentView) aView;
             for (View child : par.getChildren())
                 playDeep(child);
         }
@@ -784,10 +908,11 @@ public class ViewAnim implements XMLArchiver.Archivable {
     {
         // If anim, stop
         ViewAnim anim = aView.getAnim(-1);
-        if (anim!=null) anim.stop();
+        if (anim != null) anim.stop();
 
         // If parent, forward for children
-        if (aView instanceof ParentView) { ParentView par = (ParentView)aView;
+        if (aView instanceof ParentView) {
+            ParentView par = (ParentView) aView;
             for (View child : par.getChildren())
                 stopDeep(child);
         }
@@ -800,7 +925,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
     {
         // If anim, return time
         ViewAnim anim = aView.getAnim(-1);
-        if (anim!=null)
+        if (anim != null)
             return anim.getTime();
 
         // If parent, forward for children
@@ -822,20 +947,13 @@ public class ViewAnim implements XMLArchiver.Archivable {
     {
         // If anim, setTime
         ViewAnim anim = aView.getAnim(-1);
-        if (anim!=null) anim.setTime(aValue);
+        if (anim != null) anim.setTime(aValue);
 
         // If parent, forward for children
-        if (aView instanceof ParentView) { ParentView par = (ParentView)aView;
+        if (aView instanceof ParentView) {
+            ParentView par = (ParentView) aView;
             for (View child : par.getChildren())
                 setTimeDeep(child, aValue);
         }
-    }
-
-    /**
-     * Sets the alignment.
-     */
-    public static void setAlign(View aView, Pos aPos, int aTime)
-    {
-        ViewAnimUtils.setAlign(aView, aPos, aTime);
     }
 }
