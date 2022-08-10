@@ -2,58 +2,70 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import java.util.*;
-import snap.util.*;
-import snap.web.*;
+
+import snap.util.FormatUtils;
+import snap.util.Loadable;
+import snap.util.SnapUtils;
+import snap.util.StringUtils;
+import snap.web.WebFile;
+import snap.web.WebURL;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents an Image, such as JPEG, PNG, GIF, TIFF, BMP.
  */
 public abstract class Image implements Loadable {
 
-     // The image source
-     private Object  _source;
-     
-     // The image source URL
-     private WebURL  _url;
-     
-     // The image type
-     private String  _type;
-     
-     // The cached width/height
-     private double  _width = -1, _height = -1;
-     
-     // The pixel width/height
-     private int  _pw = -1, _ph = -1;
-     
-     // The X/Y DPI
-     private double  _dpiX = -1, _dpiY = -1;
-     
-     // Whether image has alpha
-     private Boolean  _hasAlpha;
-     
-     // The image source bytes
-     private byte  _bytes[];
-     
-     // Whether the image is loaded
-     private boolean  _loaded = true;
-     
-     // The decoded bytes
-     private byte  _bytesRGB[], _bytesRGBA[];
+    // The image source
+    private Object  _source;
 
-     // The image set, if animated image
-     private ImageSet  _imgSet;
+    // The image source URL
+    private WebURL  _url;
+
+    // The image type
+    private String  _type;
+
+    // The cached width/height
+    private double  _width = -1, _height = -1;
+
+    // The pixel width/height
+    private int  _pw = -1, _ph = -1;
+
+    // The X/Y DPI
+    private double  _dpiX = -1, _dpiY = -1;
+
+    // Whether image has alpha
+    private Boolean  _hasAlpha;
+
+    // The image source bytes
+    private byte[]  _bytes;
+
+    // Whether the image is loaded
+    private boolean  _loaded = true;
+
+    // The decoded bytes
+    private byte[]  _bytesRGB;
+
+    // The decoded bytes with alpha
+    private byte[]  _bytesRGBA;
+
+    // The image set, if animated image
+    private ImageSet  _imgSet;
 
     // Loadable Support
     private Loadable.Support  _loadLsnrs = new Loadable.Support(this);
 
     // Supported image type strings
-    private static String     _types[] = { "gif", "jpg", "jpeg", "png", "tif", "tiff", "bmp" };
+    private static String[]  _types = {"gif", "jpg", "jpeg", "png", "tif", "tiff", "bmp"};
 
     /**
      * Constructor.
      */
-    protected Image()  { }
+    protected Image()
+    {
+    }
 
     /**
      * Returns the name of image (if from URL/file).
@@ -61,7 +73,7 @@ public abstract class Image implements Loadable {
     public String getName()
     {
         WebURL url = getSourceURL();
-        return url!=null ? url.getPathName() : null;
+        return url != null ? url.getPathName() : null;
     }
 
     /**
@@ -74,7 +86,12 @@ public abstract class Image implements Loadable {
      */
     protected void setSource(Object aSource)
     {
-        _source = aSource;
+        // Probably shouldn't allow this here
+        if (aSource instanceof byte[])
+            _bytes = (byte[]) aSource;
+
+        // Set source
+        else _source = aSource;
     }
 
     /**
@@ -82,8 +99,13 @@ public abstract class Image implements Loadable {
      */
     public WebURL getSourceURL()
     {
-        if (_url!=null) return _url;
-        return _url = WebURL.getURL(_source);
+        // If already set, just return
+        if (_url != null) return _url;
+        if (_source == null) return null;
+
+        // Get, set, return
+        WebURL url = WebURL.getURL(_source);
+        return _url = url;
     }
 
     /**
@@ -91,7 +113,8 @@ public abstract class Image implements Loadable {
      */
     public double getWidth()
     {
-        return _width>=0 ? _width : (_width=getWidthImpl());
+        if (_width >= 0) return _width;
+        return _width = getWidthImpl();
     }
 
     /**
@@ -99,7 +122,8 @@ public abstract class Image implements Loadable {
      */
     public double getHeight()
     {
-        return _height>=0 ? _height : (_height=getHeightImpl());
+        if (_height >= 0) return _height;
+        return _height = getHeightImpl();
     }
 
     /**
@@ -107,7 +131,8 @@ public abstract class Image implements Loadable {
      */
     public int getPixWidth()
     {
-        return _pw>=0 ? _pw : (_pw = getPixWidthImpl());
+        if (_pw >= 0) return _pw;
+        return _pw = getPixWidthImpl();
     }
 
     /**
@@ -115,7 +140,8 @@ public abstract class Image implements Loadable {
      */
     public int getPixHeight()
     {
-        return _ph>=0 ? _ph : (_ph = getPixHeightImpl());
+        if (_ph >= 0) return _ph;
+        return _ph = getPixHeightImpl();
     }
 
     /**
@@ -123,7 +149,8 @@ public abstract class Image implements Loadable {
      */
     public double getDPIX()
     {
-        return _dpiX>=0 ? _dpiX : (_dpiX=getDPIXImpl());
+        if (_dpiX >= 0) return _dpiX;
+        return _dpiX = getDPIXImpl();
     }
 
     /**
@@ -131,7 +158,8 @@ public abstract class Image implements Loadable {
      */
     public double getDPIY()
     {
-        return _dpiY>=0 ? _dpiY : (_dpiY=getDPIYImpl());
+        if (_dpiY >= 0) return _dpiY;
+        return _dpiY = getDPIYImpl();
     }
 
     /**
@@ -139,7 +167,8 @@ public abstract class Image implements Loadable {
      */
     public boolean hasAlpha()
     {
-        return _hasAlpha!=null ? _hasAlpha : (_hasAlpha=hasAlphaImpl());
+        if (_hasAlpha != null) return _hasAlpha;
+        return _hasAlpha = hasAlphaImpl();
     }
 
     /**
@@ -152,7 +181,7 @@ public abstract class Image implements Loadable {
      */
     protected double getWidthImpl()
     {
-        return getPixWidth()*72/getDPIX();
+        return getPixWidth() * 72 / getDPIX();
     }
 
     /**
@@ -160,7 +189,7 @@ public abstract class Image implements Loadable {
      */
     protected double getHeightImpl()
     {
-        return getPixHeight()*72/getDPIY();
+        return getPixHeight() * 72 / getDPIY();
     }
 
     /**
@@ -193,7 +222,12 @@ public abstract class Image implements Loadable {
      */
     public byte[] getBytes()
     {
-        return _bytes!=null ? _bytes : (_bytes=getBytesImpl());
+        // If already set, just return
+        if (_bytes != null) return _bytes;
+
+        // Get, set, return
+        byte[] bytes = getBytesImpl();
+        return _bytes = bytes;
     }
 
     /**
@@ -203,16 +237,16 @@ public abstract class Image implements Loadable {
     {
         // Get bytes for URL and return
         WebURL url = getSourceURL();
-        if (url!=null)
+        if (url != null)
             return url.getBytes();
 
         // Get bytes for source and return
-        byte bytes[] = SnapUtils.getBytes(_source);
-        if (bytes!=null)
+        byte[] bytes = SnapUtils.getBytes(_source);
+        if (bytes != null)
             return bytes;
 
         // If image created from scratch or native, generate bytes
-        if (getNative()!=null)
+        if (getNative() != null)
             return hasAlpha() ? getBytesPNG() : getBytesJPEG();
 
         // Complain and return
@@ -225,7 +259,12 @@ public abstract class Image implements Loadable {
      */
     public String getType()
     {
-        return _type!=null ? _type : (_type=ImageUtils.getImageType(getBytes()));
+        // If already set, just return
+        if (_type != null) return _type;
+
+        // Get, set, return
+        String type = ImageUtils.getImageType(getBytes());
+        return _type = type;
     }
 
     /**
@@ -239,7 +278,7 @@ public abstract class Image implements Loadable {
     public void setLoaded(boolean aValue)
     {
         // If already set, just return
-        if (aValue==_loaded) return;
+        if (aValue == _loaded) return;
         _loaded = aValue;
 
         // If setting, reset size, fire prop change, fire load listeners
@@ -259,7 +298,8 @@ public abstract class Image implements Loadable {
      */
     public byte[] getBytesRGB()
     {
-        return _bytesRGB!=null ? _bytesRGB : (_bytesRGB=getBytesRGBImpl());
+        if (_bytesRGB != null) return _bytesRGB;
+        return _bytesRGB = getBytesRGBImpl();
     }
 
     /**
@@ -267,7 +307,8 @@ public abstract class Image implements Loadable {
      */
     public byte[] getBytesRGBA()
     {
-        return _bytesRGBA!=null ? _bytesRGBA : (_bytesRGBA=getBytesRGBAImpl());
+        if (_bytesRGBA != null) return _bytesRGBA;
+        return _bytesRGBA = getBytesRGBAImpl();
     }
 
     /**
@@ -314,7 +355,7 @@ public abstract class Image implements Loadable {
      */
     public double getScale()
     {
-        return getDPIX()!=72 ? getDPIX()/72 : 1;
+        return getDPIX() != 72 ? getDPIX() / 72 : 1;
     }
 
     /**
@@ -323,7 +364,8 @@ public abstract class Image implements Loadable {
     public Image cloneForSizeAndScale(double aW, double aH, double aScale)
     {
         Image img2 = Image.getImageForSizeAndScale(aW, aH, hasAlpha(), aScale);
-        Painter pntr = img2.getPainter(); pntr.setImageQuality(1);
+        Painter pntr = img2.getPainter();
+        pntr.setImageQuality(1);
         pntr.drawImage(this, 0, 0, aW, aH);
         return img2;
     }
@@ -333,8 +375,8 @@ public abstract class Image implements Loadable {
      */
     public Image getImageScaled(double aRatio)
     {
-        int newW = (int) Math.round(getPixWidth()*aRatio);
-        int newH = (int) Math.round(getPixHeight()*aRatio);
+        int newW = (int) Math.round(getPixWidth() * aRatio);
+        int newH = (int) Math.round(getPixHeight() * aRatio);
         return getImageForSize(newW, newH);
     }
 
@@ -357,7 +399,7 @@ public abstract class Image implements Loadable {
      */
     public Image getSubimage(double aX, double aY, double aW, double aH)
     {
-        Image img2 = Image.get((int)Math.round(aW), (int)Math.round(aH), hasAlpha());
+        Image img2 = Image.get((int) Math.round(aW), (int) Math.round(aH), hasAlpha());
         img2.getPainter().drawImage(this, aX, aY, aW, aH, 0, 0, aW, aH);
         return img2;
     }
@@ -368,7 +410,8 @@ public abstract class Image implements Loadable {
     public Image getFramedImage(int aW, int aH, double aX, double aY)
     {
         Image img2 = Image.get(aW, aH, hasAlpha());
-        Painter pntr = img2.getPainter(); pntr.drawImage(this, aX, aY);
+        Painter pntr = img2.getPainter();
+        pntr.drawImage(this, aX, aY);
         return img2;
     }
 
@@ -377,9 +420,10 @@ public abstract class Image implements Loadable {
      */
     public Image getSpriteSheetFrames(int aCount)
     {
-        List <Image> images = new ArrayList(aCount); int w = getPixWidth()/aCount;
-        for (int i=0;i<aCount;i++) {
-            Image img = getSubimage(i*w,0,w,getPixHeight());
+        List<Image> images = new ArrayList<>(aCount);
+        int w = getPixWidth() / aCount;
+        for (int i = 0; i < aCount; i++) {
+            Image img = getSubimage(i * w, 0, w, getPixHeight());
             images.add(img);
         }
         ImageSet iset = new ImageSet(images);
@@ -389,36 +433,69 @@ public abstract class Image implements Loadable {
     /**
      * Blurs the image by mixing pixels with those around it to given radius.
      */
-    public void blur(int aRad, Color aColor)  { System.err.println("Image.blur: Not impl"); }
+    public void blur(int aRad, Color aColor)
+    {
+        System.err.println("Image.blur: Not impl");
+    }
 
     /**
      * Embosses the image by mixing pixels with those around it to given radius.
      */
-    public void emboss(double aRadius, double anAzi, double anAlt)  { System.err.println("Image.emboss: Not impl"); }
+    public void emboss(double aRadius, double anAzi, double anAlt)
+    {
+        System.err.println("Image.emboss: Not impl");
+    }
 
     /**
      * Adds a load listener (cleared automatically when loaded).
      */
-    public void addLoadListener(Runnable aLoadLsnr)  { _loadLsnrs.addLoadListener(aLoadLsnr); }
+    public void addLoadListener(Runnable aLoadLsnr)
+    {
+        _loadLsnrs.addLoadListener(aLoadLsnr);
+    }
 
     /**
      * Triggers calls to load listeners.
      */
-    public void fireLoadListeners()  { _loadLsnrs.fireListeners(); }
+    public void fireLoadListeners()
+    {
+        _loadLsnrs.fireListeners();
+    }
 
     /**
      * Standard toString implementation.
      */
     public String toString()
     {
-        StringBuffer sb = new StringBuffer(getClass().getSimpleName()).append(" {");
+        String className = getClass().getSimpleName();
+        String propStrings = toStringProps();
+        return className + " { " + propStrings + " }";
+    }
+
+    /**
+     * Standard toStringProps implementation.
+     */
+    public String toStringProps()
+    {
+        // Append Width, Height
+        StringBuffer sb = new StringBuffer();
         sb.append(" Width:").append(FormatUtils.formatNum("#.##", getWidth()));
         sb.append(", Height:").append(FormatUtils.formatNum("#.##", getHeight()));
-        if (getPixWidth()!=getWidth()) sb.append(", PixWidth:").append(getPixWidth());
-        if (getPixHeight()!=getHeight()) sb.append(", PixHeight:").append(getPixHeight());
-        if (getName()!=null) sb.append(", Name:\"").append(getName()).append("\"");
-        if (getSourceURL()!=null) sb.append(", URL:").append(getSourceURL());
-        return sb.append(" }").toString();
+
+        // Append PixWidth, PixHeight
+        if (getPixWidth() != getWidth())
+            sb.append(", PixWidth:").append(getPixWidth());
+        if (getPixHeight() != getHeight())
+            sb.append(", PixHeight:").append(getPixHeight());
+
+        // Apend Name, SourceURL
+        if (getName() != null)
+            sb.append(", Name:\"").append(getName()).append("\"");
+        if (getSourceURL() != null)
+            sb.append(", URL:").append(getSourceURL());
+
+        // Return
+        return sb.toString();
     }
 
     /**
@@ -443,9 +520,9 @@ public abstract class Image implements Loadable {
     public static Image get(Class aClass, String aPath)
     {
         WebURL url = WebURL.getURL(aClass, aPath);
-        if (url==null)
+        if (url == null)
             url = WebURL.getURL(aClass, "pkg.images/" + aPath);
-        return url!=null ? Image.get(url) : null;
+        return url != null ? Image.get(url) : null;
     }
 
     /**
@@ -454,17 +531,19 @@ public abstract class Image implements Loadable {
     public static Image get(WebURL aBaseURL, String aName)
     {
         // If either param is null, just return
-        if (aBaseURL==null || aName==null) return null;
+        if (aBaseURL == null || aName == null) return null;
 
         // Get BaseURL directory
-        WebFile file = aBaseURL.getFile(); if (file==null) return null;
-        WebFile dir = file.isDir() ? file : file.getParent(); if (dir==null) return null;
+        WebFile file = aBaseURL.getFile();
+        if (file == null) return null;
+        WebFile dir = file.isDir() ? file : file.getParent();
+        if (dir == null) return null;
 
         // Get directory file for name
         WebFile ifile = dir.getFile(aName);
-        if (ifile==null)
+        if (ifile == null)
             ifile = dir.getFile("pkg.images/" + aName);
-        if (ifile==null) return null;
+        if (ifile == null) return null;
 
         // Return image for file
         return get(ifile);
@@ -505,8 +584,8 @@ public abstract class Image implements Loadable {
     /**
      * Returns whether image reader can read the file provided in the byte array.
      */
-    public static boolean canRead(byte bytes[])
+    public static boolean canRead(byte[] bytes)
     {
-        return ImageUtils.getImageType(bytes)!=null;
+        return ImageUtils.getImageType(bytes) != null;
     }
 }
