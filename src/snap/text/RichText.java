@@ -2,9 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-
 import java.util.*;
-
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -13,42 +11,35 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.util.*;
-import snap.web.*;
 
 /**
  * This class represents a block of text (lines).
  */
 public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable {
 
-    // The Source of the current content
-    Object _source;
-
-    // The URL of the file that provided the text
-    WebURL _sourceURL;
-
     // The TextDocLine in this text
-    List<RichTextLine> _lines = new ArrayList();
+    protected List<RichTextLine>  _lines = new ArrayList<>();
 
     // The length of this text
-    int _length;
+    protected int  _length;
 
     // The default text style for this text
-    TextStyle _defStyle = TextStyle.DEFAULT;
+    protected TextStyle  _defStyle = TextStyle.DEFAULT;
 
     // The default line style for this text
-    TextLineStyle _defLineStyle = TextLineStyle.DEFAULT;
+    protected TextLineStyle  _defLineStyle = TextLineStyle.DEFAULT;
 
     // Whether text only allows a single font, color, etc.
-    boolean _plainText;
+    protected boolean  _plainText;
 
     // Whether property change is enabled
-    boolean _propChangeEnabled = true;
+    protected boolean  _propChangeEnabled = true;
 
     // The width of the rich text
-    double _width = -1;
+    protected double  _width = -1;
 
     // The PropChangeSupport
-    PropChangeSupport _pcs = PropChangeSupport.EMPTY;
+    protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
 
     // Constants for properties
     public static final String Chars_Prop = "Chars";
@@ -70,60 +61,6 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
     {
         this();
         addCharsWithStyleValues(theChars, theAttrs);
-    }
-
-    /**
-     * Returns the source for the current text content.
-     */
-    public Object getSource()  { return _source; }
-
-    /**
-     * Loads the text from the given source.
-     */
-    public void setSource(Object aSource)
-    {
-        // Declare text/url vars
-        String text = null;
-        WebURL url;
-
-        // Try WebFile
-        if (aSource instanceof WebFile) {
-            WebFile file = (WebFile) aSource;
-            _source = aSource;
-            text = file.getText();
-            url = file.getURL();
-        }
-
-        // Try WebURL
-        else {
-            url = WebURL.getURL(aSource);
-            if (url != null) {
-                _source = aSource;
-                text = url.getText();
-            }
-        }
-
-        // Try to get text directly from source
-        if (text == null)
-            text = SnapUtils.getText(aSource);
-
-        // Set text and source
-        setString(text);
-        _sourceURL = url;
-    }
-
-    /**
-     * Returns the source URL.
-     */
-    public WebURL getSourceURL()  { return _sourceURL; }
-
-    /**
-     * Returns the source file.
-     */
-    public WebFile getSourceFile()
-    {
-        WebURL surl = getSourceURL();
-        return surl != null ? surl.getFile() : null;
     }
 
     /**
@@ -915,7 +852,7 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
         }
 
         // Reset lines array and length
-        clone._lines = new ArrayList(getLineCount());
+        clone._lines = new ArrayList<>(getLineCount());
         clone._length = 0;
 
         // Copy lines deep
@@ -1071,13 +1008,15 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
 
                 // Unarchive underline element
             else if (e.getName().equals("underline")) {
-                if (e.getAttributeIntValue("style") < 0) style = style.copyFor(TextStyle.UNDERLINE_KEY, null);
+                if (e.getAttributeIntValue("style") < 0)
+                    style = style.copyFor(TextStyle.UNDERLINE_KEY, null);
                 else style = style.copyFor(TextStyle.UNDERLINE_KEY, 1);
             }
 
             // Unarchive outline element
             else if (e.getName().equals("outline")) {
-                if (e.getAttributeBoolValue("off")) style = style.copyFor(TextStyle.BORDER_KEY, null);
+                if (e.getAttributeBoolValue("off"))
+                    style = style.copyFor(TextStyle.BORDER_KEY, null);
                 else {
                     double swidth = e.getAttributeFloatValue("stroke", 1);
                     String cstr = e.getAttributeValue("color");
@@ -1111,7 +1050,8 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
         }
 
         // If no string was read, apply attributes anyway
-        if (length() == 0) getLine(0).getRun(0).setStyle(style);
+        if (length() == 0)
+            getLine(0).getRun(0).setStyle(style);
 
         // Return this xstring
         return this;
@@ -1149,7 +1089,8 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
 
         public void doChange(Object oldValue, Object newValue)
         {
-            if (oldValue != null) removeChars(getIndex(), getIndex() + ((CharSequence) oldValue).length());
+            if (oldValue != null)
+                removeChars(getIndex(), getIndex() + ((CharSequence) oldValue).length());
             else addChars((CharSequence) newValue, null, getIndex());
         }
 

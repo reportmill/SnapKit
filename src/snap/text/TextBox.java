@@ -18,6 +18,12 @@ import snap.web.*;
  */
 public class TextBox {
 
+    // The Source of the current content
+    private Object  _source;
+
+    // The URL of the file that provided the text
+    private WebURL  _sourceURL;
+
     // The RichText
     private RichText  _text;
 
@@ -46,7 +52,7 @@ public class TextBox {
     protected double  _fontScale = 1;
 
     // The bounds path
-    private Shape  _bpath;
+    private Shape  _boundsPath;
 
     // The lines in this text
     private List<TextBoxLine>  _lines = new ArrayList<>();
@@ -58,7 +64,7 @@ public class TextBox {
     private int  _updStart, _updEnd, _lastLen;
 
     // A Listener to catch RichText PropChanges
-    private PropChangeListener _richTextLsnr = pc -> richTextDidPropChange(pc);
+    private PropChangeListener  _richTextLsnr = pc -> richTextDidPropChange(pc);
 
     /**
      * Constructor.
@@ -79,40 +85,37 @@ public class TextBox {
     }
 
     /**
-     * Returns the source of current content (URL, File, String path, etc.)
+     * Returns the source for the current text content.
      */
-    public Object getSource()
-    {
-        RichText richText = getRichText();
-        return richText.getSource();
-    }
+    public Object getSource()  { return _source; }
 
     /**
      * Loads the text from the given source.
      */
     public void setSource(Object aSource)
     {
-        RichText richText = getRichText();
-        richText.setSource(aSource);
-        setNeedsUpdateAll();
+        // Get/Set URL from Source
+        WebURL url = WebURL.getURL(aSource);
+        _source = url != null ? aSource : null;
+        _sourceURL = url;
+
+        // Get/set text from source
+        String text = SnapUtils.getText(aSource);
+        setString(text);
     }
 
     /**
      * Returns the source URL.
      */
-    public WebURL getSourceURL()
-    {
-        RichText richText = getRichText();
-        return richText.getSourceURL();
-    }
+    public WebURL getSourceURL()  { return _sourceURL; }
 
     /**
      * Returns the source file.
      */
     public WebFile getSourceFile()
     {
-        RichText richText = getRichText();
-        return richText.getSourceFile();
+        WebURL sourceURL = getSourceURL();
+        return sourceURL != null ? sourceURL.getFile() : null;
     }
 
     /**
@@ -141,42 +144,27 @@ public class TextBox {
     /**
      * Returns the X location.
      */
-    public double getX()
-    {
-        return _x;
-    }
+    public double getX()  { return _x; }
 
     /**
      * Sets the X location.
      */
-    public void setX(double anX)
-    {
-        _x = anX;
-    }
+    public void setX(double anX)  { _x = anX; }
 
     /**
      * Returns the Y location.
      */
-    public double getY()
-    {
-        return _y;
-    }
+    public double getY()  { return _y; }
 
     /**
      * Sets the Y location.
      */
-    public void setY(double aY)
-    {
-        _y = aY;
-    }
+    public void setY(double aY)  { _y = aY; }
 
     /**
      * Returns the width.
      */
-    public double getWidth()
-    {
-        return _width;
-    }
+    public double getWidth()  { return _width; }
 
     /**
      * Sets the width.
@@ -191,10 +179,7 @@ public class TextBox {
     /**
      * Returns the height.
      */
-    public double getHeight()
-    {
-        return _height;
-    }
+    public double getHeight()  { return _height; }
 
     /**
      * Sets the width.
@@ -355,12 +340,12 @@ public class TextBox {
     /**
      * Returns the bounds path.
      */
-    public Shape getBoundsPath()  { return _bpath; }
+    public Shape getBoundsPath()  { return _boundsPath; }
 
     /**
      * Sets the bounds path.
      */
-    public void setBoundsPath(Shape aPath)  { _bpath = aPath; }
+    public void setBoundsPath(Shape aPath)  { _boundsPath = aPath; }
 
     /**
      * Returns the number of characters in the text.
@@ -705,7 +690,7 @@ public class TextBox {
             // Add TextBoxLine(s) for RichTextLine
             while (lstart < rtl.length()) {
                 TextBoxLine line = createLine(rtl, lstart, lindex);
-                if ((isLinked() || _bpath != null) && line.getMaxY() > getMaxY()) {
+                if ((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()) {
                     i = Short.MAX_VALUE;
                     break;
                 }
@@ -719,7 +704,7 @@ public class TextBox {
             RichTextLine rtl = richText.getLine(endRTL);
             if (rtl.length() == 0 || rtl.isLastCharNewline()) {
                 TextBoxLine line = createLine(rtl, rtl.length(), getLineCount());
-                if (!((isLinked() || _bpath != null) && line.getMaxY() > getMaxY()))
+                if (!((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()))
                     _lines.add(line);
             }
         }
@@ -855,10 +840,10 @@ public class TextBox {
      */
     protected boolean isHitRight(double aX, double aY, double aH)
     {
-        if (_bpath == null || aY + aH > getMaxY())
+        if (_boundsPath == null || aY + aH > getMaxY())
             return aX > getWidth();
         Rect rect = new Rect(getX() + aX - 1, aY, 1, aH);
-        return !_bpath.contains(rect);
+        return !_boundsPath.contains(rect);
     }
 
     /**
@@ -866,9 +851,9 @@ public class TextBox {
      */
     protected double getMinHitX(double aY, double aH, double anIndent)
     {
-        if (_bpath == null || aY + aH > getMaxY()) return anIndent;
+        if (_boundsPath == null || aY + aH > getMaxY()) return anIndent;
         Rect rect = new Rect(getX() + anIndent, aY, 20, aH);
-        while (!_bpath.contains(rect) && rect.x <= getMaxX()) rect.x++;
+        while (!_boundsPath.contains(rect) && rect.x <= getMaxX()) rect.x++;
         return rect.x - getX();
     }
 
@@ -877,9 +862,9 @@ public class TextBox {
      */
     protected double getMaxHitX(double aY, double aH)
     {
-        if (_bpath == null || aY + aH > getMaxY()) return getMaxX();
+        if (_boundsPath == null || aY + aH > getMaxY()) return getMaxX();
         Rect rect = new Rect(getMaxX() - 1, aY, 1, aH);
-        while (!_bpath.contains(rect) && rect.x > 1) rect.x--;
+        while (!_boundsPath.contains(rect) && rect.x > 1) rect.x--;
         return rect.x;
     }
 
@@ -922,7 +907,7 @@ public class TextBox {
     public List<TextBoxRun> getUnderlineRuns(Rect aRect)
     {
         // Iterate over lines to add underline runs to list
-        List<TextBoxRun> uruns = new ArrayList();
+        List<TextBoxRun> uruns = new ArrayList<>();
         for (TextBoxLine line : getLines()) {
 
             // If line above rect, continue, if below, break
@@ -1132,7 +1117,7 @@ public class TextBox {
         if (!isTextOutOfBounds()) return;
 
         // Declare starting fontScale factor and dampening variables
-        double fontScale = 1;
+        double fontScale;
         double textW = getWidth();
         double textH = getHeight();
         double fsLo = 0;
@@ -1186,8 +1171,8 @@ public class TextBox {
     public boolean isTextOutOfBounds()
     {
         // Check Y no matter what
-        int lcount = getLineCount();
-        double lineMaxY = lcount > 0 ? getLine(lcount - 1).getMaxY() : 0;
+        int lineCount = getLineCount();
+        double lineMaxY = lineCount > 0 ? getLine(lineCount - 1).getMaxY() : 0;
         double tboxMaxY = getMaxY();
         if (lineMaxY >= tboxMaxY || getEnd() < getRichText().length())
             return true;
@@ -1197,8 +1182,7 @@ public class TextBox {
             TextBoxLine line = getLineLongest();
             //double lineMaxX = line != null ? line.getMaxX() : 0;
             //double tboxMaxX = getMaxX();
-            //if (lineMaxX > tboxMaxX)
-            //    return true;
+            //if (lineMaxX > tboxMaxX) return true;
             double lineW = line != null ? line.getWidth() : 0;
             double tboxW = getWidth();
             if (lineW > tboxW)
