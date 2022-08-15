@@ -2,35 +2,41 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-import java.io.*;
-import java.net.*;
+
+import snap.util.SnapUtils;
+import snap.util.URLUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.function.Consumer;
-import snap.util.*;
 
 /**
  * A class to represent a URL for a WebSite and WebFile (it can be both for nested sources).
  * Has the form: [Scheme:][//Authority][/Path[!/Path]][?Query][#HashTag].
  * Authority has the form: [UserInfo@]Host[:Port].
- * 
+ * <p>
  * WebURL is a thin wrapper around standard URL, but provides easy access to the WebSite and WebFile.
  */
 public class WebURL {
 
     // The source object (String, File, URL)
-    Object          _src;
-    
+    private Object  _src;
+
     // The source object as URL
-    URL             _srcURL, _jurl;
-    
+    private URL  _srcURL, _jurl;
+
     // The URL string
-    URLString       _ustr;
-    
+    private URLString _urlString;
+
     // The URL of WebSite this WebURL belongs to (just this WebURL if no path)
-    WebURL          _siteURL;
-    
+    private WebURL  _siteURL;
+
     // The WebSite for the URL
-    WebSite         _asSite;
-    
+    protected WebSite  _asSite;
+
     /**
      * Creates a WebURL for given source.
      */
@@ -44,7 +50,7 @@ public class WebURL {
 
         // Get URLString for parts
         String urls = URLUtils.getString(_srcURL);
-        _ustr = new URLString(urls);
+        _urlString = new URLString(urls);
     }
 
     /**
@@ -52,8 +58,11 @@ public class WebURL {
      */
     public static WebURL getURL(Object anObj)
     {
-        try { return getURLOrThrow(anObj); }
-        catch(Exception e) { return null; }
+        try {
+            return getURLOrThrow(anObj);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -62,8 +71,8 @@ public class WebURL {
     public static WebURL getURLOrThrow(Object anObj)
     {
         // Handle null, WebURL, WebFile
-        if (anObj==null || anObj instanceof WebURL) return (WebURL)anObj;
-        if (anObj instanceof WebFile) return ((WebFile)anObj).getURL();
+        if (anObj == null || anObj instanceof WebURL) return (WebURL) anObj;
+        if (anObj instanceof WebFile) return ((WebFile) anObj).getURL();
 
         // Get URL
         return new WebURL(anObj);
@@ -72,10 +81,10 @@ public class WebURL {
     /**
      * Returns a URL for given class and resource name.
      */
-    public static WebURL getURL(Class aClass, String aName)
+    public static WebURL getURL(Class<?> aClass, String aName)
     {
         URL url = WebGetter.getJavaURL(aClass, aName);
-        return url!=null ? new WebURL(url) : null;
+        return url != null ? new WebURL(url) : null;
     }
 
     /**
@@ -91,72 +100,114 @@ public class WebURL {
     /**
      * Returns the full URL string.
      */
-    public String getString()  { return _ustr.getString(); }
+    public String getString()
+    {
+        return _urlString.getString();
+    }
 
     /**
      * Returns the URL Scheme (lower case).
      */
-    public String getScheme()  { return _ustr.getScheme(); }
+    public String getScheme()
+    {
+        return _urlString.getScheme();
+    }
 
     /**
      * Returns the Host part of the URL (the Authority minus the optional UserInfo and Port).
      */
-    public String getHost()  { return _ustr.getHost(); }
+    public String getHost()
+    {
+        return _urlString.getHost();
+    }
 
     /**
      * Returns the port of the URL.
      */
-    public int getPort()  { return _ustr.getPort(); }
+    public int getPort()
+    {
+        return _urlString.getPort();
+    }
 
     /**
      * Returns the part of the URL string that describes the file path.
      */
-    public String getPath()  { return _ustr.getPath(); }
+    public String getPath()
+    {
+        return _urlString.getPath();
+    }
 
     /**
      * Returns the last component of the file path.
      */
-    public String getPathName()  { return _ustr.getPathName(); }
+    public String getPathName()
+    {
+        return _urlString.getPathName();
+    }
 
     /**
      * Returns the last component of the file path minus any '.' extension suffix.
      */
-    public String getPathNameSimple()  { return _ustr.getPathNameSimple(); }
+    public String getPathNameSimple()
+    {
+        return _urlString.getPathNameSimple();
+    }
 
     /**
      * Returns the part of the URL string that describes the query.
      */
-    public String getQuery()  { return _ustr.getQuery(); }
+    public String getQuery()
+    {
+        return _urlString.getQuery();
+    }
 
     /**
      * Returns the value for given Query key in URL, if available.
      */
-    public String getQueryValue(String aKey)  { return _ustr.getQueryValue(aKey); }
+    public String getQueryValue(String aKey)
+    {
+        return _urlString.getQueryValue(aKey);
+    }
 
     /**
      * Returns the hash tag reference from the URL as a simple string.
      */
-    public String getRef()  { return _ustr.getRef(); }
+    public String getRef()
+    {
+        return _urlString.getRef();
+    }
 
     /**
      * Returns the value for given HashTag key in URL, if available.
      */
-    public String getRefValue(String aKey)  { return _ustr.getRefValue(aKey); }
+    public String getRefValue(String aKey)
+    {
+        return _urlString.getRefValue(aKey);
+    }
 
     /**
      * Returns the site that this URL belongs to.
      */
-    public WebSite getSite()  { return getSiteURL().getAsSite(); }
+    public WebSite getSite()
+    {
+        return getSiteURL().getAsSite();
+    }
 
     /**
      * Returns the URL for the site that this URL belongs to.
      */
-    public WebURL getSiteURL()  { return _siteURL!=null? _siteURL : (_siteURL=getURL(_ustr.getSite())); }
+    public WebURL getSiteURL()
+    {
+        return _siteURL != null ? _siteURL : (_siteURL = getURL(_urlString.getSite()));
+    }
 
     /**
      * Returns the site for this URL (assumes this URL is a site).
      */
-    public WebSite getAsSite()  { return _asSite!=null? _asSite : (_asSite=WebGetter.getSite(this)); }
+    public WebSite getAsSite()
+    {
+        return _asSite != null ? _asSite : (_asSite = WebGetter.getSite(this));
+    }
 
     /**
      * Returns the file for the URL.
@@ -165,7 +216,7 @@ public class WebURL {
     {
         String path = getPath();
         WebSite site = getSite();
-        WebFile file = path!=null ? site.getFile(path) : site.getRootDir();
+        WebFile file = path != null ? site.getFileForPath(path) : site.getRootDir();
         return file;
     }
 
@@ -176,29 +227,41 @@ public class WebURL {
     {
         String path = getPath();
         WebSite site = getSite();
-        WebFile file = path!=null ? site.createFile(path, isDir) : site.getRootDir();
+        WebFile file = path != null ? site.createFile(path, isDir) : site.getRootDir();
         return file;
     }
 
     /**
      * Returns whether URL specifies only the file (no query/hashtags).
      */
-    public boolean isFileURL()  { return _ustr.isFileURL(); }
+    public boolean isFileURL()
+    {
+        return _urlString.isFileURL();
+    }
 
     /**
      * Returns the URL for the file only (no query/hashtags).
      */
-    public WebURL getFileURL()  { return isFileURL()? this : getURL(_ustr.getFileURL()); }
+    public WebURL getFileURL()
+    {
+        return isFileURL() ? this : getURL(_urlString.getFileURL());
+    }
 
     /**
      * Returns whether URL specifies only file and query (no hashtag references).
      */
-    public boolean isQueryURL()  { return _ustr.isQueryURL(); }
+    public boolean isQueryURL()
+    {
+        return _urlString.isQueryURL();
+    }
 
     /**
      * Returns the URL for the file and query only (no hashtag references).
      */
-    public WebURL getQueryURL()  { return isQueryURL()? this : getURL(_ustr.getQueryURL()); }
+    public WebURL getQueryURL()
+    {
+        return isQueryURL() ? this : getURL(_urlString.getQueryURL());
+    }
 
     /**
      * Returns the source as standard Java URL (if possible).
@@ -206,21 +269,27 @@ public class WebURL {
     public URL getJavaURL()
     {
         // If already set, just return
-        if (_jurl!=null) return _jurl;
+        if (_jurl != null) return _jurl;
 
         // If URL doesn't have site path, just set/return SourceURL
-        if (getString().indexOf('!')<0) return _jurl = _srcURL;
+        if (getString().indexOf('!') < 0) return _jurl = _srcURL;
 
         // Get URL string without site path separator and create/set/return URL
         String urls = getString().replace("!", "");
-        try { return _jurl = new URL(urls); }
-        catch(Exception e) { throw new RuntimeException(e); }
+        try {
+            return _jurl = new URL(urls);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * Returns the source as standard Java File (if possible).
      */
-    public File getJavaFile()  { return getSite().getJavaFile(this); }
+    public File getJavaFile()
+    {
+        return getSite().getJavaFile(this);
+    }
 
     /**
      * Returns whether URL can be found.
@@ -229,10 +298,10 @@ public class WebURL {
     {
         // Handle File
         if (!SnapUtils.isTeaVM && _src instanceof File)
-            return ((File)_src).exists();
+            return ((File) _src).exists();
 
         // Otherwise see if getHead() returns OK
-        return getHead().getCode()==WebResponse.OK;
+        return getHead().getCode() == WebResponse.OK;
     }
 
     /**
@@ -245,12 +314,16 @@ public class WebURL {
 
         // Handle File or URL
         if (_src instanceof File)
-            return ((File)_src).lastModified();
+            return ((File) _src).lastModified();
 
         // Handle URL
-        if (_src instanceof URL) { URL url = getJavaURL();
-            try { return url.openConnection().getLastModified(); }
-            catch(IOException e) { return 0; }
+        if (_src instanceof URL) {
+            URL url = getJavaURL();
+            try {
+                return url.openConnection().getLastModified();
+            } catch (IOException e) {
+                return 0;
+            }
         }
 
         // Otherwise, return FileHeader.LastModTime
@@ -263,8 +336,11 @@ public class WebURL {
      */
     public byte[] getBytes()
     {
-        try { return getBytesOrThrow(); }
-        catch(Exception e) { return null; }
+        try {
+            return getBytesOrThrow();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -278,7 +354,7 @@ public class WebURL {
 
         // Otherwise get response and return bytes
         WebResponse resp = getResponse();
-        if (resp.getException()!=null)                // If response hit exception, throw it
+        if (resp.getException() != null)                // If response hit exception, throw it
             throw new ResponseException(resp);
         return resp.getBytes();
     }
@@ -286,12 +362,13 @@ public class WebURL {
     /**
      * Returns bytes for this URL.
      */
-    public byte[] postBytes(byte theBytes[])
+    public byte[] postBytes(byte[] theBytes)
     {
         WebSite site = getSite();
-        WebRequest req = new WebRequest(this); req.setPostBytes(theBytes);
+        WebRequest req = new WebRequest(this);
+        req.setPostBytes(theBytes);
         WebResponse resp = site.getResponse(req);
-        if (resp.getException()!=null)                // If response hit exception, throw it
+        if (resp.getException() != null)                // If response hit exception, throw it
             throw new ResponseException(resp);
         return resp.getBytes();
     }
@@ -301,14 +378,19 @@ public class WebURL {
      */
     public String getText()
     {
-        byte bytes[] = getBytes(); if(bytes==null) return null;
+        byte[] bytes = getBytes();
+        if (bytes == null)
+            return null;
         return new String(bytes);
     }
 
     /**
      * Returns an input stream for file.
      */
-    public InputStream getInputStream()  { return new ByteArrayInputStream(getBytes()); }
+    public InputStream getInputStream()
+    {
+        return new ByteArrayInputStream(getBytes());
+    }
 
     /**
      * Returns the response for a HEAD request.
@@ -316,7 +398,8 @@ public class WebURL {
     public WebResponse getHead()
     {
         WebSite site = getSite();
-        WebRequest req = new WebRequest(this); req.setType(WebRequest.Type.HEAD);
+        WebRequest req = new WebRequest(this);
+        req.setType(WebRequest.Type.HEAD);
         return site.getResponse(req);
     }
 
@@ -342,7 +425,7 @@ public class WebURL {
     /**
      * Returns bytes for this URL.
      */
-    public void getResponseAndCall(Consumer <WebResponse> aCallback)
+    public void getResponseAndCall(Consumer<WebResponse> aCallback)
     {
         WebSite site = getSite();
         WebRequest req = new WebRequest(this);
@@ -354,7 +437,8 @@ public class WebURL {
      */
     public WebURL getParent()
     {
-        String path = getPath(); if(path.equals("/")) return null;
+        String path = getPath();
+        if (path.equals("/")) return null;
         String parPath = PathUtils.getParent(path);
         WebURL parURL = getSite().getURL(parPath);
         return parURL;
@@ -376,19 +460,25 @@ public class WebURL {
      */
     public boolean equals(Object anObj)
     {
-        if (anObj==this) return true;
-        WebURL other = anObj instanceof WebURL? (WebURL)anObj : null; if(other==null) return false;
-        return _ustr.equals(other._ustr);
+        if (anObj == this) return true;
+        WebURL other = anObj instanceof WebURL ? (WebURL) anObj : null;
+        if (other == null) return false;
+        return _urlString.equals(other._urlString);
     }
 
     /**
      * Standard HashCode implementation.
      */
-    public int hashCode()  { return _ustr.hashCode(); }
+    public int hashCode()
+    {
+        return _urlString.hashCode();
+    }
 
     /**
      * Standard toString implementation.
      */
-    public String toString()  { return "WebURL: " + getString(); }
-
+    public String toString()
+    {
+        return "WebURL: " + getString();
+    }
 }

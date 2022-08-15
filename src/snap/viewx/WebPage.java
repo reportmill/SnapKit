@@ -200,7 +200,7 @@ public WebFile showNewFilePanel(View aView, WebFile aFile)
     if(!path.toLowerCase().endsWith(ext) && ext.length()>1) path = path + ext;
     
     // If file exists, run option panel for replace
-    if(getSite().getFile(path)!=null) {
+    if(getSite().getFileForPath(path)!=null) {
         String name = FilePathUtils.getFileName(path);
         msg = "A file named " + name + " already exists in this location.\n Do you want to replace it with new file?";
         dbox = new DialogBox(title); dbox.setWarningMessage(msg);

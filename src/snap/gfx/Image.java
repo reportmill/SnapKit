@@ -540,9 +540,9 @@ public abstract class Image implements Loadable {
         if (dir == null) return null;
 
         // Get directory file for name
-        WebFile ifile = dir.getFile(aName);
+        WebFile ifile = dir.getFileForName(aName);
         if (ifile == null)
-            ifile = dir.getFile("pkg.images/" + aName);
+            ifile = dir.getFileForName("pkg.images/" + aName);
         if (ifile == null) return null;
 
         // Return image for file

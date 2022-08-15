@@ -107,7 +107,7 @@ public static class FileTreeResolver extends TreeResolver <WebFile> {
     public boolean isParent(WebFile anObj)  { return anObj.isDir(); }
 
     // Return child files
-    public WebFile[] getChildren(WebFile aParent)  { return aParent.getFiles().toArray(new WebFile[0]); }
+    public WebFile[] getChildren(WebFile aParent)  { return aParent.getFiles(); }
 
     // Return child file name
     public String getText(WebFile aFile)  { return aFile.getName(); }

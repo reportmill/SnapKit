@@ -2,72 +2,76 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-import java.io.*;
-import java.util.*;
-
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
-import snap.util.*;
+import snap.util.ArrayUtils;
+import snap.util.FilePathUtils;
+import snap.util.StringUtils;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * Represents a file from a WebSite.
  */
-public class WebFile implements Comparable <WebFile> {
+public class WebFile implements Comparable<WebFile> {
 
     // The WebSite that provided this file
-    WebSite           _site;
-    
+    protected WebSite  _site;
+
     // The file parent
-    WebFile           _parent;
-    
+    private WebFile  _parent;
+
     // The file path
-    String            _path;
-    
+    protected String  _path;
+
     // Whether file is a directory
-    boolean           _dir;
-    
+    protected boolean  _dir;
+
     // The file last modified time
-    long              _modTime;
-    
+    protected long  _modTime;
+
     // The file size
-    long              _size;
-    
+    protected long  _size;
+
     // Whether this file has been checked to see if it is saved at site
-    boolean           _verified;
-    
+    protected boolean  _verified;
+
     // Whether this file has been saved at site
-    boolean           _saved;
-    
+    protected boolean  _saved;
+
     // The file bytes
-    byte              _bytes[];
-    
+    private byte[]  _bytes;
+
     // The directory files
-    List <WebFile>    _files;
-    
+    private WebFile[]  _files;
+
     // The MIME type
-    String            _mimeType;
-    
+    private String  _mimeType;
+
     // A map of properties associated with file
-    Map               _props = new HashMap();
-    
+    private Map  _props = new HashMap<>();
+
     // The URL for this file
-    WebURL            _url;
-    
+    protected WebURL  _url;
+
+    // File updater
+    private Updater  _updater;
+
     // The PropChangeSupport
-    PropChangeSupport _pcs = PropChangeSupport.EMPTY;
+    private PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
 
     // Constants for properties
     final public static String Bytes_Prop = "Bytes";
-    final public static String File_Prop = "File";
-    final public static String Files_Prop = "Files";
     final public static String ModTime_Prop = "ModTime";
     final public static String Saved_Prop = "Saved";
     final public static String Size_Prop = "Size";
     final public static String Updater_Prop = "Updater";
     final public static String Verified_Prop = "Verified";
     final public static String Loaded_Prop = "Loaded";
-    
+
     /**
      * Returns the WebSite.
      */
@@ -79,7 +83,7 @@ public class WebFile implements Comparable <WebFile> {
     public WebFile getParent()
     {
         // If already set, just return
-        if (_parent!=null || isRoot()) return _parent;
+        if (_parent != null || isRoot()) return _parent;
 
         // Get file for parent path from site
         String path = FilePathUtils.getParent(getPath());
@@ -89,7 +93,10 @@ public class WebFile implements Comparable <WebFile> {
     /**
      * Sets the file parent.
      */
-    protected void setParent(WebFile aFile)  { _parent = aFile; }
+    protected void setParent(WebFile aFile)
+    {
+        _parent = aFile;
+    }
 
     /**
      * Returns the file path.
@@ -99,17 +106,26 @@ public class WebFile implements Comparable <WebFile> {
     /**
      * Returns the resource name.
      */
-    public String getName()  { return FilePathUtils.getFileName(getPath()); }
+    public String getName()
+    {
+        return FilePathUtils.getFileName(getPath());
+    }
 
     /**
      * Returns the file simple name.
      */
-    public String getSimpleName()  { return FilePathUtils.getFileNameSimple(getPath()); }
+    public String getSimpleName()
+    {
+        return FilePathUtils.getFileNameSimple(getPath());
+    }
 
     /**
      * Returns the file type (extension without the '.').
      */
-    public String getType()  { return FilePathUtils.getExtension(getPath()).toLowerCase(); }
+    public String getType()
+    {
+        return FilePathUtils.getExtension(getPath()).toLowerCase();
+    }
 
     /**
      * Returns the path as a directory (with trailing separator).
@@ -126,10 +142,11 @@ public class WebFile implements Comparable <WebFile> {
     public WebURL getURL()
     {
         // If already set, just return
-        if (_url!=null) return _url;
+        if (_url != null) return _url;
 
         // Get path, site, URL and return
-        String path = getPath(); WebSite site = getSite();
+        String path = getPath();
+        WebSite site = getSite();
         return _url = site.getURL(path);
     }
 
@@ -146,7 +163,10 @@ public class WebFile implements Comparable <WebFile> {
     /**
      * Returns whether this file is root directory.
      */
-    public boolean isRoot()  { return getPath().equals("/"); }
+    public boolean isRoot()
+    {
+        return getPath().equals("/");
+    }
 
     /**
      * Returns whether file status has been check at the site.
@@ -154,16 +174,18 @@ public class WebFile implements Comparable <WebFile> {
     public boolean isVerified()  { return _verified; }
 
     /**
-     * Sets whether file status has been check at the site.
+     * Sets whether file status has been checked at the site.
      */
     protected void setVerified(boolean aValue)
     {
         // If already set, just return
-        if (aValue==_verified) return;
+        if (aValue == _verified) return;
 
         // If false, clear ModTime, Size, Saved
         if (!aValue) {
-            _modTime = 0; _size = 0; _saved = false;
+            _modTime = 0;
+            _size = 0;
+            _saved = false;
         }
 
         // Set new value, fire prop change
@@ -176,7 +198,7 @@ public class WebFile implements Comparable <WebFile> {
     public WebFile getVerified()
     {
         if (!isVerified())
-            getSite().getFile(getPath());
+            getSite().getFileForPath(getPath());
         return this;
     }
 
@@ -190,14 +212,17 @@ public class WebFile implements Comparable <WebFile> {
      */
     protected void setSaved(boolean aValue)
     {
-        if (aValue==_saved) return;
+        if (aValue == _saved) return;
         firePropChange(Saved_Prop, _saved, _saved = aValue);
     }
 
     /**
      * Conventional file method that simply wraps isSaved().
      */
-    public boolean getExists()  { return isSaved(); }
+    public boolean getExists()
+    {
+        return isSaved();
+    }
 
     /**
      * Returns the file modification time.
@@ -209,7 +234,7 @@ public class WebFile implements Comparable <WebFile> {
      */
     protected void setModTime(long aTime)
     {
-        if (aTime==_modTime) return;
+        if (aTime == _modTime) return;
         firePropChange(ModTime_Prop, _modTime, _modTime = aTime);
     }
 
@@ -218,8 +243,11 @@ public class WebFile implements Comparable <WebFile> {
      */
     public void setModTimeSaved(long aTime)
     {
-        try { getSite().setModTimeSaved(this, aTime); }
-        catch(Exception e) { System.err.println("WebFile.setModTimeSaved: " + e); }
+        try {
+            getSite().setModTimeSaved(this, aTime);
+        } catch (Exception e) {
+            System.err.println("WebFile.setModTimeSaved: " + e);
+        }
         setModTime(aTime);
     }
 
@@ -243,14 +271,17 @@ public class WebFile implements Comparable <WebFile> {
      */
     protected void setSize(long aSize)
     {
-        if (aSize==_size) return;
+        if (aSize == _size) return;
         firePropChange(Size_Prop, _size, _size = aSize);
     }
 
     /**
      * Returns whether bytes/files have been set for this file/dir.
      */
-    public boolean isLoaded()  { return _dir? (_files!=null) : (_bytes!=null); }
+    public boolean isLoaded()
+    {
+        return _dir ? (_files != null) : (_bytes != null);
+    }
 
     /**
      * Sets whether bytes/files have been set for this file/dir.
@@ -258,11 +289,13 @@ public class WebFile implements Comparable <WebFile> {
     protected void setLoaded(boolean aValue)
     {
         // If already set, just return
-        if (aValue==isLoaded()) return;
+        if (aValue == isLoaded()) return;
 
         // If clearing, clear info
         if (!aValue) {
-            _files = null; _bytes = null; _updater = null;
+            _files = null;
+            _bytes = null;
+            _updater = null;
         }
 
         // Set value and fire prop change
@@ -275,29 +308,29 @@ public class WebFile implements Comparable <WebFile> {
     public synchronized byte[] getBytes()
     {
         // If already set, just return
-        if (_bytes!=null) return _bytes;
+        if (_bytes != null) return _bytes;
 
         // Set request for bytes for URL
         WebURL url = getURL();
         WebResponse resp = url.getResponse();
 
         // Handle response
-        if (resp.getCode()==WebResponse.OK)
+        if (resp.getCode() == WebResponse.OK)
             _saved = true;
-        if (resp.getException()!=null)
+        if (resp.getException() != null)
             throw new ResponseException(resp);
 
         // Update file attributes
         _bytes = resp.getBytes();
         _modTime = resp.getModTime();
-        _size = _bytes!=null? _bytes.length : 0;
+        _size = _bytes != null ? _bytes.length : 0;
         return _bytes;
     }
 
     /**
      * Sets the file bytes.
      */
-    public void setBytes(byte theBytes[])
+    public void setBytes(byte[] theBytes)
     {
         // If already set, just return
         if (ArrayUtils.equals(theBytes, _bytes)) return;
@@ -306,76 +339,94 @@ public class WebFile implements Comparable <WebFile> {
         firePropChange(Bytes_Prop, _bytes, _bytes = theBytes);
 
         // Update size
-        setSize(theBytes!=null ? theBytes.length : 0);
+        setSize(theBytes != null ? theBytes.length : 0);
     }
 
     /**
      * Returns the number of files in this directory.
      */
-    public int getFileCount()  { return getFiles()!=null? getFiles().size() : 0; }
+    public int getFileCount()
+    {
+        WebFile[] files = getFiles();
+        return files.length;
+    }
 
     /**
      * Returns the individual file at given index.
      */
-    public WebFile getFile(int anIndex)  { return getFiles().get(anIndex); }
+    public WebFile getFile(int anIndex)
+    {
+        WebFile[] files = getFiles();
+        return files[anIndex];
+    }
 
     /**
      * Returns the directory files list.
      */
-    public synchronized List <WebFile> getFiles()
+    public synchronized WebFile[] getFiles()
     {
         // If already set, just return
-        if (_files!=null) return _files;
+        if (_files != null) return _files;
 
+        // Get, set, return
+        WebFile[] files = getFilesImpl();
+        return _files = files;
+    }
+
+    /**
+     * Returns the directory files list.
+     */
+    protected WebFile[] getFilesImpl()
+    {
         // Get response for files
         WebURL url = getURL();
         WebResponse resp = url.getResponse();
 
         // Handle Response.Code
-        if (resp.getCode()==WebResponse.OK)
+        if (resp.getCode() == WebResponse.OK)
             _saved = true;
-        if (resp.getException()!=null)
+        if (resp.getException() != null)
             throw new ResponseException(resp);
 
         // Get file headers
         WebSite site = getSite();
-        List <FileHeader> fhdrs = resp.getFileHeaders();
-        if (fhdrs==null) return Collections.EMPTY_LIST;
+        List<FileHeader> fhdrs = resp.getFileHeaders();
+        if (fhdrs == null)
+            return new WebFile[0];
 
         // Get files
-        List <WebFile> files = new ArrayList(fhdrs.size());
-        for (FileHeader fhdr : fhdrs) {
-            WebFile file = site.createFile(fhdr);
+        WebFile[] files = new WebFile[fhdrs.size()];
+        for (int i = 0; i < fhdrs.size(); i++) {
+            FileHeader fileHeader = fhdrs.get(i);
+            WebFile file = site.createFile(fileHeader);
             file.setParent(this);
             file._saved = true;
-            files.add(file);
+            files[i] = file;
         }
 
         // Sort files, set and return
-        Collections.sort(files);
-        _files = files;
+        Arrays.sort(files);
         _modTime = resp.getModTime();
-        return _files;
-    }
-
-    /**
-     * Sets the directory files list.
-     */
-    protected void setFiles(List theFiles)
-    {
-        if (SnapUtils.equals(theFiles, _files)) return;
-        firePropChange(Files_Prop, _files, _files = theFiles);
+        return files;
     }
 
     /**
      * Saves the file.
      */
-    public WebResponse save() { return getSite().saveFile(this); }
+    public WebResponse save()
+    {
+        WebSite site = getSite();
+        return site.saveFile(this);
+    }
 
     /**
      * Deletes the file.
      */
-    public WebResponse delete() { return getSite().deleteFile(this); }
+    public WebResponse delete()
+    {
+        WebSite site = getSite();
+        return site.deleteFile(this);
+    }
 
     /**
      * Resets the file to unverified state where nothing is known about size, mod-time, saved.
@@ -389,7 +440,10 @@ public class WebFile implements Comparable <WebFile> {
     /**
      * Resets the file to unloaded state so files/bytes are cleared (to reload when next called).
      */
-    public void resetContent()  { setLoaded(false); }
+    public void resetContent()
+    {
+        setLoaded(false);
+    }
 
     /**
      * Resets a file with check to have parent resetContent() if file is deleted.
@@ -409,12 +463,14 @@ public class WebFile implements Comparable <WebFile> {
         // If file was deleted, reset parent content and trigger Saved change
         if (!isSaved()) {
             getParent().resetContent();
-            _saved = true; setSaved(false);
+            _saved = true;
+            setSaved(false);
         }
 
         // If ModTime changed, trigger ModTime prop change
-        else if (modTime!=0 && isFile() && modTime!=getModTime()) {
-            modTime = getModTime(); _modTime = 0;
+        else if (modTime != 0 && isFile() && modTime != getModTime()) {
+            modTime = getModTime();
+            _modTime = 0;
             setModTime(modTime);
         }
     }
@@ -422,31 +478,33 @@ public class WebFile implements Comparable <WebFile> {
     /**
      * Returns the file with the given name.
      */
-    public WebFile getFile(String aName)
+    public WebFile getFileForName(String aName)
     {
         String path = aName.startsWith("/") ? aName : getDirPath() + aName;
-        return getSite().getFile(path);
+        return getSite().getFileForPath(path);
     }
 
     /**
      * Returns the list of files that match given regex.
      */
-    public List <WebFile> getFiles(String aRegex)
+    public List<WebFile> getFilesForPattern(String aRegex)
     {
-        List files = new ArrayList();
-        for (WebFile file : getFiles())
+        WebFile[] files = getFiles();
+        List filesMatched = new ArrayList<>();
+        for (WebFile file : files)
             if (file.getName().matches(aRegex))
-                files.add(file);
-        return files;
+                filesMatched.add(file);
+        return filesMatched;
     }
 
     /**
      * Returns the file keys.
      */
-    public List <String> getFileNames()
+    public List<String> getFileNames()
     {
-        List <String> names = new ArrayList<String>();
-        for (WebFile file : getFiles()) names.add(file.getName());
+        WebFile[] files = getFiles();
+        List<String> names = new ArrayList<String>();
+        for (WebFile file : files) names.add(file.getName());
         return names;
     }
 
@@ -455,7 +513,7 @@ public class WebFile implements Comparable <WebFile> {
      */
     public boolean contains(WebFile aFile)
     {
-        return isDir() && getSite()==aFile.getSite() && aFile.getPath().startsWith(getDirPath());
+        return isDir() && getSite() == aFile.getSite() && aFile.getPath().startsWith(getDirPath());
     }
 
     /**
@@ -466,34 +524,46 @@ public class WebFile implements Comparable <WebFile> {
     /**
      * Sets the MIME type for the file.
      */
-    protected void setMIMEType(String aMIMEType)  { _mimeType = aMIMEType; }
+    protected void setMIMEType(String aMIMEType)
+    {
+        _mimeType = aMIMEType;
+    }
 
     /**
      * Returns a file property for key.
      */
-    public Object getProp(String aKey)  { return _props.get(aKey); }
+    public Object getProp(String aKey)
+    {
+        return _props.get(aKey);
+    }
 
     /**
      * Sets a property for a key.
      */
-    public void setProp(String aKey, Object aValue)  { _props.put(aKey, aValue); }
+    public void setProp(String aKey, Object aValue)
+    {
+        _props.put(aKey, aValue);
+    }
 
     /**
      * Returns whether update is set and has update.
      */
-    public boolean isUpdateSet()  { return getUpdater()!=null; }
+    public boolean isUpdateSet()
+    {
+        return getUpdater() != null;
+    }
 
     /**
      * Returns the updater.
      */
-    public Updater getUpdater()  { return _updater; } Updater _updater;
+    public Updater getUpdater()  { return _updater; }
 
     /**
      * Sets the Updater.
      */
     public void setUpdater(Updater anUpdater)
     {
-        if (anUpdater==_updater) return;
+        if (anUpdater == _updater) return;
         firePropChange(Updater_Prop, _updater, _updater = anUpdater);
     }
 
@@ -502,7 +572,9 @@ public class WebFile implements Comparable <WebFile> {
      */
     public interface Updater {
 
-        /** Saves the file. */
+        /**
+         * Saves the file.
+         */
         public void updateFile(WebFile aFile);
     }
 
@@ -511,9 +583,15 @@ public class WebFile implements Comparable <WebFile> {
      */
     public boolean isText()
     {
-        byte bytes[] = getBytes(), junk = 0; if (bytes==null) return false;
-        for (byte b : bytes) if((b & 0xFF) > 127) {
-            junk++; if(junk>10) return false; }
+        byte[] bytes = getBytes();
+        byte junk = 0;
+        if (bytes == null)
+            return false;
+        for (byte b : bytes)
+            if ((b & 0xFF) > 127) {
+                junk++;
+                if (junk > 10) return false;
+            }
         return true;
     }
 
@@ -522,24 +600,38 @@ public class WebFile implements Comparable <WebFile> {
      */
     public String getText()
     {
-        byte bytes[] = getBytes(); if (bytes==null) return null;
+        byte[] bytes = getBytes();
+        if (bytes == null)
+            return null;
         return new String(bytes);
     }
 
     /**
      * Sets the file bytes as a string.
      */
-    public void setText(String aString)  { setBytes(StringUtils.getBytes(aString)); }
+    public void setText(String aString)
+    {
+        byte[] bytes = StringUtils.getBytes(aString);
+        setBytes(bytes);
+    }
 
     /**
      * Returns an input stream for file.
      */
-    public InputStream getInputStream()  { return new ByteArrayInputStream(getBytes()); }
+    public InputStream getInputStream()
+    {
+        byte[] bytes = getBytes();
+        return new ByteArrayInputStream(bytes);
+    }
 
     /**
      * Returns a standard Java File (if available).
      */
-    public File getJavaFile()  { return getURL().getJavaFile(); }
+    public File getJavaFile()
+    {
+        WebURL url = getURL();
+        return url.getJavaFile();
+    }
 
     /**
      * Returns a relative URL for the given file path.
@@ -551,8 +643,10 @@ public class WebFile implements Comparable <WebFile> {
             return getParent().getURL(aPath);
 
         // If path has protocol, do global eval, if root path, eval with site, otherwise create global URL and eval
-        if (aPath.indexOf(':')>=0) return WebURL.getURL(aPath);
-        if (aPath.startsWith("/")) getSite().getURL(aPath);
+        if (aPath.indexOf(':') >= 0)
+            return WebURL.getURL(aPath);
+        if (aPath.startsWith("/"))
+            getSite().getURL(aPath);
         String urls = PathUtils.getChild(getURL().getString(), aPath);
         return WebURL.getURL(urls);
     }
@@ -562,7 +656,7 @@ public class WebFile implements Comparable <WebFile> {
      */
     public void addPropChangeListener(PropChangeListener aLsnr)
     {
-        if (_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+        if (_pcs == PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
         _pcs.addPropChangeListener(aLsnr);
     }
 
@@ -589,30 +683,37 @@ public class WebFile implements Comparable <WebFile> {
      */
     public boolean equals(Object anObj)
     {
-        if (anObj==this) return true;
-        WebFile other = (WebFile)anObj; if (other==null) return false;
+        if (anObj == this) return true;
+        WebFile other = (WebFile) anObj;
+        if (other == null) return false;
         return other.getURL().equals(getURL());
     }
 
     /**
      * Standard hashCode implementation.
      */
-    public int hashCode()  { return getURL().hashCode(); }
+    public int hashCode()
+    {
+        return getURL().hashCode();
+    }
 
     /**
      * Standard compareTo implementation.
      */
     public int compareTo(WebFile aFile)
     {
-        int c = aFile.getParent()!=getParent() ? getPath().compareToIgnoreCase(aFile.getPath()) :
-            getSimpleName().compareToIgnoreCase(aFile.getSimpleName());
-        if (c==0) c = getName().compareToIgnoreCase(aFile.getName());
+        int c = aFile.getParent() != getParent() ? getPath().compareToIgnoreCase(aFile.getPath()) :
+                getSimpleName().compareToIgnoreCase(aFile.getSimpleName());
+        if (c == 0)
+            c = getName().compareToIgnoreCase(aFile.getName());
         return c;
     }
 
     /**
      * Returns a string representation of file.
      */
-    public String toString()  { return getClass().getSimpleName() + ": " + getURL().getString() + (isDir()? "/" : ""); }
-
+    public String toString()
+    {
+        return getClass().getSimpleName() + ": " + getURL().getString() + (isDir() ? "/" : "");
+    }
 }

@@ -78,7 +78,7 @@ public class HTTPSite extends WebSite {
         files = new ArrayList();
 
         // If ".index" file exists, load children
-        WebFile indexFile = getFile(FilePathUtils.getChild(aPath, ".index"));
+        WebFile indexFile = getFileForPath(FilePathUtils.getChild(aPath, ".index"));
         if(indexFile!=null) {
             String indexFileString = StringUtils.getISOLatinString(indexFile.getBytes());
             String fileEntries[] = indexFileString.split("\n");
@@ -171,7 +171,7 @@ public class HTTPSite extends WebSite {
     private WebFile getCacheFile(String aPath)
     {
         WebSite sbox = getSandbox();
-        WebFile dfile = sbox.getFile("/Cache" + aPath);
+        WebFile dfile = sbox.getFileForPath("/Cache" + aPath);
         if (dfile==null) dfile = sbox.createFile("/Cache" + aPath, false);
         return dfile;
     }

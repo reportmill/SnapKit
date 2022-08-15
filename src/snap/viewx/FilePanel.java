@@ -202,7 +202,7 @@ public class FilePanel extends ViewOwner {
     WebFile getFile(String aPath)
     {
         WebSite site = getSite(); //WebURL url = WebURL.getURL(aPath);
-        WebFile file = site.getFile(aPath); //url.getFile();
+        WebFile file = site.getFileForPath(aPath); //url.getFile();
         return file;
     }
 
@@ -310,7 +310,7 @@ public class FilePanel extends ViewOwner {
     /**
      * Returns the filtered files for given list of files.
      */
-    protected WebFile[] getFilteredFiles(List <WebFile> theFiles)
+    protected WebFile[] getFilteredFiles(WebFile[] theFiles)
     {
         List <WebFile> files = new ArrayList();
         for (WebFile file : theFiles) {
@@ -334,8 +334,8 @@ public class FilePanel extends ViewOwner {
         _fileBrowser.setCellConfigure(itm -> configureFileBrowserCell(itm));
 
         // Set FileBrowser Items, SelItem
-        List<WebFile> dirFiles = getSite().getRootDir().getFiles();
-        WebFile dirFilesFiltered[] = getFilteredFiles(dirFiles);
+        WebFile[] dirFiles = getSite().getRootDir().getFiles();
+        WebFile[] dirFilesFiltered = getFilteredFiles(dirFiles);
         _fileBrowser.setItems(dirFilesFiltered);
         _fileBrowser.setSelItem(getFile()!=null ? getFile() : getDir());
 
