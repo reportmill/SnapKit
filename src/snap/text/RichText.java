@@ -97,7 +97,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
         if (isPlainText()) theStyle = null;
 
         // Get line for index - if adding at text end and last line and ends with newline, create/add new line
-        RichTextLine line = getLineAt(anIndex);
+        RichTextLine line = getLineForCharIndex(anIndex);
         if (anIndex == line.getEnd() && line.isLastCharNewline()) {
             RichTextLine nline = line.splitLineAtIndex(line.length());
             addLine(nline, line.getIndex() + 1);
@@ -178,7 +178,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
         while (end > aStart) {
 
             // Get line at end index
-            RichTextLine line = getLineAt(end);
+            RichTextLine line = getLineForCharIndex(end);
             if (end == line.getStart())
                 line = getLine(line.getIndex() - 1);
 
@@ -276,7 +276,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
 
         // Iterate over runs in range and set style
         else while (aStart < anEnd) {
-            RichTextLine line = getLineAt(aStart);
+            RichTextLine line = getLineForCharIndex(aStart);
             int lineStart = line.getStart();
             RichTextRun run = getRunAt(aStart);
             TextStyle ostyle = run.getStyle();
@@ -331,7 +331,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
 
         // Iterate over lines in range and set attribute
         else while (aStart < anEnd) {
-            RichTextLine line = getLineAt(aStart);
+            RichTextLine line = getLineForCharIndex(aStart);
             int lstart = line.getStart();
             RichTextRun run = getRunAt(aStart);
             int rend = run.getEnd();
@@ -356,7 +356,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
 
         // Handle MultiStyle
         else {
-            int sline = getLineAt(aStart).getIndex(), eline = getLineAt(anEnd).getIndex();
+            int sline = getLineForCharIndex(aStart).getIndex(), eline = getLineForCharIndex(anEnd).getIndex();
             for (int i = sline; i <= eline; i++) {
                 RichTextLine line = getLine(i);
                 TextLineStyle ostyle = line.getLineStyle();
@@ -383,7 +383,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
 
         // Handle MultiStyle
         else {
-            int sline = getLineAt(aStart).getIndex(), eline = getLineAt(anEnd).getIndex();
+            int sline = getLineForCharIndex(aStart).getIndex(), eline = getLineForCharIndex(anEnd).getIndex();
             for (int i = sline; i <= eline; i++) {
                 RichTextLine line = getLine(i);
                 TextLineStyle ostyle = line.getLineStyle(), nstyle = ostyle.copyFor(aKey, aValue);
@@ -418,9 +418,9 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
      * Returns the block at the given char index.
      */
     @Override
-    public RichTextLine getLineAt(int anIndex)
+    public RichTextLine getLineForCharIndex(int anIndex)
     {
-        return (RichTextLine) super.getLineAt(anIndex);
+        return (RichTextLine) super.getLineForCharIndex(anIndex);
     }
 
     /**
@@ -478,7 +478,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
      */
     public RichTextRun getRunAt(int anIndex)
     {
-        RichTextLine line = getLineAt(anIndex);
+        RichTextLine line = getLineForCharIndex(anIndex);
         return line.getRunAt(anIndex - line.getStart());
     }
 
@@ -511,7 +511,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
      */
     public TextLineStyle getLineStyleAt(int anIndex)
     {
-        return getLineAt(anIndex).getLineStyle();
+        return getLineForCharIndex(anIndex).getLineStyle();
     }
 
     /**
@@ -680,7 +680,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
         // Create new RichText and iterate over lines in range to add copies for subrange
         RichText rtext = new RichText();
         rtext._lines.remove(0);
-        int sline = getLineAt(aStart).getIndex(), eline = getLineAt(aEnd).getIndex();
+        int sline = getLineForCharIndex(aStart).getIndex(), eline = getLineForCharIndex(aEnd).getIndex();
         for (int i = sline; i <= eline; i++) {
             RichTextLine line = getLine(i);
             int lstart = line.getStart();

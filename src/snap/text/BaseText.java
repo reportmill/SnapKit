@@ -58,7 +58,7 @@ public abstract class BaseText implements CharSequence {
      */
     public char charAt(int anIndex)
     {
-        BaseTextLine line = getLineAt(anIndex);
+        BaseTextLine line = getLineForCharIndex(anIndex);
         return line.charAt(anIndex - line.getStart());
     }
     /**
@@ -67,7 +67,7 @@ public abstract class BaseText implements CharSequence {
     public CharSequence subSequence(int aStart, int anEnd)
     {
         StringBuffer sb = new StringBuffer(anEnd - aStart);
-        BaseTextLine line = getLineAt(aStart);
+        BaseTextLine line = getLineForCharIndex(aStart);
         while (aStart < anEnd) {
             int end = Math.min(line.getEnd(), anEnd);
             sb.append(line.subSequence(aStart - line.getStart(), end - line.getStart()));
@@ -130,11 +130,14 @@ public abstract class BaseText implements CharSequence {
     /**
      * Returns the block at the given char index.
      */
-    public BaseTextLine getLineAt(int anIndex)
+    public BaseTextLine getLineForCharIndex(int anIndex)
     {
+        // Iterate over lines and return line containing char index
         for (BaseTextLine line : _lines)
             if (anIndex < line.getEnd())
                 return line;
+
+        // If index of text end, return last
         if (anIndex == length())
             return getLineLast();
 
@@ -147,12 +150,12 @@ public abstract class BaseText implements CharSequence {
      */
     public BaseTextLine getLineLast()
     {
-        int lc = getLineCount();
-        return lc > 0 ? getLine(lc - 1) : null;
+        int lineCount = getLineCount();
+        return lineCount > 0 ? getLine(lineCount - 1) : null;
     }
 
     /**
-     * Updates blocks from index.
+     * Updates Lines (Index, Start) from index line to text end.
      */
     protected void updateLines(int anIndex)
     {

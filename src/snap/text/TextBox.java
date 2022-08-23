@@ -676,8 +676,8 @@ public class TextBox {
 
         // Get RichText start-line-index, end-line-index
         RichText richText = getRichText();
-        int startRTL = richText.getLineAt(start).getIndex();
-        int endRTL = richText.getLineAt(aEnd).getIndex();
+        int startRTL = richText.getLineForCharIndex(start).getIndex();
+        int endRTL = richText.getLineForCharIndex(aEnd).getIndex();
 
         // Iterate over RichText lines, create TextBox lines and add
         for (int i = startRTL, lindex = aLineIndex; i <= endRTL; i++) {
