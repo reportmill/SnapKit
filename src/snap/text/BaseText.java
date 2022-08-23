@@ -12,7 +12,7 @@ import java.util.List;
 public abstract class BaseText implements CharSequence {
 
     // The TextDocLine in this text
-    protected List<RichTextLine> _lines = new ArrayList<>();
+    protected List<BaseTextLine> _lines = new ArrayList<>();
 
     // The length of this text
     protected int  _length;
@@ -83,7 +83,7 @@ public abstract class BaseText implements CharSequence {
     public String getString()
     {
         StringBuilder sb = new StringBuilder(length());
-        for (RichTextLine line : _lines)
+        for (BaseTextLine line : _lines)
             sb.append(line._sb);
         return sb.toString();
     }
@@ -126,6 +126,11 @@ public abstract class BaseText implements CharSequence {
     {
         return _lines.get(anIndex);
     }
+
+    /**
+     * Returns the list of blocks.
+     */
+    public List<BaseTextLine> getLines()  { return _lines; }
 
     /**
      * Returns the block at the given char index.

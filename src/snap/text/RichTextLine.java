@@ -122,34 +122,6 @@ public class RichTextLine extends BaseTextLine {
     }
 
     /**
-     * Splits the line at given character index.
-     */
-    protected RichTextLine splitLineAtIndex(int anIndex)
-    {
-        RichTextLine remainder = clone();
-        remainder.removeChars(0, anIndex);
-        removeChars(anIndex, length());
-        return remainder;
-    }
-
-    /**
-     * Appends the given line to the end of this line.
-     */
-    protected void appendLine(RichTextLine aLine)
-    {
-        // Add chars
-        _sb.append(aLine._sb);
-
-        // Add runs
-        for (int i = 0, iMax = aLine.getRunCount(); i < iMax; i++) {
-            BaseTextRun run = aLine.getRun(i);
-            BaseTextRun run2 = run.clone();
-            run2._textLine = this;
-            addRun(run2, getRunCount());
-        }
-    }
-
-    /**
      * Splits given run at given char index and returns the run containing the remaining chars (and identical attributes).
      */
     protected BaseTextRun splitRunForCharIndex(BaseTextRun aRun, int anIndex)
@@ -184,35 +156,6 @@ public class RichTextLine extends BaseTextLine {
         for (BaseTextRun run : _runs)
             width += run.getWidth();
         return width;
-    }
-
-    /**
-     * Returns the width of line from given index.
-     */
-    public double getWidth(int anIndex)
-    {
-        // If index 0, use cached
-        if (anIndex <= 0) return getWidth();
-
-        // Calculate
-        double width = 0;
-        for (BaseTextRun run : _runs)
-            if (anIndex < run.getEnd())
-                width += run.getWidth(anIndex - run.getStart());
-
-        // Return
-        return width;
-    }
-
-    /**
-     * Returns whether line contains an underlined run.
-     */
-    public boolean isUnderlined()
-    {
-        for (BaseTextRun run : _runs)
-            if (run.isUnderlined() && run.length() > 0)
-                return true;
-        return false;
     }
 
     /**

@@ -519,13 +519,17 @@ public class TextBox {
                 textRemovedChars(index, index + oval.length());
             if (nval != null)
                 textAddedChars(index, index + nval.length());
-        } else if (aPC instanceof RichText.StyleChange) {
+        }
+
+        else if (aPC instanceof RichText.StyleChange) {
             RichText.StyleChange sc = (RichText.StyleChange) aPC;
             textChangedChars(sc.getStart(), sc.getEnd());
-        } else if (aPC instanceof RichText.LineStyleChange) {
+        }
+
+        else if (aPC instanceof RichText.LineStyleChange) {
             RichText.LineStyleChange lsc = (RichText.LineStyleChange) aPC;
-            RichTextLine rtl = getRichText().getLine(lsc.getIndex());
-            textChangedChars(rtl.getStart(), rtl.getEnd());
+            BaseTextLine textLine = getRichText().getLine(lsc.getIndex());
+            textChangedChars(textLine.getStart(), textLine.getEnd());
         }
     }
 
@@ -681,15 +685,15 @@ public class TextBox {
 
         // Iterate over RichText lines, create TextBox lines and add
         for (int i = startRTL, lindex = aLineIndex; i <= endRTL; i++) {
-            RichTextLine rtl = richText.getLine(i);
+            RichTextLine textLine = richText.getLine(i);
 
             // Get start-char-index for line
-            int lstart = Math.max(start - rtl.getStart(), 0);
-            if (lstart == rtl.length()) continue;
+            int lstart = Math.max(start - textLine.getStart(), 0);
+            if (lstart == textLine.length()) continue;
 
             // Add TextBoxLine(s) for RichTextLine
-            while (lstart < rtl.length()) {
-                TextBoxLine line = createLine(rtl, lstart, lindex);
+            while (lstart < textLine.length()) {
+                TextBoxLine line = createLine(textLine, lstart, lindex);
                 if ((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()) {
                     i = Short.MAX_VALUE;
                     break;
@@ -701,9 +705,9 @@ public class TextBox {
 
         // If we added last line and it is empty or ends with newline, add blank line
         if (endRTL == richText.getLineCount() - 1) {
-            RichTextLine rtl = richText.getLine(endRTL);
-            if (rtl.length() == 0 || rtl.isLastCharNewline()) {
-                TextBoxLine line = createLine(rtl, rtl.length(), getLineCount());
+            RichTextLine textLine = richText.getLine(endRTL);
+            if (textLine.length() == 0 || textLine.isLastCharNewline()) {
+                TextBoxLine line = createLine(textLine, textLine.length(), getLineCount());
                 if (!((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()))
                     _lines.add(line);
             }
