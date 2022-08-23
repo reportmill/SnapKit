@@ -717,10 +717,10 @@ public class TextBox {
     {
         // Get iteration variables
         int start = aStart;
-        int len = aTextLine.length();
+        int textLineLength = aTextLine.length();
         int lineStart = aStart;
         RichTextRun run = aTextLine.getRun(0);
-        int rend = run.getEnd();
+        int runEnd = run.getEnd();
         TextStyle style = run.getStyle();
         double fontScale = getFontScale();
         if (fontScale != 1)
@@ -747,12 +747,12 @@ public class TextBox {
         line._yloc = y - getY();
 
         // Iterate over line chars
-        while (start < len) {
+        while (start < textLineLength) {
 
             // Reset run if needed
-            if (start >= rend) {
+            if (start >= runEnd) {
                 run = aTextLine.getRun(run.getIndex() + 1);
-                rend = run.getEnd();
+                runEnd = run.getEnd();
                 style = run.getStyle();
                 if (fontScale != 1)
                     style = style.copyFor(style.getFont().scaleFont(fontScale));
@@ -761,18 +761,18 @@ public class TextBox {
             }
 
             // Skip past whitespace
-            while (start < len && Character.isWhitespace(c = aTextLine.charAt(start))) {
+            while (start < textLineLength && Character.isWhitespace(c = aTextLine.charAt(start))) {
                 if (c == '\t')
                     x = line.getXForTabAtIndexAndX(start, x + getX()) - getX();
                 else x += style.getCharAdvance(c) + cspace; //aTextLine.getLineStyle().getTabForX(x)-getX()
                 start++;
-                if (start >= rend && start < len)
+                if (start >= runEnd && start < textLineLength)
                     break;
             }
 
             // Iterate through non-whitespace
             int end = start;
-            while (end < len && end < rend && !Character.isWhitespace(c = aTextLine.charAt(end))) {
+            while (end < textLineLength && end < runEnd && !Character.isWhitespace(c = aTextLine.charAt(end))) {
                 w += style.getCharAdvance(c) + cspace;
                 end++;
             }

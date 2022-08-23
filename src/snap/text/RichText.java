@@ -100,8 +100,7 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
     {
         StringBuilder sb = new StringBuilder(length());
         for (RichTextLine line : _lines)
-            for (RichTextRun run : line._runs)
-                sb.append(run._sb);
+            sb.append(line._sb);
         return sb.toString();
     }
 
@@ -179,7 +178,7 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
         // Get line for index - if adding at text end and last line and ends with newline, create/add new line
         RichTextLine line = getLineAt(anIndex);
         if (anIndex == line.getEnd() && line.isLastCharNewline()) {
-            RichTextLine nline = line.split(line.length());
+            RichTextLine nline = line.splitLineAtIndex(line.length());
             addLine(nline, line.getIndex() + 1);
             line = nline;
         }
@@ -200,7 +199,7 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
 
             // If newline added and there are more chars in line, split line and add remainder
             if (newline > 0 && (end < len || lindex + chars.length() < line.length())) {
-                RichTextLine remainder = line.split(lindex + chars.length());
+                RichTextLine remainder = line.splitLineAtIndex(lindex + chars.length());
                 addLine(remainder, line.getIndex() + 1);
                 line = remainder;
                 lindex = 0;
@@ -251,29 +250,41 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
         if (anEnd == aStart) return;
 
         // If PropChangeEnabled, get chars to be deleted
-        CharSequence dchars = isPropChangeEnabled() ? subSequence(aStart, anEnd) : null;
+        CharSequence removedChars = isPropChangeEnabled() ? subSequence(aStart, anEnd) : null;
 
         // Delete lines/chars for range
         int end = anEnd;
         while (end > aStart) {
+
+            // Get line at end index
             RichTextLine line = getLineAt(end);
-            if (end == line.getStart()) line = getLine(line.getIndex() - 1);
-            int lineStart = line.getStart(), start = Math.max(aStart, lineStart);
+            if (end == line.getStart())
+                line = getLine(line.getIndex() - 1);
+
+            // Get Line.Start
+            int lineStart = line.getStart();
+            int start = Math.max(aStart, lineStart);
+
+            // If whole line in range, remove line
             if (start == lineStart && end == line.getEnd() && getLineCount() > 1)
                 removeLine(line.getIndex());
+
+            // Otherwise remove chars (if no newline afterwards, join with next line)
             else {
                 line.removeChars(start - lineStart, end - lineStart);
                 if (!line.isLastCharNewline() && line.getIndex() + 1 < getLineCount()) {
                     RichTextLine next = removeLine(line.getIndex() + 1);
-                    line.join(next);
+                    line.joinLine(next);
                 }
             }
+
+            // Reset end
             end = lineStart;
         }
 
         // If deleted chars is set, send property change
-        if (dchars != null)
-            firePropChange(new CharsChange(dchars, null, aStart));
+        if (removedChars != null)
+            firePropChange(new CharsChange(removedChars, null, aStart));
         _width = -1;
     }
 
@@ -292,14 +303,16 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
     {
         // Get style and linestyle for add chars
         TextStyle style = theStyle != null ? theStyle : getStyleAt(aStart);
-        TextLineStyle lstyle = theChars != null && theChars.length() > 0 && !isPlainText() ? getLineStyleAt(aStart) : null;
+        TextLineStyle lineStyle = theChars != null && theChars.length() > 0 && !isPlainText() ? getLineStyleAt(aStart) : null;
 
         // Remove given range and add chars
-        if (anEnd > aStart) removeChars(aStart, anEnd);
+        if (anEnd > aStart)
+            removeChars(aStart, anEnd);
         addChars(theChars, style, aStart);
 
-        // Restore linestyle (needed if range includes a newline)
-        if (lstyle != null) setLineStyle(lstyle, aStart, aStart + theChars.length());
+        // Restore LineStyle (needed if range includes a newline)
+        if (lineStyle != null)
+            setLineStyle(lineStyle, aStart, aStart + theChars.length());
     }
 
     /**
@@ -321,7 +334,8 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
      */
     public void replaceText(RichText aRichText, int aStart, int anEnd)
     {
-        if (anEnd > aStart) removeChars(aStart, anEnd);
+        if (anEnd > aStart)
+            removeChars(aStart, anEnd);
         addText(aRichText, aStart);
     }
 
@@ -342,18 +356,17 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
         // Iterate over runs in range and set style
         else while (aStart < anEnd) {
             RichTextLine line = getLineAt(aStart);
-            int lstart = line.getStart();
+            int lineStart = line.getStart();
             RichTextRun run = getRunAt(aStart);
             TextStyle ostyle = run.getStyle();
-            if (aStart - lstart > run.getStart())
-                run = line.splitRun(run, aStart - lstart - run.getStart());
-            if (anEnd - lstart < run.getEnd())
-                line.splitRun(run, anEnd - lstart - run.getStart());
+            if (aStart - lineStart > run.getStart())
+                run = line.splitRun(run, aStart - lineStart - run.getStart());
+            if (anEnd - lineStart < run.getEnd())
+                line.splitRun(run, anEnd - lineStart - run.getStart());
             run.setStyle(aStyle);
-            line._width = -1;
-            aStart = run.getEnd() + lstart;
+            aStart = run.getEnd() + lineStart;
             if (isPropChangeEnabled())
-                firePropChange(new StyleChange(ostyle, aStyle, run.getStart() + lstart, run.getEnd() + lstart));
+                firePropChange(new StyleChange(ostyle, aStyle, run.getStart() + lineStart, run.getEnd() + lineStart));
         }
 
         _width = -1;

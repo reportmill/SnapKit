@@ -427,7 +427,7 @@ public class SnapUtils {
     {
         // Handle WebFile
         if (aSource instanceof WebFile)
-            return ((WebFile) aSource).getType();
+            return ((WebFile) aSource).getText();
 
         // Handle anything else: Get bytes
         byte[] bytes = getBytes(aSource);

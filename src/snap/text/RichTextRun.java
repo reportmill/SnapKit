@@ -13,8 +13,8 @@ import snap.gfx.Font;
  */
 public class RichTextRun implements Cloneable, CharSequence {
 
-    // The characters in this line
-    protected StringBuffer  _sb = new StringBuffer();
+    // The line that holds this run
+    protected RichTextLine  _textLine;
 
     // The attributes of the Run
     private TextStyle  _style = TextStyle.DEFAULT;
@@ -25,25 +25,41 @@ public class RichTextRun implements Cloneable, CharSequence {
     // The start char index of this run in line
     protected int  _start;
 
+    // The char length of this run
+    protected int  _length;
+
     // The width of run
     private double  _width = -1;
 
     /**
+     * Constructor.
+     */
+    public RichTextRun(RichTextLine aTextLine)
+    {
+        super();
+        _textLine = aTextLine;
+    }
+
+    /**
      * Returns the string for this run.
      */
-    public String getString()  { return _sb.toString(); }
+    public String getString()
+    {
+        CharSequence chars = _textLine.subSequence(_start, _start + _length);
+        return chars.toString();
+    }
 
     /**
      * Returns the length in characters for this run.
      */
-    public int length()  { return _sb.length(); }
+    public int length()  { return _length; }
 
     /**
      * CharSequence method returning character at given index.
      */
     public char charAt(int anIndex)
     {
-        return _sb.charAt(anIndex);
+        return _textLine.charAt(_start + anIndex);
     }
 
     /**
@@ -51,7 +67,7 @@ public class RichTextRun implements Cloneable, CharSequence {
      */
     public CharSequence subSequence(int aStart, int anEnd)
     {
-        return _sb.subSequence(aStart, anEnd);
+        return _textLine.subSequence(_start + aStart, _start + anEnd);
     }
 
     /**
@@ -66,6 +82,7 @@ public class RichTextRun implements Cloneable, CharSequence {
     {
         _style = aStyle;
         _width = -1;
+        _textLine._width = -1;
     }
 
     /**
@@ -185,20 +202,19 @@ public class RichTextRun implements Cloneable, CharSequence {
     /**
      * Returns the end character index for this run.
      */
-    public int getEnd()  { return _start + _sb.length(); }
+    public int getEnd()  { return _start + length(); }
 
     /**
      * Returns the width of run.
      */
     public double getWidth()
     {
+        // If already set, just return
         if (_width >= 0) return _width;
-        int len = length();
-        while (len - 1 > 0 && Character.isWhitespace(charAt(len - 1))) len--;
-        _width = 0;
-        for (int i = 0; i < len; i++) _width += _style.getCharAdvance(charAt(i));
-        if (len > 1) _width += (len - 1) * getCharSpacing();
-        return _width;
+
+        // Calculate, set, return
+        double width = getWidth(0);
+        return _width = width;
     }
 
     /**
@@ -206,21 +222,28 @@ public class RichTextRun implements Cloneable, CharSequence {
      */
     public double getWidth(int anIndex)
     {
-        if (anIndex <= 0) return getWidth();
+        // If zero, return cached
+        if (anIndex <= 0 && _width >= 0) return getWidth();
+
+        // Calculate
         double width = 0;
         int len = length();
         while (len - 1 > 0 && Character.isWhitespace(charAt(len - 1))) len--;
-        for (int i = anIndex; i < len; i++) width += _style.getCharAdvance(charAt(i));
-        if (len - anIndex > 1) width += (len - anIndex - 1) * getCharSpacing();
+        for (int i = anIndex; i < len; i++)
+            width += _style.getCharAdvance(charAt(i));
+        if (len - anIndex > 1)
+            width += (len - anIndex - 1) * getCharSpacing();
+
+        // Return
         return width;
     }
 
     /**
      * Insets chars at index.
      */
-    protected void insert(int anIndex, CharSequence theChars)
+    protected void insert(CharSequence theChars)
     {
-        _sb.insert(anIndex, theChars);
+        _length += theChars.length();
         _width = -1;
     }
 
@@ -229,7 +252,8 @@ public class RichTextRun implements Cloneable, CharSequence {
      */
     protected void delete(int aStart, int anEnd)
     {
-        _sb.delete(aStart, anEnd);
+        int charCount = anEnd - aStart;
+        _length -= charCount;
         _width = -1;
     }
 
@@ -243,12 +267,13 @@ public class RichTextRun implements Cloneable, CharSequence {
         RichTextRun other = anObj instanceof RichTextRun ? (RichTextRun) anObj : null;
         if (other == null) return false;
 
-        // Check StringBuffer and Style
+        // Check Start, Length, Style
+        if (other.getStart() != getStart()) return false;
         if (other.length() != length()) return false;
-        for (int i = 0, iMax = _sb.length(); i < iMax; i++) // Can't just do SB.equals()
-            if (other._sb.charAt(i) != _sb.charAt(i)) return false;
         if (!other.getStyle().equals(getStyle())) return false;
-        return true;  // Return true since all checks passed
+
+        // Return equal
+        return true;
     }
 
     /**
@@ -264,12 +289,12 @@ public class RichTextRun implements Cloneable, CharSequence {
      */
     public RichTextRun clone()
     {
-        RichTextRun clone = null;
-        try {
-            clone = (RichTextRun) super.clone();
-        } catch (CloneNotSupportedException e) {
-        }
-        clone._sb = new StringBuffer(_sb);
+        // Do normal version
+        RichTextRun clone;
+        try { clone = (RichTextRun) super.clone(); }
+        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+
+        // Return
         return clone;
     }
 
@@ -282,5 +307,4 @@ public class RichTextRun implements Cloneable, CharSequence {
         string = string.replace("\n", "\\n");
         return getClass().getSimpleName() + "(" + getStart() + "," + getEnd() + "): " + string;
     }
-
 }

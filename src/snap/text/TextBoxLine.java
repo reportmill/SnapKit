@@ -2,10 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import java.util.*;
-
 import snap.geom.HPos;
 import snap.util.MathUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class to represent a line of text in a TextBox.
@@ -13,47 +13,53 @@ import snap.util.MathUtils;
 public class TextBoxLine implements CharSequence {
 
     // The TextBox that contains this line
-    TextBox              _tbox;
-    
+    protected TextBox  _tbox;
+
     // The starting style for this line
-    TextStyle            _startStyle;
-    
+    protected TextStyle  _startStyle;
+
     // The index of this line in text
-    protected int        _index;
-    
-    // The char index of the start/end of this line in text
-    int                  _start, _length;
+    protected int  _index;
+
+    // The char index of the start char of this line in text
+    protected int  _start;
+
+    // The number of chars in this text line
+    protected int  _length;
 
     // The RichTextLine that this line renders
-    RichTextLine         _rtline;
-    
+    protected RichTextLine  _textLine;
+
     // The start of this line in RichTextLine
-    int                  _rtstart;
-    
+    protected int  _textLineStart;
+
     // The bounds of this line in TextBlock
-    double               _yloc = -1, _width, _height, _widthAll;
-    
+    protected double  _yloc = -1, _width, _height, _widthAll;
+
     // The x shift of the line due to alignment
-    double               _alignX;
-    
+    protected double  _alignX;
+
     // The tokens for this line
-    List <TextBoxToken>  _tokens = new ArrayList();
-    
+    protected List<TextBoxToken>  _tokens = new ArrayList<>();
+
     // The max Ascent for line fonts
-    double               _ascent, _descent, _leading, _lineAdvance;
-    
+    protected double  _ascent, _descent, _leading, _lineAdvance;
+
     // The first TextBoxRun for this line
-    TextBoxRun           _run;
-    
+    protected TextBoxRun  _run;
+
     // An array of character runs for the line
-    List <TextBoxRun>    _runs;
+    protected List<TextBoxRun>  _runs;
 
     /**
      * Creates a new TextBoxLine.
      */
     public TextBoxLine(TextBox aBox, TextStyle aStartStyle, RichTextLine aTextLine, int theRTLStart)
     {
-        _tbox = aBox; _startStyle = aStartStyle; _rtline = aTextLine; _rtstart = theRTLStart;
+        _tbox = aBox;
+        _startStyle = aStartStyle;
+        _textLine = aTextLine;
+        _textLineStart = theRTLStart;
     }
 
     /**
@@ -89,47 +95,68 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the string for the line.
      */
-    public String getString()  { return subSequence(0, length()).toString(); }
+    public String getString()
+    {
+        return subSequence(0, length()).toString();
+    }
 
     /**
      * Returns the char value at the specified index.
      */
-    public char charAt(int anIndex)  { return _rtline.charAt(anIndex + _rtstart); }
+    public char charAt(int anIndex)
+    {
+        return _textLine.charAt(anIndex + _textLineStart);
+    }
 
     /**
      * Returns a new char sequence that is a subsequence of this sequence.
      */
-    public CharSequence subSequence(int aStart, int anEnd)  { return _rtline.subSequence(aStart+_rtstart, anEnd+_rtstart); }
+    public CharSequence subSequence(int aStart, int anEnd)
+    {
+        return _textLine.subSequence(aStart + _textLineStart, anEnd + _textLineStart);
+    }
 
     /**
-     * Returns the RichTextLine.
+     * Returns the TextLine.
      */
-    public RichTextLine getRichTextLine()  { return _rtline; }
+    public RichTextLine getRichTextLine()  { return _textLine; }
 
     /**
      * Returns the start of this line in RichTextLine.
      */
-    public int getRichTextLineStart()  { return _rtstart; }
+    public int getRichTextLineStart()  { return _textLineStart; }
 
     /**
      * Returns the RichTextRun of char in line.
      */
-    public RichTextRun getRichTextRun(int anIndex)  { return _rtline.getRunAt(_rtstart+anIndex); }
+    public RichTextRun getRichTextRun(int anIndex)
+    {
+        return _textLine.getRunAt(_textLineStart + anIndex);
+    }
 
     /**
      * Returns the line style.
      */
-    public TextLineStyle getLineStyle()  { return _rtline.getLineStyle(); }
+    public TextLineStyle getLineStyle()
+    {
+        return _textLine.getLineStyle();
+    }
 
     /**
      * Returns the line x.
      */
-    public double getX()  { return _tbox.getX() + _alignX; }
+    public double getX()
+    {
+        return _tbox.getX() + _alignX;
+    }
 
     /**
      * Returns the line y.
      */
-    public double getY()  { return getYLocal() + _tbox.getAlignedY(); }
+    public double getY()
+    {
+        return getYLocal() + _tbox.getAlignedY();
+    }
 
     /**
      * Returns the line y.
@@ -137,19 +164,22 @@ public class TextBoxLine implements CharSequence {
     public double getYLocal()
     {
         // If already set, just return
-        if (_yloc>=0) return _yloc;
+        if (_yloc >= 0) return _yloc;
 
         // Get YLocal from last line. Need to fix this to not stack overflow for large text showing tail first.
         int index = getIndex();
-        TextBoxLine lastLine = index>0 ? _tbox.getLine(index-1) : null;
-        _yloc = lastLine!=null ? (lastLine.getYLocal() + lastLine.getLineAdvance()) : 0;
+        TextBoxLine lastLine = index > 0 ? _tbox.getLine(index - 1) : null;
+        _yloc = lastLine != null ? (lastLine.getYLocal() + lastLine.getLineAdvance()) : 0;
         return _yloc;
     }
 
     /**
      * Returns the y position for this line (in same coords as the layout frame).
      */
-    public double getBaseline()  { return getY() + getAscent(); }
+    public double getBaseline()
+    {
+        return getY() + getAscent();
+    }
 
     /**
      * Returns the width.
@@ -164,12 +194,18 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the max X.
      */
-    public double getMaxX()  { return getX() + getWidth(); }
+    public double getMaxX()
+    {
+        return getX() + getWidth();
+    }
 
     /**
      * Returns the max Y.
      */
-    public double getMaxY()  { return getY() + getHeight(); }
+    public double getMaxY()
+    {
+        return getY() + getHeight();
+    }
 
     /**
      * Returns the width including trailing whitespace.
@@ -179,15 +215,20 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the max x including trailing whitespace.
      */
-    public double getMaxXAll()  { return getX() + getWidthAll(); }
+    public double getMaxXAll()
+    {
+        return getX() + getWidthAll();
+    }
 
     /**
      * Returns the width without whitespace.
      */
     public double getWidthNoWhiteSpace()
     {
-        int len = length(); while (len>0 && Character.isWhitespace(charAt(len-1))) len--;
-        if (len==length()) return getWidth();
+        int len = length();
+        while (len > 0 && Character.isWhitespace(charAt(len - 1))) len--;
+        if (len == length())
+            return getWidth();
         return getXForChar(len) - getX();
     }
 
@@ -197,19 +238,21 @@ public class TextBoxLine implements CharSequence {
     public void resetSizes()
     {
         // Get last token and its info
-        TextBoxToken etok = getTokenCount()>0 ? _tokens.get(_tokens.size()-1) : null;
-        int etokEnd = etok!=null ? etok.getEnd() : 0;
-        TextStyle etokStyle = etok!=null ? etok.getStyle() : getStartStyle();
+        TextBoxToken etok = getTokenCount() > 0 ? _tokens.get(_tokens.size() - 1) : null;
+        int etokEnd = etok != null ? etok.getEnd() : 0;
+        TextStyle etokStyle = etok != null ? etok.getStyle() : getStartStyle();
 
         // Get line end and length (extend end to capture trailing whitespace after last token)
-        int end = etokEnd + _rtstart;
-        while (end<_rtline.length() && Character.isWhitespace(_rtline.charAt(end))) end++;
-        _length = end - _rtstart; //_end += _rtline.getStart(); _length = _end - _start;
+        int end = etokEnd + _textLineStart;
+        while (end < _textLine.length() && Character.isWhitespace(_textLine.charAt(end))) end++;
+        _length = end - _textLineStart; //_end += _rtline.getStart(); _length = _end - _start;
 
         // Iterate over runs and get line metrics
-        _ascent = etokStyle.getAscent(); _descent = etokStyle.getDescent(); _leading = etokStyle.getLeading();
+        _ascent = etokStyle.getAscent();
+        _descent = etokStyle.getDescent();
+        _leading = etokStyle.getLeading();
         for (TextBoxToken tok : _tokens) {
-            if (tok.getStyle()==etokStyle) continue;
+            if (tok.getStyle() == etokStyle) continue;
             etokStyle = tok.getStyle();
             _ascent = Math.max(etokStyle.getAscent(), _ascent);
             _descent = Math.max(etokStyle.getDescent(), _descent);
@@ -221,10 +264,10 @@ public class TextBoxLine implements CharSequence {
         //height *= getLineSpacing(); height += getLineGap();
 
         // Get TextLineStyle
-        TextLineStyle lstyle = _rtline.getLineStyle();
+        TextLineStyle lstyle = _textLine.getLineStyle();
 
         // Set width, height and LineAdvance
-        _width = _widthAll = etok!=null ? etok.getTextBoxMaxX() - getX() : 0;
+        _width = _widthAll = etok != null ? etok.getTextBoxMaxX() - getX() : 0;
         _height = _ascent + _descent;
 
         // Calculate LineAdvance
@@ -234,19 +277,20 @@ public class TextBoxLine implements CharSequence {
         _lineAdvance += lstyle.getSpacing();
 
         // Calculate widthAll (width with trailing whitespace)
-        for (int i=etokEnd, iMax=_length;i<iMax;i++) { char c = charAt(i);
-            if (c=='\t')
+        for (int i = etokEnd, iMax = _length; i < iMax; i++) {
+            char c = charAt(i);
+            if (c == '\t')
                 _widthAll = getXForTabAtIndexAndX(i, getX() + _widthAll) - getX();
-            else if (c!='\n' && c!='\r') _widthAll += etokStyle.getCharAdvance(c);
+            else if (c != '\n' && c != '\r') _widthAll += etokStyle.getCharAdvance(c);
         }
 
         // If justify, shift tokens in line (unless line has newline or is last line in RichText)
-        if (lstyle.isJustify() && getTokenCount()>1) {
-            if (isLastCharNewline() || end==_rtline.length()) return;
+        if (lstyle.isJustify() && getTokenCount() > 1) {
+            if (isLastCharNewline() || end == _textLine.length()) return;
             double y = getY();
             double tmx = _tbox.getMaxHitX(y, _height);
             double lmx = getMaxX(), rem = tmx - lmx;
-            double shift = rem/(getTokenCount()-1), shft = 0;
+            double shift = rem / (getTokenCount() - 1), shft = 0;
             for (TextBoxToken tok : getTokens()) {
                 tok._shiftX = shft;
                 shft += shift;
@@ -255,13 +299,13 @@ public class TextBoxLine implements CharSequence {
         }
 
         // Calculate X alignment shift
-        else if (_rtline.getAlignX()!= HPos.LEFT && _tbox.getWidth()<9999) {
-            double ax = _rtline.getAlignX().doubleValue();
+        else if (_textLine.getAlignX() != HPos.LEFT && _tbox.getWidth() < 9999) {
+            double ax = _textLine.getAlignX().doubleValue();
             double lineY = getY();
             double tboxHitX = _tbox.getMaxHitX(lineY, _height);
             double lineMaxX = getMaxX();
             double rem = tboxHitX - lineMaxX;
-            _alignX = Math.round(ax*rem);
+            _alignX = Math.round(ax * rem);
         }
     }
 
@@ -283,15 +327,18 @@ public class TextBoxLine implements CharSequence {
     /**
      * Adds a token to line.
      */
-    public void addToken(TextBoxToken aToken)  { _tokens.add(aToken); }
+    public void addToken(TextBoxToken aToken)
+    {
+        _tokens.add(aToken);
+    }
 
     /**
      * Returns the last token for this line.
      */
     public TextBoxToken getTokenLast()
     {
-        int tc = _tokens.size();
-        return tc>0 ? _tokens.get(tc-1) : null;
+        int tokenCount = _tokens.size();
+        return tokenCount > 0 ? _tokens.get(tokenCount - 1) : null;
     }
 
     /**
@@ -320,31 +367,46 @@ public class TextBoxLine implements CharSequence {
     public char getLastChar()
     {
         int len = length();
-        return len>0 ? charAt(len-1) : 0;
+        return len > 0 ? charAt(len - 1) : 0;
     }
 
     /**
      * Returns whether line ends with space.
      */
-    public boolean isLastCharWhiteSpace()  { char c = getLastChar(); return c==' ' || c=='\t'; }
+    public boolean isLastCharWhiteSpace()
+    {
+        char c = getLastChar();
+        return c == ' ' || c == '\t';
+    }
 
     /**
      * Returns whether run ends with newline.
      */
-    public boolean isLastCharNewline()  { char c = getLastChar(); return c=='\r' || c=='\n'; }
+    public boolean isLastCharNewline()
+    {
+        char c = getLastChar();
+        return c == '\r' || c == '\n';
+    }
 
     /**
      * Returns the token at character index.
      */
     public TextBoxToken getTokenAt(int anIndex)
     {
-        int tc = getTokenCount(); if (tc==0) return null;
+        int tokenCount = getTokenCount();
+        if (tokenCount == 0)
+            return null;
+
+        // Iterate
         TextBoxToken tok = getToken(0);
-        for (int i=1; i<tc; i++) { TextBoxToken next = getToken(i);
-            if (next.getStart()<=anIndex)
+        for (int i = 1; i < tokenCount; i++) {
+            TextBoxToken next = getToken(i);
+            if (next.getStart() <= anIndex)
                 tok = next;
             else break;
         }
+
+        // Return
         return tok;
     }
 
@@ -353,13 +415,20 @@ public class TextBoxLine implements CharSequence {
      */
     public TextBoxToken getTokenForPointX(double anX)
     {
-        TextBoxToken tok = getTokenCount()>0 ? getToken(0) : null; if (tok==null || tok.getTextBoxX()>anX) return null;
-        for (int i=0, iMax=getTokenCount(); i<iMax; i++) {
-            TextBoxToken next = i+1<iMax ? getToken(i+1) : null;
-            if (next!=null && next.getTextBoxX()<=anX)
+        // Get token
+        TextBoxToken tok = getTokenCount() > 0 ? getToken(0) : null;
+        if (tok == null || tok.getTextBoxX() > anX)
+            return null;
+
+        // Iterate
+        for (int i = 0, iMax = getTokenCount(); i < iMax; i++) {
+            TextBoxToken next = i + 1 < iMax ? getToken(i + 1) : null;
+            if (next != null && next.getTextBoxX() <= anX)
                 tok = next;
             else return tok;
         }
+
+        // Return
         return tok;
     }
 
@@ -370,19 +439,21 @@ public class TextBoxLine implements CharSequence {
     {
         // Get run for x coord (just return zero if null)
         TextBoxToken token = getTokenForPointX(anX);
-        int index = token!=null ? token.getStart() : 0, len = length();
-        TextStyle style = token!=null ? token.getStyle() : getStartStyle();
-        double x = token!=null ? token.getTextBoxX() : getX();
-        while (index<len) {
+        int index = token != null ? token.getStart() : 0, len = length();
+        TextStyle style = token != null ? token.getStyle() : getStartStyle();
+        double x = token != null ? token.getTextBoxX() : getX();
+        while (index < len) {
             char c = charAt(index);
-            double w = c=='\t' ? getXForTabAtIndexAndX(index,x) - x : style.getCharAdvance(c);
-            if (x+w/2>anX)
+            double w = c == '\t' ? getXForTabAtIndexAndX(index, x) - x : style.getCharAdvance(c);
+            if (x + w / 2 > anX)
                 return index;
-            index++; x += w;
+            index++;
+            x += w;
         }
 
         // If at end of line with newline, back off 1
-        if (index==length() && isLastCharNewline()) index--;
+        if (index == length() && isLastCharNewline())
+            index--;
         return index;
     }
 
@@ -391,15 +462,24 @@ public class TextBoxLine implements CharSequence {
      */
     public double getXForChar(int anIndex)
     {
-        if (anIndex==length()) return getMaxXAll();
-        TextBoxToken tok = getTokenAt(anIndex); if (tok!=null && anIndex<tok.getStart()) tok = null;
-        TextStyle style = tok!=null ? tok.getStyle() : getStartStyle();
-        double x = tok!=null ? tok.getTextBoxX() : getX();
-        for (int i=tok!=null ? tok.getStart() : 0; i<anIndex; i++) { char c = charAt(i);
-            if (c=='\t')
-                x = getXForTabAtIndexAndX(i,x);
+        if (anIndex == length())
+            return getMaxXAll();
+
+        TextBoxToken tok = getTokenAt(anIndex);
+        if (tok != null && anIndex < tok.getStart())
+            tok = null;
+        TextStyle style = tok != null ? tok.getStyle() : getStartStyle();
+
+        // Iterate
+        double x = tok != null ? tok.getTextBoxX() : getX();
+        for (int i = tok != null ? tok.getStart() : 0; i < anIndex; i++) {
+            char c = charAt(i);
+            if (c == '\t')
+                x = getXForTabAtIndexAndX(i, x);
             else x += style.getCharAdvance(c) + style.getCharSpacing();
         }
+
+        // Return
         return x;
     }
 
@@ -409,31 +489,34 @@ public class TextBoxLine implements CharSequence {
     protected double getXForTabAtIndexAndX(int aCharInd, double aX)
     {
         // Get tab position and type. If beyond stops, return text right border. If left-tab, just return tab position
-        TextLineStyle lstyle = _rtline.getLineStyle();
-        int tindex = lstyle.getTabIndex(aX);
-        if (tindex<0)
+        TextLineStyle lineStyle = _textLine.getLineStyle();
+        int tindex = lineStyle.getTabIndex(aX);
+        if (tindex < 0)
             return Math.max(aX, _tbox.getMaxX());
-        double x = lstyle.getTabForX(aX);
-        char ttype = lstyle.getTabType(tindex);
-        if (ttype==TextLineStyle.TAB_LEFT)
+        double x = lineStyle.getTabForX(aX);
+        char tabType = lineStyle.getTabType(tindex);
+        if (tabType == TextLineStyle.TAB_LEFT)
             return x;
 
         // Get width of characters after tab (until next tab, newline or decimal)
         int start = aCharInd;
-        int len = _rtline.length() - _rtstart;
+        int len = _textLine.length() - _textLineStart;
         double w = 0;
-        for (int i=aCharInd+1; i<len; i++) { char c = charAt(i);
-            if (c=='\t' || c=='\r' || c=='\n') break;
+        for (int i = aCharInd + 1; i < len; i++) {
+            char c = charAt(i);
+            if (c == '\t' || c == '\r' || c == '\n')
+                break;
             w += _startStyle.getCharAdvance(c) + _startStyle.getCharSpacing();
-            if (ttype==TextLineStyle.TAB_DECIMAL && c=='.') break;
+            if (tabType == TextLineStyle.TAB_DECIMAL && c == '.')
+                break;
         }
 
         // If right or decimal, return tab position minus chars width (or tab char location if chars wider than tab stop)
-        if (ttype==TextLineStyle.TAB_RIGHT || ttype==TextLineStyle.TAB_DECIMAL)
-            return  aX+w<x ? x-w : aX;
+        if (tabType == TextLineStyle.TAB_RIGHT || tabType == TextLineStyle.TAB_DECIMAL)
+            return aX + w < x ? x - w : aX;
 
         // if centered, return tab position minus half chars width (or tab char location if chars wider than tab stop)
-        return aX+w/2<x ? x-w/2 : aX;
+        return aX + w / 2 < x ? x - w / 2 : aX;
     }
 
     /**
@@ -441,7 +524,7 @@ public class TextBoxLine implements CharSequence {
      */
     public TextBoxLine getPrevLine()
     {
-        return _index>0 ? _tbox.getLine(_index-1) : null;
+        return _index > 0 ? _tbox.getLine(_index - 1) : null;
     }
 
     /**
@@ -449,7 +532,7 @@ public class TextBoxLine implements CharSequence {
      */
     public TextBoxLine getNextLine()
     {
-        return _index+1<_tbox.getLineCount() ? _tbox.getLine(_index+1) : null;
+        return _index + 1 < _tbox.getLineCount() ? _tbox.getLine(_index + 1) : null;
     }
 
     /**
@@ -477,20 +560,23 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns an array of runs for the line.
      */
-    public List <TextBoxRun> getRuns()
+    public List<TextBoxRun> getRuns()
     {
         // If already set, just return
-        if (_runs!=null) return _runs;
+        if (_runs != null) return _runs;
 
         // Create new list for runs
-        List runs = new ArrayList(_rtline.getRunCount());
+        List runs = new ArrayList(_textLine.getRunCount());
 
         // Create first run and add to list.
-        TextBoxRun run = createRun(0); runs.add(run);
+        TextBoxRun run = createRun(0);
+        runs.add(run);
 
         // Continue to create/add runs while not at line end
-        while (run.getEnd()<length()) {
-            run = createRun(run.getEnd()); runs.add(run); }
+        while (run.getEnd() < length()) {
+            run = createRun(run.getEnd());
+            runs.add(run);
+        }
 
         // Set and return
         return _runs = runs;
@@ -505,7 +591,7 @@ public class TextBoxLine implements CharSequence {
         RichTextRun rtrun = getRichTextRun(aStart);
         TextStyle style = rtrun.getStyle();
         double fontScale = _tbox.getFontScale();
-        if (fontScale!=1)
+        if (fontScale != 1)
             style = style.copyFor(style.getFont().scaleFont(fontScale));
 
         // Get end of run
@@ -514,16 +600,17 @@ public class TextBoxLine implements CharSequence {
         // If Justify, reset end to start of next token
         if (getLineStyle().isJustify()) {
             TextBoxToken tok = getTokenAt(aStart);
-            int ind = tok!=null ? getTokens().indexOf(tok) : -1;
-            TextBoxToken tok2 = ind>=0 && ind+1<getTokenCount() ? getToken(ind+1) : null;
-            if (tok2!=null)
+            int ind = tok != null ? getTokens().indexOf(tok) : -1;
+            TextBoxToken tok2 = ind >= 0 && ind + 1 < getTokenCount() ? getToken(ind + 1) : null;
+            if (tok2 != null)
                 end = tok2.getStart();
         }
 
         // If there are tabs, end after first tab instead
-        for (int i=aStart;i<end;i++)
-            if (charAt(i)=='\t') {
-                end = i+1; break;
+        for (int i = aStart; i < end; i++)
+            if (charAt(i) == '\t') {
+                end = i + 1;
+                break;
             }
 
         // Create/return new run
@@ -533,12 +620,19 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the first TextBox run for the line.
      */
-    public TextBoxRun getRun()  { return getRuns().get(0); }
+    public TextBoxRun getRun()
+    {
+        return getRuns().get(0);
+    }
 
     /**
      * Returns the last TextBox run for the line.
      */
-    public TextBoxRun getRunLast()  { List <TextBoxRun> runs = getRuns(); return runs.get(runs.size()-1); }
+    public TextBoxRun getRunLast()
+    {
+        List<TextBoxRun> runs = getRuns();
+        return runs.get(runs.size() - 1);
+    }
 
     /**
      * Returns whether line ends with hyphen.
@@ -546,7 +640,7 @@ public class TextBoxLine implements CharSequence {
     public boolean isHyphenated()
     {
         TextBoxToken tok = getTokenLast();
-        return tok!=null && tok.isHyphenated();
+        return tok != null && tok.isHyphenated();
     }
 
     /**
@@ -554,7 +648,8 @@ public class TextBoxLine implements CharSequence {
      */
     public String toString()
     {
-        String str = getString(); str = str.replace("\n", "\\n");
-        return getClass().getSimpleName() + "[" + getIndex() + "](" + getStart() + "," + getEnd() + "): str=\"" + str +"\"";
+        String str = getString();
+        str = str.replace("\n", "\\n");
+        return getClass().getSimpleName() + "[" + getIndex() + "](" + getStart() + "," + getEnd() + "): str=\"" + str + "\"";
     }
 }
