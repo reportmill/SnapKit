@@ -719,7 +719,7 @@ public class TextBox {
         int start = aStart;
         int textLineLength = aTextLine.length();
         int lineStart = aStart;
-        RichTextRun run = aTextLine.getRun(0);
+        BaseTextRun run = aTextLine.getRun(0);
         int runEnd = run.getEnd();
         TextStyle style = run.getStyle();
         double fontScale = getFontScale();
@@ -880,7 +880,7 @@ public class TextBox {
     /**
      * Returns the TextRun that contains the given index.
      */
-    public RichTextRun getRunAt(int anIndex)
+    public BaseTextRun getRunAt(int anIndex)
     {
         return getRichText().getRunAt(anIndex);
     }

@@ -129,9 +129,9 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the RichTextRun of char in line.
      */
-    public RichTextRun getRichTextRun(int anIndex)
+    public BaseTextRun getRichTextRun(int anIndex)
     {
-        return _textLine.getRunAt(_textLineStart + anIndex);
+        return _textLine.getRunForCharIndex(_textLineStart + anIndex);
     }
 
     /**
@@ -588,7 +588,7 @@ public class TextBoxLine implements CharSequence {
     protected TextBoxRun createRun(int aStart)
     {
         // Get RichTextRun and TextStyle at char index
-        RichTextRun rtrun = getRichTextRun(aStart);
+        BaseTextRun rtrun = getRichTextRun(aStart);
         TextStyle style = rtrun.getStyle();
         double fontScale = _tbox.getFontScale();
         if (fontScale != 1)

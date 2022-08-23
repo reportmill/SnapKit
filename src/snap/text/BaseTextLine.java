@@ -3,6 +3,8 @@
  */
 package snap.text;
 
+import snap.geom.HPos;
+
 /**
  * This class represents a line of text in a Text.
  */
@@ -14,8 +16,11 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     // The StringBuffer that holds line chars
     protected StringBuffer  _sb = new StringBuffer();
 
+    // The char index of the start of this line in text
+    protected int  _start;
+
     // The run for this line
-    protected RichTextRun[]  _runs = EMPTY_RUNS;
+    protected BaseTextRun[]  _runs = EMPTY_RUNS;
 
     // The line style
     protected TextLineStyle  _lineStyle;
@@ -23,14 +28,11 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     // The index of this line in text
     protected int  _index;
 
-    // The char index of the start of this line in text
-    protected int  _start;
-
     // The width of this line
     protected double _width = -1;
 
     // Constants
-    private static final RichTextRun[] EMPTY_RUNS = new RichTextRun[0];
+    private static final BaseTextRun[] EMPTY_RUNS = new BaseTextRun[0];
 
     /**
      * Constructor.
@@ -38,7 +40,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     public BaseTextLine(BaseText aBaseText)
     {
         _text = aBaseText;
-        //_lineStyle = _text.getDefaultLineStyle();
+        _lineStyle = _text.getDefaultLineStyle();
         //addRun(createRun(), 0);
     }
 
@@ -73,11 +75,6 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     public String getString()  { return _sb.toString(); }
 
     /**
-     * Returns the index of this line in text.
-     */
-    public int getIndex()  { return _index; }
-
-    /**
      * Returns the start char index of this line in text.
      */
     public int getStart()  { return _start; }
@@ -88,13 +85,37 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     public int getEnd()  { return _start + length(); }
 
     /**
-     * Returns the next line, if available.
+     * Returns the index of this line in text.
      */
-    public BaseTextLine getNext()
-    {
-        return _text != null && _index + 1 < _text.getLineCount() ? _text.getLine(_index + 1) : null;
-    }
+    public int getIndex()  { return _index; }
 
+    /**
+     * Returns the number of runs for this line.
+     */
+    public int getRunCount()  { return _runs.length; }
+
+    /**
+     * Returns the individual run at given index.
+     */
+    public BaseTextRun getRun(int anIndex)  { return _runs[anIndex]; }
+
+    /**
+     * Returns the line runs.
+     */
+    public BaseTextRun[] getRuns()  { return _runs; }
+
+    /**
+     * Returns the line style.
+     */
+    public TextLineStyle getLineStyle()  { return _lineStyle; }
+
+    /**
+     * Sets the line style.
+     */
+    public void setLineStyle(TextLineStyle aLineStyle)
+    {
+        _lineStyle = aLineStyle;
+    }
 
     /**
      * Returns the width of line.
@@ -113,4 +134,161 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
      * Returns the width of line.
      */
     protected abstract double getWidthImpl();
+
+    /**
+     * Returns the head run for the line.
+     */
+    public BaseTextRun getRunForCharIndex(int anIndex)
+    {
+        // Iterate over runs and return run containing char index
+        for (BaseTextRun run : _runs)
+            if (anIndex < run.getEnd())
+                return run;
+
+        // If char index at line end, return last run
+        if (anIndex == length())
+            return getRunLast();
+
+        // Complain
+        throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + length());
+    }
+
+    /**
+     * Returns the last run.
+     */
+    public BaseTextRun getRunLast()
+    {
+        int runCount = getRunCount();
+        return runCount > 0 ? getRun(runCount - 1) : null;
+    }
+
+    /**
+     * Returns the next line, if available.
+     */
+    public BaseTextLine getNext()
+    {
+        return _text != null && _index + 1 < _text.getLineCount() ? _text.getLine(_index + 1) : null;
+    }
+
+    /**
+     * Returns the alignment associated with this line.
+     */
+    public HPos getAlignX()  { return _lineStyle.getAlign(); }
+
+    /**
+     * Sets the alignment associated with this line.
+     */
+    public void setAlignX(HPos anAlign)
+    {
+        TextLineStyle lineStyle = getLineStyle().copyFor(anAlign);
+        setLineStyle(lineStyle);
+    }
+
+    /**
+     * Returns the last char.
+     */
+    public char getLastChar()
+    {
+        int len = length();
+        return len > 0 ? charAt(len - 1) : 0;
+    }
+
+    /**
+     * Returns whether line ends with space.
+     */
+    public boolean isLastCharWhiteSpace()
+    {
+        char c = getLastChar();
+        return c == ' ' || c == '\t';
+    }
+
+    /**
+     * Returns whether run ends with newline.
+     */
+    public boolean isLastCharNewline()
+    {
+        char c = getLastChar();
+        return c == '\r' || c == '\n';
+    }
+
+    /**
+     * Updates length due to change in given run.
+     */
+    protected void updateRuns(int aRunIndex)
+    {
+        // Get BaseRun and Length at end of BaseRun
+        BaseTextRun baseRun = aRunIndex >= 0 ? getRun(aRunIndex) : null;
+        int length = baseRun != null ? baseRun.getEnd() : 0;
+
+        // Iterate over runs beyond BaseRun and update Index, Start and Length
+        for (int i = aRunIndex + 1, iMax = getRunCount(); i < iMax; i++) {
+            BaseTextRun run = getRun(i);
+            run._index = i;
+            run._start = length;
+            length += run.length();
+        }
+    }
+
+    /**
+     * Updates text.
+     */
+    protected void updateText()
+    {
+        if (_text != null)
+            _text.updateLines(getIndex());
+        _width = -1;
+    }
+
+    /**
+     * Standard clone implementation.
+     */
+    public BaseTextLine clone()
+    {
+        // Do normal version
+        BaseTextLine clone;
+        try { clone = (BaseTextLine) super.clone(); }
+        catch (Exception e) { throw new RuntimeException(e); }
+
+        // Clone StringBuffer, Runs
+        clone._sb = new StringBuffer(_sb);
+        clone._runs = _runs.clone();
+        for (int i = 0; i < _runs.length; i++) {
+            BaseTextRun runClone = clone._runs[i] = _runs[i].clone();
+            runClone._textLine = clone;
+        }
+
+        // Return
+        return clone;
+    }
+
+    /**
+     * Standard toString implementation.
+     */
+    public String toString()
+    {
+        String className = getClass().getSimpleName();
+        String propStrings = toStringProps();
+        return className + " { " + propStrings + " }";
+    }
+
+    /**
+     * Standard toStringProps implementation.
+     */
+    public String toStringProps()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        // Add Start, End, Length, Index, String
+        sb.append("Start=").append(getStart());
+        sb.append(", End=").append(getEnd());
+        sb.append(", Length=").append(length());
+        sb.append(", Index=").append(getIndex());
+
+        // Append String
+        String string = getString().replace("\n", "\\n");
+        sb.append(", String=").append(string);
+
+        // Return
+        return sb.toString();
+    }
 }

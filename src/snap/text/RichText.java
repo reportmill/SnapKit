@@ -242,7 +242,8 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
     public void addText(RichText aRichText, int anIndex)
     {
         for (RichTextLine line : aRichText.getLines()) {
-            for (RichTextRun run : line.getRuns()) {
+            BaseTextRun[] lineRuns = line.getRuns();
+            for (BaseTextRun run : lineRuns) {
                 int index = anIndex + line.getStart() + run.getStart();
                 addChars(run.getString(), run.getStyle(), index);
                 setLineStyle(line.getLineStyle(), index, index + run.length());
@@ -278,7 +279,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
         else while (aStart < anEnd) {
             RichTextLine line = getLineForCharIndex(aStart);
             int lineStart = line.getStart();
-            RichTextRun run = getRunAt(aStart);
+            BaseTextRun run = getRunAt(aStart);
             TextStyle ostyle = run.getStyle();
             if (aStart - lineStart > run.getStart())
                 run = line.splitRun(run, aStart - lineStart - run.getStart());
@@ -333,7 +334,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
         else while (aStart < anEnd) {
             RichTextLine line = getLineForCharIndex(aStart);
             int lstart = line.getStart();
-            RichTextRun run = getRunAt(aStart);
+            BaseTextRun run = getRunAt(aStart);
             int rend = run.getEnd();
             TextStyle style = run.getStyle().copyFor(aKey, aValue);
             setStyle(style, aStart, Math.min(rend + lstart, anEnd));
@@ -476,16 +477,16 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
     /**
      * Returns the TextRun that contains the given index.
      */
-    public RichTextRun getRunAt(int anIndex)
+    public BaseTextRun getRunAt(int anIndex)
     {
         RichTextLine line = getLineForCharIndex(anIndex);
-        return line.getRunAt(anIndex - line.getStart());
+        return line.getRunForCharIndex(anIndex - line.getStart());
     }
 
     /**
      * Returns the last run.
      */
-    public RichTextRun getRunLast()
+    public BaseTextRun getRunLast()
     {
         return getRunAt(length());
     }
@@ -559,7 +560,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
         if (aScale == 1) return;
         for (RichTextLine line : getLines()) {
             int lstart = line.getStart();
-            for (RichTextRun run : line.getRuns()) {
+            for (BaseTextRun run : line.getRuns()) {
                 int rstrt = run.getStart(), rend = run.getEnd();
                 setStyle(run.getStyle().copyFor(run.getFont().scaleFont(aScale)), lstart + rstrt, lstart + rend);
             }
@@ -788,7 +789,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
         // Iterate over runs
         for (RichTextLine line : getLines()) {
             for (int i = 0, iMax = line.getRunCount(); i < iMax; i++) {
-                RichTextRun run = line.getRun(i);
+                BaseTextRun run = line.getRun(i);
 
                 // If font changed for run, write font element
                 if (!SnapUtils.equals(font, run.getFont())) {
