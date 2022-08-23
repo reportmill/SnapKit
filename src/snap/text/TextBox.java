@@ -886,7 +886,7 @@ public class TextBox {
      */
     public BaseTextRun getRunAt(int anIndex)
     {
-        return getRichText().getRunAt(anIndex);
+        return getRichText().getRunForCharIndex(anIndex);
     }
 
     /**
@@ -894,7 +894,7 @@ public class TextBox {
      */
     public TextStyle getStyleAt(int anIndex)
     {
-        return getRichText().getStyleAt(anIndex);
+        return getRichText().getStyleForCharIndex(anIndex);
     }
 
     /**

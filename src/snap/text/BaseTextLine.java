@@ -243,7 +243,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Appends the given line to the end of this line.
      */
-    protected void appendLine(RichTextLine aLine)
+    protected void appendLine(BaseTextLine aLine)
     {
         // Add chars
         _sb.append(aLine._sb);

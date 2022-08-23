@@ -711,7 +711,7 @@ public class TextArea extends View {
      */
     public TextStyle getStyleAt(int anIndex)
     {
-        return getRichText().getStyleAt(anIndex);
+        return getRichText().getStyleForCharIndex(anIndex);
     }
 
     /**
@@ -744,7 +744,7 @@ public class TextArea extends View {
      */
     public TextLineStyle getSelLineStyle()
     {
-        return getRichText().getLineStyleAt(getSelStart());
+        return getRichText().getLineStyleForCharIndex(getSelStart());
     }
 
     /**

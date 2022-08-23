@@ -8,7 +8,6 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.geom.HPos;
 import snap.props.PropChange;
-import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
 import snap.util.*;
 
@@ -97,7 +96,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
         if (isPlainText()) theStyle = null;
 
         // Get line for index - if adding at text end and last line and ends with newline, create/add new line
-        RichTextLine line = getLineForCharIndex(anIndex);
+        BaseTextLine line = getLineForCharIndex(anIndex);
         if (anIndex == line.getEnd() && line.isLastCharNewline()) {
             RichTextLine remainder = (RichTextLine) line.splitLineAtIndex(line.length());
             addLine(remainder, line.getIndex() + 1);
@@ -138,7 +137,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
 
     public void addCharsWithStyleMap(CharSequence theChars, Map<String, Object> theAttrs)
     {
-        TextStyle style = getStyleAt(length());
+        TextStyle style = getStyleForCharIndex(length());
         style = style.copyFor(theAttrs);
         addChars(theChars, style, length());
     }
@@ -149,7 +148,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
     public void addCharsWithStyleValues(CharSequence theChars, Object... theAttrs)
     {
         // Get style at end and get first attribute
-        TextStyle style = getStyleAt(length());
+        TextStyle style = getStyleForCharIndex(length());
         Object attr0 = theAttrs != null && theAttrs.length > 0 ? theAttrs[0] : null;
 
         // Get modified style for given attributes
@@ -194,7 +193,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
             else {
                 line.removeChars(start - lineStart, end - lineStart);
                 if (!line.isLastCharNewline() && line.getIndex() + 1 < getLineCount()) {
-                    RichTextLine next = removeLine(line.getIndex() + 1);
+                    BaseTextLine next = removeLine(line.getIndex() + 1);
                     line.appendLine(next);
                 }
             }
@@ -223,8 +222,8 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
     public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
     {
         // Get style and linestyle for add chars
-        TextStyle style = theStyle != null ? theStyle : getStyleAt(aStart);
-        TextLineStyle lineStyle = theChars != null && theChars.length() > 0 && !isPlainText() ? getLineStyleAt(aStart) : null;
+        TextStyle style = theStyle != null ? theStyle : getStyleForCharIndex(aStart);
+        TextLineStyle lineStyle = theChars != null && theChars.length() > 0 && !isPlainText() ? getLineStyleForCharIndex(aStart) : null;
 
         // Remove given range and add chars
         if (anEnd > aStart)
@@ -268,7 +267,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
     {
         // If single style, set style on all line runs
         if (isPlainText()) {
-            TextStyle ostyle = getStyleAt(aStart);
+            TextStyle ostyle = getStyleForCharIndex(aStart);
             for (BaseTextLine line : _lines)
                 ((RichTextLine) line).setStyle(aStyle);
             if (isPropChangeEnabled())
@@ -277,9 +276,9 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
 
         // Iterate over runs in range and set style
         else while (aStart < anEnd) {
-            RichTextLine line = getLineForCharIndex(aStart);
+            RichTextLine line = (RichTextLine) getLineForCharIndex(aStart);
             int lineStart = line.getStart();
-            BaseTextRun run = getRunAt(aStart);
+            BaseTextRun run = getRunForCharIndex(aStart);
             TextStyle ostyle = run.getStyle();
             if (aStart - lineStart > run.getStart())
                 run = line.splitRunForCharIndex(run, aStart - lineStart - run.getStart());
@@ -326,15 +325,15 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
     {
         // If not multifont, set attribute and invalidate everything
         if (isPlainText()) {
-            TextStyle style = getStyleAt(aStart).copyFor(aKey, aValue);
+            TextStyle style = getStyleForCharIndex(aStart).copyFor(aKey, aValue);
             setStyle(style, aStart, anEnd);
         }
 
         // Iterate over lines in range and set attribute
         else while (aStart < anEnd) {
-            RichTextLine line = getLineForCharIndex(aStart);
+            BaseTextLine line = getLineForCharIndex(aStart);
             int lstart = line.getStart();
-            BaseTextRun run = getRunAt(aStart);
+            BaseTextRun run = getRunForCharIndex(aStart);
             int rend = run.getEnd();
             TextStyle style = run.getStyle().copyFor(aKey, aValue);
             setStyle(style, aStart, Math.min(rend + lstart, anEnd));
@@ -417,15 +416,6 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
     }
 
     /**
-     * Returns the block at the given char index.
-     */
-    @Override
-    public RichTextLine getLineForCharIndex(int anIndex)
-    {
-        return (RichTextLine) super.getLineForCharIndex(anIndex);
-    }
-
-    /**
      * Creates a new block for use in this text.
      */
     protected RichTextLine createLine()
@@ -434,95 +424,12 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
     }
 
     /**
-     * Adds a block at given index.
-     */
-    private void addLine(RichTextLine aLine, int anIndex)
-    {
-        _lines.add(anIndex, aLine);
-        aLine._text = this;
-        updateLines(anIndex - 1);
-    }
-
-    /**
-     * Removes the block at given index.
-     */
-    private RichTextLine removeLine(int anIndex)
-    {
-        RichTextLine line = (RichTextLine) _lines.remove(anIndex);
-        line._text = null;
-        updateLines(anIndex - 1);
-        return line;
-    }
-
-    /**
-     * Returns the longest line.
-     */
-    public RichTextLine getLineLongest()
-    {
-        BaseTextLine line = getLineCount() > 0 ? getLine(0) : null;
-        if (line == null)
-            return null;
-
-        double w = line.getWidth();
-        for (BaseTextLine ln : _lines) {
-            if (ln.getWidth() > w) {
-                line = ln;
-                w = ln.getWidth();
-            }
-        }
-
-        // Return
-        return (RichTextLine) line;
-    }
-
-    /**
-     * Returns the TextRun that contains the given index.
-     */
-    public BaseTextRun getRunAt(int anIndex)
-    {
-        RichTextLine line = getLineForCharIndex(anIndex);
-        return line.getRunForCharIndex(anIndex - line.getStart());
-    }
-
-    /**
-     * Returns the last run.
-     */
-    public BaseTextRun getRunLast()
-    {
-        return getRunAt(length());
-    }
-
-    /**
-     * Returns the Font for run at given character index.
-     */
-    public Font getFontAt(int anIndex)
-    {
-        return getRunAt(anIndex).getFont();
-    }
-
-    /**
-     * Returns the TextStyle for the run at the given character index.
-     */
-    public TextStyle getStyleAt(int anIndex)
-    {
-        return getRunAt(anIndex).getStyle();
-    }
-
-    /**
-     * Returns the TextLineStyle for the run at the given character index.
-     */
-    public TextLineStyle getLineStyleAt(int anIndex)
-    {
-        return getLineForCharIndex(anIndex).getLineStyle();
-    }
-
-    /**
      * Returns whether text contains an underlined run.
      */
     public boolean isUnderlined()
     {
         if (isPlainText())
-            return getStyleAt(0).isUnderlined();
+            return getStyleForCharIndex(0).isUnderlined();
         for (BaseTextLine line : _lines)
             if (line.isUnderlined())
                 return true;
@@ -542,7 +449,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
      */
     public HPos getAlignX()
     {
-        return getLineStyleAt(0).getAlign();
+        return getLineStyleForCharIndex(0).getAlign();
     }
 
     /**
@@ -569,116 +476,6 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
     }
 
     /**
-     * Returns the width of text.
-     */
-    public double getPrefWidth()
-    {
-        if (_width >= 0) return _width;
-        RichTextLine line = getLineLongest();
-        if (line == null) return 0;
-        return _width = Math.ceil(line.getWidth());
-    }
-
-    /**
-     * Returns the width of text from given index.
-     */
-    public double getPrefWidth(int anIndex)
-    {
-        if (anIndex <= 0) return getPrefWidth();
-        double width = 0;
-        for (BaseTextLine line : _lines)
-            if (anIndex < line.getEnd())
-                width = Math.max(width, line.getWidth(anIndex - line.getStart()));
-        return width;
-    }
-
-    /**
-     * Returns the index of given string.
-     */
-    public int indexOf(String aStr, int aStart)
-    {
-        for (BaseTextLine line : getLines()) {
-            if (aStart >= line.getEnd()) continue;
-            int lineStart = line.getStart();
-            int index = line.indexOf(aStr, aStart - lineStart);
-            if (index >= 0)
-                return index + lineStart;
-        }
-
-        // Return not found
-        return -1;
-    }
-
-    /**
-     * Returns index of next newline (or carriage-return/newline) starting at given char index.
-     */
-    public int indexOfNewline(int aStart)
-    {
-        return StringUtils.indexOfNewline(this, aStart);
-    }
-
-    /**
-     * Returns index just beyond next newline (or carriage-return/newline) starting at given char index.
-     */
-    public int indexAfterNewline(int aStart)
-    {
-        return StringUtils.indexAfterNewline(this, aStart);
-    }
-
-    /**
-     * Returns index of the previous newline (or carriage-return/newline) starting at given char index.
-     */
-    public int lastIndexOfNewline(int aStart)
-    {
-        return StringUtils.lastIndexOfNewline(this, aStart);
-    }
-
-    /**
-     * Returns index just beyond previous newline (or carriage-return/newline) starting at given char index.
-     */
-    public int lastIndexAfterNewline(int aStart)
-    {
-        return StringUtils.lastIndexAfterNewline(this, aStart);
-    }
-
-    /**
-     * Returns whether the index in the given char sequence is at a line end.
-     */
-    public boolean isLineEnd(int anIndex)
-    {
-        return StringUtils.isLineEnd(this, anIndex);
-    }
-
-    /**
-     * Returns whether the index in the given char sequence is at just after a line end.
-     */
-    public boolean isAfterLineEnd(int anIndex)
-    {
-        return StringUtils.isAfterLineEnd(this, anIndex);
-    }
-
-    /**
-     * Returns whether a char is a newline char.
-     */
-    public boolean isLineEndChar(int anIndex)
-    {
-        return StringUtils.isLineEndChar(this, anIndex);
-    }
-
-    /**
-     * Returns whether property change is enabled.
-     */
-    public boolean isPropChangeEnabled()  { return _propChangeEnabled; }
-
-    /**
-     * Sets whether property change is enabled.
-     */
-    public void setPropChangeEnabled(boolean aValue)
-    {
-        _propChangeEnabled = aValue;
-    }
-
-    /**
      * Returns an RichText for given char range.
      */
     public RichText subtext(int aStart, int aEnd)
@@ -697,51 +494,6 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
 
         // Return rtext
         return rtext;
-    }
-
-    /**
-     * Add listener.
-     */
-    public void addPropChangeListener(PropChangeListener aLsnr)
-    {
-        if (_pcs == PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-        _pcs.addPropChangeListener(aLsnr);
-    }
-
-    /**
-     * Remove listener.
-     */
-    public void removePropChangeListener(PropChangeListener aLsnr)
-    {
-        _pcs.removePropChangeListener(aLsnr);
-    }
-
-    /**
-     * Fires a property change for given property name, old value, new value and index.
-     */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal)
-    {
-        if (!_pcs.hasListener(aProp)) return;
-        PropChange pc = new PropChange(this, aProp, oldVal, newVal);
-        firePropChange(pc);
-    }
-
-    /**
-     * Fires a property change for given property name, old value, new value and index.
-     */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal, int anIndex)
-    {
-        if (!_pcs.hasListener(aProp)) return;
-        PropChange pc = new PropChange(this, aProp, oldVal, newVal, anIndex);
-        firePropChange(pc);
-    }
-
-    /**
-     * Fires a given property change.
-     */
-    protected void firePropChange(PropChange aPC)
-    {
-        _pcs.firePropChange(aPC);
     }
 
     /**
@@ -959,17 +711,6 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
 
         // Return this xstring
         return this;
-    }
-
-    /**
-     * Standard toString implementation.
-     */
-    public String toString()
-    {
-        String str = getClass().getSimpleName() + ": " + getLineCount() + " lines, " + length() + " chars";
-        for (int i = 0, iMax = Math.min(getLineCount(), 5); i < iMax; i++)
-            str += "\n" + getLine(i);
-        return str;
     }
 
     /**
