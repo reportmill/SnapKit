@@ -11,7 +11,7 @@ import snap.gfx.Font;
  * <p>
  * This class makes a point to treat its attributes map as read-only so they can be shared among multiple runs.
  */
-public class RichTextRun implements Cloneable, CharSequence {
+public class RichTextRun extends BaseTextRun {
 
     // The line that holds this run
     protected RichTextLine  _textLine;

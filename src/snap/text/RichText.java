@@ -15,39 +15,10 @@ import snap.util.*;
 /**
  * This class represents a block of text (lines).
  */
-public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable {
-
-    // The TextDocLine in this text
-    protected List<RichTextLine>  _lines = new ArrayList<>();
-
-    // The length of this text
-    protected int  _length;
-
-    // The default text style for this text
-    protected TextStyle  _defStyle = TextStyle.DEFAULT;
-
-    // The default line style for this text
-    protected TextLineStyle  _defLineStyle = TextLineStyle.DEFAULT;
-
-    // Whether text only allows a single font, color, etc.
-    protected boolean  _plainText;
-
-    // Whether property change is enabled
-    protected boolean  _propChangeEnabled = true;
-
-    // The width of the rich text
-    protected double  _width = -1;
-
-    // The PropChangeSupport
-    protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
-
-    // Constants for properties
-    public static final String Chars_Prop = "Chars";
-    public static final String Style_Prop = "Style";
-    public static final String LineStyle_Prop = "LineStyle";
+public class RichText extends BaseText implements Cloneable, XMLArchiver.Archivable {
 
     /**
-     * Creates RichText.
+     * Constructor.
      */
     public RichText()
     {
@@ -64,47 +35,6 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
     }
 
     /**
-     * Returns the number of characters in the text.
-     */
-    public int length()  { return _length; }
-
-    /**
-     * Returns the char value at the specified index.
-     */
-    public char charAt(int anIndex)
-    {
-        RichTextLine line = getLineAt(anIndex);
-        return line.charAt(anIndex - line.getStart());
-    }
-
-    /**
-     * Returns a new char sequence that is a subsequence of this sequence.
-     */
-    public CharSequence subSequence(int aStart, int anEnd)
-    {
-        StringBuffer sb = new StringBuffer(anEnd - aStart);
-        RichTextLine line = getLineAt(aStart);
-        while (aStart < anEnd) {
-            int end = Math.min(line.getEnd(), anEnd);
-            sb.append(line.subSequence(aStart - line.getStart(), end - line.getStart()));
-            aStart = end;
-            line = line.getNext();
-        }
-        return sb;
-    }
-
-    /**
-     * Returns the string for the text.
-     */
-    public String getString()
-    {
-        StringBuilder sb = new StringBuilder(length());
-        for (RichTextLine line : _lines)
-            sb.append(line._sb);
-        return sb.toString();
-    }
-
-    /**
      * Sets the text to the given string.
      */
     public void setString(String aString)
@@ -115,32 +45,23 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
     }
 
     /**
-     * Returns the default style for text.
-     */
-    public TextStyle getDefaultStyle()  { return _defStyle; }
-
-    /**
      * Sets the default style.
      */
     public void setDefaultStyle(TextStyle aStyle)
     {
-        _defStyle = aStyle;
+        super.setDefaultStyle(aStyle);
         for (RichTextLine line : getLines())
             line.setStyle(aStyle);
     }
-
-    /**
-     * Returns the default line style for text.
-     */
-    public TextLineStyle getDefaultLineStyle()  { return _defLineStyle; }
 
     /**
      * Sets the default line style.
      */
     public void setDefaultLineStyle(TextLineStyle aLineStyle)
     {
-        _defLineStyle = aLineStyle;
-        for (RichTextLine line : getLines()) line.setLineStyle(aLineStyle);
+        super.setDefaultLineStyle(aLineStyle);
+        for (RichTextLine line : getLines())
+            line.setLineStyle(aLineStyle);
     }
 
     /**
@@ -485,16 +406,21 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
     }
 
     /**
-     * Returns the number of block in this doc.
-     */
-    public int getLineCount()  { return _lines.size(); }
-
-    /**
      * Returns the individual block in this doc.
      */
+    @Override
     public RichTextLine getLine(int anIndex)
     {
-        return _lines.get(anIndex);
+        return (RichTextLine) super.getLine(anIndex);
+    }
+
+    /**
+     * Returns the block at the given char index.
+     */
+    @Override
+    public RichTextLine getLineAt(int anIndex)
+    {
+        return (RichTextLine) super.getLineAt(anIndex);
     }
 
     /**
@@ -529,45 +455,6 @@ public class RichText implements CharSequence, Cloneable, XMLArchiver.Archivable
         line._text = null;
         updateLines(anIndex - 1);
         return line;
-    }
-
-    /**
-     * Updates blocks from index.
-     */
-    protected void updateLines(int anIndex)
-    {
-        // Get BaseLine and length at end of BaseLine
-        RichTextLine baseLine = anIndex >= 0 ? getLine(anIndex) : null;
-        _length = baseLine != null ? baseLine.getEnd() : 0;
-
-        // Iterate over lines beyond BaseLine and update Index, Start, Length and Y
-        for (int i = anIndex + 1, iMax = _lines.size(); i < iMax; i++) {
-            RichTextLine line = getLine(i);
-            line._index = i;
-            line._start = _length;
-            _length += line.length();
-        }
-    }
-
-    /**
-     * Returns the block at the given char index.
-     */
-    public RichTextLine getLineAt(int anIndex)
-    {
-        for (RichTextLine line : _lines)
-            if (anIndex < line.getEnd())
-                return line;
-        if (anIndex == length()) return getLineLast();
-        throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + length());
-    }
-
-    /**
-     * Returns the last block.
-     */
-    public RichTextLine getLineLast()
-    {
-        int lc = getLineCount();
-        return lc > 0 ? getLine(lc - 1) : null;
     }
 
     /**
