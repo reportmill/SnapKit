@@ -7,7 +7,7 @@ import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.geom.Transform;
 import snap.gfx.*;
-import snap.text.TextRun;
+import snap.text.StyledString;
 import snap.text.TextStyle;
 import snap.util.*;
 import java.util.Objects;
@@ -18,7 +18,7 @@ import java.util.Objects;
 public class StringView extends View implements Cloneable {
 
     // TextRun
-    private TextRun  _textRun;
+    private StyledString _styledString;
     
     // Whether text should shrink to fit
     private boolean  _shrinkToFit;
@@ -45,8 +45,8 @@ public class StringView extends View implements Cloneable {
         super();
 
         // Create TextRun
-        _textRun = new TextRun();
-        _textRun.setFontSizing(DEFAULT_FONT_SIZING);
+        _styledString = new StyledString();
+        _styledString.setFontSizing(DEFAULT_FONT_SIZING);
     }
 
     /**
@@ -61,7 +61,7 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns the text.
      */
-    public String getText()  { return _textRun.getText(); }
+    public String getText()  { return _styledString.getString(); }
 
     /**
      * Sets the text.
@@ -73,7 +73,7 @@ public class StringView extends View implements Cloneable {
         if (SnapUtils.equals(aValue, old)) return;
 
         // Set new value, fire prop change, relayout and return
-        _textRun.setText(aValue);
+        _styledString.setString(aValue);
         firePropChange(Text_Prop, old, aValue);
         relayoutParent();
         repaint();
@@ -82,7 +82,7 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns the TextStyle.
      */
-    public TextStyle getStyle()  { return _textRun.getStyle(); }
+    public TextStyle getStyle()  { return _styledString.getStyle(); }
 
     /**
      * Sets the TextStyle.
@@ -94,7 +94,7 @@ public class StringView extends View implements Cloneable {
         if (Objects.equals(aStyle, old)) return;
 
         // Set new value, fire prop change, relayout and return
-        _textRun.setStyle(aStyle);
+        _styledString.setStyle(aStyle);
         firePropChange(TextStyle_Prop, old, aStyle);
         relayoutParent();
         repaint();
@@ -105,7 +105,7 @@ public class StringView extends View implements Cloneable {
      */
     public Paint getTextFill()
     {
-        return _textRun.getTextFill();
+        return _styledString.getTextFill();
     }
 
     /**
@@ -121,7 +121,7 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns whether to size to font (looser) instead of glyphs (tighter).
      */
-    public boolean isFontSizing()  { return _textRun.isFontSizing(); }
+    public boolean isFontSizing()  { return _styledString.isFontSizing(); }
 
     /**
      * Sets whether to size to font (looser) instead of glyphs (tighter).
@@ -133,7 +133,7 @@ public class StringView extends View implements Cloneable {
         if (aValue == old) return;
 
         // Set, fire prop change, relayout parent, return
-        _textRun.setFontSizing(aValue);
+        _styledString.setFontSizing(aValue);
         firePropChange(FontSizing_Prop, old, aValue);
         relayoutParent();
     }
@@ -155,14 +155,14 @@ public class StringView extends View implements Cloneable {
     /**
      * Returns the text length.
      */
-    public int length()  { return _textRun.length(); }
+    public int length()  { return _styledString.length(); }
 
     /**
      * Returns the width of the string (aka the 'advance').
      */
     public double getTextWidth()
     {
-        return _textRun.getTextWidth();
+        return _styledString.getTextWidth();
     }
 
     /**
@@ -170,7 +170,7 @@ public class StringView extends View implements Cloneable {
      */
     public double getTextHeight()
     {
-        return _textRun.getTextHeight();
+        return _styledString.getTextHeight();
     }
 
     /**
@@ -178,7 +178,7 @@ public class StringView extends View implements Cloneable {
      */
     public double getAscent()
     {
-        return _textRun.getAscent();
+        return _styledString.getAscent();
     }
 
     /**
@@ -186,7 +186,7 @@ public class StringView extends View implements Cloneable {
      */
     public double getDescent()
     {
-        return _textRun.getDescent();
+        return _styledString.getDescent();
     }
 
     /**
@@ -269,7 +269,7 @@ public class StringView extends View implements Cloneable {
     {
         double textX = getTextBounds().x;
         double runX = aX - textX;
-        return _textRun.getCharIndexForX(runX);
+        return _styledString.getCharIndexForX(runX);
     }
 
     /**
@@ -375,7 +375,7 @@ public class StringView extends View implements Cloneable {
     protected void paintString(Painter aPntr)
     {
         Rect textBounds = getTextBounds();
-        _textRun.paintStringTopLeft(aPntr, textBounds.x, textBounds.y);
+        _styledString.paintStringTopLeft(aPntr, textBounds.x, textBounds.y);
     }
 
     /**
@@ -470,7 +470,7 @@ public class StringView extends View implements Cloneable {
 
         // Set font in TextRun
         Font font = getFont();
-        _textRun.setFont(font);
+        _styledString.setFont(font);
     }
 
     /**
@@ -484,7 +484,7 @@ public class StringView extends View implements Cloneable {
 
         // Set font in TextRun
         Font font = getFont();
-        _textRun.setFont(font);
+        _styledString.setFont(font);
     }
 
     /**
@@ -517,7 +517,7 @@ public class StringView extends View implements Cloneable {
         StringView copy;
         try { copy = (StringView) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
-        copy._textRun = _textRun.clone();
+        copy._styledString = _styledString.clone();
         return copy;
     }
 

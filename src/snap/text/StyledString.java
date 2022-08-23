@@ -10,12 +10,12 @@ import snap.gfx.Painter;
 import snap.view.ViewUtils;
 
 /**
- * This class holds a text string and TextStyle and provides sizing information.
+ * This class holds a String and TextStyle and provides painting and sizing information.
  */
-public class TextRun implements Cloneable {
+public class StyledString implements Cloneable {
 
     // The text to be measured
-    private String  _text;
+    private String  _string;
 
     // The TextStyle
     private TextStyle  _style = TextStyle.DEFAULT;
@@ -35,28 +35,28 @@ public class TextRun implements Cloneable {
     /**
      * Constructor.
      */
-    public TextRun()  { }
+    public StyledString()  { }
 
     /**
      * Constructor.
      */
-    public TextRun(String aString)
+    public StyledString(String aString)
     {
         this();
-        setText(aString);
+        setString(aString);
     }
 
     /**
-     * Returns the text.
+     * Returns the string.
      */
-    public String getText()  { return _text; }
+    public String getString()  { return _string; }
 
     /**
-     * Sets the text.
+     * Sets the string.
      */
-    public void setText(String aValue)
+    public void setString(String aValue)
     {
-        _text = aValue;
+        _string = aValue;
         _ascent = -1;
     }
 
@@ -148,7 +148,7 @@ public class TextRun implements Cloneable {
     /**
      * Returns the text length.
      */
-    public int length()  { return _text != null ? _text.length() : 0; }
+    public int length()  { return _string != null ? _string.length() : 0; }
 
     /**
      * Returns the width of the string (aka the 'advance').
@@ -203,7 +203,7 @@ public class TextRun implements Cloneable {
     {
         // Get exact bounds around string glyphs for font
         Font font = getFont();
-        String text = getText();
+        String text = getString();
         Rect bnds = text != null && text.length() > 0 ? font.getGlyphBounds(text) : Rect.ZeroRect;
 
         // Get StringWidth from GlyphBounds
@@ -221,7 +221,7 @@ public class TextRun implements Cloneable {
     private void loadMetricsForFontSizing()
     {
         // Get StringWidth for string + font (aka Advance)
-        String text = getText();
+        String text = getString();
         Font font = getFont();
         _textWidth = text != null ? Math.ceil(font.getStringAdvance(text)) : 0;
 
@@ -236,7 +236,7 @@ public class TextRun implements Cloneable {
      */
     public int getCharIndexForX(double aX)
     {
-        String text = getText();
+        String text = getString();
         Font font = getFont();
         double textX = 0;
         for (int i = 0, iMax = text.length(); i < iMax; i++) {
@@ -261,7 +261,7 @@ public class TextRun implements Cloneable {
         aPntr.setPaint(textFill);
 
         // Get String X/Y and paint
-        String text = getText();
+        String text = getString();
         aPntr.drawString(text, aX, aY);
     }
 
@@ -276,10 +276,10 @@ public class TextRun implements Cloneable {
     /**
      * Returns a copy of this TextRun.
      */
-    public TextRun clone()
+    public StyledString clone()
     {
-        TextRun copy;
-        try { copy = (TextRun) super.clone(); }
+        StyledString copy;
+        try { copy = (StyledString) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
         return copy;
     }
