@@ -195,7 +195,7 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
                 line.removeChars(start - lineStart, end - lineStart);
                 if (!line.isLastCharNewline() && line.getIndex() + 1 < getLineCount()) {
                     RichTextLine next = removeLine(line.getIndex() + 1);
-                    line.joinLine(next);
+                    line.appendLine(next);
                 }
             }
 
@@ -282,9 +282,9 @@ public class RichText extends BaseText implements Cloneable, XMLArchiver.Archiva
             BaseTextRun run = getRunAt(aStart);
             TextStyle ostyle = run.getStyle();
             if (aStart - lineStart > run.getStart())
-                run = line.splitRun(run, aStart - lineStart - run.getStart());
+                run = line.splitRunForCharIndex(run, aStart - lineStart - run.getStart());
             if (anEnd - lineStart < run.getEnd())
-                line.splitRun(run, anEnd - lineStart - run.getStart());
+                line.splitRunForCharIndex(run, anEnd - lineStart - run.getStart());
             run.setStyle(aStyle);
             aStart = run.getEnd() + lineStart;
             if (isPropChangeEnabled())

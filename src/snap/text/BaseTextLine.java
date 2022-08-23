@@ -2,8 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-
 import snap.geom.HPos;
+import snap.util.ArrayUtils;
 
 /**
  * This class represents a line of text in a Text.
@@ -41,7 +41,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     {
         _text = aBaseText;
         _lineStyle = _text.getDefaultLineStyle();
-        //addRun(createRun(), 0);
+        addRun(createRun(), 0);
     }
 
     /**
@@ -118,6 +118,59 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     }
 
     /**
+     * Adds characters with attributes to this line at given index.
+     */
+    public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
+    {
+        // Add length to run
+        BaseTextRun run = getRun(0);
+        run.addLength(theChars.length());
+
+        // Add chars
+        _sb.insert(anIndex, theChars);
+        updateText();
+    }
+
+    /**
+     * Removes characters in given range.
+     */
+    public void removeChars(int aStart, int anEnd)
+    {
+        // Remove length from run
+        BaseTextRun run = getRun(0);
+        run.addLength(aStart - anEnd);
+
+        // Remove chars
+        _sb.delete(aStart, anEnd);
+        updateText();
+    }
+
+    /**
+     * Adds a run to line.
+     */
+    protected void addRun(BaseTextRun aRun, int anIndex)
+    {
+        _runs = ArrayUtils.add(_runs, aRun, anIndex);
+        updateRuns(anIndex - 1);
+    }
+
+    /**
+     * Removes the run at given index.
+     */
+    protected void removeRun(int anIndex)
+    {
+        _runs = ArrayUtils.remove(_runs, anIndex);
+    }
+
+    /**
+     * Creates a new run.
+     */
+    protected BaseTextRun createRun()
+    {
+        return new BaseTextRun(this);
+    }
+
+    /**
      * Returns the width of line.
      */
     public double getWidth()
@@ -142,12 +195,8 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     {
         // Iterate over runs and return run containing char index
         for (BaseTextRun run : _runs)
-            if (anIndex < run.getEnd())
+            if (anIndex <= run.getEnd())
                 return run;
-
-        // If char index at line end, return last run
-        if (anIndex == length())
-            return getRunLast();
 
         // Complain
         throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + length());
@@ -167,7 +216,8 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
      */
     public BaseTextLine getNext()
     {
-        return _text != null && _index + 1 < _text.getLineCount() ? _text.getLine(_index + 1) : null;
+        int nextIndex = _index + 1;
+        return _text != null && nextIndex < _text.getLineCount() ? _text.getLine(nextIndex) : null;
     }
 
     /**

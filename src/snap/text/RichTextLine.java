@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import snap.util.ArrayUtils;
 
 /**
  * A class to represent a line of text (for each newline) in RichText.
@@ -15,41 +14,67 @@ public class RichTextLine extends BaseTextLine {
     public RichTextLine(RichText aRichText)
     {
         super(aRichText);
-        addRun(createRun(), 0);
     }
 
     /**
      * Adds characters with attributes to this line at given index.
      */
+    @Override
     public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
-        // Get run at index - if empty, go ahead and set style
-        BaseTextRun run = getRunForCharIndex(anIndex);
-        if (run.length() == 0 && theStyle != null)
-            run.setStyle(theStyle);
-
-        // If style provided and different from current style, get dedicated run
-        if (theStyle != null && !theStyle.equals(run.getStyle())) {
-            if (anIndex == run.getStart())
-                run = addRun(theStyle, run.getIndex());
-            else if (anIndex == run.getEnd())
-                run = addRun(theStyle, run.getIndex() + 1);
-            else {
-                run = splitRun(run, anIndex - run.getStart());
-                run = addRun(theStyle, run.getIndex());
-            }
-        }
+        // Get run at index for style and add length
+        BaseTextRun run = getRunForCharIndexAndStyle(anIndex, theStyle);
+        run.addLength(theChars.length());
 
         // Add chars
-        run.insert(theChars);
         _sb.insert(anIndex, theChars);
         updateRuns(run.getIndex());
         updateText();
     }
 
     /**
+     * Returns the run to add chars to for given style and char index.
+     * Will try to use any adjacent run with conforming style, otherwise, will create/add new.
+     */
+    private BaseTextRun getRunForCharIndexAndStyle(int charIndex, TextStyle aStyle)
+    {
+        // Get run at index (just return if style is null or equal)
+        BaseTextRun run = getRunForCharIndex(charIndex);
+        if (aStyle == null || aStyle.equals(run.getStyle()))
+            return run;
+
+        // If empty, just set style and return
+        if (run.length() == 0) {
+            run.setStyle(aStyle);
+            return run;
+        }
+
+        // If charIndex at run end and next run has same style, return it instead
+        if (charIndex == run.getEnd() && run.getIndex() + 1 < getRunCount()) {
+            BaseTextRun nextRun = getRun(run.getIndex() + 1);
+            if (aStyle.equals(nextRun.getStyle()))
+                return nextRun;
+        }
+
+        // Get index to insert new run (need to split run if charIndex in middle)
+        int newRunIndex = run.getIndex();
+        if (charIndex > run.getStart()) {
+            newRunIndex++;
+            if (charIndex < run.getEnd())
+                splitRunForCharIndex(run, charIndex - run.getStart());
+        }
+
+        // Create new run for new chars, add and return
+        BaseTextRun newRun = createRun();
+        newRun.setStyle(aStyle);
+        addRun(newRun, newRunIndex);
+        return newRun;
+    }
+
+    /**
      * Removes characters in given range.
      */
+    @Override
     public void removeChars(int aStart, int anEnd)
     {
         // If empty range, just return
@@ -61,8 +86,6 @@ public class RichTextLine extends BaseTextLine {
 
             // Get run at end
             BaseTextRun run = getRunForCharIndex(end);
-            if (end == run.getStart())
-                run = getRun(run.getIndex() - 1);
             int runStart = run.getStart();
             int start = Math.max(aStart, runStart);
 
@@ -76,7 +99,7 @@ public class RichTextLine extends BaseTextLine {
 
             // Otherwise delete chars from run
             else {
-                run.delete(start - runStart, end - runStart);
+                run.addLength(start - end);
                 _sb.delete(start, end);
                 updateRuns(run.getIndex());
             }
@@ -89,59 +112,7 @@ public class RichTextLine extends BaseTextLine {
     }
 
     /**
-     * Creates a new run.
-     */
-    protected BaseTextRun createRun()
-    {
-        return new BaseTextRun(this);
-    }
-
-    /**
-     * Adds a new run at given index.
-     */
-    private BaseTextRun addRun(TextStyle theStyle, int anIndex)
-    {
-        BaseTextRun run = createRun();
-        if (theStyle != null)
-            run.setStyle(theStyle);
-        addRun(run, anIndex);
-        return run;
-    }
-
-    /**
-     * Adds a run to line.
-     */
-    private void addRun(BaseTextRun aRun, int anIndex)
-    {
-        _runs = ArrayUtils.add(_runs, aRun, anIndex);
-        updateRuns(anIndex - 1);
-    }
-
-    /**
-     * Removes the run at given index.
-     */
-    private void removeRun(int anIndex)
-    {
-        _runs = ArrayUtils.remove(_runs, anIndex);
-    }
-
-    /**
-     * Splits given run at given index and returns a run containing the remaining characters (and identical attributes).
-     */
-    protected BaseTextRun splitRun(BaseTextRun aRun, int anIndex)
-    {
-        // Clone to get tail and delete chars from each
-        BaseTextRun remainder = aRun.clone();
-        aRun.delete(anIndex, aRun.length());
-        remainder.delete(0, anIndex);
-
-        // Add remainder and return
-        addRun(remainder, aRun.getIndex() + 1);
-        return remainder;
-    }
-
-    /**
-     * Sets the style for the line (propogates to runs).
+     * Sets the style for the line (propagates to runs).
      */
     protected void setStyle(TextStyle aStyle)
     {
@@ -164,7 +135,7 @@ public class RichTextLine extends BaseTextLine {
     /**
      * Appends the given line to the end of this line.
      */
-    protected void joinLine(RichTextLine aLine)
+    protected void appendLine(RichTextLine aLine)
     {
         // Add chars
         _sb.append(aLine._sb);
@@ -176,6 +147,21 @@ public class RichTextLine extends BaseTextLine {
             run2._textLine = this;
             addRun(run2, getRunCount());
         }
+    }
+
+    /**
+     * Splits given run at given char index and returns the run containing the remaining chars (and identical attributes).
+     */
+    protected BaseTextRun splitRunForCharIndex(BaseTextRun aRun, int anIndex)
+    {
+        // Clone to get tail and delete chars from each
+        BaseTextRun remainder = aRun.clone();
+        aRun.addLength(anIndex - aRun.length());
+        remainder.addLength(-anIndex);
+
+        // Add remainder and return
+        addRun(remainder, aRun.getIndex() + 1);
+        return remainder;
     }
 
     /**

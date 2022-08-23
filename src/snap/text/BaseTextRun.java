@@ -133,22 +133,13 @@ public class BaseTextRun implements CharSequence, Cloneable {
     }
 
     /**
-     * Insets chars at index.
+     * Adds length to grow this run (negative value reduces it).
      */
-    protected void insert(CharSequence theChars)
+    protected void addLength(int aLength)
     {
-        _length += theChars.length();
+        _length += aLength;
         _width = -1;
-    }
-
-    /**
-     * Deletes chars from index.
-     */
-    protected void delete(int aStart, int anEnd)
-    {
-        int charCount = anEnd - aStart;
-        _length -= charCount;
-        _width = -1;
+        assert (_length >= 0);
     }
 
     /**
