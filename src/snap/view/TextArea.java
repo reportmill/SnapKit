@@ -1450,22 +1450,24 @@ public class TextArea extends View {
         if (isSelEmpty()) return;
 
         // Get RichText for selected characters and get as XML string and plain string
-        int selStart = getSelStart(), selEnd = getSelEnd();
-        RichText selRichText = getRichText().subtext(selStart, selEnd);
+        int selStart = getSelStart();
+        int selEnd = getSelEnd();
+        RichText richText = getRichText();
+        RichText richTextForRange = richText.copyForRange(selStart, selEnd);
 
         // Add to clipboard as RichText and String (text/plain)
-        Clipboard cb = Clipboard.getCleared();
+        Clipboard clipboard = Clipboard.getCleared();
 
         // Add rich text
         if (!isPlainText()) {
-            XMLElement xml = new XMLArchiver().toXML(selRichText);
+            XMLElement xml = new XMLArchiver().toXML(richTextForRange);
             String xmlStr = xml.getString();
-            cb.addData(SNAP_RICHTEXT_TYPE, xmlStr);
+            clipboard.addData(SNAP_RICHTEXT_TYPE, xmlStr);
         }
 
         // Add plain text
-        String str = selRichText.getString();
-        cb.addData(str);
+        String textString = richTextForRange.getString();
+        clipboard.addData(textString);
     }
 
     /**

@@ -364,9 +364,9 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns an RichText for given char range.
+     * Returns a copy of this text for given char range.
      */
-    public RichText subtext(int aStart, int aEnd)
+    public RichText copyForRange(int aStart, int aEnd)
     {
         // Create new RichText and iterate over lines in range to add copies for subrange
         RichText textCopy = new RichText();
