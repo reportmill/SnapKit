@@ -270,6 +270,21 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     }
 
     /**
+     * Adds given TextDoc to this text at given index.
+     */
+    public void addText(BaseText aTextDoc, int anIndex)
+    {
+        for (BaseTextLine line : aTextDoc.getLines()) {
+            BaseTextRun[] lineRuns = line.getRuns();
+            for (BaseTextRun run : lineRuns) {
+                int index = anIndex + line.getStart() + run.getStart();
+                addChars(run.getString(), run.getStyle(), index);
+                setLineStyle(line.getLineStyle(), index, index + run.length());
+            }
+        }
+    }
+
+    /**
      * Returns the number of block in this doc.
      */
     public int getLineCount()  { return _lines.size(); }

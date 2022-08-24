@@ -198,13 +198,18 @@ public class TextStyle implements Cloneable {
      */
     public TextStyle copyFor(Object ... theObjs)
     {
+        // If no attributes, just return
         if (theObjs == null || theObjs.length == 0) return this;
+
+        // Clone and set attributes
         TextStyle clone = clone();
         for (Object obj : theObjs) {
             String key = getStyleKey(obj);
             if (key != null)
                 clone.setValue(key, obj);
         }
+
+        // Return
         return clone;
     }
 

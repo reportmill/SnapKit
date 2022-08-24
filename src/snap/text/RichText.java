@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import java.util.*;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
@@ -29,7 +28,10 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
     public RichText(CharSequence theChars, Object... theAttrs)
     {
         this();
-        addCharsWithStyleValues(theChars, theAttrs);
+
+        // Add attributes
+        TextStyle style = getDefaultStyle().copyFor(theAttrs);
+        addChars(theChars, style, 0);
     }
 
     /**
@@ -50,57 +52,6 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
         super.setDefaultLineStyle(aLineStyle);
         for (BaseTextLine line : getLines())
             line.setLineStyle(aLineStyle);
-    }
-
-    public void addCharsWithStyleMap(CharSequence theChars, Map<String, Object> theAttrs)
-    {
-        TextStyle style = getStyleForCharIndex(length());
-        style = style.copyFor(theAttrs);
-        addChars(theChars, style, length());
-    }
-
-    /**
-     * Appends the given chars with the given attribute(s).
-     */
-    public void addCharsWithStyleValues(CharSequence theChars, Object... theAttrs)
-    {
-        // Get style at end and get first attribute
-        TextStyle style = getStyleForCharIndex(length());
-        Object attr0 = theAttrs != null && theAttrs.length > 0 ? theAttrs[0] : null;
-
-        // Get modified style for given attributes
-        if (attr0 instanceof TextStyle)
-            style = (TextStyle) attr0;
-        else if (attr0 != null)
-            style = style.copyFor(theAttrs);
-
-        // Add chars
-        addChars(theChars, style, length());
-    }
-
-    /**
-     * Adds a RichText to this string at given index.
-     */
-    public void addText(RichText aRichText, int anIndex)
-    {
-        for (BaseTextLine line : aRichText.getLines()) {
-            BaseTextRun[] lineRuns = line.getRuns();
-            for (BaseTextRun run : lineRuns) {
-                int index = anIndex + line.getStart() + run.getStart();
-                addChars(run.getString(), run.getStyle(), index);
-                setLineStyle(line.getLineStyle(), index, index + run.length());
-            }
-        }
-    }
-
-    /**
-     * Replaces the chars in given range, with given RichText.
-     */
-    public void replaceText(RichText aRichText, int aStart, int anEnd)
-    {
-        if (anEnd > aStart)
-            removeChars(aStart, anEnd);
-        addText(aRichText, aStart);
     }
 
     /**
