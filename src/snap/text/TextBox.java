@@ -742,102 +742,105 @@ public class TextBox {
      */
     protected TextBoxLine createLine(TextLine aTextLine, int aStart, int aLineIndex)
     {
-        // Get iteration variables
-        int start = aStart;
-        int textLineLength = aTextLine.length();
-        int lineStart = aStart;
-        TextRun run = aTextLine.getRun(0);
-        int runEnd = run.getEnd();
-        TextStyle style = run.getStyle();
-        double fontScale = getFontScale();
-        if (fontScale != 1)
-            style = style.copyFor(style.getFont().scaleFont(fontScale));
-        double lineHt = style.getLineHeight();
+        // Get text vars
         boolean wrap = isWrapLines();
         boolean hyphenate = isHyphenate();
+        double fontScale = getFontScale();
 
-        // Get start x/y
-        TextBoxLine lastLn = aLineIndex > 0 ? getLine(aLineIndex - 1) : null;
-        double y = lastLn != null ? lastLn.getY() + lastLn.getLineAdvance() : getY();
+        // Get text line vars
+        int lineLength = aTextLine.length();
         TextLineStyle lineStyle = aTextLine.getLineStyle();
-        double indent = aStart == 0 ? lineStyle.getFirstIndent() : lineStyle.getLeftIndent();
-        double x = getMinHitX(y, lineHt, indent);
-        while (x > getMaxX() && y <= getMaxY()) {
-            y++;
-            x = getMinHitX(y, lineHt, indent);
-        }
-        double w = 0;
-        double cspace = style.getCharSpacing();
-        char c;
+        double lineIndent = aStart == 0 ? lineStyle.getFirstIndent() : lineStyle.getLeftIndent();
+        int lineStart = aStart;
+        TextBoxLine lastLine = aLineIndex > 0 ? getLine(aLineIndex - 1) : null;
+        double lineY = lastLine != null ? lastLine.getY() + lastLine.getLineAdvance() : getY();
 
-        // Create lines list and create/add first line
-        TextBoxLine line = new TextBoxLine(this, style, aTextLine, aStart);
-        line._yloc = y - getY();
+        // Get text run vars
+        TextRun run = aTextLine.getRun(0);
+        int runEnd = run.getEnd();
+        TextStyle runStyle = run.getStyle();
+        if (fontScale != 1)
+            runStyle = runStyle.copyFor(runStyle.getFont().scaleFont(fontScale));
+        double runCharSpacing = runStyle.getCharSpacing();
+        double lineH = runStyle.getLineHeight();
+
+        // Get token X/W
+        double tokenX = getMinHitX(lineY, lineH, lineIndent);
+        while (tokenX > getMaxX() && lineY <= getMaxY()) {
+            lineY++;
+            tokenX = getMinHitX(lineY, lineH, lineIndent);
+        }
+        double tokenW = 0;
+
+        // Create TextBoxLine
+        TextBoxLine boxLine = new TextBoxLine(this, runStyle, aTextLine, aStart);
+        boxLine._yloc = lineY - getY();
 
         // Iterate over line chars
-        while (start < textLineLength) {
+        for (int tokenStart = aStart; tokenStart < lineLength; ) {
 
             // Reset run if needed
-            if (start >= runEnd) {
+            if (tokenStart >= runEnd) {
                 run = aTextLine.getRun(run.getIndex() + 1);
                 runEnd = run.getEnd();
-                style = run.getStyle();
+                runStyle = run.getStyle();
                 if (fontScale != 1)
-                    style = style.copyFor(style.getFont().scaleFont(fontScale));
-                lineHt = Math.max(lineHt, style.getLineHeight());
-                cspace = style.getCharSpacing();
+                    runStyle = runStyle.copyFor(runStyle.getFont().scaleFont(fontScale));
+                lineH = Math.max(lineH, runStyle.getLineHeight());
+                runCharSpacing = runStyle.getCharSpacing();
             }
 
             // Skip past whitespace
-            while (start < textLineLength && Character.isWhitespace(c = aTextLine.charAt(start))) {
-                if (c == '\t')
-                    x = line.getXForTabAtIndexAndX(start, x + getX()) - getX();
-                else x += style.getCharAdvance(c) + cspace; //aTextLine.getLineStyle().getTabForX(x)-getX()
-                start++;
-                if (start >= runEnd && start < textLineLength)
+            char loopChar;
+            while (tokenStart < lineLength && Character.isWhitespace(loopChar = aTextLine.charAt(tokenStart))) {
+                if (loopChar == '\t')
+                    tokenX = boxLine.getXForTabAtIndexAndX(tokenStart, tokenX + getX()) - getX();
+                else tokenX += runStyle.getCharAdvance(loopChar) + runCharSpacing; //aTextLine.getLineStyle().getTabForX(x)-getX()
+                tokenStart++;
+                if (tokenStart >= runEnd && tokenStart < lineLength)
                     break;
             }
 
-            // Iterate through non-whitespace
-            int end = start;
-            while (end < textLineLength && end < runEnd && !Character.isWhitespace(c = aTextLine.charAt(end))) {
-                w += style.getCharAdvance(c) + cspace;
-                end++;
+            // Find token end - first non-whitespace char
+            int tokenEnd = tokenStart;
+            while (tokenEnd < lineLength && tokenEnd < runEnd && !Character.isWhitespace(loopChar = aTextLine.charAt(tokenEnd))) {
+                tokenW += runStyle.getCharAdvance(loopChar) + runCharSpacing;
+                tokenEnd++;
             }
 
             // If char range was found, create and add token
-            if (start < end) {
+            if (tokenStart < tokenEnd) {
 
-                // If last char ouside box, try for hyphen or add new line
+                // If last char outside box, try for hyphen or add new line
                 boolean didHyph = false;
-                if (wrap && isHitRight(x + w - cspace, y, lineHt)) {
+                if (wrap && isHitRight(tokenX + tokenW - runCharSpacing, lineY, lineH)) {
 
                     // If hyphenating, see if we can break token
                     if (hyphenate) {
-                        int hyph = end, end2 = end;
-                        double w2 = w, hypw = 0;
-                        while (hyph > 0 && isHitRight(x + w2 - cspace + hypw, y, lineHt)) {
-                            hyph = TextHyphenDict.getShared().getHyphen(aTextLine, start, hyph);
+                        int hyph = tokenEnd, end2 = tokenEnd;
+                        double w2 = tokenW, hypw = 0;
+                        while (hyph > 0 && isHitRight(tokenX + w2 - runCharSpacing + hypw, lineY, lineH)) {
+                            hyph = TextHyphenDict.getShared().getHyphen(aTextLine, tokenStart, hyph);
                             if (hyph > 0) {
-                                hypw = cspace + style.getCharAdvance('-');
+                                hypw = runCharSpacing + runStyle.getCharAdvance('-');
                                 while (end2 > hyph) {
                                     --end2;
-                                    w2 -= style.getCharAdvance(aTextLine.charAt(end2)) + cspace;
+                                    w2 -= runStyle.getCharAdvance(aTextLine.charAt(end2)) + runCharSpacing;
                                 }
                             }
                         }
-                        if (hyph > 0 && hyph < end) {
-                            end = end2;
-                            w = w2 + hypw;
+                        if (hyph > 0 && hyph < tokenEnd) {
+                            tokenEnd = end2;
+                            tokenW = w2 + hypw;
                             didHyph = true;
                         }
                     }
 
                     // If no hyphen and token start is line start, shorten token until it fits
-                    if (!didHyph && start == aStart)
-                        while (isHitRight(x + w - cspace, y, lineHt) && end > lineStart + 1) {
-                            --end;
-                            w -= style.getCharAdvance(aTextLine.charAt(end)) + cspace;
+                    if (!didHyph && tokenStart == aStart)
+                        while (isHitRight(tokenX + tokenW - runCharSpacing, lineY, lineH) && tokenEnd > lineStart + 1) {
+                            --tokenEnd;
+                            tokenW -= runStyle.getCharAdvance(aTextLine.charAt(tokenEnd)) + runCharSpacing;
                         }
 
                         // If no hyphen, break
@@ -846,21 +849,21 @@ public class TextBox {
                 }
 
                 // Create new token and add to line
-                TextBoxToken token = new TextBoxToken(line, style, start - lineStart, end - lineStart);
-                token.setX(x);
-                token.setWidth(w - cspace);
+                TextBoxToken token = new TextBoxToken(boxLine, runStyle, tokenStart - lineStart, tokenEnd - lineStart);
+                token.setX(tokenX);
+                token.setWidth(tokenW - runCharSpacing);
                 if (didHyph)
                     token.setHyphenated(true);
-                line.addToken(token);
-                start = end;
-                x += w;
-                w = 0;
+                boxLine.addToken(token);
+                tokenStart = tokenEnd;
+                tokenX += tokenW;
+                tokenW = 0;
             }
         }
 
         // Reset sizes and return
-        line.resetSizes();
-        return line;
+        boxLine.resetSizes();
+        return boxLine;
     }
 
     /**

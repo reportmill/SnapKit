@@ -91,7 +91,10 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
             int lineStart = line.getStart();
 
             // Get run for start
-            TextRun run = line.getRunForCharIndex(aStart - lineStart);
+            int lineIndex = aStart - lineStart;
+            TextRun run = line.getRunForCharIndex(lineIndex);
+            if (lineIndex == run.getEnd())
+                run = run.getNext();
             int runEnd = run.getEnd();
 
             // Get run style and modify for given style key/value

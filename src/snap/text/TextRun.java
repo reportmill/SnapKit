@@ -247,6 +247,15 @@ public class TextRun implements CharSequence, Cloneable {
     }
 
     /**
+     * Returns the next run, if available.
+     */
+    public TextRun getNext()
+    {
+        int nextIndex = _index + 1;
+        return _textLine != null && nextIndex < _textLine.getRunCount() ? _textLine.getRun(nextIndex) : null;
+    }
+
+    /**
      * Returns whether this run is equal to the given object.
      */
     public boolean equals(Object anObj)
