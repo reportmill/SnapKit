@@ -8,10 +8,10 @@ import snap.util.ArrayUtils;
 /**
  * This class represents a line of text in a Text.
  */
-public abstract class BaseTextLine implements CharSequence, Cloneable {
+public abstract class TextLine implements CharSequence, Cloneable {
 
-    // The BaseText that contains this line
-    protected BaseText  _text;
+    // The TextDoc that contains this line
+    protected TextDoc  _text;
 
     // The StringBuffer that holds line chars
     protected StringBuffer  _sb = new StringBuffer();
@@ -20,7 +20,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     protected int  _start;
 
     // The run for this line
-    protected BaseTextRun[]  _runs = EMPTY_RUNS;
+    protected TextRun[]  _runs = EMPTY_RUNS;
 
     // The line style
     protected TextLineStyle  _lineStyle;
@@ -32,14 +32,14 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     protected double _width = -1;
 
     // Constants
-    private static final BaseTextRun[] EMPTY_RUNS = new BaseTextRun[0];
+    private static final TextRun[] EMPTY_RUNS = new TextRun[0];
 
     /**
      * Constructor.
      */
-    public BaseTextLine(BaseText aBaseText)
+    public TextLine(TextDoc aTextDoc)
     {
-        _text = aBaseText;
+        _text = aTextDoc;
         _lineStyle = _text.getDefaultLineStyle();
         addRun(createRun(), 0);
     }
@@ -47,7 +47,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Returns the RichText.
      */
-    public BaseText getText()  { return _text; }
+    public TextDoc getText()  { return _text; }
 
     /**
      * Returns the length of this text line.
@@ -97,12 +97,12 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Returns the individual run at given index.
      */
-    public BaseTextRun getRun(int anIndex)  { return _runs[anIndex]; }
+    public TextRun getRun(int anIndex)  { return _runs[anIndex]; }
 
     /**
      * Returns the line runs.
      */
-    public BaseTextRun[] getRuns()  { return _runs; }
+    public TextRun[] getRuns()  { return _runs; }
 
     /**
      * Returns the line style.
@@ -123,7 +123,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
         // Add length to run
-        BaseTextRun run = getRun(0);
+        TextRun run = getRun(0);
         run.addLength(theChars.length());
 
         // Add chars
@@ -137,7 +137,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     public void removeChars(int aStart, int anEnd)
     {
         // Remove length from run
-        BaseTextRun run = getRun(0);
+        TextRun run = getRun(0);
         run.addLength(aStart - anEnd);
 
         // Remove chars
@@ -148,7 +148,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Adds a run to line.
      */
-    protected void addRun(BaseTextRun aRun, int anIndex)
+    protected void addRun(TextRun aRun, int anIndex)
     {
         _runs = ArrayUtils.add(_runs, aRun, anIndex);
         updateRuns(anIndex - 1);
@@ -165,9 +165,9 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Creates a new run.
      */
-    protected BaseTextRun createRun()
+    protected TextRun createRun()
     {
-        return new BaseTextRun(this);
+        return new TextRun(this);
     }
 
     /**
@@ -175,7 +175,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
      */
     protected void setStyle(TextStyle aStyle)
     {
-        for (BaseTextRun run : getRuns())
+        for (TextRun run : getRuns())
             run.setStyle(aStyle);
         _width = -1;
     }
@@ -190,7 +190,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
 
         // Get from runs
         double width = 0;
-        for (BaseTextRun run : _runs)
+        for (TextRun run : _runs)
             width += run.getWidth();
 
         // Set, return
@@ -207,7 +207,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
 
         // Calculate
         double width = 0;
-        for (BaseTextRun run : _runs)
+        for (TextRun run : _runs)
             if (anIndex < run.getEnd())
                 width += run.getWidth(anIndex - run.getStart());
 
@@ -218,10 +218,10 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Returns the head run for the line.
      */
-    public BaseTextRun getRunForCharIndex(int anIndex)
+    public TextRun getRunForCharIndex(int anIndex)
     {
         // Iterate over runs and return run containing char index
-        for (BaseTextRun run : _runs)
+        for (TextRun run : _runs)
             if (anIndex <= run.getEnd())
                 return run;
 
@@ -232,7 +232,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Returns the last run.
      */
-    public BaseTextRun getRunLast()
+    public TextRun getRunLast()
     {
         int runCount = getRunCount();
         return runCount > 0 ? getRun(runCount - 1) : null;
@@ -241,9 +241,9 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Splits the line at given character index.
      */
-    protected BaseTextLine splitLineAtIndex(int anIndex)
+    protected TextLine splitLineAtIndex(int anIndex)
     {
-        BaseTextLine remainder = clone();
+        TextLine remainder = clone();
         remainder.removeChars(0, anIndex);
         removeChars(anIndex, length());
         return remainder;
@@ -252,15 +252,15 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Appends the given line to the end of this line.
      */
-    protected void appendLine(BaseTextLine aLine)
+    protected void appendLine(TextLine aLine)
     {
         // Add chars
         _sb.append(aLine._sb);
 
         // Add runs
         for (int i = 0, iMax = aLine.getRunCount(); i < iMax; i++) {
-            BaseTextRun run = aLine.getRun(i);
-            BaseTextRun run2 = run.clone();
+            TextRun run = aLine.getRun(i);
+            TextRun run2 = run.clone();
             run2._textLine = this;
             addRun(run2, getRunCount());
         }
@@ -269,7 +269,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Returns the next line, if available.
      */
-    public BaseTextLine getNext()
+    public TextLine getNext()
     {
         int nextIndex = _index + 1;
         return _text != null && nextIndex < _text.getLineCount() ? _text.getLine(nextIndex) : null;
@@ -294,7 +294,7 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
      */
     public boolean isUnderlined()
     {
-        for (BaseTextRun run : _runs)
+        for (TextRun run : _runs)
             if (run.isUnderlined() && run.length() > 0)
                 return true;
         return false;
@@ -333,12 +333,12 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     protected void updateRuns(int aRunIndex)
     {
         // Get BaseRun and Length at end of BaseRun
-        BaseTextRun baseRun = aRunIndex >= 0 ? getRun(aRunIndex) : null;
+        TextRun baseRun = aRunIndex >= 0 ? getRun(aRunIndex) : null;
         int length = baseRun != null ? baseRun.getEnd() : 0;
 
         // Iterate over runs beyond BaseRun and update Index, Start and Length
         for (int i = aRunIndex + 1, iMax = getRunCount(); i < iMax; i++) {
-            BaseTextRun run = getRun(i);
+            TextRun run = getRun(i);
             run._index = i;
             run._start = length;
             length += run.length();
@@ -358,10 +358,10 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Returns a RichTextLine for given char range.
      */
-    public BaseTextLine copyForRange(int aStart, int aEnd)
+    public TextLine copyForRange(int aStart, int aEnd)
     {
         // Do normal clone
-        BaseTextLine clone = clone();
+        TextLine clone = clone();
 
         // Remove leading/trailing chars
         if (aEnd < length())
@@ -376,18 +376,18 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     /**
      * Standard clone implementation.
      */
-    public BaseTextLine clone()
+    public TextLine clone()
     {
         // Do normal version
-        BaseTextLine clone;
-        try { clone = (BaseTextLine) super.clone(); }
+        TextLine clone;
+        try { clone = (TextLine) super.clone(); }
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Clone StringBuffer, Runs
         clone._sb = new StringBuffer(_sb);
         clone._runs = _runs.clone();
         for (int i = 0; i < _runs.length; i++) {
-            BaseTextRun runClone = clone._runs[i] = _runs[i].clone();
+            TextRun runClone = clone._runs[i] = _runs[i].clone();
             runClone._textLine = clone;
         }
 

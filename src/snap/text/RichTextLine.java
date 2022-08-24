@@ -6,7 +6,7 @@ package snap.text;
 /**
  * A class to represent a line of text (for each newline) in RichText.
  */
-public class RichTextLine extends BaseTextLine {
+public class RichTextLine extends TextLine {
 
     /**
      * Constructor.
@@ -23,7 +23,7 @@ public class RichTextLine extends BaseTextLine {
     public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
         // Get run at index for style and add length
-        BaseTextRun run = getRunForCharIndexAndStyle(anIndex, theStyle);
+        TextRun run = getRunForCharIndexAndStyle(anIndex, theStyle);
         run.addLength(theChars.length());
 
         // Add chars
@@ -36,10 +36,10 @@ public class RichTextLine extends BaseTextLine {
      * Returns the run to add chars to for given style and char index.
      * Will try to use any adjacent run with conforming style, otherwise, will create/add new.
      */
-    private BaseTextRun getRunForCharIndexAndStyle(int charIndex, TextStyle aStyle)
+    private TextRun getRunForCharIndexAndStyle(int charIndex, TextStyle aStyle)
     {
         // Get run at index (just return if style is null or equal)
-        BaseTextRun run = getRunForCharIndex(charIndex);
+        TextRun run = getRunForCharIndex(charIndex);
         if (aStyle == null || aStyle.equals(run.getStyle()))
             return run;
 
@@ -51,7 +51,7 @@ public class RichTextLine extends BaseTextLine {
 
         // If charIndex at run end and next run has same style, return it instead
         if (charIndex == run.getEnd() && run.getIndex() + 1 < getRunCount()) {
-            BaseTextRun nextRun = getRun(run.getIndex() + 1);
+            TextRun nextRun = getRun(run.getIndex() + 1);
             if (aStyle.equals(nextRun.getStyle()))
                 return nextRun;
         }
@@ -65,7 +65,7 @@ public class RichTextLine extends BaseTextLine {
         }
 
         // Create new run for new chars, add and return
-        BaseTextRun newRun = createRun();
+        TextRun newRun = createRun();
         newRun.setStyle(aStyle);
         addRun(newRun, newRunIndex);
         return newRun;
@@ -85,7 +85,7 @@ public class RichTextLine extends BaseTextLine {
         while (aStart < end) {
 
             // Get run at end
-            BaseTextRun run = getRunForCharIndex(end);
+            TextRun run = getRunForCharIndex(end);
             int runStart = run.getStart();
             int start = Math.max(aStart, runStart);
 
@@ -114,10 +114,10 @@ public class RichTextLine extends BaseTextLine {
     /**
      * Splits given run at given char index and returns the run containing the remaining chars (and identical attributes).
      */
-    protected BaseTextRun splitRunForCharIndex(BaseTextRun aRun, int anIndex)
+    protected TextRun splitRunForCharIndex(TextRun aRun, int anIndex)
     {
         // Clone to get tail and delete chars from each
-        BaseTextRun remainder = aRun.clone();
+        TextRun remainder = aRun.clone();
         aRun.addLength(anIndex - aRun.length());
         remainder.addLength(-anIndex);
 

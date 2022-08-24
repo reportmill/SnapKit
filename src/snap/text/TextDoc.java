@@ -12,10 +12,10 @@ import java.util.List;
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public abstract class BaseText extends PropObject implements CharSequence, Cloneable {
+public abstract class TextDoc extends PropObject implements CharSequence, Cloneable {
 
-    // The TextDocLine in this text
-    protected List<BaseTextLine>  _lines = new ArrayList<>();
+    // The TextLines in this text
+    protected List<TextLine>  _lines = new ArrayList<>();
 
     // The length of this text
     protected int  _length;
@@ -43,7 +43,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     /**
      * Constructor.
      */
-    public BaseText()
+    public TextDoc()
     {
         super();
     }
@@ -71,7 +71,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
      */
     public char charAt(int anIndex)
     {
-        BaseTextLine line = getLineForCharIndex(anIndex);
+        TextLine line = getLineForCharIndex(anIndex);
         return line.charAt(anIndex - line.getStart());
     }
     /**
@@ -80,7 +80,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     public CharSequence subSequence(int aStart, int anEnd)
     {
         StringBuffer sb = new StringBuffer(anEnd - aStart);
-        BaseTextLine line = getLineForCharIndex(aStart);
+        TextLine line = getLineForCharIndex(aStart);
         while (aStart < anEnd) {
             int end = Math.min(line.getEnd(), anEnd);
             sb.append(line.subSequence(aStart - line.getStart(), end - line.getStart()));
@@ -96,7 +96,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     public String getString()
     {
         StringBuilder sb = new StringBuilder(length());
-        for (BaseTextLine line : _lines)
+        for (TextLine line : _lines)
             sb.append(line._sb);
         return sb.toString();
     }
@@ -122,7 +122,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     public void setDefaultStyle(TextStyle aStyle)
     {
         _defStyle = aStyle;
-        for (BaseTextLine line : getLines())
+        for (TextLine line : getLines())
             line.setStyle(aStyle);
     }
 
@@ -137,7 +137,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     public void setDefaultLineStyle(TextLineStyle aLineStyle)
     {
         _defLineStyle = aLineStyle;
-        for (BaseTextLine line : getLines())
+        for (TextLine line : getLines())
             line.setLineStyle(aLineStyle);
     }
 
@@ -161,9 +161,9 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
         if (isPlainText()) theStyle = null;
 
         // Get line for index - if adding at text end and last line and ends with newline, create/add new line
-        BaseTextLine line = getLineForCharIndex(anIndex);
+        TextLine line = getLineForCharIndex(anIndex);
         if (anIndex == line.getEnd() && line.isLastCharNewline()) {
-            BaseTextLine remainder = line.splitLineAtIndex(line.length());
+            TextLine remainder = line.splitLineAtIndex(line.length());
             addLine(remainder, line.getIndex() + 1);
             line = remainder;
         }
@@ -184,7 +184,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
 
             // If newline added and there are more chars in line, split line and add remainder
             if (newline > 0 && (end < len || lindex + chars.length() < line.length())) {
-                BaseTextLine remainder = line.splitLineAtIndex(lindex + chars.length());
+                TextLine remainder = line.splitLineAtIndex(lindex + chars.length());
                 addLine(remainder, line.getIndex() + 1);
                 line = remainder;
                 lindex = 0;
@@ -196,7 +196,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
 
         // Send PropertyChange
         if (isPropChangeEnabled())
-            firePropChange(new BaseTextUtils.CharsChange(this, null, theChars, anIndex));
+            firePropChange(new TextDocUtils.CharsChange(this, null, theChars, anIndex));
         _width = -1;
     }
 
@@ -216,7 +216,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
         while (end > aStart) {
 
             // Get line at end index
-            BaseTextLine line = getLineForCharIndex(end);
+            TextLine line = getLineForCharIndex(end);
             if (end == line.getStart())
                 line = getLine(line.getIndex() - 1);
 
@@ -232,7 +232,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
             else {
                 line.removeChars(start - lineStart, end - lineStart);
                 if (!line.isLastCharNewline() && line.getIndex() + 1 < getLineCount()) {
-                    BaseTextLine next = removeLine(line.getIndex() + 1);
+                    TextLine next = removeLine(line.getIndex() + 1);
                     line.appendLine(next);
                 }
             }
@@ -243,7 +243,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
 
         // If deleted chars is set, send property change
         if (removedChars != null)
-            firePropChange(new BaseTextUtils.CharsChange(this, removedChars, null, aStart));
+            firePropChange(new TextDocUtils.CharsChange(this, removedChars, null, aStart));
         _width = -1;
     }
 
@@ -277,11 +277,11 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     /**
      * Adds given TextDoc to this text at given index.
      */
-    public void addText(BaseText aTextDoc, int anIndex)
+    public void addText(TextDoc aTextDoc, int anIndex)
     {
-        for (BaseTextLine line : aTextDoc.getLines()) {
-            BaseTextRun[] lineRuns = line.getRuns();
-            for (BaseTextRun run : lineRuns) {
+        for (TextLine line : aTextDoc.getLines()) {
+            TextRun[] lineRuns = line.getRuns();
+            for (TextRun run : lineRuns) {
                 int index = anIndex + line.getStart() + run.getStart();
                 addChars(run.getString(), run.getStyle(), index);
                 setLineStyle(line.getLineStyle(), index, index + run.length());
@@ -338,12 +338,12 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     {
         // Propagate to Lines
         TextLineStyle oldStyle = getLine(0).getLineStyle();
-        for (BaseTextLine line : getLines())
+        for (TextLine line : getLines())
             line.setLineStyle(aStyle);
 
         // Fire prop change
         if (isPropChangeEnabled())
-            firePropChange(new BaseTextUtils.LineStyleChange(this, oldStyle, aStyle, 0));
+            firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, aStyle, 0));
 
         _width = -1;
     }
@@ -367,7 +367,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     /**
      * Returns the individual block in this doc.
      */
-    public BaseTextLine getLine(int anIndex)
+    public TextLine getLine(int anIndex)
     {
         return _lines.get(anIndex);
     }
@@ -375,12 +375,12 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     /**
      * Returns the list of blocks.
      */
-    public List<BaseTextLine> getLines()  { return _lines; }
+    public List<TextLine> getLines()  { return _lines; }
 
     /**
      * Adds a block at given index.
      */
-    protected void addLine(BaseTextLine aLine, int anIndex)
+    protected void addLine(TextLine aLine, int anIndex)
     {
         _lines.add(anIndex, aLine);
         aLine._text = this;
@@ -390,9 +390,9 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     /**
      * Removes the block at given index.
      */
-    protected BaseTextLine removeLine(int anIndex)
+    protected TextLine removeLine(int anIndex)
     {
-        BaseTextLine line = _lines.remove(anIndex);
+        TextLine line = _lines.remove(anIndex);
         line._text = null;
         updateLines(anIndex - 1);
         return line;
@@ -406,11 +406,11 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     /**
      * Returns the longest line.
      */
-    public BaseTextLine getLineLongest()
+    public TextLine getLineLongest()
     {
-        BaseTextLine longLine = null;
+        TextLine longLine = null;
         double longW = 0;
-        for (BaseTextLine line : _lines) {
+        for (TextLine line : _lines) {
             if (line.getWidth() > longW) {
                 longLine = line;
                 longW = line.getWidth();
@@ -440,7 +440,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
         if (_width >= 0) return _width;
 
         // Calc, set, return
-        BaseTextLine line = getLineLongest();
+        TextLine line = getLineLongest();
         double prefW = Math.ceil(line != null ? line._width : 0);
         return _width = prefW;
     }
@@ -455,7 +455,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
 
         // Iterate over lines and get max line width
         double prefW = 0;
-        for (BaseTextLine line : _lines) {
+        for (TextLine line : _lines) {
             if (anIndex < line.getEnd()) {
                 double lineW = line.getWidth(anIndex - line.getStart());
                 prefW = Math.max(prefW, lineW);
@@ -469,10 +469,10 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     /**
      * Returns the block at the given char index.
      */
-    public BaseTextLine getLineForCharIndex(int anIndex)
+    public TextLine getLineForCharIndex(int anIndex)
     {
         // Iterate over lines and return line containing char index
-        for (BaseTextLine line : _lines)
+        for (TextLine line : _lines)
             if (anIndex < line.getEnd())
                 return line;
 
@@ -487,7 +487,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     /**
      * Returns the last block.
      */
-    public BaseTextLine getLineLast()
+    public TextLine getLineLast()
     {
         int lineCount = getLineCount();
         return lineCount > 0 ? getLine(lineCount - 1) : null;
@@ -496,19 +496,19 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     /**
      * Returns the TextRun that contains the given char index.
      */
-    public BaseTextRun getRunForCharIndex(int charIndex)
+    public TextRun getRunForCharIndex(int charIndex)
     {
-        BaseTextLine line = getLineForCharIndex(charIndex);
+        TextLine line = getLineForCharIndex(charIndex);
         return line.getRunForCharIndex(charIndex - line.getStart());
     }
 
     /**
      * Returns the last run.
      */
-    public BaseTextRun getRunLast()
+    public TextRun getRunLast()
     {
-        BaseTextLine lastLine = getLineLast();
-        BaseTextRun lastRun = lastLine != null ? lastLine.getRunLast() : null;
+        TextLine lastLine = getLineLast();
+        TextRun lastRun = lastLine != null ? lastLine.getRunLast() : null;
         return lastRun;
     }
 
@@ -517,7 +517,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
      */
     public Font getFontForCharIndex(int charIndex)
     {
-        BaseTextRun textRun = getRunForCharIndex(charIndex);
+        TextRun textRun = getRunForCharIndex(charIndex);
         return textRun.getFont();
     }
 
@@ -526,7 +526,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
      */
     public TextStyle getStyleForCharIndex(int charIndex)
     {
-        BaseTextRun textRun = getRunForCharIndex(charIndex);
+        TextRun textRun = getRunForCharIndex(charIndex);
         return textRun.getStyle();
     }
 
@@ -535,7 +535,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
      */
     public TextLineStyle getLineStyleForCharIndex(int charIndex)
     {
-        BaseTextLine textLine = getLineForCharIndex(charIndex);
+        TextLine textLine = getLineForCharIndex(charIndex);
         return textLine.getLineStyle();
     }
 
@@ -581,8 +581,8 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
         if (aScale == 1) return;
 
         // Iterate over lines
-        for (BaseTextLine line : getLines()) {
-            for (BaseTextRun run : line.getRuns()) {
+        for (TextLine line : getLines()) {
+            for (TextRun run : line.getRuns()) {
                 TextStyle runStyle = run.getStyle();
                 TextStyle runStyleScaled = runStyle.copyFor(run.getFont().scaleFont(aScale));
                 run.setStyle(runStyleScaled);
@@ -595,7 +595,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
      */
     public int indexOf(String aStr, int aStart)
     {
-        for (BaseTextLine line : getLines()) {
+        for (TextLine line : getLines()) {
             if (aStart >= line.getEnd()) continue;
             int lineStart = line.getStart();
             int index = line.indexOf(aStr, aStart - lineStart);
@@ -682,12 +682,12 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     protected void updateLines(int anIndex)
     {
         // Get BaseLine and length at end of BaseLine
-        BaseTextLine baseLine = anIndex >= 0 ? getLine(anIndex) : null;
+        TextLine baseLine = anIndex >= 0 ? getLine(anIndex) : null;
         _length = baseLine != null ? baseLine.getEnd() : 0;
 
         // Iterate over lines beyond BaseLine and update Index, Start, Length and Y
         for (int i = anIndex + 1, iMax = _lines.size(); i < iMax; i++) {
-            BaseTextLine line = getLine(i);
+            TextLine line = getLine(i);
             line._index = i;
             line._start = _length;
             _length += line.length();
@@ -698,7 +698,7 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
      * Standard clone implementation.
      */
     @Override
-    public BaseText clone()
+    public TextDoc clone()
     {
         // Do normal clone
         RichText clone;
@@ -711,8 +711,8 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
 
         // Copy lines deep
         for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
-            BaseTextLine line = getLine(i);
-            BaseTextLine lineClone = line.clone();
+            TextLine line = getLine(i);
+            TextLine lineClone = line.clone();
             clone.addLine(lineClone, i);
         }
 

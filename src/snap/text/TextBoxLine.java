@@ -28,7 +28,7 @@ public class TextBoxLine implements CharSequence {
     protected int  _length;
 
     // The TextLine that this line renders
-    protected BaseTextLine  _textLine;
+    protected TextLine _textLine;
 
     // The start of this line in RichTextLine
     protected int  _textLineStart;
@@ -54,7 +54,7 @@ public class TextBoxLine implements CharSequence {
     /**
      * Creates a new TextBoxLine.
      */
-    public TextBoxLine(TextBox aBox, TextStyle aStartStyle, BaseTextLine aTextLine, int theRTLStart)
+    public TextBoxLine(TextBox aBox, TextStyle aStartStyle, TextLine aTextLine, int theRTLStart)
     {
         _tbox = aBox;
         _startStyle = aStartStyle;
@@ -119,7 +119,7 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the TextLine.
      */
-    public BaseTextLine getRichTextLine()  { return _textLine; }
+    public TextLine getRichTextLine()  { return _textLine; }
 
     /**
      * Returns the start of this line in RichTextLine.
@@ -129,7 +129,7 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the RichTextRun of char in line.
      */
-    public BaseTextRun getRichTextRun(int anIndex)
+    public TextRun getRichTextRun(int anIndex)
     {
         return _textLine.getRunForCharIndex(_textLineStart + anIndex);
     }
@@ -588,7 +588,7 @@ public class TextBoxLine implements CharSequence {
     protected TextBoxRun createRun(int aStart)
     {
         // Get RichTextRun and TextStyle at char index
-        BaseTextRun rtrun = getRichTextRun(aStart);
+        TextRun rtrun = getRichTextRun(aStart);
         TextStyle style = rtrun.getStyle();
         double fontScale = _tbox.getFontScale();
         if (fontScale != 1)

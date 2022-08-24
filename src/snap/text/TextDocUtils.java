@@ -2,9 +2,9 @@ package snap.text;
 import snap.props.PropChange;
 
 /**
- * Utility methods to support BaseText.
+ * Utility methods to support TextDoc.
  */
-public class BaseTextUtils {
+public class TextDocUtils {
 
     /**
      * A property change event for addChars/removeChars.
@@ -12,9 +12,9 @@ public class BaseTextUtils {
     public static class CharsChange extends PropChange {
 
         /** Constructor. */
-        public CharsChange(BaseText aBaseText, Object oldV, Object newV, int anInd)
+        public CharsChange(TextDoc aTextDoc, Object oldV, Object newV, int anInd)
         {
-            super(aBaseText, BaseText.Chars_Prop, oldV, newV, anInd);
+            super(aTextDoc, TextDoc.Chars_Prop, oldV, newV, anInd);
         }
 
         public CharSequence getOldValue()  { return (CharSequence) super.getOldValue(); }
@@ -23,24 +23,24 @@ public class BaseTextUtils {
 
         public void doChange(Object oldValue, Object newValue)
         {
-            BaseText baseText = (BaseText) getSource();
+            TextDoc textDoc = (TextDoc) getSource();
             int index = getIndex();
 
             if (oldValue != null)
-                baseText.removeChars(index, index + ((CharSequence) oldValue).length());
-            else baseText.addChars((CharSequence) newValue, null, index);
+                textDoc.removeChars(index, index + ((CharSequence) oldValue).length());
+            else textDoc.addChars((CharSequence) newValue, null, index);
         }
 
         public PropChange merge(PropChange anEvent)
         {
-            BaseText baseText = (BaseText) getSource();
+            TextDoc textDoc = (TextDoc) getSource();
             CharsChange event = (CharsChange) anEvent;
             CharSequence newVal = getNewValue();
             CharSequence eventNewVal = event.getNewValue();
             int index = getIndex();
 
             if (newVal != null && eventNewVal != null && newVal.length() + index == event.getIndex())
-                return new CharsChange(baseText,null, newVal.toString() + eventNewVal, index);
+                return new CharsChange(textDoc,null, newVal.toString() + eventNewVal, index);
             return null;
         }
     }
@@ -54,9 +54,9 @@ public class BaseTextUtils {
         int _start, _end;
 
         /** Constructor. */
-        public StyleChange(BaseText aBaseText, Object oV, Object nV, int aStart, int anEnd)
+        public StyleChange(TextDoc aTextDoc, Object oV, Object nV, int aStart, int anEnd)
         {
-            super(aBaseText, BaseText.Style_Prop, oV, nV, -1);
+            super(aTextDoc, TextDoc.Style_Prop, oV, nV, -1);
             _start = aStart;
             _end = anEnd;
         }
@@ -67,8 +67,8 @@ public class BaseTextUtils {
 
         public void doChange(Object oldVal, Object newVal)
         {
-            RichText baseText = (RichText) getSource();
-            baseText.setStyle((TextStyle) newVal, _start, _end);
+            TextDoc textDoc = (TextDoc) getSource();
+            textDoc.setStyle((TextStyle) newVal, _start, _end);
         }
     }
 
@@ -78,16 +78,16 @@ public class BaseTextUtils {
     public static class LineStyleChange extends PropChange {
 
         /** Constructor. */
-        public LineStyleChange(BaseText aBaseText, Object oV, Object nV, int anIndex)
+        public LineStyleChange(TextDoc aTextDoc, Object oV, Object nV, int anIndex)
         {
-            super(aBaseText, BaseText.LineStyle_Prop, oV, nV, anIndex);
+            super(aTextDoc, TextDoc.LineStyle_Prop, oV, nV, anIndex);
         }
 
         public void doChange(Object oval, Object nval)
         {
-            BaseText baseText = (BaseText) getSource();
-            BaseTextLine line = baseText.getLine(getIndex());
-            baseText.setLineStyle((TextLineStyle) nval, line.getStart(), line.getStart());
+            TextDoc textDoc = (TextDoc) getSource();
+            TextLine line = textDoc.getLine(getIndex());
+            textDoc.setLineStyle((TextLineStyle) nval, line.getStart(), line.getStart());
         }
     }
 }

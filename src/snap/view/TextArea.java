@@ -853,9 +853,9 @@ public class TextArea extends View {
     {
         // Iterate over runs and do replace for each one individually
         int start = aStart, end = anEnd;
-        for (BaseTextLine line : aRichText.getLines()) {
-            BaseTextRun[] lineRuns = line.getRuns();
-            for (BaseTextRun run : lineRuns) {
+        for (TextLine line : aRichText.getLines()) {
+            TextRun[] lineRuns = line.getRuns();
+            for (TextRun run : lineRuns) {
                 replaceChars(run.getString(), run.getStyle(), start, end, false);
                 start = end = start + run.length();
             }

@@ -510,8 +510,8 @@ public class TextBox {
     protected void richTextDidPropChange(PropChange aPC)
     {
         // Handle CharsChange: Update lines for old/new range
-        if (aPC instanceof BaseTextUtils.CharsChange) {
-            BaseTextUtils.CharsChange charsChange = (BaseTextUtils.CharsChange) aPC;
+        if (aPC instanceof TextDocUtils.CharsChange) {
+            TextDocUtils.CharsChange charsChange = (TextDocUtils.CharsChange) aPC;
             CharSequence newVal = charsChange.getNewValue();
             CharSequence oldVal = charsChange.getOldValue();
             int index = charsChange.getIndex();
@@ -522,16 +522,16 @@ public class TextBox {
         }
 
         // Handle StyleChange
-        else if (aPC instanceof BaseTextUtils.StyleChange) {
-            BaseTextUtils.StyleChange styleChange = (BaseTextUtils.StyleChange) aPC;
+        else if (aPC instanceof TextDocUtils.StyleChange) {
+            TextDocUtils.StyleChange styleChange = (TextDocUtils.StyleChange) aPC;
             textChangedChars(styleChange.getStart(), styleChange.getEnd());
         }
 
         // Handle LineStyleChange
-        else if (aPC instanceof BaseTextUtils.LineStyleChange) {
-            BaseTextUtils.LineStyleChange lineStyleChange = (BaseTextUtils.LineStyleChange) aPC;
-            BaseText baseText = getRichText();
-            BaseTextLine textLine = baseText.getLine(lineStyleChange.getIndex());
+        else if (aPC instanceof TextDocUtils.LineStyleChange) {
+            TextDocUtils.LineStyleChange lineStyleChange = (TextDocUtils.LineStyleChange) aPC;
+            TextDoc textDoc = getRichText();
+            TextLine textLine = textDoc.getLine(lineStyleChange.getIndex());
             textChangedChars(textLine.getStart(), textLine.getEnd());
         }
     }
@@ -662,7 +662,7 @@ public class TextBox {
         int eline = getLineAt(aEnd).getIndex();
 
         // Extend end-line-index to end of RichTextLine
-        BaseTextLine endRTL = getLine(eline).getRichTextLine();
+        TextLine endRTL = getLine(eline).getRichTextLine();
         while (eline + 1 < lcount && getLine(eline + 1).getRichTextLine() == endRTL)
             eline++;
 
@@ -688,7 +688,7 @@ public class TextBox {
 
         // Iterate over RichText lines, create TextBox lines and add
         for (int i = startRTL, lindex = aLineIndex; i <= endRTL; i++) {
-            BaseTextLine textLine = richText.getLine(i);
+            TextLine textLine = richText.getLine(i);
 
             // Get start-char-index for line
             int lstart = Math.max(start - textLine.getStart(), 0);
@@ -708,7 +708,7 @@ public class TextBox {
 
         // If we added last line and it is empty or ends with newline, add blank line
         if (endRTL == richText.getLineCount() - 1) {
-            BaseTextLine textLine = richText.getLine(endRTL);
+            TextLine textLine = richText.getLine(endRTL);
             if (textLine.length() == 0 || textLine.isLastCharNewline()) {
                 TextBoxLine line = createLine(textLine, textLine.length(), getLineCount());
                 if (!((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()))
@@ -720,13 +720,13 @@ public class TextBox {
     /**
      * Create and return TextBoxLines for given RichTextLine, start char index and line index.
      */
-    protected TextBoxLine createLine(BaseTextLine aTextLine, int aStart, int aLineIndex)
+    protected TextBoxLine createLine(TextLine aTextLine, int aStart, int aLineIndex)
     {
         // Get iteration variables
         int start = aStart;
         int textLineLength = aTextLine.length();
         int lineStart = aStart;
-        BaseTextRun run = aTextLine.getRun(0);
+        TextRun run = aTextLine.getRun(0);
         int runEnd = run.getEnd();
         TextStyle style = run.getStyle();
         double fontScale = getFontScale();
@@ -888,7 +888,7 @@ public class TextBox {
     /**
      * Returns the TextRun that contains the given index.
      */
-    public BaseTextRun getRunAt(int anIndex)
+    public TextRun getRunAt(int anIndex)
     {
         return getRichText().getRunForCharIndex(anIndex);
     }

@@ -9,10 +9,10 @@ import snap.gfx.Font;
 /**
  * This is class represents a range of characters in a TextLine that share the same style.
  */
-public class BaseTextRun implements CharSequence, Cloneable {
+public class TextRun implements CharSequence, Cloneable {
 
     // The line that holds this run
-    protected BaseTextLine  _textLine;
+    protected TextLine _textLine;
 
     // The start char index of this run in line
     protected int  _start;
@@ -32,7 +32,7 @@ public class BaseTextRun implements CharSequence, Cloneable {
     /**
      * Constructor.
      */
-    public BaseTextRun(BaseTextLine aTextLine)
+    public TextRun(TextLine aTextLine)
     {
         super();
         _textLine = aTextLine;
@@ -253,7 +253,7 @@ public class BaseTextRun implements CharSequence, Cloneable {
     {
         // Check identity and get other
         if (anObj == this) return true;
-        BaseTextRun other = anObj instanceof BaseTextRun ? (BaseTextRun) anObj : null;
+        TextRun other = anObj instanceof TextRun ? (TextRun) anObj : null;
         if (other == null) return false;
 
         // Check Start, Length, Style
@@ -276,11 +276,11 @@ public class BaseTextRun implements CharSequence, Cloneable {
     /**
      * Returns a basic clone of this object.
      */
-    public BaseTextRun clone()
+    public TextRun clone()
     {
         // Do normal version
-        BaseTextRun clone;
-        try { clone = (BaseTextRun) super.clone(); }
+        TextRun clone;
+        try { clone = (TextRun) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
 
         // Return

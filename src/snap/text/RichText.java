@@ -11,7 +11,7 @@ import snap.util.*;
 /**
  * This class represents a block of text (lines).
  */
-public class RichText extends BaseText implements XMLArchiver.Archivable {
+public class RichText extends TextDoc implements XMLArchiver.Archivable {
 
     /**
      * Constructor.
@@ -54,7 +54,7 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
             // Set style
             RichTextLine line = (RichTextLine) getLineForCharIndex(aStart);
             int lineStart = line.getStart();
-            BaseTextRun run = getRunForCharIndex(aStart);
+            TextRun run = getRunForCharIndex(aStart);
             TextStyle oldStyle = run.getStyle();
             if (aStart - lineStart > run.getStart())
                 run = line.splitRunForCharIndex(run, aStart - lineStart - run.getStart());
@@ -66,7 +66,7 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
             // Fire prop change
             if (isPropChangeEnabled()) {
                 int runStart = run.getStart() + lineStart, runEnd = run.getEnd() + lineStart;
-                PropChange pc = new BaseTextUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
+                PropChange pc = new TextDocUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
                 firePropChange(pc);
             }
         }
@@ -84,11 +84,11 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
         while (aStart < anEnd) {
 
             // Get line for start
-            BaseTextLine line = getLineForCharIndex(aStart);
+            TextLine line = getLineForCharIndex(aStart);
             int lineStart = line.getStart();
 
             // Get run for start
-            BaseTextRun run = line.getRunForCharIndex(aStart - lineStart);
+            TextRun run = line.getRunForCharIndex(aStart - lineStart);
             int runEnd = run.getEnd();
 
             // Get run style and modify for given style key/value
@@ -110,11 +110,11 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
         int startLineIndex = getLineForCharIndex(aStart).getIndex();
         int endLineIndex = getLineForCharIndex(anEnd).getIndex();
         for (int i = startLineIndex; i <= endLineIndex; i++) {
-            BaseTextLine line = getLine(i);
+            TextLine line = getLine(i);
             TextLineStyle oldStyle = line.getLineStyle();
             line.setLineStyle(aStyle);
             if (isPropChangeEnabled())
-                firePropChange(new BaseTextUtils.LineStyleChange(this, oldStyle, aStyle, i));
+                firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, aStyle, i));
         }
 
         _width = -1;
@@ -130,12 +130,12 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
         int startLineIndex = getLineForCharIndex(aStart).getIndex();
         int endLineIndex = getLineForCharIndex(anEnd).getIndex();
         for (int i = startLineIndex; i <= endLineIndex; i++) {
-            BaseTextLine line = getLine(i);
+            TextLine line = getLine(i);
             TextLineStyle oldStyle = line.getLineStyle();
             TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
             line.setLineStyle(newStyle);
             if (isPropChangeEnabled())
-                firePropChange(new BaseTextUtils.LineStyleChange(this, oldStyle, newStyle, i));
+                firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, newStyle, i));
         }
 
         _width = -1;
@@ -147,7 +147,7 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
     @Override
     public boolean isUnderlined()
     {
-        for (BaseTextLine line : _lines)
+        for (TextLine line : _lines)
             if (line.isUnderlined())
                 return true;
         return false;
@@ -168,10 +168,10 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
 
         // Iterate over lines and add
         for (int i = startLineIndex; i <= endLineIndex; i++) {
-            BaseTextLine line = getLine(i);
+            TextLine line = getLine(i);
             int lineStart = line.getStart();
             int start = Math.max(aStart - lineStart, 0), end = Math.min(aEnd - lineStart, line.length());
-            BaseTextLine lineCopy = line.copyForRange(start, end);
+            TextLine lineCopy = line.copyForRange(start, end);
             textCopy.addLine(lineCopy, textCopy.getLineCount());
         }
 
@@ -205,9 +205,9 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
         boolean underline = false;
 
         // Iterate over runs
-        for (BaseTextLine line : getLines()) {
+        for (TextLine line : getLines()) {
             for (int i = 0, iMax = line.getRunCount(); i < iMax; i++) {
-                BaseTextRun run = line.getRun(i);
+                TextRun run = line.getRun(i);
 
                 // If font changed for run, write font element
                 if (!SnapUtils.equals(font, run.getFont())) {
