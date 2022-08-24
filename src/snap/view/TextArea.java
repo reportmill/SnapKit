@@ -14,75 +14,75 @@ import snap.web.*;
 import java.util.Objects;
 
 /**
- * A view subclass for displaying and editing large blocks of text and rich text using a TextBox with RichText.
+ * A view subclass for displaying and editing a TextDoc (using TextBox).
  */
 public class TextArea extends View {
 
     // The text being edited
-    private TextBox _tbox;
+    private TextBox  _textBox;
 
     // Whether text is editable
-    private boolean _editable;
+    private boolean  _editable;
 
     // Whether text should wrap lines that overrun bounds
-    private boolean _wrapLines;
+    private boolean  _wrapLines;
 
     // The char index of carat
-    private int _selIndex;
+    private int  _selIndex;
 
     // The char index of last char selection
-    private int _selAnchor;
+    private int  _selAnchor;
 
     // The char index of current selection start/end
-    private int _selStart, _selEnd;
+    private int  _selStart, _selEnd;
 
     // The text selection
-    private TextSel _sel;
+    private TextSel  _sel;
 
     // Whether the editor is word selecting (double click) or paragraph selecting (triple click)
-    private boolean _wordSel, _pgraphSel;
+    private boolean  _wordSel, _pgraphSel;
 
     // The current TextStyle for the cursor or selection
-    private TextStyle _selStyle;
+    private TextStyle  _selStyle;
 
     // The Selection color
-    private Color _selColor = new Color(181, 214, 254, 255);
+    private Color  _selColor = new Color(181, 214, 254, 255);
 
     // The text pane undoer
-    private Undoer _undoer = new Undoer();
+    private Undoer  _undoer = new Undoer();
 
     // The index of the last replace so we can commit undo changes if not adjacent
-    private int _lastReplaceIndex;
+    private int  _lastReplaceIndex;
 
     // The mouse down point
-    private double _downX, _downY;
+    private double  _downX, _downY;
 
     // The animator for caret blinking
-    private ViewTimer _caretTimer;
+    private ViewTimer  _caretTimer;
 
     // Whether to show text insertion point caret
-    private boolean _showCaret;
+    private boolean  _showCaret;
 
     // Whether to send action on enter key press
-    private boolean _fireActionOnEnterKey;
+    private boolean  _fireActionOnEnterKey;
 
     // Whether to send action on focus lost (if content changed)
-    private boolean _fireActionOnFocusLost;
+    private boolean  _fireActionOnFocusLost;
 
     // The content on focus gained
-    private String _focusGainedText;
+    private String  _focusGainedText;
 
     // Whether RM should be spell checking
-    public static boolean isSpellChecking = Prefs.get().getBoolean("SpellChecking", false);
+    public static boolean  isSpellChecking = Prefs.get().getBoolean("SpellChecking", false);
 
     // Whether hyphenating is activated
-    static boolean _hyphenating = Prefs.get().getBoolean("Hyphenating", false);
+    static boolean  _hyphenating = Prefs.get().getBoolean("Hyphenating", false);
 
     // The MIME type for SnapKit RichText
-    public static final String SNAP_RICHTEXT_TYPE = "reportmill/xstring";
+    public static final String  SNAP_RICHTEXT_TYPE = "reportmill/xstring";
 
-    // The PropChangeListener to catch RichText PropChanges.
-    private PropChangeListener _richTextPropLsnr = pce -> richTextPropChange(pce);
+    // The PropChangeListener to catch TextDoc PropChanges.
+    private PropChangeListener  _textDocPropLsnr = pce -> textDocDidPropChange(pce);
 
     // Constants for properties
     public static final String Editable_Prop = "Editable";
@@ -112,7 +112,7 @@ public class TextArea extends View {
     /**
      * Returns the text that is being edited.
      */
-    public TextBox getTextBox()  { return _tbox; }
+    public TextBox getTextBox()  { return _textBox; }
 
     /**
      * Returns the text box used to layout text.
@@ -120,17 +120,18 @@ public class TextArea extends View {
     public void setTextBox(TextBox aTextBox)
     {
         // If already set, just return
-        if (aTextBox == _tbox) return;
+        if (aTextBox == _textBox) return;
 
         // Set TextBox
-        _tbox = aTextBox;
+        _textBox = aTextBox;
 
-        // Remove PropChangeListener from old RichText
-        RichText old = getRichText();
-        if (old != null) old.removePropChangeListener(_richTextPropLsnr);
+        // Remove PropChangeListener from old TextDoc
+        TextDoc oldTextDoc = getTextDoc();
+        if (oldTextDoc != null)
+            oldTextDoc.removePropChangeListener(_textDocPropLsnr);
 
         // Add PropChangeListener to new RichText
-        _tbox.getRichText().addPropChangeListener(_richTextPropLsnr);
+        _textBox.getTextDoc().addPropChangeListener(_textDocPropLsnr);
     }
 
     /**
@@ -142,29 +143,32 @@ public class TextArea extends View {
     }
 
     /**
-     * Returns the rich text.
+     * Returns the TextDoc.
      */
-    public RichText getRichText()
+    public TextDoc getTextDoc()
     {
-        return getTextBox().getRichText();
+        TextBox textBox = getTextBox();
+        return textBox.getTextDoc();
     }
 
     /**
-     * Sets the RichText.
+     * Sets the TextDoc.
      */
-    public void setRichText(RichText aRichText)
+    public void setTextDoc(TextDoc aTextDoc)
     {
         // If already set, just return
-        RichText old = getRichText();
-        if (aRichText == old) return;
+        TextDoc oldTextDoc = getTextDoc(); if (aTextDoc == oldTextDoc) return;
 
         // Add/remove PropChangeListener
-        if (old != null) old.removePropChangeListener(_richTextPropLsnr);
-        getTextBox().setRichText(aRichText);
-        if (aRichText != null) aRichText.addPropChangeListener(_richTextPropLsnr);
+        if (oldTextDoc != null)
+            oldTextDoc.removePropChangeListener(_textDocPropLsnr);
+        getTextBox().setTextDoc(aTextDoc);
+        if (aTextDoc != null)
+            aTextDoc.addPropChangeListener(_textDocPropLsnr);
 
         // Reset selection
-        if (getSelStart() != 0 || !isSelEmpty()) setSel(0);
+        if (getSelStart() != 0 || !isSelEmpty())
+            setSel(0);
         repaint();
     }
 
@@ -182,12 +186,13 @@ public class TextArea extends View {
     public void setSource(Object aSource)
     {
         // Set source and notify textDidChange
-        getTextBox().setSource(aSource);
+        TextBox textBox = getTextBox();
+        textBox.setSource(aSource);
         textDidChange();
 
         // Reset selection (to line end if single-line, otherwise text start)
-        int sindex = getTextBox().getLineCount() == 1 && length() < 40 ? length() : 0;
-        setSel(sindex);
+        int selIndex = textBox.getLineCount() == 1 && length() < 40 ? length() : 0;
+        setSel(selIndex);
     }
 
     /**
@@ -284,17 +289,14 @@ public class TextArea extends View {
     /**
      * Returns whether text supports multiple styles.
      */
-    public boolean isRich()
-    {
-        return !isPlainText();
-    }
+    public boolean isRichText()  { return !isPlainText(); }
 
     /**
      * Returns whether text is plain text (has only one font, color. etc.).
      */
     public boolean isPlainText()
     {
-        return getRichText().isPlainText();
+        return getTextDoc().isPlainText();
     }
 
     /**
@@ -302,7 +304,7 @@ public class TextArea extends View {
      */
     public void setPlainText(boolean aValue)
     {
-        getRichText().setPlainText(aValue);
+        getTextDoc().setPlainText(aValue);
     }
 
     /**
@@ -310,7 +312,7 @@ public class TextArea extends View {
      */
     public TextStyle getDefaultStyle()
     {
-        return getRichText().getDefaultStyle();
+        return getTextDoc().getDefaultStyle();
     }
 
     /**
@@ -318,7 +320,7 @@ public class TextArea extends View {
      */
     public void setDefaultStyle(TextStyle aStyle)
     {
-        getRichText().setDefaultStyle(aStyle);
+        getTextDoc().setDefaultStyle(aStyle);
     }
 
     /**
@@ -326,7 +328,7 @@ public class TextArea extends View {
      */
     public TextLineStyle getDefaultLineStyle()
     {
-        return getRichText().getDefaultLineStyle();
+        return getTextDoc().getDefaultLineStyle();
     }
 
     /**
@@ -334,7 +336,7 @@ public class TextArea extends View {
      */
     public void setDefaultLineStyle(TextLineStyle aLineStyle)
     {
-        getRichText().setDefaultLineStyle(aLineStyle);
+        getTextDoc().setDefaultLineStyle(aLineStyle);
     }
 
     /**
@@ -428,7 +430,7 @@ public class TextArea extends View {
      */
     public TextSel getSel()
     {
-        return _sel != null ? _sel : (_sel = new TextSel(_tbox, _selAnchor, _selIndex));
+        return _sel != null ? _sel : (_sel = new TextSel(_textBox, _selAnchor, _selIndex));
     }
 
     /**
@@ -520,7 +522,7 @@ public class TextArea extends View {
     public Font getFont()
     {
         // If RichText, return SelStyle.Font
-        if (isRich()) {
+        if (isRichText()) {
             TextStyle selStyle = getSelStyle();
             return selStyle.getFont();
         }
@@ -535,7 +537,7 @@ public class TextArea extends View {
     public void setFont(Font aFont)
     {
         // If RichText, just update SelStyle.Font and return
-        if (isRich()) {
+        if (isRichText()) {
             if (aFont != null)
                 setSelStyleValue(TextStyle.FONT_KEY, aFont);
             return;
@@ -559,7 +561,7 @@ public class TextArea extends View {
         super.parentFontChanged();
 
         // Update SelStyle.Font
-        if (!isRich()) {
+        if (!isRichText()) {
             Font font = getFont();
             setSelStyleValue(TextStyle.FONT_KEY, font);
         }
@@ -711,7 +713,7 @@ public class TextArea extends View {
      */
     public TextStyle getStyleAt(int anIndex)
     {
-        return getRichText().getStyleForCharIndex(anIndex);
+        return getTextDoc().getStyleForCharIndex(anIndex);
     }
 
     /**
@@ -728,12 +730,12 @@ public class TextArea extends View {
     public void setSelStyleValue(String aKey, Object aValue)
     {
         // If selection is zero length, just modify input style
-        if (isSelEmpty() && isRich())
+        if (isSelEmpty() && isRichText())
             _selStyle = getSelStyle().copyFor(aKey, aValue);
 
             // If selection is multiple chars, apply attribute to text and reset SelStyle
         else {
-            getRichText().setStyleValue(aKey, aValue, getSelStart(), getSelEnd());
+            getTextDoc().setStyleValue(aKey, aValue, getSelStart(), getSelEnd());
             _selStyle = null;
             repaint();
         }
@@ -744,7 +746,7 @@ public class TextArea extends View {
      */
     public TextLineStyle getSelLineStyle()
     {
-        return getRichText().getLineStyleForCharIndex(getSelStart());
+        return getTextDoc().getLineStyleForCharIndex(getSelStart());
     }
 
     /**
@@ -752,7 +754,7 @@ public class TextArea extends View {
      */
     public void setSelLineStyleValue(String aKey, Object aValue)
     {
-        getRichText().setLineStyleValue(aKey, aValue, getSelStart(), getSelEnd());
+        getTextDoc().setLineStyleValue(aKey, aValue, getSelStart(), getSelEnd());
     }
 
     /**
@@ -943,10 +945,13 @@ public class TextArea extends View {
             delete();
             return;
         }
-        RichText text = getRichText();
-        int end = getSelStart(), start = end - 1;
-        if (end == 0) return;
-        if (text.isAfterLineEnd(end)) start = text.lastIndexOfNewline(end);
+
+        TextDoc text = getTextDoc();
+        int end = getSelStart(); if (end == 0) return;
+        int start = end - 1;
+        if (text.isAfterLineEnd(end))
+            start = text.lastIndexOfNewline(end);
+
         delete(start, end, true);
     }
 
@@ -959,10 +964,13 @@ public class TextArea extends View {
             delete();
             return;
         }
-        RichText text = getRichText();
-        int start = getSelStart(), end = start + 1;
-        if (start >= length()) return;
-        if (text.isLineEnd(end - 1)) end = text.indexAfterNewline(end - 1);
+
+        TextDoc text = getTextDoc();
+        int start = getSelStart(); if (start >= length()) return;
+        int end = start + 1;
+        if (text.isLineEnd(end - 1))
+            end = text.indexAfterNewline(end - 1);
+
         delete(start, end, true);
     }
 
@@ -972,7 +980,7 @@ public class TextArea extends View {
     public void deleteToLineEnd()
     {
         // If there is a current selection, just delete it
-        RichText text = getRichText();
+        TextDoc text = getTextDoc();
         if (!isSelEmpty())
             delete();
 
@@ -996,7 +1004,7 @@ public class TextArea extends View {
         if (undoer != null && undoer.isEnabled())
             undoer.disable();
         else undoer = null;
-        getRichText().clear();
+        getTextDoc().clear();
         if (undoer != null)
             undoer.enable();
     }
@@ -1131,7 +1139,7 @@ public class TextArea extends View {
         else if (anEvent.getClickCount() == 3) _pgraphSel = true;
 
         // Get selected range for down point and drag point
-        TextSel sel = new TextSel(_tbox, _downX, _downY, _downX, _downY, _wordSel, _pgraphSel);
+        TextSel sel = new TextSel(_textBox, _downX, _downY, _downX, _downY, _wordSel, _pgraphSel);
         int anchor = sel.getAnchor();
         int index = sel.getIndex();
 
@@ -1151,7 +1159,7 @@ public class TextArea extends View {
     protected void mouseDragged(ViewEvent anEvent)
     {
         // Get selected range for down point and drag point
-        TextSel sel = new TextSel(_tbox, _downX, _downY, anEvent.getX(), anEvent.getY(), _wordSel, _pgraphSel);
+        TextSel sel = new TextSel(_textBox, _downX, _downY, anEvent.getX(), anEvent.getY(), _wordSel, _pgraphSel);
         int anchor = sel.getAnchor();
         int index = sel.getIndex();
 
@@ -1449,24 +1457,25 @@ public class TextArea extends View {
         // If no selection, just return
         if (isSelEmpty()) return;
 
-        // Get RichText for selected characters and get as XML string and plain string
+        // Get TextDoc for selected characters and get as XML string and plain string
         int selStart = getSelStart();
         int selEnd = getSelEnd();
-        RichText richText = getRichText();
-        RichText richTextForRange = richText.copyForRange(selStart, selEnd);
+        TextDoc textDoc = getTextDoc();
 
-        // Add to clipboard as RichText and String (text/plain)
+        // Add to clipboard as rich text and String (text/plain)
         Clipboard clipboard = Clipboard.getCleared();
 
         // Add rich text
-        if (!isPlainText()) {
+        if (textDoc instanceof RichText) {
+            RichText richText = (RichText) textDoc;
+            TextDoc richTextForRange = richText.copyForRange(selStart, selEnd);
             XMLElement xml = new XMLArchiver().toXML(richTextForRange);
             String xmlStr = xml.getString();
             clipboard.addData(SNAP_RICHTEXT_TYPE, xmlStr);
         }
 
         // Add plain text
-        String textString = richTextForRange.getString();
+        String textString = textDoc.subSequence(selStart, selEnd).toString();
         clipboard.addData(textString);
     }
 
@@ -1485,14 +1494,14 @@ public class TextArea extends View {
         // Clear last undo set so paste doesn't get lumped in to coalescing
         undoerSaveChanges();
 
-        // If Clipboard has RichText, paste it
+        // If Clipboard has TextDoc, paste it
         if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
             byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
-            RichText rtext = new RichText();
+            RichText richText = new RichText();
             XMLArchiver archiver = new XMLArchiver();
-            archiver.setRootObject(rtext);
+            archiver.setRootObject(richText);
             archiver.readFromXMLBytes(bytes);
-            replaceCharsWithRichText(rtext);
+            replaceCharsWithRichText(richText);
         }
 
         // If Clipboard has String, paste it
@@ -1549,7 +1558,7 @@ public class TextArea extends View {
 
         // If PlainText Style_Prop or LineStyle_Prop, just return
         String pname = anEvent.getPropName();
-        if (isPlainText() && (pname == RichText.Style_Prop || pname == RichText.LineStyle_Prop))
+        if (isPlainText() && (pname == TextDoc.Style_Prop || pname == TextDoc.LineStyle_Prop))
             return;
 
         // Get ActiveUndoSet - if no previous changes, set UndoSelection
@@ -1607,9 +1616,9 @@ public class TextArea extends View {
     }
 
     /**
-     * Called when RichText changes (chars added, updated or deleted).
+     * Called when TextDoc changes (chars added, updated or deleted).
      */
-    protected void richTextPropChange(PropChange aPC)
+    protected void textDocDidPropChange(PropChange aPC)
     {
         // Add property change
         undoerAddPropertyChange(aPC);
@@ -1877,7 +1886,7 @@ public class TextArea extends View {
         if (prevAtSignIndex >= 0 && nextAtSignIndex >= 0 && prevAtSignIndex != nextAtSignIndex) {
             int start = Math.min(prevAtSignIndex, nextAtSignIndex);
             int end = Math.max(prevAtSignIndex, nextAtSignIndex);
-            return new TextSel(_tbox, start, end + 1);
+            return new TextSel(_textBox, start, end + 1);
         }
 
         // Return null since range not found
@@ -1930,16 +1939,17 @@ public class TextArea extends View {
         XMLElement e = super.toXML(anArchiver);
 
         // Archive Rich, Editable, WrapLines
-        if (isRich()) e.add("Rich", true);
+        if (isRichText()) e.add("Rich", true);
         if (!isEditable()) e.add("Editable", false);
         if (isWrapLines()) e.add(WrapLines_Prop, true);
 
         // If RichText, archive rich text
-        if (isRich()) {
+        if (isRichText()) {
             e.removeElement("font");
-            XMLElement rtxml = anArchiver.toXML(getRichText());
-            rtxml.setName("RichText");
-            if (rtxml.size() > 0) e.add(rtxml); //for (int i=0, iMax=rtxml.size(); i<iMax; i++) e.add(rtxml.get(i));
+            XMLElement richTextXML = anArchiver.toXML(getTextDoc());
+            richTextXML.setName("RichText");
+            if (richTextXML.size() > 0)
+                e.add(richTextXML); //for (int i=0, iMax=rtxml.size(); i<iMax; i++) e.add(rtxml.get(i));
         }
 
         // Otherwise, archive text string
@@ -1960,9 +1970,11 @@ public class TextArea extends View {
         super.fromXML(anArchiver, anElement);
 
         // Hack for archived rich stuff
-        XMLElement rtxml = anElement.get("RichText");
-        if (rtxml == null && anElement.get("string") != null) rtxml = anElement;
-        if (rtxml != null) setPlainText(false);
+        XMLElement richTextXML = anElement.get("RichText");
+        if (richTextXML == null && anElement.get("string") != null)
+            richTextXML = anElement;
+        if (richTextXML != null)
+            setPlainText(false);
 
         // Unarchive Rich, Editable, WrapLines
         if (anElement.hasAttribute("Rich")) setPlainText(!anElement.getAttributeBoolValue("Rich"));
@@ -1971,9 +1983,10 @@ public class TextArea extends View {
         if (anElement.hasAttribute("WrapText")) setWrapLines(anElement.getAttributeBoolValue("WrapText"));
 
         // If Rich, unarchive rich text
-        if (isRich()) {
+        if (isRichText() && richTextXML != null) {
+            RichText richText = (RichText) getTextDoc();
             getUndoer().disable();
-            if (rtxml != null) getRichText().fromXML(anArchiver, rtxml);
+            richText.fromXML(anArchiver, richTextXML);
             getUndoer().enable();
         }
 

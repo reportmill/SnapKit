@@ -50,14 +50,14 @@ public class DevPaneConsole extends ViewOwner {
             setPlainText(true);
 
             // Change Console Font
-            TextStyle textStyle = getRichText().getDefaultStyle();
+            TextStyle textStyle = getTextDoc().getDefaultStyle();
             TextStyle textStyle2 = textStyle.copyFor(new Font("Arial", 12));
-            getRichText().setDefaultStyle(textStyle2);
+            getTextDoc().setDefaultStyle(textStyle2);
 
             // Change line spacing
-            TextLineStyle lineStyle = getRichText().getDefaultLineStyle();
+            TextLineStyle lineStyle = getTextDoc().getDefaultLineStyle();
             TextLineStyle lineStyle2 = lineStyle.copyFor(TextLineStyle.SPACING_KEY, 5);
-            getRichText().setDefaultLineStyle(lineStyle2);
+            getTextDoc().setDefaultLineStyle(lineStyle2);
 
             // Set Prompt
             setPrompt("In[" + _inputIndex + "]:= ");

@@ -63,9 +63,9 @@ public class TextView extends ParentView {
     public ScrollView getScrollView()  { return _scroll; }
 
     /**
-     * Returns the rich text.
+     * Returns the TextDoc.
      */
-    public RichText getRichText()  { return _textArea.getRichText(); }
+    public TextDoc getTextDoc()  { return _textArea.getTextDoc(); }
 
     /**
      * Returns the text that is being edited.
@@ -129,12 +129,12 @@ public class TextView extends ParentView {
     /**
      * Returns whether text supports multiple styles.
      */
-    public boolean isRich()  { return !isPlainText(); }
+    public boolean isRichText()  { return !isPlainText(); }
 
     /**
      * Sets whether text supports multiple styles.
      */
-    public void setRich(boolean aValue)  { setPlainText(!aValue); }
+    public void setRichText(boolean aValue)  { setPlainText(!aValue); }
 
     /**
      * Returns whether text is plain text (has only one font, color. etc.).
@@ -457,14 +457,14 @@ public class TextView extends ParentView {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive Rich, Editable, WrapLines
-        if (isRich()) e.add("Rich", true);
+        if (isRichText()) e.add("Rich", true);
         if (!isEditable()) e.add("Editable", false);
         if (isWrapLines()) e.add(WrapLines_Prop, true);
 
         // If RichText, archive rich text
-        if (isRich()) {
+        if (isRichText()) {
             e.removeElement("font");
-            XMLElement rtxml = anArchiver.toXML(getRichText()); rtxml.setName("RichText");
+            XMLElement rtxml = anArchiver.toXML(getTextDoc()); rtxml.setName("RichText");
             if (rtxml.size()>0) e.add(rtxml); //for (int i=0, iMax=rtxml.size(); i<iMax; i++) e.add(rtxml.get(i));
         }
 
@@ -487,9 +487,11 @@ public class TextView extends ParentView {
         super.fromXMLView(anArchiver, anElement);
 
         // Hack for archived rich stuff
-        XMLElement rtxml = anElement.get("RichText");
-        if (rtxml==null && anElement.get("string")!=null) rtxml = anElement;
-        if (rtxml!=null) setPlainText(false);
+        XMLElement richTextXML = anElement.get("RichText");
+        if (richTextXML == null && anElement.get("string") != null)
+            richTextXML = anElement;
+        if (richTextXML != null)
+            setPlainText(false);
 
         // Unarchive Rich, Editable, WrapLines
         if (anElement.hasAttribute("Rich"))
@@ -502,10 +504,10 @@ public class TextView extends ParentView {
             setWrapLines(anElement.getAttributeBoolValue("WrapText"));
 
         // If Rich, unarchive rich text
-        if (isRich()) {
+        if (isRichText() && richTextXML != null) {
+            RichText richText = (RichText) getTextDoc();
             getUndoer().disable();
-            if (rtxml != null)
-                getRichText().fromXML(anArchiver, rtxml);
+            richText.fromXML(anArchiver, richTextXML);
             getUndoer().enable();
         }
 

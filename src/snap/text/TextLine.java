@@ -356,7 +356,7 @@ public abstract class TextLine implements CharSequence, Cloneable {
     }
 
     /**
-     * Returns a RichTextLine for given char range.
+     * Returns a copy of this line for given char range.
      */
     public TextLine copyForRange(int aStart, int aEnd)
     {

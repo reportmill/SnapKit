@@ -30,7 +30,7 @@ public class TextBoxLine implements CharSequence {
     // The TextLine that this line renders
     protected TextLine _textLine;
 
-    // The start of this line in RichTextLine
+    // The start of this line in TextLine
     protected int  _textLineStart;
 
     // The bounds of this line in TextBlock
@@ -119,17 +119,17 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the TextLine.
      */
-    public TextLine getRichTextLine()  { return _textLine; }
+    public TextLine getTextLine()  { return _textLine; }
 
     /**
-     * Returns the start of this line in RichTextLine.
+     * Returns the start of this line in TextLine.
      */
-    public int getRichTextLineStart()  { return _textLineStart; }
+    public int getTextLineStart()  { return _textLineStart; }
 
     /**
-     * Returns the RichTextRun of char in line.
+     * Returns the TextRun of char in line.
      */
-    public TextRun getRichTextRun(int anIndex)
+    public TextRun getTextRun(int anIndex)
     {
         return _textLine.getRunForCharIndex(_textLineStart + anIndex);
     }
@@ -588,14 +588,14 @@ public class TextBoxLine implements CharSequence {
     protected TextBoxRun createRun(int aStart)
     {
         // Get RichTextRun and TextStyle at char index
-        TextRun rtrun = getRichTextRun(aStart);
+        TextRun rtrun = getTextRun(aStart);
         TextStyle style = rtrun.getStyle();
         double fontScale = _tbox.getFontScale();
         if (fontScale != 1)
             style = style.copyFor(style.getFont().scaleFont(fontScale));
 
         // Get end of run
-        int end = Math.min(length(), rtrun.getEnd() - getRichTextLineStart());
+        int end = Math.min(length(), rtrun.getEnd() - getTextLineStart());
 
         // If Justify, reset end to start of next token
         if (getLineStyle().isJustify()) {

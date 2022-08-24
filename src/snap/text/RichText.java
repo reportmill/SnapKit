@@ -37,7 +37,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
      * Creates a new block for use in this text.
      */
     @Override
-    protected RichTextLine createLine()
+    protected TextLine createLine()
     {
         return new RichTextLine(this);
     }

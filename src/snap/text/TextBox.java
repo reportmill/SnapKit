@@ -24,8 +24,8 @@ public class TextBox {
     // The URL of the file that provided the text
     private WebURL  _sourceURL;
 
-    // The RichText
-    private RichText  _text;
+    // The TextDoc
+    private TextDoc  _text;
 
     // The bounds of the text block
     private double  _x, _y, _width = Float.MAX_VALUE, _height;
@@ -45,7 +45,7 @@ public class TextBox {
     // Whether text is linked to another text
     private boolean  _linked;
 
-    // The starting character of this box in RichText
+    // The starting character of this box in TextDoc
     private int  _start;
 
     // The font scale for this box
@@ -60,19 +60,19 @@ public class TextBox {
     // Whether text box needs updating
     private boolean  _needsUpdate, _updating;
 
-    // The update start/end char indexes in RichText
+    // The update start/end char indexes in TextDoc
     private int  _updStart, _updEnd, _lastLen;
 
-    // A Listener to catch RichText PropChanges
-    private PropChangeListener  _richTextLsnr = pc -> richTextDidPropChange(pc);
+    // A Listener to catch TextDoc PropChanges
+    private PropChangeListener  _textDocLsnr = pc -> textDocDidPropChange(pc);
 
     /**
      * Constructor.
      */
     public TextBox()
     {
-        RichText richText = new RichText();
-        setRichText(richText);
+        TextDoc textDoc = new RichText();
+        setTextDoc(textDoc);
     }
 
     /**
@@ -119,23 +119,23 @@ public class TextBox {
     }
 
     /**
-     * Returns the RichText.
+     * Returns the TextDoc.
      */
-    public RichText getRichText()  { return _text; }
+    public TextDoc getTextDoc()  { return _text; }
 
     /**
-     * Sets the RichText.
+     * Sets the TextDoc.
      */
-    public void setRichText(RichText aRichText)
+    public void setTextDoc(TextDoc aTextDoc)
     {
         // If already set, just return
-        if (aRichText == _text) return;
+        if (aTextDoc == _text) return;
 
-        // Stop listening to old RichText PropChanges, start listening to new
+        // Stop listening to old TextDoc PropChanges, start listening to new
         if (_text != null)
-            _text.removePropChangeListener(_richTextLsnr);
-        _text = aRichText;
-        _text.addPropChangeListener(_richTextLsnr);
+            _text.removePropChangeListener(_textDocLsnr);
+        _text = aTextDoc;
+        _text.addPropChangeListener(_textDocLsnr);
 
         // Update all
         setNeedsUpdateAll();
@@ -298,12 +298,12 @@ public class TextBox {
     }
 
     /**
-     * Returns the start char in RichText.
+     * Returns the start char in TextDoc.
      */
     public int getStart()  { return _start; }
 
     /**
-     * Sets the start char in RichText.
+     * Sets the start char in TextDoc.
      */
     public void setStart(int anIndex)
     {
@@ -313,7 +313,7 @@ public class TextBox {
     }
 
     /**
-     * Returns the end char in RichText.
+     * Returns the end char in TextDoc.
      */
     public int getEnd()
     {
@@ -352,8 +352,8 @@ public class TextBox {
      */
     public int length()
     {
-        RichText richText = getRichText();
-        return richText.length();
+        TextDoc textDoc = getTextDoc();
+        return textDoc.length();
     }
 
     /**
@@ -361,8 +361,8 @@ public class TextBox {
      */
     public char charAt(int anIndex)
     {
-        RichText richText = getRichText();
-        return richText.charAt(anIndex);
+        TextDoc textDoc = getTextDoc();
+        return textDoc.charAt(anIndex);
     }
 
     /**
@@ -370,8 +370,8 @@ public class TextBox {
      */
     public String getString()
     {
-        RichText richText = getRichText();
-        return richText.getString();
+        TextDoc textDoc = getTextDoc();
+        return textDoc.getString();
     }
 
     /**
@@ -382,8 +382,8 @@ public class TextBox {
         String str = aString != null ? aString : "";
         if (str.length() == length() && str.equals(getString())) return;
 
-        RichText richText = getRichText();
-        richText.setString(str);
+        TextDoc textDoc = getTextDoc();
+        textDoc.setString(str);
         setNeedsUpdateAll();
     }
 
@@ -392,8 +392,8 @@ public class TextBox {
      */
     public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
-        RichText richText = getRichText();
-        richText.addChars(theChars, theStyle, anIndex);
+        TextDoc textDoc = getTextDoc();
+        textDoc.addChars(theChars, theStyle, anIndex);
     }
 
     /**
@@ -401,8 +401,8 @@ public class TextBox {
      */
     public void removeChars(int aStart, int anEnd)
     {
-        RichText richText = getRichText();
-        richText.removeChars(aStart, anEnd);
+        TextDoc textDoc = getTextDoc();
+        textDoc.removeChars(aStart, anEnd);
     }
 
     /**
@@ -410,8 +410,8 @@ public class TextBox {
      */
     public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
     {
-        RichText richText = getRichText();
-        richText.replaceChars(theChars, theStyle, aStart, anEnd);
+        TextDoc textDoc = getTextDoc();
+        textDoc.replaceChars(theChars, theStyle, aStart, anEnd);
     }
 
     /**
@@ -419,8 +419,8 @@ public class TextBox {
      */
     public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
-        RichText richText = getRichText();
-        richText.setStyleValue(aKey, aValue, aStart, anEnd);
+        TextDoc textDoc = getTextDoc();
+        textDoc.setStyleValue(aKey, aValue, aStart, anEnd);
     }
 
     /**
@@ -505,9 +505,9 @@ public class TextBox {
     }
 
     /**
-     * Updates lines for RichText changes.
+     * Updates lines for TextDoc changes.
      */
-    protected void richTextDidPropChange(PropChange aPC)
+    protected void textDocDidPropChange(PropChange aPC)
     {
         // Handle CharsChange: Update lines for old/new range
         if (aPC instanceof TextDocUtils.CharsChange) {
@@ -530,14 +530,14 @@ public class TextBox {
         // Handle LineStyleChange
         else if (aPC instanceof TextDocUtils.LineStyleChange) {
             TextDocUtils.LineStyleChange lineStyleChange = (TextDocUtils.LineStyleChange) aPC;
-            TextDoc textDoc = getRichText();
+            TextDoc textDoc = getTextDoc();
             TextLine textLine = textDoc.getLine(lineStyleChange.getIndex());
             textChangedChars(textLine.getStart(), textLine.getEnd());
         }
     }
 
     /**
-     * Called when chars added to RichText to track range in box and text to be synchronized.
+     * Called when chars added to TextDoc to track range in box and text to be synchronized.
      */
     protected void textAddedChars(int aStart, int aEnd)
     {
@@ -545,7 +545,7 @@ public class TextBox {
     }
 
     /**
-     * Called when chars removed from RichText to track range in box and text to be synchronized.
+     * Called when chars removed from TextDoc to track range in box and text to be synchronized.
      */
     protected void textRemovedChars(int aStart, int aEnd)
     {
@@ -553,7 +553,7 @@ public class TextBox {
     }
 
     /**
-     * Called when chars changed in RichText to track range in box and text to be synchronized.
+     * Called when chars changed in TextDoc to track range in box and text to be synchronized.
      */
     protected void textChangedChars(int aStart, int aEnd)
     {
@@ -655,19 +655,19 @@ public class TextBox {
      */
     protected void removeLines(int aStart, int aEnd)
     {
-        // Get LineCount, start-line-index and end-line-index
-        int lcount = getLineCount();
-        if (lcount == 0) return;
-        int sline = getLineAt(aStart).getIndex();
-        int eline = getLineAt(aEnd).getIndex();
+        // Get LineCount, startLineIndex and endLineIndex
+        int lineCount = getLineCount(); if (lineCount == 0) return;
+        int startLineIndex = getLineAt(aStart).getIndex();
+        int endLineIndex = getLineAt(aEnd).getIndex();
 
-        // Extend end-line-index to end of RichTextLine
-        TextLine endRTL = getLine(eline).getRichTextLine();
-        while (eline + 1 < lcount && getLine(eline + 1).getRichTextLine() == endRTL)
-            eline++;
+        // Extend endLineIndex to end of TextLine
+        TextBoxLine endBoxLine = getLine(endLineIndex);
+        TextLine endTextLine = endBoxLine.getTextLine();
+        while (endLineIndex + 1 < lineCount && getLine(endLineIndex + 1).getTextLine() == endTextLine)
+            endLineIndex++;
 
         // Remove lines in range
-        for (int i = eline; i >= sline; i--)
+        for (int i = endLineIndex; i >= startLineIndex; i--)
             _lines.remove(i);
     }
 
@@ -681,34 +681,34 @@ public class TextBox {
         int start = Math.max(aStart, getStart());
         if (start > length()) return;
 
-        // Get RichText start-line-index, end-line-index
-        RichText richText = getRichText();
-        int startRTL = richText.getLineForCharIndex(start).getIndex();
-        int endRTL = richText.getLineForCharIndex(aEnd).getIndex();
+        // Get TextDoc startLineIndex, endLineIndex
+        TextDoc textDoc = getTextDoc();
+        int startLineIndex = textDoc.getLineForCharIndex(start).getIndex();
+        int endLineIndex = textDoc.getLineForCharIndex(aEnd).getIndex();
 
-        // Iterate over RichText lines, create TextBox lines and add
-        for (int i = startRTL, lindex = aLineIndex; i <= endRTL; i++) {
-            TextLine textLine = richText.getLine(i);
+        // Iterate over TextDoc lines, create TextBox lines and add
+        for (int i = startLineIndex, lindex = aLineIndex; i <= endLineIndex; i++) {
+            TextLine textLine = textDoc.getLine(i);
 
-            // Get start-char-index for line
-            int lstart = Math.max(start - textLine.getStart(), 0);
-            if (lstart == textLine.length()) continue;
+            // Get start char index for line
+            int lineStart = Math.max(start - textLine.getStart(), 0);
+            if (lineStart == textLine.length()) continue;
 
-            // Add TextBoxLine(s) for RichTextLine
-            while (lstart < textLine.length()) {
-                TextBoxLine line = createLine(textLine, lstart, lindex);
+            // Add TextBoxLine(s) for TextLine
+            while (lineStart < textLine.length()) {
+                TextBoxLine line = createLine(textLine, lineStart, lindex);
                 if ((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()) {
                     i = Short.MAX_VALUE;
                     break;
                 }
                 _lines.add(lindex++, line);
-                lstart += line.length();
+                lineStart += line.length();
             }
         }
 
         // If we added last line and it is empty or ends with newline, add blank line
-        if (endRTL == richText.getLineCount() - 1) {
-            TextLine textLine = richText.getLine(endRTL);
+        if (endLineIndex == textDoc.getLineCount() - 1) {
+            TextLine textLine = textDoc.getLine(endLineIndex);
             if (textLine.length() == 0 || textLine.isLastCharNewline()) {
                 TextBoxLine line = createLine(textLine, textLine.length(), getLineCount());
                 if (!((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()))
@@ -718,7 +718,7 @@ public class TextBox {
     }
 
     /**
-     * Create and return TextBoxLines for given RichTextLine, start char index and line index.
+     * Create and return TextBoxLines for given TextLine, start char index and line index.
      */
     protected TextBoxLine createLine(TextLine aTextLine, int aStart, int aLineIndex)
     {
@@ -890,7 +890,7 @@ public class TextBox {
      */
     public TextRun getRunAt(int anIndex)
     {
-        return getRichText().getRunForCharIndex(anIndex);
+        return getTextDoc().getRunForCharIndex(anIndex);
     }
 
     /**
@@ -898,7 +898,7 @@ public class TextBox {
      */
     public TextStyle getStyleAt(int anIndex)
     {
-        return getRichText().getStyleForCharIndex(anIndex);
+        return getTextDoc().getStyleForCharIndex(anIndex);
     }
 
     /**
@@ -906,7 +906,7 @@ public class TextBox {
      */
     public boolean isUnderlined()
     {
-        return getRichText().isUnderlined();
+        return getTextDoc().isUnderlined();
     }
 
     /**
@@ -1089,10 +1089,10 @@ public class TextBox {
      */
     public double getPrefWidth(double aH)
     {
-        RichText richText = getRichText();
-        double rtextW = richText.getPrefWidth();
+        TextDoc textDoc = getTextDoc();
+        double textPrefW = textDoc.getPrefWidth();
         double fontScale = getFontScale();
-        double prefW = Math.ceil(rtextW * fontScale);
+        double prefW = Math.ceil(textPrefW * fontScale);
         return prefW;
     }
 
@@ -1182,7 +1182,7 @@ public class TextBox {
         int lineCount = getLineCount();
         double lineMaxY = lineCount > 0 ? getLine(lineCount - 1).getMaxY() : 0;
         double tboxMaxY = getMaxY();
-        if (lineMaxY >= tboxMaxY || getEnd() < getRichText().length())
+        if (lineMaxY >= tboxMaxY || getEnd() < getTextDoc().length())
             return true;
 
         // If not WrapLines, check X

@@ -401,7 +401,7 @@ public abstract class TextDoc extends PropObject implements CharSequence, Clonea
     /**
      * Creates a new block for use in this text.
      */
-    protected abstract RichTextLine createLine();
+    protected abstract TextLine createLine();
 
     /**
      * Returns the longest line.
