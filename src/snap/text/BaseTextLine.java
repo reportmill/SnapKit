@@ -171,6 +171,16 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     }
 
     /**
+     * Sets the style for the line (propagates to runs).
+     */
+    protected void setStyle(TextStyle aStyle)
+    {
+        for (BaseTextRun run : getRuns())
+            run.setStyle(aStyle);
+        _width = -1;
+    }
+
+    /**
      * Returns the width of line.
      */
     public double getWidth()
@@ -178,15 +188,14 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
         // If already set, just return
         if (_width >= 0) return _width;
 
-        // Get, set, return
-        double width = getWidthImpl();
+        // Get from runs
+        double width = 0;
+        for (BaseTextRun run : _runs)
+            width += run.getWidth();
+
+        // Set, return
         return _width = width;
     }
-
-    /**
-     * Returns the width of line.
-     */
-    protected abstract double getWidthImpl();
 
     /**
      * Returns the width of line from given index.

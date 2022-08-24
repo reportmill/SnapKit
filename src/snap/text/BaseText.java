@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
+import snap.geom.HPos;
 import snap.gfx.Font;
 import snap.props.PropObject;
 import snap.util.StringUtils;
@@ -14,7 +15,7 @@ import java.util.List;
 public abstract class BaseText extends PropObject implements CharSequence, Cloneable {
 
     // The TextDocLine in this text
-    protected List<BaseTextLine> _lines = new ArrayList<>();
+    protected List<BaseTextLine>  _lines = new ArrayList<>();
 
     // The length of this text
     protected int  _length;
@@ -121,6 +122,8 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     public void setDefaultStyle(TextStyle aStyle)
     {
         _defStyle = aStyle;
+        for (BaseTextLine line : getLines())
+            line.setStyle(aStyle);
     }
 
     /**
@@ -134,6 +137,8 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     public void setDefaultLineStyle(TextLineStyle aLineStyle)
     {
         _defLineStyle = aLineStyle;
+        for (BaseTextLine line : getLines())
+            line.setLineStyle(aLineStyle);
     }
 
     /**
@@ -285,6 +290,76 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     }
 
     /**
+     * Sets a given style to a given range.
+     */
+    public void setStyle(TextStyle aStyle, int aStart, int anEnd)
+    {
+        System.out.println("TextDoc.setStyle: Not implemented");
+    }
+
+    /**
+     * Sets a given style value to given value for a given range.
+     */
+    public void setStyleValue(Object aValue)
+    {
+        setStyleValue(aValue, 0, length());
+    }
+
+    /**
+     * Sets a given style value to given value for a given range.
+     */
+    public void setStyleValue(Object aValue, int aStart, int aEnd)
+    {
+        String key = TextStyle.getStyleKey(aValue);
+        setStyleValue(key, aValue, aStart, aEnd);
+    }
+
+    /**
+     * Sets a given attribute to a given value for a given range.
+     */
+    public void setStyleValue(String aKey, Object aValue)
+    {
+        setStyleValue(aKey, aValue, 0, length());
+    }
+
+    /**
+     * Sets a given attribute to a given value for a given range.
+     */
+    public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
+    {
+        TextStyle style = getStyleForCharIndex(aStart).copyFor(aKey, aValue);
+        setStyle(style, aStart, anEnd);
+    }
+
+    /**
+     * Sets a given style to a given range.
+     */
+    public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
+    {
+        // Propagate to Lines
+        TextLineStyle oldStyle = getLine(0).getLineStyle();
+        for (BaseTextLine line : getLines())
+            line.setLineStyle(aStyle);
+
+        // Fire prop change
+        if (isPropChangeEnabled())
+            firePropChange(new BaseTextUtils.LineStyleChange(this, oldStyle, aStyle, 0));
+
+        _width = -1;
+    }
+
+    /**
+     * Sets a given style to a given range.
+     */
+    public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
+    {
+        TextLineStyle oldStyle = getLine(0).getLineStyle();
+        TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
+        setLineStyle(newStyle, 0, length());
+        _width = -1;
+    }
+
+    /**
      * Returns the number of block in this doc.
      */
     public int getLineCount()  { return _lines.size(); }
@@ -347,30 +422,13 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     }
 
     /**
-     * Sets a given style to a given range.
+     * Clears the text.
      */
-    public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
+    public void clear()
     {
-        // Propagate to Lines
-        TextLineStyle oldStyle = getLine(0).getLineStyle();
-        for (BaseTextLine line : getLines())
-            line.setLineStyle(aStyle);
-
-        // Fire prop change
-        if (isPropChangeEnabled())
-            firePropChange(new BaseTextUtils.LineStyleChange(this, oldStyle, aStyle, 0));
-
-        _width = -1;
-    }
-    /**
-     * Sets a given style to a given range.
-     */
-    public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
-    {
-        TextLineStyle oldStyle = getLine(0).getLineStyle();
-        TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
-        setLineStyle(newStyle, 0, length());
-        _width = -1;
+        removeChars(0, length());
+        setStyle(getDefaultStyle(), 0, 0);
+        setLineStyle(getDefaultLineStyle(), 0, 0);
     }
 
     /**
@@ -479,6 +537,57 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     {
         BaseTextLine textLine = getLineForCharIndex(charIndex);
         return textLine.getLineStyle();
+    }
+
+    /**
+     * Returns whether text contains an underlined run.
+     */
+    public boolean isUnderlined()
+    {
+        TextStyle textStyle = getStyleForCharIndex(0);
+        return textStyle.isUnderlined();
+    }
+
+    /**
+     * Sets the RichText to be underlined.
+     */
+    public void setUnderlined(boolean aFlag)
+    {
+        setStyleValue(TextStyle.UNDERLINE_KEY, aFlag ? 1 : null, 0, length());
+    }
+
+    /**
+     * Returns the horizontal alignment of the first paragraph of the RichText.
+     */
+    public HPos getAlignX()
+    {
+        return getLineStyleForCharIndex(0).getAlign();
+    }
+
+    /**
+     * Sets the horizontal alignment of the xstring.
+     */
+    public void setAlignX(HPos anAlignX)
+    {
+        setLineStyleValue(TextLineStyle.ALIGN_KEY, anAlignX, 0, length());
+    }
+
+    /**
+     * Scales all the fonts in text by given factor.
+     */
+    public void scaleFonts(double aScale)
+    {
+        // If scale 1, just return
+        if (aScale == 1) return;
+
+        // Iterate over lines
+        for (BaseTextLine line : getLines()) {
+            for (BaseTextRun run : line.getRuns()) {
+                TextStyle runStyle = run.getStyle();
+                TextStyle runStyleScaled = runStyle.copyFor(run.getFont().scaleFont(aScale));
+                run.setStyle(runStyleScaled);
+            }
+        }
     }
 
     /**

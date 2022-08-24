@@ -112,16 +112,6 @@ public class RichTextLine extends BaseTextLine {
     }
 
     /**
-     * Sets the style for the line (propagates to runs).
-     */
-    protected void setStyle(TextStyle aStyle)
-    {
-        for (BaseTextRun run : getRuns())
-            run.setStyle(aStyle);
-        _width = -1;
-    }
-
-    /**
      * Splits given run at given char index and returns the run containing the remaining chars (and identical attributes).
      */
     protected BaseTextRun splitRunForCharIndex(BaseTextRun aRun, int anIndex)
@@ -134,17 +124,6 @@ public class RichTextLine extends BaseTextLine {
         // Add remainder and return
         addRun(remainder, aRun.getIndex() + 1);
         return remainder;
-    }
-
-    /**
-     * Returns the width of line.
-     */
-    protected double getWidthImpl()
-    {
-        double width = 0;
-        for (BaseTextRun run : _runs)
-            width += run.getWidth();
-        return width;
     }
 
     /**

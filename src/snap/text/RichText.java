@@ -5,7 +5,6 @@ package snap.text;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.geom.HPos;
 import snap.props.PropChange;
 import snap.util.*;
 
@@ -35,47 +34,13 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
     }
 
     /**
-     * Sets the default style.
-     */
-    public void setDefaultStyle(TextStyle aStyle)
-    {
-        super.setDefaultStyle(aStyle);
-        for (BaseTextLine line : getLines())
-            ((RichTextLine) line).setStyle(aStyle);
-    }
-
-    /**
-     * Sets the default line style.
-     */
-    public void setDefaultLineStyle(TextLineStyle aLineStyle)
-    {
-        super.setDefaultLineStyle(aLineStyle);
-        for (BaseTextLine line : getLines())
-            line.setLineStyle(aLineStyle);
-    }
-
-    /**
      * Sets a given style to a given range.
      */
+    @Override
     public void setStyle(TextStyle aStyle, int aStart, int anEnd)
     {
-        // If single style, set style on all line runs
-        if (isPlainText()) {
-
-            // Set style
-            TextStyle oldStyle = getStyleForCharIndex(aStart);
-            for (BaseTextLine line : _lines)
-                ((RichTextLine) line).setStyle(aStyle);
-
-            // Fire prop change
-            if (isPropChangeEnabled()) {
-                PropChange pc = new BaseTextUtils.StyleChange(this, oldStyle, aStyle, 0, length());
-                firePropChange(pc);
-            }
-        }
-
         // Iterate over runs in range and set style
-        else while (aStart < anEnd) {
+        while (aStart < anEnd) {
 
             // Set style
             RichTextLine line = (RichTextLine) getLineForCharIndex(aStart);
@@ -101,50 +66,28 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
     }
 
     /**
-     * Sets a given style value to given value for a given range.
-     */
-    public void setStyleValue(Object aValue)
-    {
-        setStyleValue(aValue, 0, length());
-    }
-
-    /**
-     * Sets a given style value to given value for a given range.
-     */
-    public void setStyleValue(Object aValue, int aStart, int aEnd)
-    {
-        String key = TextStyle.getStyleKey(aValue);
-        setStyleValue(key, aValue, aStart, aEnd);
-    }
-
-    /**
      * Sets a given attribute to a given value for a given range.
      */
-    public void setStyleValue(String aKey, Object aValue)
-    {
-        setStyleValue(aKey, aValue, 0, length());
-    }
-
-    /**
-     * Sets a given attribute to a given value for a given range.
-     */
+    @Override
     public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
-        // If not multifont, set attribute and invalidate everything
-        if (isPlainText()) {
-            TextStyle style = getStyleForCharIndex(aStart).copyFor(aKey, aValue);
-            setStyle(style, aStart, anEnd);
-        }
-
         // Iterate over lines in range and set attribute
-        else while (aStart < anEnd) {
+        while (aStart < anEnd) {
+
+            // Get line for start
             BaseTextLine line = getLineForCharIndex(aStart);
-            int lstart = line.getStart();
-            BaseTextRun run = getRunForCharIndex(aStart);
-            int rend = run.getEnd();
+            int lineStart = line.getStart();
+
+            // Get run for start
+            BaseTextRun run = line.getRunForCharIndex(aStart - lineStart);
+            int runEnd = run.getEnd();
+
+            // Get run style and modify for given style key/value
             TextStyle style = run.getStyle().copyFor(aKey, aValue);
-            setStyle(style, aStart, Math.min(rend + lstart, anEnd));
-            aStart = rend + lstart;
+            setStyle(style, aStart, Math.min(runEnd + lineStart, anEnd));
+
+            // Reset start to run end
+            aStart = runEnd + lineStart;
         }
     }
 
@@ -154,16 +97,10 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
     @Override
     public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
     {
-        // Handle PlainText
-        if (isPlainText()) {
-            super.setLineStyle(aStyle, aStart, anEnd);
-            return;
-        }
-
         // Handle MultiStyle
-        int sline = getLineForCharIndex(aStart).getIndex();
-        int eline = getLineForCharIndex(anEnd).getIndex();
-        for (int i = sline; i <= eline; i++) {
+        int startLineIndex = getLineForCharIndex(aStart).getIndex();
+        int endLineIndex = getLineForCharIndex(anEnd).getIndex();
+        for (int i = startLineIndex; i <= endLineIndex; i++) {
             BaseTextLine line = getLine(i);
             TextLineStyle oldStyle = line.getLineStyle();
             line.setLineStyle(aStyle);
@@ -177,14 +114,9 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
     /**
      * Sets a given style to a given range.
      */
+    @Override
     public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
-        // Handle PlainText
-        if (isPlainText()) {
-            super.setLineStyleValue(aKey, aValue, aStart, anEnd);
-            return;
-        }
-
         // Handle MultiStyle
         int startLineIndex = getLineForCharIndex(aStart).getIndex();
         int endLineIndex = getLineForCharIndex(anEnd).getIndex();
@@ -198,16 +130,6 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
         }
 
         _width = -1;
-    }
-
-    /**
-     * Clears the text.
-     */
-    public void clear()
-    {
-        removeChars(0, length());
-        setStyle(getDefaultStyle(), 0, 0);
-        setLineStyle(getDefaultLineStyle(), 0, 0);
     }
 
     /**
@@ -228,53 +150,13 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
     /**
      * Returns whether text contains an underlined run.
      */
+    @Override
     public boolean isUnderlined()
     {
-        if (isPlainText())
-            return getStyleForCharIndex(0).isUnderlined();
         for (BaseTextLine line : _lines)
             if (line.isUnderlined())
                 return true;
         return false;
-    }
-
-    /**
-     * Sets the RichText to be underlined.
-     */
-    public void setUnderlined(boolean aFlag)
-    {
-        setStyleValue(TextStyle.UNDERLINE_KEY, aFlag ? 1 : null, 0, length());
-    }
-
-    /**
-     * Returns the horizontal alignment of the first paragraph of the RichText.
-     */
-    public HPos getAlignX()
-    {
-        return getLineStyleForCharIndex(0).getAlign();
-    }
-
-    /**
-     * Sets the horizontal alignment of the xstring.
-     */
-    public void setAlignX(HPos anAlignX)
-    {
-        setLineStyleValue(TextLineStyle.ALIGN_KEY, anAlignX, 0, length());
-    }
-
-    /**
-     * Scales all the fonts in text by given factor.
-     */
-    public void scaleFonts(double aScale)
-    {
-        if (aScale == 1) return;
-        for (BaseTextLine line : getLines()) {
-            int lstart = line.getStart();
-            for (BaseTextRun run : line.getRuns()) {
-                int rstrt = run.getStart(), rend = run.getEnd();
-                setStyle(run.getStyle().copyFor(run.getFont().scaleFont(aScale)), lstart + rstrt, lstart + rend);
-            }
-        }
     }
 
     /**
