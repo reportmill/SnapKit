@@ -137,17 +137,6 @@ public class RichTextLine extends BaseTextLine {
     }
 
     /**
-     * Returns a RichTextLine for given char range.
-     */
-    public RichTextLine subline(int aStart, int aEnd)
-    {
-        RichTextLine clone = clone();
-        if (aEnd < length()) clone.removeChars(aEnd, length());
-        if (aStart > 0) clone.removeChars(0, aStart);
-        return clone;
-    }
-
-    /**
      * Returns the width of line.
      */
     protected double getWidthImpl()

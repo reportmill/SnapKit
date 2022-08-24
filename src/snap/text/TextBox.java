@@ -510,25 +510,28 @@ public class TextBox {
     protected void richTextDidPropChange(PropChange aPC)
     {
         // Handle CharsChange: Update lines for old/new range
-        if (aPC instanceof RichText.CharsChange) {
-            RichText.CharsChange cc = (RichText.CharsChange) aPC;
-            CharSequence nval = cc.getNewValue();
-            CharSequence oval = cc.getOldValue();
-            int index = cc.getIndex();
-            if (oval != null)
-                textRemovedChars(index, index + oval.length());
-            if (nval != null)
-                textAddedChars(index, index + nval.length());
+        if (aPC instanceof BaseTextUtils.CharsChange) {
+            BaseTextUtils.CharsChange charsChange = (BaseTextUtils.CharsChange) aPC;
+            CharSequence newVal = charsChange.getNewValue();
+            CharSequence oldVal = charsChange.getOldValue();
+            int index = charsChange.getIndex();
+            if (oldVal != null)
+                textRemovedChars(index, index + oldVal.length());
+            if (newVal != null)
+                textAddedChars(index, index + newVal.length());
         }
 
-        else if (aPC instanceof RichText.StyleChange) {
-            RichText.StyleChange sc = (RichText.StyleChange) aPC;
-            textChangedChars(sc.getStart(), sc.getEnd());
+        // Handle StyleChange
+        else if (aPC instanceof BaseTextUtils.StyleChange) {
+            BaseTextUtils.StyleChange styleChange = (BaseTextUtils.StyleChange) aPC;
+            textChangedChars(styleChange.getStart(), styleChange.getEnd());
         }
 
-        else if (aPC instanceof RichText.LineStyleChange) {
-            RichText.LineStyleChange lsc = (RichText.LineStyleChange) aPC;
-            BaseTextLine textLine = getRichText().getLine(lsc.getIndex());
+        // Handle LineStyleChange
+        else if (aPC instanceof BaseTextUtils.LineStyleChange) {
+            BaseTextUtils.LineStyleChange lineStyleChange = (BaseTextUtils.LineStyleChange) aPC;
+            BaseText baseText = getRichText();
+            BaseTextLine textLine = baseText.getLine(lineStyleChange.getIndex());
             textChangedChars(textLine.getStart(), textLine.getEnd());
         }
     }
@@ -736,7 +739,8 @@ public class TextBox {
         // Get start x/y
         TextBoxLine lastLn = aLineIndex > 0 ? getLine(aLineIndex - 1) : null;
         double y = lastLn != null ? lastLn.getY() + lastLn.getLineAdvance() : getY();
-        double indent = aStart == 0 ? aTextLine.getLineStyle().getFirstIndent() : aTextLine.getLineStyle().getLeftIndent();
+        TextLineStyle lineStyle = aTextLine.getLineStyle();
+        double indent = aStart == 0 ? lineStyle.getFirstIndent() : lineStyle.getLeftIndent();
         double x = getMinHitX(y, lineHt, indent);
         while (x > getMaxX() && y <= getMaxY()) {
             y++;

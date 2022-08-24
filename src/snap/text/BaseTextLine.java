@@ -347,6 +347,24 @@ public abstract class BaseTextLine implements CharSequence, Cloneable {
     }
 
     /**
+     * Returns a RichTextLine for given char range.
+     */
+    public BaseTextLine copyForRange(int aStart, int aEnd)
+    {
+        // Do normal clone
+        BaseTextLine clone = clone();
+
+        // Remove leading/trailing chars
+        if (aEnd < length())
+            clone.removeChars(aEnd, length());
+        if (aStart > 0)
+            clone.removeChars(0, aStart);
+
+        // Return
+        return clone;
+    }
+
+    /**
      * Standard clone implementation.
      */
     public BaseTextLine clone()

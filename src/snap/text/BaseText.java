@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public abstract class BaseText extends PropObject implements CharSequence {
+public abstract class BaseText extends PropObject implements CharSequence, Cloneable {
 
     // The TextDocLine in this text
     protected List<BaseTextLine> _lines = new ArrayList<>();
@@ -45,6 +45,19 @@ public abstract class BaseText extends PropObject implements CharSequence {
     public BaseText()
     {
         super();
+    }
+
+    /**
+     * Whether this text is really just plain text (has single font, color, etc.). Defaults to false.
+     */
+    public boolean isPlainText()  { return _plainText; }
+
+    /**
+     * Sets whether this text really just plain text (has single font, color, etc.).
+     */
+    public void setPlainText(boolean aValue)
+    {
+        _plainText = aValue;
     }
 
     /**
@@ -114,6 +127,139 @@ public abstract class BaseText extends PropObject implements CharSequence {
     }
 
     /**
+     * Adds characters with attributes to this text at given index.
+     */
+    public void addChars(CharSequence theChars)
+    {
+        addChars(theChars, null, length());
+    }
+
+    /**
+     * Adds characters with attributes to this text at given index.
+     */
+    public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
+    {
+        // If no chars, just return
+        if (theChars == null) return;
+
+        // If monofont, clear attributes
+        if (isPlainText()) theStyle = null;
+
+        // Get line for index - if adding at text end and last line and ends with newline, create/add new line
+        BaseTextLine line = getLineForCharIndex(anIndex);
+        if (anIndex == line.getEnd() && line.isLastCharNewline()) {
+            BaseTextLine remainder = line.splitLineAtIndex(line.length());
+            addLine(remainder, line.getIndex() + 1);
+            line = remainder;
+        }
+
+        // Add chars line by line
+        int start = 0;
+        int len = theChars.length();
+        int lindex = anIndex - line.getStart();
+        while (start < len) {
+
+            // Get index of newline in insertion chars (if there) and end of line block
+            int newline = StringUtils.indexAfterNewline(theChars, start);
+            int end = newline > 0 ? newline : len;
+
+            // Get chars and add
+            CharSequence chars = start == 0 && end == len ? theChars : theChars.subSequence(start, end);
+            line.addChars(chars, theStyle, lindex);
+
+            // If newline added and there are more chars in line, split line and add remainder
+            if (newline > 0 && (end < len || lindex + chars.length() < line.length())) {
+                BaseTextLine remainder = line.splitLineAtIndex(lindex + chars.length());
+                addLine(remainder, line.getIndex() + 1);
+                line = remainder;
+                lindex = 0;
+            }
+
+            // Set start to last end
+            start = end;
+        }
+
+        // Send PropertyChange
+        if (isPropChangeEnabled())
+            firePropChange(new BaseTextUtils.CharsChange(this, null, theChars, anIndex));
+        _width = -1;
+    }
+
+    /**
+     * Removes characters in given range.
+     */
+    public void removeChars(int aStart, int anEnd)
+    {
+        // If empty range, just return
+        if (anEnd == aStart) return;
+
+        // If PropChangeEnabled, get chars to be deleted
+        CharSequence removedChars = isPropChangeEnabled() ? subSequence(aStart, anEnd) : null;
+
+        // Delete lines/chars for range
+        int end = anEnd;
+        while (end > aStart) {
+
+            // Get line at end index
+            BaseTextLine line = getLineForCharIndex(end);
+            if (end == line.getStart())
+                line = getLine(line.getIndex() - 1);
+
+            // Get Line.Start
+            int lineStart = line.getStart();
+            int start = Math.max(aStart, lineStart);
+
+            // If whole line in range, remove line
+            if (start == lineStart && end == line.getEnd() && getLineCount() > 1)
+                removeLine(line.getIndex());
+
+                // Otherwise remove chars (if no newline afterwards, join with next line)
+            else {
+                line.removeChars(start - lineStart, end - lineStart);
+                if (!line.isLastCharNewline() && line.getIndex() + 1 < getLineCount()) {
+                    BaseTextLine next = removeLine(line.getIndex() + 1);
+                    line.appendLine(next);
+                }
+            }
+
+            // Reset end
+            end = lineStart;
+        }
+
+        // If deleted chars is set, send property change
+        if (removedChars != null)
+            firePropChange(new BaseTextUtils.CharsChange(this, removedChars, null, aStart));
+        _width = -1;
+    }
+
+    /**
+     * Replaces chars in given range, with given String, using the given attributes.
+     */
+    public void replaceChars(CharSequence theChars, int aStart, int anEnd)
+    {
+        replaceChars(theChars, null, aStart, anEnd);
+    }
+
+    /**
+     * Replaces chars in given range, with given String, using the given attributes.
+     */
+    public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
+    {
+        // Get style and linestyle for add chars
+        TextStyle style = theStyle != null ? theStyle : getStyleForCharIndex(aStart);
+        TextLineStyle lineStyle = theChars != null && theChars.length() > 0 && !isPlainText() ? getLineStyleForCharIndex(aStart) : null;
+
+        // Remove given range and add chars
+        if (anEnd > aStart)
+            removeChars(aStart, anEnd);
+        addChars(theChars, style, aStart);
+
+        // Restore LineStyle (needed if range includes a newline)
+        if (lineStyle != null)
+            setLineStyle(lineStyle, aStart, aStart + theChars.length());
+    }
+
+    /**
      * Returns the number of block in this doc.
      */
     public int getLineCount()  { return _lines.size(); }
@@ -153,6 +299,11 @@ public abstract class BaseText extends PropObject implements CharSequence {
     }
 
     /**
+     * Creates a new block for use in this text.
+     */
+    protected abstract RichTextLine createLine();
+
+    /**
      * Returns the longest line.
      */
     public BaseTextLine getLineLongest()
@@ -168,6 +319,33 @@ public abstract class BaseText extends PropObject implements CharSequence {
 
         // Return
         return longLine;
+    }
+
+    /**
+     * Sets a given style to a given range.
+     */
+    public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
+    {
+        // Propagate to Lines
+        TextLineStyle oldStyle = getLine(0).getLineStyle();
+        for (BaseTextLine line : getLines())
+            line.setLineStyle(aStyle);
+
+        // Fire prop change
+        if (isPropChangeEnabled())
+            firePropChange(new BaseTextUtils.LineStyleChange(this, oldStyle, aStyle, 0));
+
+        _width = -1;
+    }
+    /**
+     * Sets a given style to a given range.
+     */
+    public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
+    {
+        TextLineStyle oldStyle = getLine(0).getLineStyle();
+        TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
+        setLineStyle(newStyle, 0, length());
+        _width = -1;
     }
 
     /**
@@ -382,6 +560,35 @@ public abstract class BaseText extends PropObject implements CharSequence {
         }
     }
 
+    /**
+     * Standard clone implementation.
+     */
+    @Override
+    public BaseText clone()
+    {
+        // Do normal clone
+        RichText clone;
+        try { clone = (RichText) super.clone(); }
+        catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
+
+        // Reset lines array and length
+        clone._lines = new ArrayList<>(getLineCount());
+        clone._length = 0;
+
+        // Copy lines deep
+        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
+            BaseTextLine line = getLine(i);
+            BaseTextLine lineClone = line.clone();
+            clone.addLine(lineClone, i);
+        }
+
+        // Return
+        return clone;
+    }
+
+    /**
+     * Standard toStringProps implementation.
+     */
     @Override
     public String toStringProps()
     {
