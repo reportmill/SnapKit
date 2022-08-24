@@ -27,8 +27,8 @@ public class TextBoxLine implements CharSequence {
     // The number of chars in this text line
     protected int  _length;
 
-    // The RichTextLine that this line renders
-    protected RichTextLine  _textLine;
+    // The TextLine that this line renders
+    protected BaseTextLine  _textLine;
 
     // The start of this line in RichTextLine
     protected int  _textLineStart;
@@ -54,7 +54,7 @@ public class TextBoxLine implements CharSequence {
     /**
      * Creates a new TextBoxLine.
      */
-    public TextBoxLine(TextBox aBox, TextStyle aStartStyle, RichTextLine aTextLine, int theRTLStart)
+    public TextBoxLine(TextBox aBox, TextStyle aStartStyle, BaseTextLine aTextLine, int theRTLStart)
     {
         _tbox = aBox;
         _startStyle = aStartStyle;
@@ -119,7 +119,7 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the TextLine.
      */
-    public RichTextLine getRichTextLine()  { return _textLine; }
+    public BaseTextLine getRichTextLine()  { return _textLine; }
 
     /**
      * Returns the start of this line in RichTextLine.

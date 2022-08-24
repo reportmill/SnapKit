@@ -662,7 +662,7 @@ public class TextBox {
         int eline = getLineAt(aEnd).getIndex();
 
         // Extend end-line-index to end of RichTextLine
-        RichTextLine endRTL = getLine(eline).getRichTextLine();
+        BaseTextLine endRTL = getLine(eline).getRichTextLine();
         while (eline + 1 < lcount && getLine(eline + 1).getRichTextLine() == endRTL)
             eline++;
 
@@ -688,7 +688,7 @@ public class TextBox {
 
         // Iterate over RichText lines, create TextBox lines and add
         for (int i = startRTL, lindex = aLineIndex; i <= endRTL; i++) {
-            RichTextLine textLine = richText.getLine(i);
+            BaseTextLine textLine = richText.getLine(i);
 
             // Get start-char-index for line
             int lstart = Math.max(start - textLine.getStart(), 0);
@@ -708,7 +708,7 @@ public class TextBox {
 
         // If we added last line and it is empty or ends with newline, add blank line
         if (endRTL == richText.getLineCount() - 1) {
-            RichTextLine textLine = richText.getLine(endRTL);
+            BaseTextLine textLine = richText.getLine(endRTL);
             if (textLine.length() == 0 || textLine.isLastCharNewline()) {
                 TextBoxLine line = createLine(textLine, textLine.length(), getLineCount());
                 if (!((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()))
@@ -720,7 +720,7 @@ public class TextBox {
     /**
      * Create and return TextBoxLines for given RichTextLine, start char index and line index.
      */
-    protected TextBoxLine createLine(RichTextLine aTextLine, int aStart, int aLineIndex)
+    protected TextBoxLine createLine(BaseTextLine aTextLine, int aStart, int aLineIndex)
     {
         // Get iteration variables
         int start = aStart;

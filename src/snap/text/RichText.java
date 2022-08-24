@@ -34,6 +34,15 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
     }
 
     /**
+     * Creates a new block for use in this text.
+     */
+    @Override
+    protected RichTextLine createLine()
+    {
+        return new RichTextLine(this);
+    }
+
+    /**
      * Sets a given style to a given range.
      */
     @Override
@@ -130,21 +139,6 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
         }
 
         _width = -1;
-    }
-
-    /**
-     * Returns the individual block in this doc.
-     */
-    @Override
-    public RichTextLine getLine(int anIndex)  { return (RichTextLine) super.getLine(anIndex); }
-
-    /**
-     * Creates a new block for use in this text.
-     */
-    @Override
-    protected RichTextLine createLine()
-    {
-        return new RichTextLine(this);
     }
 
     /**
