@@ -8,7 +8,7 @@ import snap.util.ArrayUtils;
 /**
  * This class represents a line of text in a Text.
  */
-public abstract class TextLine implements CharSequence, Cloneable {
+public class TextLine implements CharSequence, Cloneable {
 
     // The TextDoc that contains this line
     protected TextDoc  _text;

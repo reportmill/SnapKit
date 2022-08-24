@@ -71,7 +71,7 @@ public class TextBox {
      */
     public TextBox()
     {
-        TextDoc textDoc = new RichText();
+        TextDoc textDoc = createTextDoc();
         setTextDoc(textDoc);
     }
 
@@ -139,6 +139,35 @@ public class TextBox {
 
         // Update all
         setNeedsUpdateAll();
+    }
+
+    /**
+     * Creates the default TextDoc.
+     */
+    protected TextDoc createTextDoc()  { return new RichText(); }
+
+    /**
+     * Returns whether text supports multiple styles.
+     */
+    public boolean isRichText()
+    {
+        TextDoc textDoc = getTextDoc();
+        return textDoc.isRichText();
+    }
+
+    /**
+     * Sets whether text supports multiple styles.
+     */
+    public void setRichText(boolean aValue)
+    {
+        // If already set, just return
+        if (aValue == isRichText()) return;
+
+        // Convert to/from plain/rich text
+        TextDoc textDoc = getTextDoc();
+        TextDoc textDoc1 = textDoc instanceof RichText ? new TextDoc() : new RichText();
+        textDoc1.addTextDoc(textDoc, 0);
+        setTextDoc(textDoc1);
     }
 
     /**
@@ -412,15 +441,6 @@ public class TextBox {
     {
         TextDoc textDoc = getTextDoc();
         textDoc.replaceChars(theChars, theStyle, aStart, anEnd);
-    }
-
-    /**
-     * Sets a given attribute to a given value for a given range.
-     */
-    public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
-    {
-        TextDoc textDoc = getTextDoc();
-        textDoc.setStyleValue(aKey, aValue, aStart, anEnd);
     }
 
     /**

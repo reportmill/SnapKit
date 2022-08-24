@@ -47,7 +47,6 @@ public class DevPaneConsole extends ViewOwner {
         public DevConsoleView()
         {
             setPadding(4,4,4,4);
-            setPlainText(true);
 
             // Change Console Font
             TextStyle textStyle = getTextDoc().getDefaultStyle();

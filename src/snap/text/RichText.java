@@ -34,13 +34,16 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
     }
 
     /**
-     * Creates a new block for use in this text.
+     * Override to indicate rich text supported.
      */
     @Override
-    protected TextLine createLine()
-    {
-        return new RichTextLine(this);
-    }
+    public boolean isRichText()  { return true; }
+
+    /**
+     * Creates a new TextLine for use in this text.
+     */
+    @Override
+    protected TextLine createLine()  { return new RichTextLine(this); }
 
     /**
      * Sets a given style to a given range.

@@ -104,7 +104,6 @@ public class TextArea extends View {
         setTextBox(tbox);
 
         // Configure
-        setPlainText(true);
         setFont(getDefaultFont());
         setFocusPainted(false);
     }
@@ -289,22 +288,19 @@ public class TextArea extends View {
     /**
      * Returns whether text supports multiple styles.
      */
-    public boolean isRichText()  { return !isPlainText(); }
-
-    /**
-     * Returns whether text is plain text (has only one font, color. etc.).
-     */
-    public boolean isPlainText()
+    public boolean isRichText()
     {
-        return getTextDoc().isPlainText();
+        TextBox textBox = getTextBox();
+        return textBox.isRichText();
     }
 
     /**
-     * Sets whether text is plain text (has only one font, color. etc.).
+     * Sets whether text supports multiple styles.
      */
-    public void setPlainText(boolean aValue)
+    public void setRichText(boolean aValue)
     {
-        getTextDoc().setPlainText(aValue);
+        TextBox textBox = getTextBox();
+        textBox.setRichText(aValue);
     }
 
     /**
@@ -1557,8 +1553,8 @@ public class TextArea extends View {
         if (undoer == null || !undoer.isEnabled()) return;
 
         // If PlainText Style_Prop or LineStyle_Prop, just return
-        String pname = anEvent.getPropName();
-        if (isPlainText() && (pname == TextDoc.Style_Prop || pname == TextDoc.LineStyle_Prop))
+        String propName = anEvent.getPropName();
+        if (!isRichText() && (propName == TextDoc.Style_Prop || propName == TextDoc.LineStyle_Prop))
             return;
 
         // Get ActiveUndoSet - if no previous changes, set UndoSelection
@@ -1721,8 +1717,8 @@ public class TextArea extends View {
         // Do normal version
         super.setParent(aPar);
 
-        // If PlainText, update to to parent (should probably watch parent Font_Prop change as well)
-        if (isPlainText() && !isFontSet() && !getFont().equals(getSelStyle().getFont()))
+        // If PlainText, update to parent (should probably watch parent Font_Prop change as well)
+        if (!isRichText() && !isFontSet() && !getFont().equals(getSelStyle().getFont()))
             setSelStyleValue(TextStyle.FONT_KEY, getFont());
     }
 
@@ -1974,10 +1970,10 @@ public class TextArea extends View {
         if (richTextXML == null && anElement.get("string") != null)
             richTextXML = anElement;
         if (richTextXML != null)
-            setPlainText(false);
+            setRichText(true);
 
         // Unarchive Rich, Editable, WrapLines
-        if (anElement.hasAttribute("Rich")) setPlainText(!anElement.getAttributeBoolValue("Rich"));
+        if (anElement.hasAttribute("Rich")) setRichText(anElement.getAttributeBoolValue("Rich"));
         if (anElement.hasAttribute("Editable")) setEditable(anElement.getAttributeBoolValue("Editable"));
         if (anElement.hasAttribute(WrapLines_Prop)) setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
         if (anElement.hasAttribute("WrapText")) setWrapLines(anElement.getAttributeBoolValue("WrapText"));

@@ -68,7 +68,6 @@ public class ScanPane extends ViewOwner {
         public ScanView()
         {
             setPadding(4,4,4,4);
-            setPlainText(true);
             setFont(new Font("Arial", 16));
             getTextDoc().setDefaultStyle(new TextStyle(new Font("Arial", 16)));
         }

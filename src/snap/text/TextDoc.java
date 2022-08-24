@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public abstract class TextDoc extends PropObject implements CharSequence, Cloneable {
+public class TextDoc extends PropObject implements CharSequence, Cloneable {
 
     // The TextLines in this text
     protected List<TextLine>  _lines = new ArrayList<>();
@@ -25,9 +25,6 @@ public abstract class TextDoc extends PropObject implements CharSequence, Clonea
 
     // The default line style for this text
     protected TextLineStyle  _defLineStyle = TextLineStyle.DEFAULT;
-
-    // Whether text only allows a single font, color, etc.
-    protected boolean  _plainText;
 
     // Whether property change is enabled
     protected boolean  _propChangeEnabled = true;
@@ -49,17 +46,9 @@ public abstract class TextDoc extends PropObject implements CharSequence, Clonea
     }
 
     /**
-     * Whether this text is really just plain text (has single font, color, etc.). Defaults to false.
+     * Whether this text supports multiple styles (font, color, etc.).
      */
-    public boolean isPlainText()  { return _plainText; }
-
-    /**
-     * Sets whether this text really just plain text (has single font, color, etc.).
-     */
-    public void setPlainText(boolean aValue)
-    {
-        _plainText = aValue;
-    }
+    public boolean isRichText()  { return false; }
 
     /**
      * Returns the number of characters in the text.
@@ -157,8 +146,8 @@ public abstract class TextDoc extends PropObject implements CharSequence, Clonea
         // If no chars, just return
         if (theChars == null) return;
 
-        // If monofont, clear attributes
-        if (isPlainText()) theStyle = null;
+        // If not rich text, clear style
+        if (!isRichText()) theStyle = null;
 
         // Get line for index - if adding at text end and last line and ends with newline, create/add new line
         TextLine line = getLineForCharIndex(anIndex);
@@ -262,7 +251,9 @@ public abstract class TextDoc extends PropObject implements CharSequence, Clonea
     {
         // Get style and linestyle for add chars
         TextStyle style = theStyle != null ? theStyle : getStyleForCharIndex(aStart);
-        TextLineStyle lineStyle = theChars != null && theChars.length() > 0 && !isPlainText() ? getLineStyleForCharIndex(aStart) : null;
+        TextLineStyle lineStyle = null;
+        if (theChars != null && theChars.length() > 0 && isRichText())
+            lineStyle = getLineStyleForCharIndex(aStart);
 
         // Remove given range and add chars
         if (anEnd > aStart)
@@ -277,7 +268,7 @@ public abstract class TextDoc extends PropObject implements CharSequence, Clonea
     /**
      * Adds given TextDoc to this text at given index.
      */
-    public void addText(TextDoc aTextDoc, int anIndex)
+    public void addTextDoc(TextDoc aTextDoc, int anIndex)
     {
         for (TextLine line : aTextDoc.getLines()) {
             TextRun[] lineRuns = line.getRuns();
@@ -399,9 +390,9 @@ public abstract class TextDoc extends PropObject implements CharSequence, Clonea
     }
 
     /**
-     * Creates a new block for use in this text.
+     * Creates a new TextLine for use in this text.
      */
-    protected abstract TextLine createLine();
+    protected TextLine createLine()  { return new TextLine(this); }
 
     /**
      * Returns the longest line.

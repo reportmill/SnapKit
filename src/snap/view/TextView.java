@@ -129,22 +129,12 @@ public class TextView extends ParentView {
     /**
      * Returns whether text supports multiple styles.
      */
-    public boolean isRichText()  { return !isPlainText(); }
+    public boolean isRichText()  { return _textArea.isRichText(); }
 
     /**
      * Sets whether text supports multiple styles.
      */
-    public void setRichText(boolean aValue)  { setPlainText(!aValue); }
-
-    /**
-     * Returns whether text is plain text (has only one font, color. etc.).
-     */
-    public boolean isPlainText()  { return _textArea.isPlainText(); }
-
-    /**
-     * Sets whether text is plain text (has only one font, color. etc.).
-     */
-    public void setPlainText(boolean aValue)  { _textArea.setPlainText(aValue); }
+    public void setRichText(boolean aValue)  { _textArea.setRichText(aValue); }
 
     /**
      * Returns the default style for text.
@@ -491,11 +481,11 @@ public class TextView extends ParentView {
         if (richTextXML == null && anElement.get("string") != null)
             richTextXML = anElement;
         if (richTextXML != null)
-            setPlainText(false);
+            setRichText(true);
 
         // Unarchive Rich, Editable, WrapLines
         if (anElement.hasAttribute("Rich"))
-            setPlainText(!anElement.getAttributeBoolValue("Rich"));
+            setRichText(anElement.getAttributeBoolValue("Rich"));
         if (anElement.hasAttribute("Editable"))
             setEditable(anElement.getAttributeBoolValue("Editable"));
         if (anElement.hasAttribute(WrapLines_Prop))
