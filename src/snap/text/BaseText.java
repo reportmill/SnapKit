@@ -101,6 +101,16 @@ public abstract class BaseText extends PropObject implements CharSequence, Clone
     }
 
     /**
+     * Sets the text to the given string.
+     */
+    public void setString(String aString)
+    {
+        setPropChangeEnabled(false);
+        replaceChars(aString, null, 0, length());
+        setPropChangeEnabled(true);
+    }
+
+    /**
      * Returns the default style for text.
      */
     public TextStyle getDefaultStyle()  { return _defStyle; }

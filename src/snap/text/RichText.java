@@ -33,16 +33,6 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
     }
 
     /**
-     * Sets the text to the given string.
-     */
-    public void setString(String aString)
-    {
-        setPropChangeEnabled(false);
-        replaceChars(aString, null, 0, length());
-        setPropChangeEnabled(true);
-    }
-
-    /**
      * Sets the default style.
      */
     public void setDefaultStyle(TextStyle aStyle)
@@ -86,33 +76,6 @@ public class RichText extends BaseText implements XMLArchiver.Archivable {
 
         // Add chars
         addChars(theChars, style, length());
-    }
-
-    /**
-     * Replaces chars in given range, with given String, using the given attributes.
-     */
-    public void replaceChars(CharSequence theChars, int aStart, int anEnd)
-    {
-        replaceChars(theChars, null, aStart, anEnd);
-    }
-
-    /**
-     * Replaces chars in given range, with given String, using the given attributes.
-     */
-    public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
-    {
-        // Get style and linestyle for add chars
-        TextStyle style = theStyle != null ? theStyle : getStyleForCharIndex(aStart);
-        TextLineStyle lineStyle = theChars != null && theChars.length() > 0 && !isPlainText() ? getLineStyleForCharIndex(aStart) : null;
-
-        // Remove given range and add chars
-        if (anEnd > aStart)
-            removeChars(aStart, anEnd);
-        addChars(theChars, style, aStart);
-
-        // Restore LineStyle (needed if range includes a newline)
-        if (lineStyle != null)
-            setLineStyle(lineStyle, aStart, aStart + theChars.length());
     }
 
     /**
