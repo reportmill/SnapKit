@@ -677,7 +677,8 @@ public class TextArea extends View {
      */
     public HPos getLineAlign()
     {
-        return getSelLineStyle().getAlign();
+        TextLineStyle textLineStyle = getSelLineStyle();
+        return textLineStyle.getAlign();
     }
 
     /**
@@ -693,7 +694,8 @@ public class TextArea extends View {
      */
     public boolean isLineJustify()
     {
-        return getSelLineStyle().isJustify();
+        TextLineStyle textLineStyle = getSelLineStyle();
+        return textLineStyle.isJustify();
     }
 
     /**
@@ -707,9 +709,10 @@ public class TextArea extends View {
     /**
      * Returns the style at given char index.
      */
-    public TextStyle getStyleAt(int anIndex)
+    public TextStyle getStyleForCharIndex(int anIndex)
     {
-        return getTextDoc().getStyleForCharIndex(anIndex);
+        TextDoc textDoc = getTextDoc();
+        return textDoc.getStyleForCharIndex(anIndex);
     }
 
     /**
@@ -717,7 +720,8 @@ public class TextArea extends View {
      */
     public TextStyle getSelStyle()
     {
-        return _selStyle != null ? _selStyle : (_selStyle = getStyleAt(getSelStart()));
+        if (_selStyle != null) return _selStyle;
+        return _selStyle = getStyleForCharIndex(getSelStart());
     }
 
     /**
@@ -742,7 +746,8 @@ public class TextArea extends View {
      */
     public TextLineStyle getSelLineStyle()
     {
-        return getTextDoc().getLineStyleForCharIndex(getSelStart());
+        TextDoc textDoc = getTextDoc();
+        return textDoc.getLineStyleForCharIndex(getSelStart());
     }
 
     /**
@@ -750,7 +755,8 @@ public class TextArea extends View {
      */
     public void setSelLineStyleValue(String aKey, Object aValue)
     {
-        getTextDoc().setLineStyleValue(aKey, aValue, getSelStart(), getSelEnd());
+        TextDoc textDoc = getTextDoc();
+        textDoc.setLineStyleValue(aKey, aValue, getSelStart(), getSelEnd());
     }
 
     /**
@@ -759,7 +765,7 @@ public class TextArea extends View {
     public void addChars(String aStr, Object... theAttrs)
     {
         int len = length();
-        TextStyle style = getStyleAt(len).copyFor(theAttrs);
+        TextStyle style = getStyleForCharIndex(len).copyFor(theAttrs);
         replaceChars(aStr, style, len, len, true);
     }
 
@@ -817,7 +823,7 @@ public class TextArea extends View {
             undoerSaveChanges();
 
         // Do actual replace chars
-        TextStyle style = aStyle != null ? aStyle : aStart == getSelStart() ? getSelStyle() : getStyleAt(aStart);
+        TextStyle style = aStyle != null ? aStyle : aStart == getSelStart() ? getSelStyle() : getStyleForCharIndex(aStart);
         getTextBox().replaceChars(aString, style, aStart, anEnd);
 
         // Update selection to be at end of new string
@@ -1179,7 +1185,7 @@ public class TextArea extends View {
 
         if (anEvent.isMouseClick()) {
             int cindex = getCharIndex(anEvent.getX(), anEvent.getY());
-            TextStyle style = getStyleAt(cindex);
+            TextStyle style = getStyleForCharIndex(cindex);
             if (style.getLink() != null)
                 openLink(style.getLink().getString());
         }
@@ -1191,7 +1197,7 @@ public class TextArea extends View {
     protected void mouseMoved(ViewEvent anEvent)
     {
         int cindex = getCharIndex(anEvent.getX(), anEvent.getY());
-        TextStyle style = getStyleAt(cindex);
+        TextStyle style = getStyleForCharIndex(cindex);
         if (style.getLink() != null)
             setCursor(Cursor.HAND);
         else showCursor();

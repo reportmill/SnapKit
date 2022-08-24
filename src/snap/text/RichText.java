@@ -52,19 +52,25 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
     public void setStyle(TextStyle aStyle, int aStart, int anEnd)
     {
         // Iterate over runs in range and set style
-        while (aStart < anEnd) {
+        for (int textCharIndex = aStart; textCharIndex < anEnd; ) {
 
             // Set style
-            RichTextLine line = (RichTextLine) getLineForCharIndex(aStart);
+            RichTextLine line = (RichTextLine) getLineForCharIndex(textCharIndex);
             int lineStart = line.getStart();
-            TextRun run = getRunForCharIndex(aStart);
-            TextStyle oldStyle = run.getStyle();
-            if (aStart - lineStart > run.getStart())
-                run = line.splitRunForCharIndex(run, aStart - lineStart - run.getStart());
+            TextRun run = getRunForCharIndex(textCharIndex);
+            if (textCharIndex - lineStart == run.getEnd())
+                run = run.getNext();
+
+            // If run is too large, trim to size
+            if (textCharIndex - lineStart > run.getStart())
+                run = line.splitRunForCharIndex(run, textCharIndex - lineStart - run.getStart());
             if (anEnd - lineStart < run.getEnd())
                 line.splitRunForCharIndex(run, anEnd - lineStart - run.getStart());
+
+            // Set style
+            TextStyle oldStyle = run.getStyle();
             run.setStyle(aStyle);
-            aStart = run.getEnd() + lineStart;
+            textCharIndex = run.getEnd() + lineStart;
 
             // Fire prop change
             if (isPropChangeEnabled()) {

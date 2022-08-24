@@ -314,7 +314,7 @@ public class TextView extends ParentView {
     /**
      * Returns the style at given char index.
      */
-    public TextStyle getStyleAt(int anIndex)  { return _textArea.getStyleAt(anIndex); }
+    public TextStyle getStyleAt(int anIndex)  { return _textArea.getStyleForCharIndex(anIndex); }
 
     /**
      * Returns the TextStyle for the current selection and/or input characters.

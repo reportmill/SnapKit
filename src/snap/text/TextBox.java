@@ -913,7 +913,8 @@ public class TextBox {
      */
     public TextRun getRunAt(int anIndex)
     {
-        return getTextDoc().getRunForCharIndex(anIndex);
+        TextDoc textDoc = getTextDoc();
+        return textDoc.getRunForCharIndex(anIndex);
     }
 
     /**
