@@ -18,7 +18,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
      */
     public RichText()
     {
-        addLine(createLine(), 0);
+        super();
     }
 
     /**

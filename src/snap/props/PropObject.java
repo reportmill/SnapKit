@@ -20,6 +20,14 @@ public class PropObject implements PropChange.DoChange {
     public static final Object EMPTY_OBJECT = new Object();
 
     /**
+     * Constructor.
+     */
+    public PropObject()
+    {
+        super();
+    }
+
+    /**
      * Returns the PropSet.
      */
     public PropSet getPropSet()
