@@ -315,9 +315,9 @@ public class TextBox {
         if (_endCharIndex >= 0) return _endCharIndex;
 
         // Otherwise return last line end
-        int start = getStartCharIndex();
+        int startCharIndex = getStartCharIndex();
         int lastLineEnd = getLineCount() > 0 ? getLineLast().getEnd() : 0;
-        return start + lastLineEnd;
+        return startCharIndex + lastLineEnd;
     }
 
     /**
@@ -598,13 +598,17 @@ public class TextBox {
         _updating = true;
 
         // Get count, start and end of currently configured lines
-        int lcount = _lines.size();
-        int lend = lcount > 0 ? _lines.get(lcount - 1).getEnd() : getStartCharIndex();
+        int oldLineCount = _lines.size();
+        int oldEndCharIndex = oldLineCount > 0 ? _lines.get(oldLineCount - 1).getEnd() : getStartCharIndex();
 
         // Get update start, linesEnd and textEnd to synchronize lines to text
         int start = _updStart; //Math.max(_updStart, getStart());
-        int linesEnd = Math.min(_lastLen - _updEnd, lend);
+        int linesEnd = Math.min(_lastLen - _updEnd, oldEndCharIndex);
         int textEnd = length() - _updEnd;
+        if (_endCharIndex >= 0)
+            textEnd = Math.min(textEnd, _endCharIndex);
+
+        // Update lines
         if (start <= linesEnd || _lastLen == 0)
             updateLines(start, linesEnd, textEnd);
 
@@ -679,7 +683,7 @@ public class TextBox {
     protected void addLines(int aLineIndex, int aStart, int aEnd)
     {
         // Get start char index
-        int lcount = getLineCount();
+        int lineCount = getLineCount();
         int start = Math.max(aStart, getStartCharIndex());
         if (start > length()) return;
 
@@ -690,6 +694,8 @@ public class TextBox {
 
         // Iterate over TextDoc lines, create TextBox lines and add
         for (int i = startLineIndex, lindex = aLineIndex; i <= endLineIndex; i++) {
+
+            // Get text line
             TextLine textLine = textDoc.getLine(i);
 
             // Get start char index for line
