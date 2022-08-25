@@ -125,11 +125,8 @@ public class TextPage extends WebPage {
          */
         protected void saveChangesImpl()
         {
-            try {
-                getFile().save();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            try { getFile().save(); }
+            catch (Exception e) { throw new RuntimeException(e); }
         }
 
         /**

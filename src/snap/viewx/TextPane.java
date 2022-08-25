@@ -2,17 +2,15 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
-
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
 import snap.text.TextBoxLine;
+import snap.text.TextDoc;
 import snap.text.TextSel;
 import snap.util.SnapUtils;
 import snap.util.StringUtils;
 import snap.view.*;
-import snap.web.WebFile;
-import snap.web.WebURL;
 
 /**
  * A panel for editing text files.
@@ -20,13 +18,13 @@ import snap.web.WebURL;
 public class TextPane extends ViewOwner {
 
     // The TextArea
-    TextArea _textArea;
+    private TextArea  _textArea;
 
     // The ToolBarPane
-    ChildView _toolBarPane;
+    private ChildView  _toolBarPane;
 
     // Whether text pane text is modified
-    boolean _textModified;
+    private boolean  _textModified;
 
     /**
      * Returns the TextArea.
@@ -48,18 +46,12 @@ public class TextPane extends ViewOwner {
     /**
      * Returns the toolbar pane.
      */
-    public ChildView getToolBarPane()
-    {
-        return _toolBarPane;
-    }
+    public ChildView getToolBarPane()  { return _toolBarPane; }
 
     /**
      * Returns whether text is modified.
      */
-    public boolean isTextModified()
-    {
-        return _textModified;
-    }
+    public boolean isTextModified()  { return _textModified; }
 
     /**
      * Sets whether text is modified.
@@ -231,15 +223,9 @@ public class TextPane extends ViewOwner {
      */
     protected void saveChangesImpl()
     {
-        WebURL surl = getTextArea().getTextBox().getSourceURL();
-        WebFile file = surl.getFile();
-        if (file == null) file = surl.createFile(false);
-        file.setText(getTextArea().getTextBox().getString());
-        try {
-            file.save();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        TextArea textArea = getTextArea();
+        TextDoc textDoc = textArea.getTextDoc();
+        textDoc.saveToSourceFile();
     }
 
     /**
@@ -288,18 +274,30 @@ public class TextPane extends ViewOwner {
      */
     public void showLineNumberPanel()
     {
-        TextSel sel = getTextArea().getSel();
-        int lnum = sel.getStartLine().getIndex() + 1, start = sel.getStart(), col = start - sel.getStartLine().getStart();
-        String msg = StringUtils.format("Enter Line Number:\n(Line %d, Col %d, Char %d)", lnum, col, start);
-        DialogBox dbox = new DialogBox("Go to Line");
-        dbox.setQuestionMessage(msg);
-        String lstring = dbox.showInputDialog(getUI(), Integer.toString(lnum));
-        int lindex = lstring != null ? SnapUtils.intValue(lstring) - 1 : -1;
-        if (lindex < 0) lindex = 0;
-        else if (lindex >= getTextArea().getLineCount()) lindex = getTextArea().getLineCount() - 1;
-        TextBoxLine line = lindex >= 0 && lindex < getTextArea().getLineCount() ? getTextArea().getLine(lindex) : null;
-        getTextArea().setSel(line.getStart(), line.getEnd());
-        requestFocus(getTextArea());
+        TextArea textArea = getTextArea();
+        TextSel sel = textArea.getSel();
+        TextBoxLine selStartLine = sel.getStartLine();
+        int selStartLineIndex = selStartLine.getIndex() + 1;
+        int selStart = sel.getStart();
+        int col = selStart - selStartLine.getStart();
+
+        // Run ShowLineNumber panel
+        String msg = StringUtils.format("Enter Line Number:\n(Line %d, Col %d, Char %d)", selStartLineIndex, col, selStart);
+        DialogBox dialogBox = new DialogBox("Go to Line");
+        dialogBox.setQuestionMessage(msg);
+        String lineNumStr = dialogBox.showInputDialog(getUI(), Integer.toString(selStartLineIndex));
+
+        // Get LineIndex from response
+        int lineIndex = lineNumStr != null ? SnapUtils.intValue(lineNumStr) - 1 : -1;
+        if (lineIndex < 0)
+            lineIndex = 0;
+        else if (lineIndex >= textArea.getLineCount())
+            lineIndex = textArea.getLineCount() - 1;
+
+        // Select line and focus
+        TextBoxLine line = lineIndex >= 0 && lineIndex < textArea.getLineCount() ? textArea.getLine(lineIndex) : null;
+        textArea.setSel(line.getStart(), line.getEnd());
+        requestFocus(textArea);
     }
 
     /**
@@ -307,11 +305,12 @@ public class TextPane extends ViewOwner {
      */
     public static void main(String args[])
     {
-        TextPane tp = new TextPane();
-        tp.getTextArea().setPrefSize(800, 600);
+        TextPane textPane = new TextPane();
+        TextArea textArea = textPane.getTextArea();
+        textArea.setPrefSize(800, 600);
         //String text = WebURL.getURL(TextPane.class, "TextPane.snp").getText();
-        //tp.getTextArea().setText(text);
-        tp.setWindowVisible(true);
+        //textArea.setText(text);
+        textPane.setWindowVisible(true);
     }
 
 }

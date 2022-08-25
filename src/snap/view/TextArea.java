@@ -10,7 +10,6 @@ import snap.props.UndoSet;
 import snap.props.Undoer;
 import snap.text.*;
 import snap.util.*;
-import snap.web.*;
 import java.util.Objects;
 
 /**
@@ -176,7 +175,8 @@ public class TextArea extends View {
      */
     public Object getSource()
     {
-        return getTextBox().getSource();
+        TextDoc textDoc = getTextDoc();
+        return textDoc.getSource();
     }
 
     /**
@@ -184,30 +184,17 @@ public class TextArea extends View {
      */
     public void setSource(Object aSource)
     {
+        // Get TextDoc for Source
+        TextDoc textDoc = TextDoc.newFromSource(aSource);
+
         // Set source and notify textDidChange
         TextBox textBox = getTextBox();
-        textBox.setSource(aSource);
+        textBox.setTextDoc(textDoc);
         textDidChange();
 
         // Reset selection (to line end if single-line, otherwise text start)
         int selIndex = textBox.getLineCount() == 1 && length() < 40 ? length() : 0;
         setSel(selIndex);
-    }
-
-    /**
-     * Returns the source URL.
-     */
-    public WebURL getSourceURL()
-    {
-        return getTextBox().getSourceURL();
-    }
-
-    /**
-     * Returns the source file.
-     */
-    public WebFile getSourceFile()
-    {
-        return getTextBox().getSourceFile();
     }
 
     /**

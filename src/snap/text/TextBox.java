@@ -11,18 +11,11 @@ import snap.gfx.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.*;
-import snap.web.*;
 
 /**
  * This class manages a TextDoc to be rendered and edited in a bounding area.
  */
 public class TextBox {
-
-    // The Source of the current content
-    private Object  _source;
-
-    // The URL of the file that provided the text
-    private WebURL  _sourceURL;
 
     // The TextDoc
     private TextDoc  _text;
@@ -82,40 +75,6 @@ public class TextBox {
     {
         this();
         addChars(theChars, null, 0);
-    }
-
-    /**
-     * Returns the source for the current text content.
-     */
-    public Object getSource()  { return _source; }
-
-    /**
-     * Loads the text from the given source.
-     */
-    public void setSource(Object aSource)
-    {
-        // Get/Set URL from Source
-        WebURL url = WebURL.getURL(aSource);
-        _source = url != null ? aSource : null;
-        _sourceURL = url;
-
-        // Get/set text from source
-        String text = SnapUtils.getText(aSource);
-        setString(text);
-    }
-
-    /**
-     * Returns the source URL.
-     */
-    public WebURL getSourceURL()  { return _sourceURL; }
-
-    /**
-     * Returns the source file.
-     */
-    public WebFile getSourceFile()
-    {
-        WebURL sourceURL = getSourceURL();
-        return sourceURL != null ? sourceURL.getFile() : null;
     }
 
     /**

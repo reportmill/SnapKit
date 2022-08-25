@@ -7,10 +7,9 @@ import snap.gfx.*;
 import snap.props.Undoer;
 import snap.text.*;
 import snap.util.*;
-import snap.web.*;
 
 /**
- * A view subclass for displaying and editing large blocks of text and rich text.
+ * This view subclass wraps a TextArea in a ScrollView.
  */
 public class TextView extends ParentView {
 
@@ -71,26 +70,6 @@ public class TextView extends ParentView {
      * Returns the text that is being edited.
      */
     public TextBox getTextBox()  { return _textArea.getTextBox(); }
-
-    /**
-     * Returns the source of current content (URL, File, String path, etc.)
-     */
-    public Object getSource()  { return getTextBox().getSource(); }
-
-    /**
-     * Sets the source of current content (URL, File, String path, etc.)
-     */
-    public void setSource(Object aSource)  { _textArea.setSource(aSource); }
-
-    /**
-     * Returns the source URL.
-     */
-    public WebURL getSourceURL()  { return _textArea.getSourceURL(); }
-
-    /**
-     * Returns the source file.
-     */
-    public WebFile getSourceFile()  { return _textArea.getSourceFile(); }
 
     /**
      * Returns the plain string of the text being edited.

@@ -5,7 +5,10 @@ package snap.text;
 import snap.geom.HPos;
 import snap.gfx.Font;
 import snap.props.PropObject;
+import snap.util.SnapUtils;
 import snap.util.StringUtils;
+import snap.web.WebFile;
+import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +16,12 @@ import java.util.List;
  * This class is the basic text storage class, holding a list of TextLine.
  */
 public class TextDoc extends PropObject implements CharSequence, Cloneable {
+
+    // The Source of the current content
+    private Object  _source;
+
+    // The URL of the file that provided the text
+    private WebURL  _sourceURL;
 
     // The TextLines in this text
     protected List<TextLine>  _lines = new ArrayList<>();
@@ -51,6 +60,40 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     public boolean isRichText()  { return false; }
 
     /**
+     * Returns the source for the current text content.
+     */
+    public Object getSource()  { return _source; }
+
+    /**
+     * Loads the text from the given source.
+     */
+    public void setSource(Object aSource)
+    {
+        // Get/Set URL from Source
+        WebURL url = WebURL.getURL(aSource);
+        _source = url != null ? aSource : null;
+        _sourceURL = url;
+
+        // Get/set text from source
+        String text = SnapUtils.getText(aSource);
+        setString(text);
+    }
+
+    /**
+     * Returns the source URL.
+     */
+    public WebURL getSourceURL()  { return _sourceURL; }
+
+    /**
+     * Returns the source file.
+     */
+    public WebFile getSourceFile()
+    {
+        WebURL sourceURL = getSourceURL();
+        return sourceURL != null ? sourceURL.getFile() : null;
+    }
+
+    /**
      * Returns the number of characters in the text.
      */
     public int length()  { return _length; }
@@ -63,6 +106,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
         TextLine line = getLineForCharIndex(anIndex);
         return line.charAt(anIndex - line.getStart());
     }
+
     /**
      * Returns a new char sequence that is a subsequence of this sequence.
      */
@@ -76,6 +120,8 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
             aStart = end;
             line = line.getNext();
         }
+
+        // Return
         return sb;
     }
 
@@ -87,6 +133,8 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
         StringBuilder sb = new StringBuilder(length());
         for (TextLine line : _lines)
             sb.append(line._sb);
+
+        // Return
         return sb.toString();
     }
 
@@ -686,6 +734,26 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     }
 
     /**
+     * Save TextDoc text to Source file.
+     */
+    public void saveToSourceFile()
+    {
+        // Get SourceFile
+        WebURL sourceURL = getSourceURL();
+        WebFile sourceFile = sourceURL.getFile();
+        if (sourceFile == null)
+            sourceFile = sourceURL.createFile(false);
+
+        // Get TextDoc string and set in file
+        String fileText = getString();
+        sourceFile.setText(fileText);
+
+        // Save file
+        try { sourceFile.save(); }
+        catch (Exception e) { throw new RuntimeException(e); }
+    }
+
+    /**
      * Standard clone implementation.
      */
     @Override
@@ -730,5 +798,26 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
 
         // Return
         return sb.toString();
+    }
+
+    /**
+     * Returns a new TextDoc from given source.
+     */
+    public static TextDoc newFromSource(Object aSource)
+    {
+        // Get/Set URL from Source
+        WebURL url = WebURL.getURL(aSource);
+
+        // Create TextDoc
+        TextDoc textDoc = new TextDoc();
+        textDoc._source = url != null ? aSource : null;
+        textDoc._sourceURL = url;
+
+        // Get/set text from source
+        String text = SnapUtils.getText(aSource);
+        textDoc.setString(text);
+
+        // Return
+        return textDoc;
     }
 }
