@@ -38,8 +38,11 @@ public class TextBox {
     // Whether text is linked to another text
     private boolean  _linked;
 
-    // The starting character of this box in TextDoc
-    private int  _start;
+    // The start char index of this box in TextDoc
+    private int  _startCharIndex;
+
+    // The end char index of this box in TextDoc
+    private int  _endCharIndex = -1;
 
     // The font scale for this box
     protected double  _fontScale = 1;
@@ -288,26 +291,46 @@ public class TextBox {
     /**
      * Returns the start char in TextDoc.
      */
-    public int getStart()  { return _start; }
+    public int getStartCharIndex()  { return _startCharIndex; }
 
     /**
      * Sets the start char in TextDoc.
      */
-    public void setStart(int anIndex)
+    public void setStartCharIndex(int charIndex)
     {
-        if (anIndex == _start) return;
-        _start = anIndex;
+        // If already set, just return
+        if (charIndex == _startCharIndex) return;
+
+        // Set and update
+        _startCharIndex = charIndex;
         setNeedsUpdateAll();
     }
 
     /**
      * Returns the end char in TextDoc.
      */
-    public int getEnd()
+    public int getEndCharIndex()
     {
-        int start = getStart();
+        // If explicitly set, just return
+        if (_endCharIndex >= 0) return _endCharIndex;
+
+        // Otherwise return last line end
+        int start = getStartCharIndex();
         int lastLineEnd = getLineCount() > 0 ? getLineLast().getEnd() : 0;
         return start + lastLineEnd;
+    }
+
+    /**
+     * Sets the end char index in TextDoc.
+     */
+    public void setEndCharIndex(int charIndex)
+    {
+        // If already set, just return
+        if (charIndex == _endCharIndex) return;
+
+        // Set and update
+        _endCharIndex = charIndex;
+        setNeedsUpdateAll();
     }
 
     /**
@@ -409,7 +432,7 @@ public class TextBox {
     {
         int lcount = getLineCount();
         if (lcount == 0) return 0;
-        int start = getStart();
+        int start = getStartCharIndex();
         int end = getLineLast().getEnd();
         return end - start;
     }
@@ -576,7 +599,7 @@ public class TextBox {
 
         // Get count, start and end of currently configured lines
         int lcount = _lines.size();
-        int lend = lcount > 0 ? _lines.get(lcount - 1).getEnd() : getStart();
+        int lend = lcount > 0 ? _lines.get(lcount - 1).getEnd() : getStartCharIndex();
 
         // Get update start, linesEnd and textEnd to synchronize lines to text
         int start = _updStart; //Math.max(_updStart, getStart());
@@ -657,7 +680,7 @@ public class TextBox {
     {
         // Get start char index
         int lcount = getLineCount();
-        int start = Math.max(aStart, getStart());
+        int start = Math.max(aStart, getStartCharIndex());
         if (start > length()) return;
 
         // Get TextDoc startLineIndex, endLineIndex
@@ -957,8 +980,8 @@ public class TextBox {
         Path path = new Path();
 
         // If invalid range, just return
-        if (aStart > getEnd() || anEnd < getStart()) return path;
-        if (anEnd > getEnd()) anEnd = getEnd();
+        if (aStart > getEndCharIndex() || anEnd < getStartCharIndex()) return path;
+        if (anEnd > getEndCharIndex()) anEnd = getEndCharIndex();
 
         // Get StartLine, EndLine and start/end points
         TextBoxLine startLine = getLineAt(aStart);
@@ -1165,7 +1188,7 @@ public class TextBox {
         int lineCount = getLineCount();
         double lineMaxY = lineCount > 0 ? getLine(lineCount - 1).getMaxY() : 0;
         double tboxMaxY = getMaxY();
-        if (lineMaxY >= tboxMaxY || getEnd() < getTextDoc().length())
+        if (lineMaxY >= tboxMaxY || getEndCharIndex() < getTextDoc().length())
             return true;
 
         // If not WrapLines, check X

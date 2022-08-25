@@ -1853,9 +1853,9 @@ public class TextArea extends View {
 
             // Get word bounds
             int start = word.getStart();
-            if (start >= tbox.getEnd()) break;
+            if (start >= tbox.getEndCharIndex()) break;
             int end = word.getEnd();
-            if (end > tbox.getEnd()) end = tbox.getEnd();
+            if (end > tbox.getEndCharIndex()) end = tbox.getEndCharIndex();
 
             // If text editor selection starts in word bounds, just continue - they are still working on this word
             if (start <= getSelStart() && getSelStart() <= end)
@@ -1876,11 +1876,11 @@ public class TextArea extends View {
 
                 // If starting line, adjust x1 for starting character
                 if (i == startLineIndex)
-                    x1 = line.getXForChar(start - line.getStart() - tbox.getStart());
+                    x1 = line.getXForChar(start - line.getStart() - tbox.getStartCharIndex());
 
                 // If ending line, adjust x2 for ending character
                 if (i == endLineIndex)
-                    x2 = line.getXForChar(end - line.getStart() - tbox.getStart());
+                    x2 = line.getXForChar(end - line.getStart() - tbox.getStartCharIndex());
 
                 // Append rect for line to path
                 path.moveTo(x1, y);
