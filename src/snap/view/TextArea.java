@@ -215,7 +215,8 @@ public class TextArea extends View {
      */
     public String getText()
     {
-        return getTextBox().getString();
+        TextDoc textDoc = getTextDoc();
+        return textDoc.getString();
     }
 
     /**
@@ -228,12 +229,13 @@ public class TextArea extends View {
         if (str.length() == length() && (str.length() == 0 || str.equals(getText()))) return;
 
         // Set string and notify textDidChange
-        getTextBox().setString(aString);
+        TextBox textBox = getTextBox();
+        textBox.setString(aString);
         textDidChange();
 
         // Reset selection (to line end if single-line, otherwise text start)
-        int sindex = getTextBox().getLineCount() == 1 && length() < 40 ? length() : 0;
-        setSel(sindex);
+        int selIndex = textBox.getLineCount() == 1 && length() < 40 ? length() : 0;
+        setSel(selIndex);
     }
 
     /**
@@ -247,6 +249,7 @@ public class TextArea extends View {
     public void setEditable(boolean aValue)
     {
         if (aValue == isEditable()) return;
+
         firePropChange(Editable_Prop, _editable, _editable = aValue);
 
         // If editable, set some related attributes
@@ -256,7 +259,9 @@ public class TextArea extends View {
             setFocusable(true);
             setFocusWhenPressed(true);
             setFocusKeysEnabled(false);
-        } else {
+        }
+
+        else {
             disableEvents(MouseEvents);
             disableEvents(KeyEvents);
             setFocusable(false);
@@ -277,7 +282,8 @@ public class TextArea extends View {
     {
         if (aValue == _wrapLines) return;
         firePropChange(WrapLines_Prop, _wrapLines, _wrapLines = aValue);
-        getTextBox().setWrapLines(aValue);
+        TextBox textBox = getTextBox();
+        textBox.setWrapLines(aValue);
     }
 
     /**
@@ -308,7 +314,8 @@ public class TextArea extends View {
      */
     public TextStyle getDefaultStyle()
     {
-        return getTextDoc().getDefaultStyle();
+        TextDoc textDoc = getTextDoc();
+        return textDoc.getDefaultStyle();
     }
 
     /**
@@ -316,7 +323,8 @@ public class TextArea extends View {
      */
     public void setDefaultStyle(TextStyle aStyle)
     {
-        getTextDoc().setDefaultStyle(aStyle);
+        TextDoc textDoc = getTextDoc();
+        textDoc.setDefaultStyle(aStyle);
     }
 
     /**
@@ -324,7 +332,8 @@ public class TextArea extends View {
      */
     public TextLineStyle getDefaultLineStyle()
     {
-        return getTextDoc().getDefaultLineStyle();
+        TextDoc textDoc = getTextDoc();
+        return textDoc.getDefaultLineStyle();
     }
 
     /**
@@ -332,7 +341,8 @@ public class TextArea extends View {
      */
     public void setDefaultLineStyle(TextLineStyle aLineStyle)
     {
-        getTextDoc().setDefaultLineStyle(aLineStyle);
+        TextDoc textDoc = getTextDoc();
+        textDoc.setDefaultLineStyle(aLineStyle);
     }
 
     /**
@@ -346,7 +356,8 @@ public class TextArea extends View {
     public void setFireActionOnEnterKey(boolean aValue)
     {
         if (aValue == _fireActionOnEnterKey) return;
-        if (aValue) enableEvents(Action);
+        if (aValue)
+            enableEvents(Action);
         else getEventAdapter().disableEvents(this, Action);
         firePropChange(FireActionOnEnterKey_Prop, _fireActionOnEnterKey, _fireActionOnEnterKey = aValue);
     }
@@ -370,7 +381,8 @@ public class TextArea extends View {
      */
     public int length()
     {
-        return getTextBox().length();
+        TextDoc textDoc = getTextDoc();
+        return textDoc.length();
     }
 
     /**
@@ -378,7 +390,8 @@ public class TextArea extends View {
      */
     public char charAt(int anIndex)
     {
-        return getTextBox().charAt(anIndex);
+        TextDoc textDoc = getTextDoc();
+        return textDoc.charAt(anIndex);
     }
 
     /**
@@ -426,7 +439,9 @@ public class TextArea extends View {
      */
     public TextSel getSel()
     {
-        return _sel != null ? _sel : (_sel = new TextSel(_textBox, _selAnchor, _selIndex));
+        if (_sel != null) return _sel;
+        TextSel sel = new TextSel(_textBox, _selAnchor, _selIndex);
+        return _sel = sel;
     }
 
     /**
@@ -484,8 +499,9 @@ public class TextArea extends View {
      */
     protected void repaintSel()
     {
-        Shape shape = getSel().getPath();
-        Rect rect = shape.getBounds();
+        TextSel sel = getSel();
+        Shape selPath = sel.getPath();
+        Rect rect = selPath.getBounds();
         rect.inset(-1);
         repaint(rect);
     }
@@ -496,19 +512,21 @@ public class TextArea extends View {
     protected void scrollSelToVisible()
     {
         // Get selection rect. If empty, outset by 1. If abuts left border, make sure left border is visible.
-        Rect srect = getSel().getPath().getBounds();
-        if (srect.isEmpty()) srect.inset(-1, -2);
-        if (srect.getX() - 1 <= getTextBox().getX()) {
-            srect.setX(-getX());
-            srect.setWidth(10);
+        TextSel sel = getSel();
+        Rect selRect = sel.getPath().getBounds();
+        if (selRect.isEmpty())
+            selRect.inset(-1, -2);
+        if (selRect.x - 1 <= getTextBox().getX()) {
+            selRect.setX(-getX());
+            selRect.setWidth(10);
         }
 
         // If selection rect not fully contained in visible rect, scrollRectToVisible
         Rect vrect = getClipAllBounds();
         if (vrect == null || vrect.isEmpty()) return;
-        if (!vrect.contains(srect)) {
-            if (!srect.intersects(vrect)) srect.inset(0, -100);
-            scrollToVisible(srect);
+        if (!vrect.contains(selRect)) {
+            if (!selRect.intersects(vrect)) selRect.inset(0, -100);
+            scrollToVisible(selRect);
         }
     }
 
@@ -568,7 +586,8 @@ public class TextArea extends View {
      */
     public Color getTextColor()
     {
-        return getSelStyle().getColor();
+        TextStyle selStyle = getSelStyle();
+        return selStyle.getColor();
     }
 
     /**
@@ -584,7 +603,8 @@ public class TextArea extends View {
      */
     public Paint getTextFill()
     {
-        return getSelStyle().getColor();
+        TextStyle selStyle = getSelStyle();
+        return selStyle.getColor();
     }
 
     /**
@@ -600,7 +620,8 @@ public class TextArea extends View {
      */
     public Border getTextBorder()
     {
-        return getSelStyle().getBorder();
+        TextStyle selStyle = getSelStyle();
+        return selStyle.getBorder();
     }
 
     /**
@@ -616,7 +637,8 @@ public class TextArea extends View {
      */
     public TextFormat getFormat()
     {
-        return getSelStyle().getFormat();
+        TextStyle selStyle = getSelStyle();
+        return selStyle.getFormat();
     }
 
     /**
@@ -643,7 +665,8 @@ public class TextArea extends View {
      */
     public boolean isUnderlined()
     {
-        return getSelStyle().isUnderlined();
+        TextStyle selStyle = getSelStyle();
+        return selStyle.isUnderlined();
     }
 
     /**
@@ -659,7 +682,8 @@ public class TextArea extends View {
      */
     public void setSuperscript()
     {
-        int state = getSelStyle().getScripting();
+        TextStyle selStyle = getSelStyle();
+        int state = selStyle.getScripting();
         setSelStyleValue(TextStyle.SCRIPTING_KEY, state == 0 ? 1 : 0);
     }
 
@@ -668,7 +692,8 @@ public class TextArea extends View {
      */
     public void setSubscript()
     {
-        int state = getSelStyle().getScripting();
+        TextStyle selStyle = getSelStyle();
+        int state = selStyle.getScripting();
         setSelStyleValue(TextStyle.SCRIPTING_KEY, state == 0 ? -1 : 0);
     }
 
@@ -720,8 +745,35 @@ public class TextArea extends View {
      */
     public TextStyle getSelStyle()
     {
+        // If already set, just return
         if (_selStyle != null) return _selStyle;
-        return _selStyle = getStyleForCharIndex(getSelStart());
+
+        // Get, set, return
+        TextStyle textStyle = getSelStyleImpl();
+        return _selStyle = textStyle;
+    }
+
+    /**
+     * Returns the TextStyle for the current selection and/or input characters.
+     */
+    protected TextStyle getSelStyleImpl()
+    {
+        // If empty Sel, get style at SelStart
+        TextDoc textDoc = getTextDoc();
+        int selStart = getSelStart();
+        if (isSelEmpty())
+            return getStyleForCharIndex(selStart);
+
+        // Get Run at SelStart
+        TextRun selRun = textDoc.getRunForCharIndex(selStart);
+
+        // If SelStart at end of run but not end of line, get next run
+        TextLine selLine = selRun.getLine();
+        if (selStart == selLine.getStart() + selRun.getEnd() && selStart < selLine.getEnd())
+            selRun = selRun.getNext();
+
+        // Return
+        return selRun.getStyle();
     }
 
     /**
@@ -730,12 +782,15 @@ public class TextArea extends View {
     public void setSelStyleValue(String aKey, Object aValue)
     {
         // If selection is zero length, just modify input style
-        if (isSelEmpty() && isRichText())
-            _selStyle = getSelStyle().copyFor(aKey, aValue);
+        if (isSelEmpty() && isRichText()) {
+            TextStyle selStyle = getSelStyleImpl();
+            _selStyle = selStyle.copyFor(aKey, aValue);
+        }
 
             // If selection is multiple chars, apply attribute to text and reset SelStyle
         else {
-            getTextDoc().setStyleValue(aKey, aValue, getSelStart(), getSelEnd());
+            TextDoc textDoc = getTextDoc();
+            textDoc.setStyleValue(aKey, aValue, getSelStart(), getSelEnd());
             _selStyle = null;
             repaint();
         }

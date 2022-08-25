@@ -11,7 +11,7 @@ import snap.util.ArrayUtils;
 public class TextLine implements CharSequence, Cloneable {
 
     // The TextDoc that contains this line
-    protected TextDoc  _text;
+    protected TextDoc _textDoc;
 
     // The StringBuffer that holds line chars
     protected StringBuffer  _sb = new StringBuffer();
@@ -39,15 +39,15 @@ public class TextLine implements CharSequence, Cloneable {
      */
     public TextLine(TextDoc aTextDoc)
     {
-        _text = aTextDoc;
-        _lineStyle = _text.getDefaultLineStyle();
+        _textDoc = aTextDoc;
+        _lineStyle = _textDoc.getDefaultLineStyle();
         addRun(createRun(), 0);
     }
 
     /**
-     * Returns the RichText.
+     * Returns the TextDoc.
      */
-    public TextDoc getText()  { return _text; }
+    public TextDoc getTextDoc()  { return _textDoc; }
 
     /**
      * Returns the length of this text line.
@@ -272,7 +272,7 @@ public class TextLine implements CharSequence, Cloneable {
     public TextLine getNext()
     {
         int nextIndex = _index + 1;
-        return _text != null && nextIndex < _text.getLineCount() ? _text.getLine(nextIndex) : null;
+        return _textDoc != null && nextIndex < _textDoc.getLineCount() ? _textDoc.getLine(nextIndex) : null;
     }
 
     /**
@@ -350,8 +350,8 @@ public class TextLine implements CharSequence, Cloneable {
      */
     protected void updateText()
     {
-        if (_text != null)
-            _text.updateLines(getIndex());
+        if (_textDoc != null)
+            _textDoc.updateLines(getIndex());
         _width = -1;
     }
 

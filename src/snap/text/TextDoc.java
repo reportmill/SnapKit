@@ -374,7 +374,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     protected void addLine(TextLine aLine, int anIndex)
     {
         _lines.add(anIndex, aLine);
-        aLine._text = this;
+        aLine._textDoc = this;
         updateLines(anIndex - 1);
     }
 
@@ -384,7 +384,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     protected TextLine removeLine(int anIndex)
     {
         TextLine line = _lines.remove(anIndex);
-        line._text = null;
+        line._textDoc = null;
         updateLines(anIndex - 1);
         return line;
     }

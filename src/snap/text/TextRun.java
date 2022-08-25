@@ -11,7 +11,7 @@ import snap.gfx.Font;
  */
 public class TextRun implements CharSequence, Cloneable {
 
-    // The line that holds this run
+    // The line that contains this run
     protected TextLine _textLine;
 
     // The start char index of this run in line
@@ -37,6 +37,11 @@ public class TextRun implements CharSequence, Cloneable {
         super();
         _textLine = aTextLine;
     }
+
+    /**
+     * Returns the TextLine that contains this TextRun.
+     */
+    public TextLine getLine()  { return _textLine; }
 
     /**
      * Returns the string for this run.
