@@ -1827,10 +1827,7 @@ public class TextArea extends View {
     /**
      * Returns a mapped property name.
      */
-    public String getValuePropName()
-    {
-        return "Text";
-    }
+    public String getValuePropName()  { return "Text"; }
 
     /**
      * Returns the path for the current selection.
