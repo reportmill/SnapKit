@@ -470,14 +470,23 @@ public class TextBox {
     /**
      * Returns the TextLine at the given char index.
      */
-    public TextBoxLine getLineAt(int anIndex)
+    public TextBoxLine getLineForCharIndex(int anIndex)
     {
-        if (_needsUpdate && !_updating) update();
+        // If NeedsUpdate, do update
+        if (_needsUpdate && !_updating)
+            update();
+
+        // Iterate over lines and return first that contains index
         for (TextBoxLine line : _lines)
             if (anIndex < line.getEnd())
                 return line;
-        TextBoxLine last = getLineLast();
-        if (last != null && anIndex == last.getEnd()) return last;
+
+        // Get last line
+        TextBoxLine lastLine = getLineLast();
+        if (anIndex == lastLine.getEnd())
+            return lastLine;
+
+        // Complain
         throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + boxlen());
     }
 
@@ -628,7 +637,7 @@ public class TextBox {
 
         // Get start-line-index and start-char-index
         int lcount = getLineCount();
-        int sline = lcount > 0 ? getLineAt(aStart).getIndex() : 0;
+        int sline = lcount > 0 ? getLineForCharIndex(aStart).getIndex() : 0;
         int start = lcount > 0 ? getLine(sline).getStart() : aStart;
 
         // Remove lines for old range
@@ -663,8 +672,8 @@ public class TextBox {
     {
         // Get LineCount, startLineIndex and endLineIndex
         int lineCount = getLineCount(); if (lineCount == 0) return;
-        int startLineIndex = getLineAt(aStart).getIndex();
-        int endLineIndex = getLineAt(aEnd).getIndex();
+        int startLineIndex = getLineForCharIndex(aStart).getIndex();
+        int endLineIndex = getLineForCharIndex(aEnd).getIndex();
 
         // Extend endLineIndex to end of TextLine
         TextBoxLine endBoxLine = getLine(endLineIndex);
@@ -892,7 +901,7 @@ public class TextBox {
      */
     public TextBoxToken getTokenAt(int anIndex)
     {
-        TextBoxLine line = getLineAt(anIndex);
+        TextBoxLine line = getLineForCharIndex(anIndex);
         return line.getTokenAt(anIndex - line.getStart());
     }
 
@@ -990,8 +999,8 @@ public class TextBox {
         if (anEnd > getEndCharIndex()) anEnd = getEndCharIndex();
 
         // Get StartLine, EndLine and start/end points
-        TextBoxLine startLine = getLineAt(aStart);
-        TextBoxLine endLine = aStart == anEnd ? startLine : getLineAt(anEnd);
+        TextBoxLine startLine = getLineForCharIndex(aStart);
+        TextBoxLine endLine = aStart == anEnd ? startLine : getLineForCharIndex(anEnd);
         double startX = startLine.getXForChar(aStart - startLine.getStart()), startY = startLine.getBaseline();
         double endX = endLine.getXForChar(anEnd - endLine.getStart()), endY = endLine.getBaseline();
         startX = Math.min(startX, getMaxX());

@@ -162,7 +162,7 @@ public class TextSel {
     public int getCharUp()
     {
         int selIndex = getIndex();
-        TextBoxLine lastColumnLine = _tbox.getLineAt(selIndex);
+        TextBoxLine lastColumnLine = _tbox.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStart();
         TextBoxLine thisLine = getStartLine(), nextLine = thisLine.getPrevLine();
         int index = nextLine != null ? nextLine.getStart() + Math.min(nextLine.length() - 1, lastColumn) : getStart();
@@ -175,7 +175,7 @@ public class TextSel {
     public int getCharDown()
     {
         int selIndex = getIndex();
-        TextBoxLine lastColumnLine = _tbox.getLineAt(selIndex);
+        TextBoxLine lastColumnLine = _tbox.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStart();
         TextBoxLine thisLine = getEndLine(), nextLine = thisLine.getNextLine();
         int index = nextLine != null ? nextLine.getStart() + Math.min(nextLine.length() - 1, lastColumn) : getEnd();
@@ -210,7 +210,7 @@ public class TextSel {
      */
     public TextBoxLine getStartLine()
     {
-        return _tbox.getLineAt(getStart());
+        return _tbox.getLineForCharIndex(getStart());
     }
 
     /**
@@ -218,7 +218,7 @@ public class TextSel {
      */
     public TextBoxLine getEndLine()
     {
-        return _tbox.getLineAt(getEnd());
+        return _tbox.getLineForCharIndex(getEnd());
     }
 
     /**

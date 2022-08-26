@@ -1082,7 +1082,7 @@ public class TextArea extends View {
      */
     public TextBoxLine getLineAt(int anIndex)
     {
-        return getTextBox().getLineAt(anIndex);
+        return getTextBox().getLineForCharIndex(anIndex);
     }
 
     /**

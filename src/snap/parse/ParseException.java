@@ -54,12 +54,17 @@ public class ParseException extends RuntimeException {
         int charIndex = token != null ? token.getInputStart() : _parser.getTokenizer().getCharIndex();
         int lineIndex = token != null ? (token.getLineIndex() + 1) : _parser.getTokenizer().getLineNum();
         int colIndex = token != null ? token.getColumnIndex() : 0;
-        int lineEnd = _parser.getInput().toString().indexOf('\n', charIndex);
-        if (lineEnd < 0) lineEnd = _parser.getInput().length();
+
+        // Get Error region
+        String inputText = _parser.getInput().toString();
+        int lineEnd = inputText.indexOf('\n', charIndex);
+        if (lineEnd < 0)
+            lineEnd = inputText.length();
+        CharSequence errorChars = inputText.subSequence(charIndex, lineEnd);
 
         // Basic message
         StringBuffer sb = new StringBuffer("Failed to parse at line " + lineIndex + ", char " + colIndex);
-        sb.append(": ").append(_parser.getInput(), charIndex, lineEnd).append('\n');
+        sb.append(": ").append(errorChars).append('\n');
         sb.append("Expecting: ").append(_rule.getName() != null ? _rule.getName() : _rule);
 
         // Return string
