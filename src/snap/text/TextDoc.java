@@ -52,6 +52,14 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     public TextDoc()
     {
         super();
+        addDefaultLine();
+    }
+
+    /**
+     * Adds a default line.
+     */
+    protected void addDefaultLine()
+    {
         addLine(createLine(), 0);
     }
 
