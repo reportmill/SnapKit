@@ -175,20 +175,24 @@ public class SubText extends TextDoc {
         _lines.clear();
         _width = -1;
 
+        // Get TextLine at start char index
         int charIndex = _start;
-        while (charIndex < _end) {
-            TextLine textLine = _textDoc.getLineForCharIndex(charIndex);
+        TextLine textLine = _textDoc.getLineForCharIndex(charIndex);
+
+        // Iterate over TextLines and add SubTextLines for each
+        while (true) {
+
+            // Create, configure, add SubTextLine for TextLine
             int lineEnd = Math.min(textLine.getEnd(), _end);
             SubTextLine subLine = new SubTextLine(this, textLine, charIndex, lineEnd);
             subLine._index = _lines.size();
             _lines.add(subLine);
-            charIndex = lineEnd;
-        }
 
-        if (_lines.size() == 0) {
-            TextLine textLine = _textDoc.getLine(0);
-            TextLine subLine = new SubTextLine(this, textLine, 0, 0);
-            _lines.add(subLine);
+            // Get next TextLine - if beyond SubText.End, just break
+            textLine = textLine.getNext();
+            if (textLine == null || _end <= textLine.getStart())
+                break;
+            charIndex = lineEnd;
         }
     }
 
@@ -227,8 +231,8 @@ public class SubText extends TextDoc {
             // Handle remove chars
             else {
                 if (charIndex < _end) {
-                    int endCharIndex = Math.min(charIndex + removeChars.length(), _end);
-                    _end -= endCharIndex - charIndex;
+                    int endCharIndex = Math.min(_end - charIndex, removeChars.length());
+                    _end -= endCharIndex;
                     if (charIndex < _start)
                         _start -= Math.min(_start - charIndex, removeChars.length());
                     else needSubPropChange = true;
