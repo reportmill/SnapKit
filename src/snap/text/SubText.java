@@ -32,6 +32,16 @@ public class SubText extends TextDoc {
     }
 
     /**
+     * Returns the start char index.
+     */
+    public int getStartCharIndex()  { return _start; }
+
+    /**
+     * Returns the end char index.
+     */
+    public int getEndCharIndex()  { return _end; }
+
+    /**
      * Override to suppress.
      */
     @Override
