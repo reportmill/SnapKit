@@ -866,7 +866,8 @@ public class TextArea extends View {
 
         // Do actual replace chars
         TextStyle style = aStyle != null ? aStyle : aStart == getSelStart() ? getSelStyle() : getStyleForCharIndex(aStart);
-        getTextBox().replaceChars(aString, style, aStart, anEnd);
+        TextDoc textDoc = getTextDoc();
+        textDoc.replaceChars(aString, style, aStart, anEnd);
 
         // Update selection to be at end of new string
         if (doUpdateSel)
@@ -876,7 +877,8 @@ public class TextArea extends View {
         else if (aStart <= getSelEnd()) {
             int delta = strLen - (anEnd - aStart);
             int start = getSelStart();
-            if (aStart <= start) start += delta;
+            if (aStart <= start)
+                start += delta;
             setSel(start, getSelEnd() + delta);
         }
 
@@ -889,7 +891,8 @@ public class TextArea extends View {
      */
     public void replaceCharsWithRichText(RichText aRichText)
     {
-        replaceCharsWithRichText(aRichText, getSelStart(), getSelEnd(), true);
+        int selStart = getSelStart(), selEnd = getSelEnd();
+        replaceCharsWithRichText(aRichText, selStart, selEnd, true);
     }
 
     /**

@@ -32,6 +32,11 @@ public class SubText extends TextDoc {
     }
 
     /**
+     * Returns the TextDoc that this SubText references.
+     */
+    public TextDoc getTextDoc()  { return _textDoc; }
+
+    /**
      * Returns the start char index.
      */
     public int getStartCharIndex()  { return _start; }
