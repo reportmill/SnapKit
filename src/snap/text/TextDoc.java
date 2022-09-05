@@ -597,7 +597,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     }
 
     /**
-     * Sets the RichText to be underlined.
+     * Sets text to be underlined.
      */
     public void setUnderlined(boolean aFlag)
     {
@@ -605,15 +605,16 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     }
 
     /**
-     * Returns the horizontal alignment of the first paragraph of the RichText.
+     * Returns the horizontal alignment of the first paragraph of the text.
      */
     public HPos getAlignX()
     {
-        return getLineStyleForCharIndex(0).getAlign();
+        TextLineStyle lineStyle = getLineStyleForCharIndex(0);
+        return lineStyle.getAlign();
     }
 
     /**
-     * Sets the horizontal alignment of the xstring.
+     * Sets the horizontal alignment of the text.
      */
     public void setAlignX(HPos anAlignX)
     {
@@ -769,8 +770,8 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     public TextDoc clone()
     {
         // Do normal clone
-        RichText clone;
-        try { clone = (RichText) super.clone(); }
+        TextDoc clone;
+        try { clone = (TextDoc) super.clone(); }
         catch (CloneNotSupportedException e) { throw new RuntimeException(e); }
 
         // Reset lines array and length
