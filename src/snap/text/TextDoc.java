@@ -622,6 +622,11 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     }
 
     /**
+     * Returns the start char index (always 0, unless this is SubText).
+     */
+    public int getStartCharIndex()  { return 0; }
+
+    /**
      * Scales all the fonts in text by given factor.
      */
     public void scaleFonts(double aScale)

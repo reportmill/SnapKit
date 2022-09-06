@@ -39,6 +39,7 @@ public class SubText extends TextDoc {
     /**
      * Returns the start char index.
      */
+    @Override
     public int getStartCharIndex()  { return _start; }
 
     /**
