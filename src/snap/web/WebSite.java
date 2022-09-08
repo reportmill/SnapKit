@@ -33,7 +33,7 @@ public abstract class WebSite {
     private WebSite  _sandbox;
 
     // A map of properties associated with file
-    private Map  _props = new HashMap();
+    private Map  _props = new HashMap<>();
 
     // PropChangeListener for file changes
     private PropChangeListener  _fileLsnr = pc -> fileDidPropChange(pc);
@@ -78,7 +78,8 @@ public abstract class WebSite {
      */
     public String getName()
     {
-        return getURL().getPath() != null ? getURL().getPathName() : getURL().getHost();
+        WebURL url = getURL();
+        return url.getPath() != null ? url.getPathName() : url.getHost();
     }
 
     /**
@@ -86,7 +87,8 @@ public abstract class WebSite {
      */
     public String getHostName()
     {
-        return getURL().getHost();
+        WebURL url = getURL();
+        return url.getHost();
     }
 
     /**
@@ -94,7 +96,8 @@ public abstract class WebSite {
      */
     public String getPath()
     {
-        return getURL().getPath();
+        WebURL url = getURL();
+        return url.getPath();
     }
 
     /**
@@ -547,14 +550,7 @@ public abstract class WebSite {
      */
     public String toString()
     {
-        return getClass().getSimpleName() + ' ' + getURLString();
-    }
-
-    /**
-     * Returns a "not implemented" exception for string (method name).
-     */
-    private Exception notImpl(String aStr)
-    {
-        return new Exception(getClass().getName() + ": Not implemented:" + aStr);
+        String className = getClass().getSimpleName();
+        return className + ' ' + getURLString();
     }
 }

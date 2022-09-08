@@ -1,10 +1,17 @@
 package snap.web;
-import java.io.*;
-import java.net.*;
-import java.util.*;
 
 import snap.gfx.GFXEnv;
 import snap.util.FilePathUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A class to handle loading of URL items.
@@ -12,15 +19,16 @@ import snap.util.FilePathUtils;
 public class WebGetter {
 
     // A map of existing WebSites
-    static Map <WebURL, WebSite>  _sites = Collections.synchronizedMap(new HashMap());
-    
+    static Map<WebURL,WebSite>  _sites = Collections.synchronizedMap(new HashMap<>());
+
     /**
      * Returns a java.net.URL for given source.
      */
     public static URL getJavaURL(Object anObj) // throws MalformedURLException, IOException, IllegalArgumentException
     {
         // Handle String
-        if (anObj instanceof String) { String str = (String)anObj;
+        if (anObj instanceof String) {
+            String str = (String) anObj;
 
             // If it's our silly "Jar:/com/rm" format, return class resource URL
             if (str.startsWith("Jar:/com/reportmill"))
@@ -29,39 +37,41 @@ public class WebGetter {
                 return getJavaURL(WebURL.class, str.substring(4));
 
             // If string is Windows/Unix file path, make it a file URL
-            if (str.indexOf('\\')>=0) { String strlc = str.toLowerCase();
+            if (str.indexOf('\\') >= 0) {
+                String strlc = str.toLowerCase();
                 str = str.replace('\\', '/');
-                if(!str.startsWith("/") || !strlc.startsWith("file:")) str = '/' + str;
+                if (!str.startsWith("/") || !strlc.startsWith("file:")) str = '/' + str;
             }
             if (str.startsWith("/")) str = "file://" + str;
 
             // Get protocol for URL
             int ind = str.indexOf(':');
-            if (ind<0) throw new RuntimeException("Missing protocol in URL: " + str);
+            if (ind < 0) throw new RuntimeException("Missing protocol in URL: " + str);
             String scheme = str.substring(0, ind).toLowerCase();
 
             // Try to return URL
             try { return new URL(str); }
-            catch(MalformedURLException e) { }
+            catch (MalformedURLException e) { }
 
             // Try to return URL with bogus stream handler
             try { return new URL(null, str, new BogusURLStreamHandler()); }
-            catch(IOException e) { }
+            catch (IOException e) { }
         }
 
         // Handle File: Convert to Canonical URL to normalize path
-        if (anObj instanceof File) { File file = (File)anObj;
+        if (anObj instanceof File) {
+            File file = (File) anObj;
             try { return file.getCanonicalFile().toURI().toURL(); }
-            catch(IOException e) { }
+            catch (IOException e) { }
         }
 
         // Handle URL: Get string, decode and strip "jar:" prefix if found (we don't use that)
         if (anObj instanceof URL)
-            return (URL)anObj;
+            return (URL) anObj;
 
         // Handle Class
         if (anObj instanceof Class)
-            return getJavaURL((Class)anObj, null);
+            return getJavaURL((Class) anObj, null);
 
         // Complain
         throw new IllegalArgumentException("No URL found for: " + anObj);
@@ -74,9 +84,13 @@ public class WebGetter {
     {
         // Get absolute path to class/resource
         String path = '/' + aClass.getName().replace('.', '/') + ".class";
-        if (aName!=null) {
-            if(aName.startsWith("/")) path = aName;
-            else { int sep = path.lastIndexOf('/'); path = path.substring(0, sep+1) + aName; }
+        if (aName != null) {
+            if (aName.startsWith("/"))
+                path = aName;
+            else {
+                int sep = path.lastIndexOf('/');
+                path = path.substring(0, sep + 1) + aName;
+            }
         }
 
         // Get URL for full path
@@ -91,7 +105,7 @@ public class WebGetter {
     {
         // Get Site from map and return
         WebSite site = _sites.get(aSiteURL);
-        if (site!=null)
+        if (site != null)
             return site;
 
         // Otherwise, create site, set URL and return
@@ -116,7 +130,9 @@ public class WebGetter {
         // Get parentSiteURL, scheme, path and type
         WebURL parentSiteURL = aSiteURL.getSiteURL();
         String scheme = aSiteURL.getScheme();
-        String path = aSiteURL.getPath(); if (path==null) path = "";
+        String path = aSiteURL.getPath();
+        if (path == null)
+            path = "";
         String type = FilePathUtils.getExtension(path).toLowerCase();
 
         // Handle ZipSite and JarSite
@@ -124,7 +140,7 @@ public class WebGetter {
             return new ZipFileSite();
 
         // Handle DirSite
-        if (parentSiteURL!=null && parentSiteURL.getPath()!=null)
+        if (parentSiteURL != null && parentSiteURL.getPath() != null)
             return new DirSite();
 
         // Handle FileSite
@@ -148,6 +164,9 @@ public class WebGetter {
      * A URLStreamHandlerFactory.
      */
     private static class BogusURLStreamHandler extends URLStreamHandler {
-        protected URLConnection openConnection(URL u) { return null; }
+        protected URLConnection openConnection(URL u)
+        {
+            return null;
+        }
     }
 }

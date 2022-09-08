@@ -190,7 +190,8 @@ public class WebURL {
      */
     public WebSite getSite()
     {
-        return getSiteURL().getAsSite();
+        WebURL siteURL = getSiteURL();
+        return siteURL.getAsSite();
     }
 
     /**
@@ -198,7 +199,10 @@ public class WebURL {
      */
     public WebURL getSiteURL()
     {
-        return _siteURL != null ? _siteURL : (_siteURL = getURL(_urlString.getSite()));
+        if (_siteURL != null) return _siteURL;
+        String siteURLString = _urlString.getSite();
+        WebURL siteURL = getURL(siteURLString);
+        return _siteURL = siteURL;
     }
 
     /**
@@ -206,7 +210,9 @@ public class WebURL {
      */
     public WebSite getAsSite()
     {
-        return _asSite != null ? _asSite : (_asSite = WebGetter.getSite(this));
+        if (_asSite != null) return _asSite;
+        WebSite site = WebGetter.getSite(this);
+        return _asSite = site;
     }
 
     /**
