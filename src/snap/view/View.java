@@ -132,7 +132,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private List <Binding>  _bindings = Collections.EMPTY_LIST;
 
     // Client properties
-    private Map  _props = Collections.EMPTY_MAP;
+    private Map<String,Object>  _props = Collections.EMPTY_MAP;
 
     // The parent of this view
     private ParentView  _parent;
@@ -150,7 +150,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     protected Rect  _repaintRect;
 
     // Provides information for physics simulations
-    private ViewPhysics  _physics;
+    private ViewPhysics<?>  _physics;
 
     // The view owner of this view
     private ViewOwner  _owner;
@@ -1649,7 +1649,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Object setProp(String aName, Object aValue)
     {
-        if (_props == Collections.EMPTY_MAP) _props = new HashMap();
+        if (_props == Collections.EMPTY_MAP) _props = new HashMap<>();
         Object val = _props.put(aName, aValue); //firePropChange(aName, val, aValue);
         return val;
     }
@@ -2390,13 +2390,20 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void setFocused(boolean aValue)
     {
+        // if already set, just return
         if (aValue == _focused) return;
+
+        // Set, fire prop change
         firePropChange(Focused_Prop, _focused, _focused = aValue);
 
         // Register for repaint
         if (isFocusPainted()) {
-            if (aValue) repaint();
-            else repaint(ViewEffect.getFocusEffect().getBounds(getBoundsLocal()));
+            if (aValue)
+                repaint();
+            else {
+                Rect repaintRect = ViewEffect.getFocusEffect().getBounds(getBoundsLocal());
+                repaint(repaintRect);
+            }
         }
     }
 

@@ -1181,9 +1181,12 @@ public class TextArea extends View {
         _downY = anEvent.getY();
 
         // Determine if word or paragraph selecting
-        if (!anEvent.isShiftDown()) _wordSel = _pgraphSel = false;
-        if (anEvent.getClickCount() == 2) _wordSel = true;
-        else if (anEvent.getClickCount() == 3) _pgraphSel = true;
+        if (!anEvent.isShiftDown())
+            _wordSel = _pgraphSel = false;
+        if (anEvent.getClickCount() == 2)
+            _wordSel = true;
+        else if (anEvent.getClickCount() == 3)
+            _pgraphSel = true;
 
         // Get selected range for down point and drag point
         TextSel sel = new TextSel(_textBox, _downX, _downY, _downX, _downY, _wordSel, _pgraphSel);
@@ -1808,8 +1811,11 @@ public class TextArea extends View {
         if (aValue == isFocused()) return;
         super.setFocused(aValue);
 
-        // Toggle caret animation and repaint
-        if (!aValue || _downX == 0) setCaretAnim();
+        // Update caret
+        setShowCaret(false);
+        setCaretAnim();
+
+        // Repaint ?
         repaint();
 
         // Handle FireActionOnFocusLost
