@@ -649,10 +649,18 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
      */
     public int indexOf(String aStr, int aStart)
     {
+        // Iterate over lines
         for (TextLine line : getLines()) {
+
+            // If startIndex beyond line.End, skip
             if (aStart >= line.getEnd()) continue;
+
+            // Convert startIndex to line charIndex
             int lineStart = line.getStart();
-            int index = line.indexOf(aStr, aStart - lineStart);
+            int startIndexInLine = Math.max(aStart - lineStart, 0);
+
+            // Forward to line and return if found
+            int index = line.indexOf(aStr, startIndexInLine);
             if (index >= 0)
                 return index + lineStart;
         }

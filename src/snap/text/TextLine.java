@@ -4,6 +4,7 @@
 package snap.text;
 import snap.geom.HPos;
 import snap.util.ArrayUtils;
+import snap.util.SnapUtils;
 
 /**
  * This class represents a line of text in a Text.
@@ -67,7 +68,12 @@ public class TextLine implements CharSequence, Cloneable {
     /**
      * Returns the index of given string in line.
      */
-    public int indexOf(String aStr, int aStart)  { return _sb.indexOf(aStr, aStart); }
+    public int indexOf(String aStr, int aStart)
+    {
+        if (SnapUtils.isTeaVM)
+            return _sb.toString().indexOf(aStr, aStart);
+        return _sb.indexOf(aStr, aStart);
+    }
 
     /**
      * Returns the string for the line.
