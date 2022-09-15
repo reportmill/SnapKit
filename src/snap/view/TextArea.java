@@ -167,6 +167,9 @@ public class TextArea extends View {
         // Reset selection
         if (getSelStart() != 0 || !isSelEmpty())
             setSel(0);
+
+        // Relayout parent, repaint
+        relayoutParent();
         repaint();
     }
 
