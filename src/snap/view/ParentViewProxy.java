@@ -63,12 +63,20 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
      */
     public double getChildrenMaxXAllWithInsets()
     {
+        // Get children
         ViewProxy[] children = getChildren();
         Insets ins = getInsetsAll();
-        double childMaxX = ins.getLeft();
-        for (ViewProxy child : children)
-            childMaxX = Math.max(childMaxX, child.getMaxX());
-        return Math.ceil(childMaxX + ins.right);
+        double childMaxXAll = ins.getWidth();
+
+        // Iterate over children to get MaxX
+        for (ViewProxy child : children) {
+            double childMaxX = child.getMaxX();
+            childMaxX += Math.max(child.getMargin().right, ins.right);
+            childMaxXAll = Math.max(childMaxXAll, childMaxX);
+        }
+
+        // Return (round up)
+        return Math.ceil(childMaxXAll);
     }
 
     /**
@@ -93,12 +101,20 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
      */
     public double getChildrenMaxYAllWithInsets()
     {
+        // Get children
         ViewProxy[] children = getChildren();
         Insets ins = getInsetsAll();
-        double childMaxY = ins.top;
-        for (ViewProxy child : children)
-            childMaxY = Math.max(childMaxY, child.getMaxY());
-        return Math.ceil(childMaxY + ins.bottom);
+        double childMaxYAll = ins.getHeight();
+
+        // Iterate over children to get MaxY
+        for (ViewProxy child : children) {
+            double childMaxY = child.getMaxY();
+            childMaxY += Math.max(child.getMargin().bottom, ins.bottom);
+            childMaxYAll = Math.max(childMaxY, childMaxY);
+        }
+
+        // Return (round up)
+        return Math.ceil(childMaxYAll);
     }
 
     /**
