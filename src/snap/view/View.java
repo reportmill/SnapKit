@@ -1824,7 +1824,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public double getPrefWidth(double aH)
     {
-        return _prefWidth >= 0 ? _prefWidth : getPrefWidthImpl(aH);
+        if (_prefWidth >= 0) return _prefWidth;
+        return getPrefWidthImpl(aH);
     }
 
     /**
@@ -1855,7 +1856,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public double getPrefHeight(double aW)
     {
-        return _prefHeight >= 0 ? _prefHeight : getPrefHeightImpl(aW);
+        if (_prefHeight >= 0) return _prefHeight;
+        return getPrefHeightImpl(aW);
     }
 
     /**
@@ -1883,7 +1885,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public Size getPrefSize()
     {
-        return new Size(getPrefWidth(), getPrefHeight());
+        double prefW = getPrefWidth();
+        double prefH = getPrefHeight();
+        return new Size(prefW, prefH);
     }
 
     /**
@@ -1891,7 +1895,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setPrefSize(Size aSize)
     {
-        setPrefSize(aSize.getWidth(), aSize.getHeight());
+        setPrefSize(aSize.width, aSize.height);
     }
 
     /**

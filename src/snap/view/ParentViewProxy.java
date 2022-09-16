@@ -110,7 +110,7 @@ public abstract class ParentViewProxy<T extends View> extends ViewProxy<T> {
         for (ViewProxy child : children) {
             double childMaxY = child.getMaxY();
             childMaxY += Math.max(child.getMargin().bottom, ins.bottom);
-            childMaxYAll = Math.max(childMaxY, childMaxY);
+            childMaxYAll = Math.max(childMaxYAll, childMaxY);
         }
 
         // Return (round up)
