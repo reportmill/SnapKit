@@ -924,7 +924,7 @@ public class TextArea extends View {
     /**
      * Replaces the current selection with the given contents (TextDoc or String).
      */
-    protected void replaceCharsWithContent(Object theContent)
+    public void replaceCharsWithContent(Object theContent)
     {
         // If Clipboard has TextDoc, paste it
         if (theContent instanceof TextDoc) {
