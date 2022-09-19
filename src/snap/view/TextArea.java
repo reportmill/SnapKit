@@ -819,7 +819,8 @@ public class TextArea extends View {
      */
     public void addChars(String aStr, TextStyle aStyle)
     {
-        replaceChars(aStr, aStyle, length(), length(), true);
+        int length = length();
+        replaceChars(aStr, aStyle, length, length, true);
     }
 
     /**
@@ -835,7 +836,9 @@ public class TextArea extends View {
      */
     public void delete()
     {
-        delete(getSelStart(), getSelEnd(), true);
+        int selStart = getSelStart();
+        int selEnd = getSelEnd();
+        delete(selStart, selEnd, true);
     }
 
     /**
@@ -851,7 +854,9 @@ public class TextArea extends View {
      */
     public void replaceChars(String aString)
     {
-        replaceChars(aString, null, getSelStart(), getSelEnd(), true);
+        int selStart = getSelStart();
+        int selEnd = getSelEnd();
+        replaceChars(aString, null, selStart, selEnd, true);
     }
 
     /**
@@ -861,7 +866,8 @@ public class TextArea extends View {
     {
         // Get string length (if no string length and no char range, just return)
         int strLen = aString != null ? aString.length() : 0;
-        if (strLen == 0 && aStart == anEnd) return;
+        if (strLen == 0 && aStart == anEnd)
+            return;
 
         // If change is not adjacent to last change, call UndoerSaveChanges
         if ((strLen > 0 && aStart != _lastReplaceIndex) || (strLen == 0 && anEnd != _lastReplaceIndex))
@@ -890,32 +896,52 @@ public class TextArea extends View {
     }
 
     /**
-     * Replaces the current selection with the given RichText.
+     * Replaces the current selection with the given TextDoc.
      */
-    public void replaceCharsWithRichText(RichText aRichText)
+    public void replaceCharsWithTextDoc(TextDoc aTextDoc, int aStart, int anEnd, boolean doUpdateSel)
     {
-        int selStart = getSelStart(), selEnd = getSelEnd();
-        replaceCharsWithRichText(aRichText, selStart, selEnd, true);
-    }
+        int start = aStart;
+        int end = anEnd;
 
-    /**
-     * Replaces the current selection with the given RichText.
-     */
-    public void replaceCharsWithRichText(RichText aRichText, int aStart, int anEnd, boolean doUpdateSel)
-    {
         // Iterate over runs and do replace for each one individually
-        int start = aStart, end = anEnd;
-        for (TextLine line : aRichText.getLines()) {
+        for (TextLine line : aTextDoc.getLines()) {
             TextRun[] lineRuns = line.getRuns();
             for (TextRun run : lineRuns) {
-                replaceChars(run.getString(), run.getStyle(), start, end, false);
+                String runStr = run.getString();
+                TextStyle runStyle = run.getStyle();
+                replaceChars(runStr, runStyle, start, end, false);
                 start = end = start + run.length();
             }
         }
 
         // Update selection to be at end of new string
-        if (doUpdateSel)
-            setSel(aStart + aRichText.length());
+        if (doUpdateSel) {
+            int selIndex = aStart + aTextDoc.length();
+            setSel(selIndex);
+        }
+    }
+
+    /**
+     * Replaces the current selection with the given contents (TextDoc or String).
+     */
+    protected void replaceCharsWithContent(Object theContent)
+    {
+        // If Clipboard has TextDoc, paste it
+        if (theContent instanceof TextDoc) {
+            TextDoc textDoc = (TextDoc) theContent;
+            int selStart = getSelStart();
+            int selEnd = getSelEnd();
+            replaceCharsWithTextDoc(textDoc, selStart, selEnd, true);
+        }
+
+        // If Clipboard has String, paste it
+        else if (theContent instanceof String) {
+            String str = (String) theContent;
+            replaceChars(str);
+        }
+
+        // Complain about the unknown
+        else System.out.println("TextArea.replaceCharsWithContent: Unknown content: " + theContent);
     }
 
     /**
@@ -1547,22 +1573,39 @@ public class TextArea extends View {
         // Clear last undo set so paste doesn't get lumped in to coalescing
         undoerSaveChanges();
 
+        // Get clipboard content
+        Object content = getClipboardContent(clipboard);
+
+        // Paste clipboard content
+        replaceCharsWithContent(content);
+    }
+
+    /**
+     * Returns the clipboard content.
+     */
+    protected Object getClipboardContent(Clipboard clipboard)
+    {
         // If Clipboard has TextDoc, paste it
         if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
             byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
-            RichText richText = new RichText();
-            XMLArchiver archiver = new XMLArchiver();
-            archiver.setRootObject(richText);
-            archiver.readFromXMLBytes(bytes);
-            replaceCharsWithRichText(richText);
+            if (bytes != null && bytes.length > 0) {  // Shouldn't need this - Happens when pasting content from prior instance
+                RichText richText = new RichText();
+                XMLArchiver archiver = new XMLArchiver();
+                archiver.setRootObject(richText);
+                archiver.readFromXMLBytes(bytes);
+                return  richText;
+            }
         }
 
         // If Clipboard has String, paste it
-        else if (clipboard.hasString()) {
+        if (clipboard.hasString()) {
             String str = clipboard.getString();
             if (str != null && str.length() > 0)
-                replaceChars(str);
+                return  str;
         }
+
+        // Return not found
+        return null;
     }
 
     /**
