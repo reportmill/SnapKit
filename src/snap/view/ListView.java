@@ -22,7 +22,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     private ListArea<T>  _listArea;
     
     // The ScrollView
-    private ScrollView  _scroll;
+    private ScrollView  _scrollView;
     
     // The Preferred number of rows
     private int  _prefRowCount = -1;
@@ -31,7 +31,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     private int  _maxRowCount = -1;
 
     // Constants for properties
-    public static final String ItemKey_Prop = "ItemKey";
+    public static final String ItemKey_Prop = ListArea.ItemKey_Prop;
     public static final String Sel_Prop = ListArea.Sel_Prop;
 
     /**
@@ -51,10 +51,10 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         //_listArea.setFocusWhenPressed(false);
 
         // Create/configure ScrollView
-        _scroll = createScrollView();
-        _scroll.setBorder(null);
-        _scroll.setContent(_listArea);
-        addChild(_scroll);
+        _scrollView = createScrollView();
+        _scrollView.setBorder(null);
+        _scrollView.setContent(_listArea);
+        addChild(_scrollView);
 
         // Configure this ListView
         enableEvents(KeyPress, Action);
@@ -74,7 +74,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the ScrollView.
      */
-    public ScrollView getScrollView()  { return _scroll; }
+    public ScrollView getScrollView()  { return _scrollView; }
 
     /**
      * Creates the ScrollView.
@@ -239,7 +239,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return BoxView.getPrefWidth(this, _scroll, aH);
+        return BoxView.getPrefWidth(this, _scrollView, aH);
     }
 
     /**
@@ -252,7 +252,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
             return getPrefRowCount() * getRowHeight() + getInsetsAll().getHeight();
 
         // Return pref height of Scroll
-        return BoxView.getPrefHeight(this, _scroll, aW);
+        return BoxView.getPrefHeight(this, _scrollView, aW);
     }
 
     /**
@@ -260,7 +260,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      */
     protected void layoutImpl()
     {
-        BoxView.layout(this, _scroll, true, true);
+        BoxView.layout(this, _scrollView, true, true);
     }
 
     /**
@@ -337,6 +337,17 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         String pname = aPC.getPropName();
         if (pname==ListArea.Sel_Prop)
             firePropChange(Sel_Prop, aPC.getOldValue(), aPC.getNewValue());
+    }
+
+    /**
+     * Override to sync ScrollView and ListArea.
+     */
+    @Override
+    public void setBorderRadius(double aValue)
+    {
+        super.setBorderRadius(aValue);
+        _scrollView.setBorderRadius(aValue);
+        _listArea.setBorderRadius(aValue);
     }
 
     /**

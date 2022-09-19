@@ -5,7 +5,6 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.geom.Rect;
-import snap.geom.RoundRect;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -29,9 +28,6 @@ public class TextField extends ParentView {
     // The string to show when textfield is empty
     private String  _promptText;
     
-    // The radius of border
-    private double  _rad = 4;
-    
     // The selection start/end
     private int  _selStart, _selEnd;
     
@@ -42,7 +38,7 @@ public class TextField extends ParentView {
     private boolean  _compSel;
     
     // The mouse down point
-    private double  _downX, _downY;
+    private double  _downX;
     
     // The animator for caret blinking
     private ViewTimer  _caretTimer;
@@ -60,11 +56,11 @@ public class TextField extends ParentView {
     public static final String ColCount_Prop = "ColCount";
     public static final String Edited_Prop = "Edited";
     public static final String PromptText_Prop = "PromptText";
-    public static final String Radius_Prop = "Radius";
     public static final String Sel_Prop = "Selection";
     public static final String TextFill_Prop = "TextFill";
 
     // Constants for property defaults
+    private static Border DEFAULT_TEXT_FIELD_BORDER = Border.createLineBorder(Color.LIGHTGRAY, 1).copyForInsets(Insets.EMPTY);
     private static final Insets DEFAULT_TEXT_FIELD_PADDING = new Insets(2,2,2,5);
 
     // The color of the border when focused
@@ -76,7 +72,7 @@ public class TextField extends ParentView {
     public TextField()
     {
         setFill(Color.WHITE);
-        setBorder(getDefaultBorder());
+        setBorder(DEFAULT_TEXT_FIELD_BORDER);
         enableEvents(Action);
         enableEvents(MouseEvents);
         enableEvents(KeyEvents);
@@ -146,39 +142,21 @@ public class TextField extends ParentView {
     public Label getLabel()  { return _label; }
 
     /**
-     * Returns the rounding radius.
-     */
-    public double getRadius()  { return _rad; }
-
-    /**
-     * Sets the rounding radius.
-     */
-    public void setRadius(double aValue)
-    {
-        if (aValue==getRadius()) return;
-        firePropChange(Radius_Prop, _rad, _rad = aValue);
-    }
-
-    /**
      * Returns the default alignment.
      */
+    @Override
     public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
     /**
      * Returns the default border.
      */
-    public Border getDefaultBorder()
-    {
-        if (_defBorder!=null) return _defBorder;
-        Border bdr = Border.createLineBorder(Color.LIGHTGRAY, 1);
-        bdr = bdr.copyForInsets(Insets.EMPTY);
-        return _defBorder = bdr;
-    }
-    private static Border _defBorder;
+    @Override
+    public Border getDefaultBorder()  { return DEFAULT_TEXT_FIELD_BORDER; }
 
     /**
      * Override to return white.
      */
+    @Override
     public Paint getDefaultFill()  { return Color.WHITE; }
 
     /**
@@ -304,7 +282,7 @@ public class TextField extends ParentView {
         if (aValue==isFocused()) return; super.setFocused(aValue);
 
         // Toggle caret animation and repaint
-        if (!aValue || _downX==0) setCaretAnim();
+        if (!aValue || _downX == 0) setCaretAnim();
         repaint();
 
         // If focus gained, set FocusedGainedValue and select all (if not from mouse press)
@@ -592,51 +570,36 @@ public class TextField extends ParentView {
     }
 
     /**
-     * Paint component.
-     */
-    protected void paintBack(Painter aPntr)
-    {
-        double w = getWidth(), h = getHeight(); //aPntr.clearRect(0,0,w,h);
-        RoundRect rrect = new RoundRect(.5, .5, w-1, h-1, _rad);
-
-        // Fill round rect
-        Paint fill = getFill();
-        if (fill!=null) {
-            aPntr.setPaint(getFill()); aPntr.fill(rrect);
-        }
-
-        // Stroke round rect
-        Border bdr = getBorder();
-        if (bdr!=null) {
-            aPntr.setColor(bdr.getColor()); aPntr.setStroke(Stroke.Stroke1);
-            aPntr.draw(rrect);
-        }
-    }
-
-    /**
      * Paints TextField.
      */
+    @Override
     protected void paintFront(Painter aPntr)
     {
         // If empty, just paint selection and return
-        if (length()==0) {
+        if (length() == 0) {
             paintSel(aPntr); return; }
 
         // Get text bounds
-        Rect bnds = getTextBounds(true);
-        double tx = bnds.x, ty = bnds.y;
+        Rect textBounds = getTextBounds(true);
 
         // Clip to text bounds
-        aPntr.save(); aPntr.clip(bnds);
+        aPntr.save();
+        aPntr.clip(textBounds);
 
         // Paint selection
         paintSel(aPntr);
 
+        // Get/set font/paint
+        Font font = getFont();
+        aPntr.setFont(font);
+        aPntr.setPaint(_textFill);
+
         // Paint text
         String str = getText();
-        Font font = getFont();
-        aPntr.setFont(font); aPntr.setPaint(_textFill);
-        aPntr.drawString(str, tx, ty + Math.ceil(font.getAscent()));
+        double baseY = textBounds.y + Math.ceil(font.getAscent());
+        aPntr.drawString(str, textBounds.x, baseY);
+
+        // Restore clip
         aPntr.restore();
     }
 
@@ -645,14 +608,27 @@ public class TextField extends ParentView {
      */
     protected void paintSel(Painter aPntr)
     {
-        if (isFocused()) {
-            Rect sbnds = getSelBounds(); double sx = sbnds.x, sy = sbnds.y, sh = sbnds.height;
-            if (isSelEmpty()) { if (!_hideCaret) {
-                aPntr.setPaint(_textFill); aPntr.setStroke(Stroke.Stroke1); aPntr.drawLine(sx,sy,sx,sy+sh);
-            }}
-            else {
-                aPntr.setPaint(SELECTION_COLOR); aPntr.fill(sbnds);
+        // If not focused, just return
+        if (!isFocused())
+            return;
+
+        // Paint caret (empty selection)
+        if (isSelEmpty()) {
+
+            // Paint caret if flash on
+            if (!_hideCaret) {
+                aPntr.setPaint(Color.BLACK);
+                aPntr.setStroke(Stroke.Stroke1);
+                Rect selBounds = getSelBounds();
+                aPntr.drawLine(selBounds.x, selBounds.y, selBounds.x, selBounds.getMaxY());
             }
+        }
+
+        // Paint full selection
+        else {
+            aPntr.setPaint(SELECTION_COLOR);
+            Rect selBounds = getSelBounds();
+            aPntr.fill(selBounds);
         }
     }
 
@@ -686,7 +662,6 @@ public class TextField extends ParentView {
 
         // Store the mouse down point
         _downX = anEvent.getX();
-        _downY = anEvent.getY();
 
         // Determine if word or paragraph selecting
         if (!anEvent.isShiftDown()) _wordSel = _pgraphSel = false;
@@ -723,20 +698,27 @@ public class TextField extends ParentView {
         // Get selected range for down point and drag point
         int start = getCharIndexAt(_downX);
         int end = getCharIndexAt(anEvent.getX());
-        if (end<start) { int t = start; start = end; end = t; }
+        if (end < start) {
+            int swap = start; start = end; end = swap; }
 
         // If word selecting, extend to word bounds
         if (_wordSel) {
-            while(start>0 && Character.isLetterOrDigit(charAt(start-1))) start--;
-            while(end<length() && Character.isLetterOrDigit(charAt(end))) end++;
+            while(start > 0 && Character.isLetterOrDigit(charAt(start - 1)))
+                start--;
+            while(end < length() && Character.isLetterOrDigit(charAt(end)))
+                end++;
         }
 
         // If paragraph selecting, extend to text bounds
-        else if (_pgraphSel) { start = 0; end = length(); }
+        else if (_pgraphSel) {
+            start = 0;
+            end = length();
+        }
 
         // If shift is down, xor selection
         if (anEvent.isShiftDown()) {
-            if (start<=getSelStart()) end = getSelEnd();
+            if (start <= getSelStart())
+                end = getSelEnd();
             else start = getSelStart();
         }
 
@@ -747,12 +729,19 @@ public class TextField extends ParentView {
     /**
      * Handles mouse released.
      */
-    protected void mouseReleased(ViewEvent anEvent) { setCaretAnim(); _downX = _downY = 0; }
+    protected void mouseReleased(ViewEvent anEvent)
+    {
+        setCaretAnim();
+        _downX = 0;
+    }
 
     /**
      * Handle MouseMoved.
      */
-    protected void mouseMoved(ViewEvent anEvent)  { showCursor(); }
+    protected void mouseMoved(ViewEvent anEvent)
+    {
+        showCursor();
+    }
 
     /**
      * Called when a key is pressed.
@@ -996,11 +985,10 @@ public class TextField extends ParentView {
         // Do normal version
         XMLElement e = super.toXMLView(anArchiver);
 
-        // Archive ColCount, Text, PromptText, Radius
+        // Archive ColCount, Text, PromptText
         if (!isPrefWidthSet() && getColCount()!=12) e.add(ColCount_Prop, getColCount());
         if (getText()!=null && getText().length()>0) e.add("text", getText());
         if (getPromptText()!=null && getPromptText().length()>0) e.add(PromptText_Prop, getPromptText());
-        if (getRadius()!=4) e.add(Radius_Prop, getRadius());
         return e;
     }
 
@@ -1012,7 +1000,7 @@ public class TextField extends ParentView {
         // Do normal version
         super.fromXMLView(anArchiver, anElement);
 
-        // Unarchive ColCount, Text, PromptText, Radius
+        // Unarchive ColCount, Text, PromptText
         if (anElement.hasAttribute(ColCount_Prop))
             setColCount(anElement.getAttributeIntValue(ColCount_Prop));
         String str = anElement.getAttributeValue("text");
@@ -1022,8 +1010,6 @@ public class TextField extends ParentView {
             setText(str);
         if (anElement.hasAttribute(PromptText_Prop))
             setPromptText(anElement.getAttributeValue(PromptText_Prop));
-        if (anElement.hasAttribute(Radius_Prop))
-            setRadius(anElement.getAttributeDoubleValue(Radius_Prop));
     }
 
     /**

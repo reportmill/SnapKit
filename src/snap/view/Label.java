@@ -306,7 +306,7 @@ public class Label extends ParentView {
         // Create and return editor
         TextField editor = new TextField();
         editor.setManaged(false);
-        editor.setRadius(2);
+        editor.setBorderRadius(2);
         editor.setFill(new Color(1,.95));
         editor.setBorder(new Color(1,.3,.3,.5), 1);
         editor.setBorder(editor.getBorder().copyForInsets(Insets.EMPTY));

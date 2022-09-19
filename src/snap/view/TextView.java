@@ -17,17 +17,16 @@ public class TextView extends ParentView {
     private TextArea  _textArea;
     
     // The ScrollView for the TextArea
-    private ScrollView  _scroll;
+    private ScrollView  _scrollView;
 
     // Listener to propagate Action from TextArea to TextView
     private EventListener  _actionEvtLsnr = e -> fireActionEvent(e);
 
     // Constants for properties
-    public static final String Editable_Prop = "Editable";
     public static final String WrapLines_Prop = TextArea.WrapLines_Prop;
-    public static final String FireActionOnEnterKey_Prop = "FireActionOnEnterKey";
-    public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
-    public static final String Selection_Prop = "Selection";
+    public static final String FireActionOnEnterKey_Prop = TextArea.FireActionOnEnterKey_Prop;
+    public static final String FireActionOnFocusLost_Prop = TextArea.FireActionOnFocusLost_Prop;
+    public static final String Selection_Prop = TextArea.Selection_Prop;
 
     /**
      * Constructor.
@@ -38,8 +37,8 @@ public class TextView extends ParentView {
         _textArea = createTextArea();
 
         // Create/add ScrollView
-        _scroll = new ScrollView(_textArea);
-        addChild(_scroll);
+        _scrollView = new ScrollView(_textArea);
+        addChild(_scrollView);
 
         // Other configuration
         setEditable(true);
@@ -59,7 +58,7 @@ public class TextView extends ParentView {
     /**
      * Returns the ScrollView.
      */
-    public ScrollView getScrollView()  { return _scroll; }
+    public ScrollView getScrollView()  { return _scrollView; }
 
     /**
      * Returns the TextDoc.
@@ -102,7 +101,7 @@ public class TextView extends ParentView {
     public void setWrapLines(boolean aValue)
     {
         _textArea.setWrapLines(aValue);
-        _scroll.setFillWidth(aValue);
+        _scrollView.setFillWidth(aValue);
     }
 
     /**
@@ -383,7 +382,7 @@ public class TextView extends ParentView {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return BoxView.getPrefWidth(this, _scroll, aH);
+        return BoxView.getPrefWidth(this, _scrollView, aH);
     }
 
     /**
@@ -391,7 +390,7 @@ public class TextView extends ParentView {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return BoxView.getPrefHeight(this, _scroll, aW);
+        return BoxView.getPrefHeight(this, _scrollView, aW);
     }
 
     /**
@@ -399,7 +398,7 @@ public class TextView extends ParentView {
      */
     protected void layoutImpl()
     {
-        BoxView.layout(this, _scroll, true, true);
+        BoxView.layout(this, _scrollView, true, true);
     }
 
     /**
@@ -408,13 +407,14 @@ public class TextView extends ParentView {
     public String getValuePropName()  { return "Text"; }
 
     /**
-     * Standard toString implementation.
+     * Override to sync ScrollView and TextArea.
      */
-    public String toString()
+    @Override
+    public void setBorderRadius(double aValue)
     {
-        String str = getText();
-        if (str.length() > 40) str = str.substring(0,40) + "...";
-        return getClass().getSimpleName() + ": " + str;
+        super.setBorderRadius(aValue);
+        _scrollView.setBorderRadius(aValue);
+        _textArea.setBorderRadius(aValue);
     }
 
     /**

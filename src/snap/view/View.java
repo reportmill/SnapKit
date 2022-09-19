@@ -2217,10 +2217,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         Shape shape = getBoundsShape();
 
         // If fill set, fill inside BoundsShape
-        if (fill != null) {
-            aPntr.setPaint(fill);
-            aPntr.fill(shape);
-        }
+        if (fill != null)
+            aPntr.fillWithPaint(shape, fill);
 
         // If border set, draw border around BoundsShape
         if (border != null)
@@ -3296,12 +3294,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // Append Name
         StringBuffer sb = new StringBuffer();
-        if (getName() != null && getName().length() > 0)
+        String name = getName();
+        if (name != null && name.length() > 0)
             sb.append("Name").append(getName());
 
         // Append Text
-        if (getText() != null && getText().length() > 0)
-            StringUtils.appendProp(sb, "Text", getText());
+        String text = getText();
+        if (text != null && text.length() > 0) {
+            if (text.length() > 40)
+                text = text.substring(0, 40) + "...";
+            StringUtils.appendProp(sb, "Text", text);
+        }
 
         // Append Bounds
         StringUtils.appendProp(sb, "Bounds", getBounds());
