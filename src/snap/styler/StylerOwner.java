@@ -110,7 +110,7 @@ public class StylerOwner extends ViewOwner {
         label.setAlign(Pos.CENTER);
         label.setPadding(4,4,4,10);
         label.setMargin(4,8,4,8);
-        label.setRadius(5);
+        label.setBorderRadius(5);
         return _label = label;
     }
 }

@@ -23,9 +23,6 @@ public class Label extends ParentView {
     // The image name, if loaded from local resource
     private String  _iname;
     
-    // The rounding radius
-    private double  _rad;
-    
     // Whether label text is editable
     private boolean  _editable, _editing;
     
@@ -37,7 +34,6 @@ public class Label extends ParentView {
     public static final String Editing_Prop = "Editing";
     public static final String Graphic_Prop = "Graphic";
     public static final String GraphicAfter_Prop = "GraphicAfter";
-    public static final String Radius_Prop = "Radius";
 
     // Constants for property defaults
     private static final double DEFAULT_LABEL_SPACING = 4;
@@ -238,21 +234,6 @@ public class Label extends ParentView {
     }
 
     /**
-     * Returns the rounding radius.
-     */
-    public double getRadius()  { return _rad; }
-
-    /**
-     * Sets the rounding radius.
-     */
-    public void setRadius(double aValue)
-    {
-        if (aValue == _rad) return;
-        firePropChange(Radius_Prop, _rad, _rad = aValue);
-        repaint();
-    }
-
-    /**
      * Returns whether label text is editable.
      */
     public boolean isEditable()  { return _editable; }
@@ -356,16 +337,6 @@ public class Label extends ParentView {
     }
 
     /**
-     * Override to handle optional rounding radius.
-     */
-    public Shape getBoundsShape()
-    {
-        if (_rad>=0)
-            return new RoundRect(0,0,getWidth(),getHeight(),_rad);
-        return super.getBoundsShape();
-    }
-
-    /**
      * Handle events.
      */
     protected void processEvent(ViewEvent anEvent)
@@ -453,10 +424,6 @@ public class Label extends ParentView {
         if (iname != null)
             e.add("image", iname);
 
-        // Archive Radius
-        if (getRadius() != 0)
-            e.add(Radius_Prop, getRadius());
-
         // Return element
         return e;
     }
@@ -478,10 +445,6 @@ public class Label extends ParentView {
             if (image != null)
                 setImage(image);
         }
-
-        // Unarchive Radius
-        if (anElement.hasAttribute(Radius_Prop))
-            setRadius(anElement.getAttributeDoubleValue(Radius_Prop));
     }
 
     /**
