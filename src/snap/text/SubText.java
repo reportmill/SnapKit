@@ -1,5 +1,6 @@
 package snap.text;
 import snap.props.PropChange;
+import snap.props.PropChangeListener;
 import snap.web.WebURL;
 
 /**
@@ -16,6 +17,9 @@ public class SubText extends TextDoc {
     // The end char index
     protected int _end;
 
+    // PropChangeListener to update Start/End char indexes when text is edited
+    private PropChangeListener  _textDocPropLsnr = pc -> textDocDidPropChange(pc);
+
     /**
      * Constructor.
      */
@@ -28,7 +32,7 @@ public class SubText extends TextDoc {
         rebuildLines();
 
         // Listen to TextDoc
-        _textDoc.addPropChangeListener(pc -> textDocDidPropChange(pc));
+        _textDoc.addPropChangeListener(_textDocPropLsnr);
     }
 
     /**
@@ -276,5 +280,13 @@ public class SubText extends TextDoc {
                 firePropChange(subCharsChange);
             }
         }
+    }
+
+    /**
+     * Called when SubText is no longer needed to remove TextDoc prop listener.
+     */
+    public void dispose()
+    {
+        _textDoc.removePropChangeListener(_textDocPropLsnr);
     }
 }
