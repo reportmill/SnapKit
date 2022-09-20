@@ -282,7 +282,7 @@ public class TextPane extends ViewOwner {
         int col = selStart - selStartLine.getStart();
 
         // Run ShowLineNumber panel
-        String msg = StringUtils.format("Enter Line Number:\n(Line %d, Col %d, Char %d)", selStartLineIndex, col, selStart);
+        String msg = String.format("Enter Line Number:\n(Line %d, Col %d, Char %d)", selStartLineIndex, col, selStart);
         DialogBox dialogBox = new DialogBox("Go to Line");
         dialogBox.setQuestionMessage(msg);
         String lineNumStr = dialogBox.showInputDialog(getUI(), Integer.toString(selStartLineIndex));

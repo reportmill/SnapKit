@@ -467,7 +467,7 @@ public class Transform implements Cloneable {
      */
     public String toString()
     {
-        return StringUtils.format("[ %f %f %f %f %f %f ]", _a, _b, _c, _d, _tx, _ty);
+        return String.format("[ %f %f %f %f %f %f ]", _a, _b, _c, _d, _tx, _ty);
     }
 
     /**

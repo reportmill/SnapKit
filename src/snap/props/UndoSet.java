@@ -12,19 +12,19 @@ import java.util.*;
 public class UndoSet {
 
     // The title of the undo
-    String _undoTitle;
+    protected String  _undoTitle;
 
     // The list of change events
-    List<PropChange> _changes = new ArrayList();
+    private List<PropChange>  _changes = new ArrayList<>();
 
     // The objects to be selected if undo is executed
-    Object _undoSelection;
+    protected Object  _undoSelection;
 
     // The objects to be selected if redo is selected
-    Object _redoSelection;
+    protected Object  _redoSelection;
 
     // Whether this event has been coalesced
-    boolean _coalesced;
+    private boolean _coalesced;
 
     /**
      * Creates a new empty undo set.
@@ -215,6 +215,6 @@ public class UndoSet {
         String oS = oV != null ? oV.toString().replace("\n", "\\n") : null;
         Object nV = anEvent.getNewValue();
         String nS = nV != null ? nV.toString().replace("\n", "\\n") : null;
-        return StringUtils.format("%s %s (set %s to %s)", source, pname, doUndo ? nS : oS, doUndo ? oS : nS);
+        return String.format("%s %s (set %s to %s)", source, pname, doUndo ? nS : oS, doUndo ? oS : nS);
     }
 }

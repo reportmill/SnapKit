@@ -258,7 +258,7 @@ public class ImagePaint implements Paint, XMLArchiver.Archivable {
      */
     public String toString()
     {
-        return StringUtils.format("ImagePaint { x=%s, y=%s, w=%s, h=%s, abs=%s", fmt(_x), fmt(_y), fmt(_w), fmt(_h), _abs);
+        return String.format("ImagePaint { x=%s, y=%s, w=%s, h=%s, abs=%s", fmt(_x), fmt(_y), fmt(_w), fmt(_h), _abs);
     }
 
     // Used for print

@@ -259,7 +259,7 @@ public class Undoer {
      */
     public String toString()
     {
-        return StringUtils.format("Undoer { UndoCount=%d, RedoCount=%d }", getUndoSets().size(), getRedoSets().size());
+        return String.format("Undoer { UndoCount=%d, RedoCount=%d }", getUndoSets().size(), getRedoSets().size());
     }
 
 }
