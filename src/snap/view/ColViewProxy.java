@@ -198,13 +198,16 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
      */
     private static void addExtraSpaceY(ParentViewProxy<?> aPar, int extra)
     {
-        // If grow shapes, add grow
+        // If there is child/children with GrowHeight, add extra height to child growers
         if (aPar.getGrowHeightCount() > 0)
             addExtraSpaceY_ToGrowers(aPar, extra);
 
-        // Otherwise, check for vertical alignment/lean shift
+        // If extra is positive, use for vertical alignment/lean shift
         else if (extra > 0)
             addExtraSpaceY_ToAlign(aPar, extra);
+
+        // If negative, try to trim last child back
+        else removeExtraSpaceY_FromLastChild(aPar, extra);
     }
 
     /**
@@ -235,7 +238,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
     /**
      * Adds extra space Y to child alignment/lean.
      */
-    private static void addExtraSpaceY_ToAlign(ViewProxy<?> aPar, double extra)
+    private static void addExtraSpaceY_ToAlign(ViewProxy<?> aPar, int extra)
     {
         ViewProxy<?>[] children = aPar.getChildren();
         double alignY = aPar.getAlignYAsDouble();
@@ -245,5 +248,19 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
             if (shiftY > 0)
                 child.setY(child.getY() + extra * alignY);
         }
+    }
+
+    /**
+     * Remove extra space from last child.
+     */
+    private static void removeExtraSpaceY_FromLastChild(ViewProxy<?> aPar, int extra)
+    {
+        // Get last child
+        ViewProxy<?>[] children = aPar.getChildren();
+        ViewProxy<?> lastChild = children[children.length - 1];
+
+        // Remove width from last child - probably should iterate to previous children if needed
+        double childH = Math.max(lastChild.height + extra, 10);
+        lastChild.setHeight(childH);
     }
 }

@@ -195,17 +195,20 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
      */
     private static void addExtraSpaceX(ParentViewProxy<?> aPar, int extra)
     {
-        // If grow shapes, add grow
+        // If there is child/children with GrowWidth, add extra width to child growers
         if (aPar.getGrowWidthCount() > 0)
             addExtraSpaceX_ToGrowers(aPar, extra);
 
-        // Otherwise, check for horizontal alignment/lean shift
+        // If extra is positive, use for horizontal alignment/lean shift
         else if (extra > 0)
             addExtraSpaceX_ToAlign(aPar, extra);
+
+        // If negative, try to trim last child back
+        else removeExtraSpaceX_FromLastChild(aPar, extra);
     }
 
     /**
-     * Adds extra space X to children that GrowWidth.
+     * Adds extra space to children that GrowWidth.
      */
     private static void addExtraSpaceX_ToGrowers(ParentViewProxy<?> aPar, int extra)
     {
@@ -230,9 +233,9 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
     }
 
     /**
-     * Adds extra space X to child alignment/lean.
+     * Adds extra space to child alignment/lean.
      */
-    private static void addExtraSpaceX_ToAlign(ViewProxy<?> aPar, double extra)
+    private static void addExtraSpaceX_ToAlign(ViewProxy<?> aPar, int extra)
     {
         ViewProxy<?>[] children = aPar.getChildren();
         double alignX = aPar.getAlignXAsDouble();
@@ -242,5 +245,19 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
             if (shiftX > 0)
                 child.setX(child.getX() + extra * alignX);
         }
+    }
+
+    /**
+     * Remove extra space from last child.
+     */
+    private static void removeExtraSpaceX_FromLastChild(ViewProxy<?> aPar, int extra)
+    {
+        // Get last child
+        ViewProxy<?>[] children = aPar.getChildren();
+        ViewProxy<?> lastChild = children[children.length - 1];
+
+        // Remove width from last child - probably should iterate to previous children if needed
+        double childW = Math.max(lastChild.width + extra, 10);
+        lastChild.setWidth(childW);
     }
 }
