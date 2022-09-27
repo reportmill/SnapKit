@@ -3296,7 +3296,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         StringBuffer sb = new StringBuffer();
         String name = getName();
         if (name != null && name.length() > 0)
-            sb.append("Name").append(getName());
+            StringUtils.appendProp(sb, "Name", name);
 
         // Append Text
         String text = getText();
