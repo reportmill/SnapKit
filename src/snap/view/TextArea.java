@@ -1090,7 +1090,8 @@ public class TextArea extends View {
      */
     public int getLineCount()
     {
-        return getTextBox().getLineCount();
+        TextBox textBox = getTextBox();
+        return textBox.getLineCount();
     }
 
     /**
@@ -1098,7 +1099,8 @@ public class TextArea extends View {
      */
     public TextBoxLine getLine(int anIndex)
     {
-        return getTextBox().getLine(anIndex);
+        TextBox textBox = getTextBox();
+        return textBox.getLine(anIndex);
     }
 
     /**
@@ -1106,7 +1108,8 @@ public class TextArea extends View {
      */
     public TextBoxLine getLineLast()
     {
-        return getTextBox().getLineLast();
+        TextBox textBox = getTextBox();
+        return textBox.getLineLast();
     }
 
     /**
@@ -1114,7 +1117,8 @@ public class TextArea extends View {
      */
     public TextBoxLine getLineAt(int anIndex)
     {
-        return getTextBox().getLineForCharIndex(anIndex);
+        TextBox textBox = getTextBox();
+        return textBox.getLineForCharIndex(anIndex);
     }
 
     /**
@@ -1122,7 +1126,8 @@ public class TextArea extends View {
      */
     public TextBoxToken getTokenAt(int anIndex)
     {
-        return getTextBox().getTokenAt(anIndex);
+        TextBox textBox = getTextBox();
+        return textBox.getTokenAt(anIndex);
     }
 
     /**
@@ -1130,7 +1135,22 @@ public class TextArea extends View {
      */
     public int getCharIndex(double anX, double aY)
     {
-        return getTextBox().getCharIndex(anX, aY);
+        TextBox textBox = getTextBox();
+        return textBox.getCharIndex(anX, aY);
+    }
+
+    /**
+     * Returns the link at given XY.
+     */
+    public TextLink getLinkAtXY(double aX, double aY)
+    {
+        // If not RichText, just return
+        if (!isRichText()) return null;
+
+        // Get TextStyle at XY and return link
+        int charIndex = getCharIndex(aX, aY);
+        TextStyle textStyle = getStyleForCharIndex(charIndex);
+        return textStyle.getLink();
     }
 
     /**
@@ -1261,10 +1281,9 @@ public class TextArea extends View {
         _downX = _downY = 0;
 
         if (anEvent.isMouseClick()) {
-            int cindex = getCharIndex(anEvent.getX(), anEvent.getY());
-            TextStyle style = getStyleForCharIndex(cindex);
-            if (style.getLink() != null)
-                openLink(style.getLink().getString());
+            TextLink textLink = getLinkAtXY(anEvent.getX(), anEvent.getY());
+            if (textLink != null)
+                openLink(textLink.getString());
         }
     }
 
@@ -1273,9 +1292,8 @@ public class TextArea extends View {
      */
     protected void mouseMoved(ViewEvent anEvent)
     {
-        int cindex = getCharIndex(anEvent.getX(), anEvent.getY());
-        TextStyle style = getStyleForCharIndex(cindex);
-        if (style.getLink() != null)
+        TextLink textLink = getLinkAtXY(anEvent.getX(), anEvent.getY());
+        if (textLink != null)
             setCursor(Cursor.HAND);
         else showCursor();
     }
