@@ -5,6 +5,8 @@ package snap.text;
 import snap.geom.HPos;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a line of text in a Text.
@@ -31,6 +33,9 @@ public class TextLine implements CharSequence, Cloneable {
 
     // The width of this line
     protected double _width = -1;
+
+    // The TextTokens for this line
+    private TextToken[]  _tokens;
 
     // Constants
     private static final TextRun[] EMPTY_RUNS = new TextRun[0];
@@ -270,6 +275,112 @@ public class TextLine implements CharSequence, Cloneable {
             run2._textLine = this;
             addRun(run2, getRunCount());
         }
+    }
+
+    /**
+     * Returns the x for tab at given x.
+     */
+    protected double getXForTabAtIndexAndX(int charIndex, double aX)
+    {
+        // Get tab position and type. If beyond stops, just bump by 4 spaces
+        TextLineStyle lineStyle = getLineStyle();
+        int tabIndex = lineStyle.getTabIndexForX(aX);
+        if (tabIndex < 0) {
+            TextRun textRun = getRunForCharIndex(charIndex);
+            TextStyle textStyle = textRun.getStyle();
+            return aX + textStyle.getCharAdvance(' ') * 4;
+        }
+
+        // Get tab position and type - If left-tab, just return tab position
+        double tabX = lineStyle.getXForTabForX(aX);
+        char tabType = lineStyle.getTabType(tabIndex);
+        if (tabType == TextLineStyle.TAB_LEFT)
+            return tabX;
+
+        // Get width of characters after tab (until next tab, newline or decimal)
+        TextRun textRun = getRunForCharIndex(charIndex);
+        TextStyle textStyle = textRun.getStyle();
+        int lineLength = length();
+        double charsW = 0;
+        for (int i = charIndex + 1; i < lineLength; i++) {
+            char loopChar = charAt(i);
+            if (loopChar == '\t' || loopChar == '\r' || loopChar == '\n')
+                break;
+            charsW += textStyle.getCharAdvance(loopChar) + textStyle.getCharSpacing();
+            if (tabType == TextLineStyle.TAB_DECIMAL && loopChar == '.')
+                break;
+        }
+
+        // If right or decimal, return tab position minus chars width (or tab char location if chars wider than tab stop)
+        if (tabType == TextLineStyle.TAB_RIGHT || tabType == TextLineStyle.TAB_DECIMAL)
+            return aX + charsW < tabX ? tabX - charsW : aX;
+
+        // if centered, return tab position minus half chars width (or tab char location if chars wider than tab stop)
+        return aX + charsW / 2 < tabX ? tabX - charsW / 2 : aX;
+    }
+
+    /**
+     * Returns the tokens.
+     */
+    public TextToken[] getTokens()
+    {
+        // If already set, just return
+        if (_tokens != null) return _tokens;
+
+        TextToken[] tokens = createTokens();
+        return _tokens = tokens;
+    }
+
+    /**
+     * Returns the tokens.
+     */
+    protected TextToken[] createTokens()
+    {
+        // Loop vars
+        List<TextToken> tokens = new ArrayList<>();
+        int tokenStart = 0;
+        int lineLength = length();
+        double tokenX = 0;
+
+        // Get run
+        TextRun run = getRun(0);
+        int runEnd = run.getEnd();
+        TextStyle runStyle = run.getStyle();
+        double charSpacing = runStyle.getCharSpacing();
+
+        // Iterate over line chars
+        while (tokenStart < lineLength) {
+
+            // Find token start: Skip past whitespace
+            char loopChar;
+            while (tokenStart < runEnd && Character.isWhitespace(loopChar = charAt(tokenStart))) {
+                if (loopChar == '\t')
+                    tokenX = getXForTabAtIndexAndX(tokenStart, tokenX);
+                else tokenX += runStyle.getCharAdvance(loopChar) + charSpacing;
+                tokenStart++;
+            }
+
+            // Find token end: Skip to first non-whitespace char
+            int tokenEnd = tokenStart;
+            while (tokenEnd < runEnd && !Character.isWhitespace(charAt(tokenEnd)))
+                tokenEnd++;
+
+            // If chars found, create/add token
+            if (tokenStart < tokenEnd) {
+                TextToken token = new TextToken(this, tokenStart, tokenEnd, run);
+                tokens.add(token);
+                tokenStart = tokenEnd;
+            }
+
+            // If at RunEnd but not LineEnd, update Run/RunEnd with next run
+            if (tokenStart == runEnd && tokenStart < lineLength) {
+                run = run.getNext();
+                runEnd = run.getEnd();
+            }
+        }
+
+        // Return
+        return tokens.toArray(new TextToken[0]);
     }
 
     /**

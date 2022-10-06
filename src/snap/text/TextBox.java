@@ -767,7 +767,6 @@ public class TextBox {
             lineY++;
             tokenX = getMinHitX(lineY, lineH, lineIndent);
         }
-        double tokenW = 0;
 
         // Create TextBoxLine
         TextBoxLine boxLine = new TextBoxLine(this, runStyle, aTextLine, aStart);
@@ -791,18 +790,19 @@ public class TextBox {
             char loopChar;
             while (tokenStart < lineLength && Character.isWhitespace(loopChar = aTextLine.charAt(tokenStart))) {
                 if (loopChar == '\t')
-                    tokenX = boxLine.getXForTabAtIndexAndX(tokenStart, tokenX + getX()) - getX();
-                else tokenX += runStyle.getCharAdvance(loopChar) + runCharSpacing; //aTextLine.getLineStyle().getTabForX(x)-getX()
+                    tokenX = aTextLine.getXForTabAtIndexAndX(tokenStart, tokenX + getX()) - getX();
+                else tokenX += runStyle.getCharAdvance(loopChar) + runCharSpacing;
                 tokenStart++;
                 if (tokenStart >= runEnd && tokenStart < lineLength)
                     break;
             }
 
-            // Find token end - first non-whitespace char
+            // Find TokenEnd and TokenW: first non-whitespace char
             int tokenEnd = tokenStart;
+            double tokenW = 0;
             while (tokenEnd < lineLength && tokenEnd < runEnd && !Character.isWhitespace(loopChar = aTextLine.charAt(tokenEnd))) {
-                tokenW += runStyle.getCharAdvance(loopChar) + runCharSpacing;
                 tokenEnd++;
+                tokenW += runStyle.getCharAdvance(loopChar) + runCharSpacing;
             }
 
             // If char range was found, create and add token
@@ -854,7 +854,6 @@ public class TextBox {
                 boxLine.addToken(token);
                 tokenStart = tokenEnd;
                 tokenX += tokenW;
-                tokenW = 0;
             }
         }
 
