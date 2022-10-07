@@ -4,6 +4,9 @@
 package snap.text;
 import snap.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class represents a 'word' in a TextLine.
  */
@@ -268,5 +271,63 @@ public class TextToken implements Cloneable {
         StringUtils.appendProp(sb, "X", _x);
         StringUtils.appendProp(sb, "String", getString());
         return sb.toString();
+    }
+
+    /**
+     * Returns the tokens.
+     */
+    public static TextToken[] createTokensForTextLine(TextLine aTextLine)
+    {
+        // Loop vars
+        List<TextToken> tokens = new ArrayList<>();
+        int tokenStart = 0;
+        int lineLength = aTextLine.length();
+        double tokenX = 0;
+
+        // Get Run info
+        TextRun run = aTextLine.getRun(0);
+        int runEnd = run.getEnd();
+        TextStyle runStyle = run.getStyle();
+        double charSpacing = runStyle.getCharSpacing();
+
+        // Iterate over line chars
+        while (tokenStart < lineLength) {
+
+            // Find token start: Skip past whitespace
+            char loopChar;
+            while (tokenStart < runEnd && Character.isWhitespace(loopChar = aTextLine.charAt(tokenStart))) {
+                if (loopChar == '\t')
+                    tokenX = aTextLine.getXForTabAtIndexAndX(tokenStart, tokenX);
+                else tokenX += runStyle.getCharAdvance(loopChar) + charSpacing;
+                tokenStart++;
+            }
+
+            // Find token end: Skip to first non-whitespace char
+            int tokenEnd = tokenStart;
+            while (tokenEnd < runEnd && !Character.isWhitespace(aTextLine.charAt(tokenEnd)))
+                tokenEnd++;
+
+            // If chars found, create/add token
+            if (tokenStart < tokenEnd) {
+                TextToken token = new TextToken(aTextLine, tokenStart, tokenEnd, run);
+                token._index = tokens.size();
+                token._x = tokenX;
+                tokens.add(token);
+                tokenStart = tokenEnd;
+                double tokenW = token.getWidth();
+                tokenX += tokenW;
+            }
+
+            // If at RunEnd but not LineEnd, update Run info with next run
+            if (tokenStart == runEnd && tokenStart < lineLength) {
+                run = run.getNext();
+                runEnd = run.getEnd();
+                runStyle = run.getStyle();
+                charSpacing = runStyle.getCharSpacing();
+            }
+        }
+
+        // Return
+        return tokens.toArray(new TextToken[0]);
     }
 }

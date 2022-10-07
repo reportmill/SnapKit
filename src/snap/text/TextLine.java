@@ -5,8 +5,6 @@ package snap.text;
 import snap.geom.HPos;
 import snap.util.ArrayUtils;
 import snap.util.SnapUtils;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represents a line of text in a Text.
@@ -329,66 +327,8 @@ public class TextLine implements CharSequence, Cloneable {
         // If already set, just return
         if (_tokens != null) return _tokens;
 
-        TextToken[] tokens = createTokens();
+        TextToken[] tokens = _textDoc.createTokensForTextLine(this);
         return _tokens = tokens;
-    }
-
-    /**
-     * Returns the tokens.
-     */
-    protected TextToken[] createTokens()
-    {
-        // Loop vars
-        List<TextToken> tokens = new ArrayList<>();
-        int tokenStart = 0;
-        int lineLength = length();
-        double tokenX = 0;
-
-        // Get Run info
-        TextRun run = getRun(0);
-        int runEnd = run.getEnd();
-        TextStyle runStyle = run.getStyle();
-        double charSpacing = runStyle.getCharSpacing();
-
-        // Iterate over line chars
-        while (tokenStart < lineLength) {
-
-            // Find token start: Skip past whitespace
-            char loopChar;
-            while (tokenStart < runEnd && Character.isWhitespace(loopChar = charAt(tokenStart))) {
-                if (loopChar == '\t')
-                    tokenX = getXForTabAtIndexAndX(tokenStart, tokenX);
-                else tokenX += runStyle.getCharAdvance(loopChar) + charSpacing;
-                tokenStart++;
-            }
-
-            // Find token end: Skip to first non-whitespace char
-            int tokenEnd = tokenStart;
-            while (tokenEnd < runEnd && !Character.isWhitespace(charAt(tokenEnd)))
-                tokenEnd++;
-
-            // If chars found, create/add token
-            if (tokenStart < tokenEnd) {
-                TextToken token = new TextToken(this, tokenStart, tokenEnd, run);
-                token._index = tokens.size();
-                token._x = tokenX;
-                tokens.add(token);
-                tokenStart = tokenEnd;
-                double tokenW = token.getWidth();
-                tokenX += tokenW;
-            }
-
-            // If at RunEnd but not LineEnd, update Run info with next run
-            if (tokenStart == runEnd && tokenStart < lineLength) {
-                run = run.getNext();
-                runEnd = run.getEnd();
-                runStyle = run.getStyle();
-                charSpacing = runStyle.getCharSpacing();
-            }
-        }
-
-        // Return
-        return tokens.toArray(new TextToken[0]);
     }
 
     /**

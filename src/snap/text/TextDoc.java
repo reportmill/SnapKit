@@ -739,6 +739,14 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     }
 
     /**
+     * Creates TextTokens for a TextLine.
+     */
+    protected TextToken[] createTokensForTextLine(TextLine aTextLine)
+    {
+        return TextToken.createTokensForTextLine(aTextLine);
+    }
+
+    /**
      * Updates Lines (Index, Start) from index line to text end.
      */
     protected void updateLines(int anIndex)
