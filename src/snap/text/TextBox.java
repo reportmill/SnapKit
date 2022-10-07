@@ -713,7 +713,7 @@ public class TextBox {
 
             // Add TextBoxLine(s) for TextLine
             while (lineStart < textLine.length()) {
-                TextBoxLine line = createLine(textLine, lineStart, lindex);
+                TextBoxLine line = createTextBoxLine(textLine, lineStart, lindex);
                 if ((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()) {
                     i = Short.MAX_VALUE;
                     break;
@@ -727,7 +727,7 @@ public class TextBox {
         if (endLineIndex == textDoc.getLineCount() - 1) {
             TextLine textLine = textDoc.getLine(endLineIndex);
             if (textLine.length() == 0 || textLine.isLastCharNewline()) {
-                TextBoxLine line = createLine(textLine, textLine.length(), getLineCount());
+                TextBoxLine line = createTextBoxLine(textLine, textLine.length(), getLineCount());
                 if (!((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()))
                     _lines.add(line);
             }
@@ -737,124 +737,99 @@ public class TextBox {
     /**
      * Create and return TextBoxLines for given TextLine, start char index and line index.
      */
-    protected TextBoxLine createLine(TextLine aTextLine, int aStart, int aLineIndex)
+    protected TextBoxLine createTextBoxLine(TextLine aTextLine, int startCharIndex, int aLineIndex)
     {
         // Get text vars
         boolean wrap = isWrapLines();
         boolean hyphenate = isHyphenate();
         double fontScale = getFontScale();
 
-        // Get text line vars
-        int lineLength = aTextLine.length();
-        TextLineStyle lineStyle = aTextLine.getLineStyle();
-        double lineIndent = aStart == 0 ? lineStyle.getFirstIndent() : lineStyle.getLeftIndent();
-        int lineStart = aStart;
-        TextBoxLine lastLine = aLineIndex > 0 ? getLine(aLineIndex - 1) : null;
-        double lineY = lastLine != null ? lastLine.getY() + lastLine.getLineAdvance() : getY();
+        // Get TextToken at start char index - if in middle of token, split token
+        TextToken textToken = aTextLine.getTokenForCharIndex(startCharIndex);
+        if (textToken != null && startCharIndex > textToken.getStartCharIndex() && startCharIndex < textToken.getEndCharIndex())
+            textToken = textToken.copyFromCharIndex(startCharIndex - textToken.getStartCharIndex());
 
-        // Get text run vars
-        TextRun run = aTextLine.getRun(0);
-        int runEnd = run.getEnd();
-        TextStyle runStyle = run.getStyle();
+        // Get TextToken info
+        double textTokensX = textToken != null ? textToken.getX() * fontScale : 0;
+        TextStyle textTokenStyle = textToken != null ? textToken.getTextStyle() : aTextLine.getRunLast().getStyle();
         if (fontScale != 1)
-            runStyle = runStyle.copyFor(runStyle.getFont().scaleFont(fontScale));
-        double runCharSpacing = runStyle.getCharSpacing();
-        double lineH = runStyle.getLineHeight();
+            textTokenStyle = textTokenStyle.copyFor(textTokenStyle.getFont().scaleFont(fontScale));
 
-        // Get token X/W
-        double tokenX = getMinHitX(lineY, lineH, lineIndent);
-        while (tokenX > getMaxX() && lineY <= getMaxY()) {
+        // Get LineY, LineH
+        double lineY = getY();
+        TextBoxLine prevTextBoxLine = aLineIndex > 0 ? getLine(aLineIndex - 1) : null;
+        if (prevTextBoxLine != null)
+            lineY = prevTextBoxLine.getY() + prevTextBoxLine.getLineAdvance();
+        double lineH = textTokenStyle.getLineHeight(); // Should ask remaining tokens instead
+
+        // Get TextBox.X for LineY
+        TextLineStyle lineStyle = aTextLine.getLineStyle();
+        double lineIndent = startCharIndex == 0 ? lineStyle.getFirstIndent() : lineStyle.getLeftIndent();
+        double textBoxX = getMinHitX(lineY, lineH, lineIndent);
+        while (textBoxX > getMaxX() && lineY <= getMaxY()) {
             lineY++;
-            tokenX = getMinHitX(lineY, lineH, lineIndent);
+            textBoxX = getMinHitX(lineY, lineH, lineIndent);
         }
 
         // Create TextBoxLine
-        TextBoxLine boxLine = new TextBoxLine(this, runStyle, aTextLine, aStart);
+        TextBoxLine boxLine = new TextBoxLine(this, textTokenStyle, aTextLine, startCharIndex);
         boxLine._yloc = lineY - getY();
 
-        // Iterate over line chars
-        for (int tokenStart = aStart; tokenStart < lineLength; ) {
+        // While next token is found, add to line
+        while (textToken != null) {
 
-            // Reset run if needed
-            if (tokenStart >= runEnd) {
-                run = aTextLine.getRun(run.getIndex() + 1);
-                runEnd = run.getEnd();
-                runStyle = run.getStyle();
-                if (fontScale != 1)
-                    runStyle = runStyle.copyFor(runStyle.getFont().scaleFont(fontScale));
-                lineH = Math.max(lineH, runStyle.getLineHeight());
-                runCharSpacing = runStyle.getCharSpacing();
-            }
+            // Handle line wrapping
+            double tokenXInBox = textBoxX + textToken.getX() * fontScale - textTokensX;
+            if (wrap) {
 
-            // Skip past whitespace
-            char loopChar;
-            while (tokenStart < lineLength && Character.isWhitespace(loopChar = aTextLine.charAt(tokenStart))) {
-                if (loopChar == '\t')
-                    tokenX = aTextLine.getXForTabAtIndexAndX(tokenStart, tokenX + getX()) - getX();
-                else tokenX += runStyle.getCharAdvance(loopChar) + runCharSpacing;
-                tokenStart++;
-                if (tokenStart >= runEnd && tokenStart < lineLength)
-                    break;
-            }
+                // If token hits right side, either split or stop
+                double tokenMaxXInBox = tokenXInBox + textToken.getWidth() * fontScale;
+                if (isHitRight(tokenMaxXInBox, lineY, lineH)) {
 
-            // Find TokenEnd and TokenW: first non-whitespace char
-            int tokenEnd = tokenStart;
-            double tokenW = 0;
-            while (tokenEnd < lineLength && tokenEnd < runEnd && !Character.isWhitespace(loopChar = aTextLine.charAt(tokenEnd))) {
-                tokenEnd++;
-                tokenW += runStyle.getCharAdvance(loopChar) + runCharSpacing;
-            }
+                    // If Hyphenate and splittable, get split and try again
+                    if (hyphenate && textToken.isSplittable()) {
+                        textToken = textToken.copyForSplittable();
+                        continue;
+                    }
 
-            // If char range was found, create and add token
-            if (tokenStart < tokenEnd) {
-
-                // If last char outside box, try for hyphen or add new line
-                boolean didHyph = false;
-                if (wrap && isHitRight(tokenX + tokenW - runCharSpacing, lineY, lineH)) {
-
-                    // If hyphenating, see if we can break token
-                    if (hyphenate) {
-                        int hyph = tokenEnd, end2 = tokenEnd;
-                        double w2 = tokenW, hypw = 0;
-                        while (hyph > 0 && isHitRight(tokenX + w2 - runCharSpacing + hypw, lineY, lineH)) {
-                            hyph = TextHyphenDict.getShared().getHyphen(aTextLine, tokenStart, hyph);
-                            if (hyph > 0) {
-                                hypw = runCharSpacing + runStyle.getCharAdvance('-');
-                                while (end2 > hyph) {
-                                    --end2;
-                                    w2 -= runStyle.getCharAdvance(aTextLine.charAt(end2)) + runCharSpacing;
-                                }
-                            }
-                        }
-                        if (hyph > 0 && hyph < tokenEnd) {
-                            tokenEnd = end2;
-                            tokenW = w2 + hypw;
-                            didHyph = true;
+                    // If no tokens added to this line, split off last char and try again so there is at least 1 char
+                    if (boxLine.getTokenCount() == 0) {
+                        int tokenLength = textToken.getLength();
+                        if (tokenLength > 1) {
+                            textToken = textToken.copyToCharIndex(tokenLength - 1);
+                            continue;
                         }
                     }
 
-                    // If no hyphen and token start is line start, shorten token until it fits
-                    if (!didHyph && tokenStart == aStart)
-                        while (isHitRight(tokenX + tokenW - runCharSpacing, lineY, lineH) && tokenEnd > lineStart + 1) {
-                            --tokenEnd;
-                            tokenW -= runStyle.getCharAdvance(aTextLine.charAt(tokenEnd)) + runCharSpacing;
-                        }
-
-                        // If no hyphen, break
-                    else if (!didHyph)
-                        break;
+                    // Otherwise just break
+                    else break;
                 }
-
-                // Create new token and add to line
-                TextBoxToken token = new TextBoxToken(boxLine, runStyle, tokenStart - lineStart, tokenEnd - lineStart);
-                token.setX(tokenX);
-                token.setWidth(tokenW - runCharSpacing);
-                if (didHyph)
-                    token.setHyphenated(true);
-                boxLine.addToken(token);
-                tokenStart = tokenEnd;
-                tokenX += tokenW;
             }
+
+            // Get textToken info
+            int tokenStartCharIndex = textToken.getStartCharIndex() - startCharIndex;
+            int tokenEndCharIndex = textToken.getEndCharIndex() - startCharIndex;
+
+            // Create textBoxToken, configure and add
+            TextBoxToken token = new TextBoxToken(boxLine, textTokenStyle, tokenStartCharIndex, tokenEndCharIndex);
+            token.setX(tokenXInBox);
+            token.setWidth(textToken.getWidth() * fontScale);
+            boxLine.addToken(token);
+
+            // If Hyphenated, set TextBoxToken.Hyphenated and break
+            if (textToken._split) {
+                token.setHyphenated(true);
+                break;
+            }
+
+            // Get next token and update TextToken/TextTokenStyle
+            TextToken nextToken = textToken.getNext();
+            if (nextToken != null && nextToken.getTextRun() != textToken.getTextRun()) {
+                textTokenStyle = nextToken.getTextStyle();
+                if (fontScale != 1)
+                    textTokenStyle = textTokenStyle.copyFor(textTokenStyle.getFont().scaleFont(fontScale));
+            }
+            textToken = nextToken;
         }
 
         // Reset sizes and return

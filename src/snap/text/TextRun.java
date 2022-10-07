@@ -96,6 +96,7 @@ public class TextRun implements CharSequence, Cloneable {
         _style = aStyle;
         _width = -1;
         _textLine._width = -1;
+        _textLine._tokens = null;
     }
 
     /**

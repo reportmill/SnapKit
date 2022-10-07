@@ -14,7 +14,7 @@ import java.util.List;
 public class TextLine implements CharSequence, Cloneable {
 
     // The TextDoc that contains this line
-    protected TextDoc _textDoc;
+    protected TextDoc  _textDoc;
 
     // The StringBuffer that holds line chars
     protected StringBuffer  _sb = new StringBuffer();
@@ -32,10 +32,10 @@ public class TextLine implements CharSequence, Cloneable {
     protected int  _index;
 
     // The width of this line
-    protected double _width = -1;
+    protected double  _width = -1;
 
     // The TextTokens for this line
-    private TextToken[]  _tokens;
+    protected TextToken[]  _tokens;
 
     // Constants
     private static final TextRun[] EMPTY_RUNS = new TextRun[0];
@@ -171,6 +171,7 @@ public class TextLine implements CharSequence, Cloneable {
     protected void removeRun(int anIndex)
     {
         _runs = ArrayUtils.remove(_runs, anIndex);
+        updateRuns(anIndex - 1);
     }
 
     /**
@@ -189,6 +190,7 @@ public class TextLine implements CharSequence, Cloneable {
         for (TextRun run : getRuns())
             run.setStyle(aStyle);
         _width = -1;
+        _tokens = null;
     }
 
     /**
@@ -342,7 +344,7 @@ public class TextLine implements CharSequence, Cloneable {
         int lineLength = length();
         double tokenX = 0;
 
-        // Get run
+        // Get Run info
         TextRun run = getRun(0);
         int runEnd = run.getEnd();
         TextStyle runStyle = run.getStyle();
@@ -368,19 +370,56 @@ public class TextLine implements CharSequence, Cloneable {
             // If chars found, create/add token
             if (tokenStart < tokenEnd) {
                 TextToken token = new TextToken(this, tokenStart, tokenEnd, run);
+                token._index = tokens.size();
+                token._x = tokenX;
                 tokens.add(token);
                 tokenStart = tokenEnd;
+                double tokenW = token.getWidth();
+                tokenX += tokenW;
             }
 
-            // If at RunEnd but not LineEnd, update Run/RunEnd with next run
+            // If at RunEnd but not LineEnd, update Run info with next run
             if (tokenStart == runEnd && tokenStart < lineLength) {
                 run = run.getNext();
                 runEnd = run.getEnd();
+                runStyle = run.getStyle();
+                charSpacing = runStyle.getCharSpacing();
             }
         }
 
         // Return
         return tokens.toArray(new TextToken[0]);
+    }
+
+    /**
+     * Returns the last token.
+     */
+    public TextToken getLastToken()
+    {
+        TextToken[] tokens = getTokens();
+        return tokens.length > 0 ? tokens[tokens.length - 1] : null;
+    }
+
+    /**
+     * Returns the token at given char index.
+     */
+    public TextToken getTokenForCharIndex(int charIndex)
+    {
+        // Get tokens
+        TextToken[] tokens = getTokens();
+
+        // Iterate over tokens and return first one in range
+        for (TextToken token : tokens) {
+            if (charIndex < token.getEndAllCharIndex())
+                return token;
+        }
+
+        // If at end, return last token
+        if (charIndex <= length())
+            return getLastToken();
+
+        // Complain
+        throw new IndexOutOfBoundsException("TextLine.getTokenForCharIndex: Index " + charIndex + " beyond " + length());
     }
 
     /**
@@ -427,15 +466,6 @@ public class TextLine implements CharSequence, Cloneable {
     }
 
     /**
-     * Returns whether line ends with space.
-     */
-    public boolean isLastCharWhiteSpace()
-    {
-        char c = getLastChar();
-        return c == ' ' || c == '\t';
-    }
-
-    /**
      * Returns whether run ends with newline.
      */
     public boolean isLastCharNewline()
@@ -460,6 +490,10 @@ public class TextLine implements CharSequence, Cloneable {
             run._start = length;
             length += run.length();
         }
+
+        // Clear Width, Tokens
+        _width = -1;
+        _tokens = null;
     }
 
     /**
@@ -467,9 +501,13 @@ public class TextLine implements CharSequence, Cloneable {
      */
     protected void updateText()
     {
+        // Clear Width, Tokens
+        _width = -1;
+        _tokens = null;
+
+        // Update Lines
         if (_textDoc != null)
             _textDoc.updateLines(getIndex());
-        _width = -1;
     }
 
     /**
