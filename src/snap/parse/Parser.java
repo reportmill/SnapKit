@@ -21,10 +21,10 @@ public class Parser {
     Tokenizer _tokenizer;
 
     // The current token
-    Token _token;
+    ParseToken _token;
 
     // The list of current look ahead tokens
-    List<Token> _lookAheadTokens = new ArrayList();
+    List<ParseToken> _lookAheadTokens = new ArrayList();
 
     // The shared node used to report parse success
     ParseNode _sharedNode = new ParseNode();
@@ -223,7 +223,7 @@ public class Parser {
     /**
      * Returns the current token.
      */
-    public Token getToken()
+    public ParseToken getToken()
     {
         return _token != null ? _token : (_token = getNextToken());
     }
@@ -231,7 +231,7 @@ public class Parser {
     /**
      * Fetches and returns the next token.
      */
-    protected Token getNextToken()
+    protected ParseToken getNextToken()
     {
         if (_lookAheadTokens.size() > 0)
             return _lookAheadTokens.remove(0);
@@ -241,7 +241,7 @@ public class Parser {
     /**
      * Returns the look ahead token at given index.
      */
-    protected Token getLookAheadToken(int anIndex)
+    protected ParseToken getLookAheadToken(int anIndex)
     {
         if (anIndex == 0)
             return getToken();
@@ -308,7 +308,7 @@ public class Parser {
     protected ParseNode parse(ParseRule aRule, HandlerRef aHRef)
     {
         // Get current token (if no token, just return null)
-        Token token = getToken();
+        ParseToken token = getToken();
         if (token == null) return null;
 
         // Get handler reference for given rule: Reuse if no Rule.Handler, otherwise create new HandlerRef for rule
@@ -516,7 +516,7 @@ public class Parser {
 
             // Handle Pattern
             case Pattern: {
-                Token token = getLookAheadToken(aTokenIndex);
+                ParseToken token = getLookAheadToken(aTokenIndex);
                 if (token != null && aRule.getPattern() == token.getPattern())
                     return aTokenCount - 1;
                 return -1;
@@ -539,7 +539,7 @@ public class Parser {
     /**
      * Creates a node for given rule and start/end tokens (returns a shared node by default).
      */
-    protected ParseNode createNode(ParseRule aRule, Token aStartToken, Token anEndToken)
+    protected ParseNode createNode(ParseRule aRule, ParseToken aStartToken, ParseToken anEndToken)
     {
         _sharedNode.init(this, aRule, aStartToken, anEndToken);
         return _sharedNode;

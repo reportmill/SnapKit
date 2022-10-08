@@ -12,7 +12,7 @@ public class ParseHandler<T> {
     protected T  _part;
 
     // The token where the current part started
-    private Token  _startToken;
+    private ParseToken _startToken;
 
     // Whether handler is in use
     private boolean  _inUse;
@@ -79,7 +79,7 @@ public class ParseHandler<T> {
     /**
      * Returns the token where the current part started.
      */
-    public Token getStartToken()  { return _startToken; }
+    public ParseToken getStartToken()  { return _startToken; }
 
     /**
      * Whether parsing should bypass succeeding rules.

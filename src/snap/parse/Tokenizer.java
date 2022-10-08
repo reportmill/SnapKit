@@ -302,10 +302,10 @@ public class Tokenizer {
     /**
      * Returns the next token.
      */
-    public Token getNextToken()
+    public ParseToken getNextToken()
     {
         // Get next special token
-        Token specialToken = getNextSpecialToken();
+        ParseToken specialToken = getNextSpecialToken();
 
         // Get list of matchers for next char
         char nextChar = hasChar() ? getChar() : 0;
@@ -339,7 +339,7 @@ public class Tokenizer {
         // Create new token, reset end and return new token
         String matchName = match.getName();
         String matchPattern = match.getPattern();
-        Token token = createToken(matchName, matchPattern, _charIndex, matchEnd, specialToken);
+        ParseToken token = createToken(matchName, matchPattern, _charIndex, matchEnd, specialToken);
         _charIndex = matchEnd;
         return token;
     }
@@ -387,9 +387,9 @@ public class Tokenizer {
     /**
      * Creates a new token.
      */
-    protected Token createToken(String aName, String aPattern, int aStart, int anEnd, Token aSpclTkn)
+    protected ParseToken createToken(String aName, String aPattern, int aStart, int anEnd, ParseToken aSpclTkn)
     {
-        Token.BasicToken token = new Token.BasicToken();
+        ParseToken.BasicToken token = new ParseToken.BasicToken();
         token._tokenizer = this;
         token._name = aName;
         token._pattern = aPattern;
@@ -404,11 +404,11 @@ public class Tokenizer {
     /**
      * Processes and returns next special token.
      */
-    public Token getNextSpecialToken()
+    public ParseToken getNextSpecialToken()
     {
         // Get next special token
-        Token nextSpecialToken = getNextSpecialToken(null);
-        Token specialToken = null;
+        ParseToken nextSpecialToken = getNextSpecialToken(null);
+        ParseToken specialToken = null;
 
         // Keep getting special tokens until we have the last one
         while (nextSpecialToken != null) {
@@ -423,7 +423,7 @@ public class Tokenizer {
     /**
      * Processes and returns next special token.
      */
-    protected Token getNextSpecialToken(Token aSpecialToken)
+    protected ParseToken getNextSpecialToken(ParseToken aSpecialToken)
     {
         // Skip whitespace
         skipWhiteSpace();
@@ -435,7 +435,7 @@ public class Tokenizer {
             return null;
 
         // Look for SingleLine or DoubleLine comments
-        Token specialToken = _slc ? getSingleLineCommentToken(aSpecialToken) : null;
+        ParseToken specialToken = _slc ? getSingleLineCommentToken(aSpecialToken) : null;
         if (specialToken == null && _mlc)
             specialToken = getMultiLineCommentToken(aSpecialToken);
 
@@ -446,9 +446,9 @@ public class Tokenizer {
     /**
      * Returns next special token or token.
      */
-    public Token getNextSpecialTokenOrToken()
+    public ParseToken getNextSpecialTokenOrToken()
     {
-        Token token = getNextSpecialToken();
+        ParseToken token = getNextSpecialToken();
         if (token == null)
             token = getNextToken();
         return token;
@@ -465,7 +465,7 @@ public class Tokenizer {
     /**
      * Processes and returns a single line comment token if next up in input.
      */
-    protected Token getSingleLineCommentToken(Token aSpecialToken)
+    protected ParseToken getSingleLineCommentToken(ParseToken aSpecialToken)
     {
         // If next two chars are single line comment (//), return token
         if (hasChars(2) && getChar() == '/' && getChar(1) == '/') {
@@ -496,7 +496,7 @@ public class Tokenizer {
     /**
      * Process and return a multi-line comment if next up in input.
      */
-    public Token getMultiLineCommentToken(Token aSpecialToken)
+    public ParseToken getMultiLineCommentToken(ParseToken aSpecialToken)
     {
         // If next two chars are multi line comment (/*) prefix, return token
         if (hasChars(2) && getChar() == '/' && getChar(1) == '*')
@@ -507,7 +507,7 @@ public class Tokenizer {
     /**
      * Returns a token from the current char to multi-line comment termination or input end.
      */
-    public Token getMultiLineCommentTokenMore(Token aSpecialToken)
+    public ParseToken getMultiLineCommentTokenMore(ParseToken aSpecialToken)
     {
         // Mark start of MultiLineComment token (just return null if at input end)
         int start = _charIndex;

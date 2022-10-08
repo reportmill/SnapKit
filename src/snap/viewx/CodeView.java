@@ -1,7 +1,7 @@
 package snap.viewx;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.parse.Token;
+import snap.parse.ParseToken;
 import snap.parse.Tokenizer;
 import snap.text.TextDoc;
 import snap.text.TextStyle;
@@ -54,15 +54,15 @@ public class CodeView extends TextArea {
         tokenizer.setInput(getText());
         TextDoc textDoc = getTextDoc();
 
-        for (Token tok = tokenizer.getNextToken(); tok != null; tok = tokenizer.getNextToken()) {
+        for (ParseToken tok = tokenizer.getNextToken(); tok != null; tok = tokenizer.getNextToken()) {
             String pattern = tok.getPattern();
-            Token stok = tok.getSpecialToken();
+            ParseToken stok = tok.getSpecialToken();
             if (Character.isLetter(pattern.charAt(0)))
-                textDoc.setStyleValue(TextStyle.COLOR_KEY, _reservedWordColor, tok.getInputStart(), tok.getInputEnd());
+                textDoc.setStyleValue(TextStyle.COLOR_KEY, _reservedWordColor, tok.getStartCharIndex(), tok.getEndCharIndex());
             else if (pattern.startsWith("\\\""))
-                textDoc.setStyleValue(TextStyle.COLOR_KEY, _stringLiteralColor, tok.getInputStart(), tok.getInputEnd());
+                textDoc.setStyleValue(TextStyle.COLOR_KEY, _stringLiteralColor, tok.getStartCharIndex(), tok.getEndCharIndex());
             while (stok != null) {
-                textDoc.setStyleValue(TextStyle.COLOR_KEY, _commentColor, stok.getInputStart(), stok.getInputEnd());
+                textDoc.setStyleValue(TextStyle.COLOR_KEY, _commentColor, stok.getStartCharIndex(), stok.getEndCharIndex());
                 stok = stok.getSpecialToken();
             }
         }

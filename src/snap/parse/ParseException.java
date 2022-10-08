@@ -50,8 +50,8 @@ public class ParseException extends RuntimeException {
     protected String createMessage()
     {
         // Get some useful line/char positions
-        Token token = _parser.getToken();
-        int charIndex = token != null ? token.getInputStart() : _parser.getTokenizer().getCharIndex();
+        ParseToken token = _parser.getToken();
+        int charIndex = token != null ? token.getStartCharIndex() : _parser.getTokenizer().getCharIndex();
         int lineIndex = token != null ? (token.getLineIndex() + 1) : _parser.getTokenizer().getLineNum();
         int colIndex = token != null ? token.getColumnIndex() : 0;
 

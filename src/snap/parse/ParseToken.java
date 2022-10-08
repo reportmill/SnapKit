@@ -4,9 +4,9 @@
 package snap.parse;
 
 /**
- * Represents a portion of a char sequence.
+ * Represents an individual 'word' from parsed text.
  */
-public interface Token {
+public interface ParseToken {
 
     /**
      * Returns the token name.
@@ -19,14 +19,14 @@ public interface Token {
     String getPattern();
 
     /**
-     * Returns the index of the start of this token in input.
+     * Returns the start char index of this token in input.
      */
-    int getInputStart();
+    int getStartCharIndex();
 
     /**
-     * Returns the index of the end of this token in input.
+     * Returns the end char index of this token in input.
      */
-    int getInputEnd();
+    int getEndCharIndex();
 
     /**
      * Returns the line index.
@@ -34,24 +34,24 @@ public interface Token {
     int getLineIndex();
 
     /**
-     * Returns the line start.
+     * Returns the start char index of this token in line.
      */
-    int getLineStart();
+    int getLineStartCharIndex();
 
     /**
      * Returns the column index.
      */
     default int getColumnIndex()
     {
-        int textStartCharIndex = getInputStart();
-        int lineStartCharIndex = getLineStart();
+        int textStartCharIndex = getStartCharIndex();
+        int lineStartCharIndex = getLineStartCharIndex();
         return textStartCharIndex - lineStartCharIndex;
     }
 
     /**
      * Returns the special token.
      */
-    Token getSpecialToken();
+    ParseToken getSpecialToken();
 
     /**
      * Returns the string.
@@ -61,7 +61,7 @@ public interface Token {
     /**
      * A basic implementation of a Token.
      */
-    class BasicToken implements Token {
+    class BasicToken implements ParseToken {
 
         // The tokenizer that provided this token
         protected Tokenizer  _tokenizer;
@@ -85,7 +85,7 @@ public interface Token {
         protected int  _lineStartCharIndex;
 
         // The special token that preceded this token, if available
-        protected Token  _specialToken;
+        protected ParseToken _specialToken;
 
         // The string
         protected String  _string;
@@ -105,19 +105,19 @@ public interface Token {
         public String getPattern()  { return _pattern; }
 
         /** Returns the char start. */
-        public int getInputStart()  { return _startCharIndex; }
+        public int getStartCharIndex()  { return _startCharIndex; }
 
         /** Returns the char end. */
-        public int getInputEnd()  { return _endCharIndex; }
+        public int getEndCharIndex()  { return _endCharIndex; }
 
         /** Returns the line index. */
         public int getLineIndex()  { return _lineIndex; }
 
         /** Returns the line start. */
-        public int getLineStart()  { return _lineStartCharIndex; }
+        public int getLineStartCharIndex()  { return _lineStartCharIndex; }
 
         /** Returns the special token. */
-        public Token getSpecialToken()  { return _specialToken; }
+        public ParseToken getSpecialToken()  { return _specialToken; }
 
         /** Returns the string. */
         public String getString()

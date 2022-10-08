@@ -15,7 +15,7 @@ public class ParseNode {
     ParseRule _rule;
 
     // The first and last tokens for this rule
-    Token _startToken, _endToken;
+    ParseToken _startToken, _endToken;
 
     // The substring of the parse input represented by this node
     String _string;
@@ -26,7 +26,7 @@ public class ParseNode {
     /**
      * Creates a new parse node
      */
-    public void init(Parser aParser, ParseRule aRule, Token aStartToken, Token anEndToken)
+    public void init(Parser aParser, ParseRule aRule, ParseToken aStartToken, ParseToken anEndToken)
     {
         _parser = aParser;
         _rule = aRule;
@@ -64,19 +64,19 @@ public class ParseNode {
     /**
      * Returns the start token for this node.
      */
-    public Token getStartToken()  { return _startToken; }
+    public ParseToken getStartToken()  { return _startToken; }
 
     /**
      * Returns the end token for this node.
      */
-    public Token getEndToken()  { return _endToken; }
+    public ParseToken getEndToken()  { return _endToken; }
 
     /**
      * Returns the match start.
      */
     public int getStart()
     {
-        return _startToken.getInputStart();
+        return _startToken.getStartCharIndex();
     }
 
     /**
@@ -84,7 +84,7 @@ public class ParseNode {
      */
     public int getEnd()
     {
-        return _endToken.getInputEnd();
+        return _endToken.getEndCharIndex();
     }
 
     /**
