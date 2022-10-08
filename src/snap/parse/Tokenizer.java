@@ -16,13 +16,13 @@ import java.util.regex.Pattern;
 public class Tokenizer {
 
     // The tokenizer input
-    CharSequence  _input;
+    private CharSequence  _input;
 
     // The input length
-    int  _length;
+    private int  _length;
 
-    // Whether to support standard Java single line comments and multiple line comments
-    boolean  _slc, _mlc, _jc;
+    // Whether to support standard Java style single line comments and multiple line comments
+    private boolean  _slc, _mlc;
 
     // The current char index
     protected int  _charIndex;
@@ -31,13 +31,17 @@ public class Tokenizer {
     protected int  _lineIndex, _lineStart;
 
     // The list of regular expression objects
-    List<Regex>  _regexList = new ArrayList();
+    private List<Regex>  _regexList = new ArrayList<>();
 
     // An array of regexes
-    Regex[]  _regexes;
+    private Regex[]  _regexes;
 
     // A map of char to matchers
-    Regex[][]  _charMatchers = new Regex[128][];
+    private Regex[][]  _charMatchers = new Regex[128][];
+
+    // Constants for common special token names
+    public static final String SINGLE_LINE_COMMENT = "SingleLineComment";
+    public static final String MULTI_LINE_COMMENT = "MultiLineComment";
 
     /**
      * Returns the current tokenizer input.
@@ -55,6 +59,8 @@ public class Tokenizer {
         _input = anInput;
         _length = _input.length();
         _charIndex = _lineIndex = _lineStart = 0;
+
+        // Reset matchers
         for (Regex regex : _regexList)
             regex.getMatcher(_input).reset(_input);
     }
@@ -117,13 +123,19 @@ public class Tokenizer {
      */
     public final char eatChar()
     {
-        char c = _input.charAt(_charIndex++);
-        if (c == '\n' || c == '\r') {
-            if (c == '\r' && hasChar() && getChar() == '\n') _charIndex++;
+        // Get next char
+        char eatChar = _input.charAt(_charIndex++);
+
+        // If newline, look for Windows sister newline char and eat that too
+        if (eatChar == '\n' || eatChar == '\r') {
+            if (eatChar == '\r' && hasChar() && getChar() == '\n')
+                _charIndex++;
             _lineIndex++;
             _lineStart = _charIndex;
         }
-        return c;
+
+        // Return
+        return eatChar;
     }
 
     /**
@@ -164,7 +176,6 @@ public class Tokenizer {
     public void setReadSingleLineComments(boolean aValue)
     {
         _slc = aValue;
-        _jc = _slc || _mlc;
     }
 
     /**
@@ -181,7 +192,6 @@ public class Tokenizer {
     public void setReadMultiLineComments(boolean aValue)
     {
         _mlc = aValue;
-        _jc = _slc || _mlc;
     }
 
     /**
@@ -221,21 +231,25 @@ public class Tokenizer {
      */
     public void addPatterns(ParseRule aRule)
     {
-        addPatterns(aRule, new ArrayList(128));
+        addPatterns(aRule, new ArrayList<>(128));
     }
 
     /**
      * Adds patterns to this tokenizer for given rule.
      */
-    private void addPatterns(ParseRule aRule, List theRules)
+    private void addPatterns(ParseRule aRule, List<ParseRule> theRules)
     {
         theRules.add(aRule);
         if (aRule.getPattern() != null)
             addPattern(aRule.getName(), aRule.getPattern(), aRule.isLiteral());
+
         ParseRule r0 = aRule.getChild0();
-        if (r0 != null && !ListUtils.containsId(theRules, r0)) addPatterns(r0, theRules);
+        if (r0 != null && !ListUtils.containsId(theRules, r0))
+            addPatterns(r0, theRules);
+
         ParseRule r1 = aRule.getChild1();
-        if (r1 != null && !ListUtils.containsId(theRules, r1)) addPatterns(r1, theRules);
+        if (r1 != null && !ListUtils.containsId(theRules, r1))
+            addPatterns(r1, theRules);
     }
 
     /**
@@ -294,8 +308,8 @@ public class Tokenizer {
         Token specialToken = getNextSpecialToken();
 
         // Get list of matchers for next char
-        char c = hasChar() ? getChar() : 0;
-        Regex regexes[] = c < 128 ? getRegexes(c) : getRegexes();
+        char nextChar = hasChar() ? getChar() : 0;
+        Regex[] regexes = nextChar < 128 ? getRegexesForStartChar(nextChar) : getRegexes();
 
         // Iterate over regular expressions to find best match
         Regex match = null;
@@ -323,41 +337,51 @@ public class Tokenizer {
         }
 
         // Create new token, reset end and return new token
-        Token token = createToken(match.getName(), match.getPattern(), _charIndex, matchEnd, specialToken);
+        String matchName = match.getName();
+        String matchPattern = match.getPattern();
+        Token token = createToken(matchName, matchPattern, _charIndex, matchEnd, specialToken);
         _charIndex = matchEnd;
         return token;
     }
 
     /**
-     * Returns list of Regex for a char.
+     * Returns list of Regex for a starting char.
      */
-    public Regex[] getRegexes(char aChar)
+    public Regex[] getRegexesForStartChar(char aChar)
     {
-        // Get cached regex array for char
-        Regex regexes[] = _charMatchers[aChar];
+        // Get cached regex array for char, just return if found
+        Regex[] regexesForChar = _charMatchers[aChar];
+        if (regexesForChar != null)
+            return regexesForChar;
 
-        // If not found, create array by checking first char of all regexes and set
-        if (regexes == null) {
-            if (aChar == 0) return _charMatchers[aChar] = new Regex[0];
-            List<Regex> regexList = new ArrayList();
-            String str = Character.toString(aChar);
-            for (Regex regex : getRegexes()) {
-                char c = regex.getLiteralChar();
-                if (c == aChar)
+        // If bogus char, just return
+        if (aChar == 0)
+            return _charMatchers[aChar] = new Regex[0];
+
+        // Get Regexes and string for char
+        List<Regex> regexList = new ArrayList<>();
+        String charStr = Character.toString(aChar);
+
+        // Iterate over all regexes to find those that start with given literal char
+        for (Regex regex : getRegexes()) {
+
+            // If regex char matches given char, add to list
+            char loopChar = regex.getLiteralChar();
+            if (loopChar == aChar)
+                regexList.add(regex);
+
+            // Check "char.startsWith(regex)"
+            else if (loopChar == 0) {
+                Pattern p = regex.getPatternCompiled();
+                Matcher m = p.matcher(charStr);
+                m.matches();
+                if (m.hitEnd())
                     regexList.add(regex);
-                else if (c == 0) { // Check "char.startsWith(regex)"
-                    Pattern p = regex.getPatternCompiled();
-                    Matcher m = p.matcher(str);
-                    m.matches();
-                    if (m.hitEnd())
-                        regexList.add(regex);
-                }
             }
-            regexes = _charMatchers[aChar] = regexList.toArray(new Regex[0]);
         }
 
-        // Return regexes array
-        return regexes;
+        // Get, set, return regex array
+        return _charMatchers[aChar] = regexList.toArray(new Regex[0]);
     }
 
     /**
@@ -369,10 +393,10 @@ public class Tokenizer {
         token._tokenizer = this;
         token._name = aName;
         token._pattern = aPattern;
-        token._start = aStart;
-        token._end = anEnd;
+        token._startCharIndex = aStart;
+        token._endCharIndex = anEnd;
         token._lineIndex = _lineIndex;
-        token._lineStart = _lineStart;
+        token._lineStartCharIndex = _lineStart;
         token._specialToken = aSpclTkn;
         return token;
     }
@@ -382,28 +406,51 @@ public class Tokenizer {
      */
     public Token getNextSpecialToken()
     {
-        Token spt = null, sptn = getNextSpecialToken(null);
-        while (sptn != null) {
-            spt = sptn;
-            sptn = getNextSpecialToken(sptn);
+        // Get next special token
+        Token nextSpecialToken = getNextSpecialToken(null);
+        Token specialToken = null;
+
+        // Keep getting special tokens until we have the last one
+        while (nextSpecialToken != null) {
+            specialToken = nextSpecialToken;
+            nextSpecialToken = getNextSpecialToken(nextSpecialToken);
         }
-        return spt;
+
+        // Return
+        return specialToken;
     }
 
     /**
      * Processes and returns next special token.
      */
-    protected Token getNextSpecialToken(Token aSpclTkn)
+    protected Token getNextSpecialToken(Token aSpecialToken)
     {
         // Skip whitespace
         skipWhiteSpace();
 
         // Look for standard Java single/multi line comments tokens
-        if (!_jc || !hasChar() || getChar() != '/') return null;
-        Token token = _slc ? getSingleLineCommentToken(aSpclTkn) : null;
-        if (token == null && _mlc) token = getMultiLineCommentToken(aSpclTkn);
+        if (!(_slc || _mlc))
+            return null;
+        if (!hasChar() || getChar() != '/')
+            return null;
 
-        // Return token
+        // Look for SingleLine or DoubleLine comments
+        Token specialToken = _slc ? getSingleLineCommentToken(aSpecialToken) : null;
+        if (specialToken == null && _mlc)
+            specialToken = getMultiLineCommentToken(aSpecialToken);
+
+        // Return special token
+        return specialToken;
+    }
+
+    /**
+     * Returns next special token or token.
+     */
+    public Token getNextSpecialTokenOrToken()
+    {
+        Token token = getNextSpecialToken();
+        if (token == null)
+            token = getNextToken();
         return token;
     }
 
@@ -418,55 +465,65 @@ public class Tokenizer {
     /**
      * Processes and returns a single line comment token if next up in input.
      */
-    protected Token getSingleLineCommentToken(Token aSpclTkn)
+    protected Token getSingleLineCommentToken(Token aSpecialToken)
     {
         // If next two chars are single line comment (//), return token
         if (hasChars(2) && getChar() == '/' && getChar(1) == '/') {
-            int start = _charIndex;
+
+            // Update CharIndex to line end
+            int tokenStart = _charIndex;
             _charIndex += 2;
             _charIndex = StringUtils.indexAfterNewline(getInput(), _charIndex);
-            if (_charIndex < 0) _charIndex = length();
+
+            // If no newline in input, set to end
+            if (_charIndex < 0)
+                _charIndex = length();
+
+            // Otherwise, update LineIndex, LineStart for next line
             else {
                 _lineIndex++;
                 _lineStart = _charIndex;
             }
-            return createToken("SingleLineComment", null, start, _charIndex, aSpclTkn);
+
+            // Create/return new special token
+            return createToken(SINGLE_LINE_COMMENT, null, tokenStart, _charIndex, aSpecialToken);
         }
 
-        // Return null since not found
+        // Return not found
         return null;
     }
 
     /**
      * Process and return a multi-line comment if next up in input.
      */
-    protected Token getMultiLineCommentToken(Token aSpclTkn)
+    public Token getMultiLineCommentToken(Token aSpecialToken)
     {
         // If next two chars are multi line comment (/*) prefix, return token
         if (hasChars(2) && getChar() == '/' && getChar(1) == '*')
-            return getMultiLineCommentTokenMore(aSpclTkn);
+            return getMultiLineCommentTokenMore(aSpecialToken);
         return null;
     }
 
     /**
      * Returns a token from the current char to multi-line comment termination or input end.
      */
-    protected Token getMultiLineCommentTokenMore(Token aSpclTkn)
+    public Token getMultiLineCommentTokenMore(Token aSpecialToken)
     {
         // Mark start of MultiLineComment token (just return null if at input end)
         int start = _charIndex;
-        if (start == length()) return null;
+        if (start == length())
+            return null;
 
         // Gobble chars until multi-line comment termination or input end
         while (hasChar()) {
-            char c = eatChar();
-            if (c == '*' && hasChar() && getChar() == '/') {
+            char loopChar = eatChar();
+            if (loopChar == '*' && hasChar() && getChar() == '/') {
                 eatChar();
                 break;
             }
         }
 
         // Create and return token
-        return createToken("MultiLineComment", null, start, _charIndex, aSpclTkn);
+        return createToken(MULTI_LINE_COMMENT, null, start, _charIndex, aSpecialToken);
     }
 }

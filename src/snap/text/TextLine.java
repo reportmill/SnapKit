@@ -328,6 +328,8 @@ public class TextLine implements CharSequence, Cloneable {
         if (_tokens != null) return _tokens;
 
         TextToken[] tokens = _textDoc.createTokensForTextLine(this);
+        for (int i = 0; i < tokens.length; i++)
+            tokens[i]._index = i;
         return _tokens = tokens;
     }
 
@@ -369,6 +371,15 @@ public class TextLine implements CharSequence, Cloneable {
     {
         int nextIndex = _index + 1;
         return _textDoc != null && nextIndex < _textDoc.getLineCount() ? _textDoc.getLine(nextIndex) : null;
+    }
+
+    /**
+     * Returns the previous line, if available.
+     */
+    public TextLine getPrevious()
+    {
+        int prevIndex = _index - 1;
+        return _textDoc != null && prevIndex >= 0 ? _textDoc.getLine(prevIndex) : null;
     }
 
     /**

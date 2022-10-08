@@ -2,8 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
+import snap.gfx.Color;
 import snap.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +11,9 @@ import java.util.List;
  * This class represents a 'word' in a TextLine.
  */
 public class TextToken implements Cloneable {
+
+    // The token name
+    private String  _name;
 
     // The TextLine
     private TextLine  _textLine;
@@ -30,8 +33,11 @@ public class TextToken implements Cloneable {
     // The TextRun
     private TextRun  _textRun;
 
+    // An override TextStyle (optional)
+    private Color  _textStyle;
+
     // The X location of token in line
-    protected double  _x;
+    protected double  _x = -1;
 
     // The width
     private double  _width = -1;
@@ -54,6 +60,16 @@ public class TextToken implements Cloneable {
         while (_endAllCharIndex < _textRun.getEnd() && Character.isWhitespace(_textLine.charAt(_endAllCharIndex)))
             _endAllCharIndex++;
     }
+
+    /**
+     * Returns the token name.
+     */
+    public String getName()  { return _name; }
+
+    /**
+     * Sets the token name.
+     */
+    public void setName(String aName)  { _name = aName; }
 
     /**
      * Returns the TextLine.
@@ -96,9 +112,29 @@ public class TextToken implements Cloneable {
     public TextStyle getTextStyle()  { return _textRun.getStyle(); }
 
     /**
+     * Returns the override TextStyle, if set.
+     */
+    public Color getTextColor()  { return _textStyle; }
+
+    /**
+     * Sets an override TextStyle, if set.
+     */
+    public void setTextColor(Color aColor)  { _textStyle = aColor; }
+
+    /**
      * Returns the horizontal location of token in line.
      */
-    public double getX()  { return _x; }
+    public double getX()
+    {
+        // If set, just return
+        if (_x >=0) return _x;
+
+        // Set X
+        setTokensX(_textLine);
+
+        // Return
+        return _x;
+    }
 
     /**
      * Returns the width.
@@ -133,7 +169,7 @@ public class TextToken implements Cloneable {
         if (trimCharSpacing && charSpacing != 0)
             tokenW -= charSpacing;
 
-        // Set, return
+        // Return
         return tokenW;
     }
 
@@ -282,25 +318,17 @@ public class TextToken implements Cloneable {
         List<TextToken> tokens = new ArrayList<>();
         int tokenStart = 0;
         int lineLength = aTextLine.length();
-        double tokenX = 0;
 
         // Get Run info
         TextRun run = aTextLine.getRun(0);
         int runEnd = run.getEnd();
-        TextStyle runStyle = run.getStyle();
-        double charSpacing = runStyle.getCharSpacing();
 
         // Iterate over line chars
         while (tokenStart < lineLength) {
 
             // Find token start: Skip past whitespace
-            char loopChar;
-            while (tokenStart < runEnd && Character.isWhitespace(loopChar = aTextLine.charAt(tokenStart))) {
-                if (loopChar == '\t')
-                    tokenX = aTextLine.getXForTabAtIndexAndX(tokenStart, tokenX);
-                else tokenX += runStyle.getCharAdvance(loopChar) + charSpacing;
+            while (tokenStart < runEnd && Character.isWhitespace(aTextLine.charAt(tokenStart)))
                 tokenStart++;
-            }
 
             // Find token end: Skip to first non-whitespace char
             int tokenEnd = tokenStart;
@@ -310,24 +338,62 @@ public class TextToken implements Cloneable {
             // If chars found, create/add token
             if (tokenStart < tokenEnd) {
                 TextToken token = new TextToken(aTextLine, tokenStart, tokenEnd, run);
-                token._index = tokens.size();
-                token._x = tokenX;
                 tokens.add(token);
                 tokenStart = tokenEnd;
-                double tokenW = token.getWidth();
-                tokenX += tokenW;
             }
 
             // If at RunEnd but not LineEnd, update Run info with next run
             if (tokenStart == runEnd && tokenStart < lineLength) {
                 run = run.getNext();
                 runEnd = run.getEnd();
-                runStyle = run.getStyle();
-                charSpacing = runStyle.getCharSpacing();
             }
         }
 
         // Return
         return tokens.toArray(new TextToken[0]);
+    }
+
+    /**
+     * Sets the X values for tokens in line.
+     */
+    public static void setTokensX(TextLine aTextLine)
+    {
+        TextToken[] tokens = aTextLine.getTokens();
+        TextRun textRun = aTextLine.getRun(0);
+        TextStyle runStyle = textRun.getStyle();
+        double charSpacing = runStyle.getCharSpacing();
+        int charIndex = 0;
+        double tokenX = 0;
+
+        for (int i = 0; i < tokens.length ; i++) {
+
+            // Get token
+            TextToken token = tokens[i];
+
+            // Update runStyle
+            if (token.getTextRun() != textRun) {
+                textRun = token.getTextRun();
+                runStyle = textRun.getStyle();
+                charSpacing = runStyle.getCharSpacing();
+            }
+
+            // Find token start: Skip past whitespace
+            int tokenStart = token.getStartCharIndex();
+            while (charIndex < tokenStart) {
+                char loopChar = aTextLine.charAt(charIndex);
+                if (loopChar == '\t')
+                    tokenX = aTextLine.getXForTabAtIndexAndX(charIndex, tokenX);
+                else tokenX += runStyle.getCharAdvance(loopChar) + charSpacing;
+                charIndex++;
+            }
+
+            // Set token X
+            token._x = tokenX;
+
+            // Update token Width
+            double tokenW = token.getWidth();
+            tokenX += tokenW + charSpacing;
+            charIndex = token.getEndCharIndex();
+        }
     }
 }

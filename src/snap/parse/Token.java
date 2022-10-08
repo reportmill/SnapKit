@@ -9,87 +9,93 @@ package snap.parse;
 public interface Token {
 
     /**
-     * The Tokenizer that provided this token.
+     * Returns the token name.
      */
-    public Tokenizer getTokenizer();
-
-    /**
-     * Returns the name.
-     */
-    public String getName();
+    String getName();
 
     /**
      * Returns the pattern.
      */
-    public String getPattern();
+    String getPattern();
 
     /**
      * Returns the index of the start of this token in input.
      */
-    public int getInputStart();
+    int getInputStart();
 
     /**
      * Returns the index of the end of this token in input.
      */
-    public int getInputEnd();
+    int getInputEnd();
 
     /**
      * Returns the line index.
      */
-    public int getLineIndex();
+    int getLineIndex();
 
     /**
      * Returns the line start.
      */
-    public int getLineStart();
+    int getLineStart();
 
     /**
      * Returns the column index.
      */
-    public int getColumnIndex();
+    default int getColumnIndex()
+    {
+        int textStartCharIndex = getInputStart();
+        int lineStartCharIndex = getLineStart();
+        return textStartCharIndex - lineStartCharIndex;
+    }
 
     /**
      * Returns the special token.
      */
-    public Token getSpecialToken();
+    Token getSpecialToken();
 
     /**
      * Returns the string.
      */
-    public String getString();
+    String getString();
 
     /**
      * A basic implementation of a Token.
      */
-    public static class BasicToken implements Token {
+    class BasicToken implements Token {
 
         // The tokenizer that provided this token
-        Tokenizer _tokenizer;
+        protected Tokenizer  _tokenizer;
 
         // The name this token matches
-        String _name;
+        protected String  _name;
 
         // The pattern this token matches
-        String _pattern;
+        protected String  _pattern;
 
-        // The start/end char index
-        int _start, _end;
+        // The start char index
+        protected int  _startCharIndex;
 
-        // The line index and line start char index
-        int _lineIndex, _lineStart;
+        // The end char index
+        protected int  _endCharIndex;
 
-        // The string
-        String _string;
+        // The line index
+        protected int  _lineIndex;
+
+        // The line start char index
+        protected int  _lineStartCharIndex;
 
         // The special token that preceded this token, if available
-        Token _specialToken;
+        protected Token  _specialToken;
+
+        // The string
+        protected String  _string;
 
         /**
-         * The Tokenizer that provided this token.
+         * Constructor.
          */
-        public Tokenizer getTokenizer()
+        public BasicToken()
         {
-            return _tokenizer;
+            super();
         }
 
         /** Returns the name. */
@@ -99,19 +105,16 @@ public interface Token {
         public String getPattern()  { return _pattern; }
 
         /** Returns the char start. */
-        public int getInputStart()  { return _start; }
+        public int getInputStart()  { return _startCharIndex; }
 
         /** Returns the char end. */
-        public int getInputEnd()  { return _end; }
+        public int getInputEnd()  { return _endCharIndex; }
 
         /** Returns the line index. */
         public int getLineIndex()  { return _lineIndex; }
 
         /** Returns the line start. */
-        public int getLineStart()  { return _lineStart; }
-
-        /** Returns the column index. */
-        public int getColumnIndex()  { return getInputStart() - getLineStart(); }
+        public int getLineStart()  { return _lineStartCharIndex; }
 
         /** Returns the special token. */
         public Token getSpecialToken()  { return _specialToken; }
@@ -119,19 +122,17 @@ public interface Token {
         /** Returns the string. */
         public String getString()
         {
-            return _string != null? _string : (_string = createString());
-        }
+            if (_string != null) return _string;
 
-        /** Creates the string. */
-        protected String createString()
-        {
-            return getTokenizer().getInput(_start, _end).toString();
+            CharSequence chars = _tokenizer.getInput(_startCharIndex, _endCharIndex);
+            String string = chars.toString();
+            return _string = string;
         }
 
         /** Returns the string. */
         public String toString()
         {
-            return "Token { start:" + _start + ", end:" + _end + " }: " + getString();
+            return "Token { start:" + _startCharIndex + ", end:" + _endCharIndex + " }: " + getString();
         }
     }
 }

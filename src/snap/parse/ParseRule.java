@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.parse;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,34 +11,38 @@ import java.util.Map;
 public class ParseRule {
 
     // The name
-    String _name;
+    private String  _name;
 
     // The op
-    Op _op;
+    protected Op  _op;
 
     // The child rules
-    ParseRule _child0, _child1;
+    protected ParseRule  _child0, _child1;
 
     // Rule pattern - if simple regex
-    String _pattern;
+    protected String  _pattern;
 
-    // Returns whether the pattern is literal
-    boolean _literal;
+    // Whether the pattern is literal
+    protected boolean  _literal;
 
     // The look ahead count (implies this rule is really just a look ahead
-    int _lookAhead;
+    protected int  _lookAhead;
 
     // The handler for parse rule
-    ParseHandler _handler;
+    private ParseHandler  _handler;
+
+    // The named rules
+    private Map<String, ParseRule>  _namedRules;
 
     // Constants for booleans operators
     public enum Op {Or, And, ZeroOrOne, ZeroOrMore, OneOrMore, LookAhead, Pattern}
 
     /**
-     * Creates a new parse rule.
+     * Constructor.
      */
     public ParseRule()
     {
+        super();
     }
 
     /**
@@ -88,10 +91,7 @@ public class ParseRule {
     /**
      * Returns rule name.
      */
-    public String getName()
-    {
-        return _name;
-    }
+    public String getName()  { return _name; }
 
     /**
      * Sets rule name.
@@ -112,34 +112,22 @@ public class ParseRule {
     /**
      * Returns the op.
      */
-    public Op getOp()
-    {
-        return _op;
-    }
+    public Op getOp()  { return _op; }
 
     /**
      * Returns the first child.
      */
-    public ParseRule getChild0()
-    {
-        return _child0;
-    }
+    public ParseRule getChild0()  { return _child0; }
 
     /**
      * Returns the second child.
      */
-    public ParseRule getChild1()
-    {
-        return _child1;
-    }
+    public ParseRule getChild1() { return _child1; }
 
     /**
      * Returns the rule pattern if simple pattern.
      */
-    public String getPattern()
-    {
-        return _pattern;
-    }
+    public String getPattern()  { return _pattern; }
 
     /**
      * Sets the rule pattern if simple pattern.
@@ -155,10 +143,7 @@ public class ParseRule {
     /**
      * Returns whether pattern is literal.
      */
-    public boolean isLiteral()
-    {
-        return _literal;
-    }
+    public boolean isLiteral()  { return _literal; }
 
     /**
      * Sets whether pattern is literal.
@@ -188,10 +173,7 @@ public class ParseRule {
     /**
      * Returns the handler for this rule.
      */
-    public ParseHandler getHandler()
-    {
-        return _handler;
-    }
+    public ParseHandler getHandler()  { return _handler; }
 
     /**
      * Sets the handler for this rule.
@@ -205,18 +187,12 @@ public class ParseRule {
     /**
      * Returns whether rule is look ahead.
      */
-    public boolean isLookAhead()
-    {
-        return _lookAhead > 0;
-    }
+    public boolean isLookAhead()  { return _lookAhead > 0; }
 
     /**
      * Returns the look ahead count.
      */
-    public int getLookAhead()
-    {
-        return _lookAhead;
-    }
+    public int getLookAhead()  { return _lookAhead; }
 
     /**
      * Sets the look ahead count.
@@ -244,9 +220,9 @@ public class ParseRule {
      */
     private Map<String, ParseRule> getNamedRules()
     {
-        if (_nrules != null) return _nrules;
-        addNamedRule(this, new HashMap());
-        return _nrules;
+        if (_namedRules != null) return _namedRules;
+        addNamedRule(this, new HashMap<>());
+        return _namedRules;
     }
 
     /**
@@ -255,17 +231,19 @@ public class ParseRule {
     private void addNamedRule(ParseRule aRule, Map<String, ParseRule> aMap)
     {
         String name = aRule.getName();
-        if (name != null && aMap.get(name) != null) return;
+        if (name != null && aMap.get(name) != null)
+            return;
         if (name != null) {
             aMap.put(name, aRule);
-            aRule._nrules = aMap;
+            aRule._namedRules = aMap;
         }
-        if (aRule.getChild0() != null) addNamedRule(aRule.getChild0(), aMap);
-        if (aRule.getChild1() != null) addNamedRule(aRule.getChild1(), aMap);
-    }
 
-    // The named rules
-    private Map<String, ParseRule> _nrules;
+        // Recurse for children
+        if (aRule.getChild0() != null)
+            addNamedRule(aRule.getChild0(), aMap);
+        if (aRule.getChild1() != null)
+            addNamedRule(aRule.getChild1(), aMap);
+    }
 
     /**
      * Adds an Or rule to this rule with given pattern.
@@ -370,7 +348,8 @@ public class ParseRule {
      */
     public String toString()
     {
-        return ParseUtils.getString(this).replaceAll("\\s+", " ").trim();
+        String str = ParseUtils.getString(this);
+        String strTrim = str.replaceAll("\\s+", " ").trim();
+        return strTrim;
     }
-
 }
