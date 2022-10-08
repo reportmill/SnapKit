@@ -12,32 +12,33 @@ import java.util.List;
 public class Parser {
 
     // The top level rule
-    ParseRule _rule;
+    private ParseRule  _rule;
 
     // The current parse character input
-    CharSequence _input;
+    private CharSequence  _input;
 
     // The tokenizer
-    Tokenizer _tokenizer;
+    private Tokenizer  _tokenizer;
 
     // The current token
-    ParseToken _token;
+    private ParseToken  _token;
 
     // The list of current look ahead tokens
-    List<ParseToken> _lookAheadTokens = new ArrayList();
+    private List<ParseToken>  _lookAheadTokens = new ArrayList<>();
 
     // The shared node used to report parse success
-    ParseNode _sharedNode = new ParseNode();
+    private ParseNode _sharedNode = new ParseNode();
 
     /**
-     * Creates a new Parser.
+     * Constructor.
      */
     public Parser()
     {
+        super();
     }
 
     /**
-     * Creates a new Parser for given rule.
+     * Constructor for given rule.
      */
     public Parser(ParseRule aRule)
     {
@@ -120,22 +121,6 @@ public class Parser {
     }
 
     /**
-     * Returns whether another char is available.
-     */
-    public final boolean hasChar()
-    {
-        return getTokenizer().hasChar();
-    }
-
-    /**
-     * Returns whether another given number of chars is available.
-     */
-    public final boolean hasChars(int aVal)
-    {
-        return getTokenizer().hasChars(aVal);
-    }
-
-    /**
      * Returns the current parse char.
      */
     public final char getChar()
@@ -190,24 +175,25 @@ public class Parser {
      */
     public Tokenizer getTokenizer()
     {
-        if (_tokenizer == null) setTokenizer(createTokenizer());  // If tokenizer not set, create and set
-        return _tokenizer;
-    }
+        // If already set, just return
+        if (_tokenizer != null) return _tokenizer;
 
-    /**
-     * Creates the tokenizer instance and initializes patters from rule.
-     */
-    protected Tokenizer createTokenizer()
-    {
-        Tokenizer tokenizer = createTokenizerImpl(); // Create instance
-        tokenizer.addPatterns(getRule());  // Init patterns from rule
-        return tokenizer;
+        // Create tokenizer
+        Tokenizer tokenizer = createTokenizer();
+
+        // Add Patterns for Rule
+        ParseRule rule = getRule();
+        tokenizer.addPatterns(rule);
+
+        // Set, return
+        setTokenizer(tokenizer);
+        return _tokenizer;
     }
 
     /**
      * Creates the tokenizer instance.
      */
-    protected Tokenizer createTokenizerImpl()
+    protected Tokenizer createTokenizer()
     {
         return new Tokenizer();
     }

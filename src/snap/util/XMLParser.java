@@ -51,7 +51,7 @@ public class XMLParser extends Parser {
     /**
      * Override to return XMLTokenizer.
      */
-    protected Tokenizer createTokenizerImpl()  { return new XMLTokenizer(); }
+    protected Tokenizer createTokenizer()  { return new XMLTokenizer(); }
 
     /**
      * A Tokenizer subclass to read XML contents.

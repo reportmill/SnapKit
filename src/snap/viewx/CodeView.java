@@ -1,8 +1,8 @@
 package snap.viewx;
 import snap.gfx.Color;
 import snap.gfx.Font;
+import snap.parse.CodeTokenizer;
 import snap.parse.ParseToken;
-import snap.parse.Tokenizer;
 import snap.text.TextDoc;
 import snap.text.TextStyle;
 import snap.view.TextArea;
@@ -46,7 +46,7 @@ public class CodeView extends TextArea {
      */
     protected void syntaxColor()
     {
-        Tokenizer tokenizer = new Tokenizer();
+        CodeTokenizer tokenizer = new CodeTokenizer();
         tokenizer.setReadSingleLineComments(true);
         tokenizer.setReadMultiLineComments(true);
         for (String tok : getPatterns()) tokenizer.addPattern(tok, tok);

@@ -58,12 +58,13 @@ public class ParseRuleParser extends Parser {
     /**
      * Override to allow rules files to have standard Java single/multiple line comments.
      */
+    @Override
     protected Tokenizer createTokenizer()
     {
-        Tokenizer tz = super.createTokenizer();
-        tz.setReadSingleLineComments(true);
-        tz.setReadMultiLineComments(true);
-        return tz;
+        CodeTokenizer tokenizer = new CodeTokenizer();
+        tokenizer.setReadSingleLineComments(true);
+        tokenizer.setReadMultiLineComments(true);
+        return tokenizer;
     }
 
     /**
