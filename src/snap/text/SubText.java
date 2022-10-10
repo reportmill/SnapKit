@@ -203,14 +203,14 @@ public class SubText extends TextDoc {
         while (true) {
 
             // Create, configure, add SubTextLine for TextLine
-            int lineEnd = Math.min(textLine.getEnd(), _end);
+            int lineEnd = Math.min(textLine.getEndCharIndex(), _end);
             SubTextLine subLine = new SubTextLine(this, textLine, charIndex, lineEnd);
             subLine._index = _lines.size();
             _lines.add(subLine);
 
             // Get next TextLine - if beyond SubText.End, just break
             textLine = textLine.getNext();
-            if (textLine == null || _end <= textLine.getStart())
+            if (textLine == null || _end <= textLine.getStartCharIndex())
                 break;
             charIndex = lineEnd;
         }

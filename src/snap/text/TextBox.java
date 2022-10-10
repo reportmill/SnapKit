@@ -41,9 +41,6 @@ public class TextBox {
     // The start char index of this box in TextDoc
     private int  _startCharIndex;
 
-    // The end char index of this box in TextDoc
-    private int  _endCharIndex = -1;
-
     // The font scale for this box
     protected double  _fontScale = 1;
 
@@ -311,26 +308,10 @@ public class TextBox {
      */
     public int getEndCharIndex()
     {
-        // If explicitly set, just return
-        if (_endCharIndex >= 0) return _endCharIndex;
-
-        // Otherwise return last line end
         int startCharIndex = getStartCharIndex();
-        int lastLineEnd = getLineCount() > 0 ? getLineLast().getEnd() : 0;
+        TextBoxLine lastLine = getLineLast();
+        int lastLineEnd = lastLine != null ? lastLine.getEndCharIndex() : 0;
         return startCharIndex + lastLineEnd;
-    }
-
-    /**
-     * Sets the end char index in TextDoc.
-     */
-    public void setEndCharIndex(int charIndex)
-    {
-        // If already set, just return
-        if (charIndex == _endCharIndex) return;
-
-        // Set and update
-        _endCharIndex = charIndex;
-        setNeedsUpdateAll();
     }
 
     /**
@@ -433,7 +414,7 @@ public class TextBox {
         int lcount = getLineCount();
         if (lcount == 0) return 0;
         int start = getStartCharIndex();
-        int end = getLineLast().getEnd();
+        int end = getLineLast().getEndCharIndex();
         return end - start;
     }
 
@@ -478,12 +459,12 @@ public class TextBox {
 
         // Iterate over lines and return first that contains index
         for (TextBoxLine line : _lines)
-            if (anIndex < line.getEnd())
+            if (anIndex < line.getEndCharIndex())
                 return line;
 
         // Get last line
         TextBoxLine lastLine = getLineLast();
-        if (anIndex == lastLine.getEnd())
+        if (anIndex == lastLine.getEndCharIndex())
             return lastLine;
 
         // Complain
@@ -543,7 +524,7 @@ public class TextBox {
             TextDocUtils.LineStyleChange lineStyleChange = (TextDocUtils.LineStyleChange) aPC;
             TextDoc textDoc = getTextDoc();
             TextLine textLine = textDoc.getLine(lineStyleChange.getIndex());
-            textChangedChars(textLine.getStart(), textLine.getEnd());
+            textChangedChars(textLine.getStartCharIndex(), textLine.getEndCharIndex());
         }
     }
 
@@ -608,14 +589,12 @@ public class TextBox {
 
         // Get count, start and end of currently configured lines
         int oldLineCount = _lines.size();
-        int oldEndCharIndex = oldLineCount > 0 ? _lines.get(oldLineCount - 1).getEnd() : getStartCharIndex();
+        int oldEndCharIndex = oldLineCount > 0 ? _lines.get(oldLineCount - 1).getEndCharIndex() : getStartCharIndex();
 
         // Get update startCharIndex, linesEnd and textEnd to synchronize lines to text
         int startCharIndex = _updStart; //Math.max(_updStart, getStart());
         int linesEnd = Math.min(_lastLen - _updEnd, oldEndCharIndex);
         int textEnd = length() - _updEnd;
-        if (_endCharIndex >= 0)
-            textEnd = Math.min(textEnd, _endCharIndex);
 
         // Update lines
         if (startCharIndex <= linesEnd || _lastLen == 0)
@@ -639,7 +618,7 @@ public class TextBox {
         int lineCount = getLineCount();
         TextBoxLine startLine = lineCount > 0 ? getLineForCharIndex(aStartCharIndex) : null;
         int startLineIndex = startLine != null ? startLine.getIndex() : 0;
-        int startCharIndex = startLine != null ? startLine.getStart() : aStartCharIndex;
+        int startCharIndex = startLine != null ? startLine.getStartCharIndex() : aStartCharIndex;
 
         // Remove lines for old range
         removeLinesForCharRange(aStartCharIndex, linesEnd);
@@ -648,11 +627,11 @@ public class TextBox {
         addLinesForCharRange(startLineIndex, startCharIndex, textEnd);
 
         // Iterate over lines beyond start line and update lines Index, Start and Y_Local
-        int charIndex = startLineIndex > 0 ? getLine(startLineIndex - 1).getEnd() : 0;
+        int charIndex = startLineIndex > 0 ? getLine(startLineIndex - 1).getEndCharIndex() : 0;
         for (int i = startLineIndex, iMax = _lines.size(); i < iMax; i++) {
             TextBoxLine textBoxLine = getLine(i);
             textBoxLine._index = i;
-            textBoxLine._start = charIndex;
+            textBoxLine._startCharIndex = charIndex;
             charIndex += textBoxLine.length();
             textBoxLine._yloc = -1;
         }
@@ -710,7 +689,7 @@ public class TextBox {
             TextLine textLine = textDoc.getLine(i);
 
             // Get start char index for line
-            int charIndex = Math.max(startCharIndex - textLine.getStart(), 0);
+            int charIndex = Math.max(startCharIndex - textLine.getStartCharIndex(), 0);
             if (charIndex == textLine.length())
                 continue;
 
@@ -887,7 +866,7 @@ public class TextBox {
     public TextBoxToken getTokenAt(int anIndex)
     {
         TextBoxLine line = getLineForCharIndex(anIndex);
-        return line.getTokenAt(anIndex - line.getStart());
+        return line.getTokenAt(anIndex - line.getStartCharIndex());
     }
 
     /**
@@ -965,10 +944,10 @@ public class TextBox {
      */
     public int getCharIndex(double anX, double aY)
     {
-        TextBoxLine line = getLineForY(aY);
-        if (line == null) return 0;
-        int index = line.getCharIndex(anX);
-        return line.getStart() + index;
+        TextBoxLine textBoxLine = getLineForY(aY);
+        if (textBoxLine == null) return 0;
+        int charIndex = textBoxLine.getCharIndex(anX);
+        return textBoxLine.getStartCharIndex() + charIndex;
     }
 
     /**
@@ -986,8 +965,8 @@ public class TextBox {
         // Get StartLine, EndLine and start/end points
         TextBoxLine startLine = getLineForCharIndex(aStart);
         TextBoxLine endLine = aStart == anEnd ? startLine : getLineForCharIndex(anEnd);
-        double startX = startLine.getXForChar(aStart - startLine.getStart()), startY = startLine.getBaseline();
-        double endX = endLine.getXForChar(anEnd - endLine.getStart()), endY = endLine.getBaseline();
+        double startX = startLine.getXForChar(aStart - startLine.getStartCharIndex()), startY = startLine.getBaseline();
+        double endX = endLine.getXForChar(anEnd - endLine.getStartCharIndex()), endY = endLine.getBaseline();
         startX = Math.min(startX, getMaxX());
         endX = Math.min(endX, getMaxX());
 
@@ -1080,7 +1059,7 @@ public class TextBox {
                 double x0 = run.getX();
                 double y0 = line.getBaseline() - uy;
                 double x1 = run.getMaxX();
-                if (run.getEnd() == line.getEnd())
+                if (run.getEnd() == line.getEndCharIndex())
                     x1 = line.getX() + line.getWidthNoWhiteSpace();
                 aPntr.drawLine(x0, y0, x1, y0);
             }

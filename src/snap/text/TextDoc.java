@@ -113,7 +113,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     public char charAt(int anIndex)
     {
         TextLine line = getLineForCharIndex(anIndex);
-        return line.charAt(anIndex - line.getStart());
+        return line.charAt(anIndex - line.getStartCharIndex());
     }
 
     /**
@@ -124,8 +124,8 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
         StringBuffer sb = new StringBuffer(anEnd - aStart);
         TextLine line = getLineForCharIndex(aStart);
         while (aStart < anEnd) {
-            int end = Math.min(line.getEnd(), anEnd);
-            sb.append(line.subSequence(aStart - line.getStart(), end - line.getStart()));
+            int end = Math.min(line.getEndCharIndex(), anEnd);
+            sb.append(line.subSequence(aStart - line.getStartCharIndex(), end - line.getStartCharIndex()));
             aStart = end;
             line = line.getNext();
         }
@@ -208,7 +208,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
 
         // Get line for index - if adding at text end and last line and ends with newline, create/add new line
         TextLine line = getLineForCharIndex(anIndex);
-        if (anIndex == line.getEnd() && line.isLastCharNewline()) {
+        if (anIndex == line.getEndCharIndex() && line.isLastCharNewline()) {
             TextLine remainder = line.splitLineAtIndex(line.length());
             addLine(remainder, line.getIndex() + 1);
             line = remainder;
@@ -217,7 +217,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
         // Add chars line by line
         int start = 0;
         int len = theChars.length();
-        int lindex = anIndex - line.getStart();
+        int lindex = anIndex - line.getStartCharIndex();
         while (start < len) {
 
             // Get index of newline in insertion chars (if there) and end of line block
@@ -263,15 +263,15 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
 
             // Get line at end index
             TextLine line = getLineForCharIndex(end);
-            if (end == line.getStart())
+            if (end == line.getStartCharIndex())
                 line = getLine(line.getIndex() - 1);
 
             // Get Line.Start
-            int lineStart = line.getStart();
+            int lineStart = line.getStartCharIndex();
             int start = Math.max(aStart, lineStart);
 
             // If whole line in range, remove line
-            if (start == lineStart && end == line.getEnd() && getLineCount() > 1)
+            if (start == lineStart && end == line.getEndCharIndex() && getLineCount() > 1)
                 removeLine(line.getIndex());
 
                 // Otherwise remove chars (if no newline afterwards, join with next line)
@@ -330,7 +330,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
         for (TextLine line : aTextDoc.getLines()) {
             TextRun[] lineRuns = line.getRuns();
             for (TextRun run : lineRuns) {
-                int index = anIndex + line.getStart() + run.getStart();
+                int index = anIndex + line.getStartCharIndex() + run.getStart();
                 addChars(run.getString(), run.getStyle(), index);
                 setLineStyle(line.getLineStyle(), index, index + run.length());
             }
@@ -504,8 +504,8 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
         // Iterate over lines and get max line width
         double prefW = 0;
         for (TextLine line : _lines) {
-            if (anIndex < line.getEnd()) {
-                double lineW = line.getWidth(anIndex - line.getStart());
+            if (anIndex < line.getEndCharIndex()) {
+                double lineW = line.getWidth(anIndex - line.getStartCharIndex());
                 prefW = Math.max(prefW, lineW);
             }
         }
@@ -521,7 +521,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     {
         // Iterate over lines and return line containing char index
         for (TextLine line : _lines)
-            if (anIndex < line.getEnd())
+            if (anIndex < line.getEndCharIndex())
                 return line;
 
         // If index of text end, return last
@@ -547,7 +547,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     public TextRun getRunForCharIndex(int charIndex)
     {
         TextLine line = getLineForCharIndex(charIndex);
-        return line.getRunForCharIndex(charIndex - line.getStart());
+        return line.getRunForCharIndex(charIndex - line.getStartCharIndex());
     }
 
     /**
@@ -653,10 +653,10 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
         for (TextLine line : getLines()) {
 
             // If startIndex beyond line.End, skip
-            if (aStart >= line.getEnd()) continue;
+            if (aStart >= line.getEndCharIndex()) continue;
 
             // Convert startIndex to line charIndex
-            int lineStart = line.getStart();
+            int lineStart = line.getStartCharIndex();
             int startIndexInLine = Math.max(aStart - lineStart, 0);
 
             // Forward to line and return if found
@@ -753,13 +753,13 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
     {
         // Get BaseLine and length at end of BaseLine
         TextLine baseLine = anIndex >= 0 ? getLine(anIndex) : null;
-        _length = baseLine != null ? baseLine.getEnd() : 0;
+        _length = baseLine != null ? baseLine.getEndCharIndex() : 0;
 
         // Iterate over lines beyond BaseLine and update Index, Start, Length and Y
         for (int i = anIndex + 1, iMax = _lines.size(); i < iMax; i++) {
             TextLine line = getLine(i);
             line._index = i;
-            line._start = _length;
+            line._startCharIndex = _length;
             _length += line.length();
         }
     }

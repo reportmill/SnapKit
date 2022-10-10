@@ -29,12 +29,12 @@ public class SubTextLine extends TextLine {
         // Set ivars
         _subText = aSubText;
         _textLine = aTextLine;
-        _start = startInTextDoc - aSubText._start;
+        _startCharIndex = startInTextDoc - aSubText._start;
         _endInSubText = endInTextDoc - aSubText._start;
 
         // Create RunList and get loop vars for TextLine runs
         List<TextRun> runsList = new ArrayList<>();
-        int offsetFromTextLineToSubLine = startInTextDoc - _textLine.getStart();
+        int offsetFromTextLineToSubLine = startInTextDoc - _textLine.getStartCharIndex();
         int runStartInTextLine = offsetFromTextLineToSubLine;
         TextRun textRun = _textLine.getRunForCharIndex(runStartInTextLine);
 
@@ -60,13 +60,13 @@ public class SubTextLine extends TextLine {
      */
     private final int convertSubLineToTextLine(int charIndexInSubLine)
     {
-        return _subText._start + _start - _textLine._start + charIndexInSubLine;
+        return _subText._start + _startCharIndex - _textLine._startCharIndex + charIndexInSubLine;
     }
 
     /**
      * Returns the length of this text line.
      */
-    public int length()  { return _endInSubText - _start; }
+    public int length()  { return _endInSubText - _startCharIndex; }
 
     /**
      * Returns the char value at the specified index.
@@ -119,6 +119,6 @@ public class SubTextLine extends TextLine {
      */
     public TextLine copyForRange(int aStart, int aEnd)
     {
-        return _textLine.copyForRange(aStart + _start, aEnd + _start);
+        return _textLine.copyForRange(aStart + _startCharIndex, aEnd + _startCharIndex);
     }
 }

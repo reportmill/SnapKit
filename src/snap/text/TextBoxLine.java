@@ -13,7 +13,7 @@ import java.util.List;
 public class TextBoxLine implements CharSequence {
 
     // The TextBox that contains this line
-    protected TextBox  _tbox;
+    protected TextBox  _textBox;
 
     // The starting style for this line
     protected TextStyle  _startStyle;
@@ -22,13 +22,13 @@ public class TextBoxLine implements CharSequence {
     protected int  _index;
 
     // The char index of the start char of this line in text
-    protected int  _start;
+    protected int  _startCharIndex;
 
     // The number of chars in this text line
     protected int  _length;
 
     // The TextLine that this line renders
-    protected TextLine _textLine;
+    protected TextLine  _textLine;
 
     // The start of this line in TextLine
     protected int  _textLineStart;
@@ -53,7 +53,7 @@ public class TextBoxLine implements CharSequence {
      */
     public TextBoxLine(TextBox aBox, TextStyle aStartStyle, TextLine aTextLine, int theRTLStart)
     {
-        _tbox = aBox;
+        _textBox = aBox;
         _startStyle = aStartStyle;
         _textLine = aTextLine;
         _textLineStart = theRTLStart;
@@ -62,7 +62,7 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the TextBox.
      */
-    public TextBox getBox()  { return _tbox; }
+    public TextBox getBox()  { return _textBox; }
 
     /**
      * Returns the TextStyle at start of line.
@@ -77,12 +77,12 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the start char index of this line in text.
      */
-    public int getStart()  { return _start; }
+    public int getStartCharIndex()  { return _startCharIndex; }
 
     /**
      * Returns the end char index of this line in text.
      */
-    public int getEnd()  { return _start + _length; }
+    public int getEndCharIndex()  { return _startCharIndex + _length; }
 
     /**
      * Returns the length of this text line.
@@ -144,7 +144,7 @@ public class TextBoxLine implements CharSequence {
      */
     public double getX()
     {
-        return _tbox.getX() + _alignX;
+        return _textBox.getX() + _alignX;
     }
 
     /**
@@ -152,7 +152,7 @@ public class TextBoxLine implements CharSequence {
      */
     public double getY()
     {
-        return getYLocal() + _tbox.getAlignedY();
+        return getYLocal() + _textBox.getAlignedY();
     }
 
     /**
@@ -165,7 +165,7 @@ public class TextBoxLine implements CharSequence {
 
         // Get YLocal from last line. Need to fix this to not stack overflow for large text showing tail first.
         int index = getIndex();
-        TextBoxLine lastLine = index > 0 ? _tbox.getLine(index - 1) : null;
+        TextBoxLine lastLine = index > 0 ? _textBox.getLine(index - 1) : null;
         _yloc = lastLine != null ? (lastLine.getYLocal() + lastLine.getLineAdvance()) : 0;
         return _yloc;
     }
@@ -283,7 +283,7 @@ public class TextBoxLine implements CharSequence {
             if (isLastCharNewline() || lineEnd == _textLine.length())
                 return;
             double y = getY();
-            double tmx = _tbox.getMaxHitX(y, _height);
+            double tmx = _textBox.getMaxHitX(y, _height);
             double lmx = getMaxX();
             double rem = tmx - lmx;
             double shift = rem / (getTokenCount() - 1);
@@ -296,10 +296,10 @@ public class TextBoxLine implements CharSequence {
         }
 
         // Calculate X alignment shift
-        else if (_textLine.getAlignX() != HPos.LEFT && _tbox.getWidth() < 9999) {
+        else if (_textLine.getAlignX() != HPos.LEFT && _textBox.getWidth() < 9999) {
             double alignX = _textLine.getAlignX().doubleValue();
             double lineY = getY();
-            double tboxHitX = _tbox.getMaxHitX(lineY, _height);
+            double tboxHitX = _textBox.getMaxHitX(lineY, _height);
             double lineMaxX = getMaxX();
             double remW = tboxHitX - lineMaxX;
             _alignX = Math.round(alignX * remW);
@@ -487,7 +487,7 @@ public class TextBoxLine implements CharSequence {
      */
     public TextBoxLine getPrevLine()
     {
-        return _index > 0 ? _tbox.getLine(_index - 1) : null;
+        return _index > 0 ? _textBox.getLine(_index - 1) : null;
     }
 
     /**
@@ -495,7 +495,7 @@ public class TextBoxLine implements CharSequence {
      */
     public TextBoxLine getNextLine()
     {
-        return _index + 1 < _tbox.getLineCount() ? _tbox.getLine(_index + 1) : null;
+        return _index + 1 < _textBox.getLineCount() ? _textBox.getLine(_index + 1) : null;
     }
 
     /**
@@ -553,7 +553,7 @@ public class TextBoxLine implements CharSequence {
         // Get RichTextRun and TextStyle at char index
         TextRun textRun = getTextRun(aStart);
         TextStyle runStyle = textRun.getStyle();
-        double fontScale = _tbox.getFontScale();
+        double fontScale = _textBox.getFontScale();
         if (fontScale != 1)
             runStyle = runStyle.copyFor(runStyle.getFont().scaleFont(fontScale));
 
@@ -614,6 +614,6 @@ public class TextBoxLine implements CharSequence {
     {
         String str = getString();
         str = str.replace("\n", "\\n");
-        return getClass().getSimpleName() + "[" + getIndex() + "](" + getStart() + "," + getEnd() + "): str=\"" + str + "\"";
+        return getClass().getSimpleName() + "[" + getIndex() + "](" + getStartCharIndex() + "," + getEndCharIndex() + "): str=\"" + str + "\"";
     }
 }

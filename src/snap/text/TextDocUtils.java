@@ -87,7 +87,7 @@ public class TextDocUtils {
         {
             TextDoc textDoc = (TextDoc) getSource();
             TextLine line = textDoc.getLine(getIndex());
-            textDoc.setLineStyle((TextLineStyle) nval, line.getStart(), line.getStart());
+            textDoc.setLineStyle((TextLineStyle) nval, line.getStartCharIndex(), line.getStartCharIndex());
         }
     }
 }

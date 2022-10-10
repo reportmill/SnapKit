@@ -163,9 +163,9 @@ public class TextSel {
     {
         int selIndex = getIndex();
         TextBoxLine lastColumnLine = _tbox.getLineForCharIndex(selIndex);
-        int lastColumn = selIndex - lastColumnLine.getStart();
+        int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
         TextBoxLine thisLine = getStartLine(), nextLine = thisLine.getPrevLine();
-        int index = nextLine != null ? nextLine.getStart() + Math.min(nextLine.length() - 1, lastColumn) : getStart();
+        int index = nextLine != null ? nextLine.getStartCharIndex() + Math.min(nextLine.length() - 1, lastColumn) : getStart();
         return index;
     }
 
@@ -176,9 +176,9 @@ public class TextSel {
     {
         int selIndex = getIndex();
         TextBoxLine lastColumnLine = _tbox.getLineForCharIndex(selIndex);
-        int lastColumn = selIndex - lastColumnLine.getStart();
+        int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
         TextBoxLine thisLine = getEndLine(), nextLine = thisLine.getNextLine();
-        int index = nextLine != null ? nextLine.getStart() + Math.min(nextLine.length() - 1, lastColumn) : getEnd();
+        int index = nextLine != null ? nextLine.getStartCharIndex() + Math.min(nextLine.length() - 1, lastColumn) : getEnd();
         return index;
     }
 

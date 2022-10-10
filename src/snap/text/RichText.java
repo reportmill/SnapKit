@@ -56,7 +56,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
 
             // Set style
             RichTextLine line = (RichTextLine) getLineForCharIndex(textCharIndex);
-            int lineStart = line.getStart();
+            int lineStart = line.getStartCharIndex();
             TextRun run = getRunForCharIndex(textCharIndex);
             if (textCharIndex - lineStart == run.getEnd())
                 run = run.getNext();
@@ -94,7 +94,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
 
             // Get line for start
             TextLine line = getLineForCharIndex(aStart);
-            int lineStart = line.getStart();
+            int lineStart = line.getStartCharIndex();
 
             // Get run for start
             int lineIndex = aStart - lineStart;
@@ -181,7 +181,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
         // Iterate over lines and add
         for (int i = startLineIndex; i <= endLineIndex; i++) {
             TextLine line = getLine(i);
-            int lineStart = line.getStart();
+            int lineStart = line.getStartCharIndex();
             int start = Math.max(aStart - lineStart, 0), end = Math.min(aEnd - lineStart, line.length());
             TextLine lineCopy = line.copyForRange(start, end);
             textCopy.addLine(lineCopy, textCopy.getLineCount());

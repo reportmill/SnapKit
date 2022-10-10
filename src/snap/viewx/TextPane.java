@@ -9,7 +9,6 @@ import snap.text.TextBoxLine;
 import snap.text.TextDoc;
 import snap.text.TextSel;
 import snap.util.SnapUtils;
-import snap.util.StringUtils;
 import snap.view.*;
 
 /**
@@ -236,7 +235,7 @@ public class TextPane extends ViewOwner {
         StringBuffer sb = new StringBuffer();
         TextBoxLine textLine = getTextArea().getLineAt(getTextArea().getSelStart());
         sb.append("Line ").append(textLine.getIndex() + 1);
-        sb.append(", Col ").append(getTextArea().getSelStart() - textLine.getStart());
+        sb.append(", Col ").append(getTextArea().getSelStart() - textLine.getStartCharIndex());
         return sb.toString();
     }
 
@@ -279,7 +278,7 @@ public class TextPane extends ViewOwner {
         TextBoxLine selStartLine = sel.getStartLine();
         int selStartLineIndex = selStartLine.getIndex() + 1;
         int selStart = sel.getStart();
-        int col = selStart - selStartLine.getStart();
+        int col = selStart - selStartLine.getStartCharIndex();
 
         // Run ShowLineNumber panel
         String msg = String.format("Enter Line Number:\n(Line %d, Col %d, Char %d)", selStartLineIndex, col, selStart);
@@ -296,7 +295,7 @@ public class TextPane extends ViewOwner {
 
         // Select line and focus
         TextBoxLine line = lineIndex >= 0 && lineIndex < textArea.getLineCount() ? textArea.getLine(lineIndex) : null;
-        textArea.setSel(line.getStart(), line.getEnd());
+        textArea.setSel(line.getStartCharIndex(), line.getEndCharIndex());
         requestFocus(textArea);
     }
 

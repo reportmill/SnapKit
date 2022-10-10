@@ -18,7 +18,7 @@ public class TextLine implements CharSequence, Cloneable {
     protected StringBuffer  _sb = new StringBuffer();
 
     // The char index of the start of this line in text
-    protected int  _start;
+    protected int  _startCharIndex;
 
     // The run for this line
     protected TextRun[]  _runs = EMPTY_RUNS;
@@ -86,12 +86,12 @@ public class TextLine implements CharSequence, Cloneable {
     /**
      * Returns the start char index of this line in text.
      */
-    public int getStart()  { return _start; }
+    public int getStartCharIndex()  { return _startCharIndex; }
 
     /**
      * Returns the end char index of this line in text.
      */
-    public int getEnd()  { return _start + length(); }
+    public int getEndCharIndex()  { return _startCharIndex + length(); }
 
     /**
      * Returns the index of this line in text.
@@ -519,8 +519,8 @@ public class TextLine implements CharSequence, Cloneable {
         StringBuilder sb = new StringBuilder();
 
         // Add Start, End, Length, Index, String
-        sb.append("Start=").append(getStart());
-        sb.append(", End=").append(getEnd());
+        sb.append("Start=").append(getStartCharIndex());
+        sb.append(", End=").append(getEndCharIndex());
         sb.append(", Length=").append(length());
         sb.append(", Index=").append(getIndex());
 
