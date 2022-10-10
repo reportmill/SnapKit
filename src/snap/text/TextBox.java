@@ -54,7 +54,7 @@ public class TextBox {
     private boolean  _needsUpdate, _updating;
 
     // The update start/end char indexes in TextDoc
-    private int  _updStart, _updEnd, _lastLen;
+    private int _updateStartCharIndex, _updateFromEndCharIndex, _lastLen;
 
     // A Listener to catch TextDoc PropChanges
     private PropChangeListener  _textDocLsnr = pc -> textDocDidPropChange(pc);
@@ -533,7 +533,22 @@ public class TextBox {
      */
     protected void textAddedChars(int aStart, int aEnd)
     {
-        setUpdateBounds(aStart, length() - aEnd);
+        // If we added a MultilineComment terminator, extend start to previous Multiline
+        TextDoc textDoc = getTextDoc();
+        TextLine textLine = textDoc.getLineForCharIndex(aStart);
+        if (textLine.indexOf("*/", 0) >= 0) {
+            int newStartCharIndex = getStartCharIndex();
+            TextLine startLine = textLine.getPrevious();
+            while (startLine != null) {
+                newStartCharIndex = startLine.getStartCharIndex();
+                if (startLine.indexOf("/*", 0) >= 0)
+                    break;
+            }
+            aStart = newStartCharIndex;
+        }
+
+        int fromEndCharIndex = length() - aEnd;
+        setUpdateBounds(aStart, fromEndCharIndex);
     }
 
     /**
@@ -567,15 +582,15 @@ public class TextBox {
     {
         // If first call, set values
         if (!_needsUpdate) {
-            _updStart = aStart;
-            _updEnd = aEnd;
+            _updateStartCharIndex = aStart;
+            _updateFromEndCharIndex = aEnd;
             _needsUpdate = true;
         }
 
         // Successive calls update values
         else {
-            _updStart = Math.min(_updStart, aStart);
-            _updEnd = Math.min(_updEnd, aEnd);
+            _updateStartCharIndex = Math.min(_updateStartCharIndex, aStart);
+            _updateFromEndCharIndex = Math.min(_updateFromEndCharIndex, aEnd);
         }
     }
 
@@ -587,29 +602,23 @@ public class TextBox {
         // Set updating
         _updating = true;
 
-        // Get count, start and end of currently configured lines
-        int oldLineCount = _lines.size();
-        int oldEndCharIndex = oldLineCount > 0 ? _lines.get(oldLineCount - 1).getEndCharIndex() : getStartCharIndex();
-
-        // Get update startCharIndex, linesEnd and textEnd to synchronize lines to text
-        int startCharIndex = _updStart; //Math.max(_updStart, getStart());
-        int linesEnd = Math.min(_lastLen - _updEnd, oldEndCharIndex);
-        int textEnd = length() - _updEnd;
+        // Convert FromEndCharIndex to endCharIndex for textBox and textDoc
+        int textBoxEndCharIndex = _lastLen - _updateFromEndCharIndex;
+        int textDocLength = _lastLen = length();
+        int textDocEndCharIndex = textDocLength - _updateFromEndCharIndex;
 
         // Update lines
-        if (startCharIndex <= linesEnd || _lastLen == 0)
-            updateLines(startCharIndex, linesEnd, textEnd);
+        updateLines(_updateStartCharIndex, textBoxEndCharIndex, textDocEndCharIndex);
 
-        // Reset Updating, NeedsUpdate and LastLen
+        // Reset Updating, NeedsUpdate
         _updating = false;
         _needsUpdate = false;
-        _lastLen = length();
     }
 
     /**
      * Updates lines for given char start and an old/new char end.
      */
-    protected void updateLines(int aStartCharIndex, int linesEnd, int textEnd)
+    protected void updateLines(int aStartCharIndex, int textBoxEndCharIndex, int textDocEndCharIndex)
     {
         // Reset AlignY offset
         _alignedY = 0;
@@ -620,14 +629,14 @@ public class TextBox {
         int startLineIndex = startLine != null ? startLine.getIndex() : 0;
         int startCharIndex = startLine != null ? startLine.getStartCharIndex() : aStartCharIndex;
 
-        // Remove lines for old range
-        removeLinesForCharRange(aStartCharIndex, linesEnd);
+        // Remove lines for TextBox change range
+        removeLinesForCharRange(aStartCharIndex, textBoxEndCharIndex);
 
         // Add lines for new range
-        addLinesForCharRange(startLineIndex, startCharIndex, textEnd);
+        addLinesForCharRange(startLineIndex, startCharIndex, textDocEndCharIndex);
 
-        // Iterate over lines beyond start line and update lines Index, Start and Y_Local
-        int charIndex = startLineIndex > 0 ? getLine(startLineIndex - 1).getEndCharIndex() : 0;
+        // Iterate over TextBoxLines from startLineIndex to end: Update lines Index, StartCharIndex and Y_Local
+        int charIndex = startCharIndex;
         for (int i = startLineIndex, iMax = _lines.size(); i < iMax; i++) {
             TextBoxLine textBoxLine = getLine(i);
             textBoxLine._index = i;
@@ -644,27 +653,6 @@ public class TextBox {
             if (textBoxH > prefH)
                 _alignedY = _alignY.doubleValue() * (textBoxH - prefH);
         }
-    }
-
-    /**
-     * Removes the lines from given char index to given char index.
-     */
-    protected void removeLinesForCharRange(int aStart, int aEnd)
-    {
-        // Get LineCount, startLineIndex and endLineIndex
-        int lineCount = getLineCount(); if (lineCount == 0) return;
-        int startLineIndex = getLineForCharIndex(aStart).getIndex();
-        int endLineIndex = getLineForCharIndex(aEnd).getIndex();
-
-        // Extend endLineIndex to end of TextLine
-        TextBoxLine endBoxLine = getLine(endLineIndex);
-        TextLine endTextLine = endBoxLine.getTextLine();
-        while (endLineIndex + 1 < lineCount && getLine(endLineIndex + 1).getTextLine() == endTextLine)
-            endLineIndex++;
-
-        // Remove lines in range
-        for (int i = endLineIndex; i >= startLineIndex; i--)
-            _lines.remove(i);
     }
 
     /**
@@ -825,6 +813,34 @@ public class TextBox {
         // Reset sizes and return
         boxLine.resetSizes();
         return boxLine;
+    }
+
+    /**
+     * Removes the lines from given char index to given char index, extended to cover entire TextDoc.TextLines.
+     */
+    protected void removeLinesForCharRange(int startCharIndex, int endCharIndex)
+    {
+        // If no lines, just return
+        if (getLineCount() == 0) return;
+
+        // Get StartLine for UpdateStartCharIndex (extend to TextDocLine)
+        TextBoxLine startLine = getLineForCharIndex(startCharIndex);
+        TextBoxLine endLine = getLineForCharIndex(endCharIndex);
+
+        // If TextBox.WrapLines, extend EndLine to end of TextDoc line
+        if (isWrapLines()) {
+            while (true) {
+                TextBoxLine nextLine = endLine.getNextLine();
+                if (endLine != null && endLine.getTextLine() == endLine.getTextLine())
+                    endLine = nextLine;
+                else break;
+            }
+        }
+
+        // Remove lines in range
+        int startLineIndex = startLine.getIndex();
+        int endLineIndex = endLine.getIndex() + 1;
+        _lines.subList(startLineIndex, endLineIndex).clear();
     }
 
     /**
