@@ -610,16 +610,16 @@ public class TextBox {
         int oldLineCount = _lines.size();
         int oldEndCharIndex = oldLineCount > 0 ? _lines.get(oldLineCount - 1).getEnd() : getStartCharIndex();
 
-        // Get update start, linesEnd and textEnd to synchronize lines to text
-        int start = _updStart; //Math.max(_updStart, getStart());
+        // Get update startCharIndex, linesEnd and textEnd to synchronize lines to text
+        int startCharIndex = _updStart; //Math.max(_updStart, getStart());
         int linesEnd = Math.min(_lastLen - _updEnd, oldEndCharIndex);
         int textEnd = length() - _updEnd;
         if (_endCharIndex >= 0)
             textEnd = Math.min(textEnd, _endCharIndex);
 
         // Update lines
-        if (start <= linesEnd || _lastLen == 0)
-            updateLines(start, linesEnd, textEnd);
+        if (startCharIndex <= linesEnd || _lastLen == 0)
+            updateLines(startCharIndex, linesEnd, textEnd);
 
         // Reset Updating, NeedsUpdate and LastLen
         _updating = false;
@@ -630,45 +630,47 @@ public class TextBox {
     /**
      * Updates lines for given char start and an old/new char end.
      */
-    protected void updateLines(int aStart, int linesEnd, int textEnd)
+    protected void updateLines(int aStartCharIndex, int linesEnd, int textEnd)
     {
         // Reset AlignY offset
         _alignedY = 0;
 
-        // Get start-line-index and start-char-index
-        int lcount = getLineCount();
-        int sline = lcount > 0 ? getLineForCharIndex(aStart).getIndex() : 0;
-        int start = lcount > 0 ? getLine(sline).getStart() : aStart;
+        // Get StartLine Index and startCharIndex
+        int lineCount = getLineCount();
+        TextBoxLine startLine = lineCount > 0 ? getLineForCharIndex(aStartCharIndex) : null;
+        int startLineIndex = startLine != null ? startLine.getIndex() : 0;
+        int startCharIndex = startLine != null ? startLine.getStart() : aStartCharIndex;
 
         // Remove lines for old range
-        removeLines(aStart, linesEnd);
+        removeLinesForCharRange(aStartCharIndex, linesEnd);
 
         // Add lines for new range
-        addLines(sline, start, textEnd);
+        addLinesForCharRange(startLineIndex, startCharIndex, textEnd);
 
         // Iterate over lines beyond start line and update lines Index, Start and Y_Local
-        int len = sline > 0 ? getLine(sline - 1).getEnd() : 0;
-        for (int i = sline, iMax = _lines.size(); i < iMax; i++) {
-            TextBoxLine line = getLine(i);
-            line._index = i;
-            line._start = len;
-            len += line.length();
-            line._yloc = -1;
+        int charIndex = startLineIndex > 0 ? getLine(startLineIndex - 1).getEnd() : 0;
+        for (int i = startLineIndex, iMax = _lines.size(); i < iMax; i++) {
+            TextBoxLine textBoxLine = getLine(i);
+            textBoxLine._index = i;
+            textBoxLine._start = charIndex;
+            charIndex += textBoxLine.length();
+            textBoxLine._yloc = -1;
         }
 
         // Calculated aligned Y
         if (_alignY != VPos.TOP) {
-            double prefH = getPrefHeight(getWidth());
-            double height = getHeight();
-            if (height > prefH)
-                _alignedY = _alignY.doubleValue() * (height - prefH);
+            double textBoxW = getWidth();
+            double prefH = getPrefHeight(textBoxW);
+            double textBoxH = getHeight();
+            if (textBoxH > prefH)
+                _alignedY = _alignY.doubleValue() * (textBoxH - prefH);
         }
     }
 
     /**
      * Removes the lines from given char index to given char index.
      */
-    protected void removeLines(int aStart, int aEnd)
+    protected void removeLinesForCharRange(int aStart, int aEnd)
     {
         // Get LineCount, startLineIndex and endLineIndex
         int lineCount = getLineCount(); if (lineCount == 0) return;
@@ -689,37 +691,42 @@ public class TextBox {
     /**
      * Removes the lines from given char index to given char index.
      */
-    protected void addLines(int aLineIndex, int aStart, int aEnd)
+    protected void addLinesForCharRange(int aLineIndex, int aStartCharIndex, int aEndCharIndex)
     {
         // Get start char index
-        int lineCount = getLineCount();
-        int start = Math.max(aStart, getStartCharIndex());
-        if (start > length()) return;
+        int startCharIndex = Math.max(aStartCharIndex, getStartCharIndex());
+        if (startCharIndex > length())
+            return;
 
         // Get TextDoc startLineIndex, endLineIndex
         TextDoc textDoc = getTextDoc();
-        int startLineIndex = textDoc.getLineForCharIndex(start).getIndex();
-        int endLineIndex = textDoc.getLineForCharIndex(aEnd).getIndex();
+        int startLineIndex = textDoc.getLineForCharIndex(startCharIndex).getIndex();
+        int endLineIndex = textDoc.getLineForCharIndex(aEndCharIndex).getIndex();
 
         // Iterate over TextDoc lines, create TextBox lines and add
-        for (int i = startLineIndex, lindex = aLineIndex; i <= endLineIndex; i++) {
+        for (int i = startLineIndex, lineIndex = aLineIndex; i <= endLineIndex; i++) {
 
             // Get text line
             TextLine textLine = textDoc.getLine(i);
 
             // Get start char index for line
-            int lineStart = Math.max(start - textLine.getStart(), 0);
-            if (lineStart == textLine.length()) continue;
+            int charIndex = Math.max(startCharIndex - textLine.getStart(), 0);
+            if (charIndex == textLine.length())
+                continue;
 
             // Add TextBoxLine(s) for TextLine
-            while (lineStart < textLine.length()) {
-                TextBoxLine line = createTextBoxLine(textLine, lineStart, lindex);
-                if ((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()) {
+            while (charIndex < textLine.length()) {
+
+                // Create line
+                TextBoxLine textBoxLine = createTextBoxLine(textLine, charIndex, lineIndex);
+                if ((isLinked() || _boundsPath != null) && textBoxLine.getMaxY() > getMaxY()) {
                     i = Short.MAX_VALUE;
                     break;
                 }
-                _lines.add(lindex++, line);
-                lineStart += line.length();
+
+                // Add line
+                _lines.add(lineIndex++, textBoxLine);
+                charIndex += textBoxLine.length();
             }
         }
 
@@ -727,9 +734,9 @@ public class TextBox {
         if (endLineIndex == textDoc.getLineCount() - 1) {
             TextLine textLine = textDoc.getLine(endLineIndex);
             if (textLine.length() == 0 || textLine.isLastCharNewline()) {
-                TextBoxLine line = createTextBoxLine(textLine, textLine.length(), getLineCount());
-                if (!((isLinked() || _boundsPath != null) && line.getMaxY() > getMaxY()))
-                    _lines.add(line);
+                TextBoxLine textBoxLine = createTextBoxLine(textLine, textLine.length(), getLineCount());
+                if (!((isLinked() || _boundsPath != null) && textBoxLine.getMaxY() > getMaxY()))
+                    _lines.add(textBoxLine);
             }
         }
     }
@@ -746,8 +753,12 @@ public class TextBox {
 
         // Get TextToken at start char index - if in middle of token, split token
         TextToken textToken = aTextLine.getTokenForCharIndex(startCharIndex);
-        if (textToken != null && startCharIndex > textToken.getStartCharIndex() && startCharIndex < textToken.getEndCharIndex())
-            textToken = textToken.copyFromCharIndex(startCharIndex - textToken.getStartCharIndex());
+        if (textToken != null) {
+            if (startCharIndex >= textToken.getEndCharIndex())
+                textToken = null;
+            else if (startCharIndex > textToken.getStartCharIndex())
+                textToken = textToken.copyFromCharIndex(startCharIndex - textToken.getStartCharIndex());
+        }
 
         // Get TextToken info
         double textTokensX = textToken != null ? textToken.getX() * fontScale : 0;
