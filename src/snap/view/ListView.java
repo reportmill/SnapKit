@@ -303,11 +303,11 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     {
         // Handle KeyPress
         if (anEvent.isKeyPress()) {
-            int kcode = anEvent.getKeyCode();
-            switch (kcode) {
+            int keyCode = anEvent.getKeyCode();
+            switch (keyCode) {
                 case KeyCode.UP: selectUp(); anEvent.consume(); break;
                 case KeyCode.DOWN: selectDown(); anEvent.consume(); break;
-                case KeyCode.ENTER: _listArea.fireActionEvent(anEvent); anEvent.consume(); break;
+                case KeyCode.ENTER: _listArea.processEnterAction(anEvent); break;
             }
         }
     }

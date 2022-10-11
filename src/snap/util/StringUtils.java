@@ -501,7 +501,8 @@ public class StringUtils {
     public static Matcher getSkipCharsMatcherForLiteralString(String aStr)
     {
         String regexStr = getSkipCharsRegexForLiteralString(aStr);
-        Pattern pattern = Pattern.compile(regexStr, Pattern.CASE_INSENSITIVE);
+        int flags = Character.isUpperCase(aStr.charAt(0)) ? 0 : Pattern.CASE_INSENSITIVE;
+        Pattern pattern = Pattern.compile(regexStr, flags);
         Matcher matcher = pattern.matcher("");
         return matcher;
     }

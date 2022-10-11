@@ -246,6 +246,17 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public void selectDown()  { _items.selectDown(); }
 
     /**
+     * Handle enter action.
+     */
+    public void processEnterAction(ViewEvent anEvent)
+    {
+        if (anEvent.isShiftDown())
+            return;
+        fireActionEvent(anEvent);
+        anEvent.consume();
+    }
+
+    /**
      * Called when PickList changes selection.
      */
     protected void pickListPropChange(PropChange aPC)

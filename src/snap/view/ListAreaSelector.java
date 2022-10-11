@@ -7,7 +7,7 @@ import snap.util.ListSel;
 class ListAreaSelector {
 
     // This ListArea
-    private final ListArea  _list;
+    private final ListArea  _listArea;
 
     // Whether selection allowed on MouseDrag
     protected boolean  _dragSelect;
@@ -26,7 +26,7 @@ class ListAreaSelector {
      */
     public ListAreaSelector(ListArea aListArea)
     {
-        _list = aListArea;
+        _listArea = aListArea;
     }
 
     /**
@@ -42,9 +42,9 @@ class ListAreaSelector {
         else if (anEvent.isKeyPress()) {
             int kcode = anEvent.getKeyCode();
             switch(kcode) {
-                case KeyCode.UP: _list.selectUp(); anEvent.consume(); break;
-                case KeyCode.DOWN: _list.selectDown(); anEvent.consume(); break;
-                case KeyCode.ENTER: _list.fireActionEvent(anEvent); anEvent.consume(); break;
+                case KeyCode.UP: _listArea.selectUp(); anEvent.consume(); break;
+                case KeyCode.DOWN: _listArea.selectDown(); anEvent.consume(); break;
+                case KeyCode.ENTER: _listArea.processEnterAction(anEvent); break;
             }
         }
     }
@@ -68,13 +68,13 @@ class ListAreaSelector {
 
         // Handle MouseExit
         else if (anEvent.isMouseExit())
-            _list.setTargetedIndex(-1);
+            _listArea.setTargetedIndex(-1);
 
         // Handle MouseMove
-        else if (anEvent.isMouseMove() && _list.isTargeting()) {
-            int index = _list.getRowIndexForY(anEvent.getY());
-            if (index>= _list.getItemCount()) index = -1;
-            _list.setTargetedIndex(index);
+        else if (anEvent.isMouseMove() && _listArea.isTargeting()) {
+            int index = _listArea.getRowIndexForY(anEvent.getY());
+            if (index>= _listArea.getItemCount()) index = -1;
+            _listArea.setTargetedIndex(index);
         }
 
         // Consume all mouse events
@@ -87,21 +87,21 @@ class ListAreaSelector {
     public void mousePress(ViewEvent anEvent)
     {
         // Cache MouseDown Selection
-        _mouseDownSel = _list.getSel();
+        _mouseDownSel = _listArea.getSel();
 
         // Get SelAnchor of MousePress
-        _newAnchor = _list.getRowIndexForY(anEvent.getY());
+        _newAnchor = _listArea.getRowIndexForY(anEvent.getY());
 
         // Set DragSelect
-        _dragSelect = !_list.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount()>1;
+        _dragSelect = !_listArea.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount()>1;
 
         // Do basic Press or Drag selection
         mousePressOrDrag(anEvent);
 
         // Set whether wants drag
-        _dragGestureEnabled = _dragSelect && _list.getEventAdapter().isEnabled(View.DragGesture);
+        _dragGestureEnabled = _dragSelect && _listArea.getEventAdapter().isEnabled(View.DragGesture);
         if (_dragGestureEnabled)
-            _list.getEventAdapter().setEnabled(View.DragGesture, false);
+            _listArea.getEventAdapter().setEnabled(View.DragGesture, false);
     }
 
     /**
@@ -119,27 +119,27 @@ class ListAreaSelector {
     protected void mousePressOrDrag(ViewEvent anEvent)
     {
         // Get row-index/cell at mouse point (if no cell, just return)
-        int newLead = _list.getRowIndexForY(anEvent.getY());
-        ListCell cell = _list.getCellForRow(newLead);
+        int newLead = _listArea.getRowIndexForY(anEvent.getY());
+        ListCell cell = _listArea.getCellForRow(newLead);
         if (cell==null || !cell.isEnabled())
             return;
 
         // Handle ShortCut down: If AnchorCellSelected then add, otherwise remove
         if (anEvent.isShortcutDown()) {
             ListSel sel = _mouseDownSel.copyForMetaAdd(_newAnchor, newLead);
-            _list.setSel(sel);
+            _listArea.setSel(sel);
         }
 
         // Handle Shift down: Select
         else if (anEvent.isShiftDown()) {
             ListSel sel = _mouseDownSel.copyForShiftAdd(_newAnchor, newLead);
-            _list.setSel(sel);
+            _listArea.setSel(sel);
         }
 
         // Handle normal drag selection
         else {
             ListSel sel = new ListSel(_newAnchor, newLead);
-            _list.setSel(sel);
+            _listArea.setSel(sel);
         }
     }
 
@@ -149,16 +149,16 @@ class ListAreaSelector {
     public void mouseRelease(ViewEvent anEvent)
     {
         // Fire action event
-        _list.fireActionEvent(anEvent);
+        _listArea.fireActionEvent(anEvent);
 
         // Re-instate DragGesture if needed
         if (_dragGestureEnabled)
-            _list.getEventAdapter().setEnabled(View.DragGesture, true);
+            _listArea.getEventAdapter().setEnabled(View.DragGesture, true);
 
         // Start editing if needed
-        if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && _list.isEditable()) {
-            ListCell cell = _list.getCellForY(anEvent.getY()); if (cell==null) return;
-            _list.editCell(cell);
+        if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && _listArea.isEditable()) {
+            ListCell cell = _listArea.getCellForY(anEvent.getY()); if (cell==null) return;
+            _listArea.editCell(cell);
         }
     }
 }
