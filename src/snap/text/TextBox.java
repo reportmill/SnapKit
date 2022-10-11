@@ -1045,13 +1045,13 @@ public class TextBox {
                 String tokenStr = token.getString();
                 double tokenX = token.getTextBoxX();
                 aPntr.setFont(token.getFont());
-                aPntr.setPaint(token.getColor()); //aPntr.setPaint(SnapColor.RED);
-                aPntr.drawString(tokenStr, tokenX, lineY, token.getStyle().getCharSpacing());
+                aPntr.setPaint(token.getTextColor()); //aPntr.setPaint(SnapColor.RED);
+                aPntr.drawString(tokenStr, tokenX, lineY, token.getTextStyle().getCharSpacing());
 
                 // Handle TextBorder: Get outline and stroke
-                Border border = token.getStyle().getBorder();
+                Border border = token.getTextStyle().getBorder();
                 if (border != null) {
-                    Shape shape = token.getFont().getOutline(tokenStr, tokenX, lineY, token.getStyle().getCharSpacing());
+                    Shape shape = token.getFont().getOutline(tokenStr, tokenX, lineY, token.getTextStyle().getCharSpacing());
                     aPntr.setPaint(border.getColor());
                     aPntr.setStroke(Stroke.Stroke1.copyForWidth(border.getWidth()));
                     aPntr.draw(shape);

@@ -77,12 +77,12 @@ public class TextToken implements Cloneable {
     public TextLine getTextLine()  { return _textLine; }
 
     /**
-     * Returns the start char index.
+     * Returns the start char index of token in line.
      */
     public int getStartCharIndex()  { return _startCharIndex; }
 
     /**
-     * Returns the end char index.
+     * Returns the end char index of token in line.
      */
     public int getEndCharIndex()  { return _endCharIndex; }
 
