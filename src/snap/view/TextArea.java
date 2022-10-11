@@ -984,7 +984,7 @@ public class TextArea extends View {
 
         // Set new selection
         else {
-            int charIndex = _sel.getCharUp();
+            int charIndex = _sel.getCharLeft();
             setSel(charIndex);
         }
     }

@@ -665,13 +665,16 @@ public class TextBox {
         if (startCharIndex > length())
             return;
 
+        // Track TextBox insertion line index
+        int textBoxInsertLineIndex = aLineIndex;
+
         // Get TextDoc startLineIndex, endLineIndex
         TextDoc textDoc = getTextDoc();
         int startLineIndex = textDoc.getLineForCharIndex(startCharIndex).getIndex();
         int endLineIndex = textDoc.getLineForCharIndex(aEndCharIndex).getIndex();
 
         // Iterate over TextDoc lines, create TextBox lines and add
-        for (int i = startLineIndex, lineIndex = aLineIndex; i <= endLineIndex; i++) {
+        for (int i = startLineIndex; i <= endLineIndex; i++) {
 
             // Get text line
             TextLine textLine = textDoc.getLine(i);
@@ -685,20 +688,20 @@ public class TextBox {
             while (charIndex < textLine.length()) {
 
                 // Create line
-                TextBoxLine textBoxLine = createTextBoxLine(textLine, charIndex, lineIndex);
+                TextBoxLine textBoxLine = createTextBoxLine(textLine, charIndex, textBoxInsertLineIndex);
                 if ((isLinked() || _boundsPath != null) && textBoxLine.getMaxY() > getMaxY()) {
                     i = Short.MAX_VALUE;
                     break;
                 }
 
                 // Add line
-                _lines.add(lineIndex++, textBoxLine);
+                _lines.add(textBoxInsertLineIndex++, textBoxLine);
                 charIndex += textBoxLine.length();
             }
         }
 
         // If we added last line and it is empty or ends with newline, add blank line
-        if (endLineIndex == textDoc.getLineCount() - 1) {
+        if (endLineIndex == textDoc.getLineCount() - 1 && textBoxInsertLineIndex == getLineCount()) {
             TextLine textLine = textDoc.getLine(endLineIndex);
             if (textLine.length() == 0 || textLine.isLastCharNewline()) {
                 TextBoxLine textBoxLine = createTextBoxLine(textLine, textLine.length(), getLineCount());
