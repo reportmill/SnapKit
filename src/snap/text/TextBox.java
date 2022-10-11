@@ -830,7 +830,7 @@ public class TextBox {
         // If TextBox.WrapLines, extend EndLine to end of TextDoc line
         if (isWrapLines()) {
             while (true) {
-                TextBoxLine nextLine = endLine.getNextLine();
+                TextBoxLine nextLine = endLine.getNext();
                 if (endLine != null && endLine.getTextLine() == endLine.getTextLine())
                     endLine = nextLine;
                 else break;
@@ -958,31 +958,35 @@ public class TextBox {
     /**
      * Returns the character index for the given x/y point.
      */
-    public int getCharIndex(double anX, double aY)
+    public int getCharIndexForXY(double anX, double aY)
     {
         TextBoxLine textBoxLine = getLineForY(aY);
         if (textBoxLine == null) return 0;
-        int charIndex = textBoxLine.getCharIndex(anX);
+        int charIndex = textBoxLine.getCharIndexForX(anX);
         return textBoxLine.getStartCharIndex() + charIndex;
     }
 
     /**
      * Returns a path for two char indexes - it will be a a simple box with extensions for first/last lines.
      */
-    public Path getPathForChars(int aStart, int anEnd)
+    public Path getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
     {
         // Create new path for return
         Path path = new Path();
 
         // If invalid range, just return
-        if (aStart > getEndCharIndex() || anEnd < getStartCharIndex()) return path;
-        if (anEnd > getEndCharIndex()) anEnd = getEndCharIndex();
+        if (aStartCharIndex > getEndCharIndex() || aEndCharIndex < getStartCharIndex())
+            return path;
+        if (aEndCharIndex > getEndCharIndex())
+            aEndCharIndex = getEndCharIndex();
 
         // Get StartLine, EndLine and start/end points
-        TextBoxLine startLine = getLineForCharIndex(aStart);
-        TextBoxLine endLine = aStart == anEnd ? startLine : getLineForCharIndex(anEnd);
-        double startX = startLine.getXForChar(aStart - startLine.getStartCharIndex()), startY = startLine.getBaseline();
-        double endX = endLine.getXForChar(anEnd - endLine.getStartCharIndex()), endY = endLine.getBaseline();
+        TextBoxLine startLine = getLineForCharIndex(aStartCharIndex);
+        TextBoxLine endLine = aStartCharIndex == aEndCharIndex ? startLine : getLineForCharIndex(aEndCharIndex);
+        double startX = startLine.getXForChar(aStartCharIndex - startLine.getStartCharIndex());
+        double startY = startLine.getBaseline();
+        double endX = endLine.getXForChar(aEndCharIndex - endLine.getStartCharIndex());
+        double endY = endLine.getBaseline();
         startX = Math.min(startX, getMaxX());
         endX = Math.min(endX, getMaxX());
 
@@ -993,7 +997,7 @@ public class TextBox {
         // Get path for upper left corner of sel start
         path.moveTo(startX, startTop + startHeight);
         path.lineTo(startX, startTop);
-        if (aStart == anEnd)
+        if (aStartCharIndex == aEndCharIndex)
             return path;
 
         // If selection spans more than one line, add path components for middle lines and end line

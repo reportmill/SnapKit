@@ -1136,7 +1136,7 @@ public class TextArea extends View {
     public int getCharIndex(double anX, double aY)
     {
         TextBox textBox = getTextBox();
-        return textBox.getCharIndex(anX, aY);
+        return textBox.getCharIndexForXY(anX, aY);
     }
 
     /**

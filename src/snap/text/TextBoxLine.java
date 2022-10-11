@@ -275,24 +275,33 @@ public class TextBoxLine implements CharSequence {
             char c = charAt(i);
             if (c == '\t')
                 _widthAll = _textLine.getXForTabAtIndexAndX(_textLineStart + i, getX() + _widthAll) - getX();
-            else if (c != '\n' && c != '\r') _widthAll += lastTokenStyle.getCharAdvance(c);
+            else if (c != '\n' && c != '\r')
+                _widthAll += lastTokenStyle.getCharAdvance(c);
         }
 
         // If justify, shift tokens in line (unless line has newline or is last line in RichText)
         if (lineStyle.isJustify() && getTokenCount() > 1) {
+
+            // If line only has newline, just return
             if (isLastCharNewline() || lineEnd == _textLine.length())
                 return;
-            double y = getY();
-            double tmx = _textBox.getMaxHitX(y, _height);
-            double lmx = getMaxX();
-            double rem = tmx - lmx;
-            double shift = rem / (getTokenCount() - 1);
-            double shft = 0;
-            for (TextBoxToken tok : getTokens()) {
-                tok._shiftX = shft;
-                shft += shift;
+
+            // Calculate Justify token shift
+            double lineY = getY();
+            double textBoxMaxX = _textBox.getMaxHitX(lineY, _height);
+            double lineMaxX = getMaxX();
+            double remainderW = textBoxMaxX - lineMaxX;
+            double shiftX = remainderW / (getTokenCount() - 1);
+            double runningShiftX = 0;
+
+            // Shift tokens
+            for (TextBoxToken token : getTokens()) {
+                token._shiftX = runningShiftX;
+                runningShiftX += shiftX;
             }
-            _widthAll += shft - shift;
+
+            // Update WidthAll
+            _widthAll += runningShiftX - shiftX;
         }
 
         // Calculate X alignment shift
@@ -401,32 +410,32 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the token at index.
      */
-    public TextBoxToken getTokenForPointX(double anX)
+    public TextBoxToken getTokenForX(double anX)
     {
         // Get token
-        TextBoxToken tok = getTokenCount() > 0 ? getToken(0) : null;
-        if (tok == null || tok.getTextBoxX() > anX)
+        TextBoxToken token = getTokenCount() > 0 ? getToken(0) : null;
+        if (token == null || token.getTextBoxX() > anX)
             return null;
 
         // Iterate
         for (int i = 0, iMax = getTokenCount(); i < iMax; i++) {
-            TextBoxToken next = i + 1 < iMax ? getToken(i + 1) : null;
-            if (next != null && next.getTextBoxX() <= anX)
-                tok = next;
-            else return tok;
+            TextBoxToken nextToken = i + 1 < iMax ? getToken(i + 1) : null;
+            if (nextToken != null && nextToken.getTextBoxX() <= anX)
+                token = nextToken;
+            else return token;
         }
 
         // Return
-        return tok;
+        return token;
     }
 
     /**
      * Returns the character index for the given x/y point.
      */
-    public int getCharIndex(double anX)
+    public int getCharIndexForX(double anX)
     {
         // Get run for x coord (just return zero if null)
-        TextBoxToken token = getTokenForPointX(anX);
+        TextBoxToken token = getTokenForX(anX);
         int charIndex = token != null ? token.getStartCharIndex() : 0;
         int lineLength = length();
         TextStyle textStyle = token != null ? token.getTextStyle() : getStartStyle();
@@ -483,19 +492,21 @@ public class TextBoxLine implements CharSequence {
     }
 
     /**
-     * Returns the previous line if available.
+     * Returns the next line, if available.
      */
-    public TextBoxLine getPrevLine()
+    public TextBoxLine getNext()
     {
-        return _index > 0 ? _textBox.getLine(_index - 1) : null;
+        int nextIndex = _index + 1;
+        return nextIndex < _textBox.getLineCount() ? _textBox.getLine(nextIndex) : null;
     }
 
     /**
-     * Returns the next line, if available.
+     * Returns the previous line if available.
      */
-    public TextBoxLine getNextLine()
+    public TextBoxLine getPrevious()
     {
-        return _index + 1 < _textBox.getLineCount() ? _textBox.getLine(_index + 1) : null;
+        int prevIndex = _index - 1;
+        return prevIndex >= 0 ? _textBox.getLine(prevIndex) : null;
     }
 
     /**

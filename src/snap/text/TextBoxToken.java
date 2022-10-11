@@ -104,7 +104,12 @@ public class TextBoxToken {
     /**
      * Returns the color for this token.
      */
-    public Color getTextColor()  { return _color; }
+    public Color getTextColor()
+    {
+        if (_color != null)
+            return _color;
+        return _textStyle.getColor();
+    }
 
     /**
      * Sets the color for this token.

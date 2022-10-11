@@ -44,8 +44,8 @@ public class TextSel {
         _text = _tbox.getTextDoc();
 
         // Get character index for point 1 & point 2
-        int p1Char = _tbox.getCharIndex(x1, y1);
-        int p2Char = _tbox.getCharIndex(x2, y2);
+        int p1Char = _tbox.getCharIndexForXY(x1, y1);
+        int p2Char = _tbox.getCharIndexForXY(x2, y2);
 
         // Set selection start and end for selected chars
         int selStart = Math.min(p1Char, p2Char);
@@ -164,7 +164,7 @@ public class TextSel {
         int selIndex = getIndex();
         TextBoxLine lastColumnLine = _tbox.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
-        TextBoxLine thisLine = getStartLine(), nextLine = thisLine.getPrevLine();
+        TextBoxLine thisLine = getStartLine(), nextLine = thisLine.getPrevious();
         int index = nextLine != null ? nextLine.getStartCharIndex() + Math.min(nextLine.length() - 1, lastColumn) : getStart();
         return index;
     }
@@ -177,7 +177,7 @@ public class TextSel {
         int selIndex = getIndex();
         TextBoxLine lastColumnLine = _tbox.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
-        TextBoxLine thisLine = getEndLine(), nextLine = thisLine.getNextLine();
+        TextBoxLine thisLine = getEndLine(), nextLine = thisLine.getNext();
         int index = nextLine != null ? nextLine.getStartCharIndex() + Math.min(nextLine.length() - 1, lastColumn) : getEnd();
         return index;
     }
@@ -226,7 +226,7 @@ public class TextSel {
      */
     public Path getPath()
     {
-        return _tbox.getPathForChars(getStart(), getEnd());
+        return _tbox.getPathForCharRange(getStart(), getEnd());
     }
 
     /**
