@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
+import snap.geom.Path;
 import snap.geom.Shape;
 import snap.gfx.Color;
 import snap.gfx.Painter;
@@ -127,5 +128,63 @@ public class TextEditor extends TextArea {
 
         // Paint TextBox
         getTextBox().paint(aPntr);
+    }
+
+    /**
+     * Returns a path for misspelled word underlining.
+     */
+    public Shape getSpellingPath()
+    {
+        // Get text box and text string and path object
+        TextBox textBox = getTextBox();
+        String string = textBox.getString();
+        Path spellingPath = new Path();
+
+        // Iterate over text
+        for (SpellCheck.Word word = SpellCheck.getMisspelledWord(string, 0); word != null;
+             word = SpellCheck.getMisspelledWord(string, word.getEnd())) {
+
+            // Get word bounds
+            int wordStart = word.getStart();
+            if (wordStart >= textBox.getEndCharIndex())
+                break;
+            int wordEnd = word.getEnd();
+            if (wordEnd > textBox.getEndCharIndex())
+                wordEnd = textBox.getEndCharIndex();
+
+            // If text editor selection starts in word bounds, just continue - they are still working on this word
+            int selStart = getSelStart();
+            if (wordStart <= selStart && selStart <= wordEnd)
+                continue;
+
+            // Get the selection's start line index and end line index
+            int startLineIndex = textBox.getLineForCharIndex(wordStart).getIndex();
+            int endLineIndex = textBox.getLineForCharIndex(wordEnd).getIndex();
+
+            // Iterate over selected lines
+            for (int i = startLineIndex; i <= endLineIndex; i++) {
+                TextBoxLine textBoxLine = textBox.getLine(i);
+
+                // Get the bounds of line
+                double lineX = textBoxLine.getX();
+                double lineMaxX = textBoxLine.getMaxX();
+                double lineBaseY = textBoxLine.getBaseline() + 3;
+
+                // If starting line, adjust x1 for starting character
+                if (i == startLineIndex)
+                    lineX = textBoxLine.getXForChar(wordStart - textBoxLine.getStartCharIndex() - textBox.getStartCharIndex());
+
+                // If ending line, adjust x2 for ending character
+                if (i == endLineIndex)
+                    lineMaxX = textBoxLine.getXForChar(wordEnd - textBoxLine.getStartCharIndex() - textBox.getStartCharIndex());
+
+                // Append rect for line to path
+                spellingPath.moveTo(lineX, lineBaseY);
+                spellingPath.lineTo(lineMaxX, lineBaseY);
+            }
+        }
+
+        // Return path
+        return spellingPath;
     }
 }

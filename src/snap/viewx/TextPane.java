@@ -233,7 +233,7 @@ public class TextPane extends ViewOwner {
     public String getSelectionInfo()
     {
         StringBuffer sb = new StringBuffer();
-        TextBoxLine textLine = getTextArea().getLineAt(getTextArea().getSelStart());
+        TextBoxLine textLine = getTextArea().getLineForCharIndex(getTextArea().getSelStart());
         sb.append("Line ").append(textLine.getIndex() + 1);
         sb.append(", Col ").append(getTextArea().getSelStart() - textLine.getStartCharIndex());
         return sb.toString();

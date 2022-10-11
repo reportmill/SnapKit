@@ -879,7 +879,7 @@ public class TextBox {
     /**
      * Returns the token at given index.
      */
-    public TextBoxToken getTokenAt(int anIndex)
+    public TextBoxToken getTokenForCharIndex(int anIndex)
     {
         TextBoxLine line = getLineForCharIndex(anIndex);
         return line.getTokenAt(anIndex - line.getStartCharIndex());

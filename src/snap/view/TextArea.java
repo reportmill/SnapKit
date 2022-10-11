@@ -71,7 +71,10 @@ public class TextArea extends View {
     // The content on focus gained
     private String  _focusGainedText;
 
-    // Whether RM should be spell checking
+    // A helper class for key processing
+    private TextAreaKeys  _keys = createTextAreaKeys();
+
+    // Whether as-you-type spell checking is enabled
     public static boolean  isSpellChecking = Prefs.get().getBoolean("SpellChecking", false);
 
     // Whether hyphenating is activated
@@ -638,7 +641,7 @@ public class TextArea extends View {
     public void setFormat(TextFormat aFormat)
     {
         // Get format selection range and select it (if non-null)
-        TextSel sel = smartFindFormatRange();
+        TextSel sel = TextAreaUtils.smartFindFormatRange(this);
         if (sel != null)
             setSel(sel.getStart(), sel.getEnd());
 
@@ -959,7 +962,10 @@ public class TextArea extends View {
         }
 
         // Set new selection
-        else setSel(_sel.getCharRight());
+        else {
+            int charIndex = _sel.getCharRight();
+            setSel(charIndex);
+        }
     }
 
     /**
@@ -977,7 +983,10 @@ public class TextArea extends View {
         }
 
         // Set new selection
-        else setSel(_sel.getCharLeft());
+        else {
+            int charIndex = _sel.getCharUp();
+            setSel(charIndex);
+        }
     }
 
     /**
@@ -985,7 +994,8 @@ public class TextArea extends View {
      */
     public void selectUp()
     {
-        setSel(_sel.getCharUp());
+        int charIndex = _sel.getCharUp();
+        setSel(charIndex);
     }
 
     /**
@@ -993,7 +1003,8 @@ public class TextArea extends View {
      */
     public void selectDown()
     {
-        setSel(_sel.getCharDown());
+        int charIndex = _sel.getCharDown();
+        setSel(charIndex);
     }
 
     /**
@@ -1001,7 +1012,8 @@ public class TextArea extends View {
      */
     public void selectLineStart()
     {
-        setSel(_sel.getLineStart());
+        int charIndex = _sel.getLineStart();
+        setSel(charIndex);
     }
 
     /**
@@ -1009,7 +1021,8 @@ public class TextArea extends View {
      */
     public void selectLineEnd()
     {
-        setSel(_sel.getLineEnd());
+        int charIndex = _sel.getLineEnd();
+        setSel(charIndex);
     }
 
     /**
@@ -1022,13 +1035,13 @@ public class TextArea extends View {
             return;
         }
 
-        TextDoc text = getTextDoc();
-        int end = getSelStart(); if (end == 0) return;
-        int start = end - 1;
-        if (text.isAfterLineEnd(end))
-            start = text.lastIndexOfNewline(end);
+        TextDoc textDoc = getTextDoc();
+        int deleteEnd = getSelStart(); if (deleteEnd == 0) return;
+        int deleteStart = deleteEnd - 1;
+        if (textDoc.isAfterLineEnd(deleteEnd))
+            deleteStart = textDoc.lastIndexOfNewline(deleteEnd);
 
-        delete(start, end, true);
+        delete(deleteStart, deleteEnd, true);
     }
 
     /**
@@ -1041,13 +1054,13 @@ public class TextArea extends View {
             return;
         }
 
-        TextDoc text = getTextDoc();
-        int start = getSelStart(); if (start >= length()) return;
-        int end = start + 1;
-        if (text.isLineEnd(end - 1))
-            end = text.indexAfterNewline(end - 1);
+        TextDoc textDoc = getTextDoc();
+        int deleteStart = getSelStart(); if (deleteStart >= length()) return;
+        int deleteEnd = deleteStart + 1;
+        if (textDoc.isLineEnd(deleteEnd - 1))
+            deleteEnd = textDoc.indexAfterNewline(deleteEnd - 1);
 
-        delete(start, end, true);
+        delete(deleteStart, deleteEnd, true);
     }
 
     /**
@@ -1056,17 +1069,17 @@ public class TextArea extends View {
     public void deleteToLineEnd()
     {
         // If there is a current selection, just delete it
-        TextDoc text = getTextDoc();
+        TextDoc textDoc = getTextDoc();
         if (!isSelEmpty())
             delete();
 
-            // Otherwise, if at line end, delete line end
-        else if (text.isLineEnd(getSelEnd()))
-            delete(getSelStart(), text.indexAfterNewline(getSelStart()), true);
+        // Otherwise, if at line end, delete line end
+        else if (textDoc.isLineEnd(getSelEnd()))
+            delete(getSelStart(), textDoc.indexAfterNewline(getSelStart()), true);
 
-            // Otherwise delete up to next newline or line end
+        // Otherwise delete up to next newline or line end
         else {
-            int index = text.indexOfNewline(getSelStart());
+            int index = textDoc.indexOfNewline(getSelStart());
             delete(getSelStart(), index >= 0 ? index : length(), true);
         }
     }
@@ -1115,7 +1128,7 @@ public class TextArea extends View {
     /**
      * Returns the line for the given character index.
      */
-    public TextBoxLine getLineAt(int anIndex)
+    public TextBoxLine getLineForCharIndex(int anIndex)
     {
         TextBox textBox = getTextBox();
         return textBox.getLineForCharIndex(anIndex);
@@ -1124,16 +1137,16 @@ public class TextArea extends View {
     /**
      * Returns the token for given character index.
      */
-    public TextBoxToken getTokenAt(int anIndex)
+    public TextBoxToken getTokenForCharIndex(int anIndex)
     {
         TextBox textBox = getTextBox();
-        return textBox.getTokenAt(anIndex);
+        return textBox.getTokenForCharIndex(anIndex);
     }
 
     /**
      * Returns the char index for given point in text coordinate space.
      */
-    public int getCharIndex(double anX, double aY)
+    public int getCharIndexForXY(double anX, double aY)
     {
         TextBox textBox = getTextBox();
         return textBox.getCharIndexForXY(anX, aY);
@@ -1142,13 +1155,13 @@ public class TextArea extends View {
     /**
      * Returns the link at given XY.
      */
-    public TextLink getLinkAtXY(double aX, double aY)
+    public TextLink getTextLinkForXY(double aX, double aY)
     {
         // If not RichText, just return
         if (!isRichText()) return null;
 
         // Get TextStyle at XY and return link
-        int charIndex = getCharIndex(aX, aY);
+        int charIndex = getCharIndexForXY(aX, aY);
         TextStyle textStyle = getStyleForCharIndex(charIndex);
         return textStyle.getLink();
     }
@@ -1281,7 +1294,7 @@ public class TextArea extends View {
         _downX = _downY = 0;
 
         if (anEvent.isMouseClick()) {
-            TextLink textLink = getLinkAtXY(anEvent.getX(), anEvent.getY());
+            TextLink textLink = getTextLinkForXY(anEvent.getX(), anEvent.getY());
             if (textLink != null)
                 openLink(textLink.getString());
         }
@@ -1292,7 +1305,7 @@ public class TextArea extends View {
      */
     protected void mouseMoved(ViewEvent anEvent)
     {
-        TextLink textLink = getLinkAtXY(anEvent.getX(), anEvent.getY());
+        TextLink textLink = getTextLinkForXY(anEvent.getX(), anEvent.getY());
         if (textLink != null)
             setCursor(Cursor.HAND);
         else showCursor();
@@ -1303,105 +1316,7 @@ public class TextArea extends View {
      */
     protected void keyPressed(ViewEvent anEvent)
     {
-        // Get event info
-        int keyCode = anEvent.getKeyCode();
-        boolean commandDown = anEvent.isShortcutDown(), controlDown = anEvent.isControlDown();
-        boolean emacsDown = SnapUtils.isWindows ? anEvent.isAltDown() : controlDown;
-        boolean shiftDown = anEvent.isShiftDown();
-        setCaretAnim(false);
-        setShowCaret(isCaretNeeded());
-
-        // Handle command keys
-        if (commandDown) {
-
-            // If shift-down, just return
-            if (shiftDown && keyCode != KeyCode.Z) return;
-
-            // Handle common command keys
-            switch(keyCode) {
-                case KeyCode.X: cut(); anEvent.consume(); break; // Handle command-x cut
-                case KeyCode.C: copy(); anEvent.consume(); break; // Handle command-c copy
-                case KeyCode.V: paste(); anEvent.consume(); break; // Handle command-v paste
-                case KeyCode.A: selectAll(); anEvent.consume(); break; // Handle command-a select all
-                case KeyCode.Z: if(shiftDown) redo(); else undo(); anEvent.consume(); break; // Handle command-z undo
-                default: return; // Any other command keys just return
-            }
-        }
-
-        // Handle control keys (not applicable on Windows, since they are handled by command key code above)
-        else if (emacsDown) {
-
-            // If shift down, just return
-            if (shiftDown) return;
-
-            // Handle common emacs key bindings
-            switch (keyCode) {
-                case KeyCode.F: selectForward(false); break; // Handle control-f key forward
-                case KeyCode.B: selectBackward(false); break; // Handle control-b key backward
-                case KeyCode.P: selectUp(); break; // Handle control-p key up
-                case KeyCode.N: selectDown(); break; // Handle control-n key down
-                case KeyCode.A: selectLineStart(); break; // Handle control-a line start
-                case KeyCode.E: selectLineEnd(); break; // Handle control-e line end
-                case KeyCode.D: deleteForward(); break; // Handle control-d delete forward
-                case KeyCode.K: deleteToLineEnd(); break; // Handle control-k delete line to end
-                default: return; // Any other control keys, just return
-            }
-        }
-
-        // Handle supported non-character keys
-        else switch (keyCode) {
-                case KeyCode.TAB:
-                    replaceChars("\t");
-                    anEvent.consume();
-                    break;
-                case KeyCode.ENTER:
-                    if (isFireActionOnEnterKey()) {
-                        selectAll();
-                        fireActionEvent(anEvent);
-                    } else {
-                        replaceChars("\n");
-                        anEvent.consume();
-                    }
-                    break; // Handle enter
-                case KeyCode.LEFT:
-                    selectBackward(shiftDown);
-                    anEvent.consume();
-                    break; // Handle left arrow
-                case KeyCode.RIGHT:
-                    selectForward(shiftDown);
-                    anEvent.consume();
-                    break; // Handle right arrow
-                case KeyCode.UP:
-                    selectUp();
-                    anEvent.consume();
-                    break; // Handle up arrow
-                case KeyCode.DOWN:
-                    selectDown();
-                    anEvent.consume();
-                    break; // Handle down arrow
-                case KeyCode.HOME:
-                    selectLineStart();
-                    break; // Handle home key
-                case KeyCode.END:
-                    selectLineEnd();
-                    break; // Handle end key
-                case KeyCode.BACK_SPACE:
-                    deleteBackward();
-                    anEvent.consume();
-                    break; // Handle Backspace key
-                case KeyCode.DELETE:
-                    deleteForward();
-                    anEvent.consume();
-                    break; // Handle Delete key
-                case KeyCode.SPACE:
-                    anEvent.consume();
-                    break; // I have no idea why ScrollPane scrolls if this isn't called
-                default:
-                    return; // Any other non-character key, just return
-            }
-
-        // Consume the event
-        //anEvent.consume();
+        _keys.keyPressed(anEvent);
     }
 
     /**
@@ -1409,19 +1324,7 @@ public class TextArea extends View {
      */
     protected void keyTyped(ViewEvent anEvent)
     {
-        // Get event info
-        String keyChars = anEvent.getKeyString();
-        char keyChar = keyChars.length() > 0 ? keyChars.charAt(0) : 0;
-        boolean charDefined = keyChar != KeyCode.CHAR_UNDEFINED && !Character.isISOControl(keyChar);
-        boolean commandDown = anEvent.isShortcutDown();
-        boolean controlDown = anEvent.isControlDown();
-        boolean emacsDown = SnapUtils.isWindows ? anEvent.isAltDown() : controlDown;
-
-        // If actual text entered, replace
-        if (charDefined && !commandDown && !controlDown && !emacsDown) {
-            replaceChars(keyChars);
-            hideCursor(); //anEvent.consume();
-        }
+        _keys.keyTyped(anEvent);
     }
 
     /**
@@ -1429,8 +1332,13 @@ public class TextArea extends View {
      */
     protected void keyReleased(ViewEvent anEvent)
     {
-        setCaretAnim();
+        _keys.keyReleased(anEvent);
     }
+
+    /**
+     * Override to create TextAreaKeys.
+     */
+    protected TextAreaKeys createTextAreaKeys()  { return new TextAreaKeys(this); }
 
     /**
      * Shows the cursor.
@@ -1466,7 +1374,7 @@ public class TextArea extends View {
     /**
      * Returns whether caret is needed (true when text is focused, showing and empty selection).
      */
-    private boolean isCaretNeeded()
+    protected boolean isCaretNeeded()
     {
         return isFocused() && getSel().isEmpty() && isShowing();
     }
@@ -1474,7 +1382,7 @@ public class TextArea extends View {
     /**
      * Sets the caret animation to whether it's needed.
      */
-    private void setCaretAnim()
+    protected void setCaretAnim()
     {
         boolean show = isCaretNeeded();
         setCaretAnim(show);
@@ -1710,7 +1618,8 @@ public class TextArea extends View {
     public class UndoTextSel implements Undoer.Selection {
 
         // Ivars
-        public int start = getSelStart(), end = getSelEnd();  // Use ivars to avoid min()
+        public int start = getSelStart();
+        public int end = getSelEnd();  // Use ivars to avoid min()
 
         // SetSel
         public void setSelection()
@@ -1908,103 +1817,6 @@ public class TextArea extends View {
     public Shape getSelPath()
     {
         return getSel().getPath();
-    }
-
-    /**
-     * Returns a path for misspelled word underlining.
-     */
-    public Shape getSpellingPath()
-    {
-        // Get text box and text string and path object
-        TextBox tbox = getTextBox();
-        String string = tbox.getString();
-        Path path = new Path();
-
-        // Iterate over text
-        for (SpellCheck.Word word = SpellCheck.getMisspelledWord(string, 0); word != null;
-             word = SpellCheck.getMisspelledWord(string, word.getEnd())) {
-
-            // Get word bounds
-            int start = word.getStart();
-            if (start >= tbox.getEndCharIndex()) break;
-            int end = word.getEnd();
-            if (end > tbox.getEndCharIndex()) end = tbox.getEndCharIndex();
-
-            // If text editor selection starts in word bounds, just continue - they are still working on this word
-            if (start <= getSelStart() && getSelStart() <= end)
-                continue;
-
-            // Get the selection's start line index and end line index
-            int startLineIndex = getLineAt(start).getIndex();
-            int endLineIndex = getLineAt(end).getIndex();
-
-            // Iterate over selected lines
-            for (int i = startLineIndex; i <= endLineIndex; i++) {
-                TextBoxLine line = getLine(i);
-
-                // Get the bounds of line
-                double x1 = line.getX();
-                double x2 = line.getMaxX();
-                double y = line.getBaseline() + 3;
-
-                // If starting line, adjust x1 for starting character
-                if (i == startLineIndex)
-                    x1 = line.getXForChar(start - line.getStartCharIndex() - tbox.getStartCharIndex());
-
-                // If ending line, adjust x2 for ending character
-                if (i == endLineIndex)
-                    x2 = line.getXForChar(end - line.getStartCharIndex() - tbox.getStartCharIndex());
-
-                // Append rect for line to path
-                path.moveTo(x1, y);
-                path.lineTo(x2, y);
-            }
-        }
-
-        // Return path
-        return path;
-    }
-
-    /**
-     * This method returns the range of the @-sign delinated key closest to the current selection (or null if not found).
-     */
-    private TextSel smartFindFormatRange()
-    {
-        int selStart = getSelStart(), selEnd = getSelEnd();
-        int prevAtSignIndex = -1, nextAtSignIndex = -1;
-        String string = getText();
-
-        // See if selection contains an '@'
-        if (selEnd > selStart)
-            prevAtSignIndex = string.indexOf("@", selStart);
-        if (prevAtSignIndex >= selEnd)
-            prevAtSignIndex = -1;
-
-        // If there wasn't an '@' in selection, see if there is one before the selected range
-        if (prevAtSignIndex < 0)
-            prevAtSignIndex = string.lastIndexOf("@", selStart - 1);
-
-        // If there wasn't an '@' in or before selection, see if there is one after the selected range
-        if (prevAtSignIndex < 0)
-            prevAtSignIndex = string.indexOf("@", selEnd);
-
-        // If there is a '@' in, before or after selection, see if there is another after it
-        if (prevAtSignIndex >= 0)
-            nextAtSignIndex = string.indexOf("@", prevAtSignIndex + 1);
-
-        // If there is a '@' in, before or after selection, but not one after it, see if there is one before that
-        if (prevAtSignIndex >= 0 && nextAtSignIndex < 0)
-            nextAtSignIndex = string.lastIndexOf("@", prevAtSignIndex - 1);
-
-        // If both a previous and next '@', select the chars inbetween
-        if (prevAtSignIndex >= 0 && nextAtSignIndex >= 0 && prevAtSignIndex != nextAtSignIndex) {
-            int start = Math.min(prevAtSignIndex, nextAtSignIndex);
-            int end = Math.max(prevAtSignIndex, nextAtSignIndex);
-            return new TextSel(_textBox, start, end + 1);
-        }
-
-        // Return null since range not found
-        return null;
     }
 
     /**
