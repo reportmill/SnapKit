@@ -29,8 +29,8 @@ public class SubTextLine extends TextLine {
         // Set ivars
         _subText = aSubText;
         _textLine = aTextLine;
-        _startCharIndex = startInTextDoc - aSubText._start;
-        _endInSubText = endInTextDoc - aSubText._start;
+        _startCharIndex = startInTextDoc - aSubText._startCharIndexInDoc;
+        _endInSubText = endInTextDoc - aSubText._startCharIndexInDoc;
 
         // Create RunList and get loop vars for TextLine runs
         List<TextRun> runsList = new ArrayList<>();
@@ -60,7 +60,7 @@ public class SubTextLine extends TextLine {
      */
     private final int convertSubLineToTextLine(int charIndexInSubLine)
     {
-        return _subText._start + _startCharIndex - _textLine._startCharIndex + charIndexInSubLine;
+        return _subText._startCharIndexInDoc + _startCharIndex - _textLine._startCharIndex + charIndexInSubLine;
     }
 
     /**

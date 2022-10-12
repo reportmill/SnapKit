@@ -12,10 +12,10 @@ public class SubText extends TextDoc {
     private TextDoc  _textDoc;
 
     // The start char index
-    protected int _start;
+    protected int  _startCharIndexInDoc;
 
     // The end char index
-    protected int _end;
+    protected int  _endCharIndexInDoc;
 
     // PropChangeListener to update Start/End char indexes when text is edited
     private PropChangeListener  _textDocPropLsnr = pc -> textDocDidPropChange(pc);
@@ -27,8 +27,8 @@ public class SubText extends TextDoc {
     {
         super();
         _textDoc = aTextDoc;
-        _start = aStart;
-        _end = anEnd;
+        _startCharIndexInDoc = aStart;
+        _endCharIndexInDoc = anEnd;
         rebuildLines();
 
         // Listen to TextDoc
@@ -44,12 +44,12 @@ public class SubText extends TextDoc {
      * Returns the start char index.
      */
     @Override
-    public int getStartCharIndex()  { return _start; }
+    public int getStartCharIndex()  { return _startCharIndexInDoc; }
 
     /**
      * Returns the end char index.
      */
-    public int getEndCharIndex()  { return _end; }
+    public int getEndCharIndex()  { return _endCharIndexInDoc; }
 
     /**
      * Override to suppress.
@@ -80,19 +80,19 @@ public class SubText extends TextDoc {
     /**
      * Returns the number of characters in the text.
      */
-    public int length()  { return _end - _start; }
+    public int length()  { return _endCharIndexInDoc - _startCharIndexInDoc; }
 
     /**
      * Returns the char value at the specified index.
      */
-    public char charAt(int anIndex)  { return _textDoc.charAt(anIndex + _start); }
+    public char charAt(int anIndex)  { return _textDoc.charAt(_startCharIndexInDoc + anIndex); }
 
     /**
      * Returns a new char sequence that is a subsequence of this sequence.
      */
     public CharSequence subSequence(int aStart, int anEnd)
     {
-        return _textDoc.subSequence(aStart + _start, anEnd + _start);
+        return _textDoc.subSequence(_startCharIndexInDoc + aStart, _startCharIndexInDoc + anEnd);
     }
 
     /**
@@ -108,7 +108,7 @@ public class SubText extends TextDoc {
      */
     public void setString(String aString)
     {
-        _textDoc.replaceChars(aString, _start, _end);
+        _textDoc.replaceChars(aString, _startCharIndexInDoc, _endCharIndexInDoc);
     }
 
     /**
@@ -134,86 +134,57 @@ public class SubText extends TextDoc {
     /**
      * Adds characters with attributes to this text at given index.
      */
-    public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
+    public void addChars(CharSequence theChars, TextStyle theStyle, int charIndex)
     {
-        _textDoc.addChars(theChars, theStyle, anIndex + _start);
+        _textDoc.addChars(theChars, theStyle, _startCharIndexInDoc + charIndex);
     }
 
     /**
      * Removes characters in given range.
      */
-    public void removeChars(int aStart, int anEnd)
+    public void removeChars(int startCharIndex, int endCharIndex)
     {
-        _textDoc.removeChars(aStart + _start, anEnd + _start);
+        _textDoc.removeChars(_startCharIndexInDoc + startCharIndex, _startCharIndexInDoc + endCharIndex);
     }
 
     /**
      * Adds given TextDoc to this text at given index.
      */
-    public void addTextDoc(TextDoc aTextDoc, int anIndex)
+    public void addTextDoc(TextDoc aTextDoc, int charIndex)
     {
-        _textDoc.addTextDoc(aTextDoc, anIndex + _start);
+        _textDoc.addTextDoc(aTextDoc, _startCharIndexInDoc + charIndex);
     }
 
     /**
      * Sets a given style to a given range.
      */
-    public void setStyle(TextStyle aStyle, int aStart, int anEnd)
+    public void setStyle(TextStyle aStyle, int startCharIndex, int endCharIndex)
     {
-        _textDoc.setStyle(aStyle, aStart + _start, anEnd + _start);
+        _textDoc.setStyle(aStyle, _startCharIndexInDoc + startCharIndex, _startCharIndexInDoc + endCharIndex);
     }
 
     /**
      * Sets a given attribute to a given value for a given range.
      */
-    public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
+    public void setStyleValue(String aKey, Object aValue, int startCharIndex, int endCharIndex)
     {
-        _textDoc.setStyleValue(aKey, aValue, aStart + _start, anEnd + _start);
+        _textDoc.setStyleValue(aKey, aValue, _startCharIndexInDoc + startCharIndex, _startCharIndexInDoc + endCharIndex);
     }
 
     /**
      * Sets a given style to a given range.
      */
-    public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
+    public void setLineStyle(TextLineStyle aStyle, int startCharIndex, int endCharIndex)
     {
-        _textDoc.setLineStyle(aStyle, aStart + _start, anEnd + _start);
+        _textDoc.setLineStyle(aStyle, _startCharIndexInDoc + startCharIndex, _startCharIndexInDoc + endCharIndex);
     }
 
     /**
      * Sets a given style to a given range.
      */
-    public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
+    public void setLineStyleValue(String aKey, Object aValue, int startCharIndex, int endCharIndex)
     {
-        _textDoc.setLineStyleValue(aKey, aValue, aStart + _start, anEnd + _start);
-    }
-
-    /**
-     * Rebuilds lines.
-     */
-    private void rebuildLines()
-    {
-        _lines.clear();
-        _width = -1;
-
-        // Get TextLine at start char index
-        int charIndex = _start;
-        TextLine textLine = _textDoc.getLineForCharIndex(charIndex);
-
-        // Iterate over TextLines and add SubTextLines for each
-        while (true) {
-
-            // Create, configure, add SubTextLine for TextLine
-            int lineEnd = Math.min(textLine.getEndCharIndex(), _end);
-            SubTextLine subLine = new SubTextLine(this, textLine, charIndex, lineEnd);
-            subLine._index = _lines.size();
-            _lines.add(subLine);
-
-            // Get next TextLine - if beyond SubText.End, just break
-            textLine = textLine.getNext();
-            if (textLine == null || _end <= textLine.getStartCharIndex())
-                break;
-            charIndex = lineEnd;
-        }
+        _textDoc.setLineStyleValue(aKey, aValue, _startCharIndexInDoc + startCharIndex, _startCharIndexInDoc + endCharIndex);
     }
 
     /**
@@ -238,23 +209,23 @@ public class SubText extends TextDoc {
 
             // Handle add chars
             if (addChars != null) {
-                if (charIndex < _start) {
-                    _start += addChars.length();
-                    _end += addChars.length();
+                if (charIndex < _startCharIndexInDoc) {
+                    _startCharIndexInDoc += addChars.length();
+                    _endCharIndexInDoc += addChars.length();
                 }
-                if (charIndex >= _start && charIndex <= _end) {
-                    _end += addChars.length();
+                if (charIndex >= _startCharIndexInDoc && charIndex <= _endCharIndexInDoc) {
+                    _endCharIndexInDoc += addChars.length();
                     needSubPropChange = true;
                 }
             }
 
             // Handle remove chars
             else {
-                if (charIndex < _end) {
-                    int endCharIndex = Math.min(_end - charIndex, removeChars.length());
-                    _end -= endCharIndex;
-                    if (charIndex < _start)
-                        _start -= Math.min(_start - charIndex, removeChars.length());
+                if (charIndex < _endCharIndexInDoc) {
+                    int endCharIndex = Math.min(_endCharIndexInDoc - charIndex, removeChars.length());
+                    _endCharIndexInDoc -= endCharIndex;
+                    if (charIndex < _startCharIndexInDoc)
+                        _startCharIndexInDoc -= Math.min(_startCharIndexInDoc - charIndex, removeChars.length());
                     else needSubPropChange = true;
                 }
             }
@@ -267,18 +238,47 @@ public class SubText extends TextDoc {
 
                 // If removeChars outside SubText start/end range, trim to range
                 if (removeChars != null) {
-                    int charsStart = Math.max(charIndex, _start) - charIndex;
-                    int charsEnd = Math.min(charIndex + removeChars.length(), _end) - charIndex;
+                    int charsStart = Math.max(charIndex, _startCharIndexInDoc) - charIndex;
+                    int charsEnd = Math.min(charIndex + removeChars.length(), _endCharIndexInDoc) - charIndex;
                     if (charsStart != 0 || charsEnd != removeChars.length())
                         removeChars = removeChars.subSequence(charsStart, charsEnd);
                 }
 
                 // Create/fire CharsChange for SubText
-                int charIndexInSubText = charIndex - _start;
+                int charIndexInSubText = charIndex - _startCharIndexInDoc;
                 TextDocUtils.CharsChange subCharsChange = new TextDocUtils.CharsChange(this,
                         removeChars, addChars, charIndexInSubText);
                 firePropChange(subCharsChange);
             }
+        }
+    }
+
+    /**
+     * Rebuilds lines.
+     */
+    protected void rebuildLines()
+    {
+        _lines.clear();
+        _width = -1;
+
+        // Get TextLine at start char index
+        int charIndex = _startCharIndexInDoc;
+        TextLine textLine = _textDoc.getLineForCharIndex(charIndex);
+
+        // Iterate over TextLines and add SubTextLines for each
+        while (true) {
+
+            // Create, configure, add SubTextLine for TextLine
+            int lineEnd = Math.min(textLine.getEndCharIndex(), _endCharIndexInDoc);
+            SubTextLine subLine = new SubTextLine(this, textLine, charIndex, lineEnd);
+            subLine._index = _lines.size();
+            _lines.add(subLine);
+
+            // Get next TextLine - if beyond SubText.End, just break
+            textLine = textLine.getNext();
+            if (textLine == null || _endCharIndexInDoc <= textLine.getStartCharIndex())
+                break;
+            charIndex = lineEnd;
         }
     }
 
