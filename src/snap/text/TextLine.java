@@ -327,10 +327,21 @@ public class TextLine implements CharSequence, Cloneable {
         // If already set, just return
         if (_tokens != null) return _tokens;
 
-        TextToken[] tokens = _textDoc.createTokensForTextLine(this);
+        // Create Tokens and set index for each
+        TextToken[] tokens = createTokens();
         for (int i = 0; i < tokens.length; i++)
             tokens[i]._index = i;
+
+        // Set, return
         return _tokens = tokens;
+    }
+
+    /**
+     * Creates the tokens (via TextDoc.createTokensForTextLine() to provide another hook).
+     */
+    protected TextToken[] createTokens()
+    {
+        return _textDoc.createTokensForTextLine(this);
     }
 
     /**

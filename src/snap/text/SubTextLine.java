@@ -17,7 +17,7 @@ public class SubTextLine extends TextLine {
     private TextLine  _textLine;
 
     // The end char index in SubText
-    private int _endInSubText;
+    private int  _endInSubText;
 
     /**
      * Constructor.
@@ -113,6 +113,15 @@ public class SubTextLine extends TextLine {
      * Sets the line style.
      */
     public void setLineStyle(TextLineStyle aLineStyle)  { _textLine.setLineStyle(aLineStyle); }
+
+    /**
+     * Override to get tokens from TextLine.
+     */
+    @Override
+    protected TextToken[] createTokens()
+    {
+        return _textLine.getTokens();
+    }
 
     /**
      * Returns a copy of this line for given char range.

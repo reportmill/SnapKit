@@ -537,16 +537,18 @@ public class TextBox {
         TextDoc textDoc = getTextDoc();
         TextLine textLine = textDoc.getLineForCharIndex(aStart);
         if (textLine.indexOf("*/", 0) >= 0) {
-            int newStartCharIndex = getStartCharIndex();
-            TextLine startLine = textLine.getPrevious();
+
+            // Find startCharIndex of opening comment chars
+            TextLine startLine = textLine;
             while (startLine != null) {
-                newStartCharIndex = startLine.getStartCharIndex();
+                aStart = startLine.getStartCharIndex();
                 if (startLine.indexOf("/*", 0) >= 0)
                     break;
+                startLine = startLine.getPrevious();
             }
-            aStart = newStartCharIndex;
         }
 
+        // Calc fromEndCharIndex and set update bounds
         int fromEndCharIndex = length() - aEnd;
         setUpdateBounds(aStart, fromEndCharIndex);
     }
@@ -792,14 +794,16 @@ public class TextBox {
             int tokenEndCharIndex = textToken.getEndCharIndex() - startCharIndex;
 
             // Create textBoxToken, configure and add
-            TextBoxToken token = new TextBoxToken(boxLine, textTokenStyle, tokenStartCharIndex, tokenEndCharIndex);
-            token.setX(tokenXInBox);
-            token.setWidth(textToken.getWidth() * fontScale);
-            boxLine.addToken(token);
+            TextBoxToken textBoxToken = new TextBoxToken(boxLine, textTokenStyle, tokenStartCharIndex, tokenEndCharIndex);
+            textBoxToken.setName(textToken.getName());
+            textBoxToken.setX(tokenXInBox);
+            textBoxToken.setWidth(textToken.getWidth() * fontScale);
+            textBoxToken.setTextColor(textToken.getTextColor());
+            boxLine.addToken(textBoxToken);
 
             // If Hyphenated, set TextBoxToken.Hyphenated and break
             if (textToken._split) {
-                token.setHyphenated(true);
+                textBoxToken.setHyphenated(true);
                 break;
             }
 
