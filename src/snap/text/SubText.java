@@ -14,7 +14,7 @@ public class SubText extends TextDoc {
     // The start char index
     protected int  _startCharIndexInDoc;
 
-    // The end char index
+    // The length
     protected int  _endCharIndexInDoc;
 
     // PropChangeListener to update Start/End char indexes when text is edited
@@ -28,8 +28,11 @@ public class SubText extends TextDoc {
         super();
         _textDoc = aTextDoc;
         _startCharIndexInDoc = aStart;
-        _endCharIndexInDoc = anEnd;
-        rebuildLines();
+        _endCharIndexInDoc = aStart;
+
+        // Add TextDoc chars
+        String subString = _textDoc.getString().substring(aStart, anEnd);
+        textDocDidAddChars(aStart, subString);
 
         // Listen to TextDoc
         _textDoc.addPropChangeListener(_textDocPropLsnr);
@@ -80,7 +83,7 @@ public class SubText extends TextDoc {
     /**
      * Returns the number of characters in the text.
      */
-    public int length()  { return _endCharIndexInDoc - _startCharIndexInDoc; }
+    //public int length()  { return _endCharIndexInDoc - _startCharIndexInDoc; }
 
     /**
      * Returns the char value at the specified index.
@@ -197,88 +200,222 @@ public class SubText extends TextDoc {
      */
     private void textDocDidPropChange(PropChange aPC)
     {
+        // Get PropName
         String propName = aPC.getPropName();
+
+        // Handle Chars change
         if (propName == TextDoc.Chars_Prop) {
 
             // Get CharsChange and charIndex
             TextDocUtils.CharsChange charsChange = (TextDocUtils.CharsChange) aPC;
+            int charIndex = charsChange.getIndex();
             CharSequence addChars = charsChange.getNewValue();
             CharSequence removeChars = charsChange.getOldValue();
-            int charIndex = charsChange.getIndex();
-            boolean needSubPropChange = false;
 
-            // Handle add chars
-            if (addChars != null) {
-                if (charIndex < _startCharIndexInDoc) {
-                    _startCharIndexInDoc += addChars.length();
-                    _endCharIndexInDoc += addChars.length();
-                }
-                if (charIndex >= _startCharIndexInDoc && charIndex <= _endCharIndexInDoc) {
-                    _endCharIndexInDoc += addChars.length();
-                    needSubPropChange = true;
-                }
-            }
-
-            // Handle remove chars
-            else {
-                if (charIndex < _endCharIndexInDoc) {
-                    int endCharIndex = Math.min(_endCharIndexInDoc - charIndex, removeChars.length());
-                    _endCharIndexInDoc -= endCharIndex;
-                    if (charIndex < _startCharIndexInDoc)
-                        _startCharIndexInDoc -= Math.min(_startCharIndexInDoc - charIndex, removeChars.length());
-                    else needSubPropChange = true;
-                }
-            }
-
-            // Reset Lines, Width
-            rebuildLines();
-
-            // Fire our own CharsChange
-            if (needSubPropChange) {
-
-                // If removeChars outside SubText start/end range, trim to range
-                if (removeChars != null) {
-                    int charsStart = Math.max(charIndex, _startCharIndexInDoc) - charIndex;
-                    int charsEnd = Math.min(charIndex + removeChars.length(), _endCharIndexInDoc) - charIndex;
-                    if (charsStart != 0 || charsEnd != removeChars.length())
-                        removeChars = removeChars.subSequence(charsStart, charsEnd);
-                }
-
-                // Create/fire CharsChange for SubText
-                int charIndexInSubText = charIndex - _startCharIndexInDoc;
-                TextDocUtils.CharsChange subCharsChange = new TextDocUtils.CharsChange(this,
-                        removeChars, addChars, charIndexInSubText);
-                firePropChange(subCharsChange);
-            }
+            // Forward to textDocDidAddChars or textDocDidRemoveChars
+            if (addChars != null)
+                textDocDidAddChars(charIndex, addChars);
+            else textDocDidRemoveChars(charIndex, removeChars);
         }
+
     }
 
     /**
-     * Rebuilds lines.
+     * Called when TextDoc adds chars.
      */
-    protected void rebuildLines()
+    private void textDocDidAddChars(int charIndex, CharSequence addChars)
     {
-        _lines.clear();
-        _width = -1;
+        // If add charIndex beyond SubText.EndCharIndexInDoc, just return (nothing changes for SubText)
+        if (charIndex > _endCharIndexInDoc)
+            return;
 
-        // Get TextLine at start char index
-        int charIndex = _startCharIndexInDoc;
+        // If add charIndex before StartCharIndexInDoc, update StartCharIndex for SubText and TextLines and return
+        if (charIndex < _startCharIndexInDoc) {
+            _startCharIndexInDoc += addChars.length();
+            _endCharIndexInDoc += addChars.length();
+            updateLines(-1);
+            return;
+        }
+
+        // Update EndCharIndexInDoc for add chars
+        int charIndexInSubText = charIndex - getStartCharIndex();
+        int charsLength = addChars.length();
+        int endCharIndex = charIndex + charsLength;
+        _endCharIndexInDoc += charsLength;
+
+        // Get TextLine
         TextLine textLine = _textDoc.getLineForCharIndex(charIndex);
 
-        // Iterate over TextLines and add SubTextLines for each
+        // Get SubTextLine
+        int charIndexInSub = charIndex - getStartCharIndex();
+        SubTextLine subTextLine = (SubTextLine) getLineForCharIndex(charIndexInSub);
+        int subTextLength = _endCharIndexInDoc - _startCharIndexInDoc;
+
+        // Add or lengthen subTextLine until synched
         while (true) {
 
-            // Create, configure, add SubTextLine for TextLine
-            int lineEnd = Math.min(textLine.getEndCharIndex(), _endCharIndexInDoc);
-            SubTextLine subLine = new SubTextLine(this, textLine, charIndex, lineEnd);
-            subLine._index = _lines.size();
-            _lines.add(subLine);
+            // If no SubTextLine for TextLine, create and add
+            if (subTextLine == null || subTextLine._textLine != textLine) {
 
-            // Get next TextLine - if beyond SubText.End, just break
+                // Get new line index from SubTextLine.Index, unless at end of line (end of text, really)
+                int lineIndex = getLineCount();
+                if (subTextLine != null) {
+                    lineIndex = subTextLine.getIndex();
+                    if (charIndexInSub == subTextLine.getEndCharIndex())
+                        lineIndex++;
+                }
+
+                // Create/add SubTextLine for TextLine
+                int lineLength = Math.min(textLine.length(), _endCharIndexInDoc - textLine.getStartCharIndex());
+                subTextLine = new SubTextLine(this, textLine, lineLength);
+                addLine(subTextLine, lineIndex);
+            }
+
+            // Otherwise, update subTextLine for add chars and break
+            else {
+                int lineLength = Math.min(textLine.length(), subTextLength - subTextLine.getStartCharIndex());
+                subTextLine.setLength(lineLength);
+            }
+
+            // Get next lines
             textLine = textLine.getNext();
-            if (textLine == null || _endCharIndexInDoc <= textLine.getStartCharIndex())
+            if (textLine == null)
                 break;
-            charIndex = lineEnd;
+            int textLineStartCharIndex = textLine.getStartCharIndex();
+            if (textLineStartCharIndex > endCharIndex || textLineStartCharIndex >= _endCharIndexInDoc)
+                break;
+            subTextLine = (SubTextLine) subTextLine.getNext();
+        }
+
+        // Create/fire CharsChange for SubText
+        TextDocUtils.CharsChange subCharsChange = new TextDocUtils.CharsChange(this,
+                null, addChars, charIndexInSubText);
+        firePropChange(subCharsChange);
+        checkSynch();
+    }
+
+    /**
+     * Called when TextDoc removes chars.
+     */
+    private void textDocDidRemoveChars(int charIndex, CharSequence removeChars)
+    {
+        // If remove charIndex beyond EndCharIndexInDoc, just return
+        if (charIndex >= _endCharIndexInDoc)
+            return;
+
+        // If remove endCharIndex before StartCharIndex, update StartCharIndex for SubText and TextLines and return
+        int charsLength = removeChars.length();
+        int endCharIndex = charIndex + removeChars.length();
+        if (endCharIndex <= _startCharIndexInDoc) {
+            _startCharIndexInDoc -= charsLength;
+            _endCharIndexInDoc -= charsLength;
+            updateLines(-1);
+            return;
+        }
+
+        // If charIndex before StartCharIndexInDoc, update Start/EndCharIndexInDoc
+        if (charIndex < _startCharIndexInDoc) {
+            int beforeCharsLength = _startCharIndexInDoc - charIndex;
+            _startCharIndexInDoc -= beforeCharsLength;
+            _endCharIndexInDoc -= beforeCharsLength;
+            removeChars = removeChars.subSequence(beforeCharsLength, removeChars.length());
+            charIndex = _startCharIndexInDoc;
+            charsLength = removeChars.length();
+        }
+
+        // If endCharIndex beyond EndCharIndexInDoc, update EndCharIndex
+        if (endCharIndex > _endCharIndexInDoc) {
+            int beyondCharsLength = charIndex - _endCharIndexInDoc;
+            removeChars = removeChars.subSequence(0, removeChars.length() - beyondCharsLength);
+            endCharIndex = _endCharIndexInDoc;
+            charsLength = removeChars.length();
+        }
+
+        // Trim EndCharIndexInDoc by deleted chars
+        int charIndexInSubText = charIndex - getStartCharIndex();
+        _endCharIndexInDoc -= charsLength;
+
+        // Get TextLine
+        int subTextLength = _endCharIndexInDoc - _startCharIndexInDoc;
+        TextLine textLine = _textDoc.getLineForCharIndex(charIndex);
+        if (charIndex == textLine.getStartCharIndex() && charIndex == _endCharIndexInDoc && subTextLength > 0)
+            textLine = textLine.getPrevious();
+
+        // Get SubTextLine
+        int endCharIndexInSub = endCharIndex - getStartCharIndex();
+        SubTextLine subTextLine = (SubTextLine) getLineForCharIndex(endCharIndexInSub);
+        if (endCharIndexInSub == subTextLine.getStartCharIndex() && endCharIndexInSub > 0)
+            subTextLine = (SubTextLine) subTextLine.getPrevious();
+
+        // Remove or short subTextLine until synched
+        while (true) {
+
+            // If Lines don't match, remove line
+            if (subTextLine._textLine != textLine) {
+
+                // Remove line
+                int lineIndex = subTextLine.getIndex();
+                removeLine(lineIndex);
+
+                // If removed line 0, see if we need to add single empty line
+                if (lineIndex == 0) {
+                    if (length() == 0) {
+                        subTextLine = new SubTextLine(this, textLine, 0);
+                        addLine(subTextLine, 0);
+                    }
+                    break;
+                }
+                subTextLine = (SubTextLine) getLine(lineIndex - 1);
+            }
+
+            // Otherwise, update subTextLine for add chars and break
+            else {
+                int lineLength = Math.min(textLine.length(), subTextLength - subTextLine.getStartCharIndex());
+                subTextLine.setLength(lineLength);
+                break;
+            }
+        }
+
+        // Create/fire CharsChange for SubText
+        TextDocUtils.CharsChange subCharsChange = new TextDocUtils.CharsChange(this,
+                removeChars, null, charIndexInSubText);
+        firePropChange(subCharsChange);
+        checkSynch();
+    }
+
+    /**
+     * Check Synch  of SubText to TextDoc.
+     */
+    private void checkSynch()
+    {
+        // Get first TextLine and SubTextLine
+        TextLine textLine = _textDoc.getLineForCharIndex(getStartCharIndex());
+        SubTextLine subTextLine = (SubTextLine) getLine(0);
+
+        // Iterate over each
+        while (subTextLine != null) {
+
+            // If TextLines don't match, complain
+            if (textLine != subTextLine._textLine)
+                System.out.println("Lines don't match!!!");
+
+            // If not last line, check lengths
+            else if (subTextLine.getNext() != null) {
+
+                if (textLine.length() != subTextLine.length())
+                    System.out.println("Lengths don't match");
+            }
+
+            // If last line...
+            else {
+
+                // If ending doesn't match, complain
+                if (textLine.getStartCharIndex() + subTextLine.length() != getEndCharIndex())
+                    System.out.println("Endings don't match");
+            }
+
+            textLine = textLine.getNext();
+            subTextLine = (SubTextLine) subTextLine.getNext();
         }
     }
 

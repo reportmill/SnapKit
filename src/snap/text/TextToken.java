@@ -16,7 +16,7 @@ public class TextToken implements Cloneable {
     private String  _name;
 
     // The TextLine
-    private TextLine  _textLine;
+    protected TextLine  _textLine;
 
     // The start char index in line
     private int  _startCharIndex;
@@ -238,8 +238,8 @@ public class TextToken implements Cloneable {
     {
         TextToken copy = clone();
         copy._endCharIndex = _startCharIndex + charIndex;
+        copy._endAllCharIndex = copy._endCharIndex;
         copy._width = -1;
-        copy._split = true;
         return copy;
     }
 
@@ -269,7 +269,9 @@ public class TextToken implements Cloneable {
     public TextToken copyForSplittable()
     {
         int splitCharIndex = getSplittableCharIndex();
-        return copyToCharIndex(splitCharIndex);
+        TextToken splitCopy = copyToCharIndex(splitCharIndex);
+        splitCopy._split = true;
+        return splitCopy;
     }
 
     /**

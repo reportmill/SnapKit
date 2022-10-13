@@ -36,7 +36,7 @@ public class TextLine implements CharSequence, Cloneable {
     protected TextToken[]  _tokens;
 
     // Constants
-    private static final TextRun[] EMPTY_RUNS = new TextRun[0];
+    protected static final TextRun[] EMPTY_RUNS = new TextRun[0];
 
     /**
      * Constructor.
@@ -218,7 +218,8 @@ public class TextLine implements CharSequence, Cloneable {
 
         // Calculate
         double width = 0;
-        for (TextRun run : _runs)
+        TextRun[] runs = getRuns();
+        for (TextRun run : runs)
             if (anIndex < run.getEnd())
                 width += run.getWidth(anIndex - run.getStart());
 
@@ -232,7 +233,8 @@ public class TextLine implements CharSequence, Cloneable {
     public TextRun getRunForCharIndex(int anIndex)
     {
         // Iterate over runs and return run containing char index
-        for (TextRun run : _runs)
+        TextRun[] runs = getRuns();
+        for (TextRun run : runs)
             if (anIndex <= run.getEnd())
                 return run;
 
@@ -412,7 +414,8 @@ public class TextLine implements CharSequence, Cloneable {
      */
     public boolean isUnderlined()
     {
-        for (TextRun run : _runs)
+        TextRun[] runs = getRuns();
+        for (TextRun run : runs)
             if (run.isUnderlined() && run.length() > 0)
                 return true;
         return false;
@@ -502,10 +505,12 @@ public class TextLine implements CharSequence, Cloneable {
 
         // Clone StringBuffer, Runs
         clone._sb = new StringBuffer(_sb);
-        clone._runs = _runs.clone();
-        for (int i = 0; i < _runs.length; i++) {
-            TextRun runClone = clone._runs[i] = _runs[i].clone();
-            runClone._textLine = clone;
+        if (_runs != null) {
+            clone._runs = _runs.clone();
+            for (int i = 0; i < _runs.length; i++) {
+                TextRun runClone = clone._runs[i] = _runs[i].clone();
+                runClone._textLine = clone;
+            }
         }
 
         // Return

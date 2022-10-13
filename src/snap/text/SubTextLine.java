@@ -2,79 +2,68 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * This class represents a line of text in a Text.
  */
 public class SubTextLine extends TextLine {
 
-    // The SubText that holds this object
-    private SubText  _subText;
-
     // The real TextLine that this object maps to
-    private TextLine  _textLine;
+    protected TextLine  _textLine;
 
-    // The end char index in SubText
-    private int  _endInSubText;
+    // The start char index in TextLine
+    protected int  _startCharIndexInLine;
+
+    // The length of line
+    protected int  _length;
 
     /**
      * Constructor.
      */
-    public SubTextLine(SubText aSubText, TextLine aTextLine, int startInTextDoc, int endInTextDoc)
+    public SubTextLine(SubText aSubText, TextLine aTextLine, int lineLength)
     {
         super(aSubText);
 
         // Set ivars
-        _subText = aSubText;
         _textLine = aTextLine;
-        _startCharIndex = startInTextDoc - aSubText._startCharIndexInDoc;
-        _endInSubText = endInTextDoc - aSubText._startCharIndexInDoc;
+        _startCharIndexInLine = 0;
+        _length = lineLength;
 
-        // Create RunList and get loop vars for TextLine runs
-        List<TextRun> runsList = new ArrayList<>();
-        int offsetFromTextLineToSubLine = startInTextDoc - _textLine.getStartCharIndex();
-        int runStartInTextLine = offsetFromTextLineToSubLine;
-        TextRun textRun = _textLine.getRunForCharIndex(runStartInTextLine);
-
-        // Get runs
-        while (textRun != null) {
-            int runLength = textRun.getEnd() - runStartInTextLine;
-            TextRun subRun = new TextRun(this);
-            subRun._start = runStartInTextLine - offsetFromTextLineToSubLine;
-            subRun._length = runLength;
-            subRun._style = textRun.getStyle();
-            subRun._index = runsList.size();
-            runsList.add(subRun);
-            runStartInTextLine += runLength;
-            textRun = textRun.getNext();
+        // Create Runs
+        TextRun[] textLineRuns = _textLine.getRuns();
+        TextRun[] subLineRuns = _runs = new TextRun[textLineRuns.length];
+        for (int i = 0; i < textLineRuns.length; i++) {
+            TextRun textLineRun = textLineRuns[i];
+            TextRun subLineRun = subLineRuns[i] = new TextRun(this);
+            subLineRun._start = textLineRun._start;
+            subLineRun._length = textLineRun._length;
+            subLineRun._style = textLineRun._style;
+            subLineRun._index = i;
         }
-
-        // Get Runas as array
-        _runs = runsList.toArray(new TextRun[0]);
-    }
-
-    /**
-     * Converts index from this subLine to textLine.
-     */
-    private final int convertSubLineToTextLine(int charIndexInSubLine)
-    {
-        return _subText._startCharIndexInDoc + _startCharIndex - _textLine._startCharIndex + charIndexInSubLine;
     }
 
     /**
      * Returns the length of this text line.
      */
-    public int length()  { return _endInSubText - _startCharIndex; }
+    public int length()  { return _length; }
+
+    /**
+     * Sets the length.
+     */
+    public void setLength(int aLength)
+    {
+        _length = aLength;
+        _runs[0]._length = aLength;
+        updateText();
+    }
 
     /**
      * Returns the char value at the specified index.
      */
     public char charAt(int anIndex)
     {
-        int textLineIndex = convertSubLineToTextLine(anIndex);
-        return _textLine.charAt(textLineIndex);
+        return _textLine.charAt(_startCharIndexInLine + anIndex);
     }
 
     /**
@@ -82,9 +71,7 @@ public class SubTextLine extends TextLine {
      */
     public CharSequence subSequence(int aStart, int anEnd)
     {
-        int startInTextLine = convertSubLineToTextLine(aStart);
-        int endInTextLine = convertSubLineToTextLine(anEnd);
-        return _textLine.subSequence(startInTextLine, endInTextLine);
+        return _textLine.subSequence(_startCharIndexInLine + aStart, _startCharIndexInLine + anEnd);
     }
 
     /**
@@ -92,8 +79,7 @@ public class SubTextLine extends TextLine {
      */
     public int indexOf(String aStr, int aStart)
     {
-        int textLineIndex = convertSubLineToTextLine(aStart);
-        return _textLine.indexOf(aStr, textLineIndex);
+        return _textLine.indexOf(aStr, _startCharIndexInLine + aStart);
     }
 
     /**
@@ -120,7 +106,43 @@ public class SubTextLine extends TextLine {
     @Override
     protected TextToken[] createTokens()
     {
-        return _textLine.getTokens();
+        // Get normal line tokens - just return if empty
+        TextToken[] tokens = _textLine.getTokens();
+        if (tokens.length == 0)
+            return tokens;
+
+        // Get copy vars
+        TextToken[] subTokens = new TextToken[tokens.length];
+        int lineLength = length();
+        int subTokenCount = 0;
+
+        // Iterate over tokens and copy those within Subline
+        for (TextToken token : tokens) {
+
+            // If loop token start beyond line, stop
+            if (token.getStartCharIndex() > lineLength)
+                break;
+
+            // Copy token
+            token = token.clone();
+            token._textLine = this;
+
+            // If loop token stradles line, do split copy
+            if (token.getEndCharIndex() > lineLength) {
+                int tokenLength = lineLength - token.getStartCharIndex();
+                token = token.copyToCharIndex(tokenLength);
+            }
+
+            // Add to array
+            subTokens[subTokenCount++] = token;
+        }
+
+        // If some tokens didn't make it, trim array
+        if (subTokenCount < tokens.length)
+            subTokens = Arrays.copyOf(subTokens, subTokenCount);
+
+        // Return
+        return subTokens;
     }
 
     /**
@@ -128,6 +150,6 @@ public class SubTextLine extends TextLine {
      */
     public TextLine copyForRange(int aStart, int aEnd)
     {
-        return _textLine.copyForRange(aStart + _startCharIndex, aEnd + _startCharIndex);
+        return _textLine.copyForRange(_startCharIndexInLine + aStart, _startCharIndexInLine + aEnd);
     }
 }
