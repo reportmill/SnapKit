@@ -762,7 +762,7 @@ public class TextArea extends View {
 
         // If SelStart at end of run but not end of line, get next run
         TextLine selLine = selRun.getLine();
-        if (selStart == selLine.getStartCharIndex() + selRun.getEnd() && selStart < selLine.getEndCharIndex())
+        if (selStart == selLine.getStartCharIndex() + selRun.getEndCharIndex() && selStart < selLine.getEndCharIndex())
             selRun = selRun.getNext();
 
         // Return

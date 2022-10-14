@@ -220,8 +220,8 @@ public class TextLine implements CharSequence, Cloneable {
         double width = 0;
         TextRun[] runs = getRuns();
         for (TextRun run : runs)
-            if (anIndex < run.getEnd())
-                width += run.getWidth(anIndex - run.getStart());
+            if (anIndex < run.getEndCharIndex())
+                width += run.getWidth(anIndex - run.getStartCharIndex());
 
         // Return
         return width;
@@ -235,7 +235,7 @@ public class TextLine implements CharSequence, Cloneable {
         // Iterate over runs and return run containing char index
         TextRun[] runs = getRuns();
         for (TextRun run : runs)
-            if (anIndex <= run.getEnd())
+            if (anIndex <= run.getEndCharIndex())
                 return run;
 
         // Complain
@@ -446,13 +446,13 @@ public class TextLine implements CharSequence, Cloneable {
     {
         // Get BaseRun and Length at end of BaseRun
         TextRun baseRun = aRunIndex >= 0 ? getRun(aRunIndex) : null;
-        int length = baseRun != null ? baseRun.getEnd() : 0;
+        int length = baseRun != null ? baseRun.getEndCharIndex() : 0;
 
         // Iterate over runs beyond BaseRun and update Index, Start and Length
         for (int i = aRunIndex + 1, iMax = getRunCount(); i < iMax; i++) {
             TextRun run = getRun(i);
             run._index = i;
-            run._start = length;
+            run._startCharIndex = length;
             length += run.length();
         }
 

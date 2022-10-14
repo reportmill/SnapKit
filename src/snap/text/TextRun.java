@@ -12,10 +12,10 @@ import snap.gfx.Font;
 public class TextRun implements CharSequence, Cloneable {
 
     // The line that contains this run
-    protected TextLine _textLine;
+    protected TextLine  _textLine;
 
     // The start char index of this run in line
-    protected int  _start;
+    protected int  _startCharIndex;
 
     // The char length of this run
     protected int  _length;
@@ -44,44 +44,14 @@ public class TextRun implements CharSequence, Cloneable {
     public TextLine getLine()  { return _textLine; }
 
     /**
-     * Returns the string for this run.
+     * Returns the start char index for this run.
      */
-    public String getString()
-    {
-        CharSequence chars = _textLine.subSequence(_start, _start + _length);
-        return chars.toString();
-    }
+    public int getStartCharIndex()  { return _startCharIndex; }
 
     /**
-     * Returns the length in characters for this run.
+     * Returns the end char index for this run.
      */
-    public int length()  { return _length; }
-
-    /**
-     * CharSequence method returning character at given index.
-     */
-    public char charAt(int anIndex)
-    {
-        return _textLine.charAt(_start + anIndex);
-    }
-
-    /**
-     * CharSequence method return character sequence for range.
-     */
-    public CharSequence subSequence(int aStart, int anEnd)
-    {
-        return _textLine.subSequence(_start + aStart, _start + anEnd);
-    }
-
-    /**
-     * Returns the start character index for this run.
-     */
-    public int getStart()  { return _start; }
-
-    /**
-     * Returns the end character index for this run.
-     */
-    public int getEnd()  { return _start + length(); }
+    public int getEndCharIndex()  { return _startCharIndex + length(); }
 
     /**
      * Returns the run style.
@@ -103,6 +73,36 @@ public class TextRun implements CharSequence, Cloneable {
      * Returns the run index.
      */
     public int getIndex()  { return _index; }
+
+    /**
+     * Returns the length in characters for this run.
+     */
+    public int length()  { return _length; }
+
+    /**
+     * CharSequence method returning character at given index.
+     */
+    public char charAt(int anIndex)
+    {
+        return _textLine.charAt(_startCharIndex + anIndex);
+    }
+
+    /**
+     * CharSequence method return character sequence for range.
+     */
+    public CharSequence subSequence(int aStart, int anEnd)
+    {
+        return _textLine.subSequence(_startCharIndex + aStart, _startCharIndex + anEnd);
+    }
+
+    /**
+     * Returns the string for this run.
+     */
+    public String getString()
+    {
+        CharSequence chars = _textLine.subSequence(_startCharIndex, _startCharIndex + _length);
+        return chars.toString();
+    }
 
     /**
      * Returns the width of run.
@@ -264,6 +264,7 @@ public class TextRun implements CharSequence, Cloneable {
     /**
      * Returns whether this run is equal to the given object.
      */
+    @Override
     public boolean equals(Object anObj)
     {
         // Check identity and get other
@@ -272,7 +273,7 @@ public class TextRun implements CharSequence, Cloneable {
         if (other == null) return false;
 
         // Check Start, Length, Style
-        if (other.getStart() != getStart()) return false;
+        if (other.getStartCharIndex() != getStartCharIndex()) return false;
         if (other.length() != length()) return false;
         if (!other.getStyle().equals(getStyle())) return false;
 
@@ -283,6 +284,7 @@ public class TextRun implements CharSequence, Cloneable {
     /**
      * Standard hashCode implementation.
      */
+    @Override
     public int hashCode()
     {
         return length();
@@ -291,6 +293,7 @@ public class TextRun implements CharSequence, Cloneable {
     /**
      * Returns a basic clone of this object.
      */
+    @Override
     public TextRun clone()
     {
         // Do normal version
@@ -305,10 +308,11 @@ public class TextRun implements CharSequence, Cloneable {
     /**
      * Returns a string representation of this run.
      */
+    @Override
     public String toString()
     {
         String string = getString();
         string = string.replace("\n", "\\n");
-        return getClass().getSimpleName() + "(" + getStart() + "," + getEnd() + "): " + string;
+        return getClass().getSimpleName() + "(" + getStartCharIndex() + "," + getEndCharIndex() + "): " + string;
     }
 }

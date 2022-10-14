@@ -50,7 +50,7 @@ public class RichTextLine extends TextLine {
         }
 
         // If charIndex at run end and next run has same style, return it instead
-        if (charIndex == run.getEnd() && run.getIndex() + 1 < getRunCount()) {
+        if (charIndex == run.getEndCharIndex() && run.getIndex() + 1 < getRunCount()) {
             TextRun nextRun = getRun(run.getIndex() + 1);
             if (aStyle.equals(nextRun.getStyle()))
                 return nextRun;
@@ -58,10 +58,10 @@ public class RichTextLine extends TextLine {
 
         // Get index to insert new run (need to split run if charIndex in middle)
         int newRunIndex = run.getIndex();
-        if (charIndex > run.getStart()) {
+        if (charIndex > run.getStartCharIndex()) {
             newRunIndex++;
-            if (charIndex < run.getEnd())
-                splitRunForCharIndex(run, charIndex - run.getStart());
+            if (charIndex < run.getEndCharIndex())
+                splitRunForCharIndex(run, charIndex - run.getStartCharIndex());
         }
 
         // Create new run for new chars, add and return
@@ -86,11 +86,11 @@ public class RichTextLine extends TextLine {
 
             // Get run at end
             TextRun run = getRunForCharIndex(end);
-            int runStart = run.getStart();
+            int runStart = run.getStartCharIndex();
             int start = Math.max(aStart, runStart);
 
             // If range matches run range, just remove it
-            if (start == runStart && end == run.getEnd() && getRunCount() > 1) {
+            if (start == runStart && end == run.getEndCharIndex() && getRunCount() > 1) {
                 int runIndex = run.getIndex();
                 removeRun(runIndex);
                 _sb.delete(start, end);

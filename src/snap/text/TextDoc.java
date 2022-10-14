@@ -330,7 +330,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
         for (TextLine line : aTextDoc.getLines()) {
             TextRun[] lineRuns = line.getRuns();
             for (TextRun run : lineRuns) {
-                int index = anIndex + line.getStartCharIndex() + run.getStart();
+                int index = anIndex + line.getStartCharIndex() + run.getStartCharIndex();
                 addChars(run.getString(), run.getStyle(), index);
                 setLineStyle(line.getLineStyle(), index, index + run.length());
             }

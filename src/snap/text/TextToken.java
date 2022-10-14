@@ -57,7 +57,7 @@ public class TextToken implements Cloneable {
 
         // Get end char index including white space
         _endAllCharIndex = _endCharIndex;
-        while (_endAllCharIndex < _textRun.getEnd() && Character.isWhitespace(_textLine.charAt(_endAllCharIndex)))
+        while (_endAllCharIndex < _textRun.getEndCharIndex() && Character.isWhitespace(_textLine.charAt(_endAllCharIndex)))
             _endAllCharIndex++;
     }
 
@@ -323,7 +323,7 @@ public class TextToken implements Cloneable {
 
         // Get Run info
         TextRun run = aTextLine.getRun(0);
-        int runEnd = run.getEnd();
+        int runEnd = run.getEndCharIndex();
 
         // Iterate over line chars
         while (tokenStart < lineLength) {
@@ -347,7 +347,7 @@ public class TextToken implements Cloneable {
             // If at RunEnd but not LineEnd, update Run info with next run
             if (tokenStart == runEnd && tokenStart < lineLength) {
                 run = run.getNext();
-                runEnd = run.getEnd();
+                runEnd = run.getEndCharIndex();
             }
         }
 

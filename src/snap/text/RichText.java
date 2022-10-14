@@ -58,23 +58,23 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
             RichTextLine line = (RichTextLine) getLineForCharIndex(textCharIndex);
             int lineStart = line.getStartCharIndex();
             TextRun run = getRunForCharIndex(textCharIndex);
-            if (textCharIndex - lineStart == run.getEnd())
+            if (textCharIndex - lineStart == run.getEndCharIndex())
                 run = run.getNext();
 
             // If run is too large, trim to size
-            if (textCharIndex - lineStart > run.getStart())
-                run = line.splitRunForCharIndex(run, textCharIndex - lineStart - run.getStart());
-            if (anEnd - lineStart < run.getEnd())
-                line.splitRunForCharIndex(run, anEnd - lineStart - run.getStart());
+            if (textCharIndex - lineStart > run.getStartCharIndex())
+                run = line.splitRunForCharIndex(run, textCharIndex - lineStart - run.getStartCharIndex());
+            if (anEnd - lineStart < run.getEndCharIndex())
+                line.splitRunForCharIndex(run, anEnd - lineStart - run.getStartCharIndex());
 
             // Set style
             TextStyle oldStyle = run.getStyle();
             run.setStyle(aStyle);
-            textCharIndex = run.getEnd() + lineStart;
+            textCharIndex = run.getEndCharIndex() + lineStart;
 
             // Fire prop change
             if (isPropChangeEnabled()) {
-                int runStart = run.getStart() + lineStart, runEnd = run.getEnd() + lineStart;
+                int runStart = run.getStartCharIndex() + lineStart, runEnd = run.getEndCharIndex() + lineStart;
                 PropChange pc = new TextDocUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
                 firePropChange(pc);
             }
@@ -99,9 +99,9 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
             // Get run for start
             int lineIndex = aStart - lineStart;
             TextRun run = line.getRunForCharIndex(lineIndex);
-            if (lineIndex == run.getEnd())
+            if (lineIndex == run.getEndCharIndex())
                 run = run.getNext();
-            int runEnd = run.getEnd();
+            int runEnd = run.getEndCharIndex();
 
             // Get run style and modify for given style key/value
             TextStyle style = run.getStyle().copyFor(aKey, aValue);

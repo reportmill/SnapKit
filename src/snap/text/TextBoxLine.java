@@ -569,7 +569,7 @@ public class TextBoxLine implements CharSequence {
             runStyle = runStyle.copyFor(runStyle.getFont().scaleFont(fontScale));
 
         // Get end of run
-        int end = Math.min(length(), textRun.getEnd() - getTextLineStart());
+        int end = Math.min(length(), textRun.getEndCharIndex() - getTextLineStart());
 
         // If Justify, reset end to start of next token
         if (getLineStyle().isJustify()) {
