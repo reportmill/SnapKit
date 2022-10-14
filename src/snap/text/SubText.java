@@ -332,7 +332,7 @@ public class SubText extends TextDoc {
         }
 
         // Trim EndCharIndexInDoc by deleted chars
-        int charIndexInSubText = charIndex - getStartCharIndex();
+        int charIndexInSub = charIndex - getStartCharIndex();
         _endCharIndexInDoc -= charsLength;
 
         // Get TextLine
@@ -344,8 +344,6 @@ public class SubText extends TextDoc {
         // Get SubTextLine
         int endCharIndexInSub = endCharIndex - getStartCharIndex();
         SubTextLine subTextLine = (SubTextLine) getLineForCharIndex(endCharIndexInSub);
-        if (endCharIndexInSub == subTextLine.getStartCharIndex() && endCharIndexInSub > 0)
-            subTextLine = (SubTextLine) subTextLine.getPrevious();
 
         // Remove or short subTextLine until synched
         while (true) {
@@ -378,7 +376,7 @@ public class SubText extends TextDoc {
 
         // Create/fire CharsChange for SubText
         TextDocUtils.CharsChange subCharsChange = new TextDocUtils.CharsChange(this,
-                removeChars, null, charIndexInSubText);
+                removeChars, null, charIndexInSub);
         firePropChange(subCharsChange);
         checkSynch();
     }
