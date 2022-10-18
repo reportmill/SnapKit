@@ -3,11 +3,12 @@
  */
 package snap.gfx3d;
 import snap.gfx.*;
+import snap.props.PropObject;
 
 /**
  * This class represents a 3D shape to be rendered in a G3DView.
  */
-public abstract class Shape3D {
+public abstract class Shape3D extends PropObject {
 
     // The parent shape that holds this shape
     private ParentShape _parent;

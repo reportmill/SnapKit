@@ -3,6 +3,7 @@
  */
 package snap.gfx3d;
 import snap.geom.Shape;
+import snap.gfx.Image;
 import snap.util.MathUtils;
 
 /**
@@ -34,6 +35,13 @@ public abstract class FacetShape extends Shape3D {
     {
         _texture = aTexture;
         _triangleArray = null;
+
+        // If texture not loaded, have it do repaint when loaded
+        if (aTexture != null) {
+            Image image = aTexture.getImage();
+            if (!image.isLoaded())
+                image.addLoadListener(() -> { if(getParent() != null) getParent().repaintShape(); });
+        }
     }
 
     /**

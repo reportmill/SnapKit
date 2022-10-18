@@ -3,6 +3,8 @@
  */
 package snap.gfx3d;
 import snap.gfx.Color;
+import snap.gfx.Image;
+
 import java.util.Arrays;
 
 /**
@@ -289,6 +291,16 @@ public class VertexArray implements Cloneable {
     public boolean isTexCoordArraySet()
     {
         return _texCoordArrayLen > 0 && getTexture() != null;
+    }
+
+    /**
+     * Returns whether texture is set and loaded and text coords are set.
+     */
+    public boolean isTextureSetAndReady()
+    {
+        Texture texture = getTexture(); if (texture == null) return false;
+        Image image = texture.getImage(); if (!image.isLoaded()) return false;
+        return isTexCoordArraySet();
     }
 
     /**

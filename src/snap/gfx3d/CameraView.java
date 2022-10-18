@@ -34,9 +34,13 @@ public class CameraView extends ParentView {
      */
     public CameraView()
     {
+        // Create/configure scene
         _scene = new Scene3D();
+        _scene.addPropChangeListener(pc -> sceneDidPropChange(pc));
+
+        // Create/configure camera
         _camera = _scene.getCamera();
-        _camera.addPropChangeListener(pce -> cameraChanged(pce));
+        _camera.addPropChangeListener(pce -> cameraDidPropChange(pce));
 
         // Enable events
         enableEvents(MousePress, MouseDrag, MouseRelease, Scroll);
@@ -186,9 +190,9 @@ public class CameraView extends ParentView {
     }
 
     /**
-     * Called when scene changes.
+     * Called when camera does prop change.
      */
-    protected void cameraChanged(PropChange aPC)
+    protected void cameraDidPropChange(PropChange aPC)
     {
         // Forward on basic Camera prop changes
         String propName = aPC.getPropName();
@@ -202,6 +206,23 @@ public class CameraView extends ParentView {
 
         // Repaint
         repaint();
+    }
+
+    /**
+     * Called when Scene does prop change.
+     */
+    protected void sceneDidPropChange(PropChange aPC)
+    {
+        String propName = aPC.getPropName();
+
+        // Handle NeedsRepaint
+        if (propName == ParentShape.NeedsRepaint_Prop) {
+            Scene3D scene = getScene();
+            if (scene.isNeedsRepaint()) {
+                repaint();
+                scene.setNeedsRepaint(false);
+            }
+        }
     }
 
     /**

@@ -15,6 +15,12 @@ public class ParentShape extends Shape3D {
     // Whether parent shape needs to rebuild children
     private boolean  _needsRebuildShape;
 
+    // Whether parent shape needs to be repainted
+    private boolean  _needsRepaint;
+
+    // Constants for properties
+    public static final String NeedsRepaint_Prop = "NeedsRepaint";
+
     // Constants
     private static final Shape3D[] EMPTY_SHAPE_ARRAY = new Shape3D[0];
 
@@ -157,6 +163,31 @@ public class ParentShape extends Shape3D {
         if (!_needsRebuildShape) return;
         buildShapeImpl();
         _needsRebuildShape = false;
+    }
+
+    /**
+     * Calls to register for repaint.
+     */
+    public void repaintShape()
+    {
+        ParentShape parent = getParent();
+        if (parent != null)
+            parent.repaintShape();
+        else setNeedsRepaint(true);
+    }
+
+    /**
+     * Returns whether needs repaint.
+     */
+    public boolean isNeedsRepaint()  { return _needsRepaint; }
+
+    /**
+     * Sets whether needs repaint.
+     */
+    protected void setNeedsRepaint(boolean aValue)
+    {
+        if (aValue == isNeedsRepaint()) return;
+        firePropChange(NeedsRepaint_Prop, _needsRepaint, _needsRepaint = aValue);
     }
 
     /**
