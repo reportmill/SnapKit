@@ -167,40 +167,13 @@ public class TextArea extends View {
         if (aTextDoc != null)
             aTextDoc.addPropChangeListener(_textDocPropLsnr);
 
-        // Reset selection
-        if (getSelStart() != 0 || !isSelEmpty())
-            setSel(0);
+        // Reset selection (to line end if single-line, otherwise text start)
+        int selIndex = getLineCount() == 1 && length() < 40 ? length() : 0;
+        setSel(selIndex);
 
         // Relayout parent, repaint
         relayoutParent();
         repaint();
-    }
-
-    /**
-     * Returns the source of current content (URL, File, String path, etc.)
-     */
-    public Object getSource()
-    {
-        TextDoc textDoc = getTextDoc();
-        return textDoc.getSource();
-    }
-
-    /**
-     * Set the source for TextComponent text.
-     */
-    public void setSource(Object aSource)
-    {
-        // Get TextDoc for Source
-        TextDoc textDoc = TextDoc.newFromSource(aSource);
-
-        // Set source and notify textDidChange
-        TextBox textBox = getTextBox();
-        textBox.setTextDoc(textDoc);
-        textDidChange();
-
-        // Reset selection (to line end if single-line, otherwise text start)
-        int selIndex = textBox.getLineCount() == 1 && length() < 40 ? length() : 0;
-        setSel(selIndex);
     }
 
     /**
@@ -291,15 +264,6 @@ public class TextArea extends View {
     {
         TextBox textBox = getTextBox();
         return textBox.isRichText();
-    }
-
-    /**
-     * Sets whether text supports multiple styles.
-     */
-    public void setRichText(boolean aValue)
-    {
-        TextBox textBox = getTextBox();
-        textBox.setRichText(aValue);
     }
 
     /**
@@ -1900,16 +1864,20 @@ public class TextArea extends View {
         if (richTextXML == null && anElement.get("string") != null)
             richTextXML = anElement;
         if (richTextXML != null)
-            setRichText(true);
+            getTextBox().setRichText(true);
 
         // Unarchive Rich, Editable, WrapLines
-        if (anElement.hasAttribute("Rich")) setRichText(anElement.getAttributeBoolValue("Rich"));
-        if (anElement.hasAttribute("Editable")) setEditable(anElement.getAttributeBoolValue("Editable"));
-        if (anElement.hasAttribute(WrapLines_Prop)) setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
-        if (anElement.hasAttribute("WrapText")) setWrapLines(anElement.getAttributeBoolValue("WrapText"));
+        if (anElement.hasAttribute("Rich"))
+            getTextBox().setRichText(anElement.getAttributeBoolValue("Rich"));
+        if (anElement.hasAttribute("Editable"))
+            setEditable(anElement.getAttributeBoolValue("Editable"));
+        if (anElement.hasAttribute(WrapLines_Prop))
+            setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
+        if (anElement.hasAttribute("WrapText"))
+            setWrapLines(anElement.getAttributeBoolValue("WrapText"));
 
         // If Rich, unarchive rich text
-        if (isRichText() && richTextXML != null) {
+        if (getTextDoc() instanceof RichText) {
             RichText richText = (RichText) getTextDoc();
             getUndoer().disable();
             richText.fromXML(anArchiver, richTextXML);

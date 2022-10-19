@@ -3,6 +3,7 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.parse.CodeTokenizer;
 import snap.parse.ParseToken;
+import snap.text.RichText;
 import snap.text.TextDoc;
 import snap.text.TextStyle;
 import snap.view.TextArea;
@@ -24,17 +25,16 @@ public class CodeView extends TextArea {
     public CodeView()
     {
         setFill(Color.WHITE);
-        setRichText(true);
-        setDefaultStyle(new TextStyle(Font.Arial14));
         setEditable(true);
+
+        RichText richText = new RichText();
+        richText.setDefaultStyle(new TextStyle(Font.Arial14));
+        setTextDoc(richText);
     }
 
-    public void setSource(Object anObj)
-    {
-        super.setSource(anObj);
-        syntaxColor();
-    }
-
+    /**
+     * Override to do Syntax color.
+     */
     public void setText(String aStr)
     {
         super.setText(aStr);

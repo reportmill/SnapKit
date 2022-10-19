@@ -110,11 +110,6 @@ public class TextView extends ParentView {
     public boolean isRichText()  { return _textArea.isRichText(); }
 
     /**
-     * Sets whether text supports multiple styles.
-     */
-    public void setRichText(boolean aValue)  { _textArea.setRichText(aValue); }
-
-    /**
      * Returns the default style for text.
      */
     public TextStyle getDefaultStyle()  { return _textArea.getDefaultStyle(); }
@@ -426,12 +421,12 @@ public class TextView extends ParentView {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive Rich, Editable, WrapLines
-        if (isRichText()) e.add("Rich", true);
+        if (getTextArea().isRichText()) e.add("Rich", true);
         if (!isEditable()) e.add("Editable", false);
         if (isWrapLines()) e.add(WrapLines_Prop, true);
 
         // If RichText, archive rich text
-        if (isRichText()) {
+        if (getTextArea().isRichText()) {
             e.removeElement("font");
             XMLElement rtxml = anArchiver.toXML(getTextDoc()); rtxml.setName("RichText");
             if (rtxml.size()>0) e.add(rtxml); //for (int i=0, iMax=rtxml.size(); i<iMax; i++) e.add(rtxml.get(i));
@@ -460,11 +455,11 @@ public class TextView extends ParentView {
         if (richTextXML == null && anElement.get("string") != null)
             richTextXML = anElement;
         if (richTextXML != null)
-            setRichText(true);
+            getTextBox().setRichText(true);
 
         // Unarchive Rich, Editable, WrapLines
         if (anElement.hasAttribute("Rich"))
-            setRichText(anElement.getAttributeBoolValue("Rich"));
+            getTextBox().setRichText(anElement.getAttributeBoolValue("Rich"));
         if (anElement.hasAttribute("Editable"))
             setEditable(anElement.getAttributeBoolValue("Editable"));
         if (anElement.hasAttribute(WrapLines_Prop))
@@ -473,7 +468,7 @@ public class TextView extends ParentView {
             setWrapLines(anElement.getAttributeBoolValue("WrapText"));
 
         // If Rich, unarchive rich text
-        if (isRichText() && richTextXML != null) {
+        if (getTextDoc() instanceof RichText) {
             RichText richText = (RichText) getTextDoc();
             getUndoer().disable();
             richText.fromXML(anArchiver, richTextXML);

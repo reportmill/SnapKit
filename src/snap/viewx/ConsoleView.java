@@ -4,6 +4,7 @@
 package snap.viewx;
 import java.util.*;
 import snap.gfx.Color;
+import snap.text.RichText;
 import snap.text.TextStyle;
 import snap.util.*;
 import snap.view.*;
@@ -32,6 +33,10 @@ public class ConsoleView extends TextArea {
     {
         setFill(Color.WHITE);
         setEditable(true);
+
+        // Set RichText by default
+        RichText richText = new RichText();
+        setTextDoc(richText);
     }
 
     /**
