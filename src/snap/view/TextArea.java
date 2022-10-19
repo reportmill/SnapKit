@@ -1839,7 +1839,7 @@ public class TextArea extends View {
             XMLElement richTextXML = anArchiver.toXML(getTextDoc());
             richTextXML.setName("RichText");
             if (richTextXML.size() > 0)
-                e.add(richTextXML); //for (int i=0, iMax=rtxml.size(); i<iMax; i++) e.add(rtxml.get(i));
+                e.add(richTextXML);
         }
 
         // Otherwise, archive text string
@@ -1859,13 +1859,6 @@ public class TextArea extends View {
         // Unarchive basic view attributes
         super.fromXML(anArchiver, anElement);
 
-        // Hack for archived rich stuff
-        XMLElement richTextXML = anElement.get("RichText");
-        if (richTextXML == null && anElement.get("string") != null)
-            richTextXML = anElement;
-        if (richTextXML != null)
-            getTextBox().setRichText(true);
-
         // Unarchive Rich, Editable, WrapLines
         if (anElement.hasAttribute("Rich"))
             getTextBox().setRichText(anElement.getAttributeBoolValue("Rich"));
@@ -1876,8 +1869,10 @@ public class TextArea extends View {
         if (anElement.hasAttribute("WrapText"))
             setWrapLines(anElement.getAttributeBoolValue("WrapText"));
 
-        // If Rich, unarchive rich text
-        if (getTextDoc() instanceof RichText) {
+        // If RichText, unarchive rich text
+        XMLElement richTextXML = anElement.get("RichText");
+        if (richTextXML != null) {
+            getTextBox().setRichText(true);
             RichText richText = (RichText) getTextDoc();
             getUndoer().disable();
             richText.fromXML(anArchiver, richTextXML);

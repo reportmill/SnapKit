@@ -428,8 +428,10 @@ public class TextView extends ParentView {
         // If RichText, archive rich text
         if (getTextArea().isRichText()) {
             e.removeElement("font");
-            XMLElement rtxml = anArchiver.toXML(getTextDoc()); rtxml.setName("RichText");
-            if (rtxml.size()>0) e.add(rtxml); //for (int i=0, iMax=rtxml.size(); i<iMax; i++) e.add(rtxml.get(i));
+            XMLElement richTextXML = anArchiver.toXML(getTextDoc());
+            richTextXML.setName("RichText");
+            if (richTextXML.size() > 0)
+                e.add(richTextXML);
         }
 
         // Otherwise, archive text string
@@ -450,13 +452,6 @@ public class TextView extends ParentView {
         // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
 
-        // Hack for archived rich stuff
-        XMLElement richTextXML = anElement.get("RichText");
-        if (richTextXML == null && anElement.get("string") != null)
-            richTextXML = anElement;
-        if (richTextXML != null)
-            getTextBox().setRichText(true);
-
         // Unarchive Rich, Editable, WrapLines
         if (anElement.hasAttribute("Rich"))
             getTextBox().setRichText(anElement.getAttributeBoolValue("Rich"));
@@ -467,8 +462,9 @@ public class TextView extends ParentView {
         if (anElement.hasAttribute("WrapText"))
             setWrapLines(anElement.getAttributeBoolValue("WrapText"));
 
-        // If Rich, unarchive rich text
-        if (getTextDoc() instanceof RichText) {
+        // If RichText, unarchive rich text
+        XMLElement richTextXML = anElement.get("RichText");
+        if (richTextXML != null) {
             RichText richText = (RichText) getTextDoc();
             getUndoer().disable();
             richText.fromXML(anArchiver, richTextXML);

@@ -838,7 +838,7 @@ public class TextBox {
         if (isWrapLines()) {
             while (true) {
                 TextBoxLine nextLine = endLine.getNext();
-                if (endLine != null && endLine.getTextLine() == endLine.getTextLine())
+                if (nextLine != null && endLine.getTextLine() == nextLine.getTextLine())
                     endLine = nextLine;
                 else break;
             }
