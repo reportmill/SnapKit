@@ -84,7 +84,7 @@ public class TextBoxRun {
     public double getX()
     {
         if (_x >= 0) return _x;
-        return _x = _line.getXForChar(_start);
+        return _x = _line.getXForCharIndex(_start);
     }
 
     /**
@@ -93,7 +93,7 @@ public class TextBoxRun {
     public double getWidth()
     {
         if (_width >= 0) return _width;
-        return _width = _line.getXForChar(_end) - getX();
+        return _width = _line.getXForCharIndex(_end) - getX();
     }
 
     /**

@@ -172,11 +172,11 @@ public class TextEditor extends TextArea {
 
                 // If starting line, adjust x1 for starting character
                 if (i == startLineIndex)
-                    lineX = textBoxLine.getXForChar(wordStart - textBoxLine.getStartCharIndex() - textBox.getStartCharIndex());
+                    lineX = textBoxLine.getXForCharIndex(wordStart - textBoxLine.getStartCharIndex() - textBox.getStartCharIndex());
 
                 // If ending line, adjust x2 for ending character
                 if (i == endLineIndex)
-                    lineMaxX = textBoxLine.getXForChar(wordEnd - textBoxLine.getStartCharIndex() - textBox.getStartCharIndex());
+                    lineMaxX = textBoxLine.getXForCharIndex(wordEnd - textBoxLine.getStartCharIndex() - textBox.getStartCharIndex());
 
                 // Append rect for line to path
                 spellingPath.moveTo(lineX, lineBaseY);

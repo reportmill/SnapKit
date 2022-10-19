@@ -889,7 +889,7 @@ public class TextBox {
     public TextBoxToken getTokenForCharIndex(int anIndex)
     {
         TextBoxLine line = getLineForCharIndex(anIndex);
-        return line.getTokenAt(anIndex - line.getStartCharIndex());
+        return line.getTokenForCharIndex(anIndex - line.getStartCharIndex());
     }
 
     /**
@@ -990,9 +990,9 @@ public class TextBox {
         // Get StartLine, EndLine and start/end points
         TextBoxLine startLine = getLineForCharIndex(aStartCharIndex);
         TextBoxLine endLine = aStartCharIndex == aEndCharIndex ? startLine : getLineForCharIndex(aEndCharIndex);
-        double startX = startLine.getXForChar(aStartCharIndex - startLine.getStartCharIndex());
+        double startX = startLine.getXForCharIndex(aStartCharIndex - startLine.getStartCharIndex());
         double startY = startLine.getBaseline();
-        double endX = endLine.getXForChar(aEndCharIndex - endLine.getStartCharIndex());
+        double endX = endLine.getXForCharIndex(aEndCharIndex - endLine.getStartCharIndex());
         double endY = endLine.getBaseline();
         startX = Math.min(startX, getMaxX());
         endX = Math.min(endX, getMaxX());

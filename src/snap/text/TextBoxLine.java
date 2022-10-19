@@ -226,7 +226,7 @@ public class TextBoxLine implements CharSequence {
         while (len > 0 && Character.isWhitespace(charAt(len - 1))) len--;
         if (len == length())
             return getWidth();
-        return getXForChar(len) - getX();
+        return getXForCharIndex(len) - getX();
     }
 
     /**
@@ -388,7 +388,7 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the token at character index.
      */
-    public TextBoxToken getTokenAt(int anIndex)
+    public TextBoxToken getTokenForCharIndex(int anIndex)
     {
         int tokenCount = getTokenCount();
         if (tokenCount == 0)
@@ -464,14 +464,14 @@ public class TextBoxLine implements CharSequence {
     /**
      * Returns the X coord for given char index.
      */
-    public double getXForChar(int anIndex)
+    public double getXForCharIndex(int anIndex)
     {
         // If at end, just return MaxX
         if (anIndex == length())
             return getMaxXAll();
 
         // Get token for char index and token style
-        TextBoxToken textBoxToken = getTokenAt(anIndex);
+        TextBoxToken textBoxToken = getTokenForCharIndex(anIndex);
         if (textBoxToken != null && anIndex < textBoxToken.getStartCharIndex())
             textBoxToken = null;
         TextStyle textStyle = textBoxToken != null ? textBoxToken.getTextStyle() : getStartStyle();
@@ -573,7 +573,7 @@ public class TextBoxLine implements CharSequence {
 
         // If Justify, reset end to start of next token
         if (getLineStyle().isJustify()) {
-            TextBoxToken textBoxToken = getTokenAt(aStart);
+            TextBoxToken textBoxToken = getTokenForCharIndex(aStart);
             int tokenIndex = textBoxToken != null ? getTokens().indexOf(textBoxToken) : -1;
             TextBoxToken nextToken = tokenIndex >= 0 && tokenIndex + 1 < getTokenCount() ? getToken(tokenIndex + 1) : null;
             if (nextToken != null)
