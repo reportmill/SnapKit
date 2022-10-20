@@ -36,7 +36,7 @@ public interface ParseToken {
     /**
      * Returns the start char index of this token in line.
      */
-    int getLineStartCharIndex();
+    int getStartCharIndexInLine();
 
     /**
      * Returns the column index.
@@ -44,7 +44,7 @@ public interface ParseToken {
     default int getColumnIndex()
     {
         int textStartCharIndex = getStartCharIndex();
-        int lineStartCharIndex = getLineStartCharIndex();
+        int lineStartCharIndex = getStartCharIndexInLine();
         return textStartCharIndex - lineStartCharIndex;
     }
 
@@ -63,8 +63,8 @@ public interface ParseToken {
      */
     class BasicToken implements ParseToken {
 
-        // The tokenizer that provided this token
-        protected Tokenizer  _tokenizer;
+        // The text that provided this token
+        protected CharSequence  _text;
 
         // The name this token matches
         protected String  _name;
@@ -85,7 +85,7 @@ public interface ParseToken {
         protected int  _lineStartCharIndex;
 
         // The special token that preceded this token, if available
-        protected ParseToken _specialToken;
+        protected ParseToken  _specialToken;
 
         // The string
         protected String  _string;
@@ -114,7 +114,7 @@ public interface ParseToken {
         public int getLineIndex()  { return _lineIndex; }
 
         /** Returns the line start. */
-        public int getLineStartCharIndex()  { return _lineStartCharIndex; }
+        public int getStartCharIndexInLine()  { return _lineStartCharIndex; }
 
         /** Returns the special token. */
         public ParseToken getSpecialToken()  { return _specialToken; }
@@ -124,7 +124,7 @@ public interface ParseToken {
         {
             if (_string != null) return _string;
 
-            CharSequence chars = _tokenizer.getInput(_startCharIndex, _endCharIndex);
+            CharSequence chars = _text.subSequence(_startCharIndex, _endCharIndex);
             String string = chars.toString();
             return _string = string;
         }
