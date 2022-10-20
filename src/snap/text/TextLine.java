@@ -356,25 +356,106 @@ public class TextLine implements CharSequence, Cloneable {
     }
 
     /**
-     * Returns the token at given char index.
+     * Returns the token at or before given char index.
      */
     public TextToken getTokenForCharIndex(int charIndex)
+    {
+        // Check bounds
+        if (charIndex < 0 || charIndex > length())
+            throw new IndexOutOfBoundsException("TextLine.getTokenForCharIndex: Index " + charIndex + " beyond " + length());
+
+        // Get tokens
+        TextToken[] tokens = getTokens();
+
+        // Iterate over tokens (backwards) and return first token that starts at or before char index
+        for (int i = tokens.length - 1; i >= 0; i--) {
+            TextToken token = tokens[i];
+            if (charIndex >= token.getStartCharIndex())
+                return token;
+        }
+
+        // Return null since charIndex is before first token
+        return null;
+    }
+
+    /**
+     * Returns the X coord for given char index.
+     */
+    public double getXForCharIndex(int anIndex)
+    {
+        // Get token for char index and token style
+        TextToken textToken = getTokenForCharIndex(anIndex);
+        TextStyle textStyle = textToken != null ? textToken.getTextStyle() : getRun(0).getStyle();
+        double charSpacing = textStyle.getCharSpacing();
+
+        // Init charX to token start X
+        int startCharIndex = textToken != null ? textToken.getStartCharIndex() : 0;
+        double charX = textToken != null ? textToken.getX() : 0;
+
+        // Iterate over subsequent chars after token start and add advance
+        for (int i = startCharIndex; i < anIndex; i++) {
+            char loopChar = charAt(i);
+            if (loopChar == '\t')
+                charX = getXForTabAtIndexAndX(i, charX);
+            else charX += textStyle.getCharAdvance(loopChar) + charSpacing;
+        }
+
+        // Return
+        return charX;
+    }
+
+    /**
+     * Returns the token at index.
+     */
+    public TextToken getTokenForX(double anX)
     {
         // Get tokens
         TextToken[] tokens = getTokens();
 
-        // Iterate over tokens and return first one in range
-        for (TextToken token : tokens) {
-            if (charIndex < token.getEndAllCharIndex())
+        // Iterate over tokens (backwards) and return first token that starts at or before given X
+        for (int i = tokens.length - 1; i >= 0; i--) {
+            TextToken token = tokens[i];
+            if (anX >= token.getX())
                 return token;
         }
 
-        // If at end, return last token
-        if (charIndex <= length())
-            return getLastToken();
+        // Return null since given X is before first token
+        return null;
+    }
 
-        // Complain
-        throw new IndexOutOfBoundsException("TextLine.getTokenForCharIndex: Index " + charIndex + " beyond " + length());
+    /**
+     * Returns the character index for the given x/y point.
+     */
+    public int getCharIndexForX(double anX)
+    {
+        // Get token for x coord
+        TextToken token = getTokenForX(anX);
+        int charIndex = token != null ? token.getStartCharIndex() : 0;
+        TextStyle textStyle = token != null ? token.getTextStyle() : getRun(0).getStyle();
+        double charSpacing = textStyle.getCharSpacing();
+
+        // Get char start X and line length
+        double charX = token != null ? token.getX() : 0;
+        int lineLength = length();
+
+        // Iterate over chars and return first char that contains given X
+        while (charIndex < lineLength) {
+            char loopChar = charAt(charIndex);
+            double charW = textStyle.getCharAdvance(loopChar) + charSpacing;
+            if (loopChar == '\t')
+                charW = getXForTabAtIndexAndX(charIndex, charX) - charX;
+            if (charX + charW / 2 > anX)
+                return charIndex;
+            charIndex++;
+            charX += charW;
+        }
+
+        // If at end of line with newline, back off 1
+        if (isLastCharNewline())
+            return lineLength - 1;
+
+        // Return
+        return lineLength;
     }
 
     /**

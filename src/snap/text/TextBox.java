@@ -727,13 +727,15 @@ public class TextBox {
         TextToken textToken = aTextLine.getTokenForCharIndex(startCharIndex);
         if (textToken != null) {
             if (startCharIndex >= textToken.getEndCharIndex())
-                textToken = null;
+                textToken = textToken.getNext();
             else if (startCharIndex > textToken.getStartCharIndex())
                 textToken = textToken.copyFromCharIndex(startCharIndex - textToken.getStartCharIndex());
         }
+        else if (aTextLine.getTokens().length > 0)
+            textToken = aTextLine.getTokens()[0];
 
         // Get TextToken info
-        double textTokensX = textToken != null ? textToken.getX() * fontScale : 0;
+        double startCharX = aTextLine.getXForCharIndex(startCharIndex) * fontScale;
         TextStyle textTokenStyle = textToken != null ? textToken.getTextStyle() : aTextLine.getRunLast().getStyle();
         if (fontScale != 1)
             textTokenStyle = textTokenStyle.copyFor(textTokenStyle.getFont().scaleFont(fontScale));
@@ -762,7 +764,7 @@ public class TextBox {
         while (textToken != null) {
 
             // Handle line wrapping
-            double tokenXInBox = textBoxX + textToken.getX() * fontScale - textTokensX;
+            double tokenXInBox = textBoxX + textToken.getX() * fontScale - startCharX;
             if (wrap) {
 
                 // If token hits right side, either split or stop
