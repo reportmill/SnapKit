@@ -22,14 +22,11 @@ public class ParseRule {
     // Rule pattern - if simple regex
     protected String  _pattern;
 
-    // Whether the pattern is literal
-    protected boolean  _literal;
-
     // The look ahead count (implies this rule is really just a look ahead
     protected int  _lookAhead;
 
     // The handler for parse rule
-    private ParseHandler  _handler;
+    private ParseHandler<?>  _handler;
 
     // The named rules
     private Map<String, ParseRule>  _namedRules;
@@ -136,21 +133,6 @@ public class ParseRule {
     {
         _pattern = anPattern.intern();
         _op = Op.Pattern;
-        _literal = _pattern.length() < 3 || _pattern.indexOf('[') < 0;
-        return this;
-    }
-
-    /**
-     * Returns whether pattern is literal.
-     */
-    public boolean isLiteral()  { return _literal; }
-
-    /**
-     * Sets whether pattern is literal.
-     */
-    public ParseRule setLiteral(boolean aFlag)
-    {
-        _literal = aFlag;
         return this;
     }
 
@@ -173,12 +155,12 @@ public class ParseRule {
     /**
      * Returns the handler for this rule.
      */
-    public ParseHandler getHandler()  { return _handler; }
+    public ParseHandler<?> getHandler()  { return _handler; }
 
     /**
      * Sets the handler for this rule.
      */
-    public ParseRule setHandler(ParseHandler aHandler)
+    public ParseRule setHandler(ParseHandler<?> aHandler)
     {
         _handler = aHandler;
         return this;

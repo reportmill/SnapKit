@@ -138,7 +138,6 @@ public class ParseRuleParser extends Parser {
                 _part._child0 = rule._child0;
                 _part._child1 = rule._child1;
                 _part._pattern = rule._pattern;
-                _part._literal = rule._literal;
                 _part._lookAhead = rule._lookAhead;
             }
         }

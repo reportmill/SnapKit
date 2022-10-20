@@ -98,14 +98,6 @@ public class Regex {
     public boolean isLiteral()  { return _literal; }
 
     /**
-     * Sets whether pattern is literal.
-     */
-    public void setLiteral(boolean aFlag)
-    {
-        _literal = aFlag;
-    }
-
-    /**
      * Returns the compiled pattern.
      */
     public Pattern getPatternCompiled()
@@ -113,9 +105,13 @@ public class Regex {
         // If already set, just return
         if (_patternCompiled != null) return _patternCompiled;
 
-        // Get, set, return
-        try { _patternCompiled = Pattern.compile(getPattern(), getPatternCompileFlags()); }
+        // Get, set
+        String pattern = getPattern();
+        int compileFlags = getPatternCompileFlags();
+        try { _patternCompiled = Pattern.compile(pattern, compileFlags); }
         catch (PatternSyntaxException e) { throw e; }
+
+        // Return
         return _patternCompiled;
     }
 
@@ -128,17 +124,16 @@ public class Regex {
     }
 
     /**
-     * Returns the shared matcher (initialized to the given char sequence if not yet created).
+     * Returns the shared matcher.
      */
-    public Matcher getMatcher(CharSequence anInput)
+    public Matcher getMatcher()
     {
         // If already set, just return
         if (_matcher != null) return _matcher;
 
         // Get, set, return
         Pattern pattern = getPatternCompiled();
-        _matcher = pattern.matcher(anInput);
-        return _matcher;
+        return _matcher = pattern.matcher("");
     }
 
     /**

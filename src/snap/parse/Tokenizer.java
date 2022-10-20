@@ -65,7 +65,7 @@ public class Tokenizer {
 
         // Reset matchers
         for (Regex regex : _regexList)
-            regex.getMatcher(_input).reset(_input);
+            regex.getMatcher().reset(_input);
     }
 
     /**
@@ -169,19 +169,18 @@ public class Tokenizer {
     /**
      * Adds a pattern.
      */
-    public Regex addPattern(String aName, String aPattern)
+    public void addPattern(String aName, String aPattern)
     {
         // Get unique pattern string - if already in list, just return
         String pattern = aPattern.intern();
         for (Regex regex : _regexList)
             if (regex.getPattern() == pattern)
-                return regex;
+                return;
 
         // Create and add new regex
         Regex regex = new Regex(aName, pattern);
         _regexList.add(regex);
         _regexes = null;
-        return regex;
     }
 
     /**
@@ -198,10 +197,8 @@ public class Tokenizer {
     private void addPatternsForRule(ParseRule aRule, List<ParseRule> theRules)
     {
         theRules.add(aRule);
-        if (aRule.getPattern() != null) {
-            Regex regex = addPattern(aRule.getName(), aRule.getPattern());
-            regex.setLiteral(aRule.isLiteral());
-        }
+        if (aRule.getPattern() != null)
+            addPattern(aRule.getName(), aRule.getPattern());
 
         ParseRule r0 = aRule.getChild0();
         if (r0 != null && !ListUtils.containsId(theRules, r0))
@@ -262,7 +259,7 @@ public class Tokenizer {
         for (Regex regex : regexes) {
 
             // Get matcher
-            Matcher matcher = regex.getMatcher(_input);
+            Matcher matcher = regex.getMatcher();
             matcher.region(_charIndex, _input.length());
 
             // Find pattern

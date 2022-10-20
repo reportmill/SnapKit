@@ -6,8 +6,11 @@ import snap.util.StringUtils;
  */
 public class CodeTokenizer extends Tokenizer {
 
-    // Whether to support standard Java style single line comments and multiple line comments
-    private boolean  _slc, _mlc;
+    // Whether to support standard Java style single line comments
+    private boolean  _slc;
+
+    // Whether to support standard Java style multi line comments
+    private boolean  _mlc;
 
     /**
      * Constructor.
