@@ -163,6 +163,7 @@ public class Tokenizer {
     public void setCharIndex(int aValue)
     {
         _charIndex = aValue;
+        _lineStart = aValue;
     }
 
     /**
@@ -237,9 +238,9 @@ public class Tokenizer {
     public final int getLineIndex()  { return _lineIndex; }
 
     /**
-     * Returns the current line number.
+     * Returns the current line index.
      */
-    public final int getLineNum()  { return _lineIndex + 1; }
+    public final void setLineIndex(int aValue)  { _lineIndex = aValue; }
 
     /**
      * Returns the current line start index.
@@ -252,22 +253,6 @@ public class Tokenizer {
     public final int getColumnIndex()
     {
         return getCharIndex() - getLineStart();
-    }
-
-    /**
-     * Returns the current line number.
-     */
-    public final int getLineNumber()
-    {
-        return getLineIndex() + 1;
-    }
-
-    /**
-     * Returns the current column number.
-     */
-    public final int getColumnNumber()
-    {
-        return getCharIndex() - getColumnIndex() + 1;
     }
 
     /**

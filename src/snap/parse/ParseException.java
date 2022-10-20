@@ -52,7 +52,7 @@ public class ParseException extends RuntimeException {
         // Get some useful line/char positions
         ParseToken token = _parser.getToken();
         int charIndex = token != null ? token.getStartCharIndex() : _parser.getTokenizer().getCharIndex();
-        int lineIndex = token != null ? (token.getLineIndex() + 1) : _parser.getTokenizer().getLineNum();
+        int lineIndex = token != null ? token.getLineIndex() : _parser.getTokenizer().getLineIndex();
         int colIndex = token != null ? token.getColumnIndex() : 0;
 
         // Get Error region
@@ -63,7 +63,7 @@ public class ParseException extends RuntimeException {
         CharSequence errorChars = inputText.subSequence(charIndex, lineEnd);
 
         // Basic message
-        StringBuffer sb = new StringBuffer("Failed to parse at line " + lineIndex + ", char " + colIndex);
+        StringBuffer sb = new StringBuffer("Failed to parse at line " + (lineIndex + 1) + ", char " + colIndex);
         sb.append(": ").append(errorChars).append('\n');
         sb.append("Expecting: ").append(_rule.getName() != null ? _rule.getName() : _rule);
 
