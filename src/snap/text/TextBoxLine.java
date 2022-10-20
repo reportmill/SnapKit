@@ -3,6 +3,7 @@
  */
 package snap.text;
 import snap.geom.HPos;
+import snap.util.CharSequenceX;
 import snap.util.MathUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * A class to represent a line of text in a TextBox.
  */
-public class TextBoxLine implements CharSequence {
+public class TextBoxLine implements CharSequenceX {
 
     // The TextBox that contains this line
     protected TextBox  _textBox;
@@ -366,24 +367,6 @@ public class TextBoxLine implements CharSequence {
      * Returns the vertical distance for any line below this line.
      */
     public double getLineAdvance()  { return _lineAdvance; }
-
-    /**
-     * Returns the last char.
-     */
-    public char getLastChar()
-    {
-        int len = length();
-        return len > 0 ? charAt(len - 1) : 0;
-    }
-
-    /**
-     * Returns whether run ends with newline.
-     */
-    public boolean isLastCharNewline()
-    {
-        char c = getLastChar();
-        return c == '\r' || c == '\n';
-    }
 
     /**
      * Returns the token at character index.

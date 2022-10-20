@@ -1,5 +1,5 @@
 package snap.parse;
-import snap.util.StringUtils;
+import snap.util.CharSequenceUtils;
 
 /**
  * This Tokenizer subclass supports Java/C single-line and multi-line comments.
@@ -126,7 +126,7 @@ public class CodeTokenizer extends Tokenizer {
             // Update CharIndex to line end
             int tokenStart = _charIndex;
             _charIndex += 2;
-            _charIndex = StringUtils.indexAfterNewline(getInput(), _charIndex);
+            _charIndex = CharSequenceUtils.indexAfterNewline(getInput(), _charIndex);
 
             // If no newline in input, set to end
             if (_charIndex < 0)

@@ -4,12 +4,13 @@
 package snap.text;
 import snap.geom.HPos;
 import snap.util.ArrayUtils;
+import snap.util.CharSequenceX;
 import snap.util.SnapUtils;
 
 /**
  * This class represents a line of text in a Text.
  */
-public class TextLine implements CharSequence, Cloneable {
+public class TextLine implements CharSequenceX, Cloneable {
 
     // The TextDoc that contains this line
     protected TextDoc  _textDoc;
@@ -500,24 +501,6 @@ public class TextLine implements CharSequence, Cloneable {
             if (run.isUnderlined() && run.length() > 0)
                 return true;
         return false;
-    }
-
-    /**
-     * Returns the last char.
-     */
-    public char getLastChar()
-    {
-        int len = length();
-        return len > 0 ? charAt(len - 1) : 0;
-    }
-
-    /**
-     * Returns whether run ends with newline.
-     */
-    public boolean isLastCharNewline()
-    {
-        char c = getLastChar();
-        return c == '\r' || c == '\n';
     }
 
     /**

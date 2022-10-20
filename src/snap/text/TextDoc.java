@@ -5,8 +5,9 @@ package snap.text;
 import snap.geom.HPos;
 import snap.gfx.Font;
 import snap.props.PropObject;
+import snap.util.CharSequenceUtils;
+import snap.util.CharSequenceX;
 import snap.util.SnapUtils;
-import snap.util.StringUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.List;
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public class TextDoc extends PropObject implements CharSequence, Cloneable {
+public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
 
     // The Source of the current content
     private Object  _source;
@@ -221,7 +222,7 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
         while (start < len) {
 
             // Get index of newline in insertion chars (if there) and end of line block
-            int newline = StringUtils.indexAfterNewline(theChars, start);
+            int newline = CharSequenceUtils.indexAfterNewline(theChars, start);
             int end = newline > 0 ? newline : len;
 
             // Get chars and add
@@ -667,62 +668,6 @@ public class TextDoc extends PropObject implements CharSequence, Cloneable {
 
         // Return not found
         return -1;
-    }
-
-    /**
-     * Returns index of next newline (or carriage-return/newline) starting at given char index.
-     */
-    public int indexOfNewline(int aStart)
-    {
-        return StringUtils.indexOfNewline(this, aStart);
-    }
-
-    /**
-     * Returns index just beyond next newline (or carriage-return/newline) starting at given char index.
-     */
-    public int indexAfterNewline(int aStart)
-    {
-        return StringUtils.indexAfterNewline(this, aStart);
-    }
-
-    /**
-     * Returns index of the previous newline (or carriage-return/newline) starting at given char index.
-     */
-    public int lastIndexOfNewline(int aStart)
-    {
-        return StringUtils.lastIndexOfNewline(this, aStart);
-    }
-
-    /**
-     * Returns index just beyond previous newline (or carriage-return/newline) starting at given char index.
-     */
-    public int lastIndexAfterNewline(int aStart)
-    {
-        return StringUtils.lastIndexAfterNewline(this, aStart);
-    }
-
-    /**
-     * Returns whether the index in the given char sequence is at a line end.
-     */
-    public boolean isLineEnd(int anIndex)
-    {
-        return StringUtils.isLineEnd(this, anIndex);
-    }
-
-    /**
-     * Returns whether the index in the given char sequence is at just after a line end.
-     */
-    public boolean isAfterLineEnd(int anIndex)
-    {
-        return StringUtils.isAfterLineEnd(this, anIndex);
-    }
-
-    /**
-     * Returns whether a char is a newline char.
-     */
-    public boolean isLineEndChar(int anIndex)
-    {
-        return StringUtils.isLineEndChar(this, anIndex);
     }
 
     /**

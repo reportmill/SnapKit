@@ -5,11 +5,12 @@ package snap.text;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
+import snap.util.CharSequenceX;
 
 /**
  * This is class represents a range of characters in a TextLine that share the same style.
  */
-public class TextRun implements CharSequence, Cloneable {
+public class TextRun implements CharSequenceX, Cloneable {
 
     // The line that contains this run
     protected TextLine  _textLine;
