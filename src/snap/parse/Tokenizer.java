@@ -169,59 +169,47 @@ public class Tokenizer {
     /**
      * Adds a pattern.
      */
-    public void addPattern(String aName, String aPattern)
+    public Regex addPattern(String aName, String aPattern)
     {
         // Get unique pattern string - if already in list, just return
         String pattern = aPattern.intern();
         for (Regex regex : _regexList)
             if (regex.getPattern() == pattern)
-                return;
+                return regex;
 
         // Create and add new regex
-        _regexList.add(new Regex(aName, pattern));
+        Regex regex = new Regex(aName, pattern);
+        _regexList.add(regex);
         _regexes = null;
-    }
-
-    /**
-     * Adds a pattern.
-     */
-    public void addPattern(String aName, String aPattern, boolean isLiteral)
-    {
-        // Get unique pattern string - if already in list, just return
-        String pattern = aPattern.intern();
-        for (Regex regex : _regexList)
-            if (regex.getPattern() == pattern)
-                return;
-
-        // Create and add new regex
-        _regexList.add(new Regex(aName, pattern, isLiteral));
-        _regexes = null;
+        return regex;
     }
 
     /**
      * Adds patterns to this tokenizer for given rule.
      */
-    public void addPatterns(ParseRule aRule)
+    public void addPatternsForRule(ParseRule aRule)
     {
-        addPatterns(aRule, new ArrayList<>(128));
+        addPatternsForRule(aRule, new ArrayList<>(128));
     }
 
     /**
      * Adds patterns to this tokenizer for given rule.
      */
-    private void addPatterns(ParseRule aRule, List<ParseRule> theRules)
+    private void addPatternsForRule(ParseRule aRule, List<ParseRule> theRules)
     {
         theRules.add(aRule);
-        if (aRule.getPattern() != null)
-            addPattern(aRule.getName(), aRule.getPattern(), aRule.isLiteral());
+        if (aRule.getPattern() != null) {
+            Regex regex = addPattern(aRule.getName(), aRule.getPattern());
+            regex.setLiteral(aRule.isLiteral());
+        }
 
         ParseRule r0 = aRule.getChild0();
         if (r0 != null && !ListUtils.containsId(theRules, r0))
-            addPatterns(r0, theRules);
+            addPatternsForRule(r0, theRules);
 
         ParseRule r1 = aRule.getChild1();
         if (r1 != null && !ListUtils.containsId(theRules, r1))
-            addPatterns(r1, theRules);
+            addPatternsForRule(r1, theRules);
     }
 
     /**
@@ -229,7 +217,8 @@ public class Tokenizer {
      */
     protected Regex[] getRegexes()
     {
-        return _regexes != null ? _regexes : (_regexes = _regexList.toArray(new Regex[0]));
+        if (_regexes != null) return _regexes;
+        return _regexes = _regexList.toArray(new Regex[0]);
     }
 
     /**
@@ -288,14 +277,17 @@ public class Tokenizer {
 
         // If no match, return null
         if (match == null) {
-            if (!hasChar()) return null;
+            if (!hasChar())
+                return null;
             throw new ParseException("Token not found for: " + getInput(_charIndex, Math.min(_charIndex + 30, length())));
         }
 
-        // Create new token, reset end and return new token
+        // Create new token for match
         String matchName = match.getName();
         String matchPattern = match.getPattern();
         ParseToken token = createToken(matchName, matchPattern, _charIndex, matchEnd, specialToken);
+
+        // Reset end and return
         _charIndex = matchEnd;
         return token;
     }
@@ -343,7 +335,7 @@ public class Tokenizer {
     /**
      * Creates a new token.
      */
-    protected ParseToken createToken(String aName, String aPattern, int aStart, int anEnd, ParseToken aSpclTkn)
+    protected ParseToken createToken(String aName, String aPattern, int aStart, int anEnd, ParseToken aSpecialToken)
     {
         ParseToken.BasicToken token = new ParseToken.BasicToken();
         token._text = _input;
@@ -352,51 +344,18 @@ public class Tokenizer {
         token._startCharIndex = aStart;
         token._endCharIndex = anEnd;
         token._lineIndex = _lineIndex;
-        token._lineStartCharIndex = _lineStart;
-        token._specialToken = aSpclTkn;
+        token._startCharIndexInLine = _lineStart;
         return token;
     }
 
     /**
-     * Processes and returns next special token.
+     * Processes and returns a special token if found.
+     * This version just skips whitespace.
      */
     public ParseToken getNextSpecialToken()
     {
-        // Get next special token
-        ParseToken nextSpecialToken = getNextSpecialToken(null);
-        ParseToken specialToken = null;
-
-        // Keep getting special tokens until we have the last one
-        while (nextSpecialToken != null) {
-            specialToken = nextSpecialToken;
-            nextSpecialToken = getNextSpecialToken(nextSpecialToken);
-        }
-
-        // Return
-        return specialToken;
-    }
-
-    /**
-     * Processes and returns next special token.
-     */
-    protected ParseToken getNextSpecialToken(ParseToken aSpecialToken)
-    {
-        // Skip whitespace
         skipWhiteSpace();
-
-        // Return
         return null;
-    }
-
-    /**
-     * Returns next special token or token.
-     */
-    public ParseToken getNextSpecialTokenOrToken()
-    {
-        ParseToken token = getNextSpecialToken();
-        if (token == null)
-            token = getNextToken();
-        return token;
     }
 
     /**

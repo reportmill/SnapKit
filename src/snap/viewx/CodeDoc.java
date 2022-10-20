@@ -39,8 +39,8 @@ public class CodeDoc extends TextDoc {
         _tokenizer.setReadSingleLineComments(true);
         _tokenizer.setReadMultiLineComments(true);
         String[] javaTokenPatterns = getPatterns();
-        for (String tok : javaTokenPatterns)
-            _tokenizer.addPattern(tok, tok);
+        for (String token : javaTokenPatterns)
+            _tokenizer.addPattern(token, token);
     }
 
     /**
@@ -118,7 +118,7 @@ public class CodeDoc extends TextDoc {
 
             // Get first line token: Handle if already in Multi-line
             if (inUnterminatedComment)
-                return _tokenizer.getMultiLineCommentTokenMore(null);
+                return _tokenizer.getMultiLineCommentTokenMore();
         }
 
         // Return next token

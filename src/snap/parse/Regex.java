@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.parse;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -13,28 +12,28 @@ import java.util.regex.PatternSyntaxException;
 public class Regex {
 
     // The name of this regex, if applicable
-    String _name;
+    private String  _name;
 
     // The pattern of this regex
-    String _pattern;
+    private String  _pattern;
 
     // Returns whether the pattern is literal
-    boolean _literal;
+    private boolean  _literal;
 
     // The compiled pattern
-    Pattern _patternCompiled;
+    private Pattern  _patternCompiled;
 
     // A shared matcher
-    Matcher _matcher;
+    private Matcher  _matcher;
 
     // The literal length of the pattern
-    int _literalLength = -1;
+    private int  _literalLength = -1;
 
     // String buffer to hold expression
-    StringBuffer _sb;
+    private StringBuffer  _sb;
 
     // Operators
-    public enum Op {And, Or}
+    public enum Op { And, Or }
 
     // Constants for expression parts
     public static final String LetterLower = "a-z";
@@ -43,29 +42,12 @@ public class Regex {
     public static final String WhiteSpace = "\\s";
 
     /**
-     * Creates a new regex.
-     */
-    public Regex()
-    {
-    }
-
-    /**
-     * Creates a new regex with given pattern and name.
+     * Constructor with given pattern and name.
      */
     public Regex(String aName, String aPattern)
     {
         setName(aName);
         setPattern(aPattern);
-    }
-
-    /**
-     * Creates a new regex with given pattern and name.
-     */
-    public Regex(String aName, String aPattern, boolean isLiteral)
-    {
-        setName(aName);
-        setPattern(aPattern);
-        setLiteral(isLiteral);
     }
 
     /**
@@ -89,10 +71,12 @@ public class Regex {
      */
     public String getPattern()
     {
-        if (_pattern == null && _sb != null) {
-            _pattern = _sb.toString().intern();
-            _sb = null;
-        }
+        // If set, just return
+        if (_pattern != null || _sb == null) return _pattern;
+
+        // Get, set, return
+        _pattern = _sb.toString().intern();
+        _sb = null;
         return _pattern;
     }
 
@@ -101,7 +85,10 @@ public class Regex {
      */
     public void setPattern(String aPattern)
     {
+        // Set pattern
         _pattern = aPattern != null ? aPattern.intern() : null;
+
+        // Set whether literal
         _literal = _pattern.length() < 3 || _pattern.indexOf('[') < 0;
     }
 
@@ -123,12 +110,12 @@ public class Regex {
      */
     public Pattern getPatternCompiled()
     {
-        if (_patternCompiled == null) {
-            try {
-                _patternCompiled = Pattern.compile(getPattern(), getPatternCompileFlags());
-            }
-            catch (PatternSyntaxException e) { throw e; }
-        }
+        // If already set, just return
+        if (_patternCompiled != null) return _patternCompiled;
+
+        // Get, set, return
+        try { _patternCompiled = Pattern.compile(getPattern(), getPatternCompileFlags()); }
+        catch (PatternSyntaxException e) { throw e; }
         return _patternCompiled;
     }
 
@@ -145,8 +132,12 @@ public class Regex {
      */
     public Matcher getMatcher(CharSequence anInput)
     {
-        if (_matcher == null)
-            _matcher = getPatternCompiled().matcher(anInput);
+        // If already set, just return
+        if (_matcher != null) return _matcher;
+
+        // Get, set, return
+        Pattern pattern = getPatternCompiled();
+        _matcher = pattern.matcher(anInput);
         return _matcher;
     }
 
@@ -155,8 +146,11 @@ public class Regex {
      */
     public int getLiteralLength()
     {
-        if (_literalLength < 0)
-            _literalLength = isLiteral() ? getPattern().length() : getLiteralLength(getPattern());
+        // If already set, just return
+        if (_literalLength >= 0) return _literalLength;
+
+        // Get, set, return
+        _literalLength = isLiteral() ? getPattern().length() : getLiteralLength(getPattern());
         return _literalLength;
     }
 

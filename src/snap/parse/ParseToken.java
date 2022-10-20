@@ -49,11 +49,6 @@ public interface ParseToken {
     }
 
     /**
-     * Returns the special token.
-     */
-    ParseToken getSpecialToken();
-
-    /**
      * Returns the string.
      */
     String getString();
@@ -82,10 +77,7 @@ public interface ParseToken {
         protected int  _lineIndex;
 
         // The line start char index
-        protected int  _lineStartCharIndex;
-
-        // The special token that preceded this token, if available
-        protected ParseToken  _specialToken;
+        protected int  _startCharIndexInLine;
 
         // The string
         protected String  _string;
@@ -114,10 +106,7 @@ public interface ParseToken {
         public int getLineIndex()  { return _lineIndex; }
 
         /** Returns the line start. */
-        public int getStartCharIndexInLine()  { return _lineStartCharIndex; }
-
-        /** Returns the special token. */
-        public ParseToken getSpecialToken()  { return _specialToken; }
+        public int getStartCharIndexInLine()  { return _startCharIndexInLine; }
 
         /** Returns the string. */
         public String getString()
