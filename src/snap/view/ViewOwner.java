@@ -138,22 +138,22 @@ public class ViewOwner implements EventListener {
             System.err.println("ViewOwner.createUI: Couldn't find source for class: " + getClass().getName());
             throw new RuntimeException("ViewOwner.createUI: Couldn't find source for class: " + getClass().getName());
         }
-        return createUI(src);
+        return createUIForSource(src);
     }
 
     /**
      * Creates the top level view for given class.
      */
-    protected View createUI(Class aClass)
+    protected View createUIForClass(Class aClass)
     {
         WebURL src = _env.getUISource(aClass);
-        return createUI(src);
+        return createUIForSource(src);
     }
 
     /**
      * Creates the top level view for given class.
      */
-    protected View createUI(Object aSource)
+    protected View createUIForSource(Object aSource)
     {
         // Complain if bogus source
         if (aSource == null) {
@@ -162,9 +162,9 @@ public class ViewOwner implements EventListener {
         }
 
         // Create archiver and return view
-        ViewArchiver arch = new ViewArchiver();
-        arch.setOwner(this);
-        return arch.getView(aSource);
+        ViewArchiver archiver = new ViewArchiver();
+        archiver.setOwner(this);
+        return archiver.getView(aSource);
     }
 
     /**
@@ -245,7 +245,7 @@ public class ViewOwner implements EventListener {
             View view = getUI();
             if (name.equals(view.getName()))
                 return view;
-            View cview = view instanceof ParentView ? ((ParentView) view).getChild(name) : null;
+            View cview = view instanceof ParentView ? ((ParentView) view).getChildForName(name) : null;
             if (cview != null)
                 return cview;
         }

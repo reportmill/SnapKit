@@ -169,18 +169,25 @@ public class ParentView extends View {
     /**
      * Returns the child with given name.
      */
-    public View getChild(String aName)
+    public View getChildForName(String aName)
     {
+        // Iterate over children
         for (View child : getChildren()) {
+
+            // If child has name, return
             if (aName.equals(child.getName()))
                 return child;
+
+            // If child is ParentView, recurse
             if (child instanceof ParentView && child.getOwner() == getOwner()) {
-                ParentView par = (ParentView) child;
-                View n = par.getChild(aName);
-                if (n != null)
-                    return n;
+                ParentView parent = (ParentView) child;
+                View childForName = parent.getChildForName(aName);
+                if (childForName != null)
+                    return childForName;
             }
         }
+
+        // Return not found
         return null;
     }
 

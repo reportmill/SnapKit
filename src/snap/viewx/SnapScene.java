@@ -102,7 +102,7 @@ public void addActor(SnapActor anActor, double anX, double aY)
  */
 public SnapActor getActor(String aName)
 {
-    View child = getChild(aName);
+    View child = getChildForName(aName);
     return child instanceof SnapActor? (SnapActor)child : null;
 }
 

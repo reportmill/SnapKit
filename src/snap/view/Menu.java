@@ -114,10 +114,10 @@ public class Menu extends MenuItem {
     /**
      * Override to include child menu items.
      */
-    public View getChild(String aName)
+    public View getChildForName(String aName)
     {
         // Do normal version (just return if null)
-        View child = super.getChild(aName);
+        View child = super.getChildForName(aName);
         if (child != null)
             return child;
 

@@ -138,7 +138,7 @@ public class TreeCol <T> extends ListArea <T> {
         // If parent, configure Expand/Collapse image
         if (tree.isParent(item)) {
             Image bimg = tree.isExpanded(item) ? tree.getExpandedImage() : tree.getCollapsedImage();
-            ImageView iview = (ImageView)aCell.getChild("BranchImageView");
+            ImageView iview = (ImageView)aCell.getChildForName("BranchImageView");
             if (iview!=null) {
                 iview.setImage(bimg); return; }
 
