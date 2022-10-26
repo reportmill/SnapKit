@@ -125,14 +125,6 @@ public class TextBoxLine implements CharSequenceX {
     public int getTextLineStart()  { return _textLineStart; }
 
     /**
-     * Returns the TextRun of char in line.
-     */
-    public TextRun getTextRun(int anIndex)
-    {
-        return _textLine.getRunForCharIndex(_textLineStart + anIndex);
-    }
-
-    /**
      * Returns the line style.
      */
     public TextLineStyle getLineStyle()
@@ -544,15 +536,21 @@ public class TextBoxLine implements CharSequenceX {
      */
     protected TextBoxRun createRun(int aStart)
     {
-        // Get RichTextRun and TextStyle at char index
-        TextRun textRun = getTextRun(aStart);
+        // Get TextLine run at char index
+        TextRun textRun = _textLine.getRunForCharIndex(_textLineStart + aStart);
+        if (textRun.getEndCharIndex() == _textLineStart + aStart) // Don't like this
+            textRun = textRun.getNext();
+
+        // Get TextStyle for run
         TextStyle runStyle = textRun.getStyle();
         double fontScale = _textBox.getFontScale();
         if (fontScale != 1)
             runStyle = runStyle.copyFor(runStyle.getFont().scaleFont(fontScale));
 
         // Get end of run
-        int end = Math.min(length(), textRun.getEndCharIndex() - getTextLineStart());
+        int endCharIndex = textRun.getEndCharIndex() - _textLineStart;
+        if (endCharIndex > length())
+            endCharIndex = length();
 
         // If Justify, reset end to start of next token
         if (getLineStyle().isJustify()) {
@@ -560,19 +558,19 @@ public class TextBoxLine implements CharSequenceX {
             int tokenIndex = textBoxToken != null ? getTokens().indexOf(textBoxToken) : -1;
             TextBoxToken nextToken = tokenIndex >= 0 && tokenIndex + 1 < getTokenCount() ? getToken(tokenIndex + 1) : null;
             if (nextToken != null)
-                end = nextToken.getStartCharIndex();
+                endCharIndex = nextToken.getStartCharIndex();
         }
 
         // If there are tabs, end after first tab instead
-        for (int i = aStart; i < end; i++) {
+        for (int i = aStart; i < endCharIndex; i++) {
             if (charAt(i) == '\t') {
-                end = i + 1;
+                endCharIndex = i + 1;
                 break;
             }
         }
 
         // Create/return new run
-        return new TextBoxRun(this, runStyle, aStart, end);
+        return new TextBoxRun(this, runStyle, aStart, endCharIndex);
     }
 
     /**
