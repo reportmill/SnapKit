@@ -295,7 +295,8 @@ public class Parser {
     {
         // Get current token (if no token, just return null)
         ParseToken token = getToken();
-        if (token == null) return null;
+        if (token == null)
+            return null;
 
         // Get handler reference for given rule: Reuse if no Rule.Handler, otherwise create new HandlerRef for rule
         HandlerRef href = aRule.getHandler() == null ? aHRef : new HandlerRef(aRule);
@@ -305,20 +306,26 @@ public class Parser {
 
             // Handle Or: Parse rules and break if either passes (return null if either fail)
             case Or: {
-                ParseRule r0 = aRule.getChild0(), r1 = aRule.getChild1();
-                if (parseAndHandle(r0, href)) break;
-                if (parseAndHandle(r1, href)) break;
+                ParseRule r0 = aRule.getChild0();
+                if (parseAndHandle(r0, href))
+                    break;
+                ParseRule r1 = aRule.getChild1();
+                if (parseAndHandle(r1, href))
+                    break;
                 return null;
             }
 
             // Handle And
             case And: {
-                ParseRule r0 = aRule.getChild0(), r1 = aRule.getChild1();
+                ParseRule r0 = aRule.getChild0();
+                ParseRule r1 = aRule.getChild1();
 
                 // Handle rule 0 LookAhead(x)
                 if (r0.isLookAhead() && r0.getChild0() == null) {
-                    if (lookAhead(r1, r0.getLookAhead(), 0) < 0) return null;
-                    if (parseAndHandle(r1, href)) break;
+                    if (lookAhead(r1, r0.getLookAhead(), 0) < 0)
+                        return null;
+                    if (parseAndHandle(r1, href))
+                        break;
                     parseFailed(r1, href.handler());
                     break;
                 }
@@ -333,9 +340,12 @@ public class Parser {
                     break;
 
                 // Parse second rule
-                if (parseAndHandle(r1, href)) break;
-                if (parsed0 && r1.isOptional()) break;
-                if (!parsed0) return null;
+                if (parseAndHandle(r1, href))
+                    break;
+                if (parsed0 && r1.isOptional())
+                    break;
+                if (!parsed0)
+                    return null;
                 parseFailed(r1, href.handler());
                 break;
             }
@@ -343,23 +353,32 @@ public class Parser {
             // Handle ZeroOrOne
             case ZeroOrOne: {
                 ParseRule r0 = aRule.getChild0();
-                if (!parseAndHandle(r0, href)) return null;
+                if (!parseAndHandle(r0, href))
+                    return null;
                 break;
             }
 
             // Handle ZeroOrMore
             case ZeroOrMore: {
                 ParseRule r0 = aRule.getChild0();
-                if (!parseAndHandle(r0, href)) return null;
-                while (parseAndHandle(r0, href)) ;
+                if (!parseAndHandle(r0, href))
+                    return null;
+                while (true) {
+                    if (!parseAndHandle(r0, href))
+                        break;
+                }
                 break;
             }
 
             // Handle OneOrMore
             case OneOrMore: {
                 ParseRule r0 = aRule.getChild0();
-                if (!parseAndHandle(r0, href)) return null;
-                while (parseAndHandle(r0, href)) ;
+                if (!parseAndHandle(r0, href))
+                    return null;
+                while (true) {
+                    if (!parseAndHandle(r0, href))
+                        break;
+                }
                 break;
             }
 
@@ -387,8 +406,10 @@ public class Parser {
             // Handle LookAhead
             case LookAhead: {
                 ParseRule rule = aRule.getChild0();
-                int tcount = aRule.getLookAhead();
-                if (lookAhead(rule, tcount, 0) < 0) return null;
+                int tokenCount = aRule.getLookAhead();
+                int lookAheadCount = lookAhead(rule, tokenCount, 0);
+                if (lookAheadCount < 0)
+                    return null;
                 break;
             }
         }
@@ -447,30 +468,38 @@ public class Parser {
 
             // Handle Or
             case Or: {
-                ParseRule r0 = aRule.getChild0(), r1 = aRule.getChild1();
+                ParseRule r0 = aRule.getChild0();
+                ParseRule r1 = aRule.getChild1();
                 int remainder = lookAhead(r0, aTokenCount, aTokenIndex);
-                if (remainder >= 0) return remainder;
+                if (remainder >= 0)
+                    return remainder;
                 return lookAhead(r1, aTokenCount, aTokenIndex);
             }
 
             // Handle And
             case And: {
-                ParseRule r0 = aRule.getChild0(), r1 = aRule.getChild1();
+                ParseRule r0 = aRule.getChild0();
+                ParseRule r1 = aRule.getChild1();
 
                 // Handle rule 0 LookAhead(x)
                 if (r0.isLookAhead() && r0.getChild0() == null) {
-                    if (lookAhead(r1, r0.getLookAhead(), aTokenIndex) < 0) return -1;
+                    if (lookAhead(r1, r0.getLookAhead(), aTokenIndex) < 0)
+                        return -1;
                     return lookAhead(r1, aTokenCount, aTokenIndex);
                 }
 
                 // Handle normal And
                 int rmdr0 = lookAhead(r0, aTokenCount, aTokenIndex);
-                if (rmdr0 < 0 && !r0.isOptional() || rmdr0 == 0) return rmdr0;
+                if (rmdr0 < 0 && !r0.isOptional() || rmdr0 == 0)
+                    return rmdr0;
                 boolean parsed0 = rmdr0 > 0;
-                if (!parsed0) rmdr0 = aTokenCount;
+                if (!parsed0)
+                    rmdr0 = aTokenCount;
                 int rmdr1 = lookAhead(r1, rmdr0, aTokenIndex + aTokenCount - rmdr0);
-                if (rmdr1 >= 0) return rmdr1;
-                if (parsed0 && r1.isOptional()) return rmdr0;
+                if (rmdr1 >= 0)
+                    return rmdr1;
+                if (parsed0 && r1.isOptional())
+                    return rmdr0;
                 return -1;
             }
 
@@ -481,21 +510,25 @@ public class Parser {
             // Handle ZeroOrMore
             case ZeroOrMore: {
                 ParseRule r0 = aRule.getChild0();
-                int remainder = lookAhead(r0, aTokenCount, aTokenIndex), r = remainder;
+                int remainder = lookAhead(r0, aTokenCount, aTokenIndex);
+                int r = remainder;
                 while (r > 0) {
                     r = lookAhead(r0, r, aTokenIndex + aTokenCount - r);
-                    if (r >= 0) remainder = r;
+                    if (r >= 0)
+                        remainder = r;
                 }
                 return remainder;
             }
 
-            // Handle OneOrMore
+            // Handle OneOrMore: Why is this identical to above???
             case OneOrMore: {
                 ParseRule r0 = aRule.getChild0();
-                int remainder = lookAhead(r0, aTokenCount, aTokenIndex), r = remainder;
+                int remainder = lookAhead(r0, aTokenCount, aTokenIndex);
+                int r = remainder;
                 while (r > 0) {
                     r = lookAhead(r0, r, aTokenIndex + aTokenCount - r);
-                    if (r >= 0) remainder = r;
+                    if (r >= 0)
+                        remainder = r;
                 }
                 return remainder;
             }
@@ -511,14 +544,14 @@ public class Parser {
             // Handle LookAhead
             case LookAhead: {
                 ParseRule r0 = aRule.getChild0();
-                int tcount = aRule.getLookAhead();
-                if (lookAhead(r0, tcount, aTokenIndex) < 0) return -1;
+                int tokenCount = aRule.getLookAhead();
+                if (lookAhead(r0, tokenCount, aTokenIndex) < 0)
+                    return -1;
                 return aTokenCount;
             }
 
             // Complain
-            default:
-                throw new RuntimeException("Parser.lookAhead: Bogus op " + aRule.getOp());
+            default: throw new RuntimeException("Parser.lookAhead: Unsupported op " + aRule.getOp());
         }
     }
 
@@ -536,7 +569,8 @@ public class Parser {
      */
     protected void parseFailed(ParseRule aRule, ParseHandler aHandler)
     {
-        if (aHandler != null) aHandler.reset();
+        if (aHandler != null)
+            aHandler.reset();
         throw new ParseException(this, aRule);
     }
 

@@ -87,7 +87,7 @@ public class ParseHandler<T> {
     public boolean isBypass()  { return _bypass; }
 
     /**
-     * Indicates that parsing should short ciricuit.
+     * Indicates that parsing should short circuit.
      */
     public void bypass()  { _bypass = true; }
 
@@ -108,7 +108,8 @@ public class ParseHandler<T> {
     public ParseHandler getAvailableHandler()
     {
         ParseHandler handler = this;
-        while (handler._inUse) handler = handler.getBackupHandler();
+        while (handler._inUse)
+            handler = handler.getBackupHandler();
         handler._inUse = true;
         return handler;
     }
@@ -116,18 +117,24 @@ public class ParseHandler<T> {
     /**
      * Returns a backup handler.
      */
-    private ParseHandler getBackupHandler()
+    protected ParseHandler getBackupHandler()
     {
         // If already set, just return
         if (_backupHandler != null) return _backupHandler;
 
+        // Create, set and return
+        return _backupHandler = createBackupHandler();
+    }
+
+    /**
+     * Returns a backup handler.
+     */
+    protected ParseHandler createBackupHandler()
+    {
         // Create and return
-        try {
-            _backupHandler = getClass().newInstance();
-        }
+        try { return getClass().newInstance(); }
         catch (InstantiationException e) { throw new RuntimeException(e); }
         catch (IllegalAccessException e) { throw new RuntimeException(e); }
-        return _backupHandler;
     }
 
     /**
