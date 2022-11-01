@@ -2,9 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.parse;
-
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A class to parse a given input (string) using given rule(s).
@@ -25,6 +26,9 @@ public class Parser {
 
     // The list of current look ahead tokens
     private List<ParseToken>  _lookAheadTokens = new ArrayList<>();
+
+    // Whether an exception was hit on last parse
+    private boolean  _exceptionHitOnLastParse;
 
     // The shared node used to report parse success
     private ParseNode _sharedNode = new ParseNode();
@@ -259,7 +263,8 @@ public class Parser {
      */
     public ParseNode parse()
     {
-        return parse(getRule());
+        ParseRule rule = getRule();
+        return parse(rule);
     }
 
     /**
@@ -267,8 +272,21 @@ public class Parser {
      */
     public ParseNode parse(ParseRule aRule)
     {
+        // If exception was hit on last parse, reset all handlers
+        if (_exceptionHitOnLastParse)
+            resetAllHandlers();
+
+        // Do real parse
+        _exceptionHitOnLastParse = true;
         ParseNode node = parse(aRule, null);
-        return node != null && node.getCustomNode() instanceof ParseNode ? (ParseNode) node.getCustomNode() : node;
+        _exceptionHitOnLastParse = false;
+
+        // If result node has CustomNode, swap it in
+        if (node != null && node.getCustomNode() instanceof ParseNode)
+            node = (ParseNode) node.getCustomNode();
+
+        // Return
+        return node;
     }
 
     /**
@@ -276,7 +294,8 @@ public class Parser {
      */
     public <T> T parseCustom(Class<T> aClass)
     {
-        return parseCustom(getRule(), aClass);
+        ParseRule rule = getRule();
+        return parseCustom(rule, aClass);
     }
 
     /**
@@ -285,7 +304,8 @@ public class Parser {
     public <T> T parseCustom(ParseRule aRule, Class<T> aClass)
     {
         ParseNode node = parse(aRule, null);
-        return node != null ? node.getCustomNode(aClass) : null;
+        T customNode = node != null ? node.getCustomNode(aClass) : null;
+        return customNode;
     }
 
     /**
@@ -581,6 +601,39 @@ public class Parser {
     {
         setInput(anInput);
         return parseCustom(aClass);
+    }
+
+    /**
+     * Traverses rule tree to reset all handlers.
+     */
+    private void resetAllHandlers()
+    {
+        ParseRule rule = getRule();
+        resetHandlersForRuleDeep(rule, new HashSet<>());
+    }
+
+    /**
+     * Reset Handlers for given rule, then continues on.
+     */
+    private void resetHandlersForRuleDeep(ParseRule aRule, Set<ParseRule> visitedRules)
+    {
+        // Reset handler
+        ParseHandler handler = aRule.getHandler();
+        while (handler != null) {
+            handler.reset();
+            handler = handler.getBackupHandler();
+        }
+
+        // Add rule to visited set
+        visitedRules.add(aRule);
+
+        // Recurse for children
+        ParseRule childRule0 = aRule.getChild0();
+        if (childRule0 != null && !visitedRules.contains(childRule0))
+            resetHandlersForRuleDeep(childRule0, visitedRules);
+        ParseRule childRule1 = aRule.getChild1();
+        if (childRule1 != null && !visitedRules.contains(childRule1))
+            resetHandlersForRuleDeep(childRule1, visitedRules);
     }
 
     /**
