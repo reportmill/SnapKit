@@ -274,9 +274,15 @@ public class Tokenizer {
 
         // If no match, return null
         if (match == null) {
+
+            // If no more chars, just return null
             if (!hasChar())
                 return null;
-            throw new ParseException("Token not found for: " + getInput(_charIndex, Math.min(_charIndex + 30, length())));
+
+            // Get next chars and let tokenizerFailed() decide whether to throw, stop or provide alt token
+            String nextChars = getInput(_charIndex, Math.min(_charIndex + 30, length())).toString();
+            ParseToken nextToken = tokenizerFailed(nextChars);
+            return nextToken;
         }
 
         // Create new token for match
@@ -362,5 +368,14 @@ public class Tokenizer {
     {
         while (hasChar() && Character.isWhitespace(getChar()))
             eatChar();
+    }
+
+    /**
+     * Called when next chars don't conform to any known token pattern.
+     * Default implementation just throws ParseExcpetion.
+     */
+    protected ParseToken tokenizerFailed(String nextChars)
+    {
+        throw new ParseException("Token not found for: " + nextChars);
     }
 }

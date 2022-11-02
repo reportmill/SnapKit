@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 public class ParseUtils {
 
     // Written rules
-    List<ParseRule> _rules = new ArrayList<>();
+    private List<ParseRule>  _rules = new ArrayList<>();
 
     /**
      * Writes a rule to a file.
@@ -28,11 +28,8 @@ public class ParseUtils {
     {
         addRule(aRule);
         aFile.setText(getString());
-        try {
-            aFile.save();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        try { aFile.save(); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**

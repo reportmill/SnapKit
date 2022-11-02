@@ -54,9 +54,14 @@ public class Parser {
      */
     public ParseRule getRule()
     {
+        // If already set, just return
         if (_rule != null) return _rule;
+
+        // Create/init/set rule
         _rule = createRule();
         initRule();
+
+        // Return
         return _rule;
     }
 
@@ -621,7 +626,7 @@ public class Parser {
         ParseHandler handler = aRule.getHandler();
         while (handler != null) {
             handler.reset();
-            handler = handler.getBackupHandler();
+            handler = handler._backupHandler;
         }
 
         // Add rule to visited set
@@ -640,17 +645,24 @@ public class Parser {
      * A class to pass Handler by reference, allowing it to be created lazily, but used higher up in stack.
      */
     public static final class HandlerRef {
-        final ParseRule _rule;
-        ParseHandler _handler;
 
+        // Ivars
+        protected final ParseRule _rule;
+        private ParseHandler _handler;
+
+        /** Constructor. */
         HandlerRef(ParseRule aRule)
         {
             _rule = aRule;
         }
 
-        private final ParseHandler handler()
+        /** Returns next available handler. */
+        private ParseHandler handler()
         {
-            return _handler != null ? _handler : (_handler = _rule.getHandler().getAvailableHandler());
+            if (_handler != null) return _handler;
+            ParseHandler<?> handler = _rule.getHandler();
+            ParseHandler<?> nextHandler = handler.getAvailableHandler();
+            return _handler = nextHandler;
         }
     }
 }

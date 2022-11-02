@@ -513,7 +513,7 @@ public class StringUtils {
      */
     public static String getSkipCharsRegexForLiteralString(String aStr)
     {
-        // Generate prefix regex, e.g.: 'abc' turns to '^a[^b]*b[^c]c'
+        // Generate prefix regex, e.g.: 'abc' turns to 'a[^b]*b[^c]c'
         StringBuffer regexSB = new StringBuffer();
         for (int i = 0; i < aStr.length(); i++) {
             char prefixChar = aStr.charAt(i);

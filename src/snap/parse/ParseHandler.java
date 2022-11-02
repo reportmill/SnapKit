@@ -24,7 +24,7 @@ public class ParseHandler<T> {
     private boolean  _fail;
 
     // The backup handler
-    private ParseHandler  _backupHandler;
+    protected ParseHandler  _backupHandler;
 
     /**
      * Called when a child rule has been successfully parsed into given node.

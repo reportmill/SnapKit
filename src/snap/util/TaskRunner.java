@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
-
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
@@ -48,51 +47,41 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     public static final String Status_Prop = "Status";
 
     /**
-     * Creates a new TaskRunner.
+     * Constructor.
      */
     public TaskRunner()
     {
+        super();
     }
 
     /**
-     * Creates a new TaskRunner for given monitor.
+     * Constructor for given monitor.
      */
     public TaskRunner(TaskMonitor aMonitor)
     {
+        super();
         setMonitor(aMonitor);
     }
 
     /**
      * Returns the name of runner (and thread).
      */
-    public String getName()
-    {
-        return _name;
-    }
+    public String getName()  { return _name; }
 
     /**
      * Sets the name of runner (and thread).
      */
-    public void setName(String aName)
-    {
-        _name = aName;
-    }
+    public void setName(String aName)  { _name = aName; }
 
     /**
      * Returns the monitor.
      */
-    public TaskMonitor getMonitor()
-    {
-        return _monitor;
-    }
+    public TaskMonitor getMonitor()  { return _monitor; }
 
     /**
      * Sets the monitor.
      */
-    public void setMonitor(TaskMonitor aMonitor)
-    {
-        _monitor = aMonitor;
-    }
+    public void setMonitor(TaskMonitor aMonitor)  { _monitor = aMonitor; }
 
     /**
      * Advise the monitor of the total number of subtasks (invoke only once).
@@ -108,7 +97,8 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     public void beginTask(String aTitle, int theTotalWork)
     {
         _monitor.beginTask(aTitle, theTotalWork);
-        if (_monitor.isCancelled()) cancel();
+        if (_monitor.isCancelled())
+            cancel();
     }
 
     /**
@@ -117,7 +107,8 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     public void updateTask(int theWorkDone)
     {
         _monitor.updateTask(theWorkDone);
-        if (_monitor.isCancelled()) cancel();
+        if (_monitor.isCancelled())
+            cancel();
     }
 
     /**
@@ -132,10 +123,7 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     /**
      * Returns the status.
      */
-    public Status getStatus()
-    {
-        return _status;
-    }
+    public Status getStatus()  { return _status; }
 
     /**
      * Sets the status.
@@ -149,20 +137,15 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     /**
      * Returns the thread.
      */
-    public Thread getThread()
-    {
-        return _thread;
-    }
+    public Thread getThread()  { return _thread; }
 
     /**
      * Joins the runner.
      */
     public TaskRunner<T> join()
     {
-        try {
-            _thread.join();
-        } catch (Exception e) {
-        }
+        try { _thread.join(); }
+        catch (Exception e) { }
         return this;
     }
 
@@ -171,10 +154,8 @@ public abstract class TaskRunner<T> implements TaskMonitor {
      */
     public TaskRunner<T> join(int aTimeout)
     {
-        try {
-            _thread.join(aTimeout);
-        } catch (Exception e) {
-        }
+        try { _thread.join(aTimeout); }
+        catch (Exception e) { }
         return this;
     }
 
@@ -197,34 +178,27 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     /**
      * Returns the start time.
      */
-    public long getStartTime()
-    {
-        return _startTime;
-    }
+    public long getStartTime()  { return _startTime; }
 
     /**
      * Returns the end time.
      */
-    public long getEndTime()
-    {
-        return _endTime;
-    }
+    public long getEndTime()  { return _endTime; }
 
     /**
      * Returns the elapsed time.
      */
     public long getElapsedTime()
     {
-        return (isActive() ? getSystemTime() : getEndTime()) - getStartTime();
+        long endTime = isActive() ? getSystemTime() : getEndTime();
+        long startTime = getStartTime();
+        return endTime - startTime;
     }
 
     /**
      * Returns the system time.
      */
-    protected long getSystemTime()
-    {
-        return System.currentTimeMillis();
-    }
+    protected long getSystemTime()  { return System.currentTimeMillis(); }
 
     /**
      * Starts the runner.
@@ -263,16 +237,12 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     /**
      * The method run on success.
      */
-    public void success(T aResult)
-    {
-    }
+    public void success(T aResult)  { }
 
     /**
      * The method to run when cancelled.
      */
-    public void cancelled(Exception e)
-    {
-    }
+    public void cancelled(Exception e)  { }
 
     /**
      * The method to run on failure.
@@ -285,25 +255,17 @@ public abstract class TaskRunner<T> implements TaskMonitor {
     /**
      * The method to run when finished (after success()/failure() call).
      */
-    public void finished()
-    {
-    }
+    public void finished()  { }
 
     /**
      * Returns the result.
      */
-    public T getResult()
-    {
-        return _result;
-    }
+    public T getResult()  { return _result; }
 
     /**
      * Returns the exception.
      */
-    public Throwable getExeption()
-    {
-        return _exception;
-    }
+    public Throwable getException()  { return _exception; }
 
     /**
      * Runs the run method.
@@ -316,13 +278,9 @@ public abstract class TaskRunner<T> implements TaskMonitor {
         setStatus(Status.Running);
 
         // Run run
-        try {
-            _result = run();
-        } catch (Exception e) {
-            _exception = e;
-        } catch (Throwable e) {
-            _exception = new RuntimeException(e);
-        }
+        try { _result = run(); }
+        catch (Exception e) { _exception = e; }
+        catch (Throwable e) { _exception = new RuntimeException(e); }
 
         // Set end time
         _endTime = getSystemTime();
@@ -350,7 +308,8 @@ public abstract class TaskRunner<T> implements TaskMonitor {
      */
     public void addPropChangeListener(PropChangeListener aLsnr)
     {
-        if (_pcs == PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+        if (_pcs == PropChangeSupport.EMPTY)
+            _pcs = new PropChangeSupport(this);
         _pcs.addPropChangeListener(aLsnr);
     }
 
@@ -371,5 +330,4 @@ public abstract class TaskRunner<T> implements TaskMonitor {
         PropChange pc = new PropChange(this, aProp, oldVal, newVal);
         _pcs.firePropChange(pc);
     }
-
 }
