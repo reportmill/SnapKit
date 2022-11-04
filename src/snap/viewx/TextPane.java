@@ -144,7 +144,18 @@ public class TextPane extends ViewOwner {
     protected void respondUI(ViewEvent anEvent)
     {
         // Handle SaveButton
-        if (anEvent.equals("SaveButton")) saveChanges();
+        if (anEvent.equals("SaveButton"))
+            saveChanges();
+
+        // Handle CutButton, CopyButton, PasteButton, DeleteButton
+        if (anEvent.equals("CutButton"))
+            getTextArea().cut();
+        if (anEvent.equals("CopyButton"))
+            getTextArea().copy();
+        if (anEvent.equals("PasteButton"))
+            getTextArea().paste();
+        if (anEvent.equals("DeleteButton"))
+            getTextArea().delete();
 
         // Handle FontSizeText
         if (anEvent.equals("FontSizeText")) {

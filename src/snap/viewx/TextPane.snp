@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<HBox PrefHeight="28" Padding="0,4,0,4" Spacing="3">
+<RowView Padding="0,4,0,4" Spacing="3">
   <Button Name="SaveButton" PrefWidth="22" PrefHeight="22" ToolTip="Save" image="File_Save.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
   <Button Name="CutButton" PrefWidth="22" PrefHeight="22" ToolTip="Cut" image="Edit_Cut.png" ShowArea="false" />
@@ -14,6 +14,6 @@
   <Button Name="UndoButton" PrefWidth="22" PrefHeight="22" ToolTip="Undo" image="Edit_Undo.png" ShowArea="false" />
   <Button Name="RedoButton" PrefWidth="22" PrefHeight="22" ToolTip="Redo" image="Edit_Redo.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
-  <TextField Name="FindText" PrefWidth="172" PrefHeight="22" />
+  <TextField Name="FindText" BorderRadius="4" PrefWidth="172" PrefHeight="26" />
   <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" text="IC" Selected="true" />
-</HBox>
+</RowView>
