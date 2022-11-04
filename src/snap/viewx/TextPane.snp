@@ -7,13 +7,13 @@
   <Button Name="PasteButton" PrefWidth="22" PrefHeight="22" ToolTip="Paste" image="Edit_Paste.png" ShowArea="false" />
   <Button Name="DeleteButton" PrefWidth="22" PrefHeight="22" ToolTip="Delete" image="Edit_Delete.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
-  <TextField Name="FontSizeText" PrefWidth="32" PrefHeight="22" />
+  <TextField Name="FontSizeText" BorderRadius="4" PrefWidth="32" PrefHeight="22" Align="CENTER" />
   <Button Name="IncreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Increase Font Size" image="Font_Increase.png" ShowArea="false" />
   <Button Name="DecreaseFontButton" PrefWidth="22" PrefHeight="22" ToolTip="Decrease Font Size" image="Font_Decrease.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
   <Button Name="UndoButton" PrefWidth="22" PrefHeight="22" ToolTip="Undo" image="Edit_Undo.png" ShowArea="false" />
   <Button Name="RedoButton" PrefWidth="22" PrefHeight="22" ToolTip="Redo" image="Edit_Redo.png" ShowArea="false" />
   <Separator PrefHeight="18" Vertical="true" />
-  <TextField Name="FindText" BorderRadius="4" PrefWidth="172" PrefHeight="26" />
+  <TextField Name="FindText" BorderRadius="4" MaxWidth="172" PrefHeight="26" GrowWidth="true" />
   <CheckBox Name="IgnoreCaseCheckBox" PrefWidth="47" PrefHeight="22" text="IC" Selected="true" />
 </RowView>
