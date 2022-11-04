@@ -126,16 +126,18 @@ public class TextPane extends ViewOwner {
      */
     protected void resetUI()
     {
+        // Update UndoButton, RedoButton
+        setViewEnabled("UndoButton", getTextArea().getUndoer().hasUndos());
+        setViewEnabled("RedoButton", getTextArea().getUndoer().hasRedos());
+
         // Reset FontSizeText
         setViewValue("FontSizeText", getTextArea().getFont().getSize());
 
         // Reset TextModified
         setTextModified(getTextArea().getUndoer().hasUndos());
 
-        // Update SelectionText, UndoButton, RedoButton
+        // Update SelectionText
         setViewText("SelectionText", getSelectionInfo());
-        setViewEnabled("UndoButton", getTextArea().getUndoer().hasUndos());
-        setViewEnabled("RedoButton", getTextArea().getUndoer().hasRedos());
     }
 
     /**
@@ -154,8 +156,20 @@ public class TextPane extends ViewOwner {
             getTextArea().copy();
         if (anEvent.equals("PasteButton"))
             getTextArea().paste();
-        if (anEvent.equals("DeleteButton"))
-            getTextArea().delete();
+
+        // Handle UndoButton
+        if (anEvent.equals("UndoButton")) {
+            if (getTextArea().getUndoer().hasUndos())
+                getTextArea().undo();
+            else beep();
+        }
+
+        // Handle RedoButton
+        if (anEvent.equals("RedoButton")) {
+            if (getTextArea().getUndoer().hasRedos())
+                getTextArea().redo();
+            else beep();
+        }
 
         // Handle FontSizeText
         if (anEvent.equals("FontSizeText")) {
@@ -176,20 +190,6 @@ public class TextPane extends ViewOwner {
         if (anEvent.equals("DecreaseFontButton")) {
             Font font = getTextArea().getFont(), font2 = new Font(font.getName(), font.getSize() - 1);
             getTextArea().setFont(font2);
-        }
-
-        // Handle UndoButton
-        if (anEvent.equals("UndoButton")) {
-            if (getTextArea().getUndoer().hasUndos())
-                getTextArea().undo();
-            else beep();
-        }
-
-        // Handle RedoButton
-        if (anEvent.equals("RedoButton")) {
-            if (getTextArea().getUndoer().hasRedos())
-                getTextArea().redo();
-            else beep();
         }
 
         // Handle FindButton
