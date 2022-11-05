@@ -126,15 +126,18 @@ public class TextPane extends ViewOwner {
      */
     protected void resetUI()
     {
+        // Get TextArea
+        TextArea textArea = getTextArea();
+
         // Update UndoButton, RedoButton
-        setViewEnabled("UndoButton", getTextArea().getUndoer().hasUndos());
-        setViewEnabled("RedoButton", getTextArea().getUndoer().hasRedos());
+        setViewEnabled("UndoButton", textArea.getUndoer().hasUndos());
+        setViewEnabled("RedoButton", textArea.getUndoer().hasRedos());
 
         // Reset FontSizeText
-        setViewValue("FontSizeText", getTextArea().getFont().getSize());
+        setViewValue("FontSizeText", textArea.getFont().getSize());
 
         // Reset TextModified
-        setTextModified(getTextArea().getUndoer().hasUndos());
+        setTextModified(textArea.getUndoer().hasUndos());
 
         // Update SelectionText
         setViewText("SelectionText", getSelectionInfo());
@@ -145,29 +148,32 @@ public class TextPane extends ViewOwner {
      */
     protected void respondUI(ViewEvent anEvent)
     {
+        // Get TextArea
+        TextArea textArea = getTextArea();
+
         // Handle SaveButton
         if (anEvent.equals("SaveButton"))
             saveChanges();
 
         // Handle CutButton, CopyButton, PasteButton, DeleteButton
         if (anEvent.equals("CutButton"))
-            getTextArea().cut();
+            textArea.cut();
         if (anEvent.equals("CopyButton"))
-            getTextArea().copy();
+            textArea.copy();
         if (anEvent.equals("PasteButton"))
-            getTextArea().paste();
+            textArea.paste();
 
         // Handle UndoButton
         if (anEvent.equals("UndoButton")) {
-            if (getTextArea().getUndoer().hasUndos())
-                getTextArea().undo();
+            if (textArea.getUndoer().hasUndos())
+                textArea.undo();
             else beep();
         }
 
         // Handle RedoButton
         if (anEvent.equals("RedoButton")) {
-            if (getTextArea().getUndoer().hasRedos())
-                getTextArea().redo();
+            if (textArea.getUndoer().hasRedos())
+                textArea.redo();
             else beep();
         }
 
@@ -175,26 +181,30 @@ public class TextPane extends ViewOwner {
         if (anEvent.equals("FontSizeText")) {
             float size = anEvent.getFloatValue();
             if (size < 1) return;
-            Font font = getTextArea().getFont(), font2 = new Font(font.getName(), size);
-            getTextArea().setFont(font2);
-            requestFocus(getTextArea());
+            Font font = textArea.getFont();
+            Font font2 = new Font(font.getName(), size);
+            textArea.setFont(font2);
+            requestFocus(textArea);
         }
 
         // Handle IncreaseFontButton
         if (anEvent.equals("IncreaseFontButton")) {
-            Font font = getTextArea().getFont(), font2 = new Font(font.getName(), font.getSize() + 1);
-            getTextArea().setFont(font2);
+            Font font = textArea.getFont();
+            Font font2 = new Font(font.getName(), font.getSize() + 1);
+            textArea.setFont(font2);
         }
 
         // Handle DecreaseFontButton
         if (anEvent.equals("DecreaseFontButton")) {
-            Font font = getTextArea().getFont(), font2 = new Font(font.getName(), font.getSize() - 1);
-            getTextArea().setFont(font2);
+            Font font = textArea.getFont();
+            Font font2 = new Font(font.getName(), font.getSize() - 1);
+            textArea.setFont(font2);
         }
 
         // Handle FindButton
         if (anEvent.equals("FindButton")) {
-            if (!getTextArea().getSel().isEmpty()) setViewValue("FindText", getTextArea().getSel().getString());
+            if (!textArea.getSel().isEmpty())
+                setViewValue("FindText", textArea.getSel().getString());
             getView("FindText", TextField.class).selectAll();
             requestFocus("FindText");
         }
@@ -214,7 +224,8 @@ public class TextPane extends ViewOwner {
         // Handle EscapeAction
         if (anEvent.equals("EscapeAction")) {
             View t1 = getView("FindText"), t2 = getView("FontSizeText");
-            if (t1.isFocused() || t2.isFocused()) requestFocus(getTextArea());
+            if (t1.isFocused() || t2.isFocused())
+                requestFocus(textArea);
         }
     }
 
