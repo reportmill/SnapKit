@@ -235,7 +235,16 @@ public class TextSel {
      */
     public TextBoxLine getEndLine()
     {
-        return _textBox.getLineForCharIndex(getEnd());
+        // Get line at end char index
+        int endCharIndex = getEnd();
+        TextBoxLine endLine = _textBox.getLineForCharIndex(endCharIndex);
+
+        // If end char index is at start of line and sel not empty, back up to previous line
+        if (endCharIndex == endLine.getStartCharIndex() && !isEmpty())
+            endLine = endLine.getPrevious();
+
+        // Return
+        return endLine;
     }
 
     /**

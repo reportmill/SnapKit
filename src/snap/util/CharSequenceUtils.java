@@ -88,4 +88,38 @@ public class CharSequenceUtils {
     {
         return c == '\r' || c == '\n';
     }
+
+    /**
+     * Returns whether sequence starts with given string.
+     */
+    public static boolean startsWith(CharSequence theChars, String aString)
+    {
+        int thisLength = theChars.length();
+        int strLength = aString.length();
+        if (thisLength < strLength)
+            return false;
+        for (int i = 0; i < strLength; i++)
+            if (theChars.charAt(i) != aString.charAt(i))
+                return false;
+        return true;
+    }
+
+    /**
+     * Returns a string of any leading whitespace chars for given char sequence.
+     */
+    public static String getIndentString(CharSequence theChars)
+    {
+        // Get leading space chars
+        StringBuffer sb = new StringBuffer();
+        int lineLength = theChars.length();
+        for (int i = 0; i < lineLength; i++) {
+            char loopChar = theChars.charAt(i);
+            if (Character.isWhitespace(loopChar) && loopChar != '\n')
+                sb.append(loopChar);
+            else break;
+        }
+
+        // Return
+        return sb.toString();
+    }
 }

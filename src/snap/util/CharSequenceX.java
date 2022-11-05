@@ -80,21 +80,18 @@ public interface CharSequenceX extends CharSequence {
     }
 
     /**
+     * Returns whether sequence starts with given string.
+     */
+    default boolean startsWith(String aString)
+    {
+        return CharSequenceUtils.startsWith(this, aString);
+    }
+
+    /**
      * Returns a string of any leading whitespace chars.
      */
     default String getIndentString()
     {
-        // Get leading space chars
-        StringBuffer sb = new StringBuffer();
-        int lineLength = length();
-        for (int i = 0; i < lineLength; i++) {
-            char loopChar = charAt(i);
-            if (Character.isWhitespace(loopChar) && loopChar != '\n')
-                sb.append(loopChar);
-            else break;
-        }
-
-        // Return
-        return sb.toString();
+        return CharSequenceUtils.getIndentString(this);
     }
 }
