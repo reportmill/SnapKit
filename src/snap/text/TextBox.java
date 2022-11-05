@@ -501,6 +501,9 @@ public class TextBox {
      */
     protected void textDocDidPropChange(PropChange aPC)
     {
+        // Get PropName
+        String propName = aPC.getPropName();
+
         // Handle CharsChange: Update lines for old/new range
         if (aPC instanceof TextDocUtils.CharsChange) {
             TextDocUtils.CharsChange charsChange = (TextDocUtils.CharsChange) aPC;
@@ -525,6 +528,12 @@ public class TextBox {
             TextDoc textDoc = getTextDoc();
             TextLine textLine = textDoc.getLine(lineStyleChange.getIndex());
             textChangedChars(textLine.getStartCharIndex(), textLine.getEndCharIndex());
+        }
+
+        // Handle DefaultTextStyle, ParentTextStyle
+        else if (propName == TextDoc.DefaultTextStyle_Prop || propName == TextDoc.ParentTextStyle_Prop) {
+            if (!isRichText())
+                textChangedChars(0, length());
         }
     }
 

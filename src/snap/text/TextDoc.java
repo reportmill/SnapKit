@@ -12,6 +12,7 @@ import snap.web.WebFile;
 import snap.web.WebURL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class is the basic text storage class, holding a list of TextLine.
@@ -31,10 +32,13 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     protected int  _length;
 
     // The default text style for this text
-    protected TextStyle  _defStyle = TextStyle.DEFAULT;
+    protected TextStyle  _defaultTextStyle;
 
     // The default line style for this text
-    protected TextLineStyle  _defLineStyle = TextLineStyle.DEFAULT;
+    protected TextLineStyle  _defaultLineStyle = TextLineStyle.DEFAULT;
+
+    // The current text style for TextDoc parent/container (probably TextArea).
+    protected TextStyle  _parentTextStyle = TextStyle.DEFAULT;
 
     // Whether property change is enabled
     protected boolean  _propChangeEnabled = true;
@@ -46,6 +50,8 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     public static final String Chars_Prop = "Chars";
     public static final String Style_Prop = "Style";
     public static final String LineStyle_Prop = "LineStyle";
+    public static final String DefaultTextStyle_Prop = "DefaultTextStyle";
+    public static final String ParentTextStyle_Prop = "ParentTextStyle";
 
     /**
      * Constructor.
@@ -159,33 +165,82 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Returns the default style for text.
+     * Returns whether the default text style is explicitly set (vs. coming from parent).
      */
-    public TextStyle getDefaultStyle()  { return _defStyle; }
+    public boolean isDefaultTextStyleSet()  { return _defaultTextStyle != null; }
 
     /**
-     * Sets the default style.
+     * Returns the default text style for text.
+     */
+    public TextStyle getDefaultStyle()  { return _defaultTextStyle != null ? _defaultTextStyle : _parentTextStyle; }
+
+    /**
+     * Sets the default text style.
      */
     public void setDefaultStyle(TextStyle aStyle)
     {
-        _defStyle = aStyle;
-        for (TextLine line : getLines())
-            line.setStyle(aStyle);
+        // If already set, just return
+        if (Objects.equals(aStyle, _defaultTextStyle)) return;
+
+        // Set
+        TextStyle oldStyle = _defaultTextStyle;
+        _defaultTextStyle = aStyle;
+
+        // Update existing lines
+        if (!isRichText()) {
+            TextStyle textStyle = getDefaultStyle();
+            List<TextLine> lines = getLines();
+            for (TextLine line : lines)
+                line.setStyle(textStyle);
+        }
+
+        // Fire prop change
+        firePropChange(DefaultTextStyle_Prop, oldStyle, aStyle);
     }
 
     /**
      * Returns the default line style for text.
      */
-    public TextLineStyle getDefaultLineStyle()  { return _defLineStyle; }
+    public TextLineStyle getDefaultLineStyle()  { return _defaultLineStyle; }
 
     /**
      * Sets the default line style.
      */
     public void setDefaultLineStyle(TextLineStyle aLineStyle)
     {
-        _defLineStyle = aLineStyle;
+        _defaultLineStyle = aLineStyle;
         for (TextLine line : getLines())
             line.setLineStyle(aLineStyle);
+    }
+
+    /**
+     * Returns the current style for TextDoc parent/container (probably a TextArea).
+     */
+    public TextStyle getParentTextStyle()  { return _parentTextStyle; }
+
+    /**
+     * Sets the current style for TextDoc parent/container (probably a TextArea).
+     */
+    public void setParentTextStyle(TextStyle aStyle)
+    {
+        // If already set, just return
+        if (aStyle == null) aStyle = TextStyle.DEFAULT;
+        if (Objects.equals(aStyle, _defaultTextStyle)) return;
+
+        // Set
+        TextStyle oldStyle = _parentTextStyle;
+        _parentTextStyle = aStyle;
+
+        // If DefaultTextStyle not set, update existing lines
+        if (!isRichText() && !isDefaultTextStyleSet()) {
+            TextStyle textStyle = getDefaultStyle();
+            List<TextLine> lines = getLines();
+            for (TextLine line : lines)
+                line.setStyle(textStyle);
+        }
+
+        // Fire prop change
+        firePropChange(ParentTextStyle_Prop, oldStyle, aStyle);
     }
 
     /**

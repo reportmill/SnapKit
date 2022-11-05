@@ -19,6 +19,9 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
     public RichText()
     {
         super();
+
+        // Set DefaultStyle, because RichText never inherits from parent
+        _defaultTextStyle = TextStyle.DEFAULT;
     }
 
     /**

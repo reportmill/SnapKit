@@ -10,7 +10,6 @@ import snap.props.UndoSet;
 import snap.props.Undoer;
 import snap.text.*;
 import snap.util.*;
-import java.util.Objects;
 
 /**
  * A view subclass for displaying and editing a TextDoc (using TextBox).
@@ -101,13 +100,12 @@ public class TextArea extends View {
      */
     public TextArea()
     {
+        // Configure
+        setFocusPainted(false);
+
         // Create/set default TextBox
         TextBox tbox = createTextBox();
         setTextBox(tbox);
-
-        // Configure
-        setFont(getDefaultFont());
-        setFocusPainted(false);
     }
 
     /**
@@ -159,6 +157,13 @@ public class TextArea extends View {
     {
         // If already set, just return
         TextDoc oldTextDoc = getTextDoc(); if (aTextDoc == oldTextDoc) return;
+
+        // Update TextDoc.ParentTextStyle
+        if (aTextDoc != null && (isFontSet() || getParent() != null)) {
+            Font font = isFontSet() ? getFont() : getParent().getFont();
+            TextStyle parentTextStyle = aTextDoc.getParentTextStyle().copyFor(font);
+            aTextDoc.setParentTextStyle(parentTextStyle);
+        }
 
         // Add/remove PropChangeListener
         if (oldTextDoc != null)
@@ -492,10 +497,17 @@ public class TextArea extends View {
      */
     public Font getFont()
     {
-        // If RichText, return SelStyle.Font
+        // Handle RichText: Return SelStyle.Font
         if (isRichText()) {
             TextStyle selStyle = getSelStyle();
             return selStyle.getFont();
+        }
+
+        // Handle plain text with DefaultStyleSet: Return DefaultStyle.Font
+        TextDoc textDoc = getTextDoc();
+        if (textDoc.isDefaultTextStyleSet()) {
+            TextStyle textStyle = textDoc.getDefaultStyle();
+            return textStyle.getFont();
         }
 
         // Do normal version
@@ -507,19 +519,24 @@ public class TextArea extends View {
      */
     public void setFont(Font aFont)
     {
-        // If RichText, just update SelStyle.Font and return
+        // Handle RichText: just update SelStyle.Font and return
         if (isRichText()) {
             if (aFont != null)
                 setSelStyleValue(TextStyle.FONT_KEY, aFont);
             return;
         }
 
+        // Update TextDoc.DefaultTextStyle, ParentTextStyle
+        TextDoc textDoc = getTextDoc();
+        TextStyle defaultTextStyle = aFont != null ? textDoc.getDefaultStyle().copyFor(aFont) : null;
+        textDoc.setDefaultStyle(defaultTextStyle);
+
         // Do normal version
-        if (Objects.equals(aFont, getFont())) return;
         super.setFont(aFont);
 
-        // Update SelStyle.Font
-        setSelStyleValue(TextStyle.FONT_KEY, aFont);
+        // Update TextDoc.ParentTextStyle
+        TextStyle parentTextStyle = defaultTextStyle != null ? defaultTextStyle : textDoc.getParentTextStyle().copyFor(aFont);
+        textDoc.setParentTextStyle(parentTextStyle);
     }
 
     /**
@@ -528,14 +545,17 @@ public class TextArea extends View {
     @Override
     protected void parentFontChanged()
     {
+        // Handle RichText: Just return
+        if (isRichText()) return;
+
         // Do normal version
         super.parentFontChanged();
 
-        // Update SelStyle.Font
-        if (!isRichText()) {
-            Font font = getFont();
-            setSelStyleValue(TextStyle.FONT_KEY, font);
-        }
+        // Update TextDoc.ParentTextStyle
+        TextDoc textDoc = getTextDoc();
+        Font font = getFont();
+        TextStyle parentTextStyle = textDoc.getParentTextStyle().copyFor(font);
+        textDoc.setParentTextStyle(parentTextStyle);
     }
 
     /**
@@ -1625,11 +1645,6 @@ public class TextArea extends View {
         relayoutParent();
         repaint();
     }
-
-    /**
-     * Overrride to return Arial 11.
-     */
-    public Font getDefaultFont()  { return Font.Arial11; }
 
     /**
      * Override to return white.
