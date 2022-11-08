@@ -5,13 +5,14 @@ package snap.view;
 import java.text.DateFormat;
 import java.util.*;
 import snap.gfx.*;
+import snap.props.PropObject;
 import snap.util.*;
 import snap.web.WebURL;
 
 /**
- * A base controller class class that manages a SwingPanel usually loaded from a rib file.
+ * A base controller class that manages a UI View (usually loaded from a snp UI file).
  */
-public class ViewOwner implements EventListener {
+public class ViewOwner extends PropObject implements EventListener {
 
     // The UI View
     private View  _ui;
@@ -38,13 +39,13 @@ public class ViewOwner implements EventListener {
     private boolean  _initShowingDone;
 
     // A map of binding values not explicitly defined in model
-    private Map  _modelValues = new HashMap<>();
+    private Map<String,Object>  _modelValues = new HashMap<>();
     
     // A map of maps that perform value conversions
-    private Map <String, Map>  _conversionMaps = new HashMap<>();
+    private Map<String,Map>  _conversionMaps = new HashMap<>();
     
     // Map of RunOne runnables
-    private final Map <String,Runnable> _runOnceMap = new HashMap<>();
+    private final Map<String,Runnable> _runOnceMap = new HashMap<>();
     
     // The view environment
     private ViewEnv  _env = ViewEnv.getEnv();
@@ -75,13 +76,10 @@ public class ViewOwner implements EventListener {
     public static final ViewEvent.Type WinDeactivate = ViewEvent.Type.WinDeactivate;
     public static final ViewEvent.Type WinOpen = ViewEvent.Type.WinOpen;
     public static final ViewEvent.Type WinClose = ViewEvent.Type.WinClose;
-    public ViewEvent.Type KeyEvents[] = { KeyPress, KeyRelease, KeyType };
-    public ViewEvent.Type MouseEvents[] = { MousePress, MouseDrag, MouseRelease, MouseEnter, MouseMove, MouseExit };
-    public ViewEvent.Type DragEvents[] = { DragEnter, DragExit, DragOver, DragDrop };
+    public ViewEvent.Type[] KeyEvents = { KeyPress, KeyRelease, KeyType };
+    public ViewEvent.Type[] MouseEvents = { MousePress, MouseDrag, MouseRelease, MouseEnter, MouseMove, MouseExit };
+    public ViewEvent.Type[] DragEvents = { DragEnter, DragExit, DragOver, DragDrop };
 
-    // Constants
-    private final View VIEW_NOT_FOUND_VIEW = new View();
-    
     /**
      * Creates a new ViewOwner.
      */
@@ -250,8 +248,8 @@ public class ViewOwner implements EventListener {
                 return cview;
         }
 
-        // Return null since view not found
-        return null; // VIEW_NOT_FOUND_VIEW;
+        // Return not found
+        return null;
     }
 
     /**
