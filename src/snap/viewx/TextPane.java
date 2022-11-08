@@ -25,6 +25,9 @@ public class TextPane extends ViewOwner {
     // Whether text pane text is modified
     private boolean  _textModified;
 
+    // Constants for properties
+    public static final String TextModified_Prop = "TextModified";
+
     /**
      * Returns the TextArea.
      */
@@ -55,9 +58,10 @@ public class TextPane extends ViewOwner {
     /**
      * Sets whether text is modified.
      */
-    public void setTextModified(boolean aFlag)
+    public void setTextModified(boolean aValue)
     {
-        _textModified = aFlag;
+        if (aValue == isTextModified()) return;
+        firePropChange(TextModified_Prop, _textModified, _textModified = aValue);
     }
 
     /**
@@ -324,14 +328,12 @@ public class TextPane extends ViewOwner {
     /**
      * Silly test.
      */
-    public static void main(String args[])
+    public static void main(String[] args)
     {
         TextPane textPane = new TextPane();
         TextArea textArea = textPane.getTextArea();
         textArea.setPrefSize(800, 600);
-        //String text = WebURL.getURL(TextPane.class, "TextPane.snp").getText();
-        //textArea.setText(text);
+        //String text = WebURL.getURL(TextPane.class, "TextPane.snp").getText(); textArea.setText(text);
         textPane.setWindowVisible(true);
     }
-
 }
