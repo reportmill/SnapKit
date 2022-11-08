@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.text.DateFormat;
 import java.util.*;
 import snap.gfx.*;
 import snap.props.PropObject;
@@ -38,12 +37,6 @@ public class ViewOwner extends PropObject implements EventListener {
     // Whether initShowing has happened
     private boolean  _initShowingDone;
 
-    // A map of binding values not explicitly defined in model
-    private Map<String,Object>  _modelValues = new HashMap<>();
-    
-    // A map of maps that perform value conversions
-    private Map<String,Map>  _conversionMaps = new HashMap<>();
-    
     // Map of RunOne runnables
     private final Map<String,Runnable> _runOnceMap = new HashMap<>();
     
@@ -142,7 +135,7 @@ public class ViewOwner extends PropObject implements EventListener {
     /**
      * Creates the top level view for given class.
      */
-    protected View createUIForClass(Class aClass)
+    protected View createUIForClass(Class<?> aClass)
     {
         WebURL src = _env.getUISource(aClass);
         return createUIForSource(src);
@@ -170,7 +163,7 @@ public class ViewOwner extends PropObject implements EventListener {
      */
     protected Object getUISource()
     {
-        Class cls = getClass();
+        Class<?> cls = getClass();
         return _env.getUISource(cls);
     }
 
@@ -243,9 +236,9 @@ public class ViewOwner extends PropObject implements EventListener {
             View view = getUI();
             if (name.equals(view.getName()))
                 return view;
-            View cview = view instanceof ParentView ? ((ParentView) view).getChildForName(name) : null;
-            if (cview != null)
-                return cview;
+            View childView = view instanceof ParentView ? ((ParentView) view).getChildForName(name) : null;
+            if (childView != null)
+                return childView;
         }
 
         // Return not found
@@ -362,7 +355,7 @@ public class ViewOwner extends PropObject implements EventListener {
     /**
      * Sets the items for a given name or UI view.
      */
-    public void setViewItems(Object anObj, Object theItems[])
+    public void setViewItems(Object anObj, Object[] theItems)
     {
         Selectable selectable = getView(anObj, Selectable.class);
         selectable.setItems(theItems);
@@ -463,7 +456,7 @@ public class ViewOwner extends PropObject implements EventListener {
      */
     public Image getImage(String aPath)
     {
-        Class cls = getClass();
+        Class<?> cls = getClass();
         return Image.get(cls, aPath);
     }
 
@@ -472,10 +465,16 @@ public class ViewOwner extends PropObject implements EventListener {
      */
     public ToggleGroup getToggleGroup(String aName)
     {
-        if (_toggleGroups == null) _toggleGroups = new HashMap();
+        // Create ToggleGroups map if absent
+        if (_toggleGroups == null)
+            _toggleGroups = new HashMap<>();
+
+        // Get cached toggleGroup - create/add if absent
         ToggleGroup toggleGroup = _toggleGroups.get(aName);
         if (toggleGroup == null)
             _toggleGroups.put(aName, toggleGroup = new ToggleGroup());
+
+        // Return
         return toggleGroup;
     }
 
@@ -496,7 +495,8 @@ public class ViewOwner extends PropObject implements EventListener {
     {
         View ui = isUISet() ? getUI() : null; if (ui == null) return;
         ViewUpdater updater = ui.getUpdater();
-        if (updater == null) _resetLater = true;
+        if (updater == null)
+            _resetLater = true;
         else updater.resetLater(this);
     }
 
@@ -512,7 +512,6 @@ public class ViewOwner extends PropObject implements EventListener {
     {
         boolean old = setSendEventDisabled(true);
         try {
-            resetViewBindings(getUI()); // Reset bindings
             this.resetUI();
         }
         finally { setSendEventDisabled(old); }
@@ -523,12 +522,6 @@ public class ViewOwner extends PropObject implements EventListener {
      */
     protected void processEvent(ViewEvent anEvent)
     {
-        // Get binding for property name and have it retrieve value
-        View view = anEvent.getView();
-        Binding binding = anEvent.isActionEvent() ? view.getBinding("Value") : null;
-        if (binding != null)
-            setBindingModelValue(binding);
-
         // Call main Owner.respondUI method
         this.respondUI(anEvent);
     }
@@ -550,105 +543,6 @@ public class ViewOwner extends PropObject implements EventListener {
         if (!_cancelReset && getUI().isShowing())
             resetLater();
         _cancelReset = false;
-    }
-
-    /**
-     * Adds a binding to a UI view.
-     */
-    public void addViewBinding(Object anObj, String aPropName, String aKeyPath)
-    {
-        View view = getView(anObj);
-        view.addBinding(aPropName, aKeyPath);
-    }
-
-    /**
-     * Reset bindings for UI view (recurses for children).
-     */
-    protected void resetViewBindings(View aView)
-    {
-        // If Owner of view doesn't match, just return
-        //ViewHelper helper = aView.getHelper(); if (helper.isValueAdjusting()) return;
-        Object owner = aView.getOwner(); if (owner!=this) return;
-
-        // Iterate over view bindings and reset
-        for (Binding binding : aView.getBindings())
-            setBindingViewValue(binding);
-
-        // Iterate over view children and recurse
-        if (aView instanceof ParentView) {
-            ParentView pview = (ParentView) aView;
-            for (View child : pview.getChildren())
-                resetViewBindings(child);
-        }
-    }
-
-    /**
-     * Returns the UI view value for the given binding.
-     */
-    protected Object getBindingViewValue(Binding aBinding)
-    {
-        // Get value from UI view
-        View view = aBinding.getView(View.class); if (view == null) return null;
-        Object value = view.getPropValue(aBinding.getPropertyName());
-
-        // If conversion key is present, do conversion
-        String convKey = aBinding.getConversionKey();
-        if (convKey != null)
-            value = getConversionMapKey(convKey, value);
-
-        // If binding format is available, try to parse
-        //if (aBinding.getFormat()!=null && value instanceof String)
-        //    try { value = aBinding.getFormat().parseObject((String)value); } catch(Exception e) { }
-
-        // Return value
-        return value;
-    }
-
-    /**
-     * Sets the view value for the given binding from the key value.
-     */
-    protected void setBindingViewValue(Binding aBinding)
-    {
-        View view = aBinding.getView(View.class); if (view == null) return;
-        String pname = aBinding.getPropertyName();
-        Object value = getBindingModelValue(aBinding);
-        view.setPropValue(pname, value);
-    }
-
-    /**
-     * Returns the key value for a given binding.
-     */
-    protected Object getBindingModelValue(Binding aBinding)
-    {
-        // Get binding key and value
-        String key = aBinding.getKey();
-        Object value = getModelValue(key);
-
-        // If conversion key is present, do conversion
-        String convKey = aBinding.getConversionKey();
-        if (convKey != null)
-            value = getConversionMapValue(convKey, value);
-
-        // If format is present, format value
-        //if (aBinding.getFormat()!=null && value!=null)
-        //    try { value = aBinding.getFormat().format(value); }
-        //    catch(Exception e) { System.err.println("ViewOwner.getBindingKeyValue: " + e); }
-
-        // This is probably the wrong thing to do - maybe should be in JTextComponentHpr somehow
-        if (value instanceof Date)
-            value = DateFormat.getDateInstance(DateFormat.MEDIUM).format(value);
-
-        // Return value
-        return value;
-    }
-
-    /**
-     * Sets the key value for the given binding from the UI view.
-     */
-    protected void setBindingModelValue(Binding aBinding)
-    {
-        Object value = getBindingViewValue(aBinding); // Get value from view
-        setModelValue(aBinding.getKey(), value); // Set value in model
     }
 
     /**
@@ -711,48 +605,6 @@ public class ViewOwner extends PropObject implements EventListener {
         else win.hide();
     }
 
-    /** Returns the Window RootView. */
-    //public RootView getRootView()  { return getWindow().getRootView(); }
-
-    /**
-     * Returns the map of maps, each of which is used to perform value conversions.
-     */
-    public Map <String,Map> getConversionMaps()  { return _conversionMaps; }
-
-    /**
-     * Returns a named map to perform value conversions.
-     */
-    public Map <String,String> getConversionMap(String aName)
-    {
-        Map map = _conversionMaps.get(aName);
-        if (map==null)
-            _conversionMaps.put(aName, map = new HashMap());
-        return map;
-    }
-
-    /**
-     * Converts a UI view value to binder object value using conversion key map.
-     */
-    protected Object getConversionMapKey(String aConversionMapName, Object aValue)
-    {
-        // Get conversion map (just return original object if null)
-        Map <String, String> map = getConversionMap(aConversionMapName); if (map==null) return aValue;
-        for (Map.Entry entry : map.entrySet()) // Return key for value (just return original object if null)
-            if (entry.getValue().equals(aValue.toString()))
-                return entry.getKey();
-        return aValue.toString(); // Return original object, since value not found in conversion map
-    }
-
-    /**
-     * Converts a binder object value to UI view using conversion key map.
-     */
-    public Object getConversionMapValue(String aConversionMapName, Object aKey)
-    {
-        Map map = getConversionMap(aConversionMapName); if (map==null) return aKey;
-        String value = (String)map.get(aKey.toString());
-        return value!=null? value : aKey.toString();
-    }
-
     /**
      * Enables events on given object.
      */
@@ -799,7 +651,9 @@ public class ViewOwner extends PropObject implements EventListener {
      */
     public boolean setSendEventDisabled(boolean aFlag)
     {
-        boolean old = _sendEventDisabled; _sendEventDisabled = aFlag; return old;
+        boolean old = _sendEventDisabled;
+        _sendEventDisabled = aFlag;
+        return old;
     }
 
     /**
@@ -808,13 +662,20 @@ public class ViewOwner extends PropObject implements EventListener {
      */
     public void addKeyActionFilter(String aName, String aKey)
     {
-        KeyCombo kcombo = KeyCombo.get(aKey); if (kcombo == null) return;
+        // Get KeyCombo
+        KeyCombo keyCombo = KeyCombo.get(aKey);
+        if (keyCombo == null)
+            return;
+
+        // If first, do init
         if (_keyFilters.size() == 0) {
             View ui = getUI();
             ui.addEventFilter(e -> checkKeyActions(e, true), KeyPress);
             _keyFilters = new HashMap();
         }
-        _keyFilters.put(kcombo, aName);
+
+        // Add KeyCombo
+        _keyFilters.put(keyCombo, aName);
     }
 
     /**
@@ -823,13 +684,20 @@ public class ViewOwner extends PropObject implements EventListener {
      */
     public void addKeyActionHandler(String aName, String aKey)
     {
-        KeyCombo kcombo = KeyCombo.get(aKey); if (kcombo == null) return;
+        // Get KeyCombo
+        KeyCombo keyCombo = KeyCombo.get(aKey);
+        if (keyCombo == null)
+            return;
+
+        // If first, do init
         if (_keyHandlers.size() == 0) {
             View ui = getUI();
             ui.addEventHandler(e -> checkKeyActions(e, false), KeyPress);
             _keyHandlers = new HashMap();
         }
-        _keyHandlers.put(kcombo, aName);
+
+        // Add KeyCombo
+        _keyHandlers.put(keyCombo, aName);
     }
 
     /**
@@ -838,8 +706,8 @@ public class ViewOwner extends PropObject implements EventListener {
     private void checkKeyActions(ViewEvent anEvent, boolean isFilter)
     {
         // Get name for action associated with given key event
-        KeyCombo kcombo = anEvent.getKeyCombo();
-        String name = isFilter ? _keyFilters.get(kcombo) : _keyHandlers.get(kcombo);
+        KeyCombo keyCombo = anEvent.getKeyCombo();
+        String name = isFilter ? _keyFilters.get(keyCombo) : _keyHandlers.get(keyCombo);
 
         // If found, send action
         if (name != null) {
@@ -891,8 +759,15 @@ public class ViewOwner extends PropObject implements EventListener {
      * A wrapper Runnable for RunLaterOnce.
      */
     private class RunLaterRunnable implements Runnable {
-        String _name; Runnable _runnable;
+
+        // Ivars
+        String _name;
+        Runnable _runnable;
+
+        /** Constructor. */
         RunLaterRunnable(String aName, Runnable aRunnable)  { _name = aName; _runnable = aRunnable; }
+
+        /** Run. */
         public void run()
         {
             Runnable runnable;
@@ -903,25 +778,6 @@ public class ViewOwner extends PropObject implements EventListener {
             if (runnable != null)
                 runnable.run();
         }
-    }
-
-    /**
-     * Returns the model value for given key expression from this ViewOwner.
-     */
-    public Object getModelValue(String aKey)
-    {
-        Object value = KeyChain.getValue(this, aKey);
-        if (value == null) value = KeyChain.getValue(_modelValues, aKey);
-        return value;
-    }
-
-    /**
-     * Sets the model value for given key expression and value for this ViewOwner.
-     */
-    public void setModelValue(String aKey, Object aValue)
-    {
-        try { KeyChain.setValue(this, aKey, aValue); }
-        catch(Exception e) { KeyChain.setValueSafe(_modelValues, aKey, aValue); }
     }
 
     /**
