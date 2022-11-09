@@ -3,6 +3,8 @@
  */
 package snap.view;
 import java.util.Arrays;
+
+import snap.geom.Insets;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -78,8 +80,8 @@ public class MenuBar extends ParentView {
     protected void processEvent(ViewEvent anEvent)
     {
         for (View item : getChildren()) {
-            MenuItem match = getMatchingMenuItem((MenuItem)item, anEvent);
-            if (match!=null) {
+            MenuItem match = getMatchingMenuItem((MenuItem) item, anEvent);
+            if (match != null) {
                 match.fireActionEvent(anEvent);
                 anEvent.consume(); return;
             }
@@ -89,17 +91,23 @@ public class MenuBar extends ParentView {
     /**
      * Returns a matching menu item.
      */
-    public MenuItem getMatchingMenuItem(MenuItem aMI, ViewEvent anEvent)
+    public MenuItem getMatchingMenuItem(MenuItem aMenuItem, ViewEvent anEvent)
     {
-        if (aMI instanceof Menu) { Menu menu = (Menu)aMI;
+        // Handle Menu
+        if (aMenuItem instanceof Menu) {
+            Menu menu = (Menu) aMenuItem;
             for (MenuItem item : menu.getItems()) {
                 MenuItem match = getMatchingMenuItem(item, anEvent);
-                if(match!=null)
+                if(match != null)
                     return match;
             }
         }
-        else if (anEvent.getKeyCombo().equals(aMI.getShortcutCombo()))
-            return aMI;
+
+        // Handle MenuItem
+        else if (anEvent.getKeyCombo().equals(aMenuItem.getShortcutCombo()))
+            return aMenuItem;
+
+        // Return not found
         return null;
     }
 
@@ -109,25 +117,33 @@ public class MenuBar extends ParentView {
     protected void paintBack(Painter aPntr)
     {
         super.paintBack(aPntr);
-        double w = getWidth(), h = getHeight() - .5;
-        aPntr.setColor(Color.LIGHTGRAY); aPntr.setStroke(Stroke.Stroke1);
-        aPntr.drawLine(0,h,w,h);
+        double viewW = getWidth();
+        double viewH = getHeight() - .5;
+        aPntr.setColor(Color.LIGHTGRAY);
+        aPntr.setStroke(Stroke.Stroke1);
+        aPntr.drawLine(0, viewH, viewW, viewH);
     }
 
     /**
      * Returns the preferred height.
      */
-    protected double getMinHeightImpl()  { return getFont().getSize() + 10; }
+    protected double getMinHeightImpl()  { return getFont().getSize() + 12; }
 
     /**
      * Returns the preferred width.
      */
-    protected double getPrefWidthImpl(double aH)  { return RowView.getPrefWidth(this, aH); }
+    protected double getPrefWidthImpl(double aH)
+    {
+        return RowView.getPrefWidth(this, aH);
+    }
 
     /**
      * Returns the preferred height.
      */
-    protected double getPrefHeightImpl(double aW)  { return RowView.getPrefHeight(this, aW); }
+    protected double getPrefHeightImpl(double aW)
+    {
+        return RowView.getPrefHeight(this, aW);
+    }
 
     /**
      * Layout children.
@@ -150,7 +166,7 @@ public class MenuBar extends ParentView {
     protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Archive children
-        for (int i=0, iMax=getMenuCount(); i<iMax; i++) { Menu child = getMenu(i);
+        for (int i = 0, iMax = getMenuCount(); i < iMax; i++) { Menu child = getMenu(i);
             anElement.add(anArchiver.toXML(child, this)); }
     }
 
@@ -160,9 +176,9 @@ public class MenuBar extends ParentView {
     protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Iterate over child elements and unarchive MenuItems
-        for (int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
-            Class cls = anArchiver.getClass(childXML.getName());
-            if (cls!=null && Menu.class.isAssignableFrom(cls)) {
+        for (int i = 0, iMax = anElement.size(); i < iMax; i++) { XMLElement childXML = anElement.get(i);
+            Class<?> cls = anArchiver.getClass(childXML.getName());
+            if (cls != null && Menu.class.isAssignableFrom(cls)) {
                 Menu menu = (Menu)anArchiver.fromXML(childXML, this);
                 addMenu(menu);
             }
@@ -175,8 +191,10 @@ public class MenuBar extends ParentView {
     public static ColView createMenuBarView(MenuBar aMenuBar, View aView)
     {
         // Create ColView that makes given MenuBar FillWidth and given View fill extra height
-        ColView colView = new ColView(); colView.setFillWidth(true);
-        colView.addChild(aMenuBar); colView.addChild(aView);
+        ColView colView = new ColView();
+        colView.setFillWidth(true);
+        colView.addChild(aMenuBar);
+        colView.addChild(aView);
         aView.setGrowHeight(true);
 
         // Add EventListener (filter) to intercept any KeyPress + ShortCut events and run by MenuBar

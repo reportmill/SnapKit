@@ -75,21 +75,23 @@ public class SplitView extends ParentView implements ViewHost {
     public void addItem(View aView, int anIndex)
     {
         // Add View item
-        _items.add(anIndex,aView);
+        _items.add(anIndex, aView);
 
         // If more than one item, add divider
-        if (getItemCount()>1) {
+        if (getItemCount() > 1) {
             Divider div = createDivider();
-            addDivider(div, anIndex>0 ? (anIndex-1) : 0);
-            addChild(div, anIndex>0 ? (anIndex*2-1) : 0);
+            addDivider(div, anIndex > 0 ? (anIndex - 1) : 0);
+            addChild(div, anIndex > 0 ? (anIndex * 2 - 1) : 0);
 
             // See if divider should be not-visible
-            boolean vis = aView.isVisible(); if (anIndex==1) vis &= getItem(0).isVisible();
+            boolean vis = aView.isVisible();
+            if (anIndex == 1)
+                vis &= getItem(0).isVisible();
             div.setVisible(vis);
         }
 
         // Add view as child
-        addChild(aView, anIndex*2);
+        addChild(aView, anIndex * 2);
         aView.addPropChangeListener(_visLsnr, Visible_Prop);
     }
 
@@ -104,8 +106,8 @@ public class SplitView extends ParentView implements ViewHost {
         view.removePropChangeListener(_visLsnr, Visible_Prop);
 
         // If at least one item left, remove extra divider
-        if (getItemCount()>0)
-            removeDivider(anIndex>0 ? (anIndex-1) : 0);
+        if (getItemCount() > 0)
+            removeDivider(anIndex > 0 ? (anIndex - 1) : 0);
         return view;
     }
 
@@ -115,7 +117,8 @@ public class SplitView extends ParentView implements ViewHost {
     public int removeItem(View aView)
     {
         int index = indexOfItem(aView);
-        if (index>=0) removeItem(index);
+        if (index >= 0)
+            removeItem(index);
         return index;
     }
 
@@ -124,9 +127,9 @@ public class SplitView extends ParentView implements ViewHost {
      */
     public void setItem(View aView, int anIndex)
     {
-        View old = anIndex<getItemCount() ? _items.get(anIndex) : null;
-        int index = old!=null? removeItem(old) : -1;
-        addItem(aView, index>=0? index : getItemCount());
+        View old = anIndex < getItemCount() ? _items.get(anIndex) : null;
+        int index = old != null ? removeItem(old) : -1;
+        addItem(aView, index >= 0 ? index : getItemCount());
     }
 
     /**
@@ -135,13 +138,18 @@ public class SplitView extends ParentView implements ViewHost {
     public void setItems(View ... theViews)
     {
         removeItems();
-        for (View view : theViews) addItem(view);
+        for (View view : theViews)
+            addItem(view);
     }
 
     /**
      * Sets the splitview items to given views
      */
-    public void removeItems()  { for(View view : getItems().toArray(new View[0])) removeItem(view); }
+    public void removeItems()
+    {
+        for (View view : getItems().toArray(new View[0]))
+            removeItem(view);
+    }
 
     /**
      * Returns the index of given item.
@@ -151,7 +159,10 @@ public class SplitView extends ParentView implements ViewHost {
     /**
      * Adds a child with animation.
      */
-    public void addItemWithAnim(View aView, double aSize)  { addItemWithAnim(aView, aSize, getItemCount()); }
+    public void addItemWithAnim(View aView, double aSize)
+    {
+        addItemWithAnim(aView, aSize, getItemCount());
+    }
 
     /**
      * Adds a item with animation.
@@ -162,10 +173,10 @@ public class SplitView extends ParentView implements ViewHost {
         addItem(aView, anIndex);
 
         // Get new Divider for view
-        Divider div = anIndex==0? getDivider(0) : getDivider(anIndex-1);
+        Divider div = anIndex == 0 ? getDivider(0) : getDivider(anIndex - 1);
 
         // If first view, configure anim for given size as Location
-        if (anIndex==0) {
+        if (anIndex == 0) {
             div.setLocation(0);
             div.getAnimCleared(500).setValue(Divider.Location_Prop, 1d, aSize).play();
         }
@@ -184,11 +195,11 @@ public class SplitView extends ParentView implements ViewHost {
     {
         // Get index, divider and Location/Remainder for given view
         int index = indexOfItem(aView);
-        Divider div = index==0 ? getDivider(0) : getDivider(index-1);
+        Divider div = index == 0 ? getDivider(0) : getDivider(index - 1);
         double size = isVertical() ? aView.getHeight() : aView.getWidth();
 
         // If first item, set Location animated
-        if (index==0) {
+        if (index == 0) {
             div.setLocation(size);
             ViewAnim anim = div.getAnim(0).clear();
             anim.getAnim(500).setValue(Divider.Location_Prop, size, 1d);
@@ -210,22 +221,23 @@ public class SplitView extends ParentView implements ViewHost {
     public void setItemVisibleWithAnim(View aView, boolean aValue)
     {
         // If already set, just return
-        if (aValue==aView.isVisible()) return;
+        if (aValue == aView.isVisible()) return;
 
         // Get index, divider and size
         int index = indexOfItem(aView), time = 500;
-        Divider div = index==0 ? getDivider(0) : getDivider(index-1);
-        double size = isVertical()? aView.getHeight() : aView.getWidth();
+        Divider div = index == 0 ? getDivider(0) : getDivider(index - 1);
+        double size = isVertical() ? aView.getHeight() : aView.getWidth();
 
         // Clear running anims
-        aView.getAnimCleared(0); div.getAnimCleared(0);
+        aView.getAnimCleared(0);
+        div.getAnimCleared(0);
 
         // Handle show item
         if (aValue) {
 
             // If first item, set Location
             double dsize = div.getSpan();
-            if (index==0) {
+            if (index == 0) {
                 div.setLocation(0);
                 div.getAnim(time).setValue(Divider.Location_Prop, dsize, size).play();
             }
@@ -248,7 +260,7 @@ public class SplitView extends ParentView implements ViewHost {
         else {
 
             // If first item, set location
-            if (index==0) {
+            if (index == 0) {
                 div.setLocation(size);
                 div.getAnim(time).setValue(Divider.Location_Prop, size, 1d).play();
             }
@@ -277,7 +289,8 @@ public class SplitView extends ParentView implements ViewHost {
         aView.setVisible(false);
         aView.setOpacity(1);
         aDiv.setOpacity(1);
-        if (isVertical()) aView.setHeight(size);
+        if (isVertical())
+            aView.setHeight(size);
         else aView.setWidth(size);
     }
 
@@ -287,16 +300,16 @@ public class SplitView extends ParentView implements ViewHost {
     private void itemVisibleChanged(PropChange aPC)
     {
         // If no dividers, just return
-        if (getItemCount()<2) return;
+        if (getItemCount() < 2) return;
 
         // Get whether divider should be visible and fix
-        View view = (View)aPC.getSource();
-        int ind = getItems().indexOf(view);
-        Divider div = getDivider(ind>0? ind-1 : 0);
-        boolean vis = view.isVisible();
-        if (ind==1)
-            vis &= getItem(0).isVisible();
-        div.setVisible(vis);
+        View view = (View) aPC.getSource();
+        int viewIndex = getItems().indexOf(view);
+        Divider div = getDivider(viewIndex > 0 ? viewIndex - 1 : 0);
+        boolean divVisible = view.isVisible();
+        if (viewIndex == 1)
+            divVisible &= getItem(0).isVisible();
+        div.setVisible(divVisible);
     }
 
     /**
@@ -305,7 +318,7 @@ public class SplitView extends ParentView implements ViewHost {
     public Divider getDivider()
     {
         // If already set, just return
-        if (_divider!=null) return _divider;
+        if (_divider != null) return _divider;
 
         // Create and return
         Divider div = new Divider();
@@ -320,14 +333,17 @@ public class SplitView extends ParentView implements ViewHost {
      */
     protected Divider createDivider()
     {
-        Divider div0 = getDivider();
-        Divider div = new Divider();
-        div.setVertical(!isVertical());
-        div.setFill(div0.getFill());
-        div.setBorder(div0.getBorder());
-        div.setReach(div0.getReach());
-        div.setPrefSpan(getDividerSpan());
-        return div;
+        // Create/config new divider from prototype
+        Divider dividerPrototype = getDivider();
+        Divider newDivider = new Divider();
+        newDivider.setVertical(!isVertical());
+        newDivider.setFill(dividerPrototype.getFill());
+        newDivider.setBorder(dividerPrototype.getBorder());
+        newDivider.setReach(dividerPrototype.getReach());
+        newDivider.setPrefSpan(getDividerSpan());
+
+        // Return
+        return newDivider;
     }
 
     /**
@@ -366,20 +382,28 @@ public class SplitView extends ParentView implements ViewHost {
     public Divider getDividerAt(double aX, double aY)
     {
         // Handle vertical
-        if (isVertical()) { for(Divider div : _divs) { if(!div.isVisible()) continue;
-            double min = div.getY() - div.getReach();
-            double max = div.getMaxY() + div.getReach();
-            if(aY>=min && aY<=max)
-                return div;
-        }}
+        if (isVertical()) {
+            for (Divider div : _divs) {
+                if (!div.isVisible()) continue;
+                double min = div.getY() - div.getReach();
+                double max = div.getMaxY() + div.getReach();
+                if (aY >= min && aY <= max)
+                    return div;
+            }
+        }
 
         // Handle horizontal
-        else { for(Divider div : _divs) { if(!div.isVisible()) continue;
-            double min = div.getX() - div.getReach();
-            double max = div.getMaxX() + div.getReach();
-            if (aX>=min && aX<=max)
-                return div;
-        }}
+        else {
+            for (Divider div : _divs) {
+                if (!div.isVisible()) continue;
+                double min = div.getX() - div.getReach();
+                double max = div.getMaxX() + div.getReach();
+                if (aX >= min && aX <= max)
+                    return div;
+            }
+        }
+
+        // Return not found
         return null;
     }
 
@@ -404,11 +428,14 @@ public class SplitView extends ParentView implements ViewHost {
      */
     private void dividerPropChange(PropChange aPC)
     {
-        String pname = aPC.getPropName();
-        if (pname == Fill_Prop)
+        // Get property name
+        String propName = aPC.getPropName();
+
+        // Handle Fill, Border
+        if (propName == Fill_Prop)
             for (Divider div : _divs)
                 div.setFill(_divider.getFill());
-        else if (pname == Border_Prop)
+        else if (propName == Border_Prop)
             for (Divider div : _divs)
                 div.setBorder(_divider.getBorder());
     }
@@ -438,6 +465,31 @@ public class SplitView extends ParentView implements ViewHost {
     {
         ParentViewProxy<?> viewProxy = getViewProxy();
         viewProxy.layoutView();
+
+        // After any layout, all pref sizes should be set
+        makeSurePrefSizesAreSet();
+    }
+
+    /**
+     * After any layout, all pref sizes should be set
+     */
+    private void makeSurePrefSizesAreSet()
+    {
+        List<View> items = getItems();
+
+        // Handle Vertical: Iterate over items and make sure PrefHeight is set
+        if (isVertical()) {
+            for (View item : items)
+                if (!item.isPrefHeightSet())
+                    item.setPrefHeight(item.getHeight());
+        }
+
+        // Handle Vertical: Iterate over items and make sure PrefWidth is set
+        else {
+            for (View item : items)
+                if (!item.isPrefWidthSet())
+                    item.setPrefWidth(item.getWidth());
+        }
     }
 
     /**
@@ -454,28 +506,35 @@ public class SplitView extends ParentView implements ViewHost {
     }
 
     /**
-     * Handle MouseDrag event: Calcualte and set new location.
+     * Handle MouseDrag event: Calculate and set new location.
      */
     protected void processDividerEvent(ViewEvent anEvent)
     {
         // Handle MouseMove: If over divider, update cursor
         if (anEvent.isMouseMove()) {
             Divider div = getDividerAt(anEvent.getX(), anEvent.getY());
-            if (div!=null) { WindowView win = getWindow();
-                if(win!=null) win.setActiveCursor(div.getCursor());
+            if (div != null) {
+                WindowView win = getWindow();
+                if (win != null)
+                    win.setActiveCursor(div.getCursor());
             }
         }
 
         // Handle MousePress: Check for divider hit
         else if (anEvent.isMousePress()) {
+
+            // Get divider at mouse
             _dragDiv = getDividerAt(anEvent.getX(), anEvent.getY());
-            if (_dragDiv==null) return;
-            _dragOff = isVertical()? _dragDiv.getY() - anEvent.getY() : _dragDiv.getX() - anEvent.getX();
+            if (_dragDiv == null)
+                return;
+
+            // Set divider drag offset
+            _dragOff = isVertical() ? _dragDiv.getY() - anEvent.getY() : _dragDiv.getX() - anEvent.getX();
             anEvent.consume();
         }
 
         // Handle MouseDrag: Calculate new location and set
-        else if (anEvent.isMouseDrag() && _dragDiv!=null) {
+        else if (anEvent.isMouseDrag() && _dragDiv != null) {
             View peer0 = _dragDiv.getViewBefore();
             double loc = _dragDiv.isVertical() ? (anEvent.getX() - peer0.getX()) : (anEvent.getY() - peer0.getY());
             _dragDiv.setLocation(loc + _dragOff);
@@ -483,9 +542,9 @@ public class SplitView extends ParentView implements ViewHost {
         }
 
         // Handle MouseRelease: Clear DragDiv
-        else if (anEvent.isMouseRelease() && _dragDiv!=null) {
-           _dragDiv = null;
-           anEvent.consume();
+        else if (anEvent.isMouseRelease() && _dragDiv != null) {
+            _dragDiv = null;
+            anEvent.consume();
         }
     }
 
@@ -499,9 +558,12 @@ public class SplitView extends ParentView implements ViewHost {
      */
     public void setVertical(boolean aValue)
     {
-        if (aValue==isVertical()) return; super.setVertical(aValue);
-        if (_divider!=null) _divider.setVertical(!aValue);
-        for(Divider d : _divs) d.setVertical(!aValue);
+        if (aValue == isVertical()) return;
+        super.setVertical(aValue);
+        if (_divider != null)
+            _divider.setVertical(!aValue);
+        for (Divider div : _divs)
+            div.setVertical(!aValue);
     }
 
     /**
@@ -537,7 +599,10 @@ public class SplitView extends ParentView implements ViewHost {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive DividerSpan
-        if(getDividerSpan()!=DEFAULT_DIVIDER_SPAN) e.add(DividerSpan_Prop, getDividerSpan());
+        if (getDividerSpan() != DEFAULT_DIVIDER_SPAN)
+            e.add(DividerSpan_Prop, getDividerSpan());
+
+        // Return
         return e;
     }
 
@@ -572,10 +637,11 @@ public class SplitView extends ParentView implements ViewHost {
     protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Iterate over child elements and unarchive as child nodes
-        for (int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
-            Class cls = anArchiver.getClass(childXML.getName());
-            if (cls!=null && View.class.isAssignableFrom(cls)) {
-                View view = (View)anArchiver.fromXML(childXML, this);
+        for (int i = 0, iMax = anElement.size(); i < iMax; i++) {
+            XMLElement childXML = anElement.get(i);
+            Class<?> cls = anArchiver.getClass(childXML.getName());
+            if (cls != null && View.class.isAssignableFrom(cls)) {
+                View view = (View) anArchiver.fromXML(childXML, this);
                 addItem(view);
             }
         }
@@ -587,21 +653,24 @@ public class SplitView extends ParentView implements ViewHost {
     public static SplitView makeSplitView(View aView)
     {
         // Create SplitView to match given view
-        SplitView split = new SplitView();
-        split.setVertical(aView.isVertical());
-        split.setLeanX(aView.getLeanX());
-        split.setLeanY(aView.getLeanY());
-        split.setGrowWidth(aView.isGrowWidth());
-        split.setGrowHeight(aView.isGrowHeight());
+        SplitView splitView = new SplitView();
+        splitView.setVertical(aView.isVertical());
+        splitView.setLeanX(aView.getLeanX());
+        splitView.setLeanY(aView.getLeanY());
+        splitView.setGrowWidth(aView.isGrowWidth());
+        splitView.setGrowHeight(aView.isGrowHeight());
 
         // Handle ViewHost
-        if (aView instanceof ViewHost) { ViewHost host = (ViewHost)aView;
-            split.setItems(host.getGuests());
+        if (aView instanceof ViewHost) {
+            ViewHost host = (ViewHost) aView;
+            splitView.setItems(host.getGuests());
         }
 
         // Replace given View with new SplitView and return SplitView
-        if (aView.getParent()!=null)
-           ViewUtils.replaceView(aView, split);
-        return split;
+        if (aView.getParent() != null)
+           ViewUtils.replaceView(aView, splitView);
+
+        // Return
+        return splitView;
     }
 }

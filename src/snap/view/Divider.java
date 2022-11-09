@@ -108,7 +108,8 @@ public class Divider extends View {
      */
     public void setLocation(double aValue)
     {
-        if (isVertical()) setLocationV(aValue);
+        if (isVertical())
+            setLocationV(aValue);
         else setLocationH(aValue);
     }
 
