@@ -19,8 +19,7 @@ public interface CharSequenceX extends CharSequence {
      */
     default boolean isLastCharNewline()
     {
-        char c = getLastChar();
-        return c == '\r' || c == '\n';
+        return CharSequenceUtils.isLastCharNewline(this);
     }
 
     /**

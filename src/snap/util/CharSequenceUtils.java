@@ -6,6 +6,24 @@ package snap.util;
 public class CharSequenceUtils {
 
     /**
+     * Returns the last char.
+     */
+    public static char getLastChar(CharSequence theChars)
+    {
+        int len = theChars.length();
+        return len > 0 ? theChars.charAt(len - 1) : 0;
+    }
+
+    /**
+     * Returns whether char sequence ends with newline.
+     */
+    public static boolean isLastCharNewline(CharSequence theChars)
+    {
+        char c = getLastChar(theChars);
+        return c == '\r' || c == '\n';
+    }
+
+    /**
      * Returns index of the next newline (or carriage-return/newline) in given chars starting at given char index.
      */
     public static int indexOfNewline(CharSequence theChars, int aStart)
