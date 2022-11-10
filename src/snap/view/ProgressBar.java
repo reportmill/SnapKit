@@ -10,13 +10,13 @@ import snap.util.*;
  * A control to show progress.
  */
 public class ProgressBar extends View {
-    
+
     // The progress
     private double  _prog;
-    
+
     // The animator
     private ViewAnim  _anim;
-    
+
     // The ButtonArea used to paint background
     private ButtonArea  _btnArea;
 
@@ -28,7 +28,7 @@ public class ProgressBar extends View {
     private static Color _pbc1 = Color.get("#fefefe");
     private static Color _pbc2 = Color.get("#f7f7f7");
     private static Color _pbc3 = Color.get("#e9e9e9");
-    private static GradientPaint.Stop _pbfStops[] = GradientPaint.getStops(0, _pbc0, .33, _pbc1, .66, _pbc2, 1, _pbc3);
+    private static GradientPaint.Stop[] _pbfStops = GradientPaint.getStops(0, _pbc0, .33, _pbc1, .66, _pbc2, 1, _pbc3);
     public static Paint PROGRESS_BAR_FILL = new GradientPaint(.5, 0, .5, 1, _pbfStops);
 
     // ProgressBar fill for indeterminate
@@ -36,18 +36,19 @@ public class ProgressBar extends View {
     private static Color _pb1 = Color.get("#0096c9");
     private static Color _pb2 = Color.get("#0092c2");
     private static Color _pb3 = Color.get("#008ab7");
-    private static GradientPaint.Stop _pbstops[] = GradientPaint.getStops(0, _pb0, .33, _pb1, .66, _pb2, 1, _pb3);
-    private static GradientPaint.Stop _indetStops[] = GradientPaint.getStops(0, Color.WHITE, 1, _pb3);
-    private static GradientPaint.Stop _indetStopsBack[] = GradientPaint.getStops(0, _pb3, 1, Color.WHITE);
+    private static GradientPaint.Stop[] _pbstops = GradientPaint.getStops(0, _pb0, .33, _pb1, .66, _pb2, 1, _pb3);
+    private static GradientPaint.Stop[] _indetStops = GradientPaint.getStops(0, Color.WHITE, 1, _pb3);
+    private static GradientPaint.Stop[] _indetStopsBack = GradientPaint.getStops(0, _pb3, 1, Color.WHITE);
     private static Paint INNER_FILL = new GradientPaint(.5, 0, .5, 1, _pbstops);
     private static Paint INDET_FILL = new GradientPaint(0, .5, 1, .5, _indetStops);
     private static Paint INDET_BACK_FILL = new GradientPaint(0, .5, 1, .5, _indetStopsBack);
-    
+
     /**
-     * Create ProgressBar.
+     * Constructor.
      */
     public ProgressBar()
     {
+        super();
         themeChanged();
     }
 
@@ -61,19 +62,19 @@ public class ProgressBar extends View {
      */
     public void setProgress(double aValue)
     {
-        if (aValue>1) aValue = 1;
-        if (aValue==_prog) return;
-        firePropChange(Progress_Prop, _prog, _prog=aValue);
+        if (aValue > 1) aValue = 1;
+        if (aValue == _prog) return;
+        firePropChange(Progress_Prop, _prog, _prog = aValue);
 
         // Reset animator
-        setAnim(isAnimNeeded());
+        setAnimating(isAnimNeeded());
         repaint();
     }
 
     /**
      * Returns whether progress bar is indeterminate.
      */
-    public boolean isIndeterminate()  { return _prog<0; }
+    public boolean isIndeterminate()  { return _prog < 0; }
 
     /**
      * Sets whether progress bar is indetermiante.
@@ -84,27 +85,25 @@ public class ProgressBar extends View {
     }
 
     /**
-     * Override to check animation.
-     */
-    public void setVisible(boolean aValue)  { super.setVisible(aValue); setAnim(isAnimNeeded()); }
-
-    /**
      * Returns whether anim is needed.
      */
-    private boolean isAnimNeeded()  { return _prog<0 && isVisible(); }
+    private boolean isAnimNeeded()
+    {
+        return _prog < 0 && isShowing();
+    }
 
     /**
      * Returns whether ProgressBar is animating.
      */
-    private boolean isAnim()  { return _anim!=null; }
+    private boolean isAnimating()  { return _anim != null; }
 
     /**
      * Sets anim.
      */
-    private void setAnim(boolean aValue)
+    private void setAnimating(boolean aValue)
     {
         // If already set, just return
-        if (aValue==isAnim()) return;
+        if (aValue == isAnimating()) return;
 
         // If starting, create/configure/play anim
         if (aValue) {
@@ -113,7 +112,10 @@ public class ProgressBar extends View {
         }
 
         // Otherwise, stop and clear
-        else { _anim.clear(); _anim = null; }
+        else {
+            _anim.clear();
+            _anim = null;
+        }
     }
 
     /**
@@ -128,7 +130,7 @@ public class ProgressBar extends View {
         _btnArea.paint(aPntr);
 
         // Paint normal bar
-        if (_prog>=0) {
+        if (_prog >= 0) {
             double areaX = 3;
             double areaY = 3;
             double areaW = Math.round(areaX + _prog * (viewW - 6));
@@ -147,13 +149,13 @@ public class ProgressBar extends View {
             int areaH = (int) viewH - 6;
             int aw = 50;
             int ix2 = areaX - aw;
-            int iw2 = areaW + aw*2;
+            int iw2 = areaW + aw * 2;
             int imax2 = ix2 + iw2;
-            int etime = _anim!=null ? _anim.getTime() : 0;
-            int imax3 = ix2 + (aw + etime/10) % (iw2*2);
+            int etime = _anim != null ? _anim.getTime() : 0;
+            int imax3 = ix2 + (aw + etime / 10) % (iw2 * 2);
             int ix3 = imax3 - aw;
             boolean back = false;
-            if (imax3>imax2) {
+            if (imax3 > imax2) {
                 ix3 = imax2 - (imax3 - imax2);
                 back = true;
             }
@@ -165,6 +167,21 @@ public class ProgressBar extends View {
             aPntr.fillWithPaint(rrect, back ? INDET_BACK_FILL : INDET_FILL);
             aPntr.restore();
         }
+    }
+
+    /**
+     * Override to trigger animation.
+     */
+    @Override
+    protected void setShowing(boolean aValue)
+    {
+        // Do normal version
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
+
+        // If indeterminate, update Animating
+        if (isIndeterminate())
+            setAnimating(isAnimNeeded());
     }
 
     /**
