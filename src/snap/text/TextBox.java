@@ -340,12 +340,18 @@ public class TextBox {
     public void setBoundsPath(Shape aPath)  { _boundsPath = aPath; }
 
     /**
-     * Returns the number of characters in the text.
+     * Returns the number of chars currently in text box.
      */
     public int length()
     {
-        TextDoc textDoc = getTextDoc();
-        return textDoc.length();
+        // Get last line - If no lines, just return 0
+        TextBoxLine lastLine = getLineLast();
+        if (lastLine == null)
+            return 0;
+
+        // Return LastLine.EndCharIndex - this is length
+        int endCharIndex = lastLine.getEndCharIndex();
+        return endCharIndex;
     }
 
     /**
@@ -353,8 +359,19 @@ public class TextBox {
      */
     public char charAt(int anIndex)
     {
+        TextBoxLine textLine = getLineForCharIndex(anIndex);
+        int textLineStart = textLine.getStartCharIndex();
+        int charIndexInLine = anIndex - textLineStart;
+        return textLine.charAt(charIndexInLine);
+    }
+
+    /**
+     * Returns the number of characters in the text.
+     */
+    public int getTextDocLength()
+    {
         TextDoc textDoc = getTextDoc();
-        return textDoc.charAt(anIndex);
+        return textDoc.length();
     }
 
     /**
@@ -372,7 +389,7 @@ public class TextBox {
     public void setString(String aString)
     {
         String str = aString != null ? aString : "";
-        if (str.length() == length() && str.equals(getString())) return;
+        if (str.length() == getTextDocLength() && str.equals(getString())) return;
 
         TextDoc textDoc = getTextDoc();
         textDoc.setString(str);
@@ -404,21 +421,6 @@ public class TextBox {
     {
         TextDoc textDoc = getTextDoc();
         textDoc.replaceChars(theChars, theStyle, aStart, anEnd);
-    }
-
-    /**
-     * Returns the current box length (could be out of sync with text).
-     */
-    protected int boxlen()
-    {
-        // Get last line - If no lines, just return 0
-        TextBoxLine lastLine = getLineLast();
-        if (lastLine == null)
-            return 0;
-
-        // Return LastLine.EndCharIndex - this is length
-        int endCharIndex = lastLine.getEndCharIndex();
-        return endCharIndex;
     }
 
     /**
@@ -471,7 +473,7 @@ public class TextBox {
             return lastLine;
 
         // Complain
-        int textBoxLength = boxlen();
+        int textBoxLength = length();
         throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + textBoxLength);
     }
 
@@ -515,15 +517,15 @@ public class TextBox {
             CharSequence oldVal = charsChange.getOldValue();
             int index = charsChange.getIndex();
             if (oldVal != null)
-                textRemovedChars(index, index + oldVal.length());
+                textDocChangedChars(index, index);
             if (newVal != null)
-                textAddedChars(index, index + newVal.length());
+                textDocChangedChars(index, index + newVal.length());
         }
 
         // Handle StyleChange
         else if (aPC instanceof TextDocUtils.StyleChange) {
             TextDocUtils.StyleChange styleChange = (TextDocUtils.StyleChange) aPC;
-            textChangedChars(styleChange.getStart(), styleChange.getEnd());
+            textDocChangedChars(styleChange.getStart(), styleChange.getEnd());
         }
 
         // Handle LineStyleChange
@@ -531,55 +533,24 @@ public class TextBox {
             TextDocUtils.LineStyleChange lineStyleChange = (TextDocUtils.LineStyleChange) aPC;
             TextDoc textDoc = getTextDoc();
             TextLine textLine = textDoc.getLine(lineStyleChange.getIndex());
-            textChangedChars(textLine.getStartCharIndex(), textLine.getEndCharIndex());
+            textDocChangedChars(textLine.getStartCharIndex(), textLine.getEndCharIndex());
         }
 
         // Handle DefaultTextStyle, ParentTextStyle
         else if (propName == TextDoc.DefaultTextStyle_Prop || propName == TextDoc.ParentTextStyle_Prop) {
             if (!isRichText())
-                textChangedChars(0, length());
+                textDocChangedChars(0, getTextDocLength());
         }
-    }
-
-    /**
-     * Called when chars added to TextDoc to track range in box and text to be synchronized.
-     */
-    protected void textAddedChars(int aStart, int aEnd)
-    {
-        // If we added a MultilineComment terminator, extend start to previous Multiline
-        TextDoc textDoc = getTextDoc();
-        TextLine textLine = textDoc.getLineForCharIndex(aStart);
-        if (textLine.indexOf("*/", 0) >= 0) {
-
-            // Find startCharIndex of opening comment chars
-            TextLine startLine = textLine;
-            while (startLine != null) {
-                aStart = startLine.getStartCharIndex();
-                if (startLine.indexOf("/*", 0) >= 0)
-                    break;
-                startLine = startLine.getPrevious();
-            }
-        }
-
-        // Calc fromEndCharIndex and set update bounds
-        int fromEndCharIndex = length() - aEnd;
-        setUpdateBounds(aStart, fromEndCharIndex);
-    }
-
-    /**
-     * Called when chars removed from TextDoc to track range in box and text to be synchronized.
-     */
-    protected void textRemovedChars(int aStart, int aEnd)
-    {
-        setUpdateBounds(aStart, length() - aStart);
     }
 
     /**
      * Called when chars changed in TextDoc to track range in box and text to be synchronized.
      */
-    protected void textChangedChars(int aStart, int aEnd)
+    protected void textDocChangedChars(int aStart, int aEnd)
     {
-        setUpdateBounds(aStart, length() - aEnd);
+        int textDocLength = getTextDocLength();
+        int fromEndCharIndex = textDocLength - aEnd;
+        setUpdateBounds(aStart, fromEndCharIndex);
     }
 
     /**
@@ -618,9 +589,9 @@ public class TextBox {
         _updating = true;
 
         // Convert FromEndCharIndex to endCharIndex for textBox and textDoc
-        int textBoxLength = boxlen();
+        int textBoxLength = length();
         int textBoxEndCharIndex = textBoxLength - _updateFromEndCharIndex;
-        int textDocLength = length();
+        int textDocLength = getTextDocLength();
         int textDocEndCharIndex = textDocLength - _updateFromEndCharIndex;
 
         // Update lines
@@ -678,7 +649,7 @@ public class TextBox {
     {
         // Get start char index
         int startCharIndex = Math.max(aStartCharIndex, getStartCharIndex());
-        if (startCharIndex > length())
+        if (startCharIndex > getTextDocLength())
             return;
 
         // Track TextBox insertion line index
@@ -1170,7 +1141,7 @@ public class TextBox {
             if (isTextOutOfBounds()) {
                 fsHi = fontScale;
                 if ((fsHi + fsLo) / 2 == 0) {
-                    System.err.println("Error scaling text. Could only fit " + boxlen() + " of " + length());
+                    System.err.println("Error scaling text. Could only fit " + length() + " of " + getTextDocLength());
                     break;
                 }
             }
@@ -1235,7 +1206,7 @@ public class TextBox {
     public String toString()
     {
         String str = getClass().getSimpleName() + " [" + getBounds().getString() + "]: ";
-        str += _lines.size() + " lines, " + boxlen() + " chars";
+        str += _lines.size() + " lines, " + length() + " chars";
         return str;
     }
 }

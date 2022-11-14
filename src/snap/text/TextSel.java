@@ -56,18 +56,24 @@ public class TextSel {
         // Set selection start and end for selected chars
         int selStart = Math.min(p1CharIndex, p2CharIndex);
         int selEnd = Math.max(p1CharIndex, p2CharIndex);
+        int textDocLength = _textDoc.length();
 
         // If word selecting, expand selection to word boundary
         if (isWordSel) {
-            while (selStart > 0 && isWordChar(_textBox.charAt(selStart - 1))) selStart--;
-            while (selEnd < _textBox.length() && isWordChar(_textBox.charAt(selEnd))) selEnd++;
+            while (selStart > 0 && isWordChar(_textDoc.charAt(selStart - 1)))
+                selStart--;
+            while (selEnd < textDocLength && isWordChar(_textDoc.charAt(selEnd)))
+                selEnd++;
         }
 
         // If paragraph selecting, expand selection to paragraph boundary
         else if (isParaSel) {
-            while (selStart > 0 && !_textDoc.isLineEndChar(selStart - 1)) selStart--;
-            while (selEnd < _textBox.length() && !_textDoc.isLineEndChar(selEnd)) selEnd++;
-            if (selEnd < _textBox.length()) selEnd++;
+            while (selStart > 0 && !_textDoc.isLineEndChar(selStart - 1))
+                selStart--;
+            while (selEnd < textDocLength && !_textDoc.isLineEndChar(selEnd))
+                selEnd++;
+            if (selEnd < textDocLength)
+                selEnd++;
         }
 
         // Set selection char indexes
@@ -145,7 +151,7 @@ public class TextSel {
     {
         // If selection empty but not at end, get next char (or after newline, if at newline)
         int charIndex = getEnd();
-        if (isEmpty() && charIndex < _textBox.length())
+        if (isEmpty() && charIndex < _textBox.getTextDocLength())
             charIndex = _textDoc.isLineEnd(charIndex) ? _textDoc.indexAfterNewline(charIndex) : (charIndex + 1);
         return charIndex;
     }
@@ -201,12 +207,15 @@ public class TextSel {
      */
     public int getLineStart()
     {
-        // Get index at beginning of current line and index of first non-whitespace char and set selection
+        // Get index at beginning of current line
         int index1 = _textDoc.lastIndexAfterNewline(getEnd());
         if (index1 < 0)
             index1 = 0;
+
+        // Get index of first non-whitespace char and set selection
         int index2 = index1;
-        while (index2 < _textBox.length() && _textBox.charAt(index2) == ' ')
+        int textDocLength = _textDoc.length();
+        while (index2 < textDocLength && _textDoc.charAt(index2) == ' ')
             index2++;
 
         return !isEmpty() || index2 != getStart() ? index2 : index1;
@@ -219,7 +228,7 @@ public class TextSel {
     {
         // Get index of newline and set selection
         int index = _textDoc.indexOfNewline(getEnd());
-        return index >= 0 ? index : _textBox.length();
+        return index >= 0 ? index : _textBox.getTextDocLength();
     }
 
     /**
