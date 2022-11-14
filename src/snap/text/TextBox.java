@@ -54,7 +54,7 @@ public class TextBox {
     private boolean  _needsUpdate, _updating;
 
     // The update start/end char indexes in TextDoc
-    private int _updateStartCharIndex, _updateFromEndCharIndex, _lastLen;
+    private int _updateStartCharIndex, _updateFromEndCharIndex;
 
     // A Listener to catch TextDoc PropChanges
     private PropChangeListener  _textDocLsnr = pc -> textDocDidPropChange(pc);
@@ -411,11 +411,14 @@ public class TextBox {
      */
     protected int boxlen()
     {
-        int lcount = getLineCount();
-        if (lcount == 0) return 0;
-        int start = getStartCharIndex();
-        int end = getLineLast().getEndCharIndex();
-        return end - start;
+        // Get last line - If no lines, just return 0
+        TextBoxLine lastLine = getLineLast();
+        if (lastLine == null)
+            return 0;
+
+        // Return LastLine.EndCharIndex - this is length
+        int endCharIndex = lastLine.getEndCharIndex();
+        return endCharIndex;
     }
 
     /**
@@ -468,7 +471,8 @@ public class TextBox {
             return lastLine;
 
         // Complain
-        throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + boxlen());
+        int textBoxLength = boxlen();
+        throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + textBoxLength);
     }
 
     /**
@@ -614,8 +618,9 @@ public class TextBox {
         _updating = true;
 
         // Convert FromEndCharIndex to endCharIndex for textBox and textDoc
-        int textBoxEndCharIndex = _lastLen - _updateFromEndCharIndex;
-        int textDocLength = _lastLen = length();
+        int textBoxLength = boxlen();
+        int textBoxEndCharIndex = textBoxLength - _updateFromEndCharIndex;
+        int textDocLength = length();
         int textDocEndCharIndex = textDocLength - _updateFromEndCharIndex;
 
         // Update lines

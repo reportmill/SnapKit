@@ -536,10 +536,14 @@ public class TextBoxLine implements CharSequenceX {
      */
     protected TextBoxRun createRun(int aStart)
     {
-        // Get TextLine run at char index
-        TextRun textRun = _textLine.getRunForCharIndex(_textLineStart + aStart);
-        if (textRun.getEndCharIndex() == _textLineStart + aStart) // Don't like this
-            textRun = textRun.getNext();
+        // Get TextLine run for char index - if at TextRun.End, move to next if available
+        int startInTextLine = _textLineStart + aStart;
+        TextRun textRun = _textLine.getRunForCharIndex(startInTextLine);
+        if (startInTextLine == textRun.getEndCharIndex()) { // Not sure I like this
+            TextRun nextRun = textRun.getNext();
+            if (nextRun != null)
+                textRun = nextRun;
+        }
 
         // Get TextStyle for run
         TextStyle runStyle = textRun.getStyle();
