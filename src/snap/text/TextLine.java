@@ -264,23 +264,6 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Appends the given line to the end of this line.
-     */
-    protected void appendLine(TextLine aLine)
-    {
-        // Add chars
-        _sb.append(aLine._sb);
-
-        // Add runs
-        for (int i = 0, iMax = aLine.getRunCount(); i < iMax; i++) {
-            TextRun run = aLine.getRun(i);
-            TextRun run2 = run.clone();
-            run2._textLine = this;
-            addRun(run2, getRunCount());
-        }
-    }
-
-    /**
      * Returns the x for tab at given x.
      */
     protected double getXForTabAtIndexAndX(int charIndex, double aX)

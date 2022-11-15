@@ -1536,10 +1536,19 @@ public class TextArea extends View {
      */
     public boolean undo()
     {
+        // Flush outstanding changes
         undoerSaveChanges();
-        boolean b = _undoer.undo() != null;
-        if (!b) ViewUtils.beep();
-        return b;
+
+        // Do undo
+        UndoSet undoSet = _undoer.undo();
+
+        // Complain if no undos
+        boolean didUndo = undoSet != null;
+        if (!didUndo)
+            ViewUtils.beep();
+
+        // Return
+        return didUndo;
     }
 
     /**
@@ -1547,10 +1556,19 @@ public class TextArea extends View {
      */
     public boolean redo()
     {
+        // Flush outstanding changes
         undoerSaveChanges();
-        boolean b = _undoer.redo() != null;
-        if (!b) ViewUtils.beep();
-        return b;
+
+        // Do undo
+        UndoSet undoSet = _undoer.redo();
+
+        // Complain if no redos
+        boolean didRedo = undoSet != null;
+        if (!didRedo)
+            ViewUtils.beep();
+
+        // Return
+        return didRedo;
     }
 
     /**

@@ -150,7 +150,7 @@ public class Undoer {
     }
 
     /**
-     * Pops last undo set off stack an has it update all changed objects it contains.
+     * Pops last undo set off stack and has it update all changed objects it contains.
      */
     public UndoSet undo()
     {
@@ -168,7 +168,7 @@ public class Undoer {
             undoSet.undo();
         }
 
-        // Enable undoer and return UndoSet
+        // Enable undoer and return
         enable();
         return undoSet;
     }

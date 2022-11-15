@@ -260,40 +260,49 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
         if (theChars == null) return;
 
         // If not rich text, clear style
-        if (!isRichText()) theStyle = null;
+        if (!isRichText())
+            theStyle = null;
 
-        // Get line for index - if adding at text end and last line and ends with newline, create/add new line
-        TextLine line = getLineForCharIndex(anIndex);
-        if (anIndex == line.getEndCharIndex() && line.isLastCharNewline()) {
-            TextLine remainder = line.splitLineAtIndex(line.length());
-            addLine(remainder, line.getIndex() + 1);
-            line = remainder;
+        // Get line for char index
+        TextLine textLine = getLineForCharIndex(anIndex);
+
+        // If adding at text end and last line and ends with newline, create/add new line
+        if (anIndex == textLine.getEndCharIndex() && textLine.isLastCharNewline()) {
+            TextLine remainder = textLine.splitLineAtIndex(textLine.length());
+            addLine(remainder, textLine.getIndex() + 1);
+            textLine = remainder;
         }
 
-        // Add chars line by line
-        int start = 0;
-        int len = theChars.length();
-        int lindex = anIndex - line.getStartCharIndex();
-        while (start < len) {
+        // Loop vars
+        int charsLength = theChars.length();
+        int charIndexInLine = anIndex - textLine.getStartCharIndex();
+        int charIndexInChars = 0;
+
+        // Iterate over chars until all added
+        while (charIndexInChars < charsLength) {
 
             // Get index of newline in insertion chars (if there) and end of line block
-            int newline = CharSequenceUtils.indexAfterNewline(theChars, start);
-            int end = newline > 0 ? newline : len;
+            int newlineIndex = CharSequenceUtils.indexAfterNewline(theChars, charIndexInChars);
+            int endCharIndexInChars = newlineIndex > 0 ? newlineIndex : charsLength;
 
             // Get chars and add
-            CharSequence chars = start == 0 && end == len ? theChars : theChars.subSequence(start, end);
-            line.addChars(chars, theStyle, lindex);
+            CharSequence chars = theChars;
+            if (charIndexInChars > 0 || endCharIndexInChars < charsLength)
+                chars = theChars.subSequence(charIndexInChars, endCharIndexInChars);
+            textLine.addChars(chars, theStyle, charIndexInLine);
 
             // If newline added and there are more chars in line, split line and add remainder
-            if (newline > 0 && (end < len || lindex + chars.length() < line.length())) {
-                TextLine remainder = line.splitLineAtIndex(lindex + chars.length());
-                addLine(remainder, line.getIndex() + 1);
-                line = remainder;
-                lindex = 0;
+            if (newlineIndex > 0) {
+                if (endCharIndexInChars < charsLength || charIndexInLine + chars.length() < textLine.length()) {
+                    TextLine remainder = textLine.splitLineAtIndex(charIndexInLine + chars.length());
+                    addLine(remainder, textLine.getIndex() + 1);
+                    textLine = remainder;
+                    charIndexInLine = 0;
+                }
             }
 
             // Set start to last end
-            start = end;
+            charIndexInChars = endCharIndexInChars;
         }
 
         // Send PropertyChange
@@ -313,34 +322,51 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
         // If PropChangeEnabled, get chars to be deleted
         CharSequence removedChars = isPropChangeEnabled() ? subSequence(aStart, anEnd) : null;
 
-        // Delete lines/chars for range
-        int end = anEnd;
-        while (end > aStart) {
+        // Delete lines/chars for range from end to start
+        int removeEndCharIndex = anEnd;
+        while (removeEndCharIndex > aStart) {
 
             // Get line at end index
-            TextLine line = getLineForCharIndex(end);
-            if (end == line.getStartCharIndex())
-                line = getLine(line.getIndex() - 1);
+            TextLine textLine = getLineForCharIndex(removeEndCharIndex);
+            if (removeEndCharIndex == textLine.getStartCharIndex())
+                textLine = textLine.getPrevious();
 
             // Get Line.Start
-            int lineStart = line.getStartCharIndex();
-            int start = Math.max(aStart, lineStart);
+            int lineStartCharIndex = textLine.getStartCharIndex();
+            int removeStartCharIndex = Math.max(aStart, lineStartCharIndex);
 
             // If whole line in range, remove line
-            if (start == lineStart && end == line.getEndCharIndex() && getLineCount() > 1)
-                removeLine(line.getIndex());
+            if (removeStartCharIndex == lineStartCharIndex && removeEndCharIndex == textLine.getEndCharIndex() && getLineCount() > 1)
+                removeLine(textLine.getIndex());
 
-                // Otherwise remove chars (if no newline afterwards, join with next line)
+            // Otherwise remove chars from line
             else {
-                line.removeChars(start - lineStart, end - lineStart);
-                if (!line.isLastCharNewline() && line.getIndex() + 1 < getLineCount()) {
-                    TextLine next = removeLine(line.getIndex() + 1);
-                    line.appendLine(next);
+
+                // Remove chars from line
+                int removeStartCharIndexInLine = removeStartCharIndex - lineStartCharIndex;
+                int removeEndCharIndexInLine = removeEndCharIndex - lineStartCharIndex;
+                textLine.removeChars(removeStartCharIndexInLine, removeEndCharIndexInLine);
+
+                // If no newline remaining in line, join with next line
+                if (!textLine.isLastCharNewline()) {
+
+                    // Get NextLine
+                    TextLine nextLine = textLine.getNext();
+                    if (nextLine != null) {
+
+                        // Iterate over NextLine runs and add chars for each
+                        TextRun[] textRuns = nextLine.getRuns();
+                        for (TextRun textRun : textRuns)
+                            textLine.addChars(textRun.getString(), textRun.getStyle(), textLine.length());
+
+                        // Remove NextLine
+                        removeLine(nextLine.getIndex());
+                    }
                 }
             }
 
             // Reset end
-            end = lineStart;
+            removeEndCharIndex = lineStartCharIndex;
         }
 
         // If deleted chars is set, send property change
