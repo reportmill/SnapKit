@@ -494,39 +494,6 @@ public class StringUtils {
     }
 
     /**
-     * Returns a regex Matcher for given literal string that allows for skipping any chars between given string chars.
-     * For instance, "al" will match ArrayList with this matcher (pattern is created with CASE_INSENSITIVE).
-     * Use matcher.reset(str).lookingAt() to check prefix (like string.startWith()).
-     */
-    public static Matcher getSkipCharsMatcherForLiteralString(String aStr)
-    {
-        String regexStr = getSkipCharsRegexForLiteralString(aStr);
-        int flags = Character.isUpperCase(aStr.charAt(0)) ? 0 : Pattern.CASE_INSENSITIVE;
-        Pattern pattern = Pattern.compile(regexStr, flags);
-        Matcher matcher = pattern.matcher("");
-        return matcher;
-    }
-
-    /**
-     * Returns a regex string for given literal string that allows for skipping any chars between given string chars.
-     * For instance, "al" will match ArrayList.
-     */
-    public static String getSkipCharsRegexForLiteralString(String aStr)
-    {
-        // Generate prefix regex, e.g.: 'abc' turns to 'a[^b]*b[^c]c'
-        StringBuffer regexSB = new StringBuffer();
-        for (int i = 0; i < aStr.length(); i++) {
-            char prefixChar = aStr.charAt(i);
-            if (i == 0)
-                regexSB.append(prefixChar);
-            else regexSB.append("[^").append(prefixChar).append("]*").append(prefixChar);
-        }
-
-        // Return string
-        return regexSB.toString();
-    }
-
-    /**
      * Returns the given string with the first char promoted to uppercase.
      */
     public static String firstCharUpperCase(String aString)
