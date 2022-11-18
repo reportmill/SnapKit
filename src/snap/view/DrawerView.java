@@ -422,7 +422,9 @@ public class DrawerView extends ParentView {
             if (_mouseDragged || !inMargin(anEvent)) return;
 
             // Toggle drawer
-            if (anEvent.getX() > getWidth() - 14) explode();
+            double explodeX = _closeBox.getBounds().getMidX();
+            if (anEvent.getX() > explodeX)
+                explode();
             else toggleDrawer();
         }
 
