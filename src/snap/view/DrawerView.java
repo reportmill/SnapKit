@@ -124,21 +124,22 @@ public class DrawerView extends ParentView {
         if (_tabButton != null) return _tabButton;
 
         // Create/configure TabButton
-        Button btn = new Button();
-        btn.setSize(22, 88);
-        btn.setManaged(false);
-        btn.setLean(Pos.CENTER_RIGHT);
-        btn.setPosition(Pos.CENTER_LEFT);
+        Button tabButton = new Button();
+        tabButton.setSize(22, 88);
+        tabButton.setManaged(false);
+        tabButton.setLean(Pos.CENTER_RIGHT);
+        tabButton.setPosition(Pos.CENTER_LEFT);
+        tabButton.setEffect(new ShadowEffect(5, Color.GRAY, 0, 0));
 
         // Add tab label
-        Label tlabel = getTabLabel();
-        ViewUtils.addChild(btn, tlabel);
+        Label tabLabel = getTabLabel();
+        ViewUtils.addChild(tabButton, tabLabel);
 
         // Add EventHandler to call show when clicked
-        btn.addEventHandler(e -> toggleDrawer(), View.Action);
+        tabButton.addEventHandler(e -> toggleDrawer(), View.Action);
 
-        // Return button
-        return _tabButton = btn;
+        // Set, return
+        return _tabButton = tabButton;
     }
 
     /**
@@ -156,7 +157,11 @@ public class DrawerView extends ParentView {
         label.setManaged(false);
         label.setLean(Pos.CENTER);
         label.setRotate(-90);
+
+        // Add prop change listener to explicitly set size on any change
         label.addPropChangeListener(pc -> label.setSize(label.getPrefSize()));
+
+        // Set, return
         return _tabLabel = label;
     }
 
@@ -169,14 +174,18 @@ public class DrawerView extends ParentView {
         if (_drawerLabel != null) return _drawerLabel;
 
         // Create/configure
-        Label label = new Label();
-        label.setPadding(6, 0, 0, 0);
-        label.setFont(Font.Arial12.getBold());
-        label.setTextFill(Color.GRAY);
-        label.setManaged(false);
-        label.setLean(Pos.TOP_CENTER);
-        label.addPropChangeListener(pc -> label.setSize(label.getPrefSize()));
-        return _drawerLabel = label;
+        Label drawerLabel = new Label();
+        drawerLabel.setPadding(6, 0, 0, 0);
+        drawerLabel.setFont(Font.Arial12.getBold());
+        drawerLabel.setTextFill(Color.GRAY);
+        drawerLabel.setManaged(false);
+        drawerLabel.setLean(Pos.TOP_CENTER);
+
+        // Add prop change listener to explicitly set size on any change
+        drawerLabel.addPropChangeListener(pc -> drawerLabel.setSize(drawerLabel.getPrefSize()));
+
+        // Set, return
+        return _drawerLabel = drawerLabel;
     }
 
     /**
