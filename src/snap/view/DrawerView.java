@@ -44,6 +44,10 @@ public class DrawerView extends ParentView {
 
     // Constants
     private static final Effect SHADOW_EFFECT = new ShadowEffect(10, Color.GRAY, 0, 0);
+    private static final int BORDER_RADIUS = 5;
+
+    // The ratio used to center draw when first shown (.5 would be center)
+    private static final double CENTERING_RATIO = .67;
 
     // Constants for properties
     public static final String DrawerY_Prop = "DrawerY";
@@ -54,10 +58,10 @@ public class DrawerView extends ParentView {
     public DrawerView()
     {
         // Configure basic attributes
-        setPadding(30, 10, 10, 10);
+        setPadding(24, 8, 8, 8);
         setFill(ViewUtils.getBackFill());
         setBorder(Color.GRAY, 1);
-        setBorderRadius(5);
+        setBorderRadius(BORDER_RADIUS);
         setLean(Pos.TOP_RIGHT);
         setEffect(SHADOW_EFFECT);
         setManaged(false);
@@ -189,7 +193,7 @@ public class DrawerView extends ParentView {
         closeBox.setManaged(false);
         closeBox.setLean(Pos.TOP_RIGHT);
         closeBox.setBorder(Color.BLACK, .5);
-        closeBox.setMargin(5, 8, 0, 0);
+        closeBox.setMargin(7, 14, 0, 0);
         closeBox.setPrefSize(11, 11);
 
         // Set, return
@@ -247,10 +251,14 @@ public class DrawerView extends ParentView {
         if (getMargin().top == 0 || getMargin().top + getHeight() / 2 > parView.getHeight())
             setDrawerY(-1);
 
+        // Create SlideAnim if not yet set
+        if (_slideAnim == null)
+            _slideAnim = new ViewAnim(this);
+
         // Start animate in
         setTransX(size.width);
-        if (_slideAnim == null) _slideAnim = new ViewAnim(this);
-        _slideAnim.clear().getAnim(800).setTransX(1).play();
+        _slideAnim.clear().getAnim(800).setTransX(BORDER_RADIUS);
+        _slideAnim.play();
     }
 
     /**
@@ -263,7 +271,9 @@ public class DrawerView extends ParentView {
 
         // Animate out
         _hiding = true;
-        _slideAnim.clear().getAnim(800).setTransX(getWidth()).setOnFinish(() -> hideDrawerDone()).play();
+        _slideAnim.clear().getAnim(800).setTransX(getWidth());
+        _slideAnim.setOnFinish(() -> hideDrawerDone());
+        _slideAnim.play();
     }
 
     /**
@@ -425,8 +435,7 @@ public class DrawerView extends ParentView {
         double marginTop = aY;
         if (marginTop < 0) {
             double extraH = getParent().getHeight() - getHeight();
-            double TOP_RATIO = .75;
-            marginTop = Math.round(extraH * TOP_RATIO);
+            marginTop = Math.round(extraH * CENTERING_RATIO);
         }
 
         // Get margin, adjust and update (just return if already at Y)
@@ -449,7 +458,9 @@ public class DrawerView extends ParentView {
         relayoutParent();
     }
 
-    // Returns whether event point is in margin.
+    /**
+     * Returns whether event point is in margin.
+     */
     private boolean inMargin(ViewEvent anEvent)
     {
         Rect contentRect = getBoundsLocal().getInsetRect(getInsetsAll());
@@ -457,7 +468,9 @@ public class DrawerView extends ParentView {
         return !inContent;
     }
 
-    // Returns whether event point is bottom corner.
+    /**
+     * Returns whether event point is bottom corner.
+     */
     private boolean inResize(ViewEvent anEvent)
     {
         Insets ins = getInsetsAll();
@@ -467,13 +480,15 @@ public class DrawerView extends ParentView {
         return inResize;
     }
 
-    // Returns whether event point is bottom corner.
+    /**
+     * Returns whether event point is bottom corner.
+     */
     private boolean inResizeTop(ViewEvent anEvent)
     {
         Insets ins = getInsetsAll();
-        Rect bnds = getBoundsLocal();
-        bnds.setRect(bnds.x, 0, ins.left, ins.top);
-        boolean inResize = bnds.contains(anEvent.getPoint());
+        Rect bounds = getBoundsLocal();
+        bounds.setRect(bounds.x, 0, ins.left, ins.top);
+        boolean inResize = bounds.contains(anEvent.getPoint());
         return inResize;
     }
 

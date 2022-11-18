@@ -265,7 +265,9 @@ public class ViewAnim implements XMLArchiver.Archivable {
         if (_updater != null) {
             _updater.startAnim(this);
             _suspended = false;
-        } else _suspended = true;
+        }
+
+        else _suspended = true;
     }
 
     /**
@@ -281,7 +283,8 @@ public class ViewAnim implements XMLArchiver.Archivable {
         if (!isPlaying()) return;
 
         // If ViewUpdater set, stopAnim() and clear Updater/Suspended
-        if (_updater != null) _updater.stopAnim(this);
+        if (_updater != null)
+            _updater.stopAnim(this);
         _updater = null;
         _suspended = false;
     }
@@ -295,6 +298,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
             _parent.suspend();
             return;
         }
+
         if (_updater != null) {
             _updater.stopAnim(this);
             _updater = null;
