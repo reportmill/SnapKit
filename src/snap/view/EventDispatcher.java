@@ -341,7 +341,7 @@ public class EventDispatcher {
 
         // If CONTROL key is hit 3 times in a row, trigger DevPane
         if (anEvent.isKeyPress()) {
-            if (anEvent.getKeyCode() == KeyCode.CONTROL)
+            if (anEvent.getKeyCode() == KeyCode.CONTROL && anEvent.isShiftDown())
                 trackShowDevPane(anEvent);
             else _debugTrigger = 0;
         }
@@ -499,7 +499,7 @@ public class EventDispatcher {
     }
 
     /**
-     * Returns array of parents of given view up to and including RootView.
+     * Returns array of pDevarents of given view up to and including RootView.
      */
     private View[] getParents(View aView)
     {

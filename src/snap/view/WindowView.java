@@ -363,6 +363,10 @@ public class WindowView extends ParentView {
         // If new FocusedView, set View.Focused
         if (_focusedView != null)
             _focusedView.setFocused(true);
+
+        // Tell WindowHpr
+        WindowHpr helper = getHelper();
+        helper.focusDidChange(_focusedView);
     }
 
     /**
@@ -780,5 +784,8 @@ public class WindowView extends ParentView {
 
         /** Window/Popup method: Sets the document file url for the window title bar proxy icon. */
         public void setDocURL(WebURL aURL)  { }
+
+        /** Notifies that focus changed. */
+        public void focusDidChange(View aView) { }
     }
 }
