@@ -181,10 +181,10 @@ public class CodeDoc extends TextDoc {
     /**
      * Returns a new CodeDoc from given source.
      */
-    public static CodeDoc newFromSource(Object aSource)
+    public static CodeDoc newFromSource(WebURL aURL)
     {
         CodeDoc codeDoc = new CodeDoc();
-        codeDoc.setSource(aSource);
+        codeDoc.readFromSourceURL(aURL);
         return codeDoc;
     }
 }

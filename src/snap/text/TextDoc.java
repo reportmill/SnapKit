@@ -7,7 +7,6 @@ import snap.gfx.Font;
 import snap.props.PropObject;
 import snap.util.CharSequenceUtils;
 import snap.util.CharSequenceX;
-import snap.util.SnapUtils;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import java.util.ArrayList;
@@ -18,9 +17,6 @@ import java.util.Objects;
  * This class is the basic text storage class, holding a list of TextLine.
  */
 public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
-
-    // The Source of the current content
-    private Object  _source;
 
     // The URL of the file that provided the text
     private WebURL  _sourceURL;
@@ -76,29 +72,17 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     public boolean isRichText()  { return false; }
 
     /**
-     * Returns the source for the current text content.
-     */
-    public Object getSource()  { return _source; }
-
-    /**
-     * Loads the text from the given source.
-     */
-    public void setSource(Object aSource)
-    {
-        // Get/Set URL from Source
-        WebURL url = WebURL.getURL(aSource);
-        _source = url != null ? aSource : null;
-        _sourceURL = url;
-
-        // Get/set text from source
-        String text = SnapUtils.getText(aSource);
-        setString(text);
-    }
-
-    /**
      * Returns the source URL.
      */
     public WebURL getSourceURL()  { return _sourceURL; }
+
+    /**
+     * Sets the Source URL.
+     */
+    public void setSourceURL(WebURL aURL)
+    {
+        _sourceURL = aURL;
+    }
 
     /**
      * Returns the source file.
@@ -791,9 +775,22 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Save TextDoc text to Source file.
+     * Load TextDoc from source URL.
      */
-    public void saveToSourceFile()
+    public void readFromSourceURL(WebURL aURL)
+    {
+        // Set Doc Source URL
+        setSourceURL(aURL);
+
+        // Get URL text and set in doc
+        String text = aURL.getText();
+        setString(text);
+    }
+
+    /**
+     * Write TextDoc text to source file.
+     */
+    public void writeToSourceFile() throws Exception
     {
         // Get SourceFile
         WebURL sourceURL = getSourceURL();
@@ -806,8 +803,7 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
         sourceFile.setText(fileText);
 
         // Save file
-        try { sourceFile.save(); }
-        catch (Exception e) { throw new RuntimeException(e); }
+        sourceFile.save();
     }
 
     /**
@@ -865,14 +861,9 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
         // Get/Set URL from Source
         WebURL url = WebURL.getURL(aSource);
 
-        // Create TextDoc
+        // Create TextDoc and open from URL
         TextDoc textDoc = new TextDoc();
-        textDoc._source = url != null ? aSource : null;
-        textDoc._sourceURL = url;
-
-        // Get/set text from source
-        String text = SnapUtils.getText(aSource);
-        textDoc.setString(text);
+        textDoc.readFromSourceURL(url);
 
         // Return
         return textDoc;

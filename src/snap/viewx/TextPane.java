@@ -250,7 +250,13 @@ public class TextPane extends ViewOwner {
     {
         TextArea textArea = getTextArea();
         TextDoc textDoc = textArea.getTextDoc();
-        textDoc.saveToSourceFile();
+
+        try {
+            textDoc.writeToSourceFile();
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

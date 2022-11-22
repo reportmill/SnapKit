@@ -70,16 +70,6 @@ public class SubText extends TextDoc {
     public boolean isRichText()  { return _textDoc.isRichText(); }
 
     /**
-     * Returns the source for the current text content.
-     */
-    public Object getSource()  { return _textDoc.getSource(); }
-
-    /**
-     * Loads the text from the given source.
-     */
-    public void setSource(Object aSource)  { _textDoc.setSource(aSource); }
-
-    /**
      * Returns the source URL.
      */
     public WebURL getSourceURL()  { return _textDoc.getSourceURL(); }
@@ -159,7 +149,10 @@ public class SubText extends TextDoc {
     /**
      * Save TextDoc text to Source file.
      */
-    public void saveToSourceFile()  { _textDoc.saveToSourceFile(); }
+    public void writeToSourceFile() throws Exception
+    {
+        _textDoc.writeToSourceFile();
+    }
 
     /**
      * Override to use TextDoc tokenizer.
