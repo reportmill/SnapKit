@@ -489,9 +489,9 @@ public class Path2D extends Shape implements Cloneable {
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Copy Segs, SetPointIndexes, Points, NextPath
-        copy._segs = Arrays.copyOf(_segs, _segs.length);
-        copy._segPointIndexes = Arrays.copyOf(_segPointIndexes, _segs.length);
-        copy._points = Arrays.copyOf(_points, _points.length);
+        copy._segs = _segs.clone();
+        copy._segPointIndexes = _segPointIndexes.clone();
+        copy._points = _points.clone();
         if (_nextPath != null)
             copy._nextPath = _nextPath.clone();
 
