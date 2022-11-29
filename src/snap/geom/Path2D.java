@@ -129,6 +129,15 @@ public class Path2D extends Shape implements Cloneable {
     }
 
     /**
+     * Returns the last point.
+     */
+    public Point getLastPoint()
+    {
+        int pointCount = getPointCount();
+        return pointCount > 0 ? getPoint(pointCount - 1) : null;
+    }
+
+    /**
      * Returns the array of point-indexes for given seg index.
      */
     public int getSegPointIndex(int anIndex)
@@ -201,11 +210,11 @@ public class Path2D extends Shape implements Cloneable {
     /**
      * Moveto.
      */
-    public void moveTo(double x, double y)
+    public void moveTo(double aX, double aY)
     {
         // If closed, forward
         if (_closed) {
-            getNextPathWithIntentToExtend().moveTo(x, y);
+            getNextPathWithIntentToExtend().moveTo(aX, aY);
             return;
         }
 
@@ -218,23 +227,20 @@ public class Path2D extends Shape implements Cloneable {
 
         // Get pointIndex, add point, add pointIndexes for pointIndex
         int pointIndex = getPointCount();
-        addPoint(x, y);
+        addPoint(aX, aY);
         addSegPointIndex(pointIndex);
     }
 
     /**
      * LineTo.
      */
-    public void lineTo(double x, double y)
+    public void lineTo(double aX, double aY)
     {
         // If closed, forward
         if (_closed) {
-            getNextPathWithIntentToExtend().lineTo(x, y);
+            getNextPathWithIntentToExtend().lineTo(aX, aY);
             return;
         }
-
-        // Add LineTo
-        addSeg(Seg.LineTo);
 
         // Get pointIndex to last point (make sure there is a moveTo)
         int pointIndex = getPointCount() - 1;
@@ -243,19 +249,20 @@ public class Path2D extends Shape implements Cloneable {
             pointIndex = 0;
         }
 
-        // Add point and pointIndex
-        addPoint(x, y);
+        // Add Point, Seg and PointIndex
+        addPoint(aX, aY);
+        addSeg(Seg.LineTo);
         addSegPointIndex(pointIndex);
     }
 
     /**
      * QuadTo.
      */
-    public void quadTo(double cpx, double cpy, double x, double y)
+    public void quadTo(double cpX, double cpY, double x, double y)
     {
         // If closed, forward
         if (_closed) {
-            getNextPathWithIntentToExtend().quadTo(cpx, cpy, x, y);
+            getNextPathWithIntentToExtend().quadTo(cpX, cpY, x, y);
             return;
         }
 
@@ -270,7 +277,7 @@ public class Path2D extends Shape implements Cloneable {
         }
 
         // Add control point, end point
-        addPoint(cpx, cpy);
+        addPoint(cpX, cpY);
         addPoint(x, y);
 
         // Add SegPointIndex
@@ -364,6 +371,19 @@ public class Path2D extends Shape implements Cloneable {
                     break;
             }
         }
+    }
+
+    /**
+     * Removes the last segment.
+     */
+    public void removeLastSeg()
+    {
+        int lastSegIndex = getSegCount() - 1;
+        Seg lastSeg = getSeg(lastSegIndex);
+        int segPointCount = lastSeg.getCount();
+        _segCount--;
+        _pointCount -= segPointCount;
+
     }
 
     /**
