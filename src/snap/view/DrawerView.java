@@ -40,7 +40,7 @@ public class DrawerView extends ParentView {
     private boolean  _mouseDragged;
     private Point  _mouseDownPnt;
     private double  _mouseDownY, _mouseDownW, _mouseDownH;
-    private boolean  _msDwnResize, _msDwnResizeTop;
+    private boolean  _resizingDrawer, _resizingDrawerTop;
 
     // Constants
     private static final Effect SHADOW_EFFECT = new ShadowEffect(10, Color.GRAY, 0, 0);
@@ -268,6 +268,9 @@ public class DrawerView extends ParentView {
         setTransX(size.width);
         _slideAnim.clear().getAnim(800).setTransX(BORDER_RADIUS);
         _slideAnim.play();
+
+        // Hide the TabButton
+        getTabButton().setVisible(false);
     }
 
     /**
@@ -283,6 +286,9 @@ public class DrawerView extends ParentView {
         _slideAnim.clear().getAnim(800).setTransX(getWidth());
         _slideAnim.setOnFinish(() -> hideDrawerDone());
         _slideAnim.play();
+
+        // Show the TabButton
+        getTabButton().setVisible(true);
     }
 
     /**
@@ -311,6 +317,9 @@ public class DrawerView extends ParentView {
         ViewUtils.removeChild(parView, this);
         setOpacity(1);
         setMaximized(false);
+
+        // Show the TabButton
+        getTabButton().setVisible(true);
     }
 
     /**
@@ -377,7 +386,8 @@ public class DrawerView extends ParentView {
 
             // Clear MouseDownPoint and if not in margin, just bail
             _mouseDownPnt = null;
-            if (!inMargin(anEvent)) return;
+            if (!inMargin(anEvent))
+                return;
 
             // Set MouseDown vars
             _mouseDownPnt = anEvent.getPoint(getParent());
@@ -385,8 +395,8 @@ public class DrawerView extends ParentView {
             _mouseDownW = getWidth();
             _mouseDownH = getHeight();
             _mouseDragged = false;
-            _msDwnResize = inResize(anEvent);
-            _msDwnResizeTop = inResizeTop(anEvent);
+            _resizingDrawer = inResizeCorner(anEvent);
+            _resizingDrawerTop = inResizeTopCorner(anEvent);
         }
 
         // Handle MouseDrag
@@ -401,15 +411,17 @@ public class DrawerView extends ParentView {
             double dy = pnt.y - _mouseDownPnt.y;
 
             // Either resize or reposition
-            if (_msDwnResize) setDrawerSize(_mouseDownW - dx, _mouseDownH + dy);
-            else if (_msDwnResizeTop) {
+            if (_resizingDrawer)
+                setDrawerSize(_mouseDownW - dx, _mouseDownH + dy);
+            else if (_resizingDrawerTop) {
                 setDrawerSize(_mouseDownW - dx, _mouseDownH - dy);
                 setDrawerY(_mouseDownY + dy);
             }
             else setDrawerY(Math.max(_mouseDownY + dy, 0));
 
             // If significant change, set MouseDragged
-            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) _mouseDragged = true;
+            if (Math.abs(dx) > 2 || Math.abs(dy) > 2)
+                _mouseDragged = true;
         }
 
         // Handle MouseRelease
@@ -419,7 +431,8 @@ public class DrawerView extends ParentView {
             _mouseDownPnt = null;
 
             // If click was inside content, just return
-            if (_mouseDragged || !inMargin(anEvent)) return;
+            if (_mouseDragged || !inMargin(anEvent))
+                return;
 
             // Toggle drawer
             double explodeX = _closeBox.getBounds().getMidX();
@@ -462,10 +475,10 @@ public class DrawerView extends ParentView {
      */
     private void setDrawerSize(double aW, double aH)
     {
-        Size size = getPrefSize();
-        size.width = Math.max(size.width, aW);
-        size.height = Math.max(size.height, aH);
-        setSize(size);
+        Size minSize = getMinSize();
+        double newW = Math.max(aW, minSize.width);
+        double newH = Math.max(aH, minSize.height);
+        setSize(newW, newH);
         relayoutParent();
     }
 
@@ -482,25 +495,23 @@ public class DrawerView extends ParentView {
     /**
      * Returns whether event point is bottom corner.
      */
-    private boolean inResize(ViewEvent anEvent)
-    {
-        Insets ins = getInsetsAll();
-        Rect bnds = getBoundsLocal();
-        bnds.setRect(bnds.x, bnds.height - ins.bottom, ins.left, ins.bottom);
-        boolean inResize = bnds.contains(anEvent.getPoint());
-        return inResize;
-    }
-
-    /**
-     * Returns whether event point is bottom corner.
-     */
-    private boolean inResizeTop(ViewEvent anEvent)
+    private boolean inResizeCorner(ViewEvent anEvent)
     {
         Insets ins = getInsetsAll();
         Rect bounds = getBoundsLocal();
-        bounds.setRect(bounds.x, 0, ins.left, ins.top);
-        boolean inResize = bounds.contains(anEvent.getPoint());
-        return inResize;
+        bounds.setRect(0, bounds.height - ins.bottom, ins.left, ins.bottom);
+        return bounds.contains(anEvent.getPoint());
+    }
+
+    /**
+     * Returns whether event point is top corner.
+     */
+    private boolean inResizeTopCorner(ViewEvent anEvent)
+    {
+        Insets ins = getInsetsAll();
+        Rect bounds = getBoundsLocal();
+        bounds.setRect(0, 0, ins.left, ins.top);
+        return bounds.contains(anEvent.getPoint());
     }
 
     /**
