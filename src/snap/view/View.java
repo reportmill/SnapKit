@@ -231,8 +231,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public static final ViewEvent.Type DragSourceExit = ViewEvent.Type.DragSourceExit;
     public static final ViewEvent.Type DragSourceOver = ViewEvent.Type.DragSourceOver;
     public static final ViewEvent.Type DragSourceEnd = ViewEvent.Type.DragSourceEnd;
-    public static final ViewEvent.Type WinActivate = ViewEvent.Type.WinActivate;
-    public static final ViewEvent.Type WinDeactivate = ViewEvent.Type.WinDeactivate;
     public static final ViewEvent.Type WinOpen = ViewEvent.Type.WinOpen;
     public static final ViewEvent.Type WinClose = ViewEvent.Type.WinClose;
     public static final ViewEvent.Type[] KeyEvents = { KeyPress, KeyRelease, KeyType };

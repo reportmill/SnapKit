@@ -208,9 +208,7 @@ protected Type getTypeImpl()
         case KeyEvent.KEY_PRESSED: return Type.KeyPress;
         case KeyEvent.KEY_RELEASED: return Type.KeyRelease;
         case KeyEvent.KEY_TYPED: return Type.KeyType;
-        case WindowEvent.WINDOW_ACTIVATED: return Type.WinActivate;
         case WindowEvent.WINDOW_CLOSING: return Type.WinClose;
-        case WindowEvent.WINDOW_DEACTIVATED: return Type.WinDeactivate;
         case WindowEvent.WINDOW_OPENED: return Type.WinOpen;
     }
     if (event instanceof DropTargetDropEvent)

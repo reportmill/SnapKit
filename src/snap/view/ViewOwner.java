@@ -65,8 +65,6 @@ public class ViewOwner extends PropObject implements EventListener {
     public static final ViewEvent.Type DragExit = ViewEvent.Type.DragExit;
     public static final ViewEvent.Type DragDrop = ViewEvent.Type.DragDrop;
     public static final ViewEvent.Type DragGesture = ViewEvent.Type.DragGesture;
-    public static final ViewEvent.Type WinActivate = ViewEvent.Type.WinActivate;
-    public static final ViewEvent.Type WinDeactivate = ViewEvent.Type.WinDeactivate;
     public static final ViewEvent.Type WinOpen = ViewEvent.Type.WinOpen;
     public static final ViewEvent.Type WinClose = ViewEvent.Type.WinClose;
     public ViewEvent.Type[] KeyEvents = { KeyPress, KeyRelease, KeyType };

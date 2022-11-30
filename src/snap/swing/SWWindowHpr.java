@@ -378,11 +378,9 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
      */
     protected void swingWindowActiveChanged()
     {
+        // Update Window.Focused from SwingWindow.Active
         boolean active = _winNtv.isActive();
         ViewUtils.setFocused(_win, active);
-        ViewEvent.Type etype = active ? ViewEvent.Type.WinActivate : ViewEvent.Type.WinDeactivate;
-        if (_win.getEventAdapter().isEnabled(etype))
-            sendWinEvent(null, etype);
 
         // If window deactivated and it has Popup, hide popup
         if (!active && _win.getPopup() != null)
@@ -454,9 +452,14 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
      */
     protected void sendWinEvent(WindowEvent anEvent, ViewEvent.Type aType)
     {
+        // If event type not used, just return
         if (!_win.getEventAdapter().isEnabled(aType)) return;
+
+        // Create event and fire
         ViewEvent event = ViewEvent.createEvent(_win, anEvent, aType, null);
         _win.fireEvent(event);
+
+        // If Window Close, update JFrame.DefaultCloseOperation
         if (aType == ViewEvent.Type.WinClose && _winNtv instanceof JFrame && event.isConsumed())
             ((JFrame) _winNtv).setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     }

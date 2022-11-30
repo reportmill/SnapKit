@@ -325,16 +325,6 @@ public abstract class ViewEvent implements Cloneable {
     public boolean isDragSourceEnd()  { return getType() == Type.DragSourceEnd; }
 
     /**
-     * Returns whether event is WinActivated.
-     */
-    public boolean isWinActivate()  { return getType() == Type.WinActivate; }
-
-    /**
-     * Returns whether event is WinDeactivated.
-     */
-    public boolean isWinDeativate()  { return getType() == Type.WinDeactivate; }
-
-    /**
      * Returns whether event is WinOpened.
      */
     public boolean isWinOpen()  { return getType() == Type.WinOpen; }
@@ -699,7 +689,7 @@ public abstract class ViewEvent implements Cloneable {
         DragGesture, DragSourceEnter, DragSourceOver, DragSourceExit, DragSourceEnd,
 
         /** Window events. */
-        WinActivate, WinDeactivate, WinOpen, WinClose
+        WinOpen, WinClose
     }
 
     /** Prints "not implemented" for string (method name). */
