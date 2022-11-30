@@ -85,6 +85,12 @@ public class TextArea extends View {
     // The PropChangeListener to catch TextDoc PropChanges.
     private PropChangeListener  _textDocPropLsnr = pce -> textDocDidPropChange(pce);
 
+    // A PropChangeListener to enable/disable caret when window loses focus
+    private PropChangeListener  _windowFocusedChangedLsnr;
+
+    // A pointer to window this TextArea is showing in so we can remove WindowFocusChangedLsnr
+    private WindowView  _showingWindow;
+
     // Constants for properties
     public static final String Editable_Prop = "Editable";
     public static final String WrapLines_Prop = "WrapLines";
@@ -1360,7 +1366,16 @@ public class TextArea extends View {
      */
     protected boolean isCaretNeeded()
     {
-        return isFocused() && getSel().isEmpty() && isShowing();
+        if (!isShowing())
+            return false;
+        if (!isFocused())
+            return false;
+        if (!getSel().isEmpty())
+            return false;
+        WindowView window = getWindow();
+        if (window == null || !window.isFocused())
+            return false;
+        return true;
     }
 
     /**
@@ -1749,13 +1764,44 @@ public class TextArea extends View {
     /**
      * Override to check caret animation and scrollSelToVisible when showing.
      */
+    @Override
     protected void setShowing(boolean aValue)
     {
+        // Do normal version
         if (aValue == isShowing()) return;
         super.setShowing(aValue);
-        if (isFocused()) setCaretAnim();
+
+        // If focused, update CaretAnim
+        if (isFocused())
+            setCaretAnim();
+
+        // If Showing, make sure selection is visible
         if (aValue && getSelStart() != 0)
             getEnv().runDelayed(() -> scrollSelToVisible(), 200, true);
+
+        // Manage listener for Window.Focus changes
+        updateWindowFocusChangedLsnr();
+    }
+
+    /**
+     * Updates WindowFocusChangedLsnr when Showing prop changes to update caret showing.
+     */
+    private void updateWindowFocusChangedLsnr()
+    {
+        // Handle Showing: Set ShowingWindow, add WindowFocusChangedLsnr and reset caret
+        if (isShowing()) {
+            _showingWindow = getWindow();
+            _windowFocusedChangedLsnr = e -> setCaretAnim();
+            _showingWindow.addPropChangeListener(_windowFocusedChangedLsnr, Focused_Prop);
+        }
+
+        // Handle not Showing: Remove WindowFocusChangedLsnr and clear
+        else {
+            if (_showingWindow != null)
+                _showingWindow.removePropChangeListener(_windowFocusedChangedLsnr);
+            _showingWindow = null;
+            _windowFocusedChangedLsnr = null;
+        }
     }
 
     /**
