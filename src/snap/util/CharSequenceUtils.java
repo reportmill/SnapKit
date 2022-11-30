@@ -140,4 +140,16 @@ public class CharSequenceUtils {
         // Return
         return sb.toString();
     }
+
+    /**
+     * Returns whether given sequence is just whitespace.
+     */
+    public static boolean isWhiteSpace(CharSequence theChars)
+    {
+        int length = theChars.length();
+        for (int i = 0; i < length; i++)
+            if (!Character.isWhitespace(theChars.charAt(i)))
+                return false;
+        return true;
+    }
 }

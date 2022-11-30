@@ -93,4 +93,12 @@ public interface CharSequenceX extends CharSequence {
     {
         return CharSequenceUtils.getIndentString(this);
     }
+
+    /**
+     * Returns whether this sequence is just whitespace.
+     */
+    default boolean isWhiteSpace()
+    {
+        return CharSequenceUtils.isWhiteSpace(this);
+    }
 }
