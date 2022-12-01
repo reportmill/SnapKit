@@ -16,23 +16,31 @@ import snap.view.*;
 public class FormBuilder extends BindingViewOwner {
 
     // The root pane
-    protected ColView  _pane = createRootPane();
+    protected ColView  _formView;
 
     // The font
     private Font  _font;
     
     // Form values
-    private Map <String,Object>  _values = new HashMap();
+    private Map<String,Object>  _values = new HashMap<>();
+
+    /**
+     * Constructor.
+     */
+    public FormBuilder()
+    {
+        _formView = createFormView();
+    }
 
     /**
      * Returns the padding.
      */
-    public Insets getPadding()  { return _pane.getPadding(); }
+    public Insets getPadding()  { return _formView.getPadding(); }
 
     /**
      * Sets the padding.
      */
-    public void setPadding(Insets theInsets)  { _pane.setPadding(theInsets); }
+    public void setPadding(Insets theInsets)  { _formView.setPadding(theInsets); }
 
     /**
      * Sets the padding.
@@ -45,12 +53,12 @@ public class FormBuilder extends BindingViewOwner {
     /**
      * Returns the spacing between components.
      */
-    public double getSpacing()  { return _pane.getSpacing(); }
+    public double getSpacing()  { return _formView.getSpacing(); }
 
     /**
      * Sets the spacing between components.
      */
-    public void setSpacing(double aValue)  { _pane.setSpacing(aValue); }
+    public void setSpacing(double aValue)  { _formView.setSpacing(aValue); }
 
     /**
      * Returns the font.
@@ -96,7 +104,10 @@ public class FormBuilder extends BindingViewOwner {
     /**
      * Adds a text field.
      */
-    public TextField addTextField(String aName, String aDefault)  { return addTextField(null, aName, aDefault); }
+    public TextField addTextField(String aName, String aDefault)
+    {
+        return addTextField(null, aName, aDefault);
+    }
 
     /**
      * Adds a text field.
@@ -107,61 +118,66 @@ public class FormBuilder extends BindingViewOwner {
         RowView hbox = new RowView();
 
         // If label is provided, create configure and add
-        if (aLabel!=null) {
+        if (aLabel != null) {
             Label label = new Label();
             label.setText(aLabel);
-            if (_font!=null) label.setFont(_font);
+            if (_font != null)
+                label.setFont(_font);
             hbox.addChild(label);
         }
 
         // Create TextField and panel and add
-        TextField tfield = new TextField();
-        tfield.setName(aName);
-        if (_font!=null) tfield.setFont(_font);
-        hbox.addChild(tfield);
+        TextField textField = new TextField();
+        textField.setName(aName);
+        if (_font != null)
+            textField.setFont(_font);
+        hbox.addChild(textField);
         addView(hbox);
 
         // Add binding
-        addViewBinding(tfield, "Text", aName.replace(" ", ""));
-        if (aDefault!=null)
+        addViewBinding(textField, "Text", aName.replace(" ", ""));
+        if (aDefault != null)
             setValue(aName, aDefault);
 
         // Set FirstFocus
-        if (getFirstFocus()==null)
-            setFirstFocus(tfield);
+        if (getFirstFocus() == null)
+            setFirstFocus(textField);
 
         // Return text field
-        return tfield;
+        return textField;
     }
 
     /**
      * Adds an option field.
      */
-    public ComboBox addComboBox(String aTitle, String options[], String aDefault)
+    public ComboBox addComboBox(String aTitle, String[] options, String aDefault)
     {
         // Create ComboBox and panel and add
         Label label = new Label();
         label.setText(aTitle + ":"); //label.setAlignmentX(0);
-        ComboBox cbox = new ComboBox(); //cbox.getItems().add(options);
-        cbox.setName(aTitle); //if(_font!=null) cbox.setFont(_font);
-        RowView hbox = new RowView(); //panel.setAlignmentX(0);
-        hbox.addChild(label); hbox.addChild(cbox); addView(hbox);
+        ComboBox<?> comboBox = new ComboBox<>(); //cbox.getItems().add(options);
+        comboBox.setName(aTitle); //if(_font!=null) cbox.setFont(_font);
+        RowView rowView = new RowView(); //panel.setAlignmentX(0);
+        rowView.addChild(label);
+        rowView.addChild(comboBox);
+        addView(rowView);
 
         // Add binding
-        addViewBinding(cbox, Selectable.SelItem_Prop, aTitle.replace(" ", ""));
+        String bindingKey = aTitle.replace(" ", "");
+        addViewBinding(comboBox, Selectable.SelItem_Prop, bindingKey);
         setValue(aTitle, aDefault);
 
         // Return combobox
-        return cbox;
+        return comboBox;
     }
 
     /**
      * Adds buttons.
      */
-    public RowView addButtons(String theTitles[])
+    public RowView addButtons(String[] theTitles)
     {
-        String names[] = new String[theTitles.length];
-        for (int i=0; i<theTitles.length; i++)
+        String[] names = new String[theTitles.length];
+        for (int i = 0; i < theTitles.length; i++)
             names[i] = theTitles[i] + "Button";
         return addButtons(names, theTitles);
     }
@@ -169,30 +185,34 @@ public class FormBuilder extends BindingViewOwner {
     /**
      * Adds buttons.
      */
-    public RowView addButtons(String theNames[], String theLabels[])
+    public RowView addButtons(String[] theNames, String[] theLabels)
     {
-        RowView hbox = new RowView(); hbox.setSpacing(10); //panel.setAlignmentX(0);
+        RowView rowView = new RowView();
+        rowView.setSpacing(10); //panel.setAlignmentX(0);
 
         // Iterate over options
-        for (int i=0, iMax=theNames.length; i<iMax; i++) {
-            String title = theNames[i], text = theLabels[i];
-            Button button = new Button(); button.setName(title); button.setText(text);
-            hbox.addChild(button);
+        for (int i = 0, iMax = theNames.length; i<iMax; i++) {
+            String title = theNames[i];
+            String text = theLabels[i];
+            Button button = new Button();
+            button.setName(title);
+            button.setText(text);
+            rowView.addChild(button);
         }
 
         // Add/return hbox
-        return addView(hbox);
+        return addView(rowView);
     }
 
     /**
      * Adds radio buttons.
      */
-    public List <RadioButton> addRadioButtons(String aTitle, String options[], String aDefault)
+    public List <RadioButton> addRadioButtons(String aTitle, String[] options, String aDefault)
     {
-        List <RadioButton> rbuttons = new ArrayList();
+        List<RadioButton> radioButtons = new ArrayList<>();
         for (String option : options)
-            rbuttons.add(addRadioButton(aTitle, option, option.equals(aDefault)));
-        return rbuttons;
+            radioButtons.add(addRadioButton(aTitle, option, option.equals(aDefault)));
+        return radioButtons;
     }
 
     /**
@@ -201,16 +221,19 @@ public class FormBuilder extends BindingViewOwner {
     public RadioButton addRadioButton(String aTitle, String theText, boolean isSelected)
     {
         // Create radio button, add to button group and add to panel
-        RadioButton rb = new RadioButton();
-        rb.setName(aTitle); rb.setText(theText);
-        if (_font!=null) rb.setFont(_font);
+        RadioButton radioButton = new RadioButton();
+        radioButton.setName(aTitle);
+        radioButton.setText(theText);
+        if (_font != null)
+            radioButton.setFont(_font);
         if (isSelected) {
-            rb.setSelected(true); setValue(aTitle, theText);
+            radioButton.setSelected(true);
+            setValue(aTitle, theText);
         }
-        rb.setGroupName(aTitle);
+        radioButton.setGroupName(aTitle);
 
         // Add/return button
-        return addView(rb);
+        return addView(radioButton);
     }
 
     /**
@@ -218,7 +241,8 @@ public class FormBuilder extends BindingViewOwner {
      */
     public <T extends View> T addView(T aView)
     {
-        _pane.addChild(aView); return aView;
+        _formView.addChild(aView);
+        return aView;
     }
 
     /**
@@ -226,7 +250,8 @@ public class FormBuilder extends BindingViewOwner {
      */
     public <T extends View> T removeView(T aView)
     {
-        _pane.removeChild(aView); return aView;
+        _formView.removeChild(aView);
+        return aView;
     }
 
     /**
@@ -235,7 +260,8 @@ public class FormBuilder extends BindingViewOwner {
     public boolean showPanel(View aView, String aTitle, Image anImage)
     {
         DialogBox dbox = new DialogBox(aTitle);
-        dbox.setImage(anImage); dbox.setContent(getUI());
+        dbox.setImage(anImage);
+        dbox.setContent(getUI());
         return dbox.showConfirmDialog(aView);
     }
 
@@ -260,23 +286,31 @@ public class FormBuilder extends BindingViewOwner {
     /**
      * Returns the specified value.
      */
-    public String getStringValue(String aKey)  { return SnapUtils.stringValue(getValue(aKey)); }
+    public String getStringValue(String aKey)
+    {
+        Object keyValue = getValue(aKey);
+        return SnapUtils.stringValue(keyValue);
+    }
 
     /**
-     * Creates the UI.
+     * Creates the FormView.
      */
-    protected ColView createRootPane()
+    protected ColView createFormView()
     {
-        ColView vbox = new ColView();
-        vbox.setPadding(new Insets(8)); vbox.setSpacing(20);
-        vbox.setFillWidth(true);
-        return vbox;
+        ColView formView = new ColView();
+        formView.setPadding(new Insets(8));
+        formView.setSpacing(20);
+        formView.setFillWidth(true);
+        return formView;
     }
 
     /**
      * Creates the UI.
      */
-    protected View createUI()  { return _pane; }
+    protected View createUI()
+    {
+        return _formView;
+    }
 
     /**
      * Responds to UI.

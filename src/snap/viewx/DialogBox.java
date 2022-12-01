@@ -457,8 +457,8 @@ public class DialogBox extends FormBuilder {
     protected RowView addOptionButtons()
     {
         // If there is only a label in RootView, make it at least an inch tall
-        if (_builder._pane.getChildCount() == 1 && _builder._pane.getChild(0) instanceof Label)
-            _builder._pane.getChild(0).setMinHeight(60);
+        if (_builder._formView.getChildCount() == 1 && _builder._formView.getChild(0) instanceof Label)
+            _builder._formView.getChild(0).setMinHeight(60);
 
         // Add OK/Cancel buttons
         String[] titles = getOptions();
@@ -491,10 +491,13 @@ public class DialogBox extends FormBuilder {
      */
     protected void notifyDidShow()
     {
-        // Set FirstFocus from content if available
-        ViewOwner owner = getContent() != null ? getContent().getOwner() : null;
+        // Request focus on  Content.Owner.FirstFocus if available
+        View content = getContent();
+        ViewOwner owner = content != null ? content.getOwner() : null;
         if (owner != null && owner.getFirstFocus() != null)
             owner.requestFocus(owner.getFirstFocus());
+
+        // Otherwise try Builder.FirstFocus
         else if (_builder.getFirstFocus() != null)
             _builder.requestFocus(_builder.getFirstFocus());
     }
@@ -504,29 +507,34 @@ public class DialogBox extends FormBuilder {
      */
     protected View createUI()
     {
-        ParentView view = (ParentView) super.createUI();
-        view.setMinWidth(300);
+        View formView = super.createUI();
+        formView.setMinWidth(300);
 
-        // If image provided, reset pane to hbox containing image and original root pane
-        if (getImage() != null) {
-            RowView row = new RowView();
-            row.setPadding(15, 0, 0, 20);
-            row.setSpacing(20);
-            row.setAlign(Pos.TOP_CENTER);
-            row.addChild(new ImageView(getImage()));
-            row.addChild(view);
-            view = row;
+        // If image provided, reset pane to RowView containing image and original root pane
+        Image image = getImage();
+        if (image != null) {
+            RowView rowView = new RowView();
+            rowView.setPadding(15, 0, 0, 20);
+            rowView.setSpacing(20);
+            rowView.setAlign(Pos.TOP_CENTER);
+            rowView.addChild(new ImageView(image));
+            rowView.addChild(formView);
+            formView = rowView;
         }
-        else view.setPadding(25, 30, 8, 30);
+
+        // Otherwise, just set FormView.Padding
+        else formView.setPadding(25, 30, 8, 30);
 
         // Add OK/Cancel buttons
         addOptionButtons();
 
-        // Wrap view and button box in BorderView and return
-        BorderView bview = new BorderView();
-        bview.setCenter(view);
-        bview.setBottom(_buttonBox);
-        return bview;
+        // Wrap view and button box in BorderView
+        BorderView borderView = new BorderView();
+        borderView.setCenter(formView);
+        borderView.setBottom(_buttonBox);
+
+        // Return
+        return borderView;
     }
 
     /**
@@ -569,11 +577,12 @@ public class DialogBox extends FormBuilder {
             View btn = anEvent.getView();
             String name = btn.getName();
             String[] options = getOptions();
-            for (int i = 0; i < options.length; i++)
+            for (int i = 0; i < options.length; i++) {
                 if (name.equals(options[i])) {
                     _index = i;
                     hide();
                 }
+            }
         }
 
         // Handle TextFields: If original event was Enter key and ConfirmEnabled, confirm

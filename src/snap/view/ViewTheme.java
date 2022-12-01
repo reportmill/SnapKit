@@ -61,7 +61,7 @@ public class ViewTheme {
      */
     public Object createArea(View aView)
     {
-        Object area = null;
+        ButtonArea area = null;
 
         // Handle ButtonBase
         if (aView instanceof ButtonBase)
@@ -72,8 +72,8 @@ public class ViewTheme {
             area = createButtonArea();
 
         // Set View
-        if (area instanceof ButtonArea)
-            ((ButtonArea)area).setView(aView);
+        if (area != null)
+            area.setView(aView);
 
         // Return area
         return area;
@@ -112,12 +112,12 @@ public class ViewTheme {
         }
 
         // Update windows
-        WindowView wins[] = WindowView.getOpenWindows();
-        for (WindowView win : wins) {
-            RootView rview = win.getRootView();
-            rview.themeChanged();
-            rview.setFill(_theme.getBackFill());
-            rview.repaint();
+        WindowView[] openWindows = WindowView.getOpenWindows();
+        for (WindowView openWindow : openWindows) {
+            RootView rootView = openWindow.getRootView();
+            rootView.themeChanged();
+            rootView.setFill(_theme.getBackFill());
+            rootView.repaint();
         }
     }
 
@@ -163,7 +163,7 @@ public class ViewTheme {
     private static class LightTheme extends ViewTheme {
 
         // Color constants
-        private static Color BACK_FILL = new Color("#F2F2F2");
+        private static Color BACK_FILL = new Color("#FA");
         private static Color BACK_DARK_FILL = BACK_FILL.darker().darker();
         private static Color SEL_FILL = Color.LIGHTGRAY;
         private static Color SEL_TEXT_FILL = Color.BLACK;

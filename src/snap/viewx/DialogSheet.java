@@ -5,6 +5,8 @@ package snap.viewx;
 import snap.geom.HPos;
 import snap.geom.Size;
 import snap.gfx.Color;
+import snap.gfx.Effect;
+import snap.gfx.ShadowEffect;
 import snap.view.*;
 
 /**
@@ -16,7 +18,14 @@ public class DialogSheet extends DialogBox {
     private ChildView  _hostView;
 
     // The BoxView to hold/clip the UI
-    private BoxView  _clipBox;
+    private BoxView  _sheetView;
+
+    // The HostView children when last shown
+    private View[]  _hostChildren;
+
+    // Constants
+    private static final Effect SHADOW_EFFECT = new ShadowEffect(10, Color.GRAY, 0, 0);
+    private static final int BORDER_RADIUS = 5;
 
     /**
      * Show Dialog in sheet.
@@ -29,31 +38,19 @@ public class DialogSheet extends DialogBox {
         if (_hostView == null)
             return super.showPanel(aView);
 
-        // Make Other views invisible to mouse clicks
-        for (View child : _hostView.getChildren())
+        // Make current HostView.Children invisible to mouse clicks
+        _hostChildren = _hostView.getChildren().clone();
+        for (View child : _hostChildren)
             child.setPickable(false);
 
-        // Create/configure UI
-        View ui = getUI();
-        ui.setManaged(false);
-        ui.setFill(ViewUtils.getBackFill());
-        ui.setBorder(Color.DARKGRAY, 1);
-        Size size = ui.getPrefSize();
-        ui.setSize(size);
-
-        // Create box to hold/clip UI
-        _clipBox = new BoxView(ui);
-        _clipBox.setSize(size);
-        _clipBox.setManaged(false);
-        _clipBox.setLeanX(HPos.CENTER);
-        _clipBox.setClipToBounds(true);
-
-        // Add UI box to HostView
-        _hostView.addChild(_clipBox);
+        // Get SheetView and add to Host
+        View sheetView = getUI();
+        _hostView.addChild(sheetView);
 
         // Configure UI to animate in and start
-        ui.setTransY(-size.height);
-        ui.getAnim(1000).setTransY(-1).play();
+        double transY = sheetView.getHeight();
+        sheetView.setTransY(-transY);
+        sheetView.getAnim(1000).setTransY(-BORDER_RADIUS).play();
 
         // Make sure stage and Builder.FirstFocus are focused
         runLater(() -> notifyDidShow());
@@ -81,9 +78,41 @@ public class DialogSheet extends DialogBox {
     private void hideAnimDone()
     {
         // Remove UI, reset everything pickable and notify of close
-        _hostView.removeChild(_clipBox);
-        for (View child : _hostView.getChildren())
+        _hostView.removeChild(_sheetView);
+
+        // Reset HostView.Children pickable
+        for (View child : _hostChildren)
             child.setPickable(true);
+        _hostChildren = null;
+
+        // Reset Showing
         setShowing(false);
+    }
+
+    /**
+     * Override to create UI.
+     */
+    @Override
+    protected View createUI()
+    {
+        // Do normal version
+        View superUI = super.createUI();
+        superUI.setBorderRadius(BORDER_RADIUS);
+
+        // Create box to hold/clip UI
+        _sheetView = new BoxView(superUI);
+        _sheetView.setFill(ViewUtils.getBackFill());
+        _sheetView.setBorder(Color.GRAY, 1);
+        _sheetView.setBorderRadius(BORDER_RADIUS);
+        _sheetView.setEffect(SHADOW_EFFECT);
+        _sheetView.setLeanX(HPos.CENTER);
+        _sheetView.setManaged(false);
+
+        // Set size
+        Size prefSize = _sheetView.getPrefSize();
+        _sheetView.setSize(prefSize);
+
+        // Return
+        return _sheetView;
     }
 }
