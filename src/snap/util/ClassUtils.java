@@ -156,7 +156,7 @@ public class ClassUtils {
     /**
      * Class.getMethod wrapper to isolate call to one place.
      */
-    public static Method getMethod(Class aClass, String aName, Class... theClasses)
+    public static Method getMethod(Class<?> aClass, String aName, Class<?> ... theClasses)
     {
         // Forward to getMethodOrThrow
         try { return getMethodOrThrow(aClass, aName, theClasses); }
@@ -169,42 +169,10 @@ public class ClassUtils {
     /**
      * Class.getMethod wrapper to isolate call to one place.
      */
-    public static Method getMethodOrThrow(Class aClass, String aName, Class... theClasses) throws NoSuchMethodException
+    public static Method getMethodOrThrow(Class<?> aClass, String aName, Class<?> ... theClasses) throws NoSuchMethodException
     {
-        return GFXEnv.getEnv().getMethod(aClass, aName, theClasses);
-    }
-
-    /**
-     * Returns a declared inner class for a given class and a name, checking super classes as well.
-     */
-    public static Class getInnerClassForName(Class aClass, String aName)
-    {
-        // Make sure class is non-primitive
-        Class cls = aClass.isPrimitive() ? fromPrimitive(aClass) : aClass;
-
-        // Check declared inner classes
-        Class<?>[] innerClasses = cls.getDeclaredClasses();
-        for (Class cls2 : innerClasses)
-            if (cls2.getSimpleName().equals(aName))
-                return cls2;
-
-        // Check superclass
-        Class sclass = cls.getSuperclass();
-        if (sclass != null) {
-            Class cls2 = getInnerClassForName(sclass, aName);
-            if (cls2 != null)
-                return cls2;
-        }
-
-        // Check interfaces
-        for (Class c : cls.getInterfaces()) {
-            Class cls2 = getInnerClassForName(c, aName);
-            if (cls2 != null)
-                return cls2;
-        }
-
-        // Return null since class not found
-        return null;
+        GFXEnv env = GFXEnv.getEnv();
+        return env.getMethod(aClass, aName, theClasses);
     }
 
     /**
@@ -256,7 +224,7 @@ public class ClassUtils {
     /**
      * Returns a class code.
      */
-    public static String getClassCoded(Class aClass)
+    public static String getClassCoded(Class<?> aClass)
     {
         if (aClass.isArray()) return "[" + getClassCoded(aClass.getComponentType());
         if (aClass == byte.class) return "B";
@@ -269,17 +237,6 @@ public class ClassUtils {
         if (aClass == boolean.class) return "Z";
         if (aClass == void.class) return "V";
         return "L" + aClass.getName() + ";";
-    }
-
-    /**
-     * Returns a class code.
-     */
-    public static String getClassCodedForClassName(String aClassName)
-    {
-        Class pclass = getPrimitiveClass(aClassName);
-        if (pclass != null)
-            return getClassCoded(pclass);
-        return "L" + aClassName + ";";
     }
 
     /**

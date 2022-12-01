@@ -8,6 +8,7 @@ import java.util.*;
 import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropObject;
+import snap.props.PropSet;
 import snap.text.StringBox;
 import snap.util.*;
 
@@ -2582,6 +2583,28 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
+     * Initialize Props. Override to provide custom defaults.
+     */
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Size props: X, Y, Width, Height
+        aPropSet.addPropNamed(X_Prop, double.class, 0);
+        aPropSet.addPropNamed(Y_Prop, double.class, 0);
+        aPropSet.addPropNamed(Width_Prop, double.class, 0);
+        aPropSet.addPropNamed(Height_Prop, double.class, 0);
+
+        // Transform props: Rotate, ScaleX, ScaleY, TransX, TransY
+        aPropSet.addPropNamed(Rotate_Prop, double.class, 0);
+        aPropSet.addPropNamed(ScaleX_Prop, double.class, 0);
+        aPropSet.addPropNamed(ScaleY_Prop, double.class, 0);
+        aPropSet.addPropNamed(TransX_Prop, double.class, 0);
+        aPropSet.addPropNamed(TransY_Prop, double.class, 0);
+    }
+
+    /**
      * Returns the value for given prop name.
      */
     public Object getPropValue(String aPropName)
@@ -2637,11 +2660,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Selectable.Items_Prop: return ((Selectable) this).getItems();
             case Selectable.SelItem_Prop: return ((Selectable) this).getSelItem();
             case Selectable.SelIndex_Prop: return ((Selectable) this).getSelIndex();
-            default: break;
-        }
 
-        // Use key chain evaluator to get value
-        return KeyChain.getValue(this, propName);
+            // Do normal version
+            default:
+                System.out.println("View.getPropValue: Unknown property name: " + propName);
+                return KeyChain.getValue(this, propName);
+        }
     }
 
     /**
@@ -2713,7 +2737,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
                 sview.setSelIndex(index);
                 break;
             }
-            default: KeyChain.setValueSafe(this, propName, aValue);
+
+            // Do normal version
+            default:
+                System.out.println("View.setPropValue: Unknown prop name: " + propName);
+                KeyChain.setValueSafe(this, propName, aValue);
         }
     }
 

@@ -4,6 +4,7 @@
 package snap.view;
 import snap.geom.RoundRect;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -22,6 +23,7 @@ public class ProgressBar extends View {
 
     // Constants for properties
     public static final String Progress_Prop = "Progress";
+    public static final String Indeterminate_Prop = "Indeterminate";
 
     // ProgressBar fill normal
     private static Color _pbc0 = Color.get("#efefef");
@@ -77,7 +79,7 @@ public class ProgressBar extends View {
     public boolean isIndeterminate()  { return _prog < 0; }
 
     /**
-     * Sets whether progress bar is indetermiante.
+     * Sets whether progress bar is indeterminate.
      */
     public void setIndeterminate(boolean aValue)
     {
@@ -195,25 +197,47 @@ public class ProgressBar extends View {
     }
 
     /**
-     * XML archival.
+     * Initialize Props. Override to provide custom defaults.
      */
-    public XMLElement toXML(XMLArchiver anArchiver)
+    protected void initProps(PropSet aPropSet)
     {
-        // Do normal archival, Archive Indeterimate and return
-        XMLElement e = super.toXML(anArchiver);
-        if (isIndeterminate()) e.add("indeterminate", true);
-        return e;
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Add properties for this subclass
+        aPropSet.addPropNamed(Progress_Prop, double.class, 0);
+        aPropSet.addPropNamed(Indeterminate_Prop, boolean.class, false);
     }
 
     /**
-     * XML unarchival.
+     * Returns the value for given prop name.
      */
-    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
+    public Object getPropValue(String aPropName)
     {
-        // Do normal unarchival, Unarchive Indeterminate and return
-        super.fromXML(anArchiver, anElement);
-        if (anElement.getAttributeBoolValue("indeterminate", false))
-            setIndeterminate(true);
-        return this;
+        switch (aPropName) {
+
+            // Progress, Indeterminate
+            case Progress_Prop: return getProgress();
+            case Indeterminate_Prop: return isIndeterminate();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Sets the value for given prop name.
+     */
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Progress, Indeterminate
+            case Progress_Prop: setProgress(SnapUtils.doubleValue(aValue)); break;
+            case Indeterminate_Prop: setIndeterminate(SnapUtils.boolValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 }
