@@ -20,7 +20,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     private BrowserCol<T>  _col0;
 
     // The resolver
-    private TreeResolver<T>  _resolver = new TreeResolver.Adapter<>() { };
+    private TreeResolver<T>  _resolver;
 
     // Row height
     private int  _rowHeight = 20;
@@ -63,6 +63,9 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         _colView.setFillHeight(true);
         _col0 = addCol();
         enableEvents(Action);
+
+        // Set resolver
+        _resolver = new TreeResolver.Adapter<>();
     }
 
     /**
