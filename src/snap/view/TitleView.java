@@ -99,10 +99,12 @@ public class TitleView extends ParentView implements ViewHost {
      */
     public void setContent(View aView)
     {
-        View old = _content; if(aView==old) return;
-        if (_content!=null) removeChild(_content);
+        View old = _content; if(aView == old) return;
+        if (_content != null)
+            removeChild(_content);
         _content = aView;
-        if (_content!=null) addChild(_content);
+        if (_content != null)
+            addChild(_content);
     }
 
     /**
@@ -116,13 +118,15 @@ public class TitleView extends ParentView implements ViewHost {
     public void setTitleStyle(TitleStyle aTS)
     {
         // If already set, just return
-        if (aTS==_tstyle) return;
+        if (aTS == _tstyle) return;
 
         // Set value and fire prop change
-        firePropChange(TitleStyle_Prop, _tstyle, _tstyle=aTS);
+        firePropChange(TitleStyle_Prop, _tstyle, _tstyle = aTS);
 
         // Relayout, repaint
-        relayout(); relayoutParent(); repaint();
+        relayout();
+        relayoutParent();
+        repaint();
 
         // If Area needs to change, change it
         TitleArea area = createArea();
@@ -186,7 +190,7 @@ public class TitleView extends ParentView implements ViewHost {
             enableEvents(Action);
             View graphic = getCollapseGraphic();
             _label.setGraphic(graphic);
-            graphic.setRotate(aValue ? 90 : 0);
+            graphic.setRotate(90);
         }
 
         // If not collapsible: Disable action event and stop listen for lable click
@@ -215,7 +219,9 @@ public class TitleView extends ParentView implements ViewHost {
         relayout();
 
         // Update graphic
-        View graphic = _label.getGraphic(); if (graphic==null) return;
+        View graphic = _label.getGraphic();
+        if (graphic == null)
+            return;
         graphic.setRotate(aValue? 90 : 0);
     }
 
@@ -225,31 +231,35 @@ public class TitleView extends ParentView implements ViewHost {
     public void setExpandedAnimated(boolean aValue)
     {
         // If already set, just return
-        if(aValue==_expanded) return;
+        if(aValue == _expanded) return;
 
         // Cache current size and set new Expanded value
-        double w = getWidth(), h = getHeight();
+        double viewW = getWidth();
+        double viewH = getHeight();
         setExpanded(aValue);
 
         // Reset/get new PrefSize
         setPrefSize(-1,-1);
-        double pw = getPrefWidth();
-        double ph = getPrefHeight();
+        double prefW = getPrefWidth();
+        double prefH = getPrefHeight();
 
         // Set pref size to current size and expanded to true (for duration of anim)
-        setPrefSize(w,h);
+        setPrefSize(viewW,viewH);
         setExpanded(true);
 
         // Clip content to bounds?
-        if(getContent()!=null)
-            getContent().setClipToBounds(true);
+        View content = getContent();
+        if(content != null)
+            content.setClipToBounds(true);
 
         // Configure anim to new size
         ViewAnim anim = getAnim(0).clear();
-        anim.getAnim(500).setPrefSize(pw,ph).setOnFinish(() -> setExpandedAnimDone(aValue)).needsFinish().play();
+        anim.getAnim(500).setPrefSize(prefW, prefH).setOnFinish(() -> setExpandedAnimDone(aValue)).needsFinish().play();
 
         // Get graphic and set initial anim rotate
-        View graphic = _label.getGraphic(); if (graphic==null) return;
+        View graphic = _label.getGraphic();
+        if (graphic == null)
+            return;
         graphic.setRotate(aValue? 0 : 90);
 
         // Configure anim for graphic
@@ -280,14 +290,15 @@ public class TitleView extends ParentView implements ViewHost {
     /**
      * ViewHost method: Override to return 1 if content is present.
      */
-    public int getGuestCount()  { return getContent()!=null? 1 : 0; }
+    public int getGuestCount()  { return getContent() != null ? 1 : 0; }
 
     /**
      * ViewHost method: Override to return content (and complain if index beyond 0).
      */
     public View getGuest(int anIndex)
     {
-        if (anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+        if (anIndex > 0)
+            throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
         return getContent();
     }
 
@@ -304,7 +315,8 @@ public class TitleView extends ParentView implements ViewHost {
      */
     public View removeGuest(int anIndex)
     {
-        if (anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+        if (anIndex > 0)
+            throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
         View cont = getContent();
         setContent(null);
         return cont;
@@ -315,7 +327,7 @@ public class TitleView extends ParentView implements ViewHost {
      */
     public boolean isContentShowing()
     {
-        return _content!=null && (!isCollapsible() || isExpanded());
+        return _content != null && (!isCollapsible() || isExpanded());
     }
 
     /**
@@ -337,10 +349,10 @@ public class TitleView extends ParentView implements ViewHost {
         _area.setBounds(0, 0, getWidth(), getHeight());
 
         // Layout content
-        Rect cbnds = _area.getContentBounds();
+        Rect contentBounds = _area.getContentBounds();
         if (isContentShowing())
-            _content.setBounds(cbnds.x, cbnds.y, cbnds.width, cbnds.height);
-        else if (_content!=null) {
+            _content.setBounds(contentBounds.x, contentBounds.y, contentBounds.width, contentBounds.height);
+        else if (_content != null) {
             Insets ins = getInsetsAll();
             _content.setBounds(ins.left, ins.top, 0, 0);
         }
@@ -351,12 +363,18 @@ public class TitleView extends ParentView implements ViewHost {
      */
     public View getCollapseGraphic()
     {
-        // If down arrow icon hasn't been created, create it
-        if (_clpView!=null) return _clpView;
+        // If already set, just return
+        if (_clpView != null) return _clpView;
+
+        // Create
         Polygon poly = new Polygon(2.5, .5, 2.5, 8.5, 8.5, 4.5);
-        ShapeView sview = new ShapeView(poly); sview.setPrefSize(9,9);
-        sview.setFill(Color.GRAY); sview.setBorder(Color.GRAY, 1);
-        return _clpView = sview;
+        ShapeView shapeView = new ShapeView(poly);
+        shapeView.setPrefSize(9,9);
+        shapeView.setFill(Color.GRAY);
+        shapeView.setBorder(Color.GRAY, 1);
+
+        // Set, return
+        return _clpView = shapeView;
     }
 
     /**
@@ -373,7 +391,7 @@ public class TitleView extends ParentView implements ViewHost {
      */
     public Object getPropValue(String aPropName)
     {
-        if (aPropName.equals("Value") || aPropName==Expanded_Prop)
+        if (aPropName.equals("Value") || aPropName == Expanded_Prop)
             return isExpanded();
         return super.getPropValue(aPropName);
     }
@@ -383,7 +401,7 @@ public class TitleView extends ParentView implements ViewHost {
      */
     public void setPropValue(String aPropName, Object aValue)
     {
-        if (aPropName.equals("Value") || aPropName==Expanded_Prop)
+        if (aPropName.equals("Value") || aPropName == Expanded_Prop)
             setExpanded(SnapUtils.boolValue(aValue));
         else super.setPropValue(aPropName, aValue);
     }
@@ -471,37 +489,37 @@ public class TitleView extends ParentView implements ViewHost {
         protected double getPrefWidthImpl(double aH)
         {
             // Get max of Content.PrefWidth and TitleArea.PrefWidth
-            double pw = _label.getPrefWidth();
+            double prefWidth = _label.getPrefWidth();
             View content = getContent();
             if (isContentShowing())
-                pw = Math.max(pw, content.getPrefWidth());
+                prefWidth = Math.max(prefWidth, content.getPrefWidth());
 
             // Get insets and return Content.PrefWidth + insets width
             Insets ins = getInsetsAll();
-            return pw + ins.getWidth();
+            return prefWidth + ins.getWidth();
         }
 
         /** Override to return preferred height of TitleArea. */
         protected double getPrefHeightImpl(double aW)
         {
             // Get combined of Content.PrefHeight and Label.PrefHeight
-            double ph = _label.getPrefHeight();
+            double prefH = _label.getPrefHeight();
             View content = getContent();
             if (isContentShowing())
-                ph += content.getPrefHeight();
+                prefH += content.getPrefHeight();
 
             // Get insets and return Content.PrefHeight + insets height
             Insets ins = getInsetsAll();
-            return ph + ins.getHeight();
+            return prefH + ins.getHeight();
         }
 
         /** Override to layout TitleArea. */
         protected void layoutImpl()
         {
             // Layout label
-            double lw = _label.getPrefWidth();
-            double lh = _label.getPrefHeight();
-            _label.setBounds(0, 0, lw, lh);
+            double labelW = _label.getPrefWidth();
+            double labelH = _label.getPrefHeight();
+            _label.setBounds(0, 0, labelW, labelH);
         }
 
         /** Returns the content bounds. */
@@ -509,12 +527,14 @@ public class TitleView extends ParentView implements ViewHost {
         {
             // Get inset bounds and label height
             Insets ins = getInsetsAll();
-            double px = ins.left, pw = getWidth() - ins.getWidth();
-            double py = ins.top,  ph = getHeight() - ins.getHeight();
-            double lh = _label.getPrefHeight();
+            double areaX = ins.left;
+            double areaY = ins.top;
+            double areaW = getWidth() - ins.getWidth();
+            double areaH = getHeight() - ins.getHeight();
+            double labelH = _label.getPrefHeight();
 
             // Return rect
-            return new Rect(px, py + lh - 1, pw, ph - lh + 1);
+            return new Rect(areaX, areaY + labelH - 1, areaW, areaH - labelH + 1);
         }
 
         /** Triggers. */
@@ -558,22 +578,32 @@ public class TitleView extends ParentView implements ViewHost {
         protected void paintFront(Painter aPntr)
         {
             // Get TitleView bounds
-            double w = getWidth(), h = getHeight();
-            double sw = _label.getMaxX(), sh = _label.getHeight();
+            double w = getWidth();
+            double h = getHeight();
+            double sw = _label.getMaxX();
+            double sh = _label.getHeight();
 
             // Create path for border
-            double x1 = 5+sw, y1 = sh/2;
+            double x1 = 5 + sw;
+            double y1 = sh / 2;
             Path path = new Path();
             path.moveTo(x1, y1);
-            path.lineTo(w-2, y1);
-            path.lineTo(w-2, h-2);
-            path.lineTo(.5, h-2);
+            path.lineTo(w - 2, y1);
+            path.lineTo(w - 2, h - 2);
+            path.lineTo(.5, h - 2);
             path.lineTo(.5, y1);
             path.lineTo(5, y1);
 
             // Paint path once in white and
-            aPntr.translate(1,1); aPntr.setPaint(Color.WHITE); aPntr.setStroke(Stroke.Stroke1); aPntr.draw(path);
-            aPntr.translate(-1,-1); aPntr.setPaint(Color.LIGHTGRAY); aPntr.draw(path);
+            aPntr.translate(1,1);
+            aPntr.setPaint(Color.WHITE);
+            aPntr.setStroke(Stroke.Stroke1);
+            aPntr.draw(path);
+
+            // Paint again in gray
+            aPntr.translate(-1,-1);
+            aPntr.setPaint(Color.LIGHTGRAY);
+            aPntr.draw(path);
         }
     }
 
@@ -606,34 +636,32 @@ public class TitleView extends ParentView implements ViewHost {
         protected double getPrefWidthImpl(double aH)
         {
             // Get Button.PrefWidth and Content.PrefWidth
-            double bw = _button.getPrefWidth();
-            double cw = 0;
+            double buttonW = _button.getPrefWidth();
+            double contentW = 0;
             if(isContentShowing()) {
                 View content = getContent();
                 Insets ins = getInsetsAll();
-                cw = content.getPrefWidth() + ins.getWidth();
+                contentW = content.getPrefWidth() + ins.getWidth();
             }
 
             // Return max of Button.PrefWidth and Content.PrefWidth
-            double pw = Math.max(bw, cw);
-            return pw;
+            return Math.max(buttonW, contentW);
         }
 
         /** Override to return preferred height of TitleArea. */
         protected double getPrefHeightImpl(double aW)
         {
             // Get Button.PrefWidth and Content.PrefWidth
-            double bh = _button.getPrefHeight();
-            double ch = 0;
+            double buttonH = _button.getPrefHeight();
+            double contentH = 0;
             if(isContentShowing()) {
                 View content = getContent();
                 Insets ins = getInsetsAll();
-                ch = content.getPrefHeight() + ins.getHeight();
+                contentH = content.getPrefHeight() + ins.getHeight();
             }
 
             // Return combined Button.PrefWidth and Content.PrefWidth
-            double ph = bh + ch;
-            return ph;
+            return buttonH + contentH;
         }
 
         /** Override to layout TitleArea. */
@@ -650,13 +678,14 @@ public class TitleView extends ParentView implements ViewHost {
         {
             // Get inset bounds and label height
             Insets ins = getInsetsAll();
-            double px = ins.left, pw = getWidth() - ins.getWidth();
-            double py = ins.top,  ph = getHeight() - ins.getHeight();
-            double bh = _button.getPrefHeight();
+            double areaX = ins.left;
+            double areaY = ins.top;
+            double areaW = getWidth() - ins.getWidth();
+            double areaH = getHeight() - ins.getHeight();
+            double buttonH = _button.getPrefHeight();
 
             // Return rect
-            Rect rect = new Rect(px, py + bh, pw, ph - bh);
-            return rect;
+            return new Rect(areaX, areaY + buttonH, areaW, areaH - buttonH);
         }
     }
 }
