@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-
 import snap.util.*;
 
 /**
@@ -19,12 +18,6 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
 
     // The key that is used to get the property value from the bound object
     String _key;
-
-    // The conversion key used to get conversion map to convert bound key-value to UI node
-    String _conversionKey;
-
-    // The format to be used
-    //Format          _format;
 
     /**
      * Creates a new binding.
@@ -45,10 +38,7 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
     /**
      * Returns the UI view.
      */
-    public Object getView()
-    {
-        return _view;
-    }
+    public Object getView()  { return _view; }
 
     /**
      * Sets the UI view.
@@ -69,10 +59,7 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
     /**
      * Returns the property name.
      */
-    public String getPropertyName()
-    {
-        return _propName;
-    }
+    public String getPropertyName()  { return _propName; }
 
     /**
      * Sets the property name.
@@ -85,10 +72,7 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
     /**
      * Returns the key that is used to get the property value from the bound object.
      */
-    public String getKey()
-    {
-        return _key;
-    }
+    public String getKey()  { return _key; }
 
     /**
      * Sets the key that is used to get the property value from the bound object.
@@ -99,43 +83,14 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * Returns the conversion key used to get conversion map to convert bound object value to UI node.
-     */
-    public String getConversionKey()
-    {
-        return _conversionKey;
-    }
-
-    /**
-     * Sets the conversion key used to get conversion map to convert bound object value to UI node.
-     */
-    public void setConversionKey(String aKey)
-    {
-        _conversionKey = aKey;
-    }
-
-/**
- * Returns the format object to be used to format values to strings.
- */
-//public Format getFormat()  { return _format; }
-
-/**
- * Sets the format object to be used to convert values to strings.
- */
-//public void setFormat(Format aFormat)  { _format = aFormat; }
-
-    /**
      * Standard clone implementation.
      */
     public Binding clone()
     {
         // Do normal object cone, clear UI node and return
         Binding clone;
-        try {
-            clone = (Binding) super.clone();
-        } catch (CloneNotSupportedException e) {
-            return null;
-        }
+        try { clone = (Binding) super.clone(); }
+        catch (CloneNotSupportedException e) { return null; }
         clone._view = null;
         return clone;
     }
@@ -151,10 +106,6 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
         // Archive PropertyName, Key, ConversionKey
         e.add("aspect", getPropertyName());
         if (getKey() != null && getKey().length() > 0) e.add("key", getKey());
-        if (getConversionKey() != null && getConversionKey().length() > 0) e.add("conversion-key", getConversionKey());
-
-        // Archive Format
-        //if(getFormat()!=null) e.add(anArchiver.toXML(getFormat()));
 
         // Return xml element
         return e;
@@ -168,16 +119,6 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
         // Unarchive PropertyName, Key, ConversionKey
         setPropertyName(anElement.getAttributeValue("aspect"));
         setKey(anElement.getAttributeValue("key"));
-        if (anElement.hasAttribute("conversion-key")) setConversionKey(anElement.getAttributeValue("conversion-key"));
-
-        // Unarchive format
-    /*if(anElement.get("format")!=null) { XMLElement formatXML = anElement.get("format"); Format format;
-        if(formatXML.getAttributeValue("type")==null) format = null;
-        else if(formatXML.getAttributeValue("type").equals("number"))
-            format = anArchiver.fromXML(formatXML, RMNumberFormat.class, null);
-        else format = anArchiver.fromXML(formatXML, RMDateFormat.class, null);
-        setFormat(format);
-    }*/
 
         // Return this binding
         return this;
@@ -188,8 +129,9 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
      */
     public String toString()
     {
-        String wname = getView() != null ? getView().getClass().getSimpleName() : null, pname = getPropertyName();
-        return "Binding: " + wname + ": " + pname + " = " + getKey();
+        Object view = getView();
+        String viewClassName = view != null ? view.getClass().getSimpleName() : null;
+        String propName = getPropertyName();
+        return "Binding: " + viewClassName + ": " + propName + " = " + getKey();
     }
-
 }
