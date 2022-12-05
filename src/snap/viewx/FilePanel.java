@@ -356,7 +356,7 @@ public class FilePanel extends ViewOwner {
         _fileBrowser.setRowHeight(22);
         _fileBrowser.addEventFilter(e -> runLater(() -> fileBrowserMouseReleased(e)), MouseRelease);
         _fileBrowser.setResolver(new FileResolver());
-        _fileBrowser.setCellConfigure(itm -> configureFileBrowserCell(itm));
+        _fileBrowser.setCellConfigure(item -> configureFileBrowserCell(item));
 
         // Set FileBrowser Items, SelItem
         WebFile[] dirFiles = getSite().getRootDir().getFiles();
@@ -366,10 +366,11 @@ public class FilePanel extends ViewOwner {
 
         // Get/configure DirComboBox
         _dirComboBox = getView("DirComboBox", ComboBox.class);
-        _dirComboBox.setItemTextFunction(itm -> itm.isRoot() ? "Root Directory" : itm.getName());
+        _dirComboBox.setItemTextFunction(item -> item.isRoot() ? "Root Directory" : item.getName());
         _dirComboBox.getListView().setRowHeight(24);
-        List<WebFile> dirs = new ArrayList();
-        for (WebFile dir = getDir(); dir != null; dir = dir.getParent()) dirs.add(dir);
+        List<WebFile> dirs = new ArrayList<>();
+        for (WebFile dir = getDir(); dir != null; dir = dir.getParent())
+            dirs.add(dir);
         _dirComboBox.setItems(dirs);
         _dirComboBox.setSelIndex(0);
 
@@ -381,36 +382,6 @@ public class FilePanel extends ViewOwner {
 
         // Set handler to update DialogBox.ConfirmEnabled when text changes
         _fileText.addEventHandler(e -> runLater(() -> fileTextDidKeyRelease()), KeyRelease);
-    }
-
-    /**
-     * Called when FileBrowser gets MouseRelease.
-     */
-    private void fileBrowserMouseReleased(ViewEvent anEvent)
-    {
-        // If double-click and valid file, do confirm
-        if (anEvent.getClickCount() == 2 && _dialogBox.isConfirmEnabled())
-            _dialogBox.confirm();
-
-            // I don't know about this
-        else if (getFile() == null && getDir() != null) {
-            WebFile dir = getDir();
-            setFile(dir.getParent());
-            setFile(dir);
-        }
-    }
-
-    /**
-     * Configures a FileBrowser cell.
-     */
-    protected void configureFileBrowserCell(ListCell<WebFile> aCell)
-    {
-        WebFile file = aCell.getItem();
-        if (file == null || file.isDir() || ArrayUtils.contains(getTypes(), file.getType()))
-            return;
-
-        aCell.setEnabled(false);
-        aCell.setTextFill(Color.LIGHTGRAY);
     }
 
     /**
@@ -452,6 +423,36 @@ public class FilePanel extends ViewOwner {
             setDir(getDir().getParent());
             setDir(newDir);
         }
+    }
+
+    /**
+     * Called when FileBrowser gets MouseRelease.
+     */
+    private void fileBrowserMouseReleased(ViewEvent anEvent)
+    {
+        // If double-click and valid file, do confirm
+        if (anEvent.getClickCount() == 2 && _dialogBox.isConfirmEnabled())
+            _dialogBox.confirm();
+
+            // I don't know about this
+        else if (getFile() == null && getDir() != null) {
+            WebFile dir = getDir();
+            setFile(dir.getParent());
+            setFile(dir);
+        }
+    }
+
+    /**
+     * Configures a FileBrowser cell.
+     */
+    protected void configureFileBrowserCell(ListCell<WebFile> aCell)
+    {
+        WebFile file = aCell.getItem();
+        if (file == null || file.isDir() || ArrayUtils.contains(getTypes(), file.getType()))
+            return;
+
+        aCell.setEnabled(false);
+        aCell.setTextFill(Color.LIGHTGRAY);
     }
 
     /**
