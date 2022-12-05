@@ -13,13 +13,13 @@ import snap.util.ArrayUtils;
 public class ViewList {
 
     // The views array
-    private View  _views[] = EMPTY_VIEWS;
+    private View[]  _views = EMPTY_VIEWS;
     
     // The array of managed views (usually just the same as above)
-    protected View  _managed[] = EMPTY_VIEWS;
+    protected View[]  _managed = EMPTY_VIEWS;
     
     // Shared empty view array
-    private static View[] EMPTY_VIEWS = new View[0];
+    private static View[]  EMPTY_VIEWS = new View[0];
     
     /**
      * Returns the number of views in this list.
@@ -137,13 +137,20 @@ public class ViewList {
      */
     public View getViewAt(double aX, double aY)
     {
-        View children[] = getAll();
-        for (int i=children.length-1; i>=0; i--) {
-            View child = children[i]; if (!child.isPickableVisible()) continue;
-            Point p = child.parentToLocal(aX, aY);
-            if (child.contains(p.x,p.y))
+        // Get children
+        View[] children = getAll();
+
+        // Iterate over Children
+        for (int i = children.length-1; i >= 0; i--) {
+            View child = children[i];
+            if (!child.isPickableVisible())
+                continue;
+            Point pointInChild = child.parentToLocal(aX, aY);
+            if (child.contains(pointInChild.x,pointInChild.y))
                 return child;
         }
+
+        // Return not found
         return null;
     }
 
@@ -152,14 +159,22 @@ public class ViewList {
      */
     public <T extends View> T getViewAt(Shape aShape, Class <T> aClass, View aView)
     {
-        View children[] = getAll();
-        for (int i=children.length-1; i>=0; i--) { View child = children[i];
-            if (child==aView || !child.isPickableVisible()) continue;
-            if (aClass!=null && !aClass.isInstance(child)) continue;
-            Shape shp2 = child.parentToLocal(aShape);
-            if (child.intersects(shp2))
+        // Get Children
+        View[] children = getAll();
+
+        // Iterate over children
+        for (int i = children.length-1; i >= 0; i--) {
+            View child = children[i];
+            if (child == aView || !child.isPickableVisible())
+                continue;
+            if (aClass != null && !aClass.isInstance(child))
+                continue;
+            Shape shapeInChild = child.parentToLocal(aShape);
+            if (child.intersects(shapeInChild))
                 return (T) child;
         }
+
+        // Return not found
         return null;
     }
 
@@ -168,17 +183,25 @@ public class ViewList {
      */
     public <T extends View> T[] getViewsIntersectingShape(Shape aShape, Class <T> aClass)
     {
-        View children[] = getAll();
+        // Get Children
+        View[] children = getAll();
         List <T> hit = Collections.EMPTY_LIST;
-        for (int i=children.length-1; i>=0; i--) { View child = children[i];
-            if (!child.isPickableVisible()) continue;
-            if (aClass!=null && !aClass.isInstance(child)) continue;
-            Shape shp = child.parentToLocal(aShape);
-            if (child.intersects(shp)) {
-                if (hit==Collections.EMPTY_LIST) hit = new ArrayList();
+
+        // Iterate over children
+        for (int i = children.length-1; i >= 0; i--) {
+            View child = children[i];
+            if (!child.isPickableVisible())
+                continue;
+            if (aClass != null && !aClass.isInstance(child))
+                continue;
+            Shape shapeInChild = child.parentToLocal(aShape);
+            if (child.intersects(shapeInChild)) {
+                if (hit == Collections.EMPTY_LIST) hit = new ArrayList<>();
                 hit.add((T)child);
             }
         }
+
+        // Return array
         T[] array = (T[]) Array.newInstance(aClass, hit.size());
         return hit.toArray(array);
     }
@@ -188,10 +211,11 @@ public class ViewList {
      */
     public <T extends View> T getHitView(View aView, Class <T> aClass, double anInset)
     {
-        Rect bnds = aView.getBoundsLocal();
-        if (anInset!=0) bnds.inset(anInset);
-        Shape shp = aView.localToParent(bnds);
-        return getViewAt(shp, aClass, aView);
+        Rect bounds = aView.getBoundsLocal();
+        if (anInset != 0)
+            bounds.inset(anInset);
+        Shape boundsInParent = aView.localToParent(bounds);
+        return getViewAt(boundsInParent, aClass, aView);
     }
 
     /**
@@ -199,12 +223,29 @@ public class ViewList {
      */
     public View[] getManaged()
     {
-        if (_managed!=null) return _managed;
-        int cc = size();
-        int mc = 0; for (View child : getAll()) if (child.isManagedVisible()) mc++;
-        if (mc==cc) return _managed = _views;
-        View mngd[] = new View[mc];
-        for (int i=0,j=0;i<cc;i++) { View c = get(i); if (c.isManagedVisible()) mngd[j++] = c; }
-        return _managed = mngd;
+        // If already set, just return
+        if (_managed != null) return _managed;
+
+        // Get ChildCount, ManagedCount
+        int childCount = size();
+        int managedCount = 0;
+        for (View child : getAll())
+            if (child.isManagedVisible())
+                managedCount++;
+
+        // If same, just return children
+        if (managedCount == childCount)
+            return _managed = _views;
+
+        // Get managed array
+        View[] managed = new View[managedCount];
+        for (int i = 0, j = 0; i < childCount; i++) {
+            View child = get(i);
+            if (child.isManagedVisible())
+                managed[j++] = child;
+        }
+
+        // Set, return
+        return _managed = managed;
     }
 }

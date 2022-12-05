@@ -12,7 +12,7 @@ import snap.util.*;
  * An view subclass for editing a single line of text.
  */
 public class TextField extends ParentView {
-    
+
     // The StringBuffer to hold text
     private StringBuffer  _sb = new StringBuffer();
     
@@ -61,11 +61,11 @@ public class TextField extends ParentView {
 
     // Constants for property defaults
     private static Border DEFAULT_TEXT_FIELD_BORDER = Border.createLineBorder(Color.LIGHTGRAY, 1).copyForInsets(Insets.EMPTY);
-    private static final Insets DEFAULT_TEXT_FIELD_PADDING = new Insets(2,2,2,5);
+    private static final Insets DEFAULT_TEXT_FIELD_PADDING = new Insets(2, 2, 2, 5);
 
     // The color of the border when focused
-    static Color    SELECTION_COLOR = new Color(181, 214, 254, 255);
-    
+    static Color SELECTION_COLOR = new Color(181, 214, 254, 255);
+
     /**
      * Creates a new TextField.
      */
@@ -81,7 +81,7 @@ public class TextField extends ParentView {
 
         // Configure label and set
         _label = new Label();
-        _label.setPadding(0,0,0,0);
+        _label.setPadding(0, 0, 0, 0);
         _label.setPickable(false);
         addChild(_label);
     }
@@ -111,14 +111,17 @@ public class TextField extends ParentView {
      */
     public void setColCount(int aValue)
     {
-        firePropChange(ColCount_Prop, _colCount, _colCount=aValue);
+        firePropChange(ColCount_Prop, _colCount, _colCount = aValue);
         relayoutParent();
     }
 
     /**
      * Returns the total column width.
      */
-    double getTotalColWidth()  { return Math.ceil(_colCount*getFont().charAdvance('X')); }
+    double getTotalColWidth()
+    {
+        return Math.ceil(_colCount * getFont().charAdvance('X'));
+    }
 
     /**
      * Returns the prompt text.
@@ -164,7 +167,7 @@ public class TextField extends ParentView {
      */
     public double getTextWidth()
     {
-        return length()>0? Math.ceil(getFont().getStringAdvance(getText())) : 0;
+        return length() > 0 ? Math.ceil(getFont().getStringAdvance(getText())) : 0;
     }
 
     /**
@@ -182,29 +185,41 @@ public class TextField extends ParentView {
     {
         // Get basic bounds for TextField size/insets and font/string width/height
         Insets ins = getInsetsAll();
-        double width = getWidth(), height = getHeight();
-        double tx = ins.left, ty = ins.top, tw = getTextWidth(), th = getTextHeight();
+        double viewW = getWidth();
+        double viewH = getHeight();
+        double textX = ins.left;
+        double textY = ins.top;
+        double textW = getTextWidth();
+        double textH = getTextHeight();
 
         // If requested to return text bounds in view bounds, constrain
         if (inBounds) {
-            if (tx+tw>width-ins.right) tw = width - tx - ins.right;
-            if (ty+th>height-ins.bottom) th = height - ty - ins.bottom;
+            if (textX + textW > viewW - ins.right)
+                textW = viewW - textX - ins.right;
+            if (textY + textH > viewH - ins.bottom)
+                textH = viewH - textY - ins.bottom;
         }
 
         // Adjust for PromptText if set
-        if (_label.isStringViewSet())
-            tx += _label.getStringView().getX() + _label.getStringView().getTransX();
+        if (_label.isStringViewSet()) {
+            StringView stringView = _label.getStringView();
+            textX += stringView.getX() + stringView.getTransX();
+        }
 
         // Adjust rect by alignment
-        double ax = ViewUtils.getAlignX(this);
-        double ay = ViewUtils.getAlignY(this);
-        if (ax>0) { double extra = width - tx - ins.right - tw;
-            tx = Math.max(tx+extra*ax,tx); }
-        if (ay>0) { double extra = height - ty - ins.bottom - th;
-            ty = Math.max(ty+Math.round(extra*ay),ty); }
+        double alignX = ViewUtils.getAlignX(this);
+        double alignY = ViewUtils.getAlignY(this);
+        if (alignX > 0) {
+            double extra = viewW - textX - ins.right - textW;
+            textX = Math.max(textX + extra * alignX, textX);
+        }
+        if (alignY > 0) {
+            double extra = viewH - textY - ins.bottom - textH;
+            textY = Math.max(textY + Math.round(extra * alignY), textY);
+        }
 
         // Create/return rect
-        return new Rect(tx,ty,tw,th);
+        return new Rect(textX, textY, textW, textH);
     }
 
     /**
@@ -212,16 +227,23 @@ public class TextField extends ParentView {
      */
     public int getCharIndexAt(double anX)
     {
-        Rect bnds = getTextBounds(false);
-        if (anX<bnds.getX()) return 0;
-        if (anX>=bnds.getMaxX()) return length();
-        double cx = bnds.getX(); Font font = getFont();
-        for (int i=0,iMax=length();i<iMax;i++) { char c = charAt(i);
-            double cw = font.getCharAdvance(c,true);
-            if (anX<=cx+cw/2)
+        Rect textBounds = getTextBounds(false);
+        if (anX < textBounds.getX())
+            return 0;
+        if (anX >= textBounds.getMaxX())
+            return length();
+
+        double charX = textBounds.getX();
+        Font font = getFont();
+        for (int i = 0, iMax = length(); i < iMax; i++) {
+            char loopChar = charAt(i);
+            double charW = font.getCharAdvance(loopChar, true);
+            if (anX <= charX + charW / 2)
                 return i;
-            cx += cw;
+            charX += charW;
         }
+
+        // Return length
         return length();
     }
 
@@ -230,13 +252,22 @@ public class TextField extends ParentView {
      */
     public double getXForChar(int anIndex)
     {
-        Rect bnds = getTextBounds(false);
-        if (anIndex==0) return bnds.getX();
-        if (anIndex==length()) return bnds.getMaxX();
-        double cx = bnds.getX(); Font font = getFont();
-        for (int i=0,iMax=anIndex;i<iMax;i++) { char c = charAt(i);
-            cx += font.getCharAdvance(c,true); }
-        return cx;
+        Rect textBounds = getTextBounds(false);
+        if (anIndex == 0)
+            return textBounds.getX();
+        if (anIndex == length())
+            return textBounds.getMaxX();
+
+        //
+        double charX = textBounds.getX();
+        Font font = getFont();
+        for (int i = 0, iMax = anIndex; i < iMax; i++) {
+            char loopChar = charAt(i);
+            charX += font.getCharAdvance(loopChar, true);
+        }
+
+        // Return char X
+        return charX;
     }
 
     /**
@@ -245,10 +276,10 @@ public class TextField extends ParentView {
     protected double getPrefWidthImpl(double aH)
     {
         Insets ins = getInsetsAll();
-        double pw1 = getColCount()>0 ? getTotalColWidth() : getTextWidth() + 10;
-        double pw2 = _label.getPrefWidth();
-        double pw3 = Math.max(pw1, pw2);
-        return pw3 + ins.getWidth();
+        double prefW1 = getColCount() > 0 ? getTotalColWidth() : getTextWidth() + 10;
+        double prefW2 = _label.getPrefWidth();
+        double prefW3 = Math.max(prefW1, prefW2);
+        return prefW3 + ins.getWidth();
     }
 
     /**
@@ -257,10 +288,10 @@ public class TextField extends ParentView {
     protected double getPrefHeightImpl(double aW)
     {
         Insets ins = getInsetsAll();
-        double ph1 = getTextHeight();
-        double ph2 = _label.getPrefHeight();
-        double ph3 = Math.max(ph1, ph2);
-        return ph3 + ins.getHeight() + 4;
+        double prefH1 = getTextHeight();
+        double prefH2 = _label.getPrefHeight();
+        double prefH3 = Math.max(prefH1, prefH2);
+        return prefH3 + ins.getHeight() + 4;
     }
 
     /**
@@ -269,9 +300,11 @@ public class TextField extends ParentView {
     protected void layoutImpl()
     {
         Insets ins = getInsetsAll();
-        double x = ins.left, w = getWidth() - ins.getWidth();
-        double y = ins.top, h = getHeight() - ins.getHeight();
-        _label.setBounds(x, y, w, h);
+        double areaX = ins.left;
+        double areaY = ins.top;
+        double areaW = getWidth() - ins.getWidth();
+        double areaH = getHeight() - ins.getHeight();
+        _label.setBounds(areaX, areaY, areaW, areaH);
     }
 
     /**
@@ -279,15 +312,18 @@ public class TextField extends ParentView {
      */
     protected void setFocused(boolean aValue)
     {
-        if (aValue==isFocused()) return; super.setFocused(aValue);
+        if (aValue == isFocused()) return;
+        super.setFocused(aValue);
 
         // Toggle caret animation and repaint
-        if (!aValue || _downX == 0) setCaretAnim();
+        if (!aValue || _downX == 0)
+            setCaretAnim();
         repaint();
 
         // If focus gained, set FocusedGainedValue and select all (if not from mouse press)
         if (aValue) {
-            _focusGainedText = getText(); _edited = false;
+            _focusGainedText = getText();
+            _edited = false;
         }
 
         // If focus lost and FocusGainedVal changed, fire action
@@ -304,14 +340,16 @@ public class TextField extends ParentView {
         setSel(getSelStart(), getSelEnd());
 
         // If PromptText present, update Label.StringView.Visible
-        if (_promptText!=null) _label.getStringView().setPaintable(length()==0);
+        if (_promptText != null)
+            _label.getStringView().setPaintable(length() == 0);
 
         // If focused and text has changed, updated Edited
         if (isFocused() && !isEdited() && !SnapUtils.equals(getText(), _focusGainedText))
             setEdited(true);
 
         // Relayout parent and repaint
-        relayoutParent(); repaint();
+        relayoutParent();
+        repaint();
     }
 
     /**
@@ -334,7 +372,7 @@ public class TextField extends ParentView {
      */
     protected void setEdited(boolean aValue)
     {
-        if (aValue==isEdited()) return;
+        if (aValue == isEdited()) return;
         firePropChange(Edited_Prop, _edited, _edited = aValue);
     }
 
@@ -346,17 +384,26 @@ public class TextField extends ParentView {
     /**
      * Returns the individual character at given index.
      */
-    public char charAt(int anIndex)  { return _sb.charAt(anIndex); }
+    public char charAt(int anIndex)
+    {
+        return _sb.charAt(anIndex);
+    }
 
     /**
      * Returns the plain string of the text being edited.
      */
-    public String getText()  { return _sb.toString(); }
+    public String getText()
+    {
+        return _sb.toString();
+    }
 
     /**
      * Set text string of text editor.
      */
-    public void setText(String aString)  { replaceChars(aString, 0, length(), false); }
+    public void setText(String aString)
+    {
+        replaceChars(aString, 0, length(), false);
+    }
 
     /**
      * Returns the character index of the start of the text selection.
@@ -366,7 +413,10 @@ public class TextField extends ParentView {
     /**
      * Sets the selection start.
      */
-    public void setSelStart(int aValue)  { setSel(aValue,getSelEnd()); }
+    public void setSelStart(int aValue)
+    {
+        setSel(aValue, getSelEnd());
+    }
 
     /**
      * Returns the character index of the end of the text selection.
@@ -376,7 +426,10 @@ public class TextField extends ParentView {
     /**
      * Sets the selection end.
      */
-    public void setSelEnd(int aValue)  { setSel(getSelStart(),aValue); }
+    public void setSelEnd(int aValue)
+    {
+        setSel(getSelStart(), aValue);
+    }
 
     /**
      * Returns whether the selection is empty.
@@ -386,7 +439,10 @@ public class TextField extends ParentView {
     /**
      * Sets the character index of the text cursor.
      */
-    public void setSel(int newStartEnd)  { setSel(newStartEnd, newStartEnd); }
+    public void setSel(int newStartEnd)
+    {
+        setSel(newStartEnd, newStartEnd);
+    }
 
     /**
      * Sets the character index of the start and end of the text selection.
@@ -394,16 +450,22 @@ public class TextField extends ParentView {
     public void setSel(int aStart, int anEnd)
     {
         // Make sure start is before end and both are within bounds
-        if (anEnd<aStart) { int temp = anEnd; anEnd = aStart; aStart = temp; }
+        if (anEnd < aStart) {
+            int temp = anEnd;
+            anEnd = aStart;
+            aStart = temp;
+        }
         aStart = MathUtils.clamp(aStart, 0, length());
         anEnd = MathUtils.clamp(anEnd, 0, length());
-        if (aStart==_selStart && anEnd==_selEnd) return;
+        if (aStart == _selStart && anEnd == _selEnd)
+            return;
 
         // Set new start/end
-        _selStart = aStart; _selEnd = anEnd;
+        _selStart = aStart;
+        _selEnd = anEnd;
 
         // Fire property change
-        firePropChange(Sel_Prop, aStart + ((long)anEnd)<<32, 0);
+        firePropChange(Sel_Prop, aStart + ((long) anEnd) << 32, 0);
         repaint();
         _compSel = false;
     }
@@ -411,18 +473,22 @@ public class TextField extends ParentView {
     /**
      * Returns the selection string.
      */
-    public String getSelString()  { return getText(); }
+    public String getSelString()
+    {
+        return getText();
+    }
 
     /**
      * Returns the selection bounds.
      */
     public Rect getSelBounds()
     {
-        Rect bnds = getTextBounds(false);
+        Rect bounds = getTextBounds(false);
         double x1 = getXForChar(getSelStart());
         double x2 = isSelEmpty() ? x1 : getXForChar(getSelEnd());
-        bnds.x = x1; bnds.width = x2 - x1;
-        return bnds;
+        bounds.x = x1;
+        bounds.width = x2 - x1;
+        return bounds;
     }
 
     /**
@@ -431,7 +497,10 @@ public class TextField extends ParentView {
     public void selectAll()
     {
         // If mouse down, come back later
-        if (ViewUtils.isMouseDown()) { getEnv().runLater(() -> selectAll()); return; }
+        if (ViewUtils.isMouseDown()) {
+            getEnv().runLater(() -> selectAll());
+            return;
+        }
 
         // Set selection
         setSel(0, length());
@@ -451,11 +520,15 @@ public class TextField extends ParentView {
     public void replaceChars(String aString, int aStart, int anEnd, boolean doUpdateSel)
     {
         // Get string length (if no string length and no char range, just return)
-        int strLen = aString!=null ? aString.length() : 0; if (strLen==0 && aStart==anEnd) return;
+        int strLen = aString != null ? aString.length() : 0;
+        if (strLen == 0 && aStart == anEnd)
+            return;
 
         // Do actual replace chars
-        if (aStart!=anEnd) _sb.delete(aStart, anEnd);
-        if (aString!=null) _sb.insert(aStart, aString);
+        if (aStart != anEnd)
+            _sb.delete(aStart, anEnd);
+        if (aString != null)
+            _sb.insert(aStart, aString);
 
         // Update selection to be at end of new string
         if (doUpdateSel)
@@ -473,7 +546,10 @@ public class TextField extends ParentView {
     /**
      * Deletes the current selection.
      */
-    public void delete()  { delete(getSelStart(), getSelEnd(), true); }
+    public void delete()
+    {
+        delete(getSelStart(), getSelEnd(), true);
+    }
 
     /**
      * Deletes the given range of chars.
@@ -489,8 +565,8 @@ public class TextField extends ParentView {
     public void selectForward(boolean isShiftDown)
     {
         // If shift is down, extend selection forward, otherwise set new selection
-        if (isShiftDown) setSel(getSelStart(), getSelEnd()+1);
-        else setSel(getSelEnd()+1);
+        if (isShiftDown) setSel(getSelStart(), getSelEnd() + 1);
+        else setSel(getSelEnd() + 1);
     }
 
     /**
@@ -499,19 +575,25 @@ public class TextField extends ParentView {
     public void selectBackward(boolean isShiftDown)
     {
         // If shift is down, extend selection back, otherwise set new selection
-        if (isShiftDown) setSel(getSelStart()-1, getSelEnd());
-        else setSel(getSelStart()-1);
+        if (isShiftDown) setSel(getSelStart() - 1, getSelEnd());
+        else setSel(getSelStart() - 1);
     }
 
     /**
      * Moves the insertion point to the beginning of line.
      */
-    public void selectLineStart()  { setSel(0); }
+    public void selectLineStart()
+    {
+        setSel(0);
+    }
 
     /**
      * Moves the insertion point to next newline or text end.
      */
-    public void selectLineEnd()  { setSel(length()); }
+    public void selectLineEnd()
+    {
+        setSel(length());
+    }
 
     /**
      * Deletes the character before of the insertion point.
@@ -519,13 +601,16 @@ public class TextField extends ParentView {
     public void deleteBackward()
     {
         // If CompSel (completion selection), run extra time
-        if (_compSel) { _compSel = false; deleteBackward(); }
+        if (_compSel) {
+            _compSel = false;
+            deleteBackward();
+        }
 
         // If selected range, delete selected range
-        if (!isSelEmpty() || getSelStart()==0) delete();
+        if (!isSelEmpty() || getSelStart() == 0) delete();
 
-        // Otherwise delete previous char
-        else delete(getSelStart()-1, getSelStart(), true);
+            // Otherwise delete previous char
+        else delete(getSelStart() - 1, getSelStart(), true);
     }
 
     /**
@@ -533,8 +618,12 @@ public class TextField extends ParentView {
      */
     public void deleteForward()
     {
-        if (!isSelEmpty()) { delete(); return; }
-        int start = getSelStart(), end = start + 1; if (start>=length()) return;
+        if (!isSelEmpty()) {
+            delete();
+            return;
+        }
+        int start = getSelStart(), end = start + 1;
+        if (start >= length()) return;
         delete(start, end, true);
     }
 
@@ -554,7 +643,10 @@ public class TextField extends ParentView {
     /**
      * Clears the text.
      */
-    public void clear()  { delete(0, length(), true); }
+    public void clear()
+    {
+        delete(0, length(), true);
+    }
 
     /**
      * Sets text that represents a completion of current text. This preserves the capitalization of chars in the current
@@ -562,7 +654,8 @@ public class TextField extends ParentView {
      */
     public void setCompletionText(String aString)
     {
-        String text = getText(); if (!StringUtils.startsWithIC(aString,text)) return;
+        String text = getText();
+        if (!StringUtils.startsWithIC(aString, text)) return;
         String text2 = text + aString.substring(text.length());
         setText(text2);
         setSel(text.length(), text2.length());
@@ -577,7 +670,9 @@ public class TextField extends ParentView {
     {
         // If empty, just paint selection and return
         if (length() == 0) {
-            paintSel(aPntr); return; }
+            paintSel(aPntr);
+            return;
+        }
 
         // Get text bounds
         Rect textBounds = getTextBounds(true);
@@ -592,7 +687,8 @@ public class TextField extends ParentView {
         // Get/set font/paint
         Font font = getFont();
         aPntr.setFont(font);
-        aPntr.setPaint(_textFill);
+        Paint textFill = isEnabled() ? getTextFill() : Color.GRAY;
+        aPntr.setPaint(textFill);
 
         // Paint text
         String str = getText();
@@ -664,25 +760,32 @@ public class TextField extends ParentView {
         _downX = anEvent.getX();
 
         // Determine if word or paragraph selecting
-        if (!anEvent.isShiftDown()) _wordSel = _pgraphSel = false;
-        if (anEvent.getClickCount()==2) _wordSel = true;
-        else if (anEvent.getClickCount()==3) _pgraphSel = true;
+        if (!anEvent.isShiftDown())
+            _wordSel = _pgraphSel = false;
+        if (anEvent.getClickCount() == 2)
+            _wordSel = true;
+        else if (anEvent.getClickCount() == 3)
+            _pgraphSel = true;
 
         // Get selected range for down point
         int start = getCharIndexAt(_downX), end = start;
 
         // If word selecting extend to word bounds
         if (_wordSel) {
-            while (start>0 && Character.isLetterOrDigit(charAt(start-1))) start--;
-            while (end<length() && Character.isLetterOrDigit(charAt(end))) end++;
+            while (start > 0 && Character.isLetterOrDigit(charAt(start - 1))) start--;
+            while (end < length() && Character.isLetterOrDigit(charAt(end))) end++;
         }
 
         // If paragraph selecting extend to text bounds
-        else if (_pgraphSel) { start = 0; end = length(); }
+        else if (_pgraphSel) {
+            start = 0;
+            end = length();
+        }
 
         // If shift is down, xor selection
         if (anEvent.isShiftDown()) {
-            if (start<=getSelStart()) end = getSelEnd();
+            if (start <= getSelStart())
+                end = getSelEnd();
             else start = getSelStart();
         }
 
@@ -699,13 +802,16 @@ public class TextField extends ParentView {
         int start = getCharIndexAt(_downX);
         int end = getCharIndexAt(anEvent.getX());
         if (end < start) {
-            int swap = start; start = end; end = swap; }
+            int swap = start;
+            start = end;
+            end = swap;
+        }
 
         // If word selecting, extend to word bounds
         if (_wordSel) {
-            while(start > 0 && Character.isLetterOrDigit(charAt(start - 1)))
+            while (start > 0 && Character.isLetterOrDigit(charAt(start - 1)))
                 start--;
-            while(end < length() && Character.isLetterOrDigit(charAt(end)))
+            while (end < length() && Character.isLetterOrDigit(charAt(end)))
                 end++;
         }
 
@@ -761,7 +867,7 @@ public class TextField extends ParentView {
         if (commandDown) {
 
             // If shift-down, just return
-            if (shiftDown && keyCode!=KeyCode.Z) return;
+            if (shiftDown && keyCode != KeyCode.Z) return;
 
             // Handle common command keys
             switch (keyCode) {
@@ -816,10 +922,10 @@ public class TextField extends ParentView {
     {
         // Get event info
         String keyChars = anEvent.getKeyString();
-        char keyChar = keyChars.length()>0? keyChars.charAt(0) : 0;
-        boolean charDefined = keyChar!=KeyCode.CHAR_UNDEFINED && !Character.isISOControl(keyChar);
+        char keyChar = keyChars.length() > 0 ? keyChars.charAt(0) : 0;
+        boolean charDefined = keyChar != KeyCode.CHAR_UNDEFINED && !Character.isISOControl(keyChar);
         boolean commandDown = anEvent.isShortcutDown(), controlDown = anEvent.isControlDown();
-        boolean emacsDown = SnapUtils.isWindows? anEvent.isAltDown() : controlDown;
+        boolean emacsDown = SnapUtils.isWindows ? anEvent.isAltDown() : controlDown;
 
         // If actual text entered, replace
         if (charDefined && !commandDown && !controlDown && !emacsDown) {
@@ -836,50 +942,85 @@ public class TextField extends ParentView {
     /**
      * Called when a key is released.
      */
-    protected void keyReleased(ViewEvent anEvent)  { setCaretAnim(); }
+    protected void keyReleased(ViewEvent anEvent)
+    {
+        setCaretAnim();
+    }
 
     /**
      * Shows the cursor.
      */
-    public void showCursor()  { setCursor(Cursor.TEXT); }
+    public void showCursor()
+    {
+        setCursor(Cursor.TEXT);
+    }
 
     /**
      * Hides the cursor.
      */
-    public void hideCursor()  { setCursor(Cursor.NONE); }
+    public void hideCursor()
+    {
+        setCursor(Cursor.NONE);
+    }
 
     /**
      * Returns whether anim is needed.
      */
-    private boolean isCaretAnimNeeded()  { return isFocused() && isSelEmpty() && isShowing(); }
+    private boolean isCaretAnimNeeded()
+    {
+        return isFocused() && isSelEmpty() && isShowing();
+    }
 
     /**
      * Sets the caret animation to whether it's needed.
      */
-    private void setCaretAnim()  { setCaretAnim(isCaretAnimNeeded()); }
+    private void setCaretAnim()
+    {
+        setCaretAnim(isCaretAnimNeeded());
+    }
 
     /**
      * Returns whether ProgressBar is animating.
      */
-    private boolean isCaretAnim()  { return _caretTimer!=null; }
+    private boolean isCaretAnim()
+    {
+        return _caretTimer != null;
+    }
 
     /**
      * Sets anim.
      */
     private void setCaretAnim(boolean aValue)
     {
-        if (aValue==isCaretAnim()) return;
+        // If already set, just return
+        if (aValue == isCaretAnim()) return;
+
+        // Handle on
         if (aValue) {
-            _caretTimer = new ViewTimer(500, t -> { _hideCaret = !_hideCaret; repaint(); });
+            _caretTimer = new ViewTimer(500, t -> {
+                _hideCaret = !_hideCaret;
+                repaint();
+            });
             _caretTimer.start();
         }
-        else { _caretTimer.stop(); _caretTimer = null; _hideCaret = false; repaint(); }
+
+        // Handle off
+        else {
+            _caretTimer.stop();
+            _caretTimer = null;
+            _hideCaret = false;
+            repaint();
+        }
     }
 
     /**
      * Copies the current selection onto the clip board, then deletes the current selection.
      */
-    public void cut()  { copy(); delete(); }
+    public void cut()
+    {
+        copy();
+        delete();
+    }
 
     /**
      * Copies the current selection onto the clipboard.
@@ -943,7 +1084,8 @@ public class TextField extends ParentView {
      */
     protected void setShowing(boolean aValue)
     {
-        if (aValue==isShowing()) return; super.setShowing(aValue);
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
         if (isFocused())
             setCaretAnim();
     }
@@ -959,7 +1101,8 @@ public class TextField extends ParentView {
     public String toString()
     {
         String str = getText();
-        if (str.length()>40) str = str.substring(0,40) + "...";
+        if (str.length() > 40)
+            str = str.substring(0, 40) + "...";
         return getClass().getSimpleName() + ": " + str;
     }
 
@@ -986,9 +1129,9 @@ public class TextField extends ParentView {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive ColCount, Text, PromptText
-        if (!isPrefWidthSet() && getColCount()!=12) e.add(ColCount_Prop, getColCount());
-        if (getText()!=null && getText().length()>0) e.add("text", getText());
-        if (getPromptText()!=null && getPromptText().length()>0) e.add(PromptText_Prop, getPromptText());
+        if (!isPrefWidthSet() && getColCount() != 12) e.add(ColCount_Prop, getColCount());
+        if (getText() != null && getText().length() > 0) e.add("text", getText());
+        if (getPromptText() != null && getPromptText().length() > 0) e.add(PromptText_Prop, getPromptText());
         return e;
     }
 

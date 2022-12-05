@@ -21,14 +21,6 @@ public class ViewUtils {
     protected static boolean  _shiftDown;
     protected static boolean  _shortcutDown;
     
-    // Color constants
-    private static Color BACK_FILL = new Color("#E9E8EA");
-    private static Color BACK_DARK_FILL = new Color("#C0C0C0");
-    private static Color SEL_FILL = Color.LIGHTGRAY; //new Color("#0032D0");
-    private static Color SEL_TEXT_FILL = Color.BLACK; //Color.WHITE;
-    private static Color TARG_FILL = new Color("#4080F0");
-    private static Color TARG_TEXT_FILL = Color.WHITE;
-
     // Image Constants
     private static Image  RootFile, DirFile, ClassFile, JavaFile, TableFile, PlainFile;
 
@@ -198,10 +190,10 @@ public class ViewUtils {
     }
 
     // The current list of MouseUp runs
-    private static List <Runnable> _mouseUpRuns = new ArrayList();
+    private static List <Runnable>  _mouseUpRuns = new ArrayList<>();
 
     // An EventListener to schedule MouseUpRuns on MouseUp
-    private static snap.view.EventListener _mouseUpLsnr, _mouseUpLsnrShared = e -> runMouseUpRuns();
+    private static snap.view.EventListener  _mouseUpLsnr, _mouseUpLsnrShared = e -> runMouseUpRuns();
 
     /**
      * Returns an identifier string for a given view.
@@ -238,55 +230,60 @@ public class ViewUtils {
     /**
      * Returns the align x factor.
      */
-    public static final double getAlignX(View aView)  { return getAlignX(aView.getAlign()); }
+    public static double getAlignX(View aView)  { return getAlignX(aView.getAlign()); }
 
     /**
      * Returns the align y factor.
      */
-    public static final double getAlignY(View aView)  { return getAlignY(aView.getAlign()); }
+    public static double getAlignY(View aView)  { return getAlignY(aView.getAlign()); }
 
     /**
      * Returns the align x factor.
      */
-    public static final double getAlignX(Pos aPos)  { return getAlignX(aPos.getHPos()); }
+    public static double getAlignX(Pos aPos)  { return getAlignX(aPos.getHPos()); }
 
     /**
      * Returns the align y factor.
      */
-    public static final double getAlignY(Pos aPos)  { return getAlignY(aPos.getVPos()); }
+    public static double getAlignY(Pos aPos)  { return getAlignY(aPos.getVPos()); }
 
     /**
      * Returns the align x factor.
      */
-    public static final double getAlignX(HPos aPos)  { return aPos==HPos.RIGHT ? 1 : aPos==HPos.CENTER ? .5 : 0; }
+    public static double getAlignX(HPos aPos)  { return aPos==HPos.RIGHT ? 1 : aPos==HPos.CENTER ? .5 : 0; }
 
     /**
      * Returns the align y factor.
      */
-    public static final double getAlignY(VPos aPos)  { return aPos==VPos.BOTTOM ? 1 : aPos==VPos.CENTER ? .5 : 0; }
+    public static double getAlignY(VPos aPos)  { return aPos==VPos.BOTTOM ? 1 : aPos==VPos.CENTER ? .5 : 0; }
 
     /**
      * Returns the lean x factor.
      */
-    public static final double getLeanX(View aView)  { return getAlignX(aView.getLeanX()); }
+    public static double getLeanX(View aView)  { return getAlignX(aView.getLeanX()); }
 
     /**
      * Returns the lean y factor.
      */
-    public static final double getLeanY(View aView)  { return getAlignY(aView.getLeanY()); }
+    public static double getLeanY(View aView)  { return getAlignY(aView.getLeanY()); }
 
     /**
      * Returns the child of given class hit by coords.
      */
-    public static View getChildAt(View aView, double aX, double aY)  { return getChildAt(aView, aX, aY, null); }
+    public static View getChildAt(View aView, double aX, double aY)
+    {
+        return getChildAt(aView, aX, aY, null);
+    }
 
     /**
      * Returns the child of given class hit by coords.
      */
     public static <T extends View> T getChildAt(View aView, double aX, double aY, Class <T> aClass)
     {
-        ParentView par = aView instanceof ParentView ? (ParentView) aView : null; if (par == null) return null;
+        ParentView par = aView instanceof ParentView ? (ParentView) aView : null;
+        if (par == null) return null;
         View[] children = par.getChildren();
+
         for (int i = children.length - 1; i >= 0; i--) {
             View child = children[i];
             if (!child.isPickableVisible())
@@ -295,6 +292,8 @@ public class ViewUtils {
             if (child.contains(p.x,p.y) && (aClass == null || aClass.isInstance(child)))
                 return (T) child;
         }
+
+        // Return not found
         return null;
     }
 
@@ -355,7 +354,7 @@ public class ViewUtils {
             }
         }
 
-        // Return null since XY didn't hit child
+        // Return not found
         return null;
     }
 
@@ -364,10 +363,12 @@ public class ViewUtils {
      */
     public static View getCommonAncetor(View aView1, View aView2)
     {
-        for (View n1 = aView1; n1 != null; n1 = n1.getParent())
-            for (View n2 = aView2; n2 != null; n2 = n2.getParent())
-                if (n1 == n2)
-                    return n1;
+        for (View view1 = aView1; view1 != null; view1 = view1.getParent())
+            for (View view2 = aView2; view2 != null; view2 = view2.getParent())
+                if (view1 == view2)
+                    return view1;
+
+        // Return not found
         return null;
     }
 
