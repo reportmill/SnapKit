@@ -15,15 +15,6 @@ public class BindingViewOwner extends ViewOwner {
     private Map<String,Object> _modelValues = new HashMap<>();
 
     /**
-     * Adds a binding to a UI view.
-     */
-    public void addViewBinding(Object anObj, String aPropName, String aKeyPath)
-    {
-        View view = getView(anObj);
-        view.addBinding(aPropName, aKeyPath);
-    }
-
-    /**
      * Reset bindings for UI view (recurses for children).
      */
     protected void resetViewBindings(View aView)

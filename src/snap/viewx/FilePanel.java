@@ -3,6 +3,7 @@
  */
 package snap.viewx;
 import java.util.*;
+
 import snap.gfx.Color;
 import snap.util.*;
 import snap.view.*;
@@ -15,36 +16,36 @@ public class FilePanel extends ViewOwner {
 
     // The site used to reference files
     private WebSite  _site;
-    
+
     // Whether choosing file for save
     private boolean  _saving;
-    
+
     // The file types
-    private String  _types[];
-    
+    private String[]  _types;
+
     // The description
     private String  _desc;
-    
+
     // The current file
     private WebFile  _file;
 
     // The current directory
     private WebFile  _dir;
-    
+
     // The Directory ComboBox
-    private ComboBox <WebFile>  _dirComboBox;
-    
+    private ComboBox<WebFile>  _dirComboBox;
+
     // The FileBrowser
-    private BrowserView <WebFile>  _fileBrowser;
-    
+    private BrowserView<WebFile>  _fileBrowser;
+
     // The FileText
     private TextField  _fileText;
-    
+
     // The DialogBox
-    private DialogBox  _dbox;
+    private DialogBox  _dialogBox;
 
     // The default site
-    private static WebSite _defaultSite;
+    private static WebSite  _defaultSite;
 
     /**
      * Returns whether is opening.
@@ -59,17 +60,26 @@ public class FilePanel extends ViewOwner {
     /**
      * Sets whether is saving.
      */
-    public void setSaving(boolean aValue)  { _saving = aValue; }
+    public void setSaving(boolean aValue)
+    {
+        _saving = aValue;
+    }
 
     /**
      * Returns the window title.
      */
-    public String getTitle()  { return isSaving() ? "Save Panel" : "Open Panel"; }
+    public String getTitle()
+    {
+        return isSaving() ? "Save Panel" : "Open Panel";
+    }
 
     /**
      * Returns the first file types.
      */
-    public String getType()  { return _types!=null && _types.length>0 ? _types[0] : null; }
+    public String getType()
+    {
+        return _types != null && _types.length > 0 ? _types[0] : null;
+    }
 
     /**
      * Returns the file types.
@@ -79,10 +89,10 @@ public class FilePanel extends ViewOwner {
     /**
      * Sets the file types.
      */
-    public void setTypes(String ... theExts)
+    public void setTypes(String... theExts)
     {
         _types = new String[theExts.length];
-        for (int i=0;i<theExts.length;i++) {
+        for (int i = 0; i < theExts.length; i++) {
             String type = theExts[i].trim().toLowerCase();
             if (type.startsWith(".")) type = type.substring(1);
             _types[i] = type;
@@ -97,7 +107,10 @@ public class FilePanel extends ViewOwner {
     /**
      * Sets the descrption.
      */
-    public void setDesc(String aValue)  { _desc = aValue; }
+    public void setDesc(String aValue)
+    {
+        _desc = aValue;
+    }
 
     /**
      * Returns the site currently being browsed.
@@ -105,10 +118,10 @@ public class FilePanel extends ViewOwner {
     public WebSite getSite()
     {
         // If already set, just return
-        if (_site!=null) return _site;
+        if (_site != null) return _site;
 
         // Get default site
-        WebSite site = _dir!=null ? _dir.getSite() : getSiteDefault();
+        WebSite site = _dir != null ? _dir.getSite() : getSiteDefault();
         return _site = site;
     }
 
@@ -117,7 +130,7 @@ public class FilePanel extends ViewOwner {
      */
     public void setSite(WebSite aSite)
     {
-        if (aSite==_site) return;
+        if (aSite == _site) return;
         _site = aSite;
     }
 
@@ -138,10 +151,11 @@ public class FilePanel extends ViewOwner {
     public void setDir(WebFile aFile)
     {
         // Set dir and clear file
-        _dir = aFile; _file = null;
+        _dir = aFile;
+        _file = null;
 
         // Reset dir file to get latest listing
-        if (_dir!=null) _dir.resetContent();
+        if (_dir != null) _dir.resetContent();
 
         // If UI is set, set in browser and text
         setFileInUI();
@@ -158,16 +172,18 @@ public class FilePanel extends ViewOwner {
     public void setFile(WebFile aFile)
     {
         // If no file, use home dir
-        if (aFile==null)
+        if (aFile == null)
             aFile = getFile(getHomeDirPath());
 
         // If file is dir, do that instead
-        if (aFile!=null && aFile.isDir()) {
-            setDir(aFile); return; }
+        if (aFile != null && aFile.isDir()) {
+            setDir(aFile);
+            return;
+        }
 
         // Set file and dir
         _file = aFile;
-        _dir = aFile!=null ? aFile.getParent() : null;
+        _dir = aFile != null ? aFile.getParent() : null;
 
         // If UI is set, set in browser and text
         setFileInUI();
@@ -181,19 +197,21 @@ public class FilePanel extends ViewOwner {
         if (!isUISet()) return;
 
         // Update FileBrowser
-        _fileBrowser.setSelItem(getFile()!=null ? getFile() : getDir());
+        WebFile file = getFile();
+        _fileBrowser.setSelItem(file != null ? file : getDir());
 
         // Update DirComboBox
-        List <WebFile> dirs = new ArrayList();
-        for (WebFile dir=getDir(); dir!=null; dir=dir.getParent()) dirs.add(dir);
+        List<WebFile> dirs = new ArrayList<>();
+        for (WebFile dir = getDir(); dir != null; dir = dir.getParent())
+            dirs.add(dir);
         _dirComboBox.setItems(dirs);
         _dirComboBox.setSelIndex(0);
 
         // Update FileText
-        _fileText.setText(getFile()!=null ? getFile().getName() : null);
+        _fileText.setText(file != null ? file.getName() : null);
         _fileText.selectAll();
         _fileText.requestFocus();
-        _dbox.setConfirmEnabled(isFileTextFileValid());
+        _dialogBox.setConfirmEnabled(isFileTextFileValid());
     }
 
     /**
@@ -239,7 +257,7 @@ public class FilePanel extends ViewOwner {
     protected String showFilePanel(View aView)
     {
         WebFile file = showFilePanelWeb(aView);
-        return file!=null ? file.getPath() : null;
+        return file != null ? file.getPath() : null;
     }
 
     /**
@@ -248,7 +266,7 @@ public class FilePanel extends ViewOwner {
     protected WebFile showFilePanelWeb(View aView)
     {
         // If no file/dir set, set from RecentPath (prefs)
-        if (getDir()==null) {
+        if (getDir() == null) {
             String path = getRecentPath(getType());
             WebFile file = getFile(path);
             setFile(file);
@@ -258,16 +276,19 @@ public class FilePanel extends ViewOwner {
         if (isSaving()) runLater(() -> addNewFolderButton());
 
         // Run FileChooser UI in DialogBox
-        _dbox = new DialogBox(getTitle());
-        _dbox.setContent(getUI());
-        _dbox.setConfirmEnabled(isFileTextFileValid());
-        boolean value = _dbox.showConfirmDialog(aView);
+        _dialogBox = new DialogBox(getTitle());
+        _dialogBox.setContent(getUI());
+        _dialogBox.setConfirmEnabled(isFileTextFileValid());
+        boolean value = _dialogBox.showConfirmDialog(aView);
         if (!value)
             return null;
 
         // Get file and path of selection and save to preferences
         WebFile file = getFileTextFile();
-        if (file==null) { System.err.println("FileChooser: null not possible"); return null; }
+        if (file == null) {
+            System.err.println("FileChooser: null not possible");
+            return null;
+        }
         String path = file.getPath();
 
         // Save selected filename in preferences for it's type (extension)
@@ -284,12 +305,12 @@ public class FilePanel extends ViewOwner {
             int answer = dbox2.showOptionDialog(aView, "Replace");
 
             // If user chooses cancel, re-run chooser
-            if (answer!=0)
+            if (answer != 0)
                 return showFilePanelWeb(aView);
         }
 
         // Give focus back to given view
-        if (save && aView!=null)
+        if (save && aView != null)
             aView.requestFocus();
 
         // Return file
@@ -301,10 +322,12 @@ public class FilePanel extends ViewOwner {
      */
     protected void addNewFolderButton()
     {
-        Button btn = new Button("New Folder");
-        btn.setMinWidth(100); btn.setMinHeight(24); btn.setName("NewFolderButton");
-        btn.setOwner(this);
-        _dbox.getButtonBox().addChild(btn, 0);
+        Button newFolderButton = new Button("New Folder");
+        newFolderButton.setMinWidth(100);
+        newFolderButton.setMinHeight(24);
+        newFolderButton.setName("NewFolderButton");
+        newFolderButton.setOwner(this);
+        _dialogBox.getButtonBox().addChild(newFolderButton, 0);
     }
 
     /**
@@ -312,12 +335,14 @@ public class FilePanel extends ViewOwner {
      */
     protected WebFile[] getFilteredFiles(WebFile[] theFiles)
     {
-        List <WebFile> files = new ArrayList();
+        List<WebFile> files = new ArrayList<>();
         for (WebFile file : theFiles) {
             if (file.getName().startsWith(".")) continue;
             //if (file.isDir() || ArrayUtils.contains(getTypes(), file.getType()))
-                files.add(file);
+            files.add(file);
         }
+
+        // Return array
         return files.toArray(new WebFile[0]);
     }
 
@@ -337,20 +362,20 @@ public class FilePanel extends ViewOwner {
         WebFile[] dirFiles = getSite().getRootDir().getFiles();
         WebFile[] dirFilesFiltered = getFilteredFiles(dirFiles);
         _fileBrowser.setItems(dirFilesFiltered);
-        _fileBrowser.setSelItem(getFile()!=null ? getFile() : getDir());
+        _fileBrowser.setSelItem(getFile() != null ? getFile() : getDir());
 
         // Get/configure DirComboBox
         _dirComboBox = getView("DirComboBox", ComboBox.class);
         _dirComboBox.setItemTextFunction(itm -> itm.isRoot() ? "Root Directory" : itm.getName());
         _dirComboBox.getListView().setRowHeight(24);
-        List <WebFile> dirs = new ArrayList();
-        for (WebFile dir=getDir(); dir!=null; dir=dir.getParent()) dirs.add(dir);
+        List<WebFile> dirs = new ArrayList();
+        for (WebFile dir = getDir(); dir != null; dir = dir.getParent()) dirs.add(dir);
         _dirComboBox.setItems(dirs);
         _dirComboBox.setSelIndex(0);
 
         // Get FileText
         _fileText = getView("FileText", TextField.class);
-        _fileText.setText(getFile()!=null? getFile().getName() : null);
+        _fileText.setText(getFile() != null ? getFile().getName() : null);
         _fileText.selectAll();
         setFirstFocus(_fileText);
 
@@ -364,11 +389,11 @@ public class FilePanel extends ViewOwner {
     private void fileBrowserMouseReleased(ViewEvent anEvent)
     {
         // If double-click and valid file, do confirm
-        if (anEvent.getClickCount()==2 && _dbox.isConfirmEnabled())
-            _dbox.confirm();
+        if (anEvent.getClickCount() == 2 && _dialogBox.isConfirmEnabled())
+            _dialogBox.confirm();
 
-        // I don't know about this
-        else if (getFile()==null && getDir()!=null) {
+            // I don't know about this
+        else if (getFile() == null && getDir() != null) {
             WebFile dir = getDir();
             setFile(dir.getParent());
             setFile(dir);
@@ -380,8 +405,10 @@ public class FilePanel extends ViewOwner {
      */
     protected void configureFileBrowserCell(ListCell<WebFile> aCell)
     {
-        WebFile file = aCell.getItem(); if (file==null) return;
-        if (file==null || file.isDir() || ArrayUtils.contains(getTypes(), file.getType())) return;
+        WebFile file = aCell.getItem();
+        if (file == null || file.isDir() || ArrayUtils.contains(getTypes(), file.getType()))
+            return;
+
         aCell.setEnabled(false);
         aCell.setTextFill(Color.LIGHTGRAY);
     }
@@ -400,15 +427,15 @@ public class FilePanel extends ViewOwner {
         // Handle FileText: If directory, set
         if (anEvent.equals("FileText")) {
             WebFile file = getFileTextFile();
-            if (file!=null && file.isDir())
+            if (file != null && file.isDir())
                 setFile(file);
             else if (isFileTextFileValid())
-                _dbox.confirm();
+                _dialogBox.confirm();
             anEvent.consume();
         }
 
         // Handle HomeButton
-        if(anEvent.equals("HomeButton"))
+        if (anEvent.equals("HomeButton"))
             setFile(getFile(getHomeDirPath()));
 
         // Handle DirComboBox
@@ -418,11 +445,12 @@ public class FilePanel extends ViewOwner {
         // Handle NewFolderButton
         if (anEvent.equals("NewFolderButton")) {
             String name = DialogBox.showInputDialog(getUI(), "New Folder Panel", "Enter name:", null);
-            if (name==null) return;
+            if (name == null) return;
             String path = getDir().getDirPath() + name;
             WebFile newDir = getSite().createFile(path, true);
             newDir.save();
-            setDir(getDir().getParent()); setDir(newDir);
+            setDir(getDir().getParent());
+            setDir(newDir);
         }
     }
 
@@ -432,32 +460,37 @@ public class FilePanel extends ViewOwner {
     private String getFileTextPath()
     {
         // Get FileText string
-        String ftext = _fileText.getText().trim();
+        String fileText = _fileText.getText().trim();
 
         // If empty just return dir path
-        if(ftext==null || ftext.length()==0)
-            return getDir().getPath();
+        if (fileText.length() == 0) {
+            WebFile dir = getDir();
+            return dir.getPath();
+        }
 
         // If starts with ~ return home dir
-        if(ftext.startsWith("~"))
+        if (fileText.startsWith("~"))
             return getHomeDirPath();
 
         // If starts with '..', return parent dir
-        if(ftext.startsWith("..")) {
-            if(getFile()!=null)
-                return getDir().getPath();
-            if(getDir()!=null && getDir().getParent()!=null)
-                return getDir().getParent().getPath();
+        if (fileText.startsWith("..")) {
+            WebFile file = getFile();
+            WebFile dir = getDir();
+            if (file != null)
+                return dir.getPath();
+            if (dir != null && dir.getParent() != null)
+                return dir.getParent().getPath();
             return "/";
         }
 
         // If starts with FileSeparator, just return
-        if(ftext.startsWith("/") || ftext.startsWith("\\"))
-            return ftext;
+        if (fileText.startsWith("/") || fileText.startsWith("\\"))
+            return fileText;
 
-         // Get path
-         String path = FilePathUtils.getChild(getDir().getPath(), ftext);
-         return path;
+        // Get path
+        WebFile dir = getDir();
+        String path = FilePathUtils.getChild(dir.getPath(), fileText);
+        return path;
     }
 
     /**
@@ -470,14 +503,15 @@ public class FilePanel extends ViewOwner {
         WebFile file = getFile(path);
 
         // If opening a file that doesn't exists, see if it just needs an extension
-        if(file==null && isOpening() && path.indexOf(".")<0) {
+        if (file == null && isOpening() && !path.contains(".")) {
             path += getType();
             file = getFile(path);
         }
 
         // If saving, make sure path has extension and create
-        if (file==null && isSaving()) {
-            if (path.indexOf(".")<0) path += '.' + getType();
+        if (file == null && isSaving()) {
+            if (!path.contains("."))
+                path += '.' + getType();
             //String dpath = FilePathUtils.getParent(path);
             //WebFile dir = getFile(dpath);
             //if (dir!=null && dir.isDir())
@@ -494,16 +528,19 @@ public class FilePanel extends ViewOwner {
     private boolean isFileTextFileValid()
     {
         // If saving just return
-        if (isSaving() && getFileTextPath().length()>0)
+        if (isSaving() && getFileTextPath().length() > 0)
             return true;
 
         // Get file for path based on FilePanel Dir and FileText (filename) - just return false if null
         WebFile file = getFileTextFile();
-        if (file==null) return false;
+        if (file == null)
+            return false;
 
         // If file is plain file and matches requested type, return true
         if (file.isFile() && ArrayUtils.contains(getTypes(), file.getType()))
             return true;
+
+        // Return
         return false;
     }
 
@@ -514,22 +551,26 @@ public class FilePanel extends ViewOwner {
     {
         // Get directory for path and file name
         String dirPath = FilePathUtils.getParent(aPath);
-        String fname = FilePathUtils.getFileName(aPath);
+        String fileName = FilePathUtils.getFileName(aPath);
         WebFile dir = getFile(dirPath);
-        if (dir==null)
+        if (dir == null)
             return null;
 
         // Look for completion file of any requested type (types are checked in order to allow for precidence)
         for (String type : getTypes()) {
             for (WebFile file : dir.getFiles()) {
-                if (StringUtils.startsWithIC(file.getName(), fname) && file.getType().equals(type))
-                    return file; }
+                if (StringUtils.startsWithIC(file.getName(), fileName) && file.getType().equals(type))
+                    return file;
+            }
         }
 
         // Look for completion of type dir
         for (WebFile file : dir.getFiles()) {
-            if (StringUtils.startsWithIC(file.getName(), fname) && file.isDir())
-                return file; }
+            if (StringUtils.startsWithIC(file.getName(), fileName) && file.isDir())
+                return file;
+        }
+
+        // Return not found
         return null;
     }
 
@@ -544,51 +585,54 @@ public class FilePanel extends ViewOwner {
         // If not valid and opening, check for completion
         if (!fileTextFileValid && isOpening()) {
             WebFile file = getFileTextFile();
-            String ftext = _fileText.getText().trim();
+            String fileText = _fileText.getText().trim();
             String path = getFileTextPath();
-            WebFile cfile = file==null && ftext.length()>0 ? getFileCompletion(path) : null;
+            WebFile cfile = file == null && fileText.length() > 0 ? getFileCompletion(path) : null;
 
             // If completion found, set filename remainder in FileText and select
-            if (cfile!=null) {
+            if (cfile != null) {
                 String cpath = cfile.getPath(), cname = cfile.getName();
-                String completion = StringUtils.startsWithIC(path, ftext)? cpath : cname;
+                String completion = StringUtils.startsWithIC(path, fileText) ? cpath : cname;
                 _fileText.setCompletionText(completion);
                 fileTextFileValid = true;
             }
         }
 
         // Set confirm enabled
-        _dbox.setConfirmEnabled(fileTextFileValid);
+        _dialogBox.setConfirmEnabled(fileTextFileValid);
     }
 
     /**
      * Shows an Open panel for given description and types.
      */
-    public static String showOpenPanel(View aView, String aDesc, String ... theTypes)
+    public static String showOpenPanel(View aView, String aDesc, String... theTypes)
     {
-        FilePanel fp = new FilePanel();
-        fp.setDesc(aDesc); fp.setTypes(theTypes);
-        return fp.showOpenPanel(aView);
+        FilePanel filePanel = new FilePanel();
+        filePanel.setDesc(aDesc);
+        filePanel.setTypes(theTypes);
+        return filePanel.showOpenPanel(aView);
     }
 
     /**
      * Shows a Save panel for given description and types.
      */
-    public static String showSavePanel(View aView, String aDesc, String ... theTypes)
+    public static String showSavePanel(View aView, String aDesc, String... theTypes)
     {
-        FilePanel fp = new FilePanel();
-        fp.setDesc(aDesc); fp.setTypes(theTypes);
-        return fp.showSavePanel(aView);
+        FilePanel filePanel = new FilePanel();
+        filePanel.setDesc(aDesc);
+        filePanel.setTypes(theTypes);
+        return filePanel.showSavePanel(aView);
     }
 
     /**
      * Shows a Save panel for given description and types.
      */
-    public static WebFile showSavePanelWeb(View aView, String aDesc, String ... theTypes)
+    public static WebFile showSavePanelWeb(View aView, String aDesc, String... theTypes)
     {
-        FilePanel fp = new FilePanel();
-        fp.setDesc(aDesc); fp.setTypes(theTypes);
-        return fp.showSavePanelWeb(aView);
+        FilePanel filePanel = new FilePanel();
+        filePanel.setDesc(aDesc);
+        filePanel.setTypes(theTypes);
+        return filePanel.showSavePanelWeb(aView);
     }
 
     /**
@@ -604,9 +648,10 @@ public class FilePanel extends ViewOwner {
     /**
      * Returns the most recent path for given type.
      */
-    public static String getRecentPath(String aType)
+    private static String getRecentPath(String aType)
     {
-        if (!getSiteDefault().getURL().getScheme().equalsIgnoreCase("file"))
+        WebSite defaultSite = getSiteDefault();
+        if (!defaultSite.getURL().getScheme().equalsIgnoreCase("file"))
             return "/";
 
         String defaultPath = getHomeDirPath();
@@ -616,9 +661,10 @@ public class FilePanel extends ViewOwner {
     /**
      * Sets the most recent path for given type.
      */
-    public static void setRecentPath(String aType, String aPath)
+    private static void setRecentPath(String aType, String aPath)
     {
-        if (!getSiteDefault().getURL().getScheme().equalsIgnoreCase("file"))
+        WebSite defaultSite = getSiteDefault();
+        if (!defaultSite.getURL().getScheme().equalsIgnoreCase("file"))
             return;
 
         Prefs.get().setValue("MostRecentDocument." + aType, aPath);
@@ -630,8 +676,12 @@ public class FilePanel extends ViewOwner {
      */
     public static WebSite getSiteDefault()
     {
-        if (_defaultSite!=null) return _defaultSite;
-        return _defaultSite = WebURL.getURL("/").getSite();
+        // If already set, just return
+        if (_defaultSite != null) return _defaultSite;
+
+        // Get, set DefaultSite
+        WebURL defaultSiteURL = WebURL.getURL("/");
+        return _defaultSite = defaultSiteURL.getSite();
     }
 
     /**
@@ -645,18 +695,38 @@ public class FilePanel extends ViewOwner {
     /**
      * The TreeResolver to provide data to File browser.
      */
-    private class FileResolver extends TreeResolver <WebFile> {
+    private class FileResolver extends TreeResolver<WebFile> {
 
-        /** Returns the parent of given item. */
-        public WebFile getParent(WebFile anItem)  { return anItem.getParent(); }
+        /**
+         * Returns the parent of given item.
+         */
+        public WebFile getParent(WebFile anItem)
+        {
+            return anItem.getParent();
+        }
 
-        /** Whether given object is a parent (has children). */
-        public boolean isParent(WebFile anItem)  { return anItem.isDir(); }
+        /**
+         * Whether given object is a parent (has children).
+         */
+        public boolean isParent(WebFile anItem)
+        {
+            return anItem.isDir();
+        }
 
-        /** Returns the children. */
-        public WebFile[] getChildren(WebFile aPar)  { return getFilteredFiles(aPar.getFiles()); }
+        /**
+         * Returns the children.
+         */
+        public WebFile[] getChildren(WebFile aPar)
+        {
+            return getFilteredFiles(aPar.getFiles());
+        }
 
-        /** Returns the text to be used for given item. */
-        public String getText(WebFile anItem)  { return anItem.getName(); }
+        /**
+         * Returns the text to be used for given item.
+         */
+        public String getText(WebFile anItem)
+        {
+            return anItem.getName();
+        }
     }
 }

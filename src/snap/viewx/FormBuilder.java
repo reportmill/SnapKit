@@ -3,17 +3,15 @@
  */
 package snap.viewx;
 import java.util.*;
-
 import snap.geom.Insets;
 import snap.gfx.*;
-import snap.util.Selectable;
 import snap.util.SnapUtils;
 import snap.view.*;
 
 /**
  * A class to build a form.
  */
-public class FormBuilder extends BindingViewOwner {
+public class FormBuilder extends ViewOwner {
 
     // The root pane
     protected ColView  _formView;
@@ -114,8 +112,8 @@ public class FormBuilder extends BindingViewOwner {
      */
     public TextField addTextField(String aLabel, String aName, String aDefault)
     {
-        // Create HBox for label and text field
-        RowView hbox = new RowView();
+        // Create RowView for label and text field
+        RowView rowView = new RowView();
 
         // If label is provided, create configure and add
         if (aLabel != null) {
@@ -123,7 +121,7 @@ public class FormBuilder extends BindingViewOwner {
             label.setText(aLabel);
             if (_font != null)
                 label.setFont(_font);
-            hbox.addChild(label);
+            rowView.addChild(label);
         }
 
         // Create TextField and panel and add
@@ -131,19 +129,22 @@ public class FormBuilder extends BindingViewOwner {
         textField.setName(aName);
         if (_font != null)
             textField.setFont(_font);
-        hbox.addChild(textField);
-        addView(hbox);
+        if (aDefault != null)
+            textField.setText(aDefault);
+        rowView.addChild(textField);
+
+        // Add RowView
+        addView(rowView);
 
         // Add binding
-        addViewBinding(textField, "Text", aName.replace(" ", ""));
-        if (aDefault != null)
-            setValue(aName, aDefault);
+        //addViewBinding(textField, View.Text_Prop, aName.replace(" ", ""));
+        //if (aDefault != null) setValue(aName, aDefault);
 
         // Set FirstFocus
         if (getFirstFocus() == null)
             setFirstFocus(textField);
 
-        // Return text field
+        // Return
         return textField;
     }
 
@@ -163,11 +164,11 @@ public class FormBuilder extends BindingViewOwner {
         addView(rowView);
 
         // Add binding
-        String bindingKey = aTitle.replace(" ", "");
-        addViewBinding(comboBox, Selectable.SelItem_Prop, bindingKey);
-        setValue(aTitle, aDefault);
+        //String bindingKey = aTitle.replace(" ", "");
+        //addViewBinding(comboBox, Selectable.SelItem_Prop, bindingKey);
+        //setValue(aTitle, aDefault);
 
-        // Return combobox
+        // Return
         return comboBox;
     }
 
@@ -259,10 +260,10 @@ public class FormBuilder extends BindingViewOwner {
      */
     public boolean showPanel(View aView, String aTitle, Image anImage)
     {
-        DialogBox dbox = new DialogBox(aTitle);
-        dbox.setImage(anImage);
-        dbox.setContent(getUI());
-        return dbox.showConfirmDialog(aView);
+        DialogBox dialogBox = new DialogBox(aTitle);
+        dialogBox.setImage(anImage);
+        dialogBox.setContent(getUI());
+        return dialogBox.showConfirmDialog(aView);
     }
 
     /**

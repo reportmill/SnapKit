@@ -386,14 +386,16 @@ public class DialogBox extends FormBuilder {
             _builder.addView(getContent());
 
         // Add InputText
-        TextField tfield = _builder.addTextField("InputText", aDefault);
-        tfield.setMinWidth(150);
-        _builder.setFirstFocus(tfield);
+        TextField textField = _builder.addTextField("InputText", aDefault);
+        textField.setMinWidth(150);
+        _builder.setFirstFocus(textField);
 
         // Show panel
         if (!showPanel(aView))
             return null;
-        return tfield.getText();
+
+        // Return TextField.Text
+        return textField.getText();
     }
 
     /**
