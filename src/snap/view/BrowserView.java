@@ -29,22 +29,22 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     private Consumer<ListCell<T>>  _cellConf;
 
     // The preferred number of columns
-    private int _prefColCount = 2;
+    private int  _prefColCount = 2;
 
     // The preferred column width
-    private int _prefColWidth = 150;
+    private int  _prefColWidth = 150;
 
     // The selected column index
-    private int _selCol = -1;
+    private int  _selCol = -1;
 
     // The view that holds the columns
-    private RowView _colView = new RowView();
+    private RowView  _colView = new RowView();
 
     // The ScrollView to hold SplitView+Columns
-    private ScrollView _scroll = new ScrollView(_colView);
+    private ScrollView  _scrollView = new ScrollView(_colView);
 
     // The image to be used for branch
-    private Image _branchImg;
+    private Image  _branchImage;
 
     // Constants for properties
     public static final String PrefColCount_Prop = "PrefColCount";
@@ -57,12 +57,15 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     {
         setFocusable(true);
         setFocusWhenPressed(true);
+        enableEvents(KeyEvents);
+        enableEvents(Action);
 
-        _scroll.setFillHeight(true);
-        addChild(_scroll);
+        _scrollView.setFillHeight(true);
+        addChild(_scrollView);
+
+        // Configure Columns View
         _colView.setFillHeight(true);
         _col0 = addCol();
-        enableEvents(Action);
 
         // Set resolver
         _resolver = new TreeResolver.Adapter<>();
@@ -71,7 +74,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     /**
      * Returns the ScrollView.
      */
-    public ScrollView getScrollView()  { return _scroll; }
+    public ScrollView getScrollView()  { return _scrollView; }
 
     /**
      * Returns the preferred number of visible columns in the browser.
@@ -423,19 +426,44 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     public String getPath(String aSeparator)
     {
         // Create string buffer for path
-        StringBuffer buf = new StringBuffer();
+        StringBuffer pathSB = new StringBuffer();
 
         // Iterate over browser columns to add selected row items
         for (int i = 0, iMax = getColCount(); i < iMax; i++) {
             BrowserCol<T> col = getCol(i);
             T item = col.getSelItem();
-            if (item == null) break;
-            if (i > 0) buf.append(aSeparator);
-            buf.append(getText(item));
+            if (item == null)
+                break;
+            if (i > 0)
+                pathSB.append(aSeparator);
+            pathSB.append(getText(item));
         }
 
         // Return path string
-        return buf.toString();
+        return pathSB.toString();
+    }
+
+    /**
+     * Process events.
+     */
+    protected void processEvent(ViewEvent anEvent)
+    {
+        // Handle KeyPress
+        if (anEvent.isKeyPress()) {
+
+            // Get selected column (just return if none)
+            BrowserCol<T> selCol = getSelCol();
+            if (selCol == null)
+                return;
+
+            // Handle keys
+            int keyCode = anEvent.getKeyCode();
+            switch (keyCode) {
+                case KeyCode.UP: selCol.selectUp(); anEvent.consume(); break;
+                case KeyCode.DOWN: selCol.selectDown(); anEvent.consume(); break;
+                case KeyCode.ENTER: selCol.getListArea().processEnterAction(anEvent); break;
+            }
+        }
     }
 
     /**
@@ -470,7 +498,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         double areaY = ins.top;
         double areaW = getWidth() - areaX - ins.right;
         double areaH = getHeight() - areaY - ins.bottom;
-        _scroll.setBounds(areaX, areaY, areaW, areaH);
+        _scrollView.setBounds(areaX, areaY, areaW, areaH);
     }
 
     /**
@@ -494,9 +522,9 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
             return;
         String name = getText(item);
         aCell.setText(name);
-        Image img = getImage(item);
-        if (img != null)
-            aCell.setImage(img);
+        Image image = getImage(item);
+        if (image != null)
+            aCell.setImage(image);
         aCell.getStringView().setGrowWidth(true);
 
         // If parent, add branch icon
@@ -520,7 +548,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     public Image getBranchImage()
     {
         // If already set, just return
-        if (_branchImg != null) return _branchImg;
+        if (_branchImage != null) return _branchImage;
 
         // Create image
         Image branchImage = Image.get(9, 11, true);
@@ -531,7 +559,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         pntr.flush();
 
         // Set, return
-        return _branchImg = branchImage;
+        return _branchImage = branchImage;
     }
 
     /**

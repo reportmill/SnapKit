@@ -45,7 +45,10 @@ public class TextField extends ParentView {
     
     // Whether to hide caret
     private boolean  _hideCaret;
-    
+
+    // Whether to send action on focus lost (if content changed)
+    private boolean  _fireActionOnFocusLost;
+
     // The value of text on focus gained
     protected String  _focusGainedText;
     
@@ -58,9 +61,11 @@ public class TextField extends ParentView {
     public static final String PromptText_Prop = "PromptText";
     public static final String Sel_Prop = "Selection";
     public static final String TextFill_Prop = "TextFill";
+    public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
 
     // Constants for property defaults
     private static Border DEFAULT_TEXT_FIELD_BORDER = Border.createLineBorder(Color.LIGHTGRAY, 1).copyForInsets(Insets.EMPTY);
+    private static double DEFAULT_TEXT_FIELD_BORDER_RADIUS = 3;
     private static final Insets DEFAULT_TEXT_FIELD_PADDING = new Insets(2, 2, 2, 5);
 
     // The color of the border when focused
@@ -73,6 +78,7 @@ public class TextField extends ParentView {
     {
         setFill(Color.WHITE);
         setBorder(DEFAULT_TEXT_FIELD_BORDER);
+        setBorderRadius(DEFAULT_TEXT_FIELD_BORDER_RADIUS);
         enableEvents(Action);
         enableEvents(MouseEvents);
         enableEvents(KeyEvents);
@@ -137,6 +143,20 @@ public class TextField extends ParentView {
         _label.setText(aStr);
         _label.setTextFill(Color.LIGHTGRAY);
         firePropChange(PromptText_Prop, _promptText, _promptText = aStr);
+    }
+
+    /**
+     * Returns whether text view fires action on focus lost (if text changed).
+     */
+    public boolean isFireActionOnFocusLost()  { return _fireActionOnFocusLost; }
+
+    /**
+     * Sets whether text area sends action on focus lost (if text changed).
+     */
+    public void setFireActionOnFocusLost(boolean aValue)
+    {
+        if (aValue == _fireActionOnFocusLost) return;
+        firePropChange(FireActionOnFocusLost_Prop, _fireActionOnFocusLost, _fireActionOnFocusLost = aValue);
     }
 
     /**
@@ -312,6 +332,7 @@ public class TextField extends ParentView {
      */
     protected void setFocused(boolean aValue)
     {
+        // Do normal version
         if (aValue == isFocused()) return;
         super.setFocused(aValue);
 
@@ -320,15 +341,17 @@ public class TextField extends ParentView {
             setCaretAnim();
         repaint();
 
-        // If focus gained, set FocusedGainedValue and select all (if not from mouse press)
+        // Handle focus gained: set FocusedGainedValue and select all (if not from mouse press)
         if (aValue) {
             _focusGainedText = getText();
             _edited = false;
         }
 
-        // If focus lost and FocusGainedVal changed, fire action
-        else if (isEdited())
-            fireActionEvent(null);
+        // Handle focus lost: If FocusGainedVal changed, fire action
+        else {
+            if (isEdited() && isFireActionOnFocusLost())
+                fireActionEvent(null);
+        }
     }
 
     /**

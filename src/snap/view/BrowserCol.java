@@ -22,14 +22,16 @@ public class BrowserCol <T> extends ListView <T> {
         // Set browser
         _browser = aBrsr;
 
-        // Update some attribues
+        // Update some attributes
+        setFocusable(false);
+        setFocusWhenPressed(false);
         setRowHeight(_browser.getRowHeight());
 
         // Configure ScrollView
-        ScrollView scroll = getScrollView();
-        scroll.setShowHBar(false);
-        scroll.setShowVBar(true);
-        scroll.setBarSize(12);
+        ScrollView scrollView = getScrollView();
+        scrollView.setShowHBar(false);
+        scrollView.setShowVBar(true);
+        scrollView.setBarSize(14);
 
         // Configure ListArea to use Browser.configureBrowserCell
         ListArea<T> listArea = getListArea();

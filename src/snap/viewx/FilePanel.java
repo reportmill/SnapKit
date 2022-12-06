@@ -157,8 +157,9 @@ public class FilePanel extends ViewOwner {
         // Reset dir file to get latest listing
         if (_dir != null) _dir.resetContent();
 
-        // If UI is set, set in browser and text
-        setFileInUI();
+        // Reset UI
+        resetLater();
+        resetDirComboBox();
     }
 
     /**
@@ -185,33 +186,9 @@ public class FilePanel extends ViewOwner {
         _file = aFile;
         _dir = aFile != null ? aFile.getParent() : null;
 
-        // If UI is set, set in browser and text
-        setFileInUI();
-    }
-
-    /**
-     * Sets the file in the UI.
-     */
-    protected void setFileInUI()
-    {
-        if (!isUISet()) return;
-
-        // Update FileBrowser
-        WebFile file = getFile();
-        _fileBrowser.setSelItem(file != null ? file : getDir());
-
-        // Update DirComboBox
-        List<WebFile> dirs = new ArrayList<>();
-        for (WebFile dir = getDir(); dir != null; dir = dir.getParent())
-            dirs.add(dir);
-        _dirComboBox.setItems(dirs);
-        _dirComboBox.setSelIndex(0);
-
-        // Update FileText
-        _fileText.setText(file != null ? file.getName() : null);
-        _fileText.selectAll();
-        _fileText.requestFocus();
-        _dialogBox.setConfirmEnabled(isFileTextFileValid());
+        // Reset UI
+        resetLater();
+        resetDirComboBox();
     }
 
     /**
@@ -349,6 +326,7 @@ public class FilePanel extends ViewOwner {
     /**
      * Initialize UI.
      */
+    @Override
     protected void initUI()
     {
         // Get FileBrowser and configure
@@ -385,8 +363,45 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
+     * Reset UI.
+     */
+    @Override
+    protected void resetUI()
+    {
+        // Update FileBrowser
+        WebFile file = getFile();
+        WebFile fileOrDir = file != null ? file : getDir();
+        _fileBrowser.setSelItem(fileOrDir);
+
+        // Update FileText
+        String fileName = file != null ? file.getName() : null;
+        _fileText.setText(fileName);
+        _fileText.selectAll();
+
+        // Update DialogBox.ConfirmEnabled
+        boolean fileTextFileValid = isFileTextFileValid();
+        _dialogBox.setConfirmEnabled(fileTextFileValid);
+    }
+
+    /**
+     * Resets the DirComboBox.
+     */
+    protected void resetDirComboBox()
+    {
+        if (!isUISet()) return;
+
+        // Update DirComboBox
+        List<WebFile> dirs = new ArrayList<>();
+        for (WebFile dir = getDir(); dir != null; dir = dir.getParent())
+            dirs.add(dir);
+        _dirComboBox.setItems(dirs);
+        _dirComboBox.setSelIndex(0);
+    }
+
+    /**
      * Respond to UI changes.
      */
+    @Override
     protected void respondUI(ViewEvent anEvent)
     {
         // Handle FileBrowser
@@ -529,8 +544,10 @@ public class FilePanel extends ViewOwner {
     private boolean isFileTextFileValid()
     {
         // If saving just return
-        if (isSaving() && getFileTextPath().length() > 0)
-            return true;
+        if (isSaving()) {
+            String fileTextPath = _fileText.getText().trim();
+            return fileTextPath.length() > 0;
+        }
 
         // Get file for path based on FilePanel Dir and FileText (filename) - just return false if null
         WebFile file = getFileTextFile();
