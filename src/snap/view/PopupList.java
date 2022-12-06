@@ -35,7 +35,6 @@ public class PopupList<T> extends ListView<T> {
 
         // Create/configure PopupWindow
         PopupWindow popup = new PopupWindow();
-        popup.setFocusable(false);
         popup.setContent(this);
         popup.addPropChangeListener(pce -> popupWindowShowingChanged(), Showing_Prop);
 

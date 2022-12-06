@@ -25,7 +25,7 @@ public class WindowView extends ParentView {
     private String  _type = TYPE_MAIN;
     
     // The root view
-    private RootView  _rview;
+    private RootView  _rootView;
 
     // The Active cursor
     private Cursor  _activeCursor = Cursor.DEFAULT;
@@ -100,8 +100,8 @@ public class WindowView extends ParentView {
     public WindowView()
     {
         // Create and add RootView
-        _rview = new RootView();
-        addChild(_rview);
+        _rootView = new RootView();
+        addChild(_rootView);
     }
 
     /**
@@ -216,20 +216,20 @@ public class WindowView extends ParentView {
      */
     public void saveFrame()
     {
-        int x = (int) getX();
-        int y = (int) getY();
-        int w = (int) getWidth();
-        int h = (int) getHeight();
-        StringBuffer sb = new StringBuffer().append(x).append(' ').append(y);
+        int winX = (int) getX();
+        int winY = (int) getY();
+        int winW = (int) getWidth();
+        int winH = (int) getHeight();
+        StringBuffer sb = new StringBuffer().append(winX).append(' ').append(winY);
         if (_saveSize)
-            sb.append(' ').append(w).append(' ').append(h);
+            sb.append(' ').append(winW).append(' ').append(winH);
         Prefs.get().setValue(_saveName + "Loc", sb.toString());
     }
 
     /**
      * Returns the root view.
      */
-    public RootView getRootView()  { return _rview; }
+    public RootView getRootView()  { return _rootView; }
 
     /**
      * Returns the content associated with this window.

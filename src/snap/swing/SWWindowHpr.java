@@ -1,10 +1,8 @@
 package snap.swing;
-
 import java.awt.Window;
 import java.awt.event.*;
 import java.io.File;
 import javax.swing.*;
-
 import snap.geom.Insets;
 import snap.geom.Point;
 import snap.geom.Rect;
@@ -263,8 +261,10 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
      */
     public void setTitle(String aTitle)
     {
-        if (_winNtv instanceof JFrame) ((JFrame) _winNtv).setTitle(aTitle);
-        else if (_winNtv instanceof JDialog) ((JDialog) _winNtv).setTitle(aTitle);
+        if (_winNtv instanceof JFrame)
+            ((JFrame) _winNtv).setTitle(aTitle);
+        else if (_winNtv instanceof JDialog)
+            ((JDialog) _winNtv).setTitle(aTitle);
         else System.err.println("WindowHpr.setTitle: Not supported " + _winNtv);
     }
 
@@ -288,14 +288,15 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
             return;
 
         // Get Java file
-        File file = aURL != null ? aURL.getJavaFile() : null;
+        File file = aURL.getJavaFile();
 
         // Install in RootPane
         if (_winNtv instanceof RootPaneContainer) {
-            RootPaneContainer rpc = (RootPaneContainer) _winNtv;
-            JRootPane rpane = rpc.getRootPane();
-            if (rpane == null) return;
-            rpane.putClientProperty("Window.documentFile", file);
+            RootPaneContainer rootPaneContainer = (RootPaneContainer) _winNtv;
+            JRootPane rootPane = rootPaneContainer.getRootPane();
+            if (rootPane == null)
+                return;
+            rootPane.putClientProperty("Window.documentFile", file);
         }
     }
 
@@ -392,16 +393,21 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
      */
     protected void snapWindowPropertyChanged(PropChange aPC)
     {
-        String pname = aPC.getPropName();
-        if (pname == View.X_Prop) setX((Double) aPC.getNewValue());
-        else if (pname == View.Y_Prop) setY((Double) aPC.getNewValue());
-        else if (pname == View.Width_Prop) setWidth((Double) aPC.getNewValue());
-        else if (pname == View.Height_Prop) setHeight((Double) aPC.getNewValue());
-        else if (pname == WindowView.AlwaysOnTop_Prop)
-            _winNtv.setAlwaysOnTop(SnapUtils.booleanValue(aPC.getNewValue()));
-        else if (pname == WindowView.Image_Prop) setImage((Image) aPC.getNewValue());
-        else if (pname == WindowView.Title_Prop) setTitle((String) aPC.getNewValue());
-        else if (pname == WindowView.Resizable_Prop) setResizable(SnapUtils.booleanValue(aPC.getNewValue()));
+        String propName = aPC.getPropName();
+        switch (propName) {
+            case View.X_Prop: setX((Double) aPC.getNewValue()); break;
+            case View.Y_Prop: setY((Double) aPC.getNewValue()); break;
+            case View.Width_Prop: setWidth((Double) aPC.getNewValue()); break;
+            case View.Height_Prop: setHeight((Double) aPC.getNewValue()); break;
+            case WindowView.AlwaysOnTop_Prop:
+                _winNtv.setAlwaysOnTop(SnapUtils.booleanValue(aPC.getNewValue()));
+                break;
+            case WindowView.Image_Prop: setImage((Image) aPC.getNewValue()); break;
+            case WindowView.Title_Prop: setTitle((String) aPC.getNewValue()); break;
+            case WindowView.Resizable_Prop:
+                setResizable(SnapUtils.booleanValue(aPC.getNewValue()));
+                break;
+        }
     }
 
     /**

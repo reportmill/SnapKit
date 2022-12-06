@@ -36,5 +36,4 @@ public class PopupWindow extends WindowView {
         if (win != null)
             win.setPopup(this);
     }
-
 }
