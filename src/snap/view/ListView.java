@@ -44,11 +44,9 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         _listArea.addEventHandler(e -> listAreaDidFireActionEvent(e), Action);
         _listArea.addPropChangeListener(pce -> listAreaPropChange(pce));
 
-        // Fix so that ListView handles focus instead of ListArea
+        // Enable Focus
         setFocusable(true);
         setFocusWhenPressed(true);
-        //_listArea.setFocusable(false);
-        //_listArea.setFocusWhenPressed(false);
 
         // Create/configure ScrollView
         _scrollView = createScrollView();

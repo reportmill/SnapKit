@@ -28,7 +28,6 @@ public class TreeCol <T> extends ListArea <T> {
     {
         setGrowWidth(true);
         setAltPaint(null);
-        setFocusWhenPressed(false);
     }
 
     /**

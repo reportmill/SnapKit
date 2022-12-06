@@ -7,13 +7,13 @@ import snap.util.ListSel2D;
 class TableViewSelector {
 
     // The TableView
-    private final TableView  _table;
+    private final TableView<?>  _table;
 
     // Whether selection allowed on MouseDrag
     protected boolean  _dragSelect;
 
     // The Selection on MousePress
-    private ListSel2D _mouseDownSel;
+    private ListSel2D  _mouseDownSel;
 
     // The new SelAnchor (index of MousePress)
     protected int  _newAnchorX, _newAnchorY;
@@ -24,7 +24,7 @@ class TableViewSelector {
     /**
      * Constructor.
      */
-    public TableViewSelector(TableView aTV)
+    public TableViewSelector(TableView<?> aTV)
     {
         _table = aTV;
     }
@@ -71,7 +71,7 @@ class TableViewSelector {
         _newAnchorY = _table.getRowIndexForY(anEvent.getY());
 
         // Set DragSelect
-        _dragSelect = !_table.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount()>1;
+        _dragSelect = !_table.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture) || anEvent.getClickCount() > 1;
 
         // Do basic Press or Drag selection
         mousePressOrDrag(anEvent);
@@ -97,9 +97,11 @@ class TableViewSelector {
     protected void mousePressOrDrag(ViewEvent anEvent)
     {
         // Get row-index/cell at mouse point (if no cell, just return)
-        ListCell cell = _table.getCellForXY(anEvent.getX(), anEvent.getY());
-        if (cell==null || !cell.isEnabled())
+        ListCell<?> cell = _table.getCellForXY(anEvent.getX(), anEvent.getY());
+        if (cell == null || !cell.isEnabled())
             return;
+
+        // Get row/col
         int newLeadX = cell.getCol();
         int newLeadY = cell.getRow();
 
@@ -133,7 +135,9 @@ class TableViewSelector {
 
         // Start editing if needed
         if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && _table.isEditable()) {
-            ListCell cell = _table.getCellForXY(anEvent.getX(), anEvent.getY()); if (cell==null) return;
+            ListCell<?> cell = _table.getCellForXY(anEvent.getX(), anEvent.getY());
+            if (cell == null)
+                return;
             _table.editCell(cell);
         }
 
@@ -151,17 +155,17 @@ class TableViewSelector {
             return;
 
         // Handle special keys
-        int kcode = anEvent.getKeyCode();
-        switch (kcode) {
+        int keyCode = anEvent.getKeyCode();
+        switch (keyCode) {
             case KeyCode.UP: _table.selectUp(); _table.fireActionEvent(anEvent); anEvent.consume(); break;
             case KeyCode.DOWN: _table.selectDown(); _table.fireActionEvent(anEvent); anEvent.consume(); break;
             case KeyCode.LEFT: _table.selectLeft(); _table.fireActionEvent(anEvent); anEvent.consume(); break;
             case KeyCode.RIGHT: _table.selectRight(); _table.fireActionEvent(anEvent); anEvent.consume(); break;
             default: {
-                char c = anEvent.getKeyChar();
-                boolean printable = Character.isJavaIdentifierPart(c); // Lame
+                char keyChar = anEvent.getKeyChar();
+                boolean printable = Character.isJavaIdentifierPart(keyChar); // Lame
                 if (_table.isEditable() && printable) {
-                    ListCell cell = _table.getSelCell();
+                    ListCell<?> cell = _table.getSelCell();
                     _table.editCell(cell);
                 }
             }

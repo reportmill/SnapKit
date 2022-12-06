@@ -100,9 +100,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         setFill(Color.WHITE);
 
         // Events
-        setFocusable(true);
-        setFocusWhenPressed(true);
-        enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress, Action);
+        enableEvents(MousePress, MouseDrag, MouseRelease, Action);
 
         // Create/set PickList
         setPickList(new PickList<>());
@@ -438,7 +436,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
             // Otherwise, add items from all visible/existing cells
             else {
                 for (View child : getChildren()) {
-                    ListCell<T> cell = child instanceof ListCell ? (ListCell) child : null;
+                    ListCell<T> cell = child instanceof ListCell ? (ListCell<T>) child : null;
                     T item = cell != null ? cell.getItem() : null;
                     if (item != null)
                         _updateItems.add(item);
@@ -466,7 +464,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     protected void updateCellAt(int anIndex)
     {
         int cellIndex = anIndex - _cellStart;
-        ListCell cell = createCell(anIndex);
+        ListCell<T> cell = createCell(anIndex);
         configureCell(cell);
         removeChild(cellIndex);
         addChild(cell, cellIndex);
@@ -477,7 +475,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     public ListCell <T> getCell(int anIndex)
     {
-        return anIndex < getChildCount() ? (ListCell) getChild(anIndex) : null;
+        return anIndex < getChildCount() ? (ListCell<T>) getChild(anIndex) : null;
     }
 
     /**
@@ -485,11 +483,17 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     public ListCell <T> getCellForY(double aY)
     {
-        for (View cell : getChildren()) {
-            if (!(cell instanceof ListCell)) continue;
-            if (aY >= cell.getY() && aY <= cell.getMaxY())
-                return (ListCell) cell;
+        View[] children = getChildren();
+
+        // Iterate over children
+        for (View child : children) {
+            if (!(child instanceof ListCell)) continue;
+            ListCell<T> cell = (ListCell<T>) child;
+            if (aY >= cell.getY() && aY <= cell.getMaxY() && cell.getItem() != null)
+                return cell;
         }
+
+        // Return not found
         return null;
     }
 
@@ -498,8 +502,8 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     public ListCell <T> getCellForRow(int anIndex)
     {
-        int cindex = anIndex - _cellStart;
-        return cindex >= 0 && cindex < getChildCount() ? (ListCell) getChild(cindex) : null;
+        int cellIndex = anIndex - _cellStart;
+        return cellIndex >= 0 && cellIndex < getChildCount() ? (ListCell<T>) getChild(cellIndex) : null;
     }
 
     /**
@@ -610,11 +614,11 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
 
                 // Get item and cell for row
                 T item = i < getItemCount() ? getItem(i) : null;
-                ListCell cell = getCell(cellIndex);
+                ListCell<T> cell = getCell(cellIndex);
 
                 // If item index less than cell item index, create/add cell
                 if (i < cell.getRow()) {
-                    ListCell cell2 = createCell(i);
+                    ListCell<T> cell2 = createCell(i);
                     addChild(cell2, cellIndex);
                     configureCell(cell2);
                     cell.setBounds(0,i * rowH, areaW, rowH);
@@ -628,7 +632,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
 
             // Otherwise create, configure and add
             else {
-                ListCell cell = createCell(i);
+                ListCell<T> cell = createCell(i);
                 addChild(cell);
                 configureCell(cell);
                 cell.setBounds(0,i * rowH, areaW, rowH);
@@ -664,10 +668,10 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Creates a cell for item at index.
      */
-    protected ListCell createCell(int anIndex)
+    protected ListCell<T> createCell(int anIndex)
     {
         T item = anIndex >= 0 && anIndex < getItemCount() ? getItem(anIndex) : null;
-        ListCell cell = new ListCell(this, item, anIndex, getColIndex(), isSelIndex(anIndex));
+        ListCell<T> cell = new ListCell<>(this, item, anIndex, getColIndex(), isSelIndex(anIndex));
         cell.setPadding(getCellPadding());
         cell.setPrefHeight(getRowHeight());
         return cell;
@@ -682,7 +686,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         cellConfigureBasic(aCell);
 
         // If cell configure set, call it
-        Consumer cconf = getCellConfigure();
+        Consumer<ListCell<T>> cconf = getCellConfigure();
         if (cconf != null)
             cconf.accept(aCell);
     }
@@ -763,8 +767,8 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
 
         // If CellConfigure, create cell and call
         else if (getCellConfigure() != null) {
-            Consumer cconf = getCellConfigure();
-            ListCell cell = new ListCell(this, anItem, 0, 0, false);
+            Consumer<ListCell<T>> cconf = getCellConfigure();
+            ListCell<T> cell = new ListCell<>(this, anItem, 0, 0, false);
             cell.setText(anItem != null ? anItem.toString() : null);
             cconf.accept(cell);
             text = cell.getText();
@@ -826,7 +830,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     protected void calcSampleSize()
     {
         // Create/configure sample cell
-        ListCell cell = new ListCell(this, null, 0, getColIndex(), false);
+        ListCell<T> cell = new ListCell<>(this, null, 0, getColIndex(), false);
         cell.setFont(getFont());
         cell.setPadding(getCellPadding());
 
@@ -900,10 +904,13 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Edit cell.
      */
-    public void editCell(ListCell aCell)
+    public void editCell(ListCell<T> aCell)
     {
         // If not possible, complain and return
-        if (aCell == null) { ViewUtils.beep(); return; }
+        if (aCell == null) {
+            ViewUtils.beep();
+            return;
+        }
 
         // Set editing
         aCell.setEditing(true);
@@ -988,7 +995,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Returns whether given items are equal to set items.
      */
-    protected boolean equalsItems(List theItems)
+    protected boolean equalsItems(List<T> theItems)
     {
         return ListUtils.equalsId(theItems, _items) || SnapUtils.equals(theItems, _items);
     }

@@ -59,7 +59,9 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     {
         // Enable Action event for selection change
         enableEvents(Action);
-        setFocusable(true); setFocusWhenPressed(true); setFocusPainted(false);
+        setFocusable(true);
+        setFocusWhenPressed(true);
+        setFocusPainted(false);
 
         // Configure Columns SplitView and ScrollView and add
         _split.setBorder(null);

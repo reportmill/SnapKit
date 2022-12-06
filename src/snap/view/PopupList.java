@@ -22,7 +22,6 @@ public class PopupList<T> extends ListView<T> {
      */
     public PopupList()
     {
-        getListArea().setFocusWhenPressed(false);
         getScrollView().setBorder(null);
     }
 
