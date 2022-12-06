@@ -76,7 +76,7 @@ public class WindowView extends ParentView {
     private View  _clientView;
     
     // A list of all open windows
-    private static List <WindowView>  _openWins = new ArrayList();
+    private static List <WindowView>  _openWins = new ArrayList<>();
     
     // Constants for Type
     public static final String TYPE_MAIN = "MAIN";
@@ -84,7 +84,7 @@ public class WindowView extends ParentView {
     public static final String TYPE_PLAIN = "PLAIN";
     
     // Constants for style
-    public static enum Style { Small }
+    public enum Style { Small }
     
     // Constants for properties
     public static final String ActiveCursor_Prop = "ActiveCursor";
@@ -204,7 +204,7 @@ public class WindowView extends ParentView {
     /**
      * Returns whether to save size
      */
-    public boolean getSaveSize()  { return _saveSize; }
+    public boolean isSaveSize()  { return _saveSize; }
 
     /**
      * Sets whether to save size.
@@ -432,30 +432,38 @@ public class WindowView extends ParentView {
         // Make sure window is initialized
         initNativeWindowOnce();
 
-        // If aView provided, convert point from view to screen coords
+        // Get window XY coords: If aView provided, convert point from view to screen coords
+        double winX = aX;
+        double winY = aY;
         if (aView != null) {
-            Point pt = aView.localToScreen(aX, aY);
-            aX = pt.x;
-            aY = pt.y;
+            Point pointInScreenCoords = aView.localToScreen(aX, aY);
+            winX = pointInScreenCoords.x;
+            winY = pointInScreenCoords.y;
         }
 
         // If FrameSaveName provided, set Location from defaults and register to store future window moves
         String saveName = getSaveName();
         if (saveName != null) {
+
+            // Get location string
             String locString = Prefs.get().getString(saveName + "Loc");
             if (locString != null) {
                 String[] strings = locString.split(" ");
-                aX = StringUtils.intValue(strings[0]);
-                aY = StringUtils.intValue(strings[1]);
-                int w = getSaveSize() && strings.length > 2 ? StringUtils.intValue(strings[2]) : 0;
-                int h = getSaveSize() && strings.length > 3 ? StringUtils.intValue(strings[3]) : 0;
-                if (w > 0 && h > 0)
-                    setSize(w, h);
+                winX = StringUtils.intValue(strings[0]);
+                winY = StringUtils.intValue(strings[1]);
+
+                // Handle SaveSize
+                if (isSaveSize()) {
+                    int winW = strings.length > 2 ? StringUtils.intValue(strings[2]) : 0;
+                    int winH = strings.length > 3 ? StringUtils.intValue(strings[3]) : 0;
+                    if (winW > 0 && winH > 0)
+                        setSize(winW, winH);
+                }
             }
         }
 
         // Set window location
-        setXY(aX, aY);
+        setXY(winX, winY);
 
         // Have helper show window
         show();
@@ -573,14 +581,16 @@ public class WindowView extends ParentView {
         if (aValue == isShowing()) return;
         super.setShowing(aValue);
 
-        // Update OpenWins list
-        if (aValue)
+        // Handle Show: Update OpenWins list
+        if (aValue) {
             ListUtils.moveToFront(_openWins, this);
-        else _openWins.remove(this);
+        }
 
-        // If no longer showing, dispatch mouse move outside bounds to trigger any mouse exit code
-        if (!aValue)
+        // Handle Hide: Remove from OpenWins list and dispatch mouse move outside bounds to trigger any mouse exit code
+        else {
+            _openWins.remove(this);
             _eventDispatcher.dispatchMouseMoveOutsideWindow();
+        }
     }
 
     /**
@@ -588,8 +598,11 @@ public class WindowView extends ParentView {
      */
     protected void setFocused(boolean aValue)
     {
+        // Do normal version
         if (aValue == isFocused()) return;
         super.setFocused(aValue);
+
+        // Handle Focus Gained: Move window to front
         if (aValue)
             ListUtils.moveToFront(_openWins, this);
     }
@@ -689,7 +702,7 @@ public class WindowView extends ParentView {
     /**
      * Returns an array of all open windows.
      */
-    public static WindowView[] getOpenWindows()  { return _openWins.toArray(new WindowView[_openWins.size()]); }
+    public static WindowView[] getOpenWindows()  { return _openWins.toArray(new WindowView[0]); }
 
     /**
      * Returns an array of all open windows.
@@ -709,7 +722,7 @@ public class WindowView extends ParentView {
      */
     public static <T extends ViewOwner> T[] getOpenWindowOwners(Class <T> aClass)
     {
-        List <T> ownrs = new ArrayList();
+        List <T> ownrs = new ArrayList<>();
         for (WindowView win : _openWins) { View content = win.getContent();
             ViewOwner ownr = content.getOwner();
             if (ownr!=null && (aClass==null || aClass.isAssignableFrom(ownr.getClass())))
