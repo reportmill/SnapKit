@@ -1,10 +1,16 @@
 package snap.util;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * An interface for views that are selectable.
  */
 public interface Selectable<T> {
+
+    // Constants for properties
+    String Items_Prop = "Items";
+    String SelIndex_Prop = "SelIndex";
+    String SelItem_Prop = "SelItem";
 
     /**
      * Returns the items for a given name or UI view.
@@ -51,8 +57,21 @@ public interface Selectable<T> {
         setSelIndex(ind);
     }
 
-    // Constants for properties
-    String Items_Prop = "Items";
-    String SelIndex_Prop = "SelIndex";
-    String SelItem_Prop = "SelItem";
+    /**
+     * Sets items in given selectable
+     */
+    static void setItems(Selectable aSelectable, Object theItems)
+    {
+        // Handle null
+        if (theItems == null)
+            aSelectable.setItems(Collections.emptyList());
+
+        // Handle List
+        else if (theItems instanceof List)
+            aSelectable.setItems((List) theItems);
+
+        // Handle Array
+        else if (theItems != null && theItems.getClass().isArray())
+            aSelectable.setItems((Object[]) theItems);
+    }
 }

@@ -90,6 +90,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // Whether view should paint focus ring when focused
     private boolean  _focusPainted;
 
+    // Whether view can generate action events in response to certain user interactions
+    private boolean  _actionable;
+
     // Whether view is visible
     private boolean  _visible;
 
@@ -1542,40 +1545,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns the autosizing settings as a string with hyphens for struts and tilde for sprints (horiz,vert).
-     */
-    public String getAutosizing()
-    {
-        HPos lx = getLeanX();
-        VPos ly = getLeanY();
-        boolean left = lx == null || lx == HPos.LEFT, right = lx == null || lx == HPos.RIGHT;
-        boolean top = ly == null || ly == VPos.TOP, btm = ly == null || ly == VPos.BOTTOM;
-        char c1 = left ? '-' : '~', c2 = isGrowWidth() ? '~' : '-', c3 = right ? '-' : '~';
-        char c4 = top ? '-' : '~', c5 = isGrowHeight() ? '~' : '-', c6 = btm ? '-' : '~';
-        return "" + c1 + c2 + c3 + ',' + c4 + c5 + c6;
-    }
-
-    /**
-     * Sets the autosizing settings as a string with hyphens for struts and tilde for sprints (horiz,vert).
-     */
-    public void setAutosizing(String aVal)
-    {
-        String val = aVal != null ? aVal : "--~,--~";
-        if (val.length() < 7) return;
-        char c1 = val.charAt(0), c2 = val.charAt(1), c3 = val.charAt(2);
-        char c4 = val.charAt(4), c5 = val.charAt(5), c6 = val.charAt(6);
-        setGrowWidth(c2 == '~');
-        setGrowHeight(c5 == '~');
-        setLeanX(c1 == '~' && c3 == '~' ? HPos.CENTER : c1 == '~' ? HPos.RIGHT : c3 == '~' ? HPos.LEFT : null);
-        setLeanY(c4 == '~' && c6 == '~' ? VPos.CENTER : c4 == '~' ? VPos.BOTTOM : c6 == '~' ? VPos.TOP : null);
-    }
-
-    /**
-     * Returns the autosizing default.
-     */
-    public String getAutosizingDefault()  { return "--~,--~"; }
-
-    /**
      * Returns the list of bindings.
      */
     public List <Binding> getBindings()  { return _bindings; }
@@ -1598,7 +1567,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void addBinding(Binding aBinding)
     {
-        if (_bindings == Collections.EMPTY_LIST) _bindings = new ArrayList();
+        if (_bindings == Collections.EMPTY_LIST) _bindings = new ArrayList<>();
         removeBinding(aBinding.getPropertyName());     // Remove current binding for property (if it exists)
         _bindings.add(aBinding);
         aBinding.setView(this);
@@ -1610,16 +1579,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Binding removeBinding(int anIndex)
     {
         return _bindings.remove(anIndex);
-    }
-
-    /**
-     * Removes the given binding from view bindings list.
-     */
-    public boolean removeBinding(Binding aBinding)
-    {
-        int index = ListUtils.indexOfId(getBindings(), aBinding);
-        if (index >= 0) removeBinding(index);
-        return index >= 0;
     }
 
     /**
@@ -1657,18 +1616,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Adds a binding for given name and key.
-     */
-    public void addBinding(String aPropName, String aKey)
-    {
-        String pname = aPropName.equals("Value") ? getValuePropName() : aPropName;
-        addBinding(new Binding(pname, aKey));
-    }
-
-    /**
      * Returns the property map.
      */
-    public Map getProps()  { return _props; }
+    public Map<String,Object> getProps()  { return _props; }
 
     /**
      * Returns a named client property.
@@ -2509,10 +2459,17 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Sets whether focus ring should be painted when view is focused.
      */
-    public void setFocusPainted(boolean aValue)
-    {
-        _focusPainted = aValue;
-    }
+    public void setFocusPainted(boolean aValue)  { _focusPainted = aValue; }
+
+    /**
+     * Returns whether view can generate action events in response to certain user interactions.
+     */
+    public boolean isActionable()  { return _actionable; }
+
+    /**
+     * Sets whether view can generate action events in response to certain user interactions.
+     */
+    public void setActionable(boolean aValue)  { _actionable = aValue; }
 
     /**
      * Tells view to request focus.
@@ -2553,8 +2510,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setOwner(ViewOwner anOwner)
     {
+        // If already set, just return - Owner cannot be reset
         if (_owner != null) return;
         _owner = anOwner;
+
+        // If View.Actionable, make Owner listen for Action events
         if (_eventAdapter != null && _eventAdapter.isEnabled(Action))
             anOwner.enableEvents(this, Action);
     }
@@ -2632,7 +2592,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Align_Prop: return getAlign();
             case Margin_Prop: return getMargin();
             case Padding_Prop: return getPadding();
-            case Spacing_Prop:_Prop: return getSpacing();
+            case Spacing_Prop: return getSpacing();
 
             // Alignment: LeanX, LeanY, GrowWidth, GrowHeight
             case LeanX_Prop: return getLeanX();
@@ -2657,9 +2617,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case "Enabled": return isEnabled();
 
             // List Props: Items, SelItem, SelIndex
-            case Selectable.Items_Prop: return ((Selectable) this).getItems();
-            case Selectable.SelItem_Prop: return ((Selectable) this).getSelItem();
-            case Selectable.SelIndex_Prop: return ((Selectable) this).getSelIndex();
+            case Selectable.Items_Prop: return ((Selectable<?>) this).getItems();
+            case Selectable.SelItem_Prop: return ((Selectable<?>) this).getSelItem();
+            case Selectable.SelIndex_Prop: return ((Selectable<?>) this).getSelIndex();
 
             // Do normal version
             default:
@@ -2721,22 +2681,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case "Enabled": setDisabled(!SnapUtils.boolValue(aValue)); break;
 
             // List Props: Items, SelItem, SelIndex
-            case Selectable.Items_Prop: {
-                Selectable sview = (Selectable) this;
-                if (aValue instanceof List)
-                    sview.setItems((List) aValue);
-                else if (aValue != null && aValue.getClass().isArray())
-                    sview.setItems((Object[]) aValue);
-                else sview.setItems(Collections.emptyList());
-                break;
-            }
+            case Selectable.Items_Prop: Selectable.setItems((Selectable<?>) this, aValue); break;
             case Selectable.SelItem_Prop: ((Selectable) this).setSelItem(aValue); break;
-            case Selectable.SelIndex_Prop: {
-                Selectable sview = (Selectable) this;
-                int index = aValue == null ? -1 : SnapUtils.intValue(aValue);
-                sview.setSelIndex(index);
-                break;
-            }
+            case Selectable.SelIndex_Prop: ((Selectable<?>) this).setSelIndex(SnapUtils.intValue(aValue)); break;
 
             // Do normal version
             default:
@@ -3028,7 +2975,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // Get class name for element
         String className;
-        for (Class cls = getClass(); ; cls = cls.getSuperclass()) {
+        for (Class<?> cls = getClass(); ; cls = cls.getSuperclass()) {
             if (cls == ParentView.class) continue;
             if (cls.getName().startsWith("snap.view")) {
                 className = cls.getSimpleName();
@@ -3273,10 +3220,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             setLeanX(HPos.get(anElement.getAttributeValue(LeanX_Prop)));
         if (anElement.hasAttribute(LeanY_Prop))
             setLeanY(VPos.get(anElement.getAttributeValue(LeanY_Prop)));
-
-        // Unarchive Autosizing
-        if (anElement.hasAttribute("asize"))
-            setAutosizing(anElement.getAttributeValue("asize"));
 
         // Unarchive animation
         XMLElement animXML = anElement.getElement("Anim");

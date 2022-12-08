@@ -4,6 +4,8 @@
 package snap.view;
 import java.util.*;
 
+import snap.geom.HPos;
+import snap.geom.VPos;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.*;
@@ -14,13 +16,13 @@ import snap.util.*;
 public class SpringView extends ChildView {
 
     // The last set size
-    double _ow, _oh;
+    private double  _oldW, _oldH;
     
     // The SpringInfos for children
-    Map <Object,SpringInfo> _sinfos = new HashMap();
+    private Map <Object,SpringInfo>  _springInfos = new HashMap<>();
     
     // A PropChangeListener to resetSpringInfo when child bounds change outside of layout
-    PropChangeListener _pcl = pce -> childPropChange(pce);
+    private PropChangeListener  _childPropChangeLsnr = pce -> childPropChange(pce);
     
     /**
      * Override to add layout info.
@@ -29,7 +31,7 @@ public class SpringView extends ChildView {
     {
         super.addChild(aChild, anIndex);
         addSpringInfo(aChild);
-        aChild.addPropChangeListener(_pcl);
+        aChild.addPropChangeListener(_childPropChangeLsnr);
     }
 
     /**
@@ -39,7 +41,7 @@ public class SpringView extends ChildView {
     {
         View child = super.removeChild(anIndex);
         removeSpringInfo(child);
-        child.removePropChangeListener(_pcl);
+        child.removePropChangeListener(_childPropChangeLsnr);
         return child;
     }
 
@@ -57,7 +59,7 @@ public class SpringView extends ChildView {
     /**
      * Returns spring info for child.
      */
-    protected SpringInfo getSpringInfo(View aChild)  { return _sinfos.get(aChild); }
+    protected SpringInfo getSpringInfo(View aChild)  { return _springInfos.get(aChild); }
 
     /**
      * Adds spring info for child.
@@ -67,13 +69,18 @@ public class SpringView extends ChildView {
         double pw = getWidth(), ph = getHeight();
         double x = aChild.getX(), y = aChild.getY(), w = aChild.getWidth(), h = aChild.getHeight();
         SpringInfo sinfo = new SpringInfo(x,y,w,h,pw,ph);
-        _sinfos.put(aChild, sinfo); _ow = _oh = 0;
+        _springInfos.put(aChild, sinfo);
+        _oldW = _oldH = 0;
     }
 
     /**
      * Removes spring info for child.
      */
-    protected void removeSpringInfo(View aChild)  { _sinfos.remove(aChild); _ow = _oh = 0; }
+    protected void removeSpringInfo(View aChild)
+    {
+        _springInfos.remove(aChild);
+        _oldW = _oldH = 0;
+    }
 
     /**
      * Returns preferred width.
@@ -90,10 +97,16 @@ public class SpringView extends ChildView {
      */
     protected void layoutImpl()
     {
-        View children[] = getChildren();
-        double pw = getWidth(), ph = getHeight(); if (pw==_ow && ph==_oh) return;
-        for (View child : children) layoutChild(child, pw, ph);
-        _ow = pw; _oh = ph;
+        View[] children = getChildren();
+        double pw = getWidth();
+        double ph = getHeight();
+        if (pw == _oldW && ph == _oldH)
+            return;
+
+        for (View child : children)
+            layoutChild(child, pw, ph);
+        _oldW = pw;
+        _oldH = ph;
     }
 
     /**
@@ -102,7 +115,7 @@ public class SpringView extends ChildView {
     protected void layoutChild(View aChild, double newPW, double newPH)
     {
         SpringInfo sinfo = getSpringInfo(aChild);
-        String asize = aChild.getAutosizing();
+        String asize = getAutosizing(aChild);
         double oldPW = sinfo.pwidth;
         double oldPH = sinfo.pheight;
         boolean lms = asize.charAt(0)=='~', ws = asize.charAt(1)=='~', rms = asize.charAt(2)=='~';
@@ -130,8 +143,9 @@ public class SpringView extends ChildView {
     protected void childPropChange(PropChange aPCE)
     {
         if (isInLayout()) return;
-        String pname = aPCE.getPropName();
-        if (pname==X_Prop || pname==Y_Prop || pname==Width_Prop || pname==Height_Prop)
+
+        String propName = aPCE.getPropName();
+        if (propName == X_Prop || propName == Y_Prop || propName == Width_Prop || propName == Height_Prop)
             resetSpringInfo((View)aPCE.getSource());
     }
 
@@ -144,6 +158,32 @@ public class SpringView extends ChildView {
         super.fromXMLView(anArchiver, anElement);
         setPrefSize(getWidth(), getHeight());
     }
+
+    /**
+     * Returns the autosizing settings as a string with hyphens for struts and tilde for sprints (horiz,vert).
+     */
+    public static String getAutosizing(View aView)
+    {
+        HPos leanX = aView.getLeanX();
+        VPos leanY = aView.getLeanY();
+        boolean left = leanX == null || leanX == HPos.LEFT, right = leanX == null || leanX == HPos.RIGHT;
+        boolean top = leanY == null || leanY == VPos.TOP, btm = leanY == null || leanY == VPos.BOTTOM;
+        char c1 = left ? '-' : '~', c2 = aView.isGrowWidth() ? '~' : '-', c3 = right ? '-' : '~';
+        char c4 = top ? '-' : '~', c5 = aView.isGrowHeight() ? '~' : '-', c6 = btm ? '-' : '~';
+        return "" + c1 + c2 + c3 + ',' + c4 + c5 + c6;
+    }
+
+//    public static void setAutosizing(View aView, String aVal)
+//    {
+//        String val = aVal != null ? aVal : "--~,--~";
+//        if (val.length() < 7) return;
+//        char c1 = val.charAt(0), c2 = val.charAt(1), c3 = val.charAt(2);
+//        char c4 = val.charAt(4), c5 = val.charAt(5), c6 = val.charAt(6);
+//        aView.setGrowWidth(c2 == '~');
+//        aView.setGrowHeight(c5 == '~');
+//        aView.setLeanX(c1 == '~' && c3 == '~' ? HPos.CENTER : c1 == '~' ? HPos.RIGHT : c3 == '~' ? HPos.LEFT : null);
+//        aView.setLeanY(c4 == '~' && c6 == '~' ? VPos.CENTER : c4 == '~' ? VPos.BOTTOM : c6 == '~' ? VPos.TOP : null);
+//    }
 
     /**
      * A class to hold info for a spring child.
