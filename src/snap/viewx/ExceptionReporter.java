@@ -90,7 +90,7 @@ public class ExceptionReporter extends ViewOwner implements Thread.UncaughtExcep
         aThrowable.printStackTrace();
 
         // If exception reporting not enabled, just return (otherwise mark done, because we only offer this once)
-        Prefs prefs = Prefs.get();
+        Prefs prefs = Prefs.getDefaultPrefs();
         if (_done || !prefs.getBoolean("ExceptionReportingEnabled", true))
             return;
         else _done = true;

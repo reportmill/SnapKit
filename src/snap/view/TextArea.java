@@ -74,10 +74,10 @@ public class TextArea extends View {
     private TextAreaKeys  _keys = createTextAreaKeys();
 
     // Whether as-you-type spell checking is enabled
-    public static boolean  isSpellChecking = Prefs.get().getBoolean("SpellChecking", false);
+    public static boolean  isSpellChecking = Prefs.getDefaultPrefs().getBoolean("SpellChecking", false);
 
     // Whether hyphenating is activated
-    static boolean  _hyphenating = Prefs.get().getBoolean("Hyphenating", false);
+    static boolean  _hyphenating = Prefs.getDefaultPrefs().getBoolean("Hyphenating", false);
 
     // The MIME type for SnapKit RichText
     public static final String  SNAP_RICHTEXT_TYPE = "reportmill/xstring";
@@ -1872,7 +1872,7 @@ public class TextArea extends View {
      */
     public static void setHyphenating(boolean aValue)
     {
-        Prefs.get().setValue("Hyphenating", _hyphenating = aValue);
+        Prefs.getDefaultPrefs().setValue("Hyphenating", _hyphenating = aValue);
     }
 
     /**

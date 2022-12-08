@@ -408,7 +408,7 @@ public class ColorDock extends View {
     protected void saveToPrefs(String aName, int anIndex)
     {
         // Get the app's preferences node and sub-node for the list of colors
-        Prefs prefs = Prefs.get().getChild(aName);
+        Prefs prefs = Prefs.getDefaultPrefs().getChild(aName);
 
         // Get color, rgb value, key, then if not white put value, otherwise remove
         Color c = getColor(anIndex); // Legacy: c = getColor(aRow, aCol);
@@ -429,7 +429,7 @@ public class ColorDock extends View {
         resetColors();
 
         // Get named node and node keys and iterate over keys
-        Prefs prefs = Prefs.get().getChild(aName);
+        Prefs prefs = Prefs.getDefaultPrefs().getChild(aName);
         String keys[] = prefs.getKeys();
         for (String key : keys) {
 

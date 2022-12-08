@@ -673,7 +673,7 @@ public class FilePanel extends ViewOwner {
             return "/";
 
         String defaultPath = getHomeDirPath();
-        return Prefs.get().getString("MostRecentDocument." + aType, defaultPath);
+        return Prefs.getDefaultPrefs().getString("MostRecentDocument." + aType, defaultPath);
     }
 
     /**
@@ -685,8 +685,8 @@ public class FilePanel extends ViewOwner {
         if (!defaultSite.getURL().getScheme().equalsIgnoreCase("file"))
             return;
 
-        Prefs.get().setValue("MostRecentDocument." + aType, aPath);
-        Prefs.get().flush();
+        Prefs.getDefaultPrefs().setValue("MostRecentDocument." + aType, aPath);
+        Prefs.getDefaultPrefs().flush();
     }
 
     /**

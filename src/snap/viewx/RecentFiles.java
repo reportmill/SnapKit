@@ -87,7 +87,7 @@ public class RecentFiles extends ViewOwner {
     public static String[] getPaths(String aName)
     {
         // Get prefs for RecentDocuments (just return if missing)
-        Prefs prefs = Prefs.get().getChild(aName);
+        Prefs prefs = Prefs.getDefaultPrefs().getChild(aName);
 
         // Add to the list only if the file is around and readable
         List<String> list = new ArrayList<>();
@@ -115,7 +115,7 @@ public class RecentFiles extends ViewOwner {
         paths = ArrayUtils.add(paths, aPath);
 
         // Add at most Max paths to the prefs list
-        Prefs prefs = Prefs.get().getChild(aName);
+        Prefs prefs = Prefs.getDefaultPrefs().getChild(aName);
         for (int i = 0; i < paths.length && i < aMax; i++)
             prefs.setValue("index" + i, paths[i]);
 
@@ -129,7 +129,7 @@ public class RecentFiles extends ViewOwner {
      */
     public static void clearPaths(String aName)
     {
-        Prefs.get().getChild(aName).clear();
+        Prefs.getDefaultPrefs().getChild(aName).clear();
     }
 
     /**

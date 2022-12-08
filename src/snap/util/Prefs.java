@@ -9,7 +9,7 @@ import java.util.Map;
 public abstract class Prefs {
 
     // The default preferences
-    private static Prefs  _default;
+    private static Prefs  _defaultPrefs;
     
     /**
      * Returns a value for given string.
@@ -107,21 +107,19 @@ public abstract class Prefs {
     /**
      * Returns the default prefs.
      */
-    public static Prefs get()  { return getPrefsDefault(); }
-
-    /**
-     * Returns the default prefs.
-     */
-    public static Prefs getPrefsDefault()
+    public static Prefs getDefaultPrefs()
     {
-        if (_default != null) return _default;
-        return _default = getPrefsForName("DefaultPrefs");
+        // If already set, just return
+        if (_defaultPrefs != null) return _defaultPrefs;
+
+        // Create, set, return
+        return _defaultPrefs = getPrefsForName("DefaultPrefs");
     }
 
     /**
      * Sets the default preferences instance.
      */
-    public static void setPrefsDefault(Prefs thePrefs)  { _default = thePrefs; }
+    public static void setDefaultPrefs(Prefs thePrefs)  { _defaultPrefs = thePrefs; }
 
     /**
      * Returns the preferences for given node name.

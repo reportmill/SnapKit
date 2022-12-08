@@ -70,7 +70,7 @@ public class ColorButton extends View {
 
         // If Title set, save to prefs under that name
         if (getTitle() != null) {
-            Prefs.get().setValue(_title, _color == null ? null : _color.toHexString());
+            Prefs.getDefaultPrefs().setValue(_title, _color == null ? null : _color.toHexString());
         }
     }
 
@@ -87,7 +87,7 @@ public class ColorButton extends View {
         _title = aTitle;
 
         // If color string is found, set color
-        String cstr = Prefs.get().getString(_title);
+        String cstr = Prefs.getDefaultPrefs().getString(_title);
         if (cstr != null)
             _color = Color.get(cstr);
         repaint();

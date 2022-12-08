@@ -223,7 +223,7 @@ public class WindowView extends ParentView {
         StringBuffer sb = new StringBuffer().append(winX).append(' ').append(winY);
         if (_saveSize)
             sb.append(' ').append(winW).append(' ').append(winH);
-        Prefs.get().setValue(_saveName + "Loc", sb.toString());
+        Prefs.getDefaultPrefs().setValue(_saveName + "Loc", sb.toString());
     }
 
     /**
@@ -446,7 +446,7 @@ public class WindowView extends ParentView {
         if (saveName != null) {
 
             // Get location string
-            String locString = Prefs.get().getString(saveName + "Loc");
+            String locString = Prefs.getDefaultPrefs().getString(saveName + "Loc");
             if (locString != null) {
                 String[] strings = locString.split(" ");
                 winX = StringUtils.intValue(strings[0]);
