@@ -37,7 +37,7 @@ public class AWTEnv extends GFXEnv {
     /**
      * Returns resource for class and path.
      */
-    public URL getResource(Class aClass, String aPath)
+    public URL getResource(Class<?> aClass, String aPath)
     {
         return aClass.getResource(aPath);
     }
@@ -47,10 +47,16 @@ public class AWTEnv extends GFXEnv {
      */
     public String getClassRoot()
     {
-        URL url = getClass().getResource(getClass().getSimpleName() + ".class");
+        Class<?> cls = getClass();
+        String className = cls.getName();
+        String simpleName = cls.getSimpleName();
+
+        // Get URL
+        URL url = cls.getResource(simpleName + ".class");
         String urls = url.toString();
-        String suffix = getClass().getName();
-        String urls2 = urls.substring(0, urls.length() - suffix.length() - 1);
+        String urls2 = urls.substring(0, urls.length() - className.length() - 1);
+
+        // Return
         return urls2;
     }
 
@@ -165,7 +171,7 @@ public class AWTEnv extends GFXEnv {
         File file = FileUtils.getFile(aSource);
 
         // Open with Runtime.exec "open -e <file-name>"
-        String commands[] = { "open",  "-e", file.getAbsolutePath() };
+        String[] commands = { "open",  "-e", file.getAbsolutePath() };
         try { Runtime.getRuntime().exec(commands); }
         catch(Exception e) { e.printStackTrace(); }
     }
@@ -242,7 +248,7 @@ public class AWTEnv extends GFXEnv {
     /**
      * This is really just here to help with TeaVM.
      */
-    public Method getMethod(Class aClass, String aName, Class ... theClasses) throws NoSuchMethodException
+    public Method getMethod(Class<?> aClass, String aName, Class<?>... theClasses) throws NoSuchMethodException
     {
         return aClass.getMethod(aName, theClasses);
     }

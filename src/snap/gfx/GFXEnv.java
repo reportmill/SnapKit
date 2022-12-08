@@ -14,14 +14,14 @@ import snap.web.*;
 public abstract class GFXEnv {
 
     // The node environment
-    protected static GFXEnv        _env;
+    protected static GFXEnv  _env;
 
     /**
      * Returns the Graphics environment.
      */
     public static GFXEnv getEnv()
     {
-        if (_env!=null) return _env;
+        if (_env != null) return _env;
         setDefaultEnv();
         return _env;
     }
@@ -32,17 +32,17 @@ public abstract class GFXEnv {
     private static void setDefaultEnv()
     {
         // Get class name for platform GFXEnv
-        String cname = SnapUtils.getPlatform()==SnapUtils.Platform.TEAVM ? "snaptea.TV" : "snap.swing.AWTEnv";
+        String className = SnapUtils.getPlatform() == SnapUtils.Platform.TEAVM ? "snaptea.TV" : "snap.swing.AWTEnv";
 
         // Try Swing
-        try { Class.forName(cname).newInstance(); }
-        catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set GFXEnv " + cname + ", " + e); }
+        try { Class.forName(className).newInstance(); }
+        catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set GFXEnv " + className + ", " + e); }
     }
 
     /**
      * Returns resource for class and path.
      */
-    public abstract URL getResource(Class aClass, String aPath);
+    public abstract URL getResource(Class<?> aClass, String aPath);
 
     /**
      * Returns a list of all system fontnames (excludes any that don't start with capital A-Z).
@@ -135,7 +135,7 @@ public abstract class GFXEnv {
     /**
      * This is really just here to help with TeaVM.
      */
-    public abstract Method getMethod(Class aClass, String aName, Class ... theClasses) throws NoSuchMethodException;
+    public abstract Method getMethod(Class<?> aClass, String aName, Class<?>... theClasses) throws NoSuchMethodException;
 
     /**
      * This is really just here to help with TeaVM.

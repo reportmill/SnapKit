@@ -1,6 +1,5 @@
 package snap.util;
 import snap.gfx.GFXEnv;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +60,7 @@ public abstract class Prefs {
     public int getInt(String aKey, int aDefault)
     {
         Object val = getValue(aKey);
-        return val!=null ? SnapUtils.intValue(val) : aDefault;
+        return val != null ? SnapUtils.intValue(val) : aDefault;
     }
 
     /**
@@ -70,7 +69,7 @@ public abstract class Prefs {
     public double getDouble(String aKey, double aDefault)
     {
         Object val = getValue(aKey);
-        return val!=null ? SnapUtils.doubleValue(val) : aDefault;
+        return val != null ? SnapUtils.doubleValue(val) : aDefault;
     }
 
     /**
@@ -79,7 +78,7 @@ public abstract class Prefs {
     public boolean getBoolean(String aKey, boolean aDefault)
     {
         Object val = getValue(aKey);
-        return val!=null ? SnapUtils.boolValue(val) : aDefault;
+        return val != null ? SnapUtils.boolValue(val) : aDefault;
     }
 
     /**
@@ -115,8 +114,8 @@ public abstract class Prefs {
      */
     public static Prefs getPrefsDefault()
     {
-        if (_default!=null) return _default;
-        return _default = getPrefs("DefaultPrefs");
+        if (_default != null) return _default;
+        return _default = getPrefsForName("DefaultPrefs");
     }
 
     /**
@@ -127,24 +126,19 @@ public abstract class Prefs {
     /**
      * Returns the preferences for given node name.
      */
-    public static Prefs getPrefs(String aName)  { return GFXEnv.getEnv().getPrefs(aName); }
-
-    /**
-     * Returns the preferences for given class (package really).
-     */
-    public static Prefs getPrefs(Class aClass)
-    {
-        String cname = aClass.getName();
-        int pkgEndInd = cname.lastIndexOf('.');
-        String pname = pkgEndInd>0 ? cname.substring(0, pkgEndInd) : "<unnamed>";
-        String ppath = "/" + pname.replace('.', '/');
-        return getPrefs(ppath);
-    }
+    public static Prefs getPrefsForName(String aName)  { return GFXEnv.getEnv().getPrefs(aName); }
 
     /**
      * Returns a prefs instance that doesn't do anything.
      */
-    public static Prefs getFake()  { return _fp!=null? _fp : (_fp=new MapPrefs()); } static Prefs _fp;
+    public static Prefs getFake()
+    {
+        if (_fakePrefs != null) return _fakePrefs;
+        return _fakePrefs = new MapPrefs();
+    }
+
+    // Fake Prefs
+    private static Prefs  _fakePrefs;
 
     /**
      * A Prefs implementation that doesn't do anything.
@@ -158,7 +152,7 @@ public abstract class Prefs {
         public Object getValue(String aKey, Object aDefault)
         {
             Object val = _map.get(aKey);
-            return val!=null ? val : aDefault;
+            return val != null ? val : aDefault;
         }
 
         /** Sets a value for given string. */

@@ -1,7 +1,5 @@
 package snap.swing;
-
 import javax.swing.SwingUtilities;
-
 import snap.util.*;
 import snap.view.*;
 import snap.viewx.*;
@@ -12,19 +10,22 @@ import snap.viewx.*;
 public class SnapApp extends ViewOwner implements Thread.UncaughtExceptionHandler {
 
     // The WebBrowser
-    WebBrowser _browser;
+    private WebBrowser  _browser;
 
     // Launch args
-    static String _args[], _fname;
+    private static String[]  _args;
+
+    // File Name
+    private static String  _fileName;
 
     /**
      * Main.
      */
-    public static void main(final String args[])
+    public static void main(final String[] args)
     {
         // Set args
         _args = args;
-        _fname = getParameter(args, "file");
+        _fileName = getParameter(args, "file");
 
         // Run this app
         SwingUtilities.invokeLater(() -> new SnapApp().main());
@@ -39,12 +40,13 @@ public class SnapApp extends ViewOwner implements Thread.UncaughtExceptionHandle
         Thread.setDefaultUncaughtExceptionHandler(this);
 
         // Install default snap preferences
-        Prefs.setPrefsDefault(Prefs.getPrefs(SnapApp.class));
+        Prefs prefs = Prefs.getPrefsForName("/snap/swing");
+        Prefs.setPrefsDefault(prefs);
 
         // Set URL file in background
         getUI();
-        _browser.setURLString(_fname);
-        getWindow().setTitle(FilePathUtils.getFileNameSimple(_fname));
+        _browser.setURLString(_fileName);
+        getWindow().setTitle(FilePathUtils.getFileNameSimple(_fileName));
 
         // Make window visible
         getWindow().setSaveName("SnapBrowser");
@@ -59,7 +61,8 @@ public class SnapApp extends ViewOwner implements Thread.UncaughtExceptionHandle
     {
         String text = "  " + FilePathUtils.getFileNameSimple(getParameter(_args, "file"));
         WebBrowserPane browserPane;
-        if (isParameter(_args, "iphone")) browserPane = new WebBrowserPanes.iPhone();
+        if (isParameter(_args, "iphone"))
+            browserPane = new WebBrowserPanes.iPhone();
         else browserPane = new WebBrowserPanes.Labeled(text);
         _browser = browserPane.getBrowser();
         return browserPane.getUI();
@@ -68,7 +71,7 @@ public class SnapApp extends ViewOwner implements Thread.UncaughtExceptionHandle
     /**
      * Returns given parameter.
      */
-    static boolean isParameter(String args[], String aName)
+    private static boolean isParameter(String[] args, String aName)
     {
         return getArgIndex(args, aName) >= 0;
     }
@@ -76,7 +79,7 @@ public class SnapApp extends ViewOwner implements Thread.UncaughtExceptionHandle
     /**
      * Returns given parameter.
      */
-    static String getParameter(String args[], String aName)
+    private static String getParameter(String[] args, String aName)
     {
         int index = getArgIndex(args, aName);
         return index >= 0 && index + 1 < _args.length ? _args[index + 1] : null;
@@ -85,9 +88,10 @@ public class SnapApp extends ViewOwner implements Thread.UncaughtExceptionHandle
     /**
      * Returns the arg index for a given arg.
      */
-    static int getArgIndex(String args[], String aName)
+    private static int getArgIndex(String[] args, String aName)
     {
-        for (int i = 0; i < _args.length; i++) if (_args[i].equals(aName)) return i;
+        for (int i = 0; i < args.length; i++)
+            if (args[i].equals(aName)) return i;
         return -1;
     }
 
@@ -99,5 +103,4 @@ public class SnapApp extends ViewOwner implements Thread.UncaughtExceptionHandle
         t.printStackTrace();
         _browser.showException(t);
     }
-
 }
