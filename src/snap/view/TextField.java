@@ -47,7 +47,7 @@ public class TextField extends ParentView {
     private boolean  _hideCaret;
 
     // Whether to send action on focus lost (if content changed)
-    private boolean  _fireActionOnFocusLost;
+    private boolean  _fireActionOnFocusLost = true;
 
     // The value of text on focus gained
     protected String  _focusGainedText;
