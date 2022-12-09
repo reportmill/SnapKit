@@ -179,7 +179,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
 
             // Create new event and dispatch
             ViewEvent event = ViewEvent.createEvent(_rview, me, null, null);
-            _win.dispatchEvent(event);
+            _win.dispatchEventToWindow(event);
 
             // Bogus! (not sure why this is here)
             if (!isFocusOwner()) requestFocusInWindow(true);
@@ -193,7 +193,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
             KeyEvent ke = (KeyEvent) anEvent;
             int id = ke.getID();
             ViewEvent event = ViewEvent.createEvent(_rview, anEvent, null, null);
-            _win.dispatchEvent(event);
+            _win.dispatchEventToWindow(event);
         }
     }
 
@@ -233,7 +233,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
     public void dragGestureRecognized(DragGestureEvent anEvent)
     {
         ViewEvent event = ViewEvent.createEvent(_rview, anEvent, ViewEvent.Type.DragGesture, null);
-        _win.dispatchEvent(event);
+        _win.dispatchEventToWindow(event);
     }
 
     /**
@@ -242,7 +242,7 @@ public class SWRootView extends JComponent implements DragGestureListener {
     public void sendDropTargetEvent(DropTargetEvent anEvent, ViewEvent.Type aType)
     {
         ViewEvent event = ViewEvent.createEvent(_rview, anEvent, aType, null);
-        _win.dispatchEvent(event);
+        _win.dispatchEventToWindow(event);
     }
 
     /**

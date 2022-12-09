@@ -152,7 +152,7 @@ public class ViewUpdater {
             ViewOwner[] owners = _resetLaters.toArray(new ViewOwner[0]);
             _resetLaters.clear();
             for (ViewOwner owner : owners)
-                owner.processResetUI();
+                owner.invokeResetUI();
         }
 
         // Layout all views that need it

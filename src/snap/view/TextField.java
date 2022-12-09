@@ -79,11 +79,11 @@ public class TextField extends ParentView {
         setFill(Color.WHITE);
         setBorder(DEFAULT_TEXT_FIELD_BORDER);
         setBorderRadius(DEFAULT_TEXT_FIELD_BORDER_RADIUS);
-        enableEvents(Action);
-        enableEvents(MouseEvents);
-        enableEvents(KeyEvents);
         setFocusable(true);
         setFocusWhenPressed(true);
+        setActionable(true);
+        enableEvents(MouseEvents);
+        enableEvents(KeyEvents);
 
         // Configure label and set
         _label = new Label();

@@ -140,18 +140,12 @@ public class TextView extends ParentView {
     public void setFireActionOnEnterKey(boolean aValue)
     {
         _textArea.setFireActionOnEnterKey(aValue);
+        setActionable(isFireActionOnEnterKey() || isFireActionOnFocusLost());
 
         // Enable
-        if (aValue) {
-            enableEvents(Action);
+        if (aValue)
             _textArea.addEventHandler(_actionEvtLsnr, Action);
-        }
-
-        // Disable
-        else {
-            getEventAdapter().disableEvents(this, Action);
-            _textArea.removeEventHandler(_actionEvtLsnr);
-        }
+        else _textArea.removeEventHandler(_actionEvtLsnr);
     }
 
     /**
@@ -165,18 +159,12 @@ public class TextView extends ParentView {
     public void setFireActionOnFocusLost(boolean aValue)
     {
         _textArea.setFireActionOnFocusLost(aValue);
+        setActionable(isFireActionOnEnterKey() || isFireActionOnFocusLost());
 
         // Enable
-        if (aValue) {
-            enableEvents(Action);
+        if (aValue)
             _textArea.addEventHandler(_actionEvtLsnr, Action);
-        }
-
-        // Disable
-        else {
-            getEventAdapter().disableEvents(this, Action);
-            _textArea.removeEventHandler(_actionEvtLsnr);
-        }
+        else _textArea.removeEventHandler(_actionEvtLsnr);
     }
 
     /**

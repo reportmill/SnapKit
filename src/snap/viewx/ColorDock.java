@@ -46,7 +46,8 @@ public class ColorDock extends View {
     public ColorDock()
     {
         // Configure this view
-        enableEvents(MousePress, MouseRelease, Action);
+        setActionable(true);
+        enableEvents(MousePress, MouseRelease);
         enableEvents(DragGesture, DragSourceEnd); enableEvents(DragEvents);
         setBorder(COLOR_DOCK_BORDER);
 

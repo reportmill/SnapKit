@@ -11,7 +11,7 @@ import snap.web.WebURL;
 /**
  * A base controller class that manages a UI View (usually loaded from a snp UI file).
  */
-public class ViewOwner extends PropObject implements EventListener {
+public class ViewOwner extends PropObject {
 
     // The UI View
     private View  _ui;
@@ -48,6 +48,9 @@ public class ViewOwner extends PropObject implements EventListener {
     
     // Whether this ViewOwner should suppress the next automatic reset that normally happens after respondUI
     private boolean  _cancelReset;
+
+    // The EventListener to listen to view events
+    private EventListener  _viewEventListener;
     
     // Convenience for common events
     public static final ViewEvent.Type Action = ViewEvent.Type.Action;
@@ -169,6 +172,16 @@ public class ViewOwner extends PropObject implements EventListener {
      * Initializes the UI panel.
      */
     protected void initUI()  { }
+
+    /**
+     * Returns the first focus UI view for when window/dialog is made visible.
+     */
+    public Object getFirstFocus()  { return _firstFocus; }
+
+    /**
+     * Sets the first focus UI view.
+     */
+    public void setFirstFocus(Object anObj)  { _firstFocus = anObj; }
 
     /**
      * Returns whether ViewOwner UI is showing.
@@ -504,38 +517,52 @@ public class ViewOwner extends PropObject implements EventListener {
     protected void cancelReset()  { _cancelReset = true; }
 
     /**
-     * Called to reset bindings and resetUI().
+     * A wrapper to call resetUI() properly so resulting view action events are ignored.
      */
-    protected void processResetUI()
+    protected void invokeResetUI()
     {
+        // Set SendEventDisabled to ignore action events
         boolean old = setSendEventDisabled(true);
+
+        // Reset UI
         try {
             this.resetUI();
         }
-        finally { setSendEventDisabled(old); }
+
+        // Always reset SendEventDisabled
+        finally {
+            setSendEventDisabled(old);
+        }
     }
 
     /**
-     * Called to invoke respondUI().
+     * A hook to allow subclasses to wrap respondUI invocation easier.
      */
-    protected void processEvent(ViewEvent anEvent)
+    protected void invokeRespondUI(ViewEvent anEvent)
     {
-        // Call main Owner.respondUI method
         this.respondUI(anEvent);
     }
 
     /**
-     * Sends an event for a UI view.
+     * Sends an event to this ViewOwner through processEvent method.
      */
-    public void fireEvent(ViewEvent anEvent)
+    public void dispatchEventToOwner(ViewEvent anEvent)
     {
         // If send event is disabled, just return
         if (isSendEventDisabled()) return;
 
-        // If no special callback, just call respondUI
+        // Set SendEventDisabled to ignore action events
         setSendEventDisabled(true);
-        try { processEvent(anEvent); }
-        finally { setSendEventDisabled(false); }
+
+        // Call respondUI
+        try {
+            invokeRespondUI(anEvent);
+        }
+
+        // Always clear SendEventDisabled
+        finally {
+            setSendEventDisabled(false);
+        }
 
         // Trigger UI reset
         if (!_cancelReset && getUI().isShowing())
@@ -544,72 +571,17 @@ public class ViewOwner extends PropObject implements EventListener {
     }
 
     /**
-     * Returns the first focus UI view for when window/dialog is made visible.
-     */
-    public Object getFirstFocus()  { return _firstFocus; }
-
-    /**
-     * Sets the first focus UI view.
-     */
-    public void setFirstFocus(Object anObj)  { _firstFocus = anObj; }
-
-    /**
-     * Focuses given UI view (name or view).
-     */
-    public void requestFocus(Object anObj)
-    {
-        View view = getView(anObj);
-        if (view != null)
-            view.requestFocus();
-    }
-
-    /**
-     * Returns whether Window has been created (happens when first accessed).
-     */
-    public boolean isWindowSet()  { return _win != null; }
-
-    /**
-     * Returns the Window to manage this ViewOwner's window.
-     */
-    public WindowView getWindow()
-    {
-        // If already set, just return
-        if (_win != null) return _win;
-
-        // Create window, set content to UI, set owner to this ViewOwner and return
-        _win = new WindowView();
-        View ui = getUI();
-        _win.setContent(ui);
-        _win.setOwner(this);
-        return _win;
-    }
-
-    /**
-     * Returns whether window is visible.
-     */
-    public boolean isWindowVisible()
-    {
-        return isWindowSet() && getWindow().isVisible();
-    }
-
-    /**
-     * Sets whether window is visible.
-     */
-    public void setWindowVisible(boolean aValue)
-    {
-        WindowView win = getWindow();
-        if (aValue)
-            win.showCentered(null);
-        else win.hide();
-    }
-
-    /**
      * Enables events on given object.
      */
     public void enableEvents(Object anObj, ViewEvent.Type ... theTypes)
     {
+        // Get View and view EventListener
         View view = getView(anObj);
-        view.addEventHandler(this, theTypes);
+        if (_viewEventListener == null)
+            _viewEventListener = e -> dispatchEventToOwner(e);
+
+        // Add EventHandler
+        view.addEventHandler(_viewEventListener, theTypes);
     }
 
     /**
@@ -618,24 +590,28 @@ public class ViewOwner extends PropObject implements EventListener {
     public void disableEvents(Object anObj, ViewEvent.Type ... theTypes)
     {
         View view = getView(anObj);
-        view.removeEventHandler(this, theTypes);
+        view.removeEventHandler(_viewEventListener, theTypes);
     }
 
     /**
-     * Sends an event for a UI view (name or view).
+     * Triggers and action event for a UI view (name or view).
      */
-    public void sendEvent(Object anObj)
+    public void fireActionEventForObject(Object anObj, ViewEvent parentEvent)
     {
         // If view found for object, fire and return
         View view = getView(anObj);
         if (view != null && view.isEnabled()) {
-            view.fireActionEvent(null); return; }
+            view.fireActionEvent(parentEvent);
+            return;
+        }
 
         // Otherwise, if object is string, create event for UI and fire
         if (anObj instanceof String) {
             String name = (String) anObj;
-            ViewEvent event = ViewEvent.createEvent(getUI(), null, null, name);
-            fireEvent(event);
+            ViewEvent event = ViewEvent.createEvent(getUI(), null, View.Action, name);
+            if (parentEvent != null)
+                event.setParentEvent(parentEvent);
+            dispatchEventToOwner(event);
         }
     }
 
@@ -709,9 +685,59 @@ public class ViewOwner extends PropObject implements EventListener {
 
         // If found, send action
         if (name != null) {
-            sendEvent(name);
+            fireActionEventForObject(name, anEvent);
             anEvent.consume();
         }
+    }
+
+    /**
+     * Focuses given UI view (name or view).
+     */
+    public void requestFocus(Object anObj)
+    {
+        View view = getView(anObj);
+        if (view != null)
+            view.requestFocus();
+    }
+
+    /**
+     * Returns whether Window has been created (happens when first accessed).
+     */
+    public boolean isWindowSet()  { return _win != null; }
+
+    /**
+     * Returns the Window to manage this ViewOwner's window.
+     */
+    public WindowView getWindow()
+    {
+        // If already set, just return
+        if (_win != null) return _win;
+
+        // Create window, set content to UI, set owner to this ViewOwner and return
+        _win = new WindowView();
+        View ui = getUI();
+        _win.setContent(ui);
+        _win.setOwner(this);
+        return _win;
+    }
+
+    /**
+     * Returns whether window is visible.
+     */
+    public boolean isWindowVisible()
+    {
+        return isWindowSet() && getWindow().isVisible();
+    }
+
+    /**
+     * Sets whether window is visible.
+     */
+    public void setWindowVisible(boolean aValue)
+    {
+        WindowView win = getWindow();
+        if (aValue)
+            win.showCentered(null);
+        else win.hide();
     }
 
     /**

@@ -46,9 +46,10 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
      */
     public ComboBox()
     {
+        super();
+        setActionable(true);
         getButton();
         comboChanged();
-        enableEvents(Action);
     }
 
     /**

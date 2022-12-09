@@ -34,7 +34,8 @@ public class Slider extends View {
      */
     public Slider()
     {
-        enableEvents(Action, MousePress, MouseDrag);
+        setActionable(true);
+        enableEvents(MousePress, MouseDrag);
     }
 
     /**

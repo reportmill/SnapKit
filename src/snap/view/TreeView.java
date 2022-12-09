@@ -22,7 +22,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     private int  _selCol;
     
     // The resolver
-    private TreeResolver <T>  _resolver = new TreeResolver.Adapter<T>() { };
+    private TreeResolver <T>  _resolver = new TreeResolver.Adapter<>();
     
     // Row height
     private int  _rowHeight = 20;
@@ -43,10 +43,10 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     private Image  _clpImg, _expImg;
     
     // The SplitView to hold columns
-    private SplitView  _split = new SplitView();
+    private SplitView  _splitView = new SplitView();
     
     // The ScrollView to hold SplitView+Columns
-    private ScrollView  _scroll = new ScrollView(_split);
+    private ScrollView  _scrollView = new ScrollView(_splitView);
     
     // Constants
     private static final Paint DIVIDER_FILL = new Color("#EEEEEE");
@@ -58,21 +58,21 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     public TreeView()
     {
         // Enable Action event for selection change
-        enableEvents(Action);
         setFocusable(true);
         setFocusWhenPressed(true);
         setFocusPainted(false);
+        setActionable(true);
 
         // Configure Columns SplitView and ScrollView and add
-        _split.setBorder(null);
-        _split.setGrowWidth(true);
-        _split.setDividerSpan(2);
-        Divider div = _split.getDivider();
-        div.setFill(DIVIDER_FILL);
-        div.setBorder(null);
-        div.setReach(3);
-        _scroll.setBorder(null);
-        addChild(_scroll);
+        _splitView.setBorder(null);
+        _splitView.setGrowWidth(true);
+        _splitView.setDividerSpan(2);
+        Divider divider = _splitView.getDivider();
+        divider.setFill(DIVIDER_FILL);
+        divider.setBorder(null);
+        divider.setReach(3);
+        _scrollView.setBorder(null);
+        addChild(_scrollView);
 
         // Set main scroller to sync HeaderScroller
         //Scroller scroller = _scroll.getScroller();
@@ -87,14 +87,14 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         _items.addPropChangeListener(pc -> pickListSelChange(pc));
 
         // Create/add first column
-        TreeCol treeCol = new TreeCol();
+        TreeCol<T> treeCol = new TreeCol<>();
         addCol(treeCol);
     }
 
     /**
      * Returns the ScrollView.
      */
-    public ScrollView getScrollView()  { return _scroll; }
+    public ScrollView getScrollView()  { return _scrollView; }
 
     /**
      * Returns the row height.
@@ -142,17 +142,17 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the number of columns.
      */
-    public int getColCount()  { return _split.getItemCount(); }
+    public int getColCount()  { return _splitView.getItemCount(); }
 
     /**
      * Returns the column at given index.
      */
-    public TreeCol <T> getCol(int anIndex)  { return (TreeCol)_split.getItem(anIndex); }
+    public TreeCol <T> getCol(int anIndex)  { return (TreeCol) _splitView.getItem(anIndex); }
 
     /**
      * Returns the column at given index.
      */
-    public TreeCol<T>[] getCols()  { return _split.getItems().toArray(new TreeCol[getColCount()]); }
+    public TreeCol<T>[] getCols()  { return _splitView.getItems().toArray(new TreeCol[getColCount()]); }
 
     /**
      * Adds a column.
@@ -166,7 +166,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     {
         // Add TreeCol to SplitView
         aCol.setTree(this);
-        _split.addItem(aCol, anIndex);
+        _splitView.addItem(aCol, anIndex);
 
         // Replace column picklist with tableView picklist
         aCol.setPickList(_items);
@@ -488,7 +488,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return BoxView.getPrefWidth(this, _scroll, aH);
+        return BoxView.getPrefWidth(this, _scrollView, aH);
     }
 
     /**
@@ -501,7 +501,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
             return getPrefRowCount() * getRowHeight() + getInsetsAll().getHeight();
 
         // Return pref height of Scroll
-        return BoxView.getPrefHeight(this, _scroll, aW);
+        return BoxView.getPrefHeight(this, _scrollView, aW);
     }
 
     /**
@@ -509,7 +509,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     protected void layoutImpl()
     {
-        BoxView.layout(this, _scroll, true, true);
+        BoxView.layout(this, _scrollView, true, true);
     }
 
     /**
@@ -532,7 +532,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     {
         // If DragGesture outside ScrollView.Scroller, just return
         if (anEvent.isDragGesture()) {
-            if (!_scroll.getScroller().contains(anEvent.getX(), anEvent.getY())) {
+            if (!_scrollView.getScroller().contains(anEvent.getX(), anEvent.getY())) {
                 anEvent.consume();
                 return;
             }

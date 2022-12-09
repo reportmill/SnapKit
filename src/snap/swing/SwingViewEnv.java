@@ -83,15 +83,16 @@ public class SwingViewEnv extends ViewEnv {
      */
     public ViewEvent createEvent(View aView, Object anEvent, ViewEvent.Type aType, String aName)
     {
-        EventObject eobj = anEvent instanceof EventObject ? (EventObject) anEvent : null;
-        if (eobj == null && aType == null) aType = ViewEvent.Type.Action;
+        EventObject eventObject = anEvent instanceof EventObject ? (EventObject) anEvent : null;
 
-        // Create event, configure and send
+        // Create, configure event
         ViewEvent event = new SwingEvent();
         event.setView(aView);
-        event.setEvent(eobj);
+        event.setEvent(eventObject);
         event.setType(aType);
         event.setName(aName != null ? aName : aView != null ? aView.getName() : null);
+
+        // Return
         return event;
     }
 

@@ -324,10 +324,10 @@ public class TextArea extends View {
     public void setFireActionOnEnterKey(boolean aValue)
     {
         if (aValue == _fireActionOnEnterKey) return;
-        if (aValue)
-            enableEvents(Action);
-        else getEventAdapter().disableEvents(this, Action);
         firePropChange(FireActionOnEnterKey_Prop, _fireActionOnEnterKey, _fireActionOnEnterKey = aValue);
+
+        // Update Actionable
+        setActionable(isFireActionOnEnterKey() || isFireActionOnFocusLost());
     }
 
     /**
@@ -1372,9 +1372,13 @@ public class TextArea extends View {
             return false;
         if (!getSel().isEmpty())
             return false;
+
+        // If there is a window, it should be focused: It is possible to be set Showing, but not in Window
         WindowView window = getWindow();
-        if (window == null || !window.isFocused())
+        if (window != null && !window.isFocused())
             return false;
+
+        // Return true
         return true;
     }
 
@@ -1791,8 +1795,10 @@ public class TextArea extends View {
         // Handle Showing: Set ShowingWindow, add WindowFocusChangedLsnr and reset caret
         if (isShowing()) {
             _showingWindow = getWindow();
-            _windowFocusedChangedLsnr = e -> setCaretAnim();
-            _showingWindow.addPropChangeListener(_windowFocusedChangedLsnr, Focused_Prop);
+            if (_showingWindow != null) {
+                _windowFocusedChangedLsnr = e -> setCaretAnim();
+                _showingWindow.addPropChangeListener(_windowFocusedChangedLsnr, Focused_Prop);
+            }
         }
 
         // Handle not Showing: Remove WindowFocusChangedLsnr and clear

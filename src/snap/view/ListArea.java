@@ -100,7 +100,8 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         setFill(Color.WHITE);
 
         // Events
-        enableEvents(MousePress, MouseDrag, MouseRelease, Action);
+        setActionable(true);
+        enableEvents(MousePress, MouseDrag, MouseRelease);
 
         // Create/set PickList
         setPickList(new PickList<>());

@@ -49,7 +49,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     private ListCell<T>  _editingCell;
 
     // The SplitView to hold columns
-    private SplitView  _split;
+    private SplitView  _splitView;
     
     // The ScrollView to hold SplitView+Columns
     private ScrollGroup  _scrollGroup;
@@ -82,22 +82,23 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     {
         // Set border, enable Action event for selection change
         setBorder(getDefaultBorder());
-        enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress, Action);
         setFocusable(true);
         setFocusWhenPressed(true);
+        setActionable(true);
+        enableEvents(MousePress, MouseDrag, MouseRelease, KeyPress);
 
         // Create/configure Columns SplitView and ScrollView and add
-        _split = new SplitView();
-        _split.setBorder(null);
-        _split.setGrowWidth(true);
-        _split.setDividerSpan(DIVIDER_SPAN);
-        Divider div = _split.getDivider();
-        div.setFill(DIVIDER_FILL);
-        div.setBorder(null);
-        div.setReach(3);
+        _splitView = new SplitView();
+        _splitView.setBorder(null);
+        _splitView.setGrowWidth(true);
+        _splitView.setDividerSpan(DIVIDER_SPAN);
+        Divider divider = _splitView.getDivider();
+        divider.setFill(DIVIDER_FILL);
+        divider.setBorder(null);
+        divider.setReach(3);
 
         // Create/configure/add ScrollGroup
-        _scrollGroup = new ScrollGroup(_split);
+        _scrollGroup = new ScrollGroup(_splitView);
         _scrollGroup.setBorder(null);
         addChild(_scrollGroup);
 
@@ -350,7 +351,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the number of columns.
      */
-    public int getColCount()  { return _split.getItemCount(); }
+    public int getColCount()  { return _splitView.getItemCount(); }
 
     /**
      * Returns the column at given index.
@@ -358,13 +359,13 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public TableCol <T> getCol(int anIndex)
     {
         if (anIndex==-1 && isShowHeaderCol()) return getHeaderCol();
-        return (TableCol)_split.getItem(anIndex);
+        return (TableCol) _splitView.getItem(anIndex);
     }
 
     /**
      * Returns the column at given index.
      */
-    public TableCol[] getCols()  { return _split.getItems().toArray(new TableCol[0]); }
+    public TableCol[] getCols()  { return _splitView.getItems().toArray(new TableCol[0]); }
 
     /**
      * Adds a TableCol.
@@ -372,7 +373,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public void addCol(TableCol aCol)
     {
         // Add column to column SplitView
-        _split.addItem(aCol);
+        _splitView.addItem(aCol);
         aCol._table = this;
 
         // Create Header Box for Column Header label
@@ -391,7 +392,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         hsplit.addItem(hdrBox);
 
         // Configure split dividers
-        for (Divider div : _split.getDividers()) {
+        for (Divider div : _splitView.getDividers()) {
             div.setFill(DIVIDER_FILL); div.setBorder(null); }
         for (Divider div : hsplit.getDividers()) {
             div.setFill(DIVIDER_FILLH); div.setBorder(null); }
@@ -417,7 +418,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public int removeCol(TableCol aCol)
     {
-        int ind = _split.removeItem(aCol);
+        int ind = _splitView.removeItem(aCol);
         if (ind>=0) getHeaderView().removeItem(ind);
         return ind;
     }
@@ -634,7 +635,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public int getColIndexForX(double aX)
     {
-        Point pnt = _split.parentToLocal(aX, 0, this);
+        Point pnt = _splitView.parentToLocal(aX, 0, this);
         TableCol cols[] = getCols();
         for (int i=0; i<cols.length; i++) {
             TableCol col = cols[i];
@@ -649,7 +650,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public int getRowIndexForY(double aY)
     {
-        Point pnt = _split.parentToLocal(0, aY, this);
+        Point pnt = _splitView.parentToLocal(0, aY, this);
         return (int) (pnt.y/getRowHeight());
     }
 
@@ -659,7 +660,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public TableCol <T> getColForX(double aX)
     {
         // Check normal columns
-        Point pnt = _split.parentToLocal(aX, 0, this);
+        Point pnt = _splitView.parentToLocal(aX, 0, this);
         for (TableCol col : getCols())
             if (pnt.x>=col.getX() && pnt.x<=col.getMaxX())
                 return col;

@@ -102,7 +102,8 @@ public class Trackball extends ParentView {
         _camera.setPrefGimbalRadius(_camera.getFocalLength());
 
         // Enable mouse/action events
-        enableEvents(MousePress, MouseDrag, MouseRelease, Action);
+        setActionable(true);
+        enableEvents(MousePress, MouseDrag, MouseRelease);
         _mouseHandler = new MouseHandler(_camera);
     }
 

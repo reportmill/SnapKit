@@ -268,7 +268,7 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
     {
         RootView rview = _view.getRootView();
         ViewEvent nevent = ViewEvent.createEvent(rview, anEvent, aType, null);
-        rview.getWindow().dispatchEvent(nevent);
+        rview.getWindow().dispatchEventToWindow(nevent);
     }
 
     /**

@@ -2513,10 +2513,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // If already set, just return - Owner cannot be reset
         if (_owner != null) return;
         _owner = anOwner;
-
-        // If View.Actionable, make Owner listen for Action events
-        if (_eventAdapter != null && _eventAdapter.isEnabled(Action))
-            anOwner.enableEvents(this, Action);
     }
 
     /**
@@ -2798,29 +2794,21 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     protected void fireActionEvent(ViewEvent anEvent)
     {
-        ViewEvent event = ViewEvent.createEvent(this, null, null, null);
+        ViewEvent event = ViewEvent.createEvent(this, null, Action, null);
         if (anEvent != null)
             event.setParentEvent(anEvent);
-        fireEvent(event);
+
+        // Dispatch to View
+        dispatchEventToView(event);
     }
 
     /**
-     * Sends an event to this view.
+     * Sends an event to this view through processEvent methods.
      */
-    public void fireEvent(ViewEvent anEvent)
+    public void dispatchEventToView(ViewEvent anEvent)
     {
-        processEventAll(anEvent);
-    }
-
-    /**
-     * Sends an event to this view.
-     */
-    protected void processEventAll(ViewEvent anEvent)
-    {
-        // Forward to Filters
+        // Forward to Filters - just return if consumed
         processEventFilters(anEvent);
-
-        // If event consumed, just return
         if (anEvent.isConsumed())
             return;
 
@@ -2842,7 +2830,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         for (EventListener lsnr : filters) {
             Set<ViewEvent.Type> types = eventAdapter._types.get(lsnr);
             if (types.contains(eventType)) {
-                lsnr.fireEvent(anEvent);
+                lsnr.listenEvent(anEvent);
                 if (anEvent.isConsumed())
                     break;
             }
@@ -2857,16 +2845,22 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // If event not consumed, send to view
         processEvent(anEvent);
 
-        // Get event handlers and event type
+        // If Action event, automatically forward to owner
+        if (anEvent.isActionEvent() && _owner != null)
+            _owner.dispatchEventToOwner(anEvent);
+
+        // If handlers are set, forward event on
         EventAdapter eventAdapter = getEventAdapter();
         EventListener[] handlers = eventAdapter._handlers;
-        ViewEvent.Type eventType = anEvent.getType();
+        if (handlers.length > 0) {
+            ViewEvent.Type eventType = anEvent.getType();
 
-        // Iterate over handlers: If event type supported, send to handler
-        for (EventListener lsnr : handlers) {
-            Set<ViewEvent.Type> types = eventAdapter._types.get(lsnr);
-            if (types.contains(eventType))
-                lsnr.fireEvent(anEvent);
+            // Iterate over handlers: If event type supported, send to handler
+            for (EventListener lsnr : handlers) {
+                Set<ViewEvent.Type> types = eventAdapter._types.get(lsnr);
+                if (types.contains(eventType))
+                    lsnr.listenEvent(anEvent);
+            }
         }
     }
 

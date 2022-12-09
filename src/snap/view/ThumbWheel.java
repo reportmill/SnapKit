@@ -53,7 +53,7 @@ public class ThumbWheel extends View {
     Image            _image;
     
     // Shared map of images
-    static Hashtable _images = new Hashtable();
+    private static Map<String,Image> _images = new HashMap<>();
     
     // Constants for type
     public static final byte TYPE_RADIAL = 0;
@@ -68,8 +68,9 @@ public class ThumbWheel extends View {
      */
     public ThumbWheel()
     {
-        enableEvents(MousePress, MouseDrag, MouseRelease, Action); // Turn on mouse events
-        setFill(Color.LIGHTGRAY); // Set default color
+        setActionable(true);
+        enableEvents(MousePress, MouseDrag, MouseRelease);
+        setFill(Color.LIGHTGRAY);
     }
 
     /**
@@ -441,7 +442,7 @@ public class ThumbWheel extends View {
         // Get name for image and try to find new image (return if already created/cached)
         int w = (int)Math.round(getWidth()), h = (int)Math.round(getHeight());
         String iname = (isVertical()? "V" : "H") + w + "x" + h + "_" + color.getRGB();
-        Image image = (Image)_images.get(iname); if (image!=null) return image;
+        Image image = _images.get(iname); if (image!=null) return image;
 
         // Get new image and put in cache, then draw button background
         image = Image.get(w, h, false);

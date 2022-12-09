@@ -55,7 +55,8 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         addChild(_scrollView);
 
         // Configure this ListView
-        enableEvents(KeyPress, Action);
+        setActionable(true);
+        enableEvents(KeyPress);
         setBorder(ScrollView.SCROLL_VIEW_BORDER);
     }
 

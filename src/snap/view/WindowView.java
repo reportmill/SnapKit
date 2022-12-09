@@ -655,7 +655,7 @@ public class WindowView extends ParentView {
     /**
      * Dispatch event.
      */
-    public void dispatchEvent(ViewEvent anEvent)
+    public void dispatchEventToWindow(ViewEvent anEvent)
     {
         _eventDispatcher.dispatchEvent(anEvent);
     }

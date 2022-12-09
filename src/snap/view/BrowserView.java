@@ -57,8 +57,8 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     {
         setFocusable(true);
         setFocusWhenPressed(true);
+        setActionable(true);
         enableEvents(KeyEvents);
-        enableEvents(Action);
 
         _scrollView.setFillHeight(true);
         addChild(_scrollView);

@@ -70,8 +70,9 @@ public class ButtonBase extends ParentView {
 
         // Config
         setFocusable(true);
+        setActionable(true);
         enableEvents(MouseEvents);
-        enableEvents(KeyPress, Action);
+        enableEvents(KeyPress);
         themeChanged();
     }
 

@@ -34,7 +34,7 @@ public class ArrowView extends ParentView {
     public ArrowView()
     {
         // Enable Action event
-        enableEvents(Action);
+        setActionable(true);
 
         // Create/configure Col view to hold up/down buttons
         _col = new ColView();

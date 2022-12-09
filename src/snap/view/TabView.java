@@ -38,7 +38,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
     private static Paint BACK_FILL = ViewUtils.getBackFill();
     private static Color c1 = new Color("#d6d6d6");
     private static Color c2 = new Color("#dddddd");
-    private static GradientPaint.Stop SHELF_FILL_STOPS[] = GradientPaint.getStops(0, c1,.2, c2,1,c2);
+    private static GradientPaint.Stop[] SHELF_FILL_STOPS = GradientPaint.getStops(0, c1,.2, c2,1,c2);
     private static Paint SHELF_FILL = new GradientPaint(.5,0,.5,1, SHELF_FILL_STOPS);
 
     /**
@@ -46,6 +46,8 @@ public class TabView extends ParentView implements Selectable<Tab> {
      */
     public TabView()
     {
+        setActionable(true);
+
         // Create and configure shelf
         _shelf = new RowView();
         _shelf.setFillHeight(true);
@@ -67,7 +69,6 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Add shelf and content cradle, enable action event
         setChildren(_hiddenKids, _shelf, _contentBox, _borderBlockerBox);
-        enableEvents(Action);
     }
 
     /**

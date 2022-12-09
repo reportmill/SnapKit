@@ -108,7 +108,7 @@ public class BindingViewOwner extends ViewOwner {
      * Called to reset bindings and resetUI().
      */
     @Override
-    protected void processResetUI()
+    protected void invokeResetUI()
     {
         boolean old = setSendEventDisabled(true);
         try {
@@ -122,7 +122,7 @@ public class BindingViewOwner extends ViewOwner {
      * Called to invoke respondUI().
      */
     @Override
-    protected void processEvent(ViewEvent anEvent)
+    protected void invokeRespondUI(ViewEvent anEvent)
     {
         // Get binding for property name and have it retrieve value
         View view = anEvent.getView();
@@ -131,6 +131,6 @@ public class BindingViewOwner extends ViewOwner {
             setBindingModelValue(binding);
 
         // Do normal version
-        super.processEvent(anEvent);
+        super.invokeRespondUI(anEvent);
     }
 }

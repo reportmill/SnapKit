@@ -176,10 +176,10 @@ public class WebPage extends ViewOwner {
     /**
      * Override to show exception page.
      */
-    protected void processResetUI()
+    protected void invokeResetUI()
     {
         try {
-            super.processResetUI();
+            super.invokeResetUI();
         }
         catch (Throwable t) {
             getBrowser().showException(getURL(), t);
@@ -189,10 +189,10 @@ public class WebPage extends ViewOwner {
     /**
      * Override to show exception page.
      */
-    public void processEvent(ViewEvent anEvent)
+    public void invokeRespondUI(ViewEvent anEvent)
     {
         try {
-            super.processEvent(anEvent);
+            super.invokeRespondUI(anEvent);
         }
         catch (Throwable t) {
             if (getBrowser() != null) getBrowser().showException(getURL(), t);

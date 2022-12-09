@@ -33,7 +33,7 @@ public class TableCol <T> extends ListArea <T> {
         _header.setPadding(4,4,4,4);
 
         // Events
-        disableEvents(MousePress, MouseDrag, MouseRelease, Action);
+        disableEvents(MousePress, MouseDrag, MouseRelease);
     }
 
     /**

@@ -140,7 +140,7 @@ public class EventDispatcher {
             dispatchDragSourceEvent(anEvent);
 
             // All other events just go to the view
-        else anEvent.getView().fireEvent(anEvent);
+        else anEvent.getView().dispatchEventToView(anEvent);
     }
 
     /**
@@ -307,7 +307,7 @@ public class EventDispatcher {
 
                 // Dispatch MouseExit event
                 ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseExit, null);
-                view.fireEvent(e2);
+                view.dispatchEventToView(e2);
             } else break;
         }
 
@@ -320,7 +320,7 @@ public class EventDispatcher {
 
             // Dispatch MouseEnter event
             ViewEvent e2 = ViewEvent.createEvent(view, anEvent.getEvent(), MouseEnter, null);
-            view.fireEvent(e2);
+            view.dispatchEventToView(e2);
         }
 
         // Update CurrentCursor
@@ -392,7 +392,7 @@ public class EventDispatcher {
                 if (view.getEventAdapter().isEnabled(DragGesture)) {
                     _dragSourceView = view;
                     ViewEvent event = anEvent.copyForView(view);
-                    view.fireEvent(event);
+                    view.dispatchEventToView(event);
                     if (event.isConsumed())
                         break;
                 }
@@ -402,7 +402,7 @@ public class EventDispatcher {
         else if (_dragSourceView != null) {
             if (_dragSourceView.getEventAdapter().isEnabled(anEvent.getType())) {
                 ViewEvent event = anEvent.copyForView(_dragSourceView);
-                _dragSourceView.fireEvent(event);
+                _dragSourceView.dispatchEventToView(event);
             }
             if (anEvent.isDragSourceEnd())
                 _dragSourceView = null;
@@ -427,7 +427,7 @@ public class EventDispatcher {
                     continue;
                 ViewEvent e2 = anEvent.copyForView(view);
                 e2._type = DragExit;
-                view.fireEvent(e2);
+                view.dispatchEventToView(e2);
                 if (e2.isConsumed()) anEvent.consume();
             } else break;
         }
@@ -441,7 +441,7 @@ public class EventDispatcher {
                 continue;
             ViewEvent e2 = anEvent.copyForView(view);
             e2._type = DragEnter;
-            view.fireEvent(e2);
+            view.dispatchEventToView(e2);
             if (e2.isConsumed()) anEvent.consume();
         }
 
@@ -450,7 +450,7 @@ public class EventDispatcher {
             for (View view = _dragOverView; view != null; view = view.getParent()) {
                 if (view.getEventAdapter().isEnabled(anEvent.getType())) {
                     ViewEvent e2 = anEvent.copyForView(view);
-                    view.fireEvent(e2);
+                    view.dispatchEventToView(e2);
                     if (e2.isConsumed())
                         anEvent.consume();
                     break;

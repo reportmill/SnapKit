@@ -184,10 +184,10 @@ public class TitleView extends ParentView implements ViewHost {
         // Do normal setter
         if(aValue==_collapsible) return;
         firePropChange(Collapsible_Prop, _collapsible, _collapsible=aValue);
+        setActionable(aValue);
 
         // If collapsible: Enable action event and listen for label click
         if (aValue) {
-            enableEvents(Action);
             View graphic = getCollapseGraphic();
             _label.setGraphic(graphic);
             graphic.setRotate(90);
@@ -195,7 +195,6 @@ public class TitleView extends ParentView implements ViewHost {
 
         // If not collapsible: Disable action event and stop listen for lable click
         else {
-            disableEvents(Action);
             _label.setGraphic(null);
             setExpanded(true);
         }

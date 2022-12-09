@@ -8,7 +8,9 @@ package snap.view;
  */
 public interface EventListener {
 
-    // The method called to send an event to listener
-    void fireEvent(ViewEvent anEvent);
+    /**
+     * The method called to notify listener of event.
+     */
+    void listenEvent(ViewEvent anEvent);
 
 }

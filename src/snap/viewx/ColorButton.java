@@ -46,8 +46,8 @@ public class ColorButton extends View {
      */
     public ColorButton()
     {
+        setActionable(true);
         enableEvents(MouseEvents);
-        enableEvents(Action);
         setPrefSize(32,22);
     }
 

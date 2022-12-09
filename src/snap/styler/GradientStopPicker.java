@@ -19,13 +19,13 @@ import snap.viewx.ColorWell;
 public class GradientStopPicker extends ParentView {
 
     // The stops
-    private Stop  _stops[];
+    private Stop[]  _stops;
     
     // The knobs
-    private List <Rect>  _knobs = new ArrayList();
+    private List <Rect>  _knobs = new ArrayList<>();
     
     // The wells
-    private List <ColorWell>  _wells = new ArrayList();
+    private List <ColorWell>  _wells = new ArrayList<>();
     
     // The gradient rect
     private Rect  _gradientRect;
@@ -58,8 +58,8 @@ public class GradientStopPicker extends ParentView {
      */
     public GradientStopPicker()
     {
-        // Enable events
-        enableEvents(MousePress, MouseDrag, MouseMove, Action);
+        setActionable(true);
+        enableEvents(MousePress, MouseDrag, MouseMove);
         enableEvents(DragEvents);
     }
 
@@ -91,7 +91,7 @@ public class GradientStopPicker extends ParentView {
     /**
      * Resets all the stops from the new list.
      */
-    public void setStops(Stop theStops[])
+    public void setStops(Stop[] theStops)
     {
         if(Arrays.equals(theStops, _stops) && _gradientRect!=null) return;
         _stops = Arrays.copyOf(theStops, theStops.length);  // Copy stops
@@ -196,20 +196,26 @@ public class GradientStopPicker extends ParentView {
      */
     public void reverseStops()
     {
-        int nstops = getStopCount(); Stop stops[] = new Stop[nstops];
-        for(int i=0; i<nstops; i++) stops[nstops-i-1] = new Stop(1 - getStopOffset(i), getStopColor(i));
+        int nstops = getStopCount();
+        Stop[] stops = new Stop[nstops];
+        for(int i = 0; i < nstops; i++)
+            stops[nstops-i-1] = new Stop(1 - getStopOffset(i), getStopColor(i));
         _stops = stops;
     }
 
     public int getKnobIndex(Point pt)
     {
-        for(int i=0, iMax=_knobs.size(); i<iMax; i++) { Rect r = _knobs.get(i); if(r.contains(pt)) return i; }
+        for(int i = 0, iMax = _knobs.size(); i < iMax; i++) {
+            Rect r = _knobs.get(i);
+            if(r.contains(pt))
+                return i;
+        }
         return -1;
     }
 
     public void selectStop(int anIndex)
     {
-        if(anIndex== _selKnob) return;
+        if(anIndex == _selKnob) return;
         _selKnob = anIndex; repaint();
     }
 
@@ -220,7 +226,7 @@ public class GradientStopPicker extends ParentView {
     public double getStopOffset(Point pt)
     {
         double position = (pt.x -_gradientRect.getX()) / _gradientRect.getWidth();
-        return position<0? 0 : (position>1? 1 : position);
+        return position < 0 ? 0 : (position>1? 1 : position);
     }
 
     /**

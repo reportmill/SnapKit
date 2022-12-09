@@ -38,7 +38,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
      */
     public MenuItem()
     {
-        enableEvents(Action);
+        super();
     }
 
     /**
