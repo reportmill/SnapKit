@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-
 import java.util.*;
 
 import snap.gfx.*;
@@ -15,7 +14,7 @@ import snap.web.WebURL;
 public class ViewArchiver extends XMLArchiver {
 
     // Whether to use real class
-    static boolean _useRealCls = true;
+    static boolean  _useRealClass = true;
 
     /**
      * Creates a new ViewArchiver.
@@ -26,45 +25,54 @@ public class ViewArchiver extends XMLArchiver {
     }
 
     /**
-     * Returns a ParentView for source.
+     * Returns a View for source.
      */
-    public ParentView getParentView(Object aSource)
+    public View getViewForSource(Object aSource)
     {
-        return (ParentView) getView(aSource);
+        return getViewForSourceAndOwner(aSource, null);
     }
 
     /**
      * Returns a View for source.
      */
-    public View getView(Object aSource)
+    public View getViewForSourceAndOwner(Object aSource, Object anOwner)
     {
-        // If source is a document, just return it
-        if (aSource instanceof View) return (View) aSource;
-
-        // Return readObject(src)
+        setOwner(anOwner);
         return (View) readFromXMLSource(aSource);
+    }
+
+    /**
+     * Returns a View for source.
+     */
+    public View getViewForBytes(byte[] theBytes)
+    {
+        return (View) readFromXMLSource(theBytes);
     }
 
     /**
      * Returns the class for a given element.
      */
-    protected Class getClassForXML(XMLElement anElement)
+    @Override
+    protected Class<?> getClassForXML(XMLElement anElement)
     {
-        Class cls = super.getClassForXML(anElement);
-        String cname = anElement.getAttributeValue("class");
-        if (cname != null && getUseRealClass()) {
-            Class c = getClassForName(cname);
-            if (c != null && View.class.isAssignableFrom(c)) {
-                cls = c;
+        Class<?> classForXML = super.getClassForXML(anElement);
+        String className = anElement.getAttributeValue("class");
+
+        if (className != null && isUseRealClass()) {
+            Class<?> cls = getClassForName(className);
+            if (cls != null && View.class.isAssignableFrom(cls)) {
+                classForXML = cls;
             }
         }
-        return cls;
+
+        // Return
+        return classForXML;
     }
 
     /**
      * Returns a class for name.
      */
-    private static Class getClassForName(String aClassName)
+    private static Class<?> getClassForName(String aClassName)
     {
         ClassLoader classLoader = ViewArchiver.class.getClassLoader();
         try {
@@ -75,24 +83,14 @@ public class ViewArchiver extends XMLArchiver {
         catch (Throwable t) { System.err.println("ViewArchiver.getClassForName: " + t); return null; }
     }
 
-
-    /**
-     * Returns the class map.
-     */
-    public Map<String, Class> getClassMap()
-    {
-        return _rmCM != null ? _rmCM : (_rmCM = createClassMap());
-    }
-
-    static Map<String, Class> _rmCM;
-
     /**
      * Creates the class map.
      */
+    @Override
     protected Map<String, Class> createClassMap()
     {
         // Create class map and add classes
-        Map cmap = new HashMap();
+        Map<String,Class> cmap = new HashMap<>();
 
         // View classes
         cmap.put("ArcView", ArcView.class);
@@ -171,7 +169,7 @@ public class ViewArchiver extends XMLArchiver {
     /**
      * Adds aliases.
      */
-    protected void addAliases(Map cmap)
+    protected void addAliases(Map<String,Class> cmap)
     {
         // Shape classes
         cmap.put("document", DocView.class); // RMDocument.class
@@ -233,11 +231,11 @@ public class ViewArchiver extends XMLArchiver {
     public Image getImage(String aPath)
     {
         // If there is an Archiver.Owner, look for image as class resource
-        Class cls = getOwnerClass();
-        for (Class c = cls; c != null && c != ViewOwner.class; c = c.getSuperclass()) {
-            Image img = Image.get(c, aPath);
-            if (img != null)
-                return img;
+        Class<?> ownerClass = getOwnerClass();
+        for (Class<?> cls = ownerClass; cls != null && cls != ViewOwner.class; cls = cls.getSuperclass()) {
+            Image image = Image.get(cls, aPath);
+            if (image != null)
+                return image;
         }
 
         // Otherwise, try to find image name as path relative to Archiver.SourceURL
@@ -248,9 +246,9 @@ public class ViewArchiver extends XMLArchiver {
     /**
      * Returns whether to use real classes.
      */
-    public static boolean getUseRealClass()
+    public static boolean isUseRealClass()
     {
-        return _useRealCls;
+        return _useRealClass;
     }
 
     /**
@@ -258,7 +256,7 @@ public class ViewArchiver extends XMLArchiver {
      */
     public static void setUseRealClass(boolean aFlag)
     {
-        _useRealCls = aFlag;
+        _useRealClass = aFlag;
     }
 
     /**
@@ -270,5 +268,4 @@ public class ViewArchiver extends XMLArchiver {
             return ((ViewArchiver) anArchiver).getImage(aPath);
         return null;
     }
-
 }

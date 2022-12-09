@@ -74,19 +74,23 @@ public class ViewOwner extends PropObject {
     public ViewEvent.Type[] DragEvents = ViewEvent.Type.DragEvents;
 
     /**
-     * Creates a new ViewOwner.
+     * Constructor.
      */
     public ViewOwner()  { }
 
     /**
-     * Creates a new ViewOwner with given View for UI.
+     * Constructor with given View for UI.
      */
-    public ViewOwner(View aView)  { _ui = aView; _ui.setOwner(this); }
+    public ViewOwner(View aView)
+    {
+        _ui = aView;
+        _ui.setOwner(this);
+    }
 
     /**
      * Returns whether UI has been set.
      */
-    public boolean isUISet()  { return _ui!=null; }
+    public boolean isUISet()  { return _ui != null; }
 
     /**
      * Returns top level view.
@@ -107,7 +111,9 @@ public class ViewOwner extends PropObject {
 
         // Register for reset and showingChanged() and return
         resetLater();
-        _ui.addPropChangeListener(pce -> showingChanged(), View.Showing_Prop);
+        _ui.addPropChangeListener(pc -> showingChanged(), View.Showing_Prop);
+
+        // Return
         return _ui;
     }
 
@@ -124,12 +130,14 @@ public class ViewOwner extends PropObject {
      */
     protected View createUI()
     {
-        Object src = getUISource();
-        if (src == null) {
-            System.err.println("ViewOwner.createUI: Couldn't find source for class: " + getClass().getName());
+        // Get source
+        Object source = getUISource();
+        if (source == null)
             throw new RuntimeException("ViewOwner.createUI: Couldn't find source for class: " + getClass().getName());
-        }
-        return createUIForSource(src);
+
+        // Create archiver and return view
+        ViewArchiver archiver = new ViewArchiver();
+        return archiver.getViewForSourceAndOwner(source, this);
     }
 
     /**
@@ -137,25 +145,16 @@ public class ViewOwner extends PropObject {
      */
     protected View createUIForClass(Class<?> aClass)
     {
-        WebURL src = _env.getUISource(aClass);
-        return createUIForSource(src);
-    }
-
-    /**
-     * Creates the top level view for given class.
-     */
-    protected View createUIForSource(Object aSource)
-    {
-        // Complain if bogus source
-        if (aSource == null) {
+        // Get source url
+        WebURL sourceURL = _env.getUISource(aClass);
+        if (sourceURL == null) {
             System.err.println("ViewOwner.createUI: Can't load from Null Source!");
             return null;
         }
 
         // Create archiver and return view
         ViewArchiver archiver = new ViewArchiver();
-        archiver.setOwner(this);
-        return archiver.getView(aSource);
+        return archiver.getViewForSourceAndOwner(sourceURL, this);
     }
 
     /**
@@ -203,8 +202,8 @@ public class ViewOwner extends PropObject {
             _initShowingDone = true;
 
             // Handle First focus
-            Object firstFoc = getFirstFocus();
-            View view = firstFoc != null ? getView(firstFoc) : null;
+            Object firstFocus = getFirstFocus();
+            View view = firstFocus != null ? getView(firstFocus) : null;
             if (view != null) {
                 view.requestFocus();
                 if (view instanceof TextField)

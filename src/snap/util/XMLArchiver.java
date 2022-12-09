@@ -40,13 +40,13 @@ public class XMLArchiver {
     private Map<XMLElement, Object> _readElements = new HashMap<>();
 
     // list of objects that are archived by reference
-    private List _references = new ArrayList();
+    private List _references = new ArrayList<>();
 
     // Archiver manages archival of shared BLOBs external to normal element hierarchy
     private List<Resource> _resources = new ArrayList<>();
 
     // The map of classes for unarchival
-    private Map<String, Class> _classMap;
+    private Map<String,Class> _classMap;
 
     // The stack of parents
     private Deque _parentStack = new ArrayDeque();
@@ -54,10 +54,7 @@ public class XMLArchiver {
     /**
      * Returns the WebURL of the currently loading archive.
      */
-    public WebURL getSourceURL()
-    {
-        return _surl;
-    }
+    public WebURL getSourceURL()  { return _surl; }
 
     /**
      * Sets the WebURL of the currently loading archive.
@@ -70,10 +67,7 @@ public class XMLArchiver {
     /**
      * Returns the owner.
      */
-    public Object getOwner()
-    {
-        return _owner;
-    }
+    public Object getOwner()  { return _owner; }
 
     /**
      * Sets the owner.
@@ -94,10 +88,7 @@ public class XMLArchiver {
     /**
      * Returns the object that the archiver should read "into".
      */
-    public Object getRootObject()
-    {
-        return _rootObject;
-    }
+    public Object getRootObject()  { return _rootObject; }
 
     /**
      * Sets the object that the archiver should read "into".
@@ -110,10 +101,7 @@ public class XMLArchiver {
     /**
      * Returns the version of the document.
      */
-    public double getVersion()
-    {
-        return _version;
-    }
+    public double getVersion()  { return _version; }
 
     /**
      * Sets the version of the document.
@@ -126,10 +114,7 @@ public class XMLArchiver {
     /**
      * Returns whether element should ignore case when asking for attributes/elements by name.
      */
-    public boolean isIgnoreCase()
-    {
-        return _ignoreCase;
-    }
+    public boolean isIgnoreCase()  { return _ignoreCase; }
 
     /**
      * Sets whether element should ignore case when asking for attributes/elements by name.
@@ -142,17 +127,15 @@ public class XMLArchiver {
     /**
      * Returns the root xml.
      */
-    public XMLElement getRootXML()
-    {
-        return _root;
-    }
+    public XMLElement getRootXML()  { return _root; }
 
     /**
      * Returns the class map.
      */
     public Map<String, Class> getClassMap()
     {
-        return _classMap != null ? _classMap : (_classMap = createClassMap());
+        if (_classMap != null) return _classMap;
+        return _classMap = createClassMap();
     }
 
     /**
@@ -400,7 +383,7 @@ public class XMLArchiver {
     /**
      * Returns the class for a given element.
      */
-    protected Class getClassForXML(XMLElement anElement)
+    protected Class<?> getClassForXML(XMLElement anElement)
     {
         // If ClassName attribute is present, try that
         String className = anElement.getAttributeValue("ClassName");
