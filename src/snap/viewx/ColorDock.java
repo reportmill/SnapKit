@@ -48,7 +48,7 @@ public class ColorDock extends View {
         // Configure this view
         setActionable(true);
         enableEvents(MousePress, MouseRelease);
-        enableEvents(DragGesture, DragSourceEnd); enableEvents(DragEvents);
+        enableEvents(ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd); enableEvents(DragEvents);
         setBorder(COLOR_DOCK_BORDER);
 
         // Create ColorWell

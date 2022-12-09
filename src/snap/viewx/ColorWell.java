@@ -35,7 +35,7 @@ public class ColorWell extends View {
     public ColorWell()
     {
         setActionable(true);
-        enableEvents(MouseRelease, DragGesture, DragSourceEnd);
+        enableEvents(MouseRelease, ViewEvent.Type.DragGesture, ViewEvent.Type.DragSourceEnd);
         enableEvents(DragEvents);
     }
 

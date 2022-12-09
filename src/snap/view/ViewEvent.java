@@ -689,7 +689,12 @@ public abstract class ViewEvent implements Cloneable {
         DragGesture, DragSourceEnter, DragSourceOver, DragSourceExit, DragSourceEnd,
 
         /** Window events. */
-        WinOpen, WinClose
+        WinOpen, WinClose;
+
+        // Conveniences for common types
+        public static final Type[] KeyEvents = { KeyPress, KeyRelease, KeyType };
+        public static final Type[] MouseEvents = { MousePress, MouseDrag, MouseRelease, MouseEnter, MouseMove, MouseExit };
+        public static final Type[] DragEvents = { DragEnter, DragExit, DragOver, DragDrop };
     }
 
     /** Prints "not implemented" for string (method name). */

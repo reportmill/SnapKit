@@ -99,9 +99,9 @@ class ListAreaSelector {
         mousePressOrDrag(anEvent);
 
         // Set whether wants drag
-        _dragGestureEnabled = _dragSelect && _listArea.getEventAdapter().isEnabled(View.DragGesture);
+        _dragGestureEnabled = _dragSelect && _listArea.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture);
         if (_dragGestureEnabled)
-            _listArea.getEventAdapter().setEnabled(View.DragGesture, false);
+            _listArea.getEventAdapter().setEnabled(ViewEvent.Type.DragGesture, false);
     }
 
     /**
@@ -153,7 +153,7 @@ class ListAreaSelector {
 
         // Re-instate DragGesture if needed
         if (_dragGestureEnabled)
-            _listArea.getEventAdapter().setEnabled(View.DragGesture, true);
+            _listArea.getEventAdapter().setEnabled(ViewEvent.Type.DragGesture, true);
 
         // Start editing if needed
         if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && _listArea.isEditable()) {

@@ -226,21 +226,9 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public static final ViewEvent.Type MouseMove = ViewEvent.Type.MouseMove;
     public static final ViewEvent.Type MouseExit = ViewEvent.Type.MouseExit;
     public static final ViewEvent.Type Scroll = ViewEvent.Type.Scroll;
-    public static final ViewEvent.Type DragEnter = ViewEvent.Type.DragEnter;
-    public static final ViewEvent.Type DragOver = ViewEvent.Type.DragOver;
-    public static final ViewEvent.Type DragExit = ViewEvent.Type.DragExit;
-    public static final ViewEvent.Type DragDrop = ViewEvent.Type.DragDrop;
-    public static final ViewEvent.Type DragGesture = ViewEvent.Type.DragGesture;
-    public static final ViewEvent.Type DragSourceEnter = ViewEvent.Type.DragSourceEnter;
-    public static final ViewEvent.Type DragSourceExit = ViewEvent.Type.DragSourceExit;
-    public static final ViewEvent.Type DragSourceOver = ViewEvent.Type.DragSourceOver;
-    public static final ViewEvent.Type DragSourceEnd = ViewEvent.Type.DragSourceEnd;
-    public static final ViewEvent.Type WinOpen = ViewEvent.Type.WinOpen;
-    public static final ViewEvent.Type WinClose = ViewEvent.Type.WinClose;
-    public static final ViewEvent.Type[] KeyEvents = { KeyPress, KeyRelease, KeyType };
-    public static final ViewEvent.Type[] MouseEvents = { MousePress, MouseDrag, MouseRelease,
-        MouseEnter, MouseMove, MouseExit };
-    public static final ViewEvent.Type[] DragEvents = { DragEnter, DragExit, DragOver, DragDrop };
+    public static final ViewEvent.Type[] KeyEvents = ViewEvent.Type.KeyEvents;
+    public static final ViewEvent.Type[] MouseEvents = ViewEvent.Type.MouseEvents;
+    public static final ViewEvent.Type[] DragEvents = ViewEvent.Type.DragEvents;
 
     /**
      * Constructor.
@@ -2789,8 +2777,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
     /**
      * Fires the action event.
-     * This should only be called in response to user input events (mouse, key) when a complete change has been made
-     * to the primary value of a control view. Perhaps this method should even take an event to wrap in Action event.
+     * This should mostly be called in response to user input events (mouse, key) when a complete change has been made
+     * to the primary value of a control view.
      */
     protected void fireActionEvent(ViewEvent anEvent)
     {

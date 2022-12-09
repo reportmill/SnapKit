@@ -77,9 +77,9 @@ class TableViewSelector {
         mousePressOrDrag(anEvent);
 
         // Set whether wants drag
-        _dragGestureEnabled = _dragSelect && _table.getEventAdapter().isEnabled(View.DragGesture);
+        _dragGestureEnabled = _dragSelect && _table.getEventAdapter().isEnabled(ViewEvent.Type.DragGesture);
         if (_dragGestureEnabled)
-            _table.getEventAdapter().setEnabled(View.DragGesture, false);
+            _table.getEventAdapter().setEnabled(ViewEvent.Type.DragGesture, false);
     }
 
     /**
@@ -131,7 +131,7 @@ class TableViewSelector {
     {
         // Re-instate DragGesture if needed
         if (_dragGestureEnabled)
-            _table.getEventAdapter().setEnabled(View.DragGesture, true);
+            _table.getEventAdapter().setEnabled(ViewEvent.Type.DragGesture, true);
 
         // Start editing if needed
         if (anEvent.isMouseClick() && anEvent.getClickCount()>1 && _table.isEditable()) {

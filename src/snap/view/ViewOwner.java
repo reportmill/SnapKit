@@ -68,11 +68,10 @@ public class ViewOwner extends PropObject {
     public static final ViewEvent.Type DragExit = ViewEvent.Type.DragExit;
     public static final ViewEvent.Type DragDrop = ViewEvent.Type.DragDrop;
     public static final ViewEvent.Type DragGesture = ViewEvent.Type.DragGesture;
-    public static final ViewEvent.Type WinOpen = ViewEvent.Type.WinOpen;
     public static final ViewEvent.Type WinClose = ViewEvent.Type.WinClose;
-    public ViewEvent.Type[] KeyEvents = { KeyPress, KeyRelease, KeyType };
-    public ViewEvent.Type[] MouseEvents = { MousePress, MouseDrag, MouseRelease, MouseEnter, MouseMove, MouseExit };
-    public ViewEvent.Type[] DragEvents = { DragEnter, DragExit, DragOver, DragDrop };
+    public ViewEvent.Type[] KeyEvents = ViewEvent.Type.KeyEvents;
+    public ViewEvent.Type[] MouseEvents = ViewEvent.Type.MouseEvents;
+    public ViewEvent.Type[] DragEvents = ViewEvent.Type.DragEvents;
 
     /**
      * Creates a new ViewOwner.
