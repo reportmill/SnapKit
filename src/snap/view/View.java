@@ -2,9 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-
 import java.util.*;
-
 import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropObject;
@@ -18,6 +16,9 @@ import snap.util.*;
  */
 public class View extends PropObject implements XMLArchiver.Archivable {
 
+    // The parent of this view
+    private ParentView  _parent;
+
     // The name of this view
     private String  _name;
 
@@ -28,13 +29,13 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private double  _width, _height;
 
     // The view translation from x and y
-    private double  _tx, _ty;
+    private double  _transX, _transY;
 
     // The view rotation
-    private double  _rot;
+    private double  _rotate;
 
     // The view scale from x and y
-    private double  _sx, _sy;
+    private double  _scaleX, _scaleY;
 
     // The alignment of content in this view
     protected Pos  _align;
@@ -69,8 +70,23 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // The view preferred width and height
     private double  _prefWidth, _prefHeight;
 
-    // The view best width and height
-    private double  _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
+    // The view fill
+    private Paint  _fill;
+
+    // The view border
+    private Border  _border;
+
+    // The radius for border rounded corners
+    private double  _borderRadius;
+
+    // The ViewEffect to manage effect rendering for this view and current effect
+    protected ViewEffect  _effect;
+
+    // The opacity
+    private double  _opacity;
+
+    // The view font
+    protected Font  _font;
 
     // Whether view is disabled
     private boolean  _disabled;
@@ -108,29 +124,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // Whether view should be included in layout
     private boolean  _managed;
 
-    // The view fill
-    private Paint  _fill;
-
-    // The view border
-    private Border  _border;
-
-    // The radius for border rounded corners
-    private double  _borderRadius;
-
-    // The ViewEffect to manage effect rendering for this view and current effect
-    protected ViewEffect  _effect;
-
-    // The opacity
-    private double  _opacity;
-
-    // The view font
-    protected Font  _font;
-
     // The view cursor
     private Cursor  _cursor;
 
     // The tooltip
-    private String  _ttip;
+    private String  _toolTip;
 
     // The clip (if set)
     private Shape  _clip;
@@ -141,8 +139,8 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     // Client properties
     private Map<String,Object>  _props = Collections.EMPTY_MAP;
 
-    // The parent of this view
-    private ParentView  _parent;
+    // The view best width and height
+    private double  _bestWidth = -1, _bestHeight = -1, _bestWidthParam, _bestHeightParam;
 
     // The real class name, if shape component is really a custom subclass
     private String  _realClassName;
@@ -210,6 +208,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
     // Constants for property defaults
     private static final boolean DEFAULT_VERTICAL = false;
+    public static final Pos DEFAULT_ALIGN = Pos.TOP_LEFT;
     public static final Insets DEFAULT_MARGIN = Insets.EMPTY;
     public static final Insets DEFAULT_PADDING = Insets.EMPTY;
     public static final double DEFAULT_SPACING = 0;
@@ -238,7 +237,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         super();
 
         // Set property defaults
-        _sx = _sy = 1;
+        _scaleX = _scaleY = 1;
         _align = getDefaultAlign();
         _margin = (Insets) getPropDefault(Margin_Prop);
         _padding = (Insets) getPropDefault(Padding_Prop);
@@ -544,82 +543,82 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the translation of this view from X.
      */
-    public double getTransX()  { return _tx; }
+    public double getTransX()  { return _transX; }
 
     /**
      * Sets the translation of this view from X.
      */
     public void setTransX(double aValue)
     {
-        if (aValue == _tx) return;
+        if (aValue == _transX) return;
         repaintInParent(null);
-        firePropChange(TransX_Prop, _tx, _tx = aValue);
+        firePropChange(TransX_Prop, _transX, _transX = aValue);
     }
 
     /**
      * Returns the translation of this view from Y.
      */
-    public double getTransY()  { return _ty; }
+    public double getTransY()  { return _transY; }
 
     /**
      * Sets the translation of this view from Y.
      */
     public void setTransY(double aValue)
     {
-        if (aValue == _ty) return;
+        if (aValue == _transY) return;
         repaintInParent(null);
-        firePropChange(TransY_Prop, _ty, _ty = aValue);
+        firePropChange(TransY_Prop, _transY, _transY = aValue);
     }
 
     /**
      * Returns the rotation of the view in degrees.
      */
-    public double getRotate()  { return _rot; }
+    public double getRotate()  { return _rotate; }
 
     /**
      * Turn to given angle.
      */
     public void setRotate(double theDegrees)
     {
-        if (theDegrees == _rot) return;
+        if (theDegrees == _rotate) return;
         repaintInParent(null);
-        firePropChange(Rotate_Prop, _rot, _rot = theDegrees);
+        firePropChange(Rotate_Prop, _rotate, _rotate = theDegrees);
     }
 
     /**
      * Returns the scale of this view from X.
      */
-    public double getScaleX()  { return _sx; }
+    public double getScaleX()  { return _scaleX; }
 
     /**
      * Sets the scale of this view from X.
      */
     public void setScaleX(double aValue)
     {
-        if (aValue == _sx) return;
+        if (aValue == _scaleX) return;
         repaintInParent(null);
-        firePropChange(ScaleX_Prop, _sx, _sx = aValue);
+        firePropChange(ScaleX_Prop, _scaleX, _scaleX = aValue);
     }
 
     /**
      * Returns the scale of this view from Y.
      */
-    public double getScaleY()  { return _sy; }
+    public double getScaleY()  { return _scaleY; }
 
     /**
      * Sets the scale of this view from Y.
      */
     public void setScaleY(double aValue)
     {
-        if (aValue == _sy) return;
+        if (aValue == _scaleY) return;
         repaintInParent(null);
-        firePropChange(ScaleY_Prop, _sy, _sy = aValue);
+        firePropChange(ScaleY_Prop, _scaleY, _scaleY = aValue);
     }
 
     /**
      * Returns the scale of this view.
      */
-    public double getScale()  { return _sx; }
+    public double getScale()  { return _scaleX; }
 
     /**
      * Sets the scale of this view from Y.
@@ -953,7 +952,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public boolean isLocalToParentSimple()
     {
-        return _rot == 0 && _sx == 1 && _sy == 1;
+        return _rotate == 0 && _scaleX == 1 && _scaleY == 1;
     }
 
     /**
@@ -964,7 +963,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         double viewX = getX();
         double viewY = getY();
         if (isLocalToParentSimple())
-            return new Transform(viewX + _tx, viewY + _ty);
+            return new Transform(viewX + _transX, viewY + _transY);
 
         // Get location, size, point of rotation, rotation, scale, skew
         double x = viewX + getTransX();
@@ -995,7 +994,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
             // If simple, just add translation
             if (view.isLocalToParentSimple())
-                xfm.preTranslate(view._x + view._tx, view._y + view._ty);
+                xfm.preTranslate(view._x + view._transX, view._y + view._transY);
 
             // Otherwise multiply full transform
             else {
@@ -1022,7 +1021,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // If simple, just add offset
         if (isLocalToParentSimple())
-            return new Point(aX + _x + _tx, aY + _y + _ty);
+            return new Point(aX + _x + _transX, aY + _y + _transY);
 
         // Otherwise do full transform
         Transform localToParent = getLocalToParent();
@@ -1039,7 +1038,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Iterate up parents to given parent (or null) and transform point for each
         for (View view = this; view != aPar && view != null; view = view.getParent()) {
             if (view.isLocalToParentSimple())
-                point.offset(view._x + view._tx, view._y + view._ty);
+                point.offset(view._x + view._transX, view._y + view._transY);
             else point = view.localToParent(point.x, point.y);
         }
 
@@ -1071,7 +1070,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public Transform getParentToLocal()
     {
         if (isLocalToParentSimple())
-            return new Transform(-_x - _tx, -_y - _ty);
+            return new Transform(-_x - _transX, -_y - _transY);
         Transform tfm = getLocalToParent();
         tfm.invert();
         return tfm;
@@ -1094,7 +1093,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // If simple, just subtract offset
         if (isLocalToParentSimple())
-            return new Point(aX - _x - _tx, aY - _y - _ty);
+            return new Point(aX - _x - _transX, aY - _y - _transY);
 
         // Otherwise do full transform
         Transform parentToLocal = getParentToLocal();
@@ -2175,15 +2174,15 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the tool tip text.
      */
-    public String getToolTip()  { return _ttip; }
+    public String getToolTip()  { return _toolTip; }
 
     /**
      * Sets the tool tip text.
      */
     public void setToolTip(String aString)
     {
-        if (SnapUtils.equals(aString, _ttip)) return;
-        firePropChange(ToolTip_Prop, _ttip, _ttip = aString);
+        if (SnapUtils.equals(aString, _toolTip)) return;
+        firePropChange(ToolTip_Prop, _toolTip, _toolTip = aString);
     }
 
     // Whether tool tip is enabled
@@ -2527,182 +2526,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Initialize Props. Override to provide custom defaults.
-     */
-    protected void initProps(PropSet aPropSet)
-    {
-        // Do normal version
-        super.initProps(aPropSet);
-
-        // Size props: X, Y, Width, Height
-        aPropSet.addPropNamed(X_Prop, double.class, 0);
-        aPropSet.addPropNamed(Y_Prop, double.class, 0);
-        aPropSet.addPropNamed(Width_Prop, double.class, 0);
-        aPropSet.addPropNamed(Height_Prop, double.class, 0);
-
-        // Transform props: Rotate, ScaleX, ScaleY, TransX, TransY
-        aPropSet.addPropNamed(Rotate_Prop, double.class, 0);
-        aPropSet.addPropNamed(ScaleX_Prop, double.class, 0);
-        aPropSet.addPropNamed(ScaleY_Prop, double.class, 0);
-        aPropSet.addPropNamed(TransX_Prop, double.class, 0);
-        aPropSet.addPropNamed(TransY_Prop, double.class, 0);
-    }
-
-    /**
-     * Returns the value for given prop name.
-     */
-    public Object getPropValue(String aPropName)
-    {
-        // Map property name
-        String propName = aPropName.equals("Value") ? getValuePropName() : aPropName;
-
-        // Handle properties
-        switch (propName) {
-
-            // Size props: X, Y, Width, Height
-            case X_Prop: return getX();
-            case Y_Prop: return getY();
-            case Width_Prop: return getWidth();
-            case Height_Prop: return getHeight();
-
-            // Transform props: Rotate, ScaleX, ScaleY, TransX, TransY
-            case Rotate_Prop: return getRotate();
-            case ScaleX_Prop: return getScaleX();
-            case ScaleY_Prop: return getScaleY();
-            case TransX_Prop: return getTransX();
-            case TransY_Prop: return getTransY();
-
-            // Sizing: Align, Margin, Padding, Spacing
-            case Align_Prop: return getAlign();
-            case Margin_Prop: return getMargin();
-            case Padding_Prop: return getPadding();
-            case Spacing_Prop: return getSpacing();
-
-            // Alignment: LeanX, LeanY, GrowWidth, GrowHeight
-            case LeanX_Prop: return getLeanX();
-            case LeanY_Prop: return getLeanY();
-            case GrowWidth_Prop: return isGrowWidth();
-            case GrowHeight_Prop: return isGrowHeight();
-            case Vertical_Prop: return isVertical();
-
-            // Pref Sizing: PrefWidth, PrefHeight
-            case View.PrefWidth_Prop: return getPrefWidth();
-            case View.PrefHeight_Prop: return getPrefHeight();
-
-            // Paint Props: Border, Fill, Effect, Opacity
-            case Border_Prop: return getBorder();
-            case Fill_Prop: return getFill();
-            case Effect_Prop: return getEffect();
-            case Opacity_Prop: return getOpacity();
-
-            // Text Props: Font, Text
-            case Font_Prop: return getFont();
-            case Text_Prop: return getText();
-            case "Enabled": return isEnabled();
-
-            // List Props: Items, SelItem, SelIndex
-            case Selectable.Items_Prop: return ((Selectable<?>) this).getItems();
-            case Selectable.SelItem_Prop: return ((Selectable<?>) this).getSelItem();
-            case Selectable.SelIndex_Prop: return ((Selectable<?>) this).getSelIndex();
-
-            // Do normal version
-            default:
-                System.out.println("View.getPropValue: Unknown property name: " + propName);
-                return KeyChain.getValue(this, propName);
-        }
-    }
-
-    /**
-     * Sets the value for given prop name.
-     */
-    public void setPropValue(String aPropName, Object aValue)
-    {
-        // Map property name
-        String propName = aPropName.equals("Value") ? getValuePropName() : aPropName;
-
-        // Handle properties
-        switch (propName) {
-
-            // Size props: X, Y, Width, Height
-            case X_Prop: setX(SnapUtils.doubleValue(aValue)); break;
-            case Y_Prop: setY(SnapUtils.doubleValue(aValue)); break;
-            case Width_Prop: setWidth(SnapUtils.doubleValue(aValue)); break;
-            case Height_Prop: setHeight(SnapUtils.doubleValue(aValue)); break;
-
-            // Transform props: Rotate, ScaleX, ScaleY, TransX, TransY
-            case Rotate_Prop: setRotate(SnapUtils.doubleValue(aValue)); break;
-            case ScaleX_Prop: setScaleX(SnapUtils.doubleValue(aValue)); break;
-            case ScaleY_Prop: setScaleY(SnapUtils.doubleValue(aValue)); break;
-            case TransX_Prop: setTransX(SnapUtils.doubleValue(aValue)); break;
-            case TransY_Prop: setTransY(SnapUtils.doubleValue(aValue)); break;
-
-            // Sizing: Align, Margin, Padding, Spacing
-            case Align_Prop: setAlign((Pos) aValue); break;
-            case Margin_Prop: setMargin((Insets) aValue); break;
-            case Padding_Prop: setPadding((Insets) aValue); break;
-            case Spacing_Prop: setSpacing(SnapUtils.doubleValue(aValue)); break;
-
-            // Alignment: LeanX, LeanY, GrowWidth, GrowHeight, Vertical
-            case LeanX_Prop: setLeanX((HPos) aValue); break;
-            case LeanY_Prop: setLeanY((VPos) aValue); break;
-            case GrowWidth_Prop: setGrowWidth(SnapUtils.boolValue(aValue)); break;
-            case GrowHeight_Prop: setGrowHeight(SnapUtils.boolValue(aValue)); break;
-            case Vertical_Prop: setVertical(SnapUtils.boolValue(aValue));
-
-            // Pref Sizing: PrefWidth, PrefHeight
-            case PrefWidth_Prop: setPrefWidth(SnapUtils.doubleValue(aValue)); break;
-            case PrefHeight_Prop: setPrefHeight(SnapUtils.doubleValue(aValue)); break;
-
-            // Paint Props: Border, Fill, Effect, Opacity
-            case Border_Prop: setBorder((Border) aValue); break;
-            case Fill_Prop: setFill(aValue instanceof Paint ? (Paint) aValue : null); break;
-            case Effect_Prop: setEffect((Effect) aValue); break;
-            case Opacity_Prop: setOpacity(SnapUtils.doubleValue(aValue)); break;
-
-            // Text Props: Font, Text
-            case Font_Prop: setFont((Font) aValue); break;
-            case Text_Prop: setText(SnapUtils.stringValue(aValue)); break;
-            case "Enabled": setDisabled(!SnapUtils.boolValue(aValue)); break;
-
-            // List Props: Items, SelItem, SelIndex
-            case Selectable.Items_Prop: Selectable.setItems((Selectable<?>) this, aValue); break;
-            case Selectable.SelItem_Prop: ((Selectable) this).setSelItem(aValue); break;
-            case Selectable.SelIndex_Prop: ((Selectable<?>) this).setSelIndex(SnapUtils.intValue(aValue)); break;
-
-            // Do normal version
-            default:
-                System.out.println("View.setPropValue: Unknown prop name: " + propName);
-                KeyChain.setValueSafe(this, propName, aValue);
-        }
-    }
-
-    /**
-     * Override property defaults for View.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        switch (aPropName) {
-
-            // Vertical
-            case Vertical_Prop: return DEFAULT_VERTICAL;
-
-            // Margin, Padding, Spacing
-            case Margin_Prop: return DEFAULT_MARGIN;
-            case Padding_Prop: return DEFAULT_PADDING;
-            case Spacing_Prop: return DEFAULT_SPACING;
-
-            // Do normal version
-            default: return super.getPropDefault(aPropName);
-        }
-    }
-
-    /**
-     * Returns a mapped property name name.
-     */
-    protected String getValuePropName()  { return "Value"; }
-
-    /**
      * Returns the text value of this view.
      */
     public String getText()  { return null; }
@@ -2949,6 +2772,222 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         // Return
         return clone;
     }
+
+    /**
+     * Returns a mapped property name.
+     */
+    protected String getValuePropName()  { return "Value"; }
+
+    /**
+     * Initialize Props. Override to provide custom defaults.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Name
+        aPropSet.addPropNamed(Name_Prop, String.class, null);
+
+        // X, Y, Width, Height
+        aPropSet.addPropNamed(X_Prop, double.class, 0d);
+        aPropSet.addPropNamed(Y_Prop, double.class, 0d);
+        aPropSet.addPropNamed(Width_Prop, double.class, 0d);
+        aPropSet.addPropNamed(Height_Prop, double.class, 0d);
+
+        // Rotate, ScaleX, ScaleY, TransX, TransY
+        aPropSet.addPropNamed(Rotate_Prop, double.class, 0d);
+        aPropSet.addPropNamed(ScaleX_Prop, double.class, 0d);
+        aPropSet.addPropNamed(ScaleY_Prop, double.class, 0d);
+        aPropSet.addPropNamed(TransX_Prop, double.class, 0d);
+        aPropSet.addPropNamed(TransY_Prop, double.class, 0d);
+
+        // Align, Margin, Padding, Spacing, Vertical
+        aPropSet.addPropNamed(Align_Prop, Pos.class, DEFAULT_ALIGN);
+        aPropSet.addPropNamed(Margin_Prop, Insets.class, DEFAULT_MARGIN);
+        aPropSet.addPropNamed(Padding_Prop, Insets.class, DEFAULT_MARGIN);
+        aPropSet.addPropNamed(Spacing_Prop, double.class, DEFAULT_SPACING);
+        aPropSet.addPropNamed(Vertical_Prop, boolean.class, DEFAULT_VERTICAL);
+
+        // LeanX, LeanY, GrowWidth, GrowHeight
+        aPropSet.addPropNamed(LeanX_Prop, HPos.class, null);
+        aPropSet.addPropNamed(LeanY_Prop, VPos.class, null);
+        aPropSet.addPropNamed(GrowWidth_Prop, boolean.class, false);
+        aPropSet.addPropNamed(GrowHeight_Prop, boolean.class, false);
+
+        // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight
+        aPropSet.addPropNamed(MinWidth_Prop, double.class, 0d);
+        aPropSet.addPropNamed(MinHeight_Prop, double.class, 0d);
+        aPropSet.addPropNamed(MaxWidth_Prop, double.class, 0d);
+        aPropSet.addPropNamed(MaxHeight_Prop, double.class, 0d);
+        aPropSet.addPropNamed(PrefWidth_Prop, double.class, 0d);
+        aPropSet.addPropNamed(PrefHeight_Prop, double.class, 0d);
+
+        // Border, BorderRadius, Fill, Effect, Opacity
+        aPropSet.addPropNamed(Border_Prop, Border.class, null);
+        aPropSet.addPropNamed(BorderRadius_Prop, double.class, 0d);
+        aPropSet.addPropNamed(Fill_Prop, Paint.class, null);
+        aPropSet.addPropNamed(Effect_Prop, Effect.class, null);
+        aPropSet.addPropNamed(Opacity_Prop, double.class, 1d);
+    }
+
+    /**
+     * Returns the value for given prop name.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        // Map property name
+        String propName = aPropName.equals("Value") ? getValuePropName() : aPropName;
+
+        // Handle properties
+        switch (propName) {
+
+            // Name
+            case Name_Prop: return getName();
+
+            // X, Y, Width, Height
+            case X_Prop: return getX();
+            case Y_Prop: return getY();
+            case Width_Prop: return getWidth();
+            case Height_Prop: return getHeight();
+
+            // Rotate, ScaleX, ScaleY, TransX, TransY
+            case Rotate_Prop: return getRotate();
+            case ScaleX_Prop: return getScaleX();
+            case ScaleY_Prop: return getScaleY();
+            case TransX_Prop: return getTransX();
+            case TransY_Prop: return getTransY();
+
+            // Align, Margin, Padding, Spacing, Vertical
+            case Align_Prop: return getAlign();
+            case Margin_Prop: return getMargin();
+            case Padding_Prop: return getPadding();
+            case Spacing_Prop: return getSpacing();
+            case Vertical_Prop: return isVertical();
+
+            // LeanX, LeanY, GrowWidth, GrowHeight
+            case LeanX_Prop: return getLeanX();
+            case LeanY_Prop: return getLeanY();
+            case GrowWidth_Prop: return isGrowWidth();
+            case GrowHeight_Prop: return isGrowHeight();
+
+            // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight
+            case View.MinWidth_Prop: return getMinWidth();
+            case View.MinHeight_Prop: return getMinHeight();
+            case View.MaxWidth_Prop: return getMaxWidth();
+            case View.MaxHeight_Prop: return getMaxHeight();
+            case View.PrefWidth_Prop: return getPrefWidth();
+            case View.PrefHeight_Prop: return getPrefHeight();
+
+            // Border, BorderRadius, Fill, Effect, Opacity
+            case Border_Prop: return getBorder();
+            case BorderRadius_Prop: return getBorderRadius();
+            case Fill_Prop: return getFill();
+            case Effect_Prop: return getEffect();
+            case Opacity_Prop: return getOpacity();
+
+            // Font, Text
+            case Font_Prop: return getFont();
+            case Text_Prop: return getText();
+
+            // Items, SelItem, SelIndex
+            case Selectable.Items_Prop: return ((Selectable<?>) this).getItems();
+            case Selectable.SelItem_Prop: return ((Selectable<?>) this).getSelItem();
+            case Selectable.SelIndex_Prop: return ((Selectable<?>) this).getSelIndex();
+
+            // Do normal version
+            default:
+                System.out.println("View.getPropValue: Unknown property name: " + propName);
+                return KeyChain.getValue(this, propName);
+        }
+    }
+
+    /**
+     * Sets the value for given prop name.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        // Map property name
+        String propName = aPropName.equals("Value") ? getValuePropName() : aPropName;
+
+        // Handle properties
+        switch (propName) {
+
+            // Name
+            case Name_Prop: setName(SnapUtils.stringValue(aValue)); break;
+
+            // X, Y, Width, Height
+            case X_Prop: setX(SnapUtils.doubleValue(aValue)); break;
+            case Y_Prop: setY(SnapUtils.doubleValue(aValue)); break;
+            case Width_Prop: setWidth(SnapUtils.doubleValue(aValue)); break;
+            case Height_Prop: setHeight(SnapUtils.doubleValue(aValue)); break;
+
+            // Rotate, ScaleX, ScaleY, TransX, TransY
+            case Rotate_Prop: setRotate(SnapUtils.doubleValue(aValue)); break;
+            case ScaleX_Prop: setScaleX(SnapUtils.doubleValue(aValue)); break;
+            case ScaleY_Prop: setScaleY(SnapUtils.doubleValue(aValue)); break;
+            case TransX_Prop: setTransX(SnapUtils.doubleValue(aValue)); break;
+            case TransY_Prop: setTransY(SnapUtils.doubleValue(aValue)); break;
+
+            // Align, Margin, Padding, Spacing, Vertical
+            case Align_Prop: setAlign((Pos) aValue); break;
+            case Margin_Prop: setMargin((Insets) aValue); break;
+            case Padding_Prop: setPadding((Insets) aValue); break;
+            case Spacing_Prop: setSpacing(SnapUtils.doubleValue(aValue)); break;
+            case Vertical_Prop: setVertical(SnapUtils.boolValue(aValue));
+
+            // Alignment: LeanX, LeanY, GrowWidth, GrowHeight
+            case LeanX_Prop: setLeanX((HPos) aValue); break;
+            case LeanY_Prop: setLeanY((VPos) aValue); break;
+            case GrowWidth_Prop: setGrowWidth(SnapUtils.boolValue(aValue)); break;
+            case GrowHeight_Prop: setGrowHeight(SnapUtils.boolValue(aValue)); break;
+
+            // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight
+            case MinWidth_Prop: setMinWidth(SnapUtils.doubleValue(aValue)); break;
+            case MinHeight_Prop: setMinHeight(SnapUtils.doubleValue(aValue)); break;
+            case MaxWidth_Prop: setMaxWidth(SnapUtils.doubleValue(aValue)); break;
+            case MaxHeight_Prop: setMaxHeight(SnapUtils.doubleValue(aValue)); break;
+            case PrefWidth_Prop: setPrefWidth(SnapUtils.doubleValue(aValue)); break;
+            case PrefHeight_Prop: setPrefHeight(SnapUtils.doubleValue(aValue)); break;
+
+            // Border, BorderRadius, Fill, Effect, Opacity
+            case Border_Prop: setBorder((Border) aValue); break;
+            case BorderRadius_Prop: setBorderRadius(SnapUtils.doubleValue(aValue)); break;
+            case Fill_Prop: setFill(aValue instanceof Paint ? (Paint) aValue : null); break;
+            case Effect_Prop: setEffect((Effect) aValue); break;
+            case Opacity_Prop: setOpacity(SnapUtils.doubleValue(aValue)); break;
+
+            // Font, Text
+            case Font_Prop: setFont((Font) aValue); break;
+            case Text_Prop: setText(SnapUtils.stringValue(aValue)); break;
+
+            // Items, SelItem, SelIndex
+            case Selectable.Items_Prop: Selectable.setItems((Selectable<?>) this, aValue); break;
+            case Selectable.SelItem_Prop: ((Selectable) this).setSelItem(aValue); break;
+            case Selectable.SelIndex_Prop: ((Selectable<?>) this).setSelIndex(SnapUtils.intValue(aValue)); break;
+
+            // Do normal version
+            default:
+                System.out.println("View.setPropValue: Unknown prop name: " + propName);
+                KeyChain.setValueSafe(this, propName, aValue);
+        }
+    }
+
+    /**
+     * Override property defaults for View.
+     */
+//    @Override
+//    public Object getPropDefault(String aPropName)
+//    {
+//        switch (aPropName) {
+//
+//            // Do normal version
+//            default: return super.getPropDefault(aPropName);
+//        }
+//    }
 
     /**
      * XML Archival.
@@ -3227,14 +3266,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Return this shape
         return this;
-    }
-
-    /**
-     * Standard clone implementation.
-     */
-    public View copyUsingArchiver()
-    {
-        return new ViewArchiver().copy(this);
     }
 
     /**
