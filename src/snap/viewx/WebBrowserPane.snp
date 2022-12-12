@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SpringView width="500" height="500" PrefWidth="500" PrefHeight="500">
   <SpringView Name="ToolBar" width="500" height="30" PrefWidth="500" PrefHeight="30" GrowWidth="true">
-    <Button Name="BackButton" x="2" y="2" width="25" height="25" ToolTip="Page Back">
-      <binding aspect="Enabled" key="Browser.LastURL" />
-    </Button>
+    <Button Name="BackButton" x="2" y="2" width="25" height="25" ToolTip="Page Back" />
     <Button Name="ReloadButton" x="27" y="2" width="25" height="25" image="Reload.png" />
-    <Button Name="NextButton" x="52" y="2" width="25" height="25" ToolTip="Page Forward">
-      <binding aspect="Enabled" key="Browser.NextURL" />
-    </Button>
+    <Button Name="NextButton" x="52" y="2" width="25" height="25" ToolTip="Page Forward" />
     <TextField Name="AddressText" x="77" y="2" width="350" height="25" GrowWidth="true">
       <font name="Arial" size="12" />
     </TextField>

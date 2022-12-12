@@ -11,14 +11,12 @@
   </Label>
   <TextField Name="NameText" x="132" y="142" width="217" height="22">
     <font name="Arial" size="14" />
-    <binding aspect="Text" key="Name" />
   </TextField>
   <Label x="56" y="182" width="76" height="22" text="Password:">
     <font name="Arial" size="14" />
   </Label>
   <TextField Name="PasswordText" x="132" y="182" width="217" height="22">
     <font name="Arial" size="14" />
-    <binding aspect="Text" key="Password" />
   </TextField>
   <CheckBox Name="RememberLoginCheckBox" x="56" y="220" width="273" height="22" text="Remember this password" Selected="true">
     <font name="Arial" size="12" />
