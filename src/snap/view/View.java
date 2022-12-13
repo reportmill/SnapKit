@@ -2830,6 +2830,28 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(Fill_Prop, Paint.class, null);
         aPropSet.addPropNamed(Effect_Prop, Effect.class, null);
         aPropSet.addPropNamed(Opacity_Prop, double.class, 1d);
+
+        // Font, Text, ToolTip, Cursor, Clip
+        aPropSet.addPropNamed(Font_Prop, Font.class, null);
+        aPropSet.addPropNamed(Text_Prop, String.class, null).setSkipArchival(true);
+        aPropSet.addPropNamed(ToolTip_Prop, String.class, null);
+        aPropSet.addPropNamed(Cursor_Prop, Cursor.class, null).setSkipArchival(true);
+        aPropSet.addPropNamed(Clip_Prop, Shape.class, null).setSkipArchival(true);
+
+        // Disabled, Visible, Pickable, Paintable
+        aPropSet.addPropNamed(Disabled_Prop, boolean.class, false);
+        aPropSet.addPropNamed(Visible_Prop, boolean.class, true);
+        aPropSet.addPropNamed(Pickable_Prop, boolean.class, true);
+        aPropSet.addPropNamed(Paintable_Prop, boolean.class, true);
+
+        // Focusable, FocusWhenPressed, Focused
+        aPropSet.addPropNamed(Focusable_Prop, boolean.class, false);
+        aPropSet.addPropNamed(FocusWhenPressed_Prop, boolean.class, true);
+        aPropSet.addPropNamed(Focused_Prop, boolean.class, true);
+
+        // Parent, Showing
+        aPropSet.addPropNamed(Parent_Prop, ParentView.class, null).setSkipArchival(true);
+        aPropSet.addPropNamed(Showing_Prop, boolean.class, false).setSkipArchival(true);
     }
 
     /**
@@ -2888,9 +2910,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Effect_Prop: return getEffect();
             case Opacity_Prop: return getOpacity();
 
-            // Font, Text
+            // Font, Text, ToolTip, Cursor, Clip
             case Font_Prop: return getFont();
             case Text_Prop: return getText();
+            case ToolTip_Prop: return getToolTip();
+            case Cursor_Prop: return getCursor();
+            case Clip_Prop: return getClip();
 
             // Items, SelItem, SelIndex
             case Selectable.Items_Prop: return ((Selectable<?>) this).getItems();
@@ -2960,9 +2985,12 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Effect_Prop: setEffect((Effect) aValue); break;
             case Opacity_Prop: setOpacity(SnapUtils.doubleValue(aValue)); break;
 
-            // Font, Text
+            // Font, Text, ToolTip, Cursor, Clip
             case Font_Prop: setFont((Font) aValue); break;
             case Text_Prop: setText(SnapUtils.stringValue(aValue)); break;
+            case ToolTip_Prop: setToolTip(SnapUtils.stringValue(aValue)); break;
+            case Cursor_Prop: setCursor((Cursor) aValue); break;
+            case Clip_Prop: setClip((Shape) aValue); break;
 
             // Items, SelItem, SelIndex
             case Selectable.Items_Prop: Selectable.setItems((Selectable<?>) this, aValue); break;
@@ -2979,15 +3007,18 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     /**
      * Override property defaults for View.
      */
-//    @Override
-//    public Object getPropDefault(String aPropName)
-//    {
-//        switch (aPropName) {
-//
-//            // Do normal version
-//            default: return super.getPropDefault(aPropName);
-//        }
-//    }
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Font
+            case Font_Prop: getDefaultFont();
+
+            // Do normal version
+            default: return super.getPropDefault(aPropName);
+        }
+    }
 
     /**
      * XML Archival.
