@@ -4,13 +4,15 @@
 package snap.gfx;
 import snap.geom.Rect;
 import snap.geom.Shape;
+import snap.props.PropObject;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
  * This class represents a font for use in rich text. Currently this is necessary because Java fonts are missing
  * so much basic typographic information.
  */
-public class Font implements XMLArchiver.Archivable {
+public class Font extends PropObject implements XMLArchiver.Archivable {
     
     // This font's base font file
     private FontFile  _fontFile;
@@ -317,6 +319,37 @@ public class Font implements XMLArchiver.Archivable {
      * Standard hashcode implementation.
      */
     public int hashCode()  { return getName().hashCode() + (int)(_size*10); }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Name, Size
+        aPropSet.addPropNamed(Name_Prop, String.class, null);
+        aPropSet.addPropNamed(Size_Prop, double.class, 0d);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Name, Size
+            case Name_Prop: return getName();
+            case Size_Prop: return getSize();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
 
     /**
      * XML archival.

@@ -3,6 +3,7 @@ import snap.geom.*;
 import snap.util.XMLArchiver;
 import snap.util.XMLElement;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -12,58 +13,11 @@ public class Borders {
 
     // Common borders
     public static final Border BLACK_BORDER = Border.createLineBorder(Color.BLACK, 1);
-    public static final Border EMPTY_BORDER = Border.createEmptyBorder(0);
+    public static final Border EMPTY_BORDER = Border.createLineBorder(Color.BLACK, 0);
 
     // Border constants
     private static Color BORDER_GRAY = Color.LIGHTGRAY;
     private static Color BORDER_DARKGRAY = BORDER_GRAY.darker();
-
-    /**
-     * A subclass for empty border.
-     */
-    public static class NullBorder extends Border {
-
-        /** XML Archival. */
-        public XMLElement toXML(XMLArchiver anArchiver)  { XMLElement e = new XMLElement("border"); return e; }
-
-        /** XML Unarchival. */
-        public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)  { return this; }
-    }
-
-    /**
-     * A subclass for empty border.
-     */
-    public static class EmptyBorder extends Border {
-
-        // The insets
-        double _tp, _rt, _bm, _lt;
-
-        /** Creates a new EmptyBorder. */
-        public EmptyBorder()  { }
-
-        /** Creates a new EmptyBorder with insets. */
-        public EmptyBorder(double tp, double rt, double bm, double lt)  { _tp = tp; _rt = rt; _bm = bm; _lt = lt; }
-
-        /** Returns the insets. */
-        protected Insets createInsets()  { return new Insets(_tp,_rt,_bm,_lt); }
-
-        /** XML Archival. */
-        public XMLElement toXML(XMLArchiver anArchiver)
-        {
-            XMLElement e = new XMLElement("EmptyBorder");
-            if(_tp!=0) e.add("Top", _tp); if(_lt!=0) e.add("Left", _lt);
-            if(_bm!=0) e.add("Bottom", _bm); if(_rt!=0) e.add("Right", _rt);
-            return e;
-        }
-
-        /** XML Unarchival. */
-        public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
-        {
-            _tp = anElement.getAttributeFloatValue("Top", 0); _lt = anElement.getAttributeFloatValue("Left", 0);
-            _bm = anElement.getAttributeFloatValue("Bottom", 0); _rt = anElement.getAttributeFloatValue("Right", 0);
-            return this;
-        }
-    }
 
     /**
      * A subclass for line border.
@@ -80,10 +34,18 @@ public class Borders {
         public LineBorder()  { }
 
         /** Creates lineBorder. */
-        public LineBorder(Color aColor, double aWidth)  { _color = aColor; _stroke = Stroke.getStroke(aWidth); }
+        public LineBorder(Color aColor, double aWidth)
+        {
+            _color = aColor;
+            _stroke = Stroke.getStroke(aWidth);
+        }
 
         /** Creates lineBorder. */
-        public LineBorder(Color aColor, Stroke aStroke)  { _color = aColor; _stroke = aStroke; }
+        public LineBorder(Color aColor, Stroke aStroke)
+        {
+            _color = aColor;
+            _stroke = aStroke;
+        }
 
         /** Returns color. */
         public Color getColor()  { return _color; }
@@ -117,7 +79,8 @@ public class Borders {
                 rect = rect.getInsetRect(insX, insY);
 
                 // If stroke is dashed, see if we need to draw as horizontal or vertical line to avoid dash overlaps
-                if (!Objects.equals(stroke.getDashArray(), Stroke.DASH_SOLID) && (rect.width < .001 || rect.height < .001)) {
+                boolean isCustomDashArray = !Arrays.equals(stroke.getDashArray(), Stroke.DASH_SOLID);
+                if (isCustomDashArray && (rect.width < .001 || rect.height < .001)) {
                     if (rect.width < .001)
                         aPntr.drawLine(rect.x, rect.y, rect.x, rect.getMaxY());
                     aPntr.drawLine(rect.x, rect.y, rect.getMaxX(), rect.y);
@@ -139,7 +102,9 @@ public class Borders {
          */
         public LineBorder copyForColor(Color aColor)
         {
-            LineBorder c = clone(); c._color = aColor; return c;
+            LineBorder c = clone();
+            c._color = aColor;
+            return c;
         }
 
         /**
@@ -181,7 +146,7 @@ public class Borders {
         /** XML Archival. */
         public XMLElement toXML(XMLArchiver anArchiver)
         {
-            XMLElement e = new XMLElement("LineBorder");
+            XMLElement e = super.toXML(anArchiver);
             if(!_color.equals(Color.BLACK))
                 e.add("Color", '#' + _color.toHexString());
             if(getWidth() != 1)
@@ -232,34 +197,43 @@ public class Borders {
         /** Paint border. */
         public void paint(Painter aPntr, Shape aShape)
         {
-            Rect rect = aShape.getBounds();
-            double x = rect.x, y = rect.y, w = rect.width, h = rect.height;
+            Rect bounds = aShape.getBounds();
+            double boundsX = bounds.x;
+            double boundsY = bounds.y;
+            double boundsW = bounds.width;
+            double boundsH = bounds.height;
+
+            // Paint highlight
             aPntr.setColor(Color.WHITE);
             aPntr.setStroke(Stroke.Stroke1);
-            aPntr.drawRect(x+.5,y+.5,w-1,h-1);
-            aPntr.drawRect(x+1.5,y+1.5,w-3,h-3);
+            aPntr.drawRect(boundsX + .5,boundsY + .5,boundsW - 1,boundsH - 1);
+            aPntr.drawRect(boundsX + 1.5,boundsY + 1.5,boundsW - 3,boundsH - 3);
+
+            // Paint Lowered
             if(_type == LOWERED) {
                 aPntr.setColor(BORDER_GRAY);
-                aPntr.drawLine(x+.5,y+.5,x+w-1,y+.5);
-                aPntr.drawLine(x+.5,y+.5,x+.5,y+h-1);
+                aPntr.drawLine(boundsX + .5,boundsY + .5,boundsX + boundsW - 1,boundsY + .5);
+                aPntr.drawLine(boundsX + .5,boundsY + .5,boundsX + .5,boundsY + boundsH - 1);
                 aPntr.setColor(BORDER_DARKGRAY);
-                aPntr.drawLine(x+1.5,y+1.5,x+w-3,y+1.5);
-                aPntr.drawLine(x+1.5,y+1.5,x+1.5,y+h-3);
+                aPntr.drawLine(boundsX + 1.5,boundsY + 1.5,boundsX + boundsW-3,boundsY + 1.5);
+                aPntr.drawLine(boundsX + 1.5,boundsY + 1.5,boundsX + 1.5,boundsY + boundsH - 3);
             }
+
+            // Paint Raised
             else {
                 aPntr.setColor(BORDER_DARKGRAY);
-                aPntr.drawLine(x+.5,y+h-.5,x+w-1,y+h-.5);
-                aPntr.drawLine(x+w-.5,y+.5,x+w-.5,y+h-1);
+                aPntr.drawLine(boundsX + .5,boundsY + boundsH - .5,boundsX + boundsW - 1,boundsY + boundsH - .5);
+                aPntr.drawLine(boundsX + boundsW - .5,boundsY + .5,boundsX + boundsW - .5,boundsY + boundsH - 1);
                 aPntr.setColor(BORDER_GRAY);
-                aPntr.drawLine(x+1.5,y+h-1.5,x+w-3,y+h-1.5);
-                aPntr.drawLine(x+w-1.5,y+1.5,x+w-1.5,y+h-3);
+                aPntr.drawLine(boundsX + 1.5,boundsY + boundsH - 1.5,boundsX + boundsW - 3,boundsY + boundsH - 1.5);
+                aPntr.drawLine(boundsX + boundsW - 1.5,boundsY + 1.5,boundsX + boundsW - 1.5,boundsY + boundsH - 3);
             }
         }
 
         /** XML Archival. */
         public XMLElement toXML(XMLArchiver anArchiver)
         {
-            XMLElement e = new XMLElement("BevelBorder");
+            XMLElement e = super.toXML(anArchiver);
             if(_type == RAISED)
                 e.add("Type", "RAISED");
             return e;
@@ -300,18 +274,8 @@ public class Borders {
      */
     public static class EtchBorder extends Border {
 
-        // The type
-        int _type = LOWERED;
-        public static final int LOWERED = 0, RAISED = 1;
-
         /** Creates new EtchBorder. */
         public EtchBorder() { }
-
-        /** Creates new EtchBorder. */
-        public EtchBorder(int aType) { _type = aType; }
-
-        /** Returns the type. */
-        public int getType()  { return _type; }
 
         /** Creates the insets. */
         protected Insets createInsets()  { return new Insets(2); }
@@ -327,24 +291,6 @@ public class Borders {
             aPntr.setColor(BORDER_GRAY);
             aPntr.drawRect(.5,.5,w-2,h-2);
         }
-
-        /** XML Archival. */
-        public XMLElement toXML(XMLArchiver anArchiver)
-        {
-            XMLElement e = new XMLElement("EtchBorder");
-            if(_type==RAISED)
-                e.add("Type", "RAISED");
-            return e;
-        }
-
-        /** XML Unarchival. */
-        public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
-        {
-            String type = anElement.getAttributeValue("Type", "LOWERED");
-            if(type.equals("RAISED"))
-                _type = RAISED;
-            return this;
-        }
     }
 
     /**
@@ -352,47 +298,42 @@ public class Borders {
      */
     public static class CompoundBorder extends Border {
 
-        // The two borders
-        Border  _obdr, _ibdr;
+        // The outer border
+        private Border  _outerBorder;
+
+        // The inner border
+        private Border  _innerBorder;
 
         /** Creates a CompoundBorder. */
         public CompoundBorder(Border anOuterBdr, Border anInnerBdr)
         {
-            _obdr = anOuterBdr;
-            _ibdr = anInnerBdr;
+            _outerBorder = anOuterBdr;
+            _innerBorder = anInnerBdr;
         }
 
         /** Returns the real border. */
-        public Border getOuterBorder()  { return _obdr; }
+        public Border getOuterBorder()  { return _outerBorder; }
 
         /** Returns the real border. */
-        public Border getInnerBorder()  { return _ibdr; }
+        public Border getInnerBorder()  { return _innerBorder; }
 
         /** Creates the insets. */
-        protected Insets createInsets()  { return Insets.add(_obdr.getInsets(), _ibdr.getInsets()); }
+        protected Insets createInsets()
+        {
+            Insets insAll = Insets.add(_outerBorder.getInsets(), _innerBorder.getInsets());
+            return insAll;
+        }
 
         /** Paint border. */
         public void paint(Painter aPntr, Shape aShape)
         {
-            _obdr.paint(aPntr, aShape);
-            Insets ins = _obdr.getInsets();
+            _outerBorder.paint(aPntr, aShape);
+            Insets ins = _outerBorder.getInsets();
             Rect bnds = aShape.getBounds();
             if(bnds == aShape)
                 bnds = bnds.clone();
             bnds.inset(ins);
-            _ibdr.paint(aPntr, bnds);
-        }
-
-        /** XML Archival. */
-        public XMLElement toXML(XMLArchiver anArchiver)
-        {
-            throw new RuntimeException("Border.CompoundBorder: archival not implemented");
-        }
-
-        /** XML Unarchival. */
-        public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
-        {
-            throw new RuntimeException("Border.CompoundBorder: unarchival not implemented");
+            _innerBorder.paint(aPntr, bnds);
         }
     }
 
@@ -443,8 +384,10 @@ public class Borders {
         {
             // If showing all borders, just return bounds
             Rect rect = aShape.getBounds(); if(isShowAll()) return rect;
-            boolean st = isShowTop(), sr = isShowRight(), sb = isShowBottom(), sl = isShowLeft();
-            double w = rect.width, h = rect.height;
+            boolean st = isShowTop(), sr = isShowRight();
+            boolean sb = isShowBottom(), sl = isShowLeft();
+            double w = rect.width;
+            double h = rect.height;
 
             // Otherwise, build path based on sides showing and return
             Path path = new Path();

@@ -4,20 +4,24 @@
 package snap.gfx;
 import snap.geom.Insets;
 import snap.geom.Shape;
+import snap.props.PropObject;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
  * A class to represent a painted stroke.
  */
-public abstract class Border implements Cloneable, XMLArchiver.Archivable {
+public abstract class Border extends PropObject implements Cloneable, XMLArchiver.Archivable {
     
     // Cached version of insets
-    private Insets _insets;
+    private Insets  _insets;
     
     // Whether to paint above view
-    private boolean _paintAbove;
+    private boolean  _paintAbove;
 
     // Constants for properties
+    public static final String Stroke_Prop = "Stroke";
+    public static final String Color_Prop = "Color";
     public static final String Insets_Prop = "Insets";
     public static final String PaintAbove_Prop = "PaintAbove";
 
@@ -26,7 +30,7 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
      */
     public Insets getInsets()
     {
-        if (_insets!=null) return _insets;
+        if (_insets != null) return _insets;
         return _insets = createInsets();
     }
 
@@ -78,7 +82,11 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     /**
      * Copies border for given stroke width.
      */
-    public Border copyForStrokeWidth(double aWidth)  { return copyForStroke(getStroke().copyForWidth(aWidth)); }
+    public Border copyForStrokeWidth(double aWidth)
+    {
+        Stroke newStroke = getStroke().copyForWidth(aWidth);
+        return copyForStroke(newStroke);
+    }
 
     /**
      * Copies border for given insets.
@@ -101,13 +109,35 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Stroke, Color, Insets, PaintAbove
+        aPropSet.addPropNamed(Stroke_Prop, Stroke.class, null);
+        aPropSet.addPropNamed(Color_Prop, Color.class, null);
+        aPropSet.addPropNamed(Insets_Prop, Insets.class, null);
+        aPropSet.addPropNamed(PaintAbove_Prop, Insets.class, null);
+    }
+
+    /**
      * Returns a value for a key.
      */
     public Object getPropValue(String aPropName)
     {
         switch (aPropName) {
-            case Insets_Prop: return _insets;
-            case PaintAbove_Prop: return _paintAbove;
+
+            // Stroke, Color, Insets, PaintAbove
+            case Stroke_Prop: return getStroke();
+            case Color_Prop: return getColor();
+            case Insets_Prop: return getInsets();
+            case PaintAbove_Prop: return isPaintAbove();
+
+            // Do normal version
             default: throw new RuntimeException("Border.getPropValue: Unknown key: " + aPropName);
         }
     }
@@ -115,23 +145,29 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     /**
      * Sets a value for a key.
      */
-    protected void setPropValue(String aPropName, Object aValue)
+    public void setPropValue(String aPropName, Object aValue)
     {
         switch (aPropName) {
-            case Insets_Prop: _insets = (Insets)aValue; break;
-            case PaintAbove_Prop: _paintAbove = (Boolean)aValue; break;
+
+            // Stroke, Color, Insets, PaintAbove
+            case Stroke_Prop: break;
+            case Color_Prop: break;
+            case Insets_Prop: _insets = (Insets) aValue; break;
+            case PaintAbove_Prop: _paintAbove = SnapUtils.boolValue(aValue); break;
+
+            // Do normal version
             default: throw new RuntimeException("Border.setPropValue: Unknown key: " + aPropName);
         }
     }
 
     /**
-     * Standard clone implementation - only used interally (by copyFor methods).
+     * Standard clone implementation - only used internally (by copyFor methods).
      */
     protected Border clone()
     {
         try
         {
-            Border copy = (Border)super.clone();
+            Border copy = (Border) super.clone();
             copy._insets = null;
             return copy;
         }
@@ -144,17 +180,35 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
     public boolean equals(Object anObj)
     {
         // Check identity and get other
-        if (anObj==this) return true;
-        Border other = anObj instanceof Border? (Border)anObj : null; if (other==null) return false;
-        if (other.getClass()!=getClass()) return false;
+        if (anObj == this) return true;
+        Border other = anObj instanceof Border ? (Border) anObj : null; if (other == null) return false;
+        if (other.getClass() != getClass()) return false;
 
         // Check Color, Width
         if (!other.getColor().equals(getColor())) return false;
-        if (other.getWidth()!=getWidth()) return false;
-        if (other.isPaintAbove()!=isPaintAbove()) return false;
+        if (other.getWidth() != getWidth()) return false;
+        if (other.isPaintAbove() != isPaintAbove()) return false;
 
-        // Return true since all checks passed
+        // Return equal
         return true;
+    }
+
+    /**
+     * XML Archival.
+     */
+    public XMLElement toXML(XMLArchiver anArchiver)
+    {
+        String className = getClass().getSimpleName();
+        XMLElement e = new XMLElement(className);
+        return e;
+    }
+
+    /**
+     * XML Unarchival.
+     */
+    public Border fromXML(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        return this;
     }
 
     /**
@@ -166,22 +220,6 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
      * Returns a simple empty border.
      */
     public static Border emptyBorder()  { return Borders.EMPTY_BORDER; }
-
-    /**
-     * Creates an empty border for inset.
-     */
-    public static Borders.EmptyBorder createEmptyBorder(double w)
-    {
-        return new Borders.EmptyBorder(w,w,w,w);
-    }
-
-    /**
-     * Creates an empty border.
-     */
-    public static Borders.EmptyBorder createEmptyBorder(double tp, double rt, double bm, double lt)
-    {
-        return new Borders.EmptyBorder(tp,rt,bm,lt);
-    }
 
     /**
      * Creates a line border for given color and width.
@@ -204,27 +242,6 @@ public abstract class Border implements Cloneable, XMLArchiver.Archivable {
      */
     public static Borders.BevelBorder createLoweredBevelBorder()
     {
-        return new Borders.BevelBorder(Borders.BevelBorder.LOWERED);
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public static Border fromXMLBorder(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Get type
-        String type = anElement.getAttributeValue("type", "");
-
-        // Create instance based on type
-        Border border;
-        if(type.equals("line")) border = new Borders.LineBorder();
-        else if(type.equals("bevel")) border = new Borders.BevelBorder();
-        else if(type.equals("etched")) border = new Borders.EtchBorder();
-        else if(type.equals("empty")) border = new Borders.EmptyBorder();
-        else border = new Borders.NullBorder();
-
-        // Unarchive border and return
-        border.fromXML(anArchiver, anElement);
-        return border;
+        return new Borders.BevelBorder();
     }
 }

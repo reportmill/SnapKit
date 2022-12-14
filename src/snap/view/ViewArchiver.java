@@ -150,7 +150,6 @@ public class ViewArchiver extends XMLArchiver {
         // Graphics
         cmap.put("Color", Color.class);
         cmap.put("Font", Font.class);
-        cmap.put("EmptyBorder", Borders.EmptyBorder.class);
         cmap.put("BevelBorder", Borders.BevelBorder.class);
         cmap.put("EtchBorder", Borders.EtchBorder.class);
         cmap.put("LineBorder", Borders.LineBorder.class);

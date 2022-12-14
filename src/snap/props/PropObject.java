@@ -84,7 +84,7 @@ public class PropObject implements PropChange.DoChange {
     public PropObject getPropParent()  { return null; }
 
     /**
-     * Initialize Props. Override to provide custom defaults.
+     * Initialize Props. Override to support props for this class.
      */
     protected void initProps(PropSet aPropSet)
     {
