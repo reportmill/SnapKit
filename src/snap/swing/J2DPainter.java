@@ -20,7 +20,7 @@ import snap.gfx.*;
 public class J2DPainter extends Painter {
 
     // The Stroke
-    private Stroke  _stroke = new Stroke(1);
+    private Stroke  _stroke = Stroke.getStrokeRound(1);
 
     // The Font
     private Font  _font = Font.Arial12;

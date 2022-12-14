@@ -277,7 +277,7 @@ public class ThumbWheel extends View {
         // Draw dashes once for white part of groove
         if (isHorizontal()) aPntr.translate(1, 0);
         else aPntr.translate(0, 1);
-        aPntr.setStroke(new Stroke(1));
+        aPntr.setStroke(Stroke.getStrokeRound(1));
 
         // Get inset thumbwheel width/height
         double width = getWidth()-4;

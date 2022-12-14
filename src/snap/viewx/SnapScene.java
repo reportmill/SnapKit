@@ -415,7 +415,7 @@ public class SnapScene extends ChildView {
             SnapActor actr = (SnapActor) child;
             for (SnapPen.PenPath pp : actr.getPen()._paths) {
                 aPntr.setColor(pp.getColor());
-                aPntr.setStroke(new Stroke(pp.getWidth()));
+                aPntr.setStroke(Stroke.getStrokeRound(pp.getWidth()));
                 aPntr.draw(pp);
             }
             aPntr.setStroke(Stroke.Stroke1);

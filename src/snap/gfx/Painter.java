@@ -86,11 +86,11 @@ public abstract class Painter {
      */
     public void setStrokeWidth(double aWidth)
     {
-        Stroke s = getStroke();
-        if (s!=null)
-            s = s.copyForWidth(aWidth);
-        else s = new Stroke(aWidth);
-        setStroke(s);
+        Stroke stroke = getStroke();
+        if (stroke != null)
+            stroke = stroke.copyForWidth(aWidth);
+        else stroke = Stroke.getStrokeRound(aWidth);
+        setStroke(stroke);
     }
 
     /**

@@ -38,7 +38,7 @@ public class DevPane extends ViewOwner {
 
     // Constants
     private static int DEFAULT_HEIGHT = 300;
-    protected static Stroke HIGHLIGHT_BORDER_STROKE = new Stroke(3);
+    protected static Stroke HIGHLIGHT_BORDER_STROKE = Stroke.getStrokeRound(3);
     protected static Color HIGHLIGHT_BORDER_COLOR = Color.RED.blend(Color.CLEARWHITE, .34);
 
     /**

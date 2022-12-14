@@ -87,20 +87,29 @@ public class PropObject implements PropChange.DoChange {
      * Initialize Props. Override to support props for this class.
      */
     protected void initProps(PropSet aPropSet)
-    {
-        // super.initProps(aPropSet);
-        // aPropSet.addPropNamed(Something_Prop, double.class, DEFAULT_SOMETHING_VALUE);
+    { /*
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Add props for this class
+        aPropSet.addPropNamed(Something_Prop, double.class, DEFAULT_SOMETHING_VALUE);
+    */
     }
 
     /**
      * Returns the value for given prop name.
      */
     public Object getPropValue(String aPropName)
-    {
-        // switch (aPropName) {
-        //     case Something_Prop: return getSomething();
-        //     default: return super.getPropValue(aPropName);
-        // }
+    { /*
+        switch (aPropName) {
+
+            // Something
+            case Something_Prop: return getSomething();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    */
 
         return null;
     }
@@ -109,11 +118,16 @@ public class PropObject implements PropChange.DoChange {
      * Sets the value for given prop name.
      */
     public void setPropValue(String aPropName, Object aValue)
-    {
-        // switch (aPropName) {
-        //     case Something_Prop: setSomething(aValue); break;
-        //     default: super.setPropValue(aPropName, aValue);
-        // }
+    { /*
+        switch (aPropName) {
+
+            // Something
+            case Something_Prop: setSomething(aValue); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
+    */
     }
 
     /**
@@ -290,5 +304,30 @@ public class PropObject implements PropChange.DoChange {
     /**
      * Standard toStringProps implementation.
      */
-    public String toStringProps()  { return ""; }
+    public String toStringProps()
+    {
+        // Get props
+        Prop[] props = getPropsForArchival();
+        StringBuilder sb = new StringBuilder();
+
+        // Iterate over props and add to string
+        for (Prop prop : props) {
+
+            // Skip relations and arrays
+            if (prop.isRelation()) continue;
+            if (prop.isArray()) continue;
+            if (isPropDefault(prop.getName())) continue;;
+
+            // If not default value, add to string
+            String propName = prop.getName();
+            Object propValue = getPropValue(propName);
+            String stringValue = StringCodec.SHARED.codeString(propValue);
+            if (sb.length() > 0)
+                sb.append(", ");
+            sb.append(propName).append('=').append(stringValue);
+        }
+
+        // Return
+        return sb.toString();
+    }
 }
