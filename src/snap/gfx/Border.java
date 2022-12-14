@@ -230,14 +230,6 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
     }
 
     /**
-     * Creates a compound border.
-     */
-    public static Border createCompoundBorder(Border aB1, Border aB2)
-    {
-        return new Borders.CompoundBorder(aB1, aB2);
-    }
-
-    /**
      * Creates a beveled border.
      */
     public static Borders.BevelBorder createLoweredBevelBorder()

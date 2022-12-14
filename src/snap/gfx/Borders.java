@@ -294,50 +294,6 @@ public class Borders {
     }
 
     /**
-     * A subclass for compound border.
-     */
-    public static class CompoundBorder extends Border {
-
-        // The outer border
-        private Border  _outerBorder;
-
-        // The inner border
-        private Border  _innerBorder;
-
-        /** Creates a CompoundBorder. */
-        public CompoundBorder(Border anOuterBdr, Border anInnerBdr)
-        {
-            _outerBorder = anOuterBdr;
-            _innerBorder = anInnerBdr;
-        }
-
-        /** Returns the real border. */
-        public Border getOuterBorder()  { return _outerBorder; }
-
-        /** Returns the real border. */
-        public Border getInnerBorder()  { return _innerBorder; }
-
-        /** Creates the insets. */
-        protected Insets createInsets()
-        {
-            Insets insAll = Insets.add(_outerBorder.getInsets(), _innerBorder.getInsets());
-            return insAll;
-        }
-
-        /** Paint border. */
-        public void paint(Painter aPntr, Shape aShape)
-        {
-            _outerBorder.paint(aPntr, aShape);
-            Insets ins = _outerBorder.getInsets();
-            Rect bnds = aShape.getBounds();
-            if(bnds == aShape)
-                bnds = bnds.clone();
-            bnds.inset(ins);
-            _innerBorder.paint(aPntr, bnds);
-        }
-    }
-
-    /**
      * This Border subclass strokes the rectangular border of a given shape, with option include/exclude
      * individual sides.
      */
