@@ -21,7 +21,7 @@ public class BlurEffect extends Effect {
     public static final double DEFAULT_RADIUS = 5;
 
     /**
-     * Creates a new BlurEffect.
+     * Constructor.
      */
     public BlurEffect()
     {
@@ -29,7 +29,7 @@ public class BlurEffect extends Effect {
     }
 
     /**
-     * Creates a new BlurEffect for given radius.
+     * Constructor for given radius.
      */
     public BlurEffect(double aRadius)  { _radius = aRadius; }
 
@@ -37,11 +37,6 @@ public class BlurEffect extends Effect {
      * Returns the radius.
      */
     public double getRadius()  { return _radius; }
-
-    /**
-     * Sets the radius.
-     */
-    public void setRadius(double aValue)  { _radius = aValue; }
 
     /**
      * Override to account for blur radius.
@@ -65,8 +60,8 @@ public class BlurEffect extends Effect {
         }
 
         // Get effect image for shape and draw at offset (blur effect draws as a complete replacement for shape drawing)
-        Image img = getBlurImage(aPDVR, aRect);
-        aPntr.drawImage(img, -radius*2, -radius*2, img.getWidth(), img.getHeight());
+        Image blurImage = getBlurImage(aPDVR, aRect);
+        aPntr.drawImage(blurImage, -radius * 2, -radius * 2, blurImage.getWidth(), blurImage.getHeight());
     }
 
     /**
@@ -74,10 +69,10 @@ public class BlurEffect extends Effect {
      */
     public Image getBlurImage(PainterDVR aPDVR, Rect aRect)
     {
-        int radius = (int)getRadius();
-        Image bimg = aPDVR.getImage(aRect, radius*2);
-        bimg.blur(radius, null);
-        return bimg;
+        int radius = (int) getRadius();
+        Image blurImage = aPDVR.getImage(aRect, radius*2);
+        blurImage.blur(radius, null);
+        return blurImage;
     }
 
     /**
@@ -132,7 +127,7 @@ public class BlurEffect extends Effect {
             // Radius
             case Radius_Prop: _radius = SnapUtils.doubleValue(aValue); break;
 
-                // Do normal version
+            // Do normal version
             default: super.setPropValue(aPropName, aValue);
         }
     }

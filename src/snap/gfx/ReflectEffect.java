@@ -86,7 +86,8 @@ public class ReflectEffect extends Effect {
     public Rect getBounds(Rect aRect)
     {
         Rect bounds = aRect.clone();
-        bounds.height = bounds.height + getGap() + bounds.height*getReflectHeight()*getFadeHeight();
+        double extraH = getGap() + bounds.height * getReflectHeight() * getFadeHeight();
+        bounds.height += extraH;
         return bounds;
     }
 
@@ -96,9 +97,13 @@ public class ReflectEffect extends Effect {
     public void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect)
     {
         // If valid reflection and fade heights, get reflection image for shape and draw at offset
-        if (getReflectHeight()>0 && getFadeHeight()>0) {
-            Image img = getReflectImage(aPDVR, aRect);
-            aPntr.drawImage(img, aRect.getX(), aRect.getMaxY()+getGap(), img.getWidth(), img.getHeight());
+        if (getReflectHeight() > 0 && getFadeHeight() > 0) {
+            Image reflectImage = getReflectImage(aPDVR, aRect);
+            double drawX = aRect.x;
+            double drawY = aRect.getMaxY() + getGap();
+            double drawW = reflectImage.getWidth();
+            double drawH = reflectImage.getHeight();
+            aPntr.drawImage(reflectImage, drawX, drawY, drawW, drawH);
         }
 
         // Do normal effect paint
@@ -130,7 +135,7 @@ public class ReflectEffect extends Effect {
         // Create gradient paint to fade image out
         Color c1 = new Color(1d,.5);
         Color c2 = new Color(1d, 0d);
-        GradientPaint.Stop stops[] = GradientPaint.getStops(0, c1, 1, c2);
+        GradientPaint.Stop[] stops = GradientPaint.getStops(0, c1, 1, c2);
         GradientPaint mask = new GradientPaint(0, 0, 0, 1, stops);
 
         // Set composite to change mask colors to gradient and return image
@@ -169,11 +174,12 @@ public class ReflectEffect extends Effect {
      */
     public boolean equals(Object anObj)
     {
-        if (anObj==this) return true;
-        ReflectEffect other = anObj instanceof ReflectEffect ? (ReflectEffect)anObj :null; if (other==null) return false;
-        if (other._refHeight!=_refHeight) return false;
-        if (other._fadeHeight!=_fadeHeight) return false;
-        if (other._gap!=_gap) return false;
+        if (anObj == this) return true;
+        ReflectEffect other = anObj instanceof ReflectEffect ? (ReflectEffect) anObj : null;
+        if (other == null) return false;
+        if (other._refHeight != _refHeight) return false;
+        if (other._fadeHeight != _fadeHeight) return false;
+        if (other._gap != _gap) return false;
         return true;
     }
 
@@ -233,10 +239,14 @@ public class ReflectEffect extends Effect {
      */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
-        XMLElement e = super.toXML(anArchiver); e.add("type", "reflection");       // Archive basic attributes and set type
-        if (getReflectHeight()!=.5) e.add("reflection-height", getReflectHeight()); // Archive ReflectHeight
-        if (getFadeHeight()!=1) e.add("fade-height", getFadeHeight());              // Archive FadeHeight, Gap
-        if (getGap()!=0) e.add("gap-height", getGap());
+        XMLElement e = super.toXML(anArchiver);
+        e.add("type", "reflection");
+        if (getReflectHeight() != DEFAULT_REFLECT_HEIGHT)
+            e.add(ReflectHeight_Prop, getReflectHeight());
+        if (getFadeHeight() != DEFAULT_FADE_HEIGHT)
+            e.add(FadeHeight_Prop, getFadeHeight());
+        if (getGap() != DEFAULT_GAP)
+            e.add(Gap_Prop, getGap());
         return e;
     }
 
@@ -249,10 +259,12 @@ public class ReflectEffect extends Effect {
         super.fromXML(anArchiver, anElement);
 
         // Unarchive ReflectHeight, FadeHeight, Gap
-        if (anElement.hasAttribute("reflection-height"))
-            setReflectHeight(anElement.getAttributeFloatValue("reflection-height"));
-        if (anElement.hasAttribute("fade-height")) setFadeHeight(anElement.getAttributeFloatValue("fade-height"));
-        if (anElement.hasAttribute("gap-height")) setGap(anElement.getAttributeFloatValue("gap-height"));
+        if (anElement.hasAttribute(ReflectHeight_Prop))
+            setReflectHeight(anElement.getAttributeFloatValue(ReflectHeight_Prop));
+        if (anElement.hasAttribute(FadeHeight_Prop))
+            setFadeHeight(anElement.getAttributeFloatValue(FadeHeight_Prop));
+        if (anElement.hasAttribute(Gap_Prop))
+            setGap(anElement.getAttributeFloatValue(Gap_Prop));
         return this;
     }
 }

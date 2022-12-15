@@ -46,7 +46,9 @@ public class EmbossEffect extends Effect {
     public EmbossEffect(double anAlt, double anAzi, double aRad)
     {
         super();
-        _altitude = anAlt; _azimuth = anAzi; _radius = aRad;
+        _altitude = anAlt;
+        _azimuth = anAzi;
+        _radius = aRad;
     }
 
     /**
@@ -67,15 +69,19 @@ public class EmbossEffect extends Effect {
     /**
      * Override to account for blur radius.
      */
-    public Rect getBounds(Rect aRect) { Rect rect = aRect.getInsetRect(-getRadius()); return rect; }
+    public Rect getBounds(Rect aRect)
+    {
+        Rect rect = aRect.getInsetRect(-getRadius());
+        return rect;
+    }
 
     /**
      * Performs the ShadowEffect with given PainterDVR.
      */
     public void applyEffect(PainterDVR aPDVR, Painter aPntr, Rect aRect)
     {
-        Image img = getEmbossImage(aPDVR, aRect);
-        aPntr.drawImage(img, 0, 0, img.getWidth(), img.getHeight());
+        Image embossImage = getEmbossImage(aPDVR, aRect);
+        aPntr.drawImage(embossImage, 0, 0);
     }
 
     /**
@@ -83,9 +89,9 @@ public class EmbossEffect extends Effect {
      */
     public Image getEmbossImage(PainterDVR aPDVR, Rect aRect)
     {
-        Image eimg = aPDVR.getImage(aRect, 0);
-        eimg.emboss(getRadius(), getAzimuth(), getAltitude());
-        return eimg;
+        Image embossImage = aPDVR.getImage(aRect, 0);
+        embossImage.emboss(getRadius(), getAzimuth(), getAltitude());
+        return embossImage;
     }
 
     /**
@@ -118,7 +124,8 @@ public class EmbossEffect extends Effect {
     public boolean equals(Object anObj)
     {
         if (anObj==this) return true;
-        EmbossEffect other = anObj instanceof EmbossEffect ? (EmbossEffect)anObj : null; if (other==null) return false;
+        EmbossEffect other = anObj instanceof EmbossEffect ? (EmbossEffect) anObj : null;
+        if (other == null) return false;
         if (other._radius != _radius) return false;
         if (other._altitude != _altitude) return false;
         if (other._azimuth != _azimuth) return false;
@@ -185,9 +192,9 @@ public class EmbossEffect extends Effect {
         XMLElement e = super.toXML(anArchiver); e.add("type", "emboss");
 
         // Archive Radius, Altitude, Azimuth
-        if (getRadius()!=10) e.add("radius", getRadius());
-        if (getAzimuth()!=120) e.add("azimuth", getAzimuth());
-        if (getAltitude()!=60) e.add("altitude", getAltitude());
+        if (getRadius() != DEFAULT_RADIUS) e.add("radius", getRadius());
+        if (getAzimuth() != DEFAULT_AZIMUTH) e.add("azimuth", getAzimuth());
+        if (getAltitude() != DEFAULT_ALTITUDE) e.add("altitude", getAltitude());
 
         // Return element
         return e;
@@ -205,6 +212,8 @@ public class EmbossEffect extends Effect {
         _radius = anElement.getAttributeIntValue("radius", 10);
         _azimuth = anElement.getAttributeFloatValue("azimuth", 120);
         _altitude = anElement.getAttributeFloatValue("altitude", 60);
-        return this;  // Return this effect
+
+        // Return
+        return this;
     }
 }

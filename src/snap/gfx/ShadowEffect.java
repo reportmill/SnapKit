@@ -34,7 +34,7 @@ public class ShadowEffect extends Effect {
     public static final Color DEFAULT_COLOR = Color.BLACK;
 
     /**
-     * Creates a new ShadowEffect.
+     * Constructor.
      */
     public ShadowEffect()
     {
@@ -43,7 +43,7 @@ public class ShadowEffect extends Effect {
     }
 
     /**
-     * Creates a new ShadowEffect for given radius, color and offset.
+     * Constructor for given radius, color and offset.
      */
     public ShadowEffect(double aRadius, Color aColor, double aDX, double aDY)
     {
@@ -81,10 +81,12 @@ public class ShadowEffect extends Effect {
     public Rect getBounds(Rect aRect)
     {
         Rect rect = aRect.getInsetRect(-getRadius());
-        if (_dx!=0 || _dy!=0) {
+        if (_dx != 0 || _dy != 0) {
             rect.offset(_dx, _dy);
             rect.union(aRect);
         }
+
+        // Return
         return rect;
     }
 
@@ -96,8 +98,12 @@ public class ShadowEffect extends Effect {
         int radius = (int) getRadius();
         int dx = (int) getDX();
         int dy = (int) getDY();
-        Image img = getShadowImage(aPDVR, aRect);
-        aPntr.drawImage(img, -radius*2 + dx, -radius*2 + dy, img.getWidth(), img.getHeight());
+        Image shadowImage = getShadowImage(aPDVR, aRect);
+        double drawX = -radius * 2 + dx;
+        double drawY = -radius * 2 + dy;
+        aPntr.drawImage(shadowImage, drawX, drawY);
+
+        // Draw contents of PainterDVR
         aPDVR.exec(aPntr);
     }
 
@@ -109,8 +115,10 @@ public class ShadowEffect extends Effect {
         int radius = (int) getRadius();
         int dx = (int) getDX();
         int dy = (int) getDY();
-        Image img = getShadowImage(aPDVR, aRect);
-        aPntr.drawImage(img, -radius*2 + dx, -radius*2 + dy, img.getWidth(), img.getHeight());
+        Image shadowImage = getShadowImage(aPDVR, aRect);
+        double drawX = -radius * 2 + dx;
+        double drawY = -radius * 2 + dy;
+        aPntr.drawImage(shadowImage, drawX, drawY);
     }
 
     /**
@@ -118,19 +126,21 @@ public class ShadowEffect extends Effect {
      */
     public Image getShadowImage(PainterDVR aPDVR, Rect aRect)
     {
-        // If marked shape is rect and opaque, return simple shadow image
+        // If Simple, return simple shadow image
         if (_simple)
             return getShadowImage(aRect, getRadius(), getColor());
+
+        // If marked shape is rect and opaque, return simple shadow image
         if (aPDVR.getMarkedShape() instanceof Rect && aPDVR.isMarkedShapeOpaque())
             return getShadowImage(aPDVR.getMarkedShape().getBounds(), getRadius(), getColor());
 
         // Create new image for dvr
         int radius = (int) getRadius(); //if (radius>2) return getShadowImageSimple(aRect);
-        Image simg = aPDVR.getImage(aRect, radius*2);
+        Image shadowImage = aPDVR.getImage(aRect, radius * 2);
 
         // Blur image and return
-        simg.blur(radius, getColor());
-        return simg;
+        shadowImage.blur(radius, getColor());
+        return shadowImage;
     }
 
     /**
@@ -162,7 +172,9 @@ public class ShadowEffect extends Effect {
      */
     public ShadowEffect copySimple()
     {
-        ShadowEffect eff = new ShadowEffect(_radius, _color, _dx, _dy); eff._simple = true; return eff;
+        ShadowEffect copy = new ShadowEffect(_radius, _color, _dx, _dy);
+        copy._simple = true;
+        return copy;
     }
 
     /**
@@ -170,8 +182,9 @@ public class ShadowEffect extends Effect {
      */
     public boolean equals(Object anObj)
     {
-        if (anObj==this) return true;
-        ShadowEffect other = anObj instanceof ShadowEffect ? (ShadowEffect)anObj : null; if (other==null) return false;
+        if (anObj == this) return true;
+        ShadowEffect other = anObj instanceof ShadowEffect ? (ShadowEffect) anObj : null;
+        if (other == null) return false;
         if (other._radius != _radius) return false;
         if (other._dx != _dx || other._dy != _dy) return false;
         if (other._color != _color) return false;
@@ -192,7 +205,7 @@ public class ShadowEffect extends Effect {
         aPropSet.addPropNamed(Radius_Prop, double.class, DEFAULT_RADIUS);
         aPropSet.addPropNamed(DX_Prop, double.class, 0d);
         aPropSet.addPropNamed(DY_Prop, double.class, 0d);
-        aPropSet.addPropNamed(Color_Prop, double.class, DEFAULT_COLOR);
+        aPropSet.addPropNamed(Color_Prop, Color.class, DEFAULT_COLOR);
     }
 
     /**
@@ -265,7 +278,7 @@ public class ShadowEffect extends Effect {
         _dx = anElement.getAttributeIntValue("dx");
         _dy = anElement.getAttributeIntValue("dy");
         String color = anElement.getAttributeValue("color");
-        if (color!=null)
+        if (color != null)
             _color = new Color(color);
 
         // Return this effect
@@ -290,10 +303,10 @@ public class ShadowEffect extends Effect {
         s0.blur(rad, aColor);
 
         // Create image for full size shadow and fill unblurred content area
-        Image simg = Image.get(contentW + rad4, contentH + rad4, true);
-        Painter pntr = simg.getPainter();
+        Image shadowImage = Image.get(contentW + rad4, contentH + rad4, true);
+        Painter pntr = shadowImage.getPainter();
         pntr.setColor(aColor);
-        pntr.fillRect(rad3, rad3, contentW-rad2, contentH-rad2);
+        pntr.fillRect(rad3, rad3, contentW - rad2, contentH - rad2);
 
         // Copy over corners
         pntr.drawImage(s0, 0, 0, rad3, rad3, 0, 0, rad3, rad3);               // Upper left
@@ -304,6 +317,8 @@ public class ShadowEffect extends Effect {
         pntr.drawImage(s0, 0, rad3+1, rad3, rad3, 0, rad+contentH, rad3, rad3);           // Lower left
         pntr.drawImage(s0, rad3, rad3+1, 1, rad3, rad3, rad+contentH, contentW-rad2, rad3);   // Lower Center
         pntr.drawImage(s0, rad3+1, rad3+1, rad3, rad3, rad+contentW, rad+contentH, rad3, rad3); // Lower right
-        return simg;
+
+        // Return
+        return shadowImage;
     }
 }

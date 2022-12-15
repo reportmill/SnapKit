@@ -193,30 +193,34 @@ public abstract class Painter {
     /**
      * Draw image with transform.
      */
-    public void drawImage(Image anImg, Transform xform)
+    public void drawImage(Image anImage, Transform xform)
     {
-        save(); transform(xform);
-        drawImage(anImg, 0, 0);
+        save();
+        transform(xform);
+        drawImage(anImage, 0, 0);
         restore();
     }
 
     /**
      * Draw image in rect.
      */
-    public void drawImage(Image anImg, double aX, double aY)  { drawImage(anImg,aX,aY,anImg.getWidth(),anImg.getHeight()); }
-
-    /**
-     * Draw image in rect.
-     */
-    public void drawImage(Image anImg, double aX, double aY, double aWidth, double aHeight)
+    public void drawImage(Image anImage, double aX, double aY)
     {
-        drawImage(anImg, 0, 0, anImg.getWidth(), anImg.getHeight(), aX, aY, aWidth, aHeight);
+        drawImage(anImage, aX, aY, anImage.getWidth(), anImage.getHeight());
     }
 
     /**
      * Draw image in rect.
      */
-    public abstract void drawImage(Image img, double sx, double sy, double sw, double sh,
+    public void drawImage(Image anImage, double aX, double aY, double aWidth, double aHeight)
+    {
+        drawImage(anImage, 0, 0, anImage.getWidth(), anImage.getHeight(), aX, aY, aWidth, aHeight);
+    }
+
+    /**
+     * Draw image in rect.
+     */
+    public abstract void drawImage(Image anImage, double sx, double sy, double sw, double sh,
         double dx, double dy, double dw, double dh);
 
     /**
