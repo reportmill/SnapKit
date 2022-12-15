@@ -15,10 +15,10 @@ public class Prop {
     private String  _name;
 
     // The property class
-    private Class  _propClass;
+    private Class<?>  _propClass;
 
     // The default property class
-    private Class  _defaultPropClass;
+    private Class<?>  _defaultPropClass;
 
     // Whether property is array class
     private boolean  _array;
@@ -53,7 +53,7 @@ public class Prop {
     /**
      * Constructor.
      */
-    public Prop(String aName, Class aClass, Object aDefault)
+    public Prop(String aName, Class<?> aClass, Object aDefault)
     {
         _name = aName;
         setPropClass(aClass);
@@ -68,7 +68,7 @@ public class Prop {
     /**
      * Returns the return class.
      */
-    public Class getPropClass()  { return _propClass; }
+    public Class<?> getPropClass()  { return _propClass; }
 
     /**
      * Sets the return class.
@@ -83,7 +83,7 @@ public class Prop {
     /**
      * Returns the default property class (if different from prop class).
      */
-    public Class getDefaultPropClass()  { return _defaultPropClass; }
+    public Class<?> getDefaultPropClass()  { return _defaultPropClass; }
 
     /**
      * Sets the default property class (if different from prop class).

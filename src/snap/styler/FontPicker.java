@@ -55,7 +55,7 @@ public class FontPicker extends ViewOwner {
         Color c1 = Color.WHITE, c2 = new Color("#F8F8F8"), c3 = c1;
         Border border = Border.createLineBorder(Color.LIGHTGRAY,1);
         for (String fam : fams) {
-            Font font = Font.get(fam, 18);
+            Font font = Font.getFont(fam, 18);
             FontSampleView fview = new FontSampleView(font, c3, border);
             c3 = c3==c1? c2 : c1;
             enableEvents(fview, MousePress);

@@ -54,7 +54,7 @@ public class PropArchiverHpr {
     /**
      * Returns a PropObjectProxy for given class, if supported.
      */
-    public PropObject getProxyForClass(Class aClass)
+    public PropObject getProxyForClass(Class<?> aClass)
     {
         if (Image.class.isAssignableFrom(aClass))
             return new ImageProxy(null);
@@ -122,7 +122,7 @@ public class PropArchiverHpr {
     private static class ColorProxy extends PropObjectProxy {
 
         // The color
-        private Color  _color = Color.BLACK;
+        private Color  _color;
 
         // Constants for properties
         public static final String Color_Prop = "Color";

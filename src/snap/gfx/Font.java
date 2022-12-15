@@ -82,7 +82,8 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
 
         // If fontFile not found, substitute Helvetica (try to get the style right)
         if (_fontFile==null) {
-            _substitute = true; _fontFile = Arial10.getFontFile();
+            _substitute = true;
+            _fontFile = Arial10.getFontFile();
 
             if (!_fontNotFoundErrorPrinted) {
                 System.err.println("Font Alert! See http://www.reportmill.com/support/docs/fonts.html");
@@ -132,21 +133,29 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the char advance for the given char.
      */
-    public double charAdvance(char aChar)  { return _fontFile.charAdvance(aChar)*_size; }
+    public double charAdvance(char aChar)
+    {
+        double charAdv = _fontFile.charAdvance(aChar);
+        return charAdv * _size;
+    }
 
     /**
      * Returns the char advance for a given character.
      */
     public double getCharAdvance(char aChar, boolean isFractional)
     {
-        double adv = _fontFile.charAdvance(aChar)*_size;
+        double adv = _fontFile.charAdvance(aChar) * _size;
         return isFractional ? adv : Math.round(adv);
     }
 
     /**
      * Returns the kerning for the given pair of characters (no way to do this in Java!).
      */
-    public double getCharKern(char aChar1, char aChar2)  { return _fontFile.getCharKern(aChar1, aChar2)*_size; }
+    public double getCharKern(char aChar1, char aChar2)
+    {
+        double charKern = _fontFile.getCharKern(aChar1, aChar2);
+        return charKern * _size;
+    }
 
     /**
      * Returns the path for a given character.
@@ -158,10 +167,10 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
      */
     public Rect getCharBounds(char aChar)
     {
-        Shape path = getCharPath(aChar);
-        Rect cbounds = path.getBounds();
-        cbounds.scale(_size);
-        return cbounds;
+        Shape charPath = getCharPath(aChar);
+        Rect charBounds = charPath.getBounds();
+        charBounds.scale(_size);
+        return charBounds;
     }
 
     /**
@@ -169,10 +178,10 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
      */
     public double getStringAdvance(String aString)
     {
-        double w = 0;
-        for (int i=0, iMax=aString.length(); i<iMax; i++)
-            w += charAdvance(aString.charAt(i));
-        return w;
+        double strW = 0;
+        for (int i = 0, iMax = aString.length(); i < iMax; i++)
+            strW += charAdvance(aString.charAt(i));
+        return strW;
     }
 
     /**
@@ -180,8 +189,11 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
      */
     public Rect getStringBounds(String aString)
     {
-        double w = getStringAdvance(aString);
-        return new Rect(0, getDescent(), w, getDescent() + getAscent());
+        double ascent = getAscent();
+        double descent = getDescent();
+        double strW = getStringAdvance(aString);
+        double strH = ascent + descent;
+        return new Rect(0, descent, strW, strH);
     }
 
     /**
@@ -208,42 +220,42 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the max distance above the baseline that this font goes.
      */
-    public double getAscent()  { return _fontFile.getAscent()*_size; }
+    public double getAscent()  { return _fontFile.getAscent() * _size; }
 
     /**
      * Returns the max distance below the baseline that this font goes.
      */
-    public double getDescent()  { return _fontFile.getDescent()*_size; }
+    public double getDescent()  { return _fontFile.getDescent() * _size; }
 
     /**
      * Returns the default distance between lines for this font.
      */
-    public double getLeading()  { return _fontFile.getLeading()*_size; }
+    public double getLeading()  { return _fontFile.getLeading() * _size; }
 
     /**
      * Returns the height for a line of text in this font.
      */
-    public double getLineHeight()  { return _fontFile.getLineHeight()*_size; }
+    public double getLineHeight()  { return _fontFile.getLineHeight() * _size; }
 
     /**
      * Returns the distance from the top of a line of text to the to top of a successive line of text.
      */
-    public double getLineAdvance()  { return _fontFile.getLineAdvance()*_size; }
+    public double getLineAdvance()  { return _fontFile.getLineAdvance() * _size; }
 
     /**
      * Returns the distance below the baseline that an underline should be drawn.
      */
-    public double getUnderlineOffset()  { return _fontFile.getUnderlineOffset()*_size; }
+    public double getUnderlineOffset()  { return _fontFile.getUnderlineOffset() * _size; }
 
     /**
      * Returns the default thickness that an underline should be drawn.
      */
-    public double getUnderlineThickness()  { return _fontFile.getUnderlineThickness()*_size; }
+    public double getUnderlineThickness()  { return _fontFile.getUnderlineThickness() * _size; }
 
     /**
      * Returns the distance above the baseline that a strikethrough should be drawn.
      */
-    public double getStrikethroughOffset()  { return _fontFile.getStrikethroughOffset()*_size; }
+    public double getStrikethroughOffset()  { return _fontFile.getStrikethroughOffset() * _size; }
 
     /**
      * Returns whether this font is considered bold.
@@ -270,8 +282,8 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
      */
     public Font getBold()
     {
-        FontFile ff = _fontFile.getBold();
-        return ff!=null ? new Font(ff, _size) : null;
+        FontFile boldFontFile = _fontFile.getBold();
+        return boldFontFile != null ? new Font(boldFontFile, _size) : null;
     }
 
     /**
@@ -279,8 +291,8 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
      */
     public Font getItalic()
     {
-        FontFile ff =_fontFile.getItalic();
-        return ff!=null ? new Font(ff, _size) : null;
+        FontFile italicFontFile =_fontFile.getItalic();
+        return italicFontFile != null ? new Font(italicFontFile, _size) : null;
     }
 
     /**
@@ -288,7 +300,7 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
      */
     public Font deriveFont(double aPointSize)
     {
-        return aPointSize==_size ? this : new Font(_fontFile, aPointSize);
+        return aPointSize == _size ? this : new Font(_fontFile, aPointSize);
     }
 
     /**
@@ -296,7 +308,7 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
      */
     public Font scaleFont(double aScale)
     {
-        return aScale==1 ? this : new Font(_fontFile, _size*aScale);
+        return aScale == 1 ? this : new Font(_fontFile, _size * aScale);
     }
 
     /**
@@ -305,20 +317,22 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
     public boolean equals(Object anObj)
     {
         // Check identity, class and get other
-        if (anObj==this) return true;
+        if (anObj == this) return true;
         if (!(anObj instanceof Font)) return false;
-        Font font = (Font)anObj;
+        Font other = (Font) anObj;
 
         // Check FontFile, Size
-        if (font._fontFile!=_fontFile) return false;
-        if (font._size!=_size) return false;
-        return true; // Return true since all checks passed
+        if (other._fontFile != _fontFile) return false;
+        if (other._size != _size) return false;
+
+        // Return equal
+        return true;
     }
 
     /**
      * Standard hashcode implementation.
      */
-    public int hashCode()  { return getName().hashCode() + (int)(_size*10); }
+    public int hashCode()  { return getName().hashCode() + (int) (_size * 10); }
 
     /**
      * Override to support props for this class.
@@ -343,7 +357,7 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
         switch (aPropName) {
 
             // Name, Size
-            case Name_Prop: return getName();
+            case Name_Prop: return getNameEnglish();
             case Size_Prop: return getSize();
 
             // Do normal version
@@ -383,7 +397,7 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
      */
     public Object getNative()
     {
-        if (_native!=null) return _native;
+        if (_native != null) return _native;
         _native = _fontFile.getNative(_size);
         return _native;
     }
@@ -391,18 +405,10 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
     /**
      * Returns the font for the given name and size.
      */
-    public static Font get(String aName, double aSize)
-    {
-        return getFont(aName, aSize);
-    }
-
-    /**
-     * Returns the font for the given name and size.
-     */
     public static Font getFont(String aName, double aSize)
     {
-        FontFile ffile = FontFile.getFontFile(aName);
-        return ffile!=null ? new Font(ffile, aSize) : null;
+        FontFile fontFile = FontFile.getFontFile(aName);
+        return fontFile != null ? new Font(fontFile, aSize) : null;
     }
 
     /**
@@ -411,20 +417,29 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
     public static Font getDefaultFont()  { return Arial12; }
 
     /**
-     * Returns a list of all system fontnames (excludes any that don't start with capital A-Z).
+     * Returns a list of all system font names.
      */
-    public static String[] getFontNames()  { return GFXEnv.getEnv().getFontNames(); }
+    public static String[] getFontNames()
+    {
+        GFXEnv gfxEnv = GFXEnv.getEnv();
+        return gfxEnv.getFontNames();
+    }
 
     /**
      * Returns a list of all system family names.
      */
-    public static String[] getFamilyNames()  { return GFXEnv.getEnv().getFamilyNames(); }
+    public static String[] getFamilyNames()
+    {
+        GFXEnv gfxEnv = GFXEnv.getEnv();
+        return gfxEnv.getFamilyNames();
+    }
 
     /**
      * Returns a list of all font names for a given family name.
      */
     public static String[] getFontNames(String aFamilyName)
     {
-        return GFXEnv.getEnv().getFontNames(aFamilyName);
+        GFXEnv gfxEnv = GFXEnv.getEnv();
+        return gfxEnv.getFontNames(aFamilyName);
     }
 }
