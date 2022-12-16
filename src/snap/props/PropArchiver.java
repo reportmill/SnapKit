@@ -312,6 +312,24 @@ public class PropArchiver {
     }
 
     /**
+     * Convenience newInstance.
+     */
+    protected PropObject createPropObjectForClass(Class<?> aClass)
+    {
+        // See if we have proxy
+        PropObject proxyObject = _helper.getProxyForClass(aClass);
+        if (proxyObject != null)
+            return proxyObject;
+
+        Object propObject;
+        try { propObject = aClass.newInstance(); }
+        catch (InstantiationException | IllegalAccessException e) { throw new RuntimeException(e + " for: " + aClass); }
+
+        // Return
+        return (PropObject) propObject;
+    }
+
+    /**
      * Returns the list of optional resources associated with this archiver.
      */
     public Resource[] getResources()  { return _resources; }

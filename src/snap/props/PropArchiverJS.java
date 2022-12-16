@@ -343,24 +343,6 @@ public class PropArchiverJS extends PropArchiver {
     }
 
     /**
-     * Convenience newInstance.
-     */
-    private PropObject createPropObjectForClass(Class<?> aClass)
-    {
-        // See if we have proxy
-        PropObject proxyObject = _helper.getProxyForClass(aClass);
-        if (proxyObject != null)
-            return proxyObject;
-
-        Object propObject;
-        try { propObject = aClass.newInstance(); }
-        catch (InstantiationException | IllegalAccessException e) { throw new RuntimeException(e + " for: " + aClass); }
-
-        // Return
-        return (PropObject) propObject;
-    }
-
-    /**
      * Reads resources from <Resource> objects in given JS (top-level) object, converts from ASCII encoding and
      * adds to archiver.
      */
