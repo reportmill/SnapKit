@@ -369,13 +369,7 @@ public class PropArchiverXML extends PropArchiver {
 
         Object propObject;
         try { propObject = aClass.newInstance(); }
-        catch (InstantiationException e) { throw new RuntimeException(e + " for class: " + aClass); }
-        catch (IllegalAccessException e) { throw new RuntimeException(e + " for class: " + aClass); }
-
-        // See if we need proxy
-        PropObject proxyObject1 = _helper.getProxyForObject(propObject);
-        if (proxyObject1 != null)
-            propObject = proxyObject1;
+        catch (InstantiationException | IllegalAccessException e) { throw new RuntimeException(e + " for: " + aClass); }
 
         // Return
         return (PropObject) propObject;

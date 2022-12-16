@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
-import snap.util.ArrayUtils;
 import snap.util.StringUtils;
 import java.util.List;
 
@@ -233,35 +232,30 @@ public class Prop {
      */
     private static boolean isRelationPropClass(Class<?> aClass)
     {
+        // Handle primitive
+        if (aClass.isPrimitive())
+            return false;
+
         // Handle PropObject class/subclass
         if (PropObject.class.isAssignableFrom(aClass))
             return true;
 
-        // Handle PropObject[] class
-        if (aClass.isArray() && PropObject.class.isAssignableFrom(aClass.getComponentType()))
-            return true;
+        // Handle array
+        if (aClass.isArray()) {
+            Class<?> compClass = aClass.getComponentType();
+            return isRelationPropClass(compClass);
+        }
 
         // Handle List class
         if (List.class.isAssignableFrom(aClass))
             return true;
 
         // Additional relation classes
-        for (Class<?> cls : _relationClasses)
-            if (cls.isAssignableFrom(aClass))
-                return true;
+        Class<? extends PropObjectProxy> proxyClass = PropArchiverHpr.getProxyClassForClass(aClass);
+        if (proxyClass != null)
+            return true;
 
         // Return
         return false;
-    }
-
-    // Additional relation classes
-    private static Class[]  _relationClasses = new Class[0];
-
-    /**
-     * Adds additional relation classes.
-     */
-    public static void addRelationClass(Class<?> aClass)
-    {
-        _relationClasses = ArrayUtils.add(_relationClasses, aClass);
     }
 }

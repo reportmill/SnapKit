@@ -215,7 +215,7 @@ public class PropArchiver {
                 // Convert to native (if PropObjectProxy, swap for real)
                 nativeValue = convertNodeToNative(relationNode);
                 if (nativeValue instanceof PropObjectProxy)
-                    nativeValue = ((PropObjectProxy) nativeValue).getReal();
+                    nativeValue = ((PropObjectProxy<?>) nativeValue).getReal();
             }
 
             // Handle Relation array
@@ -234,7 +234,7 @@ public class PropArchiver {
                     PropNode relationNode = relationNodeArray[i];
                     Object relationNative = convertNodeToNative(relationNode);
                     if (relationNative instanceof PropObjectProxy)
-                        relationNative = ((PropObjectProxy) relationNative).getReal();
+                        relationNative = ((PropObjectProxy<?>) relationNative).getReal();
                     Array.set(nativeValue, i, relationNative);
                 }
             }

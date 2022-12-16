@@ -10,6 +10,9 @@ import snap.text.NumberFormat;
 import snap.text.TextFormat;
 import snap.util.SnapUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * This class helps PropArchiver archive some common SnapKit classes.
  */
@@ -18,13 +21,16 @@ public class PropArchiverHpr {
     // The PropArchiver associated with this instance
     private PropArchiver  _archiver;
 
+    // A Map of PropObjectProxy classes.
+    private static Map<Class<?>, Class<? extends PropObjectProxy<?>>> _proxyClasses = new HashMap<>();
+
     // Add classes
     static
     {
-        Prop.addRelationClass(Font.class);
-        Prop.addRelationClass(Paint.class);
-        Prop.addRelationClass(TextFormat.class);
-        Prop.addRelationClass(Image.class);
+        setProxyClassForClass(Font.class, FontProxy.class);
+        setProxyClassForClass(Paint.class, ColorProxy.class);
+        setProxyClassForClass(TextFormat.class, NumberFormatProxy.class);
+        setProxyClassForClass(Image.class, ImageProxy.class);
     }
 
     /**
@@ -40,34 +46,56 @@ public class PropArchiverHpr {
      */
     public PropObject getProxyForObject(Object anObj)
     {
-        if (anObj instanceof Font)
-            return new FontProxy((Font) anObj);
-        if (anObj instanceof Color)
-            return new ColorProxy((Color) anObj);
-        if (anObj instanceof NumberFormat)
-            return new NumberFormatProxy((NumberFormat) anObj);
-        if (anObj instanceof Image)
-            return new ImageProxy((Image) anObj);
-        return null;
+        Class<?> objClass = anObj.getClass();
+        PropObjectProxy<Object> proxy = getProxyForClass(objClass);
+        if (proxy != null)
+            proxy.setReal(anObj);
+        return proxy;
     }
 
     /**
      * Returns a PropObjectProxy for given class, if supported.
      */
-    public PropObject getProxyForClass(Class<?> aClass)
+    public PropObjectProxy<Object> getProxyForClass(Class<?> aClass)
     {
-        if (Image.class.isAssignableFrom(aClass))
-            return new ImageProxy(null);
+        Class<? extends PropObjectProxy<?>> propObjClass = getProxyClassForClass(aClass);
+        if (propObjClass == null)
+            return null;
+
+        // Return new instance
+        try { return (PropObjectProxy<Object>) propObjClass.newInstance(); }
+        catch (InstantiationException | IllegalAccessException e) { throw new RuntimeException(e + " for: " + aClass); }
+    }
+
+    /**
+     * Returns a ProxyPropObject class for given class, if set.
+     */
+    public static Class<? extends PropObjectProxy<?>> getProxyClassForClass(Class<?> aClass)
+    {
+        // Iterate over key classes - if matching class, get proxy
+        for (Class<?> cls : _proxyClasses.keySet()) {
+            if (cls.isAssignableFrom(aClass)) {
+                Class<? extends PropObjectProxy<?>> proxyClass = _proxyClasses.get(cls);
+                return proxyClass;
+            }
+        }
+
+        // Return not found
         return null;
+    }
+
+    /**
+     * Sets a ProxyPropObject class for given class, if set.
+     */
+    public static void setProxyClassForClass(Class<?> aClass, Class<? extends PropObjectProxy<?>> aProxyClass)
+    {
+        _proxyClasses.put(aClass, aProxyClass);
     }
 
     /**
      * A PropObjectProxy subclass for Font.
      */
-    private static class FontProxy extends PropObjectProxy {
-
-        // The font
-        private Font  _font;
+    private static class FontProxy extends PropObjectProxy<Font> {
 
         // Constants for properties
         public static final String Name_Prop = Font.Name_Prop;
@@ -76,16 +104,10 @@ public class PropArchiverHpr {
         /**
          * Constructor.
          */
-        public FontProxy(Font aFont)
+        public FontProxy()
         {
-            _font = aFont;
+            super();
         }
-
-        /**
-         * Override to return Font.
-         */
-        @Override
-        public Object getReal()  { return _font; }
 
         @Override
         protected void initProps(PropSet aPropSet)
@@ -99,8 +121,8 @@ public class PropArchiverHpr {
         public Object getPropValue(String aPropName)
         {
             switch (aPropName) {
-                case Name_Prop: return _font.getNameEnglish();
-                case Size_Prop: return _font.getSize();
+                case Name_Prop: return _real.getNameEnglish();
+                case Size_Prop: return _real.getSize();
                 default: return super.getPropValue(aPropName);
             }
         }
@@ -109,8 +131,8 @@ public class PropArchiverHpr {
         public void setPropValue(String aPropName, Object aValue)
         {
             switch (aPropName) {
-                case Name_Prop: _font = new Font(SnapUtils.stringValue(aValue), 12); break;
-                case Size_Prop: _font = _font.deriveFont(SnapUtils.doubleValue(aValue)); break;
+                case Name_Prop: _real = new Font(SnapUtils.stringValue(aValue), 12); break;
+                case Size_Prop: _real = _real.deriveFont(SnapUtils.doubleValue(aValue)); break;
                 default: super.setPropValue(aPropName, aValue);
             }
         }
@@ -119,10 +141,7 @@ public class PropArchiverHpr {
     /**
      * A PropObjectProxy subclass for Color.
      */
-    private static class ColorProxy extends PropObjectProxy {
-
-        // The color
-        private Color  _color;
+    private static class ColorProxy extends PropObjectProxy<Color> {
 
         // Constants for properties
         public static final String Color_Prop = "Color";
@@ -130,16 +149,10 @@ public class PropArchiverHpr {
         /**
          * Constructor.
          */
-        public ColorProxy(Color aColor)
+        public ColorProxy()
         {
-            _color = aColor;
+            super();
         }
-
-        /**
-         * Override to return Color.
-         */
-        @Override
-        public Object getReal()  { return _color; }
 
         @Override
         protected void initProps(PropSet aPropSet)
@@ -152,7 +165,7 @@ public class PropArchiverHpr {
         public Object getPropValue(String aPropName)
         {
             switch (aPropName) {
-                case Color_Prop: return '#' + _color.toHexString();
+                case Color_Prop: return '#' + _real.toHexString();
                 default: return super.getPropValue(aPropName);
             }
         }
@@ -161,7 +174,7 @@ public class PropArchiverHpr {
         public void setPropValue(String aPropName, Object aValue)
         {
             switch (aPropName) {
-                case Color_Prop: _color = Color.get(SnapUtils.stringValue(aValue)); break;
+                case Color_Prop: _real = Color.get(SnapUtils.stringValue(aValue)); break;
                 default: super.setPropValue(aPropName, aValue);
             }
         }
@@ -170,10 +183,7 @@ public class PropArchiverHpr {
     /**
      * A PropObjectProxy subclass for NumberFormat.
      */
-    private static class NumberFormatProxy extends PropObjectProxy {
-
-        // The number format
-        private NumberFormat  _format;
+    private static class NumberFormatProxy extends PropObjectProxy<NumberFormat> {
 
         // Constants for properties
         public static final String Pattern_Prop = NumberFormat.Pattern_Prop;
@@ -186,16 +196,10 @@ public class PropArchiverHpr {
         /**
          * Constructor.
          */
-        public NumberFormatProxy(NumberFormat aFormat)
+        public NumberFormatProxy()
         {
-            _format = aFormat;
+            super();
         }
-
-        /**
-         * Override to return Format.
-         */
-        @Override
-        public Object getReal()  { return _format; }
 
         @Override
         protected void initProps(PropSet aPropSet)
@@ -209,8 +213,8 @@ public class PropArchiverHpr {
         public Object getPropValue(String aPropName)
         {
             switch (aPropName) {
-                case Pattern_Prop: return _format.getPattern();
-                case ExpStyle_Prop: return _format.getExpStyle();
+                case Pattern_Prop: return _real.getPattern();
+                case ExpStyle_Prop: return _real.getExpStyle();
                 default: return super.getPropValue(aPropName);
             }
         }
@@ -221,11 +225,11 @@ public class PropArchiverHpr {
             switch (aPropName) {
                 case Pattern_Prop:
                     String pattern = SnapUtils.stringValue(aValue);
-                    _format.setPattern(pattern);
+                    _real.setPattern(pattern);
                     break;
                 case ExpStyle_Prop:
                     NumberFormat.ExpStyle expStyle = (NumberFormat.ExpStyle) aValue;
-                    _format = _format.copyForProps(ExpStyle_Prop, expStyle);
+                    _real = _real.copyForProps(ExpStyle_Prop, expStyle);
                     break;
                 default: super.setPropValue(aPropName, aValue);
             }
@@ -235,10 +239,7 @@ public class PropArchiverHpr {
     /**
      * A PropObjectProxy subclass for Image.
      */
-    private class ImageProxy extends PropObjectProxy {
-
-        // The image
-        private Image  _image;
+    private class ImageProxy extends PropObjectProxy<Image> {
 
         // The image name
         private String  _name;
@@ -249,28 +250,17 @@ public class PropArchiverHpr {
         /**
          * Constructor.
          */
-        public ImageProxy(Image anImage)
+        public ImageProxy()
         {
-            _image = anImage;
-
-            if (_image != null) {
-                _name = _image.getName();
-                if (_name == null)
-                    _name = String.valueOf(System.identityHashCode(_image));
-                byte[] bytes = _image.getBytes();
-                _archiver.addResource(_name, bytes);
-            }
+            super();
         }
 
         /**
          * Override to return Image.
          */
         @Override
-        public Object getReal()
+        public Image getRealImpl()
         {
-            // If already set, just return
-            if (_image != null) return _image;
-
             // Get named resource
             PropArchiver.Resource resource = _archiver.getResourceForName(_name);
             if (resource == null) {
@@ -282,8 +272,25 @@ public class PropArchiverHpr {
             byte[] bytes = resource.getBytes();
             Image image = Image.getImageForBytes(bytes);
 
-            // Set/return
-            return _image = image;
+            // Return
+            return image;
+        }
+
+        @Override
+        public void setReal(Image aReal)
+        {
+            // Do normal version
+            super.setReal(aReal);
+            if (aReal == null) return;
+
+            // Get Image Name
+            _name = aReal.getName();
+            if (_name == null)
+                _name = String.valueOf(System.identityHashCode(aReal));
+
+            // Add Image Bytes to Archiver.Resources
+            byte[] bytes = aReal.getBytes();
+            _archiver.addResource(_name, bytes);
         }
 
         @Override
