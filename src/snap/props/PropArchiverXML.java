@@ -377,4 +377,160 @@ public class PropArchiverXML extends PropArchiver {
             addResource(name, bytes);
         }
     }
+
+    /**
+     * This FormatNode implementation allows PropArchiver to read/write to XML.
+     */
+    public static class XMLFormatConverter implements PropArchiverX.FormatConverter<Object> {
+
+        /**
+         * Creates a format node for given prop name.
+         */
+        public Object createFormatNode(String aPropName)
+        {
+            return new XMLElement(aPropName);
+        }
+
+        /**
+         * Return child property keys.
+         */
+        @Override
+        public String[] getChildKeys(Object aNode)
+        {
+            if (aNode instanceof XMLElement) {
+                XMLElement xml = (XMLElement) aNode;
+                int attrCount = xml.getAttributeCount();
+                int elemCount = xml.getElementCount();
+                String[] keys = new String[attrCount + elemCount];
+                for (int i = 0; i < attrCount; i++)
+                    keys[i] = xml.getAttribute(i).getName();
+                for (int i = 0; i < elemCount; i++)
+                    keys[i + attrCount] = xml.getElement(i).getName();
+                return keys;
+            }
+
+            return new String[0];
+        }
+
+        /**
+         * Return child property value for given key.
+         */
+        @Override
+        public Object getChildNodeForKey(Object aNode, String aName)
+        {
+            // Handle XMLElement
+            if (aNode instanceof XMLElement) {
+
+                // Look for attribute
+                XMLElement xml = (XMLElement) aNode;
+                Object value = xml.getAttribute(aName);
+                if (value != null)
+                    return value;
+
+                // Look for element
+                value = xml.getElement(aName);
+                if (value != null)
+                    return value;
+
+                // Special Class_Key support: XML can exclude explicit Class key if matches name
+                if (aName.equals("Class"))
+                    return xml.getName();
+            }
+
+            // Return not found
+            return null;
+        }
+
+        /**
+         * Returns the node value as string.
+         */
+        @Override
+        public String getNodeValueAsString(Object aNode)
+        {
+            // Handle Attribute
+            if (aNode instanceof XMLAttribute)
+                return ((XMLAttribute) aNode).getValue();
+
+            // Handle Element
+            if (aNode instanceof XMLElement)
+                return ((XMLElement) aNode).getValue();
+
+            // Handle String (Probably Class_Key)
+            if (aNode instanceof String)
+                return (String) aNode;
+
+            // Return not found
+            return null;
+        }
+
+        /**
+         * Returns array of nodes for a format node.
+         */
+        public Object[] getNodeValueAsArray(Object anArrayNode)
+        {
+            if (anArrayNode instanceof XMLElement)
+                return ((XMLElement) anArrayNode).getElements().toArray();
+            return null;
+        }
+
+        /**
+         * Sets a node value.
+         */
+        public void setNodeValue(Object aNode, String aValue)
+        {
+            // Handle Attribute
+            if (aNode instanceof XMLAttribute)
+                ((XMLAttribute) aNode).setValue(aValue);
+
+                // Handle Element
+            else if (aNode instanceof XMLElement)
+                ((XMLElement) aNode).setValue(aValue);
+
+                // Handle unexpected
+            else System.err.println("XMLFormatConverter.setNodeValue: Unexpected node: " + aNode);
+        }
+
+        /**
+         * Sets a node value for given key.
+         */
+        public void setNodeValueForKey(Object aNode, String aKey, Object aValue)
+        {
+            // Handle Element
+            if (aNode instanceof XMLElement) {
+                XMLElement xml = (XMLElement) aNode;
+                if (aValue instanceof XMLElement)
+                    xml.addElement((XMLElement) aValue);
+                else xml.add(aKey, aValue);
+            }
+
+            // Handle unexpected
+            else System.err.println("XMLFormatConverter.setNodeValueForKey: Unexpected node: " + aNode);
+        }
+
+        /**
+         * Adds a node array item for given array key.
+         */
+        public void addNodeArrayItemForKey(Object aNode, String aKey, Object aValue)
+        {
+            // Handle Element
+            if (aNode instanceof XMLElement) {
+                XMLElement xml = (XMLElement) aNode;
+
+                // Get array element (create/add if missing)
+                XMLElement arrayXML = xml.getElement(aKey);
+                if (arrayXML == null) {
+                    arrayXML = new XMLElement(aKey);
+                    xml.addElement(arrayXML);
+                }
+
+                // Add item
+                if (aValue instanceof XMLElement)
+                    arrayXML.addElement((XMLElement) aValue);
+                else System.err.println("XMLFormatConverter.addNodeArrayItemForKey: Unexpected array item node: " + aNode);
+            }
+
+            // Handle unexpected
+            else System.err.println("XMLFormatConverter.addNodeArrayItemForKey: Unexpected array node: " + aNode);
+        }
+    }
 }

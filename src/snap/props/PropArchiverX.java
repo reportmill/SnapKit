@@ -4,30 +4,31 @@
 package snap.props;
 import java.util.ArrayList;
 import java.util.List;
-import snap.util.XMLAttribute;
-import snap.util.XMLElement;
 
 /**
  * A PropArchiver subclass specifically to convert to/from XML.
  */
-public class PropArchiverX extends PropArchiver {
+public abstract class PropArchiverX extends PropArchiver {
 
     // The FormatConverter
-    private FormatConverter _formatConverter;
+    protected FormatConverter  _formatConverter;
+
+    // Constant for special Class key
+    public static final String CLASS_KEY = "Class";
 
     /**
-     * Returns XML for PropNode.
+     * Returns an abstract format node (as defined by FormatConverter) for given PropNode.
      */
-    protected XMLElement convertNodeToXML(String aPropName, PropNode aPropNode)
+    protected Object convertNodeToFormatNode(String aPropName, PropNode aPropNode)
     {
-        // Create XML element for PropNode
-        XMLElement xml = new XMLElement(aPropName);
+        // Create format node for PropNode
+        Object formatNode = _formatConverter.createFormatNode(aPropName);
 
         // If PropNode.NeedsClassDeclaration, add Class attribute to XML
         if (aPropNode.isNeedsClassDeclaration()) {
             String className = aPropNode.getClassName();
             if (!className.equals(aPropName))
-                xml.add("Class", className);
+                _formatConverter.setNodeValueForKey(formatNode, CLASS_KEY, className);
         }
 
         // Get configured Props
@@ -43,27 +44,27 @@ public class PropArchiverX extends PropArchiver {
 
             // Handle null
             if (nodeValue == null)
-                xml.add(propName, "null");
+                _formatConverter.setNodeValueForKey(formatNode, propName, "null");
 
             // Handle Relation prop
             else if (isRelation)
-                convertNodeToXMLForPropRelation(xml, prop, nodeValue);
+                convertNodeToFormatNodeForRelation(formatNode, prop, nodeValue);
 
             // Handle String (non-Node) prop
             else {
                 String stringValue = (String) nodeValue;
-                convertNodeToXMLForPropSimple(xml, prop, stringValue);
+                convertNodeToFormatNodeForSimpleProp(formatNode, prop, stringValue);
             }
         }
 
         // Return xml
-        return xml;
+        return formatNode;
     }
 
     /**
-     * Converts and adds a prop node relation value to XML.
+     * Converts and adds a prop node relation value to abstract format node.
      */
-    protected void convertNodeToXMLForPropRelation(XMLElement xml, Prop prop, Object nodeValue)
+    protected void convertNodeToFormatNodeForRelation(Object aFormatNode, Prop prop, Object nodeValue)
     {
         // Get prop info
         String propName = prop.getName();
@@ -75,30 +76,30 @@ public class PropArchiverX extends PropArchiver {
             // Get array
             PropNode[] nodeArray = (PropNode[]) nodeValue;
 
-            // Create child XML
-            XMLElement propXML = new XMLElement(propName);
-            xml.addElement(propXML);
+            // Create child format array node
+            //Object arrayNode = _formatConverter.createFormatArrayNode(propName);
+            //_formatConverter.setNodeValueForKey(aFormatNode, propName, arrayNode);
 
             // Handle PropNode array
             for (PropNode childNode : nodeArray) {
                 String childName = childNode.getClassName();
-                XMLElement childXML = convertNodeToXML(childName, childNode);
-                propXML.addElement(childXML);
+                Object childFormatNode = convertNodeToFormatNode(childName, childNode);
+                _formatConverter.addNodeArrayItemForKey(aFormatNode, propName, childFormatNode);
             }
         }
 
         // Handle Node object
         else {
             PropNode propNode = (PropNode) nodeValue;
-            XMLElement propXML = convertNodeToXML(propName, propNode);
-            xml.addElement(propXML);
+            Object childFormatNode = convertNodeToFormatNode(propName, propNode);
+            _formatConverter.setNodeValueForKey(aFormatNode, propName, childFormatNode);
         }
     }
 
     /**
-     * Converts and adds a prop node string value to XML.
+     * Converts and adds a prop node string value to abstract format node.
      */
-    protected void convertNodeToXMLForPropSimple(XMLElement xml, Prop prop, String stringValue)
+    protected void convertNodeToFormatNodeForSimpleProp(Object aFormatNode, Prop prop, String stringValue)
     {
         // Get prop info
         String propName = prop.getName();
@@ -106,13 +107,13 @@ public class PropArchiverX extends PropArchiver {
 
         // Handle primitive array
         if (isArray) {
-            XMLElement propXML = new XMLElement(propName);
-            xml.addElement(propXML);
-            propXML.setValue(stringValue);
+            Object formatNode = _formatConverter.createFormatNode(propName);
+            _formatConverter.setNodeValueForKey(aFormatNode, propName, formatNode);
+            _formatConverter.setNodeValue(formatNode, stringValue);
         }
 
         // Handle primitive value
-        else xml.add(propName, stringValue);
+        else _formatConverter.setNodeValueForKey(aFormatNode, propName, stringValue);
     }
 
     /**
@@ -133,7 +134,7 @@ public class PropArchiverX extends PropArchiver {
         for (String propName : childNodeKeys) {
 
             // Skip special Class key
-            if (propName.equals("Class")) continue;
+            if (propName.equals(CLASS_KEY)) continue;
 
             // Get prop
             Prop prop = propObject.getPropForName(propName);
@@ -231,7 +232,7 @@ public class PropArchiverX extends PropArchiver {
     protected Class<?> getPropObjectClassForFormatNode(Prop aProp, Object aFormatNode)
     {
         // If Class prop set, try that
-        Object classNode = _formatConverter.getChildNodeForKey(aFormatNode, "Class");
+        Object classNode = _formatConverter.getChildNodeForKey(aFormatNode, CLASS_KEY);
         if (classNode != null) {
             String className = _formatConverter.getNodeValueAsString(classNode);
             Class<?> cls = getClassForName(className);
@@ -258,30 +259,14 @@ public class PropArchiverX extends PropArchiver {
     }
 
     /**
-     * Reads resources from <Resource> elements in given xml (top-level) element, converts from ASCII encoding and
-     * adds to archiver.
-     */
-    protected void readResources(XMLElement anElement)
-    {
-        // Get resources from top level <resource> tags
-        for (int i = anElement.indexOf("Resource"); i >= 0; i = anElement.indexOf("Resource", i)) {
-
-            // Get/remove current resource element
-            XMLElement e = anElement.removeElement(i);
-
-            // Get resource name and bytes
-            String name = e.getAttributeValue("name");
-            byte[] bytes = e.getValueBytes();
-
-            // Add resource bytes for name
-            addResource(name, bytes);
-        }
-    }
-
-    /**
      * An interface to read/write to an abstract format node.
      */
     public interface FormatConverter<T> {
+
+        /**
+         * Creates a format node for given prop name.
+         */
+        T createFormatNode(String aPropName);
 
         /**
          * Return child property keys.
@@ -302,93 +287,20 @@ public class PropArchiverX extends PropArchiver {
          * Returns array of nodes for a format node.
          */
         Object[] getNodeValueAsArray(Object anArrayNode);
-    }
-
-    /**
-     * This FormatNode implementation allows PropArchiver to read/write to XML.
-     */
-    public static class XMLFormatConverter implements FormatConverter<Object> {
 
         /**
-         * Return child property keys.
+         * Sets a node value.
          */
-        @Override
-        public String[] getChildKeys(Object aNode)
-        {
-            if (aNode instanceof XMLElement) {
-                XMLElement xml = (XMLElement) aNode;
-                int attrCount = xml.getAttributeCount();
-                int elemCount = xml.getElementCount();
-                String[] keys = new String[attrCount + elemCount];
-                for (int i = 0; i < attrCount; i++)
-                    keys[i] = xml.getAttribute(i).getName();
-                for (int i = 0; i < elemCount; i++)
-                    keys[i + attrCount] = xml.getElement(i).getName();
-                return keys;
-            }
-
-            return new String[0];
-        }
+        void setNodeValue(Object aNode, String aValue);
 
         /**
-         * Return child property value for given key.
+         * Sets a node value for given key.
          */
-        @Override
-        public Object getChildNodeForKey(Object aNode, String aName)
-        {
-            // Handle XMLElement
-            if (aNode instanceof XMLElement) {
-
-                // Look for attribute
-                XMLElement xml = (XMLElement) aNode;
-                Object value = xml.getAttribute(aName);
-                if (value != null)
-                    return value;
-
-                // Look for element
-                value = xml.getElement(aName);
-                if (value != null)
-                    return value;
-
-                // Special Class_Key support: XML can exclude explicit Class key if matches name
-                if (aName.equals("Class"))
-                    return xml.getName();
-            }
-
-            // Return not found
-            return null;
-        }
+        void setNodeValueForKey(Object aNode, String aKey, Object aValue);
 
         /**
-         * Returns the node value as string.
+         * Adds a node array item for given array key.
          */
-        @Override
-        public String getNodeValueAsString(Object aNode)
-        {
-            // Handle Attribute
-            if (aNode instanceof XMLAttribute)
-                return ((XMLAttribute) aNode).getValue();
-
-            // Handle Element
-            if (aNode instanceof XMLElement)
-                return ((XMLElement) aNode).getValue();
-
-            // Handle String (Probably Class_Key)
-            if (aNode instanceof String)
-                return (String) aNode;
-
-            // Return not found
-            return null;
-        }
-
-        /**
-         * Returns array of nodes for a format node.
-         */
-        public Object[] getNodeValueAsArray(Object anArrayNode)
-        {
-            if (anArrayNode instanceof XMLElement)
-                return ((XMLElement) anArrayNode).getElements().toArray();
-            return null;
-        }
+        void addNodeArrayItemForKey(Object aNode, String aKey, Object aValue);
     }
 }
