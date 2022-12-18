@@ -121,9 +121,9 @@ public class PropArchiverXML extends PropArchiverX {
     }
 
     /**
-     * Returns a copy of the given object using archival.
+     * Returns a copy of the given PropObject using archival.
      */
-    public <T extends PropObject> T copy(T aPropObject)
+    public <T extends PropObject> T copyPropObject(T aPropObject)
     {
         XMLElement xml = writePropObjectToXML(aPropObject);
         return (T) readPropObjectFromXML(xml);
