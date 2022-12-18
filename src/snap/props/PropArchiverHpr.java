@@ -185,6 +185,12 @@ public class PropArchiverHpr {
      */
     private static class NumberFormatProxy extends PropObjectProxy<NumberFormat> {
 
+        // The pattern
+        private String  _pattern;
+
+        // The Exponent style
+        private NumberFormat.ExpStyle  _expStyle;
+
         // Constants for properties
         public static final String Pattern_Prop = NumberFormat.Pattern_Prop;
         public static final String ExpStyle_Prop = NumberFormat.ExpStyle_Prop;
@@ -220,16 +226,20 @@ public class PropArchiverHpr {
         }
 
         @Override
+        protected NumberFormat getRealImpl()
+        {
+            return new NumberFormat(_pattern, _expStyle);
+        }
+
+        @Override
         public void setPropValue(String aPropName, Object aValue)
         {
             switch (aPropName) {
                 case Pattern_Prop:
-                    String pattern = SnapUtils.stringValue(aValue);
-                    _real.setPattern(pattern);
+                    _pattern = SnapUtils.stringValue(aValue);
                     break;
                 case ExpStyle_Prop:
-                    NumberFormat.ExpStyle expStyle = (NumberFormat.ExpStyle) aValue;
-                    _real = _real.copyForProps(ExpStyle_Prop, expStyle);
+                    _expStyle = (NumberFormat.ExpStyle) aValue;
                     break;
                 default: super.setPropValue(aPropName, aValue);
             }

@@ -11,7 +11,7 @@ import java.util.List;
 public abstract class PropArchiverX extends PropArchiver {
 
     // The FormatConverter
-    protected FormatConverter  _formatConverter;
+    protected FormatConverter<Object>  _formatConverter;
 
     // Constant for special Class key
     public static final String CLASS_KEY = "Class";
