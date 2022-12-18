@@ -21,7 +21,7 @@ public class PropArchiverXML extends PropArchiverX {
     /**
      * Converts a PropObject to XML.
      */
-    public XMLElement convertPropObjectToXML(PropObject aPropObject)
+    public XMLElement writePropObjectToXML(PropObject aPropObject)
     {
         // Convert native to node
         PropNode propNode = convertNativeToNode(null, aPropObject);
@@ -45,9 +45,9 @@ public class PropArchiverXML extends PropArchiverX {
     /**
      * Converts a PropObject to XML.
      */
-    public byte[] convertPropObjectToXMLBytes(PropObject aPropObject)
+    public byte[] writePropObjectToXMLBytes(PropObject aPropObject)
     {
-        XMLElement xml = convertPropObjectToXML(aPropObject);
+        XMLElement xml = writePropObjectToXML(aPropObject);
         byte[] xmlBytes = xml.getBytes();
         return xmlBytes;
     }
@@ -125,7 +125,7 @@ public class PropArchiverXML extends PropArchiverX {
      */
     public <T extends PropObject> T copy(T aPropObject)
     {
-        XMLElement xml = convertPropObjectToXML(aPropObject);
+        XMLElement xml = writePropObjectToXML(aPropObject);
         return (T) readPropObjectFromXML(xml);
     }
 

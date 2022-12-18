@@ -14,14 +14,14 @@ import java.util.Map;
  */
 public class PropArchiver {
 
-    // A helper class to archive common SnapKit classes (Font, Color, etc.)
-    protected PropArchiverHpr  _helper;
-
     // A map of names to Class names, for unarchival
     private Map<String,Class<?>>  _classMap;
 
     // Resources
     private Resource[]  _resources = new Resource[0];
+
+    // A helper class to archive common SnapKit classes (Font, Color, etc.)
+    protected PropArchiverHpr  _helper;
 
     /**
      * Constructor.
@@ -34,7 +34,7 @@ public class PropArchiver {
     /**
      * Returns a PropNode for given PropObject.
      */
-    public PropNode convertNativeToNode(Prop prop, PropObject aPropObj)
+    protected PropNode convertNativeToNode(Prop prop, PropObject aPropObj)
     {
         // Create new PropNode
         PropNode propNode = new PropNode(aPropObj, this);
@@ -55,7 +55,7 @@ public class PropArchiver {
         if (propsExtra != null)
             convertNativeToNodeForProps(aPropObj, propNode, propsExtra);
 
-        // Return PropNode
+        // Return
         return propNode;
     }
 
@@ -106,7 +106,7 @@ public class PropArchiver {
             return stringValue;
         }
 
-        // Otherwise complain and return null
+        // Otherwise complain and return
         System.err.println("PropArchiver.convertNativeToNodeForPropSimple: Value not codeable: " + nativeValue.getClass());
         return null;
     }
@@ -344,9 +344,12 @@ public class PropArchiver {
      */
     public Resource getResourceForName(String aName)
     {
+        // Iterate over resources and return resource matching name
         for (Resource resource : _resources)
             if (resource.getName().equals(aName))
                 return resource;
+
+        // Return not found
         return null;
     }
 
@@ -400,10 +403,15 @@ public class PropArchiver {
         // Standard equals implementation
         public boolean equalsBytes(byte[] bytes)
         {
+            // Check length
             if (bytes.length != _bytes.length) return false;
+
+            // Check bytes
             for (int i = 0, iMax = bytes.length; i < iMax; i++)
                 if (bytes[i] != _bytes[i])
                     return false;
+
+            // Return true
             return true;
         }
     }

@@ -22,7 +22,7 @@ public class PropArchiverJS extends PropArchiverX {
     /**
      * Converts a PropObject to JSON.
      */
-    public JSObject convertPropObjectToJSON(PropObject aPropObject)
+    public JSObject writePropObjectToJSON(PropObject aPropObject)
     {
         // Convert native to node
         PropNode propNode = convertNativeToNode(null, aPropObject);
