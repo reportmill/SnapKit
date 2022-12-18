@@ -8,7 +8,16 @@ import java.util.*;
 /**
  * A PropArchiver subclass specifically to convert to/from JSON.
  */
-public class PropArchiverJS extends PropArchiver {
+public class PropArchiverJS extends PropArchiverX {
+
+    /**
+     * Constructor.
+     */
+    public PropArchiverJS()
+    {
+        super();
+        _formatConverter = new JSONFormatConverter();
+    }
 
     /**
      * Converts a PropObject to JSON.
@@ -20,7 +29,7 @@ public class PropArchiverJS extends PropArchiver {
         propNode.setNeedsClassDeclaration(true);
 
         // Convert node to JSON
-        JSObject objectJS = convertNodeToJSON(null, propNode);
+        JSObject objectJS = (JSObject) convertNodeToFormatNode(null, propNode);
 
         // Archive resources
         /*for (Resource resource : getResources()) {
@@ -32,117 +41,6 @@ public class PropArchiverJS extends PropArchiver {
 
         // Return
         return objectJS;
-    }
-
-    /**
-     * Converts a PropObject to JSON.
-     */
-    public byte[] convertPropObjectToJSONBytes(PropObject aPropObject)
-    {
-        JSObject json = convertPropObjectToJSON(aPropObject);
-        String jsonStr = json.toString();
-        byte[] jsonBytes = jsonStr.getBytes();
-        return jsonBytes;
-    }
-
-    /**
-     * Returns JSON for PropNode.
-     */
-    protected JSObject convertNodeToJSON(String aPropName, PropNode aPropNode)
-    {
-        // Create JSObject for PropNode
-        JSObject propNodeJS = new JSObject();
-
-        // If PropNode.NeedsClassDeclaration, add Class attribute to JSON
-        if (aPropNode.isNeedsClassDeclaration()) {
-            String className = aPropNode.getClassName();
-            if (!className.equals(aPropName))
-                propNodeJS.setNativeValue("Class", className);
-        }
-
-        // Get configured Props
-        List<Prop> props = aPropNode.getProps();
-
-        // Iterate over PropNames and add JSValue/JSObject/JSArray for each
-        for (Prop prop : props) {
-
-            // Get Node value and whether it is node and/or array
-            String propName = prop.getName();
-            Object nodeValue = aPropNode.getNodeValueForPropName(propName);
-            boolean isRelation = prop.isRelation();
-
-            // Handle null
-            if (nodeValue == null)
-                propNodeJS.setNativeValue(propName, null);
-
-            // Handle Relation prop
-            else if (isRelation)
-                convertNodeToJSONForPropRelation(propNodeJS, prop, nodeValue);
-
-            // Handle array of double or String
-            else if (prop.isArray()) {
-
-                // If double[] or String[], add JSArray
-                Class propClass = prop.getPropClass();
-                if (propClass == double[].class || propClass == String.class) {
-                    Object arrayObj = aPropNode.getPropObject().getPropValue(propName);
-                    JSArray arrayJS = new JSArray(arrayObj);
-                    propNodeJS.setValue(propName, arrayJS);
-                }
-
-                // Otherwise add string
-                else propNodeJS.setNativeValue(propName, nodeValue);
-            }
-
-            // Handle String (non-Node) prop
-            else {
-
-                // If PropClass is Number or Boolean, use original PropObject value
-                Class propClass = prop.getPropClass();
-                if (Number.class.isAssignableFrom(propClass) || propClass == Boolean.class || propClass.isPrimitive())
-                    nodeValue = aPropNode.getPropObject().getPropValue(propName);
-
-                // Set native value
-                propNodeJS.setNativeValue(propName, nodeValue);
-            }
-        }
-
-        // Return
-        return propNodeJS;
-    }
-
-    /**
-     * Converts and adds a prop node relation value to JSON.
-     */
-    protected void convertNodeToJSONForPropRelation(JSObject parentJS, Prop prop, Object nodeValue)
-    {
-        // Get prop info
-        String propName = prop.getName();
-        boolean isArray = prop.isArray();
-
-        // Handle Node array
-        if (isArray) {
-
-            // Get array
-            PropNode[] nodeArray = (PropNode[]) nodeValue;
-
-            // Create JSArray
-            JSArray arrayJS = new JSArray();
-            parentJS.setValue(propName, arrayJS);
-
-            // Handle PropNode array
-            for (PropNode childNode : nodeArray) {
-                JSObject childNodeJS = convertNodeToJSON(null, childNode);
-                arrayJS.addValue(childNodeJS);
-            }
-        }
-
-        // Handle Node object
-        else {
-            PropNode propNode = (PropNode) nodeValue;
-            JSObject propNodeJS = convertNodeToJSON(propName, propNode);
-            parentJS.setValue(propName, propNodeJS);
-        }
     }
 
     /**
@@ -194,152 +92,13 @@ public class PropArchiverJS extends PropArchiver {
         readResources(objectJS);
 
         // Read PropNode from JSON
-        PropNode propNode = convertJSONToNode(null, null, objectJS);
+        PropNode propNode = convertFormatNodeToNode(null, null, objectJS);
 
         // Convert PropNode (graph) to PropObject
         PropObject propObject = convertNodeToNative(propNode);
 
         // Return
         return propObject;
-    }
-
-    /**
-     * Reads a PropNode from JSON.
-     */
-    protected PropNode convertJSONToNode(PropNode aParent, Prop aProp, JSObject anObjectJS)
-    {
-        // Create PropObject for JSObject
-        PropObject propObject = createPropObjectForJSON(aParent, aProp, anObjectJS);
-
-        // Create PropNode for propObject
-        PropNode propNode = new PropNode(propObject, this);
-
-        // Get list of configured JSON attributes
-        Map<String,JSValue> keyValues = anObjectJS.getKeyValues();
-        Collection<String> keys = keyValues.keySet();
-
-        // Iterate over JSON KeyValue keys and add node/native value for each
-        for (String propName : keys) {
-
-            // Skip special Class key
-            if (propName.equals("Class")) continue;
-
-            // Get prop
-            Prop prop = propObject.getPropForName(propName);
-            if (prop == null) continue; // Should never happen
-
-            // Get value
-            JSValue valueJS = anObjectJS.getValue(propName);
-
-            // Handle array
-            if (prop.isArray()) {
-
-                // Handle Relation array: Get node value for JSON and add to PropNode
-                if (prop.isRelation()) {
-                    PropNode[] nodeValue = convertJSONToNodeForRelationArray(propNode, prop, (JSArray) valueJS);
-                    propNode.addNodeValueForProp(prop, nodeValue);
-                }
-
-                // Handle simple array: Read array string and add to PropNode
-                else {
-                    String nodeValue = valueJS.getValueAsString();
-                    propNode.addNodeValueForProp(prop, nodeValue);
-                }
-            }
-
-            // Handle relation: Get node value for JSON and add to PropNode
-            else {
-                if (valueJS instanceof JSObject) {
-                    JSObject objectJS = (JSObject) valueJS;
-                    PropNode nodeValue = convertJSONToNode(propNode, prop, objectJS);
-                    propNode.addNodeValueForProp(prop, nodeValue);
-                }
-            }
-        }
-
-        // Return
-        return propNode;
-    }
-
-    /**
-     * Reads a PropNode from JSON.
-     */
-    protected PropNode[] convertJSONToNodeForRelationArray(PropNode aParent, Prop aProp, JSArray anObjectJS)
-    {
-        // Get list of configured JSON objects
-        List<JSValue> valuesJS = anObjectJS.getValues();
-
-        // Create list
-        List<PropNode> propNodes = new ArrayList<>(valuesJS.size());
-
-        // Iterate over JSON objects and add node/native value for each
-        for (JSValue valueJS : valuesJS) {
-
-            PropNode propNode = convertJSONToNode(aParent, aProp, (JSObject) valueJS);
-            if (propNode != null)
-                propNodes.add(propNode);
-        }
-
-        // Return
-        return propNodes.toArray(new PropNode[0]);
-    }
-
-    /**
-     * Creates a PropObject for JSON object.
-     */
-    protected PropObject createPropObjectForJSON(PropNode aParent, Prop aProp, JSObject anObjectJS)
-    {
-        // If Prop.Preexisting, just instance from PropObject instead
-        if (aProp != null && aProp.isPreexisting() && aParent != null) {
-            PropObject propObject = aParent.getPropObject();
-            Object existingInstance = propObject.getPropValue(aProp.getName());
-            if (existingInstance instanceof PropObject)
-                return (PropObject) existingInstance;
-        }
-
-        // If Class attribute set, try that
-        String className = anObjectJS.getStringValue("Class");
-        if (className != null) {
-            Class<?> cls = getClassForName(className);
-            if (cls != null)
-                return createPropObjectForClass(cls);
-        }
-
-        // If Prop is Array, try name next
-        /*if (aProp != null && aProp.isArray()) {
-            String xmlName = anObjectJS.getName();
-            Class<?> xmlNameClass = getClassForName(xmlName);
-            if (xmlNameClass != null)
-                return createPropObjectForClass(xmlNameClass);
-        }*/
-
-        // Try Prop class attribute
-        Class<?> propClass = aProp != null ? aProp.getDefaultPropClass() : null;
-        if (propClass != null) {
-
-            // If array, swap for component class
-            if (propClass.isArray())
-                propClass = propClass.getComponentType();
-
-            return createPropObjectForClass(propClass);
-        }
-
-        // Try PropName as ClassMap name
-        String propName = aProp != null ? aProp.getName() : null;
-        propClass = getClassForName(propName);
-        if (propClass != null) {
-            return createPropObjectForClass(propClass);
-        }
-
-        // Try object name
-        /*String xmlName = anElement.getName();
-        Class<?> xmlNameClass = getClassForName(xmlName);
-        if (xmlNameClass != null)
-            return createPropObjectForClass(xmlNameClass);*/
-
-        // Complain and return
-        System.err.println("PropArchiverJS.createPropObjectForJSON: Undetermined class for JS: " + anObjectJS);
-        return null;
     }
 
     /**
@@ -361,5 +120,140 @@ public class PropArchiverJS extends PropArchiver {
             // Add resource bytes for name
             addResource(name, bytes);
         }*/
+    }
+    /**
+     * This FormatNode implementation allows PropArchiver to read/write to JSON.
+     */
+    public static class JSONFormatConverter implements PropArchiverX.FormatConverter<Object> {
+
+        /**
+         * Creates a format node for given prop name.
+         */
+        @Override
+        public Object createFormatNode(String aPropName)
+        {
+            return new JSObject();
+        }
+
+        /**
+         * Creates a format array node for given prop name and array.
+         */
+        @Override
+        public Object createFormatArrayNode(String aPropName, Object arrayObj)
+        {
+            return new JSArray(arrayObj);
+        }
+
+        /**
+         * Return child property keys.
+         */
+        @Override
+        public String[] getChildKeys(Object aNode)
+        {
+            // Handle JSObject
+            if (aNode instanceof JSObject) {
+                JSObject jsonObj = (JSObject) aNode;
+                Map<String,JSValue> keyValues = jsonObj.getKeyValues();
+                Set<String> keys = keyValues.keySet();
+                return keys.toArray(new String[0]);
+            }
+
+            return new String[0];
+        }
+
+        /**
+         * Return child property value for given key.
+         */
+        @Override
+        public Object getChildNodeForKey(Object aNode, String aName)
+        {
+            // Handle JSObject
+            if (aNode instanceof JSObject) {
+                JSObject jsonObj = (JSObject) aNode;
+                return jsonObj.getValue(aName);
+            }
+
+            // Return not found
+            return null;
+        }
+
+        /**
+         * Returns the node value as string.
+         */
+        @Override
+        public String getNodeValueAsString(Object aNode)
+        {
+            // Handle JSValue
+            if (aNode instanceof JSValue) {
+                JSValue jsonValue = (JSValue) aNode;
+                return jsonValue.getValueAsString();
+            }
+
+            // Return not found
+            System.err.println("JSONFormatConverter.getNodeValueAsString: Unexpected node: " + aNode);
+            return null;
+        }
+
+        /**
+         * Returns array of nodes for a format node.
+         */
+        @Override
+        public Object[] getNodeValueAsArray(Object anArrayNode)
+        {
+            // Handle JSArray
+            if (anArrayNode instanceof JSArray) {
+                JSArray jsonArray = (JSArray) anArrayNode;
+                List<JSValue> valuesList = jsonArray.getValues();
+                return valuesList.toArray();
+            }
+
+            System.err.println("JSONFormatConverter.getNodeValueAsArray: Unexpected array node: " + anArrayNode);
+            return null;
+        }
+
+        /**
+         * Sets a node value for given key.
+         */
+        @Override
+        public void setNodeValueForKey(Object aNode, String aKey, Object aValue)
+        {
+            // Handle JSObject
+            if (aNode instanceof JSObject) {
+                JSObject jsonObj = (JSObject) aNode;
+                if (aValue instanceof JSValue)
+                    jsonObj.setValue(aKey, (JSValue) aValue);
+                else jsonObj.setNativeValue(aKey, aValue);
+            }
+
+            // Handle unexpected
+            else System.err.println("JSONFormatConverter.setNodeValueForKey: Unexpected node: " + aNode);
+        }
+
+        /**
+         * Adds a node array item for given array key.
+         */
+        @Override
+        public void addNodeArrayItemForKey(Object aNode, String aKey, Object aValue)
+        {
+            // Handle JSObject
+            if (aNode instanceof JSObject) {
+                JSObject jsonObj = (JSObject) aNode;
+
+                // Get array element (create/add if missing)
+                JSArray arrayJS = (JSArray) jsonObj.getValue(aKey);
+                if (arrayJS == null) {
+                    arrayJS = new JSArray();
+                    jsonObj.setValue(aKey, arrayJS);
+                }
+
+                // Add item
+                if (aValue instanceof JSValue)
+                    arrayJS.addValue((JSValue) aValue);
+                else System.err.println("JSONFormatConverter.addNodeArrayItemForKey: Unexpected array item node: " + aNode);
+            }
+
+            // Handle unexpected
+            else System.err.println("JSONFormatConverter.addNodeArrayItemForKey: Unexpected array node: " + aNode);
+        }
     }
 }

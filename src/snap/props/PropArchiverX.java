@@ -27,8 +27,7 @@ public abstract class PropArchiverX extends PropArchiver {
         // If PropNode.NeedsClassDeclaration, add Class attribute to XML
         if (aPropNode.isNeedsClassDeclaration()) {
             String className = aPropNode.getClassName();
-            if (!className.equals(aPropName))
-                _formatConverter.setNodeValueForKey(formatNode, CLASS_KEY, className);
+            _formatConverter.setNodeValueForKey(formatNode, CLASS_KEY, className);
         }
 
         // Get configured Props
@@ -50,10 +49,18 @@ public abstract class PropArchiverX extends PropArchiver {
             else if (isRelation)
                 convertNodeToFormatNodeForRelation(formatNode, prop, nodeValue);
 
+            // Handle primitive array
+            else if (prop.isArray()) {
+                PropObject propObj = aPropNode.getPropObject();
+                Object projObjValue = propObj.getPropValue(propName);
+                Object arrayNode = _formatConverter.createFormatArrayNode(propName, projObjValue);
+                _formatConverter.setNodeValueForKey(formatNode, propName, arrayNode);
+            }
+
             // Handle String (non-Node) prop
             else {
                 String stringValue = (String) nodeValue;
-                convertNodeToFormatNodeForSimpleProp(formatNode, prop, stringValue);
+                _formatConverter.setNodeValueForKey(formatNode, propName, stringValue);
             }
         }
 
@@ -94,26 +101,6 @@ public abstract class PropArchiverX extends PropArchiver {
             Object childFormatNode = convertNodeToFormatNode(propName, propNode);
             _formatConverter.setNodeValueForKey(aFormatNode, propName, childFormatNode);
         }
-    }
-
-    /**
-     * Converts and adds a prop node string value to abstract format node.
-     */
-    protected void convertNodeToFormatNodeForSimpleProp(Object aFormatNode, Prop prop, String stringValue)
-    {
-        // Get prop info
-        String propName = prop.getName();
-        boolean isArray = prop.isArray();
-
-        // Handle primitive array
-        if (isArray) {
-            Object formatNode = _formatConverter.createFormatNode(propName);
-            _formatConverter.setNodeValueForKey(aFormatNode, propName, formatNode);
-            _formatConverter.setNodeValue(formatNode, stringValue);
-        }
-
-        // Handle primitive value
-        else _formatConverter.setNodeValueForKey(aFormatNode, propName, stringValue);
     }
 
     /**
@@ -269,6 +256,11 @@ public abstract class PropArchiverX extends PropArchiver {
         T createFormatNode(String aPropName);
 
         /**
+         * Creates a format array node for given prop name and array.
+         */
+        T createFormatArrayNode(String aPropName, Object arrayObj);
+
+        /**
          * Return child property keys.
          */
         String[] getChildKeys(T aNode);
@@ -287,11 +279,6 @@ public abstract class PropArchiverX extends PropArchiver {
          * Returns array of nodes for a format node.
          */
         Object[] getNodeValueAsArray(Object anArrayNode);
-
-        /**
-         * Sets a node value.
-         */
-        void setNodeValue(Object aNode, String aValue);
 
         /**
          * Sets a node value for given key.

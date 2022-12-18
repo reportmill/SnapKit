@@ -70,20 +70,6 @@ public class PropArchiverXML extends PropArchiverX {
     }
 
     /**
-     * Reads a PropObject from XML String.
-     */
-    public Object readPropObjectFromXMLString(String xmlString)
-    {
-        try {
-            XMLParser xmlParser = new XMLParser();
-            XMLElement xml = xmlParser.parseXMLFromString(xmlString);
-            return readPropObjectFromXML(xml);
-        }
-
-        catch (Exception e) { throw new RuntimeException(e); }
-    }
-
-    /**
      * Reads a PropObject from XML.
      */
     public Object readPropObjectFromXMLBytes(byte[] theBytes)
@@ -157,11 +143,23 @@ public class PropArchiverXML extends PropArchiverX {
         }
 
         /**
+         * Creates a format array node for given prop name and array.
+         */
+        public Object createFormatArrayNode(String aPropName, Object arrayObj)
+        {
+            String arrayStr = StringCodec.SHARED.codeString(arrayObj);
+            XMLElement arrayXML = new XMLElement(aPropName);
+            arrayXML.setValue(arrayStr);
+            return arrayXML;
+        }
+
+        /**
          * Return child property keys.
          */
         @Override
         public String[] getChildKeys(Object aNode)
         {
+            // Handle XMLElement
             if (aNode instanceof XMLElement) {
                 XMLElement xml = (XMLElement) aNode;
                 int attrCount = xml.getAttributeCount();
@@ -174,6 +172,8 @@ public class PropArchiverXML extends PropArchiverX {
                 return keys;
             }
 
+            // Return not found
+            System.err.println("XMLFormatConverter.getChildKeys: Unexpected node: " + aNode);
             return new String[0];
         }
 
@@ -198,11 +198,12 @@ public class PropArchiverXML extends PropArchiverX {
                     return value;
 
                 // Special Class_Key support: XML can exclude explicit Class key if matches name
-                if (aName.equals("Class"))
+                if (aName.equals(CLASS_KEY))
                     return xml.getName();
             }
 
             // Return not found
+            System.err.println("XMLFormatConverter.getChildNodeForKey: Unexpected node: " + aNode);
             return null;
         }
 
@@ -225,6 +226,7 @@ public class PropArchiverXML extends PropArchiverX {
                 return (String) aNode;
 
             // Return not found
+            System.err.println("XMLFormatConverter.getNodeValueAsString: Unexpected node: " + aNode);
             return null;
         }
 
@@ -233,26 +235,13 @@ public class PropArchiverXML extends PropArchiverX {
          */
         public Object[] getNodeValueAsArray(Object anArrayNode)
         {
+            // Handle Element
             if (anArrayNode instanceof XMLElement)
                 return ((XMLElement) anArrayNode).getElements().toArray();
+
+            // Handle unexpected
+            System.err.println("XMLFormatConverter.getNodeValueAsArray: Unexpected array node: " + anArrayNode);
             return null;
-        }
-
-        /**
-         * Sets a node value.
-         */
-        public void setNodeValue(Object aNode, String aValue)
-        {
-            // Handle Attribute
-            if (aNode instanceof XMLAttribute)
-                ((XMLAttribute) aNode).setValue(aValue);
-
-                // Handle Element
-            else if (aNode instanceof XMLElement)
-                ((XMLElement) aNode).setValue(aValue);
-
-                // Handle unexpected
-            else System.err.println("XMLFormatConverter.setNodeValue: Unexpected node: " + aNode);
         }
 
         /**
@@ -263,9 +252,21 @@ public class PropArchiverXML extends PropArchiverX {
             // Handle Element
             if (aNode instanceof XMLElement) {
                 XMLElement xml = (XMLElement) aNode;
+
+                // Add node value
                 if (aValue instanceof XMLElement)
                     xml.addElement((XMLElement) aValue);
-                else xml.add(aKey, aValue);
+
+                // Add simple value
+                else {
+
+                    // Special support for Class_Key: Can skip if matches element name
+                    if (aKey == CLASS_KEY && aValue.equals(xml.getName()))
+                        return;
+
+                    // Add value
+                    xml.add(aKey, aValue);
+                }
             }
 
             // Handle unexpected
