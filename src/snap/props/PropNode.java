@@ -14,8 +14,8 @@ public class PropNode {
     // The PropArchiver associated with this node
     private PropArchiver  _archiver;
 
-    // The native object represented by this node
-    private Object  _native;
+    // The PropObject represented by this node
+    private PropObject  _propObject;
 
     // The ClassName, if available
     private String  _className;
@@ -23,40 +23,27 @@ public class PropNode {
     // Whether this PropNode needs to declare actual class name
     private boolean  _needsClassDeclaration;
 
-    // A list of props configured for node
-    private List<Prop>  _props = new ArrayList<>();
-
     // A map of prop names to PropObject values as strings
     private Map<String,Object>  _propValues = new HashMap<>();
+
+    // A list of props configured for node
+    private List<Prop>  _props = new ArrayList<>();
 
     /**
      * Constructor.
      */
-    public PropNode(Object aValue, PropArchiver anArchiver)
+    public PropNode(PropObject aPropObj, PropArchiver anArchiver)
     {
-        _native = aValue;
         _archiver = anArchiver;
-        if (aValue != null)
-            _className = aValue.getClass().getSimpleName();
+        _propObject = aPropObj;
+        if (aPropObj != null)
+            _className = aPropObj.getClass().getSimpleName();
     }
 
     /**
      * Returns the PropObject.
      */
-    public PropObject getPropObject()
-    {
-        return _native instanceof PropObject ? (PropObject) _native : null;
-    }
-
-    /**
-     * Returns the native object.
-     */
-    public Object getNative()
-    {
-        if (_native instanceof PropObjectProxy)
-            return ((PropObjectProxy) _native).getReal();
-        return _native;
-    }
+    public PropObject getPropObject()  { return _propObject; }
 
     /**
      * Returns the native object class name.
@@ -74,33 +61,6 @@ public class PropNode {
     public void setNeedsClassDeclaration(boolean aValue)
     {
         _needsClassDeclaration = aValue;
-    }
-
-    /**
-     * Returns the PropSet.
-     */
-    public PropSet getPropSet()
-    {
-        // Handle PropObject
-        if (_native instanceof PropObject)
-            return ((PropObject) _native).getPropSet();
-
-        // Complain and return not found
-        System.err.println("PropNode.getPropSet: Not found for class: " + _native.getClass());
-        return null;
-    }
-
-    /**
-     * Returns the list of configured props.
-     */
-    public List<Prop> getProps()  { return _props; }
-
-    /**
-     * Returns the list of configured prop names.
-     */
-    public String[] getPropNames()
-    {
-        return _props.stream().map(prop -> prop.getName()).toArray(size -> new String[size]);
     }
 
     /**
@@ -125,6 +85,19 @@ public class PropNode {
     }
 
     /**
+     * Returns the list of configured props.
+     */
+    public List<Prop> getProps()  { return _props; }
+
+    /**
+     * Returns the list of configured prop names.
+     */
+    public String[] getPropNames()
+    {
+        return _props.stream().map(prop -> prop.getName()).toArray(size -> new String[size]);
+    }
+
+    /**
      * Returns a Prop for given PropName.
      */
     public Prop getPropForName(String aName)
@@ -134,10 +107,8 @@ public class PropNode {
             if (prop.getName().equals(aName))
                 return prop;
 
-        // Complain since PropNode should really only know about configured props
-        System.err.println("PropNode.getPropForName: Prop not found in props list: " + aName);
-        PropSet propSet = getPropSet();
-        return propSet.getPropForName(aName);
+        // Return not found
+        return null;
     }
 
     /**

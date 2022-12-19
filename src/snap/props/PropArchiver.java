@@ -74,12 +74,12 @@ public class PropArchiver {
 
             // Get object value from PropObject.PropName
             Object nativeValue = aPropObj.getPropValue(propName);
-            boolean isSimple = !prop.isRelation();
+            Object nodeValue;
 
             // Get node value
-            Object nodeValue = isSimple ?
-                    convertNativeToNodeForPropSimple(prop, nativeValue) :
-                    convertNativeToNodeForPropRelation(propNode, prop, nativeValue);
+            if (prop.isRelation())
+                nodeValue = convertNativeToNodeForPropRelation(propNode, prop, nativeValue);
+            else nodeValue = convertNativeToNodeForPropSimple(prop, nativeValue);
 
             // If nodeValue, add to PropNode
             if (nodeValue != null)
