@@ -62,10 +62,10 @@ public class PropArchiver {
     /**
      * Returns a PropNode for given PropObject.
      */
-    protected void convertNativeToNodeForProps(PropObject aPropObj, PropNode propNode, Prop[] props)
+    protected void convertNativeToNodeForProps(PropObject aPropObj, PropNode aPropNode, Prop[] theProps)
     {
         // Iterate over props and add node value for each to PropNode
-        for (Prop prop : props) {
+        for (Prop prop : theProps) {
 
             // If prop hasn't changed, just skip
             String propName = prop.getName();
@@ -74,112 +74,79 @@ public class PropArchiver {
 
             // Get object value from PropObject.PropName
             Object nativeValue = aPropObj.getPropValue(propName);
-            Object nodeValue;
+            Object nodeValue = nativeValue;
 
-            // Get node value
-            if (prop.isRelation())
-                nodeValue = convertNativeToNodeForPropRelation(propNode, prop, nativeValue);
-            else nodeValue = convertNativeToNodeForPropSimple(prop, nativeValue);
+            // Handle relation
+            if (prop.isRelation()) {
+
+                // Convert relation
+                nodeValue = convertNativeToNodeForPropRelation(prop, nativeValue);
+
+                // Handle Prop.Default EMPTY_OBJECT: If nodeValue is empty PropNode, clear value
+                if (prop.getDefaultValue() == PropObject.EMPTY_OBJECT && nodeValue instanceof PropNode) {
+                    PropNode propNode = (PropNode) nodeValue;
+                    if (propNode.getProps().size() == 0)
+                        nodeValue = null;
+                }
+            }
+
+            // Handle simple
+            else {
+
+                // Convert to string
+                if (StringCodec.SHARED.isCodeable(nativeValue))
+                    nodeValue = StringCodec.SHARED.codeString(nativeValue);
+                else System.err.println("PropArchiver.convertNativeToNodeForProps: Value not codeable: " + nativeValue.getClass());
+            }
 
             // If nodeValue, add to PropNode
             if (nodeValue != null)
-                propNode.setPropValue(prop, nodeValue);
+                aPropNode.setPropValue(prop, nodeValue);
         }
-    }
-
-    /**
-     * Adds a given native simple value (String, Number, etc.) to given PropNode for given Prop.
-     */
-    protected String convertNativeToNodeForPropSimple(Prop prop, Object nativeValue)
-    {
-        // If String-codeable, get coded String and return
-        if (StringCodec.SHARED.isCodeable(nativeValue)) {
-
-            // Get coded string
-            String stringValue = StringCodec.SHARED.codeString(nativeValue);
-
-            // If empty array and Prop.DefaultValue is EMPTY_OBJECT, return null
-            if (prop.isArray() && stringValue.equals("[]") && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
-                return null;
-
-            // Return
-            return stringValue;
-        }
-
-        // Otherwise complain and return
-        System.err.println("PropArchiver.convertNativeToNodeForPropSimple: Value not codeable: " + nativeValue.getClass());
-        return null;
-    }
-
-    /**
-     * Converts and adds given native relation value (PropObject/PropObject[]) to given PropNode for given Prop.
-     */
-    protected Object convertNativeToNodeForPropRelation(PropNode propNode, Prop prop, Object nativeValue)
-    {
-        // Convert native relation value to PropNode
-        Object nodeValue = convertNativeToNodeForPropRelationImpl(propNode, prop, nativeValue);
-
-        // If nodeValue is empty PropNode or array and Prop.DefaultValue is EMPTY_OBJECT, skip
-        if (PropUtils.isEmptyNodeOrArray(nodeValue) && prop.getDefaultValue() == PropObject.EMPTY_OBJECT)
-            return null;
-
-        // Return
-        return nodeValue;
     }
 
     /**
      * Converts given native relation object to PropNode/PropNode[].
      */
-    protected Object convertNativeToNodeForPropRelationImpl(PropNode aPropNode, Prop aProp, Object nativeValue)
+    protected Object convertNativeToNodeForPropRelation(Prop aProp, Object nativeValue)
     {
         // Handle null
         if (nativeValue == null)
             return null;
 
-        // Give helper first shot
+        // Handle Array
+        if (aProp.isArray()) {
+
+            // Get array
+            Object[] array;
+            if (nativeValue instanceof List) {
+                List<?> list = (List<?>) nativeValue;
+                array = list.toArray();
+            }
+            else array = (Object[]) nativeValue;
+
+            // Iterate over native array objects and try to create/set PropNode for each
+            PropNode[] propNodes = new PropNode[array.length];
+            for (int i = 0; i < array.length; i++) {
+                PropObject propObject = (PropObject) array[i];
+                propNodes[i] = convertNativeToNode(aProp, propObject);
+            }
+
+            // Return
+            return propNodes;
+        }
+
+        // Swap in PropObjectProxy if needed
         PropObject proxy = _helper.getProxyForObject(nativeValue);
         if (proxy != null)
-            return convertNativeToNodeForPropRelationImpl(aPropNode, aProp, proxy);
+            nativeValue = proxy;
 
         // Handle PropObject
-        if (nativeValue instanceof PropObject) {
-            PropObject propObject = (PropObject) nativeValue;
-            PropNode propNode = convertNativeToNode(aProp, propObject);
-            return propNode;
-        }
-
-        // Handle List
-        if (nativeValue instanceof List) {
-            List<?> list = (List<?>) nativeValue;
-            Object[] array = list.toArray();
-            return convertNativeToNodeForPropRelationArray(aProp, array);
-        }
-
-        // Handle array
-        if (nativeValue.getClass().isArray())
-            return convertNativeToNodeForPropRelationArray(aProp, nativeValue);
-
-        // Return original object (assumed to be primitive)
-        return nativeValue;
-    }
-
-    /**
-     * Returns an array of nodes or primitives for given array.
-     */
-    private Object convertNativeToNodeForPropRelationArray(Prop prop, Object nativeArray)
-    {
-        // Get array and create PropNode array
-        Object[] array = (Object[]) nativeArray;
-        PropNode[] propNodes = new PropNode[array.length];
-
-        // Iterate over native array objects and try to create/set PropNode for each
-        for (int i = 0; i < array.length; i++) {
-            PropObject propObject = (PropObject) array[i];
-            propNodes[i] = convertNativeToNode(prop, propObject);
-        }
+        PropObject propObject = (PropObject) nativeValue;
+        PropNode propNode = convertNativeToNode(aProp, propObject);
 
         // Return
-        return propNodes;
+        return propNode;
     }
 
     /**
@@ -202,45 +169,55 @@ public class PropArchiver {
             // Get native value
             Object nativeValue = null;
 
-            // Handle simple
-            if (nodeValue instanceof String)
-                nativeValue = convertNodeToNativeForPropSimple(propNode, prop, (String) nodeValue);
-
             // Handle Relation
-            else if (nodeValue instanceof PropNode) {
+            if (prop.isRelation()) {
 
-                // Get relation node
-                PropNode relationNode = (PropNode) nodeValue;
+                // Handle Relation array
+                if (nodeValue instanceof PropNode[]) {
 
-                // Convert to native (if PropObjectProxy, swap for real)
-                nativeValue = convertNodeToNative(relationNode);
-                if (nativeValue instanceof PropObjectProxy)
-                    nativeValue = ((PropObjectProxy<?>) nativeValue).getReal();
-            }
+                    // Get relation node array
+                    PropNode[] relationNodeArray = (PropNode[]) nodeValue;
 
-            // Handle Relation array
-            else if (nodeValue instanceof PropNode[]) {
+                    // Create native array for prop
+                    Class<?> nativeArrayClass = prop.getPropClass();
+                    Class<?> nativeCompClass = nativeArrayClass.getComponentType();
+                    nativeValue = Array.newInstance(nativeCompClass, relationNodeArray.length);
 
-                // Get relation node array
-                PropNode[] relationNodeArray = (PropNode[]) nodeValue;
+                    // Fill native array
+                    for (int i = 0; i < relationNodeArray.length; i++) {
+                        PropNode relationNode = relationNodeArray[i];
+                        Object relationNative = convertNodeToNative(relationNode);
+                        if (relationNative instanceof PropObjectProxy)
+                            relationNative = ((PropObjectProxy<?>) relationNative).getReal();
+                        Array.set(nativeValue, i, relationNative);
+                    }
+                }
 
-                // Create native array for prop
-                Class<?> nativeArrayClass = prop.getPropClass();
-                Class<?> nativeCompClass = nativeArrayClass.getComponentType();
-                nativeValue = Array.newInstance(nativeCompClass, relationNodeArray.length);
+                // Handle Relation
+                else if (nodeValue instanceof PropNode) {
 
-                // Fill native array
-                for (int i = 0; i < relationNodeArray.length; i++) {
-                    PropNode relationNode = relationNodeArray[i];
-                    Object relationNative = convertNodeToNative(relationNode);
-                    if (relationNative instanceof PropObjectProxy)
-                        relationNative = ((PropObjectProxy<?>) relationNative).getReal();
-                    Array.set(nativeValue, i, relationNative);
+                    // Get relation node
+                    PropNode relationNode = (PropNode) nodeValue;
+
+                    // Convert to native (if PropObjectProxy, swap for real)
+                    nativeValue = convertNodeToNative(relationNode);
+                    if (nativeValue instanceof PropObjectProxy)
+                        nativeValue = ((PropObjectProxy<?>) nativeValue).getReal();
                 }
             }
 
-            // Complain
-            else System.err.println("PropArchiver: convertNodeToNative: Illegal node value: " + nodeValue.getClass());
+            // Handle primitive property
+            else {
+
+                // Handle simple
+                if (nodeValue instanceof String) {
+                    Class<?> propClass = prop.getPropClass();
+                    nativeValue = StringCodec.SHARED.decodeString((String) nodeValue, propClass);
+                }
+
+                // Complain
+                else System.err.println("PropArchiver: convertNodeToNative: Illegal node value: " + nodeValue.getClass());
+            }
 
             // Set value in prop object
             if (!prop.isPreexisting())
@@ -249,19 +226,6 @@ public class PropArchiver {
 
         // Return
         return propObject;
-    }
-
-    /**
-     * Returns a native simple value (String, Number, etc.) to given PropNode for given Node string value.
-     */
-    protected Object convertNodeToNativeForPropSimple(PropNode propNode, Prop prop, String nodeValue)
-    {
-        // Get coded string
-        Class<?> propClass = prop.getPropClass();
-        Object nativeValue = StringCodec.SHARED.decodeString(nodeValue, propClass);
-
-        // Return
-        return nativeValue;
     }
 
     /**
@@ -276,7 +240,10 @@ public class PropArchiver {
         if (prop.isPropChanger() && (nodeValue instanceof String || nodeValue == null)) {
 
             // Convert node value to native
-            Object nativeValue = convertNodeToNativeForPropSimple(propNode, prop, (String) nodeValue);
+            Class<?> propClass = prop.getPropClass();
+            Object nativeValue = nodeValue;
+            if (nativeValue != null)
+                nativeValue = StringCodec.SHARED.decodeString((String) nativeValue, propClass);
 
             // Set native value in PropObject
             PropObject propObject = propNode.getPropObject();

@@ -3,6 +3,7 @@
  */
 package snap.props;
 import snap.util.SnapUtils;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -135,9 +136,28 @@ public class PropObject implements PropChange.DoChange {
      */
     public boolean isPropDefault(String aPropName)
     {
+        // Get Prop value and default - just return true if equal
         Object propValue = getPropValue(aPropName);
         Object propDefault = getPropDefault(aPropName);
-        return Objects.equals(propValue, propDefault);
+        if (Objects.equals(propValue, propDefault))
+            return true;
+
+        // If default not EMPTY_OBJECT, return false
+        if (propValue == null || propDefault != EMPTY_OBJECT)
+            return false;
+
+        // Special handling for EMPTY_OBJECT
+        if (propValue.getClass().isArray()) {
+            if (Array.getLength(propValue) == 0)
+                return true;
+        }
+        if (propValue instanceof List) {
+            if (((List<?>) propValue).size() == 0)
+                return true;
+        }
+
+        // Return not equal
+        return false;
     }
 
     /**
