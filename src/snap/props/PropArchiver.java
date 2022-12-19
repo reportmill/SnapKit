@@ -83,7 +83,7 @@ public class PropArchiver {
 
             // If nodeValue, add to PropNode
             if (nodeValue != null)
-                propNode.addNodeValueForProp(prop, nodeValue);
+                propNode.setPropValue(prop, nodeValue);
         }
     }
 
@@ -197,7 +197,7 @@ public class PropArchiver {
         for (Prop prop : props) {
 
             // Get node value
-            Object nodeValue = propNode.getNodeValueForPropName(prop.getName());
+            Object nodeValue = propNode.getPropValue(prop.getName());
 
             // Get native value
             Object nativeValue = null;
@@ -270,7 +270,7 @@ public class PropArchiver {
     protected void addNodeValueForProp(PropNode propNode, Prop prop, Object nodeValue)
     {
         // Add value
-        propNode.addNodeValueForProp(prop, nodeValue);
+        propNode.setPropValue(prop, nodeValue);
 
         // If Prop.PropChanger, push to propObject
         if (prop.isPropChanger() && (nodeValue instanceof String || nodeValue == null)) {

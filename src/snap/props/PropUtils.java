@@ -59,8 +59,11 @@ public class PropUtils {
             return false;
 
         // Handle PropNode with PropValues size 0
-        if (anObj instanceof PropNode && ((PropNode) anObj).getPropNames().size() == 0)
-            return true;
+        if (anObj instanceof PropNode) {
+            PropNode propNode = (PropNode) anObj;
+            if (propNode.getProps().size() == 0)
+                return true;
+        }
 
         // Handle array with length 0
         Class<?> objClass = anObj.getClass();

@@ -38,7 +38,7 @@ public abstract class PropArchiverX extends PropArchiver {
 
             // Get Node value and whether it is node and/or array
             String propName = prop.getName();
-            Object nodeValue = aPropNode.getNodeValueForPropName(propName);
+            Object nodeValue = aPropNode.getPropValue(propName);
             boolean isRelation = prop.isRelation();
 
             // Handle null
@@ -136,13 +136,13 @@ public abstract class PropArchiverX extends PropArchiver {
                 // Handle Relation array: Get node value for JSON and add to PropNode
                 if (prop.isRelation()) {
                     PropNode[] nodeValue = convertFormatToNodeForRelationArray(propNode, prop, childNode);
-                    propNode.addNodeValueForProp(prop, nodeValue);
+                    propNode.setPropValue(prop, nodeValue);
                 }
 
                 // Handle simple array: Read array string and add to PropNode
                 else {
                     String nodeValue = _formatConverter.getNodeValueAsString(childNode);
-                    propNode.addNodeValueForProp(prop, nodeValue);
+                    propNode.setPropValue(prop, nodeValue);
                 }
             }
 
@@ -152,7 +152,7 @@ public abstract class PropArchiverX extends PropArchiver {
                 // Handle relation
                 if (prop.isRelation()) {
                     PropNode nodeValue = convertFormatNodeToNode(propNode, prop, childNode);
-                    propNode.addNodeValueForProp(prop, nodeValue);
+                    propNode.setPropValue(prop, nodeValue);
                 }
 
                 // Handle simple node

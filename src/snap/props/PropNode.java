@@ -11,11 +11,11 @@ import java.util.*;
  */
 public class PropNode {
 
-    // The native object represented by this node
-    private Object  _native;
-
     // The PropArchiver associated with this node
     private PropArchiver  _archiver;
+
+    // The native object represented by this node
+    private Object  _native;
 
     // The ClassName, if available
     private String  _className;
@@ -26,11 +26,8 @@ public class PropNode {
     // A list of props configured for node
     private List<Prop>  _props = new ArrayList<>();
 
-    // A list of prop names configured for node
-    private List<String>  _propNames = new ArrayList<>();
-
     // A map of prop names to PropObject values as strings
-    private Map<String,Object>  _nodeValues = new HashMap<>();
+    private Map<String,Object>  _propValues = new HashMap<>();
 
     /**
      * Constructor.
@@ -84,8 +81,11 @@ public class PropNode {
      */
     public PropSet getPropSet()
     {
+        // Handle PropObject
         if (_native instanceof PropObject)
             return ((PropObject) _native).getPropSet();
+
+        // Complain and return not found
         System.err.println("PropNode.getPropSet: Not found for class: " + _native.getClass());
         return null;
     }
@@ -98,29 +98,30 @@ public class PropNode {
     /**
      * Returns the list of configured prop names.
      */
-    public List<String> getPropNames()  { return _propNames; }
+    public String[] getPropNames()
+    {
+        return _props.stream().map(prop -> prop.getName()).toArray(size -> new String[size]);
+    }
 
     /**
      * Returns a node value (String, PropNode, PropNode[]) for given prop name.
      */
-    public Object getNodeValueForPropName(String aPropName)
+    public Object getPropValue(String aPropName)
     {
-        Object nodeValue = _nodeValues.get(aPropName);
-        return nodeValue;
+        return _propValues.get(aPropName);
     }
 
     /**
-     * Adds a node value (String, PropNode, PropNode[]) for given prop name.
+     * Sets a node value (String, PropNode, PropNode[]) for given prop name.
      */
-    public void addNodeValueForProp(Prop aProp, Object nodeValue)
+    public void setPropValue(Prop aProp, Object nodeValue)
     {
-        // Add PropName to PropNames
+        // Add Prop and value
         _props.add(aProp);
         String propName = aProp.getName();
-        _propNames.add(propName);
 
         // Add to NodeValues
-        _nodeValues.put(propName, nodeValue);
+        _propValues.put(propName, nodeValue);
     }
 
     /**
@@ -161,7 +162,7 @@ public class PropNode {
             StringUtils.appendProp(sb, "Class", className);
 
         // Add leaf props
-        String[] propNames = getPropNames().toArray(new String[0]);
+        String[] propNames = getPropNames();
         StringUtils.appendProp(sb, "Props", Arrays.toString(propNames));
 
         // Return string
