@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * A base class for anything that wants to work with props.
  */
-public class PropObject implements PropChange.DoChange {
+public abstract class PropObject implements PropChange.DoChange {
 
     // The PropSet to hold prop info
     private PropSet _propSet;

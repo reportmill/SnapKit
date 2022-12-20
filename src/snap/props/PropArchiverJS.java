@@ -95,7 +95,7 @@ public class PropArchiverJS extends PropArchiverX {
         PropNode propNode = convertFormatNodeToNode(null, null, objectJS);
 
         // Convert PropNode (graph) to PropObject
-        PropObject propObject = convertNodeToNative(propNode);
+        PropObject propObject = convertNodeToNative(propNode, null);
 
         // Return
         return propObject;

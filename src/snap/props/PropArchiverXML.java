@@ -7,7 +7,7 @@ import snap.util.*;
 /**
  * A PropArchiver subclass specifically to convert to/from XML.
  */
-public class PropArchiverXML extends PropArchiverX {
+public class PropArchiverXML extends PropArchiver {
 
     /**
      * Constructor.
@@ -15,7 +15,6 @@ public class PropArchiverXML extends PropArchiverX {
     public PropArchiverXML()
     {
         super();
-        _formatConverter = new XMLFormatConverter();
     }
 
     /**
@@ -28,7 +27,7 @@ public class PropArchiverXML extends PropArchiverX {
 
         // Convert node to XML
         String propName = propNode.getClassName();
-        XMLElement xml = (XMLElement) convertNodeToFormatNode(propName, propNode);
+        XMLElement xml = PropNodeXML.convertPropNodeToXML(propNode, propName);
 
         // Archive resources
         for (Resource resource : getResources()) {
@@ -90,10 +89,12 @@ public class PropArchiverXML extends PropArchiverX {
         readResources(anElement);
 
         // Read PropNode from XML
-        PropNode propNode = convertFormatNodeToNode(null, null, anElement);
+        PropNode propNode = PropNodeXML.convertXMLToPropNode(anElement, anElement.getName());
+        propNode.setXmlName(anElement.getName());
 
         // Convert PropNode (graph) to PropObject
-        PropObject propObject = convertNodeToNative(propNode);
+        Prop prop = new Prop(anElement.getName(), Object.class, null);
+        PropObject propObject = convertNodeToNative(propNode, prop);
 
         // Return
         return propObject;
@@ -118,15 +119,6 @@ public class PropArchiverXML extends PropArchiverX {
             // Add resource bytes for name
             addResource(name, bytes);
         }
-    }
-
-    /**
-     * Returns a copy of the given PropObject using archival.
-     */
-    public <T extends PropObject> T copyPropObject(T aPropObject)
-    {
-        XMLElement xml = writePropObjectToXML(aPropObject);
-        return (T) readPropObjectFromXML(xml);
     }
 
     /**

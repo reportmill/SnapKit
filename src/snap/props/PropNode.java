@@ -11,30 +11,26 @@ import java.util.*;
  */
 public class PropNode {
 
-    // The PropArchiver associated with this node
-    private PropArchiver  _archiver;
-
     // The PropObject represented by this node
     private PropObject  _propObject;
 
     // The ClassName, if available
     private String  _className;
 
+    // The XML name of node if from XML
+    private String  _xmlName;
+
     // Whether this PropNode needs to declare actual class name
     private boolean  _needsClassDeclaration;
 
     // A map of prop names to PropObject values as strings
-    private Map<String,Object>  _propValues = new HashMap<>();
-
-    // A list of props configured for node
-    private List<Prop>  _props = new ArrayList<>();
+    private Map<String,Object>  _propValues = new LinkedHashMap<>();
 
     /**
      * Constructor.
      */
-    public PropNode(PropObject aPropObj, PropArchiver anArchiver)
+    public PropNode(PropObject aPropObj)
     {
-        _archiver = anArchiver;
         _propObject = aPropObj;
         if (aPropObj != null)
             _className = aPropObj.getClass().getSimpleName();
@@ -49,6 +45,16 @@ public class PropNode {
      * Returns the native object class name.
      */
     public String getClassName()  { return _className; }
+
+    /**
+     * Returns the XML name of node if from XML.
+     */
+    public String getXmlName()  { return _xmlName; }
+
+    /**
+     * Sets the XML name of node if from XML.
+     */
+    public void setXmlName(String aValue)  { _xmlName = aValue; }
 
     /**
      * Returns whether this PropNode needs to declare actual class name
@@ -74,41 +80,62 @@ public class PropNode {
     /**
      * Sets a node value (String, PropNode, PropNode[]) for given prop name.
      */
+    public void setPropValue(String aPropName, Object nodeValue)
+    {
+        _propValues.put(aPropName, nodeValue);
+    }
+
     public void setPropValue(Prop aProp, Object nodeValue)
     {
-        // Add Prop and value
-        _props.add(aProp);
-        String propName = aProp.getName();
+        throw new RuntimeException("PropNode.setPropValue(prop) Not implemented");
+    }
 
-        // Add to NodeValues
-        _propValues.put(propName, nodeValue);
+    /**
+     * Returns the prop value as string.
+     */
+    public String getPropValueAsString(String aPropName)
+    {
+        Object value = getPropValue(aPropName);
+        String valueStr = StringCodec.SHARED.codeString(value);
+        return valueStr;
+    }
+
+    /**
+     * Returns all values as PropNode array.
+     */
+    public PropNode[] getPropValuesAsArray()
+    {
+        // Return all values as PropNode array
+        Collection<Object> values = _propValues.values();
+        boolean allPropNodes = values.stream().allMatch(obj -> obj instanceof PropNode);
+        if (allPropNodes)
+            return values.toArray(new PropNode[0]);
+
+        // Should never happen
+        System.err.println("PropNode.getPropValuesAsArray: Not all children are PropNodes");
+        return new PropNode[0];
     }
 
     /**
      * Returns the list of configured props.
      */
-    public List<Prop> getProps()  { return _props; }
+    public List<Prop> getProps()  { return null; }
 
     /**
      * Returns the list of configured prop names.
      */
     public String[] getPropNames()
     {
-        return _props.stream().map(prop -> prop.getName()).toArray(size -> new String[size]);
+        Set<String> propNamesSet = _propValues.keySet();
+        return propNamesSet.toArray(new String[0]);
     }
 
     /**
-     * Returns a Prop for given PropName.
+     * Whether node is empty.
      */
-    public Prop getPropForName(String aName)
+    public boolean isEmpty()
     {
-        // Iterate over props and return if name found
-        for (Prop prop : _props)
-            if (prop.getName().equals(aName))
-                return prop;
-
-        // Return not found
-        return null;
+        return _propValues.size() == 0;
     }
 
     /**
@@ -131,6 +158,11 @@ public class PropNode {
         String className = getClassName();
         if (className != null)
             StringUtils.appendProp(sb, "Class", className);
+
+        // Add XmlName
+        String xmlName = getXmlName();
+        if (xmlName != null)
+            StringUtils.appendProp(sb, "XmlName", xmlName);
 
         // Add leaf props
         String[] propNames = getPropNames();

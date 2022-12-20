@@ -13,9 +13,6 @@ public abstract class PropArchiverX extends PropArchiver {
     // The FormatConverter
     protected FormatConverter<Object>  _formatConverter;
 
-    // Constant for special Class key
-    public static final String CLASS_KEY = "Class";
-
     /**
      * Returns an abstract format node (as defined by FormatConverter) for given PropNode.
      */
@@ -112,7 +109,7 @@ public abstract class PropArchiverX extends PropArchiver {
         PropObject propObject = createPropObjectForFormatNode(aParent, aProp, aFormatNode);
 
         // Create PropNode for propObject
-        PropNode propNode = new PropNode(propObject, this);
+        PropNode propNode = new PropNode(propObject);
 
         // Get list of configured format node child property keys attributes
         String[] childNodeKeys = _formatConverter.getChildKeys(aFormatNode);

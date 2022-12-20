@@ -15,7 +15,7 @@ public class PropUtils {
     /**
      * Returns whether given PropNode needs class declaration when referenced via given prop.
      */
-    public static boolean isNodeNeedsClassDeclarationForProp(PropNode propNode, Prop prop)
+    public static boolean isNodeNeedsClassDeclarationForProp(PropObject propObject, Prop prop)
     {
         // If no prop, return false (assume class defined by element name or reference key)
         if (prop == null)
@@ -27,11 +27,10 @@ public class PropUtils {
 
         // Get Prop.DefaultPropClass (if Prop.isArray, use component class)
         Class<?> defaultPropClass = prop.getDefaultPropClass();
-        if (prop.isArray() && defaultPropClass.isArray())
+        if (defaultPropClass != null && defaultPropClass.isArray() && prop.isArray())
             defaultPropClass = defaultPropClass.getComponentType();
 
         // Get PropObject.Class
-        PropObject propObject = propNode.getPropObject();
         Class<?> propObjectClass = propObject.getClass();
         if (propObject instanceof PropObjectProxy)
             propObjectClass = ((PropObjectProxy<?>) propObject).getReal().getClass();

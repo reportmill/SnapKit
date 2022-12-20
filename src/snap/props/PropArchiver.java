@@ -23,6 +23,9 @@ public class PropArchiver {
     // A helper class to archive common SnapKit classes (Font, Color, etc.)
     protected PropArchiverHpr  _helper;
 
+    // Constant for special Class key
+    public static final String CLASS_KEY = "Class";
+
     /**
      * Constructor.
      */
@@ -37,10 +40,10 @@ public class PropArchiver {
     protected PropNode convertNativeToNode(Prop prop, PropObject aPropObj)
     {
         // Create new PropNode
-        PropNode propNode = new PropNode(aPropObj, this);
+        PropNode propNode = new PropNode(aPropObj);
 
         // Configure PropNode.NeedsClassDeclaration
-        boolean needsClassDeclaration = PropUtils.isNodeNeedsClassDeclarationForProp(propNode, prop);
+        boolean needsClassDeclaration = PropUtils.isNodeNeedsClassDeclarationForProp(aPropObj, prop);
         if (needsClassDeclaration)
             propNode.setNeedsClassDeclaration(true);
 
@@ -85,23 +88,14 @@ public class PropArchiver {
                 // Handle Prop.Default EMPTY_OBJECT: If nodeValue is empty PropNode, clear value
                 if (prop.getDefaultValue() == PropObject.EMPTY_OBJECT && nodeValue instanceof PropNode) {
                     PropNode propNode = (PropNode) nodeValue;
-                    if (propNode.getProps().size() == 0)
+                    if (propNode.isEmpty())
                         nodeValue = null;
                 }
             }
 
-            // Handle simple
-            else {
-
-                // Convert to string
-                if (StringCodec.SHARED.isCodeable(nativeValue))
-                    nodeValue = StringCodec.SHARED.codeString(nativeValue);
-                else System.err.println("PropArchiver.convertNativeToNodeForProps: Value not codeable: " + nativeValue.getClass());
-            }
-
             // If nodeValue, add to PropNode
             if (nodeValue != null)
-                aPropNode.setPropValue(prop, nodeValue);
+                aPropNode.setPropValue(prop.getName(), nodeValue);
         }
     }
 
@@ -152,19 +146,34 @@ public class PropArchiver {
     /**
      * Converts a PropNode (graph) to PropObject.
      */
-    protected PropObject convertNodeToNative(PropNode propNode)
+    protected PropObject convertNodeToNative(PropNode propNode, Prop aProp)
+    {
+        return convertNodeToNative(propNode, aProp, null);
+    }
+
+    /**
+     * Converts a PropNode (graph) to PropObject.
+     */
+    protected PropObject convertNodeToNative(PropNode propNode, Prop aProp, PropObject aPropObject)
     {
         // Get PropObject
-        PropObject propObject = propNode.getPropObject();
+        PropObject propObject = aPropObject;
+        if (propObject == null)
+            propObject = createPropObjectForPropNode(propNode, aProp);
 
         // Get PropNode props
-        List<Prop> props = propNode.getProps();
+        String[] propNames = propNode.getPropNames();
 
         // Iterate over props and convert each to native
-        for (Prop prop : props) {
+        for (String propName : propNames) {
+
+            // Skip special Class key
+            if (propName.equals(CLASS_KEY)) continue;
 
             // Get node value
-            Object nodeValue = propNode.getPropValue(prop.getName());
+            Prop prop = propObject.getPropForName(propName);
+            if (prop == null) { System.err.println("PropArchiver.convertNodeToNative: Unknown prop: " + propName); continue; }
+            Object nodeValue = propNode.getPropValue(propName);
 
             // Get native value
             Object nativeValue = null;
@@ -173,7 +182,11 @@ public class PropArchiver {
             if (prop.isRelation()) {
 
                 // Handle Relation array
-                if (nodeValue instanceof PropNode[]) {
+                if (prop.isArray()) {
+
+                    // If node is PropNode, get PropNode values as array (since XML can't differentiate lists)
+                    if (nodeValue instanceof PropNode)
+                        nodeValue = ((PropNode) nodeValue).getPropValuesAsArray();
 
                     // Get relation node array
                     PropNode[] relationNodeArray = (PropNode[]) nodeValue;
@@ -185,10 +198,16 @@ public class PropArchiver {
 
                     // Fill native array
                     for (int i = 0; i < relationNodeArray.length; i++) {
+
+                        // Get array node and array object
                         PropNode relationNode = relationNodeArray[i];
-                        Object relationNative = convertNodeToNative(relationNode);
+                        Object relationNative = convertNodeToNative(relationNode, prop, null);
+
+                        // If proxy, swap in real
                         if (relationNative instanceof PropObjectProxy)
                             relationNative = ((PropObjectProxy<?>) relationNative).getReal();
+
+                        // Set in nativeValue array
                         Array.set(nativeValue, i, relationNative);
                     }
                 }
@@ -199,8 +218,13 @@ public class PropArchiver {
                     // Get relation node
                     PropNode relationNode = (PropNode) nodeValue;
 
+                    // If Prop.Preexisting, use preexisting object
+                    PropObject relationObjPreexisting = null;
+                    if (prop.isPreexisting())
+                        relationObjPreexisting = (PropObject) propObject.getPropValue(propName);
+
                     // Convert to native (if PropObjectProxy, swap for real)
-                    nativeValue = convertNodeToNative(relationNode);
+                    nativeValue = convertNodeToNative(relationNode, prop, relationObjPreexisting);
                     if (nativeValue instanceof PropObjectProxy)
                         nativeValue = ((PropObjectProxy<?>) nativeValue).getReal();
                 }
@@ -209,14 +233,14 @@ public class PropArchiver {
             // Handle primitive property
             else {
 
-                // Handle simple
+                // Set native value
+                nativeValue = nodeValue;
+
+                // If string, see if it needs to be decoded
                 if (nodeValue instanceof String) {
                     Class<?> propClass = prop.getPropClass();
                     nativeValue = StringCodec.SHARED.decodeString((String) nodeValue, propClass);
                 }
-
-                // Complain
-                else System.err.println("PropArchiver: convertNodeToNative: Illegal node value: " + nodeValue.getClass());
             }
 
             // Set value in prop object
@@ -234,7 +258,7 @@ public class PropArchiver {
     protected void addNodeValueForProp(PropNode propNode, Prop prop, Object nodeValue)
     {
         // Add value
-        propNode.setPropValue(prop, nodeValue);
+        propNode.setPropValue(prop.getName(), nodeValue);
 
         // If Prop.PropChanger, push to propObject
         if (prop.isPropChanger() && (nodeValue instanceof String || nodeValue == null)) {
@@ -279,6 +303,60 @@ public class PropArchiver {
     }
 
     /**
+     * Creates a PropObject for PropNode.
+     */
+    protected PropObject createPropObjectForPropNode(PropNode aPropNode, Prop aProp)
+    {
+        // Get PropObject class
+        Class<?> propObjClass = getPropObjectClassForPropNode(aPropNode, aProp);
+        if (propObjClass != null)
+            return createPropObjectForClass(propObjClass);
+
+        // Complain and return
+        System.err.println("PropArchiver.createPropObjectForPropNode: Undetermined class for node: " + aPropNode);
+        return null;
+    }
+
+    /**
+     * Returns a PropObject class for PropNode.
+     */
+    protected Class<?> getPropObjectClassForPropNode(PropNode aPropNode, Prop aProp)
+    {
+        // If Class prop set, try that
+        String className = aPropNode.getPropValueAsString(PropArchiverX.CLASS_KEY);
+        if (className != null) {
+            Class<?> cls = getClassForName(className);
+            if (cls != null)
+                return cls;
+        }
+
+        // Try XML name
+        String xmlName = aPropNode.getXmlName();
+        if (xmlName != null) {
+            Class<?> propClass = getClassForName(xmlName);
+            if (propClass != null)
+                return propClass;
+        }
+
+        // Try Prop.DefaultPropClass (If array, swap for component class)
+        Class<?> propClass = aProp != null ? aProp.getDefaultPropClass() : null;
+        if (propClass != null) {
+            if (propClass.isArray())
+                propClass = propClass.getComponentType();
+            return propClass;
+        }
+
+        // Try PropName - shouldn't need this since Prop.DefaultPropClass should be set
+        String propName = aProp != null ? aProp.getName() : null;
+        propClass = getClassForName(propName);
+        if (propClass != null)
+            return propClass;
+
+        // Return not found
+        return null;
+    }
+
+    /**
      * Convenience newInstance.
      */
     protected PropObject createPropObjectForClass(Class<?> aClass)
@@ -294,6 +372,23 @@ public class PropArchiver {
 
         // Return
         return (PropObject) propObject;
+    }
+
+    /**
+     * Returns a copy of the given PropObject using archival.
+     */
+    public <T extends PropObject> T copyPropObject(T aPropObject)
+    {
+        // Convert PropObject to PropNode
+        PropNode propNode = convertNativeToNode(null, aPropObject);
+
+        // Convert back - not sure I need to create prop
+        Class<?> propObjClass = aPropObject.getClass();
+        Prop prop = new Prop(propObjClass.getSimpleName(), propObjClass, null);
+        T copy = (T) convertNodeToNative(propNode, prop);
+
+        // Return
+        return copy;
     }
 
     /**
@@ -356,16 +451,10 @@ public class PropArchiver {
         }
 
         // Returns resource name
-        public String getName()
-        {
-            return _name;
-        }
+        public String getName()  { return _name; }
 
         // Returns resource bytes
-        public byte[] getBytes()
-        {
-            return _bytes;
-        }
+        public byte[] getBytes()  { return _bytes; }
 
         // Standard equals implementation
         public boolean equalsBytes(byte[] bytes)

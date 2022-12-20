@@ -3,6 +3,7 @@
  */
 package snap.props;
 import snap.util.StringUtils;
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 /**
@@ -36,10 +37,6 @@ public class Prop {
 
     // Whether this prop can change an object's props (ArchivalPropsExtra)
     private boolean  _propChanger;
-
-    // The getter/setter
-    //private Callable<?>  _getter;
-    //private Consumer<?>  _setter;
 
     /**
      * Constructor.
@@ -75,8 +72,12 @@ public class Prop {
     protected void setPropClass(Class<?> aClass)
     {
         _propClass = aClass;
-        _defaultPropClass = aClass;
         _array = isArrayClass(aClass);
+
+        // If PropClass is viable instance, set to DefaultPropClass
+        boolean isAbstract = aClass.isInterface() || Modifier.isAbstract(aClass.getModifiers()) || aClass == Object.class;
+        if (!isAbstract || PropArchiverHpr.getProxyClassForClass(aClass) != null)
+            _defaultPropClass = aClass;
     }
 
     /**
@@ -193,7 +194,7 @@ public class Prop {
         if (isRelation())
             StringUtils.appendProp(sb, "Relation", true); _relation = null;
         if (_defaultPropClass != _propClass)
-            StringUtils.appendProp(sb, "DefaultPropClass", _defaultPropClass.getSimpleName());
+            StringUtils.appendProp(sb, "DefaultPropClass", _defaultPropClass != null ? _defaultPropClass.getSimpleName() : "null");
 
         // Add Default value
         Object defValue = getDefaultValue();
