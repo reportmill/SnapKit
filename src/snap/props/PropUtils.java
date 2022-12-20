@@ -17,9 +17,9 @@ public class PropUtils {
      */
     public static boolean isNodeNeedsClassDeclarationForProp(PropObject propObject, Prop prop)
     {
-        // If no prop, return false (assume class defined by element name or reference key)
+        // If no prop, return true
         if (prop == null)
-            return false;
+            return true;
 
         // If Prop.PropClassConstant, return false (archiver can determine class name from prop Name or PropClass)
         if (prop.isPropClassConstant())

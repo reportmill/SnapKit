@@ -20,7 +20,7 @@ public class PropNodeXML {
         if (aPropNode.isNeedsClassDeclaration()) {
             String className = aPropNode.getClassName();
             if (!className.equals(aNodeKey))
-                xml.add(PropArchiverX.CLASS_KEY, className);
+                xml.add(PropArchiver.CLASS_KEY, className);
         }
 
         // Get configured Props
@@ -76,17 +76,17 @@ public class PropNodeXML {
             }
         }
 
-        // Return xml
+        // Return
         return xml;
     }
 
     /**
      * Converts a given XML element to PropNode.
      */
-    public static PropNode convertXMLToPropNode(XMLElement anElement, String aNodeKey)
+    public static PropNode convertXMLToPropNode(XMLElement anElement)
     {
         // Create PropNode for XML element
-        PropNode propNode = new PropNode(null);
+        PropNode propNode = new PropNode();
 
         // Get attributes
         List<XMLAttribute> attributes = anElement.getAttributes();
@@ -105,7 +105,7 @@ public class PropNodeXML {
         for (XMLElement element : elements) {
 
             // If child element is definitely an array element, convert to PropNode array and set that
-            if (isDefinitelyAnArrayElement(element)) {
+            if (isDefinitelyArrayElement(element)) {
                 PropNode[] arrayNodes = convertXMLToPropNodeArray(element);
                 propNode.setPropValue(element.getName(), arrayNodes);
                 continue;
@@ -120,7 +120,7 @@ public class PropNodeXML {
             }
 
             // Get child xml as PropNode and set in parent
-            PropNode relation = convertXMLToPropNode(element, propName);
+            PropNode relation = convertXMLToPropNode(element);
             relation.setXmlName(propName);
             propNode.setPropValue(propName, relation);
         }
@@ -130,9 +130,9 @@ public class PropNodeXML {
     }
 
     /**
-     * Returns whether an XML element is definitely an array. Only true if any child element has redundant name.
+     * Returns whether given XML element is definitely an array. Only true if any child element has redundant name.
      */
-    private static boolean isDefinitelyAnArrayElement(XMLElement anElement)
+    private static boolean isDefinitelyArrayElement(XMLElement anElement)
     {
         // If element has attributes or value, it isn't array
         if (anElement.getAttributeCount() > 0 || anElement.getValue() != null)
@@ -153,7 +153,6 @@ public class PropNodeXML {
         // Get elements and create PropNodes array
         List<XMLElement> elements = anElement.getElements();
         int elementCount = elements.size();
-        String arrayKey = anElement.getName();
         PropNode[] propNodes = new PropNode[elementCount];
 
         // Iterate over elements, convert each and add to PropNode array
@@ -161,7 +160,7 @@ public class PropNodeXML {
 
             // Get child xml as PropNode and set in parent
             XMLElement element = elements.get(i);
-            PropNode relation = convertXMLToPropNode(element, arrayKey);
+            PropNode relation = convertXMLToPropNode(element);
             String propName = element.getName();
             relation.setXmlName(propName);
 

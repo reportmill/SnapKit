@@ -37,18 +37,25 @@ public class PropArchiver {
     /**
      * Returns a PropNode for given PropObject.
      */
-    protected PropNode convertNativeToNode(Prop prop, PropObject aPropObj)
+    protected PropNode convertNativeToNode(PropObject aPropObj, Prop aProp)
     {
         // Create new PropNode
-        PropNode propNode = new PropNode(aPropObj);
+        PropNode propNode = new PropNode();
+        String className = aPropObj.getClass().getSimpleName();
+        propNode.setClassName(className);
 
         // Configure PropNode.NeedsClassDeclaration
-        boolean needsClassDeclaration = PropUtils.isNodeNeedsClassDeclarationForProp(aPropObj, prop);
+        boolean needsClassDeclaration = PropUtils.isNodeNeedsClassDeclarationForProp(aPropObj, aProp);
         if (needsClassDeclaration)
             propNode.setNeedsClassDeclaration(true);
 
         // Get props for archival and iterate
         Prop[] props = aPropObj.getPropsForArchival();
+
+        // Get PropChanger Props
+        //Prop[] propChangerProps = Stream.of(props).filter(prop -> prop.isPropChanger()).toArray(size -> new Prop[size]);
+        //if (propChangerProps.length > 0)
+        //    convertNativeToNodeForProps(aPropObj, propNode, propChangerProps);
 
         // Iterate over props and add native/node values for each to PropNode
         convertNativeToNodeForProps(aPropObj, propNode, props);
@@ -123,7 +130,7 @@ public class PropArchiver {
             PropNode[] propNodes = new PropNode[array.length];
             for (int i = 0; i < array.length; i++) {
                 PropObject propObject = (PropObject) array[i];
-                propNodes[i] = convertNativeToNode(aProp, propObject);
+                propNodes[i] = convertNativeToNode(propObject, aProp);
             }
 
             // Return
@@ -137,7 +144,7 @@ public class PropArchiver {
 
         // Handle PropObject
         PropObject propObject = (PropObject) nativeValue;
-        PropNode propNode = convertNativeToNode(aProp, propObject);
+        PropNode propNode = convertNativeToNode(propObject, aProp);
 
         // Return
         return propNode;
@@ -253,29 +260,6 @@ public class PropArchiver {
     }
 
     /**
-     * Adds a node value to a prop node.
-     */
-    protected void addNodeValueForProp(PropNode propNode, Prop prop, Object nodeValue)
-    {
-        // Add value
-        propNode.setPropValue(prop.getName(), nodeValue);
-
-        // If Prop.PropChanger, push to propObject
-        if (prop.isPropChanger() && (nodeValue instanceof String || nodeValue == null)) {
-
-            // Convert node value to native
-            Class<?> propClass = prop.getPropClass();
-            Object nativeValue = nodeValue;
-            if (nativeValue != null)
-                nativeValue = StringCodec.SHARED.decodeString((String) nativeValue, propClass);
-
-            // Set native value in PropObject
-            PropObject propObject = propNode.getPropObject();
-            propObject.setPropValue(prop.getName(), nativeValue);
-        }
-    }
-
-    /**
      * Returns the map of names to class names.
      */
     public Map<String,Class<?>> getClassMap()
@@ -323,7 +307,7 @@ public class PropArchiver {
     protected Class<?> getPropObjectClassForPropNode(PropNode aPropNode, Prop aProp)
     {
         // If Class prop set, try that
-        String className = aPropNode.getPropValueAsString(PropArchiverX.CLASS_KEY);
+        String className = aPropNode.getPropValueAsString(CLASS_KEY);
         if (className != null) {
             Class<?> cls = getClassForName(className);
             if (cls != null)
@@ -380,7 +364,7 @@ public class PropArchiver {
     public <T extends PropObject> T copyPropObject(T aPropObject)
     {
         // Convert PropObject to PropNode
-        PropNode propNode = convertNativeToNode(null, aPropObject);
+        PropNode propNode = convertNativeToNode(aPropObject, null);
 
         // Convert back - not sure I need to create prop
         Class<?> propObjClass = aPropObject.getClass();

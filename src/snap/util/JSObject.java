@@ -81,10 +81,10 @@ public class JSObject extends JSValue {
      * Returns this JS object as a native object.
      */
     @Override
-    public Map getNative()
+    public Map<String,Object> getNative()
     {
         // Create native map
-        Map<String,Object> map = new LinkedHashMap(_keyValues.size());
+        Map<String,Object> map = new LinkedHashMap<>(_keyValues.size());
 
         // Iterate over KeyValues map and replace JS with native
         for (Map.Entry<String, JSValue> entry : _keyValues.entrySet()) {
@@ -101,7 +101,7 @@ public class JSObject extends JSValue {
     /**
      * Returns the node as a map.
      */
-    public Map getAsMap()
+    public Map<String,Object> getAsMap()
     {
         return getNative();
     }

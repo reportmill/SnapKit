@@ -80,13 +80,13 @@ public class JSArray extends JSValue {
     /**
      * Returns this JS object as a native object.
      */
-    public Object getNative()
+    public List<?> getNative()
     {
         // Create native list
-        List list = new ArrayList(_values.size());
+        List<Object> list = new ArrayList<>(_values.size());
 
         // Iterate over items and replace with native
-        for (int i = 0, iMax = _values.size() ; i < iMax; i++) {
+        for (int i = 0, iMax = _values.size(); i < iMax; i++) {
             JSValue item = _values.get(i);
             Object nativeItem = item.getNative();
             list.add(nativeItem);

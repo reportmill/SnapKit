@@ -41,7 +41,7 @@ public class JSValue {
             _value = anObj.toString();
 
         // Handle String, Number, Boolean
-        if (anObj instanceof String || anObj instanceof Number || anObj instanceof Boolean || anObj == null)
+        else if (anObj instanceof String || anObj instanceof Number || anObj instanceof Boolean || anObj == null)
             _value = anObj;
 
         // Complain

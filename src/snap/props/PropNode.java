@@ -11,9 +11,6 @@ import java.util.*;
  */
 public class PropNode {
 
-    // The PropObject represented by this node
-    private PropObject  _propObject;
-
     // The ClassName, if available
     private String  _className;
 
@@ -29,22 +26,20 @@ public class PropNode {
     /**
      * Constructor.
      */
-    public PropNode(PropObject aPropObj)
+    public PropNode()
     {
-        _propObject = aPropObj;
-        if (aPropObj != null)
-            _className = aPropObj.getClass().getSimpleName();
+        super();
     }
-
-    /**
-     * Returns the PropObject.
-     */
-    public PropObject getPropObject()  { return _propObject; }
 
     /**
      * Returns the native object class name.
      */
     public String getClassName()  { return _className; }
+
+    /**
+     * Sets the native object class name.
+     */
+    public void setClassName(String aName)  { _className = aName; }
 
     /**
      * Returns the XML name of node if from XML.
@@ -155,14 +150,12 @@ public class PropNode {
     {
         // Add ClassName
         StringBuffer sb = new StringBuffer();
-        String className = getClassName();
-        if (className != null)
-            StringUtils.appendProp(sb, "Class", className);
+        if (_className != null)
+            StringUtils.appendProp(sb, "Class", _className);
 
         // Add XmlName
-        String xmlName = getXmlName();
-        if (xmlName != null)
-            StringUtils.appendProp(sb, "XmlName", xmlName);
+        if (_xmlName != null)
+            StringUtils.appendProp(sb, "XmlName", _xmlName);
 
         // Add leaf props
         String[] propNames = getPropNames();
