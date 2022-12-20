@@ -311,28 +311,6 @@ public class ArrayUtils {
     }
 
     /**
-     * Returns a double array for given floats.
-     */
-    public static double[] doubleArray(float[] theFloats)
-    {
-        if (theFloats == null) return null;
-        double[] doubleArray = new double[theFloats.length];
-        for (int i = 0; i < theFloats.length; i++) doubleArray[i] = theFloats[i];
-        return doubleArray;
-    }
-
-    /**
-     * Returns a float array for given doubles.
-     */
-    public static float[] floatArray(double[] theDoubles)
-    {
-        if (theDoubles == null) return null;
-        float[] floatArray = new float[theDoubles.length];
-        for (int i = 0; i < theDoubles.length; i++) floatArray[i] = (float) theDoubles[i];
-        return floatArray;
-    }
-
-    /**
      * Returns the index of the given object in the given array.
      */
     public static int indexOf(Object[] anArray, Object anObj)

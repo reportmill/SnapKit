@@ -1,5 +1,4 @@
 package snap.swing;
-
 import java.awt.BasicStroke;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -10,10 +9,9 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
-
 import snap.geom.*;
 import snap.gfx.*;
-import snap.util.ArrayUtils;
+import snap.util.Convert;
 import snap.util.SnapUtils;
 
 /**
@@ -178,9 +176,9 @@ public class AWT {
         float miter = (float) aStroke.getMiterLimit();
         int cap = snapToAwtStrokeCap(aStroke.getCap());
         int join = snapToAwtStrokeJoin(aStroke.getJoin());
-        float dary[] = ArrayUtils.floatArray(aStroke.getDashArray());
+        float[] dashArray = Convert.floatArray(aStroke.getDashArray());
         float offset = (float) aStroke.getDashOffset();
-        return new BasicStroke(width, cap, join, miter, dary, offset);
+        return new BasicStroke(width, cap, join, miter, dashArray, offset);
     }
 
     /**

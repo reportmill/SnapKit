@@ -96,7 +96,7 @@ public class Stroke extends PropObject implements Cloneable, XMLArchiver.Archiva
      */
     public Stroke(double aWidth, float[] aDashAry, float aDashOffset)
     {
-        this(aWidth, ArrayUtils.doubleArray(aDashAry), aDashOffset);
+        this(aWidth, Convert.doubleArray(aDashAry), aDashOffset);
     }
 
     /**
@@ -112,7 +112,7 @@ public class Stroke extends PropObject implements Cloneable, XMLArchiver.Archiva
      */
     public Stroke(double aWidth, Cap aCap, Join aJoin, double aMiterLimit, float[] aDashAry, float aDashOffset)
     {
-        this(aWidth, aCap, aJoin, aMiterLimit, ArrayUtils.doubleArray(aDashAry), aDashOffset);
+        this(aWidth, aCap, aJoin, aMiterLimit, Convert.doubleArray(aDashAry), aDashOffset);
     }
 
     /**
@@ -430,7 +430,7 @@ public class Stroke extends PropObject implements Cloneable, XMLArchiver.Archiva
         public Builder join(Join aJoin)  { _join = aJoin; return this; }
         public Builder miterLimit(double aLimit)  { _miterLimit = aLimit; return this; }
         public Builder dashArray(double[] aDashArray)  { _dashArray = aDashArray; return this; }
-        public Builder dashArrayFloats(float[] aDashArray)  { _dashArray = ArrayUtils.doubleArray(aDashArray); return this; }
+        public Builder dashArrayFloats(float[] aDashArray)  { _dashArray = Convert.doubleArray(aDashArray); return this; }
         public Stroke build()
         {
             Stroke stroke = new Stroke();
