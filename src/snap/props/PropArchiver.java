@@ -45,7 +45,7 @@ public class PropArchiver {
         propNode.setClassName(className);
 
         // Configure PropNode.NeedsClassDeclaration
-        boolean needsClassDeclaration = PropUtils.isNodeNeedsClassDeclarationForProp(aPropObj, aProp);
+        boolean needsClassDeclaration = PropUtils.isClassDeclarationNeededForObjectAndProp(aPropObj, aProp);
         if (needsClassDeclaration)
             propNode.setNeedsClassDeclaration(true);
 

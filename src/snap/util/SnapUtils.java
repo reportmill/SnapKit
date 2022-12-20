@@ -6,14 +6,13 @@ import snap.gfx.GFXEnv;
 import snap.web.WebFile;
 import snap.web.WebURL;
 import java.io.*;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 
 /**
  * This class provides general utility methods.
  */
-public class SnapUtils {
+public class SnapUtils extends Convert {
 
     // The current platform
     private static Platform platform = getPlatform();
@@ -57,209 +56,6 @@ public class SnapUtils {
     }
 
     /**
-     * Returns a boolean value for the given object.
-     */
-    public static boolean boolValue(Object anObj)
-    {
-        // If Boolean, return bool value
-        if (anObj instanceof Boolean)
-            return ((Boolean) anObj);
-
-        // If number, return true if number is non-zero
-        if (anObj instanceof Number)
-            return !MathUtils.equalsZero(((Number) anObj).floatValue());
-
-            // If string and "false", return false
-        if (anObj instanceof String && StringUtils.equalsIC((String) anObj, "false"))
-            return false;
-
-        // Other return true if object is non-null
-        return anObj != null;
-    }
-
-    /**
-     * Returns the int value for a given object (assumed to be a string or number).
-     */
-    public static int intValue(Object anObj)
-    {
-        return (int) longValue(anObj);
-    }
-
-    /**
-     * Returns the int value for a given object (assumed to be a string or number).
-     */
-    public static long longValue(Object anObj)
-    {
-        if (anObj instanceof Number)
-            return ((Number) anObj).longValue(); // If Number, return double value
-        if (anObj instanceof String)
-            return StringUtils.longValue((String) anObj); // If String, parse as double value
-        return 0; // If anything else, return zero
-    }
-
-    /**
-     * Returns the float value for a given object (assumed to be a string or number).
-     */
-    public static float floatValue(Object anObj)
-    {
-        return (float) doubleValue(anObj);
-    }
-
-    /**
-     * Returns the double value for a given object (assumed to be a string or number).
-     */
-    public static double doubleValue(Object anObj)
-    {
-        if (anObj instanceof Number)
-            return ((Number) anObj).doubleValue(); // If Number, return double value
-        if (anObj instanceof String)
-            return StringUtils.doubleValue((String) anObj); // If String, parse as double
-        return 0; // If anything else, return zero
-    }
-
-    /**
-     * Returns a String for a given arbitrary object.
-     */
-    public static String stringValue(Object anObj)
-    {
-        // If object is null, return null
-        if (anObj == null) return null;
-
-        // If object is string, just return it
-        if (anObj instanceof String)
-            return (String) anObj;
-
-        // If object is number, string format it
-        if (anObj instanceof Number)
-            return FormatUtils.formatNum((Number) anObj);
-
-        // If object is Date, date format it
-        if (anObj instanceof Date)
-            return FormatUtils.formatDate((Date) anObj);
-
-        // If byte array, format as base64
-        if (anObj instanceof byte[]) {
-            String str = ASCIICodec.encodeBase64((byte[]) anObj);
-            str = str.replace((char) 0, ' ');
-            return str;
-        }
-
-        // If class get standard name
-        if (anObj instanceof Class)
-            return ((Class<?>) anObj).getName().replace('$', '.');
-
-        // Return object's toString
-        return anObj.toString();
-    }
-
-    /**
-     * Returns the Boolean for a given object (assumed to be Number or String).
-     */
-    public static Boolean booleanValue(Object anObj)
-    {
-        if (anObj instanceof Boolean || anObj == null)
-            return (Boolean) anObj;
-        return boolValue(anObj);
-    }
-
-    /**
-     * Returns the Number for a given object (assumed to be Number or String).
-     */
-    public static Number numberValue(Object anObj)
-    {
-        // If already a number or null, just return it
-        if (anObj instanceof Number || anObj == null) return (Number) anObj;
-
-        // Try returning as BigDecimal  - can fail if is Nan or pos/neg infinity (returns as double)
-        try { return getBigDecimal(anObj); }
-        catch (Exception e) {
-            return doubleValue(anObj);
-        }
-    }
-
-    /**
-     * Returns an enum value for given enum class and object.
-     */
-    public static <T extends Enum<T>> T enumValue(Class<T> enumClass, Object anObj)
-    {
-        // If given object already enum, just return
-        if (enumClass.isInstance(anObj))
-            return (T) anObj;
-
-        // Otherwise, get string, try to match with enum and return
-        String str = stringValue(anObj);
-        T enumVal = str != null ? EnumUtils.valueOfIC(enumClass, str) : null;
-        return enumVal;
-    }
-
-    /**
-     * Returns the Integer for a given object.
-     */
-    public static Integer getInteger(Object anObj)
-    {
-        if (anObj instanceof Integer || anObj == null)
-            return (Integer) anObj; // If already Integer or null, just return it
-        return intValue(anObj); // Otherwise, return new integer
-    }
-
-    /**
-     * Returns a Float for a given object.
-     */
-    public static Float getFloat(Object anObj)
-    {
-        if (anObj instanceof Float || anObj == null) return (Float) anObj; // If already Float or null, just return it
-        return floatValue(anObj); // Otherwise, return float
-    }
-
-    /**
-     * Returns a Double for a given object.
-     */
-    public static Double getDouble(Object anObj)
-    {
-        if (anObj instanceof Double || anObj == null)
-            return (Double) anObj; // If already Double or null, just return it
-        return doubleValue(anObj); // Otherwise, return float
-    }
-
-    /**
-     * Returns the BigDecimal for a given object (assumed to be a string or number).
-     */
-    public static BigDecimal getBigDecimal(Object anObj)
-    {
-        if (anObj instanceof BigDecimal || anObj == null)
-            return (BigDecimal) anObj;
-        double doubleValue = doubleValue(anObj);
-        return new BigDecimal(doubleValue);
-    }
-
-    /**
-     * Returns an enum for enum class and string, ignoring case.
-     */
-    public static <T extends Enum<T>> T valueOfIC(Class<T> enumType, String aName)
-    {
-        return EnumUtils.valueOfIC(enumType, aName);
-    }
-
-    /**
-     * Returns a date for given object of arbitrary type.
-     */
-    public static Date getDate(Object anObj)
-    {
-        // If object is date or null, just return it
-        if (anObj instanceof Date || anObj == null)
-            return (Date) anObj;
-
-        // If object is long, return date
-        if (anObj instanceof Long)
-            return new Date((Long) anObj);
-
-        // Otherwise, try to parse string as simple date
-        // Was this: return new java.text.SimpleDateFormat("MM/dd/yy").parse(anObj.toString());
-        //try { return RMDateUtils.getDate(anObj.toString()); } catch(Exception e) { return null; }
-        return DateParser.parseDate(anObj.toString());
-    }
-
-    /**
      * Returns a clone of the given object (supports List, Map, Cloneable and null).
      * If object not cloneable, returns object.
      */
@@ -291,17 +87,19 @@ public class SnapUtils {
 
         // If object is Map, duplicate entries and clone values
         if (clone instanceof Map) {
-            Map map = (Map) clone;
-            for (Map.Entry entry : (Set<Map.Entry>) map.entrySet())
+            Map<Object,Object> map = (Map<Object,Object>) clone;
+            Set<Map.Entry<Object,Object>> entrySet = map.entrySet();
+            for (Map.Entry<Object,Object> entry : entrySet)
                 map.put(entry.getKey(), cloneDeep(entry.getValue()));
         }
 
         // If object is List, duplicate it's elements
         else if (clone instanceof List) {
-            List list = (List) clone;
+            List<Object> list = (List<Object>) clone;
             for (int i = 0, iMax = list.size(); i < iMax; i++) {
                 Object item = list.get(i);
-                list.set(i, cloneDeep(item));
+                Object cloneItem = cloneDeep(item);
+                list.set(i, cloneItem);
             }
         }
 
@@ -331,9 +129,9 @@ public class SnapUtils {
 
         // If object is comparable and is same or super class, let it do the comparison (try both)
         if (anObj1 instanceof Comparable && anObj1.getClass().isInstance(anObj2))
-            return ((Comparable) anObj1).compareTo(anObj2);
+            return ((Comparable<Object>) anObj1).compareTo(anObj2);
         if (anObj2 instanceof Comparable && anObj2.getClass().isInstance(anObj1))
-            return -((Comparable) anObj2).compareTo(anObj1);
+            return -((Comparable<Object>) anObj2).compareTo(anObj1);
 
         // Compare big decimal values
         return getBigDecimal(anObj1).compareTo(getBigDecimal(anObj2));
@@ -348,10 +146,12 @@ public class SnapUtils {
         if (isTeaVM) return "/";
 
         // Get System property and make sure it ends with dir char
-        String tdir = System.getProperty("java.io.tmpdir");
-        if (!tdir.endsWith(java.io.File.separator))
-            tdir += java.io.File.separator;
-        return tdir;
+        String tempDir = System.getProperty("java.io.tmpdir");
+        if (!tempDir.endsWith(java.io.File.separator))
+            tempDir += java.io.File.separator;
+
+        // Return
+        return tempDir;
     }
 
     /**
