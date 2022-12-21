@@ -125,6 +125,28 @@ public class RecentFiles extends ViewOwner {
     }
 
     /**
+     * Removes a file from the list and updates the users preferences.
+     */
+    public static void removePath(String aName, String aPath)
+    {
+        // Get the doc list from the preferences
+        String[] paths = getPaths(aName);
+
+        // Remove the path (if it was there)
+        paths = ArrayUtils.remove(paths, aPath);
+
+        // Add at most Max paths to the prefs list
+        Prefs prefs = Prefs.getDefaultPrefs().getChild(aName);
+        for (int i = 0; i < paths.length; i++)
+            prefs.setValue("index" + i, paths[i]);
+        prefs.remove("index" + paths.length);
+
+        // Flush prefs
+        try { prefs.flush(); }
+        catch (Exception e) { System.err.println(e); }
+    }
+
+    /**
      * Clears recent documents from preferences.
      */
     public static void clearPaths(String aName)

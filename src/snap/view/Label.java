@@ -12,7 +12,7 @@ import snap.util.*;
 public class Label extends ParentView {
     
     // The view to show text string
-    protected StringView  _strView;
+    protected StringView  _stringView;
     
     // The graphics view
     protected View  _graphic;
@@ -21,11 +21,14 @@ public class Label extends ParentView {
     private View  _graphicAfter;
     
     // The image name, if loaded from local resource
-    private String  _iname;
+    private String  _imageName;
     
     // Whether label text is editable
-    private boolean  _editable, _editing;
+    private boolean  _editable;
     
+    // Whether label text is currently being edited
+    private boolean  _editing;
+
     // A textfield for editing
     private TextField  _editor;
     
@@ -69,7 +72,7 @@ public class Label extends ParentView {
      */
     public String getText()
     {
-        return _strView != null ? _strView.getText() : null;
+        return _stringView != null ? _stringView.getText() : null;
     }
 
     /**
@@ -132,7 +135,7 @@ public class Label extends ParentView {
      */
     public Paint getTextFill()
     {
-        return _strView != null ? _strView.getTextFill() : null;
+        return _stringView != null ? _stringView.getTextFill() : null;
     }
 
     /**
@@ -146,7 +149,7 @@ public class Label extends ParentView {
     /**
      * Returns the StringView.
      */
-    public boolean isStringViewSet()  { return _strView!=null; }
+    public boolean isStringViewSet()  { return _stringView !=null; }
 
     /**
      * Returns the StringView.
@@ -154,14 +157,14 @@ public class Label extends ParentView {
     public StringView getStringView()
     {
         // If StringView already set, just return
-        if (_strView != null) return _strView;
+        if (_stringView != null) return _stringView;
 
         // Create, configure, add StringView and return
-        _strView = new StringView();
-        _strView.setGrowWidth(isEditable());
-        _strView.setAlignX(getAlignX());
-        addChild(_strView, getGraphic() != null ? 1 : 0);
-        return _strView;
+        _stringView = new StringView();
+        _stringView.setGrowWidth(isEditable());
+        _stringView.setAlignX(getAlignX());
+        addChild(_stringView, getGraphic() != null ? 1 : 0);
+        return _stringView;
     }
 
     /**
@@ -223,14 +226,14 @@ public class Label extends ParentView {
     /**
      * Returns the image name, if loaded from local resource.
      */
-    public String getImageName()  { return _iname; }
+    public String getImageName()  { return _imageName; }
 
     /**
      * Sets the image name, if loaded from local resource.
      */
     public void setImageName(String aName)
     {
-        _iname = aName;
+        _imageName = aName;
     }
 
     /**
@@ -370,7 +373,8 @@ public class Label extends ParentView {
      */
     protected void layoutImpl()
     {
-        if (isHorizontal()) RowView.layout(this, false);
+        if (isHorizontal())
+            RowView.layout(this, false);
         else ColView.layout(this, false);
     }
 
