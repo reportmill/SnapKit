@@ -112,7 +112,7 @@ public class RecentFiles extends ViewOwner {
 
         // Remove the path (if it was there) and add to front of list
         paths = ArrayUtils.remove(paths, aPath);
-        paths = ArrayUtils.add(paths, aPath);
+        paths = ArrayUtils.add(paths, aPath, 0);
 
         // Add at most Max paths to the prefs list
         Prefs prefs = Prefs.getDefaultPrefs().getChild(aName);

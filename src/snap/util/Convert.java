@@ -29,7 +29,7 @@ public class Convert {
         if (anObj instanceof String && StringUtils.equalsIC((String) anObj, "false"))
             return false;
 
-        // Other return true if object is non-null
+        // Return true if non-null
         return anObj != null;
     }
 
@@ -46,11 +46,14 @@ public class Convert {
      */
     public static long longValue(Object anObj)
     {
+        // Handle Number or String
         if (anObj instanceof Number)
-            return ((Number) anObj).longValue(); // If Number, return double value
+            return ((Number) anObj).longValue();
         if (anObj instanceof String)
-            return StringUtils.longValue((String) anObj); // If String, parse as double value
-        return 0; // If anything else, return zero
+            return StringUtils.longValue((String) anObj);
+
+        // Return default
+        return 0;
     }
 
     /**
@@ -66,11 +69,14 @@ public class Convert {
      */
     public static double doubleValue(Object anObj)
     {
+        // Handle Number or String
         if (anObj instanceof Number)
-            return ((Number) anObj).doubleValue(); // If Number, return double value
+            return ((Number) anObj).doubleValue();
         if (anObj instanceof String)
-            return StringUtils.doubleValue((String) anObj); // If String, parse as double
-        return 0; // If anything else, return zero
+            return StringUtils.doubleValue((String) anObj);
+
+        // Return default
+        return 0;
     }
 
     /**
@@ -113,8 +119,11 @@ public class Convert {
      */
     public static Boolean booleanValue(Object anObj)
     {
+        // Handle Boolean or null
         if (anObj instanceof Boolean || anObj == null)
             return (Boolean) anObj;
+
+        // Return boolean value
         return boolValue(anObj);
     }
 
@@ -123,8 +132,9 @@ public class Convert {
      */
     public static Number numberValue(Object anObj)
     {
-        // If already a number or null, just return it
-        if (anObj instanceof Number || anObj == null) return (Number) anObj;
+        // Handle Number or null
+        if (anObj instanceof Number || anObj == null)
+            return (Number) anObj;
 
         // Try returning as BigDecimal  - can fail if is Nan or pos/neg infinity (returns as double)
         try { return getBigDecimal(anObj); }
@@ -138,9 +148,12 @@ public class Convert {
      */
     public static Integer getInteger(Object anObj)
     {
+        // Handle Integer or null
         if (anObj instanceof Integer || anObj == null)
-            return (Integer) anObj; // If already Integer or null, just return it
-        return intValue(anObj); // Otherwise, return new integer
+            return (Integer) anObj;
+
+        // Return int value
+        return intValue(anObj);
     }
 
     /**
@@ -148,8 +161,12 @@ public class Convert {
      */
     public static Float getFloat(Object anObj)
     {
-        if (anObj instanceof Float || anObj == null) return (Float) anObj; // If already Float or null, just return it
-        return floatValue(anObj); // Otherwise, return float
+        // Handle Float or null
+        if (anObj instanceof Float || anObj == null)
+            return (Float) anObj;
+
+        // Return float value
+        return floatValue(anObj);
     }
 
     /**
@@ -157,9 +174,12 @@ public class Convert {
      */
     public static Double getDouble(Object anObj)
     {
+        // Handle Double or null
         if (anObj instanceof Double || anObj == null)
-            return (Double) anObj; // If already Double or null, just return it
-        return doubleValue(anObj); // Otherwise, return float
+            return (Double) anObj;
+
+        // Return double value
+        return doubleValue(anObj);
     }
 
     /**
@@ -167,8 +187,11 @@ public class Convert {
      */
     public static BigDecimal getBigDecimal(Object anObj)
     {
+        // Handle BigDecimal or null
         if (anObj instanceof BigDecimal || anObj == null)
             return (BigDecimal) anObj;
+
+        // Return double value as BigDecimal
         double doubleValue = doubleValue(anObj);
         return new BigDecimal(doubleValue);
     }
@@ -180,7 +203,8 @@ public class Convert {
     {
         if (theFloats == null) return null;
         double[] doubleArray = new double[theFloats.length];
-        for (int i = 0; i < theFloats.length; i++) doubleArray[i] = theFloats[i];
+        for (int i = 0; i < theFloats.length; i++)
+            doubleArray[i] = theFloats[i];
         return doubleArray;
     }
 
@@ -191,7 +215,8 @@ public class Convert {
     {
         if (theDoubles == null) return null;
         float[] floatArray = new float[theDoubles.length];
-        for (int i = 0; i < theDoubles.length; i++) floatArray[i] = (float) theDoubles[i];
+        for (int i = 0; i < theDoubles.length; i++)
+            floatArray[i] = (float) theDoubles[i];
         return floatArray;
     }
 
