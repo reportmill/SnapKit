@@ -176,7 +176,7 @@ public class AWT {
         float miter = (float) aStroke.getMiterLimit();
         int cap = snapToAwtStrokeCap(aStroke.getCap());
         int join = snapToAwtStrokeJoin(aStroke.getJoin());
-        float[] dashArray = Convert.floatArray(aStroke.getDashArray());
+        float[] dashArray = Convert.doubleArrayToFloat(aStroke.getDashArray());
         float offset = (float) aStroke.getDashOffset();
         return new BasicStroke(width, cap, join, miter, dashArray, offset);
     }

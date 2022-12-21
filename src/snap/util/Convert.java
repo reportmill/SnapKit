@@ -176,7 +176,7 @@ public class Convert {
     /**
      * Returns a double array for given floats.
      */
-    public static double[] doubleArray(float[] theFloats)
+    public static double[] floatArrayToDouble(float[] theFloats)
     {
         if (theFloats == null) return null;
         double[] doubleArray = new double[theFloats.length];
@@ -187,7 +187,7 @@ public class Convert {
     /**
      * Returns a float array for given doubles.
      */
-    public static float[] floatArray(double[] theDoubles)
+    public static float[] doubleArrayToFloat(double[] theDoubles)
     {
         if (theDoubles == null) return null;
         float[] floatArray = new float[theDoubles.length];
