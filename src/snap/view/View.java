@@ -265,7 +265,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setName(String aName)
     {
-        if (SnapUtils.equals(aName, _name)) return;
+        if (Objects.equals(aName, _name)) return;
         firePropChange(Name_Prop, _name, _name = StringUtils.min(aName));
     }
 
@@ -639,7 +639,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setFill(Paint aPaint)
     {
-        if (SnapUtils.equals(aPaint, getFill())) return;
+        if (Objects.equals(aPaint, getFill())) return;
         firePropChange(Fill_Prop, _fill, _fill = aPaint);
         repaint();
     }
@@ -667,7 +667,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setBorder(Border aBorder)
     {
-        if (SnapUtils.equals(aBorder, getBorder())) return;
+        if (Objects.equals(aBorder, getBorder())) return;
         firePropChange(Border_Prop, _border, _border = aBorder);
         relayout();
         relayoutParent();
@@ -713,7 +713,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // If already set, just return
         Effect old = getEffect();
-        if (SnapUtils.equals(anEff, getEffect())) return;
+        if (Objects.equals(anEff, getEffect())) return;
 
         // Set new ViewEffect, fire prop change and repaint
         repaintInParent(null);
@@ -766,7 +766,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void setFont(Font aFont)
     {
         // If already set, just return
-        if (SnapUtils.equals(aFont, _font)) return;
+        if (Objects.equals(aFont, _font)) return;
 
         // Set, fire prop change, relayout parent, repaint
         firePropChange(Font_Prop, _font, _font = aFont);
@@ -878,7 +878,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setClip(Shape aShape)
     {
-        if (SnapUtils.equals(aShape, _clip)) return;
+        if (Objects.equals(aShape, _clip)) return;
         firePropChange(Clip_Prop, _clip, _clip = aShape);
     }
 
@@ -2012,7 +2012,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             theIns = (Insets) getPropDefault(Margin_Prop);
 
         // If value already set, just return
-        if (SnapUtils.equals(theIns, _margin)) return;
+        if (Objects.equals(theIns, _margin)) return;
 
         // Set value, fire prop change, relayout parent
         firePropChange(Margin_Prop, _margin, _margin = theIns);
@@ -2042,7 +2042,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             theIns = (Insets) getPropDefault(Padding_Prop);
 
         // If value already set, just return
-        if (SnapUtils.equals(theIns, _padding)) return;
+        if (Objects.equals(theIns, _padding)) return;
 
         // Set value, fire prop change, relayout, relayout parent
         firePropChange(Padding_Prop, _padding, _padding = theIns);
@@ -2181,7 +2181,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setToolTip(String aString)
     {
-        if (SnapUtils.equals(aString, _toolTip)) return;
+        if (Objects.equals(aString, _toolTip)) return;
         firePropChange(ToolTip_Prop, _toolTip, _toolTip = aString);
     }
 
@@ -2217,7 +2217,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
      */
     public void setRealClassName(String aName)
     {
-        if (SnapUtils.equals(aName, getRealClassName()) || getClass().getName().equals(aName)) return;
+        if (Objects.equals(aName, getRealClassName()) || getClass().getName().equals(aName)) return;
         firePropChange("RealClassString", _realClassName, _realClassName = aName);
     }
 
@@ -2942,60 +2942,60 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         switch (propName) {
 
             // Name
-            case Name_Prop: setName(SnapUtils.stringValue(aValue)); break;
+            case Name_Prop: setName(Convert.stringValue(aValue)); break;
 
             // X, Y, Width, Height
-            case X_Prop: setX(SnapUtils.doubleValue(aValue)); break;
-            case Y_Prop: setY(SnapUtils.doubleValue(aValue)); break;
-            case Width_Prop: setWidth(SnapUtils.doubleValue(aValue)); break;
-            case Height_Prop: setHeight(SnapUtils.doubleValue(aValue)); break;
+            case X_Prop: setX(Convert.doubleValue(aValue)); break;
+            case Y_Prop: setY(Convert.doubleValue(aValue)); break;
+            case Width_Prop: setWidth(Convert.doubleValue(aValue)); break;
+            case Height_Prop: setHeight(Convert.doubleValue(aValue)); break;
 
             // Rotate, ScaleX, ScaleY, TransX, TransY
-            case Rotate_Prop: setRotate(SnapUtils.doubleValue(aValue)); break;
-            case ScaleX_Prop: setScaleX(SnapUtils.doubleValue(aValue)); break;
-            case ScaleY_Prop: setScaleY(SnapUtils.doubleValue(aValue)); break;
-            case TransX_Prop: setTransX(SnapUtils.doubleValue(aValue)); break;
-            case TransY_Prop: setTransY(SnapUtils.doubleValue(aValue)); break;
+            case Rotate_Prop: setRotate(Convert.doubleValue(aValue)); break;
+            case ScaleX_Prop: setScaleX(Convert.doubleValue(aValue)); break;
+            case ScaleY_Prop: setScaleY(Convert.doubleValue(aValue)); break;
+            case TransX_Prop: setTransX(Convert.doubleValue(aValue)); break;
+            case TransY_Prop: setTransY(Convert.doubleValue(aValue)); break;
 
             // Align, Margin, Padding, Spacing, Vertical
             case Align_Prop: setAlign((Pos) aValue); break;
             case Margin_Prop: setMargin((Insets) aValue); break;
             case Padding_Prop: setPadding((Insets) aValue); break;
-            case Spacing_Prop: setSpacing(SnapUtils.doubleValue(aValue)); break;
-            case Vertical_Prop: setVertical(SnapUtils.boolValue(aValue));
+            case Spacing_Prop: setSpacing(Convert.doubleValue(aValue)); break;
+            case Vertical_Prop: setVertical(Convert.boolValue(aValue));
 
             // Alignment: LeanX, LeanY, GrowWidth, GrowHeight
             case LeanX_Prop: setLeanX((HPos) aValue); break;
             case LeanY_Prop: setLeanY((VPos) aValue); break;
-            case GrowWidth_Prop: setGrowWidth(SnapUtils.boolValue(aValue)); break;
-            case GrowHeight_Prop: setGrowHeight(SnapUtils.boolValue(aValue)); break;
+            case GrowWidth_Prop: setGrowWidth(Convert.boolValue(aValue)); break;
+            case GrowHeight_Prop: setGrowHeight(Convert.boolValue(aValue)); break;
 
             // MinWidth, MinHeight, MaxWidth, MaxHeight, PrefWidth, PrefHeight
-            case MinWidth_Prop: setMinWidth(SnapUtils.doubleValue(aValue)); break;
-            case MinHeight_Prop: setMinHeight(SnapUtils.doubleValue(aValue)); break;
-            case MaxWidth_Prop: setMaxWidth(SnapUtils.doubleValue(aValue)); break;
-            case MaxHeight_Prop: setMaxHeight(SnapUtils.doubleValue(aValue)); break;
-            case PrefWidth_Prop: setPrefWidth(SnapUtils.doubleValue(aValue)); break;
-            case PrefHeight_Prop: setPrefHeight(SnapUtils.doubleValue(aValue)); break;
+            case MinWidth_Prop: setMinWidth(Convert.doubleValue(aValue)); break;
+            case MinHeight_Prop: setMinHeight(Convert.doubleValue(aValue)); break;
+            case MaxWidth_Prop: setMaxWidth(Convert.doubleValue(aValue)); break;
+            case MaxHeight_Prop: setMaxHeight(Convert.doubleValue(aValue)); break;
+            case PrefWidth_Prop: setPrefWidth(Convert.doubleValue(aValue)); break;
+            case PrefHeight_Prop: setPrefHeight(Convert.doubleValue(aValue)); break;
 
             // Border, BorderRadius, Fill, Effect, Opacity
             case Border_Prop: setBorder((Border) aValue); break;
-            case BorderRadius_Prop: setBorderRadius(SnapUtils.doubleValue(aValue)); break;
+            case BorderRadius_Prop: setBorderRadius(Convert.doubleValue(aValue)); break;
             case Fill_Prop: setFill(aValue instanceof Paint ? (Paint) aValue : null); break;
             case Effect_Prop: setEffect((Effect) aValue); break;
-            case Opacity_Prop: setOpacity(SnapUtils.doubleValue(aValue)); break;
+            case Opacity_Prop: setOpacity(Convert.doubleValue(aValue)); break;
 
             // Font, Text, ToolTip, Cursor, Clip
             case Font_Prop: setFont((Font) aValue); break;
-            case Text_Prop: setText(SnapUtils.stringValue(aValue)); break;
-            case ToolTip_Prop: setToolTip(SnapUtils.stringValue(aValue)); break;
+            case Text_Prop: setText(Convert.stringValue(aValue)); break;
+            case ToolTip_Prop: setToolTip(Convert.stringValue(aValue)); break;
             case Cursor_Prop: setCursor((Cursor) aValue); break;
             case Clip_Prop: setClip((Shape) aValue); break;
 
             // Items, SelItem, SelIndex
             case Selectable.Items_Prop: Selectable.setItems((Selectable<?>) this, aValue); break;
             case Selectable.SelItem_Prop: ((Selectable) this).setSelItem(aValue); break;
-            case Selectable.SelIndex_Prop: ((Selectable<?>) this).setSelIndex(SnapUtils.intValue(aValue)); break;
+            case Selectable.SelIndex_Prop: ((Selectable<?>) this).setSelIndex(Convert.intValue(aValue)); break;
 
             // Do normal version
             default:
@@ -3075,7 +3075,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Archive Border, BorderRadius
         Border border = getBorder();
-        if (border != null && !SnapUtils.equals(border, getDefaultBorder()))
+        if (border != null && !Objects.equals(border, getDefaultBorder()))
             e.add(anArchiver.toXML(border, this));
         double borderRadius = getBorderRadius();
         if (borderRadius > 0)
@@ -3083,7 +3083,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Archive Fill
         Paint fill = getFill();
-        if (fill != null && !SnapUtils.equals(fill, getDefaultFill()))
+        if (fill != null && !Objects.equals(fill, getDefaultFill()))
             e.add(anArchiver.toXML(fill, this));
 
         // Archive Effect
@@ -3092,7 +3092,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             e.add(anArchiver.toXML(effect, this));
 
         // Archive font
-        if (!SnapUtils.equals(getFont(), getDefaultFont()))
+        if (!Objects.equals(getFont(), getDefaultFont()))
             e.add(getFont().toXML(anArchiver));
 
         // Archive Disabled, Visible, Opacity

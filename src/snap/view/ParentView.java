@@ -7,6 +7,7 @@ import snap.gfx.*;
 import snap.props.DeepChangeListener;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.props.PropSet;
 import snap.util.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -39,8 +40,6 @@ public class ParentView extends View {
 
     // Constants for properties
     public static final String Child_Prop = "Child";
-    
-    // Constants for properties
     public static final String NeedsLayout_Prop = "NeedsLayout";
 
     /**
@@ -688,6 +687,52 @@ public class ParentView extends View {
         super.themeChanged();
         for (View child : getChildren())
             child.themeChanged();
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // Child, NeedsLayout
+        aPropSet.addPropNamed(Child_Prop, View[].class, EMPTY_OBJECT);
+        aPropSet.addPropNamed(NeedsLayout_Prop, boolean.class, false).setSkipArchival(true);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // Child
+            case Child_Prop: return getChildren();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // Child
+            case Child_Prop: setChildren((View[]) aValue); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
     }
 
     /**

@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.geom.Pos;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -93,33 +94,6 @@ public class ColView extends ChildView {
     }
 
     /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive FillWidth
-        if (isFillWidth())
-            e.add(FillWidth_Prop, true);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive FillWidth
-        if (anElement.hasAttribute(FillWidth_Prop))
-            setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
-    }
-
-    /**
      * Returns preferred width of given parent with given children.
      */
     public static double getPrefWidth(ParentView aPar, double aH)
@@ -149,5 +123,77 @@ public class ColView extends ChildView {
         ColViewProxy<?> viewProxy = new ColViewProxy<>(aParent);
         viewProxy.setFillWidth(isFillWidth);
         viewProxy.layoutView();
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // FillWidth
+        aPropSet.addPropNamed(FillWidth_Prop, boolean.class, false);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // FillWidth
+            case FillWidth_Prop: return isFillWidth();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // FillWidth
+            case FillWidth_Prop: setFillWidth(Convert.boolValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
+    }
+
+    /**
+     * XML archival.
+     */
+    public XMLElement toXMLView(XMLArchiver anArchiver)
+    {
+        // Archive basic view attributes
+        XMLElement e = super.toXMLView(anArchiver);
+
+        // Archive FillWidth
+        if (isFillWidth())
+            e.add(FillWidth_Prop, true);
+        return e;
+    }
+
+    /**
+     * XML unarchival.
+     */
+    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        // Unarchive basic view attributes
+        super.fromXMLView(anArchiver, anElement);
+
+        // Unarchive FillWidth
+        if (anElement.hasAttribute(FillWidth_Prop))
+            setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
     }
 }

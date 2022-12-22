@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.geom.Pos;
+import snap.props.PropSet;
 import snap.util.*;
 
 /**
@@ -73,33 +74,6 @@ public class RowView extends ChildView {
     }
 
     /**
-     * XML archival.
-     */
-    public XMLElement toXMLView(XMLArchiver anArchiver)
-    {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive FillHeight
-        if (isFillHeight())
-            e.add(FillHeight_Prop, true);
-        return e;
-    }
-
-    /**
-     * XML unarchival.
-     */
-    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
-    {
-        // Unarchive basic view attributes
-        super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive FillHeight
-        if (anElement.hasAttribute(FillHeight_Prop))
-            setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop, false));
-    }
-
-    /**
      * Returns preferred width of given parent using RowView layout.
      */
     public static double getPrefWidth(View aParent, double aH)
@@ -129,5 +103,77 @@ public class RowView extends ChildView {
         RowViewProxy<?> viewProxy = new RowViewProxy<>(aParent);
         viewProxy.setFillHeight(isFillHeight);
         viewProxy.layoutView();
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    protected void initProps(PropSet aPropSet)
+    {
+        // Do normal version
+        super.initProps(aPropSet);
+
+        // FillHeight
+        aPropSet.addPropNamed(FillHeight_Prop, boolean.class, false);
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public Object getPropValue(String aPropName)
+    {
+        switch (aPropName) {
+
+            // FillHeight
+            case FillHeight_Prop: return isFillHeight();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
+    }
+
+    /**
+     * Override to support props for this class.
+     */
+    @Override
+    public void setPropValue(String aPropName, Object aValue)
+    {
+        switch (aPropName) {
+
+            // FillHeight
+            case FillHeight_Prop: setFillHeight(Convert.boolValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue);
+        }
+    }
+
+    /**
+     * XML archival.
+     */
+    public XMLElement toXMLView(XMLArchiver anArchiver)
+    {
+        // Archive basic view attributes
+        XMLElement e = super.toXMLView(anArchiver);
+
+        // Archive FillHeight
+        if (isFillHeight())
+            e.add(FillHeight_Prop, true);
+        return e;
+    }
+
+    /**
+     * XML unarchival.
+     */
+    public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        // Unarchive basic view attributes
+        super.fromXMLView(anArchiver, anElement);
+
+        // Unarchive FillHeight
+        if (anElement.hasAttribute(FillHeight_Prop))
+            setFillHeight(anElement.getAttributeBoolValue(FillHeight_Prop, false));
     }
 }
