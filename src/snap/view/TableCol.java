@@ -89,8 +89,8 @@ public class TableCol <T> extends ListArea <T> {
      */
     public Consumer <ListCell<T>> getCellConfigure()
     {
-        Consumer <ListCell<T>> cconf = super.getCellConfigure();
-        return cconf!=null ? cconf : getTable().getCellConfigure();
+        Consumer <ListCell<T>> cellConfigure = super.getCellConfigure();
+        return cellConfigure != null ? cellConfigure : getTable().getCellConfigure();
     }
 
     /**
@@ -103,11 +103,18 @@ public class TableCol <T> extends ListArea <T> {
      */
     protected double getPrefWidthImpl(double aH)
     {
-        double pw = super.getPrefWidthImpl(aH);
+        // Do normal version
+        double prefW = super.getPrefWidthImpl(aH);
+
+        // Add Header.PrefWidth
         TableView table = getTable();
-        if (table!=null && table.isShowHeader())
-            pw = Math.max(getHeader().getPrefWidth(aH), pw);
-        return pw;
+        if (table != null && table.isShowHeader()) {
+            double headerPrefW = getHeader().getPrefWidth(aH);
+            prefW = Math.max(headerPrefW, prefW);
+        }
+
+        // Return
+        return prefW;
     }
 
     /**
@@ -117,7 +124,7 @@ public class TableCol <T> extends ListArea <T> {
     protected void cellEditingChanged(ListCell<T> aCell)
     {
         super.cellEditingChanged(aCell);
-        TableView table = getTable(); if (table==null) return;
+        TableView table = getTable(); if (table == null) return;
         table.cellEditingChanged(aCell);
     }
 

@@ -127,17 +127,15 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public void setItems(List <T> theItems)
     {
         // If items already set, just return
-        if (ListUtils.equalsId(theItems, _items) || SnapUtils.equals(theItems,_items)) return;
+        if (ListUtils.equalsId(theItems, _items) || SnapUtils.equals(theItems, _items)) return;
 
         // Set items
         _items.setAll(theItems);
-        for (TableCol tc : getCols())
-            tc.setItems(theItems);
-        if (_headerCol!=null)
-            _headerCol.setItems(theItems);
 
         // Register for relayout/repaint
-        relayout(); relayoutParent(); repaint();
+        relayout();
+        relayoutParent();
+        repaint();
     }
 
     /**
@@ -145,7 +143,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void setItems(T ... theItems)
     {
-        setItems(theItems!=null ? Arrays.asList(theItems) : null);
+        List<T> itemsList = theItems != null ? Arrays.asList(theItems) : null;
+        setItems(itemsList);
     }
 
     /**
@@ -317,20 +316,18 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     {
         // Handle Sel_Prop: Get array of changed indexes and update
         String propName = aPC.getPropName();
-        if (propName==PickList.Sel_Prop) {
-            ListSel sel1 = (ListSel)aPC.getOldValue();
-            ListSel sel2 = (ListSel)aPC.getNewValue();
-            int changed[] = ListSel.getChangedIndexes(sel1, sel2);
-            //for (int i : changed)
-            //    updateIndex(i);
+        if (propName == PickList.Sel_Prop) {
+            ListSel sel1 = (ListSel) aPC.getOldValue();
+            ListSel sel2 = (ListSel) aPC.getNewValue();
+            int[] changed = ListSel.getChangedIndexes(sel1, sel2);
 
-            int oldInd = changed.length>1 ? changed[0] : -1;
-            int newInd = changed.length>1 ? changed[changed.length-1] : -1;
+            int oldInd = changed.length > 1 ? changed[0] : -1;
+            int newInd = changed.length > 1 ? changed[changed.length-1] : -1;
             firePropChange(SelIndex_Prop, oldInd, newInd);
         }
 
         // Handle Items_Prop: Reset RowHeightCached
-        else if (propName==PickList.Item_Prop) {
+        else if (propName == PickList.Item_Prop) {
             _rowHeightCached = -1;
         }
 
@@ -344,8 +341,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void updateItems(T ... theItems)
     {
-        for (TableCol tcol : getCols())
-            tcol.updateItems(theItems);
+        for (TableCol<T> tableCol : getCols())
+            tableCol.updateItems(theItems);
     }
 
     /**
@@ -358,19 +355,23 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public TableCol <T> getCol(int anIndex)
     {
-        if (anIndex==-1 && isShowHeaderCol()) return getHeaderCol();
-        return (TableCol) _splitView.getItem(anIndex);
+        if (anIndex == -1 && isShowHeaderCol())
+            return getHeaderCol();
+        return (TableCol<T>) _splitView.getItem(anIndex);
     }
 
     /**
      * Returns the column at given index.
      */
-    public TableCol[] getCols()  { return _splitView.getItems().toArray(new TableCol[0]); }
+    public TableCol<T>[] getCols()
+    {
+        return _splitView.getItems().toArray(new TableCol[0]);
+    }
 
     /**
      * Adds a TableCol.
      */
-    public void addCol(TableCol aCol)
+    public void addCol(TableCol<T> aCol)
     {
         // Add column to column SplitView
         _splitView.addItem(aCol);
@@ -406,9 +407,9 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Remove's the TableCol at the given index from this Table's children list.
      */
-    public TableCol removeCol(int anIndex)
+    public TableCol<T> removeCol(int anIndex)
     {
-        TableCol col = getCol(anIndex);
+        TableCol<T> col = getCol(anIndex);
         removeCol(col);
         return col;
     }
@@ -416,10 +417,11 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Removes the given TableCol from this table's children list.
      */
-    public int removeCol(TableCol aCol)
+    public int removeCol(TableCol<T> aCol)
     {
         int ind = _splitView.removeItem(aCol);
-        if (ind>=0) getHeaderView().removeItem(ind);
+        if (ind >= 0)
+            getHeaderView().removeItem(ind);
         return ind;
     }
 
@@ -492,19 +494,21 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the header col.
      */
-    public TableCol getHeaderCol()
+    public TableCol<T> getHeaderCol()
     {
         // If already set, just return
-        if (_headerCol!=null) return _headerCol;
+        if (_headerCol != null) return _headerCol;
 
-        // Create and return
-        _headerCol = new TableCol();
+        // Create and configure
+        _headerCol = new TableCol<>();
         _headerCol._table = this;
         _headerCol.setFill(null);
         _headerCol.setPickList(_items);
         _headerCol.setCellPadding(getCellPadding());
         _headerCol.setItems(getItems());
         _headerCol.setCellConfigure(cell -> configureHeaderColCell(cell));
+
+        // Return
         return _headerCol;
     }
 
@@ -572,10 +576,12 @@ public class TableView <T> extends ParentView implements Selectable<T> {
             return _rowHeightCached;
 
         _rowHeightCached = 1;
-        for (TableCol col : getCols())
-            _rowHeightCached = Math.max(_rowHeightCached, col.getRowHeightSuper());
+        for (TableCol<T> tableCol : getCols())
+            _rowHeightCached = Math.max(_rowHeightCached, tableCol.getRowHeightSuper());
         if (isShowHeaderCol())
             _rowHeightCached = Math.max(_rowHeightCached, getHeaderCol().getRowHeightSuper());
+
+        // Return
         return _rowHeightCached;
     }
 
@@ -597,11 +603,17 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public void setCellPadding(Insets aPad)
     {
-        if (aPad==null) aPad = ListArea.CELL_PAD_DEFAULT; if (aPad.equals(_cellPad)) return;
+        if (aPad == null)
+            aPad = ListArea.CELL_PAD_DEFAULT;
+        if (aPad.equals(_cellPad)) return;
+
         firePropChange(CellPadding_Prop, _cellPad, _cellPad=aPad);
-        for (TableCol col : getCols())
-            col.setCellPadding(_cellPad);
-        relayout(); relayoutParent();
+
+        // Forward to columns
+        for (TableCol<T> tableCol : getCols())
+            tableCol.setCellPadding(_cellPad);
+        relayout();
+        relayoutParent();
     }
 
     /**
@@ -619,29 +631,28 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public ListCell <T> getCell(int aRow, int aCol)
     {
-        if (aRow<0) return null; // || aCol<0
-        TableCol col = getCol(aCol);
-        ListCell <T> cell = col!=null ? col.getCellForRow(aRow) : null;
+        if (aRow < 0) return null; // || aCol<0
+        TableCol<T> tableCol = getCol(aCol);
+        ListCell<T> cell = tableCol != null ? tableCol.getCellForRow(aRow) : null;
         return cell;
     }
-
-    /**
-     * Get rid of this.
-     */
-    public int getRowAt(double aX, double aY)  { return getRowIndexForY(aY); }
 
     /**
      * Returns the col index for given X.
      */
     public int getColIndexForX(double aX)
     {
-        Point pnt = _splitView.parentToLocal(aX, 0, this);
-        TableCol cols[] = getCols();
+        Point pointInSplit = _splitView.parentToLocal(aX, 0, this);
+
+        // Iterate over cols
+        TableCol<T>[] cols = getCols();
         for (int i=0; i<cols.length; i++) {
-            TableCol col = cols[i];
-            if (pnt.x >= col.getX() && pnt.x <= col.getMaxX())
+            TableCol<T> col = cols[i];
+            if (pointInSplit.x >= col.getX() && pointInSplit.x <= col.getMaxX())
                 return i;
         }
+
+        // Return not found
         return -1;
     }
 
@@ -650,8 +661,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public int getRowIndexForY(double aY)
     {
-        Point pnt = _splitView.parentToLocal(0, aY, this);
-        return (int) (pnt.y/getRowHeight());
+        Point pointInSplit = _splitView.parentToLocal(0, aY, this);
+        return (int) (pointInSplit.y / getRowHeight());
     }
 
     /**
@@ -660,16 +671,16 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public TableCol <T> getColForX(double aX)
     {
         // Check normal columns
-        Point pnt = _splitView.parentToLocal(aX, 0, this);
-        for (TableCol col : getCols())
-            if (pnt.x>=col.getX() && pnt.x<=col.getMaxX())
-                return col;
+        Point pointInSplit = _splitView.parentToLocal(aX, 0, this);
+        for (TableCol<T> tableCol : getCols())
+            if (pointInSplit.x >= tableCol.getX() && pointInSplit.x <= tableCol.getMaxX())
+                return tableCol;
 
         // If header column is showing, check it
         if (isShowHeaderCol()) {
-            TableCol hdrCol = getHeaderCol();
-            pnt = hdrCol.parentToLocal(aX,0);
-            if (hdrCol.contains(aX,1))
+            TableCol<T> hdrCol = getHeaderCol();
+            Point pointInHeader = hdrCol.parentToLocal(aX,0);
+            if (hdrCol.contains(pointInHeader.x,1))
                 return hdrCol;
         }
 
@@ -680,11 +691,14 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the cell at given Y coord.
      */
-    public ListCell <T> getCellForXY(double aX, double aY)
+    public ListCell<T> getCellForXY(double aX, double aY)
     {
-        TableCol <T> col = getColForX(aX); if (col==null) return null;
-        Point pnt = col.parentToLocal(aX, aY, this);
-        return col.getCellForY(pnt.y);
+        TableCol<T> tableCol = getColForX(aX);
+        if (tableCol == null)
+            return null;
+
+        Point pointInCol = tableCol.parentToLocal(aX, aY, this);
+        return tableCol.getCellForY(pointInCol.y);
     }
 
     /**
@@ -701,10 +715,9 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     protected double getPrefHeightImpl(double aW)
     {
         Insets ins = getInsetsAll();
-        double hdrPH = isShowHeader() ? _header.getPrefHeight(aW) : 0;
-        double rowsPH = getRowHeight()*getItems().size();
-        double ph = hdrPH + rowsPH + ins.getHeight();
-        return ph;
+        double hdrPrefH = isShowHeader() ? _header.getPrefHeight(aW) : 0;
+        double rowsPrefH = getRowHeight() * getItems().size();
+        return hdrPrefH + rowsPrefH + ins.getHeight();
     }
 
     /**
@@ -733,14 +746,28 @@ public class TableView <T> extends ParentView implements Selectable<T> {
 
         // Handle KeyPress Tab
         if (anEvent.isKeyPress()) {
-            int kcode = anEvent.getKeyCode();
-            switch (kcode) {
+            int keyCode = anEvent.getKeyCode();
+            switch (keyCode) {
+
+                // Handle Tab
                 case KeyCode.TAB:
-                    if (anEvent.isShiftDown()) selectLeft(); else selectRight();
-                    fireActionEvent(anEvent); anEvent.consume(); requestFocus(); break;
+                    if (anEvent.isShiftDown())
+                        selectLeft();
+                    else selectRight();
+                    fireActionEvent(anEvent);
+                    anEvent.consume();
+                    requestFocus();
+                    break;
+
+                // Handle Enter
                 case KeyCode.ENTER:
-                    if (anEvent.isShiftDown()) selectUp(); else selectDown();
-                    fireActionEvent(anEvent); anEvent.consume(); requestFocus(); break;
+                    if (anEvent.isShiftDown())
+                        selectUp();
+                    else selectDown();
+                    fireActionEvent(anEvent);
+                    anEvent.consume();
+                    requestFocus();
+                    break;
             }
         }
     }
@@ -751,7 +778,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     protected void paintAbove(Painter aPntr)
     {
         // Get Selected Cell (just return if null)
-        ListCell cell = getSelCell(); if (cell == null) return;
+        ListCell<T> cell = getSelCell(); if (cell == null) return;
 
         // Clip to Scroller bounds
         Scroller scroller = getScrollView().getScroller();
@@ -788,12 +815,12 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     private ImageBox _selImgBox;
 
     /** Returns whether this view or child view has focus. */
-    boolean isFoc()
+    private boolean isFoc()
     {
-        WindowView win = getWindow(); if (win==null) return false;
-        View fv = win.getFocusedView();
-        for (View v = fv; v!=null; v = v.getParent())
-            if (v==this)
+        WindowView win = getWindow(); if (win == null) return false;
+        View focusedView = win.getFocusedView();
+        for (View view = focusedView; view != null; view = view.getParent())
+            if (view == this)
                 return true;
         return false;
     }
@@ -809,7 +836,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public void setEditable(boolean aValue)
     {
         // If already set, just return
-        if (aValue==isEditable()) return;
+        if (aValue == isEditable()) return;
         _editable = aValue;
 
         // Set value, fire prop change and enable MouseRelease events
@@ -830,7 +857,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     protected void setEditingCell(ListCell<T> aCell)
     {
-        if (aCell==getEditingCell()) return;
+        if (aCell == getEditingCell()) return;
         firePropChange(EditingCell_Prop, _editingCell, _editingCell = aCell);
     }
 
@@ -840,7 +867,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public void editCell(ListCell aCell)
     {
         // If not appropriate, just return
-        if (aCell==null || !isEditable() || aCell.isEditing()) return;
+        if (aCell == null || !isEditable() || aCell.isEditing())
+            return;
 
         // Call CellEditStart (or just set Cell.Editing true)
         aCell.setEditing(true);
@@ -852,8 +880,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public void editCellStop()
     {
         if (!isEditable()) return;
-        ListCell cell = getSelCell();
-        if (cell!=null && cell.isEditing())
+        ListCell<T> cell = getSelCell();
+        if (cell != null && cell.isEditing())
             cell.setEditing(false);
     }
 
@@ -870,19 +898,15 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Override to reset cells.
      */
-    public void setY(double aValue)
-    {
-        if (aValue==getY()) return; super.setY(aValue);
-        for (TableCol tcol : getCols()) tcol.relayout();
-    }
-
-    /**
-     * Override to reset cells.
-     */
     public void setHeight(double aValue)
     {
-        if (aValue==getHeight()) return; super.setHeight(aValue);
-        for (TableCol tcol : getCols()) tcol.relayout();
+        // Do normal version
+        if (aValue == getHeight()) return;
+        super.setHeight(aValue);
+
+        // Tell cols to relayout
+        for (TableCol<T> tableCol : getCols())
+            tableCol.relayout();
     }
 
     /**
@@ -891,8 +915,9 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public View getFocusNext()
     {
         selectRight();
-        ListCell cell = getSelCell();
-        if (cell!=null && isEditable()) getEnv().runLater(() -> editCell(cell));
+        ListCell<T> cell = getSelCell();
+        if (cell != null && isEditable())
+            getEnv().runLater(() -> editCell(cell));
         return cell;
     }
 
@@ -902,8 +927,9 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public View getFocusPrev()
     {
         selectLeft();
-        ListCell cell = getSelCell();
-        if (cell!=null && isEditable()) getEnv().runLater(() -> editCell(cell));
+        ListCell<T> cell = getSelCell();
+        if (cell != null && isEditable())
+            getEnv().runLater(() -> editCell(cell));
         return cell;
     }
 
@@ -912,7 +938,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     protected void setFocused(boolean aValue)
     {
-        if (aValue==isFocused()) return;
+        if (aValue == isFocused()) return;
         super.setFocused(aValue);
         _selImgBox = null;
     }
@@ -977,7 +1003,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     protected void toXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Archive children
-        for (int i=0, iMax=getColCount(); i<iMax; i++) { TableCol child = getCol(i);
+        for (int i = 0, iMax = getColCount(); i < iMax; i++) { TableCol<T> child = getCol(i);
             anElement.add(anArchiver.toXML(child, this)); }
     }
 
@@ -987,10 +1013,10 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     protected void fromXMLChildren(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Iterate over child elements and unarchive as child views
-        for (int i=0, iMax=anElement.size(); i<iMax; i++) { XMLElement childXML = anElement.get(i);
-            Class cls = anArchiver.getClass(childXML.getName());
-            if (cls!=null && TableCol.class.isAssignableFrom(cls)) {
-                TableCol col = (TableCol)anArchiver.fromXML(childXML, this);
+        for (int i = 0, iMax = anElement.size(); i < iMax; i++) { XMLElement childXML = anElement.get(i);
+            Class<?> cls = anArchiver.getClass(childXML.getName());
+            if (cls != null && TableCol.class.isAssignableFrom(cls)) {
+                TableCol<T> col = (TableCol<T>) anArchiver.fromXML(childXML, this);
                 addCol(col);
             }
         }
