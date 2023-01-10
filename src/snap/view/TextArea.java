@@ -96,6 +96,7 @@ public class TextArea extends View {
     public static final String WrapLines_Prop = "WrapLines";
     public static final String FireActionOnEnterKey_Prop = "FireActionOnEnterKey";
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
+    public static final String TextDoc_Prop = "TextDoc";
     public static final String Selection_Prop = "Selection";
 
     // Constants for property defaults
@@ -181,6 +182,9 @@ public class TextArea extends View {
         // Reset selection (to line end if single-line, otherwise text start)
         int selIndex = getLineCount() == 1 && length() < 40 ? length() : 0;
         setSel(selIndex);
+
+        // FirePropChange
+        firePropChange(TextDoc_Prop, oldTextDoc, aTextDoc);
 
         // Relayout parent, repaint
         relayoutParent();

@@ -368,4 +368,15 @@ public class ArrayUtils {
         Stream<T> filteredStream = Stream.of(anArray).filter(aPredicate);
         return filteredStream.toArray(size -> (T[]) Array.newInstance(anArray.getClass().getComponentType(), size));
     }
+
+    /**
+     * Returns the first item in array that matches given predicate (or null).
+     */
+    public static <T> T findMatch(T[] anArray, Predicate<? super T> aPred)
+    {
+        for (T item : anArray)
+            if (aPred.test(item))
+                return item;
+        return null;
+    }
 }
