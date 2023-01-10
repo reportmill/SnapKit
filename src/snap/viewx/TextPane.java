@@ -5,6 +5,7 @@ package snap.viewx;
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
+import snap.props.PropChange;
 import snap.text.TextBoxLine;
 import snap.text.TextDoc;
 import snap.text.TextSel;
@@ -110,7 +111,7 @@ public class TextPane extends ViewOwner {
     {
         // Get text area and start listening for events (KeyEvents, MouseReleased, DragOver/Exit/Drop)
         _textArea = getView("TextArea", TextArea.class);
-        _textArea.getTextDoc().addPropChangeListener(pc -> resetLater());
+        _textArea.addPropChangeListener(pc -> textAreaDidPropChange(pc));
 
         // Configure FindText
         getView("FindText", TextField.class).setPromptText("Find");
@@ -329,6 +330,24 @@ public class TextPane extends ViewOwner {
         TextBoxLine line = lineIndex >= 0 && lineIndex < textArea.getLineCount() ? textArea.getLine(lineIndex) : null;
         textArea.setSel(line.getStartCharIndex(), line.getEndCharIndex());
         requestFocus(textArea);
+    }
+
+    /**
+     * Called when TextArea does prop change.
+     */
+    protected void textAreaDidPropChange(PropChange aPC)
+    {
+        Object src = aPC.getSource();
+        if (src instanceof TextDoc)
+            textDocDidPropChange(aPC);
+    }
+
+    /**
+     * Called when TextDoc does prop change.
+     */
+    protected void textDocDidPropChange(PropChange aPC)
+    {
+        resetLater();
     }
 
     /**
