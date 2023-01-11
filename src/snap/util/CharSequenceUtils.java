@@ -123,6 +123,25 @@ public class CharSequenceUtils {
     }
 
     /**
+     * Returns the length of leading whitespace chars for given char sequence.
+     */
+    public static int getIndentLength(CharSequence theChars)
+    {
+        // Get leading space chars
+        int indentLength = 0;
+        int lineLength = theChars.length();
+        for (int i = 0; i < lineLength; i++) {
+            char loopChar = theChars.charAt(i);
+            if (Character.isWhitespace(loopChar) && loopChar != '\n')
+                indentLength++;
+            else break;
+        }
+
+        // Return
+        return indentLength;
+    }
+
+    /**
      * Returns a string of any leading whitespace chars for given char sequence.
      */
     public static String getIndentString(CharSequence theChars)

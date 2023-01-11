@@ -87,6 +87,14 @@ public interface CharSequenceX extends CharSequence {
     }
 
     /**
+     * Returns length of leading whitespace chars.
+     */
+    default int getIndentLength()
+    {
+        return CharSequenceUtils.getIndentLength(this);
+    }
+
+    /**
      * Returns a string of any leading whitespace chars.
      */
     default String getIndentString()
