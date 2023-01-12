@@ -11,101 +11,138 @@ import snap.web.*;
 public class WebBrowserLoader {
 
     // The Browser
-    WebBrowser           _browser;
-    
+    private WebBrowser  _browser;
+
     // The current URL loading
-    WebRequest           _req;
-    
+    private WebRequest  _req;
+
     // The current runner loading a file
-    TaskRunnerPanel      _runner;
-    
-/**
- * Creates a loader for a browser.
- */
-public WebBrowserLoader(WebBrowser aBrowser)  { _browser = aBrowser; }
+    private TaskRunnerPanel  _runner;
 
-/**
- * Returns the current URL to set.
- */
-public WebURL getURL()  { return _req!=null? _req.getURL() : null; }
+    /**
+     * Creates a loader for a browser.
+     */
+    public WebBrowserLoader(WebBrowser aBrowser)
+    {
+        _browser = aBrowser;
+    }
 
-/**
- * Sets the URL to load and set into browser.
- */
-public void setURL(WebURL aURL)
-{
-    if(aURL==null) { _browser.setPage(null); return; }
-    WebRequest req = new WebRequest(aURL);
-    setRequest(req);
-}
+    /**
+     * Returns the current URL to set.
+     */
+    public WebURL getURL()
+    {
+        return _req != null ? _req.getURL() : null;
+    }
 
-/**
- * Returns the current request to set.
- */
-public WebRequest getRequest()  { return _req; }
+    /**
+     * Sets the URL to load and set into browser.
+     */
+    public void setURL(WebURL aURL)
+    {
+        if (aURL == null) {
+            _browser.setPage(null);
+            return;
+        }
+        WebRequest req = new WebRequest(aURL);
+        setRequest(req);
+    }
 
-/**
- * Sets the URL to load and set into browser.
- */
-public void setRequest(WebRequest aReq)
-{
-    // If not EventDispatchThread, re-invoke in that thread
-    ViewEnv env = ViewEnv.getEnv(); if(!env.isEventThread()) { env.runLater(() -> setRequest(aReq)); return; }
-    
-    // Set browser ActivityText
-    _browser.setActivity("Loading " + aReq.getURL().getString());
-    _browser.setLoading(true);
-    
-    // Create and start URLLoader
-    _req = aReq; _runner = new URLLoader(aReq);
-    _runner.start();
-}
+    /**
+     * Returns the current request to set.
+     */
+    public WebRequest getRequest()  { return _req; }
 
-/**
- * Returns whether runner is still running.
- */
-public boolean isLoading()  { return _runner!=null && _runner.isActive(); }
+    /**
+     * Sets the URL to load and set into browser.
+     */
+    public void setRequest(WebRequest aReq)
+    {
+        // If not EventDispatchThread, re-invoke in that thread
+        ViewEnv env = ViewEnv.getEnv();
+        if (!env.isEventThread()) {
+            env.runLater(() -> setRequest(aReq));
+            return;
+        }
 
-/**
- * Loads a URL.
- */
-protected WebResponse loadURL(WebRequest aReq) throws Exception
-{
-    WebSite site = aReq.getURL().getSite();
-    return site.getResponse(aReq);
-}
+        // Set browser ActivityText
+        _browser.setActivity("Loading " + aReq.getURL().getString());
+        _browser.setLoading(true);
 
-/**
- * Handle success: Get WebPage for URL and start PageLoader.
- */
-protected void loadURLSuccess(WebResponse aResp)
-{
-    if(aResp.getRequest()!=_req) return; // Just return if loader is already loading another request
-    _browser.setResponse(aResp);
-    _browser.setActivity("");
-    _browser.setLoading(false);
-    _req = null; _runner = null;
-}
+        // Create and start URLLoader
+        _req = aReq;
+        _runner = new URLLoader(aReq);
+        _runner.start();
+    }
 
-/**
- * Handle failure: Clear Browser.Activity and Loading and show exception.
- */
-protected void loadURLFailure(WebRequest aReq, Throwable e)
-{
-    _browser.setActivity("");
-    _browser.setLoading(false);
-    _browser.showException(aReq.getURL(), e);
-    _req = null; _runner = null;
-}
+    /**
+     * Returns whether runner is still running.
+     */
+    public boolean isLoading()
+    {
+        return _runner != null && _runner.isActive();
+    }
 
-/**
- * A JFXRunner subclass to load a URL file+bytes.
- */
-private class URLLoader extends TaskRunnerPanel <WebResponse> {
-    URLLoader(WebRequest aReq)  { _ldrReq = aReq; } WebRequest _ldrReq;
-    public WebResponse run() throws Exception  { return loadURL(_ldrReq); }
-    public void success(WebResponse aResponse)  { loadURLSuccess(aResponse); }
-    public void failure(Exception e)  { loadURLFailure(_ldrReq, e); }
-}
+    /**
+     * Loads a URL.
+     */
+    protected WebResponse loadURL(WebRequest aReq) throws Exception
+    {
+        WebSite site = aReq.getURL().getSite();
+        return site.getResponse(aReq);
+    }
 
+    /**
+     * Handle success: Get WebPage for URL and start PageLoader.
+     */
+    protected void loadURLSuccess(WebResponse aResp)
+    {
+        if (aResp.getRequest() != _req) return; // Just return if loader is already loading another request
+        _browser.setResponse(aResp);
+        _browser.setActivity("");
+        _browser.setLoading(false);
+        _req = null;
+        _runner = null;
+    }
+
+    /**
+     * Handle failure: Clear Browser.Activity and Loading and show exception.
+     */
+    protected void loadURLFailure(WebRequest aReq, Throwable e)
+    {
+        _browser.setActivity("");
+        _browser.setLoading(false);
+        _browser.showException(aReq.getURL(), e);
+        _req = null;
+        _runner = null;
+    }
+
+    /**
+     * A JFXRunner subclass to load a URL file+bytes.
+     */
+    private class URLLoader extends TaskRunnerPanel<WebResponse> {
+
+        // Ivars
+        WebRequest  _ldrReq;
+
+        URLLoader(WebRequest aReq)
+        {
+            _ldrReq = aReq;
+        }
+
+        public WebResponse run() throws Exception
+        {
+            return loadURL(_ldrReq);
+        }
+
+        public void success(WebResponse aResponse)
+        {
+            loadURLSuccess(aResponse);
+        }
+
+        public void failure(Exception e)
+        {
+            loadURLFailure(_ldrReq, e);
+        }
+    }
 }

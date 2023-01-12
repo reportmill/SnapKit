@@ -10,26 +10,34 @@ import snap.view.*;
 public class ViewOwnerPage extends WebPage {
 
     // The ViewOwner
-    ViewOwner              _owner;
+    private ViewOwner  _owner;
 
-/**
- * Creates a new ViewOwnerPage for given ViewOwner.
- */
-public ViewOwnerPage(ViewOwner anOwner)  { _owner = anOwner; }
+    /**
+     * Creates a new ViewOwnerPage for given ViewOwner.
+     */
+    public ViewOwnerPage(ViewOwner anOwner)
+    {
+        _owner = anOwner;
+    }
 
-/**
- * Returns the ViewOwner for this page.
- */
-public ViewOwner getViewOwner()  { return _owner; }
+    /**
+     * Returns the ViewOwner for this page.
+     */
+    public ViewOwner getViewOwner()  { return _owner; }
 
-/**
- * Override to return ViewOwner UI.
- */
-protected View createUI()  { return getViewOwner().getUI(); }
+    /**
+     * Override to return ViewOwner UI.
+     */
+    protected View createUI()
+    {
+        return getViewOwner().getUI();
+    }
 
-/**
- * Override to forward to ViewOwner.
- */
-public Object getFirstFocus()  { return getViewOwner().getFirstFocus(); }
-
+    /**
+     * Override to forward to ViewOwner.
+     */
+    public Object getFirstFocus()
+    {
+        return getViewOwner().getFirstFocus();
+    }
 }

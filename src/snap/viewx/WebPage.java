@@ -162,16 +162,12 @@ public class WebPage extends ViewOwner {
     /**
      * Notification that WebPage was installed in WebBrowser.
      */
-    public void notifyPageAdded(WebBrowser aBrowser)
-    {
-    }
+    public void notifyPageAdded(WebBrowser aBrowser)  { }
 
     /**
      * Notification that WebPage was removed from WebBrowser.
      */
-    public void notifyPageRemoved(WebBrowser aBrowser)
-    {
-    }
+    public void notifyPageRemoved(WebBrowser aBrowser)  { }
 
     /**
      * Override to show exception page.
@@ -208,9 +204,12 @@ public class WebPage extends ViewOwner {
         // Reload page
         WebURL url = getURL();
         WebFile file = url.getFile();
-        if (file != null) file.reload();
-        if (getBrowser() != null && getBrowser().getPage() == this)
-            getBrowser().getLoader().setURL(url);
+        if (file != null)
+            file.reload();
+
+        WebBrowser browser = getBrowser();
+        if (browser != null && browser.getPage() == this)
+            browser.getLoader().setURL(url);
     }
 
     /**
@@ -237,7 +236,8 @@ public class WebPage extends ViewOwner {
             msg = "A file named " + name + " already exists in this location.\n Do you want to replace it with new file?";
             dbox = new DialogBox(title);
             dbox.setWarningMessage(msg);
-            if (!dbox.showConfirmDialog(aView)) return showNewFilePanel(aView, aFile);
+            if (!dbox.showConfirmDialog(aView))
+                return showNewFilePanel(aView, aFile);
         }
 
         // If directory, just create and return
