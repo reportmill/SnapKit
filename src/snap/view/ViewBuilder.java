@@ -140,9 +140,11 @@ public class ViewBuilder<T extends View> {
     /**
      * Returns menu with all menu items.
      */
-    public Menu buildMenu()
+    public Menu buildMenu(String aName, String aText)
     {
         Menu menu = new Menu();
+        menu.setName(aName);
+        menu.setText(aText);
         T[] menuItems = buildAll();
         for (T menuItem : menuItems)
             menu.addItem((MenuItem) menuItem);
