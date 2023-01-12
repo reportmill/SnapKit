@@ -15,7 +15,7 @@ import snap.view.*;
 /**
  * A panel for editing text files.
  */
-public class TextPane extends ViewOwner {
+public class TextPane<T extends TextDoc> extends ViewOwner {
 
     // The TextArea
     private TextArea  _textArea;
@@ -28,6 +28,33 @@ public class TextPane extends ViewOwner {
 
     // Constants for properties
     public static final String TextModified_Prop = "TextModified";
+
+    /**
+     * Constructor.
+     */
+    public TextPane()
+    {
+        super();
+    }
+
+    /**
+     * Returns the TextDoc.
+     */
+    public T getTextDoc()
+    {
+        TextDoc textDoc = _textArea != null ? _textArea.getTextDoc() : null;
+        return (T) textDoc;
+    }
+
+    /**
+     * Sets the TextDoc.
+     */
+    public void setTextDoc(T aTextDoc)
+    {
+        // Set in TextArea
+        TextArea textArea = getTextArea();
+        textArea.setTextDoc(aTextDoc);
+    }
 
     /**
      * Returns the TextArea.
@@ -265,7 +292,7 @@ public class TextPane extends ViewOwner {
      */
     public String getSelectionInfo()
     {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         TextBoxLine textLine = getTextArea().getLineForCharIndex(getTextArea().getSelStart());
         sb.append("Line ").append(textLine.getIndex() + 1);
         sb.append(", Col ").append(getTextArea().getSelStart() - textLine.getStartCharIndex());
@@ -294,7 +321,7 @@ public class TextPane extends ViewOwner {
         // If index not found, beep and try again from start
         if (index < 0) {
             beep();
-            index = isNext ? text.indexOf(string) : text.lastIndexOf(string, text.length());
+            index = isNext ? text.indexOf(string) : text.lastIndexOf(string);
         }
 
         // If index found, select text and focus
@@ -328,7 +355,13 @@ public class TextPane extends ViewOwner {
 
         // Select line and focus
         TextBoxLine line = lineIndex >= 0 && lineIndex < textArea.getLineCount() ? textArea.getLine(lineIndex) : null;
-        textArea.setSel(line.getStartCharIndex(), line.getEndCharIndex());
+        if (line != null) {
+            int start = line.getStartCharIndex();
+            int end = line.getEndCharIndex();
+            textArea.setSel(start, end);
+        }
+
+        // Focus TextArea
         requestFocus(textArea);
     }
 
@@ -355,7 +388,7 @@ public class TextPane extends ViewOwner {
      */
     public static void main(String[] args)
     {
-        TextPane textPane = new TextPane();
+        TextPane<?> textPane = new TextPane<>();
         TextArea textArea = textPane.getTextArea();
         textArea.setPrefSize(800, 600);
         //String text = WebURL.getURL(TextPane.class, "TextPane.snp").getText(); textArea.setText(text);

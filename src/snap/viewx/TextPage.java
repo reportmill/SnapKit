@@ -2,9 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
-
 import snap.geom.HPos;
 import snap.gfx.Font;
+import snap.text.TextDoc;
 import snap.view.Button;
 import snap.view.TextArea;
 import snap.view.View;
@@ -16,17 +16,18 @@ import snap.web.WebFile;
 public class TextPage extends WebPage {
 
     // The text pane
-    TFTextPane _textPane = new TFTextPane();
+    private TFTextPane<?>  _textPane = new TFTextPane<>();
 
     // The text
-    String _text;
+    private String  _text;
 
     /**
      * Returns the text.
      */
     public String getText()
     {
-        return _text != null ? _text : (_text = getDefaultText());
+        if (_text != null) return _text;
+        return _text = getDefaultText();
     }
 
     /**
@@ -50,7 +51,7 @@ public class TextPage extends WebPage {
     /**
      * Returns the TextPane.
      */
-    public TextPane getTextPane()
+    public TextPane<?> getTextPane()
     {
         getUI();
         return _textPane;
@@ -96,10 +97,10 @@ public class TextPage extends WebPage {
      */
     private Font getDefaultFont()
     {
-        String names[] = {"Monaco", "Consolas", "Courier"};
-        for (int i = 0; i < names.length; i++) {
-            Font font = new Font(names[i], 12);
-            if (font.getFamily().startsWith(names[i]))
+        String[] names = { "Monaco", "Consolas", "Courier" };
+        for (String name : names) {
+            Font font = new Font(name, 12);
+            if (font.getFamily().startsWith(name))
                 return font;
         }
         return new Font("Arial", 12);
@@ -118,7 +119,7 @@ public class TextPage extends WebPage {
     /**
      * A TextPane subclass.
      */
-    private class TFTextPane extends TextPane implements WebFile.Updater {
+    private class TFTextPane<T extends TextDoc> extends TextPane<T> implements WebFile.Updater {
 
         /**
          * Save file.
@@ -135,7 +136,9 @@ public class TextPage extends WebPage {
         public void setTextModified(boolean aFlag)
         {
             super.setTextModified(aFlag);
-            if (getFile() != null) getFile().setUpdater(aFlag ? this : null);
+            WebFile file = getFile();
+            if (file != null)
+                file.setUpdater(aFlag ? this : null);
         }
 
         /**
@@ -143,8 +146,8 @@ public class TextPage extends WebPage {
          */
         public void updateFile(WebFile aFile)
         {
-            getFile().setText(getTextArea().getText());
+            WebFile file = getFile();
+            file.setText(getTextArea().getText());
         }
     }
-
 }
