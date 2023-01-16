@@ -124,4 +124,25 @@ public interface ParseToken {
             return "Token { start:" + _startCharIndex + ", end:" + _endCharIndex + " }: " + getString();
         }
     }
+
+    /**
+     * A Builder.
+     */
+    class Builder {
+
+        // The ParseToken
+        private BasicToken  _token = new BasicToken();
+
+        // Property Methods
+        public Builder text(CharSequence aValue)  { _token._text = aValue; return this; }
+        public Builder name(String aName)  { _token._name = aName; return this; }
+        public Builder pattern(String aString)  { _token._pattern = aString; return this; }
+        public Builder startCharIndex(int aValue)  { _token._startCharIndex = aValue; return this; }
+        public Builder endCharIndex(int aValue)  { _token._endCharIndex = aValue; return this; }
+        public Builder lineIndex(int aValue)  { _token._lineIndex = aValue; return this; }
+        public Builder startCharIndexInLine(int aValue)  { _token._startCharIndexInLine = aValue; return this; }
+
+        // Build method
+        public ParseToken build()  { return _token; }
+    }
 }
