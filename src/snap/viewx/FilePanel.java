@@ -433,7 +433,7 @@ public class FilePanel extends ViewOwner {
             String name = DialogBox.showInputDialog(getUI(), "New Folder Panel", "Enter name:", null);
             if (name == null) return;
             String path = getDir().getDirPath() + name;
-            WebFile newDir = getSite().createFile(path, true);
+            WebFile newDir = getSite().createFileForPath(path, true);
             newDir.save();
             setDir(getDir().getParent());
             setDir(newDir);
@@ -531,7 +531,7 @@ public class FilePanel extends ViewOwner {
             //String dpath = FilePathUtils.getParent(path);
             //WebFile dir = getFile(dpath);
             //if (dir!=null && dir.isDir())
-            file = getSite().createFile(path, false);
+            file = getSite().createFileForPath(path, false);
         }
 
         // Return file

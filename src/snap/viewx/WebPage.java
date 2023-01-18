@@ -242,7 +242,7 @@ public class WebPage extends ViewOwner {
 
         // If directory, just create and return
         if (aFile.isDir())
-            return getSite().createFile(path, true);
+            return getSite().createFileForPath(path, true);
 
         // Create and return new file
         return createNewFile(path);
@@ -253,7 +253,7 @@ public class WebPage extends ViewOwner {
      */
     protected WebFile createNewFile(String aPath)
     {
-        return getSite().createFile(aPath, false);
+        return getSite().createFileForPath(aPath, false);
     }
 
     /**

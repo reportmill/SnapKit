@@ -233,7 +233,7 @@ public class WebURL {
     {
         String path = getPath();
         WebSite site = getSite();
-        WebFile file = path != null ? site.createFile(path, isDir) : site.getRootDir();
+        WebFile file = path != null ? site.createFileForPath(path, isDir) : site.getRootDir();
         return file;
     }
 

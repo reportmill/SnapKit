@@ -172,7 +172,7 @@ public class HTTPSite extends WebSite {
     {
         WebSite sbox = getSandbox();
         WebFile dfile = sbox.getFileForPath("/Cache" + aPath);
-        if (dfile==null) dfile = sbox.createFile("/Cache" + aPath, false);
+        if (dfile==null) dfile = sbox.createFileForPath("/Cache" + aPath, false);
         return dfile;
     }
 }

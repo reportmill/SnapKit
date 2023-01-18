@@ -148,6 +148,6 @@ public class DirSite extends WebSite {
         if (dir == null || !dir.isDir()) return null;
         WebSite ds = dir.getSite();
         String path = dir.getPath() + aPath;
-        return ds.createFile(path, isDir);
+        return ds.createFileForPath(path, isDir);
     }
 }

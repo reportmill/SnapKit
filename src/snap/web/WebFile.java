@@ -87,7 +87,7 @@ public class WebFile implements Comparable<WebFile> {
 
         // Get file for parent path from site
         String path = FilePathUtils.getParent(getPath());
-        return _parent = getSite().createFile(path, true);
+        return _parent = getSite().createFileForPath(path, true);
     }
 
     /**

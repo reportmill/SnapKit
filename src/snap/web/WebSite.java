@@ -33,7 +33,7 @@ public abstract class WebSite {
     private WebSite  _sandbox;
 
     // A map of properties associated with file
-    private Map  _props = new HashMap<>();
+    private Map<String,Object>  _props = new HashMap<>();
 
     // PropChangeListener for file changes
     private PropChangeListener  _fileLsnr = pc -> fileDidPropChange(pc);
@@ -70,7 +70,8 @@ public abstract class WebSite {
      */
     public String getURLString()
     {
-        return getURL().getString();
+        WebURL url = getURL();
+        return url.getString();
     }
 
     /**
@@ -141,7 +142,9 @@ public abstract class WebSite {
     public WebFile getRootDir()
     {
         WebFile file = getFileForPath("/");
-        return file != null ? file : createFile("/", true);
+        if (file == null)
+            file = createFileForPath("/", true);
+        return file;
     }
 
     /**
@@ -239,23 +242,26 @@ public abstract class WebSite {
         if (resp.getCode() != WebResponse.OK)
             return null;
 
-        // Get file header from response, create file and return
-        FileHeader fhdr = resp.getFileHeader();
-        file = createFile(fhdr);
+        // Get file header from response, create file
+        FileHeader fileHeader = resp.getFileHeader();
+        file = createFile(fileHeader);
         file._verified = true;
         file._saved = true;
-        file._modTime = fhdr.getModTime();
-        file._size = fhdr.getSize();
+        file._modTime = fileHeader.getModTime();
+        file._size = fileHeader.getSize();
         file._url = url;
+
+        // Return
         return file;
     }
 
     /**
      * Returns a new file for given path, regardless of whether it exists on site.
      */
-    public WebFile createFile(String aPath, boolean isDir)
+    public WebFile createFileForPath(String aPath, boolean isDir)
     {
-        return createFile(new FileHeader(aPath, isDir));
+        FileHeader fileHeader = new FileHeader(aPath, isDir);
+        return createFile(fileHeader);
     }
 
     /**
@@ -278,9 +284,11 @@ public abstract class WebSite {
         file._size = fileHdr.getSize();
         file.setMIMEType(fileHdr.getMIMEType());
 
-        // Put in cache, start listening to file changes and return
+        // Put in cache, start listening to file changes
         _files.put(path, file);
         file.addPropChangeListener(_fileLsnr);
+
+        // Return
         return file;
     }
 
@@ -342,7 +350,7 @@ public abstract class WebSite {
             Exception e = new Exception("WebSite.deleteFile: File doesn't exist: " + aFile.getPath());
             WebResponse r = new WebResponse(null);
             r.setException(e);
-            new ResponseException(r);
+            throw new ResponseException(r);
         }
 
         // If directory, delete child files
@@ -442,33 +450,51 @@ public abstract class WebSite {
         // If already set, just return
         if (_sandbox != null) return _sandbox;
 
-        // Create and return
-        WebURL sboxURL = WebURL.getURL(getSandboxURLS());
-        return _sandbox = sboxURL.getAsSite();
+        // Get sandbox url
+        String sandboxName = getSandboxName();
+        String sandboxUrlStr = "local:/Sandboxes/" + sandboxName;
+        WebURL sandboxURL = WebURL.getURL(sandboxUrlStr);
+
+        // Get, set, return
+        WebSite sandboxSite = sandboxURL.getAsSite();
+        return _sandbox = sandboxSite;
     }
 
     /**
      * Creates a WebSite that can be used for storing persistent support files.
      */
-    protected String getSandboxURLS()
+    protected String getSandboxName()
     {
         // Get site URL and construct filename string from scheme/host/path
+        String sandboxName = "";
+
+        // Add URL.Scheme
         WebURL url = getURL();
-        String fname = "";
         String scheme = url.getScheme();
-        if (!scheme.equals("local")) fname += scheme + '/';
+        if (!scheme.equals("local"))
+            sandboxName += scheme + '/';
+
+        // Add URL.Host
         String host = url.getHost();
-        if (host != null && host.length() > 0) fname += host + '/';
+        if (host != null && host.length() > 0)
+            sandboxName += host + '/';
+
+        // Add URL.Path
         String path = url.getPath();
-        if (path != null && path.length() > 1) fname += path.substring(1);
+        if (path != null && path.length() > 1)
+            sandboxName += path.substring(1);
 
-        // If filename string ends with /bin or /, trim, then replace '/' & '.' separators with '_'
-        if (fname.endsWith("/bin")) fname = fname.substring(0, fname.length() - 4);
-        else if (fname.endsWith("/")) fname = fname.substring(0, fname.length() - 1);
-        fname = fname.replace('.', '_').replace('/', '_');
+        // If filename string ends with /bin or /, trim
+        if (sandboxName.endsWith("/bin"))
+            sandboxName = sandboxName.substring(0, sandboxName.length() - 4);
+        else if (sandboxName.endsWith("/"))
+            sandboxName = sandboxName.substring(0, sandboxName.length() - 1);
 
-        // Return URL string for filename in local Sandboxes directory
-        return "local:/Sandboxes/" + fname;
+        // Replace '/' & '.' separators with '_'
+        sandboxName = sandboxName.replace('.', '_').replace('/', '_');
+
+        // Return
+        return sandboxName;
     }
 
     /**
@@ -482,16 +508,12 @@ public abstract class WebSite {
     /**
      * Clears site caches.
      */
-    public synchronized void refresh()
-    {
-    }
+    public synchronized void refresh()  { }
 
     /**
      * Flushes any unsaved changes to backing store.
      */
-    public void flush() throws Exception
-    {
-    }
+    public void flush() throws Exception  { }
 
     /**
      * Add listener.
@@ -525,7 +547,8 @@ public abstract class WebSite {
      */
     public void addFileChangeListener(PropChangeListener aLsnr)
     {
-        if (_filePCS == PropChangeSupport.EMPTY) _filePCS = new PropChangeSupport(this);
+        if (_filePCS == PropChangeSupport.EMPTY)
+            _filePCS = new PropChangeSupport(this);
         _filePCS.addPropChangeListener(aLsnr);
     }
 

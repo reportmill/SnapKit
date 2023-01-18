@@ -37,7 +37,7 @@ public class WebUtils {
         WebFile dstFile = aDstFile;
         if (dstFile.isDir()) {
             String path = aDstFile.getDirPath() + aSrcFile.getName();
-            dstFile = aDstFile.getSite().createFile(path, aSrcFile.isDir());
+            dstFile = aDstFile.getSite().createFileForPath(path, aSrcFile.isDir());
         }
 
         // If plain file, just load bytes into dest file and save
