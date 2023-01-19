@@ -4,6 +4,7 @@
 package snap.util;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -366,7 +367,17 @@ public class ArrayUtils {
     public static <T> T[] filter(T[] anArray, Predicate<? super T> aPredicate)
     {
         Stream<T> filteredStream = Stream.of(anArray).filter(aPredicate);
-        return filteredStream.toArray(size -> (T[]) Array.newInstance(anArray.getClass().getComponentType(), size));
+        Class<? extends T> compClass = (Class<? extends T>) anArray.getClass().getComponentType();
+        return filteredStream.toArray(size -> (T[]) Array.newInstance(compClass, size));
+    }
+
+    /**
+     * Returns a mapped array for given original and Function.
+     */
+    public static <T,R> R[] map(T[] anArray, Function<? super T, ? extends R> aFunction, Class<R> aClass)
+    {
+        Stream<R> filteredStream = Stream.of(anArray).map(aFunction);
+        return filteredStream.toArray(size -> (R[]) Array.newInstance(aClass, size));
     }
 
     /**
@@ -378,5 +389,25 @@ public class ArrayUtils {
             if (aPred.test(item))
                 return item;
         return null;
+    }
+
+    /**
+     * Joins an array of items by given delimiter using given function to get item strings.
+     */
+    public static <T> String joinString(T[] anArray, String aDelim, Function<T,String> aFunc)
+    {
+        // Get vars
+        if (anArray.length == 0) return "";
+        String str0 = aFunc.apply(anArray[0]);
+        StringBuilder sb = new StringBuilder(str0);
+
+        // Iterate over remaining items and add delim + func(item) for each
+        for (int i = 1; i < anArray.length; i++) {
+            String itemStr = aFunc.apply(anArray[i]);
+            sb.append(aDelim).append(itemStr);
+        }
+
+        // Return
+        return sb.toString();
     }
 }

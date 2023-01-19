@@ -2,9 +2,12 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Utility methods for use with Java.util.List.
@@ -243,11 +246,20 @@ public class ListUtils {
     }
 
     /**
-     * Returns a list of derived items for given collection of original items.
+     * Returns a filtered array for given original and Predicate.
      */
-    public static <T, R> List<R> getFilteredForClass(Collection<T> aList, Class<R> aClass)
+    public static <T> List<T> filter(Collection<T> aList, Predicate<? super T> pred)
     {
-        return (List<R>) aList.stream().filter(item -> aClass.isInstance(item)).collect(Collectors.toList());
+        return aList.stream().filter(pred).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a mapped array for given original and Function.
+     */
+    public static <T,R> R[] map(Collection<T> aList, Function<? super T, ? extends R> aFunction, Class<R> aClass)
+    {
+        Stream<R> filteredStream = aList.stream().map(aFunction);
+        return filteredStream.toArray(size -> (R[]) Array.newInstance(aClass, size));
     }
 
     /**
@@ -259,5 +271,27 @@ public class ListUtils {
             if (aPred.test(item))
                 return item;
         return null;
+    }
+
+    /**
+     * Joins a list of items by given delimiter using given function to get item strings.
+     */
+    public static <T> String joinString(List<T> aList, String aDelim, Function<T,String> aFunc)
+    {
+        // Get vars
+        int size = aList.size();
+        if (size == 0) return "";
+        String str0 = aFunc.apply(aList.get(0));
+        StringBuilder sb = new StringBuilder(str0);
+
+        // Iterate over remaining items and add delim + func(item) for each
+        for (int i = 1; i < size; i++) {
+            T item = aList.get(i);
+            String itemStr = aFunc.apply(item);
+            sb.append(aDelim).append(itemStr);
+        }
+
+        // Return
+        return sb.toString();
     }
 }
