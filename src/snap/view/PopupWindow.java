@@ -35,5 +35,6 @@ public class PopupWindow extends WindowView {
         WindowView win = aView != null ? aView.getWindow() : null;
         if (win != null)
             win.setPopup(this);
+        else System.err.println("PopupWindow.show: No Window found");
     }
 }

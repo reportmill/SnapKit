@@ -101,8 +101,14 @@ public class EventDispatcher {
      */
     protected void setPopup(PopupWindow aPopup)
     {
+        // If already set, just return (shouldn't happen)
+        if (_popup == aPopup) return;
+
+        // Hide old Popup
         if (_popup != null)
             _popup.hide();
+
+        // Set new
         _popup = aPopup;
     }
 
