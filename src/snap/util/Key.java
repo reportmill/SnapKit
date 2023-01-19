@@ -219,4 +219,9 @@ public class Key {
         // Return name
         return name;
     }
+
+    /**
+     * Sets whether Key is allowed to try to resolve values using object fields.
+     */
+    public static void setAllowFields(boolean aValue)  { KeyAccessor._allowFields = aValue; }
 }

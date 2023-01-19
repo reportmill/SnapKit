@@ -39,6 +39,9 @@ class KeyAccessor {
     // The field, if type is Field
     private Field  _field;
 
+    // Whether to allow fields
+    protected static boolean  _allowFields;
+
     // Some constants
     public enum Type { Map, Method, Field, Enum, Unknown }
 
@@ -73,12 +76,14 @@ class KeyAccessor {
         }
 
         // See if object has field (ivar)
-        try {
-            _field = _class.getField(_rawKey);
-            _type = Type.Field;
-            return;
+        if (_allowFields) {
+            try {
+                _field = _class.getField(_rawKey);
+                _type = Type.Field;
+                return;
+            }
+            catch (Exception e) { }
         }
-        catch (Exception e) { }
 
         // Since nothing else panned out, set type to Unknown
         _type = Type.Unknown;
