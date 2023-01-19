@@ -171,4 +171,31 @@ public class CharSequenceUtils {
                 return false;
         return true;
     }
+
+    /**
+     * Returns number of newlines in given chars.
+     */
+    public static int getNewlineCount(CharSequence theChars)
+    {
+        int newlineCount = 0;
+
+        // Iterate over chars and look for newline, carriage return or CR/NL
+        for (int i = 0, iMax = theChars.length(); i < iMax; i++) {
+            char loopChar = theChars.charAt(i);
+
+            // If newline, just bump count
+            if (loopChar == '\n')
+                newlineCount++;
+
+            // If carriage return, bump count and check for newline
+            else if (loopChar == '\r') {
+                newlineCount++;
+                if (i + 1 < iMax && theChars.charAt(i + 1) == '\n')
+                    i++;
+            }
+        }
+
+        // Return
+        return newlineCount;
+    }
 }
