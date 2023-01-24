@@ -61,15 +61,15 @@ public class WebBrowser extends TransitionPane {
         }
 
         // Get page - if not found, have loader load it
-        WebPage page = getPage(aURL); // Get page
+        WebPage page = getPageForURL(aURL); // Get page
         if (page == null) {
             getLoader().setURL(aURL);
             return;
         }
 
         // Update page display URL, set page and update history
-        page.setURL(aURL); // Set/update URL in page
-        setPage(page); // Set page in browser
+        page.setURL(aURL);
+        setPage(page);
     }
 
     /**
@@ -105,17 +105,25 @@ public class WebBrowser extends TransitionPane {
      */
     public void setFile(WebFile aFile)
     {
+        // Handle null
         if (aFile == null) {
             setPage(null);
             return;
-        }              // Handle null page
-        if (aFile == getFile()) return;
-        WebPage page = getPage(aFile.getURL());                 // Get cached page for URL
-        if (page == null) {                                        // Create and cache if necessary
-            page = createPage(aFile);
-            setPage(page.getURL(), page);
         }
-        setPage(page);                                          // Set page in browser
+
+        // If already set, just return
+        if (aFile == getFile()) return;
+
+        // Get cached page for URL - create if missing
+        WebURL url = aFile.getURL();
+        WebPage page = getPageForURL(url);
+        if (page == null) {
+            page = createPageForURL(url);
+            setPageForURL(page.getURL(), page);
+        }
+
+        // Set page
+        setPage(page);
     }
 
     /**
@@ -123,9 +131,13 @@ public class WebBrowser extends TransitionPane {
      */
     public void setResponse(WebResponse aResp)
     {
-        WebPage page = createPage(aResp); // Create page for URL
-        if (aResp.getFile() != null) setPage(page.getURL(), page);
-        setPage(page); // Set page in browser
+        // Create page for URL and set
+        WebPage page = createPageForResponse(aResp);
+        setPage(page);
+
+        // If response has file, cache page
+        if (aResp.getFile() != null)
+            setPageForURL(page.getURL(), page);
     }
 
     /**
@@ -177,7 +189,7 @@ public class WebBrowser extends TransitionPane {
     /**
      * Returns the WebPage for given WebURL.
      */
-    public WebPage getPage(WebURL aURL)
+    public WebPage getPageForURL(WebURL aURL)
     {
         return _pages.get(aURL.getQueryURL());
     }
@@ -185,7 +197,7 @@ public class WebBrowser extends TransitionPane {
     /**
      * Sets the WebPage for a given WebFile.
      */
-    public void setPage(WebURL aURL, WebPage aPage)
+    public void setPageForURL(WebURL aURL, WebPage aPage)
     {
         WebURL url = aURL.getQueryURL();
         if (aPage != null) {
@@ -196,33 +208,33 @@ public class WebBrowser extends TransitionPane {
     }
 
     /**
-     * Creates a WebPage for given WebFile.
+     * Creates a WebPage for given WebURL.
      */
-    public WebPage createPage(WebFile aFile)
+    public WebPage createPageForURL(WebURL aURL)
     {
-        WebURL url = aFile.getURL();
-        WebRequest req = new WebRequest(url);
+        WebRequest req = new WebRequest(aURL);
         WebResponse resp = new WebResponse(req);
         resp.setCode(WebResponse.OK);
-        return createPage(resp);
+        return createPageForResponse(resp);
     }
 
     /**
      * Creates a WebPage for given WebFile.
      */
-    protected WebPage createPage(WebResponse aResp)
+    protected WebPage createPageForResponse(WebResponse aResp)
     {
         // If UNAUTHORIZED response, create LoginPage
-        WebPage page = null;
+        WebPage page;
         if (aResp.getCode() == WebResponse.UNAUTHORIZED)
             page = new LoginPage();
 
-            // If not OK, create FileNotFoundPage
+        // If not OK, create FileNotFoundPage
         else if (aResp.getCode() != WebResponse.OK)
             page = new FileNotFoundPage();
 
-            // Create WebPage in handler
-        else try {
+        // Create WebPage in handler
+        else {
+            try {
                 Class<? extends WebPage> cls = getPageClass(aResp);
                 page = ClassUtils.newInstance(cls);
             }
@@ -232,6 +244,7 @@ public class WebBrowser extends TransitionPane {
                 aResp.setException(t);
                 return createExceptionPage(aResp);
             }
+        }
 
         // Set response and browser and return
         page.setResponse(aResp);
@@ -246,30 +259,41 @@ public class WebBrowser extends TransitionPane {
     {
         String type = aResp.getPathType();
 
+        // Handle directory
         WebFile file = aResp.getFile();
         if (file != null && file.isDir())
             return DirFilePage.class;
 
+        // Handle image
         if (type.equals("jpg") || type.equals("jpeg") || type.equals("gif") || type.equals("png"))
             return ImagePage.class;
-        if (type.equals("snp")) return SnapPage.class;
-        if (type.equals("rpt")) return getPageClass("com.reportmill.app.ReportPage", TextPage.class);
+
+        // Handle Snap file
+        if (type.equals("snp"))
+            return SnapPage.class;
+
+        // Handle ReportMill
+        if (type.equals("rpt"))
+            return getPageClass("com.reportmill.app.ReportPage", TextPage.class);
+
+        // Handle sound
         if (type.equals("wav") || type.equals("snd") || type.equals("mp3") || type.equals("m4a"))
             return SoundPage.class;
-        if (type.equals("java")) return getPageClass("javakit.text.JavaPage", TextPage.class);
-        if (type.equals("jar")) return ZipPage.class;
-        if (type.equals("txt") || (file != null && file.isText())) return TextPage.class;
-        return UnknownPage.class;
-    }
 
-    /**
-     * Returns the specified WebPage subclass for given WebFile.
-     */
-    protected Class<? extends WebPage> getPageClass(String aClassName, Class<? extends WebPage> aDefault)
-    {
-        try { return (Class) Class.forName(aClassName); }
-        catch (Exception e) { System.err.println("WebBrowser: Page class not found: " + e); }
-        return aDefault != null ? aDefault : UnknownPage.class;
+        // Handle Java
+        if (type.equals("java"))
+            return getPageClass("javakit.text.JavaPage", TextPage.class);
+
+        // Handle Jar
+        if (type.equals("jar"))
+            return ZipPage.class;
+
+        // Handle Text
+        if (type.equals("txt") || (file != null && file.isText()))
+            return TextPage.class;
+
+        // Return Unknown
+        return UnknownPage.class;
     }
 
     /**
@@ -285,41 +309,31 @@ public class WebBrowser extends TransitionPane {
     /**
      * Returns the previous URL.
      */
-    public WebURL getLastURL()
-    {
-        return getHistory().getLastURL();
-    }
+    public WebURL getLastURL()  { return _history.getLastURL(); }
 
     /**
      * Returns the next URL (if browser has backtracked).
      */
-    public WebURL getNextURL()
-    {
-        return getHistory().getNextURL();
-    }
+    public WebURL getNextURL()  { return _history.getNextURL(); }
 
     /**
      * Sets the browser URL to the last URL (backtracking).
      */
-    public void trackBack()
-    {
-        getHistory().trackBack();
-    }
+    public void trackBack()  { _history.trackBack(); }
 
     /**
      * Sets the browser URL to the next URL (forward tracking).
      */
-    public void trackForward()
-    {
-        getHistory().trackForward();
-    }
+    public void trackForward()  { _history.trackForward(); }
 
     /**
      * Reloads the current page.
      */
     public void reloadPage()
     {
-        if (getPage() != null) getPage().reload();
+        WebPage page = getPage();
+        if (page != null)
+            page.reload();
     }
 
     /**
@@ -327,18 +341,9 @@ public class WebBrowser extends TransitionPane {
      */
     public void reloadFile(WebFile aFile)
     {
-        WebPage page = getPage(aFile.getURL());
+        WebPage page = getPageForURL(aFile.getURL());
         if (page != null)
             page.reload();
-    }
-
-    /**
-     * Shows an exception.
-     */
-    public void showException(Throwable t)
-    {
-        WebURL url = getFile() != null ? getFile().getURL() : WebURL.getURL("/Unknown.exception");
-        showException(url, t);
     }
 
     /**
@@ -441,5 +446,15 @@ public class WebBrowser extends TransitionPane {
     {
         setURLString(aURL);
         return true;
+    }
+
+    /**
+     * Returns the specified WebPage subclass for given WebFile.
+     */
+    protected static Class<? extends WebPage> getPageClass(String aClassName, Class<? extends WebPage> aDefault)
+    {
+        try { return (Class<? extends WebPage>) Class.forName(aClassName); }
+        catch (Exception e) { System.err.println("WebBrowser: Page class not found: " + e); }
+        return aDefault != null ? aDefault : UnknownPage.class;
     }
 }

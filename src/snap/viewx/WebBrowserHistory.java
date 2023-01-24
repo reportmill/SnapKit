@@ -187,7 +187,7 @@ public class WebBrowserHistory {
         _lastURLs.remove(aURL);
         _nextURLs.remove(aURL);
         if (getBrowser().getURL() == aURL) getBrowser().setURL(null);
-        getBrowser().setPage(aURL, null);
+        getBrowser().setPageForURL(aURL, null);
     }
 
     /**
@@ -200,7 +200,7 @@ public class WebBrowserHistory {
         for (WebURL url : lastURLs) if (url.getFile() == aFile) _lastURLs.remove(url);
         for (WebURL url : nextURLs) if (url.getFile() == aFile) _lastURLs.remove(url);
         if (getBrowser().getFile() == aFile) getBrowser().setURL(null);
-        getBrowser().setPage(aFile.getURL(), null);
+        getBrowser().setPageForURL(aFile.getURL(), null);
     }
 
     /**
