@@ -3,14 +3,15 @@
  */
 package snap.view;
 import snap.geom.Pos;
+import snap.props.PropObject;
 
 /**
  * A class to represent a TabView tab.
  */
-public class Tab {
+public class Tab extends PropObject {
     
-    // The TabView
-    protected TabView  _tabView;
+    // The TabBar
+    protected TabBar  _tabBar;
 
     // The tab button
     private ToggleButton  _button;
@@ -24,7 +25,7 @@ public class Tab {
     public Tab()
     {
         _button = new ToggleButton();
-        _button.getLabel().setPadding(4,7,4,7);
+        _button.getLabel().setPadding(4,7,2,7);
         _button.setAlign(Pos.TOP_CENTER);
         _button.setPosition(Pos.TOP_CENTER);
     }
@@ -59,8 +60,8 @@ public class Tab {
      */
     public int getIndex()
     {
-        for (int i=0;i<_tabView.getTabCount();i++)
-            if (_tabView.getTab(i)==this)
+        for (int i = 0; i < _tabBar.getTabCount(); i++)
+            if (_tabBar.getTab(i) == this)
                 return i;
         return -1;
     }
@@ -75,10 +76,12 @@ public class Tab {
      */
     public void setVisible(boolean aValue)
     {
-        if (aValue==isVisible()) return;
+        if (aValue == isVisible()) return;
+
         _button.setVisible(aValue);
-        if (!aValue && _tabView.getSelIndex()==getIndex())
-            _tabView.setSelIndex(getIndex()!=0 ? 0 : 1);
+
+        if (!aValue && _tabBar.getSelIndex() == getIndex())
+            _tabBar.setSelIndex(getIndex() != 0 ? 0 : 1);
     }
 
     /**
