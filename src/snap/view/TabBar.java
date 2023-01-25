@@ -122,17 +122,29 @@ public class TabBar extends ParentView implements Selectable<Tab> {
      */
     public void removeTab(int anIndex)
     {
-        // Remove Tab content and button
-        ToggleButton btn = getTabButton(anIndex);
+        // Remove Tab button
+        ToggleButton btabButtonn = getTabButton(anIndex);
+        _shelf.removeChild(btabButtonn);
+
+        // Remove Tab
         _tabs.remove(anIndex);
-        _shelf.removeChild(btn);
 
         // Reset Selection
         if (anIndex == getSelIndex()) {
-            setSelIndex(anIndex - 1);
+            setSelIndex(-1);
             if (anIndex < getTabCount())
                 setSelIndex(anIndex);
         }
+    }
+
+    /**
+     * Removes the given tab.
+     */
+    public void removeTab(Tab aTab)
+    {
+        int index = _tabs.indexOf(aTab);
+        if (index >= 0)
+            removeTab(index);
     }
 
     /**
