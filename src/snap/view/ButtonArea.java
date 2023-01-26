@@ -83,13 +83,13 @@ public class ButtonArea {
         // Handle CheckBox
         if (_view instanceof CheckBox || _view instanceof CheckBoxMenuItem) {
             setBounds(0, 0, 16, 16);
-            setRadius(3);
+            setBorderRadius(3);
         }
 
         // Handle RadioButton
         else if (_view instanceof RadioButton) {
             setBounds(0, 0, 16, 16);
-            setRadius(8);
+            setBorderRadius(8);
         }
     }
 
@@ -160,12 +160,12 @@ public class ButtonArea {
     /**
      * Returns the radius of the round.
      */
-    public double getRadius()  { return _rad; }
+    public double getBorderRadius()  { return _rad; }
 
     /**
      * Sets the radius of the round.
      */
-    public void setRadius(double aValue)  { _rad = aValue;  }
+    public void setBorderRadius(double aValue)  { _rad = aValue;  }
 
     /**
      * Returns the position of the button when in a group (determines corner rendering).
@@ -249,18 +249,18 @@ public class ButtonArea {
     protected void updateFromButton()
     {
         // Basic attrs
-        ButtonBase btn = (ButtonBase)_view;
-        setSize(btn.getWidth(), btn.getHeight());
-        setRadius(btn.getRadius());
-        setPosition(btn.getPosition());
-        setSelected(btn.isSelected());
+        ButtonBase button = (ButtonBase)_view;
+        setSize(button.getWidth(), button.getHeight());
+        setBorderRadius(button.getBorderRadius());
+        setPosition(button.getPosition());
+        setSelected(button.isSelected());
 
         // Get/set state
-        int state = btn.isPressed()? BUTTON_PRESSED : btn.isTargeted()? BUTTON_OVER : BUTTON_NORMAL;
+        int state = button.isPressed()? BUTTON_PRESSED : button.isTargeted()? BUTTON_OVER : BUTTON_NORMAL;
         setState(state);
 
         // Get/set fill
-        Paint bfill = btn.getButtonFill();
+        Paint bfill = button.getButtonFill();
         if (bfill != null)
             setFill(bfill);
     }

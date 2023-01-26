@@ -621,7 +621,7 @@ public class TitleView extends ParentView implements ViewHost {
             _button = new Button();
             _button.setPadding(3,3,3,3);
             _button.setAlignX(HPos.LEFT);
-            _button.setRadius(0);
+            _button.setBorderRadius(0);
             addChild(_button);
 
             // Listen for Button click to trigger expand

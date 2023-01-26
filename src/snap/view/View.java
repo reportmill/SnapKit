@@ -77,7 +77,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private Border  _border;
 
     // The radius for border rounded corners
-    private double  _borderRadius;
+    protected double  _borderRadius;
 
     // The ViewEffect to manage effect rendering for this view and current effect
     protected ViewEffect  _effect;

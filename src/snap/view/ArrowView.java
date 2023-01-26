@@ -67,7 +67,7 @@ public class ArrowView extends ParentView {
             _ubtn = new Button();
             _ubtn.setPrefWidth(14);
             _ubtn.setMinHeight(9);
-            _ubtn.setRadius(3);
+            _ubtn.setBorderRadius(3);
             _ubtn.setPosition(Pos.TOP_CENTER);
             _ubtn.setImage(getUpArrowImage());
             _ubtn.addEventHandler(e -> buttonDidFire(_ubtn), Action);
@@ -102,7 +102,7 @@ public class ArrowView extends ParentView {
             _dbtn = new Button();
             _dbtn.setPrefWidth(14);
             _dbtn.setMinHeight(9);
-            _dbtn.setRadius(3);
+            _dbtn.setBorderRadius(3);
             _dbtn.setPosition(Pos.BOTTOM_CENTER);
             _dbtn.setImage(getDownArrowImage());
             _dbtn.addEventHandler(e -> buttonDidFire(_dbtn), Action);
@@ -137,7 +137,7 @@ public class ArrowView extends ParentView {
             _lbtn = new Button();
             _lbtn.setPrefHeight(14);
             _lbtn.setMinWidth(9);
-            _lbtn.setRadius(3);
+            _lbtn.setBorderRadius(3);
             _lbtn.setPosition(Pos.CENTER_LEFT);
             _lbtn.setImage(getLeftArrowImage());
             _lbtn.addEventHandler(e -> buttonDidFire(_lbtn), Action);
@@ -172,7 +172,7 @@ public class ArrowView extends ParentView {
             _rbtn = new Button();
             _rbtn.setPrefHeight(14);
             _rbtn.setMinWidth(9);
-            _rbtn.setRadius(3);
+            _rbtn.setBorderRadius(3);
             _rbtn.setPosition(Pos.CENTER_RIGHT);
             _rbtn.setImage(getRightArrowImage());
             _rbtn.addEventHandler(e -> buttonDidFire(_rbtn), Action);

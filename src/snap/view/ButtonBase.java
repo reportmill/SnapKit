@@ -17,16 +17,13 @@ public class ButtonBase extends ParentView {
     private Label  _label;
     
     // The image name, if loaded from local resource
-    private String  _iname;
+    private String  _imageName;
     
     // Whether button displays the standard background area
     private boolean  _showArea;
     
     // The position of the button when in a group (determines corner rendering)
     private Pos  _pos;
-    
-    // The radius of the button rounding
-    private double  _rad = 4;
     
     // The button fill
     private Paint  _btnFill;
@@ -44,12 +41,10 @@ public class ButtonBase extends ParentView {
     protected ButtonArea  _btnArea;
     
     // Constants for properties
-    public static final String Image_Prop = "Image";
     public static final String ImageName_Prop = "ImageName";
     public static final String Pressed_Prop = "Pressed";
     public static final String ShowArea_Prop = "ShowArea";
     public static final String Position_Prop = "Position";
-    public static final String Radius_Prop = "Radius";
     public static final String Targeted_Prop = "Targeted";
 
     // Constants for property defaults
@@ -66,6 +61,7 @@ public class ButtonBase extends ParentView {
     public ButtonBase()
     {
         // Set default properties
+        _borderRadius = 4;
         _showArea = getPropDefaultBool(ShowArea_Prop);
 
         // Config
@@ -171,15 +167,15 @@ public class ButtonBase extends ParentView {
     /**
      * Returns the image name, if loaded from local resource.
      */
-    public String getImageName()  { return _iname; }
+    public String getImageName()  { return _imageName; }
 
     /**
      * Sets the image name, if loaded from local resource.
      */
     public void setImageName(String aName)
     {
-        if (SnapUtils.equals(aName, _iname)) return;
-        firePropChange(ImageName_Prop, _iname, _iname = aName);
+        if (SnapUtils.equals(aName, _imageName)) return;
+        firePropChange(ImageName_Prop, _imageName, _imageName = aName);
         repaint();
     }
 
@@ -207,23 +203,8 @@ public class ButtonBase extends ParentView {
      */
     public void setPosition(Pos aPos)
     {
-        if (aPos==_pos) return;
+        if (aPos == _pos) return;
         firePropChange(Position_Prop, _pos, _pos = aPos);
-        repaint();
-    }
-
-    /**
-     * Returns the radius of the round.
-     */
-    public double getRadius()  { return _rad; }
-
-    /**
-     * Sets the radius of the round.
-     */
-    public void setRadius(double aValue)
-    {
-        if (MathUtils.equals(aValue, _rad)) return;
-        firePropChange(Radius_Prop, _rad, _rad = aValue);
         repaint();
     }
 
@@ -247,7 +228,7 @@ public class ButtonBase extends ParentView {
      */
     protected void setPressed(boolean aValue)
     {
-        if (aValue==_pressed) return;
+        if (aValue == _pressed) return;
         firePropChange(Pressed_Prop, _pressed, _pressed = aValue);
         repaint();
     }
@@ -427,7 +408,7 @@ public class ButtonBase extends ParentView {
     {
         // Create ViewProxy with Label ViewProxy as Content
         BoxViewProxy<?> viewProxy = new BoxViewProxy<>(this);
-        ViewProxy labelProxy = ViewProxy.getProxy(getLabel());
+        ViewProxy<?> labelProxy = ViewProxy.getProxy(getLabel());
         viewProxy.setContent(labelProxy);
 
         // If ShowArea, add padding
