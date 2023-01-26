@@ -258,11 +258,6 @@ public class ButtonArea {
         // Get/set state
         int state = button.isPressed()? BUTTON_PRESSED : button.isTargeted()? BUTTON_OVER : BUTTON_NORMAL;
         setState(state);
-
-        // Get/set fill
-        Paint bfill = button.getButtonFill();
-        if (bfill != null)
-            setFill(bfill);
     }
 
     /**

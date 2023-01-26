@@ -101,15 +101,21 @@ public class Tab extends PropObject {
      */
     protected ToggleButton createButton()
     {
-        String title = getTitle();
-        ToggleButton button = new ToggleButton(title);
-        button.getLabel().setPadding(4,7,2,7);
-        button.setAlign(Pos.TOP_CENTER);
-        button.setPosition(Pos.TOP_CENTER);
+        // Create button
+        ToggleButton button = new ToggleButton(getTitle());
         button.setVisible(isVisible());
-
-        if (isClosable()) {
+        if (isClosable())
             addCloseBoxToButton(button);
+
+        // Set padding
+        button.setPadding(3,7,3,7);
+
+        // If button is for TabView, configure as Tabs
+        boolean isForTabView = _tabBar != null && _tabBar.getParent() instanceof TabView;
+        if (isForTabView) {
+            button.setPadding(4,7,2,7);
+            button.setAlign(Pos.TOP_CENTER);
+            button.setPosition(Pos.TOP_CENTER);
         }
 
         // Return

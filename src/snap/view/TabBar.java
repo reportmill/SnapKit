@@ -2,10 +2,8 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.geom.Insets;
 import snap.geom.Pos;
-import snap.gfx.Color;
-import snap.gfx.GradientPaint;
-import snap.gfx.Paint;
 import snap.util.Selectable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,21 +22,14 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     // The selected tab index
     private int  _selIndex = -1;
 
-    // The tab shelf
-    private RowView  _shelf;
+    // The inner view that actually holds tab buttons
+    private RowView  _tabsBox;
 
     // A shared listener for tab button action
     private EventListener  _buttonActionLsnr = e -> shelfButtonPressed(e);
 
     // Constants for properties
     public static final String Tabs_Prop = "Tabs";
-
-    // The default back fill
-    private static Paint BACK_FILL = ViewUtils.getBackFill();
-    private static Color c1 = new Color("#d6d6d6");
-    private static Color c2 = new Color("#dddddd");
-    private static GradientPaint.Stop[] SHELF_FILL_STOPS = GradientPaint.getStops(0, c1,.2, c2,1,c2);
-    private static Paint SHELF_FILL = new GradientPaint(.5,0,.5,1, SHELF_FILL_STOPS);
 
     /**
      * Constructor.
@@ -47,13 +38,12 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     {
         super();
         setActionable(true);
+        _padding = new Insets(3, 3, 3, 5);
 
-        // Create and configure shelf
-        _shelf = new TabRowView();
-        _shelf.setSpacing(1);
-        _shelf.setPadding(5,5,0,5);
-        _shelf.setFill(SHELF_FILL);
-        addChild(_shelf);
+        // Create and configure TabsBox
+        _tabsBox = new TabRowView();
+        _tabsBox.setSpacing(3);
+        addChild(_tabsBox);
     }
 
     /**
@@ -107,7 +97,7 @@ public class TabBar extends ParentView implements Selectable<Tab> {
         tabButton.addEventHandler(_buttonActionLsnr, Action);
 
         // Add button to shelf
-        _shelf.addChild(tabButton, anIndex);
+        _tabsBox.addChild(tabButton, anIndex);
 
         // If first tab, select 0
         int selIndex = getSelIndex();
@@ -123,8 +113,8 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     public void removeTab(int anIndex)
     {
         // Remove Tab button
-        ToggleButton btabButtonn = getTabButton(anIndex);
-        _shelf.removeChild(btabButtonn);
+        ToggleButton tabButton = getTabButton(anIndex);
+        _tabsBox.removeChild(tabButton);
 
         // Remove Tab
         _tabs.remove(anIndex);
@@ -145,6 +135,15 @@ public class TabBar extends ParentView implements Selectable<Tab> {
         int index = _tabs.indexOf(aTab);
         if (index >= 0)
             removeTab(index);
+    }
+
+    /**
+     * Removes all tabs.
+     */
+    public void removeTabs()
+    {
+        while (getTabCount() > 0)
+            removeTab(0);
     }
 
     /**
@@ -182,16 +181,12 @@ public class TabBar extends ParentView implements Selectable<Tab> {
 
         // Update old/new ToggleButtons
         ToggleButton oldButton = getTabButton(_selIndex);
-        if (oldButton != null) {
+        if (oldButton != null)
             oldButton.setSelected(false);
-            oldButton.setButtonFill(null);
-        }
 
         ToggleButton newButton = getTabButton(anIndex);
-        if (newButton != null) {
+        if (newButton != null)
             newButton.setSelected(true);
-            newButton.setButtonFill(BACK_FILL);
-        }
 
         // FirePropChange and fireActionEvent
         firePropChange(SelIndex_Prop, _selIndex, _selIndex = anIndex);
@@ -225,11 +220,16 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     }
 
     /**
+     * Returns the actual box that holds the tabs.
+     */
+    public ParentView getTabsBox()  { return _tabsBox; }
+
+    /**
      * Returns the preferred width.
      */
     protected double getPrefWidthImpl(double aH)
     {
-        return BoxView.getPrefWidth(this, _shelf, aH);
+        return BoxView.getPrefWidth(this, _tabsBox, aH);
     }
 
     /**
@@ -237,7 +237,7 @@ public class TabBar extends ParentView implements Selectable<Tab> {
      */
     protected double getPrefHeightImpl(double aW)
     {
-        return BoxView.getPrefHeight(this, _shelf, aW);
+        return BoxView.getPrefHeight(this, _tabsBox, aW);
     }
 
     /**
@@ -245,7 +245,7 @@ public class TabBar extends ParentView implements Selectable<Tab> {
      */
     protected void layoutImpl()
     {
-        BoxView.layout(this, _shelf, true, true);
+        BoxView.layout(this, _tabsBox, true, true);
     }
 
     /**
@@ -256,8 +256,8 @@ public class TabBar extends ParentView implements Selectable<Tab> {
         // Get index for button
         View button = anEvent.getView();
         int index = -1;
-        for (int i = 0; i < _shelf.getChildCount(); i++)
-            if (_shelf.getChild(i) == button)
+        for (int i = 0; i < _tabsBox.getChildCount(); i++)
+            if (_tabsBox.getChild(i) == button)
                 index = i;
 
         // Set selected index
@@ -268,17 +268,6 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     }
 
     /**
-     * Called when Theme changes.
-     */
-    @Override
-    protected void themeChanged()
-    {
-        super.themeChanged();
-        Paint shelfFill = ViewTheme.get().getClass().getSimpleName().equals("ViewTheme") ? SHELF_FILL : ViewUtils.getBackDarkFill();
-        _shelf.setFill(shelfFill);
-    }
-
-    /**
      * A RowView to stretch buttons if configured like actual tabs.
      */
     private class TabRowView extends RowView {
@@ -286,7 +275,7 @@ public class TabBar extends ParentView implements Selectable<Tab> {
         {
             super.layoutImpl();
             if (getTabCount() > 0 && getTabButton(0).getPosition() == Pos.TOP_CENTER)
-                getTabs().stream().forEach(tab -> tab.getButton().setHeight(tab.getButton().getHeight() + 15));
+                getTabs().forEach(tab -> tab.getButton().setHeight(tab.getButton().getHeight() + 15));
         }
     }
 }

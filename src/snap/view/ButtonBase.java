@@ -26,9 +26,6 @@ public class ButtonBase extends ParentView {
     // The position of the button when in a group (determines corner rendering)
     private Pos  _pos;
     
-    // The button fill
-    private Paint  _btnFill;
-    
     // Whether button is pressed
     private boolean  _pressed;
     
@@ -87,37 +84,22 @@ public class ButtonBase extends ParentView {
     /**
      * Returns the text.
      */
-    public String getText()
-    {
-        return getLabel().getText();
-    }
+    public String getText()  { return getLabel().getText(); }
 
     /**
      * Sets the text.
      */
-    public void setText(String aStr)
-    {
-        if (SnapUtils.equals(aStr, getText())) return;
-        getLabel().setText(aStr);
-        relayout();
-    }
+    public void setText(String aStr)  { getLabel().setText(aStr); }
 
     /**
      * Returns the image.
      */
-    public Image getImage()
-    {
-        return getLabel().getImage();
-    }
+    public Image getImage()  { return getLabel().getImage(); }
 
     /**
      * Sets the image.
      */
-    public void setImage(Image anImage)
-    {
-        getLabel().setImage(anImage);
-        relayout();
-    }
+    public void setImage(Image anImage)  { getLabel().setImage(anImage); }
 
     /**
      * Returns the image after text.
@@ -127,43 +109,37 @@ public class ButtonBase extends ParentView {
     /**
      * Sets the image after text.
      */
-    public void setImageAfter(Image anImage)
-    {
-        getLabel().setImageAfter(anImage);
-        relayout();
-    }
+    public void setImageAfter(Image anImage)  { getLabel().setImageAfter(anImage); }
 
     /**
      * Returns the graphic node.
      */
-    public View getGraphic()
-    {
-        return getLabel().getGraphic();
-    }
+    public View getGraphic()  { return getLabel().getGraphic(); }
 
     /**
      * Sets the graphic node.
      */
-    public void setGraphic(View aGraphic)
-    {
-        getLabel().setGraphic(aGraphic);
-    }
+    public void setGraphic(View aGraphic)  { getLabel().setGraphic(aGraphic); }
 
     /**
      * Returns the graphic node after text.
      */
-    public View getGraphicAfter()
-    {
-        return getLabel().getGraphicAfter();
-    }
+    public View getGraphicAfter()  { return getLabel().getGraphicAfter(); }
 
     /**
      * Sets the graphic node after text.
      */
-    public void setGraphicAfter(View aGraphic)
-    {
-        getLabel().setGraphicAfter(aGraphic);
-    }
+    public void setGraphicAfter(View aGraphic)  { getLabel().setGraphicAfter(aGraphic); }
+
+    /**
+     * Returns the text fill.
+     */
+    public Paint getTextFill()  { return getLabel().getTextFill(); }
+
+    /**
+     * Sets the text fill.
+     */
+    public void setTextFill(Paint aFill)  { getLabel().setTextFill(aFill); }
 
     /**
      * Returns the image name, if loaded from local resource.
@@ -208,16 +184,6 @@ public class ButtonBase extends ParentView {
         firePropChange(Position_Prop, _pos, _pos = aPos);
         repaint();
     }
-
-    /**
-     * Returns the button fill.
-     */
-    public Paint getButtonFill()  { return _btnFill; }
-
-    /**
-     * Sets the button fill.
-     */
-    public void setButtonFill(Paint aPaint)  { _btnFill = aPaint; }
 
     /**
      * Returns whether button is pressed (visibly).

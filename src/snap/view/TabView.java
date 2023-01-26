@@ -21,6 +21,12 @@ public class TabView extends ParentView implements Selectable<Tab> {
     // A child view holding Tab.Content views that aren't currently showing, so getView(name) works
     private RowView  _hiddenKids;
 
+    // The default TabBar fill
+    private static Color c1 = new Color("#d6d6d6");
+    private static Color c2 = new Color("#dddddd");
+    private static GradientPaint.Stop[] SHELF_FILL_STOPS = GradientPaint.getStops(0, c1,.2, c2,1,c2);
+    private static Paint TAB_BAR_FILL = new GradientPaint(.5,0,.5,1, SHELF_FILL_STOPS);
+
     /**
      * Creates a new TabView.
      */
@@ -30,6 +36,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Create ToolBar
         _tabBar = new TabBar();
+        _tabBar.setFill(TAB_BAR_FILL);
+        _tabBar.setPadding(5,5,0,5);
+        _tabBar.getTabsBox().setSpacing(2);
         _tabBar.addPropChangeListener(pc -> tabBarDidPropChange(pc));
 
         // Create and configure content cradle
@@ -191,7 +200,8 @@ public class TabView extends ParentView implements Selectable<Tab> {
         ToggleButton tabButton = _tabBar.getTabButton(selIndex);
         if (tabButton != null && tabButton.getPosition() == Pos.TOP_CENTER) {
             aPntr.setPaint(_contentBox.getFill());
-            aPntr.fillRect(tabButton.getX() + 1, _contentBox.getY(),tabButton.getWidth() - 2,1);
+            double rectX = _tabBar.getInsetsAll().left + tabButton.getX() + 1;
+            aPntr.fillRect(rectX, _contentBox.getY(),tabButton.getWidth() - 2,1);
         }
     }
 
@@ -232,6 +242,8 @@ public class TabView extends ParentView implements Selectable<Tab> {
     protected void themeChanged()
     {
         super.themeChanged();
+        Paint tabBarFill = ViewTheme.get().getClass().getSimpleName().equals("ViewTheme") ? TAB_BAR_FILL : ViewUtils.getBackDarkFill();
+        _tabBar.setFill(tabBarFill);
         _contentBox.setFill(ViewUtils.getBackFill());
     }
 
