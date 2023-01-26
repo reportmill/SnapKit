@@ -5,6 +5,7 @@ package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.geom.RoundRect;
+import snap.geom.Shape;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -329,15 +330,18 @@ public class ButtonBase extends ParentView {
         else {
 
             // If pressed, paint background
-            if (isPressed() || isSelected())
-                aPntr.fillRectWithPaint(0, 0, getWidth(), getHeight(), Color.LIGHTGRAY);
+            if (isPressed() || isSelected()) {
+                Shape shape = getBoundsShape();
+                Paint fill = ViewUtils.getSelectFill();
+                aPntr.fillWithPaint(shape, fill);
+            }
 
             // If Targeted, paint border
             if (isTargeted()) {
-                boolean oldAA = aPntr.setAntialiasing(false);
+                Shape shape = getBoundsShape();
+                Paint fill = ViewUtils.getSelectFill();
                 aPntr.setStroke(Stroke.Stroke1);
-                aPntr.drawRectWithPaint(.5, .5, getWidth()-1, getHeight()-1, Color.LIGHTGRAY);
-                aPntr.setAntialiasing(oldAA);
+                aPntr.drawWithPaint(shape, fill);
             }
         }
     }
