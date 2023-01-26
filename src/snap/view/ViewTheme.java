@@ -14,12 +14,13 @@ public class ViewTheme {
     private static ViewTheme     _lastTheme;
 
     // Color constants
-    private static Color BACK_FILL = new Color("#E9E8EA");
-    private static Color BACK_DARK_FILL = new Color("#C0"); // Color.LIGHTGRAY
-    private static Color SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY
-    private static Color SEL_TEXT_FILL = Color.BLACK;
-    private static Color TARG_FILL = new Color("#4080F0");
-    private static Color TARG_TEXT_FILL = Color.WHITE;
+    protected Color BACK_FILL = new Color("#E9E8EA");
+    protected Color BACK_DARK_FILL = new Color("#C0"); // Color.LIGHTGRAY
+    protected Color SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY
+    protected Color TARG_FILL = new Color("#D0");
+    protected Color TEXT_FILL = Color.BLACK;
+    protected Color SEL_TEXT_FILL = Color.BLACK;
+    protected Color TARG_TEXT_FILL = Color.WHITE;
 
     /**
      * Returns the background fill.
@@ -34,7 +35,7 @@ public class ViewTheme {
     /**
      * Returns the text fill.
      */
-    public Paint getTextFill()  { return Color.BLACK; }
+    public Paint getTextFill()  { return TEXT_FILL; }
 
     /**
      * Returns the selection color.
@@ -126,31 +127,15 @@ public class ViewTheme {
      */
     private static class LightTheme extends ViewTheme {
 
-        // Color constants
-        private static Color BACK_FILL = new Color("#FA");
-        private static Color BACK_DARK_FILL = new Color("#7B");
-        private static Color SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY
-        private static Color SEL_TEXT_FILL = Color.BLACK;
-        private static Color TARG_FILL = new Color("#4080F0");
-        private static Color TARG_TEXT_FILL = Color.WHITE;
-
-        /** Returns the background fill. */
-        public Paint getBackFill()  { return BACK_FILL; }
-
-        /** Returns the background fill. */
-        public Paint getBackDarkFill()  { return BACK_DARK_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getSelectFill()  { return SEL_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getSelectTextFill()  { return SEL_TEXT_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getTargetFill()  { return TARG_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
+        // Reset Color constants
+        {
+            BACK_FILL = new Color("#FA");
+            BACK_DARK_FILL = new Color("#F0");
+            SEL_FILL = new Color("#DA");
+            TARG_FILL = new Color("#E6");
+            SEL_TEXT_FILL = Color.BLACK;
+            TARG_TEXT_FILL = Color.WHITE;
+        }
 
         /** Creates a button area. */
         protected ButtonArea createButtonArea()
@@ -215,32 +200,16 @@ public class ViewTheme {
      */
     private static class StandardBlueTheme extends ViewTheme {
 
-        // Color constants
-        private static Color BASE = new Color(165, 179, 216).brighter();
-        private static Color BACK_FILL = BASE.blend(Color.WHITE, .8);
-        private static Color BACK_DARK_FILL = BACK_FILL.darker().darker();
-        private static Color SEL_FILL = Color.LIGHTGRAY;
-        private static Color SEL_TEXT_FILL = Color.BLACK;
-        private static Color TARG_FILL = new Color("#4080F0");
-        private static Color TARG_TEXT_FILL = Color.WHITE;
-
-        /** Returns the background fill. */
-        public Paint getBackFill()  { return BACK_FILL; }
-
-        /** Returns the background fill. */
-        public Paint getBackDarkFill()  { return BACK_DARK_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getSelectFill()  { return SEL_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getSelectTextFill()  { return SEL_TEXT_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getTargetFill()  { return TARG_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
+        // Reset Color constants
+        {
+            Color BASE = new Color(165, 179, 216).brighter();
+            BACK_FILL = BASE.blend(Color.WHITE, .8);
+            BACK_DARK_FILL = BASE.blend(Color.WHITE, .6);
+            SEL_FILL = BASE.blend(Color.WHITE, .6);
+            TARG_FILL = BASE.blend(Color.WHITE, .7);
+            SEL_TEXT_FILL = Color.BLACK;
+            TARG_TEXT_FILL = Color.WHITE;
+        }
 
         /** Creates a button area. */
         protected ButtonArea createButtonArea() { return new StandardBlueButtonArea(); }
@@ -253,7 +222,7 @@ public class ViewTheme {
 
         // Reset Colors
         {
-            Color blue = Color.BLUE;//new Color(165, 179, 216).brighter();
+            Color blue = Color.BLUE;
             double fract = .01;
             BUTTON_COLOR = Color.WHITE.blend(blue, fract);
             BUTTON_RING_COLOR = new Color("#BFBFBF").blend(blue, fract);
@@ -268,34 +237,16 @@ public class ViewTheme {
      */
     private static class DarkTheme extends ViewTheme {
 
-        // Color constants
-        private static Color BACK_FILL = new Color("#3C3F41");
-        private static Color BACK_DARK_FILL = BACK_FILL.darker().darker();
-        private static Color SEL_FILL = Color.LIGHTGRAY;
-        private static Color SEL_TEXT_FILL = Color.BLACK;
-        private static Color TARG_FILL = new Color("#4080F0");
-        private static Color TARG_TEXT_FILL = Color.WHITE;
-
-        /** Returns the background fill. */
-        public Paint getBackFill()  { return BACK_FILL; }
-
-        /** Returns the background fill. */
-        public Paint getBackDarkFill()  { return BACK_DARK_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getSelectFill()  { return SEL_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getSelectTextFill()  { return SEL_TEXT_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getTargetFill()  { return TARG_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
-
-        /** Returns the text fill. */
-        public Paint getTextFill()  { return Color.WHITE; }
+        // Reset Color constants
+        {
+            BACK_FILL = new Color("#3C3F41");
+            BACK_DARK_FILL = BACK_FILL.darker().darker();
+            SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY;
+            TARG_FILL = new Color("#90");
+            TEXT_FILL = Color.WHITE;
+            SEL_TEXT_FILL = Color.BLACK;
+            TARG_TEXT_FILL = Color.WHITE;
+        }
 
         /** Creates a button area. */
         protected ButtonArea createButtonArea()
@@ -324,31 +275,15 @@ public class ViewTheme {
      */
     private static class BlackAndWhiteTheme extends ViewTheme {
 
-        // Color constants
-        private static Color BACK_FILL = Color.WHITE;
-        private static Color BACK_DARK_FILL = Color.WHITE;
-        private static Color SEL_FILL = new Color("#F0");
-        private static Color SEL_TEXT_FILL = Color.BLACK;
-        private static Color TARG_FILL = new Color("#F4");
-        private static Color TARG_TEXT_FILL = Color.BLACK;
-
-        /** Returns the background fill. */
-        public Paint getBackFill()  { return BACK_FILL; }
-
-        /** Returns the background fill. */
-        public Paint getBackDarkFill()  { return BACK_DARK_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getSelectFill()  { return SEL_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getSelectTextFill()  { return SEL_TEXT_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getTargetFill()  { return TARG_FILL; }
-
-        /** Returns the selection color. */
-        public Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
+        // Reset Color constants
+        {
+            BACK_FILL = Color.WHITE;
+            BACK_DARK_FILL = Color.WHITE;
+            SEL_FILL = new Color("#F0");
+            TARG_FILL = new Color("#F8");
+            SEL_TEXT_FILL = Color.BLACK;
+            TARG_TEXT_FILL = Color.BLACK;
+        }
 
         /** Creates a button area. */
         protected ButtonArea createButtonArea()  { return new BlackAndWhiteButtonArea(); }

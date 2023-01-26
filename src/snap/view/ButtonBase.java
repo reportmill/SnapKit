@@ -334,14 +334,17 @@ public class ButtonBase extends ParentView {
                 Shape shape = getBoundsShape();
                 Paint fill = ViewUtils.getSelectFill();
                 aPntr.fillWithPaint(shape, fill);
+                if (getBorder() != null)
+                    getBorder().paint(aPntr, shape);
             }
 
             // If Targeted, paint border
-            if (isTargeted()) {
+            else if (isTargeted()) {
                 Shape shape = getBoundsShape();
-                Paint fill = ViewUtils.getSelectFill();
-                aPntr.setStroke(Stroke.Stroke1);
-                aPntr.drawWithPaint(shape, fill);
+                Paint fill = ViewUtils.getTargetFill();
+                aPntr.fillWithPaint(shape, fill);
+                if (getBorder() != null)
+                    getBorder().paint(aPntr, shape);
             }
         }
     }
