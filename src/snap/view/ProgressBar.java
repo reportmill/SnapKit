@@ -18,9 +18,6 @@ public class ProgressBar extends View {
     // The animator
     private ViewAnim  _anim;
 
-    // The ButtonArea used to paint background
-    private ButtonArea  _btnArea;
-
     // Constants for properties
     public static final String Progress_Prop = "Progress";
     public static final String Indeterminate_Prop = "Indeterminate";
@@ -51,7 +48,7 @@ public class ProgressBar extends View {
     public ProgressBar()
     {
         super();
-        themeChanged();
+        _borderRadius = 4;
     }
 
     /**
@@ -128,8 +125,6 @@ public class ProgressBar extends View {
         // Paint ProgressBar background as button using ButtonArea
         double viewW = getWidth();
         double viewH = getHeight();
-        _btnArea.setSize(viewW, viewH);
-        _btnArea.paint(aPntr);
 
         // Paint normal bar
         if (_prog >= 0) {
@@ -172,6 +167,51 @@ public class ProgressBar extends View {
     }
 
     /**
+     * Override to paint.
+     */
+    @Override
+    protected void paintBack(Painter aPntr)
+    {
+        // Get RoundRect shape for bounds, Radius and Position
+        double pbarX = 0;
+        double pbarY = 0;
+        double pbarW = getWidth();
+        double pbarH = getHeight();
+        RoundRect rect = new RoundRect(pbarX, pbarY, pbarW, pbarH, getBorderRadius());
+
+        // Standard theme
+        if (ViewTheme.get().getClass() == ViewTheme.class) {
+
+            // Fill rect
+            aPntr.fillWithPaint(rect, PROGRESS_BAR_FILL);
+
+            // Paint bottom highlite ring (white)
+            rect.setRect(pbarX + .5, pbarY + .5, pbarW - 1, pbarH);
+            aPntr.drawWithPaint(rect, ButtonArea.BOTTOM_HIGHLITE_PAINT);
+
+            // Paint inner ring (light gray gradient)
+            rect.setRect(pbarX + 1.5, pbarY + 1.5, pbarW - 3, pbarH - 4);
+            aPntr.drawWithPaint(rect, ButtonArea.INNER_RING_PAINT);
+
+            // Paint outer ring (gray)
+            rect.setRect(pbarX + .5, pbarY + .5, pbarW - 1, pbarH - 1);
+            aPntr.drawWithPaint(rect, ButtonArea.OUTER_RING_PAINT);
+        }
+
+        // Other themes
+        else {
+
+            // Get shape and paint fill
+            Color fillColor = ViewTheme.get().getButtonColor();
+            aPntr.fillWithPaint(rect, fillColor);
+
+            // Draw outer ring
+            Color strokeColor = ViewTheme.get().getButtonBorderColor();
+            aPntr.drawWithPaint(rect, strokeColor);
+        }
+    }
+
+    /**
      * Override to trigger animation.
      */
     @Override
@@ -184,16 +224,6 @@ public class ProgressBar extends View {
         // If indeterminate, update Animating
         if (isIndeterminate())
             setAnimating(isAnimNeeded());
-    }
-
-    /**
-     * Override to set/reset ButtonArea.
-     */
-    protected void themeChanged()
-    {
-        super.themeChanged();
-        _btnArea = (ButtonArea) ViewTheme.get().createArea(this);
-        _btnArea.setFill(PROGRESS_BAR_FILL);
     }
 
     /**

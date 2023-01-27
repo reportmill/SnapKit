@@ -22,6 +22,13 @@ public class ViewTheme {
     protected Color SEL_TEXT_FILL = Color.BLACK;
     protected Color TARG_TEXT_FILL = Color.WHITE;
 
+    // Button colors
+    protected Color BUTTON_COLOR = Color.WHITE;
+    protected Color BUTTON_RING_COLOR = new Color("#BFBFBF");
+    protected Color BUTTON_OVER_COLOR = new Color("#F8F8F8");
+    protected Color BUTTON_PRESSED_COLOR = new Color("#DFDFDF");
+    protected Color BUTTON_BLUE_COLOR = new Color("#87AFDA");
+
     /**
      * Returns the background fill.
      */
@@ -58,32 +65,22 @@ public class ViewTheme {
     public Paint getTargetTextFill()  { return TARG_TEXT_FILL; }
 
     /**
-     * Creates an area for given view.
+     * Returns the button color.
      */
-    public Object createArea(View aView)
-    {
-        ButtonArea area = null;
+    public Color getButtonColor()  { return BUTTON_COLOR; }
 
-        // Handle ButtonBase
-        if (aView instanceof ButtonBase)
-            area = createButtonArea();
-
-        // Handle ProgressBar
-        if (aView instanceof ProgressBar)
-            area = createButtonArea();
-
-        // Set View
-        if (area != null)
-            area.setView(aView);
-
-        // Return area
-        return area;
-    }
+    /**
+     * Returns the button border color.
+     */
+    public Color getButtonBorderColor()  { return BUTTON_RING_COLOR; }
 
     /**
      * Creates a ButtonArea.
      */
-    protected ButtonArea createButtonArea()  { return new ButtonArea(); }
+    public ButtonArea createButtonArea(ButtonBase aButton)
+    {
+        return new ButtonArea(aButton);
+    }
 
     /**
      * Returns the current theme.
@@ -138,23 +135,24 @@ public class ViewTheme {
         }
 
         /** Creates a button area. */
-        protected ButtonArea createButtonArea()
+        public ButtonArea createButtonArea(ButtonBase aButton)
         {
-            return new PlainButtonArea();
+            return new PlainButtonArea(aButton);
         }
     }
 
     /**
      * A ButtonArea for plain buttons.
      */
-    private static class PlainButtonArea extends ButtonArea {
+    private class PlainButtonArea extends ButtonArea {
 
-        // Colors
-        protected static Color BUTTON_COLOR = Color.WHITE;
-        protected static Color BUTTON_RING_COLOR = new Color("#BFBFBF");
-        protected static Color BUTTON_OVER_COLOR = new Color("#F8F8F8");
-        protected static Color BUTTON_PRESSED_COLOR = new Color("#DFDFDF");
-        protected static Color BUTTON_BLUE_COLOR = new Color("#87AFDA");
+        /**
+         * Constructor.
+         */
+        public PlainButtonArea(ButtonBase aButton)
+        {
+            super(aButton);
+        }
 
         /**
          * Draws a button for the given rect with an option for pressed.
@@ -202,6 +200,7 @@ public class ViewTheme {
 
         // Reset Color constants
         {
+            // Reset Color constants
             Color BASE = new Color(165, 179, 216).brighter();
             BACK_FILL = BASE.blend(Color.WHITE, .8);
             BACK_DARK_FILL = BASE.blend(Color.WHITE, .6);
@@ -209,19 +208,8 @@ public class ViewTheme {
             TARG_FILL = BASE.blend(Color.WHITE, .7);
             SEL_TEXT_FILL = Color.BLACK;
             TARG_TEXT_FILL = Color.WHITE;
-        }
 
-        /** Creates a button area. */
-        protected ButtonArea createButtonArea() { return new StandardBlueButtonArea(); }
-    }
-
-    /**
-     * A ButtonArea for plain buttons.
-     */
-    private static class StandardBlueButtonArea extends PlainButtonArea {
-
-        // Reset Colors
-        {
+            // Reset Button colors
             Color blue = Color.BLUE;
             double fract = .01;
             BUTTON_COLOR = Color.WHITE.blend(blue, fract);
@@ -239,6 +227,7 @@ public class ViewTheme {
 
         // Reset Color constants
         {
+            // Reset Color constants
             BACK_FILL = new Color("#3C3F41");
             BACK_DARK_FILL = BACK_FILL.darker().darker();
             SEL_FILL = new Color("#C0"); // Color.LIGHTGRAY;
@@ -246,22 +235,8 @@ public class ViewTheme {
             TEXT_FILL = Color.WHITE;
             SEL_TEXT_FILL = Color.BLACK;
             TARG_TEXT_FILL = Color.WHITE;
-        }
 
-        /** Creates a button area. */
-        protected ButtonArea createButtonArea()
-        {
-            return new DarkButtonArea();
-        }
-    }
-
-    /**
-     * A ButtonArea for plain buttons.
-     */
-    private static class DarkButtonArea extends PlainButtonArea {
-
-        // Reset Colors
-        {
+            // Reset Button colors
             BUTTON_COLOR = new Color("#45494A");
             BUTTON_RING_COLOR = new Color("#BFBFBF");
             BUTTON_OVER_COLOR = BUTTON_COLOR.brighter();
@@ -277,25 +252,15 @@ public class ViewTheme {
 
         // Reset Color constants
         {
+            // Reset Color constants
             BACK_FILL = Color.WHITE;
             BACK_DARK_FILL = Color.WHITE;
             SEL_FILL = new Color("#F0");
             TARG_FILL = new Color("#F8");
             SEL_TEXT_FILL = Color.BLACK;
             TARG_TEXT_FILL = Color.BLACK;
-        }
 
-        /** Creates a button area. */
-        protected ButtonArea createButtonArea()  { return new BlackAndWhiteButtonArea(); }
-    }
-
-    /**
-     * A ButtonArea for Black and White buttons.
-     */
-    private static class BlackAndWhiteButtonArea extends PlainButtonArea {
-
-        // Reset Colors
-        {
+            // Reset Button colors
             BUTTON_COLOR = Color.WHITE;
             BUTTON_RING_COLOR = Color.BLACK;
             BUTTON_OVER_COLOR = new Color("#F8");

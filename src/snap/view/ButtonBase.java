@@ -400,7 +400,7 @@ public class ButtonBase extends ParentView {
     protected void themeChanged()
     {
         super.themeChanged();
-        _btnArea = (ButtonArea)ViewTheme.get().createArea(this);
+        _btnArea = ViewTheme.get().createButtonArea(this);
     }
 
     /**

@@ -10,8 +10,8 @@ import snap.gfx.*;
  */
 public class ButtonArea {
     
-    // The View associated with this area
-    private View  _view;
+    // The button associated with this area
+    private ButtonBase  _button;
     
     // The location
     protected double  _x, _y;
@@ -37,9 +37,6 @@ public class ButtonArea {
     // The center shape (RadioButton)
     private Shape  _radioShape;
     
-    // The button fill
-    private Paint  _fill = BUTTON_FILL;
-    
     // Button states
     public static final int BUTTON_NORMAL = ButtonBase.BUTTON_NORMAL;
     public static final int BUTTON_OVER = ButtonBase.BUTTON_OVER;
@@ -55,39 +52,34 @@ public class ButtonArea {
     private static Color _irc1 = Color.get("#fbfbfb");
     private static Color _irc2 = Color.get("#dbdbdb");
     private static GradientPaint.Stop[]  _ring1Stops = GradientPaint.getStops(0, _irc1, 1, _irc2);
-    private static GradientPaint INNER_RING_PAINT = new GradientPaint(.5, 0, .5, 1, _ring1Stops);
+    public static GradientPaint INNER_RING_PAINT = new GradientPaint(.5, 0, .5, 1, _ring1Stops);
     
     // Button outer ring paint
-    private static Color OUTER_RING_PAINT = Color.get("#a6a6a6");
+    public static Color OUTER_RING_PAINT = Color.get("#a6a6a6");
     
     // Button bottom highlight paint
-    private static Color BOTTOM_HIGHLITE_PAINT = Color.get("#ffffffBB");
+    public static Color BOTTOM_HIGHLITE_PAINT = Color.get("#ffffffBB");
     
     // Button Mouse-over paint and Mouse-pressed paint
     private static Color BUTTON_MOUSE_OVER_PAINT = Color.get("#FFFFFF50");
     private static Color BUTTON_MOUSE_PRESSED_PAINT = Color.get("#0000001A");
 
     /**
-     * Returns the View assoicated with this area.
+     * Constructor.
      */
-    public View getView()  { return _view; }
-
-    /**
-     * Sets hte View associated with this area.
-     */
-    public void setView(View aView)
+    public ButtonArea(ButtonBase aButton)
     {
-        // Set View
-        _view = aView;
+        super();
+        _button = aButton;
 
         // Handle CheckBox
-        if (_view instanceof CheckBox || _view instanceof CheckBoxMenuItem) {
+        if (_button instanceof CheckBox || _button instanceof CheckBoxMenuItem) {
             setBounds(0, 0, 16, 16);
             setBorderRadius(3);
         }
 
         // Handle RadioButton
-        else if (_view instanceof RadioButton) {
+        else if (_button instanceof RadioButton) {
             setBounds(0, 0, 16, 16);
             setBorderRadius(8);
         }
@@ -158,11 +150,6 @@ public class ButtonArea {
     }
 
     /**
-     * Returns the radius of the round.
-     */
-    public double getBorderRadius()  { return _rad; }
-
-    /**
      * Sets the radius of the round.
      */
     public void setBorderRadius(double aValue)  { _rad = aValue;  }
@@ -198,66 +185,49 @@ public class ButtonArea {
     public void setSelected(boolean aValue)  { _selected = aValue; }
 
     /**
-     * Returns the fill.
-     */
-    public Paint getFill()  { return _fill; }
-
-    /**
-     * Sets the fill.
-     */
-    public void setFill(Paint aPaint)  { _fill = aPaint; }
-
-    /**
      * Sets ButtonArea attributes from a button.
      */
     protected void updateFromView()
     {
         // Handle CheckBox, RadioButton
-        if (_view instanceof CheckBox || _view instanceof RadioButton) {
+        if (_button instanceof CheckBox || _button instanceof RadioButton) {
 
             // Update ButtonArea.State and ButtonArea.Selected
-            ToggleButton btn = (ToggleButton)_view;
-            int state = btn.isPressed()? BUTTON_PRESSED : btn.isTargeted()? BUTTON_OVER : BUTTON_NORMAL;
+            ToggleButton btn = (ToggleButton) _button;
+            int state = btn.isPressed() ? BUTTON_PRESSED : btn.isTargeted() ? BUTTON_OVER : BUTTON_NORMAL;
             setState(state);
             setSelected(btn.isSelected());
         }
 
         // Handle CheckBoxMenuItem
-        else if (_view instanceof CheckBoxMenuItem) {
+        else if (_button instanceof CheckBoxMenuItem) {
 
             // Update ButtonArea.State and ButtonArea.Selected
-            MenuItem btn = (MenuItem)_view;
+            MenuItem btn = (MenuItem) _button;
             int state = btn.isPressed()? BUTTON_PRESSED : btn.isTargeted()? BUTTON_OVER : BUTTON_NORMAL;
             setState(state);
             setSelected(btn.isSelected());
 
             // Update x/y
-            Insets ins = _view.getInsetsAll();
+            Insets ins = _button.getInsetsAll();
             double x = ins.left;
-            double y = ins.top + 2 + Math.round((_view.getHeight() - ins.getHeight() - 2 - 16 - 2)/2);
+            double y = ins.top + 2 + Math.round((_button.getHeight() - ins.getHeight() - 2 - 16 - 2)/2);
             setXY(x, y);
         }
 
         // Handle normal button
-        else if (_view instanceof ButtonBase)
-            updateFromButton();
-    }
+        else if (_button != null) {
 
-    /**
-     * Sets ButtonArea attributes from a button.
-     */
-    protected void updateFromButton()
-    {
-        // Basic attrs
-        ButtonBase button = (ButtonBase)_view;
-        setSize(button.getWidth(), button.getHeight());
-        setBorderRadius(button.getBorderRadius());
-        setPosition(button.getPosition());
-        setSelected(button.isSelected());
+            // Basic attrs
+            setSize(_button.getWidth(), _button.getHeight());
+            setBorderRadius(_button.getBorderRadius());
+            setPosition(_button.getPosition());
+            setSelected(_button.isSelected());
 
-        // Get/set state
-        int state = button.isPressed()? BUTTON_PRESSED : button.isTargeted()? BUTTON_OVER : BUTTON_NORMAL;
-        setState(state);
+            // Get/set state
+            int state = _button.isPressed() ? BUTTON_PRESSED : _button.isTargeted() ? BUTTON_OVER : BUTTON_NORMAL;
+            setState(state);
+        }
     }
 
     /**
@@ -270,26 +240,27 @@ public class ButtonArea {
 
         // Get RoundRect shape for bounds, Radius and Position
         _rect.setRadius(_rad);
-        _rect = _rect.copyForPosition(_pos);
+        if (_pos != null)
+            _rect = _rect.copyForPosition(_pos);
 
         // Fill rect
-        fillRect(aPntr, _rect, _x, _y, _w, _h, _fill);
+        fillRect(aPntr, _rect, _x, _y, _w, _h, BUTTON_FILL);
 
         // Paint bottom highlite ring (white)
-        drawRect(aPntr, _rect, _x+.5, _y+.5, _w-1, _h, BOTTOM_HIGHLITE_PAINT);
+        drawRect(aPntr, _rect, _x + .5, _y + .5, _w - 1, _h, BOTTOM_HIGHLITE_PAINT);
 
         // Paint inner ring (light gray gradient)
-        drawRect(aPntr, _rect, _x+1.5, _y+1.5, _w-3, _h-4, INNER_RING_PAINT);
+        drawRect(aPntr, _rect, _x + 1.5, _y + 1.5, _w - 3, _h - 4, INNER_RING_PAINT);
 
         // Paint outer ring (gray)
-        drawRect(aPntr, _rect, _x+.5, _y+.5, _w-1, _h-1, OUTER_RING_PAINT);
+        drawRect(aPntr, _rect, _x + .5, _y + .5, _w - 1, _h - 1, OUTER_RING_PAINT);
 
         // Handle BUTTON_OVER
-        if (_state==BUTTON_OVER)
+        if (_state == BUTTON_OVER)
             fillRect(aPntr, _rect, _x, _y, _w, _h, BUTTON_MOUSE_OVER_PAINT);
 
         // Handle BUTTON_PRESSED
-        else if (_state==BUTTON_PRESSED && _fill==BUTTON_FILL)
+        else if (_state == BUTTON_PRESSED)
             fillRect(aPntr, _rect, _x, _y, _w, _h, BUTTON_MOUSE_PRESSED_PAINT);
 
         // Handle Selected
@@ -303,32 +274,31 @@ public class ButtonArea {
     public void paintSelected(Painter aPntr)
     {
         // Handle CheckBox
-        if (_view instanceof CheckBox || _view instanceof CheckBoxMenuItem) {
+        if (_button instanceof CheckBox || _button instanceof CheckBoxMenuItem) {
             Stroke str = aPntr.getStroke();
-            double x = getX(), y = getY();
+            double x = getX();
+            double y = getY();
             aPntr.setStroke(Stroke.Stroke2);
-            aPntr.drawLineWithPaint(x+5, y+5, x+11, y+11, Color.BLACK);
-            aPntr.drawLine(x+11, y+5, x+5, y+11);
+            aPntr.drawLineWithPaint(x + 5, y + 5, x + 11, y + 11, Color.BLACK);
+            aPntr.drawLine(x + 11, y + 5, x + 5, y + 11);
             aPntr.setStroke(str);
         }
 
         // Handle RadioButton
-        else if (_view instanceof RadioButton) {
+        else if (_button instanceof RadioButton) {
             if (_radioShape == null)
                 _radioShape = new Ellipse(3, 3, 10, 10);
             aPntr.fillWithPaint(_radioShape, Color.DARKGRAY);
         }
 
         // Handle other
-        else if (_view instanceof ButtonBase) {
-            fillRect(aPntr, _rect, _x, _y, _w, _h, BUTTON_MOUSE_PRESSED_PAINT);
-        }
+        else fillRect(aPntr, _rect, _x, _y, _w, _h, BUTTON_MOUSE_PRESSED_PAINT);
     }
 
     /**
      * Convenience to draw rect shape in bounds with color.
      */
-    public static final void drawRect(Painter aPntr, RectBase aRect, double aX, double aY, double aW, double aH, Paint aPnt)
+    public static void drawRect(Painter aPntr, RectBase aRect, double aX, double aY, double aW, double aH, Paint aPnt)
     {
         aRect.setRect(aX, aY, aW, aH);
         aPntr.drawWithPaint(aRect, aPnt);
@@ -337,7 +307,7 @@ public class ButtonArea {
     /**
      * Convenience to draw rect shape in bounds with color.
      */
-    public static final void fillRect(Painter aPntr, RectBase aRect, double aX, double aY, double aW, double aH, Paint aPnt)
+    public static void fillRect(Painter aPntr, RectBase aRect, double aX, double aY, double aW, double aH, Paint aPnt)
     {
         aRect.setRect(aX, aY, aW, aH);
         aPntr.fillWithPaint(aRect, aPnt);
