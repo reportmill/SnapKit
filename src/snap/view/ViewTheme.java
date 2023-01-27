@@ -1,17 +1,10 @@
 package snap.view;
-import snap.geom.RoundRect;
 import snap.gfx.*;
 
 /**
  * A class to provide view area classes to define UI look.
  */
 public class ViewTheme {
-    
-    // The current theme
-    private static ViewTheme     _theme = new ViewTheme();
-
-    // The last theme
-    private static ViewTheme     _lastTheme;
 
     // Color constants
     protected Color BACK_FILL = new Color("#E9E8EA");
@@ -24,10 +17,31 @@ public class ViewTheme {
 
     // Button colors
     protected Color BUTTON_COLOR = Color.WHITE;
-    protected Color BUTTON_RING_COLOR = new Color("#BFBFBF");
     protected Color BUTTON_OVER_COLOR = new Color("#F8F8F8");
     protected Color BUTTON_PRESSED_COLOR = new Color("#DFDFDF");
-    protected Color BUTTON_BLUE_COLOR = new Color("#87AFDA");
+    protected Color BUTTON_BORDER_COLOR = new Color("#BFBFBF");
+    protected Color BUTTON_BORDER_PRESSED_COLOR = new Color("#87AFDA");
+
+    // The ButtonPainter
+    private ButtonPainter  _buttonPainter;
+
+    // The current theme
+    private static ViewTheme  _theme = getClassic();
+
+    // The last theme
+    private static ViewTheme  _lastTheme;
+
+    // The classic theme
+    private static ViewTheme  _classic;
+
+    /**
+     * Constructor.
+     */
+    public ViewTheme()
+    {
+        super();
+        _buttonPainter = createButtonPainter();
+    }
 
     /**
      * Returns the background fill.
@@ -70,17 +84,34 @@ public class ViewTheme {
     public Color getButtonColor()  { return BUTTON_COLOR; }
 
     /**
-     * Returns the button border color.
+     * Returns the button over color.
      */
-    public Color getButtonBorderColor()  { return BUTTON_RING_COLOR; }
+    public Color getButtonOverColor()  { return BUTTON_OVER_COLOR; }
 
     /**
-     * Creates a ButtonArea.
+     * Returns the button pressed color.
      */
-    public ButtonArea createButtonArea(ButtonBase aButton)
-    {
-        return new ButtonArea(aButton);
-    }
+    public Color getButtonPressedColor()  { return BUTTON_PRESSED_COLOR; }
+
+    /**
+     * Returns the button border color.
+     */
+    public Color getButtonBorderColor()  { return BUTTON_BORDER_COLOR; }
+
+    /**
+     * Returns the button border pressed color.
+     */
+    public Color getButtonBorderPressedColor()  { return BUTTON_BORDER_PRESSED_COLOR; }
+
+    /**
+     * Returns the button painter.
+     */
+    public ButtonPainter getButtonPainter()  { return _buttonPainter; }
+
+    /**
+     * Creates the button painter.
+     */
+    protected ButtonPainter createButtonPainter()  { return new ButtonPainter.Flat(this); }
 
     /**
      * Returns the current theme.
@@ -91,6 +122,15 @@ public class ViewTheme {
      * Returns the last theme.
      */
     public static ViewTheme getLast()  { return _lastTheme; }
+
+    /**
+     * Returns the classic theme.
+     */
+    public static ViewTheme getClassic()
+    {
+        if (_classic != null) return _classic;
+        return _classic = new Classic();
+    }
 
     /**
      * Sets the theme by name.
@@ -106,7 +146,7 @@ public class ViewTheme {
             case "Light": _theme = new LightTheme(); break;
             case "Dark": _theme = new DarkTheme(); break;
             case "BlackAndWhite": _theme = new BlackAndWhiteTheme(); break;
-            default: _theme = new ViewTheme();
+            default: _theme = getClassic();
         }
 
         // Update windows
@@ -117,6 +157,16 @@ public class ViewTheme {
             rootView.setFill(_theme.getBackFill());
             rootView.repaint();
         }
+    }
+
+    /**
+     * The classic theme.
+     */
+    private static class Classic extends ViewTheme {
+
+        /** Creates a button area. */
+        @Override
+        public ButtonPainter createButtonPainter()  { return new ButtonPainter.Classic(); }
     }
 
     /**
@@ -132,64 +182,6 @@ public class ViewTheme {
             TARG_FILL = new Color("#E6");
             SEL_TEXT_FILL = Color.BLACK;
             TARG_TEXT_FILL = Color.WHITE;
-        }
-
-        /** Creates a button area. */
-        public ButtonArea createButtonArea(ButtonBase aButton)
-        {
-            return new PlainButtonArea(aButton);
-        }
-    }
-
-    /**
-     * A ButtonArea for plain buttons.
-     */
-    private class PlainButtonArea extends ButtonArea {
-
-        /**
-         * Constructor.
-         */
-        public PlainButtonArea(ButtonBase aButton)
-        {
-            super(aButton);
-        }
-
-        /**
-         * Draws a button for the given rect with an option for pressed.
-         */
-        public void paint(Painter aPntr)
-        {
-            // Update Area from View
-            updateFromView();
-
-            // Get fill color
-            Color fillColor = BUTTON_COLOR;
-            if (_state == BUTTON_OVER)
-                fillColor = BUTTON_OVER_COLOR;
-            else if (_state == BUTTON_PRESSED)
-                fillColor = BUTTON_PRESSED_COLOR;
-            else if (isSelected())
-                fillColor = BUTTON_PRESSED_COLOR;
-
-            // Get shape and paint fill
-            RoundRect rect = new RoundRect(_x, _y, _w, _h, _rad);
-            if (_pos != null)
-                rect = rect.copyForPosition(_pos);
-            aPntr.fillWithPaint(rect, fillColor);
-
-            // Get stroke color
-            Color strokeColor = BUTTON_RING_COLOR;
-            if (_state == BUTTON_OVER)
-                strokeColor = BUTTON_BLUE_COLOR;
-            else if (_state == BUTTON_PRESSED)
-                strokeColor = BUTTON_BLUE_COLOR;
-
-            // Draw outer ring
-            drawRect(aPntr, rect, _x, _y, _w, _h, strokeColor);
-
-            // Handle Selected
-            if (isSelected())
-                paintSelected(aPntr);
         }
     }
 
@@ -213,10 +205,10 @@ public class ViewTheme {
             Color blue = Color.BLUE;
             double fract = .01;
             BUTTON_COLOR = Color.WHITE.blend(blue, fract);
-            BUTTON_RING_COLOR = new Color("#BFBFBF").blend(blue, fract);
+            BUTTON_BORDER_COLOR = new Color("#BFBFBF").blend(blue, fract);
             BUTTON_OVER_COLOR = new Color("#F8F8F8").blend(blue, fract);
             BUTTON_PRESSED_COLOR = new Color("#DFDFDF").blend(blue, fract);
-            BUTTON_BLUE_COLOR = new Color("#87AFDA").blend(blue, fract);
+            BUTTON_BORDER_PRESSED_COLOR = new Color("#87AFDA").blend(blue, fract);
         }
     }
 
@@ -238,10 +230,9 @@ public class ViewTheme {
 
             // Reset Button colors
             BUTTON_COLOR = new Color("#45494A");
-            BUTTON_RING_COLOR = new Color("#BFBFBF");
+            BUTTON_BORDER_COLOR = new Color("#BFBFBF");
             BUTTON_OVER_COLOR = BUTTON_COLOR.brighter();
             BUTTON_PRESSED_COLOR = BUTTON_OVER_COLOR.brighter();
-            BUTTON_BLUE_COLOR = new Color("#87AFDA");
         }
     }
 
@@ -262,10 +253,9 @@ public class ViewTheme {
 
             // Reset Button colors
             BUTTON_COLOR = Color.WHITE;
-            BUTTON_RING_COLOR = Color.BLACK;
+            BUTTON_BORDER_COLOR = Color.BLACK;
             BUTTON_OVER_COLOR = new Color("#F8");
             BUTTON_PRESSED_COLOR = new Color("#F0");
-            BUTTON_BLUE_COLOR = new Color("#87AFDA");
         }
     }
 }

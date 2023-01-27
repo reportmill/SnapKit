@@ -11,8 +11,8 @@ import snap.gfx.*;
  */
 public class RadioButton extends ToggleButton {
 
-    // The view to render the actual Radio button
-    private RadioArea  _radio;
+    // The placeholder view for actual checkbox bounds
+    private Label  _radio;
 
     // Constants for overridden defaults
     private static final boolean DEFAULT_RADIO_BUTTON_SHOW_AREA = false;
@@ -26,7 +26,8 @@ public class RadioButton extends ToggleButton {
     public RadioButton()
     {
         // Create/add radio
-        _radio = new RadioArea();
+        _radio = new Label();
+        _radio.setPrefSize(16, 16);
         addChild(_radio);
     }
 
@@ -35,14 +36,23 @@ public class RadioButton extends ToggleButton {
      */
     public RadioButton(String aStr)
     {
-        this(); setText(aStr);
+        this();
+        setText(aStr);
     }
 
     /**
      * Override to suppress normal version.
      */
     @Override
-    protected void paintButton(Painter aPntr)  { }
+    protected void paintButton(Painter aPntr)
+    {
+        double buttonX = _radio.getX();
+        double buttonY = _radio.getY();
+        aPntr.translate(buttonX, buttonY);
+        ButtonPainter buttonPainter = ViewTheme.get().getButtonPainter();
+        buttonPainter.paintButton(aPntr, this);
+        aPntr.translate(-buttonX, -buttonY);
+    }
 
     /**
      * Override to situate Radio view.
@@ -110,24 +120,6 @@ public class RadioButton extends ToggleButton {
 
             // Do normal version
             default: return super.getPropDefault(aPropName);
-        }
-    }
-
-    /**
-     * The View to render the Radio button.
-     */
-    protected class RadioArea extends View {
-
-        /** Create RadioArea. */
-        public RadioArea()
-        {
-            setPrefSize(16, 16);
-        }
-
-        /** Paint RadioArea. */
-        public void paintFront(Painter aPntr)
-        {
-            _btnArea.paint(aPntr);
         }
     }
 }

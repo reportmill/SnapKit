@@ -22,7 +22,8 @@ public class CheckBoxMenuItem extends MenuItem {
     @Override
     protected void paintButton(Painter aPntr)
     {
-        _btnArea.paint(aPntr);
+        ButtonPainter buttonPainter = ViewTheme.get().getButtonPainter();
+        buttonPainter.paintButton(aPntr, this);
     }
 
     /**

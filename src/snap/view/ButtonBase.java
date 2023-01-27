@@ -35,9 +35,6 @@ public class ButtonBase extends ParentView {
     // Whether button is being tracked by mouse
     private boolean  _tracked;
     
-    // The class that renders the button
-    protected ButtonArea  _btnArea;
-    
     // Constants for properties
     public static final String ImageName_Prop = "ImageName";
     public static final String Pressed_Prop = "Pressed";
@@ -289,8 +286,10 @@ public class ButtonBase extends ParentView {
     protected void paintButton(Painter aPntr)
     {
         // If ShowArea, use ButtonArea to paint actual button background
-        if (isShowArea())
-            _btnArea.paint(aPntr);
+        if (isShowArea()) {
+            ButtonPainter buttonPainter = ViewTheme.get().getButtonPainter();
+            buttonPainter.paintButton(aPntr, this);
+        }
 
         // If not ShowArea, paint rects for Pressed or Targeted
         else {
@@ -392,15 +391,6 @@ public class ButtonBase extends ParentView {
 
         // Return ViewProxy
         return viewProxy;
-    }
-
-    /**
-     * Override to set/reset ButtonArea.
-     */
-    protected void themeChanged()
-    {
-        super.themeChanged();
-        _btnArea = ViewTheme.get().createButtonArea(this);
     }
 
     /**

@@ -11,8 +11,8 @@ import snap.gfx.*;
  */
 public class CheckBox extends ToggleButton {
     
-    // The view to render the actual check box
-    private CheckArea  _check;
+    // The placeholder view for actual checkbox bounds
+    private Label  _check;
     
     // Constants for overridden defaults
     private static final boolean DEFAULT_CHECK_BOX_SHOW_AREA = false;
@@ -26,7 +26,8 @@ public class CheckBox extends ToggleButton {
     public CheckBox()
     {
         // Create/add check
-        _check = new CheckArea();
+        _check = new Label();
+        _check.setPrefSize(16, 16);
         addChild(_check);
     }
 
@@ -39,7 +40,15 @@ public class CheckBox extends ToggleButton {
      * Override to suppress normal painting.
      */
     @Override
-    protected void paintButton(Painter aPntr)  { }
+    protected void paintButton(Painter aPntr)
+    {
+        double buttonX = _check.getX();
+        double buttonY = _check.getY();
+        aPntr.translate(buttonX, buttonY);
+        ButtonPainter buttonPainter = ViewTheme.get().getButtonPainter();
+        buttonPainter.paintButton(aPntr, this);
+        aPntr.translate(-buttonX, -buttonY);
+    }
 
     /**
      * Override to situate Check view.
@@ -107,24 +116,6 @@ public class CheckBox extends ToggleButton {
 
             // Do normal version
             default: return super.getPropDefault(aPropName);
-        }
-    }
-
-    /**
-     * The View to render the check.
-     */
-    protected class CheckArea extends View {
-
-        /** Create CheckArea. */
-        public CheckArea()
-        {
-            setPrefSize(16, 16);
-        }
-
-        /** Paint CheckArea. */
-        public void paintFront(Painter aPntr)
-        {
-            _btnArea.paint(aPntr);
         }
     }
 }

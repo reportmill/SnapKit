@@ -180,22 +180,22 @@ public class ProgressBar extends View {
         RoundRect rect = new RoundRect(pbarX, pbarY, pbarW, pbarH, getBorderRadius());
 
         // Standard theme
-        if (ViewTheme.get().getClass() == ViewTheme.class) {
+        if (ViewTheme.get() == ViewTheme.getClassic()) {
 
             // Fill rect
             aPntr.fillWithPaint(rect, PROGRESS_BAR_FILL);
 
             // Paint bottom highlite ring (white)
             rect.setRect(pbarX + .5, pbarY + .5, pbarW - 1, pbarH);
-            aPntr.drawWithPaint(rect, ButtonArea.BOTTOM_HIGHLITE_PAINT);
+            aPntr.drawWithPaint(rect, ButtonPainter.Classic.BOTTOM_HIGHLITE_PAINT);
 
             // Paint inner ring (light gray gradient)
             rect.setRect(pbarX + 1.5, pbarY + 1.5, pbarW - 3, pbarH - 4);
-            aPntr.drawWithPaint(rect, ButtonArea.INNER_RING_PAINT);
+            aPntr.drawWithPaint(rect, ButtonPainter.Classic.INNER_RING_PAINT);
 
             // Paint outer ring (gray)
             rect.setRect(pbarX + .5, pbarY + .5, pbarW - 1, pbarH - 1);
-            aPntr.drawWithPaint(rect, ButtonArea.OUTER_RING_PAINT);
+            aPntr.drawWithPaint(rect, ButtonPainter.Classic.OUTER_RING_PAINT);
         }
 
         // Other themes
