@@ -111,8 +111,9 @@ public class Tab extends PropObject {
         button.setPadding(3,7,3,7);
 
         // If button is for TabView, configure as Tabs
-        boolean isForTabView = _tabBar != null && _tabBar.getParent() instanceof TabView;
-        if (isForTabView) {
+        View tabBarParent = _tabBar != null ? _tabBar.getParent() : null;
+        boolean isForClassicTabView = tabBarParent instanceof TabView && ((TabView) tabBarParent).isClassic();
+        if (isForClassicTabView) {
             button.setPadding(4,7,2,7);
             button.setAlign(Pos.TOP_CENTER);
             button.setPosition(Pos.TOP_CENTER);

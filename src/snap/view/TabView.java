@@ -2,7 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.geom.Insets;
 import snap.geom.Pos;
+import snap.geom.Side;
 import snap.gfx.*;
 import snap.props.PropChange;
 import snap.util.*;
@@ -12,20 +14,34 @@ import snap.util.*;
  */
 public class TabView extends ParentView implements Selectable<Tab> {
 
+    // The side that tabs should be on
+    private Side  _tabSide;
+
+    // Whether tabView should render in classic style
+    private boolean  _classic;
+
     // The TabBar
     private TabBar  _tabBar;
 
     // The view to hold content
     private BoxView  _contentBox;
-    
+
     // A child view holding Tab.Content views that aren't currently showing, so getView(name) works
     private RowView  _hiddenKids;
+
+    // Constants for properties
+    public static final String TabSide_Prop = "TabSide";
+    public static final String Classic_Prop = "Classic";
 
     // The default TabBar fill
     private static Color c1 = new Color("#d6d6d6");
     private static Color c2 = new Color("#dddddd");
     private static GradientPaint.Stop[] SHELF_FILL_STOPS = GradientPaint.getStops(0, c1,.2, c2,1,c2);
-    private static Paint TAB_BAR_FILL = new GradientPaint(.5,0,.5,1, SHELF_FILL_STOPS);
+    private static Paint CLASSIC_TAB_BAR_FILL = new GradientPaint(.5,0,.5,1, SHELF_FILL_STOPS);
+
+    // Constants
+    private static final Insets CLASSIC_TAB_BAR_INSETS = new Insets(5, 5, 0, 5);
+    private static final double CLASSIC_TAB_BAR_SPACING = 2;
 
     /**
      * Creates a new TabView.
@@ -33,12 +49,14 @@ public class TabView extends ParentView implements Selectable<Tab> {
     public TabView()
     {
         setActionable(true);
+        _tabSide = Side.TOP;
+        _classic = true;
 
         // Create ToolBar
         _tabBar = new TabBar();
-        _tabBar.setFill(TAB_BAR_FILL);
-        _tabBar.setPadding(5,5,0,5);
-        _tabBar.getTabsBox().setSpacing(2);
+        _tabBar.setFill(CLASSIC_TAB_BAR_FILL);
+        _tabBar.setPadding(CLASSIC_TAB_BAR_INSETS);
+        _tabBar.getTabsBox().setSpacing(CLASSIC_TAB_BAR_SPACING);
         _tabBar.addPropChangeListener(pc -> tabBarDidPropChange(pc));
 
         // Create and configure content cradle
@@ -54,6 +72,69 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Add shelf and content cradle, enable action event
         setChildren(_tabBar, _contentBox, _hiddenKids);
+
+        // Test
+        setTabSide(Side.BOTTOM);
+    }
+
+    /**
+     * Returns the side where tabs are shown.
+     */
+    public Side getTabSide()  { return _tabSide; }
+
+    /**
+     * Sets the side where tabs are shown.
+     */
+    public void setTabSide(Side aSide)
+    {
+        if (aSide == _tabSide) return;
+
+        // Add child at right index
+        removeChild(_tabBar);
+        if (aSide == Side.BOTTOM)
+            addChild(_tabBar, 1);
+        else addChild(_tabBar, 0);
+
+        // Set, fire prop change
+        firePropChange(TabSide_Prop, _tabSide, _tabSide = aSide);
+
+        // If side not top, turn off classic
+        if (aSide != Side.TOP)
+            setClassic(false);
+    }
+
+    /**
+     * Returns whether tab view should render tabs in classic style.
+     */
+    public boolean isClassic()  { return _classic; }
+
+    /**
+     * Sets whether tab view should render tabs in classic style.
+     */
+    public void setClassic(boolean aValue)
+    {
+        // If already set, just return
+        if (aValue == _classic) return;
+
+        // Set classic
+        _classic = aValue;
+
+        // Handle configure classic
+        if (aValue) {
+            _tabBar.setFill(CLASSIC_TAB_BAR_FILL);
+            _tabBar.setPadding(CLASSIC_TAB_BAR_INSETS);
+            _tabBar.getTabsBox().setSpacing(CLASSIC_TAB_BAR_SPACING);
+        }
+
+        // Handle configure non-classic
+        else {
+            _tabBar.setFill(null);
+            _tabBar.setPadding(TabBar.DEFAULT_PADDING);
+            _tabBar.getTabsBox().setSpacing(TabBar.DEFAULT_SPACING);
+        }
+
+        // Fire prop change
+        firePropChange(Classic_Prop, !_classic, _classic);
     }
 
     /**
@@ -242,7 +323,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
     protected void themeChanged()
     {
         super.themeChanged();
-        Paint tabBarFill = ViewTheme.get().getClass().getSimpleName().equals("ViewTheme") ? TAB_BAR_FILL : ViewUtils.getBackDarkFill();
+        Paint tabBarFill = ViewTheme.get().getClass().getSimpleName().equals("ViewTheme") ? CLASSIC_TAB_BAR_FILL : ViewUtils.getBackDarkFill();
         _tabBar.setFill(tabBarFill);
         _contentBox.setFill(ViewUtils.getBackFill());
     }

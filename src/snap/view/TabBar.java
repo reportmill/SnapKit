@@ -31,6 +31,10 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     // Constants for properties
     public static final String Tabs_Prop = "Tabs";
 
+    // Constants
+    public static final Insets DEFAULT_PADDING = new Insets(3, 3, 3, 5);
+    public static final double DEFAULT_SPACING = 3;
+
     /**
      * Constructor.
      */
@@ -38,11 +42,11 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     {
         super();
         setActionable(true);
-        _padding = new Insets(3, 3, 3, 5);
+        _padding = DEFAULT_PADDING;
 
         // Create and configure TabsBox
         _tabsBox = new TabRowView();
-        _tabsBox.setSpacing(3);
+        _tabsBox.setSpacing(DEFAULT_SPACING);
         addChild(_tabsBox);
     }
 
