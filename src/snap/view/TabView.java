@@ -141,6 +141,11 @@ public class TabView extends ParentView implements Selectable<Tab> {
     public TabBar getTabBar()  { return _tabBar; }
 
     /**
+     * Returns the ContentBox.
+     */
+    public BoxView getContentBox()  { return _contentBox; }
+
+    /**
      * Returns the number of tabs in pane.
      */
     public int getTabCount()  { return _tabBar.getTabCount(); }
@@ -234,6 +239,10 @@ public class TabView extends ParentView implements Selectable<Tab> {
      */
     protected void setContent(View aView)
     {
+        // If already set, just return
+        if (aView == getContent()) return;
+
+        // Set content
         View old = getContent();
         _contentBox.setContent(aView);
 
@@ -241,8 +250,6 @@ public class TabView extends ParentView implements Selectable<Tab> {
         boolean isKid = _tabBar.getTabs().stream().anyMatch(tab -> tab.getContent() == old);
         if (old != null && isKid)
             _hiddenKids.addChild(old,0);
-
-        relayout();
     }
 
     /**

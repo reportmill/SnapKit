@@ -183,6 +183,47 @@ public class BoxView extends ParentView implements ViewHost {
     }
 
     /**
+     * Sets the content with animation.
+     */
+    public void setContentWithAnim(View aView)
+    {
+        // If already set, just return
+        View content = getContent();
+        if (aView == content) return;
+
+        // Get anim - finished/cleared in case it was running
+        ViewAnim anim = getAnim(0).finish().clear();
+        anim.setOnFinish(() -> setContentAnimDone(aView));
+        ViewAnim anim500 = anim.getAnim(500);
+
+        // Handle showing: Add view, config anim and play
+        if (aView != null) {
+            setContent(aView);
+            double newH = getBestHeight(-1);
+            anim500.setPrefHeight(newH);
+        }
+
+        // Handle hiding: Config anim and play
+        else {
+            anim.setPrefHeight(0);
+            anim500.setOnFinish(() -> setContentAnimDone(aView));
+        }
+
+        // Start anim
+        anim.play();
+    }
+
+    /**
+     * Called when setContentWithAnim() is done.
+     */
+    private void setContentAnimDone(View aView)
+    {
+        if (aView == null)
+            setContent(null);
+        setPrefHeight(-1);
+    }
+
+    /**
      * XML archival.
      */
     public XMLElement toXMLView(XMLArchiver anArchiver)

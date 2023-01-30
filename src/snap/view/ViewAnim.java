@@ -553,23 +553,26 @@ public class ViewAnim implements XMLArchiver.Archivable {
     protected Object findStartValue(String aKey, Object aVal)
     {
         // Iterate up parents to see if start val has been set in previous key frame
-        Object sval = null;
-        for (ViewAnim par = _parent; par != null && sval == null; par = par._parent)
-            sval = par.getEndVal(aKey);
+        Object startVal = null;
+        for (ViewAnim par = _parent; par != null && startVal == null; par = par._parent)
+            startVal = par.getEndVal(aKey);
 
         // If not found, get from current view
-        if (sval == null) {
-            sval = _view.getPropValue(aKey);
-            if (sval == null) {
-                if (aVal instanceof Integer) sval = 0;
-                else if (aVal instanceof Double) sval = 0d;
-                else if (aVal instanceof Color) sval = Color.CLEAR;
+        if (startVal == null) {
+            startVal = _view.getPropValue(aKey);
+            if (startVal == null) {
+                if (aVal instanceof Integer)
+                    startVal = 0;
+                else if (aVal instanceof Double)
+                    startVal = 0d;
+                else if (aVal instanceof Color)
+                    startVal = Color.CLEAR;
                 else System.err.println("ViewAnim.findStartValue: No default start value for type " + aVal.getClass());
             }
         }
 
-        // Return start value
-        return sval;
+        // Return
+        return startVal;
     }
 
     /**
@@ -633,7 +636,8 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     public ViewAnim setOnFinish(Runnable aRun)
     {
-        if (_parent != null) _parent.setOnFinish(aRun);
+        if (_parent != null)
+            _parent.setOnFinish(aRun);
         else _onFinish = aRun;
         return this;
     }
@@ -651,7 +655,8 @@ public class ViewAnim implements XMLArchiver.Archivable {
      */
     public ViewAnim needsFinish()
     {
-        if (_parent != null) _parent.needsFinish();
+        if (_parent != null)
+            return _parent.needsFinish();
         return this;
     }
 
