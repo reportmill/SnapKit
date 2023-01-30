@@ -348,6 +348,14 @@ public class ParentView extends View {
         super.setOwner(anOwner);
 
         // Send to children
+        setOwnerChildren(anOwner);
+    }
+
+    /**
+     * Forwards setOwner() call to children.
+     */
+    protected void setOwnerChildren(ViewOwner anOwner)
+    {
         for (View child : getChildren())
             child.setOwner(anOwner);
     }

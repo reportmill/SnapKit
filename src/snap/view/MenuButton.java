@@ -22,7 +22,7 @@ public class MenuButton extends ButtonBase {
     private Size  _popSize;
 
     // The items
-    private List<MenuItem>  _items = new ArrayList();
+    private List<MenuItem>  _items = new ArrayList<>();
 
     /**
      * Constructor.
@@ -43,7 +43,9 @@ public class MenuButton extends ButtonBase {
     public void setItems(List<MenuItem> theItems)
     {
         _items.clear();
-        if (theItems != null) for (MenuItem mi : theItems) addItem(mi);
+        if (theItems != null)
+            for (MenuItem mi : theItems)
+                addItem(mi);
     }
 
     /**
@@ -84,10 +86,7 @@ public class MenuButton extends ButtonBase {
     /**
      * Returns the popup point.
      */
-    public Point getPopupPoint()
-    {
-        return _popPoint;
-    }
+    public Point getPopupPoint()  { return _popPoint; }
 
     /**
      * Sets the popup point.
@@ -100,10 +99,7 @@ public class MenuButton extends ButtonBase {
     /**
      * Returns the popup size.
      */
-    public Size getPopupSize()
-    {
-        return _popSize;
-    }
+    public Size getPopupSize()  { return _popSize; }
 
     /**
      * Sets the popup size.
@@ -118,19 +114,28 @@ public class MenuButton extends ButtonBase {
      */
     protected void processEvent(ViewEvent anEvent)
     {
-        // Handle MouseEnter, MouseExit, MousePress, MouseRelease
+        // Handle MouseEnter
         if (anEvent.isMouseEnter()) {
             setTargeted(true);
             repaint();
-        } else if (anEvent.isMouseExit()) {
+        }
+
+        // Handle MouseExit
+        else if (anEvent.isMouseExit()) {
             setTargeted(false);
             repaint();
-        } else if (anEvent.isMousePress()) {
+        }
+
+        // Handle MousePress
+        else if (anEvent.isMousePress()) {
             setPressed(false);
             setTargeted(false);
             fireActionEvent(anEvent);
             repaint();
-        } else if (anEvent.isMouseRelease()) {
+        }
+
+        // Handle MouseRelease
+        else if (anEvent.isMouseRelease()) {
             setPressed(false);
             setTargeted(false);
             repaint();
@@ -226,12 +231,11 @@ public class MenuButton extends ButtonBase {
             XMLElement childXML = anElement.get(i);
 
             // Get child class - if MenuItem, unarchive and add
-            Class childClass = anArchiver.getClass(childXML.getName());
+            Class<?> childClass = anArchiver.getClass(childXML.getName());
             if (childClass != null && MenuItem.class.isAssignableFrom(childClass)) {
                 MenuItem mitem = (MenuItem) anArchiver.fromXML(childXML, this);
                 addItem(mitem);
             }
         }
     }
-
 }

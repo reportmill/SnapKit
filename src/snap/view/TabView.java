@@ -58,6 +58,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
         _tabBar.setPadding(CLASSIC_TAB_BAR_INSETS);
         _tabBar.getTabsBox().setSpacing(CLASSIC_TAB_BAR_SPACING);
         _tabBar.addPropChangeListener(pc -> tabBarDidPropChange(pc));
+        _tabBar.addEventHandler(e -> tabBarDidFireAction(e), Action);
 
         // Create and configure content cradle
         _contentBox = new BoxView(null, true, true);
@@ -327,6 +328,20 @@ public class TabView extends ParentView implements Selectable<Tab> {
         _tabBar.setFill(tabBarFill);
         _contentBox.setFill(ViewUtils.getBackFill());
     }
+
+    /**
+     * Called when TabBar does fireAction
+     */
+    protected void tabBarDidFireAction(ViewEvent anEvent)
+    {
+        fireActionEvent(anEvent);
+    }
+
+    /**
+     * Override to suppress so TabBar doesn't fireAction to Owner.
+     */
+    @Override
+    protected void setOwnerChildren(ViewOwner anOwner)  { }
 
     /**
      * XML archival.

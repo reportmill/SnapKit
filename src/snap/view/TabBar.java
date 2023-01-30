@@ -29,7 +29,7 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     private RowView  _tabsBox;
 
     // A shared listener for tab button action
-    private EventListener  _buttonActionLsnr = e -> tabButtonWasPressed(e);
+    private EventListener  _buttonActionLsnr = e -> tabButtonDidFireAction(e);
 
     // Constants for properties
     public static final String Tabs_Prop = "Tabs";
@@ -271,9 +271,9 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     }
 
     /**
-     * Called when tab button was pressed.
+     * Called when tab button fires action.
      */
-    protected void tabButtonWasPressed(ViewEvent anEvent)
+    protected void tabButtonDidFireAction(ViewEvent anEvent)
     {
         // Get index for button
         View button = anEvent.getView();
@@ -292,6 +292,12 @@ public class TabBar extends ParentView implements Selectable<Tab> {
         // Fire action event
         fireActionEvent(anEvent);
     }
+
+    /**
+     * Override to suppress so tab buttons don't fireAction to Owner.
+     */
+    @Override
+    protected void setOwnerChildren(ViewOwner anOwner)  { }
 
     /**
      * A RowView to stretch buttons if configured like actual tabs.
