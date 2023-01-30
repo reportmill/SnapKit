@@ -84,31 +84,33 @@ public class ListUtils {
     /**
      * Adds an object to the given list if object is absent (creates list if missing).
      */
-    public static <T> List<T> addUnique(List<T> aList, T anObj)
+    public static <T> void addUnique(List<T> aList, T anObj)
     {
-        return contains(aList, anObj) ? aList : add(aList, anObj);
+        if (!contains(aList, anObj))
+            add(aList, anObj);
     }
 
     /**
      * Adds an object to the given list if identical object is missing (creates list if missing).
      */
-    public static <T> List<T> addUniqueId(List<T> aList, T anObj)
+    public static <T> void addUniqueId(List<T> aList, T anObj)
     {
-        return containsId(aList, anObj) ? aList : add(aList, anObj);
+        if (!containsId(aList, anObj))
+            add(aList, anObj);
     }
 
     /**
      * Adds all object from second list to first list (creates first list if missing).
      */
-    public static <T> List<T> addAllUnique(List<T> aList, T... theObjects)
+    public static <T> void addAllUnique(List<T> aList, T... theObjects)
     {
-        return addAllUnique(aList, aList != null ? aList.size() : 0, theObjects);
+        addAllUnique(aList, aList != null ? aList.size() : 0, theObjects);
     }
 
     /**
      * Adds all object from second list to first list (creates first list if missing).
      */
-    public static <T> List<T> addAllUnique(List<T> aList, int anIndex, T... theObjects)
+    public static <T> void addAllUnique(List<T> aList, int anIndex, T... theObjects)
     {
         // If list is null, create it
         if (aList == null) aList = new ArrayList<>();
@@ -118,9 +120,6 @@ public class ListUtils {
             if (!aList.contains(object))
                 aList.add(anIndex++, object);
         }
-
-        // Return list
-        return aList;
     }
 
     /**
@@ -159,9 +158,9 @@ public class ListUtils {
     /**
      * Returns a string by concatenating strings in given list separated by given string.
      */
-    public static String joinStrings(List aList, String aString)
+    public static String joinStrings(List<?> aList, String aString)
     {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0, iMax = aList.size(); i < iMax; i++)
             sb.append(i == 0 ? "" : aString).append(aList.get(i));
         return sb.toString();
@@ -170,12 +169,12 @@ public class ListUtils {
     /**
      * Adds object from list 2 to list 1, unless they are already present (then removes them).
      */
-    public static void xor(List list1, List list2)
+    public static <T> void xor(List<T> list1, List<T> list2)
     {
         int size = list1.size();
 
         // Add objects from l2 that aren't in l
-        for (Object item : list2)
+        for (T item : list2)
             if (!list1.contains(item))
                 list1.add(item);
 
@@ -188,7 +187,7 @@ public class ListUtils {
     /**
      * Moves the object at the given index to the front of the list.
      */
-    public static void moveToFront(List<?> aList, int anIndex)
+    public static <T> void moveToFront(List<T> aList, int anIndex)
     {
         if (anIndex > 0)
             moveToFront(aList, aList.get(anIndex));
@@ -197,7 +196,7 @@ public class ListUtils {
     /**
      * Move the given object to the front of the list.
      */
-    public static void moveToFront(List aList, Object anObj)
+    public static <T> void moveToFront(List<T> aList, T anObj)
     {
         if (anObj == null) return;
         aList.remove(anObj);
@@ -271,6 +270,17 @@ public class ListUtils {
             if (aPred.test(item))
                 return item;
         return null;
+    }
+
+    /**
+     * Returns the index of first item in list that matches given predicate (or -1).
+     */
+    public static <T> int findMatchIndex(List<T> aList, Predicate<? super T> aPred)
+    {
+        for (int i = 0, iMax = aList.size(); i < iMax; i++)
+            if (aPred.test(aList.get(i)))
+                return i;
+        return -1;
     }
 
     /**

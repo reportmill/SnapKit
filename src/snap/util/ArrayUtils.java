@@ -392,6 +392,17 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns the index of first item in array that matches given predicate (or -1).
+     */
+    public static <T> int findMatchIndex(T[] anArray, Predicate<? super T> aPred)
+    {
+        for (int i = 0; i < anArray.length; i++)
+            if (aPred.test(anArray[i]))
+                return i;
+        return -1;
+    }
+
+    /**
      * Joins an array of items by given delimiter using given function to get item strings.
      */
     public static <T> String joinString(T[] anArray, String aDelim, Function<T,String> aFunc)

@@ -16,6 +16,9 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     // The tabs
     private List<Tab>  _tabs = new ArrayList<>();
 
+    // Whether it is acceptable for tool bar to have no button selected
+    private boolean  _allowEmptySelection;
+
     // The tab min size
     private double  _tabMinWidth;
 
@@ -26,10 +29,11 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     private RowView  _tabsBox;
 
     // A shared listener for tab button action
-    private EventListener  _buttonActionLsnr = e -> shelfButtonPressed(e);
+    private EventListener  _buttonActionLsnr = e -> tabButtonWasPressed(e);
 
     // Constants for properties
     public static final String Tabs_Prop = "Tabs";
+    public static final String AllowEmptySelection_Prop = "AllowEmptySelection";
 
     // Constants
     public static final Insets DEFAULT_PADDING = new Insets(3, 3, 3, 5);
@@ -105,10 +109,8 @@ public class TabBar extends ParentView implements Selectable<Tab> {
 
         // If first tab, select 0
         int selIndex = getSelIndex();
-        if (anIndex <= selIndex || selIndex < 0) {
-            setSelIndex(-1);
-            setSelIndex(selIndex + 1);
-        }
+        if (selIndex < 0 && !isAllowEmptySelection())
+            setSelIndex(0);
     }
 
     /**
@@ -148,6 +150,22 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     {
         while (getTabCount() > 0)
             removeTab(0);
+    }
+
+    /**
+     * Returns whether it is acceptable for tool bar to have no button selected.
+     *
+     * If true, clicking the selected button results in it being deselected.
+     */
+    public boolean isAllowEmptySelection()  { return _allowEmptySelection; }
+
+    /**
+     * Sets whether it is acceptable for tool bar to have no button selected.
+     */
+    public void setAllowEmptySelection(boolean aValue)
+    {
+        if (aValue == _allowEmptySelection) return;
+        firePropChange(AllowEmptySelection_Prop, _allowEmptySelection, _allowEmptySelection = aValue);
     }
 
     /**
@@ -253,16 +271,20 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     }
 
     /**
-     * Called when shelf button pressed.
+     * Called when tab button was pressed.
      */
-    protected void shelfButtonPressed(ViewEvent anEvent)
+    protected void tabButtonWasPressed(ViewEvent anEvent)
     {
         // Get index for button
         View button = anEvent.getView();
-        int index = -1;
-        for (int i = 0; i < _tabsBox.getChildCount(); i++)
-            if (_tabsBox.getChild(i) == button)
-                index = i;
+        int index = button.indexInParent();
+
+        // If selected button was pressed, either reset index or return
+        if (index == getSelIndex()) {
+            if (isAllowEmptySelection())
+                index = -1;
+            else return;
+        }
 
         // Set selected index
         setSelIndex(index);
