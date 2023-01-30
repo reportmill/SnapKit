@@ -73,9 +73,6 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Add shelf and content cradle, enable action event
         setChildren(_tabBar, _contentBox, _hiddenKids);
-
-        // Test
-        setTabSide(Side.BOTTOM);
     }
 
     /**
