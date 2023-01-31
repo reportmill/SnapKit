@@ -156,16 +156,6 @@ public class TabView extends ParentView implements Selectable<Tab> {
     public Tab getTab(int anIndex)  { return _tabBar.getTab(anIndex); }
 
     /**
-     * Adds the given tab shape to tabbed pane shape.
-     */
-    public void addTab(String aTitle, View aView)  { _tabBar.addTab(aTitle, aView); }
-
-    /**
-     * Adds the given tab shape to tabbed pane shape.
-     */
-    public void addTab(String aTitle, View aView, int anIndex)  { _tabBar.addTab(aTitle, aView, anIndex); }
-
-    /**
      * Adds a tab.
      */
     public void addTab(Tab aTab)  { _tabBar.addTab(aTab, getTabCount()); }
@@ -181,33 +171,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
     public void removeTab(int anIndex)  { _tabBar.removeTab(anIndex); }
 
     /**
-     * Returns tab content at index.
+     * Creates and adds a tab for given title and content view.
      */
-    public String getTabTitle(int anIndex)  { return _tabBar.getTabTitle(anIndex); }
-
-    /**
-     * Returns tab content at index.
-     */
-    public View getTabContent(int anIndex)  { return getTab(anIndex).getContent(); }
-
-    /**
-     * Sets tab content at index.
-     */
-    public void setTabContent(View aView, int anIndex)
-    {
-        Tab tab = getTab(anIndex);
-        if (tab.getContent() != null)
-            _hiddenKids.removeChild(tab.getContent());
-        if (aView != null)
-            _hiddenKids.addChild(aView);
-
-        // Set Tab.Content
-        tab.setContent(aView);
-
-        // If selected tab, reset content
-        if (anIndex == getSelIndex())
-            setContent(tab.getContent());
-    }
+    public void addTab(String aTitle, View aView)  { _tabBar.addTab(aTitle, aView); }
 
     /**
      * Returns the tap pane's selected index.
@@ -370,10 +336,11 @@ public class TabView extends ParentView implements Selectable<Tab> {
     {
         // Archive children
         for (int i = 0, iMax = getTabCount(); i < iMax; i++) {
-            View child = getTabContent(i);
-            String title = getTabTitle(i);
-            XMLElement childXML = anArchiver.toXML(child, this);
-            childXML.add("title", title);
+            Tab tab = getTab(i);
+            View tabContent = tab.getContent();
+            String tabTitle = tab.getTitle();
+            XMLElement childXML = anArchiver.toXML(tabContent, this);
+            childXML.add("title", tabTitle);
             anElement.add(childXML);
         }
     }

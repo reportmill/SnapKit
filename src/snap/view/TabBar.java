@@ -70,22 +70,6 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     public Tab getTab(int anIndex)  { return _tabs.get(anIndex); }
 
     /**
-     * Adds the given tab shape to tabbed pane shape.
-     */
-    public void addTab(String aTitle, View aView)  { addTab(aTitle, aView, getTabCount()); }
-
-    /**
-     * Adds the given tab shape to tabbed pane shape.
-     */
-    public void addTab(String aTitle, View aView, int anIndex)
-    {
-        Tab tab = new Tab();
-        tab.setTitle(aTitle);
-        tab.setContent(aView);
-        addTab(tab, anIndex);
-    }
-
-    /**
      * Adds a tab.
      */
     public void addTab(Tab aTab)  { addTab(aTab, getTabCount()); }
@@ -156,6 +140,17 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     {
         while (getTabCount() > 0)
             removeTab(0);
+    }
+
+    /**
+     * Creates and adds a tab for given name and content view.
+     */
+    public void addTab(String aTitle, View aView)
+    {
+        Tab tab = new Tab();
+        tab.setTitle(aTitle);
+        tab.setContent(aView);
+        addTab(tab, getTabCount());
     }
 
     /**
