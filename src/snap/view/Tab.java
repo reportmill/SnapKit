@@ -7,6 +7,8 @@ import snap.geom.Pos;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.props.PropObject;
+import snap.util.ListUtils;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -31,6 +33,9 @@ public class Tab extends PropObject {
 
     // The content
     private View  _content;
+
+    // The content owner
+    private ViewOwner  _contentOwner;
 
     // Constants for properties
     private static final String Title_Prop = "Title";
@@ -126,7 +131,15 @@ public class Tab extends PropObject {
     /**
      * Returns the content.
      */
-    public View getContent()  { return _content; }
+    public View getContent()
+    {
+        // If already set, just return
+        if (_content != null) return _content;
+
+        // Create, set, return
+        View content = _contentOwner != null ? _contentOwner.getUI() : null;
+        return _content = content;
+    }
 
     /**
      * Sets the content.
@@ -134,14 +147,22 @@ public class Tab extends PropObject {
     public void setContent(View aView)  { _content = aView; }
 
     /**
+     * Returns the content owner.
+     */
+    public ViewOwner getContentOwner()  { return _contentOwner; }
+
+    /**
+     * Sets the content owner.
+     */
+    public void setContentOwner(ViewOwner aViewOwner)  { _contentOwner = aViewOwner; }
+
+    /**
      * Returns the index of this tab in TabView.
      */
     public int getIndex()
     {
-        for (int i = 0; i < _tabBar.getTabCount(); i++)
-            if (_tabBar.getTab(i) == this)
-                return i;
-        return -1;
+        List<Tab> tabs = _tabBar.getTabs();
+        return ListUtils.indexOfId(tabs, this);
     }
 
     /**
@@ -154,13 +175,17 @@ public class Tab extends PropObject {
      */
     public void setVisible(boolean aValue)
     {
+        // If already set, just return
         if (aValue == isVisible()) return;
 
+        // Set value, fire prop change
         firePropChange(Visible_Prop, _visible, _visible = aValue);
 
+        // Forward to Button
         if (_button != null)
             _button.setVisible(aValue);
 
+        // If this Tab is selected, select next
         if (!aValue && _tabBar.getSelIndex() == getIndex())
             _tabBar.setSelIndex(getIndex() != 0 ? 0 : 1);
     }
@@ -221,5 +246,68 @@ public class Tab extends PropObject {
             sb.append(", ").append(Closable_Prop).append(':').append(isClosable());
         sb.append(", Index").append(':').append(getIndex());
         return sb.toString();
+    }
+
+    /**
+     * A builder class.
+     */
+    public static class Builder {
+
+        // Ivars
+        private Tab  _tab;
+        private TabBar  _tabBar;
+
+        /**
+         * Constructor.
+         */
+        public Builder()
+        {
+            super();
+        }
+
+        /**
+         * Constructor.
+         */
+        public Builder(TabBar tabBar)
+        {
+            super();
+            _tabBar = tabBar;
+        }
+
+        /**
+         * Return tab.
+         */
+        private Tab _tab()
+        {
+            if (_tab != null) return _tab;
+            return _tab = new Tab();
+        }
+
+        // Properties
+        public Builder title(String aTitle)  { _tab()._title = aTitle; return this; }
+        public Builder closable(boolean aValue)  { _tab()._closable = aValue; return this; }
+        public Builder visible(boolean aValue)  { _tab()._visible = aValue; return this; }
+        public Builder content(View aValue)  { _tab()._content = aValue; return this; }
+        public Builder contentOwner(ViewOwner aValue)  { _tab()._contentOwner = aValue; return this; }
+
+        /**
+         * Build.
+         */
+        public Tab build()
+        {
+            Tab tab = _tab();
+            _tab = null;
+            return tab;
+        }
+
+        /**
+         * Add.
+         */
+        public Tab add()
+        {
+            Tab tab = build();
+            _tabBar.addTab(tab);
+            return tab;
+        }
     }
 }
