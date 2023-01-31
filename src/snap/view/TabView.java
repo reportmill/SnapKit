@@ -199,7 +199,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
         if (tab.getContent() != null)
             _hiddenKids.removeChild(tab.getContent());
         if (aView != null)
-            _hiddenKids.addChild(aView,0);
+            _hiddenKids.addChild(aView);
 
         // Set Tab.Content
         tab.setContent(aView);
@@ -247,9 +247,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
         _contentBox.setContent(aView);
 
         // If old is a tab content, add back to hidden kids
-        boolean isKid = _tabBar.getTabs().stream().anyMatch(tab -> tab.getContent() == old);
+        boolean isKid = _tabBar.getTabs().stream().anyMatch(tab -> tab.getContentOwner() == null && tab.getContent() == old);
         if (old != null && isKid)
-            _hiddenKids.addChild(old,0);
+            _hiddenKids.addChild(old);
     }
 
     /**
@@ -306,16 +306,16 @@ public class TabView extends ParentView implements Selectable<Tab> {
             firePropChange(SelIndex_Prop, aPC.getOldValue(), aPC.getNewValue());
         }
 
-        // Handle Tabs
+        // Handle Tabs: If added/removed tab doesn't have ContentOwner, add/remove Content from HiddenKids
         else if (propName == TabBar.Tabs_Prop) {
             if (aPC.getNewValue() instanceof Tab) {
                 Tab newTab = (Tab) aPC.getNewValue();
-                if (newTab.getContent() != null)
-                    _hiddenKids.addChild(newTab.getContent(),0);
+                if (newTab.getContentOwner() == null && newTab.getContent() != null)
+                    _hiddenKids.addChild(newTab.getContent());
             }
             if (aPC.getOldValue() instanceof Tab) {
                 Tab oldTab = (Tab) aPC.getOldValue();
-                if (oldTab.getContent() != null)
+                if (oldTab.getContentOwner() == null && oldTab.getContent() != null)
                     _hiddenKids.removeChild(oldTab.getContent());
             }
         }
@@ -345,7 +345,11 @@ public class TabView extends ParentView implements Selectable<Tab> {
      * Override to suppress so TabBar doesn't fireAction to Owner.
      */
     @Override
-    protected void setOwnerChildren(ViewOwner anOwner)  { }
+    protected void setOwnerChildren(ViewOwner anOwner)
+    {
+        _contentBox.setOwner(anOwner);
+        _hiddenKids.setOwner(anOwner);
+    }
 
     /**
      * XML archival.

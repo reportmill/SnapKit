@@ -107,6 +107,9 @@ public class TabBar extends ParentView implements Selectable<Tab> {
         // Add button to shelf
         _tabsBox.addChild(tabButton, anIndex);
 
+        // Fire prop change
+        firePropChange(Tabs_Prop, null, aTab, anIndex);
+
         // If first tab, select 0
         int selIndex = getSelIndex();
         if (selIndex < 0 && !isAllowEmptySelection())
@@ -123,7 +126,10 @@ public class TabBar extends ParentView implements Selectable<Tab> {
         _tabsBox.removeChild(tabButton);
 
         // Remove Tab
-        _tabs.remove(anIndex);
+        Tab tab = _tabs.remove(anIndex);
+
+        // Fire prop change
+        firePropChange(Tabs_Prop, tab, null, anIndex);
 
         // Reset Selection
         if (anIndex == getSelIndex()) {
