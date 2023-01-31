@@ -154,7 +154,11 @@ public class Tab extends PropObject {
     /**
      * Sets the content owner.
      */
-    public void setContentOwner(ViewOwner aViewOwner)  { _contentOwner = aViewOwner; }
+    public void setContentOwner(ViewOwner aViewOwner)
+    {
+        _contentOwner = aViewOwner;
+        _content = null;
+    }
 
     /**
      * Returns the index of this tab in TabView.
