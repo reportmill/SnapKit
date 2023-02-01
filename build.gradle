@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.reportmill'
-version '1.0.0'
+version '2023.01.02'
 
 sourceSets.main.java.srcDirs = ['src']
 sourceSets.main.resources.srcDirs = ['src']
@@ -28,8 +28,8 @@ publishing {
             name = "GitHubPackages"
             url = "https://maven.pkg.github.com/reportmill/SnapKit"
             credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
                 //println "GitHubPackages Publish Artifact:\n\tusername=$username\n\ttoken=$password"
             }
         }
