@@ -25,7 +25,6 @@ tasks.publish.doFirst() {
     def user = System.getenv("GITHUB_USER")
     def pw = System.getenv("GITHUB_TOKEN")
     println "Publish start user:$user"
-    println "Publish start pw:$pw"
 }
 
 publishing {
@@ -38,7 +37,6 @@ publishing {
                 username = System.getenv("GITHUB_USER")
                 password = System.getenv("GITHUB_TOKEN")
                 println "Publish user: username=$username"
-                println "Publish token: token=$password"
             }
         }
     }
