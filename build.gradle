@@ -30,7 +30,7 @@ publishing {
             credentials {
                 username = System.getenv("USERNAME")
                 password = System.getenv("TOKEN")
-                //println "GitHubPackages Publish Artifact:\n\tusername=$username\n\ttoken=$password"
+                println "GitHubPackages Publish Artifact X:\n\tusername=$username\n\ttoken=$password"
             }
         }
     }
