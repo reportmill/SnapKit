@@ -21,6 +21,12 @@ repositories {
 dependencies {
 }
 
+tasks.build.doLast() {
+    def user = System.getenv("USERNAME")
+    def pw = System.getenv("TOKEN")
+    println "Build finished for:\n\tuser=$user\n\ttoken=$pw"
+}
+
 publishing {
 
     repositories {
