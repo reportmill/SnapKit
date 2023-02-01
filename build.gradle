@@ -21,10 +21,11 @@ repositories {
 dependencies {
 }
 
-tasks.build.doLast() {
+tasks.publish.doFirst() {
     def user = System.getenv("USERNAME")
     def pw = System.getenv("TOKEN")
-    println "Build finished for:\n\tuser=$user\n\ttoken=$pw"
+    println "Publish start user:$user"
+    println "Publish start pw:$pw"
 }
 
 publishing {
@@ -36,7 +37,8 @@ publishing {
             credentials {
                 username = System.getenv("USERNAME")
                 password = System.getenv("TOKEN")
-                println "GitHubPackages Publish Artifact X:\n\tusername=$username\n\ttoken=$password"
+                println "Publish user: username=$username"
+                println "Publish token: token=$password"
             }
         }
     }
