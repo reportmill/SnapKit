@@ -951,7 +951,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the default border.
      */
-    public Border getDefaultBorder()  { return ScrollView.SCROLL_VIEW_BORDER; }
+    public Border getDefaultBorder()  { return ScrollView.DEFAULT_SCROLL_VIEW_BORDER; }
 
     /**
      * XML archival.

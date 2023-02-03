@@ -43,10 +43,10 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     private Image  _clpImg, _expImg;
     
     // The SplitView to hold columns
-    private SplitView  _splitView = new SplitView();
+    private SplitView  _splitView;
     
     // The ScrollView to hold SplitView+Columns
-    private ScrollView  _scrollView = new ScrollView(_splitView);
+    private ScrollView  _scrollView;
     
     // Constants
     private static final Paint DIVIDER_FILL = new Color("#EEEEEE");
@@ -57,20 +57,27 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
      */
     public TreeView()
     {
-        // Enable Action event for selection change
+        super();
+        setActionable(true);
         setFocusable(true);
         setFocusWhenPressed(true);
         setFocusPainted(false);
-        setActionable(true);
+        setBorder(ScrollView.DEFAULT_SCROLL_VIEW_BORDER);
 
-        // Configure Columns SplitView and ScrollView and add
+        // Create/configure Columns SplitView
+        _splitView = new SplitView();
         _splitView.setBorder(null);
         _splitView.setGrowWidth(true);
         _splitView.setDividerSpan(2);
+
+        // Configure SplitView.Divider
         Divider divider = _splitView.getDivider();
         divider.setFill(DIVIDER_FILL);
         divider.setBorder(null);
         divider.setReach(3);
+
+        // Create/configure ScrollView
+        _scrollView = new ScrollView(_splitView);
         _scrollView.setBorder(null);
         addChild(_scrollView);
 
@@ -573,7 +580,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the default border.
      */
-    public Border getDefaultBorder()  { return ScrollView.SCROLL_VIEW_BORDER; }
+    public Border getDefaultBorder()  { return ScrollView.DEFAULT_SCROLL_VIEW_BORDER; }
 
     /**
      * Returns whether given items are equal to set items.

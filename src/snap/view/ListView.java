@@ -39,6 +39,11 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      */
     public ListView()
     {
+        super();
+        setActionable(true);
+        enableEvents(KeyPress);
+        setBorder(ScrollView.DEFAULT_SCROLL_VIEW_BORDER);
+
         // Create/configure ListArea
         _listArea = createListArea();
         _listArea.addEventHandler(e -> listAreaDidFireActionEvent(e), Action);
@@ -53,11 +58,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
         _scrollView.setBorder(null);
         _scrollView.setContent(_listArea);
         addChild(_scrollView);
-
-        // Configure this ListView
-        setActionable(true);
-        enableEvents(KeyPress);
-        setBorder(ScrollView.SCROLL_VIEW_BORDER);
     }
 
     /**

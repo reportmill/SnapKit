@@ -26,7 +26,7 @@ public class ScrollView extends ParentView implements ViewHost {
     private int  _barSize = 16;
     
     // Constants
-    static final Border SCROLL_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
+    public static final Border DEFAULT_SCROLL_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
     public static final String ShowHBar_Prop = "ShowHBar";
     public static final String ShowVBar_Prop = "ShowVBar";
     public static final String HBarShowing_Prop = "HBarShowing";
@@ -39,7 +39,7 @@ public class ScrollView extends ParentView implements ViewHost {
     public ScrollView()
     {
         // Configure ScrollView
-        setBorder(SCROLL_VIEW_BORDER);
+        setBorder(DEFAULT_SCROLL_VIEW_BORDER);
 
         // Create Scroller and add listeners for scroll changes
         _scroller = new Scroller();
@@ -391,7 +391,7 @@ public class ScrollView extends ParentView implements ViewHost {
     /**
      * Returns the default border.
      */
-    public Border getDefaultBorder()  { return SCROLL_VIEW_BORDER; }
+    public Border getDefaultBorder()  { return DEFAULT_SCROLL_VIEW_BORDER; }
 
     /**
      * Handle Scroller property changes.
