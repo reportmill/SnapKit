@@ -1,3 +1,4 @@
+import java.text.SimpleDateFormat
 
 plugins {
     id 'java-library'
@@ -5,7 +6,7 @@ plugins {
 }
 
 group 'com.reportmill'
-version '2023.01.02'
+version  new SimpleDateFormat("yyyy.MM.dd").format(new Date())
 
 sourceSets.main.java.srcDirs = ['src']
 sourceSets.main.resources.srcDirs = ['src']
