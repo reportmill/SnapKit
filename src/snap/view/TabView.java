@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
+import snap.geom.HPos;
 import snap.geom.Insets;
 import snap.geom.Pos;
 import snap.geom.Side;
@@ -64,6 +65,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
         _contentBox = new BoxView(null, true, true);
         _contentBox.setFill(ViewUtils.getBackFill());
         _contentBox.setBorder(Color.LIGHTGRAY, 1);
+        _contentBox.setGrowWidth(true);
         _contentBox.setGrowHeight(true);
 
         // Create/configure HiddenKids
@@ -87,11 +89,23 @@ public class TabView extends ParentView implements Selectable<Tab> {
     {
         if (aSide == _tabSide) return;
 
+        // Remove TabBar
+        View tabBarView = _tabBar.getParent() == this ? _tabBar : _tabBar.getParent();
+        removeChild(tabBarView);
+
+        // Get new view to add (need to wrap/rotate tabBar if side is left/right)
+        tabBarView = _tabBar;
+        _tabBar.setRotate(0);
+        _tabBar.getTabsBox().setAlignX(aSide == Side.LEFT ? HPos.RIGHT : HPos.LEFT);
+        if (aSide.isLeftOrRight()) {
+            tabBarView = new WrapView(_tabBar, true, true);
+            _tabBar.setRotate(aSide == Side.LEFT ? -90 : 90);
+        }
+
         // Add child at right index
-        removeChild(_tabBar);
-        if (aSide == Side.BOTTOM)
-            addChild(_tabBar, 1);
-        else addChild(_tabBar, 0);
+        if (aSide == Side.BOTTOM || aSide == Side.RIGHT)
+            addChild(tabBarView, 1);
+        else addChild(tabBarView, 0);
 
         // Set, fire prop change
         firePropChange(TabSide_Prop, _tabSide, _tabSide = aSide);
@@ -223,6 +237,8 @@ public class TabView extends ParentView implements Selectable<Tab> {
      */
     protected double getPrefWidthImpl(double aH)
     {
+        if (_tabSide.isLeftOrRight())
+            return RowView.getPrefWidth(this, aH);
         return ColView.getPrefWidth(this, aH);
     }
 
@@ -231,6 +247,8 @@ public class TabView extends ParentView implements Selectable<Tab> {
      */
     protected double getPrefHeightImpl(double aW)
     {
+        if (_tabSide.isLeftOrRight())
+            return RowView.getPrefHeight(this, aW);
         return ColView.getPrefHeight(this, aW);
     }
 
@@ -239,7 +257,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
      */
     protected void layoutImpl()
     {
-        ColView.layout(this, true);
+        if (_tabSide.isLeftOrRight())
+            RowView.layout(this, true);
+        else ColView.layout(this, true);
     }
 
     /**

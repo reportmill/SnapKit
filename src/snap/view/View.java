@@ -1983,12 +1983,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         setAlign(Pos.get(getAlignX(), aPos));
     }
 
-    @Deprecated
-    public void setAlign(HPos aPos)
-    {
-        setAlign(Pos.get(aPos, getAlign().getVPos()));
-    }
-
     /**
      * Returns the spacing insets requested between parent/neighbors and the border of this view.
      */
