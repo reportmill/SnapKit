@@ -81,7 +81,7 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
         _size = aSize;
 
         // If fontFile not found, substitute Helvetica (try to get the style right)
-        if (_fontFile==null) {
+        if (_fontFile == null) {
             _substitute = true;
             _fontFile = Arial10.getFontFile();
 

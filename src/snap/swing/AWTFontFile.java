@@ -25,15 +25,6 @@ public class AWTFontFile extends FontFile {
     // Cached font name in English
     private String  _fontNameEnglish;
     
-    // Cached "canDisplay" bitset
-    private BitSet  _canDisplay = new BitSet(128);
-    
-    // Cached reference to bold version of font
-    private FontFile  _boldVersion = null;
-    
-    // Cached reference to italic version of font
-    private FontFile  _italicVersion = null;
-    
     // This font files AWT representation
     private java.awt.Font  _awt;
     
@@ -85,7 +76,7 @@ public class AWTFontFile extends FontFile {
     /**
      * Returns the char advance for the given char.
      */
-    protected double charAdvanceImpl(char aChar)  { return _fontMetrics.charWidth(aChar)/1000d; }
+    protected double charAdvanceImpl(char aChar)  { return _fontMetrics.charWidth(aChar) / 1000d; }
 
     /**
      * Returns the bounds rect for glyphs in given string.
@@ -107,14 +98,17 @@ public class AWTFontFile extends FontFile {
     {
         // Get bounds: Contains the origin, ascent, advance and height
         Graphics2D gfx = getGraphics2D();
-        FontRenderContext frc = gfx.getFontRenderContext();
-        Rectangle2D bounds = new TextLayout(aString, _awt, frc).getBounds();
+        FontRenderContext fontRenderContext = gfx.getFontRenderContext();
+        TextLayout textLayout = new TextLayout(aString, _awt, fontRenderContext);
+        Rectangle2D bounds = textLayout.getBounds();
 
         // Get parts
         double glyphX = bounds.getX();
         double glyphAsc = bounds.getY();
         double glyphW = bounds.getWidth() + glyphX;
         double glyphH = bounds.getHeight();
+
+        // Return
         return new Rect(0, glyphAsc, glyphW, glyphH);
     }
 
@@ -125,9 +119,9 @@ public class AWTFontFile extends FontFile {
     {
         // Get default graphics 2D, glyph vector for char and shape from glyph vector
         Graphics2D gfx = getGraphics2D();
-        FontRenderContext frc = gfx.getFontRenderContext();
-        GlyphVector gv = _awt.createGlyphVector(frc, new char[] { c });
-        java.awt.Shape shape = gv.getOutline();
+        FontRenderContext fontRenderContext = gfx.getFontRenderContext();
+        GlyphVector glyphVector = _awt.createGlyphVector(fontRenderContext, new char[] { c });
+        java.awt.Shape shape = glyphVector.getOutline();
         return getShape(shape, true);
     }
 
@@ -139,18 +133,20 @@ public class AWTFontFile extends FontFile {
         // Get graphics, font render context and glyph vector
         String str = StringUtils.trimEnd(aStr);
         Graphics2D gfx = getGraphics2D();
-        FontRenderContext frc = gfx.getFontRenderContext();
-        GlyphVector gv = _awt.deriveFont((float)aSize).createGlyphVector(frc, str);
+        FontRenderContext fontRenderContext = gfx.getFontRenderContext();
+        Font awtFont = _awt.deriveFont((float) aSize);
+        GlyphVector glyphVector = awtFont.createGlyphVector(fontRenderContext, str);
 
         // Adjust glyph positions
-        Point2D.Double p = new Point2D.Double(aX, aY);
-        for (int i=0, iMax=str.length(); i<iMax; i++) {
-            gv.setGlyphPosition(i, p);
-            p.x += charAdvance(str.charAt(i))*aSize + aCharSpacing;
+        Point2D.Double point = new Point2D.Double(aX, aY);
+        for (int i = 0, iMax = str.length(); i < iMax; i++) {
+            glyphVector.setGlyphPosition(i, point);
+            point.x += charAdvance(str.charAt(i)) * aSize + aCharSpacing;
         }
 
         // Return glyph vector
-        return getShape(gv.getOutline(), false);
+        java.awt.Shape glyphOutline = glyphVector.getOutline();
+        return getShape(glyphOutline, false);
     }
 
     /**
@@ -158,15 +154,27 @@ public class AWTFontFile extends FontFile {
      */
     private Shape getShape(java.awt.Shape aShape, boolean flip)
     {
+        // Loop vars
+        Path path = new Path();
+        double[] points = new double[6];
+
         // Iterate over shape segments and build path
-        Path path = new Path(); double pts[] = new double[6];
-        for (PathIterator pi = aShape.getPathIterator(null); !pi.isDone(); pi.next()) { int type = pi.currentSegment(pts);
-            if (flip) { pts[1] = -pts[1]; pts[3] = -pts[3]; pts[5] = -pts[5]; }
+        for (PathIterator pi = aShape.getPathIterator(null); !pi.isDone(); pi.next()) {
+
+            // Get segment and points
+            int type = pi.currentSegment(points);
+            if (flip) {
+                points[1] = -points[1];
+                points[3] = -points[3];
+                points[5] = -points[5];
+            }
+
+            // Handle segments
             switch (type) {
-                case PathIterator.SEG_MOVETO: path.moveTo(pts[0], pts[1]); break;
-                case PathIterator.SEG_LINETO: path.lineTo(pts[0], pts[1]); break;
-                case PathIterator.SEG_QUADTO: path.quadTo(pts[0], pts[1], pts[2], pts[3]); break;
-                case PathIterator.SEG_CUBICTO: path.curveTo(pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]); break;
+                case PathIterator.SEG_MOVETO: path.moveTo(points[0], points[1]); break;
+                case PathIterator.SEG_LINETO: path.lineTo(points[0], points[1]); break;
+                case PathIterator.SEG_QUADTO: path.quadTo(points[0], points[1], points[2], points[3]); break;
+                case PathIterator.SEG_CUBICTO: path.curveTo(points[0], points[1], points[2], points[3], points[4], points[5]); break;
                 case PathIterator.SEG_CLOSE: path.close();
             }
         }
@@ -178,22 +186,22 @@ public class AWTFontFile extends FontFile {
     /**
      * Returns the max distance above the baseline that this font goes.
      */
-    public double getAscent()  { return _fontMetrics.getAscent()/1000f; }
+    public double getAscent()  { return _fontMetrics.getAscent() / 1000f; }
 
     /**
      * Returns the max distance below the baseline that this font goes.
      */
-    public double getDescent()  { return _fontMetrics.getDescent()/1000f; }
+    public double getDescent()  { return _fontMetrics.getDescent() / 1000f; }
 
     /**
      * Returns the default distance between lines for this font.
      */
-    public double getLeading()  { return _fontMetrics.getLeading()/1000f; }
+    public double getLeading()  { return _fontMetrics.getLeading() / 1000f; }
 
     /**
      * Returns the max advance of characters in this font.
      */
-    public double getMaxAdvance()  { return _fontMetrics.getMaxAdvance()/1000f; }
+    public double getMaxAdvance()  { return _fontMetrics.getMaxAdvance() / 1000f; }
 
     /**
      * Returns the default thickness that an underline should be drawn.
@@ -202,9 +210,9 @@ public class AWTFontFile extends FontFile {
     {
         // Get the AWT Font's LineMetrics for X and return underline thickness
         Graphics2D gfx = getGraphics2D();
-        FontRenderContext frc = gfx.getFontRenderContext();
-        LineMetrics lm = _awt.getLineMetrics("X", frc);
-        return lm.getUnderlineThickness()/1000f;
+        FontRenderContext fontRenderContext = gfx.getFontRenderContext();
+        LineMetrics lineMetrics = _awt.getLineMetrics("X", fontRenderContext);
+        return lineMetrics.getUnderlineThickness()/1000f;
     }
 
     /**
@@ -225,7 +233,7 @@ public class AWTFontFile extends FontFile {
     /**
      * Returns the awt font.
      */
-    public java.awt.Font getNative(double aSize)  { return _awt.deriveFont((float)aSize); }
+    public java.awt.Font getNative(double aSize)  { return _awt.deriveFont((float) aSize); }
 
     /**
      * Returns the font name of this font file.
@@ -237,12 +245,17 @@ public class AWTFontFile extends FontFile {
      */
     static synchronized Graphics2D getGraphics2D()
     {
-        if (_g2d!=null) return _g2d;
+        // If already set, just return
+        if (_g2d != null) return _g2d;
+
+        // Create/configure Graphics2D
         BufferedImage img = new BufferedImage(1,1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = img.createGraphics();
         //g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         //g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+
+        // Set, return
         return _g2d = g2d;
     }
 }

@@ -11,7 +11,7 @@ import snap.util.StringUtils;
 public class AWTFontUtils {
 
     // Fonts - caches requested font names for fast successive lookups
-    private static Map  _fontCache = new Hashtable();
+    private static Map<String,java.awt.Font>  _fontCache = new Hashtable<>();
     
     // The array of system fonts
     private static java.awt.Font[]  _fonts;
@@ -23,7 +23,7 @@ public class AWTFontUtils {
     private static String[]  _familyNames;
     
     // A list of all fonts
-    private static List<Font>  _altFonts;
+    private static Font[]  _altFonts;
     
     /**
      * Returns a Font for a given name and size.
@@ -31,10 +31,12 @@ public class AWTFontUtils {
     public static java.awt.Font getFont(String aName, double aSize)
     {
         // Get font from fonts map, if not in map, guess font for name and put in map
-        java.awt.Font font = (java.awt.Font)_fontCache.get(aName);
-        if (font==null)
+        java.awt.Font font = _fontCache.get(aName);
+        if (font == null)
             _fontCache.put(aName, font = guessFont(aName));
-        return font.deriveFont((float)aSize); // Return font adjusted for requested size
+
+        // Return font adjusted for requested size
+        return font.deriveFont((float) aSize);
     }
 
     /**
@@ -52,19 +54,19 @@ public class AWTFontUtils {
     public static synchronized String[] getFontNames()
     {
         // If fontNames has been loaded already, just return it
-        if (_fontNames!=null) return _fontNames;
+        if (_fontNames != null) return _fontNames;
 
         // Get system fonts and create list for font names and family names
-        java.awt.Font fonts[] = getFonts();
-        List fontNames = new ArrayList(fonts.length);
-        List familyNames = new Vector(fonts.length/2);
+        java.awt.Font[] fonts = getFonts();
+        List<String> fontNames = new ArrayList<>(fonts.length);
+        List<String> familyNames = new ArrayList<>(fonts.length / 2);
 
         // Iterate over fonts
-        for (int i=0; i<fonts.length; i++) {
+        for (java.awt.Font font : fonts) {
 
             // Get current loop font name and family name
-            String name = fonts[i].getFontName();
-            String family = fonts[i].getFamily();
+            String name = font.getFontName();
+            String family = font.getFamily();
 
             // skip fonts with bad names
             if (StringUtils.isEmpty(name) || StringUtils.isEmpty(family))
@@ -84,11 +86,11 @@ public class AWTFontUtils {
         }
 
         // Get String array for font names and sort
-        _fontNames = (String[])fontNames.toArray(new String[fontNames.size()]);
+        _fontNames = fontNames.toArray(new String[0]);
         Arrays.sort(_fontNames);
 
         // Get String array for family names and sort
-        _familyNames = (String[])familyNames.toArray(new String[familyNames.size()]);
+        _familyNames = familyNames.toArray(new String[0]);
         Arrays.sort(_familyNames);
 
         // Return font names
@@ -100,8 +102,9 @@ public class AWTFontUtils {
      */
     public static String[] getFamilyNames()
     {
-        if (_familyNames==null)
-            getFontNames(); // If family names haven't been loaded, call allFontNames
+        // If family names haven't been loaded, call allFontNames
+        if (_familyNames == null)
+            getFontNames();
         return _familyNames;
     }
 
@@ -111,15 +114,15 @@ public class AWTFontUtils {
     public static String[] getFontNames(String aFamilyName)
     {
         // Get system fonts and create new list for font family
-        java.awt.Font fonts[] = getFonts();
-        List family = new Vector();
+        java.awt.Font[] fonts = getFonts();
+        List<String> family = new ArrayList<>();
 
         // Iterate over fonts
-        for (int i=0; i<fonts.length; i++) {
+        for (java.awt.Font font : fonts) {
 
             // Get current loop font name and family name
-            String name = fonts[i].getFontName();
-            String fam = fonts[i].getFamily();
+            String name = font.getFontName();
+            String fam = font.getFamily();
 
             // If family name is equal to given family name, add font name
             if (fam.equals(aFamilyName) && !family.contains(name))
@@ -127,7 +130,7 @@ public class AWTFontUtils {
         }
 
         // Get font names as array and sort
-        String familyArray[] = (String[])family.toArray(new String[family.size()]);
+        String[] familyArray = family.toArray(new String[0]);
         Arrays.sort(familyArray);
 
         // Return list for font family
@@ -141,58 +144,58 @@ public class AWTFontUtils {
     {
         // Get normalized font name and array of system fonts
         String name = getFontNameNormalized(aName);
-        java.awt.Font fonts[] = getFonts();
+        java.awt.Font[] fonts = getFonts();
 
         // Iterate over system fonts and if one has same name, return it
-        for (int i=0; i<fonts.length; i++) {
-            String fontName = getFontNameNormalized(fonts[i].getFontName(Locale.ENGLISH));
+        for (java.awt.Font font : fonts) {
+            String fontName = getFontNameNormalized(font.getFontName(Locale.ENGLISH));
             if (name.equals(fontName))
-                return fonts[i];
+                return font;
         }
 
         // Declare variable for guess font, maximum matches found and minNameLengthDelta
         java.awt.Font guessFont = null;
-        int maxMatches = 0, minNameLengthDelta = 999;
+        int maxMatches = 0;
+        int minNameLengthDelta = 999;
 
         // Iterate over all fonts to see if one has similar name
-        for (int i=0, iMax=fonts.length; i<iMax; i++) {
+        for (java.awt.Font font : fonts) {
 
             // Get font name normalized and break it into pieces
-            String fName = fonts[i].getFontName(Locale.ENGLISH);
+            String fName = font.getFontName(Locale.ENGLISH);
             String fontName = getFontNameNormalized(fName);
-            String pieces[] = fontName.split(" ");
+            String[] pieces = fontName.split(" ");
 
             // Declare vars for determining relevance
             boolean substantialMatch = false;
             int matches = 0;
 
             // Iterate over pieces of current font name
-            for (int j=0, jMax=pieces.length; j<jMax; j++) {
+            for (String piece : pieces) {
 
                 // Get current piece (just skip it if zero length)
-                String piece = pieces[j];
-                if (piece.length()==0)
+                if (piece.length() == 0)
                     continue;
 
                 // If piece is found in font name, increment pieces count and possibly declare substantial match
-                if (aName.indexOf(piece)>=0) {
+                if (aName.contains(piece)) {
 
                     // Just skip out if piece is part of another piece
                     if ((piece.equalsIgnoreCase("Bold") ||
-                        piece.equalsIgnoreCase("Italic") ||
-                        piece.equalsIgnoreCase("Oblique")) &&
-                        (aName.indexOf("BoldItalic")>0 || aName.indexOf("BoldOblique")>0))
+                            piece.equalsIgnoreCase("Italic") ||
+                            piece.equalsIgnoreCase("Oblique")) &&
+                            (aName.indexOf("BoldItalic") > 0 || aName.indexOf("BoldOblique") > 0))
                         break;
 
                     // If piece isn't common descriptor, mark substantial match true
                     if (!(piece.equalsIgnoreCase("Regular") ||
-                        piece.equalsIgnoreCase("Medium") ||
-                        piece.equalsIgnoreCase("Bold") ||
-                        piece.equalsIgnoreCase("Italic") ||
-                        piece.equalsIgnoreCase("Oblique") ||
-                        piece.equalsIgnoreCase("BoldItalic") ||
-                        piece.equalsIgnoreCase("BoldOblique") ||
-                        piece.equalsIgnoreCase("Rounded")))
+                            piece.equalsIgnoreCase("Medium") ||
+                            piece.equalsIgnoreCase("Bold") ||
+                            piece.equalsIgnoreCase("Italic") ||
+                            piece.equalsIgnoreCase("Oblique") ||
+                            piece.equalsIgnoreCase("BoldItalic") ||
+                            piece.equalsIgnoreCase("BoldOblique") ||
+                            piece.equalsIgnoreCase("Rounded")))
                         substantialMatch = true;
 
                     // Increment found pieces counter
@@ -204,15 +207,15 @@ public class AWTFontUtils {
             int nameLengthDelta = Math.abs(aName.length() - fontName.length());
 
             // If we found a substantial piece and this is highest pieces/missingPieces count, cache ttfName et. al.
-            if (substantialMatch && (matches>maxMatches || (matches==maxMatches && nameLengthDelta<minNameLengthDelta))) {
-                guessFont = fonts[i];
+            if (substantialMatch && (matches > maxMatches || (matches == maxMatches && nameLengthDelta < minNameLengthDelta))) {
+                guessFont = font;
                 maxMatches = matches;
                 minNameLengthDelta = nameLengthDelta;
             }
         }
 
         // If guessFont is still null, return something
-        if (guessFont==null) {
+        if (guessFont == null) {
             guessFont = new java.awt.Font(aName, java.awt.Font.PLAIN, 1000);
             if (!name.equals(getFontNameNormalized(guessFont.getFontName())) &&
                !name.equals(getFontNameNormalized(guessFont.getFontName(Locale.ENGLISH))) &&
@@ -240,10 +243,10 @@ public class AWTFontUtils {
         aName = StringUtils.delete(aName, "PS");
 
         // Get string buffer for name
-        StringBuffer name = new StringBuffer(aName);
+        StringBuilder name = new StringBuilder(aName);
 
         // Iterate over chars
-        for (int i=0; i<name.length()-1; i++) {
+        for (int i = 0; i < name.length() - 1; i++) {
 
             // 2. Convert any non alpha-numeric characters to space
             if (!Character.isLetterOrDigit(name.charAt(i)))
@@ -255,7 +258,7 @@ public class AWTFontUtils {
                 name.insert(i+1, ' ');
 
             // Coalesce adjacent space
-            if (name.charAt(i)==' ' && name.charAt(i+1)==' ') {
+            if (name.charAt(i) == ' ' && name.charAt(i+1) == ' ') {
                 name.deleteCharAt(i+1);
                 i--;
             }
@@ -270,17 +273,22 @@ public class AWTFontUtils {
      */
     public static Font getAltFont(char aChar)
     {
+        Font[] altFonts = getAltFonts();
+
         // Iterate over alternate fonts and return first that can display
-        for (int i=0, iMax=getAltFonts().size(); i<iMax; i++) { Font font = getAltFonts().get(i);
+        for (Font font : altFonts) {
             if (font.canDisplay(aChar))
-                return font; }
-        return null; // Return null since alternate font not found
+                return font;
+        }
+
+        // Return not found
+        return null;
     }
 
     /**
      * Returns the list of suggested alternate fonts.
      */
-    public static List <Font> getAltFonts()
+    public static Font[] getAltFonts()
     {
         if (_altFonts != null) return _altFonts;
         return _altFonts = createAltFonts();
@@ -289,7 +297,7 @@ public class AWTFontUtils {
     /**
      * Returns the list of suggested alternate fonts.
      */
-    static List <Font> createAltFonts()
+    private static Font[] createAltFonts()
     {
         // Yuichi recommended:
         // Japanese, Simplified Chinese, Traditional Chinese, Korean
@@ -301,13 +309,15 @@ public class AWTFontUtils {
         //    if (f!=null && !_altFonts.contains(f)) _altFonts.add(f); }
 
         // Get all system fonts and create alt fonts list with RMFont for each system font
-        java.awt.Font fonts[] = getFonts();
-        List <Font> altFonts = new Vector(fonts.length);
-        for (int i=0; i<fonts.length; i++)
-            altFonts.add(new Font(fonts[i].getFontName(), 12));
+        java.awt.Font[] fonts = getFonts();
+        List<Font> altFonts = new ArrayList<>(fonts.length);
+        for (java.awt.Font font : fonts)
+            altFonts.add(new Font(font.getFontName(), 12));
 
-        // Make sure Symbol is the first font and return
+        // Make sure Symbol is the first font
         altFonts.add(0, new Font("Symbol", 12));
-        return altFonts;
+
+        // Return array
+        return altFonts.toArray(new Font[0]);
     }
 }
