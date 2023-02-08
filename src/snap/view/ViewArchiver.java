@@ -148,13 +148,14 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("View", View.class);
 
         // Graphics
+        cmap.put("Fill", Color.class);
         cmap.put("Color", Color.class);
         cmap.put("Font", Font.class);
         cmap.put("BevelBorder", Borders.BevelBorder.class);
         cmap.put("EtchBorder", Borders.EtchBorder.class);
         cmap.put("LineBorder", Borders.LineBorder.class);
-        cmap.put("GradientPaint", GradientPaint.class); //RMGradientFill.class
-        cmap.put("ImagePaint", ImagePaint.class); //RMImageFill.class
+        cmap.put("GradientPaint", GradientPaint.class);
+        cmap.put("ImagePaint", ImagePaint.class);
         cmap.put("BlurEffect", BlurEffect.class);
         cmap.put("ShadowEffect", ShadowEffect.class);
         cmap.put("ReflectEffect", ReflectEffect.class);
@@ -180,32 +181,6 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("text", TextView.class); //RMTextShape.class
         cmap.put("TextViewBase", TextView.class);
 
-        // Swing Component shapes
-        cmap.put("panel", SpringView.class);
-        cmap.put("jbutton", Button.class);
-        cmap.put("jcheckbox", CheckBox.class);
-        cmap.put("jcheckboxmenuitem", CheckBoxMenuItem.class);
-        cmap.put("jcombobox", ComboBox.class);
-        cmap.put("jlabel", Label.class);
-        cmap.put("jlist", ListView.class);
-        cmap.put("jmenu", Menu.class);
-        cmap.put("jmenuitem", MenuItem.class);
-        cmap.put("jprogressbar", ProgressBar.class);
-        cmap.put("jradiobutton", RadioButton.class);
-        cmap.put("jscrollpane", ScrollView.class);
-        cmap.put("jseparator", Separator.class);
-        cmap.put("jslider", Slider.class);
-        cmap.put("jspinner", Spinner.class);
-        cmap.put("jsplitpane", SplitView.class);
-        cmap.put("jtable", TableView.class);
-        cmap.put("JTableColumn", TableCol.class);
-        cmap.put("jtabbedpane", TabView.class);
-        cmap.put("jtextarea", TextView.class);
-        cmap.put("jtextfield", TextField.class);
-        cmap.put("jtogglebutton", ToggleButton.class);
-        cmap.put("jtree", TreeView.class);
-        cmap.put("TitlePane", TitleView.class);
-
         // Graphics
         cmap.put("color", Color.class);
         cmap.put("font", Font.class);
@@ -216,12 +191,6 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("shadow-effect", ShadowEffect.class);
         cmap.put("reflection-effect", ReflectEffect.class);
         cmap.put("emboss-effect", EmbossEffect.class);
-
-        // Miscellaneous component shapes
-        cmap.put("customview", View.class);
-        cmap.put("menubutton", MenuButton.class);
-        cmap.put("switchpane", SwitchView.class);
-        cmap.put("thumbwheel", ThumbWheel.class);
     }
 
     /**
