@@ -135,12 +135,12 @@ public class FileSite extends WebSite {
             file.mkdir();
 
         // Otherwise, write bytes
-        else if (aReq.getSendBytes() != null) {
-            try {
-                byte[] fileBytes = aReq.getSendBytes();
-                FileUtils.writeBytesSafely(file, fileBytes);
+        else {
+            byte[] fileBytes = aReq.getSendBytes();
+            if (fileBytes != null) {
+                try { FileUtils.writeBytesSafely(file, fileBytes); }
+                catch(IOException e) { aResp.setException(e); return; }
             }
-            catch(IOException e) { aResp.setException(e); return; }
         }
 
         // Return standard file modified time
@@ -163,7 +163,7 @@ public class FileSite extends WebSite {
     /**
      * Saves the modified time for a file to underlying file system.
      */
-    protected void setModTimeSaved(WebFile aFile, long aTime) throws Exception
+    protected void setModTimeSaved(WebFile aFile, long aTime)
     {
         File file = aFile.getJavaFile();
         file.setLastModified(aTime);
