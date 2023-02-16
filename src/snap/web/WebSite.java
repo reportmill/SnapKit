@@ -10,6 +10,7 @@ import snap.util.FileUtils;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -111,6 +112,7 @@ public abstract class WebSite {
      */
     public void setUserName(String aName)
     {
+        if (Objects.equals(aName, _userName)) return;
         firePropChange("UserName", _userName, _userName = aName);
     }
 
@@ -124,6 +126,7 @@ public abstract class WebSite {
      */
     public void setPassword(String aPassword)
     {
+        if (Objects.equals(aPassword, _password)) return;
         firePropChange("Password", _password, _password = aPassword);
     }
 
@@ -321,14 +324,17 @@ public abstract class WebSite {
 
         // Create web request
         WebRequest req = new WebRequest(aFile);
-        req.setPutBytes(aFile.getBytes());
+        byte[] fileBytes = aFile.getBytes();
+        req.setPutBytes(fileBytes);
 
         // Get response
         WebResponse resp = getResponse(req); // Used to be saveFileImpl()
-        if (resp.getCode() == WebResponse.OK) {
-            long mt = resp.getModTime();
-            if (mt == 0) System.out.println("WebSite.saveFile: Unlikely saved mod time of 0");
-            aFile.setModTime(mt);
+        int respCode = resp.getCode();
+        if (respCode == WebResponse.OK) {
+            long modTime = resp.getModTime();
+            if (modTime == 0)
+                System.out.println("WebSite.saveFile: Unlikely saved mod time of 0");
+            aFile.setModTime(modTime);
         }
 
         // If this is first save, have parent resetContent() so it will be added to parent files
@@ -399,7 +405,8 @@ public abstract class WebSite {
     protected File getJavaFile(WebURL aURL)
     {
         Object src = aURL.getSource();
-        if (src instanceof File) return (File) src;
+        if (src instanceof File)
+            return (File) src;
         java.net.URL url = aURL.getJavaURL();
         return url != null ? FileUtils.getFile(url) : null;
     }
@@ -409,11 +416,13 @@ public abstract class WebSite {
      */
     public WebURL getURL(String aPath)
     {
-        if (aPath.indexOf(':') >= 0) return WebURL.getURL(aPath);
+        if (aPath.indexOf(':') >= 0)
+            return WebURL.getURL(aPath);
         String path = PathUtils.getNormalized(aPath);
         WebURL url = getURL();
         String urls = url.getString();
-        if (url.getPath() != null) urls += '!';
+        if (url.getPath() != null)
+            urls += '!';
         return WebURL.getURL(urls + path);
     }
 
@@ -422,8 +431,9 @@ public abstract class WebSite {
      */
     public void deleteSite() throws Exception
     {
-        if (getFileForPath("/") != null)
-            getFileForPath("/").delete();
+        WebFile rootDir = getFileForPath("/");
+        if (rootDir != null)
+            rootDir.delete();
     }
 
     /**
