@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Polygon;
 import snap.geom.Pos;
-import snap.gfx.Border;
-import snap.gfx.Color;
 import snap.props.PropObject;
 import snap.util.ListUtils;
 import java.util.List;
@@ -41,10 +38,6 @@ public class Tab extends PropObject {
     private static final String Title_Prop = "Title";
     private static final String Closable_Prop = "Closable";
     private static final String Visible_Prop = "Visible";
-
-    // Constants
-    private static Border TAB_CLOSE_BORDER1 = Border.createLineBorder(Color.BLACK, .5);
-    private static Border TAB_CLOSE_BORDER2 = Border.createLineBorder(Color.BLACK, 1);
 
     /**
      * Creates a new Tab.
@@ -199,43 +192,12 @@ public class Tab extends PropObject {
      */
     protected void addCloseBoxToButton(ToggleButton tabButton)
     {
-        // Create close box polygon
-        Polygon poly = new Polygon(0, 2, 2, 0, 5, 3, 8, 0, 10, 2, 7, 5, 10, 8, 8, 10, 5, 7, 2, 10, 0, 8, 3, 5);
-
         // Create close box ShapeView
-        ShapeView closeBox = new ShapeView(poly);
-        closeBox.setBorder(TAB_CLOSE_BORDER1);
-        closeBox.setPrefSize(11, 11);
-        closeBox.addEventFilter(e -> handleTabCloseBoxEvent(e), View.MouseEnter, View.MouseExit, View.MouseRelease);
+        CloseBox closeBox = new CloseBox();
+        closeBox.addEventHandler(e -> _tabBar.removeTab(this), View.Action);
 
         // Add to FileTab
         tabButton.setGraphicAfter(closeBox);
-    }
-
-    /**
-     * Called for events on tab close button.
-     */
-    private void handleTabCloseBoxEvent(ViewEvent anEvent)
-    {
-        View closeBox = anEvent.getView();
-
-        // Handle MouseEnter
-        if (anEvent.isMouseEnter()) {
-            closeBox.setFill(Color.CRIMSON);
-            closeBox.setBorder(TAB_CLOSE_BORDER2);
-        }
-
-        // Handle MouseExit
-        else if (anEvent.isMouseExit()) {
-            closeBox.setFill(null);
-            closeBox.setBorder(TAB_CLOSE_BORDER1);
-        }
-
-        // Handle MouseRemove
-        else if (anEvent.isMouseRelease())
-            _tabBar.removeTab(this);
-
-        anEvent.consume();
     }
 
     /**
