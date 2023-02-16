@@ -13,8 +13,10 @@ public class CloseBox extends ShapeView {
 
     // Constant for close shape, Borders
     private static final Polygon CLOSE_SHAPE = new Polygon(0, 2, 2, 0, 5, 3, 8, 0, 10, 2, 7, 5, 10, 8, 8, 10, 5, 7, 2, 10, 0, 8, 3, 5);
-    private static Border CLOSE_BOX_BORDER1 = Border.createLineBorder(Color.LIGHTGRAY, .5);
-    private static Border CLOSE_BOX_BORDER2 = Border.createLineBorder(Color.BLACK, 1);
+    private static final Color DEFAULT_COLOR = null;
+    private static final Color HOVER_COLOR = Color.CRIMSON;
+    private static Border DEFAULT_BORDER = Border.createLineBorder(Color.BLACK, .5);
+    private static Border HOVER_BORDER = Border.createLineBorder(Color.BLACK, 1);
     private static EventListener  _handleCloseBoxMouseEvent = e -> handleCloseBoxMouseEvent(e);
 
     /**
@@ -28,8 +30,8 @@ public class CloseBox extends ShapeView {
 
         setPrefSize(11, 11);
         setFillSize(true);
-        setFill(Color.WHITE);
-        setBorder(CLOSE_BOX_BORDER1);
+        setFill(DEFAULT_COLOR);
+        setBorder(DEFAULT_BORDER);
         addEventFilter(_handleCloseBoxMouseEvent, MouseEnter, MouseExit, MouseRelease);
     }
 
@@ -43,14 +45,14 @@ public class CloseBox extends ShapeView {
 
         // Handle MouseEnter
         if (anEvent.isMouseEnter()) {
-            closeBox.setFill(Color.CRIMSON);
-            closeBox.setBorder(CLOSE_BOX_BORDER2);
+            closeBox.setFill(HOVER_COLOR);
+            closeBox.setBorder(HOVER_BORDER);
         }
 
         // Handle MouseExit
         else if (anEvent.isMouseExit()) {
-            closeBox.setFill(Color.WHITE);
-            closeBox.setBorder(CLOSE_BOX_BORDER1);
+            closeBox.setFill(DEFAULT_COLOR);
+            closeBox.setBorder(DEFAULT_BORDER);
         }
 
         // Handle MouseRelease
