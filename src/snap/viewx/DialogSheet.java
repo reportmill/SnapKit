@@ -15,7 +15,7 @@ import snap.view.*;
 public class DialogSheet extends DialogBox {
 
     // The parent view hosting the SheetDialogBox
-    private ChildView  _hostView;
+    private ParentView  _hostView;
 
     // The BoxView to hold/clip the UI
     private BoxView  _sheetView;
@@ -34,7 +34,7 @@ public class DialogSheet extends DialogBox {
     protected boolean showPanel(View aView)
     {
         // Get given view as HostView
-        _hostView = aView instanceof ChildView ? (ChildView) aView : null;
+        _hostView = aView instanceof ParentView ? (ParentView) aView : null;
         if (_hostView == null)
             return super.showPanel(aView);
 
@@ -45,7 +45,7 @@ public class DialogSheet extends DialogBox {
 
         // Get SheetView and add to Host
         View sheetView = getUI();
-        _hostView.addChild(sheetView);
+        ViewUtils.addChild(_hostView, sheetView);
 
         // Configure UI to animate in and start
         double transY = sheetView.getHeight();
@@ -78,7 +78,7 @@ public class DialogSheet extends DialogBox {
     private void hideAnimDone()
     {
         // Remove UI, reset everything pickable and notify of close
-        _hostView.removeChild(_sheetView);
+        ViewUtils.removeChild(_hostView, _sheetView);
 
         // Reset HostView.Children pickable
         for (View child : _hostChildren)
