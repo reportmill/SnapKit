@@ -7,6 +7,7 @@ import snap.geom.Pos;
 import snap.util.Selectable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * This class manages and displays a list of tabs.
@@ -18,6 +19,9 @@ public class TabBar extends ParentView implements Selectable<Tab> {
 
     // Whether it is acceptable for tool bar to have no button selected
     private boolean  _allowEmptySelection;
+
+    // A handler to be called when a tab close box is triggered
+    private BiConsumer<ViewEvent,Tab>  _tabCloseActionHandler;
 
     // The tab min size
     private double  _tabMinWidth;
@@ -167,6 +171,19 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     {
         if (aValue == _allowEmptySelection) return;
         firePropChange(AllowEmptySelection_Prop, _allowEmptySelection, _allowEmptySelection = aValue);
+    }
+
+    /**
+     * Returns the tab close action handler, called when a tab button close box is triggered.
+     */
+    public BiConsumer<ViewEvent,Tab> getTabCloseActionHandler()  { return _tabCloseActionHandler; }
+
+    /**
+     * Sets the tab close action handler, called when a tab button close box is triggered.
+     */
+    public void setTabCloseActionHandler(BiConsumer<ViewEvent,Tab> eventListener)
+    {
+        _tabCloseActionHandler = eventListener;
     }
 
     /**

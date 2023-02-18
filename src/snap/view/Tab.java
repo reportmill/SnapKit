@@ -7,6 +7,7 @@ import snap.props.PropObject;
 import snap.util.ListUtils;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 /**
  * A class to represent a TabView tab.
@@ -194,10 +195,25 @@ public class Tab extends PropObject {
     {
         // Create close box ShapeView
         CloseBox closeBox = new CloseBox();
-        closeBox.addEventHandler(e -> _tabBar.removeTab(this), View.Action);
+        closeBox.addEventHandler(e -> tabCloseBoxDidFireAction(e), View.Action);
 
         // Add to FileTab
         tabButton.setGraphicAfter(closeBox);
+    }
+
+    /**
+     * Called when tab button close box is triggered.
+     */
+    protected void tabCloseBoxDidFireAction(ViewEvent anEvent)
+    {
+        // Forward to TabBar.TabCloseActionHandler
+        BiConsumer<ViewEvent,Tab> closeActionHandler = _tabBar.getTabCloseActionHandler();
+        if (closeActionHandler != null)
+            closeActionHandler.accept(anEvent, this);
+
+        // If event not consumed, remove tab
+        if (!anEvent.isConsumed())
+            _tabBar.removeTab(this);
     }
 
     /**
