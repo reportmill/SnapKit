@@ -2,11 +2,11 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import java.text.DecimalFormat;
 import java.util.*;
-
 import snap.geom.*;
 import snap.gfx.*;
+import snap.props.PropChangeListener;
+import snap.util.KeyChain;
 import snap.web.WebFile;
 
 /**
@@ -383,6 +383,22 @@ public class ViewUtils {
     }
 
     /**
+     * Binds a view property to another view prop with given expression.
+     */
+    public static void bindExpr(View aView1, String aProp, View aView2, String aProp2, String aKeyChainExpr)
+    {
+        // Get KeyChain and PropChangeListener for expression
+        KeyChain keyChain = KeyChain.getKeyChain(aKeyChainExpr);
+        PropChangeListener propChangeListener = pc -> {
+            Object value = KeyChain.getValue(aView1, keyChain);
+            aView2.setPropValue(aProp2, value);
+        };
+
+        // Add PropChangeListener for prop
+        aView1.addPropChangeListener(propChangeListener, aProp);
+    }
+
+    /**
      * Returns the image for a file.
      */
     public static Image getFileIconImage(WebFile aFile)
@@ -563,53 +579,6 @@ public class ViewUtils {
      * Beep.
      */
     public static void beep()  { GFXEnv.getEnv().beep(); }
-
-    /**
-     * Prints a View hierarchy.
-     */
-    public static void print(View aView, int aLevel)
-    {
-        String indent = ""; for (int i=0;i<aLevel;i++) indent += "  ";
-        System.out.printf("%s%s %s [%s %s %s %s]\n", indent, aView.getClass().getSimpleName(), aView.getName(),
-            fmt(aView.getX()), fmt(aView.getY()), fmt(aView.getWidth()), fmt(aView.getHeight()));
-        if (aView instanceof ParentView) { ParentView par = (ParentView)aView;
-            for (View child : par.getChildren()) print(child, aLevel+1);
-        }
-    }
-
-    /**
-     * Copies a list of menu items.
-     */
-    public static List <MenuItem> copyMenuItems(List <MenuItem> theItems)
-    {
-        List<MenuItem> copy = new ArrayList<>();
-        for (MenuItem mi : theItems)
-            copy.add(copyMenuItem(mi));
-        return copy;
-    }
-
-    /**
-     * Copies a menu item.
-     */
-    public static MenuItem copyMenuItem(MenuItem anItem)
-    {
-        MenuItem mi = null;
-        //if (anItem instanceof SeparatorMenuItem) mi = new SeparatorMenuItem(); else
-        if (anItem instanceof Menu) { Menu menu = (Menu) anItem;
-            Menu menu2 = new Menu(); mi = menu2;
-            List<MenuItem> citems = copyMenuItems(menu.getItems());
-            for (MenuItem i : citems) menu2.addItem(i);
-        }
-        else mi = new MenuItem();
-        mi.setText(anItem.getText());
-        mi.setName(anItem.getName());
-        mi.setShortcut(anItem.getShortcut());
-        return mi;
-    }
-
-    // Used for print
-    private static String fmt(double aValue)  { return _fmt.format(aValue); }
-    private static DecimalFormat _fmt = new DecimalFormat("0.##");
 
     /**
      * Silly feature to make any view draggable.
