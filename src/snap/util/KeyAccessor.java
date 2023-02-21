@@ -1,4 +1,8 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.util;
+import snap.props.PropObject;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -43,7 +47,7 @@ class KeyAccessor {
     protected static boolean  _allowFields;
 
     // Some constants
-    public enum Type { Map, Method, Field, Enum, Unknown }
+    public enum Type { Map, PropObject, Method, Field, Enum, Unknown }
 
     /**
      * Creates a new getter for given object and key (caches type).
@@ -60,6 +64,12 @@ class KeyAccessor {
         // If object is Map, return value for key
         if (anObj instanceof Map) {
             _type = Type.Map;
+            return;
+        }
+
+        // Handle PropObject
+        if (anObj instanceof PropObject) {
+            _type = Type.PropObject;
             return;
         }
 
@@ -104,6 +114,9 @@ class KeyAccessor {
                     value = ((Map<?, ?>) anObj).get(_key);
                 return value;
             }
+
+            // Handle PropObject
+            case PropObject: return ((PropObject) anObj).getPropValue(_rawKey);
 
             // Handle TYPE_METHOD
             case Method:
@@ -211,9 +224,16 @@ class KeyAccessor {
      */
     public void set(Object anObj, Object aValue) throws Exception
     {
+        // Handle PropObject
+        if (_type == Type.PropObject) {
+            ((PropObject) anObj).setPropValue(_rawKey, aValue);
+            return;
+        }
+
         // Get set method
         Method method = getSetMethod();
-        if (method == null) throw new NoSuchMethodException(_class.getName() + '.' + "set" + _key);
+        if (method == null)
+            throw new NoSuchMethodException(_class.getName() + '.' + "set" + _key);
         Class<?> methodClass = method.getParameterTypes()[0];
 
         // Get Value (if list, use first item)
