@@ -2911,6 +2911,21 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Cursor_Prop: return getCursor();
             case Clip_Prop: return getClip();
 
+            // Disabled, Visible, Pickable, Paintable
+            case Disabled_Prop: return isDisabled();
+            case Visible_Prop: return isVisible();
+            case Pickable_Prop: return isPickable();
+            case Paintable_Prop: return isPaintable();
+
+            // Focusable, FocusWhenPressed, Focused
+            case Focusable_Prop: return isFocusable();
+            case FocusWhenPressed_Prop: return isFocusWhenPressed();
+            case Focused_Prop: return isFocused();
+
+            // Parent, Showing
+            case Parent_Prop: return getParent();
+            case Showing_Prop: return isShowing();
+
             // Items, SelItem, SelIndex
             case Selectable.Items_Prop: return ((Selectable<?>) this).getItems();
             case Selectable.SelItem_Prop: return ((Selectable<?>) this).getSelItem();
@@ -2985,6 +3000,21 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case ToolTip_Prop: setToolTip(Convert.stringValue(aValue)); break;
             case Cursor_Prop: setCursor((Cursor) aValue); break;
             case Clip_Prop: setClip((Shape) aValue); break;
+
+            // Disabled, Visible, Pickable, Paintable
+            case Disabled_Prop: setDisabled(Convert.boolValue(aValue)); break;
+            case Visible_Prop: setVisible(Convert.boolValue(aValue)); break;
+            case Pickable_Prop: setPickable(Convert.boolValue(aValue)); break;
+            case Paintable_Prop: setPaintable(Convert.boolValue(aValue)); break;
+
+            // Focusable, FocusWhenPressed, Focused
+            case Focusable_Prop: setFocusable(Convert.boolValue(aValue)); break;
+            case FocusWhenPressed_Prop: setFocusWhenPressed(Convert.boolValue(aValue)); break;
+            case Focused_Prop: setFocused(Convert.boolValue(aValue)); break;
+
+            // Parent, Showing
+            case Parent_Prop: setParent((ParentView) aValue); break;
+            case Showing_Prop: setShowing(Convert.boolValue(aValue)); break;
 
             // Items, SelItem, SelIndex
             case Selectable.Items_Prop: Selectable.setItems((Selectable<?>) this, aValue); break;
