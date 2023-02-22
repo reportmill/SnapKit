@@ -128,4 +128,134 @@ public class ViewAnimUtils {
             anim.play();
         }
     }
+
+    /**
+     * Adds a item with animation.
+     */
+    protected static void addSplitViewItemWithAnim(SplitView aSplitView, View aView, double aSize, int anIndex)
+    {
+        // Add view as item
+        aSplitView.addItem(aView, anIndex);
+
+        // Get new Divider for view
+        Divider div = anIndex == 0 ? aSplitView.getDivider(0) : aSplitView.getDivider(anIndex - 1);
+
+        // If first view, configure anim for given size as Location
+        if (anIndex == 0) {
+            div.setLocation(0);
+            div.getAnimCleared(500).setValue(Divider.Location_Prop, 1d, aSize).play();
+        }
+
+        // If successive view, configure anim for given size as Remainder
+        else {
+            div.setRemainder(1);
+            div.getAnimCleared(500).setValue(Divider.Remainder_Prop, 1d, aSize).play();
+        }
+    }
+
+    /**
+     * Removes a item with animation.
+     */
+    protected static void removeSplitViewItemWithAnim(SplitView aSplitView, View aView)
+    {
+        // Get index, divider and Location/Remainder for given view
+        int index = aSplitView.indexOfItem(aView);
+        Divider div = index == 0 ? aSplitView.getDivider(0) : aSplitView.getDivider(index - 1);
+        double size = aSplitView.isVertical() ? aView.getHeight() : aView.getWidth();
+
+        // If first item, set Location animated
+        if (index == 0) {
+            div.setLocation(size);
+            ViewAnim anim = div.getAnim(0).clear();
+            anim.getAnim(500).setValue(Divider.Location_Prop, size, 1d);
+            anim.setOnFinish(() -> aSplitView.removeItem(aView)).needsFinish().play();
+        }
+
+        // If not first item, set Remainder animated
+        else {
+            div.setRemainder(size);
+            ViewAnim anim = div.getAnim(0).clear();
+            anim.getAnim(500).setValue(Divider.Remainder_Prop, size, 1d);
+            anim.setOnFinish(() -> aSplitView.removeItem(aView)).needsFinish().play();
+        }
+    }
+
+    /**
+     * Sets a child visible with animation.
+     */
+    protected static void setSplitViewItemVisibleWithAnim(SplitView aSplitView, View aView, boolean aValue)
+    {
+        // If already set, just return
+        if (aValue == aView.isVisible()) return;
+
+        // Get index, divider and size
+        int index = aSplitView.indexOfItem(aView), time = 500;
+        Divider div = index == 0 ? aSplitView.getDivider(0) : aSplitView.getDivider(index - 1);
+        double size = aSplitView.isVertical() ? aView.getHeight() : aView.getWidth();
+
+        // Clear running anims
+        aView.getAnimCleared(0);
+        div.getAnimCleared(0);
+
+        // Handle show item
+        if (aValue) {
+
+            // If first item, set Location
+            double dsize = div.getSpan();
+            if (index == 0) {
+                div.setLocation(0);
+                div.getAnim(time).setValue(Divider.Location_Prop, dsize, size).play();
+            }
+
+            // If not first item, set Remainder
+            else {
+                div.setRemainder(1);
+                div.getAnim(time).setValue(Divider.Remainder_Prop, dsize, size).play();
+            }
+
+            // Show view and divider
+            aView.setVisible(true);
+            aView.setOpacity(0);
+            aView.getAnim(time).setOpacity(1).play();
+            div.setOpacity(0);
+            div.getAnim(time).setOpacity(1).play();
+        }
+
+        // Handle hide item
+        else {
+
+            // If first item, set location
+            if (index == 0) {
+                div.setLocation(size);
+                div.getAnim(time).setValue(Divider.Location_Prop, size, 1d).play();
+            }
+
+            // If non-first item, set remainder
+            else {
+                div.setRemainder(size);
+                div.getAnim(time).setValue(Divider.Remainder_Prop, size, 1d).play();
+            }
+
+            // Clear
+            aView.setOpacity(1);
+            div.setOpacity(1);
+            div.getAnim(time).setOpacity(0).play();
+
+            // Configure anim
+            aView.getAnim(time).setOpacity(0).setOnFinish(() -> setItemVisibleWithAnimDone(aSplitView, aView, div, size)).play();
+        }
+    }
+
+    /**
+     * Called when setItemVisibleWithAnim is done.
+     */
+    private static void setItemVisibleWithAnimDone(SplitView aSplitView, View aView,Divider aDiv, double size)
+    {
+        aView.setVisible(false);
+        aView.setOpacity(1);
+        aDiv.setOpacity(1);
+        if (aSplitView.isVertical())
+            aView.setHeight(size);
+        else aView.setWidth(size);
+    }
 }
