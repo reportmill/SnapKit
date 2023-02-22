@@ -4,9 +4,11 @@
 package snap.view;
 import snap.geom.Insets;
 import snap.geom.Pos;
+import snap.util.ListUtils;
 import snap.util.Selectable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -312,20 +314,78 @@ public class TabBar extends ParentView implements Selectable<Tab> {
     }
 
     /**
-     * Override to suppress so tab buttons don't fireAction to Owner.
+     * Override to search Tabs.Content not showing.
      */
     @Override
-    protected void setOwnerChildren(ViewOwner anOwner)  { }
+    public View getChildForName(String aName)
+    {
+        // Do normal version (just return if null)
+        View child = super.getChildForName(aName);
+        if (child != null)
+            return child;
+
+        // Search Tabs.Content for name, return if found
+        List<Tab> tabs = getTabs();
+        for (Tab tab : tabs) {
+
+            // If content not set or not showing, just skip
+            if (!tab.isContentSet())
+                continue;
+            View tabContent = tab.getContent();
+            if (tabContent.isShowing())
+                continue;
+
+            // If content has given name, return it
+            if (Objects.equals(aName, tabContent.getName()))
+                return tabContent;
+
+            // If content has child with given name, return it
+            if (tabContent instanceof ParentView) {
+                ParentView tabContentAsParent = (ParentView) tabContent;
+                child = tabContentAsParent.getChildForName(aName);
+                if (child != null)
+                    return child;
+            }
+        }
+
+        // Return not found
+        return null;
+    }
 
     /**
      * A RowView to stretch buttons if configured like actual tabs.
      */
     private class TabRowView extends RowView {
+
+        /**
+         * Override to extend classic Tab button heights.
+         */
         protected void layoutImpl()
         {
             super.layoutImpl();
-            if (getTabCount() > 0 && getTabButton(0).getPosition() == Pos.TOP_CENTER)
-                getTabs().forEach(tab -> tab.getButton().setHeight(tab.getButton().getHeight() + 15));
+
+            // If class tab buttons, extend height
+            boolean isClassicTabButtons = getTabCount() > 0 && getTabButton(0).getPosition() == Pos.TOP_CENTER;
+            if (isClassicTabButtons) {
+                List<Tab> tabs = getTabs();
+                tabs.forEach(tab -> tab.getButton().setHeight(tab.getButton().getHeight() + 15));
+            }
+        }
+
+        /**
+         * Override to not send to Tab.Buttons.
+         */
+        @Override
+        protected void setOwnerChildren(ViewOwner anOwner)
+        {
+            View[] children = getChildren();
+            List<Tab> tabs = getTabs();
+
+            for (View child : children) {
+                boolean isTabButton = ListUtils.findMatch(tabs, tab -> tab.getButton() == child) != null;
+                if (!isTabButton)
+                    child.setOwner(anOwner);
+            }
         }
     }
 }

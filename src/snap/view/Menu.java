@@ -112,25 +112,6 @@ public class Menu extends MenuItem {
     }
 
     /**
-     * Override to include child menu items.
-     */
-    public View getChildForName(String aName)
-    {
-        // Do normal version (just return if null)
-        View child = super.getChildForName(aName);
-        if (child != null)
-            return child;
-
-        // Search MenuItems for name, return if found
-        for (View menuItem : _items)
-            if (SnapUtils.equals(aName, menuItem.getName()))
-                return menuItem;
-
-        // Return null since not found
-        return null;
-    }
-
-    /**
      * Returns a popup node for this menu.
      */
     public PopupWindow getPopup()
@@ -264,6 +245,26 @@ public class Menu extends MenuItem {
     }
 
     /**
+     * Override to include child menu items.
+     */
+    @Override
+    public View getChildForName(String aName)
+    {
+        // Do normal version (just return if null)
+        View child = super.getChildForName(aName);
+        if (child != null)
+            return child;
+
+        // Search MenuItems for name, return if found
+        child = ListUtils.findMatch(_items, item -> Objects.equals(aName, item.getName()));
+        if (child != null)
+            return child;
+
+        // Return not found
+        return null;
+    }
+
+    /**
      * Override to send to items.
      */
     @Override
@@ -302,7 +303,7 @@ public class Menu extends MenuItem {
         // Iterate over child elements and unarchive MenuItems
         for (int i = 0, iMax = anElement.size(); i < iMax; i++) {
             XMLElement childXML = anElement.get(i);
-            Class cls = anArchiver.getClass(childXML.getName());
+            Class<?> cls = anArchiver.getClass(childXML.getName());
             if (cls != null && MenuItem.class.isAssignableFrom(cls)) {
                 MenuItem mi = (MenuItem) anArchiver.fromXML(childXML, this);
                 addItem(mi);

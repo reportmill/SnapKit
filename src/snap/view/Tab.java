@@ -123,6 +123,11 @@ public class Tab extends PropObject {
     }
 
     /**
+     * Returns whether content is set.
+     */
+    public boolean isContentSet()  { return _content != null; }
+
+    /**
      * Returns the content.
      */
     public View getContent()

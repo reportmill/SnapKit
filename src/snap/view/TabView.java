@@ -27,9 +27,6 @@ public class TabView extends ParentView implements Selectable<Tab> {
     // The view to hold content
     private BoxView  _contentBox;
 
-    // A child view holding Tab.Content views that aren't currently showing, so getView(name) works
-    private RowView  _hiddenKids;
-
     // Constants for properties
     public static final String TabSide_Prop = "TabSide";
     public static final String Classic_Prop = "Classic";
@@ -68,13 +65,8 @@ public class TabView extends ParentView implements Selectable<Tab> {
         _contentBox.setGrowWidth(true);
         _contentBox.setGrowHeight(true);
 
-        // Create/configure HiddenKids
-        _hiddenKids = new RowView();
-        _hiddenKids.setManaged(false);
-        _hiddenKids.setVisible(false);
-
         // Add shelf and content cradle, enable action event
-        setChildren(_tabBar, _contentBox, _hiddenKids);
+        setChildren(_tabBar, _contentBox);
     }
 
     /**
@@ -223,13 +215,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
         if (aView == getContent()) return;
 
         // Set content
-        View old = getContent();
         _contentBox.setContent(aView);
-
-        // If old is a tab content, add back to hidden kids
-        boolean isKid = _tabBar.getTabs().stream().anyMatch(tab -> tab.getContentOwner() == null && tab.getContent() == old);
-        if (old != null && isKid)
-            _hiddenKids.addChild(old);
     }
 
     /**
@@ -291,20 +277,6 @@ public class TabView extends ParentView implements Selectable<Tab> {
             setContent(content);
             firePropChange(SelIndex_Prop, aPC.getOldValue(), aPC.getNewValue());
         }
-
-        // Handle Tabs: If added/removed tab doesn't have ContentOwner, add/remove Content from HiddenKids
-        else if (propName == TabBar.Tabs_Prop) {
-            if (aPC.getNewValue() instanceof Tab) {
-                Tab newTab = (Tab) aPC.getNewValue();
-                if (newTab.getContentOwner() == null && newTab.getContent() != null)
-                    _hiddenKids.addChild(newTab.getContent());
-            }
-            if (aPC.getOldValue() instanceof Tab) {
-                Tab oldTab = (Tab) aPC.getOldValue();
-                if (oldTab.getContentOwner() == null && oldTab.getContent() != null)
-                    _hiddenKids.removeChild(oldTab.getContent());
-            }
-        }
     }
 
     /**
@@ -333,8 +305,12 @@ public class TabView extends ParentView implements Selectable<Tab> {
     @Override
     protected void setOwnerChildren(ViewOwner anOwner)
     {
-        _contentBox.setOwner(anOwner);
-        _hiddenKids.setOwner(anOwner);
+        View[] children = getChildren();
+        for (View child : children) {
+            if (child == _tabBar)
+                _tabBar.setOwnerChildren(anOwner);
+            else child.setOwner(anOwner);
+        }
     }
 
     /**
