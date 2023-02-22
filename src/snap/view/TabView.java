@@ -21,6 +21,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
     // Whether tabView should render in classic style
     private boolean  _classic;
 
+    // Whether tab changes should animate
+    private boolean  _animateTabChange;
+
     // The TabBar
     private TabBar  _tabBar;
 
@@ -33,6 +36,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
     // Constants for properties
     public static final String TabSide_Prop = "TabSide";
     public static final String Classic_Prop = "Classic";
+    public static final String AnimateTabChange_Prop = "AnimateTabChange";
 
     // The default TabBar fill
     private static Color c1 = new Color("#d6d6d6");
@@ -103,7 +107,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Add child at right index
         if (aSide == Side.BOTTOM || aSide == Side.RIGHT)
-            addChild(tabBarView, 1);
+            addChild(tabBarView, 2);
         else addChild(tabBarView, 0);
 
         // Set, fire prop change
@@ -189,6 +193,20 @@ public class TabView extends ParentView implements Selectable<Tab> {
     public void addTab(String aTitle, View aView)  { _tabBar.addTab(aTitle, aView); }
 
     /**
+     * Returns whether to animate tab changes.
+     */
+    public boolean isAnimateTabChange()  { return _animateTabChange; }
+
+    /**
+     * Sets whether to animate tab changes.
+     */
+    public void setAnimateTabChange(boolean aValue)
+    {
+        if (aValue == _animateTabChange) return;
+        firePropChange(AnimateTabChange_Prop, _animateTabChange, _animateTabChange = aValue);
+    }
+
+    /**
      * Returns the tap pane's selected index.
      */
     public int getSelIndex()  { return _tabBar.getSelIndex(); }
@@ -221,8 +239,12 @@ public class TabView extends ParentView implements Selectable<Tab> {
         // If already set, just return
         if (aView == getContent()) return;
 
-        // Set content
-        _contentBox.setContent(aView);
+        // If animating (and showing), setContentWithAnim
+        if (isAnimateTabChange() && isShowing())
+            _contentBox.setContentWithAnim(aView);
+
+        // Otherwise, do normal version
+        else _contentBox.setContent(aView);
 
         // Update Separator
         _separator.setVisible(aView != null);

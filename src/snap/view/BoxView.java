@@ -191,22 +191,30 @@ public class BoxView extends ParentView implements ViewHost {
         View content = getContent();
         if (aView == content) return;
 
+        // Set PrefSize to current size
+        double viewW = getWidth();
+        double viewH = getHeight();
+        setPrefSize(viewW, viewH);
+        setClipToBounds(true);
+
         // Get anim - finished/cleared in case it was running
         ViewAnim anim = getAnim(0).finish().clear();
         anim.setOnFinish(() -> setContentAnimDone(aView));
+
+        // Get end anim
         ViewAnim anim500 = anim.getAnim(500);
 
         // Handle showing: Add view, config anim and play
         if (aView != null) {
             setContent(aView);
-            double newH = getBestHeight(-1);
-            anim500.setPrefHeight(newH);
+            double newW = aView.getBestWidth(-1);
+            double newH = aView.getBestHeight(-1);
+            anim500.setPrefSize(newW, newH);
         }
 
         // Handle hiding: Config anim and play
         else {
-            anim.setPrefHeight(0);
-            anim500.setOnFinish(() -> setContentAnimDone(aView));
+            anim500.setPrefSize(0, 0);
         }
 
         // Start anim
@@ -220,7 +228,7 @@ public class BoxView extends ParentView implements ViewHost {
     {
         if (aView == null)
             setContent(null);
-        setPrefHeight(-1);
+        setPrefSize(-1, -1);
     }
 
     /**
