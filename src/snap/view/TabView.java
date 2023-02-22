@@ -27,6 +27,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
     // The view to hold content
     private BoxView  _contentBox;
 
+    // The separator between toolbar and content
+    private RectView  _separator;
+
     // Constants for properties
     public static final String TabSide_Prop = "TabSide";
     public static final String Classic_Prop = "Classic";
@@ -58,15 +61,19 @@ public class TabView extends ParentView implements Selectable<Tab> {
         _tabBar.addPropChangeListener(pc -> tabBarDidPropChange(pc));
         _tabBar.addEventHandler(e -> tabBarDidFireAction(e), Action);
 
+        // Create separator
+        _separator = new RectView();
+        _separator.setFill(Color.GRAY8);
+        _separator.setPrefSize(1, 1);
+
         // Create and configure content cradle
         _contentBox = new BoxView(null, true, true);
         _contentBox.setFill(ViewUtils.getBackFill());
-        _contentBox.setBorder(Color.LIGHTGRAY, 1);
         _contentBox.setGrowWidth(true);
         _contentBox.setGrowHeight(true);
 
         // Add shelf and content cradle, enable action event
-        setChildren(_tabBar, _contentBox);
+        setChildren(_tabBar, _separator, _contentBox);
     }
 
     /**
@@ -216,6 +223,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
 
         // Set content
         _contentBox.setContent(aView);
+
+        // Update Separator
+        _separator.setVisible(aView != null);
     }
 
     /**
@@ -259,7 +269,8 @@ public class TabView extends ParentView implements Selectable<Tab> {
         if (tabButton != null && tabButton.getPosition() == Pos.TOP_CENTER) {
             aPntr.setPaint(_contentBox.getFill());
             double rectX = _tabBar.getInsetsAll().left + tabButton.getX() + 1;
-            aPntr.fillRect(rectX, _contentBox.getY(),tabButton.getWidth() - 2,1);
+            double rectY = _separator.getY();
+            aPntr.fillRect(rectX, rectY,tabButton.getWidth() - 2,1);
         }
     }
 

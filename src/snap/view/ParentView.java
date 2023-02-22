@@ -178,11 +178,13 @@ public class ParentView extends View {
                 return child;
 
             // If child is ParentView, recurse
-            if (child instanceof ParentView && child.getOwner() == getOwner()) {
-                ParentView parent = (ParentView) child;
-                View childForName = parent.getChildForName(aName);
-                if (childForName != null)
-                    return childForName;
+            if (child instanceof ParentView) {
+                if (child.getOwner() == getOwner() || child.getOwner() == null) {
+                    ParentView parent = (ParentView) child;
+                    View childForName = parent.getChildForName(aName);
+                    if (childForName != null)
+                        return childForName;
+                }
             }
         }
 

@@ -239,15 +239,20 @@ public class ViewOwner extends PropObject {
             return (View) anObj;
 
         // If object is String, try to find in UI hierarchy as name
-        if (anObj instanceof String) { String name = (String) anObj;
+        if (anObj instanceof String) {
 
-            // Look for view in UI hierarchy
-            View view = getUI();
-            if (name.equals(view.getName()))
-                return view;
-            View childView = view instanceof ParentView ? ((ParentView) view).getChildForName(name) : null;
-            if (childView != null)
-                return childView;
+            // If given name is UI name, return UI
+            String name = (String) anObj;
+            View uiView = getUI();
+            if (name.equals(uiView.getName()))
+                return uiView;
+
+            // If UI is ParentView, forward to ParentView.getChildForName()
+            if (uiView instanceof ParentView) {
+                View childView = ((ParentView) uiView).getChildForName(name);
+                if (childView != null)
+                    return childView;
+            }
         }
 
         // Return not found
@@ -346,16 +351,16 @@ public class ViewOwner extends PropObject {
     /**
      * Returns the items for a given name or UI view.
      */
-    public List getViewItems(Object anObj)
+    public List<?> getViewItems(Object anObj)
     {
-        Selectable selectable = getView(anObj, Selectable.class);
+        Selectable<?> selectable = getView(anObj, Selectable.class);
         return selectable.getItems();
     }
 
     /**
      * Sets the items for a given name or UI view.
      */
-    public void setViewItems(Object anObj, List theItems)
+    public void setViewItems(Object anObj, List<?> theItems)
     {
         Selectable selectable = getView(anObj, Selectable.class);
         selectable.setItems(theItems);
@@ -636,14 +641,12 @@ public class ViewOwner extends PropObject {
     {
         // Get KeyCombo
         KeyCombo keyCombo = KeyCombo.get(aKey);
-        if (keyCombo == null)
-            return;
 
         // If first, do init
         if (_keyFilters.size() == 0) {
             View ui = getUI();
             ui.addEventFilter(e -> checkKeyActions(e, true), KeyPress);
-            _keyFilters = new HashMap();
+            _keyFilters = new HashMap<>();
         }
 
         // Add KeyCombo
@@ -658,14 +661,12 @@ public class ViewOwner extends PropObject {
     {
         // Get KeyCombo
         KeyCombo keyCombo = KeyCombo.get(aKey);
-        if (keyCombo == null)
-            return;
 
         // If first, do init
         if (_keyHandlers.size() == 0) {
             View ui = getUI();
             ui.addEventHandler(e -> checkKeyActions(e, false), KeyPress);
-            _keyHandlers = new HashMap();
+            _keyHandlers = new HashMap<>();
         }
 
         // Add KeyCombo
