@@ -40,7 +40,7 @@ public class SplitView extends ParentView implements ViewHost {
     public static final int DEFAULT_DIVIDER_SPAN = Divider.DEFAULT_SPAN;
 
     // Constant for props that all SplitView dividers share with prototype returned by getDivider()
-    private static String[] SHARED_DIVIDER_PROPS = { Fill_Prop, Border_Prop, Pickable_Prop, Divider.Span_Prop, Divider.ClickSpan_Prop };
+    private static String[] SHARED_DIVIDER_PROPS = { Fill_Prop, Border_Prop, Paintable_Prop, Divider.Span_Prop, Divider.ClickSpan_Prop };
 
 
     /**
