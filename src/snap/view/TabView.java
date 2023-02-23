@@ -96,6 +96,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
         // Remove TabBar
         View tabBarView = _tabBar.getParent() == this ? _tabBar : _tabBar.getParent();
         removeChild(tabBarView);
+        removeChild(_separator);
 
         // Get new view to add (need to wrap/rotate tabBar if side is left/right)
         tabBarView = _tabBar;
@@ -107,9 +108,14 @@ public class TabView extends ParentView implements Selectable<Tab> {
         }
 
         // Add child at right index
-        if (aSide == Side.BOTTOM || aSide == Side.RIGHT)
-            addChild(tabBarView, 2);
-        else addChild(tabBarView, 0);
+        if (aSide == Side.BOTTOM || aSide == Side.RIGHT) {
+            addChild(_separator);
+            addChild(tabBarView);
+        }
+        else {
+            addChild(tabBarView, 0);
+            addChild(_separator, 1);
+        }
 
         // Set, fire prop change
         firePropChange(TabSide_Prop, _tabSide, _tabSide = aSide);
