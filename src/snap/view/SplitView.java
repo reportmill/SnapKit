@@ -497,14 +497,14 @@ public class SplitView extends ParentView implements ViewHost {
         // Handle Vertical: Iterate over items and make sure PrefHeight is set
         if (isVertical()) {
             for (View item : items)
-                if (!item.isPrefHeightSet())
+                if (!item.isPrefHeightSet() && item.isVisible())
                     item.setPrefHeight(item.getHeight());
         }
 
         // Handle Vertical: Iterate over items and make sure PrefWidth is set
         else {
             for (View item : items)
-                if (!item.isPrefWidthSet())
+                if (!item.isPrefWidthSet() && item.isVisible())
                     item.setPrefWidth(item.getWidth());
         }
     }

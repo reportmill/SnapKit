@@ -16,7 +16,15 @@ public class RowView extends ChildView {
     
     // Constants for properties
     public static final String FillHeight_Prop = "FillHeight";
-    
+
+    /**
+     * Constructor.
+     */
+    public RowView()
+    {
+        super();
+    }
+
     /**
      * Returns whether children will be resized to fill height.
      */

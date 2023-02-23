@@ -19,7 +19,15 @@ public class ColView extends ChildView {
 
     // Constants for property defaults
     private static final boolean DEFAULT_COL_VIEW_VERTICAL = true;
-    
+
+    /**
+     * Constructor.
+     */
+    public ColView()
+    {
+        super();
+    }
+
     /**
      * Returns whether children will be resized to fill width.
      */
@@ -77,20 +85,6 @@ public class ColView extends ChildView {
     protected ColViewProxy<?> getViewProxy()
     {
         return new ColViewProxy<>(this);
-    }
-
-    /**
-     * Override for custom defaults.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        // Vertical
-        if (aPropName == Vertical_Prop)
-            return DEFAULT_COL_VIEW_VERTICAL;
-
-        // Do normal version
-        return super.getPropDefault(aPropName);
     }
 
     /**
@@ -168,6 +162,20 @@ public class ColView extends ChildView {
             // Do normal version
             default: super.setPropValue(aPropName, aValue);
         }
+    }
+
+    /**
+     * Override for custom defaults.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        // Vertical
+        if (aPropName == Vertical_Prop)
+            return DEFAULT_COL_VIEW_VERTICAL;
+
+        // Do normal version
+        return super.getPropDefault(aPropName);
     }
 
     /**

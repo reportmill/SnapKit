@@ -117,6 +117,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
         // If side not top, turn off classic
         if (aSide != Side.TOP)
             setClassic(false);
+
+        // Update Vertical
+        setVertical(aSide.isTopOrBottom());
     }
 
     /**
@@ -319,17 +322,17 @@ public class TabView extends ParentView implements Selectable<Tab> {
     private void contentBoxDidContentChange()
     {
         // Get Visible/Vertical
-        boolean isVisible = _contentBox.getChildCount() > 0;
         boolean isVertical = getTabSide().isTopOrBottom();
+        boolean isContentSet = _contentBox.getContent() != null;
 
         // Update TabBar Min/Max size to make TabView unsizable when there is no content for sake of SplitView
         if (isVertical) {
-            double prefH = isVisible ? -1 : getPrefHeight();
+            double prefH = isContentSet ? -1 : getPrefHeightImpl(-1);
             setMinHeight(prefH);
             setMaxHeight(prefH);
         }
         else {
-            double prefW = isVisible ? -1 : getPrefWidth();
+            double prefW = isContentSet ? -1 : getPrefWidthImpl(-1);
             setMinWidth(prefW);
             setMaxWidth(prefW);
         }
@@ -378,6 +381,20 @@ public class TabView extends ParentView implements Selectable<Tab> {
                 _tabBar.setOwnerChildren(anOwner);
             else child.setOwner(anOwner);
         }
+    }
+
+    /**
+     * Override for custom defaults.
+     */
+    @Override
+    public Object getPropDefault(String aPropName)
+    {
+        // Vertical
+        if (aPropName == Vertical_Prop)
+            return true;
+
+        // Do normal version
+        return super.getPropDefault(aPropName);
     }
 
     /**
