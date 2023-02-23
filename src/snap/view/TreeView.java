@@ -77,7 +77,6 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         Divider divider = _splitView.getDivider();
         divider.setFill(DIVIDER_FILL);
         divider.setBorder(null);
-        divider.setReach(3);
 
         // Create/configure ScrollView
         _scrollView = new ScrollView(_splitView);

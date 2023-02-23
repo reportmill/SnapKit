@@ -95,7 +95,6 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         Divider divider = _splitView.getDivider();
         divider.setFill(DIVIDER_FILL);
         divider.setBorder(null);
-        divider.setReach(3);
 
         // Create/configure/add ScrollGroup
         _scrollGroup = new ScrollGroup(_splitView);
@@ -458,16 +457,17 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         // If already set, just return
         if (_header!=null) return _header;
 
-        // Create and return
-        SplitView split = new SplitView();
-        split.setGrowWidth(true);
-        split.setBorder(null);
-        split.setDividerSpan(DIVIDER_SPAN);
-        Divider div = split.getDivider();
+        // Create/configure Header SplitView
+        SplitView splitView = new SplitView();
+        splitView.setGrowWidth(true);
+        splitView.setBorder(null);
+        splitView.setDividerSpan(DIVIDER_SPAN);
+        Divider div = splitView.getDivider();
         div.setFill(DIVIDER_FILLH);
         div.setBorder(null);
-        div.setReach(3);
-        return _header = split;
+
+        // Set/return
+        return _header = splitView;
     }
 
     /**

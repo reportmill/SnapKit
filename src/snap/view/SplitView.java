@@ -20,7 +20,7 @@ public class SplitView extends ParentView implements ViewHost {
     private List <Divider>  _divs = new ArrayList<>();
     
     // The spacing between items (really the default span of the dividers)
-    private double  _divSpan = DEFAULT_DIVIDER_SPAN;
+    private double  _divSpan;
     
     // The default divider
     private Divider  _divider;
@@ -39,11 +39,17 @@ public class SplitView extends ParentView implements ViewHost {
     public static final Border SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
     public static final int DEFAULT_DIVIDER_SPAN = Divider.DEFAULT_SPAN;
 
+    // Constant for props that all SplitView dividers share with prototype returned by getDivider()
+    private static String[] SHARED_DIVIDER_PROPS = { Fill_Prop, Border_Prop, Pickable_Prop, Divider.Span_Prop, Divider.ClickSpan_Prop };
+
+
     /**
      * Creates a new SplitView.
      */
     public SplitView()
     {
+        super();
+        _divSpan = DEFAULT_DIVIDER_SPAN;
         setBorder(SPLIT_VIEW_BORDER);
         setClipToBounds(true);
         addEventFilter(e -> processDividerMouseEvent(e), MouseMove, MousePress, MouseDrag, MouseRelease);
@@ -166,12 +172,14 @@ public class SplitView extends ParentView implements ViewHost {
         // If already set, just return
         if (_divider != null) return _divider;
 
-        // Create and return
-        Divider div = new Divider();
-        div.setVertical(!isVertical());
-        div.setBorder(Divider.DIVIDER_BORDER);
-        div.addPropChangeListener(pc -> dividerPropChange(pc), Fill_Prop, Border_Prop);
-        return _divider = div;
+        // Create/configure prototype divider
+        Divider divider = new Divider();
+        divider.setVertical(!isVertical());
+        divider.setSpan(getDividerSpan());
+        divider.addPropChangeListener(pc -> dividerPropChange(pc), SHARED_DIVIDER_PROPS);
+
+        // Set/return
+        return _divider = divider;
     }
 
     /**
@@ -180,13 +188,15 @@ public class SplitView extends ParentView implements ViewHost {
     protected Divider createDivider()
     {
         // Create/config new divider from prototype
-        Divider dividerPrototype = getDivider();
         Divider newDivider = new Divider();
         newDivider.setVertical(!isVertical());
-        newDivider.setFill(dividerPrototype.getFill());
-        newDivider.setBorder(dividerPrototype.getBorder());
-        newDivider.setReach(dividerPrototype.getReach());
-        newDivider.setPrefSpan(getDividerSpan());
+
+        // Propagate shared divider props
+        Divider dividerPrototype = getDivider();
+        for (String sharedProp : SHARED_DIVIDER_PROPS) {
+            Object sharedPropValue = dividerPrototype.getPropValue(sharedProp);
+            newDivider.setPropValue(sharedProp, sharedPropValue);
+        }
 
         // Return
         return newDivider;
@@ -236,7 +246,7 @@ public class SplitView extends ParentView implements ViewHost {
     {
         if (aValue == _divSpan) return;
         for (Divider div : _divs)
-            div.setPrefSpan(aValue);
+            div.setSpan(aValue);
         firePropChange(DividerSpan_Prop, _divSpan, _divSpan = aValue);
     }
 
@@ -250,8 +260,10 @@ public class SplitView extends ParentView implements ViewHost {
             for (Divider div : _divs) {
                 if (!div.isVisible())
                     continue;
-                double min = div.getY() - div.getReach();
-                double max = div.getMaxY() + div.getReach();
+                double midY = div.getMidY();
+                double halfClickSpan = Math.max(div.getSpan(), div.getClickSpan()) / 2;
+                double min = midY - halfClickSpan;
+                double max = midY + halfClickSpan;
                 if (aY >= min && aY <= max)
                     return div;
             }
@@ -262,8 +274,10 @@ public class SplitView extends ParentView implements ViewHost {
             for (Divider div : _divs) {
                 if (!div.isVisible())
                     continue;
-                double min = div.getX() - div.getReach();
-                double max = div.getMaxX() + div.getReach();
+                double midX = div.getMidX();
+                double halfClickSpan = Math.max(div.getSpan(), div.getClickSpan()) / 2;
+                double min = midX - halfClickSpan;
+                double max = midX + halfClickSpan;
                 if (aX >= min && aX <= max)
                     return div;
             }
@@ -439,18 +453,13 @@ public class SplitView extends ParentView implements ViewHost {
     public View removeGuest(int anIndex)  { return removeItem(anIndex); }
 
     /**
-     * Called when prototype divider has prop change to forward to active dividers.
+     * Called when prototype divider has prop change to forward to existing dividers.
      */
     private void dividerPropChange(PropChange aPC)
     {
-        // Get property name
         String propName = aPC.getPropName();
-
-        // Handle Fill, Border
-        if (propName == Fill_Prop)
-            _divs.forEach(div -> div.setFill(_divider.getFill()));
-        else if (propName == Border_Prop)
-            _divs.forEach(div -> div.setBorder(_divider.getBorder()));
+        Object propValue = _divider.getPropValue(propName);
+        _divs.forEach(div -> div.setPropValue(propName, propValue));
     }
 
     /**

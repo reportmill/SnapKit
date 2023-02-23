@@ -14,11 +14,11 @@ public class Divider extends View {
     private double  _span;
 
     // The extra space beyond the divider bounds that should respond to resize
-    private double  _reach;
+    private double  _clickSpan;
 
     // Constants for properties
-    public static final String PrefSpan_Prop = "PrefSpan";
-    public static final String Reach_Prop = "Reach";
+    public static final String Span_Prop = "Span";
+    public static final String ClickSpan_Prop = "ClickSpan";
     public static final String Location_Prop = "Location";
     public static final String Remainder_Prop = "Remainder";
 
@@ -36,6 +36,7 @@ public class Divider extends View {
     {
         super();
         _span = DEFAULT_SPAN;
+        _clickSpan = DEFAULT_SPAN;
         setCursor(Cursor.N_RESIZE);
         setFill(DIVIDER_FILL_HOR);
         setBorder(DIVIDER_BORDER);
@@ -44,41 +45,33 @@ public class Divider extends View {
     /**
      * Returns the size of the divider.
      */
-    public double getSpan()
-    {
-        return isVertical() ? getWidth() : getHeight();
-    }
-
-    /**
-     * Returns the preferred size of the divider.
-     */
-    public double getPrefSpan()  { return _span; }
+    public double getSpan()  { return _span; }
 
     /**
      * Sets the size of the divider.
      */
-    public void setPrefSpan(double aValue)
+    public void setSpan(double aValue)
     {
         if (aValue == _span) return;
-        firePropChange(PrefSpan_Prop, _span, _span = aValue);
+        firePropChange(Span_Prop, _span, _span = aValue);
     }
 
     /**
-     * Returns the extra space beyond the span that divider should respond to.
+     * Returns the size of the clickable length of the divider (if greater than Span).
      */
-    public double getReach()  { return _reach; }
+    public double getClickSpan()  { return _clickSpan; }
 
     /**
-     * Sets the extra space beyond the span that divider should respond to.
+     * Sets the size of the clickable length of the divider (if greater than Span).
      */
-    public void setReach(double aValue)
+    public void setClickSpan(double aValue)
     {
-        if (aValue == _reach) return;
-        firePropChange(Reach_Prop, _reach, _reach = aValue);
+        if (aValue == _clickSpan) return;
+        firePropChange(ClickSpan_Prop, _clickSpan, _clickSpan = aValue);
     }
 
     /**
-     * Returns the distance from the min x of preceeding View to min x of divider (or y if vertical).
+     * Returns the distance from the min x of preceding View to min x of divider (or y if vertical).
      */
     public double getLocation()
     {
@@ -88,7 +81,7 @@ public class Divider extends View {
     }
 
     /**
-     * Sets the distance from the min x of preceeding View to min x of divider (or y if vertical).
+     * Sets the distance from the min x of preceding View to min x of divider (or y if vertical).
      */
     public void setLocation(double aValue)
     {
@@ -234,8 +227,11 @@ public class Divider extends View {
         if (aValue == isVertical()) return;
         super.setVertical(aValue);
 
-        // Set Cursor and Fill based on Vertical
-        setCursor(aValue ? Cursor.E_RESIZE : Cursor.N_RESIZE);
+        // Reset Cursor
+        Cursor cursor = isDisabled() ? null : isVertical() ? Cursor.E_RESIZE : Cursor.N_RESIZE;
+        setCursor(cursor);
+
+        // Update fill
         if (getFill() == DIVIDER_FILL_VER)
             setFill(DIVIDER_FILL_HOR);
         else if (getFill() == DIVIDER_FILL_HOR)
@@ -248,7 +244,7 @@ public class Divider extends View {
     @Override
     protected double getPrefWidthImpl(double aH)
     {
-        return !isVertical() ? 0 : isDisabled() ? 1 : getPrefSpan();
+        return !isVertical() ? 0 : isDisabled() ? 1 : getSpan();
     }
 
     /**
@@ -257,7 +253,7 @@ public class Divider extends View {
     @Override
     protected double getPrefHeightImpl(double aH)
     {
-        return isVertical() ? 0 : isDisabled() ? 1 : getPrefSpan();
+        return isVertical() ? 0 : isDisabled() ? 1 : getSpan();
     }
 
     /**
@@ -271,8 +267,13 @@ public class Divider extends View {
         super.setDisabled(aValue);
 
         // If divider size and disabled size differ, trigger parent relayout
-        if (getPrefSpan() != 1)
+        if (getSpan() != 1)
             relayoutParent();
+
+        // Reset Cursor
+        Cursor cursor = isDisabled() ? null : isVertical() ? Cursor.E_RESIZE : Cursor.N_RESIZE;
+        setCursor(cursor);
+
     }
 
     /**
@@ -282,9 +283,9 @@ public class Divider extends View {
     {
         switch (aPropName) {
 
-            // PrefSpan, Reach
-            case PrefSpan_Prop: return getPrefSpan();
-            case Reach_Prop: return getReach();
+            // Span, ClickSpan
+            case Span_Prop: return getSpan();
+            case ClickSpan_Prop: return getClickSpan();
 
             // Location, Remainder
             case Location_Prop: return getLocation();
@@ -302,9 +303,9 @@ public class Divider extends View {
     {
         switch (aPropName) {
 
-            // PrefSpan, Reach
-            case PrefSpan_Prop: setPrefSpan(Convert.doubleValue(aValue)); break;
-            case Reach_Prop: setReach(Convert.doubleValue(aValue)); break;
+            // Span, ClickSpan
+            case Span_Prop: setSpan(Convert.doubleValue(aValue)); break;
+            case ClickSpan_Prop: setClickSpan(Convert.doubleValue(aValue)); break;
 
             // Location, Remainder
             case Location_Prop: setLocation(Convert.doubleValue(aValue)); break;
