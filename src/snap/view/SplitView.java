@@ -29,15 +29,15 @@ public class SplitView extends ParentView implements ViewHost {
     private Divider  _dragDiv;
     private double  _dragOff;
 
-    // A listener to watch for when item.Visible changes
-    private PropChangeListener  _itemVisibleChangedLsnr = pc -> itemVisibleChanged(pc);
+    // A listener to watch for when item Visible or Min/MaxSize changes
+    private PropChangeListener  _itemVisibleOrMinMaxSizeChangedLsnr = pc -> itemVisibleOrMinMaxSizeChanged(pc);
 
     // Constants for properties
     public static final String DividerSpan_Prop = "DividerSpan";
     
     // Constants for internal use
-    private static final Border SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
-    private static final int DEFAULT_DIVIDER_SPAN = 8;
+    public static final Border SPLIT_VIEW_BORDER = Border.createLineBorder(Color.LIGHTGRAY,1);
+    public static final int DEFAULT_DIVIDER_SPAN = Divider.DEFAULT_SPAN;
 
     /**
      * Creates a new SplitView.
@@ -78,21 +78,23 @@ public class SplitView extends ParentView implements ViewHost {
         _items.add(anIndex, aView);
 
         // If more than one item, add divider
+        Divider divider = null;
         if (getItemCount() > 1) {
-            Divider div = createDivider();
-            addDivider(div, anIndex > 0 ? (anIndex - 1) : 0);
-            addChild(div, anIndex > 0 ? (anIndex * 2 - 1) : 0);
-
-            // See if divider should be not-visible
-            boolean vis = aView.isVisible();
-            if (anIndex == 1)
-                vis &= getItem(0).isVisible();
-            div.setVisible(vis);
+            divider = createDivider();
+            addDivider(divider, anIndex > 0 ? (anIndex - 1) : 0);
+            addChild(divider, anIndex > 0 ? (anIndex * 2 - 1) : 0);
         }
 
         // Add view as child
         addChild(aView, anIndex * 2);
-        aView.addPropChangeListener(_itemVisibleChangedLsnr, Visible_Prop);
+
+        // Update divider Visible/Disabled for item
+        if (divider != null)
+            setDividerVisibleAndDisabled(divider);
+
+        // Add listener to view to update divider Visible/Disabled when item changes Visible or Min/MaxSize
+        String[] props = { Visible_Prop, MinWidth_Prop, MinHeight_Prop, MaxWidth_Prop, MaxHeight_Prop };
+        aView.addPropChangeListener(_itemVisibleOrMinMaxSizeChangedLsnr, props);
     }
 
     /**
@@ -103,7 +105,7 @@ public class SplitView extends ParentView implements ViewHost {
         // Remove item and child and listener
         View view = _items.remove(anIndex);
         removeChild(view);
-        view.removePropChangeListener(_itemVisibleChangedLsnr, Visible_Prop);
+        view.removePropChangeListener(_itemVisibleOrMinMaxSizeChangedLsnr);
 
         // If at least one item left, remove extra divider
         if (getItemCount() > 0)
@@ -353,11 +355,11 @@ public class SplitView extends ParentView implements ViewHost {
     {
         // Handle MouseMove: If over divider, update cursor
         if (anEvent.isMouseMove()) {
-            Divider div = getDividerForXY(anEvent.getX(), anEvent.getY());
-            if (div != null) {
+            Divider divider = getDividerForXY(anEvent.getX(), anEvent.getY());
+            if (divider != null && divider.isEnabled()) {
                 WindowView win = getWindow();
                 if (win != null)
-                    win.setActiveCursor(div.getCursor());
+                    win.setActiveCursor(divider.getCursor());
             }
         }
 
@@ -365,11 +367,12 @@ public class SplitView extends ParentView implements ViewHost {
         else if (anEvent.isMousePress()) {
 
             // Get divider at mouse
-            _dragDiv = getDividerForXY(anEvent.getX(), anEvent.getY());
-            if (_dragDiv == null)
+            Divider divider = getDividerForXY(anEvent.getX(), anEvent.getY());
+            if (divider == null || divider.isDisabled())
                 return;
 
             // Set divider drag offset
+            _dragDiv = divider;
             _dragOff = isVertical() ? _dragDiv.getY() - anEvent.getY() : _dragDiv.getX() - anEvent.getX();
             anEvent.consume();
         }
@@ -451,9 +454,9 @@ public class SplitView extends ParentView implements ViewHost {
     }
 
     /**
-     * Called when an item changes the value of visible property.
+     * Called when an item changes the value of Visible or Min/Max size properties to update divider Visible/Disabled.
      */
-    private void itemVisibleChanged(PropChange aPC)
+    private void itemVisibleOrMinMaxSizeChanged(PropChange aPC)
     {
         // If no dividers, just return
         if (getItemCount() < 2) return;
@@ -461,11 +464,18 @@ public class SplitView extends ParentView implements ViewHost {
         // Get whether divider should be visible and fix
         View view = (View) aPC.getSource();
         int viewIndex = getItems().indexOf(view);
-        Divider div = getDivider(viewIndex > 0 ? viewIndex - 1 : 0);
-        boolean divVisible = view.isVisible();
-        if (viewIndex == 1)
-            divVisible &= getItem(0).isVisible();
-        div.setVisible(divVisible);
+
+        // Update divider visible/disabled to left of view
+        if (viewIndex > 0) {
+            Divider divider = getDivider(viewIndex - 1);
+            setDividerVisibleAndDisabled(divider);
+        }
+
+        // Update divider visible/disabled to right of view
+        if (viewIndex < getItemCount() - 1) {
+            Divider divider = getDivider(viewIndex);
+            setDividerVisibleAndDisabled(divider);
+        }
     }
 
     /**
@@ -488,6 +498,34 @@ public class SplitView extends ParentView implements ViewHost {
                 if (!item.isPrefWidthSet())
                     item.setPrefWidth(item.getWidth());
         }
+    }
+
+    /**
+     * Sets a divider Visible and Disabled property for given views.
+     */
+    private void setDividerVisibleAndDisabled(Divider divider)
+    {
+        // Get view before/after
+        View view1 = divider.getViewBefore();
+        View view2 = divider.getViewAfter();
+
+        // Set Divider.Visible
+        boolean isVisible = view1.isVisible() && view2.isVisible();
+        divider.setVisible(isVisible);
+
+        // Set Divider.Disabled
+        boolean isDisabled = isViewFrozen(view1) || isViewFrozen(view2);
+        divider.setDisabled(isDisabled);
+    }
+
+    /**
+     * Utility method to return whether SplitView item view is frozen (can't be resized) because Min/Max sizes are equal.
+     */
+    private boolean isViewFrozen(View aView)
+    {
+        if (isVertical())
+            return aView.isMinHeightSet() && aView.isMaxHeightSet() && aView.getMinHeight() == aView.getMaxHeight();
+        return aView.isMinWidthSet() && aView.isMaxWidthSet() && aView.getMinWidth() == aView.getMaxWidth();
     }
 
     /**

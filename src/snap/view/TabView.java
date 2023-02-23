@@ -75,6 +75,7 @@ public class TabView extends ParentView implements Selectable<Tab> {
         _contentBox.setFill(ViewUtils.getBackFill());
         _contentBox.setGrowWidth(true);
         _contentBox.setGrowHeight(true);
+        _contentBox.addPropChangeListener(pc -> contentBoxDidContentChange(), BoxView.Content_Prop);
 
         // Add shelf and content cradle, enable action event
         setChildren(_tabBar, _separator, _contentBox);
@@ -310,6 +311,39 @@ public class TabView extends ParentView implements Selectable<Tab> {
             setContent(content);
             firePropChange(SelIndex_Prop, aPC.getOldValue(), aPC.getNewValue());
         }
+    }
+
+    /**
+     * Called when ContentBox does content change.
+     */
+    private void contentBoxDidContentChange()
+    {
+        // Get Visible/Vertical
+        boolean isVisible = _contentBox.getChildCount() > 0;
+        boolean isVertical = getTabSide().isTopOrBottom();
+
+        // Update TabBar Min/Max size to make TabView unsizable when there is no content for sake of SplitView
+        if (isVertical) {
+            double prefH = isVisible ? -1 : getPrefHeight();
+            setMinHeight(prefH);
+            setMaxHeight(prefH);
+        }
+        else {
+            double prefW = isVisible ? -1 : getPrefWidth();
+            setMinWidth(prefW);
+            setMaxWidth(prefW);
+        }
+    }
+
+    /**
+     * Override to trigger content contentBoxDidContentChange() when first showing.
+     */
+    @Override
+    protected void setShowing(boolean aValue)
+    {
+        super.setShowing(aValue);
+        if (aValue)
+            contentBoxDidContentChange();
     }
 
     /**

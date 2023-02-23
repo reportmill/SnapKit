@@ -3,31 +3,39 @@
  */
 package snap.view;
 import snap.gfx.*;
-import snap.util.SnapUtils;
+import snap.util.Convert;
 
 /**
  * A View to represent a movable separation between views.
  */
 public class Divider extends View {
 
+    // The spacing between items (really the default span of the dividers)
+    private double  _span;
+
     // The extra space beyond the divider bounds that should respond to resize
-    double _reach;
+    private double  _reach;
+
+    // Constants for properties
+    public static final String PrefSpan_Prop = "PrefSpan";
+    public static final String Reach_Prop = "Reach";
+    public static final String Location_Prop = "Location";
+    public static final String Remainder_Prop = "Remainder";
 
     // Constants for Divider Fill
     private static final Color c1 = Color.get("#fbfbfb"), c2 = Color.get("#e3e3e3");
     private static final Paint DIVIDER_FILL_HOR = new GradientPaint(c1, c2, 90);
     private static final Paint DIVIDER_FILL_VER = new GradientPaint(c1, c2, 0);
     public static final Border DIVIDER_BORDER = Border.createLineBorder(Color.LIGHTGRAY, 1);
-
-    // Constants for properties
-    public static final String Location_Prop = "Location";
-    public static final String Remainder_Prop = "Remainder";
+    public static final int DEFAULT_SPAN = 8;
 
     /**
      * Creates a new Divider.
      */
     public Divider()
     {
+        super();
+        _span = DEFAULT_SPAN;
         setCursor(Cursor.N_RESIZE);
         setFill(DIVIDER_FILL_HOR);
         setBorder(DIVIDER_BORDER);
@@ -44,18 +52,15 @@ public class Divider extends View {
     /**
      * Returns the preferred size of the divider.
      */
-    public double getPrefSpan()
-    {
-        return isVertical() ? getPrefWidth() : getPrefHeight();
-    }
+    public double getPrefSpan()  { return _span; }
 
     /**
      * Sets the size of the divider.
      */
     public void setPrefSpan(double aValue)
     {
-        boolean isVert = isVertical();
-        setPrefSize(isVert ? aValue : -1, isVert ? -1 : aValue);
+        if (aValue == _span) return;
+        firePropChange(PrefSpan_Prop, _span, _span = aValue);
     }
 
     /**
@@ -68,29 +73,8 @@ public class Divider extends View {
      */
     public void setReach(double aValue)
     {
-        _reach = aValue;
-    }
-
-    /**
-     * Returns the view before divider.
-     */
-    public View getViewBefore()
-    {
-        ParentView par = getParent();
-        int index = par.indexOfChild(this);
-        View peer0 = par.getChild(index - 1);
-        return peer0;
-    }
-
-    /**
-     * Returns the view after divider.
-     */
-    public View getViewAfter()
-    {
-        ParentView par = getParent();
-        int index = par.indexOfChild(this);
-        View peer1 = par.getChild(index + 1);
-        return peer1;
+        if (aValue == _reach) return;
+        firePropChange(Reach_Prop, _reach, _reach = aValue);
     }
 
     /**
@@ -219,8 +203,31 @@ public class Divider extends View {
     }
 
     /**
+     * Returns the view before divider.
+     */
+    public View getViewBefore()
+    {
+        ParentView par = getParent();
+        int index = par.indexOfChild(this);
+        View peer0 = par.getChild(index - 1);
+        return peer0;
+    }
+
+    /**
+     * Returns the view after divider.
+     */
+    public View getViewAfter()
+    {
+        ParentView par = getParent();
+        int index = par.indexOfChild(this);
+        View peer1 = par.getChild(index + 1);
+        return peer1;
+    }
+
+    /**
      * Override to configure attributes based on parent.Vertical.
      */
+    @Override
     public void setVertical(boolean aValue)
     {
         // Do normal version
@@ -236,13 +243,56 @@ public class Divider extends View {
     }
 
     /**
+     * Override to return pref span.
+     */
+    @Override
+    protected double getPrefWidthImpl(double aH)
+    {
+        return !isVertical() ? 0 : isDisabled() ? 1 : getPrefSpan();
+    }
+
+    /**
+     * Override to return pref span.
+     */
+    @Override
+    protected double getPrefHeightImpl(double aH)
+    {
+        return isVertical() ? 0 : isDisabled() ? 1 : getPrefSpan();
+    }
+
+    /**
+     * Override to relayout parent since this can cause size change.
+     */
+    @Override
+    public void setDisabled(boolean aValue)
+    {
+        // Do normal version
+        if (aValue == isDisabled()) return;
+        super.setDisabled(aValue);
+
+        // If divider size and disabled size differ, trigger parent relayout
+        if (getPrefSpan() != 1)
+            relayoutParent();
+    }
+
+    /**
      * Override to handle extra props.
      */
     public Object getPropValue(String aPropName)
     {
-        if (aPropName == Location_Prop) return getLocation();
-        if (aPropName == Remainder_Prop) return getRemainder();
-        return super.getPropValue(aPropName);
+        switch (aPropName) {
+
+            // PrefSpan, Reach
+            case PrefSpan_Prop: return getPrefSpan();
+            case Reach_Prop: return getReach();
+
+            // Location, Remainder
+            case Location_Prop: return getLocation();
+            case Remainder_Prop: return getRemainder();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
     }
 
     /**
@@ -250,8 +300,18 @@ public class Divider extends View {
      */
     public void setPropValue(String aPropName, Object aValue)
     {
-        if (aPropName == Location_Prop) setLocation(SnapUtils.doubleValue(aValue));
-        else if (aPropName == Remainder_Prop) setRemainder(SnapUtils.doubleValue(aValue));
-        else super.setPropValue(aPropName, aValue);
+        switch (aPropName) {
+
+            // PrefSpan, Reach
+            case PrefSpan_Prop: setPrefSpan(Convert.doubleValue(aValue)); break;
+            case Reach_Prop: setReach(Convert.doubleValue(aValue)); break;
+
+            // Location, Remainder
+            case Location_Prop: setLocation(Convert.doubleValue(aValue)); break;
+            case Remainder_Prop: setRemainder(Convert.doubleValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue); break;
+        }
     }
 }

@@ -25,7 +25,8 @@ public class BoxView extends ParentView implements ViewHost {
     // Constants for properties
     public static final String FillWidth_Prop = "FillWidth";
     public static final String FillHeight_Prop = "FillHeight";
-    
+    public static final String Content_Prop = "Content";
+
     /**
      * Creates a new Box.
      */
@@ -60,9 +61,17 @@ public class BoxView extends ParentView implements ViewHost {
         if (aView == getContent()) return;
 
         // Remove old content, set/add new content
-        if (_content != null) removeChild(_content);
+        View oldContent = _content;
+        if (oldContent != null)
+            removeChild(_content);
+
+        // Set/add new
         _content = aView;
-        if (_content != null) addChild(_content);
+        if (_content != null)
+            addChild(_content);
+
+        // Fire prop change
+        firePropChange(Content_Prop, oldContent, _content);
     }
 
     /**
