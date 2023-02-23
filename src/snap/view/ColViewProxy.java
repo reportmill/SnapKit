@@ -54,7 +54,7 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
 
         // If FillHeight and no children grow, make last child grow
         if (isFillHeight() && getGrowHeightCount() == 0) {
-            ViewProxy lastChild = getChildren()[getChildCount() - 1];
+            ViewProxy<?> lastChild = getChildren()[getChildCount() - 1];
             lastChild.setGrowHeight(true);
             _growHeightCount++;
         }
@@ -153,12 +153,13 @@ public class ColViewProxy<T extends View> extends ParentViewProxy<T> {
             if (isFillWidth || child.isGrowWidth())
                 childW = getChildFixedWidth(this, child);
 
-            // Update ChildY with spacing and calculate ChildH
+            // Update ChildY with spacing, round and set
             childY += childSpacing;
-            double childH = child.getBestHeight(childW);
-
-            // Set child bounds Y and Height
+            childY = Math.round(childY);
             child.setY(childY);
+
+            // Calculate child height and set
+            double childH = child.getBestHeight(childW);
             child.setHeight(childH);
 
             // Update child Y loop var and last child

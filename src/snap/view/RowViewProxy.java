@@ -91,12 +91,13 @@ public class RowViewProxy<T extends View> extends ParentViewProxy<T> {
             if (isFillHeight || child.isGrowHeight())
                 childH = getChildFixedHeight(this, child);
 
-            // Update ChildY with spacing and calculate ChildH
+            // Update ChildX with spacing, round and set
             childX += childSpacing;
-            double childW = child.getBestWidth(childH);
-
-            // Set child bounds X and Width
+            childX = Math.round(childX);
             child.setX(childX);
+
+            // Calculate child width and set
+            double childW = child.getBestWidth(childH);
             child.setWidth(childW);
 
             // Update child x loop var and last child
