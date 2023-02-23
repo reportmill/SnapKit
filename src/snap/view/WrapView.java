@@ -98,11 +98,19 @@ public class WrapView extends ParentView {
         if (_content == null)
             return ins.getWidth();
 
+        // Simple case of 90 degrees
+        if (isContentAt90()) {
+            double childH = _content.getPrefHeight();
+            double prefW = childH + ins.getWidth();
+            return Math.round(prefW);
+        }
+
+        // General case
         double childW = _content.getPrefWidth();
         double childH = _content.getPrefHeight();
         Rect areaBounds = new Rect(0,0, childW, childH);
         Rect areaBounds2 = _content.localToParent(areaBounds).getBounds();
-        double areaW = Math.ceil(areaBounds2.width);
+        double areaW = Math.round(areaBounds2.width);
         return areaW + ins.getWidth();
     }
 
@@ -115,11 +123,19 @@ public class WrapView extends ParentView {
         if (_content == null)
             return ins.getHeight();
 
+        // Simple case of 90 degrees
+        if (isContentAt90()) {
+            double childW = _content.getPrefWidth();
+            double prefH = childW + ins.getHeight();
+            return Math.round(prefH);
+        }
+
+        // General case
         double childW = _content.getPrefWidth();
         double childH = _content.getPrefHeight();
         Rect areaBounds = new Rect(0,0, childW, childH);
         Rect areaBounds2 = _content.localToParent(areaBounds).getBounds();
-        double areaH = Math.ceil(areaBounds2.width);
+        double areaH = Math.round(areaBounds2.height);
         return areaH + ins.getHeight();
     }
 
@@ -137,17 +153,19 @@ public class WrapView extends ParentView {
         double areaY = ins.top;
         double areaW = getWidth() - ins.getWidth();
         double areaH = getHeight() - ins.getHeight();
-        double childW = Math.min(_content.getPrefWidth(), Math.max(areaW, areaH)); // This is me being stupid/lazy
+
+        // Get Child Width/Height - this is me being stupid/lazy
+        double childW = Math.min(_content.getPrefWidth(), Math.max(areaW, areaH));
         double childH = _content.getPrefHeight();
 
         // Still being lazy
-        double rotate = _content.getRotate();
+        boolean isContentAt90 = isContentAt90();
         if (_fillWidth) {
-            if (MathUtils.equals(Math.abs(rotate), 90))
+            if (isContentAt90)
                 childH = areaW;
         }
         if (_fillHeight) {
-            if (MathUtils.equals(Math.abs(rotate), 90))
+            if (isContentAt90)
                 childW = areaH;
         }
 
@@ -169,7 +187,35 @@ public class WrapView extends ParentView {
         Point childXY = _content.parentToLocal(childX, childY);
         childXY.x += _content.getTransX() - childW / 2;
         childXY.y += _content.getTransY() - childH / 2;
-        _content.setXYLocal(childXY.x, childXY.y);
+        setViewXYLocal(_content, childXY.x, childXY.y);
+    }
+
+    /**
+     * Sets the view x/y with given point in current local coords such that new origin will be at that point.
+     */
+    private static void setViewXYLocal(View aView, double aX, double aY)
+    {
+        double viewX = aView.getX();
+        double viewY = aView.getY();
+        if (aView.isLocalToParentSimple()) {
+            aView.setXY(viewX + aX, viewY + aY);
+            return;
+        }
+
+        Point p0 = aView.localToParent(0, 0);
+        Point p1 = aView.localToParent(aX, aY);
+        double newX = viewX + p1.x - p0.x;
+        double newY = viewY + p1.y - p0.y;
+        aView.setXY(newX, newY);
+    }
+
+    /**
+     * Returns whether content is at 90 degrees.
+     */
+    private boolean isContentAt90()
+    {
+        double rotate = _content.getRotate();
+        return MathUtils.equals(Math.abs(rotate), 90);
     }
 
     /**
