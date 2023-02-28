@@ -876,24 +876,8 @@ public class TextBox {
     public TextBoxToken getTokenForCharIndex(int anIndex)
     {
         TextBoxLine line = getLineForCharIndex(anIndex);
-        return line.getTokenForCharIndex(anIndex - line.getStartCharIndex());
-    }
-
-    /**
-     * Returns the TextRun that contains the given index.
-     */
-    public TextRun getRunAt(int anIndex)
-    {
-        TextDoc textDoc = getTextDoc();
-        return textDoc.getRunForCharIndex(anIndex);
-    }
-
-    /**
-     * Returns the TextStyle for the run at the given character index.
-     */
-    public TextStyle getStyleAt(int anIndex)
-    {
-        return getTextDoc().getStyleForCharIndex(anIndex);
+        int indexInLine = anIndex - line.getStartCharIndex();
+        return line.getTokenForCharIndex(indexInLine);
     }
 
     /**

@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.HPos;
 import snap.gfx.*;
 import snap.props.Undoer;
 import snap.text.*;
@@ -241,109 +240,6 @@ public class TextView extends ParentView {
      * Sets the color of the current selection or cursor.
      */
     public void setTextFill(Paint aColor)  { _textArea.setTextFill(aColor); }
-
-    /**
-     * Returns whether TextView is underlined.
-     */
-    public boolean isUnderlined()  { return _textArea.isUnderlined(); }
-
-    /**
-     * Sets whether TextView is underlined.
-     */
-    public void setUnderlined(boolean aValue)  { _textArea.setUnderlined(aValue); }
-
-    /**
-     * Returns the text line alignment.
-     */
-    public HPos getLineAlign()  { return _textArea.getLineAlign(); }
-
-    /**
-     * Sets the text line alignment.
-     */
-    public void setLineAlign(HPos anAlign)  { _textArea.setLineAlign(anAlign); }
-
-    /**
-     * Returns whether the text line justifies text.
-     */
-    public boolean isLineJustify()  { return _textArea.isLineJustify(); }
-
-    /**
-     * Sets whether the text line justifies text.
-     */
-    public void setLineJustify(boolean aValue)  { _textArea.setLineJustify(aValue); }
-
-    /**
-     * Returns the style at given char index.
-     */
-    public TextStyle getStyleAt(int anIndex)  { return _textArea.getStyleForCharIndex(anIndex); }
-
-    /**
-     * Returns the TextStyle for the current selection and/or input characters.
-     */
-    public TextStyle getSelStyle()  { return _textArea.getSelStyle(); }
-
-    /**
-     * Sets the attributes that are applied to current selection or newly typed chars.
-     */
-    public void setSelStyleValue(String aKey, Object aValue)  { _textArea.setSelStyleValue(aKey, aValue); }
-
-    /**
-     * Returns the TextLineStyle for currently selection.
-     */
-    public TextLineStyle getLineStyle()  { return _textArea.getSelLineStyle(); }
-
-    /**
-     * Sets the line attributes that are applied to current selection or newly typed chars.
-     */
-    public void setLineStyleValue(String aKey, Object aValue)  { _textArea.setSelLineStyleValue(aKey, aValue); }
-
-    /**
-     * Adds the given string to end of text.
-     */
-    public void addChars(String aStr, Object ... theAttrs)  { _textArea.addChars(aStr, theAttrs); }
-
-    /**
-     * Adds the given string with given style to text at given index.
-     */
-    public void addChars(String aStr, TextStyle aStyle)  { _textArea.addChars(aStr, aStyle); }
-
-    /**
-     * Adds the given string with given style to text at given index.
-     */
-    public void addChars(String aStr, TextStyle aStyle, int anIndex) { _textArea.addChars(aStr, aStyle, anIndex, anIndex); }
-
-    /**
-     * Deletes the current selection.
-     */
-    public void delete()  { _textArea.delete(); }
-
-    /**
-     * Deletes the given range of chars.
-     */
-    public void delete(int aStart, int anEnd, boolean doUpdateSel) { _textArea.delete(aStart, anEnd, doUpdateSel); }
-
-    /**
-     * Replaces the current selection with the given string.
-     */
-    public void replaceChars(String aString)  { replaceChars(aString, null, getSelStart(), getSelEnd(), true);}
-
-    /**
-     * Replaces the current selection with the given string.
-     */
-    public void replaceChars(String aString, TextStyle aStyle, int aStart, int anEnd, boolean doUpdateSel)
-    {
-        _textArea.replaceChars(aString, aStyle, aStart, anEnd, doUpdateSel);
-    }
-
-    /**
-     * Clears the text.
-     */
-    public void clear()  { _textArea.clear(); }
-
-    /**
-     * Opens a given link.
-     */
-    protected void openLink(String aLink)  { System.out.println("Open Link: " + aLink); }
 
     /**
      * Returns the undoer.

@@ -23,7 +23,8 @@ public class DevPaneExceptions extends ViewOwner {
     {
         anExc.fillInStackTrace();
         String str = StringUtils.getStackTraceString(anExc);
-        _textView.addChars(str);
+        TextArea textArea = _textView.getTextArea();
+        textArea.addChars(str);
     }
 
     @Override
