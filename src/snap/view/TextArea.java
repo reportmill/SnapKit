@@ -735,32 +735,14 @@ public class TextArea extends View {
         // If already set, just return
         if (_selStyle != null) return _selStyle;
 
-        // Get, set, return
-        TextStyle textStyle = getSelStyleImpl();
-        return _selStyle = textStyle;
-    }
-
-    /**
-     * Returns the TextStyle for the current selection and/or input characters.
-     */
-    protected TextStyle getSelStyleImpl()
-    {
-        // If empty Sel, get style at SelStart
+        // Get style for sel range
         TextDoc textDoc = getTextDoc();
         int selStart = getSelStart();
-        if (isSelEmpty())
-            return getStyleForCharIndex(selStart);
+        int selEnd = getSelEnd();
+        TextStyle selStyle = textDoc.getStyleForCharRange(selStart, selEnd);
 
-        // Get Run at SelStart
-        TextRun selRun = textDoc.getRunForCharIndex(selStart);
-
-        // If SelStart at end of run but not end of line, get next run
-        TextLine selLine = selRun.getLine();
-        if (selStart == selLine.getStartCharIndex() + selRun.getEndCharIndex() && selStart < selLine.getEndCharIndex())
-            selRun = selRun.getNext();
-
-        // Return
-        return selRun.getStyle();
+        // Set/return
+        return _selStyle = selStyle;
     }
 
     /**
@@ -770,11 +752,11 @@ public class TextArea extends View {
     {
         // If selection is zero length, just modify input style
         if (isSelEmpty() && isRichText()) {
-            TextStyle selStyle = getSelStyleImpl();
+            TextStyle selStyle = getSelStyle();
             _selStyle = selStyle.copyFor(aKey, aValue);
         }
 
-            // If selection is multiple chars, apply attribute to text and reset SelStyle
+        // If selection is multiple chars, apply attribute to text and reset SelStyle
         else {
             TextDoc textDoc = getTextDoc();
             textDoc.setStyleValue(aKey, aValue, getSelStart(), getSelEnd());
@@ -870,9 +852,16 @@ public class TextArea extends View {
         if ((strLen > 0 && aStart != _lastReplaceIndex) || (strLen == 0 && anEnd != _lastReplaceIndex))
             undoerSaveChanges();
 
-        // Do actual replace chars
-        TextStyle style = aStyle != null ? aStyle : aStart == getSelStart() ? getSelStyle() : getStyleForCharIndex(aStart);
+        // Get style (might need SelStyle if replacing empty selection)
         TextDoc textDoc = getTextDoc();
+        TextStyle style = aStyle;
+        if (style == null) {
+            if (aStart == getSelStart())
+                style = getSelStyle();
+            else style = textDoc.getStyleForCharRange(aStart, anEnd);
+        }
+
+        // Forward to TextDoc replaceChars()
         textDoc.replaceChars(aString, style, aStart, anEnd);
 
         // Update selection to be at end of new string

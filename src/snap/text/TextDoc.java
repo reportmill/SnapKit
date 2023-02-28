@@ -372,20 +372,15 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
      */
     public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
     {
-        // Get style and linestyle for add chars
-        TextStyle style = theStyle != null ? theStyle : getStyleForCharIndex(aStart);
-        TextLineStyle lineStyle = null;
-        if (theChars != null && theChars.length() > 0 && isRichText())
-            lineStyle = getLineStyleForCharIndex(aStart);
+        // Get TextStyle for add chars range (if not provided)
+        TextStyle style = theStyle;
+        if (style == null)
+            style = getStyleForCharRange(aStart, anEnd);
 
         // Remove given range and add chars
         if (anEnd > aStart)
             removeChars(aStart, anEnd);
         addChars(theChars, style, aStart);
-
-        // Restore LineStyle (needed if range includes a newline)
-        if (lineStyle != null)
-            setLineStyle(lineStyle, aStart, aStart + theChars.length());
     }
 
     /**
@@ -441,8 +436,9 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
      */
     public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
-        TextStyle style = getStyleForCharIndex(aStart).copyFor(aKey, aValue);
-        setStyle(style, aStart, anEnd);
+        TextStyle styleForRange = getStyleForCharRange(aStart, anEnd);
+        TextStyle newStyle = styleForRange.copyFor(aKey, aValue);
+        setStyle(newStyle, aStart, anEnd);
     }
 
     /**
@@ -504,12 +500,11 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     /**
      * Removes the block at given index.
      */
-    protected TextLine removeLine(int anIndex)
+    protected void removeLine(int anIndex)
     {
         TextLine line = _lines.remove(anIndex);
         line._textDoc = null;
         updateLines(anIndex - 1);
-        return line;
     }
 
     /**
@@ -617,6 +612,27 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the TextRun for the given char range (usually just run for start, but can be next run if at boundary).
+     */
+    public TextRun getRunForCharRange(int startIndex, int endIndex)
+    {
+        // Get run at start index
+        TextRun textRun = getRunForCharIndex(startIndex);
+
+        // If given non-empty range and startIndex is at end of normal run, get next
+        if (endIndex > startIndex) {
+            if (startIndex == textRun.getEndCharIndex()) {
+                TextRun nextRun = textRun.getNext();
+                if (nextRun != null)
+                    textRun = nextRun;
+            }
+        }
+
+        // Return
+        return textRun;
+    }
+
+    /**
      * Returns the last run.
      */
     public TextRun getRunLast()
@@ -641,6 +657,15 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     public TextStyle getStyleForCharIndex(int charIndex)
     {
         TextRun textRun = getRunForCharIndex(charIndex);
+        return textRun.getStyle();
+    }
+
+    /**
+     * Returns the TextStyle for the run for given char range.
+     */
+    public TextStyle getStyleForCharRange(int startIndex, int endIndex)
+    {
+        TextRun textRun = getRunForCharRange(startIndex, endIndex);
         return textRun.getStyle();
     }
 

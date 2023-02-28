@@ -60,15 +60,17 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
             // Set style
             RichTextLine line = (RichTextLine) getLineForCharIndex(textCharIndex);
             int lineStart = line.getStartCharIndex();
-            TextRun run = getRunForCharIndex(textCharIndex);
-            if (textCharIndex - lineStart == run.getEndCharIndex())
-                run = run.getNext();
+            TextRun run = getRunForCharRange(textCharIndex, anEnd);
 
-            // If run is too large, trim to size
-            if (textCharIndex - lineStart > run.getStartCharIndex())
-                run = line.splitRunForCharIndex(run, textCharIndex - lineStart - run.getStartCharIndex());
-            if (anEnd - lineStart < run.getEndCharIndex())
-                line.splitRunForCharIndex(run, anEnd - lineStart - run.getStartCharIndex());
+            // If run is is larger than range, trim to size
+            if (textCharIndex - lineStart > run.getStartCharIndex()) {
+                int newRunStart = textCharIndex - lineStart - run.getStartCharIndex();
+                run = line.splitRunForCharIndex(run, newRunStart);
+            }
+            if (anEnd - lineStart < run.getEndCharIndex()) {
+                int newRunEnd = anEnd - lineStart - run.getStartCharIndex();
+                line.splitRunForCharIndex(run, newRunEnd);
+            }
 
             // Set style
             TextStyle oldStyle = run.getStyle();
@@ -77,7 +79,8 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
 
             // Fire prop change
             if (isPropChangeEnabled()) {
-                int runStart = run.getStartCharIndex() + lineStart, runEnd = run.getEndCharIndex() + lineStart;
+                int runStart = run.getStartCharIndex() + lineStart;
+                int runEnd = run.getEndCharIndex() + lineStart;
                 PropChange pc = new TextDocUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
                 firePropChange(pc);
             }
