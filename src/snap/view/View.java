@@ -1555,7 +1555,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     public void addBinding(Binding aBinding)
     {
         if (_bindings == Collections.EMPTY_LIST) _bindings = new ArrayList<>();
-        removeBinding(aBinding.getPropertyName());     // Remove current binding for property (if it exists)
+        removeBinding(aBinding.getPropName());     // Remove current binding for property (if it exists)
         _bindings.add(aBinding);
         aBinding.setView(this);
     }
@@ -1575,7 +1575,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         // Iterate over bindings and if we find one for given property name, return it
         for (Binding b : _bindings)
-            if (b.getPropertyName().equals(aPropName))
+            if (b.getPropName().equals(aPropName))
                 return b;
 
         // If property name is mapped, try again
@@ -1594,7 +1594,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     {
         for (int i = 0, iMax = getBindingCount(); i < iMax; i++) {
             Binding binding = getBinding(i);
-            if (binding.getPropertyName().equals(aPropName)) {
+            if (binding.getPropName().equals(aPropName)) {
                 removeBinding(i);
                 return true;
             }

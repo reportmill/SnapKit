@@ -11,13 +11,13 @@ import snap.util.*;
 public class Binding implements Cloneable, XMLArchiver.Archivable {
 
     // The UI node (most commonly a snap View)
-    Object _view;
+    private Object  _view;
 
     // The property name that is being bound
-    String _propName;
+    private String  _propName;
 
     // The key that is used to get the property value from the bound object
-    String _key;
+    private String  _key;
 
     /**
      * Creates a new binding.
@@ -31,7 +31,7 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
      */
     public Binding(String aPropName, String aKey)
     {
-        setPropertyName(aPropName);
+        setPropName(aPropName);
         setKey(aKey);
     }
 
@@ -59,12 +59,12 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
     /**
      * Returns the property name.
      */
-    public String getPropertyName()  { return _propName; }
+    public String getPropName()  { return _propName; }
 
     /**
      * Sets the property name.
      */
-    public void setPropertyName(String aPropertyName)
+    public void setPropName(String aPropertyName)
     {
         _propName = aPropertyName;
     }
@@ -104,7 +104,7 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
         XMLElement e = new XMLElement("binding");
 
         // Archive PropertyName, Key, ConversionKey
-        e.add("aspect", getPropertyName());
+        e.add("aspect", getPropName());
         if (getKey() != null && getKey().length() > 0) e.add("key", getKey());
 
         // Return xml element
@@ -117,7 +117,7 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
     public Binding fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
         // Unarchive PropertyName, Key, ConversionKey
-        setPropertyName(anElement.getAttributeValue("aspect"));
+        setPropName(anElement.getAttributeValue("aspect"));
         setKey(anElement.getAttributeValue("key"));
 
         // Return this binding
@@ -131,7 +131,7 @@ public class Binding implements Cloneable, XMLArchiver.Archivable {
     {
         Object view = getView();
         String viewClassName = view != null ? view.getClass().getSimpleName() : null;
-        String propName = getPropertyName();
+        String propName = getPropName();
         return "Binding: " + viewClassName + ": " + propName + " = " + getKey();
     }
 }
