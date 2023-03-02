@@ -133,6 +133,12 @@ public class CameraView extends ParentView {
     protected void paintFront(Painter aPntr)
     {
         _camera.paintScene(aPntr);
+
+        // This is an ugly fix for Jogl/MacOS bug where 3D painting doesn't seem to work when mouse dragging
+        if (!isShowCubeView() && SnapUtils.isMac) {  // P.S. - I don't know why it works
+            aPntr.clipRect(0, 0, .1, .1);
+            getCubeView().paintFront(aPntr);
+        }
     }
 
     /**
