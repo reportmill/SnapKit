@@ -267,7 +267,10 @@ public class WebURL {
      */
     public WebURL getFileURL()
     {
-        return isFileURL() ? this : getURL(_urlString.getFileURL());
+        if (isFileURL())
+            return this;
+        String fileUrlStr = _urlString.getFileURL();
+        return getURL(fileUrlStr);
     }
 
     /**
@@ -283,7 +286,10 @@ public class WebURL {
      */
     public WebURL getQueryURL()
     {
-        return isQueryURL() ? this : getURL(_urlString.getQueryURL());
+        if (isQueryURL())
+            return this;
+        String queryUrlStr = _urlString.getQueryURL();
+        return getURL(queryUrlStr);
     }
 
     /**

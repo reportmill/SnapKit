@@ -89,8 +89,6 @@ public class JRTSite extends WebSite {
         else {
             List<FileHeader> fileHeaders = getFileHeadersForUrlPath(urlPath);
             aResp.setFileHeaders(fileHeaders);
-            System.out.println("Get files for: " + urlPath);
-            System.out.println("    " + fileHeaders.stream().map(fhdr -> fhdr.getPath()).collect(Collectors.joining(", ")));
         }
     }
 
