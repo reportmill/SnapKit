@@ -1,5 +1,7 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.web;
-
 import snap.gfx.GFXEnv;
 import snap.util.FilePathUtils;
 
@@ -27,36 +29,8 @@ public class WebGetter {
     public static URL getJavaURL(Object anObj) // throws MalformedURLException, IOException, IllegalArgumentException
     {
         // Handle String
-        if (anObj instanceof String) {
-            String str = (String) anObj;
-
-            // If it's our silly "Jar:/com/rm" format, return class resource URL
-            if (str.startsWith("Jar:/com/reportmill"))
-                return getJavaURL(WebURL.class, str.substring(4));
-            if (str.startsWith("Jar:/reportmill"))
-                return getJavaURL(WebURL.class, str.substring(4));
-
-            // If string is Windows/Unix file path, make it a file URL
-            if (str.indexOf('\\') >= 0) {
-                String strlc = str.toLowerCase();
-                str = str.replace('\\', '/');
-                if (!str.startsWith("/") || !strlc.startsWith("file:")) str = '/' + str;
-            }
-            if (str.startsWith("/")) str = "file://" + str;
-
-            // Get protocol for URL
-            int ind = str.indexOf(':');
-            if (ind < 0) throw new RuntimeException("Missing protocol in URL: " + str);
-            String scheme = str.substring(0, ind).toLowerCase();
-
-            // Try to return URL
-            try { return new URL(str); }
-            catch (MalformedURLException e) { }
-
-            // Try to return URL with bogus stream handler
-            try { return new URL(null, str, new BogusURLStreamHandler()); }
-            catch (IOException e) { }
-        }
+        if (anObj instanceof String)
+            return getJavaUrlForString((String) anObj);
 
         // Handle File: Convert to Canonical URL to normalize path
         if (anObj instanceof File) {
@@ -71,31 +45,71 @@ public class WebGetter {
 
         // Handle Class
         if (anObj instanceof Class)
-            return getJavaURL((Class) anObj, null);
+            return getJavaUrlForClass((Class<?>) anObj, null);
 
         // Complain
-        throw new IllegalArgumentException("No URL found for: " + anObj);
+        throw new IllegalArgumentException("WebGetter.getJavaURL: No URL found for: " + anObj);
+    }
+
+    /**
+     * Returns a java.net.URL for given source.
+     */
+    public static URL getJavaUrlForString(String urlString)
+    {
+        // If it's our silly "Jar:/com/rm" format, return class resource URL
+        if (urlString.startsWith("Jar:/com/reportmill"))
+            return getJavaUrlForClass(WebURL.class, urlString.substring(4));
+        if (urlString.startsWith("Jar:/reportmill"))
+            return getJavaUrlForClass(WebURL.class, urlString.substring(4));
+
+        // If string is Windows/Unix file path, make it a file URL
+        if (urlString.indexOf('\\') >= 0) {
+            String urlStringLowerCase = urlString.toLowerCase();
+            urlString = urlString.replace('\\', '/');
+            if (!urlString.startsWith("/") || !urlStringLowerCase.startsWith("file:"))
+                urlString = '/' + urlString;
+        }
+        if (urlString.startsWith("/"))
+            urlString = "file://" + urlString;
+
+        // If no protocol declared, complain
+        boolean containsSchemeSeparator = urlString.contains(":");
+        if (!containsSchemeSeparator)
+            throw new RuntimeException("Missing protocol in URL: " + urlString);
+
+        // Try to return URL
+        try { return new URL(urlString); }
+        catch (MalformedURLException e) { }
+
+        // Try to return URL with bogus stream handler
+        try { return new URL(null, urlString, new BogusURLStreamHandler()); }
+        catch (IOException e) { }
+
+        // Complain
+        throw new IllegalArgumentException("WebGetter.getJavaUrlForString: No URL found for: " + urlString);
     }
 
     /**
      * Returns a URL for given class and name/path string.
      */
-    public static URL getJavaURL(Class aClass, String aName)
+    public static URL getJavaUrlForClass(Class<?> aClass, String aName)
     {
         // Get absolute path to class/resource
-        String path = '/' + aClass.getName().replace('.', '/') + ".class";
+        String className = aClass.getName();
+        String classPath = '/' + className.replace('.', '/');
+        String resourcePath = classPath + ".class";
         if (aName != null) {
             if (aName.startsWith("/"))
-                path = aName;
+                resourcePath = aName;
             else {
-                int sep = path.lastIndexOf('/');
-                path = path.substring(0, sep + 1) + aName;
+                int sep = resourcePath.lastIndexOf('/');
+                resourcePath = resourcePath.substring(0, sep + 1) + aName;
             }
         }
 
         // Get URL for full path
         GFXEnv env = GFXEnv.getEnv();
-        return env.getResource(aClass, path);
+        return env.getResource(aClass, resourcePath);
     }
 
     /**
@@ -109,7 +123,7 @@ public class WebGetter {
             return site;
 
         // Otherwise, create site, set URL and return
-        site = createSite(aSiteURL);
+        site = createSiteForURL(aSiteURL);
         site.setURL(aSiteURL);
         return site;
     }
@@ -125,7 +139,7 @@ public class WebGetter {
     /**
      * Creates a site for given URL.
      */
-    protected static WebSite createSite(WebURL aSiteURL)
+    protected static WebSite createSiteForURL(WebURL aSiteURL)
     {
         // Get parentSiteURL, scheme, path and type
         WebURL parentSiteURL = aSiteURL.getSiteURL();
@@ -134,6 +148,11 @@ public class WebGetter {
         if (path == null)
             path = "";
         String type = FilePathUtils.getExtension(path).toLowerCase();
+
+        // Try platform env
+        WebSite site = GFXEnv.getEnv().createSiteForURL(aSiteURL);
+        if (site != null)
+            return site;
 
         // Handle ZipSite and JarSite
         if (type.equals("zip") || type.equals("jar") || path.endsWith(".jar.pack.gz") || type.equals("gfar"))

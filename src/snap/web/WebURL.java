@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-
 import snap.util.SnapUtils;
 import snap.util.URLUtils;
 
@@ -26,10 +25,13 @@ public class WebURL {
     private Object  _src;
 
     // The source object as URL
-    private URL  _srcURL, _jurl;
+    private URL  _srcURL;
+
+    // The native URL
+    private URL  _jurl;
 
     // The URL string
-    private URLString _urlString;
+    private URLString  _urlString;
 
     // The URL of WebSite this WebURL belongs to (just this WebURL if no path)
     private WebURL  _siteURL;
@@ -58,11 +60,8 @@ public class WebURL {
      */
     public static WebURL getURL(Object anObj)
     {
-        try {
-            return getURLOrThrow(anObj);
-        } catch (Exception e) {
-            return null;
-        }
+        try { return getURLOrThrow(anObj); }
+        catch (Exception e) { return null; }
     }
 
     /**
@@ -71,8 +70,10 @@ public class WebURL {
     public static WebURL getURLOrThrow(Object anObj)
     {
         // Handle null, WebURL, WebFile
-        if (anObj == null || anObj instanceof WebURL) return (WebURL) anObj;
-        if (anObj instanceof WebFile) return ((WebFile) anObj).getURL();
+        if (anObj == null || anObj instanceof WebURL)
+            return (WebURL) anObj;
+        if (anObj instanceof WebFile)
+            return ((WebFile) anObj).getURL();
 
         // Get URL
         return new WebURL(anObj);
@@ -83,8 +84,10 @@ public class WebURL {
      */
     public static WebURL getURL(Class<?> aClass, String aName)
     {
-        URL url = WebGetter.getJavaURL(aClass, aName);
-        return url != null ? new WebURL(url) : null;
+        URL url = WebGetter.getJavaUrlForClass(aClass, aName);
+        if (url != null)
+            return new WebURL(url);
+        return null;
     }
 
     /**
@@ -199,9 +202,14 @@ public class WebURL {
      */
     public WebURL getSiteURL()
     {
+        // If already set, just return
         if (_siteURL != null) return _siteURL;
+
+        // Get site for site string
         String siteURLString = _urlString.getSite();
         WebURL siteURL = getURL(siteURLString);
+
+        // Set/return
         return _siteURL = siteURL;
     }
 
@@ -210,7 +218,10 @@ public class WebURL {
      */
     public WebSite getAsSite()
     {
+        // If already set, just return
         if (_asSite != null) return _asSite;
+
+        // Get/set/return
         WebSite site = WebGetter.getSite(this);
         return _asSite = site;
     }
@@ -220,10 +231,13 @@ public class WebURL {
      */
     public WebFile getFile()
     {
-        String path = getPath();
         WebSite site = getSite();
-        WebFile file = path != null ? site.getFileForPath(path) : site.getRootDir();
-        return file;
+        String path = getPath();
+        if (path != null)
+            return site.getFileForPath(path);
+
+        // Fallback to root dir?
+        return site.getRootDir();
     }
 
     /**
@@ -233,8 +247,11 @@ public class WebURL {
     {
         String path = getPath();
         WebSite site = getSite();
-        WebFile file = path != null ? site.createFileForPath(path, isDir) : site.getRootDir();
-        return file;
+        if (path != null)
+            return site.createFileForPath(path, isDir);
+
+        // Fallback to root dir?
+        return site.getRootDir();
     }
 
     /**
@@ -278,15 +295,13 @@ public class WebURL {
         if (_jurl != null) return _jurl;
 
         // If URL doesn't have site path, just set/return SourceURL
-        if (getString().indexOf('!') < 0) return _jurl = _srcURL;
+        if (getString().indexOf('!') < 0)
+            return _jurl = _srcURL;
 
         // Get URL string without site path separator and create/set/return URL
-        String urls = getString().replace("!", "");
-        try {
-            return _jurl = new URL(urls);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        String urlString = getString().replace("!", "");
+        try { return _jurl = new URL(urlString); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 
     /**
@@ -294,7 +309,8 @@ public class WebURL {
      */
     public File getJavaFile()
     {
-        return getSite().getJavaFile(this);
+        WebSite site = getSite();
+        return site.getJavaFile(this);
     }
 
     /**
@@ -307,7 +323,8 @@ public class WebURL {
             return ((File) _src).exists();
 
         // Otherwise see if getHead() returns OK
-        return getHead().getCode() == WebResponse.OK;
+        WebResponse headResp = getHead();
+        return headResp.getCode() == WebResponse.OK;
     }
 
     /**
@@ -325,16 +342,13 @@ public class WebURL {
         // Handle URL
         if (_src instanceof URL) {
             URL url = getJavaURL();
-            try {
-                return url.openConnection().getLastModified();
-            } catch (IOException e) {
-                return 0;
-            }
+            try { return url.openConnection().getLastModified(); }
+            catch (IOException e) { return 0; }
         }
 
         // Otherwise, return FileHeader.LastModTime
-        FileHeader fhdr = getFileHeader();
-        return fhdr.getModTime();
+        FileHeader fileHeader = getFileHeader();
+        return fileHeader.getModTime();
     }
 
     /**
@@ -342,11 +356,8 @@ public class WebURL {
      */
     public byte[] getBytes()
     {
-        try {
-            return getBytesOrThrow();
-        } catch (Exception e) {
-            return null;
-        }
+        try { return getBytesOrThrow(); }
+        catch (Exception e) { return null; }
     }
 
     /**
@@ -395,7 +406,8 @@ public class WebURL {
      */
     public InputStream getInputStream()
     {
-        return new ByteArrayInputStream(getBytes());
+        byte[] bytes = getBytes();
+        return new ByteArrayInputStream(bytes);
     }
 
     /**
@@ -444,10 +456,12 @@ public class WebURL {
     public WebURL getParent()
     {
         String path = getPath();
-        if (path.equals("/")) return null;
+        if (path.equals("/"))
+            return null;
+
+        WebSite site = getSite();
         String parPath = PathUtils.getParent(path);
-        WebURL parURL = getSite().getURL(parPath);
-        return parURL;
+        return site.getURL(parPath);
     }
 
     /**
@@ -457,8 +471,8 @@ public class WebURL {
     {
         String path = getPath();
         String childPath = PathUtils.getChild(path, aName);
-        WebURL childURL = getSite().getURL(childPath);
-        return childURL;
+        WebSite site = getSite();
+        return site.getURL(childPath);
     }
 
     /**
@@ -475,6 +489,7 @@ public class WebURL {
     /**
      * Standard HashCode implementation.
      */
+    @Override
     public int hashCode()
     {
         return _urlString.hashCode();
@@ -483,6 +498,7 @@ public class WebURL {
     /**
      * Standard toString implementation.
      */
+    @Override
     public String toString()
     {
         return "WebURL: " + getString();

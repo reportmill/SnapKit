@@ -138,6 +138,11 @@ public abstract class GFXEnv {
     public abstract Method getMethod(Class<?> aClass, String aName, Class<?>... theClasses) throws NoSuchMethodException;
 
     /**
+     * Creates a site for a URL.
+     */
+    public WebSite createSiteForURL(WebURL aURL)  { return null; }
+
+    /**
      * This is really just here to help with TeaVM.
      */
     public abstract void exit(int aValue);
