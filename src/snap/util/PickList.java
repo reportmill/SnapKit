@@ -9,24 +9,34 @@ import java.util.*;
 /**
  * A list implementation that includes support for a selection and a synchronized sorted list.
  */
-public class PickList <E> extends AbstractList <E> implements Cloneable {
+public class PickList<E> extends AbstractList<E> implements Cloneable {
     
     // The real list
-    private List <E>  _list = new ArrayList<>();
+    private List<E>  _list;
 
     // Whether list supports multiple selection
     private boolean  _multiSel;
 
     // The selection
-    private ListSel  _sel = new ListSel(-1, -1);
+    private ListSel  _sel;
 
     // The PropChangeSupport
-    protected PropChangeSupport _pcs = PropChangeSupport.EMPTY;
+    protected PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
 
     // Constants for properties
     public static final String Item_Prop = "Item";
     public static final String Sel_Prop = "Sel";
     public static final String MultiSel_Prop = "MultiSel";
+
+    /**
+     * Constructor.
+     */
+    public PickList()
+    {
+        super();
+        _list = new ArrayList<>();
+        _sel = new ListSel(-1, -1);
+    }
 
     /**
      * Return list size.
@@ -60,18 +70,23 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     /**
      * Sets all items.
      */
-    public void setAll(Collection <? extends E> aCol)
+    public void setAll(Collection<? extends E> aCollection)
     {
-        E sitems[] = (E[]) getSelItems();
+        E[] selItems = (E[]) getSelItems();
         clear();
-        if (aCol!=null) addAll(aCol);
-        setSelItems(sitems);
+        if (aCollection != null)
+            addAll(aCollection);
+        setSelItems(selItems);
     }
 
     /**
      * Clears the list.
      */
-    public void clear()  { _list.clear(); }
+    public void clear()
+    {
+        while (_list.size() > 0)
+            remove(0);
+    }
 
     /**
      * Returns whether list allows multiple selections.
@@ -83,7 +98,7 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
      */
     public void setMultiSel(boolean aValue)
     {
-        if (aValue==isMultiSel()) return;
+        if (aValue == isMultiSel()) return;
         firePropChange(MultiSel_Prop, _multiSel, _multiSel = aValue, -1);
     }
 
@@ -162,8 +177,8 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
      */
     public E getSelItem()
     {
-        int ind = getSelIndex();
-        return ind>=0 && ind<size() ? get(ind) : null;
+        int selIndex = getSelIndex();
+        return selIndex >= 0 && selIndex < size() ? get(selIndex) : null;
     }
 
     /**
@@ -185,11 +200,11 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
      */
     public <T> T[] getSelItems(Class <T> aClass)
     {
-        int selInds[] = getSelIndexes();
-        T[] items = (T[]) Array.newInstance(aClass, selInds.length);
-        for (int i=0; i<selInds.length; i++)
-            items[i] = (T) get(selInds[i]);
-        return items;
+        int[] selIndexes = getSelIndexes();
+        T[] selItems = (T[]) Array.newInstance(aClass, selIndexes.length);
+        for (int i = 0; i < selIndexes.length; i++)
+            selItems[i] = (T) get(selIndexes[i]);
+        return selItems;
     }
 
     /**
@@ -197,8 +212,8 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
      */
     public void setSelItems(E ... theItems)
     {
-        int indexes[] = getIndexesForItems(theItems);
-        setSelIndexes(indexes);
+        int[] selIndexes = getIndexesForItems(theItems);
+        setSelIndexes(selIndexes);
     }
 
     /**
@@ -208,15 +223,15 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
     {
         // Iterate over items and return array of indexes
         int len = theItems.length, len2 = 0;
-        int indexes[] = new int[len];
-        for (int i=0; i<len; i++) { E item = theItems[i];
-            int ind = indexOf(item);
-            if (ind>=0)
-                indexes[len2++] = ind;
+        int[] indexes = new int[len];
+        for (E item : theItems) {
+            int itemIndex = indexOf(item);
+            if (itemIndex >= 0)
+                indexes[len2++] = itemIndex;
         }
 
         // Trim list and return
-        if (len2!=len)
+        if (len2 != len)
             indexes = Arrays.copyOf(indexes, len2);
         return indexes;
     }
@@ -226,8 +241,9 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
      */
     public void selectUp()
     {
-        if (getSelIndex()>0)
-            setSelIndex(getSelIndex()-1);
+        int selIndex = getSelIndex();
+        if (selIndex > 0)
+            setSelIndex(selIndex - 1);
     }
 
     /**
@@ -235,8 +251,9 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
      */
     public void selectDown()
     {
-        if (getSelIndex()<size()-1)
-            setSelIndex(getSelIndex()+1);
+        int selIndex = getSelIndex();
+        if (selIndex < size()-1)
+            setSelIndex(selIndex + 1);
     }
 
     /**
@@ -244,7 +261,7 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
      */
     public void addPropChangeListener(PropChangeListener aLsnr)
     {
-        if (_pcs==PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
+        if (_pcs == PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
         _pcs.addPropChangeListener(aLsnr);
     }
 
@@ -272,10 +289,10 @@ public class PickList <E> extends AbstractList <E> implements Cloneable {
      */
     public Object clone()
     {
-        PickList clone;
-        try { clone = (PickList)super.clone(); }
+        PickList<E> clone;
+        try { clone = (PickList<E>) super.clone(); }
         catch(CloneNotSupportedException e) { throw new RuntimeException(e); }
-        clone._list = new ArrayList(_list);
+        clone._list = new ArrayList<>(_list);
         clone._pcs = PropChangeSupport.EMPTY;  // Clear listeners and return clone
         return clone;
     }

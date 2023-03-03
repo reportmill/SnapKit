@@ -14,10 +14,6 @@ import snap.util.*;
 
 /**
  * A View to show a list of items and act as basis of ListView.
- * 
- * To display custom text in list, simply call list.setItemTextFunction(itm -> itm.getName());
- * 
- * To custom configure list cell, simply call list.setCellConfigure(cell -> cell.setImage(img));
  */
 public class ListArea <T> extends ParentView implements Selectable<T> {
 
@@ -345,12 +341,12 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns function for deteriming text for an item.
+     * Returns function for determining text for an item.
      */
     public Function <T,String> getItemTextFunction()  { return _itemTextFunc; }
 
     /**
-     * Sets function for deteriming text for an item.
+     * Sets function for determining text for an item.
      */
     public void setItemTextFunction(Function <T,String> aFunc)  { _itemTextFunc = aFunc; }
 
@@ -512,8 +508,8 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     public ListCell<T> getSelCell()
     {
-        int ind = getSelIndex();
-        return getCellForRow(ind);
+        int selIndex = getSelIndex();
+        return getCellForRow(selIndex);
     }
 
     /**
@@ -539,7 +535,8 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         }
 
         // Get selection rect. If empty, outset by 1
-        Rect scrollBounds = getItemBounds(getSelIndex());
+        int selIndex = getSelIndex();
+        Rect scrollBounds = getItemBounds(selIndex);
         if (scrollBounds.isEmpty())
             scrollBounds.inset(-1,-2);
         else scrollBounds.width = 30;

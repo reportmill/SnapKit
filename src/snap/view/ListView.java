@@ -11,10 +11,6 @@ import snap.util.*;
 
 /**
  * A View to manage a list of items (ListArea) in a ScrollView.
- * 
- * To display custom text in list, simply call list.setItemTextFunction(itm -> itm.getName());
- * 
- * To custom configure list cell, simply call list.setCellConfigure(cell -> cell.setImage(img));
  */
 public class ListView <T> extends ParentView implements Selectable<T> {
     
@@ -68,7 +64,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Creates the ListArea.
      */
-    protected ListArea createListArea()  { return new ListArea(); }
+    protected ListArea<T> createListArea()  { return new ListArea<>(); }
 
     /**
      * Returns the ScrollView.
@@ -123,10 +119,7 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Sets the items.
      */
-    public void setItems(T ... theItems)
-    {
-        setItems(theItems!=null ? Arrays.asList(theItems) : null);
-    }
+    public void setItems(T ... theItems)  { _listArea.setItems(theItems); }
 
     /**
      * Returns the selected index.
@@ -167,16 +160,6 @@ public class ListView <T> extends ParentView implements Selectable<T> {
      * Sets the row height.
      */
     public void setRowHeight(double aValue)  { _listArea.setRowHeight(aValue); }
-
-    /**
-     * Returns the row at given Y location.
-     */
-    public int getRowForY(double aY)  { return _listArea.getRowIndexForY(aY); }
-
-    /**
-     * Returns function for deteriming text for an item.
-     */
-    public Function <T,String> getItemTextFunction()  { return _listArea.getItemTextFunction(); }
 
     /**
      * Sets function for deteriming text for an item.
