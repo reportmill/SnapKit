@@ -30,8 +30,8 @@ public class WebURL {
     // The native URL
     private URL  _jurl;
 
-    // The URL string
-    private URLString  _urlString;
+    // The Parsed URL
+    private ParsedURL  _parsedUrl;
 
     // The URL of WebSite this WebURL belongs to (just this WebURL if no path)
     private WebURL  _siteURL;
@@ -40,7 +40,7 @@ public class WebURL {
     protected WebSite  _asSite;
 
     /**
-     * Creates a WebURL for given source.
+     * Constructor for given source.
      */
     protected WebURL(Object aSource)
     {
@@ -52,7 +52,7 @@ public class WebURL {
 
         // Get URLString for parts
         String urls = URLUtils.getString(_srcURL);
-        _urlString = new URLString(urls);
+        _parsedUrl = new ParsedURL(urls);
     }
 
     /**
@@ -103,90 +103,57 @@ public class WebURL {
     /**
      * Returns the full URL string.
      */
-    public String getString()
-    {
-        return _urlString.getString();
-    }
+    public String getString()  { return _parsedUrl.getString(); }
 
     /**
      * Returns the URL Scheme (lower case).
      */
-    public String getScheme()
-    {
-        return _urlString.getScheme();
-    }
+    public String getScheme()  { return _parsedUrl.getScheme(); }
 
     /**
-     * Returns the Host part of the URL (the Authority minus the optional UserInfo and Port).
+     * Returns the Host part of the URL.
      */
-    public String getHost()
-    {
-        return _urlString.getHost();
-    }
+    public String getHost()  { return _parsedUrl.getSiteId(); }
 
     /**
      * Returns the port of the URL.
      */
-    public int getPort()
-    {
-        return _urlString.getPort();
-    }
+    public int getPort()  { return _parsedUrl.getPort(); }
 
     /**
      * Returns the part of the URL string that describes the file path.
      */
-    public String getPath()
-    {
-        return _urlString.getPath();
-    }
+    public String getPath()  { return _parsedUrl.getPath(); }
 
     /**
      * Returns the last component of the file path.
      */
-    public String getPathName()
-    {
-        return _urlString.getPathName();
-    }
+    public String getPathName()  { return _parsedUrl.getPathName(); }
 
     /**
      * Returns the last component of the file path minus any '.' extension suffix.
      */
-    public String getPathNameSimple()
-    {
-        return _urlString.getPathNameSimple();
-    }
+    public String getPathNameSimple()  { return _parsedUrl.getPathNameSimple(); }
 
     /**
      * Returns the part of the URL string that describes the query.
      */
-    public String getQuery()
-    {
-        return _urlString.getQuery();
-    }
+    public String getQuery()  { return _parsedUrl.getQuery(); }
 
     /**
      * Returns the value for given Query key in URL, if available.
      */
-    public String getQueryValue(String aKey)
-    {
-        return _urlString.getQueryValue(aKey);
-    }
+    public String getQueryValue(String aKey)  { return _parsedUrl.getQueryValue(aKey); }
 
     /**
      * Returns the hash tag reference from the URL as a simple string.
      */
-    public String getRef()
-    {
-        return _urlString.getRef();
-    }
+    public String getRef()  { return _parsedUrl.getHashtag(); }
 
     /**
      * Returns the value for given HashTag key in URL, if available.
      */
-    public String getRefValue(String aKey)
-    {
-        return _urlString.getRefValue(aKey);
-    }
+    public String getRefValue(String aKey)  { return _parsedUrl.getHashtagValue(aKey); }
 
     /**
      * Returns the site that this URL belongs to.
@@ -206,7 +173,7 @@ public class WebURL {
         if (_siteURL != null) return _siteURL;
 
         // Get site for site string
-        String siteURLString = _urlString.getSite();
+        String siteURLString = _parsedUrl.getSiteUrl();
         WebURL siteURL = getURL(siteURLString);
 
         // Set/return
@@ -259,7 +226,7 @@ public class WebURL {
      */
     public boolean isFileURL()
     {
-        return _urlString.isFileURL();
+        return _parsedUrl.isFileURL();
     }
 
     /**
@@ -269,7 +236,7 @@ public class WebURL {
     {
         if (isFileURL())
             return this;
-        String fileUrlStr = _urlString.getFileURL();
+        String fileUrlStr = _parsedUrl.getFileURL();
         return getURL(fileUrlStr);
     }
 
@@ -278,7 +245,7 @@ public class WebURL {
      */
     public boolean isQueryURL()
     {
-        return _urlString.isQueryURL();
+        return _parsedUrl.isQueryURL();
     }
 
     /**
@@ -288,7 +255,7 @@ public class WebURL {
     {
         if (isQueryURL())
             return this;
-        String queryUrlStr = _urlString.getQueryURL();
+        String queryUrlStr = _parsedUrl.getQueryURL();
         return getURL(queryUrlStr);
     }
 
@@ -489,7 +456,7 @@ public class WebURL {
         if (anObj == this) return true;
         WebURL other = anObj instanceof WebURL ? (WebURL) anObj : null;
         if (other == null) return false;
-        return _urlString.equals(other._urlString);
+        return _parsedUrl.equals(other._parsedUrl);
     }
 
     /**
@@ -498,7 +465,7 @@ public class WebURL {
     @Override
     public int hashCode()
     {
-        return _urlString.hashCode();
+        return _parsedUrl.hashCode();
     }
 
     /**

@@ -5,29 +5,29 @@ package snap.web;
 import snap.util.FilePathUtils;
 
 /**
- * A class to read a URL string and provide the parts.
+ * A class to parse a URL string and provide the parts.
  * Has the form: [Scheme:][//Authority][/Path[!/Path]][?Query][#HashTag].
  * Authority has the form: [UserInfo@]Host[:Port].
  */
-public class URLString {
+public class ParsedURL {
 
     // The URL string
     private String  _str;
     
-    // The full site string: http://abc.com
-    private String  _site;
-    
     // The scheme string (lowercase): http, file, etc.
     private String  _scheme;
+
+    // The full site string: http://abc.com
+    private String  _siteUrl;
+
+    // The site identifier - generally a name or path
+    private String  _siteId;
 
     // The full authority string: user@host:port
     //private String  _auth;
 
     // The user string
     private String  _user;
-
-    // The plain host string
-    private String  _host;
 
     // The port
     private int  _port;
@@ -38,16 +38,16 @@ public class URLString {
     // The full query string: ?this=that;name=joe
     private String  _query;
 
-    // The ref string: #something
-    private String  _ref;
-
-    // An object to help parse refs
-    private MapString _refMap;
+    // The hashtag string: #something
+    private String  _hashtag;
 
     /**
      * Constructor for given string.
      */
-    public URLString(String aStr)  { setString(aStr); }
+    public ParsedURL(String aStr)
+    {
+        parseString(aStr);
+    }
 
     /**
      * Returns the URL string.
@@ -57,38 +57,23 @@ public class URLString {
     /**
      * Sets the string and it's pieces.
      */
-    protected void setString(String aStr)
+    protected void parseString(String aStr)
     {
         // Set String
         _str = aStr;
 
-        // Pick off scheme
-        String str = aStr;
-        int schemeEnd = str.indexOf(':');
-        if (schemeEnd > 0) {
-            _scheme = str.substring(0, schemeEnd).toLowerCase();
-            str = str.substring(schemeEnd + 1);
-        }
+        // Parse scheme
+        String str = parseScheme(aStr);
 
-        // Pick off reference
-        int referenceStart = str.lastIndexOf('#');
-        if (referenceStart > 0) {
-            _ref = str.substring(referenceStart + 1);
-            str = str.substring(0, referenceStart);
-        }
-
-        // Pick off Query
-        int queryStart = str.lastIndexOf('?');
-        if (queryStart > 0) {
-            _query = str.substring(queryStart + 1);
-            str = str.substring(0, queryStart);
-        }
+        // Parse parameters (query and hashtag)
+        str = parseParameters(str);
 
         // If nested path char '!', get Site/Path and return
         int nestedPathStart = str.lastIndexOf('!');
         if (nestedPathStart > 0) {
-            _site = _scheme + ':' + str.substring(0, nestedPathStart);
+            _siteId = str.substring(0, nestedPathStart);
             _path = str.substring(nestedPathStart + 1);
+            _siteUrl = _scheme + ':' + _siteId;
             return;
         }
 
@@ -104,7 +89,7 @@ public class URLString {
         }
 
         // Set SiteURL string
-        _site = _scheme + "://" + str;
+        _siteUrl = _scheme + "://" + str;
 
         // Pick off port
         int portStart = str.lastIndexOf(':');
@@ -121,9 +106,9 @@ public class URLString {
             str = str.substring(userNameStart + 1);
         }
 
-        // Anything left is host!
+        // Anything left is host
         if (str.length() > 0)
-            _host = str;
+            _siteId = str;
 
         // Handle JRT special
         if (_scheme.equals("jrt"))
@@ -131,9 +116,43 @@ public class URLString {
     }
 
     /**
-     * Returns the site string.
+     * Parses the URL scheme.
      */
-    public String getSite()  { return _site; }
+    private String parseScheme(String urlString)
+    {
+        // Parse scheme
+        int schemeEnd = urlString.indexOf(':');
+        if (schemeEnd > 0) {
+            _scheme = urlString.substring(0, schemeEnd).toLowerCase();
+            urlString = urlString.substring(schemeEnd + 1);
+        }
+
+        // Return
+        return urlString;
+    }
+
+    /**
+     * Parses the URL parameters (query and hashtab) and returns the plain URL.
+     */
+    private String parseParameters(String urlString)
+    {
+        // Pick off reference
+        int referenceStart = urlString.lastIndexOf('#');
+        if (referenceStart > 0) {
+            _hashtag = urlString.substring(referenceStart + 1);
+            urlString = urlString.substring(0, referenceStart);
+        }
+
+        // Pick off Query
+        int queryStart = urlString.lastIndexOf('?');
+        if (queryStart > 0) {
+            _query = urlString.substring(queryStart + 1);
+            urlString = urlString.substring(0, queryStart);
+        }
+
+        // Return
+        return urlString;
+    }
 
     /**
      * Returns the URL Scheme (lower case).
@@ -141,14 +160,19 @@ public class URLString {
     public String getScheme()  { return _scheme; }
 
     /**
+     * Returns the site id string.
+     */
+    public String getSiteId()  { return _siteId; }
+
+    /**
+     * Returns the site string.
+     */
+    public String getSiteUrl()  { return _siteUrl; }
+
+    /**
      * Returns the User part of the URL.
      */
     public String getUser()  { return _user; }
-
-    /**
-     * Returns the Host part of the URL (the Authority minus the optional UserInfo and Port).
-     */
-    public String getHost()  { return _host; }
 
     /**
      * Returns the port of the URL.
@@ -189,31 +213,30 @@ public class URLString {
     public String getQueryValue(String aKey)
     {
         String queryStr = getQuery();
-        MapString queryMapStr = new MapString(queryStr);
-        return queryMapStr.getValue(aKey);
+        ParsedUrlArgs queryArgs = new ParsedUrlArgs(queryStr);
+        return queryArgs.getValue(aKey);
     }
 
     /**
-     * Returns the hash tag reference from the URL as a simple string.
+     * Returns the hashtag reference from the URL as a simple string.
      */
-    public String getRef()  { return _ref; }
+    public String getHashtag()  { return _hashtag; }
 
     /**
-     * Returns the value for given HashTag key in URL, if available.
+     * Returns the value for given hashtag key in URL, if available.
      */
-    public String getRefValue(String aKey)
+    public String getHashtagValue(String aKey)
     {
-        if (_ref == null)
+        if (_hashtag == null)
             return null;
-        if (_refMap == null)
-            _refMap = new MapString(_ref);
-        return _refMap.getValue(aKey);
+        ParsedUrlArgs hashtagArgs = new ParsedUrlArgs(_hashtag);
+        return hashtagArgs.getValue(aKey);
     }
 
     /**
      * Returns whether URL specifies only the file (no query/hashtags).
      */
-    public boolean isFileURL()  { return getQuery() == null && getRef() == null; }
+    public boolean isFileURL()  { return getQuery() == null && getHashtag() == null; }
 
     /**
      * Returns the URL string for the file only (no query/hashtags).
@@ -237,7 +260,7 @@ public class URLString {
     /**
      * Returns whether URL specifies only file and query (no hashtag references).
      */
-    public boolean isQueryURL()  { return getRef() == null; }
+    public boolean isQueryURL()  { return getHashtag() == null; }
 
     /**
      * Returns the URL string for the file and query only (no hashtag references).
@@ -258,11 +281,11 @@ public class URLString {
     {
         int moduleNameEnd = _path.indexOf('/', 1);
         if (moduleNameEnd < 0) {
-            _site = "jrt:" + _path;
+            _siteUrl = "jrt:" + _path;
             _path = "/";
         }
         else {
-            _site = "jrt:" + _path.substring(0, moduleNameEnd);
+            _siteUrl = "jrt:" + _path.substring(0, moduleNameEnd);
             _path = _path.substring(moduleNameEnd);
         }
     }
@@ -273,7 +296,7 @@ public class URLString {
     public boolean equals(Object anObj)
     {
         if (anObj == this) return true;
-        URLString other = anObj instanceof URLString ? (URLString) anObj : null; if (other == null) return false;
+        ParsedURL other = anObj instanceof ParsedURL ? (ParsedURL) anObj : null; if (other == null) return false;
         return _str.equals(other._str);
     }
 
