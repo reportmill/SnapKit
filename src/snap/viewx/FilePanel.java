@@ -119,12 +119,12 @@ public class FilePanel extends ViewOwner {
     protected WebFile showFilePanelWeb(View aView)
     {
         // If no file/dir set, set from RecentPath (prefs)
-        WebFile selDir = _filesBrowser.getDir();
+        WebFile selDir = _filesBrowser.getSelDir();
         if (selDir == null) {
             String path = getRecentPath(getType());
             WebSite site = getSite();
             WebFile file = site.getFileForPath(path);
-            _filesBrowser.setFile(file);
+            _filesBrowser.setSelFile(file);
         }
 
         // Run code to add new folder button
@@ -201,13 +201,13 @@ public class FilePanel extends ViewOwner {
             return;
 
         // Get new dir path and create new dir
-        WebFile selDir = _filesBrowser.getDir();
+        WebFile selDir = _filesBrowser.getSelDir();
         String newDirPath = selDir.getDirPath() + newDirName;
         WebFile newDir = getSite().createFileForPath(newDirPath, true);
         newDir.save();
 
         // Set new dir
-        _filesBrowser.setDir(newDir);
+        _filesBrowser.setSelFile(newDir);
     }
 
     /**

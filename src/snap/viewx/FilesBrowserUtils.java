@@ -49,6 +49,17 @@ class FilesBrowserUtils {
     }
 
     /**
+     * Returns a normalized type.
+     */
+    public static String normalizeType(String aType)
+    {
+        String type = aType.trim().toLowerCase();
+        if (type.startsWith("."))
+            type = type.substring(1);
+        return type;
+    }
+
+    /**
      * The TreeResolver to provide data to File browser.
      */
     public static class FileResolver extends TreeResolver<WebFile> {
