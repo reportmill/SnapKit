@@ -180,13 +180,8 @@ public class FilesBrowser extends ViewOwner {
         _dirComboBox = getView("DirComboBox", ComboBox.class);
         _dirComboBox.setItemTextFunction(item -> item.isRoot() ? "Root Directory" : item.getName());
         _dirComboBox.getListView().setRowHeight(24);
-        List<WebFile> dirs = new ArrayList<>();
-        for (WebFile dir = getSelDir(); dir != null; dir = dir.getParent())
-            dirs.add(dir);
-        _dirComboBox.setItems(dirs);
-        _dirComboBox.setSelIndex(0);
 
-        // Get FileText
+        // Get/configure FileText
         _fileText = getView("FileText", TextField.class);
         _fileText.setFireActionOnFocusLost(false);
         setFirstFocus(_fileText);
@@ -217,12 +212,14 @@ public class FilesBrowser extends ViewOwner {
         _fileText.setText(fileName);
         _fileText.selectAll();
 
-        // Update DirComboBox
+        // Get selected dir and list of parents
         WebFile selDir = getSelDir();
-        List<WebFile> dirs = new ArrayList<>();
+        List<WebFile> selDirs = new ArrayList<>();
         for (WebFile dir = selDir; dir != null; dir = dir.getParent())
-            dirs.add(dir);
-        _dirComboBox.setItems(dirs);
+            selDirs.add(dir);
+
+        // Update DirComboBox
+        _dirComboBox.setItems(selDirs);
         _dirComboBox.setSelItem(selDir);
 
         // Update ConfirmEnabled
