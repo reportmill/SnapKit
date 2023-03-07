@@ -133,16 +133,16 @@ public class FilePanel extends ViewOwner {
         // Run FileChooser UI in DialogBox
         _dialogBox = new DialogBox(getTitle());
         _dialogBox.setContent(getUI());
-        _dialogBox.setConfirmEnabled(_filesBrowser.isFileTextFileValid());
+        _dialogBox.setConfirmEnabled(FilesBrowserUtils.isInputTextFileValid(_filesBrowser));
         boolean value = _dialogBox.showConfirmDialog(aView);
         if (!value)
             return null;
 
         // Get file and path of selection and save to preferences
-        WebFile file = _filesBrowser.getFileTextFile();
+        WebFile file = FilesBrowserUtils.getInputTextAsFile(_filesBrowser);
         String path = file.getPath();
 
-        // Save selected filename in preferences for it's type (extension)
+        // Save selected filename in preferences for its type (extension)
         setRecentPath(getType(), path);
 
         // If user is trying to save over an existing file, warn them

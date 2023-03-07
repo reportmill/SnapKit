@@ -13,6 +13,6 @@
   <RowView Align="CENTER" Spacing="5" >
     <Font Name="Arial" Size="14" />
     <Label Text="File:" />
-    <TextField name="FileText" ColCount="32" />
+    <TextField name="InputText" ColCount="32" />
   </RowView>
 </ColView>

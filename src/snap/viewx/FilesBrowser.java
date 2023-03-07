@@ -38,8 +38,8 @@ public class FilesBrowser extends ViewOwner {
     // The FileBrowser
     private BrowserView<WebFile>  _fileBrowser;
 
-    // The FileText
-    private TextField  _fileText;
+    // The InputText
+    protected TextField  _inputText;
 
     // Constants for properties
     public static final String SelFile_Prop = "SelFile";
@@ -181,19 +181,19 @@ public class FilesBrowser extends ViewOwner {
         _dirComboBox.setItemTextFunction(item -> item.isRoot() ? "Root Directory" : item.getName());
         _dirComboBox.getListView().setRowHeight(24);
 
-        // Get/configure FileText
-        _fileText = getView("FileText", TextField.class);
-        _fileText.setFireActionOnFocusLost(false);
-        setFirstFocus(_fileText);
+        // Get/configure InputText
+        _inputText = getView("InputText", TextField.class);
+        _inputText.setFireActionOnFocusLost(false);
+        setFirstFocus(_inputText);
 
-        // Initialize FileText
+        // Initialize InputText
         WebFile selFile = getSelFile();
         String selFileName = selFile != null ? selFile.getName() : null;
-        _fileText.setText(selFileName);
-        _fileText.selectAll();
+        _inputText.setText(selFileName);
+        _inputText.selectAll();
 
         // Set handler to update DialogBox.ConfirmEnabled when text changes
-        _fileText.addEventHandler(e -> runLater(() -> fileTextDidKeyRelease()), KeyRelease);
+        _inputText.addEventHandler(e -> runLater(() -> inputTextDidKeyRelease()), KeyRelease);
     }
 
     /**
@@ -207,10 +207,10 @@ public class FilesBrowser extends ViewOwner {
         WebFile selFileOrDir = selFile != null ? selFile : getSelDir();
         _fileBrowser.setSelItem(selFileOrDir);
 
-        // Update FileText
+        // Update InputText
         String fileName = selFile != null ? selFile.getName() : null;
-        _fileText.setText(fileName);
-        _fileText.selectAll();
+        _inputText.setText(fileName);
+        _inputText.selectAll();
 
         // Get selected dir and list of parents
         WebFile selDir = getSelDir();
@@ -223,8 +223,8 @@ public class FilesBrowser extends ViewOwner {
         _dirComboBox.setSelItem(selDir);
 
         // Update ConfirmEnabled
-        boolean fileTextFileValid = isFileTextFileValid();
-        setConfirmEnabled(fileTextFileValid);
+        boolean inputTextFileValid = FilesBrowserUtils.isInputTextFileValid(this);
+        setConfirmEnabled(inputTextFileValid);
     }
 
     /**
@@ -239,16 +239,16 @@ public class FilesBrowser extends ViewOwner {
             setSelFile(newSelFile);
         }
 
-        // Handle FileText: If directory, set
-        if (anEvent.equals("FileText")) {
+        // Handle InputText: If directory, set
+        if (anEvent.equals("InputText")) {
 
             // If directory was entered, set file
-            WebFile file = getFileTextFile();
+            WebFile file = FilesBrowserUtils.getInputTextAsFile(this);
             if (file != null && file.isDir())
                 setSelFile(file);
 
             // If valid filename entered, fire action
-            else if (isFileTextFileValid())
+            else if (FilesBrowserUtils.isInputTextFileValid(this))
                 fireActionEvent(anEvent);
             anEvent.consume();
         }
@@ -267,95 +267,6 @@ public class FilesBrowser extends ViewOwner {
     }
 
     /**
-     * Returns the FileText path.
-     */
-    protected String getFileTextPath()
-    {
-        // Get FileText string
-        String fileText = _fileText.getText().trim();
-
-        // If empty just return dir path
-        if (fileText.length() == 0) {
-            WebFile selDir = getSelDir();
-            return selDir.getPath();
-        }
-
-        // If starts with ~ return home dir
-        if (fileText.startsWith("~"))
-            return getHomeDirPath();
-
-        // If starts with '..', return parent dir
-        if (fileText.startsWith("..")) {
-            WebFile selFile = getSelFile();
-            WebFile selDir = getSelDir();
-            if (selFile != null)
-                return selDir.getPath();
-            if (selDir != null && selDir.getParent() != null)
-                return selDir.getParent().getPath();
-            return "/";
-        }
-
-        // If starts with FileSeparator, just return
-        if (fileText.startsWith("/") || fileText.startsWith("\\"))
-            return fileText;
-
-        // Get path
-        WebFile selDir = getSelDir();
-        String path = FilePathUtils.getChild(selDir.getPath(), fileText);
-        return path;
-    }
-
-    /**
-     * Returns the FileText path.
-     */
-    protected WebFile getFileTextFile()
-    {
-        // Get path and file for FileText
-        String path = getFileTextPath();
-        WebFile file = getFileForPath(path);
-
-        // If opening a file that doesn't exist, see if it just needs an extension
-        if (file == null && isOpening() && !path.contains(".")) {
-            path += getType();
-            file = getFileForPath(path);
-        }
-
-        // If saving, make sure path has extension and create
-        if (file == null && isSaving()) {
-            if (!path.contains("."))
-                path += '.' + getType();
-            file = getSite().createFileForPath(path, false);
-        }
-
-        // Return file
-        return file;
-    }
-
-    /**
-     * Returns the FileText path.
-     */
-    protected boolean isFileTextFileValid()
-    {
-        // If saving just return
-        if (isSaving()) {
-            String fileTextPath = _fileText.getText().trim();
-            return fileTextPath.length() > 0;
-        }
-
-        // Get file for path based on FilePanel Dir and FileText (filename) - just return false if null
-        WebFile file = getFileTextFile();
-        if (file == null)
-            return false;
-
-        // If file is plain file and matches requested type, return true
-        if (file.isFile() && ArrayUtils.contains(getTypes(), file.getType()))
-            return true;
-
-        // Return
-        return false;
-    }
-
-    /**
      * Called when FileBrowser gets MouseRelease.
      */
     private void fileBrowserMouseReleased(ViewEvent anEvent)
@@ -366,48 +277,49 @@ public class FilesBrowser extends ViewOwner {
     }
 
     /**
-     * Called after FileText KeyRelease.
+     * Called after InputText KeyRelease.
      */
-    private void fileTextDidKeyRelease()
+    private void inputTextDidKeyRelease()
     {
-        // Get whether FileTextFile is valid (exists and is right type)
-        boolean fileTextFileValid = isFileTextFileValid();
+        // Get whether InputText file is valid (exists and is right type)
+        boolean inputTextFileValid = FilesBrowserUtils.isInputTextFileValid(this);
 
         // If not valid and opening, check for completion
-        if (!fileTextFileValid && isOpening()) {
-            WebFile file = getFileTextFile();
-            String fileText = _fileText.getText().trim();
-            String path = getFileTextPath();
-            WebFile cfile = file == null && fileText.length() > 0 ? getFileCompletionForPath(path) : null;
+        if (!inputTextFileValid && isOpening()) {
 
-            // If completion found, set filename remainder in FileText and select
-            if (cfile != null) {
-                String cpath = cfile.getPath();
-                String cname = cfile.getName();
-                String completion = StringUtils.startsWithIC(path, fileText) ? cpath : cname;
-                _fileText.setCompletionText(completion);
-                fileTextFileValid = true;
+            WebFile inputTextFile = FilesBrowserUtils.getInputTextAsFile(this);
+            String inputText = FilesBrowserUtils.getInputText(this);
+            String inputTextPath = FilesBrowserUtils.getInputTextAsPath(this);
+            WebFile completionFile = inputTextFile == null && inputText.length() > 0 ? getFileCompletionForPath(inputTextPath) : null;
+
+            // If completion found, set filename remainder in InputText and select
+            if (completionFile != null) {
+                String completionPath = completionFile.getPath();
+                String completionFilename = completionFile.getName();
+                String completion = StringUtils.startsWithIC(inputTextPath, inputText) ? completionPath : completionFilename;
+                _inputText.setCompletionText(completion);
+                inputTextFileValid = true;
             }
         }
 
         // Set confirm enabled
-        setConfirmEnabled(fileTextFileValid);
+        setConfirmEnabled(inputTextFileValid);
     }
 
     /**
-     * Called on FileBrowser double-click or FileText enter key.
+     * Called on FileBrowser double-click or InputText enter key.
      */
     protected void fireActionEvent(ViewEvent anEvent)  { }
 
     /**
      * Called when
      */
-    protected void setConfirmEnabled(boolean fileTextFileValid) { }
+    protected void setConfirmEnabled(boolean inputTextFileValid) { }
 
     /**
      * Returns a file for a path.
      */
-    private WebFile getFileForPath(String aPath)
+    protected WebFile getFileForPath(String aPath)
     {
         WebSite site = getSite();
         return site.getFileForPath(aPath);
@@ -450,7 +362,7 @@ public class FilesBrowser extends ViewOwner {
     /**
      * Returns the home directory path.
      */
-    private String getHomeDirPath()
+    protected String getHomeDirPath()
     {
         WebSite site = getSite();
         return FilesBrowserUtils.getHomeDirPathForSite(site);
