@@ -4,6 +4,7 @@
 package snap.viewx;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
+import snap.util.StringUtils;
 import snap.view.TreeResolver;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -111,6 +112,40 @@ class FilesBrowserUtils {
 
         // Return
         return false;
+    }
+
+    /**
+     * Returns a file completion for given path.
+     */
+    public static WebFile getFileCompletionForPath(FilesBrowser filesBrowser, String aPath)
+    {
+        // Get parent directory for path
+        String parentPath = FilePathUtils.getParent(aPath);
+        WebFile parentDir = filesBrowser.getFileForPath(parentPath);
+        if (parentDir == null)
+            return null;
+
+        // Get directory files and valid file types
+        String fileName = FilePathUtils.getFileName(aPath);
+        WebFile[] dirFiles = parentDir.getFiles();
+        String[] fileTypes = filesBrowser.getTypes();
+
+        // Look for completion file of any requested type (types are checked in order to allow for precedence)
+        for (String type : fileTypes) {
+            for (WebFile file : dirFiles) {
+                if (StringUtils.startsWithIC(file.getName(), fileName) && file.getType().equals(type))
+                    return file;
+            }
+        }
+
+        // Look for completion of type dir
+        for (WebFile file : dirFiles) {
+            if (StringUtils.startsWithIC(file.getName(), fileName) && file.isDir())
+                return file;
+        }
+
+        // Return not found
+        return null;
     }
 
     /**

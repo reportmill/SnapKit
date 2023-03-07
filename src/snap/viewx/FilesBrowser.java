@@ -4,7 +4,6 @@
 package snap.viewx;
 import snap.gfx.Color;
 import snap.util.ArrayUtils;
-import snap.util.FilePathUtils;
 import snap.util.StringUtils;
 import snap.view.*;
 import snap.web.WebFile;
@@ -166,9 +165,9 @@ public class FilesBrowser extends ViewOwner {
         // Get FileBrowser and configure
         _fileBrowser = getView("FileBrowser", BrowserView.class);
         _fileBrowser.setRowHeight(22);
-        _fileBrowser.addEventFilter(e -> runLater(() -> fileBrowserMouseReleased(e)), MouseRelease);
         _fileBrowser.setResolver(new FilesBrowserUtils.FileResolver());
         _fileBrowser.setCellConfigure(item -> configureFileBrowserCell(item));
+        _fileBrowser.addEventFilter(e -> runLater(() -> fileBrowserMouseReleased(e)), MouseRelease);
 
         // Set FileBrowser Items
         WebFile rootDir = getSite().getRootDir();
@@ -243,9 +242,9 @@ public class FilesBrowser extends ViewOwner {
         if (anEvent.equals("InputText")) {
 
             // If directory was entered, set file
-            WebFile file = FilesBrowserUtils.getInputTextAsFile(this);
-            if (file != null && file.isDir())
-                setSelFile(file);
+            WebFile inputTextFile = FilesBrowserUtils.getInputTextAsFile(this);
+            if (inputTextFile != null && inputTextFile.isDir())
+                setSelFile(inputTextFile);
 
             // If valid filename entered, fire action
             else if (FilesBrowserUtils.isInputTextFileValid(this))
@@ -290,15 +289,17 @@ public class FilesBrowser extends ViewOwner {
             WebFile inputTextFile = FilesBrowserUtils.getInputTextAsFile(this);
             String inputText = FilesBrowserUtils.getInputText(this);
             String inputTextPath = FilesBrowserUtils.getInputTextAsPath(this);
-            WebFile completionFile = inputTextFile == null && inputText.length() > 0 ? getFileCompletionForPath(inputTextPath) : null;
+            if (inputTextFile == null && inputText.length() > 0) {
+                WebFile completionFile = FilesBrowserUtils.getFileCompletionForPath(this, inputTextPath);
 
-            // If completion found, set filename remainder in InputText and select
-            if (completionFile != null) {
-                String completionPath = completionFile.getPath();
-                String completionFilename = completionFile.getName();
-                String completion = StringUtils.startsWithIC(inputTextPath, inputText) ? completionPath : completionFilename;
-                _inputText.setCompletionText(completion);
-                inputTextFileValid = true;
+                // If completion found, set filename remainder in InputText and select
+                if (completionFile != null) {
+                    String completionPath = completionFile.getPath();
+                    String completionFilename = completionFile.getName();
+                    String completion = StringUtils.startsWithIC(inputTextPath, inputText) ? completionPath : completionFilename;
+                    _inputText.setCompletionText(completion);
+                    inputTextFileValid = true;
+                }
             }
         }
 
@@ -323,40 +324,6 @@ public class FilesBrowser extends ViewOwner {
     {
         WebSite site = getSite();
         return site.getFileForPath(aPath);
-    }
-
-    /**
-     * Returns a file completion file if found.
-     */
-    private WebFile getFileCompletionForPath(String aPath)
-    {
-        // Get directory for path and file name
-        String dirPath = FilePathUtils.getParent(aPath);
-        String fileName = FilePathUtils.getFileName(aPath);
-        WebFile dir = getFileForPath(dirPath);
-        if (dir == null)
-            return null;
-
-        // Get directory files and valid file types
-        WebFile[] dirFiles = dir.getFiles();
-        String[] fileTypes = getTypes();
-
-        // Look for completion file of any requested type (types are checked in order to allow for precedence)
-        for (String type : fileTypes) {
-            for (WebFile file : dirFiles) {
-                if (StringUtils.startsWithIC(file.getName(), fileName) && file.getType().equals(type))
-                    return file;
-            }
-        }
-
-        // Look for completion of type dir
-        for (WebFile file : dirFiles) {
-            if (StringUtils.startsWithIC(file.getName(), fileName) && file.isDir())
-                return file;
-        }
-
-        // Return not found
-        return null;
     }
 
     /**
