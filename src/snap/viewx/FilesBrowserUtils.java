@@ -28,21 +28,21 @@ class FilesBrowserUtils {
      */
     public static String getInputTextAsPath(FilesBrowser filesBrowser)
     {
-        // Get FileText string
-        String fileText = getInputText(filesBrowser);
+        // Get InputText string
+        String inputText = getInputText(filesBrowser);
 
         // If empty just return dir path
-        if (fileText.length() == 0) {
+        if (inputText.length() == 0) {
             WebFile selDir = filesBrowser.getSelDir();
             return selDir.getPath();
         }
 
         // If starts with ~ return home dir
-        if (fileText.startsWith("~"))
+        if (inputText.startsWith("~"))
             return filesBrowser.getHomeDirPath();
 
         // If starts with '..', return parent dir
-        if (fileText.startsWith("..")) {
+        if (inputText.startsWith("..")) {
             WebFile selFile = filesBrowser.getSelFile();
             WebFile selDir = filesBrowser.getSelDir();
             if (selFile != null)
@@ -53,13 +53,13 @@ class FilesBrowserUtils {
         }
 
         // If starts with FileSeparator, just return
-        if (fileText.startsWith("/") || fileText.startsWith("\\"))
-            return fileText;
+        if (inputText.startsWith("/") || inputText.startsWith("\\"))
+            return inputText;
 
         // Get path
         WebFile selDir = filesBrowser.getSelDir();
-        String path = FilePathUtils.getChild(selDir.getPath(), fileText);
-        return path;
+        String inputTextPath = FilePathUtils.getChild(selDir.getPath(), inputText);
+        return inputTextPath;
     }
 
     /**
@@ -67,25 +67,25 @@ class FilesBrowserUtils {
      */
     public static WebFile getInputTextAsFile(FilesBrowser filesBrowser)
     {
-        // Get path and file for FileText
-        String path = getInputTextAsPath(filesBrowser);
-        WebFile file = filesBrowser.getFileForPath(path);
+        // Get path and file for InputText
+        String inputTextPath = getInputTextAsPath(filesBrowser);
+        WebFile inputTextFile = filesBrowser.getFileForPath(inputTextPath);
 
         // If opening a file that doesn't exist, see if it just needs an extension
-        if (file == null && filesBrowser.isOpening() && !path.contains(".")) {
-            path += filesBrowser.getType();
-            file = filesBrowser.getFileForPath(path);
+        if (inputTextFile == null && filesBrowser.isOpening() && !inputTextPath.contains(".")) {
+            inputTextPath += filesBrowser.getType();
+            inputTextFile = filesBrowser.getFileForPath(inputTextPath);
         }
 
         // If saving, make sure path has extension and create
-        if (file == null && filesBrowser.isSaving()) {
-            if (!path.contains("."))
-                path += '.' + filesBrowser.getType();
-            file = filesBrowser.getSite().createFileForPath(path, false);
+        if (inputTextFile == null && filesBrowser.isSaving()) {
+            if (!inputTextPath.contains("."))
+                inputTextPath += '.' + filesBrowser.getType();
+            inputTextFile = filesBrowser.getSite().createFileForPath(inputTextPath, false);
         }
 
         // Return file
-        return file;
+        return inputTextFile;
     }
 
     /**
@@ -95,18 +95,18 @@ class FilesBrowserUtils {
     {
         // If saving just return
         if (filesBrowser.isSaving()) {
-            String fileTextPath = getInputText(filesBrowser);
-            return fileTextPath.length() > 0;
+            String inputText = getInputText(filesBrowser);
+            return inputText.length() > 0;
         }
 
-        // Get file for path based on FilePanel Dir and FileText (filename) - just return false if null
-        WebFile file = getInputTextAsFile(filesBrowser);
-        if (file == null)
+        // Get file for path based on FilePanel Dir and InputText (filename) - just return false if null
+        WebFile inputTextFile = getInputTextAsFile(filesBrowser);
+        if (inputTextFile == null)
             return false;
 
         // If file is plain file and matches requested type, return true
-        if (file.isFile()) {
-            if (ArrayUtils.contains(filesBrowser.getTypes(), file.getType()))
+        if (inputTextFile.isFile()) {
+            if (ArrayUtils.contains(filesBrowser.getTypes(), inputTextFile.getType()))
                 return true;
         }
 
