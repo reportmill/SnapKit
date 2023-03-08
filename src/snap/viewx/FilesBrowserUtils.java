@@ -89,28 +89,6 @@ class FilesBrowserUtils {
     }
 
     /**
-     * Returns whether the file resolved from FilesBrowser InputText is valid open/save file.
-     */
-    public static boolean isInputTextFileValid(FilesBrowser filesBrowser)
-    {
-        // If saving just return
-        if (filesBrowser.isSaving()) {
-            String inputText = getInputText(filesBrowser);
-            return inputText.length() > 0;
-        }
-
-        // Get InputText file and return true
-        WebFile inputTextFile = getInputTextAsFile(filesBrowser);
-
-        // If InputText file is valid file, return true
-        if (filesBrowser.isValidFile(inputTextFile))
-                return true;
-
-        // Return
-        return false;
-    }
-
-    /**
      * Returns a file completion for given path.
      */
     public static WebFile getFileCompletionForPath(FilesBrowser filesBrowser, String aPath)

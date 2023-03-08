@@ -280,13 +280,18 @@ public class FilesBrowser extends ViewOwner {
         if (anEvent.equals("InputText")) {
 
             // If directory was entered, set file
-            WebFile inputTextFile = FilesBrowserUtils.getInputTextAsFile(this);
-            if (inputTextFile != null && inputTextFile.isDir())
-                setSelFile(inputTextFile);
+            WebFile selFile = getSelOrTargFile();
+            if (selFile != null) {
 
-            // If valid filename entered, fire action
-            else if (FilesBrowserUtils.isInputTextFileValid(this))
-                fireActionEvent(anEvent);
+                // If dir, just update SelFile
+                if (selFile.isDir())
+                    setSelFile(selFile);
+
+                // Otherwise, fire action
+                else fireActionEvent(anEvent);
+            }
+
+            // Consume event
             anEvent.consume();
         }
 
@@ -318,20 +323,24 @@ public class FilesBrowser extends ViewOwner {
      */
     private void inputTextDidKeyRelease()
     {
-        // Get whether InputText file is valid (exists and is right type)
-        boolean inputTextFileValid = FilesBrowserUtils.isInputTextFileValid(this);
+        // Get file for InputText
         WebFile inputTextFile = FilesBrowserUtils.getInputTextAsFile(this);
 
         // If not valid and opening, check for completion
-        if (!inputTextFileValid && isOpening()) {
+        if (inputTextFile == null && isOpening()) {
 
+            // If InputText has some chars, try to find completion candidate
             String inputText = FilesBrowserUtils.getInputText(this);
-            String inputTextPath = FilesBrowserUtils.getInputTextAsPath(this);
-            if (inputTextFile == null && inputText.length() > 0) {
+            if (inputText.length() > 0) {
+
+                // Get completion candidate for InputText as path
+                String inputTextPath = FilesBrowserUtils.getInputTextAsPath(this);
                 WebFile completionFile = FilesBrowserUtils.getFileCompletionForPath(this, inputTextPath);
 
                 // If completion found, set filename remainder in InputText and select
                 if (completionFile != null) {
+
+                    // Configure InputText to select completion chars
                     String completionPath = completionFile.getPath();
                     String completionFilename = completionFile.getName();
                     String completion = StringUtils.startsWithIC(inputTextPath, inputText) ? completionPath : completionFilename;
