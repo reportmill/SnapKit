@@ -47,8 +47,11 @@ class FilesBrowserUtils {
             WebFile selDir = filesBrowser.getSelDir();
             if (selFile != null)
                 return selDir.getPath();
-            if (selDir != null && selDir.getParent() != null)
-                return selDir.getParent().getPath();
+            if (selDir != null) {
+                WebFile selDirParent = selDir.getParent();
+                if (selDirParent != null)
+                    return selDirParent.getPath();
+            }
             return "/";
         }
 
@@ -67,21 +70,20 @@ class FilesBrowserUtils {
      */
     public static WebFile getInputTextAsFile(FilesBrowser filesBrowser)
     {
-        // Get path and file for InputText
+        // Get file for InputText path
         String inputTextPath = getInputTextAsPath(filesBrowser);
         WebFile inputTextFile = filesBrowser.getFileForPath(inputTextPath);
 
-        // If opening a file that doesn't exist, see if it just needs an extension
-        if (inputTextFile == null && filesBrowser.isOpening() && !inputTextPath.contains(".")) {
-            inputTextPath += filesBrowser.getType();
+        // If file not found and path is missing extension, try again with extension
+        if (inputTextFile == null && !inputTextPath.contains(".")) {
+            inputTextPath += '.' + filesBrowser.getType();
             inputTextFile = filesBrowser.getFileForPath(inputTextPath);
         }
 
-        // If saving, make sure path has extension and create
+        // If file not found and isSaving, create file
         if (inputTextFile == null && filesBrowser.isSaving()) {
-            if (!inputTextPath.contains("."))
-                inputTextPath += '.' + filesBrowser.getType();
-            inputTextFile = filesBrowser.getSite().createFileForPath(inputTextPath, false);
+            WebSite site = filesBrowser.getSite();
+            inputTextFile = site.createFileForPath(inputTextPath, false);
         }
 
         // Return file
@@ -89,9 +91,37 @@ class FilesBrowserUtils {
     }
 
     /**
+     * Performs file name completion on input text.
+     */
+    public static WebFile performFileCompletionOnInputText(FilesBrowser filesBrowser)
+    {
+        // Get InputText - just return if empty
+        String inputText = FilesBrowserUtils.getInputText(filesBrowser);
+        if (inputText.length() == 0)
+            return null;
+
+        // Get completion candidate for InputText path - just return if not found
+        String inputTextPath = FilesBrowserUtils.getInputTextAsPath(filesBrowser);
+        WebFile completionFile = FilesBrowserUtils.getFileCompletionForPath(filesBrowser, inputTextPath);
+        if (completionFile == null)
+            return null;
+
+        // Get completion string - usually just completion file filename, but it could be whole path
+        String completionStr = completionFile.getName();
+        if (StringUtils.startsWithIC(inputTextPath, inputText))
+            completionStr = completionFile.getPath();
+
+        // Set completion string in InputText
+        filesBrowser._inputText.setCompletionText(completionStr);
+
+        // Return
+        return completionFile;
+    }
+
+    /**
      * Returns a file completion for given path.
      */
-    public static WebFile getFileCompletionForPath(FilesBrowser filesBrowser, String aPath)
+    private static WebFile getFileCompletionForPath(FilesBrowser filesBrowser, String aPath)
     {
         // Get parent directory for path
         String parentPath = FilePathUtils.getParent(aPath);

@@ -677,10 +677,16 @@ public class TextField extends ParentView {
      */
     public void setCompletionText(String aString)
     {
+        // Get text - just return if completion string is just text
         String text = getText();
-        if (!StringUtils.startsWithIC(aString, text)) return;
+        if (!StringUtils.startsWithIC(aString, text))
+            return;
+
+        // Get completion string by appending chars to original text and set
         String text2 = text + aString.substring(text.length());
         setText(text2);
+
+        // Set sel and mark as CompletionSel
         setSel(text.length(), text2.length());
         _compSel = true;
     }
@@ -1183,11 +1189,12 @@ public class TextField extends ParentView {
      */
     public static void setBackLabelAlignAnimatedOnFocused(TextField aTextField, boolean aValue)
     {
-        aTextField.getLabel().setAlign(Pos.CENTER);
+        Label textFieldLabel = aTextField.getLabel();
+        textFieldLabel.setAlign(Pos.CENTER);
         aTextField.addPropChangeListener(pce -> {
             if (aTextField.isFocused())
-                ViewAnimUtils.setAlign(aTextField.getLabel(), Pos.CENTER_LEFT, 200);
-            else ViewAnimUtils.setAlign(aTextField.getLabel(), Pos.CENTER, 600);
+                ViewAnimUtils.setAlign(textFieldLabel, Pos.CENTER_LEFT, 200);
+            else ViewAnimUtils.setAlign(textFieldLabel, Pos.CENTER, 600);
         }, View.Focused_Prop);
     }
 }

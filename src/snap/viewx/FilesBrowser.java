@@ -4,7 +4,6 @@
 package snap.viewx;
 import snap.gfx.Color;
 import snap.util.ArrayUtils;
-import snap.util.StringUtils;
 import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -280,7 +279,8 @@ public class FilesBrowser extends ViewOwner {
         if (anEvent.equals("InputText")) {
 
             // If directory was entered, set file
-            WebFile selFile = getSelOrTargFile();
+            WebFile targFile = getTargFile();
+            WebFile selFile = targFile != null ? targFile : getSelFile();
             if (selFile != null) {
 
                 // If dir, just update SelFile
@@ -326,29 +326,9 @@ public class FilesBrowser extends ViewOwner {
         // Get file for InputText
         WebFile inputTextFile = FilesBrowserUtils.getInputTextAsFile(this);
 
-        // If not valid and opening, check for completion
-        if (inputTextFile == null && isOpening()) {
-
-            // If InputText has some chars, try to find completion candidate
-            String inputText = FilesBrowserUtils.getInputText(this);
-            if (inputText.length() > 0) {
-
-                // Get completion candidate for InputText as path
-                String inputTextPath = FilesBrowserUtils.getInputTextAsPath(this);
-                WebFile completionFile = FilesBrowserUtils.getFileCompletionForPath(this, inputTextPath);
-
-                // If completion found, set filename remainder in InputText and select
-                if (completionFile != null) {
-
-                    // Configure InputText to select completion chars
-                    String completionPath = completionFile.getPath();
-                    String completionFilename = completionFile.getName();
-                    String completion = StringUtils.startsWithIC(inputTextPath, inputText) ? completionPath : completionFilename;
-                    _inputText.setCompletionText(completion);
-                    inputTextFile = completionFile;
-                }
-            }
-        }
+        // If not valid and opening file, try file completion
+        if (inputTextFile == null && isOpening())
+            inputTextFile = FilesBrowserUtils.performFileCompletionOnInputText(this);
 
         // Set the target file
         setTargFile(inputTextFile);

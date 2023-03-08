@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
-import snap.props.PropChange;
 import snap.util.*;
 import snap.view.*;
 import snap.web.*;
@@ -298,7 +297,7 @@ public class FilePanel extends ViewOwner {
      */
     private void filesBrowserDidPropChange()
     {
-        WebFile selOrTargFile = _filesBrowser.getSelOrTargFile();;
+        WebFile selOrTargFile = _filesBrowser.getSelOrTargFile();
         boolean isFileSet = selOrTargFile != null;
         if (_dialogBox != null)
             _dialogBox.setConfirmEnabled(isFileSet);
