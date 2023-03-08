@@ -19,11 +19,14 @@ public class FilesBrowser extends ViewOwner {
     // The site used to reference files
     private WebSite  _site;
 
-    // The current file
+    // The currently selected file
     private WebFile  _selFile;
 
-    // The current directory
+    // The current selected directory
     private WebFile  _selDir;
+
+    // A file targeted by input text
+    private WebFile  _targFile;
 
     // Whether choosing file for save
     private boolean  _saving;
@@ -43,6 +46,7 @@ public class FilesBrowser extends ViewOwner {
     // Constants for properties
     public static final String SelFile_Prop = "SelFile";
     public static final String SelDir_Prop = "SelDir";
+    public static final String TargFile_Prop = "TargFile";
 
     /**
      * Constructor.
@@ -108,6 +112,9 @@ public class FilesBrowser extends ViewOwner {
         if (_selDir != oldSelDir)
             firePropChange(SelDir_Prop, oldSelDir, _selDir);
 
+        // Clear TargFile
+        setTargFile(null);
+
         // Reset UI
         resetLater();
     }
@@ -116,6 +123,32 @@ public class FilesBrowser extends ViewOwner {
      * Returns the selected directory.
      */
     public WebFile getSelDir()  { return _selDir; }
+
+    /**
+     * Returns the file targeted by the input text.
+     */
+    public WebFile getTargFile()  { return _targFile; }
+
+    /**
+     * Sets the file targeted by the input text.
+     */
+    public void setTargFile(WebFile aFile)
+    {
+        if (aFile == _targFile) return;
+        firePropChange(TargFile_Prop, _targFile, _targFile = aFile);
+    }
+
+    /**
+     * Returns the selected or targeted file.
+     */
+    public WebFile getSelOrTargFile()
+    {
+        if (isValidFile(_targFile))
+            return _targFile;
+        if (isValidFile(_selFile))
+            return _selFile;
+        return null;
+    }
 
     /**
      * Returns whether is opening.
@@ -154,6 +187,15 @@ public class FilesBrowser extends ViewOwner {
     public void setTypes(String ... theExts)
     {
         _types = ArrayUtils.map(theExts, type -> FilesBrowserUtils.normalizeType(type), String.class);
+    }
+
+    /**
+     * Returns whether given file is valid.
+     */
+    public boolean isValidFile(WebFile aFile)
+    {
+        boolean isValid = aFile != null && aFile.isFile() && ArrayUtils.contains(getTypes(), aFile.getType());
+        return isValid;
     }
 
     /**
@@ -220,10 +262,6 @@ public class FilesBrowser extends ViewOwner {
         // Update DirComboBox
         _dirComboBox.setItems(selDirs);
         _dirComboBox.setSelItem(selDir);
-
-        // Update ConfirmEnabled
-        boolean inputTextFileValid = FilesBrowserUtils.isInputTextFileValid(this);
-        setConfirmEnabled(inputTextFileValid);
     }
 
     /**
@@ -282,11 +320,11 @@ public class FilesBrowser extends ViewOwner {
     {
         // Get whether InputText file is valid (exists and is right type)
         boolean inputTextFileValid = FilesBrowserUtils.isInputTextFileValid(this);
+        WebFile inputTextFile = FilesBrowserUtils.getInputTextAsFile(this);
 
         // If not valid and opening, check for completion
         if (!inputTextFileValid && isOpening()) {
 
-            WebFile inputTextFile = FilesBrowserUtils.getInputTextAsFile(this);
             String inputText = FilesBrowserUtils.getInputText(this);
             String inputTextPath = FilesBrowserUtils.getInputTextAsPath(this);
             if (inputTextFile == null && inputText.length() > 0) {
@@ -298,24 +336,19 @@ public class FilesBrowser extends ViewOwner {
                     String completionFilename = completionFile.getName();
                     String completion = StringUtils.startsWithIC(inputTextPath, inputText) ? completionPath : completionFilename;
                     _inputText.setCompletionText(completion);
-                    inputTextFileValid = true;
+                    inputTextFile = completionFile;
                 }
             }
         }
 
-        // Set confirm enabled
-        setConfirmEnabled(inputTextFileValid);
+        // Set the target file
+        setTargFile(inputTextFile);
     }
 
     /**
      * Called on FileBrowser double-click or InputText enter key.
      */
     protected void fireActionEvent(ViewEvent anEvent)  { }
-
-    /**
-     * Called when
-     */
-    protected void setConfirmEnabled(boolean inputTextFileValid) { }
 
     /**
      * Returns a file for a path.
@@ -341,7 +374,7 @@ public class FilesBrowser extends ViewOwner {
     protected void configureFileBrowserCell(ListCell<WebFile> aCell)
     {
         WebFile file = aCell.getItem();
-        if (file == null || file.isDir() || ArrayUtils.contains(getTypes(), file.getType()))
+        if (file == null || file.isDir() || isValidFile(file))
             return;
 
         aCell.setEnabled(false);

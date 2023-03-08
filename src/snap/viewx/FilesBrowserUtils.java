@@ -99,16 +99,12 @@ class FilesBrowserUtils {
             return inputText.length() > 0;
         }
 
-        // Get file for path based on FilePanel Dir and InputText (filename) - just return false if null
+        // Get InputText file and return true
         WebFile inputTextFile = getInputTextAsFile(filesBrowser);
-        if (inputTextFile == null)
-            return false;
 
-        // If file is plain file and matches requested type, return true
-        if (inputTextFile.isFile()) {
-            if (ArrayUtils.contains(filesBrowser.getTypes(), inputTextFile.getType()))
+        // If InputText file is valid file, return true
+        if (filesBrowser.isValidFile(inputTextFile))
                 return true;
-        }
 
         // Return
         return false;
@@ -153,15 +149,7 @@ class FilesBrowserUtils {
      */
     public static WebFile[] getVisibleFiles(WebFile[] theFiles)
     {
-        return ArrayUtils.filter(theFiles, file -> isVisibleFile(file));
-    }
-
-    /**
-     * Returns whether given file is visible (not hidden).
-     */
-    public static boolean isVisibleFile(WebFile aFile)
-    {
-        return !aFile.getName().startsWith(".");
+        return ArrayUtils.filter(theFiles, file -> !file.getName().startsWith("."));
     }
 
     /**

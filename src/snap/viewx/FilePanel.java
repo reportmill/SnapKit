@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
+import snap.props.PropChange;
 import snap.util.*;
 import snap.view.*;
 import snap.web.*;
@@ -29,7 +30,10 @@ public class FilePanel extends ViewOwner {
     public FilePanel()
     {
         super();
+
+        // Create/config FilesBrowser
         _filesBrowser = new CustomFilesBrowser();
+        _filesBrowser.addPropChangeListener(pc -> filesBrowserDidPropChange());
     }
 
     /**
@@ -130,28 +134,30 @@ public class FilePanel extends ViewOwner {
         // Run code to add new folder button
         if (isSaving()) runLater(() -> addNewFolderButton());
 
-        // Run FileChooser UI in DialogBox
+        // Create/config DialogBox with FilePanel UI
         _dialogBox = new DialogBox(getTitle());
         _dialogBox.setContent(getUI());
-        _dialogBox.setConfirmEnabled(FilesBrowserUtils.isInputTextFileValid(_filesBrowser));
+        _dialogBox.setConfirmEnabled(_filesBrowser.getSelOrTargFile() != null);
+
+        // Run FileChooser UI in DialogBox
         boolean value = _dialogBox.showConfirmDialog(aView);
         if (!value)
             return null;
 
         // Get file and path of selection and save to preferences
-        WebFile file = FilesBrowserUtils.getInputTextAsFile(_filesBrowser);
-        String path = file.getPath();
+        WebFile selFile = _filesBrowser.getSelOrTargFile();
+        String selFilePath = selFile.getPath();
 
         // Save selected filename in preferences for its type (extension)
-        setRecentPath(getType(), path);
+        setRecentPath(getType(), selFilePath);
 
         // If user is trying to save over an existing file, warn them
         boolean save = isSaving();
-        if (save && file.getExists()) {
+        if (save && selFile.getExists()) {
 
             // Run option panel for whether to overwrite
             DialogBox dbox2 = new DialogBox("Replace File");
-            dbox2.setWarningMessage("The file " + path + " already exists. Replace it?");
+            dbox2.setWarningMessage("The file " + selFilePath + " already exists. Replace it?");
             dbox2.setOptions("Replace", "Cancel");
             int answer = dbox2.showOptionDialog(aView, "Replace");
 
@@ -165,7 +171,7 @@ public class FilePanel extends ViewOwner {
             aView.requestFocus();
 
         // Return file
-        return file;
+        return selFile;
     }
 
     /**
@@ -288,6 +294,17 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
+     * Called when FilesBrowser does prop change.
+     */
+    private void filesBrowserDidPropChange()
+    {
+        WebFile selOrTargFile = _filesBrowser.getSelOrTargFile();;
+        boolean isFileSet = selOrTargFile != null;
+        if (_dialogBox != null)
+            _dialogBox.setConfirmEnabled(isFileSet);
+    }
+
+    /**
      * Custom FilesBrowser.
      */
     private class CustomFilesBrowser extends FilesBrowser {
@@ -300,15 +317,6 @@ public class FilePanel extends ViewOwner {
         {
             if (_dialogBox.isConfirmEnabled())
                 _dialogBox.confirm();
-        }
-
-        /**
-         * Called when
-         */
-        @Override
-        protected void setConfirmEnabled(boolean fileTextFileValid)
-        {
-            _dialogBox.setConfirmEnabled(fileTextFileValid);
         }
     }
 }
