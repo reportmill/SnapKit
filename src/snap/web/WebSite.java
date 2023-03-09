@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-import snap.gfx.GFXEnv;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
@@ -11,7 +10,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * This is an abstract class to provide data management (create, get, put, delete) and file management.
@@ -172,24 +170,6 @@ public abstract class WebSite {
     }
 
     /**
-     * Executes request and invokes callback with response.
-     */
-    public void getResponseAndCall(WebRequest aReq, Consumer<WebResponse> aCallback)
-    {
-        // If platform can handle this request, just return
-        if (GFXEnv.getEnv().getResponseAndCall(aReq, aCallback))
-            return;
-
-        // Otherwise wrap in thread and start
-        Runnable run = () -> {
-            WebResponse resp = getResponse(aReq);
-            aCallback.accept(resp);
-        };
-        Thread thread = new Thread(run);
-        thread.start();
-    }
-
-    /**
      * Handles a get or head request.
      */
     protected abstract void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead);
@@ -224,13 +204,13 @@ public abstract class WebSite {
     public synchronized WebFile getFileForPath(String aPath) throws ResponseException
     {
         // Get file from cache (just return if found)
-        String path = PathUtils.getNormalized(aPath);
-        WebFile file = _files.get(path);
+        String filePath = PathUtils.getNormalized(aPath);
+        WebFile file = _files.get(filePath);
         if (file != null && file.isVerified() && file.isSaved())
             return file;
 
         // Get path URL and Head response
-        WebURL url = getURL(path);
+        WebURL url = getURL(filePath);
         WebResponse resp = url.getHead();
 
         // If not found, return null

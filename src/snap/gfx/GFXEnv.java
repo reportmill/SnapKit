@@ -100,14 +100,6 @@ public abstract class GFXEnv {
     public void openTextFile(Object aSource)  { openFile(aSource); }
 
     /**
-     * Executes request and invokes callback with response.
-     */
-    public boolean getResponseAndCall(WebRequest aReq, Consumer <WebResponse> aCallback)
-    {
-        return false;
-    }
-
-    /**
      * Returns the screen resolution.
      */
     public abstract double getScreenResolution();

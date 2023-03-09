@@ -199,9 +199,9 @@ public class WebURL {
     public WebFile getFile()
     {
         WebSite site = getSite();
-        String path = getPath();
-        if (path != null)
-            return site.getFileForPath(path);
+        String filePath = getPath();
+        if (filePath != null)
+            return site.getFileForPath(filePath);
 
         // Fallback to root dir?
         return site.getRootDir();
@@ -418,9 +418,18 @@ public class WebURL {
      */
     public void getResponseAndCall(Consumer<WebResponse> aCallback)
     {
+        // Get site/request
         WebSite site = getSite();
         WebRequest req = new WebRequest(this);
-        site.getResponseAndCall(req, aCallback);
+
+        // Create runnable to fetch response and call callback
+        Runnable run = () -> {
+            WebResponse resp = site.getResponse(req);
+            aCallback.accept(resp);
+        };
+
+        // Create/start thread for runnable
+        new Thread(run).start();
     }
 
     /**
