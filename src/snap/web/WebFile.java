@@ -60,6 +60,9 @@ public class WebFile implements Comparable<WebFile> {
     // File updater
     private Updater  _updater;
 
+    // The link, if this file really points to another
+    private WebFile  _linkFile;
+
     // The PropChangeSupport
     private PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
 
@@ -566,6 +569,24 @@ public class WebFile implements Comparable<WebFile> {
         if (anUpdater == _updater) return;
         firePropChange(Updater_Prop, _updater, _updater = anUpdater);
     }
+
+    /**
+     * Returns the link file, if this file really points to another.
+     */
+    public WebFile getLinkFile()  { return _linkFile; }
+
+    /**
+     * Sets the link file, if this file really points to another.
+     */
+    protected void setLinkFile(WebFile aFile)
+    {
+        _linkFile = aFile;
+    }
+
+    /**
+     * Returns the real file.
+     */
+    public WebFile getRealFile()  { return _linkFile != null ? _linkFile : this; }
 
     /**
      * An interface for classes that want to post modifications to files.

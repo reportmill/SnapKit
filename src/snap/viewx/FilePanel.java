@@ -58,7 +58,7 @@ public class FilePanel extends ViewOwner {
      */
     public void addSites(WebSite aSite)
     {
-        _sites = ArrayUtils.add(_sites, aSite);
+        _sites = ArrayUtils.addId(_sites, aSite);
     }
 
     /**
@@ -382,7 +382,7 @@ public class FilePanel extends ViewOwner {
      */
     public static WebSite[] getDefaultSites()
     {
-        if (_defaultSite != null) return _defaultSites;
+        if (_defaultSites != null) return _defaultSites;
 
         // Init to local site
         WebSite localSite = FilesBrowserUtils.getLocalFileSystemSite();
@@ -397,7 +397,8 @@ public class FilePanel extends ViewOwner {
      */
     public static void addDefaultSite(WebSite aSite)
     {
-        _defaultSites = ArrayUtils.add(_defaultSites, aSite);
+        getDefaultSites();
+        _defaultSites = ArrayUtils.addId(_defaultSites, aSite);
     }
 
     /**
@@ -407,8 +408,8 @@ public class FilePanel extends ViewOwner {
     {
         if (aSite instanceof FileSite)
             return "Local Files";
-        //if (aSite instanceof RecentFilesSite)
-        //    return "Recent Files";
+        if (aSite instanceof RecentFilesSite)
+            return "Recent Files";
         //if (aSite instanceof DropBoxSite)
         //    return "DropBox";
         return "Files";

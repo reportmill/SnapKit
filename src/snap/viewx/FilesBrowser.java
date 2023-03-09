@@ -70,6 +70,15 @@ public class FilesBrowser extends ViewOwner {
     {
         if (aSite == _site) return;
         _site = aSite;
+
+        // Reset FilesBrowser.Items to Site.RootDir.Files
+        WebFile rootDir = _site.getRootDir();
+        WebFile[] dirFiles = rootDir.getFiles();
+        WebFile[] dirFilesFiltered = FilesBrowserUtils.getVisibleFiles(dirFiles);
+        _fileBrowser.setItems(dirFilesFiltered);
+
+        // Reset selected file
+        setSelFile(rootDir);
     }
 
     /**
