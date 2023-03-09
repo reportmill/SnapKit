@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
+import snap.gfx.Color;
 import snap.util.*;
 import snap.view.*;
 import snap.web.*;
@@ -11,6 +12,9 @@ import snap.web.*;
  */
 public class FilePanel extends ViewOwner {
 
+    // The sites
+    private WebSite[]  _sites;
+
     // The FilesBrowser
     private FilesBrowser  _filesBrowser;
 
@@ -19,6 +23,12 @@ public class FilePanel extends ViewOwner {
 
     // The DialogBox
     private DialogBox  _dialogBox;
+
+    // The tab bar holding sites
+    private TabBar  _sitesTabBar;
+
+    // The sites
+    private static WebSite[]  _defaultSites;
 
     // The default site
     private static WebSite  _defaultSite;
@@ -33,6 +43,30 @@ public class FilePanel extends ViewOwner {
         // Create/config FilesBrowser
         _filesBrowser = new CustomFilesBrowser();
         _filesBrowser.addPropChangeListener(pc -> filesBrowserDidPropChange());
+
+        // Get sites
+        _sites = getDefaultSites();
+    }
+
+    /**
+     * Return sites available to open/save files.
+     */
+    public WebSite[] getSites()  { return _sites; }
+
+    /**
+     * Adds a sites available to open/save files.
+     */
+    public void addSites(WebSite aSite)
+    {
+        _sites = ArrayUtils.add(_sites, aSite);
+    }
+
+    /**
+     * Removes a sites available to open/save files.
+     */
+    public void removeSites(WebSite aSite)
+    {
+        _sites = ArrayUtils.remove(_sites, aSite);
     }
 
     /**
@@ -179,7 +213,55 @@ public class FilePanel extends ViewOwner {
     @Override
     protected View createUI()
     {
-        return _filesBrowser.getUI();
+        // Create top level ColView
+        ColView topColView = new ColView();
+        topColView.setFillWidth(true);
+        topColView.setSpacing(5);
+
+        // Create/add TabBar
+        _sitesTabBar = new TabBar();
+        _sitesTabBar.setName("SitesTabBar");
+        _sitesTabBar.setBorder(Color.GRAY8, 1);
+        _sitesTabBar.setBorderRadius(4);
+        _sitesTabBar.setPadding(5, 5, 5, 5);
+        _sitesTabBar.setTabMinWidth(90);
+        topColView.addChild(_sitesTabBar);
+
+        // Add FilesBrowser UI
+        View filesBrowserUI = _filesBrowser.getUI();
+        topColView.addChild(filesBrowserUI);
+
+        // Return
+        return topColView;
+    }
+
+    /**
+     * Initialize UI.
+     */
+    @Override
+    protected void initUI()
+    {
+        // Add tabs for sites to SitesTabBar
+        WebSite[] sites = getSites();
+        Tab.Builder tabBuilder = new Tab.Builder(_sitesTabBar);
+        for (WebSite site : sites) {
+            String siteName = getNameForSite(site);
+            tabBuilder.title(siteName).add();
+        }
+    }
+
+    /**
+     * Respond UI.
+     */
+    @Override
+    protected void respondUI(ViewEvent anEvent)
+    {
+        // Handle SitesTabBar
+        if (anEvent.equals("SitesTabBar")) {
+            int selIndex = _sitesTabBar.getSelIndex();
+            WebSite newSelSite = getSites()[selIndex];
+            _filesBrowser.setSite(newSelSite);
+        }
     }
 
     /**
@@ -285,14 +367,6 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
-     * Sets the default site.
-     */
-    public static void setSiteDefault(WebSite aSite)
-    {
-        _defaultSite = aSite;
-    }
-
-    /**
      * Called when FilesBrowser does prop change.
      */
     private void filesBrowserDidPropChange()
@@ -301,6 +375,51 @@ public class FilePanel extends ViewOwner {
         boolean isFileSet = selOrTargFile != null;
         if (_dialogBox != null)
             _dialogBox.setConfirmEnabled(isFileSet);
+    }
+
+    /**
+     * Returns the sites.
+     */
+    public static WebSite[] getDefaultSites()
+    {
+        if (_defaultSite != null) return _defaultSites;
+
+        // Init to local site
+        WebSite localSite = FilesBrowserUtils.getLocalFileSystemSite();
+        WebSite[] defaultSites = new WebSite[] { localSite };
+
+        // Set/return
+        return _defaultSites = defaultSites;
+    }
+
+    /**
+     * Adds a site.
+     */
+    public static void addDefaultSite(WebSite aSite)
+    {
+        _defaultSites = ArrayUtils.add(_defaultSites, aSite);
+    }
+
+    /**
+     * Returns a name for a given site.
+     */
+    private static String getNameForSite(WebSite aSite)
+    {
+        if (aSite instanceof FileSite)
+            return "Local Files";
+        //if (aSite instanceof RecentFilesSite)
+        //    return "Recent Files";
+        //if (aSite instanceof DropBoxSite)
+        //    return "DropBox";
+        return "Files";
+    }
+
+    /**
+     * Sets the default site.
+     */
+    public static void setSiteDefault(WebSite aSite)
+    {
+        _defaultSite = aSite;
     }
 
     /**
