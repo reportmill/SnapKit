@@ -40,7 +40,7 @@ public class WebResponse {
     private String  _text;
     
     // The response file header
-    private FileHeader  _fileHdr;
+    private FileHeader  _fileHeader;
     
     // The response files (if directory get)
     private List<FileHeader>  _files;
@@ -58,7 +58,11 @@ public class WebResponse {
     /**
      * Creates a new WebResponse for given request.
      */
-    public WebResponse(WebRequest aReq)  { setRequest(aReq); }
+    public WebResponse(WebRequest aReq)
+    {
+        super();
+        setRequest(aReq);
+    }
 
     /**
      * Returns the request.
@@ -136,7 +140,7 @@ public class WebResponse {
     /**
      * Returns the response MIME type.
      */
-    public String getMIMEType()
+    public String getMimeType()
     {
         if (_mimeType != null) return _mimeType;
         String path = getPath();
@@ -147,7 +151,7 @@ public class WebResponse {
     /**
      * Sets the response MIME type.
      */
-    protected void setMIMEType(String aMIMEType)
+    protected void setMimeType(String aMIMEType)
     {
         _mimeType = aMIMEType;
     }
@@ -193,14 +197,14 @@ public class WebResponse {
     public FileHeader getFileHeader()
     {
         // If already set, just return
-        if (_fileHdr != null) return _fileHdr;
+        if (_fileHeader != null) return _fileHeader;
 
         // Create and return
-        FileHeader fhdr = new FileHeader(getPath(), isDir());
-        fhdr.setModTime(getModTime());
-        fhdr.setSize(getSize());
-        fhdr.setMIMEtype(getMIMEType());
-        return _fileHdr = fhdr;
+        FileHeader fileHeader = new FileHeader(getPath(), isDir());
+        fileHeader.setModTime(getModTime());
+        fileHeader.setSize(getSize());
+        fileHeader.setMIMEtype(getMimeType());
+        return _fileHeader = fileHeader;
     }
 
     /**
@@ -208,7 +212,7 @@ public class WebResponse {
      */
     public void setFileHeader(FileHeader aFHdr)
     {
-        _fileHdr = aFHdr;
+        _fileHeader = aFHdr;
         _dir = aFHdr.isDir();
         _modTime = aFHdr.getModTime();
         _size = aFHdr.getSize();
@@ -218,7 +222,7 @@ public class WebResponse {
     /**
      * Returns the files (for directory request).
      */
-    public List <FileHeader> getFileHeaders()  { return _files; }
+    public List<FileHeader> getFileHeaders()  { return _files; }
 
     /**
      * Sets the files (for directory request).
@@ -233,7 +237,7 @@ public class WebResponse {
     /**
      * Sets the response bytes.
      */
-    public void setBytes(byte theBytes[])  { _bytes = theBytes; }
+    public void setBytes(byte[] theBytes)  { _bytes = theBytes; }
 
     /**
      * Returns the exception.
@@ -255,14 +259,17 @@ public class WebResponse {
      */
     public boolean isText()
     {
-        byte[] bytes = getBytes(); if(bytes == null) return false;
+        byte[] bytes = getBytes();
+        if (bytes == null)
+            return false;
         byte junk = 0;
-        for (byte b : bytes)
-            if((b & 0xFF) > 127) {
+        for (byte b : bytes) {
+            if ((b & 0xFF) > 127) {
                 junk++;
-                if( junk > 10)
+                if (junk > 10)
                     return false;
             }
+        }
         return true;
     }
 
@@ -272,7 +279,8 @@ public class WebResponse {
     public String getText()
     {
         if (_text != null) return _text;
-        if (_bytes != null) _text = new String(_bytes);
+        if (_bytes != null)
+            _text = new String(_bytes);
         return _text;
     }
 
@@ -329,13 +337,12 @@ public class WebResponse {
     public String toStringProps()
     {
         // Add Code
-        StringBuffer sb = new StringBuffer();
-        sb.append("Code: ").append(getCode()).append(", ");
-        sb.append("CodeString: ").append(getCodeString()).append(", ");
-        sb.append("URL: ").append(getURL().getString());
+        String sb = "Code: " + getCode() + ", " +
+                "CodeString: " + getCodeString() + ", " +
+                "URL: " + getURL().getString();
 
         // Return
-        return sb.toString();
+        return sb;
     }
 
     /**
@@ -351,5 +358,4 @@ public class WebResponse {
             default: return "Unknown";
         }
     }
-
 }

@@ -9,34 +9,46 @@ package snap.web;
 public class WebRequest {
 
     // The URL
-    WebURL         _url;
+    private WebURL  _url;
     
     // The file - if request was for existing file
-    WebFile        _file;
+    private WebFile  _file;
     
     // The type of request
-    Type           _type = Type.GET;
+    private Type  _type = Type.GET;
     
     // The bytes to send with request
-    byte           _sendBytes[];
+    private byte[]  _sendBytes;
     
     // Constants for request type
     public enum Type  { GET, HEAD, POST, PUT, DELETE }
 
     /**
-     * Creates a new WebRequestL.
+     * Constructor.
      */
-    public WebRequest()  { }
+    public WebRequest()
+    {
+        super();
+    }
 
     /**
-     * Creates a new WebRequest for URL.
+     * Constructor for given URL.
      */
-    public WebRequest(WebURL aURL)  { _url = aURL; }
+    public WebRequest(WebURL aURL)
+    {
+        super();
+        _url = aURL;
+    }
 
     /**
-     * Creates a new WebRequest for URL.
+     * Constructor for given file.
      */
-    public WebRequest(WebFile aFile)  { _file = aFile; _url = aFile.getURL(); }
+    public WebRequest(WebFile aFile)
+    {
+        super();
+        _file = aFile;
+        _url = aFile.getURL();
+    }
 
     /**
      * Returns the site for the request.
@@ -53,8 +65,8 @@ public class WebRequest {
      */
     public WebFile getFile()
     {
-        if (_file!=null) return _file;
-        return _file = getSite().getFileCacheFile(_url.getPath());
+        if (_file != null) return _file;
+        return _file = _url.getFile();
     }
 
     /**
@@ -75,21 +87,34 @@ public class WebRequest {
     /**
      * Sets the bytes to send.
      */
-    public void setSendBytes(byte theBytes[])  { _sendBytes = theBytes; }
+    public void setSendBytes(byte[] theBytes)
+    {
+        _sendBytes = theBytes;
+    }
 
     /**
      * Sets the bytes to POST.
      */
-    public void setPostBytes(byte theBytes[])  { setSendBytes(theBytes); _type = Type.POST; }
+    public void setPostBytes(byte[] theBytes)
+    {
+        setSendBytes(theBytes);
+        _type = Type.POST;
+    }
 
     /**
      * Sets the bytes to PUT.
      */
-    public void setPutBytes(byte theBytes[])  { setSendBytes(theBytes); _type = Type.PUT; }
+    public void setPutBytes(byte[] theBytes)
+    {
+        setSendBytes(theBytes);
+        _type = Type.PUT;
+    }
 
     /**
      * Standard toString implementation.
      */
-    public String toString()  { return "Request " + getType() + ' ' + getURL().getString(); }
-
+    public String toString()
+    {
+        return "Request " + getType() + ' ' + getURL().getString();
+    }
 }

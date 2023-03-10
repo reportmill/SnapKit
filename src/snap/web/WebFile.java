@@ -52,7 +52,7 @@ public class WebFile implements Comparable<WebFile> {
     private String  _mimeType;
 
     // A map of properties associated with file
-    private Map  _props = new HashMap<>();
+    private Map<String,Object>  _props = new HashMap<>();
 
     // The URL for this file
     protected WebURL  _url;
@@ -74,6 +74,14 @@ public class WebFile implements Comparable<WebFile> {
     final public static String Updater_Prop = "Updater";
     final public static String Verified_Prop = "Verified";
     final public static String Loaded_Prop = "Loaded";
+
+    /**
+     * Constructor.
+     */
+    public WebFile()
+    {
+        super();
+    }
 
     /**
      * Returns the WebSite.
@@ -393,14 +401,14 @@ public class WebFile implements Comparable<WebFile> {
 
         // Get file headers
         WebSite site = getSite();
-        List<FileHeader> fhdrs = resp.getFileHeaders();
-        if (fhdrs == null)
+        List<FileHeader> fileHeaders = resp.getFileHeaders();
+        if (fileHeaders == null)
             return new WebFile[0];
 
         // Get files
-        WebFile[] files = new WebFile[fhdrs.size()];
-        for (int i = 0; i < fhdrs.size(); i++) {
-            FileHeader fileHeader = fhdrs.get(i);
+        WebFile[] files = new WebFile[fileHeaders.size()];
+        for (int i = 0; i < fileHeaders.size(); i++) {
+            FileHeader fileHeader = fileHeaders.get(i);
             WebFile file = site.createFile(fileHeader);
             file.setParent(this);
             file._saved = true;
@@ -488,30 +496,6 @@ public class WebFile implements Comparable<WebFile> {
     }
 
     /**
-     * Returns the list of files that match given regex.
-     */
-    public List<WebFile> getFilesForPattern(String aRegex)
-    {
-        WebFile[] files = getFiles();
-        List filesMatched = new ArrayList<>();
-        for (WebFile file : files)
-            if (file.getName().matches(aRegex))
-                filesMatched.add(file);
-        return filesMatched;
-    }
-
-    /**
-     * Returns the file keys.
-     */
-    public List<String> getFileNames()
-    {
-        WebFile[] files = getFiles();
-        List<String> names = new ArrayList<String>();
-        for (WebFile file : files) names.add(file.getName());
-        return names;
-    }
-
-    /**
      * Returns whether given file is contained in this directory.
      */
     public boolean contains(WebFile aFile)
@@ -522,39 +506,27 @@ public class WebFile implements Comparable<WebFile> {
     /**
      * Returns the MIME type of the file.
      */
-    public String getMiType()  { return _mimeType; }
+    public String getMimeType()  { return _mimeType; }
 
     /**
      * Sets the MIME type for the file.
      */
-    protected void setMIMEType(String aMIMEType)
-    {
-        _mimeType = aMIMEType;
-    }
+    protected void setMimeType(String aMIMEType)  { _mimeType = aMIMEType; }
 
     /**
      * Returns a file property for key.
      */
-    public Object getProp(String aKey)
-    {
-        return _props.get(aKey);
-    }
+    public Object getProp(String aKey)  { return _props.get(aKey); }
 
     /**
      * Sets a property for a key.
      */
-    public void setProp(String aKey, Object aValue)
-    {
-        _props.put(aKey, aValue);
-    }
+    public void setProp(String aKey, Object aValue)  { _props.put(aKey, aValue); }
 
     /**
      * Returns whether update is set and has update.
      */
-    public boolean isUpdateSet()
-    {
-        return getUpdater() != null;
-    }
+    public boolean isUpdateSet()  { return _updater != null; }
 
     /**
      * Returns the updater.
@@ -611,7 +583,8 @@ public class WebFile implements Comparable<WebFile> {
         for (byte b : bytes)
             if ((b & 0xFF) > 127) {
                 junk++;
-                if (junk > 10) return false;
+                if (junk > 10)
+                    return false;
             }
         return true;
     }
@@ -659,17 +632,21 @@ public class WebFile implements Comparable<WebFile> {
      */
     public WebURL getURL(String aPath)
     {
-        // If file, get from parent directory instead
+        // If plain file, get from parent directory instead
         if (isFile())
             return getParent().getURL(aPath);
 
-        // If path has protocol, do global eval, if root path, eval with site, otherwise create global URL and eval
+        // If path has protocol, do global eval
         if (aPath.indexOf(':') >= 0)
             return WebURL.getURL(aPath);
+
+        // If root path, eval with site
         if (aPath.startsWith("/"))
-            getSite().getURL(aPath);
-        String urls = PathUtils.getChild(getURL().getString(), aPath);
-        return WebURL.getURL(urls);
+            return getSite().getURL(aPath);
+
+        // Otherwise create global URL and eval
+        String urlStr = PathUtils.getChild(getURL().getString(), aPath);
+        return WebURL.getURL(urlStr);
     }
 
     /**

@@ -149,57 +149,7 @@ public abstract class WebSite {
     }
 
     /**
-     * Returns a response instance for a request.
-     */
-    public WebResponse getResponse(WebRequest aReq)
-    {
-        // Create response
-        WebResponse resp = new WebResponse(aReq);
-
-        // Send to property method
-        switch (aReq.getType())  {
-            case HEAD: doGetOrHead(aReq, resp, true); break;
-            case GET: doGetOrHead(aReq, resp, false); break;
-            case POST: doPost(aReq, resp); break;
-            case PUT: doPut(aReq, resp); break;
-            case DELETE: doDelete(aReq, resp); break;
-        }
-
-        // Return response
-        return resp;
-    }
-
-    /**
-     * Handles a get or head request.
-     */
-    protected abstract void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead);
-
-    /**
-     * Handle a get request.
-     */
-    protected void doPost(WebRequest aReq, WebResponse aResp)
-    {
-        throw new RuntimeException("handlePost");
-    }
-
-    /**
-     * Handle a PUT request.
-     */
-    protected void doPut(WebRequest aReq, WebResponse aResp)
-    {
-        throw new RuntimeException("handlePut");
-    }
-
-    /**
-     * Handle a DELETE request.
-     */
-    protected void doDelete(WebRequest aReq, WebResponse aResp)
-    {
-        throw new RuntimeException("handleDelete");
-    }
-
-    /**
-     * Returns the individual file with the given path.
+     * Returns the unique file instance with the given path (or null if it doesn't exist).
      */
     public synchronized WebFile getFileForPath(String aPath) throws ResponseException
     {
@@ -209,6 +159,15 @@ public abstract class WebSite {
         if (file != null && file.isVerified() && file.isSaved())
             return file;
 
+        // Return
+        return getFileForPathImpl(filePath);
+    }
+
+    /**
+     * Returns the individual file with the given path.
+     */
+    protected WebFile getFileForPathImpl(String filePath) throws ResponseException
+    {
         // Get path URL and Head response
         WebURL url = getURL(filePath);
         WebResponse resp = url.getHead();
@@ -227,11 +186,9 @@ public abstract class WebSite {
 
         // Get file header from response, create file
         FileHeader fileHeader = resp.getFileHeader();
-        file = createFile(fileHeader);
+        WebFile file = createFile(fileHeader);
         file._verified = true;
         file._saved = true;
-        file._modTime = fileHeader.getModTime();
-        file._size = fileHeader.getSize();
         file._url = url;
 
         // Return
@@ -252,37 +209,31 @@ public abstract class WebSite {
      */
     protected synchronized WebFile createFile(FileHeader fileHdr)
     {
-        // Get file from cache (just return if found)
+        // Get file from cache
         String path = PathUtils.getNormalized(fileHdr.getPath());
         WebFile file = _files.get(path);
-        if (file != null)
-            return file;
 
-        // Create/configure new file
-        file = new WebFile();
-        file._path = path;
-        file._dir = fileHdr.isDir();
-        file._site = this;
+        // If not found, create and add to cache
+        if (file == null) {
+
+            // Create/config
+            file = new WebFile();
+            file._path = path;
+            file._dir = fileHdr.isDir();
+            file._site = this;
+
+            // Put in cache, start listening to file changes
+            _files.put(path, file);
+            file.addPropChangeListener(_fileLsnr);
+        }
+
+        // Update properties file
         file._modTime = fileHdr.getModTime();
         file._size = fileHdr.getSize();
-        file.setMIMEType(fileHdr.getMIMEType());
-
-        // Put in cache, start listening to file changes
-        _files.put(path, file);
-        file.addPropChangeListener(_fileLsnr);
+        file.setMimeType(fileHdr.getMIMEType());
 
         // Return
         return file;
-    }
-
-    /**
-     * Returns the file if it has been entered in the file cache.
-     */
-    protected synchronized WebFile getFileCacheFile(String aPath)
-    {
-        // Get file from cache (just return if found)
-        String path = PathUtils.getNormalized(aPath);
-        return _files.get(path);
     }
 
     /**
@@ -362,6 +313,56 @@ public abstract class WebSite {
         // Resets the file
         aFile.reset();
         return resp;
+    }
+
+    /**
+     * Returns a response instance for a request.
+     */
+    public WebResponse getResponse(WebRequest aReq)
+    {
+        // Create response
+        WebResponse resp = new WebResponse(aReq);
+
+        // Send to property method
+        switch (aReq.getType())  {
+            case HEAD: doGetOrHead(aReq, resp, true); break;
+            case GET: doGetOrHead(aReq, resp, false); break;
+            case POST: doPost(aReq, resp); break;
+            case PUT: doPut(aReq, resp); break;
+            case DELETE: doDelete(aReq, resp); break;
+        }
+
+        // Return response
+        return resp;
+    }
+
+    /**
+     * Handles a get or head request.
+     */
+    protected abstract void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead);
+
+    /**
+     * Handle a get request.
+     */
+    protected void doPost(WebRequest aReq, WebResponse aResp)
+    {
+        throw new RuntimeException("handlePost");
+    }
+
+    /**
+     * Handle a PUT request.
+     */
+    protected void doPut(WebRequest aReq, WebResponse aResp)
+    {
+        throw new RuntimeException("handlePut");
+    }
+
+    /**
+     * Handle a DELETE request.
+     */
+    protected void doDelete(WebRequest aReq, WebResponse aResp)
+    {
+        throw new RuntimeException("handleDelete");
     }
 
     /**
