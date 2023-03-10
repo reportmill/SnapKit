@@ -236,6 +236,50 @@ public abstract class WebSite {
     }
 
     /**
+     * Returns the contents for given file.
+     */
+    protected FileContents getContentsForFile(WebFile aFile)
+    {
+        // Get request/response for file URL
+        WebURL url = aFile.getURL();
+        WebResponse resp = url.getResponse();
+        int respCode = resp.getCode();
+        long modTime = resp.getModTime();
+
+        // Handle response
+        if (respCode != WebResponse.OK) {
+            if (resp.getException() != null)
+                throw new ResponseException(resp);
+            System.err.println("WebSite.getContentsForFile: Error: " + resp.getCodeString());
+            if (aFile.isDir())
+                return new FileContents(new WebFile[0], 0);
+            return null;
+        }
+
+        // Handle plain file
+        if (aFile.isFile()) {
+            byte[] bytes = resp.getBytes();
+            return new FileContents(bytes, modTime);
+        }
+
+        // Get file headers
+        FileHeader[] fileHeaders = resp.getFileHeaders();
+        if (fileHeaders == null)
+            return new FileContents(new WebFile[0], 0);
+
+        // Get files
+        WebFile[] files = new WebFile[fileHeaders.length];
+        for (int i = 0; i < fileHeaders.length; i++) {
+            FileHeader fileHeader = fileHeaders[i];
+            WebFile file = files[i] = createFile(fileHeader);
+            file._saved = true;
+        }
+
+        // Return
+        return new FileContents(files, modTime);
+    }
+
+    /**
      * Save file.
      */
     protected WebResponse saveFile(WebFile aFile)
@@ -312,47 +356,6 @@ public abstract class WebSite {
         // Resets the file
         aFile.reset();
         return resp;
-    }
-
-    /**
-     * Returns the contents for given file.
-     */
-    protected FileContents getContentsForFile(WebFile aFile)
-    {
-        // Get request/response for file URL
-        WebURL url = aFile.getURL();
-        WebResponse resp = url.getResponse();
-        int respCode = resp.getCode();
-        long modTime = resp.getModTime();
-
-        // Handle response
-        if (respCode != WebResponse.OK) {
-            if (resp.getException() != null)
-                throw new ResponseException(resp);
-            return null;
-        }
-
-        // Handle plain file
-        if (aFile.isFile()) {
-            byte[] bytes = resp.getBytes();
-            return new FileContents(bytes, modTime);
-        }
-
-        // Get file headers
-        FileHeader[] fileHeaders = resp.getFileHeaders();
-        if (fileHeaders == null)
-            return new FileContents(new WebFile[0], 0);
-
-        // Get files
-        WebFile[] files = new WebFile[fileHeaders.length];
-        for (int i = 0; i < fileHeaders.length; i++) {
-            FileHeader fileHeader = fileHeaders[i];
-            WebFile file = files[i] = createFile(fileHeader);
-            file._saved = true;
-        }
-
-        // Return
-        return new FileContents(files, modTime);
     }
 
     /**

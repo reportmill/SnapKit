@@ -133,15 +133,6 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
-     * Shows the panel.
-     */
-    public WebFile showSavePanelWeb(View aView)
-    {
-        setSaving(true);
-        return showFilePanelWeb(aView);
-    }
-
-    /**
      * Runs a file chooser that remembers last open file and size.
      */
     protected String showFilePanel(View aView)
@@ -165,7 +156,8 @@ public class FilePanel extends ViewOwner {
         }
 
         // Run code to add new folder button
-        if (isSaving()) runLater(() -> addNewFolderButton());
+        if (isSaving())
+            runLater(() -> addNewFolderButton());
 
         // Create/config DialogBox with FilePanel UI
         _dialogBox = new DialogBox(getTitle());
@@ -202,6 +194,10 @@ public class FilePanel extends ViewOwner {
         // Give focus back to given view
         if (save && aView != null)
             aView.requestFocus();
+
+        // If link file, replace with real file
+        if (selFile.getLinkFile() != null)
+            selFile = selFile.getLinkFile();
 
         // Return file
         return selFile;
@@ -320,6 +316,17 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
+     * Shows a Open panel for given description and types.
+     */
+    public static WebFile showOpenPanelWeb(View aView, String aDesc, String... theTypes)
+    {
+        FilePanel filePanel = new FilePanel();
+        filePanel.setDesc(aDesc);
+        filePanel.setTypes(theTypes);
+        return filePanel.showFilePanelWeb(aView);
+    }
+
+    /**
      * Shows a Save panel for given description and types.
      */
     public static WebFile showSavePanelWeb(View aView, String aDesc, String... theTypes)
@@ -327,7 +334,8 @@ public class FilePanel extends ViewOwner {
         FilePanel filePanel = new FilePanel();
         filePanel.setDesc(aDesc);
         filePanel.setTypes(theTypes);
-        return filePanel.showSavePanelWeb(aView);
+        filePanel.setSaving(true);
+        return filePanel.showFilePanelWeb(aView);
     }
 
     /**

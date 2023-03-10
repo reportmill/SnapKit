@@ -2,11 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import snap.util.ArrayUtils;
 import snap.viewx.RecentFiles;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,9 +15,6 @@ public class RecentFilesSite extends WebSite {
 
     // The id
     private String  _id;
-
-    // The root dir
-    private WebFile  _rootDir;
 
     // A map of all known RecentFiles sites by Id
     private static Map<String,RecentFilesSite>  _recentFilesSites = new HashMap<>();
@@ -52,51 +48,6 @@ public class RecentFilesSite extends WebSite {
         return recentFiles;
     }
 
-    @Override
-    public WebFile getRootDir()
-    {
-        if (_rootDir != null) return _rootDir;
-
-        // Create RootDir
-        _rootDir = createFileForPath("/", true);
-        _rootDir.save();
-
-        // Iterate over rootDir files and recent files and set each as link
-        WebFile[] rootDirFiles = _rootDir.getFiles();
-        WebFile[] recentFiles = getRecentFiles();
-
-        // Iterate over rootDir files and recent files and set each as link
-        for (int i = 0; i < rootDirFiles.length; i++) {
-            WebFile rootDirFile = rootDirFiles[i];
-            WebFile recentFile = recentFiles[i];
-            rootDirFile.setLinkFile(recentFile);
-        }
-
-        // Set/return
-        return _rootDir;
-    }
-
-    /**
-     * Returns a file from this site for a path.
-     */
-    private WebFile getRecentFileForPath(String aPath)
-    {
-        // Get RootDir
-        WebFile rootDir = getRootDir();
-
-        // If root dir, just return
-        if (aPath.equals("/"))
-            return rootDir;
-
-        // Find matching RootDirFile for path and return recent file
-        WebFile localFile = getFileForPath(aPath);
-        if (localFile != null)
-            return localFile.getLinkFile();
-
-        // Return not found
-        return null;
-    }
-
     /**
      * Adds a recent file.
      */
@@ -109,71 +60,67 @@ public class RecentFilesSite extends WebSite {
     }
 
     /**
-     * Handles a get or head request.
+     * Override to create RootDir file.
      */
-    protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
+    @Override
+    protected WebFile getFileForPathImpl(String filePath) throws ResponseException
     {
-        // Get URL and path
-        WebURL fileURL = aReq.getURL();
-        String filePath = fileURL.getPath();
-
-        // Handle root dir
-        if (filePath == null || filePath.equals("/")) {
-            aResp.setCode(WebResponse.OK);
-            aResp.setDir(true);
+        // Handle RootDir
+        if (filePath.equals("/")) {
+            WebFile rootDir = createFileForPath("/", true);
+            rootDir.save();
+            return rootDir;
         }
 
         // Handle root dir file
-        else {
+        WebFile rootDir = getRootDir();
+        WebFile[] rootDirFiles = rootDir.getFiles();
+        WebFile rootDirFile = ArrayUtils.findMatch(rootDirFiles, file -> file.getPath().equals(filePath));
+        if (rootDirFile != null)
+            return rootDirFile;
 
-            // Get WebFile from Dir site
-            WebFile recentFile = getRecentFileForPath(filePath);
-
-            // If not found, set Response.Code to NOT_FOUND and return
-            if (recentFile == null) {
-                aResp.setCode(WebResponse.NOT_FOUND);
-                return;
-            }
-
-            // If found, set response code to ok
-            aResp.setCode(WebResponse.OK);
-            aResp.setDir(recentFile.isDir());
-            aResp.setModTime(recentFile.getModTime());
-            aResp.setSize(recentFile.getSize());
-            return;
-        }
-
-        // If Head, just return
-        if (isHead)
-            return;
-
-        // Handle dir: Get/set dir FileHeaders - should only get called for root dir
-        assert (filePath.equals("/"));
-
-        // Get RecentFiles and FileHeaders list
-        WebFile[] recentFiles = getRecentFiles();
-        List<FileHeader> fileHeaders = new ArrayList<>(recentFiles.length);
-
-        // Iterate over RecentFiles and create/add FileHeader for each
-        for (WebFile recFile : recentFiles) {
-            String localFilePath = "/" + recFile.getName();
-            FileHeader fileHeader = new FileHeader(localFilePath, recFile.isDir());
-            fileHeader.setModTime(recFile.getModTime());
-            fileHeader.setSize(recFile.getSize());
-            fileHeaders.add(fileHeader);
-        }
-
-        // Set FileHeaders
-        aResp.setFileHeaders(fileHeaders);
+        // This should never happen
+        System.err.println("RecentFilesSite.getFileForPathImpl: Can't find file for path: " + filePath);
+        return null;
     }
 
     /**
-     * Handle POST request.
+     * Override to provide root dir files.
      */
-    protected void doPost(WebRequest aReq, WebResponse aResp)
+    @Override
+    protected FileContents getContentsForFile(WebFile aFile)
     {
-        doPut(aReq, aResp);
+        String filePath = aFile.getPath();
+
+        // Handle RootDir
+        if (filePath.equals("/")) {
+
+            // Get recent file
+            WebFile[] recentFiles = getRecentFiles();
+            WebFile[] rootDirFiles = new WebFile[recentFiles.length];
+
+            // Iterate over rootDir files and recent files and set each as link
+            for (int i = 0; i < recentFiles.length; i++) {
+                WebFile recentFile = recentFiles[i];
+                String rootDirPath = '/' + recentFile.getName();
+                WebFile rootDirFile = rootDirFiles[i] = createFileForPath(rootDirPath, false);
+                rootDirFile.setLinkFile(recentFile);
+                rootDirFile._saved = true;
+            }
+
+            // Return
+            return new FileContents(rootDirFiles, 0);
+        }
+
+        // Should never happen
+        System.err.println("RecentFilesSite.getContentsForFile: Shouldn't need contents for file: " + aFile.getPath());
+        return null;
     }
+
+    /**
+     * Override to suppress, since RecentFiles are really virtual files.
+     */
+    protected void doPost(WebRequest aReq, WebResponse aResp)  { }
 
     /**
      * Override to suppress, since RecentFiles are really virtual files.
@@ -192,9 +139,11 @@ public class RecentFilesSite extends WebSite {
     @Override
     protected File getJavaFile(WebURL aURL)
     {
-        String filePath = aURL.getPath();
-        WebFile recentFile = getRecentFileForPath(filePath);
-        return recentFile != null ? recentFile.getJavaFile() : null;
+        WebFile file = aURL.getFile();
+        WebFile realFile = file.getRealFile();
+        if (realFile != file)
+            return realFile.getJavaFile();
+        return null;
     }
 
     /**
@@ -202,11 +151,16 @@ public class RecentFilesSite extends WebSite {
      */
     public static RecentFilesSite getRecentFilesSiteForId(String anId)
     {
+        // Get from sites cache - just return if found
         RecentFilesSite recentFilesSite = _recentFilesSites.get(anId);
-        if (recentFilesSite == null) {
-            recentFilesSite = new RecentFilesSite(anId);
-            _recentFilesSites.put(anId, recentFilesSite);
-        }
+        if (recentFilesSite != null)
+            return recentFilesSite;
+
+        // Create and add to cache
+        recentFilesSite = new RecentFilesSite(anId);
+        _recentFilesSites.put(anId, recentFilesSite);
+
+        // Return
         return recentFilesSite;
     }
 }
