@@ -3,6 +3,7 @@
  */
 package snap.viewx;
 import snap.gfx.Color;
+import snap.gfx.Font;
 import snap.util.*;
 import snap.view.*;
 import snap.web.*;
@@ -220,7 +221,9 @@ public class FilePanel extends ViewOwner {
         _sitesTabBar.setBorder(Color.GRAY8, 1);
         _sitesTabBar.setBorderRadius(4);
         _sitesTabBar.setPadding(5, 5, 5, 5);
-        _sitesTabBar.setTabMinWidth(90);
+        _sitesTabBar.getTabsBox().setSpacing(5);
+        _sitesTabBar.setTabMinWidth(100);
+        _sitesTabBar.setFont(Font.Arial14);
         topColView.addChild(_sitesTabBar);
 
         // Add FilesBrowser UI
