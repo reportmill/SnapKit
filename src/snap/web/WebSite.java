@@ -275,6 +275,9 @@ public abstract class WebSite {
             file._saved = true;
         }
 
+        // Sort files
+        Arrays.sort(files);
+
         // Return
         return new FileContents(files, modTime);
     }

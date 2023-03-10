@@ -369,7 +369,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
             _saved = true;
             _modTime = Math.max(_modTime, fileContents.getModTime());
             WebFile[] files = fileContents.getFiles();
-            Arrays.sort(files);
             for (WebFile file : files)
                 file.setParent(this);
             _files = files;

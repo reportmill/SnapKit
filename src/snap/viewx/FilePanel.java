@@ -261,6 +261,17 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
+     * Called when FilesBrowser does prop change.
+     */
+    private void filesBrowserDidPropChange()
+    {
+        WebFile selOrTargFile = _filesBrowser.getSelOrTargFile();
+        boolean isFileSet = selOrTargFile != null;
+        if (_dialogBox != null)
+            _dialogBox.setConfirmEnabled(isFileSet);
+    }
+
+    /**
      * Adds a new Folder button.
      */
     protected void addNewFolderButton()
@@ -375,14 +386,11 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
-     * Called when FilesBrowser does prop change.
+     * Sets the default site.
      */
-    private void filesBrowserDidPropChange()
+    public static void setSiteDefault(WebSite aSite)
     {
-        WebFile selOrTargFile = _filesBrowser.getSelOrTargFile();
-        boolean isFileSet = selOrTargFile != null;
-        if (_dialogBox != null)
-            _dialogBox.setConfirmEnabled(isFileSet);
+        _defaultSite = aSite;
     }
 
     /**
@@ -421,14 +429,6 @@ public class FilePanel extends ViewOwner {
         //if (aSite instanceof DropBoxSite)
         //    return "DropBox";
         return "Files";
-    }
-
-    /**
-     * Sets the default site.
-     */
-    public static void setSiteDefault(WebSite aSite)
-    {
-        _defaultSite = aSite;
     }
 
     /**
