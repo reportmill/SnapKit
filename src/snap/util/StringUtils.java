@@ -3,6 +3,7 @@
  */
 package snap.util;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.*;
 
@@ -109,12 +110,16 @@ public class StringUtils {
     public static StringBuffer toStringAdd(StringBuffer aSB, String aName, Object aVal)
     {
         Object val = aVal;
-        if (val instanceof snap.gfx.Color) val = ((snap.gfx.Color) val).toHexString();
-        if (val instanceof Double) val = toString((Double) val);
-        if (val instanceof String && !((String) val).startsWith("\"")) val = '"' + (String) val + '"';
+        if (val instanceof snap.gfx.Color)
+            val = ((snap.gfx.Color) val).toHexString();
+        if (val instanceof Double)
+            val = toString((Double) val);
+        if (val instanceof String && !((String) val).startsWith("\""))
+            val = '"' + (String) val + '"';
 
         int ind = aSB.length() - 2;
-        if (aSB.charAt(ind - 1) != '{') aSB.insert(ind++, ',');
+        if (aSB.charAt(ind - 1) != '{')
+            aSB.insert(ind++, ',');
         return aSB.insert(ind, ' ' + aName + '=' + val);
     }
 
@@ -178,7 +183,7 @@ public class StringUtils {
     public static String replace(String s, int start, int end, String withString)
     {
         String first = start > 0 ? s.substring(0, start) : "";
-        String last = end < s.length() ? s.substring(end, s.length()) : "";
+        String last = end < s.length() ? s.substring(end) : "";
         return first + withString + last;
     }
 
@@ -187,9 +192,16 @@ public class StringUtils {
      */
     public static String replace(String aString, String search, String replace)
     {
-        if (aString == null || search == null) return aString; // If string or search are null, return
-        if (replace == null) return delete(aString, search); // If replace is null, do delete
-        return aString.replace(search, replace); // Return real replace
+        // If string or search are null, return
+        if (aString == null || search == null)
+            return aString;
+
+        // If replace is null, do delete
+        if (replace == null)
+            return delete(aString, search);
+
+        // Return real replace
+        return aString.replace(search, replace);
     }
 
     /**
@@ -200,7 +212,7 @@ public class StringUtils {
         int start = indexOfIC(aString, search);
 
         if (start >= 0) {
-            StringBuffer sb = new StringBuffer(aString);
+            StringBuilder sb = new StringBuilder(aString);
 
             do {
                 int sbStart = start + sb.length() - aString.length();
@@ -227,7 +239,8 @@ public class StringUtils {
     public static List<String> separate(String aString, String aSeparator, boolean doTrim)
     {
         List<String> list = new ArrayList<>();
-        if (aString == null || aSeparator == null) return list;
+        if (aString == null || aSeparator == null)
+            return list;
         int start = 0, length = aSeparator.length();
 
         // While instances of aSeparator are found, add preceding characters
@@ -239,7 +252,7 @@ public class StringUtils {
 
         // If remainder, add it
         if (start < aString.length())
-            list.add(doTrim ? aString.substring(start, aString.length()).trim() : aString.substring(start, aString.length()));
+            list.add(doTrim ? aString.substring(start).trim() : aString.substring(start));
 
         // Return list
         return list;
@@ -275,11 +288,8 @@ public class StringUtils {
         // If number found, have Double parse it
         if (matcher.find(aStart)) {
             String string = matcher.group();
-            try {
-                return Long.parseLong(string);
-            }
-            catch (Exception e) {
-            }
+            try { return Long.parseLong(string); }
+            catch (Exception e) { }
         }
 
         // Return zero since number not found
@@ -316,12 +326,10 @@ public class StringUtils {
         // If number found, have Double parse it
         if (matcher.find(aStart)) {
             String str = matcher.group();
-            if (str.charAt(0) == '.') str = '0' + str; // For TeaVM
-            try {
-                return Double.parseDouble(str);
-            }
-            catch (Exception e) {
-            }
+            if (str.charAt(0) == '.')
+                str = '0' + str; // For TeaVM
+            try { return Double.parseDouble(str); }
+            catch (Exception e) { }
         }
 
         // Return zero since number not found
@@ -341,9 +349,7 @@ public class StringUtils {
      */
     public static byte[] getBytes(String aString, String enc)
     {
-        try {
-            return aString != null ? aString.getBytes(enc) : null;
-        }
+        try { return aString != null ? aString.getBytes(enc) : null; }
         catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -353,11 +359,9 @@ public class StringUtils {
     /**
      * Returns a string for given bytes.
      */
-    public static String getString(byte theBytes[])
+    public static String getString(byte[] theBytes)
     {
-        try {
-            return theBytes != null ? new String(theBytes) : null;
-        } //return getString(theBytes, "ISO-8859-1");
+        try { return theBytes != null ? new String(theBytes) : null; } //return getString(theBytes, "ISO-8859-1");
         catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -367,7 +371,7 @@ public class StringUtils {
     /**
      * Returns a string for given bytes.
      */
-    public static String getString(byte theBytes[], String anEncoding)
+    public static String getString(byte[] theBytes, String anEncoding)
     {
         try {
             return theBytes != null ? new String(theBytes, 0, theBytes.length, anEncoding) : null;
@@ -381,7 +385,7 @@ public class StringUtils {
     /**
      * Returns a string from the given ASCII bytes.
      */
-    public static String getISOLatinString(byte bytes[])
+    public static String getISOLatinString(byte[] bytes)
     {
         return getISOLatinString(bytes, 0, bytes.length);
     }
@@ -389,11 +393,9 @@ public class StringUtils {
     /**
      * Returns a string from the given ASCII bytes (from offset to offset+length).
      */
-    public static String getISOLatinString(byte bytes[], int offset, int length)
+    public static String getISOLatinString(byte[] bytes, int offset, int length)
     {
-        try {
-            return new String(bytes, offset, length, "ISO-8859-1");
-        }
+        try { return new String(bytes, offset, length, StandardCharsets.ISO_8859_1); }
         catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -405,13 +407,17 @@ public class StringUtils {
      */
     public static int indexOf(CharSequence theChars, CharSequence theSearch, int aStart)
     {
-        int clen = theChars.length(), slen = theSearch.length();
+        int charsLength = theChars.length();
+        int searchLength = theSearch.length();
         char fchar = theSearch.charAt(0);
-        for (int cpos = aStart; cpos < clen; cpos++) {
+        for (int cpos = aStart; cpos < charsLength; cpos++) {
             if (theChars.charAt(cpos) == fchar) {
                 int i = 1;
-                for (i = 0; i < slen; i++) if (theChars.charAt(cpos + i) != theSearch.charAt(i)) break;
-                if (i == slen)
+                for (i = 0; i < searchLength; i++) {
+                    if (theChars.charAt(cpos + i) != theSearch.charAt(i))
+                        break;
+                }
+                if (i == searchLength)
                     return cpos;
             }
         }
@@ -449,11 +455,15 @@ public class StringUtils {
      */
     public static int indexOfIC(CharSequence s1, CharSequence s2, int start)
     {
-        int l1 = length(s1), l2 = length(s2);
-        if (l1 == 0 || l2 == 0) return -1;
+        int l1 = length(s1);
+        int l2 = length(s2);
+        if (l1 == 0 || l2 == 0)
+            return -1;
+
         for (int i = start, iMax = l1 - l2; i <= iMax; i++) {
             for (int j = 0; j < l2; j++) {
-                char c1 = s1.charAt(i + j), c2 = s2.charAt(j);
+                char c1 = s1.charAt(i + j);
+                char c2 = s2.charAt(j);
                 if (c1 != c2 && Character.toUpperCase(c1) != Character.toUpperCase(c2))
                     break;
                 if (j == l2 - 1)
@@ -461,7 +471,7 @@ public class StringUtils {
             }
         }
 
-        // Return -1 since string not found
+        // Return not found
         return -1;
     }
 
@@ -470,8 +480,10 @@ public class StringUtils {
      */
     public static boolean equalsIC(String s1, String s2)
     {
-        if (s1 == null || s2 == null) return false;
-        if (s1.length() != s2.length()) return false;
+        if (s1 == null || s2 == null)
+            return false;
+        if (s1.length() != s2.length())
+            return false;
         return startsWithIC(s1, s2);
     }
 
@@ -480,7 +492,8 @@ public class StringUtils {
      */
     public static boolean endsWithIC(String s1, String s2)
     {
-        if (s1 == null || s2 == null) return false;
+        if (s1 == null || s2 == null)
+            return false;
         return s1.regionMatches(true, s1.length() - s2.length(), s2, 0, s2.length());
     }
 
@@ -489,7 +502,8 @@ public class StringUtils {
      */
     public static boolean startsWithIC(String s1, String s2)
     {
-        if (s1 == null || s2 == null) return false;
+        if (s1 == null || s2 == null)
+            return false;
         return s1.regionMatches(true, 0, s2, 0, s2.length());
     }
 
@@ -499,11 +513,11 @@ public class StringUtils {
     public static String firstCharUpperCase(String aString)
     {
         // If first char already upper case (or if string empty) return string
-        if (aString == null | aString.length() == 0 || Character.isUpperCase(aString.charAt(0)))
+        if (aString == null || aString.length() == 0 || Character.isUpperCase(aString.charAt(0)))
             return aString;
 
         // Fix string
-        StringBuffer sb = new StringBuffer(aString);
+        StringBuilder sb = new StringBuilder(aString);
         sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
         return sb.toString();
     }
@@ -513,7 +527,7 @@ public class StringUtils {
      */
     public static String firstCharLowerCase(String aString)
     {
-        StringBuffer sb = new StringBuffer(aString);
+        StringBuilder sb = new StringBuilder(aString);
         sb.setCharAt(0, Character.toLowerCase(sb.charAt(0)));
         return sb.toString();
     }
@@ -524,7 +538,7 @@ public class StringUtils {
     public static String fromCamelCase(String aString)
     {
         // Get string buffer for string and make sure first char is upper case
-        StringBuffer sb = new StringBuffer(aString);
+        StringBuilder sb = new StringBuilder(aString);
         if (sb.length() > 0 && Character.isLowerCase(sb.charAt(0)))
             sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
 
@@ -546,17 +560,17 @@ public class StringUtils {
     public static String toCamelCase(String aString)
     {
         // Get string buffer for string and iterate over chars
-        StringBuffer sb = new StringBuffer(aString);
+        StringBuilder sb = new StringBuilder(aString);
         for (int i = 0; i < sb.length() - 1; i++) {
-            char c = sb.charAt(i);
+            char loopChar = sb.charAt(i);
 
             // If whitespace char, delete (and see if next char needs to be promoted)
-            if (!Character.isJavaIdentifierPart(c)) {
+            if (!Character.isJavaIdentifierPart(loopChar)) {
                 sb.deleteCharAt(i);
                 if (i < sb.length()) {
-                    c = sb.charAt(i);
-                    if (Character.isLetter(c) && Character.isLowerCase(c))
-                        sb.setCharAt(i, Character.toUpperCase(c));
+                    loopChar = sb.charAt(i);
+                    if (Character.isLetter(loopChar) && Character.isLowerCase(loopChar))
+                        sb.setCharAt(i, Character.toUpperCase(loopChar));
                 }
             }
         }
@@ -629,10 +643,11 @@ public class StringUtils {
      */
     public static String join(Object[] theParts, String aSep)
     {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0, iMax = theParts.length; i < iMax; i++) {
             sb.append(theParts[i]);
-            if (i < iMax - 1 && aSep != null) sb.append(aSep);
+            if (i < iMax - 1 && aSep != null)
+                sb.append(aSep);
         }
         return sb.toString();
     }
@@ -640,7 +655,7 @@ public class StringUtils {
     /**
      * Returns a joined string given a list and separator.
      */
-    public static String join(List aList, String aSep)
+    public static String join(List<?> aList, String aSep)
     {
         return join(aList.toArray(), aSep);
     }
@@ -648,7 +663,7 @@ public class StringUtils {
     /**
      * Returns the index of a given string in the given array, ignoring case.
      */
-    public static int indexOfIC(String theStrings[], String aString)
+    public static int indexOfIC(String[] theStrings, String aString)
     {
         for (int i = 0; i < theStrings.length; i++)
             if (equalsIC(aString, theStrings[i]))

@@ -12,24 +12,27 @@ import java.util.*;
 public class HTTPRequest {
 
     // The URL
-    URL            _url;
+    private URL  _url;
     
     // The request method
-    String         _method = "GET";
+    private String  _method = "GET";
     
     // The headers
-    List <Header>  _headers;
+    private List<Header>  _headers;
     
     // The cookie
-    String         _cookie;
+    private String  _cookie;
     
     // The bytes to post
-    byte           _bytes[];
+    private byte[]  _bytes;
     
     /**
      * Creates a new URL from Java URL.
      */
-    public HTTPRequest(URL aURL)  { _url = aURL; }
+    public HTTPRequest(URL aURL)
+    {
+        _url = aURL;
+    }
 
     /**
      * Creates a new URL from string.
@@ -80,7 +83,7 @@ public class HTTPRequest {
      */
     public void addHeader(String aKey, String aValue)
     {
-        if (_headers==null) _headers = new ArrayList();
+        if (_headers == null) _headers = new ArrayList<>();
         _headers.add(new Header(aKey, aValue));
     }
 
@@ -88,8 +91,13 @@ public class HTTPRequest {
      * A class to hold headers.
      */
     public static class Header {
-        String key; String value;
-        public Header(String aKey, String aValue)  { key = aKey; value = aValue; }
+        String key;
+        String value;
+        public Header(String aKey, String aValue)
+        {
+            key = aKey;
+            value = aValue;
+        }
     }
 
     /**
@@ -100,10 +108,11 @@ public class HTTPRequest {
     /**
      * Sets the bytes associated with the request (POST).
      */
-    public void setBytes(byte theBytes[])
+    public void setBytes(byte[] theBytes)
     {
         _bytes = theBytes;
-        if (getMethod().equals("GET")) setMethod("POST");
+        if (getMethod().equals("GET"))
+            setMethod("POST");
     }
 
     /**
@@ -125,16 +134,18 @@ public class HTTPRequest {
             connection.setRequestMethod(getMethod());
 
         // Append additional headers
-        if (getHeaders()!=null)
-            for (Header header : getHeaders())
+        List<HTTPRequest.Header> headers = getHeaders();
+        if (headers != null) {
+            for (Header header : headers)
                 connection.setRequestProperty(header.key, header.value);
+        }
 
         // Append cookies
-        if (getCookie()!=null)
+        if (getCookie() != null)
             connection.setRequestProperty("Cookie", getCookie());
 
         // If bytes are provided append them
-        if (getBytes()!=null) {
+        if (getBytes() != null) {
             connection.setDoOutput(true);
             OutputStream outStream = connection.getOutputStream();
             outStream.write(getBytes());
@@ -154,11 +165,13 @@ public class HTTPRequest {
         //else { resp._code = HTTPResponse.OK; resp._message = "OK"; }
 
         // Get headers and cookies
-        for (int i=1; true; i++) {
-            String headerKey = connection.getHeaderFieldKey(i); if(headerKey==null) break;
+        for (int i = 1; true; i++) {
+            String headerKey = connection.getHeaderFieldKey(i);
+            if (headerKey == null)
+                break;
             String headerValue = connection.getHeaderField(i);
             resp.addHeader(headerKey, headerValue);
-            if(headerKey.equals("Set-Cookie"))
+            if (headerKey.equals("Set-Cookie"))
                 resp._cookies.add(headerValue);
         }
 
@@ -166,7 +179,7 @@ public class HTTPRequest {
         resp._time = System.currentTimeMillis() - resp._time;
 
         // If response code not success, just return
-        if (resp._code!=HTTPResponse.OK)
+        if (resp._code != HTTPResponse.OK)
             return resp;
 
         // Get ContentType, Length, LastModified
@@ -178,15 +191,15 @@ public class HTTPRequest {
         InputStream inputStream = connection.getInputStream();
 
         // Read stream bytes - create byte array output stream to hold bytes read from input stream and buffer to hold chunk
-        ByteArrayOutputStream bs = new ByteArrayOutputStream();
-        byte chunk[] = new byte[8192];
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        byte[] chunk = new byte[8192];
 
         // Read contents of inputStream into ByteArrayOutputStream until EOF
-        for (int len=inputStream.read(chunk, 0, chunk.length); len>0; len=inputStream.read(chunk, 0, chunk.length))
-            bs.write(chunk, 0, len);
+        for (int len = inputStream.read(chunk, 0, chunk.length); len > 0; len = inputStream.read(chunk, 0, chunk.length))
+            byteStream.write(chunk, 0, len);
 
         // Get byte array output stream bytes
-        resp._bytes = bs.toByteArray();
+        resp._bytes = byteStream.toByteArray();
 
         // Return response
         return resp;
@@ -195,6 +208,8 @@ public class HTTPRequest {
     /**
      * Standard toString implementation.
      */
-    public String toString()  { return getClass().getSimpleName() + ": " + getURLString(); }
-
+    public String toString()
+    {
+        return getClass().getSimpleName() + ": " + getURLString();
+    }
 }

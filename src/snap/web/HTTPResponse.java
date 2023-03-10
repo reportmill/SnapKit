@@ -13,31 +13,31 @@ import snap.web.HTTPRequest.Header;
 public class HTTPResponse {
 
     // The return code
-    int            _code = -1;
+    protected int  _code = -1;
     
     // The return message
-    String         _message;
+    protected String  _message;
 
     // List of headers
-    List <Header>  _headers = new ArrayList();
+    private List<Header>  _headers = new ArrayList<>();
     
     // The content type
-    String         _contentType;
+    protected String  _contentType;
     
     // The length
-    int            _contentLength;
+    protected int  _contentLength;
     
     // The last modified
-    long           _lastModified;
+    protected long  _lastModified;
 
     // The bytes
-    byte           _bytes[];
+    protected byte[]  _bytes;
     
     // List of cookies
-    List <String>  _cookies = new ArrayList();
+    protected List<String>  _cookies = new ArrayList<>();
     
     // The time the response took to return
-    long           _time;
+    protected long  _time;
     
     // Response codes
     public static final int OK = 200;
@@ -59,14 +59,14 @@ public class HTTPResponse {
     /**
      * Returns the headers.
      */
-    public List <Header> getHeaders()  { return _headers; }
+    public List<Header> getHeaders()  { return _headers; }
 
     /**
      * Adds a header for key.
      */
     public void addHeader(String aKey, String aValue)
     {
-        if (_headers == null) _headers = new ArrayList();
+        if (_headers == null) _headers = new ArrayList<>();
         Header header = new Header(aKey, aValue);
         _headers.add(header);
     }
@@ -76,8 +76,9 @@ public class HTTPResponse {
      */
     public String getHeaderString()
     {
-        if (getHeaders().size() == 0) return "";
-        StringBuffer sb = new StringBuffer();
+        if (getHeaders().size() == 0)
+            return "";
+        StringBuilder sb = new StringBuilder();
         for (Header header : getHeaders())
             sb.append(header.key).append('=').append(header.value).append(", ");
         sb.delete(sb.length() - 2, sb.length());
@@ -99,7 +100,7 @@ public class HTTPResponse {
         if (getCookies().size() == 1) return getCookies().get(0);
 
         // Add cookie strings joined
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String cookie : getCookies())
             sb.append(cookie).append("; ");
         sb.delete(sb.length() - 2, sb.length());
@@ -143,7 +144,9 @@ public class HTTPResponse {
      */
     public JSValue getJSON()
     {
-        String text = getText(); if (text == null) return null;
+        String text = getText();
+        if (text == null)
+            return null;
         JSParser parser = new JSParser();
         JSValue json = parser.readString(text);
         return json;
@@ -169,9 +172,12 @@ public class HTTPResponse {
     static String getCodeString(int aCode)
     {
         switch (aCode) {
-            case OK: return "OK"; case BAD_REQUEST: return "BadRequest";
-            case UNAUTHORIZED: return "Unauthorized"; case FORBIDDEN: return "Forbidden";
-            case NOT_FOUND: return "NotFound"; default: return "Unknown code" + Integer.toString(aCode);
+            case OK: return "OK";
+            case BAD_REQUEST: return "BadRequest";
+            case UNAUTHORIZED: return "Unauthorized";
+            case FORBIDDEN: return "Forbidden";
+            case NOT_FOUND: return "NotFound";
+            default: return "Unknown code" + Integer.toString(aCode);
         }
     }
 
@@ -191,7 +197,7 @@ public class HTTPResponse {
     public String toStringProps()
     {
         // Add ContentType
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String contentType = getContentType();
         sb.append("ContentType: ").append(contentType).append(", ");
 
