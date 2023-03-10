@@ -43,7 +43,7 @@ public class WebResponse {
     private FileHeader  _fileHeader;
     
     // The response files (if directory get)
-    private List<FileHeader>  _files;
+    private FileHeader[]  _fileHeaders;
     
     // An exception if response represents an exception
     private Throwable  _exception;
@@ -203,7 +203,7 @@ public class WebResponse {
         FileHeader fileHeader = new FileHeader(getPath(), isDir());
         fileHeader.setModTime(getModTime());
         fileHeader.setSize(getSize());
-        fileHeader.setMIMEtype(getMimeType());
+        fileHeader.setMimeType(getMimeType());
         return _fileHeader = fileHeader;
     }
 
@@ -216,18 +216,30 @@ public class WebResponse {
         _dir = aFHdr.isDir();
         _modTime = aFHdr.getModTime();
         _size = aFHdr.getSize();
-        _mimeType = aFHdr.getMIMEType();
+        _mimeType = aFHdr.getMimeType();
     }
 
     /**
      * Returns the files (for directory request).
      */
-    public List<FileHeader> getFileHeaders()  { return _files; }
+    public FileHeader[] getFileHeaders()  { return _fileHeaders; }
 
     /**
      * Sets the files (for directory request).
      */
-    public void setFileHeaders(List <FileHeader> theFile)  { _files = theFile; }
+    public void setFileHeaders(FileHeader[] fileHeaders)
+    {
+        _fileHeaders = fileHeaders;
+    }
+
+    /**
+     * Sets the files (for directory request).
+     */
+    @Deprecated
+    public void setFileHeaders(List<FileHeader> theFile)
+    {
+        _fileHeaders = theFile.toArray(new FileHeader[0]);
+    }
 
     /**
      * Returns the bytes.

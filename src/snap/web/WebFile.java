@@ -180,7 +180,7 @@ public class WebFile implements Comparable<WebFile> {
     }
 
     /**
-     * Returns whether file status has been check at the site.
+     * Returns whether file status has been checked at the site.
      */
     public boolean isVerified()  { return _verified; }
 
@@ -214,12 +214,12 @@ public class WebFile implements Comparable<WebFile> {
     }
 
     /**
-     * Returns whether this file has been saved at site..
+     * Returns whether this file has been saved at site.
      */
     public boolean isSaved()  { return _saved; }
 
     /**
-     * Sets whether this file has been saved at site..
+     * Sets whether this file has been saved at site.
      */
     protected void setSaved(boolean aValue)
     {
@@ -321,20 +321,17 @@ public class WebFile implements Comparable<WebFile> {
         // If already set, just return
         if (_bytes != null) return _bytes;
 
-        // Set request for bytes for URL
-        WebURL url = getURL();
-        WebResponse resp = url.getResponse();
-
-        // Handle response
-        if (resp.getCode() == WebResponse.OK)
+        // Get content bytes from site
+        WebSite site = getSite();
+        FileContents fileContents = site.getContentsForFile(this);
+        if (fileContents != null) {
             _saved = true;
-        if (resp.getException() != null)
-            throw new ResponseException(resp);
+            _modTime = Math.max(_modTime, fileContents.getModTime());
+            _bytes = fileContents.getBytes();
+            _size = _bytes != null ? _bytes.length : 0;
+        }
 
-        // Update file attributes
-        _bytes = resp.getBytes();
-        _modTime = resp.getModTime();
-        _size = _bytes != null ? _bytes.length : 0;
+        // Return
         return _bytes;
     }
 
@@ -379,46 +376,21 @@ public class WebFile implements Comparable<WebFile> {
         // If already set, just return
         if (_files != null) return _files;
 
-        // Get, set, return
-        WebFile[] files = getFilesImpl();
-        return _files = files;
-    }
-
-    /**
-     * Returns the directory files list.
-     */
-    protected WebFile[] getFilesImpl()
-    {
-        // Get response for files
-        WebURL url = getURL();
-        WebResponse resp = url.getResponse();
-
-        // Handle Response.Code
-        if (resp.getCode() == WebResponse.OK)
-            _saved = true;
-        if (resp.getException() != null)
-            throw new ResponseException(resp);
-
-        // Get file headers
+        // Get content files from site
         WebSite site = getSite();
-        List<FileHeader> fileHeaders = resp.getFileHeaders();
-        if (fileHeaders == null)
-            return new WebFile[0];
-
-        // Get files
-        WebFile[] files = new WebFile[fileHeaders.size()];
-        for (int i = 0; i < fileHeaders.size(); i++) {
-            FileHeader fileHeader = fileHeaders.get(i);
-            WebFile file = site.createFile(fileHeader);
-            file.setParent(this);
-            file._saved = true;
-            files[i] = file;
+        FileContents fileContents = site.getContentsForFile(this);
+        if (fileContents != null) {
+            _saved = true;
+            _modTime = Math.max(_modTime, fileContents.getModTime());
+            WebFile[] files = fileContents.getFiles();
+            Arrays.sort(files);
+            for (WebFile file : files)
+                file.setParent(this);
+            _files = files;
         }
 
-        // Sort files, set and return
-        Arrays.sort(files);
-        _modTime = resp.getModTime();
-        return files;
+        // Return
+        return _files;
     }
 
     /**

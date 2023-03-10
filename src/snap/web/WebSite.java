@@ -5,11 +5,10 @@ package snap.web;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
+import snap.util.ArrayUtils;
 import snap.util.FileUtils;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * This is an abstract class to provide data management (create, get, put, delete) and file management.
@@ -230,7 +229,7 @@ public abstract class WebSite {
         // Update properties file
         file._modTime = fileHdr.getModTime();
         file._size = fileHdr.getSize();
-        file.setMimeType(fileHdr.getMIMEType());
+        file.setMimeType(fileHdr.getMimeType());
 
         // Return
         return file;
@@ -316,6 +315,47 @@ public abstract class WebSite {
     }
 
     /**
+     * Returns the contents for given file.
+     */
+    protected FileContents getContentsForFile(WebFile aFile)
+    {
+        // Get request/response for file URL
+        WebURL url = aFile.getURL();
+        WebResponse resp = url.getResponse();
+        int respCode = resp.getCode();
+        long modTime = resp.getModTime();
+
+        // Handle response
+        if (respCode != WebResponse.OK) {
+            if (resp.getException() != null)
+                throw new ResponseException(resp);
+            return null;
+        }
+
+        // Handle plain file
+        if (aFile.isFile()) {
+            byte[] bytes = resp.getBytes();
+            return new FileContents(bytes, modTime);
+        }
+
+        // Get file headers
+        FileHeader[] fileHeaders = resp.getFileHeaders();
+        if (fileHeaders == null)
+            return new FileContents(new WebFile[0], 0);
+
+        // Get files
+        WebFile[] files = new WebFile[fileHeaders.length];
+        for (int i = 0; i < fileHeaders.length; i++) {
+            FileHeader fileHeader = fileHeaders[i];
+            WebFile file = files[i] = createFile(fileHeader);
+            file._saved = true;
+        }
+
+        // Return
+        return new FileContents(files, modTime);
+    }
+
+    /**
      * Returns a response instance for a request.
      */
     public WebResponse getResponse(WebRequest aReq)
@@ -339,7 +379,40 @@ public abstract class WebSite {
     /**
      * Handles a get or head request.
      */
-    protected abstract void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead);
+    protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
+    {
+        // Get file for Request.URL.Path
+        WebURL fileURL = aReq.getURL();
+        String filePath = fileURL.getPath();
+        WebFile file = getFileForPathImpl(filePath);
+
+        // If not found, return not found
+        if (file == null) {
+            aResp.setCode(WebResponse.NOT_FOUND);
+            return;
+        }
+
+        // Create FileHeader for file and set in Response
+        FileHeader fileHeader = new FileHeader(file);
+        aResp.setFileHeader(fileHeader);
+
+        // If Head, just return
+        if (isHead)
+            return;
+
+        // Handle plain file contents
+        if (file.isFile()) {
+            byte[] bytes = file.getBytes();
+            aResp.setBytes(bytes);
+        }
+
+        // Handle directory file contents
+        else {
+            WebFile[] dirFiles = file.getFiles();
+            FileHeader[] fileHeaders = ArrayUtils.map(dirFiles, dirFile -> new FileHeader(dirFile), FileHeader.class);
+            aResp.setFileHeaders(fileHeaders);
+        }
+    }
 
     /**
      * Handle a get request.
