@@ -2,9 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-import snap.props.PropChange;
-import snap.props.PropChangeListener;
-import snap.props.PropChangeSupport;
+import snap.props.PropObject;
 import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
 import snap.util.StringUtils;
@@ -16,7 +14,7 @@ import java.util.*;
 /**
  * Represents a file from a WebSite.
  */
-public class WebFile implements Comparable<WebFile> {
+public class WebFile extends PropObject implements Comparable<WebFile> {
 
     // The WebSite that provided this file
     protected WebSite  _site;
@@ -63,17 +61,14 @@ public class WebFile implements Comparable<WebFile> {
     // The link, if this file really points to another
     private WebFile  _linkFile;
 
-    // The PropChangeSupport
-    private PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
-
     // Constants for properties
-    final public static String Bytes_Prop = "Bytes";
-    final public static String ModTime_Prop = "ModTime";
-    final public static String Saved_Prop = "Saved";
-    final public static String Size_Prop = "Size";
-    final public static String Updater_Prop = "Updater";
-    final public static String Verified_Prop = "Verified";
-    final public static String Loaded_Prop = "Loaded";
+    public static final String Bytes_Prop = "Bytes";
+    public static final String ModTime_Prop = "ModTime";
+    public static final String Saved_Prop = "Saved";
+    public static final String Size_Prop = "Size";
+    public static final String Updater_Prop = "Updater";
+    public static final String Verified_Prop = "Verified";
+    public static final String Loaded_Prop = "Loaded";
 
     /**
      * Constructor.
@@ -156,9 +151,9 @@ public class WebFile implements Comparable<WebFile> {
         if (_url != null) return _url;
 
         // Get path, site, URL and return
-        String path = getPath();
         WebSite site = getSite();
-        return _url = site.getURL(path);
+        String filePath = getPath();
+        return _url = site.getURL(filePath);
     }
 
     /**
@@ -360,15 +355,6 @@ public class WebFile implements Comparable<WebFile> {
     }
 
     /**
-     * Returns the individual file at given index.
-     */
-    public WebFile getFile(int anIndex)
-    {
-        WebFile[] files = getFiles();
-        return files[anIndex];
-    }
-
-    /**
      * Returns the directory files list.
      */
     public synchronized WebFile[] getFiles()
@@ -552,12 +538,13 @@ public class WebFile implements Comparable<WebFile> {
         byte junk = 0;
         if (bytes == null)
             return false;
-        for (byte b : bytes)
+        for (byte b : bytes) {
             if ((b & 0xFF) > 127) {
                 junk++;
                 if (junk > 10)
                     return false;
             }
+        }
         return true;
     }
 
@@ -622,39 +609,12 @@ public class WebFile implements Comparable<WebFile> {
     }
 
     /**
-     * Add listener.
-     */
-    public void addPropChangeListener(PropChangeListener aLsnr)
-    {
-        if (_pcs == PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-        _pcs.addPropChangeListener(aLsnr);
-    }
-
-    /**
-     * Remove listener.
-     */
-    public void removePropChangeListener(PropChangeListener aLsnr)
-    {
-        _pcs.removePropChangeListener(aLsnr);
-    }
-
-    /**
-     * Fires a property change for given property name, old value, new value and index.
-     */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal)
-    {
-        if (!_pcs.hasListener(aProp)) return;
-        PropChange pc = new PropChange(this, aProp, oldVal, newVal);
-        _pcs.firePropChange(pc);
-    }
-
-    /**
      * Standard equals implementation.
      */
     public boolean equals(Object anObj)
     {
         if (anObj == this) return true;
-        WebFile other = (WebFile) anObj;
+        WebFile other = anObj instanceof WebFile ? (WebFile) anObj : null;
         if (other == null) return false;
         return other.getURL().equals(getURL());
     }

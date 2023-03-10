@@ -250,7 +250,7 @@ public abstract class WebSite {
         if (respCode != WebResponse.OK) {
             if (resp.getException() != null)
                 throw new ResponseException(resp);
-            System.err.println("WebSite.getContentsForFile: Error: " + resp.getCodeString());
+            System.err.println("WebSite.getContentsForFile: Response error: " + resp.getCodeString() + ", for file: " + aFile.getPath());
             if (aFile.isDir())
                 return new FileContents(new WebFile[0], 0);
             return null;
