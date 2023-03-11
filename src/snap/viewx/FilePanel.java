@@ -149,36 +149,9 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
-     * Shows the panel.
-     */
-    public String showOpenPanel(View aView)
-    {
-        setSaving(false);
-        return showFilePanel(aView);
-    }
-
-    /**
-     * Shows the panel.
-     */
-    public String showSavePanel(View aView)
-    {
-        setSaving(true);
-        return showFilePanel(aView);
-    }
-
-    /**
      * Runs a file chooser that remembers last open file and size.
      */
-    protected String showFilePanel(View aView)
-    {
-        WebFile file = showFilePanelWeb(aView);
-        return file != null ? file.getPath() : null;
-    }
-
-    /**
-     * Runs a file chooser that remembers last open file and size.
-     */
-    protected WebFile showFilePanelWeb(View aView)
+    public WebFile showFilePanel(View aView)
     {
         // Get UI
         View filesPanelUI = getUI();
@@ -226,7 +199,7 @@ public class FilePanel extends ViewOwner {
 
             // If user chooses cancel, re-run chooser
             if (answer != 0)
-                return showFilePanelWeb(aView);
+                return showFilePanel(aView);
         }
 
         // Give focus back to given view
@@ -416,10 +389,8 @@ public class FilePanel extends ViewOwner {
      */
     public static String showOpenPanel(View aView, String aDesc, String... theTypes)
     {
-        FilePanel filePanel = new FilePanel();
-        filePanel.setDesc(aDesc);
-        filePanel.setTypes(theTypes);
-        return filePanel.showOpenPanel(aView);
+        WebFile file = showOpenFilePanel(aView, aDesc, theTypes);
+        return file != null ? file.getPath() : null;
     }
 
     /**
@@ -427,33 +398,31 @@ public class FilePanel extends ViewOwner {
      */
     public static String showSavePanel(View aView, String aDesc, String... theTypes)
     {
-        FilePanel filePanel = new FilePanel();
-        filePanel.setDesc(aDesc);
-        filePanel.setTypes(theTypes);
-        return filePanel.showSavePanel(aView);
+        WebFile file = showSaveFilePanel(aView, aDesc, theTypes);
+        return file != null ? file.getPath() : null;
     }
 
     /**
-     * Shows a Open panel for given description and types.
+     * Shows an Open panel for given description and types.
      */
-    public static WebFile showOpenPanelWeb(View aView, String aDesc, String... theTypes)
+    public static WebFile showOpenFilePanel(View aView, String aDesc, String... theTypes)
     {
         FilePanel filePanel = new FilePanel();
         filePanel.setDesc(aDesc);
         filePanel.setTypes(theTypes);
-        return filePanel.showFilePanelWeb(aView);
+        return filePanel.showFilePanel(aView);
     }
 
     /**
      * Shows a Save panel for given description and types.
      */
-    public static WebFile showSavePanelWeb(View aView, String aDesc, String... theTypes)
+    public static WebFile showSaveFilePanel(View aView, String aDesc, String... theTypes)
     {
         FilePanel filePanel = new FilePanel();
         filePanel.setDesc(aDesc);
         filePanel.setTypes(theTypes);
         filePanel.setSaving(true);
-        return filePanel.showFilePanelWeb(aView);
+        return filePanel.showFilePanel(aView);
     }
 
     /**
