@@ -3,7 +3,7 @@
  */
 package snap.web;
 import snap.util.ArrayUtils;
-import snap.viewx.RecentFiles;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;

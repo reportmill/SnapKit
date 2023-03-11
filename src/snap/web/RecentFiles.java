@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
-package snap.viewx;
+package snap.web;
 import java.util.*;
 import java.util.function.Consumer;
 import snap.util.ArrayUtils;
 import snap.util.Prefs;
 import snap.view.*;
-import snap.web.*;
+import snap.viewx.DialogBox;
 
 /**
  * A class to manage UI for recent files (can show a panel or a menu).
@@ -21,17 +21,18 @@ public class RecentFiles extends ViewOwner {
     private DialogBox  _dialogBox;
 
     /**
-     * Creates a RecentFiles for given name.
+     * Constructor for given name.
      */
     public RecentFiles(String aName)
     {
+        super();
         _name = aName;
     }
 
     /**
      * Shows the RecentFiles.
      */
-    public WebFile showFilesPanel(View aView)
+    public WebFile showPanel(View aView)
     {
         // Create DialogBox with UI, and showConfirmDialog (just return if cancelled)
         _dialogBox = new DialogBox("Recent Files");
@@ -49,7 +50,7 @@ public class RecentFiles extends ViewOwner {
      */
     protected View createUI()
     {
-        ListView listView = new ListView();
+        ListView<WebFile> listView = new ListView<>();
         listView.setName("FilesList");
         listView.setPrefSize(250, 300);
         enableEvents(listView, MouseRelease);
@@ -121,7 +122,7 @@ public class RecentFiles extends ViewOwner {
 
         // Flush prefs
         try { prefs.flush(); }
-        catch (Exception e) { System.err.println(e); }
+        catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
     /**
@@ -143,7 +144,7 @@ public class RecentFiles extends ViewOwner {
 
         // Flush prefs
         try { prefs.flush(); }
-        catch (Exception e) { System.err.println(e); }
+        catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
     /**
@@ -196,7 +197,7 @@ public class RecentFiles extends ViewOwner {
     public static String showPathsPanel(View aView, String aName)
     {
         RecentFiles recentFiles = new RecentFiles(aName);
-        WebFile file = recentFiles.showFilesPanel(aView);
+        WebFile file = recentFiles.showPanel(aView);
         return file != null ? file.getPath() : null;
     }
 
