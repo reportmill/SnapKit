@@ -40,6 +40,9 @@ public class FilePanel extends ViewOwner {
     // The tab bar holding sites
     private TabBar  _sitesTabBar;
 
+    // A view to animate FilesBrowser changes
+    private TransitionPane  _transitionPane;
+
     // Map of existing/cached file browsers
     private Map<WebSite,FilesBrowser>  _filesBrowsers = new HashMap<>();
 
@@ -260,6 +263,10 @@ public class FilePanel extends ViewOwner {
         _sitesTabBar.setFont(Font.Arial14);
         topColView.addChild(_sitesTabBar);
 
+        // Create/add TransitionPane
+        _transitionPane = new TransitionPane();
+        topColView.addChild(_transitionPane);
+
         // Return
         return topColView;
     }
@@ -306,14 +313,13 @@ public class FilePanel extends ViewOwner {
         // If already set, just return
         if (filesBrowser == _filesBrowser) return;
 
-        // Get TopColView
-        ColView topColView = getUI(ColView.class);
+        // Get/set transition
+        TransitionPane.Transition transition = getTransitionForFileBrowsers(_filesBrowser, filesBrowser);
+        _transitionPane.setTransition(transition);
 
         // If old, remove
-        if (_filesBrowser != null) {
+        if (_filesBrowser != null)
             _filesBrowser.removePropChangeListener(_fileBrowserPropChangeLsnr);
-            topColView.removeChild(_filesBrowser.getUI());
-        }
 
         // Set FilesBrowser
         _filesBrowser = filesBrowser;
@@ -325,7 +331,7 @@ public class FilePanel extends ViewOwner {
         // Update UI
         _filesBrowser.addPropChangeListener(_fileBrowserPropChangeLsnr);
         View filesBrowserUI = _filesBrowser.getUI();
-        topColView.addChild(filesBrowserUI);
+        _transitionPane.setContent(filesBrowserUI);
 
         // Update
         filesBrowserDidPropChange();
@@ -392,6 +398,17 @@ public class FilePanel extends ViewOwner {
 
         // Return
         return filesBrowser;
+    }
+
+    /**
+     * Returns the transition for given FileBrowsers so changing sites will slide left/right when new one selected.
+     */
+    private TransitionPane.Transition getTransitionForFileBrowsers(FilesBrowser filesBrowser1, FilesBrowser filesBrowser2)
+    {
+        if (filesBrowser1 == null) return TransitionPane.Instant;
+        int index1 = ArrayUtils.indexOf(getSites(), filesBrowser1.getSite());
+        int index2 = ArrayUtils.indexOf(getSites(), filesBrowser2.getSite());
+        return index1 < index2 ? TransitionPane.MoveRight : TransitionPane.MoveLeft;
     }
 
     /**
