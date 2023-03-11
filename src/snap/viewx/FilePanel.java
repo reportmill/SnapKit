@@ -4,14 +4,26 @@
 package snap.viewx;
 import snap.gfx.Color;
 import snap.gfx.Font;
+import snap.props.PropChangeListener;
 import snap.util.*;
 import snap.view.*;
 import snap.web.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A class to select a file to open or save.
  */
 public class FilePanel extends ViewOwner {
+
+    // Whether choosing file for save
+    private boolean  _saving;
+
+    // The file types
+    private String[]  _types;
+
+    // The description
+    private String  _desc;
 
     // The sites
     private WebSite[]  _sites;
@@ -19,14 +31,20 @@ public class FilePanel extends ViewOwner {
     // The FilesBrowser
     private FilesBrowser  _filesBrowser;
 
-    // The description
-    private String  _desc;
+    // The currently selected site
+    private WebSite  _selSite;
 
     // The DialogBox
     private DialogBox  _dialogBox;
 
     // The tab bar holding sites
     private TabBar  _sitesTabBar;
+
+    // Map of existing/cached file browsers
+    private Map<WebSite,FilesBrowser>  _filesBrowsers = new HashMap<>();
+
+    // Listener for FileBrowser prop changes
+    private PropChangeListener  _fileBrowserPropChangeLsnr = pc -> filesBrowserDidPropChange();
 
     // The sites
     private static WebSite[]  _defaultSites;
@@ -41,13 +59,49 @@ public class FilePanel extends ViewOwner {
     {
         super();
 
-        // Create/config FilesBrowser
-        _filesBrowser = new CustomFilesBrowser();
-        _filesBrowser.addPropChangeListener(pc -> filesBrowserDidPropChange());
-
         // Get sites
         _sites = getDefaultSites();
+        _selSite = FilesBrowserUtils.getLocalFileSystemSite();
     }
+
+    /**
+     * Returns whether is saving.
+     */
+    public boolean isSaving()  { return _saving; }
+
+    /**
+     * Sets whether is saving.
+     */
+    public void setSaving(boolean aValue)
+    {
+        _saving = aValue;
+    }
+
+    /**
+     * Returns the first file types.
+     */
+    public String getType()
+    {
+        return _types != null && _types.length > 0 ? _types[0] : null;
+    }
+
+    /**
+     * Returns the file types.
+     */
+    public String[] getTypes()  { return _types; }
+
+    /**
+     * Sets the file types.
+     */
+    public void setTypes(String ... theExts)
+    {
+        _types = ArrayUtils.map(theExts, type -> FilesBrowserUtils.normalizeType(type), String.class);
+    }
+
+    /**
+     * Sets the description.
+     */
+    public void setDesc(String aValue)  { _desc = aValue; }
 
     /**
      * Return sites available to open/save files.
@@ -71,49 +125,25 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
-     * Returns whether is saving.
-     */
-    public boolean isSaving()  { return _filesBrowser.isSaving(); }
-
-    /**
-     * Sets whether is saving.
-     */
-    public void setSaving(boolean aValue)  { _filesBrowser.setSaving(aValue); }
-
-    /**
-     * Returns the window title.
-     */
-    public String getTitle()  { return isSaving() ? "Save Panel" : "Open Panel"; }
-
-    /**
-     * Returns the first file types.
-     */
-    public String getType()  { return _filesBrowser.getType(); }
-
-    /**
-     * Returns the file types.
-     */
-    public String[] getTypes()  { return _filesBrowser.getTypes(); }
-
-    /**
-     * Sets the file types.
-     */
-    public void setTypes(String... theExts)  { _filesBrowser.setTypes(theExts); }
-
-    /**
-     * Sets the description.
-     */
-    public void setDesc(String aValue)  { _desc = aValue; }
-
-    /**
      * Returns the site currently being browsed.
      */
-    public WebSite getSite()  { return _filesBrowser.getSite(); }
+    public WebSite getSelSite()  { return _selSite; }
 
     /**
-     * Sets the site for the panel.
+     * Sets the site currently being browsed.
      */
-    public void setSite(WebSite aSite)  { _filesBrowser.setSite(aSite); }
+    public void setSelSite(WebSite aSite)
+    {
+        // If already set, just return
+        if (aSite == _selSite) return;
+
+        // Set site
+        _selSite = aSite;
+
+        // Get/set FilesBrowser
+        FilesBrowser filesBrowser = getFilesBrowserForSite(aSite);
+        setFilesBrowser(filesBrowser);
+    }
 
     /**
      * Shows the panel.
@@ -147,11 +177,14 @@ public class FilePanel extends ViewOwner {
      */
     protected WebFile showFilePanelWeb(View aView)
     {
+        // Get UI
+        View filesPanelUI = getUI();
+
         // If no file/dir set, set from RecentPath (prefs)
         WebFile selDir = _filesBrowser.getSelDir();
         if (selDir == null) {
             String path = getRecentPath(getType());
-            WebSite site = getSite();
+            WebSite site = getSelSite();
             WebFile file = site.getFileForPath(path);
             _filesBrowser.setSelFile(file);
         }
@@ -161,8 +194,9 @@ public class FilePanel extends ViewOwner {
             runLater(() -> addNewFolderButton());
 
         // Create/config DialogBox with FilePanel UI
-        _dialogBox = new DialogBox(getTitle());
-        _dialogBox.setContent(getUI());
+        String title = isSaving() ? "Save Panel" : "Open Panel";
+        _dialogBox = new DialogBox(title);
+        _dialogBox.setContent(filesPanelUI);
         _dialogBox.setConfirmEnabled(_filesBrowser.getSelOrTargFile() != null);
 
         // Run FileChooser UI in DialogBox
@@ -226,10 +260,6 @@ public class FilePanel extends ViewOwner {
         _sitesTabBar.setFont(Font.Arial14);
         topColView.addChild(_sitesTabBar);
 
-        // Add FilesBrowser UI
-        View filesBrowserUI = _filesBrowser.getUI();
-        topColView.addChild(filesBrowserUI);
-
         // Return
         return topColView;
     }
@@ -247,6 +277,11 @@ public class FilePanel extends ViewOwner {
             String siteName = getNameForSite(site);
             tabBuilder.title(siteName).add();
         }
+
+        // Set FilesBrowser for SelSite
+        WebSite selSite = getSelSite();
+        FilesBrowser filesBrowser = getFilesBrowserForSite(selSite);
+        setFilesBrowser(filesBrowser);
     }
 
     /**
@@ -259,8 +294,41 @@ public class FilePanel extends ViewOwner {
         if (anEvent.equals("SitesTabBar")) {
             int selIndex = _sitesTabBar.getSelIndex();
             WebSite newSelSite = getSites()[selIndex];
-            _filesBrowser.setSite(newSelSite);
+            setSelSite(newSelSite);
         }
+    }
+
+    /**
+     * Sets the FilesBrowser.
+     */
+    private void setFilesBrowser(FilesBrowser filesBrowser)
+    {
+        // If already set, just return
+        if (filesBrowser == _filesBrowser) return;
+
+        // Get TopColView
+        ColView topColView = getUI(ColView.class);
+
+        // If old, remove
+        if (_filesBrowser != null) {
+            _filesBrowser.removePropChangeListener(_fileBrowserPropChangeLsnr);
+            topColView.removeChild(_filesBrowser.getUI());
+        }
+
+        // Set FilesBrowser
+        _filesBrowser = filesBrowser;
+
+        // Update FilesBrowser
+        _filesBrowser.setSaving(isSaving());
+        _filesBrowser.setTypes(getTypes());
+
+        // Update UI
+        _filesBrowser.addPropChangeListener(_fileBrowserPropChangeLsnr);
+        View filesBrowserUI = _filesBrowser.getUI();
+        topColView.addChild(filesBrowserUI);
+
+        // Update
+        filesBrowserDidPropChange();
     }
 
     /**
@@ -300,11 +368,30 @@ public class FilePanel extends ViewOwner {
         // Get new dir path and create new dir
         WebFile selDir = _filesBrowser.getSelDir();
         String newDirPath = selDir.getDirPath() + newDirName;
-        WebFile newDir = getSite().createFileForPath(newDirPath, true);
+        WebFile newDir = getSelSite().createFileForPath(newDirPath, true);
         newDir.save();
 
         // Set new dir
         _filesBrowser.setSelFile(newDir);
+    }
+
+    /**
+     * Returns a FilesBrowser for given site.
+     */
+    private FilesBrowser getFilesBrowserForSite(WebSite aSite)
+    {
+        // Get from cache and just return if found
+        FilesBrowser filesBrowser = _filesBrowsers.get(aSite);
+        if (filesBrowser != null)
+            return filesBrowser;
+
+        // Create and add to cache
+        filesBrowser = new CustomFilesBrowser();
+        filesBrowser.setSite(aSite);
+        _filesBrowsers.put(aSite, filesBrowser);
+
+        // Return
+        return filesBrowser;
     }
 
     /**

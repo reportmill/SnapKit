@@ -71,13 +71,11 @@ public class FilesBrowser extends ViewOwner {
         if (aSite == _site) return;
         _site = aSite;
 
-        // Reset FilesBrowser.Items to Site.RootDir.Files
-        WebFile rootDir = _site.getRootDir();
-        WebFile[] dirFiles = rootDir.getFiles();
-        WebFile[] dirFilesFiltered = FilesBrowserUtils.getVisibleFiles(dirFiles);
-        _fileBrowser.setItems(dirFilesFiltered);
+        // Reset FilesBrowser.Items
+        resetFilesBrowserItems();
 
         // Reset selected file
+        WebFile rootDir = aSite.getRootDir();
         setSelFile(rootDir);
     }
 
@@ -220,10 +218,7 @@ public class FilesBrowser extends ViewOwner {
         _fileBrowser.addEventFilter(e -> runLater(() -> fileBrowserMouseReleased(e)), MouseRelease);
 
         // Set FileBrowser Items
-        WebFile rootDir = getSite().getRootDir();
-        WebFile[] dirFiles = rootDir.getFiles();
-        WebFile[] dirFilesFiltered = FilesBrowserUtils.getVisibleFiles(dirFiles);
-        _fileBrowser.setItems(dirFilesFiltered);
+        resetFilesBrowserItems();
 
         // Get/configure DirComboBox
         _dirComboBox = getView("DirComboBox", ComboBox.class);
@@ -315,6 +310,18 @@ public class FilesBrowser extends ViewOwner {
             WebFile newSelDir = _dirComboBox.getSelItem();
             setSelFile(newSelDir);
         }
+    }
+
+    /**
+     * Resets FilesBrowser.Items.
+     */
+    private void resetFilesBrowserItems()
+    {
+        if (_fileBrowser == null) return;
+        WebFile rootDir = getSite().getRootDir();
+        WebFile[] dirFiles = rootDir.getFiles();
+        WebFile[] dirFilesFiltered = FilesBrowserUtils.getVisibleFiles(dirFiles);
+        _fileBrowser.setItems(dirFilesFiltered);
     }
 
     /**
