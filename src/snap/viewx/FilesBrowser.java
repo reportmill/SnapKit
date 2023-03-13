@@ -34,7 +34,7 @@ public class FilesBrowser extends ViewOwner {
     private String[]  _types;
 
     // The Directory ComboBox
-    private ComboBox<WebFile>  _dirComboBox;
+    protected ComboBox<WebFile>  _dirComboBox;
 
     // The FileBrowser
     private BrowserView<WebFile>  _fileBrowser;

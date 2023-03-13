@@ -255,7 +255,16 @@ public class ListUtils {
     /**
      * Returns a mapped array for given original and Function.
      */
-    public static <T,R> R[] map(Collection<T> aList, Function<? super T, ? extends R> aFunction, Class<R> aClass)
+    public static <T,R> List<R> map(Collection<T> aList, Function<? super T, ? extends R> aFunction)
+    {
+        Stream<R> filteredStream = aList.stream().map(aFunction);
+        return filteredStream.collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a mapped array for given original and Function.
+     */
+    public static <T,R> R[] mapToArray(Collection<T> aList, Function<? super T, ? extends R> aFunction, Class<R> aClass)
     {
         Stream<R> filteredStream = aList.stream().map(aFunction);
         return filteredStream.toArray(size -> (R[]) Array.newInstance(aClass, size));

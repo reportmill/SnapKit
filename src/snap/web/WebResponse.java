@@ -50,6 +50,7 @@ public class WebResponse {
     
     // Constants for response codes (http://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
     public static final int OK = 200;
+    public static final int BAD_REQUEST = 400;
     public static final int UNAUTHORIZED = 401;
     public static final int FORBIDDEN = 403;
     public static final int NOT_FOUND = 404;
@@ -365,11 +366,12 @@ public class WebResponse {
     {
         switch (aCode) {
             case OK: return "OK";
+            case BAD_REQUEST: return "Bad or malformed request";
             case UNAUTHORIZED: return "Unauthorized";
             case FORBIDDEN: return "Client is forbidden from accessing valid URL";
-            case NOT_FOUND: return "Not Found";
+            case NOT_FOUND: return "File not Found";
             case METHOD_NOT_ALLOWED: return "Method Not Allowed";
-            default: return "Unknown";
+            default: return "Unknown error code";
         }
     }
 }

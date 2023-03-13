@@ -365,12 +365,38 @@ public class FilePanel extends ViewOwner {
             return filesBrowser;
 
         // Create and add to cache
-        filesBrowser = new CustomFilesBrowser();
+        filesBrowser = createFilesBrowserForSite(aSite);
         filesBrowser.setSite(aSite);
         _filesBrowsers.put(aSite, filesBrowser);
 
         // Return
         return filesBrowser;
+    }
+
+    /**
+     * Creates a FilesBrowser for given site.
+     */
+    private FilesBrowser createFilesBrowserForSite(WebSite aSite)
+    {
+        if (aSite instanceof DropBoxSite) {
+            return new DropBoxPane() {
+                @Override
+                protected void fireActionEvent(ViewEvent anEvent)
+                {
+                    if (_dialogBox.isConfirmEnabled())
+                        _dialogBox.confirm();
+                }
+            };
+        }
+
+        return new FilesBrowser() {
+            @Override
+            protected void fireActionEvent(ViewEvent anEvent)
+            {
+                if (_dialogBox.isConfirmEnabled())
+                    _dialogBox.confirm();
+            }
+        };
     }
 
     /**
@@ -489,8 +515,27 @@ public class FilePanel extends ViewOwner {
      */
     public static void addDefaultSite(WebSite aSite)
     {
-        getDefaultSites();
+        // Get sites
+        WebSite[] defaultSites = getDefaultSites();
+
+        // Make sure we don't double-add DropBoxSite (fix this!)
+        if (aSite instanceof DropBoxSite) {
+            WebSite oldDropBoxSite = ArrayUtils.findMatch(defaultSites, site -> site instanceof DropBoxSite);
+            if (oldDropBoxSite != null)
+                removeDefaultSite(oldDropBoxSite);
+        }
+
+        // Add site
         _defaultSites = ArrayUtils.addId(_defaultSites, aSite);
+    }
+
+    /**
+     * Removes a site.
+     */
+    public static void removeDefaultSite(WebSite aSite)
+    {
+        getDefaultSites();
+        _defaultSites = ArrayUtils.removeId(_defaultSites, aSite);
     }
 
     /**
@@ -502,24 +547,8 @@ public class FilePanel extends ViewOwner {
             return "Local Files";
         if (aSite instanceof RecentFilesSite)
             return "Recent Files";
-        //if (aSite instanceof DropBoxSite)
-        //    return "DropBox";
+        if (aSite instanceof DropBoxSite)
+            return "DropBox Files";
         return "Files";
-    }
-
-    /**
-     * Custom FilesBrowser.
-     */
-    private class CustomFilesBrowser extends FilesBrowser {
-
-        /**
-         * Called on FileBrowser double-click or FileText enter key.
-         */
-        @Override
-        protected void fireActionEvent(ViewEvent anEvent)
-        {
-            if (_dialogBox.isConfirmEnabled())
-                _dialogBox.confirm();
-        }
     }
 }
