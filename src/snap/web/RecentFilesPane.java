@@ -2,20 +2,23 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import snap.geom.Insets;
+import snap.gfx.Color;
 import snap.view.*;
 import snap.viewx.DialogBox;
+import snap.viewx.FilesPane;
 import java.util.function.Consumer;
 
 /**
  * A class to manage UI for recent files (can show a panel or a menu).
  */
-public class RecentFilesPane extends ViewOwner {
+public class RecentFilesPane extends FilesPane {
 
     // The name
     private String  _name;
 
-    // The DialogBox
-    private DialogBox  _dialogBox;
+    // The FilesTable
+    private TableView<WebFile>  _filesTable;
 
     /**
      * Constructor for given name.
@@ -27,6 +30,75 @@ public class RecentFilesPane extends ViewOwner {
     }
 
     /**
+     * Initialize UI panel.
+     */
+    @Override
+    protected void initUI()
+    {
+        // Configure FilesTable
+        _filesTable = getView("FilesTable", TableView.class);
+        _filesTable.getScrollView().setFillWidth(false);
+        _filesTable.getScrollView().setBarSize(14);
+        _filesTable.addEventFilter(e -> runLater(() -> filesTableMouseReleased(e)), MouseRelease);
+
+        // Configure FilesTable columns
+        TableCol<WebFile> nameCol = _filesTable.getCol(0);
+        nameCol.setCellPadding(new Insets(4, 8, 4, 5));
+        nameCol.setCellConfigure(cell -> configureFilesTableNameColCell(cell));
+        TableCol<WebFile> pathCol = _filesTable.getCol(1);
+        pathCol.setCellPadding(new Insets(4, 5, 4, 5));
+        pathCol.setCellConfigure(cell -> configureFilesTablePathColCell(cell));
+
+        // Init SelFile
+        WebFile[] recentFiles = RecentFiles.getFiles(_name);
+        if (recentFiles.length > 0)
+            setSelFile(recentFiles[0]);
+    }
+
+    /**
+     * Resets UI.
+     */
+    @Override
+    public void resetUI()
+    {
+        // Update FilesTable.Items/SelItem
+        WebFile[] recentFiles = RecentFiles.getFiles(_name);
+        _filesTable.setItems(recentFiles);
+        _filesTable.setSelItem(getSelFile());
+    }
+
+    /**
+     * Responds to UI changes.
+     */
+    @Override
+    public void respondUI(ViewEvent anEvent)
+    {
+        // Handle FilesTable
+        if (anEvent.equals("FilesTable")) {
+            WebFile newSelFile = (WebFile) anEvent.getSelItem();
+            setSelFile(newSelFile);
+        }
+
+        // Handle ClearRecentMenuItem
+        if (anEvent.equals("ClearRecentMenuItem"))
+            RecentFiles.clearPaths(_name);
+    }
+
+    /**
+     * Override.
+     */
+    @Override
+    public void setSite(WebSite aSite)
+    {
+        // Do normal version
+        if (aSite == _site) return;
+        super.setSite(aSite);
+
+        // Set name
+        _name = ((RecentFilesSite) aSite).getId();
+    }
+
+    /**
      * Shows the RecentFiles.
      */
     public WebFile showPanel(View aView)
@@ -35,49 +107,75 @@ public class RecentFilesPane extends ViewOwner {
         _dialogBox = new DialogBox("Recent Files");
         _dialogBox.setContent(getUI());
         _dialogBox.setOptions("Open", "Cancel");
-        if (!_dialogBox.showConfirmDialog(aView)) return null;
+        if (!_dialogBox.showConfirmDialog(aView))
+            return null;
 
-        // If not cancelled, return selected file
-        WebFile file = (WebFile) getViewSelItem("FilesList");
-        return file;
+        // Return selected file
+        return getSelOrTargFile();
     }
 
     /**
-     * Create UI.
+     * Called to configure a FilesTable.ListCell for Name Column.
      */
-    protected View createUI()
+    private void configureFilesTableNameColCell(ListCell<WebFile> aCell)
     {
-        ListView<WebFile> listView = new ListView<>();
-        listView.setName("FilesList");
-        listView.setPrefSize(250, 300);
-        enableEvents(listView, MouseRelease);
-        return listView;
+        WebFile file = aCell.getItem();
+        if (file == null) return;
+        String dirPath = file.getName();
+        aCell.setText(dirPath);
     }
 
     /**
-     * Reset UI.
+     * Called to configure a FilesTable.ListCell for Path Column.
      */
-    protected void resetUI()
+    private void configureFilesTablePathColCell(ListCell<WebFile> aCell)
     {
-        WebFile[] recentFiles = RecentFiles.getFiles(_name);
-        setViewItems("FilesList", recentFiles);
-        getView("FilesList", ListView.class).setItemKey("Name");
-        if (getViewSelIndex("FilesList") < 0)
-            setViewSelIndex("FilesList", 0);
+        WebFile file = aCell.getItem();
+        if (file == null) return;
+        String dirPath = file.getParent().getPath();
+        aCell.setText(dirPath);
+        aCell.setTextFill(Color.DARKGRAY);
+
+        // Add button to clear item from recent files
+        CloseBox closeBox = new CloseBox();
+        closeBox.setMargin(0, 4, 0, 4);
+        closeBox.addEventHandler(e -> handleCloseBoxClicked(closeBox), View.Action);
+        aCell.setGraphic(closeBox);
     }
 
     /**
-     * Respond to any selection from the RecentFiles menu
+     * Called when FilesTable gets MouseRelease.
      */
-    public void respondUI(ViewEvent anEvent)
+    private void filesTableMouseReleased(ViewEvent anEvent)
     {
-        // Handle ClearRecentMenuItem
-        if (anEvent.equals("ClearRecentMenuItem"))
-            RecentFiles.clearPaths(_name);
+        // If double-click and valid file, do confirm
+        if (anEvent.getClickCount() == 2)
+            fireActionEvent(anEvent);
+    }
 
-        // Handle FilesList MouseClick
-        if (anEvent.equals("FilesList") && anEvent.getClickCount() > 1)
-            if (_dialogBox != null) _dialogBox.confirm();
+    /**
+     * Called when FilesTable.ListCell close box is clicked.
+     */
+    private void handleCloseBoxClicked(View aView)
+    {
+        // Get FilesTable ListCell holding given view
+        ListCell<?> listCell = aView.getParent(ListCell.class);
+        if (listCell == null)
+            return;
+
+        // Get recent file for ListCell
+        WebFile file = (WebFile) listCell.getItem();
+        if (file == null)
+            return;
+
+        // Clear RecentFile
+        String filePath = file.getURL().getString();
+        RecentFiles.removePath(_name, filePath);
+
+        // Clear RecentFiles, SelFile and trigger reset
+        if (getSelFile() == file)
+            setSelFile(null);
+        resetLater();
     }
 
     /**

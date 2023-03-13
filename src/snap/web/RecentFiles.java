@@ -22,6 +22,24 @@ public class RecentFiles extends ViewOwner {
     }
 
     /**
+     * Returns the list of the recent paths as WebFiles.
+     */
+    public static WebURL[] getURLs(String aName)
+    {
+        // Get RecentPaths
+        String[] paths = getPaths(aName);
+        List<WebURL> urls = new ArrayList<>();
+        for (String path : paths) {
+            WebURL url = WebURL.getURL(path);
+            if (url != null)
+                urls.add(url);
+        }
+
+        // Return array
+        return urls.toArray(new WebURL[0]);
+    }
+
+    /**
      * Returns the list of recent paths for name.
      */
     public static String[] getPaths(String aName)
@@ -92,24 +110,6 @@ public class RecentFiles extends ViewOwner {
     public static void clearPaths(String aName)
     {
         Prefs.getDefaultPrefs().getChild(aName).clear();
-    }
-
-    /**
-     * Returns the list of the recent paths as WebFiles.
-     */
-    public static WebURL[] getURLs(String aName)
-    {
-        // Get RecentPaths
-        String[] paths = getPaths(aName);
-        List<WebURL> urls = new ArrayList<>();
-        for (String path : paths) {
-            WebURL url = WebURL.getURL(path);
-            if (url != null)
-                urls.add(url);
-        }
-
-        // Return array
-        return urls.toArray(new WebURL[0]);
     }
 
     /**

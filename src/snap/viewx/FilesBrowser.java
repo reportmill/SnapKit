@@ -3,7 +3,6 @@
  */
 package snap.viewx;
 import snap.gfx.Color;
-import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.web.WebFile;
 import snap.web.WebSite;
@@ -13,25 +12,7 @@ import java.util.List;
 /**
  * A class to select a file to open or save.
  */
-public class FilesBrowser extends ViewOwner {
-
-    // The site used to reference files
-    private WebSite  _site;
-
-    // The currently selected file
-    private WebFile  _selFile;
-
-    // The current selected directory
-    private WebFile  _selDir;
-
-    // A file targeted by input text
-    private WebFile  _targFile;
-
-    // Whether choosing file for save
-    private boolean  _saving;
-
-    // The file types
-    private String[]  _types;
+public class FilesBrowser extends FilesPane {
 
     // The Directory ComboBox
     protected ComboBox<WebFile>  _dirComboBox;
@@ -42,11 +23,6 @@ public class FilesBrowser extends ViewOwner {
     // The InputText
     protected TextField  _inputText;
 
-    // Constants for properties
-    public static final String SelFile_Prop = "SelFile";
-    public static final String SelDir_Prop = "SelDir";
-    public static final String TargFile_Prop = "TargFile";
-
     /**
      * Constructor.
      */
@@ -56,152 +32,6 @@ public class FilesBrowser extends ViewOwner {
 
         // Set default site
         _site = FilesBrowserUtils.getLocalFileSystemSite();
-    }
-
-    /**
-     * Returns the site currently being browsed.
-     */
-    public WebSite getSite()  { return _site; }
-
-    /**
-     * Sets the site for the panel.
-     */
-    public void setSite(WebSite aSite)
-    {
-        if (aSite == _site) return;
-        _site = aSite;
-
-        // Reset FilesBrowser.Items
-        resetFilesBrowserItems();
-
-        // Reset selected file
-        WebFile rootDir = aSite.getRootDir();
-        setSelFile(rootDir);
-    }
-
-    /**
-     * Returns the selected file.
-     */
-    public WebFile getSelFile()  { return _selFile; }
-
-    /**
-     * Sets the selected file or directory.
-     */
-    public void setSelFile(WebFile aFile)
-    {
-        // Cache old file/dir
-        WebFile oldSelFile = _selFile;
-        WebFile oldSelDir = _selDir;
-
-        // If no file, use home dir
-        if (aFile == null) {
-            String homeDirPath = getHomeDirPath();
-            aFile = getFileForPath(homeDirPath);
-        }
-
-        // If file is dir, do that instead
-        if (aFile != null && aFile.isDir()) {
-            _selDir = aFile;
-            _selFile = null;
-            _selDir.resetContent();
-        }
-
-        // Set file and dir
-        else {
-            _selFile = aFile;
-            _selDir = aFile != null ? aFile.getParent() : null;
-        }
-
-        // Fire prop changes
-        if (_selFile != oldSelFile)
-            firePropChange(SelFile_Prop, oldSelFile, _selFile);
-        if (_selDir != oldSelDir)
-            firePropChange(SelDir_Prop, oldSelDir, _selDir);
-
-        // Clear TargFile
-        setTargFile(null);
-
-        // Reset UI
-        resetLater();
-    }
-
-    /**
-     * Returns the selected directory.
-     */
-    public WebFile getSelDir()  { return _selDir; }
-
-    /**
-     * Returns the file targeted by the input text.
-     */
-    public WebFile getTargFile()  { return _targFile; }
-
-    /**
-     * Sets the file targeted by the input text.
-     */
-    public void setTargFile(WebFile aFile)
-    {
-        if (aFile == _targFile) return;
-        firePropChange(TargFile_Prop, _targFile, _targFile = aFile);
-    }
-
-    /**
-     * Returns the selected or targeted file.
-     */
-    public WebFile getSelOrTargFile()
-    {
-        if (isValidFile(_targFile))
-            return _targFile;
-        if (isValidFile(_selFile))
-            return _selFile;
-        return null;
-    }
-
-    /**
-     * Returns whether is opening.
-     */
-    public boolean isOpening()  { return !_saving; }
-
-    /**
-     * Returns whether is saving.
-     */
-    public boolean isSaving()  { return _saving; }
-
-    /**
-     * Sets whether is saving.
-     */
-    public void setSaving(boolean aValue)
-    {
-        _saving = aValue;
-    }
-
-    /**
-     * Returns the first file types.
-     */
-    public String getType()
-    {
-        return _types != null && _types.length > 0 ? _types[0] : null;
-    }
-
-    /**
-     * Returns the file types.
-     */
-    public String[] getTypes()  { return _types; }
-
-    /**
-     * Sets the file types.
-     */
-    public void setTypes(String ... theExts)
-    {
-        _types = ArrayUtils.map(theExts, type -> FilesBrowserUtils.normalizeType(type), String.class);
-    }
-
-    /**
-     * Returns whether given file is valid.
-     */
-    public boolean isValidFile(WebFile aFile)
-    {
-        boolean isValid = aFile != null && aFile.isFile() && ArrayUtils.contains(getTypes(), aFile.getType());
-        return isValid;
     }
 
     /**
@@ -313,6 +143,20 @@ public class FilesBrowser extends ViewOwner {
     }
 
     /**
+     * Override to reset browser items.
+     */
+    @Override
+    public void setSite(WebSite aSite)
+    {
+        // Do normal version
+        if (aSite == _site) return;
+        super.setSite(aSite);
+
+        // Reset FilesBrowser.Items
+        resetFilesBrowserItems();
+    }
+
+    /**
      * Resets FilesBrowser.Items.
      */
     private void resetFilesBrowserItems()
@@ -349,11 +193,6 @@ public class FilesBrowser extends ViewOwner {
         // Set the target file
         setTargFile(inputTextFile);
     }
-
-    /**
-     * Called on FileBrowser double-click or InputText enter key.
-     */
-    protected void fireActionEvent(ViewEvent anEvent)  { }
 
     /**
      * Returns a file for a path.
