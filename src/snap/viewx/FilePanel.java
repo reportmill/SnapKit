@@ -52,9 +52,6 @@ public class FilePanel extends ViewOwner {
     // The sites
     private static WebSite[]  _defaultSites;
 
-    // The default site
-    private static WebSite  _defaultSite;
-
     /**
      * Constructor.
      */
@@ -159,10 +156,12 @@ public class FilePanel extends ViewOwner {
         // If no file/dir set, set from RecentPath (prefs)
         WebFile selDir = _filesBrowser.getSelDir();
         if (selDir == null) {
-            String path = getRecentPath(getType());
-            WebSite site = getSelSite();
-            WebFile file = site.getFileForPath(path);
-            _filesBrowser.setSelFile(file);
+            WebFile recentFile = RecentFiles.getRecentFileForType(getType());
+            if (recentFile != null) {
+                WebSite recentFileSite = recentFile.getSite();
+                setSelSite(recentFileSite);
+                _filesBrowser.setSelFile(recentFile);
+            }
         }
 
         // Run code to add new folder button
@@ -182,20 +181,20 @@ public class FilePanel extends ViewOwner {
 
         // Get file and path of selection and save to preferences
         WebFile selFile = _filesBrowser.getSelOrTargFile();
-        String selFilePath = selFile.getPath();
 
         // Save selected filename in preferences for its type (extension)
-        setRecentPath(getType(), selFilePath);
+        RecentFiles.setRecentFileForType(getType(), selFile);
 
         // If user is trying to save over an existing file, warn them
         boolean save = isSaving();
         if (save && selFile.getExists()) {
 
             // Run option panel for whether to overwrite
-            DialogBox dbox2 = new DialogBox("Replace File");
-            dbox2.setWarningMessage("The file " + selFilePath + " already exists. Replace it?");
-            dbox2.setOptions("Replace", "Cancel");
-            int answer = dbox2.showOptionDialog(aView, "Replace");
+            DialogBox replaceFileDialogBox = new DialogBox("Replace File");
+            String message = String.format("The file %s already exists. Replace it?", selFile.getPath());
+            replaceFileDialogBox.setWarningMessage(message);
+            replaceFileDialogBox.setOptions("Replace", "Cancel");
+            int answer = replaceFileDialogBox.showOptionDialog(aView, "Replace");
 
             // If user chooses cancel, re-run chooser
             if (answer != 0)
@@ -449,50 +448,6 @@ public class FilePanel extends ViewOwner {
         filePanel.setTypes(theTypes);
         filePanel.setSaving(true);
         return filePanel.showFilePanel(aView);
-    }
-
-    /**
-     * Returns the most recent path for given type.
-     */
-    private static String getRecentPath(String aType)
-    {
-        WebSite defaultSite = getSiteDefault();
-        String defaultPath = FilesBrowserUtils.getHomeDirPathForSite(defaultSite);
-        return Prefs.getDefaultPrefs().getString("MostRecentDocument." + aType, defaultPath);
-    }
-
-    /**
-     * Sets the most recent path for given type.
-     */
-    private static void setRecentPath(String aType, String aPath)
-    {
-        WebSite defaultSite = getSiteDefault();
-        if (!defaultSite.getURL().getScheme().equalsIgnoreCase("file"))
-            return;
-
-        Prefs.getDefaultPrefs().setValue("MostRecentDocument." + aType, aPath);
-        Prefs.getDefaultPrefs().flush();
-    }
-
-    /**
-     * Returns the default site.
-     */
-    public static WebSite getSiteDefault()
-    {
-        // If already set, just return
-        if (_defaultSite != null) return _defaultSite;
-
-        // Get, set DefaultSite
-        WebURL defaultSiteURL = WebURL.getURL("/");
-        return _defaultSite = defaultSiteURL.getSite();
-    }
-
-    /**
-     * Sets the default site.
-     */
-    public static void setSiteDefault(WebSite aSite)
-    {
-        _defaultSite = aSite;
     }
 
     /**

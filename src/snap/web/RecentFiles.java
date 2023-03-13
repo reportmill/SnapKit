@@ -225,4 +225,35 @@ public class RecentFiles extends ViewOwner {
         // Show menu
         menu.show(aView, 0, aView.getHeight());
     }
+
+    /**
+     * Returns the most recent file for given type.
+     */
+    public static WebFile getRecentFileForType(String aType)
+    {
+        String recentFileUrlStr = Prefs.getDefaultPrefs().getString("MostRecentDocument." + aType);
+        WebURL recentFileURL = recentFileUrlStr != null ? WebURL.getURL(recentFileUrlStr) : null;
+        if (recentFileURL == null)
+            return null;
+        return recentFileURL.getFile();
+    }
+
+    /**
+     * Sets the most recent file for given type.
+     */
+    public static void setRecentFileForType(String aType, WebFile recentFile)
+    {
+        WebURL recentFileURL = recentFile.getURL();
+        String recentFileUrlStr = recentFileURL.getString();
+        Prefs.getDefaultPrefs().setValue("MostRecentDocument." + aType, recentFileUrlStr);
+        Prefs.getDefaultPrefs().flush();
+    }
+
+    /**
+     * Clears recent documents from preferences.
+     */
+    public static void clearRecentFiles()
+    {
+        Prefs.getDefaultPrefs().getChild("RecentDocuments").clear();
+    }
 }
