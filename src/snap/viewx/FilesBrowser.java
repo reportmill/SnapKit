@@ -47,9 +47,6 @@ public class FilesBrowser extends FilesPane {
         _fileBrowser.setCellConfigure(item -> configureFileBrowserCell(item));
         _fileBrowser.addEventFilter(e -> runLater(() -> fileBrowserMouseReleased(e)), MouseRelease);
 
-        // Set FileBrowser Items
-        resetFilesBrowserItems();
-
         // Get/configure DirComboBox
         _dirComboBox = getView("DirComboBox", ComboBox.class);
         _dirComboBox.setItemTextFunction(item -> item.isRoot() ? "Root Directory" : item.getName());
@@ -153,13 +150,14 @@ public class FilesBrowser extends FilesPane {
         super.setSite(aSite);
 
         // Reset FilesBrowser.Items
-        resetFilesBrowserItems();
+        setSiteFilesInUI();
     }
 
     /**
-     * Resets FilesBrowser.Items.
+     * Called to set the FilesPane WebFiles.
      */
-    private void resetFilesBrowserItems()
+    @Override
+    protected void setSiteFilesInUI()
     {
         if (_fileBrowser == null) return;
         WebFile rootDir = getSite().getRootDir();

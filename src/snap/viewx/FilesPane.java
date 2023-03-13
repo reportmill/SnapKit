@@ -2,6 +2,7 @@ package snap.viewx;
 import snap.util.ArrayUtils;
 import snap.view.ViewEvent;
 import snap.view.ViewOwner;
+import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
 
@@ -195,4 +196,46 @@ public class FilesPane extends ViewOwner {
         if (_filePanel != null)
             _filePanel.fireActionEvent(anEvent);
     }
+
+    /**
+     * Called when Showing changes.
+     */
+    @Override
+    protected void showingChanged()
+    {
+        if (isShowing())
+            runLater(() -> initFilesPane());
+    }
+
+    /**
+     * Called when Showing changes.
+     */
+    protected void initFilesPane()
+    {
+        // Reload files
+        WebSite site = getSite();
+        WebFile rootDir = site.getRootDir();
+        rootDir.resetContent();
+        rootDir.getFiles();
+
+        // Set the files in UI
+        setSiteFilesInUI();
+
+        // If no file/dir set, set from RecentPath (prefs)
+        WebFile selDir = getSelDir();
+        if (selDir == null) {
+            String type = getType();
+            WebFile recentFile = RecentFiles.getRecentFileForType(type);
+            if (recentFile != null) {
+                WebSite recentFileSite = recentFile.getSite();
+                if (recentFileSite == getSite())
+                    setSelFile(recentFile);
+            }
+        }
+    }
+
+    /**
+     * Called to set the FilesPane WebFiles.
+     */
+    protected void setSiteFilesInUI()  { }
 }

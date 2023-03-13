@@ -62,8 +62,6 @@ public class RecentFilesPane extends FilesPane {
     public void resetUI()
     {
         // Update FilesTable.Items/SelItem
-        WebFile[] recentFiles = RecentFiles.getFiles(_name);
-        _filesTable.setItems(recentFiles);
         _filesTable.setSelItem(getSelFile());
     }
 
@@ -82,6 +80,18 @@ public class RecentFilesPane extends FilesPane {
         // Handle ClearRecentMenuItem
         if (anEvent.equals("ClearRecentMenuItem"))
             RecentFiles.clearPaths(_name);
+    }
+
+    /**
+     * Called to set the FilesPane WebFiles.
+     */
+    @Override
+    protected void setSiteFilesInUI()
+    {
+        WebFile[] recentFiles = RecentFiles.getFiles(_name);
+        _filesTable.setItems(recentFiles);
+        WebFile recentFile = recentFiles.length > 0 ? recentFiles[0] : null;
+        setSelFile(recentFile);
     }
 
     /**

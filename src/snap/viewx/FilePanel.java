@@ -185,17 +185,6 @@ public class FilePanel extends ViewOwner {
         // Get UI
         View filesPanelUI = getUI();
 
-        // If no file/dir set, set from RecentPath (prefs)
-        WebFile selDir = _filesPane.getSelDir();
-        if (selDir == null) {
-            WebFile recentFile = RecentFiles.getRecentFileForType(getType());
-            if (recentFile != null) {
-                WebSite recentFileSite = recentFile.getSite();
-                setSelSite(recentFileSite);
-                _filesPane.setSelFile(recentFile);
-            }
-        }
-
         // Run code to add new folder button
         if (isSaving())
             runLater(() -> addNewFolderButton());
