@@ -104,10 +104,10 @@ public class RecentFilesPane extends FilesPane {
     public WebFile showPanel(View aView)
     {
         // Create DialogBox with UI, and showConfirmDialog (just return if cancelled)
-        _dialogBox = new DialogBox("Recent Files");
-        _dialogBox.setContent(getUI());
-        _dialogBox.setOptions("Open", "Cancel");
-        if (!_dialogBox.showConfirmDialog(aView))
+        DialogBox dialogBox = new DialogBox("Recent Files");
+        dialogBox.setContent(getUI());
+        dialogBox.setOptions("Open", "Cancel");
+        if (!dialogBox.showConfirmDialog(aView))
             return null;
 
         // Return selected file

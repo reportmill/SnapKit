@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ColView Padding="5" GrowHeight="true" PrefWidth="500" PrefHeight="400" Spacing="18" FillWidth="true">
+<ColView Padding="5" GrowHeight="true" PrefWidth="500" PrefHeight="400" Spacing="12" FillWidth="true">
   <RowView Align="CENTER" Spacing="8" >
     <Font Name="Arial" Size="13" />
     <Label Text="Directory:" />

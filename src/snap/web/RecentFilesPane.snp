@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ColView Padding="5" GrowHeight="true" PrefWidth="500" PrefHeight="400" FillWidth="true">
   <TableView Name="FilesTable" GrowHeight="true" BorderRadius="3">
-    <font name="Arial" size="14" />
+    <font name="Arial" size="13" />
     <TableCol Header="Name" GrowWidth="true" />
     <TableCol Header="Path" GrowWidth="true">
-      <font name="Arial" size="12" />
+      <font name="Arial" size="11" />
     </TableCol>
   </TableView>
 </ColView>

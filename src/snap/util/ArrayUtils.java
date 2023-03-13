@@ -140,9 +140,17 @@ public class ArrayUtils {
      */
     public static <T> T[] addId(T[] anArray, T anObj)
     {
+        return addId(anArray, anObj, anArray.length);
+    }
+
+    /**
+     * Adds a value to an array of objects if list doesn't already contain it.
+     */
+    public static <T> T[] addId(T[] anArray, T anObj, int anIndex)
+    {
         if (containsId(anArray, anObj))
             return anArray;
-        return add(anArray, anObj);
+        return add(anArray, anObj, anIndex);
     }
 
     /**

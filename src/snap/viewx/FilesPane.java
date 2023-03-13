@@ -28,8 +28,8 @@ public class FilesPane extends ViewOwner {
     // The file types
     protected String[]  _types;
 
-    // The DialogBox
-    protected DialogBox  _dialogBox;
+    // The FilePanel
+    protected FilePanel  _filePanel;
 
     // Constants for properties
     public static final String SelFile_Prop = "SelFile";
@@ -192,7 +192,7 @@ public class FilesPane extends ViewOwner {
      */
     protected void fireActionEvent(ViewEvent anEvent)
     {
-        if (_dialogBox != null && _dialogBox.isConfirmEnabled())
-            _dialogBox.confirm();
+        if (_filePanel != null)
+            _filePanel.fireActionEvent(anEvent);
     }
 }

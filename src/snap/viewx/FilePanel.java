@@ -34,6 +34,9 @@ public class FilePanel extends ViewOwner {
     // The currently selected site
     private WebSite  _selSite;
 
+    // Whether confirm enabled
+    private boolean  _confirmEnabled;
+
     // The DialogBox
     private DialogBox  _dialogBox;
 
@@ -52,6 +55,9 @@ public class FilePanel extends ViewOwner {
     // The sites
     private static WebSite[]  _defaultSites;
 
+    // Constants for properties
+    public static final String ConfirmEnabled_Prop = "ConfirmEnabled";
+
     /**
      * Constructor.
      */
@@ -61,7 +67,7 @@ public class FilePanel extends ViewOwner {
 
         // Get sites
         _sites = getDefaultSites();
-        _selSite = FilesBrowserUtils.getLocalFileSystemSite();
+        _selSite = _sites.length > 0 ? _sites[0] : null;
     }
 
     /**
@@ -146,6 +152,32 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
+     * Returns the selected file.
+     */
+    public WebFile getSelFile()
+    {
+        WebFile selFile = _filesPane.getSelOrTargFile();
+        return selFile;
+    }
+
+    /**
+     * Returns whether confirm enabled.
+     */
+    public boolean isConfirmEnabled()  { return _confirmEnabled; }
+
+    /**
+     * Sets whether confirm enabled.
+     */
+    public void setConfirmEnabled(boolean aValue)
+    {
+        if (aValue == _confirmEnabled) return;
+        firePropChange(ConfirmEnabled_Prop, _confirmEnabled, _confirmEnabled = aValue);
+
+        if (_dialogBox != null)
+            _dialogBox.setConfirmEnabled(aValue);
+    }
+
+    /**
      * Runs a file chooser that remembers last open file and size.
      */
     public WebFile showFilePanel(View aView)
@@ -172,8 +204,8 @@ public class FilePanel extends ViewOwner {
         String title = isSaving() ? "Save Panel" : "Open Panel";
         _dialogBox = new DialogBox(title);
         _dialogBox.setContent(filesPanelUI);
-        _dialogBox.setConfirmEnabled(_filesPane.getSelOrTargFile() != null);
-        _filesPane._dialogBox = _dialogBox;
+        setConfirmEnabled(_filesPane.getSelOrTargFile() != null);
+        _filesPane._filePanel = this;
 
         // Run FileChooser UI in DialogBox
         boolean value = _dialogBox.showConfirmDialog(aView);
@@ -233,7 +265,7 @@ public class FilePanel extends ViewOwner {
         _sitesTabBar.setPadding(5, 5, 5, 5);
         _sitesTabBar.getTabsBox().setSpacing(5);
         _sitesTabBar.setTabMinWidth(100);
-        _sitesTabBar.setFont(Font.Arial14);
+        _sitesTabBar.setFont(Font.Arial13);
         topColView.addChild(_sitesTabBar);
 
         // Create/add TransitionPane
@@ -279,6 +311,15 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
+     * Called on FileBrowser double-click or InputText enter key.
+     */
+    protected void fireActionEvent(ViewEvent anEvent)
+    {
+        if (_dialogBox != null && _dialogBox.isConfirmEnabled())
+            _dialogBox.confirm();
+    }
+
+    /**
      * Sets the FilesPane.
      */
     private void setFilesPane(FilesPane filesPane)
@@ -317,8 +358,7 @@ public class FilePanel extends ViewOwner {
     {
         WebFile selOrTargFile = _filesPane.getSelOrTargFile();
         boolean isFileSet = selOrTargFile != null;
-        if (_dialogBox != null)
-            _dialogBox.setConfirmEnabled(isFileSet);
+        setConfirmEnabled(isFileSet);
     }
 
     /**
@@ -367,7 +407,7 @@ public class FilePanel extends ViewOwner {
         // Create and add to cache
         filesPane = createFilesPaneForSite(aSite);
         filesPane.setSite(aSite);
-        filesPane._dialogBox = _dialogBox;
+        filesPane._filePanel = this;
         _filesPanes.put(aSite, filesPane);
 
         // Return
@@ -469,7 +509,8 @@ public class FilePanel extends ViewOwner {
         }
 
         // Add site
-        _defaultSites = ArrayUtils.addId(_defaultSites, aSite);
+        int index = aSite instanceof RecentFilesSite ? 0 : _defaultSites.length;
+        _defaultSites = ArrayUtils.addId(_defaultSites, aSite, index);
     }
 
     /**
