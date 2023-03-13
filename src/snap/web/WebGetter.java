@@ -124,7 +124,8 @@ public class WebGetter {
 
         // Otherwise, create site, set URL and return
         site = createSiteForURL(aSiteURL);
-        site.setURL(aSiteURL);
+        if (site != null)
+            site.setURL(aSiteURL);
         return site;
     }
 

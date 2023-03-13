@@ -200,11 +200,14 @@ public class WebURL {
     {
         WebSite site = getSite();
         String filePath = getPath();
-        if (filePath != null)
-            return site.getFileForPath(filePath);
+        if (site != null) {
+            if (filePath != null)
+                return site.getFileForPath(filePath);
+            return site.getRootDir();
+        }
 
-        // Fallback to root dir?
-        return site.getRootDir();
+        // Return not found
+        return null;
     }
 
     /**
