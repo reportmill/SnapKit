@@ -21,33 +21,13 @@ public class RecentFilesSite extends WebSite {
         super();
 
         // Create/set URL
-        String RECENT_FILES_ROOT = "recent:/";
+        String RECENT_FILES_ROOT = "recent:";
         String urls = RECENT_FILES_ROOT;
         WebURL url = WebURL.getURL(urls);
         setURL(url);
 
         // Set this to shared
         _shared = this;
-    }
-
-    /**
-     * Returns the recent files.
-     */
-    public WebFile[] getRecentFiles()
-    {
-        WebFile[] recentFiles = RecentFiles.getFiles();
-        return recentFiles;
-    }
-
-    /**
-     * Adds a recent file.
-     */
-    public void addRecentFile(WebFile aFile)
-    {
-        String localFilePath = "/" + aFile.getName();
-        WebFile newLocalFile = createFileForPath(localFilePath, false);
-        newLocalFile.setLinkFile(aFile);
-        newLocalFile.save();
     }
 
     /**
@@ -87,7 +67,7 @@ public class RecentFilesSite extends WebSite {
         if (filePath.equals("/")) {
 
             // Get recent file
-            WebFile[] recentFiles = getRecentFiles();
+            WebFile[] recentFiles = RecentFiles.getFiles();
             WebFile[] rootDirFiles = new WebFile[recentFiles.length];
 
             // Iterate over rootDir files and recent files and set each as link

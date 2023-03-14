@@ -173,7 +173,7 @@ public class RecentFiles extends ViewOwner {
     /**
      * Returns a standard URL String for given URL string.
      */
-    private static String getNormalizedUrlString(String urlString)
+    public static String getNormalizedUrlString(String urlString)
     {
         // If URL String is 'file:/', replace with path
         if (urlString.startsWith("file:")) {
@@ -181,6 +181,10 @@ public class RecentFiles extends ViewOwner {
             if (urlString.startsWith("//"))
                 urlString = urlString.substring(1);
         }
+
+        // Remove nested site separator
+        if (urlString.contains("!"))
+            urlString = urlString.replace("!", "");
 
         // Return
         return urlString;

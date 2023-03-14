@@ -4,6 +4,7 @@
 package snap.web;
 import snap.geom.Insets;
 import snap.gfx.Color;
+import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.FilesPane;
@@ -36,7 +37,7 @@ public class RecentFilesPane extends FilesPane {
         _filesTable = getView("FilesTable", TableView.class);
         _filesTable.getScrollView().setFillWidth(false);
         _filesTable.getScrollView().setBarSize(14);
-        _filesTable.addEventFilter(e -> runLater(() -> filesTableMouseReleased(e)), MouseRelease);
+        _filesTable.addEventFilter(e -> runLater(() -> filesTableMousePressReleased(e)), MousePress, MouseRelease);
 
         // Configure FilesTable columns
         TableCol<WebFile> nameCol = _filesTable.getCol(0);
@@ -85,9 +86,15 @@ public class RecentFilesPane extends FilesPane {
     @Override
     protected void setSiteFilesInUI()
     {
-        WebFile[] recentFiles = RecentFiles.getFiles();
-        _filesTable.setItems(recentFiles);
-        WebFile recentFile = recentFiles.length > 0 ? recentFiles[0] : null;
+        // Get valid files
+        WebSite recentFilesSite = getSite();
+        WebFile rootDir = recentFilesSite.getRootDir();
+        WebFile[] recentFiles = rootDir.getFiles();
+        WebFile[] recentFilesValid = ArrayUtils.filter(recentFiles, file -> isValidFile(file));
+        _filesTable.setItems(recentFilesValid);
+
+        // Set SelFile
+        WebFile recentFile = recentFilesValid.length > 0 ? recentFilesValid[0] : null;
         setSelFile(recentFile);
     }
 
@@ -113,9 +120,10 @@ public class RecentFilesPane extends FilesPane {
     private void configureFilesTableNameColCell(ListCell<WebFile> aCell)
     {
         WebFile file = aCell.getItem();
-        if (file == null) return;
-        String dirPath = file.getName();
-        aCell.setText(dirPath);
+        if (file == null)
+            return;
+        String filename = file.getName();
+        aCell.setText(filename);
     }
 
     /**
@@ -124,9 +132,14 @@ public class RecentFilesPane extends FilesPane {
     private void configureFilesTablePathColCell(ListCell<WebFile> aCell)
     {
         WebFile file = aCell.getItem();
-        if (file == null) return;
-        String dirPath = file.getParent().getPath();
-        aCell.setText(dirPath);
+        if (file == null)
+            return;
+
+        // Get URL string and set in cell
+        WebFile recentFile = file.getRealFile();
+        WebURL directoryURL = recentFile.getURL().getParent();
+        String directoryUrlString = RecentFiles.getNormalizedUrlString(directoryURL.getString());
+        aCell.setText(directoryUrlString);
         aCell.setTextFill(Color.DARKGRAY);
 
         // Add button to clear item from recent files
@@ -139,11 +152,25 @@ public class RecentFilesPane extends FilesPane {
     /**
      * Called when FilesTable gets MouseRelease.
      */
-    private void filesTableMouseReleased(ViewEvent anEvent)
+    private void filesTableMousePressReleased(ViewEvent anEvent)
     {
         // If double-click and valid file, do confirm
-        if (anEvent.getClickCount() == 2)
+        if (anEvent.isMouseRelease() && anEvent.getClickCount() == 2)
             fireActionEvent(anEvent);
+
+        // Handle content menu
+        else if (anEvent.isPopupTrigger()) {
+
+            // Create context menu
+            ViewBuilder<MenuItem> menuBuilder = new ViewBuilder<>(MenuItem.class);
+            menuBuilder.text("Clear Recent Files").save().addEventHandler(e -> {
+                RecentFiles.clearRecentFiles();
+                resetLater();
+                resetFilesUI();
+            }, View.Action);
+            Menu contextMenu = menuBuilder.buildMenu("ContextMenu", null);
+            contextMenu.show(anEvent.getView(), anEvent.getX(), anEvent.getY());
+        }
     }
 
     /**
@@ -168,7 +195,40 @@ public class RecentFilesPane extends FilesPane {
         // Clear RecentFiles, SelFile and trigger reset
         if (getSelFile() == file)
             setSelFile(null);
+
+        // Reset UI
         resetLater();
+        resetFilesUI();
+    }
+
+    /**
+     * Override to maybe swap local file.
+     */
+    @Override
+    public void setSelFile(WebFile aFile)
+    {
+        // If file is from foreign site, swap with local file
+        WebFile localFile = getLocalFile(aFile);
+
+        // Do normal version
+        super.setSelFile(localFile);
+    }
+
+    /**
+     * Returns a local file for given file.
+     */
+    private WebFile getLocalFile(WebFile aFile)
+    {
+        WebFile localFile = aFile;
+        WebSite recentFilesSite = getSite();
+        if (aFile != null && aFile.getSite() != recentFilesSite) {
+            WebFile rootDir = recentFilesSite.getRootDir();
+            WebFile[] localRecentFiles = rootDir.getFiles();
+            localFile = ArrayUtils.findMatch(localRecentFiles, locFile -> locFile.getLinkFile() == aFile);
+        }
+
+        // Return
+        return localFile;
     }
 
     /**

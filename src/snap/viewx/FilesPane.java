@@ -184,7 +184,7 @@ public class FilesPane extends ViewOwner {
         if (types == null || types.length == 0)
             return true;
 
-        boolean isValid = aFile != null && aFile.isFile() && ArrayUtils.contains(types, aFile.getType());
+        boolean isValid = aFile.isFile() && ArrayUtils.contains(types, aFile.getType());
         return isValid;
     }
 
@@ -204,13 +204,13 @@ public class FilesPane extends ViewOwner {
     protected void showingChanged()
     {
         if (isShowing())
-            runLater(() -> initFilesPane());
+            runLater(() -> resetFilesUI());
     }
 
     /**
      * Called when Showing changes.
      */
-    protected void initFilesPane()
+    protected void resetFilesUI()
     {
         // Reload files
         WebSite site = getSite();

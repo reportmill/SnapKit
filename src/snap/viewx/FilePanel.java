@@ -156,7 +156,19 @@ public class FilePanel extends ViewOwner {
      */
     public WebFile getSelFile()
     {
+        // Get current FilesPane selected/targeted file
         WebFile selFile = _filesPane.getSelOrTargFile();
+
+        // If link file, replace with real
+        if (selFile != null && selFile.getLinkFile() != null)
+            selFile = selFile.getRealFile();
+
+        // Add to recent files
+        WebURL selFileURL = selFile != null ? selFile.getURL() : null;
+        if (selFileURL != null)
+            RecentFiles.addURL(selFileURL);
+
+        // Return
         return selFile;
     }
 
@@ -202,7 +214,7 @@ public class FilePanel extends ViewOwner {
             return null;
 
         // Get file and path of selection and save to preferences
-        WebFile selFile = _filesPane.getSelOrTargFile();
+        WebFile selFile = getSelFile();
 
         // Add recent file
         WebURL selFileURL = selFile.getURL();
@@ -227,10 +239,6 @@ public class FilePanel extends ViewOwner {
         // Give focus back to given view
         if (save && aView != null)
             aView.requestFocus();
-
-        // If link file, replace with real file
-        if (selFile.getLinkFile() != null)
-            selFile = selFile.getLinkFile();
 
         // Return file
         return selFile;
