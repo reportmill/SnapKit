@@ -13,6 +13,12 @@ import snap.view.*;
  */
 public class RecentFiles extends ViewOwner {
 
+    // The key used in preferences to store recent file urls
+    private static String  _prefsKey = "RecentDocuments";
+
+    // Constants
+    private static int MAX_FILES = 20;
+
     /**
      * Constructor for given name.
      */
@@ -24,10 +30,10 @@ public class RecentFiles extends ViewOwner {
     /**
      * Returns the list of the recent paths as WebFiles.
      */
-    public static WebURL[] getURLs(String aName)
+    public static WebURL[] getURLs()
     {
         // Get RecentPaths
-        String[] paths = getPaths(aName);
+        String[] paths = getPaths();
         List<WebURL> urls = new ArrayList<>();
         for (String path : paths) {
             WebURL url = WebURL.getURL(path);
@@ -42,16 +48,17 @@ public class RecentFiles extends ViewOwner {
     /**
      * Returns the list of recent paths for name.
      */
-    public static String[] getPaths(String aName)
+    public static String[] getPaths()
     {
         // Get prefs for RecentDocuments (just return if missing)
-        Prefs prefs = Prefs.getDefaultPrefs().getChild(aName);
+        Prefs prefsNode = getRecentFilesPrefsNode();
 
         // Add to the list only if the file is around and readable
         List<String> list = new ArrayList<>();
         for (int i = 0; ; i++) {
-            String path = prefs.getString("index" + i, null);
-            if (path == null) break;
+            String path = prefsNode.getString("index" + i, null);
+            if (path == null)
+                break;
             if (!list.contains(path))
                 list.add(path);
         }
@@ -63,62 +70,63 @@ public class RecentFiles extends ViewOwner {
     /**
      * Adds a new file to the list and updates the users preferences.
      */
-    public static void addPath(String aName, String aPath, int aMax)
+    public static void addPath(String aPath)
     {
         // Get the doc list from the preferences
-        String[] paths = getPaths(aName);
+        String[] paths = getPaths();
 
         // Remove the path (if it was there) and add to front of list
         paths = ArrayUtils.remove(paths, aPath);
         paths = ArrayUtils.add(paths, aPath, 0);
 
         // Add at most Max paths to the prefs list
-        Prefs prefs = Prefs.getDefaultPrefs().getChild(aName);
-        for (int i = 0; i < paths.length && i < aMax; i++)
-            prefs.setValue("index" + i, paths[i]);
+        Prefs prefsNode = getRecentFilesPrefsNode();
+        for (int i = 0; i < paths.length && i < MAX_FILES; i++)
+            prefsNode.setValue("index" + i, paths[i]);
 
         // Flush prefs
-        try { prefs.flush(); }
+        try { prefsNode.flush(); }
         catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
     /**
      * Removes a file from the list and updates the users preferences.
      */
-    public static void removePath(String aName, String aPath)
+    public static void removePath(String aPath)
     {
         // Get the doc list from the preferences
-        String[] paths = getPaths(aName);
+        String[] paths = getPaths();
 
         // Remove the path (if it was there)
         paths = ArrayUtils.remove(paths, aPath);
 
         // Add at most Max paths to the prefs list
-        Prefs prefs = Prefs.getDefaultPrefs().getChild(aName);
+        Prefs prefsNode = getRecentFilesPrefsNode();
         for (int i = 0; i < paths.length; i++)
-            prefs.setValue("index" + i, paths[i]);
-        prefs.remove("index" + paths.length);
+            prefsNode.setValue("index" + i, paths[i]);
+        prefsNode.remove("index" + paths.length);
 
         // Flush prefs
-        try { prefs.flush(); }
+        try { prefsNode.flush(); }
         catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
     /**
-     * Clears recent documents from preferences.
+     * Clears recent files from preferences.
      */
-    public static void clearPaths(String aName)
+    public static void clearRecentFiles()
     {
-        Prefs.getDefaultPrefs().getChild(aName).clear();
+        Prefs prefsNode = getRecentFilesPrefsNode();
+        prefsNode.clear();
     }
 
     /**
      * Returns the list of the recent paths as WebFiles.
      */
-    public static WebFile[] getFiles(String aName)
+    public static WebFile[] getFiles()
     {
         // Get RecentPaths
-        WebURL[] urls = getURLs(aName);
+        WebURL[] urls = getURLs();
         List<WebFile> files = new ArrayList<>();
         for (WebURL url : urls) {
             WebFile file = url.getFile();
@@ -131,19 +139,24 @@ public class RecentFiles extends ViewOwner {
     }
 
     /**
+     * Returns the prefs node used to store recent files.
+     */
+    private static Prefs getRecentFilesPrefsNode()  { return Prefs.getDefaultPrefs().getChild(_prefsKey); }
+
+    /**
      * Shows a recent files menu for given view.
      */
-    public static String showPathsPanel(View aView, String aName)
+    public static String showPathsPanel(View aView)
     {
-        return RecentFilesPane.showPathsPanel(aView, aName);
+        return RecentFilesPane.showPathsPanel(aView);
     }
 
     /**
      * Shows a recent files menu for given view.
      */
-    public static void showPathsMenu(View aView, String aName, Consumer<String> aFunc)
+    public static void showPathsMenu(View aView, Consumer<String> aFunc)
     {
-        RecentFilesPane.showPathsMenu(aView, aName, aFunc);
+        RecentFilesPane.showPathsMenu(aView, aFunc);
     }
 
     /**
@@ -170,10 +183,7 @@ public class RecentFiles extends ViewOwner {
     }
 
     /**
-     * Clears recent documents from preferences.
+     * Sets the Recent files key.
      */
-    public static void clearRecentFiles()
-    {
-        Prefs.getDefaultPrefs().getChild("RecentDocuments").clear();
-    }
+    public static void setPrefsKey(String aKey)  { _prefsKey = aKey; }
 }

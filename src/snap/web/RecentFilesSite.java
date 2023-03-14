@@ -4,46 +4,38 @@
 package snap.web;
 import snap.util.ArrayUtils;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This WebSite manages recent files.
  */
 public class RecentFilesSite extends WebSite {
 
-    // The id
-    private String  _id;
-
-    // A map of all known RecentFiles sites by Id
-    private static Map<String,RecentFilesSite>  _recentFilesSites = new HashMap<>();
+    // The shared site
+    private static RecentFilesSite  _shared;
 
     /**
      * Constructor.
      */
-    private RecentFilesSite(String anId)
+    private RecentFilesSite()
     {
         super();
-        _id = anId;
 
         // Create/set URL
-        String DROPBOX_ROOT = "recent://";
-        String urls = DROPBOX_ROOT + _id;
+        String RECENT_FILES_ROOT = "recent:/";
+        String urls = RECENT_FILES_ROOT;
         WebURL url = WebURL.getURL(urls);
         setURL(url);
-    }
 
-    /**
-     * Returns the id.
-     */
-    public String getId()  { return _id; }
+        // Set this to shared
+        _shared = this;
+    }
 
     /**
      * Returns the recent files.
      */
     public WebFile[] getRecentFiles()
     {
-        WebFile[] recentFiles = RecentFiles.getFiles(_id);
+        WebFile[] recentFiles = RecentFiles.getFiles();
         return recentFiles;
     }
 
@@ -148,18 +140,9 @@ public class RecentFilesSite extends WebSite {
     /**
      * Returns the recent files site for id.
      */
-    public static RecentFilesSite getRecentFilesSiteForId(String anId)
+    public static RecentFilesSite getShared()
     {
-        // Get from sites cache - just return if found
-        RecentFilesSite recentFilesSite = _recentFilesSites.get(anId);
-        if (recentFilesSite != null)
-            return recentFilesSite;
-
-        // Create and add to cache
-        recentFilesSite = new RecentFilesSite(anId);
-        _recentFilesSites.put(anId, recentFilesSite);
-
-        // Return
-        return recentFilesSite;
+        if (_shared != null) return _shared;
+        return _shared = new RecentFilesSite();
     }
 }

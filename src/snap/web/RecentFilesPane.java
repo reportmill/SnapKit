@@ -14,19 +14,16 @@ import java.util.function.Consumer;
  */
 public class RecentFilesPane extends FilesPane {
 
-    // The name
-    private String  _name;
-
     // The FilesTable
     private TableView<WebFile>  _filesTable;
 
     /**
      * Constructor for given name.
      */
-    public RecentFilesPane(String aName)
+    public RecentFilesPane()
     {
         super();
-        _name = aName;
+        _site = RecentFilesSite.getShared();
     }
 
     /**
@@ -50,7 +47,7 @@ public class RecentFilesPane extends FilesPane {
         pathCol.setCellConfigure(cell -> configureFilesTablePathColCell(cell));
 
         // Init SelFile
-        WebFile[] recentFiles = RecentFiles.getFiles(_name);
+        WebFile[] recentFiles = RecentFiles.getFiles();
         if (recentFiles.length > 0)
             setSelFile(recentFiles[0]);
     }
@@ -79,7 +76,7 @@ public class RecentFilesPane extends FilesPane {
 
         // Handle ClearRecentMenuItem
         if (anEvent.equals("ClearRecentMenuItem"))
-            RecentFiles.clearPaths(_name);
+            RecentFiles.clearRecentFiles();
     }
 
     /**
@@ -88,24 +85,10 @@ public class RecentFilesPane extends FilesPane {
     @Override
     protected void setSiteFilesInUI()
     {
-        WebFile[] recentFiles = RecentFiles.getFiles(_name);
+        WebFile[] recentFiles = RecentFiles.getFiles();
         _filesTable.setItems(recentFiles);
         WebFile recentFile = recentFiles.length > 0 ? recentFiles[0] : null;
         setSelFile(recentFile);
-    }
-
-    /**
-     * Override.
-     */
-    @Override
-    public void setSite(WebSite aSite)
-    {
-        // Do normal version
-        if (aSite == _site) return;
-        super.setSite(aSite);
-
-        // Set name
-        _name = ((RecentFilesSite) aSite).getId();
     }
 
     /**
@@ -180,7 +163,7 @@ public class RecentFilesPane extends FilesPane {
 
         // Clear RecentFile
         String filePath = file.getURL().getString();
-        RecentFiles.removePath(_name, filePath);
+        RecentFiles.removePath(filePath);
 
         // Clear RecentFiles, SelFile and trigger reset
         if (getSelFile() == file)
@@ -191,9 +174,9 @@ public class RecentFilesPane extends FilesPane {
     /**
      * Shows a recent files menu for given view.
      */
-    public static String showPathsPanel(View aView, String aName)
+    public static String showPathsPanel(View aView)
     {
-        RecentFilesPane recentFiles = new RecentFilesPane(aName);
+        RecentFilesPane recentFiles = new RecentFilesPane();
         WebFile file = recentFiles.showPanel(aView);
         return file != null ? file.getPath() : null;
     }
@@ -201,10 +184,10 @@ public class RecentFilesPane extends FilesPane {
     /**
      * Shows a recent files menu for given view.
      */
-    public static void showPathsMenu(View aView, String aName, Consumer<String> aFunc)
+    public static void showPathsMenu(View aView, Consumer<String> aFunc)
     {
         Menu menu = new Menu();
-        WebFile[] recentFiles = RecentFiles.getFiles(aName);
+        WebFile[] recentFiles = RecentFiles.getFiles();
         for (WebFile recentFile : recentFiles) {
             MenuItem menuItem = new MenuItem();
             menuItem.setText(recentFile.getName());
@@ -216,7 +199,7 @@ public class RecentFilesPane extends FilesPane {
         menu.addSeparator();
         MenuItem ci = new MenuItem();
         ci.setText("Clear Recents");
-        ci.addEventHandler(e -> RecentFiles.clearPaths(aName), Action);
+        ci.addEventHandler(e -> RecentFiles.clearRecentFiles(), Action);
         menu.addItem(ci);
 
         // Show menu
