@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import snap.util.ArrayUtils;
 import snap.util.Prefs;
+import snap.util.StringUtils;
 import snap.view.*;
 
 /**
@@ -20,69 +21,68 @@ public class RecentFiles extends ViewOwner {
     private static int MAX_FILES = 20;
 
     /**
-     * Constructor for given name.
+     * Returns the array of recent files.
      */
-    public RecentFiles()
+    public static WebFile[] getFiles()
     {
-        super();
+        WebURL[] urls = getURLs();
+        return ArrayUtils.mapNonNull(urls, url -> url.getFile(), WebFile.class);
     }
 
     /**
-     * Returns the list of the recent paths as WebFiles.
+     * Returns the array of recent file URLs.
      */
     public static WebURL[] getURLs()
     {
-        // Get RecentPaths
-        String[] paths = getPaths();
-        List<WebURL> urls = new ArrayList<>();
-        for (String path : paths) {
-            WebURL url = WebURL.getURL(path);
-            if (url != null)
-                urls.add(url);
-        }
-
-        // Return array
-        return urls.toArray(new WebURL[0]);
+        String[] urlStrings = getUrlStrings();
+        return ArrayUtils.mapNonNull(urlStrings, urlStr -> WebURL.getURL(urlStr),WebURL.class);
     }
 
     /**
-     * Returns the list of recent paths for name.
+     * Returns the array of recent file URL strings.
      */
-    public static String[] getPaths()
+    public static String[] getUrlStrings()
     {
         // Get prefs for RecentDocuments (just return if missing)
         Prefs prefsNode = getRecentFilesPrefsNode();
 
         // Add to the list only if the file is around and readable
-        List<String> list = new ArrayList<>();
+        List<String> urlStrings = new ArrayList<>();
         for (int i = 0; ; i++) {
-            String path = prefsNode.getString("index" + i, null);
-            if (path == null)
+            String urlString = prefsNode.getString("index" + i, null);
+            if (urlString == null)
                 break;
-            if (!list.contains(path))
-                list.add(path);
+            if (!urlStrings.contains(urlString))
+                urlStrings.add(urlString);
         }
 
         // Return list
-        return list.toArray(new String[0]);
+        return urlStrings.toArray(new String[0]);
     }
 
     /**
-     * Adds a new file to the list and updates the users preferences.
+     * Adds a URL string to recent files and updates the users preferences.
      */
-    public static void addPath(String aPath)
+    public static void addUrlString(String urlString)
     {
-        // Get the doc list from the preferences
-        String[] paths = getPaths();
+        // Standardize URL
+        urlString = getNormalizedUrlString(urlString);
 
-        // Remove the path (if it was there) and add to front of list
-        paths = ArrayUtils.remove(paths, aPath);
-        paths = ArrayUtils.add(paths, aPath, 0);
+        // Get URL strings from prefs
+        String[] urlStrings = getUrlStrings();
+
+        // If already first, just return
+        if (urlStrings.length > 0 && urlStrings[0].equals(urlString))
+            return;
+
+        // Remove the URL (if it was there) and add to front of list
+        urlStrings = ArrayUtils.remove(urlStrings, urlString);
+        urlStrings = ArrayUtils.add(urlStrings, urlString, 0);
 
         // Add at most Max paths to the prefs list
         Prefs prefsNode = getRecentFilesPrefsNode();
-        for (int i = 0; i < paths.length && i < MAX_FILES; i++)
-            prefsNode.setValue("index" + i, paths[i]);
+        for (int i = 0; i < urlStrings.length && i < MAX_FILES; i++)
+            prefsNode.setValue("index" + i, urlStrings[i]);
 
         // Flush prefs
         try { prefsNode.flush(); }
@@ -90,21 +90,26 @@ public class RecentFiles extends ViewOwner {
     }
 
     /**
-     * Removes a file from the list and updates the users preferences.
+     * Removes a URL string from recent files and updates the users preferences.
      */
-    public static void removePath(String aPath)
+    public static void removeUrlString(String urlString)
     {
-        // Get the doc list from the preferences
-        String[] paths = getPaths();
+        // Standardize URL
+        urlString = getNormalizedUrlString(urlString);
 
-        // Remove the path (if it was there)
-        paths = ArrayUtils.remove(paths, aPath);
+        // Get URL strings from prefs
+        String[] urlStrings = getUrlStrings();
+
+        // Remove the URL (if it was there)
+        urlStrings = ArrayUtils.remove(urlStrings, urlString);
 
         // Add at most Max paths to the prefs list
         Prefs prefsNode = getRecentFilesPrefsNode();
-        for (int i = 0; i < paths.length; i++)
-            prefsNode.setValue("index" + i, paths[i]);
-        prefsNode.remove("index" + paths.length);
+        for (int i = 0; i < urlStrings.length; i++)
+            prefsNode.setValue("index" + i, urlStrings[i]);
+
+        // Remove old end index
+        prefsNode.remove("index" + urlStrings.length);
 
         // Flush prefs
         try { prefsNode.flush(); }
@@ -118,24 +123,67 @@ public class RecentFiles extends ViewOwner {
     {
         Prefs prefsNode = getRecentFilesPrefsNode();
         prefsNode.clear();
+
+        // Flush prefs
+        try { prefsNode.flush(); }
+        catch (Exception e) { System.err.println(e.getMessage()); }
     }
 
     /**
-     * Returns the list of the recent paths as WebFiles.
+     * Adds a URL string to recent files and updates the users preferences.
      */
-    public static WebFile[] getFiles()
+    public static void addURL(WebURL aURL)
     {
-        // Get RecentPaths
-        WebURL[] urls = getURLs();
-        List<WebFile> files = new ArrayList<>();
-        for (WebURL url : urls) {
-            WebFile file = url.getFile();
-            if (file != null)
-                files.add(file);
+        String urlString = aURL.getString();
+        addUrlString(urlString);
+    }
+
+    /**
+     * Removes a URL string from recent files and updates the users preferences.
+     */
+    public static void removeURL(WebURL aURL)
+    {
+        String urlString = aURL.getString();
+        removeUrlString(urlString);
+    }
+
+    /**
+     * Returns the most recent file for given type.
+     */
+    public static WebFile getRecentFileForType(String aType)
+    {
+        // Get URL String for type
+        String[] urlStrings = getUrlStrings();
+        String recentFileUrlStr = ArrayUtils.findMatch(urlStrings, urls -> StringUtils.endsWithIC(urls, aType));
+        if (recentFileUrlStr == null)
+            return null;
+
+        // Get URL and file
+        WebURL recentFileURL = WebURL.getURL(recentFileUrlStr);
+        WebFile recentFile = recentFileURL != null ? recentFileURL.getFile() : null;
+        if (recentFile == null) {
+            removeUrlString(recentFileUrlStr);
+            return getRecentFileForType(aType);
         }
 
-        // Return as array
-        return files.toArray(new WebFile[0]);
+        // Return
+        return recentFile;
+    }
+
+    /**
+     * Returns a standard URL String for given URL string.
+     */
+    private static String getNormalizedUrlString(String urlString)
+    {
+        // If URL String is 'file:/', replace with path
+        if (urlString.startsWith("file:")) {
+            urlString = urlString.replace("file:", "");
+            if (urlString.startsWith("//"))
+                urlString = urlString.substring(1);
+        }
+
+        // Return
+        return urlString;
     }
 
     /**
@@ -157,29 +205,6 @@ public class RecentFiles extends ViewOwner {
     public static void showPathsMenu(View aView, Consumer<String> aFunc)
     {
         RecentFilesPane.showPathsMenu(aView, aFunc);
-    }
-
-    /**
-     * Returns the most recent file for given type.
-     */
-    public static WebFile getRecentFileForType(String aType)
-    {
-        String recentFileUrlStr = Prefs.getDefaultPrefs().getString("MostRecentDocument." + aType);
-        WebURL recentFileURL = recentFileUrlStr != null ? WebURL.getURL(recentFileUrlStr) : null;
-        if (recentFileURL == null)
-            return null;
-        return recentFileURL.getFile();
-    }
-
-    /**
-     * Sets the most recent file for given type.
-     */
-    public static void setRecentFileForType(String aType, WebFile recentFile)
-    {
-        WebURL recentFileURL = recentFile.getURL();
-        String recentFileUrlStr = recentFileURL.getString();
-        Prefs.getDefaultPrefs().setValue("MostRecentDocument." + aType, recentFileUrlStr);
-        Prefs.getDefaultPrefs().flush();
     }
 
     /**

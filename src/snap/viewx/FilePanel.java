@@ -204,8 +204,9 @@ public class FilePanel extends ViewOwner {
         // Get file and path of selection and save to preferences
         WebFile selFile = _filesPane.getSelOrTargFile();
 
-        // Save selected filename in preferences for its type (extension)
-        RecentFiles.setRecentFileForType(getType(), selFile);
+        // Add recent file
+        WebURL selFileURL = selFile.getURL();
+        RecentFiles.addURL(selFileURL);
 
         // If user is trying to save over an existing file, warn them
         boolean save = isSaving();

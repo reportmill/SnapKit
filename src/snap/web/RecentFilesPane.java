@@ -162,8 +162,8 @@ public class RecentFilesPane extends FilesPane {
             return;
 
         // Clear RecentFile
-        String filePath = file.getURL().getString();
-        RecentFiles.removePath(filePath);
+        WebURL fileURL = file.getURL();
+        RecentFiles.removeURL(fileURL);
 
         // Clear RecentFiles, SelFile and trigger reset
         if (getSelFile() == file)

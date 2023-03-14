@@ -389,6 +389,16 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns a mapped array for given original and Function.
+     */
+    public static <T,R> R[] mapNonNull(T[] anArray, Function<? super T, ? extends R> aFunction, Class<R> aClass)
+    {
+        Stream<R> filteredStream = Stream.of(anArray).map(aFunction);
+        Stream<R> filteredNonNull = filteredStream.filter(item -> item != null);
+        return filteredNonNull.toArray(size -> (R[]) Array.newInstance(aClass, size));
+    }
+
+    /**
      * Returns the first item in array that matches given predicate (or null).
      */
     public static <T> T findMatch(T[] anArray, Predicate<? super T> aPred)
