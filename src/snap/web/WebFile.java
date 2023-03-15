@@ -190,24 +190,36 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         // If already set, just return
         if (aValue == _verified) return;
 
-        // If false, clear ModTime, Size, Saved
-        if (!aValue) {
+        // Set value
+        _verified = aValue;
+
+        // Handle true: Reset Saved
+        if (aValue) {
+            _saved = _bytes == null;
+        }
+
+        // Handle false: clear ModTime, Size, Saved
+        else {
             _modTime = 0;
             _size = 0;
             _saved = false;
         }
 
-        // Set new value, fire prop change
-        firePropChange(Verified_Prop, _verified, _verified = aValue);
+        // Fire prop change
+        firePropChange(Verified_Prop, !_verified, _verified);
     }
 
     /**
-     * Returns the file, ensuring that it's status has been checked with the site.
+     * Returns this file, ensuring that it's status has been checked with the site.
      */
-    public WebFile getVerified()
+    public WebFile getVerifiedFile()
     {
-        if (!isVerified())
-            getSite().getFileForPath(getPath());
+        // If file hasn't been loaded from site, load from site
+        if (!isVerified()) {
+            WebSite site = getSite();
+            String filePath = getPath();
+            site.getFileForPath(filePath);
+        }
         return this;
     }
 
@@ -323,7 +335,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         WebSite site = getSite();
         FileContents fileContents = site.getContentsForFile(this);
         if (fileContents != null) {
-            _saved = true;
+            setVerified(true);
             _modTime = Math.max(_modTime, fileContents.getModTime());
             _bytes = fileContents.getBytes();
             _size = _bytes != null ? _bytes.length : 0;
@@ -369,11 +381,13 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         WebSite site = getSite();
         FileContents fileContents = site.getContentsForFile(this);
         if (fileContents != null) {
-            _saved = true;
+            setVerified(true);
             _modTime = Math.max(_modTime, fileContents.getModTime());
             WebFile[] files = fileContents.getFiles();
-            for (WebFile file : files)
+            for (WebFile file : files) {
                 file.setParent(this);
+                file.setVerified(true);
+            }
             _files = files;
         }
 
@@ -429,7 +443,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         // Reset and verify
         long modTime = getModTime();
         reset();
-        getVerified();
+        getVerifiedFile();
 
         // If file was deleted, reset parent content and trigger Saved change
         if (!isSaved()) {

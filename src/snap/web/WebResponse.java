@@ -305,11 +305,7 @@ public class WebResponse {
     {
         WebURL url = getURL();
         WebFile file = url.getFile();
-        if (file == null) {
-            WebSite site = getSite();
-            FileHeader fileHeader = getFileHeader();
-            file = site.createFile(fileHeader);
-        }
+        //if (file == null) file = getSite().createFile(getFileHeader()); // This seems wrong
 
         // Return
         return file;

@@ -37,13 +37,10 @@ public class RecentFilesSite extends WebSite {
     protected WebFile getFileForPathImpl(String filePath) throws ResponseException
     {
         // Handle RootDir
-        if (filePath.equals("/")) {
-            WebFile rootDir = createFileForPath("/", true);
-            rootDir.save();
-            return rootDir;
-        }
+        if (filePath.equals("/"))
+            return createFileForPath("/", true);
 
-        // Handle root dir file
+        // Handle any other path: Return first (any) RootDir file with matching name
         WebFile rootDir = getRootDir();
         WebFile[] rootDirFiles = rootDir.getFiles();
         WebFile rootDirFile = ArrayUtils.findMatch(rootDirFiles, file -> file.getPath().equals(filePath));
@@ -76,7 +73,6 @@ public class RecentFilesSite extends WebSite {
                 String rootDirPath = '/' + recentFile.getName();
                 WebFile rootDirFile = rootDirFiles[i] = createFileForPath(rootDirPath, false);
                 rootDirFile.setLinkFile(recentFile);
-                rootDirFile._saved = true;
             }
 
             // Return

@@ -144,14 +144,14 @@ public class DropBoxSite extends WebSite {
         // Get JSON response
         JSObject json = (JSObject) httpResp.getJSON();
         if (json == null) {
-            System.err.println("DropBox.doGetDir: null response");
+            System.err.println("DropBoxSite.doGetDir: null response");
             return;
         }
 
         // Get Entries Node, complain if not array
         JSValue entriesNode = json.getValue("entries");
         if (!(entriesNode instanceof JSArray)) {
-            System.err.println("DropBox.doGetDir: Unexpected response: " + entriesNode.getValueAsString());
+            System.err.println("DropBoxSite.doGetDir: Unexpected response: " + entriesNode.getValueAsString());
             return;
         }
 
@@ -237,7 +237,7 @@ public class DropBoxSite extends WebSite {
                 }
                 catch (Exception e) { System.err.println(e); }
             }
-            else System.err.println("DropBox.doPutFile: Can't get save mod time: " + json);
+            else System.err.println("DropBoxSite.doPutFile: Can't get save mod time: " + json);
         }
     }
 
@@ -258,7 +258,7 @@ public class DropBoxSite extends WebSite {
         // Get HTTP Response
         HTTPResponse httpResp = getResponseHTTP(httpReq, aResp);
         if (httpResp == null || httpResp.getCode() != HTTPResponse.OK) {
-            System.err.println("DropBox.createFolder: " + (httpResp != null ? httpResp.getMessage() : "null"));
+            System.err.println("DropBoxSite.createFolder: " + (httpResp != null ? httpResp.getMessage() : "null"));
             return;
         }
 

@@ -158,8 +158,13 @@ public abstract class WebSite {
         if (file != null && file.isVerified() && file.isSaved())
             return file;
 
+        // Get file
+        file = getFileForPathImpl(filePath);
+        if (file != null)
+            file.setVerified(true);
+
         // Return
-        return getFileForPathImpl(filePath);
+        return file;
     }
 
     /**
@@ -185,9 +190,9 @@ public abstract class WebSite {
 
         // Get file header from response, create file
         FileHeader fileHeader = resp.getFileHeader();
+
+        // Create file (might as well set URL)
         WebFile file = createFile(fileHeader);
-        file._verified = true;
-        file._saved = true;
         file._url = url;
 
         // Return
@@ -206,30 +211,30 @@ public abstract class WebSite {
     /**
      * Returns a new file for given file header, regardless of whether it exists on site.
      */
-    protected synchronized WebFile createFile(FileHeader fileHdr)
+    protected synchronized WebFile createFile(FileHeader fileHeader)
     {
         // Get file from cache
-        String path = PathUtils.getNormalized(fileHdr.getPath());
-        WebFile file = _files.get(path);
+        String filePath = PathUtils.getNormalized(fileHeader.getPath());
+        WebFile file = _files.get(filePath);
 
         // If not found, create and add to cache
         if (file == null) {
 
             // Create/config
             file = new WebFile();
-            file._path = path;
-            file._dir = fileHdr.isDir();
+            file._path = filePath;
+            file._dir = fileHeader.isDir();
             file._site = this;
 
             // Put in cache, start listening to file changes
-            _files.put(path, file);
+            _files.put(filePath, file);
             file.addPropChangeListener(_fileLsnr);
         }
 
         // Update properties file
-        file._modTime = fileHdr.getModTime();
-        file._size = fileHdr.getSize();
-        file.setMimeType(fileHdr.getMimeType());
+        file._modTime = fileHeader.getModTime();
+        file._size = fileHeader.getSize();
+        file.setMimeType(fileHeader.getMimeType());
 
         // Return
         return file;
@@ -268,12 +273,7 @@ public abstract class WebSite {
             return new FileContents(new WebFile[0], 0);
 
         // Get files
-        WebFile[] files = new WebFile[fileHeaders.length];
-        for (int i = 0; i < fileHeaders.length; i++) {
-            FileHeader fileHeader = fileHeaders[i];
-            WebFile file = files[i] = createFile(fileHeader);
-            file._saved = true;
-        }
+        WebFile[] files = ArrayUtils.map(fileHeaders, fhdr -> createFile(fhdr), WebFile.class);
 
         // Sort files
         Arrays.sort(files);
@@ -296,7 +296,7 @@ public abstract class WebSite {
 
         // If parent doesn't exist, save it (to make sure it exists)
         WebFile par = aFile.getParent();
-        if (par != null && !par.getVerified().isSaved())
+        if (par != null && !par.getVerifiedFile().isSaved())
             par.save();
 
         // Create web request
@@ -310,7 +310,7 @@ public abstract class WebSite {
         if (respCode == WebResponse.OK) {
             long modTime = resp.getModTime();
             if (modTime == 0)
-                System.out.println("WebSite.saveFile: Unlikely saved mod time of 0");
+                System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getURL().getString());
             aFile.setModTime(modTime);
         }
 

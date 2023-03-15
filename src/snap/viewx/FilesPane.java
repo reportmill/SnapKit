@@ -204,6 +204,7 @@ public class FilesPane extends ViewOwner {
     @Override
     protected void showingChanged()
     {
+        super.showingChanged();
         if (isShowing())
             runLater(() -> resetFilesUI());
     }
@@ -223,32 +224,34 @@ public class FilesPane extends ViewOwner {
         setSiteFilesInUI();
 
         // If no file/dir set, set from RecentPath (prefs)
-        if (getSelDir() == null)
-            resetSelFile();
+        if (getSelDir() == null) {
+            WebFile newSelFile = getDefaultSelFile();
+            setSelFile(newSelFile);
+        }
     }
 
     /**
      * Resets the selected file.
      */
-    private void resetSelFile()
+    protected WebFile getDefaultSelFile()
     {
         // Get recent URLs for types and this site
         String[] types = getTypes();
         WebURL[] recentURLs = RecentFiles.getRecentUrlsForTypes(types);
         WebURL[] recentURLsForSite = ArrayUtils.filter(recentURLs, url -> url.getSite() == getSite());
         if (recentURLsForSite.length == 0)
-            return;
+            return null;
 
         // Get recent file
-        WebURL recentURL = recentURLsForSite[0];
-        WebFile recentFile = recentURL.getFile();
-        if (recentFile == null)
-            return;
+        WebURL recentURL = recentURLsForSite.length > 0 ? recentURLsForSite[0] : null;
+        WebFile defaultSelFile = recentURL != null ? recentURL.getFile() : null;
 
-        // Set SelFile
-        WebSite recentFileSite = recentFile.getSite();
-        if (recentFileSite == getSite())
-            setSelFile(recentFile);
+        // If null, just root dir
+        if (defaultSelFile == null)
+            defaultSelFile = getSite().getRootDir();
+
+        // Return
+        return defaultSelFile;
     }
 
     /**

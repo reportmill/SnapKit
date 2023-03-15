@@ -530,7 +530,7 @@ public class FilePanel extends ViewOwner {
         if (aSite instanceof RecentFilesSite)
             return "Recent Files";
         if (aSite instanceof DropBoxSite)
-            return "DropBox Files";
+            return "Cloud Files";
         return "Files";
     }
 }
