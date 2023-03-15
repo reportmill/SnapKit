@@ -114,7 +114,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public String getName()
     {
-        return FilePathUtils.getFileName(getPath());
+        String filePath = getPath();
+        return FilePathUtils.getFileName(filePath);
     }
 
     /**
@@ -122,7 +123,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public String getSimpleName()
     {
-        return FilePathUtils.getFileNameSimple(getPath());
+        String filePath = getPath();
+        return FilePathUtils.getFileNameSimple(filePath);
     }
 
     /**
@@ -130,7 +132,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public String getType()
     {
-        return FilePathUtils.getExtension(getPath()).toLowerCase();
+        String filePath = getPath();
+        return FilePathUtils.getExtension(filePath).toLowerCase();
     }
 
     /**
@@ -138,8 +141,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public String getDirPath()
     {
-        String path = getPath();
-        return path.endsWith("/") ? path : path + '/';
+        String filePath = getPath();
+        return filePath.endsWith("/") ? filePath : filePath + '/';
     }
 
     /**

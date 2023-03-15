@@ -187,7 +187,7 @@ public class ParsedURL {
     /**
      * Returns the last component of the file path.
      */
-    public String getPathName()
+    public String getFilename()
     {
         String path = getPath();
         return FilePathUtils.getFileName(path);
@@ -196,7 +196,7 @@ public class ParsedURL {
     /**
      * Returns the last component of the file path minus any '.' extension suffix.
      */
-    public String getPathNameSimple()
+    public String getFilenameSimple()
     {
         String path = getPath();
         return FilePathUtils.getFileNameSimple(path);

@@ -5,6 +5,7 @@ import snap.view.ViewOwner;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
+import snap.web.WebURL;
 
 /**
  * This class is the base class for WebSite open/save browsers.
@@ -222,16 +223,32 @@ public class FilesPane extends ViewOwner {
         setSiteFilesInUI();
 
         // If no file/dir set, set from RecentPath (prefs)
-        WebFile selDir = getSelDir();
-        if (selDir == null) {
-            String type = getType();
-            WebFile recentFile = RecentFiles.getRecentFileForType(type);
-            if (recentFile != null) {
-                WebSite recentFileSite = recentFile.getSite();
-                if (recentFileSite == getSite())
-                    setSelFile(recentFile);
-            }
-        }
+        if (getSelDir() == null)
+            resetSelFile();
+    }
+
+    /**
+     * Resets the selected file.
+     */
+    private void resetSelFile()
+    {
+        // Get recent URLs for types and this site
+        String[] types = getTypes();
+        WebURL[] recentURLs = RecentFiles.getRecentUrlsForTypes(types);
+        WebURL[] recentURLsForSite = ArrayUtils.filter(recentURLs, url -> url.getSite() == getSite());
+        if (recentURLsForSite.length == 0)
+            return;
+
+        // Get recent file
+        WebURL recentURL = recentURLsForSite[0];
+        WebFile recentFile = recentURL.getFile();
+        if (recentFile == null)
+            return;
+
+        // Set SelFile
+        WebSite recentFileSite = recentFile.getSite();
+        if (recentFileSite == getSite())
+            setSelFile(recentFile);
     }
 
     /**

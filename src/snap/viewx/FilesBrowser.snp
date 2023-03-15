@@ -6,10 +6,9 @@
     <ComboBox name="DirComboBox" PrefWidth="250" PrefHeight="24" />
     <Button name="HomeButton" PrefWidth="24" PrefHeight="24" ToolTip="Go to Home Directory" image="Home.png" />
   </RowView>
-  <RowView GrowHeight="true" Padding="1" >
+  <BrowserView name="FileBrowser" GrowWidth="true" GrowHeight="true" PrefColCount="2">
     <Font Name="Arial" Size="13" />
-    <BrowserView name="FileBrowser" GrowWidth="true" GrowHeight="true" />
-  </RowView>
+  </BrowserView>
   <RowView Align="CENTER" Spacing="5" >
     <Font Name="Arial" Size="14" />
     <Label Text="File:" />

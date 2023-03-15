@@ -6,7 +6,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import snap.util.ArrayUtils;
 import snap.util.Prefs;
-import snap.util.StringUtils;
 import snap.view.*;
 
 /**
@@ -150,24 +149,11 @@ public class RecentFiles extends ViewOwner {
     /**
      * Returns the most recent file for given type.
      */
-    public static WebFile getRecentFileForType(String aType)
+    public static WebURL[] getRecentUrlsForTypes(String[] theTypes)
     {
         // Get URL String for type
-        String[] urlStrings = getUrlStrings();
-        String recentFileUrlStr = ArrayUtils.findMatch(urlStrings, urls -> StringUtils.endsWithIC(urls, aType));
-        if (recentFileUrlStr == null)
-            return null;
-
-        // Get URL and file
-        WebURL recentFileURL = WebURL.getURL(recentFileUrlStr);
-        WebFile recentFile = recentFileURL != null ? recentFileURL.getFile() : null;
-        if (recentFile == null) {
-            removeUrlString(recentFileUrlStr);
-            return getRecentFileForType(aType);
-        }
-
-        // Return
-        return recentFile;
+        WebURL[] recentUrls = getURLs();
+        return ArrayUtils.filter(recentUrls, url -> ArrayUtils.contains(theTypes, url.getType()));
     }
 
     /**

@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import snap.util.FilePathUtils;
 import snap.util.SnapUtils;
 import snap.util.URLUtils;
 
@@ -128,12 +129,21 @@ public class WebURL {
     /**
      * Returns the last component of the file path.
      */
-    public String getPathName()  { return _parsedUrl.getPathName(); }
+    public String getPathName()  { return _parsedUrl.getFilename(); }
 
     /**
      * Returns the last component of the file path minus any '.' extension suffix.
      */
-    public String getPathNameSimple()  { return _parsedUrl.getPathNameSimple(); }
+    public String getPathNameSimple()  { return _parsedUrl.getFilenameSimple(); }
+
+    /**
+     * Returns the file type (extension without the '.').
+     */
+    public String getType()
+    {
+        String filePath = getPath();
+        return FilePathUtils.getExtension(filePath).toLowerCase();
+    }
 
     /**
      * Returns the part of the URL string that describes the query.
