@@ -433,6 +433,17 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     }
 
     /**
+     * Returns whether file has been modified at site (outside this process).
+     */
+    public boolean isModifiedExternally()
+    {
+        WebURL url = getURL();
+        long modTime = getModTime();
+        long modTimeExternal = url.getLastModTime();
+        return modTime < modTimeExternal;
+    }
+
+    /**
      * Returns whether given file is contained in this directory.
      */
     public boolean contains(WebFile aFile)
