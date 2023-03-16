@@ -425,7 +425,7 @@ public abstract class WebSite {
      */
     protected void doPost(WebRequest aReq, WebResponse aResp)
     {
-        throw new RuntimeException("handlePost");
+        System.err.println(getClass().getSimpleName() + ".doPost: Not supported (" + aReq.getURL().getSite() + ')');
     }
 
     /**
@@ -433,7 +433,7 @@ public abstract class WebSite {
      */
     protected void doPut(WebRequest aReq, WebResponse aResp)
     {
-        throw new RuntimeException("handlePut");
+        System.err.println(getClass().getSimpleName() + ".doPut: Not supported (" + aReq.getURL().getSite() + ')');
     }
 
     /**
@@ -441,7 +441,7 @@ public abstract class WebSite {
      */
     protected void doDelete(WebRequest aReq, WebResponse aResp)
     {
-        throw new RuntimeException("handleDelete");
+        System.err.println(getClass().getSimpleName() + ".doDelete: Not supported (" + aReq.getURL().getSite() + ')');
     }
 
     /**
