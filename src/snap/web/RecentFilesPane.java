@@ -86,9 +86,12 @@ public class RecentFilesPane extends FilesPane {
     @Override
     protected void setSiteFilesInUI()
     {
-        // Get valid files
+        // Get RootDir and reset files to make sure we have latest RecentFiles
         WebSite recentFilesSite = getSite();
         WebFile rootDir = recentFilesSite.getRootDir();
+        rootDir.resetContent();
+
+        // Get valid files
         WebFile[] recentFiles = rootDir.getFiles();
         WebFile[] recentFilesValid = ArrayUtils.filter(recentFiles, file -> isValidFile(file));
         _filesTable.setItems(recentFilesValid);

@@ -78,11 +78,10 @@ public class FilesPane extends ViewOwner {
         WebFile oldSelFile = _selFile;
         WebFile oldSelDir = _selDir;
 
-        // If file is dir, do that instead
+        // If given file is dir, set SelDir
         if (aFile != null && aFile.isDir()) {
-            _selDir = aFile;
             _selFile = null;
-            _selDir.resetContent();
+            _selDir = aFile;
         }
 
         // Set file and dir
@@ -214,12 +213,6 @@ public class FilesPane extends ViewOwner {
      */
     protected void resetFilesUI()
     {
-        // Reload files
-        WebSite site = getSite();
-        WebFile rootDir = site.getRootDir();
-        rootDir.resetContent();
-        rootDir.getFiles();
-
         // Set the files in UI
         setSiteFilesInUI();
 
@@ -243,7 +236,7 @@ public class FilesPane extends ViewOwner {
             return null;
 
         // Get recent file
-        WebURL recentURL = recentURLsForSite.length > 0 ? recentURLsForSite[0] : null;
+        WebURL recentURL = recentURLsForSite[0];
         WebFile defaultSelFile = recentURL != null ? recentURL.getFile() : null;
 
         // If null, just root dir
