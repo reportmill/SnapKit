@@ -36,9 +36,6 @@ public abstract class WebSite {
     // PropChangeListener for file changes
     private PropChangeListener  _fileLsnr = pc -> fileDidPropChange(pc);
 
-    // The PropChangeSupport for site listeners
-    private PropChangeSupport  _pcs = PropChangeSupport.EMPTY;
-
     // The PropChangeSupport for site file listeners
     private PropChangeSupport  _filePCS = PropChangeSupport.EMPTY;
 
@@ -132,8 +129,8 @@ public abstract class WebSite {
      */
     public boolean getExists()
     {
-        WebFile file = getFileForPath("/");
-        return file != null && file.isSaved();
+        WebFile rootDir = getFileForPath("/");
+        return rootDir != null;
     }
 
     /**
@@ -152,10 +149,10 @@ public abstract class WebSite {
      */
     public synchronized WebFile getFileForPath(String aPath) throws ResponseException
     {
-        // Get file from cache (just return if found)
+        // Get file from cache (just return if found and previously verified)
         String filePath = PathUtils.getNormalized(aPath);
         WebFile file = _files.get(filePath);
-        if (file != null && file.isVerified() && file.isSaved())
+        if (file != null && file.isVerified())
             return file;
 
         // Get file
@@ -294,32 +291,46 @@ public abstract class WebSite {
             aFile.setUpdater(null);
         }
 
-        // If parent doesn't exist, save it (to make sure it exists)
-        WebFile par = aFile.getParent();
-        if (par != null && !par.getVerifiedFile().isSaved())
-            par.save();
+        // If parent dir doesn't exist, save it (to make sure it exists)
+        WebFile parentDir = aFile.getParent();
+        if (parentDir != null && !parentDir.getExists())
+            parentDir.save();
 
         // Create web request
         WebRequest req = new WebRequest(aFile);
         byte[] fileBytes = aFile.getBytes();
         req.setPutBytes(fileBytes);
 
-        // Get response
-        WebResponse resp = getResponse(req); // Used to be saveFileImpl()
+        // Send request and get response - Used to be saveFileImpl()
+        WebResponse resp = getResponse(req);
+
+        // Just return if failed
         int respCode = resp.getCode();
-        if (respCode == WebResponse.OK) {
-            long modTime = resp.getModTime();
-            if (modTime == 0)
-                System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getURL().getString());
-            aFile.setModTime(modTime);
+        if (respCode != WebResponse.OK)
+            return resp;
+
+        // Update ModTime
+        long modTime = resp.getModTime();
+        aFile.setModTime(modTime);
+        if (modTime == 0)
+            System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlString());
+
+        // If file had not previously existed (or known by this site to exist), reset parent contents to make sure it's there
+        boolean fileCreated = !aFile.isVerified();
+        if (fileCreated && parentDir != null)
+            parentDir.resetContent();
+
+        // Set File.Verified since save succeeded
+        aFile.setVerified(true);
+        aFile.setModified(false);
+
+        // Send Saved notification - bogus
+        if (fileCreated) {
+            PropChange filePC = new PropChange(aFile, WebFile.Saved_Prop, false, true);
+            fileDidPropChange(filePC);
         }
 
-        // If this is first save, have parent resetContent() so it will be added to parent files
-        if (par != null && !aFile.isSaved())
-            par.resetContent();
-
-        // Set File.Saved
-        aFile.setSaved(true);
+        // Return
         return resp;
     }
 
@@ -329,11 +340,11 @@ public abstract class WebSite {
     protected WebResponse deleteFile(WebFile aFile)
     {
         // If file doesn't exist, throw exception
-        if (!aFile.isSaved()) {
-            Exception e = new Exception("WebSite.deleteFile: File doesn't exist: " + aFile.getPath());
-            WebResponse r = new WebResponse(null);
-            r.setException(e);
-            throw new ResponseException(r);
+        if (!aFile.getExists()) {
+            Exception exception = new Exception("WebSite.deleteFile: File doesn't exist: " + aFile.getPath());
+            WebResponse errorResponse = new WebResponse(null);
+            errorResponse.setException(exception);
+            throw new ResponseException(errorResponse);
         }
 
         // If directory, delete child files
@@ -351,13 +362,18 @@ public abstract class WebSite {
         WebResponse resp = getResponse(req); // Used to be deleteFileImpl()
 
         // If not root, have parent resetContent() so file will be removed from parent files
-        if (!aFile.isRoot()) {
-            WebFile par = aFile.getParent();
-            par.resetContent();
-        }
+        WebFile parentDir = aFile.getParent();
+        if (parentDir != null)
+            parentDir.resetContent();
 
-        // Resets the file
+        // Reset the file
         aFile.reset();
+
+        // Send Deleted notification - bogus
+        PropChange filePC = new PropChange(aFile, WebFile.Saved_Prop, true, false);
+        fileDidPropChange(filePC);
+
+        // Return
         return resp;
     }
 
@@ -456,7 +472,8 @@ public abstract class WebSite {
      */
     public synchronized void resetFiles()
     {
-        for (WebFile file : _files.values()) file.reset();
+        for (WebFile file : _files.values())
+            file.reset();
     }
 
     /**
@@ -464,9 +481,12 @@ public abstract class WebSite {
      */
     protected File getJavaFile(WebURL aURL)
     {
+        // If URL.Source happens to be File, just return it
         Object src = aURL.getSource();
         if (src instanceof File)
             return (File) src;
+
+        // If native URL if possible and try to get file
         java.net.URL url = aURL.getJavaURL();
         return url != null ? FileUtils.getFile(url) : null;
     }
@@ -476,14 +496,20 @@ public abstract class WebSite {
      */
     public WebURL getURL(String aPath)
     {
+        // If given path is already full URL string, return URL for it
         if (aPath.indexOf(':') >= 0)
             return WebURL.getURL(aPath);
-        String path = PathUtils.getNormalized(aPath);
-        WebURL url = getURL();
-        String urls = url.getString();
-        if (url.getPath() != null)
-            urls += '!';
-        return WebURL.getURL(urls + path);
+
+        // Get file path
+        String filePath = PathUtils.getNormalized(aPath);
+        WebURL siteURL = getURL();
+        String siteUrlString = siteURL.getString();
+        if (siteURL.getPath() != null)
+            siteUrlString += '!';
+
+        // Get full URL string and return URL for it
+        String fullUrlString = siteUrlString + filePath;
+        return WebURL.getURL(fullUrlString);
     }
 
     /**
@@ -586,31 +612,9 @@ public abstract class WebSite {
     public void flush() throws Exception  { }
 
     /**
-     * Add listener.
-     */
-    public void addPropChangeListener(PropChangeListener aLsnr)
-    {
-        if (_pcs == PropChangeSupport.EMPTY) _pcs = new PropChangeSupport(this);
-        _pcs.addPropChangeListener(aLsnr);
-    }
-
-    /**
-     * Remove listener.
-     */
-    public void removePropChangeListener(PropChangeListener aLsnr)
-    {
-        _pcs.removePropChangeListener(aLsnr);
-    }
-
-    /**
      * Fires a property change for given property name, old value, new value and index.
      */
-    protected void firePropChange(String aProp, Object oldVal, Object newVal)
-    {
-        if (!_pcs.hasListener(aProp)) return;
-        PropChange pc = new PropChange(this, aProp, oldVal, newVal);
-        _pcs.firePropChange(pc);
-    }
+    protected void firePropChange(String aProp, Object oldVal, Object newVal)  { }
 
     /**
      * Adds a PropChangeListener to listen for any site file PropChange.
@@ -644,6 +648,6 @@ public abstract class WebSite {
     public String toString()
     {
         String className = getClass().getSimpleName();
-        return className + ' ' + getURLString();
+        return className + ": " + getURLString();
     }
 }

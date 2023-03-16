@@ -34,11 +34,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     // The file size
     protected long  _size;
 
-    // Whether this file has been checked to see if it exists at site
+    // Whether this file is known to exist at site
     protected boolean  _verified;
-
-    // Whether this file has been saved at site
-    protected boolean  _saved;
 
     // The file bytes
     private byte[]  _bytes;
@@ -55,6 +52,9 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     // The URL for this file
     protected WebURL  _url;
 
+    // Whether this file has been modified locally
+    protected boolean  _modified;
+
     // File updater
     private Updater  _updater;
 
@@ -68,6 +68,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public static final String Size_Prop = "Size";
     public static final String Updater_Prop = "Updater";
     public static final String Verified_Prop = "Verified";
+    public static final String Modified_Prop = "Modified";
 
     /**
      * Constructor.
@@ -94,7 +95,10 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         WebSite site = getSite();
         String filePath = getPath();
         String parentPath = FilePathUtils.getParent(filePath);
-        return _parent = site.createFileForPath(parentPath, true);
+        WebFile parentDir = site.createFileForPath(parentPath, true);
+
+        // Set/return
+        return _parent = parentDir;
     }
 
     /**
@@ -161,6 +165,15 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     }
 
     /**
+     * Returns the URL string.
+     */
+    public String getUrlString()
+    {
+        WebURL url = getURL();
+        return url.getString();
+    }
+
+    /**
      * Returns whether file is a directory.
      */
     public boolean isDir()  { return _dir; }
@@ -179,71 +192,36 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     }
 
     /**
-     * Returns whether file status has been checked at the site.
+     * Returns whether file is known to exist at site.
      */
     public boolean isVerified()  { return _verified; }
 
     /**
-     * Sets whether file status has been checked at the site.
+     * Sets whether file is known to exist at site.
      */
     protected void setVerified(boolean aValue)
     {
         // If already set, just return
         if (aValue == _verified) return;
 
-        // Set value
-        _verified = aValue;
-
-        // Handle true: Reset Saved
-        if (aValue) {
-            _saved = _bytes == null;
-        }
-
-        // Handle false: clear ModTime, Size, Saved
-        else {
-            _modTime = 0;
-            _size = 0;
-            _saved = false;
-        }
-
-        // Fire prop change
-        firePropChange(Verified_Prop, !_verified, _verified);
+        // Set value and fire prop change
+        firePropChange(Verified_Prop, _verified, _verified = aValue);
     }
 
     /**
-     * Returns this file, ensuring that it's status has been checked with the site.
+     * Returns whether file exists in site.
      */
-    public WebFile getVerifiedFile()
+    public boolean getExists()
     {
-        // If file hasn't been loaded from site, load from site
-        if (!isVerified()) {
+        // If file hasn't been verified, verify it (just fetch it)
+        if (!_verified) {
             WebSite site = getSite();
             String filePath = getPath();
             site.getFileForPath(filePath);
         }
-        return this;
-    }
 
-    /**
-     * Returns whether this file has been saved at site.
-     */
-    public boolean isSaved()  { return _saved; }
-
-    /**
-     * Sets whether this file has been saved at site.
-     */
-    protected void setSaved(boolean aValue)
-    {
-        if (aValue == _saved) return;
-        firePropChange(Saved_Prop, _saved, _saved = aValue);
-    }
-
-    /**
-     * Conventional file method that simply wraps isSaved().
-     */
-    public boolean getExists()
-    {
-        return isSaved();
+        // Return
+        return _verified;
     }
 
     /**
@@ -267,9 +245,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     {
         try {
             getSite().setModTimeSaved(this, aTime);
-        } catch (Exception e) {
-            System.err.println("WebFile.setModTimeSaved: " + e);
         }
+        catch (Exception e) { System.err.println("WebFile.setModTimeSaved: " + e); }
         setModTime(aTime);
     }
 
@@ -330,8 +307,11 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         // Set bytes and fire PropChange
         firePropChange(Bytes_Prop, _bytes, _bytes = theBytes);
 
-        // Update size
+        // Update Size
         setSize(theBytes != null ? theBytes.length : 0);
+
+        // Update Modified
+        setModified(true);
     }
 
     /**
@@ -394,6 +374,8 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     {
         resetContent();
         setVerified(false);
+        _modTime = 0;
+        _size = 0;
     }
 
     /**
@@ -404,6 +386,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         _bytes = null;
         _files = null;
         _updater = null;
+        setModified(false);
     }
 
     /**
@@ -411,30 +394,32 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public void reload()
     {
-        // Reset content (just return if not verified)
-        resetContent();
-        if (!isVerified())
+        // If file hasn't really been loaded, just reset content and return
+        if (!isVerified()) {
+            resetContent();
             return;
+        }
 
-        // Reset and verify
-        long modTime = getModTime();
+        // Cache current ModTime
+        long oldModTime = getModTime();
+
+        // Reset file
         reset();
-        getVerifiedFile();
 
-        // If file was deleted, reset parent content and trigger Saved change
-        if (!isSaved()) {
+        // If file was deleted, reset parent content and fire Saved prop change
+        boolean isDeleted = !getExists();
+        if (isDeleted) {
             WebFile parent = getParent();
             if (parent != null)
                 parent.resetContent();
-            _saved = true;
-            setSaved(false);
+            firePropChange(Saved_Prop, true, false);
         }
 
-        // If ModTime changed, trigger ModTime prop change
-        else if (modTime != 0 && isFile() && modTime != getModTime()) {
-            modTime = getModTime();
-            _modTime = 0;
-            setModTime(modTime);
+        // If File and ModTime changed, fire ModTime prop change
+        else if (isFile()) {
+            long newModTime = getModTime();
+            if (oldModTime != 0 && oldModTime != newModTime)
+                firePropChange(ModTime_Prop, 0, newModTime);
         }
     }
 
@@ -476,6 +461,20 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public void setProp(String aKey, Object aValue)  { _props.put(aKey, aValue); }
 
     /**
+     * Returns whether this file has been modified locally.
+     */
+    public boolean isModified()  { return _modified; }
+
+    /**
+     * Sets whether this file has been modified locally.
+     */
+    protected void setModified(boolean aValue)
+    {
+        if (aValue == _modified) return;
+        firePropChange(Modified_Prop, _modified, _modified = aValue);
+    }
+
+    /**
      * Returns whether update is set and has update.
      */
     public boolean isUpdateSet()  { return _updater != null; }
@@ -490,8 +489,15 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public void setUpdater(Updater anUpdater)
     {
+        // If already set, just return
         if (anUpdater == _updater) return;
+
+        // Set value and fire prop change
         firePropChange(Updater_Prop, _updater, _updater = anUpdater);
+
+        // Update modified
+        if (anUpdater != null)
+            setModified(true);
     }
 
     /**
@@ -638,6 +644,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public String toString()
     {
-        return getClass().getSimpleName() + ": " + getURL().getString() + (isDir() ? "/" : "");
+        return "WebFile: " + getUrlString() + (isDir() ? "/" : "");
     }
 }
