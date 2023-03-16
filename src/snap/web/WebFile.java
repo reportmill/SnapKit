@@ -34,7 +34,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     // The file size
     protected long  _size;
 
-    // Whether this file has been checked to see if it is saved at site
+    // Whether this file has been checked to see if it exists at site
     protected boolean  _verified;
 
     // Whether this file has been saved at site
@@ -68,7 +68,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public static final String Size_Prop = "Size";
     public static final String Updater_Prop = "Updater";
     public static final String Verified_Prop = "Verified";
-    public static final String Loaded_Prop = "Loaded";
 
     /**
      * Constructor.
@@ -92,8 +91,10 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         if (_parent != null || isRoot()) return _parent;
 
         // Get file for parent path from site
-        String path = FilePathUtils.getParent(getPath());
-        return _parent = getSite().createFileForPath(path, true);
+        WebSite site = getSite();
+        String filePath = getPath();
+        String parentPath = FilePathUtils.getParent(filePath);
+        return _parent = site.createFileForPath(parentPath, true);
     }
 
     /**
@@ -297,33 +298,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     }
 
     /**
-     * Returns whether bytes/files have been set for this file/dir.
-     */
-    public boolean isLoaded()
-    {
-        return _dir ? (_files != null) : (_bytes != null);
-    }
-
-    /**
-     * Sets whether bytes/files have been set for this file/dir.
-     */
-    protected void setLoaded(boolean aValue)
-    {
-        // If already set, just return
-        if (aValue == isLoaded()) return;
-
-        // If clearing, clear info
-        if (!aValue) {
-            _files = null;
-            _bytes = null;
-            _updater = null;
-        }
-
-        // Set value and fire prop change
-        firePropChange(Loaded_Prop, !aValue, aValue);
-    }
-
-    /**
      * Returns the file bytes.
      */
     public synchronized byte[] getBytes()
@@ -427,7 +401,9 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      */
     public void resetContent()
     {
-        setLoaded(false);
+        _bytes = null;
+        _files = null;
+        _updater = null;
     }
 
     /**
@@ -447,7 +423,9 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
 
         // If file was deleted, reset parent content and trigger Saved change
         if (!isSaved()) {
-            getParent().resetContent();
+            WebFile parent = getParent();
+            if (parent != null)
+                parent.resetContent();
             _saved = true;
             setSaved(false);
         }
