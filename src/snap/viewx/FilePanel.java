@@ -280,13 +280,20 @@ public class FilePanel extends ViewOwner {
     @Override
     protected void initUI()
     {
-        // Add tabs for sites to SitesTabBar
+        // Get file sites
         WebSite[] sites = getSites();
-        Tab.Builder tabBuilder = new Tab.Builder(_sitesTabBar);
-        for (WebSite site : sites) {
-            String siteName = getNameForSite(site);
-            tabBuilder.title(siteName).add();
+
+        // If more than one, add tabs for sites to SitesTabBar
+        if (sites.length > 1) {
+            Tab.Builder tabBuilder = new Tab.Builder(_sitesTabBar);
+            for (WebSite site : sites) {
+                String siteName = getNameForSite(site);
+                tabBuilder.title(siteName).add();
+            }
         }
+
+        // Otherwise, just hide SitesTabBar
+        else _sitesTabBar.setVisible(false);
 
         // Set FilesPane for SelSite
         WebSite selSite = getSelSite();
