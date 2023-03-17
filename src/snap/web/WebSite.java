@@ -316,17 +316,17 @@ public abstract class WebSite {
             System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlString());
 
         // If file had not previously existed (or known by this site to exist), reset parent contents to make sure it's there
-        boolean fileCreated = !aFile.isVerified();
-        if (fileCreated && parentDir != null)
+        boolean fileCreatedExternally = !aFile.isVerified();
+        if (fileCreatedExternally && parentDir != null)
             parentDir.resetContent();
 
         // Set File.Verified since save succeeded
         aFile.setVerified(true);
         aFile.setModified(false);
 
-        // Send Saved notification - bogus
-        if (fileCreated) {
-            PropChange filePC = new PropChange(aFile, WebFile.Saved_Prop, false, true);
+        // If file created, fire Exists prop change
+        if (fileCreatedExternally) {
+            PropChange filePC = new PropChange(aFile, WebFile.Exists_Prop, false, true);
             fileDidPropChange(filePC);
         }
 
@@ -369,8 +369,8 @@ public abstract class WebSite {
         // Reset the file
         aFile.reset();
 
-        // Send Deleted notification - bogus
-        PropChange filePC = new PropChange(aFile, WebFile.Saved_Prop, true, false);
+        // Fire Exists prop change
+        PropChange filePC = new PropChange(aFile, WebFile.Exists_Prop, true, false);
         fileDidPropChange(filePC);
 
         // Return

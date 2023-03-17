@@ -63,12 +63,14 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
 
     // Constants for properties
     public static final String Bytes_Prop = "Bytes";
-    public static final String ModTime_Prop = "ModTime";
-    public static final String Saved_Prop = "Saved";
     public static final String Size_Prop = "Size";
+    public static final String ModTime_Prop = "ModTime";
+    public static final String Modified_Prop = "Modified";
     public static final String Updater_Prop = "Updater";
     public static final String Verified_Prop = "Verified";
-    public static final String Modified_Prop = "Modified";
+
+    // This is really a virtual property
+    public static final String Exists_Prop = "Exists";
 
     /**
      * Constructor.
@@ -412,14 +414,14 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
             WebFile parent = getParent();
             if (parent != null)
                 parent.resetContent();
-            firePropChange(Saved_Prop, true, false);
+            firePropChange(Exists_Prop, true, false);
         }
 
         // If File and ModTime changed, fire ModTime prop change
         else if (isFile()) {
             long newModTime = getModTime();
             if (oldModTime != 0 && oldModTime != newModTime)
-                firePropChange(ModTime_Prop, 0, newModTime);
+                firePropChange(ModTime_Prop, oldModTime, newModTime);
         }
     }
 
