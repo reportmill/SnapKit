@@ -17,7 +17,7 @@ public class ImageView extends View {
     protected Image  _image;
 
     // The image name, if loaded from local resource
-    private String  _iname;
+    private String  _imageName;
     
     // Whether to resize image to fill view width
     private boolean  _fillWidth;
@@ -41,29 +41,44 @@ public class ImageView extends View {
     public static final String FillHeight_Prop = "FillHeight";
     public static final String KeepAspect_Prop = "KeepAspect";
     public static final String AllowBleed_Prop = "AllowBleed";
-    
-    /**
-     * Creates a new ImageNode.
-     */
-    public ImageView()  { }
+    public static final String Frame_Prop = "Frame";
 
     /**
-     * Creates a new ImageNode with Image.
+     * Constructor.
      */
-    public ImageView(Image anImage)  { setImage(anImage); }
+    public ImageView()
+    {
+        super();
+    }
 
     /**
-     * Creates a new ImageNode with Image and FillWidth/FillHeight params.
+     * Constructor with given Image.
+     */
+    public ImageView(Image anImage)
+    {
+        super();
+        setImage(anImage);
+    }
+
+    /**
+     * Constructor with given Image and FillWidth/FillHeight params.
      */
     public ImageView(Image anImage, boolean isFillWidth, boolean isFillHeight)
     {
-        setImage(anImage); setFillWidth(isFillWidth); setFillHeight(isFillHeight);
+        super();
+        setImage(anImage);
+        setFillWidth(isFillWidth);
+        setFillHeight(isFillHeight);
     }
 
     /**
      * Creates a new ImageNode for given URL.
      */
-    public ImageView(Object aSource)  { _image = Image.get(aSource); }
+    public ImageView(Object aSource)
+    {
+        super();
+        _image = Image.get(aSource);
+    }
 
     /**
      * Returns the image.
@@ -75,29 +90,35 @@ public class ImageView extends View {
      */
     public void setImage(Image anImage)
     {
+        if (anImage == _image) return;
         firePropChange(Image_Prop, _image, _image = anImage);
-        relayoutParent(); repaint();
+        relayoutParent();
+        repaint();
 
         // If image not done loading - listen for load
-        if (_image!=null && !_image.isLoaded())
+        if (_image != null && !_image.isLoaded())
             _image.addLoadListener(() -> imageFinishedLoading());
     }
 
     /** Called when image finishes loading. */
-    void imageFinishedLoading()  { relayoutParent(); repaint(); }
+    private void imageFinishedLoading()
+    {
+        relayoutParent();
+        repaint();
+    }
 
     /**
      * Returns the image name, if loaded from local resource.
      */
-    public String getImageName()  { return _iname; }
+    public String getImageName()  { return _imageName; }
 
     /**
      * Sets the image name, if loaded from local resource.
      */
     public void setImageName(String aName)
     {
-        if (SnapUtils.equals(aName, _iname)) return;
-        firePropChange(ImageName_Prop, _iname, _iname = aName);
+        if (SnapUtils.equals(aName, _imageName)) return;
+        firePropChange(ImageName_Prop, _imageName, _imageName = aName);
     }
 
     /**
@@ -110,7 +131,7 @@ public class ImageView extends View {
      */
     public void setFillWidth(boolean aValue)
     {
-        if (aValue==_fillWidth) return;
+        if (aValue == _fillWidth) return;
         firePropChange(FillWidth_Prop, _fillWidth, _fillWidth = aValue);
         repaint();
     }
@@ -125,7 +146,7 @@ public class ImageView extends View {
      */
     public void setFillHeight(boolean aValue)
     {
-        if (aValue==_fillHeight) return;
+        if (aValue == _fillHeight) return;
         firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
         repaint();
     }
@@ -140,7 +161,7 @@ public class ImageView extends View {
      */
     public void setKeepAspect(boolean aValue)
     {
-        if (aValue==_keepAspect) return;
+        if (aValue == _keepAspect) return;
         firePropChange(KeepAspect_Prop, _keepAspect, _keepAspect = aValue);
         repaint();
     }
@@ -155,7 +176,7 @@ public class ImageView extends View {
      */
     public void setAllowBleed(boolean aValue)
     {
-        if (aValue==_allowBleed) return;
+        if (aValue == _allowBleed) return;
         firePropChange(AllowBleed_Prop, _allowBleed, _allowBleed = aValue);
         repaint();
         System.err.println("ImageView.setAllowBleed: Not implemented");
@@ -171,9 +192,21 @@ public class ImageView extends View {
      */
     public void setFrame(int anIndex)
     {
-        _frame = anIndex%getFrameCount();
-        ImageSet iset = _image!=null ? _image.getImageSet() : null; if (iset==null) return;
-        setImage(iset.getImage(_frame));
+        // If already set, just return
+        int frame = anIndex % getFrameCount();
+        if (frame == _frame) return;
+
+        // Set value
+        _frame = frame;
+
+        // Get ImageSet
+        ImageSet imageSet = _image != null ? _image.getImageSet() : null;
+        if (imageSet == null)
+            return;
+
+        // Get image for frame and set
+        Image frameImage = imageSet.getImage(_frame);
+        setImage(frameImage);
     }
 
     /**
@@ -186,8 +219,10 @@ public class ImageView extends View {
      */
     public int getFrameCount()
     {
-        ImageSet iset = _image!=null ? _image.getImageSet() : null; if (iset==null) return 1;
-        return iset.getCount();
+        ImageSet imageSet = _image != null ? _image.getImageSet() : null;
+        if (imageSet == null)
+            return 1;
+        return imageSet.getCount();
     }
 
     /**
@@ -195,40 +230,50 @@ public class ImageView extends View {
      */
     public Rect getImageBounds()
     {
+        // If no image, return null
+        if (_image == null) return null;
+
         // Get insets, View width/height, available with/height, image width/height
-        Insets ins = getInsetsAll(); if (_image==null) return null;
-        double iw = _image.getWidth();
-        double ih = _image.getHeight();
+        Insets ins = getInsetsAll();
+        double imageW = _image.getWidth();
+        double imageH = _image.getHeight();
 
         // Get inset bounds
-        Rect bnds = new Rect(ins.left, ins.top, getWidth() - ins.left - ins.right, getHeight() - ins.top - ins.bottom);
+        double areaW = getWidth() - ins.getWidth();
+        double areaH = getHeight() - ins.getHeight();
+        Rect areaBounds = new Rect(ins.left, ins.top, areaW, areaH);
 
         // Return image bounds
-        Rect ibounds = getImageBounds(iw, ih, bnds, getAlign(), isFillWidth(), isFillHeight(), isKeepAspect());
-        return ibounds;
+        Pos align = getAlign();
+        boolean fillW = isFillWidth();
+        boolean fillH = isFillHeight();
+        boolean keepAspect = isKeepAspect();
+        return getImageBounds(imageW, imageH, areaBounds, align, fillW, fillH, keepAspect);
     }
 
     /**
      * Returns the image bounds in a given rect.
      */
-    public static Rect getImageBounds(double aW, double aH, Rect aBnds, Pos anAlign,
+    public static Rect getImageBounds(double imageW, double imageH, Rect areaBounds, Pos anAlign,
         boolean fillWidth, boolean fillHeight, boolean keepAspect)
     {
         // Get w/h based on FillWidth, FillHeight, KeepAspect, image size and available size
-        double w = fillWidth || aW>aBnds.width ? aBnds.width : aW;
-        double h = fillHeight || aH>aBnds.height ? aBnds.height : aH;
+        double paintW = fillWidth || imageW > areaBounds.width ? areaBounds.width : imageW;
+        double paintH = fillHeight || imageH > areaBounds.height ? areaBounds.height : imageH;
 
         // If KeepAspect and either axis needs resize, find axis with least scale and ajust other to match
-        if (keepAspect && (w!=aW || h!=aH)) {
-            double sx = w/aW, sy = h/aH;
-            if (sx<=sy) h = aH*sx;
-            else w = aW*sy;
+        if (keepAspect && (paintW != imageW || paintH != imageH)) {
+            double scaleX = paintW / imageW;
+            double scaleY = paintH / imageH;
+            if (scaleX <= scaleY)
+                paintH = imageH * scaleX;
+            else paintW = imageW * scaleY;
         }
 
         // Calculate x/y based on w/h, avaiable size and alignment
-        double x = aBnds.x + Math.round(ViewUtils.getAlignX(anAlign)*(aBnds.width-w));
-        double y = aBnds.y + Math.round(ViewUtils.getAlignY(anAlign)*(aBnds.height-h));
-        return new Rect(x, y, w, h);
+        double paintX = areaBounds.x + Math.round(ViewUtils.getAlignX(anAlign) * (areaBounds.width - paintW));
+        double paintY = areaBounds.y + Math.round(ViewUtils.getAlignY(anAlign) * (areaBounds.height - paintH));
+        return new Rect(paintX, paintY, paintW, paintH);
     }
 
     /**
@@ -242,16 +287,18 @@ public class ImageView extends View {
     protected double getPrefWidthImpl(double aH)
     {
         // Get insets and given height minus insets (just return insets width if no image)
-        Insets ins = getInsetsAll(); if (_image==null) return ins.left + ins.right;
-        double h = aH>0 ? aH - ins.top - ins.bottom : aH;
+        Insets ins = getInsetsAll();
+        if (_image == null)
+            return ins.getWidth();
+        double imageH = aH > 0 ? aH - ins.getHeight() : aH;
 
         // PrefWidth is image width. If height is provided, adjust pref width by aspect
-        double pw = _image.getWidth();
-        if (h>0 && !MathUtils.equals(h, _image.getHeight()))
-            pw = h*getAspect();
+        double prefW = _image.getWidth();
+        if (imageH > 0 && !MathUtils.equals(imageH, _image.getHeight()))
+            prefW = imageH * getAspect();
 
         // Return PrefWidth plus insets width
-        return ins.left + pw + ins.right;
+        return prefW + ins.getWidth();
     }
 
     /**
@@ -260,20 +307,29 @@ public class ImageView extends View {
     protected double getPrefHeightImpl(double aW)
     {
         // Get insets and given width minus insets (just return insets height if no image)
-        Insets ins = getInsetsAll(); if (_image==null) return ins.top + ins.bottom;
-        double w = aW>=0 ? aW - ins.left - ins.right : aW;
+        Insets ins = getInsetsAll();
+        if (_image == null)
+            return ins.getHeight();
+        double imageW = aW >= 0 ? aW - ins.left - ins.right : aW;
 
         // PrefHeight is image height. If width is provided, adjust pref height by aspect
-        double ph = _image.getHeight();
-        if (w>0 && !MathUtils.equals(w, _image.getWidth()))
-            ph = w/getAspect();
+        double prefH = _image.getHeight();
+        if (imageW > 0 && !MathUtils.equals(imageW, _image.getWidth()))
+            prefH = imageW / getAspect();
 
         // Return PrefHeight plus insets height
-        return ins.top + ph + ins.bottom;
+        return prefH + ins.getHeight();
     }
 
-    /** Returns the ratio of the width/height. */
-    protected double getAspect()  { return _image.getWidth()/_image.getHeight(); }
+    /**
+     * Returns the ratio of the width/height.
+     */
+    protected double getAspect()
+    {
+        double imageW = _image.getWidth();
+        double imageH = _image.getHeight();
+        return imageW / imageH;
+    }
 
     /**
      * Paints node.
@@ -282,25 +338,31 @@ public class ImageView extends View {
     {
         // Get image (just return if not set or not loaded)
         Image image = getImage();
-        if (image==null || !image.isLoaded())
+        if (image == null || !image.isLoaded())
             return;
 
         // Get whether to clip to bounds, and if so, do clip
         boolean clipToBounds = isFillWidth() && !isFillHeight();
-        if (clipToBounds) { aPntr.save(); aPntr.clip(getBoundsLocal().getInsetRect(getInsetsAll())); }
+        if (clipToBounds) {
+            aPntr.save();
+            Rect clipRect = getBoundsLocal().getInsetRect(getInsetsAll());
+            aPntr.clip(clipRect);
+        }
 
         // Calcuate text x/y based on insets, font and alignment
-        Rect ibnds = getImageBounds(); if (ibnds==null) return;
-        double iw = _image.getWidth();
-        double ih = _image.getHeight();
+        Rect paintBounds = getImageBounds();
+        if (paintBounds == null)
+            return;
+        double imageW = _image.getWidth();
+        double imageH = _image.getHeight();
 
         // If drawing at natural size and simple transform, get nearest-neighbor rendering (faster and better for hidpi)
-        boolean noResize = ibnds.width==iw && ibnds.height==ih && aPntr.getTransform().isSimple();
+        boolean noResize = paintBounds.width == imageW && paintBounds.height == imageH && aPntr.getTransform().isSimple();
         if (noResize)
             aPntr.setImageQuality(0);
 
         // Draw image
-        aPntr.drawImage(_image, ibnds.x, ibnds.y, ibnds.width, ibnds.height);
+        aPntr.drawImage(_image, paintBounds.x, paintBounds.y, paintBounds.width, paintBounds.height);
 
         // Restore rendering mode
         if (noResize)
@@ -316,8 +378,24 @@ public class ImageView extends View {
      */
     public Object getPropValue(String aPropName)
     {
-        if (aPropName.equals("Frame")) return getFrame();
-        return super.getPropValue(aPropName);
+        switch (aPropName) {
+
+            // Image, ImageName
+            case Image_Prop: return getImage();
+            case ImageName_Prop: return getImageName();
+
+            // FillWidth, FillHeight, KeepAspect, AllowBleed
+            case FillWidth_Prop: return isFillWidth();
+            case FillHeight_Prop: return isFillHeight();
+            case KeepAspect_Prop: return isKeepAspect();
+            case AllowBleed_Prop: return isAllowBleed();
+
+            // Frame
+            case Frame_Prop: return getFrame();
+
+            // Do normal version
+            default: return super.getPropValue(aPropName);
+        }
     }
 
     /**
@@ -325,9 +403,24 @@ public class ImageView extends View {
      */
     public void setPropValue(String aPropName, Object aValue)
     {
-        if (aPropName.equals("Frame"))
-            setFrame(SnapUtils.intValue(aValue));
-        else super.setPropValue(aPropName, aValue);
+        switch (aPropName) {
+
+            // Image, ImageName
+            case Image_Prop: setImage((Image) aValue); break;
+            case ImageName_Prop: setImageName(Convert.stringValue(aValue)); break;
+
+            // FillWidth, FillHeight, KeepAspect, AllowBleed
+            case FillWidth_Prop: setFillWidth(Convert.boolValue(aValue)); break;
+            case FillHeight_Prop: setFillHeight(Convert.boolValue(aValue)); break;
+            case KeepAspect_Prop: setKeepAspect(Convert.boolValue(aValue)); break;
+            case AllowBleed_Prop: setAllowBleed(Convert.boolValue(aValue)); break;
+
+            // Frame
+            case Frame_Prop: setFrame(Convert.intValue(aValue)); break;
+
+            // Do normal version
+            default: super.setPropValue(aPropName, aValue); break;
+        }
     }
 
     /**
@@ -340,16 +433,16 @@ public class ImageView extends View {
 
         // Get image and image name
         Image image = getImage();
-        String iname = getImageName();
+        String imageName = getImageName();
 
         // If image name available, just archive it
-        if (iname!=null)
-            e.add(ImageName_Prop, iname);
+        if (imageName != null)
+            e.add(ImageName_Prop, imageName);
 
         // Otherwise if image available, archive image bytes as archiver resource
-        else if (image!=null) {
-            String rname = anArchiver.addResource(image.getBytes(), "" + System.identityHashCode(this));
-            e.add("resource", rname);
+        else if (image != null) {
+            String resourceName = anArchiver.addResource(image.getBytes(), "" + System.identityHashCode(this));
+            e.add("resource", resourceName);
         }
 
         // Archive FillWidth, FillHeight, KeepAspect
@@ -370,19 +463,19 @@ public class ImageView extends View {
         super.fromXML(anArchiver, anElement);
 
         // Unarchive ImageName
-        String iname = anElement.getAttributeValue(ImageName_Prop);
-        if (iname==null) iname = anElement.getAttributeValue("image");
-        if (iname!=null) {
-            setImageName(iname);
-            Image image = ViewArchiver.getImage(anArchiver, iname);
-            if (image!=null)
+        String imageName = anElement.getAttributeValue(ImageName_Prop);
+        if (imageName == null) imageName = anElement.getAttributeValue("image");
+        if (imageName != null) {
+            setImageName(imageName);
+            Image image = ViewArchiver.getImage(anArchiver, imageName);
+            if (image != null)
                 setImage(image);
         }
 
         // Unarchive image resource: get resource bytes, page and set ImageData
-        String rname = anElement.getAttributeValue("resource");
-        byte bytes[] = rname!=null ? anArchiver.getResource(rname) : null; // Get resource bytes
-        if (rname!=null)
+        String resourceName = anElement.getAttributeValue("resource");
+        byte[] bytes = resourceName != null ? anArchiver.getResource(resourceName) : null; // Get resource bytes
+        if (resourceName != null)
             setImage(Image.get(bytes));
 
         // Unarchive FillWidth, FillHeight, KeepAspect

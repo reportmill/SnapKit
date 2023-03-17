@@ -3085,7 +3085,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (isPrefHeightSet())
             e.add(PrefHeight_Prop, getPrefHeight());
 
-        // Archive Rotate, ScaleX, ScaleY
+        // Archive TransX, TransY, Rotate, ScaleX, ScaleY
+        if (getTransX() != 0)
+            e.add(TransX_Prop, getTransX());
+        if (getTransY() != 0)
+            e.add(TransY_Prop, getTransY());
         if (getRotate() != 0)
             e.add(Rotate_Prop, getRotate());
         if (getScaleX() != 1)
@@ -3203,9 +3207,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (anElement.hasAttribute(PrefHeight_Prop))
             setPrefHeight(anElement.getAttributeFloatValue(PrefHeight_Prop));
 
-        // Unarchive Roll, ScaleX, ScaleY
-        if (anElement.hasAttribute("roll"))
-            setRotate(anElement.getAttributeFloatValue("roll"));
+        // Unarchive TransX, TransY, Rotate, ScaleX, ScaleY
+        if (anElement.hasAttribute(TransX_Prop))
+            setTransX(anElement.getAttributeFloatValue(TransX_Prop));
+        if (anElement.hasAttribute(TransY_Prop))
+            setTransY(anElement.getAttributeFloatValue(TransY_Prop));
         if (anElement.hasAttribute(Rotate_Prop))
             setRotate(anElement.getAttributeFloatValue(Rotate_Prop));
         if (anElement.hasAttribute(ScaleX_Prop))
