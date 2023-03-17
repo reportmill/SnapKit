@@ -446,7 +446,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     /**
      * Returns whether given file is contained in this directory.
      */
-    public boolean contains(WebFile aFile)
+    public boolean containsFile(WebFile aFile)
     {
         return isDir() && getSite() == aFile.getSite() && aFile.getPath().startsWith(getDirPath());
     }
