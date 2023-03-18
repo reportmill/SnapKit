@@ -87,6 +87,7 @@ public class ParsedURL {
             _path = str.substring(pathIndex);
             str = str.substring(0, pathIndex);
         }
+        else _path = "/";
 
         // Set SiteURL string
         _siteUrl = _scheme + "://" + str;

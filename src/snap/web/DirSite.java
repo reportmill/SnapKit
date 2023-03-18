@@ -2,12 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
-
+import snap.util.ArrayUtils;
 import snap.util.FilePathUtils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A data source implementation that draws from a directory WebFile.
@@ -15,14 +13,17 @@ import java.util.List;
 public class DirSite extends WebSite {
 
     // The directory WebFile
-    WebFile _dir;
+    private WebFile  _dir;
 
     /**
-     * Returns the directory.
+     * Returns the directory file this site represents.
      */
     public WebFile getDir()
     {
-        return getURL().getFile();
+        if (_dir != null) return _dir;
+        WebURL siteURL = getURL();
+        WebFile dir = siteURL.getFile();
+        return _dir = dir;
     }
 
     /**
@@ -31,12 +32,11 @@ public class DirSite extends WebSite {
     protected void doGetOrHead(WebRequest aReq, WebResponse aResp, boolean isHead)
     {
         // Get URL and path
-        WebURL url = aReq.getURL();
-        String path = url.getPath();
-        if (path == null) path = "/";
+        WebURL fileURL = aReq.getURL();
+        String filePath = fileURL.getPath();
 
         // Get WebFile from Dir site
-        WebFile dirFile = getDirFile(path);
+        WebFile dirFile = getDirFileForPath(filePath);
 
         // If not found, set Response.Code to NOT_FOUND and return
         if (dirFile == null) {
@@ -56,23 +56,15 @@ public class DirSite extends WebSite {
 
         // If file, get/set file bytes
         if (dirFile.isFile()) {
-            byte bytes[] = dirFile.getBytes();
+            byte[] bytes = dirFile.getBytes();
             aResp.setBytes(bytes);
+            return;
         }
 
         // Otherwise, get/set dir FileHeaders
-        else {
-            WebFile[] dirFiles = dirFile.getFiles();
-            List<FileHeader> fhdrs = new ArrayList(dirFiles.length);
-            for (WebFile df : dirFiles) {
-                String hpath = FilePathUtils.getChild(path, df.getName());
-                FileHeader fhdr = new FileHeader(hpath, df.isDir());
-                fhdr.setModTime(df.getModTime());
-                fhdr.setSize(df.getSize());
-                fhdrs.add(fhdr);
-            }
-            aResp.setFileHeaders(fhdrs);
-        }
+        WebFile[] dirFiles = dirFile.getFiles();
+        FileHeader[] fileHeaders = ArrayUtils.map(dirFiles, file -> createFileHeaderForFile(filePath, file), FileHeader.class);
+        aResp.setFileHeaders(fileHeaders);
     }
 
     /**
@@ -89,16 +81,20 @@ public class DirSite extends WebSite {
     protected void doPut(WebRequest aReq, WebResponse aResp)
     {
         // Get file we're trying to save
-        String path = aReq.getURL().getPath();
-        WebFile file = getFileForPath(path);
+        WebURL fileURL = aReq.getURL();
+        String filePath = fileURL.getPath();
+        WebFile localFile = getFileForPath(filePath);
 
         // Get remote file
-        WebFile dfile = createDirFile(file.getPath(), file.isDir());
-        if (file.isFile()) dfile.setBytes(file.getBytes());
-        dfile.save();
+        WebFile dirFile = createDirFileForPath(localFile.getPath(), localFile.isDir());
+        if (dirFile == null)
+            return;
+        if (localFile.isFile())
+            dirFile.setBytes(localFile.getBytes());
+        dirFile.save();
 
         // Update response
-        aResp.setModTime(dfile.getModTime());
+        aResp.setModTime(dirFile.getModTime());
     }
 
     /**
@@ -107,12 +103,13 @@ public class DirSite extends WebSite {
     protected void doDelete(WebRequest aReq, WebResponse aResp)
     {
         // Get file we're trying to save
-        String path = aReq.getURL().getPath();
-        //WebFile file = getFile(path);
+        WebURL fileURL = aReq.getURL();
+        String filePath = fileURL.getPath();
 
         // Do Delete
-        WebFile dfile = getDirFile(path);
-        if (dfile != null) dfile.delete();
+        WebFile dirFile = getDirFileForPath(filePath);
+        if (dirFile != null)
+            dirFile.delete();
 
         // Update response
         System.out.println("DirSite.doDelete: Probably need to do something more here");
@@ -123,31 +120,51 @@ public class DirSite extends WebSite {
      */
     protected File getJavaFile(WebURL aURL)
     {
-        WebFile dfile = getDirFile(aURL.getPath());
-        return dfile != null ? dfile.getJavaFile() : null;
+        String filePath = aURL.getPath();
+        WebFile dirFile = getDirFileForPath(filePath);
+        return dirFile != null ? dirFile.getJavaFile() : null;
     }
 
     /**
-     * Returns the directory file for a path.
+     * Returns a new FileHeader for given file.
      */
-    protected WebFile getDirFile(String aPath)
+    private FileHeader createFileHeaderForFile(String parentFilePath, WebFile aFile)
     {
-        WebFile dir = getDir();
-        if (dir == null || !dir.isDir()) return null;
-        WebSite ds = dir.getSite();
-        String path = dir.getPath() + aPath;
-        return ds.getFileForPath(path);
+        FileHeader fileHeader = new FileHeader(aFile);
+        String filePath = FilePathUtils.getChild(parentFilePath, aFile.getName());
+        fileHeader.setPath(filePath);
+        return fileHeader;
     }
 
     /**
-     * Returns the directory file for a path.
+     * Returns the foreign file for a path from foreign site.
      */
-    protected WebFile createDirFile(String aPath, boolean isDir)
+    private WebFile getDirFileForPath(String aPath)
     {
+        // Get dir file
         WebFile dir = getDir();
-        if (dir == null || !dir.isDir()) return null;
-        WebSite ds = dir.getSite();
-        String path = dir.getPath() + aPath;
-        return ds.createFileForPath(path, isDir);
+        if (dir == null || !dir.isDir())
+            return null;
+
+        // Get file path for dir file and fetch
+        WebSite dirSite = dir.getSite();
+        String dirFilePath = dir.getPath() + aPath;
+        return dirSite.getFileForPath(dirFilePath);
+    }
+
+    /**
+     * Returns a new foreign file for a path from foreign site.
+     */
+    private WebFile createDirFileForPath(String aPath, boolean isDir)
+    {
+        // Get dir file
+        WebFile dir = getDir();
+        if (dir == null || !dir.isDir())
+            return null;
+
+        // Get file path for dir file and create
+        WebSite dirSite = dir.getSite();
+        String dirFilePath = dir.getPath() + aPath;
+        return dirSite.createFileForPath(dirFilePath, isDir);
     }
 }
