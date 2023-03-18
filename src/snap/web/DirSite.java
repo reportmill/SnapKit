@@ -16,6 +16,14 @@ public class DirSite extends WebSite {
     private WebFile  _dir;
 
     /**
+     * Constructor.
+     */
+    public DirSite()
+    {
+        super();
+    }
+
+    /**
      * Returns the directory file this site represents.
      */
     public WebFile getDir()

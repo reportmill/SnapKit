@@ -40,6 +40,14 @@ public abstract class WebSite {
     private PropChangeSupport  _filePCS = PropChangeSupport.EMPTY;
 
     /**
+     * Constructor.
+     */
+    public WebSite()
+    {
+        super();
+    }
+
+    /**
      * Returns the URL.
      */
     public WebURL getURL()  { return _url; }
