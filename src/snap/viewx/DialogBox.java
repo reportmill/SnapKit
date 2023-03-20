@@ -376,14 +376,16 @@ public class DialogBox extends FormBuilder {
         setType(Type.Input);
 
         // Add Message Text
-        if (getMessage() != null) {
-            TextArea msgText = _builder.addTextArea(getMessage());
-            msgText.setGrowWidth(true);
+        String message = getMessage();
+        if (message != null) {
+            TextArea msgTextArea = _builder.addTextArea(message);
+            msgTextArea.setGrowWidth(true);
         }
 
-        // Add content
-        if (getContent() != null)
-            _builder.addView(getContent());
+        // Add content view
+        View content = getContent();
+        if (content != null)
+            _builder.addView(content);
 
         // Add InputText
         TextField textField = _builder.addTextField("InputText", aDefault);

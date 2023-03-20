@@ -25,6 +25,14 @@ public class WebPage extends ViewOwner {
     private WebBrowser  _browser;
 
     /**
+     * Constructor.
+     */
+    public WebPage()
+    {
+        super();
+    }
+
+    /**
      * Returns the WebBrowser for this WebPage.
      */
     public WebBrowser getBrowser()  { return _browser; }
@@ -42,7 +50,8 @@ public class WebPage extends ViewOwner {
      */
     public WebURL getURL()
     {
-        return _url != null ? _url : (_url = getURLImpl());
+        if (_url != null) return _url;
+        return _url = getURLImpl();
     }
 
     /**
@@ -59,8 +68,9 @@ public class WebPage extends ViewOwner {
             return _response.getURL();
 
         // If subclass of WebPage, use Class file URL
-        if (getClass() != WebPage.class)
-            return WebURL.getURL(getClass());
+        Class<? extends WebPage> pageClass = getClass();
+        if (pageClass != WebPage.class)
+            return WebURL.getURL(pageClass);
 
         // Return null
         System.err.println("WebPage.getURL: No page URL");
@@ -73,7 +83,8 @@ public class WebPage extends ViewOwner {
     public void setURL(WebURL aURL)
     {
         // If already set, just return
-        if (SnapUtils.equals(aURL, _url)) return;
+        if (SnapUtils.equals(aURL, _url))
+            return;
 
         // Set URL and Response
         _url = aURL;
@@ -93,8 +104,10 @@ public class WebPage extends ViewOwner {
 
         // Get file from URL
         WebURL url = getURL();
-        if (url == null) return null;
-        return _file = url.getFile();
+        WebFile file = url != null ? url.getFile() : null;
+
+        // Set/return
+        return _file = file;
     }
 
     /**
@@ -103,9 +116,6 @@ public class WebPage extends ViewOwner {
     public void setFile(WebFile aFile)
     {
         _file = aFile;
-        //WebURL url = aFile.getURL(); WebRequest req = new WebRequest(url);
-        //WebResponse resp = new WebResponse(); resp.setRequest(req); resp.setCode(WebResponse.OK);
-        //setResponse(resp);
     }
 
     /**
@@ -117,10 +127,13 @@ public class WebPage extends ViewOwner {
 
         // Create response from URL
         WebURL url = getURL();
-        if (url == null) return null;
+        if (url == null)
+            return null;
         WebRequest req = new WebRequest(url);
         WebResponse resp = new WebResponse(req);
         resp.setCode(WebResponse.OK);
+
+        // Set/return
         return _response = resp;
     }
 
@@ -137,7 +150,8 @@ public class WebPage extends ViewOwner {
      */
     public WebSite getSite()
     {
-        return getURL().getSite();
+        WebURL url = getURL();
+        return url.getSite();
     }
 
     /**
@@ -145,10 +159,18 @@ public class WebPage extends ViewOwner {
      */
     public String getTitle()
     {
-        WebURL url = getURL();
-        String path = url.getPath(), name = url.getPathName();
-        path = path.substring(0, path.length() - name.length() - 1);
-        return name + " - " + path + " - " + url.getSite().getName();
+        // Get file name and path
+        WebURL pageURL = getURL();
+        String filePath = pageURL.getPath();
+        String filename = pageURL.getPathName();
+        filePath = filePath.substring(0, filePath.length() - filename.length() - 1);
+
+        // Get Site.Name
+        WebSite site = getSite();
+        String siteName = site.getName();
+
+        // Return
+        return filename + " - " + filePath + " - " + siteName;
     }
 
     /**
@@ -156,7 +178,8 @@ public class WebPage extends ViewOwner {
      */
     public Image getIcon()
     {
-        return ViewUtils.getFileIconImage(getFile());
+        WebFile file = getFile();
+        return ViewUtils.getFileIconImage(file);
     }
 
     /**
@@ -174,11 +197,10 @@ public class WebPage extends ViewOwner {
      */
     protected void invokeResetUI()
     {
-        try {
-            super.invokeResetUI();
-        }
+        try { super.invokeResetUI(); }
         catch (Throwable t) {
-            getBrowser().showException(getURL(), t);
+            WebBrowser browser = getBrowser();
+            browser.showException(getURL(), t);
         }
     }
 
@@ -187,11 +209,11 @@ public class WebPage extends ViewOwner {
      */
     public void invokeRespondUI(ViewEvent anEvent)
     {
-        try {
-            super.invokeRespondUI(anEvent);
-        }
+        try { super.invokeRespondUI(anEvent); }
         catch (Throwable t) {
-            if (getBrowser() != null) getBrowser().showException(getURL(), t);
+            WebBrowser browser = getBrowser();
+            if (browser != null)
+                browser.showException(getURL(), t);
             else throw new RuntimeException(t);
         }
     }
@@ -218,34 +240,47 @@ public class WebPage extends ViewOwner {
     public WebFile showNewFilePanel(View aView, WebFile aFile)
     {
         // Run input panel to get new file name
-        String type = aFile.getType(), ext = '.' + type;
-        String msg = "Enter " + type + " file name", title = "New " + type + " File";
-        DialogBox dbox = new DialogBox(title);
-        dbox.setQuestionMessage(msg);
-        String fname = dbox.showInputDialog(aView, aFile.getName());
-        if (fname == null) return null;
+        String type = aFile.getType();
+        String msg = "Enter " + type + " file name";
+        String title = "New " + type + " File";
+        DialogBox dialogBox = new DialogBox(title);
+        dialogBox.setQuestionMessage(msg);
+        String filename = dialogBox.showInputDialog(aView, aFile.getName());
+        if (filename == null)
+            return null;
 
-        // Strip spaces (for now) and get file path
-        fname = fname.replace(" ", "");
-        String path = fname.startsWith("/") ? fname : (aFile.getParent().getDirPath() + fname);
-        if (!path.toLowerCase().endsWith(ext) && ext.length() > 1) path = path + ext;
+        // Strip spaces from filename (for now) and make sure it has extension
+        filename = filename.replace(" ", "");
+        if (!filename.toLowerCase().endsWith('.' + type) && type.length() > 0)
+            filename = filename + '.' + type;
+
+        // Get file path for filename
+        String filePath = filename;
+        if (!filePath.startsWith("/")) {
+            WebFile parentDir = aFile.getParent();
+            filePath = parentDir.getDirPath() + filename;
+        }
+
+        // Get file for path
+        WebSite site = getSite();
+        WebFile newFile = site.getFileForPath(filePath);
 
         // If file exists, run option panel for replace
-        if (getSite().getFileForPath(path) != null) {
-            String name = FilePathUtils.getFileName(path);
-            msg = "A file named " + name + " already exists in this location.\n Do you want to replace it with new file?";
-            dbox = new DialogBox(title);
-            dbox.setWarningMessage(msg);
-            if (!dbox.showConfirmDialog(aView))
+        if (newFile != null) {
+            msg = "A file named " + newFile.getName() + " already exists.\n Do you want to replace it with new file?";
+            dialogBox = new DialogBox(title);
+            dialogBox.setWarningMessage(msg);
+            if (!dialogBox.showConfirmDialog(aView))
                 return showNewFilePanel(aView, aFile);
+            return newFile;
         }
 
         // If directory, just create and return
         if (aFile.isDir())
-            return getSite().createFileForPath(path, true);
+            return site.createFileForPath(filePath, true);
 
         // Create and return new file
-        return createNewFile(path);
+        return createNewFile(filePath);
     }
 
     /**
