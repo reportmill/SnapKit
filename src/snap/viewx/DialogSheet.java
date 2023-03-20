@@ -54,7 +54,6 @@ public class DialogSheet extends DialogBox {
 
         // Make sure stage and Builder.FirstFocus are focused
         runLater(() -> notifyDidShow());
-        setShowing(true);
 
         return true;
     }
@@ -84,9 +83,6 @@ public class DialogSheet extends DialogBox {
         for (View child : _hostChildren)
             child.setPickable(true);
         _hostChildren = null;
-
-        // Reset Showing
-        setShowing(false);
     }
 
     /**

@@ -34,6 +34,9 @@ public class ViewOwner extends PropObject {
     // Map of key combos to action (names)
     private Map <KeyCombo,String>  _keyHandlers = Collections.emptyMap();
 
+    // Whether ViewOwner UI is showing
+    private boolean  _showing;
+
     // Whether initShowing has happened
     private boolean  _initShowingDone;
 
@@ -51,6 +54,9 @@ public class ViewOwner extends PropObject {
 
     // The EventListener to listen to view events
     private EventListener  _viewEventListener;
+
+    // Constants for properties
+    public static final String Showing_Prop = "Showing";
     
     // Convenience for common events
     public static final ViewEvent.Type Action = ViewEvent.Type.Action;
@@ -97,7 +103,7 @@ public class ViewOwner extends PropObject {
      */
     public synchronized View getUI()
     {
-        // If UI not present, create, init and set
+        // If already set, just return
         if (_ui != null) return _ui;
 
         // Create UI
@@ -109,9 +115,9 @@ public class ViewOwner extends PropObject {
         _ui.setOwner(this);
         setSendEventDisabled(false);
 
-        // Register for reset and showingChanged() and return
+        // Register for reset and bind UI.Showing to ViewOwner.Showing
         resetLater();
-        _ui.addPropChangeListener(pc -> showingChanged(), View.Showing_Prop);
+        _ui.addPropChangeListener(pc -> setShowing(_ui.isShowing()), View.Showing_Prop);
 
         // Return
         return _ui;
@@ -184,35 +190,48 @@ public class ViewOwner extends PropObject {
     /**
      * Returns whether ViewOwner UI is showing.
      */
-    public boolean isShowing()
-    {
-        boolean showing = isUISet() && getUI().isShowing();
-        return showing;
-    }
+    public boolean isShowing()  { return _showing; }
 
     /**
-     * Called when UI showing has changed.
+     * Sets whether ViewOwner UI is showing.
      */
-    protected void showingChanged()
+    protected void setShowing(boolean aValue)
     {
-        if (_resetLater) {
-            resetLater(); _resetLater = false; }
+        // If already set, just return
+        if (aValue == _showing) return;
 
-        if (isShowing() && !_initShowingDone) {
-            _initShowingDone = true;
+        // Set value
+        _showing = aValue;
 
-            // Handle First focus
-            Object firstFocus = getFirstFocus();
-            View view = firstFocus != null ? getView(firstFocus) : null;
-            if (view != null) {
-                view.requestFocus();
-                if (view instanceof TextField)
-                    ((TextField) view).selectAll();
+        // Handle Showing true
+        if (aValue) {
+
+            // Handle needs resetLater
+            if (_resetLater) {
+                resetLater();
+                _resetLater = false;
             }
 
-            // Trigger initShowing
-            initShowing();
+            // Handle FirstFocus and initShowing
+            if (!_initShowingDone) {
+
+                // Handle FirstFocus: If set, requestFocus and select text
+                Object firstFocus = getFirstFocus();
+                View firstFocusView = firstFocus != null ? getView(firstFocus) : null;
+                if (firstFocusView != null) {
+                    firstFocusView.requestFocus();
+                    if (firstFocusView instanceof TextField)
+                        ((TextField) firstFocusView).selectAll();
+                }
+
+                // Trigger initShowing
+                initShowing();
+                _initShowingDone = true;
+            }
         }
+
+        // Fire Prop Change
+        firePropChange(Showing_Prop, !_showing, _showing);
     }
 
     /**
@@ -507,7 +526,12 @@ public class ViewOwner extends PropObject {
      */
     public void resetLater()
     {
-        View ui = isUISet() ? getUI() : null; if (ui == null) return;
+        // Get UI
+        View ui = isUISet() ? getUI() : null;
+        if (ui == null)
+            return;
+
+        // Get updater and forward
         ViewUpdater updater = ui.getUpdater();
         if (updater == null)
             _resetLater = true;

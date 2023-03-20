@@ -348,9 +348,15 @@ public class ColorPanel extends ViewOwner {
     /**
      * Override to de-select color well on hide.
      */
-    protected void showingChanged()
+    @Override
+    protected void setShowing(boolean aValue)
     {
-        if (!getUI().isShowing())
+        // Do normal version
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
+
+        // Handle hide
+        if (!aValue)
             setColorWell(null);
     }
 

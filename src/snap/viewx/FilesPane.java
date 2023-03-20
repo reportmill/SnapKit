@@ -198,13 +198,17 @@ public class FilesPane extends ViewOwner {
     }
 
     /**
-     * Called when Showing changes.
+     * Override to reset files UI when showing.
      */
     @Override
-    protected void showingChanged()
+    protected void setShowing(boolean aValue)
     {
-        super.showingChanged();
-        if (isShowing())
+        // Do normal version
+        if (aValue == isShowing()) return;
+        super.setShowing(aValue);
+
+        // Handle Showing: Reset Files UI
+        if (aValue)
             runLater(() -> resetFilesUI());
     }
 

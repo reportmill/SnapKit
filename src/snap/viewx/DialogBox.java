@@ -28,9 +28,6 @@ public class DialogBox extends FormBuilder {
     // The options for buttons
     private String[]  _options;
 
-    // Whether dialog is showing
-    private boolean  _showing;
-
     // The image for dialog box
     private Image  _image;
 
@@ -78,9 +75,6 @@ public class DialogBox extends FormBuilder {
     public static final int NO_OPTION = 1;  /** Return value from class method if NO is chosen. */
     public static final int CANCEL_OPTION = 2;   /** Return value from class method if CANCEL is chosen. */
 
-    // Constants for properties
-    public static final String Showing_Prop = "Showing";
-
     // Get InfoImage
     public static Image questImage = Image.get(DialogBox.class, "Dialog_Question.png");
     public static Image infoImage = Image.get(DialogBox.class, "Dialog_Info.png");
@@ -88,14 +82,14 @@ public class DialogBox extends FormBuilder {
     public static Image errorImage = Image.get(DialogBox.class, "Dialog_Error.png");
 
     /**
-     * Creates a new JFXDialogBox.
+     * Constructor.
      */
     public DialogBox()
     {
     }
 
     /**
-     * Creates a new SwingDialogBox with given title.
+     * Constructor with given title.
      */
     public DialogBox(String aTitle)
     {
@@ -199,23 +193,6 @@ public class DialogBox extends FormBuilder {
     public void setOptions(String ... theOptions)
     {
         _options = theOptions;
-    }
-
-    /**
-     * Returns whether view is visible and has parent that is showing.
-     */
-    public boolean isShowing()  { return _showing; }
-
-    /**
-     * Sets whether view is showing.
-     */
-    protected void setShowing(boolean aValue)
-    {
-        // If already set, just return
-        if (aValue == _showing) return;
-
-        // Set value and firePropChange
-        firePropChange(Showing_Prop, _showing, _showing = aValue);
     }
 
     /**
@@ -406,17 +383,16 @@ public class DialogBox extends FormBuilder {
     protected boolean showPanel(View aView)
     {
         // Configure window
-        WindowView win = getWindow();
-        win.setTitle(getTitle());
-        win.setType(WindowView.TYPE_UTILITY);
-        win.setModal(true);
+        WindowView window = getWindow();
+        window.setTitle(getTitle());
+        window.setType(WindowView.TYPE_UTILITY);
+        window.setModal(true);
 
         // Make sure stage and Builder.FirstFocus are focused
         _builder.runLater(() -> notifyDidShow());
 
-        // Show window and set Showing
-        win.showCentered(aView);
-        setShowing(true);
+        // Show window
+        window.showCentered(aView);
 
         // Return
         return !_cancelled;
@@ -427,8 +403,8 @@ public class DialogBox extends FormBuilder {
      */
     protected void hide()
     {
-        getWindow().hide();
-        setShowing(false);
+        WindowView window = getWindow();
+        window.hide();
     }
 
     /**
