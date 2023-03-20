@@ -67,25 +67,26 @@ public class KeyChainParser extends Parser {
         public void parsedOne(ParseNode aNode, String anId)
         {
             // Handle KEY
-            if (anId == "KEY")
-                _part = new KeyChain(Op.Key, aNode.getString());
+            switch (anId) {
 
-            // Handle Expression
-            else if (anId == "Expression") {
-                KeyChain expr = aNode.getCustomNode(KeyChain.class);
-                if (_part == null)
-                    _part = expr;
-                else if (_op == 1)
-                    _part = new KeyChain(Op.Assignment, _part, expr);
-                else _part = new KeyChain(Op.Assignment, _part, new KeyChain(KeyChain.Op.Add, _part, expr));
-                _op = 0;
+                // Handle KEY
+                case "KEY": _part = new KeyChain(Op.Key, aNode.getString()); break;
+
+                // Handle Expression
+                case "Expression":
+                    KeyChain expr = aNode.getCustomNode(KeyChain.class);
+                    if (_part == null)
+                        _part = expr;
+                    else if (_op == 1)
+                        _part = new KeyChain(Op.Assignment, _part, expr);
+                    else _part = new KeyChain(Op.Assignment, _part, new KeyChain(Op.Add, _part, expr));
+                    _op = 0;
+                    break;
+
+                // Handle Ops
+                case "=": _op = 1; break;
+                case "+=": _op = 2; break;
             }
-
-            // Handle Ops
-            else if (anId == "=")
-                _op = 1;
-            else if (anId == "+=")
-                _op = 2;
         }
 
         /** Returns the part class. */
@@ -102,12 +103,12 @@ public class KeyChainParser extends Parser {
         {
             // Handle KeyChain
             if (aNode.getCustomNode() instanceof KeyChain) {
-                KeyChain kc = aNode.getCustomNode(KeyChain.class);
-                if (_part==null)
-                    _part = kc;
+                KeyChain keyChain = aNode.getCustomNode(KeyChain.class);
+                if (_part == null)
+                    _part = keyChain;
                 else if (_part.getOp() != Op.Conditional)
-                    _part = new KeyChain(Op.Conditional, _part, kc);
-                else _part.addChild(kc);
+                    _part = new KeyChain(Op.Conditional, _part, keyChain);
+                else _part.addChild(keyChain);
             }
         }
 
@@ -158,26 +159,29 @@ public class KeyChainParser extends Parser {
         {
             // Handle KeyChain
             if (aNode.getCustomNode() instanceof KeyChain) {
-                KeyChain kc = aNode.getCustomNode(KeyChain.class);
-                if (_part==null)
-                    _part = kc;
-                else _part = new KeyChain(_op, _part, kc);
+                KeyChain keyChain = aNode.getCustomNode(KeyChain.class);
+                if (_part == null)
+                    _part = keyChain;
+                else _part = new KeyChain(_op, _part, keyChain);
+                return;
             }
 
             // Handle Ops
-            else if (anId=="+") _op = Op.Add;
-            else if (anId=="-") _op = Op.Subtract;
-            else if (anId=="*") _op = Op.Multiply;
-            else if (anId=="/") _op = Op.Divide;
-            else if (anId=="%") _op = Op.Mod;
-            else if (anId=="==") _op = Op.Equal;
-            else if (anId=="!=") _op = Op.NotEqual;
-            else if (anId==">") _op = Op.GreaterThan;
-            else if (anId=="<") _op = Op.LessThan;
-            else if (anId==">=") _op = Op.GreaterThanOrEqual;
-            else if (anId=="<=") _op = Op.LessThanOrEqual;
-            else if (anId=="||") _op = Op.Or;
-            else if (anId=="&&") _op = Op.And;
+            switch (anId) {
+                case "+": _op = Op.Add; break;
+                case "-": _op = Op.Subtract; break;
+                case "*": _op = Op.Multiply; break;
+                case "/": _op = Op.Divide; break;
+                case "%": _op = Op.Mod; break;
+                case "==": _op = Op.Equal; break;
+                case "!=": _op = Op.NotEqual; break;
+                case ">": _op = Op.GreaterThan; break;
+                case "<": _op = Op.LessThan; break;
+                case ">=": _op = Op.GreaterThanOrEqual; break;
+                case "<=": _op = Op.LessThanOrEqual; break;
+                case "||": _op = Op.Or; break;
+                case "&&": _op = Op.And; break;
+            }
         }
 
         /** Returns the part class. */
@@ -196,17 +200,17 @@ public class KeyChainParser extends Parser {
         public void parsedOne(ParseNode aNode, String anId)
         {
             // Handle KeyChain
-            if (anId=="KeyChain") {
-                KeyChain kc = aNode.getCustomNode(KeyChain.class);
-                _part = _op==null ? kc : new KeyChain(_op, kc);
-                _op = null;
-            }
+            switch (anId) {
+                case "KeyChain":
+                    KeyChain kc = aNode.getCustomNode(KeyChain.class);
+                    _part = _op == null ? kc : new KeyChain(_op, kc);
+                    _op = null;
+                    break;
 
-            // Handle Ops
-            else if (anId=="-")
-                _op = Op.Negate;
-            else if (anId=="!")
-                _op = Op.Not;
+                // Handle Ops
+                case "-": _op = Op.Negate; break;
+                case "!": _op = Op.Not; break;
+            }
         }
 
         /** Returns the part class. */
@@ -223,12 +227,12 @@ public class KeyChainParser extends Parser {
         {
             // Handle Object (TeaVM having issue with ==)
             if (anId.equals("Object")) {
-                KeyChain kc = aNode.getCustomNode(KeyChain.class);
+                KeyChain keyChain = aNode.getCustomNode(KeyChain.class);
                 if (_part == null)
-                    _part = kc;
+                    _part = keyChain;
                 else if (_part.getOp() != Op.Chain)
-                    _part = new KeyChain(Op.Chain, _part, kc);
-                else _part.addChild(kc);
+                    _part = new KeyChain(Op.Chain, _part, keyChain);
+                else _part.addChild(keyChain);
             }
         }
 
@@ -249,42 +253,45 @@ public class KeyChainParser extends Parser {
         public void parsedOne(ParseNode aNode, String anId)
         {
             // Handle Key
-            if (anId=="KEY")
-                _part = new KeyChain(Op.Key, aNode.getString());
+            switch (anId) {
 
-            // Handle ArgList
-            else if (anId=="ArgList") {
-                KeyChain args = aNode.getCustomNode(KeyChain.class);
-                _part = new KeyChain(Op.FunctionCall, _part.getChildString(0), args);
-            }
+                // Handle KEY
+                case "KEY": _part = new KeyChain(Op.Key, aNode.getString()); break;
 
-            // Handle empty ArgList
-            else if (anId == "(") {
-                _startArgs = _part!=null;
-            }
-            else if (anId == ")") {
-                if (_startArgs && _part.getOp()==Op.Key) {
-                    _part = new KeyChain(Op.FunctionCall, _part.getChildString(0), new KeyChain(Op.ArgList));
-                    _startArgs = false;
-                }
-            }
+                // Handle ArgList
+                case "ArgList":
+                    KeyChain args = aNode.getCustomNode(KeyChain.class);
+                    _part = new KeyChain(Op.FunctionCall, _part.getChildString(0), args);
+                    break;
 
-            // Handle INT or Float
-            else if (anId=="INT" || anId=="FLOAT") {
-                java.math.BigDecimal d = new java.math.BigDecimal(aNode.getString());
-                _part = new KeyChain(Op.Literal, d);
-            }
+                // Handle empty ArgList
+                case "(": _startArgs = _part != null; break;
+                case ")":
+                    if (_startArgs && _part.getOp() == Op.Key) {
+                        _part = new KeyChain(Op.FunctionCall, _part.getChildString(0), new KeyChain(Op.ArgList));
+                        _startArgs = false;
+                    }
+                    break;
 
-            // Handle STRING
-            else if (anId=="STRING") {
-                String str = aNode.getString(); str = str.substring(1, str.length()-1); // Strip quotes
-                _part = new KeyChain(Op.Literal, str);
-            }
+                // Handle INT or Float
+                case "INT":
+                case "FLOAT":
+                    java.math.BigDecimal d = new java.math.BigDecimal(aNode.getString());
+                    _part = new KeyChain(Op.Literal, d);
+                    break;
 
-            // Handle Expression
-            else if (anId=="Expression") {
-                KeyChain expr = aNode.getCustomNode(KeyChain.class);
-                _part = _part!=null ? new KeyChain(Op.ArrayIndex, _part, expr) : expr;
+                // Handle STRING
+                case "STRING":
+                    String str = aNode.getString();
+                    str = str.substring(1, str.length() - 1); // Strip quotes
+                    _part = new KeyChain(Op.Literal, str);
+                    break;
+
+                // Handle Expression
+                case "Expression":
+                    KeyChain expr = aNode.getCustomNode(KeyChain.class);
+                    _part = _part != null ? new KeyChain(Op.ArrayIndex, _part, expr) : expr;
+                    break;
             }
         }
 
@@ -301,9 +308,9 @@ public class KeyChainParser extends Parser {
         public void parsedOne(ParseNode aNode, String anId)
         {
             // Handle Expression
-            if (anId=="Expression") {
+            if (anId == "Expression") {
                 KeyChain arg = aNode.getCustomNode(KeyChain.class);
-                if (_part==null)
+                if (_part == null)
                     _part = new KeyChain(Op.ArgList, arg);
                 else _part.addChild(arg);
             }
