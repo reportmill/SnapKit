@@ -244,6 +244,28 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the TextRun for the given char range (usually just run for start, but can be next run if at boundary).
+     */
+    public TextRun getRunForCharRange(int startIndex, int endIndex)
+    {
+        // Get run at start index
+        TextRun textRun = getRunForCharIndex(startIndex);
+
+        // If given non-empty range and startIndex is at end of normal run, get next
+        if (endIndex > startIndex) {
+            int runEnd = textRun.getEndCharIndex();
+            if (startIndex == runEnd) {
+                TextRun nextRun = textRun.getNext();
+                if (nextRun != null)
+                    textRun = nextRun;
+            }
+        }
+
+        // Return
+        return textRun;
+    }
+
+    /**
      * Returns the last run.
      */
     public TextRun getRunLast()

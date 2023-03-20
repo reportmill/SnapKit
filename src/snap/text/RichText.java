@@ -62,7 +62,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
             int lineStart = line.getStartCharIndex();
             TextRun run = getRunForCharRange(textCharIndex, anEnd);
 
-            // If run is is larger than range, trim to size
+            // If run is larger than range, trim to size
             if (textCharIndex - lineStart > run.getStartCharIndex()) {
                 int newRunStart = textCharIndex - lineStart - run.getStartCharIndex();
                 run = line.splitRunForCharIndex(run, newRunStart);
@@ -98,23 +98,22 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
         // Iterate over lines in range and set attribute
         while (aStart < anEnd) {
 
-            // Get line for start
-            TextLine line = getLineForCharIndex(aStart);
-            int lineStart = line.getStartCharIndex();
+            // Get run for range
+            TextRun textRun = getRunForCharRange(aStart, anEnd);
+            RichTextLine textLine = (RichTextLine) textRun.getLine();
+            int lineStart = textLine.getStartCharIndex();
+            int runEndInText = textRun.getEndCharIndex() + lineStart;
+            int newStyleEndInText = Math.min(runEndInText, anEnd);
 
-            // Get run for start
-            int lineIndex = aStart - lineStart;
-            TextRun run = line.getRunForCharIndex(lineIndex);
-            if (lineIndex == run.getEndCharIndex())
-                run = run.getNext();
-            int runEnd = run.getEndCharIndex();
+            // Get current run style, get new style for given key/value
+            TextStyle style = textRun.getStyle();
+            TextStyle newStyle = style.copyFor(aKey, aValue);
 
-            // Get run style and modify for given style key/value
-            TextStyle style = run.getStyle().copyFor(aKey, aValue);
-            setStyle(style, aStart, Math.min(runEnd + lineStart, anEnd));
+            // Set new style for run range
+            setStyle(newStyle, aStart, newStyleEndInText);
 
             // Reset start to run end
-            aStart = runEnd + lineStart;
+            aStart = runEndInText;
         }
     }
 

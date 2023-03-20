@@ -607,8 +607,13 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
      */
     public TextRun getRunForCharIndex(int charIndex)
     {
-        TextLine line = getLineForCharIndex(charIndex);
-        return line.getRunForCharIndex(charIndex - line.getStartCharIndex());
+        // Get line for start char index and convert char index to line
+        TextLine textLine = getLineForCharIndex(charIndex);
+        int lineStart = textLine.getStartCharIndex();
+        int charIndexInLine = charIndex - lineStart;
+
+        // Forward to line
+        return textLine.getRunForCharIndex(charIndexInLine);
     }
 
     /**
@@ -616,20 +621,14 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
      */
     public TextRun getRunForCharRange(int startIndex, int endIndex)
     {
-        // Get run at start index
-        TextRun textRun = getRunForCharIndex(startIndex);
+        // Get line for start char index and convert start/end index to line
+        TextLine textLine = getLineForCharIndex(startIndex);
+        int lineStart = textLine.getStartCharIndex();
+        int startIndexInLine = startIndex - lineStart;
+        int endIndexInLine = endIndex - lineStart;
 
-        // If given non-empty range and startIndex is at end of normal run, get next
-        if (endIndex > startIndex) {
-            if (startIndex == textRun.getEndCharIndex()) {
-                TextRun nextRun = textRun.getNext();
-                if (nextRun != null)
-                    textRun = nextRun;
-            }
-        }
-
-        // Return
-        return textRun;
+        // Forward to line
+        return textLine.getRunForCharRange(startIndexInLine, endIndexInLine);
     }
 
     /**
