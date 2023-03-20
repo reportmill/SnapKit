@@ -27,6 +27,7 @@ public class FormBuilder extends ViewOwner {
      */
     public FormBuilder()
     {
+        super();
         _formView = createFormView();
     }
 
@@ -75,7 +76,8 @@ public class FormBuilder extends ViewOwner {
     {
         Label label = new Label();
         label.setText(aTitle);
-        if (_font!=null) label.setFont(_font);
+        if (_font != null)
+            label.setFont(_font);
         return addView(label);
     }
 
@@ -86,7 +88,8 @@ public class FormBuilder extends ViewOwner {
     {
         TextArea text = new TextArea();
         text.setText(aTitle);
-        if (_font!=null) text.setFont(_font);
+        if (_font != null)
+            text.setFont(_font);
         return addView(text);
     }
 
@@ -155,10 +158,10 @@ public class FormBuilder extends ViewOwner {
     {
         // Create ComboBox and panel and add
         Label label = new Label();
-        label.setText(aTitle + ":"); //label.setAlignmentX(0);
-        ComboBox<?> comboBox = new ComboBox<>(); //cbox.getItems().add(options);
-        comboBox.setName(aTitle); //if(_font!=null) cbox.setFont(_font);
-        RowView rowView = new RowView(); //panel.setAlignmentX(0);
+        label.setText(aTitle + ":");
+        ComboBox<?> comboBox = new ComboBox<>();
+        comboBox.setName(aTitle);
+        RowView rowView = new RowView();
         rowView.addChild(label);
         rowView.addChild(comboBox);
         addView(rowView);

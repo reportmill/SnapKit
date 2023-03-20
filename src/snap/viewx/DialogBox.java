@@ -40,9 +40,6 @@ public class DialogBox extends FormBuilder {
     // Whether to trigger confirm when enter key is pressed
     private boolean  _confirmOnEnter = true;
 
-    // The FormBuilder
-    private FormBuilder  _builder = this;
-
     // Whether stage was cancelled
     protected boolean  _cancelled;
 
@@ -296,11 +293,8 @@ public class DialogBox extends FormBuilder {
         // Set type
         setType(Type.Message);
 
-        // Configure: Add MessageLabel, Content
-        if (getMessage() != null)
-            _builder.addTextArea(getMessage());
-        if (getContent() != null)
-            _builder.addView(getContent());
+        // Add Message and Content
+        addMessageAndContent();
 
         // Show dialog
         showPanel(aView);
@@ -314,11 +308,8 @@ public class DialogBox extends FormBuilder {
         // Set type
         setType(Type.Confirm);
 
-        // Configure: Add MessageLabel, Content
-        if (getMessage() != null)
-            _builder.addTextArea(getMessage());
-        if (getContent() != null)
-            _builder.addView(getContent());
+        // Add Message and Content
+        addMessageAndContent();
 
         // Show dialog
         return showPanel(aView);
@@ -332,11 +323,8 @@ public class DialogBox extends FormBuilder {
         // Set type
         setType(Type.Option);
 
-        // Configure: Add MessageLabel, Content
-        if (getMessage() != null)
-            _builder.addTextArea(getMessage());
-        if (getContent() != null)
-            _builder.addView(getContent());
+        // Add Message and Content
+        addMessageAndContent();
 
         // Show panel
         if (!showPanel(aView))
@@ -352,22 +340,13 @@ public class DialogBox extends FormBuilder {
         // Set type
         setType(Type.Input);
 
-        // Add Message Text
-        String message = getMessage();
-        if (message != null) {
-            TextArea msgTextArea = _builder.addTextArea(message);
-            msgTextArea.setGrowWidth(true);
-        }
-
-        // Add content view
-        View content = getContent();
-        if (content != null)
-            _builder.addView(content);
+        // Add Message and Content
+        addMessageAndContent();
 
         // Add InputText
-        TextField textField = _builder.addTextField("InputText", aDefault);
+        TextField textField = addTextField("InputText", aDefault);
         textField.setMinWidth(150);
-        _builder.setFirstFocus(textField);
+        setFirstFocus(textField);
 
         // Show panel
         if (!showPanel(aView))
@@ -389,7 +368,7 @@ public class DialogBox extends FormBuilder {
         window.setModal(true);
 
         // Make sure stage and Builder.FirstFocus are focused
-        _builder.runLater(() -> notifyDidShow());
+        runLater(() -> notifyDidShow());
 
         // Show window
         window.showCentered(aView);
@@ -432,24 +411,42 @@ public class DialogBox extends FormBuilder {
     public boolean isCancelled()  { return _cancelled; }
 
     /**
+     * Adds the Message and Content, if available.
+     */
+    protected void addMessageAndContent()
+    {
+        // Add Message Text
+        String message = getMessage();
+        if (message != null)
+            addTextArea(message);
+
+        // Add content view
+        View content = getContent();
+        if (content != null)
+            addView(content);
+    }
+
+    /**
      * Adds the option buttons for dialog panel.
      */
-    protected RowView addOptionButtons()
+    protected void addOptionButtons()
     {
         // If there is only a label in RootView, make it at least an inch tall
-        if (_builder._formView.getChildCount() == 1 && _builder._formView.getChild(0) instanceof Label)
-            _builder._formView.getChild(0).setMinHeight(60);
+        View[] formViewChildren = _formView.getChildren();
+        if (formViewChildren.length == 1 && formViewChildren[0] instanceof Label)
+            formViewChildren[0].setMinHeight(60);
 
         // Add OK/Cancel buttons
         String[] titles = getOptions();
         String[] titlesReversed = titles.clone();
         ArrayUtils.reverse(titlesReversed);
-        _buttonBox = _builder.addButtons(titlesReversed, titlesReversed);
+        _buttonBox = addButtons(titlesReversed, titlesReversed);
         _buttonBox.setPadding(15, 15, 15, 15); //_buttonBox.setAlign(Pos.CENTER_RIGHT);
-        for (View btn : _buttonBox.getChildren()) {
-            btn.setMinWidth(100);
-            btn.setMinHeight(24);
-            btn.setLeanX(HPos.RIGHT);
+        View[] buttonBoxButtons = _buttonBox.getChildren();
+        for (View button : buttonBoxButtons) {
+            button.setMinWidth(100);
+            button.setMinHeight(24);
+            button.setLeanX(HPos.RIGHT);
         }
 
         // Set ConfirmButton (and maybe FirstFocus)
@@ -461,9 +458,6 @@ public class DialogBox extends FormBuilder {
 
         // Set CancelButton
         _cancelBtn = _buttonBox.getChildCount() > 1 ? (Button) _buttonBox.getChild(0) : null;
-
-        // Return button box
-        return _buttonBox;
     }
 
     /**
@@ -476,10 +470,6 @@ public class DialogBox extends FormBuilder {
         ViewOwner owner = content != null ? content.getOwner() : null;
         if (owner != null && owner.getFirstFocus() != null)
             owner.requestFocus(owner.getFirstFocus());
-
-        // Otherwise try Builder.FirstFocus
-        else if (_builder.getFirstFocus() != null)
-            _builder.requestFocus(_builder.getFirstFocus());
     }
 
     /**
@@ -491,13 +481,13 @@ public class DialogBox extends FormBuilder {
         formView.setMinWidth(300);
 
         // If image provided, reset pane to RowView containing image and original root pane
-        Image image = getImage();
-        if (image != null) {
+        Image dialogImage = getImage();
+        if (dialogImage != null) {
             RowView rowView = new RowView();
             rowView.setPadding(15, 0, 0, 20);
             rowView.setSpacing(20);
             rowView.setAlign(Pos.TOP_CENTER);
-            rowView.addChild(new ImageView(image));
+            rowView.addChild(new ImageView(dialogImage));
             rowView.addChild(formView);
             formView = rowView;
         }
@@ -537,7 +527,7 @@ public class DialogBox extends FormBuilder {
     public void respondUI(ViewEvent anEvent)
     {
         // Handle Okay, EnterAction
-        if (anEvent.equals(_confirmBtn) || anEvent.equals("EnterAction")) {
+        if (anEvent.getView() == _confirmBtn || anEvent.equals("EnterAction")) {
             if (!isConfirmEnabled()) {
                 beep();
                 return;
@@ -589,9 +579,9 @@ public class DialogBox extends FormBuilder {
      */
     public static boolean showConfirmDialog(View aView, String aTitle, String aMessage)
     {
-        DialogBox dbox = new DialogBox(aTitle);
-        dbox.setQuestionMessage(aMessage);
-        return dbox.showConfirmDialog(aView);
+        DialogBox dialogBox = new DialogBox(aTitle);
+        dialogBox.setQuestionMessage(aMessage);
+        return dialogBox.showConfirmDialog(aView);
     }
 
     /**
@@ -599,9 +589,9 @@ public class DialogBox extends FormBuilder {
      */
     public static void showErrorDialog(View aView, String aTitle, String aMessage)
     {
-        DialogBox dbox = new DialogBox(aTitle);
-        dbox.setErrorMessage(aMessage);
-        dbox.showMessageDialog(aView);
+        DialogBox dialogBox = new DialogBox(aTitle);
+        dialogBox.setErrorMessage(aMessage);
+        dialogBox.showMessageDialog(aView);
     }
 
     /**
@@ -609,9 +599,9 @@ public class DialogBox extends FormBuilder {
      */
     public static void showWarningDialog(View aView, String aTitle, String aMessage)
     {
-        DialogBox dbox = new DialogBox(aTitle);
-        dbox.setWarningMessage(aMessage);
-        dbox.showMessageDialog(aView);
+        DialogBox dialogBox = new DialogBox(aTitle);
+        dialogBox.setWarningMessage(aMessage);
+        dialogBox.showMessageDialog(aView);
     }
 
     /**
@@ -619,9 +609,9 @@ public class DialogBox extends FormBuilder {
      */
     public static void showExceptionDialog(View aView, String aTitle, Throwable e)
     {
-        DialogBox dbox = new DialogBox(aTitle);
-        dbox.setErrorMessage(e.toString());
-        dbox.showMessageDialog(aView);
+        DialogBox dialogBox = new DialogBox(aTitle);
+        dialogBox.setErrorMessage(e.toString());
+        dialogBox.showMessageDialog(aView);
         e.printStackTrace();
     }
 
@@ -630,8 +620,8 @@ public class DialogBox extends FormBuilder {
      */
     public static String showInputDialog(View aView, String aTitle, String aMessage, String aDefault)
     {
-        DialogBox dbox = new DialogBox(aTitle);
-        dbox.setQuestionMessage(aMessage);
-        return dbox.showInputDialog(aView, aDefault);
+        DialogBox dialogBox = new DialogBox(aTitle);
+        dialogBox.setQuestionMessage(aMessage);
+        return dialogBox.showInputDialog(aView, aDefault);
     }
 }
