@@ -364,7 +364,11 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the row index at given point.
      */
-    public int getRowAt(double aX, double aY)  { return (int)(aY/getRowHeight()); }
+    public int getRowIndexForY(double aY)
+    {
+        int rowH = getRowHeight();
+        return (int) (aY / rowH);
+    }
 
     /**
      * Expands all tree nodes.
