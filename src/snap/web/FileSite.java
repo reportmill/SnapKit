@@ -163,7 +163,7 @@ public class FileSite extends WebSite {
     /**
      * Saves the modified time for a file to underlying file system.
      */
-    protected void setModTimeSaved(WebFile aFile, long aTime)
+    protected void setModTimeForFile(WebFile aFile, long aTime)
     {
         File file = aFile.getJavaFile();
         file.setLastModified(aTime);

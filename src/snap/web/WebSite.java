@@ -166,7 +166,7 @@ public abstract class WebSite {
         // Get file
         file = getFileForPathImpl(filePath);
         if (file != null)
-            file.setVerified(true);
+            file.setExists(true);
 
         // Return
         return file;
@@ -299,6 +299,9 @@ public abstract class WebSite {
             aFile.setUpdater(null);
         }
 
+        // Get whether file is being created by this save
+        boolean fileBeingCreatedBySave = !aFile.getExists();
+
         // If parent dir doesn't exist, save it (to make sure it exists)
         WebFile parentDir = aFile.getParent();
         if (parentDir != null && !parentDir.getExists())
@@ -317,14 +320,9 @@ public abstract class WebSite {
         if (respCode != WebResponse.OK)
             return resp;
 
-        // Set File.Verified since save succeeded
-        boolean fileCreatedExternally = !aFile.isVerified();
-        aFile.setVerified(true);
+        // Set File.Exists and clear File.Modified since save succeeded
+        aFile.setExists(true);
         aFile.setModified(false);
-
-        // If file created, fire Exists prop change
-        if (fileCreatedExternally)
-            aFile.fireExistsPropChange(true);
 
         // Update ModTime
         long modTime = resp.getModTime();
@@ -332,8 +330,8 @@ public abstract class WebSite {
         if (modTime == 0)
             System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlString());
 
-        // If file had not previously existed (or known by this site to exist), reset parent contents to make sure it's there
-        if (fileCreatedExternally && parentDir != null) {
+        // If file created by save, reset parent contents to make sure it's there
+        if (fileBeingCreatedBySave && parentDir != null) {
             parentDir.resetContent();
             parentDir.setModTime(modTime);
         }
@@ -369,16 +367,22 @@ public abstract class WebSite {
         // Get response
         WebResponse resp = getResponse(req);
 
-        // If not root, have parent resetContent() so file will be removed from parent files
-        WebFile parentDir = aFile.getParent();
-        if (parentDir != null)
-            parentDir.resetContent();
+        // Just return if failed
+        int respCode = resp.getCode();
+        if (respCode != WebResponse.OK)
+            return resp;
 
         // Reset the file
+        aFile.setExists(false);
         aFile.reset();
 
-        // Fire Exists prop change
-        aFile.fireExistsPropChange(false);
+        // If not root, have parent resetContent() (so file will be removed from parent files) and update ModTime
+        WebFile parentDir = aFile.getParent();
+        if (parentDir != null) {
+            parentDir.resetContent();
+            long modTime = resp.getModTime();
+            parentDir.setModTime(modTime);
+        }
 
         // Return
         return resp;
@@ -470,7 +474,7 @@ public abstract class WebSite {
     /**
      * Saves the modified time for a file to underlying file system.
      */
-    protected void setModTimeSaved(WebFile aFile, long aTime) throws Exception
+    protected void setModTimeForFile(WebFile aFile, long aTime) throws Exception
     {
     }
 

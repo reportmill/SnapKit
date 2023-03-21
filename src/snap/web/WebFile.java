@@ -35,7 +35,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     protected long  _size;
 
     // Whether this file is known to exist at site
-    protected boolean  _verified;
+    protected Boolean  _exists;
 
     // The file bytes
     private byte[]  _bytes;
@@ -67,9 +67,6 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public static final String ModTime_Prop = "ModTime";
     public static final String Modified_Prop = "Modified";
     public static final String Updater_Prop = "Updater";
-    public static final String Verified_Prop = "Verified";
-
-    // This is really a virtual property
     public static final String Exists_Prop = "Exists";
 
     /**
@@ -194,44 +191,43 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     }
 
     /**
-     * Returns whether file is known to exist at site.
+     * Returns whether Exists property has been explicitly set/checked.
      */
-    public boolean isVerified()  { return _verified; }
-
-    /**
-     * Sets whether file is known to exist at site.
-     */
-    protected void setVerified(boolean aValue)
-    {
-        // If already set, just return
-        if (aValue == _verified) return;
-
-        // Set value and fire prop change
-        firePropChange(Verified_Prop, _verified, _verified = aValue);
-    }
+    public boolean isVerified()  { return _exists != null; }
 
     /**
      * Returns whether file exists in site.
      */
     public boolean getExists()
     {
-        // If file hasn't been verified, verify it (just fetch it)
-        if (!_verified) {
-            WebSite site = getSite();
-            String filePath = getPath();
-            site.getFileForPath(filePath);
-        }
+        // If already set, just return
+        if (_exists != null) return _exists;
+
+        // Explicitly fetch file
+        WebSite site = getSite();
+        String filePath = getPath();
+        WebFile file = site.getFileForPath(filePath);
+        _exists = file != null;
 
         // Return
-        return _verified;
+        return _exists;
     }
 
     /**
-     * Fires Exists prop change - unconventional because Exists is derived from verified.
+     * Sets whether file is known to exist at site.
      */
-    protected void fireExistsPropChange(boolean aValue)
+    protected void setExists(Boolean aValue)
     {
-        firePropChange(Exists_Prop, !aValue, aValue);
+        // If already set, just return
+        if (aValue == _exists) return;
+
+        // Set value
+        Boolean oldExists = _exists;
+        _exists = aValue;
+
+        // Fire prop change if changing real value
+        if (oldExists != null && _exists != null)
+            firePropChange(Exists_Prop, oldExists, _exists);
     }
 
     /**
@@ -242,33 +238,14 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     /**
      * Sets the file modification time.
      */
-    protected void setModTime(long aTime)
+    protected void setModTime(long aValue)
     {
-        if (aTime == _modTime) return;
-        firePropChange(ModTime_Prop, _modTime, _modTime = aTime);
+        // If already set, just return
+        if (aValue == _modTime) return;
+
+        // Set value and fire prop change
+        firePropChange(ModTime_Prop, _modTime, _modTime = aValue);
     }
-
-    /**
-     * Sets the file modification time in file and in site internal storage.
-     */
-    public void setModTimeSaved(long aTime)
-    {
-        try {
-            getSite().setModTimeSaved(this, aTime);
-        }
-        catch (Exception e) { System.err.println("WebFile.setModTimeSaved: " + e); }
-        setModTime(aTime);
-    }
-
-    /**
-     * Returns the modified date.
-     */
-    public Date getModDate()  { return new Date(_modTime); }
-
-    /**
-     * Conventional file method that simply wraps getModTime().
-     */
-    public long getLastModTime()  { return _modTime; }
 
     /**
      * Returns the file size.
@@ -296,7 +273,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         WebSite site = getSite();
         FileContents fileContents = site.getContentsForFile(this);
         if (fileContents != null) {
-            setVerified(true);
+            setExists(true);
             _modTime = Math.max(_modTime, fileContents.getModTime());
             _bytes = fileContents.getBytes();
             _size = _bytes != null ? _bytes.length : 0;
@@ -345,12 +322,12 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         WebSite site = getSite();
         FileContents fileContents = site.getContentsForFile(this);
         if (fileContents != null) {
-            setVerified(true);
+            setExists(true);
             _modTime = Math.max(_modTime, fileContents.getModTime());
             WebFile[] files = fileContents.getFiles();
             for (WebFile file : files) {
                 file.setParent(this);
-                file.setVerified(true);
+                file.setExists(true);
             }
             _files = files;
         }
@@ -383,7 +360,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public void reset()
     {
         resetContent();
-        setVerified(false);
+        setExists(null);
         _modTime = 0;
         _size = 0;
     }
@@ -422,7 +399,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
             WebFile parent = getParent();
             if (parent != null)
                 parent.resetContent();
-            fireExistsPropChange(false);
+            setExists(false);
         }
 
         // If File and ModTime changed, fire ModTime prop change
@@ -538,6 +515,32 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
      * Returns the real file.
      */
     public WebFile getRealFile()  { return _linkFile != null ? _linkFile : this; }
+
+    /**
+     * Sets the file modification time in file and in site internal storage.
+     */
+    public void setModTimeSaved(long aValue)
+    {
+        // Set ModTime in site
+        try {
+            WebSite site = getSite();
+            site.setModTimeForFile(this, aValue);
+        }
+        catch (Exception e) { System.err.println("WebFile.setModTimeSaved: " + e); }
+
+        // Set ModTime in file
+        setModTime(aValue);
+    }
+
+    /**
+     * Returns the modified date.
+     */
+    public Date getModDate()  { return new Date(_modTime); }
+
+    /**
+     * Conventional file method that simply wraps getModTime().
+     */
+    public long getLastModTime()  { return _modTime; }
 
     /**
      * An interface for classes that want to post modifications to files.
