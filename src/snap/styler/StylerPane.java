@@ -116,12 +116,8 @@ public class StylerPane extends StylerOwner {
         Collapser collapser = aStylerOwner.getCollapser();
         if (!isShowing)
             collapser.setCollapsed(true);
-        else aStylerOwner.setSelected(true);
 
-        aStylerOwner.getLabel().setText(aName);
-        // Add listener to update ChartPartInsp.Sel when label is clicked
-        //Label label = aChartPartInsp.getLabel();
-        //label.addEventFilter(e -> runLater(() -> chartPartInspLabelMousePress(aChartPartInsp)), MousePress);
+        collapser.getLabel().setText(aName);
     }
 
     /**
