@@ -309,13 +309,22 @@ public abstract class WebSite {
         byte[] fileBytes = aFile.getBytes();
         req.setPutBytes(fileBytes);
 
-        // Send request and get response - Used to be saveFileImpl()
+        // Send request and get response
         WebResponse resp = getResponse(req);
 
         // Just return if failed
         int respCode = resp.getCode();
         if (respCode != WebResponse.OK)
             return resp;
+
+        // Set File.Verified since save succeeded
+        boolean fileCreatedExternally = !aFile.isVerified();
+        aFile.setVerified(true);
+        aFile.setModified(false);
+
+        // If file created, fire Exists prop change
+        if (fileCreatedExternally)
+            aFile.fireExistsPropChange(true);
 
         // Update ModTime
         long modTime = resp.getModTime();
@@ -324,18 +333,9 @@ public abstract class WebSite {
             System.out.println("WebSite.saveFile: Unlikely saved mod time of 0 for " + aFile.getUrlString());
 
         // If file had not previously existed (or known by this site to exist), reset parent contents to make sure it's there
-        boolean fileCreatedExternally = !aFile.isVerified();
-        if (fileCreatedExternally && parentDir != null)
+        if (fileCreatedExternally && parentDir != null) {
             parentDir.resetContent();
-
-        // Set File.Verified since save succeeded
-        aFile.setVerified(true);
-        aFile.setModified(false);
-
-        // If file created, fire Exists prop change
-        if (fileCreatedExternally) {
-            PropChange filePC = new PropChange(aFile, WebFile.Exists_Prop, false, true);
-            fileDidPropChange(filePC);
+            parentDir.setModTime(modTime);
         }
 
         // Return
@@ -367,7 +367,7 @@ public abstract class WebSite {
         req.setType(WebRequest.Type.DELETE);
 
         // Get response
-        WebResponse resp = getResponse(req); // Used to be deleteFileImpl()
+        WebResponse resp = getResponse(req);
 
         // If not root, have parent resetContent() so file will be removed from parent files
         WebFile parentDir = aFile.getParent();
@@ -378,8 +378,7 @@ public abstract class WebSite {
         aFile.reset();
 
         // Fire Exists prop change
-        PropChange filePC = new PropChange(aFile, WebFile.Exists_Prop, true, false);
-        fileDidPropChange(filePC);
+        aFile.fireExistsPropChange(false);
 
         // Return
         return resp;

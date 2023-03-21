@@ -227,6 +227,14 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     }
 
     /**
+     * Fires Exists prop change - unconventional because Exists is derived from verified.
+     */
+    protected void fireExistsPropChange(boolean aValue)
+    {
+        firePropChange(Exists_Prop, !aValue, aValue);
+    }
+
+    /**
      * Returns the file modification time.
      */
     public long getModTime()  { return _modTime; }
@@ -414,7 +422,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
             WebFile parent = getParent();
             if (parent != null)
                 parent.resetContent();
-            firePropChange(Exists_Prop, true, false);
+            fireExistsPropChange(false);
         }
 
         // If File and ModTime changed, fire ModTime prop change
