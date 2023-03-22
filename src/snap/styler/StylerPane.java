@@ -62,7 +62,7 @@ public class StylerPane extends StylerOwner {
 
         // Add MiscPane
         mainView.addChild(miscPane);
-        Collapser.createCollapserAndLabel(miscPane, "Transparency").setCollapsed(true);
+        CollapseView.replaceViewWithCollapseView(miscPane, "Transparency").setCollapsed(true);
     }
 
     /**
@@ -101,7 +101,6 @@ public class StylerPane extends StylerOwner {
         }
     }
 
-
     /**
      * Adds an inspector.
      */
@@ -113,11 +112,9 @@ public class StylerPane extends StylerOwner {
         mainView.addChild(inspUI);
 
         // Trigger Collapser create
-        Collapser collapser = aStylerOwner.getCollapser();
+        CollapseView collapser = CollapseView.replaceViewWithCollapseView(inspUI, aName);
         if (!isShowing)
             collapser.setCollapsed(true);
-
-        collapser.getLabel().setText(aName);
     }
 
     /**

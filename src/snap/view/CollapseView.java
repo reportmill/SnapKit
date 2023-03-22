@@ -1,11 +1,10 @@
-package snap.styler;
+package snap.view;
 import snap.geom.Insets;
 import snap.geom.Polygon;
 import snap.geom.Pos;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.view.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,15 +12,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A class to collapse any view.
+ * This view subclass holds a header label and content view with support to collapse.
  */
-public class Collapser {
+public class CollapseView extends ParentView {
 
-    // The View
-    private View _view;
-
-    // The label
+    // The header label
     private Label _label;
+
+    // The content view
+    private View _content;
 
     // The first focus view
     private View _firstFocus;
@@ -48,27 +47,44 @@ public class Collapser {
     public static Border LABEL_BORDER = Border.createLineBorder(LABEL_FILL.darker(), 1).copyForInsets(Insets.EMPTY);
 
     /**
-     * Creates a Collapser for given View and Label.
+     * Constructor.
      */
-    public Collapser(View aView, Label aLabel)
+    public CollapseView()
     {
-        setView(aView);
-        setLabel(aLabel);
+        super();
+
+        // Create/add label
+        _label = createLabel();
+        addChild(_label);
     }
 
     /**
-     * Returns the view.
+     * Constructor for given View.
      */
-    public View getView()  { return _view; }
+    public CollapseView(String aTitle, View aView)
+    {
+        this();
+
+        // Set title and name
+        if (aTitle != null) {
+            setTitle(aTitle);
+            String name = aTitle.replace(" ", "") + "CollapseView";
+            setName(name);
+        }
+        setContent(aView);
+    }
 
     /**
-     * Sets the View.
+     * Returns the title.
      */
-    public void setView(View aView)
+    public String getTitle()  { return _label.getText(); }
+
+    /**
+     * Sets the title.
+     */
+    public void setTitle(String aValue)
     {
-        if (aView == _view) return;
-        _view = aView;
-        _growHeight = aView.isGrowHeight();
+        _label.setText(aValue);
     }
 
     /**
@@ -77,31 +93,60 @@ public class Collapser {
     public Label getLabel()  { return _label; }
 
     /**
-     * Sets the label.
+     * Creates a label.
      */
-    public void setLabel(Label aLabel)
+    protected Label createLabel()
     {
-        // If already set, just return
-        if (aLabel == _label) return;
-
-        // Set label
-        _label = aLabel;
+        // Create label
+        Label label = new Label();
+        label.setFont(LABEL_FONT);
+        label.setFill(LABEL_FILL);
+        label.setTextFill(LABEL_TEXT_FILL);
+        label.setBorder(LABEL_BORDER);
+        label.getStringView().setGrowWidth(true);
+        label.setAlign(Pos.CENTER);
+        label.setPadding(4, 4, 4, 10);
+        label.setMargin(4, 8, 4, 8);
+        label.setBorderRadius(5);
 
         // Listen for Label MousePress to trigger expand
-        _label.addEventHandler(e -> labelWasPressed(e), View.MousePress);
+        label.addEventHandler(e -> labelWasPressed(e), View.MousePress);
 
         // Set CollapseGraphic
         View graphic = getCollapseGraphic();
-        _label.setGraphic(graphic);
+        label.setGraphic(graphic);
         graphic.setRotate(isExpanded() ? 90 : 0);
+
+        // Return
+        return label;
     }
 
     /**
-     * Sets the first focus component.
+     * Returns the content view.
      */
-    public void setFirstFocus(View aView)
+    public View getContent()  { return _content; }
+
+    /**
+     * Sets the content view.
+     */
+    public void setContent(View aView)
     {
-        _firstFocus = aView;
+        // If already set, just return
+        if (aView == _content) return;
+
+        // Remove old
+        if (_content != null)
+            removeChild(_content);
+
+        // Set
+        _content = aView;
+
+        // Add new
+        if (_content != null) {
+            addChild(_content);
+            _growHeight = aView.isGrowHeight();
+            setGrowHeight(aView.isGrowHeight());
+        }
     }
 
     /**
@@ -112,18 +157,7 @@ public class Collapser {
     /**
      * Sets whether view is collapsed.
      */
-    public void setCollapsed(boolean aValue)
-    {
-        setExpanded(!aValue);
-    }
-
-    /**
-     * Sets collapsed animated.
-     */
-    public void setCollapsedAnimated(boolean aValue)
-    {
-        setExpandedAnimated(!aValue);
-    }
+    public void setCollapsed(boolean aValue)  { setExpanded(!aValue); }
 
     /**
      * Returns whether title view is expanded.
@@ -143,20 +177,20 @@ public class Collapser {
 
         // If expanding
         if (aValue) {
-            _view.setPrefHeight(-1);
-            _view.setGrowHeight(_growHeight);
+            setGrowHeight(_growHeight);
+            _content.setPrefHeight(-1);
             if (_group != null)
-                _group.collapserDidExpand(this);
+                _group.collapseViewDidExpand(this);
         }
 
-        // If callapsing
+        // If collapsing
         else {
-            _view.setVisible(false);
-            _view.setManaged(false);
-            _view.setPrefHeight(0);
-            _view.setGrowHeight(false);
+            setGrowHeight(false);
+            _content.setVisible(false);
+            _content.setManaged(false);
+            _content.setPrefHeight(0);
             if (_group != null)
-                _group.collapserDidCollapse(this);
+                _group.collapseViewDidCollapse(this);
         }
 
         // Update graphic
@@ -174,24 +208,26 @@ public class Collapser {
         if (aValue == _expanded) return;
 
         // Cache current size and set new Expanded value
-        double viewH = _view.getHeight();
+        double viewH = _content.getHeight();
         setExpanded(aValue);
 
         // Reset/get new PrefSize
-        _view.setVisible(true);
-        _view.setManaged(true);
-        _view.setPrefHeight(-1);
-        double prefH = aValue ? _view.getPrefHeight() : 0;
+        _content.setVisible(true);
+        _content.setManaged(true);
+        _content.setPrefHeight(-1);
+        double prefH = aValue ? _content.getPrefHeight() : 0;
 
         // Set pref size to current size and expanded to true (for duration of anim)
-        _view.setPrefHeight(viewH);
+        _content.setPrefHeight(viewH);
 
         // Clip View to bounds? (was TitleView.Content)
-        _view.setClipToBounds(true);
+        _content.setClipToBounds(true);
 
         // Configure anim to new size
-        ViewAnim anim = _view.getAnim(0).clear();
-        anim.getAnim(500).setPrefHeight(prefH).setOnFinish(() -> setExpandedAnimDone(aValue)).needsFinish().play();
+        ViewAnim anim = _content.getAnim(0).clear();
+        anim.getAnim(500).setPrefHeight(prefH);
+        anim.setOnFinish(() -> setExpandedAnimDone(aValue)).needsFinish();
+        anim.play();
 
         // Get graphic and set initial anim rotate
         View graphic = _label.getGraphic();
@@ -213,15 +249,15 @@ public class Collapser {
     {
         // If Showing, restore full pref size
         if (aValue) {
-            _view.setPrefHeight(-1);
+            _content.setPrefHeight(-1);
             if (_firstFocus != null)
                 _firstFocus.requestFocus();
         }
 
         // If Hiding, make really hidden
         else {
-            _view.setVisible(false);
-            _view.setManaged(false);
+            _content.setVisible(false);
+            _content.setManaged(false);
         }
     }
 
@@ -235,12 +271,20 @@ public class Collapser {
     }
 
     /**
+     * Sets the first focus component.
+     */
+    public void setFirstFocus(View aView)
+    {
+        _firstFocus = aView;
+    }
+
+    /**
      * Sets a collapse group by name.
      */
     public void setGroupForName(String aName)
     {
         _group = getCollapseGroupForName(aName);
-        _group.addCollapser(this);
+        _group.addCollapseView(this);
     }
 
     /**
@@ -282,51 +326,51 @@ public class Collapser {
     }
 
     /**
-     * Creates a Collapser for given view, including a label with given name.
+     * Returns the preferred width.
      */
-    public static Collapser createCollapserAndLabel(View aView, String aLabelTitle)
+    protected double getPrefWidthImpl(double aH)
     {
-        // Create Label
-        Label label = createLabel(aLabelTitle);
-
-        // Handle TitleView
-        if (aView instanceof TitleView) {
-            TitleView titleView = (TitleView) aView;
-            View content = titleView.getContent();
-            BoxView boxView = new BoxView(content, true, true);
-            boxView.setPadding(titleView.getPadding());
-            ColView colView = new ColView();
-            colView.addChild(boxView);
-            ViewUtils.replaceView(titleView, colView);
-            aView = colView;
-        }
-
-        // Add above given view
-        ViewHost host = aView.getHost();
-        int index = aView.indexInHost();
-        host.addGuest(label, index);
-
-        // Create/return collapser
-        return new Collapser(aView, label);
+        return ColView.getPrefWidth(this, -1);
     }
 
     /**
-     * Creates a label.
+     * Returns the preferred height.
      */
-    public static Label createLabel(String aTitle)
+    protected double getPrefHeightImpl(double aW)
     {
-        Label label = new Label(aTitle);
-        label.setName(aTitle + "Label");
-        label.setFont(LABEL_FONT);
-        label.setFill(LABEL_FILL);
-        label.setTextFill(LABEL_TEXT_FILL);
-        label.setBorder(LABEL_BORDER);
-        label.getStringView().setGrowWidth(true);
-        label.setAlign(Pos.CENTER);
-        label.setPadding(4, 4, 4, 10);
-        label.setMargin(4, 8, 4, 8);
-        label.setBorderRadius(5);
-        return label;
+        return ColView.getPrefHeight(this, -1);
+    }
+
+    /**
+     * Layout children.
+     */
+    protected void layoutImpl()
+    {
+        ColView.layout(this, true);
+    }
+
+    /**
+     * Override to forward to label.
+     */
+    @Override
+    public String getText()  { return getLabel().getText(); }
+
+    /**
+     * Override to forward to label.
+     */
+    @Override
+    public void setText(String aStr)  { getLabel().setText(aStr); }
+
+    /**
+     * Replaces given view with CollapseView with given title.
+     */
+    public static CollapseView replaceViewWithCollapseView(View aView, String aTitle)
+    {
+        ParentView parentView = aView.getParent();
+        int indexInParent = aView.indexInParent();
+        CollapseView collapseView = new CollapseView(aTitle, aView);
+        ViewUtils.addChild(parentView, collapseView, indexInParent);
+        return collapseView;
     }
 
     /**
@@ -335,7 +379,7 @@ public class Collapser {
     public static class CollapseGroup {
 
         // The list of collapsers
-        private List<Collapser> _collapsers = new ArrayList<>();
+        private List<CollapseView> _collapseViews = new ArrayList<>();
 
         // Whether doing group work
         private boolean _groupWork;
@@ -343,37 +387,37 @@ public class Collapser {
         /**
          * Adds a collapser.
          */
-        public void addCollapser(Collapser aCollapser)
+        public void addCollapseView(CollapseView aCollapser)
         {
-            _collapsers.add(aCollapser);
+            _collapseViews.add(aCollapser);
         }
 
         /**
-         * Called when a collapser collapses.
+         * Called when a CollapseView collapses.
          */
-        protected void collapserDidExpand(Collapser aCollapser)
+        protected void collapseViewDidExpand(CollapseView aCollapseView)
         {
             if (_groupWork) return;
             _groupWork = true;
 
-            for (Collapser c : _collapsers)
-                if (c != aCollapser && c.isExpanded())
-                    c.setExpandedAnimated(false);
+            for (CollapseView collapseView : _collapseViews)
+                if (collapseView != aCollapseView && collapseView.isExpanded())
+                    collapseView.setExpandedAnimated(false);
 
             _groupWork = false;
         }
 
         /**
-         * Called when a collapser collapses.
+         * Called when a CollapseView collapses.
          */
-        protected void collapserDidCollapse(Collapser aCollapser)
+        protected void collapseViewDidCollapse(CollapseView aCollapseView)
         {
             if (_groupWork) return;
             _groupWork = true;
 
-            for (Collapser c : _collapsers)
-                if (c != aCollapser && !c.isExpanded()) {
-                    c.setExpandedAnimated(true);
+            for (CollapseView collapseView : _collapseViews)
+                if (collapseView != aCollapseView && !collapseView.isExpanded()) {
+                    collapseView.setExpandedAnimated(true);
                     break;
                 }
 

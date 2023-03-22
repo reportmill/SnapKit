@@ -88,38 +88,6 @@ public class ColView extends ChildView {
     }
 
     /**
-     * Returns preferred width of given parent with given children.
-     */
-    public static double getPrefWidth(ParentView aPar, double aH)
-    {
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aPar);
-        return viewProxy.getPrefWidth(aH);
-    }
-
-    /**
-     * Returns preferred height of given parent with given children.
-     */
-    public static double getPrefHeight(ParentView aParent, double aW)
-    {
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aParent);
-        return viewProxy.getPrefHeight(aW);
-    }
-
-    /**
-     * Performs layout for given parent with option to fill width.
-     */
-    public static void layout(ParentView aParent, boolean isFillWidth)
-    {
-        // Get layout children (just return if none)
-        if (aParent.getChildrenManaged().length == 0) return;
-
-        // Get Parent ColViewProxy and layout views
-        ColViewProxy<?> viewProxy = new ColViewProxy<>(aParent);
-        viewProxy.setFillWidth(isFillWidth);
-        viewProxy.layoutView();
-    }
-
-    /**
      * Override to support props for this class.
      */
     @Override
@@ -203,5 +171,37 @@ public class ColView extends ChildView {
         // Unarchive FillWidth
         if (anElement.hasAttribute(FillWidth_Prop))
             setFillWidth(anElement.getAttributeBoolValue(FillWidth_Prop));
+    }
+
+    /**
+     * Returns preferred width of given parent with given children.
+     */
+    public static double getPrefWidth(ParentView aPar, double aH)
+    {
+        ColViewProxy<?> viewProxy = new ColViewProxy<>(aPar);
+        return viewProxy.getPrefWidth(aH);
+    }
+
+    /**
+     * Returns preferred height of given parent with given children.
+     */
+    public static double getPrefHeight(ParentView aParent, double aW)
+    {
+        ColViewProxy<?> viewProxy = new ColViewProxy<>(aParent);
+        return viewProxy.getPrefHeight(aW);
+    }
+
+    /**
+     * Performs layout for given parent with option to fill width.
+     */
+    public static void layout(ParentView aParent, boolean isFillWidth)
+    {
+        // Get layout children (just return if none)
+        if (aParent.getChildrenManaged().length == 0) return;
+
+        // Get Parent ColViewProxy and layout views
+        ColViewProxy<?> viewProxy = new ColViewProxy<>(aParent);
+        viewProxy.setFillWidth(isFillWidth);
+        viewProxy.layoutView();
     }
 }
