@@ -52,6 +52,8 @@ public class CollapseView extends ParentView {
     public CollapseView()
     {
         super();
+        setMargin(4, 0, 4, 0);
+        setSpacing(4);
 
         // Create/add label
         _label = createLabel();
@@ -106,7 +108,7 @@ public class CollapseView extends ParentView {
         label.getStringView().setGrowWidth(true);
         label.setAlign(Pos.CENTER);
         label.setPadding(4, 4, 4, 10);
-        label.setMargin(4, 8, 4, 8);
+        label.setMargin(0, 8, 0, 8);
         label.setBorderRadius(5);
 
         // Listen for Label MousePress to trigger expand
