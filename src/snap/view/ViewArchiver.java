@@ -100,6 +100,7 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("BoxView", BoxView.class);
         cmap.put("BrowserView", BrowserView.class);
         cmap.put("Button", Button.class);
+        cmap.put("CollapseView", CollapseView.class);
         cmap.put("ColorButton", snap.viewx.ColorButton.class);
         cmap.put("ColorDock", snap.viewx.ColorDock.class);
         cmap.put("ColorWell", snap.viewx.ColorWell.class);

@@ -161,14 +161,15 @@ public class BoxView extends ParentView implements ViewHost {
     /**
      * ViewHost method: Override to return 1 if content is present.
      */
-    public int getGuestCount()  { return getContent()!=null ? 1 : 0; }
+    public int getGuestCount()  { return getContent() != null ? 1 : 0; }
 
     /**
      * ViewHost method: Override to return content (and complain if index beyond 0).
      */
     public View getGuest(int anIndex)
     {
-        if (anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+        if (anIndex > 0)
+            throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
         return getContent();
     }
 
@@ -177,7 +178,8 @@ public class BoxView extends ParentView implements ViewHost {
      */
     public void addGuest(View aChild, int anIndex)
     {
-        if (anIndex>0) System.err.println("BoxView: Attempt to addGuest beyond 0");
+        if (anIndex > 0)
+            System.err.println("BoxView: Attempt to addGuest beyond 0");
         setContent(aChild);
     }
 
@@ -186,9 +188,11 @@ public class BoxView extends ParentView implements ViewHost {
      */
     public View removeGuest(int anIndex)
     {
-        if (anIndex>0) throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
-        View cont = getContent(); setContent(null);
-        return cont;
+        if (anIndex > 0)
+            throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+        View content = getContent();
+        setContent(null);
+        return content;
     }
 
     /**
@@ -198,7 +202,8 @@ public class BoxView extends ParentView implements ViewHost {
     {
         // If already set, just return
         View content = getContent();
-        if (aView == content) return;
+        if (aView == content)
+            return;
 
         // Set PrefSize to current size
         double viewW = getWidth();

@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * This view subclass holds a header label and content view with support to collapse.
  */
-public class CollapseView extends ParentView {
+public class CollapseView extends ParentView implements ViewHost {
 
     // The header label
     private Label _label;
@@ -349,6 +349,43 @@ public class CollapseView extends ParentView {
     protected void layoutImpl()
     {
         ColView.layout(this, true);
+    }
+
+    /**
+     * ViewHost method: Override to return 1 if content is present.
+     */
+    public int getGuestCount()  { return getContent() != null ? 1 : 0; }
+
+    /**
+     * ViewHost method: Override to return content (and complain if index beyond 0).
+     */
+    public View getGuest(int anIndex)
+    {
+        if (anIndex > 0)
+            throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+        return getContent();
+    }
+
+    /**
+     * ViewHost method: Override to set content.
+     */
+    public void addGuest(View aChild, int anIndex)
+    {
+        if (anIndex > 0)
+            System.err.println("CollapseView: Attempt to addGuest beyond 0");
+        setContent(aChild);
+    }
+
+    /**
+     * ViewHost method: Override to clear content (and complain if index beyond 0).
+     */
+    public View removeGuest(int anIndex)
+    {
+        if (anIndex > 0)
+            throw new IndexOutOfBoundsException("Index " + anIndex + " beyond 0");
+        View content = getContent();
+        setContent(null);
+        return content;
     }
 
     /**
