@@ -157,10 +157,10 @@ public abstract class WebSite {
      */
     public synchronized WebFile getFileForPath(String aPath) throws ResponseException
     {
-        // Get file from cache (just return if found and previously verified)
+        // Get file from cache (just return if found and previously verified and exists)
         String filePath = PathUtils.getNormalized(aPath);
         WebFile file = _files.get(filePath);
-        if (file != null && file.isVerified())
+        if (file != null && file.isVerified() && file.getExists())
             return file;
 
         // Get file
