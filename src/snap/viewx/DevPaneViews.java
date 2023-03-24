@@ -272,10 +272,6 @@ public class DevPaneViews extends ViewOwner {
             anEvent.consume();
         }
 
-        // Handle CloseButton
-        if (anEvent.equals("CloseButton"))
-            runLater(() -> DevPane.setDevPaneShowing(_devPane.getContent(), false));
-
         // Handle ShowSourceButton
         if (anEvent.equals("ShowSourceButton"))
             showSource();

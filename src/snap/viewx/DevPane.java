@@ -1,4 +1,5 @@
 package snap.viewx;
+import snap.geom.Pos;
 import snap.gfx.Color;
 import snap.gfx.Painter;
 import snap.gfx.Stroke;
@@ -141,8 +142,20 @@ public class DevPane extends ViewOwner {
         _tabView.addTab("Views", _viewTree.getUI());
         _tabView.addTab("Graphics", _gfxInsp.getUI());
         _tabView.addTab("Console", _consoleInsp.getUI());
+
+        // Add CloseBox
+        TabBar tabBar = _tabView.getTabBar();
+        CloseBox closeBox = new CloseBox();
+        closeBox.setMargin(0, 15, 0, 0);
+        closeBox.setLean(Pos.CENTER_RIGHT);
+        closeBox.setManaged(false);
+        closeBox.addEventHandler(e -> removeFromWindow(), View.Action);
+        ViewUtils.addChild(tabBar, closeBox);
     }
 
+    /**
+     * RespondUI.
+     */
     @Override
     protected void respondUI(ViewEvent anEvent)
     {

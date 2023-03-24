@@ -20,10 +20,4 @@
     </RowView>
     <TextView Name="XMLText" GrowHeight="true" />
   </ColView>
-  <ColView Padding="4,4,4,4" FillWidth="true">
-    <font name="Arial" size="12" />
-    <RowView PrefHeight="29" Padding="0,4,10,4">
-      <Button Name="CloseButton" Padding="3,6,3,6" LeanX="RIGHT" text="X" />
-    </RowView>
-  </ColView>
 </RowView>

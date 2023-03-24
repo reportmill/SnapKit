@@ -273,10 +273,6 @@ public class DevPaneViewOwners extends ViewOwner {
             anEvent.consume();
         }
 
-        // Handle CloseButton
-        if (anEvent.equals("CloseButton"))
-            runLater(() -> DevPane.setDevPaneShowing(_devPane.getContent(), false));
-
         // Handle ShowUIButton
         if (anEvent.equals("ShowUIButton"))
             showInSnapBuilder(anEvent.isAltDown());
