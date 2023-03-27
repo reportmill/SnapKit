@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView Padding="5" FillHeight="true">
+<RowView PrefHeight="300" Padding="5" FillHeight="true">
   <ColView Padding="5" FillWidth="true">
     <font name="Arial" size="13" />
     <RowView Padding="2,4,3,4">
@@ -8,7 +8,7 @@
         <font name="Arial" size="11" />
       </ToggleButton>
     </RowView>
-    <BrowserView Name="BrowserView" PrefWidth="420" PrefHeight="300" GrowHeight="true" PrefColCount="3" PrefColWidth="140" />
+    <BrowserView Name="BrowserView" PrefWidth="420" GrowHeight="true" PrefColCount="3" PrefColWidth="120" />
   </ColView>
   <ColView Padding="5" GrowHeight="true">
     <RowView PrefHeight="26" Padding="2,4,3,4" GrowWidth="true" Spacing="4">

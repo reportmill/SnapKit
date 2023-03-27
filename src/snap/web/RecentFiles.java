@@ -3,7 +3,6 @@
  */
 package snap.web;
 import java.util.*;
-import java.util.function.Consumer;
 import snap.util.ArrayUtils;
 import snap.util.Prefs;
 import snap.view.*;

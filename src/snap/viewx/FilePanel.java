@@ -276,6 +276,7 @@ public class FilePanel extends ViewOwner {
 
         // Create/add TransitionPane
         _transitionPane = new TransitionPane();
+        _transitionPane.setGrowHeight(true);
         topColView.addChild(_transitionPane);
 
         // Return

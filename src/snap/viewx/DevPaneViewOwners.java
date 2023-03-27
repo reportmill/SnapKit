@@ -220,7 +220,6 @@ public class DevPaneViewOwners extends ViewOwner {
         _browserView = getView("BrowserView", BrowserView.class);
         _browserView.setResolver(new ViewOwnersTreeResolver());
         _browserView.setItems(_devPane.getContent());
-        _browserView.setPrefColWidth(120);
 
         // Get TextView
         _textView = getView("XMLText", TextView.class);

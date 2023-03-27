@@ -34,7 +34,7 @@ public class ScrollView extends ParentView implements ViewHost {
     public static final String BarSize_Prop = "BarSize";
     
     /**
-     * Creates a new ScrollView.
+     * Constructor.
      */
     public ScrollView()
     {
@@ -49,9 +49,13 @@ public class ScrollView extends ParentView implements ViewHost {
     }
 
     /**
-     * Creates a new ScrollView.
+     * Constructor for given view.
      */
-    public ScrollView(View aView)  { this(); setContent(aView); }
+    public ScrollView(View aView)
+    {
+        this();
+        setContent(aView);
+    }
 
     /**
      * Returns the content.
@@ -93,7 +97,7 @@ public class ScrollView extends ParentView implements ViewHost {
      */
     public ScrollBar getHBar()
     {
-        if (_hbar!=null) return _hbar;
+        if (_hbar != null) return _hbar;
         _hbar = new ScrollBar();
         _hbar.addPropChangeListener(pc -> scrollBarDidPropChange(pc), ScrollBar.Scroll_Prop);
         return _hbar;
@@ -104,8 +108,9 @@ public class ScrollView extends ParentView implements ViewHost {
      */
     public ScrollBar getVBar()
     {
-        if (_vbar!=null) return _vbar;
-        _vbar = new ScrollBar(); _vbar.setVertical(true);
+        if (_vbar != null) return _vbar;
+        _vbar = new ScrollBar();
+        _vbar.setVertical(true);
         _vbar.addPropChangeListener(pc -> scrollBarDidPropChange(pc), ScrollBar.Scroll_Prop);
         return _vbar;
     }
@@ -120,8 +125,8 @@ public class ScrollView extends ParentView implements ViewHost {
      */
     public void setShowHBar(Boolean aValue)
     {
-        if (aValue==_showHBar) return;
-        firePropChange(ShowHBar_Prop, _showHBar, _showHBar=aValue);
+        if (aValue == _showHBar) return;
+        firePropChange(ShowHBar_Prop, _showHBar, _showHBar = aValue);
     }
 
     /**
@@ -134,14 +139,14 @@ public class ScrollView extends ParentView implements ViewHost {
      */
     public void setShowVBar(Boolean aValue)
     {
-        if (aValue==_showVBar) return;
-        firePropChange(ShowVBar_Prop, _showVBar, _showVBar=aValue);
+        if (aValue == _showVBar) return;
+        firePropChange(ShowVBar_Prop, _showVBar, _showVBar = aValue);
     }
 
     /**
      * Returns whether HBar is showing.
      */
-    public boolean isHBarShowing()  { return getHBar().getParent()!=null; }
+    public boolean isHBarShowing()  { return getHBar().getParent() != null; }
 
     /**
      * Sets whether HBar is showing.
@@ -149,7 +154,7 @@ public class ScrollView extends ParentView implements ViewHost {
     protected void setHBarShowing(boolean aValue)
     {
         // If already set, just return
-        if (aValue==isHBarShowing()) return;
+        if (aValue == isHBarShowing()) return;
 
         // If showing, add and update
         ScrollBar hbar = getHBar();
@@ -170,7 +175,7 @@ public class ScrollView extends ParentView implements ViewHost {
     /**
      * Returns whether VBar is showing.
      */
-    public boolean isVBarShowing()  { return getVBar().getParent()!=null; }
+    public boolean isVBarShowing()  { return getVBar().getParent() != null; }
 
     /**
      * Sets whether VBar is showing.
@@ -178,7 +183,7 @@ public class ScrollView extends ParentView implements ViewHost {
     protected void setVBarShowing(boolean aValue)
     {
         // If already set, just return
-        if (aValue==isVBarShowing()) return;
+        if (aValue == isVBarShowing()) return;
 
         // If showing, add and update
         ScrollBar vbar = getVBar();
@@ -206,7 +211,7 @@ public class ScrollView extends ParentView implements ViewHost {
      */
     public void setBarSize(int aValue)
     {
-        if (aValue==_barSize) return;
+        if (aValue == _barSize) return;
         firePropChange(BarSize_Prop, _barSize, _barSize = aValue);
     }
 
@@ -399,25 +404,25 @@ public class ScrollView extends ParentView implements ViewHost {
     protected void scrollerDidPropChange(PropChange anEvent)
     {
         // Get Property Name
-        String pname = anEvent.getPropName();
+        String propName = anEvent.getPropName();
 
         // Handle Scroller.ScrollX change
-        if (pname==Scroller.ScrollX_Prop)
+        if (propName == Scroller.ScrollX_Prop)
             getHBar().setScroll(_scroller.getScrollX());
 
         // Handle Scroller.ScrollY change
-        else if (pname==Scroller.ScrollY_Prop)
+        else if (propName == Scroller.ScrollY_Prop)
             getVBar().setScroll(_scroller.getScrollY());
 
         // Handle Scroller.Width or Scroller.ScrollWidth change
-        else if (pname==Width_Prop || pname==Scroller.ScrollWidth_Prop) {
+        else if (propName == Width_Prop || propName == Scroller.ScrollWidth_Prop) {
             getHBar().setViewSize(_scroller.getWidth());
             getHBar().setScrollSize(_scroller.getScrollWidth());
             getHBar().setScroll(_scroller.getScrollX());
         }
 
         // Handle Scroller.Height or Scroller.ScrollHeight change
-        else if (pname==Scroller.Height_Prop || pname==Scroller.ScrollHeight_Prop) {
+        else if (propName == Scroller.Height_Prop || propName == Scroller.ScrollHeight_Prop) {
             getVBar().setViewSize(_scroller.getHeight());
             getVBar().setScrollSize(_scroller.getScrollHeight());
             getVBar().setScroll(_scroller.getScrollY());
@@ -429,13 +434,13 @@ public class ScrollView extends ParentView implements ViewHost {
      */
     public void scrollBarDidPropChange(PropChange aPC)
     {
-        String pname = aPC.getPropName();
-        if (pname==ScrollBar.Scroll_Prop) {
-            ScrollBar sbar = (ScrollBar)aPC.getSource();
-            double val = sbar.getScrollRatio();
-            if (sbar==_hbar)
-                _scroller.setScrollXRatio(val);
-            else _scroller.setScrollYRatio(val);
+        String propName = aPC.getPropName();
+        if (propName == ScrollBar.Scroll_Prop) {
+            ScrollBar scrollBar = (ScrollBar) aPC.getSource();
+            double val = scrollBar.getScrollRatio();
+            if (scrollBar == _hbar)
+                _scroller.setScrollRatioX(val);
+            else _scroller.setScrollRatioY(val);
         }
     }
 
@@ -448,9 +453,9 @@ public class ScrollView extends ParentView implements ViewHost {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive ShowHBar, ShowVBar, BarSize
-        if (getShowHBar()!=null) e.add(ShowHBar_Prop, getShowHBar());
-        if (getShowVBar()!=null) e.add(ShowVBar_Prop, getShowVBar());
-        if (getBarSize()!=16) e.add(BarSize_Prop, getBarSize());
+        if (getShowHBar() != null) e.add(ShowHBar_Prop, getShowHBar());
+        if (getShowVBar() != null) e.add(ShowVBar_Prop, getShowVBar());
+        if (getBarSize() != 16) e.add(BarSize_Prop, getBarSize());
         return e;
     }
 

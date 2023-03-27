@@ -214,7 +214,6 @@ public class DevPaneViews extends ViewOwner {
         _browserView = getView("BrowserView", BrowserView.class);
         _browserView.setResolver(new ViewTreeResolver());
         _browserView.setItems(_devPane.getContent());
-        _browserView.setPrefColWidth(120);
 
         // Configure PropTableView
         _propTable = getView("PropTableView", TableView.class);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView Padding="5" FillHeight="true">
-  <ColView Padding="5" FillWidth="true">
+<RowView PrefHeight="300" Padding="5" FillHeight="true">
+  <ColView PrefWidth="300" Padding="5" GrowWidth="true" FillWidth="true">
     <font name="Arial" size="13" />
     <RowView Padding="2,4,3,4">
       <Label text="ViewOwner Hierarchy" />
@@ -8,9 +8,9 @@
         <font name="Arial" size="11" />
       </ToggleButton>
     </RowView>
-    <BrowserView Name="BrowserView" PrefWidth="420" PrefHeight="300" GrowHeight="true" PrefColCount="3" PrefColWidth="140" />
+    <BrowserView Name="BrowserView" GrowHeight="true" PrefColCount="3" PrefColWidth="120" />
   </ColView>
-  <ColView Padding="5" GrowWidth="true" FillWidth="true">
+  <ColView PrefWidth="100" Padding="5" GrowWidth="true" FillWidth="true">
     <RowView Padding="2,4,3,4" Spacing="8">
       <Label Name="XMLTextLabel" text="View XML">
         <font name="Arial" size="13" />
