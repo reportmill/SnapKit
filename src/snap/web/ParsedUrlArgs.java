@@ -77,7 +77,8 @@ public class ParsedUrlArgs {
      */
     public int getFieldIndex(String aName)
     {
-        return ListUtils.findMatchIndex(_fields, field -> aName.equals(field));
+        List<String> fields = getFields();
+        return ListUtils.findMatchIndex(fields, field -> aName.equals(field));
     }
 
     /**
@@ -85,8 +86,8 @@ public class ParsedUrlArgs {
      */
     public String getValue(String aFieldName)
     {
-        int index = getFieldIndex(aFieldName);
-        return index >= 0 ? getValue(index) : null;
+        int fieldIndex = getFieldIndex(aFieldName);
+        return fieldIndex >= 0 ? getValue(fieldIndex) : null;
     }
 
     /**
@@ -95,13 +96,13 @@ public class ParsedUrlArgs {
     public ParsedUrlArgs setValue(String aFieldName, Object aValue)
     {
         String value = aValue != null ? aValue.toString() : null;
-        int index = getFieldIndex(aFieldName);
-        if (index >= 0) {
+        int fieldIndex = getFieldIndex(aFieldName);
+        if (fieldIndex >= 0) {
             if (value != null)
-                _values.set(index, value);
+                _values.set(fieldIndex, value);
             else {
-                _fields.remove(index);
-                _values.remove(index);
+                _fields.remove(fieldIndex);
+                _values.remove(fieldIndex);
             }
         }
         else if (value != null) {
