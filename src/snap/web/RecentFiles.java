@@ -182,22 +182,6 @@ public class RecentFiles extends ViewOwner {
     private static Prefs getRecentFilesPrefsNode()  { return Prefs.getDefaultPrefs().getChild(_prefsKey); }
 
     /**
-     * Shows a recent files menu for given view.
-     */
-    public static String showPathsPanel(View aView)
-    {
-        return RecentFilesPane.showPathsPanel(aView);
-    }
-
-    /**
-     * Shows a recent files menu for given view.
-     */
-    public static void showPathsMenu(View aView, Consumer<String> aFunc)
-    {
-        RecentFilesPane.showPathsMenu(aView, aFunc);
-    }
-
-    /**
      * Sets the Recent files key.
      */
     public static void setPrefsKey(String aKey)  { _prefsKey = aKey; }

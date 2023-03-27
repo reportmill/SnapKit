@@ -8,7 +8,6 @@ import snap.util.ArrayUtils;
 import snap.view.*;
 import snap.viewx.DialogBox;
 import snap.viewx.FilesPane;
-import java.util.function.Consumer;
 
 /**
  * A class to manage UI for recent files (can show a panel or a menu).
@@ -114,7 +113,9 @@ public class RecentFilesPane extends FilesPane {
             return null;
 
         // Return selected file
-        return getSelOrTargFile();
+        WebFile selFile =  getSelOrTargFile();
+        WebFile realFile = selFile != null ? selFile.getRealFile() : null;
+        return realFile;
     }
 
     /**
@@ -232,40 +233,5 @@ public class RecentFilesPane extends FilesPane {
 
         // Return
         return localFile;
-    }
-
-    /**
-     * Shows a recent files menu for given view.
-     */
-    public static String showPathsPanel(View aView)
-    {
-        RecentFilesPane recentFiles = new RecentFilesPane();
-        WebFile file = recentFiles.showPanel(aView);
-        return file != null ? file.getPath() : null;
-    }
-
-    /**
-     * Shows a recent files menu for given view.
-     */
-    public static void showPathsMenu(View aView, Consumer<String> aFunc)
-    {
-        Menu menu = new Menu();
-        WebFile[] recentFiles = RecentFiles.getFiles();
-        for (WebFile recentFile : recentFiles) {
-            MenuItem menuItem = new MenuItem();
-            menuItem.setText(recentFile.getName());
-            menuItem.addEventHandler(e -> aFunc.accept(recentFile.getPath()), Action);
-            menu.addItem(menuItem);
-        }
-
-        // Add clear menu
-        menu.addSeparator();
-        MenuItem ci = new MenuItem();
-        ci.setText("Clear Recents");
-        ci.addEventHandler(e -> RecentFiles.clearRecentFiles(), Action);
-        menu.addItem(ci);
-
-        // Show menu
-        menu.show(aView, 0, aView.getHeight());
     }
 }
