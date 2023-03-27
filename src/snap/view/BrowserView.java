@@ -23,16 +23,16 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     private TreeResolver<T>  _resolver;
 
     // Row height
-    private int  _rowHeight = 20;
+    private int  _rowHeight;
 
     // The Cell Configure method
     private Consumer<ListCell<T>>  _cellConf;
 
     // The preferred number of columns
-    private int  _prefColCount = 2;
+    private int  _prefColCount;
 
     // The preferred column width
-    private int  _prefColWidth = 150;
+    private int  _prefColWidth;
 
     // The selected column index
     private int  _selCol = -1;
@@ -50,16 +50,30 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     public static final String PrefColCount_Prop = "PrefColCount";
     public static final String PrefColWidth_Prop = "PrefColWidth";
 
+    // Constants for defaults
+    public static final int DEFAULT_ROW_HEIGHT = 20;
+    public static final int DEFAULT_PREF_COL_COUNT = 2;
+    public static final int DEFAULT_PREF_COL_WIDTH = 150;
+    public static final int MAX_VISIBLE_COL_COUNT = 4;
+
     /**
      * Creates a new BrowserView.
      */
     public BrowserView()
     {
+        // Basic config
+        super();
         setFocusable(true);
         setFocusWhenPressed(true);
         setActionable(true);
         enableEvents(KeyEvents);
 
+        // Set default values
+        _rowHeight = DEFAULT_ROW_HEIGHT;
+        _prefColCount = DEFAULT_PREF_COL_COUNT;
+        _prefColWidth = DEFAULT_PREF_COL_WIDTH;
+
+        // Create/add ScrollView
         _scrollView.setFillHeight(true);
         addChild(_scrollView);
 
@@ -192,14 +206,6 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         _resolver = aResolver;
     }
 
-    // Convenience resolver methods
-    private boolean isParent(T anItem)  { return _resolver.isParent(anItem); }
-    private T getParent(T anItem)  { return _resolver.getParent(anItem); }
-    private T[] getChildren(T aParent)  { return _resolver.getChildren(aParent); }
-    private String getText(T anItem)  { return _resolver.getText(anItem); }
-    private Image getImage(T anItem)  { return _resolver.getImage(anItem); }
-    private Image getBranchImage(T anItem)  { return _resolver.getBranchImage(anItem); }
-
     /**
      * Returns the column count.
      */
@@ -243,14 +249,14 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     {
         // Create new browser column and set index
         BrowserCol<T> browserCol = new BrowserCol<>(this);
-        int index = browserCol._index = getColCount();
+        int colIndex = browserCol._index = getColCount();
 
         // Add to ColBox
         _colView.addChild(browserCol);
 
         // If not root column, set items from last
-        if (index > 0) {
-            BrowserCol<T> lastCol = getCol(index - 1);
+        if (colIndex > 0) {
+            BrowserCol<T> lastCol = getCol(colIndex - 1);
             T item = lastCol.getSelItem();
             T[] items = getChildren(item);
             browserCol.setItems(items);
@@ -302,6 +308,9 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         T selItem = getSelItem();
         if (selItem != null && isParent(selItem))
             addCol();
+
+        // Reset ColView.PrefWidth
+        resetColViewWidth();
     }
 
     /**
@@ -471,7 +480,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     {
         Insets ins = getInsetsAll();
         double prefW = getPrefColCount() * getPrefColWidth();
-        return ins.left + prefW + ins.right;
+        return prefW + ins.getWidth();
     }
 
     /**
@@ -483,7 +492,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         double prefH = 0;
         for (BrowserCol<T> col : getCols())
             prefH = Math.max(prefH, col.getBestHeight(-1));
-        return ins.top + prefH + ins.bottom;
+        return prefH + ins.getHeight();
     }
 
     /**
@@ -494,19 +503,48 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         Insets ins = getInsetsAll();
         double areaX = ins.left;
         double areaY = ins.top;
-        double areaW = getWidth() - areaX - ins.right;
-        double areaH = getHeight() - areaY - ins.bottom;
+        double areaW = getWidth() - ins.getWidth();
+        double areaH = getHeight() - ins.getHeight();
         _scrollView.setBounds(areaX, areaY, areaW, areaH);
     }
 
     /**
-     * Override to automatically set parent Scroller to FillHeight.
+     * Called when Column count or width changes to reset ColView.PrefWidth.
      */
-    protected void setParent(ParentView aPar)
+    protected void resetColViewWidth()
     {
-        super.setParent(aPar);
-        if (aPar instanceof Scroller)
-            ((Scroller) aPar).setFillHeight(true);
+        // Get best column width for current browser width
+        Insets ins = _scrollView.getInsetsAll();
+        double areaW = getWidth() - ins.getWidth();
+        double prefColWidth = getPrefColWidth();
+        int availableColCount = (int) Math.floor(areaW / prefColWidth);
+        int bestColCount = Math.min(Math.max(availableColCount, 1), MAX_VISIBLE_COL_COUNT);
+        int bestColWidth = (int) Math.floor(areaW / bestColCount);
+
+        // Calculate ColView width and set
+        int colCount = getColCount();
+        double colViewWidth = Math.max(bestColWidth * colCount, areaW);
+        _colView.setPrefWidth(colViewWidth);
+
+        //
+        Scroller scroller = _scrollView.getScroller();
+        double scrollRatioX = scroller.getScrollRatioX();
+        if (scrollRatioX > 0 || scrollRatioX < 1)
+            getEnv().runLater(() -> scroller.setScrollRatioX(1));
+    }
+
+    /**
+     * Override to update ColView.PrefWidth.
+     */
+    @Override
+    public void setWidth(double aValue)
+    {
+        // Do normal version
+        if (aValue == getWidth()) return;
+        super.setWidth(aValue);
+
+        // Update ColView.PrefWidth
+        resetColViewWidth();
     }
 
     /**
@@ -590,4 +628,12 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         if (anElement.hasAttribute(PrefColWidth_Prop))
             setPrefColWidth(anElement.getAttributeIntValue(PrefColWidth_Prop));
     }
+
+    // Convenience resolver methods
+    private boolean isParent(T anItem)  { return _resolver.isParent(anItem); }
+    private T getParent(T anItem)  { return _resolver.getParent(anItem); }
+    private T[] getChildren(T aParent)  { return _resolver.getChildren(aParent); }
+    private String getText(T anItem)  { return _resolver.getText(anItem); }
+    private Image getImage(T anItem)  { return _resolver.getImage(anItem); }
+    private Image getBranchImage(T anItem)  { return _resolver.getBranchImage(anItem); }
 }
