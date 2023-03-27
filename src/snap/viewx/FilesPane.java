@@ -74,6 +74,9 @@ public class FilesPane extends ViewOwner {
      */
     public void setSelFile(WebFile aFile)
     {
+        // If already set, just return
+        if (aFile == _selFile) return;
+
         // Cache old file/dir
         WebFile oldSelFile = _selFile;
         WebFile oldSelDir = _selDir;
@@ -221,7 +224,8 @@ public class FilesPane extends ViewOwner {
         setSiteFilesInUI();
 
         // If no file/dir set, set from RecentPath (prefs)
-        if (getSelDir() == null) {
+        WebFile selDir = getSelDir();
+        if (selDir == null) {
             WebFile newSelFile = getDefaultSelFile();
             setSelFile(newSelFile);
         }

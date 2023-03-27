@@ -159,11 +159,19 @@ public class FilesBrowser extends FilesPane {
     @Override
     protected void setSiteFilesInUI()
     {
+        // If UI not loaded, just return
         if (_fileBrowser == null) return;
+
+        // Get root dir files and set in browser
         WebFile rootDir = getSite().getRootDir();
         WebFile[] dirFiles = rootDir.getFiles();
         WebFile[] dirFilesFiltered = FilesBrowserUtils.getVisibleFiles(dirFiles);
         _fileBrowser.setItems(dirFilesFiltered);
+
+        // If SelFile, set
+        WebFile selFile = getSelFile();
+        if (selFile != null)
+            _fileBrowser.setSelItem(selFile);
     }
 
     /**

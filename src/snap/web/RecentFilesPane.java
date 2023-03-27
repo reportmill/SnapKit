@@ -98,6 +98,7 @@ public class RecentFilesPane extends FilesPane {
         // Set SelFile
         WebFile recentFile = recentFilesValid.length > 0 ? recentFilesValid[0] : null;
         setSelFile(recentFile);
+        _filesTable.setSelItem(recentFile);
     }
 
     /**

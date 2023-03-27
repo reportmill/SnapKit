@@ -157,16 +157,28 @@ public class FilePanel extends ViewOwner {
     public WebFile getSelFile()
     {
         // Get current FilesPane selected/targeted file
-        WebFile selFile = _filesPane.getSelOrTargFile();
-
-        // If link file, replace with real
-        if (selFile != null && selFile.getLinkFile() != null)
-            selFile = selFile.getRealFile();
+        WebFile selFile = getSelFileImpl();
 
         // Add to recent files
         WebURL selFileURL = selFile != null ? selFile.getURL() : null;
         if (selFileURL != null)
             RecentFiles.addURL(selFileURL);
+
+        // Return
+        return selFile;
+    }
+
+    /**
+     * Returns the selected file.
+     */
+    protected WebFile getSelFileImpl()
+    {
+        // Get current FilesPane selected/targeted file
+        WebFile selFile = _filesPane.getSelOrTargFile();
+
+        // If link file, replace with real
+        if (selFile != null && selFile.getLinkFile() != null)
+            selFile = selFile.getRealFile();
 
         // Return
         return selFile;
@@ -215,10 +227,6 @@ public class FilePanel extends ViewOwner {
 
         // Get file and path of selection and save to preferences
         WebFile selFile = getSelFile();
-
-        // Add recent file
-        WebURL selFileURL = selFile.getURL();
-        RecentFiles.addURL(selFileURL);
 
         // If user is trying to save over an existing file, warn them
         boolean save = isSaving();
@@ -308,11 +316,8 @@ public class FilePanel extends ViewOwner {
     protected void respondUI(ViewEvent anEvent)
     {
         // Handle SitesTabBar
-        if (anEvent.equals("SitesTabBar")) {
-            int selIndex = _sitesTabBar.getSelIndex();
-            WebSite newSelSite = getSites()[selIndex];
-            setSelSite(newSelSite);
-        }
+        if (anEvent.equals("SitesTabBar"))
+            resetSelSiteFromSitesTabBar();
     }
 
     /**
@@ -322,6 +327,29 @@ public class FilePanel extends ViewOwner {
     {
         if (_dialogBox != null && _dialogBox.isConfirmEnabled())
             _dialogBox.confirm();
+    }
+
+    /**
+     * Resets the SelSite from new SitesTabBar selection.
+     */
+    private void resetSelSiteFromSitesTabBar()
+    {
+        // Get current selected file/site
+        WebFile selFile = getSelFileImpl();
+        boolean isRecentFilesSite = selFile != null && getSelSite() instanceof RecentFilesSite;
+
+        // Get site at SitesTabBar.SelIndex and set
+        int selIndex = _sitesTabBar.getSelIndex();
+        WebSite[] fileSites = getSites();
+        WebSite newSelSite = fileSites[selIndex];
+        setSelSite(newSelSite);
+
+        // If recent files site had selected file from this site, select in new FilesPane
+        if (isRecentFilesSite) {
+            WebSite selFileSite = selFile.getSite();
+            if (selFileSite == newSelSite)
+                _filesPane.setSelFile(selFile);
+        }
     }
 
     /**

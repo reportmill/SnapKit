@@ -153,7 +153,11 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         // Get current selected item and col0 selected item
         T selItem = getSelItem();
         T selItem0 = _col0.getSelItem();
+
+        // Set items
         _col0.setItems(theItems);
+
+        // Reset SelItem
         if (selItem0 == _col0.getSelItem())
             setSelItem(selItem);
         else setSelItem(null);
@@ -295,8 +299,8 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
             removeCol(i);
 
         // See if we need to add column
-        T item = getSelItem();
-        if (item != null && isParent(item))
+        T selItem = getSelItem();
+        if (selItem != null && isParent(selItem))
             addCol();
     }
 
@@ -324,8 +328,8 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
      */
     public T getSelItem()
     {
-        BrowserCol<T> bcol = getSelCol();
-        return bcol != null ? bcol.getSelItem() : null;
+        BrowserCol<T> selCol = getSelCol();
+        return selCol != null ? selCol.getSelItem() : null;
     }
 
     /**
@@ -352,30 +356,32 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         if (anItem.equals(getSelItem())) return;
 
         // If item in last column, select it
-        if (getColLast().getItems().contains(anItem)) {
-            getColLast().setSelItem(anItem);
-            setSelColIndex(getColLast().getIndex());
+        BrowserCol<T> lastCol = getColLast();
+        if (lastCol.getItems().contains(anItem)) {
+            lastCol.setSelItem(anItem);
+            setSelColIndex(lastCol.getIndex());
             if (scrollToVisible)
                 scrollSelToVisible();
             return;
         }
 
-        // Otherwise if item is selected, select column
-        BrowserCol<T> col = getColWithSelItem(anItem);
-        if (col != null) {
-            setSelColIndex(col.getIndex());
+        // If column found with matching selected item, select column
+        BrowserCol<T> newSelCol = getColWithSelItem(anItem);
+        if (newSelCol != null) {
+            setSelColIndex(newSelCol.getIndex());
             if (scrollToVisible)
                 scrollSelToVisible();
             return;
         }
 
         // Otherwise, select parent
-        T par = getParent(anItem);
-        setSelItem(par, false);
+        T itemParent = getParent(anItem);
+        setSelItem(itemParent, false);
 
-        // Select item
-        getColLast().setSelItem(anItem);
-        setSelColIndex(getColLast().getIndex());
+        // Select item and column
+        lastCol = getColLast();
+        lastCol.setSelItem(anItem);
+        setSelColIndex(lastCol.getIndex());
         if (scrollToVisible)
             scrollSelToVisible();
     }
@@ -403,9 +409,9 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     {
         // Iterate over columns and return last with matching SelItem
         for (int i = getColCount() - 1; i >= 0; i--) {
-            BrowserCol<T> col = getCol(i);
-            if (col.getSelItem() == anItem)
-                return col;
+            BrowserCol<T> browserCol = getCol(i);
+            if (browserCol.getSelItem() == anItem)
+                return browserCol;
         }
 
         // Return not found
@@ -413,34 +419,26 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Returns the path constructed by appending the selected row in each column by a dot.
+     * Returns the path constructed by appending the selected item in each column by a separator string.
      */
-    public String getPath()
-    {
-        return getPath(".");
-    }
-
-    /**
-     * Returns the path constructed by appending the selected row in each column by a dot.
-     */
-    public String getPath(String aSeparator)
+    public String getSelPathForSeparator(String aSeparator)
     {
         // Create string buffer for path
-        StringBuffer pathSB = new StringBuffer();
+        StringBuilder selPath = new StringBuilder();
 
         // Iterate over browser columns to add selected row items
         for (int i = 0, iMax = getColCount(); i < iMax; i++) {
-            BrowserCol<T> col = getCol(i);
-            T item = col.getSelItem();
-            if (item == null)
+            BrowserCol<T> browserCol = getCol(i);
+            T colSelItem = browserCol.getSelItem();
+            if (colSelItem == null)
                 break;
             if (i > 0)
-                pathSB.append(aSeparator);
-            pathSB.append(getText(item));
+                selPath.append(aSeparator);
+            selPath.append(getText(colSelItem));
         }
 
         // Return path string
-        return pathSB.toString();
+        return selPath.toString();
     }
 
     /**
