@@ -28,11 +28,14 @@ public class FilePanel extends ViewOwner {
     // The sites
     private WebSite[]  _sites;
 
-    // The FilesPane
-    private FilesPane  _filesPane;
+    // ActionHandler
+    private EventListener  _actionHandler;
 
     // The currently selected site
     private WebSite  _selSite;
+
+    // The FilesPane
+    private FilesPane  _filesPane;
 
     // Whether confirm enabled
     private boolean  _confirmEnabled;
@@ -81,6 +84,12 @@ public class FilePanel extends ViewOwner {
     public void setSaving(boolean aValue)
     {
         _saving = aValue;
+
+        // If Saving, remove RecentFilesSite
+        if (aValue) {
+            RecentFilesSite recentFilesSite = RecentFilesSite.getShared();
+            removeSite(recentFilesSite);
+        }
     }
 
     /**
@@ -115,19 +124,26 @@ public class FilePanel extends ViewOwner {
     public WebSite[] getSites()  { return _sites; }
 
     /**
-     * Adds a sites available to open/save files.
+     * Adds a site available to open/save files.
      */
-    public void addSites(WebSite aSite)
+    public void addSite(WebSite aSite)
     {
         _sites = ArrayUtils.addId(_sites, aSite);
     }
 
     /**
-     * Removes a sites available to open/save files.
+     * Removes a site available to open/save files.
      */
-    public void removeSites(WebSite aSite)
+    public void removeSite(WebSite aSite)
     {
+        // Remove site
         _sites = ArrayUtils.remove(_sites, aSite);
+
+        // If SelSite is removed site, reset SelSite
+        if (aSite == getSelSite()) {
+            WebSite newSelSite = _sites.length > 0 ? _sites[0] : null;
+            setSelSite(newSelSite);
+        }
     }
 
     /**
@@ -147,8 +163,23 @@ public class FilePanel extends ViewOwner {
         _selSite = aSite;
 
         // Get/set FilesPane
-        FilesPane filesPane = getFilesPaneForSite(aSite);
-        setFilesPane(filesPane);
+        if (isUISet()) {
+            FilesPane filesPane = getFilesPaneForSite(aSite);
+            setFilesPane(filesPane);
+        }
+    }
+
+    /**
+     * Returns the action event listener.
+     */
+    public EventListener getActionHandler()  { return _actionHandler; }
+
+    /**
+     * Sets the action event listener.
+     */
+    public void setActionHandler(EventListener actionHandler)
+    {
+        _actionHandler = actionHandler;
     }
 
     /**
@@ -326,8 +357,13 @@ public class FilePanel extends ViewOwner {
      */
     protected void fireActionEvent(ViewEvent anEvent)
     {
+        // If DialogBox set, confirm
         if (_dialogBox != null && _dialogBox.isConfirmEnabled())
             _dialogBox.confirm();
+
+        // If ActionHandler set, forward event
+        if (_actionHandler != null)
+            _actionHandler.listenEvent(anEvent);
     }
 
     /**
