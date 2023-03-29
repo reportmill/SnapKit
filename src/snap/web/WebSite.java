@@ -83,7 +83,7 @@ public abstract class WebSite {
     public String getName()
     {
         WebURL url = getURL();
-        return url.getPath() != null ? url.getPathName() : url.getHost();
+        return url.getPath() != null ? url.getFilename() : url.getHost();
     }
 
     /**

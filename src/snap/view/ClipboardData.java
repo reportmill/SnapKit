@@ -110,7 +110,7 @@ public class ClipboardData {
     {
         if (_name!=null) return _name;
         if (getSourceURL()!=null)
-            return _name = getSourceURL().getPathName();
+            return _name = getSourceURL().getFilename();
         return _name;
     }
 

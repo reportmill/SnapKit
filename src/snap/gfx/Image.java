@@ -73,7 +73,7 @@ public abstract class Image implements Loadable {
     public String getName()
     {
         WebURL url = getSourceURL();
-        return url != null ? url.getPathName() : null;
+        return url != null ? url.getFilename() : null;
     }
 
     /**

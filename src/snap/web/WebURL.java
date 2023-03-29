@@ -129,12 +129,12 @@ public class WebURL {
     /**
      * Returns the last component of the file path.
      */
-    public String getPathName()  { return _parsedUrl.getFilename(); }
+    public String getFilename()  { return _parsedUrl.getFilename(); }
 
     /**
-     * Returns the last component of the file path minus any '.' extension suffix.
+     * Returns the filename without extension.
      */
-    public String getPathNameSimple()  { return _parsedUrl.getFilenameSimple(); }
+    public String getFilenameSimple()  { return _parsedUrl.getFilenameSimple(); }
 
     /**
      * Returns the file type (extension without the '.').

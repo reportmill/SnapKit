@@ -195,7 +195,7 @@ public class ParsedURL {
     }
 
     /**
-     * Returns the last component of the file path minus any '.' extension suffix.
+     * Returns the filename without extension.
      */
     public String getFilenameSimple()
     {

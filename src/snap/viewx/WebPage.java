@@ -162,7 +162,7 @@ public class WebPage extends ViewOwner {
         // Get file name and path
         WebURL pageURL = getURL();
         String filePath = pageURL.getPath();
-        String filename = pageURL.getPathName();
+        String filename = pageURL.getFilename();
         filePath = filePath.substring(0, filePath.length() - filename.length() - 1);
 
         // Get Site.Name

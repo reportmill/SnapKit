@@ -127,7 +127,7 @@ public class WebResponse {
     public String getPathName()
     {
         WebURL url = getURL();
-        return url.getPathName();
+        return url.getFilename();
     }
 
     /**
