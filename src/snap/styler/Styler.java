@@ -9,6 +9,14 @@ import snap.view.View;
 public class Styler {
 
     /**
+     * Constructor.
+     */
+    public Styler()
+    {
+        super();
+    }
+
+    /**
      * Returns the selected border.
      */
     public Border getBorder()  { return null; }
@@ -23,7 +31,9 @@ public class Styler {
      */
     public void setBorderStrokeColor(Color aColor)
     {
-        Border b1 = getBorder(); if (b1==null) b1 = Border.blackBorder();
+        Border b1 = getBorder();
+        if (b1 == null)
+            b1 = Border.blackBorder();
         Border b2 = b1.copyForColor(aColor);
         setBorder(b2);
     }
@@ -33,7 +43,9 @@ public class Styler {
      */
     public void setBorderStrokeWidth(double aWidth)
     {
-        Border b1 = getBorder(); if (b1==null) b1 = Border.blackBorder();
+        Border b1 = getBorder();
+        if (b1 == null)
+            b1 = Border.blackBorder();
         Border b2 = b1.copyForStrokeWidth(aWidth);
         setBorder(b2);
     }
@@ -41,10 +53,13 @@ public class Styler {
     /**
      * Sets the selected border stroke dash array.
      */
-    public void setBorderStrokeDashArray(double theDashes[])
+    public void setBorderStrokeDashArray(double[] theDashes)
     {
-        Border bdr1 = getBorder(); if (bdr1==null) bdr1 = Border.blackBorder();
-        Stroke str1 = bdr1.getStroke(), str2 = str1.copyForDashes(theDashes);
+        Border bdr1 = getBorder();
+        if (bdr1 == null)
+            bdr1 = Border.blackBorder();
+        Stroke str1 = bdr1.getStroke();
+        Stroke str2 = str1.copyForDashes(theDashes);
         Border bdr2 = bdr1.copyForStroke(str2);
         setBorder(bdr2);
     }
@@ -54,8 +69,11 @@ public class Styler {
      */
     public void setBorderStrokeDashPhase(double aValue)
     {
-        Border bdr1 = getBorder(); if (bdr1==null) bdr1 = Border.blackBorder();
-        Stroke str1 = bdr1.getStroke(), str2 = str1.copyForDashOffset(aValue);
+        Border bdr1 = getBorder();
+        if (bdr1 == null)
+            bdr1 = Border.blackBorder();
+        Stroke str1 = bdr1.getStroke();
+        Stroke str2 = str1.copyForDashOffset(aValue);
         Border bdr2 = bdr1.copyForStroke(str2);
         setBorder(bdr2);
     }
@@ -65,10 +83,11 @@ public class Styler {
      */
     public void setBorderShowEdge(Pos aPos, boolean aValue)
     {
-        Border bdr = getBorder();
-        Borders.EdgeBorder ebdr = bdr instanceof Borders.EdgeBorder ? (Borders.EdgeBorder)bdr : new Borders.EdgeBorder();
-        ebdr = ebdr.copyForShowEdge(aPos, aValue);
-        setBorder(ebdr);
+        Border border = getBorder();
+        Borders.EdgeBorder edgeBorder = border instanceof Borders.EdgeBorder ?
+            (Borders.EdgeBorder) border : new Borders.EdgeBorder();
+        edgeBorder = edgeBorder.copyForShowEdge(aPos, aValue);
+        setBorder(edgeBorder);
     }
 
     /**
@@ -87,13 +106,16 @@ public class Styler {
     public Color getFillColor()
     {
         Paint fill = getFill();
-        return fill!=null ? fill.getColor() : null;
+        return fill != null ? fill.getColor() : null;
     }
 
     /**
      * Sets the color of currently selected view.
      */
-    public void setFillColor(Color aColor)  { setFill(aColor); }
+    public void setFillColor(Color aColor)
+    {
+        setFill(aColor);
+    }
 
     /**
      * Returns the currently selected effect.
@@ -171,7 +193,9 @@ public class Styler {
      */
     public void setFontName(String aName)
     {
-        Font font1 = getFont(); if (font1==null) font1 = getFontDefault();
+        Font font1 = getFont();
+        if (font1 == null)
+            font1 = getFontDefault();
         Font font2 = Font.getFont(aName, font1.getSize());
         setFont(font2);
     }
@@ -181,9 +205,11 @@ public class Styler {
      */
     public void setFontFamily(String aName)
     {
-        String fnames[] = Font.getFontNames(aName); if (fnames.length==0) return;
-        String fname = fnames[0];
-        setFontName(fname);
+        String[] fontNames = Font.getFontNames(aName);
+        if (fontNames.length == 0)
+            return;
+        String fontName = fontNames[0];
+        setFontName(fontName);
     }
 
     /**

@@ -305,6 +305,26 @@ public class Borders {
         // Whether to show top/bottom borders
         private boolean _showTop = true, _showBottom = true;
 
+        /**
+         * Constructor.
+         */
+        public EdgeBorder()
+        {
+            super();
+        }
+
+        /**
+         * Constructor for edges.
+         */
+        public EdgeBorder(boolean showTop, boolean showRight, boolean showBottom, boolean showLeft)
+        {
+            this();
+            _showLeft = showLeft;
+            _showRight = showRight;
+            _showTop = showTop;
+            _showBottom = showBottom;
+        }
+
         /** Returns whether to show left border. */
         public boolean isShowLeft()  { return _showLeft; }
 
