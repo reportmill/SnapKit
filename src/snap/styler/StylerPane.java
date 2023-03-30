@@ -20,6 +20,9 @@ public class StylerPane extends StylerOwner {
 
     // The EffectTool
     private EffectTool _effectTool;
+
+    // Whether to show font tool
+    private boolean _showFontTool = true;
     
     /**
      * Creates StylerPane.
@@ -27,6 +30,14 @@ public class StylerPane extends StylerOwner {
     public StylerPane(Styler aStyler)
     {
         setStyler(aStyler);
+    }
+
+    /**
+     * Sets whether to show font tool.
+     */
+    public void setShowFontTool(boolean aValue)
+    {
+        _showFontTool = aValue;
     }
 
     /**
@@ -42,9 +53,11 @@ public class StylerPane extends StylerOwner {
         mainView.removeChild(miscPane);
 
         // Install FontTool
-        _fontTool = new FontTool();
-        _fontTool.setStyler(getStyler());
-        addInspector(_fontTool, "Text / Font", true);
+        if (_showFontTool) {
+            _fontTool = new FontTool();
+            _fontTool.setStyler(getStyler());
+            addInspector(_fontTool, "Text / Font", true);
+        }
 
         // Create/install FillTool
         _fillTool = new PaintTool();
@@ -76,7 +89,8 @@ public class StylerPane extends StylerOwner {
         _effectTool.resetLater();
 
         // Reset FontTool
-        _fontTool.resetLater();
+        if (_showFontTool)
+            _fontTool.resetLater();
 
         // Update TransparencySlider, TransparencyText (transparency is opposite of opacity and on 0-100 scale)
         Styler styler = getStyler();
