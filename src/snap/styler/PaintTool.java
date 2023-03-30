@@ -4,6 +4,7 @@
 package snap.styler;
 import java.util.*;
 import snap.gfx.*;
+import snap.util.ArrayUtils;
 import snap.view.*;
 
 /**
@@ -12,10 +13,10 @@ import snap.view.*;
 public class PaintTool extends StylerOwner {
 
     // Map of PaintTool instances by Paint class
-    private Map<Class,StylerOwner> _tools = new HashMap<>();
+    private Map<Class<?>,StylerOwner> _tools = new HashMap<>();
     
     // Array of known fills
-    private static Paint  _fills[];
+    private static Paint[]  _fills;
 
     /**
      * Creates PaintTool.
@@ -30,12 +31,10 @@ public class PaintTool extends StylerOwner {
      */
     protected void initUI()
     {
-        // Get array of known fill names and initialize FillComboBox
-        int fcount = getFillCount();
-        Object fnames[] = new String[fcount];
-        for (int i=0;i<fcount;i++)
-            fnames[i] = getFill(i).getName();
-        setViewItems("FillComboBox", fnames);
+        // Configure FillComboBox
+        Paint[] fills = getFills();
+        String[] fillNames = ArrayUtils.map(fills, fill -> fill.getName(), String.class);
+        setViewItems("FillComboBox", fillNames);
     }
 
     /**
@@ -48,16 +47,17 @@ public class PaintTool extends StylerOwner {
 
         // Get current fill (or default, if not available)
         Paint fill = styler.getFill();
-        if (fill==null) fill = Color.BLACK;
+        if (fill == null)
+            fill = Color.BLACK;
 
         // Update FillCheckBox, FillComboBox
-        setViewValue("FillCheckBox", styler.getFill()!=null);
+        setViewValue("FillCheckBox", styler.getFill() != null);
         setViewValue("FillComboBox", fill.getName());
 
         // Get fill tool, install tool UI in fill panel and ResetUI
-        StylerOwner ftool = getTool(fill);
-        getView("FillPane", BoxView.class).setContent(ftool.getUI());
-        ftool.resetLater();
+        StylerOwner fillTool = getTool(fill);
+        getView("FillPane", BoxView.class).setContent(fillTool.getUI());
+        fillTool.resetLater();
     }
 
     /**
@@ -77,20 +77,11 @@ public class PaintTool extends StylerOwner {
 
         // Handle FillComboBox: Get selected fill instance and iterate over shapes and add fill if not there
         if (anEvent.equals("FillComboBox")) {
-            Paint fill = getFill(anEvent.getSelIndex());
+            Paint[] fills = getFills();
+            Paint fill = fills[anEvent.getSelIndex()];
             styler.setFill(fill);
         }
     }
-
-    /**
-     * Returns the number of known fills.
-     */
-    public int getFillCount()  { return getFills().length; }
-
-    /**
-     * Returns an individual fill at given index.
-     */
-    public Paint getFill(int anIndex)  { return getFills()[anIndex]; }
 
     /**
      * Returns the fills.
@@ -98,11 +89,12 @@ public class PaintTool extends StylerOwner {
     private Paint[] getFills()
     {
         // If already set, just return
-        if (_fills!=null) return _fills;
+        if (_fills != null) return _fills;
 
         // Create default fills array and return
-        Paint f0 = Color.BLACK, f1 = new GradientPaint();
-        return _fills = new Paint[] { f0, f1, ImagePaintTool.getDefault() };
+        Paint fill0 = Color.BLACK;
+        Paint fill1 = new GradientPaint();
+        return _fills = new Paint[] { fill0, fill1, ImagePaintTool.getDefault() };
     }
 
     /**
@@ -111,23 +103,29 @@ public class PaintTool extends StylerOwner {
     public StylerOwner getTool(Object anObj)
     {
         // Get tool from tools map - just return if present
-        Class cls = anObj instanceof Class? (Class)anObj : anObj.getClass();
-        StylerOwner tool = _tools.get(cls);
-        if (tool==null) {
-            _tools.put(cls, tool=getToolImpl(cls));
+        Class<?> toolClass = anObj instanceof Class ? (Class<?>) anObj : anObj.getClass();
+        StylerOwner tool = _tools.get(toolClass);
+        if (tool == null) {
+            tool = getToolImpl(toolClass);
+            _tools.put(toolClass, tool);
             tool.setStyler(getStyler());
         }
+
+        // Return
         return tool;
     }
 
     /**
      * Returns the specific tool for a given fill.
      */
-    private static StylerOwner getToolImpl(Class aClass)
+    private static StylerOwner getToolImpl(Class<?> aClass)
     {
-        if (aClass==Color.class) return new ColorPaintTool();
-        if (aClass==GradientPaint.class) return new GradientPaintTool();
-        if (aClass==ImagePaint.class) return new ImagePaintTool();
+        if (Color.class.isAssignableFrom(aClass))
+            return new ColorPaintTool();
+        if (GradientPaint.class.isAssignableFrom(aClass))
+            return new GradientPaintTool();
+        if (ImagePaint.class.isAssignableFrom(aClass))
+            return new ImagePaintTool();
         throw new RuntimeException("PaintTool.getToolImp: No tool class for " + aClass);
     }
 }

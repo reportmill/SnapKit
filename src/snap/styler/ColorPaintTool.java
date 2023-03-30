@@ -25,7 +25,8 @@ public class ColorPaintTool extends StylerOwner {
     protected void resetUI()
     {
         // Get currently selected color
-        Color color = getStyler().getFillColor();
+        Styler styler = getStyler();
+        Color color = styler.getFillColor();
 
         // Update FillColorWell
         setViewValue("FillColorWell", color);
@@ -36,11 +37,24 @@ public class ColorPaintTool extends StylerOwner {
      */
     protected void respondUI(ViewEvent anEvent)
     {
+        Styler styler = getStyler();
+
         // Handle FillColorWell: Get color from ColorWell and set with styler
         if (anEvent.equals("FillColorWell")) {
-            ColorWell cwell = getView("FillColorWell", ColorWell.class);
-            Color color = cwell.getColor();
-            getStyler().setFillColor(color);
+
+            // Get color
+            ColorWell fillColorWell = getView("FillColorWell", ColorWell.class);
+            Color color = fillColorWell.getColor();
+
+            // If command-click, set gradient fill
+            if (anEvent.isMetaDown()) {
+                Color color1 = styler.getFill() != null ? styler.getFillColor() : Color.CLEARWHITE;
+                GradientPaint gradientPaint = new GradientPaint(color1, color, 0);
+                styler.setFill(gradientPaint);
+            }
+
+            // Set color
+            else styler.setFillColor(color);
         }
     }
 }
