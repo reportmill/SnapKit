@@ -423,7 +423,7 @@ public class ColorButton extends View {
     }
 
     // Get colors
-    static Color _colors[] = {
+    static Color[] _colors = {
         Color.BLACK, new Color(158,61,12), new Color(61,61,12), new Color(12,61,12),
         new Color(12,61,109), new Color(12,12,134), new Color(58,58,155), new Color(61,61,61),
         new Color(134,12,12), new Color(255,109,12), new Color(134,134,12), new Color(12,134,12),

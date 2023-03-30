@@ -15,25 +15,25 @@ import snap.view.*;
 public class ColorPanel extends ViewOwner {
 
     // The currently selected color
-    Color _color = Color.BLACK;
+    private Color _color = Color.BLACK;
 
     // The ColorWell that gets notification of color changes
-    ColorWell _colorWell;
+    private ColorWell _colorWell;
 
     // The ColorWell to fall back on when no current ColorWell set
-    ColorWell _defColorWell;
+    private ColorWell _defColorWell;
 
     // The list of previously selected colors
-    List<Color> _recentColors = new ArrayList();
+    private List<Color> _recentColors = new ArrayList<>();
 
     // The shared instance of the color panel
     private static ColorPanel _shared;
 
     // Image names
-    private static String _iNames[] = {"Spectrum", "Paradise", "Floral", "Fall Leaves", "Metal", "Wood"};
+    private static String[] _iNames = { "Spectrum", "Paradise", "Floral", "Fall Leaves", "Metal", "Wood" };
 
     // Image file names
-    static Object _images[] = {"spectrum.jpg", "paradise.jpg", "tulips.jpg", "fall.jpg", "metal.jpg", "wood.jpg"};
+    static Object[] _images = { "spectrum.jpg", "paradise.jpg", "tulips.jpg", "fall.jpg", "metal.jpg", "wood.jpg" };
 
     /**
      * Creates a new color panel.
@@ -75,12 +75,8 @@ public class ColorPanel extends ViewOwner {
      */
     public void addRecentColor(Color aColor)
     {
-        // If the color is already in the list, delete it from its old position so it gets moved to the head of the list.
-        int oldPosition = _recentColors.indexOf(aColor);
-        if (oldPosition != -1)
-            _recentColors.remove(oldPosition);
-        else if (oldPosition == 0)
-            return;
+        // Remove previous version of color in recentColors (if present)
+        _recentColors.remove(aColor);
 
         // Add it at the beginning
         _recentColors.add(0, aColor);
@@ -481,7 +477,7 @@ public class ColorPanel extends ViewOwner {
     /**
      * A panel for picking colors from a set of swatches.
      */
-    private class SwatchPanel extends View {
+    private static class SwatchPanel extends View {
 
         Color _color = Color.BLACK;
 
@@ -536,7 +532,7 @@ public class ColorPanel extends ViewOwner {
     /**
      * A list of hard-coded colors for the swatch panel.
      */
-    private static String _webColors[] = {
+    private static String[] _webColors = {
             "0x990033", "0xFF3366", "0xCC0033", "0xFF0033", "0xFF9999", "0xCC3366", "0xFFCCFF", "0xCC6699",
             "0x993366", "0x660033", "0xCC3399", "0xFF99CC", "0xFF66CC", "0xFF99FF", "0xFF6699", "0xCC0066",
             "0xFF0066", "0xFF3399", "0xFF0099", "0xFF33CC", "0xFF00CC", "0xFF66FF", "0xFF33FF", "0xFF00FF",
