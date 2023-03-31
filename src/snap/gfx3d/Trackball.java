@@ -108,6 +108,36 @@ public class Trackball extends ParentView {
     }
 
     /**
+     * Returns the rotation about the Y axis in degrees.
+     */
+    public double getYaw()  { return _camera.getYaw(); }
+
+    /**
+     * Sets the rotation about the Y axis in degrees.
+     */
+    public void setYaw(double aValue)  { _camera.setYaw(aValue); }
+
+    /**
+     * Returns the rotation about the X axis in degrees.
+     */
+    public double getPitch()  { return _camera.getPitch(); }
+
+    /**
+     * Sets the rotation about the X axis in degrees.
+     */
+    public void setPitch(double aValue)  { _camera.setPitch(aValue); }
+
+    /**
+     * Returns the rotation about the Z axis in degrees.
+     */
+    public double getRoll()  { return _camera.getRoll(); }
+
+    /**
+     * Sets the rotation about the Z axis in degrees.
+     */
+    public void setRoll(double aValue)  { _camera.setRoll(aValue); }
+
+    /**
      * Override to add scuff marks.
      */
     public void setWidth(double aValue)
