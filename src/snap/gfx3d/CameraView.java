@@ -17,9 +17,6 @@ public class CameraView extends ParentView {
     // The Scene
     private Scene3D  _scene;
 
-    // The MouseHandler
-    private MouseHandler  _mouseHandler;
-
     // The control cube
     private CubeView  _cubeView;
 
@@ -44,7 +41,6 @@ public class CameraView extends ParentView {
 
         // Enable events
         enableEvents(MousePress, MouseDrag, MouseRelease, Scroll);
-        _mouseHandler = new MouseHandler(_camera);
     }
 
     /**
@@ -146,7 +142,7 @@ public class CameraView extends ParentView {
      */
     public void processEvent(ViewEvent anEvent)
     {
-        _mouseHandler.processEvent(anEvent);
+        _camera.processEvent(anEvent);
     }
 
     /**

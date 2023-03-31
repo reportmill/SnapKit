@@ -8,6 +8,7 @@ import snap.gfx.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.props.PropChangeSupport;
+import snap.view.ViewEvent;
 
 /**
  * This class represent a camera focusing on a scene and manages a display list of simple paths based on
@@ -59,6 +60,9 @@ public class Camera {
     // The Renderer
     private Renderer  _renderer;
 
+    // The MouseHandler
+    private MouseHandler  _mouseHandler;
+
     // The PropChangeSupport
     protected PropChangeSupport _pcs = PropChangeSupport.EMPTY;
 
@@ -77,7 +81,10 @@ public class Camera {
     /**
      * Constructor.
      */
-    public Camera()  { }
+    public Camera()
+    {
+        _mouseHandler = new MouseHandler(this);
+    }
 
     /**
      * Returns the scene this camera is associated with.
@@ -483,22 +490,6 @@ public class Camera {
     }
 
     /**
-     * Returns whether a Path3d is facing camera.
-     */
-    public boolean isFacing(Path3D aPath)
-    {
-        return isFacing(aPath.getNormal());
-    }
-
-    /**
-     * Returns whether a Path3d is facing away from camera.
-     */
-    public boolean isFacingAway(Path3D aPath)
-    {
-        return isFacingAway(aPath.getNormal());
-    }
-
-    /**
      * Returns the renderer.
      */
     public Renderer getRenderer()
@@ -571,6 +562,14 @@ public class Camera {
 
         Renderer renderer = getRenderer();
         renderer.renderAndPaint(aPntr);
+    }
+
+    /**
+     * Viewer method.
+     */
+    public void processEvent(ViewEvent anEvent)
+    {
+        _mouseHandler.processEvent(anEvent);
     }
 
     /**
