@@ -48,9 +48,11 @@ public class PathBox3D extends ParentShape {
         for (Shape3D shape3D : extrusionShapes) {
             shape3D.setColor(color);
             shape3D.setOpacity(opacity);
-            if (shape3D.getName() == null) continue;
+            //if (shape3D.getName() == null) continue;
             shape3D.setStrokeColor(strokeColor);
             shape3D.setStroke(stroke);
+            if (_smoothSides)
+                shape3D.setSmoothSides(true);
         }
 
         // Set children
@@ -60,7 +62,7 @@ public class PathBox3D extends ParentShape {
     /**
      * Creates and returns an array of Shape3Ds for a given 2D shape and extrusion front/back z values.
      */
-    public static Shape3D[] createExtrusionShape3Ds(Shape aPath, double z1, double z2)
+    private Shape3D[] createExtrusionShape3Ds(Shape aPath, double z1, double z2)
     {
         // Get flattened path
         Shape flatPath = aPath.getFlat();
@@ -86,10 +88,13 @@ public class PathBox3D extends ParentShape {
                 front.reverse();
 
             // Otherwise, reverse back
-            else {
-                back.reverse();
-                flatPath = back.getShape2D();
-            }
+            else back.reverse();
+        }
+
+        // Make room for path stroke
+        if (_smoothSides) {
+            z1 += .001;
+            z2 -= .001;
         }
 
         // Get PathIter and loop vars

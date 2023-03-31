@@ -37,6 +37,9 @@ public abstract class Shape3D extends PropObject {
     // The path bounding box
     private Bounds3D  _bounds3D;
 
+    // Whether to try to render sides smoothly (for paths with curves)
+    protected boolean _smoothSides;
+
     /**
      * Constructor.
      */
@@ -73,7 +76,12 @@ public abstract class Shape3D extends PropObject {
     /**
      * Sets the color of shape.
      */
-    public void setColor(Color aColor)  { _color = aColor; }
+    public void setColor(Color aColor)
+    {
+        _color = aColor;
+        if (_smoothSides)
+            _strokeColor = _color;
+    }
 
     /**
      * Returns the stroke of shape.
@@ -147,6 +155,14 @@ public abstract class Shape3D extends PropObject {
     public void setDoubleSided(boolean aValue)
     {
         _doubleSided = aValue;
+    }
+
+    /**
+     * Called to make sides smooth.
+     */
+    public void setSmoothSides(boolean aValue)
+    {
+        _smoothSides = aValue;
     }
 
     /**
@@ -239,7 +255,7 @@ public abstract class Shape3D extends PropObject {
      */
     public String toStringProps()
     {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String name = getName();
         if (name != null) sb.append("Name=").append(name).append(", ");
         Bounds3D bounds3D = getBounds3D();
