@@ -55,6 +55,11 @@ public class PathBox3D extends ParentShape {
                 shape3D.setSmoothSides(true);
         }
 
+        if (_smoothSides) {
+            extrusionShapes[0].setSmoothSides(false);
+            extrusionShapes[extrusionShapes.length-1].setSmoothSides(false);
+        }
+
         // Set children
         setChildren(extrusionShapes);
     }
@@ -70,6 +75,7 @@ public class PathBox3D extends ParentShape {
         // Create list to hold paths
         List<Shape3D> paths = new ArrayList<>();
         Path3D back = null;
+        boolean reverse = true;
 
         // If path is closed, create path3d for front from aPath and z1
         if (flatPath.isClosed()) {
@@ -84,8 +90,11 @@ public class PathBox3D extends ParentShape {
             paths.add(front);
 
             // If front is pointing wrong way, reverse it
-            if (front.getNormal().isAway(new Vector3D(0, 0, -1), true))
+            Vector3D frontNormal = front.getNormal();
+            if (frontNormal.isAway(new Vector3D(0, 0, -1), true)) {
                 front.reverse();
+                reverse = false;
+            }
 
             // Otherwise, reverse back
             else back.reverse();
@@ -93,20 +102,22 @@ public class PathBox3D extends ParentShape {
 
         // Make room for path stroke
         if (_smoothSides) {
-            z1 += .001;
-            z2 -= .001;
+            z1 += 1;
+            z2 -= 1;
         }
 
         // Get PathIter and loop vars
-        PathIter piter = aPath.getPathIter(null);
+        PathIter pathIter = aPath.getPathIter(null);
         double[] pts = new double[6];
-        double lastX = 0, lastY = 0;
-        double lastMoveX = 0, lastMoveY = 0;
+        double lastX = 0;
+        double lastY = 0;
+        double lastMoveX = 0;
+        double lastMoveY = 0;
         int sideNum = 0;
 
         // Iterate over path elements
-        while (piter.hasNext()) {
-            Seg seg = piter.getNext(pts);
+        while (pathIter.hasNext()) {
+            Seg seg = pathIter.getNext(pts);
             switch (seg) {
 
                 // Handle MoveTo:
@@ -118,9 +129,12 @@ public class PathBox3D extends ParentShape {
                 // Handle LineTo:
                 case LineTo: {
                     Poly3D polyShape = lineTo(lastX, lastY, lastX = pts[0], lastY = pts[1], z1, z2);
-                    if (polyShape == null) break;
+                    if (polyShape == null)
+                        break;
                     polyShape.setName("BoxSide" + sideNum++);
                     paths.add(polyShape);
+                    if (reverse)
+                        polyShape.reverse();
                 }
                 break;
 
@@ -132,9 +146,12 @@ public class PathBox3D extends ParentShape {
                 // Handle Close
                 case Close: {
                     Poly3D polyShape = lineTo(lastX, lastY, lastX = lastMoveX, lastY = lastMoveY, z1, z2);
-                    if (polyShape == null) break;
+                    if (polyShape == null)
+                        break;
                     polyShape.setName("BoxSide" + sideNum++);
                     paths.add(polyShape);
+                    if (reverse)
+                        polyShape.reverse();
                 }
                 break;
 
