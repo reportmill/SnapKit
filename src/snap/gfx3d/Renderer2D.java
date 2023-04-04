@@ -5,6 +5,8 @@ import snap.gfx.Color;
 import snap.gfx.Paint;
 import snap.gfx.Painter;
 import snap.props.PropChange;
+import snap.util.ListUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class Renderer2D extends Renderer {
     private boolean  _sortSurfaces = true;
 
     // List of all Scene FacetShapes in view coords
-    private List<FacetShape>  _surfacesInViewCoords = new ArrayList<>();
+    private List<FacetShape>  _surfacesInViewCoords;
 
     // Bounds of shapes in scene
     private Rect  _sceneBounds2D;
@@ -84,16 +86,10 @@ public class Renderer2D extends Renderer {
         // Add in FacetShape painter paths
         addFacetShapePainterPathsInCameraCoords(facetShapesInCameraCoords);
 
-        // Get transform from camera to View center space
+        // Get facet shapes in view coords
         Camera camera = getCamera();
         Matrix3D cameraToView = camera.getCameraToView();
-
-        // Iterate over FacetShape and replace with paths in view coords
-        List<FacetShape> facetsInViewCoords = new ArrayList<>();
-        for (FacetShape facetShapeInCamera : facetShapesInCameraCoords) {
-            FacetShape facetShapeInView = facetShapeInCamera.copyForMatrix(cameraToView);
-            facetsInViewCoords.add(facetShapeInView);
-        }
+        List<FacetShape> facetsInViewCoords = ListUtils.map(facetShapesInCameraCoords, fs -> fs.copyForMatrix(cameraToView));
 
         // Return FacetShapes in view coords
         return facetsInViewCoords;
@@ -230,7 +226,8 @@ public class Renderer2D extends Renderer {
 
             // Get facetShape (just skip if no Painter)
             FacetShape facetShape = facetShapeList.get(i);
-            if (facetShape.getPainter() == null) continue;
+            if (facetShape.getPainter() == null)
+                continue;
 
             // Get Paths for painter
             Matrix3D sceneToCamera = _camera.getSceneToCamera();
