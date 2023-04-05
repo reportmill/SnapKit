@@ -75,8 +75,8 @@ public class Sort3D {
             return ORDER_BACK_TO_FRONT;
 
         // If no X/Y overlap, return MinZ order
-        boolean noOverlapX = shape1.getMaxX() <= shape2.getMinX() || shape1.getMinX() >= shape2.getMaxX();
-        boolean noOverlapXY = noOverlapX || shape1.getMaxY() <= shape2.getMinY() || shape1.getMinY() >= shape2.getMaxY();
+        boolean noOverlapX = shape1.getMaxX() <= shape2.getMinX() || shape2.getMaxX() <= shape1.getMinX();
+        boolean noOverlapXY = noOverlapX || shape1.getMaxY() <= shape2.getMinY() || shape2.getMaxY() <= shape1.getMinY();
         if (noOverlapXY)
             return zOrder;
 
@@ -98,22 +98,22 @@ public class Sort3D {
         // Iterate over shape points to check distance for each to plane
         for (int i = 0; i < pointCount; i++) {
 
-            // Get distance from shape point to plane
+            // Get distance from shape point to plane - if zero distance, just skip (point is on path1 plane)
             Point3D shape2Point = shape2.getPoint(i);
             double pointDist = getDistanceFromShapePlaneToPoint(shape1, shape2Point);
-
-            // If negligible distance, assume point is on path1 plane and skip
             if (MathUtils.equalsZero(pointDist))
                 continue;
 
-            // If ref distance not yet set, set
+            // If reference distance not yet set, set
             if (distToShape2 == 0)
                 distToShape2 = pointDist;
 
             // If distance from loop point is opposite side of shape plane (sign flipped), return indeterminate
-            boolean pointsOnBothSidesOfPlane = pointDist != 0 && pointDist * distToShape2 < 0;
-            if (pointsOnBothSidesOfPlane)
-                return ORDER_INDETERMINATE;
+            else {
+                boolean pointsOnBothSidesOfPlane = pointDist * distToShape2 < 0;
+                if (pointsOnBothSidesOfPlane)
+                    return ORDER_INDETERMINATE;
+            }
         }
 
         // If positive distance, return BACK_TO_FRONT, if negative FRONT_TO_BACK, otherwise SAME (co-planar)
