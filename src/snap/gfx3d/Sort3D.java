@@ -20,7 +20,7 @@ public class Sort3D {
     {
         try {
             theShapes.sort((s1, s2) -> Sort3D.compareShapeMinZs(s1, s2));
-            theShapes.sort((s1, s2) -> Sort3D.compareFacetShapes(s1, s2));
+            theShapes.sort((s1, s2) -> Sort3D.compareShapesForPaintOrder(s1, s2));
         }
         catch (Exception e) {
             System.err.println("Sort3D.sortShapesBackToFront: Sort failed: " + e);
@@ -34,12 +34,11 @@ public class Sort3D {
      *    Returns 0 (Same) if either shape can be drawn first
      *
      *    1. Do the Z extents not overlap? Return Z order
-     *    2. Do the X/Y extents not overlap? Return Z order
-     *    3. Is P entirely on the opposite side of Q’s plane from the viewpoint?
-     *    4. Is Q entirely on the same side of P ’s plane as the viewpoint?
-     *    5. Do the projections of the polygons not overlap?
+     *    2. Is Shape2 entirely in front of Shape1’s plane?
+     *    3. Is Shape1 entirely in front of Shape2’s plane?
+     *    4. If best guess, return min Z order.
      */
-    public static int compareFacetShapes(FacetShape shape1, FacetShape shape2)
+    public static int compareShapesForPaintOrder(FacetShape shape1, FacetShape shape2)
     {
         // If all shape1 points are behind all shape2 points, return BACK_TO_FRONT (and vice versa)
         if (shape1.getMaxZ() <= shape2.getMinZ())
@@ -47,41 +46,22 @@ public class Sort3D {
         if (shape2.getMaxZ() <= shape1.getMinZ())
             return ORDER_FRONT_TO_BACK;
 
-        // Get simple min Z order (if same, use max Z)
-        int zOrder = compareShapeMinZs(shape1, shape2);
-        if (zOrder == ORDER_SAME)
-            zOrder = compareShapeMaxZs(shape1, shape2);
-
         // Get ordering based on whether shape2 points are in front or behind shape1 points
         int comp1 = compareShapePlanes(shape1, shape2);
         int comp2 = compareShapePlanes(shape2, shape1);
 
-        // If both shapes find each other in front or back, just return Z min order (they probably share a side)
-        if (comp1 == comp2 && comp1 != ORDER_INDETERMINATE)
-            return zOrder;
+        // If plane comparisons differ, we may have definitive result
+        if (comp1 != comp2) {
+            if (comp1 == ORDER_BACK_TO_FRONT || comp1 == ORDER_FRONT_TO_BACK)
+                return comp1;
+            if (comp2 == ORDER_BACK_TO_FRONT || comp2 == ORDER_FRONT_TO_BACK)
+                return -comp2;
+        }
 
-        // If all shape2 points in front or back of shape1, return that order
-        if (comp1 == ORDER_BACK_TO_FRONT || comp1 == ORDER_FRONT_TO_BACK)
-            return comp1;
-
-        // If shape1/shape2 points are coplanar, return MinZ order
-        if (comp1 == ORDER_SAME)
-            return zOrder;
-
-        // If all shape1 points in front or back of shape2, return reverse order
-        if (comp2 == ORDER_BACK_TO_FRONT)
-            return ORDER_FRONT_TO_BACK;
-        if (comp2 == ORDER_FRONT_TO_BACK)
-            return ORDER_BACK_TO_FRONT;
-
-        // If no X/Y overlap, return MinZ order
-        boolean noOverlapX = shape1.getMaxX() <= shape2.getMinX() || shape2.getMaxX() <= shape1.getMinX();
-        boolean noOverlapXY = noOverlapX || shape1.getMaxY() <= shape2.getMinY() || shape2.getMaxY() <= shape1.getMinY();
-        if (noOverlapXY)
-            return zOrder;
-
-        // This should never happen
-        System.err.println("Sort3D.compareFacetShapes: Sort fail.");
+        // Get simple min Z order (if same, use max Z)
+        int zOrder = compareShapeMinZs(shape1, shape2);
+        if (zOrder == ORDER_SAME)
+            zOrder = compareShapeMaxZs(shape1, shape2);
         return zOrder;
     }
 
@@ -150,6 +130,8 @@ public class Sort3D {
     {
         double z0 = shape1.getMinZ();
         double z1 = shape2.getMinZ();
+        if (MathUtils.equals(z0, z1))
+            return ORDER_SAME;
         return Double.compare(z0, z1); // z0 < z1 ? ORDER_BACK_TO_FRONT : z1 < z0 ? ORDER_FRONT_TO_BACK : 0;
     }
 
@@ -160,6 +142,8 @@ public class Sort3D {
     {
         double z0 = shape1.getMaxZ();
         double z1 = shape2.getMaxZ();
+        if (MathUtils.equals(z0, z1))
+            return ORDER_SAME;
         return Double.compare(z0, z1); // z0 < z1 ? ORDER_BACK_TO_FRONT : z1 < z0 ? ORDER_FRONT_TO_BACK : 0;
     }
 }
