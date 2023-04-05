@@ -73,15 +73,8 @@ public class Renderer2D extends Renderer {
         List<FacetShape> facetShapesInCameraCoords = getFacetShapesInCameraCoords();
 
         // Sort FacetShapes
-        if (isSortSurfaces()) {
-            try {
-                facetShapesInCameraCoords.sort((p0, p1) -> Sort3D.compareFacetShape_MinZs(p0, p1));
-                facetShapesInCameraCoords.sort((p0, p1) -> Sort3D.compareFacetShapes(p0, p1));
-            }
-            catch (Exception e) {
-                System.err.println("Renderer2D.getFacetShapesInViewCoordsImpl: Sort failed: " + e);
-            }
-        }
+        if (isSortSurfaces())
+            Sort3D.sortShapesBackToFront(facetShapesInCameraCoords);
 
         // Add in FacetShape painter paths
         addFacetShapePainterPathsInCameraCoords(facetShapesInCameraCoords);
@@ -171,42 +164,40 @@ public class Renderer2D extends Renderer {
      */
     protected void addFacetShapeInCameraCoords(FacetShape facetShape, List<FacetShape> facetShapeList)
     {
-        // Get the camera transform & optionally align it to the screen
-        Matrix3D sceneToCamera = _camera.getSceneToCamera();
-        Light3D light = _scene.getLight();
-        Color color = facetShape.getColor();
-
         // Get facet normal (if bogus, complain and return - not sure this happens anymore)
-        Vector3D facetNormLocal = facetShape.getNormal();
-        if (Double.isNaN(facetNormLocal.x)) {
+        Vector3D facetNormal = facetShape.getNormal();
+        if (Double.isNaN(facetNormal.x)) {
             System.err.println("Renderer2D.addShapeSurfacesInCameraCoords: Invalid facet normal");
             return;
         }
 
         // Get facet normal in camera coords
-        Vector3D facetNormalInCamera = sceneToCamera.transformVector(facetNormLocal.clone());
+        Matrix3D sceneToCamera = _camera.getSceneToCamera();
+        Vector3D facetNormalInCamera = sceneToCamera.transformVector(facetNormal.clone());
         facetNormalInCamera.normalize();
 
         // Get camera-to-facet vector in camera coords
-        Point3D facetCenterLocal = facetShape.getBoundsCenter();
-        Point3D facetCenterCamera = sceneToCamera.transformPoint(facetCenterLocal.clone());
-        Vector3D cameraToFacetVector = new Vector3D(facetCenterCamera.x, facetCenterCamera.y, facetCenterCamera.z);
+        Point3D facetCenter = facetShape.getBoundsCenter();
+        Point3D facetCenterInCamera = sceneToCamera.transformPoint(facetCenter.clone());
+        Vector3D cameraToFacetVector = new Vector3D(facetCenterInCamera.x, facetCenterInCamera.y, facetCenterInCamera.z);
 
         // Backface culling : If facet pointed away from camera, skip facet
-        if (cameraToFacetVector.isAligned(facetNormalInCamera, false)) {
-
-            // If not double-sided, just skip
+        boolean shapeFacingAway = cameraToFacetVector.isAligned(facetNormalInCamera, false);
+        if (shapeFacingAway) {
             if (!facetShape.isDoubleSided())
                 return;
+        }
 
-            // Otherwise, negate normal
+        // Get facetShape in camera space (reverse if shape was facing away but double-sided)
+        FacetShape facetShapeInCamera = facetShape.copyForMatrix(sceneToCamera);
+        if (shapeFacingAway) {
+            facetShapeInCamera.reverse();
             facetNormalInCamera.negate();
         }
 
-        // Get facetShape in camera space
-        FacetShape facetShapeInCamera = facetShape.copyForMatrix(sceneToCamera);
-
         // If color on shape, set color on facet for scene lights
+        Light3D light = _scene.getLight();
+        Color color = facetShape.getColor();
         if (color != null) {
             Color rcol = light.getRenderColor(facetNormalInCamera, color);
             facetShapeInCamera.setColor(rcol);
