@@ -180,18 +180,19 @@ public class Sort3D {
      */
     private static double getDistanceFromShapePlaneToPoint(FacetShape aShape, Point3D aPoint)
     {
-        // Get plane normal
-        Vector3D planeNormal = aShape.getNormal();
+        // A plane is defined by a normal (ABC) and a point on the plane (xyz): Ax + By + Cz + D = 0
+        Vector3D normal = aShape.getNormal();
+        Point3D planePoint = aShape.getPoint(0);
 
-        // Get vector from plane point to given point
-        Point3D planePoint = aShape.getBoundsCenter();
-        double vx = aPoint.x - planePoint.x;
-        double vy = aPoint.y - planePoint.y;
-        double vz = aPoint.z - planePoint.z;
+        // Calculate D from Ax + By + Cz + D = 0
+        double Ax = normal.x * planePoint.x;
+        double By = normal.y * planePoint.y;
+        double Cz = normal.z * planePoint.z;
+        double D = -Ax - By - Cz;
 
-        // Distance is just the length of the projection of points vector onto normal vector (v dot n)
-        double dist = vx * planeNormal.x + vy * planeNormal.y + vz * planeNormal.z;
-        return Math.abs(dist) < .001 ? 0 : dist;
+        // Distance is Ax + By + Cz + D / NormalMagnitude (magnitude of normal is 1)
+        double dist = normal.x * aPoint.x + normal.y * aPoint.y + normal.z * aPoint.z + D;
+        return Math.abs(dist) < .01 ? 0 : dist;
     }
 
     /**
