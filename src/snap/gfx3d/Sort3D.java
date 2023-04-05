@@ -3,6 +3,7 @@
  */
 package snap.gfx3d;
 import snap.util.MathUtils;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,15 +17,81 @@ public class Sort3D {
     public static final int ORDER_SAME = 0;
     public static final int ORDER_INDETERMINATE = 2;
 
+    /**
+     * Sorts the given list in back-to-front paint order.
+     */
     public static void sortShapesBackToFront(List<FacetShape> theShapes)
     {
-        try {
-            theShapes.sort((s1, s2) -> Sort3D.compareShapeMinZs(s1, s2));
-            theShapes.sort((s1, s2) -> Sort3D.compareShapesForPaintOrder(s1, s2));
+        // Just return if no shapes
+        if (theShapes.size() == 0) return;
+
+        // Do a simple Z order sort
+        theShapes.sort((s1, s2) -> Sort3D.compareShapeMinZs(s1, s2));
+
+        // This was back when I hoped I could compare shapes definitively
+        //try { theShapes.sort((s1, s2) -> Sort3D.compareShapesForPaintOrder(s1, s2, true)); }
+        //catch (Exception e) { System.err.println("Sort3D.sortShapesBackToFront: Sort failed: " + e); }
+
+        // Create new SortedList seeded with last shape
+        List<FacetShape> shapesSorted = new ArrayList<>(theShapes.size());
+        FacetShape lastShape = theShapes.remove(theShapes.size() - 1);
+        shapesSorted.add(lastShape);
+
+        // Iterate until all original shapes added to SortedShapes
+        while (theShapes.size() > 0) {
+
+            // Try to add one sorted shape if possible using definitive sorting (fall back using best guess)
+            boolean didAdd = addOneShapeSorted(theShapes, shapesSorted, false);
+            if (!didAdd)
+                addOneShapeSorted(theShapes, shapesSorted, true);
         }
-        catch (Exception e) {
-            System.err.println("Sort3D.sortShapesBackToFront: Sort failed: " + e);
+
+        // Re-add SortedShapes to Shapes
+        theShapes.addAll(shapesSorted);
+    }
+
+    /**
+     * Iterates over source shapes in given list to try to add shape to sorted shapes list.
+     */
+    private static boolean addOneShapeSorted(List<FacetShape> theShapes, List<FacetShape> sortedShapes, boolean bestGuess)
+    {
+        // Iterate over source shapes list and try to find a place for each in SortedShapes
+        for (int i = 0, iMax = theShapes.size(); i < iMax; i++) {
+            FacetShape shape1 = theShapes.get(i);
+            int paintOrder = 0;
+
+            // Iterate over SortedShapes and if source shape is ordered before, add source shape at index and return
+            for (int j = 0, jMax = sortedShapes.size(); j < jMax; j++) {
+
+                // Get shape and paint order
+                FacetShape shape2 = sortedShapes.get(j);
+                paintOrder = compareShapesForPaintOrder(shape1, shape2, bestGuess);
+
+                // If ordered BACK_TO_FRONT, add at SortedShapes index and return
+                if (paintOrder == ORDER_BACK_TO_FRONT) {
+                    theShapes.remove(i);
+                    sortedShapes.add(j, shape1);
+                    return true;
+                }
+            }
+
+            // If last shape was ordered FRONT_TO_BACK or SAME (only if best guess), add shape at end of SortedShapes
+            if (paintOrder == ORDER_FRONT_TO_BACK || paintOrder == ORDER_SAME) {
+                theShapes.remove(i);
+                sortedShapes.add(shape1);
+                return true;
+            }
         }
+
+        // If at end of rope, just add last shape - not sure this ever happens
+        if (bestGuess) {
+            System.err.println("Sort3D.addOneShapeSorted: Failed to add sorted shape");
+            sortedShapes.add(theShapes.remove(theShapes.size() - 1));
+            return true;
+        }
+
+        // Return failure
+        return false;
     }
 
     /**
@@ -38,7 +105,7 @@ public class Sort3D {
      *    3. Is Shape1 entirely in front of Shape2’s plane?
      *    4. If best guess, return min Z order.
      */
-    public static int compareShapesForPaintOrder(FacetShape shape1, FacetShape shape2)
+    public static int compareShapesForPaintOrder(FacetShape shape1, FacetShape shape2, boolean bestGuess)
     {
         // If all shape1 points are behind all shape2 points, return BACK_TO_FRONT (and vice versa)
         if (shape1.getMaxZ() <= shape2.getMinZ())
@@ -57,6 +124,10 @@ public class Sort3D {
             if (comp2 == ORDER_BACK_TO_FRONT || comp2 == ORDER_FRONT_TO_BACK)
                 return -comp2;
         }
+
+        // If not guessing, return INDETERMINATE
+        if (!bestGuess)
+            return ORDER_INDETERMINATE;
 
         // Get simple min Z order (if same, use max Z)
         int zOrder = compareShapeMinZs(shape1, shape2);
