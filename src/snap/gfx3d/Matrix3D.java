@@ -338,11 +338,18 @@ public class Matrix3D implements Cloneable {
      */
     public final Vector3D transformVector(Vector3D aVector)
     {
-        double x2 = mtx[0 * 4 + 0] * aVector.x + mtx[1 * 4 + 0] * aVector.y + mtx[2 * 4 + 0] * aVector.z;
-        double y2 = mtx[0 * 4 + 1] * aVector.x + mtx[1 * 4 + 1] * aVector.y + mtx[2 * 4 + 1] * aVector.z;
-        double z2 = mtx[0 * 4 + 2] * aVector.x + mtx[1 * 4 + 2] * aVector.y + mtx[2 * 4 + 2] * aVector.z;
-        aVector.x = x2; aVector.y = y2; aVector.z = z2;
-        return aVector;
+        return transformVectorXYZ(aVector.x, aVector.y, aVector.z);
+    }
+
+    /**
+     * Transforms a given vector (and returns it as a convenience).
+     */
+    public final Vector3D transformVectorXYZ(double vx, double vy, double vz)
+    {
+        double x2 = mtx[0 * 4 + 0] * vx + mtx[1 * 4 + 0] * vy + mtx[2 * 4 + 0] * vz;
+        double y2 = mtx[0 * 4 + 1] * vx + mtx[1 * 4 + 1] * vy + mtx[2 * 4 + 1] * vz;
+        double z2 = mtx[0 * 4 + 2] * vx + mtx[1 * 4 + 2] * vy + mtx[2 * 4 + 2] * vz;
+        return new Vector3D(x2, y2, z2);
     }
 
     /**

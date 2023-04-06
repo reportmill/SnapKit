@@ -173,7 +173,7 @@ public class Renderer2D extends Renderer {
 
         // Get facet normal in camera coords
         Matrix3D sceneToCamera = _camera.getSceneToCamera();
-        Vector3D facetNormalInCamera = sceneToCamera.transformVector(facetNormal.clone());
+        Vector3D facetNormalInCamera = sceneToCamera.transformVector(facetNormal);
         facetNormalInCamera.normalize();
 
         // Get camera-to-facet vector in camera coords
