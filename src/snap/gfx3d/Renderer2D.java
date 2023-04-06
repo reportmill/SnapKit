@@ -74,7 +74,7 @@ public class Renderer2D extends Renderer {
 
         // Sort FacetShapes
         if (isSortSurfaces())
-            Sort3D.sortShapesBackToFront(facetShapesInCameraCoords);
+            BinarySpaceTree.sortShapesBackToFront(facetShapesInCameraCoords);
 
         // Add in FacetShape painter paths
         addFacetShapePainterPathsInCameraCoords(facetShapesInCameraCoords);
