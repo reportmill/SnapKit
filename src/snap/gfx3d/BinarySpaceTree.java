@@ -17,6 +17,9 @@ public class BinarySpaceTree {
     // The node definitely in front of shape plane
     private BinarySpaceTree _frontNode;
 
+    // The node on same plane
+    private BinarySpaceTree _planarNode;
+
     // The node not in front (not necessarily geometrically in behind shape plane)
     private BinarySpaceTree _backNode;
 
@@ -47,10 +50,10 @@ public class BinarySpaceTree {
     {
         // Get paint order of this node shape and given node shape
         FacetShape nodeShape = aNode.getShape();
-        int paintOrder = compareShapesForPaintOrder(_shape, nodeShape);
+        int paintOrder = compareShapePlanes(_shape, nodeShape);
 
-        // Handle Node in back: Just return failure
-        if (paintOrder == Sort3D.ORDER_FRONT_TO_BACK)
+        // If order not determined, return false
+        if (paintOrder == ORDER_INDETERMINATE)
             return false;
 
         // Handle Node in front: Add node as FrontNode or to FrontNode
@@ -68,19 +71,44 @@ public class BinarySpaceTree {
                     _frontNode = aNode;
                 }
             }
-
-            // Return success
-            return true;
         }
 
-        // If BackNode not set, just set and return
-        if (_backNode == null) {
-            _backNode = aNode;
-            return true;
+        // Handle Node in front: Add node as FrontNode or to FrontNode
+        else if (paintOrder == Sort3D.ORDER_FRONT_TO_BACK) {
+
+            // If FrontNode not set, just set
+            if (_backNode == null)
+                _backNode = aNode;
+
+            // Add node to FrontNode (swap out if fails)
+            else {
+                boolean didAdd = _backNode.addNode(aNode);
+                if (!didAdd) {
+                    aNode.addNode(_backNode);
+                    _backNode = aNode;
+                }
+            }
+        }
+
+        // Handle Planar
+        else {
+
+            // If FrontNode not set, just set
+            if (_planarNode == null)
+                _planarNode = aNode;
+
+            // Add node to FrontNode (swap out if fails)
+            else {
+                boolean didAdd = _planarNode.addNode(aNode);
+                if (!didAdd) {
+                    aNode.addNode(_planarNode);
+                    _planarNode = aNode;
+                }
+            }
         }
 
         // Add Node to BackNode
-        return _backNode.addNode(aNode);
+        return true;
     }
 
     /**
@@ -88,9 +116,18 @@ public class BinarySpaceTree {
      */
     public void loadBackToFrontList(List<FacetShape> sortedList)
     {
-        sortedList.add(_shape);
+        // Add BackNodes
         if (_backNode != null)
             _backNode.loadBackToFrontList(sortedList);
+
+        // Add Shape
+        sortedList.add(_shape);
+
+        // Add PlanarNodes
+        if (_planarNode != null)
+            _planarNode.loadBackToFrontList(sortedList);
+
+        // Add FrontNodes
         if (_frontNode != null)
             _frontNode.loadBackToFrontList(sortedList);
     }
@@ -141,34 +178,6 @@ public class BinarySpaceTree {
         // Clear list and reload in paint order
         theShapes.clear();
         binarySpaceTree.loadBackToFrontList(theShapes);
-    }
-
-    /**
-     * Compares two facet shapes to determine whether they are definitively ordered.
-     */
-    private static int compareShapesForPaintOrder(FacetShape shape1, FacetShape shape2)
-    {
-        // Get ordering based on whether shape2 points are in front or behind shape1 points
-        int comp1 = compareShapePlanes(shape1, shape2);
-        int comp2 = compareShapePlanes(shape2, shape1);
-
-        // If plane comparisons differ, we may have definitive result
-        if (comp1 != comp2) {
-            if (comp1 == ORDER_BACK_TO_FRONT || comp1 == ORDER_FRONT_TO_BACK)
-                return comp1;
-            if (comp2 == ORDER_BACK_TO_FRONT || comp2 == ORDER_FRONT_TO_BACK)
-                return -comp2;
-        }
-
-        // If comparisons are ordered same, return Z order
-        if (comp1 == ORDER_SAME || comp2 == ORDER_SAME) {
-            double z1 = shape1.getMinZ();
-            double z2 = shape2.getMinZ();
-            return Double.compare(z1, z2);
-        }
-
-        // Return order INDETERMINATE
-        return ORDER_INDETERMINATE;
     }
 
     /**

@@ -241,27 +241,23 @@ public abstract class Shape3D extends PropObject {
     }
 
     /**
-     * Standard toString implementation.
-     */
-    public String toString()
-    {
-        String className = getClass().getSimpleName();
-        String propsStr = toStringProps();
-        return className + " { " + propsStr + " }";
-    }
-
-    /**
      * Standard toStringProps implementation.
      */
     public String toStringProps()
     {
         StringBuilder sb = new StringBuilder();
         String name = getName();
-        if (name != null) sb.append("Name=").append(name).append(", ");
-        Bounds3D bounds3D = getBounds3D();
-        Point3D minXYZ = bounds3D.getMinXYZ();
-        Point3D maxXYZ = bounds3D.getMaxXYZ();
-        sb.append("MinXYZ").append(minXYZ).append(", MaxXYZ").append(maxXYZ);
+        if (name != null)
+            sb.append("Name=").append(name).append(", ");
+
+        // Append Bounds
+        if (_bounds3D != null) {
+            Point3D minXYZ = _bounds3D.getMinXYZ();
+            Point3D maxXYZ = _bounds3D.getMaxXYZ();
+            sb.append("MinXYZ").append(minXYZ).append(", MaxXYZ").append(maxXYZ);
+        }
+
+        // Return
         return sb.toString();
     }
 }
