@@ -57,7 +57,7 @@ public class BinarySpaceTree {
             return false;
 
         // Handle Node in front: Add node as FrontNode or to FrontNode
-        if (paintOrder == Sort3D.ORDER_BACK_TO_FRONT) {
+        if (paintOrder == ORDER_BACK_TO_FRONT) {
 
             // If FrontNode not set, just set
             if (_frontNode == null)
@@ -74,7 +74,7 @@ public class BinarySpaceTree {
         }
 
         // Handle Node in front: Add node as FrontNode or to FrontNode
-        else if (paintOrder == Sort3D.ORDER_FRONT_TO_BACK) {
+        else if (paintOrder == ORDER_FRONT_TO_BACK) {
 
             // If FrontNode not set, just set
             if (_backNode == null)
