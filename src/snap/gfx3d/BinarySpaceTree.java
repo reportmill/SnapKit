@@ -2,7 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
+import snap.util.ListUtils;
 import snap.util.MathUtils;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,9 +50,8 @@ public class BinarySpaceTree {
      */
     public boolean addNode(BinarySpaceTree aNode)
     {
-        // Get paint order of this node shape and given node shape
-        FacetShape nodeShape = aNode.getShape();
-        int paintOrder = compareShapePlanes(_shape, nodeShape);
+        // Get paint order of this node and given node
+        int paintOrder = compareNodePlanes(aNode);
 
         // If order not determined, return false
         if (paintOrder == ORDER_INDETERMINATE)
@@ -91,24 +92,51 @@ public class BinarySpaceTree {
         }
 
         // Handle Planar
-        else {
-
-            // If FrontNode not set, just set
-            if (_planarNode == null)
-                _planarNode = aNode;
-
-            // Add node to FrontNode (swap out if fails)
-            else {
-                boolean didAdd = _planarNode.addNode(aNode);
-                if (!didAdd) {
-                    aNode.addNode(_planarNode);
-                    _planarNode = aNode;
-                }
-            }
-        }
+        else System.err.println("BinarySpaceTree.addNode: Shouldn't hit ORDER_SAME in this method");
 
         // Add Node to BackNode
         return true;
+    }
+
+    /**
+     * Adds a node to PlanarNode if planar.
+     */
+    public BinarySpaceTree addCoplanarNode(BinarySpaceTree aNode)
+    {
+        // Get paint order of this node shape and given node shape
+        int paintOrder = compareNodePlanes(aNode);
+
+        // Handle ORDER_SAME: Add node to PlanarNode tail and return this node
+        if (paintOrder == ORDER_SAME) {
+            BinarySpaceTree planarRootNode = this;
+            while (planarRootNode._planarNode != null)
+                planarRootNode = planarRootNode._planarNode;
+            planarRootNode._planarNode = aNode;
+            return this;
+        }
+
+        // Return not added
+        return null;
+    }
+
+    /**
+     * Compare Node planes.
+     */
+    public int compareNodePlanes(BinarySpaceTree aNode)
+    {
+        // Get Node.Shape and compare shape planes
+        FacetShape nodeShape = aNode.getShape();
+        int order = compareShapePlanes(_shape, nodeShape);
+
+        // If node has planar nodes, compare those, too (recursively). Return indeterminate if any disagree.
+        if (aNode._planarNode != null) {
+            int subOrder = compareNodePlanes(aNode._planarNode);
+            if (order != subOrder)
+                return ORDER_INDETERMINATE;
+        }
+
+        // Return order
+        return order;
     }
 
     /**
@@ -141,15 +169,24 @@ public class BinarySpaceTree {
         if (theShapes.size() == 0) return null;
 
         // Create root node from first shape
-        FacetShape shape0 = theShapes.get(0);
-        BinarySpaceTree rootNode = new BinarySpaceTree(shape0);
+        List<BinarySpaceTree> shapeNodes = new ArrayList<>(theShapes.size());
 
-        // Iterate over successive shapes
-        for (int i = 1, iMax = theShapes.size(); i < iMax; i++) {
+        // Convert shapes to BinarySpaceTree nodes and coalesce if coplanar nodes found
+        for (FacetShape shape : theShapes) {
+            BinarySpaceTree shapeNode = new BinarySpaceTree(shape);
+            BinarySpaceTree coplanarNode = ListUtils.findMatch(shapeNodes, node -> node.addCoplanarNode(shapeNode) != null);
+            if (coplanarNode == null)
+                shapeNodes.add(shapeNode);
+        }
+
+        // Get root node (first node)
+        BinarySpaceTree rootNode = shapeNodes.get(0);
+
+        // Iterate over successive nodes and add
+        for (int i = 1, iMax = shapeNodes.size(); i < iMax; i++) {
 
             // Get shape and create tree node
-            FacetShape shape = theShapes.get(i);
-            BinarySpaceTree shapeNode = new BinarySpaceTree(shape);
+            BinarySpaceTree shapeNode = shapeNodes.get(i);
 
             // Add node to root
             boolean didAdd = rootNode.addNode(shapeNode);
