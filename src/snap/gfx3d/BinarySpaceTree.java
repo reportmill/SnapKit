@@ -233,7 +233,9 @@ public class BinarySpaceTree {
             // Get distance from shape point to plane - if zero distance, just skip (point is on path1 plane)
             Point3D shape2Point = shape2.getPoint(i);
             double pointDist = getDistanceFromShapePlaneToPoint(shape1, shape2Point);
-            if (MathUtils.equalsZero(pointDist))
+
+            // If point very close to plane, treat as on plane
+            if (MathUtils.equalsZero(pointDist, .01))
                 continue;
 
             // If reference distance not yet set, set
@@ -272,7 +274,6 @@ public class BinarySpaceTree {
         double D = -Ax - By - Cz;
 
         // Distance is Ax + By + Cz + D / NormalMagnitude (magnitude of normal is 1)
-        double dist = normal.x * aPoint.x + normal.y * aPoint.y + normal.z * aPoint.z + D;
-        return Math.abs(dist) < .01 ? 0 : dist;
+        return normal.x * aPoint.x + normal.y * aPoint.y + normal.z * aPoint.z + D;
     }
 }

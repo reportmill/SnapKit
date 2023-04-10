@@ -38,6 +38,14 @@ public class MathUtils {
     }
 
     /**
+     * Returns whether a real number is practically zero.
+     */
+    public static boolean equalsZero(double a, double aTolerance)
+    {
+        return Math.abs(a) < aTolerance;
+    }
+
+    /**
      * Returns whether a real number is practically greater than another.
      */
     public static boolean gt(double a, double b)
