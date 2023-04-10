@@ -354,21 +354,11 @@ public class Path2D extends Shape implements Cloneable {
         double[] pnts = new double[6];
         while (aPathIter.hasNext()) {
             switch (aPathIter.getNext(pnts)) {
-                case MoveTo:
-                    moveTo(pnts[0], pnts[1]);
-                    break;
-                case LineTo:
-                    lineTo(pnts[0], pnts[1]);
-                    break;
-                case QuadTo:
-                    quadTo(pnts[0], pnts[1], pnts[2], pnts[3]);
-                    break;
-                case CubicTo:
-                    curveTo(pnts[0], pnts[1], pnts[2], pnts[3], pnts[4], pnts[5]);
-                    break;
-                case Close:
-                    close();
-                    break;
+                case MoveTo: moveTo(pnts[0], pnts[1]); break;
+                case LineTo: lineTo(pnts[0], pnts[1]); break;
+                case QuadTo: quadTo(pnts[0], pnts[1], pnts[2], pnts[3]); break;
+                case CubicTo: curveTo(pnts[0], pnts[1], pnts[2], pnts[3], pnts[4], pnts[5]); break;
+                case Close: close(); break;
             }
         }
     }
@@ -537,7 +527,7 @@ public class Path2D extends Shape implements Cloneable {
 
         // Ivars
         private int _segCount;
-        private int _sindex;
+        private int _segIndex;
         private PathIter _nextIter;
 
         /**
@@ -556,7 +546,7 @@ public class Path2D extends Shape implements Cloneable {
          */
         public boolean hasNext()
         {
-            return _sindex < _segCount || (_nextIter != null && _nextIter.hasNext());
+            return _segIndex < _segCount || (_nextIter != null && _nextIter.hasNext());
         }
 
         /**
@@ -564,8 +554,8 @@ public class Path2D extends Shape implements Cloneable {
          */
         public Seg getNext(double[] coords)
         {
-            if (_sindex < _segCount)
-                return getSegEndPointsForIndex(_sindex++, coords, _trans);
+            if (_segIndex < _segCount)
+                return getSegEndPointsForIndex(_segIndex++, coords, _trans);
             return _nextIter.getNext(coords);
         }
 

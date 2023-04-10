@@ -12,16 +12,16 @@ import snap.util.*;
 public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
 
     // The array of segments
-    private Seg _segs[] = new Seg[8];
+    private Seg[] _segs = new Seg[8];
 
     // The segment count
-    private int _scount;
+    private int _segCount;
 
     // The array of points
-    private double _points[] = new double[16];
+    private double[] _points = new double[16];
 
     // The number of points
-    private int _pcount;
+    private int _pointCount;
 
     // The winding -how a path determines what to fill when segments intersect
     private int _wind = WIND_EVEN_ODD;
@@ -31,14 +31,15 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     public static final int WIND_NON_ZERO = PathIter.WIND_NON_ZERO;
 
     /**
-     * Creates a new path.
+     * Constructor.
      */
     public Path()
     {
+        super();
     }
 
     /**
-     * Creates a new path with given path iterator.
+     * Constructor with given path iterator.
      */
     public Path(PathIter aPI)
     {
@@ -46,7 +47,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * Creates a path for given shape.
+     * Constructor for given shape.
      */
     public Path(Shape aShape)
     {
@@ -66,7 +67,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     /**
      * Returns the number of segments.
      */
-    public int getSegCount()  { return _scount; }
+    public int getSegCount()  { return _segCount; }
 
     /**
      * Returns the individual segement at index.
@@ -82,18 +83,18 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     protected void addSeg(Seg aSeg)
     {
         // If at end of Segs array, extend by 2x
-        if (_scount + 1 > _segs.length)
+        if (_segCount + 1 > _segs.length)
             _segs = Arrays.copyOf(_segs, _segs.length * 2);
 
         // Add Seg at end, increment SegCount, notify shapeChanged
-        _segs[_scount++] = aSeg;
+        _segs[_segCount++] = aSeg;
         shapeChanged();
     }
 
     /**
      * Returns the number of points.
      */
-    public int getPointCount()  { return _pcount; }
+    public int getPointCount()  { return _pointCount; }
 
     /**
      * Returns individual point at given index.
@@ -111,13 +112,13 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     protected void addPoint(double x, double y)
     {
         // If at end of Points array, extend by 2x
-        if (_pcount * 2 + 1 > _points.length)
+        if (_pointCount * 2 + 1 > _points.length)
             _points = Arrays.copyOf(_points, _points.length * 2);
 
         // Add points at end and increment PointCount
-        _points[_pcount * 2] = x;
-        _points[_pcount * 2 + 1] = y;
-        _pcount++;
+        _points[_pointCount * 2] = x;
+        _points[_pointCount * 2 + 1] = y;
+        _pointCount++;
     }
 
     /**
@@ -143,8 +144,8 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
      */
     public void lineBy(double x, double y)
     {
-        x += _points[_pcount * 2 - 2];
-        y += _points[_pcount * 2 - 1];
+        x += _points[_pointCount * 2 - 2];
+        y += _points[_pointCount * 2 - 1];
         lineTo(x, y);
     }
 
@@ -153,7 +154,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
      */
     public void hlineTo(double x)
     {
-        double y = _points[_pcount * 2 - 1];
+        double y = _points[_pointCount * 2 - 1];
         lineTo(x, y);
     }
 
@@ -162,7 +163,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
      */
     public void vlineTo(double y)
     {
-        double x = _points[_pcount * 2 - 2];
+        double x = _points[_pointCount * 2 - 2];
         lineTo(x, y);
     }
 
@@ -193,8 +194,8 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     public void arcTo(double cx, double cy, double x, double y)
     {
         double magic = .5523f; // I calculated this in mathematica one time - probably only valid for 90 deg corner.
-        double lx = _points[_pcount * 2 - 2];
-        double ly = _points[_pcount * 2 - 1];
+        double lx = _points[_pointCount * 2 - 2];
+        double ly = _points[_pointCount * 2 - 1];
         double cpx1 = lx + (cx - lx) * magic;
         double cpy1 = ly + (cy - ly) * magic;
         double cpx2 = x + (cx - x) * magic;
@@ -256,7 +257,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
      */
     public Seg getSegLast()
     {
-        return _scount > 0 ? _segs[_scount - 1] : null;
+        return _segCount > 0 ? _segs[_segCount - 1] : null;
     }
 
     /**
@@ -265,8 +266,8 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     public void removeLastSeg()
     {
         Seg seg = getSegLast();
-        _pcount -= seg.getCount();
-        _scount--;
+        _pointCount -= seg.getCount();
+        _segCount--;
         shapeChanged();
     }
 
@@ -276,14 +277,14 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     public void removeSeg(int anIndex)
     {
         // range check
-        int scount = getSegCount();
-        if (anIndex < 0 || anIndex >= scount)
+        int segCount = getSegCount();
+        if (anIndex < 0 || anIndex >= segCount)
             throw new IndexOutOfBoundsException("PathViewUtils.removeSeg: index out of bounds: " + anIndex);
 
         // If this is the last element, nuke it
-        if (anIndex == scount - 1) {
+        if (anIndex == segCount - 1) {
             removeLastSeg();
-            if (scount > 0 && getSeg(scount - 1) == Seg.MoveTo) // but don't leave stray moveto sitting around
+            if (getSeg(segCount - 1) == Seg.MoveTo) // but don't leave stray moveto sitting around
                 removeLastSeg();
             return;
         }
@@ -318,10 +319,10 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
         }
 
         // Remove segement and points
-        System.arraycopy(_segs, deleteIndex + nDeletedSegs, _segs, deleteIndex, _scount - deleteIndex - nDeletedSegs);
-        _scount -= nDeletedSegs;
-        System.arraycopy(_points, (pindex + nDeletedPts) * 2, _points, pindex * 2, (_pcount - pindex - nDeletedPts) * 2);
-        _pcount -= nDeletedPts;
+        System.arraycopy(_segs, deleteIndex + nDeletedSegs, _segs, deleteIndex, _segCount - deleteIndex - nDeletedSegs);
+        _segCount -= nDeletedSegs;
+        System.arraycopy(_points, (pindex + nDeletedPts) * 2, _points, pindex * 2, (_pointCount - pindex - nDeletedPts) * 2);
+        _pointCount -= nDeletedPts;
         shapeChanged();
     }
 
@@ -330,7 +331,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
      */
     public Point getPointLast()
     {
-        return _pcount > 0 ? getPoint(_pcount - 1) : null;
+        return _pointCount > 0 ? getPoint(_pointCount - 1) : null;
     }
 
     /**
@@ -394,23 +395,13 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
      */
     public void append(PathIter aPI)
     {
-        double crds[] = new double[6];
-        while (aPI.hasNext()) switch (aPI.getNext(crds)) {
-            case MoveTo:
-                moveTo(crds[0], crds[1]);
-                break;
-            case LineTo:
-                lineTo(crds[0], crds[1]);
-                break;
-            case QuadTo:
-                quadTo(crds[0], crds[1], crds[2], crds[3]);
-                break;
-            case CubicTo:
-                curveTo(crds[0], crds[1], crds[2], crds[3], crds[4], crds[5]);
-                break;
-            case Close:
-                close();
-                break;
+        double[] points = new double[6];
+        while (aPI.hasNext()) switch (aPI.getNext(points)) {
+            case MoveTo: moveTo(points[0], points[1]); break;
+            case LineTo: lineTo(points[0], points[1]); break;
+            case QuadTo: quadTo(points[0], points[1], points[2], points[3]); break;
+            case CubicTo: curveTo(points[0], points[1], points[2], points[3], points[4], points[5]); break;
+            case Close: close(); break;
         }
     }
 
@@ -431,55 +422,12 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * Transforms the points in the path by the given transform.
-     */
-    public void transformBy(Transform aTrans)
-    {
-        for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
-            Point p = getPoint(i);
-            aTrans.transformPoint(p);
-            setPoint(i, p.x, p.y);
-        }
-    }
-
-    /**
      * Clears all segments from path.
      */
     public void clear()
     {
-        _scount = _pcount = 0;
+        _segCount = _pointCount = 0;
         shapeChanged();
-    }
-
-    /**
-     * Returns a path with only moveto, lineto.
-     */
-    public Path getPathFlattened()
-    {
-        // Get a new path and point-array for path segment iteration and iterate over path segments
-        Path path = new Path();
-        PathIter piter = getPathIter(null);
-        double pts[] = new double[6];
-        while (piter.hasNext()) switch (piter.getNext(pts)) {
-            case MoveTo:
-                path.moveTo(pts[0], pts[1]);
-                break;
-            case LineTo:
-                path.lineTo(pts[0], pts[1]);
-                break;
-            case QuadTo:
-                path.quadToFlat(pts[0], pts[1], pts[2], pts[3]);
-                break;
-            case CubicTo:
-                path.curveToFlat(pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]);
-                break;
-            case Close:
-                path.close();
-                break;
-        }
-
-        // Return new path
-        return path;
     }
 
     /**
@@ -504,12 +452,8 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     public Path clone()
     {
         Path copy;
-        try {
-            copy = (Path) super.clone();
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        try { copy = (Path) super.clone(); }
+        catch (Exception e) { throw new RuntimeException(e); }
         copy._segs = Arrays.copyOf(_segs, _segs.length);
         copy._points = Arrays.copyOf(_points, _points.length);
         return copy;
@@ -526,7 +470,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
         if (path == null) return false;
 
         // Check ElementCount, WindingRule, Elements and Points
-        if (path._scount != _scount || path._pcount != _pcount) return false;
+        if (path._segCount != _segCount || path._pointCount != _pointCount) return false;
         if (!Arrays.equals(path._segs, _segs)) return false;
         if (!Arrays.equals(path._points, _points)) return false;
         return true; // Return true since all checks passed
@@ -544,45 +488,45 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
         //if (_windingRule!=WIND_NON_ZERO) e.add("wind", "even-odd");
 
         // Archive individual elements/points
-        PathIter piter = getPathIter(null);
-        double pts[] = new double[6];
-        while (piter.hasNext()) switch (piter.getNext(pts)) {
+        PathIter pathIter = getPathIter(null);
+        double[] points = new double[6];
+        while (pathIter.hasNext()) switch (pathIter.getNext(points)) {
 
             // Handle MoveTo
             case MoveTo:
                 XMLElement move = new XMLElement("mv");
-                move.add("x", pts[0]);
-                move.add("y", pts[1]);
+                move.add("x", points[0]);
+                move.add("y", points[1]);
                 e.add(move);
                 break;
 
             // Handle LineTo
             case LineTo:
                 XMLElement line = new XMLElement("ln");
-                line.add("x", pts[0]);
-                line.add("y", pts[1]);
+                line.add("x", points[0]);
+                line.add("y", points[1]);
                 e.add(line);
                 break;
 
             // Handle QuadTo
             case QuadTo:
                 XMLElement quad = new XMLElement("qd");
-                quad.add("cx", pts[0]);
-                quad.add("cy", pts[1]);
-                quad.add("x", pts[2]);
-                quad.add("y", pts[3]);
+                quad.add("cx", points[0]);
+                quad.add("cy", points[1]);
+                quad.add("x", points[2]);
+                quad.add("y", points[3]);
                 e.add(quad);
                 break;
 
             // Handle CubicTo
             case CubicTo:
                 XMLElement curve = new XMLElement("cv");
-                curve.add("cp1x", pts[0]);
-                curve.add("cp1y", pts[1]);
-                curve.add("cp2x", pts[2]);
-                curve.add("cp2y", pts[3]);
-                curve.add("x", pts[4]);
-                curve.add("y", pts[5]);
+                curve.add("cp1x", points[0]);
+                curve.add("cp1y", points[1]);
+                curve.add("cp2x", points[2]);
+                curve.add("cp2y", points[3]);
+                curve.add("x", points[4]);
+                curve.add("y", points[5]);
                 e.add(curve);
                 break;
 
@@ -631,9 +575,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
      */
     public static Path getPathFromSVG(String aStr)
     {
-        try {
-            return getPathFromSVGOrThrow(aStr);
-        }
+        try { return getPathFromSVGOrThrow(aStr); }
         catch (Exception e) {
             System.err.println("Path.getPathFromSVG: " + e);
             return null;
@@ -688,7 +630,7 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
             }
         }
 
-        // Return path
+        // Return
         return path;
     }
 
@@ -716,13 +658,13 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
          */
         public boolean hasNext()
         {
-            return _sindex < _path._scount;
+            return _sindex < _path._segCount;
         }
 
         /**
          * Returns the next segment.
          */
-        public Seg getNext(double coords[])
+        public Seg getNext(double[] coords)
         {
             Seg seg = _path._segs[_sindex++];
             int count = seg.getCount();
