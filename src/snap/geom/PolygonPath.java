@@ -22,7 +22,7 @@ public class PolygonPath extends Shape {
     private double  _flatDist = DEFAULT_FLAT_DISTANCE;
 
     // Constant for default flatness
-    public static final double DEFAULT_FLAT_DISTANCE = .5;
+    public static final double DEFAULT_FLAT_DISTANCE = .25;
 
     /**
      * Constructor.
@@ -84,15 +84,12 @@ public class PolygonPath extends Shape {
     /**
      * Returns the number of polygons.
      */
-    public int getPolyCount()  { return _polyCount; }
+    public int getPolygonCount()  { return _polyCount; }
 
     /**
      * Returns the individual polygon at given index.
      */
-    public Polygon getPoly(int anIndex)
-    {
-        return _polys[anIndex];
-    }
+    public Polygon getPolygon(int anIndex)  { return _polys[anIndex]; }
 
     /**
      * Adds a polygon.
@@ -107,19 +104,14 @@ public class PolygonPath extends Shape {
     /**
      * Returns the last polygon.
      */
-    public Polygon getLast()
-    {
-        if (_polyCount == 0)
-            return null;
-        return _polys[_polyCount - 1];
-    }
+    public Polygon getLastPolygon()  { return _polyCount > 0 ? _polys[_polyCount - 1] : null; }
 
     /**
      * Returns the last polygon last point.
      */
     public Point getLastPoint()
     {
-        Polygon lastPoly = getLast();
+        Polygon lastPoly = getLastPolygon();
         return lastPoly != null ? lastPoly.getLastPoint() : null;
     }
 
@@ -135,7 +127,7 @@ public class PolygonPath extends Shape {
         // Create new poly
         else {
             _poly = new Polygon();
-            addPoly(_poly, getPolyCount());
+            addPoly(_poly, getPolygonCount());
             _poly.addPoint(aX, aY);
         }
 
@@ -241,14 +233,14 @@ public class PolygonPath extends Shape {
     protected Rect getBoundsImpl()
     {
         // If no polys, return empty rect
-        int polyCount = getPolyCount();
+        int polyCount = getPolygonCount();
         if (polyCount == 0)
             return new Rect();
 
         // Get union of all polys
-        Rect totalBounds = getPoly(0).getBounds();
+        Rect totalBounds = getPolygon(0).getBounds();
         for (int i = 1; i < polyCount; i++)
-            totalBounds.union(getPoly(i).getBounds());
+            totalBounds.union(getPolygon(i).getBounds());
         return totalBounds;
     }
 
