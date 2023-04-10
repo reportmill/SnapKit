@@ -193,8 +193,9 @@ public class BinarySpaceTree {
 
             // If node not added, make it root and add other
             if (!didAdd) {
-                shapeNode.addNode(rootNode);
-                rootNode = shapeNode;
+                if (!shapeNode.addNode(rootNode))
+                    System.out.println("BinarySpaceTree.createBinarySpaceTree: Undetermined shape ordering (intersecting)");
+                else rootNode = shapeNode;
             }
         }
 
@@ -220,7 +221,7 @@ public class BinarySpaceTree {
     /**
      * Returns whether (facet) shapes are ordered BACK_TO_FRONT OR FRONT_TO_BACK.
      * Returns ORDER_SAME if shapes are coplanar.
-     * Returns INDETERMINATE if shape2 points lie on both sides of shape1 plane (straddle).
+     * Returns INDETERMINATE if shape2 points lie on both sides of shape1 plane (straddle or intersect).
      */
     private static int compareShapePlanes(FacetShape shape1, FacetShape shape2)
     {
@@ -230,11 +231,11 @@ public class BinarySpaceTree {
         // Iterate over shape points to check distance for each to plane
         for (int i = 0; i < pointCount; i++) {
 
-            // Get distance from shape point to plane - if zero distance, just skip (point is on path1 plane)
+            // Get distance from shape point to plane
             Point3D shape2Point = shape2.getPoint(i);
             double pointDist = getDistanceFromShapePlaneToPoint(shape1, shape2Point);
 
-            // If point very close to plane, treat as on plane
+            // If point very close to plane, just skip (treat as on plane)
             if (MathUtils.equalsZero(pointDist, .01))
                 continue;
 
