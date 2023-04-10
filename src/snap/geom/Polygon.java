@@ -17,7 +17,7 @@ public class Polygon extends Shape implements Cloneable {
     private int _pointCount;
 
     // Whether polygon is closed or not
-    //private boolean _closed;
+    private boolean _closed;
 
     /**
      * Constructor.
@@ -34,6 +34,7 @@ public class Polygon extends Shape implements Cloneable {
     {
         super();
         _pointArray = theCoords;
+        _pointCount = theCoords.length / 2;
     }
 
     /**
@@ -42,9 +43,9 @@ public class Polygon extends Shape implements Cloneable {
     public Polygon(Point ... thePoints)
     {
         super();
-        int pointCount = thePoints.length;
-        _pointArray = new double[pointCount * 2];
-        for (int i = 0; i < pointCount; i++) {
+        _pointCount = thePoints.length;
+        _pointArray = new double[_pointCount * 2];
+        for (int i = 0; i < _pointCount; i++) {
             _pointArray[i * 2] = thePoints[i].x;
             _pointArray[i * 2 + 1] = thePoints[i].y;
         }
@@ -73,12 +74,12 @@ public class Polygon extends Shape implements Cloneable {
     /**
      * Returns the x at given point index.
      */
-    public double getX(int anIndex)  { return _pointArray[anIndex * 2]; }
+    public double getPointX(int anIndex)  { return _pointArray[anIndex * 2]; }
 
     /**
      * Returns the y at given point index.
      */
-    public double getY(int anIndex)  { return _pointArray[anIndex * 2 + 1]; }
+    public double getPointY(int anIndex)  { return _pointArray[anIndex * 2 + 1]; }
 
     /**
      * Returns the point at given index.
@@ -104,6 +105,7 @@ public class Polygon extends Shape implements Cloneable {
         // Add point
         _pointArray[coordIndex] = aX;
         _pointArray[coordIndex + 1] = aY;
+        _pointCount++;
         shapeChanged();
     }
 
@@ -119,9 +121,33 @@ public class Polygon extends Shape implements Cloneable {
     }
 
     /**
+     * Returns whether the polygon is closed.
+     */
+    public boolean isClosed()  { return _closed; }
+
+    /**
+     * Sets whether the polygon is closed.
+     */
+    public void setClosed(boolean aValue)
+    {
+        if (aValue == _closed) return;
+        _closed = aValue;
+    }
+
+    /**
+     * Returns the last point.
+     */
+    public Point getLastPoint()
+    {
+        double lastX = getLastPointX();
+        double lastY = getLastPointY();
+        return new Point(lastX, lastY);
+    }
+
+    /**
      * Returns the last x point.
      */
-    public double getLastX()
+    public double getLastPointX()
     {
         int coordIndex = _pointCount * 2 - 2;
         return coordIndex >= 0 ? _pointArray[coordIndex] : 0;
@@ -130,20 +156,10 @@ public class Polygon extends Shape implements Cloneable {
     /**
      * Returns the last y point.
      */
-    public double getLastY()
+    public double getLastPointY()
     {
         int coordIndex = _pointCount * 2 - 1;
         return coordIndex > 0 ? _pointArray[coordIndex] : 0;
-    }
-
-    /**
-     * Returns the last point.
-     */
-    public Point getLastPoint()
-    {
-        double lastX = getLastX();
-        double lastY = getLastY();
-        return new Point(lastX, lastY);
     }
 
     /**
@@ -161,7 +177,7 @@ public class Polygon extends Shape implements Cloneable {
     public int getPointIndexForXY(double aX, double aY, double aRad)
     {
         for (int i = 0, pc = getPointCount(); i < pc; i++)
-            if (Point.getDistance(aX, aY, getX(i), getY(i)) <= aRad)
+            if (Point.getDistance(aX, aY, getPointX(i), getPointY(i)) <= aRad)
                 return i;
         return -1;
     }
@@ -181,13 +197,13 @@ public class Polygon extends Shape implements Cloneable {
             int j = (i + 1) % pointCount;
 
             // Get line endpoint and see if next point is collinear
-            double x0 = getX(i), y0 = getY(i);
-            double x1 = getX(j), y1 = getY(j);
+            double x0 = getPointX(i), y0 = getPointY(i);
+            double x1 = getPointX(j), y1 = getPointY(j);
 
             // If next point is collinear and backtracks over previous segment, return false.
             int jp1 = (j + 1) % pointCount;
-            double jp1x = getX(jp1);
-            double jp1y = getY(jp1);
+            double jp1x = getPointX(jp1);
+            double jp1y = getPointY(jp1);
             boolean isCollinear = Line.isCollinear(x0, y0, x1, y1, jp1x, jp1y);
             if (isCollinear && (jp1x - x0) / (x1 - x0) < 1)
                 return false;
@@ -195,8 +211,8 @@ public class Polygon extends Shape implements Cloneable {
             // Iterate over remaining lines and see if they intersect
             for (int k = j + 1; k < pointCount; k++) {
                 int l = (k + 1) % pointCount;
-                double x2 = getX(k), y2 = getY(k);
-                double x3 = getX(l), y3 = getY(l);
+                double x2 = getPointX(k), y2 = getPointY(k);
+                double x3 = getPointX(l), y3 = getPointY(l);
                 boolean intersectsLine = Line.intersectsLine(x0, y0, x1, y1, x2, y2, x3, y3);
                 if (intersectsLine && i != l) // Suppress last
                     return false;
@@ -230,9 +246,9 @@ public class Polygon extends Shape implements Cloneable {
         int i0 = (anIndex - 1 + pointCount) % pointCount;
         int i1 = anIndex;
         int i2 = (anIndex + 1) % pointCount;
-        double x0 = getX(i0), y0 = getY(i0);
-        double x1 = getX(i1), y1 = getY(i1);
-        double x2 = getX(i2), y2 = getY(i2);
+        double x0 = getPointX(i0), y0 = getPointY(i0);
+        double x1 = getPointX(i1), y1 = getPointY(i1);
+        double x2 = getPointX(i2), y2 = getPointY(i2);
 
         // Get vector v0, from point to previous point, and v1, from point to next point
         double v0x = x0 - x1;
@@ -358,15 +374,15 @@ public class Polygon extends Shape implements Cloneable {
         ind1 %= pc;
 
         // Get endpoints for crossbar
-        double x0 = getX(ind0), y0 = getY(ind0);
-        double x1 = getX(ind1), y1 = getY(ind1);
+        double x0 = getPointX(ind0), y0 = getPointY(ind0);
+        double x1 = getPointX(ind1), y1 = getPointY(ind1);
 
         // Iterate over polygon points and if any sides intersect crossbar, return false
         for (int i = 0, iMax = getPointCount(); i < iMax; i++) {
             int j = (i + 1) % iMax;
             if (i == ind0 || i == ind1 || j == ind0 || j == ind1) continue;
-            double px0 = getX(i), py0 = getY(i);
-            double px1 = getX(j), py1 = getY(j);
+            double px0 = getPointX(i), py0 = getPointY(i);
+            double px1 = getPointX(j), py1 = getPointY(j);
             if (Line.intersectsLine(px0, py0, px1, py1, x0, y0, x1, y1))
                 return false;
         }
@@ -388,8 +404,8 @@ public class Polygon extends Shape implements Cloneable {
         double[] points = new double[remainderPointCount * 2];
         for (int i = end > pointCount ? end % pointCount : 0, k = 0; k < remainderPointCount; i++) {
             if (i <= start || i >= end) {
-                points[k * 2] = getX(i % pointCount);
-                points[k * 2 + 1] = getY(i % pointCount);
+                points[k * 2] = getPointX(i % pointCount);
+                points[k * 2 + 1] = getPointY(i % pointCount);
                 k++;
             }
         }
@@ -401,8 +417,8 @@ public class Polygon extends Shape implements Cloneable {
         int pointCount2 = len + 1;
         points = new double[pointCount2 * 2];
         for (int j = start, k = 0; j < start + pointCount2; j++, k++) {
-            points[k * 2] = getX(j % pointCount);
-            points[k * 2 + 1] = getY(j % pointCount);
+            points[k * 2] = getPointX(j % pointCount);
+            points[k * 2 + 1] = getPointY(j % pointCount);
         }
         setPointArray(points);
 
@@ -492,6 +508,7 @@ public class Polygon extends Shape implements Cloneable {
         private double[] _points;
         private int _coordCount;
         private int _coordIndex;
+        private boolean _needsClose;
 
         /**
          * Constructor.
@@ -501,6 +518,7 @@ public class Polygon extends Shape implements Cloneable {
             super(at);
             _points = aPolygon._pointArray;
             _coordCount = aPolygon.getPointCount() * 2;
+            _needsClose = aPolygon.isClosed();
         }
 
         /**
@@ -508,7 +526,7 @@ public class Polygon extends Shape implements Cloneable {
          */
         public boolean hasNext()
         {
-            return _coordIndex < _coordCount + 2;
+            return _coordIndex < _coordCount || _needsClose;
         }
 
         /**
@@ -525,8 +543,8 @@ public class Polygon extends Shape implements Cloneable {
                 return lineTo(_points[_coordIndex++], _points[_coordIndex++], coords);
 
             // Close on last point
-            if (_coordIndex == _coordCount) {
-                _coordIndex += 2;
+            if (_needsClose) {
+                _needsClose = false;
                 return close();
             }
 

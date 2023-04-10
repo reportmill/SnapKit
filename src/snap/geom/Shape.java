@@ -70,9 +70,9 @@ public abstract class Shape {
     /**
      * Returns whether shape contains point.
      */
-    public boolean contains(Point aPnt)
+    public boolean contains(Point aPoint)
     {
-        return contains(aPnt.getX(), aPnt.getY());
+        return contains(aPoint.x, aPoint.y);
     }
 
     /**
@@ -80,11 +80,12 @@ public abstract class Shape {
      */
     public boolean contains(double aX, double aY)
     {
-        if (!getBounds().contains(aX, aY)) return false;
+        if (!getBounds().contains(aX, aY))
+            return false;
         int cross = getCrossings(aX, aY);
         int mask = -1;
-        boolean c = ((cross & mask) != 0);
-        return c;
+        boolean contains = ((cross & mask) != 0);
+        return contains;
     }
 
     /**
@@ -94,32 +95,36 @@ public abstract class Shape {
     {
         // Get path iterator and declare iter vars
         PathIter pathIter = getPathIter(null);
-        double pts[] = new double[6];
-        double mx = 0, my = 0;
-        double lx = 0, ly = 0;
+        double[] points = new double[6];
+        double moveX = 0;
+        double moveY = 0;
+        double lineX = 0;
+        double lineY = 0;
         int cross = 0;
 
-        // Iterate over path segements
+        // Iterate over path segments
         while (pathIter.hasNext()) {
-            Seg seg = pathIter.getNext(pts);
+            Seg seg = pathIter.getNext(points);
             switch (seg) {
                 case MoveTo:
-                    if (ly!=my) cross += Line.crossings(lx, ly, mx, my, aX, aY);
-                    lx = mx = pts[0];
-                    ly = my = pts[1];
+                    if (lineY != moveY)
+                        cross += Line.crossings(lineX, lineY, moveX, moveY, aX, aY);
+                    lineX = moveX = points[0];
+                    lineY = moveY = points[1];
                     break;
                 case LineTo:
-                    cross += Line.crossings(lx, ly, lx=pts[0], ly=pts[1], aX, aY);
+                    cross += Line.crossings(lineX, lineY, lineX = points[0], lineY = points[1], aX, aY);
                     break;
                 case QuadTo:
-                    cross += Quad.crossings(lx, ly, pts[0], pts[1], lx=pts[2], ly=pts[3], aX, aY, 0);
+                    cross += Quad.crossings(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3], aX, aY, 0);
                     break;
                 case CubicTo:
-                    cross += Cubic.crossings(lx, ly, pts[0], pts[1], pts[2], pts[3], lx=pts[4], ly=pts[5], aX, aY, 0);
+                    cross += Cubic.crossings(lineX, lineY, points[0], points[1], points[2], points[3],
+                            lineX = points[4], lineY = points[5], aX, aY, 0);
                     break;
                 case Close:
-                    if (ly!=my)
-                        cross += Line.crossings(lx, ly, lx=mx, ly=my, aX, aY);
+                    if (lineY!=moveY)
+                        cross += Line.crossings(lineX, lineY, lineX = moveX, lineY = moveY, aX, aY);
                     break;
             }
         }
@@ -142,42 +147,44 @@ public abstract class Shape {
 
         // Get path iterator and declare iter vars
         PathIter pathIter = aShape.getPathIter(null);
-        double pts[] = new double[6];
-        double mx = 0, my = 0;
-        double lx = 0, ly = 0;
+        double[] points = new double[6];
+        double moveX = 0;
+        double moveY = 0;
+        double lineX = 0;
+        double lineY = 0;
         Line line = new Line(0,0,0,0);
         Quad quad = null;
         Cubic cub = null;
 
         // Iterate over shape segments, if any segment edge intersects, return false
         while (pathIter.hasNext()) {
-            Seg seg = pathIter.getNext(pts);
+            Seg seg = pathIter.getNext(points);
             switch (seg) {
                 case MoveTo:
-                    mx = lx = pts[0];
-                    my = ly = pts[1];
+                    moveX = lineX = points[0];
+                    moveY = lineY = points[1];
                     break;
                 case LineTo:
-                    line.setPoints(lx, ly, lx = pts[0], ly = pts[1]);
+                    line.setPoints(lineX, lineY, lineX = points[0], lineY = points[1]);
                     if (!containsSeg(line))
                         return false;
                     break;
                 case QuadTo:
                     if (quad==null)
                         quad = new Quad(0,0,0,0,0,0);
-                    quad.setPoints(lx, ly, pts[0], pts[1], lx = pts[2], ly = pts[3]);
+                    quad.setPoints(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     if (!containsSeg(quad))
                         return false;
                     break;
                 case CubicTo:
                     if (cub==null)
                         cub = new Cubic(0,0,0,0,0,0,0,0);
-                    cub.setPoints(lx, ly, pts[0], pts[1], pts[2], pts[3], lx = pts[4], ly = pts[5]);
+                    cub.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
                     if (!containsSeg(cub))
                         return false;
                     break;
                 case Close:
-                    line.setPoints(lx, ly, lx = mx, ly = my);
+                    line.setPoints(lineX, lineY, lineX = moveX, lineY = moveY);
                     if (!containsSeg(line))
                         return false;
                     break;
@@ -208,42 +215,44 @@ public abstract class Shape {
 
         // Get path iterator and declare iter vars
         PathIter pathIter = aShape.getPathIter(null);
-        double pts[] = new double[6];
-        double mx = 0, my = 0;
-        double lx = 0, ly = 0;
+        double[] points = new double[6];
+        double moveX = 0;
+        double moveY = 0;
+        double lineX = 0;
+        double lineY = 0;
         Line line = new Line(0,0,0,0);
         Quad quad = null;
         Cubic cub = null;
 
         // Iterate over shape segments, if any segment intersects, return true
         while (pathIter.hasNext()) {
-            Seg seg = pathIter.getNext(pts);
+            Seg seg = pathIter.getNext(points);
             switch (seg) {
                 case MoveTo:
-                    mx = lx = pts[0];
-                    my = ly = pts[1];
+                    moveX = lineX = points[0];
+                    moveY = lineY = points[1];
                     break;
                 case LineTo:
-                    line.setPoints(lx, ly, lx = pts[0], ly = pts[1]);
+                    line.setPoints(lineX, lineY, lineX = points[0], lineY = points[1]);
                     if (intersectsSeg(line))
                         return true;
                     break;
                 case QuadTo:
                     if (quad==null)
                         quad = new Quad(0,0,0,0,0,0);
-                    quad.setPoints(lx, ly, pts[0], pts[1], lx = pts[2], ly = pts[3]);
+                    quad.setPoints(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     if (intersectsSeg(quad))
                         return true;
                     break;
                 case CubicTo:
                     if (cub==null)
                         cub = new Cubic(0,0,0,0,0,0,0,0);
-                    cub.setPoints(lx, ly, pts[0], pts[1], pts[2], pts[3], lx = pts[4], ly = pts[5]);
+                    cub.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
                     if (intersectsSeg(cub))
                         return true;
                     break;
                 case Close:
-                    line.setPoints(lx, ly, lx = mx, ly = my);
+                    line.setPoints(lineX, lineY, lineX = moveX, lineY = moveY);
                     if (intersectsSeg(line))
                         return true;
                     break;
@@ -293,41 +302,43 @@ public abstract class Shape {
 
         // Get path iterator and declare iter vars
         PathIter pathIter = getPathIter(null);
-        double pts[] = new double[6];
-        double mx = 0, my = 0;
-        double lx = 0, ly = 0;
+        double[] points = new double[6];
+        double moveX = 0;
+        double moveY = 0;
+        double lineX = 0;
+        double lineY = 0;
         Line line = new Line(0,0,0,0);
         Quad quad = null;
         Cubic cub = null;
 
         // Iterate over local segments, if any segment intersects, return true
         while (pathIter.hasNext()) {
-            Seg seg = pathIter.getNext(pts);
+            Seg seg = pathIter.getNext(points);
             switch (seg) {
                 case MoveTo:
-                    mx = lx = pts[0]; my = ly = pts[1];
+                    moveX = lineX = points[0]; moveY = lineY = points[1];
                     break;
                 case LineTo:
-                    line.setPoints(lx, ly, lx = pts[0], ly = pts[1]);
+                    line.setPoints(lineX, lineY, lineX = points[0], lineY = points[1]);
                     if (aSeg.crossesSeg(line))
                         return true;
                     break;
                 case QuadTo:
                     if (quad==null)
                         quad = new Quad(0,0,0,0,0,0);
-                    quad.setPoints(lx, ly, pts[0], pts[1], lx = pts[2], ly = pts[3]);
+                    quad.setPoints(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     if (aSeg.crossesSeg(quad))
                         return true;
                     break;
                 case CubicTo:
                     if (cub==null)
                         cub = new Cubic(0,0,0,0,0,0,0,0);
-                    cub.setPoints(lx, ly, pts[0], pts[1], pts[2], pts[3], lx = pts[4], ly = pts[5]);
+                    cub.setPoints(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
                     if (aSeg.crossesSeg(cub))
                         return true;
                     break;
                 case Close:
-                    line.setPoints(lx, ly, lx = mx, ly = my);
+                    line.setPoints(lineX, lineY, lineX = moveX, lineY = moveY);
                     if (aSeg.crossesSeg(line))
                         return true;
                     break;
@@ -345,31 +356,34 @@ public abstract class Shape {
     {
         // Get path iterator and declare iter vars
         PathIter pathIter = getPathIter(null);
-        double pts[] = new double[6];
-        double lx = 0, ly = 0;
-        double mx = 0, my = 0;
+        double[] points = new double[6];
+        double moveX = 0;
+        double moveY = 0;
+        double lineX = 0;
+        double lineY = 0;
         double minDist = Float.MAX_VALUE;
         double dist = minDist;
 
         // Iterate over segments, track minimum distanceSquared to segment
         while (pathIter.hasNext()) {
-            Seg seg = pathIter.getNext(pts);
+            Seg seg = pathIter.getNext(points);
             switch (seg) {
                 case MoveTo:
-                    mx = lx = pts[0];
-                    my = ly = pts[1];
+                    moveX = lineX = points[0];
+                    moveY = lineY = points[1];
                     break;
                 case LineTo:
-                    dist = Line.getDistanceSquared(lx, ly, lx=pts[0], ly=pts[1], x, y);
+                    dist = Line.getDistanceSquared(lineX, lineY, lineX = points[0], lineY = points[1], x, y);
                     break;
                 case QuadTo:
-                    dist = Quad.getDistanceSquared(lx, ly, pts[0], pts[1], lx=pts[2], ly=pts[3], x, y);
+                    dist = Quad.getDistanceSquared(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3], x, y);
                     break;
                 case CubicTo:
-                    dist = Cubic.getDistanceSquared(lx, ly, pts[0], pts[1], pts[2], pts[3], lx=pts[4], ly=pts[5], x, y);
+                    dist = Cubic.getDistanceSquared(lineX, lineY, points[0], points[1], points[2], points[3],
+                            lineX = points[4], lineY = points[5], x, y);
                     break;
                 case Close:
-                    dist = Line.getDistanceSquared(lx, ly, lx=mx, ly=my, x, y);
+                    dist = Line.getDistanceSquared(lineX, lineY, lineX = moveX, lineY = moveY, x, y);
                     break;
             }
             minDist = Math.min(minDist, dist);
@@ -439,36 +453,38 @@ public abstract class Shape {
     {
         // Get path iterator and declare iter vars
         PathIter pathIter = getPathIter(null);
-        double pts[] = new double[6];
-        double mx = 0, my = 0;
-        double lx = 0, ly = 0;
+        double[] points = new double[6];
+        double moveX = 0;
+        double moveY = 0;
+        double lineX = 0;
+        double lineY = 0;
         boolean closed = true;
 
         // Iterate over path
         while (pathIter.hasNext()) {
-            switch (pathIter.getNext(pts)) {
+            switch (pathIter.getNext(points)) {
 
                 // Handle MoveTo: If we were in a path, and last move-to isn't equal, return false
                 case MoveTo:
-                    if (!closed && !Point.equals(lx, ly, mx, my))
+                    if (!closed && !Point.equals(lineX, lineY, moveX, moveY))
                         return false;
-                    mx = pts[0];
-                    my = pts[1];
+                    moveX = points[0];
+                    moveY = points[1];
                     closed = true;
                     break;
                 case LineTo:
-                    lx = pts[0];
-                    ly = pts[1];
+                    lineX = points[0];
+                    lineY = points[1];
                     closed = false;
                     break;
                 case QuadTo:
-                    lx = pts[2];
-                    ly = pts[3];
+                    lineX = points[2];
+                    lineY = points[3];
                     closed = false;
                     break;
                 case CubicTo:
-                    lx = pts[4];
-                    ly = pts[5];
+                    lineX = points[4];
+                    lineY = points[5];
                     closed = false;
                     break;
                 case Close:
@@ -478,7 +494,7 @@ public abstract class Shape {
         }
 
         // Return true if last segment was an explicit close or ended at last move to point
-        return closed || Point.equals(lx,ly,mx,my);
+        return closed || Point.equals(lineX,lineY,moveX,moveY);
     }
 
     /**
@@ -488,10 +504,10 @@ public abstract class Shape {
     {
         // Get path iterator and declare iter vars
         PathIter pathIter = getPathIter(null);
-        double pnts[] = new double[6];
+        double[] points = new double[6];
 
         // Iterate over path
-        while (pathIter.hasNext()) switch (pathIter.getNext(pnts)) {
+        while (pathIter.hasNext()) switch (pathIter.getNext(points)) {
             case QuadTo: case CubicTo: return false; }
         return true;
     }
@@ -502,36 +518,12 @@ public abstract class Shape {
     public Shape getFlat()
     {
         // If already flat, just return this shape
-        if (isFlat()) return this;
+        if (isFlat())
+            return this;
 
-        // Get path iterator and declare iter vars
-        PathIter pathIter = getPathIter(null);
-        double pnts[] = new double[6];
-        Path path = new Path();
-
-        // Iterate over segments to generate flat path
-        while (pathIter.hasNext()) {
-            switch (pathIter.getNext(pnts)) {
-                case MoveTo:
-                    path.moveTo(pnts[0], pnts[1]);
-                    break;
-                case LineTo:
-                    path.lineTo(pnts[0], pnts[1]);
-                    break;
-                case QuadTo:
-                    path.quadToFlat(pnts[0], pnts[1], pnts[2], pnts[3]);
-                    break;
-                case CubicTo:
-                    path.curveToFlat(pnts[0], pnts[1], pnts[2], pnts[3], pnts[4], pnts[5]);
-                    break;
-                case Close:
-                    path.close();
-                    break;
-            }
-        }
-
-        // Return new path
-        return path;
+        // Create and return PolygonPath for shape
+        PolygonPath polygonPath = new PolygonPath(this);
+        return polygonPath;
     }
 
     /**
@@ -541,13 +533,16 @@ public abstract class Shape {
     {
         // Get path iterator and declare iter vars
         PathIter pathIter = getPathIter(null);
-        double pnts[] = new double[6];
+        double[] points = new double[6];
         int moveCount = 0;
 
         // Iterate over segments to generate flat path
-        while (pathIter.hasNext()) switch (pathIter.getNext(pnts)) {
+        while (pathIter.hasNext()) switch (pathIter.getNext(points)) {
             case MoveTo: moveCount++; break;
-            case LineTo: case QuadTo: case CubicTo: if (moveCount>1) return false; break;
+            case LineTo: case QuadTo: case CubicTo:
+                if (moveCount > 1)
+                    return false;
+                break;
             case Close: break;
         }
 
@@ -567,26 +562,6 @@ public abstract class Shape {
     {
         SegList slist = new SegList(this);
         return slist.isSimple();
-    }
-
-    /**
-     * Returns the first segment end point.
-     */
-    public Point getFirstMoveTo()
-    {
-        // Get path iterator and declare iter vars
-        PathIter pathIter = getPathIter(null);
-        double pts[] = new double[6];
-        double mx = 0, my = 0;
-
-        // Iterate over path segments
-        while (pathIter.hasNext()) {
-            switch (pathIter.getNext(pts)) {
-                case MoveTo: mx = pts[0]; my = pts[1]; break;
-                case LineTo: case QuadTo: case CubicTo: return new Point(mx, my);
-            }
-        }
-        return new Point(mx,my);
     }
 
     /**
@@ -644,26 +619,26 @@ public abstract class Shape {
     {
         // Get path iterator and declare iter vars
         PathIter pathIter = getPathIter(null);
-        double pts[] = new double[6];
+        double[] points = new double[6];
         StringBuilder sb = new StringBuilder();
 
         // Iterate over path segments
         while (pathIter.hasNext()) {
-            switch (pathIter.getNext(pts)) {
+            switch (pathIter.getNext(points)) {
                 case MoveTo:
-                    sb.append("M ").append(fmt(pts[0])).append(' ').append(fmt(pts[1])).append('\n');
+                    sb.append("M ").append(fmt(points[0])).append(' ').append(fmt(points[1])).append('\n');
                     break;
                 case LineTo:
-                    sb.append("L ").append(fmt(pts[0])).append(' ').append(fmt(pts[1])).append('\n');
+                    sb.append("L ").append(fmt(points[0])).append(' ').append(fmt(points[1])).append('\n');
                     break;
                 case QuadTo:
-                    sb.append("Q ").append(fmt(pts[0])).append(' ').append(fmt(pts[1])).append(' ');
-                    sb.append(fmt(pts[2])).append(' ').append(fmt(pts[3])).append('\n');
+                    sb.append("Q ").append(fmt(points[0])).append(' ').append(fmt(points[1])).append(' ');
+                    sb.append(fmt(points[2])).append(' ').append(fmt(points[3])).append('\n');
                     break;
                 case CubicTo:
-                    sb.append("C ").append(fmt(pts[0])).append(' ').append(fmt(pts[1])).append(' ');
-                    sb.append(fmt(pts[2])).append(' ').append(fmt(pts[3])).append(' ').append(fmt(pts[4])).append(' ');
-                    sb.append(fmt(pts[5])).append('\n');
+                    sb.append("C ").append(fmt(points[0])).append(' ').append(fmt(points[1])).append(' ');
+                    sb.append(fmt(points[2])).append(' ').append(fmt(points[3])).append(' ').append(fmt(points[4])).append(' ');
+                    sb.append(fmt(points[5])).append('\n');
                     break;
                 case Close:
                     sb.append("Z\n");

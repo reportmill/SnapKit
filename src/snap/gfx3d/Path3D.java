@@ -308,12 +308,12 @@ public class Path3D extends FacetShape implements Cloneable {
         for (Polygon triangle : triangles) {
 
             // Get triangle points
-            p0.x = triangle.getX(0);
-            p0.y = triangle.getY(0);
-            p1.x = triangle.getX(1);
-            p1.y = triangle.getY(1);
-            p2.x = triangle.getX(2);
-            p2.y = triangle.getY(2);
+            p0.x = triangle.getPointX(0);
+            p0.y = triangle.getPointY(0);
+            p1.x = triangle.getPointX(1);
+            p1.y = triangle.getPointY(1);
+            p2.x = triangle.getPointX(2);
+            p2.y = triangle.getPointY(2);
             p0.z = p1.z = p2.z = zVal;
 
             // Transform points back and add to VertexArray

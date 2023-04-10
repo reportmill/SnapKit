@@ -58,7 +58,7 @@ public class PolygonPath extends Shape {
                 case LineTo: lineTo(points[0], points[1]); break;
                 case QuadTo: quadTo(points[0], points[1], points[2], points[3]); break;
                 case CubicTo: curveTo(points[0], points[1], points[2], points[3], points[4], points[5]); break;
-                case Close: break;
+                case Close: close(); break;
             }
         }
     }
@@ -140,16 +140,27 @@ public class PolygonPath extends Shape {
             moveTo(0, 0);
 
         // If closing last poly, just return
-        double lastX = _poly.getX(0);
-        double lastY = _poly.getY(0);
-        if (Point.equals(aX, aY, lastX, lastY))
+        double lastX = _poly.getPointX(0);
+        double lastY = _poly.getPointY(0);
+        if (Point.equals(aX, aY, lastX, lastY)) {
+            close();
             return;
+        }
 
         // Add point and clear bounds
         _poly.addPoint(aX, aY);
 
         // Notify shape changed
         shapeChanged();
+    }
+
+    /**
+     * Closes the current polygon.
+     */
+    public void close()
+    {
+        if (_poly != null)
+            _poly.setClosed(true);
     }
 
     /**

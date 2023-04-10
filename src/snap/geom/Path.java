@@ -204,47 +204,6 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * QuadTo by adding lineTo segments.
-     */
-    public void quadToFlat(double cpx, double cpy, double x, double y)
-    {
-        // If distance from control point to base line less than tolerance, just add line
-        Point last = getCurrentPoint();
-        double dist = Line.getDistance(last.x, last.y, x, y, cpx, cpy);
-        if (dist < .25) {
-            lineTo(x, y);
-            return;
-        }
-
-        // Split curve at midpoint and add parts
-        Quad c0 = new Quad(last.x, last.y, cpx, cpy, x, y);
-        Quad c1 = c0.split(.5);
-        quadToFlat(c0.cpx, c0.cpy, c0.x1, c0.y1);
-        quadToFlat(c1.cpx, c1.cpy, c1.x1, c1.y1);
-    }
-
-    /**
-     * CubicTo by adding lineTo segments.
-     */
-    public void curveToFlat(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y)
-    {
-        // If distance from control points to base line less than tolerance, just add line
-        Point last = getCurrentPoint();
-        double dist1 = Line.getDistance(last.x, last.y, x, y, cp1x, cp1y);
-        double dist2 = Line.getDistance(last.x, last.y, x, y, cp2x, cp2y);
-        if (dist1 < .25 && dist2 < .25) {
-            lineTo(x, y);
-            return;
-        }
-
-        // Split curve at midpoint and add parts
-        Cubic c0 = new Cubic(last.x, last.y, cp1x, cp1y, cp2x, cp2y, x, y);
-        Cubic c1 = c0.split(.5);
-        curveToFlat(c0.cp0x, c0.cp0y, c0.cp1x, c0.cp1y, c0.x1, c0.y1);
-        curveToFlat(c1.cp0x, c1.cp0y, c1.cp1x, c1.cp1y, c1.x1, c1.y1);
-    }
-
-    /**
      * Close.
      */
     public void close()
