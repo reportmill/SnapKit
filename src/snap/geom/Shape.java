@@ -515,15 +515,22 @@ public abstract class Shape {
     /**
      * Returns a flattented version of this shape (just this shape if already flat).
      */
-    public Shape getFlat()
+    public Shape getFlattenedShape()
+    {
+        return getFlattenedShape(PolygonPath.DEFAULT_FLAT_DISTANCE);
+    }
+
+    /**
+     * Returns a flattented version of this shape (just this shape if already flat).
+     */
+    public Shape getFlattenedShape(double aFlatDistance)
     {
         // If already flat, just return this shape
         if (isFlat())
             return this;
 
         // Create and return PolygonPath for shape
-        PolygonPath polygonPath = new PolygonPath(this);
-        return polygonPath;
+        return new PolygonPath(this, aFlatDistance);
     }
 
     /**

@@ -70,20 +70,20 @@ public class PathBox3D extends ParentShape {
     private Shape3D[] createExtrusionShape3Ds(Shape aPath, double z1, double z2)
     {
         // Get flattened path
-        Shape flatPath = aPath.getFlat();
+        Shape flatPath = aPath.getFlattenedShape();
 
         // Create list to hold paths
         List<Shape3D> paths = new ArrayList<>();
-        Path3D back = null;
+        Poly3D back = null;
         boolean reverse = true;
 
         // If path is closed, create path3d for front from aPath and z1
         if (flatPath.isClosed()) {
 
             // Create path3d for front and back
-            Path3D front = new Path3D(flatPath, z1);
+            Poly3D front = new Poly3D(flatPath, z1);
             front.setName("BoxBack");
-            back = new Path3D(flatPath, z2);
+            back = new Poly3D(flatPath, z2);
             back.setName("BoxFront");
 
             // Add front to paths list
@@ -107,28 +107,28 @@ public class PathBox3D extends ParentShape {
         }
 
         // Get PathIter and loop vars
-        PathIter pathIter = aPath.getPathIter(null);
-        double[] pts = new double[6];
-        double lastX = 0;
-        double lastY = 0;
-        double lastMoveX = 0;
-        double lastMoveY = 0;
+        PathIter pathIter = flatPath.getPathIter(null);
+        double[] points = new double[6];
+        double moveX = 0;
+        double moveY = 0;
+        double lineX = 0;
+        double lineY = 0;
         int sideNum = 0;
 
         // Iterate over path elements
         while (pathIter.hasNext()) {
-            Seg seg = pathIter.getNext(pts);
+            Seg seg = pathIter.getNext(points);
             switch (seg) {
 
                 // Handle MoveTo:
                 case MoveTo:
-                    lastX = lastMoveX = pts[0];
-                    lastY = lastMoveY = pts[1];
+                    lineX = moveX = points[0];
+                    lineY = moveY = points[1];
                     break;
 
                 // Handle LineTo:
                 case LineTo: {
-                    Poly3D polyShape = lineTo(lastX, lastY, lastX = pts[0], lastY = pts[1], z1, z2);
+                    Poly3D polyShape = lineTo(lineX, lineY, lineX = points[0], lineY = points[1], z1, z2);
                     if (polyShape == null)
                         break;
                     polyShape.setName("BoxSide" + sideNum++);
@@ -138,14 +138,9 @@ public class PathBox3D extends ParentShape {
                 }
                 break;
 
-                // Handle CurveTo
-                case CubicTo:
-                    curveToFlat(lastX, lastY, pts[0], pts[1], pts[2], pts[3], lastX = pts[4], lastY = pts[5], z1, z2, paths);
-                    break;
-
                 // Handle Close
                 case Close: {
-                    Poly3D polyShape = lineTo(lastX, lastY, lastX = lastMoveX, lastY = lastMoveY, z1, z2);
+                    Poly3D polyShape = lineTo(lineX, lineY, lineX = moveX, lineY = moveY, z1, z2);
                     if (polyShape == null)
                         break;
                     polyShape.setName("BoxSide" + sideNum++);
@@ -180,28 +175,5 @@ public class PathBox3D extends ParentShape {
         path.addPoint(x2, y2, z2);
         path.addPoint(x1, y1, z2);
         return path;
-    }
-
-    /**
-     * CubicTo by adding lineTo segments.
-     */
-    private static void curveToFlat(double lastX, double lastY, double cp1x, double cp1y, double cp2x, double cp2y, double x, double y,
-                          double z1, double z2, List<Shape3D> polyList)
-    {
-        // If distance from control points to base line less than tolerance, just add line
-        double dist1 = Line.getDistance(lastX, lastY, x, y, cp1x, cp1y);
-        double dist2 = Line.getDistance(lastX, lastY, x, y, cp2x, cp2y);
-        if (dist1 < .25 && dist2 < .25) {
-            Poly3D polyShape = lineTo(lastX, lastY, x, y, z1, z2);
-            if (polyShape != null)
-                polyList.add(polyShape);
-            return;
-        }
-
-        // Split curve at midpoint and add parts
-        Cubic c0 = new Cubic(lastX, lastY, cp1x, cp1y, cp2x, cp2y, x, y);
-        Cubic c1 = c0.split(.5);
-        curveToFlat(lastX, lastY, c0.cp0x, c0.cp0y, c0.cp1x, c0.cp1y, c0.x1, c0.y1, z1, z2, polyList);
-        curveToFlat(c0.x1, c0.y1, c1.cp0x, c1.cp0y, c1.cp1x, c1.cp1y, c1.x1, c1.y1, z1, z2, polyList);
     }
 }

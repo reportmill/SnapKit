@@ -19,7 +19,10 @@ public class PolygonPath extends Shape {
     private Polygon  _poly;
 
     // The flatness
-    private double  _flatDist = .5;
+    private double  _flatDist = DEFAULT_FLAT_DISTANCE;
+
+    // Constant for default flatness
+    public static final double DEFAULT_FLAT_DISTANCE = .5;
 
     /**
      * Constructor.
@@ -32,6 +35,16 @@ public class PolygonPath extends Shape {
     public PolygonPath(Shape aShape)
     {
         this();
+        appendShape(aShape);
+    }
+
+    /**
+     * Constructor for given Shape.
+     */
+    public PolygonPath(Shape aShape, double aFlatDistance)
+    {
+        this();
+        setFlatDistance(aFlatDistance);
         appendShape(aShape);
     }
 
@@ -206,6 +219,20 @@ public class PolygonPath extends Shape {
         Cubic c0 = new Cubic(last.x, last.y, cp1x, cp1y, cp2x, cp2y, x, y), c1 = c0.split(.5);
         curveTo(c0.cp0x, c0.cp0y, c0.cp1x, c0.cp1y, c0.x1, c0.y1);
         curveTo(c1.cp0x, c1.cp0y, c1.cp1x, c1.cp1y, c1.x1, c1.y1);
+    }
+
+    /**
+     * Returns the acceptable distance of control points to segment line when flattening curved segments.
+     */
+    public double getFlatDistance()  { return _flatDist; }
+
+    /**
+     * Sets the acceptable distance of control points to segment line when flattening curved segments.
+     */
+    public void setFlatDistance(double aValue)
+    {
+        if (aValue == getFlatDistance()) return;
+        _flatDist = aValue;
     }
 
     /**

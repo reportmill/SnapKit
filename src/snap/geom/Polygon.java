@@ -17,7 +17,7 @@ public class Polygon extends Shape implements Cloneable {
     private int _pointCount;
 
     // Whether polygon is closed or not
-    private boolean _closed;
+    private boolean _closed = true;
 
     /**
      * Constructor.
