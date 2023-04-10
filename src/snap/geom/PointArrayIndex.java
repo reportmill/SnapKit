@@ -128,7 +128,7 @@ public class PointArrayIndex implements Cloneable {
         double zval = 0;
         for (int i = 0; i < pointCount; i++) {
             int pointsArrayIndex = i * 2;
-            double thisX = pointsArray[pointsArrayIndex + 0];
+            double thisX = pointsArray[pointsArrayIndex];
             double thisY = pointsArray[pointsArrayIndex + 1];
             int nextIndex = (i + 1) % pointCount * 2;
             double nextX = pointsArray[nextIndex];
@@ -145,11 +145,11 @@ public class PointArrayIndex implements Cloneable {
      */
     public static PointArrayIndex newTrianglePointArrayForShape(Shape aShape)
     {
-        PolygonList polygonList = new PolygonList(aShape);
-        Polygon[] polygons = polygonList.getPolys();
+        PolygonPath polygonPath = new PolygonPath(aShape);
+        Polygon[] polygons = polygonPath.getPolygons();
         double[] pointsArray = null;
         for (Polygon poly : polygons)
-            pointsArray = poly.getPoints();
+            pointsArray = poly.getPointArray();
         //if (pointsArray.length > 1)
         //    System.err.println("PointArray.newTrianglePointArrayForShape: Complex shape not supported");
 
