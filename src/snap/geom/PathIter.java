@@ -45,10 +45,10 @@ public abstract class PathIter {
      */
     public Seg getNext(float[] coords)
     {
-        double[] dcoords = new double[6];
-        Seg seg = getNext(dcoords);
+        double[] points = new double[6];
+        Seg seg = getNext(points);
         for (int i = 0; i < 6; i++)
-            coords[i] = (float) dcoords[i];
+            coords[i] = (float) points[i];
         return seg;
     }
 
@@ -135,37 +135,49 @@ public abstract class PathIter {
     public static Rect getBounds(PathIter aPathIter)
     {
         // Get iter vars
-        double[] pts = new double[6];
-        double lx = 0, ly = 0;
-        Rect bounds = new Rect();
-        Rect bnds = null;
+        double[] points = new double[6];
+        double lineX = 0;
+        double lineY = 0;
+        Rect shapeBounds = new Rect();
+        Rect segBounds = shapeBounds;
 
         // Iterate over segments
         while (aPathIter.hasNext()) {
-            switch (aPathIter.getNext(pts)) {
+            Seg seg = aPathIter.getNext(points);
+            switch (seg) {
+
+                // Handle MoveTo
                 case MoveTo:
-                    if (bnds==null) {
-                        bounds.setRect(lx = pts[0], ly = pts[1],0,0);
+                    if (segBounds == shapeBounds) {
+                        shapeBounds.setRect(lineX = points[0], lineY = points[1],0,0);
                         continue;
                     }
+
+                // Handle LineTo
                 case LineTo:
-                    bnds = Line.getBounds(lx, ly, lx = pts[0], ly = pts[1], bnds);
+                    segBounds = Line.getBounds(lineX, lineY, lineX = points[0], lineY = points[1], segBounds);
                     break;
+
+                // Handle QuadTo
                 case QuadTo:
-                    bnds = Quad.getBounds(lx, ly, pts[0], pts[1], lx = pts[2], ly = pts[3], bnds);
+                    segBounds = Quad.getBounds(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3], segBounds);
                     break;
+
+                // Handle CubicTo
                 case CubicTo:
-                    bnds = Cubic.getBounds(lx, ly, pts[0], pts[1], pts[2], pts[3], lx = pts[4], ly = pts[5], bnds);
+                    segBounds = Cubic.getBounds(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5], segBounds);
                     break;
+
+                // Handle Close
                 case Close: break;
             }
 
             // Combine bounds for segment (I wish this was union() instead, so it didn't include (0,0))
-            bounds.add(bnds);
+            shapeBounds.add(segBounds);
         }
 
-        // Return bounds
-        return bounds;
+        // Return
+        return shapeBounds;
     }
 
     /**
@@ -174,36 +186,48 @@ public abstract class PathIter {
     public static double getArcLength(PathIter aPathIter)
     {
         // Get iter vars
-        double[] pts = new double[6];
-        double lx = 0, ly = 0;
-        double lenAll = 0;
-        double len = 0;
+        double[] points = new double[6];
+        double lineX = 0;
+        double lineY = 0;
+        double arcLength = 0;
+        double segLength = 0;
 
         // Iterate over segments
         while (aPathIter.hasNext()) {
-            switch (aPathIter.getNext(pts)) {
+            Seg seg = aPathIter.getNext(points);
+            switch (seg) {
+
+                // Handle MoveTo
                 case MoveTo:
-                    lx = pts[0];
-                    ly = pts[1];
-                    len = 0;
+                    lineX = points[0];
+                    lineY = points[1];
+                    segLength = 0;
                     break;
+
+                // Handle LineTo
                 case LineTo:
-                    len = Point.getDistance(lx, ly, lx = pts[0], ly = pts[1]);
+                    segLength = Point.getDistance(lineX, lineY, lineX = points[0], lineY = points[1]);
                     break;
+
+                // Handle QuadTo
                 case QuadTo:
-                    len = SegmentLengths.getArcLengthQuad(lx, ly, pts[0], pts[1], lx = pts[2], ly = pts[3]);
+                    segLength = SegmentLengths.getArcLengthQuad(lineX, lineY, points[0], points[1], lineX = points[2], lineY = points[3]);
                     break;
+
+                // Handle CubicTo
                 case CubicTo:
-                    len = SegmentLengths.getArcLengthCubic(lx, ly, pts[0], pts[1], pts[2], pts[3], lx = pts[4], ly = pts[5]);
+                    segLength = SegmentLengths.getArcLengthCubic(lineX, lineY, points[0], points[1], points[2], points[3], lineX = points[4], lineY = points[5]);
                     break;
-                case Close: len = 0; break;
+
+                // Handle Close
+                case Close: segLength = 0; break;
             }
 
-            // Combine len for segment
-            lenAll += len;
+            // Add SegLength
+            arcLength += segLength;
         }
 
-        // Return length all
-        return lenAll;
+        // Return
+        return arcLength;
     }
 }
