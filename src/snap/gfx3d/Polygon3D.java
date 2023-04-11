@@ -9,7 +9,7 @@ import java.util.Arrays;
 /**
  * This class represents a polygon surface in 3D space.
  */
-public class Poly3D extends FacetShape implements Cloneable {
+public class Polygon3D extends FacetShape implements Cloneable {
 
     // The float array to hold actual vertex point components
     private float[]  _pointArray = new float[24];
@@ -37,7 +37,7 @@ public class Poly3D extends FacetShape implements Cloneable {
     /**
      * Constructor.
      */
-    public Poly3D()
+    public Polygon3D()
     {
         super();
     }
@@ -45,7 +45,7 @@ public class Poly3D extends FacetShape implements Cloneable {
     /**
      * Constructor.
      */
-    public Poly3D(Shape aShape, double aDepth)
+    public Polygon3D(Shape aShape, double aDepth)
     {
         super();
         addShapePath(aShape, aDepth);
@@ -239,7 +239,7 @@ public class Poly3D extends FacetShape implements Cloneable {
     {
         // Get copy of path facing Z
         Matrix3D localToFacingZ = getTransformToAlignToVector(0, 0, 1);
-        Poly3D polyFacingZ = copyForMatrix(localToFacingZ);
+        Polygon3D polyFacingZ = copyForMatrix(localToFacingZ);
 
         // Get Poly2D, break into triangles
         Shape poly2D = polyFacingZ.getShape2D();
@@ -299,9 +299,9 @@ public class Poly3D extends FacetShape implements Cloneable {
      * Copies path for given transform matrix.
      */
     @Override
-    public Poly3D copyForMatrix(Matrix3D aTrans)
+    public Polygon3D copyForMatrix(Matrix3D aTrans)
     {
-        Poly3D copy = clone();
+        Polygon3D copy = clone();
         copy.transform(aTrans);
         return copy;
     }
@@ -416,13 +416,13 @@ public class Poly3D extends FacetShape implements Cloneable {
      * Standard clone implementation.
      */
     @Override
-    public Poly3D clone()
+    public Polygon3D clone()
     {
         // Trim
         trim();
 
         // Do normal version
-        Poly3D clone  = (Poly3D) super.clone();
+        Polygon3D clone  = (Polygon3D) super.clone();
 
         // Clone arrays
         clone._pointArray = _pointArray.clone();

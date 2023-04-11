@@ -145,16 +145,16 @@ public class Renderer2D extends Renderer {
                 float p3x = pointsArray[i], c3x = colorsArray != null ? colorsArray[i++] : (float) color.getRed();
                 float p3y = pointsArray[i], c3y = colorsArray != null ? colorsArray[i++] : (float) color.getGreen();
                 float p3z = pointsArray[i], c3z = colorsArray != null ? colorsArray[i++] : (float) color.getBlue();
-                Poly3D poly3D = new Poly3D();
-                poly3D.addPoint(p1x, p1y, p1z);
-                poly3D.addPoint(p2x, p2y, p2z);
-                poly3D.addPoint(p3x, p3y, p3z);
+                Polygon3D polygon3D = new Polygon3D();
+                polygon3D.addPoint(p1x, p1y, p1z);
+                polygon3D.addPoint(p2x, p2y, p2z);
+                polygon3D.addPoint(p3x, p3y, p3z);
                 float red = (c1x + c2x + c3x) / 3;
                 float green = (c1y + c2y + c3y) / 3;
                 float blue = (c1z + c2z + c3z) / 3;
-                poly3D.setColor(new Color(red, green, blue));
-                poly3D.setDoubleSided(true);
-                addFacetShapeInCameraCoords(poly3D, facetShapeList);
+                polygon3D.setColor(new Color(red, green, blue));
+                polygon3D.setDoubleSided(true);
+                addFacetShapeInCameraCoords(polygon3D, facetShapeList);
             }
         }
     }

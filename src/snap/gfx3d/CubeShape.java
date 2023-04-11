@@ -16,16 +16,16 @@ import java.util.Map;
 public class CubeShape extends ParentShape {
 
     // The Front/Back sides
-    private Poly3D  _frontSide, _backSide;
+    private Polygon3D _frontSide, _backSide;
 
     // The Left/Right sides
-    private Poly3D  _leftSide, _rightSide;
+    private Polygon3D _leftSide, _rightSide;
 
     // The Top/Bottom sides
-    private Poly3D  _topSide, _bottomSide;
+    private Polygon3D _topSide, _bottomSide;
 
     // An extra shape to act as shadow
-    private Poly3D  _shadowShape;
+    private Polygon3D _shadowShape;
 
     // Map cache of textures for sides
     private static Map<Side3D,Texture>  _textures = new HashMap<>();
@@ -56,7 +56,7 @@ public class CubeShape extends ParentShape {
     /**
      * Returns the side shape.
      */
-    public Poly3D getSideShape(Side3D aSide)
+    public Polygon3D getSideShape(Side3D aSide)
     {
         switch (aSide) {
             case FRONT: return _frontSide;
@@ -108,7 +108,7 @@ public class CubeShape extends ParentShape {
         _topSide = addSideTopBottom(width, height, depth);
 
         // Add Shadow shape
-        _shadowShape = new Poly3D();
+        _shadowShape = new Polygon3D();
         _shadowShape.setName("CubeShadow");
         _shadowShape.setColor(SHADOW_COLOR);
         _shadowShape.setOpacity(.8f);
@@ -131,10 +131,10 @@ public class CubeShape extends ParentShape {
     /**
      * Adds geometry for front/back sides.
      */
-    private Poly3D addSideFrontBack(double width, double height, double sideZ)
+    private Polygon3D addSideFrontBack(double width, double height, double sideZ)
     {
         // Create wall shape
-        Poly3D side = new Poly3D();
+        Polygon3D side = new Polygon3D();
         side.setName(sideZ == 0 ? "AxisBack" : "AxisFront");
         side.setOpacity(.8f);
         side.setColor(SIDE_COLOR);
@@ -160,10 +160,10 @@ public class CubeShape extends ParentShape {
     /**
      * Add geometry for left/right sides.
      */
-    private Poly3D addSideLeftRight(double sideX, double height, double depth)
+    private Polygon3D addSideLeftRight(double sideX, double height, double depth)
     {
         // Create side shape
-        Poly3D side = new Poly3D();
+        Polygon3D side = new Polygon3D();
         side.setName(sideX == 0 ? "AxisLeft" : "AxisRight");
         side.setColor(SIDE_COLOR);
         side.setOpacity(.8f);
@@ -189,10 +189,10 @@ public class CubeShape extends ParentShape {
     /**
      * Adds geometry for top/bottom sides.
      */
-    private Poly3D addSideTopBottom(double width, double sideY, double depth)
+    private Polygon3D addSideTopBottom(double width, double sideY, double depth)
     {
         // Create side shape
-        Poly3D side = new Poly3D();
+        Polygon3D side = new Polygon3D();
         side.setName(sideY == 0 ? "AxisBottom" : "AxisTop");
         side.setColor(sideY == 0 ? BOTTOM_COLOR : SIDE_COLOR);
         side.setOpacity(.8f);
@@ -273,7 +273,7 @@ public class CubeShape extends ParentShape {
     private void setTextureForSide(Texture aTexture, Side3D aSide)
     {
         // Get side and set texture
-        Poly3D sideShape = getSideShape(aSide);
+        Polygon3D sideShape = getSideShape(aSide);
         sideShape.setTexture(aTexture);
 
         // Add standard texture coords if not yet added

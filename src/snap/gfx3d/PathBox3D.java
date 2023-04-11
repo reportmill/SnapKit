@@ -74,16 +74,16 @@ public class PathBox3D extends ParentShape {
 
         // Create list to hold paths
         List<Shape3D> paths = new ArrayList<>();
-        Poly3D back = null;
+        Polygon3D back = null;
         boolean reverse = true;
 
         // If path is closed, create path3d for front from aPath and z1
         if (flatPath.isClosed()) {
 
             // Create path3d for front and back
-            Poly3D front = new Poly3D(flatPath, z1);
+            Polygon3D front = new Polygon3D(flatPath, z1);
             front.setName("BoxBack");
-            back = new Poly3D(flatPath, z2);
+            back = new Polygon3D(flatPath, z2);
             back.setName("BoxFront");
 
             // Add front to paths list
@@ -128,7 +128,7 @@ public class PathBox3D extends ParentShape {
 
                 // Handle LineTo:
                 case LineTo: {
-                    Poly3D polyShape = lineTo(lineX, lineY, lineX = points[0], lineY = points[1], z1, z2);
+                    Polygon3D polyShape = lineTo(lineX, lineY, lineX = points[0], lineY = points[1], z1, z2);
                     if (polyShape == null)
                         break;
                     polyShape.setName("BoxSide" + sideNum++);
@@ -140,7 +140,7 @@ public class PathBox3D extends ParentShape {
 
                 // Handle Close
                 case Close: {
-                    Poly3D polyShape = lineTo(lineX, lineY, lineX = moveX, lineY = moveY, z1, z2);
+                    Polygon3D polyShape = lineTo(lineX, lineY, lineX = moveX, lineY = moveY, z1, z2);
                     if (polyShape == null)
                         break;
                     polyShape.setName("BoxSide" + sideNum++);
@@ -166,10 +166,10 @@ public class PathBox3D extends ParentShape {
     /**
      * Create a Poly3D quad surface for 2D lineTo points and depth1/depth2.
      */
-    private static Poly3D lineTo(double x1, double y1, double x2, double y2, double z1, double z2)
+    private static Polygon3D lineTo(double x1, double y1, double x2, double y2, double z1, double z2)
     {
         if (Point.equals(x1, y1, x2, y2)) return null;
-        Poly3D path = new Poly3D();
+        Polygon3D path = new Polygon3D();
         path.addPoint(x1, y1, z1);
         path.addPoint(x2, y2, z1);
         path.addPoint(x2, y2, z2);
