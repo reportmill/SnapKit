@@ -49,34 +49,6 @@ public class PolygonPath extends Shape {
     }
 
     /**
-     * Appends given shape to this polygon path.
-     */
-    public void appendShape(Shape aShape)
-    {
-        PathIter pathIter = aShape.getPathIter(null);
-        appendPathIter(pathIter);
-    }
-
-    /**
-     * Appends given PathIter to this polygon path.
-     */
-    public void appendPathIter(PathIter aPathIter)
-    {
-        double[] points = new double[6];
-
-        while (aPathIter.hasNext()) {
-            Seg pathSeg = aPathIter.getNext(points);
-            switch (pathSeg) {
-                case MoveTo: moveTo(points[0], points[1]); break;
-                case LineTo: lineTo(points[0], points[1]); break;
-                case QuadTo: quadTo(points[0], points[1], points[2], points[3]); break;
-                case CubicTo: curveTo(points[0], points[1], points[2], points[3], points[4], points[5]); break;
-                case Close: close(); break;
-            }
-        }
-    }
-
-    /**
      * Returns the Polygons.
      */
     public Polygon[] getPolygons()  { return _polys; }
@@ -228,6 +200,47 @@ public class PolygonPath extends Shape {
     }
 
     /**
+     * Appends given shape to this polygon path.
+     */
+    public void appendShape(Shape aShape)
+    {
+        PathIter pathIter = aShape.getPathIter(null);
+        appendPathIter(pathIter);
+    }
+
+    /**
+     * Appends given PathIter to this polygon path.
+     */
+    public void appendPathIter(PathIter aPathIter)
+    {
+        double[] points = new double[6];
+
+        // Iterate over PathIter
+        while (aPathIter.hasNext()) {
+
+            // Get next segment and handle
+            Seg pathSeg = aPathIter.getNext(points);
+            switch (pathSeg) {
+
+                // Handle MoveTo
+                case MoveTo: moveTo(points[0], points[1]); break;
+
+                // Handle LineTo
+                case LineTo: lineTo(points[0], points[1]); break;
+
+                // Handle QuadTo
+                case QuadTo: quadTo(points[0], points[1], points[2], points[3]); break;
+
+                // Handle CubicTo
+                case CubicTo: curveTo(points[0], points[1], points[2], points[3], points[4], points[5]); break;
+
+                // Handle Close
+                case Close: close(); break;
+            }
+        }
+    }
+
+    /**
      * Returns the shape bounds.
      */
     protected Rect getBoundsImpl()
@@ -247,54 +260,11 @@ public class PolygonPath extends Shape {
     /**
      * Returns the path iterator.
      */
-    public PathIter getPathIter(Transform aTrans)
+    public PathIter getPathIter(Transform aTransform)
     {
-        return new PolygonPathIter(this, aTrans);
-    }
-
-    /**
-     * PathIter for PolygonPath.
-     */
-    private static class PolygonPathIter extends PathIter {
-
-        // Ivars
-        private PathIter[] _pathIters;
-        private PathIter _pathIter;
-        private int _polyCount;
-        private int _polyIndex;
-
-        /**
-         * Constructor.
-         */
-        private PolygonPathIter(PolygonPath polygonPath, Transform at)
-        {
-            super(at);
-
-            Polygon[] polygons = polygonPath.getPolygons();
-            _polyCount = polygons.length;
-            _pathIters = new PathIter[_polyCount];
-            for (int i = 0; i < _polyCount; i++)
-                _pathIters[i] = polygons[i].getPathIter(at);
-            _pathIter = _polyCount > 0 ? _pathIters[0] : null;
-        }
-
-        /**
-         * Returns whether there are more segments.
-         */
-        public boolean hasNext()
-        {
-            return _pathIter != null && _pathIter.hasNext();
-        }
-
-        /**
-         * Returns the coordinates and type of the current path segment in the iteration.
-         */
-        public Seg getNext(double[] coords)
-        {
-            Seg seg = _pathIter.getNext(coords);
-            while (!_pathIter.hasNext() && _polyIndex < _polyCount)
-                _pathIter = _pathIters[_polyIndex++];
-            return seg;
-        }
+        // Array of Polygon.PathIters
+        Polygon[] polygons = getPolygons();
+        PathIter[] pathIters = ArrayUtils.map(polygons, poly -> poly.getPathIter(aTransform), PathIter.class);
+        return PathIter.getPathIterForPathIterArray(pathIters);
     }
 }

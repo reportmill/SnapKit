@@ -230,4 +230,54 @@ public abstract class PathIter {
         // Return
         return arcLength;
     }
+
+    /**
+     * Returns a combined PathIter for given array of PathIter.
+     */
+    public static PathIter getPathIterForPathIterArray(PathIter[] pathIters)
+    {
+        return new ArrayPathIter(pathIters);
+    }
+
+    /**
+     * PathIter for an array of PathIters.
+     */
+    private static class ArrayPathIter extends PathIter {
+
+        // Ivars
+        private PathIter[] _pathIters;
+        private PathIter _pathIter;
+        private int _polyIndex;
+
+        /**
+         * Constructor.
+         */
+        private ArrayPathIter(PathIter[] pathIters)
+        {
+            super(null);
+            _pathIters = pathIters;
+            _pathIter = _pathIters.length > 0 ? _pathIters[0] : null;
+        }
+
+        /**
+         * Returns whether there are more segments.
+         */
+        public boolean hasNext()  { return _pathIter != null && _pathIter.hasNext(); }
+
+        /**
+         * Returns the coordinates and type of the current path segment in the iteration.
+         */
+        public Seg getNext(double[] coords)
+        {
+            // Get next segment + points
+            Seg seg = _pathIter.getNext(coords);
+
+            // If at end of current PathIter, get next
+            while (!_pathIter.hasNext() && _polyIndex < _pathIters.length)
+                _pathIter = _pathIters[_polyIndex++];
+
+            // Return
+            return seg;
+        }
+    }
 }
