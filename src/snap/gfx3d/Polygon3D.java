@@ -455,6 +455,29 @@ public class Polygon3D extends FacetShape implements Cloneable {
     }
 
     /**
+     * Creates a polygon from a given simple path.
+     * If Path has multiple MoveTos, this will return first polygon and complain.
+     */
+    public static Polygon3D createFromShape(Shape aShape, double aDepth)
+    {
+        // Create PolygonPath3D and return polygon (if one and only one)
+        PolygonPath3D polygonPath = new PolygonPath3D(aShape, aDepth);
+        Polygon3D[] polygons = polygonPath.getPolygons();
+        if (polygons.length == 1)
+            return polygons[0];
+
+        // Complain about empty shape
+        if (polygons.length == 0) {
+            System.err.println("Polygon3D.createFromShape: Shape is empty");
+            return null;
+        }
+
+        // Complain about complex shape
+        System.err.println("Polygon3D.createFromShape: Shape has multiple cycles (" + polygons.length + ")");
+        return polygons[0];
+    }
+
+    /**
      * Reverses a float array with given number of records of given component count.
      */
     private static void reverseArray(float[] theArray, int recordCount, int componentCount)

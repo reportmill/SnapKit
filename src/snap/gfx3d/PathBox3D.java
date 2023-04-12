@@ -74,16 +74,18 @@ public class PathBox3D extends ParentShape {
 
         // Create list to hold paths
         List<Shape3D> paths = new ArrayList<>();
-        Polygon3D back = null;
+        FacetShape back = null;
         boolean reverse = true;
 
         // If path is closed, create path3d for front from aPath and z1
         if (flatPath.isClosed()) {
 
             // Create path3d for front and back
-            Polygon3D front = new Polygon3D(flatPath, z1);
+            FacetShape front = Polygon3D.createFromShape(flatPath, z1);
             front.setName("BoxBack");
-            back = new Polygon3D(flatPath, z2);
+
+            // Create back
+            back = Polygon3D.createFromShape(flatPath, z2);
             back.setName("BoxFront");
 
             // Add front to paths list
