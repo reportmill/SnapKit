@@ -185,7 +185,7 @@ public class Trackball extends ParentView {
         transform.translate(0, 0, -_radius);
 
         // Transform path
-        path.transform(transform);
+        path.transformBy(transform);
 
         // If the trackball is shrunk down, draw the scuffmarks a darker color so they'll show up.
         path.setColor(SCUFF_COLOR); //if (getZoomFactor()<.75) path.setColor(new Color(0,0,0,.75f));

@@ -81,10 +81,21 @@ public class Polygon3D extends FacetShape implements Cloneable {
     public Point3D getPoint(Point3D aPoint, int anIndex)
     {
         int index = anIndex * POINT_COMP_COUNT;
-        aPoint.x = _pointArray[index + 0];
+        aPoint.x = _pointArray[index];
         aPoint.y = _pointArray[index + 1];
         aPoint.z = _pointArray[index + 2];
         return aPoint;
+    }
+
+    /**
+     * Returns the Point3D at index.
+     */
+    public void setPointXYZ(int anIndex, double aX, double aY, double aZ)
+    {
+        int index = anIndex * POINT_COMP_COUNT;
+        _pointArray[index] = (float) aX;
+        _pointArray[index + 1] = (float) aY;
+        _pointArray[index + 2] = (float) aZ;
     }
 
     /**
@@ -287,7 +298,7 @@ public class Polygon3D extends FacetShape implements Cloneable {
     /**
      * Transforms the path by the given transform matrix.
      */
-    public void transform(Matrix3D xform)
+    public void transformBy(Matrix3D xform)
     {
         float[] pointArray = getPointArray();
         int pointCount = getPointCount();
@@ -302,7 +313,7 @@ public class Polygon3D extends FacetShape implements Cloneable {
     public Polygon3D copyForMatrix(Matrix3D aTrans)
     {
         Polygon3D copy = clone();
-        copy.transform(aTrans);
+        copy.transformBy(aTrans);
         return copy;
     }
 
@@ -402,7 +413,7 @@ public class Polygon3D extends FacetShape implements Cloneable {
         float[] pointArray = getPointArray();
         int arrayCount = getPointCount() * POINT_COMP_COUNT;
         for (int i = 0; i < arrayCount; i += POINT_COMP_COUNT) {
-            float x = pointArray[i + 0];
+            float x = pointArray[i];
             float y = pointArray[i + 1];
             float z = pointArray[i + 2];
             bounds.addXYZ(x, y, z);
@@ -505,7 +516,7 @@ public class Polygon3D extends FacetShape implements Cloneable {
 
                 // Get X/Y for PointIndex
                 int pointArrayIndex = _pointIndex * POINT_COMP_COUNT;
-                float x = _pointArray[pointArrayIndex + 0];
+                float x = _pointArray[pointArrayIndex];
                 float y = _pointArray[pointArrayIndex + 1];
                 _pointIndex++;
 
