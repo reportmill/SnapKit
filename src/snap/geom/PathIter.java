@@ -139,7 +139,7 @@ public abstract class PathIter {
         double lineX = 0;
         double lineY = 0;
         Rect shapeBounds = new Rect();
-        Rect segBounds = shapeBounds;
+        Rect segBounds = null;
 
         // Iterate over segments
         while (aPathIter.hasNext()) {
@@ -148,7 +148,7 @@ public abstract class PathIter {
 
                 // Handle MoveTo
                 case MoveTo:
-                    if (segBounds == shapeBounds) {
+                    if (segBounds == null) {
                         shapeBounds.setRect(lineX = points[0], lineY = points[1],0,0);
                         continue;
                     }
