@@ -248,13 +248,13 @@ public abstract class Shape3D extends PropObject {
         StringBuilder sb = new StringBuilder();
         String name = getName();
         if (name != null)
-            sb.append("Name=").append(name).append(", ");
+            sb.append("Name=").append(name);
 
         // Append Bounds
         if (_bounds3D != null) {
             Point3D minXYZ = _bounds3D.getMinXYZ();
             Point3D maxXYZ = _bounds3D.getMaxXYZ();
-            sb.append("MinXYZ").append(minXYZ).append(", MaxXYZ").append(maxXYZ);
+            sb.append(", MinXYZ=").append(minXYZ).append(", MaxXYZ=").append(maxXYZ);
         }
 
         // Return
