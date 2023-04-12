@@ -10,13 +10,10 @@ import snap.util.ArrayUtils;
 public class PolygonPath extends Shape {
 
     // The polygons
-    private Polygon[]  _polys = new Polygon[0];
-
-    // The number of polygons
-    private int  _polyCount;
+    private Polygon[] _polygons = new Polygon[0];
 
     // The current polygon
-    private Polygon  _poly;
+    private Polygon _lastPolygon;
 
     // The flatness
     private double  _flatDist = DEFAULT_FLAT_DISTANCE;
@@ -51,32 +48,31 @@ public class PolygonPath extends Shape {
     /**
      * Returns the Polygons.
      */
-    public Polygon[] getPolygons()  { return _polys; }
+    public Polygon[] getPolygons()  { return _polygons; }
 
     /**
      * Returns the number of polygons.
      */
-    public int getPolygonCount()  { return _polyCount; }
+    public int getPolygonCount()  { return _polygons.length; }
 
     /**
      * Returns the individual polygon at given index.
      */
-    public Polygon getPolygon(int anIndex)  { return _polys[anIndex]; }
+    public Polygon getPolygon(int anIndex)  { return _polygons[anIndex]; }
 
     /**
      * Adds a polygon.
      */
     public void addPoly(Polygon aPoly, int anIndex)
     {
-        _polys = ArrayUtils.add(_polys, aPoly, anIndex);
-        _polyCount++;
+        _polygons = ArrayUtils.add(_polygons, aPoly, anIndex);
         shapeChanged();
     }
 
     /**
      * Returns the last polygon.
      */
-    public Polygon getLastPolygon()  { return _polyCount > 0 ? _polys[_polyCount - 1] : null; }
+    public Polygon getLastPolygon()  { return _lastPolygon; }
 
     /**
      * Returns the last polygon last point.
@@ -93,14 +89,14 @@ public class PolygonPath extends Shape {
     public void moveTo(double aX, double aY)
     {
         // Handle two consecutive MoveTos
-        if (_poly != null && _poly.getPointCount() == 1)
-            _poly.setPoint(0, aX, aY);
+        if (_lastPolygon != null && _lastPolygon.getPointCount() == 1)
+            _lastPolygon.setPoint(0, aX, aY);
 
         // Create new poly
         else {
-            _poly = new Polygon();
-            addPoly(_poly, getPolygonCount());
-            _poly.addPoint(aX, aY);
+            _lastPolygon = new Polygon();
+            addPoly(_lastPolygon, getPolygonCount());
+            _lastPolygon.addPoint(aX, aY);
         }
 
         // Notify shape changed
@@ -113,19 +109,19 @@ public class PolygonPath extends Shape {
     public void lineTo(double aX, double aY)
     {
         // If no poly, start one
-        if (_poly == null)
+        if (_lastPolygon == null)
             moveTo(0, 0);
 
         // If closing last poly, just return
-        double lastX = _poly.getPointX(0);
-        double lastY = _poly.getPointY(0);
+        double lastX = _lastPolygon.getPointX(0);
+        double lastY = _lastPolygon.getPointY(0);
         if (Point.equals(aX, aY, lastX, lastY)) {
             close();
             return;
         }
 
         // Add point and clear bounds
-        _poly.addPoint(aX, aY);
+        _lastPolygon.addPoint(aX, aY);
 
         // Notify shape changed
         shapeChanged();
@@ -136,8 +132,8 @@ public class PolygonPath extends Shape {
      */
     public void close()
     {
-        if (_poly != null)
-            _poly.setClosed(true);
+        if (_lastPolygon != null)
+            _lastPolygon.setClosed(true);
     }
 
     /**
