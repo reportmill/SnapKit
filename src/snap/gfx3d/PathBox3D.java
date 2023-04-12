@@ -67,26 +67,26 @@ public class PathBox3D extends ParentShape {
     /**
      * Creates and returns an array of Shape3Ds for a given 2D shape and extrusion front/back z values.
      */
-    private Shape3D[] createExtrusionShape3Ds(Shape aPath, double z1, double z2)
+    private Shape3D[] createExtrusionShape3Ds(Shape aShape, double z1, double z2)
     {
         // Get flattened path
-        Shape flatPath = aPath.getFlattenedShape();
+        Shape flatPath = aShape.getFlattenedShape();
 
         // Create list to hold paths
         List<Shape3D> paths = new ArrayList<>();
         FacetShape back = null;
         boolean reverse = true;
 
-        // If path is closed, create path3d for front from aPath and z1
+        // If path is closed, create facet shapes for front/back from shape and z1/z2
         if (flatPath.isClosed()) {
 
-            // Create path3d for front and back
-            FacetShape front = Polygon3D.createFromShape(flatPath, z1);
-            front.setName("BoxBack");
+            // Create front for shape
+            FacetShape front = PolygonPath3D.createFacetShapeForShapeAndDepth(flatPath, z1);
+            front.setName("BoxFront");
 
-            // Create back
-            back = Polygon3D.createFromShape(flatPath, z2);
-            back.setName("BoxFront");
+            // Create back for path
+            back = PolygonPath3D.createFacetShapeForShapeAndDepth(flatPath, z2);
+            back.setName("BoxBack");
 
             // Add front to paths list
             paths.add(front);

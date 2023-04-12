@@ -43,15 +43,6 @@ public class Polygon3D extends FacetShape implements Cloneable {
     }
 
     /**
-     * Constructor.
-     */
-    public Polygon3D(Shape aShape, double aDepth)
-    {
-        super();
-        addShapePath(aShape, aDepth);
-    }
-
-    /**
      * Returns the vertex points components array.
      */
     public float[] getPointArray()
@@ -352,50 +343,6 @@ public class Polygon3D extends FacetShape implements Cloneable {
         // Trim TexCoordArray
         if (_texCoordArray.length != _texCoordArrayLen)
             _texCoordArray = Arrays.copyOf(_texCoordArray, _texCoordArrayLen);
-    }
-
-    /**
-     * Adds a Shape path to this path3D at given depth.
-     */
-    public void addShapePath(Shape aPath, double aDepth)
-    {
-        // Iterate over elements in given path
-        PathIter pathIter = aPath.getPathIter(null);
-        double[] pts = new double[6];
-
-        // Iterate over elements in given path
-        while (pathIter.hasNext()) {
-
-            // Get/handle Seg
-            Seg seg = pathIter.getNext(pts);
-            switch (seg) {
-
-                // Handle MoveTo
-                case MoveTo:
-                    if (getPointCount() > 0)
-                        System.err.println("Poly3D.addShapePath: Poly3D cannot have multiple moveTos");
-                    addPoint(pts[0], pts[1], aDepth);
-                    break;
-
-                // Handle LineTo
-                case LineTo:
-                    addPoint(pts[0], pts[1], aDepth);
-                    break;
-
-                // Handle QuadTo
-                case QuadTo:
-                    System.err.println("Poly3D.addShapePath: Poly3D cannot add non-flat path (QuadTo)");
-                    break;
-
-                // Handle CubicTo
-                case CubicTo:
-                    System.err.println("Poly3D.addShapePath: Poly3D cannot add non-flat path (CubicTo)");
-                    break;
-
-                // Handle Close
-                case Close: break;
-            }
-        }
     }
 
     /**

@@ -102,7 +102,10 @@ public class PolygonPath3D extends FacetShape implements Cloneable {
     /**
      * Closes the current polygon.
      */
-    public void close()  { }
+    public void close()
+    {
+        clearCachedValues();
+    }
 
     /**
      * Appends given shape to this polygon path.
@@ -364,6 +367,9 @@ public class PolygonPath3D extends FacetShape implements Cloneable {
         Polygon3D[] polygons = getPolygons();
         for (Polygon3D polygon : polygons)
             polygon.reverse();
+
+        // Clear cached values
+        clearCachedValues();
     }
 
     /**
@@ -375,6 +381,9 @@ public class PolygonPath3D extends FacetShape implements Cloneable {
         PolygonPath3D clone = clone();
         for (int i = 0; i < _polygons.length; i++)
             clone._polygons[i] = _polygons[i].copyForMatrix(aTrans);
+
+        // Clear cached values
+        clone.clearCachedValues();
 
         // Return
         return clone;
@@ -394,5 +403,17 @@ public class PolygonPath3D extends FacetShape implements Cloneable {
 
         // Return
         return clone;
+    }
+
+    /**
+     * Creates a Shape3D (either Polygon3D or PolygonPath3D) for given shape and depth.
+     */
+    public static FacetShape createFacetShapeForShapeAndDepth(Shape aShape, double aDepth)
+    {
+        PolygonPath3D polygonPath3D = new PolygonPath3D(aShape, aDepth);
+        Polygon3D[] polygons = polygonPath3D.getPolygons();
+        if (polygons.length == 1)
+            return polygons[0];
+        return polygonPath3D;
     }
 }
