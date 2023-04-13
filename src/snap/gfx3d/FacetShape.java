@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx3d;
+import snap.geom.Polygon;
 import snap.geom.Shape;
 import snap.gfx.Image;
 import snap.util.MathUtils;
@@ -97,25 +98,127 @@ public abstract class FacetShape extends Shape3D {
         if (_triangleArray != null) return _triangleArray;
 
         // Create, set, return
-        VertexArray triVA = createTriangleArray();
+        VertexArray triVA = createVertexArrays();
         return _triangleArray = triVA;
+    }
+
+    /**
+     * Creates the VertexArrays.
+     */
+    protected VertexArray createVertexArrays()
+    {
+        // Get Surface VertexArray
+        VertexArray surfaceVertexArray = createTriangleArray();
+        if (surfaceVertexArray == null)
+            return null;
+
+        // Get Stroke VertexArray
+        VertexArray strokeVertexArray = getStrokeTriangleArray();
+        if (strokeVertexArray != null)
+            surfaceVertexArray.setLast(strokeVertexArray);
+
+        // Get Painter VertexArray
+        Painter3D painter3D = getPainter();
+        if (painter3D != null) {
+            VertexArray painterVA = getPainterVertexArray();
+            surfaceVertexArray.setLast(painterVA);
+        }
+
+        // Return
+        return surfaceVertexArray;
     }
 
     /**
      * Creates a VertexArray of shape surface triangles.
      */
-    protected abstract VertexArray createTriangleArray();
+    protected VertexArray createTriangleArray()
+    {
+        // Create/configure VertexArray
+        VertexArray triangleArray = new VertexArray();
+        triangleArray.setColor(getColor());
+        triangleArray.setDoubleSided(isDoubleSided());
+
+        // If no normal, just return empty
+        Vector3D pathNormal = getNormal();
+        if (Double.isNaN(pathNormal.x))
+            return triangleArray;
+
+        // Get transform matrix to transform this path to/from facing Z
+        Matrix3D xfmToZ = getTransformToAlignToVector(0, 0, 1);
+        Matrix3D xfmFromZ = xfmToZ.clone().invert();
+
+        // Get copy of path facing Z
+        FacetShape pathFacingZ = copyForMatrix(xfmToZ);
+        double zVal = pathFacingZ.getMinZ();
+
+        // Get Path2D, break into triangles
+        Shape path2D = pathFacingZ.getShape2D();
+        Polygon[] triangles = Polygon.getConvexPolys(path2D, 3);
+
+        // Create loop variables
+        Point3D p0 = new Point3D(0, 0, 0);
+        Point3D p1 = new Point3D(0, 0, 0);
+        Point3D p2 = new Point3D(0, 0, 0);
+        Point3D[] points = { p0, p1, p2 };
+        Vector3D pointsNormal = new Vector3D(0, 0, 0);
+
+        // Get Path3Ds
+        for (Polygon triangle : triangles) {
+
+            // Get triangle points
+            p0.x = triangle.getPointX(0);
+            p0.y = triangle.getPointY(0);
+            p1.x = triangle.getPointX(1);
+            p1.y = triangle.getPointY(1);
+            p2.x = triangle.getPointX(2);
+            p2.y = triangle.getPointY(2);
+            p0.z = p1.z = p2.z = zVal;
+
+            // Transform points back and add to VertexArray
+            xfmFromZ.transformPoint(p0);
+            xfmFromZ.transformPoint(p1);
+            xfmFromZ.transformPoint(p2);
+
+            // If points normal facing backwards, reverse points (swap p0 and p2)
+            Vector3D.getNormalForPoints(pointsNormal, points);
+            if (!pointsNormal.equals(pathNormal)) {
+                double px = p0.x, py = p0.y, pz = p0.z;
+                p0.x = p2.x; p0.y = p2.y; p0.z = p2.z;
+                p2.x = px; p2.y = py; p2.z = pz;
+            }
+
+            // Add points to VertexArray
+            triangleArray.addPoint(p0.x, p0.y, p0.z);
+            triangleArray.addPoint(p1.x, p1.y, p1.z);
+            triangleArray.addPoint(p2.x, p2.y, p2.z);
+        }
+
+        // Return
+        return triangleArray;
+    }
+
+    /**
+     * Returns a VertexArray for path stroke.
+     */
+    protected VertexArray getStrokeTriangleArray()  { return null; }
 
     /**
      * Returns the painter VertexArray for 'painted' triangles on shape surface.
      */
-    protected VertexArray getPainterTriangleArray()
+    protected VertexArray getPainterVertexArray()
     {
+        // Get Painter (just return if null)
         Painter3D painter = getPainter();
+        if (painter == null)
+            return null;
+
+        // Get Painter VertexArray in this shape coords
         Matrix3D painterToLocal = getPainterToLocal();
-        VertexArray triangleArray = painter.getTriangleArray();
-        VertexArray triangleArrayLocal = triangleArray.copyForTransform(painterToLocal);
-        return triangleArrayLocal;
+        VertexArray painterVertexArray = painter.getTriangleArray();
+        VertexArray painterVertexArrayInLocalCoords = painterVertexArray.copyForTransform(painterToLocal);
+
+        // Return
+        return painterVertexArrayInLocalCoords;
     }
 
     /**

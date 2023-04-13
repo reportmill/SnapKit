@@ -17,9 +17,6 @@ public class Path3D extends FacetShape implements Cloneable {
     // The list of point3Ds in this path
     private List<Point3D>  _points = new ArrayList<>();
     
-    // The list of colors in this path
-    private List<Color>  _colors = new ArrayList<>();
-
     // Cached pointers for iterating efficiently over the path
     private int  _nextElementIndex = -100;
     private int  _nextPointIndex = -100;
@@ -212,14 +209,6 @@ public class Path3D extends FacetShape implements Cloneable {
     }
 
     /**
-     * Adds a color.
-     */
-    public void addColor(Color aColor)
-    {
-        _colors.add(aColor);
-    }
-
-    /**
      * Returns the normal of the path3d. Right hand rule for clockwise/counter-clockwise defined polygons.
      */
     @Override
@@ -267,93 +256,6 @@ public class Path3D extends FacetShape implements Cloneable {
         // Draw surface normals - handy for debugging
         //Point3D c = getCenter(); Vector3D n = getNormal(); path.moveTo(c.x,c.y); path.lineTo(c.x+n.x*20,c.y+.y*20);
         return path;
-    }
-
-    /**
-     * Creates a VertexArray of path triangles.
-     */
-    @Override
-    protected VertexArray createTriangleArray()
-    {
-        // Create/configure VertexArray
-        VertexArray triangleArray = new VertexArray();
-        triangleArray.setColor(getColor());
-        triangleArray.setDoubleSided(isDoubleSided());
-
-        // If no normal, just return empty
-        Vector3D pathNormal = getNormal();
-        if (Double.isNaN(pathNormal.x))
-            return triangleArray;
-
-        // Get transform matrix to transform this path to/from facing Z
-        Matrix3D xfmToZ = getTransformToAlignToVector(0, 0, 1);
-        Matrix3D xfmFromZ = xfmToZ.clone().invert();
-
-        // Get copy of path facing Z
-        Path3D pathFacingZ = copyForMatrix(xfmToZ);
-        double zVal = pathFacingZ.getMinZ();
-
-        // Get Path2D, break into triangles
-        Shape path2D = pathFacingZ.getShape2D();
-        Polygon[] triangles = Polygon.getConvexPolys(path2D, 3);
-
-        // Create loop variables
-        Point3D p0 = new Point3D(0, 0, 0);
-        Point3D p1 = new Point3D(0, 0, 0);
-        Point3D p2 = new Point3D(0, 0, 0);
-        Point3D[] points = { p0, p1, p2 };
-        Vector3D pointsNormal = new Vector3D(0, 0, 0);
-
-        // Get Path3Ds
-        for (Polygon triangle : triangles) {
-
-            // Get triangle points
-            p0.x = triangle.getPointX(0);
-            p0.y = triangle.getPointY(0);
-            p1.x = triangle.getPointX(1);
-            p1.y = triangle.getPointY(1);
-            p2.x = triangle.getPointX(2);
-            p2.y = triangle.getPointY(2);
-            p0.z = p1.z = p2.z = zVal;
-
-            // Transform points back and add to VertexArray
-            xfmFromZ.transformPoint(p0);
-            xfmFromZ.transformPoint(p1);
-            xfmFromZ.transformPoint(p2);
-
-            // If points normal facing backwards, reverse points (swap p0 and p2)
-            Vector3D.getNormalForPoints(pointsNormal, points);
-            if (!pointsNormal.equals(pathNormal)) {
-                double px = p0.x, py = p0.y, pz = p0.z;
-                p0.x = p2.x; p0.y = p2.y; p0.z = p2.z;
-                p2.x = px; p2.y = py; p2.z = pz;
-            }
-
-            // Add points to VertexArray
-            triangleArray.addPoint(p0.x, p0.y, p0.z);
-            triangleArray.addPoint(p1.x, p1.y, p1.z);
-            triangleArray.addPoint(p2.x, p2.y, p2.z);
-        }
-
-        // Add colors
-        for (Color color : _colors)
-            triangleArray.addColor(color);
-
-        // Handle Stroke: Create/add stroke VertexArray
-        if (getStrokeColor() != null) {
-            VertexArray strokeVA = getStrokeTriangleArray();
-            triangleArray.setLast(strokeVA);
-        }
-
-        // Handle Painter: Create/add painterVertexArray
-        Painter3D painter3D = getPainter();
-        if (painter3D != null) {
-            VertexArray painterVA = getPainterTriangleArray();
-            triangleArray.setLast(painterVA);
-        }
-
-        // Return
-        return triangleArray;
     }
 
     /**
@@ -445,14 +347,6 @@ public class Path3D extends FacetShape implements Cloneable {
     public void reverse()
     {
         reverse(0, null, null);
-
-        // Reverse colors
-        if (_colors.size() == 3) {
-            Color color = _colors.remove(1);
-            _colors.add(color);
-        }
-        else if (_colors.size() > 3)
-            System.err.println("Path3D.reverse: Colors not supported");
     }
 
     /**
@@ -539,9 +433,6 @@ public class Path3D extends FacetShape implements Cloneable {
         clone._points = new ArrayList<>(_points.size());
         for (Point3D pnt : _points)
             clone._points.add(pnt.clone());
-
-        // Clone colors
-        clone._colors = new ArrayList<>(_colors);
 
         // Return clone
         return clone;

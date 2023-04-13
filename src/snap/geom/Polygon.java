@@ -54,7 +54,16 @@ public class Polygon extends Shape implements Cloneable {
     /**
      * Returns the raw points array.
      */
-    public double[] getPointArray()  { return _pointArray; }
+    public double[] getPointArray()
+    {
+        // Trim array to exact point count
+        int pointArrayLen = _pointCount * 2;
+        if (pointArrayLen != _pointArray.length)
+            _pointArray = Arrays.copyOf(_pointArray, pointArrayLen);
+
+        // Return
+        return _pointArray;
+    }
 
     /**
      * Sets the points.
@@ -100,7 +109,7 @@ public class Polygon extends Shape implements Cloneable {
         // Make sure array is long enough
         int coordIndex = _pointCount * 2;
         if (coordIndex + 2 >= _pointArray.length)
-            _pointArray = Arrays.copyOf(_pointArray, _pointArray.length * 2);
+            _pointArray = Arrays.copyOf(_pointArray, Math.max(_pointArray.length * 2, 8));
 
         // Add point
         _pointArray[coordIndex] = aX;

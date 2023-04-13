@@ -17,12 +17,6 @@ public class Polygon3D extends FacetShape implements Cloneable {
     // The number of components in vertex points array
     private int  _pointArrayLen = 0;
 
-    // The float array to hold actual vertex color components
-    private float[]  _colorArray = new float[0];
-
-    // The number of components in vertex colors array
-    private int  _colorArrayLen = 0;
-
     // The float array to hold vertex texture coords
     private float[]  _texCoordArray = new float[0];
 
@@ -31,7 +25,6 @@ public class Polygon3D extends FacetShape implements Cloneable {
 
     // Constants
     public static final int POINT_COMP_COUNT = 3;
-    public static final int COLOR_COMP_COUNT = 4;
     public static final int TEX_COORD_COMP_COUNT = 2;
 
     /**
@@ -105,32 +98,6 @@ public class Polygon3D extends FacetShape implements Cloneable {
     }
 
     /**
-     * Returns the vertex colorscomponents array.
-     */
-    public float[] getColorArray()
-    {
-        trim();
-        return _colorArray;
-    }
-
-    /**
-     * Adds a color to vertex color components array.
-     */
-    public void addColor(Color aColor)
-    {
-        // Expand color components array if needed
-        if (_colorArrayLen + COLOR_COMP_COUNT > _colorArray.length)
-            _colorArray = Arrays.copyOf(_colorArray, Math.max(_colorArray.length * 2, 24));
-
-        // Add values
-        _colorArray[_colorArrayLen++] = (float) aColor.getRed();
-        _colorArray[_colorArrayLen++] = (float) aColor.getGreen();
-        _colorArray[_colorArrayLen++] = (float) aColor.getBlue();
-        if (COLOR_COMP_COUNT > 3)
-            _colorArray[_colorArrayLen++] = (float) aColor.getAlpha();
-    }
-
-    /**
      * Returns whether texture coords array is set.
      */
     public boolean isTexCoordArraySet()  { return _texCoordArray != null && _texCoordArray.length > 0; }
@@ -187,6 +154,10 @@ public class Polygon3D extends FacetShape implements Cloneable {
     @Override
     protected VertexArray createTriangleArray()
     {
+        // If more than 4 points, do normal version
+        if (getPointCount() > 4)
+            return super.createTriangleArray();
+
         // Create/configure VertexArray
         VertexArray triangleArray = new VertexArray();
         triangleArray.setColor(getColor());
@@ -201,10 +172,6 @@ public class Polygon3D extends FacetShape implements Cloneable {
         float[] pointArray = getPointArray();
         triangleArray.setPointArray(pointArray);
 
-        // Add colors
-        //for (Color color : _colors)
-        //    vertexArray.addColor(color);
-
         // If Texture/TexCoordArray is set, configure in VertexArray
         Texture texture = getTexture();
         if (texture != null && isTexCoordArraySet()) {
@@ -216,19 +183,6 @@ public class Polygon3D extends FacetShape implements Cloneable {
         // Get/set point index array for triangle points in VertexArray
         int[] indexArrayForTrianglePoints = getIndexArrayForTrianglePoints();
         triangleArray.setIndexArray(indexArrayForTrianglePoints);
-
-        // Handle Stroke: Create/add stroke VertexArray
-        if (getStrokeColor() != null) {
-            VertexArray strokeVA = getStrokeTriangleArray();
-            triangleArray.setLast(strokeVA);
-        }
-
-        // Handle Painter: Create/add painterVertexArray
-        Painter3D painter3D = getPainter();
-        if (painter3D != null) {
-            VertexArray painterVA = getPainterTriangleArray();
-            triangleArray.setLast(painterVA);
-        }
 
         // Return
         return triangleArray;
@@ -309,7 +263,7 @@ public class Polygon3D extends FacetShape implements Cloneable {
     }
 
     /**
-     * Reverses the path3d.
+     * Reverses the polygon points.
      */
     public void reverse()
     {
@@ -318,10 +272,9 @@ public class Polygon3D extends FacetShape implements Cloneable {
         int pointCount = getPointCount();
         reverseArray(pointArray, pointCount, POINT_COMP_COUNT);
 
-        // Reverse ColorArray
-        float[] colorArray = getColorArray();
-        int colorCount = _colorArrayLen / COLOR_COMP_COUNT;
-        reverseArray(colorArray, colorCount, COLOR_COMP_COUNT);
+        // Reverse TextCoordArray
+        if (_texCoordArrayLen > 0)
+            reverseArray(_texCoordArray, _texCoordArrayLen / 2 , 2);
 
         // Clear cached values
         clearCachedValues();
@@ -335,10 +288,6 @@ public class Polygon3D extends FacetShape implements Cloneable {
         // Trim PointArray
         if (_pointArray.length != _pointArrayLen)
             _pointArray = Arrays.copyOf(_pointArray, _pointArrayLen);
-
-        // Trim ColorArray
-        if (_colorArray.length != _colorArrayLen)
-            _colorArray = Arrays.copyOf(_colorArray, _colorArrayLen);
 
         // Trim TexCoordArray
         if (_texCoordArray.length != _texCoordArrayLen)
@@ -384,7 +333,6 @@ public class Polygon3D extends FacetShape implements Cloneable {
 
         // Clone arrays
         clone._pointArray = _pointArray.clone();
-        clone._colorArray = _colorArray.clone();
         clone._texCoordArray = _texCoordArray.clone();
 
         // Return clone
