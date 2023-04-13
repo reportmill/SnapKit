@@ -188,6 +188,19 @@ public class Menu extends MenuItem {
     }
 
     /**
+     * Hides child menu popup windows.
+     */
+    protected void hideChildPopupWindows()
+    {
+        PopupWindow popupWindow = getPopup();
+        if (popupWindow != null) {
+            PopupWindow childPopupWindow = popupWindow.getPopup();
+            if (childPopupWindow != null)
+                childPopupWindow.hide();
+        }
+    }
+
+    /**
      * Called when child MenuItem fires action.
      */
     protected void itemFiredActionEvent(ViewEvent anEvent)

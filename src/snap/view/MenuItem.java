@@ -129,10 +129,20 @@ public class MenuItem extends ButtonBase implements Cloneable {
     @Override
     protected void setTargeted(boolean aValue)
     {
+        // Do normal version
         if (aValue == isTargeted()) return;
         super.setTargeted(aValue);
+
+        // Update Fill/TextFill to show Targetted
         setFill(aValue ? ViewUtils.getTargetFill() : null);
         getLabel().setTextFill(aValue ? ViewUtils.getTargetTextFill() : Color.BLACK);
+
+        // If targeting this menu item, hide any previous peer menu popups
+        if (aValue) {
+            Menu parentMenu = getParentMenu();
+            if (parentMenu != null)
+                parentMenu.hideChildPopupWindows();
+        }
     }
 
     /**
