@@ -900,7 +900,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         if (vshp != null)
             vshp = parentToLocal(vshp);
         if (getClip() != null)
-            vshp = vshp != null ? Shape.intersect(vshp, getClip()) : getClip();
+            vshp = vshp != null ? Shape.intersectShapes(vshp, getClip()) : getClip();
         return vshp;
     }
 

@@ -95,7 +95,7 @@ public abstract class PainterImpl extends Painter {
 
         // If shape not in clip, clip
         if (!_gstate.clip.contains(mshp) && _gstate.clip.intersects(mshp))
-            mshp = Shape.intersect(_gstate.clip, mshp);
+            mshp = Shape.intersectShapes(_gstate.clip, mshp);
 
         // If no marked shape yet, just set
         if (_mshape == null) {
@@ -173,7 +173,7 @@ public abstract class PainterImpl extends Painter {
      */
     public void clip(Shape aShape)
     {
-        _gstate.clip = _gstate.clip != null ? Shape.intersect(_gstate.clip, aShape) : aShape;
+        _gstate.clip = _gstate.clip != null ? Shape.intersectShapes(_gstate.clip, aShape) : aShape;
     }
 
     /**

@@ -665,25 +665,25 @@ public abstract class Shape {
     /**
      * Adds two shapes together.
      */
-    public static Shape add(Shape aShape1, Shape aShape2)
+    public static Shape addShapes(Shape aShape1, Shape aShape2)
     {
-        return SegList.add(aShape1, aShape2);
+        return SegList.addShapes(aShape1, aShape2);
     }
 
     /**
      * Subtracts two shapes together.
      */
-    public static Shape subtract(Shape aShape1, Shape aShape2)
+    public static Shape subtractShapes(Shape aShape1, Shape aShape2)
     {
-        return SegList.subtract(aShape1, aShape2);
+        return SegList.subtractShapes(aShape1, aShape2);
     }
 
     /**
      * Returns the intersection shape of two shapes.
      */
-    public static Shape intersect(Shape aShape1, Shape aShape2)
+    public static Shape intersectShapes(Shape aShape1, Shape aShape2)
     {
-        return SegList.intersect(aShape1, aShape2);
+        return SegList.intersectShapes(aShape1, aShape2);
     }
 
     /**
