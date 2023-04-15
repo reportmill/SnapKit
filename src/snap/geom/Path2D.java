@@ -7,7 +7,7 @@ import java.util.Arrays;
 /**
  * A standard path shape that can be built/modified by standard moveTo/lineTo/curveTo methods.
  */
-public class Path2D extends Shape implements Cloneable {
+public class Path2D extends ShapeBuilder implements Cloneable {
 
     // The array of segments
     protected Seg[] _segs = new Seg[8];
@@ -204,48 +204,6 @@ public class Path2D extends Shape implements Cloneable {
     {
         _segCount = _pointCount = 0;
         shapeChanged();
-    }
-
-    /**
-     * Appends given shape to end of path.
-     */
-    public void appendShape(Shape aShape)
-    {
-        PathIter pathIter = aShape.getPathIter(null);
-        appendPathIter(pathIter);
-    }
-
-    /**
-     * Appends given PathIter to end of path.
-     */
-    public void appendPathIter(PathIter aPathIter)
-    {
-        double[] points = new double[6];
-        while (aPathIter.hasNext()) {
-            switch (aPathIter.getNext(points)) {
-                case MoveTo: moveTo(points[0], points[1]); break;
-                case LineTo: lineTo(points[0], points[1]); break;
-                case QuadTo: quadTo(points[0], points[1], points[2], points[3]); break;
-                case CubicTo: curveTo(points[0], points[1], points[2], points[3], points[4], points[5]); break;
-                case Close: close(); break;
-            }
-        }
-    }
-
-    /**
-     * Appends a path segment.
-     */
-    public void appendSegment(Segment aSeg)
-    {
-        if (aSeg instanceof Cubic) {
-            Cubic seg = (Cubic) aSeg;
-            curveTo(seg.cp0x, seg.cp0y, seg.cp1x, seg.cp1y, aSeg.x1, aSeg.y1);
-        }
-        else if (aSeg instanceof Quad) {
-            Quad seg = (Quad) aSeg;
-            quadTo(seg.cpx, seg.cpy, aSeg.x1, aSeg.y1);
-        }
-        else lineTo(aSeg.x1, aSeg.y1);
     }
 
     /**

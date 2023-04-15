@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.geom;
-import java.util.*;
-
 import snap.util.*;
 
 /**
@@ -33,49 +31,6 @@ public class Path extends Path2D implements Cloneable, XMLArchiver.Archivable {
     public Path(PathIter aPathIter)
     {
         super(aPathIter);
-    }
-
-    /**
-     * LineTo.
-     */
-    public void lineBy(double x, double y)
-    {
-        x += getLastPointX();
-        y += getLastPointY();
-        lineTo(x, y);
-    }
-
-    /**
-     * Horizontal LineTo.
-     */
-    public void hlineTo(double x)
-    {
-        double y = getLastPointY();
-        lineTo(x, y);
-    }
-
-    /**
-     * Vertical LineTo.
-     */
-    public void vlineTo(double y)
-    {
-        double x = getLastPointX();
-        lineTo(x, y);
-    }
-
-    /**
-     * ArcTo: Adds a Cubic using the corner point as a guide.
-     */
-    public void arcTo(double cx, double cy, double x, double y)
-    {
-        double magic = .5523f; // I calculated this in mathematica one time - probably only valid for 90 deg corner.
-        double lx = getLastPointX();
-        double ly = getLastPointY();
-        double cpx1 = lx + (cx - lx) * magic;
-        double cpy1 = ly + (cy - ly) * magic;
-        double cpx2 = x + (cx - x) * magic;
-        double cpy2 = y + (cy - y) * magic;
-        curveTo(cpx1, cpy1, cpx2, cpy2, x, y);
     }
 
     /**
@@ -275,69 +230,5 @@ public class Path extends Path2D implements Cloneable, XMLArchiver.Archivable {
 
         // Return this path
         return this;
-    }
-
-    /**
-     * Returns a path from an SVG path string.
-     */
-    public static Path getPathFromSVG(String aStr)
-    {
-        try { return getPathFromSVGOrThrow(aStr); }
-        catch (Exception e) {
-            System.err.println("Path.getPathFromSVG: " + e);
-            return null;
-        }
-    }
-
-    /**
-     * Returns a path from an SVG path string.
-     */
-    public static Path getPathFromSVGOrThrow(String aStr) throws InputMismatchException, NoSuchElementException
-    {
-        // Create scanner from string and new path
-        Scanner scan = new Scanner(aStr);
-        Path path = new Path();
-
-        // Iterate over scanner tokens
-        double x1, y1, cp0x, cp0y, cp1x, cp1y;
-        while (scan.hasNext()) {
-            String op = scan.next();
-            switch (op) {
-                case "M":
-                    x1 = scan.nextDouble();
-                    y1 = scan.nextDouble();
-                    path.moveTo(x1, y1);
-                    break;
-                case "L":
-                    x1 = scan.nextDouble();
-                    y1 = scan.nextDouble();
-                    path.lineTo(x1, y1);
-                    break;
-                case "Q":
-                    cp0x = scan.nextDouble();
-                    cp0y = scan.nextDouble();
-                    x1 = scan.nextDouble();
-                    y1 = scan.nextDouble();
-                    path.quadTo(cp0x, cp0y, x1, y1);
-                    break;
-                case "C":
-                    cp0x = scan.nextDouble();
-                    cp0y = scan.nextDouble();
-                    cp1x = scan.nextDouble();
-                    cp1y = scan.nextDouble();
-                    x1 = scan.nextDouble();
-                    y1 = scan.nextDouble();
-                    path.curveTo(cp0x, cp0y, cp1x, cp1y, x1, y1);
-                    break;
-                case "Z":
-                    path.close();
-                    break;
-                default:
-                    throw new NoSuchElementException("Invalid op: " + op);
-            }
-        }
-
-        // Return
-        return path;
     }
 }
