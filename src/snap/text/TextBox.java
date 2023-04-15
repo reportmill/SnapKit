@@ -1189,7 +1189,7 @@ public class TextBox {
      */
     public String toString()
     {
-        String str = getClass().getSimpleName() + " [" + getBounds().getString() + "]: ";
+        String str = getClass().getSimpleName() + " [" + getBounds().getSvgString() + "]: ";
         str += _lines.size() + " lines, " + length() + " chars";
         return str;
     }

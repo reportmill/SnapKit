@@ -58,7 +58,7 @@ public class StringBox extends RoundRect {
     /**
      * Returns the string.
      */
-    public String getString()  { return _string; }
+    public String getSvgString()  { return _string; }
 
     /**
      * Returns the length of the string.
@@ -210,7 +210,7 @@ public class StringBox extends RoundRect {
     /**
      * Returns whether this run has a hyphen at the end.
      */
-    public boolean isHyphenated()  { return getString().endsWith("-"); }
+    public boolean isHyphenated()  { return getSvgString().endsWith("-"); }
 
     /**
      * Sets whether this run has a hyphen at the end.
@@ -218,7 +218,7 @@ public class StringBox extends RoundRect {
     public void setHyphenated(boolean aFlag)
     {
         if (aFlag == isHyphenated()) return;
-        String str = getString();
+        String str = getSvgString();
         String str2 = aFlag ? (str + '-') : (str.substring(0, str.length() - 1));
         setString(str2);
     }
@@ -319,7 +319,7 @@ public class StringBox extends RoundRect {
     {
         // Get exact bounds around string glyphs for font
         Font font = getFont();
-        String str = getString();
+        String str = getSvgString();
         Rect bnds = str != null && str.length() > 0 ? font.getGlyphBounds(str) : Rect.ZeroRect;
 
         // Get StringWidth from GlyphBounds
@@ -344,7 +344,7 @@ public class StringBox extends RoundRect {
     private void loadMetricsForFontSizing()
     {
         // Get StringWidth for string + font (aka Advance)
-        String str = getString();
+        String str = getSvgString();
         Font font = getFont();
         _strWidth = Math.ceil(font.getStringAdvance(str));
 
@@ -427,7 +427,7 @@ public class StringBox extends RoundRect {
         if (_needsResize) resize();
 
         // Get info
-        String str = getString();
+        String str = getSvgString();
         double strX = getStringX();
         double strY = getStringY();
         Font font = getFont();
@@ -517,7 +517,7 @@ public class StringBox extends RoundRect {
     public String toString()
     {
         String cname = getClass().getSimpleName();
-        return cname + " { String='" + _string + '\'' + ", Style=" + _style + ", Rect=[" + super.getString() + ']' +
+        return cname + " { String='" + _string + '\'' + ", Style=" + _style + ", Rect=[" + super.getSvgString() + ']' +
             ", Padding=" + _padding + ", Border=" + _border +
             ", Ascent=" + getAscent() + ", Descent=" + getDescent() + ", LineHeight=" + _strHeight +
             ", Advance=" + _strWidth + " }";

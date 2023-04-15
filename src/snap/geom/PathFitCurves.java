@@ -14,7 +14,7 @@ public class PathFitCurves {
     /**
      * Takes a path with a bunch of line-to segments and replaces them with curves.
      */
-    public static void fitCurveFromPointIndex(Path aPath, int anIndex)
+    public static void fitCurveFromPointIndex(Path2D aPath, int anIndex)
     {
         // Copy the points to be fit (remove duplicates that are adjacent or within one point)
         List<Point> points = new ArrayList<>(aPath.getPointCount() - anIndex);

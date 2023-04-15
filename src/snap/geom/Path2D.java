@@ -274,6 +274,14 @@ public class Path2D extends ShapeBuilder implements Cloneable {
     public void setWinding(int aValue)  { _winding = aValue; }
 
     /**
+     * Fits the path points to a curve starting at the given point index.
+     */
+    public void fitToCurveFromPointIndex(int pointIndex)
+    {
+        PathFitCurves.fitCurveFromPointIndex(this, pointIndex);
+    }
+
+    /**
      * Standard clone implementation.
      */
     @Override

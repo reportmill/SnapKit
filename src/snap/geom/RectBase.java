@@ -245,7 +245,7 @@ public abstract class RectBase extends Shape implements Cloneable {
     /**
      * Returns a String reprsentation of this rect.
      */
-    public String getString()
+    public String getSvgString()
     {
         StringBuffer sb = new StringBuffer();
         sb.append(StringUtils.toString(x)).append(' ').append(StringUtils.toString(y)).append(' ');
@@ -278,7 +278,7 @@ public abstract class RectBase extends Shape implements Cloneable {
      */
     public String toString()
     {
-        return getClass().getSimpleName() + " [" + getString() + "]";
+        return getClass().getSimpleName() + " [" + getSvgString() + "]";
     }
 
     /**

@@ -624,9 +624,9 @@ public abstract class Shape {
     }
 
     /**
-     * Returns a string representation of Shape.
+     * Returns an SVG string representation of Shape.
      */
-    public String getString()
+    public String getSvgString()
     {
         // Get path iterator and declare iter vars
         PathIter pathIter = getPathIter(null);
@@ -663,7 +663,7 @@ public abstract class Shape {
      */
     public String toString()
     {
-        return getClass().getSimpleName() + " [" + getBounds().getString() + "] " + getString();
+        return getClass().getSimpleName() + " [" + getBounds().getSvgString() + "] " + getSvgString();
     }
 
     /**

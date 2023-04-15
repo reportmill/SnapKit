@@ -118,14 +118,6 @@ public class Path extends Path2D implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * Fits the path points to a curve starting at the given point index.
-     */
-    public void fitToCurve(int anIndex)
-    {
-        PathFitCurves.fitCurveFromPointIndex(this, anIndex);
-    }
-
-    /**
      * Override to return as path.
      */
     public Path copyFor(Rect aRect)
