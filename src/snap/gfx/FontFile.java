@@ -156,7 +156,7 @@ public abstract class FontFile {
             double charH = charBounds.getHeight();
             Rect charBounds2 = new Rect(x, aY - descent, charW * aSize / 1000, charH * aSize / 1000);
             charPath = charPath.copyFor(charBounds2);
-            path.append(charPath);
+            path.appendShape(charPath);
             x += charAdvance(loopChar) * aSize + aCharSpacing;
         }
         return path;

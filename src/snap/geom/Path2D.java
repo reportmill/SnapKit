@@ -13,16 +13,16 @@ public class Path2D extends Shape implements Cloneable {
     protected Seg[] _segs = new Seg[8];
 
     // The segment count
-    private int _segCount;
+    protected int _segCount;
 
     // The array of points
     protected double[] _points = new double[16];
 
     // The number of points
-    private int _pointCount;
+    protected int _pointCount;
 
     // The indexes to start point for each seg
-    private int[] _segPointIndexes = new int[8];
+    protected int[] _segPointIndexes = new int[8];
 
     // The winding - how a path determines what to fill when segments intersect
     private int _winding = WIND_EVEN_ODD;
@@ -42,6 +42,15 @@ public class Path2D extends Shape implements Cloneable {
     {
         this();
         appendShape(aShape);
+    }
+
+    /**
+     * Constructor with given PathIter.
+     */
+    public Path2D(PathIter aPathIter)
+    {
+        this();
+        appendPathIter(aPathIter);
     }
 
     /**
@@ -86,6 +95,16 @@ public class Path2D extends Shape implements Cloneable {
         double px = _points[anIndex * 2];
         double py = _points[anIndex * 2 + 1];
         return new Point(px, py);
+    }
+
+    /**
+     * Sets the individual point at given index.
+     */
+    public void setPoint(int anIndex, double aX, double aY)
+    {
+        _points[anIndex * 2] = aX;
+        _points[anIndex * 2 + 1] = aY;
+        shapeChanged();
     }
 
     /**
@@ -179,6 +198,15 @@ public class Path2D extends Shape implements Cloneable {
     }
 
     /**
+     * Clears all segments from path.
+     */
+    public void clear()
+    {
+        _segCount = _pointCount = 0;
+        shapeChanged();
+    }
+
+    /**
      * Appends given shape to end of path.
      */
     public void appendShape(Shape aShape)
@@ -205,6 +233,22 @@ public class Path2D extends Shape implements Cloneable {
     }
 
     /**
+     * Appends a path segment.
+     */
+    public void appendSegment(Segment aSeg)
+    {
+        if (aSeg instanceof Cubic) {
+            Cubic seg = (Cubic) aSeg;
+            curveTo(seg.cp0x, seg.cp0y, seg.cp1x, seg.cp1y, aSeg.x1, aSeg.y1);
+        }
+        else if (aSeg instanceof Quad) {
+            Quad seg = (Quad) aSeg;
+            quadTo(seg.cpx, seg.cpy, aSeg.x1, aSeg.y1);
+        }
+        else lineTo(aSeg.x1, aSeg.y1);
+    }
+
+    /**
      * Returns the last seg.
      */
     public Seg getLastSeg()  { return _segCount > 0 ? getSeg(_segCount - 1) : null; }
@@ -217,12 +261,12 @@ public class Path2D extends Shape implements Cloneable {
     /**
      * Returns the last point X.
      */
-    public double getLastPointX(int anIndex)  { return _pointCount > 0 ? _points[_pointCount * 2 - 2] : 0; }
+    public double getLastPointX()  { return _pointCount > 0 ? _points[_pointCount * 2 - 2] : 0; }
 
     /**
      * Returns the last point Y.
      */
-    public double getLastPointY(int anIndex)  { return _pointCount > 0 ? _points[_pointCount * 2 - 1] : 0; }
+    public double getLastPointY()  { return _pointCount > 0 ? _points[_pointCount * 2 - 1] : 0; }
 
     /**
      * Returns the array of point-indexes for given seg index.
@@ -255,8 +299,7 @@ public class Path2D extends Shape implements Cloneable {
      */
     public void removeLastSeg()
     {
-        int lastSegIndex = getSegCount() - 1;
-        Seg lastSeg = getSeg(lastSegIndex);
+        Seg lastSeg = getLastSeg();
         int segPointCount = lastSeg.getCount();
         _segCount--;
         _pointCount -= segPointCount;

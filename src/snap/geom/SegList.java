@@ -437,7 +437,7 @@ public class SegList extends Shape {
         // Simple case: If shapes don't intersect, just add them and return
         if (!aShape1.intersects(aShape2)) {
             Path path = new Path(aShape1);
-            path.append(aShape2);
+            path.appendShape(aShape2);
             return path;
         }
 
@@ -497,9 +497,9 @@ public class SegList extends Shape {
 
         // If either shape contains the other, return concatenated shape
         if (aShape1.contains(aShape2)) {
-            Path path = new Path(aShape1); path.append(aShape2); return path; }
+            Path path = new Path(aShape1); path.appendShape(aShape2); return path; }
         if (aShape2.contains(aShape1)) {
-            Path path = new Path(aShape2); path.append(aShape1); return path; }
+            Path path = new Path(aShape2); path.appendShape(aShape1); return path; }
 
         // Create SegLists for given shapes and new shape
         SegList shape1 = new SegList(aShape1), refShp = shape1;
