@@ -6,10 +6,9 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.util.*;
-
+import snap.geom.Path2D;
 import snap.geom.Rect;
 import snap.gfx.FontFile;
-import snap.geom.Path;
 import snap.geom.Shape;
 import snap.util.*;
 
@@ -155,14 +154,14 @@ public class AWTFontFile extends FontFile {
     private Shape getShape(java.awt.Shape aShape, boolean flip)
     {
         // Loop vars
-        Path path = new Path();
+        Path2D path = new Path2D();
         double[] points = new double[6];
 
         // Iterate over shape segments and build path
-        for (PathIterator pi = aShape.getPathIterator(null); !pi.isDone(); pi.next()) {
+        for (PathIterator pathIter = aShape.getPathIterator(null); !pathIter.isDone(); pathIter.next()) {
 
             // Get segment and points
-            int type = pi.currentSegment(points);
+            int type = pathIter.currentSegment(points);
             if (flip) {
                 points[1] = -points[1];
                 points[3] = -points[3];

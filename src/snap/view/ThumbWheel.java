@@ -3,9 +3,9 @@
  */
 package snap.view;
 import java.util.*;
-
-import snap.geom.Path;
+import snap.geom.Path2D;
 import snap.geom.Point;
+import snap.geom.Shape;
 import snap.gfx.*;
 import snap.util.*;
 
@@ -272,7 +272,7 @@ public class ThumbWheel extends View {
         }
 
         // Get the userpath for the dashes
-        Path path = getThumbWheelDashes();
+        Shape path = getThumbWheelDashes();
 
         // Draw dashes once for white part of groove
         if (isHorizontal()) aPntr.translate(1, 0);
@@ -318,12 +318,17 @@ public class ThumbWheel extends View {
     /**
      * Returns a Java2D shape for painting thumbwheel dashes.
      */
-    private Path getThumbWheelDashes()
+    private Shape getThumbWheelDashes()
     {
-        double minX = 2, minY = 2, maxX = getWidth(), maxY = getHeight(), fwidth = maxX-4, height = maxY-4;
+        double minX = 2;
+        double minY = 2;
+        double maxX = getWidth();
+        double maxY = getHeight();
+        double fwidth = maxX-4;
+        double height = maxY-4;
 
         // Get dashInterval (in pnts or degs depending on display mode) and shift
-        Path path = new Path();
+        Path2D path = new Path2D();
         double length = isVertical()? height - 1f : fwidth;
         int dashInt = isLinear()? _dashInterval : (int)Math.round(360/(Math.PI*length/_dashInterval));
         int shift = getShift();
@@ -338,7 +343,7 @@ public class ThumbWheel extends View {
         double mid = base + halfWidth, top = base + width;
 
         // Calculate whether first dash is a major one
-        boolean isMajor = (shift>=0)? isEven(shift/dashInt) : !isEven(shift/dashInt);
+        boolean isMajor = (shift >= 0) == isEven(shift / dashInt);
 
         // Calculate Linear dashes
         if (isLinear()) {

@@ -123,7 +123,7 @@ public class Arc extends RectBase {
     /**
      * Adds elements describing an oval in the given rect to this path. Need a real PathIter some day.
      */
-    private Path getPath()
+    private Path2D getPath()
     {
         // Get basic arc info
         double startAngle = getStartAngle();
@@ -139,7 +139,7 @@ public class Arc extends RectBase {
         double midY = bounds.getMidY();
 
         // Create new path
-        Path path = new Path();
+        Path2D path = new Path2D();
 
         // Calculate inner start point, outer point
         double x1 = midX + cos(startAngle) * arcHalfW;
@@ -186,7 +186,7 @@ public class Arc extends RectBase {
     /**
      * Appends a 90 deg sweep to given path.
      */
-    private static void appendArc(Path aPath, double midX, double midY, double hw, double hh, double angle, double aSweep)
+    private static void appendArc(Path2D aPath, double midX, double midY, double hw, double hh, double angle, double aSweep)
     {
         // Limit sweep to 90, take care of remainder via recursion, later
         double sweep = aSweep > 90 ? 90 : aSweep < -90 ? -90 : aSweep;
@@ -224,13 +224,6 @@ public class Arc extends RectBase {
     }
 
     // Convenience wraps for sin/cos.
-    private static double sin(double angle)
-    {
-        return MathUtils.sin(angle);
-    }
-
-    private static double cos(double angle)
-    {
-        return MathUtils.cos(angle);
-    }
+    private static double sin(double angle)  { return MathUtils.sin(angle); }
+    private static double cos(double angle)  { return MathUtils.cos(angle); }
 }

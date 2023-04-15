@@ -585,7 +585,7 @@ public class TitleView extends ParentView implements ViewHost {
             // Create path for border
             double x1 = 5 + sw;
             double y1 = sh / 2;
-            Path path = new Path();
+            Path2D path = new Path2D();
             path.moveTo(x1, y1);
             path.lineTo(w - 2, y1);
             path.lineTo(w - 2, h - 2);

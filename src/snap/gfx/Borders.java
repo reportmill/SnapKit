@@ -360,17 +360,19 @@ public class Borders {
         {
             // If showing all borders, just return bounds
             Rect rect = aShape.getBounds(); if(isShowAll()) return rect;
-            boolean st = isShowTop(), sr = isShowRight();
-            boolean sb = isShowBottom(), sl = isShowLeft();
-            double w = rect.width;
-            double h = rect.height;
+            boolean showTop = isShowTop();
+            boolean showRight = isShowRight();
+            boolean showBottom = isShowBottom();
+            boolean showLeft = isShowLeft();
+            double rectW = rect.width;
+            double rectH = rect.height;
 
             // Otherwise, build path based on sides showing and return
-            Path path = new Path();
-            if(st) { path.moveTo(0,0); path.lineTo(w, 0); }
-            if(sr) { if(!st) path.moveTo(w, 0); path.lineTo(w, h); }
-            if(sb) { if(!sr) path.moveTo(w, h); path.lineTo(0, h); }
-            if(sl) { if(!sb) path.moveTo(0, h); path.lineTo(0,0); }
+            Path2D path = new Path2D();
+            if(showTop) { path.moveTo(0,0); path.lineTo(rectW, 0); }
+            if(showRight) { if(!showTop) path.moveTo(rectW, 0); path.lineTo(rectW, rectH); }
+            if(showBottom) { if(!showRight) path.moveTo(rectW, rectH); path.lineTo(0, rectH); }
+            if(showLeft) { if(!showBottom) path.moveTo(0, rectH); path.lineTo(0,0); }
             return path;
         }
 
@@ -379,14 +381,14 @@ public class Borders {
          */
         public EdgeBorder copyForShowEdge(Pos aPos, boolean aValue)
         {
-            EdgeBorder s = (EdgeBorder)clone();
+            EdgeBorder clone = (EdgeBorder) clone();
             switch (aPos) {
-                case CENTER_LEFT: s._showLeft = aValue; break;
-                case CENTER_RIGHT: s._showRight = aValue; break;
-                case TOP_CENTER: s._showTop = aValue; break;
-                case BOTTOM_CENTER: s._showBottom = aValue;
+                case CENTER_LEFT: clone._showLeft = aValue; break;
+                case CENTER_RIGHT: clone._showRight = aValue; break;
+                case TOP_CENTER: clone._showTop = aValue; break;
+                case BOTTOM_CENTER: clone._showBottom = aValue;
             }
-            return s;
+            return clone;
         }
 
         /**

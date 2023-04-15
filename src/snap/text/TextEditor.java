@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import snap.geom.Path;
+import snap.geom.Path2D;
 import snap.geom.Shape;
 import snap.gfx.Color;
 import snap.gfx.Painter;
@@ -138,7 +138,7 @@ public class TextEditor extends TextArea {
         // Get text box and text string and path object
         TextBox textBox = getTextBox();
         String string = textBox.getString();
-        Path spellingPath = new Path();
+        Path2D spellingPath = new Path2D();
 
         // Iterate over text
         for (SpellCheck.Word word = SpellCheck.getMisspelledWord(string, 0); word != null;

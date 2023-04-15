@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import snap.geom.Path;
+import snap.geom.Shape;
 
 /**
  * A class to represent a selection of text.
@@ -259,7 +259,7 @@ public class TextSel {
     /**
      * Returns a path for two char indexes - it will be a a simple box with extensions for first/last lines.
      */
-    public Path getPath()
+    public Shape getPath()
     {
         return _textBox.getPathForCharRange(getStart(), getEnd());
     }

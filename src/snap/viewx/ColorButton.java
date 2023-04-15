@@ -2,11 +2,10 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
-import snap.geom.Path;
+import snap.geom.Path2D;
 import snap.gfx.*;
 import snap.util.*;
 import snap.view.*;
-
 import java.util.Objects;
 
 /**
@@ -286,10 +285,13 @@ public class ColorButton extends View {
         // Create DownArrow image
         Image img = Image.get(11,10,true);
         Painter pntr = img.getPainter();
-        Path p = new Path(); p.moveTo(2.5f, 1f);
-        p.lineTo(5.5f, 6f); p.lineTo(8.5f, 1f); p.close();
+        Path2D path = new Path2D();
+        path.moveTo(2.5f, 1f);
+        path.lineTo(5.5f, 6f);
+        path.lineTo(8.5f, 1f);
+        path.close();
         pntr.setColor(Color.BLACK);
-        pntr.fill(p);
+        pntr.fill(path);
         return _arrowImg = img;
     }
 

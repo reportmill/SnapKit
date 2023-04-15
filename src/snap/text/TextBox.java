@@ -3,10 +3,8 @@
  */
 package snap.text;
 import java.util.*;
-import snap.geom.Path;
-import snap.geom.Rect;
-import snap.geom.Shape;
-import snap.geom.VPos;
+
+import snap.geom.*;
 import snap.gfx.*;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
@@ -947,10 +945,10 @@ public class TextBox {
     /**
      * Returns a path for two char indexes - it will be a a simple box with extensions for first/last lines.
      */
-    public Path getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
+    public Shape getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
     {
         // Create new path for return
-        Path path = new Path();
+        Path2D path = new Path2D();
 
         // If invalid range, just return
         if (aStartCharIndex > getEndCharIndex() || aEndCharIndex < getStartCharIndex())

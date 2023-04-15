@@ -97,16 +97,6 @@ public class Path extends Path2D implements Cloneable, XMLArchiver.Archivable {
     }
 
     /**
-     * Returns current path point.
-     */
-    public Point getCurrentPoint()
-    {
-        if (getLastSeg() == Seg.Close && getPointCount() > 0)
-            return getPoint(0);
-        return getLastPoint();
-    }
-
-    /**
      * Returns the element index for the given point index.
      */
     public int getSegIndexForPointIndex(int anIndex)

@@ -2,10 +2,9 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.gfx;
-import snap.geom.Path;
+import snap.geom.Path2D;
 import snap.geom.Rect;
 import snap.geom.Shape;
-
 import java.util.*;
 
 /**
@@ -143,8 +142,8 @@ public abstract class FontFile {
     public Shape getOutline(CharSequence aStr, double aSize, double aX, double aY, double aCharSpacing)
     {
         // Loop vars
-        Path path = new Path();
-        double x = aX;
+        Path2D path = new Path2D();
+        double charX = aX;
         double descent = getDescent() * aSize;
 
         // Iterate over chars
@@ -154,11 +153,13 @@ public abstract class FontFile {
             Rect charBounds = charPath.getBounds();
             double charW = charBounds.getWidth();
             double charH = charBounds.getHeight();
-            Rect charBounds2 = new Rect(x, aY - descent, charW * aSize / 1000, charH * aSize / 1000);
+            Rect charBounds2 = new Rect(charX, aY - descent, charW * aSize / 1000, charH * aSize / 1000);
             charPath = charPath.copyFor(charBounds2);
             path.appendShape(charPath);
-            x += charAdvance(loopChar) * aSize + aCharSpacing;
+            charX += charAdvance(loopChar) * aSize + aCharSpacing;
         }
+
+        // Return
         return path;
     }
 

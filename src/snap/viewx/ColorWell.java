@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.viewx;
-import snap.geom.Path;
+import snap.geom.Path2D;
 import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
@@ -158,13 +158,18 @@ public class ColorWell extends View {
     public static void paintSwatch(Painter aPntr, Color c, double x, double y, double w, double h)
     {
         // Draw given color in given rect
-        aPntr.setColor(c); aPntr.fillRect(x, y, w, h);
+        aPntr.setColor(c);
+        aPntr.fillRect(x, y, w, h);
 
         // If color has an alpha component, fill half the well with a fully-opaque version of the color
         if (c.getAlphaInt() != 255) {
             aPntr.setColor(new Color(c.getRGB() | 0xFF000000));
-            Path p = new Path(); p.moveTo(x, y+h); p.lineTo(x+w, y+h); p.lineTo(x+w, y); p.close();
-            aPntr.fill(p);
+            Path2D path = new Path2D();
+            path.moveTo(x, y + h);
+            path.lineTo(x + w, y + h);
+            path.lineTo(x + w, y);
+            path.close();
+            aPntr.fill(path);
         }
     }
 
