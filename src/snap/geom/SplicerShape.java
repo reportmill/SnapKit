@@ -104,7 +104,7 @@ public class SplicerShape extends Shape {
         public Seg getNext(double coords[])
         {
             // Get seg and points (just return if zero length - (MoveTo or Close))
-            Seg seg = _path.getSegEndPointsForIndex(_segIndex, coords, _trans);
+            Seg seg = _path.getSegAndPointsForIndex(_segIndex, coords, _trans);
             if (seg==Seg.MoveTo || seg==Seg.Close) {
                 _segIndex++;
                 return seg;

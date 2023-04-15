@@ -53,7 +53,7 @@ public class Path2D extends Shape implements Cloneable {
      */
     public Path2D(Shape aShape)
     {
-        addShape(aShape);
+        appendShape(aShape);
     }
 
     /**
@@ -89,6 +89,9 @@ public class Path2D extends Shape implements Cloneable {
             _segs = Arrays.copyOf(_segs, _segs.length * 2);
             _segPointIndexes = Arrays.copyOf(_segPointIndexes, _segPointIndexes.length * 2);
         }
+
+        // Update SegPointIndexes
+        _segPointIndexes[_segCount] = getPointCount();
 
         // Add Seg at end, increment SegCount, notify shapeChanged
         _segs[_segCount++] = aSeg;
@@ -138,25 +141,167 @@ public class Path2D extends Shape implements Cloneable {
     }
 
     /**
+     * Moveto.
+     */
+    public void moveTo(double aX, double aY)
+    {
+        // If closed, forward
+        if (_closed) {
+            getNextPathWithIntentToExtend().moveTo(aX, aY);
+            return;
+        }
+
+        // Check for consecutive moveTo
+        if (getSegCount() > 0 && getSeg(getSegCount() - 1) == Seg.MoveTo)
+            System.err.println("SegPoints.moveTo: Consecutive MoveTo");
+
+        // Add MoveTo and point
+        addSeg(Seg.MoveTo);
+        addPoint(aX, aY);
+    }
+
+    /**
+     * LineTo.
+     */
+    public void lineTo(double aX, double aY)
+    {
+        // If closed, forward
+        if (_closed) {
+            getNextPathWithIntentToExtend().lineTo(aX, aY);
+            return;
+        }
+
+        // Make sure there is a starting MoveTo
+        if (getPointCount() == 0)
+            moveTo(0, 0);
+
+        // Add LineTo and Point
+        addSeg(Seg.LineTo);
+        addPoint(aX, aY);
+    }
+
+    /**
+     * QuadTo.
+     */
+    public void quadTo(double cpX, double cpY, double endX, double endY)
+    {
+        // If closed, forward
+        if (_closed) {
+            getNextPathWithIntentToExtend().quadTo(cpX, cpY, endX, endY);
+            return;
+        }
+
+        // Make sure there is a starting MoveTo
+        if (getPointCount() == 0)
+            moveTo(0, 0);
+
+        // Add QuadTo and points
+        addSeg(Seg.QuadTo);
+        addPoint(cpX, cpY);
+        addPoint(endX, endY);
+    }
+
+    /**
+     * CubicTo.
+     */
+    public void curveTo(double cp1x, double cp1y, double cp2x, double cp2y, double endX, double endY)
+    {
+        // If closed, forward
+        if (_closed) {
+            Path2D nextPath = getNextPathWithIntentToExtend();
+            nextPath.curveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
+            return;
+        }
+
+        // Make sure there is a starting MoveTo
+        if (getPointCount() == 0)
+            moveTo(0, 0);
+
+        // Add CubicTo and points
+        addSeg(Seg.CubicTo);
+        addPoint(cp1x, cp1y);
+        addPoint(cp2x, cp2y);
+        addPoint(endX, endY);
+    }
+
+    /**
+     * Close.
+     */
+    public void close()
+    {
+        // If closed, forward
+        if (_closed) {
+            getNextPathWithIntentToExtend().close();
+            return;
+        }
+
+        // If no points, just return - don't close empty path
+        if (getPointCount() == 0)
+            return;
+
+        // Add Close
+        addSeg(Seg.Close);
+        _closed = true;
+    }
+
+    /**
+     * Appends given shape to end of path.
+     */
+    public void appendShape(Shape aShape)
+    {
+        PathIter pathIter = aShape.getPathIter(null);
+        appendPathIter(pathIter);
+    }
+
+    /**
+     * Appends given PathIter to end of path.
+     */
+    public void appendPathIter(PathIter aPathIter)
+    {
+        double[] points = new double[6];
+        while (aPathIter.hasNext()) {
+            switch (aPathIter.getNext(points)) {
+                case MoveTo: moveTo(points[0], points[1]); break;
+                case LineTo: lineTo(points[0], points[1]); break;
+                case QuadTo: quadTo(points[0], points[1], points[2], points[3]); break;
+                case CubicTo: curveTo(points[0], points[1], points[2], points[3], points[4], points[5]); break;
+                case Close: close(); break;
+            }
+        }
+    }
+
+    /**
      * Returns the array of point-indexes for given seg index.
      */
-    public int getSegPointIndex(int anIndex)
-    {
-        return _segPointIndexes[anIndex];
-    }
+    public int getSegPointIndex(int anIndex)  { return _segPointIndexes[anIndex]; }
 
     /**
-     * Adds an array of point-indexes.
-     */
-    protected void addSegPointIndex(int pointIndex)
-    {
-        _segPointIndexes[_segCount - 1] = pointIndex;
-    }
-
-    /**
-     * Returns the points for a given seg index, by copying to given array (should be length of 8).
+     * Returns the control points and end point for a given seg index, by copying to given array (should be length of 6).
      */
     public Seg getSegAndPointsForIndex(int anIndex, double[] theCoords, Transform aTrans)
+    {
+        // Get seg (just return if Close)
+        Seg seg = getSeg(anIndex);
+        if (seg == Seg.Close)
+            return seg;
+
+        // Get Seg PointIndex. If not MoveTo, skip forward 2 coords
+        int pointIndex = getSegPointIndex(anIndex) * 2;
+        if (seg != Seg.MoveTo)
+            pointIndex += 2;
+
+        // Copy end points to given point coord array and return
+        int pointCount = seg.getCount();
+        System.arraycopy(_points, pointIndex, theCoords, 0, pointCount * 2);
+        if (aTrans != null)
+            aTrans.transformXYArray(theCoords, pointCount);
+        return seg;
+    }
+
+    /**
+     * Returns all points (start/control/end) for a given seg index, by copying to given array (should be length of 8).
+     */
+    public Seg getSegAndAllPointsForIndex(int anIndex, double[] theCoords, Transform aTrans)
     {
         // Get Seg and Seg PointIndex
         Seg seg = getSeg(anIndex);
@@ -185,185 +330,6 @@ public class Path2D extends Shape implements Cloneable {
     }
 
     /**
-     * Returns the points for a given seg index, by copying to given array (should be length of 8).
-     */
-    public Seg getSegEndPointsForIndex(int anIndex, double[] theCoords, Transform aTrans)
-    {
-        // Get seg (just return if Close)
-        Seg seg = getSeg(anIndex);
-        if (seg == Seg.Close)
-            return seg;
-
-        // Get Seg PointIndex. If not MoveTo, skip forward 2 coords
-        int pointIndex = getSegPointIndex(anIndex) * 2;
-        if (seg != Seg.MoveTo)
-            pointIndex += 2;
-
-        // Copy end points to given point coord array and return
-        int pointCount = seg.getCount();
-        System.arraycopy(_points, pointIndex, theCoords, 0, pointCount * 2);
-        if (aTrans != null)
-            aTrans.transformXYArray(theCoords, pointCount);
-        return seg;
-    }
-
-    /**
-     * Moveto.
-     */
-    public void moveTo(double aX, double aY)
-    {
-        // If closed, forward
-        if (_closed) {
-            getNextPathWithIntentToExtend().moveTo(aX, aY);
-            return;
-        }
-
-        // Check for consecutive moveTo
-        if (getSegCount() > 0 && getSeg(getSegCount() - 1) == Seg.MoveTo)
-            System.err.println("SegPoints.moveTo: Consecutive MoveTo");
-
-        // Add MoveTo
-        addSeg(Seg.MoveTo);
-
-        // Get pointIndex, add point, add pointIndexes for pointIndex
-        int pointIndex = getPointCount();
-        addPoint(aX, aY);
-        addSegPointIndex(pointIndex);
-    }
-
-    /**
-     * LineTo.
-     */
-    public void lineTo(double aX, double aY)
-    {
-        // If closed, forward
-        if (_closed) {
-            getNextPathWithIntentToExtend().lineTo(aX, aY);
-            return;
-        }
-
-        // Get pointIndex to last point (make sure there is a moveTo)
-        int pointIndex = getPointCount() - 1;
-        if (pointIndex < 0) {
-            moveTo(0, 0);
-            pointIndex = 0;
-        }
-
-        // Add Point, Seg and PointIndex
-        addPoint(aX, aY);
-        addSeg(Seg.LineTo);
-        addSegPointIndex(pointIndex);
-    }
-
-    /**
-     * QuadTo.
-     */
-    public void quadTo(double cpX, double cpY, double x, double y)
-    {
-        // If closed, forward
-        if (_closed) {
-            getNextPathWithIntentToExtend().quadTo(cpX, cpY, x, y);
-            return;
-        }
-
-        // Add QuadTo
-        addSeg(Seg.QuadTo);
-
-        // Get pointIndex to last point (make sure there is a moveTo)
-        int pointIndex = getPointCount() - 1;
-        if (pointIndex < 0) {
-            moveTo(0, 0);
-            pointIndex = 0;
-        }
-
-        // Add control point, end point
-        addPoint(cpX, cpY);
-        addPoint(x, y);
-
-        // Add SegPointIndex
-        addSegPointIndex(pointIndex);
-    }
-
-    /**
-     * CubicTo.
-     */
-    public void curveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y)
-    {
-        // If closed, forward
-        if (_closed) {
-            Path2D nextPath = getNextPathWithIntentToExtend();
-            nextPath.curveTo(cp1x, cp1y, cp2x, cp2y, x, y);
-            return;
-        }
-
-        // Add CubicTo
-        addSeg(Seg.CubicTo);
-
-        // Get pointIndex to last point (make sure there is a moveTo)
-        int pointIndex = getPointCount() - 1;
-        if (pointIndex < 0) {
-            moveTo(0, 0);
-            pointIndex = 0;
-        }
-
-        // Add control points and end point
-        addPoint(cp1x, cp1y);
-        addPoint(cp2x, cp2y);
-        addPoint(x, y);
-
-        // Add SegPointIndex
-        addSegPointIndex(pointIndex);
-    }
-
-    /**
-     * Close.
-     */
-    public void close()
-    {
-        // If closed, forward
-        if (_closed) {
-            getNextPathWithIntentToExtend().close();
-            return;
-        }
-
-        // Get pointIndex to last point (if no points, just return - don't close empty path)
-        int pointIndex = getPointCount() - 1;
-        if (pointIndex < 0)
-            return;
-
-        // Add Close
-        addSeg(Seg.Close);
-        addSegPointIndex(pointIndex);
-        _closed = true;
-    }
-
-    /**
-     * Adds a Shape.
-     */
-    public void addShape(Shape aShape)
-    {
-        PathIter pathIter = aShape.getPathIter(null);
-        addPathIter(pathIter);
-    }
-
-    /**
-     * Adds a PathIter.
-     */
-    public void addPathIter(PathIter aPathIter)
-    {
-        double[] pnts = new double[6];
-        while (aPathIter.hasNext()) {
-            switch (aPathIter.getNext(pnts)) {
-                case MoveTo: moveTo(pnts[0], pnts[1]); break;
-                case LineTo: lineTo(pnts[0], pnts[1]); break;
-                case QuadTo: quadTo(pnts[0], pnts[1], pnts[2], pnts[3]); break;
-                case CubicTo: curveTo(pnts[0], pnts[1], pnts[2], pnts[3], pnts[4], pnts[5]); break;
-                case Close: close(); break;
-            }
-        }
-    }
-
-    /**
      * Removes the last segment.
      */
     public void removeLastSeg()
@@ -373,7 +339,6 @@ public class Path2D extends Shape implements Cloneable {
         int segPointCount = lastSeg.getCount();
         _segCount--;
         _pointCount -= segPointCount;
-
     }
 
     /**
@@ -398,7 +363,7 @@ public class Path2D extends Shape implements Cloneable {
     public Segment getSegment(int anIndex, Transform aTrans)
     {
         double[] pnts = new double[8];
-        Seg seg = getSegAndPointsForIndex(anIndex, pnts, aTrans);
+        Seg seg = getSegAndAllPointsForIndex(anIndex, pnts, aTrans);
         return Segment.newSegmentForSegAndPoints(seg, pnts);
     }
 
@@ -438,7 +403,7 @@ public class Path2D extends Shape implements Cloneable {
         // Iterate over segs and calc lengths
         for (int i = 0; i < segCount; i++) {
 
-            Seg seg = getSegAndPointsForIndex(i, pnts, null);
+            Seg seg = getSegAndAllPointsForIndex(i, pnts, null);
             double len = 0;
 
             // Get arcLength for seg
@@ -509,7 +474,9 @@ public class Path2D extends Shape implements Cloneable {
             return false;
         if (!Objects.equals(other._nextPath, _nextPath))
             return false;
-        return true; // Return true since all checks passed
+
+        // Return true since all checks passed
+        return true;
     }
 
     /**
@@ -517,13 +484,13 @@ public class Path2D extends Shape implements Cloneable {
      */
     public PathIter getPathIter(Transform aTrans)
     {
-        return new SPPathIter(aTrans);
+        return new Path2DPathIter(aTrans);
     }
 
     /**
-     * A PathIter for Path.
+     * A PathIter for Path2D.
      */
-    private class SPPathIter extends PathIter {
+    private class Path2DPathIter extends PathIter {
 
         // Ivars
         private int _segCount;
@@ -533,7 +500,7 @@ public class Path2D extends Shape implements Cloneable {
         /**
          * Constructor.
          */
-        SPPathIter(Transform aTrans)
+        Path2DPathIter(Transform aTrans)
         {
             super(aTrans);
             _segCount = getSegCount();
@@ -555,16 +522,13 @@ public class Path2D extends Shape implements Cloneable {
         public Seg getNext(double[] coords)
         {
             if (_segIndex < _segCount)
-                return getSegEndPointsForIndex(_segIndex++, coords, _trans);
+                return getSegAndPointsForIndex(_segIndex++, coords, _trans);
             return _nextIter.getNext(coords);
         }
 
         /**
          * Returns the winding - how a path determines what to fill when segments intersect.
          */
-        public int getWinding()
-        {
-            return Path2D.this.getWinding();
-        }
+        public int getWinding()  { return Path2D.this.getWinding(); }
     }
 }
