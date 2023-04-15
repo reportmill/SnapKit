@@ -26,10 +26,6 @@ public class Path extends Shape implements Cloneable, XMLArchiver.Archivable {
     // The winding -how a path determines what to fill when segments intersect
     private int _wind = WIND_EVEN_ODD;
 
-    // Constants for winding
-    public static final int WIND_EVEN_ODD = PathIter.WIND_EVEN_ODD;
-    public static final int WIND_NON_ZERO = PathIter.WIND_NON_ZERO;
-
     /**
      * Constructor.
      */

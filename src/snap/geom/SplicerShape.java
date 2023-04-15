@@ -6,7 +6,7 @@ package snap.geom;
 public class SplicerShape extends Shape {
 
     // The original shape
-    private Path2D _path;
+    private Path2DX _path;
 
     // The start parametric ratio
     private double _start;
@@ -25,7 +25,7 @@ public class SplicerShape extends Shape {
      */
     public SplicerShape(Shape aShape, double aStart, double anEnd)
     {
-        _path = aShape instanceof Path2D ? (Path2D) aShape : new Path2D(aShape);
+        _path = aShape instanceof Path2DX ? (Path2DX) aShape : new Path2DX(aShape);
         _start = aStart;
         _end = anEnd;
     }
@@ -101,11 +101,11 @@ public class SplicerShape extends Shape {
          * Return next Seg and points, trimming if at end of range.
          */
         @Override
-        public Seg getNext(double coords[])
+        public Seg getNext(double[] coords)
         {
             // Get seg and points (just return if zero length - (MoveTo or Close))
             Seg seg = _path.getSegAndPointsForIndex(_segIndex, coords, _trans);
-            if (seg==Seg.MoveTo || seg==Seg.Close) {
+            if (seg == Seg.MoveTo || seg == Seg.Close) {
                 _segIndex++;
                 return seg;
             }
@@ -129,7 +129,7 @@ public class SplicerShape extends Shape {
 
             // Get Tail angle
             _tailAngle = segment.getPointAndAngle(1, _tailPoint);
-            if (_trans!=null)
+            if (_trans != null)
                 _trans.getInverse().transformPoint(_tailPoint);
 
             // Set finished and return

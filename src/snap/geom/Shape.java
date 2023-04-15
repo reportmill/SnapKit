@@ -14,6 +14,10 @@ public abstract class Shape {
     // The cached length
     private double  _arcLen = -1;
 
+    // Constants for winding
+    public static final int WIND_EVEN_ODD = PathIter.WIND_EVEN_ODD;
+    public static final int WIND_NON_ZERO = PathIter.WIND_NON_ZERO;
+
     /**
      * Returns the shape bounds x.
      */
