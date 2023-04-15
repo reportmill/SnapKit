@@ -3,7 +3,6 @@
  */
 package snap.geom;
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * A standard path shape that can be built/modified by standard moveTo/lineTo/curveTo methods.
@@ -22,17 +21,11 @@ public class Path2D extends Shape implements Cloneable {
     // The number of points
     private int _pointCount;
 
-    // The indexes to start point for each seg (or to ClosePointIndexes for Close seg)
+    // The indexes to start point for each seg
     private int[] _segPointIndexes = new int[8];
 
-    // Whether path is closed
-    private boolean  _closed;
-
-    // The next path (if segs added after close)
-    private Path2D  _nextPath;
-
     // The winding - how a path determines what to fill when segments intersect
-    private int _wind = WIND_EVEN_ODD;
+    private int _winding = WIND_EVEN_ODD;
 
     /**
      * Constructor.
@@ -50,16 +43,6 @@ public class Path2D extends Shape implements Cloneable {
         this();
         appendShape(aShape);
     }
-
-    /**
-     * Returns the winding - how a path determines what to fill when segments intersect.
-     */
-    public int getWinding()  { return _wind; }
-
-    /**
-     * Sets the winding - how a path determines what to fill when segments intersect.
-     */
-    public void setWinding(int aValue)  { _wind = aValue; }
 
     /**
      * Returns the number of segments.
@@ -125,15 +108,9 @@ public class Path2D extends Shape implements Cloneable {
      */
     public void moveTo(double aX, double aY)
     {
-        // If closed, forward
-        if (_closed) {
-            getNextPathWithIntentToExtend().moveTo(aX, aY);
-            return;
-        }
-
         // Check for consecutive moveTo
         if (getSegCount() > 0 && getSeg(getSegCount() - 1) == Seg.MoveTo)
-            System.err.println("SegPoints.moveTo: Consecutive MoveTo");
+            System.err.println("Path2D.moveTo: Consecutive MoveTo should be avoided");
 
         // Add MoveTo and point
         addSeg(Seg.MoveTo);
@@ -145,12 +122,6 @@ public class Path2D extends Shape implements Cloneable {
      */
     public void lineTo(double aX, double aY)
     {
-        // If closed, forward
-        if (_closed) {
-            getNextPathWithIntentToExtend().lineTo(aX, aY);
-            return;
-        }
-
         // Make sure there is a starting MoveTo
         if (getPointCount() == 0)
             moveTo(0, 0);
@@ -165,12 +136,6 @@ public class Path2D extends Shape implements Cloneable {
      */
     public void quadTo(double cpX, double cpY, double endX, double endY)
     {
-        // If closed, forward
-        if (_closed) {
-            getNextPathWithIntentToExtend().quadTo(cpX, cpY, endX, endY);
-            return;
-        }
-
         // Make sure there is a starting MoveTo
         if (getPointCount() == 0)
             moveTo(0, 0);
@@ -186,13 +151,6 @@ public class Path2D extends Shape implements Cloneable {
      */
     public void curveTo(double cp1x, double cp1y, double cp2x, double cp2y, double endX, double endY)
     {
-        // If closed, forward
-        if (_closed) {
-            Path2D nextPath = getNextPathWithIntentToExtend();
-            nextPath.curveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
-            return;
-        }
-
         // Make sure there is a starting MoveTo
         if (getPointCount() == 0)
             moveTo(0, 0);
@@ -209,19 +167,15 @@ public class Path2D extends Shape implements Cloneable {
      */
     public void close()
     {
-        // If closed, forward
-        if (_closed) {
-            getNextPathWithIntentToExtend().close();
+        // If last seg has no points, just return - don't close empty path
+        Seg lastSeg = getLastSeg();
+        if (lastSeg == Seg.MoveTo || lastSeg == Seg.Close || lastSeg == null) {
+            System.err.println("Path2D.close: Attempting to close empty path");
             return;
         }
 
-        // If no points, just return - don't close empty path
-        if (getPointCount() == 0)
-            return;
-
         // Add Close
         addSeg(Seg.Close);
-        _closed = true;
     }
 
     /**
@@ -249,6 +203,11 @@ public class Path2D extends Shape implements Cloneable {
             }
         }
     }
+
+    /**
+     * Returns the last seg.
+     */
+    public Seg getLastSeg()  { return _segCount > 0 ? getSeg(_segCount - 1) : null; }
 
     /**
      * Returns the last point.
@@ -304,20 +263,14 @@ public class Path2D extends Shape implements Cloneable {
     }
 
     /**
-     * Returns the next path.
+     * Returns the winding - how a path determines what to fill when segments intersect.
      */
-    public Path2D getNextPath()  { return _nextPath; }
+    public int getWinding()  { return _winding; }
 
     /**
-     * Returns the next path.
+     * Sets the winding - how a path determines what to fill when segments intersect.
      */
-    protected Path2D getNextPathWithIntentToExtend()
-    {
-        if (_nextPath == null)
-            _nextPath = new Path2D();
-        shapeChanged();
-        return _nextPath;
-    }
+    public void setWinding(int aValue)  { _winding = aValue; }
 
     /**
      * Standard clone implementation.
@@ -330,12 +283,10 @@ public class Path2D extends Shape implements Cloneable {
         try { copy = (Path2D) super.clone(); }
         catch (Exception e) { throw new RuntimeException(e); }
 
-        // Copy Segs, SetPointIndexes, Points, NextPath
+        // Copy Segs, Points, SetPointIndexes
         copy._segs = _segs.clone();
-        copy._segPointIndexes = _segPointIndexes.clone();
         copy._points = _points.clone();
-        if (_nextPath != null)
-            copy._nextPath = _nextPath.clone();
+        copy._segPointIndexes = _segPointIndexes.clone();
 
         // Return
         return copy;
@@ -353,14 +304,14 @@ public class Path2D extends Shape implements Cloneable {
         if (other == null)
             return false;
 
-        // Check ElementCount, WindingRule, Elements and Points
+        // Check SegCount/PointCount, Segs, Points and Winding
         if (other._segCount != _segCount || other._pointCount != _pointCount)
             return false;
         if (!Arrays.equals(other._segs, _segs))
             return false;
         if (!Arrays.equals(other._points, _points))
             return false;
-        if (!Objects.equals(other._nextPath, _nextPath))
+        if (other._winding != _winding)
             return false;
 
         // Return true since all checks passed
@@ -384,7 +335,6 @@ public class Path2D extends Shape implements Cloneable {
         // Ivars
         private int _segCount;
         private int _segIndex;
-        private PathIter _nextIter;
 
         /**
          * Constructor.
@@ -393,26 +343,23 @@ public class Path2D extends Shape implements Cloneable {
         {
             super(aTrans);
             _segCount = getSegCount();
-            if (_nextPath != null)
-                _nextIter = _nextPath.getPathIter(aTrans);
         }
 
         /**
          * Returns whether PathIter has another segment.
          */
-        public boolean hasNext()
-        {
-            return _segIndex < _segCount || (_nextIter != null && _nextIter.hasNext());
-        }
+        public boolean hasNext()  { return _segIndex < _segCount; }
 
         /**
          * Returns the next segment.
          */
         public Seg getNext(double[] coords)
         {
-            if (_segIndex < _segCount)
-                return getSegAndPointsForIndex(_segIndex++, coords, _trans);
-            return _nextIter.getNext(coords);
+            if (_segIndex >= _segCount)
+                throw new RuntimeException("Path2DPathIter.getNext: No more path segments");
+
+            // Return Seg and points
+            return getSegAndPointsForIndex(_segIndex++, coords, _trans);
         }
 
         /**
