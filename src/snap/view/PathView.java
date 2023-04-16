@@ -2,10 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.view;
-import snap.geom.Insets;
-import snap.geom.Path;
-import snap.geom.Rect;
-import snap.geom.Shape;
+import snap.geom.*;
 import snap.util.*;
 
 /**
@@ -14,7 +11,7 @@ import snap.util.*;
 public class PathView extends View {
 
     // The path shape
-    private Path  _path;
+    private Path2D _path;
 
     /**
      * Constructor.
@@ -27,47 +24,31 @@ public class PathView extends View {
     /**
      * Returns the path.
      */
-    public Path getPath()
+    public Path2D getPath()
     {
         if (_path != null) return _path;
-        Path path = new Path();
-        return _path = path;
+        return _path = new Path2D();
     }
 
     /**
      * Sets the path.
      */
-    public void setPath(Path aPath)
+    public void setPath(Shape aPath)
     {
-        _path = aPath;
+        _path = aPath instanceof Path2D ? (Path2D) aPath : new Path2D(aPath);
         repaint();
-    }
-
-    /**
-     * Returns the path in shape bounds.
-     */
-    public Path getPathInBounds()
-    {
-        return getPath().copyFor(getBoundsLocal());
     }
 
     /**
      * Replace the polygon's current path with a new path, adjusting the shape's bounds to match the new path.
      */
-    public void resetPath(Shape aShape)
+    public void resetPathAndBounds(Shape aShape)
     {
-        // Get the transform to parent shape coords
-        //Transform toParentXF = getLocalToParent();
-
         // Set the new path and new size
-        Path newPath = new Path(aShape);
+        Path2D newPath = new Path2D(aShape);
         setPath(newPath);
         Rect bounds = newPath.getBounds();
         setSizeLocal(bounds.getWidth(), bounds.getHeight());
-
-        // Transform to parent for new x & y
-        //Rect boundsInParent = bounds.clone(); toParentXF.transform(boundsInParent);
-        //setFrameXY(boundsInParent.getXY());
     }
 
     /**
@@ -75,7 +56,9 @@ public class PathView extends View {
      */
     public Shape getBoundsShape()
     {
-        return getPath().copyFor(getBoundsLocal());
+        Shape path = getPath();
+        Rect boundsLocal = getBoundsLocal();
+        return path.copyFor(boundsLocal);
     }
 
     /**
@@ -83,8 +66,10 @@ public class PathView extends View {
      */
     protected double getPrefWidthImpl(double aH)
     {
+        Shape path = getPath();
+        Rect pathBounds = path.getBounds();
         Insets ins = getInsetsAll();
-        return ins.left + getPath().getBounds().getMaxX() + ins.right;
+        return pathBounds.getMaxX() + ins.getWidth();
     }
 
     /**
@@ -92,8 +77,10 @@ public class PathView extends View {
      */
     protected double getPrefHeightImpl(double aW)
     {
+        Shape path = getPath();
+        Rect pathBounds = path.getBounds();
         Insets ins = getInsetsAll();
-        return ins.top + getPath().getBounds().getMaxY() + ins.bottom;
+        return pathBounds.getMaxY() + ins.getHeight();
     }
 
     /**
@@ -104,8 +91,14 @@ public class PathView extends View {
         // Do normal version
         XMLElement e = super.toXML(anArchiver);
 
-        // Archive path
-        e.add(_path.toXML(anArchiver));
+        // Archive path - was: e.add(_path.toXML(anArchiver));
+        Shape path = getPath();
+        if (path != null) {
+            String svgString = path.getSvgString().replace('\n', ' ');
+            e.add("SvgString", svgString);
+        }
+
+        // Return
         return e;
     }
 
@@ -117,10 +110,14 @@ public class PathView extends View {
         // Do normal version
         super.fromXML(anArchiver, anElement);
 
-        // Unarchive path
-        XMLElement pathXML = anElement.get("path");
-        _path = anArchiver.fromXML(pathXML, Path.class, this);
+        // Unarchive path - was: pathXML = anElement.get("path"); _path = anArchiver.fromXML(pathXML, Path.class, this);
+        String svgString = anElement.getAttributeValue("SvgString");
+        if (svgString != null) {
+            _path = new Path();
+            _path.appendSvgString(svgString);
+        }
+
+        // Return
         return this;
     }
-
 }
