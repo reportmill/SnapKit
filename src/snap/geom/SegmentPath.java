@@ -32,7 +32,7 @@ public class SegmentPath extends Shape {
     {
         super();
         _shape = aShape;
-        buildSegmentsFromShape();
+        appendShape(aShape);
     }
 
     /**
@@ -288,10 +288,10 @@ public class SegmentPath extends Shape {
     /**
      * Builds segments from shape.
      */
-    private void buildSegmentsFromShape()
+    private void appendShape(Shape aShape)
     {
         // Iterate over segments, if any segment intersects cubic, return true
-        PathIter pathIter = _shape.getPathIter(null);
+        PathIter pathIter = aShape.getPathIter(null);
         double[] points = new double[6];
         double moveX = 0, moveY = 0;
         double lineX = 0, lineY = 0;

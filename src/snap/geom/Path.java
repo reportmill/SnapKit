@@ -38,12 +38,8 @@ public class Path extends Path2D implements Cloneable, XMLArchiver.Archivable {
      */
     public void removeSeg(int anIndex)
     {
-        // Range check
-        int segCount = getSegCount();
-        if (anIndex < 0 || anIndex >= segCount)
-            throw new IndexOutOfBoundsException("Path.removeSeg: index out of bounds: " + anIndex);
-
         // If index is last seg, just remove and return (but don't leave dangling moveto)
+        int segCount = getSegCount();
         if (anIndex == segCount - 1) {
             removeLastSeg();
             if (getLastSeg() == Seg.MoveTo)
@@ -51,48 +47,50 @@ public class Path extends Path2D implements Cloneable, XMLArchiver.Archivable {
             return;
         }
 
-        // Get some info
-        Seg seg = getSeg(anIndex);
-        int segPointIndex = getSegPointIndex(anIndex);
-        int segPointCount = seg.getCount();
-        int nDeletedPts = segPointCount;       // how many points to delete from the points array
-        int nDeletedSegs = 1;                  // how many elements to delete (usually 1)
-        int deleteIndex = anIndex;             // index to delete from element array (usually same as original index)
+        // Get delete seg and next seg
+        Seg deleteSeg = getSeg(anIndex);
+        Seg nextSeg = getSeg(anIndex + 1);
 
-        // delete all points but the last of the next segment
-        if (seg == Seg.MoveTo) {
-            nDeletedPts = getSeg(anIndex + 1).getCount();
-            deleteIndex++;  // delete the next element and preserve the MOVETO
+        // Get delete seg and point index + count
+        int deleteSegIndex = anIndex;
+        int deleteSegCount = 1;
+        int deletePointIndex = getSegPointIndex(anIndex);
+        int deletePointCount = deleteSeg.getCount();
+
+        // If seg is MoveTo, delete next seg instead (but take MoveTo point and leave NextSeg end point)
+        if (deleteSeg == Seg.MoveTo) {
+            deleteSegIndex++;
+            deletePointCount = nextSeg.getCount();
         }
 
-        else {
-            // If next element is a curveTo, we are merging 2 curves into one, so delete points such that slopes
-            // at endpoints of new curve match the starting and ending slopes of the originals.
-            if (getSeg(anIndex + 1) == Seg.CubicTo)
-                segPointIndex++;
+        // If next seg is a curve, we are merging 2 curves into one, so delete next control point instead,
+        // so that slopes at endpoints of new curve match the starting and ending slopes of the originals.
+        else if (nextSeg == Seg.CubicTo || nextSeg == Seg.QuadTo)
+            deletePointIndex++;
 
-                // Deleting the only curve or a line in a subpath can leave a stray moveto. If that happens, delete it, too
-            else if (getSeg(anIndex - 1) == Seg.MoveTo && getSeg(anIndex + 1) == Seg.MoveTo) {
-                nDeletedSegs++;
-                deleteIndex--;
-                nDeletedPts++;
-                segPointIndex--;
-            }
+        // If next and last segs are MoveTos (deleting only curve/line between two MoveTos), delete previous MoveTo as well
+        else if (nextSeg == Seg.MoveTo && anIndex > 0 && getSeg(anIndex - 1) == Seg.MoveTo) {
+            deleteSegIndex--; deleteSegCount++;
+            deletePointIndex--; deletePointCount++;
         }
 
         // Delete segs, seg point indexes
-        int deleteEndIndex = deleteIndex + nDeletedSegs;
-        int deleteLength = _segCount - deleteIndex - nDeletedSegs;
-        System.arraycopy(_segs, deleteEndIndex, _segs, deleteIndex, deleteLength);
-        System.arraycopy(_segPointIndexes, deleteEndIndex, _segPointIndexes, deleteIndex, deleteLength);
-        _segCount -= nDeletedSegs;
+        int deleteSegEndIndex = deleteSegIndex + deleteSegCount;
+        int deleteSegTailLength = _segCount - deleteSegEndIndex;
+        System.arraycopy(_segs, deleteSegEndIndex, _segs, deleteSegIndex, deleteSegTailLength);
+        _segCount -= deleteSegCount;
 
-        // Delete points
-        int deletePointStartIndex = segPointIndex * 2;
-        int deletePointEndIndex = (segPointIndex + nDeletedPts) * 2;
-        int deletePointLength = (_pointCount - segPointIndex - nDeletedPts) * 2;
-        System.arraycopy(_points, deletePointEndIndex, _points, deletePointStartIndex, deletePointLength);
-        _pointCount -= nDeletedPts;
+        // Delete points ( x2 for XY coords array)
+        int deletePointEndIndex = deletePointIndex + deletePointCount;
+        int deletePointTailLength = _pointCount - deletePointEndIndex;
+        System.arraycopy(_points, deletePointEndIndex * 2, _points, deletePointIndex * 2, deletePointTailLength * 2);
+        _pointCount -= deletePointCount;
+
+        // Update SegPointIndexes
+        for (int i = 1; i < _segCount; i++)
+            _segPointIndexes[i] = _segPointIndexes[i - 1] + getSeg(i - 1).getCount();
+
+        // Notify shape changed
         shapeChanged();
     }
 
@@ -102,7 +100,7 @@ public class Path extends Path2D implements Cloneable, XMLArchiver.Archivable {
     public int getSegIndexForPointIndex(int anIndex)
     {
         int segIndex = 0;
-        for (int pointIndex = 0; pointIndex <= anIndex; segIndex++)
+        for (int pointIndex = 0; pointIndex <= anIndex && segIndex < _segCount; segIndex++)
             pointIndex += getSeg(segIndex).getCount();
         return segIndex - 1;
     }
