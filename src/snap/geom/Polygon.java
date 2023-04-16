@@ -194,7 +194,7 @@ public class Polygon extends Shape implements Cloneable {
     /**
      * Returns whether polygon has no intersecting lines.
      */
-    public boolean isSimple()
+    public boolean isSelfIntersecting()
     {
         // Get point count (if not at least 3 points, return false)
         int pointCount = getPointCount();
@@ -209,13 +209,13 @@ public class Polygon extends Shape implements Cloneable {
             double x0 = getPointX(i), y0 = getPointY(i);
             double x1 = getPointX(j), y1 = getPointY(j);
 
-            // If next point is collinear and backtracks over previous segment, return false.
+            // If next point is collinear and backtracks over previous segment, return true.
             int jp1 = (j + 1) % pointCount;
             double jp1x = getPointX(jp1);
             double jp1y = getPointY(jp1);
             boolean isCollinear = Line.isCollinear(x0, y0, x1, y1, jp1x, jp1y);
             if (isCollinear && (jp1x - x0) / (x1 - x0) < 1)
-                return false;
+                return true;
 
             // Iterate over remaining lines and see if they intersect
             for (int k = j + 1; k < pointCount; k++) {
@@ -224,12 +224,12 @@ public class Polygon extends Shape implements Cloneable {
                 double x3 = getPointX(l), y3 = getPointY(l);
                 boolean intersectsLine = Line.intersectsLine(x0, y0, x1, y1, x2, y2, x3, y3);
                 if (intersectsLine && i != l) // Suppress last
-                    return false;
+                    return true;
             }
         }
 
-        // Return true
-        return true;
+        // Return no intersections
+        return false;
     }
 
     /**
@@ -294,22 +294,24 @@ public class Polygon extends Shape implements Cloneable {
     /**
      * Returns an array of polygons that are convex with max number of vertices.
      */
-    public Polygon[] getConvexPolys(int aMax)
+    public Polygon[] getConvexPolygonsWithMaxSideCount(int aMax)
     {
         // If not simple, get simples
-        if (!isSimple()) {
+        if (isSelfIntersecting()) {
 
             // Complain
-            System.err.println("Polygon.getConvexPolys: Not simple - shouldn't happen");
+            System.err.println("Polygon.getConvexPolygonsWithMaxSideCount: Is self intersecting - shouldn't happen");
 
             // Get simple polygons
-            Polygon[] polygons = getSimplePolys(this);
+            Shape simpleShape = Shape.getNotSelfIntersectingShape(this);
+            PolygonPath polygonPath = new PolygonPath(simpleShape);
+            Polygon[] simplePolygons = polygonPath.getPolygons();
 
             // Get convex polygons for simple polygons
             List<Polygon> convexPolygons = new ArrayList<>();
-            for (Polygon poly : polygons) {
-                Polygon[] plist1 = poly.getConvexPolys(aMax);
-                Collections.addAll(convexPolygons, plist1);
+            for (Polygon polygon : simplePolygons) {
+                Polygon[] convexPolygons2 = polygon.getConvexPolygonsWithMaxSideCount(aMax);
+                Collections.addAll(convexPolygons, convexPolygons2);
             }
 
             // Return
@@ -317,18 +319,18 @@ public class Polygon extends Shape implements Cloneable {
         }
 
         // Create list with clone of first poly
-        Polygon poly = clone();
-        List<Polygon> polys = new ArrayList<>();
-        polys.add(poly);
+        Polygon polygon = clone();
+        List<Polygon> convexPolygons = new ArrayList<>();
+        convexPolygons.add(polygon);
 
         // While current is concave or has too many points, split
-        while (!poly.isConvex() || poly.getPointCount() > aMax) {
-            poly = poly.splitConvex(aMax);
-            polys.add(poly);
+        while (!polygon.isConvex() || polygon.getPointCount() > aMax) {
+            polygon = polygon.splitConvex(aMax);
+            convexPolygons.add(polygon);
         }
 
         // Return Polygon array
-        return polys.toArray(new Polygon[0]);
+        return convexPolygons.toArray(new Polygon[0]);
     }
 
     /**
@@ -480,32 +482,24 @@ public class Polygon extends Shape implements Cloneable {
     }
 
     /**
-     * Returns an array of simple polygons for a shape (assuming there are potentially subpaths and such).
+     * Returns an array of convex polygons for given max side count.
      */
-    public static Polygon[] getSimplePolys(Shape aShape)
-    {
-        Shape shape = Shape.makeSimple(aShape);
-        PolygonPath plist = new PolygonPath(shape);
-        return plist.getPolygons();
-    }
-
-    /**
-     * Returns an array of convex polysgons for given max side count.
-     */
-    public static Polygon[] getConvexPolys(Shape aShape, int aMax)
+    public static Polygon[] getConvexPolygonsWithMaxSideCount(Shape aShape, int aMax)
     {
         // Get simple polygons
-        Polygon[] simplePolys = getSimplePolys(aShape);
+        Shape simpleShape = Shape.getNotSelfIntersectingShape(aShape);
+        PolygonPath polygonPath = new PolygonPath(simpleShape);
+        Polygon[] simplePolygons = polygonPath.getPolygons();
 
         // Get convex polygons
-        List<Polygon> cpolys = new ArrayList<>();
-        for (Polygon spoly : simplePolys) {
-            Polygon[] cpolys2 = spoly.getConvexPolys(aMax);
-            Collections.addAll(cpolys, cpolys2);
+        List<Polygon> convexPolygons = new ArrayList<>();
+        for (Polygon simplePolygon : simplePolygons) {
+            Polygon[] convexPolygons2 = simplePolygon.getConvexPolygonsWithMaxSideCount(aMax);
+            Collections.addAll(convexPolygons, convexPolygons2);
         }
 
         // Return convex polygons
-        return cpolys.toArray(new Polygon[0]);
+        return convexPolygons.toArray(new Polygon[0]);
     }
 
     /**

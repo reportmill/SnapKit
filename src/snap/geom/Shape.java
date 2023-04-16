@@ -567,12 +567,12 @@ public abstract class Shape {
     public boolean isMultiPath()  { return !isSinglePath(); }
 
     /**
-     * Returns whether shape has no intersecting lines.
+     * Returns whether shape has intersecting segments.
      */
-    public boolean isSimple()
+    public boolean isSelfIntersecting()
     {
-        SegList slist = new SegList(this);
-        return slist.isSimple();
+        SegmentPath segmentPath = new SegmentPath(this);
+        return segmentPath.isSelfIntersecting();
     }
 
     /**
@@ -671,7 +671,7 @@ public abstract class Shape {
      */
     public static Shape addShapes(Shape aShape1, Shape aShape2)
     {
-        return SegList.addShapes(aShape1, aShape2);
+        return SegmentPathCAG.addShapes(aShape1, aShape2);
     }
 
     /**
@@ -679,7 +679,7 @@ public abstract class Shape {
      */
     public static Shape subtractShapes(Shape aShape1, Shape aShape2)
     {
-        return SegList.subtractShapes(aShape1, aShape2);
+        return SegmentPathCAG.subtractShapes(aShape1, aShape2);
     }
 
     /**
@@ -687,15 +687,17 @@ public abstract class Shape {
      */
     public static Shape intersectShapes(Shape aShape1, Shape aShape2)
     {
-        return SegList.intersectShapes(aShape1, aShape2);
+        return SegmentPathCAG.intersectShapes(aShape1, aShape2);
     }
 
     /**
      * Returns a simple shape for complex shape.
      */
-    public static Shape makeSimple(Shape aShape)
+    public static Shape getNotSelfIntersectingShape(Shape aShape)
     {
-        return SegList.makeSimple(aShape);
+        SegmentPath segmentPath = new SegmentPath(aShape);
+        segmentPath.makeNotSelfIntersecting();
+        return segmentPath;
     }
 
     /** Helper. */
