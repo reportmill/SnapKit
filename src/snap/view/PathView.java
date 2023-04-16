@@ -113,7 +113,7 @@ public class PathView extends View {
         // Unarchive path - was: pathXML = anElement.get("path"); _path = anArchiver.fromXML(pathXML, Path.class, this);
         String svgString = anElement.getAttributeValue("SvgString");
         if (svgString != null) {
-            _path = new Path();
+            _path = new Path2D();
             _path.appendSvgString(svgString);
         }
 
