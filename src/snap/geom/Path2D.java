@@ -253,6 +253,17 @@ public class Path2D extends ShapeBuilder implements Cloneable {
     }
 
     /**
+     * Returns the seg index for given point index.
+     */
+    public int getSegIndexForPointIndex(int anIndex)
+    {
+        int segIndex = 0;
+        for (int pointIndex = 0; pointIndex <= anIndex && segIndex < _segCount; segIndex++)
+            pointIndex += getSeg(segIndex).getCount();
+        return segIndex - 1;
+    }
+
+    /**
      * Removes the last segment.
      */
     public void removeLastSeg()
@@ -279,6 +290,14 @@ public class Path2D extends ShapeBuilder implements Cloneable {
     public void fitToCurveFromPointIndex(int pointIndex)
     {
         PathFitCurves.fitCurveFromPointIndex(this, pointIndex);
+    }
+
+    /**
+     * Override to return as path.
+     */
+    public Path2D copyFor(Rect aRect)
+    {
+        return (Path2D) super.copyFor(aRect);
     }
 
     /**

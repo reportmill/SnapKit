@@ -538,9 +538,9 @@ public abstract class Shape {
     }
 
     /**
-     * Returns whether path is a single path (as opposed to having multiple subpaths).
+     * Returns whether path has only a single moveto.
      */
-    public boolean isSinglePath()
+    public boolean isSingleCycle()
     {
         // Get path iterator and declare iter vars
         PathIter pathIter = getPathIter(null);
@@ -562,9 +562,9 @@ public abstract class Shape {
     }
 
     /**
-     * Returns whether path made up of multiple subpaths.
+     * Returns whether path made up of multiple subpaths (more than one moveto).
      */
-    public boolean isMultiPath()  { return !isSinglePath(); }
+    public boolean isMultiCycle()  { return !isSingleCycle(); }
 
     /**
      * Returns whether shape has intersecting segments.
@@ -611,7 +611,7 @@ public abstract class Shape {
         Transform xfm = Transform.getScale(scaleX, scaleY);
         xfm.translate(transX, transY);
         PathIter pathIter = getPathIter(xfm);
-        return new Path(pathIter);
+        return new Path2D(pathIter);
     }
 
     /**
@@ -620,7 +620,7 @@ public abstract class Shape {
     public Shape copyFor(Transform aTrans)
     {
         PathIter pathIter = getPathIter(aTrans);
-        return new Path(pathIter);
+        return new Path2D(pathIter);
     }
 
     /**
