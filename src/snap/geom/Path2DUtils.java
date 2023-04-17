@@ -17,9 +17,9 @@ public class Path2DUtils {
     private static Point ZERO_POINT = new Point();
 
     /**
-     * Handles painting a polygon shape.
+     * Handles painting a path showing control point handles.
      */
-    public static void paintHandles(Path2D aPath, Painter aPntr, int selectedPointIndex)
+    public static void paintHandles(Path2D aPath, Painter aPntr, int selPointIndex)
     {
         // Declare loop vars
         Seg lastSeg = null;
@@ -55,14 +55,14 @@ public class Path2DUtils {
                     break;
                 }
 
-                // Handle CURVE_TO: If selectedPointIndex is CurveTo, draw line to nearest endPoint and button
+                // Handle CURVE_TO: If SelPointIndex is CurveTo, draw line to nearest endPoint and button
                 case CubicTo: {
 
-                    // If controlPoint1's point index is the selectedPointIndex or last end point was selectedPointIndex
-                    // or lastElement was a CurveTo and it's controlPoint2's pointIndex was the selectedPointIndex
+                    // If controlPoint1's point index is the SelPointIndex or last end point was SelPointIndex
+                    // or last seg was a CurveTo and it's controlPoint2's pointIndex was the SelPointIndex
                     //   then draw control line from controlPoint1 to last end point and draw handle for control point 1
-                    if (currentPointIndex == selectedPointIndex || currentPointIndex - 1 == selectedPointIndex ||
-                            (lastSeg == Seg.CubicTo && currentPointIndex - 2 == selectedPointIndex)) {
+                    if (currentPointIndex == selPointIndex || currentPointIndex - 1 == selPointIndex ||
+                            (lastSeg == Seg.CubicTo && currentPointIndex - 2 == selPointIndex)) {
                         Point lastPoint = aPath.getPoint(currentPointIndex - 1);
                         aPntr.setStroke(Stroke.Stroke1);
                         aPntr.drawLine(points[0].x, points[0].getY(), lastPoint.getX(), lastPoint.getY());
@@ -70,11 +70,11 @@ public class Path2DUtils {
                         paintHandleAtXY(aPntr, lastPoint.x, lastPoint.y);
                     }
 
-                    // If controlPoint2's point index is selectedPointIndex or if end point's index is
-                    // selectedPointIndex or if next element is CurveTo and it's cp1 point index is
-                    // selectedPointIndex then draw control line from cp2 to end point and draw handle for cp2
-                    else if (currentPointIndex + 1 == selectedPointIndex || currentPointIndex + 2 == selectedPointIndex ||
-                            (nextSeg == Seg.CubicTo && currentPointIndex + 3 == selectedPointIndex)) {
+                    // If controlPoint2's point index is SelPointIndex or if end point's index is
+                    // SelPointIndex or if next seg is CurveTo and it's cp1 point index is
+                    // SelPointIndex then draw control line from cp2 to end point and draw handle for cp2
+                    else if (currentPointIndex + 1 == selPointIndex || currentPointIndex + 2 == selPointIndex ||
+                            (nextSeg == Seg.CubicTo && currentPointIndex + 3 == selPointIndex)) {
                         aPntr.setStroke(Stroke.Stroke1);
                         aPntr.drawLine(points[1].x, points[1].y, points[2].x, points[2].y);
                         paintHandleAtXY(aPntr, points[1].x, points[1].y);
@@ -90,7 +90,7 @@ public class Path2DUtils {
                 default: break;
             }
 
-            // Remember last element
+            // Remember last seg
             lastSeg = seg;
         }
     }
@@ -106,13 +106,13 @@ public class Path2DUtils {
 
         // If point at index is part of a curveto, perform structured set
         if (seg == Seg.CubicTo) {
-            int pointIndexForElementIndex = newPath.getSegPointIndex(segIndex);
+            int pointIndexForSeg = newPath.getSegPointIndex(segIndex);
 
-            // If point index is control point 1, and previous element is a curveto, bring control point 2 of previous curveto in line
-            if (index - pointIndexForElementIndex == 0) {
+            // If point index is control point 1, and previous seg is a curveto, bring control point 2 of previous curveto in line
+            if (index - pointIndexForSeg == 0) {
                 if (segIndex - 1 > 0 && newPath.getSeg(segIndex - 1) == Seg.CubicTo) {
                     Point endPoint = newPath.getPoint(index - 1), cntrlPnt2 = newPath.getPoint(index - 2);
-                    // endpoint==point winds up putting a NaN in the path
+                    // endpoint == point winds up putting a NaN in the path
                     if (!endPoint.equals(point)) {
                         Size size = new Size(point.x - endPoint.x, point.y - endPoint.y);
                         size.normalize();
@@ -124,8 +124,8 @@ public class Path2DUtils {
                 }
             }
 
-            // If point index is control point 2, and next element is a curveto, bring control point 1 of next curveto in line
-            else if (index - pointIndexForElementIndex == 1) {
+            // If point index is control point 2, and next seg is a curveto, bring control point 1 of next curveto in line
+            else if (index - pointIndexForSeg == 1) {
                 if (segIndex + 1 < newPath.getSegCount() && newPath.getSeg(segIndex + 1) == Seg.CubicTo) {
                     Point endPoint = newPath.getPoint(index + 1), otherControlPoint = newPath.getPoint(index + 2);
                     // don't normalize a point
@@ -141,7 +141,7 @@ public class Path2DUtils {
             }
 
             // If point index is curve end point, move the second control point by the same amount as main point move
-            else if (index - pointIndexForElementIndex == 2) {
+            else if (index - pointIndexForSeg == 2) {
                 Point p1 = new Point(point);
                 p1.subtract(newPath.getPoint(index));
                 Point p2 = new Point(newPath.getPoint(index - 1));
@@ -157,7 +157,7 @@ public class Path2DUtils {
             }
         }
 
-        // If there is a next element and it is a curveto, move its first control point by the same amount as main point move
+        // If there is a next seg and it is curveto, move its first control point by the same amount as main point move
         else if (segIndex + 1 < newPath.getSegCount() && newPath.getSeg(segIndex + 1) == Seg.CubicTo) {
             Point p1 = new Point(point);
             p1.subtract(newPath.getPoint(index));
@@ -329,52 +329,37 @@ public class Path2DUtils {
             deletePointIndex--; deletePointCount++;
         }
 
-        // Delete segs, seg point indexes
-        int deleteSegEndIndex = deleteSegIndex + deleteSegCount;
-        int deleteSegTailLength = aPath._segCount - deleteSegEndIndex;
-        System.arraycopy(aPath._segs, deleteSegEndIndex, aPath._segs, deleteSegIndex, deleteSegTailLength);
-        aPath._segCount -= deleteSegCount;
-
-        // Delete points ( x2 for XY coords array)
-        int deletePointEndIndex = deletePointIndex + deletePointCount;
-        int deletePointTailLength = aPath._pointCount - deletePointEndIndex;
-        System.arraycopy(aPath._points, deletePointEndIndex * 2, aPath._points, deletePointIndex * 2, deletePointTailLength * 2);
-        aPath._pointCount -= deletePointCount;
-
-        // Update SegPointIndexes
-        for (int i = deleteSegIndex + 1; i < aPath._segCount; i++)
-            aPath._segPointIndexes[i] = aPath._segPointIndexes[i - 1] + aPath.getSeg(i - 1).getCount();
-
-        // Notify shape changed
-        aPath.shapeChanged();
+        // Remove segs and points in ranges
+        removeSegsInRange(aPath, deleteSegIndex, deleteSegIndex + deleteSegCount);
+        removePointsInRange(aPath, deletePointIndex, deletePointIndex + deletePointCount);
     }
 
     /**
      * Returns the bounds for all the control points.
      */
-    public static Rect getControlPointBoundsWithSelPointIndex(Path2D aPath, int selectedPointIndex)
+    public static Rect getControlPointBoundsWithSelPointIndex(Path2D aPath, int selPointIndex)
     {
         // Get segment index for selected control point handle
-        int mouseDownIndex = aPath.getSegIndexForPointIndex(selectedPointIndex);
+        int mouseDownIndex = aPath.getSegIndexForPointIndex(selPointIndex);
         if (mouseDownIndex >= 0 && aPath.getSeg(mouseDownIndex) == Seg.CubicTo &&
-                (aPath.getSegPointIndex(mouseDownIndex) == selectedPointIndex))
+                (aPath.getSegPointIndex(mouseDownIndex) == selPointIndex))
             mouseDownIndex--;
 
-        // Iterate over path elements
+        // Declare loop vars
         Point p0 = aPath.getPointCount() > 0 ? new Point(aPath.getPoint(0)) : ZERO_POINT;
         double p1x = p0.x, p1y = p0.y;
         double p2x = p1x, p2y = p1y;
         PathIter pathIter = aPath.getPathIter(null);
         double[] points = new double[6];
 
-
+        // Iterate over segs
         for (int i = 0; pathIter.hasNext(); i++)
             switch (pathIter.getNext(points)) {
 
                 // Handle MoveTo
                 case MoveTo:
 
-                    // Handle LineTo
+                // Handle LineTo
                 case LineTo: {
                     p1x = Math.min(p1x, points[0]);
                     p1y = Math.min(p1y, points[1]);
@@ -405,8 +390,7 @@ public class Path2DUtils {
                 break;
 
                 // Handle default
-                default:
-                    break;
+                default: break;
             }
 
         // Create control point bounds rect, union with path bounds and return
@@ -419,7 +403,7 @@ public class Path2DUtils {
 
     /**
      * Returns the handle index for a given point for given path. Only returns points that are on the path,
-     * except for the control points of selectedPoint (if not -1)
+     * except for the control points of selected point (if not -1)
      */
     public static int handleAtPoint(Path2D aPath, Point aPoint, int selPointIndex)
     {
@@ -434,11 +418,11 @@ public class Path2DUtils {
             // If the selected point is one of the on path points, figure out the indices of the others
             if (isPointOnPath(aPath, selPointIndex)) {
 
-                // If the selected element is a curveto or quadto, the second to the last control point will be active
+                // If the selected seg is a curveto or quadto, the second to the last control point will be active
                 if (seg == Seg.CubicTo || seg == Seg.QuadTo)
                     offPathPoints[noffPathPoints++] = selPointIndex - 1;
 
-                // If the element following the selected element is a curveto, it's first control point will be active
+                // If seg following the selected seg is a curveto, it's first control point will be active
                 if (segIndex < segCount - 1 && aPath.getSeg(segIndex + 1) == Seg.CubicTo)
                     offPathPoints[noffPathPoints++] = selPointIndex + 1;
             }
@@ -506,5 +490,40 @@ public class Path2DUtils {
     private static void paintHandleAtXY(Painter aPntr, double aX, double aY)
     {
         aPntr.drawButton(aX - HALF_HANDLE_WIDTH, aY - HALF_HANDLE_WIDTH, HANDLE_WIDTH, HANDLE_WIDTH, false);
+    }
+
+    /**
+     * Removes path segs in given range.
+     */
+    private static void removeSegsInRange(Path2D aPath, int startIndex, int endIndex)
+    {
+        // Copy tail segs over deleted range
+        int tailLength = aPath._segCount - endIndex;
+        System.arraycopy(aPath._segs, endIndex, aPath._segs, startIndex, tailLength);
+
+        // Update count
+        int deleteCount = endIndex - startIndex;
+        aPath._segCount -= deleteCount;
+
+        // Update SegPointIndexes
+        for (int i = startIndex + 1; i < aPath._segCount; i++)
+            aPath._segPointIndexes[i] = aPath._segPointIndexes[i - 1] + aPath.getSeg(i - 1).getCount();
+
+        // Notify shape changed
+        aPath.shapeChanged();
+    }
+
+    /**
+     * Removes path points in given range.
+     */
+    private static void removePointsInRange(Path2D aPath, int startIndex, int endIndex)
+    {
+        // Copy tail points over deleted range ( x2 for XY coords array)
+        int tailLength = aPath._pointCount - endIndex;
+        System.arraycopy(aPath._points, endIndex * 2, aPath._points, startIndex * 2, tailLength * 2);
+
+        // Update count
+        int deleteCount = endIndex - startIndex;
+        aPath._pointCount -= deleteCount;
     }
 }
