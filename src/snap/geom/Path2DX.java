@@ -52,10 +52,25 @@ public class Path2DX extends Path2D {
 
         // Handle Close special: PointIndex is to index in ClosePointIndexes (an array of each close {start,end} index)
         if (seg == Seg.Close) {
+
+            // Copy last point
             theCoords[0] = _points[pointIndex];
             theCoords[1] = _points[pointIndex + 1];
-            theCoords[2] = _points[0];
-            theCoords[3] = _points[1];
+
+            // Get previous MoveTo SegIndex
+            int moveToSegIndex = anIndex;
+            while (moveToSegIndex > 0 && getSeg(moveToSegIndex) != Seg.MoveTo)
+                moveToSegIndex--;
+
+            // Get MoveTo PointIndex and copy points
+            int moveToPointIndex = getSegPointIndex(moveToSegIndex) * 2;
+            theCoords[2] = _points[moveToPointIndex];
+            theCoords[3] = _points[moveToPointIndex + 1];
+        }
+
+        // Handle MoveTo: Probably not used, but copy move to point
+        else if (seg == Seg.MoveTo) {
+            System.arraycopy(_points, pointIndex + 2, theCoords, 0, 2);
         }
 
         // Copy Seg points to given point coord array
@@ -113,19 +128,15 @@ public class Path2DX extends Path2D {
 
             // Get arcLength for seg
             switch (seg) {
-                case MoveTo:
-                    break;
-                case LineTo:
-                    len = Point.getDistance(points[0], points[1], points[2], points[3]);
-                    break;
+                case MoveTo: break;
+                case LineTo: len = Point.getDistance(points[0], points[1], points[2], points[3]); break;
                 case QuadTo:
                     len = SegmentLengths.getArcLengthQuad(points[0], points[1], points[2], points[3], points[4], points[5]);
                     break;
                 case CubicTo:
                     len = SegmentLengths.getArcLengthCubic(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
                     break;
-                default:
-                    throw new RuntimeException("SegPoints.getArcLengths: Unsuppored seg: " + seg);
+                default: throw new RuntimeException("SegPoints.getArcLengths: Unsuppored seg: " + seg);
             }
 
             // Update arcLengths
