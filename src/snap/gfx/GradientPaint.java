@@ -46,7 +46,7 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     /**
      * Creates a new linear GradientPaint with given stops and roll.
      */
-    public GradientPaint(double anAngle, Stop theStops[])
+    public GradientPaint(double anAngle, Stop[] theStops)
     {
         _stops = theStops;
         setRoll(anAngle, new Rect(0,0,1,1));
@@ -64,25 +64,9 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     /**
      * Creates a new linear GradientPaint with given type, start/end points, stops.
      */
-    public GradientPaint(double aSX, double aSY, Color aC1, double aEX, double aEY, Color aC2)
-    {
-        this(Type.LINEAR, aSX, aSY, aEX, aEY, getStops(0, aC1, 1, aC2));
-    }
-
-    /**
-     * Creates a new linear GradientPaint with given type, start/end points, stops.
-     */
     public GradientPaint(double aSX, double aSY, double aEX, double aEY, Stop[] theStops)
     {
         this(Type.LINEAR, aSX, aSY, aEX, aEY, theStops);
-    }
-
-    /**
-     * Creates a new GradientPaint with given type and stops and roll.
-     */
-    public GradientPaint(Type aType, Stop[] theStops)
-    {
-        this(aType, aType==Type.LINEAR ? 0 : .5, .5, 1d, .5, theStops);
     }
 
     /**
@@ -237,7 +221,7 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
      */
     public GradientPaint copyForColor(Color aColor)
     {
-        GradientPaint.Stop stops[] = Arrays.copyOf(getStops(), getStopCount());
+        GradientPaint.Stop[] stops = Arrays.copyOf(getStops(), getStopCount());
         stops[0] = new Stop(getStopOffset(0), aColor);
         return copyForStops(stops);
     }
@@ -272,7 +256,7 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
     /**
      * Returns a copy of this paint with stops from given array.
      */
-    public GradientPaint copyForStops(Stop theStops[])
+    public GradientPaint copyForStops(Stop[] theStops)
     {
         GradientPaint clone = clone();
         clone._stops = Arrays.copyOf(theStops, theStops.length);
@@ -434,8 +418,9 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
      */
     public String toString()
     {
-        StringBuffer sb = new StringBuffer("Gradient { ");
-        for (Stop s : getStops()) sb.append(s).append(", ");
+        StringBuilder sb = new StringBuilder("Gradient { ");
+        for (Stop s : getStops())
+            sb.append(s).append(", ");
         return sb.append(" }").toString();
     }
 
@@ -468,8 +453,10 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
         }
 
         /** Standard to string implementation. */
-        public String toString() { return "ColorStop { Color=" + getColor().toHexString() + ", Offset=" + getOffset()+"}"; }
-
+        public String toString()
+        {
+            return "ColorStop { Color=" + getColor().toHexString() + ", Offset=" + getOffset() + "}";
+        }
     }
 
     /**
@@ -477,8 +464,8 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
      */
     public static boolean getStopsHaveAlpha(Stop[] theStops)
     {
-        for (int i=0, iMax=theStops.length; i<iMax; i++)
-            if (theStops[i].getColor().getAlphaInt() != 255)
+        for (Stop theStop : theStops)
+            if (theStop.getColor().getAlphaInt() != 255)
                 return true;
         return false;
     }
@@ -517,5 +504,67 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
         for (int i=0; i<theOffs.length; i++)
             stops[i] = new Stop(theOffs[i], theColors[i]);
         return stops;
+    }
+
+    /**
+     * A Builder class for GradientPaint.
+     */
+    public static class Builder {
+
+        private double _angle;
+        private Stop[] _stops = new Stop[0];
+        private boolean _radial;
+        private double _sx = -1, _sy, _ex, _ey;
+
+        public Builder()  { }
+        public Builder angle(double anAngle)  { _angle = anAngle; return  this; }
+        public Builder radial()  { _radial = true; return  this; }
+        public Builder startEnd(double sx, double sy, double ex, double ey)
+        {
+            _sx = sx; _sy = sy;
+            _ex = ex; _ey = ey;
+            return this;
+        }
+        public Builder stops(Stop[] theStops)  { _stops = theStops; return this; }
+        public Builder stop(double anOffset, Color aColor)
+        {
+            Stop stop = new Stop(anOffset, aColor);
+            _stops = ArrayUtils.add(_stops, stop);
+            return this;
+        }
+        public Builder colors(Color ... theColors)
+        {
+            double offset = 0;
+            double increment = 1d / theColors.length;
+            for (Color color : theColors) {
+                _stops = ArrayUtils.add(_stops, new Stop(offset, color));
+                offset += increment;
+            }
+            return this;
+        }
+        public GradientPaint build()
+        {
+            GradientPaint gradientPaint = new GradientPaint();
+            if (_radial)
+                gradientPaint._type = Type.RADIAL;
+            if (_stops.length > 1)
+                gradientPaint._stops = _stops;
+            if (_angle != 0)
+                gradientPaint.setRoll(_angle, new Rect(0,0,1,1));
+            if (_sx >= 0) {
+                gradientPaint._sx = _sx; gradientPaint._sy = _sy;
+                gradientPaint._ex = _ex; gradientPaint._ey = _ey;
+                gradientPaint._abs = Math.abs(_ex - _sx) > 2 || Math.abs( _ey - _sy) > 2;
+            }
+            reset();
+            return gradientPaint;
+        }
+        private void reset()
+        {
+            _angle = 0;
+            _radial = false;
+            _stops = new Stop[0];
+            _sx = -1;
+        }
     }
 }

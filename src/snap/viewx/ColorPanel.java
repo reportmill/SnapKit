@@ -578,13 +578,14 @@ public class ColorPanel extends ViewOwner {
 
         public void paintTrack(Painter g)
         {
-            Rect tbnds = getTrackBounds();
-            tbnds.inset(0, -1);
-            RoundRect tbndsRnd = new RoundRect(tbnds.x, tbnds.y, tbnds.width, tbnds.height, 3);
-            g.setPaint(new GradientPaint(1, 1, _c1, tbnds.width, 1, _c2));
-            g.fill(tbndsRnd);
+            Rect trackBounds = getTrackBounds();
+            trackBounds.inset(0, -1);
+            RoundRect trackBoundsRoundRect = new RoundRect(trackBounds, 3);
+            GradientPaint gradientPaint = new GradientPaint.Builder().startEnd(1, 1, trackBounds.width, 1).colors(_c1, _c2).build();
+            g.setPaint(gradientPaint);
+            g.fill(trackBoundsRoundRect);
             g.setColor(Color.GRAY);
-            g.draw(tbndsRnd);
+            g.draw(trackBoundsRoundRect);
         }
     }
 }
