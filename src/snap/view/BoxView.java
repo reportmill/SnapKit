@@ -19,9 +19,6 @@ public class BoxView extends ParentView implements ViewHost {
     // Whether to fill height
     private boolean  _fillHeight;
 
-    // Whether child will crop to height if not enough space available
-    private boolean  _cropHeight;
-
     // Constants for properties
     public static final String FillWidth_Prop = "FillWidth";
     public static final String FillHeight_Prop = "FillHeight";
@@ -102,19 +99,6 @@ public class BoxView extends ParentView implements ViewHost {
         if (aValue == _fillHeight) return;
         firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
         relayout();
-    }
-
-    /**
-     * Returns whether child will crop to height if needed.
-     */
-    public boolean isCropHeight()  { return _cropHeight; }
-
-    /**
-     * Sets whether child will crop to height if needed.
-     */
-    public void setCropHeight(boolean aValue)
-    {
-        _cropHeight = aValue;
     }
 
     /**

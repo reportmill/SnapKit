@@ -9,9 +9,6 @@ import snap.geom.Insets;
  */
 public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
 
-    // Whether child will crop to height if not enough space available
-    private boolean  _cropHeight;
-
     /**
      * Constructor for given parent view.
      */
@@ -23,7 +20,6 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
             BoxView boxView = (BoxView) aParent;
             setFillWidth(boxView.isFillWidth());
             setFillHeight(boxView.isFillHeight());
-            setCropHeight(boxView.isCropHeight());
         }
     }
 
@@ -37,19 +33,6 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
             setContent(ViewProxy.getProxy(aChild));
         setFillWidth(isFillWidth);
         setFillHeight(isFillHeight);
-    }
-
-    /**
-     * Returns whether child will crop to height if needed.
-     */
-    public boolean isCropHeight()  { return _cropHeight; }
-
-    /**
-     * Sets whether child will crop to height if needed.
-     */
-    public void setCropHeight(boolean aValue)
-    {
-        _cropHeight = aValue;
     }
 
     /**
@@ -83,7 +66,6 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
         double viewH = getHeight();
         boolean isFillWidth = isFillWidth();
         boolean isFillHeight = isFillHeight();
-        boolean isCropHeight = isCropHeight();
 
         // Get child
         ViewProxy<?> child = getContent(); if (child == null) return;
@@ -118,8 +100,8 @@ public class BoxViewProxy<T extends View> extends ParentViewProxy<T> {
         }
 
         // If child needs crop, make sure it fits in space
-        if (isCropHeight)
-            childH = Math.min(childH, areaH);
+        childW = Math.min(childW, areaW);
+        childH = Math.min(childH, areaH);
 
         // Get content alignment as modifer/factor (0 = left, 1 = right)
         double alignX = child.getLeanX() != null ? child.getLeanXAsDouble() : getAlignXAsDouble();
