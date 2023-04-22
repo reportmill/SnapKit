@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.web;
+import snap.util.FileUtils;
 import java.io.File;
 
 /**
@@ -10,8 +11,16 @@ import java.io.File;
 public class LocalSite extends FileSite {
 
     // The file path to this data source
-    String                 _filePath;
-    
+    private String _filePath;
+
+    /**
+     * Constructor.
+     */
+    public LocalSite()
+    {
+        super();
+    }
+
     /**
      * Returns the string identifying the prefix for URLs in this data source.
      */
@@ -29,7 +38,7 @@ public class LocalSite extends FileSite {
     {
         // If not set or if name has changed, reset cached FilePath
         if (_filePath==null) {
-            File jdir = snap.util.ClientUtils.getHomeDir(true);
+            File jdir = getHomeDir(true);
             _filePath = new File(jdir, getPath()).getAbsolutePath();
         }
 
@@ -37,4 +46,11 @@ public class LocalSite extends FileSite {
         return _filePath;
     }
 
+    /**
+     * Returns the SnapCode directory in user's home directory.
+     */
+    public static File getHomeDir(boolean doCreate)
+    {
+        return FileUtils.getUserHomeDir("SnapCode", doCreate);
+    }
 }
