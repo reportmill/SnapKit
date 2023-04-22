@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
-import snap.util.SnapUtils;
+import snap.util.Convert;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -181,7 +181,7 @@ public abstract class PropObject implements PropChange.DoChange {
     public final boolean getPropDefaultBool(String aPropName)
     {
         Object val = getPropDefault(aPropName);
-        return SnapUtils.boolValue(val);
+        return Convert.boolValue(val);
     }
 
     /**
@@ -190,7 +190,7 @@ public abstract class PropObject implements PropChange.DoChange {
     public final int getPropDefaultInt(String aPropName)
     {
         Object val = getPropDefault(aPropName);
-        return SnapUtils.intValue(val);
+        return Convert.intValue(val);
     }
 
     /**
@@ -199,7 +199,7 @@ public abstract class PropObject implements PropChange.DoChange {
     public final double getPropDefaultDouble(String aPropName)
     {
         Object val = getPropDefault(aPropName);
-        return SnapUtils.doubleValue(val);
+        return Convert.doubleValue(val);
     }
 
     /**
@@ -208,7 +208,7 @@ public abstract class PropObject implements PropChange.DoChange {
     public final String getPropDefaultString(String aPropName)
     {
         Object val = getPropDefault(aPropName);
-        return SnapUtils.stringValue(val);
+        return Convert.stringValue(val);
     }
 
     /**

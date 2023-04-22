@@ -319,7 +319,7 @@ public class ViewOwner extends PropObject {
     public String getViewStringValue(Object anObj)
     {
         Object value = getViewValue(anObj);
-        return SnapUtils.stringValue(value);
+        return Convert.stringValue(value);
     }
 
     /**
@@ -328,7 +328,7 @@ public class ViewOwner extends PropObject {
     public boolean getViewBoolValue(Object anObj)
     {
         Object value = getViewValue(anObj);
-        return SnapUtils.boolValue(value);
+        return Convert.boolValue(value);
     }
 
     /**
@@ -337,7 +337,7 @@ public class ViewOwner extends PropObject {
     public int getViewIntValue(Object anObj)
     {
         Object value = getViewValue(anObj);
-        return SnapUtils.intValue(value);
+        return Convert.intValue(value);
     }
 
     /**
@@ -346,7 +346,7 @@ public class ViewOwner extends PropObject {
     public float getViewFloatValue(Object anObj)
     {
         Object value = getViewValue(anObj);
-        return SnapUtils.floatValue(value);
+        return Convert.floatValue(value);
     }
 
     /**

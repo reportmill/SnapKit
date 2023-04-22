@@ -51,7 +51,7 @@ public abstract class Prefs {
     public String getString(String aKey, String aDefault)
     {
         Object val = getValue(aKey, aDefault);
-        return SnapUtils.stringValue(val);
+        return Convert.stringValue(val);
     }
 
     /**
@@ -60,7 +60,7 @@ public abstract class Prefs {
     public int getInt(String aKey, int aDefault)
     {
         Object val = getValue(aKey);
-        return val != null ? SnapUtils.intValue(val) : aDefault;
+        return val != null ? Convert.intValue(val) : aDefault;
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class Prefs {
     public double getDouble(String aKey, double aDefault)
     {
         Object val = getValue(aKey);
-        return val != null ? SnapUtils.doubleValue(val) : aDefault;
+        return val != null ? Convert.doubleValue(val) : aDefault;
     }
 
     /**
@@ -78,7 +78,7 @@ public abstract class Prefs {
     public boolean getBoolean(String aKey, boolean aDefault)
     {
         Object val = getValue(aKey);
-        return val != null ? SnapUtils.boolValue(val) : aDefault;
+        return val != null ? Convert.boolValue(val) : aDefault;
     }
 
     /**

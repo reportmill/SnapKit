@@ -9,6 +9,8 @@ import snap.geom.Shape;
 import snap.gfx.*;
 import snap.util.*;
 
+import java.util.Objects;
+
 /**
  * A View for Buttons.
  */
@@ -148,7 +150,7 @@ public class ButtonBase extends ParentView {
      */
     public void setImageName(String aName)
     {
-        if (SnapUtils.equals(aName, _imageName)) return;
+        if (Objects.equals(aName, _imageName)) return;
         firePropChange(ImageName_Prop, _imageName, _imageName = aName);
         repaint();
     }
@@ -426,7 +428,7 @@ public class ButtonBase extends ParentView {
     {
         // ShowArea
         if (aPropName == ShowArea_Prop)
-            setShowArea(SnapUtils.boolValue(aValue));
+            setShowArea(Convert.boolValue(aValue));
 
         // Do normal version
         super.setPropValue(aPropName, aValue);

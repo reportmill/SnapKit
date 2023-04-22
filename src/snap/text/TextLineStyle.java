@@ -219,7 +219,7 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
 
         // Iterate over tabs and set individual doubles and types
         for (int i = 0, iMax = tabs.length; i < iMax; i++) {
-            _tabs[i] = SnapUtils.doubleValue(tabs[i]);
+            _tabs[i] = Convert.doubleValue(tabs[i]);
             char type = tabs[i].charAt(tabs[i].length() - 1);
             _tabTypes[i] = Character.isLetter(type) ? type : TAB_LEFT;
         }
@@ -265,15 +265,15 @@ public class TextLineStyle implements Cloneable, XMLArchiver.Archivable {
             _align = (HPos) aValue;
             _justify = false;
         }
-        else if (aKey.equals(JUSTIFY_KEY)) _justify = SnapUtils.boolValue(aValue);
-        else if (aKey.equals(SPACING_KEY)) _spacing = SnapUtils.doubleValue(aValue);
-        else if (aKey.equals(SPACING_FACTOR_KEY)) _spacingFactor = SnapUtils.doubleValue(aValue);
-        else if (aKey.equals(NEWLINE_SPACING_KEY)) _newlineSpacing = SnapUtils.doubleValue(aValue);
-        else if (aKey.equals(MIN_HEIGHT_KEY)) _minHeight = SnapUtils.doubleValue(aValue);
-        else if (aKey.equals(MAX_HEIGHT_KEY)) _maxHeight = SnapUtils.doubleValue(aValue);
-        else if (aKey.equals(FIRST_INDENT_KEY)) _firstIndent = SnapUtils.doubleValue(aValue);
-        else if (aKey.equals(LEFT_INDENT_KEY)) _leftIndent = SnapUtils.doubleValue(aValue);
-        else if (aKey.equals(RIGHT_INDENT_KEY)) _rightIndent = SnapUtils.doubleValue(aValue);
+        else if (aKey.equals(JUSTIFY_KEY)) _justify = Convert.boolValue(aValue);
+        else if (aKey.equals(SPACING_KEY)) _spacing = Convert.doubleValue(aValue);
+        else if (aKey.equals(SPACING_FACTOR_KEY)) _spacingFactor = Convert.doubleValue(aValue);
+        else if (aKey.equals(NEWLINE_SPACING_KEY)) _newlineSpacing = Convert.doubleValue(aValue);
+        else if (aKey.equals(MIN_HEIGHT_KEY)) _minHeight = Convert.doubleValue(aValue);
+        else if (aKey.equals(MAX_HEIGHT_KEY)) _maxHeight = Convert.doubleValue(aValue);
+        else if (aKey.equals(FIRST_INDENT_KEY)) _firstIndent = Convert.doubleValue(aValue);
+        else if (aKey.equals(LEFT_INDENT_KEY)) _leftIndent = Convert.doubleValue(aValue);
+        else if (aKey.equals(RIGHT_INDENT_KEY)) _rightIndent = Convert.doubleValue(aValue);
         else System.err.println("TextLineStyle.setValue: Unsupported key: " + aKey);
     }
 

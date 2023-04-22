@@ -401,7 +401,7 @@ public class TitleView extends ParentView implements ViewHost {
     public void setPropValue(String aPropName, Object aValue)
     {
         if (aPropName.equals("Value") || aPropName == Expanded_Prop)
-            setExpanded(SnapUtils.boolValue(aValue));
+            setExpanded(Convert.boolValue(aValue));
         else super.setPropValue(aPropName, aValue);
     }
 

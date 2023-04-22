@@ -4,6 +4,8 @@
 package snap.view;
 import snap.util.*;
 
+import java.util.Objects;
+
 /**
  * A ButtonBase subclass for ToggleButton.
  */
@@ -66,7 +68,7 @@ public class ToggleButton extends ButtonBase {
      */
     public void setGroupName(String aName)
     {
-        if (SnapUtils.equals(aName,_groupName)) return;
+        if (Objects.equals(aName, _groupName)) return;
         firePropChange(Group_Prop, _groupName, _groupName = aName);
     }
 
@@ -98,7 +100,7 @@ public class ToggleButton extends ButtonBase {
     public void setPropValue(String aPropName, Object aValue)
     {
         if (aPropName.equals("Value") || aPropName == Selected_Prop)
-            setSelected(SnapUtils.boolValue(aValue));
+            setSelected(Convert.boolValue(aValue));
         else super.setPropValue(aPropName, aValue);
     }
 

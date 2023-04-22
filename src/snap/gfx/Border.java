@@ -153,7 +153,7 @@ public abstract class Border extends PropObject implements Cloneable, XMLArchive
             case Stroke_Prop: break;
             case Color_Prop: break;
             case Insets_Prop: _insets = (Insets) aValue; break;
-            case PaintAbove_Prop: _paintAbove = SnapUtils.boolValue(aValue); break;
+            case PaintAbove_Prop: _paintAbove = Convert.boolValue(aValue); break;
 
             // Do normal version
             default: throw new RuntimeException("Border.setPropValue: Unknown key: " + aPropName);

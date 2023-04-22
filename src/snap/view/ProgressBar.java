@@ -263,8 +263,8 @@ public class ProgressBar extends View {
         switch (aPropName) {
 
             // Progress, Indeterminate
-            case Progress_Prop: setProgress(SnapUtils.doubleValue(aValue)); break;
-            case Indeterminate_Prop: setIndeterminate(SnapUtils.boolValue(aValue)); break;
+            case Progress_Prop: setProgress(Convert.doubleValue(aValue)); break;
+            case Indeterminate_Prop: setIndeterminate(Convert.boolValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);
