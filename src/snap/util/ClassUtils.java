@@ -84,15 +84,6 @@ public class ClassUtils {
     }
 
     /**
-     * Returns a class for a given name.
-     */
-    public static Class getClassForName(String aName)
-    {
-        ClassLoader classLoader = ClassUtils.class.getClassLoader();
-        return getClassForName(aName, classLoader);
-    }
-
-    /**
      * Returns a class for a given name, using the class loader of the given class.
      */
     public static Class getClassForName(String aName, ClassLoader aClassLoader)
@@ -237,59 +228,6 @@ public class ClassUtils {
         if (aClass == boolean.class) return "Z";
         if (aClass == void.class) return "V";
         return "L" + aClass.getName() + ";";
-    }
-
-    /**
-     * Returns whether a given class could be assigned a value from the second given class (accounting for auto-boxing).
-     */
-    public static boolean isAssignable(Class aClass1, Class aClass2)
-    {
-        // Handle null
-        if (aClass2 == null) return !aClass1.isPrimitive();
-
-        // Handle primitive
-        if (aClass1.isPrimitive() || aClass2.isPrimitive())
-            return isAssignablePrimitive(aClass1, aClass2);
-
-        // Do normal version
-        return aClass1.isAssignableFrom(aClass2);
-    }
-
-    /**
-     * Returns whether a given primitive class could be assigned a value from the second given class.
-     */
-    private static boolean isAssignablePrimitive(Class aClass1, Class aClass2)
-    {
-        // Get primitives
-        Class c1 = toPrimitive(aClass1);
-        Class c2 = toPrimitive(aClass2);
-        if (c1 == Object.class) return true;
-
-        // Handle float, double, Number
-        if (c1 == float.class || c1 == double.class || c1 == Number.class)
-            return c2 == c1 || c2 == byte.class || c2 == char.class || c2 == short.class || c2 == int.class || c2 == long.class || c2 == float.class;
-
-        // Handle byte, char, short, int long
-        if (c1 == byte.class || c1 == char.class || c1 == short.class || c1 == int.class || c1 == long.class)
-            return c2 == c1 || c2 == byte.class || c2 == char.class || c2 == short.class || c2 == int.class;
-
-        // Do normal version
-        return c1.isAssignableFrom(c2);
-    }
-
-    /**
-     * Returns whether second batch of classes is assignable to first batch of classes (accounting for auto-boxing).
-     */
-    protected static boolean isAssignable(Class[] theClasses1, Class[] theClasses2, int aCount)
-    {
-        if (theClasses1 == null)
-            return theClasses2 == null || theClasses2.length == 0;
-        if (theClasses2 == null)
-            return theClasses1.length == 0;
-        for (int i = 0; i < aCount; i++)
-            if (theClasses2[i] != null && !isAssignable(theClasses1[i], theClasses2[i]))
-                return false;
-        return true;
     }
 
     /**
