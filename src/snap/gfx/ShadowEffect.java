@@ -236,9 +236,9 @@ public class ShadowEffect extends Effect {
         switch (aPropName) {
 
             // Radius, DX, DY, Color
-            case Radius_Prop: _radius = SnapUtils.doubleValue(aValue); break;
-            case DX_Prop: _dx = SnapUtils.doubleValue(aValue); break;
-            case DY_Prop: _dy = SnapUtils.doubleValue(aValue); break;
+            case Radius_Prop: _radius = Convert.doubleValue(aValue); break;
+            case DX_Prop: _dx = Convert.doubleValue(aValue); break;
+            case DY_Prop: _dy = Convert.doubleValue(aValue); break;
             case Color_Prop: _color = (Color) aValue;
 
             // Do normal version

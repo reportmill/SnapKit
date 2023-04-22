@@ -3,7 +3,7 @@
  */
 package snap.text;
 import snap.gfx.Color;
-import snap.util.SnapUtils;
+import java.util.Objects;
 
 /**
  * A class to represent a hyperlink in a RichText TextStyle.
@@ -50,7 +50,7 @@ public class TextLink {
     public boolean equals(Object anObj)
     {
         TextLink other = (TextLink) anObj;
-        if (!SnapUtils.equals(other._string, _string)) return false;
+        if (!Objects.equals(other._string, _string)) return false;
         return true;
     }
 

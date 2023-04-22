@@ -136,7 +136,7 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
      */
     public String format(Object anObj)
     {
-        double value = SnapUtils.doubleValue(anObj);
+        double value = Convert.doubleValue(anObj);
         return format(value);
     }
 
@@ -364,7 +364,7 @@ public class NumberFormat extends PropObject implements TextFormat, Cloneable {
         switch (aPropName) {
 
             // Pattern, ExpStyle
-            case Pattern_Prop: setPattern(SnapUtils.stringValue(aValue)); break;
+            case Pattern_Prop: setPattern(Convert.stringValue(aValue)); break;
             case ExpStyle_Prop: setExpStyle((ExpStyle) aValue); break;
 
             // Handle super class properties (or unknown)

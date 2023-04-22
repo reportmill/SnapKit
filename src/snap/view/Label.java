@@ -6,6 +6,8 @@ import snap.geom.*;
 import snap.gfx.*;
 import snap.util.*;
 
+import java.util.Objects;
+
 /**
  * A class to display simple text with associcated image(s).
  */
@@ -81,7 +83,7 @@ public class Label extends ParentView {
     public void setText(String aValue)
     {
         // If value already set or setting null in label with no StringView, just return
-        String oldVal = getText(); if (SnapUtils.equals(aValue, oldVal)) return;
+        String oldVal = getText(); if (Objects.equals(aValue, oldVal)) return;
         if (aValue == null && !isStringViewSet())
             return;
 

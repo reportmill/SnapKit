@@ -371,7 +371,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public void setItemKey(String aKey)
     {
         String old = _itemKey; _itemKey = aKey;
-        setItemTextFunction(itm -> SnapUtils.stringValue(KeyChain.getValue(itm, _itemKey)));
+        setItemTextFunction(itm -> Convert.stringValue(KeyChain.getValue(itm, _itemKey)));
         firePropChange(ItemKey_Prop, old, _itemKey);
     }
 
@@ -963,7 +963,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         // Iterate over items and if item text is exact match for string, return it
         for (T item : getItems()) {
             String str = getText(item);
-            if (SnapUtils.equals(aString, str))
+            if (Objects.equals(aString, str))
                 return item;
         }
 
@@ -971,9 +971,9 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         T item0 = getItemCount() > 0 ? getItem(0) : null;
         T itemX = null;
         if (item0 instanceof String) itemX = (T) aString;
-        else if (item0 instanceof Integer) itemX = (T) SnapUtils.getInteger(aString);
-        else if (item0 instanceof Float) itemX = (T) SnapUtils.getFloat(aString);
-        else if (item0 instanceof Double) itemX = (T) SnapUtils.getDouble(aString);
+        else if (item0 instanceof Integer) itemX = (T) Convert.getInteger(aString);
+        else if (item0 instanceof Float) itemX = (T) Convert.getFloat(aString);
+        else if (item0 instanceof Double) itemX = (T) Convert.getDouble(aString);
         int index = itemX != null ? getItems().indexOf(itemX) : -1;
         if (index >= 0)
             return getItem(index);
@@ -995,7 +995,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
      */
     protected boolean equalsItems(List<T> theItems)
     {
-        return ListUtils.equalsId(theItems, _items) || SnapUtils.equals(theItems, _items);
+        return ListUtils.equalsId(theItems, _items) || Objects.equals(theItems, _items);
     }
 
     /**

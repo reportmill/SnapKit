@@ -306,7 +306,7 @@ public class Sort implements Comparator, Cloneable, JSArchiver.GetKeys {
         Sort other = (Sort) anObj;
 
         // Check Key, Order
-        if (!SnapUtils.equals(other._key, _key)) return false;
+        if (!Objects.equals(other._key, _key)) return false;
         if (other._order != _order) return false;
         return true; // Return true since all checks passed
     }

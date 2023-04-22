@@ -174,9 +174,9 @@ public class EmbossEffect extends Effect {
         switch (aPropName) {
 
             // Altitude, Azimuth, Radius
-            case Altitude_Prop: _altitude = SnapUtils.doubleValue(aValue); break;
-            case Azimuth_Prop: _azimuth = SnapUtils.doubleValue(aValue); break;
-            case Radius_Prop: _radius = SnapUtils.doubleValue(aValue); break;
+            case Altitude_Prop: _altitude = Convert.doubleValue(aValue); break;
+            case Azimuth_Prop: _azimuth = Convert.doubleValue(aValue); break;
+            case Radius_Prop: _radius = Convert.doubleValue(aValue); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);

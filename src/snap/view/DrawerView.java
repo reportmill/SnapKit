@@ -4,7 +4,7 @@
 package snap.view;
 import snap.geom.*;
 import snap.gfx.*;
-import snap.util.SnapUtils;
+import snap.util.Convert;
 import snap.viewx.Explode;
 
 /**
@@ -554,7 +554,7 @@ public class DrawerView extends ParentView {
     public void setPropValue(String aPropName, Object aValue)
     {
         if (aPropName == DrawerY_Prop)
-            setDrawerY(SnapUtils.doubleValue(aValue));
+            setDrawerY(Convert.doubleValue(aValue));
         else super.setPropValue(aPropName, aValue);
     }
 }

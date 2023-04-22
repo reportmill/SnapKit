@@ -553,7 +553,7 @@ public class ThumbWheel extends View {
      */
     public void setPropValue(String aPropName, Object aValue)
     {
-        if (aPropName.equals("Value")) setValue(SnapUtils.doubleValue(aValue));
+        if (aPropName.equals("Value")) setValue(Convert.doubleValue(aValue));
         else super.setPropValue(aPropName, aValue);
     }
 

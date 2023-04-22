@@ -400,12 +400,12 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
             case View.Width_Prop: setWidth((Double) aPC.getNewValue()); break;
             case View.Height_Prop: setHeight((Double) aPC.getNewValue()); break;
             case WindowView.AlwaysOnTop_Prop:
-                _winNtv.setAlwaysOnTop(SnapUtils.booleanValue(aPC.getNewValue()));
+                _winNtv.setAlwaysOnTop(Convert.booleanValue(aPC.getNewValue()));
                 break;
             case WindowView.Image_Prop: setImage((Image) aPC.getNewValue()); break;
             case WindowView.Title_Prop: setTitle((String) aPC.getNewValue()); break;
             case WindowView.Resizable_Prop:
-                setResizable(SnapUtils.booleanValue(aPC.getNewValue()));
+                setResizable(Convert.booleanValue(aPC.getNewValue()));
                 break;
         }
     }

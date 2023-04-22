@@ -2,8 +2,8 @@ package snap.viewx;
 import snap.gfx.Font;
 import snap.text.TextLineStyle;
 import snap.text.TextStyle;
+import snap.util.Convert;
 import snap.util.KeyChain;
-import snap.util.SnapUtils;
 import snap.view.BoxView;
 import snap.view.ScrollView;
 import snap.view.View;
@@ -70,7 +70,7 @@ public class DevPaneConsole extends ViewOwner {
         {
             String expr = aCommand;
             Object val = KeyChain.getValue(new Object(), expr);
-            String valStr = SnapUtils.stringValue(val);
+            String valStr = Convert.stringValue(val);
             String outStr = "Out[" + _inputIndex + "]:= " + valStr;
             _inputIndex++;
             setPrompt("In[" + _inputIndex + "]:= ");

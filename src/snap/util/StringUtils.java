@@ -136,7 +136,7 @@ public class StringUtils {
         aSB.append(aName).append('=');
 
         // Add prop value
-        String str = SnapUtils.stringValue(aVal);
+        String str = Convert.stringValue(aVal);
         aSB.append(str);
         return aSB;
     }

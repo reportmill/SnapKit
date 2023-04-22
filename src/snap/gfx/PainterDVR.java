@@ -3,11 +3,9 @@
  */
 package snap.gfx;
 import java.util.*;
-
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.geom.Transform;
-import snap.util.SnapUtils;
 import snap.util.StringUtils;
 
 /**
@@ -382,7 +380,7 @@ public class PainterDVR extends PainterImpl {
         public boolean equals(Object anObj)
         {
             DrawImageX o = (DrawImageX)anObj;
-            return _img==o._img && SnapUtils.equals(_xfm,o._xfm);
+            return _img==o._img && Objects.equals(_xfm,o._xfm);
         }
     }
 

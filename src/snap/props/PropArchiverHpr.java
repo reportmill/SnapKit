@@ -8,8 +8,7 @@ import snap.gfx.Image;
 import snap.gfx.Paint;
 import snap.text.NumberFormat;
 import snap.text.TextFormat;
-import snap.util.SnapUtils;
-
+import snap.util.Convert;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -131,8 +130,8 @@ public class PropArchiverHpr {
         public void setPropValue(String aPropName, Object aValue)
         {
             switch (aPropName) {
-                case Name_Prop: _real = new Font(SnapUtils.stringValue(aValue), 12); break;
-                case Size_Prop: _real = _real.deriveFont(SnapUtils.doubleValue(aValue)); break;
+                case Name_Prop: _real = new Font(Convert.stringValue(aValue), 12); break;
+                case Size_Prop: _real = _real.deriveFont(Convert.doubleValue(aValue)); break;
                 default: super.setPropValue(aPropName, aValue);
             }
         }
@@ -174,7 +173,7 @@ public class PropArchiverHpr {
         public void setPropValue(String aPropName, Object aValue)
         {
             switch (aPropName) {
-                case Color_Prop: _real = Color.get(SnapUtils.stringValue(aValue)); break;
+                case Color_Prop: _real = Color.get(Convert.stringValue(aValue)); break;
                 default: super.setPropValue(aPropName, aValue);
             }
         }
@@ -236,7 +235,7 @@ public class PropArchiverHpr {
         {
             switch (aPropName) {
                 case Pattern_Prop:
-                    _pattern = SnapUtils.stringValue(aValue);
+                    _pattern = Convert.stringValue(aValue);
                     break;
                 case ExpStyle_Prop:
                     _expStyle = (NumberFormat.ExpStyle) aValue;
@@ -323,7 +322,7 @@ public class PropArchiverHpr {
         public void setPropValue(String aPropName, Object aValue)
         {
             switch (aPropName) {
-                case Name_Prop: _name = SnapUtils.stringValue(aValue); break;
+                case Name_Prop: _name = Convert.stringValue(aValue); break;
                 default: super.setPropValue(aPropName, aValue);
             }
         }

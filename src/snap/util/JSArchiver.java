@@ -141,11 +141,11 @@ public class JSArchiver {
         if (value instanceof String) {
             String string = (String) value;
             if (string.startsWith(_jsonRefString)) {
-                int index = SnapUtils.intValue(string.substring(_jsonRefString.length()));
+                int index = Convert.intValue(string.substring(_jsonRefString.length()));
                 return _objects.get(index);
             }
             if (string.startsWith(_jsonDateString)) {
-                long time = SnapUtils.longValue(string.substring(_jsonDateString.length()));
+                long time = Convert.longValue(string.substring(_jsonDateString.length()));
                 return new Date(time);
             }
         }
@@ -195,7 +195,7 @@ public class JSArchiver {
                     dvalue = Boolean.FALSE;
 
                 // If not default value, write and add
-                if (!SnapUtils.equals(value, dvalue)) {
+                if (!Objects.equals(value, dvalue)) {
                     JSValue valueJS = writeObject(value);
                     objectJS.setValue(key, valueJS);
                 }

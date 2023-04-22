@@ -563,10 +563,10 @@ public class Scroller extends ParentView implements ViewHost {
         switch (aPropName) {
 
             // ScrollX, ScrollY, ScrollWidth, ScrollHeight
-            case ScrollX_Prop: setScrollX(SnapUtils.doubleValue(aValue)); break;
-            case ScrollY_Prop: setScrollY(SnapUtils.doubleValue(aValue)); break;
-            case ScrollWidth_Prop: setScrollWidth(SnapUtils.doubleValue(aValue)); break;
-            case ScrollHeight_Prop: setScrollY(SnapUtils.doubleValue(aValue)); break;
+            case ScrollX_Prop: setScrollX(Convert.doubleValue(aValue)); break;
+            case ScrollY_Prop: setScrollY(Convert.doubleValue(aValue)); break;
+            case ScrollWidth_Prop: setScrollWidth(Convert.doubleValue(aValue)); break;
+            case ScrollHeight_Prop: setScrollY(Convert.doubleValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);

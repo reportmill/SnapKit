@@ -3,6 +3,7 @@
  */
 package snap.view;
 import java.text.DecimalFormat;
+import java.util.Objects;
 
 import snap.geom.Pos;
 import snap.util.*;
@@ -75,7 +76,7 @@ public class Spinner <T> extends ParentView {
      */
     public void setValue(T aValue)
     {
-        if (SnapUtils.equals(aValue,getValue())) return;
+        if (Objects.equals(aValue,getValue())) return;
         firePropChange(Value_Prop, _value, _value = aValue);
         _text.setText(getText());
     }
@@ -169,7 +170,7 @@ public class Spinner <T> extends ParentView {
         else { System.err.println("Spinner: Unsuported value/step type: " + getValueClass()); return; }
 
         // If new value, set and fire action
-        if (SnapUtils.equals(val, getValue())) return;
+        if (Objects.equals(val, getValue())) return;
         setValue((T)val);
         fireActionEvent(null);
     }
@@ -189,7 +190,7 @@ public class Spinner <T> extends ParentView {
         else { System.err.println("Spinner: Unsuported value/step type: " + getValueClass()); return; }
 
         // If new value, set and fire action
-        if (SnapUtils.equals(val, getValue())) return;
+        if (Objects.equals(val, getValue())) return;
         setValue((T)val);
         fireActionEvent(null);
     }
@@ -201,12 +202,12 @@ public class Spinner <T> extends ParentView {
     {
         // Get Text value based as same current type of spinner
         Object oval = getValue(), nval = null; String str = _text.getText();
-        if (oval instanceof Integer) nval = SnapUtils.intValue(str);
-        else if (oval instanceof Long) nval = SnapUtils.longValue(str);
-        else if (oval instanceof Byte) nval = (byte)SnapUtils.intValue(str);
-        else if (oval instanceof Short) nval = (short)SnapUtils.intValue(str);
-        else if (oval instanceof Float) nval = SnapUtils.floatValue(str);
-        else if (oval instanceof Double) nval = SnapUtils.doubleValue(str);
+        if (oval instanceof Integer) nval = Convert.intValue(str);
+        else if (oval instanceof Long) nval = Convert.longValue(str);
+        else if (oval instanceof Byte) nval = (byte) Convert.intValue(str);
+        else if (oval instanceof Short) nval = (short) Convert.intValue(str);
+        else if (oval instanceof Float) nval = Convert.floatValue(str);
+        else if (oval instanceof Double) nval = Convert.doubleValue(str);
         else { System.err.println("Spinner: Unsuported value type: " + getValueClass()); return; }
 
         setValue((T)nval);

@@ -195,7 +195,7 @@ public class MenuItem extends ButtonBase implements Cloneable {
     public void setPropValue(String aPropName, Object aValue)
     {
         if (aPropName.equals("Value") || aPropName.equals(Selected_Prop))
-            setSelected(SnapUtils.boolValue(aValue));
+            setSelected(Convert.boolValue(aValue));
         else super.setPropValue(aPropName, aValue);
     }
 

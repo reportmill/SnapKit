@@ -5,7 +5,7 @@ import snap.geom.RoundRect;
 import snap.geom.Shape;
 import snap.gfx.GFXEnv;
 import snap.gfx.Painter;
-import snap.util.SnapUtils;
+import snap.util.Convert;
 import snap.view.*;
 
 /**
@@ -427,7 +427,7 @@ public class DevPaneViews extends ViewOwner {
             Object propValue = getValue();
             if (propValue instanceof Insets)
                 return ((Insets) propValue).getString();
-            return SnapUtils.stringValue(propValue);
+            return Convert.stringValue(propValue);
         }
     }
 

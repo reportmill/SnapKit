@@ -376,9 +376,9 @@ public class Stroke extends PropObject implements Cloneable, XMLArchiver.Archiva
         if (dashArray == null || dashArray.length == 0) return null;
 
         // Build dash array string
-        String str = SnapUtils.stringValue(dashArray[0]);
+        String str = Convert.stringValue(dashArray[0]);
         for (int i = 1; i < dashArray.length; i++)
-            str += aDelimiter + SnapUtils.stringValue(dashArray[i]);
+            str += aDelimiter + Convert.stringValue(dashArray[i]);
 
         // Return dash array string
         return str;
@@ -407,7 +407,7 @@ public class Stroke extends PropObject implements Cloneable, XMLArchiver.Archiva
         // Create dash array, parse doubles and return
         double[] dashArray = new double[dashStrings.length];
         for (int i = 0; i < dashStrings.length; i++)
-            dashArray[i] = SnapUtils.doubleValue(dashStrings[i]);
+            dashArray[i] = Convert.doubleValue(dashStrings[i]);
         return dashArray;
     }
 

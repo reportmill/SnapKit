@@ -90,7 +90,7 @@ public class DocView extends ParentView {
      */
     public void setPageMargin(Insets aIns)
     {
-        if(SnapUtils.equals(aIns, _pageMargin)) return;
+        if(Objects.equals(aIns, _pageMargin)) return;
         firePropChange(PageMargin_Prop, _pageMargin, _pageMargin = aIns);
     }
 

@@ -225,9 +225,9 @@ public class ReflectEffect extends Effect {
         switch (aPropName) {
 
             // ReflectHeight, FadeHeight, Gap
-            case ReflectHeight_Prop: setReflectHeight(SnapUtils.doubleValue(aValue)); break;
-            case FadeHeight_Prop: setFadeHeight(SnapUtils.doubleValue(aValue)); break;
-            case Gap_Prop: setGap(SnapUtils.doubleValue(aValue)); break;
+            case ReflectHeight_Prop: setReflectHeight(Convert.doubleValue(aValue)); break;
+            case FadeHeight_Prop: setFadeHeight(Convert.doubleValue(aValue)); break;
+            case Gap_Prop: setGap(Convert.doubleValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);

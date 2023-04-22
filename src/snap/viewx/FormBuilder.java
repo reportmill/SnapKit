@@ -5,7 +5,7 @@ package snap.viewx;
 import java.util.*;
 import snap.geom.Insets;
 import snap.gfx.*;
-import snap.util.SnapUtils;
+import snap.util.Convert;
 import snap.view.*;
 
 /**
@@ -293,7 +293,7 @@ public class FormBuilder extends ViewOwner {
     public String getStringValue(String aKey)
     {
         Object keyValue = getValue(aKey);
-        return SnapUtils.stringValue(keyValue);
+        return Convert.stringValue(keyValue);
     }
 
     /**

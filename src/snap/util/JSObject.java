@@ -74,7 +74,7 @@ public class JSObject extends JSValue {
     public String getStringValue(String aKey)
     {
         Object nativeValue = getNativeValue(aKey);
-        return SnapUtils.stringValue(nativeValue);
+        return Convert.stringValue(nativeValue);
     }
 
     /**

@@ -125,7 +125,7 @@ public class BlurEffect extends Effect {
         switch (aPropName) {
 
             // Radius
-            case Radius_Prop: _radius = SnapUtils.doubleValue(aValue); break;
+            case Radius_Prop: _radius = Convert.doubleValue(aValue); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);

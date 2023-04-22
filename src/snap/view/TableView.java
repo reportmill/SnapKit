@@ -126,7 +126,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public void setItems(List <T> theItems)
     {
         // If items already set, just return
-        if (ListUtils.equalsId(theItems, _items) || SnapUtils.equals(theItems, _items)) return;
+        if (ListUtils.equalsId(theItems, _items) || Objects.equals(theItems, _items)) return;
 
         // Set items
         _items.setAll(theItems);

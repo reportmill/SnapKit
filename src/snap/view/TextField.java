@@ -8,6 +8,8 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
 
+import java.util.Objects;
+
 /**
  * An view subclass for editing a single line of text.
  */
@@ -102,7 +104,7 @@ public class TextField extends ParentView {
      */
     public void setTextFill(Paint aPaint)
     {
-        if (SnapUtils.equals(aPaint, _textFill)) return;
+        if (Objects.equals(aPaint, _textFill)) return;
         firePropChange(TextFill_Prop, _textFill, _textFill = aPaint);
         repaint();
     }
@@ -139,7 +141,7 @@ public class TextField extends ParentView {
      */
     public void setPromptText(String aStr)
     {
-        if (SnapUtils.equals(aStr, _promptText)) return;
+        if (Objects.equals(aStr, _promptText)) return;
         _label.setText(aStr);
         _label.setTextFill(Color.LIGHTGRAY);
         firePropChange(PromptText_Prop, _promptText, _promptText = aStr);
@@ -367,7 +369,7 @@ public class TextField extends ParentView {
             _label.getStringView().setPaintable(length() == 0);
 
         // If focused and text has changed, updated Edited
-        if (isFocused() && !isEdited() && !SnapUtils.equals(getText(), _focusGainedText))
+        if (isFocused() && !isEdited() && !Objects.equals(getText(), _focusGainedText))
             setEdited(true);
 
         // Relayout parent and repaint

@@ -2,8 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
-import snap.util.SnapUtils;
-import snap.util.StringUtils;
 import java.util.*;
 
 /**
@@ -141,7 +139,7 @@ public class UndoSet {
         }
 
         // If values are equal, just return
-        if (SnapUtils.equals(anEvent.getOldValue(), anEvent.getNewValue()))
+        if (Objects.equals(anEvent.getOldValue(), anEvent.getNewValue()))
             return;
 
         // Add change

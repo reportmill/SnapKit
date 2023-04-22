@@ -114,7 +114,7 @@ public class WindowView extends ParentView {
      */
     public void setTitle(String aValue)
     {
-        if (SnapUtils.equals(aValue, _title)) return;
+        if (Objects.equals(aValue, _title)) return;
         firePropChange(Title_Prop, _title, _title = aValue);
     }
 
@@ -280,7 +280,7 @@ public class WindowView extends ParentView {
     public void setDocURL(WebURL aURL)
     {
         // If already set, just return
-        if (SnapUtils.equals(aURL, _docURL)) return;
+        if (Objects.equals(aURL, _docURL)) return;
 
         // Set
         _docURL = aURL;

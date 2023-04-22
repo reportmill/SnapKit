@@ -8,6 +8,8 @@ import snap.geom.Rect;
 import snap.gfx.*;
 import snap.util.*;
 
+import java.util.Objects;
+
 /**
  * A View subclass for images.
  */
@@ -117,7 +119,7 @@ public class ImageView extends View {
      */
     public void setImageName(String aName)
     {
-        if (SnapUtils.equals(aName, _imageName)) return;
+        if (Objects.equals(aName, _imageName)) return;
         firePropChange(ImageName_Prop, _imageName, _imageName = aName);
     }
 

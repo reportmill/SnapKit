@@ -8,6 +8,8 @@ import snap.gfx.*;
 import snap.util.*;
 import snap.view.*;
 
+import java.util.Objects;
+
 /**
  * This control view displays a color value and interacts with ColorPanel when selected.
  */
@@ -50,7 +52,7 @@ public class ColorWell extends View {
     public void setColor(Color aColor)
     {
         // If already set, just return
-        if (SnapUtils.equals(aColor, _color)) return;
+        if (Objects.equals(aColor, _color)) return;
 
         // Set value, fire prop change and repaint
         firePropChange(Color_Prop, _color, _color = aColor);

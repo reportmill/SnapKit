@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * This class provides general utility methods.
  */
-public class SnapUtils extends Convert {
+public class SnapUtils {
 
     // The current platform
     private static Platform platform = getPlatform();
@@ -108,14 +108,6 @@ public class SnapUtils extends Convert {
     }
 
     /**
-     * Returns whether two objects are equal (supports either being null).
-     */
-    public static boolean equals(Object obj1, Object obj2)
-    {
-        return Objects.equals(obj1, obj2);
-    }
-
-    /**
      * Returns result of comparing two values.
      */
     public static int compare(Object anObj1, Object anObj2)
@@ -134,7 +126,7 @@ public class SnapUtils extends Convert {
             return -((Comparable<Object>) anObj2).compareTo(anObj1);
 
         // Compare big decimal values
-        return getBigDecimal(anObj1).compareTo(getBigDecimal(anObj2));
+        return Convert.getBigDecimal(anObj1).compareTo(Convert.getBigDecimal(anObj2));
     }
 
     /**

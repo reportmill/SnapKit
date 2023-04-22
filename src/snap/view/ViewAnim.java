@@ -423,7 +423,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
         // Get start/end values (just return if they are equal)
         Object fromVal = getStartVal(aKey);
         Object toVal = getEndVal(aKey);
-        if (SnapUtils.equals(fromVal, toVal))
+        if (Objects.equals(fromVal, toVal))
             return fromVal;
 
         // Return value based on time
@@ -864,7 +864,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
             if (valStr.startsWith("#")) val = new Color(valStr);
             else if (valStr.equalsIgnoreCase("true")) val = Boolean.TRUE;
             else if (valStr.equalsIgnoreCase("false")) val = Boolean.FALSE;
-            else val = SnapUtils.doubleValue(valStr);
+            else val = Convert.doubleValue(valStr);
             anim.setValue(key, val);
         }
 

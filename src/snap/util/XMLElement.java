@@ -803,7 +803,7 @@ public class XMLElement implements Cloneable {
         aSB.append(getFullName());
 
         // Append namespace
-        if (!SnapUtils.equals(getNamespace(), aNameSpace)) {
+        if (!Objects.equals(getNamespace(), aNameSpace)) {
             aSB.append(' ').append("xmlns");
             String prfx = getPrefix();
             if (prfx != null) aSB.append(':').append(prfx);

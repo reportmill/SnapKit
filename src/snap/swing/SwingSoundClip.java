@@ -1,8 +1,7 @@
 package snap.swing;
-
 import java.io.*;
+import java.util.Objects;
 import javax.sound.sampled.*;
-
 import snap.gfx.SoundClip;
 import snap.util.SnapUtils;
 
@@ -369,7 +368,7 @@ public class SwingSoundClip extends SoundClip {
         if (anObj == this) return true;
         if (!(anObj instanceof SwingSoundClip)) return false;
         SwingSoundClip other = (SwingSoundClip) anObj;
-        if (!SnapUtils.equals(other._bytes, _bytes)) return false;
+        if (!Objects.equals(other._bytes, _bytes)) return false;
         return true;
     }
 

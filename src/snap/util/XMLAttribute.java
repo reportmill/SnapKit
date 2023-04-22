@@ -146,7 +146,7 @@ public class XMLAttribute implements Cloneable {
      */
     public int getIntValue()
     {
-        return SnapUtils.intValue(_value);
+        return Convert.intValue(_value);
     }
 
     /**
@@ -154,7 +154,7 @@ public class XMLAttribute implements Cloneable {
      */
     public float getFloatValue()
     {
-        return SnapUtils.floatValue(_value);
+        return Convert.floatValue(_value);
     }
 
     /**
@@ -162,7 +162,7 @@ public class XMLAttribute implements Cloneable {
      */
     public double getDoubleValue()
     {
-        return SnapUtils.doubleValue(_value);
+        return Convert.doubleValue(_value);
     }
 
     /**
@@ -170,7 +170,7 @@ public class XMLAttribute implements Cloneable {
      */
     public Number getNumberValue()
     {
-        return SnapUtils.numberValue(_value);
+        return Convert.numberValue(_value);
     }
 
     /**

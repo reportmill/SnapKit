@@ -356,27 +356,27 @@ public abstract class ViewEvent implements Cloneable {
     /**
      * Returns the String value encapsulated by the event widget.
      */
-    public String getStringValue()  { return SnapUtils.stringValue(getValue()); }
+    public String getStringValue()  { return Convert.stringValue(getValue()); }
 
     /**
      * Returns the Boolean value encapsulated by the event widget.
      */
-    public boolean getBoolValue()  { return SnapUtils.booleanValue(getValue()); }
+    public boolean getBoolValue()  { return Convert.booleanValue(getValue()); }
 
     /**
      * Returns the Boolean value encapsulated by the event widget.
      */
-    public Boolean getBooleanValue()  { return SnapUtils.booleanValue(getValue()); }
+    public Boolean getBooleanValue()  { return Convert.booleanValue(getValue()); }
 
     /**
      * Returns the Integer value encapsulated by the event widget.
      */
-    public Integer getIntValue()  { return SnapUtils.getInteger(getValue()); }
+    public Integer getIntValue()  { return Convert.getInteger(getValue()); }
 
     /**
      * Returns the Float value encapsulated by the event widget.
      */
-    public Float getFloatValue()  { return SnapUtils.getFloat(getValue()); }
+    public Float getFloatValue()  { return Convert.getFloat(getValue()); }
 
     /**
      * Returns text for encapsulated widget.

@@ -215,7 +215,7 @@ public class ConsoleView extends TextArea {
     {
         Object value = KeyChain.getValue(new Object(), aCommand);
         if (value instanceof Number)
-            value = SnapUtils.getBigDecimal(value);
+            value = Convert.getBigDecimal(value);
         return value.toString();
     }
 

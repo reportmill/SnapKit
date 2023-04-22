@@ -2,7 +2,7 @@ package snap.styler;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.util.SnapUtils;
+import snap.util.Convert;
 import snap.view.ComboBox;
 import snap.view.TitleView;
 import snap.view.ViewEvent;
@@ -36,7 +36,7 @@ public class FontTool extends StylerOwner {
         _fontSizeComboBox = getView("FontSizeComboBox", ComboBox.class);
         Number sizes[] = { 6, 8, 9, 10, 11, 12, 14, 16, 18, 22, 24, 36, 48, 64, 72, 96, 128, 144 };
         _fontSizeComboBox.setItems(sizes);
-        _fontSizeComboBox.setItemTextFunction(i -> SnapUtils.stringValue(i) + " pt");
+        _fontSizeComboBox.setItemTextFunction(i -> Convert.stringValue(i) + " pt");
 
         _titleView = getView("TextTitleView", TitleView.class);
         //textTitleView.setContent(_fontPanel.getUI());

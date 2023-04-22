@@ -118,7 +118,7 @@ public class PickList<E> extends AbstractList<E> implements Cloneable {
             sel = aSel.copyForSingleSel();
 
         // If already set, just return
-        if (SnapUtils.equals(sel, _sel)) return;
+        if (Objects.equals(sel, _sel)) return;
 
         // Set new Sel and fire prop change
         firePropChange(Sel_Prop, _sel, _sel = sel, -1);

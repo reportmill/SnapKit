@@ -3,6 +3,7 @@ import snap.geom.Pos;
 import snap.geom.Rect;
 import snap.gfx.*;
 import snap.props.PropChange;
+import snap.util.Convert;
 import snap.util.SnapUtils;
 import snap.view.*;
 
@@ -253,10 +254,10 @@ public class CameraView extends ParentView {
         switch (aPropName) {
 
             // Handle Yaw, Pitch, Roll, PrefGimbalRadius
-            case Yaw_Prop: setYaw(SnapUtils.doubleValue(aValue)); break;
-            case Pitch_Prop: setPitch(SnapUtils.doubleValue(aValue)); break;
-            case Roll_Prop: setRoll(SnapUtils.doubleValue(aValue)); break;
-            case PrefGimbalRadius_Prop: _camera.setPrefGimbalRadius(SnapUtils.doubleValue(aValue)); break;
+            case Yaw_Prop: setYaw(Convert.doubleValue(aValue)); break;
+            case Pitch_Prop: setPitch(Convert.doubleValue(aValue)); break;
+            case Roll_Prop: setRoll(Convert.doubleValue(aValue)); break;
+            case PrefGimbalRadius_Prop: _camera.setPrefGimbalRadius(Convert.doubleValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);

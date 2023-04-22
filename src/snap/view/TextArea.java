@@ -11,6 +11,8 @@ import snap.props.Undoer;
 import snap.text.*;
 import snap.util.*;
 
+import java.util.Objects;
+
 /**
  * A view subclass for displaying and editing a TextDoc (using TextBox).
  */
@@ -1843,7 +1845,7 @@ public class TextArea extends View {
             }
 
             // If focus lost and FocusGainedVal changed, fire action
-            else if (!SnapUtils.equals(_focusGainedText, getText()))
+            else if (!Objects.equals(_focusGainedText, getText()))
                 fireActionEvent(null);
         }
     }

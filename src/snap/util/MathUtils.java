@@ -223,7 +223,7 @@ public class MathUtils {
             return ((BigDecimal)aNumber).negate();
 
         // Return big decimal of negative double value
-        return new BigDecimal(-SnapUtils.doubleValue(aNumber));
+        return new BigDecimal(-Convert.doubleValue(aNumber));
     }
 
     /**
@@ -232,8 +232,8 @@ public class MathUtils {
     public static Number add(Number n1, Number n2)
     {
         // Try subtracting as BigDecimal (can fail if either are NaN or neg/pos infinity), otherwise add as doubles
-        try { return SnapUtils.getBigDecimal(n1).add(SnapUtils.getBigDecimal(n2)); }
-        catch(Exception e) { return SnapUtils.doubleValue(n1) + SnapUtils.doubleValue(n2); }
+        try { return Convert.getBigDecimal(n1).add(Convert.getBigDecimal(n2)); }
+        catch(Exception e) { return Convert.doubleValue(n1) + Convert.doubleValue(n2); }
     }
 
     /**
@@ -242,8 +242,8 @@ public class MathUtils {
     public static Number subtract(Number n1, Number n2)
     {
         // Try subtracting as BigDecimal (can fail if either are NaN or neg/pos infinity), otherwise subtract as doubles
-        try { return SnapUtils.getBigDecimal(n1).subtract(SnapUtils.getBigDecimal(n2)); }
-        catch(Exception e) { return SnapUtils.doubleValue(n1) - SnapUtils.doubleValue(n2); }
+        try { return Convert.getBigDecimal(n1).subtract(Convert.getBigDecimal(n2)); }
+        catch(Exception e) { return Convert.doubleValue(n1) - Convert.doubleValue(n2); }
     }
 
     /**
@@ -252,8 +252,8 @@ public class MathUtils {
     public static Number multiply(Number n1, Number n2)
     {
         // Try multiplying as BigDecimals (can fail if either are NaN or neg/pos infinity), otherwise, multiply as doubles
-        try { return SnapUtils.getBigDecimal(n1).multiply(SnapUtils.getBigDecimal(n2)); }
-        catch(Exception e) { return SnapUtils.doubleValue(n1)*SnapUtils.doubleValue(n2); }
+        try { return Convert.getBigDecimal(n1).multiply(Convert.getBigDecimal(n2)); }
+        catch(Exception e) { return Convert.doubleValue(n1)*Convert.doubleValue(n2); }
     }
 
     /**
@@ -263,15 +263,15 @@ public class MathUtils {
     {
         // Try dividing as BigDecimals (can fail if either are NaN or neg/pos infinity)
         try {
-            BigDecimal dec1 = SnapUtils.getBigDecimal(n1);
-            BigDecimal dec2 = SnapUtils.getBigDecimal(n2);
+            BigDecimal dec1 = Convert.getBigDecimal(n1);
+            BigDecimal dec2 = Convert.getBigDecimal(n2);
             return dec1.divide(dec2, 16, BigDecimal.ROUND_HALF_DOWN);
         }
 
         // Otherwise, divide as doubles
         catch(Exception e) {
-            double d1 = SnapUtils.doubleValue(n1);
-            double d2 = SnapUtils.doubleValue(n2);
+            double d1 = Convert.doubleValue(n1);
+            double d2 = Convert.doubleValue(n2);
             if (d2==0)
                 return d1>=0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
             return d1/d2;

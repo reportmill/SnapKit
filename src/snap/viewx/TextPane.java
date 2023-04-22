@@ -9,7 +9,7 @@ import snap.props.PropChange;
 import snap.text.TextBoxLine;
 import snap.text.TextDoc;
 import snap.text.TextSel;
-import snap.util.SnapUtils;
+import snap.util.Convert;
 import snap.view.*;
 
 /**
@@ -347,7 +347,7 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
         String lineNumStr = dialogBox.showInputDialog(getUI(), Integer.toString(selStartLineIndex));
 
         // Get LineIndex from response
-        int lineIndex = lineNumStr != null ? SnapUtils.intValue(lineNumStr) - 1 : -1;
+        int lineIndex = lineNumStr != null ? Convert.intValue(lineNumStr) - 1 : -1;
         if (lineIndex < 0)
             lineIndex = 0;
         else if (lineIndex >= textArea.getLineCount())

@@ -8,7 +8,7 @@ import snap.geom.Pos;
 import snap.geom.VPos;
 import snap.gfx.Painter;
 import snap.props.PropChange;
-import snap.util.SnapUtils;
+import snap.util.Convert;
 import snap.view.View;
 import snap.view.ViewAnim;
 import snap.view.ViewEvent;
@@ -307,10 +307,10 @@ public class CubeView extends View {
         switch (aPropName) {
 
             // Handle Yaw, Pitch, Roll, PrefGimbalRadius
-            case Yaw_Prop: setYaw(SnapUtils.doubleValue(aValue)); break;
-            case Pitch_Prop: setPitch(SnapUtils.doubleValue(aValue)); break;
-            case Roll_Prop: setRoll(SnapUtils.doubleValue(aValue)); break;
-            case PrefGimbalRadius_Prop: _camera.setPrefGimbalRadius(SnapUtils.doubleValue(aValue)); break;
+            case Yaw_Prop: setYaw(Convert.doubleValue(aValue)); break;
+            case Pitch_Prop: setPitch(Convert.doubleValue(aValue)); break;
+            case Roll_Prop: setRoll(Convert.doubleValue(aValue)); break;
+            case PrefGimbalRadius_Prop: _camera.setPrefGimbalRadius(Convert.doubleValue(aValue)); break;
 
             // Do normal version
             default: super.setPropValue(aPropName, aValue);

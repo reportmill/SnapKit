@@ -70,7 +70,7 @@ public class StringView extends View implements Cloneable {
     {
         // if already set, just return
         String old = getText();
-        if (SnapUtils.equals(aValue, old)) return;
+        if (Objects.equals(aValue, old)) return;
 
         // Set new value, fire prop change, relayout and return
         _styledString.setString(aValue);

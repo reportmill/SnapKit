@@ -3,11 +3,11 @@
  */
 package snap.text;
 import java.util.Map;
-
+import java.util.Objects;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.util.SnapUtils;
+import snap.util.Convert;
 
 /**
  * A class to hold style attributes for a text run.
@@ -154,14 +154,14 @@ public class TextStyle implements Cloneable {
     {
         if (anObj == this) return true;
         TextStyle other = anObj instanceof TextStyle ? (TextStyle) anObj : null; if (other == null) return false;
-        if (!SnapUtils.equals(other.getFont(), getFont())) return false;
-        if (!SnapUtils.equals(other.getColor(), getColor())) return false;
-        if (!SnapUtils.equals(other.getFormat(), getFormat())) return false;
+        if (!Objects.equals(other.getFont(), getFont())) return false;
+        if (!Objects.equals(other.getColor(), getColor())) return false;
+        if (!Objects.equals(other.getFormat(), getFormat())) return false;
         if (other._underline != _underline) return false;
         if (other._scripting != _scripting) return false;
         if (other._charSpacing != _charSpacing) return false;
-        if (!SnapUtils.equals(other.getBorder(), getBorder())) return false;
-        if (!SnapUtils.equals(other.getLink(), getLink())) return false;
+        if (!Objects.equals(other.getBorder(), getBorder())) return false;
+        if (!Objects.equals(other.getLink(), getLink())) return false;
         return true;
     }
 
@@ -244,11 +244,11 @@ public class TextStyle implements Cloneable {
         else if (aKey.equals(COLOR_KEY))
             _color = (Color) aValue;
         else if (aKey.equals(UNDERLINE_KEY))
-            _underline = SnapUtils.intValue(aValue);
+            _underline = Convert.intValue(aValue);
         else if (aKey.equals(SCRIPTING_KEY))
-            _scripting = SnapUtils.intValue(aValue);
+            _scripting = Convert.intValue(aValue);
         else if (aKey.equals(CHAR_SPACING_KEY))
-            _charSpacing = SnapUtils.doubleValue(aValue);
+            _charSpacing = Convert.doubleValue(aValue);
         else if (aKey.equals(FORMAT_KEY))
             _format = (TextFormat)aValue;
         else if (aKey.equals(BORDER_KEY))

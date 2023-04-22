@@ -5,6 +5,8 @@ package snap.web;
 import snap.props.PropObject;
 import snap.util.*;
 
+import java.util.Objects;
+
 /**
  * A class to hold basic information for a generic file.
  */
@@ -141,7 +143,7 @@ public class FileHeader extends PropObject {
      */
     public void setMimeType(String aMIMEType)
     {
-        if (SnapUtils.equals(aMIMEType, _mimeType)) return;
+        if (Objects.equals(aMIMEType, _mimeType)) return;
         firePropChange(MIMEType_Prop, _mimeType, _mimeType = aMIMEType);
     }
 

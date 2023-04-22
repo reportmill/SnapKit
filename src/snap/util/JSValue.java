@@ -53,7 +53,7 @@ public class JSValue {
      */
     public String getValueAsString()
     {
-        return SnapUtils.stringValue(_value);
+        return Convert.stringValue(_value);
     }
 
     /**

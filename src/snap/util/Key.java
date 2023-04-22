@@ -153,7 +153,7 @@ public class Key {
      */
     public static int getIntValue(Object anObj, String aKey)
     {
-        return SnapUtils.intValue(getValue(anObj, aKey));
+        return Convert.intValue(getValue(anObj, aKey));
     }
 
     /**
@@ -161,7 +161,7 @@ public class Key {
      */
     public static String getStringValue(Object anObj, String aKey)
     {
-        return SnapUtils.stringValue(getValue(anObj, aKey));
+        return Convert.stringValue(getValue(anObj, aKey));
     }
 
     /**

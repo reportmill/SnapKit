@@ -3,6 +3,7 @@
  */
 package snap.gfx;
 import java.util.Arrays;
+import java.util.Objects;
 
 import snap.geom.Point;
 import snap.geom.Rect;
@@ -449,7 +450,7 @@ public class GradientPaint implements Paint, Cloneable, XMLArchiver.Archivable {
         {
             if (anObj==this) return true;
             Stop other = anObj instanceof Stop ? (Stop)anObj : null; if (other == null) return false;
-            return SnapUtils.equals(_color, other._color) && MathUtils.equals(_offset, other._offset);
+            return Objects.equals(_color, other._color) && MathUtils.equals(_offset, other._offset);
         }
 
         /** Standard to string implementation. */

@@ -4,9 +4,8 @@
 package snap.props;
 import snap.geom.Insets;
 import snap.gfx.Color;
+import snap.util.Convert;
 import snap.util.EnumUtils;
-import snap.util.SnapUtils;
-
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -134,7 +133,7 @@ public class StringCodec {
         if (anObj instanceof Boolean)
             return anObj.toString();
         if (anObj instanceof Number)
-            return SnapUtils.stringValue(anObj);
+            return Convert.stringValue(anObj);
 
         // Handle String[]
         if (anObj instanceof String[])
@@ -197,13 +196,13 @@ public class StringCodec {
 
         // Handle boolean, int, float, double
         if (aClass == boolean.class || aClass == Boolean.class)
-            return (T) SnapUtils.booleanValue(aString);
+            return (T) Convert.booleanValue(aString);
         if (aClass == int.class || aClass == Integer.class)
-            return (T) SnapUtils.getInteger(aString);
+            return (T) Convert.getInteger(aString);
         if (aClass == float.class || aClass == Float.class)
-            return (T) SnapUtils.getFloat(aString);
+            return (T) Convert.getFloat(aString);
         if (aClass == double.class || aClass == Double.class)
-            return (T) SnapUtils.getDouble(aString);
+            return (T) Convert.getDouble(aString);
 
         // Handle String[]
         if (aClass == String[].class)

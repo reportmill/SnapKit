@@ -8,6 +8,8 @@ import snap.gfx.Font;
 import snap.props.PropChange;
 import snap.util.*;
 
+import java.util.Objects;
+
 /**
  * This class represents a block of text (lines).
  */
@@ -227,26 +229,26 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
                 TextRun run = line.getRun(i);
 
                 // If font changed for run, write font element
-                if (!SnapUtils.equals(font, run.getFont())) {
+                if (!Objects.equals(font, run.getFont())) {
                     font = run.getFont();
                     e.add(anArchiver.toXML(font));
                 }
 
                 // If color changed for run, write color
-                if (!SnapUtils.equals(color, run.getColor())) {
+                if (!Objects.equals(color, run.getColor())) {
                     color = run.getColor();
                     e.add(anArchiver.toXML(color));
                 }
 
                 // If format changed for run, write format
-                if (!SnapUtils.equals(format, run.getFormat())) {
+                if (!Objects.equals(format, run.getFormat())) {
                     format = run.getFormat();
                     if (format == null) e.add(new XMLElement("format"));
                     else e.add(anArchiver.toXML(format));
                 }
 
                 // If paragraph style changed for run, write paragraph
-                if (!SnapUtils.equals(lstyle, line.getLineStyle())) {
+                if (!Objects.equals(lstyle, line.getLineStyle())) {
                     lstyle = line.getLineStyle();
                     e.add(anArchiver.toXML(lstyle));
                 }
@@ -259,7 +261,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
                 }
 
                 // If border changed, write border
-                if (!SnapUtils.equals(border, run.getBorder())) {
+                if (!Objects.equals(border, run.getBorder())) {
                     border = run.getBorder();
                     e.add(new XMLElement("TextBorder"));
                     if (border != null) {
