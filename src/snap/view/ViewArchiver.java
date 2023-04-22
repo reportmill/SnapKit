@@ -127,8 +127,6 @@ public class ViewArchiver extends XMLArchiver {
         cmap.put("ScrollView", ScrollView.class);
         cmap.put("Separator", Separator.class);
         cmap.put("Slider", Slider.class);
-        cmap.put("SnapActor", snap.viewx.SnapActor.class);
-        cmap.put("SnapScene", snap.viewx.SnapScene.class);
         cmap.put("Spinner", Spinner.class);
         cmap.put("SplitView", SplitView.class);
         cmap.put("SpringView", SpringView.class);
