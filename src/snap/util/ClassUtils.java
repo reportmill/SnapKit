@@ -258,7 +258,7 @@ public class ClassUtils {
     /**
      * Returns whether a given primitive class could be assigned a value from the second given class.
      */
-    public static boolean isAssignablePrimitive(Class aClass1, Class aClass2)
+    private static boolean isAssignablePrimitive(Class aClass1, Class aClass2)
     {
         // Get primitives
         Class c1 = toPrimitive(aClass1);
