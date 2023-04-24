@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<SpringView width="330" height="220" PrefWidth="330" PrefHeight="220">
-  <Label x="5" y="3" width="131" height="20" text="Not in Dictionary:" />
-  <TextField Name="WordText" x="5" y="23" width="215" height="22" GrowWidth="true" />
-  <ListView Name="SuggestionList" x="5" y="68" width="215" height="147" GrowWidth="true" GrowHeight="true">
-    <font name="Arial" size="12" />
-  </ListView>
-  <Label x="5" y="46" width="131" height="20" text="Suggestions:" />
-  <Button Name="FindNextButton" x="230" y="23" width="90" height="22" LeanX="RIGHT" text="Find Next" />
-  <Button Name="CorrectButton" x="230" y="55" width="90" height="22" LeanX="RIGHT" text="Correct" />
-  <Button Name="LearnButton" x="230" y="88" width="90" height="22" LeanX="RIGHT" text="Learn" />
-  <Button Name="CloseButton" x="230" y="193" width="90" height="22" LeanX="RIGHT" LeanY="BOTTOM" text="Close" />
-</SpringView>
+<RowView PrefWidth="330" PrefHeight="220" FillHeight="true">
+  <ColView Margin="5" GrowWidth="true">
+    <Label Margin="0,5,5,5" PrefWidth="131" PrefHeight="20" text="Not in Dictionary:" />
+    <TextField Name="WordText" Margin="5" PrefWidth="215" PrefHeight="22" GrowWidth="true" />
+    <Label Margin="5" PrefWidth="131" PrefHeight="20" text="Suggestions:" />
+    <ListView Name="SuggestionList" Margin="5" PrefWidth="215" PrefHeight="147" GrowWidth="true" GrowHeight="true">
+      <Font Name="Arial" Size="12" />
+    </ListView>
+  </ColView>
+  <ColView Margin="5" Spacing="5">
+    <Button Name="FindNextButton" Margin="10" PrefWidth="90" PrefHeight="22" Text="Find Next" />
+    <Button Name="CorrectButton" Margin="10" PrefWidth="90" PrefHeight="22" Text="Correct" />
+    <Button Name="LearnButton" Margin="10" PrefWidth="90" PrefHeight="22" Text="Learn" />
+    <Button Name="CloseButton" Margin="10" PrefWidth="90" PrefHeight="22" LeanY="BOTTOM" Text="Close" />
+  </ColView>
+</RowView>
