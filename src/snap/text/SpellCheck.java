@@ -70,6 +70,7 @@ public class SpellCheck {
      */
     public static void setSharedClass(Class<? extends SpellCheck> aClass)
     {
+        if (aClass == _sharedClass) return;
         _sharedClass = aClass;
         _shared = null;
     }
