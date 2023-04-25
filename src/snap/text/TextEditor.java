@@ -10,31 +10,27 @@ import snap.gfx.Stroke;
 import snap.view.*;
 
 /**
- * This class provides all of the event and drawing code necessary to edit text in the form of a RichText.
- * (separated from an actual UI View).
- *
- * Current this just subclasses TextArea. But if there's a problem referencing View package, this class could instead
- * use all the code from TextArea, and have TextArea encapsulate one of these instead.
+ * This class provides the event and drawing code necessary to edit text in a TextDoc.
  */
 public class TextEditor extends TextArea {
 
     /**
-     * Sets whether TextEditor is showing and focused.
+     * Constructor.
      */
-    public void setActive(boolean aValue)
+    public TextEditor()
     {
-        setShowing(aValue);
-        setFocused(aValue);
+        super();
     }
-    /**
-     * Returns the character spacing of the current selection or cursor.
-     */
-    public float getCharSpacing()  { return (float)getSelStyle().getCharSpacing(); }
 
     /**
      * Returns the character spacing of the current selection or cursor.
      */
-    public void setCharSpacing(float aValue)
+    public double getCharSpacing()  { return getSelStyle().getCharSpacing(); }
+
+    /**
+     * Returns the character spacing of the current selection or cursor.
+     */
+    public void setCharSpacing(double aValue)
     {
         setSelStyleValue(TextStyle.CHAR_SPACING_KEY, aValue);
     }
@@ -47,7 +43,7 @@ public class TextEditor extends TextArea {
     /**
      * Sets the line spacing for current selection.
      */
-    public void setLineSpacing(float aHeight)
+    public void setLineSpacing(double aHeight)
     {
         setSelLineStyleValue(TextLineStyle.SPACING_FACTOR_KEY, aHeight);
     }
@@ -73,7 +69,7 @@ public class TextEditor extends TextArea {
     /**
      * Sets the min line height for current selection.
      */
-    public void setLineHeightMin(float aHeight)
+    public void setLineHeightMin(double aHeight)
     {
         setSelLineStyleValue(TextLineStyle.MIN_HEIGHT_KEY, aHeight);
     }
@@ -86,9 +82,18 @@ public class TextEditor extends TextArea {
     /**
      * Sets the maximum line height for a line of text (even if font size would dictate higher).
      */
-    public void setLineHeightMax(float aHeight)
+    public void setLineHeightMax(double aHeight)
     {
         setSelLineStyleValue(TextLineStyle.MIN_HEIGHT_KEY, aHeight);
+    }
+
+    /**
+     * Sets whether TextEditor is showing and focused.
+     */
+    public void setActive(boolean aValue)
+    {
+        setShowing(aValue);
+        setFocused(aValue);
     }
 
     /**
@@ -100,7 +105,7 @@ public class TextEditor extends TextArea {
         Shape path = getSelPath();
 
         // If empty selection, draw caret
-        if(isSelEmpty() && path!=null) {
+        if(isSelEmpty() && path != null) {
             if (isShowCaret()) {
                 aPntr.setColor(Color.BLACK);
                 aPntr.setStroke(Stroke.Stroke1); // Set color and stroke of cursor
@@ -117,11 +122,11 @@ public class TextEditor extends TextArea {
         }
 
         // If spell checking, get path for misspelled words and draw
-        if (isSpellChecking() && length()>0) {
-            Shape spath = getSpellingPath();
-            if(spath!=null) {
+        if (isSpellChecking() && length() > 0) {
+            Shape spellingPath = getSpellingPath();
+            if(spellingPath != null) {
                 aPntr.setColor(Color.RED); aPntr.setStroke(Stroke.StrokeDash1);
-                aPntr.draw(spath);
+                aPntr.draw(spellingPath);
                 aPntr.setColor(Color.BLACK); aPntr.setStroke(Stroke.Stroke1);
             }
         }

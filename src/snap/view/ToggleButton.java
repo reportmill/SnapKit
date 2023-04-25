@@ -79,7 +79,7 @@ public class ToggleButton extends ButtonBase {
     protected void fireActionEvent(ViewEvent anEvent)
     {
         // Toggle Selected property (unless ToggleGroup is set and doesn't allow it)
-        if (getGroupName() == null || getToggleGroup().isAllowEmpty() && isSelected())
+        if (getGroupName() == null || getToggleGroup().isAllowEmpty() || !isSelected())
             setSelected(!isSelected());
 
         // Do normal version
