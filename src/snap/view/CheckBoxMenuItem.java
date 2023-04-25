@@ -17,6 +17,27 @@ public class CheckBoxMenuItem extends MenuItem {
     private static final int CHECKBOX_GRAPHIC_INSET_ALL = DEFAULT_BUTTON_PAD + CHECKBOX_GRAPHIC_WIDTH + CHECKBOX_GRAPHIC_SPACING;
 
     /**
+     * Constructor.
+     */
+    public CheckBoxMenuItem()
+    {
+        super();
+    }
+
+    /**
+     * Override to toggle Selected state.
+     */
+    @Override
+    protected void fireActionEvent(ViewEvent anEvent)
+    {
+        // Toggle Selected property
+        setSelected(!isSelected());
+
+        // Do normal version
+        super.fireActionEvent(anEvent);
+    }
+
+    /**
      * Paint Button.
      */
     @Override

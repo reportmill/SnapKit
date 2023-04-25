@@ -22,12 +22,12 @@ public class ToggleButton extends ButtonBase {
     public static final String Group_Prop = "Group";
     
     /**
-     * Creates a new ToggleButton.
+     * Constructor.
      */
     public ToggleButton()  { }
 
     /**
-     * Creates a new ToggleButton with given text.
+     * Constructor with given text.
      */
     public ToggleButton(String aStr)
     {
@@ -75,10 +75,11 @@ public class ToggleButton extends ButtonBase {
     /**
      * Override to toggle Selected state (if no ToggleGroup or not selected).
      */
+    @Override
     protected void fireActionEvent(ViewEvent anEvent)
     {
         // Toggle Selected property (unless ToggleGroup is set and doesn't allow it)
-        if (getGroupName() == null || getToggleGroup().isAllowEmpty() || !isSelected())
+        if (getGroupName() == null || getToggleGroup().isAllowEmpty() && isSelected())
             setSelected(!isSelected());
 
         // Do normal version
