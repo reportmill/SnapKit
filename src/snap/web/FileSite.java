@@ -51,7 +51,7 @@ public class FileSite extends WebSite {
 
         // If directory, configure directory info and return
         else {
-            List<FileHeader> fileHeaders = getFileHeaders(filePath, file);
+            FileHeader[] fileHeaders = getFileHeaders(filePath, file);
             aResp.setFileHeaders(fileHeaders);
         }
     }
@@ -68,7 +68,7 @@ public class FileSite extends WebSite {
         String path = aPath;
         try {
             String canonicalPath = file.getCanonicalPath();
-            if (canonicalPath != null && !canonicalPath.endsWith(path) && StringUtils.endsWithIC(canonicalPath, path))
+            if (!canonicalPath.endsWith(path) && StringUtils.endsWithIC(canonicalPath, path))
                 path = canonicalPath.substring(canonicalPath.length() - path.length());
         }
         catch(Exception e) { System.err.println("FileSite.getFileHeader:" + e); }
@@ -83,12 +83,14 @@ public class FileSite extends WebSite {
     /**
      * Returns the child file headers at given path.
      */
-    protected List <FileHeader> getFileHeaders(String aPath, File aFile)
+    protected FileHeader[] getFileHeaders(String aPath, File aFile)
     {
         // Get java file children (if null, just return)
         File[] dirFiles = aFile.listFiles();
-        if (dirFiles == null)
-            return null;
+        if (dirFiles == null) {
+            System.err.println("FileSite.getFileHeaders: error from list files for file: " + aFile.getPath());
+            return new FileHeader[0];
+        }
 
         // Create return list
         List<FileHeader> fileHeaders = new ArrayList<>(dirFiles.length);
@@ -107,7 +109,7 @@ public class FileSite extends WebSite {
         }
 
         // Return
-        return fileHeaders;
+        return fileHeaders.toArray(new FileHeader[0]);
     }
 
     /**
@@ -128,11 +130,14 @@ public class FileSite extends WebSite {
 
         // Make sure parent directories exist
         File fileDir = file.getParentFile();
-        fileDir.mkdirs();
+        if (!fileDir.mkdirs())
+            System.err.println("FileSite.doPut: Error creating parent dir: " + fileDir.getPath());
 
         // If directory, create
-        if (wfile != null && wfile.isDir())
-            file.mkdir();
+        if (wfile != null && wfile.isDir()) {
+            if (!file.mkdir())
+                System.err.println("FileSite.doPut: Error creating dir: " + file.getPath());
+        }
 
         // Otherwise, write bytes
         else {
@@ -166,7 +171,8 @@ public class FileSite extends WebSite {
     protected void setModTimeForFile(WebFile aFile, long aTime)
     {
         File file = aFile.getJavaFile();
-        file.setLastModified(aTime);
+        if (!file.setLastModified(aTime))
+            System.err.println("FileSite.setModTimeForFile: Error setting mod time for file: " + file.getPath());
     }
 
     /**
