@@ -60,6 +60,7 @@ public class FilePanel extends ViewOwner {
 
     // Constants for properties
     public static final String ConfirmEnabled_Prop = "ConfirmEnabled";
+    public static final String SelSite_Prop = "SelSite";
 
     /**
      * Constructor.
@@ -160,7 +161,7 @@ public class FilePanel extends ViewOwner {
         if (aSite == _selSite) return;
 
         // Set site
-        _selSite = aSite;
+        firePropChange(SelSite_Prop, _selSite, _selSite = aSite);
 
         // Get/set FilesPane
         if (isUISet()) {
