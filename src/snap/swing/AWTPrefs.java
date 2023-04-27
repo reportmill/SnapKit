@@ -1,9 +1,6 @@
 package snap.swing;
-
-import java.security.AccessControlException;
 import java.util.*;
 import java.util.prefs.*;
-
 import snap.util.*;
 
 /**
@@ -15,10 +12,7 @@ public class AWTPrefs extends Prefs {
     private Preferences _prefs;
 
     // The shared AWT Prefs
-    private static Map<String, AWTPrefs> _shared = new HashMap();
-
-    // A special preferences instance to use if we don't have preferences permissions
-    private static Preferences _bogus = null;
+    private static Map<String, AWTPrefs> _shared = new HashMap<>();
 
     /**
      * Creates new AWTPrefs.
@@ -26,14 +20,11 @@ public class AWTPrefs extends Prefs {
     private AWTPrefs(String aName)
     {
         // Get root prefs
-        try {
-            _prefs = Preferences.userRoot();
-        } catch (AccessControlException ex) {
-            _prefs = getBogus();
-        }
+        _prefs = Preferences.userRoot();
 
         // Get named prefs
-        if (aName != null) _prefs = _prefs.node(aName);
+        if (aName != null)
+            _prefs = _prefs.node(aName);
     }
 
     /**
@@ -51,15 +42,15 @@ public class AWTPrefs extends Prefs {
         if (aDefault instanceof String)
             return _prefs.get(aKey, (String) aDefault);
         else if (aDefault instanceof Boolean)
-            return _prefs.getBoolean(aKey, ((Boolean) aDefault).booleanValue());
+            return _prefs.getBoolean(aKey, (Boolean) aDefault);
         else if (aDefault instanceof Float)
-            return _prefs.getFloat(aKey, ((Float) aDefault).floatValue());
+            return _prefs.getFloat(aKey, (Float) aDefault);
         else if (aDefault instanceof Double)
-            return _prefs.getDouble(aKey, ((Double) aDefault).doubleValue());
+            return _prefs.getDouble(aKey, (Double) aDefault);
         else if (aDefault instanceof Integer)
-            return _prefs.getInt(aKey, ((Integer) aDefault).intValue());
+            return _prefs.getInt(aKey, (Integer) aDefault);
         else if (aDefault instanceof Long)
-            return _prefs.getLong(aKey, ((Long) aDefault).longValue());
+            return _prefs.getLong(aKey, (Long) aDefault);
         else if (aDefault instanceof Enum)
             return _prefs.get(aKey, aDefault.toString());
 
@@ -77,15 +68,15 @@ public class AWTPrefs extends Prefs {
         if (aValue instanceof String)
             _prefs.put(aKey, (String) aValue);
         else if (aValue instanceof Boolean)
-            _prefs.putBoolean(aKey, ((Boolean) aValue).booleanValue());
+            _prefs.putBoolean(aKey, (Boolean) aValue);
         else if (aValue instanceof Float)
-            _prefs.putFloat(aKey, ((Float) aValue).floatValue());
+            _prefs.putFloat(aKey, (Float) aValue);
         else if (aValue instanceof Double)
-            _prefs.putDouble(aKey, ((Double) aValue).doubleValue());
+            _prefs.putDouble(aKey, (Double) aValue);
         else if (aValue instanceof Integer)
-            _prefs.putInt(aKey, ((Integer) aValue).intValue());
+            _prefs.putInt(aKey, (Integer) aValue);
         else if (aValue instanceof Long)
-            _prefs.putLong(aKey, ((Long) aValue).longValue());
+            _prefs.putLong(aKey, (Long) aValue);
         else if (aValue instanceof Enum)
             _prefs.put(aKey, aValue.toString());
         else if (aValue == null)
@@ -138,12 +129,8 @@ public class AWTPrefs extends Prefs {
      */
     public String[] getKeys()
     {
-        try {
-            return _prefs.keys();
-        } catch (Exception e) {
-            System.err.println(e);
-            return new String[0];
-        }
+        try { return _prefs.keys(); }
+        catch (Exception e) { System.err.println(e.getMessage()); return new String[0]; }
     }
 
     /**
@@ -159,11 +146,8 @@ public class AWTPrefs extends Prefs {
      */
     public void flush()
     {
-        try {
-            _prefs.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        try { _prefs.flush(); }
+        catch (Exception e) { e.printStackTrace(); }
     }
 
     /**
@@ -171,11 +155,8 @@ public class AWTPrefs extends Prefs {
      */
     public void clear()
     {
-        try {
-            _prefs.removeNode();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        try { _prefs.removeNode(); }
+        catch (Exception e) { e.printStackTrace(); }
     }
 
     /**
@@ -183,76 +164,14 @@ public class AWTPrefs extends Prefs {
      */
     public static AWTPrefs getPrefs(String aName)
     {
+        // Get named prefs from cache, just return if found
         AWTPrefs prefs = _shared.get(aName);
-        if (prefs == null)
-            _shared.put(aName, prefs = new AWTPrefs(aName));
+        if (prefs != null)
+            return prefs;
+
+        // Create, add to cache and return
+        prefs = new AWTPrefs(aName);
+        _shared.put(aName, prefs);
         return prefs;
-    }
-
-    /**
-     * Returns a shared bogus preferences instance.
-     */
-    private static Preferences getBogus()
-    {
-        if (_bogus != null) return _bogus;
-        _bogus = new BogusPrefs(null, "");
-        return _bogus;
-    }
-
-    /**
-     * A Preferences implementation that just stores prefs to a map, in case we don't have permission
-     * to read & write permissions.
-     */
-    private static class BogusPrefs extends AbstractPreferences {
-
-        Map _store = new HashMap();
-
-        public BogusPrefs(AbstractPreferences parent, String name)
-        {
-            super(parent, name);
-        }
-
-        protected void syncSpi() throws BackingStoreException
-        {
-        }
-
-        protected void flushSpi() throws BackingStoreException
-        {
-        }
-
-        protected void removeSpi(String key)
-        {
-            _store.remove(key);
-        }
-
-        protected void removeNodeSpi() throws BackingStoreException
-        {
-            _store.clear();
-        }
-
-        protected void putSpi(String key, String value)
-        {
-            _store.put(key, value);
-        }
-
-        protected String[] keysSpi() throws BackingStoreException
-        {
-            return (String[]) _store.keySet().toArray();
-        }
-
-        protected String getSpi(String key)
-        {
-            return (String) _store.get(key);
-        }
-
-        protected AbstractPreferences childSpi(String name)
-        {
-            return this;
-        }
-
-        protected String[] childrenNamesSpi() throws BackingStoreException
-        {
-            return null;
-        }
     }
 }

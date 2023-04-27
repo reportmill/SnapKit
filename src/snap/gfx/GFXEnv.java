@@ -4,7 +4,6 @@
 package snap.gfx;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.function.Consumer;
 import snap.util.*;
 import snap.web.*;
 
@@ -34,8 +33,11 @@ public abstract class GFXEnv {
         // Get class name for platform GFXEnv
         String className = SnapUtils.getPlatform() == SnapUtils.Platform.TEAVM ? "snaptea.TV" : "snap.swing.AWTEnv";
 
-        // Try Swing
-        try { Class.forName(className).newInstance(); }
+        // Get GFXEnv class and create instance to set
+        try {
+            Class<?> envClass = Class.forName(className);
+            ClassUtils.newInstance(envClass);
+        }
         catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set GFXEnv " + className + ", " + e); }
     }
 

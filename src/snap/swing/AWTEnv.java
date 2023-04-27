@@ -134,9 +134,9 @@ public class AWTEnv extends GFXEnv {
     {
         // Get file
         if (aSource instanceof WebFile)
-            aSource = ((WebFile)aSource).getJavaFile();
+            aSource = ((WebFile) aSource).getJavaFile();
         if (aSource instanceof WebURL)
-            aSource = ((WebURL)aSource).getJavaURL();
+            aSource = ((WebURL) aSource).getJavaURL();
         File file = FileUtils.getFile(aSource);
 
         // Open with Desktop API
@@ -149,12 +149,15 @@ public class AWTEnv extends GFXEnv {
      */
     public void openURL(Object aSource)
     {
-        // Get URL string
-        WebURL url = WebURL.getURL(aSource);
-        String urls = url != null? url.getString() : null;
+        // Get URL/URI and open with Desktop API
+        try {
+            WebURL url = WebURL.getURL(aSource);
+            String urlStr = url != null ? url.getString() : null;
+            URI uri = urlStr != null ? new URI(urlStr) : null;
+            Desktop.getDesktop().browse(uri);
+        }
 
-        // Open with Desktop API
-        try { Desktop.getDesktop().browse(new URI(urls)); }
+        // If something goes wrong, just complain
         catch(Throwable e) { System.err.println(e.getMessage()); }
     }
 
@@ -165,9 +168,9 @@ public class AWTEnv extends GFXEnv {
     {
         // Get file
         if (aSource instanceof WebFile)
-            aSource = ((WebFile)aSource).getJavaFile();
+            aSource = ((WebFile) aSource).getJavaFile();
         if (aSource instanceof WebURL)
-            aSource = ((WebURL)aSource).getJavaURL();
+            aSource = ((WebURL) aSource).getJavaURL();
         File file = FileUtils.getFile(aSource);
 
         // Open with Runtime.exec "open -e <file-name>"
@@ -200,32 +203,18 @@ public class AWTEnv extends GFXEnv {
     private double getScreenScaleImpl()
     {
         // Get graphics configuration
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        GraphicsEnvironment graphicsEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice graphicsDevice = graphicsEnv.getDefaultScreenDevice();
+        GraphicsConfiguration graphicsConfig = graphicsDevice.getDefaultConfiguration();
 
-        // The method was private in Java 8.
-        try {
-            Method  meth = gd.getClass().getMethod("getScaleFactor");
-            Number scale = (Number) meth.invoke(gd);
-            double ds = scale.doubleValue();
-            if (ds == 1 || ds == 2)
-                return ds;
-            System.err.println("AWTEnv.getScreenScale: Unexpected value: " + ds);
-            return 1;
-        }
-
-        // Handle exception
-        catch(Exception e) { }
-
-        // This is the way to do it in Java 9.
-        GraphicsConfiguration gc = gd.getDefaultConfiguration();
-        AffineTransform xfm = gc.getDefaultTransform();
-        double ds = xfm.getScaleX();
-        if (ds == 1 || ds == 2)
-            return ds;
+        // Get DefaultTransform.Scale
+        AffineTransform defaultTransform = graphicsConfig.getDefaultTransform();
+        double defaultScale = defaultTransform.getScaleX();
+        if (defaultScale == 1 || defaultScale == 2)
+            return defaultScale;
 
         // Complain and return 1 since other methods failed
-        System.err.println("AWTEnv.getScreenScale: Unexpected value: " + ds);
+        System.err.println("AWTEnv.getScreenScale: Unexpected value: " + defaultScale);
         return 1;
     }
 
@@ -242,7 +231,8 @@ public class AWTEnv extends GFXEnv {
      */
     public Prefs getPrefs(String aName)
     {
-        return AWTPrefs.getPrefs(aName);
+        try { return AWTPrefs.getPrefs(aName); }
+        catch (Exception e) { return super.getPrefs(aName); }
     }
 
     /**
