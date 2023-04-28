@@ -25,8 +25,8 @@ public class ClassUtils {
     public static <T> T newInstance(Class<T> aClass)
     {
         try {
-            Constructor<T> constructor = aClass.getConstructor();
-            return constructor.newInstance();
+            //return aClass.getConstructor().newInstance(); // Causes TeaVM size to grow
+            return aClass.newInstance();
         }
         catch(Exception e) { throw new RuntimeException(e); }
     }

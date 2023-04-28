@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
+import snap.util.ClassUtils;
 import java.util.*;
 
 /**
@@ -58,7 +59,7 @@ public class SpellCheck {
         // Create new instance
         Class<? extends SpellCheck> sharedClass = _sharedClass != null ? _sharedClass : SpellCheck.class;
         SpellCheck shared;
-        try { shared = sharedClass.getConstructor().newInstance(); }
+        try { shared = ClassUtils.newInstance(sharedClass); }
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Return
