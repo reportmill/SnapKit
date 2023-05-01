@@ -127,7 +127,10 @@ public class RecentFilesPane extends FilesPane {
         WebFile file = aCell.getItem();
         if (file == null)
             return;
-        String filename = file.getName();
+
+        // Get filename from RecentFile.RealFile and set
+        WebFile recentFile = file.getRealFile();
+        String filename = recentFile.getName();
         aCell.setText(filename);
     }
 

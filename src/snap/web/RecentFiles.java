@@ -77,9 +77,13 @@ public class RecentFiles extends ViewOwner {
         urlStrings = ArrayUtils.remove(urlStrings, urlString);
         urlStrings = ArrayUtils.add(urlStrings, urlString, 0);
 
-        // Add at most Max paths to the prefs list
+        // Get RecentFilesNode and clear
         Prefs prefsNode = getRecentFilesPrefsNode();
-        for (int i = 0; i < urlStrings.length && i < MAX_FILES; i++)
+        prefsNode.clear();
+
+        // Add URL strings back to node (but limit to Max_Files)
+        int urlCount = Math.min(urlStrings.length, MAX_FILES);
+        for (int i = 0; i < urlCount; i++)
             prefsNode.setValue("index" + i, urlStrings[i]);
 
         // Flush prefs

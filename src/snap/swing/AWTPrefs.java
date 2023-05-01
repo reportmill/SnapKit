@@ -155,7 +155,7 @@ public class AWTPrefs extends Prefs {
      */
     public void clear()
     {
-        try { _prefs.removeNode(); }
+        try { _prefs.clear(); }
         catch (Exception e) { e.printStackTrace(); }
     }
 

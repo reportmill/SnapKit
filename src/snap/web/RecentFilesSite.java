@@ -70,7 +70,7 @@ public class RecentFilesSite extends WebSite {
             // Iterate over rootDir files and recent files and set each as link
             for (int i = 0; i < recentFiles.length; i++) {
                 WebFile recentFile = recentFiles[i];
-                String rootDirPath = '/' + recentFile.getName();
+                String rootDirPath = "/RecentFile-" + i + "-" + recentFile.getName();
                 WebFile rootDirFile = rootDirFiles[i] = createFileForPath(rootDirPath, false);
                 rootDirFile.setLinkFile(recentFile);
             }
