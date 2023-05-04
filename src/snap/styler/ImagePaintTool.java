@@ -69,7 +69,7 @@ public class ImagePaintTool extends StylerOwner {
             String path = FilePanel.showOpenPanel(getUI(), "Image File", "png", "jpg", "gif");
             if (path!=null) {
                 WebURL url = WebURL.getURL(path);
-                Image img = Image.get(url);
+                Image img = Image.getImageForSource(url);
                 fill = img!=null ? new ImagePaint(img) : null;
             }
         }
@@ -90,7 +90,7 @@ public class ImagePaintTool extends StylerOwner {
     public static ImagePaint getDefault()
     {
         if (_imageFill!=null) return _imageFill;
-        Image img = Image.get(ImagePaintTool.class, "pkg.images/Clouds.jpg");
+        Image img = Image.getImageForClassResource(ImagePaintTool.class, "pkg.images/Clouds.jpg");
         return _imageFill = new ImagePaint(img);
     }
 }

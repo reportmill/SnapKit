@@ -378,7 +378,7 @@ public class ColorPanel extends ViewOwner {
         // If image at given index is still a String, convert to image
         if (_images[anIndex] instanceof String) {
             String iname = (String) _images[anIndex];
-            Image img = Image.get(ColorPanel.class, iname);
+            Image img = Image.getImageForClassResource(ColorPanel.class, iname);
             _images[anIndex] = img;
         }
 

@@ -79,7 +79,7 @@ public class ImageView extends View {
     public ImageView(Object aSource)
     {
         super();
-        _image = Image.get(aSource);
+        _image = Image.getImageForSource(aSource);
     }
 
     /**
@@ -478,7 +478,7 @@ public class ImageView extends View {
         String resourceName = anElement.getAttributeValue("resource");
         byte[] bytes = resourceName != null ? anArchiver.getResource(resourceName) : null; // Get resource bytes
         if (resourceName != null)
-            setImage(Image.get(bytes));
+            setImage(Image.getImageForSource(bytes));
 
         // Unarchive FillWidth, FillHeight, KeepAspect
         if (anElement.hasAttribute(FillWidth_Prop)) setFillWidth(anElement.getAttributeBooleanValue(FillWidth_Prop));

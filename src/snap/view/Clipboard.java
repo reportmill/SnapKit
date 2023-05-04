@@ -4,7 +4,6 @@
 package snap.view;
 import java.io.File;
 import java.util.*;
-import java.util.function.Consumer;
 
 import snap.geom.Point;
 import snap.gfx.*;
@@ -195,7 +194,7 @@ public abstract class Clipboard implements Loadable {
     {
         ClipboardData cdata = getData(aMimeType);
         byte bytes[] = cdata.getBytes();
-        return Image.get(bytes);
+        return Image.getImageForSource(bytes);
     }
 
     /**

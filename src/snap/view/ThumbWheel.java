@@ -445,34 +445,36 @@ public class ThumbWheel extends View {
         Color color = (Color)getFill(); if (color==null) color = Color.LIGHTGRAY;
 
         // Get name for image and try to find new image (return if already created/cached)
-        int w = (int)Math.round(getWidth()), h = (int)Math.round(getHeight());
-        String iname = (isVertical()? "V" : "H") + w + "x" + h + "_" + color.getRGB();
-        Image image = _images.get(iname); if (image!=null) return image;
+        int imageW = (int)Math.round(getWidth());
+        int imageH = (int)Math.round(getHeight());
+        String imageName = (isVertical() ? "V" : "H") + imageW + "x" + imageH + "_" + color.getRGB();
+        Image image = _images.get(imageName); if (image!=null) return image;
 
         // Get new image and put in cache, then draw button background
-        image = Image.get(w, h, false);
+        image = Image.getImageForSize(imageW, imageH, false);
         Painter pntr = image.getPainter();
 
         // Draw button background
-        pntr.setColor(color); pntr.fill3DRect(0, 0, w, h, false);
+        pntr.setColor(color);
+        pntr.fill3DRect(0, 0, imageW, imageH, false);
 
         // If Horizontal: Draw top 2 points brighter, middle normal and bottom darker
         if (isHorizontal()) {
-            drawGradient(pntr, 2, 2, w-4, 2, color.brighter());
-            drawGradient(pntr, 2, 4, w-4, h-8, color);
-            drawGradient(pntr, 2, h-4, w-4, 2, color.darker());
+            drawGradient(pntr, 2, 2, imageW-4, 2, color.brighter());
+            drawGradient(pntr, 2, 4, imageW-4, imageH-8, color);
+            drawGradient(pntr, 2, imageH-4, imageW-4, 2, color.darker());
         }
 
         // If Vertical: Draw left 2 points brighter, middle normal and right darker
         else {
-            drawGradient(pntr, 2, 2, 2, h-4, color.brighter());
-            drawGradient(pntr, 4, 2, w-4, h-4, color);
-            drawGradient(pntr, w-4, 2, 2, h-4, color.darker());
+            drawGradient(pntr, 2, 2, 2, imageH-4, color.brighter());
+            drawGradient(pntr, 4, 2, imageW-4, imageH-4, color);
+            drawGradient(pntr, imageW-4, 2, 2, imageH-4, color.darker());
         }
 
         // Flush painter, add image to map and return
         pntr.flush();
-        _images.put(iname, image);
+        _images.put(imageName, image);
         return image;
     }
 
@@ -489,20 +491,26 @@ public class ThumbWheel extends View {
      */
     private void drawGradient(Painter aPntr, double aX, double aY, double aW, double aH, Color aColor)
     {
-        int length = isHorizontal()? (int)aW : (int)aH;
-        double r = aColor.getRedInt(), g = aColor.getGreenInt(), b = aColor.getBlueInt();
-        double radius = (length-1)/2f, radiusSquared = radius*radius;
+        int length = isHorizontal() ? (int) aW : (int) aH;
+        double r = aColor.getRedInt();
+        double g = aColor.getGreenInt();
+        double b = aColor.getBlueInt();
+        double radius = (length - 1) / 2f;
+        double radiusSquared = radius * radius;
 
         // Fill strip image with color components for each point along the thumbWheelLength
-        Image strip = Image.get((int)aW, 1, false); Painter spntr = strip.getPainter();
-        for (int i=0; i<length; i++) {
+        Image strip = Image.getImageForSize((int) aW, 1, false);
+        Painter spntr = strip.getPainter();
+        for (int i = 0; i < length; i++) {
 
             // Calculate the height of the thumbwheel at current point
-            double h = Math.sqrt(radiusSquared - (radius-i)*(radius-i))/radius;
+            double h = Math.sqrt(radiusSquared - (radius - i) * (radius - i)) / radius;
 
             // Get red, green and blue component of color (scaled for the height)
-            int ri = (int)Math.round(r*h), gi = (int)Math.round(g*h), bi = (int)Math.round(b*h);
-            int val = (255<<24) + (ri<<16) + (gi<<8) + bi; //int val = (ri<<16) + (gi<<8) + bi;
+            int ri = (int) Math.round(r * h);
+            int gi = (int) Math.round(g * h);
+            int bi = (int) Math.round(b * h);
+            int val = (255 << 24) + (ri << 16) + (gi << 8) + bi; //int val = (ri<<16) + (gi<<8) + bi;
             spntr.setColor(new Color(val)); spntr.fillRect(i,0,1,1); //strip.setRGB(i, 0, val);
         }
         spntr.flush();

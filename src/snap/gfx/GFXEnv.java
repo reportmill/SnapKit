@@ -69,7 +69,7 @@ public abstract class GFXEnv {
     /**
      * Creates image from source.
      */
-    public abstract Image getImage(Object aSource);
+    public abstract Image getImageForSource(Object aSource);
 
     /**
      * Creates image for width, height and alpha and dpi scale (0 = screen dpi, 1 = 72 dpi, 2 = 144 dpi).

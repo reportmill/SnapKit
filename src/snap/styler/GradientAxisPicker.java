@@ -165,7 +165,7 @@ public class GradientAxisPicker extends View {
     {
         if (_background != null) return _background;
         int cs = 4, w = 2 * cs;
-        Image img = Image.get(w, w, true);
+        Image img = Image.getImageForSize(w, w, true);
         Painter pntr = img.getPainter();
         pntr.setColor(Color.WHITE);
         pntr.fillRect(0, 0, w, w);

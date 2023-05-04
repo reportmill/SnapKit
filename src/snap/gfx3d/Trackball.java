@@ -45,9 +45,9 @@ public class Trackball extends ParentView {
     private MouseHandler  _mouseHandler;
 
     // The trackball image, highlight image and knob image
-    private ImageView  _tball = new ImageView(Image.get(getClass(), "pkg.images/Trackball.png"));
-    private ImageView  _tball_lit = new ImageView(Image.get(getClass(), "pkg.images/Trackball_lit.png"));
-    private ImageView  _knob = new ImageView(Image.get(getClass(), "pkg.images/Trackball_knob.png"));
+    private ImageView  _tball = new ImageView(Image.getImageForClassResource(getClass(), "pkg.images/Trackball.png"));
+    private ImageView  _tball_lit = new ImageView(Image.getImageForClassResource(getClass(), "pkg.images/Trackball_lit.png"));
+    private ImageView  _knob = new ImageView(Image.getImageForClassResource(getClass(), "pkg.images/Trackball_knob.png"));
    
     // Location of the important parts of the control image
     static final float LEFT_EDGE = 2;

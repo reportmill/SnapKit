@@ -88,15 +88,20 @@ public class J2DImage extends Image {
     protected byte[] getBytesRGBImpl()
     {
         // Get ARGB pixel int array
-        int w = getPixWidth(), h = getPixHeight(), boff = 0;
-        int pixInts[] = getNative().getRGB(0, 0, w, h, null, 0, w);
+        int pixW = getPixWidth();
+        int pixH = getPixHeight();
+        int boff = 0;
+        int[] pixInts = getNative().getRGB(0, 0, pixW, pixH, null, 0, pixW);
 
         // Create RGB byte array and load from pixel int array
-        byte rgb[] = new byte[w*h*3];
-        for (int y=0;y<h;y++) for (int x=0;x<w;x++) { int pix = pixInts[y*w+x];
-            rgb[boff++] = (byte)(pix>>16 & 0xff);
-            rgb[boff++] = (byte)(pix>>8 & 0xff);
-            rgb[boff++] = (byte)(pix & 0xff);
+        byte[] rgb = new byte[pixW * pixH * 3];
+        for (int y = 0; y < pixH; y++) {
+            for (int x = 0; x < pixW; x++) {
+                int pix = pixInts[y * pixW + x];
+                rgb[boff++] = (byte) (pix >> 16 & 0xff);
+                rgb[boff++] = (byte) (pix >> 8 & 0xff);
+                rgb[boff++] = (byte) (pix & 0xff);
+            }
         }
 
         // Return RGB byte array
@@ -109,16 +114,21 @@ public class J2DImage extends Image {
     protected byte[] getBytesRGBAImpl()
     {
         // Get ARGB pixel int array
-        int w = getPixWidth(), h = getPixHeight(), boff = 0;
-        int pixInts[] = getNative().getRGB(0, 0, w, h, null, 0, w);
+        int pixW = getPixWidth();
+        int pixH = getPixHeight();
+        int boff = 0;
+        int[] pixInts = getNative().getRGB(0, 0, pixW, pixH, null, 0, pixW);
 
         // Create RGBA byte array and load from pixel int array
-        byte rgba[] = new byte[w*h*4];
-        for (int y=0;y<h;y++) for (int x=0;x<w;x++) { int pix = pixInts[y*w+x];
-            rgba[boff++] = (byte)(pix>>16 & 0xff);
-            rgba[boff++] = (byte)(pix>>8 & 0xff);
-            rgba[boff++] = (byte)(pix & 0xff);
-            rgba[boff++] = (byte)(pix>>24 & 0xff);
+        byte[] rgba = new byte[pixW * pixH * 4];
+        for (int y = 0; y < pixH; y++) {
+            for (int x = 0; x < pixW; x++) {
+                int pix = pixInts[y * pixW + x];
+                rgba[boff++] = (byte) (pix >> 16 & 0xff);
+                rgba[boff++] = (byte) (pix >> 8 & 0xff);
+                rgba[boff++] = (byte) (pix & 0xff);
+                rgba[boff++] = (byte) (pix >> 24 & 0xff);
+            }
         }
 
         // Return RGBA byte array
@@ -131,7 +141,7 @@ public class J2DImage extends Image {
     public byte[] getBytesJPEG()
     {
         // If HiDPI, get 72 dpi image and return that instead
-        if (getScale()!=1) {
+        if (getScale() != 1) {
             System.out.println("J2DImage.getBytesJPEG: Downsampling to 72 dpi since other dpi not suppored");
             return cloneForSizeAndScale(getWidth(), getHeight(), 1).getBytesJPEG();
         }
@@ -146,7 +156,7 @@ public class J2DImage extends Image {
     public byte[] getBytesPNG()
     {
         // If HiDPI, get 72 dpi image and return that instead
-        if (getScale()!=1) {
+        if (getScale() != 1) {
             System.out.println("J2DImage.getBytesPNG: Downsampling to 72 dpi since other dpi not suppored");
             return cloneForSizeAndScale(getWidth(), getHeight(), 1).getBytesPNG();
         }
@@ -179,7 +189,7 @@ public class J2DImage extends Image {
     public void blur(int aRad, Color aColor)
     {
         // If color provided, apply to image with SRC_IN
-        if (aColor!=null) {
+        if (aColor != null) {
             Painter pntr = getPainter();
             pntr.setComposite(Painter.Composite.SRC_IN);
             pntr.setColor(aColor);
@@ -190,14 +200,15 @@ public class J2DImage extends Image {
         setPremultiplied(true);
 
         // Get image data (and temp data)
-        int w = getPixWidth(), h = getPixHeight();
-        int spix[] = getArrayARGB(); if (spix==null) { System.err.println("Image.blur: No data"); return; }
-        int tpix[] = new int[w*h];
+        int pixW = getPixWidth();
+        int pixH = getPixHeight();
+        int[] spix = getArrayARGB(); if (spix == null) { System.err.println("Image.blur: No data"); return; }
+        int[] tpix = new int[pixW * pixH];
 
         // Apply 1D gausian kernal for speed, as horizontal, then vertical (order = 2*rad instead of rad^2)
-        float kern1[] = AWTImageUtils.getGaussianKernel(aRad,0); // size = aRad*2+1 x 1
-        AWTImageUtils.convolve(spix, tpix, w, h, kern1, aRad*2+1);  // Horizontal 1D, kern size = aRad*2+1 x 1
-        AWTImageUtils.convolve(tpix, spix, w, h, kern1, 1);         // Vertical 1D, kern size = 1 x aRad*2+1
+        float[] kern1 = AWTImageUtils.getGaussianKernel(aRad,0); // size = aRad*2+1 x 1
+        AWTImageUtils.convolve(spix, tpix, pixW, pixH, kern1, aRad*2+1);  // Horizontal 1D, kern size = aRad*2+1 x 1
+        AWTImageUtils.convolve(tpix, spix, pixW, pixH, kern1, 1);         // Vertical 1D, kern size = 1 x aRad*2+1
 
         // Convert blur image to non-premultiplied and return
         setPremultiplied(false);
@@ -209,19 +220,22 @@ public class J2DImage extends Image {
     public void emboss(double aRadius, double anAzi, double anAlt)
     {
         // Get basic info
-        int w = getPixWidth(), h = getPixHeight();
-        int radius = (int)Math.round(aRadius), rad = Math.abs(radius);
+        int pixW = getPixWidth();
+        int pixH = getPixHeight();
+        int radius = (int) Math.round(aRadius);
+        int rad = Math.abs(radius);
 
         // Create bump map: original graphics offset by radius, blurred. Color doesn't matter - only alpha channel used.
-        J2DImage bumpImg = (J2DImage)Image.get(w+rad*2, h+rad*2, true);
-        Painter ipntr = bumpImg.getPainter(); ipntr.setImageQuality(1); //ipntr.clipRect(0, 0, width, height);
-        ipntr.drawImage(this, rad, rad, w, h);
+        J2DImage bumpImg = (J2DImage) Image.getImageForSize(pixW + rad * 2, pixH + rad * 2, true);
+        Painter ipntr = bumpImg.getPainter();
+        ipntr.setImageQuality(1); //ipntr.clipRect(0, 0, width, height);
+        ipntr.drawImage(this, rad, rad, pixW, pixH);
         bumpImg.blur(rad, null);
 
         // Get source and bump pixels as int arrays and call general emboss method
-        int spix[] = getArrayARGB(); if (spix==null) { System.err.println("Image.emboss: No data"); return; }
-        int bpix[] = bumpImg.getArrayARGB();
-        AWTImageUtils.emboss(spix, bpix, w, h, radius, anAzi*Math.PI/180, anAlt*Math.PI/180);
+        int[] spix = getArrayARGB(); if (spix == null) { System.err.println("Image.emboss: No data"); return; }
+        int[] bpix = bumpImg.getArrayARGB();
+        AWTImageUtils.emboss(spix, bpix, pixW, pixH, radius, anAzi * Math.PI / 180, anAlt * Math.PI / 180);
     }
 
     /**
@@ -239,7 +253,7 @@ public class J2DImage extends Image {
         DataBuffer buf = raster.getDataBuffer();
         if (buf.getDataType() != DataBuffer.TYPE_INT || buf.getNumBanks() != 1)
             throw new RuntimeException("unknown data format");
-        int pix[] = ((DataBufferInt)buf).getData();
+        int[] pix = ((DataBufferInt) buf).getData();
         return pix;
     }
 
@@ -284,17 +298,17 @@ public class J2DImage extends Image {
     private BufferedImage getNativeImpl()
     {
         // If already set, just return
-        if (_native!=null) return _native;
+        if (_native != null) return _native;
 
         if (getSource() instanceof java.awt.Image)
             return _native = AWTImageUtils.getBufferedImage((java.awt.Image)getSource());
 
-        if (getType()=="gif")
+        if (getType() == "gif")
             return getGif();
 
         // Get image bytes
-        byte bytes[] = getBytes();
-        if (bytes==null) {
+        byte[] bytes = getBytes();
+        if (bytes == null) {
             System.out.println("J2DImage.getNative: No bytes for source: " + getSource()); return null; }
         InputStream istream = new ByteArrayInputStream(bytes);
 
@@ -321,7 +335,7 @@ public class J2DImage extends Image {
     /**
      * What a load of junk!
      */
-    private void getDPI(byte theBytes[]) throws IOException
+    private void getDPI(byte[] theBytes) throws IOException
     {
         // Get ImageIO Readers
         InputStream istream = new ByteArrayInputStream(theBytes);
@@ -337,10 +351,10 @@ public class J2DImage extends Image {
 
             // Check for horizontal DPI
             NodeList hps = root.getElementsByTagName("HorizontalPixelSize");
-            IIOMetadataNode hps2 = hps.getLength()>0 ? (IIOMetadataNode) hps.item(0) : null;
-            NamedNodeMap hnnm = hps2!=null ? hps2.getAttributes() : null;
-            Node hitem = hnnm!=null ? hnnm.item(0) : null;
-            if (hitem!=null)
+            IIOMetadataNode hps2 = hps.getLength() > 0 ? (IIOMetadataNode) hps.item(0) : null;
+            NamedNodeMap hnnm = hps2 != null ? hps2.getAttributes() : null;
+            Node hitem = hnnm != null ? hnnm.item(0) : null;
+            if (hitem != null)
                 _wdpi = Math.round(25.4/Double.parseDouble(hitem.getNodeValue()));
 
             // Check for vertical DPI
@@ -359,32 +373,35 @@ public class J2DImage extends Image {
     public BufferedImage getGif()
     {
         // Create images array, initialized with this image
-        List <Image> images = new ArrayList(); images.add(this);
+        List<Image> images = new ArrayList<>();
+        images.add(this);
 
         // Read image (or images, if more than one)
         try {
-            byte bytes[] = getBytes();
+            byte[] bytes = getBytes();
             InputStream istream = new ByteArrayInputStream(bytes);
             ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
             ImageInputStream stream = ImageIO.createImageInputStream(istream);
             reader.setInput(stream);
 
             // Read first image
-            BufferedImage img0 = reader.read(0); _native = img0;
-            int w = img0.getWidth(), h = img0.getHeight();
+            BufferedImage img0 = reader.read(0);
+            _native = img0;
+            int imageW = img0.getWidth();
+            int imageH = img0.getHeight();
 
             // Read successive images
             int count = reader.getNumImages(true);
-            for (int ind=1;ind<count;ind++) {
+            for (int ind = 1; ind < count; ind++) {
 
                 // Read next image into J2DImage
                 BufferedImage bimg = reader.read(ind);
                 Image img2 = new J2DImage(bimg);
 
                 // If partial, center in full image
-                if (img2.getPixWidth()!=w || img2.getPixHeight()!=h) {
+                if (img2.getPixWidth() != imageW || img2.getPixHeight() != imageH) {
                     Point offset = getGIFOffset(reader.getImageMetadata(ind));
-                    img2 = img2.getFramedImage(w, h, offset.x, offset.y);
+                    img2 = img2.getFramedImage(imageW, imageH, offset.x, offset.y);
                 }
 
                 // Add to images
@@ -393,10 +410,11 @@ public class J2DImage extends Image {
         }
 
         // Catch exception
-        catch(IOException e) { System.err.println(e); return null; }
+        catch(IOException e) { System.err.println(e.getMessage()); return null; }
 
         // If multiple images, create set
-        if (images.size()>1) new ImageSet(images);
+        if (images.size() > 1)
+            new ImageSet(images);
         return _native;
     }
 
@@ -408,14 +426,15 @@ public class J2DImage extends Image {
         Node tree = metaData.getAsTree("javax_imageio_gif_image_1.0");
         NodeList childNodes = tree.getChildNodes();
 
-        for (int j=0; j<childNodes.getLength(); j++) { Node nodeItem = childNodes.item(j);
+        for (int j = 0; j < childNodes.getLength(); j++) {
+            Node nodeItem = childNodes.item(j);
 
             if (nodeItem.getNodeName().equals("ImageDescriptor")){
                 NamedNodeMap attrs = nodeItem.getAttributes();
                 Node attrX = attrs.getNamedItem("imageLeftPosition");
-                int dx = Integer.valueOf(attrX.getNodeValue());
+                int dx = Integer.parseInt(attrX.getNodeValue());
                 Node attrY = attrs.getNamedItem("imageTopPosition");
-                int dy = Integer.valueOf(attrY.getNodeValue());
+                int dy = Integer.parseInt(attrY.getNodeValue());
                 return new Point(dx,dy);
             }
         }

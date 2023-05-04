@@ -118,17 +118,17 @@ public class ReflectEffect extends Effect {
         // Get shape image width and height
         double refHeight = getReflectHeight();
         double fadeHeight = getFadeHeight();
-        int width = (int) Math.round(aRect.getWidth());
-        int height = (int) Math.ceil(aRect.getHeight()*refHeight*fadeHeight);
+        int width = (int) Math.round(aRect.width);
+        int height = (int) Math.ceil(aRect.height * refHeight * fadeHeight);
 
         // Get original graphics as flipped image
-        Image img = Image.get(width, height, true);
+        Image img = Image.getImageForSize(width, height, true);
         Painter pntr = img.getPainter();
         pntr.setImageQuality(1);
         pntr.clipRect(0, 0, width, height);
         pntr.save();
         pntr.scale(1,-refHeight);
-        pntr.translate(-aRect.getX(), -aRect.getMaxY());
+        pntr.translate(-aRect.x, -aRect.getMaxY());
         aPDVR.exec(pntr);
         pntr.restore();
 

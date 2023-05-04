@@ -604,7 +604,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     {
         // If down arrow icon hasn't been created, create it
         if (_expImg != null) return _expImg;
-        Image img = Image.get(9,9,true); Painter pntr = img.getPainter();
+        Image img = Image.getImageForSize(9,9,true); Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 1.5, 7.5, 1.5, 4.5, 5.5);
         pntr.setColor(Color.BLACK); pntr.draw(poly); pntr.fill(poly); pntr.flush();
         return _expImg = img;
@@ -617,7 +617,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     {
         // If down arrow icon hasn't been created, create it
         if (_clpImg != null) return _clpImg;
-        Image img = Image.get(9,9,true); Painter pntr = img.getPainter();
+        Image img = Image.getImageForSize(9,9,true); Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 1.5, 1.5, 7.5, 5.5, 4.5);
         pntr.setColor(Color.BLACK); pntr.draw(poly); pntr.fill(poly); pntr.flush();
         return _clpImg = img;

@@ -53,11 +53,11 @@ public class PainterDVR extends PainterImpl {
     public Image getImage(Rect aRect, int anInset)
     {
         // Get shape image width and height
-        int width = (int) Math.round(aRect.getWidth()) + anInset*2;
-        int height = (int) Math.round(aRect.getHeight()) + anInset*2;
+        int width = (int) Math.round(aRect.width) + anInset * 2;
+        int height = (int) Math.round(aRect.height) + anInset * 2;
 
         // Create new image for dvr painter and paint dvr to it
-        Image img = Image.get(width, height, true);
+        Image img = Image.getImageForSize(width, height, true);
         Painter ipntr = img.getPainter();
         ipntr.setImageQuality(1);
         ipntr.clipRect(0, 0, width, height);

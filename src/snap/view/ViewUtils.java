@@ -514,12 +514,12 @@ public class ViewUtils {
     /** Loads the file icon images. */
     private static void loadFileIconImages()
     {
-        RootFile = Image.get(ViewUtils.class, "RootFile.png");
-        DirFile = Image.get(ViewUtils.class, "DirFile.png");
-        ClassFile = Image.get(ViewUtils.class, "ClassFile.png");
-        JavaFile = Image.get(ViewUtils.class, "JavaFile.png");
-        TableFile = Image.get(ViewUtils.class, "TableFile.png");
-        PlainFile = Image.get(ViewUtils.class, "PlainFile.png");
+        RootFile = Image.getImageForClassResource(ViewUtils.class, "RootFile.png");
+        DirFile = Image.getImageForClassResource(ViewUtils.class, "DirFile.png");
+        ClassFile = Image.getImageForClassResource(ViewUtils.class, "ClassFile.png");
+        JavaFile = Image.getImageForClassResource(ViewUtils.class, "JavaFile.png");
+        TableFile = Image.getImageForClassResource(ViewUtils.class, "TableFile.png");
+        PlainFile = Image.getImageForClassResource(ViewUtils.class, "PlainFile.png");
     }
 
     /**

@@ -387,7 +387,7 @@ public abstract class Image implements Loadable {
     {
         int newW = (int) Math.round(aW);
         int newH = (int) Math.round(aH);
-        Image img2 = Image.get(newW, newH, hasAlpha());
+        Image img2 = Image.getImageForSize(newW, newH, hasAlpha());
         Painter pntr = img2.getPainter();
         pntr.setImageQuality(1);
         pntr.drawImage(this, 0, 0, getWidth(), getHeight(), 0, 0, newW, newH);
@@ -399,7 +399,7 @@ public abstract class Image implements Loadable {
      */
     public Image getSubimage(double aX, double aY, double aW, double aH)
     {
-        Image img2 = Image.get((int) Math.round(aW), (int) Math.round(aH), hasAlpha());
+        Image img2 = Image.getImageForSize(Math.round(aW), Math.round(aH), hasAlpha());
         img2.getPainter().drawImage(this, aX, aY, aW, aH, 0, 0, aW, aH);
         return img2;
     }
@@ -409,7 +409,7 @@ public abstract class Image implements Loadable {
      */
     public Image getFramedImage(int aW, int aH, double aX, double aY)
     {
-        Image img2 = Image.get(aW, aH, hasAlpha());
+        Image img2 = Image.getImageForSize(aW, aH, hasAlpha());
         Painter pntr = img2.getPainter();
         pntr.drawImage(this, aX, aY);
         return img2;
@@ -501,9 +501,9 @@ public abstract class Image implements Loadable {
     /**
      * Creates image from source.
      */
-    public static Image get(Object aSource)
+    public static Image getImageForSource(Object aSource)
     {
-        return GFXEnv.getEnv().getImage(aSource);
+        return GFXEnv.getEnv().getImageForSource(aSource);
     }
 
     /**
@@ -511,24 +511,24 @@ public abstract class Image implements Loadable {
      */
     public static Image getImageForBytes(byte[] theBytes)
     {
-        return GFXEnv.getEnv().getImage(theBytes);
+        return GFXEnv.getEnv().getImageForSource(theBytes);
     }
 
     /**
      * Creates image from class and resource path.
      */
-    public static Image get(Class aClass, String aPath)
+    public static Image getImageForClassResource(Class<?> aClass, String aPath)
     {
         WebURL url = WebURL.getURL(aClass, aPath);
         if (url == null)
             url = WebURL.getURL(aClass, "pkg.images/" + aPath);
-        return url != null ? Image.get(url) : null;
+        return url != null ? Image.getImageForSource(url) : null;
     }
 
     /**
      * Creates image from URL and resource path.
      */
-    public static Image get(WebURL aBaseURL, String aName)
+    public static Image getImageForUrlResource(WebURL aBaseURL, String aName)
     {
         // If either param is null, just return
         if (aBaseURL == null || aName == null) return null;
@@ -546,15 +546,7 @@ public abstract class Image implements Loadable {
         if (ifile == null) return null;
 
         // Return image for file
-        return get(ifile);
-    }
-
-    /**
-     * Creates image for width, height and alpha at 72 dpi.
-     */
-    public static Image get(int aWidth, int aHeight, boolean hasAlpha)
-    {
-        return getImageForSizeAndScale(aWidth, aHeight, hasAlpha, 1);
+        return getImageForSource(ifile);
     }
 
     /**

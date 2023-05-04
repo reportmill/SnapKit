@@ -587,7 +587,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
         if (_branchImage != null) return _branchImage;
 
         // Create image
-        Image branchImage = Image.get(9, 11, true);
+        Image branchImage = Image.getImageForSize(9, 11, true);
         Polygon poly = new Polygon(1.5, 1.5, 7.5, 5.5, 1.5, 9.5);
         Painter pntr = branchImage.getPainter();
         pntr.setColor(Color.BLACK);

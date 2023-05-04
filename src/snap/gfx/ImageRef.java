@@ -77,7 +77,7 @@ public class ImageRef {
     public Image getImage()
     {
         if (_image != null) return _image;
-        return _image = Image.get(getSource());
+        return _image = Image.getImageForSource(getSource());
     }
 
     /**

@@ -291,19 +291,19 @@ public class ShadowEffect extends Effect {
     public static Image getShadowImage(Rect aRect, double aRad, Color aColor)
     {
         // Get info
-        int rad = (int) aRad, rad2 = rad*2, rad3 = rad*3, rad4 = rad*4, rad6 = rad*6;
+        int rad = (int) aRad, rad2 = rad * 2, rad3 = rad * 3, rad4 = rad * 4, rad6 = rad * 6;
         int contentW = (int) Math.round(aRect.width);
         int contentH = (int) Math.round(aRect.height);
 
         // Create image with mini version of shadowed rect
-        Image s0 = Image.get(rad6+1,rad6+1, true);
+        Image s0 = Image.getImageForSize(rad6 + 1,rad6 + 1, true);
         Painter spntr = s0.getPainter();
         spntr.setColor(Color.BLACK);
         spntr.fillRect(rad2, rad2,rad2+1,rad2+1);
         s0.blur(rad, aColor);
 
         // Create image for full size shadow and fill unblurred content area
-        Image shadowImage = Image.get(contentW + rad4, contentH + rad4, true);
+        Image shadowImage = Image.getImageForSize(contentW + rad4, contentH + rad4, true);
         Painter pntr = shadowImage.getPainter();
         pntr.setColor(aColor);
         pntr.fillRect(rad3, rad3, contentW - rad2, contentH - rad2);

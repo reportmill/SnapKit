@@ -573,10 +573,16 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     public static Image getArrowImage()
     {
         if (_arrowImg!=null) return _arrowImg;
-        Image img = Image.get(9,7,true); Painter pntr = img.getPainter();
+        Image img = Image.getImageForSize(9,7,true);
+        Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 1.5, 7.5, 1.5, 4.5, 5.5);
-        pntr.setColor(new Color("#FFFFFF99")); pntr.drawLine(4.5,8,2,2); pntr.drawLine(4.5,8,7,2);
-        pntr.setColor(Color.DARKGRAY); pntr.draw(poly); pntr.fill(poly); pntr.flush();
+        pntr.setColor(new Color("#FFFFFF99"));
+        pntr.drawLine(4.5,8,2,2);
+        pntr.drawLine(4.5,8,7,2);
+        pntr.setColor(Color.DARKGRAY);
+        pntr.draw(poly);
+        pntr.fill(poly);
+        pntr.flush();
         return _arrowImg = img;
     }
 }

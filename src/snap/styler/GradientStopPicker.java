@@ -34,8 +34,8 @@ public class GradientStopPicker extends ParentView {
     private int _selKnob;
     
     // The knob images
-    private Image  _knob = Image.get(getClass(), "Knob.png");
-    private Image  _knobLit = Image.get(getClass(), "KnobHilighted.png");
+    private Image  _knob = Image.getImageForClassResource(getClass(), "Knob.png");
+    private Image  _knobLit = Image.getImageForClassResource(getClass(), "KnobHilighted.png");
     
     // The texture paint
     private ImagePaint  _background;
@@ -432,7 +432,7 @@ public class GradientStopPicker extends ParentView {
     {
         if(_background!=null) return _background;
         int cs = 4, w = 2*cs;
-        Image img = Image.get(w,w,true); Painter pntr = img.getPainter();
+        Image img = Image.getImageForSize(w,w,true); Painter pntr = img.getPainter();
         pntr.setColor(Color.WHITE); pntr.fillRect(0, 0, w, w);
         pntr.setColor(new Color(168,193,255)); pntr.fillRect(0,0,cs,cs); pntr.fillRect(cs,cs,cs,cs);
         return _background = new ImagePaint(img);

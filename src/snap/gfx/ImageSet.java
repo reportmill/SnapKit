@@ -67,16 +67,18 @@ public class ImageSet {
     public Image getSpriteSheetImage()
     {
         Image img0 = getImage(0);
-        int w = img0.getPixWidth();
-        int h = img0.getPixHeight();
+        int imageW = img0.getPixWidth();
+        int imageH = img0.getPixHeight();
         int count = getCount();
 
-        Image imgSheet = Image.get(w*count, h, true);
+        Image imgSheet = Image.getImageForSize(imageW * count, imageH, true);
         Painter pntr = imgSheet.getPainter();
-        for(int i=0; i<count; i++) {
-            Image img = getImage(i);
-            pntr.drawImage(img, i*w, 0);
+        for(int i = 0; i < count; i++) {
+            Image image = getImage(i);
+            pntr.drawImage(image, i * imageW, 0);
         }
+
+        // Return
         return imgSheet;
     }
 }

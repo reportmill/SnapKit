@@ -53,16 +53,21 @@ public class ImageUtils {
     /**
      * Returns an image for string and font.
      */
-    public static Image getImage(String aStr, Font aFont)
+    public static Image getImageForStringAndFont(String aStr, Font aFont)
     {
-        int sw = (int) Math.ceil(aFont.getStringAdvance(aStr));
-        int sh = (int) Math.ceil(aFont.getLineHeight());
-        Image img = Image.get(sw+8,sh+8,true);
-        Painter pntr = img.getPainter();
+        // Get image for string width/height
+        int strW = (int) Math.ceil(aFont.getStringAdvance(aStr));
+        int strH = (int) Math.ceil(aFont.getLineHeight());
+        Image image = Image.getImageForSize(strW + 8,strH + 8,true);
+
+        // Paint string
+        Painter pntr = image.getPainter();
         pntr.setColor(Color.BLACK);
         pntr.setFont(aFont);
         pntr.drawString(aStr, 4,aFont.getAscent() + 4);
-        return img;
+
+        // Return
+        return image;
     }
 
     /**
@@ -165,12 +170,12 @@ public class ImageUtils {
 
         // If URL set, load from URL
         if (_emptyImageURL != null) {
-            Image img = Image.get(_emptyImageURL);
+            Image img = Image.getImageForSource(_emptyImageURL);
             return _emptyImage = img;
         }
 
         // Otherwise, just create empty image
-        Image img = Image.get(10, 10, true);
+        Image img = Image.getImageForSize(10, 10, true);
         return _emptyImage = img;
     }
 

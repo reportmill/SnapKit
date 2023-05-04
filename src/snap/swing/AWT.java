@@ -283,7 +283,7 @@ public class AWT {
      */
     public static Image awtToSnapImage(java.awt.Image anImage)
     {
-        return Image.get(anImage);
+        return Image.getImageForSource(anImage);
     }
 
     /**

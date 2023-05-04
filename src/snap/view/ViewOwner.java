@@ -490,7 +490,7 @@ public class ViewOwner extends PropObject {
     public Image getImage(String aPath)
     {
         Class<?> cls = getClass();
-        return Image.get(cls, aPath);
+        return Image.getImageForClassResource(cls, aPath);
     }
 
     /**

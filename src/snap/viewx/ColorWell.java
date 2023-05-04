@@ -214,7 +214,7 @@ public class ColorWell extends View {
         // Handle DragGesture
         else if (anEvent.isDragGesture()) {
             Color color = getColor();
-            Image image = Image.get(14,14,true);
+            Image image = Image.getImageForSize(14,14,true);
             Painter pntr = image.getPainter();
             paintSwatch(pntr,color,0,0,14,14);
             pntr.setColor(Color.BLACK);

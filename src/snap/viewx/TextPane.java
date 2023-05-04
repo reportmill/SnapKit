@@ -142,7 +142,7 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
 
         // Configure FindText
         getView("FindText", TextField.class).setPromptText("Find");
-        getView("FindText", TextField.class).getLabel().setImage(Image.get(TextPane.class, "Find.png"));
+        getView("FindText", TextField.class).getLabel().setImage(Image.getImageForClassResource(TextPane.class, "Find.png"));
 
         // Register command-s for save, command-f for find, command-l for line number and escape
         addKeyActionHandler("SaveButton", "Shortcut+S");

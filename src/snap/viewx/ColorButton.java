@@ -102,14 +102,14 @@ public class ColorButton extends View {
 
         // Handle standard stroke color image
         if (_title.startsWith("Stroke"))
-            return _image = Image.get(getClass(), "pkg.images/Color_StrokeColor.png");
+            return _image = Image.getImageForClassResource(getClass(), "pkg.images/Color_StrokeColor.png");
 
         // Handle standard text color image
         if (_title.startsWith("Text"))
-            return _image = Image.get(getClass(), "pkg.images/Color_TextColor.png");
+            return _image = Image.getImageForClassResource(getClass(), "pkg.images/Color_TextColor.png");
 
         // Return default color button image
-        return _image = Image.get(getClass(), "pkg.images/Color_FillColor.png");
+        return _image = Image.getImageForClassResource(getClass(), "pkg.images/Color_FillColor.png");
     }
 
     /**
@@ -283,7 +283,7 @@ public class ColorButton extends View {
         if (_arrowImg != null) return _arrowImg;
 
         // Create DownArrow image
-        Image img = Image.get(11,10,true);
+        Image img = Image.getImageForSize(11,10,true);
         Painter pntr = img.getPainter();
         Path2D path = new Path2D();
         path.moveTo(2.5f, 1f);

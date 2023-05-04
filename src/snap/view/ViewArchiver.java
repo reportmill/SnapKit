@@ -200,14 +200,14 @@ public class ViewArchiver extends XMLArchiver {
         // If there is an Archiver.Owner, look for image as class resource
         Class<?> ownerClass = getOwnerClass();
         for (Class<?> cls = ownerClass; cls != null && cls != ViewOwner.class; cls = cls.getSuperclass()) {
-            Image image = Image.get(cls, aPath);
+            Image image = Image.getImageForClassResource(cls, aPath);
             if (image != null)
                 return image;
         }
 
         // Otherwise, try to find image name as path relative to Archiver.SourceURL
         WebURL url = getSourceURL();
-        return Image.get(url, aPath);
+        return Image.getImageForUrlResource(url, aPath);
     }
 
     /**

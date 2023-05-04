@@ -219,7 +219,7 @@ public class ImagePaint implements Paint, XMLArchiver.Archivable {
         String iname = anElement.getAttributeValue("resource");
         if (iname!=null) {
             byte[] bytes = anArchiver.getResource(iname); // Get resource bytes
-            _image = Image.get(bytes); // Create new image data
+            _image = Image.getImageForSource(bytes); // Create new image data
             _w = _image.getWidth();
             _h = _image.getHeight();
         }

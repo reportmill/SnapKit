@@ -89,7 +89,7 @@ public class SwingClipboard extends Clipboard implements DragSourceListener, Dra
         java.awt.Image img2;
         try { img2 = (java.awt.Image)trans.getTransferData(DataFlavor.imageFlavor); }
         catch(Exception e) { throw new RuntimeException(e); }
-        return Image.get(img2);
+        return Image.getImageForSource(img2);
     }
 
     /**

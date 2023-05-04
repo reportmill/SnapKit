@@ -73,10 +73,10 @@ public class DialogBox extends FormBuilder {
     public static final int CANCEL_OPTION = 2;   /** Return value from class method if CANCEL is chosen. */
 
     // Get InfoImage
-    public static Image questImage = Image.get(DialogBox.class, "Dialog_Question.png");
-    public static Image infoImage = Image.get(DialogBox.class, "Dialog_Info.png");
-    public static Image warnImage = Image.get(DialogBox.class, "Dialog_Warning.png");
-    public static Image errorImage = Image.get(DialogBox.class, "Dialog_Error.png");
+    public static Image questImage = Image.getImageForClassResource(DialogBox.class, "Dialog_Question.png");
+    public static Image infoImage = Image.getImageForClassResource(DialogBox.class, "Dialog_Info.png");
+    public static Image warnImage = Image.getImageForClassResource(DialogBox.class, "Dialog_Warning.png");
+    public static Image errorImage = Image.getImageForClassResource(DialogBox.class, "Dialog_Error.png");
 
     /**
      * Constructor.

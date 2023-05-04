@@ -387,7 +387,7 @@ public class ColorDock extends View {
     {
         // Get color and create image
         Color color = getColor();
-        Image image = Image.get(14,14,true);
+        Image image = Image.getImageForSize(14,14,true);
         Painter pntr = image.getPainter();
         ColorWell.paintSwatch(pntr, color,0,0,14,14);
         pntr.setColor(Color.BLACK);

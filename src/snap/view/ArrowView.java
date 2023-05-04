@@ -245,7 +245,7 @@ public class ArrowView extends ParentView {
     public static Image getUpArrowImage()
     {
         if (_uimg != null) return _uimg;
-        Image img = Image.get(9, 7, true);
+        Image img = Image.getImageForSize(9, 7, true);
         Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 5.5, 7.5, 5.5, 4.5, 1.5);
         pntr.setColor(Color.DARKGRAY);
@@ -260,7 +260,7 @@ public class ArrowView extends ParentView {
     public static Image getDownArrowImage()
     {
         if (_dimg != null) return _dimg;
-        Image img = Image.get(9, 7, true);
+        Image img = Image.getImageForSize(9, 7, true);
         Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 1.5, 7.5, 1.5, 4.5, 5.5);
         pntr.setColor(Color.DARKGRAY);
@@ -275,7 +275,7 @@ public class ArrowView extends ParentView {
     public static Image getLeftArrowImage()
     {
         if (_limg != null) return _limg;
-        Image img = Image.get(7, 9, true);
+        Image img = Image.getImageForSize(7, 9, true);
         Painter pntr = img.getPainter();
         Polygon poly = new Polygon(5.5, 1.5, 5.5, 7.5, 1.5, 4.5);
         pntr.setColor(Color.DARKGRAY);
@@ -290,7 +290,7 @@ public class ArrowView extends ParentView {
     public static Image getRightArrowImage()
     {
         if (_rimg != null) return _rimg;
-        Image img = Image.get(7, 9, true);
+        Image img = Image.getImageForSize(7, 9, true);
         Painter pntr = img.getPainter();
         Polygon poly = new Polygon(1.5, 1.5, 1.5, 7.5, 5.5, 4.5);
         pntr.setColor(Color.DARKGRAY);
