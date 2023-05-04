@@ -550,11 +550,11 @@ public abstract class Image implements Loadable {
     }
 
     /**
-     * Creates image for width, height and alpha at screen dpi scale (72 dpi normal, 144 dpi for retina/hidpi).
+     * Creates image for width, height and alpha at standard 72 dpi.
      */
     public static Image getImageForSize(double aWidth, double aHeight, boolean hasAlpha)
     {
-        return getImageForSizeAndScale(aWidth, aHeight, hasAlpha, 0);
+        return getImageForSizeAndScale(aWidth, aHeight, hasAlpha, 1);
     }
 
     /**
