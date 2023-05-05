@@ -93,7 +93,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
         // Get file for parent path from site
         WebSite site = getSite();
         String filePath = getPath();
-        String parentPath = FilePathUtils.getParent(filePath);
+        String parentPath = FilePathUtils.getParentPath(filePath);
         WebFile parentDir = site.createFileForPath(parentPath, true);
 
         // Set/return
@@ -119,7 +119,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public String getName()
     {
         String filePath = getPath();
-        return FilePathUtils.getFileName(filePath);
+        return FilePathUtils.getFilename(filePath);
     }
 
     /**
@@ -128,7 +128,7 @@ public class WebFile extends PropObject implements Comparable<WebFile> {
     public String getSimpleName()
     {
         String filePath = getPath();
-        return FilePathUtils.getFileNameSimple(filePath);
+        return FilePathUtils.getFilenameSimple(filePath);
     }
 
     /**

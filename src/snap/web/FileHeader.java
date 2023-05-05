@@ -65,12 +65,12 @@ public class FileHeader extends PropObject {
     /**
      * Returns the resource name.
      */
-    public String getName()  { return FilePathUtils.getFileName(getPath()); }
+    public String getName()  { return FilePathUtils.getFilename(getPath()); }
 
     /**
      * Returns the file simple name.
      */
-    public String getSimpleName()  { return FilePathUtils.getFileNameSimple(getPath()); }
+    public String getSimpleName()  { return FilePathUtils.getFilenameSimple(getPath()); }
 
     /**
      * Returns the file type (extension without the '.').

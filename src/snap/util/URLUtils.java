@@ -170,7 +170,7 @@ public class URLUtils {
 
         // If file is directory, create from URL path file name in directory
         else if (file.isDirectory())
-            file = new File(file, FilePathUtils.getFileName(aURL.getPath()));
+            file = new File(file, FilePathUtils.getFilename(aURL.getPath()));
 
         // Return file
         return file;

@@ -191,7 +191,7 @@ public class ParsedURL {
     public String getFilename()
     {
         String path = getPath();
-        return FilePathUtils.getFileName(path);
+        return FilePathUtils.getFilename(path);
     }
 
     /**
@@ -200,7 +200,7 @@ public class ParsedURL {
     public String getFilenameSimple()
     {
         String path = getPath();
-        return FilePathUtils.getFileNameSimple(path);
+        return FilePathUtils.getFilenameSimple(path);
     }
 
     /**

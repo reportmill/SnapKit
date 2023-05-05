@@ -3,8 +3,6 @@
  */
 package snap.web;
 import java.io.*;
-import java.net.JarURLConnection;
-import java.net.URL;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.zip.*;
@@ -92,7 +90,7 @@ public class ZipFileSite extends WebSite {
         if(_trim && !anEntry.isDirectory() && !isInterestingPath(anEntry.getName())) return;
 
         // Get path and add entry to entries and path to dirs lists
-        String path = FilePathUtils.getStandardized('/' + anEntry.getName());
+        String path = FilePathUtils.getStandardizedPath('/' + anEntry.getName());
         _entries.put(path, anEntry);
         addDirListPath(path);
     }
@@ -103,7 +101,7 @@ public class ZipFileSite extends WebSite {
     protected List <String> getDirList(String aPath)
     {
         // Get parent path and return list for path
-        String ppath =  FilePathUtils.getParent(aPath);
+        String ppath =  FilePathUtils.getParentPath(aPath);
         List <String> dlist = _dirs.get(ppath); if(dlist!=null) return dlist;
 
         // If list not found, create, set and return
@@ -118,7 +116,7 @@ public class ZipFileSite extends WebSite {
     protected void addDirListPath(String aPath)
     {
         if(aPath.length()<=1) return;
-        String path = FilePathUtils.getStandardized(aPath);
+        String path = FilePathUtils.getStandardizedPath(aPath);
 
         List <String> dlist = getDirList(path);
         if(!dlist.contains(path))

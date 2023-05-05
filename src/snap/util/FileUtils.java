@@ -49,12 +49,12 @@ public class FileUtils {
     /**
      * Returns the file name for a file.
      */
-    public static String getFileName(File aFile)  { return FilePathUtils.getFileName(getPath(aFile)); }
+    public static String getFileName(File aFile)  { return FilePathUtils.getFilename(getPath(aFile)); }
 
     /**
      * Returns the file name for a file.
      */
-    public static String getFileNameSimple(File aFile)  { return FilePathUtils.getFileNameSimple(getPath(aFile)); }
+    public static String getFileNameSimple(File aFile)  { return FilePathUtils.getFilenameSimple(getPath(aFile)); }
 
     /**
      * Returns the file name for a file.
