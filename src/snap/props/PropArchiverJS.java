@@ -92,7 +92,8 @@ public class PropArchiverJS extends PropArchiver {
         PropNode propNode = PropNodeJSON.convertJSONToPropNode(objectJS);
 
         // Convert PropNode (graph) to PropObject
-        PropObject propObject = convertNodeToNative(propNode, null);
+        PropObject rootObject = getRootObject();
+        PropObject propObject = convertNodeToNative(propNode, null, rootObject);
 
         // Return
         return propObject;

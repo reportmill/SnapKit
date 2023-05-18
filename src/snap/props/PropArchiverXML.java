@@ -94,7 +94,8 @@ public class PropArchiverXML extends PropArchiver {
 
         // Convert PropNode (graph) to PropObject
         Prop prop = new Prop(anElement.getName(), Object.class, null);
-        PropObject propObject = convertNodeToNative(propNode, prop);
+        PropObject rootObject = getRootObject();
+        PropObject propObject = convertNodeToNative(propNode, prop, rootObject);
 
         // Return
         return propObject;

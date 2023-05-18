@@ -4,6 +4,7 @@
 package snap.props;
 import snap.util.ArrayUtils;
 import java.lang.reflect.Array;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,9 @@ public class PropArchiver {
 
     // A map of names to Class names, for unarchival
     private Map<String,Class<?>>  _classMap;
+
+    // The root object (for unarchival, optional)
+    private PropObject _rootObject;
 
     // Resources
     private Resource[]  _resources = new Resource[0];
@@ -33,6 +37,16 @@ public class PropArchiver {
     {
         _helper = new PropArchiverHpr(this);
     }
+
+    /**
+     * Returns the object to read properties into.
+     */
+    public PropObject getRootObject()  { return _rootObject; }
+
+    /**
+     * Sets the object to read properties into.
+     */
+    public void setRootObject(PropObject rootObject)  { _rootObject = rootObject; }
 
     /**
      * Returns a PropNode for given PropObject.
@@ -153,14 +167,6 @@ public class PropArchiver {
     /**
      * Converts a PropNode (graph) to PropObject.
      */
-    protected PropObject convertNodeToNative(PropNode propNode, Prop aProp)
-    {
-        return convertNodeToNative(propNode, aProp, null);
-    }
-
-    /**
-     * Converts a PropNode (graph) to PropObject.
-     */
     protected PropObject convertNodeToNative(PropNode propNode, Prop aProp, PropObject aPropObject)
     {
         // Get PropObject
@@ -275,7 +281,7 @@ public class PropArchiver {
     /**
      * Creates the map of names to class names.
      */
-    protected Map<String,Class<?>> createClassMap()  { return null; }
+    protected Map<String,Class<?>> createClassMap()  { return new HashMap<>(); }
 
     /**
      * Returns a class for name.
@@ -369,7 +375,7 @@ public class PropArchiver {
         // Convert back - not sure I need to create prop
         Class<?> propObjClass = aPropObject.getClass();
         Prop prop = new Prop(propObjClass.getSimpleName(), propObjClass, null);
-        T copy = (T) convertNodeToNative(propNode, prop);
+        T copy = (T) convertNodeToNative(propNode, prop, null);
 
         // Return
         return copy;
