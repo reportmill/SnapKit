@@ -176,42 +176,6 @@ public abstract class PropObject implements PropChange.DoChange {
     }
 
     /**
-     * Returns prop default as int.
-     */
-    public final boolean getPropDefaultBool(String aPropName)
-    {
-        Object val = getPropDefault(aPropName);
-        return Convert.boolValue(val);
-    }
-
-    /**
-     * Returns prop default as int.
-     */
-    public final int getPropDefaultInt(String aPropName)
-    {
-        Object val = getPropDefault(aPropName);
-        return Convert.intValue(val);
-    }
-
-    /**
-     * Returns prop default as double.
-     */
-    public final double getPropDefaultDouble(String aPropName)
-    {
-        Object val = getPropDefault(aPropName);
-        return Convert.doubleValue(val);
-    }
-
-    /**
-     * Returns prop default as String.
-     */
-    public final String getPropDefaultString(String aPropName)
-    {
-        Object val = getPropDefault(aPropName);
-        return Convert.stringValue(val);
-    }
-
-    /**
      * Add listener.
      */
     public void addPropChangeListener(PropChangeListener aPCL)

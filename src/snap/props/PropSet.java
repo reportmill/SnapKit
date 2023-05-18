@@ -3,20 +3,25 @@
  */
 package snap.props;
 import snap.util.ArrayUtils;
-
+import snap.util.ClassUtils;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * This class holds a list of props for a PropObject class.
  */
 public class PropSet {
 
+    // The class that this prop set is for
+    private Class<? extends PropObject> _propObjectClass;
+
     // An array of all known properties for class
     private Prop[]  _props = new Prop[0];
 
     // A map of props by name
     private Map<String,Prop>  _propsMap = new HashMap<>();
+
+    // A default instance of PropObject class
+    private PropObject _defaultInstance;
 
     // An array of all known prop names for class
     private String[]  _propNames;
@@ -30,9 +35,16 @@ public class PropSet {
     /**
      * Constructor.
      */
-    public PropSet()
+    public PropSet(Class<? extends PropObject> propObjectClass)
     {
+        super();
+        _propObjectClass = propObjectClass;
     }
+
+    /**
+     * Returns the PropObject class.
+     */
+    public Class<? extends PropObject> getPropObjectClass()  { return _propObjectClass; }
 
     /**
      * Returns the props.
@@ -84,6 +96,16 @@ public class PropSet {
     }
 
     /**
+     * Adds new property for given name and class.
+     */
+    public Prop addPropNamed(String aPropName, Class<?> aClass)
+    {
+        PropObject defaultInstance = getDefaultInstance();
+        Object defaultValue = defaultInstance.getPropValue(aPropName);
+        return addPropNamed(aPropName, aClass, defaultValue);
+    }
+
+    /**
      * Adds new property for given name, class and default value.
      */
     public Prop addPropNamed(String aPropName, Class<?> aClass, Object aDefault)
@@ -91,6 +113,17 @@ public class PropSet {
         Prop prop = new Prop(aPropName, aClass, aDefault);
         addProp(prop);
         return prop;
+    }
+
+    /**
+     * Returns the default object.
+     */
+    public PropObject getDefaultInstance()
+    {
+        if (_defaultInstance != null) return _defaultInstance;
+        Class<? extends PropObject> propObjClass = getPropObjectClass();
+        PropObject defaultInstance = ClassUtils.newInstance(propObjClass);
+        return _defaultInstance = defaultInstance;
     }
 
     /**
@@ -103,8 +136,7 @@ public class PropSet {
 
         // Stream props to propNames via map
         Prop[] props = getProps();
-        Stream<String> propNamesStream = Arrays.stream(props).map(i -> i.getName());
-        String[] propNames = propNamesStream.toArray(size -> new String[size]);
+        String[] propNames = ArrayUtils.map(props, prop -> prop.getName(), String.class);
 
         // Set/return
         return _propNames = propNames;
@@ -119,9 +151,8 @@ public class PropSet {
         if (_archivalProps != null) return _archivalProps;
 
         // Stream props to archivalProps via filter
-        Stream<Prop> propsStream = Arrays.stream(getProps());
-        Stream<Prop> archivalPropsStream = propsStream.filter(p -> !p.isSkipArchival());
-        Prop[] archivalProps = archivalPropsStream.toArray(size -> new Prop[size]);
+        Prop[] props = getProps();
+        Prop[] archivalProps = ArrayUtils.filter(props, prop -> !prop.isSkipArchival());
 
         // Set/return
         return _archivalProps = archivalProps;
@@ -137,20 +168,31 @@ public class PropSet {
     }
 
     /**
+     * Standard toString implementation.
+     */
+    @Override
+    public String toString()
+    {
+        String name = getClass().getSimpleName();
+        String propNames = Arrays.toString(getPropNames());
+        return name + "{ " + propNames + " }";
+    }
+
+    /**
      * Returns the PropSet for given class.
      */
     public static PropSet getPropSetForPropObject(PropObject aPropObj)
     {
         // Get PropSet for class (if already set, just return)
-        Class<? extends PropObject> cls = aPropObj.getClass();
-        PropSet propSet = _propSets.get(cls);
+        Class<? extends PropObject> propObjClass = aPropObj.getClass();
+        PropSet propSet = _propSets.get(propObjClass);
         if (propSet != null)
             return propSet;
 
         // Create PropSet, init, and add to map
-        propSet = new PropSet();
+        propSet = new PropSet(propObjClass);
         aPropObj.initProps(propSet);
-        _propSets.put(cls, propSet);
+        _propSets.put(propObjClass, propSet);
 
         // Return
         return propSet;
