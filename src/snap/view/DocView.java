@@ -13,7 +13,7 @@ import snap.util.*;
 public class DocView extends ParentView {
 
     // The pages
-    private List<PageView>  _pages = new ArrayList();
+    private List<PageView>  _pages = new ArrayList<>();
     
     // The page margin
     private Insets  _pageMargin = new Insets(36);
@@ -25,11 +25,12 @@ public class DocView extends ParentView {
     public static final String PageMargin_Prop = "PageMargin";
 
     /**
-     * Creates a new DocNode.
+     * Constructor.
      */
     public DocView()
     {
-        setAlign(Pos.CENTER);
+        super();
+        _align = Pos.CENTER_LEFT;
     }
 
     /**
@@ -149,11 +150,6 @@ public class DocView extends ParentView {
             removePage(getPage());
         addPage(aPage);
     }
-
-    /**
-     * Returns the default alignment.
-     */
-    public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
     /**
      * Returns the preferred width.

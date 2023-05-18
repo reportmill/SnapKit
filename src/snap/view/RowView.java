@@ -23,6 +23,7 @@ public class RowView extends ChildView {
     public RowView()
     {
         super();
+        _align = Pos.CENTER_LEFT;
     }
 
     /**
@@ -39,11 +40,6 @@ public class RowView extends ChildView {
         firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
         relayout();
     }
-
-    /**
-     * Returns the default alignment.
-     */
-    public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
     /**
      * Returns the preferred width.

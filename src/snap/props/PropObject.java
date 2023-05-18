@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.props;
-import snap.util.Convert;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -53,13 +52,14 @@ public abstract class PropObject implements PropChange.DoChange {
             return prop;
 
         // Look for prop in extra prop set
-        Prop[] propsExtra = getPropsForArchivalExtra();
-        if (propsExtra != null)
-        for (Prop prp : propsExtra)
-            if (prp.getName().equals(aPropName))
-                return prp;
+        Prop[] extraProps = getPropsForArchivalExtra();
+        if (extraProps != null) {
+            for (Prop extraProp : extraProps)
+                if (extraProp.getName().equals(aPropName))
+                    return extraProp;
+        }
 
-        // Complain since it's unexpected to ask for a non-existant prop
+        // Complain since it's unexpected to ask for a non-existent prop
         System.err.println("PropObject.getPropForName: Prop not found for: " + getClass() + ": " + aPropName);
         return null;
     }

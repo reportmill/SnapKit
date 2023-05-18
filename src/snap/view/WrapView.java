@@ -28,6 +28,8 @@ public class WrapView extends ParentView {
      */
     public WrapView(View aView)
     {
+        super();
+        _align = Pos.CENTER;
         _content = aView;
         addChild(aView);
     }
@@ -217,9 +219,4 @@ public class WrapView extends ParentView {
         double rotate = _content.getRotate();
         return MathUtils.equals(Math.abs(rotate), 90);
     }
-
-    /**
-     * Override to align to middle.
-     */
-    public Pos getDefaultAlign()  { return Pos.CENTER; }
 }

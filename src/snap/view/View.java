@@ -59,7 +59,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     private boolean  _growWidth, _growHeight;
 
     // Whether this view has a vertical orientation.
-    private boolean  _vertical;
+    protected boolean  _vertical;
 
     // The view minimum width and height
     private double  _minWidth, _minHeight;
@@ -238,11 +238,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
 
         // Set property defaults
         _scaleX = _scaleY = 1;
-        _align = getDefaultAlign();
-        _margin = (Insets) getPropDefault(Margin_Prop);
-        _padding = (Insets) getPropDefault(Padding_Prop);
-        _spacing = getPropDefaultDouble(Spacing_Prop);
-        _vertical = getPropDefaultBool(Vertical_Prop);
+        _align = DEFAULT_ALIGN;
+        _margin = DEFAULT_MARGIN;
+        _padding = DEFAULT_PADDING;
+        _spacing = DEFAULT_SPACING;
+        _vertical = DEFAULT_VERTICAL;
         _minWidth = _minHeight = -1;
         _maxWidth = _maxHeight = -1;
         _prefWidth = _prefHeight = -1;
@@ -1140,7 +1140,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         }
 
         // Ask WindowHpr to do it
-        WindowView.WindowHpr hpr = win.getHelper();
+        WindowView.WindowHpr<?> hpr = win.getHelper();
         Point pnt = hpr.viewToScreen(this, aX, aY);
         return pnt;
     }
@@ -2061,11 +2061,6 @@ public class View extends PropObject implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns the default alignment.
-     */
-    public Pos getDefaultAlign()  { return Pos.TOP_LEFT; }
-
-    /**
      * Returns the default border.
      */
     public Border getDefaultBorder()  { return null; }
@@ -2798,11 +2793,11 @@ public class View extends PropObject implements XMLArchiver.Archivable {
         aPropSet.addPropNamed(TransY_Prop, double.class, 0d);
 
         // Align, Margin, Padding, Spacing, Vertical
-        aPropSet.addPropNamed(Align_Prop, Pos.class, DEFAULT_ALIGN);
-        aPropSet.addPropNamed(Margin_Prop, Insets.class, DEFAULT_MARGIN);
-        aPropSet.addPropNamed(Padding_Prop, Insets.class, DEFAULT_MARGIN);
-        aPropSet.addPropNamed(Spacing_Prop, double.class, DEFAULT_SPACING);
-        aPropSet.addPropNamed(Vertical_Prop, boolean.class, DEFAULT_VERTICAL);
+        aPropSet.addPropNamed(Align_Prop, Pos.class);
+        aPropSet.addPropNamed(Margin_Prop, Insets.class);
+        aPropSet.addPropNamed(Padding_Prop, Insets.class);
+        aPropSet.addPropNamed(Spacing_Prop, double.class);
+        aPropSet.addPropNamed(Vertical_Prop, boolean.class);
 
         // LeanX, LeanY, GrowWidth, GrowHeight
         aPropSet.addPropNamed(LeanX_Prop, HPos.class, null);
@@ -3132,7 +3127,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             e.add(Opacity_Prop, getOpacity());
 
         // Archive Align, Margin, Padding, Spacing
-        if (getAlign() != getDefaultAlign())
+        if (!isPropDefault(Align_Prop))
             e.add(Align_Prop, getAlign());
         if (!isPropDefault(Margin_Prop))
             e.add(Margin_Prop, getMargin().getString());

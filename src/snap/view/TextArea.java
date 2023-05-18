@@ -109,6 +109,9 @@ public class TextArea extends View {
      */
     public TextArea()
     {
+        super();
+        _padding = DEFAULT_TEXT_AREA_PADDING;
+
         // Configure
         setFocusPainted(false);
 
@@ -1884,20 +1887,6 @@ public class TextArea extends View {
         String str = getText();
         if (str.length() > 40) str = str.substring(0, 40) + "...";
         return getClass().getSimpleName() + ": " + str;
-    }
-
-    /**
-     * Override for custom defaults.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        // Padding
-        if (aPropName == Padding_Prop)
-            return DEFAULT_TEXT_AREA_PADDING;
-
-        // Do normal version
-        return super.getPropDefault(aPropName);
     }
 
     /**

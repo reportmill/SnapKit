@@ -25,20 +25,29 @@ public class BoxView extends ParentView implements ViewHost {
     public static final String Content_Prop = "Content";
 
     /**
-     * Creates a new Box.
+     * Constructor.
      */
-    public BoxView()  { }
+    public BoxView()
+    {
+        super();
+        _align = Pos.CENTER;
+    }
 
     /**
-     * Creates a new Box for content.
+     * Constructor for content.
      */
-    public BoxView(View aContent)  { setContent(aContent); }
+    public BoxView(View aContent)
+    {
+        this();
+        setContent(aContent);
+    }
 
     /**
-     * Creates a new Box for content with FillWidth, FillHeight params.
+     * Constructor for content with FillWidth, FillHeight params.
      */
     public BoxView(View aContent, boolean isFillWidth, boolean isFillHeight)
     {
+        this();
         setContent(aContent);
         setFillWidth(isFillWidth);
         setFillHeight(isFillHeight);
@@ -100,11 +109,6 @@ public class BoxView extends ParentView implements ViewHost {
         firePropChange(FillHeight_Prop, _fillHeight, _fillHeight = aValue);
         relayout();
     }
-
-    /**
-     * Override to change to CENTER.
-     */
-    public Pos getDefaultAlign()  { return Pos.CENTER; }
 
     /**
      * Override.

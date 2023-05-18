@@ -49,6 +49,8 @@ public class Label extends ParentView {
     public Label()
     {
         super();
+        _align = Pos.CENTER_LEFT;
+        _spacing = DEFAULT_LABEL_SPACING;
     }
 
     /**
@@ -56,6 +58,7 @@ public class Label extends ParentView {
      */
     public Label(String aStr)
     {
+        this();
         setText(aStr);
     }
 
@@ -64,6 +67,7 @@ public class Label extends ParentView {
      */
     public Label(View aGrph, String aStr, View aGrphAfter)
     {
+        this();
         setGraphic(aGrph);
         setText(aStr);
         setGraphicAfter(aGrphAfter);
@@ -386,11 +390,6 @@ public class Label extends ParentView {
     public String getValuePropName()  { return "Text"; }
 
     /**
-     * Override to make default align center-left.
-     */
-    public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
-
-    /**
      * Override to forward to StringView.
      */
     public void setAlign(Pos aPos)
@@ -398,20 +397,6 @@ public class Label extends ParentView {
         super.setAlign(aPos);
         if (isStringViewSet())
             getStringView().setAlignX(getAlignX());
-    }
-
-    /**
-     * Override for custom defaults.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        // Spacing
-        if (aPropName == Spacing_Prop)
-            return DEFAULT_LABEL_SPACING;
-
-        // Do normal version
-        return super.getPropDefault(aPropName);
     }
 
     /**

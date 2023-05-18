@@ -39,6 +39,9 @@ public class MenuItem extends ButtonBase implements Cloneable {
     public MenuItem()
     {
         super();
+        _align = Pos.CENTER_LEFT;
+        _padding = DEFAULT_MENU_ITEM_PADDING;
+        _showArea = DEFAULT_MENU_ITEM_SHOW_AREA;
     }
 
     /**
@@ -109,11 +112,6 @@ public class MenuItem extends ButtonBase implements Cloneable {
      * Returns the parent Menu (if there is one).
      */
     public Menu getParentMenu()  { return _parentMenu; }
-
-    /**
-     * Returns the default alignment for button.
-     */
-    public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
     /**
      * Returns a mapped property name.
@@ -197,25 +195,6 @@ public class MenuItem extends ButtonBase implements Cloneable {
         if (aPropName.equals("Value") || aPropName.equals(Selected_Prop))
             setSelected(Convert.boolValue(aValue));
         else super.setPropValue(aPropName, aValue);
-    }
-
-    /**
-     * Override for custom defaults.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        switch (aPropName) {
-
-            // ShowArea
-            case ShowArea_Prop: return DEFAULT_MENU_ITEM_SHOW_AREA;
-
-            // Padding
-            case Padding_Prop: return DEFAULT_MENU_ITEM_PADDING;
-
-            // Do normal version
-            default: return super.getPropDefault(aPropName);
-        }
     }
 
     /**

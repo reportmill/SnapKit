@@ -14,6 +14,15 @@ public class BorderView extends ParentView {
     private View _top, _center, _bottom, _left, _right;
 
     /**
+     * Constructor.
+     */
+    public BorderView()
+    {
+        super();
+        _align = Pos.CENTER;
+    }
+
+    /**
      * Returns the center node.
      */
     public View getCenter()
@@ -120,14 +129,6 @@ public class BorderView extends ParentView {
             addChild(aView);
         _right = aView;
         firePropChange("Right", old, aView);
-    }
-
-    /**
-     * Returns the default alignment.
-     */
-    public Pos getDefaultAlign()
-    {
-        return Pos.CENTER;
     }
 
     /**
@@ -245,7 +246,7 @@ public class BorderView extends ParentView {
      */
     public static double getPrefWidth(ParentView aPar, View aCtr, View aTop, View aRgt, View aBtm, View aLft, double aH)
     {
-        ViewProxy proxy = new BorderViewProxy(aPar, aCtr, aTop, aRgt, aBtm, aLft);
+        ViewProxy<?> proxy = new BorderViewProxy(aPar, aCtr, aTop, aRgt, aBtm, aLft);
         return proxy.getBestWidth(aH);
     }
 
@@ -254,7 +255,7 @@ public class BorderView extends ParentView {
      */
     public static double getPrefHeight(ParentView aPar, View aCtr, View aTop, View aRgt, View aBtm, View aLft, double aW)
     {
-        ViewProxy proxy = new BorderViewProxy(aPar, aCtr, aTop, aRgt, aBtm, aLft);
+        ViewProxy<?> proxy = new BorderViewProxy(aPar, aCtr, aTop, aRgt, aBtm, aLft);
         return proxy.getBestHeight(aW);
     }
 

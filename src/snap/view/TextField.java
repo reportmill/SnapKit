@@ -74,10 +74,14 @@ public class TextField extends ParentView {
     static Color SELECTION_COLOR = new Color(181, 214, 254, 255);
 
     /**
-     * Creates a new TextField.
+     * Constructor.
      */
     public TextField()
     {
+        super();
+        _align = Pos.CENTER_LEFT;
+        _padding = DEFAULT_TEXT_FIELD_PADDING;
+
         setFill(Color.WHITE);
         setBorder(DEFAULT_TEXT_FIELD_BORDER);
         setBorderRadius(DEFAULT_TEXT_FIELD_BORDER_RADIUS);
@@ -165,12 +169,6 @@ public class TextField extends ParentView {
      * Returns the label in the background.
      */
     public Label getLabel()  { return _label; }
-
-    /**
-     * Returns the default alignment.
-     */
-    @Override
-    public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
     /**
      * Returns the default border.
@@ -1135,20 +1133,6 @@ public class TextField extends ParentView {
         if (str.length() > 40)
             str = str.substring(0, 40) + "...";
         return getClass().getSimpleName() + ": " + str;
-    }
-
-    /**
-     * Override for custom defaults.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        // Padding
-        if (aPropName == Padding_Prop)
-            return DEFAULT_TEXT_FIELD_PADDING;
-
-        // Do normal version
-        return super.getPropDefault(aPropName);
     }
 
     /**

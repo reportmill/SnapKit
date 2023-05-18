@@ -26,6 +26,8 @@ public class ColView extends ChildView {
     public ColView()
     {
         super();
+        _align = Pos.TOP_LEFT;
+        _vertical = DEFAULT_COL_VIEW_VERTICAL;
     }
 
     /**
@@ -42,11 +44,6 @@ public class ColView extends ChildView {
         firePropChange(FillWidth_Prop, _fillWidth, _fillWidth = aValue);
         relayout();
     }
-
-    /**
-     * Returns the default alignment.
-     */
-    public Pos getDefaultAlign()  { return Pos.TOP_LEFT; }
 
     /**
      * Returns the preferred width.
@@ -130,20 +127,6 @@ public class ColView extends ChildView {
             // Do normal version
             default: super.setPropValue(aPropName, aValue);
         }
-    }
-
-    /**
-     * Override for custom defaults.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        // Vertical
-        if (aPropName == Vertical_Prop)
-            return DEFAULT_COL_VIEW_VERTICAL;
-
-        // Do normal version
-        return super.getPropDefault(aPropName);
     }
 
     /**

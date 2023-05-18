@@ -15,16 +15,22 @@ public class RadioButton extends ToggleButton {
     private Label  _radio;
 
     // Constants for overridden defaults
-    private static final boolean DEFAULT_RADIO_BUTTON_SHOW_AREA = false;
     private static final Pos DEFAULT_RADIO_BUTTON_ALIGN = Pos.CENTER_LEFT;
     private static final Insets DEFAULT_RADIO_BUTTON_PADDING = new Insets(2);
     private static final int DEFAULT_RADIO_BUTTON_SPACING = 5;
+    private static final boolean DEFAULT_RADIO_BUTTON_SHOW_AREA = false;
 
     /**
      * Creates RadioButton.
      */
     public RadioButton()
     {
+        super();
+        _align = DEFAULT_RADIO_BUTTON_ALIGN;
+        _padding = DEFAULT_RADIO_BUTTON_PADDING;
+        _spacing = DEFAULT_RADIO_BUTTON_SPACING;
+        _showArea = DEFAULT_RADIO_BUTTON_SHOW_AREA;
+
         // Create/add radio
         _radio = new Label();
         _radio.setPrefSize(16, 16);
@@ -74,11 +80,6 @@ public class RadioButton extends ToggleButton {
     }
 
     /**
-     * Returns the default alignment for button.
-     */
-    public Pos getDefaultAlign()  { return DEFAULT_RADIO_BUTTON_ALIGN; }
-
-    /**
      * Returns the preferred width.
      */
     protected double getPrefWidthImpl(double aH)
@@ -100,26 +101,5 @@ public class RadioButton extends ToggleButton {
     protected void layoutImpl()
     {
         RowView.layout(this, false);
-    }
-
-    /**
-     * Override to customize.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        switch (aPropName) {
-
-            // ShowArea
-            case ShowArea_Prop: return DEFAULT_RADIO_BUTTON_SHOW_AREA;
-
-            // Align, Padding, Spacing
-            case Align_Prop: return DEFAULT_RADIO_BUTTON_ALIGN;
-            case Padding_Prop: return DEFAULT_RADIO_BUTTON_PADDING;
-            case Spacing_Prop: return DEFAULT_RADIO_BUTTON_SPACING;
-
-            // Do normal version
-            default: return super.getPropDefault(aPropName);
-        }
     }
 }

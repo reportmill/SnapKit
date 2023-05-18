@@ -33,6 +33,9 @@ public class ArrowView extends ParentView {
      */
     public ArrowView()
     {
+        super();
+        _align = Pos.CENTER;
+
         // Enable Action event
         setActionable(true);
 
@@ -321,14 +324,6 @@ public class ArrowView extends ParentView {
     protected void layoutImpl()
     {
         RowView.layout(this, false);
-    }
-
-    /**
-     * Returns the default alignment.
-     */
-    public Pos getDefaultAlign()
-    {
-        return Pos.CENTER;
     }
 
     /**

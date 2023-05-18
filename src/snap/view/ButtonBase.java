@@ -7,6 +7,7 @@ import snap.geom.Pos;
 import snap.geom.RoundRect;
 import snap.geom.Shape;
 import snap.gfx.*;
+import snap.props.PropSet;
 import snap.util.*;
 
 import java.util.Objects;
@@ -23,7 +24,7 @@ public class ButtonBase extends ParentView {
     private String  _imageName;
     
     // Whether button displays the standard background area
-    private boolean  _showArea;
+    protected boolean _showArea;
     
     // The position of the button when in a group (determines corner rendering)
     private Pos  _pos;
@@ -57,9 +58,12 @@ public class ButtonBase extends ParentView {
      */
     public ButtonBase()
     {
+        super();
+
         // Set default properties
+        _align = Pos.CENTER;
         _borderRadius = 4;
-        _showArea = getPropDefaultBool(ShowArea_Prop);
+        _showArea = DEFAULT_SHOW_AREA;
 
         // Config
         setFocusable(true);
@@ -342,11 +346,6 @@ public class ButtonBase extends ParentView {
     }
 
     /**
-     * Returns the default alignment for button.
-     */
-    public Pos getDefaultAlign()  { return Pos.CENTER; }
-
-    /**
      * Returns the preferred width.
      */
     protected double getPrefWidthImpl(double aH)
@@ -396,14 +395,15 @@ public class ButtonBase extends ParentView {
     }
 
     /**
-     * Override to customize defaults.
+     * Override to add properties for this class.
      */
     @Override
-    public Object getPropDefault(String aPropName)
+    protected void initProps(PropSet aPropSet)
     {
-        if (aPropName == ShowArea_Prop)
-            return DEFAULT_SHOW_AREA;
-        return super.getPropDefault(aPropName);
+        super.initProps(aPropSet);
+
+        // ShowArea
+        aPropSet.addPropNamed(ShowArea_Prop, boolean.class);
     }
 
     /**

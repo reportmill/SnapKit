@@ -53,6 +53,9 @@ public class TabView extends ParentView implements Selectable<Tab> {
      */
     public TabView()
     {
+        super();
+        _vertical = true;
+
         setActionable(true);
         _tabSide = Side.TOP;
         _classic = true;
@@ -387,20 +390,6 @@ public class TabView extends ParentView implements Selectable<Tab> {
                 _tabBar.setOwnerChildren(anOwner);
             else child.setOwner(anOwner);
         }
-    }
-
-    /**
-     * Override for custom defaults.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        // Vertical
-        if (aPropName == Vertical_Prop)
-            return true;
-
-        // Do normal version
-        return super.getPropDefault(aPropName);
     }
 
     /**

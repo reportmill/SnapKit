@@ -43,6 +43,7 @@ public class StringView extends View implements Cloneable {
     public StringView()
     {
         super();
+        _align = Pos.CENTER_LEFT;
 
         // Create TextRun
         _styledString = new StyledString();
@@ -283,11 +284,6 @@ public class StringView extends View implements Cloneable {
         int y2 = (int) Math.round(aY - height / 2);
         setXY(x2, y2);
     }
-
-    /**
-     * Override to make default center-left.
-     */
-    public Pos getDefaultAlign()  { return Pos.CENTER_LEFT; }
 
     /**
      * Override to clear size info.

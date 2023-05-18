@@ -51,6 +51,7 @@ public class ImageView extends View {
     public ImageView()
     {
         super();
+        _align = Pos.CENTER;
     }
 
     /**
@@ -58,7 +59,7 @@ public class ImageView extends View {
      */
     public ImageView(Image anImage)
     {
-        super();
+        this();
         setImage(anImage);
     }
 
@@ -67,18 +68,18 @@ public class ImageView extends View {
      */
     public ImageView(Image anImage, boolean isFillWidth, boolean isFillHeight)
     {
-        super();
+        this();
         setImage(anImage);
         setFillWidth(isFillWidth);
         setFillHeight(isFillHeight);
     }
 
     /**
-     * Creates a new ImageNode for given URL.
+     * Constructor for given source URL.
      */
     public ImageView(Object aSource)
     {
-        super();
+        this();
         _image = Image.getImageForSource(aSource);
     }
 
@@ -277,11 +278,6 @@ public class ImageView extends View {
         double paintY = areaBounds.y + Math.round(ViewUtils.getAlignY(anAlign) * (areaBounds.height - paintH));
         return new Rect(paintX, paintY, paintW, paintH);
     }
-
-    /**
-     * Returns the default alignment.
-     */
-    public Pos getDefaultAlign()  { return Pos.CENTER; }
 
     /**
      * Returns the preferred width.

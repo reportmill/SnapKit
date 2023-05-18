@@ -11,9 +11,13 @@ import snap.geom.Pos;
 public class StackView extends ChildView {
 
     /**
-     * Returns the default alignment.
+     * Constructor.
      */
-    public Pos getDefaultAlign()  { return Pos.CENTER; }
+    public StackView()
+    {
+        super();
+        _align = Pos.CENTER;
+    }
 
     /**
      * Returns the preferred width.
@@ -52,16 +56,18 @@ public class StackView extends ChildView {
     public static void layout(ParentView aPar)
     {
         // Get children (just return if empty)
-        View children[] = aPar.getChildrenManaged(); if (children.length==0) return;
+        View[] children = aPar.getChildrenManaged(); if (children.length == 0) return;
 
         // Get parent bounds for insets
         Insets ins = aPar.getInsetsAll();
-        double px = ins.left, pw = aPar.getWidth() - ins.getWidth(); if(pw<0) pw = 0;
-        double py = ins.top, ph = aPar.getHeight() - ins.getHeight(); if(ph<0) ph = 0;
+        double areaX = ins.left;
+        double areaY = ins.top;
+        double areaW = aPar.getWidth() - ins.getWidth(); if(areaW < 0) areaW = 0;
+        double areaH = aPar.getHeight() - ins.getHeight(); if(areaH < 0) areaH = 0;
 
         // Get child bounds
-        double ax = ViewUtils.getAlignX(aPar);
-        double ay = ViewUtils.getAlignY(aPar);
+        double alignX = ViewUtils.getAlignX(aPar);
+        double alignY = ViewUtils.getAlignY(aPar);
 
         // Layout children
         for (View child : children) {
@@ -70,29 +76,29 @@ public class StackView extends ChildView {
             Insets marg = child.getMargin();
 
             // Get child width
-            double maxW = Math.max(pw - marg.getWidth(), 0);
-            double cw = child.isGrowWidth() ? maxW : Math.min(child.getBestWidth(-1), maxW);
+            double maxW = Math.max(areaW - marg.getWidth(), 0);
+            double childW = child.isGrowWidth() ? maxW : Math.min(child.getBestWidth(-1), maxW);
 
             // Calc x accounting for margin and alignment
-            double cx = px + marg.left;
-            if (cw<maxW) {
-                double ax2 = Math.max(ax,ViewUtils.getLeanX(child));
-                cx = Math.max(cx, px + Math.round((pw-cw)*ax2));
+            double childX = areaX + marg.left;
+            if (childW < maxW) {
+                double alignX2 = Math.max(alignX, ViewUtils.getLeanX(child));
+                childX = Math.max(childX, areaX + Math.round((areaW - childW) * alignX2));
             }
 
             // Get child height
-            double maxH = Math.max(ph - marg.getHeight(), 0);
-            double ch = child.isGrowHeight() ? maxH : Math.min(child.getBestHeight(-1), maxH);
+            double maxH = Math.max(areaH - marg.getHeight(), 0);
+            double childH = child.isGrowHeight() ? maxH : Math.min(child.getBestHeight(-1), maxH);
 
             // Calc y accounting for margin and alignment
-            double cy = py + marg.top;
-            if (ch<maxH) {
-                double ay2 = Math.max(ay,ViewUtils.getLeanY(child));
-                cy = Math.max(cy, py + Math.round((ph-ch)*ay2));
+            double childY = areaY + marg.top;
+            if (childH < maxH) {
+                double alignY2 = Math.max(alignY, ViewUtils.getLeanY(child));
+                childY = Math.max(childY, areaY + Math.round((areaH - childH) * alignY2));
             }
 
             // Set child bounds
-            child.setBounds(cx, cy, cw, ch);
+            child.setBounds(childX, childY, childW, childH);
         }
     }
 }

@@ -25,6 +25,12 @@ public class CheckBox extends ToggleButton {
      */
     public CheckBox()
     {
+        super();
+        _align = DEFAULT_CHECK_BOX_ALIGN;
+        _padding = DEFAULT_CHECK_BOX_PADDING;
+        _spacing = DEFAULT_CHECK_BOX_SPACING;
+        _showArea = DEFAULT_CHECK_BOX_SHOW_AREA;
+
         // Create/add check
         _check = new Label();
         _check.setPrefSize(16, 16);
@@ -70,11 +76,6 @@ public class CheckBox extends ToggleButton {
     }
 
     /**
-     * Returns the default alignment for CheckBox.
-     */
-    public Pos getDefaultAlign()  { return DEFAULT_CHECK_BOX_ALIGN; }
-
-    /**
      * Returns the preferred width.
      */
     protected double getPrefWidthImpl(double aH)
@@ -96,26 +97,5 @@ public class CheckBox extends ToggleButton {
     protected void layoutImpl()
     {
         RowView.layout(this, false);
-    }
-
-    /**
-     * Override to customize.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        switch (aPropName) {
-
-            // ShowArea
-            case ShowArea_Prop: return DEFAULT_CHECK_BOX_SHOW_AREA;
-
-            // Align, Padding, Spacing
-            case Align_Prop: return DEFAULT_CHECK_BOX_ALIGN;
-            case Padding_Prop: return DEFAULT_CHECK_BOX_PADDING;
-            case Spacing_Prop: return DEFAULT_CHECK_BOX_SPACING;
-
-            // Do normal version
-            default: return super.getPropDefault(aPropName);
-        }
     }
 }

@@ -48,11 +48,11 @@ public class TitleView extends ParentView implements ViewHost {
      */
     public TitleView()
     {
+        super();
+        _padding = DEFAULT_TITLE_VIEW_PADDING;
+
         // Create/add TitleArea
         setTitleStyle(TitleStyle.EtchBorder);
-
-        // Configure TitleView
-        setPadding(2,2,2,2);
     }
 
     /**
@@ -409,20 +409,6 @@ public class TitleView extends ParentView implements ViewHost {
      * Returns a mapped property name name.
      */
     protected String getValuePropName()  { return Expanded_Prop; }
-
-    /**
-     * Override for custom defaults.
-     */
-    @Override
-    public Object getPropDefault(String aPropName)
-    {
-        // Padding
-        if (aPropName == Padding_Prop)
-            return DEFAULT_TITLE_VIEW_PADDING;
-
-        // Do normal version
-        return super.getPropDefault(aPropName);
-    }
 
     /**
      * XML archival.
