@@ -5,7 +5,6 @@ package snap.web;
 import snap.util.FilePathUtils;
 import snap.util.SnapUtils;
 import snap.util.URLUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -431,17 +430,11 @@ public class WebURL {
      */
     public void getResponseAndCall(Consumer<WebResponse> aCallback)
     {
-        // Get site/request
-        WebSite site = getSite();
-        WebRequest req = new WebRequest(this);
+        //CompletableFuture<WebResponse> getResponseAsync = CompletableFuture.supplyAsync(() -> getResponse());
+        //getResponseAsync.thenAccept(aCallback);
 
-        // Create runnable to fetch response and call callback
-        Runnable run = () -> {
-            WebResponse resp = site.getResponse(req);
-            aCallback.accept(resp);
-        };
-
-        // Create/start thread for runnable
+        // Create Thread and runnable to fetch response and call callback
+        Runnable run = () -> aCallback.accept(getResponse());
         new Thread(run).start();
     }
 
