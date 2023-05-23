@@ -120,9 +120,21 @@ public class PropSet {
      */
     public PropObject getDefaultInstance()
     {
+        // If already set, just return
         if (_defaultInstance != null) return _defaultInstance;
+
+        // Get instance
         Class<? extends PropObject> propObjClass = getPropObjectClass();
-        PropObject defaultInstance = ClassUtils.newInstance(propObjClass);
+        PropObject defaultInstance = null;
+        while (defaultInstance == null) {
+            try { defaultInstance = ClassUtils.newInstance(propObjClass); }
+            catch (Throwable t) {
+                System.err.println("PropSet.getDefaultInstance: Couldn't create instance of class " + propObjClass.getName());
+                propObjClass = (Class<? extends PropObject>) propObjClass.getSuperclass();
+            }
+        }
+
+        // Set/return
         return _defaultInstance = defaultInstance;
     }
 
