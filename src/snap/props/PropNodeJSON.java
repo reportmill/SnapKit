@@ -1,7 +1,5 @@
 package snap.props;
 import snap.util.*;
-
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -100,15 +98,13 @@ public class PropNodeJSON {
                 JSArray jsonArray = (JSArray) propValue;
                 int count = jsonArray.getValueCount();
 
-                // Handle array of JSObject
+                // Handle array of JSObject: Convert JSObjects to PropNode array and set
                 if (count > 0 && jsonArray.getValue(0) instanceof JSObject) {
 
                     // Convert array
-                    List<?> arrayValues = jsonArray.getNative();
-                    JSObject[] jsonObjArray = arrayValues.toArray(new JSObject[0]);
-                    PropNode[] nodeArray = new PropNode[jsonObjArray.length];
+                    PropNode[] nodeArray = new PropNode[count];
                     for (int i = 0; i < count; i++) {
-                        JSObject jsonObj = jsonObjArray[i];
+                        JSObject jsonObj = (JSObject) jsonArray.getValue(i);
                         PropNode node = convertJSONToPropNode(jsonObj);
                         nodeArray[i] = node;
                     }

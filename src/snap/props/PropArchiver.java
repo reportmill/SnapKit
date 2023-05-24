@@ -197,11 +197,16 @@ public class PropArchiver {
                 // Handle Relation array
                 if (prop.isArray()) {
 
-                    // If node is PropNode, get PropNode values as array (since XML can't differentiate lists)
+                    // If nodeValue is PropNode, get PropNode values as array (since XML can't differentiate lists)
                     if (nodeValue instanceof PropNode)
                         nodeValue = ((PropNode) nodeValue).getPropValuesAsArray();
 
+                    // If node is empty array string, replace with empty PropNode array (since JSON can't differentiate empty lists)
+                    else if (nodeValue instanceof String && ((String) nodeValue).replace(" ", "").equals("[]"))
+                        nodeValue = new PropNode[0];
+
                     // Get relation node array
+                    assert (nodeValue instanceof PropNode[]);
                     PropNode[] relationNodeArray = (PropNode[]) nodeValue;
 
                     // Create native array for prop
@@ -282,6 +287,15 @@ public class PropArchiver {
      * Creates the map of names to class names.
      */
     protected Map<String,Class<?>> createClassMap()  { return new HashMap<>(); }
+
+    /**
+     * Adds a Class to class map.
+     */
+    public void addClassMapClass(Class<? extends PropObject> aClass)
+    {
+        Map<String,Class<?>> classMap = getClassMap();
+        classMap.put(aClass.getSimpleName(), aClass);
+    }
 
     /**
      * Returns a class for name.

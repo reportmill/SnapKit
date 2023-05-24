@@ -250,23 +250,28 @@ public class StringCodec {
      */
     public static String[] getStringArrayForString(String aStr)
     {
-        // String start/end brackets ( '[ one two three ]')
+        // Strip start/end brackets ( '[ one two three ]')
         String str = aStr;
         if (str.startsWith("[") && str.endsWith("]"))
-            str = str.substring(1, str.length() - 1);
+            str = str.substring(1, str.length() - 1).trim();
+        if (str.length() == 0)
+            return new String[0];
 
+        // Split string into strings
         String[] valStrs = str.split("\\s*,\\s*");
         int len = valStrs.length;
         int count = 0;
-        String[] vals = new String[len];
+        String[] stringArray = new String[len];
         for (String valStr : valStrs) {
             if (valStr.startsWith("\""))
                 valStr = valStr.substring(1);
             if (valStr.endsWith("\""))
                 valStr = valStr.substring(0, valStr.length() - 1);
-            vals[count++] = valStr;
+            stringArray[count++] = valStr;
         }
-        return vals;
+
+        // Return
+        return stringArray;
     }
 
     /**
