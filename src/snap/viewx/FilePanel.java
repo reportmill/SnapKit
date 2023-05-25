@@ -37,8 +37,8 @@ public class FilePanel extends ViewOwner {
     // The FilesPane
     private FilesPane  _filesPane;
 
-    // Whether confirm enabled
-    private boolean  _confirmEnabled;
+    // The currently selected file
+    private WebFile _selFile;
 
     // The DialogBox
     private DialogBox  _dialogBox;
@@ -59,7 +59,7 @@ public class FilePanel extends ViewOwner {
     private static WebSite[]  _defaultSites;
 
     // Constants for properties
-    public static final String ConfirmEnabled_Prop = "ConfirmEnabled";
+    public static final String SelFile_Prop = "SelFile";
     public static final String SelSite_Prop = "SelSite";
 
     /**
@@ -189,23 +189,6 @@ public class FilePanel extends ViewOwner {
     public WebFile getSelFile()
     {
         // Get current FilesPane selected/targeted file
-        WebFile selFile = getSelFileImpl();
-
-        // Add to recent files
-        WebURL selFileURL = selFile != null ? selFile.getURL() : null;
-        if (selFileURL != null)
-            RecentFiles.addURL(selFileURL);
-
-        // Return
-        return selFile;
-    }
-
-    /**
-     * Returns the selected file.
-     */
-    protected WebFile getSelFileImpl()
-    {
-        // Get current FilesPane selected/targeted file
         WebFile selFile = _filesPane.getSelOrTargFile();
 
         // If link file, replace with real
@@ -217,20 +200,36 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
-     * Returns whether confirm enabled.
+     * Returns the selected file.
      */
-    public boolean isConfirmEnabled()  { return _confirmEnabled; }
+    public void setSelFile(WebFile aFile)
+    {
+        // If already set, just return
+        if (aFile == _selFile) return;
+
+        // Set value and fire prop change
+        firePropChange(SelFile_Prop, _selFile, _selFile = aFile);
+
+        // Update Dialogbox.ConfirmEnabled
+        if (_dialogBox != null)
+            _dialogBox.setConfirmEnabled(aFile != null);
+    }
 
     /**
-     * Sets whether confirm enabled.
+     * Returns the selected file and adds it to recent files.
      */
-    public void setConfirmEnabled(boolean aValue)
+    public WebFile getSelFileAndAddToRecentFiles()
     {
-        if (aValue == _confirmEnabled) return;
-        firePropChange(ConfirmEnabled_Prop, _confirmEnabled, _confirmEnabled = aValue);
+        // Get SelFile
+        WebFile selFile = getSelFile();
 
-        if (_dialogBox != null)
-            _dialogBox.setConfirmEnabled(aValue);
+        // Add to recent files
+        WebURL selFileURL = selFile != null ? selFile.getURL() : null;
+        if (selFileURL != null)
+            RecentFiles.addURL(selFileURL);
+
+        // Return
+        return selFile;
     }
 
     /**
@@ -238,9 +237,6 @@ public class FilePanel extends ViewOwner {
      */
     public WebFile showFilePanel(View aView)
     {
-        // Get UI
-        View filesPanelUI = getUI();
-
         // Run code to add new folder button
         if (isSaving())
             runLater(() -> addNewFolderButton());
@@ -248,9 +244,8 @@ public class FilePanel extends ViewOwner {
         // Create/config DialogBox with FilePanel UI
         String title = isSaving() ? "Save Panel" : "Open Panel";
         _dialogBox = new DialogBox(title);
+        View filesPanelUI = getUI();
         _dialogBox.setContent(filesPanelUI);
-        setConfirmEnabled(_filesPane.getSelOrTargFile() != null);
-        _filesPane._filePanel = this;
 
         // Run FileChooser UI in DialogBox
         boolean value = _dialogBox.showConfirmDialog(aView);
@@ -258,7 +253,7 @@ public class FilePanel extends ViewOwner {
             return null;
 
         // Get file and path of selection and save to preferences
-        WebFile selFile = getSelFile();
+        WebFile selFile = getSelFileAndAddToRecentFiles();
 
         // If user is trying to save over an existing file, warn them
         boolean save = isSaving();
@@ -373,7 +368,7 @@ public class FilePanel extends ViewOwner {
     private void resetSelSiteFromSitesTabBar()
     {
         // Get current selected file/site
-        WebFile selFile = getSelFileImpl();
+        WebFile selFile = getSelFile();
         boolean isRecentFilesSite = selFile != null && getSelSite() instanceof RecentFilesSite;
 
         // Get site at SitesTabBar.SelIndex and set
@@ -428,8 +423,7 @@ public class FilePanel extends ViewOwner {
     private void filesPaneDidPropChange()
     {
         WebFile selOrTargFile = _filesPane.getSelOrTargFile();
-        boolean isFileSet = selOrTargFile != null;
-        setConfirmEnabled(isFileSet);
+        setSelFile(selOrTargFile);
     }
 
     /**
