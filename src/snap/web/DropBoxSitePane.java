@@ -3,12 +3,12 @@
  */
 package snap.web;
 import snap.view.*;
-import snap.viewx.FilesBrowser;
+import snap.viewx.WebSitePaneX;
 
 /**
- * This FileBrowser subclass browses DropBox files.
+ * This WebSitePane subclass browses DropBox files.
  */
-public class DropBoxPane extends FilesBrowser {
+public class DropBoxSitePane extends WebSitePaneX {
 
     // UserEmail Text field
     private TextField  _userEmailText;
@@ -16,7 +16,7 @@ public class DropBoxPane extends FilesBrowser {
     /**
      * Constructor.
      */
-    public DropBoxPane()
+    public DropBoxSitePane()
     {
         super();
     }

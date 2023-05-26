@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * A class to select a file to open or save.
  */
-public class FilesBrowser extends FilesPane {
+public class WebSitePaneX extends WebSitePane {
 
     // The Directory ComboBox
     protected ComboBox<WebFile>  _dirComboBox;
@@ -26,12 +26,12 @@ public class FilesBrowser extends FilesPane {
     /**
      * Constructor.
      */
-    public FilesBrowser()
+    public WebSitePaneX()
     {
         super();
 
         // Set default site
-        _site = FilesBrowserUtils.getLocalFileSystemSite();
+        _site = WebSitePaneUtils.getLocalFileSystemSite();
     }
 
     /**
@@ -43,7 +43,7 @@ public class FilesBrowser extends FilesPane {
         // Get FileBrowser and configure
         _fileBrowser = getView("FileBrowser", BrowserView.class);
         _fileBrowser.setRowHeight(22);
-        _fileBrowser.setResolver(new FilesBrowserUtils.FileResolver());
+        _fileBrowser.setResolver(new WebSitePaneUtils.FileResolver());
         _fileBrowser.setCellConfigure(item -> configureFileBrowserCell(item));
         _fileBrowser.addEventFilter(e -> runLater(() -> fileBrowserMouseReleased(e)), MouseRelease);
 
@@ -149,12 +149,12 @@ public class FilesBrowser extends FilesPane {
         if (aSite == _site) return;
         super.setSite(aSite);
 
-        // Reset FilesBrowser.Items
+        // Reset FileBrowser.Items
         setSiteFilesInUI();
     }
 
     /**
-     * Called to set the FilesPane WebFiles.
+     * Called to set the WebFiles in UI.
      */
     @Override
     protected void setSiteFilesInUI()
@@ -165,7 +165,7 @@ public class FilesBrowser extends FilesPane {
         // Get root dir files and set in browser
         WebFile rootDir = getSite().getRootDir();
         WebFile[] dirFiles = rootDir.getFiles();
-        WebFile[] dirFilesFiltered = FilesBrowserUtils.getVisibleFiles(dirFiles);
+        WebFile[] dirFilesFiltered = WebSitePaneUtils.getVisibleFiles(dirFiles);
         _fileBrowser.setItems(dirFilesFiltered);
 
         // If SelFile, set
@@ -190,11 +190,11 @@ public class FilesBrowser extends FilesPane {
     private void inputTextDidKeyRelease()
     {
         // Get file for InputText
-        WebFile inputTextFile = FilesBrowserUtils.getInputTextAsFile(this);
+        WebFile inputTextFile = WebSitePaneUtils.getInputTextAsFile(this);
 
         // If not valid and opening file, try file completion
         if (inputTextFile == null && isOpening())
-            inputTextFile = FilesBrowserUtils.performFileCompletionOnInputText(this);
+            inputTextFile = WebSitePaneUtils.performFileCompletionOnInputText(this);
 
         // Set the target file
         setTargFile(inputTextFile);
@@ -215,7 +215,7 @@ public class FilesBrowser extends FilesPane {
     protected String getHomeDirPath()
     {
         WebSite site = getSite();
-        return FilesBrowserUtils.getHomeDirPathForSite(site);
+        return WebSitePaneUtils.getHomeDirPathForSite(site);
     }
 
     /**

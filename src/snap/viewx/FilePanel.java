@@ -34,8 +34,8 @@ public class FilePanel extends ViewOwner {
     // The currently selected site
     private WebSite  _selSite;
 
-    // The FilesPane
-    private FilesPane  _filesPane;
+    // The WebSitePane
+    private WebSitePane _sitePane;
 
     // The currently selected file
     private WebFile _selFile;
@@ -46,14 +46,14 @@ public class FilePanel extends ViewOwner {
     // The tab bar holding sites
     private TabBar  _sitesTabBar;
 
-    // A view to animate FilesPane changes
+    // A view to animate WebSitePane changes
     private TransitionPane  _transitionPane;
 
-    // Map of existing/cached FilesPanes
-    private Map<WebSite,FilesPane>  _filesPanes = new HashMap<>();
+    // Map of existing/cached WebSitePanes
+    private Map<WebSite, WebSitePane> _sitePanes = new HashMap<>();
 
-    // Listener for FilePane prop changes
-    private PropChangeListener  _filesPanePropChangeLsnr = pc -> filesPaneDidPropChange();
+    // Listener for WebSitePane prop changes
+    private PropChangeListener _sitePanePropChangeLsnr = pc -> sitePaneDidPropChange();
 
     // The sites
     private static WebSite[]  _defaultSites;
@@ -111,7 +111,7 @@ public class FilePanel extends ViewOwner {
      */
     public void setTypes(String ... theExts)
     {
-        _types = ArrayUtils.map(theExts, type -> FilesBrowserUtils.normalizeType(type), String.class);
+        _types = ArrayUtils.map(theExts, type -> WebSitePaneUtils.normalizeType(type), String.class);
     }
 
     /**
@@ -163,10 +163,10 @@ public class FilePanel extends ViewOwner {
         // Set site
         firePropChange(SelSite_Prop, _selSite, _selSite = aSite);
 
-        // Get/set FilesPane
+        // Get/set SitePane
         if (isUISet()) {
-            FilesPane filesPane = getFilesPaneForSite(aSite);
-            setFilesPane(filesPane);
+            WebSitePane sitePane = getSitePaneForSite(aSite);
+            setSitePane(sitePane);
         }
     }
 
@@ -188,8 +188,8 @@ public class FilePanel extends ViewOwner {
      */
     public WebFile getSelFile()
     {
-        // Get current FilesPane selected/targeted file
-        WebFile selFile = _filesPane.getSelOrTargFile();
+        // Get current SitePane selected/targeted file
+        WebFile selFile = _sitePane.getSelOrTargFile();
 
         // If link file, replace with real
         if (selFile != null && selFile.getLinkFile() != null)
@@ -244,8 +244,8 @@ public class FilePanel extends ViewOwner {
         // Create/config DialogBox with FilePanel UI
         String title = isSaving() ? "Save Panel" : "Open Panel";
         _dialogBox = new DialogBox(title);
-        View filesPanelUI = getUI();
-        _dialogBox.setContent(filesPanelUI);
+        View sitePanelUI = getUI();
+        _dialogBox.setContent(sitePanelUI);
 
         // Run FileChooser UI in DialogBox
         boolean value = _dialogBox.showConfirmDialog(aView);
@@ -331,10 +331,10 @@ public class FilePanel extends ViewOwner {
         // Otherwise, just hide SitesTabBar
         else _sitesTabBar.setVisible(false);
 
-        // Set FilesPane for SelSite
+        // Set SitePane for SelSite
         WebSite selSite = getSelSite();
-        FilesPane filesPane = getFilesPaneForSite(selSite);
-        setFilesPane(filesPane);
+        WebSitePane sitePane = getSitePaneForSite(selSite);
+        setSitePane(sitePane);
     }
 
     /**
@@ -377,52 +377,52 @@ public class FilePanel extends ViewOwner {
         WebSite newSelSite = fileSites[selIndex];
         setSelSite(newSelSite);
 
-        // If recent files site had selected file from this site, select in new FilesPane
+        // If recent files site had selected file from this site, select in new SitePane
         if (isRecentFilesSite) {
             WebSite selFileSite = selFile.getSite();
             if (selFileSite == newSelSite)
-                _filesPane.setSelFile(selFile);
+                _sitePane.setSelFile(selFile);
         }
     }
 
     /**
-     * Sets the FilesPane.
+     * Sets the SitePane.
      */
-    private void setFilesPane(FilesPane filesPane)
+    private void setSitePane(WebSitePane aSitePane)
     {
         // If already set, just return
-        if (filesPane == _filesPane) return;
+        if (aSitePane == _sitePane) return;
 
         // Get/set transition
-        TransitionPane.Transition transition = getTransitionForFileBrowsers(_filesPane, filesPane);
+        TransitionPane.Transition transition = getTransitionForFileBrowsers(_sitePane, aSitePane);
         _transitionPane.setTransition(transition);
 
         // If old, remove
-        if (_filesPane != null)
-            _filesPane.removePropChangeListener(_filesPanePropChangeLsnr);
+        if (_sitePane != null)
+            _sitePane.removePropChangeListener(_sitePanePropChangeLsnr);
 
-        // Set FilesPane
-        _filesPane = filesPane;
+        // Set SitePane
+        _sitePane = aSitePane;
 
-        // Update FilesPane
-        _filesPane.setSaving(isSaving());
-        _filesPane.setTypes(getTypes());
+        // Update SitePane
+        _sitePane.setSaving(isSaving());
+        _sitePane.setTypes(getTypes());
 
         // Update UI
-        _filesPane.addPropChangeListener(_filesPanePropChangeLsnr);
-        View filesPaneUI = _filesPane.getUI();
-        _transitionPane.setContent(filesPaneUI);
+        _sitePane.addPropChangeListener(_sitePanePropChangeLsnr);
+        View sitePaneUI = _sitePane.getUI();
+        _transitionPane.setContent(sitePaneUI);
 
         // Update
-        filesPaneDidPropChange();
+        sitePaneDidPropChange();
     }
 
     /**
-     * Called when FilesPane does prop change.
+     * Called when SitePane does prop change.
      */
-    private void filesPaneDidPropChange()
+    private void sitePaneDidPropChange()
     {
-        WebFile selOrTargFile = _filesPane.getSelOrTargFile();
+        WebFile selOrTargFile = _sitePane.getSelOrTargFile();
         setSelFile(selOrTargFile);
     }
 
@@ -450,55 +450,55 @@ public class FilePanel extends ViewOwner {
             return;
 
         // Get new dir path and create new dir
-        WebFile selDir = _filesPane.getSelDir();
+        WebFile selDir = _sitePane.getSelDir();
         String newDirPath = selDir.getDirPath() + newDirName;
         WebFile newDir = getSelSite().createFileForPath(newDirPath, true);
         newDir.save();
 
         // Set new dir
-        _filesPane.setSelFile(newDir);
+        _sitePane.setSelFile(newDir);
     }
 
     /**
-     * Returns a FilesPane for given site.
+     * Returns a WebSitePane for given site.
      */
-    private FilesPane getFilesPaneForSite(WebSite aSite)
+    private WebSitePane getSitePaneForSite(WebSite aSite)
     {
         // Get from cache and just return if found
-        FilesPane filesPane = _filesPanes.get(aSite);
-        if (filesPane != null)
-            return filesPane;
+        WebSitePane webSitePane = _sitePanes.get(aSite);
+        if (webSitePane != null)
+            return webSitePane;
 
         // Create and add to cache
-        filesPane = createFilesPaneForSite(aSite);
-        filesPane.setSite(aSite);
-        filesPane._filePanel = this;
-        _filesPanes.put(aSite, filesPane);
+        webSitePane = createSitePaneForSite(aSite);
+        webSitePane.setSite(aSite);
+        webSitePane._filePanel = this;
+        _sitePanes.put(aSite, webSitePane);
 
         // Return
-        return filesPane;
+        return webSitePane;
     }
 
     /**
-     * Creates a FilesPane for given site.
+     * Creates a SitePane for given site.
      */
-    private FilesPane createFilesPaneForSite(WebSite aSite)
+    private WebSitePane createSitePaneForSite(WebSite aSite)
     {
         if (aSite instanceof RecentFilesSite)
-            return new RecentFilesPane();
+            return new RecentFilesSitePane();
         if (aSite instanceof DropBoxSite)
-            return new DropBoxPane();
-        return new FilesBrowser();
+            return new DropBoxSitePane();
+        return new WebSitePaneX();
     }
 
     /**
-     * Returns the transition for given FilesPanes so changing sites will slide left/right when new one selected.
+     * Returns the transition for given WebSitePanes so changing sites will slide left/right when new one selected.
      */
-    private TransitionPane.Transition getTransitionForFileBrowsers(FilesPane filesPane1, FilesPane filesPane2)
+    private TransitionPane.Transition getTransitionForFileBrowsers(WebSitePane webSitePane1, WebSitePane webSitePane2)
     {
-        if (filesPane1 == null) return TransitionPane.Instant;
-        int index1 = ArrayUtils.indexOf(getSites(), filesPane1.getSite());
-        int index2 = ArrayUtils.indexOf(getSites(), filesPane2.getSite());
+        if (webSitePane1 == null) return TransitionPane.Instant;
+        int index1 = ArrayUtils.indexOf(getSites(), webSitePane1.getSite());
+        int index2 = ArrayUtils.indexOf(getSites(), webSitePane2.getSite());
         return index1 < index2 ? TransitionPane.MoveRight : TransitionPane.MoveLeft;
     }
 
@@ -551,7 +551,7 @@ public class FilePanel extends ViewOwner {
         if (_defaultSites != null) return _defaultSites;
 
         // Init to local site
-        WebSite localSite = FilesBrowserUtils.getLocalFileSystemSite();
+        WebSite localSite = WebSitePaneUtils.getLocalFileSystemSite();
         WebSite[] defaultSites = new WebSite[] { localSite };
 
         // Set/return

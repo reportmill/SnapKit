@@ -10,7 +10,7 @@ import snap.web.WebURL;
 /**
  * This class is the base class for WebSite open/save browsers.
  */
-public class FilesPane extends ViewOwner {
+public class WebSitePane extends ViewOwner {
 
     // The site used to reference files
     protected WebSite  _site;
@@ -41,7 +41,7 @@ public class FilesPane extends ViewOwner {
     /**
      * Constructor.
      */
-    public FilesPane()
+    public WebSitePane()
     {
         super();
     }
@@ -173,7 +173,7 @@ public class FilesPane extends ViewOwner {
      */
     public void setTypes(String ... theExts)
     {
-        _types = ArrayUtils.map(theExts, type -> FilesBrowserUtils.normalizeType(type), String.class);
+        _types = ArrayUtils.map(theExts, type -> WebSitePaneUtils.normalizeType(type), String.class);
     }
 
     /**
@@ -256,7 +256,7 @@ public class FilesPane extends ViewOwner {
     }
 
     /**
-     * Called to set the FilesPane WebFiles.
+     * Called to set the WebFiles in UI.
      */
     protected void setSiteFilesInUI()  { }
 }
