@@ -1,11 +1,14 @@
 package snap.viewx;
 import snap.util.ArrayUtils;
+import snap.view.EventListener;
 import snap.view.ViewEvent;
 import snap.view.ViewOwner;
 import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
+
+import java.util.function.Predicate;
 
 /**
  * This class is the base class for WebSite open/save browsers.
@@ -27,11 +30,14 @@ public class WebSitePane extends ViewOwner {
     // Whether choosing file for save
     protected boolean  _saving;
 
+    // A function to determine if a given file is valid
+    private Predicate<WebFile> _fileValidator;
+
     // The file types
     protected String[]  _types;
 
-    // The FilePanel
-    protected FilePanel  _filePanel;
+    // An EventListener to be called when action is fired
+    protected EventListener _actionHandler;
 
     // Constants for properties
     public static final String SelFile_Prop = "SelFile";
@@ -156,11 +162,16 @@ public class WebSitePane extends ViewOwner {
     }
 
     /**
-     * Returns the first file types.
+     * Returns the function that determines whether file can be selected.
      */
-    public String getType()
+    public Predicate<WebFile> getFileValidator()  { return _fileValidator; }
+
+    /**
+     * Sets the function that determines whether file can be selected.
+     */
+    public void setFileValidator(Predicate<WebFile> fileValidator)
     {
-        return _types != null && _types.length > 0 ? _types[0] : null;
+        _fileValidator = fileValidator;
     }
 
     /**
@@ -174,21 +185,25 @@ public class WebSitePane extends ViewOwner {
     public void setTypes(String ... theExts)
     {
         _types = ArrayUtils.map(theExts, type -> WebSitePaneUtils.normalizeType(type), String.class);
+        setFileValidator(file -> WebSitePaneUtils.isValidFileForTypes(file, _types));
     }
+
+    /**
+     * Returns the listener triggered when action event is fired.
+     */
+    public EventListener getActionHandler()  { return _actionHandler; }
+
+    /**
+     * Sets the listener triggered when action event is fired.
+     */
+    public void setActionHandler(EventListener actionListener)  { _actionHandler = actionListener; }
 
     /**
      * Returns whether given file is valid.
      */
     public boolean isValidFile(WebFile aFile)
     {
-        if (aFile == null)
-            return false;
-        String[] types = getTypes();
-        if (types == null || types.length == 0)
-            return true;
-
-        boolean isValid = aFile.isFile() && ArrayUtils.contains(types, aFile.getType());
-        return isValid;
+        return _fileValidator == null || _fileValidator.test(aFile);
     }
 
     /**
@@ -196,8 +211,8 @@ public class WebSitePane extends ViewOwner {
      */
     protected void fireActionEvent(ViewEvent anEvent)
     {
-        if (_filePanel != null)
-            _filePanel.fireActionEvent(anEvent);
+        if (_actionHandler != null)
+            _actionHandler.listenEvent(anEvent);
     }
 
     /**
@@ -236,15 +251,9 @@ public class WebSitePane extends ViewOwner {
      */
     protected WebFile getDefaultSelFile()
     {
-        // Get recent URLs for types and this site
-        String[] types = getTypes();
-        WebURL[] recentURLs = RecentFiles.getRecentUrlsForTypes(types);
-        WebURL[] recentURLsForSite = ArrayUtils.filter(recentURLs, url -> url.getSite() == getSite());
-        if (recentURLsForSite.length == 0)
-            return null;
-
         // Get recent file
-        WebURL recentURL = recentURLsForSite[0];
+        WebURL[] recentUrls = getRecentUrlsForSiteAndFileValidator();
+        WebURL recentURL = recentUrls.length > 0 ? recentUrls[0] : null;
         WebFile defaultSelFile = recentURL != null ? recentURL.getFile() : null;
 
         // If null, just root dir
@@ -253,6 +262,35 @@ public class WebSitePane extends ViewOwner {
 
         // Return
         return defaultSelFile;
+    }
+
+    /**
+     * Returns valid recent URLs.
+     */
+    private WebURL[] getRecentUrlsForSiteAndFileValidator()
+    {
+        // Get recent URLs for site
+        WebURL[] recentURLs = RecentFiles.getURLs();
+        WebSite site = getSite();
+        WebURL[] recentUrlsForSite = ArrayUtils.filter(recentURLs, url -> url.getSite() == site);
+
+        // If Types set, do simple version on URLs to avoid resolving files
+        String[] types = getTypes();
+        if (types != null) {
+            WebURL[] validUrlsForSite = ArrayUtils.filter(recentUrlsForSite, url -> ArrayUtils.contains(types, url.getType()));
+            return validUrlsForSite;
+        }
+
+        // Get RecentURLs for site
+        Predicate<WebFile> fileValidator = getFileValidator();
+        if (fileValidator == null)
+            return recentURLs;
+
+        // Get valid URLs
+        WebFile[] recentFilesForSite = ArrayUtils.map(recentUrlsForSite, url -> url.getFile(), WebFile.class);
+        WebFile[] validRecentFiles = ArrayUtils.filter(recentFilesForSite, fileValidator);
+        WebURL[] validRecentURLs = ArrayUtils.map(validRecentFiles, file -> file.getURL(), WebURL.class);
+        return validRecentURLs;
     }
 
     /**

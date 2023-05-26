@@ -10,6 +10,8 @@ import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
 
+import java.util.function.Predicate;
+
 /**
  * Utilities for WebSitePane.
  */
@@ -18,33 +20,33 @@ class WebSitePaneUtils {
     /**
      * Returns the InputText string.
      */
-    public static String getInputText(WebSitePaneX webSitePane)
+    public static String getInputText(WebSitePaneX sitePane)
     {
-        return webSitePane._inputText.getText().trim();
+        return sitePane._inputText.getText().trim();
     }
 
     /**
      * Returns the path resolved from WebSitePane InputText.
      */
-    public static String getInputTextAsPath(WebSitePaneX webSitePane)
+    public static String getInputTextAsPath(WebSitePaneX sitePane)
     {
         // Get InputText string
-        String inputText = getInputText(webSitePane);
+        String inputText = getInputText(sitePane);
 
         // If empty just return dir path
         if (inputText.length() == 0) {
-            WebFile selDir = webSitePane.getSelDir();
+            WebFile selDir = sitePane.getSelDir();
             return selDir.getPath();
         }
 
         // If starts with ~ return home dir
         if (inputText.startsWith("~"))
-            return webSitePane.getHomeDirPath();
+            return sitePane.getHomeDirPath();
 
         // If starts with '..', return parent dir
         if (inputText.startsWith("..")) {
-            WebFile selFile = webSitePane.getSelFile();
-            WebFile selDir = webSitePane.getSelDir();
+            WebFile selFile = sitePane.getSelFile();
+            WebFile selDir = sitePane.getSelDir();
             if (selFile != null)
                 return selDir.getPath();
             if (selDir != null) {
@@ -60,7 +62,7 @@ class WebSitePaneUtils {
             return inputText;
 
         // Get path
-        WebFile selDir = webSitePane.getSelDir();
+        WebFile selDir = sitePane.getSelDir();
         String inputTextPath = FilePathUtils.getChild(selDir.getPath(), inputText);
         return inputTextPath;
     }
@@ -68,21 +70,25 @@ class WebSitePaneUtils {
     /**
      * Returns the file resolved from WebSitePane InputText.
      */
-    public static WebFile getInputTextAsFile(WebSitePaneX webSitePane)
+    public static WebFile getInputTextAsFile(WebSitePaneX sitePane)
     {
         // Get file for InputText path
-        String inputTextPath = getInputTextAsPath(webSitePane);
-        WebFile inputTextFile = webSitePane.getFileForPath(inputTextPath);
+        String inputTextPath = getInputTextAsPath(sitePane);
+        WebFile inputTextFile = sitePane.getFileForPath(inputTextPath);
 
         // If file not found and path is missing extension, try again with extension
         if (inputTextFile == null && !inputTextPath.contains(".")) {
-            inputTextPath += '.' + webSitePane.getType();
-            inputTextFile = webSitePane.getFileForPath(inputTextPath);
+            String[] types = sitePane.getTypes();
+            if (types != null && types.length > 0) {
+                String type = types[0];
+                inputTextPath += '.' + type;
+                inputTextFile = sitePane.getFileForPath(inputTextPath);
+            }
         }
 
         // If file not found and isSaving, create file
-        if (inputTextFile == null && webSitePane.isSaving()) {
-            WebSite site = webSitePane.getSite();
+        if (inputTextFile == null && sitePane.isSaving()) {
+            WebSite site = sitePane.getSite();
             inputTextFile = site.createFileForPath(inputTextPath, false);
         }
 
@@ -93,16 +99,16 @@ class WebSitePaneUtils {
     /**
      * Performs file name completion on input text.
      */
-    public static WebFile performFileCompletionOnInputText(WebSitePaneX webSitePane)
+    public static WebFile performFileCompletionOnInputText(WebSitePaneX sitePane)
     {
         // Get InputText - just return if empty
-        String inputText = WebSitePaneUtils.getInputText(webSitePane);
+        String inputText = WebSitePaneUtils.getInputText(sitePane);
         if (inputText.length() == 0)
             return null;
 
         // Get completion candidate for InputText path - just return if not found
-        String inputTextPath = WebSitePaneUtils.getInputTextAsPath(webSitePane);
-        WebFile completionFile = WebSitePaneUtils.getFileCompletionForPath(webSitePane, inputTextPath);
+        String inputTextPath = WebSitePaneUtils.getInputTextAsPath(sitePane);
+        WebFile completionFile = WebSitePaneUtils.getFileCompletionForPath(sitePane, inputTextPath);
         if (completionFile == null)
             return null;
 
@@ -112,7 +118,7 @@ class WebSitePaneUtils {
             completionStr = completionFile.getPath();
 
         // Set completion string in InputText
-        webSitePane._inputText.setCompletionText(completionStr);
+        sitePane._inputText.setCompletionText(completionStr);
 
         // Return
         return completionFile;
@@ -121,26 +127,23 @@ class WebSitePaneUtils {
     /**
      * Returns a file completion for given path.
      */
-    private static WebFile getFileCompletionForPath(WebSitePaneX webSitePane, String aPath)
+    private static WebFile getFileCompletionForPath(WebSitePaneX sitePane, String aPath)
     {
         // Get parent directory for path
         String parentPath = FilePathUtils.getParentPath(aPath);
-        WebFile parentDir = webSitePane.getFileForPath(parentPath);
+        WebFile parentDir = sitePane.getFileForPath(parentPath);
         if (parentDir == null)
             return null;
 
         // Get directory files and valid file types
         String fileName = FilePathUtils.getFilename(aPath);
         WebFile[] dirFiles = parentDir.getFiles();
-        String[] fileTypes = webSitePane.getTypes();
 
-        // Look for completion file of any requested type (types are checked in order to allow for precedence)
-        for (String type : fileTypes) {
-            for (WebFile file : dirFiles) {
-                if (StringUtils.startsWithIC(file.getName(), fileName) && file.getType().equals(type))
-                    return file;
-            }
-        }
+        // Look for valid completion file
+        Predicate<WebFile> fileValidator = file -> StringUtils.startsWithIC(file.getName(), fileName) && sitePane.isValidFile(file);
+        WebFile firstValidFile = ArrayUtils.findMatch(dirFiles, fileValidator);
+        if (firstValidFile != null)
+            return firstValidFile;
 
         // Look for completion of type dir
         for (WebFile file : dirFiles) {
@@ -150,6 +153,19 @@ class WebSitePaneUtils {
 
         // Return not found
         return null;
+    }
+
+    /**
+     * Returns whether given file is valid for given types.
+     */
+    public static boolean isValidFileForTypes(WebFile aFile, String[] theTypes)
+    {
+        if (aFile == null)
+            return false;
+        if (theTypes == null || theTypes.length == 0)
+            return true;
+
+        return aFile.isFile() && ArrayUtils.contains(theTypes, aFile.getType());
     }
 
     /**
@@ -176,6 +192,7 @@ class WebSitePaneUtils {
     public static WebSite getLocalFileSystemSite()
     {
         WebURL defaultSiteURL = WebURL.getURL("/");
+        assert (defaultSiteURL != null);
         return defaultSiteURL.getSite();
     }
 

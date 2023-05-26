@@ -10,6 +10,7 @@ import snap.view.*;
 import snap.web.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * A class to select a file to open or save.
@@ -19,17 +20,17 @@ public class FilePanel extends ViewOwner {
     // Whether choosing file for save
     private boolean  _saving;
 
+    // A function to determine if a given file is valid
+    private Predicate<WebFile> _fileValidator;
+
     // The file types
     private String[]  _types;
 
-    // The description
-    private String  _desc;
+    // ActionHandler
+    private EventListener _actionHandler;
 
     // The sites
     private WebSite[]  _sites;
-
-    // ActionHandler
-    private EventListener  _actionHandler;
 
     // The currently selected site
     private WebSite  _selSite;
@@ -94,11 +95,16 @@ public class FilePanel extends ViewOwner {
     }
 
     /**
-     * Returns the first file types.
+     * Returns the function that determines whether file can be selected.
      */
-    public String getType()
+    public Predicate<WebFile> getFileValidator()  { return _fileValidator; }
+
+    /**
+     * Sets the function that determines whether file can be selected.
+     */
+    public void setFileValidator(Predicate<WebFile> fileValidator)
     {
-        return _types != null && _types.length > 0 ? _types[0] : null;
+        _fileValidator = fileValidator;
     }
 
     /**
@@ -112,12 +118,26 @@ public class FilePanel extends ViewOwner {
     public void setTypes(String ... theExts)
     {
         _types = ArrayUtils.map(theExts, type -> WebSitePaneUtils.normalizeType(type), String.class);
+        setFileValidator(file -> WebSitePaneUtils.isValidFileForTypes(file, _types));
+    }
+
+    /**
+     * Returns the action event listener.
+     */
+    public EventListener getActionHandler()  { return _actionHandler; }
+
+    /**
+     * Sets the action event listener.
+     */
+    public void setActionHandler(EventListener actionHandler)
+    {
+        _actionHandler = actionHandler;
     }
 
     /**
      * Sets the description.
      */
-    public void setDesc(String aValue)  { _desc = aValue; }
+    public void setDesc(String aValue)  { }
 
     /**
      * Return sites available to open/save files.
@@ -168,19 +188,6 @@ public class FilePanel extends ViewOwner {
             WebSitePane sitePane = getSitePaneForSite(aSite);
             setSitePane(sitePane);
         }
-    }
-
-    /**
-     * Returns the action event listener.
-     */
-    public EventListener getActionHandler()  { return _actionHandler; }
-
-    /**
-     * Sets the action event listener.
-     */
-    public void setActionHandler(EventListener actionHandler)
-    {
-        _actionHandler = actionHandler;
     }
 
     /**
@@ -407,6 +414,7 @@ public class FilePanel extends ViewOwner {
         // Update SitePane
         _sitePane.setSaving(isSaving());
         _sitePane.setTypes(getTypes());
+        _sitePane.setFileValidator(getFileValidator());
 
         // Update UI
         _sitePane.addPropChangeListener(_sitePanePropChangeLsnr);
@@ -472,7 +480,7 @@ public class FilePanel extends ViewOwner {
         // Create and add to cache
         webSitePane = createSitePaneForSite(aSite);
         webSitePane.setSite(aSite);
-        webSitePane._filePanel = this;
+        webSitePane.setActionHandler(e -> fireActionEvent(e));
         _sitePanes.put(aSite, webSitePane);
 
         // Return
