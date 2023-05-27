@@ -195,10 +195,8 @@ public class FilePanel extends ViewOwner {
      */
     public WebFile getSelFile()
     {
-        // Get current SitePane selected/targeted file
-        WebFile selFile = _sitePane.getSelOrTargFile();
-
-        // If link file, replace with real
+        // If SelFile is link file, replace with real file
+        WebFile selFile = _selFile;
         if (selFile != null && selFile.getLinkFile() != null)
             selFile = selFile.getRealFile();
 
