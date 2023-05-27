@@ -114,12 +114,13 @@ public class WebSitePaneX extends WebSitePane {
             WebFile selFile = targFile != null ? targFile : getSelFile();
             if (selFile != null) {
 
-                // If dir, just update SelFile
-                if (selFile.isDir())
-                    setSelFile(selFile);
+                // If valid file, fire action event
+                if (isValidFile(selFile))
+                    fireActionEvent(anEvent);
 
-                // Otherwise, fire action
-                else fireActionEvent(anEvent);
+                // If dir, just update SelFile
+                else if (selFile.isDir())
+                    setSelFile(selFile);
             }
 
             // Consume event
@@ -180,8 +181,10 @@ public class WebSitePaneX extends WebSitePane {
     private void fileBrowserMouseReleased(ViewEvent anEvent)
     {
         // If double-click and valid file, do confirm
-        if (anEvent.getClickCount() == 2)
-            fireActionEvent(anEvent);
+        if (anEvent.getClickCount() == 2) {
+            if (getValidSelOrTargFile() != null)
+                fireActionEvent(anEvent);
+        }
     }
 
     /**

@@ -428,7 +428,7 @@ public class FilePanel extends ViewOwner {
      */
     private void sitePaneDidPropChange()
     {
-        WebFile selOrTargFile = _sitePane.getSelOrTargFile();
+        WebFile selOrTargFile = _sitePane.getValidSelOrTargFile();
         setSelFile(selOrTargFile);
     }
 

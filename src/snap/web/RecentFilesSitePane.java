@@ -114,7 +114,7 @@ public class RecentFilesSitePane extends WebSitePane {
             return null;
 
         // Return selected file
-        WebFile selFile =  getSelOrTargFile();
+        WebFile selFile = getValidSelOrTargFile();
         WebFile realFile = selFile != null ? selFile.getRealFile() : null;
         return realFile;
     }

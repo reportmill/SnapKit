@@ -7,7 +7,6 @@ import snap.web.RecentFiles;
 import snap.web.WebFile;
 import snap.web.WebSite;
 import snap.web.WebURL;
-
 import java.util.function.Predicate;
 
 /**
@@ -20,9 +19,6 @@ public class WebSitePane extends ViewOwner {
 
     // The currently selected file
     protected WebFile  _selFile;
-
-    // The current selected directory
-    protected WebFile  _selDir;
 
     // A file targeted by input text
     protected WebFile  _targFile;
@@ -41,7 +37,6 @@ public class WebSitePane extends ViewOwner {
 
     // Constants for properties
     public static final String SelFile_Prop = "SelFile";
-    public static final String SelDir_Prop = "SelDir";
     public static final String TargFile_Prop = "TargFile";
 
     /**
@@ -83,27 +78,8 @@ public class WebSitePane extends ViewOwner {
         // If already set, just return
         if (aFile == _selFile) return;
 
-        // Cache old file/dir
-        WebFile oldSelFile = _selFile;
-        WebFile oldSelDir = _selDir;
-
-        // If given file is dir, set SelDir
-        if (aFile != null && aFile.isDir()) {
-            _selFile = null;
-            _selDir = aFile;
-        }
-
-        // Set file and dir
-        else {
-            _selFile = aFile;
-            _selDir = aFile != null ? aFile.getParent() : null;
-        }
-
         // Fire prop changes
-        if (_selFile != oldSelFile)
-            firePropChange(SelFile_Prop, oldSelFile, _selFile);
-        if (_selDir != oldSelDir)
-            firePropChange(SelDir_Prop, oldSelDir, _selDir);
+        firePropChange(SelFile_Prop, _selFile, _selFile = aFile);
 
         // Clear TargFile
         setTargFile(null);
@@ -115,7 +91,15 @@ public class WebSitePane extends ViewOwner {
     /**
      * Returns the selected directory.
      */
-    public WebFile getSelDir()  { return _selDir; }
+    public WebFile getSelDir()
+    {
+        WebFile selFile = getSelFile();
+        if (selFile == null)
+            return null;
+        if (selFile.isDir())
+            return selFile;
+        return selFile.getParent();
+    }
 
     /**
      * Returns the file targeted by the input text.
@@ -132,9 +116,9 @@ public class WebSitePane extends ViewOwner {
     }
 
     /**
-     * Returns the selected or targeted file.
+     * Returns the selected or targeted file if valid.
      */
-    public WebFile getSelOrTargFile()
+    public WebFile getValidSelOrTargFile()
     {
         if (isValidFile(_targFile))
             return _targFile;
