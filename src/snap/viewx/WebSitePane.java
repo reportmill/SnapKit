@@ -120,9 +120,9 @@ public class WebSitePane extends ViewOwner {
      */
     public WebFile getValidSelOrTargFile()
     {
-        if (isValidFile(_targFile))
+        if (_targFile != null && isValidFile(_targFile))
             return _targFile;
-        if (isValidFile(_selFile))
+        if (_selFile != null && isValidFile(_selFile))
             return _selFile;
         return null;
     }
@@ -168,8 +168,13 @@ public class WebSitePane extends ViewOwner {
      */
     public void setTypes(String ... theExts)
     {
-        _types = ArrayUtils.map(theExts, type -> WebSitePaneUtils.normalizeType(type), String.class);
-        setFileValidator(file -> WebSitePaneUtils.isValidFileForTypes(file, _types));
+        // Normalize extensions (lowercase, no spaces or dot)
+        if (theExts != null)
+            theExts = ArrayUtils.map(theExts, type -> WebSitePaneUtils.normalizeType(type), String.class);
+
+        // Set types/validator
+        _types = theExts;
+        setFileValidator(theExts != null ? file -> WebSitePaneUtils.isValidFileForTypes(file, _types) : null);
     }
 
     /**

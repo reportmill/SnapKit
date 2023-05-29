@@ -223,6 +223,16 @@ public class RecentFilesSitePane extends WebSitePane {
     }
 
     /**
+     * Override to use real file.
+     */
+    @Override
+    public boolean isValidFile(WebFile aFile)
+    {
+        WebFile realFile = aFile.getRealFile();
+        return super.isValidFile(realFile);
+    }
+
+    /**
      * Returns a local file for given file.
      */
     private WebFile getLocalFile(WebFile aFile)

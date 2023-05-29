@@ -411,7 +411,9 @@ public class FilePanel extends ViewOwner {
 
         // Update SitePane
         _sitePane.setSaving(isSaving());
-        _sitePane.setTypes(getTypes());
+        String[] types = getTypes();
+        if (types != null)
+            _sitePane.setTypes(types);
         _sitePane.setFileValidator(getFileValidator());
 
         // Update UI
