@@ -89,9 +89,10 @@ public class XMLParser extends Parser {
         /** Returns whether the given string is up next. */
         public boolean isNext(String aStr)
         {
-            if (_charIndex+aStr.length()>length()) return false;
-            for (int i=0,iMax=aStr.length();i<iMax;i++)
-                if (charAt(_charIndex+i)!=aStr.charAt(i))
+            if (_charIndex + aStr.length() > length())
+                return false;
+            for (int i = 0, iMax = aStr.length(); i < iMax;i++)
+                if (charAt(_charIndex+i) != aStr.charAt(i))
                     return false;
             return true;
         }
@@ -109,7 +110,7 @@ public class XMLParser extends Parser {
         public void parsedOne(ParseNode aNode, String anId)
         {
             // Handle Element
-            if (anId=="Element")
+            if (anId == "Element")
                 _part = (XMLElement)aNode.getCustomNode();
         }
     }
@@ -126,7 +127,7 @@ public class XMLParser extends Parser {
         public void parsedOne(ParseNode aNode, String anId)
         {
             // Handle Attribute
-            if (anId=="Attribute")
+            if (anId == "Attribute")
                 getPart().addAttribute((XMLAttribute)aNode.getCustomNode());
         }
     }
@@ -145,26 +146,37 @@ public class XMLParser extends Parser {
         /** ParseHandler method. */
         public void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Name
-            if (anId=="Name") {
-                if (_part==null) { _part = new XMLElement(aNode.getString()); _checkedContent = false; }
-                else if (!_part.getName().equals(aNode.getString()))
-                    throw new RuntimeException("XMLParser: Expected closing tag " + _part.getName());
-            }
+            switch (anId) {
 
-            // Handle Attribute
-            else if (anId=="Attribute")
-                _part.addAttribute((XMLAttribute)aNode.getCustomNode());
+                // Handle Name
+                case "Name":
+                    if (_part == null) {
+                        _part = new XMLElement(aNode.getString());
+                        _checkedContent = false;
+                    }
+                    else if (!_part.getName().equals(aNode.getString()))
+                        throw new RuntimeException("XMLParser: Expected closing tag " + _part.getName());
+                    break;
 
-            // Handle Element
-            else if (anId=="Element")
-                _part.addElement((XMLElement)aNode.getCustomNode());
+                // Handle Attribute
+                case "Attribute":
+                    _part.addAttribute((XMLAttribute) aNode.getCustomNode());
+                    break;
 
-            // Handle close: On first close, check for content
-            else if (anId==">" && !_checkedContent) {
-                XMLTokenizer xt = (XMLTokenizer)aNode.getParser().getTokenizer();
-                String content = xt.getContent(); _checkedContent = true;
-                _part.setValue(content);
+                // Handle Element
+                case "Element":
+                    _part.addElement((XMLElement) aNode.getCustomNode());
+                    break;
+
+                // Handle close: On first close, check for content
+                case ">":
+                    if (!_checkedContent) {
+                        XMLTokenizer xt = (XMLTokenizer) aNode.getParser().getTokenizer();
+                        String content = xt.getContent();
+                        _checkedContent = true;
+                        _part.setValue(content);
+                    }
+                    break;
             }
         }
     }
@@ -184,14 +196,18 @@ public class XMLParser extends Parser {
         public void parsedOne(ParseNode aNode, String anId)
         {
             // Handle Name
-            if (anId=="Name")
-                _name = aNode.getString();
+            switch (anId) {
+                case "Name":
+                    _name = aNode.getString();
+                    break;
 
-            // Handle String
-            else if (anId=="String") { String str = aNode.getString();
-                str = str.substring(1, str.length()-1);
-                str = decodeXMLString(str);
-                _part = new XMLAttribute(_name, str);
+                // Handle String
+                case "String":
+                    String str = aNode.getString();
+                    str = str.substring(1, str.length() - 1);
+                    str = decodeXMLString(str);
+                    _part = new XMLAttribute(_name, str);
+                    break;
             }
         }
     }
@@ -200,7 +216,8 @@ public class XMLParser extends Parser {
     private static String decodeXMLString(String aStr)
     {
         // If no entity refs, just return
-        if (aStr.indexOf('&')<0) return aStr;
+        if (aStr.indexOf('&') < 0)
+            return aStr;
 
         // Do common entity ref replacements
         aStr = aStr.replace("&amp;", "&");
@@ -208,10 +225,14 @@ public class XMLParser extends Parser {
         aStr = aStr.replace("&quot;", "\"").replace("&apos;", "'");
 
         // Iterate over string to find numeric/hex references and replace with char
-        for (int start=aStr.indexOf("&#"); start>=0;start=aStr.indexOf("&#",start)) {
-            int end = aStr.indexOf(";", start); if (end<0) continue;
-            String str0 = aStr.substring(start, end+1), str1 = str0.substring(2,str0.length()-1);
-            int val = Integer.valueOf(str1); String str2 = String.valueOf((char)val);
+        for (int start = aStr.indexOf("&#"); start >= 0; start = aStr.indexOf("&#", start)) {
+            int end = aStr.indexOf(";", start);
+            if (end < 0)
+                continue;
+            String str0 = aStr.substring(start, end + 1);
+            String str1 = str0.substring(2, str0.length() - 1);
+            int val = Integer.parseInt(str1);
+            String str2 = String.valueOf((char) val);
             aStr = aStr.replace(str0, str2);
         }
 
@@ -222,7 +243,7 @@ public class XMLParser extends Parser {
     /**
      * Test.
      */
-    public static void main(String args[]) throws Exception
+    public static void main(String[] args) throws Exception
     {
         XMLParser parser = new XMLParser();
         XMLElement xml = parser.parseXMLFromSource("/Temp/SnapCode/src/snap/app/AppPane.snp");
