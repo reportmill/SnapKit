@@ -2,6 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.util;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -21,7 +22,18 @@ public class JSWriter {
     
     // Whether writer compacts JSON (no indent or newline)
     private boolean  _compacted = false;
-    
+
+    // Constant for escape chars
+    private static final char[] ESCAPE_CHARS = { '"', '\\', '\b', '\f', '\n', '\r', '\t' };
+
+    /**
+     * Constructor.
+     */
+    public JSWriter()
+    {
+        super();
+    }
+
     /**
      * Returns the current indent.
      */
@@ -57,10 +69,9 @@ public class JSWriter {
     /**
      * Sets whether writer compacts JSON (no indent or newline).
      */
-    public JSWriter setCompacted(boolean aValue)
+    public void setCompacted(boolean aValue)
     {
         _compacted = aValue;
-        return this;
     }
 
     /**
@@ -199,14 +210,8 @@ public class JSWriter {
             aSB.append('"');
             for (int i = 0, iMax = string.length(); i < iMax; i++) {
                 char c = string.charAt(i);
-                if (c=='"' || c=='\\' || c=='/') aSB.append('\\').append(c);
-                else if (c=='\b') aSB.append("\\b");
-                else if (c=='\f') aSB.append("\\f");
-                else if (c=='\n') aSB.append("\\n");
-                else if (c=='\r') aSB.append("\\r");
-                else if (c=='\t') aSB.append("\\t");
-                else if (Character.isISOControl(c))
-                    System.err.println("JSONWriter.append: Tried to print control char in string: " + string);
+                if (isEscapeChar(c))
+                    aSB.append(getEscapeCharString(c));
                 else aSB.append(c);
             }
             aSB.append('"');
@@ -250,7 +255,7 @@ public class JSWriter {
 
         // Otherwise, append newline, indent and return
         aSB.append('\n');
-        for (int i=0; i<aLevel; i++) aSB.append(_indent);
+        for (int i = 0; i < aLevel; i++) aSB.append(_indent);
         return aSB;
     }
 
@@ -287,5 +292,37 @@ public class JSWriter {
 
         // Return false for anything else
         return false;
+    }
+
+    /**
+     * Returns whether a given character is an escape character.
+     */
+    private static boolean isEscapeChar(char aChar)
+    {
+        if (Arrays.binarySearch(ESCAPE_CHARS, aChar) >= 0)
+            return true;
+        return Character.isISOControl(aChar);
+    }
+
+    /**
+     * Returns the escape string for given escape character.
+     */
+    private static String getEscapeCharString(char aChar)
+    {
+        switch (aChar) {
+            case '"': return "\\\"";
+            case '\\': return "\\\\";
+            case '\b': return "\\b";
+            case '\f': return "\\f";
+            case '\n': return "\\n";
+            case '\r': return "\\r";
+            case '\t': return "\\t";
+            default:
+                if (Character.isISOControl(aChar)) {
+                    System.err.println("JSONWriter.append: Tried to print control char in string: " + aChar);
+                    return "";
+                }
+                return String.valueOf(aChar);
+        }
     }
 }
