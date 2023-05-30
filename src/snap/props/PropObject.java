@@ -139,21 +139,24 @@ public abstract class PropObject implements PropChange.DoChange {
         // Get Prop value and default - just return true if equal
         Object propValue = getPropValue(aPropName);
         Object propDefault = getPropDefault(aPropName);
-        if (Objects.equals(propValue, propDefault))
+        if (Objects.deepEquals(propValue, propDefault))
             return true;
 
-        // If default not EMPTY_OBJECT, return false
-        if (propValue == null || propDefault != EMPTY_OBJECT)
+        // If propValue or propDefault null, return false
+        if (propValue == null || propDefault == null)
             return false;
 
-        // Special handling for EMPTY_OBJECT
-        if (propValue.getClass().isArray()) {
-            if (Array.getLength(propValue) == 0)
-                return true;
-        }
-        if (propValue instanceof List) {
-            if (((List<?>) propValue).size() == 0)
-                return true;
+        // Special handling for EMPTY_OBJECT or empty array
+        boolean isEmptyObject = propDefault == EMPTY_OBJECT || propDefault.getClass().isArray() && Array.getLength(propDefault) == 0;
+        if (isEmptyObject) {
+            if (propValue.getClass().isArray()) {
+                if (Array.getLength(propValue) == 0)
+                    return true;
+            }
+            if (propValue instanceof List) {
+                if (((List<?>) propValue).size() == 0)
+                    return true;
+            }
         }
 
         // Return not equal
