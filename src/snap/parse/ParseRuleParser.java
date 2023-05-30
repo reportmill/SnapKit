@@ -78,7 +78,7 @@ public class ParseRuleParser extends Parser {
         return rule;
     }
 
-    static Map<String, ParseRule> _rules = new HashMap();
+    static Map<String, ParseRule> _rules = new HashMap<>();
 
     /**
      * ParseRuleFile Handler: { ParseRule* }
@@ -109,7 +109,7 @@ public class ParseRuleParser extends Parser {
          */
         public ParseRule parsedAll()
         {
-            _rules = new HashMap();
+            _rules = new HashMap<>();
             return super.parsedAll();
         }
     }
@@ -166,7 +166,9 @@ public class ParseRuleParser extends Parser {
                 if (_part == null) {
                     _part = rule;
                     _more = null;
-                } else if (_more == null) _part = _more = new ParseRule(Op.Or, _part, rule);
+                }
+                else if (_more == null)
+                    _part = _more = new ParseRule(Op.Or, _part, rule);
                 else {
                     _more._child1 = new ParseRule(Op.Or, _more._child1, rule);
                     _more = _more._child1;
@@ -198,7 +200,9 @@ public class ParseRuleParser extends Parser {
                 if (_part == null) {
                     _part = rule;
                     _more = null;
-                } else if (_more == null) _part = _more = new ParseRule(Op.And, _part, rule);
+                }
+                else if (_more == null)
+                    _part = _more = new ParseRule(Op.And, _part, rule);
                 else {
                     _more._child1 = new ParseRule(Op.And, _more._child1, rule);
                     _more = _more._child1;
@@ -222,14 +226,16 @@ public class ParseRuleParser extends Parser {
          */
         protected void parsedOne(ParseNode aNode, String anId)
         {
-            // Handle Expression
-            if (anId == "Expression")
-                _part = (ParseRule) aNode.getCustomNode();
+            switch (anId) {
+
+                // Handle Expression
+                case "Expression": _part = (ParseRule) aNode.getCustomNode(); break;
 
                 // Handle Counts
-            else if (anId == "*") _part = new ParseRule(Op.ZeroOrMore, _part);
-            else if (anId == "+") _part = new ParseRule(Op.OneOrMore, _part);
-            else if (anId == "?") _part = new ParseRule(Op.ZeroOrOne, _part);
+                case "*": _part = new ParseRule(Op.ZeroOrMore, _part); break;
+                case "+": _part = new ParseRule(Op.OneOrMore, _part); break;
+                case "?": _part = new ParseRule(Op.ZeroOrOne, _part); break;
+            }
         }
     }
 
@@ -249,31 +255,35 @@ public class ParseRuleParser extends Parser {
         protected void parsedOne(ParseNode aNode, String anId)
         {
             // Handle Name
-            if (anId == "Name")
-                _part = getRule2(aNode.getString());
+            switch (anId) {
+                case "Name":
+                    _part = getRule2(aNode.getString());
+                    break;
 
                 // Handle string
-            else if (anId == "String") {
-                String string = aNode.getString(), pattern = string.substring(1, string.length() - 1);
-                getPart().setPattern(pattern);
-            }
+                case "String":
+                    String string = aNode.getString(), pattern = string.substring(1, string.length() - 1);
+                    getPart().setPattern(pattern);
+                    break;
 
-            // Handle OrExpr
-            else if (anId == "OrExpr") {
-                ParseRule rule = (ParseRule) aNode.getCustomNode();
-                if (_part == null) _part = rule;
-                else _part._child0 = rule;  // LookAhead
-            }
+                // Handle OrExpr
+                case "OrExpr":
+                    ParseRule rule = (ParseRule) aNode.getCustomNode();
+                    if (_part == null) _part = rule;
+                    else _part._child0 = rule;  // LookAhead
+                    break;
 
-            // Handle LookAhead
-            else if (aNode.getPattern() == "LookAhead")
-                getPart().setLookAhead(99);
+                // Handle LookAhead
+                case "LookAhead":
+                    getPart().setLookAhead(99);
+                    break;
 
                 // Handle Number
-            else if (anId == "Number") {
-                String str = aNode.getString();
-                int count = Integer.valueOf(str);
-                getPart().setLookAhead(count);
+                case "Number":
+                    String str = aNode.getString();
+                    int count = Integer.parseInt(str);
+                    getPart().setLookAhead(count);
+                    break;
             }
         }
     }
