@@ -276,7 +276,7 @@ public class WebSitePane extends ViewOwner {
             return recentURLs;
 
         // Get valid URLs
-        WebFile[] recentFilesForSite = ArrayUtils.map(recentUrlsForSite, url -> url.getFile(), WebFile.class);
+        WebFile[] recentFilesForSite = ArrayUtils.mapNonNull(recentUrlsForSite, url -> url.getFile(), WebFile.class);
         WebFile[] validRecentFiles = ArrayUtils.filter(recentFilesForSite, fileValidator);
         WebURL[] validRecentURLs = ArrayUtils.map(validRecentFiles, file -> file.getURL(), WebURL.class);
         return validRecentURLs;
