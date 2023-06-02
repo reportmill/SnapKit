@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'com.reportmill'
-version  new SimpleDateFormat("yyyy.MM.dd").format(new Date())
+version  new SimpleDateFormat("yyyy.MM").format(new Date())
 
 sourceSets.main.java.srcDirs = ['src']
 sourceSets.main.resources.srcDirs = ['src']
