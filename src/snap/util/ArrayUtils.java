@@ -65,6 +65,25 @@ public class ArrayUtils {
     }
 
     /**
+     * Adds all object from second list to first list (creates first list if missing).
+     */
+    public static <T> T[] addAllUnique(T[] anArray, T... theObjects)
+    {
+        int length = anArray.length;
+        int newLengthMax = length + theObjects.length;
+        T[] newArray = Arrays.copyOf(anArray, newLengthMax);
+
+        // Add objects unique
+        for (T object : theObjects) {
+            if (!contains(anArray, theObjects))
+                newArray[length++] = object;
+        }
+
+        // Return trimmed
+        return length == newLengthMax ? newArray : Arrays.copyOf(newArray, length);
+    }
+
+    /**
      * Returns a new array by removing a value from an array of objects at the given index.
      */
     public static <T> T[] remove(T[] anArray, int anIndex)
@@ -115,7 +134,7 @@ public class ArrayUtils {
     }
 
     /**
-     * Replaces a range of values in an int array with values from another int array.
+     * Replaces a range of values in an array with values from another array.
      */
     public static <T> T[] replace(T[] anArray, int start, int end, T ... swapInArray)
     {
