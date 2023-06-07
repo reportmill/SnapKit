@@ -395,25 +395,9 @@ public class Renderer2D extends Renderer {
     }*/
 
     /**
-     * Registers factory.
-     */
-    public static void registerFactory()
-    {
-        // If already set, just return
-        for (RendererFactory factory : RendererFactory.getFactories())
-            if (factory.getClass() == Renderer2DFactory.class)
-                return;
-
-        // Create, add and setDefault
-        RendererFactory factory = new Renderer2DFactory();
-        RendererFactory.addFactory(factory);
-        RendererFactory.setDefaultFactory(factory);
-    }
-
-    /**
      * A default implementation.
      */
-    private static class Renderer2DFactory extends RendererFactory {
+    public static class Renderer2DFactory extends RendererFactory {
 
         /**
          * Returns the renderer name.

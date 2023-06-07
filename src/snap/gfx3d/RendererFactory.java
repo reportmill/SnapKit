@@ -1,5 +1,5 @@
 package snap.gfx3d;
-import java.util.Arrays;
+import snap.util.ArrayUtils;
 
 /**
  * Used to create new renderers.
@@ -10,7 +10,7 @@ public abstract class RendererFactory {
     private static RendererFactory  _defaultFactory;
 
     // All RendererFactories
-    private static RendererFactory[]  _factories = new RendererFactory[0];
+    private static RendererFactory[]  _factories;
 
     /**
      * Returns the renderer name.
@@ -27,8 +27,9 @@ public abstract class RendererFactory {
      */
     public static Renderer newDefaultRenderer(Camera aCamera)
     {
-        if (_defaultFactory != null)
-            return _defaultFactory.newRenderer(aCamera);
+        RendererFactory defaultFactory = getDefaultFactory();
+        if (defaultFactory != null)
+            return defaultFactory.newRenderer(aCamera);
 
         return new Renderer2D(aCamera);
     }
@@ -38,7 +39,15 @@ public abstract class RendererFactory {
      */
     public static RendererFactory getDefaultFactory()
     {
-        return _defaultFactory;
+        // If set, just return
+        if (_defaultFactory != null) return _defaultFactory;
+
+        // Try to find factory
+        RendererFactory[] knownFactories = getFactories();
+        RendererFactory knownFactory = knownFactories.length > 0 ? knownFactories[0] : null;
+
+        // Set and return
+        return _defaultFactory = knownFactory;
     }
 
     /**
@@ -54,7 +63,27 @@ public abstract class RendererFactory {
      */
     public static RendererFactory[] getFactories()
     {
-        return _factories;
+        if (_factories != null) return _factories;
+
+        // Try to find known factories
+        String JOGL_RENDERER_FACTORY = "snapgl.JGLRenderer$JGLRendererFactory";
+        String[] knownFactoryClassNames = { JOGL_RENDERER_FACTORY };
+        RendererFactory[] factories = new RendererFactory[0];
+        for (String knownFactoryClassName : knownFactoryClassNames) {
+            try {
+                Class<? extends RendererFactory> knownFactoryClass = (Class<? extends RendererFactory>) Class.forName(knownFactoryClassName);
+                RendererFactory factory = knownFactoryClass.newInstance();
+                factories = ArrayUtils.add(factories, factory);
+            }
+            catch (Exception ignore) { }
+        }
+
+        // Add Renderer2D
+        RendererFactory renderer2dFactory = new Renderer2D.Renderer2DFactory();
+        factories = ArrayUtils.add(factories, renderer2dFactory);
+
+        // Return
+        return _factories = factories;
     }
 
     /**
@@ -62,9 +91,16 @@ public abstract class RendererFactory {
      */
     public static void addFactory(RendererFactory aFactory)
     {
-        int end = _factories.length;
-        _factories = Arrays.copyOf(_factories, end + 1);
-        _factories[end] = aFactory;
+        // If already added, just return
+        RendererFactory[] factories = getFactories();
+        boolean containsFactory = ArrayUtils.findMatch(factories, factory -> factory.getClass().isInstance(aFactory)) != null;
+        if (containsFactory) {
+            System.out.println("RenderFactory.addFactory: Factory already added for type: " + aFactory.getRendererName());
+            return;
+        }
+
+        // Add factory
+        _factories = ArrayUtils.addUnique(_factories, aFactory);
     }
 
     /**
@@ -89,13 +125,5 @@ public abstract class RendererFactory {
             if (factory.getRendererName().equals(aName))
                 return factory;
         return null;
-    }
-
-    /**
-     * Static initializer.
-     */
-    static
-    {
-        Renderer2D.registerFactory();
     }
 }

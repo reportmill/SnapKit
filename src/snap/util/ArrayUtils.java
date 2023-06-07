@@ -52,6 +52,16 @@ public class ArrayUtils {
     }
 
     /**
+     * Adds all object from second list to first list (creates first list if missing).
+     */
+    public static <T> T[] addUnique(T[] anArray, T anObj)
+    {
+        if (!contains(anArray, anObj))
+            return add(anArray, anObj);
+        return anArray;
+    }
+
+    /**
      * Returns an array by adding to the given array the given objects (array).
      */
     public static <T> T[] addAll(T[] anArray, T ... theObjs)
