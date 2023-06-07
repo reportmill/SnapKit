@@ -1,5 +1,6 @@
 package snap.viewx;
 import snap.geom.Insets;
+import snap.gfx3d.RendererFactory;
 import snap.view.*;
 
 /**
@@ -35,11 +36,16 @@ public class DevPaneGraphics extends ViewOwner {
     @Override
     protected void initUI()
     {
-        // Init themeList
-        ListView<String> themeList = getView("ThemeList", ListView.class);
-        themeList.setItems(ALL_THEMES);
-        themeList.setSelItem(STANDARD_THEME);
-        themeList.getListArea().setCellPadding(new Insets(4, 8, 4, 8));
+        // Init ThemesListView
+        ListView<String> themesListView = getView("ThemesListView", ListView.class);
+        themesListView.setItems(ALL_THEMES);
+        themesListView.setSelItem(STANDARD_THEME);
+        themesListView.getListArea().setCellPadding(new Insets(4, 8, 4, 8));
+
+        // Init RenderersListView
+        ListView<RendererFactory> rendererListView = getView("RenderersListView", ListView.class);
+        rendererListView.setItemTextFunction(itm -> itm.getRendererName());
+        rendererListView.setItems(RendererFactory.getFactories());
     }
 
     /**
@@ -48,10 +54,14 @@ public class DevPaneGraphics extends ViewOwner {
     @Override
     protected void resetUI()
     {
-        // Update ThemeList
+        // Update ThemesListView
         String themeName = ViewTheme.get().getClass().getSimpleName().replace("Theme", "");
         if (themeName.equals("View")) themeName = STANDARD_THEME;
-        setViewSelItem("ThemeList", themeName);
+        setViewSelItem("ThemesListView", themeName);
+
+        // Update RenderersListView
+        RendererFactory rendererFactory = RendererFactory.getDefaultFactory();
+        setViewSelItem("RenderersListView", rendererFactory);
     }
 
     /**
@@ -68,10 +78,16 @@ public class DevPaneGraphics extends ViewOwner {
         if (anEvent.equals("ShowFrameRateButton"))
             ViewUpdater.setShowFrameRate(anEvent.getBoolValue());
 
-        // Handle ThemeList
-        if (anEvent.equals("ThemeList")) {
+        // Handle ThemesListView
+        if (anEvent.equals("ThemesListView")) {
             String themeName = anEvent.getStringValue();
             ViewTheme.setThemeForName(themeName);
+        }
+
+        // Handle RenderersListView
+        if (anEvent.equals("RenderersListView")) {
+            RendererFactory rendererFactory = (RendererFactory) anEvent.getSelItem();
+            RendererFactory.setDefaultFactory(rendererFactory);
         }
     }
 }

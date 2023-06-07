@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RowView Padding="25" Spacing="8" FillHeight="true">
-  <ColView Padding="4" GrowHeight="true" Spacing="4">
-    <Label text="Themes" />
-    <ListView Name="ThemeList" MinWidth="140" GrowHeight="true">
-      <LineBorder Color="#c0c0c0" />
-      <font name="Arial" size="14" />
-    </ListView>
-  </ColView>
   <TitleView MinWidth="120" MinHeight="60" Text="Debug Options">
     <ColView Padding="8" Spacing="7" FillWidth="true">
       <font name="Arial" size="13" />
@@ -14,4 +7,18 @@
       <CheckBox Name="ShowFrameRateButton" PrefHeight="22" Padding="2,6,2,6" text="Show Frame rate" />
     </ColView>
   </TitleView>
+  <ColView Padding="4" GrowHeight="true" Spacing="4">
+    <Label text="Themes" />
+    <ListView Name="ThemesListView" MinWidth="140" GrowHeight="true">
+      <LineBorder Color="#c0c0c0" />
+      <font name="Arial" size="14" />
+    </ListView>
+  </ColView>
+  <ColView Padding="4" GrowHeight="true" Spacing="4">
+    <Label text="Renderers" />
+    <ListView Name="RenderersListView" MinWidth="140" GrowHeight="true">
+      <LineBorder Color="#c0c0c0" />
+      <font name="Arial" size="14" />
+    </ListView>
+  </ColView>
 </RowView>
