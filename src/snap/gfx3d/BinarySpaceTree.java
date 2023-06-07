@@ -25,6 +25,9 @@ public class BinarySpaceTree {
     // The node not in front (not necessarily geometrically in behind shape plane)
     private BinarySpaceTree _backNode;
 
+    // Whether error has been hit
+    private static boolean _hitError;
+
     // Constants for comparison/ordering of Path3Ds
     public static final int ORDER_BACK_TO_FRONT = -1;
     public static final int ORDER_FRONT_TO_BACK = 1;
@@ -68,7 +71,12 @@ public class BinarySpaceTree {
             else {
                 boolean didAdd = _frontNode.addNode(aNode);
                 if (!didAdd) {
-                    aNode.addNode(_frontNode);
+                    if (!aNode.addNode(_frontNode)) {
+                        if (!_hitError)
+                            System.out.println("BinarySpaceTree.addNode: Can't add font node");
+                        _hitError = true;
+                        aNode._frontNode = _frontNode;
+                    }
                     _frontNode = aNode;
                 }
             }
@@ -85,7 +93,12 @@ public class BinarySpaceTree {
             else {
                 boolean didAdd = _backNode.addNode(aNode);
                 if (!didAdd) {
-                    aNode.addNode(_backNode);
+                    if (!aNode.addNode(_backNode)) {
+                        if (!_hitError)
+                            System.out.println("BinarySpaceTree.addNode: Can't add back node");
+                        _hitError = true;
+                        aNode._backNode = _backNode;
+                    }
                     _backNode = aNode;
                 }
             }
@@ -208,6 +221,9 @@ public class BinarySpaceTree {
      */
     public static void sortShapesBackToFront(List<FacetShape> theShapes)
     {
+        // Reset error
+        _hitError = false;
+
         // Create BinarySpaceTree for shapes
         BinarySpaceTree binarySpaceTree = createBinarySpaceTree(theShapes);
         if (binarySpaceTree == null)

@@ -2,6 +2,7 @@ package snap.gfx3d;
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.gfx.Color;
+import snap.gfx.Image;
 import snap.gfx.Paint;
 import snap.gfx.Painter;
 import snap.props.PropChange;
@@ -132,28 +133,115 @@ public class Renderer2D extends Renderer {
             float[] pointsArray = triangleArray.getPointArray();
             float[] colorsArray = triangleArray.isColorArraySet() ? triangleArray.getColorArray() : null;
             Color color = triangleArray.getColor();
+            boolean textureSet = triangleArray.isTextureSetAndReady();;
+            Image textureImage = textureSet ? triangleArray.getTexture().getImage() : null;
+            float[] textureCoords = textureSet ? triangleArray.getTexCoordArray() : null;
+            int textImageW = textureImage != null ? textureImage.getPixWidth() - 1 : 0;
+            int textImageH = textureImage != null ? textureImage.getPixHeight() - 1 : 0;
 
-            int pointCount = triangleArray.getPointCount();
+            // Get indexes
+            int[] indexArray = triangleArray.getIndexArray();
+            if (!triangleArray.isIndexArraySet()) {
+                int pointCount = triangleArray.getPointCount();
+                indexArray = new int[pointCount];
+                for (int i = 0; i < pointCount; i++)
+                    indexArray[i] = i;
+            }
+
+            // Get point count, triangle count (increment to avoid painting more than 3000 mesh triangles)
+            int pointCount = indexArray.length;
             int triangleCount = pointCount / 3;
-            for (int triangleIndex = 0, i = 0; triangleIndex < triangleCount; triangleIndex++) {
-                float p1x = pointsArray[i], c1x = colorsArray != null ? colorsArray[i++] : (float) color.getRed();
-                float p1y = pointsArray[i], c1y = colorsArray != null ? colorsArray[i++] : (float) color.getGreen();
-                float p1z = pointsArray[i], c1z = colorsArray != null ? colorsArray[i++] : (float) color.getBlue();
-                float p2x = pointsArray[i], c2x = colorsArray != null ? colorsArray[i++] : (float) color.getRed();
-                float p2y = pointsArray[i], c2y = colorsArray != null ? colorsArray[i++] : (float) color.getGreen();
-                float p2z = pointsArray[i], c2z = colorsArray != null ? colorsArray[i++] : (float) color.getBlue();
-                float p3x = pointsArray[i], c3x = colorsArray != null ? colorsArray[i++] : (float) color.getRed();
-                float p3y = pointsArray[i], c3y = colorsArray != null ? colorsArray[i++] : (float) color.getGreen();
-                float p3z = pointsArray[i], c3z = colorsArray != null ? colorsArray[i++] : (float) color.getBlue();
+            int increment = Math.max(triangleCount / 3000, 1);
+
+            // Iterate over triangles and add polygon 3d for each
+            for (int triangleIndex = 0; triangleIndex < triangleCount; triangleIndex += increment) {
+
+                // Get indexes
+                int indexIndex = triangleIndex * 3;
+                int index1 = indexArray[indexIndex];
+                int index2 = indexArray[indexIndex + 1];
+                int index3 = indexArray[indexIndex + 2];
+
+                // Get triangle points
+                int pointIndex1 = index1 * 3;
+                int pointIndex2 = index2 * 3;
+                int pointIndex3 = index3 * 3;
+                float p1x = pointsArray[pointIndex1];
+                float p1y = pointsArray[pointIndex1 + 1];
+                float p1z = pointsArray[pointIndex1 + 2];
+                float p2x = pointsArray[pointIndex2];
+                float p2y = pointsArray[pointIndex2 + 1];
+                float p2z = pointsArray[pointIndex2 + 2];
+                float p3x = pointsArray[pointIndex3];
+                float p3y = pointsArray[pointIndex3 + 1];
+                float p3z = pointsArray[pointIndex3 + 2];
+
+                // Create polygon 3D
                 Polygon3D polygon3D = new Polygon3D();
                 polygon3D.addPoint(p1x, p1y, p1z);
                 polygon3D.addPoint(p2x, p2y, p2z);
                 polygon3D.addPoint(p3x, p3y, p3z);
+
+                // Get colors
+                float c1x, c1y, c1z;
+                float c2x, c2y, c2z;
+                float c3x, c3y, c3z;
+                if (colorsArray != null) {
+                    c1x = colorsArray[pointIndex1];
+                    c1y = colorsArray[pointIndex1 + 1];
+                    c1z = colorsArray[pointIndex1 + 2];
+                    c2x = colorsArray[pointIndex2];
+                    c2y = colorsArray[pointIndex2 + 1];
+                    c2z = colorsArray[pointIndex2 + 2];
+                    c3x = colorsArray[pointIndex3];
+                    c3y = colorsArray[pointIndex3 + 1];
+                    c3z = colorsArray[pointIndex3 + 2];
+                }
+                else if (textureSet) {
+                    int texIndex1 = index1 * 2;
+                    int texIndex2 = index2 * 2;
+                    int texIndex3 = index3 * 2;
+                    int t1x = Math.round(textureCoords[texIndex1] * textImageW);
+                    int t1y = Math.round(textureCoords[texIndex1 + 1] * textImageH);
+                    int c1 = textureImage.getRGB(t1x, t1y);
+                    c1x = (c1 >> 16 & 0xff) / 255f;
+                    c1y = (c1 >> 8 & 0Xff) / 255f;
+                    c1z = (c1 & 0xff) / 255f;
+                    int t2x = Math.round(textureCoords[texIndex2] * textImageW);
+                    int t2y = Math.round(textureCoords[texIndex2 + 1] * textImageH);
+                    int c2 = textureImage.getRGB(t2x, t2y);
+                    c2x = (c2 >> 16 & 0xff) / 255f;
+                    c2y = (c2 >> 8 & 0Xff) / 255f;
+                    c2z = (c2 & 0xff) / 255f;
+                    int t3x = Math.round(textureCoords[texIndex3] * textImageW);
+                    int t3y = Math.round(textureCoords[texIndex3 + 1] * textImageH);
+                    int c3 = textureImage.getRGB(t3x, t3y);
+                    c3x = (c3 >> 16 & 0xff) / 255f;
+                    c3y = (c3 >> 8 & 0Xff) / 255f;
+                    c3z = (c3 & 0xff) / 255f;
+                }
+                else {
+                    c1x = (float) color.getRed();
+                    c1y = (float) color.getGreen();
+                    c1z = (float) color.getBlue();
+                    c2x = (float) color.getRed();
+                    c2y = (float) color.getGreen();
+                    c2z = (float) color.getBlue();
+                    c3x = (float) color.getRed();
+                    c3y = (float) color.getGreen();
+                    c3z = (float) color.getBlue();
+                }
+
+                // Get color components
                 float red = (c1x + c2x + c3x) / 3;
                 float green = (c1y + c2y + c3y) / 3;
                 float blue = (c1z + c2z + c3z) / 3;
+
+                // Set color
                 polygon3D.setColor(new Color(red, green, blue));
                 polygon3D.setDoubleSided(true);
+
+                // Add shape in camera coords
                 addFacetShapeInCameraCoords(polygon3D, facetShapeList);
             }
         }
@@ -190,6 +278,8 @@ public class Renderer2D extends Renderer {
 
         // Get facetShape in camera space (reverse if shape was facing away but double-sided)
         FacetShape facetShapeInCamera = facetShape.copyForMatrix(sceneToCamera);
+        if (facetShapeInCamera == null)
+            return; // AxisBoxShape
         if (shapeFacingAway) {
             facetShapeInCamera.reverse();
             facetNormalInCamera.negate();
