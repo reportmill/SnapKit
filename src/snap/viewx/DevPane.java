@@ -34,6 +34,9 @@ public class DevPane extends ViewOwner {
     // The Console inspector
     private DevPaneConsole  _consoleInsp = new DevPaneConsole();
 
+    // The Files inspector
+    private DevPaneFiles _filesInsp = new DevPaneFiles(this);
+
     // The Exception inspector
     private DevPaneExceptions  _exceptionInsp;
 
@@ -142,6 +145,7 @@ public class DevPane extends ViewOwner {
         _tabView.addTab("Views", _viewTree.getUI());
         _tabView.addTab("Graphics", _gfxInsp.getUI());
         _tabView.addTab("Console", _consoleInsp.getUI());
+        _tabView.addTab("Files", _filesInsp.getUI());
 
         // Add CloseBox
         TabBar tabBar = _tabView.getTabBar();
