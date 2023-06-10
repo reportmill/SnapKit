@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RowView Padding="5" FillWidth="true" FillHeight="true">
-  <ColView GrowWidth="true" FillWidth="true" FillHeight="true">
+<SplitView>
+  <ColView Margin="5" PrefWidth="300" GrowWidth="true" FillWidth="true">
     <RowView Padding="4" Spacing="4" GrowWidth="true">
       <Label text="Root File:" />
       <TextField Name="RootFileText" PrefWidth="412" BorderRadius="3" />
     </RowView>
     <BoxView Name="SitePaneBox" GrowWidth="true" GrowHeight="true" />
   </ColView>
-  <TextView Margin="10" PrefWidth="300" />
-</RowView>
+  <TextView Name="FileTextView" Margin="10" PrefWidth="60" GrowWidth="true" />
+</SplitView>

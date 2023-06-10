@@ -7,9 +7,6 @@ import snap.web.*;
  */
 public class DevPaneFiles extends ViewOwner {
 
-    // The DevPane
-    private DevPane  _devPane;
-
     // The root file name
     private String _rootFilename;
 
@@ -19,10 +16,9 @@ public class DevPaneFiles extends ViewOwner {
     /**
      * Constructor.
      */
-    public DevPaneFiles(DevPane aDevPane)
+    public DevPaneFiles()
     {
         super();
-        _devPane = aDevPane;
         _rootFilename = "/";
     }
 
@@ -67,15 +63,26 @@ public class DevPaneFiles extends ViewOwner {
     }
 
     /**
+     * Sets SitePane.
+     */
+    private void setSitePane(WebSitePane sitePane)
+    {
+        _sitePane = sitePane;
+        BoxView sitePaneBox = getView("SitePaneBox", BoxView.class);
+        sitePane.setActionHandler(e -> sitePaneDidFireAction());
+        sitePane.addPropChangeListener(pc -> sitePaneSelFileChanged(), WebSitePane.SelFile_Prop);
+        sitePaneBox.setContent(sitePane.getUI());
+    }
+    /**
      * Reset SitePane.
      */
     private void resetSitePane()
     {
-        BoxView sitePaneBox = getView("SitePaneBox", BoxView.class);
-
+        // Get WebSite for RootFilename (show error if not found)
         WebURL rootFileURL = WebURL.getURL(_rootFilename);
         WebSite site = rootFileURL != null ? rootFileURL.getAsSite() : null;
         if (site == null) {
+            BoxView sitePaneBox = getView("SitePaneBox", BoxView.class);
             sitePaneBox.setContent(new Label("Can't find site for: " + _rootFilename));
             return;
         }
@@ -83,6 +90,26 @@ public class DevPaneFiles extends ViewOwner {
         // Create SitePane and set in SitePaneBox
         WebSitePane sitePane = new WebSitePaneX();
         sitePane.setSite(site);
-        sitePaneBox.setContent(sitePane.getUI());
+        setSitePane(sitePane);
+    }
+
+    /**
+     * Called when SitePane super-selects a file (double-clicks or text field entry) to fetch contents in TextView.
+     */
+    private void sitePaneDidFireAction()
+    {
+        WebFile selFile = _sitePane.getSelFile();
+        if (selFile.isFile()) {
+            String fileText = selFile.getText();
+            setViewValue("FileTextView", fileText);
+        }
+    }
+
+    /**
+     * Called when SitePane selects a new file.
+     */
+    private void sitePaneSelFileChanged()
+    {
+        setViewValue("FileTextView", null);
     }
 }

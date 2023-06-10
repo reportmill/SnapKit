@@ -23,19 +23,19 @@ public class DevPane extends ViewOwner {
     private TabView  _tabView;
 
     // The ViewOwners inspector
-    private DevPaneViewOwners  _viewOwners = new DevPaneViewOwners(this);
+    private DevPaneViewOwners _viewOwnersInsp;
 
     // The ViewTree inspector
-    private DevPaneViews _viewTree = new DevPaneViews(this);
+    private DevPaneViews _viewsInsp;
 
     // The Graphics inspector
-    private DevPaneGraphics  _gfxInsp = new DevPaneGraphics(this);
+    private DevPaneGraphics _graphicsInsp;
 
     // The Console inspector
-    private DevPaneConsole  _consoleInsp = new DevPaneConsole();
+    private DevPaneConsole _consoleInsp;
 
     // The Files inspector
-    private DevPaneFiles _filesInsp = new DevPaneFiles(this);
+    private DevPaneFiles _filesInsp;
 
     // The Exception inspector
     private DevPaneExceptions  _exceptionInsp;
@@ -54,6 +54,13 @@ public class DevPane extends ViewOwner {
 
         _rootView = aView.getRootView();
         _content = _rootView.getContent();
+
+        // Set DevPanes
+        _viewOwnersInsp = new DevPaneViewOwners(this);
+        _viewsInsp = new DevPaneViews(this);
+        _graphicsInsp = new DevPaneGraphics(this);
+        _consoleInsp = new DevPaneConsole();
+        _filesInsp = new DevPaneFiles();
     }
 
     /**
@@ -68,14 +75,10 @@ public class DevPane extends ViewOwner {
     {
         // If first exception, create UI, add TabView, select it
         if (_exceptionInsp == null) {
-            System.out.println("ShowException");
             getUI();
-            System.out.println("ShowException: Loaded UI");
             _exceptionInsp = new DevPaneExceptions();
             _tabView.addTab("Exceptions", _exceptionInsp.getUI());
-            System.out.println("ShowException: Added tab");
             _tabView.setSelIndex(_tabView.getTabCount()-1);
-            System.out.println("ShowException: Set sel");
         }
 
         // Show Exception
@@ -141,19 +144,23 @@ public class DevPane extends ViewOwner {
     @Override
     protected void initUI()
     {
-        _tabView.addTab("View Owners", _viewOwners.getUI());
-        _tabView.addTab("Views", _viewTree.getUI());
-        _tabView.addTab("Graphics", _gfxInsp.getUI());
-        _tabView.addTab("Console", _consoleInsp.getUI());
-        _tabView.addTab("Files", _filesInsp.getUI());
+        // Add tabs
+        Tab.Builder tabBuilder = new Tab.Builder(_tabView.getTabBar());
+        tabBuilder.title("View Owners").contentOwner(_viewOwnersInsp).add();
+        tabBuilder.title("Views").contentOwner(_viewsInsp).add();
+        tabBuilder.title("Graphics").contentOwner(_graphicsInsp).add();
+        tabBuilder.title("Console").contentOwner(_consoleInsp).add();
+        tabBuilder.title("Files").contentOwner(_filesInsp).add();
 
-        // Add CloseBox
-        TabBar tabBar = _tabView.getTabBar();
+        // Create CloseBox for TabView.TabBar
         CloseBox closeBox = new CloseBox();
         closeBox.setMargin(0, 15, 0, 0);
         closeBox.setLean(Pos.CENTER_RIGHT);
         closeBox.setManaged(false);
         closeBox.addEventHandler(e -> removeFromWindow(), View.Action);
+
+        // Add CloseBox to TabView.TabBar
+        TabBar tabBar = _tabView.getTabBar();
         ViewUtils.addChild(tabBar, closeBox);
     }
 
@@ -244,10 +251,10 @@ public class DevPane extends ViewOwner {
         @Override
         protected void paintAbove(Painter aPntr)
         {
-            if (_viewOwners.isShowing())
-                _viewOwners.paintViewSelection(aPntr, _splitView);
-            else if (_viewTree.isShowing())
-                _viewTree.paintViewSelection(aPntr, _splitView);
+            if (_viewOwnersInsp.isShowing())
+                _viewOwnersInsp.paintViewSelection(aPntr, _splitView);
+            else if (_viewsInsp.isShowing())
+                _viewsInsp.paintViewSelection(aPntr, _splitView);
         }
     }
 }
