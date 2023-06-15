@@ -2,6 +2,7 @@ package snap.swing;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.ByteArrayOutputStream;
+import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
 
@@ -18,10 +19,11 @@ public class AWTImageUtils {
         // Catch exceptions
         try {
             BufferedImage image = getBufferedImage(anImage, false); // Get buffered image
-            ByteArrayOutputStream out = new ByteArrayOutputStream(); // Get byte array output stream
-            ImageIO.write(image, "jpg", out);  // Write jpg image to output stream
-            return out.toByteArray();  // Return byte array output stream bytes
-        } catch(Exception e) { e.printStackTrace(); return null; }
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(); // Get byte array output stream
+            ImageIO.write(image, "jpg", byteArrayOutputStream);  // Write jpg image to output stream
+            return byteArrayOutputStream.toByteArray();  // Return byte array output stream bytes
+        }
+        catch(Exception e) { e.printStackTrace(); return null; }
     }
 
     /**
@@ -32,10 +34,11 @@ public class AWTImageUtils {
         // Catch exceptions
         try {
             BufferedImage image = getBufferedImage(anImage); // Get buffered image
-            ByteArrayOutputStream out = new ByteArrayOutputStream(); // Get byte array output stream
-            ImageIO.write(image, "png", out); // Write png image to output stream
-            return out.toByteArray(); // Return output stream bytes
-        } catch(Exception e) { e.printStackTrace(); return null; }
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(); // Get byte array output stream
+            ImageIO.write(image, "png", byteArrayOutputStream); // Write png image to output stream
+            return byteArrayOutputStream.toByteArray(); // Return output stream bytes
+        }
+        catch(Exception e) { e.printStackTrace(); return null; }
     }
 
     /**
@@ -45,7 +48,7 @@ public class AWTImageUtils {
     {
         // If image is already a buffered image, just return it
         if (anImage instanceof BufferedImage)
-            return (BufferedImage)anImage;
+            return (BufferedImage) anImage;
 
         // Return buffered image for image with transparency
         return getBufferedImage(anImage, true);
@@ -58,22 +61,24 @@ public class AWTImageUtils {
     {
         // If image is already a buffered image with given transparency, just return it
         if (anImage instanceof BufferedImage) {
-            BufferedImage image = (BufferedImage)anImage;
-            if ((image.getTransparency()==BufferedImage.TRANSLUCENT && withAlpha) ||
-                (image.getTransparency()==BufferedImage.OPAQUE && !withAlpha))
+            BufferedImage image = (BufferedImage) anImage;
+            int transparency = image.getTransparency();
+            if ((transparency == BufferedImage.TRANSLUCENT && withAlpha) || (transparency == BufferedImage.OPAQUE && !withAlpha))
                 return image;
         }
 
         // Get image width and height
-        int w = anImage.getWidth(null);
-        int h = anImage.getHeight(null);
+        int imageW = anImage.getWidth(null);
+        int imageH = anImage.getHeight(null);
 
-        // Create new buffered image, draw old image in new buffered image and return
-        BufferedImage bi = getBufferedImage(w, h, withAlpha);
-        Graphics2D g = bi.createGraphics();
-        g.drawImage(anImage, 0, 0, null);
-        g.dispose();
-        return bi;
+        // Create new buffered image and draw old image in new buffered image
+        BufferedImage bufferedImage = getBufferedImage(imageW, imageH, withAlpha);
+        Graphics2D gfx2D = bufferedImage.createGraphics();
+        gfx2D.drawImage(anImage, 0, 0, null);
+        gfx2D.dispose();
+
+        // Return
+        return bufferedImage;
     }
 
     /**
@@ -82,12 +87,12 @@ public class AWTImageUtils {
     public static BufferedImage getBufferedImage(int aWidth, int aHeight, boolean withAlpha)
     {
         // Get graphics configuration
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice gd = ge.getDefaultScreenDevice();
-        GraphicsConfiguration gc = gd.getDefaultConfiguration();
+        GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice graphicsDevice = graphicsEnvironment.getDefaultScreenDevice();
+        GraphicsConfiguration defaultConfig = graphicsDevice.getDefaultConfiguration();
 
         // Return buffered image
-        return gc.createCompatibleImage(aWidth, aHeight, withAlpha ? Transparency.TRANSLUCENT : Transparency.OPAQUE);
+        return defaultConfig.createCompatibleImage(aWidth, aHeight, withAlpha ? Transparency.TRANSLUCENT : Transparency.OPAQUE);
     }
 
     /**
@@ -96,116 +101,157 @@ public class AWTImageUtils {
      * to compensate for edge conditions of both the blur and the emboss convolutions.
      * Code adapted from Graphics Gems IV - Fast Embossing Effects on Raster Image Data (by John Schlag)
      */
-    public static void emboss(int spix[], int bpix[], int sw, int sh, int radius, double az, double alt)
+    public static void emboss(int[] srcPix, int[] bumpPix, int srcW, int srcH, int radius, double azimuth, double altitude)
     {
         // Get basic info
         int rad = Math.abs(radius);
-        int bw = sw + 2*rad, bh = sh + 2*rad;
+        int bumpW = srcW + 2 * rad;
+        int bumpH = srcH + 2 * rad;
 
         // Normalized light source vector
         double pixScale = 255.9;
-        int Lx = (int)(Math.cos(az) * Math.cos(alt) * pixScale);
-        int Ly = (int)(Math.sin(az) * Math.cos(alt) * pixScale);
-        int Lz = (int)(Math.sin(alt) * pixScale);
+        int Lx = (int) (Math.cos(azimuth) * Math.cos(altitude) * pixScale);
+        int Ly = (int) (Math.sin(azimuth) * Math.cos(altitude) * pixScale);
+        int Lz = (int) (Math.sin(altitude) * pixScale);
 
         // Constant z component of surface normal
-        int Nz = 3*255/rad, Nz2 = Nz*Nz;
-        int NzLz = Nz*Lz, background = Lz;
+        int Nz = 3 * 255 / rad;
+        int Nz2 = Nz * Nz;
+        int NzLz = Nz * Lz;
+        int background = Lz;
 
         // Bump map is an ARGB image - Turn it into an array of ints representing heights (in range 0-255).
-        int pcount = sh>100 ? 8 : sh>50 ? 5 : sh>20 ? 2 : 1, blen = bw*bh;
-        IntStream.range(0,pcount).parallel().forEach(i -> {
-            int jMin = blen/pcount*i, jMax = blen/pcount*(i+1); if (i==pcount-1) jMax = blen;
-            for (int j=jMin;j<jMax;j++) bpix[j] = (bpix[j]>>24) & 0xff;  // If single thread: jMin=0,jMax=bw*bh
+        int threadCount = srcH > 100 ? 8 : srcH > 50 ? 5 : srcH > 20 ? 2 : 1;
+        int bumpPixLen = bumpW * bumpH;
+        runInParallel(threadCount, i -> {
+            int jMin = bumpPixLen / threadCount * i;
+            int jMax = bumpPixLen / threadCount * (i + 1);
+            if (i == threadCount - 1)
+                jMax = bumpPixLen;
+            for (int j = jMin; j < jMax; j++)
+                bumpPix[j] = (bumpPix[j] >> 24) & 0xff;  // If single thread: jMin=0,jMax=bw*bh
         });
 
         // Break image up into some number of parts and run in parallel stream threads
-        IntStream.range(0,pcount).parallel().forEach(i -> {
-            int yMin = sh/pcount*i, yMax = sh/pcount*(i+1); if (i==pcount-1) yMax = sh;
-            int soff = yMin*sw, boff = yMin*(sw+2*rad) + bw*rad + rad; // If single thread: yMin=0,yMax=sh
+        runInParallel(threadCount, i -> {
+            int yMin = srcH / threadCount * i;
+            int yMax = srcH / threadCount * (i + 1);
+            if (i == threadCount - 1)
+                yMax = srcH;
+            int srcOff = yMin * srcW;
+            int bumpOff = yMin * (srcW + 2 * rad) + bumpW * rad + rad; // If single thread: yMin=0,yMax=sh
 
-        // Shade the pixels based on bump height & light source location
-        for (int y=yMin; y<yMax; y++, boff+=2*rad) { for (int x=0; x<sw; x++) {
+            // Shade the pixels based on bump height & light source location
+            for (int y = yMin; y < yMax; y++, bumpOff += 2 * rad) {
+                for (int x = 0; x < srcW; x++) {
 
-            // Normal calculation from alpha sample of bump map of surrounding pixels
-            int b_0_0 = bpix[boff-bw-1], b_0_1 = bpix[boff-bw], b_0_2 = bpix[boff-bw+1];
-            int b_1_0 = bpix[boff-1],                           b_1_2 = bpix[boff+1];
-            int b_2_0 = bpix[boff+bw-1], b_2_1 = bpix[boff+bw], b_2_2 = bpix[boff+bw+1];
-            int Nx = b_0_0 + b_1_0 + b_2_0 - b_0_2 - b_1_2 - b_2_2;
-            int Ny = b_2_0 + b_2_1 + b_2_2 - b_0_0 - b_0_1 - b_0_2;
+                    // Normal calculation from alpha sample of bump map of surrounding pixels
+                    int b_0_0 = bumpPix[bumpOff - bumpW - 1];
+                    int b_0_1 = bumpPix[bumpOff - bumpW];
+                    int b_0_2 = bumpPix[bumpOff - bumpW + 1];
+                    int b_1_0 = bumpPix[bumpOff - 1];
+                    int b_1_2 = bumpPix[bumpOff + 1];
+                    int b_2_0 = bumpPix[bumpOff + bumpW - 1];
+                    int b_2_1 = bumpPix[bumpOff + bumpW];
+                    int b_2_2 = bumpPix[bumpOff + bumpW + 1];
+                    int Nx = b_0_0 + b_1_0 + b_2_0 - b_0_2 - b_1_2 - b_2_2;
+                    int Ny = b_2_0 + b_2_1 + b_2_2 - b_0_0 - b_0_1 - b_0_2;
 
-            // If negative, negate everything
-            if (radius<0) { Nx = -Nx; Ny = -Ny; }
+                    // If negative, negate everything
+                    if (radius < 0) {
+                        Nx = -Nx;
+                        Ny = -Ny;
+                    }
 
-            // Calculate shade: If normal isn't normal, calculate shade
-            int shade = background;
-            if (Nx!=0 || Ny!=0) {
-                int NdotL = Nx*Lx + Ny*Ly + NzLz;
-                if (NdotL<0) shade = 0;
-                else shade = (int)(NdotL / Math.sqrt(Nx*Nx + Ny*Ny + Nz2));
+                    // Calculate shade: If normal isn't normal, calculate shade
+                    int shade = background;
+                    if (Nx != 0 || Ny != 0) {
+                        int NdotL = Nx * Lx + Ny * Ly + NzLz;
+                        if (NdotL < 0) shade = 0;
+                        else shade = (int) (NdotL / Math.sqrt(Nx * Nx + Ny * Ny + Nz2));
+                    }
+
+                    // scale each sample by shade
+                    int pixel = srcPix[srcOff]; //if (shade<Lz) p=0xff202020; else p=0xff808080; spix[off] = (0x010101*shade) | alpha;
+
+                    // Recalculate components
+                    int red = (((pixel & 0xff0000) * shade) >> 8) & 0xff0000;
+                    int green = (((pixel & 0xff00) * shade) >> 8) & 0xff00;
+                    int blue = (((pixel & 0xff) * shade) >> 8);
+                    int alpha = pixel & 0xff000000; //((p>>8)*shade) & 0xff000000;
+
+                    // Set new value and increment offsets (assumption is that rowbytes==width)
+                    srcPix[srcOff] = red | green | blue | alpha;
+                    srcOff++;
+                    bumpOff++;
+                }
             }
-
-            // scale each sample by shade
-            int p = spix[soff]; //if (shade<Lz) p=0xff202020; else p=0xff808080; spix[off] = (0x010101*shade) | alpha;
-
-            // Recalculate components
-            int r = (((p&0xff0000)*shade)>>8) & 0xff0000;
-            int g = (((p&0xff00)*shade)>>8) & 0xff00;
-            int b = (((p&0xff)*shade)>>8);
-            int a = p & 0xff000000; //((p>>8)*shade) & 0xff000000;
-
-            // Set new value and increment offsets (assumption is that rowbytes==width)
-            spix[soff] = r | g | b | a; soff++; boff++;
-        }}});
+        });
     }
 
     /**
      * Convolves given source image into dest image.
      */
-    public static void convolve(int spix[], int dpix[], int sw, int sh, float kern[], int kw)
+    public static void convolve(int[] srcPix, int[] destPix, int srcW, int srcH, float[] kern, int kernW)
     {
         // Get offset x/y and integer kernel
-        int klen = kern.length, kh = klen/kw, dx = kw/2, dy = kh/2;
-        int kern2[] = new int[klen]; for (int i=0;i<klen;i++) kern2[i] = (int)(kern[i]*255*255);
+        int kernLen = kern.length;
+        int kernH = kernLen / kernW;
+        int dx = kernW / 2;
+        int dy = kernH / 2;
+        int[] kern2 = new int[kernLen];
+        for (int i = 0; i < kernLen; i++)
+            kern2[i] = (int) (kern[i] * 255 * 255);
 
         // Bump map is an ARGB image - Turn it into an array of ints representing heights (in range 0-255).
-        int pcount = sh>100 ? 8 : sh>50 ? 5 : sh>20 ? 2 : 1;
-        IntStream.range(0,pcount).parallel().forEach(i -> {
+        int threadCount = srcH > 100 ? 8 : srcH > 50 ? 5 : srcH > 20 ? 2 : 1;
+        runInParallel(threadCount, i -> {
 
             // Get yMin/yMax for thread part and calculate start offset
-            int yMin = dy + (sh-2*dy) / pcount*i;
-            int yMax = dy + (sh-2*dy) / pcount*(i+1);
-            if (i==pcount-1) yMax = sh-dy;
-            int off = yMin*sw + dx; // If single thread: yMin=dy,yMax=sh-dy
+            int yMin = dy + (srcH - 2 * dy) / threadCount * i;
+            int yMax = dy + (srcH - 2 * dy) / threadCount * (i + 1);
+            if (i == threadCount - 1)
+                yMax = srcH - dy;
+            int srcOff = yMin * srcW + dx; // If single thread: yMin=dy,yMax=sh-dy
 
             // Iterate over pix map
-            for (int y=yMin;y<yMax;y++,off+=dx*2)
-                for (int x=dx,xMax=sw-dx;x<xMax;x++,off++)
-                    dpix[off] = getPixAverage(spix, sw, sh, off, kern2, kw, kh, dx, dy);
+            for (int y = yMin; y < yMax; y++, srcOff += dx * 2) {
+                for (int x = dx, xMax = srcW - dx; x < xMax; x++, srcOff++)
+                    destPix[srcOff] = getPixAverage(srcPix, srcW, srcOff, kern2, kernW, kernH, dx, dy);
+            }
         });
     }
 
     /**
      * Returns the pixel value for given.
      */
-    private static final int getPixAverage(int spix[], int sw, int sh, int off, int kern[], int kw, int kh, int dx, int dy)
+    private static int getPixAverage(int[] srcPix, int srcW, int srcOff, int[] kern, int kernW, int kernH, int dx, int dy)
     {
         // Declare vars for weighted color component sums
-        int sr = 0, sg = 0, sb = 0, sa = 0;
+        int sr = 0;
+        int sg = 0;
+        int sb = 0;
+        int sa = 0;
 
         // Iterate over kernel matrix: get pix value for each and sum component value times kernel value
-        for (int ky=0, koff=0;ky<kh;ky++) for (int kx=0;kx<kw;kx++,koff++) {
-            int p = spix[off + (-dy+ky)*sw + (-dx+kx)]; if (p==0) continue;
-            int kval = kern[koff];
-            int r = (p>>16) & 0xff;
-            int g = (p>>8) & 0xff;
-            int b = p & 0xff;
-            int a = (p>>24) & 0xff;
-            sr += r*kval; sg += g*kval; sb += b*kval; sa += a*kval;
-        }
+        for (int ky = 0, koff = 0; ky < kernH; ky++)
+            for (int kx = 0; kx < kernW; kx++, koff++) {
+                int pixel = srcPix[srcOff + (-dy + ky) * srcW + (-dx + kx)];
+                if (pixel == 0)
+                    continue;
+                int kernVal = kern[koff];
+                int red = (pixel >> 16) & 0xff;
+                int green = (pixel >> 8) & 0xff;
+                int blue = pixel & 0xff;
+                int alpha = (pixel >> 24) & 0xff;
+                sr += red * kernVal;
+                sg += green * kernVal;
+                sb += blue * kernVal;
+                sa += alpha * kernVal;
+            }
 
         // Reconstruct pix int and return
-        return (sr&0xff0000) | ((sg>>8) & 0xff00) | (sb>>16) | ((sa<<8) & 0xff000000);
+        return (sr & 0xff0000) | ((sg >> 8) & 0xff00) | (sb >> 16) | ((sa << 8) & 0xff000000);
     }
 
     /**
@@ -214,31 +260,46 @@ public class AWTImageUtils {
     public static float[] getGaussianKernel(int rx, int ry)
     {
         // Set kernel/loop variables
-        int kw = rx*2 + 1;
-        int kh = ry*2 + 1;
-        int klen = kw*kh;
-        float[] kern = new float[klen];
-        double devx = rx>0 ? rx/3d : .1;
-        double devy = ry>0 ? ry/3d : .1; // This guarantees non zero values in the kernel
-        double devxSqr2 = 2*devx*devx;
-        double devySqr2 = 2*devy*devy;
-        double devSqr2Pi = Math.max(devxSqr2,devySqr2)*Math.PI;
+        int kernW = rx * 2 + 1;
+        int kernH = ry * 2 + 1;
+        int kernLength = kernW * kernH;
+        float[] gaussianKernel = new float[kernLength];
+        double devx = rx > 0 ? rx / 3d : .1;
+        double devy = ry > 0 ? ry / 3d : .1; // This guarantees non zero values in the kernel
+        double devxSqr2 = 2 * devx * devx;
+        double devySqr2 = 2 * devy * devy;
+        double devSqr2Pi = Math.max(devxSqr2, devySqr2) * Math.PI;
         double sum = 0;
 
         // Calculate/set kernal values and sum
-        for (int i=0; i<kw; i++) { for (int j=0; j<kh; j++) {
-            double kbase = -(j-ry)*(j-ry)/devySqr2 - (i-rx)*(i-rx)/devxSqr2;
-            kern[i*kh+j] = (float)(Math.pow(Math.E, kbase)/devSqr2Pi);
-            sum += kern[i*kh+j];
-        }}
+        for (int i = 0; i < kernW; i++) {
+            for (int j = 0; j < kernH; j++) {
+                double kbase = -(j - ry) * (j - ry) / devySqr2 - (i - rx) * (i - rx) / devxSqr2;
+                gaussianKernel[i * kernH + j] = (float) (Math.pow(Math.E, kbase) / devSqr2Pi);
+                sum += gaussianKernel[i * kernH + j];
+            }
+        }
 
-        // Calculate/set kernal values and sum
+        // Calculate/set kernel values and sum
         //for (int y=0; y<h; y++) { for (int x=0; x<w; x++) {
         //    double kbase = -(y-ry)*(y-ry)/devySqr2 - (x-rx)*(x-rx)/devxSqr2;
         //    kern2[y*w+x] = (float)(Math.pow(Math.E, kbase)/devSqr2Pi); sum += kern[y*w+x]; }}
 
-        // Make elements sum to 1 and return
-        for (int i=0; i<klen; i++) kern[i] /= sum;
-        return kern;
+        // Make elements sum to 1
+        for (int i = 0; i < kernLength; i++)
+            gaussianKernel[i] /= sum;
+
+        // Return
+        return gaussianKernel;
+    }
+
+    /**
+     * Runs the given int consumer in given number of threads.
+     */
+    private static void runInParallel(int threadCount, IntConsumer aConsumer)
+    {
+        if (threadCount == 1)
+            aConsumer.accept(0);
+        else IntStream.range(0, threadCount).parallel().forEach(aConsumer);
     }
 }
