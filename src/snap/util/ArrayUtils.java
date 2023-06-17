@@ -428,6 +428,14 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns whether given array has match for given predicate.
+     */
+    public static <T> boolean hasMatch(T[] anArray, Predicate<? super T> aPred)
+    {
+        return findMatch(anArray, aPred) != null;
+    }
+
+    /**
      * Returns the first item in array that matches given predicate (or null).
      */
     public static <T> T findMatch(T[] anArray, Predicate<? super T> aPred)

@@ -271,6 +271,14 @@ public class ListUtils {
     }
 
     /**
+     * Returns whether given collection has match for given predicate.
+     */
+    public static <T> boolean hasMatch(Collection<T> aList, Predicate<? super T> aPred)
+    {
+        return findMatch(aList, aPred) != null;
+    }
+
+    /**
      * Returns the first item in collection that matches given predicate (or null).
      */
     public static <T> T findMatch(Collection<T> aList, Predicate<? super T> aPred)
