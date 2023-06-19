@@ -26,6 +26,9 @@ public class SnapUtils {
     // Whether app is currently running on TeaVM
     public static boolean isTeaVM = platform == Platform.TEAVM;
 
+    // Whether app is currently running on CheerpJ
+    public static boolean isWebVM = platform == Platform.CHEERP;
+
     // The build info string from "BuildInfo.txt" (eg, "Aug-31-04")
     private static String _buildInfo;
 

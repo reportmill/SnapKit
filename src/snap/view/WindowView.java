@@ -441,11 +441,19 @@ public class WindowView extends ParentView {
             winY = pointInScreenCoords.y;
         }
 
+        // Handle Maximized
+        if (isMaximized()) {
+            Rect screenBounds = ViewEnv.getEnv().getScreenBoundsInset();
+            System.out.println("ScreenBounds: " + screenBounds);
+            setSize(screenBounds.width, screenBounds.height);
+            winX = winY = 0;
+        }
+
         // If FrameSaveName provided, set Location from defaults and register to store future window moves
-        String saveName = getSaveName();
-        if (saveName != null) {
+        else if (getSaveName() != null) {
 
             // Get location string
+            String saveName = getSaveName();
             String locString = Prefs.getDefaultPrefs().getString(saveName + "Loc");
             if (locString != null) {
                 String[] strings = locString.split(" ");
