@@ -44,46 +44,55 @@ public class Font extends PropObject implements XMLArchiver.Archivable {
     // Moved class initialization here because we were getting some odd init errors with bogus stacktraces
     static {
         try {
-            Arial10 = new Font("Arial",10d);
+            FontFile arialFontFile = FontFile.getArialFontFile();
+            Arial10 = new Font(arialFontFile,10d);
             Arial11 = Arial10.deriveFont(11d);
             Arial12 = Arial10.deriveFont(12d);
             Arial13 = Arial10.deriveFont(13d);
             Arial14 = Arial10.deriveFont(14d);
             Arial16 = Arial10.deriveFont(16d);
         }
-        catch(Throwable t) { t.printStackTrace(); throw new RuntimeException(t); }
+        catch(Throwable t) {
+            t.printStackTrace();
+            throw new RuntimeException(t);
+        }
     }
 
     /**
-     * Creates an empty font (really only used for unarchival).
+     * Constructor (really only used for unarchival).
      */
     public Font()
     {
-        this(Arial12._fontFile, 12);
+        super();
+        _fontFile = FontFile.getArialFontFile();
+        _size = 12;
     }
 
     /**
-     * Creates a font for the given font file and point size.
+     * Constructor for given font file and point size.
      */
     protected Font(FontFile aFontFile, double aPointSize)
     {
+        super();
         _fontFile = aFontFile;
         _size = aPointSize;
     }
 
     /**
-     * Returns the font for the given name and size.
+     * Constructor for given name and size.
      */
     public Font(String aName, double aSize)
     {
+        super();
+
         // Get fontFile for aName
         _fontFile = FontFile.getFontFile(aName);
         _size = aSize;
 
-        // If fontFile not found, substitute Helvetica (try to get the style right)
+        // If fontFile not found, substitute Arial (try to get the style right)
         if (_fontFile == null) {
             _substitute = true;
-            _fontFile = Arial10.getFontFile();
+            _fontFile = FontFile.getArialFontFile();
 
             if (!_fontNotFoundErrorPrinted) {
                 System.err.println("Font Alert! See http://www.reportmill.com/support/docs/fonts.html");

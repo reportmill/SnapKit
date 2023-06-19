@@ -27,6 +27,9 @@ public abstract class FontFile {
     
     // Cached glyph paths
     private Map<Character, Shape>  _glyphPaths = new Hashtable<>();
+
+    // The default font file
+    private static FontFile _arialFontFile;
     
     // Cached map of all previously encountered font files
     private static Map<String,FontFile>  _allFontFiles = new Hashtable<>();
@@ -36,10 +39,25 @@ public abstract class FontFile {
      */
     public static synchronized FontFile getFontFile(String aName)
     {
+        // Get cached font file for name (just return if found)
         FontFile fontFile = _allFontFiles.get(aName);
-        if (fontFile == null)
-            _allFontFiles.put(aName, fontFile = GFXEnv.getEnv().getFontFile(aName));
+        if (fontFile != null)
+            return fontFile;
+
+        // Create FontFile for name
+        fontFile = GFXEnv.getEnv().getFontFile(aName);
+        _allFontFiles.put(aName, fontFile);
+
+        // Return
         return fontFile;
+    }
+
+    /**
+     * Constructor.
+     */
+    public FontFile()
+    {
+        super();
     }
 
     /**
@@ -385,5 +403,23 @@ public abstract class FontFile {
 
         // Return
         return matchingWordCount;
+    }
+
+    /**
+     * Returns Arial FontFile.
+     */
+    protected static FontFile getArialFontFile()
+    {
+        if (_arialFontFile != null) return _arialFontFile;
+
+        // Get default
+        FontFile fontFile = FontFile.getFontFile("Arial");
+        if (fontFile == null) {
+            fontFile = FontFile.getFontFile("Dialog");
+            System.err.println("Font.init: Can't find arial, using: " + fontFile);
+        }
+
+        // Set and return
+        return _arialFontFile = fontFile;
     }
 }
