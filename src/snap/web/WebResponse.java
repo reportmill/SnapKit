@@ -264,8 +264,7 @@ public class WebResponse {
     public void setException(Throwable aThrowable)
     {
         _exception = aThrowable;
-        if (_code == 0)
-            _code = EXCEPTION_THROWN;
+        _code = EXCEPTION_THROWN;
     }
 
     /**

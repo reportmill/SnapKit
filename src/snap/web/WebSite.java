@@ -186,8 +186,8 @@ public abstract class WebSite {
             return null;
 
         // If response contains exception, throw it
-        if (resp.getException() != null)
-            throw new ResponseException(resp);
+        //if (resp.getException() != null)
+        //    throw new ResponseException(resp);
 
         // If not found, return null
         if (resp.getCode() != WebResponse.OK)

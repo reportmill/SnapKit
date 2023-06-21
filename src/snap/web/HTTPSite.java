@@ -25,7 +25,7 @@ public class HTTPSite extends WebSite {
         // Get HTTPResponse response (if IOException, set code/exception and return)
         HTTPResponse httpResp;
         try { httpResp = httpRequest.getResponse(); }
-        catch(IOException e) {
+        catch(Throwable e) {
             aResp.setException(e);
             return;
         }
