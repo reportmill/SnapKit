@@ -448,8 +448,10 @@ public class SWWindowHpr extends WindowView.WindowHpr<Window> {
      */
     private void setCursorNow()
     {
-        java.awt.Cursor cursor = AWT.get(_cursor);
-        _rviewNtv.setCursor(cursor);
+        if (!SnapUtils.isWebVM) {
+            java.awt.Cursor cursor = AWT.get(_cursor);
+            _rviewNtv.setCursor(cursor);
+        }
         _cursRun = null;
     }
 

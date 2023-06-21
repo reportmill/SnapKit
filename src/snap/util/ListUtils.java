@@ -253,6 +253,14 @@ public class ListUtils {
     }
 
     /**
+     * Returns a filtered array for given original and Predicate.
+     */
+    public static <T,R> R[] filterToArray(Collection<T> aList, Predicate<? super T> pred, Class<R> aClass)
+    {
+        return aList.stream().filter(pred).toArray(size -> (R[]) Array.newInstance(aClass, size));
+    }
+
+    /**
      * Returns a mapped array for given original and Function.
      */
     public static <T,R> List<R> map(Collection<T> aList, Function<? super T, ? extends R> aFunction)
