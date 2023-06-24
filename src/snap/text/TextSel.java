@@ -257,6 +257,19 @@ public class TextSel {
     }
 
     /**
+     * Returns whether selection is at line end.
+     */
+    public boolean isAtLineEnd()
+    {
+        int selCharIndex = getStart();
+        TextBoxLine selLine = getStartLine();
+        int selLineEnd = selLine.getEndCharIndex();
+        if (selLine.isLastCharNewline())
+            selLineEnd--;
+        return selCharIndex == selLineEnd;
+    }
+
+    /**
      * Returns a path for two char indexes - it will be a a simple box with extensions for first/last lines.
      */
     public Shape getPath()

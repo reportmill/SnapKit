@@ -709,7 +709,8 @@ public class ViewOwner extends PropObject {
         // If found, send action
         if (name != null) {
             fireActionEventForObject(name, anEvent);
-            anEvent.consume();
+            if (!isFilter)
+                anEvent.consume();
         }
     }
 
