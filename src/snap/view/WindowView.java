@@ -168,9 +168,10 @@ public class WindowView extends ParentView {
             if (_unmaxBounds != null && !_unmaxBounds.isEmpty())
                 setBounds(_unmaxBounds);
             else {
-                Size psize = getPrefSize();
+                Size prefSize = getPrefSize();
                 Rect screenRect = ViewEnv.getEnv().getScreenBoundsInset();
-                Rect centeredBounds = screenRect.getRectCenteredInside(psize.width, psize.height);
+                Rect centeredBounds = screenRect.getRectCenteredInside(prefSize.width, prefSize.height);
+                setBounds(centeredBounds);
             }
         }
 
@@ -183,7 +184,13 @@ public class WindowView extends ParentView {
      */
     public Rect getMaximizedBounds()
     {
-        return _maxBounds!=null? _maxBounds : ViewEnv.getEnv().getScreenBoundsInset();
+        if (_maxBounds != null) return _maxBounds;
+
+        // Get screen bounds
+        Rect maxBounds = ViewEnv.getEnv().getScreenBoundsInset();
+
+        // Set and return
+        return _maxBounds = maxBounds;
     }
 
     /**
@@ -443,10 +450,10 @@ public class WindowView extends ParentView {
 
         // Handle Maximized
         if (isMaximized()) {
-            Rect screenBounds = ViewEnv.getEnv().getScreenBoundsInset();
-            System.out.println("ScreenBounds: " + screenBounds);
-            setSize(screenBounds.width, screenBounds.height);
-            winX = winY = 0;
+            Rect maximizedBounds = getMaximizedBounds();
+            setSize(maximizedBounds.width, maximizedBounds.height);
+            winX = maximizedBounds.x;
+            winY = maximizedBounds.y;
         }
 
         // If FrameSaveName provided, set Location from defaults and register to store future window moves
@@ -530,9 +537,9 @@ public class WindowView extends ParentView {
         initNativeWindowOnce();
 
         // If no view, just use screen
-        if (aView==null) {
-            Rect rect = getEnv().getScreenBoundsInset();
-            return getRectLocation(rect, aPos, aDX, aDY);
+        if (aView == null) {
+            Rect screenBounds = getEnv().getScreenBoundsInset();
+            return getRectLocation(screenBounds, aPos, aDX, aDY);
         }
 
         // Get View bounds in screen coords
