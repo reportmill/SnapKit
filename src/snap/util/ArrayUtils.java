@@ -409,6 +409,15 @@ public class ArrayUtils {
     }
 
     /**
+     * Returns a filtered array for given original and Predicate.
+     */
+    public static <T,R> R[] filterByClass(T[] anArray, Class<R> aClass)
+    {
+        Stream<T> filteredStream = Stream.of(anArray).filter(obj -> aClass.isInstance(obj));
+        return filteredStream.toArray(size -> (R[]) Array.newInstance(aClass, size));
+    }
+
+    /**
      * Returns a mapped array for given original and Function.
      */
     public static <T,R> R[] map(T[] anArray, Function<? super T, ? extends R> aFunction, Class<R> aClass)
