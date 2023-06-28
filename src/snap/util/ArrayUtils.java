@@ -441,7 +441,7 @@ public class ArrayUtils {
      */
     public static <T> boolean hasMatch(T[] anArray, Predicate<? super T> aPred)
     {
-        return findMatch(anArray, aPred) != null;
+        return findMatchIndex(anArray, aPred) >= 0;
     }
 
     /**
