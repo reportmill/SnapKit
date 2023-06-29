@@ -21,11 +21,16 @@ public class FileUtils {
             return (File)aSource;
 
         // for a file URL, pull out the path and fall through to the string case
-        if (aSource instanceof URL && ((URL)aSource).getProtocol().equals("file")) { URL url = (URL)aSource;
-            return new File(url.getPath()); }
+        if (aSource instanceof URL) {
+            URL url = (URL) aSource;
+            if (url.getProtocol().equals("file"))
+                return new File(url.getPath());
+        }
 
         // If source is string, see if it represents a file
-        if (aSource instanceof String) { String string = (String)aSource; string.trim();
+        if (aSource instanceof String) {
+            String string = (String) aSource;
+            string = string.trim();
 
             // If starts with a common file separator try file
             if (string.startsWith("/") || string.startsWith("\\") ||
@@ -37,50 +42,8 @@ public class FileUtils {
                 return getFile(string.substring(5));
         }
 
-        // Return null if file not found
+        // Return not found
         return null;
-    }
-
-    /**
-     * Returns the path for a file.
-     */
-    public static String getPath(File aFile)  { return aFile.getAbsolutePath(); }
-
-    /**
-     * Returns the file name for a file.
-     */
-    public static String getFileName(File aFile)  { return FilePathUtils.getFilename(getPath(aFile)); }
-
-    /**
-     * Returns the file name for a file.
-     */
-    public static String getFileNameSimple(File aFile)  { return FilePathUtils.getFilenameSimple(getPath(aFile)); }
-
-    /**
-     * Returns the file name for a file.
-     */
-    public static String getFileExtension(File aFile)  { return FilePathUtils.getExtension(getPath(aFile)); }
-
-    /**
-     * Returns whether file is given type.
-     */
-    public static boolean isFileType(File aFile, String ... theTypes)
-    {
-        for (String type : theTypes)
-            if (StringUtils.endsWithIC(getPath(aFile), type))
-                return true;
-        return false;
-    }
-
-    /**
-     * Returns a child directory for a parent directory, creating if necessary.
-     */
-    public static File getDirectory(File aParent, String aChild, boolean create)
-    {
-        File file = new File(aParent, aChild);
-        if (create && !file.exists())
-            file.mkdirs();
-        return file;
     }
 
     /**
@@ -90,8 +53,10 @@ public class FileUtils {
     {
         // Get File
         File file = getFile(aSource);
-        if (file==null) {
-            System.err.println("FileUtils.mkdirs: Couldn't create file for source: " + aSource); return null; }
+        if (file == null) {
+            System.err.println("FileUtils.mkdirs: Couldn't create file for source: " + aSource);
+            return null;
+        }
 
         // Create dir
         if (doCreate && !file.exists())
@@ -121,7 +86,7 @@ public class FileUtils {
     public static byte[] getBytes(File aFile)
     {
         // Return null if file is null, doesn't exist, isn't readable or is directory
-        if (aFile==null)
+        if (aFile == null)
             return null;
         if (!aFile.exists())
             return null;
@@ -140,8 +105,8 @@ public class FileUtils {
      */
     public static byte[] getBytesOrThrow(File aFile) throws IOException
     {
-        int length = (int)aFile.length();
-        byte bytes[] = new byte[length];
+        int length = (int) aFile.length();
+        byte[] bytes = new byte[length];
         InputStream stream = new FileInputStream(aFile);
         stream.read(bytes, 0, length);
         stream.close();
@@ -151,7 +116,7 @@ public class FileUtils {
     /**
      * Writes the given bytes (within the specified range) to the given file.
      */
-    public static void writeBytes(File aFile, byte theBytes[]) throws IOException
+    public static void writeBytes(File aFile, byte[] theBytes) throws IOException
     {
         // If null bytes, delete file
         if (theBytes == null) {
@@ -168,10 +133,10 @@ public class FileUtils {
     /**
      * Writes the given bytes (within the specified range) to the given file, with an option for doing it "safely".
      */
-    public static void writeBytesSafely(File aFile, byte theBytes[]) throws IOException
+    public static void writeBytesSafely(File aFile, byte[] theBytes) throws IOException
     {
         // If null bytes, delete file
-        if (theBytes==null) {
+        if (theBytes == null) {
             aFile.delete();
             return;
         }
@@ -242,10 +207,12 @@ public class FileUtils {
         if (aName!=null)
             dir += File.separator + aName;
 
-        // Create file, actual directory (if requested) and return
+        // Create file, actual directory (if requested)
         File dfile = new File(dir);
-        if (doCreate && aName!=null)
+        if (doCreate && aName != null)
             dfile.mkdirs();
+
+        // Return
         return dfile;
     }
 
@@ -284,10 +251,11 @@ public class FileUtils {
      */
     public static boolean move(File aSource, File aDest) throws IOException
     {
-        for (int i=1; i<=10; i++) {
+        for (int i = 1; i <= 10; i++) {
             if (aSource.renameTo(aDest))
                 return true;
-            try { Thread.sleep(i*20); } catch(Exception e) { }
+            try { Thread.sleep(i*20); }
+            catch(Exception ignore) { }
         }
         throw new IOException("FileUtils move timeout for " + aSource.getAbsolutePath() + " to " + aDest.getAbsolutePath());
     }
@@ -298,9 +266,13 @@ public class FileUtils {
     public static boolean deleteDeep(File aFile)
     {
         // Handle directory
-        if (aFile.isDirectory())
-            for (File file : aFile.listFiles())
-                deleteDeep(file);
+        if (aFile.isDirectory()) {
+            File[] files = aFile.listFiles();
+            if (files != null) {
+                for (File file : files)
+                    deleteDeep(file);
+            }
+        }
 
         // Delete file
         return aFile.delete();
@@ -309,22 +281,19 @@ public class FileUtils {
     /**
      * Unzips the given file into the destination file.
      */
-    public static void unzip(File aFile)
+    public static void unzipFile(File aFile) throws IOException
     {
-        // Catch exceptions
-        try {
-
         // Get new file input stream for file
-        FileInputStream fis = new FileInputStream(aFile);
+        FileInputStream fileInputStream = new FileInputStream(aFile);
 
         // Get zip input stream
-        ZipInputStream zis = new ZipInputStream(fis);
+        ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
 
         // Create stream buffer
-        byte buffer[] = new byte[8192];
+        byte[] buffer = new byte[8192];
 
         // Iterate over zip entries
-        for (ZipEntry entry=zis.getNextEntry(); entry!=null; entry=zis.getNextEntry()) {
+        for (ZipEntry entry = zipInputStream.getNextEntry(); entry != null; entry = zipInputStream.getNextEntry()) {
 
             // Get entry output file
             File outputFile = new File(aFile.getParent(), entry.getName());
@@ -336,9 +305,9 @@ public class FileUtils {
             }
 
             // Write the files to the disk
-            FileOutputStream fos = new FileOutputStream(outputFile);
-            BufferedOutputStream dest = new BufferedOutputStream(fos, 8192);
-            for (int count=zis.read(buffer, 0, 8192); count!=-1; count=zis.read(buffer, 0, 8192))
+            FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
+            BufferedOutputStream dest = new BufferedOutputStream(fileOutputStream, 8192);
+            for (int count = zipInputStream.read(buffer, 0, 8192); count != -1; count = zipInputStream.read(buffer, 0, 8192))
                 dest.write(buffer, 0, count);
 
             // Flush and close output stream
@@ -347,9 +316,6 @@ public class FileUtils {
         }
 
         // Close zip
-        zis.close();
-
-        // Catch exceptions
-        } catch(IOException e) { e.printStackTrace(); }
+        zipInputStream.close();
     }
 }
