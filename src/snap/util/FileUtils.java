@@ -194,6 +194,10 @@ public class FileUtils {
      */
     public static File getTempDir()
     {
+        // Hack for TeaVM, WebVM
+        if (SnapUtils.isTeaVM) return new File("/");
+        if (SnapUtils.isWebVM) return new File("/files/snaptmp/");
+
         String tmpDirStr = System.getProperty("java.io.tmpdir");
         return new File(tmpDirStr);
     }
