@@ -197,7 +197,8 @@ public class RecentFilesSitePane extends WebSitePane {
             return;
 
         // Clear RecentFile
-        WebURL fileURL = file.getURL();
+        WebFile realFile = file.getRealFile();
+        WebURL fileURL = realFile.getURL();
         RecentFiles.removeURL(fileURL);
 
         // Clear RecentFiles, SelFile and trigger reset
