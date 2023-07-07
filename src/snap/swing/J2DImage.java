@@ -233,15 +233,19 @@ public class J2DImage extends Image {
         bumpImg.blur(rad, null);
 
         // Get source and bump pixels as int arrays and call general emboss method
-        int[] spix = getArrayARGB(); if (spix == null) { System.err.println("Image.emboss: No data"); return; }
-        int[] bpix = bumpImg.getArrayARGB();
-        AWTImageUtils.emboss(spix, bpix, pixW, pixH, radius, anAzi * Math.PI / 180, anAlt * Math.PI / 180);
+        int[] srcPixels = getArrayARGB(); if (srcPixels == null) { System.err.println("Image.emboss: No data"); return; }
+        int[] bumpPixels = bumpImg.getArrayARGB();
+        AWTImageUtils.emboss(srcPixels, bumpPixels, pixW, pixH, radius, anAzi * Math.PI / 180, anAlt * Math.PI / 180);
     }
 
     /**
-     * Returns/sets whether image data is premultiplied.
+     * Returns whether image data is premultiplied.
      */
     private boolean isPremultiplied()  { return _native.isAlphaPremultiplied(); }
+
+    /**
+     * Sets whether image data is premultiplied.
+     */
     private void setPremultiplied(boolean aValue)  { _native.coerceData(aValue); }
 
     /**
@@ -249,12 +253,37 @@ public class J2DImage extends Image {
      */
     private int[] getArrayARGB()
     {
+        // Get Raster, DataBuffer
         Raster raster = _native.getRaster();
-        DataBuffer buf = raster.getDataBuffer();
-        if (buf.getDataType() != DataBuffer.TYPE_INT || buf.getNumBanks() != 1)
-            throw new RuntimeException("unknown data format");
-        int[] pix = ((DataBufferInt) buf).getData();
-        return pix;
+        DataBuffer dataBuffer = raster.getDataBuffer();
+
+        // If not int type, convert
+        if (dataBuffer.getDataType() != DataBuffer.TYPE_INT || dataBuffer.getNumBanks() != 1) {
+            convertNativeToIntType();
+            dataBuffer = _native.getRaster().getDataBuffer();
+        }
+
+        // Return int[] data
+        return ((DataBufferInt) dataBuffer).getData();
+    }
+
+    /**
+     * Converts native to int type.
+     */
+    private void convertNativeToIntType()
+    {
+        // Create new buffered image and draw old image in new buffered image
+        int imageW = getPixWidth();
+        int imageH = getPixHeight();
+        BufferedImage intTypeImage = AWTImageUtils.getBufferedImage(imageW, imageH, hasAlpha());
+        java.awt.Graphics2D gfx2D = intTypeImage.createGraphics();
+        gfx2D.drawImage(_native, 0, 0, null);
+        gfx2D.dispose();
+        if (isPremultiplied())
+            intTypeImage.coerceData(true);
+
+        // Reset native to int type
+        _native = intTypeImage;
     }
 
     /** Blurs the image by mixing pixels with those around it to given radius. */
