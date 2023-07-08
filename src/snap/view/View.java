@@ -2922,7 +2922,7 @@ public class View extends PropObject implements XMLArchiver.Archivable {
             case Showing_Prop: return isShowing();
 
             // Items, SelItem, SelIndex
-            case Selectable.Items_Prop: return ((Selectable<?>) this).getItems();
+            case Selectable.Items_Prop: return ((Selectable<?>) this).getItemsList();
             case Selectable.SelItem_Prop: return ((Selectable<?>) this).getSelItem();
             case Selectable.SelIndex_Prop: return ((Selectable<?>) this).getSelIndex();
 

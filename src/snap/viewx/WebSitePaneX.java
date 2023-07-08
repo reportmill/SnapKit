@@ -90,7 +90,7 @@ public class WebSitePaneX extends WebSitePane {
             selDirs.add(dir);
 
         // Update DirComboBox
-        _dirComboBox.setItems(selDirs);
+        _dirComboBox.setItemsList(selDirs);
         _dirComboBox.setSelItem(selDir);
     }
 

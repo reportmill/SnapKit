@@ -8,6 +8,8 @@ import snap.gfx.Painter;
 import snap.util.Convert;
 import snap.view.*;
 
+import java.util.Collections;
+
 /**
  * A DevPane tab for inspecting the view tree.
  */
@@ -213,7 +215,7 @@ public class DevPaneViews extends ViewOwner {
         // Configure BrowserView
         _browserView = getView("BrowserView", BrowserView.class);
         _browserView.setResolver(new ViewTreeResolver());
-        _browserView.setItems(_devPane.getContent());
+        _browserView.setItemsList(Collections.singletonList(_devPane.getContent()));
 
         // Configure PropTableView
         _propTable = getView("PropTableView", TableView.class);

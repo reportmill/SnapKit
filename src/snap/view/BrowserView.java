@@ -150,26 +150,28 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     /**
      * Returns the items.
      */
-    public List<T> getItems()
+    @Override
+    public List<T> getItemsList()
     {
-        return _col0.getItems();
+        return _col0.getItemsList();
     }
 
     /**
      * Sets the items.
      */
-    public void setItems(List<T> theItems)
+    @Override
+    public void setItemsList(List<T> theItems)
     {
         // If already set, just return
-        if (ListUtils.equalsId(theItems, getItems())) return;
-        if (theItems.equals(getItems())) return;
+        if (ListUtils.equalsId(theItems, getItemsList())) return;
+        if (theItems.equals(getItemsList())) return;
 
         // Get current selected item and col0 selected item
         T selItem = getSelItem();
         T selItem0 = _col0.getSelItem();
 
         // Set items
-        _col0.setItems(theItems);
+        _col0.setItemsList(theItems);
 
         // Reset SelItem
         if (selItem0 == _col0.getSelItem())
@@ -180,9 +182,10 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     /**
      * Sets the items.
      */
-    public void setItems(T... theItems)
+    @Override
+    public void setItems(T[] theItems)
     {
-        setItems(Arrays.asList(theItems));
+        setItemsList(Arrays.asList(theItems));
     }
 
     /**
@@ -366,7 +369,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
 
         // If item in last column, select it
         BrowserCol<T> lastCol = getColLast();
-        if (lastCol.getItems().contains(anItem)) {
+        if (lastCol.getItemsList().contains(anItem)) {
             lastCol.setSelItem(anItem);
             setSelColIndex(lastCol.getIndex());
             if (scrollToVisible)

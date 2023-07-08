@@ -96,7 +96,7 @@ public class TableCol <T> extends ListArea <T> {
     /**
      * Override to suppress setting items in pick list (already done by TableView).
      */
-    public void setItems(List <T> theItems)  { }
+    public void setItemsList(List <T> theItems)  { }
 
     /**
      * Override to account for header (if showing).

@@ -13,19 +13,19 @@ public interface Selectable<T> {
     String SelItem_Prop = "SelItem";
 
     /**
+     * Sets the items for a given name or UI view.
+     */
+    default void setItems(T[] theItems)  { }
+
+    /**
      * Returns the items for a given name or UI view.
      */
-    default List<T> getItems() { return null; }
+    default List<T> getItemsList() { return null; }
 
     /**
      * Sets the items for a given name or UI view.
      */
-    default void setItems(List<T> theItems)  { }
-
-    /**
-     * Sets the items for a given name or UI view.
-     */
-    default void setItems(T... theItems)  { }
+    default void setItemsList(List<T> theItems)  { }
 
     /**
      * Returns the selected index for given name or UI view.
@@ -43,7 +43,7 @@ public interface Selectable<T> {
     default T getSelItem()
     {
         int ind = getSelIndex();
-        List<T> items = getItems();
+        List<T> items = getItemsList();
         return ind>=0 && items!=null ? items.get(ind) : null;
     }
 
@@ -52,7 +52,7 @@ public interface Selectable<T> {
      */
     default void setSelItem(T anItem)
     {
-        List<T> items = getItems(); if (items==null) return;
+        List<T> items = getItemsList(); if (items==null) return;
         int ind = items.indexOf(anItem);
         setSelIndex(ind);
     }
@@ -60,18 +60,24 @@ public interface Selectable<T> {
     /**
      * Sets items in given selectable
      */
-    static void setItems(Selectable aSelectable, Object theItems)
+    static void setItems(Selectable<?> aSelectable, Object theItems)
     {
         // Handle null
         if (theItems == null)
-            aSelectable.setItems(Collections.emptyList());
+            aSelectable.setItemsList(Collections.emptyList());
 
         // Handle List
-        else if (theItems instanceof List)
-            aSelectable.setItems((List) theItems);
+        else if (theItems instanceof List) {
+            Selectable<Object> selectable = (Selectable<Object>) aSelectable;
+            List<Object> itemsList = (List<Object>) theItems;
+            selectable.setItemsList(itemsList);
+        }
 
         // Handle Array
-        else if (theItems != null && theItems.getClass().isArray())
-            aSelectable.setItems((Object[]) theItems);
+        else if (theItems.getClass().isArray()) {
+            Selectable<Object> selectable = (Selectable<Object>) aSelectable;
+            Object[] items = (Object[]) theItems;
+            selectable.setItems(items);
+        }
     }
 }

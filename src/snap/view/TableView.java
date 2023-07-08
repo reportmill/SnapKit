@@ -118,12 +118,14 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the items.
      */
-    public List <T> getItems()  { return _items; }
+    @Override
+    public List <T> getItemsList()  { return _items; }
 
     /**
      * Sets the items.
      */
-    public void setItems(List <T> theItems)
+    @Override
+    public void setItemsList(List <T> theItems)
     {
         // If items already set, just return
         if (ListUtils.equalsId(theItems, _items) || Objects.equals(theItems, _items)) return;
@@ -140,10 +142,11 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Sets the items.
      */
-    public void setItems(T ... theItems)
+    @Override
+    public void setItems(T[] theItems)
     {
         List<T> itemsList = theItems != null ? Arrays.asList(theItems) : null;
-        setItems(itemsList);
+        setItemsList(itemsList);
     }
 
     /**
@@ -283,7 +286,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     public void selectDown()
     {
         int row = getSelRowIndex();
-        if (row<getItems().size()-1)
+        if (row< getItemsList().size()-1)
             setSelIndex(row+1);
         else ViewUtils.beep();
     }
@@ -427,7 +430,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the number of rows.
      */
-    public int getRowCount()  { return getItems().size(); }
+    public int getRowCount()  { return getItemsList().size(); }
 
     /**
      * Returns whether to show header.
@@ -505,7 +508,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
         _headerCol.setFill(null);
         _headerCol.setPickList(_items);
         _headerCol.setCellPadding(getCellPadding());
-        _headerCol.setItems(getItems());
+        _headerCol.setItemsList(getItemsList());
         _headerCol.setCellConfigure(cell -> configureHeaderColCell(cell));
 
         // Return
@@ -716,7 +719,7 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     {
         Insets ins = getInsetsAll();
         double hdrPrefH = isShowHeader() ? _header.getPrefHeight(aW) : 0;
-        double rowsPrefH = getRowHeight() * getItems().size();
+        double rowsPrefH = getRowHeight() * getItemsList().size();
         return hdrPrefH + rowsPrefH + ins.getHeight();
     }
 

@@ -66,9 +66,9 @@ public class PopupList<T> extends ListView<T> {
     /**
      * Override to resize if showing.
      */
-    public void setItems(java.util.List<T> theItems)
+    public void setItemsList(java.util.List<T> theItems)
     {
-        super.setItems(theItems);
+        super.setItemsList(theItems);
         if (isShowing())
             getPopup().pack();
     }

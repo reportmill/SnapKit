@@ -79,7 +79,7 @@ public class TreeCol <T> extends ListArea <T> {
     /**
      * Override to suppress setting items in pick list (already done by TreeView).
      */
-    public void setItems(List <T> theItems)  { }
+    public void setItemsList(List <T> theItems)  { }
 
     /**
      * Override to set TreeView.SelCol.

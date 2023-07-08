@@ -282,41 +282,49 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the items.
      */
-    public List <T> getItems()  { return getListView().getItems(); }
+    @Override
+    public List <T> getItemsList()  { return getListView().getItemsList(); }
 
     /**
      * Sets the items.
      */
-    public void setItems(List <T> theItems)  { getListView().setItems(theItems); }
+    @Override
+    public void setItemsList(List <T> theItems)  { getListView().setItemsList(theItems); }
 
     /**
      * Sets the items.
      */
-    public void setItems(T ... theItems)  { getListView().setItems(theItems); }
+    @Override
+    public void setItems(T[] theItems)  { getListView().setItems(theItems); }
 
     /**
      * Returns the selected index.
      */
+    @Override
     public int getSelIndex()  { return getListView().getSelIndex(); }
 
     /**
      * Sets the selected index.
      */
+    @Override
     public void setSelIndex(int anIndex)  { getListView().setSelIndex(anIndex); }
 
     /**
      * Returns the selected item.
      */
+    @Override
     public T getSelItem()  { return getListView().getSelItem(); }
 
     /**
      * Sets the selected index.
      */
+    @Override
     public void setSelItem(T anItem)  { getListView().setSelItem(anItem); }
 
     /**
      * Return combo box text.
      */
+    @Override
     public String getText()
     {
         // If selected Item, use it's text (potentially corrects case issues)
@@ -333,6 +341,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
     /**
      * Set combo box text.
      */
+    @Override
     public void setText(String aString)
     {
         // If matching item, set in ListView
@@ -367,13 +376,13 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
         // On focus gained: SelectAll, get copy of current items,
         if (_text.isFocused()) {
             _text.selectAll();
-            _items = new ArrayList<>(getListView().getItems());
+            _items = new ArrayList<>(getListView().getItemsList());
             if (isPopup() && getItemCount()>0)
                 showPopup();
         }
 
         // On focus lost: Restore list items after delay (twice, in case textFieldFiredAction with scrollSelToVisible)
-        else getEnv().runLater(() -> getEnv().runLater(() -> { _list.setItems(_items); _items = null; }));
+        else getEnv().runLater(() -> getEnv().runLater(() -> { _list.setItemsList(_items); _items = null; }));
     }
 
     /**
@@ -396,7 +405,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
 
             // If value has changed, reset to focus gained values
             if (_text.isEdited()) {
-                _list.setItems(_items);
+                _list.setItemsList(_items);
                 _list.setText(_text._focusGainedText);
                 _text.selectAll();
                 if (getItemCount() == 0 && isPopup() && isPopupShowing())
@@ -436,7 +445,7 @@ public class ComboBox <T> extends ParentView implements Selectable<T> {
             item = getSelItem();
 
         // Set ListView Items, SelItem
-        if (isFilterList()) _list.setItems(items);
+        if (isFilterList()) _list.setItemsList(items);
         _list.setSelItem(item);
         if (items.size() <= 1 && isPopup() && isPopupShowing())
             getPopupList().hide();

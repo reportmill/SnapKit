@@ -106,22 +106,24 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the number of items.
      */
-    public int getItemCount()  { return getItems().size(); }
+    public int getItemCount()  { return getItemsList().size(); }
 
     /**
      * Returns the individual item at index.
      */
-    public T getItem(int anIndex)  { return getItems().get(anIndex); }
+    public T getItem(int anIndex)  { return getItemsList().get(anIndex); }
 
     /**
      * Returns the items.
      */
-    public List <T> getItems()  { return _items; }
+    @Override
+    public List <T> getItemsList()  { return _items; }
 
     /**
      * Sets the items.
      */
-    public void setItems(List <T> theItems)
+    @Override
+    public void setItemsList(List <T> theItems)
     {
         if (equalsItems(theItems)) return;
         _items.setAll(theItems);
@@ -130,10 +132,11 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Sets the items.
      */
-    public void setItems(T ... theItems)
+    @Override
+    public void setItems(T[] theItems)
     {
         List<T> items = theItems != null ? Arrays.asList(theItems) : null;
-        setItems(items);
+        setItemsList(items);
     }
 
     /**
@@ -178,11 +181,13 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the selected index.
      */
+    @Override
     public int getSelIndex()  { return _items.getSelIndex(); }
 
     /**
      * Sets the selected index.
      */
+    @Override
     public void setSelIndex(int anIndex)  { _items.setSelIndex(anIndex); }
 
     /**
@@ -961,7 +966,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     public T getItemForText(String aString)
     {
         // Iterate over items and if item text is exact match for string, return it
-        for (T item : getItems()) {
+        for (T item : getItemsList()) {
             String str = getText(item);
             if (Objects.equals(aString, str))
                 return item;
@@ -974,7 +979,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
         else if (item0 instanceof Integer) itemX = (T) Convert.getInteger(aString);
         else if (item0 instanceof Float) itemX = (T) Convert.getFloat(aString);
         else if (item0 instanceof Double) itemX = (T) Convert.getDouble(aString);
-        int index = itemX != null ? getItems().indexOf(itemX) : -1;
+        int index = itemX != null ? getItemsList().indexOf(itemX) : -1;
         if (index >= 0)
             return getItem(index);
 

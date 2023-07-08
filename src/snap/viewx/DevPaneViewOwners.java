@@ -219,7 +219,7 @@ public class DevPaneViewOwners extends ViewOwner {
         // Configure BrowserView
         _browserView = getView("BrowserView", BrowserView.class);
         _browserView.setResolver(new ViewOwnersTreeResolver());
-        _browserView.setItems(_devPane.getContent());
+        _browserView.setItemsList(Collections.singletonList(_devPane.getContent()));
 
         // Get TextView
         _textView = getView("XMLText", TextView.class);

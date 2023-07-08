@@ -109,36 +109,43 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     /**
      * Returns the items.
      */
-    public List <T> getItems()  { return _listArea.getItems(); }
+    @Override
+    public List <T> getItemsList()  { return _listArea.getItemsList(); }
 
     /**
      * Sets the items.
      */
-    public void setItems(List <T> theItems)  { _listArea.setItems(theItems); }
+    @Override
+    public void setItemsList(List <T> theItems)  { _listArea.setItemsList(theItems); }
 
     /**
      * Sets the items.
      */
-    public void setItems(T ... theItems)  { _listArea.setItems(theItems); }
+    @Override
+    public void setItems(T[] theItems)  { _listArea.setItems(theItems); }
 
     /**
      * Returns the selected index.
      */
+    @Override
     public int getSelIndex()  { return _listArea.getSelIndex(); }
 
     /**
      * Sets the selected index.
      */
+    @Override
     public void setSelIndex(int anIndex)  { _listArea.setSelIndex(anIndex); }
 
     /**
      * Returns the selected item.
      */
+    @Override
     public T getSelItem()  { return _listArea.getSelItem(); }
 
     /**
      * Sets the selected index.
      */
+    @Override
     public void setSelItem(T anItem)  { _listArea.setSelItem(anItem); }
 
     /**
