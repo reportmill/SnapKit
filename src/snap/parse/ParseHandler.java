@@ -17,9 +17,6 @@ public class ParseHandler<T> {
     // Whether handler is in use
     private boolean  _inUse;
 
-    // Whether handler has been told to bypass further rules
-    private boolean  _bypass;
-
     // Whether handler has been told to fail
     private boolean  _fail;
 
@@ -82,16 +79,6 @@ public class ParseHandler<T> {
     public ParseToken getStartToken()  { return _startToken; }
 
     /**
-     * Whether parsing should bypass succeeding rules.
-     */
-    public boolean isBypass()  { return _bypass; }
-
-    /**
-     * Indicates that parsing should short circuit.
-     */
-    public void bypass()  { _bypass = true; }
-
-    /**
      * Whether parsing should fail on current rule.
      */
     public boolean isFail()  { return _fail; }
@@ -144,6 +131,6 @@ public class ParseHandler<T> {
     {
         _part = null;
         _startToken = null;
-        _inUse = _bypass = _fail = false;
+        _inUse = _fail = false;
     }
 }

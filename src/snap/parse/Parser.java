@@ -140,25 +140,9 @@ public class Parser {
     /**
      * Returns the char at the current index plus offset.
      */
-    public final char getChar(int anOffset)
-    {
-        return getTokenizer().getChar(anOffset);
-    }
-
-    /**
-     * Returns the char at the current index plus offset.
-     */
     public final char eatChar()
     {
         return getTokenizer().eatChar();
-    }
-
-    /**
-     * Returns the next given number of chars as a string.
-     */
-    public final String getChars(int aValue)
-    {
-        return getTokenizer().getChars(aValue);
     }
 
     /**
@@ -331,47 +315,58 @@ public class Parser {
 
             // Handle Or: Parse rules and break if either passes (return null if either fail)
             case Or: {
-                ParseRule r0 = aRule.getChild0();
-                if (parseAndHandle(r0, href))
+
+                // Parse rule 1 - just break if successful
+                ParseRule rule1 = aRule.getChild0();
+                if (parseAndHandle(rule1, href))
                     break;
-                ParseRule r1 = aRule.getChild1();
-                if (parseAndHandle(r1, href))
+
+                // Parse rule 2 - just break if successful
+                ParseRule rule2 = aRule.getChild1();
+                if (parseAndHandle(rule2, href))
                     break;
+
+                // Return fail since both rules failed
                 return null;
             }
 
             // Handle And
             case And: {
-                ParseRule r0 = aRule.getChild0();
-                ParseRule r1 = aRule.getChild1();
 
-                // Handle rule 0 LookAhead(x)
-                if (r0.isLookAhead() && r0.getChild0() == null) {
-                    if (lookAhead(r1, r0.getLookAhead(), 0) < 0)
+                // Get rules
+                ParseRule rule1 = aRule.getChild0();
+                ParseRule rule2 = aRule.getChild1();
+
+                // Handle rule 1 LookAhead(count)
+                if (rule1.isLookAhead() && rule1.getChild0() == null) {
+                    if (lookAhead(rule2, rule1.getLookAheadCount(), 0) < 0)
                         return null;
-                    if (parseAndHandle(r1, href))
+                    if (parseAndHandle(rule2, href))
                         break;
-                    parseFailed(r1, href.handler());
+                    parseFailed(rule2, href.handler());
                     break;
                 }
 
-                // Parse first rule (just return if parse not successful+optional)
-                boolean parsed0 = parseAndHandle(r0, href);
-                if (!parsed0 && !r0.isOptional())
+                // Parse first rule - return fail if not successful and not optional
+                boolean rule1Success = parseAndHandle(rule1, href);
+                if (!rule1Success && !rule1.isOptional())
                     return null;
 
-                // If handler requested bypass, just break
-                if (href != null && href.handler().isBypass())
+                // Parse second rule - just break if successful
+                boolean rule2Success = parseAndHandle(rule2, href);
+                if (rule2Success)
                     break;
 
-                // Parse second rule
-                if (parseAndHandle(r1, href))
+                // If rule 2 optional, just break
+                if (rule1Success && rule2.isOptional())
                     break;
-                if (parsed0 && r1.isOptional())
-                    break;
-                if (!parsed0)
+
+                // If rule 1 was failed but optional, return fail
+                if (!rule1Success)
                     return null;
-                parseFailed(r1, href.handler());
+
+                // Call parse failed (usually throws exception)
+                parseFailed(rule2, href.handler());
                 break;
             }
 
@@ -417,7 +412,7 @@ public class Parser {
                 // Otherwise, create node, send handler parsedOne and parsedAll and return
                 ParseNode node = createNode(aRule, token, token);
                 if (href != aHRef) {
-                    ParseHandler handler = href.handler();
+                    ParseHandler<?> handler = href.handler();
                     if (!sendHandlerParsedOne(node, handler))
                         return null;
                     node._customNode = handler.parsedAll();
@@ -431,7 +426,7 @@ public class Parser {
             // Handle LookAhead
             case LookAhead: {
                 ParseRule rule = aRule.getChild0();
-                int tokenCount = aRule.getLookAhead();
+                int tokenCount = aRule.getLookAheadCount();
                 int lookAheadCount = lookAhead(rule, tokenCount, 0);
                 if (lookAheadCount < 0)
                     return null;
@@ -449,7 +444,7 @@ public class Parser {
     /**
      * Parse rule and send handler parsedOne if successful.
      */
-    boolean parseAndHandle(ParseRule aRule, HandlerRef anHRef)
+    private boolean parseAndHandle(ParseRule aRule, HandlerRef anHRef)
     {
         // Do normal parse (just return if not successful)
         ParseNode node = parse(aRule, anHRef);
@@ -461,14 +456,14 @@ public class Parser {
             return true;
 
         // Send handler parsedOne
-        ParseHandler handler = anHRef.handler();
+        ParseHandler<?> handler = anHRef.handler();
         return sendHandlerParsedOne(node, handler);
     }
 
     /**
      * Send handler parsedOne (with check for handler fail).
      */
-    boolean sendHandlerParsedOne(ParseNode aNode, ParseHandler aHandler)
+    private boolean sendHandlerParsedOne(ParseNode aNode, ParseHandler<?> aHandler)
     {
         // Get handler and notify parseOne
         aHandler.parsedOne(aNode);
@@ -493,38 +488,54 @@ public class Parser {
 
             // Handle Or
             case Or: {
-                ParseRule r0 = aRule.getChild0();
-                ParseRule r1 = aRule.getChild1();
-                int remainder = lookAhead(r0, aTokenCount, aTokenIndex);
-                if (remainder >= 0)
-                    return remainder;
-                return lookAhead(r1, aTokenCount, aTokenIndex);
+
+                // Get rules
+                ParseRule rule1 = aRule.getChild0();
+                ParseRule rule2 = aRule.getChild1();
+
+                // Do rule 1 look-ahead
+                int remainder1 = lookAhead(rule1, aTokenCount, aTokenIndex);
+                if (remainder1 >= 0)
+                    return remainder1;
+
+                // Return rule 2 look-ahead
+                return lookAhead(rule2, aTokenCount, aTokenIndex);
             }
 
             // Handle And
             case And: {
-                ParseRule r0 = aRule.getChild0();
-                ParseRule r1 = aRule.getChild1();
 
-                // Handle rule 0 LookAhead(x)
-                if (r0.isLookAhead() && r0.getChild0() == null) {
-                    if (lookAhead(r1, r0.getLookAhead(), aTokenIndex) < 0)
+                // Get rules
+                ParseRule rule1 = aRule.getChild0();
+                ParseRule rule2 = aRule.getChild1();
+
+                // Handle rule 0 LookAhead(count)
+                if (rule1.isLookAhead() && rule1.getChild0() == null) {
+                    if (lookAhead(rule2, rule1.getLookAheadCount(), aTokenIndex) < 0)
                         return -1;
-                    return lookAhead(r1, aTokenCount, aTokenIndex);
+                    return lookAhead(rule2, aTokenCount, aTokenIndex);
                 }
 
-                // Handle normal And
-                int rmdr0 = lookAhead(r0, aTokenCount, aTokenIndex);
-                if (rmdr0 < 0 && !r0.isOptional() || rmdr0 == 0)
-                    return rmdr0;
-                boolean parsed0 = rmdr0 > 0;
-                if (!parsed0)
-                    rmdr0 = aTokenCount;
-                int rmdr1 = lookAhead(r1, rmdr0, aTokenIndex + aTokenCount - rmdr0);
-                if (rmdr1 >= 0)
-                    return rmdr1;
-                if (parsed0 && r1.isOptional())
-                    return rmdr0;
+                // Do rule 1 look-ahead
+                int remainder1 = lookAhead(rule1, aTokenCount, aTokenIndex);
+                if (remainder1 < 0 && !rule1.isOptional() || remainder1 == 0)
+                    return remainder1;
+
+                // If tokens not matched, reset remainder
+                boolean rule1Success = remainder1 > 0;
+                if (!rule1Success)
+                    remainder1 = aTokenCount;
+
+                // Do rule 2 look-ahead
+                int remainder2 = lookAhead(rule2, remainder1, aTokenIndex + aTokenCount - remainder1);
+                if (remainder2 >= 0)
+                    return remainder2;
+
+                // If rule2 optional, return remainder 1
+                if (rule1Success && rule2.isOptional())
+                    return remainder1;
+
+                // Return fail
                 return -1;
             }
 
@@ -569,7 +580,7 @@ public class Parser {
             // Handle LookAhead
             case LookAhead: {
                 ParseRule r0 = aRule.getChild0();
-                int tokenCount = aRule.getLookAhead();
+                int tokenCount = aRule.getLookAheadCount();
                 if (lookAhead(r0, tokenCount, aTokenIndex) < 0)
                     return -1;
                 return aTokenCount;
@@ -623,7 +634,7 @@ public class Parser {
     private void resetHandlersForRuleDeep(ParseRule aRule, Set<ParseRule> visitedRules)
     {
         // Reset handler
-        ParseHandler handler = aRule.getHandler();
+        ParseHandler<?> handler = aRule.getHandler();
         while (handler != null) {
             handler.reset();
             handler = handler._backupHandler;
@@ -647,8 +658,8 @@ public class Parser {
     public static final class HandlerRef {
 
         // Ivars
-        protected final ParseRule _rule;
-        private ParseHandler _handler;
+        private final ParseRule _rule;
+        private ParseHandler<?> _handler;
 
         /** Constructor. */
         HandlerRef(ParseRule aRule)
@@ -657,7 +668,7 @@ public class Parser {
         }
 
         /** Returns next available handler. */
-        private ParseHandler handler()
+        private ParseHandler<?> handler()
         {
             if (_handler != null) return _handler;
             ParseHandler<?> handler = _rule.getHandler();

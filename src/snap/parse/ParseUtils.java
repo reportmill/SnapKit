@@ -166,7 +166,7 @@ public class ParseUtils {
 
             // Handle LookAhead
             case LookAhead: {
-                if (aRule.getLookAhead() < 99) return "LookAhead(" + aRule.getLookAhead() + ")";
+                if (aRule.getLookAheadCount() < 99) return "LookAhead(" + aRule.getLookAheadCount() + ")";
                 ParseRule c = aRule.getChild0();
                 String s = c.getName() != null ? c.getName() : c.toString();
                 return "LookAhead(" + s + ")";

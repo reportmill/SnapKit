@@ -23,7 +23,7 @@ public class ParseRule {
     protected String  _pattern;
 
     // The look ahead count (implies this rule is really just a look ahead
-    protected int  _lookAhead;
+    protected int _lookAheadCount;
 
     // The handler for parse rule
     private ParseHandler<?>  _handler;
@@ -169,21 +169,20 @@ public class ParseRule {
     /**
      * Returns whether rule is look ahead.
      */
-    public boolean isLookAhead()  { return _lookAhead > 0; }
+    public boolean isLookAhead()  { return _lookAheadCount > 0; }
 
     /**
      * Returns the look ahead count.
      */
-    public int getLookAhead()  { return _lookAhead; }
+    public int getLookAheadCount()  { return _lookAheadCount; }
 
     /**
      * Sets the look ahead count.
      */
-    public ParseRule setLookAhead(int aValue)
+    public void setLookAheadCount(int aValue)
     {
-        _lookAhead = aValue;
+        _lookAheadCount = aValue;
         _op = Op.LookAhead;
-        return this;
     }
 
     /**

@@ -138,7 +138,7 @@ public class ParseRuleParser extends Parser {
                 _part._child0 = rule._child0;
                 _part._child1 = rule._child1;
                 _part._pattern = rule._pattern;
-                _part._lookAhead = rule._lookAhead;
+                _part._lookAheadCount = rule._lookAheadCount;
             }
         }
     }
@@ -275,14 +275,14 @@ public class ParseRuleParser extends Parser {
 
                 // Handle LookAhead
                 case "LookAhead":
-                    getPart().setLookAhead(99);
+                    getPart().setLookAheadCount(99);
                     break;
 
                 // Handle Number
                 case "Number":
                     String str = aNode.getString();
                     int count = Integer.parseInt(str);
-                    getPart().setLookAhead(count);
+                    getPart().setLookAheadCount(count);
                     break;
             }
         }
