@@ -588,7 +588,7 @@ public class Parser {
     /**
      * Called when parse fails.
      */
-    protected void parseFailed(ParseRule aRule, ParseHandler aHandler)
+    protected void parseFailed(ParseRule aRule, ParseHandler<?> aHandler)
     {
         if (aHandler != null)
             aHandler.reset();
