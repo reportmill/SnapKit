@@ -378,25 +378,18 @@ public class Parser {
                 break;
             }
 
-            // Handle ZeroOrMore
-            case ZeroOrMore: {
-                ParseRule r0 = aRule.getChild0();
-                if (!parseAndHandle(r0, href))
-                    return null;
-                while (true) {
-                    if (!parseAndHandle(r0, href))
-                        break;
-                }
-                break;
-            }
-
-            // Handle OneOrMore
+            // Handle ZeroOrMore, OneOrMore: These parse identically, but differ in how parent rule handles them (ZeroOrMore is optional)
+            case ZeroOrMore:
             case OneOrMore: {
-                ParseRule r0 = aRule.getChild0();
-                if (!parseAndHandle(r0, href))
+
+                // Parse rule - just return if failed
+                ParseRule rule = aRule.getChild0();
+                if (!parseAndHandle(rule, href))
                     return null;
+
+                // Keep parsing while more are available
                 while (true) {
-                    if (!parseAndHandle(r0, href))
+                    if (!parseAndHandle(rule, href))
                         break;
                 }
                 break;
@@ -543,28 +536,20 @@ public class Parser {
             case ZeroOrOne:
                 return lookAhead(aRule.getChild0(), aTokenCount, aTokenIndex);
 
-            // Handle ZeroOrMore
-            case ZeroOrMore: {
-                ParseRule r0 = aRule.getChild0();
-                int remainder = lookAhead(r0, aTokenCount, aTokenIndex);
-                int r = remainder;
-                while (r > 0) {
-                    r = lookAhead(r0, r, aTokenIndex + aTokenCount - r);
-                    if (r >= 0)
-                        remainder = r;
-                }
-                return remainder;
-            }
-
-            // Handle OneOrMore: Why is this identical to above???
+            // Handle ZeroOrMore, OneOrMore: These parse identically, but differ in how parent rule handles them (ZeroOrMore is optional)
+            case ZeroOrMore:
             case OneOrMore: {
-                ParseRule r0 = aRule.getChild0();
-                int remainder = lookAhead(r0, aTokenCount, aTokenIndex);
-                int r = remainder;
-                while (r > 0) {
-                    r = lookAhead(r0, r, aTokenIndex + aTokenCount - r);
-                    if (r >= 0)
-                        remainder = r;
+
+                // Do rule look-ahead
+                ParseRule rule = aRule.getChild0();
+                int remainder = lookAhead(rule, aTokenCount, aTokenIndex);
+
+                // Keep doing look-ahead
+                int remainder2 = remainder;
+                while (remainder2 > 0) {
+                    remainder2 = lookAhead(rule, remainder2, aTokenIndex + aTokenCount - remainder2);
+                    if (remainder2 >= 0)
+                        remainder = remainder2;
                 }
                 return remainder;
             }
