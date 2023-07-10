@@ -21,7 +21,7 @@ public class ParseHandler<T> {
     private boolean  _fail;
 
     // The backup handler
-    protected ParseHandler  _backupHandler;
+    protected ParseHandler<T> _backupHandler;
 
     /**
      * Called when a child rule has been successfully parsed into given node.
@@ -92,9 +92,9 @@ public class ParseHandler<T> {
      * Returns a handler that is not in use.
      * This method should be synchronized, but that makes TeaVM unhappy.
      */
-    public ParseHandler getAvailableHandler()
+    public ParseHandler<T> getAvailableHandler()
     {
-        ParseHandler handler = this;
+        ParseHandler<T> handler = this;
         while (handler._inUse)
             handler = handler.getBackupHandler();
         handler._inUse = true;
@@ -104,7 +104,7 @@ public class ParseHandler<T> {
     /**
      * Returns a backup handler.
      */
-    protected ParseHandler getBackupHandler()
+    protected ParseHandler<T> getBackupHandler()
     {
         // If already set, just return
         if (_backupHandler != null) return _backupHandler;
@@ -116,7 +116,7 @@ public class ParseHandler<T> {
     /**
      * Returns a backup handler.
      */
-    protected ParseHandler createBackupHandler()
+    protected ParseHandler<T> createBackupHandler()
     {
         // Create and return
         try { return getClass().newInstance(); }

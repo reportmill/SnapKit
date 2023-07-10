@@ -146,23 +146,26 @@ public class ParseNode {
      */
     public String toString()
     {
-        StringBuffer sb = new StringBuffer(toStringSimple());
-        sb.append(" \"" + (getLength() > 43 ? (getString().substring(0, 40) + "...") : getString()).replace('\n', ' ') + '"');
-        return sb.toString();
-    }
-
-    /**
-     * Returns a string representation of node (just .
-     */
-    public String toStringSimple()
-    {
+        // Add name
+        StringBuilder sb = new StringBuilder();
         ParseRule rule = getRule();
         String name = rule.getName();
-        if (name == null) name = rule.toString();
-        StringBuffer sb = new StringBuffer(name).append(' ');
+        if (name == null)
+            name = rule.toString();
+        sb.append(name).append(' ');
+
+        // Add LineIndex, Start, End
         sb.append("{ line:").append(getLineIndex() + 1).append(", start:").append(getStart());
         sb.append(", end:").append(getEnd()).append(" }");
+
+        // Add String to end
+        String string = getString();
+        if (getLength() > 43)
+            string = string.substring(0, 40) + "...";
+        string = string.replace('\n', ' ');
+        sb.append(" \"").append(string).append('"');
+
+        // Return
         return sb.toString();
     }
-
 }
