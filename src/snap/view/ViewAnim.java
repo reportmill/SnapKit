@@ -339,7 +339,9 @@ public class ViewAnim implements XMLArchiver.Archivable {
         _time = newTime;
 
         // If new values need to be set, set them
-        boolean needsUpdate = !(oldTime <= _start && newTime <= _start || oldTime >= _end && newTime >= _end);
+        int oldTimeLocation = oldTime <= _start ? -1 : oldTime >= _end ? 1 : 0;
+        int newTimeLocation = newTime <= _start ? -1 : newTime >= _end ? 1 : 0;
+        boolean needsUpdate = oldTimeLocation * newTimeLocation != 1;
         if (needsUpdate)
             updateValues();
 
@@ -657,6 +659,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
     {
         if (_parent != null)
             return _parent.needsFinish();
+        _needsFinish = true;
         return this;
     }
 
