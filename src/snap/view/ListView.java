@@ -214,9 +214,14 @@ public class ListView <T> extends ParentView implements Selectable<T> {
     public void setTargeting(boolean aValue)  { _listArea.setTargeting(aValue); }
 
     /**
+     * Called to update item in list that has changed.
+     */
+    public void updateItem(T anItem)  { _listArea.updateItem(anItem); }
+
+    /**
      * Called to update items in list that have changed.
      */
-    public void updateItems(T ... theItems)  { _listArea.updateItems(theItems); }
+    public void updateItems(T[] theItems)  { _listArea.updateItems(theItems); }
 
     /**
      * Returns the cell at given index.

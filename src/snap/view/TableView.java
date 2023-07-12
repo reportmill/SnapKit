@@ -339,9 +339,27 @@ public class TableView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Tell table to update given items (none means all).
+     * Tell table to update given item.
      */
-    public void updateItems(T ... theItems)
+    public void updateItem(T anItem)
+    {
+        for (TableCol<T> tableCol : getCols())
+            tableCol.updateItem(anItem);
+    }
+
+    /**
+     * Tell table to update visible items.
+     */
+    public void updateItems()
+    {
+        for (TableCol<T> tableCol : getCols())
+            tableCol.updateItems();
+    }
+
+    /**
+     * Tell table to update given items.
+     */
+    public void updateItems(T[] theItems)
     {
         for (TableCol<T> tableCol : getCols())
             tableCol.updateItems(theItems);
@@ -367,7 +385,8 @@ public class TableView <T> extends ParentView implements Selectable<T> {
      */
     public TableCol<T>[] getCols()
     {
-        return _splitView.getItems().toArray(new TableCol[0]);
+        List<View> splitViewItems = _splitView.getItems();
+        return splitViewItems.toArray(new TableCol[0]);
     }
 
     /**

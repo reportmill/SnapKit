@@ -198,7 +198,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Sets the selected index.
      */
-    public void setSelIndexes(int ... theIndexes)  { _items.setSelIndexes(theIndexes); }
+    public void setSelIndexes(int[] theIndexes)  { _items.setSelIndexes(theIndexes); }
 
     /**
      * Clears the selection.
@@ -233,7 +233,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     /**
      * Sets the selected items.
      */
-    public void setSelItems(T ... theItems)  { _items.setSelItems(theItems); }
+    public void setSelItems(T[] theItems)  { _items.setSelItems(theItems); }
 
     /**
      * Selects up in the list.
@@ -424,30 +424,41 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     }
 
     /**
-     * Called to update items in list that have changed.
+     * Called to update item in list that has changed.
      */
-    public void updateItems(T ... theItems)
+    public void updateItem(T anItem)
     {
         // Sync while adding to UpdateItems
         synchronized (_updateItems) {
-
-            // If items provided, add them to list
-            if (theItems != null && theItems.length > 0)
-                Collections.addAll(_updateItems, theItems);
-
-            // Otherwise, add items from all visible/existing cells
-            else {
-                for (View child : getChildren()) {
-                    ListCell<T> cell = child instanceof ListCell ? (ListCell<T>) child : null;
-                    T item = cell != null ? cell.getItem() : null;
-                    if (item != null)
-                        _updateItems.add(item);
-                }
-            }
+            _updateItems.add(anItem);
         }
 
         // Relayout
         relayout();
+    }
+
+    /**
+     * Called to update all visible items in list.
+     */
+    public void updateItems()
+    {
+        // Add items from all visible/existing cells
+        View[] children = getChildren();
+        for (View child : children) {
+            ListCell<T> cell = child instanceof ListCell ? (ListCell<T>) child : null;
+            T item = cell != null ? cell.getItem() : null;
+            if (item != null)
+                updateItem(item);
+        }
+    }
+
+    /**
+     * Called to update items in list that have changed.
+     */
+    public void updateItems(T[] theItems)
+    {
+        for (T item : theItems)
+            updateItem(item);
     }
 
     /**
@@ -457,7 +468,7 @@ public class ListArea <T> extends ParentView implements Selectable<T> {
     {
         T item = anIndex >= 0 && anIndex < getItemCount() ? getItem(anIndex) : null;
         if (item != null)
-            updateItems(item);
+            updateItem(item);
     }
 
     /**

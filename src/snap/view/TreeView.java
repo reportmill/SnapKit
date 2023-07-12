@@ -336,9 +336,27 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
     }
 
     /**
+     * Called to update item that has changed.
+     */
+    public void updateItem(T anItem)
+    {
+        for (TreeCol<T> treeCol : getCols())
+            treeCol.updateItem(anItem);
+    }
+
+    /**
+     * Called to update all visible items.
+     */
+    public void updateItems()
+    {
+        for (TreeCol<T> treeCol : getCols())
+            treeCol.updateItems();
+    }
+
+    /**
      * Called to update items that have changed.
      */
-    public void updateItems(T ... theItems)
+    public void updateItems(T[] theItems)
     {
         for (TreeCol<T> treeCol : getCols())
             treeCol.updateItems(theItems);
@@ -384,7 +402,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         // Set item expanded state, reset items and update given item
         setExpanded(anItem, true);
         setItemsList(getItemsList());
-        updateItems(anItem);
+        updateItem(anItem);
     }
 
     /**
@@ -408,7 +426,7 @@ public class TreeView <T> extends ParentView implements Selectable<T> {
         // Set item expanded state, reset items and update given item
         setExpanded(anItem, false);
         setItemsImpl(items);
-        updateItems(anItem);
+        updateItem(anItem);
     }
 
     /**

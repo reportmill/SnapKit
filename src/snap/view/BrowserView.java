@@ -191,7 +191,7 @@ public class BrowserView<T> extends ParentView implements Selectable<T> {
     /**
      * Called to update items that have changed.
      */
-    public void updateItems(T... theItems)
+    public void updateItems(T[] theItems)
     {
         _col0.updateItems(theItems);
     }
