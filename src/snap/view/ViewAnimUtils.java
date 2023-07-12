@@ -84,7 +84,7 @@ public class ViewAnimUtils {
             anim.setOpacity(0);
 
             // On finish, make not visible and restore old PrefW, PrefH, ClipToBounds
-            anim.setOnFinish(a -> {
+            anim.setOnFinish(() -> {
                 aView.setVisible(false);
                 aView.setPrefWidth(prefW);
                 aView.setPrefHeight(prefH);
@@ -95,7 +95,7 @@ public class ViewAnimUtils {
             anim.play();
         }
 
-        // Return anim
+        // Return
         return anim;
     }
 

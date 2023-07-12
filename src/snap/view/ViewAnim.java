@@ -8,7 +8,6 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.*;
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * A class to animate View attributes.
@@ -216,21 +215,6 @@ public class ViewAnim implements XMLArchiver.Archivable {
 
         // Set and return
         return _maxTime = max;
-    }
-
-    /**
-     * Returns the key frame times.
-     */
-    public Integer[] getKeyFrameTimes()
-    {
-        Set<Integer> timesSet = new HashSet<>();
-        timesSet.add(getStart());
-        timesSet.add(getEnd());
-        for (ViewAnim anim : _anims)
-            Collections.addAll(timesSet, anim.getKeyFrameTimes());
-        Integer[] times = timesSet.toArray(new Integer[0]);
-        Arrays.sort(times);
-        return times;
     }
 
     /**
@@ -594,7 +578,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
     }
 
     /**
-     * Returns the consumer to be called on each frame.
+     * Returns the runnable to be called on each frame.
      */
     public Runnable getOnFrame()
     {
@@ -602,7 +586,7 @@ public class ViewAnim implements XMLArchiver.Archivable {
     }
 
     /**
-     * Sets the consumer to be called on each frame.
+     * Sets the runnable to be called on each frame.
      */
     public ViewAnim setOnFrame(Runnable aRun)
     {
@@ -610,14 +594,6 @@ public class ViewAnim implements XMLArchiver.Archivable {
             _parent.setOnFrame(aRun);
         else _onFrame = aRun;
         return this;
-    }
-
-    /**
-     * Sets the consumer to be called on each frame.
-     */
-    public ViewAnim setOnFrame(Consumer<ViewAnim> aCall)
-    {
-        return setOnFrame(() -> aCall.accept(this));
     }
 
     /**
@@ -637,14 +613,6 @@ public class ViewAnim implements XMLArchiver.Archivable {
             _parent.setOnFinish(aRun);
         else _onFinish = aRun;
         return this;
-    }
-
-    /**
-     * Sets a function to be called when anim is finished.
-     */
-    public ViewAnim setOnFinish(Consumer<ViewAnim> aFinish)
-    {
-        return setOnFinish(() -> aFinish.accept(this));
     }
 
     /**
@@ -703,7 +671,6 @@ public class ViewAnim implements XMLArchiver.Archivable {
         // Do clear
         stop();
         _loopCount = 0;
-        _onFinish = null;
         _interp = Interpolator.EASE_BOTH;
         _time = 0;
         _maxTime = -1;
@@ -781,8 +748,24 @@ public class ViewAnim implements XMLArchiver.Archivable {
     private List<PropChange> _autoRegisterChanges;
 
     /**
+     * Returns the key frame times.
+     */
+    public Integer[] getKeyFrameTimes()
+    {
+        Set<Integer> timesSet = new HashSet<>();
+        timesSet.add(getStart());
+        timesSet.add(getEnd());
+        for (ViewAnim anim : _anims)
+            Collections.addAll(timesSet, anim.getKeyFrameTimes());
+        Integer[] times = timesSet.toArray(new Integer[0]);
+        Arrays.sort(times);
+        return times;
+    }
+
+    /**
      * Standard toString implementation.
      */
+    @Override
     public String toString()
     {
         StringBuffer sb = StringUtils.toString(this, "Start", "End");

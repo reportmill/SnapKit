@@ -153,14 +153,17 @@ public class Explode extends View {
         ViewUtils.addChild(_host, this);
 
         // Start animation with hooks to call animFrame and animFinish
-        getAnim(_runTime).setOnFrame(a -> animFrame()).setOnFinish(a -> animFinish()).play();
+        ViewAnim anim0 = getAnim(0);
+        anim0.setOnFrame(() -> animDidFrame());
+        anim0.setOnFinish(() -> animDidFinish());
+        getAnim(_runTime).play();
 
         // Hide view
         _view.setOpacity(0);
 
         // If reversed, configure frags exploded
         if (_reverse)
-            animFrame();
+            animDidFrame();
     }
 
     /**
@@ -234,7 +237,7 @@ public class Explode extends View {
     /**
      * Called on each frame.
      */
-    void animFrame()
+    void animDidFrame()
     {
         // Get current anim time
         int time = getAnim(0).getTime();
@@ -248,7 +251,7 @@ public class Explode extends View {
     /**
      * Called when finished.
      */
-    void animFinish()
+    void animDidFinish()
     {
         // Remove original view from parent
         if (_removeOnDone && _view.getParent() != null) {
