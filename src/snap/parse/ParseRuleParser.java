@@ -19,7 +19,7 @@ public class ParseRuleParser extends Parser {
     {
         // Number, String, Name
         ParseRule number = new ParseRule("Number").setPattern("[1-9][0-9]*");
-        ParseRule string = new ParseRule("String").setPattern("\"(([^\"\\\\\\n\\r])|(\\\\.))*\"");
+        ParseRule string = new ParseRule("String").setPattern("\"(([^\"\\\\])|(\\\\.))*\"");
         ParseRule name = new ParseRule("Name").setPattern("[$a-zA-Z][$\\w]*");
 
         // Predefine Expression
