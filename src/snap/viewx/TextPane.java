@@ -243,10 +243,12 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
      */
     public void saveChanges()
     {
-        saveChangesImpl(); // Do real version
-        getTextArea().getUndoer().reset(); // Reset Undo
-        TextDoc textDoc = getTextDoc();
-        textDoc.setTextModified(false);
+        // Do real version
+        saveChangesImpl();
+
+        // Reset TextArea.Undoer
+        TextArea textArea = getTextArea();
+        textArea.getUndoer().reset();
     }
 
     /**

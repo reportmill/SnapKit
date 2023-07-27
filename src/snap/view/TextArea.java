@@ -49,7 +49,7 @@ public class TextArea extends View {
     private Color  _selColor = new Color(181, 214, 254, 255);
 
     // The text pane undoer
-    private Undoer  _undoer = new Undoer();
+    private Undoer  _undoer;
 
     // The index of the last replace so we can commit undo changes if not adjacent
     private int  _lastReplaceIndex;
@@ -118,6 +118,10 @@ public class TextArea extends View {
         // Create/set default TextBox
         TextBox tbox = createTextBox();
         setTextBox(tbox);
+
+        // Create/set Undoer
+        _undoer = new Undoer();
+        _undoer.addPropChangeListener(pc -> undoerUndoAvailableChanged(), Undoer.UndoAvailable_Prop);
     }
 
     /**
@@ -1593,21 +1597,30 @@ public class TextArea extends View {
     /**
      * Adds a property change to undoer.
      */
-    protected void undoerAddPropertyChange(PropChange anEvent)
+    protected void undoerAddPropChange(PropChange anEvent)
     {
         // Get undoer (just return if null or disabled)
         Undoer undoer = getUndoer();
-        if (undoer == null || !undoer.isEnabled()) return;
+        if (undoer == null || !undoer.isEnabled())
+            return;
+
+        // If TextDoc.TextModified, just return
+        String propName = anEvent.getPropName();
+        if (propName == TextDoc.TextModified_Prop)
+            return;
 
         // If PlainText Style_Prop or LineStyle_Prop, just return
-        String propName = anEvent.getPropName();
-        if (!isRichText() && (propName == TextDoc.Style_Prop || propName == TextDoc.LineStyle_Prop))
-            return;
+        if (!isRichText()) {
+             if (propName == TextDoc.Style_Prop || propName == TextDoc.LineStyle_Prop)
+                return;
+        }
 
         // Get ActiveUndoSet - if no previous changes, set UndoSelection
         UndoSet activeUndoSet = undoer.getActiveUndoSet();
-        if (activeUndoSet.getChangeCount() == 0)
-            activeUndoSet.setUndoSelection(getUndoSelection());
+        if (activeUndoSet.getChangeCount() == 0) {
+            Object undoSelection = getUndoSelection();
+            activeUndoSet.setUndoSelection(undoSelection);
+        }
 
         // Add property
         undoer.addPropChange(anEvent);
@@ -1660,20 +1673,25 @@ public class TextArea extends View {
     }
 
     /**
+     * Called when Undoer.UndoAvailable changes.
+     */
+    private void undoerUndoAvailableChanged()
+    {
+        TextDoc textDoc = getTextDoc();
+        boolean textModified = _undoer.isUndoAvailable();
+        textDoc.setTextModified(textModified);
+    }
+
+    /**
      * Called when TextDoc changes (chars added, updated or deleted).
      */
     protected void textDocDidPropChange(PropChange aPC)
     {
         // Add property change
-        undoerAddPropertyChange(aPC);
+        undoerAddPropChange(aPC);
 
         // Forward on to listeners
         firePropChange(aPC);
-
-        // Update TextDoc.TextModified from Undoer
-        boolean hasUndos = getUndoer().hasUndos();
-        TextDoc textDoc = getTextDoc();
-        textDoc.setTextModified(hasUndos);
 
         // Notify text did change
         textDidChange();
@@ -1703,8 +1721,8 @@ public class TextArea extends View {
     {
         Insets ins = getInsetsAll();
         double h = aH >= 0 ? (aH - ins.top - ins.bottom) : aH;
-        double pw = getTextBox().getPrefWidth(h);
-        return ins.left + pw + ins.right;
+        double prefW = getTextBox().getPrefWidth(h);
+        return ins.left + prefW + ins.right;
     }
 
     /**
@@ -1714,8 +1732,8 @@ public class TextArea extends View {
     {
         Insets ins = getInsetsAll();
         double w = aW >= 0 ? (aW - ins.left - ins.right) : aW;
-        double ph = getTextBox().getPrefHeight(w);
-        return ins.top + ph + ins.bottom;
+        double prefH = getTextBox().getPrefHeight(w);
+        return ins.top + prefH + ins.bottom;
     }
 
     /**

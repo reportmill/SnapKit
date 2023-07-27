@@ -3,26 +3,38 @@
  */
 package snap.props;
 import snap.util.ListUtils;
-import snap.util.StringUtils;
-
 import java.util.*;
 
 /**
  * Undoer - this object manages undo by keeping lists of property changes.
  */
-public class Undoer {
+public class Undoer extends PropObject {
 
     // The current undo set to add new property changes to
-    UndoSet _activeUndoSet = new UndoSet();
+    private UndoSet _activeUndoSet = new UndoSet();
 
     // The list of undo sets
-    List<UndoSet> _undoSets = new Vector();
+    private List<UndoSet> _undoSets = new ArrayList<>();
 
     // The list of redo sets
-    List<UndoSet> _redoSets = new Vector();
+    private List<UndoSet> _redoSets = new ArrayList<>();
 
     // Whether undoer is disabled
-    int _disabled = 0;
+    private int _disabled = 0;
+
+    // Whether an undo is currently available
+    private boolean _undoAvailable;
+
+    // Constants for properties
+    public static final String UndoAvailable_Prop = "UndoAvailable";
+
+    /**
+     * Constructor.
+     */
+    public Undoer()
+    {
+        super();
+    }
 
     /**
      * Returns the active undo set.
@@ -53,18 +65,12 @@ public class Undoer {
     /**
      * Returns the list of undo sets.
      */
-    public List<UndoSet> getUndoSets()
-    {
-        return _undoSets;
-    }
+    public List<UndoSet> getUndoSets()  { return _undoSets; }
 
     /**
      * Returns the list of redo sets.
      */
-    public List<UndoSet> getRedoSets()
-    {
-        return _redoSets;
-    }
+    public List<UndoSet> getRedoSets()  { return _redoSets; }
 
     /**
      * Returns the last undo.
@@ -125,6 +131,7 @@ public class Undoer {
 
         // Add change
         _activeUndoSet.addPropChange(anEvent);
+        resetUndoAvailable();
     }
 
     /**
@@ -147,6 +154,8 @@ public class Undoer {
 
         // If no changed objects, just reset current undo
         else _activeUndoSet.reset();
+
+        resetUndoAvailable();
     }
 
     /**
@@ -170,6 +179,7 @@ public class Undoer {
 
         // Enable undoer and return
         enable();
+        resetUndoAvailable();
         return undoSet;
     }
 
@@ -194,32 +204,24 @@ public class Undoer {
 
         // Enable undoer and return UndoSet
         enable();
+        resetUndoAvailable();
         return undoSet;
     }
 
     /**
      * Returns whether undoer is disabled.
      */
-    public boolean isEnabled()
-    {
-        return _disabled == 0;
-    }
+    public boolean isEnabled()  { return _disabled == 0; }
 
     /**
      * Disables undoer so it can receive new changes.
      */
-    public void disable()
-    {
-        _disabled++;
-    }
+    public void disable()  { _disabled++; }
 
     /**
      * Enables undoer.
      */
-    public void enable()
-    {
-        _disabled--;
-    }
+    public void enable()  { _disabled--; }
 
     /**
      * Resets the undoer to its initial state (good to do when a document is saved).
@@ -229,6 +231,7 @@ public class Undoer {
         _activeUndoSet.reset();
         _undoSets.clear();
         _redoSets.clear();
+        resetUndoAvailable();
     }
 
     /**
@@ -248,6 +251,29 @@ public class Undoer {
     }
 
     /**
+     * Returns whether an undo is available.
+     */
+    public boolean isUndoAvailable()  { return _undoAvailable; }
+
+    /**
+     * Sets whether an undo is available.
+     */
+    private void setUndoAvailable(boolean aValue)
+    {
+        if (aValue == _undoAvailable) return;
+        firePropChange(UndoAvailable_Prop, _undoAvailable, _undoAvailable = aValue);
+    }
+
+    /**
+     * Resets the UndoAvailable property.
+     */
+    private void resetUndoAvailable()
+    {
+        boolean undoAvailable = hasUndos();
+        setUndoAvailable(undoAvailable);
+    }
+
+    /**
      * An interface for undo/redo selection.
      */
     public interface Selection {
@@ -261,5 +287,4 @@ public class Undoer {
     {
         return String.format("Undoer { UndoCount=%d, RedoCount=%d }", getUndoSets().size(), getRedoSets().size());
     }
-
 }
