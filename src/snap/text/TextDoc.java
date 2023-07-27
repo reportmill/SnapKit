@@ -36,6 +36,9 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     // The current text style for TextDoc parent/container (probably TextArea).
     protected TextStyle  _parentTextStyle = TextStyle.DEFAULT;
 
+    // Whether text is modified
+    private boolean _textModified;
+
     // Whether property change is enabled
     protected boolean  _propChangeEnabled = true;
 
@@ -48,6 +51,7 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     public static final String LineStyle_Prop = "LineStyle";
     public static final String DefaultTextStyle_Prop = "DefaultTextStyle";
     public static final String ParentTextStyle_Prop = "ParentTextStyle";
+    public static final String TextModified_Prop = "TextModified";
 
     /**
      * Constructor.
@@ -179,7 +183,8 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
         }
 
         // Fire prop change
-        firePropChange(DefaultTextStyle_Prop, oldStyle, aStyle);
+        if (isPropChangeEnabled())
+            firePropChange(DefaultTextStyle_Prop, oldStyle, aStyle);
     }
 
     /**
@@ -225,6 +230,20 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
 
         // Fire prop change
         firePropChange(ParentTextStyle_Prop, oldStyle, aStyle);
+    }
+
+    /**
+     * Returns whether text is modified.
+     */
+    public boolean isTextModified()  { return _textModified; }
+
+    /**
+     * Sets whether text is modified.
+     */
+    public void setTextModified(boolean aValue)
+    {
+        if (aValue == isTextModified()) return;
+        firePropChange(TextModified_Prop, _textModified, _textModified = aValue);
     }
 
     /**

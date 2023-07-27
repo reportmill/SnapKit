@@ -543,6 +543,7 @@ public class TextArea extends View {
 
         // Update TextDoc.DefaultTextStyle, ParentTextStyle
         TextDoc textDoc = getTextDoc();
+        textDoc.setPropChangeEnabled(false);
         TextStyle defaultTextStyle = aFont != null ? textDoc.getDefaultStyle().copyFor(aFont) : null;
         textDoc.setDefaultStyle(defaultTextStyle);
 
@@ -552,6 +553,7 @@ public class TextArea extends View {
         // Update TextDoc.ParentTextStyle
         TextStyle parentTextStyle = defaultTextStyle != null ? defaultTextStyle : textDoc.getParentTextStyle().copyFor(aFont);
         textDoc.setParentTextStyle(parentTextStyle);
+        textDoc.setPropChangeEnabled(true);
     }
 
     /**
@@ -1667,6 +1669,11 @@ public class TextArea extends View {
 
         // Forward on to listeners
         firePropChange(aPC);
+
+        // Update TextDoc.TextModified from Undoer
+        boolean hasUndos = getUndoer().hasUndos();
+        TextDoc textDoc = getTextDoc();
+        textDoc.setTextModified(hasUndos);
 
         // Notify text did change
         textDidChange();

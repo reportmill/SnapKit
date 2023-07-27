@@ -23,12 +23,6 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
     // The ToolBarPane
     private ChildView  _toolBarPane;
 
-    // Whether text pane text is modified
-    private boolean  _textModified;
-
-    // Constants for properties
-    public static final String TextModified_Prop = "TextModified";
-
     /**
      * Constructor.
      */
@@ -77,20 +71,6 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
      * Returns the toolbar pane.
      */
     public ChildView getToolBarPane()  { return _toolBarPane; }
-
-    /**
-     * Returns whether text is modified.
-     */
-    public boolean isTextModified()  { return _textModified; }
-
-    /**
-     * Sets whether text is modified.
-     */
-    public void setTextModified(boolean aValue)
-    {
-        if (aValue == isTextModified()) return;
-        firePropChange(TextModified_Prop, _textModified, _textModified = aValue);
-    }
 
     /**
      * Create UI.
@@ -161,15 +141,12 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
         // Get TextArea
         TextArea textArea = getTextArea();
 
-        // Update UndoButton, RedoButton
-        setViewEnabled("UndoButton", textArea.getUndoer().hasUndos());
-        setViewEnabled("RedoButton", textArea.getUndoer().hasRedos());
-
         // Reset FontSizeText
         setViewValue("FontSizeText", textArea.getFont().getSize());
 
-        // Reset TextModified
-        setTextModified(textArea.getUndoer().hasUndos());
+        // Update UndoButton, RedoButton
+        setViewEnabled("UndoButton", textArea.getUndoer().hasUndos());
+        setViewEnabled("RedoButton", textArea.getUndoer().hasRedos());
 
         // Update SelectionText
         setViewText("SelectionText", getSelectionInfo());
@@ -268,7 +245,8 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
     {
         saveChangesImpl(); // Do real version
         getTextArea().getUndoer().reset(); // Reset Undo
-        setTextModified(false); // Reset TextModified
+        TextDoc textDoc = getTextDoc();
+        textDoc.setTextModified(false);
     }
 
     /**
