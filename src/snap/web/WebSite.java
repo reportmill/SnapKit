@@ -310,6 +310,8 @@ public abstract class WebSite {
         // Create web request
         WebRequest req = new WebRequest(aFile);
         byte[] fileBytes = aFile.getBytes();
+        if (fileBytes == null)
+            fileBytes = new byte[0];
         req.setPutBytes(fileBytes);
 
         // Send request and get response

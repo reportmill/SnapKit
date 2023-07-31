@@ -125,33 +125,33 @@ public class FileSite extends WebSite {
         // Get standard file
         WebURL pathURL = aReq.getURL();
         String path = pathURL.getPath();
-        WebFile wfile = aReq.getFile();
-        File file = getJavaFile(path);
+        WebFile snapFile = aReq.getFile();
+        File javaFile = getJavaFile(path);
 
         // Make sure parent directories exist
-        File fileDir = file.getParentFile();
+        File fileDir = javaFile.getParentFile();
         if (!fileDir.exists()) {
             if (!fileDir.mkdirs())
                 System.err.println("FileSite.doPut: Error creating parent dir: " + fileDir.getPath());
         }
 
         // If directory, create
-        if (wfile != null && wfile.isDir() && !file.exists()) {
-            if (!file.mkdir())
-                System.err.println("FileSite.doPut: Error creating dir: " + file.getPath());
+        if (snapFile != null && snapFile.isDir() && !javaFile.exists()) {
+            if (!javaFile.mkdir())
+                System.err.println("FileSite.doPut: Error creating dir: " + javaFile.getPath());
         }
 
         // Otherwise, write bytes
         else {
             byte[] fileBytes = aReq.getSendBytes();
             if (fileBytes != null) {
-                try { FileUtils.writeBytesSafely(file, fileBytes); }
+                try { FileUtils.writeBytesSafely(javaFile, fileBytes); }
                 catch(IOException e) { aResp.setException(e); return; }
             }
         }
 
         // Return standard file modified time
-        aResp.setModTime(file.lastModified());
+        aResp.setModTime(javaFile.lastModified());
     }
 
     /**
