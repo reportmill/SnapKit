@@ -32,7 +32,7 @@ public abstract class ViewEnv {
      */
     public static ViewEnv getEnv()
     {
-        if (_env!=null) return _env;
+        if (_env != null) return _env;
         setDefaultEnv();
         return _env;
     }
@@ -43,11 +43,11 @@ public abstract class ViewEnv {
     private static void setDefaultEnv()
     {
         // Get class name for platform GFXEnv
-        String cname = SnapUtils.getPlatform()==SnapUtils.Platform.TEAVM ? "snaptea.TV" : "snap.swing.SwingViewEnv";
+        String className = SnapUtils.getPlatform()==SnapUtils.Platform.TEAVM ? "snaptea.TV" : "snap.swing.SwingViewEnv";
 
         // Try Swing
-        try { Class.forName(cname).newInstance(); }
-        catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set ViewEnv: " + cname + ", " + e); }
+        try { Class.forName(className).newInstance(); }
+        catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set ViewEnv: " + className + ", " + e); }
     }
 
     /**
@@ -91,7 +91,13 @@ public abstract class ViewEnv {
      */
     public void runDelayed(Runnable aRun, int aDelay, boolean inAppThread)
     {
-        TimerTask task = new TimerTask() { public void run() { if (inAppThread) runLater(aRun); else aRun.run(); }};
+        TimerTask task = new TimerTask() {
+            public void run() {
+                if (inAppThread)
+                    runLater(aRun);
+                else aRun.run();
+            }
+        };
         _timer.schedule(task, aDelay);
     }
 
@@ -103,7 +109,8 @@ public abstract class ViewEnv {
         // Create task
         TimerTask task = new TimerTask() { public void run()  {
             if (inAppThread) {
-                if (doAll) runLater(aRun);
+                if (doAll)
+                    runLater(aRun);
                 else runLaterAndWait(aRun);
             }
             else aRun.run();
@@ -111,7 +118,8 @@ public abstract class ViewEnv {
 
         // Add task and schedule
         _timerTasks.put(aRun, task);
-        if (doAll) _timer.scheduleAtFixedRate(task, aDelay, aPeriod);
+        if (doAll)
+            _timer.scheduleAtFixedRate(task, aDelay, aPeriod);
         else _timer.schedule(task, aDelay, aPeriod);
     }
 
@@ -121,7 +129,8 @@ public abstract class ViewEnv {
     public void stopIntervals(Runnable aRun)
     {
         TimerTask task = _timerTasks.get(aRun);
-        if (task!=null) task.cancel();
+        if (task != null)
+            task.cancel();
     }
 
     /**
@@ -150,7 +159,7 @@ public abstract class ViewEnv {
     /**
      * Returns a UI source for given class.
      */
-    public WebURL getUISource(Class aClass)
+    public WebURL getUISource(Class<?> aClass)
     {
         // Look for snap file with same name as class
         String name = aClass.getSimpleName() + ".snp";

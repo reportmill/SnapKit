@@ -85,7 +85,7 @@ public class PopupList<T> extends ListView<T> {
     /**
      * Called when owner View has KeyPress events.
      */
-    protected void handleShowViewEvent(ViewEvent anEvent)
+    protected void processPopupListKeyPressEvent(ViewEvent anEvent)
     {
         if (anEvent.isUpArrow() || anEvent.isDownArrow() || anEvent.isEnterKey())
             processEvent(anEvent);
@@ -102,7 +102,7 @@ public class PopupList<T> extends ListView<T> {
 
         // If showing, add EventListener, otherwise, remove
         if (showing)
-            _showView.addEventFilter(_lsnr = e -> handleShowViewEvent(e), KeyPress);
+            _showView.addEventFilter(_lsnr = e -> processPopupListKeyPressEvent(e), KeyPress);
 
         // Otherwise remove listener
         else {
