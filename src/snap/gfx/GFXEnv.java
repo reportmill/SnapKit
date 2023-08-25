@@ -34,11 +34,12 @@ public abstract class GFXEnv {
         String className = SnapUtils.getPlatform() == SnapUtils.Platform.TEAVM ? "snaptea.TV" : "snap.swing.AWTEnv";
 
         // Get GFXEnv class and create instance to set
-        try {
-            Class<?> envClass = Class.forName(className);
-            ClassUtils.newInstance(envClass);
-        }
+        try { Class.forName(className).newInstance(); }
         catch(Exception e) { System.err.println("GFXEnv.setDefaultEnv: Can't set GFXEnv " + className + ", " + e); }
+
+        // Fall back on swing (but so teavm doesn't try to include swing classes)
+        try { Class.forName("fool-teavm".length() > 0 ? "snap.swing.AWTEnv" : "").newInstance(); }
+        catch(Exception e) { System.err.println("ViewEnv.setDefaultEnv: Can't set ViewEnv: " + className + ", " + e); }
     }
 
     /**
