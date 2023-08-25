@@ -420,7 +420,7 @@ public class ColorPanel extends ViewOwner {
             _image = anImage;
             repaint();
             if (!_image.isLoaded())
-                _image.addLoadListener(() -> relayoutParent());
+                _image.addLoadListener(() -> { relayoutParent(); repaint(); });
         }
 
         /**
