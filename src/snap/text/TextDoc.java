@@ -661,6 +661,17 @@ public class TextDoc extends PropObject implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the token at given char index.
+     */
+    public TextToken getTokenForCharIndex(int charIndex)
+    {
+        TextLine textLine = getLineForCharIndex(charIndex);
+        int lineStart = textLine.getStartCharIndex();
+        int selStartInLine = charIndex - lineStart;
+        return textLine.getTokenForCharIndex(selStartInLine);
+    }
+
+    /**
      * Returns the Font for run at given character index.
      */
     public Font getFontForCharIndex(int charIndex)

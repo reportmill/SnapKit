@@ -362,7 +362,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Returns the token at or before given char index.
+     * Returns the token at given char index.
      */
     public TextToken getTokenForCharIndex(int charIndex)
     {
@@ -376,11 +376,36 @@ public class TextLine implements CharSequenceX, Cloneable {
         // Iterate over tokens (backwards) and return first token that starts at or before char index
         for (int i = tokens.length - 1; i >= 0; i--) {
             TextToken token = tokens[i];
+            if (charIndex > token.getEndCharIndex())
+                break;
             if (charIndex >= token.getStartCharIndex())
                 return token;
         }
 
-        // Return null since charIndex is before first token
+        // Return not found
+        return null;
+    }
+
+    /**
+     * Returns the token at or before given char index.
+     */
+    public TextToken getLastTokenForCharIndex(int charIndex)
+    {
+        // Check bounds
+        if (charIndex < 0 || charIndex > length())
+            throw new IndexOutOfBoundsException("TextLine.getLastTokenForCharIndex: Index " + charIndex + " beyond " + length());
+
+        // Get tokens
+        TextToken[] tokens = getTokens();
+
+        // Iterate over tokens (backwards) and return first token that starts at or before char index
+        for (int i = tokens.length - 1; i >= 0; i--) {
+            TextToken token = tokens[i];
+            if (charIndex >= token.getStartCharIndex())
+                return token;
+        }
+
+        // Return not found
         return null;
     }
 
@@ -390,7 +415,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     public double getXForCharIndex(int anIndex)
     {
         // Get token for char index and token style
-        TextToken textToken = getTokenForCharIndex(anIndex);
+        TextToken textToken = getLastTokenForCharIndex(anIndex);
         TextStyle textStyle = textToken != null ? textToken.getTextStyle() : getRun(0).getStyle();
         double charSpacing = textStyle.getCharSpacing();
 

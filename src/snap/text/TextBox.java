@@ -707,7 +707,7 @@ public class TextBox {
         double fontScale = getFontScale();
 
         // Get TextToken at start char index - if in middle of token, split token
-        TextToken textToken = aTextLine.getTokenForCharIndex(startCharIndex);
+        TextToken textToken = aTextLine.getLastTokenForCharIndex(startCharIndex);
         if (textToken != null) {
             if (startCharIndex >= textToken.getEndCharIndex())
                 textToken = textToken.getNext();
