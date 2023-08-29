@@ -12,8 +12,8 @@ import snap.util.SnapUtils;
  */
 public class TextLine implements CharSequenceX, Cloneable {
 
-    // The TextDoc that contains this line
-    protected TextDoc  _textDoc;
+    // The TextBlock that contains this line
+    protected TextBlock _textBlock;
 
     // The StringBuffer that holds line chars
     protected StringBuffer  _sb = new StringBuffer();
@@ -42,17 +42,17 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Constructor.
      */
-    public TextLine(TextDoc aTextDoc)
+    public TextLine(TextBlock aTextBlock)
     {
-        _textDoc = aTextDoc;
-        _lineStyle = _textDoc.getDefaultLineStyle();
+        _textBlock = aTextBlock;
+        _lineStyle = _textBlock.getDefaultLineStyle();
         addRun(createRun(), 0);
     }
 
     /**
-     * Returns the TextDoc.
+     * Returns the TextBlock.
      */
-    public TextDoc getTextDoc()  { return _textDoc; }
+    public TextBlock getTextBlock()  { return _textBlock; }
 
     /**
      * Returns the length of this text line.
@@ -345,11 +345,11 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Creates the tokens (via TextDoc.createTokensForTextLine() to provide another hook).
+     * Creates the tokens (via TextBlock.createTokensForTextLine() to provide another hook).
      */
     protected TextToken[] createTokens()
     {
-        return _textDoc.createTokensForTextLine(this);
+        return _textBlock.createTokensForTextLine(this);
     }
 
     /**
@@ -495,7 +495,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     public TextLine getNext()
     {
         int nextIndex = _index + 1;
-        return _textDoc != null && nextIndex < _textDoc.getLineCount() ? _textDoc.getLine(nextIndex) : null;
+        return _textBlock != null && nextIndex < _textBlock.getLineCount() ? _textBlock.getLine(nextIndex) : null;
     }
 
     /**
@@ -504,7 +504,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     public TextLine getPrevious()
     {
         int prevIndex = _index - 1;
-        return _textDoc != null && prevIndex >= 0 ? _textDoc.getLine(prevIndex) : null;
+        return _textBlock != null && prevIndex >= 0 ? _textBlock.getLine(prevIndex) : null;
     }
 
     /**
@@ -565,8 +565,8 @@ public class TextLine implements CharSequenceX, Cloneable {
         _tokens = null;
 
         // Update Lines
-        if (_textDoc != null)
-            _textDoc.updateLines(getIndex());
+        if (_textBlock != null)
+            _textBlock.updateLines(getIndex());
     }
 
     /**
