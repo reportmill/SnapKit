@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-
 import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.util.StringUtils;
@@ -13,16 +12,22 @@ import snap.util.StringUtils;
 public class TextBoxRun {
 
     // The line this run is from
-    TextBoxLine _line;
+    protected TextBoxLine _line;
 
-    // The start/end char index of this run in line
-    int _start, _end;
+    // The start char index of this run in line
+    protected int _startCharIndex;
+
+    // The end char index of this run in line
+    protected int _endCharIndex;
 
     // The TextStyle for characters in this run
-    TextStyle _style;
+    protected TextStyle _style;
 
-    // The run x and width
-    double _x = -1, _width = -1;
+    // The run x
+    protected double _x = -1;
+
+    // The run width
+    protected double _width = -1;
 
     /**
      * Creates a new TextBoxRun.
@@ -31,8 +36,8 @@ public class TextBoxRun {
     {
         _line = aLine;
         _style = aStyle;
-        _start = aStart;
-        _end = aEnd;
+        _startCharIndex = aStart;
+        _endCharIndex = aEnd;
     }
 
     /**
@@ -58,24 +63,24 @@ public class TextBoxRun {
     /**
      * Returns the start index of this run in line.
      */
-    public int getStart()  { return _start; }
+    public int getStartCharIndex()  { return _startCharIndex; }
 
     /**
      * Returns the end index of this run in line.
      */
-    public int getEnd()  { return _end; }
+    public int getEndCharIndex()  { return _endCharIndex; }
 
     /**
      * Returns the length of run.
      */
-    public int length()  { return _end - _start; }
+    public int length()  { return _endCharIndex - _startCharIndex; }
 
     /**
      * Returns an individual char in run.
      */
     public char charAt(int anIndex)
     {
-        return _line.charAt(_start + anIndex);
+        return _line.charAt(_startCharIndex + anIndex);
     }
 
     /**
@@ -84,7 +89,7 @@ public class TextBoxRun {
     public double getX()
     {
         if (_x >= 0) return _x;
-        return _x = _line.getXForCharIndex(_start);
+        return _x = _line.getXForCharIndex(_startCharIndex);
     }
 
     /**
@@ -93,7 +98,7 @@ public class TextBoxRun {
     public double getWidth()
     {
         if (_width >= 0) return _width;
-        return _width = _line.getXForCharIndex(_end) - getX();
+        return _width = _line.getXForCharIndex(_endCharIndex) - getX();
     }
 
     /**
@@ -117,7 +122,7 @@ public class TextBoxRun {
      */
     public String getString()
     {
-        return _line.subSequence(_start, _end).toString();
+        return _line.subSequence(_startCharIndex, _endCharIndex).toString();
     }
 
     /**
@@ -137,8 +142,8 @@ public class TextBoxRun {
     {
         // Add Name
         StringBuffer sb = new StringBuffer();
-        StringUtils.appendProp(sb, "Start", _start);
-        StringUtils.appendProp(sb, "End", _end);
+        StringUtils.appendProp(sb, "Start", _startCharIndex);
+        StringUtils.appendProp(sb, "End", _endCharIndex);
         StringUtils.appendProp(sb, "String", getString());
         return sb.toString();
     }

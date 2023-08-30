@@ -8,7 +8,7 @@ import java.util.Arrays;
 /**
  * This class manages an array of object values.
  */
-public abstract class ObjectArray<T> implements Cloneable {
+public class ObjectArray<T> implements Cloneable {
 
     // The String array
     protected T[]  _array;
@@ -61,12 +61,12 @@ public abstract class ObjectArray<T> implements Cloneable {
     /**
      * Returns the Object value at index.
      */
-    public T getValue(int anIndex)  { return _array[anIndex]; }
+    public T get(int anIndex)  { return _array[anIndex]; }
 
     /**
      * Sets the String value at index.
      */
-    public void setValue(T aValue, int anIndex)
+    public void set(T aValue, int anIndex)
     {
         _array[anIndex] = aValue;
     }
@@ -74,15 +74,15 @@ public abstract class ObjectArray<T> implements Cloneable {
     /**
      * Adds the value at index.
      */
-    public void addValue(T aValue)
+    public void add(T aValue)
     {
-        addValue(aValue, _length);
+        add(aValue, _length);
     }
 
     /**
      * Adds the value at index.
      */
-    public void addValue(T aValue, int anIndex)
+    public void add(T aValue, int anIndex)
     {
         // Expand components array if needed
         if (_length == _array.length)
@@ -118,6 +118,11 @@ public abstract class ObjectArray<T> implements Cloneable {
     }
 
     /**
+     * Returns the last item.
+     */
+    public T getLast()  { return _length > 0 ? _array[_length - 1] : null; }
+
+    /**
      * Returns the component class.
      */
     public Class<T> getComponentClass()  { return _compClass; }
@@ -126,11 +131,11 @@ public abstract class ObjectArray<T> implements Cloneable {
      * Standard clone implementation.
      */
     @Override
-    protected ObjectArray clone()
+    protected ObjectArray<T> clone()
     {
         // Do normal version
-        ObjectArray clone;
-        try { clone = (ObjectArray) super.clone(); }
+        ObjectArray<T> clone;
+        try { clone = (ObjectArray<T>) super.clone(); }
         catch (Exception e) { throw new RuntimeException(e); }
 
         // Copy array
@@ -157,10 +162,9 @@ public abstract class ObjectArray<T> implements Cloneable {
     public String toStringProps()
     {
         // Add Name
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String className = getComponentClass().getName();
-        if (className != null)
-            sb.append("ComponentClass=").append(className).append(", ");
+        sb.append("ComponentClass=").append(className).append(", ");
 
         // Add Length
         sb.append("Length=").append(length());

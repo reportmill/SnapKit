@@ -1055,7 +1055,7 @@ public class TextBox {
                 double x0 = run.getX();
                 double y0 = line.getBaseline() - uy;
                 double x1 = run.getMaxX();
-                if (run.getEnd() == line.getEndCharIndex())
+                if (run.getEndCharIndex() == line.getEndCharIndex())
                     x1 = line.getX() + line.getWidthNoWhiteSpace();
                 aPntr.drawLine(x0, y0, x1, y0);
             }

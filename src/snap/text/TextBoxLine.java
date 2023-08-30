@@ -3,10 +3,10 @@
  */
 package snap.text;
 import snap.geom.HPos;
+import snap.util.ArrayUtils;
 import snap.util.CharSequenceX;
 import snap.util.MathUtils;
-import java.util.ArrayList;
-import java.util.List;
+import snap.util.ObjectArray;
 
 /**
  * A class to represent a line of text in a TextBox.
@@ -16,14 +16,17 @@ public class TextBoxLine implements CharSequenceX {
     // The TextBox that contains this line
     protected TextBox  _textBox;
 
+    // The char index of the start char of this line in text
+    protected int  _startCharIndex;
+
+    // An array of character runs for the line
+    protected ObjectArray<TextBoxRun>  _runs = new ObjectArray<>(TextBoxRun.class);
+
     // The starting style for this line
     protected TextStyle  _startStyle;
 
     // The index of this line in text
     protected int  _index;
-
-    // The char index of the start char of this line in text
-    protected int  _startCharIndex;
 
     // The number of chars in this text line
     protected int  _length;
@@ -41,13 +44,10 @@ public class TextBoxLine implements CharSequenceX {
     protected double  _alignX;
 
     // The tokens for this line
-    protected List<TextBoxToken>  _tokens = new ArrayList<>();
+    protected ObjectArray<TextBoxToken>  _tokens = new ObjectArray<>(TextBoxToken.class);
 
     // The max Ascent for line fonts
     protected double  _ascent, _descent, _leading, _lineAdvance;
-
-    // An array of character runs for the line
-    protected List<TextBoxRun>  _runs;
 
     /**
      * Creates a new TextBoxLine.
@@ -228,7 +228,7 @@ public class TextBoxLine implements CharSequenceX {
     public void resetSizes()
     {
         // Get last token and its info
-        TextBoxToken lastToken = getTokenCount() > 0 ? _tokens.get(_tokens.size() - 1) : null;
+        TextBoxToken lastToken = getTokenCount() > 0 ? _tokens.get(_tokens.length() - 1) : null;
         int lastTokenEnd = lastToken != null ? lastToken.getEndCharIndex() : 0;
         TextStyle lastTokenStyle = lastToken != null ? lastToken.getTextStyle() : getStartStyle();
 
@@ -242,7 +242,7 @@ public class TextBoxLine implements CharSequenceX {
         _ascent = lastTokenStyle.getAscent();
         _descent = lastTokenStyle.getDescent();
         _leading = lastTokenStyle.getLeading();
-        for (TextBoxToken tok : _tokens) {
+        for (TextBoxToken tok : getTokens()) {
             if (tok.getTextStyle() == lastTokenStyle) continue;
             lastTokenStyle = tok.getTextStyle();
             _ascent = Math.max(lastTokenStyle.getAscent(), _ascent);
@@ -311,7 +311,7 @@ public class TextBoxLine implements CharSequenceX {
     /**
      * Returns the number of tokens.
      */
-    public int getTokenCount()  { return _tokens.size(); }
+    public int getTokenCount()  { return _tokens.length(); }
 
     /**
      * Returns the individual token at given index.
@@ -321,7 +321,7 @@ public class TextBoxLine implements CharSequenceX {
     /**
      * Returns the tokens for this line.
      */
-    public List <TextBoxToken> getTokens()  { return _tokens; }
+    public TextBoxToken[] getTokens()  { return _tokens.getArray(); }
 
     /**
      * Adds a token to line.
@@ -334,11 +334,7 @@ public class TextBoxLine implements CharSequenceX {
     /**
      * Returns the last token for this line.
      */
-    public TextBoxToken getTokenLast()
-    {
-        int tokenCount = _tokens.size();
-        return tokenCount > 0 ? _tokens.get(tokenCount - 1) : null;
-    }
+    public TextBoxToken getTokenLast()  { return _tokens.getLast(); }
 
     /**
      * Returns the max ascent of the chars in this line.
@@ -509,26 +505,27 @@ public class TextBoxLine implements CharSequenceX {
     /**
      * Returns an array of runs for the line.
      */
-    public List<TextBoxRun> getRuns()
+    public TextBoxRun[] getRuns()
     {
         // If already set, just return
-        if (_runs != null) return _runs;
+        if (_runs != null) return _runs.getArray();
 
         // Create new list for runs
-        List<TextBoxRun> runs = new ArrayList<>(_textLine.getRunCount());
+        ObjectArray<TextBoxRun> runs = new ObjectArray<>(TextBoxRun.class);
 
         // Create first run and add to list.
         TextBoxRun run = createRun(0);
         runs.add(run);
 
         // Continue to create/add runs while not at line end
-        while (run.getEnd() < length()) {
-            run = createRun(run.getEnd());
+        while (run.getEndCharIndex() < length()) {
+            run = createRun(run.getEndCharIndex());
             runs.add(run);
         }
 
         // Set and return
-        return _runs = runs;
+        _runs = runs;
+        return _runs.getArray();
     }
 
     /**
@@ -559,7 +556,7 @@ public class TextBoxLine implements CharSequenceX {
         // If Justify, reset end to start of next token
         if (getLineStyle().isJustify()) {
             TextBoxToken textBoxToken = getTokenForCharIndex(aStart);
-            int tokenIndex = textBoxToken != null ? getTokens().indexOf(textBoxToken) : -1;
+            int tokenIndex = textBoxToken != null ? ArrayUtils.indexOfId(getTokens(), textBoxToken) : -1;
             TextBoxToken nextToken = tokenIndex >= 0 && tokenIndex + 1 < getTokenCount() ? getToken(tokenIndex + 1) : null;
             if (nextToken != null)
                 endCharIndex = nextToken.getStartCharIndex();
@@ -582,7 +579,8 @@ public class TextBoxLine implements CharSequenceX {
      */
     public TextBoxRun getRun()
     {
-        return getRuns().get(0);
+        TextBoxRun[] runs = getRuns();
+        return runs[0];
     }
 
     /**
@@ -590,8 +588,8 @@ public class TextBoxLine implements CharSequenceX {
      */
     public TextBoxRun getRunLast()
     {
-        List<TextBoxRun> runs = getRuns();
-        return runs.get(runs.size() - 1);
+        TextBoxRun[] runs = getRuns();
+        return runs[runs.length - 1];
     }
 
     /**
