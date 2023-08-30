@@ -100,34 +100,6 @@ public class TextLine implements CharSequenceX, Cloneable {
     public int getIndex()  { return _index; }
 
     /**
-     * Returns the number of runs for this line.
-     */
-    public int getRunCount()  { return _runs.length; }
-
-    /**
-     * Returns the individual run at given index.
-     */
-    public TextRun getRun(int anIndex)  { return _runs[anIndex]; }
-
-    /**
-     * Returns the line runs.
-     */
-    public TextRun[] getRuns()  { return _runs; }
-
-    /**
-     * Returns the line style.
-     */
-    public TextLineStyle getLineStyle()  { return _lineStyle; }
-
-    /**
-     * Sets the line style.
-     */
-    public void setLineStyle(TextLineStyle aLineStyle)
-    {
-        _lineStyle = aLineStyle;
-    }
-
-    /**
      * Adds characters with attributes to this line at given index.
      */
     public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
@@ -156,6 +128,21 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the number of runs for this line.
+     */
+    public int getRunCount()  { return _runs.length; }
+
+    /**
+     * Returns the individual run at given index.
+     */
+    public TextRun getRun(int anIndex)  { return _runs[anIndex]; }
+
+    /**
+     * Returns the line runs.
+     */
+    public TextRun[] getRuns()  { return _runs; }
+
+    /**
      * Adds a run to line.
      */
     protected void addRun(TextRun aRun, int anIndex)
@@ -179,53 +166,6 @@ public class TextLine implements CharSequenceX, Cloneable {
     protected TextRun createRun()
     {
         return new TextRun(this);
-    }
-
-    /**
-     * Sets the style for the line (propagates to runs).
-     */
-    protected void setStyle(TextStyle aStyle)
-    {
-        for (TextRun run : getRuns())
-            run.setStyle(aStyle);
-        _width = -1;
-        _tokens = null;
-    }
-
-    /**
-     * Returns the width of line.
-     */
-    public double getWidth()
-    {
-        // If already set, just return
-        if (_width >= 0) return _width;
-
-        // Get from runs
-        double width = 0;
-        for (TextRun run : _runs)
-            width += run.getWidth();
-
-        // Set, return
-        return _width = width;
-    }
-
-    /**
-     * Returns the width of line from given index.
-     */
-    public double getWidth(int anIndex)
-    {
-        // If index 0, use cached
-        if (anIndex <= 0) return getWidth();
-
-        // Calculate
-        double width = 0;
-        TextRun[] runs = getRuns();
-        for (TextRun run : runs)
-            if (anIndex < run.getEndCharIndex())
-                width += run.getWidth(anIndex - run.getStartCharIndex());
-
-        // Return
-        return width;
     }
 
     /**
@@ -272,6 +212,66 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         int runCount = getRunCount();
         return runCount > 0 ? getRun(runCount - 1) : null;
+    }
+
+    /**
+     * Sets the style for the line (propagates to runs).
+     */
+    protected void setStyle(TextStyle aStyle)
+    {
+        for (TextRun run : getRuns())
+            run.setStyle(aStyle);
+        _width = -1;
+        _tokens = null;
+    }
+
+    /**
+     * Returns the line style.
+     */
+    public TextLineStyle getLineStyle()  { return _lineStyle; }
+
+    /**
+     * Sets the line style.
+     */
+    public void setLineStyle(TextLineStyle aLineStyle)
+    {
+        _lineStyle = aLineStyle;
+    }
+
+    /**
+     * Returns the width of line.
+     */
+    public double getWidth()
+    {
+        // If already set, just return
+        if (_width >= 0) return _width;
+
+        // Get from runs
+        double width = 0;
+        for (TextRun run : _runs)
+            width += run.getWidth();
+
+        // Set, return
+        return _width = width;
+    }
+
+    /**
+     * Returns the width of line from given index.
+     */
+    public double getWidth(int anIndex)
+    {
+        // If index 0, use cached
+        if (anIndex <= 0) return getWidth();
+
+        // Calculate
+        double width = 0;
+        TextRun[] runs = getRuns();
+        for (TextRun run : runs)
+            if (anIndex < run.getEndCharIndex())
+                width += run.getWidth(anIndex - run.getStartCharIndex());
+
+        // Return
+        return width;
     }
 
     /**
