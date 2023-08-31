@@ -264,7 +264,8 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
                 chars = theChars.subSequence(charIndexInChars, newlineIndex);
 
             // Add chars to line
-            textLine = addCharsToLine(chars, theStyle, textLine, anIndex + charIndexInChars, newlineIndex);
+            int charIndex = anIndex + charIndexInChars;
+            textLine = addCharsToLine(chars, theStyle, charIndex, textLine, newlineIndex);
 
             // Set start to last end
             charIndexInChars += chars.length();
@@ -279,7 +280,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     /**
      * Adds chars to line.
      */
-    protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, TextLine textLine, int charIndex, int newlineIndex)
+    protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, int newlineIndex)
     {
         // Add chars to line
         int charIndexInLine = charIndex - textLine.getStartCharIndex();
