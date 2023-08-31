@@ -11,12 +11,13 @@ import snap.gfx.Painter;
 import snap.gfx.Stroke;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
+import snap.util.CharSequenceUtils;
 import snap.util.MathUtils;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class manages a TextBlock to be rendered and edited in a bounding area.
+ * This TextBlock subclass adds support for text wrapping and syncs to a source TextBlock.
  */
 public class TextBox2 extends TextBlock {
 
@@ -94,7 +95,7 @@ public class TextBox2 extends TextBlock {
         _textBlock.addPropChangeListener(_textBlockLsnr);
 
         // Update all
-        setNeedsUpdateAll();
+        updateAll();
     }
 
     /**
@@ -127,12 +128,90 @@ public class TextBox2 extends TextBlock {
     }
 
     /**
+     * Adds characters with attributes to this text at given index.
+     */
+    public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
+    {
+        TextBlock textBlock = getTextDoc();
+        textBlock.addChars(theChars, theStyle, anIndex);
+    }
+
+    /**
+     * Removes characters in given range.
+     */
+    public void removeChars(int aStart, int anEnd)
+    {
+        TextBlock textBlock = getTextDoc();
+        textBlock.removeChars(aStart, anEnd);
+    }
+
+    /**
+     * Replaces chars in given range, with given String, using the given attributes.
+     */
+    public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
+    {
+        TextBlock textBlock = getTextDoc();
+        textBlock.replaceChars(theChars, theStyle, aStart, anEnd);
+    }
+
+    /**
      * Override to do wrapping.
      */
     @Override
     protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, int newlineIndex)
     {
-        return super.addCharsToLine(theChars, theStyle, charIndex, textLine, newlineIndex);
+        // Do normal add chars
+        TextLine textLine2 = super.addCharsToLine(theChars, theStyle, charIndex, textLine, newlineIndex);
+        if (!isWrapLines())
+            return textLine2;
+
+        // Wrap line if needed
+        boolean didWrap = wrapLineIfNeeded(textLine);
+
+        // If line didn't wrap but newline was added, wrap next line if needed
+        if (!didWrap && textLine2 != textLine)
+            wrapLineIfNeeded(textLine2);
+
+        // Return
+        return textLine2;
+    }
+
+    /**
+     * Wraps given line if needed by moving chars from last token(s) to next line.
+     */
+    protected boolean wrapLineIfNeeded(TextLine textLine)
+    {
+        boolean didWrap = false;
+
+        // If line is now outside bounds, move chars to new line
+        while (isHitRight(textLine.getMaxX(), textLine.getY(), textLine.getHeight()) && textLine.getTokenCount() > 0) {
+
+            // Get last token
+            TextToken lastToken = textLine.getLastToken();
+            //if (isHyphenate() && lastToken.isSplittable())
+            //    lastToken = lastToken.copyForSplittable();
+
+            // Get next line to move chars to
+            TextLine nextLine = textLine.getNext();
+            if (nextLine == null) {
+                nextLine = textLine.splitLineAtIndex(textLine.length());
+                addLine(nextLine, textLine.getIndex() + 1);
+            }
+
+            // Remove chars from text line
+            int tokenStartCharIndex = lastToken.getStartCharIndex();
+            CharSequence moveChars = textLine.subSequence(tokenStartCharIndex, textLine.length());
+            textLine.removeChars(tokenStartCharIndex, textLine.length());
+
+            // Add chars to next line
+            TextStyle textStyle = lastToken.getTextStyle();
+            int newlineIndex2 = CharSequenceUtils.indexAfterNewline(moveChars, 0);
+            addCharsToLine(moveChars, textStyle, 0, nextLine, newlineIndex2);
+            didWrap = true;
+        }
+
+        // Return
+        return didWrap;
     }
 
     /**
@@ -167,7 +246,7 @@ public class TextBox2 extends TextBlock {
     {
         if (aValue == _width) return;
         _width = aValue;
-        if (isWrapLines()) setNeedsUpdateAll();
+        if (isWrapLines()) updateAll();
     }
 
     /**
@@ -182,7 +261,7 @@ public class TextBox2 extends TextBlock {
     {
         if (aValue == _height) return;
         _height = aValue;
-        setNeedsUpdateAll();
+        updateAll();
     }
 
     /**
@@ -224,7 +303,7 @@ public class TextBox2 extends TextBlock {
     {
         if (aPos == _alignY) return;
         _alignY = aPos;
-        setNeedsUpdateAll();
+        updateAll();
     }
 
     /**
@@ -257,7 +336,7 @@ public class TextBox2 extends TextBlock {
     {
         if (aValue == _hyphenate) return;
         _hyphenate = aValue;
-        setNeedsUpdateAll();
+        updateAll();
     }
 
     /**
@@ -272,7 +351,7 @@ public class TextBox2 extends TextBlock {
     {
         if (aValue == _linked) return;
         _linked = aValue;
-        setNeedsUpdateAll();
+        updateAll();
     }
 
     /**
@@ -290,7 +369,7 @@ public class TextBox2 extends TextBlock {
 
         // Set and update
         _startCharIndex = charIndex;
-        setNeedsUpdateAll();
+        updateAll();
     }
 
     /**
@@ -316,7 +395,7 @@ public class TextBox2 extends TextBlock {
     {
         if (aValue == _fontScale) return;
         _fontScale = aValue;
-        setNeedsUpdateAll();
+        updateAll();
     }
 
     /**
@@ -348,34 +427,7 @@ public class TextBox2 extends TextBlock {
 
         TextBlock textBlock = getTextDoc();
         textBlock.setString(str);
-        setNeedsUpdateAll();
-    }
-
-    /**
-     * Adds characters with attributes to this text at given index.
-     */
-    public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
-    {
-        TextBlock textBlock = getTextDoc();
-        textBlock.addChars(theChars, theStyle, anIndex);
-    }
-
-    /**
-     * Removes characters in given range.
-     */
-    public void removeChars(int aStart, int anEnd)
-    {
-        TextBlock textBlock = getTextDoc();
-        textBlock.removeChars(aStart, anEnd);
-    }
-
-    /**
-     * Replaces chars in given range, with given String, using the given attributes.
-     */
-    public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
-    {
-        TextBlock textBlock = getTextDoc();
-        textBlock.replaceChars(theChars, theStyle, aStart, anEnd);
+        updateAll();
     }
 
     /**
@@ -393,9 +445,9 @@ public class TextBox2 extends TextBlock {
             CharSequence oldVal = charsChange.getOldValue();
             int index = charsChange.getIndex();
             if (oldVal != null)
-                textBlockChangedChars(index, index);
+                super.removeChars(index, index + oldVal.length());
             if (newVal != null)
-                textBlockChangedChars(index, index + newVal.length());
+                super.addChars(newVal, _textBlock.getStyleForCharIndex(index), index);
         }
 
         // Handle StyleChange
@@ -427,7 +479,7 @@ public class TextBox2 extends TextBlock {
         TextBlock textBlock = getTextDoc();
         int textBlockLength = textBlock.length();
         int fromEndCharIndex = textBlockLength - aEnd;
-        setUpdateBounds(aStart, fromEndCharIndex);
+        updateCharRange(aStart, fromEndCharIndex);
     }
 
     /**
@@ -454,206 +506,19 @@ public class TextBox2 extends TextBlock {
     /**
      * Updates all lines.
      */
-    protected void setNeedsUpdateAll()  { }
+    protected void updateAll()
+    {
+        super.removeChars(0, length());
+        addTextBlock(_textBlock, 0);
+    }
 
     /**
      * Sets the update bounds (in characters from start and from end).
      */
-    protected void setUpdateBounds(int aStart, int aEnd)  { }
-
-    /**
-     * Removes the lines from given char index to given char index.
-     */
-    protected void addLinesForCharRange(int aLineIndex, int aStartCharIndex, int aEndCharIndex)
+    protected void updateCharRange(int aStart, int aEnd)
     {
-        // Get start char index
-        int startCharIndex = Math.max(aStartCharIndex, getStartCharIndex());
-        if (startCharIndex > getTextDoc().length())
-            return;
-
-        // Track TextBox insertion line index
-        int textBoxInsertLineIndex = aLineIndex;
-
-        // Get TextBlock startLineIndex, endLineIndex
-        TextDoc textDoc = getTextDoc();
-        int startLineIndex = textDoc.getLineForCharIndex(startCharIndex).getIndex();
-        int endLineIndex = textDoc.getLineForCharIndex(aEndCharIndex).getIndex();
-
-        // Iterate over TextDoc lines, create TextBox lines and add
-        for (int i = startLineIndex; i <= endLineIndex; i++) {
-
-            // Get text line
-            TextLine textLine = textDoc.getLine(i);
-
-            // Get start char index for line
-            int charIndex = Math.max(startCharIndex - textLine.getStartCharIndex(), 0);
-            if (charIndex == textLine.length())
-                continue;
-
-            // Add TextBoxLine(s) for TextLine
-            while (charIndex < textLine.length()) {
-
-                // Create line
-                TextLine textBoxLine = createTextBoxLine(textLine, charIndex, textBoxInsertLineIndex);
-                if ((isLinked() || _boundsPath != null) && textBoxLine.getMaxY() > getMaxY()) {
-                    i = Short.MAX_VALUE;
-                    break;
-                }
-
-                // Add line
-                _lines.add(textBoxInsertLineIndex++, textBoxLine);
-                charIndex += textBoxLine.length();
-            }
-        }
-
-        // If we added last line and it is empty or ends with newline, add blank line
-        if (endLineIndex == textDoc.getLineCount() - 1 && textBoxInsertLineIndex == getLineCount()) {
-            TextLine textLine = textDoc.getLine(endLineIndex);
-            if (textLine.length() == 0 || textLine.isLastCharNewline()) {
-                TextLine textBoxLine = createTextBoxLine(textLine, textLine.length(), getLineCount());
-                if (!((isLinked() || _boundsPath != null) && textBoxLine.getMaxY() > getMaxY()))
-                    _lines.add(textBoxLine);
-            }
-        }
-    }
-
-    /**
-     * Create and return TextBoxLines for given TextLine, start char index and line index.
-     */
-    protected TextLine createTextBoxLine(TextLine aTextLine, int startCharIndex, int aLineIndex)
-    {
-        // Get text vars
-        boolean wrap = isWrapLines();
-        boolean hyphenate = isHyphenate();
-        double fontScale = getFontScale();
-
-        // Get TextToken at start char index - if in middle of token, split token
-        TextToken textToken = aTextLine.getLastTokenForCharIndex(startCharIndex);
-        if (textToken != null) {
-            if (startCharIndex >= textToken.getEndCharIndex())
-                textToken = textToken.getNext();
-            else if (startCharIndex > textToken.getStartCharIndex())
-                textToken = textToken.copyFromCharIndex(startCharIndex - textToken.getStartCharIndex());
-        }
-        else if (aTextLine.getTokens().length > 0)
-            textToken = aTextLine.getTokens()[0];
-
-        // Get TextToken info
-        double startCharX = aTextLine.getXForCharIndex(startCharIndex) * fontScale;
-        TextStyle textTokenStyle = textToken != null ? textToken.getTextStyle() : aTextLine.getRunLast().getStyle();
-        if (fontScale != 1)
-            textTokenStyle = textTokenStyle.copyFor(textTokenStyle.getFont().scaleFont(fontScale));
-
-        // Get LineY, LineH
-        double lineY = getY();
-        TextLine prevTextBoxLine = aLineIndex > 0 ? getLine(aLineIndex - 1) : null;
-        if (prevTextBoxLine != null)
-            lineY = prevTextBoxLine.getY() + prevTextBoxLine.getMetrics().getLineAdvance();
-        double lineH = textTokenStyle.getLineHeight(); // Should ask remaining tokens instead
-
-        // Get TextBox.X for LineY
-        TextLineStyle lineStyle = aTextLine.getLineStyle();
-        double lineIndent = startCharIndex == 0 ? lineStyle.getFirstIndent() : lineStyle.getLeftIndent();
-        double textBoxX = getMinHitX(lineY, lineH, lineIndent);
-        while (textBoxX > getMaxX() && lineY <= getMaxY()) {
-            lineY++;
-            textBoxX = getMinHitX(lineY, lineH, lineIndent);
-        }
-
-        // Create TextBoxLine
-        TextLine boxLine = new TextLine(this);//, textTokenStyle, aTextLine, startCharIndex);
-        boxLine._y = lineY - getY();
-
-        // While next token is found, add to line
-        while (textToken != null) {
-
-            // Handle line wrapping
-            double tokenXInBox = textBoxX + textToken.getX() * fontScale - startCharX;
-            if (wrap) {
-
-                // If token hits right side, either split or stop
-                double tokenMaxXInBox = tokenXInBox + textToken.getWidth() * fontScale;
-                if (isHitRight(tokenMaxXInBox, lineY, lineH)) {
-
-                    // If Hyphenate and splittable, get split and try again
-                    if (hyphenate && textToken.isSplittable()) {
-                        textToken = textToken.copyForSplittable();
-                        continue;
-                    }
-
-                    // If no tokens added to this line, split off last char and try again so there is at least 1 char
-                    if (boxLine.getTokenCount() == 0) {
-                        int tokenLength = textToken.getLength();
-                        if (tokenLength > 1) {
-                            textToken = textToken.copyToCharIndex(tokenLength - 1);
-                            continue;
-                        }
-                    }
-
-                    // Otherwise just break
-                    else break;
-                }
-            }
-
-            // Get textToken info
-            int tokenStartCharIndex = textToken.getStartCharIndex() - startCharIndex;
-            int tokenEndCharIndex = textToken.getEndCharIndex() - startCharIndex;
-
-            // Create textBoxToken, configure and add
-            TextToken textBoxToken = new TextToken(boxLine, tokenStartCharIndex, tokenEndCharIndex, null);//textTokenStyle);
-            textBoxToken.setName(textToken.getName());
-//            textBoxToken.setX(tokenXInBox);
-//            textBoxToken.setWidth(textToken.getWidth() * fontScale);
-            textBoxToken.setTextColor(textToken.getTextColor());
-//            boxLine.addToken(textBoxToken);
-
-            // If Hyphenated, set TextBoxToken.Hyphenated and break
-            if (textToken._split) {
-                textBoxToken.setHyphenated(true);
-                break;
-            }
-
-            // Get next token and update TextToken/TextTokenStyle
-            TextToken nextToken = textToken.getNext();
-            if (nextToken != null && nextToken.getTextRun() != textToken.getTextRun()) {
-                textTokenStyle = nextToken.getTextStyle();
-                if (fontScale != 1)
-                    textTokenStyle = textTokenStyle.copyFor(textTokenStyle.getFont().scaleFont(fontScale));
-            }
-            textToken = nextToken;
-        }
-
-        // Reset sizes and return
-//        boxLine.resetSizes();
-        return boxLine;
-    }
-
-    /**
-     * Removes the lines from given char index to given char index, extended to cover entire TextBlock.TextLines.
-     */
-    protected void removeLinesForCharRange(int startCharIndex, int endCharIndex)
-    {
-        // If no lines, just return
-        if (getLineCount() == 0) return;
-
-        // Get StartLine for UpdateStartCharIndex (extend to TextDocLine)
-        TextLine startLine = getLineForCharIndex(startCharIndex);
-        TextLine endLine = getLineForCharIndex(endCharIndex);
-
-        // If TextBox.WrapLines, extend EndLine to end of TextDoc line
-        if (isWrapLines()) {
-            while (true) {
-                TextLine nextLine = endLine.getNext();
-//                if (nextLine != null && endLine.getTextLine() == nextLine.getTextLine())
-//                    endLine = nextLine;
-//                else break;
-            }
-        }
-
-        // Remove lines in range
-        int startLineIndex = startLine.getIndex();
-        int endLineIndex = endLine.getIndex() + 1;
-        _lines.subList(startLineIndex, endLineIndex).clear();
+        super.removeChars(0, length());
+        addTextBlock(_textBlock, 0);
     }
 
     /**
