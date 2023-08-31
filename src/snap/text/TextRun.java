@@ -27,6 +27,9 @@ public class TextRun implements CharSequenceX, Cloneable {
     // The index of this run in line
     protected int  _index;
 
+    // The run x
+    protected double _x = -1;
+
     // The width of run
     protected double  _width = -1;
 
@@ -106,6 +109,15 @@ public class TextRun implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the x location of run.
+     */
+    public double getX()
+    {
+        if (_x >= 0) return _x;
+        return _x = _textLine.getXForCharIndex(_startCharIndex);
+    }
+
+    /**
      * Returns the width of run.
      */
     public double getWidth()
@@ -119,6 +131,11 @@ public class TextRun implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the max x location of run.
+     */
+    public double getMaxX()  { return getX() + getWidth(); }
+
+    /**
      * Returns the width of run from given index.
      */
     public double getWidth(int anIndex)
@@ -129,7 +146,8 @@ public class TextRun implements CharSequenceX, Cloneable {
         // Calculate
         double width = 0;
         int len = length();
-        while (len - 1 > 0 && Character.isWhitespace(charAt(len - 1))) len--;
+        while (len - 1 > 0 && Character.isWhitespace(charAt(len - 1)))
+            len--;
         for (int i = anIndex; i < len; i++)
             width += _style.getCharAdvance(charAt(i));
         if (len - anIndex > 1)

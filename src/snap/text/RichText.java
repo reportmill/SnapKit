@@ -88,7 +88,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
             }
         }
 
-        _width = -1;
+        _prefW = -1;
     }
 
     /**
@@ -136,7 +136,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
                 firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, aStyle, i));
         }
 
-        _width = -1;
+        _prefW = -1;
     }
 
     /**
@@ -157,7 +157,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
                 firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, newStyle, i));
         }
 
-        _width = -1;
+        _prefW = -1;
     }
 
     /**

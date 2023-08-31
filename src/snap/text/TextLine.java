@@ -24,17 +24,29 @@ public class TextLine implements CharSequenceX, Cloneable {
     // The run for this line
     protected TextRun[]  _runs = EMPTY_RUNS;
 
+    // The TextTokens for this line
+    protected TextToken[]  _tokens;
+
     // The line style
     protected TextLineStyle  _lineStyle;
 
     // The index of this line in text
     protected int  _index;
 
+    // The X location of line in block
+    protected double _x;
+
+    // The Y location of line in block
+    protected double _y = -1;
+
     // The width of this line
     protected double  _width = -1;
 
-    // The TextTokens for this line
-    protected TextToken[]  _tokens;
+    // The height of this line
+    protected double  _height = -1;
+
+    // The TextMetrics
+    private TextMetrics _textMetrics;
 
     // Constants
     protected static final TextRun[] EMPTY_RUNS = new TextRun[0];
@@ -221,8 +233,9 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         for (TextRun run : getRuns())
             run.setStyle(aStyle);
-        _width = -1;
+        _width = _height = -1;
         _tokens = null;
+        _textMetrics = null;
     }
 
     /**
@@ -236,6 +249,32 @@ public class TextLine implements CharSequenceX, Cloneable {
     public void setLineStyle(TextLineStyle aLineStyle)
     {
         _lineStyle = aLineStyle;
+    }
+
+    /**
+     * Returns the line x.
+     */
+    public double getX()  { return _x; }
+
+    /**
+     * Returns the line y.
+     */
+    public double getY()
+    {
+        // If already set, just return
+        if (_y >= 0) return _y;
+
+        // Get Y from previous line. Need to fix this to not stack overflow for large text showing tail first.
+        double y = 0;
+        TextLine previousLine = getPrevious();
+        if (previousLine != null) {
+            double prevY = previousLine.getY();
+            double prevH = previousLine.getMetrics().getLineAdvance();
+            y = prevY + prevH;
+        }
+
+        // Set and return
+        return _y = y;
     }
 
     /**
@@ -256,6 +295,17 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the height of line.
+     */
+    public double getHeight()
+    {
+        if (_height >= 0) return _height;
+        double ascent = getMetrics().getAscent();
+        double descent = getMetrics().getDescent();
+        return _height = ascent + descent;
+    }
+
+    /**
      * Returns the width of line from given index.
      */
     public double getWidth(int anIndex)
@@ -266,12 +316,69 @@ public class TextLine implements CharSequenceX, Cloneable {
         // Calculate
         double width = 0;
         TextRun[] runs = getRuns();
-        for (TextRun run : runs)
+        for (TextRun run : runs) {
             if (anIndex < run.getEndCharIndex())
                 width += run.getWidth(anIndex - run.getStartCharIndex());
+        }
 
         // Return
         return width;
+    }
+
+    /**
+     * Returns the width without whitespace.
+     */
+    public double getWidthNoWhiteSpace()
+    {
+        int length = length();
+        int lengthNoWhiteSpace = length;
+        while (lengthNoWhiteSpace > 0 && Character.isWhitespace(charAt(lengthNoWhiteSpace - 1)))
+            lengthNoWhiteSpace--;
+
+        if (lengthNoWhiteSpace == length)
+            return getWidth();
+
+        return getXForCharIndex(lengthNoWhiteSpace) - getX();
+    }
+
+    /**
+     * Returns the y position for this line (in same coords as the layout frame).
+     */
+    public double getBaseline()
+    {
+        return getY() + getMetrics().getAscent();
+    }
+
+    /**
+     * Returns the max X.
+     */
+    public double getMaxX()
+    {
+        return getX() + getWidth();
+    }
+
+    /**
+     * Returns the max Y.
+     */
+    public double getMaxY()
+    {
+        return getY() + getHeight();
+    }
+
+    /**
+     * Returns the line x in text block coords.
+     */
+    public double getTextBlockX()
+    {
+        return getX() + _textBlock.getX();
+    }
+
+    /**
+     * Returns the line y.
+     */
+    public double getTextBlockY()
+    {
+        return getY() + _textBlock.getAlignedY();
     }
 
     /**
@@ -328,6 +435,11 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the number of tokens.
+     */
+    public int getTokenCount()  { return getTokens().length; }
+
+    /**
      * Returns the tokens.
      */
     public TextToken[] getTokens()
@@ -359,6 +471,15 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         TextToken[] tokens = getTokens();
         return tokens.length > 0 ? tokens[tokens.length - 1] : null;
+    }
+
+    /**
+     * Returns the text metrics for line text.
+     */
+    public TextMetrics getMetrics()
+    {
+        if (_textMetrics != null) return _textMetrics;
+        return _textMetrics = new TextMetrics(this);
     }
 
     /**
@@ -551,8 +672,9 @@ public class TextLine implements CharSequenceX, Cloneable {
         }
 
         // Clear Width, Tokens
-        _width = -1;
+        _width = _height = -1;
         _tokens = null;
+        _textMetrics = null;
     }
 
     /**
@@ -561,12 +683,52 @@ public class TextLine implements CharSequenceX, Cloneable {
     protected void updateText()
     {
         // Clear Width, Tokens
-        _width = -1;
+        _width = _height = -1;
         _tokens = null;
+        _textMetrics = null;
 
         // Update Lines
         if (_textBlock != null)
             _textBlock.updateLines(getIndex());
+    }
+
+    /**
+     * Update
+     */
+    private void updateAlignmentAndJustify()
+    {
+        // If justify, shift tokens in line (unless line has newline or is last line in RichText)
+        TextLineStyle lineStyle = getLineStyle();
+        if (lineStyle.isJustify() && getTokenCount() > 1) {
+
+            // Calculate Justify token shift
+            double lineY = getY();
+            double textBoxMaxX = _textBlock.getMaxHitX(lineY, _height);
+            double lineMaxX = getMaxX();
+            double remainderW = textBoxMaxX - lineMaxX;
+            double shiftX = remainderW / (getTokenCount() - 1);
+            double runningShiftX = 0;
+
+            // Shift tokens
+            for (TextToken token : getTokens()) {
+                token._justifyShiftX = runningShiftX;
+                runningShiftX += shiftX;
+            }
+
+            // Update WidthAll
+            double _widthAll = 0;
+            _widthAll += runningShiftX - shiftX;
+        }
+
+        // Calculate X alignment shift
+        else if (lineStyle.getAlign() != HPos.LEFT && _textBlock.getWidth() < 9999) {
+            double alignX = lineStyle.getAlign().doubleValue();
+            double lineY = getY();
+            double tboxHitX = _textBlock.getMaxHitX(lineY, _height);
+            double lineMaxX = getMaxX();
+            double remW = tboxHitX - lineMaxX;
+            _x = Math.round(alignX * remW);
+        }
     }
 
     /**

@@ -3,6 +3,7 @@
  */
 package snap.text;
 import snap.gfx.Color;
+import snap.gfx.Font;
 import snap.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,15 @@ public class TextToken implements Cloneable {
 
     // Whether this token was split
     protected boolean  _split;
+
+    // Whether token is hyphenated
+    private boolean _hyphenated;
+
+    // The shift x if text line is justified
+    protected double _justifyShiftX = 0;
+
+    // The string for this token
+    private String _string;
 
     /**
      * Constructor.
@@ -99,6 +109,11 @@ public class TextToken implements Cloneable {
     public TextStyle getTextStyle()  { return _textRun.getStyle(); }
 
     /**
+     * Returns the token font.
+     */
+    public Font getFont()  { return getTextRun().getFont(); }
+
+    /**
      * Returns the override TextStyle, if set.
      */
     public Color getTextColor()  { return _textStyle; }
@@ -107,6 +122,16 @@ public class TextToken implements Cloneable {
      * Sets an override TextStyle, if set.
      */
     public void setTextColor(Color aColor)  { _textStyle = aColor; }
+
+    /**
+     * Returns whether this run has a hyphen at the end.
+     */
+    public boolean isHyphenated()  { return _hyphenated; }
+
+    /**
+     * Sets whether this run has a hyphen at the end.
+     */
+    public void setHyphenated(boolean aFlag)  { _hyphenated = aFlag; _string = null; }
 
     /**
      * Returns the horizontal location of token in line.
@@ -135,6 +160,19 @@ public class TextToken implements Cloneable {
         double tokenW = getWidthForLineRange(_startCharIndex, _endCharIndex, true);
         return _width = tokenW;
     }
+
+    /**
+     * Returns the X location in text global coords.
+     */
+    public double getTextBoxX()
+    {
+        return _textLine.getX() + _x + _justifyShiftX;
+    }
+
+    /**
+     * Returns the Y location.
+     */
+    public double getTextBoxY()  { return _textLine.getY(); }
 
     /**
      * Returns the width for given char range.
@@ -203,7 +241,16 @@ public class TextToken implements Cloneable {
      */
     public String getString()
     {
-        return _textLine.subSequence(_startCharIndex, _endCharIndex).toString();
+        // If already set, just return
+        if (_string != null) return _string;
+
+        // Get string and append hyphen if set
+        String string = _textLine.subSequence(_startCharIndex, _endCharIndex).toString();
+        if(isHyphenated())
+            string += '-';
+
+        // Set, return
+        return _string = string;
     }
 
     /**

@@ -34,11 +34,11 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     // Whether text is modified
     private boolean _textModified;
 
+    // The pref width of the text block
+    protected double _prefW = -1;
+
     // Whether property change is enabled
     protected boolean  _propChangeEnabled = true;
-
-    // The width of the rich text
-    protected double  _width = -1;
 
     // Constants for properties
     public static final String Chars_Prop = "Chars";
@@ -274,7 +274,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
         // Send PropertyChange
         if (isPropChangeEnabled())
             firePropChange(new TextDocUtils.CharsChange(this, null, theChars, anIndex));
-        _width = -1;
+        _prefW = -1;
     }
 
     /**
@@ -358,7 +358,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
         // If deleted chars is set, send property change
         if (removedChars != null)
             firePropChange(new TextDocUtils.CharsChange(this, removedChars, null, aStart));
-        _width = -1;
+        _prefW = -1;
     }
 
     /**
@@ -386,11 +386,12 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     }
 
     /**
-     * Adds given TextDoc to this text at given index.
+     * Adds given TextBlock to this text at given index.
      */
-    public void addTextDoc(TextBlock aTextDoc, int anIndex)
+    public void addTextBlock(TextBlock textBlock, int anIndex)
     {
-        for (TextLine line : aTextDoc.getLines()) {
+        List<TextLine> textLines = textBlock.getLines();
+        for (TextLine line : textLines) {
             TextRun[] lineRuns = line.getRuns();
             for (TextRun run : lineRuns) {
                 int index = anIndex + line.getStartCharIndex() + run.getStartCharIndex();
@@ -457,7 +458,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
         if (isPropChangeEnabled())
             firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, aStyle, 0));
 
-        _width = -1;
+        _prefW = -1;
     }
 
     /**
@@ -468,7 +469,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
         TextLineStyle oldStyle = getLine(0).getLineStyle();
         TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
         setLineStyle(newStyle, 0, length());
-        _width = -1;
+        _prefW = -1;
     }
 
     /**
@@ -479,10 +480,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     /**
      * Returns the individual block in this doc.
      */
-    public TextLine getLine(int anIndex)
-    {
-        return _lines.get(anIndex);
-    }
+    public TextLine getLine(int anIndex)  { return _lines.get(anIndex); }
 
     /**
      * Returns the list of blocks.
@@ -738,6 +736,46 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     }
 
     /**
+     * Returns the X location.
+     */
+    public double getX()  { return 0; }
+
+    /**
+     * Returns the Y location.
+     */
+    public double getY()  { return 0; }
+
+    /**
+     * Returns the width.
+     */
+    public double getWidth()  { return Float.MAX_VALUE; }
+
+    /**
+     * Returns the height.
+     */
+    public double getHeight()  { return 0; }
+
+    /**
+     * Returns the max X.
+     */
+    public double getMaxX()  { return getX() + getWidth(); }
+
+    /**
+     * Returns the max Y.
+     */
+    public double getMaxY()  { return getY() + getHeight(); }
+
+    /**
+     * Returns the y for alignment.
+     */
+    public double getAlignedY()  { return getY(); }
+
+    /**
+     * Returns the max x value that doesn't hit right border for given y/height.
+     */
+    protected double getMaxHitX(double aY, double aH)  { return getMaxX(); }
+
+    /**
      * Returns whether property change is enabled.
      */
     public boolean isPropChangeEnabled()  { return _propChangeEnabled; }
@@ -756,12 +794,12 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     public double getPrefWidth()
     {
         // If already set, just return
-        if (_width >= 0) return _width;
+        if (_prefW >= 0) return _prefW;
 
         // Calc, set, return
         TextLine line = getLineLongest();
         double prefW = Math.ceil(line != null ? line._width : 0);
-        return _width = prefW;
+        return _prefW = prefW;
     }
 
     /**
@@ -807,6 +845,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
             TextLine line = getLine(i);
             line._index = i;
             line._startCharIndex = _length;
+            line._y = -1;
             _length += line.length();
         }
     }
