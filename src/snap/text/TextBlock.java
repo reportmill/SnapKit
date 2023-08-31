@@ -251,40 +251,49 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
 
         // Loop vars
         int charsLength = theChars.length();
-        int charIndexInLine = anIndex - textLine.getStartCharIndex();
         int charIndexInChars = 0;
 
         // Iterate over chars until all added
         while (charIndexInChars < charsLength) {
 
-            // Get index of newline in insertion chars (if there) and end of line block
+            // Get chars up to first newline or end
+            CharSequence chars = theChars;
             int newlineIndex = CharSequenceUtils.indexAfterNewline(theChars, charIndexInChars);
             int endCharIndexInChars = newlineIndex > 0 ? newlineIndex : charsLength;
-
-            // Get chars and add
-            CharSequence chars = theChars;
             if (charIndexInChars > 0 || endCharIndexInChars < charsLength)
-                chars = theChars.subSequence(charIndexInChars, endCharIndexInChars);
-            textLine.addChars(chars, theStyle, charIndexInLine);
+                chars = theChars.subSequence(charIndexInChars, newlineIndex);
 
-            // If newline added and there are more chars in line, split line and add remainder
-            if (newlineIndex > 0) {
-                if (endCharIndexInChars < charsLength || charIndexInLine + chars.length() < textLine.length()) {
-                    TextLine remainder = textLine.splitLineAtIndex(charIndexInLine + chars.length());
-                    addLine(remainder, textLine.getIndex() + 1);
-                    textLine = remainder;
-                    charIndexInLine = 0;
-                }
-            }
+            // Add chars to line
+            textLine = addCharsToLine(chars, theStyle, textLine, anIndex + charIndexInChars, newlineIndex);
 
             // Set start to last end
-            charIndexInChars = endCharIndexInChars;
+            charIndexInChars += chars.length();
         }
 
         // Send PropertyChange
         if (isPropChangeEnabled())
             firePropChange(new TextDocUtils.CharsChange(this, null, theChars, anIndex));
         _width = -1;
+    }
+
+    /**
+     * Adds chars to line.
+     */
+    protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, TextLine textLine, int charIndex, int newlineIndex)
+    {
+        // Add chars to line
+        int charIndexInLine = charIndex - textLine.getStartCharIndex();
+        textLine.addChars(theChars, theStyle, charIndexInLine);
+
+        // If newline added and there are more chars in line, split line and add remainder
+        if (newlineIndex > 0) {
+            TextLine remainder = textLine.splitLineAtIndex(charIndexInLine + theChars.length());
+            addLine(remainder, textLine.getIndex() + 1);
+            textLine = remainder;
+        }
+
+        // Return
+        return textLine;
     }
 
     /**
