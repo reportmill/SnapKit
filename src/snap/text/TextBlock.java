@@ -3,6 +3,7 @@
  */
 package snap.text;
 import snap.geom.HPos;
+import snap.geom.Shape;
 import snap.gfx.Font;
 import snap.props.PropObject;
 import snap.util.CharSequenceUtils;
@@ -654,6 +655,37 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     }
 
     /**
+     * Returns the line for the given y value.
+     */
+    public TextLine getLineForY(double aY)
+    {
+        // If y less than zero, return null
+        if (aY < 0) return null;
+
+        // Iterate over lines and return one that spans given y
+        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
+            TextLine line = getLine(i);
+            if (aY < line.getMaxY())
+                return line;
+        }
+
+        // If no line for given y, return last line
+        return getLineLast();
+    }
+
+    /**
+     * Returns the character index for the given x/y point.
+     */
+    public int getCharIndexForXY(double anX, double aY)
+    {
+        TextLine textLine = getLineForY(aY);
+        if (textLine == null)
+            return 0;
+        int charIndex = textLine.getCharIndexForX(anX);
+        return textLine.getStartCharIndex() + charIndex;
+    }
+
+    /**
      * Returns whether text contains an underlined run.
      */
     public boolean isUnderlined()
@@ -691,6 +723,17 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      * Returns the start char index (always 0, unless this is SubText).
      */
     public int getStartCharIndex()  { return 0; }
+
+    /**
+     * Returns the end char in source TextBlock.
+     */
+    public int getEndCharIndex()
+    {
+        int startCharIndex = getStartCharIndex();
+        TextLine lastLine = getLineLast();
+        int lastLineEnd = lastLine != null ? lastLine.getEndCharIndex() : 0;
+        return startCharIndex + lastLineEnd;
+    }
 
     /**
      * Scales all the fonts in text by given factor.
@@ -774,6 +817,14 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      * Returns the max x value that doesn't hit right border for given y/height.
      */
     protected double getMaxHitX(double aY, double aH)  { return getMaxX(); }
+
+    /**
+     * Returns a path for two char indexes - it will be a a simple box with extensions for first/last lines.
+     */
+    public Shape getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
+    {
+        return TextDocUtils.getPathForCharRange(this, aStartCharIndex, aEndCharIndex);
+    }
 
     /**
      * Returns whether property change is enabled.

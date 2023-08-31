@@ -1,10 +1,69 @@
 package snap.text;
+import snap.geom.Path2D;
+import snap.geom.Shape;
 import snap.props.PropChange;
 
 /**
  * Utility methods to support TextBlock.
  */
 public class TextDocUtils {
+
+    /**
+     * Returns a path for two char indexes - it will be a a simple box with extensions for first/last lines.
+     */
+    public static Shape getPathForCharRange(TextBlock textBlock, int aStartCharIndex, int aEndCharIndex)
+    {
+        // Create new path for return
+        Path2D path = new Path2D();
+
+        // If invalid range, just return
+        if (aStartCharIndex > textBlock.getEndCharIndex() || aEndCharIndex < textBlock.getStartCharIndex())
+            return path;
+        if (aEndCharIndex > textBlock.getEndCharIndex())
+            aEndCharIndex = textBlock.getEndCharIndex();
+
+        // Get StartLine, EndLine and start/end points
+        TextLine startLine = textBlock.getLineForCharIndex(aStartCharIndex);
+        TextLine endLine = aStartCharIndex == aEndCharIndex ? startLine : textBlock.getLineForCharIndex(aEndCharIndex);
+        double startX = startLine.getXForCharIndex(aStartCharIndex - startLine.getStartCharIndex());
+        double startY = startLine.getBaseline();
+        double endX = endLine.getXForCharIndex(aEndCharIndex - endLine.getStartCharIndex());
+        double endY = endLine.getBaseline();
+        startX = Math.min(startX, textBlock.getMaxX());
+        endX = Math.min(endX, textBlock.getMaxX());
+
+        // Get start top/height
+        double startTop = startLine.getY() - 1;
+        double startHeight = startLine.getHeight() + 2;
+
+        // Get path for upper left corner of sel start
+        path.moveTo(startX, startTop + startHeight);
+        path.lineTo(startX, startTop);
+        if (aStartCharIndex == aEndCharIndex)
+            return path;
+
+        // If selection spans more than one line, add path components for middle lines and end line
+        if (startY != endY) {  //!SnapMath.equals(startY, endY)
+            double endTop = endLine.getY() - 1;
+            double endHeight = endLine.getHeight() + 2;
+            path.lineTo(textBlock.getWidth(), startTop);
+            path.lineTo(textBlock.getWidth(), endTop);
+            path.lineTo(endX, endTop);
+            path.lineTo(endX, endTop + endHeight);
+            path.lineTo(textBlock.getX(), endTop + endHeight);
+            path.lineTo(textBlock.getX(), startTop + startHeight);
+        }
+
+        // If selection spans only one line, add path components for upper-right, lower-right
+        else {
+            path.lineTo(endX, startTop);
+            path.lineTo(endX, startTop + startHeight);
+        }
+
+        // Close path and return
+        path.close();
+        return path;
+    }
 
     /**
      * A property change event for addChars/removeChars.

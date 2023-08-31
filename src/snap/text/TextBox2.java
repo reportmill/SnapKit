@@ -373,17 +373,6 @@ public class TextBox2 extends TextBlock {
     }
 
     /**
-     * Returns the end char in source TextBlock.
-     */
-    public int getEndCharIndex()
-    {
-        int startCharIndex = getStartCharIndex();
-        TextLine lastLine = getLineLast();
-        int lastLineEnd = lastLine != null ? lastLine.getEndCharIndex() : 0;
-        return startCharIndex + lastLineEnd;
-    }
-
-    /**
      * Returns the font scale of the text box.
      */
     public double getFontScale()  { return _fontScale; }
