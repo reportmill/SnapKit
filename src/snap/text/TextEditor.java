@@ -168,20 +168,20 @@ public class TextEditor extends TextArea {
 
             // Iterate over selected lines
             for (int i = startLineIndex; i <= endLineIndex; i++) {
-                TextBoxLine textBoxLine = textBox.getLine(i);
+                TextLine textLine = textBox.getLine(i);
 
                 // Get the bounds of line
-                double lineX = textBoxLine.getX();
-                double lineMaxX = textBoxLine.getMaxX();
-                double lineBaseY = textBoxLine.getBaseline() + 3;
+                double lineX = textLine.getX();
+                double lineMaxX = textLine.getMaxX();
+                double lineBaseY = textLine.getBaseline() + 3;
 
                 // If starting line, adjust x1 for starting character
                 if (i == startLineIndex)
-                    lineX = textBoxLine.getXForCharIndex(wordStart - textBoxLine.getStartCharIndex() - textBox.getStartCharIndex());
+                    lineX = textLine.getXForCharIndex(wordStart - textLine.getStartCharIndex() - textBox.getStartCharIndex());
 
                 // If ending line, adjust x2 for ending character
                 if (i == endLineIndex)
-                    lineMaxX = textBoxLine.getXForCharIndex(wordEnd - textBoxLine.getStartCharIndex() - textBox.getStartCharIndex());
+                    lineMaxX = textLine.getXForCharIndex(wordEnd - textLine.getStartCharIndex() - textBox.getStartCharIndex());
 
                 // Append rect for line to path
                 spellingPath.moveTo(lineX, lineBaseY);

@@ -187,7 +187,7 @@ public class TextToken implements Cloneable {
      */
     public double getTextBoxX()
     {
-        return _textLine.getTextBlockX() + _x + _justifyShiftX;
+        return _textLine.getTextBlockX() + getX() + _justifyShiftX;
     }
 
     /**

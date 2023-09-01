@@ -14,7 +14,7 @@ import snap.util.ObjectArray;
 public class TextBoxLine implements CharSequenceX {
 
     // The TextBox that contains this line
-    protected TextBox  _textBox;
+    protected TextBoxOld  _textBox;
 
     // The char index of the start char of this line in text
     protected int  _startCharIndex;
@@ -52,7 +52,7 @@ public class TextBoxLine implements CharSequenceX {
     /**
      * Creates a new TextBoxLine.
      */
-    public TextBoxLine(TextBox aBox, TextStyle aStartStyle, TextLine aTextLine, int theRTLStart)
+    public TextBoxLine(TextBoxOld aBox, TextStyle aStartStyle, TextLine aTextLine, int theRTLStart)
     {
         _textBox = aBox;
         _startStyle = aStartStyle;
@@ -63,7 +63,7 @@ public class TextBoxLine implements CharSequenceX {
     /**
      * Returns the TextBox.
      */
-    public TextBox getBox()  { return _textBox; }
+    public TextBoxOld getBox()  { return _textBox; }
 
     /**
      * Returns the TextStyle at start of line.

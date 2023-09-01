@@ -655,6 +655,37 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns whether line ends with hyphen.
+     */
+    public boolean isHyphenated()
+    {
+        TextToken tok = getLastToken();
+        return tok != null && tok.isHyphenated();
+    }
+
+    /**
+     * Returns the max stroke width of any underlined chars in this line.
+     */
+    public double getUnderlineStroke()
+    {
+        double stroke = 0;
+        for (TextRun run : getRuns())
+            stroke = Math.max(stroke, run.getFont().getUnderlineThickness());
+        return stroke;
+    }
+
+    /**
+     * Returns the Y position of any underlined chars in this line.
+     */
+    public double getUnderlineY()
+    {
+        double y = 0;
+        for (TextRun run : getRuns())
+            y = Math.min(y, run.getFont().getUnderlineOffset());
+        return y;
+    }
+
+    /**
      * Updates length due to change in given run.
      */
     protected void updateRuns(int aRunIndex)

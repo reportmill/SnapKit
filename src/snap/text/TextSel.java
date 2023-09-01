@@ -151,7 +151,7 @@ public class TextSel {
     {
         // If selection empty but not at end, get next char (or after newline, if at newline)
         int charIndex = getEnd();
-        if (isEmpty() && charIndex < _textBox.getTextDocLength())
+        if (isEmpty() && charIndex < _textBox.length())
             charIndex = _textDoc.isLineEnd(charIndex) ? _textDoc.indexAfterNewline(charIndex) : (charIndex + 1);
         return charIndex;
     }
@@ -174,10 +174,10 @@ public class TextSel {
     public int getCharUp()
     {
         int selIndex = getIndex();
-        TextBoxLine lastColumnLine = _textBox.getLineForCharIndex(selIndex);
+        TextLine lastColumnLine = _textBox.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
-        TextBoxLine thisLine = getStartLine();
-        TextBoxLine nextLine = thisLine.getPrevious();
+        TextLine thisLine = getStartLine();
+        TextLine nextLine = thisLine.getPrevious();
         if (nextLine == null)
             return getStart();
 
@@ -191,10 +191,10 @@ public class TextSel {
     public int getCharDown()
     {
         int selIndex = getIndex();
-        TextBoxLine lastColumnLine = _textBox.getLineForCharIndex(selIndex);
+        TextLine lastColumnLine = _textBox.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
-        TextBoxLine thisLine = getEndLine();
-        TextBoxLine nextLine = thisLine.getNext();
+        TextLine thisLine = getEndLine();
+        TextLine nextLine = thisLine.getNext();
         if (nextLine == null)
             return getEnd();
 
@@ -228,13 +228,13 @@ public class TextSel {
     {
         // Get index of newline and set selection
         int index = _textDoc.indexOfNewline(getEnd());
-        return index >= 0 ? index : _textBox.getTextDocLength();
+        return index >= 0 ? index : _textBox.length();
     }
 
     /**
      * Returns the line at selection start.
      */
-    public TextBoxLine getStartLine()
+    public TextLine getStartLine()
     {
         return _textBox.getLineForCharIndex(getStart());
     }
@@ -242,11 +242,11 @@ public class TextSel {
     /**
      * Returns the line at selection end.
      */
-    public TextBoxLine getEndLine()
+    public TextLine getEndLine()
     {
         // Get line at end char index
         int endCharIndex = getEnd();
-        TextBoxLine endLine = _textBox.getLineForCharIndex(endCharIndex);
+        TextLine endLine = _textBox.getLineForCharIndex(endCharIndex);
 
         // If end char index is at start of line and sel not empty, back up to previous line
         if (endCharIndex == endLine.getStartCharIndex() && !isEmpty())
@@ -262,7 +262,7 @@ public class TextSel {
     public boolean isAtLineEnd()
     {
         int selCharIndex = getStart();
-        TextBoxLine selLine = getStartLine();
+        TextLine selLine = getStartLine();
         int selLineEnd = selLine.getEndCharIndex();
         if (selLine.isLastCharNewline())
             selLineEnd--;

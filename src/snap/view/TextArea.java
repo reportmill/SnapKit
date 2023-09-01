@@ -1104,7 +1104,7 @@ public class TextArea extends View {
     /**
      * Returns the individual line at given index.
      */
-    public TextBoxLine getLine(int anIndex)
+    public TextLine getLine(int anIndex)
     {
         TextBox textBox = getTextBox();
         return textBox.getLine(anIndex);
@@ -1113,7 +1113,7 @@ public class TextArea extends View {
     /**
      * Returns the last line.
      */
-    public TextBoxLine getLineLast()
+    public TextLine getLineLast()
     {
         TextBox textBox = getTextBox();
         return textBox.getLineLast();
@@ -1122,7 +1122,7 @@ public class TextArea extends View {
     /**
      * Returns the line for the given character index.
      */
-    public TextBoxLine getLineForCharIndex(int anIndex)
+    public TextLine getLineForCharIndex(int anIndex)
     {
         TextBox textBox = getTextBox();
         return textBox.getLineForCharIndex(anIndex);
@@ -1131,7 +1131,7 @@ public class TextArea extends View {
     /**
      * Returns the token for given character index.
      */
-    public TextBoxToken getTokenForCharIndex(int anIndex)
+    public TextToken getTokenForCharIndex(int anIndex)
     {
         TextBox textBox = getTextBox();
         return textBox.getTokenForCharIndex(anIndex);

@@ -6,8 +6,8 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
 import snap.props.PropChange;
-import snap.text.TextBoxLine;
 import snap.text.TextDoc;
+import snap.text.TextLine;
 import snap.text.TextSel;
 import snap.util.Convert;
 import snap.view.*;
@@ -273,7 +273,7 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
     public String getSelectionInfo()
     {
         StringBuilder sb = new StringBuilder();
-        TextBoxLine textLine = getTextArea().getLineForCharIndex(getTextArea().getSelStart());
+        TextLine textLine = getTextArea().getLineForCharIndex(getTextArea().getSelStart());
         sb.append("Line ").append(textLine.getIndex() + 1);
         sb.append(", Col ").append(getTextArea().getSelStart() - textLine.getStartCharIndex());
         return sb.toString();
@@ -315,7 +315,7 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
     {
         TextArea textArea = getTextArea();
         TextSel sel = textArea.getSel();
-        TextBoxLine selStartLine = sel.getStartLine();
+        TextLine selStartLine = sel.getStartLine();
         int selStartLineIndex = selStartLine.getIndex() + 1;
         int selStart = sel.getStart();
         int col = selStart - selStartLine.getStartCharIndex();
@@ -334,7 +334,7 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
             lineIndex = textArea.getLineCount() - 1;
 
         // Select line and focus
-        TextBoxLine line = lineIndex >= 0 && lineIndex < textArea.getLineCount() ? textArea.getLine(lineIndex) : null;
+        TextLine line = lineIndex >= 0 && lineIndex < textArea.getLineCount() ? textArea.getLine(lineIndex) : null;
         if (line != null) {
             int start = line.getStartCharIndex();
             int end = line.getEndCharIndex();
