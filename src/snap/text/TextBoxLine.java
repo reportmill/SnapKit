@@ -334,7 +334,7 @@ public class TextBoxLine implements CharSequenceX {
     /**
      * Returns the last token for this line.
      */
-    public TextBoxToken getTokenLast()  { return _tokens.getLast(); }
+    public TextBoxToken getLastToken()  { return _tokens.getLast(); }
 
     /**
      * Returns the max ascent of the chars in this line.
@@ -597,7 +597,7 @@ public class TextBoxLine implements CharSequenceX {
      */
     public boolean isHyphenated()
     {
-        TextBoxToken tok = getTokenLast();
+        TextBoxToken tok = getLastToken();
         return tok != null && tok.isHyphenated();
     }
 

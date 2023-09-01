@@ -675,7 +675,7 @@ public class TextBox2 extends TextBlock {
         // Iterate over lines
         for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
             TextLine line = getLine(i);
-            double lineY = line.getBaseline();
+            double lineY = getY() + line.getBaseline();
             if (line.getMaxY() < clip.getMinY())
                 continue;
             if (line.getY() >= clip.getMaxY())

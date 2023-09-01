@@ -32,13 +32,19 @@ public class TextToken implements Cloneable {
     private TextRun  _textRun;
 
     // An override TextStyle (optional)
-    private Color  _textStyle;
+    private TextStyle _textStyle;
+
+    // An override Text color (optional)
+    private Color _color;
 
     // The X location of token in line
     protected double  _x = -1;
 
-    // The width
+    // The token width
     private double  _width = -1;
+
+    // The token height
+    private double  _height = -1;
 
     // Whether this token was split
     protected boolean  _split;
@@ -61,6 +67,8 @@ public class TextToken implements Cloneable {
         _startCharIndex = startCharIndex;
         _endCharIndex = endCharIndex;
         _textRun = aTextRun;
+        _textStyle = aTextRun.getStyle();
+        _color = aTextRun.getColor();
     }
 
     /**
@@ -106,22 +114,25 @@ public class TextToken implements Cloneable {
     /**
      * Returns the TextStyle for token.
      */
-    public TextStyle getTextStyle()  { return _textRun.getStyle(); }
+    public TextStyle getTextStyle()  { return _textStyle; }
 
     /**
      * Returns the token font.
      */
-    public Font getFont()  { return getTextRun().getFont(); }
+    public Font getFont()  { return _textStyle.getFont(); }
 
     /**
-     * Returns the override TextStyle, if set.
+     * Returns the token color.
      */
-    public Color getTextColor()  { return _textStyle; }
+    public Color getTextColor()  { return _color; }
 
     /**
-     * Sets an override TextStyle, if set.
+     * Sets token color.
      */
-    public void setTextColor(Color aColor)  { _textStyle = aColor; }
+    public void setTextColor(Color aColor)
+    {
+        _color = aColor;
+    }
 
     /**
      * Returns whether this run has a hyphen at the end.
@@ -139,7 +150,7 @@ public class TextToken implements Cloneable {
     public double getX()
     {
         // If set, just return
-        if (_x >=0) return _x;
+        if (_x >= 0) return _x;
 
         // Set X
         setTokensX(_textLine);
@@ -162,17 +173,58 @@ public class TextToken implements Cloneable {
     }
 
     /**
+     * Returns the height.
+     */
+    public double getHeight()
+    {
+        if (_height > 0) return _height;
+        double height = _textStyle.getLineHeight();
+        return _height = height;
+    }
+
+    /**
      * Returns the X location in text global coords.
      */
     public double getTextBoxX()
     {
-        return _textLine.getX() + _x + _justifyShiftX;
+        return _textLine.getTextBlockX() + _x + _justifyShiftX;
     }
 
     /**
      * Returns the Y location.
      */
-    public double getTextBoxY()  { return _textLine.getY(); }
+    public double getTextBoxY()  { return _textLine.getTextBlockY(); }
+
+    /**
+     * Returns the y position for this run text global coords.
+     */
+    public double getTextBoxStringY()
+    {
+        // Get offset from y
+        double offsetY = _textStyle.getAscent();
+        int scripting = _textStyle.getScripting();
+        if (scripting != 0)
+            offsetY += getFont().getSize() * (scripting < 0? .4f : -.6f);
+
+        // Return TextBoxY plus offset
+        return getTextBoxY() + offsetY;
+    }
+
+    /**
+     * Returns the max X.
+     */
+    public double getTextBoxMaxX()
+    {
+        return getTextBoxX() + getWidth();
+    }
+
+    /**
+     * Returns the max Y.
+     */
+    public double getTextBoxMaxY()
+    {
+        return getTextBoxY() + getHeight();
+    }
 
     /**
      * Returns the width for given char range.
