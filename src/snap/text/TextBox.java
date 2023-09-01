@@ -62,8 +62,12 @@ public class TextBox extends TextBlock {
      */
     public TextBox()
     {
-        TextDoc textBlock = createTextDoc();
+        super();
+
+        // Set default text block
+        TextDoc textBlock = new RichText();
         setTextDoc(textBlock);
+        setRichText(true);
     }
 
     /**
@@ -99,20 +103,6 @@ public class TextBox extends TextBlock {
     }
 
     /**
-     * Creates the default TextBlock.
-     */
-    protected TextDoc createTextDoc()  { return new RichText(); }
-
-    /**
-     * Returns whether text supports multiple styles.
-     */
-    public boolean isRichText()
-    {
-        TextBlock textBlock = getTextDoc();
-        return textBlock.isRichText();
-    }
-
-    /**
      * Sets whether text supports multiple styles.
      */
     public void setRichText(boolean aValue)
@@ -120,11 +110,11 @@ public class TextBox extends TextBlock {
         // If already set, just return
         if (aValue == isRichText()) return;
 
-        // Convert to/from plain/rich text
-        TextBlock textBlock = getTextDoc();
-        TextDoc textBlock2 = textBlock instanceof RichText ? new TextDoc() : new RichText();
-        textBlock2.addTextBlock(textBlock, 0);
-        setTextDoc(textBlock2);
+        // Do normal version
+        super.setRichText(aValue);
+
+        // Forward to source text block
+        _textBlock.setRichText(aValue);
     }
 
     /**
@@ -683,15 +673,17 @@ public class TextBox extends TextBlock {
         // Get StartLine, EndLine and start/end points
         TextLine startLine = getLineForCharIndex(aStartCharIndex);
         TextLine endLine = aStartCharIndex == aEndCharIndex ? startLine : getLineForCharIndex(aEndCharIndex);
-        double startX = startLine.getXForCharIndex(aStartCharIndex - startLine.getStartCharIndex());
-        double startY = startLine.getBaseline();
-        double endX = endLine.getXForCharIndex(aEndCharIndex - endLine.getStartCharIndex());
-        double endY = endLine.getBaseline();
+        double textBoxX = getX();
+        double textBoxY = getAlignedY();
+        double startX = textBoxX + startLine.getXForCharIndex(aStartCharIndex - startLine.getStartCharIndex());
+        double startY = textBoxY + startLine.getBaseline();
+        double endX = textBoxX + endLine.getXForCharIndex(aEndCharIndex - endLine.getStartCharIndex());
+        double endY = textBoxY + endLine.getBaseline();
         startX = Math.min(startX, getMaxX());
         endX = Math.min(endX, getMaxX());
 
         // Get start top/height
-        double startTop = startLine.getY() - 1;
+        double startTop = startLine.getTextY() - 1;
         double startHeight = startLine.getHeight() + 2;
 
         // Get path for upper left corner of sel start
@@ -702,7 +694,7 @@ public class TextBox extends TextBlock {
 
         // If selection spans more than one line, add path components for middle lines and end line
         if (startY != endY) {  //!SnapMath.equals(startY, endY)
-            double endTop = endLine.getY() - 1;
+            double endTop = endLine.getTextY() - 1;
             double endHeight = endLine.getHeight() + 2;
             path.lineTo(getWidth(), startTop);
             path.lineTo(getWidth(), endTop);
@@ -749,7 +741,7 @@ public class TextBox extends TextBlock {
 
                 // Do normal paint token
                 String tokenStr = token.getString();
-                double tokenX = token.getTextBoxX();
+                double tokenX = token.getTextX();
                 aPntr.setFont(token.getFont());
                 aPntr.setPaint(token.getTextColor()); //aPntr.setPaint(SnapColor.RED);
                 aPntr.drawString(tokenStr, tokenX, lineY, token.getTextStyle().getCharSpacing());

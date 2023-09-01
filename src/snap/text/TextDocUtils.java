@@ -9,7 +9,7 @@ import snap.props.PropChange;
 public class TextDocUtils {
 
     /**
-     * Returns a path for two char indexes - it will be a a simple box with extensions for first/last lines.
+     * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.
      */
     public static Shape getPathForCharRange(TextBlock textBlock, int aStartCharIndex, int aEndCharIndex)
     {
@@ -25,15 +25,15 @@ public class TextDocUtils {
         // Get StartLine, EndLine and start/end points
         TextLine startLine = textBlock.getLineForCharIndex(aStartCharIndex);
         TextLine endLine = aStartCharIndex == aEndCharIndex ? startLine : textBlock.getLineForCharIndex(aEndCharIndex);
-        double startX = startLine.getXForCharIndex(aStartCharIndex - startLine.getStartCharIndex());
-        double startY = startLine.getBaseline();
-        double endX = endLine.getXForCharIndex(aEndCharIndex - endLine.getStartCharIndex());
-        double endY = endLine.getBaseline();
+        double startX = startLine.getTextXForCharIndex(aStartCharIndex - startLine.getStartCharIndex());
+        double startY = startLine.getTextBaseline();
+        double endX = endLine.getTextXForCharIndex(aEndCharIndex - endLine.getStartCharIndex());
+        double endY = endLine.getTextBaseline();
         startX = Math.min(startX, textBlock.getMaxX());
         endX = Math.min(endX, textBlock.getMaxX());
 
         // Get start top/height
-        double startTop = startLine.getY() - 1;
+        double startTop = startLine.getTextY() - 1;
         double startHeight = startLine.getHeight() + 2;
 
         // Get path for upper left corner of sel start
@@ -44,7 +44,7 @@ public class TextDocUtils {
 
         // If selection spans more than one line, add path components for middle lines and end line
         if (startY != endY) {  //!SnapMath.equals(startY, endY)
-            double endTop = endLine.getY() - 1;
+            double endTop = endLine.getTextY() - 1;
             double endHeight = endLine.getHeight() + 2;
             path.lineTo(textBlock.getWidth(), startTop);
             path.lineTo(textBlock.getWidth(), endTop);

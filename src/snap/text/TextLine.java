@@ -368,18 +368,27 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the line x in text block coords.
      */
-    public double getTextBlockX()
-    {
-        return getX() + _textBlock.getX();
-    }
+    public double getTextX()  { return getX() + _textBlock.getX(); }
 
     /**
      * Returns the line y.
      */
-    public double getTextBlockY()
-    {
-        return getY() + _textBlock.getAlignedY();
-    }
+    public double getTextY()  { return getY() + _textBlock.getAlignedY(); }
+
+    /**
+     * Returns the y position for this line (in same coords as the layout frame).
+     */
+    public double getTextBaseline()  { return getTextY() + getMetrics().getAscent(); }
+
+    /**
+     * Returns the max X.
+     */
+    public double getTextMaxX()  { return getTextX() + getWidth(); }
+
+    /**
+     * Returns the max Y.
+     */
+    public double getTextMaxY()  { return getTextY() + getHeight(); }
 
     /**
      * Splits the line at given character index.
@@ -554,6 +563,14 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // Return
         return charX;
+    }
+
+    /**
+     * Returns the X coord for given char index.
+     */
+    public double getTextXForCharIndex(int anIndex)
+    {
+        return getTextX() + getXForCharIndex(anIndex);
     }
 
     /**
@@ -760,6 +777,25 @@ public class TextLine implements CharSequenceX, Cloneable {
             double remW = tboxHitX - lineMaxX;
             _x = Math.round(alignX * remW);
         }
+    }
+
+    /**
+     * Splits given run at given char index and returns the run containing the remaining chars (and identical attributes).
+     */
+    protected TextRun splitRunForCharIndex(TextRun aRun, int anIndex)
+    {
+        // Sanity check
+        if (!_textBlock.isRichText())
+            System.err.println("TextLine.splitRunForCharIndex: Should never get called for plain text");
+
+        // Clone to get tail and delete chars from each
+        TextRun remainder = aRun.clone();
+        aRun.addLength(anIndex - aRun.length());
+        remainder.addLength(-anIndex);
+
+        // Add remainder and return
+        addRun(remainder, aRun.getIndex() + 1);
+        return remainder;
     }
 
     /**

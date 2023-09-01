@@ -11,9 +11,9 @@ public class RichTextLine extends TextLine {
     /**
      * Constructor.
      */
-    public RichTextLine(RichText aRichText)
+    public RichTextLine(TextBlock aTextBlock)
     {
-        super(aRichText);
+        super(aTextBlock);
     }
 
     /**
@@ -109,29 +109,5 @@ public class RichTextLine extends TextLine {
         }
 
         updateText();
-    }
-
-    /**
-     * Splits given run at given char index and returns the run containing the remaining chars (and identical attributes).
-     */
-    protected TextRun splitRunForCharIndex(TextRun aRun, int anIndex)
-    {
-        // Clone to get tail and delete chars from each
-        TextRun remainder = aRun.clone();
-        aRun.addLength(anIndex - aRun.length());
-        remainder.addLength(-anIndex);
-
-        // Add remainder and return
-        addRun(remainder, aRun.getIndex() + 1);
-        return remainder;
-    }
-
-    /**
-     * Standard clone implementation.
-     */
-    @Override
-    public RichTextLine clone()
-    {
-        return (RichTextLine) super.clone();
     }
 }

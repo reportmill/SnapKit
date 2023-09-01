@@ -5,9 +5,7 @@ package snap.text;
 import snap.gfx.Border;
 import snap.gfx.Color;
 import snap.gfx.Font;
-import snap.props.PropChange;
 import snap.util.*;
-
 import java.util.Objects;
 
 /**
@@ -21,9 +19,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
     public RichText()
     {
         super();
-
-        // Set DefaultStyle, because RichText never inherits from parent
-        _defaultTextStyle = TextStyle.DEFAULT;
+        setRichText(true);
     }
 
     /**
@@ -36,140 +32,6 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
         // Add attributes
         TextStyle style = getDefaultStyle().copyFor(theAttrs);
         addChars(theChars, style, 0);
-    }
-
-    /**
-     * Override to indicate rich text supported.
-     */
-    @Override
-    public boolean isRichText()  { return true; }
-
-    /**
-     * Creates a new TextLine for use in this text.
-     */
-    @Override
-    protected TextLine createLine()  { return new RichTextLine(this); }
-
-    /**
-     * Sets a given style to a given range.
-     */
-    @Override
-    public void setStyle(TextStyle aStyle, int aStart, int anEnd)
-    {
-        // Iterate over runs in range and set style
-        for (int textCharIndex = aStart; textCharIndex < anEnd; ) {
-
-            // Set style
-            RichTextLine line = (RichTextLine) getLineForCharIndex(textCharIndex);
-            int lineStart = line.getStartCharIndex();
-            TextRun run = getRunForCharRange(textCharIndex, anEnd);
-
-            // If run is larger than range, trim to size
-            if (textCharIndex - lineStart > run.getStartCharIndex()) {
-                int newRunStart = textCharIndex - lineStart - run.getStartCharIndex();
-                run = line.splitRunForCharIndex(run, newRunStart);
-            }
-            if (anEnd - lineStart < run.getEndCharIndex()) {
-                int newRunEnd = anEnd - lineStart - run.getStartCharIndex();
-                line.splitRunForCharIndex(run, newRunEnd);
-            }
-
-            // Set style
-            TextStyle oldStyle = run.getStyle();
-            run.setStyle(aStyle);
-            textCharIndex = run.getEndCharIndex() + lineStart;
-
-            // Fire prop change
-            if (isPropChangeEnabled()) {
-                int runStart = run.getStartCharIndex() + lineStart;
-                int runEnd = run.getEndCharIndex() + lineStart;
-                PropChange pc = new TextDocUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
-                firePropChange(pc);
-            }
-        }
-
-        _prefW = -1;
-    }
-
-    /**
-     * Sets a given attribute to a given value for a given range.
-     */
-    @Override
-    public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
-    {
-        // Iterate over lines in range and set attribute
-        while (aStart < anEnd) {
-
-            // Get run for range
-            TextRun textRun = getRunForCharRange(aStart, anEnd);
-            RichTextLine textLine = (RichTextLine) textRun.getLine();
-            int lineStart = textLine.getStartCharIndex();
-            int runEndInText = textRun.getEndCharIndex() + lineStart;
-            int newStyleEndInText = Math.min(runEndInText, anEnd);
-
-            // Get current run style, get new style for given key/value
-            TextStyle style = textRun.getStyle();
-            TextStyle newStyle = style.copyFor(aKey, aValue);
-
-            // Set new style for run range
-            setStyle(newStyle, aStart, newStyleEndInText);
-
-            // Reset start to run end
-            aStart = runEndInText;
-        }
-    }
-
-    /**
-     * Sets a given style to a given range.
-     */
-    @Override
-    public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
-    {
-        // Handle MultiStyle
-        int startLineIndex = getLineForCharIndex(aStart).getIndex();
-        int endLineIndex = getLineForCharIndex(anEnd).getIndex();
-        for (int i = startLineIndex; i <= endLineIndex; i++) {
-            TextLine line = getLine(i);
-            TextLineStyle oldStyle = line.getLineStyle();
-            line.setLineStyle(aStyle);
-            if (isPropChangeEnabled())
-                firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, aStyle, i));
-        }
-
-        _prefW = -1;
-    }
-
-    /**
-     * Sets a given style to a given range.
-     */
-    @Override
-    public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
-    {
-        // Handle MultiStyle
-        int startLineIndex = getLineForCharIndex(aStart).getIndex();
-        int endLineIndex = getLineForCharIndex(anEnd).getIndex();
-        for (int i = startLineIndex; i <= endLineIndex; i++) {
-            TextLine line = getLine(i);
-            TextLineStyle oldStyle = line.getLineStyle();
-            TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
-            line.setLineStyle(newStyle);
-            if (isPropChangeEnabled())
-                firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, newStyle, i));
-        }
-
-        _prefW = -1;
-    }
-
-    /**
-     * Returns whether text contains an underlined run.
-     */
-    @Override
-    public boolean isUnderlined()
-    {
-        for (TextLine line : _lines)
-            if (line.isUnderlined())
-                return true;
-        return false;
     }
 
     /**
@@ -293,7 +155,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
             }
         }
 
-        // Return xml element
+        // Return
         return e;
     }
 
@@ -391,7 +253,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
         if (length() == 0)
             getLine(0).getRun(0).setStyle(style);
 
-        // Return this xstring
+        // Return
         return this;
     }
 }

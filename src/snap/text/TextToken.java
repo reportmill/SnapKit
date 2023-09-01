@@ -183,22 +183,22 @@ public class TextToken implements Cloneable {
     }
 
     /**
-     * Returns the X location in text global coords.
+     * Returns the token X coord in text block.
      */
-    public double getTextBoxX()
+    public double getTextX()
     {
-        return _textLine.getTextBlockX() + getX() + _justifyShiftX;
+        return _textLine.getTextX() + getX() + _justifyShiftX;
     }
 
     /**
-     * Returns the Y location.
+     * Returns token Y coord in text block.
      */
-    public double getTextBoxY()  { return _textLine.getTextBlockY(); }
+    public double getTextY()  { return _textLine.getTextY(); }
 
     /**
-     * Returns the y position for this run text global coords.
+     * Returns the y position for this token in text block.
      */
-    public double getTextBoxStringY()
+    public double getTextStringY()
     {
         // Get offset from y
         double offsetY = _textStyle.getAscent();
@@ -207,23 +207,23 @@ public class TextToken implements Cloneable {
             offsetY += getFont().getSize() * (scripting < 0? .4f : -.6f);
 
         // Return TextBoxY plus offset
-        return getTextBoxY() + offsetY;
+        return getTextY() + offsetY;
     }
 
     /**
-     * Returns the max X.
+     * Returns the max X in text block.
      */
-    public double getTextBoxMaxX()
+    public double getTextMaxX()
     {
-        return getTextBoxX() + getWidth();
+        return getTextX() + getWidth();
     }
 
     /**
-     * Returns the max Y.
+     * Returns the max Y in text block.
      */
-    public double getTextBoxMaxY()
+    public double getTextMaxY()
     {
-        return getTextBoxY() + getHeight();
+        return getTextY() + getHeight();
     }
 
     /**

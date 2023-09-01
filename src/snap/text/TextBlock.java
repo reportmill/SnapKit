@@ -5,6 +5,7 @@ package snap.text;
 import snap.geom.HPos;
 import snap.geom.Shape;
 import snap.gfx.Font;
+import snap.props.PropChange;
 import snap.props.PropObject;
 import snap.util.CharSequenceUtils;
 import snap.util.CharSequenceX;
@@ -16,6 +17,9 @@ import java.util.Objects;
  * This class is the basic text storage class, holding a list of TextLine.
  */
 public abstract class TextBlock extends PropObject implements CharSequenceX, Cloneable {
+
+    // Whether text is rich
+    private boolean _rich;
 
     // The TextLines in this text
     protected List<TextLine>  _lines = new ArrayList<>();
@@ -63,13 +67,40 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     protected void addDefaultLine()
     {
-        addLine(createLine(), 0);
+        TextLine defaultLine = createLine();
+        addLine(defaultLine, 0);
     }
 
     /**
      * Whether this text supports multiple styles (font, color, etc.).
      */
-    public boolean isRichText()  { return false; }
+    public boolean isRichText()  { return _rich; }
+
+    /**
+     * Sets whether text supports multiple styles.
+     */
+    public void setRichText(boolean aValue)
+    {
+        // If already set, just return
+        if (aValue == isRichText()) return;
+
+        // Get clone
+        //TextBlock clone = clone();
+
+        // Set value
+        _rich = aValue;
+
+        // Set DefaultStyle, because RichText never inherits from parent
+        if (aValue)
+            _defaultTextStyle = TextStyle.DEFAULT;
+
+        // Remove lines and add default
+        _lines.clear();
+        addDefaultLine();
+
+        // Add clone back
+        //addTextBlock(clone, 0);
+    }
 
     /**
      * Returns the number of characters in the text.
@@ -407,7 +438,52 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     public void setStyle(TextStyle aStyle, int aStart, int anEnd)
     {
-        System.out.println("TextDoc.setStyle: Not implemented");
+        // Handle Rich
+        if (isRichText())
+            setStyleRich(aStyle, aStart, anEnd);
+
+        // Handle Plain
+        else System.out.println("TextBlock.setStyle: Has no effect on plain text");
+
+        _prefW = -1;
+    }
+
+    /**
+     * Sets a given style to a given range.
+     */
+    private void setStyleRich(TextStyle aStyle, int aStart, int anEnd)
+    {
+        // Iterate over runs in range and set style
+        for (int textCharIndex = aStart; textCharIndex < anEnd; ) {
+
+            // Set style
+            TextLine line = getLineForCharIndex(textCharIndex);
+            int lineStart = line.getStartCharIndex();
+            TextRun run = getRunForCharRange(textCharIndex, anEnd);
+
+            // If run is larger than range, trim to size
+            if (textCharIndex - lineStart > run.getStartCharIndex()) {
+                int newRunStart = textCharIndex - lineStart - run.getStartCharIndex();
+                run = line.splitRunForCharIndex(run, newRunStart);
+            }
+            if (anEnd - lineStart < run.getEndCharIndex()) {
+                int newRunEnd = anEnd - lineStart - run.getStartCharIndex();
+                line.splitRunForCharIndex(run, newRunEnd);
+            }
+
+            // Set style
+            TextStyle oldStyle = run.getStyle();
+            run.setStyle(aStyle);
+            textCharIndex = run.getEndCharIndex() + lineStart;
+
+            // Fire prop change
+            if (isPropChangeEnabled()) {
+                int runStart = run.getStartCharIndex() + lineStart;
+                int runEnd = run.getEndCharIndex() + lineStart;
+                PropChange pc = new TextDocUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
+                firePropChange(pc);
+            }
+        }
     }
 
     /**
@@ -440,9 +516,43 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
-        TextStyle styleForRange = getStyleForCharRange(aStart, anEnd);
-        TextStyle newStyle = styleForRange.copyFor(aKey, aValue);
-        setStyle(newStyle, aStart, anEnd);
+        // Handle Rich
+        if (isRichText())
+            setStyleValueRich(aKey, aValue, aStart, anEnd);
+
+        // Handle Plain
+        else {
+            TextStyle styleForRange = getStyleForCharRange(aStart, anEnd);
+            TextStyle newStyle = styleForRange.copyFor(aKey, aValue);
+            setStyle(newStyle, aStart, anEnd);
+        }
+    }
+
+    /**
+     * Sets a given attribute to a given value for a given range.
+     */
+    private void setStyleValueRich(String aKey, Object aValue, int aStart, int anEnd)
+    {
+        // Iterate over lines in range and set attribute
+        while (aStart < anEnd) {
+
+            // Get run for range
+            TextRun textRun = getRunForCharRange(aStart, anEnd);
+            RichTextLine textLine = (RichTextLine) textRun.getLine();
+            int lineStart = textLine.getStartCharIndex();
+            int runEndInText = textRun.getEndCharIndex() + lineStart;
+            int newStyleEndInText = Math.min(runEndInText, anEnd);
+
+            // Get current run style, get new style for given key/value
+            TextStyle style = textRun.getStyle();
+            TextStyle newStyle = style.copyFor(aKey, aValue);
+
+            // Set new style for run range
+            setStyle(newStyle, aStart, newStyleEndInText);
+
+            // Reset start to run end
+            aStart = runEndInText;
+        }
     }
 
     /**
@@ -450,14 +560,20 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
     {
-        // Propagate to Lines
-        TextLineStyle oldStyle = getLine(0).getLineStyle();
-        for (TextLine line : getLines())
-            line.setLineStyle(aStyle);
+        // Handle Rich
+        if (isRichText())
+            setLineStyleRich(aStyle, aStart, anEnd);
 
-        // Fire prop change
-        if (isPropChangeEnabled())
-            firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, aStyle, 0));
+        // Handle Plain: Propagate to Lines
+        else {
+            TextLineStyle oldStyle = getLine(0).getLineStyle();
+            for (TextLine line : getLines())
+                line.setLineStyle(aStyle);
+
+            // Fire prop change
+            if (isPropChangeEnabled())
+                firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, aStyle, 0));
+        }
 
         _prefW = -1;
     }
@@ -467,10 +583,55 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
-        TextLineStyle oldStyle = getLine(0).getLineStyle();
-        TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
-        setLineStyle(newStyle, 0, length());
+        // Handle Rich
+        if (isRichText())
+            setLineStyleValueRich(aKey, aValue, aStart, anEnd);
+
+        // Handle plain
+        else {
+            TextLineStyle oldStyle = getLine(0).getLineStyle();
+            TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
+            setLineStyle(newStyle, 0, length());
+        }
+
         _prefW = -1;
+    }
+
+    /**
+     * Sets a given style to a given range.
+     */
+    private void setLineStyleRich(TextLineStyle aStyle, int aStart, int anEnd)
+    {
+        // Handle MultiStyle
+        int startLineIndex = getLineForCharIndex(aStart).getIndex();
+        int endLineIndex = getLineForCharIndex(anEnd).getIndex();
+        for (int i = startLineIndex; i <= endLineIndex; i++) {
+            TextLine line = getLine(i);
+            TextLineStyle oldStyle = line.getLineStyle();
+            line.setLineStyle(aStyle);
+            if (isPropChangeEnabled())
+                firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, aStyle, i));
+        }
+    }
+
+    /**
+     * Sets a given style to a given range.
+     */
+    private void setLineStyleValueRich(String aKey, Object aValue, int aStart, int anEnd)
+    {
+        // Get start/end line indexes
+        int startLineIndex = getLineForCharIndex(aStart).getIndex();
+        int endLineIndex = getLineForCharIndex(anEnd).getIndex();
+
+        // Iterate over lines and set value independently for each
+        for (int i = startLineIndex; i <= endLineIndex; i++) {
+            TextLine line = getLine(i);
+            TextLineStyle oldStyle = line.getLineStyle();
+            TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
+            line.setLineStyle(newStyle);
+            if (isPropChangeEnabled())
+                firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, newStyle, i));
+        }
     }
 
     /**
@@ -511,7 +672,12 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     /**
      * Creates a new TextLine for use in this text.
      */
-    protected TextLine createLine()  { return new TextLine(this); }
+    protected TextLine createLine()
+    {
+        if (isRichText())
+            return new RichTextLine(this);
+        return new TextLine(this);
+    }
 
     /**
      * Returns the longest line.
@@ -690,6 +856,13 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     public boolean isUnderlined()
     {
+        // Handle Rich
+        if (isRichText()) {
+            for (TextLine line : _lines)
+                if (line.isUnderlined())
+                    return true;
+        }
+
         TextStyle textStyle = getStyleForCharIndex(0);
         return textStyle.isUnderlined();
     }
