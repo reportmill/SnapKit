@@ -540,21 +540,22 @@ public class TextBox extends TextBlock {
      */
     protected void updateAll()
     {
-        if (length() == 0) return;
-        super.removeChars(0, length());
-        superAddTextBlock(_textBlock, 0);
-    }
+        // Skip if no text
+        if (length() == 0 && _textBlock.length() == 0) return;
 
-    /**
-     * Adds given TextBlock to this text at given index.
-     */
-    private void superAddTextBlock(TextBlock textBlock, int anIndex)
-    {
-        List<TextLine> textLines = textBlock.getLines();
+        // Remove all chars and re-add
+        super.removeChars(0, length());
+
+        // Get source text lines
+        List<TextLine> textLines = _textBlock.getLines();
+
+        // Iterate over source text lines and add back
         for (TextLine line : textLines) {
+
+            // Iterate over source text lines and add back
             TextRun[] lineRuns = line.getRuns();
             for (TextRun run : lineRuns) {
-                int index = anIndex + line.getStartCharIndex() + run.getStartCharIndex();
+                int index = line.getStartCharIndex() + run.getStartCharIndex();
                 super.addChars(run.getString(), run.getStyle(), index);
                 super.setLineStyle(line.getLineStyle(), index, index + run.length());
             }

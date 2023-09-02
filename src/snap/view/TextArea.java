@@ -1742,7 +1742,7 @@ public class TextArea extends View {
     public void setWidth(double aWidth)
     {
         super.setWidth(aWidth);
-        setTextBoxBounds();
+        updateTextBoxBounds();
     }
 
     /**
@@ -1751,28 +1751,30 @@ public class TextArea extends View {
     public void setHeight(double aHeight)
     {
         super.setHeight(aHeight);
-        setTextBoxBounds();
+        updateTextBoxBounds();
     }
 
     /**
      * Sets the Text.Rect from text area.
      */
-    protected Rect getTextBoxBounds()
+    protected Rect getTextBounds()
     {
         Insets ins = getInsetsAll();
-        double x = ins.left, w = getWidth() - x - ins.right;
-        double y = ins.top, h = getHeight() - y - ins.bottom;
-        return new Rect(x, y, w, h);
+        double textX = ins.left;
+        double textY = ins.top;
+        double textW = Math.max(getWidth() - ins.getWidth(), 0);
+        double textH = Math.max(getHeight() - ins.getHeight(), 0);
+        return new Rect(textX, textY, textW, textH);
     }
 
     /**
-     * Sets the Text.Rect from text area.
+     * Sets the TextBox.Bounds from text bounds.
      */
-    protected void setTextBoxBounds()
+    protected void updateTextBoxBounds()
     {
-        TextBox tbox = getTextBox();
-        Rect tbnds = getTextBoxBounds();
-        tbox.setBounds(tbnds);
+        TextBox textBox = getTextBox();
+        Rect textBounds = getTextBounds();
+        textBox.setBounds(textBounds);
     }
 
     /**
