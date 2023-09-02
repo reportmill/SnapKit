@@ -840,4 +840,13 @@ public class TextBox extends TextBlock {
         // Return false
         return false;
     }
+
+    /**
+     * Override to forward to source text.
+     */
+    @Override
+    protected TextToken[] createTokensForTextLine(TextLine aTextLine)
+    {
+        return _textBlock.createTokensForTextLine(aTextLine);
+    }
 }
