@@ -2,7 +2,6 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import snap.geom.Path2D;
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.geom.VPos;
@@ -471,8 +470,8 @@ public class TextBox extends TextBlock {
         String propName = aPC.getPropName();
 
         // Handle CharsChange: Update lines for old/new range
-        if (aPC instanceof TextDocUtils.CharsChange) {
-            TextDocUtils.CharsChange charsChange = (TextDocUtils.CharsChange) aPC;
+        if (aPC instanceof TextBlockUtils.CharsChange) {
+            TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) aPC;
             CharSequence newVal = charsChange.getNewValue();
             CharSequence oldVal = charsChange.getOldValue();
             int index = charsChange.getIndex();
@@ -483,8 +482,8 @@ public class TextBox extends TextBlock {
         }
 
         // Handle StyleChange
-        else if (aPC instanceof TextDocUtils.StyleChange) {
-            TextDocUtils.StyleChange styleChange = (TextDocUtils.StyleChange) aPC;
+        else if (aPC instanceof TextBlockUtils.StyleChange) {
+            TextBlockUtils.StyleChange styleChange = (TextBlockUtils.StyleChange) aPC;
             TextStyle newStyle = (TextStyle) styleChange.getNewValue();
             int startCharIndex = styleChange.getStart();
             int endCharIndex = styleChange.getEnd();
@@ -492,8 +491,8 @@ public class TextBox extends TextBlock {
         }
 
         // Handle LineStyleChange
-        else if (aPC instanceof TextDocUtils.LineStyleChange) {
-            TextDocUtils.LineStyleChange lineStyleChange = (TextDocUtils.LineStyleChange) aPC;
+        else if (aPC instanceof TextBlockUtils.LineStyleChange) {
+            TextBlockUtils.LineStyleChange lineStyleChange = (TextBlockUtils.LineStyleChange) aPC;
             TextLineStyle lineStyle = (TextLineStyle) lineStyleChange.getNewValue();
             TextBlock textBlock = getTextDoc();
             TextLine textLine = textBlock.getLine(lineStyleChange.getIndex());
@@ -654,65 +653,6 @@ public class TextBox extends TextBlock {
             return 0;
         int charIndex = textBoxLine.getCharIndexForX(anX);
         return textBoxLine.getStartCharIndex() + charIndex;
-    }
-
-    /**
-     * Returns a path for two char indexes - it will be a a simple box with extensions for first/last lines.
-     */
-    public Shape getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
-    {
-        // Create new path for return
-        Path2D path = new Path2D();
-
-        // If invalid range, just return
-        if (aStartCharIndex > getEndCharIndex() || aEndCharIndex < getStartCharIndex())
-            return path;
-        if (aEndCharIndex > getEndCharIndex())
-            aEndCharIndex = getEndCharIndex();
-
-        // Get StartLine, EndLine and start/end points
-        TextLine startLine = getLineForCharIndex(aStartCharIndex);
-        TextLine endLine = aStartCharIndex == aEndCharIndex ? startLine : getLineForCharIndex(aEndCharIndex);
-        double textBoxX = getX();
-        double textBoxY = getAlignedY();
-        double startX = textBoxX + startLine.getXForCharIndex(aStartCharIndex - startLine.getStartCharIndex());
-        double startY = textBoxY + startLine.getBaseline();
-        double endX = textBoxX + endLine.getXForCharIndex(aEndCharIndex - endLine.getStartCharIndex());
-        double endY = textBoxY + endLine.getBaseline();
-        startX = Math.min(startX, getMaxX());
-        endX = Math.min(endX, getMaxX());
-
-        // Get start top/height
-        double startTop = startLine.getTextY() - 1;
-        double startHeight = startLine.getHeight() + 2;
-
-        // Get path for upper left corner of sel start
-        path.moveTo(startX, startTop + startHeight);
-        path.lineTo(startX, startTop);
-        if (aStartCharIndex == aEndCharIndex)
-            return path;
-
-        // If selection spans more than one line, add path components for middle lines and end line
-        if (startY != endY) {  //!SnapMath.equals(startY, endY)
-            double endTop = endLine.getTextY() - 1;
-            double endHeight = endLine.getHeight() + 2;
-            path.lineTo(getWidth(), startTop);
-            path.lineTo(getWidth(), endTop);
-            path.lineTo(endX, endTop);
-            path.lineTo(endX, endTop + endHeight);
-            path.lineTo(getX(), endTop + endHeight);
-            path.lineTo(getX(), startTop + startHeight);
-        }
-
-        // If selection spans only one line, add path components for upper-right, lower-right
-        else {
-            path.lineTo(endX, startTop);
-            path.lineTo(endX, startTop + startHeight);
-        }
-
-        // Close path and return
-        path.close();
-        return path;
     }
 
     /**

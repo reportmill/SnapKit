@@ -6,7 +6,7 @@ import snap.props.PropChange;
 /**
  * Utility methods to support TextBlock.
  */
-public class TextDocUtils {
+public class TextBlockUtils {
 
     /**
      * Returns a path for two char indexes - it will be a simple box with extensions for first/last lines.

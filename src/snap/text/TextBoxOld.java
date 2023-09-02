@@ -515,8 +515,8 @@ public class TextBoxOld {
         String propName = aPC.getPropName();
 
         // Handle CharsChange: Update lines for old/new range
-        if (aPC instanceof TextDocUtils.CharsChange) {
-            TextDocUtils.CharsChange charsChange = (TextDocUtils.CharsChange) aPC;
+        if (aPC instanceof TextBlockUtils.CharsChange) {
+            TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) aPC;
             CharSequence newVal = charsChange.getNewValue();
             CharSequence oldVal = charsChange.getOldValue();
             int index = charsChange.getIndex();
@@ -527,14 +527,14 @@ public class TextBoxOld {
         }
 
         // Handle StyleChange
-        else if (aPC instanceof TextDocUtils.StyleChange) {
-            TextDocUtils.StyleChange styleChange = (TextDocUtils.StyleChange) aPC;
+        else if (aPC instanceof TextBlockUtils.StyleChange) {
+            TextBlockUtils.StyleChange styleChange = (TextBlockUtils.StyleChange) aPC;
             textDocChangedChars(styleChange.getStart(), styleChange.getEnd());
         }
 
         // Handle LineStyleChange
-        else if (aPC instanceof TextDocUtils.LineStyleChange) {
-            TextDocUtils.LineStyleChange lineStyleChange = (TextDocUtils.LineStyleChange) aPC;
+        else if (aPC instanceof TextBlockUtils.LineStyleChange) {
+            TextBlockUtils.LineStyleChange lineStyleChange = (TextBlockUtils.LineStyleChange) aPC;
             TextDoc textDoc = getTextDoc();
             TextLine textLine = textDoc.getLine(lineStyleChange.getIndex());
             textDocChangedChars(textLine.getStartCharIndex(), textLine.getEndCharIndex());

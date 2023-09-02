@@ -267,10 +267,6 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
         // If no chars, just return
         if (theChars == null) return;
 
-        // If not rich text, clear style
-        if (!isRichText())
-            theStyle = null;
-
         // Get line for char index
         TextLine textLine = getLineForCharIndex(anIndex);
 
@@ -305,7 +301,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
 
         // Send PropertyChange
         if (isPropChangeEnabled())
-            firePropChange(new TextDocUtils.CharsChange(this, null, theChars, anIndex));
+            firePropChange(new TextBlockUtils.CharsChange(this, null, theChars, anIndex));
         _prefW = -1;
     }
 
@@ -389,7 +385,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
 
         // If deleted chars is set, send property change
         if (removedChars != null)
-            firePropChange(new TextDocUtils.CharsChange(this, removedChars, null, aStart));
+            firePropChange(new TextBlockUtils.CharsChange(this, removedChars, null, aStart));
         _prefW = -1;
     }
 
@@ -480,7 +476,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
             if (isPropChangeEnabled()) {
                 int runStart = run.getStartCharIndex() + lineStart;
                 int runEnd = run.getEndCharIndex() + lineStart;
-                PropChange pc = new TextDocUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
+                PropChange pc = new TextBlockUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
                 firePropChange(pc);
             }
         }
@@ -572,7 +568,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
 
             // Fire prop change
             if (isPropChangeEnabled())
-                firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, aStyle, 0));
+                firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, aStyle, 0));
         }
 
         _prefW = -1;
@@ -610,7 +606,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
             TextLineStyle oldStyle = line.getLineStyle();
             line.setLineStyle(aStyle);
             if (isPropChangeEnabled())
-                firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, aStyle, i));
+                firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, aStyle, i));
         }
     }
 
@@ -630,7 +626,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
             TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
             line.setLineStyle(newStyle);
             if (isPropChangeEnabled())
-                firePropChange(new TextDocUtils.LineStyleChange(this, oldStyle, newStyle, i));
+                firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, newStyle, i));
         }
     }
 
@@ -996,7 +992,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     public Shape getPathForCharRange(int aStartCharIndex, int aEndCharIndex)
     {
-        return TextDocUtils.getPathForCharRange(this, aStartCharIndex, aEndCharIndex);
+        return TextBlockUtils.getPathForCharRange(this, aStartCharIndex, aEndCharIndex);
     }
 
     /**

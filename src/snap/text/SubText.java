@@ -2,7 +2,7 @@
  * Copyright (c) 2010, ReportMill Software. All rights reserved.
  */
 package snap.text;
-import snap.text.TextDocUtils.CharsChange;
+import snap.text.TextBlockUtils.CharsChange;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.web.WebURL;
