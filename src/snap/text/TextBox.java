@@ -247,8 +247,9 @@ public class TextBox extends TextBlock {
 
             // Add chars to next line
             TextStyle textStyle = lastToken.getTextStyle();
+            int nextLineStartCharIndex = nextLine.getStartCharIndex();
             int newlineIndex2 = CharSequenceUtils.indexAfterNewline(moveChars, 0);
-            addCharsToLine(moveChars, textStyle, 0, nextLine, newlineIndex2);
+            addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, newlineIndex2);
             didWrap = true;
         }
 
