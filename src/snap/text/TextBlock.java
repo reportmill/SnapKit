@@ -289,7 +289,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
             int newlineIndex = CharSequenceUtils.indexAfterNewline(theChars, charIndexInChars);
             int endCharIndexInChars = newlineIndex > 0 ? newlineIndex : charsLength;
             if (charIndexInChars > 0 || endCharIndexInChars < charsLength)
-                chars = theChars.subSequence(charIndexInChars, newlineIndex);
+                chars = theChars.subSequence(charIndexInChars, endCharIndexInChars);
 
             // Add chars to line
             int charIndex = anIndex + charIndexInChars;
@@ -348,36 +348,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
             // Get Line.Start
             int lineStartCharIndex = textLine.getStartCharIndex();
             int removeStartCharIndex = Math.max(aStart, lineStartCharIndex);
-
-            // If whole line in range, remove line
-            if (removeStartCharIndex == lineStartCharIndex && removeEndCharIndex == textLine.getEndCharIndex() && getLineCount() > 1)
-                removeLine(textLine.getIndex());
-
-            // Otherwise remove chars from line
-            else {
-
-                // Remove chars from line
-                int removeStartCharIndexInLine = removeStartCharIndex - lineStartCharIndex;
-                int removeEndCharIndexInLine = removeEndCharIndex - lineStartCharIndex;
-                textLine.removeChars(removeStartCharIndexInLine, removeEndCharIndexInLine);
-
-                // If no newline remaining in line, join with next line
-                if (!textLine.isLastCharNewline()) {
-
-                    // Get NextLine
-                    TextLine nextLine = textLine.getNext();
-                    if (nextLine != null) {
-
-                        // Iterate over NextLine runs and add chars for each
-                        TextRun[] textRuns = nextLine.getRuns();
-                        for (TextRun textRun : textRuns)
-                            textLine.addChars(textRun.getString(), textRun.getStyle(), textLine.length());
-
-                        // Remove NextLine
-                        removeLine(nextLine.getIndex());
-                    }
-                }
-            }
+            removeCharsFromLine(removeStartCharIndex, removeEndCharIndex, textLine);
 
             // Reset end
             removeEndCharIndex = lineStartCharIndex;
@@ -387,6 +358,43 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
         if (removedChars != null)
             firePropChange(new TextBlockUtils.CharsChange(this, removedChars, null, aStart));
         _prefW = -1;
+    }
+
+    /**
+     * Remove chars from line.
+     */
+    protected void removeCharsFromLine(int startCharIndex, int endCharIndex, TextLine textLine)
+    {
+        // If whole line in range, remove line
+        int lineStartCharIndex = textLine.getStartCharIndex();
+        if (startCharIndex == lineStartCharIndex && endCharIndex == textLine.getEndCharIndex() && getLineCount() > 1)
+            removeLine(textLine.getIndex());
+
+        // Otherwise remove chars from line
+        else {
+
+            // Remove chars from line
+            int startCharIndexInLine = startCharIndex - lineStartCharIndex;
+            int endCharIndexInLine = endCharIndex - lineStartCharIndex;
+            textLine.removeChars(startCharIndexInLine, endCharIndexInLine);
+
+            // If no newline remaining in line, join with next line
+            if (!textLine.isLastCharNewline()) {
+
+                // Get NextLine
+                TextLine nextLine = textLine.getNext();
+                if (nextLine != null) {
+
+                    // Iterate over NextLine runs and add chars for each
+                    TextRun[] textRuns = nextLine.getRuns();
+                    for (TextRun textRun : textRuns)
+                        textLine.addChars(textRun.getString(), textRun.getStyle(), textLine.length());
+
+                    // Remove NextLine
+                    removeLine(nextLine.getIndex());
+                }
+            }
+        }
     }
 
     /**
