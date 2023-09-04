@@ -328,17 +328,17 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     /**
      * Removes characters in given range.
      */
-    public void removeChars(int aStart, int anEnd)
+    public void removeChars(int aStartCharIndex, int anEndCharIndex)
     {
         // If empty range, just return
-        if (anEnd == aStart) return;
+        if (anEndCharIndex == aStartCharIndex) return;
 
         // If PropChangeEnabled, get chars to be deleted
-        CharSequence removedChars = isPropChangeEnabled() ? subSequence(aStart, anEnd) : null;
+        CharSequence removedChars = isPropChangeEnabled() ? subSequence(aStartCharIndex, anEndCharIndex) : null;
 
         // Delete lines/chars for range from end to start
-        int removeEndCharIndex = anEnd;
-        while (removeEndCharIndex > aStart) {
+        int removeEndCharIndex = anEndCharIndex;
+        while (removeEndCharIndex > aStartCharIndex) {
 
             // Get line at end index
             TextLine textLine = getLineForCharIndex(removeEndCharIndex);
@@ -347,16 +347,19 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
 
             // Get Line.Start
             int lineStartCharIndex = textLine.getStartCharIndex();
-            int removeStartCharIndex = Math.max(aStart, lineStartCharIndex);
+            int removeStartCharIndex = Math.max(aStartCharIndex, lineStartCharIndex);
             removeCharsFromLine(removeStartCharIndex, removeEndCharIndex, textLine);
 
             // Reset end
             removeEndCharIndex = lineStartCharIndex;
         }
 
+        // Hook for subclasses
+        didRemoveChars(removedChars, aStartCharIndex);
+
         // If deleted chars is set, send property change
         if (removedChars != null)
-            firePropChange(new TextBlockUtils.CharsChange(this, removedChars, null, aStart));
+            firePropChange(new TextBlockUtils.CharsChange(this, removedChars, null, aStartCharIndex));
         _prefW = -1;
     }
 
@@ -396,6 +399,11 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
             }
         }
     }
+
+    /**
+     * A hook for subclasses.
+     */
+    protected void didRemoveChars(CharSequence removedChars, int aStartCharIndex)  { }
 
     /**
      * Replaces chars in given range, with given String, using the given attributes.

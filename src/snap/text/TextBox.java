@@ -130,10 +130,10 @@ public class TextBox extends TextBlock {
      * Override to forward to source text block.
      */
     @Override
-    public void removeChars(int aStart, int anEnd)
+    public void removeChars(int aStartCharIndex, int anEndCharIndex)
     {
         TextBlock textBlock = getTextDoc();
-        textBlock.removeChars(aStart, anEnd);
+        textBlock.removeChars(aStartCharIndex, anEndCharIndex);
     }
 
     /**
@@ -202,7 +202,7 @@ public class TextBox extends TextBlock {
     @Override
     protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, int newlineIndex)
     {
-        // Do normal add chars
+        // Do normal version
         TextLine textLine2 = super.addCharsToLine(theChars, theStyle, charIndex, textLine, newlineIndex);
         if (!isWrapLines())
             return textLine2;
@@ -216,6 +216,25 @@ public class TextBox extends TextBlock {
 
         // Return
         return textLine2;
+    }
+
+    /**
+     * Override to do wrapping.
+     */
+    @Override
+    protected void didRemoveChars(CharSequence removedChars, int startCharIndex)
+    {
+        // If not wrapping, just return
+        if (!isWrapLines())
+            return;
+
+        // If newline wasn't removed, just return
+        if (CharSequenceUtils.indexOfNewline(removedChars, 0) < 0)
+            return;
+
+        // Wrap line if needed
+        TextLine textLine = getLineForCharIndex(startCharIndex);
+        wrapLineIfNeeded(textLine);
     }
 
     /**
