@@ -1,7 +1,12 @@
 package snap.text;
 import snap.geom.Path2D;
+import snap.geom.Rect;
 import snap.geom.Shape;
+import snap.gfx.Painter;
 import snap.props.PropChange;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility methods to support TextBlock.
@@ -63,6 +68,61 @@ public class TextBlockUtils {
         // Close path and return
         path.close();
         return path;
+    }
+
+    /**
+     * Returns underlined runs for text box.
+     */
+    public static TextRun[] getUnderlineRuns(TextBlock textBlock, Rect aRect)
+    {
+        // Get lines
+        List<TextLine> textLines = textBlock.getLines();
+        List<TextRun> underlineRuns = new ArrayList<>();
+
+        // Iterate over lines to add underline runs to list
+        for (TextLine line : textLines) {
+
+            // If line above rect, continue, if below, break
+            if (aRect != null) {
+                if (line.getMaxY() < aRect.y) continue;
+                else if (line.getY() >= aRect.getMaxY())
+                    break;
+            }
+
+            // If run underlined, add to list
+            for (TextRun run : line.getRuns())
+                if (run.getStyle().isUnderlined())
+                    underlineRuns.add(run);
+        }
+
+        // Return
+        return underlineRuns.toArray(new TextRun[0]);
+    }
+
+    /**
+     * Paint TextBox to given painter.
+     */
+    public static void paintTextBlockUnderlines(Painter aPntr, TextBlock textBlock, Rect clipRect)
+    {
+        TextRun[] underlineRuns = getUnderlineRuns(textBlock, clipRect);
+
+        for (TextRun run : underlineRuns) {
+
+            // Set underline color and width
+            TextLine line = run.getLine();
+            double uy = run.getFont().getUnderlineOffset();
+            double uw = run.getFont().getUnderlineThickness();
+            aPntr.setColor(run.getColor());
+            aPntr.setStrokeWidth(uw);
+
+            // Get under line endpoints and draw line
+            double x0 = run.getX();
+            double y0 = line.getBaseline() - uy;
+            double x1 = run.getMaxX();
+            if (run.getEndCharIndex() == line.getEndCharIndex())
+                x1 = line.getX() + line.getWidthNoWhiteSpace();
+            aPntr.drawLine(x0, y0, x1, y0);
+        }
     }
 
     /**

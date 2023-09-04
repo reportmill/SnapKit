@@ -3,8 +3,12 @@
  */
 package snap.text;
 import snap.geom.HPos;
+import snap.geom.Rect;
 import snap.geom.Shape;
+import snap.gfx.Border;
 import snap.gfx.Font;
+import snap.gfx.Painter;
+import snap.gfx.Stroke;
 import snap.props.PropChange;
 import snap.props.PropObject;
 import snap.util.CharSequenceUtils;
@@ -38,6 +42,12 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
 
     // Whether text is modified
     private boolean _textModified;
+
+    // The X/Y of the text block
+    private double _x, _y;
+
+    // The width/height of the text block
+    private double _width = Float.MAX_VALUE, _height;
 
     // The pref width of the text block
     protected double _prefW = -1;
@@ -975,22 +985,74 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     /**
      * Returns the X location.
      */
-    public double getX()  { return 0; }
+    public double getX()  { return _x; }
+
+    /**
+     * Sets the X location.
+     */
+    public void setX(double anX)  { _x = anX; }
 
     /**
      * Returns the Y location.
      */
-    public double getY()  { return 0; }
+    public double getY()  { return _y; }
+
+    /**
+     * Sets the Y location.
+     */
+    public void setY(double aY)  { _y = aY; }
 
     /**
      * Returns the width.
      */
-    public double getWidth()  { return Float.MAX_VALUE; }
+    public double getWidth()  { return _width; }
+
+    /**
+     * Sets the width.
+     */
+    public void setWidth(double aValue)
+    {
+        if (aValue == _width) return;
+        _width = aValue;
+    }
 
     /**
      * Returns the height.
      */
-    public double getHeight()  { return 0; }
+    public double getHeight()  { return _height; }
+
+    /**
+     * Sets the width.
+     */
+    public void setHeight(double aValue)
+    {
+        if (aValue == _height) return;
+        _height = aValue;
+    }
+
+    /**
+     * Returns the current bounds.
+     */
+    public Rect getBounds()  { return new Rect(_x, _y, _width, _height); }
+
+    /**
+     * Sets the rect location and size.
+     */
+    public void setBounds(Rect aRect)
+    {
+        setBounds(aRect.x, aRect.y, aRect.width, aRect.height);
+    }
+
+    /**
+     * Sets the rect location and size.
+     */
+    public void setBounds(double aX, double aY, double aW, double aH)
+    {
+        setX(aX);
+        setY(aY);
+        setWidth(aW);
+        setHeight(aH);
+    }
 
     /**
      * Returns the max X.
@@ -1031,6 +1093,75 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     public void setPropChangeEnabled(boolean aValue)
     {
         _propChangeEnabled = aValue;
+    }
+
+    /**
+     * Paint TextBox to given painter.
+     */
+    public void paint(Painter aPntr)
+    {
+        // Save painter state
+        aPntr.save();
+
+        // Get text bounds and clip
+        Rect textBounds = getBounds();
+        Rect clipBounds = aPntr.getClipBounds();
+        clipBounds = clipBounds != null ? clipBounds.getIntersectRect(textBounds) : textBounds;
+        aPntr.clip(clipBounds);
+
+        // Iterate over lines
+        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
+
+            // If line not yet visible, skip
+            TextLine textLine = getLine(i);
+            if (textLine.getTextMaxY() < clipBounds.y)
+                continue;
+
+            // If line no longer visible, break
+            if (textLine.getTextY() >= clipBounds.getMaxY())
+                break;
+
+            // Paint line
+            double lineY = getAlignedY() + textLine.getBaseline();
+            paintLine(aPntr, textLine, lineY);
+        }
+
+        // Paint underlines
+        if (isUnderlined())
+            TextBlockUtils.paintTextBlockUnderlines(aPntr, this, clipBounds);
+
+        // Restore state
+        aPntr.restore();
+    }
+
+    /**
+     * Paint TextBox to given painter.
+     */
+    public void paintLine(Painter aPntr, TextLine textLine, double lineY)
+    {
+        TextToken[] lineTokens = textLine.getTokens();
+
+        // Iterate over line tokens
+        for (TextToken token : lineTokens) {
+
+            // Do normal paint token
+            String tokenStr = token.getString();
+            double tokenX = token.getTextX();
+            aPntr.setFont(token.getFont());
+            aPntr.setPaint(token.getTextColor()); //aPntr.setPaint(SnapColor.RED);
+            aPntr.drawString(tokenStr, tokenX, lineY, token.getTextStyle().getCharSpacing());
+
+            // Handle TextBorder: Get outline and stroke
+            Border border = token.getTextStyle().getBorder();
+            if (border != null) {
+                Font tokenFont = token.getFont();
+                double charSpacing = token.getTextStyle().getCharSpacing();
+                Shape shape = tokenFont.getOutline(tokenStr, tokenX, lineY, charSpacing);
+                aPntr.setPaint(border.getColor());
+                aPntr.setStroke(Stroke.Stroke1.copyForWidth(border.getWidth()));
+                aPntr.draw(shape);
+            }
+        }
     }
 
     /**
@@ -1094,6 +1225,11 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
             _length += line.length();
         }
     }
+
+    /**
+     * Returns underlined runs for text box.
+     */
+    public TextRun[] getUnderlineRuns(Rect aRect)  { return TextBlockUtils.getUnderlineRuns(this, aRect); }
 
     /**
      * Standard clone implementation.

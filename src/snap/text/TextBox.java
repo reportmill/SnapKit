@@ -5,14 +5,10 @@ package snap.text;
 import snap.geom.Rect;
 import snap.geom.Shape;
 import snap.geom.VPos;
-import snap.gfx.Border;
-import snap.gfx.Painter;
-import snap.gfx.Stroke;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.CharSequenceUtils;
 import snap.util.MathUtils;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,12 +18,6 @@ public class TextBox extends TextBlock {
 
     // The TextBlock
     private TextBlock _textBlock;
-
-    // The X/Y of the text block
-    private double _x, _y;
-
-    // The width/height of the text block
-    private double _width = Float.MAX_VALUE, _height;
 
     // Whether to wrap lines that overrun bounds
     private boolean _wrapLines;
@@ -274,80 +264,6 @@ public class TextBox extends TextBlock {
 
         // Return
         return didWrap;
-    }
-
-    /**
-     * Returns the X location.
-     */
-    public double getX()  { return _x; }
-
-    /**
-     * Sets the X location.
-     */
-    public void setX(double anX)  { _x = anX; }
-
-    /**
-     * Returns the Y location.
-     */
-    public double getY()  { return _y; }
-
-    /**
-     * Sets the Y location.
-     */
-    public void setY(double aY)  { _y = aY; }
-
-    /**
-     * Returns the width.
-     */
-    public double getWidth()  { return _width; }
-
-    /**
-     * Sets the width.
-     */
-    public void setWidth(double aValue)
-    {
-        if (aValue == _width) return;
-        _width = aValue;
-        if (isWrapLines()) updateAll();
-    }
-
-    /**
-     * Returns the height.
-     */
-    public double getHeight()  { return _height; }
-
-    /**
-     * Sets the width.
-     */
-    public void setHeight(double aValue)
-    {
-        if (aValue == _height) return;
-        _height = aValue;
-        updateAll();
-    }
-
-    /**
-     * Returns the current bounds.
-     */
-    public Rect getBounds()  { return new Rect(_x, _y, _width, _height); }
-
-    /**
-     * Sets the rect location and size.
-     */
-    public void setBounds(Rect aRect)
-    {
-        setBounds(aRect.x, aRect.y, aRect.width, aRect.height);
-    }
-
-    /**
-     * Sets the rect location and size.
-     */
-    public void setBounds(double aX, double aY, double aW, double aH)
-    {
-        setX(aX);
-        setY(aY);
-        setWidth(aW);
-        setHeight(aH);
     }
 
     /**
@@ -617,97 +533,26 @@ public class TextBox extends TextBlock {
     }
 
     /**
-     * Returns underlined runs for text box.
+     * Override to update layout.
      */
-    public List<TextRun> getUnderlineRuns(Rect aRect)
+    @Override
+    public void setWidth(double aValue)
     {
-        // Iterate over lines to add underline runs to list
-        List<TextRun> underlineRuns = new ArrayList<>();
-        for (TextLine line : getLines()) {
-
-            // If line above rect, continue, if below, break
-            if (aRect != null) {
-                if (line.getMaxY() < aRect.y) continue;
-                else if (line.getY() >= aRect.getMaxY())
-                    break;
-            }
-
-            // If run underlined, add to list
-            for (TextRun run : line.getRuns())
-                if (run.getStyle().isUnderlined())
-                    underlineRuns.add(run);
-        }
-
-        // Return
-        return underlineRuns;
+        if (aValue == getWidth()) return;
+        super.setWidth(aValue);
+        if (isWrapLines())
+            updateAll();
     }
 
     /**
-     * Paint TextBox to given painter.
+     * Override to update layout.
      */
-    public void paint(Painter aPntr)
+    @Override
+    public void setHeight(double aValue)
     {
-        // Get intersection of clip rect and bounds
-        aPntr.save();
-        Rect clip = aPntr.getClipBounds();
-        clip = clip != null ? clip.getIntersectRect(getBounds()) : getBounds();
-        aPntr.clip(clip);
-
-        // Iterate over lines
-        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
-            TextLine line = getLine(i);
-            double lineY = getY() + line.getBaseline();
-            if (line.getMaxY() < clip.getMinY())
-                continue;
-            if (line.getY() >= clip.getMaxY())
-                break;
-
-            // Iterate over line tokens
-            TextToken[] lineTokens = line.getTokens();
-            for (TextToken token : lineTokens) {
-
-                // Do normal paint token
-                String tokenStr = token.getString();
-                double tokenX = token.getTextX();
-                aPntr.setFont(token.getFont());
-                aPntr.setPaint(token.getTextColor()); //aPntr.setPaint(SnapColor.RED);
-                aPntr.drawString(tokenStr, tokenX, lineY, token.getTextStyle().getCharSpacing());
-
-                // Handle TextBorder: Get outline and stroke
-                Border border = token.getTextStyle().getBorder();
-                if (border != null) {
-                    Shape shape = token.getFont().getOutline(tokenStr, tokenX, lineY, token.getTextStyle().getCharSpacing());
-                    aPntr.setPaint(border.getColor());
-                    aPntr.setStroke(Stroke.Stroke1.copyForWidth(border.getWidth()));
-                    aPntr.draw(shape);
-                }
-            }
-        }
-
-        // Paint underlines
-        if (isUnderlined()) {
-
-            for (TextRun run : getUnderlineRuns(clip)) {
-
-                // Set underline color and width
-                TextLine line = run.getLine();
-                double uy = run.getFont().getUnderlineOffset();
-                double uw = run.getFont().getUnderlineThickness();
-                aPntr.setColor(run.getColor());
-                aPntr.setStrokeWidth(uw);
-
-                // Get under line endpoints and draw line
-                double x0 = run.getX();
-                double y0 = line.getBaseline() - uy;
-                double x1 = run.getMaxX();
-                if (run.getEndCharIndex() == line.getEndCharIndex())
-                    x1 = line.getX() + line.getWidthNoWhiteSpace();
-                aPntr.drawLine(x0, y0, x1, y0);
-            }
-        }
-
-        // Restore state
-        aPntr.restore();
+        if (aValue == getHeight()) return;
+        super.setHeight(aValue);
+        updateAll();
     }
 
     /**
