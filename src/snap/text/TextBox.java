@@ -329,17 +329,14 @@ public class TextBox extends TextBlock {
     /**
      * Returns the current bounds.
      */
-    public Rect getBounds()
-    {
-        return new Rect(_x, _y, _width, _height);
-    }
+    public Rect getBounds()  { return new Rect(_x, _y, _width, _height); }
 
     /**
      * Sets the rect location and size.
      */
     public void setBounds(Rect aRect)
     {
-        setBounds(aRect.getX(), aRect.getY(), aRect.getWidth(), aRect.getHeight());
+        setBounds(aRect.x, aRect.y, aRect.width, aRect.height);
     }
 
     /**
@@ -643,37 +640,6 @@ public class TextBox extends TextBlock {
 
         // Return
         return underlineRuns;
-    }
-
-    /**
-     * Returns the line for the given y value.
-     */
-    public TextLine getLineForY(double aY)
-    {
-        // If y less than zero, return null
-        if (aY < 0) return null;
-
-        // Iterate over lines and return one that spans given y
-        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
-            TextLine line = getLine(i);
-            if (aY < line.getMaxY())
-                return line;
-        }
-
-        // If no line for given y, return last line
-        return getLineLast();
-    }
-
-    /**
-     * Returns the character index for the given x/y point.
-     */
-    public int getCharIndexForXY(double anX, double aY)
-    {
-        TextLine textBoxLine = getLineForY(aY);
-        if (textBoxLine == null)
-            return 0;
-        int charIndex = textBoxLine.getCharIndexForX(anX);
-        return textBoxLine.getStartCharIndex() + charIndex;
     }
 
     /**

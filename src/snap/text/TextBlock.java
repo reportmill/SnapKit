@@ -840,10 +840,13 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
         // If y less than zero, return null
         if (aY < 0) return null;
 
+        // Get Y in text
+        double textY = aY - getAlignedY();
+
         // Iterate over lines and return one that spans given y
         for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
             TextLine line = getLine(i);
-            if (aY < line.getMaxY())
+            if (textY < line.getMaxY())
                 return line;
         }
 
@@ -856,10 +859,16 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     public int getCharIndexForXY(double anX, double aY)
     {
+        // Get text line for y (just return 0 if not found)
         TextLine textLine = getLineForY(aY);
         if (textLine == null)
             return 0;
-        int charIndex = textLine.getCharIndexForX(anX);
+
+        // Get x in text
+        double textX = anX - getX();
+
+        // Get char index for x in line and return
+        int charIndex = textLine.getCharIndexForX(textX);
         return textLine.getStartCharIndex() + charIndex;
     }
 
