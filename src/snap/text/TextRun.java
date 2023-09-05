@@ -310,6 +310,23 @@ public class TextRun implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns a copy of this line for given char range.
+     */
+    public TextRun copyForRange(int aStart, int aEnd)
+    {
+        // Do normal clone
+        TextRun clone = clone();
+
+        // Reset values for range
+        clone._startCharIndex += aStart;
+        clone._length = aEnd - aStart;
+        clone._x = clone._width = -1;
+
+        // Return
+        return clone;
+    }
+
+    /**
      * Returns a basic clone of this object.
      */
     @Override

@@ -417,10 +417,9 @@ public class TextBox extends TextBlock {
         // Handle StyleChange
         else if (aPC instanceof TextBlockUtils.StyleChange) {
             TextBlockUtils.StyleChange styleChange = (TextBlockUtils.StyleChange) aPC;
-            TextStyle newStyle = (TextStyle) styleChange.getNewValue();
             int startCharIndex = styleChange.getStart();
             int endCharIndex = styleChange.getEnd();
-            super.setStyle(newStyle, startCharIndex, endCharIndex);
+            updateTextForCharRange(startCharIndex, endCharIndex);
         }
 
         // Handle LineStyleChange
@@ -492,6 +491,25 @@ public class TextBox extends TextBlock {
                 super.addChars(run.getString(), run.getStyle(), index);
                 super.setLineStyle(line.getLineStyle(), index, index + run.length());
             }
+        }
+    }
+
+    /**
+     * Updates all lines.
+     */
+    protected void updateTextForCharRange(int startCharIndex, int endCharIndex)
+    {
+        // Skip if no text
+        if (length() == 0 && _textBlock.length() == 0) return;
+
+        // Remove all chars and re-add
+        super.removeChars(startCharIndex, endCharIndex);
+
+        // Get runs for range and add
+        TextRun[] textRuns = _textBlock.getRunsForCharRange(startCharIndex, endCharIndex, true);
+        for (TextRun textRun : textRuns) {
+            super.addChars(textRun.getString(), textRun.getStyle(), startCharIndex);
+            startCharIndex += textRun.length();
         }
     }
 
