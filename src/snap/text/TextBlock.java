@@ -456,73 +456,6 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     }
 
     /**
-     * Returns an array of runs for given char range.
-     */
-    public TextRun[] getRunsForCharRange(int startCharIndex, int endCharIndex, boolean trimEndRanges)
-    {
-        // If no range, return empty array
-        if (startCharIndex == endCharIndex) return new TextRun[0];
-
-        // Get text line for range
-        TextLine textLine = getLineForCharIndex(startCharIndex);
-        List<TextRun> runsList = new ArrayList<>();
-        int charIndex = startCharIndex;
-
-        // Iterate over lines for char range
-        while (textLine != null) {
-
-            // Get line text run for range
-            int lineStartCharIndex = textLine.getStartCharIndex();
-            int charIndexInLine = charIndex - lineStartCharIndex;
-            TextRun textRun = textLine.getRunForCharRange(charIndexInLine, endCharIndex - lineStartCharIndex);
-
-            // Iterate over line runs for range
-            while (textRun != null) {
-
-                // Add run
-                runsList.add(textRun);
-
-                // Get next run
-                charIndex = textRun.getEndCharIndex() + lineStartCharIndex;
-                textRun = charIndex < endCharIndex ? textRun.getNext() : null;
-            }
-
-            // Update line
-            textLine.updateRuns(0);
-            textLine = charIndex < endCharIndex ? textLine.getNext() : null;
-        }
-
-        // Get array
-        TextRun[] runs = runsList.toArray(new TextRun[0]);
-
-        // Do trim if needed
-        if (trimEndRanges && runs.length > 0) {
-            runs[0] = trimRun(runs[0], startCharIndex, endCharIndex);
-            if (runs.length > 1)
-                runs[runs.length - 1] = trimRun(runs[runs.length - 1], startCharIndex, endCharIndex);
-        }
-
-        // Return
-        return runsList.toArray(new TextRun[0]);
-    }
-
-    /**
-     * Trims a run.
-     */
-    private TextRun trimRun(TextRun textRun, int startCharIndex, int endCharIndex)
-    {
-        int startCharIndexInLine = startCharIndex - textRun.getLine().getStartCharIndex();
-        int endCharIndexInLine = endCharIndex - textRun.getLine().getStartCharIndex();
-        if (startCharIndexInLine > textRun.getStartCharIndex() || endCharIndexInLine < textRun.getEndCharIndex()) {
-            int newRunStartCharIndex = Math.max(startCharIndexInLine, textRun.getStartCharIndex());
-            int newRunEndStartCharIndex = Math.min(endCharIndexInLine, textRun.getEndCharIndex());
-            return textRun.copyForRange(newRunStartCharIndex, newRunEndStartCharIndex);
-        }
-
-        return textRun;
-    }
-
-    /**
      * Sets a given style to a given range.
      */
     public void setStyle(TextStyle aStyle, int aStart, int anEnd)
@@ -869,13 +802,11 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     }
 
     /**
-     * Returns the last run.
+     * Returns a TextRunIter to easily traverse the runs for a given range of chars.
      */
-    public TextRun getRunLast()
+    public TextRunIter getRunIterForCharRange(int startCharIndex, int endCharIndex)
     {
-        TextLine lastLine = getLineLast();
-        TextRun lastRun = lastLine != null ? lastLine.getRunLast() : null;
-        return lastRun;
+        return new TextRunIter(this, startCharIndex, endCharIndex, true);
     }
 
     /**

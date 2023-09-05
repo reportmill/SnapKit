@@ -475,22 +475,26 @@ public class TextBox extends TextBlock {
         // Skip if no text
         if (length() == 0 && _textBlock.length() == 0) return;
 
-        // Remove all chars and re-add
+        // Remove all chars
         super.removeChars(0, length());
 
         // Get source text lines
         List<TextLine> textLines = _textBlock.getLines();
 
-        // Iterate over source text lines and add back
+        // Iterate over source text lines and add line chars back
         for (TextLine line : textLines) {
 
-            // Iterate over source text lines and add back
+            // Iterate over source text runs and reset run chars
             TextRun[] lineRuns = line.getRuns();
             for (TextRun run : lineRuns) {
                 int index = line.getStartCharIndex() + run.getStartCharIndex();
                 super.addChars(run.getString(), run.getStyle(), index);
-                super.setLineStyle(line.getLineStyle(), index, index + run.length());
             }
+
+            // Reset line style
+            int lineStartCharIndex = line.getStartCharIndex();
+            int lineEndCharIndex = line.getEndCharIndex();
+            super.setLineStyle(line.getLineStyle(), lineStartCharIndex, lineEndCharIndex);
         }
     }
 
@@ -505,11 +509,11 @@ public class TextBox extends TextBlock {
         // Remove all chars and re-add
         super.removeChars(startCharIndex, endCharIndex);
 
-        // Get runs for range and add
-        TextRun[] textRuns = _textBlock.getRunsForCharRange(startCharIndex, endCharIndex, true);
-        for (TextRun textRun : textRuns) {
-            super.addChars(textRun.getString(), textRun.getStyle(), startCharIndex);
-            startCharIndex += textRun.length();
+        // Iterate over source text runs for range and add
+        TextRunIter runIter = _textBlock.getRunIterForCharRange(startCharIndex, endCharIndex);
+        while (runIter.hasNextRun()) {
+            TextRun nextRun = runIter.getNextRun();
+            super.addChars(nextRun.getString(), nextRun.getStyle(), startCharIndex);
         }
     }
 
