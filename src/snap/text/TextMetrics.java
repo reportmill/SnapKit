@@ -23,12 +23,18 @@ public class TextMetrics {
      */
     public TextMetrics(TextLine textLine)
     {
+        // Get values for first run
         TextRun run = textLine.getRun(0);
+        _ascent = run.getAscent();
+        _descent = run.getDescent();
+        _leading = run.getLeading();
 
+        // Update for successive runs
+        run = run.getNext();
         while (run != null) {
-            _ascent = run.getAscent();
-            _descent = run.getDescent();
-            _leading = run.getLeading();
+            _ascent = Math.max(_ascent, run.getAscent());
+            _descent = Math.max(_descent, run.getDescent());
+            _leading = Math.max(_leading, run.getLeading());
             run = run.getNext();
         }
 
