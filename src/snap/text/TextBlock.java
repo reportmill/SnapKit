@@ -475,36 +475,52 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     private void setStyleRich(TextStyle aStyle, int aStart, int anEnd)
     {
-        // Iterate over runs in range and set style
-        for (int textCharIndex = aStart; textCharIndex < anEnd; ) {
+        // Get text line for range
+        TextLine textLine = getLineForCharIndex(aStart);
+        textLine.updateText();
+        int charIndex = aStart;
 
-            // Set style
-            TextLine line = getLineForCharIndex(textCharIndex);
-            int lineStart = line.getStartCharIndex();
-            TextRun run = getRunForCharRange(textCharIndex, anEnd);
+        // Iterate over lines for char range
+        while (textLine != null) {
 
-            // If run is larger than range, trim to size
-            if (textCharIndex - lineStart > run.getStartCharIndex()) {
-                int newRunStart = textCharIndex - lineStart - run.getStartCharIndex();
-                run = line.splitRunForCharIndex(run, newRunStart);
+            // Get line text run for range
+            int lineStartCharIndex = textLine.getStartCharIndex();
+            int charIndexInLine = charIndex - lineStartCharIndex;
+            TextRun textRun = textLine.getRunForCharRange(charIndexInLine, anEnd - lineStartCharIndex);
+
+            // Iterate over line runs for range
+            while (textRun != null) {
+
+                // If run is larger than range, trim to size
+                if (charIndexInLine > textRun.getStartCharIndex()) {
+                    int newRunStart = charIndexInLine - textRun.getStartCharIndex();
+                    textRun = textLine.splitRunForCharIndex(textRun, newRunStart);
+                }
+                if (anEnd - lineStartCharIndex < textRun.getEndCharIndex()) {
+                    int newRunEnd = anEnd - lineStartCharIndex - textRun.getStartCharIndex();
+                    textLine.splitRunForCharIndex(textRun, newRunEnd);
+                }
+
+                // Set style
+                TextStyle oldStyle = textRun.getStyle();
+                textRun.setStyle(aStyle);
+
+                // Fire prop change
+                if (isPropChangeEnabled()) {
+                    int runStart = textRun.getStartCharIndex() + lineStartCharIndex;
+                    int runEnd = textRun.getEndCharIndex() + lineStartCharIndex;
+                    PropChange pc = new TextBlockUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
+                    firePropChange(pc);
+                }
+
+                // Get next run
+                charIndex = textRun.getEndCharIndex() + lineStartCharIndex;
+                textRun = charIndex < anEnd ? textRun.getNext() : null;
             }
-            if (anEnd - lineStart < run.getEndCharIndex()) {
-                int newRunEnd = anEnd - lineStart - run.getStartCharIndex();
-                line.splitRunForCharIndex(run, newRunEnd);
-            }
 
-            // Set style
-            TextStyle oldStyle = run.getStyle();
-            run.setStyle(aStyle);
-            textCharIndex = run.getEndCharIndex() + lineStart;
-
-            // Fire prop change
-            if (isPropChangeEnabled()) {
-                int runStart = run.getStartCharIndex() + lineStart;
-                int runEnd = run.getEndCharIndex() + lineStart;
-                PropChange pc = new TextBlockUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
-                firePropChange(pc);
-            }
+            // Update line
+            textLine.updateRuns(0);
+            textLine = charIndex < anEnd ? textLine.getNext() : null;
         }
     }
 
