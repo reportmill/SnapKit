@@ -716,6 +716,7 @@ public class TextLine implements CharSequenceX, Cloneable {
             TextRun run = getRun(i);
             run._index = i;
             run._startCharIndex = length;
+            run._x = -1;
             length += run.length();
         }
 

@@ -69,8 +69,7 @@ public class TextRun implements CharSequenceX, Cloneable {
     {
         _style = aStyle;
         _width = -1;
-        _textLine._width = -1;
-        _textLine._tokens = null;
+        _textLine.updateRuns(_index);
     }
 
     /**
@@ -165,6 +164,7 @@ public class TextRun implements CharSequenceX, Cloneable {
         _length += aLength;
         _width = -1;
         assert (_length >= 0);
+        _textLine.updateRuns(_index);
     }
 
     /**
