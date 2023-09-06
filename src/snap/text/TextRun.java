@@ -164,7 +164,6 @@ public class TextRun implements CharSequenceX, Cloneable {
         _length += aLength;
         _width = -1;
         assert (_length >= 0);
-        _textLine.updateRuns(_index);
     }
 
     /**

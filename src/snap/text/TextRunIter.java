@@ -1,9 +1,15 @@
+/*
+ * Copyright (c) 2010, ReportMill Software. All rights reserved.
+ */
 package snap.text;
 
 /**
  * This class iterates over TextBlock TextRuns.
  */
 public class TextRunIter {
+
+    // The TextBlock
+    private TextBlock _textBlock;
 
     // The start char index
     private int _startCharIndex;
@@ -28,6 +34,7 @@ public class TextRunIter {
      */
     public TextRunIter(TextBlock textBlock, int startCharIndex, int endCharIndex, boolean trimEndRuns)
     {
+        _textBlock = textBlock;
         _startCharIndex = startCharIndex;
         _endCharIndex = endCharIndex;
         _trimEndRuns = trimEndRuns;
@@ -37,7 +44,7 @@ public class TextRunIter {
 
         // Get/set starting next run
         int startCharIndexInLine = startCharIndex - _textLine.getStartCharIndex();
-        _nextRun = _textLine.getRunForCharIndex(startCharIndexInLine);
+        _nextRun = _textLine.getRunForCharRange(startCharIndexInLine, _textLine.length());
     }
 
     /**
@@ -98,6 +105,34 @@ public class TextRunIter {
 
         // Return no next run
         return null;
+    }
+
+    /**
+     * Returns the current line.
+     */
+    public TextLine getLine()  { return _textLine; }
+
+    /**
+     * Splits the end runs.
+     */
+    public void splitEndRuns()
+    {
+        // If start run starts before start char index, split at start char index
+        TextRun startRun = _nextRun;
+        int startIndexInLine = _startCharIndex - _textLine.getStartCharIndex();
+        if (startIndexInLine > startRun.getStartCharIndex()) {
+            int newRunStartInLine = startIndexInLine - startRun.getStartCharIndex();
+            _nextRun = _textLine.splitRunForCharIndex(startRun, newRunStartInLine);
+        }
+
+        // If end run ends after end char index, split at end char index
+        TextRun endRun = _textBlock.getRunForCharIndex(_endCharIndex);
+        TextLine endLine = endRun.getLine();
+        int endIndexInLine = _endCharIndex - endLine.getStartCharIndex();
+        if (endIndexInLine < endRun.getEndCharIndex()) {
+            int newRunEndInLine = endIndexInLine - endRun.getStartCharIndex();
+            endLine.splitRunForCharIndex(endRun, newRunEndInLine);
+        }
     }
 
     /**

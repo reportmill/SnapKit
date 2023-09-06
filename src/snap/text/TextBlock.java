@@ -475,53 +475,31 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     private void setStyleRich(TextStyle aStyle, int aStart, int anEnd)
     {
-        // Get text line for range
-        TextLine textLine = getLineForCharIndex(aStart);
-        textLine.updateText();
-        int charIndex = aStart;
+        // Get run iter and split end runs
+        TextRunIter runIter = getRunIterForCharRange(aStart, anEnd);
+        runIter.splitEndRuns();
+        TextLine startLine = runIter.getLine();
 
-        // Iterate over lines for char range
-        while (textLine != null) {
+        // Iterate over runs and reset style
+        while (runIter.hasNextRun()) {
 
-            // Get line text run for range
-            int lineStartCharIndex = textLine.getStartCharIndex();
-            int charIndexInLine = charIndex - lineStartCharIndex;
-            TextRun textRun = textLine.getRunForCharRange(charIndexInLine, anEnd - lineStartCharIndex);
+            // Set style
+            TextRun textRun = runIter.getNextRun();
+            TextStyle oldStyle = textRun.getStyle();
+            textRun.setStyle(aStyle);
 
-            // Iterate over line runs for range
-            while (textRun != null) {
-
-                // If run is larger than range, trim to size
-                if (charIndexInLine > textRun.getStartCharIndex()) {
-                    int newRunStart = charIndexInLine - textRun.getStartCharIndex();
-                    textRun = textLine.splitRunForCharIndex(textRun, newRunStart);
-                }
-                if (anEnd - lineStartCharIndex < textRun.getEndCharIndex()) {
-                    int newRunEnd = anEnd - lineStartCharIndex - textRun.getStartCharIndex();
-                    textLine.splitRunForCharIndex(textRun, newRunEnd);
-                }
-
-                // Set style
-                TextStyle oldStyle = textRun.getStyle();
-                textRun.setStyle(aStyle);
-
-                // Fire prop change
-                if (isPropChangeEnabled()) {
-                    int runStart = textRun.getStartCharIndex() + lineStartCharIndex;
-                    int runEnd = textRun.getEndCharIndex() + lineStartCharIndex;
-                    PropChange pc = new TextBlockUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
-                    firePropChange(pc);
-                }
-
-                // Get next run
-                charIndex = textRun.getEndCharIndex() + lineStartCharIndex;
-                textRun = charIndex < anEnd ? textRun.getNext() : null;
+            // Fire prop change
+            if (isPropChangeEnabled()) {
+                int lineStartCharIndex = textRun.getLine().getStartCharIndex();
+                int runStart = textRun.getStartCharIndex() + lineStartCharIndex;
+                int runEnd = textRun.getEndCharIndex() + lineStartCharIndex;
+                PropChange pc = new TextBlockUtils.StyleChange(this, oldStyle, aStyle, runStart, runEnd);
+                firePropChange(pc);
             }
-
-            // Update line
-            textLine.updateRuns(0);
-            textLine = charIndex < anEnd ? textLine.getNext() : null;
         }
+
+        // Update lines
+        startLine.updateText();
     }
 
     /**
