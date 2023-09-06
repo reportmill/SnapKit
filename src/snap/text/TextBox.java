@@ -201,7 +201,7 @@ public class TextBox extends TextBlock {
         boolean didWrap = wrapLineIfNeeded(textLine);
 
         // If line didn't wrap but newline was added, wrap next line if needed
-        if (!didWrap && textLine2 != textLine)
+        if (!didWrap && textLine2 != textLine && textLine2.getTokenCount() > 0)
             wrapLineIfNeeded(textLine2);
 
         // Return
@@ -224,7 +224,8 @@ public class TextBox extends TextBlock {
 
         // Wrap line if needed
         TextLine textLine = getLineForCharIndex(startCharIndex);
-        wrapLineIfNeeded(textLine);
+        if (textLine.getTokenCount() > 0)
+            wrapLineIfNeeded(textLine);
     }
 
     /**
@@ -235,35 +236,71 @@ public class TextBox extends TextBlock {
         boolean didWrap = false;
 
         // If line is now outside bounds, move chars to new line
-        while (isHitRight(textLine.getMaxX(), textLine.getY(), textLine.getHeight()) && textLine.getTokenCount() > 0) {
+        while (isHitRight(textLine.getMaxX(), textLine.getY(), textLine.getHeight())) {
 
-            // Get last token
-            TextToken lastToken = textLine.getLastToken();
-            //if (isHyphenate() && lastToken.isSplittable())
-            //    lastToken = lastToken.copyForSplittable();
-
-            // Get next line to move chars to
-            TextLine nextLine = textLine.getNext();
-            if (nextLine == null) {
-                nextLine = textLine.splitLineAtIndex(textLine.length());
-                addLine(nextLine, textLine.getIndex() + 1);
+            // If only one token, move the minimum number of end chars to next line
+            if (textLine.getTokenCount() == 1) {
+                moveMinimumLineEndCharsToNextLine(textLine);
+                return true;
             }
 
-            // Remove chars from text line
-            int tokenStartCharIndex = lastToken.getStartCharIndex();
-            CharSequence moveChars = textLine.subSequence(tokenStartCharIndex, textLine.length());
-            textLine.removeChars(tokenStartCharIndex, textLine.length());
-
-            // Add chars to next line
-            TextStyle textStyle = lastToken.getTextStyle();
-            int nextLineStartCharIndex = nextLine.getStartCharIndex();
-            int newlineIndex2 = CharSequenceUtils.indexAfterNewline(moveChars, 0);
-            addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, newlineIndex2);
+            // Move last token (and trailing chars) to next line
+            TextToken lastToken = textLine.getLastToken();
+            moveLineCharsToNextLine(textLine, lastToken.getStartCharIndex(), lastToken);
             didWrap = true;
         }
 
         // Return
         return didWrap;
+    }
+
+    /**
+     * Moves the minimum number of line end chars to next line (leaves at least one char, even if it doesn't fit).
+     */
+    private void moveMinimumLineEndCharsToNextLine(TextLine textLine)
+    {
+        // While token is splittable, move end chars to next line
+        TextToken token = textLine.getLastToken();
+        while (isHyphenate() && token.isSplittable()) {
+            token = token.copyForSplittable();
+            if (moveLineCharsToNextLine(textLine, token.getEndCharIndex(), token)) {
+                textLine.getLastToken().setHyphenated(true);
+                return;
+            }
+        }
+
+        // While token has more than 1 char, move last char to next line
+        while (token.getLength() > 1) {
+            token = token.copyToCharIndex(token.getLength() - 1);
+            if (moveLineCharsToNextLine(textLine, token.getEndCharIndex(), token))
+                return;
+        }
+    }
+
+    /**
+     * Move line chars from given start char index to line end to next line.
+     */
+    private boolean moveLineCharsToNextLine(TextLine textLine, int startCharIndex, TextToken token)
+    {
+        // Get next line to move chars to
+        TextLine nextLine = textLine.getNext();
+        if (nextLine == null) {
+            nextLine = textLine.splitLineAtIndex(textLine.length());
+            addLine(nextLine, textLine.getIndex() + 1);
+        }
+
+        // Remove chars from text line
+        CharSequence moveChars = textLine.subSequence(startCharIndex, textLine.length());
+        textLine.removeChars(startCharIndex, textLine.length());
+
+        // Add chars to next line
+        TextStyle textStyle = token.getTextStyle();
+        int nextLineStartCharIndex = nextLine.getStartCharIndex();
+        int newlineIndex = CharSequenceUtils.indexAfterNewline(moveChars, 0);
+        addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, newlineIndex);
+
+        // Return whether line is now within bounds
+        return !isHitRight(textLine.getMaxX(), textLine.getY(), textLine.getHeight());
     }
 
     /**
