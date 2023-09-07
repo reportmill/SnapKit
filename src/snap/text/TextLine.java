@@ -744,11 +744,13 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Update
      */
-    private void updateAlignmentAndJustify()
+    protected void updateAlignmentAndJustify()
     {
-        // If justify, shift tokens in line (unless line has newline or is last line in RichText)
         TextLineStyle lineStyle = getLineStyle();
-        if (lineStyle.isJustify() && getTokenCount() > 1) {
+        _x = 0;
+
+        // If justify, shift tokens in line (unless line has newline or is last line in RichText)
+        if (lineStyle.isJustify() && getTokenCount() > 1 && _textBlock.getWidth() < 9999 && !isLastCharNewline()) {
 
             // Calculate Justify token shift
             double lineY = getY();
@@ -760,13 +762,10 @@ public class TextLine implements CharSequenceX, Cloneable {
 
             // Shift tokens
             for (TextToken token : getTokens()) {
-                token._justifyShiftX = runningShiftX;
+//                token._justifyShiftX = runningShiftX;
+                token._x += runningShiftX;
                 runningShiftX += shiftX;
             }
-
-            // Update WidthAll
-            double _widthAll = 0;
-            _widthAll += runningShiftX - shiftX;
         }
 
         // Calculate X alignment shift

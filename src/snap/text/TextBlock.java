@@ -577,19 +577,23 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
     {
         // Handle Rich
-        if (isRichText())
+        if (isRichText()) {
             setLineStyleRich(aStyle, aStart, anEnd);
+            return;
+        }
 
         // Handle Plain: Propagate to Lines
-        else {
-            TextLineStyle oldStyle = getLine(0).getLineStyle();
-            for (TextLine line : getLines())
-                line.setLineStyle(aStyle);
+        TextLineStyle oldStyle = getLine(0).getLineStyle();
+        if (aStyle.equals(oldStyle))
+            return;
 
-            // Fire prop change
-            if (isPropChangeEnabled())
-                firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, aStyle, 0));
-        }
+        // Propagate to all lines
+        for (TextLine line : getLines())
+            line.setLineStyle(aStyle);
+
+        // Fire prop change
+        if (isPropChangeEnabled())
+            firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, aStyle, 0));
 
         _prefW = -1;
     }
@@ -618,15 +622,19 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     private void setLineStyleRich(TextLineStyle aStyle, int aStart, int anEnd)
     {
-        // Handle MultiStyle
+        // Get start/end line indexes for char range
         int startLineIndex = getLineForCharIndex(aStart).getIndex();
         int endLineIndex = getLineForCharIndex(anEnd).getIndex();
+
+        // Iterate over lines and set new style
         for (int i = startLineIndex; i <= endLineIndex; i++) {
             TextLine line = getLine(i);
             TextLineStyle oldStyle = line.getLineStyle();
-            line.setLineStyle(aStyle);
-            if (isPropChangeEnabled())
-                firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, aStyle, i));
+            if (!aStyle.equals(oldStyle)) {
+                line.setLineStyle(aStyle);
+                if (isPropChangeEnabled())
+                    firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, aStyle, i));
+            }
         }
     }
 
@@ -644,9 +652,11 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
             TextLine line = getLine(i);
             TextLineStyle oldStyle = line.getLineStyle();
             TextLineStyle newStyle = oldStyle.copyFor(aKey, aValue);
-            line.setLineStyle(newStyle);
-            if (isPropChangeEnabled())
-                firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, newStyle, i));
+            if (!newStyle.equals(oldStyle)) {
+                line.setLineStyle(newStyle);
+                if (isPropChangeEnabled())
+                    firePropChange(new TextBlockUtils.LineStyleChange(this, oldStyle, newStyle, i));
+            }
         }
     }
 

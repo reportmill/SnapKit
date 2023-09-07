@@ -9,7 +9,6 @@ import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.CharSequenceUtils;
 import snap.util.MathUtils;
-import java.util.List;
 
 /**
  * This TextBlock subclass adds support for text wrapping and syncs to a source TextBlock.
@@ -45,6 +44,9 @@ public class TextBox extends TextBlock {
 
     // A Listener to catch TextBlock PropChanges
     private PropChangeListener _textBlockLsnr = pc -> textBlockDidPropChange(pc);
+
+    // A temp var to hold TextLineStyle when updating runs from source text
+    private TextLineStyle _updateTextLineStyle;
 
     /**
      * Constructor.
@@ -88,7 +90,7 @@ public class TextBox extends TextBlock {
         _textBlock.addPropChangeListener(_textBlockLsnr);
 
         // Update all
-        updateAll();
+        updateTextAll();
     }
 
     /**
@@ -192,6 +194,10 @@ public class TextBox extends TextBlock {
     @Override
     protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, int newlineIndex)
     {
+        // If updating text from source text, update line style
+        if (_updateTextLineStyle != null)
+            textLine.setLineStyle(_updateTextLineStyle);
+
         // Do normal version
         TextLine textLine2 = super.addCharsToLine(theChars, theStyle, charIndex, textLine, newlineIndex);
         if (!isWrapLines())
@@ -315,7 +321,7 @@ public class TextBox extends TextBlock {
     {
         if (aPos == _alignY) return;
         _alignY = aPos;
-        updateAll();
+        updateTextAll();
     }
 
     /**
@@ -348,7 +354,7 @@ public class TextBox extends TextBlock {
     {
         if (aValue == _hyphenate) return;
         _hyphenate = aValue;
-        updateAll();
+        updateTextAll();
     }
 
     /**
@@ -363,7 +369,7 @@ public class TextBox extends TextBlock {
     {
         if (aValue == _linked) return;
         _linked = aValue;
-        updateAll();
+        updateTextAll();
     }
 
     /**
@@ -381,7 +387,7 @@ public class TextBox extends TextBlock {
 
         // Set and update
         _startCharIndex = charIndex;
-        updateAll();
+        updateTextAll();
     }
 
     /**
@@ -396,7 +402,7 @@ public class TextBox extends TextBlock {
     {
         if (aValue == _fontScale) return;
         _fontScale = aValue;
-        updateAll();
+        updateTextAll();
     }
 
     /**
@@ -428,7 +434,7 @@ public class TextBox extends TextBlock {
 
         TextBlock textBlock = getTextDoc();
         textBlock.setString(str);
-        updateAll();
+        updateTextAll();
     }
 
     /**
@@ -462,12 +468,10 @@ public class TextBox extends TextBlock {
         // Handle LineStyleChange
         else if (aPC instanceof TextBlockUtils.LineStyleChange) {
             TextBlockUtils.LineStyleChange lineStyleChange = (TextBlockUtils.LineStyleChange) aPC;
-            TextLineStyle lineStyle = (TextLineStyle) lineStyleChange.getNewValue();
-            TextBlock textBlock = getTextDoc();
-            TextLine textLine = textBlock.getLine(lineStyleChange.getIndex());
+            TextLine textLine = _textBlock.getLine(lineStyleChange.getIndex());
             int startCharIndex = textLine.getStartCharIndex();
             int endCharIndex = textLine.getEndCharIndex();
-            super.setLineStyle(lineStyle, startCharIndex, endCharIndex);
+            updateTextForCharRange(startCharIndex, endCharIndex);
         }
 
         // Handle DefaultTextStyle
@@ -507,32 +511,9 @@ public class TextBox extends TextBlock {
     /**
      * Updates all lines.
      */
-    protected void updateAll()
+    protected void updateTextAll()
     {
-        // Skip if no text
-        if (length() == 0 && _textBlock.length() == 0) return;
-
-        // Remove all chars
-        super.removeChars(0, length());
-
-        // Get source text lines
-        List<TextLine> textLines = _textBlock.getLines();
-
-        // Iterate over source text lines and add line chars back
-        for (TextLine line : textLines) {
-
-            // Iterate over source text runs and reset run chars
-            TextRun[] lineRuns = line.getRuns();
-            for (TextRun run : lineRuns) {
-                int index = line.getStartCharIndex() + run.getStartCharIndex();
-                super.addChars(run.getString(), run.getStyle(), index);
-            }
-
-            // Reset line style
-            int lineStartCharIndex = line.getStartCharIndex();
-            int lineEndCharIndex = line.getEndCharIndex();
-            super.setLineStyle(line.getLineStyle(), lineStartCharIndex, lineEndCharIndex);
-        }
+        updateTextForCharRange(0, length());
     }
 
     /**
@@ -549,8 +530,15 @@ public class TextBox extends TextBlock {
         // Iterate over source text runs for range and add
         TextRunIter runIter = _textBlock.getRunIterForCharRange(startCharIndex, endCharIndex);
         while (runIter.hasNextRun()) {
+
+            // Set temp LineStyle
             TextRun nextRun = runIter.getNextRun();
+            TextLine textLine = nextRun.getLine();
+            _updateTextLineStyle = textLine.getLineStyle();
+
+            // Add run chars
             super.addChars(nextRun.getString(), nextRun.getStyle(), startCharIndex);
+            _updateTextLineStyle = null;
         }
     }
 
@@ -600,7 +588,7 @@ public class TextBox extends TextBlock {
         if (aValue == getWidth()) return;
         super.setWidth(aValue);
         if (isWrapLines())
-            updateAll();
+            updateTextAll();
     }
 
     /**
@@ -611,7 +599,7 @@ public class TextBox extends TextBlock {
     {
         if (aValue == getHeight()) return;
         super.setHeight(aValue);
-        updateAll();
+        updateTextAll();
     }
 
     /**
