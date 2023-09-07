@@ -580,11 +580,12 @@ public class TextLine implements CharSequenceX, Cloneable {
     {
         // Get tokens
         TextToken[] tokens = getTokens();
+        double xInLineCoords = anX - getTextX();
 
         // Iterate over tokens (backwards) and return first token that starts at or before given X
         for (int i = tokens.length - 1; i >= 0; i--) {
             TextToken token = tokens[i];
-            if (anX >= token.getX())
+            if (xInLineCoords >= token.getX())
                 return token;
         }
 
@@ -604,6 +605,7 @@ public class TextLine implements CharSequenceX, Cloneable {
         double charSpacing = textStyle.getCharSpacing();
 
         // Get char start X and line length
+        double xInLineCoords = anX - getTextX();
         double charX = token != null ? token.getX() : 0;
         int lineLength = length();
 
@@ -613,7 +615,7 @@ public class TextLine implements CharSequenceX, Cloneable {
             double charW = textStyle.getCharAdvance(loopChar) + charSpacing;
             if (loopChar == '\t')
                 charW = getXForTabAtIndexAndX(charIndex, charX) - charX;
-            if (charX + charW / 2 > anX)
+            if (charX + charW / 2 > xInLineCoords)
                 return charIndex;
             charIndex++;
             charX += charW;
