@@ -228,8 +228,10 @@ public class TextBox extends TextBlock {
      */
     protected void wrapLineIfNeeded(TextLine textLine)
     {
+        // Reset line alignment
         textLine._x = 0;
 
+        // If WrapLines, do wrapping
         if (isWrapLines()) {
 
             // Get last token
@@ -238,10 +240,17 @@ public class TextBox extends TextBlock {
             // If line is now outside bounds, move chars to new line
             while (lastToken != null && isHitRight(lastToken.getMaxX(), textLine.getY(), textLine.getHeight())) {
 
-                // If only one token, move the minimum number of end chars to next line
-                if (textLine.getTokenCount() == 1) {
-                    moveMinimumLineEndCharsToNextLine(textLine);
-                    return;
+                // Find first token that is outside bounds and use that instead (if any)
+                TextToken prevToken = lastToken.getPrevious();
+                while (prevToken != null && isHitRight(prevToken.getMaxX(), textLine.getY(), textLine.getHeight())) {
+                    lastToken = prevToken;
+                    prevToken = prevToken.getPrevious();
+                }
+
+                // If first token, move the minimum number of end chars to next line
+                if (lastToken.getIndex() == 0) {
+                    moveMinimumLineEndCharsToNextLine(textLine, lastToken);
+                    break;
                 }
 
                 // Move last token (and trailing chars) to next line
@@ -250,37 +259,45 @@ public class TextBox extends TextBlock {
             }
         }
 
-        // Update alignment
+        // Update line alignment
         textLine.updateAlignmentAndJustify();
     }
 
     /**
      * Moves the minimum number of line end chars to next line (leaves at least one char, even if it doesn't fit).
      */
-    private void moveMinimumLineEndCharsToNextLine(TextLine textLine)
+    private void moveMinimumLineEndCharsToNextLine(TextLine textLine, TextToken token)
     {
         // While token is splittable, move end chars to next line
-        TextToken token = textLine.getLastToken();
         while (isHyphenate() && token.isSplittable()) {
             token = token.copyForSplittable();
-            if (moveLineCharsToNextLine(textLine, token.getEndCharIndex(), token)) {
+            if (!isHitRight(token.getMaxX(), textLine.getY(), textLine.getHeight())) {
+                moveLineCharsToNextLine(textLine, token.getEndCharIndex(), token);
                 textLine.getLastToken().setHyphenated(true);
                 return;
             }
         }
 
-        // While token has more than 1 char, move last char to next line
-        while (token.getLength() > 1) {
-            token = token.copyToCharIndex(token.getLength() - 1);
-            if (moveLineCharsToNextLine(textLine, token.getEndCharIndex(), token))
-                return;
+        // If token has more than 1 char, move last chars to next line
+        if (token.getLength() > 1) {
+
+            // Find min length that fits
+            int newLength = token.getLength() - 1;
+            double endX = token.getXForCharIndex(newLength);
+            while (newLength > 1 && isHitRight(endX, textLine.getY(), textLine.getHeight())) {
+                newLength--;
+                endX = token.getXForCharIndex(newLength);
+            }
+
+            // Move chars to next line
+            moveLineCharsToNextLine(textLine, token.getStartCharIndex() + newLength, token);
         }
     }
 
     /**
      * Move line chars from given start char index to line end to next line.
      */
-    private boolean moveLineCharsToNextLine(TextLine textLine, int startCharIndex, TextToken lastToken)
+    private void moveLineCharsToNextLine(TextLine textLine, int startCharIndex, TextToken lastToken)
     {
         // Get next line to move chars to
         TextLine nextLine = textLine.getNext();
@@ -298,9 +315,6 @@ public class TextBox extends TextBlock {
         int nextLineStartCharIndex = nextLine.getStartCharIndex();
         int newlineIndex = CharSequenceUtils.indexAfterNewline(moveChars, 0);
         addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, newlineIndex);
-
-        // Return whether line is now within bounds
-        return !isHitRight(lastToken.getMaxX(), textLine.getY(), textLine.getHeight());
     }
 
     /**
