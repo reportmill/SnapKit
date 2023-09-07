@@ -43,9 +43,6 @@ public class TextToken implements Cloneable {
     // The token width
     private double  _width = -1;
 
-    // The token height
-    private double  _height = -1;
-
     // Whether this token was split
     protected boolean  _split;
 
@@ -173,22 +170,19 @@ public class TextToken implements Cloneable {
     }
 
     /**
+     * Returns the token max x.
+     */
+    public double getMaxX()  { return getX() + getWidth(); }
+
+    /**
      * Returns the height.
      */
-    public double getHeight()
-    {
-        if (_height > 0) return _height;
-        double height = _textStyle.getLineHeight();
-        return _height = height;
-    }
+    public double getHeight()  { return _textStyle.getLineHeight(); }
 
     /**
      * Returns the token X coord in text block.
      */
-    public double getTextX()
-    {
-        return _textLine.getTextX() + getX() + _justifyShiftX;
-    }
+    public double getTextX()  { return _textLine.getTextX() + getX() + _justifyShiftX; }
 
     /**
      * Returns token Y coord in text block.
