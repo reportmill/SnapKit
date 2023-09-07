@@ -189,6 +189,20 @@ public class TextBox extends TextBlock {
     }
 
     /**
+     * Used to call super.addChars().
+     */
+    private void super_addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
+    {
+        // If FontScale is set, replace style with scaled style
+        double fontScale = getFontScale();
+        if (fontScale != 1)
+            theStyle = theStyle.copyFor(theStyle.getFont().scaleFont(fontScale));
+
+        // Do normal version
+        super.addChars(theChars, theStyle, anIndex);
+    }
+
+    /**
      * Override to do wrapping.
      */
     @Override
@@ -462,7 +476,7 @@ public class TextBox extends TextBlock {
             if (oldVal != null)
                 super.removeChars(index, index + oldVal.length());
             if (newVal != null)
-                super.addChars(newVal, _textBlock.getStyleForCharIndex(index), index);
+                super_addChars(newVal, _textBlock.getStyleForCharIndex(index), index);
         }
 
         // Handle StyleChange
@@ -552,7 +566,7 @@ public class TextBox extends TextBlock {
             _updateTextLineStyle = textLine.getLineStyle();
 
             // Add run chars
-            super.addChars(nextRun.getString(), nextRun.getStyle(), startCharIndex);
+            super_addChars(nextRun.getString(), nextRun.getStyle(), startCharIndex);
             _updateTextLineStyle = null;
         }
     }
