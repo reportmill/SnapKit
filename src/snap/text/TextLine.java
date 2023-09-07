@@ -750,14 +750,19 @@ public class TextLine implements CharSequenceX, Cloneable {
         _x = 0;
 
         // If justify, shift tokens in line (unless line has newline or is last line in RichText)
-        if (lineStyle.isJustify() && getTokenCount() > 1 && _textBlock.getWidth() < 9999 && !isLastCharNewline()) {
+        if (lineStyle.isJustify()) {
+
+            boolean justifiable = getTokenCount() > 1 && _textBlock.getWidth() < 9999 && !isLastCharNewline() &&
+                    getEndCharIndex() != _textBlock.length();
+            if (!justifiable)
+                return;
 
             // Calculate Justify token shift
-            double lineY = getY();
-            double textBoxMaxX = _textBlock.getMaxHitX(lineY, _height);
-            double lineMaxX = getMaxX();
-            double remainderW = textBoxMaxX - lineMaxX;
-            double shiftX = remainderW / (getTokenCount() - 1);
+            TextToken lastToken = getLastToken();
+            double lineW = lastToken != null ? lastToken.getMaxX() : getWidth(); // getMaxX()
+            double lineMaxW = _textBlock.getWidth(); //_textBlock.getMaxHitX(getY(), _height);
+            double extraW = lineMaxW - lineW;
+            double shiftX = extraW / (getTokenCount() - 1);
             double runningShiftX = 0;
 
             // Shift tokens
@@ -770,12 +775,12 @@ public class TextLine implements CharSequenceX, Cloneable {
 
         // Calculate X alignment shift
         else if (lineStyle.getAlign() != HPos.LEFT && _textBlock.getWidth() < 9999) {
+            TextToken lastToken = getLastToken();
+            double lineW = lastToken != null ? lastToken.getMaxX() : getWidth(); // getMaxX()
+            double lineMaxW = _textBlock.getWidth(); //_textBlock.getMaxHitX(getY(), _height);
+            double extraW = lineMaxW - lineW;
             double alignX = lineStyle.getAlign().doubleValue();
-            double lineY = getY();
-            double tboxHitX = _textBlock.getMaxHitX(lineY, _height);
-            double lineMaxX = getMaxX();
-            double remW = tboxHitX - lineMaxX;
-            _x = Math.round(alignX * remW);
+            _x = Math.round(alignX * extraW);
         }
     }
 

@@ -200,14 +200,12 @@ public class TextBox extends TextBlock {
 
         // Do normal version
         TextLine textLine2 = super.addCharsToLine(theChars, theStyle, charIndex, textLine, newlineIndex);
-        if (!isWrapLines())
-            return textLine2;
 
         // Wrap line if needed
-        boolean didWrap = wrapLineIfNeeded(textLine);
+        wrapLineIfNeeded(textLine);
 
-        // If line didn't wrap but newline was added, wrap next line if needed
-        if (!didWrap && textLine2 != textLine && textLine2.getTokenCount() > 0)
+        // If newline was added, wrap next line if needed
+        if (textLine2 != textLine)
             wrapLineIfNeeded(textLine2);
 
         // Return
@@ -220,44 +218,40 @@ public class TextBox extends TextBlock {
     @Override
     protected void didRemoveChars(CharSequence removedChars, int startCharIndex)
     {
-        // If not wrapping, just return
-        if (!isWrapLines())
-            return;
-
-        // If newline wasn't removed, just return
-        if (CharSequenceUtils.indexOfNewline(removedChars, 0) < 0)
-            return;
-
         // Wrap line if needed
         TextLine textLine = getLineForCharIndex(startCharIndex);
-        if (textLine.getTokenCount() > 0)
-            wrapLineIfNeeded(textLine);
+        wrapLineIfNeeded(textLine);
     }
 
     /**
      * Wraps given line if needed by moving chars from last token(s) to next line.
      */
-    protected boolean wrapLineIfNeeded(TextLine textLine)
+    protected void wrapLineIfNeeded(TextLine textLine)
     {
-        boolean didWrap = false;
+        textLine._x = 0;
 
-        // If line is now outside bounds, move chars to new line
-        while (isHitRight(textLine.getMaxX(), textLine.getY(), textLine.getHeight())) {
+        if (isWrapLines()) {
 
-            // If only one token, move the minimum number of end chars to next line
-            if (textLine.getTokenCount() == 1) {
-                moveMinimumLineEndCharsToNextLine(textLine);
-                return true;
-            }
-
-            // Move last token (and trailing chars) to next line
+            // Get last token
             TextToken lastToken = textLine.getLastToken();
-            moveLineCharsToNextLine(textLine, lastToken.getStartCharIndex(), lastToken);
-            didWrap = true;
+
+            // If line is now outside bounds, move chars to new line
+            while (lastToken != null && isHitRight(lastToken.getMaxX(), textLine.getY(), textLine.getHeight())) {
+
+                // If only one token, move the minimum number of end chars to next line
+                if (textLine.getTokenCount() == 1) {
+                    moveMinimumLineEndCharsToNextLine(textLine);
+                    return;
+                }
+
+                // Move last token (and trailing chars) to next line
+                moveLineCharsToNextLine(textLine, lastToken.getStartCharIndex(), lastToken);
+                lastToken = textLine.getLastToken();
+            }
         }
 
-        // Return
-        return didWrap;
+        // Update alignment
+        textLine.updateAlignmentAndJustify();
     }
 
     /**
@@ -286,7 +280,7 @@ public class TextBox extends TextBlock {
     /**
      * Move line chars from given start char index to line end to next line.
      */
-    private boolean moveLineCharsToNextLine(TextLine textLine, int startCharIndex, TextToken token)
+    private boolean moveLineCharsToNextLine(TextLine textLine, int startCharIndex, TextToken lastToken)
     {
         // Get next line to move chars to
         TextLine nextLine = textLine.getNext();
@@ -300,13 +294,13 @@ public class TextBox extends TextBlock {
         textLine.removeChars(startCharIndex, textLine.length());
 
         // Add chars to next line
-        TextStyle textStyle = token.getTextStyle();
+        TextStyle textStyle = lastToken.getTextStyle();
         int nextLineStartCharIndex = nextLine.getStartCharIndex();
         int newlineIndex = CharSequenceUtils.indexAfterNewline(moveChars, 0);
         addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, newlineIndex);
 
         // Return whether line is now within bounds
-        return !isHitRight(textLine.getMaxX(), textLine.getY(), textLine.getHeight());
+        return !isHitRight(lastToken.getMaxX(), textLine.getY(), textLine.getHeight());
     }
 
     /**
@@ -513,7 +507,7 @@ public class TextBox extends TextBlock {
      */
     protected void updateTextAll()
     {
-        updateTextForCharRange(0, length());
+        updateTextForCharRange(-1, length());
     }
 
     /**
@@ -524,8 +518,15 @@ public class TextBox extends TextBlock {
         // Skip if no text
         if (length() == 0 && _textBlock.length() == 0) return;
 
-        // Remove all chars and re-add
-        super.removeChars(startCharIndex, endCharIndex);
+        // If update all, remove all chars
+        if (startCharIndex < 0) {
+            startCharIndex = 0;
+            endCharIndex = _textBlock.length();
+            super.removeChars(0, length());
+        }
+
+        // Otherwise, remove chars in range
+        else super.removeChars(startCharIndex, endCharIndex);
 
         // Iterate over source text runs for range and add
         TextRunIter runIter = _textBlock.getRunIterForCharRange(startCharIndex, endCharIndex);
@@ -547,8 +548,11 @@ public class TextBox extends TextBlock {
      */
     protected boolean isHitRight(double aX, double aY, double aH)
     {
+        // Simple case: check if x is within bounds
         if (_boundsPath == null || aY + aH > getMaxY())
             return aX > getWidth();
+
+        // Do BoundsPath version
         Rect rect = new Rect(getX() + aX - 1, aY, 1, aH);
         return !_boundsPath.contains(rect);
     }
@@ -558,8 +562,11 @@ public class TextBox extends TextBlock {
      */
     protected double getMinHitX(double aY, double aH, double anIndent)
     {
+        // Simple case: Return indent
         if (_boundsPath == null || aY + aH > getMaxY())
             return anIndent;
+
+        // Do BoundsPath version
         Rect rect = new Rect(getX() + anIndent, aY, 20, aH);
         while (!_boundsPath.contains(rect) && rect.x <= getMaxX())
             rect.x++;
@@ -571,8 +578,11 @@ public class TextBox extends TextBlock {
      */
     protected double getMaxHitX(double aY, double aH)
     {
+        // Simple case: Return MaxX
         if (_boundsPath == null || aY + aH > getMaxY())
             return getMaxX();
+
+        // Do BoundsPath version
         Rect rect = new Rect(getMaxX() - 1, aY, 1, aH);
         while (!_boundsPath.contains(rect) && rect.x > 1)
             rect.x--;

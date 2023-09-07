@@ -473,7 +473,5 @@ public class TextToken implements Cloneable {
             tokenX += tokenW + charSpacing;
             charIndex = token.getEndCharIndex();
         }
-
-        aTextLine.updateAlignmentAndJustify();
     }
 }
