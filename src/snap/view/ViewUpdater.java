@@ -183,7 +183,7 @@ public class ViewUpdater {
 
             // If ClearFlash, register for proper repaint to clear highlight
             if (_clearFlash)
-                _rview.repaint(rect);
+                ViewUtils.runDelayed(() -> _rview.repaint(rect), 10, true);
         }
     }
 
@@ -238,16 +238,8 @@ public class ViewUpdater {
      */
     protected void paintDebug(Painter aPntr, Shape aShape)
     {
-        // If animator running, just paint and return
-        if (_timer.isRunning()) {
-            _rview.paintAll(aPntr);
-            _clearFlash = false;
-            return;
-        }
-
         // If ClearFlash, pause for a moment, paint and return
         if (_clearFlash) {
-            try { Thread.sleep(120); } catch(Exception e) { }
             _rview.paintAll(aPntr);
             _clearFlash = false;
             return;

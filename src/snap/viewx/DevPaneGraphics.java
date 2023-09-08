@@ -54,6 +54,10 @@ public class DevPaneGraphics extends ViewOwner {
     @Override
     protected void resetUI()
     {
+        // Update ShowFlashButton, ShowFrameRateButton
+        setViewValue("ShowFlashButton", ViewUpdater.isPaintDebug());
+        setViewValue("ShowFrameRateButton", ViewUpdater.isShowFrameRate());
+
         // Update ThemesListView
         String themeName = ViewTheme.get().getClass().getSimpleName().replace("Theme", "");
         if (themeName.equals("View")) themeName = STANDARD_THEME;
