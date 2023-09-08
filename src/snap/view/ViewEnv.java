@@ -108,7 +108,7 @@ public abstract class ViewEnv {
     /**
      * Runs given runnable for given period after given delay with option to run once for every interval, even under load.
      */
-    public void runIntervals(Runnable aRun, int aPeriod, int aDelay, boolean doAll, boolean inAppThread)
+    public void runIntervals(Runnable aRun, int aPeriod, boolean doAll, boolean inAppThread)
     {
         // Create task
         TimerTask task = new TimerTask() { public void run()  {
@@ -123,8 +123,8 @@ public abstract class ViewEnv {
         // Add task and schedule
         _timerTasks.put(aRun, task);
         if (doAll)
-            _timer.scheduleAtFixedRate(task, aDelay, aPeriod);
-        else _timer.schedule(task, aDelay, aPeriod);
+            _timer.scheduleAtFixedRate(task, 0, aPeriod);
+        else _timer.schedule(task, 0, aPeriod);
     }
 
     /**
