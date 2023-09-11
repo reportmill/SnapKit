@@ -568,6 +568,7 @@ public class TextBox extends TextBlock {
             // Add run chars
             super_addChars(nextRun.getString(), nextRun.getStyle(), startCharIndex);
             _updateTextLineStyle = null;
+            startCharIndex += nextRun.length();
         }
     }
 
