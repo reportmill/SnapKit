@@ -31,7 +31,9 @@ public abstract class GFXEnv {
     private static void setDefaultEnv()
     {
         // Get class name for platform GFXEnv
-        String className = SnapUtils.getPlatform() == SnapUtils.Platform.TEAVM ? "snaptea.TV" : "snap.swing.AWTEnv";
+        String className = SnapUtils.isTeaVM ? "snaptea.TV" : "snap.swing.AWTEnv";
+        if (SnapUtils.isWebVM)
+            className = "snapcj.CJEnv";
 
         // Get GFXEnv class and create instance to set
         try { Class.forName(className).newInstance(); }

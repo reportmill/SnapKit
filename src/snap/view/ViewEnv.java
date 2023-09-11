@@ -43,7 +43,9 @@ public abstract class ViewEnv {
     private static void setDefaultEnv()
     {
         // Get class name for platform GFXEnv
-        String className = SnapUtils.getPlatform()==SnapUtils.Platform.TEAVM ? "snaptea.TV" : "snap.swing.SwingViewEnv";
+        String className = SnapUtils.isTeaVM ? "snaptea.TV" : "snap.swing.SwingViewEnv";
+        if (SnapUtils.isWebVM)
+            className = "snapcj.CJViewEnv";
 
         // Create instance
         try { Class.forName(className).newInstance(); }
