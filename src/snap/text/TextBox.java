@@ -484,7 +484,7 @@ public class TextBox extends TextBlock {
             TextBlockUtils.StyleChange styleChange = (TextBlockUtils.StyleChange) aPC;
             int startCharIndex = styleChange.getStart();
             int endCharIndex = styleChange.getEnd();
-            updateTextForCharRange(startCharIndex, endCharIndex);
+            updateTextForCharRange(startCharIndex, endCharIndex, endCharIndex);
         }
 
         // Handle LineStyleChange
@@ -493,7 +493,7 @@ public class TextBox extends TextBlock {
             TextLine textLine = _textBlock.getLine(lineStyleChange.getIndex());
             int startCharIndex = textLine.getStartCharIndex();
             int endCharIndex = textLine.getEndCharIndex();
-            updateTextForCharRange(startCharIndex, endCharIndex);
+            updateTextForCharRange(startCharIndex, endCharIndex, endCharIndex);
         }
 
         // Handle DefaultTextStyle
@@ -535,29 +535,24 @@ public class TextBox extends TextBlock {
      */
     protected void updateTextAll()
     {
-        updateTextForCharRange(-1, length());
+        int endCharIndexBox = length();
+        int endCharIndexBlock = _textBlock.length();
+        updateTextForCharRange(0, endCharIndexBox, endCharIndexBlock);
     }
 
     /**
      * Updates all lines.
      */
-    protected void updateTextForCharRange(int startCharIndex, int endCharIndex)
+    protected void updateTextForCharRange(int startCharIndex, int endCharIndexBox, int endCharIndexBlock)
     {
         // Skip if no text
         if (length() == 0 && _textBlock.length() == 0) return;
 
-        // If update all, remove all chars
-        if (startCharIndex < 0) {
-            startCharIndex = 0;
-            endCharIndex = _textBlock.length();
-            super.removeChars(0, length());
-        }
-
-        // Otherwise, remove chars in range
-        else super.removeChars(startCharIndex, endCharIndex);
+        // Remove chars in range
+        super.removeChars(startCharIndex, endCharIndexBox);
 
         // Iterate over source text runs for range and add
-        TextRunIter runIter = _textBlock.getRunIterForCharRange(startCharIndex, endCharIndex);
+        TextRunIter runIter = _textBlock.getRunIterForCharRange(startCharIndex, endCharIndexBlock);
         while (runIter.hasNextRun()) {
 
             // Set temp LineStyle
