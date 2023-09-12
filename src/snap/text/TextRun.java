@@ -280,6 +280,15 @@ public class TextRun implements CharSequenceX, Cloneable {
     }
 
     /**
+     * Returns the previous run, if available.
+     */
+    public TextRun getPrevious()
+    {
+        int prevIndex = _index - 1;
+        return _textLine != null && prevIndex >= 0 ? _textLine.getRun(prevIndex) : null;
+    }
+
+    /**
      * Returns whether this run is equal to the given object.
      */
     @Override

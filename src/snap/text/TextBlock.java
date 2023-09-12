@@ -316,7 +316,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     }
 
     /**
-     * Adds chars to line.
+     * Adds a block of chars to line - each block is guaranteed to either have no newlines or end with newline.
      */
     protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, int newlineIndex)
     {
@@ -324,15 +324,52 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
         int charIndexInLine = charIndex - textLine.getStartCharIndex();
         textLine.addChars(theChars, theStyle, charIndexInLine);
 
-        // If newline added and there are more chars in line, split line and add remainder
+        // If newline added, move trailing chars to next line
         if (newlineIndex > 0) {
-            TextLine remainder = textLine.splitLineAtIndex(charIndexInLine + theChars.length());
-            addLine(remainder, textLine.getIndex() + 1);
-            textLine = remainder;
+            int moveCharsIndexInLine = charIndexInLine + theChars.length();
+            moveLineCharsToNextLine(textLine, moveCharsIndexInLine);
+            textLine = textLine.getNext();
         }
 
         // Return
         return textLine;
+    }
+
+    /**
+     * Move line chars from given start char index to line end to next line.
+     */
+    protected void moveLineCharsToNextLine(TextLine textLine, int startCharIndex)
+    {
+        // Get next line to move chars to
+        TextLine nextLine = textLine.getNext();
+
+        // If no next line or moving chars + newline, just split line and return
+        if (nextLine == null || startCharIndex < textLine.length() && textLine.isLastCharNewline()) {
+            nextLine = textLine.splitLineAtIndex(startCharIndex);
+            addLine(nextLine, textLine.getIndex() + 1);
+            return;
+        }
+
+        // Get last run
+        TextRun lastRun = textLine.getRunLast();
+
+        // Iterate over runs from end of line, moving chars from each to next line
+        while (lastRun != null && textLine.length() > startCharIndex) {
+
+            // Remove run chars from text line (chars after startCharIndex)
+            int runStartCharIndex = Math.max(startCharIndex, lastRun.getStartCharIndex());
+            CharSequence moveChars = textLine.subSequence(runStartCharIndex, textLine.length());
+            textLine.removeChars(startCharIndex, textLine.length());
+
+            // Add run chars to next line
+            TextStyle textStyle = lastRun.getStyle();
+            int nextLineStartCharIndex = nextLine.getStartCharIndex();
+            int newlineIndex = CharSequenceUtils.indexAfterNewline(moveChars, 0);
+            addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, newlineIndex);
+
+            // Get previous run
+            lastRun = lastRun.getPrevious();
+        }
     }
 
     /**
