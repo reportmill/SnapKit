@@ -303,7 +303,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
 
             // Add chars to line
             int charIndex = anIndex + charIndexInChars;
-            textLine = addCharsToLine(chars, theStyle, charIndex, textLine, newlineIndex);
+            textLine = addCharsToLine(chars, theStyle, charIndex, textLine, newlineIndex > 0);
 
             // Set start to last end
             charIndexInChars += chars.length();
@@ -318,14 +318,14 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     /**
      * Adds a block of chars to line - each block is guaranteed to either have no newlines or end with newline.
      */
-    protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, int newlineIndex)
+    protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, boolean charsHaveNewline)
     {
         // Add chars to line
         int charIndexInLine = charIndex - textLine.getStartCharIndex();
         textLine.addChars(theChars, theStyle, charIndexInLine);
 
-        // If newline added, move trailing chars to next line
-        if (newlineIndex > 0) {
+        // If chars have newline, move chars after newline to next line
+        if (charsHaveNewline) {
             int moveCharsIndexInLine = charIndexInLine + theChars.length();
             moveLineCharsToNextLine(textLine, moveCharsIndexInLine);
             textLine = textLine.getNext();
@@ -343,11 +343,11 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
         // Get next line to move chars to
         TextLine nextLine = textLine.getNext();
 
-        // If no next line or moving chars + newline, just split line and return
+        // If no next line or moving chars + newline, clone line and remove chars
         if (nextLine == null || startCharIndex < textLine.length() && textLine.isLastCharNewline()) {
-            nextLine = textLine.splitLineAtIndex(startCharIndex);
+            nextLine = textLine.clone();
+            nextLine.removeChars(0, nextLine.length());
             addLine(nextLine, textLine.getIndex() + 1);
-            return;
         }
 
         // Get last run
@@ -364,8 +364,8 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
             // Add run chars to next line
             TextStyle textStyle = lastRun.getStyle();
             int nextLineStartCharIndex = nextLine.getStartCharIndex();
-            int newlineIndex = CharSequenceUtils.indexAfterNewline(moveChars, 0);
-            addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, newlineIndex);
+            boolean charsHaveNewline = CharSequenceUtils.indexAfterNewline(moveChars, 0) > 0;
+            addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, charsHaveNewline);
 
             // Get previous run
             lastRun = lastRun.getPrevious();

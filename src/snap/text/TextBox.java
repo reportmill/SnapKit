@@ -7,7 +7,6 @@ import snap.geom.Shape;
 import snap.geom.VPos;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
-import snap.util.CharSequenceUtils;
 import snap.util.MathUtils;
 
 /**
@@ -206,14 +205,14 @@ public class TextBox extends TextBlock {
      * Override to do wrapping.
      */
     @Override
-    protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, int newlineIndex)
+    protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, boolean charsHaveNewline)
     {
         // If updating text from source text, update line style
         if (_updateTextLineStyle != null)
             textLine.setLineStyle(_updateTextLineStyle);
 
         // Do normal version
-        TextLine textLine2 = super.addCharsToLine(theChars, theStyle, charIndex, textLine, newlineIndex);
+        TextLine textLine2 = super.addCharsToLine(theChars, theStyle, charIndex, textLine, charsHaveNewline);
 
         // Wrap line if needed
         wrapLineIfNeeded(textLine);
@@ -268,7 +267,7 @@ public class TextBox extends TextBlock {
                 }
 
                 // Move last token (and trailing chars) to next line
-                moveLineCharsToNextLine(textLine, lastToken.getStartCharIndex(), lastToken);
+                moveLineCharsToNextLine(textLine, lastToken.getStartCharIndex());
                 lastToken = textLine.getLastToken();
             }
         }
@@ -286,7 +285,7 @@ public class TextBox extends TextBlock {
         while (isHyphenate() && token.isSplittable()) {
             token = token.copyForSplittable();
             if (!isHitRight(token.getMaxX(), textLine.getY(), textLine.getHeight())) {
-                moveLineCharsToNextLine(textLine, token.getEndCharIndex(), token);
+                moveLineCharsToNextLine(textLine, token.getEndCharIndex());
                 textLine.getLastToken().setHyphenated(true);
                 return;
             }
@@ -304,31 +303,8 @@ public class TextBox extends TextBlock {
             }
 
             // Move chars to next line
-            moveLineCharsToNextLine(textLine, token.getStartCharIndex() + newLength, token);
+            moveLineCharsToNextLine(textLine, token.getStartCharIndex() + newLength);
         }
-    }
-
-    /**
-     * Move line chars from given start char index to line end to next line.
-     */
-    private void moveLineCharsToNextLine(TextLine textLine, int startCharIndex, TextToken lastToken)
-    {
-        // Get next line to move chars to
-        TextLine nextLine = textLine.getNext();
-        if (nextLine == null) {
-            nextLine = textLine.splitLineAtIndex(textLine.length());
-            addLine(nextLine, textLine.getIndex() + 1);
-        }
-
-        // Remove chars from text line
-        CharSequence moveChars = textLine.subSequence(startCharIndex, textLine.length());
-        textLine.removeChars(startCharIndex, textLine.length());
-
-        // Add chars to next line
-        TextStyle textStyle = lastToken.getTextStyle();
-        int nextLineStartCharIndex = nextLine.getStartCharIndex();
-        int newlineIndex = CharSequenceUtils.indexAfterNewline(moveChars, 0);
-        addCharsToLine(moveChars, textStyle, nextLineStartCharIndex, nextLine, newlineIndex);
     }
 
     /**
