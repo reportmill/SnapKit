@@ -344,26 +344,17 @@ public class TextLine implements CharSequenceX, Cloneable {
     /**
      * Returns the y position for this line (in same coords as the layout frame).
      */
-    public double getBaseline()
-    {
-        return getY() + getMetrics().getAscent();
-    }
+    public double getBaseline()  { return getY() + getMetrics().getAscent(); }
 
     /**
      * Returns the max X.
      */
-    public double getMaxX()
-    {
-        return getX() + getWidth();
-    }
+    public double getMaxX()  { return getX() + getWidth(); }
 
     /**
      * Returns the max Y.
      */
-    public double getMaxY()
-    {
-        return getY() + getHeight();
-    }
+    public double getMaxY()  { return getY() + getHeight(); }
 
     /**
      * Returns the line x in text block coords.
