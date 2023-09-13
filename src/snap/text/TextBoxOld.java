@@ -107,7 +107,7 @@ public class TextBoxOld {
     /**
      * Creates the default TextDoc.
      */
-    protected TextDoc createTextDoc()  { return new RichText(); }
+    protected TextDoc createTextDoc()  { return new TextDoc(true); }
 
     /**
      * Returns whether text supports multiple styles.
@@ -128,7 +128,7 @@ public class TextBoxOld {
 
         // Convert to/from plain/rich text
         TextDoc textDoc = getTextDoc();
-        TextDoc textDoc1 = textDoc instanceof RichText ? new TextDoc() : new RichText();
+        TextDoc textDoc1 = new TextDoc(!textDoc.isRichText());
         textDoc1.addTextBlock(textDoc, 0);
         setTextDoc(textDoc1);
     }

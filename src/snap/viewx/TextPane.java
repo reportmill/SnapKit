@@ -6,6 +6,7 @@ import snap.gfx.Color;
 import snap.gfx.Font;
 import snap.gfx.Image;
 import snap.props.PropChange;
+import snap.text.TextBlock;
 import snap.text.TextDoc;
 import snap.text.TextLine;
 import snap.text.TextSel;
@@ -15,7 +16,7 @@ import snap.view.*;
 /**
  * A panel for editing text files.
  */
-public class TextPane<T extends TextDoc> extends ViewOwner {
+public class TextPane<T extends TextBlock> extends ViewOwner {
 
     // The TextArea
     private TextArea  _textArea;
@@ -36,7 +37,7 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
      */
     public T getTextDoc()
     {
-        TextDoc textDoc = _textArea != null ? _textArea.getTextDoc() : null;
+        TextBlock textDoc = _textArea != null ? _textArea.getTextDoc() : null;
         return (T) textDoc;
     }
 
@@ -257,13 +258,12 @@ public class TextPane<T extends TextDoc> extends ViewOwner {
     protected void saveChangesImpl()
     {
         TextArea textArea = getTextArea();
-        TextDoc textDoc = textArea.getTextDoc();
+        TextBlock textBlock = textArea.getTextDoc();
 
-        try {
-            textDoc.writeToSourceFile();
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
+        if (textBlock instanceof TextDoc) {
+            TextDoc textDoc = (TextDoc) textBlock;
+            try { textDoc.writeToSourceFile(); }
+            catch (Exception e) { throw new RuntimeException(e); }
         }
     }
 

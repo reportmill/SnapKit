@@ -60,11 +60,6 @@ public class TextView extends ParentView {
     public ScrollView getScrollView()  { return _scrollView; }
 
     /**
-     * Returns the TextDoc.
-     */
-    public TextDoc getTextDoc()  { return _textArea.getTextDoc(); }
-
-    /**
      * Returns the text that is being edited.
      */
     public TextBox getTextBox()  { return _textArea.getTextBox(); }
@@ -305,14 +300,16 @@ public class TextView extends ParentView {
         XMLElement e = super.toXMLView(anArchiver);
 
         // Archive Rich, Editable, WrapLines
-        if (getTextArea().isRichText()) e.add("Rich", true);
+        TextArea textArea = getTextArea();
+        if (textArea.isRichText()) e.add("Rich", true);
         if (!isEditable()) e.add("Editable", false);
         if (isWrapLines()) e.add(WrapLines_Prop, true);
 
         // If RichText, archive rich text
-        if (getTextArea().isRichText()) {
+        if (textArea.isRichText()) {
             e.removeElement("font");
-            XMLElement richTextXML = anArchiver.toXML(getTextDoc());
+            TextBlock textBlock = textArea.getTextDoc();
+            XMLElement richTextXML = anArchiver.toXML(textBlock);
             richTextXML.setName("RichText");
             if (richTextXML.size() > 0)
                 e.add(richTextXML);
@@ -349,9 +346,10 @@ public class TextView extends ParentView {
         // If RichText, unarchive rich text
         XMLElement richTextXML = anElement.get("RichText");
         if (richTextXML != null) {
-            RichText richText = (RichText) getTextDoc();
+            TextArea textArea = getTextArea();
+            TextBlock textBlock = textArea.getTextDoc();
             getUndoer().disable();
-            richText.fromXML(anArchiver, richTextXML);
+            textBlock.fromXML(anArchiver, richTextXML);
             getUndoer().enable();
         }
 

@@ -55,7 +55,7 @@ public class TextBox extends TextBlock {
         super();
 
         // Set default text block
-        TextDoc textBlock = new RichText();
+        TextBlock textBlock = new RichText();
         setTextDoc(textBlock);
         setRichText(true);
     }
@@ -72,7 +72,7 @@ public class TextBox extends TextBlock {
     /**
      * Returns the TextBlock.
      */
-    public TextDoc getTextDoc()  { return (TextDoc) _textBlock; }
+    public TextBlock getTextDoc()  { return _textBlock; }
 
     /**
      * Sets the TextBlock.
@@ -430,7 +430,7 @@ public class TextBox extends TextBlock {
      */
     public String getString()
     {
-        TextDoc textDoc = getTextDoc();
+        TextBlock textDoc = getTextDoc();
         String textStr = textDoc.getString();
 
         if (length() < textStr.length()) {

@@ -141,7 +141,7 @@ public class TextArea extends View {
         _textBox = aTextBox;
 
         // Remove PropChangeListener from old TextDoc
-        TextDoc oldTextDoc = getTextDoc();
+        TextBlock oldTextDoc = getTextDoc();
         if (oldTextDoc != null)
             oldTextDoc.removePropChangeListener(_textDocPropLsnr);
 
@@ -160,15 +160,15 @@ public class TextArea extends View {
     /**
      * Returns the TextDoc.
      */
-    public TextDoc getTextDoc()  { return _textBox.getTextDoc(); }
+    public TextBlock getTextDoc()  { return _textBox.getTextDoc(); }
 
     /**
      * Sets the TextDoc.
      */
-    public void setTextDoc(TextDoc aTextDoc)
+    public void setTextDoc(TextBlock aTextDoc)
     {
         // If already set, just return
-        TextDoc oldTextDoc = getTextDoc(); if (aTextDoc == oldTextDoc) return;
+        TextBlock oldTextDoc = getTextDoc(); if (aTextDoc == oldTextDoc) return;
 
         // Update TextDoc.ParentTextStyle
         if (aTextDoc != null && (isFontSet() || getParent() != null)) {
@@ -1840,7 +1840,7 @@ public class TextArea extends View {
         XMLElement richTextXML = anElement.get("RichText");
         if (richTextXML != null) {
             _textBox.setRichText(true);
-            RichText richText = (RichText) getTextDoc();
+            TextBlock richText = getTextDoc();
             getUndoer().disable();
             richText.fromXML(anArchiver, richTextXML);
             getUndoer().enable();

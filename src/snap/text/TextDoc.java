@@ -22,6 +22,14 @@ public class TextDoc extends TextBlock {
     }
 
     /**
+     * Constructor for rich text.
+     */
+    public TextDoc(boolean isRich)
+    {
+        super(isRich);
+    }
+
+    /**
      * Returns the source URL.
      */
     public WebURL getSourceURL()  { return _sourceURL; }
