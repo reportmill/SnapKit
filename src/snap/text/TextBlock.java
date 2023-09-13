@@ -1139,6 +1139,11 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
      */
     public void paint(Painter aPntr)
     {
+        // Just return if no lines
+        int lineCount = getLineCount();
+        if (lineCount == 0)
+            return;
+
         // Save painter state
         aPntr.save();
 
@@ -1149,7 +1154,7 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
         aPntr.clip(clipBounds);
 
         // Iterate over lines
-        for (int i = 0, iMax = getLineCount(); i < iMax; i++) {
+        for (int i = 0; i < lineCount; i++) {
 
             // If line not yet visible, skip
             TextLine textLine = getLine(i);

@@ -192,6 +192,11 @@ public class TextBox extends TextBlock {
      */
     private void super_addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
+        // Get start char index - just return if index before text start
+        int startCharIndex = Math.max(anIndex, getStartCharIndex());
+        if (startCharIndex >= _textBlock.length())
+            return;
+
         // If FontScale is set, replace style with scaled style
         double fontScale = getFontScale();
         if (fontScale != 1)
@@ -199,6 +204,13 @@ public class TextBox extends TextBlock {
 
         // Do normal version
         super.addChars(theChars, theStyle, anIndex);
+
+        // Remove any lines below bounds
+        while (getLineCount() > 0 && getLineLast().getMaxY() > getHeight()) {
+            if (isLinked())
+                removeLine(getLineCount() - 1);
+            else break;
+        }
     }
 
     /**
@@ -213,6 +225,16 @@ public class TextBox extends TextBlock {
 
         // Do normal version
         TextLine textLine2 = super.addCharsToLine(theChars, theStyle, charIndex, textLine, charsHaveNewline);
+
+        // If lined text and added line is below bounds, remove it and return
+        if (isLinked()) {
+            if (textLine2.getMaxY() > getHeight()) {
+                removeLine(getLineCount() - 1);
+                if (textLine != textLine2 && textLine.getMaxY() > getHeight())
+                    removeLine(getLineCount() - 1);
+                return textLine2;
+            }
+        }
 
         // Wrap line if needed
         wrapLineIfNeeded(textLine);
@@ -245,7 +267,7 @@ public class TextBox extends TextBlock {
         textLine._x = 0;
 
         // If WrapLines, do wrapping
-        if (isWrapLines()) {
+        if (isWrapLines() && textLine.getMaxY() < getHeight()) {
 
             // Get last token
             TextToken lastToken = textLine.getLastToken();
@@ -527,8 +549,12 @@ public class TextBox extends TextBlock {
         // Remove chars in range
         super.removeChars(startCharIndex, endCharIndexBox);
 
+        // Get run iterator for range (adjusted if this text is overflow from linked)
+        int textStartCharIndex = getStartCharIndex();
+        int charIndex = Math.max(textStartCharIndex, startCharIndex);
+        TextRunIter runIter = _textBlock.getRunIterForCharRange(charIndex, endCharIndexBlock);
+
         // Iterate over source text runs for range and add
-        TextRunIter runIter = _textBlock.getRunIterForCharRange(startCharIndex, endCharIndexBlock);
         while (runIter.hasNextRun()) {
 
             // Set temp LineStyle
@@ -537,9 +563,9 @@ public class TextBox extends TextBlock {
             _updateTextLineStyle = textLine.getLineStyle();
 
             // Add run chars
-            super_addChars(nextRun.getString(), nextRun.getStyle(), startCharIndex);
+            super_addChars(nextRun.getString(), nextRun.getStyle(), charIndex - textStartCharIndex);
             _updateTextLineStyle = null;
-            startCharIndex += nextRun.length();
+            charIndex += nextRun.length();
         }
     }
 
