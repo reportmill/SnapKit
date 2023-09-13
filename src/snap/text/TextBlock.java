@@ -125,6 +125,22 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     }
 
     /**
+     * Returns the next text, if chained.
+     */
+    public TextBlock getNextText()  { return null; }
+
+    /**
+     * Returns the last text, if chained.
+     */
+    public TextBlock getLastText()
+    {
+        TextBlock lastText = this;
+        while (lastText.getNextText() != null)
+            lastText = lastText.getNextText();
+        return lastText;
+    }
+
+    /**
      * Returns the number of characters in the text.
      */
     public int length()  { return _length; }
