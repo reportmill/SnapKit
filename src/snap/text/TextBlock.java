@@ -13,6 +13,8 @@ import snap.props.PropChange;
 import snap.props.PropObject;
 import snap.util.CharSequenceUtils;
 import snap.util.CharSequenceX;
+import snap.util.XMLArchiver;
+import snap.util.XMLElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -20,7 +22,7 @@ import java.util.Objects;
 /**
  * This class is the basic text storage class, holding a list of TextLine.
  */
-public abstract class TextBlock extends PropObject implements CharSequenceX, Cloneable {
+public class TextBlock extends PropObject implements CharSequenceX, Cloneable, XMLArchiver.Archivable {
 
     // Whether text is rich
     private boolean _rich;
@@ -69,6 +71,16 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     public TextBlock()
     {
         super();
+        addDefaultLine();
+    }
+
+    /**
+     * Constructor with option to make rich text.
+     */
+    public TextBlock(boolean isRich)
+    {
+        super();
+        setRichText(isRich);
         addDefaultLine();
     }
 
@@ -1347,5 +1359,24 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
 
         // Return
         return sb.toString();
+    }
+
+    /**
+     * XMLArchiver.Archivable archival.
+     */
+    @Override
+    public XMLElement toXML(XMLArchiver anArchiver)
+    {
+        return TextBlockUtils.toXML(this, anArchiver);
+    }
+
+    /**
+     * XMLArchiver.Archivable unarchival.
+     */
+    @Override
+    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        TextBlockUtils.fromXML(this, anArchiver, anElement);
+        return this;
     }
 }
