@@ -22,7 +22,7 @@ public class TextBlockUtils {
         Path2D path = new Path2D();
 
         // If invalid range, just return
-        if (aStartCharIndex > textBlock.getEndCharIndex() || aEndCharIndex < textBlock.getStartCharIndex())
+        if (aStartCharIndex > textBlock.getEndCharIndex()) // || aEndCharIndex < textBlock.getStartCharIndex())
             return path;
         if (aEndCharIndex > textBlock.getEndCharIndex())
             aEndCharIndex = textBlock.getEndCharIndex();

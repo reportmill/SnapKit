@@ -9,11 +9,8 @@ import snap.geom.Shape;
  */
 public class TextSel {
 
-    // The TextBox
-    private TextBox  _textBox;
-
-    // The TextDoc
-    private TextDoc  _textDoc;
+    // The TextBlock
+    private TextBlock _textBlock;
 
     // The selection anchor
     private int  _anchor;
@@ -28,12 +25,11 @@ public class TextSel {
     private int  _end;
 
     /**
-     * Creates a new selection.
+     * Constructor.
      */
-    public TextSel(TextBox aTextBox, int aStart, int aEnd)
+    public TextSel(TextBlock aTextBox, int aStart, int aEnd)
     {
-        _textBox = aTextBox;
-        _textDoc = _textBox.getTextDoc();
+        _textBlock = aTextBox;
         _anchor = aStart;
         _index = aEnd;
         _start = Math.min(aStart, aEnd);
@@ -41,38 +37,37 @@ public class TextSel {
     }
 
     /**
-     * Returns the selected range that would result from the given two points.
+     * Constructor for selected range resulting from the given two points.
      */
-    public TextSel(TextBox aTextBox, double x1, double y1, double x2, double y2, boolean isWordSel, boolean isParaSel)
+    public TextSel(TextBlock aTextBox, double x1, double y1, double x2, double y2, boolean isWordSel, boolean isParaSel)
     {
         // Get text
-        _textBox = aTextBox;
-        _textDoc = _textBox.getTextDoc();
+        _textBlock = aTextBox;
 
         // Get character index for point 1 & point 2
-        int p1CharIndex = _textBox.getCharIndexForXY(x1, y1);
-        int p2CharIndex = _textBox.getCharIndexForXY(x2, y2);
+        int p1CharIndex = _textBlock.getCharIndexForXY(x1, y1);
+        int p2CharIndex = _textBlock.getCharIndexForXY(x2, y2);
 
         // Set selection start and end for selected chars
         int selStart = Math.min(p1CharIndex, p2CharIndex);
         int selEnd = Math.max(p1CharIndex, p2CharIndex);
-        int textDocLength = _textDoc.length();
+        int textLength = _textBlock.length();
 
         // If word selecting, expand selection to word boundary
         if (isWordSel) {
-            while (selStart > 0 && isWordChar(_textDoc.charAt(selStart - 1)))
+            while (selStart > 0 && isWordChar(_textBlock.charAt(selStart - 1)))
                 selStart--;
-            while (selEnd < textDocLength && isWordChar(_textDoc.charAt(selEnd)))
+            while (selEnd < textLength && isWordChar(_textBlock.charAt(selEnd)))
                 selEnd++;
         }
 
         // If paragraph selecting, expand selection to paragraph boundary
         else if (isParaSel) {
-            while (selStart > 0 && !_textDoc.isLineEndChar(selStart - 1))
+            while (selStart > 0 && !_textBlock.isLineEndChar(selStart - 1))
                 selStart--;
-            while (selEnd < textDocLength && !_textDoc.isLineEndChar(selEnd))
+            while (selEnd < textLength && !_textBlock.isLineEndChar(selEnd))
                 selEnd++;
-            if (selEnd < textDocLength)
+            if (selEnd < textLength)
                 selEnd++;
         }
 
@@ -84,64 +79,43 @@ public class TextSel {
     }
 
     /**
-     * Returns the text.
-     */
-    public TextBox getTextBox()  { return _textBox; }
-
-    /**
      * Returns the selection anchor (initial char of multi-char selection - usually start).
      */
-    public int getAnchor()
-    {
-        return Math.min(_anchor, _textDoc.length());
-    }
+    public int getAnchor()  { return Math.min(_anchor, _textBlock.length()); }
 
     /**
      * Returns the cursor position (final char of multi-char selection - usually end).
      */
-    public int getIndex()
-    {
-        return Math.min(_index, _textDoc.length());
-    }
+    public int getIndex()  { return Math.min(_index, _textBlock.length()); }
 
     /**
      * Returns the selection start.
      */
-    public int getStart()
-    {
-        return Math.min(_start, _textDoc.length());
-    }
+    public int getStart()  { return Math.min(_start, _textBlock.length()); }
 
     /**
      * Returns the selection end.
      */
-    public int getEnd()
-    {
-        return Math.min(_end, _textDoc.length());
-    }
+    public int getEnd()  { return Math.min(_end, _textBlock.length()); }
 
     /**
      * The length.
      */
-    public int getSize()
-    {
-        return getEnd() - getStart();
-    }
+    public int getSize()  { return getEnd() - getStart(); }
 
     /**
      * Returns whether selection is empty.
      */
-    public boolean isEmpty()
-    {
-        return getStart() == getEnd();
-    }
+    public boolean isEmpty()  { return getStart() == getEnd(); }
 
     /**
      * Returns the selected text string.
      */
     public String getString()
     {
-        return _textDoc.subSequence(getStart(), getEnd()).toString();
+        int startCharIndex = getStart();
+        int endCharIndex = getEnd();
+        return _textBlock.subSequence(startCharIndex, endCharIndex).toString();
     }
 
     /**
@@ -151,8 +125,8 @@ public class TextSel {
     {
         // If selection empty but not at end, get next char (or after newline, if at newline)
         int charIndex = getEnd();
-        if (isEmpty() && charIndex < _textBox.length())
-            charIndex = _textDoc.isLineEnd(charIndex) ? _textDoc.indexAfterNewline(charIndex) : (charIndex + 1);
+        if (isEmpty() && charIndex < _textBlock.length())
+            charIndex = _textBlock.isLineEnd(charIndex) ? _textBlock.indexAfterNewline(charIndex) : (charIndex + 1);
         return charIndex;
     }
 
@@ -164,7 +138,7 @@ public class TextSel {
         // If selection empty but not at start, get previous char (or before newline if after newline)
         int charIndex = getStart();
         if (isEmpty() && charIndex > 0)
-            charIndex = _textDoc.isAfterLineEnd(charIndex) ? _textDoc.lastIndexOfNewline(charIndex) : (charIndex - 1);
+            charIndex = _textBlock.isAfterLineEnd(charIndex) ? _textBlock.lastIndexOfNewline(charIndex) : (charIndex - 1);
         return charIndex;
     }
 
@@ -174,7 +148,7 @@ public class TextSel {
     public int getCharUp()
     {
         int selIndex = getIndex();
-        TextLine lastColumnLine = _textBox.getLineForCharIndex(selIndex);
+        TextLine lastColumnLine = _textBlock.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
         TextLine thisLine = getStartLine();
         TextLine nextLine = thisLine.getPrevious();
@@ -191,7 +165,7 @@ public class TextSel {
     public int getCharDown()
     {
         int selIndex = getIndex();
-        TextLine lastColumnLine = _textBox.getLineForCharIndex(selIndex);
+        TextLine lastColumnLine = _textBlock.getLineForCharIndex(selIndex);
         int lastColumn = selIndex - lastColumnLine.getStartCharIndex();
         TextLine thisLine = getEndLine();
         TextLine nextLine = thisLine.getNext();
@@ -208,14 +182,14 @@ public class TextSel {
     public int getLineStart()
     {
         // Get index at beginning of current line
-        int index1 = _textDoc.lastIndexAfterNewline(getEnd());
+        int index1 = _textBlock.lastIndexAfterNewline(getEnd());
         if (index1 < 0)
             index1 = 0;
 
         // Get index of first non-whitespace char and set selection
         int index2 = index1;
-        int textDocLength = _textDoc.length();
-        while (index2 < textDocLength && _textDoc.charAt(index2) == ' ')
+        int textLength = _textBlock.length();
+        while (index2 < textLength && _textBlock.charAt(index2) == ' ')
             index2++;
 
         return !isEmpty() || index2 != getStart() ? index2 : index1;
@@ -227,8 +201,8 @@ public class TextSel {
     public int getLineEnd()
     {
         // Get index of newline and set selection
-        int index = _textDoc.indexOfNewline(getEnd());
-        return index >= 0 ? index : _textBox.length();
+        int index = _textBlock.indexOfNewline(getEnd());
+        return index >= 0 ? index : _textBlock.length();
     }
 
     /**
@@ -236,7 +210,7 @@ public class TextSel {
      */
     public TextLine getStartLine()
     {
-        return _textBox.getLineForCharIndex(getStart());
+        return _textBlock.getLineForCharIndex(getStart());
     }
 
     /**
@@ -246,7 +220,7 @@ public class TextSel {
     {
         // Get line at end char index
         int endCharIndex = getEnd();
-        TextLine endLine = _textBox.getLineForCharIndex(endCharIndex);
+        TextLine endLine = _textBlock.getLineForCharIndex(endCharIndex);
 
         // If end char index is at start of line and sel not empty, back up to previous line
         if (endCharIndex == endLine.getStartCharIndex() && !isEmpty())
@@ -274,7 +248,7 @@ public class TextSel {
      */
     public Shape getPath()
     {
-        return _textBox.getPathForCharRange(getStart(), getEnd());
+        return _textBlock.getPathForCharRange(getStart(), getEnd());
     }
 
     /**

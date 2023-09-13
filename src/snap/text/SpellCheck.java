@@ -91,11 +91,11 @@ public class SpellCheck {
 
                 // If starting line, adjust x1 for starting character
                 if (i == startLineIndex)
-                    lineX = textLine.getTextXForCharIndex(wordStart - textLine.getStartCharIndex() - textBox.getStartCharIndex());
+                    lineX = textLine.getTextXForCharIndex(wordStart - textLine.getStartCharIndex()); // - textBox.getStartCharIndex());
 
                 // If ending line, adjust x2 for ending character
                 if (i == endLineIndex)
-                    lineMaxX = textLine.getTextXForCharIndex(wordEnd - textLine.getStartCharIndex() - textBox.getStartCharIndex());
+                    lineMaxX = textLine.getTextXForCharIndex(wordEnd - textLine.getStartCharIndex()); // - textBox.getStartCharIndex());
 
                 // Append rect for line to path
                 spellingPath.moveTo(lineX, lineBaseY);

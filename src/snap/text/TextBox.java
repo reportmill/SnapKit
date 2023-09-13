@@ -421,7 +421,15 @@ public class TextBox extends TextBlock {
     public String getString()
     {
         TextDoc textDoc = getTextDoc();
-        return textDoc.getString();
+        String textStr = textDoc.getString();
+
+        if (length() < textStr.length()) {
+            int startCharIndex = getStartCharIndex();
+            int endCharIndex = getEndCharIndex();
+            textStr = textStr.substring(startCharIndex, endCharIndex);
+        }
+
+        return textStr;
     }
 
     /**
