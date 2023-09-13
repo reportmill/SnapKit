@@ -206,18 +206,8 @@ public class TextBox extends TextBlock {
         super.addChars(theChars, theStyle, anIndex);
 
         // If linked, remove any lines below bounds
-        if (isLinked()) {
-            TextLine lastLine = getLineLast();
-            while (lastLine.getMaxY() > getHeight()) {
-                int lineIndex = lastLine.getIndex();
-                if (lineIndex == 0) {
-                    lastLine.removeChars(0, lastLine.length());
-                    break;
-                }
-                removeLine(lineIndex);
-                lastLine = getLine(lineIndex - 1);
-            }
-        }
+        if (isLinked())
+            removeOutOfBoundsLines();
     }
 
     /**
@@ -744,6 +734,30 @@ public class TextBox extends TextBlock {
 
         // Return false
         return false;
+    }
+
+    /**
+     * Removes all lines not fully above bottom border.
+     */
+    private void removeOutOfBoundsLines()
+    {
+        TextLine lastLine = getLineLast();
+
+        // While last line not fully above bottom, remove line
+        while (lastLine.getMaxY() > getHeight()) {
+
+            // If line 0, just remove chars
+            int lineIndex = lastLine.getIndex();
+            if (lineIndex == 0) {
+                lastLine.removeChars(0, lastLine.length());
+                break;
+            }
+
+            // Otherwise, remove line
+            removeLine(lineIndex);
+            lastLine = getLine(lineIndex - 1);
+        }
+
     }
 
     /**
