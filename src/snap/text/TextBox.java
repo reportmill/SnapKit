@@ -205,11 +205,18 @@ public class TextBox extends TextBlock {
         // Do normal version
         super.addChars(theChars, theStyle, anIndex);
 
-        // Remove any lines below bounds
-        while (getLineCount() > 0 && getLineLast().getMaxY() > getHeight()) {
-            if (isLinked())
-                removeLine(getLineCount() - 1);
-            else break;
+        // If linked, remove any lines below bounds
+        if (isLinked()) {
+            TextLine lastLine = getLineLast();
+            while (lastLine.getMaxY() > getHeight()) {
+                int lineIndex = lastLine.getIndex();
+                if (lineIndex == 0) {
+                    lastLine.removeChars(0, lastLine.length());
+                    break;
+                }
+                removeLine(lineIndex);
+                lastLine = getLine(lineIndex - 1);
+            }
         }
     }
 
@@ -226,22 +233,8 @@ public class TextBox extends TextBlock {
         // Do normal version
         TextLine textLine2 = super.addCharsToLine(theChars, theStyle, charIndex, textLine, charsHaveNewline);
 
-        // If lined text and added line is below bounds, remove it and return
-        if (isLinked()) {
-            if (textLine2.getMaxY() > getHeight()) {
-                removeLine(getLineCount() - 1);
-                if (textLine != textLine2 && textLine.getMaxY() > getHeight())
-                    removeLine(getLineCount() - 1);
-                return textLine2;
-            }
-        }
-
         // Wrap line if needed
         wrapLineIfNeeded(textLine);
-
-        // If newline was added, wrap next line if needed
-        if (textLine2 != textLine)
-            wrapLineIfNeeded(textLine2);
 
         // Return
         return textLine2;
