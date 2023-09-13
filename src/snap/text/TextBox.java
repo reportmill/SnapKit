@@ -224,20 +224,17 @@ public class TextBox extends TextBlock {
      * Override to do wrapping.
      */
     @Override
-    protected TextLine addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, boolean charsHaveNewline)
+    protected void addCharsToLine(CharSequence theChars, TextStyle theStyle, int charIndex, TextLine textLine, boolean charsHaveNewline)
     {
         // If updating text from source text, update line style
         if (_updateTextLineStyle != null)
             textLine.setLineStyle(_updateTextLineStyle);
 
         // Do normal version
-        TextLine textLine2 = super.addCharsToLine(theChars, theStyle, charIndex, textLine, charsHaveNewline);
+        super.addCharsToLine(theChars, theStyle, charIndex, textLine, charsHaveNewline);
 
         // Wrap line if needed
         wrapLineIfNeeded(textLine);
-
-        // Return
-        return textLine2;
     }
 
     /**
