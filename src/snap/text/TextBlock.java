@@ -1277,6 +1277,32 @@ public abstract class TextBlock extends PropObject implements CharSequenceX, Clo
     public TextRun[] getUnderlineRuns(Rect aRect)  { return TextBlockUtils.getUnderlineRuns(this, aRect); }
 
     /**
+     * Returns a copy of this text for given char range.
+     */
+    public TextBlock copyForRange(int aStart, int aEnd)
+    {
+        // Create new RichText and iterate over lines in range to add copies for subrange
+        TextBlock textCopy = new RichText();
+        textCopy._lines.remove(0);
+
+        // Get start/end line indexes
+        int startLineIndex = getLineForCharIndex(aStart).getIndex();
+        int endLineIndex = getLineForCharIndex(aEnd).getIndex();
+
+        // Iterate over lines and add
+        for (int i = startLineIndex; i <= endLineIndex; i++) {
+            TextLine line = getLine(i);
+            int lineStart = line.getStartCharIndex();
+            int start = Math.max(aStart - lineStart, 0), end = Math.min(aEnd - lineStart, line.length());
+            TextLine lineCopy = line.copyForRange(start, end);
+            textCopy.addLine(lineCopy, textCopy.getLineCount());
+        }
+
+        // Return
+        return textCopy;
+    }
+
+    /**
      * Standard clone implementation.
      */
     @Override

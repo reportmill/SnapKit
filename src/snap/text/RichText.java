@@ -23,114 +23,69 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
     }
 
     /**
-     * Creates RichText initialized with given String and attributes (font, color).
-     */
-    public RichText(CharSequence theChars, Object... theAttrs)
-    {
-        this();
-
-        // Add attributes
-        TextStyle style = getDefaultStyle().copyFor(theAttrs);
-        addChars(theChars, style, 0);
-    }
-
-    /**
-     * Returns a copy of this text for given char range.
-     */
-    public RichText copyForRange(int aStart, int aEnd)
-    {
-        // Create new RichText and iterate over lines in range to add copies for subrange
-        RichText textCopy = new RichText();
-        textCopy._lines.remove(0);
-
-        // Get start/end line indexes
-        int startLineIndex = getLineForCharIndex(aStart).getIndex();
-        int endLineIndex = getLineForCharIndex(aEnd).getIndex();
-
-        // Iterate over lines and add
-        for (int i = startLineIndex; i <= endLineIndex; i++) {
-            TextLine line = getLine(i);
-            int lineStart = line.getStartCharIndex();
-            int start = Math.max(aStart - lineStart, 0), end = Math.min(aEnd - lineStart, line.length());
-            TextLine lineCopy = line.copyForRange(start, end);
-            textCopy.addLine(lineCopy, textCopy.getLineCount());
-        }
-
-        // Return
-        return textCopy;
-    }
-
-    /**
-     * Standard clone implementation.
-     */
-    @Override
-    public RichText clone()  { return (RichText) super.clone(); }
-
-    /**
      * XML archival.
      */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
         // Get new element named xstring
-        XMLElement e = new XMLElement("xstring");
+        XMLElement xml = new XMLElement("xstring");
 
-        // Declare loop variable for xstring attributes: Font, Color, Paragraph, Format, Outline, Underline, Scripting, CS
-        TextStyle style = getDefaultStyle();
-        TextLineStyle lstyle = getDefaultLineStyle();
-        Font font = style.getFont();
-        Color color = style.getColor();
-        TextFormat format = style.getFormat();
-        Border border = null; //RMParagraph pgraph = getDefaultParagraph();
+        // Declare loop variables for text attributes: TextTyle, LineStyle, Font, Color, Format, Outline, Underline, Scripting, CS
+        TextStyle textStyle = getDefaultStyle();
+        TextLineStyle lineStyle = getDefaultLineStyle();
+        Font font = textStyle.getFont();
+        Color color = textStyle.getColor();
+        TextFormat format = textStyle.getFormat();
+        Border border = null;
         int scripting = 0;
         float charSpacing = 0;
         boolean underline = false;
 
         // Iterate over runs
         for (TextLine line : getLines()) {
-            for (int i = 0, iMax = line.getRunCount(); i < iMax; i++) {
-                TextRun run = line.getRun(i);
+            for (TextRun run : line.getRuns()) {
 
                 // If font changed for run, write font element
                 if (!Objects.equals(font, run.getFont())) {
                     font = run.getFont();
-                    e.add(anArchiver.toXML(font));
+                    xml.add(anArchiver.toXML(font));
                 }
 
                 // If color changed for run, write color
                 if (!Objects.equals(color, run.getColor())) {
                     color = run.getColor();
-                    e.add(anArchiver.toXML(color));
+                    xml.add(anArchiver.toXML(color));
                 }
 
                 // If format changed for run, write format
                 if (!Objects.equals(format, run.getFormat())) {
                     format = run.getFormat();
-                    if (format == null) e.add(new XMLElement("format"));
-                    else e.add(anArchiver.toXML(format));
+                    if (format == null) xml.add(new XMLElement("format"));
+                    else xml.add(anArchiver.toXML(format));
                 }
 
                 // If paragraph style changed for run, write paragraph
-                if (!Objects.equals(lstyle, line.getLineStyle())) {
-                    lstyle = line.getLineStyle();
-                    e.add(anArchiver.toXML(lstyle));
+                if (!Objects.equals(lineStyle, line.getLineStyle())) {
+                    lineStyle = line.getLineStyle();
+                    xml.add(anArchiver.toXML(lineStyle));
                 }
 
                 // If underline style changed, write underline
                 if (underline != run.isUnderlined()) {
                     underline = run.isUnderlined();
-                    e.add(new XMLElement("underline"));
-                    if (!underline) e.get(e.size() - 1).add("style", -1);
+                    xml.add(new XMLElement("underline"));
+                    if (!underline) xml.get(xml.size() - 1).add("style", -1);
                 }
 
                 // If border changed, write border
                 if (!Objects.equals(border, run.getBorder())) {
                     border = run.getBorder();
-                    e.add(new XMLElement("TextBorder"));
+                    xml.add(new XMLElement("TextBorder"));
                     if (border != null) {
-                        if (border.getWidth() != 1) e.get(e.size() - 1).add("stroke", border.getWidth());
+                        if (border.getWidth() != 1) xml.get(xml.size() - 1).add("stroke", border.getWidth());
                         if (border.getColor() != null)
-                            e.get(e.size() - 1).add("color", "#" + border.getColor().toHexString());
-                    } else e.get(e.size() - 1).add("off", true);
+                            xml.get(xml.size() - 1).add("color", "#" + border.getColor().toHexString());
+                    } else xml.get(xml.size() - 1).add("off", true);
                 }
 
                 // If scripting changed, write scripting
@@ -138,7 +93,7 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
                     scripting = run.getScripting();
                     XMLElement se = new XMLElement("scripting");
                     if (scripting != 0) se.add("val", scripting);
-                    e.add(se);
+                    xml.add(se);
                 }
 
                 // If char spacing changed, write char spacing
@@ -146,17 +101,17 @@ public class RichText extends TextDoc implements XMLArchiver.Archivable {
                     charSpacing = run.getCharSpacing();
                     XMLElement charSpacingXML = new XMLElement("char-spacing");
                     charSpacingXML.add("value", charSpacing);
-                    e.add(charSpacingXML);
+                    xml.add(charSpacingXML);
                 }
 
                 // Write run string
                 if (run.length() > 0)
-                    e.add(new XMLElement("string", run.getString()));
+                    xml.add(new XMLElement("string", run.getString()));
             }
         }
 
         // Return
-        return e;
+        return xml;
     }
 
     /**

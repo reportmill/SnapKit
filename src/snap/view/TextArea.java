@@ -1353,9 +1353,8 @@ public class TextArea extends View {
 
         // Add rich text
         if (_textBox.isRichText()) {
-            RichText richText = (RichText) getTextDoc();
-            TextBlock richTextForRange = richText.copyForRange(selStart, selEnd);
-            XMLElement xml = new XMLArchiver().toXML(richTextForRange);
+            TextBlock textForRange = _textBox.copyForRange(selStart, selEnd);
+            XMLElement xml = new XMLArchiver().toXML(textForRange);
             String xmlStr = xml.getString();
             clipboard.addData(SNAP_RICHTEXT_TYPE, xmlStr);
         }

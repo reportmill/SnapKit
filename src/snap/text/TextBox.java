@@ -188,6 +188,16 @@ public class TextBox extends TextBlock {
     }
 
     /**
+     * Override to forward to source text block.
+     */
+    @Override
+    public TextBlock copyForRange(int aStart, int aEnd)
+    {
+        TextBlock textBlock = getTextDoc();
+        return textBlock.copyForRange(aStart, aEnd);
+    }
+
+    /**
      * Used to call super.addChars().
      */
     private void super_addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
