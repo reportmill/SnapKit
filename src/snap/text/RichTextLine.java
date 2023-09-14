@@ -50,9 +50,9 @@ public class RichTextLine extends TextLine {
         }
 
         // If charIndex at run end and next run has same style, return it instead
-        if (charIndex == run.getEndCharIndex() && run.getIndex() + 1 < getRunCount()) {
-            TextRun nextRun = getRun(run.getIndex() + 1);
-            if (aStyle.equals(nextRun.getStyle()))
+        if (charIndex == run.getEndCharIndex()) {
+            TextRun nextRun = run.getNext();
+            if (nextRun != null && aStyle.equals(nextRun.getStyle()))
                 return nextRun;
         }
 

@@ -147,7 +147,7 @@ public class TextBlockUtils {
         TextFormat format = textStyle.getFormat();
         Border border = null;
         int scripting = 0;
-        float charSpacing = 0;
+        double charSpacing = 0;
         boolean underline = false;
 
         // Iterate over runs

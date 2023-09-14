@@ -169,106 +169,52 @@ public class TextRun implements CharSequenceX, Cloneable {
     /**
      * Returns the font for this run.
      */
-    public Font getFont()
-    {
-        return getStyle().getFont();
-    }
+    public Font getFont()  { return _style.getFont(); }
 
     /**
      * Returns the color for this run.
      */
-    public Color getColor()
-    {
-        return getStyle().getColor();
-    }
+    public Color getColor()  { return _style.getColor(); }
 
     /**
      * Returns the format for this run.
      */
-    public TextFormat getFormat()
-    {
-        return getStyle().getFormat();
-    }
+    public TextFormat getFormat()  { return _style.getFormat(); }
 
     /**
      * Returns the border for this run.
      */
-    public Border getBorder()
-    {
-        return getStyle().getBorder();
-    }
+    public Border getBorder()  { return _style.getBorder(); }
 
     /**
      * Returns whether this run is underlined.
      */
-    public boolean isUnderlined()
-    {
-        return getStyle().isUnderlined();
-    }
-
-    /**
-     * Returns the underline style of this run.
-     */
-    public int getUnderlineStyle()
-    {
-        return getStyle().getUnderlineStyle();
-    }
+    public boolean isUnderlined()  { return _style.isUnderlined(); }
 
     /**
      * Returns the scripting for this run (1=SuperScripting, -1=Subscripting, 0=none).
      */
-    public int getScripting()
-    {
-        return getStyle().getScripting();
-    }
+    public int getScripting()  { return _style.getScripting(); }
 
     /**
      * Returns the char spacing.
      */
-    public float getCharSpacing()
-    {
-        return (float) getStyle().getCharSpacing();
-    }
-
-    /**
-     * Returns the char advance for a given character.
-     */
-    public double getCharAdvance(char aChar)
-    {
-        return getFont().charAdvance(aChar);
-    }
+    public double getCharSpacing()  { return _style.getCharSpacing(); }
 
     /**
      * Returns the max distance above the baseline for this run font.
      */
-    public double getAscent()
-    {
-        return getFont().getAscent();
-    }
+    public double getAscent()  { return getFont().getAscent(); }
 
     /**
      * Returns the max distance below the baseline that this font goes.
      */
-    public double getDescent()
-    {
-        return getFont().getDescent();
-    }
+    public double getDescent()  { return getFont().getDescent(); }
 
     /**
      * Returns the default distance between lines for this font.
      */
-    public double getLeading()
-    {
-        return getFont().getLeading();
-    }
-
-    /**
-     * Returns the line advance.
-     */
-    public double getLineAdvance()
-    {
-        return getAscent() + getDescent() + getLeading();
-    }
+    public double getLeading()  { return getFont().getLeading(); }
 
     /**
      * Returns the next run, if available.
@@ -302,7 +248,7 @@ public class TextRun implements CharSequenceX, Cloneable {
         // Check Start, Length, Style
         if (other.getStartCharIndex() != getStartCharIndex()) return false;
         if (other.length() != length()) return false;
-        if (!other.getStyle().equals(getStyle())) return false;
+        if (!other._style.equals(_style)) return false;
 
         // Return equal
         return true;
