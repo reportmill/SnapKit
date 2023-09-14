@@ -146,7 +146,7 @@ public class TextArea extends View {
             oldTextDoc.removePropChangeListener(_textDocPropLsnr);
 
         // Add PropChangeListener to new RichText
-        _textBox.getNextText().addPropChangeListener(_textDocPropLsnr);
+        _textBox.getSourceText().addPropChangeListener(_textDocPropLsnr);
     }
 
     /**
@@ -160,7 +160,7 @@ public class TextArea extends View {
     /**
      * Returns the TextBlock.
      */
-    public TextBlock getTextDoc()  { return _textBox.getNextText(); }
+    public TextBlock getTextDoc()  { return _textBox.getSourceText(); }
 
     /**
      * Sets the TextDoc.
@@ -180,7 +180,7 @@ public class TextArea extends View {
         // Add/remove PropChangeListener
         if (oldTextDoc != null)
             oldTextDoc.removePropChangeListener(_textDocPropLsnr);
-        _textBox.setNextText(aTextDoc);
+        _textBox.setSourceText(aTextDoc);
         if (aTextDoc != null)
             aTextDoc.addPropChangeListener(_textDocPropLsnr);
 
@@ -197,9 +197,9 @@ public class TextArea extends View {
     }
 
     /**
-     * Returns the last text.
+     * Returns the root text block.
      */
-    public TextBlock getLastText()  { return _textBox.getLastText(); }
+    public TextBlock getSourceText()  { return _textBox.getSourceText(); }
 
     /**
      * Returns the plain string of the text being edited.

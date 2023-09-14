@@ -15,7 +15,7 @@ import snap.util.MathUtils;
 public class TextBox extends TextBlock {
 
     // The source TextBlock
-    private TextBlock _nextText;
+    private TextBlock _sourceText;
 
     // Whether to wrap lines that overrun bounds
     private boolean _wrapLines;
@@ -56,7 +56,7 @@ public class TextBox extends TextBlock {
 
         // Set default text block
         TextBlock textBlock = new RichText();
-        setNextText(textBlock);
+        setSourceText(textBlock);
         setRichText(true);
     }
 
@@ -70,23 +70,23 @@ public class TextBox extends TextBlock {
     }
 
     /**
-     * Returns the TextBlock.
+     * Returns the source TextBlock.
      */
-    public TextBlock getNextText()  { return _nextText; }
+    public TextBlock getSourceText()  { return _sourceText; }
 
     /**
-     * Sets the TextBlock.
+     * Sets the source TextBlock.
      */
-    public void setNextText(TextBlock aTextBlock)
+    public void setSourceText(TextBlock aTextBlock)
     {
         // If already set, just return
-        if (aTextBlock == _nextText) return;
+        if (aTextBlock == _sourceText) return;
 
         // Stop listening to old TextBlock PropChanges, start listening to new
-        if (_nextText != null)
-            _nextText.removePropChangeListener(_textBlockLsnr);
-        _nextText = aTextBlock;
-        _nextText.addPropChangeListener(_textBlockLsnr);
+        if (_sourceText != null)
+            _sourceText.removePropChangeListener(_textBlockLsnr);
+        _sourceText = aTextBlock;
+        _sourceText.addPropChangeListener(_textBlockLsnr);
 
         // Update all
         updateTextAll();
@@ -104,7 +104,7 @@ public class TextBox extends TextBlock {
         super.setRichText(aValue);
 
         // Forward to source text block
-        _nextText.setRichText(aValue);
+        _sourceText.setRichText(aValue);
     }
 
     /**
@@ -113,8 +113,7 @@ public class TextBox extends TextBlock {
     @Override
     public void addChars(CharSequence theChars, TextStyle theStyle, int anIndex)
     {
-        TextBlock nextText = getNextText();
-        nextText.addChars(theChars, theStyle, anIndex);
+        _sourceText.addChars(theChars, theStyle, anIndex);
     }
 
     /**
@@ -123,8 +122,7 @@ public class TextBox extends TextBlock {
     @Override
     public void removeChars(int aStartCharIndex, int anEndCharIndex)
     {
-        TextBlock nextText = getNextText();
-        nextText.removeChars(aStartCharIndex, anEndCharIndex);
+        _sourceText.removeChars(aStartCharIndex, anEndCharIndex);
     }
 
     /**
@@ -133,8 +131,7 @@ public class TextBox extends TextBlock {
     @Override
     public void replaceChars(CharSequence theChars, TextStyle theStyle, int aStart, int anEnd)
     {
-        TextBlock nextText = getNextText();
-        nextText.replaceChars(theChars, theStyle, aStart, anEnd);
+        _sourceText.replaceChars(theChars, theStyle, aStart, anEnd);
     }
 
     /**
@@ -143,8 +140,7 @@ public class TextBox extends TextBlock {
     @Override
     public void setStyle(TextStyle aStyle, int aStart, int anEnd)
     {
-        TextBlock nextText = getNextText();
-        nextText.setStyle(aStyle, aStart, anEnd);
+        _sourceText.setStyle(aStyle, aStart, anEnd);
     }
 
     /**
@@ -153,8 +149,7 @@ public class TextBox extends TextBlock {
     @Override
     public void setLineStyle(TextLineStyle aStyle, int aStart, int anEnd)
     {
-        TextBlock nextText = getNextText();
-        nextText.setLineStyle(aStyle, aStart, anEnd);
+        _sourceText.setLineStyle(aStyle, aStart, anEnd);
     }
 
     /**
@@ -163,8 +158,7 @@ public class TextBox extends TextBlock {
     @Override
     public void setLineStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
-        TextBlock nextText = getNextText();
-        nextText.setLineStyleValue(aKey, aValue, aStart, anEnd);
+        _sourceText.setLineStyleValue(aKey, aValue, aStart, anEnd);
     }
 
     /**
@@ -173,8 +167,7 @@ public class TextBox extends TextBlock {
     @Override
     public void setDefaultStyle(TextStyle aStyle)
     {
-        TextBlock nextText = getNextText();
-        nextText.setDefaultStyle(aStyle);
+        _sourceText.setDefaultStyle(aStyle);
     }
 
     /**
@@ -183,8 +176,7 @@ public class TextBox extends TextBlock {
     @Override
     public void setParentTextStyle(TextStyle aStyle)
     {
-        TextBlock nextText = getNextText();
-        nextText.setParentTextStyle(aStyle);
+        _sourceText.setParentTextStyle(aStyle);
     }
 
     /**
@@ -193,8 +185,7 @@ public class TextBox extends TextBlock {
     @Override
     public TextBlock copyForRange(int aStart, int aEnd)
     {
-        TextBlock nextText = getNextText();
-        return nextText.copyForRange(aStart, aEnd);
+        return _sourceText.copyForRange(aStart, aEnd);
     }
 
     /**
@@ -204,7 +195,7 @@ public class TextBox extends TextBlock {
     {
         // Get start char index - just return if index before text start
         int startCharIndex = Math.max(anIndex, getStartCharIndex());
-        if (startCharIndex >= _nextText.length())
+        if (startCharIndex >= _sourceText.length())
             return;
 
         // If FontScale is set, replace style with scaled style
@@ -417,15 +408,16 @@ public class TextBox extends TextBlock {
     @Override
     public String getString()
     {
-        TextBlock nextText = getNextText();
-        String textStr = nextText.getString();
+        String textStr = _sourceText.getString();
 
+        // If not same size, trim string
         if (length() < textStr.length()) {
             int startCharIndex = getStartCharIndex();
             int endCharIndex = getEndCharIndex();
             textStr = textStr.substring(startCharIndex, endCharIndex);
         }
 
+        // Return
         return textStr;
     }
 
@@ -435,11 +427,12 @@ public class TextBox extends TextBlock {
     @Override
     public void setString(String aString)
     {
+        // If already set, just return
         String str = aString != null ? aString : "";
         if (str.length() == length() && str.equals(getString())) return;
 
-        TextBlock nextText = getNextText();
-        nextText.setString(str);
+        // Forward to SourceText and update all
+        _sourceText.setString(str);
         updateTextAll();
     }
 
@@ -492,7 +485,7 @@ public class TextBox extends TextBlock {
         // Handle LineStyleChange
         else if (aPC instanceof TextBlockUtils.LineStyleChange) {
             TextBlockUtils.LineStyleChange lineStyleChange = (TextBlockUtils.LineStyleChange) aPC;
-            TextLine textLine = _nextText.getLine(lineStyleChange.getIndex());
+            TextLine textLine = _sourceText.getLine(lineStyleChange.getIndex());
             int startCharIndex = textLine.getStartCharIndex();
             int endCharIndex = textLine.getEndCharIndex();
             updateTextForCharRange(startCharIndex, endCharIndex, endCharIndex);
@@ -538,7 +531,7 @@ public class TextBox extends TextBlock {
     protected void updateTextAll()
     {
         int endCharIndexBox = length();
-        int endCharIndexBlock = _nextText.length();
+        int endCharIndexBlock = _sourceText.length();
         updateTextForCharRange(0, endCharIndexBox, endCharIndexBlock);
     }
 
@@ -548,7 +541,7 @@ public class TextBox extends TextBlock {
     protected void updateTextForCharRange(int startCharIndex, int endCharIndexBox, int endCharIndexBlock)
     {
         // Skip if no text
-        if (length() == 0 && _nextText.length() == 0) return;
+        if (length() == 0 && _sourceText.length() == 0) return;
 
         // If WrapLines, mark location of first line's first token - if it shrinks, might need to re-wrap previous line
         boolean wrapLines = isWrapLines();
@@ -561,7 +554,7 @@ public class TextBox extends TextBlock {
         // Get run iterator for range (adjusted if this text is overflow from linked)
         int textStartCharIndex = getStartCharIndex();
         int charIndex = Math.max(textStartCharIndex, startCharIndex);
-        TextRunIter runIter = _nextText.getRunIterForCharRange(charIndex, endCharIndexBlock);
+        TextRunIter runIter = _sourceText.getRunIterForCharRange(charIndex, endCharIndexBlock);
 
         // Iterate over source text runs for range and add
         while (runIter.hasNextRun()) {
@@ -658,8 +651,7 @@ public class TextBox extends TextBlock {
      */
     public double getPrefWidth(double aH)
     {
-        TextBlock nextText = getNextText();
-        double textPrefW = nextText.getPrefWidth();
+        double textPrefW = _sourceText.getPrefWidth();
         double fontScale = getFontScale();
         double prefW = Math.ceil(textPrefW * fontScale);
         return prefW;
@@ -712,7 +704,7 @@ public class TextBox extends TextBlock {
             if (isTextOutOfBounds()) {
                 fsHi = fontScale;
                 if ((fsHi + fsLo) / 2 == 0) {
-                    System.err.println("Error scaling text. Could only fit " + length() + " of " + getNextText().length());
+                    System.err.println("Error scaling text. Could only fit " + length() + " of " + _sourceText.length());
                     break;
                 }
             }
@@ -752,7 +744,7 @@ public class TextBox extends TextBlock {
         int lineCount = getLineCount();
         double lineMaxY = lineCount > 0 ? getLine(lineCount - 1).getMaxY() : 0;
         double tboxMaxY = getMaxY();
-        if (lineMaxY >= tboxMaxY || getEndCharIndex() < getNextText().length())
+        if (lineMaxY >= tboxMaxY || getEndCharIndex() < _sourceText.length())
             return true;
 
         // If not WrapLines, check X
@@ -800,7 +792,7 @@ public class TextBox extends TextBlock {
     @Override
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
-        return _nextText.createTokensForTextLine(aTextLine);
+        return _sourceText.createTokensForTextLine(aTextLine);
     }
 
     /**

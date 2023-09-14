@@ -107,7 +107,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         if (aValue == isRichText()) return;
 
         // Get clone
-        //TextBlock clone = clone();
+        //TextBlock clone = length() > 0 ? clone() : null;
 
         // Set value
         _rich = aValue;
@@ -121,24 +121,13 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         addDefaultLine();
 
         // Add clone back
-        //addTextBlock(clone, 0);
+        //if (clone != null) addTextBlock(clone, 0);
     }
 
     /**
-     * Returns the next text, if chained.
+     * Returns the root text block.
      */
-    public TextBlock getNextText()  { return null; }
-
-    /**
-     * Returns the last text, if chained.
-     */
-    public TextBlock getLastText()
-    {
-        TextBlock lastText = this;
-        while (lastText.getNextText() != null)
-            lastText = lastText.getNextText();
-        return lastText;
-    }
+    public TextBlock getSourceText()  { return this; }
 
     /**
      * Returns the number of characters in the text.
