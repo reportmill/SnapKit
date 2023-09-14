@@ -308,7 +308,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         // Get line for char index
         TextLine textLine = getLineForCharIndex(anIndex);
 
-        // If adding at text end and last line and ends with newline, create/add new line
+        // If adding at text end and last line and ends with newline, create/add new line (should never happen)
         if (anIndex == textLine.getEndCharIndex() && textLine.isLastCharNewline())
             textLine = splitLineAtIndex(textLine, textLine.length());
 
@@ -326,14 +326,15 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             if (charIndexInChars > 0 || endCharIndexInChars < charsLength)
                 chars = theChars.subSequence(charIndexInChars, endCharIndexInChars);
 
-            // Add chars to line
+            // Get char index and update line
             int charIndex = anIndex + charIndexInChars;
-            addCharsToLine(chars, theStyle, charIndex, textLine, newlineIndex > 0);
+            if (charIndexInChars > 0) {
+                while (charIndex > textLine.getEndCharIndex() || charIndex == textLine.getEndCharIndex() && textLine.isLastCharNewline())
+                    textLine = textLine.getNext();
+            }
 
-            // Update line
-            charIndex += chars.length();
-            while (charIndex > textLine.getEndCharIndex() || charIndex == textLine.getEndCharIndex() && textLine.isLastCharNewline())
-                textLine = textLine.getNext();
+            // Add chars to line
+            addCharsToLine(chars, theStyle, charIndex, textLine, newlineIndex > 0);
 
             // Set start to last end
             charIndexInChars += chars.length();
@@ -380,7 +381,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         TextRun lastRun = textLine.getRunLast();
 
         // Iterate over runs from end of line, moving chars from each to next line
-        while (lastRun != null && textLine.length() > startCharIndex) {
+        while (textLine.length() > startCharIndex) {
 
             // Remove run chars from text line (chars after startCharIndex)
             int runStartCharIndex = Math.max(startCharIndex, lastRun.getStartCharIndex());
@@ -427,9 +428,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             removeEndCharIndex = lineStartCharIndex;
         }
 
-        // Hook for subclasses
-        didRemoveChars(removedChars, aStartCharIndex);
-
         // If deleted chars is set, send property change
         if (removedChars != null)
             firePropChange(new TextBlockUtils.CharsChange(this, removedChars, null, aStartCharIndex));
@@ -457,11 +455,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         if (!textLine.isLastCharNewline())
             joinLineWithNextLine(textLine);
     }
-
-    /**
-     * A hook for subclasses.
-     */
-    protected void didRemoveChars(CharSequence removedChars, int aStartCharIndex)  { }
 
     /**
      * Replaces chars in given range, with given String, using the given attributes.

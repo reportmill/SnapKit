@@ -141,12 +141,16 @@ public class TextRunIter {
     private TextRun trimRunIfNeeded(TextRun textRun)
     {
         // If run starts before StartCharIndex or ends before EndCharIndex, return copy for sub range
-        int startCharIndexInLine = _startCharIndex - textRun.getLine().getStartCharIndex();
-        int endCharIndexInLine = _endCharIndex - textRun.getLine().getStartCharIndex();
+        TextLine textLine = textRun.getLine();
+        int lineStartCharIndex = textLine.getStartCharIndex();
+        int startCharIndexInLine = _startCharIndex - lineStartCharIndex;
+        int endCharIndexInLine = _endCharIndex - lineStartCharIndex;
+
+        // If run starts before StartCharIndex or ends before EndCharIndex, return copy for sub range
         if (startCharIndexInLine > textRun.getStartCharIndex() || endCharIndexInLine < textRun.getEndCharIndex()) {
-            int newRunStartCharIndex = Math.max(startCharIndexInLine, textRun.getStartCharIndex());
-            int newRunEndStartCharIndex = Math.min(endCharIndexInLine, textRun.getEndCharIndex());
-            return textRun.copyForRange(newRunStartCharIndex, newRunEndStartCharIndex);
+            int startCharOffset = Math.max(startCharIndexInLine - textRun.getStartCharIndex(), 0);
+            int endCharOffset = textRun.length() - Math.max(textRun.getEndCharIndex() - endCharIndexInLine, 0);
+            return textRun.copyForRange(startCharOffset, endCharOffset);
         }
 
         // Return

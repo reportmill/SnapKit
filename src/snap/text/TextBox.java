@@ -238,17 +238,6 @@ public class TextBox extends TextBlock {
     }
 
     /**
-     * Override to do wrapping.
-     */
-    @Override
-    protected void didRemoveChars(CharSequence removedChars, int startCharIndex)
-    {
-        // Wrap line if needed
-        TextLine textLine = getLineForCharIndex(startCharIndex);
-        wrapLineIfNeeded(textLine);
-    }
-
-    /**
      * Wraps given line if needed by moving chars from last token(s) to next line.
      */
     protected void wrapLineIfNeeded(TextLine textLine)
@@ -425,6 +414,7 @@ public class TextBox extends TextBlock {
     /**
      * Returns the string for the text.
      */
+    @Override
     public String getString()
     {
         TextBlock nextText = getNextText();
@@ -442,6 +432,7 @@ public class TextBox extends TextBlock {
     /**
      * Sets the text to the given string.
      */
+    @Override
     public void setString(String aString)
     {
         String str = aString != null ? aString : "";
@@ -450,6 +441,20 @@ public class TextBox extends TextBlock {
         TextBlock nextText = getNextText();
         nextText.setString(str);
         updateTextAll();
+    }
+
+    /**
+     * Override to wrap joined lines.
+     */
+    @Override
+    protected void joinLineWithNextLine(TextLine textLine)
+    {
+        // Do normal version
+        super.joinLineWithNextLine(textLine);
+
+        // Wrap joined line
+        if (isWrapLines())
+            wrapLineIfNeeded(textLine);
     }
 
     /**
@@ -576,7 +581,6 @@ public class TextBox extends TextBlock {
         if (firstLineTokenMaxX > 0 && firstLineTokenMaxX > firstLine.getToken(0).getMaxX()) {
             TextLine previousLine = firstLine.getPrevious();
             joinLineWithNextLine(previousLine);
-            wrapLineIfNeeded(previousLine);
         }
     }
 
