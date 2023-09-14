@@ -4,8 +4,6 @@
 package snap.viewx;
 import java.util.*;
 import snap.gfx.Color;
-import snap.text.RichText;
-import snap.text.TextBlock;
 import snap.text.TextDoc;
 import snap.text.TextStyle;
 import snap.util.*;
@@ -20,7 +18,7 @@ public class ConsoleView extends TextArea {
     private int  _inputLoc;
     
     // List of previous commands
-    private List <String>  _cmdHistory = new ArrayList();
+    private List <String>  _cmdHistory = new ArrayList<>();
     
     // Index of command
     private int  _cmdHistoryIndex;
@@ -52,7 +50,7 @@ public class ConsoleView extends TextArea {
     public void setPrompt(String aPrompt)
     {
         _prompt = aPrompt;
-        if (getTextBox().length()==0)
+        if (getTextBlock().length() == 0)
             append(getPrompt());
     }
 

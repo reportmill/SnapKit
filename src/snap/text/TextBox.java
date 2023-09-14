@@ -643,7 +643,8 @@ public class TextBox extends TextBlock {
     {
         if (aValue == getHeight()) return;
         super.setHeight(aValue);
-        updateTextAll();
+        if (isWrapLines())
+            updateTextAll();
     }
 
     /**

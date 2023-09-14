@@ -124,7 +124,7 @@ public class TextEditor extends TextArea {
         if (isSpellChecking() && length() > 0) {
 
             // Get spelling path
-            Shape spellingPath = SpellCheck.getSpellingPath(getTextBox(), getSelStart());
+            Shape spellingPath = SpellCheck.getSpellingPath(getTextBlock(), getSelStart());
 
             // Paint spelling path
             aPntr.setColor(Color.RED);
@@ -135,6 +135,7 @@ public class TextEditor extends TextArea {
         }
 
         // Paint TextBox
-        getTextBox().paint(aPntr);
+        TextBlock textBlock = getTextBlock();
+        textBlock.paint(aPntr);
     }
 }

@@ -116,8 +116,8 @@ public class TextArea extends View {
         setFocusPainted(false);
 
         // Create/set default TextBlock
-        TextBox textBlock = createTextBox();
-        setTextBox(textBlock);
+        _textBox = new TextBox();
+        _textBox.getSourceText().addPropChangeListener(_textDocPropLsnr);
 
         // Create/set Undoer
         _undoer = new Undoer();
@@ -125,37 +125,9 @@ public class TextArea extends View {
     }
 
     /**
-     * Returns the text that is being edited.
+     * Returns the text block that holds the text.
      */
-    public TextBox getTextBox()  { return _textBox; }
-
-    /**
-     * Returns the text box used to layout text.
-     */
-    public void setTextBox(TextBox aTextBox)
-    {
-        // If already set, just return
-        if (aTextBox == _textBox) return;
-
-        // Set TextBox
-        _textBox = aTextBox;
-
-        // Remove PropChangeListener from old TextDoc
-        TextBlock oldTextDoc = getTextDoc();
-        if (oldTextDoc != null)
-            oldTextDoc.removePropChangeListener(_textDocPropLsnr);
-
-        // Add PropChangeListener to new RichText
-        _textBox.getSourceText().addPropChangeListener(_textDocPropLsnr);
-    }
-
-    /**
-     * Creates a new TextBox.
-     */
-    protected TextBox createTextBox()
-    {
-        return new TextBox();
-    }
+    public TextBlock getTextBlock()  { return _textBox; }
 
     /**
      * Returns the TextBlock.

@@ -62,7 +62,7 @@ public class TextView extends ParentView {
     /**
      * Returns the text that is being edited.
      */
-    public TextBox getTextBox()  { return _textArea.getTextBox(); }
+    public TextBlock getTextBlock()  { return _textArea.getTextBlock(); }
 
     /**
      * Returns the plain string of the text being edited.
@@ -335,7 +335,7 @@ public class TextView extends ParentView {
 
         // Unarchive Rich, Editable, WrapLines
         if (anElement.hasAttribute("Rich"))
-            getTextBox().setRichText(anElement.getAttributeBoolValue("Rich"));
+            getTextBlock().setRichText(anElement.getAttributeBoolValue("Rich"));
         if (anElement.hasAttribute("Editable"))
             setEditable(anElement.getAttributeBoolValue("Editable"));
         if (anElement.hasAttribute(WrapLines_Prop))

@@ -46,7 +46,7 @@ public class TextAreaUtils {
         if (prevAtSignIndex >= 0 && nextAtSignIndex >= 0 && prevAtSignIndex != nextAtSignIndex) {
             int start = Math.min(prevAtSignIndex, nextAtSignIndex);
             int end = Math.max(prevAtSignIndex, nextAtSignIndex);
-            return new TextSel(aTextArea.getTextBox(), start, end + 1);
+            return new TextSel(aTextArea.getTextBlock(), start, end + 1);
         }
 
         // Return null since range not found
