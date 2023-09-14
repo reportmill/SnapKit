@@ -36,7 +36,7 @@ public class ConsoleView extends TextArea {
 
         // Set RichText by default
         TextDoc richText = new TextDoc(true);
-        setTextDoc(richText);
+        setSourceText(richText);
     }
 
     /**

@@ -14,7 +14,7 @@ import snap.util.*;
 import java.util.Objects;
 
 /**
- * A view subclass for displaying and editing a TextDoc (using TextBox).
+ * A view subclass for displaying and editing a TextBlock.
  */
 public class TextArea extends View {
 
@@ -84,8 +84,8 @@ public class TextArea extends View {
     // The MIME type for SnapKit RichText
     public static final String  SNAP_RICHTEXT_TYPE = "reportmill/xstring";
 
-    // The PropChangeListener to catch TextDoc PropChanges.
-    private PropChangeListener  _textDocPropLsnr = pce -> textDocDidPropChange(pce);
+    // The PropChangeListener to catch SourceText PropChanges.
+    private PropChangeListener _sourceTextPropLsnr = pc -> sourceTextDidPropChange(pc);
 
     // A PropChangeListener to enable/disable caret when window loses focus
     private PropChangeListener  _windowFocusedChangedLsnr;
@@ -98,7 +98,7 @@ public class TextArea extends View {
     public static final String WrapLines_Prop = "WrapLines";
     public static final String FireActionOnEnterKey_Prop = "FireActionOnEnterKey";
     public static final String FireActionOnFocusLost_Prop = "FireActionOnFocusLost";
-    public static final String TextDoc_Prop = "TextDoc";
+    public static final String SourceText_Prop = "SourceText";
     public static final String Selection_Prop = "Selection";
 
     // Constants for property defaults
@@ -117,7 +117,7 @@ public class TextArea extends View {
 
         // Create/set default TextBlock
         _textBox = new TextBox();
-        _textBox.getSourceText().addPropChangeListener(_textDocPropLsnr);
+        _textBox.getSourceText().addPropChangeListener(_sourceTextPropLsnr);
 
         // Create/set Undoer
         _undoer = new Undoer();
@@ -130,48 +130,47 @@ public class TextArea extends View {
     public TextBlock getTextBlock()  { return _textBox; }
 
     /**
-     * Returns the TextBlock.
+     * Returns the root text block.
      */
-    public TextBlock getTextDoc()  { return _textBox.getSourceText(); }
+    public TextBlock getSourceText()  { return _textBox.getSourceText(); }
 
     /**
-     * Sets the TextDoc.
+     * Sets the source TextBlock.
      */
-    public void setTextDoc(TextBlock aTextDoc)
+    public void setSourceText(TextBlock aTextBlock)
     {
         // If already set, just return
-        TextBlock oldTextDoc = getTextDoc(); if (aTextDoc == oldTextDoc) return;
+        TextBlock oldSourceText = getSourceText();
+        if (aTextBlock == oldSourceText) return;
 
-        // Update TextDoc.ParentTextStyle
-        if (aTextDoc != null && (isFontSet() || getParent() != null)) {
-            Font font = isFontSet() ? getFont() : getParent().getFont();
-            TextStyle parentTextStyle = aTextDoc.getParentTextStyle().copyFor(font);
-            aTextDoc.setParentTextStyle(parentTextStyle);
+        // Update new TextBlock.ParentTextStyle
+        if (aTextBlock != null) {
+            View parent = getParent();
+            if (isFontSet() || parent != null) {
+                Font font = isFontSet() ? getFont() : parent.getFont();
+                TextStyle parentTextStyle = aTextBlock.getParentTextStyle().copyFor(font);
+                aTextBlock.setParentTextStyle(parentTextStyle);
+            }
         }
 
         // Add/remove PropChangeListener
-        if (oldTextDoc != null)
-            oldTextDoc.removePropChangeListener(_textDocPropLsnr);
-        _textBox.setSourceText(aTextDoc);
-        if (aTextDoc != null)
-            aTextDoc.addPropChangeListener(_textDocPropLsnr);
+        if (oldSourceText != null)
+            oldSourceText.removePropChangeListener(_sourceTextPropLsnr);
+        _textBox.setSourceText(aTextBlock);
+        if (aTextBlock != null)
+            aTextBlock.addPropChangeListener(_sourceTextPropLsnr);
 
         // Reset selection (to line end if single-line, otherwise text start)
         int selIndex = getLineCount() == 1 && length() < 40 ? length() : 0;
         setSel(selIndex);
 
         // FirePropChange
-        firePropChange(TextDoc_Prop, oldTextDoc, aTextDoc);
+        firePropChange(SourceText_Prop, oldSourceText, aTextBlock);
 
         // Relayout parent, repaint
         relayoutParent();
         repaint();
     }
-
-    /**
-     * Returns the root text block.
-     */
-    public TextBlock getSourceText()  { return _textBox.getSourceText(); }
 
     /**
      * Returns the plain string of the text being edited.
@@ -464,7 +463,7 @@ public class TextArea extends View {
             return;
         }
 
-        // Update TextDoc.DefaultTextStyle, ParentTextStyle
+        // Update TextBlock.DefaultTextStyle, ParentTextStyle
         _textBox.setPropChangeEnabled(false);
         TextStyle defaultTextStyle = aFont != null ? _textBox.getDefaultStyle().copyFor(aFont) : null;
         _textBox.setDefaultStyle(defaultTextStyle);
@@ -472,7 +471,7 @@ public class TextArea extends View {
         // Do normal version
         super.setFont(aFont);
 
-        // Update TextDoc.ParentTextStyle
+        // Update TextBlock.ParentTextStyle
         TextStyle parentTextStyle = defaultTextStyle != null ? defaultTextStyle : _textBox.getParentTextStyle().copyFor(aFont);
         _textBox.setParentTextStyle(parentTextStyle);
         _textBox.setPropChangeEnabled(true);
@@ -490,7 +489,7 @@ public class TextArea extends View {
         // Do normal version
         super.parentFontChanged();
 
-        // Update TextDoc.ParentTextStyle
+        // Update TextBlock.ParentTextStyle
         Font font = getFont();
         TextStyle parentTextStyle = _textBox.getParentTextStyle().copyFor(font);
         _textBox.setParentTextStyle(parentTextStyle);
@@ -783,7 +782,7 @@ public class TextArea extends View {
             else style = _textBox.getStyleForCharRange(aStart, anEnd);
         }
 
-        // Forward to TextDoc replaceChars()
+        // Forward to TextBlock replaceChars()
         _textBox.replaceChars(aString, style, aStart, anEnd);
 
         // Update selection to be at end of new string
@@ -804,11 +803,11 @@ public class TextArea extends View {
     }
 
     /**
-     * Replaces the current selection with the given contents (TextDoc or String).
+     * Replaces the current selection with the given contents (TextBlock or String).
      */
     public void replaceCharsWithContent(Object theContent)
     {
-        // If Clipboard has TextDoc, paste it
+        // If Clipboard has TextBlock, paste it
         if (theContent instanceof TextBlock) {
             TextBlock textBlock = (TextBlock) theContent;
             int selStart = getSelStart();
@@ -1321,12 +1320,12 @@ public class TextArea extends View {
         // If no selection, just return
         if (isSelEmpty()) return;
 
-        // Get TextDoc for selected characters and get as XML string and plain string
+        // Get clipboard
+        Clipboard clipboard = Clipboard.getCleared();
+
+        // Get selection start/end
         int selStart = getSelStart();
         int selEnd = getSelEnd();
-
-        // Add to clipboard as rich text and String (text/plain)
-        Clipboard clipboard = Clipboard.getCleared();
 
         // Add rich text
         if (_textBox.isRichText()) {
@@ -1336,7 +1335,7 @@ public class TextArea extends View {
             clipboard.addData(SNAP_RICHTEXT_TYPE, xmlStr);
         }
 
-        // Add plain text
+        // Add plain text (text/plain)
         String textString = _textBox.subSequence(selStart, selEnd).toString();
         clipboard.addData(textString);
     }
@@ -1368,7 +1367,7 @@ public class TextArea extends View {
      */
     protected Object getClipboardContent(Clipboard clipboard)
     {
-        // If Clipboard has TextDoc, paste it
+        // If Clipboard has RICHTEXT_TYPE, paste it
         if (clipboard.hasData(SNAP_RICHTEXT_TYPE)) {
             byte[] bytes = clipboard.getDataBytes(SNAP_RICHTEXT_TYPE);
             if (bytes != null && bytes.length > 0) {  // Shouldn't need this - Happens when pasting content from prior instance
@@ -1454,14 +1453,14 @@ public class TextArea extends View {
         if (undoer == null || !undoer.isEnabled())
             return;
 
-        // If TextDoc.TextModified, just return
+        // If TextBlock.TextModified, just return
         String propName = anEvent.getPropName();
-        if (propName == TextDoc.TextModified_Prop)
+        if (propName == TextBlock.TextModified_Prop)
             return;
 
         // If PlainText Style_Prop or LineStyle_Prop, just return
         if (!isRichText()) {
-             if (propName == TextDoc.Style_Prop || propName == TextDoc.LineStyle_Prop)
+             if (propName == TextBlock.Style_Prop || propName == TextBlock.LineStyle_Prop)
                 return;
         }
 
@@ -1532,9 +1531,9 @@ public class TextArea extends View {
     }
 
     /**
-     * Called when TextDoc changes (chars added, updated or deleted).
+     * Called when SourceText changes (chars added, updated or deleted).
      */
-    protected void textDocDidPropChange(PropChange aPC)
+    protected void sourceTextDidPropChange(PropChange aPC)
     {
         // Add property change
         undoerAddPropChange(aPC);
@@ -1787,7 +1786,7 @@ public class TextArea extends View {
         // If RichText, archive rich text
         if (isRichText()) {
             xml.removeElement("font");
-            XMLElement richTextXML = anArchiver.toXML(getTextDoc());
+            XMLElement richTextXML = anArchiver.toXML(_textBox);
             richTextXML.setName("RichText");
             if (richTextXML.size() > 0)
                 xml.add(richTextXML);
