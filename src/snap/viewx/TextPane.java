@@ -16,7 +16,7 @@ import snap.view.*;
 /**
  * A panel for editing text files.
  */
-public class TextPane<T extends TextBlock> extends ViewOwner {
+public class TextPane extends ViewOwner {
 
     // The TextArea
     private TextArea  _textArea;
@@ -30,25 +30,6 @@ public class TextPane<T extends TextBlock> extends ViewOwner {
     public TextPane()
     {
         super();
-    }
-
-    /**
-     * Returns the TextDoc.
-     */
-    public T getTextDoc()
-    {
-        TextBlock textDoc = _textArea != null ? _textArea.getTextDoc() : null;
-        return (T) textDoc;
-    }
-
-    /**
-     * Sets the TextDoc.
-     */
-    public void setTextDoc(T aTextDoc)
-    {
-        // Set in TextArea
-        TextArea textArea = getTextArea();
-        textArea.setTextDoc(aTextDoc);
     }
 
     /**
@@ -258,7 +239,7 @@ public class TextPane<T extends TextBlock> extends ViewOwner {
     protected void saveChangesImpl()
     {
         TextArea textArea = getTextArea();
-        TextBlock textBlock = textArea.getTextDoc();
+        TextBlock textBlock = textArea.getSourceText();
 
         if (textBlock instanceof TextDoc) {
             TextDoc textDoc = (TextDoc) textBlock;
@@ -368,7 +349,7 @@ public class TextPane<T extends TextBlock> extends ViewOwner {
      */
     public static void main(String[] args)
     {
-        TextPane<?> textPane = new TextPane<>();
+        TextPane textPane = new TextPane();
         TextArea textArea = textPane.getTextArea();
         textArea.setPrefSize(800, 600);
         //String text = WebURL.getURL(TextPane.class, "TextPane.snp").getText(); textArea.setText(text);

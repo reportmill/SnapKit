@@ -1769,30 +1769,36 @@ public class TextArea extends View {
      */
     public XMLElement toXML(XMLArchiver anArchiver)
     {
-        // Archive basic view attributes
-        XMLElement e = super.toXML(anArchiver);
+        XMLElement xml = super.toXML(anArchiver);
+        toXMLTextArea(anArchiver, xml);
+        return xml;
+    }
 
+    /**
+     * XML archival.
+     */
+    protected void toXMLTextArea(XMLArchiver anArchiver, XMLElement xml)
+    {
         // Archive Rich, Editable, WrapLines
-        if (isRichText()) e.add("Rich", true);
-        if (!isEditable()) e.add("Editable", false);
-        if (isWrapLines()) e.add(WrapLines_Prop, true);
+        if (isRichText()) xml.add("Rich", true);
+        if (!isEditable()) xml.add("Editable", false);
+        if (isWrapLines()) xml.add(WrapLines_Prop, true);
 
         // If RichText, archive rich text
         if (isRichText()) {
-            e.removeElement("font");
+            xml.removeElement("font");
             XMLElement richTextXML = anArchiver.toXML(getTextDoc());
             richTextXML.setName("RichText");
             if (richTextXML.size() > 0)
-                e.add(richTextXML);
+                xml.add(richTextXML);
         }
 
         // Otherwise, archive text string
-        else if (getText() != null && getText().length() > 0) e.add("text", getText());
+        else if (getText() != null && getText().length() > 0) xml.add("text", getText());
 
         // Archive FireActionOnEnterKey, FireActionOnFocusLost
-        if (isFireActionOnEnterKey()) e.add(FireActionOnEnterKey_Prop, true);
-        if (isFireActionOnFocusLost()) e.add(FireActionOnFocusLost_Prop, true);
-        return e;
+        if (isFireActionOnEnterKey()) xml.add(FireActionOnEnterKey_Prop, true);
+        if (isFireActionOnFocusLost()) xml.add(FireActionOnFocusLost_Prop, true);
     }
 
     /**
@@ -1800,9 +1806,16 @@ public class TextArea extends View {
      */
     public TextArea fromXML(XMLArchiver anArchiver, XMLElement anElement)
     {
-        // Unarchive basic view attributes
         super.fromXML(anArchiver, anElement);
+        fromXMLTextArea(anArchiver, anElement);
+        return this;
+    }
 
+    /**
+     * XML unarchival.
+     */
+    protected void fromXMLTextArea(XMLArchiver anArchiver, XMLElement anElement)
+    {
         // Unarchive Rich, Editable, WrapLines
         if (anElement.hasAttribute("Rich"))
             _textBox.setRichText(anElement.getAttributeBoolValue("Rich"));
@@ -1817,10 +1830,7 @@ public class TextArea extends View {
         XMLElement richTextXML = anElement.get("RichText");
         if (richTextXML != null) {
             _textBox.setRichText(true);
-            TextBlock richText = getTextDoc();
-            getUndoer().disable();
-            richText.fromXML(anArchiver, richTextXML);
-            getUndoer().enable();
+            _textBox.fromXML(anArchiver, richTextXML);
         }
 
         // Otherwise unarchive text. Text can be "text" or "value" attribute, or as content (CDATA or otherwise)
@@ -1835,6 +1845,5 @@ public class TextArea extends View {
             setFireActionOnEnterKey(anElement.getAttributeBoolValue(FireActionOnEnterKey_Prop, true));
         if (anElement.hasAttribute(FireActionOnFocusLost_Prop))
             setFireActionOnFocusLost(anElement.getAttributeBoolValue(FireActionOnFocusLost_Prop, true));
-        return this;
     }
 }

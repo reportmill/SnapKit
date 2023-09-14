@@ -587,14 +587,6 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     /**
      * Sets a given attribute to a given value for a given range.
      */
-    public void setStyleValue(String aKey, Object aValue)
-    {
-        setStyleValue(aKey, aValue, 0, length());
-    }
-
-    /**
-     * Sets a given attribute to a given value for a given range.
-     */
     public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
     {
         // Handle Rich

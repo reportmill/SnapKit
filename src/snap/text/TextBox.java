@@ -8,6 +8,8 @@ import snap.geom.VPos;
 import snap.props.PropChange;
 import snap.props.PropChangeListener;
 import snap.util.MathUtils;
+import snap.util.XMLArchiver;
+import snap.util.XMLElement;
 
 /**
  * This TextBlock subclass adds support for text wrapping and syncs to a source TextBlock.
@@ -141,6 +143,15 @@ public class TextBox extends TextBlock {
     public void setStyle(TextStyle aStyle, int aStart, int anEnd)
     {
         _sourceText.setStyle(aStyle, aStart, anEnd);
+    }
+
+    /**
+     * Override to forward to source text block.
+     */
+    @Override
+    public void setStyleValue(String aKey, Object aValue, int aStart, int anEnd)
+    {
+        _sourceText.setStyleValue(aKey, aValue, aStart, anEnd);
     }
 
     /**
@@ -794,6 +805,25 @@ public class TextBox extends TextBlock {
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
         return _sourceText.createTokensForTextLine(aTextLine);
+    }
+
+    /**
+     * Override to use SourceText.
+     */
+    @Override
+    public XMLElement toXML(XMLArchiver anArchiver)  { return _sourceText.toXML(anArchiver); }
+
+    /**
+     * Override to use SourceText.
+     */
+    @Override
+    public Object fromXML(XMLArchiver anArchiver, XMLElement anElement)
+    {
+        _sourceText.setPropChangeEnabled(false);
+        _sourceText.fromXML(anArchiver, anElement);
+        _sourceText.setPropChangeEnabled(true);
+        updateTextAll();
+        return this;
     }
 
     /**

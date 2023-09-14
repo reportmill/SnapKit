@@ -3,6 +3,7 @@
  */
 package snap.view;
 import snap.gfx.*;
+import snap.props.PropChange;
 import snap.props.Undoer;
 import snap.text.*;
 import snap.util.*;
@@ -19,13 +20,7 @@ public class TextView extends ParentView {
     private ScrollView  _scrollView;
 
     // Listener to propagate Action from TextArea to TextView
-    private EventListener  _actionEvtLsnr = e -> fireActionEvent(e);
-
-    // Constants for properties
-    public static final String WrapLines_Prop = TextArea.WrapLines_Prop;
-    public static final String FireActionOnEnterKey_Prop = TextArea.FireActionOnEnterKey_Prop;
-    public static final String FireActionOnFocusLost_Prop = TextArea.FireActionOnFocusLost_Prop;
-    public static final String Selection_Prop = TextArea.Selection_Prop;
+    private EventListener  _actionEvtLsnr;
 
     /**
      * Constructor.
@@ -34,6 +29,7 @@ public class TextView extends ParentView {
     {
         // Create/configure TextArea
         _textArea = createTextArea();
+        _textArea.addPropChangeListener(pc -> textAreaDidPropChange(pc));
 
         // Create/add ScrollView
         _scrollView = new ScrollView(_textArea);
@@ -85,11 +81,6 @@ public class TextView extends ParentView {
     public void setEditable(boolean aValue)  { _textArea.setEditable(aValue); }
 
     /**
-     * Returns whether to wrap lines that overrun bounds.
-     */
-    public boolean isWrapLines()  { return _textArea.isWrapLines(); }
-
-    /**
      * Sets whether to wrap lines that overrun bounds.
      */
     public void setWrapLines(boolean aValue)
@@ -97,11 +88,6 @@ public class TextView extends ParentView {
         _textArea.setWrapLines(aValue);
         _scrollView.setFillWidth(aValue);
     }
-
-    /**
-     * Returns whether text supports multiple styles.
-     */
-    public boolean isRichText()  { return _textArea.isRichText(); }
 
     /**
      * Returns the default style for text.
@@ -114,52 +100,9 @@ public class TextView extends ParentView {
     public void setDefaultStyle(TextStyle aStyle)  { _textArea.setDefaultStyle(aStyle); }
 
     /**
-     * Returns the default line style for text.
-     */
-    public TextLineStyle getDefaultLineStyle()  { return _textArea.getDefaultLineStyle(); }
-
-    /**
-     * Sets the default line style.
-     */
-    public void setDefaultLineStyle(TextLineStyle aLineStyle)  { _textArea.setDefaultLineStyle(aLineStyle); }
-
-    /**
-     * Returns whether text view fires action on return.
-     */
-    public boolean isFireActionOnEnterKey()  { return _textArea.isFireActionOnEnterKey(); }
-
-    /**
-     * Sets whether text area sends action on return.
-     */
-    public void setFireActionOnEnterKey(boolean aValue)
-    {
-        _textArea.setFireActionOnEnterKey(aValue);
-        setActionable(isFireActionOnEnterKey() || isFireActionOnFocusLost());
-
-        // Enable
-        if (aValue)
-            _textArea.addEventHandler(_actionEvtLsnr, Action);
-        else _textArea.removeEventHandler(_actionEvtLsnr);
-    }
-
-    /**
-     * Returns whether text view fires action on focus lost (if text changed).
-     */
-    public boolean isFireActionOnFocusLost()  { return _textArea.isFireActionOnFocusLost(); }
-
-    /**
      * Sets whether text area sends action on focus lost (if text changed).
      */
-    public void setFireActionOnFocusLost(boolean aValue)
-    {
-        _textArea.setFireActionOnFocusLost(aValue);
-        setActionable(isFireActionOnEnterKey() || isFireActionOnFocusLost());
-
-        // Enable
-        if (aValue)
-            _textArea.addEventHandler(_actionEvtLsnr, Action);
-        else _textArea.removeEventHandler(_actionEvtLsnr);
-    }
+    public void setFireActionOnFocusLost(boolean aValue)  { _textArea.setFireActionOnFocusLost(aValue); }
 
     /**
      * Returns the number of characters in the text string.
@@ -175,11 +118,6 @@ public class TextView extends ParentView {
      * Returns whether the selection is empty.
      */
     public boolean isSelEmpty()  { return _textArea.isSelEmpty(); }
-
-    /**
-     * Returns the initial character index of the selection (usually SelStart).
-     */
-    public int getSelAnchor()  { return _textArea.getSelAnchor(); }
 
     /**
      * Returns the final character index of the selection (usually SelEnd).
@@ -292,37 +230,41 @@ public class TextView extends ParentView {
     }
 
     /**
+     * Called when TextArea gets prop changes.
+     */
+    protected void textAreaDidPropChange(PropChange aPC)
+    {
+        String propName = aPC.getPropName();
+
+        // Handle WrapLines
+        if (propName == TextArea.WrapLines_Prop)
+            _scrollView.setFillWidth(_textArea.isWrapLines());
+
+        // Handle FireActionOnEnterKey, FireActionOnFocusLost
+        if (propName == TextArea.FireActionOnEnterKey_Prop || propName == TextArea.FireActionOnFocusLost_Prop) {
+            boolean propagateTextAreaFireAction = _textArea.isFireActionOnEnterKey() || _textArea.isFireActionOnFocusLost();
+            setActionable(propagateTextAreaFireAction);
+            if (propagateTextAreaFireAction) {
+                if (_actionEvtLsnr == null) {
+                    _actionEvtLsnr =  e -> fireActionEvent(e);
+                    _textArea.addEventHandler(_actionEvtLsnr, Action);
+                }
+            }
+            else if (_actionEvtLsnr != null) {
+                _textArea.removeEventHandler(_actionEvtLsnr);
+                _actionEvtLsnr = null;
+            }
+        }
+    }
+
+    /**
      * XML archival.
      */
     public XMLElement toXMLView(XMLArchiver anArchiver)
     {
-        // Archive basic view attributes
-        XMLElement e = super.toXMLView(anArchiver);
-
-        // Archive Rich, Editable, WrapLines
-        TextArea textArea = getTextArea();
-        if (textArea.isRichText()) e.add("Rich", true);
-        if (!isEditable()) e.add("Editable", false);
-        if (isWrapLines()) e.add(WrapLines_Prop, true);
-
-        // If RichText, archive rich text
-        if (textArea.isRichText()) {
-            e.removeElement("font");
-            TextBlock textBlock = textArea.getTextDoc();
-            XMLElement richTextXML = anArchiver.toXML(textBlock);
-            richTextXML.setName("RichText");
-            if (richTextXML.size() > 0)
-                e.add(richTextXML);
-        }
-
-        // Otherwise, archive text string
-        else if (getText() != null && getText().length() > 0)
-            e.add("text", getText());
-
-        // Archive FireActionOnEnterKey, FireActionOnFocusLost
-        if (isFireActionOnEnterKey()) e.add(FireActionOnEnterKey_Prop, true);
-        if (isFireActionOnFocusLost()) e.add(FireActionOnFocusLost_Prop, true);
-        return e;
+        XMLElement xml = super.toXMLView(anArchiver);
+        _textArea.toXMLTextArea(anArchiver, xml);
+        return xml;
     }
 
     /**
@@ -330,40 +272,7 @@ public class TextView extends ParentView {
      */
     public void fromXMLView(XMLArchiver anArchiver, XMLElement anElement)
     {
-        // Unarchive basic view attributes
         super.fromXMLView(anArchiver, anElement);
-
-        // Unarchive Rich, Editable, WrapLines
-        if (anElement.hasAttribute("Rich"))
-            getTextBlock().setRichText(anElement.getAttributeBoolValue("Rich"));
-        if (anElement.hasAttribute("Editable"))
-            setEditable(anElement.getAttributeBoolValue("Editable"));
-        if (anElement.hasAttribute(WrapLines_Prop))
-            setWrapLines(anElement.getAttributeBoolValue(WrapLines_Prop));
-        if (anElement.hasAttribute("WrapText"))
-            setWrapLines(anElement.getAttributeBoolValue("WrapText"));
-
-        // If RichText, unarchive rich text
-        XMLElement richTextXML = anElement.get("RichText");
-        if (richTextXML != null) {
-            TextArea textArea = getTextArea();
-            TextBlock textBlock = textArea.getTextDoc();
-            getUndoer().disable();
-            textBlock.fromXML(anArchiver, richTextXML);
-            getUndoer().enable();
-        }
-
-        // Otherwise unarchive text. Text can be "text" or "value" attribute, or as content (CDATA or otherwise)
-        else {
-            String str = anElement.getAttributeValue("text",  anElement.getAttributeValue("value", anElement.getValue()));
-            if (str != null && str.length() > 0)
-                setText(str);
-        }
-
-        // Unarchive FireActionOnEnterKey, FireActionOnFocusLost
-        if (anElement.hasAttribute(FireActionOnEnterKey_Prop))
-            setFireActionOnEnterKey(anElement.getAttributeBoolValue(FireActionOnEnterKey_Prop));
-        if (anElement.hasAttribute(FireActionOnFocusLost_Prop))
-            setFireActionOnFocusLost(anElement.getAttributeBoolValue(FireActionOnFocusLost_Prop));
+        _textArea.fromXMLTextArea(anArchiver, anElement);
     }
 }
