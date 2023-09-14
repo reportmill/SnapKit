@@ -388,7 +388,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
             // Remove run chars from text line (chars after startCharIndex)
             int runStartCharIndex = Math.max(startCharIndex, lastRun.getStartCharIndex());
             CharSequence moveChars = textLine.subSequence(runStartCharIndex, textLine.length());
-            textLine.removeChars(startCharIndex, textLine.length());
+            textLine.removeChars(runStartCharIndex, textLine.length());
 
             // Add run chars to next line
             TextStyle textStyle = lastRun.getStyle();

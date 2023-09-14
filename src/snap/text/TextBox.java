@@ -257,13 +257,13 @@ public class TextBox extends TextBlock {
         textLine._x = 0;
 
         // If WrapLines, do wrapping
-        if (isWrapLines() && textLine.getMaxY() < getHeight()) {
+        if (isWrapLines() && textLine.getTokenCount() > 0 && textLine.getMaxY() < getHeight()) {
 
             // Get last token
             TextToken lastToken = textLine.getLastToken();
 
             // If line is now outside bounds, move chars to new line
-            while (lastToken != null && isHitRight(lastToken.getMaxX(), textLine.getY(), textLine.getHeight())) {
+            if (isHitRight(lastToken.getMaxX(), textLine.getY(), textLine.getHeight())) {
 
                 // Find first token that is outside bounds and use that instead (if any)
                 TextToken prevToken = lastToken.getPrevious();
@@ -273,14 +273,11 @@ public class TextBox extends TextBlock {
                 }
 
                 // If first token, move the minimum number of end chars to next line
-                if (lastToken.getIndex() == 0) {
+                if (lastToken.getIndex() == 0)
                     moveMinimumLineEndCharsToNextLine(textLine, lastToken);
-                    break;
-                }
 
-                // Move last token (and trailing chars) to next line
-                moveLineCharsToNextLine(textLine, lastToken.getStartCharIndex());
-                lastToken = textLine.getLastToken();
+                // Otherwise, move last token (and trailing chars) to next line
+                else moveLineCharsToNextLine(textLine, lastToken.getStartCharIndex());
             }
         }
 
