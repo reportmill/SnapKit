@@ -382,17 +382,6 @@ public class TextLine implements CharSequenceX, Cloneable {
     public double getTextMaxY()  { return getTextY() + getHeight(); }
 
     /**
-     * Splits the line at given character index.
-     */
-    protected TextLine splitLineAtIndex(int anIndex)
-    {
-        TextLine remainder = clone();
-        remainder.removeChars(0, anIndex);
-        removeChars(anIndex, length());
-        return remainder;
-    }
-
-    /**
      * Returns the x for tab at given x.
      */
     protected double getXForTabAtIndexAndX(int charIndex, double aX)
@@ -438,6 +427,11 @@ public class TextLine implements CharSequenceX, Cloneable {
      * Returns the number of tokens.
      */
     public int getTokenCount()  { return getTokens().length; }
+
+    /**
+     * Returns the individual token at given index.
+     */
+    public TextToken getToken(int anIndex)  { return getTokens()[anIndex]; }
 
     /**
      * Returns the tokens.

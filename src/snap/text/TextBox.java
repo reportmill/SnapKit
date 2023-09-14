@@ -463,13 +463,17 @@ public class TextBox extends TextBlock {
         // Handle CharsChange: Update lines for old/new range
         if (aPC instanceof TextBlockUtils.CharsChange) {
             TextBlockUtils.CharsChange charsChange = (TextBlockUtils.CharsChange) aPC;
-            CharSequence newVal = charsChange.getNewValue();
-            CharSequence oldVal = charsChange.getOldValue();
             int index = charsChange.getIndex();
-            if (oldVal != null)
-                super.removeChars(index, index + oldVal.length());
-            if (newVal != null)
-                super_addChars(newVal, _nextText.getStyleForCharIndex(index), index);
+
+            // Handle add chars
+            CharSequence addChars = charsChange.getNewValue();
+            if (addChars != null)
+                updateTextForCharRange(index, index, index + addChars.length());
+
+            // Handle remove chars
+            CharSequence removeChars = charsChange.getOldValue();
+            if (removeChars != null)
+                updateTextForCharRange(index, index + removeChars.length(), index);
         }
 
         // Handle StyleChange
@@ -541,6 +545,11 @@ public class TextBox extends TextBlock {
         // Skip if no text
         if (length() == 0 && _nextText.length() == 0) return;
 
+        // If WrapLines, mark location of first line's first token - if it shrinks, might need to re-wrap previous line
+        boolean wrapLines = isWrapLines();
+        TextLine firstLine = wrapLines ? getLineForCharIndex(startCharIndex) : null;
+        double firstLineTokenMaxX = wrapLines ? getFirstTokenMaxXForLineIfPreviousLineCares(firstLine) : 0;
+
         // Remove chars in range
         super.removeChars(startCharIndex, endCharIndexBox);
 
@@ -561,6 +570,13 @@ public class TextBox extends TextBlock {
             super_addChars(nextRun.getString(), nextRun.getStyle(), charIndex - textStartCharIndex);
             _updateTextLineStyle = null;
             charIndex += nextRun.length();
+        }
+
+        // If first token shrank, re-wrap previous line
+        if (firstLineTokenMaxX > 0 && firstLineTokenMaxX > firstLine.getToken(0).getMaxX()) {
+            TextLine previousLine = firstLine.getPrevious();
+            joinLineWithNextLine(previousLine);
+            wrapLineIfNeeded(previousLine);
         }
     }
 
@@ -772,7 +788,6 @@ public class TextBox extends TextBlock {
             removeLine(lineIndex);
             lastLine = getLine(lineIndex - 1);
         }
-
     }
 
     /**
@@ -782,5 +797,20 @@ public class TextBox extends TextBlock {
     protected TextToken[] createTokensForTextLine(TextLine aTextLine)
     {
         return _nextText.createTokensForTextLine(aTextLine);
+    }
+
+    /**
+     * Returns the MaxX of first token in given line.
+     * If no first token or there is no way previous line would need to re-wrap if this shrinks, returns 0.
+     */
+    private static double getFirstTokenMaxXForLineIfPreviousLineCares(TextLine textLine)
+    {
+        if (textLine.getTokenCount() == 0)
+            return 0;
+        TextLine previousLine = textLine.getPrevious();
+        if (previousLine == null || previousLine.isLastCharNewline())
+            return 0;
+        TextToken firstToken = textLine.getToken(0);
+        return firstToken.getMaxX();
     }
 }

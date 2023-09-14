@@ -309,11 +309,8 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         TextLine textLine = getLineForCharIndex(anIndex);
 
         // If adding at text end and last line and ends with newline, create/add new line
-        if (anIndex == textLine.getEndCharIndex() && textLine.isLastCharNewline()) {
-            TextLine remainder = textLine.splitLineAtIndex(textLine.length());
-            addLine(remainder, textLine.getIndex() + 1);
-            textLine = remainder;
-        }
+        if (anIndex == textLine.getEndCharIndex() && textLine.isLastCharNewline())
+            textLine = splitLineAtIndex(textLine, textLine.length());
 
         // Loop vars
         int charsLength = theChars.length();
@@ -444,36 +441,21 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     protected void removeCharsFromLine(int startCharIndex, int endCharIndex, TextLine textLine)
     {
-        // If whole line in range, remove line
+        // Simple case: If whole line in range, just remove line and return
         int lineStartCharIndex = textLine.getStartCharIndex();
-        if (startCharIndex == lineStartCharIndex && endCharIndex == textLine.getEndCharIndex() && getLineCount() > 1)
+        if (startCharIndex == lineStartCharIndex && endCharIndex == textLine.getEndCharIndex() && getLineCount() > 1) {
             removeLine(textLine.getIndex());
-
-        // Otherwise remove chars from line
-        else {
-
-            // Remove chars from line
-            int startCharIndexInLine = startCharIndex - lineStartCharIndex;
-            int endCharIndexInLine = endCharIndex - lineStartCharIndex;
-            textLine.removeChars(startCharIndexInLine, endCharIndexInLine);
-
-            // If no newline remaining in line, join with next line
-            if (!textLine.isLastCharNewline()) {
-
-                // Get NextLine
-                TextLine nextLine = textLine.getNext();
-                if (nextLine != null) {
-
-                    // Iterate over NextLine runs and add chars for each
-                    TextRun[] textRuns = nextLine.getRuns();
-                    for (TextRun textRun : textRuns)
-                        textLine.addChars(textRun.getString(), textRun.getStyle(), textLine.length());
-
-                    // Remove NextLine
-                    removeLine(nextLine.getIndex());
-                }
-            }
+            return;
         }
+
+        // Remove chars from line
+        int startCharIndexInLine = startCharIndex - lineStartCharIndex;
+        int endCharIndexInLine = endCharIndex - lineStartCharIndex;
+        textLine.removeChars(startCharIndexInLine, endCharIndexInLine);
+
+        // If no newline remaining in line, join with next line
+        if (!textLine.isLastCharNewline())
+            joinLineWithNextLine(textLine);
     }
 
     /**
@@ -503,6 +485,41 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         if (anEnd > aStart)
             removeChars(aStart, anEnd);
         addChars(theChars, style, aStart);
+    }
+
+    /**
+     * Splits given line at given character index and adds remainder to text and returns it.
+     */
+    protected TextLine splitLineAtIndex(TextLine textLine, int anIndex)
+    {
+        // Create remainder from clone and remove respective chars from given line and remainder
+        TextLine remainderLine = textLine.clone();
+        textLine.removeChars(anIndex, length());
+        remainderLine.removeChars(0, anIndex);
+
+        // Add remainder
+        addLine(remainderLine, textLine.getIndex() + 1);
+
+        // Return
+        return remainderLine;
+    }
+
+    /**
+     * Joins given line with next line.
+     */
+    protected void joinLineWithNextLine(TextLine textLine)
+    {
+        TextLine nextLine = textLine.getNext();
+        if (nextLine == null)
+            return;
+
+        // Iterate over NextLine runs and add chars for each
+        TextRun[] textRuns = nextLine.getRuns();
+        for (TextRun textRun : textRuns)
+            textLine.addChars(textRun.getString(), textRun.getStyle(), textLine.length());
+
+        // Remove NextLine
+        removeLine(nextLine.getIndex());
     }
 
     /**
