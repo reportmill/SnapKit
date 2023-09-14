@@ -125,8 +125,8 @@ public abstract class ViewEnv {
         // Add task and schedule
         _timerTasks.put(aRun, task);
         if (doAll)
-            _timer.scheduleAtFixedRate(task, 0, aPeriod);
-        else _timer.schedule(task, 0, aPeriod);
+            _timer.scheduleAtFixedRate(task, aPeriod, aPeriod);
+        else _timer.schedule(task, aPeriod, aPeriod);
     }
 
     /**
