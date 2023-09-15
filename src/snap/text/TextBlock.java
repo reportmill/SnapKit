@@ -54,6 +54,9 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     // Whether property change is enabled
     protected boolean  _propChangeEnabled = true;
 
+    // The last mouse Y, to help in caret placement (can be ambiguous for start/end of line)
+    protected double _mouseY;
+
     // Constants for properties
     public static final String Chars_Prop = "Chars";
     public static final String Style_Prop = "Style";

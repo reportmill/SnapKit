@@ -420,6 +420,9 @@ public class TextArea extends View {
         // Reset SelStyle
         _selStyle = null;
 
+        // Reset mouse point
+        TextBlockUtils.setMouseY(_textBlock, 0);
+
         // Repaint selection and scroll to visible (after delay)
         if (isShowing()) {
             repaintSel();
@@ -1152,6 +1155,7 @@ public class TextArea extends View {
 
         // Set selection
         setSel(anchor, index);
+        TextBlockUtils.setMouseY(_textBlock, _downY);
     }
 
     /**
@@ -1172,6 +1176,7 @@ public class TextArea extends View {
 
         // Set selection
         setSel(anchor, index);
+        TextBlockUtils.setMouseY(_textBlock, anEvent.getY());
     }
 
     /**

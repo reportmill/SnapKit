@@ -33,8 +33,12 @@ public class TextBlockUtils {
         if (aEndCharIndex > textBlock.getEndCharIndex())
             aEndCharIndex = textBlock.getEndCharIndex();
 
-        // Get StartLine, EndLine and start/end points
+        // Get StartLine for start char index (maybe adjust if at ambiguous start/end of lines and mouse Y available)
         TextLine startLine = textBlock.getLineForCharIndex(aStartCharIndex);
+        if (aStartCharIndex == aEndCharIndex && aStartCharIndex == startLine.getStartCharIndex() && textBlock._mouseY > 0)
+            startLine = textBlock.getLineForY(textBlock._mouseY);
+
+        // Get end line
         TextLine endLine = aStartCharIndex == aEndCharIndex ? startLine : textBlock.getLineForCharIndex(aEndCharIndex);
         double startX = startLine.getTextXForCharIndex(aStartCharIndex - startLine.getStartCharIndex());
         double startY = startLine.getTextBaseline();
@@ -130,6 +134,11 @@ public class TextBlockUtils {
             aPntr.drawLine(x0, y0, x1, y0);
         }
     }
+
+    /**
+     * Sets the Mouse Y for given text block to assist in caret placement (can be ambiguous for start/end of line).
+     */
+    public static void setMouseY(TextBlock textBlock, double aY)  { textBlock._mouseY = aY; }
 
     /**
      * XML archival.
