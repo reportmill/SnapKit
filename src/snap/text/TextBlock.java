@@ -11,10 +11,7 @@ import snap.gfx.Painter;
 import snap.gfx.Stroke;
 import snap.props.PropChange;
 import snap.props.PropObject;
-import snap.util.CharSequenceUtils;
-import snap.util.CharSequenceX;
-import snap.util.XMLArchiver;
-import snap.util.XMLElement;
+import snap.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -1261,6 +1258,21 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // Return
         return prefW;
+    }
+
+    /**
+     * Returns the preferred height.
+     */
+    public double getPrefHeight()
+    {
+        // Return bottom of last line minus box Y
+        TextLine lastLine = getLineLast();
+        if (lastLine == null)
+            return 0;
+        TextLine firstLine = getLine(0);
+        double lastLineMaxY = lastLine.getMaxY();
+        double firstLineY = firstLine.getY();
+        return Math.ceil(lastLineMaxY - firstLineY);
     }
 
     /**

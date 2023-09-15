@@ -29,7 +29,7 @@ public class TextBox extends TextBlock {
     private VPos _alignY = VPos.TOP;
 
     // The y alignment amount
-    private double _alignedY;
+    private double _alignedY = -1;
 
     // Whether text is linked to another text
     private boolean _linked;
@@ -327,6 +327,20 @@ public class TextBox extends TextBlock {
      */
     public double getAlignedY()
     {
+        // If already set, just return
+        if (_alignedY >= 0) return getY() + _alignedY;
+
+        // Calculated aligned Y
+        _alignedY = 0;
+        if (_alignY != VPos.TOP) {
+            double textBoxW = getWidth();
+            double prefH = getPrefHeight(textBoxW);
+            double textBoxH = getHeight();
+            if (textBoxH > prefH)
+                _alignedY = _alignY.doubleValue() * (textBoxH - prefH);
+        }
+
+        // Return
         return getY() + _alignedY;
     }
 
@@ -524,16 +538,7 @@ public class TextBox extends TextBlock {
         super.updateLines(lineIndex);
 
         // Reset AlignY offset
-        _alignedY = 0;
-
-        // Calculated aligned Y
-        if (_alignY != VPos.TOP) {
-            double textBoxW = getWidth();
-            double prefH = getPrefHeight(textBoxW);
-            double textBoxH = getHeight();
-            if (textBoxH > prefH)
-                _alignedY = _alignY.doubleValue() * (textBoxH - prefH);
-        }
+        _alignedY = -1;
     }
 
     /**
@@ -681,13 +686,8 @@ public class TextBox extends TextBlock {
             return prefH;                     // if they didn't plan to use this width?
         }
 
-        // Return bottom of last line minus box Y
-        TextLine lastLine = getLineLast();
-        if (lastLine == null)
-            return 0;
-        double lineMaxY = lastLine.getMaxY();
-        double alignedY = getAlignedY();
-        return Math.ceil(lineMaxY - alignedY);
+        // Return normal version
+        return super.getPrefHeight();
     }
 
     /**
