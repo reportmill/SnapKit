@@ -587,7 +587,7 @@ public class TextBox extends TextBlock {
         }
 
         // If first token shrank, re-wrap previous line
-        if (firstLineTokenMaxX > 0 && firstLineTokenMaxX > firstLine.getToken(0).getMaxX()) {
+        if (firstLineTokenMaxX > 0 && firstLineTokenMaxX > getFirstTokenMaxXForLineIfPreviousLineCares(firstLine)) {
             TextLine previousLine = firstLine.getPrevious();
             joinLineWithNextLine(previousLine);
         }
