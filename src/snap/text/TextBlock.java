@@ -428,11 +428,16 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
      */
     protected void removeCharsFromLine(int startCharIndex, int endCharIndex, TextLine textLine)
     {
-        // Simple case: If whole line in range, just remove line and return
+        // Simple case: If range is whole line, can just remove line if more than one line ...
         int lineStartCharIndex = textLine.getStartCharIndex();
         if (startCharIndex == lineStartCharIndex && endCharIndex == textLine.getEndCharIndex() && getLineCount() > 1) {
-            removeLine(textLine.getIndex());
-            return;
+
+            // ... and either (1) line is first line or (2) previous line wrapped or (3) not last line
+            TextLine previousLine = textLine.getPrevious();
+            if (previousLine == null || !previousLine.isLastCharNewline() || textLine != getLineLast()) {
+                removeLine(textLine.getIndex());
+                return;
+            }
         }
 
         // Remove chars from line
