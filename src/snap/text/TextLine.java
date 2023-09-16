@@ -218,9 +218,9 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Returns the last run.
+     * Returns the last run (or null if none).
      */
-    public TextRun getRunLast()
+    public TextRun getLastRun()
     {
         int runCount = getRunCount();
         return runCount > 0 ? getRun(runCount - 1) : null;
@@ -729,7 +729,7 @@ public class TextLine implements CharSequenceX, Cloneable {
     }
 
     /**
-     * Update
+     * Update line/token x for center/right alignment or justify.
      */
     protected void updateAlignmentAndJustify()
     {
@@ -754,7 +754,6 @@ public class TextLine implements CharSequenceX, Cloneable {
 
             // Shift tokens
             for (TextToken token : getTokens()) {
-//                token._justifyShiftX = runningShiftX;
                 token._x += runningShiftX;
                 runningShiftX += shiftX;
             }

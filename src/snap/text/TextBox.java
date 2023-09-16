@@ -780,7 +780,7 @@ public class TextBox extends TextBlock {
      */
     private void removeOutOfBoundsLines()
     {
-        TextLine lastLine = getLineLast();
+        TextLine lastLine = getLastLine();
 
         // While last line not fully above bottom, remove line
         while (lastLine.getMaxY() > getHeight()) {

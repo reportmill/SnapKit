@@ -367,7 +367,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         }
 
         // Get last run
-        TextRun lastRun = textLine.getRunLast();
+        TextRun lastRun = textLine.getLastRun();
 
         // Iterate over runs from end of line, moving chars from each to next line
         while (textLine.length() > startCharIndex) {
@@ -434,7 +434,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
             // ... and either (1) line is first line or (2) previous line wrapped or (3) not last line
             TextLine previousLine = textLine.getPrevious();
-            if (previousLine == null || !previousLine.isLastCharNewline() || textLine != getLineLast()) {
+            if (previousLine == null || !previousLine.isLastCharNewline() || textLine != getLastLine()) {
                 removeLine(textLine.getIndex());
                 return;
             }
@@ -807,16 +807,16 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
 
         // If index of text end, return last
         if (anIndex == length())
-            return getLineLast();
+            return getLastLine();
 
         // Complain
         throw new IndexOutOfBoundsException("Index " + anIndex + " beyond " + length());
     }
 
     /**
-     * Returns the last block.
+     * Returns the last text line (or null if none).
      */
-    public TextLine getLineLast()
+    public TextLine getLastLine()
     {
         int lineCount = getLineCount();
         return lineCount > 0 ? getLine(lineCount - 1) : null;
@@ -925,7 +925,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         }
 
         // If no line for given y, return last line
-        return getLineLast();
+        return getLastLine();
     }
 
     /**
@@ -998,7 +998,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public int getEndCharIndex()
     {
         int startCharIndex = getStartCharIndex();
-        TextLine lastLine = getLineLast();
+        TextLine lastLine = getLastLine();
         int lastLineEnd = lastLine != null ? lastLine.getEndCharIndex() : 0;
         return startCharIndex + lastLineEnd;
     }
@@ -1274,7 +1274,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public double getPrefHeight()
     {
         // Return bottom of last line minus box Y
-        TextLine lastLine = getLineLast();
+        TextLine lastLine = getLastLine();
         if (lastLine == null)
             return 0;
         TextLine firstLine = getLine(0);

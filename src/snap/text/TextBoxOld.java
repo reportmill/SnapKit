@@ -725,7 +725,7 @@ public class TextBoxOld {
 
         // Get TextToken info
         double startCharX = aTextLine.getXForCharIndex(startCharIndex) * fontScale;
-        TextStyle textTokenStyle = textToken != null ? textToken.getTextStyle() : aTextLine.getRunLast().getStyle();
+        TextStyle textTokenStyle = textToken != null ? textToken.getTextStyle() : aTextLine.getLastRun().getStyle();
         if (fontScale != 1)
             textTokenStyle = textTokenStyle.copyFor(textTokenStyle.getFont().scaleFont(fontScale));
 
