@@ -119,19 +119,20 @@ public class TextBlockUtils {
         for (TextRun run : underlineRuns) {
 
             // Set underline color and width
-            TextLine line = run.getLine();
-            double uy = run.getFont().getUnderlineOffset();
-            double uw = run.getFont().getUnderlineThickness();
+            TextLine textLine = run.getLine();
+            Font font = run.getFont();
+            double underlineOffset = Math.ceil(Math.abs(font.getUnderlineOffset()));
+            double underlineThickness = font.getUnderlineThickness();
             aPntr.setColor(run.getColor());
-            aPntr.setStrokeWidth(uw);
+            aPntr.setStrokeWidth(underlineThickness);
 
-            // Get under line endpoints and draw line
-            double x0 = run.getX();
-            double y0 = line.getBaseline() - uy;
-            double x1 = run.getMaxX();
-            if (run.getEndCharIndex() == line.getEndCharIndex())
-                x1 = line.getX() + line.getWidthNoWhiteSpace();
-            aPntr.drawLine(x0, y0, x1, y0);
+            // Get underline endpoints and draw line
+            double lineX = textLine.getTextX() + run.getX();
+            double lineMaxX = lineX + run.getWidth();
+            double lineY = textLine.getTextBaseline() + underlineOffset;
+            if (run.getEndCharIndex() == textLine.getEndCharIndex())
+                lineMaxX = textLine.getX() + textLine.getWidthNoWhiteSpace();
+            aPntr.drawLine(lineX, lineY, lineMaxX, lineY);
         }
     }
 

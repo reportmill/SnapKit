@@ -80,8 +80,8 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
     public TextBlock(boolean isRich)
     {
         super();
-        setRichText(isRich);
         addDefaultLine();
+        setRichText(isRich);
     }
 
     /**
@@ -207,7 +207,7 @@ public class TextBlock extends PropObject implements CharSequenceX, Cloneable, X
         _defaultTextStyle = aStyle;
 
         // Update existing lines
-        if (!isRichText()) {
+        if (!isRichText() || length() == 0) {
             TextStyle textStyle = getDefaultStyle();
             List<TextLine> lines = getLines();
             for (TextLine line : lines)
