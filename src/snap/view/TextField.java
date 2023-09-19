@@ -383,6 +383,8 @@ public class TextField extends ParentView {
         _focusGainedText = getText();
         _edited = false;
         super.fireActionEvent(anEvent);
+        _focusGainedText = getText();
+        setEdited(false);
     }
 
     /**
