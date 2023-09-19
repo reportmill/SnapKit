@@ -35,8 +35,11 @@ public class TextBlockUtils {
 
         // Get StartLine for start char index (maybe adjust if at ambiguous start/end of lines and mouse Y available)
         TextLine startLine = textBlock.getLineForCharIndex(aStartCharIndex);
-        if (aStartCharIndex == aEndCharIndex && aStartCharIndex == startLine.getStartCharIndex() && textBlock._mouseY > 0)
-            startLine = textBlock.getLineForY(textBlock._mouseY);
+        if (aStartCharIndex == aEndCharIndex && aStartCharIndex == startLine.getStartCharIndex() && textBlock._mouseY > 0) {
+            TextLine altStartLine = textBlock.getLineForY(textBlock._mouseY);
+            if (altStartLine == startLine.getPrevious())
+                startLine = altStartLine;
+        }
 
         // Get end line
         TextLine endLine = aStartCharIndex == aEndCharIndex ? startLine : textBlock.getLineForCharIndex(aEndCharIndex);
