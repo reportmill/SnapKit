@@ -332,14 +332,14 @@ public class TextPane extends ViewOwner {
     protected void textAreaDidPropChange(PropChange aPC)
     {
         Object src = aPC.getSource();
-        if (src instanceof TextDoc)
-            textDocDidPropChange(aPC);
+        if (src instanceof TextBlock)
+            textBlockDidPropChange(aPC);
     }
 
     /**
-     * Called when TextDoc does prop change.
+     * Called when TextBlock does prop change.
      */
-    protected void textDocDidPropChange(PropChange aPC)
+    protected void textBlockDidPropChange(PropChange aPC)
     {
         resetLater();
     }
