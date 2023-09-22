@@ -151,4 +151,9 @@ public abstract class GFXEnv {
     {
         return "localhost";
     }
+
+    /**
+     * Sets the Browser window.location.hash (if running in browser).
+     */
+    public void setBrowserWindowLocationHash(String aString)  { }
 }
