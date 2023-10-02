@@ -51,6 +51,10 @@ public class Convert {
             return ((Number) anObj).longValue();
         if (anObj instanceof String)
             return StringUtils.longValue((String) anObj);
+        if (anObj instanceof Character)
+            return (Character) anObj;
+        if (anObj instanceof Boolean)
+            return ((Boolean) anObj) ? 1 : 0;
 
         // Return default
         return 0;
@@ -74,6 +78,10 @@ public class Convert {
             return ((Number) anObj).doubleValue();
         if (anObj instanceof String)
             return StringUtils.doubleValue((String) anObj);
+        if (anObj instanceof Character)
+            return (Character) anObj;
+        if (anObj instanceof Boolean)
+            return ((Boolean) anObj) ? 1 : 0;
 
         // Return default
         return 0;
@@ -105,6 +113,10 @@ public class Convert {
             str = str.replace((char) 0, ' ');
             return str;
         }
+
+        // Handle Character or Boolean
+        if (anObj instanceof Character || anObj instanceof Boolean)
+            return String.valueOf(anObj);
 
         // If class get standard name
         if (anObj instanceof Class)
